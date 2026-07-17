@@ -1,0 +1,35 @@
+#name
+switches to CommentEndDash when parsing HyphenMinus
+#data
+<!--comment--!-
+#expected-state
+CommentEndDash
+#tokens
+
+#name
+emits comment when parsing GreaterThanSign
+#data
+<!--comment--!>
+#tokens
+Comment(comment)
+#errors
+1:15 IncorrectlyClosedComment
+
+#name
+emits comment with parser error followed by EOF when parsing EOF
+#data
+<!--comment--!
+#append-eof
+#tokens
+Comment(comment)
+EndOfFile
+#errors
+1:15 EOFInComment
+
+#name
+reconsumes in Comment for anything else
+#data
+<!--comment--!a
+#expected-state
+Comment
+#tokens

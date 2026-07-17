@@ -60,3 +60,14 @@ TagOpen
 Character(<*)
 #errors
 1:1 InvalidFirstCharacterOfTagName
+
+#name
+Emits LessThanSign if EOF encountered
+#data
+<
+#append-eof
+#tokens
+Character(<)
+EndOfFile
+#errors
+1:2 EOFBeforeTagName

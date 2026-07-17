@@ -1,0 +1,57 @@
+#name
+ignores whitespace and switches to BetweenDOCTYPEPublicAndSystemIdentifiers when parsing whitespace
+#data
+<!DOCTYPE HTML PUBLIC "id"   	
+
+  
+#expected-state
+BetweenDOCTYPEPublicAndSystemIdentifiers
+#tokens
+
+#name
+switches to Data and emits DOCTYPE when parsing GreaterThanSign
+#data
+<!DOCTYPE HTML PUBLIC "id">
+#tokens
+DOCTYPE(html, id, , ForceQuirks=false)
+
+#name
+switches to DOCTYPESystemIdentifierDoubleQuoted with parser error when parsing QuotationMark
+#data
+<!DOCTYPE HTML PUBLIC "id""
+#expected-state
+DOCTYPESystemIdentifierDoubleQuoted
+#tokens
+#errors
+1:27 MissingWhitespaceBetweenDOCTYPEPublicAndSystemIdentifiers
+
+#name
+switches to DOCTYPESystemIdentifierSingleQuoted with parser error when parsing Apostrophe
+#data
+<!DOCTYPE HTML PUBLIC "id"'
+#expected-state
+DOCTYPESystemIdentifierSingleQuoted
+#tokens
+#errors
+1:27 MissingWhitespaceBetweenDOCTYPEPublicAndSystemIdentifiers
+
+#name
+emits DOCTYPE with force-quirks when EOF reached
+#data
+<!DOCTYPE HTML PUBLIC "id"
+#append-eof
+#tokens
+DOCTYPE(html, id, , ForceQuirks=true)
+EndOfFile
+#errors
+1:27 EOFInDOCTYPE
+
+#name
+treats anything else as unexpected and switches to BogusDOCTYPE
+#data
+<!DOCTYPE HTML PUBLIC "id"a
+#expected-state
+BogusDOCTYPE
+#tokens
+#errors
+1:27 MissingQuoteBeforeDOCTYPESystemIdentifier

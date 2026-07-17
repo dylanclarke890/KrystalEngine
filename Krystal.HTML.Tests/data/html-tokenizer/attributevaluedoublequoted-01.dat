@@ -37,6 +37,29 @@ EndOfFile
 #name
 Batches characters and preserves non-ASCII content
 #data
-<div a="valúe">
+<div a="valï¿½e">
 #tokens
-StartTag(div, a="valúe", SelfClosing=false)
+StartTag(div, a="valï¿½e", SelfClosing=false)
+
+#name
+switches to AfterAttributeValueQuoted when parsing QuotationMark 
+#data
+<div a="value"
+#expected-state
+AfterAttributeValueQuoted
+#tokens
+
+#name
+switches to CharacterReference when parsing Ampersand 
+#data
+<div a="value&
+#expected-state
+CharacterReference
+#tokens
+
+#name
+appends to attribute value when parsing any other character
+#data
+<div a="valÃºe">
+#tokens
+StartTag(div, a="valÃºe", SelfClosing=false)

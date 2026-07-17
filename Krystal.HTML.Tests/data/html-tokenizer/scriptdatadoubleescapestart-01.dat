@@ -85,3 +85,14 @@ ScriptDataDoubleEscapeStart
 ScriptDataDoubleEscaped
 #tokens
 Character(script>)
+
+#name
+switches to ScriptDataEscaped if not ASCII alpha 
+#data
+©
+#initial-state
+ScriptDataDoubleEscapeStart
+#expected-state
+ScriptDataEscaped
+#tokens
+Character(©)

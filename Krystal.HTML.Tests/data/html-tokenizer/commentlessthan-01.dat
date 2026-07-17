@@ -1,0 +1,23 @@
+#name
+witches to CommentLessThanSignBang when parsing ExclamationMark
+#data
+<!--a<!
+#expected-state
+CommentLessThanSignBang
+#tokens
+
+#name
+appends LessThanSign and remains in CommentLessThanSign when parsing LessThanSign
+#data
+<!--a<<
+#expected-state
+CommentLessThanSign
+#tokens
+
+#name
+reconsumes in Comment for anything else
+#data
+<!--a<b
+#expected-state
+Comment
+#tokens

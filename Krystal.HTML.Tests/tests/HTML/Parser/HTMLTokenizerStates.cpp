@@ -53,42 +53,6 @@ namespace Krys::Tests
 
 #pragma endregion
 
-#pragma region RCDATA
-
-  TEST("RCDATA", "Batches characters",
-       (UnitTest {.InitialState = TokenizerState::RCDATA,
-                  .ExpectedState = TokenizerState::RCDATA,
-                  .Input = U"a string of characters; 123145",
-                  .Output = {CreateCharacterToken(u8"a string of characters; 123145")}}))
-
-  TEST("RCDATA", "Replaces character references",
-       (UnitTest {.InitialState = TokenizerState::RCDATA,
-                  .ExpectedState = TokenizerState::RCDATA,
-                  .Input = U"Some data &copy; some more data",
-                  .Output = {CreateCharacterToken(u8"Some data © some more data")}}))
-
-  TEST("RCDATA", "switches to RCDATALessThanSign when parsing LessThanSign",
-       (UnitTest {.InitialState = TokenizerState::RCDATA,
-                  .ExpectedState = TokenizerState::RCDATALessThanSign,
-                  .Input = U"<",
-                  .Output = {}}))
-
-  TEST("RCDATA", "Emits null character as U+FFFD with parse error",
-       (UnitTest {
-         .InitialState = TokenizerState::RCDATA,
-         .ExpectedState = TokenizerState::RCDATA,
-         .Input = InsertUTF32Null(U"1234"),
-         .Output = {CreateCharacterToken(u8"1234\uFFFD")},
-         .Errors = {{.Error = HTMLParseError::UnexpectedNullCharacter, .Line = 1uz, .Column = 5uz}}}))
-
-  TEST("RCDATA", "Batches characters up to EOF then emits EOF",
-       (UnitTest {.InitialState = TokenizerState::RCDATA,
-                  .Input = U"a string of characters; 123145",
-                  .AppendEOF = true,
-                  .Output = {CreateCharacterToken(u8"a string of characters; 123145"), CreateEOFToken()}}))
-
-#pragma endregion
-
 #pragma region RAWTEXT
 
   TEST("RAWTEXT", "switches to RAWTEXTLessThanSign when parsing LessThanSign",

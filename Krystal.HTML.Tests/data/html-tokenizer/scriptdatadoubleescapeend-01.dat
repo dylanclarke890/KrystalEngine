@@ -85,3 +85,25 @@ ScriptDataDoubleEscapeEnd
 ScriptDataDoubleEscaped
 #tokens
 Character(©)
+
+#name
+switches to ScriptDataDoubleEscaped after parsing GreaterThanSign if temporary buffer is not 'script'
+#data
+>
+#initial-state
+ScriptDataDoubleEscapeEnd
+#expected-state
+ScriptDataDoubleEscaped
+#tokens
+Character(>)
+
+#name
+switches to ScriptDataDoubleEscaped if not ASCII alpha 
+#data
+©
+#initial-state
+ScriptDataDoubleEscapeEnd
+#expected-state
+ScriptDataDoubleEscaped
+#tokens
+Character(©)

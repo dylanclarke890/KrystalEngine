@@ -14,3 +14,13 @@ Emits EOF instead of tag if EOF reached
 EndOfFile
 #errors
 1:7 EOFInTag
+
+#name
+Treats anything else as unexpected Solidus with parser error and switches to AttributeName
+#data
+<div /a
+#expected-state
+AttributeName
+#tokens
+#errors
+1:7 UnexpectedSolidusInTag

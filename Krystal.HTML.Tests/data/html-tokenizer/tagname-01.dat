@@ -51,3 +51,11 @@ Emits EOF instead of tag token if EOF reached
 EndOfFile
 #errors
 1:5 EOFInTag
+
+#name
+Switches to BeforeAttributeName when parsing solidus
+#data
+<div/
+#expected-state
+SelfClosingStartTag
+#tokens

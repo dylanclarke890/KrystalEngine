@@ -85,3 +85,10 @@ Batches characters and preserves content up to EOF
 EndOfFile
 #errors
 1:13 EOFInTag
+
+#name
+switches to Data and emits the current tag when parsing GreaterThanSign
+#data
+<div a=value>
+#tokens
+StartTag(div, a="value", SelfClosing=false)

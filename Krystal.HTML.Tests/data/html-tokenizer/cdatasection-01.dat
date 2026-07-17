@@ -1,0 +1,30 @@
+#name
+switches to CDATASectionEnd when parsing RightSquareBracket
+#data
+<![CDATA[]]
+#expected-state
+CDATASectionEnd
+#cdata-allowed
+#tokens
+
+#name
+emits EndOfFile with parser error when EOF reached
+#data
+<![CDATA[A
+#append-eof
+#cdata-allowed
+#tokens
+Character(A)
+EndOfFile
+#errors
+1:11 EOFInCDATA
+
+#name
+emits Character tokens for all characters except RightSquareBracket and EOF
+#data
+<![CDATA[ABC
+#expected-state
+CDATASection
+#cdata-allowed
+#tokens
+Character(ABC)

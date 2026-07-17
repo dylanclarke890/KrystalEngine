@@ -1,0 +1,18 @@
+#name
+non character
+#data
+&#xFFFE;
+#tokens
+Character(￾)
+#errors
+1:8 NonCharacterCharacterReference
+
+#name
+control character
+#data
+&#x0D;
+#tokens
+Character(
+)
+#errors
+1:6 ControlCharacterReference

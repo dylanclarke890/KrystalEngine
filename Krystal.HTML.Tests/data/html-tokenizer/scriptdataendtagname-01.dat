@@ -1,54 +1,43 @@
 #name
-Emits end tag characters when tag name doesn't match
-#data
-</span©
-#initial-state
-Data
-#append-eof
-#tokens
-Character(</span©)
-EndOfFile
-
-#name
 switches to BeforeAttributeName when parsing whitespace and end tag name matches start tag
 #data
-<div></div 
+<script></script 
 #expected-state
 BeforeAttributeName
 #tokens
-StartTag(div, SelfClosing=false)
+StartTag(script, SelfClosing=false)
 
 #name
 switches to SelfClosingStartTag when parsing solidus and end tag name matches start tag
 #data
-<div></div/
+<script></script/
 #expected-state
 SelfClosingStartTag
 #tokens
-StartTag(div, SelfClosing=false)
+StartTag(script, SelfClosing=false)
 
 #name
 emits end tag token when parsing GreaterThanSign end tag name matches start tag
 #data
-<div></div>
+<script></script>
 #tokens
-StartTag(div, SelfClosing=false)
-EndTag(div)
+StartTag(script, SelfClosing=false)
+EndTag(script)
 
 #name
 allows mixed case
 #data
-<div></DiV>
+<script></ScRiPt>
 #tokens
-StartTag(div, SelfClosing=false)
-EndTag(div)
+StartTag(script, SelfClosing=false)
+EndTag(script)
 
 #name
 emits less than sign, solidus, and characters when tag name doesn't match
 #data
-<div></span©
+<script></span©
 #append-eof
 #tokens
-StartTag(div, SelfClosing=false)
+StartTag(script, SelfClosing=false)
 Character(</span©)
 EndOfFile
