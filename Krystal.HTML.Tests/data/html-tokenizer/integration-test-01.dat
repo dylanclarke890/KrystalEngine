@@ -1,0 +1,64 @@
+#name
+Integration Test 1
+#append-eof
+#data
+<!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <link type="text/css" href="index.css">
+            <title>Document</title>
+        </head>
+        <body style="background-color: maroon;">
+            <div style="
+              box-sizing: border-box;">Hello, Krystal UI</div>
+            <script type="javascript" src="index.js"></script>
+        </body
+>
+        </html>
+#tokens
+DOCTYPE(html, , , ForceQuirks=false)
+Character(
+        )
+StartTag(html, lang="en", SelfClosing=false)
+Character(
+        )
+StartTag(head, SelfClosing=false)
+Character(
+            )
+StartTag(meta, charset="UTF-8", SelfClosing=false)
+Character(
+            )
+StartTag(meta, name="viewport", content="width=device-width, initial-scale=1.0", SelfClosing=false)
+Character(
+            )
+StartTag(link, type="text/css", href="index.css", SelfClosing=false)
+Character(
+            )
+StartTag(title, SelfClosing=false)
+Character(Document)
+EndTag(title)
+Character(
+        )
+EndTag(head)
+Character(
+        )
+StartTag(body, style="background-color: maroon;", SelfClosing=false)
+Character(
+            )
+StartTag(div, style="
+              box-sizing: border-box;", SelfClosing=false)
+Character(Hello, Krystal UI)
+EndTag(div)
+Character(
+            )
+StartTag(script, type="javascript", src="index.js", SelfClosing=false)
+EndTag(script)
+Character(
+        )
+EndTag(body)
+Character(
+        )
+EndTag(html)
+EndOfFile

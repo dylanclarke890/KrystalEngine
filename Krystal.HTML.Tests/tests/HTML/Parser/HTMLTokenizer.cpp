@@ -162,4 +162,6 @@ namespace Krys::HTML::Tests
   HTML_TOKENIZER_TEST_CASE("selfclosingstartag-01.dat");
   HTML_TOKENIZER_TEST_CASE("tagname-01.dat");
   HTML_TOKENIZER_TEST_CASE("tagopen-01.dat");
+
+  HTML_TOKENIZER_TEST_CASE("integration-test-01.dat");
 }

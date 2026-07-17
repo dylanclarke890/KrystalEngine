@@ -30,9 +30,6 @@
     <ClCompile Include="tests\HTML\Parser\HTMLCharacterReference.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\HTML\Parser\HTMLTokenizerIntegrationTests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="tests\DOM\ContainerNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -164,9 +161,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.HTML.Tests\ParserTestUtils.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -306,7 +300,6 @@
     <None Include="data\html-tokenizer\commentstart-01.dat" />
     <None Include="data\html-tokenizer\commentstartdash-01.dat" />
     <None Include="data\html-tokenizer\data-01.dat" />
-    <None Include="data\html-tokenizer\decimalcharacterreference-01.dat" />
     <None Include="data\html-tokenizer\doctype-01.dat" />
     <None Include="data\html-tokenizer\doctypename-01.dat" />
     <None Include="data\html-tokenizer\doctypepublicidentifierdoublequoted-01.dat" />
@@ -314,11 +307,9 @@
     <None Include="data\html-tokenizer\doctypesystemidentifierdoublequoted-01.dat" />
     <None Include="data\html-tokenizer\doctypesystemidentifiersinglequoted-01.dat" />
     <None Include="data\html-tokenizer\endtagopen-01.dat" />
-    <None Include="data\html-tokenizer\hexadecimalcharacterreference-01.dat" />
     <None Include="data\html-tokenizer\markupdeclarationopen-01.dat" />
     <None Include="data\html-tokenizer\plaintext-01.dat" />
     <None Include="data\html-tokenizer\rawtext-01.dat" />
-    <None Include="data\html-tokenizer\rawtextendtagname-01.dat" />
     <None Include="data\html-tokenizer\rawtextendtagopen-01.dat" />
     <None Include="data\html-tokenizer\rawtextlessthan-01.dat" />
     <None Include="data\html-tokenizer\rcdata-01.dat" />
@@ -345,5 +336,6 @@
     <None Include="data\html-tokenizer\selfclosingstartag-01.dat" />
     <None Include="data\html-tokenizer\tagname-01.dat" />
     <None Include="data\html-tokenizer\tagopen-01.dat" />
+    <None Include="data\html-tokenizer\integration-test-01.dat" />
   </ItemGroup>
 </Project>
