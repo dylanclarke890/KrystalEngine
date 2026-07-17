@@ -82,7 +82,18 @@ namespace Krys::HTML::Tests
 
   CSS_TOKENIZER_TEST_CASE("dimension-01.dat");
 
+  CSS_TOKENIZER_TEST_CASE("escaped-code-point-01.dat");
+
   CSS_TOKENIZER_TEST_CASE("full-stop-01.dat");
+  
+  CSS_TOKENIZER_TEST_CASE("fuzz-01.dat");
+  CSS_TOKENIZER_TEST_CASE("fuzz-02.dat");
+  CSS_TOKENIZER_TEST_CASE("fuzz-03.dat");
+  CSS_TOKENIZER_TEST_CASE("fuzz-04.dat");
+  CSS_TOKENIZER_TEST_CASE("fuzz-05.dat");
+  CSS_TOKENIZER_TEST_CASE("fuzz-06.dat");
+  CSS_TOKENIZER_TEST_CASE("fuzz-07.dat");
+  CSS_TOKENIZER_TEST_CASE("fuzz-08.dat");
 
   CSS_TOKENIZER_TEST_CASE("hash-01.dat");
 

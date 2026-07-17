@@ -234,7 +234,17 @@
     <None Include="data\css-tokenizer\comma-01.dat" />
     <None Include="data\css-tokenizer\digit-01.dat" />
     <None Include="data\css-tokenizer\dimension-01.dat" />
+    <None Include="data\css-tokenizer\escaped-code-point-01.dat" />
     <None Include="data\css-tokenizer\full-stop-01.dat" />
+    <None Include="data\css-tokenizer\fuzz-01.dat" />
+    <None Include="data\css-tokenizer\fuzz-02.dat" />
+    <None Include="data\css-tokenizer\fuzz-03.dat" />
+    <None Include="data\css-tokenizer\fuzz-04.dat" />
+    <None Include="data\css-tokenizer\fuzz-05.dat" />
+    <None Include="data\css-tokenizer\fuzz-06.dat" />
+    <None Include="data\css-tokenizer\fuzz-07.dat" />
+    <None Include="data\css-tokenizer\fuzz-08.dat" />
+    <None Include="data\css-tokenizer\fuzz-09.dat" />
     <None Include="data\css-tokenizer\hash-01.dat" />
     <None Include="data\css-tokenizer\hyphen-minus-01.dat" />
     <None Include="data\css-tokenizer\ident-01.dat" />

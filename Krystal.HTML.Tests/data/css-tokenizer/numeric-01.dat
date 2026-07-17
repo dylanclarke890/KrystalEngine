@@ -1,4 +1,20 @@
 #data
--123.753e-2
+-123.75e-2
 #tokens
-Number(-1.23753)
+Number(-1.2375)
+
+#data
+-123.75e-2px
+#tokens
+Dimension(-1.2375, px)
+
+#data
+-123.75e-2%
+#tokens
+Percentage(-1.2375)
+
+#data
+1.2.3
+#tokens
+Number(1.2)
+Number(0.3)

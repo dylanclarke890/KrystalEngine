@@ -337,5 +337,15 @@
     <None Include="data\html-tokenizer\tagname-01.dat" />
     <None Include="data\html-tokenizer\tagopen-01.dat" />
     <None Include="data\html-tokenizer\integration-test-01.dat" />
+    <None Include="data\css-tokenizer\escaped-code-point-01.dat" />
+    <None Include="data\css-tokenizer\fuzz-01.dat" />
+    <None Include="data\css-tokenizer\fuzz-02.dat" />
+    <None Include="data\css-tokenizer\fuzz-03.dat" />
+    <None Include="data\css-tokenizer\fuzz-04.dat" />
+    <None Include="data\css-tokenizer\fuzz-05.dat" />
+    <None Include="data\css-tokenizer\fuzz-06.dat" />
+    <None Include="data\css-tokenizer\fuzz-07.dat" />
+    <None Include="data\css-tokenizer\fuzz-08.dat" />
+    <None Include="data\css-tokenizer\fuzz-09.dat" />
   </ItemGroup>
 </Project>

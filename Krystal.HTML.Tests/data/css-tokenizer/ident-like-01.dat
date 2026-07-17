@@ -2,3 +2,57 @@
 url(foo)
 #tokens
 Url(foo)
+
+#data
+\75 Rl(foo)
+#tokens
+Url(foo)
+
+#data
+uR\6c (foo)
+#tokens
+Url(foo)
+
+#data
+url('foo')
+#tokens
+Function(url)
+String(foo)
+CloseParen
+
+#data
+url( 'foo')
+#tokens
+Function(url)
+Whitespace
+String(foo)
+CloseParen
+
+#data
+url(  'foo')
+#tokens
+Function(url)
+Whitespace
+String(foo)
+CloseParen
+
+#data
+url(   'foo')
+#tokens
+Function(url)
+Whitespace
+String(foo)
+CloseParen
+
+#data
+not-url(   'foo')
+#tokens
+Function(not-url)
+Whitespace
+String(foo)
+CloseParen
+
+#data
+url(   foo)
+#tokens
+Url(foo)

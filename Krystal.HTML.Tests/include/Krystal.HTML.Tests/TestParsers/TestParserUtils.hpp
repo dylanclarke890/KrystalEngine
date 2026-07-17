@@ -9,14 +9,36 @@ namespace Krys::HTML::Tests
 {
   KRYS_NODISCARD inline DOMString ToUTF8(const string &s) noexcept
   {
-    return DOMString(reinterpret_cast<const char8_t *>(s.data()), s.size());
+    return utf8_string(s.begin(), s.end());
   };
 
   template <Number T>
   KRYS_NODISCARD utf8_string ToUTF8(T number) noexcept
   {
-    auto str = std::format("{}", number);
-    return utf8_string(str.begin(), str.end());
+    if constexpr (FloatingPoint<T>)
+    {
+      // NOTE: sorry future me if this causes confusion; doubles are annoying to print and compare.
+      auto str = std::format("{:.4f}", number);
+
+      // remove trailing zeroes and the decimal point if necessary
+      auto lastNonZero = str.find_last_not_of('0');
+      if (lastNonZero != std::string::npos && str[lastNonZero] == '.')
+      {
+        lastNonZero--;
+      }
+
+      if (lastNonZero != std::string::npos)
+      {
+        str.erase(lastNonZero + 1uz);
+      }
+
+      return ToUTF8(str);
+    }
+    else
+    {
+      auto str = std::format("{}", number);
+      return ToUTF8(str);
+    }
   }
 
   template <typename T>
@@ -40,12 +62,12 @@ namespace Krys::HTML::Tests
 
   inline void SkipUTF8FileBOM(std::ifstream &file)
   {
-    char bom[3];
+    char bom[3uz];
 
     file.read(bom, 3);
 
-    if (file.gcount() == 3 && static_cast<uchar>(bom[0]) == 0xEF && static_cast<uchar>(bom[1]) == 0xBB
-        && static_cast<uchar>(bom[2]) == 0xBF)
+    if (file.gcount() == 3 && static_cast<uchar>(bom[0uz]) == 0xEF && static_cast<uchar>(bom[1uz]) == 0xBB
+        && static_cast<uchar>(bom[2uz]) == 0xBF)
     {
       // BOM consumed; continue reading
     }
@@ -54,11 +76,6 @@ namespace Krys::HTML::Tests
       file.clear();  // clear eof/fail if we hit it
       file.seekg(0); // rewind to beginning
     }
-  }
-
-  inline void UTF8Info(const utf8_string &str) noexcept
-  {
-    INFO(string(reinterpret_cast<const char *>(str.data()), str.size()));
   }
 
 #define UTF8_INFO(str) INFO(string(reinterpret_cast<const char *>(str.data()), str.size()));

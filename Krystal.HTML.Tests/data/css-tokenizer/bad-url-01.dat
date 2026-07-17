@@ -26,7 +26,7 @@ BadUrl
 #data
 url( \
 #tokens
-BadUrl
+Url(�)
 
 #data
 url(a'')

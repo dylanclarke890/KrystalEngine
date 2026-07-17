@@ -4,7 +4,7 @@
 #tokens
 BadString
 Whitespace
-BadString
+String()
 
 #data
 "foo\
@@ -14,5 +14,7 @@ String(foo)
 
 #data
 "aa𐀀
+
 #tokens
 BadString
+Whitespace

@@ -307,7 +307,7 @@ namespace Krys::HTML
       if (current == EOFMarker)
       {
         ParseError(CSSParseError::UnexpectedEOFInString);
-        return CSSToken {CSSTokenType::BadString};
+        return CSSToken {CSSTokenType::String, codePoints};
       }
 
       if (current == U'\n')
@@ -321,8 +321,7 @@ namespace Krys::HTML
       {
         if (next == EOFMarker)
         {
-          ParseError(CSSParseError::UnexpectedEOFInString);
-          return CSSToken {CSSTokenType::BadString};
+          continue;
         }
 
         if (next == U'\n')
@@ -424,14 +423,14 @@ namespace Krys::HTML
         current = _inputStream.NextInputCharacter();
         _inputStream.Consume();
 
-        if (IsWhitespace(_inputStream.NextInputCharacter()))
-        {
-          _inputStream.Consume();
-        }
-
         value <<= 4u;
         value |= Krys::Text::ToASCIIHexValue(current);
         ++digits;
+      }
+
+      if (IsWhitespace(_inputStream.NextInputCharacter()))
+      {
+        _inputStream.Consume();
       }
 
       if (value == 0u || value > 0x10FFFFu || Krys::Text::Unicode::IsSurrogate(value))
@@ -459,7 +458,7 @@ namespace Krys::HTML
       return false;
     }
 
-    if (second == EOFMarker || IsNewline(second))
+    if (IsNewline(second))
     {
       return false;
     }
