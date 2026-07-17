@@ -1,5 +1,5 @@
 #name
-witches to CommentLessThanSignBang when parsing ExclamationMark
+switches to CommentLessThanSignBang when parsing ExclamationMark
 #data
 <!--a<!
 #expected-state

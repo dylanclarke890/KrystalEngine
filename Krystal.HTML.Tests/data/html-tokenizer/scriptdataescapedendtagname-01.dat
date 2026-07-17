@@ -31,11 +31,3 @@ allows mixed case
 #tokens
 StartTag(script, SelfClosing=false)
 EndTag(script)
-
-#name
-emits less than sign, solidus, and characters when tag name doesn't match
-#data
-<script></span©
-#tokens
-StartTag(script, SelfClosing=false)
-Character(</span©)

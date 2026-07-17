@@ -90,3 +90,21 @@ surrogate
 Character(�)
 #errors
 1:8 SurrogateCharacterReference
+
+#name
+non character
+#data
+&#65534;
+#tokens
+Character(￾)
+#errors
+1:8 NonCharacterCharacterReference
+
+#name
+control character
+#data
+&#13;
+#tokens
+Character()
+#errors
+1:5 ControlCharacterReference

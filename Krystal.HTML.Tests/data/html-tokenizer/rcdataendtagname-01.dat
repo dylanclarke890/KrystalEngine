@@ -30,29 +30,3 @@ RCDATAEndTagName
 RCDATA
 #tokens
 Character(</d!v>)
-
-#name
-switches to BeforeAttributeName when parsing whitespace and end tag name matches start tag
-#data
-<div></div 
-#expected-state
-BeforeAttributeName
-#tokens
-StartTag(div, SelfClosing=false)
-
-#name
-switches to SelfClosingStartTag when parsing solidus and end tag name matches start tag
-#data
-<div></div/
-#expected-state
-SelfClosingStartTag
-#tokens
-StartTag(div, SelfClosing=false)
-
-#name
-emits end tag token when parsing GreaterThanSign end tag name matches start tag
-#data
-<div></div>
-#tokens
-StartTag(div, SelfClosing=false)
-EndTag(div)

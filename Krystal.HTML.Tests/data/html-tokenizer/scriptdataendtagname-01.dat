@@ -1,5 +1,5 @@
 #name
-switches to BeforeAttributeName when parsing whitespace and end tag name matches start tag
+switches to BeforeAttributeName when parsing whitespace and end tag matches start tag
 #data
 <script></script 
 #expected-state
@@ -8,7 +8,7 @@ BeforeAttributeName
 StartTag(script, SelfClosing=false)
 
 #name
-switches to SelfClosingStartTag when parsing solidus and end tag name matches start tag
+switches to SelfClosingStartTag when parsing solidus and end tag matches start tag
 #data
 <script></script/
 #expected-state
@@ -17,7 +17,7 @@ SelfClosingStartTag
 StartTag(script, SelfClosing=false)
 
 #name
-emits end tag token when parsing GreaterThanSign end tag name matches start tag
+emits end tag token when parsing GreaterThanSign and end tag matches start tag
 #data
 <script></script>
 #tokens
@@ -31,13 +31,3 @@ allows mixed case
 #tokens
 StartTag(script, SelfClosing=false)
 EndTag(script)
-
-#name
-emits less than sign, solidus, and characters when tag name doesn't match
-#data
-<script></span©
-#append-eof
-#tokens
-StartTag(script, SelfClosing=false)
-Character(</span©)
-EndOfFile

@@ -154,10 +154,14 @@ namespace Krys::HTML::Tests
       {
         line.pop_back();
       }
+
       if (line == "#name")
       {
         NormaliseData(tokens);
-        FinishParsingTest();
+        if (!html.empty())
+        {
+          FinishParsingTest();
+        }
 
         section = HTMLTokenizerTestSection::Name;
         continue;

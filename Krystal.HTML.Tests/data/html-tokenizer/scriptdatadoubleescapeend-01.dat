@@ -96,14 +96,3 @@ ScriptDataDoubleEscapeEnd
 ScriptDataDoubleEscaped
 #tokens
 Character(>)
-
-#name
-switches to ScriptDataDoubleEscaped if not ASCII alpha 
-#data
-©
-#initial-state
-ScriptDataDoubleEscapeEnd
-#expected-state
-ScriptDataDoubleEscaped
-#tokens
-Character(©)

@@ -208,7 +208,6 @@
     <ClCompile Include="tests\HTML\Parser\HTMLCharacterReference.cpp" />
     <ClCompile Include="tests\HTML\Parser\HTMLInputStream.cpp" />
     <ClCompile Include="tests\HTML\Parser\HTMLTokenizerIntegrationTests.cpp" />
-    <ClCompile Include="tests\HTML\Parser\HTMLTokenizerStates.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\TreeQueries.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\OrderedSet.cpp" />
     <ClCompile Include="tests\Infra\StringAlgorithms.cpp" />

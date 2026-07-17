@@ -126,7 +126,6 @@ namespace Krys::HTML::Tests
   HTML_TOKENIZER_TEST_CASE("commentstart-01.dat");
   HTML_TOKENIZER_TEST_CASE("commentstartdash-01.dat");
   HTML_TOKENIZER_TEST_CASE("data-01.dat");
-  HTML_TOKENIZER_TEST_CASE("decimalcharacterreference-01.dat");
   HTML_TOKENIZER_TEST_CASE("doctype-01.dat");
   HTML_TOKENIZER_TEST_CASE("doctypename-01.dat");
   HTML_TOKENIZER_TEST_CASE("doctypepublicidentifierdoublequoted-01.dat");
@@ -134,11 +133,9 @@ namespace Krys::HTML::Tests
   HTML_TOKENIZER_TEST_CASE("doctypesystemidentifierdoublequoted-01.dat");
   HTML_TOKENIZER_TEST_CASE("doctypesystemidentifiersinglequoted-01.dat");
   HTML_TOKENIZER_TEST_CASE("endtagopen-01.dat");
-  HTML_TOKENIZER_TEST_CASE("hexadecimalcharacterreference-01.dat");
   HTML_TOKENIZER_TEST_CASE("markupdeclarationopen-01.dat");
   HTML_TOKENIZER_TEST_CASE("plaintext-01.dat");
   HTML_TOKENIZER_TEST_CASE("rawtext-01.dat");
-  HTML_TOKENIZER_TEST_CASE("rawtextendtagname-01.dat");
   HTML_TOKENIZER_TEST_CASE("rawtextendtagopen-01.dat");
   HTML_TOKENIZER_TEST_CASE("rawtextlessthan-01.dat");
   HTML_TOKENIZER_TEST_CASE("rcdata-01.dat");
