@@ -2,6 +2,7 @@
 
 #include "Krystal.HTML/CSS/Parser/CSSInputStream.hpp"
 #include "Krystal.HTML/CSS/Parser/CSSToken.hpp"
+#include "Krystal.HTML/CSS/Parser/CSSTokenRange.hpp"
 #include "Krystal.HTML/CSS/Parser/Enums/CSSParseError.hpp"
 #include "Krystal.HTML/CSS/Parser/Types/ParsedInt64OrDouble.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
@@ -20,20 +21,32 @@ namespace Krys::HTML
   {
   private:
     CSSInputStream _inputStream;
-    List<CSSTokenizerError> _parseErrors;
+    List<CSSToken> _tokens;
+    List<CSSTokenizerError> _errors;
 
   public:
     explicit CSSTokenizer(CSSInputStream &inputStream) noexcept;
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#consume-token
-    KRYS_NODISCARD Maybe<CSSToken> ConsumeToken() noexcept;
+    /// @brief Pumps the tokenizer until the input stream is exhausted. Returns true if the tokenizer has
+    /// consumed at least token.
+    bool PumpTokenizer() noexcept;
 
-    KRYS_NODISCARD const List<CSSTokenizerError> ParseErrors() noexcept
+    /// @brief Gets the range of tokens produced by the tokenizer.
+    KRYS_NODISCARD CSSTokenRange TokenRange() const noexcept
     {
-      return _parseErrors;
+      return CSSTokenRange(_tokens);
+    }
+
+    /// @brief Gets the list of errors produced by the tokenizer.
+    KRYS_NODISCARD const List<CSSTokenizerError> &Errors() noexcept
+    {
+      return _errors;
     }
 
   private:
+    /// @see https://www.w3.org/TR/css-syntax-3/#consume-token
+    KRYS_NODISCARD CSSToken ConsumeToken() noexcept;
+
     /// @see https://www.w3.org/TR/css-syntax-3/#consume-comment
     void ConsumeComments() noexcept;
 

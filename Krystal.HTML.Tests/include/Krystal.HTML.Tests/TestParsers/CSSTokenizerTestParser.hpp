@@ -25,7 +25,7 @@ namespace Krys::HTML::Tests
     Errors,
   };
 
-  inline void SerializeNumericValue(CSSToken &token, DOMString &output)
+  inline void SerializeNumericValue(const CSSToken &token, DOMString &output)
   {
     auto numericValue = token.NumericValue();
     if (token.NumericTokenType() == NumericTokenType::Integer)
@@ -38,7 +38,7 @@ namespace Krys::HTML::Tests
     }
   }
 
-  inline void SerializeCSSToken(CSSToken &token, DOMString &output) noexcept
+  inline void SerializeCSSToken(const CSSToken &token, DOMString &output) noexcept
   {
     switch (token.Type())
     {
@@ -85,7 +85,7 @@ namespace Krys::HTML::Tests
       case CSSTokenType::Url:
       {
         output += u8"Url(";
-        output += Krys::Text::ConvertToUTF8(utf32_stringview(token.IdentCodePoints()));
+        output += Krys::Text::ConvertToUTF8(token.IdentCodePoints());
         output += u8")\n";
         break;
       }
@@ -187,7 +187,7 @@ namespace Krys::HTML::Tests
     }
   }
 
-  KRYS_NODISCARD inline DOMString SerializeCSSTokens(List<CSSToken> &tokens) noexcept
+  KRYS_NODISCARD inline DOMString SerializeCSSTokens(CSSTokenRange tokens) noexcept
   {
     DOMString output;
 

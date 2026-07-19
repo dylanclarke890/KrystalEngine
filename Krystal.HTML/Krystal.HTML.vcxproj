@@ -35,6 +35,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\CSS\CSSRule.cpp" />
+    <ClCompile Include="src\CSS\CSSStyleSheet.cpp" />
     <ClCompile Include="src\CSS\Parser\CSSTokenizer.cpp" />
     <ClCompile Include="src\HTML\Algorithms\FormControlAlgorithms.cpp" />
     <ClCompile Include="src\HTML\Parser\HTMLDocumentParser.cpp" />
@@ -96,13 +98,34 @@
     <ClCompile Include="src\SVG\SVGUseElement.cpp" />
     <ClInclude Include="include\Krystal.HTML\Constants\ElementNames.hpp" />
     <ClInclude Include="include\Krystal.HTML\Constants\TagNames.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Enums\CSSRuleFlag.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Parser\CSSTokenRange.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Serializer\CSSRuleSerializer.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Serializer\CSSSerializerIdioms.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSGroupingRule.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSImportRule.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSMarginRule.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSMediaRule.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSNamespaceRule.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSPageRule.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSRule.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSRuleList.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSStyleDeclaration.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSStyleRule.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSStyleSheet.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Dicts\CSSStyleSheetInit.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Enums\CSSRuleType.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\MediaList.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\CSSInputStream.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\CSSToken.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\CSSTokenizer.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSParseError.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSTokenType.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\ParsedInt64OrDouble.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\StyleSheet.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\StyleSheetList.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Types\CSSOMString.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Types\MediaListOrDOMString.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\StaticRangeInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\BoundaryPointComparator.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Algorithms\DOMTreeAccessors.hpp" />
@@ -620,6 +643,24 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="data\HTML\Document.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\CSS\CSSGroupingRule.idl" />
+    <None Include="data\CSS\CSSImportRule.idl" />
+    <None Include="data\CSS\CSSMarginRule.idl" />
+    <None Include="data\CSS\CSSMediaRule.idl" />
+    <None Include="data\CSS\CSSNamespaceRule.idl" />
+    <None Include="data\CSS\CSSPageRule.idl" />
+    <None Include="data\CSS\CSSRule.idl" />
+    <None Include="data\CSS\CSSStyleRule.idl" />
+    <None Include="data\CSS\CSSStyleSheet.idl" />
+    <None Include="data\CSS\MediaList.idl" />
+    <None Include="data\CSS\StyleSheet.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\CSS\Mixins\DocumentOrShadowRoot.idl" />
+    <None Include="data\CSS\Mixins\LinkStyle.idl" />
+    <None Include="data\CSS\StyleSheetList.idl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

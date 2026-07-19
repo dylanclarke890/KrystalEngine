@@ -7,7 +7,21 @@ namespace Krys::HTML
   {
   }
 
-  Maybe<CSSToken> CSSTokenizer::ConsumeToken() noexcept
+  bool CSSTokenizer::PumpTokenizer() noexcept
+  {
+    while (true)
+    {
+      auto token = ConsumeToken();
+      if (token.Type() == CSSTokenType::EndOfFile)
+      {
+        return !_tokens.empty();
+      }
+
+      _tokens.emplace_back(Krys::Move(token));
+    }
+  }
+
+  CSSToken CSSTokenizer::ConsumeToken() noexcept
   {
     ConsumeComments();
 
@@ -188,7 +202,7 @@ namespace Krys::HTML
 
     if (current == EOFMarker)
     {
-      return Null;
+      return CSSToken {CSSTokenType::EndOfFile};
     }
 
     return CSSToken {CSSTokenType::Delim, current};
@@ -739,9 +753,6 @@ namespace Krys::HTML
 
   void CSSTokenizer::ParseError(CSSParseError error) noexcept
   {
-    _parseErrors.push_back({
-      .Error = error,
-      .Location = _inputStream.CurrentLocation(),
-    });
+    _errors.push_back({.Error = error, .Location = _inputStream.CurrentLocation()});
   }
 }

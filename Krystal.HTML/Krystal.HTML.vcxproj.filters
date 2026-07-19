@@ -855,6 +855,69 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Types\CSSOMString.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\StyleSheet.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSStyleSheet.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Dicts\CSSStyleSheetInit.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSRule.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\MediaList.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSRuleList.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSStyleRule.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSImportRule.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSGroupingRule.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSMediaRule.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSPageRule.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSMarginRule.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSNamespaceRule.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSStyleDeclaration.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Types\MediaListOrDOMString.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Enums\CSSRuleType.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Serializer\CSSSerializerIdioms.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Serializer\CSSRuleSerializer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\StyleSheetList.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Enums\CSSRuleFlag.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Parser\CSSTokenRange.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -1346,6 +1409,12 @@
     <ClCompile Include="src\CSS\Parser\CSSTokenizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\CSS\CSSStyleSheet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CSS\CSSRule.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\HTMLTagNames.in" />
@@ -1587,6 +1656,48 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\HTML\Document.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CSS\StyleSheet.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CSS\CSSGroupingRule.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CSS\CSSImportRule.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CSS\CSSMarginRule.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CSS\CSSMediaRule.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CSS\CSSNamespaceRule.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CSS\CSSPageRule.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CSS\CSSRule.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CSS\CSSStyleRule.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CSS\CSSStyleSheet.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CSS\MediaList.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CSS\StyleSheetList.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CSS\Mixins\DocumentOrShadowRoot.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CSS\Mixins\LinkStyle.idl">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

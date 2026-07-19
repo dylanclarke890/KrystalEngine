@@ -31,6 +31,7 @@ namespace Krys::HTML
     CloseParen,
     OpenCurly,
     CloseCurly,
+    EndOfFile
   };
 
   enum class HashTokenType : uint8
@@ -46,7 +47,7 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSTokenType, 25uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSTokenType, 26uz);
 
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::HashTokenType, 2uz);
 
