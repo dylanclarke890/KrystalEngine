@@ -32,6 +32,8 @@ namespace Krys::HTML
     bool PumpTokenizer() noexcept;
 
     /// @brief Gets the range of tokens produced by the tokenizer.
+    /// @note The tokens are only valid as long as the tokenizer is alive. The tokenizer owns the tokens and
+    /// will free them when it is destroyed.
     KRYS_NODISCARD CSSTokenRange TokenRange() const noexcept
     {
       return CSSTokenRange(_tokens);
@@ -87,8 +89,11 @@ namespace Krys::HTML
     /// @see https://www.w3.org/TR/css-syntax-3/#consume-remnants-of-bad-url
     void ConsumeRemnantsOfBadUrl() noexcept;
 
+    /// @brief Utility helper for consuming whitespace from the input stream without emitting whitespace
+    /// tokens, as required by some parts of the spec.
     void ConsumeWhitespace() noexcept;
 
+    /// @brief Reports an error that occurred during tokenization.
     void ParseError(CSSParseError error) noexcept;
 
 #pragma region Tokenizer Definitions - https://www.w3.org/TR/css-syntax-3/#tokenizer-definitions
@@ -126,6 +131,8 @@ namespace Krys::HTML
     /// @see https://www.w3.org/TR/css-syntax-3/#non-ascii-code-point
     KRYS_NODISCARD static bool IsNonASCIICodePoint(char32 codePoint) noexcept
     {
+      // NOTE: the spec says any codepoint greater that 0x80 but we reserve an unused codepoint as an end of
+      // file marker so we need to explicitly check for it here.
       return codePoint >= 0x80 && codePoint != EOFMarker;
     }
 
