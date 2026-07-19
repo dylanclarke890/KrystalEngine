@@ -9,10 +9,14 @@ namespace Krys::HTML
 
   bool CSSTokenizer::PumpTokenizer() noexcept
   {
+    // NOTE(webkit): To avoid resizing we err on the side of reserving too much space. Most strings we
+    // tokenize have about 3.5 to 5 characters per token.
+    _tokens.reserve(_inputStream.Size() / 3uz);
+
     while (true)
     {
       auto token = ConsumeToken();
-      if (token.Type() == CSSTokenType::EndOfFile)
+      if (token.Type() == CSSTokenType::EndOfFile) KRYS_UNLIKELY
       {
         return !_tokens.empty();
       }
@@ -714,6 +718,7 @@ namespace Krys::HTML
 
     return ParsedInt64OrDouble {.Value = value, .Type = NumericTokenType::Number};
   }
+
   void CSSTokenizer::ConsumeRemnantsOfBadUrl() noexcept
   {
     while (true)

@@ -4,6 +4,7 @@
 #include "Krystal.HTML/CSS/Parser/Types/ParsedInt64OrDouble.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/SmallList.hpp"
+#include "Krystal.Text/StringConversion.hpp"
 
 namespace Krys::HTML
 {
@@ -14,7 +15,7 @@ namespace Krys::HTML
     HashTokenType _hashType : BitCount<HashTokenType>() {HashTokenType::Unrestricted};
     NumericTokenType _numericTokenType : BitCount<NumericTokenType>() {NumericTokenType::Integer};
     Int64OrDouble _numericValue;
-    SmallList<char32, 32uz> _codePoints;
+    SmallList<char8, 32uz> _codePoints;
 
   public:
     CSSToken(CSSTokenType type) noexcept : _type(type)
@@ -25,7 +26,7 @@ namespace Krys::HTML
     {
       assert(type == CSSTokenType::Delim);
 
-      _codePoints.push_back(codePoint);
+      AppendDataInternal(utf32_stringview(&codePoint, 1uz));
     }
 
     CSSToken(CSSTokenType type, utf32_stringview codePoints) noexcept : _type(type)
@@ -33,7 +34,7 @@ namespace Krys::HTML
       assert(_type == CSSTokenType::Ident || _type == CSSTokenType::Function || type == CSSTokenType::Url
              || type == CSSTokenType::String);
 
-      _codePoints.assign(codePoints.begin(), codePoints.end());
+      AppendDataInternal(codePoints);
     }
 
     KRYS_NODISCARD CSSTokenType Type() const noexcept
@@ -53,13 +54,13 @@ namespace Krys::HTML
       _hashType = hashType;
     }
 
-    KRYS_NODISCARD utf32_stringview IdentCodePoints() const noexcept
+    KRYS_NODISCARD utf8_stringview IdentCodePoints() const noexcept
     {
       assert(_type == CSSTokenType::Ident || _type == CSSTokenType::Function
              || _type == CSSTokenType::AtKeyword || _type == CSSTokenType::Hash
              || _type == CSSTokenType::String || _type == CSSTokenType::Url || _type == CSSTokenType::Delim);
 
-      return utf32_stringview {_codePoints.data(), _codePoints.size()};
+      return utf8_stringview {_codePoints.data(), _codePoints.size()};
     }
 
     void IdentCodePoints(utf32_stringview codePoints) noexcept
@@ -68,7 +69,7 @@ namespace Krys::HTML
              || _type == CSSTokenType::AtKeyword || _type == CSSTokenType::Hash
              || _type == CSSTokenType::String || _type == CSSTokenType::Url || _type == CSSTokenType::Delim);
 
-      _codePoints.assign(codePoints.begin(), codePoints.end());
+      AppendDataInternal(codePoints);
     }
 
     void NumericValue(ParsedInt64OrDouble value) noexcept
@@ -99,13 +100,20 @@ namespace Krys::HTML
     void Unit(utf32_stringview unit) noexcept
     {
       assert(_type == CSSTokenType::Dimension);
-      _codePoints.assign(unit.begin(), unit.end());
+      AppendDataInternal(unit);
     }
 
-    KRYS_NODISCARD utf32_stringview Unit() const noexcept
+    KRYS_NODISCARD utf8_stringview Unit() const noexcept
     {
       assert(_type == CSSTokenType::Dimension);
-      return utf32_stringview {_codePoints.data(), _codePoints.size()};
+      return utf8_stringview {_codePoints.data(), _codePoints.size()};
+    }
+
+  private:
+    void AppendDataInternal(utf32_stringview codePoints)
+    {
+      auto converted = Krys::Text::ConvertToUTF8(codePoints);
+      _codePoints.assign(converted.begin(), converted.end());
     }
   };
 }

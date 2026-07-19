@@ -25,6 +25,13 @@ namespace Krys::HTML
       assert(!_data.empty() && _data.back() != EOFMarker);
     }
 
+    /// @brief Gets the size of the input stream. This is the number of characters in the input stream, not
+    /// including the EOF marker. Not affected by the current read position.
+    KRYS_NODISCARD size_t Size() const noexcept
+    {
+      return _data.size();
+    }
+
     /// @brief Gets the next
     KRYS_NODISCARD char32 NextInputCharacter() const noexcept
     {

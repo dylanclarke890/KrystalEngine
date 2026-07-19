@@ -45,35 +45,35 @@ namespace Krys::HTML::Tests
       case CSSTokenType::Ident:
       {
         output += u8"Ident(";
-        output += Krys::Text::ConvertToUTF8(token.IdentCodePoints());
+        output += token.IdentCodePoints();
         output += u8")\n";
         break;
       }
       case CSSTokenType::Function:
       {
         output += u8"Function(";
-        output += Krys::Text::ConvertToUTF8(token.IdentCodePoints());
+        output += token.IdentCodePoints();
         output += u8")\n";
         break;
       }
       case CSSTokenType::AtKeyword:
       {
         output += u8"AtKeyword(";
-        output += Krys::Text::ConvertToUTF8(token.IdentCodePoints());
+        output += token.IdentCodePoints();
         output += u8")\n";
         break;
       }
       case CSSTokenType::Hash:
       {
         output += u8"Hash(";
-        output += Krys::Text::ConvertToUTF8(token.IdentCodePoints());
+        output += token.IdentCodePoints();
         output += u8")\n";
         break;
       }
       case CSSTokenType::String:
       {
         output += u8"String(";
-        output += Krys::Text::ConvertToUTF8(token.IdentCodePoints());
+        output += token.IdentCodePoints();
         output += u8")\n";
         break;
       }
@@ -85,7 +85,7 @@ namespace Krys::HTML::Tests
       case CSSTokenType::Url:
       {
         output += u8"Url(";
-        output += Krys::Text::ConvertToUTF8(token.IdentCodePoints());
+        output += token.IdentCodePoints();
         output += u8")\n";
         break;
       }
@@ -97,7 +97,7 @@ namespace Krys::HTML::Tests
       case CSSTokenType::Delim:
       {
         output += u8"Delim(";
-        output += Krys::Text::ConvertToUTF8(token.IdentCodePoints());
+        output += token.IdentCodePoints();
         output += u8")\n";
         break;
       }
@@ -120,7 +120,7 @@ namespace Krys::HTML::Tests
         output += u8"Dimension(";
         SerializeNumericValue(token, output);
         output += u8", ";
-        output += Krys::Text::ConvertToUTF8(token.Unit());
+        output += token.Unit();
         output += u8")\n";
         break;
       }

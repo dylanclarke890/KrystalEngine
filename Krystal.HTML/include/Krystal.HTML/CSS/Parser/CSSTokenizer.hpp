@@ -17,6 +17,7 @@ namespace Krys::HTML
     SourceLocation Location {};
   };
 
+  /// @see https://www.w3.org/TR/css-syntax-3/#tokenization
   class CSSTokenizer
   {
   private:
@@ -28,7 +29,7 @@ namespace Krys::HTML
     explicit CSSTokenizer(CSSInputStream &inputStream) noexcept;
 
     /// @brief Pumps the tokenizer until the input stream is exhausted. Returns true if the tokenizer has
-    /// consumed at least token.
+    /// consumed at least one token.
     bool PumpTokenizer() noexcept;
 
     /// @brief Gets the range of tokens produced by the tokenizer.
@@ -37,6 +38,12 @@ namespace Krys::HTML
     KRYS_NODISCARD CSSTokenRange TokenRange() const noexcept
     {
       return CSSTokenRange(_tokens);
+    }
+
+    /// @brief Gets the number of tokens produced by the tokenizer.
+    KRYS_NODISCARD size_t TokenCount() const noexcept
+    {
+      return _tokens.size();
     }
 
     /// @brief Gets the list of errors produced by the tokenizer.

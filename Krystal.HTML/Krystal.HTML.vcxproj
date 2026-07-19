@@ -35,6 +35,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\CSS\CSSParser.cpp" />
     <ClCompile Include="src\CSS\CSSRule.cpp" />
     <ClCompile Include="src\CSS\CSSStyleSheet.cpp" />
     <ClCompile Include="src\CSS\Parser\CSSTokenizer.cpp" />
@@ -99,6 +100,8 @@
     <ClInclude Include="include\Krystal.HTML\Constants\ElementNames.hpp" />
     <ClInclude Include="include\Krystal.HTML\Constants\TagNames.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Enums\CSSRuleFlag.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Parser\CSSParser.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSAtRuleId.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\CSSTokenRange.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Serializer\CSSRuleSerializer.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Serializer\CSSSerializerIdioms.hpp" />
