@@ -79,7 +79,8 @@ namespace Krys::HTML
       return CSSTokenRange(start.first(_tokens.data() - start.data() - 1uz));
     }
 
-    void SkipWhitespace() noexcept
+    /// @see https://drafts.csswg.org/css-syntax/#token-stream-discard-whitespace
+    void DiscardWhitespace() noexcept
     {
       size_t count = 0uz;
       for (auto &token : _tokens)

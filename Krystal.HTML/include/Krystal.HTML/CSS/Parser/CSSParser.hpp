@@ -27,6 +27,7 @@ namespace Krys::HTML
 
 #pragma region Parser Entry Points - https://drafts.csswg.org/css-syntax/#parser-entry-points
 
+    /// @see https://drafts.csswg.org/css-syntax/#parse-a-rule
     KRYS_NODISCARD static RefPtr<CSSRule> ParseRule(utf32_string &&input,
                                                     CSSAllowedRules allowedRules) noexcept;
 
@@ -45,12 +46,12 @@ namespace Krys::HTML
 #pragma region Parser Algorithms - https://drafts.csswg.org/css-syntax/#parser-algorithms
 
     /// @see https://drafts.csswg.org/css-syntax/#consume-an-at-rule
-    KRYS_NODISCARD RefPtr<CSSRule> ConsumeAtRule(CSSTokenRange &tokens,
-                                                 CSSAllowedRules allowedRules) noexcept;
+    KRYS_NODISCARD RefPtr<CSSRule> ConsumeAtRule(CSSTokenRange &tokens, CSSAllowedRules allowedRules,
+                                                 bool nested = false) noexcept;
 
     /// @see https://drafts.csswg.org/css-syntax/#consume-a-qualified-rule
-    KRYS_NODISCARD RefPtr<CSSRule> ConsumeQualifiedRule(CSSTokenRange &tokens,
-                                                        CSSAllowedRules allowedRules) noexcept;
+    KRYS_NODISCARD RefPtr<CSSRule> ConsumeQualifiedRule(CSSTokenRange &tokens, CSSAllowedRules allowedRules,
+                                                        bool nested = false) noexcept;
 
 #pragma endregion
 
@@ -62,7 +63,11 @@ namespace Krys::HTML
 
     KRYS_NODISCARD RefPtr<CSSNamespaceRule> ConsumeNamespaceRule(CSSTokenRange prelude) noexcept;
 
-    KRYS_NODISCARD RefPtr<CSSStyleRule> ConsumeStyleRule(CSSTokenRange prelude) noexcept;
+#pragma endregion
+
+#pragma region Qualified Rule Consumers
+
+    KRYS_NODISCARD RefPtr<CSSStyleRule> ConsumeStyleRule(CSSTokenRange prelude, CSSTokenRange block) noexcept;
 
 #pragma endregion
   };

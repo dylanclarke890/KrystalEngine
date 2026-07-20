@@ -16,7 +16,6 @@ namespace Krys::HTML
   RefPtr<CSSRule> CSSParser::ParseRule(utf32_string &&input, CSSAllowedRules allowedRules) noexcept
   {
     CSSParser parser(Krys::Move(input));
-
     if (!parser.PumpTokenizer())
     {
       // TODO(CSSParser): parse error (empty rule).
@@ -24,8 +23,7 @@ namespace Krys::HTML
     }
 
     auto tokens = parser.TokenRange();
-    tokens.SkipWhitespace();
-
+    tokens.DiscardWhitespace();
     if (tokens.IsAtEnd())
     {
       // TODO(CSSParser): parse error (empty rule).
@@ -40,14 +38,14 @@ namespace Krys::HTML
       return nullptr;
     }
 
-    tokens.SkipWhitespace();
-    if (!tokens.IsAtEnd())
+    tokens.DiscardWhitespace();
+    if (tokens.IsAtEnd())
     {
-      // TODO(CSSParser): parse error (unexpected tokens after rule).
-      return nullptr;
+      return rule;
     }
 
-    return rule;
+    // TODO(CSSParser): parse error (unexpected tokens after rule).
+    return nullptr;
   }
 
 #pragma endregion
@@ -64,7 +62,8 @@ namespace Krys::HTML
 
 #pragma region Parser Entry Points
 
-  RefPtr<CSSRule> CSSParser::ConsumeAtRule(CSSTokenRange &tokens, CSSAllowedRules allowedRules) noexcept
+  RefPtr<CSSRule> CSSParser::ConsumeAtRule(CSSTokenRange &tokens, CSSAllowedRules allowedRules,
+                                           bool nested) noexcept
   {
     assert(tokens.Peek().Type() == CSSTokenType::AtKeyword);
 
@@ -119,18 +118,42 @@ namespace Krys::HTML
     return nullptr;
   }
 
-  RefPtr<CSSRule> CSSParser::ConsumeQualifiedRule(CSSTokenRange &tokens,
-                                                  CSSAllowedRules allowedRules) noexcept
+  RefPtr<CSSRule> CSSParser::ConsumeQualifiedRule(CSSTokenRange &tokens, CSSAllowedRules allowedRules,
+                                                  bool nested) noexcept
   {
+    auto initialTokens = tokens;
+
     auto prelude = tokens;
+
+    // Parsing a selector (aka a component value) should stop at the first semicolon (and goes to error
+    // recovery) instead of consuming the whole list of declarations (in nested context). At top level (aka
+    // non nested context), it's the normal rule list error recovery and we don't need this.
     while (!tokens.IsAtEnd() && tokens.Peek().Type() != CSSTokenType::OpenCurly
-           && tokens.Peek().Type() != CSSTokenType::Semicolon)
+           && (!nested || tokens.Peek().Type() != CSSTokenType::Semicolon))
     {
       tokens.SkipComponentValue();
     }
-    prelude = prelude.RangeUntil(tokens);
 
-    // TODO(CSSParser): Implement qualified rule consumer.
+    if (tokens.IsAtEnd())
+    {
+      // TODO(CSSParser): parse error (EOF instead of qualified rule block).
+      return nullptr;
+    }
+
+    // See comment above
+    if (nested && tokens.Peek().Type() == CSSTokenType::Semicolon)
+    {
+      (void)tokens.Consume();
+      return nullptr;
+    }
+
+    prelude = prelude.RangeUntil(tokens);
+    auto block = tokens.ConsumeBlock();
+
+    if (allowedRules <= CSSAllowedRules::Regular)
+    {
+      return ConsumeStyleRule(prelude, block);
+    }
 
     return nullptr;
   }
@@ -142,7 +165,7 @@ namespace Krys::HTML
   RefPtr<CSSCharsetRule> CSSParser::ConsumeCharsetRule(CSSTokenRange prelude) noexcept
   {
     const CSSToken &encoding = prelude.Consume();
-    prelude.SkipWhitespace();
+    prelude.DiscardWhitespace();
 
     if (encoding.Type() != CSSTokenType::String || !prelude.IsAtEnd())
     {
@@ -162,7 +185,11 @@ namespace Krys::HTML
     return nullptr;
   }
 
-  RefPtr<CSSStyleRule> CSSParser::ConsumeStyleRule(CSSTokenRange prelude) noexcept
+#pragma endregion
+
+#pragma region Qualified Rule Consumers
+
+  RefPtr<CSSStyleRule> CSSParser::ConsumeStyleRule(CSSTokenRange prelude, CSSTokenRange block) noexcept
   {
     return nullptr;
   }
