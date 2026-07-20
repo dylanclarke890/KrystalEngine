@@ -10,7 +10,7 @@
 
 namespace Krys::HTML
 {
-  /// @see https://www.w3.org/TR/css-syntax-3/#input-stream
+  /// @see https://drafts.csswg.org/css-syntax/#input-stream
   class CSSInputStream
   {
   private:
@@ -108,7 +108,7 @@ namespace Krys::HTML
     }
 
   private:
-    /// @see https://www.w3.org/TR/css-syntax-3/#css-filter-code-points
+    /// @see https://drafts.csswg.org/css-syntax/#css-filter-code-points
     static utf32_string FilterCodePoints(utf32_string &&input) noexcept
     {
       utf32_string output;

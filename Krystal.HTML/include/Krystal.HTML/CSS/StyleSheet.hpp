@@ -13,7 +13,7 @@ namespace Krys::HTML
   class CSSStyleSheet;
   class MediaList;
 
-  /// @see https://www.w3.org/TR/cssom-1/#stylesheet
+  /// @see hhttps://drafts.csswg.org/cssom/#the-stylesheet-interface
   class StyleSheet : public RefCounted<StyleSheet>
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();
@@ -21,36 +21,36 @@ namespace Krys::HTML
   public:
     virtual ~StyleSheet() noexcept = default;
 
-#pragma region StyleSheet - https://www.w3.org/TR/cssom-1/#stylesheet
+#pragma region StyleSheet - https://drafts.csswg.org/cssom/#stylesheet
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-stylesheet-type
+    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-type
     KRYS_NODISCARD virtual CSSOMString Type() const noexcept = 0;
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-stylesheet-href
+    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-href
     KRYS_NODISCARD virtual Maybe<USVString> Href() const noexcept = 0;
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-stylesheet-ownernode
+    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-ownernode
     KRYS_NODISCARD virtual RefPtr<Node> OwnerNode() const noexcept = 0;
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-stylesheet-parentstylesheet
+    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-parentstylesheet
     KRYS_NODISCARD virtual RefPtr<StyleSheet> ParentStyleSheet() const noexcept
     {
       return nullptr;
     }
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-stylesheet-title
+    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-title
     KRYS_NODISCARD virtual Maybe<DOMString> Title() const noexcept = 0;
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-stylesheet-media
+    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-media
     KRYS_NODISCARD virtual RefPtr<MediaList> Media() const noexcept
     {
       return nullptr;
     }
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-stylesheet-disabled
+    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-disabled
     KRYS_NODISCARD virtual bool Disabled() const noexcept = 0;
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-stylesheet-disabled
+    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-disabled
     virtual void Disabled(bool value) noexcept = 0;
 
 #pragma endregion

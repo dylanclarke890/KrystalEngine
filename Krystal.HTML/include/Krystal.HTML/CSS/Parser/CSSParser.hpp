@@ -25,7 +25,7 @@ namespace Krys::HTML
     {
     }
 
-#pragma region Parser Entry Points - https://www.w3.org/TR/css-syntax-3/#parser-entry-points
+#pragma region Parser Entry Points - https://drafts.csswg.org/css-syntax/#parser-entry-points
 
     KRYS_NODISCARD static RefPtr<CSSRule> ParseRule(utf32_string &&input,
                                                     CSSAllowedRules allowedRules) noexcept;
@@ -42,13 +42,13 @@ namespace Krys::HTML
     /// will free them when it is destroyed.
     KRYS_NODISCARD CSSTokenRange TokenRange() const noexcept;
 
-#pragma region Parser Algorithms - https://www.w3.org/TR/css-syntax-3/#parser-algorithms
+#pragma region Parser Algorithms - https://drafts.csswg.org/css-syntax/#parser-algorithms
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#consume-an-at-rule
+    /// @see https://drafts.csswg.org/css-syntax/#consume-an-at-rule
     KRYS_NODISCARD RefPtr<CSSRule> ConsumeAtRule(CSSTokenRange &tokens,
                                                  CSSAllowedRules allowedRules) noexcept;
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#consume-a-qualified-rule
+    /// @see https://drafts.csswg.org/css-syntax/#consume-a-qualified-rule
     KRYS_NODISCARD RefPtr<CSSRule> ConsumeQualifiedRule(CSSTokenRange &tokens,
                                                         CSSAllowedRules allowedRules) noexcept;
 

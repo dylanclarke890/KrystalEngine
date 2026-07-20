@@ -7,7 +7,7 @@ namespace Krys::HTML
   class MediaList;
   class CSSStyleSheet;
 
-  /// @see https://www.w3.org/TR/cssom-1/#cssimportrule
+  /// @see https://drafts.csswg.org/cssom/#the-cssimportrule-interface
   class CSSImportRule : public CSSRule
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CSSImportRule);
@@ -17,16 +17,22 @@ namespace Krys::HTML
 
     ~CSSImportRule() noexcept override = default;
 
-#pragma region CSSImportRule - https://www.w3.org/TR/cssom-1/#cssimportrule
+#pragma region CSSImportRule - https://drafts.csswg.org/cssom/#cssimportrule
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-cssimportrule-href
+    /// @see https://drafts.csswg.org/cssom/#dom-cssimportrule-href
     KRYS_NODISCARD USVString Href() const noexcept;
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-cssimportrule-media
+    /// @see https://drafts.csswg.org/cssom/#dom-cssimportrule-media
     KRYS_NODISCARD RefPtr<MediaList> Media() const noexcept;
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-cssimportrule-stylesheet
+    /// @see https://drafts.csswg.org/cssom/#dom-cssimportrule-stylesheet
     KRYS_NODISCARD RefPtr<CSSStyleSheet> StyleSheet() const noexcept;
+
+    /// @see https://drafts.csswg.org/cssom/#dom-cssimportrule-layername
+    KRYS_NODISCARD Maybe<CSSOMString> LayerName() const noexcept;
+
+    /// @see https://drafts.csswg.org/cssom/#dom-cssimportrule-supportstext
+    KRYS_NODISCARD Maybe<CSSOMString> SupportsText() const noexcept;
 
 #pragma endregion
   };

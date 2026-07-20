@@ -12,7 +12,7 @@ namespace Krys::HTML
 {
   class CSSStyleSheet;
 
-  /// @see https://www.w3.org/TR/cssom-1/#cssrule
+  /// @see https://drafts.csswg.org/cssom/#the-cssrule-interface
   class CSSRule : public RefCounted<CSSRule>,
                   public CanMakeWeakPtr<CSSRule>,
                   public CanMakeCheckedPtr<CSSStyleSheet>
@@ -30,27 +30,28 @@ namespace Krys::HTML
   public:
     virtual ~CSSRule() noexcept = default;
 
-#pragma region CSSRule - https://www.w3.org/TR/cssom-1/#cssrule
+#pragma region CSSRule - https://drafts.csswg.org/cssom/#cssrule
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-cssrule-csstext
+    /// @see https://drafts.csswg.org/cssom/#dom-cssrule-csstext
     KRYS_NODISCARD virtual CSSOMString CssText() const noexcept = 0;
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-cssrule-csstext
+    /// @see https://drafts.csswg.org/cssom/#dom-cssrule-csstext
     ExceptionOr<void> CssText(const CSSOMString &text) noexcept;
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-cssrule-parentrule
+    /// @see https://drafts.csswg.org/cssom/#dom-cssrule-parentrule
     KRYS_NODISCARD RefPtr<CSSRule> ParentRule() const noexcept;
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-cssrule-parentstylesheet
+    /// @see https://drafts.csswg.org/cssom/#dom-cssrule-parentstylesheet
     KRYS_NODISCARD RefPtr<CSSStyleSheet> ParentStyleSheet() const noexcept;
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-cssrule-type
+    /// @deprecated
+    /// @see https://drafts.csswg.org/cssom/#dom-cssrule-type
     KRYS_NODISCARD uint8 Type() const noexcept;
 
 #pragma endregion
 
-    /// @brief Custom version of Type() that includes all CSSRuleType values, including those that are not
-    /// exposed via the spec's Type() method.
+    /// @brief Custom version of Type() that includes all supported CSSRuleType values, including those that
+    /// are not exposed via the spec's Type() method.
     KRYS_NODISCARD CSSRuleType RuleType() const noexcept
     {
       return _type;

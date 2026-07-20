@@ -100,6 +100,8 @@
     <ClInclude Include="include\Krystal.HTML\Constants\ElementNames.hpp" />
     <ClInclude Include="include\Krystal.HTML\Constants\TagNames.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\CSSCharsetRule.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSMarginDescriptors.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSPageDescriptors.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\CSSStyleProperties.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Enums\CSSRuleFlag.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\CSSParser.hpp" />
@@ -667,6 +669,14 @@
     <None Include="data\CSS\Mixins\DocumentOrShadowRoot.idl" />
     <None Include="data\CSS\Mixins\LinkStyle.idl" />
     <None Include="data\CSS\StyleSheetList.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\CSS\CSSPageDescriptors.idl" />
+    <None Include="data\CSS\CSSRuleList.idl" />
+    <None Include="data\CSS\CSSStyleDeclaration.idl" />
+    <None Include="data\CSS\CSSStyleProperties.idl" />
+    <None Include="data\CSS\Mixins\ElementCSSInlineStyle.idl" />
+    <None Include="data\CSS\Mixins\Window.idl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

@@ -1,5 +1,4 @@
 ﻿#pragma once
-#pragma once
 
 #include "Krystal.HTML/CSS/CSSGroupingRule.hpp"
 
@@ -7,7 +6,7 @@ namespace Krys::HTML
 {
   class CSSPageDescriptors;
 
-  /// @see https://www.w3.org/TR/cssom-1/#csspagerule
+  /// @see https://drafts.csswg.org/cssom/#the-csspagerule-interface
   class CSSPageRule : public CSSGroupingRule
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CSSPageRule);
@@ -17,18 +16,18 @@ namespace Krys::HTML
 
     ~CSSPageRule() noexcept override = default;
 
-#pragma region CSSPageRule - https://www.w3.org/TR/cssom-1/#csspagerule
+#pragma region CSSPageRule - https://drafts.csswg.org/cssom/#csspagerule
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-csspagerule-selectortext
+    /// @see https://drafts.csswg.org/cssom/#dom-csspagerule-selectortext
     KRYS_NODISCARD CSSOMString SelectorText() const noexcept;
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-csspagerule-selectortext
+    /// @see https://drafts.csswg.org/cssom/#dom-csspagerule-selectortext
     void SelectorText(const CSSOMString &text) noexcept;
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-csspagerule-style
+    /// @see https://drafts.csswg.org/cssom/#dom-csspagerule-style
     KRYS_NODISCARD RefPtr<CSSPageDescriptors> Style() const noexcept;
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-csspagerule-style
+    /// @see https://drafts.csswg.org/cssom/#dom-csspagerule-style
     ExceptionOr<void> Style(const CSSOMString &text) noexcept;
 
 #pragma endregion

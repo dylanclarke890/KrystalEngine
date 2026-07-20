@@ -7,7 +7,7 @@ namespace Krys::HTML
 {
   class CSSStyleProperties;
 
-  /// @see https://www.w3.org/TR/cssom-1/#cssstylerule
+  /// @see https://drafts.csswg.org/cssom/#the-cssstylerule-interface
   class CSSStyleRule : public CSSRule
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CSSStyleRule);
@@ -17,18 +17,18 @@ namespace Krys::HTML
 
     ~CSSStyleRule() noexcept override = default;
 
-#pragma region CSSStyleRule - https://www.w3.org/TR/cssom-1/#cssstylerule
+#pragma region CSSStyleRule - https://drafts.csswg.org/cssom/#cssstylerule
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-cssstylerule-selectortext
+    /// @see https://drafts.csswg.org/cssom/#dom-cssstylerule-selectortext
     KRYS_NODISCARD CSSOMString SelectorText() const noexcept;
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-cssstylerule-selectortext
+    /// @see https://drafts.csswg.org/cssom/#dom-cssstylerule-selectortext
     void SelectorText(const CSSOMString &text) noexcept;
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-cssstylerule-style
+    /// @see https://drafts.csswg.org/cssom/#dom-cssstylerule-style
     KRYS_NODISCARD RefPtr<CSSStyleProperties> Style() const noexcept;
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-cssstylerule-style
+    /// @see https://drafts.csswg.org/cssom/#dom-cssstylerule-style
     ExceptionOr<void> Style(const CSSOMString& text) noexcept;
 
 #pragma endregion

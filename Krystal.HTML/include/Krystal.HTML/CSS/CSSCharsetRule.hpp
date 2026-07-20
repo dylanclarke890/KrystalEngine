@@ -30,9 +30,9 @@ namespace Krys::HTML
 
 #pragma endregion
 
-#pragma region CSSRule - https://www.w3.org/TR/cssom-1/#cssrule
+#pragma region CSSRule - https://drafts.csswg.org/cssom/#cssrule
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-cssrule-csstext
+    /// @see https://drafts.csswg.org/cssom/#dom-cssrule-csstext
     KRYS_NODISCARD CSSOMString CssText() const noexcept final
     {
       return u8"@charset \"\";";

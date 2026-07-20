@@ -4,12 +4,12 @@
 
 namespace Krys::HTML
 {
-  /// @see https://www.w3.org/TR/cssom-1/#cssomstring-type
+  /// @see https://drafts.csswg.org/cssom/#cssomstring-type
   using CSSOMString = DOMString;
 
-  /// @see https://www.w3.org/TR/cssom-1/#cssomstring-type
+  /// @see https://drafts.csswg.org/cssom/#cssomstring-type
   using CSSOMStringView = DOMStringView;
 
-  /// @see https://www.w3.org/TR/cssom-1/#cssomstring-type
+  /// @see https://drafts.csswg.org/cssom/#cssomstring-type
   using CSSOMStringAtom = DOMStringAtom;
 }

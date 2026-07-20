@@ -6,7 +6,7 @@ namespace Krys::HTML
 {
   class CSSMarginDescriptors;
 
-  /// @see https://www.w3.org/TR/cssom-1/#cssmarginrule
+  /// @see https://drafts.csswg.org/cssom/#the-cssmarginrule-interface
   class CSSMarginRule : public CSSRule
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CSSMarginRule);
@@ -16,15 +16,15 @@ namespace Krys::HTML
 
     ~CSSMarginRule() noexcept override = default;
 
-#pragma region CSSMarginRule - https://www.w3.org/TR/cssom-1/#cssmarginrule
+#pragma region CSSMarginRule - https://drafts.csswg.org/cssom/#cssmarginrule
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-cssmarginrule-name
+    /// @see https://drafts.csswg.org/cssom/#dom-cssmarginrule-name
     KRYS_NODISCARD CSSOMString Name() const noexcept;
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-cssmarginrule-style
+    /// @see https://drafts.csswg.org/cssom/#dom-cssmarginrule-style
     KRYS_NODISCARD RefPtr<CSSMarginDescriptors> Style() const noexcept;
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-cssmarginrule-style
+    /// @see https://drafts.csswg.org/cssom/#dom-cssmarginrule-style
     ExceptionOr<void> Style(const CSSOMString &text) noexcept;
 
 #pragma endregion

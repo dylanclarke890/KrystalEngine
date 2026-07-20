@@ -6,7 +6,7 @@ namespace Krys::HTML
 {
   class CSSRuleList;
 
-  /// @see https://www.w3.org/TR/cssom-1/#cssgroupingrule
+  /// @see https://drafts.csswg.org/cssom/#the-cssgroupingrule-interface
   class CSSGroupingRule : public CSSRule
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CSSGroupingRule);
@@ -16,15 +16,15 @@ namespace Krys::HTML
 
     ~CSSGroupingRule() noexcept override = default;
 
-#pragma region CSSGroupingRule - https://www.w3.org/TR/cssom-1/#cssgroupingrule
+#pragma region CSSGroupingRule - https://drafts.csswg.org/cssom/#cssgroupingrule
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-cssgroupingrule-cssrules
+    /// @see https://drafts.csswg.org/cssom/#dom-cssgroupingrule-cssrules
     KRYS_NODISCARD virtual RefPtr<CSSRuleList> CssRules() const noexcept = 0;
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-cssgroupingrule-insertrule
+    /// @see https://drafts.csswg.org/cssom/#dom-cssgroupingrule-insertrule
     ExceptionOr<uint32> InsertRule(const CSSOMString &rule, uint32 index) noexcept;
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-cssgroupingrule-deleterule
+    /// @see https://drafts.csswg.org/cssom/#dom-cssgroupingrule-deleterule
     ExceptionOr<void> DeleteRule(uint32 index) noexcept;
 
 #pragma endregion

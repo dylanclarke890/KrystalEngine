@@ -4,13 +4,13 @@
 
 namespace Krys::HTML
 {
-  /// @see https://www.w3.org/TR/cssom-1/#cssstyleproperties
+  /// @see https://drafts.csswg.org/cssom/#the-cssstyledeclaration-interface
   class CSSStyleProperties final : public CSSStyleDeclaration
   {
   public:
-#pragma region CSSStyleProperties - https://www.w3.org/TR/cssom-1/#cssstyleproperties
+#pragma region CSSStyleProperties - https://drafts.csswg.org/cssom/#cssstyleproperties
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-cssstyledeclaration-cssfloat
+    /// @see https://drafts.csswg.org/cssom/#dom-cssstyleproperties-cssfloat
     KRYS_NODISCARD CSSOMString CssFloat() const noexcept;
 
 #pragma endregion

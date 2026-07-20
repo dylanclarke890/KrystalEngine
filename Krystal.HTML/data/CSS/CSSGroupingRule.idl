@@ -1,6 +1,6 @@
 [Exposed=Window]
-interface CSSImportRule : CSSRule {
-  readonly attribute USVString href;
-  [SameObject, PutForwards=mediaText] readonly attribute MediaList media;
-  [SameObject] readonly attribute CSSStyleSheet styleSheet;
+interface CSSGroupingRule : CSSRule {
+  [SameObject] readonly attribute CSSRuleList cssRules;
+  unsigned long insertRule(CSSOMString rule, optional unsigned long index = 0);
+  undefined deleteRule(unsigned long index);
 };

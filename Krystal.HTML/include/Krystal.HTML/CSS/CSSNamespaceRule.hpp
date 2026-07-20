@@ -5,7 +5,7 @@
 
 namespace Krys::HTML
 {
-  /// @see https://www.w3.org/TR/cssom-1/#cssnamespacerule
+  /// @see https://drafts.csswg.org/cssom/#the-cssnamespacerule-interface
   class CSSNamespaceRule : public CSSRule
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CSSNamespaceRule);
@@ -19,12 +19,12 @@ namespace Krys::HTML
 
     ~CSSNamespaceRule() noexcept override = default;
 
-#pragma region CSSNamespaceRule - https://www.w3.org/TR/cssom-1/#cssnamespacerule
+#pragma region CSSNamespaceRule - https://drafts.csswg.org/cssom/#cssnamespacerule
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-cssnamespacerule-namespaceuri
+    /// @see https://drafts.csswg.org/cssom/#dom-cssnamespacerule-namespaceuri
     KRYS_NODISCARD CSSOMStringAtom NamespaceURI() const noexcept;
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-cssnamespacerule-prefix
+    /// @see https://drafts.csswg.org/cssom/#dom-cssnamespacerule-prefix
     KRYS_NODISCARD CSSOMStringAtom Prefix() const noexcept;
 
 #pragma endregion

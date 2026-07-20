@@ -933,6 +933,12 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Serializer\CSSSerializerIdioms.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSPageDescriptors.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSMarginDescriptors.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -1716,6 +1722,24 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\CSS\Mixins\LinkStyle.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CSS\Mixins\ElementCSSInlineStyle.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CSS\Mixins\Window.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CSS\CSSPageDescriptors.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CSS\CSSRuleList.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CSS\CSSStyleDeclaration.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CSS\CSSStyleProperties.idl">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
