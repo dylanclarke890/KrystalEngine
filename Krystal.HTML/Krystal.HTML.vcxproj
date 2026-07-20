@@ -99,12 +99,14 @@
     <ClCompile Include="src\SVG\SVGUseElement.cpp" />
     <ClInclude Include="include\Krystal.HTML\Constants\ElementNames.hpp" />
     <ClInclude Include="include\Krystal.HTML\Constants\TagNames.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSCharsetRule.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSStyleProperties.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Enums\CSSRuleFlag.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\CSSParser.hpp" />
-    <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSAtRuleId.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSAllowedRules.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSAtRuleType.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\CSSTokenRange.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Serializer\CSSRuleSerializer.hpp" />
-    <ClInclude Include="include\Krystal.HTML\CSS\Serializer\CSSSerializerIdioms.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\CSSGroupingRule.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\CSSImportRule.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\CSSMarginRule.hpp" />
@@ -125,6 +127,7 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSParseError.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSTokenType.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\ParsedInt64OrDouble.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Serializer\CSSSerializerIdioms.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\StyleSheet.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\StyleSheetList.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Types\CSSOMString.hpp" />

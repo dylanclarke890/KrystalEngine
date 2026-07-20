@@ -43,9 +43,6 @@ namespace Krys::HTML
     /// @see https://www.w3.org/TR/cssom-1/#dom-cssstyledeclaration-parentrule
     KRYS_NODISCARD RefPtr<CSSRule> ParentRule() const noexcept;
 
-    /// @see https://www.w3.org/TR/cssom-1/#dom-cssstyledeclaration-cssfloat
-    KRYS_NODISCARD CSSOMString CssFloat() const noexcept;
-
 #pragma endregion
   };
 }

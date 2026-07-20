@@ -23,6 +23,11 @@ namespace Krys::HTML
     {
     }
 
+    KRYS_NODISCARD bool IsAtEnd() const noexcept
+    {
+      return _tokens.empty();
+    }
+
     KRYS_NODISCARD const CSSToken &Peek(size_t offset = 0uz) const noexcept
     {
       if (offset >= _tokens.size())
@@ -43,21 +48,6 @@ namespace Krys::HTML
       auto &token = _tokens.front();
       _tokens = _tokens.subspan(1uz);
       return token;
-    }
-
-    void ConsumeWhitespace() noexcept
-    {
-      size_t count = 0uz;
-      for (auto &token : _tokens)
-      {
-        if (token.Type() != CSSTokenType::Whitespace)
-        {
-          break;
-        }
-        ++count;
-      }
-
-      _tokens = _tokens.subspan(count);
     }
 
     KRYS_NODISCARD CSSTokenRange ConsumeBlock() noexcept
@@ -87,6 +77,31 @@ namespace Krys::HTML
       }
 
       return CSSTokenRange(start.first(_tokens.data() - start.data() - 1uz));
+    }
+
+    void SkipWhitespace() noexcept
+    {
+      size_t count = 0uz;
+      for (auto &token : _tokens)
+      {
+        if (token.Type() != CSSTokenType::Whitespace)
+        {
+          break;
+        }
+        ++count;
+      }
+
+      _tokens = _tokens.subspan(count);
+    }
+
+    void SkipComponentValue() noexcept
+    {
+    }
+
+    /// @brief Creates a new token range that ends at the specified end token range.
+    CSSTokenRange RangeUntil(const CSSTokenRange &end) noexcept
+    {
+      return CSSTokenRange(_tokens.first(end._tokens.data() - _tokens.data()));
     }
 
     auto begin() const noexcept

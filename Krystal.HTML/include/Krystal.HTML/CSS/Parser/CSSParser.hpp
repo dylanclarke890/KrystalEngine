@@ -3,11 +3,16 @@
 #include "Krystal.HTML/CSS/Parser/CSSInputStream.hpp"
 #include "Krystal.HTML/CSS/Parser/CSSToken.hpp"
 #include "Krystal.HTML/CSS/Parser/CSSTokenizer.hpp"
+#include "Krystal.HTML/CSS/Parser/Enums/CSSAllowedRules.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 
 namespace Krys::HTML
 {
   class CSSRule;
+  class CSSCharsetRule;
+  class CSSImportRule;
+  class CSSNamespaceRule;
+  class CSSStyleRule;
 
   class CSSParser
   {
@@ -22,7 +27,8 @@ namespace Krys::HTML
 
 #pragma region Parser Entry Points - https://www.w3.org/TR/css-syntax-3/#parser-entry-points
 
-    KRYS_NODISCARD static RefPtr<CSSRule> ParseRule(utf32_string &&input) noexcept;
+    KRYS_NODISCARD static RefPtr<CSSRule> ParseRule(utf32_string &&input,
+                                                    CSSAllowedRules allowedRules) noexcept;
 
 #pragma endregion
 
@@ -39,10 +45,24 @@ namespace Krys::HTML
 #pragma region Parser Algorithms - https://www.w3.org/TR/css-syntax-3/#parser-algorithms
 
     /// @see https://www.w3.org/TR/css-syntax-3/#consume-an-at-rule
-    KRYS_NODISCARD RefPtr<CSSRule> ConsumeAtRule(CSSTokenRange &tokens) noexcept;
+    KRYS_NODISCARD RefPtr<CSSRule> ConsumeAtRule(CSSTokenRange &tokens,
+                                                 CSSAllowedRules allowedRules) noexcept;
 
     /// @see https://www.w3.org/TR/css-syntax-3/#consume-a-qualified-rule
-    KRYS_NODISCARD RefPtr<CSSRule> ConsumeQualifiedRule(CSSTokenRange &tokens) noexcept;
+    KRYS_NODISCARD RefPtr<CSSRule> ConsumeQualifiedRule(CSSTokenRange &tokens,
+                                                        CSSAllowedRules allowedRules) noexcept;
+
+#pragma endregion
+
+#pragma region At-Rule Consumers
+
+    KRYS_NODISCARD RefPtr<CSSCharsetRule> ConsumeCharsetRule(CSSTokenRange prelude) noexcept;
+
+    KRYS_NODISCARD RefPtr<CSSImportRule> ConsumeImportRule(CSSTokenRange prelude) noexcept;
+
+    KRYS_NODISCARD RefPtr<CSSNamespaceRule> ConsumeNamespaceRule(CSSTokenRange prelude) noexcept;
+
+    KRYS_NODISCARD RefPtr<CSSStyleRule> ConsumeStyleRule(CSSTokenRange prelude) noexcept;
 
 #pragma endregion
   };

@@ -5,7 +5,7 @@
 
 namespace Krys::HTML
 {
-  class CSSStyleDeclaration;
+  class CSSPageDescriptors;
 
   /// @see https://www.w3.org/TR/cssom-1/#csspagerule
   class CSSPageRule : public CSSGroupingRule
@@ -26,7 +26,7 @@ namespace Krys::HTML
     void SelectorText(const CSSOMString &text) noexcept;
 
     /// @see https://www.w3.org/TR/cssom-1/#dom-csspagerule-style
-    KRYS_NODISCARD RefPtr<CSSStyleDeclaration> Style() const noexcept;
+    KRYS_NODISCARD RefPtr<CSSPageDescriptors> Style() const noexcept;
 
     /// @see https://www.w3.org/TR/cssom-1/#dom-csspagerule-style
     ExceptionOr<void> Style(const CSSOMString &text) noexcept;

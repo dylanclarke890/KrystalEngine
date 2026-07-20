@@ -4,7 +4,7 @@
 
 namespace Krys::HTML
 {
-  class CSSStyleDeclaration;
+  class CSSMarginDescriptors;
 
   /// @see https://www.w3.org/TR/cssom-1/#cssmarginrule
   class CSSMarginRule : public CSSRule
@@ -22,7 +22,7 @@ namespace Krys::HTML
     KRYS_NODISCARD CSSOMString Name() const noexcept;
 
     /// @see https://www.w3.org/TR/cssom-1/#dom-cssmarginrule-style
-    KRYS_NODISCARD RefPtr<CSSStyleDeclaration> Style() const noexcept;
+    KRYS_NODISCARD RefPtr<CSSMarginDescriptors> Style() const noexcept;
 
     /// @see https://www.w3.org/TR/cssom-1/#dom-cssmarginrule-style
     ExceptionOr<void> Style(const CSSOMString &text) noexcept;

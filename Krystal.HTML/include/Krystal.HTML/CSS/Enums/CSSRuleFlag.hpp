@@ -11,4 +11,4 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSRuleFlag, 29uz);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::CSSRuleFlag, 2uz);

@@ -5,7 +5,7 @@
 
 namespace Krys::HTML
 {
-  class CSSStyleDeclaration;
+  class CSSStyleProperties;
 
   /// @see https://www.w3.org/TR/cssom-1/#cssstylerule
   class CSSStyleRule : public CSSRule
@@ -26,7 +26,7 @@ namespace Krys::HTML
     void SelectorText(const CSSOMString &text) noexcept;
 
     /// @see https://www.w3.org/TR/cssom-1/#dom-cssstylerule-style
-    KRYS_NODISCARD RefPtr<CSSStyleDeclaration> Style() const noexcept;
+    KRYS_NODISCARD RefPtr<CSSStyleProperties> Style() const noexcept;
 
     /// @see https://www.w3.org/TR/cssom-1/#dom-cssstylerule-style
     ExceptionOr<void> Style(const CSSOMString& text) noexcept;
