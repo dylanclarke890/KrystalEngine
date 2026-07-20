@@ -2,8 +2,8 @@
 
 #include "Krystal.HTML/CSS/Parser/CSSInputStream.hpp"
 #include "Krystal.HTML/CSS/Parser/CSSToken.hpp"
+#include "Krystal.HTML/CSS/Parser/CSSTokenRange.hpp"
 #include "Krystal.HTML/CSS/Parser/Enums/CSSParseError.hpp"
-#include "Krystal.HTML/CSS/Parser/Types/CSSTokenRange.hpp"
 #include "Krystal.HTML/CSS/Parser/Types/NumericValue.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Types/List.hpp"

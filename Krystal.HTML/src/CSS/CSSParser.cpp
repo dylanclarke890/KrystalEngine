@@ -60,7 +60,79 @@ namespace Krys::HTML
     return _tokenizer.TokenRange();
   }
 
-#pragma region Parser Entry Points
+  CSSAllowedRules CSSParser::ComputeNextAllowedRules(CSSAllowedRules current,
+                                                     RawPtr<CSSRule> ref) const noexcept
+  {
+    if (!ref || current == CSSAllowedRules::None)
+    {
+      return current;
+    }
+    assert(current <= CSSAllowedRules::Regular);
+
+    if (Is<CSSCharsetRule>(ref))
+    {
+      return CSSAllowedRules::Import;
+    }
+
+    if (Is<CSSImportRule>(ref))
+    {
+      return CSSAllowedRules::Import;
+    }
+
+    if (Is<CSSNamespaceRule>(ref))
+    {
+      return CSSAllowedRules::Namespace;
+    }
+
+    return CSSAllowedRules::Regular;
+  }
+
+#pragma region Parser Algorithms
+
+  List<Ref<CSSRule>> CSSParser::ConsumeStyleSheetContents(CSSTokenRange &input) noexcept
+  {
+    CSSAllowedRules allowedRules = CSSAllowedRules::Charset;
+
+    List<Ref<CSSRule>> rules;
+    while (true)
+    {
+      RefPtr<CSSRule> rule;
+      switch (input.Peek().Type())
+      {
+        case CSSTokenType::Whitespace:
+        {
+          input.Discard();
+          continue;
+        }
+        case CSSTokenType::EndOfFile:
+        {
+          return rules;
+        }
+        case CSSTokenType::CDC:
+        case CSSTokenType::CDO:
+        {
+          input.Discard();
+          continue;
+        }
+        case CSSTokenType::AtKeyword:
+        {
+          rule = ConsumeAtRule(input, allowedRules);
+          break;
+        }
+        default:
+        {
+          rule = ConsumeQualifiedRule(input, allowedRules);
+          break;
+        }
+      }
+
+      if (rule != nullptr)
+      {
+        allowedRules = ComputeNextAllowedRules(allowedRules, rule.get());
+        rules.push_back(Krys::Move(rule));
+      }
+    }
+  }
 
   RefPtr<CSSRule> CSSParser::ConsumeAtRule(CSSTokenRange &tokens, CSSAllowedRules allowedRules,
                                            bool nested) noexcept
@@ -80,7 +152,7 @@ namespace Krys::HTML
     auto atRuleType = ParseCSSAtRuleType(name);
     if (tokens.IsAtEnd() || tokens.Peek().Type() == CSSTokenType::Semicolon)
     {
-      (void)tokens.Consume();
+      tokens.Discard();
       if (atRuleType == CSSAtRuleType::Charset && allowedRules <= CSSAllowedRules::Charset)
       {
         return ConsumeCharsetRule(prelude);
@@ -141,7 +213,7 @@ namespace Krys::HTML
     // See comment above
     if (nested && tokens.Peek().Type() == CSSTokenType::Semicolon)
     {
-      (void)tokens.Consume();
+      tokens.Discard();
       return nullptr;
     }
 

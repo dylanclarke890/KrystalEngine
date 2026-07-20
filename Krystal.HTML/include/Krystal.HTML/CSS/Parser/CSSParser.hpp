@@ -43,7 +43,16 @@ namespace Krys::HTML
     /// will free them when it is destroyed.
     KRYS_NODISCARD CSSTokenRange TokenRange() const noexcept;
 
+    /// @brief Computes the next allowed rules based on the current allowed rules and the reference rule. For
+    /// example, if the current allowed rules are `Charset` and the reference rule is an `@import` rule, the
+    /// next allowed rules will be `Import` (`Charset` is not allowed after an `@import` rule).
+    KRYS_NODISCARD CSSAllowedRules ComputeNextAllowedRules(CSSAllowedRules current,
+                                                           RawPtr<CSSRule> ref) const noexcept;
+
 #pragma region Parser Algorithms - https://drafts.csswg.org/css-syntax/#parser-algorithms
+
+    /// @see https://drafts.csswg.org/css-syntax/#consume-a-stylesheets-contents
+    KRYS_NODISCARD List<Ref<CSSRule>> ConsumeStyleSheetContents(CSSTokenRange &input) noexcept;
 
     /// @see https://drafts.csswg.org/css-syntax/#consume-an-at-rule
     KRYS_NODISCARD RefPtr<CSSRule> ConsumeAtRule(CSSTokenRange &tokens, CSSAllowedRules allowedRules,

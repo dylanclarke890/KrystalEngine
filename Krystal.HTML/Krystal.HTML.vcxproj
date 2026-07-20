@@ -107,7 +107,7 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\CSSParser.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSAllowedRules.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSAtRuleType.hpp" />
-    <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\CSSTokenRange.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Parser\CSSTokenRange.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Serializer\CSSRuleSerializer.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\CSSGroupingRule.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\CSSImportRule.hpp" />

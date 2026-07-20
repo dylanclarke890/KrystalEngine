@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/CSS/Enums/CSSRuleFlag.hpp"
 #include "Krystal.HTML/CSS/Enums/CSSRuleType.hpp"
 #include "Krystal.HTML/CSS/Types/CSSOMString.hpp"
 #include "Krystal.HTML/DOM/Types/ExceptionOr.hpp"
@@ -17,10 +18,12 @@ namespace Krys::HTML
                   public CanMakeWeakPtr<CSSRule>,
                   public CanMakeCheckedPtr<CSSStyleSheet>
   {
+    KRYS_TYPE_CAST_TRAITS_ACCESS();
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CSSRule);
 
   private:
     CSSRuleType _type : BitCount<CSSRuleType>() {CSSRuleType::Unknown};
+    CSSRuleFlag _flags : BitCount<CSSRuleFlag>() {CSSRuleFlag::None};
     CheckedPtr<CSSRule> _parentRule;
     CheckedPtr<CSSStyleSheet> _parentStylesheet;
 
@@ -56,5 +59,50 @@ namespace Krys::HTML
     {
       return _type;
     }
+
+  protected:
+#pragma region Type Checks
+
+    KRYS_NODISCARD bool IsCSSCharsetRule() const noexcept
+    {
+      return _type == CSSRuleType::Charset;
+    }
+
+    KRYS_NODISCARD bool IsCSSGroupingRule() const noexcept
+    {
+      return HasFlag(_flags, CSSRuleFlag::IsGroupingRule);
+    }
+
+    KRYS_NODISCARD bool IsCSSImportRule() const noexcept
+    {
+      return _type == CSSRuleType::Import;
+    }
+
+    KRYS_NODISCARD bool IsCSSMarginRule() const noexcept
+    {
+      return _type == CSSRuleType::Margin;
+    }
+
+    KRYS_NODISCARD bool IsCSSMediaRule() const noexcept
+    {
+      return _type == CSSRuleType::Media;
+    }
+
+    KRYS_NODISCARD bool IsCSSNamespaceRule() const noexcept
+    {
+      return _type == CSSRuleType::Namespace;
+    }
+
+    KRYS_NODISCARD bool IsCSSPageRule() const noexcept
+    {
+      return _type == CSSRuleType::Page;
+    }
+
+    KRYS_NODISCARD bool IsCSSStyleRule() const noexcept
+    {
+      return _type == CSSRuleType::Style;
+    }
+
+#pragma endregion
   };
 }

@@ -33,3 +33,10 @@ namespace Krys::HTML
 #pragma endregion
   };
 }
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::CSSPageRule)
+  KRYS_NODISCARD static bool IsType(const Krys::HTML::CSSRule &rule) noexcept
+  {
+    return rule.IsCSSPageRule();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

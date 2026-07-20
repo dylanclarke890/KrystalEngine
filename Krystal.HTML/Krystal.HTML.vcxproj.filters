@@ -912,7 +912,7 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Enums\CSSRuleFlag.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\CSSTokenRange.hpp">
+    <ClInclude Include="include\Krystal.HTML\CSS\Parser\CSSTokenRange.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\CSSParser.hpp">
