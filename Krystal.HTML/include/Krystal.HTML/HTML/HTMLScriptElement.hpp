@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/HTML/HTMLElement.hpp"
 #include "Krystal.HTML/DOM/Types/USVString.hpp"
+#include "Krystal.HTML/HTML/HTMLElement.hpp"
 
 namespace Krys::HTML
 {
@@ -116,6 +116,7 @@ namespace Krys::HTML
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::HTMLScriptElement)
+
   KRYS_NODISCARD static bool IsType(const Krys::HTML::Node &target) noexcept
   {
     return Is<Krys::HTML::HTMLElement>(target)
@@ -126,4 +127,5 @@ KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::HTMLScriptElement)
   {
     return target.IsHTMLScriptElement();
   }
+
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

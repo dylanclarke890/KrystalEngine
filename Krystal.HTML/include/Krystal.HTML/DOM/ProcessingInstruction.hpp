@@ -45,7 +45,7 @@ namespace Krys::HTML
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::ProcessingInstruction)
-  static bool IsType(const Krys::HTML::Node &node)
+  KRYS_NODISCARD static bool IsType(const Krys::HTML::Node &node) noexcept
   {
     return node.IsProcessingInstructionNode();
   }

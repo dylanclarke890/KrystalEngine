@@ -31,12 +31,15 @@ namespace Krys::HTML
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::HTMLOptGroupElement)
-  static bool IsType(const Krys::HTML::Node &target) noexcept
+
+  KRYS_NODISCARD static bool IsType(const Krys::HTML::Node &target) noexcept
   {
     return target.IsHTMLElement() && Downcast<Krys::HTML::HTMLElement>(target).IsHTMLOptGroupElement();
   }
-  static bool IsType(const Krys::HTML::HTMLElement &target) noexcept
+
+  KRYS_NODISCARD static bool IsType(const Krys::HTML::HTMLElement &target) noexcept
   {
     return target.IsHTMLOptGroupElement();
   }
+
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

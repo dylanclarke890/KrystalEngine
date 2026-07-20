@@ -29,7 +29,7 @@ namespace Krys::HTML
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::HTMLLabelElement)
-  static bool IsType(const Krys::HTML::HTMLElement &target) noexcept
+  KRYS_NODISCARD static bool IsType(const Krys::HTML::HTMLElement &target) noexcept
   {
     return target.IsHTMLLabelElement();
   }

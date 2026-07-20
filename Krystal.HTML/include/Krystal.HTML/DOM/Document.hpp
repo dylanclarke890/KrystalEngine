@@ -486,7 +486,7 @@ namespace Krys::HTML
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::Document)
-  static bool IsType(const Krys::HTML::Node &node) noexcept
+  KRYS_NODISCARD static bool IsType(const Krys::HTML::Node &node) noexcept
   {
     return node.IsDocumentNode();
   }
