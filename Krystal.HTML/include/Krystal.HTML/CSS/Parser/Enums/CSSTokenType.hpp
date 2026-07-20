@@ -32,6 +32,9 @@ namespace Krys::HTML
     OpenCurly,
     CloseCurly,
     UnicodeRange,
+
+    /// @brief An <eof-token> is a conceptual token, not actually produced by the tokenizer, used to indicate
+    /// that the token stream has been exhausted.
     EndOfFile
   };
 

@@ -4,8 +4,7 @@
 
 namespace Krys::HTML
 {
-  /// @brief Specifies the allowed rules in a CSS stylesheet. Permissions are cumulative, so a higher value
-  /// allows all rules of lower values, except where otherwise specified.
+  /// @brief Specifies the allowed rules in a CSS stylesheet.
   enum class CSSAllowedRules : uint8
   {
     /// @brief The @charset rule and later rules are allowed.
