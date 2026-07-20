@@ -121,8 +121,6 @@ namespace Krys::HTML
   RefPtr<CSSRule> CSSParser::ConsumeQualifiedRule(CSSTokenRange &tokens, CSSAllowedRules allowedRules,
                                                   bool nested) noexcept
   {
-    auto initialTokens = tokens;
-
     auto prelude = tokens;
 
     // Parsing a selector (aka a component value) should stop at the first semicolon (and goes to error
@@ -147,6 +145,31 @@ namespace Krys::HTML
       return nullptr;
     }
 
+    // TODO(CSSParser): Implement the following rule to disambiguate between a qualified rule and a custom
+    // property.
+    // https://github.com/w3c/csswg-drafts/issues/9336#issuecomment-1719806755
+    // if (range.peek().type() == LeftBraceToken)
+    // {
+    //   auto rangeCopyForDashedIdent = initialRange;
+    //   auto customProperty = CSSPropertyParserHelpers::consumeDashedIdent(rangeCopyForDashedIdent);
+    //   // This rule is ambigous with a custom property because it looks like "--ident: ...."
+    //   if (customProperty && rangeCopyForDashedIdent.peek().type() == ColonToken)
+    //   {
+    //     if (isStyleNestedContext())
+    //     {
+    //       // Error, consume until semicolon or end of block.
+    //       while (!range.atEnd() && range.peek().type() != SemicolonToken)
+    //         range.consumeComponentValue();
+    //       if (range.peek().type() == SemicolonToken)
+    //         range.consume();
+    //       return {};
+    //     }
+    //     // Error, consume until end of block.
+    //     range.consumeBlock();
+    //     return {};
+    //   }
+    // }
+
     prelude = prelude.RangeUntil(tokens);
     auto block = tokens.ConsumeBlock();
 
@@ -155,6 +178,7 @@ namespace Krys::HTML
       return ConsumeStyleRule(prelude, block);
     }
 
+    // TODO(CSSParser): Implement remaining qualified rule consumers.
     return nullptr;
   }
 
