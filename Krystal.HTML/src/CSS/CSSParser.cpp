@@ -4,6 +4,7 @@
 #include "Krystal.HTML/CSS/CSSNamespaceRule.hpp"
 #include "Krystal.HTML/CSS/CSSRule.hpp"
 #include "Krystal.HTML/CSS/CSSRuleList.hpp"
+#include "Krystal.HTML/CSS/CSSStyleRule.hpp"
 #include "Krystal.HTML/CSS/CSSStyleSheet.hpp"
 #include "Krystal.HTML/CSS/MediaList.hpp"
 #include "Krystal.HTML/CSS/Parser/Enums/CSSAtRuleType.hpp"
@@ -128,6 +129,10 @@ namespace Krys::HTML
       tokens.SkipComponentValue();
     }
     prelude = prelude.RangeUntil(tokens);
+
+    // TODO(CSSParser): Implement qualified rule consumer.
+
+    return nullptr;
   }
 
 #pragma endregion

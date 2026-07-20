@@ -1,4 +1,4 @@
-#data
+﻿#data
 foo
 #tokens
 Ident(foo)
@@ -26,12 +26,14 @@ Ident(--💅)
 #data
 -§
 #tokens
-Ident(-§)
+Delim(-)
+Delim(§)
 
 #data
 -×
 #tokens
-Ident(-×)
+Delim(-)
+Delim(×)
 
 #data
 --a𐀀

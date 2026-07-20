@@ -103,72 +103,79 @@ namespace Krys::HTML
     /// @brief Reports an error that occurred during tokenization.
     void ParseError(CSSParseError error) noexcept;
 
-#pragma region Tokenizer Definitions - https://www.w3.org/TR/css-syntax-3/#tokenizer-definitions
+#pragma region Tokenizer Definitions - https://drafts.csswg.org/css-syntax/#tokenizer-definitions
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#digit
+    /// @see https://drafts.csswg.org/css-syntax/#digit
     KRYS_NODISCARD static bool IsDigit(char32 codePoint) noexcept
     {
       return Krys::Text::IsASCIIDigit(codePoint);
     }
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#hex-digit
+    /// @see https://drafts.csswg.org/css-syntax/#hex-digit
     KRYS_NODISCARD static bool IsHexDigit(char32 codePoint) noexcept
     {
       return Krys::Text::IsASCIIHexDigit(codePoint);
     }
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#uppercase-letter
+    /// @see https://drafts.csswg.org/css-syntax/#uppercase-letter
     KRYS_NODISCARD static bool IsUppercaseLetter(char32 codePoint) noexcept
     {
       return Krys::Text::IsASCIIUpper(codePoint);
     }
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#lowercase-letter
+    /// @see https://drafts.csswg.org/css-syntax/#lowercase-letter
     KRYS_NODISCARD static bool IsLowercaseLetter(char32 codePoint) noexcept
     {
       return Krys::Text::IsASCIILower(codePoint);
     }
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#letter
+    /// @see https://drafts.csswg.org/css-syntax/#letter
     KRYS_NODISCARD static bool IsLetter(char32 codePoint) noexcept
     {
       return Krys::Text::IsASCIIAlpha(codePoint);
     }
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#non-ascii-code-point
+    /// @see https://drafts.csswg.org/css-syntax/#non-ascii-code-point
     KRYS_NODISCARD static bool IsNonASCIICodePoint(char32 codePoint) noexcept
     {
-      // NOTE: the spec says any codepoint greater that 0x80 but we reserve an unused codepoint as an end of
-      // file marker so we need to explicitly check for it here.
-      return codePoint >= 0x80 && codePoint != EOFMarker;
+      return codePoint == U'\u00B7' || (codePoint >= U'\u00C0' && codePoint <= U'\u00D6')
+             || (codePoint >= U'\u00D8' && codePoint <= U'\u00F6')
+             || (codePoint >= U'\u00F8' && codePoint <= U'\u037D')
+             || (codePoint >= U'\u037F' && codePoint <= U'\u1FFF') || codePoint == U'\u200C'
+             || codePoint == U'\u200D' || codePoint == U'\u203F' || codePoint == U'\u2040'
+             || (codePoint >= U'\u2070' && codePoint <= U'\u218F')
+             || (codePoint >= U'\u2C00' && codePoint <= U'\u2FEF')
+             || (codePoint >= U'\u3001' && codePoint <= U'\uD7FF')
+             || (codePoint >= U'\uF900' && codePoint <= U'\uFDCF')
+             || (codePoint >= U'\uFDF0' && codePoint <= U'\uFFFD') || codePoint >= U'\U00010000';
     }
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#ident-start-code-point
+    /// @see https://drafts.csswg.org/css-syntax/#ident-start-code-point
     KRYS_NODISCARD static bool IsIdentStartCodePoint(char32 codePoint) noexcept
     {
       return IsLetter(codePoint) || IsNonASCIICodePoint(codePoint) || codePoint == U'_';
     }
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#ident-code-point
+    /// @see https://drafts.csswg.org/css-syntax/#ident-code-point
     KRYS_NODISCARD static bool IsIdentCodePoint(char32 codePoint) noexcept
     {
       return IsIdentStartCodePoint(codePoint) || IsDigit(codePoint) || codePoint == U'-';
     }
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#non-printable-code-point
+    /// @see https://drafts.csswg.org/css-syntax/#non-printable-code-point
     KRYS_NODISCARD static bool IsNonPrintableCodePoint(char32 codePoint) noexcept
     {
       return (codePoint >= 0x0 && codePoint <= 0x8) || codePoint == 0xB
              || (codePoint >= 0xE && codePoint <= 0x1F) || codePoint == 0x7F;
     }
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#newline
+    /// @see https://drafts.csswg.org/css-syntax/#newline
     KRYS_NODISCARD static bool IsNewline(char32 codePoint) noexcept
     {
       return codePoint == U'\n';
     }
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#whitespace
+    /// @see https://drafts.csswg.org/css-syntax/#whitespace
     KRYS_NODISCARD static bool IsWhitespace(char32 codePoint) noexcept
     {
       return IsNewline(codePoint) || codePoint == U'\t' || codePoint == U' ';

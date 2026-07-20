@@ -23,6 +23,11 @@ namespace Krys::HTML
       return u8"";
     }
 
+    ExceptionOr<void> Encoding(const CSSOMString &encoding) noexcept
+    {
+      return ExceptionCode::NoModificationAllowedError;
+    }
+
 #pragma endregion
 
 #pragma region CSSRule - https://www.w3.org/TR/cssom-1/#cssrule
