@@ -849,7 +849,7 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSParseError.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\ParsedInt64OrDouble.hpp">
+    <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\NumericValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\CSS\Types\CSSOMString.hpp">

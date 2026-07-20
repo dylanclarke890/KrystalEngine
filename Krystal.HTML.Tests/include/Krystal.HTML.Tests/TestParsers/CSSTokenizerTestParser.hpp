@@ -27,15 +27,7 @@ namespace Krys::HTML::Tests
 
   inline void SerializeNumericValue(const CSSToken &token, DOMString &output)
   {
-    auto numericValue = token.NumericValue();
-    if (token.NumericTokenType() == NumericTokenType::Integer)
-    {
-      output += ToUTF8(std::get<int64>(numericValue));
-    }
-    else
-    {
-      output += ToUTF8(std::get<double>(numericValue));
-    }
+    output += ToUTF8(token.NumericValue());
   }
 
   inline void SerializeCSSToken(const CSSToken &token, DOMString &output) noexcept

@@ -4,7 +4,7 @@
 #include "Krystal.HTML/CSS/Parser/CSSToken.hpp"
 #include "Krystal.HTML/CSS/Parser/Enums/CSSParseError.hpp"
 #include "Krystal.HTML/CSS/Parser/Types/CSSTokenRange.hpp"
-#include "Krystal.HTML/CSS/Parser/Types/ParsedInt64OrDouble.hpp"
+#include "Krystal.HTML/CSS/Parser/Types/NumericValue.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
@@ -17,7 +17,7 @@ namespace Krys::HTML
     SourceLocation Location {};
   };
 
-  /// @see https://www.w3.org/TR/css-syntax-3/#tokenization
+  /// @see https://drafts.csswg.org/css-syntax/#tokenization
   class CSSTokenizer
   {
   private:
@@ -53,47 +53,53 @@ namespace Krys::HTML
     }
 
   private:
-    /// @see https://www.w3.org/TR/css-syntax-3/#consume-token
-    KRYS_NODISCARD CSSToken ConsumeToken() noexcept;
+    /// @see https://drafts.csswg.org/css-syntax/#tokenizer-consume-a-token
+    KRYS_NODISCARD CSSToken ConsumeToken(bool unicodeRangesAllowed = false) noexcept;
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#consume-comment
+    /// @see https://drafts.csswg.org/css-syntax/#consume-comments
     void ConsumeComments() noexcept;
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#consume-numeric-token
+    /// @see https://drafts.csswg.org/css-syntax/#consume-a-numeric-token
     CSSToken ConsumeNumericToken() noexcept;
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#consume-ident-like-token
+    /// @see https://drafts.csswg.org/css-syntax/#consume-an-ident-like-token
     CSSToken ConsumeIdentLikeToken() noexcept;
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#consume-string-token
+    /// @see https://drafts.csswg.org/css-syntax/#consume-a-string-token
     CSSToken ConsumeStringToken(char32 endingCodePoint) noexcept;
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#consume-url-token
+    /// @see https://drafts.csswg.org/css-syntax/#consume-a-url-token
     CSSToken ConsumeUrlToken() noexcept;
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#consume-escaped-code-point
+    /// @see https://drafts.csswg.org/css-syntax/#consume-an-escaped-code-point
     KRYS_NODISCARD char32 ConsumeEscapedCodePoint() noexcept;
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#starts-with-a-valid-escape
+    /// @see https://drafts.csswg.org/css-syntax/#starts-with-a-valid-escape
     KRYS_NODISCARD bool StartsWithValidEscape(char32 first, char32 second) const noexcept;
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#would-start-an-identifier
-    KRYS_NODISCARD bool WouldStartIdentifier(char32 first, char32 second, char32 third) const noexcept;
+    /// @see https://drafts.csswg.org/css-syntax/#check-if-three-code-points-would-start-an-ident-sequence
+    KRYS_NODISCARD bool StartsWithIdentifier(char32 first, char32 second, char32 third) const noexcept;
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#starts-with-a-number
+    /// @see https://drafts.csswg.org/css-syntax/#check-if-three-code-points-would-start-a-number
     KRYS_NODISCARD bool StartsWithNumber(char32 first, char32 second, char32 third) const noexcept;
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#consume-ident-sequence
-    utf32_string ConsumeIdentSequence() noexcept;
+    /// @see https://drafts.csswg.org/css-syntax/#check-if-three-code-points-would-start-a-unicode-range
+    KRYS_NODISCARD bool StartsWithUnicodeRange(char32 first, char32 second, char32 third) const noexcept;
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#consume-number
-    KRYS_NODISCARD ParsedInt64OrDouble ConsumeNumber() noexcept;
+    /// @brief Helper function to check if the next characters in the input stream start with an exponent,
+    /// which is part of a number token.
+    KRYS_NODISCARD bool StartsWithExponent(char32 first, char32 second, char32 third) const noexcept;
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#convert-string-to-number
-    KRYS_NODISCARD ParsedInt64OrDouble ConvertStringToNumber(utf32_stringview codePoints,
-                                                             NumericTokenType type) noexcept;
+    /// @see https://drafts.csswg.org/css-syntax/#consume-an-ident-sequence
+    KRYS_NODISCARD utf32_string ConsumeIdentSequence() noexcept;
 
-    /// @see https://www.w3.org/TR/css-syntax-3/#consume-remnants-of-bad-url
+    /// @see https://drafts.csswg.org/css-syntax/#consume-a-number
+    KRYS_NODISCARD NumericValue ConsumeNumber() noexcept;
+
+    /// @see https://drafts.csswg.org/css-syntax/#consume-a-unicode-range-token
+    KRYS_NODISCARD CSSToken ConsumeUnicodeRangeToken() noexcept;
+
+    /// @see https://drafts.csswg.org/css-syntax/#consume-the-remnants-of-a-bad-url
     void ConsumeRemnantsOfBadUrl() noexcept;
 
     /// @brief Utility helper for consuming whitespace from the input stream without emitting whitespace

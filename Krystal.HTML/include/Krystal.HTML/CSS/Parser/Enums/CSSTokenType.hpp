@@ -31,6 +31,7 @@ namespace Krys::HTML
     CloseParen,
     OpenCurly,
     CloseCurly,
+    UnicodeRange,
     EndOfFile
   };
 
@@ -40,15 +41,24 @@ namespace Krys::HTML
     Id
   };
 
-  enum class NumericTokenType : uint8
+  enum class NumericValueType : uint8
   {
     Number,
     Integer
   };
+
+  enum class NumericSignChar : uint8
+  {
+    Missing,
+    Plus,
+    Minus
+  };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSTokenType, 26uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSTokenType, 27uz);
 
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::HashTokenType, 2uz);
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::NumericTokenType, 2uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::NumericValueType, 2uz);
+
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::NumericSignChar, 3uz);

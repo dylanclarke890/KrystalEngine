@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/CSS/Parser/Enums/CSSTokenType.hpp"
-#include "Krystal.HTML/CSS/Parser/Types/ParsedInt64OrDouble.hpp"
+#include "Krystal.HTML/CSS/Parser/Types/NumericValue.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/SmallList.hpp"
 #include "Krystal.Text/StringConversion.hpp"
@@ -13,9 +13,12 @@ namespace Krys::HTML
   private:
     CSSTokenType _type : BitCount<CSSTokenType>() {CSSTokenType::Uninitialized};
     HashTokenType _hashType : BitCount<HashTokenType>() {HashTokenType::Unrestricted};
-    NumericTokenType _numericTokenType : BitCount<NumericTokenType>() {NumericTokenType::Integer};
-    Int64OrDouble _numericValue;
+    NumericValueType _numericValueType : BitCount<NumericValueType>() {NumericValueType::Integer};
+    NumericSignChar _numericSignChar : BitCount<NumericSignChar>() {NumericSignChar::Missing};
+    double _numericValue;
     SmallList<char8, 32uz> _codePoints;
+    char32 _unicodeRangeStart;
+    char32 _unicodeRangeEnd;
 
   public:
     CSSToken(CSSTokenType type) noexcept : _type(type)
@@ -72,16 +75,17 @@ namespace Krys::HTML
       AppendDataInternal(codePoints);
     }
 
-    void NumericValue(ParsedInt64OrDouble value) noexcept
+    void NumericValue(NumericValue value) noexcept
     {
       assert(_type == CSSTokenType::Number || _type == CSSTokenType::Percentage
              || _type == CSSTokenType::Dimension);
 
       _numericValue = value.Value;
-      _numericTokenType = value.Type;
+      _numericValueType = value.Type;
+      _numericSignChar = value.SignCharacter;
     }
 
-    KRYS_NODISCARD Int64OrDouble NumericValue() const noexcept
+    KRYS_NODISCARD double NumericValue() const noexcept
     {
       assert(_type == CSSTokenType::Number || _type == CSSTokenType::Percentage
              || _type == CSSTokenType::Dimension);
@@ -89,12 +93,12 @@ namespace Krys::HTML
       return _numericValue;
     }
 
-    KRYS_NODISCARD NumericTokenType NumericTokenType() const noexcept
+    KRYS_NODISCARD NumericValueType NumericValueType() const noexcept
     {
       assert(_type == CSSTokenType::Number || _type == CSSTokenType::Percentage
              || _type == CSSTokenType::Dimension);
 
-      return _numericTokenType;
+      return _numericValueType;
     }
 
     void Unit(utf32_stringview unit) noexcept
@@ -107,6 +111,14 @@ namespace Krys::HTML
     {
       assert(_type == CSSTokenType::Dimension);
       return utf8_stringview {_codePoints.data(), _codePoints.size()};
+    }
+
+    void UnicodeRange(char32 start, char32 end) noexcept
+    {
+      assert(_type == CSSTokenType::UnicodeRange);
+
+      _unicodeRangeStart = start;
+      _unicodeRangeEnd = end;
     }
 
   private:

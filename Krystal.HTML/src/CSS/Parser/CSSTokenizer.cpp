@@ -25,7 +25,7 @@ namespace Krys::HTML
     }
   }
 
-  CSSToken CSSTokenizer::ConsumeToken() noexcept
+  CSSToken CSSTokenizer::ConsumeToken(bool unicodeRangesAllowed) noexcept
   {
     ConsumeComments();
 
@@ -50,7 +50,7 @@ namespace Krys::HTML
       {
         auto token = CSSToken {CSSTokenType::Hash};
 
-        if (WouldStartIdentifier(current, next, _inputStream.Peek(1uz)))
+        if (StartsWithIdentifier(current, next, _inputStream.Peek(1uz)))
         {
           token.HashType(HashTokenType::Id);
         }
@@ -107,7 +107,7 @@ namespace Krys::HTML
         return CSSToken {CSSTokenType::CDC};
       }
 
-      if (WouldStartIdentifier(current, next, _inputStream.Peek(1uz)))
+      if (StartsWithIdentifier(current, next, _inputStream.Peek(1uz)))
       {
         _inputStream.Reconsume(current);
         return ConsumeIdentLikeToken();
@@ -150,7 +150,7 @@ namespace Krys::HTML
 
     if (current == U'@')
     {
-      if (WouldStartIdentifier(next, _inputStream.Peek(1uz), _inputStream.Peek(2uz)))
+      if (StartsWithIdentifier(next, _inputStream.Peek(1uz), _inputStream.Peek(2uz)))
       {
         auto token = CSSToken {CSSTokenType::AtKeyword};
         token.IdentCodePoints(ConsumeIdentSequence());
@@ -196,6 +196,18 @@ namespace Krys::HTML
     {
       _inputStream.Reconsume(current);
       return ConsumeNumericToken();
+    }
+
+    if (current == U'U' || current == U'u')
+    {
+      if (unicodeRangesAllowed && StartsWithUnicodeRange(current, next, _inputStream.Peek(1uz)))
+      {
+        _inputStream.Reconsume(current);
+        return ConsumeUnicodeRangeToken();
+      }
+
+      _inputStream.Reconsume(current);
+      return ConsumeIdentLikeToken();
     }
 
     if (IsIdentStartCodePoint(current))
@@ -250,7 +262,7 @@ namespace Krys::HTML
   {
     auto number = ConsumeNumber();
 
-    if (WouldStartIdentifier(_inputStream.NextInputCharacter(), _inputStream.Peek(1uz),
+    if (StartsWithIdentifier(_inputStream.NextInputCharacter(), _inputStream.Peek(1uz),
                              _inputStream.Peek(2uz)))
     {
       auto token = CSSToken {CSSTokenType::Dimension};
@@ -484,7 +496,7 @@ namespace Krys::HTML
     return true;
   }
 
-  bool CSSTokenizer::WouldStartIdentifier(char32 first, char32 second, char32 third) const noexcept
+  bool CSSTokenizer::StartsWithIdentifier(char32 first, char32 second, char32 third) const noexcept
   {
     if (first == U'-')
     {
@@ -544,6 +556,31 @@ namespace Krys::HTML
     return false;
   }
 
+  bool CSSTokenizer::StartsWithUnicodeRange(char32 first, char32 second, char32 third) const noexcept
+  {
+    if ((first == U'U' || first == U'u') && second == U'+' && (IsHexDigit(third) || third == U'?'))
+    {
+      return true;
+    }
+
+    return false;
+  }
+
+  bool CSSTokenizer::StartsWithExponent(char32 first, char32 second, char32 third) const noexcept
+  {
+    if (first != U'E' && first != U'e')
+    {
+      return false;
+    }
+
+    if (second == U'-' || second == U'+')
+    {
+      return IsDigit(third);
+    }
+
+    return IsDigit(second);
+  }
+
   utf32_string CSSTokenizer::ConsumeIdentSequence() noexcept
   {
     utf32_string result;
@@ -571,152 +608,164 @@ namespace Krys::HTML
     }
   }
 
-  ParsedInt64OrDouble CSSTokenizer::ConsumeNumber() noexcept
+  NumericValue CSSTokenizer::ConsumeNumber() noexcept
   {
-    NumericTokenType type = NumericTokenType::Integer;
-    utf32_string repr;
+    NumericValueType type = NumericValueType::Integer;
+    NumericSignChar sign = NumericSignChar::Missing;
+
+    // The characters below are all ASCII characters, so we can safely use a string buffer to store them.
+    string numberPart = "";
+    string exponentPart = "";
 
     if (_inputStream.NextInputCharacter() == U'+' || _inputStream.NextInputCharacter() == U'-')
     {
-      repr.push_back(_inputStream.NextInputCharacter());
+      if (_inputStream.NextInputCharacter() == U'+')
+      {
+        sign = NumericSignChar::Plus;
+      }
+      else
+      {
+        sign = NumericSignChar::Minus;
+        numberPart.push_back(static_cast<char8>(_inputStream.NextInputCharacter()));
+      }
+
       _inputStream.Consume();
     }
 
     while (IsDigit(_inputStream.NextInputCharacter()))
     {
-      repr.push_back(_inputStream.NextInputCharacter());
+      numberPart.push_back(static_cast<char8>(_inputStream.NextInputCharacter()));
       _inputStream.Consume();
     }
 
     if (_inputStream.NextInputCharacter() == U'.' && IsDigit(_inputStream.Peek(1uz)))
     {
-      repr.push_back(_inputStream.NextInputCharacter());
-      repr.push_back(_inputStream.Peek(1uz));
+      numberPart.push_back(static_cast<char8>(_inputStream.NextInputCharacter()));
+      numberPart.push_back(static_cast<char8>(_inputStream.Peek(1uz)));
       _inputStream.Consume(2uz);
-      type = NumericTokenType::Number;
 
       while (IsDigit(_inputStream.NextInputCharacter()))
       {
-        repr.push_back(_inputStream.NextInputCharacter());
+        numberPart.push_back(static_cast<char8>(_inputStream.NextInputCharacter()));
         _inputStream.Consume();
       }
+
+      type = NumericValueType::Number;
     }
 
-    if (_inputStream.NextInputCharacter() == U'e' || _inputStream.NextInputCharacter() == U'E')
+    if (StartsWithExponent(_inputStream.NextInputCharacter(), _inputStream.Peek(1uz), _inputStream.Peek(2uz)))
     {
-      if (IsDigit(_inputStream.Peek(1uz)))
-      {
-        repr.push_back(_inputStream.NextInputCharacter());
-        repr.push_back(_inputStream.Peek(1uz));
-        _inputStream.Consume(2uz);
-        type = NumericTokenType::Number;
+      _inputStream.Consume();
 
-        while (IsDigit(_inputStream.NextInputCharacter()))
-        {
-          repr.push_back(_inputStream.NextInputCharacter());
-          _inputStream.Consume();
-        }
-      }
-      else if ((_inputStream.Peek(1uz) == U'+' || _inputStream.Peek(1uz) == U'-')
-               && IsDigit(_inputStream.Peek(2uz)))
+      if (_inputStream.NextInputCharacter() == U'+')
       {
-        repr.push_back(_inputStream.NextInputCharacter());
-        repr.push_back(_inputStream.Peek(1uz));
-        repr.push_back(_inputStream.Peek(2uz));
-        _inputStream.Consume(3uz);
-        type = NumericTokenType::Number;
-
-        while (IsDigit(_inputStream.NextInputCharacter()))
-        {
-          repr.push_back(_inputStream.NextInputCharacter());
-          _inputStream.Consume();
-        }
+        _inputStream.Consume(); // skip the plus
       }
+      else if (_inputStream.NextInputCharacter() == U'-')
+      {
+        exponentPart.push_back('-');
+        _inputStream.Consume();
+      }
+
+      while (IsDigit(_inputStream.NextInputCharacter()))
+      {
+        exponentPart.push_back(static_cast<char8>(_inputStream.NextInputCharacter()));
+        _inputStream.Consume();
+      }
+
+      type = NumericValueType::Number;
     }
 
-    return ConvertStringToNumber(repr, type);
+    double value;
+    auto [nptr, nec] = std::from_chars(numberPart.data(), numberPart.data() + numberPart.size(), value);
+    assert(nec == std::errc());
+
+    if (!exponentPart.empty())
+    {
+      int64 exponent;
+      auto [eptr, eec] =
+        std::from_chars(exponentPart.data(), exponentPart.data() + exponentPart.size(), exponent);
+      assert(eec == std::errc());
+
+      value *= std::pow(10.0, static_cast<double>(exponent));
+    }
+
+    return NumericValue {.Value = value, .Type = type, .SignCharacter = sign};
   }
 
-  ParsedInt64OrDouble CSSTokenizer::ConvertStringToNumber(utf32_stringview codePoints,
-                                                          NumericTokenType type) noexcept
+  CSSToken CSSTokenizer::ConsumeUnicodeRangeToken() noexcept
   {
-    auto position = codePoints.begin();
+    assert(StartsWithUnicodeRange(_inputStream.NextInputCharacter(), _inputStream.Peek(1uz),
+                                  _inputStream.Peek(2uz)));
 
-    auto peek = [&]() -> char32_t
+    auto ConvertHexStrToInt = [](const string &str) noexcept -> int32
     {
-      return position != codePoints.end() ? *position : U'\0';
+      int32 value = 0;
+      auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value, 16);
+      assert(ec == std::errc());
+      return value;
     };
 
-    auto consume = [&]() -> char32_t
+    string consumed;
+    while (consumed.size() < 6uz && IsHexDigit(_inputStream.NextInputCharacter()))
     {
-      assert(position != codePoints.end());
-      return *position++;
-    };
-
-    int sign = 1;
-    if (peek() == U'-')
-    {
-      sign = -1;
-      consume();
-    }
-    else if (peek() == U'+')
-    {
-      consume();
+      consumed.push_back(static_cast<char8>(_inputStream.NextInputCharacter()));
+      _inputStream.Consume();
     }
 
-    uint64 integer = 0;
-    while (IsDigit(peek()))
+    bool hasQuestionMark = false;
+    while (consumed.size() < 6uz && _inputStream.NextInputCharacter() == U'?')
     {
-      integer = integer * 10U + (static_cast<uint64>(consume()) - U'0');
+      hasQuestionMark = true;
+      consumed.push_back(static_cast<char8>(_inputStream.NextInputCharacter()));
+      _inputStream.Consume();
     }
 
-    if (type == NumericTokenType::Integer)
+    CSSToken token {CSSTokenType::UnicodeRange};
+    if (hasQuestionMark)
     {
-      int64 value = static_cast<int64>(integer) * sign;
-      return ParsedInt64OrDouble {.Value = value, .Type = NumericTokenType::Integer};
-    }
+      string start = consumed;
 
-    uint64 fraction = 0;
-    int fractionDigits = 0;
-
-    if (peek() == U'.')
-    {
-      consume();
-
-      while (IsDigit(peek()))
+      auto questionMarkIndex = start.find_first_of('?');
+      while (questionMarkIndex != string::npos)
       {
-        fraction = fraction * 10U + (static_cast<uint64>(consume()) - U'0');
-        ++fractionDigits;
-      }
-    }
-
-    int exponentSign = 1;
-    uint64 exponent = 0;
-
-    if (peek() == U'e' || peek() == U'E')
-    {
-      consume();
-
-      if (peek() == U'-')
-      {
-        exponentSign = -1;
-        consume();
-      }
-      else if (peek() == U'+')
-      {
-        consume();
+        start[questionMarkIndex] = '0';
+        questionMarkIndex = start.find_first_of('?', questionMarkIndex + 1uz);
       }
 
-      while (IsDigit(peek()))
+      // reuse the consumed string to store the end of the range, since we don't need it anymore
+      string &end = consumed;
+
+      questionMarkIndex = end.find_first_of('?');
+      while (questionMarkIndex != string::npos)
       {
-        exponent = exponent * 10U + (static_cast<uint64>(consume()) - U'0');
+        end[questionMarkIndex] = 'F';
+        questionMarkIndex = end.find_first_of('?', questionMarkIndex + 1uz);
       }
+
+      token.UnicodeRange(ConvertHexStrToInt(start), ConvertHexStrToInt(end));
+      return token;
     }
 
-    double value = sign * (integer + fraction * std::pow(10.0, -fractionDigits))
-                   * std::pow(10.0, exponentSign * static_cast<int>(exponent));
+    int32 startOfRange = ConvertHexStrToInt(consumed);
+    if (_inputStream.NextInputCharacter() == U'-' && IsHexDigit(_inputStream.Peek(1uz)))
+    {
+      _inputStream.Consume();
+      consumed.clear();
 
-    return ParsedInt64OrDouble {.Value = value, .Type = NumericTokenType::Number};
+      while (consumed.size() < 6uz && IsHexDigit(_inputStream.NextInputCharacter()))
+      {
+        consumed.push_back(static_cast<char8>(_inputStream.NextInputCharacter()));
+        _inputStream.Consume();
+      }
+
+      int32 endOfRange = ConvertHexStrToInt(consumed);
+      token.UnicodeRange(startOfRange, endOfRange);
+      return token;
+    }
+
+    token.UnicodeRange(startOfRange, startOfRange);
+    return token;
   }
 
   void CSSTokenizer::ConsumeRemnantsOfBadUrl() noexcept

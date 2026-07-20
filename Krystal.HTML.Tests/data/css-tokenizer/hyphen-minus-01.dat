@@ -1,4 +1,4 @@
-#data
+﻿#data
 -
 #tokens
 Delim(-)
@@ -21,7 +21,7 @@ Ident(--1)
 #data
 -0
 #tokens
-Number(0)
+Number(-0)
 
 #data
 -->
