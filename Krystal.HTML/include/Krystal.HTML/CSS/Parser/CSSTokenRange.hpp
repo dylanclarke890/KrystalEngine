@@ -50,6 +50,16 @@ namespace Krys::HTML
       return token;
     }
 
+    void Discard() noexcept
+    {
+      if (_tokens.empty())
+      {
+        return;
+      }
+
+      _tokens = _tokens.subspan(1uz);
+    }
+
     KRYS_NODISCARD CSSTokenRange ConsumeBlock() noexcept
     {
       assert(Peek().Type() == CSSTokenType::OpenCurly);
