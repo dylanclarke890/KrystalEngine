@@ -65,16 +65,16 @@ namespace Krys::HTML
       assert(Peek().Type() == CSSTokenType::OpenCurly);
 
       auto start = _tokens.subspan(1uz);
-      size_t nestingLevel = 0uz;
 
+      size_t nestingLevel = 0uz;
       do
       {
         const CSSToken &token = Consume();
-        if (token.Type() == CSSTokenType::OpenCurly)
+        if (token.IsBlockStart())
         {
           nestingLevel++;
         }
-        else if (token.Type() == CSSTokenType::CloseCurly)
+        else if (token.IsBlockEnd())
         {
           nestingLevel--;
         }
@@ -87,6 +87,23 @@ namespace Krys::HTML
       }
 
       return CSSTokenRange(start.first(_tokens.data() - start.data() - 1uz));
+    }
+
+    void SkipComponentValue() noexcept
+    {
+      size_t nestingLevel = 0uz;
+      do
+      {
+        const CSSToken &token = Consume();
+        if (token.IsBlockStart())
+        {
+          nestingLevel++;
+        }
+        else if (token.IsBlockEnd())
+        {
+          nestingLevel--;
+        }
+      } while (nestingLevel && !_tokens.empty());
     }
 
     /// @see https://drafts.csswg.org/css-syntax/#token-stream-discard-whitespace
@@ -103,10 +120,6 @@ namespace Krys::HTML
       }
 
       _tokens = _tokens.subspan(count);
-    }
-
-    void SkipComponentValue() noexcept
-    {
     }
 
     /// @brief Creates a new token range that ends at the specified end token range.

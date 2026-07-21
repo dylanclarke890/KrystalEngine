@@ -12,6 +12,7 @@ namespace Krys::HTML
   {
   private:
     CSSTokenType _type : BitCount<CSSTokenType>() {CSSTokenType::Uninitialized};
+    BlockTokenType _blockType : BitCount<BlockTokenType>() {BlockTokenType::None};
     HashTokenType _hashType : BitCount<HashTokenType>() {HashTokenType::Unrestricted};
     NumericValueType _numericValueType : BitCount<NumericValueType>() {NumericValueType::Integer};
     NumericSignChar _numericSignChar : BitCount<NumericSignChar>() {NumericSignChar::Missing};
@@ -22,6 +23,10 @@ namespace Krys::HTML
 
   public:
     CSSToken(CSSTokenType type) noexcept : _type(type)
+    {
+    }
+
+    CSSToken(CSSTokenType type, BlockTokenType blockType) noexcept : _type(type), _blockType(blockType)
     {
     }
 
@@ -119,6 +124,16 @@ namespace Krys::HTML
 
       _unicodeRangeStart = start;
       _unicodeRangeEnd = end;
+    }
+
+    KRYS_NODISCARD bool IsBlockStart() const noexcept
+    {
+      return _blockType == BlockTokenType::Start;
+    }
+
+    KRYS_NODISCARD bool IsBlockEnd() const noexcept
+    {
+      return _blockType == BlockTokenType::End;
     }
 
   private:

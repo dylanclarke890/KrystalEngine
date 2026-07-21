@@ -9,8 +9,8 @@ namespace Krys::HTML
 
   bool CSSTokenizer::PumpTokenizer() noexcept
   {
-    // NOTE(webkit): To avoid resizing we err on the side of reserving too much space. Most strings we
-    // tokenize have about 3.5 to 5 characters per token.
+    // NOTE(webkit-optimisation): To avoid resizing we err on the side of reserving too much space. Most
+    // strings we tokenize have about 3.5 to 5 characters per token.
     _tokens.reserve(_inputStream.Size() / 3uz);
 
     while (true)
@@ -69,12 +69,12 @@ namespace Krys::HTML
 
     if (current == U'(')
     {
-      return CSSToken {CSSTokenType::OpenParen};
+      return BlockStart(CSSTokenType::OpenParen);
     }
 
     if (current == U')')
     {
-      return CSSToken {CSSTokenType::CloseParen};
+      return BlockEnd(CSSTokenType::CloseParen);
     }
 
     if (current == U'+')
@@ -162,7 +162,7 @@ namespace Krys::HTML
 
     if (current == U'[')
     {
-      return CSSToken {CSSTokenType::OpenSquare};
+      return BlockStart(CSSTokenType::OpenSquare);
     }
 
     if (current == U'\\')
@@ -179,17 +179,17 @@ namespace Krys::HTML
 
     if (current == U']')
     {
-      return CSSToken {CSSTokenType::CloseSquare};
+      return BlockEnd(CSSTokenType::CloseSquare);
     }
 
     if (current == U'{')
     {
-      return CSSToken {CSSTokenType::OpenCurly};
+      return BlockStart(CSSTokenType::OpenCurly);
     }
 
     if (current == U'}')
     {
-      return CSSToken {CSSTokenType::CloseCurly};
+      return BlockEnd(CSSTokenType::CloseCurly);
     }
 
     if (IsDigit(current))
@@ -808,5 +808,39 @@ namespace Krys::HTML
   void CSSTokenizer::ParseError(CSSParseError error) noexcept
   {
     _errors.push_back({.Error = error, .Location = _inputStream.CurrentLocation()});
+  }
+
+  CSSToken CSSTokenizer::BlockStart(CSSTokenType type) noexcept
+  {
+    assert(type == CSSTokenType::OpenSquare || type == CSSTokenType::OpenParen
+           || type == CSSTokenType::OpenCurly);
+
+    _blockStack.push_back(type);
+    return CSSToken(type, BlockTokenType::Start);
+  }
+
+  CSSToken CSSTokenizer::BlockEnd(CSSTokenType type) noexcept
+  {
+    assert(type == CSSTokenType::CloseSquare || type == CSSTokenType::CloseParen
+           || type == CSSTokenType::CloseCurly);
+
+    auto startType = [](CSSTokenType endType)
+    {
+      switch (endType)
+      {
+        case CSSTokenType::CloseSquare: return CSSTokenType::OpenSquare;
+        case CSSTokenType::CloseParen:  return CSSTokenType::OpenParen;
+        case CSSTokenType::CloseCurly:  return CSSTokenType::OpenCurly;
+      }
+      return CSSTokenType::Uninitialized; // unreachable
+    }(type);
+
+    if (!_blockStack.empty() && _blockStack.back() == startType)
+    {
+      _blockStack.pop_back();
+      return CSSToken(type, BlockTokenType::End);
+    }
+
+    return CSSToken(type);
   }
 }

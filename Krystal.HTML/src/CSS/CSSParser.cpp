@@ -60,13 +60,13 @@ namespace Krys::HTML
     return _tokenizer.TokenRange();
   }
 
-  CSSAllowedRules CSSParser::ComputeNextAllowedRules(CSSAllowedRules current,
-                                                     RawPtr<CSSRule> ref) const noexcept
+  CSSAllowedRules CSSParser::ComputeNextAllowedRules(CSSAllowedRules current, RawPtr<CSSRule> ref) noexcept
   {
-    if (!ref || current == CSSAllowedRules::None)
+    if (!ref || current == CSSAllowedRules::None || current == CSSAllowedRules::Keyframes)
     {
       return current;
     }
+
     assert(current <= CSSAllowedRules::Regular);
 
     if (Is<CSSCharsetRule>(ref))
@@ -140,8 +140,10 @@ namespace Krys::HTML
     assert(tokens.Peek().Type() == CSSTokenType::AtKeyword);
 
     auto name = tokens.Consume().IdentCodePoints();
+    tokens.DiscardWhitespace();
 
     auto prelude = tokens;
+    // we skip the prelude for now, we will parse it later in the specific at-rule consumer
     while (!tokens.IsAtEnd() && tokens.Peek().Type() != CSSTokenType::OpenCurly
            && tokens.Peek().Type() != CSSTokenType::Semicolon)
     {
@@ -152,18 +154,21 @@ namespace Krys::HTML
     auto atRuleType = ParseCSSAtRuleType(name);
     if (tokens.IsAtEnd() || tokens.Peek().Type() == CSSTokenType::Semicolon)
     {
-      tokens.Discard();
-      if (atRuleType == CSSAtRuleType::Charset && allowedRules <= CSSAllowedRules::Charset)
+      tokens.Discard(); // consume semicolon if present
+
+      if (atRuleType == CSSAtRuleType::Charset && allowedRules == CSSAllowedRules::Charset)
       {
         return ConsumeCharsetRule(prelude);
       }
+
       if (atRuleType == CSSAtRuleType::Import && allowedRules <= CSSAllowedRules::Import)
       {
         return ConsumeImportRule(prelude);
       }
+
       if (atRuleType == CSSAtRuleType::Namespace && allowedRules <= CSSAllowedRules::Namespace)
       {
-        return ConsumeImportRule(prelude);
+        return ConsumeNamespaceRule(prelude);
       }
 
       // TODO(CSSParser): Implement remaining at-rule consumers for at-rules without blocks.
@@ -180,8 +185,15 @@ namespace Krys::HTML
       return nullptr;
     }
 
+    if (allowedRules == CSSAllowedRules::Keyframes)
+    {
+      // TODO(CSSParser): parse error (at-rule not allowed in @keyframes context).
+      return nullptr;
+    }
+
     if (allowedRules == CSSAllowedRules::None)
     {
+      // TODO(CSSParser): parse error (rule not allowed in current context).
       return nullptr;
     }
 
@@ -217,30 +229,27 @@ namespace Krys::HTML
       return nullptr;
     }
 
-    // TODO(CSSParser): Implement the following rule to disambiguate between a qualified rule and a custom
-    // property.
-    // https://github.com/w3c/csswg-drafts/issues/9336#issuecomment-1719806755
-    // if (range.peek().type() == LeftBraceToken)
-    // {
-    //   auto rangeCopyForDashedIdent = initialRange;
-    //   auto customProperty = CSSPropertyParserHelpers::consumeDashedIdent(rangeCopyForDashedIdent);
-    //   // This rule is ambigous with a custom property because it looks like "--ident: ...."
-    //   if (customProperty && rangeCopyForDashedIdent.peek().type() == ColonToken)
-    //   {
-    //     if (isStyleNestedContext())
-    //     {
-    //       // Error, consume until semicolon or end of block.
-    //       while (!range.atEnd() && range.peek().type() != SemicolonToken)
-    //         range.consumeComponentValue();
-    //       if (range.peek().type() == SemicolonToken)
-    //         range.consume();
-    //       return {};
-    //     }
-    //     // Error, consume until end of block.
-    //     range.consumeBlock();
-    //     return {};
-    //   }
-    // }
+    if (tokens.Peek().Type() == CSSTokenType::OpenCurly)
+    {
+      auto preludeCopy = prelude;
+      preludeCopy.DiscardWhitespace();
+
+      if (preludeCopy.Peek().Type() == CSSTokenType::Ident)
+      {
+        auto ident = preludeCopy.Consume().IdentCodePoints();
+        if (ident.starts_with(u8"--") && preludeCopy.Peek().Type() == CSSTokenType::Colon)
+        {
+          if (nested)
+          {
+            ConsumeBadDeclaration(tokens, nested);
+            return nullptr;
+          }
+
+          (void)tokens.ConsumeBlock();
+          return nullptr;
+        }
+      }
+    }
 
     prelude = prelude.RangeUntil(tokens);
     auto block = tokens.ConsumeBlock();
@@ -252,6 +261,38 @@ namespace Krys::HTML
 
     // TODO(CSSParser): Implement remaining qualified rule consumers.
     return nullptr;
+  }
+
+  void CSSParser::ConsumeBlockContents(CSSTokenRange &tokens, CSSAllowedBlockRules allowedBlockRules) noexcept
+  {
+  }
+
+  void CSSParser::ConsumeBadDeclaration(CSSTokenRange &tokens, bool nested) noexcept
+  {
+    while (!tokens.IsAtEnd())
+    {
+      switch (tokens.Peek().Type())
+      {
+        case CSSTokenType::Semicolon:
+        {
+          tokens.Discard();
+          return;
+        }
+        case CSSTokenType::CloseCurly:
+        {
+          if (nested)
+          {
+            return;
+          }
+
+          tokens.Discard();
+          continue;
+        }
+      }
+
+      tokens.SkipComponentValue();
+      continue;
+    }
   }
 
 #pragma endregion

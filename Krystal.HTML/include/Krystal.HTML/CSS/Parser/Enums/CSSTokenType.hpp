@@ -56,6 +56,14 @@ namespace Krys::HTML
     Plus,
     Minus
   };
+
+  
+  enum class BlockTokenType : uint8
+  {
+    None,
+    Start,
+    End,
+  };
 }
 
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSTokenType, 27uz);
@@ -65,3 +73,5 @@ KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::HashTokenType, 2uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::NumericValueType, 2uz);
 
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::NumericSignChar, 3uz);
+
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::BlockTokenType, 3uz);

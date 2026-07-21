@@ -8,6 +8,7 @@
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
+#include "Krystal.Lib/Types/SmallList.hpp"
 
 namespace Krys::HTML
 {
@@ -24,6 +25,7 @@ namespace Krys::HTML
     CSSInputStream _inputStream;
     List<CSSToken> _tokens;
     List<CSSTokenizerError> _errors;
+    SmallList<CSSTokenType> _blockStack;
 
   public:
     explicit CSSTokenizer(CSSInputStream &inputStream) noexcept;
@@ -108,6 +110,13 @@ namespace Krys::HTML
 
     /// @brief Reports an error that occurred during tokenization.
     void ParseError(CSSParseError error) noexcept;
+
+    /// @brief Creates a CSSToken for a block start token (e.g., `{`, `[`, `(`).
+    KRYS_NODISCARD CSSToken BlockStart(CSSTokenType type) noexcept;
+
+    /// @brief Creates a CSSToken for a block start token (e.g., `}`, `]`, `)`). May not actually be classed
+    /// as a block end token depending on the current block stack.
+    KRYS_NODISCARD CSSToken BlockEnd(CSSTokenType type) noexcept;
 
 #pragma region Tokenizer Definitions - https://drafts.csswg.org/css-syntax/#tokenizer-definitions
 

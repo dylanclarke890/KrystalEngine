@@ -3,6 +3,7 @@
 #include "Krystal.HTML/CSS/Parser/CSSInputStream.hpp"
 #include "Krystal.HTML/CSS/Parser/CSSToken.hpp"
 #include "Krystal.HTML/CSS/Parser/CSSTokenizer.hpp"
+#include "Krystal.HTML/CSS/Parser/Enums/CSSAllowedBlockRules.hpp"
 #include "Krystal.HTML/CSS/Parser/Enums/CSSAllowedRules.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 
@@ -46,8 +47,8 @@ namespace Krys::HTML
     /// @brief Computes the next allowed rules based on the current allowed rules and the reference rule. For
     /// example, if the current allowed rules are `Charset` and the reference rule is an `@import` rule, the
     /// next allowed rules will be `Import` (`Charset` is not allowed after an `@import` rule).
-    KRYS_NODISCARD CSSAllowedRules ComputeNextAllowedRules(CSSAllowedRules current,
-                                                           RawPtr<CSSRule> ref) const noexcept;
+    KRYS_NODISCARD static CSSAllowedRules ComputeNextAllowedRules(CSSAllowedRules current,
+                                                                  RawPtr<CSSRule> ref) noexcept;
 
 #pragma region Parser Algorithms - https://drafts.csswg.org/css-syntax/#parser-algorithms
 
@@ -61,6 +62,12 @@ namespace Krys::HTML
     /// @see https://drafts.csswg.org/css-syntax/#consume-a-qualified-rule
     KRYS_NODISCARD RefPtr<CSSRule> ConsumeQualifiedRule(CSSTokenRange &tokens, CSSAllowedRules allowedRules,
                                                         bool nested = false) noexcept;
+
+    /// @see https://drafts.csswg.org/css-syntax/#consume-a-blocks-contents
+    void ConsumeBlockContents(CSSTokenRange &tokens, CSSAllowedBlockRules allowedBlockRules) noexcept;
+
+    /// @see https://drafts.csswg.org/css-syntax/#consume-the-remnants-of-a-bad-declaration
+    void ConsumeBadDeclaration(CSSTokenRange &tokens, bool nested) noexcept;
 
 #pragma endregion
 

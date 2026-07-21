@@ -15,9 +15,12 @@ namespace Krys::HTML
     Namespace,
     /// @brief General at-rules and qualified rules are allowed.
     Regular,
+    /// @brief For within an @keyframe context. At-rules are not allowed, but some qualified rules are
+    /// allowed.
+    Keyframes,
     /// @brief No rules are allowed.
     None,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSAllowedRules, 5uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSAllowedRules, 6uz);

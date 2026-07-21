@@ -168,6 +168,7 @@
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="catch_main.cpp" />
+    <ClCompile Include="tests\CSS\Parser\CSSParser.cpp" />
     <ClCompile Include="tests\CSS\Parser\CSSTokenizer.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\EventDispatcher.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\MutationAlgorithms.cpp" />
