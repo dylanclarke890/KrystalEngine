@@ -54,7 +54,7 @@ namespace Krys::HTML
     RefPtr<CSSRule> parsedRule = CSSParser::ParseRule(Krys::Move(rule), CSSAllowedRules::Import);
     if (parsedRule == nullptr)
     {
-      return Exception {ExceptionCode::SyntaxError};
+      return ExceptionCode::SyntaxError;
     }
 
     if (_constructed && Is<CSSImportRule>(parsedRule.get()))
@@ -69,13 +69,28 @@ namespace Krys::HTML
     {
       if (isNamespace)
       {
-        return Exception {ExceptionCode::InvalidStateError};
+        return ExceptionCode::InvalidStateError;
       }
 
-      return Exception {ExceptionCode::HierarchyRequestError};
+      return ExceptionCode::HierarchyRequestError;
     }
 
     return index;
+  }
+
+  ExceptionOr<void> CSSStyleSheet::DeleteRule(size_t index) noexcept
+  {
+    if (index > _contents->TotalRules())
+    {
+      return ExceptionCode::IndexSizeError;
+    }
+
+    if (!_contents->DeleteRule(index))
+    {
+      return ExceptionCode::InvalidStateError;
+    }
+
+    return {};
   }
 
 #pragma endregion

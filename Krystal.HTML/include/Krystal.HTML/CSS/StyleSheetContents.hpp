@@ -36,6 +36,8 @@ namespace Krys::HTML
 
     KRYS_NODISCARD RawPtr<CSSRule> RuleAt(size_t index) const noexcept;
 
-    bool InsertRule(Ref<CSSRule>&& rule, size_t index) noexcept;
+    bool InsertRule(Ref<CSSRule> &&rule, size_t index) noexcept;
+    
+    bool DeleteRule(size_t index) noexcept;
   };
 }

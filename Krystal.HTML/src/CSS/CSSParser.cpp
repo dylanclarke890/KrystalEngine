@@ -288,6 +288,7 @@ namespace Krys::HTML
       return ConsumeKeyframeStyleRule(prelude, block);
     }
 
+    // TODO(CSSParser): parse error (qualified rule not allowed in current context).
     return nullptr;
   }
 
