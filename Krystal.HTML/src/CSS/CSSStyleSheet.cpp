@@ -26,7 +26,7 @@ namespace Krys::HTML
       return ExceptionCode::SecurityError;
     }
 
-    if (!_cssRules)
+    if (_cssRules == nullptr)
     {
       _cssRules = CreateUnique<CSSRuleList>();
     }

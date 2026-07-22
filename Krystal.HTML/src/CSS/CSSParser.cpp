@@ -28,7 +28,7 @@ namespace Krys::HTML
 
 #pragma region Parser Entry Points
 
-  RefPtr<CSSRule> CSSParser::ParseRule(utf8_string &&input, CSSAllowedRules allowedRules) noexcept
+  RefPtr<CSSRule> CSSParser::ParseRule(CSSOMString &&input, CSSAllowedRules allowedRules) noexcept
   {
     CSSParser parser(Krys::Move(input));
     if (!parser.PumpTokenizer())

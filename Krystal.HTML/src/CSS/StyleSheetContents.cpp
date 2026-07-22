@@ -104,6 +104,7 @@ namespace Krys::HTML
 
   bool StyleSheetContents::DeleteRule(size_t index) noexcept
   {
+    // TODO: Set old rule’s parent CSS rule and parent CSS style sheet to null.
     assert(index < TotalRules());
 
     if (index < _importRules.size())
@@ -128,6 +129,7 @@ namespace Krys::HTML
     index -= _namespaceRules.size();
 
     _childRules.erase(_childRules.begin() + index);
+
     return true;
   }
 }

@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/CSS/Types/CSSOMString.hpp"
 #include "Krystal.HTML/Types/IsEOF.hpp"
 #include "Krystal.HTML/Types/SourceLocation.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
@@ -21,7 +22,7 @@ namespace Krys::HTML
     SourceLocation _currentLocation;
 
   public:
-    CSSInputStream(utf8_string &&input) noexcept : _data(FilterCodePoints(Krys::Move(input)))
+    CSSInputStream(CSSOMString &&input) noexcept : _data(FilterCodePoints(Krys::Move(input)))
     {
       assert(!_data.empty() && _data.back() != EOFMarker);
     }
@@ -110,7 +111,7 @@ namespace Krys::HTML
 
   private:
     /// @see https://drafts.csswg.org/css-syntax/#css-filter-code-points
-    static utf32_string FilterCodePoints(utf8_string &&input) noexcept
+    static utf32_string FilterCodePoints(CSSOMString &&input) noexcept
     {
       utf8_string output;
       output.reserve(input.size());
