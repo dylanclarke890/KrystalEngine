@@ -4,12 +4,14 @@
 #include "Krystal.HTML/CSS/Parser/CSSInputStream.hpp"
 #include "Krystal.HTML/CSS/Parser/CSSToken.hpp"
 #include "Krystal.HTML/CSS/Parser/CSSTokenizer.hpp"
+#include "Krystal.HTML/CSS/Parser/CSSTokenRange.hpp"
 #include "Krystal.HTML/CSS/Parser/Enums/CSSAllowedBlockRules.hpp"
 #include "Krystal.HTML/CSS/Parser/Enums/CSSAllowedRules.hpp"
 #include "Krystal.HTML/CSS/Parser/Enums/NestedContextType.hpp"
 #include "Krystal.HTML/CSS/Parser/Types/NestedParsingContext.hpp"
 #include "Krystal.HTML/CSS/Properties/CSSInternalStyleProperties.hpp"
 #include "Krystal.HTML/CSS/Properties/CSSProperty.hpp"
+#include "Krystal.HTML/URL/Url.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 
 namespace Krys::HTML
@@ -19,6 +21,7 @@ namespace Krys::HTML
   class CSSImportRule;
   class CSSNamespaceRule;
   class CSSStyleRule;
+  class CSSStyleSheet;
 
   class CSSParser
   {
@@ -35,6 +38,9 @@ namespace Krys::HTML
     }
 
 #pragma region Parser Entry Points - https://drafts.csswg.org/css-syntax/#parser-entry-points
+
+    /// @see https://drafts.csswg.org/css-syntax/#parse-stylesheet
+    KRYS_NODISCARD static RefPtr<CSSStyleSheet> ParseStylesheet(utf32_string &&input) noexcept;
 
     /// @see https://drafts.csswg.org/css-syntax/#parse-a-rule
     KRYS_NODISCARD static RefPtr<CSSRule> ParseRule(utf32_string &&input,

@@ -42,6 +42,7 @@
     <ClCompile Include="src\CSS\CSSStyleSheet.cpp" />
     <ClCompile Include="src\CSS\Parser\CSSTokenizer.cpp" />
     <ClCompile Include="src\CSS\Properties\CSSProperty.cpp" />
+    <ClCompile Include="src\CSS\StyleSheetContents.cpp" />
     <ClCompile Include="src\HTML\Algorithms\FormControlAlgorithms.cpp" />
     <ClCompile Include="src\HTML\Parser\HTMLDocumentParser.cpp" />
     <ClCompile Include="src\SVG\SVGCircleElement.cpp" />
@@ -146,6 +147,7 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\NumericValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Serializer\CSSSerializerIdioms.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\StyleSheet.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\StyleSheetContents.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\StyleSheetList.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Types\CSSOMString.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSProperty.hpp" />
@@ -259,6 +261,7 @@
     <ClInclude Include="include\Krystal.HTML\Types\NestedLevelIncrementer.hpp" />
     <ClInclude Include="include\Krystal.HTML\Types\SourceLocation.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Types\USVString.hpp" />
+    <ClInclude Include="include\Krystal.HTML\URL\Url.hpp" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="include\Krystal.HTML\HTML\Attributes\Reflection.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Algorithms\RenderBlocking.hpp" />

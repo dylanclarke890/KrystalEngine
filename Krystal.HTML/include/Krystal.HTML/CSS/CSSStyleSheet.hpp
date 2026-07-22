@@ -11,6 +11,7 @@ namespace Krys::HTML
   class MediaList;
   class CSSImportRule;
   class CSSRuleList;
+  class StyleSheetContents;
 
   /// @see https://drafts.csswg.org/cssom/#the-cssstylesheet-interface
   class CSSStyleSheet : public StyleSheet, public CanMakeCheckedPtr<CSSStyleSheet>
@@ -46,6 +47,8 @@ namespace Krys::HTML
     WeakPtr<Document> m_constructorDocument;
     /// @see https://drafts.csswg.org/cssom/#concept-css-style-sheet-location
     Maybe<USVString> _stylesheetBaseUrl;
+
+    RefPtr<StyleSheetContents> _contents;
 
   public:
     CSSStyleSheet(CSSStyleSheetInit options = {}) noexcept;

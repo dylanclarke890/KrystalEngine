@@ -2,6 +2,8 @@
 #include "Krystal.HTML/CSS/CSSImportRule.hpp"
 #include "Krystal.HTML/CSS/CSSRuleList.hpp"
 #include "Krystal.HTML/CSS/MediaList.hpp"
+#include "Krystal.HTML/CSS/Parser/CSSParser.hpp"
+#include "Krystal.HTML/CSS/StyleSheetContents.hpp"
 
 namespace Krys::HTML
 {
@@ -43,7 +45,25 @@ namespace Krys::HTML
       return ExceptionCode::NotAllowedError;
     }
 
-    // TODO(CSSStyleSheet): Implement InsertRule(), needs a CSSRule parser.
+    if (index > _contents->TotalRules())
+    {
+      return ExceptionCode::IndexSizeError;
+    }
+
+    //RefPtr<CSSRule> rule = CSSParser::ParseRule(ruleString, m_contents.ptr(), CSSAllowedRules::Import);
+
+    //if (rule == nullptr)
+    //{
+    //  return Exception {ExceptionCode::SyntaxError};
+    //}
+
+    //if (_constructed && Is<CSSImportRule>(rule))
+    //{
+    //  return Exception {
+    //    ExceptionCode::SyntaxError,
+    //    utf8_string(u8"Cannot inserted an @import rule in a constructed CSSStyleSheet object")};
+    //}
+
     return ExceptionCode::NotSupportedError;
   }
 

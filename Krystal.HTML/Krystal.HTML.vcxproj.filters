@@ -1005,6 +1005,12 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\ParsedCSSPropertyList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\URL\Url.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\StyleSheetContents.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -1512,6 +1518,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\CSS\Properties\CSSPropertyParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CSS\StyleSheetContents.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
