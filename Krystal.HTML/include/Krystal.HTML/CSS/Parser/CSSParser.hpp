@@ -33,17 +33,17 @@ namespace Krys::HTML
     List<NestedContextType> _ancestorRuleTypeStack;
 
   public:
-    CSSParser(utf32_string &&input) noexcept : _inputStream(Krys::Move(input)), _tokenizer(_inputStream)
+    CSSParser(utf8_string &&input) noexcept : _inputStream(Krys::Move(input)), _tokenizer(_inputStream)
     {
     }
 
 #pragma region Parser Entry Points - https://drafts.csswg.org/css-syntax/#parser-entry-points
 
     /// @see https://drafts.csswg.org/css-syntax/#parse-stylesheet
-    KRYS_NODISCARD static RefPtr<CSSStyleSheet> ParseStylesheet(utf32_string &&input) noexcept;
+    KRYS_NODISCARD static RefPtr<CSSStyleSheet> ParseStylesheet(utf8_string &&input) noexcept;
 
     /// @see https://drafts.csswg.org/css-syntax/#parse-a-rule
-    KRYS_NODISCARD static RefPtr<CSSRule> ParseRule(utf32_string &&input,
+    KRYS_NODISCARD static RefPtr<CSSRule> ParseRule(utf8_string &&input,
                                                     CSSAllowedRules allowedRules) noexcept;
 
 #pragma endregion

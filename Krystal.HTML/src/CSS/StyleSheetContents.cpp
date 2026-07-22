@@ -1,7 +1,10 @@
 ﻿#include "Krystal.HTML/CSS/StyleSheetContents.hpp"
 #include "Krystal.HTML/CSS/CSSImportRule.hpp"
 #include "Krystal.HTML/CSS/CSSNamespaceRule.hpp"
+#include "Krystal.HTML/CSS/CSSRuleList.hpp"
 #include "Krystal.HTML/CSS/CSSStyleRule.hpp"
+#include "Krystal.HTML/CSS/CSSStyleSheet.hpp"
+#include "Krystal.HTML/CSS/MediaList.hpp"
 
 namespace Krys::HTML
 {

@@ -13,6 +13,7 @@
 #include "Krystal.HTML/CSS/MediaList.hpp"
 #include "Krystal.HTML/CSS/Parser/Enums/CSSAtRuleType.hpp"
 #include "Krystal.HTML/CSS/Properties/CSSPropertyParser.hpp"
+#include "Krystal.HTML/CSS/StyleSheetContents.hpp"
 
 namespace Krys::HTML
 {
@@ -27,7 +28,7 @@ namespace Krys::HTML
 
 #pragma region Parser Entry Points
 
-  RefPtr<CSSRule> CSSParser::ParseRule(utf32_string &&input, CSSAllowedRules allowedRules) noexcept
+  RefPtr<CSSRule> CSSParser::ParseRule(utf8_string &&input, CSSAllowedRules allowedRules) noexcept
   {
     CSSParser parser(Krys::Move(input));
     if (!parser.PumpTokenizer())

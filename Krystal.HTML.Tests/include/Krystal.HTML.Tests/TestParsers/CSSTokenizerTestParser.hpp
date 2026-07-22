@@ -12,7 +12,7 @@ namespace Krys::HTML::Tests
 {
   struct CSSTokenizerTest
   {
-    utf32_string Css;
+    utf8_string Css;
     utf8_string Tokens;
     List<CSSTokenizerError> Errors;
   };
@@ -205,7 +205,7 @@ namespace Krys::HTML::Tests
       NormaliseData(tokens);
 
       tests.push_back({
-        .Css = Krys::Text::ConvertToUTF32(utf8_stringview(ToUTF8(css))),
+        .Css = ToUTF8(css),
         .Tokens = ToUTF8(tokens),
       });
 

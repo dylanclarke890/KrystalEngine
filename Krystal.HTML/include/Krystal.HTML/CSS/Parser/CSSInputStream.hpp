@@ -5,6 +5,7 @@
 #include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Text/ASCIILiteral.hpp"
+#include "Krystal.Text/StringConversion.hpp"
 #include "Krystal.Text/Unicode.hpp"
 #include <cassert>
 
@@ -20,7 +21,7 @@ namespace Krys::HTML
     SourceLocation _currentLocation;
 
   public:
-    CSSInputStream(utf32_string &&input) noexcept : _data(FilterCodePoints(Krys::Move(input)))
+    CSSInputStream(utf8_string &&input) noexcept : _data(FilterCodePoints(Krys::Move(input)))
     {
       assert(!_data.empty() && _data.back() != EOFMarker);
     }
@@ -32,7 +33,7 @@ namespace Krys::HTML
       return _data.size();
     }
 
-    /// @brief Gets the next
+    /// @brief Gets the next character without consuming it.
     KRYS_NODISCARD char32 NextInputCharacter() const noexcept
     {
       if (_readPosition >= _data.size()) KRYS_UNLIKELY
@@ -43,7 +44,7 @@ namespace Krys::HTML
       return _data[_readPosition];
     }
 
-    /// @brief Peek the next `n` characters ahead without consuming it.
+    /// @brief Peek the next `n` characters ahead without consuming any.
     char32 Peek(size_t n) noexcept
     {
       if (_readPosition + n >= _data.size()) KRYS_UNLIKELY
@@ -109,9 +110,9 @@ namespace Krys::HTML
 
   private:
     /// @see https://drafts.csswg.org/css-syntax/#css-filter-code-points
-    static utf32_string FilterCodePoints(utf32_string &&input) noexcept
+    static utf32_string FilterCodePoints(utf8_string &&input) noexcept
     {
-      utf32_string output;
+      utf8_string output;
       output.reserve(input.size());
 
       for (auto it = input.begin(); it != input.end(); it++)
@@ -142,16 +143,12 @@ namespace Krys::HTML
 
         // SPEC: Replace any U+0000 NULL or surrogate code points in input with U+FFFD REPLACEMENT CHARACTER
         // (�).
+        // NOTE: We don't need to check for surrogate code points here because the input is UTF-8 and will
+        // never contain surrogate code points. However, we still check for NULL code points.
 
         if (ch == U'\0') KRYS_UNLIKELY
         {
-          output.push_back(U'\uFFFD');
-          continue;
-        }
-
-        if (Krys::Text::Unicode::IsSurrogate(ch)) KRYS_UNLIKELY
-        {
-          output.push_back(U'\uFFFD');
+          output += u8"\uFFFD";
           continue;
         }
 
@@ -160,7 +157,7 @@ namespace Krys::HTML
         continue;
       }
 
-      return output;
+      return Krys::Text::ConvertToUTF32(utf8_stringview(output));
     }
   };
 }

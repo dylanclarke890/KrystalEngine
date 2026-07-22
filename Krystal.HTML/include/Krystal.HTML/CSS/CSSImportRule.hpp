@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/CSS/CSSRule.hpp"
+#include "Krystal.HTML/DOM/Types/USVString.hpp"
 
 namespace Krys::HTML
 {

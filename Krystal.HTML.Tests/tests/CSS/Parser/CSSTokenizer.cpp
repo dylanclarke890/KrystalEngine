@@ -8,14 +8,14 @@ namespace Krys::HTML::Tests
   {
     void DoCSSTokenizerTest(const CSSTokenizerTest &test, size_t number, size_t total) noexcept
     {
-      utf8_string str = u8"--- TEST " + ToUTF8(number + 1uz) + u8" OF " + ToUTF8(total) + u8" ---\n"
-                        + Krys::Text::ConvertToUTF8(utf32_stringview(test.Css));
+      utf8_string str =
+        u8"--- TEST " + ToUTF8(number + 1uz) + u8" OF " + ToUTF8(total) + u8" ---\n" + test.Css;
       UTF8_INFO(str);
 
       str = u8"--- EXPECTED TOKENS ---\n" + test.Tokens;
       UTF8_INFO(str);
 
-      CSSInputStream inputStream(utf32_string(test.Css));
+      CSSInputStream inputStream(utf8_string(test.Css));
       CSSTokenizer tokenizer(inputStream);
       REQUIRE(tokenizer.PumpTokenizer());
 
