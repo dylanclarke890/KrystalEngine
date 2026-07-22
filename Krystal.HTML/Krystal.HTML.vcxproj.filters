@@ -903,9 +903,6 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Enums\CSSRuleType.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\CSS\Serializer\CSSRuleSerializer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.HTML\CSS\StyleSheetList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -930,7 +927,7 @@
     <ClInclude Include="include\Krystal.HTML\CSS\CSSStyleProperties.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\CSS\Serializer\CSSSerializerIdioms.hpp">
+    <ClInclude Include="include\Krystal.HTML\CSS\Parser\CSSSerializerIdioms.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\CSS\CSSPageDescriptors.hpp">

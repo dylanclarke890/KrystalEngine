@@ -124,7 +124,6 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\NestedContextType.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\NestedParsingContext.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyShorthand.hpp" />
-    <ClInclude Include="include\Krystal.HTML\CSS\Serializer\CSSRuleSerializer.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\CSSGroupingRule.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\CSSImportRule.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\CSSMarginRule.hpp" />
@@ -145,7 +144,7 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSParseError.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSTokenType.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\NumericValue.hpp" />
-    <ClInclude Include="include\Krystal.HTML\CSS\Serializer\CSSSerializerIdioms.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Parser\CSSSerializerIdioms.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\StyleSheet.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\StyleSheetContents.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\StyleSheetList.hpp" />

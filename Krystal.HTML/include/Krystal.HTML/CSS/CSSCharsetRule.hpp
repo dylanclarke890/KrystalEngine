@@ -4,16 +4,16 @@
 
 namespace Krys::HTML
 {
-  /// @deprecated The @charset rule is deprecated and is only here for completeness.
+  /// @deprecated The @charset rule is deprecated and is only here for use by the parser.
   class CSSCharsetRule final : public CSSRule
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CSSCharsetRule);
 
-  public:
     CSSCharsetRule(RawPtr<CSSStyleSheet> stylesheet) noexcept : CSSRule(CSSRuleType::Charset, stylesheet)
     {
     }
 
+  public:
     ~CSSCharsetRule() noexcept override = default;
 
 #pragma region CSSCharsetRule

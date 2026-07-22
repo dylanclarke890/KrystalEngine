@@ -26,7 +26,7 @@ namespace Krys::HTML
     /// @see https://drafts.csswg.org/cssom/#concept-css-style-sheet-owner-node
     WeakPtr<Node> _ownerNode;
     /// @see https://drafts.csswg.org/cssom/#concept-css-style-sheet-owner-rule
-    WeakPtr<CSSImportRule> _ownerCssRule;
+    WeakPtr<CSSImportRule> _ownerRule;
     /// @see https://drafts.csswg.org/cssom/#concept-css-style-sheet-title
     DOMString _title;
     /// @see https://drafts.csswg.org/cssom/#concept-css-style-sheet-media
@@ -62,7 +62,7 @@ namespace Krys::HTML
     KRYS_NODISCARD ExceptionOr<Ref<CSSRuleList>> CssRules() const noexcept;
 
     /// @see https://drafts.csswg.org/cssom/#dom-cssstylesheet-insertrule
-    ExceptionOr<size_t> InsertRule(CSSOMStringView rule, size_t index = 0uz) noexcept;
+    ExceptionOr<size_t> InsertRule(CSSOMString&& rule, size_t index = 0uz) noexcept;
 
     /// @see https://drafts.csswg.org/cssom/#dom-cssstylesheet-deleterule
     ExceptionOr<void> DeleteRule(size_t index) noexcept;

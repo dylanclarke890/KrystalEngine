@@ -29,12 +29,17 @@ namespace Krys::HTML
     }
 
     index -= _importRules.size();
-
     if (index < _namespaceRules.size())
+    {
       return _namespaceRules[index].get();
+    }
 
     index -= _namespaceRules.size();
-
     return _childRules[index].get();
+  }
+
+  bool StyleSheetContents::InsertRule(Ref<CSSRule> &&rule, size_t index) noexcept
+  {
+    return false;
   }
 }

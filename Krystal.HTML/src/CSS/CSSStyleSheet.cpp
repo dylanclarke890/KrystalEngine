@@ -16,7 +16,7 @@ namespace Krys::HTML
 
   RefPtr<CSSImportRule> CSSStyleSheet::OwnerRule() const noexcept
   {
-    return _ownerCssRule.lock();
+    return _ownerRule.lock();
   }
 
   ExceptionOr<Ref<CSSRuleList>> CSSStyleSheet::CssRules() const noexcept
@@ -34,7 +34,7 @@ namespace Krys::HTML
     return ShareRef(*_cssRules);
   }
 
-  ExceptionOr<size_t> CSSStyleSheet::InsertRule(CSSOMStringView rule, size_t index) noexcept
+  ExceptionOr<size_t> CSSStyleSheet::InsertRule(CSSOMString &&rule, size_t index) noexcept
   {
     if (!_originClean)
     {
@@ -51,21 +51,31 @@ namespace Krys::HTML
       return ExceptionCode::IndexSizeError;
     }
 
-    // RefPtr<CSSRule> rule = CSSParser::ParseRule(ruleString, m_contents.ptr(), CSSAllowedRules::Import);
+    RefPtr<CSSRule> parsedRule = CSSParser::ParseRule(Krys::Move(rule), CSSAllowedRules::Import);
+    if (parsedRule == nullptr)
+    {
+      return Exception {ExceptionCode::SyntaxError};
+    }
 
-    // if (rule == nullptr)
-    //{
-    //   return Exception {ExceptionCode::SyntaxError};
-    // }
+    if (_constructed && Is<CSSImportRule>(parsedRule.get()))
+    {
+      return Exception {ExceptionCode::SyntaxError,
+                        u8"Cannot insert an @import rule in a constructed CSSStyleSheet object"};
+    }
 
-    // if (_constructed && Is<CSSImportRule>(rule))
-    //{
-    //   return Exception {
-    //     ExceptionCode::SyntaxError,
-    //     utf8_string(u8"Cannot inserted an @import rule in a constructed CSSStyleSheet object")};
-    // }
+    bool isNamespace = Is<CSSNamespaceRule>(parsedRule.get());
+    bool success = _contents.get()->InsertRule(Krys::Move(parsedRule), index);
+    if (!success)
+    {
+      if (isNamespace)
+      {
+        return Exception {ExceptionCode::InvalidStateError};
+      }
 
-    return ExceptionCode::NotSupportedError;
+      return Exception {ExceptionCode::HierarchyRequestError};
+    }
+
+    return index;
   }
 
 #pragma endregion
