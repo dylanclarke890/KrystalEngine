@@ -18,9 +18,10 @@ namespace Krys::HTML
     /// @brief For within an @keyframe context. At-rules are not allowed, but some qualified rules are
     /// allowed.
     Keyframes,
+    ConditionalGroup,
     /// @brief No rules are allowed.
     None,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSAllowedRules, 6uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSAllowedRules, 7uz);

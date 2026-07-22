@@ -305,6 +305,24 @@ namespace Krys::Text
     return result;
   }
 
+  KRYS_NODISCARD constexpr bool ASCIICaseInsensitiveMatch(utf8_stringview a, utf8_stringview b) noexcept
+  {
+    if (a.length() != b.length())
+    {
+      return false;
+    }
+
+    for (size_t i = 0; i < a.length(); i++)
+    {
+      if (ToASCIILowerUnchecked(a[i]) != ToASCIILowerUnchecked(b[i]))
+      {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   KRYS_NODISCARD constexpr bool ASCIICaseInsensitiveMatch(utf32_stringview a, utf32_stringview b) noexcept
   {
     if (a.length() != b.length())

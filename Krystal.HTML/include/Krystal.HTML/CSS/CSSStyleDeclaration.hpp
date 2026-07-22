@@ -10,7 +10,7 @@ namespace Krys::HTML
   class CSSRule;
 
   /// @see https://www.w3.org/TR/cssom-1/#cssstyledeclaration
-  class CSSStyleDeclaration
+  class CSSStyleDeclaration : public RefCounted<CSSStyleDeclaration>
   {
   public:
 #pragma region CSSStyleDeclaration - https://www.w3.org/TR/cssom-1/#cssstyledeclaration

@@ -28,6 +28,11 @@ namespace Krys::HTML
       return _tokens.empty();
     }
 
+    KRYS_NODISCARD size_t Size() const noexcept
+    {
+      return _tokens.size();
+    }
+
     KRYS_NODISCARD const CSSToken &Peek(size_t offset = 0uz) const noexcept
     {
       if (offset >= _tokens.size())
@@ -47,6 +52,20 @@ namespace Krys::HTML
 
       auto &token = _tokens.front();
       _tokens = _tokens.subspan(1uz);
+
+      return token;
+    }
+
+    KRYS_NODISCARD const CSSToken &ConsumeLast() noexcept
+    {
+      if (_tokens.empty())
+      {
+        return EOFToken();
+      }
+
+      auto &token = _tokens.back();
+      _tokens = _tokens.first(_tokens.size() - 1uz);
+
       return token;
     }
 
@@ -89,7 +108,8 @@ namespace Krys::HTML
       return CSSTokenRange(start.first(_tokens.data() - start.data() - 1uz));
     }
 
-    void SkipComponentValue() noexcept
+    /// @brief Skips over a component value, which may be a simple token or a block of tokens.
+    void DiscardComponentValue() noexcept
     {
       size_t nestingLevel = 0uz;
       do
@@ -116,10 +136,27 @@ namespace Krys::HTML
         {
           break;
         }
+
         ++count;
       }
 
       _tokens = _tokens.subspan(count);
+    }
+
+    void DiscardTrailingWhitespace() noexcept
+    {
+      size_t count = 0uz;
+      for (auto it = _tokens.rbegin(); it != _tokens.rend(); ++it)
+      {
+        if (it->Type() != CSSTokenType::Whitespace)
+        {
+          break;
+        }
+
+        ++count;
+      }
+
+      _tokens = _tokens.first(_tokens.size() - count);
     }
 
     /// @brief Creates a new token range that ends at the specified end token range.

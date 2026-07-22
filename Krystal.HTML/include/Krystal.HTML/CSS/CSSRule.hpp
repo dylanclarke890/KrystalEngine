@@ -16,7 +16,7 @@ namespace Krys::HTML
   /// @see https://drafts.csswg.org/cssom/#the-cssrule-interface
   class CSSRule : public RefCounted<CSSRule>,
                   public CanMakeWeakPtr<CSSRule>,
-                  public CanMakeCheckedPtr<CSSStyleSheet>
+                  public CanMakeCheckedPtr<CSSRule>
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CSSRule);
@@ -68,6 +68,11 @@ namespace Krys::HTML
       return _type == CSSRuleType::Charset;
     }
 
+    KRYS_NODISCARD bool IsCSSFunctionDeclarations() const noexcept
+    {
+      return _type == CSSRuleType::FunctionDeclarations;
+    }
+
     KRYS_NODISCARD bool IsCSSGroupingRule() const noexcept
     {
       return HasFlag(_flags, CSSRuleFlag::IsGroupingRule);
@@ -91,6 +96,11 @@ namespace Krys::HTML
     KRYS_NODISCARD bool IsCSSNamespaceRule() const noexcept
     {
       return _type == CSSRuleType::Namespace;
+    }
+
+    KRYS_NODISCARD bool IsCSSNestedDeclarations() const noexcept
+    {
+      return _type == CSSRuleType::NestedDeclarations;
     }
 
     KRYS_NODISCARD bool IsCSSPageRule() const noexcept

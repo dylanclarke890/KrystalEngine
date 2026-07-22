@@ -1,16 +1,30 @@
 ﻿#include "Krystal.HTML/CSS/Parser/CSSParser.hpp"
 #include "Krystal.HTML/CSS/CSSCharsetRule.hpp"
+#include "Krystal.HTML/CSS/CSSFunctionDeclarations.hpp"
+#include "Krystal.HTML/CSS/CSSGroupingRule.hpp"
 #include "Krystal.HTML/CSS/CSSImportRule.hpp"
 #include "Krystal.HTML/CSS/CSSNamespaceRule.hpp"
+#include "Krystal.HTML/CSS/CSSNestedDeclarations.hpp"
 #include "Krystal.HTML/CSS/CSSRule.hpp"
 #include "Krystal.HTML/CSS/CSSRuleList.hpp"
+#include "Krystal.HTML/CSS/CSSStyleProperties.hpp"
 #include "Krystal.HTML/CSS/CSSStyleRule.hpp"
 #include "Krystal.HTML/CSS/CSSStyleSheet.hpp"
 #include "Krystal.HTML/CSS/MediaList.hpp"
 #include "Krystal.HTML/CSS/Parser/Enums/CSSAtRuleType.hpp"
+#include "Krystal.HTML/CSS/Properties/CSSPropertyParser.hpp"
 
 namespace Krys::HTML
 {
+  namespace
+  {
+    // Check if a CSS rule type does not allow declarations with !important.
+    KRYS_NODISCARD bool RuleDoesNotAllowImportant(CSSRuleType type) noexcept
+    {
+      return type == CSSRuleType::FunctionDeclarations;
+    }
+  }
+
 #pragma region Parser Entry Points
 
   RefPtr<CSSRule> CSSParser::ParseRule(utf32_string &&input, CSSAllowedRules allowedRules) noexcept
@@ -21,8 +35,8 @@ namespace Krys::HTML
       // TODO(CSSParser): parse error (empty rule).
       return nullptr;
     }
-
     auto tokens = parser.TokenRange();
+
     tokens.DiscardWhitespace();
     if (tokens.IsAtEnd())
     {
@@ -87,6 +101,17 @@ namespace Krys::HTML
     return CSSAllowedRules::Regular;
   }
 
+  Ref<CSSInternalStyleProperties>
+    CSSParser::CreateInternalStyleProperties(ParsedCSSPropertyList &properties) noexcept
+  {
+    auto internalProperties = CreateRef<CSSInternalStyleProperties>();
+
+    // TODO(CSSParser): Implement the logic to populate internalProperties with the provided properties.
+
+    properties.clear();
+    return internalProperties;
+  }
+
 #pragma region Parser Algorithms
 
   List<Ref<CSSRule>> CSSParser::ConsumeStyleSheetContents(CSSTokenRange &input) noexcept
@@ -147,7 +172,7 @@ namespace Krys::HTML
     while (!tokens.IsAtEnd() && tokens.Peek().Type() != CSSTokenType::OpenCurly
            && tokens.Peek().Type() != CSSTokenType::Semicolon)
     {
-      tokens.SkipComponentValue();
+      tokens.DiscardComponentValue();
     }
     prelude = prelude.RangeUntil(tokens);
 
@@ -170,8 +195,6 @@ namespace Krys::HTML
       {
         return ConsumeNamespaceRule(prelude);
       }
-
-      // TODO(CSSParser): Implement remaining at-rule consumers for at-rules without blocks.
 
       // TODO(CSSParser): parse error (unknown at-rule with no block).
       return nullptr;
@@ -213,7 +236,7 @@ namespace Krys::HTML
     while (!tokens.IsAtEnd() && tokens.Peek().Type() != CSSTokenType::OpenCurly
            && (!nested || tokens.Peek().Type() != CSSTokenType::Semicolon))
     {
-      tokens.SkipComponentValue();
+      tokens.DiscardComponentValue();
     }
 
     if (tokens.IsAtEnd())
@@ -259,12 +282,233 @@ namespace Krys::HTML
       return ConsumeStyleRule(prelude, block);
     }
 
-    // TODO(CSSParser): Implement remaining qualified rule consumers.
+    if (allowedRules == CSSAllowedRules::Keyframes)
+    {
+      return ConsumeKeyframeStyleRule(prelude, block);
+    }
+
     return nullptr;
   }
 
-  void CSSParser::ConsumeBlockContents(CSSTokenRange &tokens, CSSAllowedBlockRules allowedBlockRules) noexcept
+  void CSSParser::ConsumeBlockContents(CSSTokenRange tokens, CSSAllowedBlockRules allowedBlockRules,
+                                       CSSRuleType ruleType) noexcept
   {
+    assert(CurrentNestedContext().ParsedRules.empty());
+    assert(CurrentNestedContext().ParsedProperties.empty());
+
+    auto ConsumeUntilSemicolon = [&]() -> void
+    {
+      while (!tokens.IsAtEnd() && tokens.Peek().Type() != CSSTokenType::Semicolon)
+      {
+        tokens.DiscardComponentValue();
+      }
+    };
+
+    UniquePtr<ParsedCSSPropertyList> firstDeclarationBlock;
+    auto StoreDeclarations = [&]() noexcept -> void
+    {
+      // We don't wrap the first declaration block, we store it until the end of the style rule.
+      // For @function we always use the declaration block.
+      if (!firstDeclarationBlock && ruleType != CSSRuleType::FunctionDeclarations)
+      {
+        firstDeclarationBlock = CreateUnique<ParsedCSSPropertyList>();
+        std::swap(*firstDeclarationBlock, CurrentNestedContext().ParsedProperties);
+        return;
+      }
+
+      // Nothing to wrap
+      if (CurrentNestedContext().ParsedProperties.empty())
+      {
+        return;
+      }
+
+      ParsedCSSPropertyList properties;
+      std::swap(properties, CurrentNestedContext().ParsedProperties);
+
+      if (ruleType == CSSRuleType::FunctionDeclarations)
+      {
+        auto rule =
+          AdoptRef(*new CSSFunctionDeclarations(CreateInternalStyleProperties(properties), nullptr));
+        CurrentNestedContext().ParsedRules.emplace_back(Krys::Move(rule));
+        return;
+      }
+
+      auto rule = AdoptRef(*new CSSNestedDeclarations(CreateInternalStyleProperties(properties), nullptr));
+      CurrentNestedContext().ParsedRules.emplace_back(Krys::Move(rule));
+    };
+
+    while (!tokens.IsAtEnd())
+    {
+      const auto initialRange = tokens;
+
+      auto ConsumeNestedRuleOrInvalidSyntax = [&]() noexcept -> void
+      {
+        if (HasFlag(allowedBlockRules, CSSAllowedBlockRules::QualifiedRules))
+        {
+          assert(IsStyleNestedParsingContext());
+
+          // For block, we try to consume a qualified rule (~= a style rule).
+          // This consumes tokens and deals with error recovery
+          // in the case of invalid syntax.
+          auto rule = ConsumeQualifiedRule(tokens, CSSAllowedRules::Regular);
+          if (!Is<CSSStyleRule>(rule.get()))
+          {
+            return;
+          }
+
+          StoreDeclarations();
+          CurrentNestedContext().ParsedRules.push_back(Krys::Move(rule));
+        }
+        else
+        {
+          // https://drafts.csswg.org/css-syntax/#typedef-declaration-list
+          // For declaration list, we consume invalid tokens until next recovery point.
+          tokens = initialRange;
+          ConsumeUntilSemicolon();
+        }
+      };
+
+      switch (tokens.Peek().Type())
+      {
+        case CSSTokenType::Whitespace:
+        case CSSTokenType::Semicolon:
+        {
+          tokens.Discard();
+          break;
+        }
+        case CSSTokenType::Ident:
+        {
+          if (HasFlag(allowedBlockRules, CSSAllowedBlockRules::Declarations))
+          {
+            auto declarationStart = tokens;
+            ConsumeUntilSemicolon();
+
+            auto declarationRange = declarationStart.RangeUntil(tokens);
+            if (!ConsumeDeclaration(declarationRange, ruleType))
+            {
+              // If it's not a valid declaration, we rewind the parser and try to parse it as a nested style
+              // rule.
+              tokens = initialRange;
+              ConsumeNestedRuleOrInvalidSyntax();
+            }
+          }
+          else
+          {
+            tokens = initialRange;
+            ConsumeNestedRuleOrInvalidSyntax();
+          }
+
+          break;
+        }
+        case CSSTokenType::AtKeyword:
+        {
+          if (HasFlag(allowedBlockRules, CSSAllowedBlockRules::AtRules))
+          {
+            auto allowedRules = ruleType == CSSRuleType::FunctionDeclarations
+                                  ? CSSAllowedRules::ConditionalGroup
+                                  : CSSAllowedRules::Regular;
+
+            auto rule = ConsumeAtRule(tokens, allowedRules);
+            if (rule == nullptr)
+            {
+              break;
+            }
+
+            auto lastAncestor = CurrentAncestorRuleType();
+            assert(lastAncestor);
+
+            // Style rule only support nested group rule.
+            if (*lastAncestor == NestedContextType::Style && !Is<CSSGroupingRule>(rule.get()))
+            {
+              break;
+            }
+
+            StoreDeclarations();
+            CurrentNestedContext().ParsedRules.push_back(Krys::Move(rule));
+          }
+          else
+          {
+            // Rule will be ignored, but consuming the tokens is necessary.
+            (void)ConsumeAtRule(tokens, CSSAllowedRules::None);
+          }
+          break;
+        }
+        default:
+        {
+          ConsumeNestedRuleOrInvalidSyntax();
+          break;
+        }
+      }
+    }
+
+    // Store trailing declarations if any
+    StoreDeclarations();
+
+    // Restore the initial declaration block
+    if (firstDeclarationBlock != nullptr)
+    {
+      std::swap(*firstDeclarationBlock, CurrentNestedContext().ParsedProperties);
+    }
+  }
+
+  bool CSSParser::ConsumeDeclaration(CSSTokenRange &tokens, CSSRuleType ruleType) noexcept
+  {
+    assert(tokens.Peek().Type() == CSSTokenType::Ident);
+
+    auto &token = tokens.Consume();
+    tokens.DiscardWhitespace();
+
+    auto propertyId = ParseCSSPropertyId(token.IdentCodePoints());
+    if (tokens.Consume().Type() != CSSTokenType::Colon)
+    {
+      // TODO(CSSParser): parse error (expected colon after property name).
+      return false;
+    }
+
+    tokens.DiscardWhitespace();
+
+    auto important = ConsumeTrailingImportantAndWhitespace(tokens);
+    if (important && RuleDoesNotAllowImportant(ruleType))
+    {
+      return false;
+    }
+
+    const size_t oldPropertiesCount = CurrentNestedContext().ParsedProperties.size();
+    if (propertyId != CSSPropertyId::Invalid)
+    {
+      CSSPropertyParser::ParseValue(tokens, propertyId, ruleType, important,
+                                    CurrentNestedContext().ParsedProperties);
+    }
+
+    return CurrentNestedContext().ParsedProperties.size() != oldPropertiesCount;
+  }
+
+  IsImportant CSSParser::ConsumeTrailingImportantAndWhitespace(CSSTokenRange &range)
+  {
+    range.DiscardTrailingWhitespace();
+    if (range.Size() < 2uz)
+    {
+      return IsImportant(false);
+    }
+
+    auto removeImportantRange = range;
+    if (auto &last = removeImportantRange.ConsumeLast();
+        last.Type() != CSSTokenType::Ident
+        || !Krys::Text::ASCIICaseInsensitiveMatch(last.IdentCodePoints(), u8"important"))
+    {
+      return IsImportant(false);
+    }
+
+    removeImportantRange.DiscardTrailingWhitespace();
+    if (auto &last = removeImportantRange.ConsumeLast();
+        last.Type() != CSSTokenType::Delim || last.IdentCodePoints() != u8"!")
+    {
+      return IsImportant(false);
+    }
+
+    removeImportantRange.DiscardTrailingWhitespace();
+    range = removeImportantRange;
+    return IsImportant(true);
   }
 
   void CSSParser::ConsumeBadDeclaration(CSSTokenRange &tokens, bool nested) noexcept
@@ -290,9 +534,52 @@ namespace Krys::HTML
         }
       }
 
-      tokens.SkipComponentValue();
+      tokens.DiscardComponentValue();
       continue;
     }
+  }
+
+  void CSSParser::ConsumeDeclarationList(CSSTokenRange block, CSSRuleType ruleType) noexcept
+  {
+    constexpr static auto allowed = CSSAllowedBlockRules::Declarations;
+
+    ConsumeBlockContents(block, allowed, ruleType);
+  }
+
+  void CSSParser::ConsumeQualifiedRuleList(CSSTokenRange block, CSSRuleType ruleType) noexcept
+  {
+    constexpr static auto allowed = CSSAllowedBlockRules::QualifiedRules;
+
+    ConsumeBlockContents(block, allowed, ruleType);
+  }
+
+  void CSSParser::ConsumeAtRuleList(CSSTokenRange block, CSSRuleType ruleType) noexcept
+  {
+    constexpr static auto allowed = CSSAllowedBlockRules::AtRules;
+
+    ConsumeBlockContents(block, allowed, ruleType);
+  }
+
+  void CSSParser::ConsumeDeclarationRuleList(CSSTokenRange block, CSSRuleType ruleType) noexcept
+  {
+    constexpr static auto allowed = CSSAllowedBlockRules::Declarations | CSSAllowedBlockRules::AtRules;
+
+    ConsumeBlockContents(block, allowed, ruleType);
+  }
+
+  void CSSParser::ConsumeRuleList(CSSTokenRange block, CSSRuleType ruleType) noexcept
+  {
+    constexpr static auto allowed = CSSAllowedBlockRules::AtRules | CSSAllowedBlockRules::QualifiedRules;
+
+    ConsumeBlockContents(block, allowed, ruleType);
+  }
+
+  void CSSParser::ConsumeStyleBlock(CSSTokenRange block) noexcept
+  {
+    constexpr static auto allowed = CSSAllowedBlockRules::Declarations | CSSAllowedBlockRules::QualifiedRules
+                                    | CSSAllowedBlockRules::AtRules;
+
+    ConsumeBlockContents(block, allowed, CSSRuleType::Style);
   }
 
 #pragma endregion
@@ -327,6 +614,12 @@ namespace Krys::HTML
 #pragma region Qualified Rule Consumers
 
   RefPtr<CSSStyleRule> CSSParser::ConsumeStyleRule(CSSTokenRange prelude, CSSTokenRange block) noexcept
+  {
+    return nullptr;
+  }
+
+  RefPtr<CSSStyleRule> CSSParser::ConsumeKeyframeStyleRule(CSSTokenRange prelude,
+                                                           CSSTokenRange block) noexcept
   {
     return nullptr;
   }

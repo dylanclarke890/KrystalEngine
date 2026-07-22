@@ -36,9 +36,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\CSS\CSSParser.cpp" />
+    <ClCompile Include="src\CSS\Properties\CSSPropertyParser.cpp" />
+    <ClCompile Include="src\CSS\Properties\CSSPropertyShorthand.cpp" />
     <ClCompile Include="src\CSS\CSSRule.cpp" />
     <ClCompile Include="src\CSS\CSSStyleSheet.cpp" />
     <ClCompile Include="src\CSS\Parser\CSSTokenizer.cpp" />
+    <ClCompile Include="src\CSS\Properties\CSSProperty.cpp" />
     <ClCompile Include="src\HTML\Algorithms\FormControlAlgorithms.cpp" />
     <ClCompile Include="src\HTML\Parser\HTMLDocumentParser.cpp" />
     <ClCompile Include="src\SVG\SVGCircleElement.cpp" />
@@ -100,16 +103,26 @@
     <ClInclude Include="include\Krystal.HTML\Constants\ElementNames.hpp" />
     <ClInclude Include="include\Krystal.HTML\Constants\TagNames.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\CSSCharsetRule.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSFunctionDeclarations.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\CSSMarginDescriptors.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\CSSNestedDeclarations.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\CSSPageDescriptors.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\CSSStyleProperties.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyParser.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\ParsedCSSPropertyList.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\ParsedCSSRuleList.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSInternalStyleProperties.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Enums\CSSPropertyFlag.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Enums\CSSPropertyId.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Enums\CSSRuleFlag.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\CSSParser.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSAllowedBlockRules.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSAllowedRules.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSAtRuleType.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\CSSTokenRange.hpp" />
-    <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\BlockContents.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\NestedContextType.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\NestedParsingContext.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyShorthand.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Serializer\CSSRuleSerializer.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\CSSGroupingRule.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\CSSImportRule.hpp" />
@@ -135,7 +148,11 @@
     <ClInclude Include="include\Krystal.HTML\CSS\StyleSheet.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\StyleSheetList.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Types\CSSOMString.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSProperty.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Types\IsImplicit.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Types\IsImportant.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Types\MediaListOrDOMString.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Types\IsSetFromShorthand.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSUnits.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSUnitCategory.hpp" />
@@ -239,6 +256,7 @@
     <ClInclude Include="include\Krystal.HTML\SVG\SVGUnknownElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\SVG\SVGUseElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\Types\IsEOF.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Types\NestedLevelIncrementer.hpp" />
     <ClInclude Include="include\Krystal.HTML\Types\SourceLocation.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Types\USVString.hpp" />
     <ClInclude Include="pch.h" />

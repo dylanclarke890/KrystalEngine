@@ -1,5 +1,6 @@
 ﻿#include "Krystal.HTML/CSS/Parser/CSSTokenizer.hpp"
 #include "Krystal.Text/ASCII.hpp"
+#include <charconv>
 
 namespace Krys::HTML
 {

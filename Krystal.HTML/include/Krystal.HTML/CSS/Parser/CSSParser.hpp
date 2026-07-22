@@ -1,10 +1,15 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/CSS/Enums/CSSRuleType.hpp"
 #include "Krystal.HTML/CSS/Parser/CSSInputStream.hpp"
 #include "Krystal.HTML/CSS/Parser/CSSToken.hpp"
 #include "Krystal.HTML/CSS/Parser/CSSTokenizer.hpp"
 #include "Krystal.HTML/CSS/Parser/Enums/CSSAllowedBlockRules.hpp"
 #include "Krystal.HTML/CSS/Parser/Enums/CSSAllowedRules.hpp"
+#include "Krystal.HTML/CSS/Parser/Enums/NestedContextType.hpp"
+#include "Krystal.HTML/CSS/Parser/Types/NestedParsingContext.hpp"
+#include "Krystal.HTML/CSS/Properties/CSSInternalStyleProperties.hpp"
+#include "Krystal.HTML/CSS/Properties/CSSProperty.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 
 namespace Krys::HTML
@@ -20,6 +25,9 @@ namespace Krys::HTML
   private:
     CSSInputStream _inputStream;
     CSSTokenizer _tokenizer;
+    size_t _ruleListNestingLevel;
+    List<NestedParsingContext> _nestedContextStack;
+    List<NestedContextType> _ancestorRuleTypeStack;
 
   public:
     CSSParser(utf32_string &&input) noexcept : _inputStream(Krys::Move(input)), _tokenizer(_inputStream)
@@ -50,6 +58,9 @@ namespace Krys::HTML
     KRYS_NODISCARD static CSSAllowedRules ComputeNextAllowedRules(CSSAllowedRules current,
                                                                   RawPtr<CSSRule> ref) noexcept;
 
+    KRYS_NODISCARD static Ref<CSSInternalStyleProperties>
+      CreateInternalStyleProperties(ParsedCSSPropertyList &properties) noexcept;
+
 #pragma region Parser Algorithms - https://drafts.csswg.org/css-syntax/#parser-algorithms
 
     /// @see https://drafts.csswg.org/css-syntax/#consume-a-stylesheets-contents
@@ -64,10 +75,34 @@ namespace Krys::HTML
                                                         bool nested = false) noexcept;
 
     /// @see https://drafts.csswg.org/css-syntax/#consume-a-blocks-contents
-    void ConsumeBlockContents(CSSTokenRange &tokens, CSSAllowedBlockRules allowedBlockRules) noexcept;
+    void ConsumeBlockContents(CSSTokenRange tokens, CSSAllowedBlockRules allowedBlockRules,
+                              CSSRuleType ruleType) noexcept;
+
+    /// @see https://drafts.csswg.org/css-syntax-3/#consume-a-declaration
+    bool ConsumeDeclaration(CSSTokenRange &tokens, CSSRuleType ruleType) noexcept;
+
+    IsImportant ConsumeTrailingImportantAndWhitespace(CSSTokenRange &range);
 
     /// @see https://drafts.csswg.org/css-syntax/#consume-the-remnants-of-a-bad-declaration
     void ConsumeBadDeclaration(CSSTokenRange &tokens, bool nested) noexcept;
+
+    /// @see https://drafts.csswg.org/css-syntax-3/#typedef-declaration-list
+    void ConsumeDeclarationList(CSSTokenRange block, CSSRuleType ruleType) noexcept;
+
+    /// @see https://drafts.csswg.org/css-syntax-3/#typedef-qualified-rule-list
+    void ConsumeQualifiedRuleList(CSSTokenRange block, CSSRuleType ruleType) noexcept;
+
+    /// @see https://drafts.csswg.org/css-syntax-3/#typedef-at-rule-list
+    void ConsumeAtRuleList(CSSTokenRange block, CSSRuleType ruleType) noexcept;
+
+    /// @see https://drafts.csswg.org/css-syntax-3/#typedef-declaration-rule-list
+    void ConsumeDeclarationRuleList(CSSTokenRange block, CSSRuleType ruleType) noexcept;
+
+    /// @see https://drafts.csswg.org/css-syntax-3/#typedef-rule-list
+    void ConsumeRuleList(CSSTokenRange block, CSSRuleType ruleType) noexcept;
+
+    /// @see https://drafts.csswg.org/css-syntax-3/#typedef-block-contents
+    void ConsumeStyleBlock(CSSTokenRange block) noexcept;
 
 #pragma endregion
 
@@ -84,6 +119,52 @@ namespace Krys::HTML
 #pragma region Qualified Rule Consumers
 
     KRYS_NODISCARD RefPtr<CSSStyleRule> ConsumeStyleRule(CSSTokenRange prelude, CSSTokenRange block) noexcept;
+
+    KRYS_NODISCARD RefPtr<CSSStyleRule> ConsumeKeyframeStyleRule(CSSTokenRange prelude,
+                                                                 CSSTokenRange block) noexcept;
+
+#pragma endregion
+
+#pragma region Nested Parsing Context
+
+    void RunInNewNestedParsingContext(auto &&run) noexcept
+    {
+      _nestedContextStack.push_back(NestedParsingContext {});
+      run();
+      _nestedContextStack.pop_back();
+    }
+
+    KRYS_NODISCARD NestedParsingContext &CurrentNestedContext() noexcept
+    {
+      assert(!_nestedContextStack.empty());
+      return _nestedContextStack.back();
+    }
+
+    KRYS_NODISCARD bool IsStyleNestedParsingContext() const noexcept
+    {
+      return !_ancestorRuleTypeStack.empty() && _ancestorRuleTypeStack.back() != NestedContextType::Function;
+    }
+
+    KRYS_NODISCARD bool IsFunctionNestedParsingContext() const noexcept
+    {
+      return !_ancestorRuleTypeStack.empty() && _ancestorRuleTypeStack.back() == NestedContextType::Function;
+    }
+
+    KRYS_NODISCARD bool HasStyleRuleAncestor() const noexcept
+    {
+      return std::ranges::any_of(_ancestorRuleTypeStack,
+                                 [](NestedContextType type) { return type == NestedContextType::Style; });
+    }
+
+    KRYS_NODISCARD Maybe<NestedContextType> CurrentAncestorRuleType() const noexcept
+    {
+      if (_ancestorRuleTypeStack.empty())
+      {
+        return {};
+      }
+
+      return _ancestorRuleTypeStack.back();
+    }
 
 #pragma endregion
   };
