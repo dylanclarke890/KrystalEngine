@@ -165,11 +165,11 @@ namespace Krys::HTML
   {
     assert(tokens.Peek().Type() == CSSTokenType::AtKeyword);
 
-    auto name = tokens.Consume().IdentCodePoints();
+    auto type = tokens.Consume().IdentCodePoints();
     tokens.DiscardWhitespace();
 
     auto prelude = tokens;
-    // we skip the prelude for now, we will parse it later in the specific at-rule consumer
+    // we skip the prelude for now, we parse it below in the specific at-rule consumer
     while (!tokens.IsAtEnd() && tokens.Peek().Type() != CSSTokenType::OpenCurly
            && tokens.Peek().Type() != CSSTokenType::Semicolon)
     {
@@ -177,7 +177,7 @@ namespace Krys::HTML
     }
     prelude = prelude.RangeUntil(tokens);
 
-    auto atRuleType = ParseCSSAtRuleType(name);
+    auto atRuleType = ParseCSSAtRuleType(type);
     if (tokens.IsAtEnd() || tokens.Peek().Type() == CSSTokenType::Semicolon)
     {
       tokens.Discard(); // consume semicolon if present

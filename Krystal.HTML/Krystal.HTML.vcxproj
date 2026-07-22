@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <None Include="data\CSSProperties.json" />
     <None Include="data\_progress\DOM.txt" />
     <None Include="data\_progress\HTML.txt" />
     <Text Include="data\HTMLEntityNames.in" />

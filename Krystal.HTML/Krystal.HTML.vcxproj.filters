@@ -1823,5 +1823,6 @@
     <None Include="data\CSS\CSSStyleProperties.idl">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="data\CSSProperties.json" />
   </ItemGroup>
 </Project>
