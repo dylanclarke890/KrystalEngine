@@ -153,11 +153,11 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Types\IsImportant.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Types\MediaListOrDOMString.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Types\IsSetFromShorthand.hpp" />
-    <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSUnits.hpp" />
-    <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSValue.hpp" />
-    <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSUnitCategory.hpp" />
-    <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSUnitType.hpp" />
-    <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSValueType.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSUnits.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSValue.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Enums\CSSUnitCategory.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Enums\CSSUnitType.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Enums\CSSValueType.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\StaticRangeInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\BoundaryPointComparator.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Algorithms\DOMTreeAccessors.hpp" />
