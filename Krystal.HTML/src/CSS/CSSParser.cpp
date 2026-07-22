@@ -594,7 +594,8 @@ namespace Krys::HTML
 
     if (encoding.Type() != CSSTokenType::String || !prelude.IsAtEnd())
     {
-      return nullptr; // Parse error, expected a single string
+      // TODO(CSSParser): parse error (expected a single string).
+      return nullptr;
     }
 
     return AdoptRefPtr<CSSCharsetRule>(new CSSCharsetRule(nullptr));
