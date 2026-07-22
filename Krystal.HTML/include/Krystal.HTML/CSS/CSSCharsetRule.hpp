@@ -7,8 +7,11 @@ namespace Krys::HTML
   /// @deprecated The @charset rule is deprecated and is only here for use by the parser.
   class CSSCharsetRule final : public CSSRule
   {
+    friend class CSSParser;
+
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CSSCharsetRule);
 
+  private:
     CSSCharsetRule(RawPtr<CSSStyleSheet> stylesheet) noexcept : CSSRule(CSSRuleType::Charset, stylesheet)
     {
     }

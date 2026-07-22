@@ -597,7 +597,7 @@ namespace Krys::HTML
       return nullptr; // Parse error, expected a single string
     }
 
-    return CreateRefPtr<CSSCharsetRule>(nullptr);
+    return AdoptRefPtr<CSSCharsetRule>(new CSSCharsetRule(nullptr));
   }
 
   RefPtr<CSSImportRule> CSSParser::ConsumeImportRule(CSSTokenRange prelude) noexcept
