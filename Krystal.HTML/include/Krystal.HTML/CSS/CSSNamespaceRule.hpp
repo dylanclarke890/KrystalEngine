@@ -15,17 +15,40 @@ namespace Krys::HTML
     CSSOMStringAtom _prefix;
 
   public:
-    CSSNamespaceRule(RawPtr<CSSStyleSheet> stylesheet) noexcept;
+    CSSNamespaceRule(CSSOMStringAtom prefix, CSSOMStringAtom namespaceURI,
+                     RawPtr<CSSStyleSheet> stylesheet) noexcept
+        : CSSRule(CSSRuleType::Namespace, stylesheet), _namespaceURI(Krys::Move(namespaceURI)),
+          _prefix(Krys::Move(prefix))
+    {
+    }
 
     ~CSSNamespaceRule() noexcept override = default;
 
 #pragma region CSSNamespaceRule - https://drafts.csswg.org/cssom/#cssnamespacerule
 
     /// @see https://drafts.csswg.org/cssom/#dom-cssnamespacerule-namespaceuri
-    KRYS_NODISCARD CSSOMStringAtom NamespaceURI() const noexcept;
+    KRYS_NODISCARD CSSOMStringAtom NamespaceURI() const noexcept
+    {
+      return _namespaceURI;
+    }
 
     /// @see https://drafts.csswg.org/cssom/#dom-cssnamespacerule-prefix
-    KRYS_NODISCARD CSSOMStringAtom Prefix() const noexcept;
+    KRYS_NODISCARD CSSOMStringAtom Prefix() const noexcept
+    {
+      return _prefix;
+    }
+
+#pragma endregion
+
+    
+#pragma region CSSRule - https://drafts.csswg.org/cssom/#cssrule
+
+    /// @see https://drafts.csswg.org/cssom/#dom-cssrule-csstext
+    KRYS_NODISCARD CSSOMString CssText() const noexcept final
+    {
+      // TODO(CSSNamespaceRule): Implement CssText()
+      return u8"";
+    }
 
 #pragma endregion
   };

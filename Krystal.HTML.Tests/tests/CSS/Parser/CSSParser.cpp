@@ -18,4 +18,28 @@ namespace Krys::HTML::Tests
     REQUIRE(rule != nullptr);
     REQUIRE(Is<CSSCharsetRule>(rule));
   }
+
+  TEST_CASE("CSSParser::ParseRule - @namespace", "[CSSParser]")
+  {
+    SECTION("Default namespace")
+    {
+      utf8_string input = u8"@namespace \"http://www.w3.org/1999/xhtml\";";
+      auto rule = CSSParser::ParseRule(Krys::Move(input), CSSAllowedRules::Charset);
+      REQUIRE(rule != nullptr);
+      REQUIRE(Is<CSSNamespaceRule>(rule));
+      REQUIRE(Downcast<CSSNamespaceRule>(rule.get())->Prefix() == CSSOMStringAtom::Null());
+      REQUIRE(Downcast<CSSNamespaceRule>(rule.get())->NamespaceURI() == u8"http://www.w3.org/1999/xhtml");
+    }
+
+    SECTION("Prefix and namespace")
+    {
+      utf8_string input = u8"@namespace svg \"http://www.w3.org/2000/svg\";";
+      auto rule = CSSParser::ParseRule(Krys::Move(input), CSSAllowedRules::Charset);
+
+      REQUIRE(rule != nullptr);
+      REQUIRE(Is<CSSNamespaceRule>(rule));
+      REQUIRE(Downcast<CSSNamespaceRule>(rule.get())->Prefix() == u8"svg");
+      REQUIRE(Downcast<CSSNamespaceRule>(rule.get())->NamespaceURI() == u8"http://www.w3.org/2000/svg");
+    }
+  }
 }

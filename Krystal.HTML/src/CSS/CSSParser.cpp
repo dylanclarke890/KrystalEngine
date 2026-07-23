@@ -609,6 +609,36 @@ namespace Krys::HTML
 
   RefPtr<CSSNamespaceRule> CSSParser::ConsumeNamespaceRule(CSSTokenRange prelude) noexcept
   {
+    // @namespace <namespace-prefix>? [ <string> | <url> ] ;
+    // <namespace-prefix> = <ident>
+
+    CSSOMStringAtom prefix = CSSOMStringAtom::Null();
+    if (prelude.Peek().Type() == CSSTokenType::Ident)
+    {
+      prefix = prelude.Consume().IdentCodePoints();
+      prelude.DiscardWhitespace();
+    }
+
+    if (prelude.IsAtEnd())
+    {
+      // TODO(CSSParser): parse error (expected a string or url).
+      return nullptr;
+    }
+
+    if (prelude.Peek().Type() == CSSTokenType::String || prelude.Peek().Type() == CSSTokenType::Url)
+    {
+      CSSOMStringAtom namespaceURI = prelude.Consume().IdentCodePoints();
+      prelude.DiscardWhitespace();
+
+      if (!prelude.IsAtEnd())
+      {
+        // TODO(CSSParser): parse error (unexpected tokens after namespace URI).
+        return nullptr;
+      }
+
+      return CreateRefPtr<CSSNamespaceRule>(prefix, namespaceURI, nullptr);
+    }
+
     return nullptr;
   }
 
