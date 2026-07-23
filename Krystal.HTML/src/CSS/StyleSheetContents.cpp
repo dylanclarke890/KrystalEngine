@@ -82,11 +82,10 @@ namespace Krys::HTML
 
       _namespaceRules.insert(_namespaceRules.begin() + index, ShareRef(*namespaceRule));
 
-      // TODO: look at the below
-      // For now, to be compatible with IE and Firefox, if a namespace rule with the same prefix is added, it
-      // overwrites previous ones.
-      // TODO: The eventual correct behavior would be to ensure that the last value in the list wins.
-      // parserAddNamespace(namespaceRule->prefix(), namespaceRule->uri());
+      // NOTE: webkit, IE and Firefox all overwrite previous @namespace rules with the same prefix. The spec
+      // says the last value in the list should win but it seems like we should follow the behaviour of the
+      // browsers instead.
+      AddNamespace(namespaceRule->Prefix(), namespaceRule->NamespaceURI());
 
       return true;
     }
@@ -132,4 +131,33 @@ namespace Krys::HTML
 
     return true;
   }
+
+#pragma region Namespaces
+
+  void StyleSheetContents::AddNamespace(CSSOMStringAtom prefix, CSSOMStringAtom namespaceURI) noexcept
+  {
+    assert(namespaceURI != CSSOMStringAtom::Null());
+
+    if (prefix == CSSOMStringAtom::Null())
+    {
+      _defaultNamespace = namespaceURI;
+    }
+    else
+    {
+      _namespaces.insert_or_assign(prefix, namespaceURI);
+    }
+  }
+
+  CSSOMStringAtom StyleSheetContents::NamespaceURIForPrefix(CSSOMStringAtom prefix) const noexcept
+  {
+    auto result = _namespaces.find(prefix);
+    if (result != _namespaces.end())
+    {
+      return result->second;
+    }
+
+    return CSSOMStringAtom::Null();
+  }
+
+#pragma endregion
 }

@@ -35,7 +35,20 @@ namespace Krys::HTML
     KRYS_NODISCARD RawPtr<CSSRule> RuleAt(size_t index) const noexcept;
 
     bool InsertRule(Ref<CSSRule> &&rule, size_t index) noexcept;
-    
+
     bool DeleteRule(size_t index) noexcept;
+
+#pragma region Namespaces
+
+    void AddNamespace(CSSOMStringAtom prefix, CSSOMStringAtom namespaceURI) noexcept;
+
+    KRYS_NODISCARD CSSOMStringAtom DefaultNamespaceURI() const noexcept
+    {
+      return _defaultNamespace;
+    }
+
+    KRYS_NODISCARD CSSOMStringAtom NamespaceURIForPrefix(CSSOMStringAtom prefix) const noexcept;
+
+#pragma endregion
   };
 }
