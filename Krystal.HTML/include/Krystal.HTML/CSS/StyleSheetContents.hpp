@@ -15,8 +15,6 @@ namespace Krys::HTML
 
   class StyleSheetContents : public RefCounted<StyleSheetContents>
   {
-    friend class CSSStyleSheet;
-
     using PrefixNamespaceURIMap = Map<CSSOMStringAtom, CSSOMStringAtom>;
 
   private:

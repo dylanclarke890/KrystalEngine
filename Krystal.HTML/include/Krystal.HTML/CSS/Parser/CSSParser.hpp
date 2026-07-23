@@ -22,6 +22,7 @@ namespace Krys::HTML
   class CSSNamespaceRule;
   class CSSStyleRule;
   class CSSStyleSheet;
+  class CSSStyleDeclaration;
 
   class CSSParser
   {

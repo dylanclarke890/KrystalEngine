@@ -57,13 +57,13 @@ namespace Krys::HTML
       return ExceptionCode::SyntaxError;
     }
 
-    if (_constructed && Is<CSSImportRule>(parsedRule.get()))
+    if (_constructed && Is<CSSImportRule>(parsedRule))
     {
       return Exception {ExceptionCode::SyntaxError,
                         u8"Cannot insert an @import rule in a constructed CSSStyleSheet object"};
     }
 
-    bool isNamespace = Is<CSSNamespaceRule>(parsedRule.get());
+    bool isNamespace = Is<CSSNamespaceRule>(parsedRule);
     bool success = _contents.get()->InsertRule(Krys::Move(parsedRule), index);
     if (!success)
     {
