@@ -28,6 +28,10 @@ namespace Krys::HTML
 
 #pragma region Parser Entry Points
 
+  RefPtr<CSSStyleSheet> CSSParser::ParseStylesheet(CSSOMString &&input) noexcept
+  {
+  }
+
   RefPtr<CSSRule> CSSParser::ParseRule(CSSOMString &&input, CSSAllowedRules allowedRules) noexcept
   {
     CSSParser parser(Krys::Move(input));
@@ -295,6 +299,7 @@ namespace Krys::HTML
   void CSSParser::ConsumeBlockContents(CSSTokenRange tokens, CSSAllowedBlockRules allowedBlockRules,
                                        CSSRuleType ruleType) noexcept
   {
+    assert(allowedBlockRules != CSSAllowedBlockRules::None);
     assert(CurrentNestedContext().ParsedRules.empty());
     assert(CurrentNestedContext().ParsedProperties.empty());
 
@@ -350,8 +355,7 @@ namespace Krys::HTML
           assert(IsStyleNestedParsingContext());
 
           // For block, we try to consume a qualified rule (~= a style rule).
-          // This consumes tokens and deals with error recovery
-          // in the case of invalid syntax.
+          // This consumes tokens and deals with error recovery in the case of invalid syntax.
           auto rule = ConsumeQualifiedRule(tokens, CSSAllowedRules::Regular);
           if (!Is<CSSStyleRule>(rule.get()))
           {
@@ -543,44 +547,38 @@ namespace Krys::HTML
 
   void CSSParser::ConsumeDeclarationList(CSSTokenRange block, CSSRuleType ruleType) noexcept
   {
-    constexpr static auto allowed = CSSAllowedBlockRules::Declarations;
-
+    constexpr auto allowed = CSSAllowedBlockRules::Declarations;
     ConsumeBlockContents(block, allowed, ruleType);
   }
 
   void CSSParser::ConsumeQualifiedRuleList(CSSTokenRange block, CSSRuleType ruleType) noexcept
   {
-    constexpr static auto allowed = CSSAllowedBlockRules::QualifiedRules;
-
+    constexpr auto allowed = CSSAllowedBlockRules::QualifiedRules;
     ConsumeBlockContents(block, allowed, ruleType);
   }
 
   void CSSParser::ConsumeAtRuleList(CSSTokenRange block, CSSRuleType ruleType) noexcept
   {
-    constexpr static auto allowed = CSSAllowedBlockRules::AtRules;
-
+    constexpr auto allowed = CSSAllowedBlockRules::AtRules;
     ConsumeBlockContents(block, allowed, ruleType);
   }
 
   void CSSParser::ConsumeDeclarationRuleList(CSSTokenRange block, CSSRuleType ruleType) noexcept
   {
-    constexpr static auto allowed = CSSAllowedBlockRules::Declarations | CSSAllowedBlockRules::AtRules;
-
+    constexpr auto allowed = CSSAllowedBlockRules::Declarations | CSSAllowedBlockRules::AtRules;
     ConsumeBlockContents(block, allowed, ruleType);
   }
 
   void CSSParser::ConsumeRuleList(CSSTokenRange block, CSSRuleType ruleType) noexcept
   {
-    constexpr static auto allowed = CSSAllowedBlockRules::AtRules | CSSAllowedBlockRules::QualifiedRules;
-
+    constexpr auto allowed = CSSAllowedBlockRules::AtRules | CSSAllowedBlockRules::QualifiedRules;
     ConsumeBlockContents(block, allowed, ruleType);
   }
 
   void CSSParser::ConsumeStyleBlock(CSSTokenRange block) noexcept
   {
-    constexpr static auto allowed = CSSAllowedBlockRules::Declarations | CSSAllowedBlockRules::QualifiedRules
-                                    | CSSAllowedBlockRules::AtRules;
-
+    constexpr auto allowed = CSSAllowedBlockRules::Declarations | CSSAllowedBlockRules::QualifiedRules
+                             | CSSAllowedBlockRules::AtRules;
     ConsumeBlockContents(block, allowed, CSSRuleType::Style);
   }
 
@@ -590,6 +588,8 @@ namespace Krys::HTML
 
   RefPtr<CSSCharsetRule> CSSParser::ConsumeCharsetRule(CSSTokenRange prelude) noexcept
   {
+    // @charset <string> ;
+
     const CSSToken &encoding = prelude.Consume();
     prelude.DiscardWhitespace();
 

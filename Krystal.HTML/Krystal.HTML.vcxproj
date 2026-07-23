@@ -146,6 +146,7 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSTokenType.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\NumericValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\CSSSerializerIdioms.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Selectors\CSSSelectorParser.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\StyleSheet.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\StyleSheetContents.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\StyleSheetList.hpp" />
