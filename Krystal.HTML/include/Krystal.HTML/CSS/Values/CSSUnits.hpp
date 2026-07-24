@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/CSS/Properties/Enums/CSSUnitCategory.hpp"
-#include "Krystal.HTML/CSS/Properties/Enums/CSSUnitType.hpp"
+#include "Krystal.HTML/CSS/Values/Enums/CSSUnitCategory.hpp"
+#include "Krystal.HTML/CSS/Values/Enums/CSSUnitType.hpp"
 #include <cassert>
 
 namespace Krys::HTML

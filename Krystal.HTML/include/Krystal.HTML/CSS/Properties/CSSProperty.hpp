@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/CSS/Properties/CSSValue.hpp"
 #include "Krystal.HTML/CSS/Properties/Enums/CSSPropertyFlag.hpp"
 #include "Krystal.HTML/CSS/Properties/Enums/CSSPropertyId.hpp"
 #include "Krystal.HTML/CSS/Properties/Types/IsImplicit.hpp"
 #include "Krystal.HTML/CSS/Properties/Types/IsImportant.hpp"
 #include "Krystal.HTML/CSS/Properties/Types/IsSetFromShorthand.hpp"
+#include "Krystal.HTML/CSS/Values/CSSValue.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 
 namespace Krys::HTML

@@ -30,6 +30,7 @@ namespace Krys::HTML
 
   RefPtr<CSSStyleSheet> CSSParser::ParseStylesheet(CSSOMString &&input) noexcept
   {
+    return nullptr;
   }
 
   RefPtr<CSSRule> CSSParser::ParseRule(CSSOMString &&input, CSSAllowedRules allowedRules) noexcept
@@ -233,11 +234,10 @@ namespace Krys::HTML
   RefPtr<CSSRule> CSSParser::ConsumeQualifiedRule(CSSTokenRange &tokens, CSSAllowedRules allowedRules,
                                                   bool nested) noexcept
   {
-    auto prelude = tokens;
-
     // Parsing a selector (aka a component value) should stop at the first semicolon (and goes to error
     // recovery) instead of consuming the whole list of declarations (in nested context). At top level (aka
     // non nested context), it's the normal rule list error recovery and we don't need this.
+    auto prelude = tokens;
     while (!tokens.IsAtEnd() && tokens.Peek().Type() != CSSTokenType::OpenCurly
            && (!nested || tokens.Peek().Type() != CSSTokenType::Semicolon))
     {

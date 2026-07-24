@@ -939,19 +939,19 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSAllowedBlockRules.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSValue.hpp">
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Enums\CSSValueType.hpp">
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSValueType.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSUnits.hpp">
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSUnits.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Enums\CSSUnitType.hpp">
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSUnitType.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Enums\CSSUnitCategory.hpp">
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSUnitCategory.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\CSS\CSSFunctionDeclarations.hpp">
@@ -1009,6 +1009,33 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\CSS\Selectors\CSSSelectorParser.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Selectors\Enums\SelectorRelation.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Selectors\CSSSelectorParserContext.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSParserMode.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Selectors\CSSSelector.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Selectors\CSSSelectorList.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Selectors\Enums\PseudoClassId.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Selectors\Enums\PseudoElementId.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Selectors\Enums\SelectorMatch.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Selectors\Enums\CSSSelectorFlag.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1521,6 +1548,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\CSS\StyleSheetContents.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CSS\Selectors\CSSSelectorParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

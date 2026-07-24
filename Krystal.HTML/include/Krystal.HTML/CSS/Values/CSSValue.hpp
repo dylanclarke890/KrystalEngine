@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/CSS/Properties/Enums/CSSUnitCategory.hpp"
-#include "Krystal.HTML/CSS/Properties/Enums/CSSUnitType.hpp"
-#include "Krystal.HTML/CSS/Properties/Enums/CSSValueType.hpp"
+#include "Krystal.HTML/CSS/Values/Enums/CSSUnitCategory.hpp"
+#include "Krystal.HTML/CSS/Values/Enums/CSSUnitType.hpp"
+#include "Krystal.HTML/CSS/Values/Enums/CSSValueType.hpp"
 #include "Krystal.Lib/Mixins/RefCounted.hpp"
 
 namespace Krys::HTML

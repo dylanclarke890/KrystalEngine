@@ -219,6 +219,7 @@
     <ClInclude Include="include\Krystal.Lib\Types\Map.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Maybe.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\NTTPMaybe.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\NTTPString.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\NullableFloat.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\OrderedMap.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Pair.hpp" />
