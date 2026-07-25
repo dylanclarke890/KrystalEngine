@@ -25,7 +25,7 @@ namespace Krys::HTML::Tests
 {
   struct HTMLTreeBuilderTest
   {
-    utf32_string Input;
+    utf8_string Input;
     DOMString Expected;
     Maybe<DOMString> FragmentContext;
     Maybe<ParserScriptingMode> ScriptingMode;
@@ -205,7 +205,7 @@ namespace Krys::HTML::Tests
       }
 
       tests.push_back({
-        .Input = Krys::Text::ConvertToUTF32(utf8_stringview(ToUTF8(input))),
+        .Input = ToUTF8(input),
         .Expected = ToUTF8(expected),
         .FragmentContext = fragmentContext.has_value() ? ToUTF8(*fragmentContext) : Maybe<DOMString>(Null),
         .ScriptingMode = scriptingMode,

@@ -9,7 +9,7 @@ namespace Krys::HTML::Tests
 {
   namespace
   {
-    Ref<HTMLDocumentParser> CreateParser(HTMLDocument &document, utf32_string &&input) noexcept
+    Ref<HTMLDocumentParser> CreateParser(HTMLDocument &document, utf8_string &&input) noexcept
     {
       auto parser = CreateRef<HTMLDocumentParser>(document);
       parser->InputStream().Append(Krys::Move(input), IsEOF(true));
@@ -27,7 +27,7 @@ namespace Krys::HTML::Tests
                                              test.FragmentContext.value(), fragmentTagName, Namespace::HTML};
         auto element = ElementFactory::Create(*document, qName, DOMStringAtom::Null());
         auto result = HTMLDocumentParser::ParseFragment(
-          *element, utf32_string(test.Input), false, test.ScriptingMode.value_or(ParserScriptingMode::Inert));
+          *element, utf8_string(test.Input), false, test.ScriptingMode.value_or(ParserScriptingMode::Inert));
 
         output = u8"#document\n";
         for (auto &child : result)
@@ -39,7 +39,7 @@ namespace Krys::HTML::Tests
       else
       {
         auto document = CreateRef<HTMLDocument>();
-        auto parser = CreateParser(*document, utf32_string(test.Input));
+        auto parser = CreateParser(*document, utf8_string(test.Input));
 
         if (test.ScriptingMode.has_value())
         {
@@ -51,8 +51,8 @@ namespace Krys::HTML::Tests
         output = SerializeDocument(*document);
       }
 
-      utf8_string str = u8"--- TEST " + ToUTF8(number + 1uz) + u8" OF " + ToUTF8(total) + u8" ---\n"
-                        + Krys::Text::ConvertToUTF8(utf32_stringview(test.Input));
+      utf8_string str =
+        u8"--- TEST " + ToUTF8(number + 1uz) + u8" OF " + ToUTF8(total) + u8" ---\n" + test.Input;
       UTF8_INFO(str);
 
       str = u8"--- FRAGMENT CONTEXT ---\n#document-fragment\n" + test.FragmentContext.value_or(u8"none");

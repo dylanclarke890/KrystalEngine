@@ -33,7 +33,7 @@ namespace Krys::HTML
 
     /// @see https://html.spec.whatwg.org/#html-fragment-parsing-algorithm
     KRYS_NODISCARD static SmallNodeList
-      ParseFragment(Element &contextElement, utf32_string &&input, bool allowDeclarativeShadowRoots = false,
+      ParseFragment(Element &contextElement, utf8_string &&input, bool allowDeclarativeShadowRoots = false,
                     ParserScriptingMode scriptingMode = ParserScriptingMode::Inert) noexcept;
 
     void PumpTokenizer() noexcept;

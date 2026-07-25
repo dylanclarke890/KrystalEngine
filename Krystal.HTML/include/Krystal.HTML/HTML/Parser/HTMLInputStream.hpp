@@ -7,6 +7,7 @@
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Text/ASCII.hpp"
 #include "Krystal.Text/ASCIILiteral.hpp"
+#include "Krystal.Text/StringConversion.hpp"
 #include "Krystal.Text/Unicode.hpp"
 #include <cassert>
 
@@ -24,13 +25,13 @@ namespace Krys::HTML
     SourceLocation _currentLocation;
 
   public:
-    void Append(utf32_string &&chunk, IsEOF isEOF = IsEOF(false)) noexcept
+    void Append(utf8_string &&chunk, IsEOF isEOF = IsEOF(false)) noexcept
     {
       assert(_data.empty() || _data.back() != EOFMarker);
 
       if (!chunk.empty())
       {
-        _data.append(chunk);
+        _data.append(Krys::Text::ConvertToUTF32(utf8_stringview(chunk)));
       }
 
       if (isEOF)
@@ -39,13 +40,13 @@ namespace Krys::HTML
       }
     }
 
-    void Insert(utf32_string &&chunk) noexcept
+    void Insert(utf8_string &&chunk) noexcept
     {
       assert(_insertionPosition != utf32_string::npos);
 
       if (!chunk.empty())
       {
-        _data.insert(_insertionPosition, chunk);
+        _data.insert(_insertionPosition, Krys::Text::ConvertToUTF32(utf8_stringview(chunk)));
         _insertionPosition += chunk.size();
       }
     }

@@ -15,7 +15,7 @@ namespace Krys::HTML::Tests
   struct HTMLTokenizerTest
   {
     string Name;
-    utf32_string Html;
+    utf8_string Html;
     utf8_string Tokens;
     TokenizerState InitialState {TokenizerState::Data};
     TokenizerState ExpectedState {TokenizerState::Data};
@@ -129,7 +129,7 @@ namespace Krys::HTML::Tests
 
       tests.push_back({
         .Name = name,
-        .Html = Krys::Text::ConvertToUTF32(utf8_stringview(ToUTF8(html))),
+        .Html = ToUTF8(html),
         .Tokens = ToUTF8(tokens),
         .InitialState = initialState,
         .ExpectedState = expectedState,

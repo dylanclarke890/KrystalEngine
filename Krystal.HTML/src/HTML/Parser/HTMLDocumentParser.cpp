@@ -12,7 +12,7 @@ namespace Krys::HTML
   {
   }
 
-  SmallNodeList HTMLDocumentParser::ParseFragment(Element &context, utf32_string &&input,
+  SmallNodeList HTMLDocumentParser::ParseFragment(Element &context, utf8_string &&input,
                                                   bool allowDeclarativeShadowRoots,
                                                   ParserScriptingMode scriptingMode) noexcept
   {

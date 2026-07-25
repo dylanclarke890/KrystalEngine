@@ -12,11 +12,11 @@ namespace Krys::HTML::Tests
       tokenizer.State(test.InitialState);
       if (test.AppendEOF)
       {
-        inputStream.Append(utf32_string(test.Html), IsEOF(true));
+        inputStream.Append(utf8_string(test.Html), IsEOF(true));
       }
       else
       {
-        inputStream.Append(utf32_string(test.Html), IsEOF(false));
+        inputStream.Append(utf8_string(test.Html), IsEOF(false));
       }
 
       DOMString tokens;
@@ -36,7 +36,7 @@ namespace Krys::HTML::Tests
                         + ToUTF8(test.Name.empty() ? "Unnamed Test" : test.Name);
       UTF8_INFO(str);
 
-      str = u8"\n--- INPUT ---\n" + Krys::Text::ConvertToUTF8(utf32_stringview(test.Html));
+      str = u8"\n--- INPUT ---\n" + test.Html;
       UTF8_INFO(str);
 
       str = u8"--- EXPECTED TOKENS ---\n" + test.Tokens;

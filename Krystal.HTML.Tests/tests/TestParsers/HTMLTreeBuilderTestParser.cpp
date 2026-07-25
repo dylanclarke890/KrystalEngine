@@ -106,7 +106,7 @@ namespace Krys::HTML::Tests
 
     REQUIRE(tests.size() == 1);
 
-    CHECK(tests[0].Input == U"<div></div>");
+    CHECK(tests[0].Input == u8"<div></div>");
     CHECK(tests[0].Expected
           == u8"#document\n"
              u8"| <html>\n"
@@ -128,7 +128,7 @@ namespace Krys::HTML::Tests
 
     REQUIRE(tests.size() == 1);
 
-    CHECK(tests[0].Input == U"<!DOCTYPE html>");
+    CHECK(tests[0].Input == u8"<!DOCTYPE html>");
     CHECK(tests[0].Expected
           == u8"#document\n"
              u8"| <!DOCTYPE html>\n"
@@ -154,7 +154,7 @@ namespace Krys::HTML::Tests
 
     REQUIRE(tests.size() == 1);
 
-    CHECK(tests[0].Input == U"<div foo=`bar`>");
+    CHECK(tests[0].Input == u8"<div foo=`bar`>");
     CHECK(tests[0].Expected
           == u8"#document\n"
              u8"| <html>\n"
@@ -180,7 +180,7 @@ namespace Krys::HTML::Tests
 
     REQUIRE(tests.size() == 1);
 
-    CHECK(tests[0].Input == U"<p>hello</p>");
+    CHECK(tests[0].Input == u8"<p>hello</p>");
     CHECK(tests[0].Expected
           == u8"#document\n"
              u8"| <html>\n"
@@ -215,7 +215,7 @@ namespace Krys::HTML::Tests
 
     REQUIRE(tests.size() == 2);
 
-    CHECK(tests[0].Input == U"<p>one</p>");
+    CHECK(tests[0].Input == u8"<p>one</p>");
     CHECK(tests[0].Expected
           == u8"#document\n"
              u8"| <html>\n"
@@ -224,7 +224,7 @@ namespace Krys::HTML::Tests
              u8"|     <p>\n"
              u8"|       \"one\"");
 
-    CHECK(tests[1].Input == U"<p>two</p>");
+    CHECK(tests[1].Input == u8"<p>two</p>");
     CHECK(tests[1].Expected
           == u8"#document\n"
              u8"| <html>\n"
@@ -248,7 +248,7 @@ namespace Krys::HTML::Tests
 
     REQUIRE(tests.size() == 1);
 
-    CHECK(tests[0].Input == U"<span></span>");
+    CHECK(tests[0].Input == u8"<span></span>");
     CHECK(tests[0].Expected
           == u8"#document\n"
              u8"| <html>\n"
@@ -273,7 +273,7 @@ namespace Krys::HTML::Tests
 
     REQUIRE(tests.size() == 1);
 
-    CHECK(tests[0].Input == U"<div>\n  text\n</div>");
+    CHECK(tests[0].Input == u8"<div>\n  text\n</div>");
   }
 
   TEST_CASE("ParseTreeConstructionTests - empty stream produces no tests", "[HTML][TreeConstruction]")
@@ -337,7 +337,7 @@ namespace Krys::HTML::Tests
 
     REQUIRE(tests.size() == 1);
 
-    CHECK(tests[0].Input == U"<div bar=\"ZZ&gt;YY\"></div>");
+    CHECK(tests[0].Input == u8"<div bar=\"ZZ&gt;YY\"></div>");
     CHECK(tests[0].Expected
           == u8"#document\n"
              u8"| <html>\n"
@@ -365,7 +365,7 @@ namespace Krys::HTML::Tests
                        "|         \"Item\"\n");
 
     REQUIRE(tests.size() == 1);
-    CHECK(tests[0].Input == U"<li>Item</li>");
+    CHECK(tests[0].Input == u8"<li>Item</li>");
     CHECK(tests[0].FragmentContext.has_value());
     CHECK(tests[0].FragmentContext.value() == u8"ul");
   }

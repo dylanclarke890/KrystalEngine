@@ -5,18 +5,10 @@ namespace Krys::Tests
 {
   using namespace Krys::HTML;
 
-  static utf32_string ToUTF32(const char *s)
-  {
-    utf32_string out;
-    while (*s)
-      out.push_back(static_cast<char32>(*s++));
-    return out;
-  }
-
   TEST_CASE("HTMLInputStream: basic iteration", "[HTML][InputStream]")
   {
     HTMLInputStream stream;
-    stream.Append(ToUTF32("abc"), IsEOF(true));
+    stream.Append(u8"abc", IsEOF(true));
 
     REQUIRE(stream.Peek());
     REQUIRE(stream.NextInputCharacter() == U'a');
@@ -37,7 +29,7 @@ namespace Krys::Tests
   TEST_CASE("HTMLInputStream: CR normalizes to LF", "[HTML][InputStream]")
   {
     HTMLInputStream stream;
-    stream.Append(ToUTF32("a\rb"), IsEOF(true));
+    stream.Append(u8"a\rb", IsEOF(true));
 
     REQUIRE(stream.Peek());
     REQUIRE(stream.NextInputCharacter() == U'a');
@@ -54,7 +46,7 @@ namespace Krys::Tests
   TEST_CASE("HTMLInputStream: CRLF collapses to single LF", "[HTML][InputStream]")
   {
     HTMLInputStream stream;
-    stream.Append(ToUTF32("a\r\nb"), IsEOF(true));
+    stream.Append(u8"a\r\nb", IsEOF(true));
 
     REQUIRE(stream.Peek());
     REQUIRE(stream.NextInputCharacter() == U'a');
@@ -71,7 +63,7 @@ namespace Krys::Tests
   TEST_CASE("HTMLInputStream: LF preserved", "[HTML][InputStream]")
   {
     HTMLInputStream stream;
-    stream.Append(ToUTF32("a\nb"), IsEOF(true));
+    stream.Append(u8"a\nb", IsEOF(true));
 
     REQUIRE(stream.Peek());
     REQUIRE(stream.NextInputCharacter() == U'a');
@@ -88,7 +80,7 @@ namespace Krys::Tests
   TEST_CASE("HTMLInputStream: incremental append", "[HTML][InputStream]")
   {
     HTMLInputStream stream;
-    stream.Append(ToUTF32("ab"));
+    stream.Append(u8"ab");
 
     REQUIRE(stream.Peek());
     REQUIRE(stream.NextInputCharacter() == U'a');
@@ -100,7 +92,7 @@ namespace Krys::Tests
 
     REQUIRE_FALSE(stream.Peek());
 
-    stream.Append(ToUTF32("cd"), IsEOF(true));
+    stream.Append(u8"cd", IsEOF(true));
 
     REQUIRE(stream.Peek());
     REQUIRE(stream.NextInputCharacter() == U'c');
@@ -113,7 +105,7 @@ namespace Krys::Tests
   TEST_CASE("HTMLInputStream: Peek does not consume", "[HTML][InputStream]")
   {
     HTMLInputStream stream;
-    stream.Append(ToUTF32("x"), IsEOF(true));
+    stream.Append(u8"x", IsEOF(true));
 
     REQUIRE(stream.Peek());
     REQUIRE(stream.NextInputCharacter() == U'x');
@@ -129,7 +121,7 @@ namespace Krys::Tests
   TEST_CASE("HTMLInputStream: Advance past advances the correct amount of characters", "[HTML][InputStream]")
   {
     HTMLInputStream stream;
-    stream.Append(ToUTF32("aBcDeF"), IsEOF(true));
+    stream.Append(u8"aBcDeF", IsEOF(true));
 
     auto result = stream.AdvancePast<false>(Krys::Text::ASCIILiteral::From("aBc"));
     REQUIRE(result == HTMLInputStream::MatchResult::Matched);
@@ -152,7 +144,7 @@ namespace Krys::Tests
   {
     HTMLInputStream stream;
 
-    stream.Append(ToUTF32("a\nb\rc\r\ndtext"), IsEOF(true));
+    stream.Append(u8"a\nb\rc\r\ndtext", IsEOF(true));
     {
       const auto &loc = stream.GetCurrentLocation();
       REQUIRE(loc.Line == 1uz);
