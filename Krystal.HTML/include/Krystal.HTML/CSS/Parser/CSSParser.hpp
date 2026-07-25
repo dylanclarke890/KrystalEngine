@@ -44,7 +44,9 @@ namespace Krys::HTML
 #pragma region Parser Entry Points - https://drafts.csswg.org/css-syntax/#parser-entry-points
 
     /// @see https://drafts.csswg.org/css-syntax/#parse-stylesheet
-    KRYS_NODISCARD static RefPtr<CSSStyleSheet> ParseStylesheet(CSSOMString &&input) noexcept;
+    KRYS_NODISCARD static RefPtr<CSSStyleSheet> ParseStylesheet(CSSOMString &&input,
+                                                                const CSSParserContext &context,
+                                                                StyleSheetContents &stylesheet) noexcept;
 
     /// @see https://drafts.csswg.org/css-syntax/#parse-a-rule
     KRYS_NODISCARD static RefPtr<CSSRule> ParseRule(CSSOMString &&input, const CSSParserContext &context,

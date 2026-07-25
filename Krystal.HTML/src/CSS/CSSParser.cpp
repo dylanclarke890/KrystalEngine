@@ -39,8 +39,11 @@ namespace Krys::HTML
   {
   }
 
-  RefPtr<CSSStyleSheet> CSSParser::ParseStylesheet(CSSOMString &&input) noexcept
+  RefPtr<CSSStyleSheet> CSSParser::ParseStylesheet(CSSOMString &&input, const CSSParserContext &context,
+                                                   StyleSheetContents &stylesheet) noexcept
   {
+    CSSParser parser(Krys::Move(input), context, &stylesheet);
+
     return nullptr;
   }
 
