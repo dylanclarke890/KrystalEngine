@@ -5,6 +5,7 @@
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"
 #include "Krystal.Lib/Types/Func.hpp"
 #include "Krystal.Lib/Types/SmallList.hpp"
+#include "Krystal.Lib/Types/UniqueArray.hpp"
 
 namespace Krys::HTML
 {
@@ -16,7 +17,7 @@ namespace Krys::HTML
     /// @brief The selectors in this list. They are stored contiguously, with complex selectors being stored
     /// right-to-left (i.e. the rightmost selector is first in memory, followed by its preceding selector
     /// component, and so on).
-    List<CSSSelector> _selectors;
+    UniqueArray<CSSSelector> _selectors;
 
   public:
     CSSSelectorList() noexcept = default;
@@ -27,7 +28,7 @@ namespace Krys::HTML
 
     explicit CSSSelectorList(MutableCSSSelectorList &&selectors) noexcept;
 
-    explicit CSSSelectorList(List<CSSSelector> &&array) noexcept : _selectors(Krys::Move(array))
+    explicit CSSSelectorList(UniqueArray<CSSSelector> &&array) noexcept : _selectors(Krys::Move(array))
     {
     }
 
@@ -42,7 +43,7 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool IsEmpty() const noexcept
     {
-      return _selectors.empty();
+      return _selectors == nullptr;
     }
 
     KRYS_NODISCARD size_t ComponentCount() const noexcept;
@@ -82,13 +83,13 @@ namespace Krys::HTML
     template <typename Functor>
     bool ForEachSelector(Functor &functor) const noexcept
     {
-      for (const auto &selector : _selectors)
-      {
-        if (ForEachTagSelector(functor, &selector))
-        {
-          return true;
-        }
-      }
+      // for (const auto &selector : _selectors)
+      // {
+      //   if (ForEachTagSelector(functor, &selector))
+      //   {
+      //     return true;
+      //   }
+      // }
 
       return false;
     }

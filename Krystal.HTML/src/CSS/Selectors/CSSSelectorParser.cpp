@@ -18,7 +18,12 @@ namespace Krys::HTML
                                                           Maybe<NestedContextType> nestedContext) noexcept
   {
     CSSInputStream inputStream(Krys::Move(input));
-    return ParseSelector(CSSTokenizer(inputStream).TokenRange(), context, stylesheet, nestedContext);
+    CSSTokenizer tokenizer(inputStream);
+    if (!tokenizer.PumpTokenizer())
+    {
+      return Null;
+    }
+    return ParseSelector(tokenizer.TokenRange(), context, stylesheet, nestedContext);
   }
 
   Maybe<CSSSelectorList> CSSSelectorParser::ParseSelector(CSSTokenRange tokens,
@@ -597,7 +602,7 @@ namespace Krys::HTML
         namespacePrefix = CSSOMStringAtom::Null();
       }
 
-      return CreateUnique<MutableCSSSelector>(QualifiedName(namespacePrefix, elementName, namespaceURI));
+      return CreateUnique<MutableCSSSelector>(QualifiedName(namespaceURI, namespacePrefix, elementName));
     }
 
     // PrependTypeSelectorIfNeeded(namespacePrefix, elementName, *compoundSelector);

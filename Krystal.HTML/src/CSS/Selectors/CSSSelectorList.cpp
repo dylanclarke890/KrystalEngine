@@ -9,7 +9,7 @@ namespace Krys::HTML
     if (!otherComponentCount)
       return;
 
-    _selectors.reserve(otherComponentCount);
+    _selectors = CreateUniqueArray<CSSSelector>(otherComponentCount);
     for (size_t i = 0uz; i < otherComponentCount; ++i)
     {
       new (NotNullTag {}, &_selectors[i]) CSSSelector(other._selectors[i]);
@@ -32,7 +32,7 @@ namespace Krys::HTML
 
     assert(flattenedSize);
 
-    _selectors.reserve(flattenedSize);
+    _selectors = CreateUniqueArray<CSSSelector>(flattenedSize);
     size_t arrayIndex = 0uz;
 
     for (size_t i = 0uz; i < selectors.size(); ++i)
@@ -45,7 +45,7 @@ namespace Krys::HTML
         {
           // Move item from the parser selector vector into _selectors without invoking destructor (Ugh.)
           auto *currentSelector = current->release().release();
-          std::memcpy(static_cast<void *>(&selectors[arrayIndex]), static_cast<void *>(currentSelector),
+          std::memcpy(static_cast<void *>(&_selectors[arrayIndex]), static_cast<void *>(currentSelector),
                       sizeof(CSSSelector));
 
           // Free the underlying memory without invoking the destructor.
@@ -90,8 +90,7 @@ namespace Krys::HTML
     auto aComponentCount = a.ComponentCount();
     auto bComponentCount = b.ComponentCount();
 
-    List<CSSSelector> selectors;
-    selectors.reserve(aComponentCount + bComponentCount);
+    auto selectors = CreateUniqueArray<CSSSelector>(aComponentCount + bComponentCount);
 
     for (size_t i = 0; i < aComponentCount; ++i)
     {
@@ -122,8 +121,7 @@ namespace Krys::HTML
       return {};
     }
 
-    List<CSSSelector> selectors;
-    selectors.reserve(totalComponentCount);
+    auto selectors = CreateUniqueArray<CSSSelector>(totalComponentCount);
 
     size_t componentIndex = 0uz;
     for (auto list : lists)
@@ -145,8 +143,7 @@ namespace Krys::HTML
 
   CSSSelectorList CSSSelectorList::CopySimpleSelector(const CSSSelector &simpleSelector) noexcept
   {
-    List<CSSSelector> selectors;
-    selectors.reserve(1uz);
+    auto selectors = CreateUniqueArray<CSSSelector>(1uz);
 
     new (NotNullTag {}, &selectors[0uz]) CSSSelector(simpleSelector);
     selectors[0].SetIsFirstInComplexSelector(true);
@@ -165,8 +162,7 @@ namespace Krys::HTML
       ++length;
     }
 
-    List<CSSSelector> selectors;
-    selectors.reserve(length);
+    auto selectors = CreateUniqueArray<CSSSelector>(length);
 
     size_t i = 0uz;
     for (auto *selector = &complexSelector; selector;
@@ -181,29 +177,29 @@ namespace Krys::HTML
 
   size_t CSSSelectorList::ComponentCount() const noexcept
   {
-    if (_selectors.empty())
+    if (_selectors == nullptr)
     {
       return 0uz;
     }
 
-    auto current = _selectors.begin();
+    auto current = _selectors.get();
     while (!current->IsLastInSelectorList())
     {
       ++current;
     }
 
-    return std::distance(_selectors.begin(), current) + 1uz;
+    return std::distance(_selectors.get(), current) + 1uz;
   }
 
   size_t CSSSelectorList::SelectorCount() const noexcept
   {
-    if (_selectors.empty())
+    if (_selectors == nullptr)
     {
       return 0uz;
     }
 
     size_t size = 1uz;
-    auto current = _selectors.begin();
+    auto current = _selectors.get();
     while (!current->IsLastInSelectorList())
     {
       if (current->IsFirstInComplexSelector())
@@ -234,7 +230,7 @@ namespace Krys::HTML
       return false;
     }
 
-    auto singleSelector = _selectors.begin();
+    auto singleSelector = _selectors.get();
     // Selector should be a single selector
     if (singleSelector->PrecedingComplexSelectorComponent())
     {

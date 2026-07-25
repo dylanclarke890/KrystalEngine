@@ -28,7 +28,8 @@ namespace Krys::HTML
   private:
     SelectorMatch _match : BitCount<SelectorMatch>();
     SelectorRelation _relation : BitCount<SelectorRelation>();
-    CSSSelectorFlag _flags : BitCount<CSSSelectorFlag>();
+    CSSSelectorFlag _flags : BitCount<CSSSelectorFlag>() {CSSSelectorFlag::IsFirstInComplexSelector
+                                                          | CSSSelectorFlag::IsLastInComplexSelector};
     PseudoClassId _pseudoClass : BitCount<PseudoClassId>();
     PseudoElementId _pseudoElement : BitCount<PseudoElementId>();
     QualifiedName _tagName {CSSOMStringAtom::Null(), CSSOMStringAtom::Null(), CSSOMStringAtom::Null()};
