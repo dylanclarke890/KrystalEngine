@@ -77,93 +77,89 @@ namespace Krys::HTML::Tests
     }
   }
 
-#define PARSER_TEST_CASE(datFile)                                                                            \
-  TEST_CASE("HTMLDocumentParser(" datFile ")", "[HTML][HTMLDocumentParser]")                                 \
-  {                                                                                                          \
-    auto tests = ParseHTMLTreeBuilderTests("data/html-tree-builder/" datFile);                               \
-    REQUIRE(tests.has_value());                                                                              \
-    DoHTMLTreeBuilderTests(*tests);                                                                          \
-  }
+#define EXECUTE_HTML_PARSER_TEST_CASE(testDataFile)                                                          \
+  EXECUTE_TEST_CASE("HTMLDocumentParser", ParseHTMLTreeBuilderTests, DoHTMLTreeBuilderTests,                 \
+                    "data/html-tree-builder/", testDataFile)
 
-  PARSER_TEST_CASE("adoption-01.dat");
-  PARSER_TEST_CASE("adoption-02.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("adoption-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("adoption-02.dat");
 
-  PARSER_TEST_CASE("blocks-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("blocks-01.dat");
 
-  PARSER_TEST_CASE("comments-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("comments-01.dat");
 
-  PARSER_TEST_CASE("doctype-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("doctype-01.dat");
 
-  PARSER_TEST_CASE("entities-01.dat");
-  PARSER_TEST_CASE("entities-02.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("entities-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("entities-02.dat");
 
-  PARSER_TEST_CASE("formatting-elements-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("formatting-elements-01.dat");
 
-  PARSER_TEST_CASE("foster-parenting-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("foster-parenting-01.dat");
 
-  PARSER_TEST_CASE("html5test-com.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("html5test-com.dat");
 
-  PARSER_TEST_CASE("inbody-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("inbody-01.dat");
 
-  PARSER_TEST_CASE("inner-html-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("inner-html-01.dat");
 
-  PARSER_TEST_CASE("isindex-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("isindex-01.dat");
 
-  PARSER_TEST_CASE("main-element-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("main-element-01.dat");
 
-  PARSER_TEST_CASE("math-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("math-01.dat");
 
-  PARSER_TEST_CASE("menuitem-element-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("menuitem-element-01.dat");
 
-  PARSER_TEST_CASE("namespace-sensitivity-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("namespace-sensitivity-01.dat");
 
-  PARSER_TEST_CASE("noscript-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("noscript-01.dat");
 
-  PARSER_TEST_CASE("plain-text-unsafe-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("plain-text-unsafe-01.dat");
 
-  PARSER_TEST_CASE("quirks-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("quirks-01.dat");
 
-  PARSER_TEST_CASE("ruby-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("ruby-01.dat");
 
-  PARSER_TEST_CASE("script-data-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("script-data-01.dat");
 
-  PARSER_TEST_CASE("search-element-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("search-element-01.dat");
 
-  PARSER_TEST_CASE("svg-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("svg-01.dat");
 
-  PARSER_TEST_CASE("tables-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tables-01.dat");
 
-  PARSER_TEST_CASE("template-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("template-01.dat");
 
-  PARSER_TEST_CASE("tests-01.dat");
-  PARSER_TEST_CASE("tests-02.dat");
-  PARSER_TEST_CASE("tests-03.dat");
-  PARSER_TEST_CASE("tests-04.dat");
-  PARSER_TEST_CASE("tests-05.dat");
-  PARSER_TEST_CASE("tests-06.dat");
-  PARSER_TEST_CASE("tests-07.dat");
-  PARSER_TEST_CASE("tests-08.dat");
-  PARSER_TEST_CASE("tests-09.dat");
-  PARSER_TEST_CASE("tests-11.dat");
-  PARSER_TEST_CASE("tests-12.dat");
-  PARSER_TEST_CASE("tests-14.dat");
-  PARSER_TEST_CASE("tests-15.dat");
-  PARSER_TEST_CASE("tests-16.dat");
-  PARSER_TEST_CASE("tests-17.dat");
-  PARSER_TEST_CASE("tests-18.dat");
-  PARSER_TEST_CASE("tests-19.dat");
-  PARSER_TEST_CASE("tests-20.dat");
-  PARSER_TEST_CASE("tests-21.dat");
-  PARSER_TEST_CASE("tests-22.dat");
-  PARSER_TEST_CASE("tests-23.dat");
-  PARSER_TEST_CASE("tests-24.dat");
-  PARSER_TEST_CASE("tests-25.dat");
-  PARSER_TEST_CASE("tests-26.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-02.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-03.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-04.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-05.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-06.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-07.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-08.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-09.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-11.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-12.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-14.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-15.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-16.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-17.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-18.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-19.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-20.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-21.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-22.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-23.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-24.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-25.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tests-26.dat");
 
-  PARSER_TEST_CASE("tricky-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("tricky-01.dat");
 
-  PARSER_TEST_CASE("void-in-phrasing-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("void-in-phrasing-01.dat");
 
-  PARSER_TEST_CASE("webkit-01.dat");
-  PARSER_TEST_CASE("webkit-02.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("webkit-01.dat");
+  EXECUTE_HTML_PARSER_TEST_CASE("webkit-02.dat");
 }

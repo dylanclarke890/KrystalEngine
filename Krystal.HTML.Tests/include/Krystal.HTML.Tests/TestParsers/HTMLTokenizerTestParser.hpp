@@ -295,17 +295,4 @@ namespace Krys::HTML::Tests
 
     return tests;
   }
-
-  KRYS_NODISCARD inline Maybe<List<HTMLTokenizerTest>>
-    ParseHTMLTokenizerTests(const string &filePath) noexcept
-  {
-    std::ifstream file(filePath, std::ios::binary);
-    if (!file.is_open())
-    {
-      return {};
-    }
-
-    SkipUTF8FileBOM(file);
-    return ParseHTMLTokenizerTests(file);
-  }
 }

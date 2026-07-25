@@ -1,6 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/DOM/Types/DOMString.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
 #include <catch_all.hpp>
 #include <format>
 #include <fstream>
@@ -76,6 +78,28 @@ namespace Krys::HTML::Tests
       file.clear();  // clear eof/fail if we hit it
       file.seekg(0); // rewind to beginning
     }
+  }
+
+  template <typename ParseFunc>
+  KRYS_NODISCARD inline auto ParseTestData(const string &filePath, ParseFunc &&func) noexcept
+    -> Maybe<decltype(func(std::declval<std::istream &>()))>
+  {
+    std::ifstream file(filePath, std::ios::binary);
+    if (!file.is_open())
+    {
+      return Null;
+    }
+
+    SkipUTF8FileBOM(file);
+    return func(file);
+  }
+
+#define EXECUTE_TEST_CASE(name, parseFile, doTests, rootDir, testDataFile)                                   \
+  TEST_CASE(name "(" testDataFile ")", "[HTML][" name "]")                                                   \
+  {                                                                                                          \
+    auto tests = ParseTestData(rootDir##testDataFile, &parseFile);                                           \
+    REQUIRE(tests.has_value());                                                                              \
+    doTests(*tests);                                                                                         \
   }
 
 #define UTF8_INFO(str) INFO(string(reinterpret_cast<const char *>(str.data()), str.size()));
