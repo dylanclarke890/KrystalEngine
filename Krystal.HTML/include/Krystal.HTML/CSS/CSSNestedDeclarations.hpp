@@ -2,6 +2,7 @@
 
 #include "Krystal.HTML/CSS/CSSRule.hpp"
 #include "Krystal.HTML/CSS/Properties/CSSInternalStyleProperties.hpp"
+#include "Krystal.HTML/CSS/Selectors/CSSSelectorList.hpp"
 
 namespace Krys::HTML
 {
@@ -12,18 +13,26 @@ namespace Krys::HTML
   {
     friend class CSSParser;
 
-    KRYS_TYPE_CAST_TRAITS_ACCESS();
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CSSNestedDeclarations);
 
-  protected:
-    Ref<CSSInternalStyleProperties> _style;
+  private:
+    CSSSelectorList _selectors;
+    RefPtr<CSSInternalStyleProperties> _properties;
+    ParsedCSSRuleList _nestedRules;
 
-    CSSNestedDeclarations(Ref<CSSInternalStyleProperties> style, RawPtr<CSSStyleSheet> stylesheet) noexcept
-        : CSSRule(CSSRuleType::NestedDeclarations, stylesheet), _style(Krys::Move(style))
+  public:
+    CSSNestedDeclarations(CSSSelectorList &&selectors, Ref<CSSInternalStyleProperties> properties,
+                          ParsedCSSRuleList &&nestedRules) noexcept
+        : CSSRule(CSSRuleType::Style, nullptr), _selectors(Krys::Move(selectors)),
+          _properties(Krys::Move(properties)), _nestedRules(Krys::Move(nestedRules))
     {
     }
 
-  public:
+    CSSNestedDeclarations(Ref<CSSInternalStyleProperties> properties) noexcept
+        : CSSRule(CSSRuleType::Style, nullptr), _properties(Krys::Move(properties))
+    {
+    }
+
     ~CSSNestedDeclarations() noexcept override = default;
 
 #pragma region CSSNestedDeclarations - https://drafts.csswg.org/css-nesting/#cssnesteddeclarations

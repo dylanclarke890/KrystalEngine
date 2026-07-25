@@ -2,6 +2,7 @@
 
 #include "Krystal.HTML/CSS/Enums/CSSRuleType.hpp"
 #include "Krystal.HTML/CSS/Parser/CSSInputStream.hpp"
+#include "Krystal.HTML/CSS/Parser/CSSParserContext.hpp"
 #include "Krystal.HTML/CSS/Parser/CSSToken.hpp"
 #include "Krystal.HTML/CSS/Parser/CSSTokenizer.hpp"
 #include "Krystal.HTML/CSS/Parser/CSSTokenRange.hpp"
@@ -23,20 +24,22 @@ namespace Krys::HTML
   class CSSStyleRule;
   class CSSStyleSheet;
   class CSSStyleDeclaration;
+  class StyleSheetContents;
 
   class CSSParser
   {
   private:
     CSSInputStream _inputStream;
+    const CSSParserContext _context;
     CSSTokenizer _tokenizer;
     size_t _ruleListNestingLevel;
     List<NestedParsingContext> _nestedContextStack;
     List<NestedContextType> _ancestorRuleTypeStack;
+    RefPtr<StyleSheetContents> _stylesheet;
 
   public:
-    CSSParser(CSSOMString &&input) noexcept : _inputStream(Krys::Move(input)), _tokenizer(_inputStream)
-    {
-    }
+    CSSParser(CSSOMString &&input, const CSSParserContext &context,
+              RawPtr<StyleSheetContents> stylesheet) noexcept;
 
 #pragma region Parser Entry Points - https://drafts.csswg.org/css-syntax/#parser-entry-points
 
@@ -44,7 +47,7 @@ namespace Krys::HTML
     KRYS_NODISCARD static RefPtr<CSSStyleSheet> ParseStylesheet(CSSOMString &&input) noexcept;
 
     /// @see https://drafts.csswg.org/css-syntax/#parse-a-rule
-    KRYS_NODISCARD static RefPtr<CSSRule> ParseRule(CSSOMString &&input,
+    KRYS_NODISCARD static RefPtr<CSSRule> ParseRule(CSSOMString &&input, const CSSParserContext &context,
                                                     CSSAllowedRules allowedRules) noexcept;
 
 #pragma endregion

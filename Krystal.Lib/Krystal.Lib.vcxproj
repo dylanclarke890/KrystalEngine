@@ -241,6 +241,7 @@
     <ClInclude Include="include\Krystal.Lib\Utils\Hijack.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\ipow.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\ReferenceWrapper.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Utils\SetForScope.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\StrongOrder.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\Tag.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\ToMutableIter.hpp" />

@@ -119,13 +119,13 @@ namespace Krys
     }
 
   public:
-    KRYS_NODISCARD static StringAtom Null() noexcept
+    KRYS_NODISCARD static const StringAtom &Null() noexcept
     {
       static StringAtom nullAtom = StringAtom(NullTag {});
       return nullAtom;
     }
 
-    KRYS_NODISCARD static StringAtom Empty() noexcept
+    KRYS_NODISCARD static const StringAtom &Empty() noexcept
     {
       static StringAtom emptyAtom = StringAtom(EmptyTag {});
       return emptyAtom;

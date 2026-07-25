@@ -6,5 +6,6 @@ namespace Krys::HTML
 {
   class CSSInternalStyleProperties : public RefCounted<CSSInternalStyleProperties>
   {
+  public:
   };
 }

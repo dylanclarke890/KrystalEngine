@@ -43,7 +43,9 @@
     <ClCompile Include="src\CSS\CSSStyleSheet.cpp" />
     <ClCompile Include="src\CSS\Parser\CSSTokenizer.cpp" />
     <ClCompile Include="src\CSS\Properties\CSSProperty.cpp" />
+    <ClCompile Include="src\CSS\Selectors\CSSSelectorList.cpp" />
     <ClCompile Include="src\CSS\Selectors\CSSSelectorParser.cpp" />
+    <ClCompile Include="src\CSS\Selectors\MutableCSSSelector.cpp" />
     <ClCompile Include="src\CSS\StyleSheetContents.cpp" />
     <ClCompile Include="src\HTML\Algorithms\FormControlAlgorithms.cpp" />
     <ClCompile Include="src\HTML\Parser\HTMLDocumentParser.cpp" />
@@ -111,6 +113,7 @@
     <ClInclude Include="include\Krystal.HTML\CSS\CSSNestedDeclarations.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\CSSPageDescriptors.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\CSSStyleProperties.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Parser\CSSParserContext.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSParserMode.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyParser.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\ParsedCSSPropertyList.hpp" />
@@ -157,6 +160,11 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Selectors\Enums\PseudoElementId.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Selectors\Enums\SelectorMatch.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Selectors\Enums\SelectorRelation.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Selectors\MutableCSSSelector.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Selectors\Types\DisallowPseudoElements.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Selectors\Types\IsCaseSensitive.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Selectors\Types\IsForgivingSelectorList.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Selectors\Types\MatchLowercase.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\StyleSheet.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\StyleSheetContents.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\StyleSheetList.hpp" />

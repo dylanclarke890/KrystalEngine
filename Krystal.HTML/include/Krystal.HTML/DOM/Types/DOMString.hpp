@@ -10,4 +10,10 @@ namespace Krys::HTML
   using DOMStringView = utf8_stringview;
 
   using DOMStringAtom = StringAtom;
+
+  inline const StringAtom &StarAtom() noexcept
+  {
+    static StringAtom starAtom = StringAtom(u8"*");
+    return starAtom;
+  }
 }

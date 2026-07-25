@@ -12,7 +12,11 @@
 #include "Krystal.HTML/CSS/CSSStyleSheet.hpp"
 #include "Krystal.HTML/CSS/MediaList.hpp"
 #include "Krystal.HTML/CSS/Parser/Enums/CSSAtRuleType.hpp"
+#include "Krystal.HTML/CSS/Properties/CSSInternalStyleProperties.hpp"
 #include "Krystal.HTML/CSS/Properties/CSSPropertyParser.hpp"
+#include "Krystal.HTML/CSS/Selectors/CSSSelector.hpp"
+#include "Krystal.HTML/CSS/Selectors/CSSSelectorList.hpp"
+#include "Krystal.HTML/CSS/Selectors/CSSSelectorParser.hpp"
 #include "Krystal.HTML/CSS/StyleSheetContents.hpp"
 
 namespace Krys::HTML
@@ -28,14 +32,22 @@ namespace Krys::HTML
 
 #pragma region Parser Entry Points
 
+  CSSParser::CSSParser(CSSOMString &&input, const CSSParserContext &context,
+                       RawPtr<StyleSheetContents> stylesheet) noexcept
+      : _inputStream(Krys::Move(input)), _context(context), _tokenizer(_inputStream),
+        _ruleListNestingLevel(0uz), _stylesheet(ShareRefPtr(stylesheet))
+  {
+  }
+
   RefPtr<CSSStyleSheet> CSSParser::ParseStylesheet(CSSOMString &&input) noexcept
   {
     return nullptr;
   }
 
-  RefPtr<CSSRule> CSSParser::ParseRule(CSSOMString &&input, CSSAllowedRules allowedRules) noexcept
+  RefPtr<CSSRule> CSSParser::ParseRule(CSSOMString &&input, const CSSParserContext &context,
+                                       CSSAllowedRules allowedRules) noexcept
   {
-    CSSParser parser(Krys::Move(input));
+    CSSParser parser(Krys::Move(input), context, nullptr);
     if (!parser.PumpTokenizer())
     {
       // TODO(CSSParser): parse error (empty rule).
@@ -340,7 +352,7 @@ namespace Krys::HTML
         return;
       }
 
-      auto rule = AdoptRef(*new CSSNestedDeclarations(CreateInternalStyleProperties(properties), nullptr));
+      auto rule = AdoptRef(*new CSSNestedDeclarations(CreateInternalStyleProperties(properties)));
       CurrentNestedContext().ParsedRules.emplace_back(Krys::Move(rule));
     };
 
@@ -648,7 +660,46 @@ namespace Krys::HTML
 
   RefPtr<CSSStyleRule> CSSParser::ConsumeStyleRule(CSSTokenRange prelude, CSSTokenRange block) noexcept
   {
-    return nullptr;
+    auto mutableSelectors = CSSSelectorParser::ParseMutableSelectorList(
+      prelude, {}, _stylesheet.get(), CurrentAncestorRuleType(), IsForgivingSelectorList(false),
+      DisallowPseudoElements(false));
+
+    if (mutableSelectors.empty())
+    {
+      return nullptr;
+    }
+
+    CSSSelectorList selectors {Krys::Move(mutableSelectors)};
+    assert(!selectors.IsEmpty());
+
+    RefPtr<CSSRule> styleRule;
+
+    RunInNewNestedParsingContext(
+      [&]()
+      {
+        {
+          _ancestorRuleTypeStack.push_back(NestedContextType::Style);
+          ConsumeStyleBlock(block);
+          _ancestorRuleTypeStack.pop_back();
+        }
+
+        auto nestedRules = Krys::Move(CurrentNestedContext().ParsedRules);
+        auto properties = CreateInternalStyleProperties(CurrentNestedContext().ParsedProperties);
+
+        // We save memory by creating a simple StyleRule instead of a heavier StyleRuleWithNesting when we
+        // don't need the CSS Nesting features.
+        if (nestedRules.empty() && !selectors.HasExplicitNestingParent() && !IsStyleNestedParsingContext())
+        {
+          styleRule = CreateRefPtr<CSSStyleRule>(Krys::Move(selectors), Krys::Move(properties));
+        }
+        else
+        {
+          styleRule = CreateRefPtr<CSSNestedDeclarations>(Krys::Move(selectors), Krys::Move(properties),
+                                                          Krys::Move(nestedRules));
+        }
+      });
+
+    return styleRule;
   }
 
   RefPtr<CSSStyleRule> CSSParser::ConsumeKeyframeStyleRule(CSSTokenRange prelude,

@@ -81,7 +81,7 @@ namespace Krys::HTML
 
     KRYS_NODISCARD CSSTokenRange ConsumeBlock() noexcept
     {
-      assert(Peek().Type() == CSSTokenType::OpenCurly);
+      assert(Peek().IsBlockStart());
 
       auto start = _tokens.subspan(1uz);
 

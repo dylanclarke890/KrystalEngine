@@ -2,6 +2,8 @@
 #pragma once
 
 #include "Krystal.HTML/CSS/CSSRule.hpp"
+#include "Krystal.HTML/CSS/Properties/CSSInternalStyleProperties.hpp"
+#include "Krystal.HTML/CSS/Selectors/CSSSelectorList.hpp"
 
 namespace Krys::HTML
 {
@@ -12,8 +14,16 @@ namespace Krys::HTML
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CSSStyleRule);
 
+  private:
+    CSSSelectorList _selectors;
+    Ref<CSSInternalStyleProperties> _properties;
+
   public:
-    CSSStyleRule(RawPtr<CSSStyleSheet> stylesheet) noexcept;
+    CSSStyleRule(CSSSelectorList &&selectors, Ref<CSSInternalStyleProperties> properties) noexcept
+        : CSSRule(CSSRuleType::Style, nullptr), _selectors(Krys::Move(selectors)),
+          _properties(Krys::Move(properties))
+    {
+    }
 
     ~CSSStyleRule() noexcept override = default;
 
@@ -29,7 +39,18 @@ namespace Krys::HTML
     KRYS_NODISCARD RefPtr<CSSStyleProperties> Style() const noexcept;
 
     /// @see https://drafts.csswg.org/cssom/#dom-cssstylerule-style
-    ExceptionOr<void> Style(const CSSOMString& text) noexcept;
+    ExceptionOr<void> Style(const CSSOMString &text) noexcept;
+
+#pragma endregion
+
+#pragma region CSSRule - https://drafts.csswg.org/cssom/#cssrule
+
+    /// @see https://drafts.csswg.org/cssom/#dom-cssrule-csstext
+    KRYS_NODISCARD CSSOMString CssText() const noexcept final
+    {
+      // TODO
+      return {};
+    }
 
 #pragma endregion
   };

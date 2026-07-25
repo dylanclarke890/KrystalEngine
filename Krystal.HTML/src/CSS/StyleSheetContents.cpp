@@ -134,7 +134,8 @@ namespace Krys::HTML
 
 #pragma region Namespaces
 
-  void StyleSheetContents::AddNamespace(CSSOMStringAtom prefix, CSSOMStringAtom namespaceURI) noexcept
+  void StyleSheetContents::AddNamespace(const CSSOMStringAtom &prefix,
+                                        const CSSOMStringAtom &namespaceURI) noexcept
   {
     assert(namespaceURI != CSSOMStringAtom::Null());
 
@@ -148,7 +149,7 @@ namespace Krys::HTML
     }
   }
 
-  CSSOMStringAtom StyleSheetContents::NamespaceURIForPrefix(CSSOMStringAtom prefix) const noexcept
+  const CSSOMStringAtom &StyleSheetContents::NamespaceForPrefix(const CSSOMStringAtom &prefix) const noexcept
   {
     auto result = _namespaces.find(prefix);
     if (result != _namespaces.end())

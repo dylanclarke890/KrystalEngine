@@ -6,8 +6,8 @@ namespace Krys::HTML
 {
   enum class CSSParserMode : uint8
   {
-    HTMLStandardMode,
-    HTMLQuirksMode,
+    HTMLStandard,
+    HTMLQuirks,
   };
 }
 

@@ -51,7 +51,7 @@ namespace Krys::HTML
       return ExceptionCode::IndexSizeError;
     }
 
-    RefPtr<CSSRule> parsedRule = CSSParser::ParseRule(Krys::Move(rule), CSSAllowedRules::Import);
+    RefPtr<CSSRule> parsedRule = CSSParser::ParseRule(Krys::Move(rule), {}, CSSAllowedRules::Import);
     if (parsedRule == nullptr)
     {
       return ExceptionCode::SyntaxError;

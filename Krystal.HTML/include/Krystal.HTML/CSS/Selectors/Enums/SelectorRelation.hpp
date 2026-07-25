@@ -10,14 +10,14 @@ namespace Krys::HTML
   enum class SelectorRelation : uint8
   {
     // @brief The selector forms a compound selector with the preceding selector. (e.g. `div.class`).
-    Subselector,
+    Compounding,
     /// @brief The selector is a direct child of the preceding selector. (e.g. `div > p`).
     Child,
     /// @brief The selector is a descendant of the preceding selector. (e.g. `div p`).
     Descendant,
     /// @brief The selector is the direct next sibling of the preceding selector. (e.g. `div + p`).
     NextSibling,
-    /// @brief The selector shares the same parent as and follows the preceding selector. (e.g. `div ~ p`).
+    /// @brief The selector is one of the following siblings of the preceding selector. (e.g. `div ~ p`).
     SubsequentSibling,
   };
 }

@@ -40,14 +40,14 @@ namespace Krys::HTML
 
 #pragma region Namespaces
 
-    void AddNamespace(CSSOMStringAtom prefix, CSSOMStringAtom namespaceURI) noexcept;
+    void AddNamespace(const CSSOMStringAtom &prefix, const CSSOMStringAtom &namespaceURI) noexcept;
 
-    KRYS_NODISCARD CSSOMStringAtom DefaultNamespaceURI() const noexcept
+    KRYS_NODISCARD const CSSOMStringAtom &DefaultNamespace() const noexcept
     {
       return _defaultNamespace;
     }
 
-    KRYS_NODISCARD CSSOMStringAtom NamespaceURIForPrefix(CSSOMStringAtom prefix) const noexcept;
+    KRYS_NODISCARD const CSSOMStringAtom &NamespaceForPrefix(const CSSOMStringAtom &prefix) const noexcept;
 
 #pragma endregion
   };
