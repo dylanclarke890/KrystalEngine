@@ -235,6 +235,7 @@
     <ClInclude Include="include\Krystal.Lib\String\StringUtils.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\StronglyTypedValue.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Numeric.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\UniqueArray.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Variant.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\LosslessStaticCast.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\EBCO.hpp" />
