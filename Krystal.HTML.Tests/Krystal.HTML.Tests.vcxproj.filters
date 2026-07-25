@@ -162,6 +162,9 @@
     <ClCompile Include="tests\CSS\Parser\CSSParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tests\CSS\Selectors\CSSSelectorParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
