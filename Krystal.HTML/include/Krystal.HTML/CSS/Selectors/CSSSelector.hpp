@@ -73,11 +73,11 @@ namespace Krys::HTML
 
       ~RareData() noexcept = default;
 
-      bool Equals(const RareData &) const noexcept;
+      KRYS_NODISCARD bool Equals(const RareData &) const noexcept;
 
-      bool MatchNth(int64 count) const noexcept;
+      KRYS_NODISCARD bool MatchNth(int64 count) const noexcept;
 
-      Ref<RareData> DeepCopy() const noexcept;
+      KRYS_NODISCARD Ref<RareData> DeepCopy() const noexcept;
     };
 
   private:
@@ -94,6 +94,7 @@ namespace Krys::HTML
       RawPtr<QualifiedNameStorage> TagName;
       RawPtr<RareData> RareData;
     } _data;
+
     static_assert(SameType<StringAtomStorage, const utf8_string *>, "StringAtomStorage type has changed.");
 
   public:
@@ -130,6 +131,22 @@ namespace Krys::HTML
       return HasFlag(_flags, CSSSelectorFlag::CaseInsensitiveAttributeValueMatching);
     }
 
+    KRYS_NODISCARD const CSSOMStringAtom &Argument() const noexcept
+    {
+      return HasFlag(_flags, CSSSelectorFlag::HasRareData) ? _data.RareData->Argument
+                                                           : CSSOMStringAtom::Null();
+    }
+
+    KRYS_NODISCARD RawPtr<const SmallList<CSSOMStringAtom>> ArgumentList() const noexcept
+    {
+      return HasFlag(_flags, CSSSelectorFlag::HasRareData) ? &_data.RareData->ArgumentList : nullptr;
+    }
+
+    KRYS_NODISCARD RawPtr<const SmallList<PossiblyQuotedIdentifier>> LangList() const noexcept
+    {
+      return HasFlag(_flags, CSSSelectorFlag::HasRareData) ? &_data.RareData->LangList : nullptr;
+    }
+
     KRYS_NODISCARD RawPtr<CSSSelectorList> SubSelectors() const noexcept
     {
       if (HasFlag(_flags, CSSSelectorFlag::HasRareData))
@@ -145,6 +162,8 @@ namespace Krys::HTML
     KRYS_NODISCARD int64 NthB() const noexcept;
 
     KRYS_NODISCARD bool MatchNth(int64 count) const noexcept;
+
+    KRYS_NODISCARD bool SimpleSelectorEqual(const CSSSelector &other) const noexcept;
 
 #pragma region Traversal
 
@@ -216,8 +235,6 @@ namespace Krys::HTML
 
 #pragma endregion
 
-    KRYS_NODISCARD bool SimpleSelectorEqual(const CSSSelector &other) const noexcept;
-
   private:
     void SetMatch(SelectorMatch match) noexcept
     {
@@ -279,6 +296,14 @@ namespace Krys::HTML
 
     void SetAttribute(const QualifiedName &name, IsCaseSensitive caseSensitive) noexcept;
 
+    void SetArgument(const CSSOMStringAtom &value) noexcept;
+
+    void SetArgumentList(SmallList<CSSOMStringAtom> argumentList) noexcept;
+
+    void SetLangList(SmallList<PossiblyQuotedIdentifier> langList) noexcept;
+
+    void SetSubSelectors(UniquePtr<CSSSelectorList> subSelectors) noexcept;
+
     void SetNth(int64 a, int64 b) noexcept;
 
     void CreateRareData() noexcept;
@@ -336,7 +361,4 @@ namespace Krys::HTML
   KRYS_NODISCARD bool
     ComplexSelectorsEqual(const CSSSelector &a, const CSSSelector &b,
                           ComplexSelectorsEqualMode mode = ComplexSelectorsEqualMode::Full) noexcept;
-
-  KRYS_NODISCARD bool IsElementBackedPseudoElement(PseudoElementId pseudoElement) noexcept;
-
 }

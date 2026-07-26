@@ -120,12 +120,91 @@ namespace Krys::HTML
     }
   }
 
+  void CSSSelector::SetArgument(const CSSOMStringAtom &value) noexcept
+  {
+    CreateRareData();
+    _data.RareData->Argument = value;
+  }
+
+  void CSSSelector::SetArgumentList(SmallList<CSSOMStringAtom> argumentList) noexcept
+  {
+    CreateRareData();
+    _data.RareData->ArgumentList = Krys::Move(argumentList);
+  }
+
+  void CSSSelector::SetLangList(SmallList<PossiblyQuotedIdentifier> langList) noexcept
+  {
+    CreateRareData();
+    _data.RareData->LangList = Krys::Move(langList);
+  }
+
+  void CSSSelector::SetSubSelectors(UniquePtr<CSSSelectorList> subSelectors) noexcept
+  {
+    CreateRareData();
+    _data.RareData->SubSelectors = Krys::Move(subSelectors);
+  }
+
   void CSSSelector::SetNth(int64 a, int64 b) noexcept
   {
     CreateRareData();
 
     _data.RareData->NthA = a;
     _data.RareData->NthB = b;
+  }
+
+  static bool ShouldSkipForEqualMode(const CSSSelector &simpleSelector,
+                                     ComplexSelectorsEqualMode mode) noexcept
+  {
+    if (mode == ComplexSelectorsEqualMode::IgnoreNonElementBackedPseudoElements)
+    {
+      return simpleSelector.Match() == SelectorMatch::PseudoElement
+             && !IsElementBackedPseudoElement(simpleSelector.PseudoElement());
+    }
+
+    return false;
+  };
+
+  bool ComplexSelectorsEqual(const CSSSelector &complexA, const CSSSelector &complexB,
+                             ComplexSelectorsEqualMode mode) noexcept
+  {
+    auto aRelation = SelectorRelation::Compounding;
+    auto bRelation = SelectorRelation::Compounding;
+
+    for (auto a = &complexA, b = &complexB; a != nullptr || b != nullptr;
+         a = a->PrecedingComplexSelectorComponent(), b = b->PrecedingComplexSelectorComponent())
+    {
+      if (a != nullptr && ShouldSkipForEqualMode(*a, mode))
+      {
+        aRelation = a->Relation();
+        a = a->PrecedingComplexSelectorComponent();
+      }
+
+      if (b != nullptr && ShouldSkipForEqualMode(*b, mode))
+      {
+        bRelation = b->Relation();
+        b = b->PrecedingComplexSelectorComponent();
+      }
+
+      if (a == nullptr || b == nullptr)
+      {
+        return a == b;
+      }
+
+      if (aRelation != bRelation)
+      {
+        return false;
+      }
+
+      if (!a->SimpleSelectorEqual(*b))
+      {
+        return false;
+      }
+
+      aRelation = a->Relation();
+      bRelation = b->Relation();
+    }
+
+    return true;
   }
 
   void CSSSelector::CreateRareData() noexcept
@@ -238,63 +317,4 @@ namespace Krys::HTML
   }
 
 #pragma endregion
-
-  bool IsElementBackedPseudoElement(PseudoElementId pseudoElement) noexcept
-  {
-    return false;
-  }
-
-  static bool ShouldSkipForEqualMode(const CSSSelector &simpleSelector,
-                                     ComplexSelectorsEqualMode mode) noexcept
-  {
-    if (mode == ComplexSelectorsEqualMode::IgnoreNonElementBackedPseudoElements)
-    {
-      return simpleSelector.Match() == SelectorMatch::PseudoElement
-             && !IsElementBackedPseudoElement(simpleSelector.PseudoElement());
-    }
-
-    return false;
-  };
-
-  bool ComplexSelectorsEqual(const CSSSelector &complexA, const CSSSelector &complexB,
-                             ComplexSelectorsEqualMode mode) noexcept
-  {
-    auto aRelation = SelectorRelation::Compounding;
-    auto bRelation = SelectorRelation::Compounding;
-
-    for (auto a = &complexA, b = &complexB; a || b;
-         a = a->PrecedingComplexSelectorComponent(), b = b->PrecedingComplexSelectorComponent())
-    {
-      if (a && ShouldSkipForEqualMode(*a, mode))
-      {
-        aRelation = a->Relation();
-        a = a->PrecedingComplexSelectorComponent();
-      }
-
-      if (b && ShouldSkipForEqualMode(*b, mode))
-      {
-        bRelation = b->Relation();
-        b = b->PrecedingComplexSelectorComponent();
-      }
-
-      if (!a || !b)
-      {
-        return a == b;
-      }
-
-      if (aRelation != bRelation)
-      {
-        return false;
-      }
-
-      if (!a->SimpleSelectorEqual(*b))
-      {
-        return false;
-      }
-
-      aRelation = a->Relation();
-      bRelation = b->Relation();
-    }
-    return true;
-  }
 }
