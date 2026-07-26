@@ -136,7 +136,8 @@ namespace Krys::HTML
 
   private:
     template <typename Functor>
-    bool ForEachTagSelector(Functor &functor, RawPtr<const CSSSelector> selector) const noexcept
+    KRYS_NODISCARD bool ForEachTagSelector(Functor &functor,
+                                           RawPtr<const CSSSelector> selector) const noexcept
     {
       assert(selector);
 
@@ -147,14 +148,16 @@ namespace Krys::HTML
           return true;
         }
 
-        // if (const CSSSelectorList *selectors = selector->selectorList())
-        // {
-        //   for (const auto &subSelector : *selectorList)
-        //   {
-        //     if (forEachTagSelector(functor, &subSelector))
-        //       return true;
-        //   }
-        // }
+        if (auto subSelectors = selector->SubSelectors())
+        {
+          for (const auto &subSelector : *subSelectors)
+          {
+            if (ForEachTagSelector(functor, &subSelector))
+            {
+              return true;
+            }
+          }
+        }
 
       } while ((selector = selector->PrecedingComplexSelectorComponent()));
 
@@ -162,7 +165,7 @@ namespace Krys::HTML
     }
 
     template <typename Functor>
-    bool ForEachSelector(Functor &functor) const noexcept
+    KRYS_NODISCARD bool ForEachSelector(Functor &functor) const noexcept
     {
       for (const auto &selector : *this)
       {
