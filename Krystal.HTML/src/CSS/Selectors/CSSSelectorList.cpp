@@ -3,6 +3,8 @@
 
 namespace Krys::HTML
 {
+#pragma region Constructors
+
   CSSSelectorList::CSSSelectorList(const CSSSelectorList &other) noexcept
   {
     size_t otherComponentCount = other.ComponentCount();
@@ -75,6 +77,79 @@ namespace Krys::HTML
     _selectors[arrayIndex - 1].SetIsLastInComplexSelector(true);
   }
 
+  CSSSelectorList::CSSSelectorList(UniqueArray<CSSSelector> &&array) noexcept : _selectors(Krys::Move(array))
+  {
+  }
+
+#pragma endregion
+
+  size_t CSSSelectorList::ComponentCount() const noexcept
+  {
+    if (_selectors == nullptr)
+    {
+      return 0uz;
+    }
+
+    auto current = _selectors.get();
+    while (!current->IsLastInSelectorList())
+    {
+      ++current;
+    }
+
+    return std::distance(_selectors.get(), current) + 1uz;
+  }
+
+  size_t CSSSelectorList::SelectorCount() const noexcept
+  {
+    if (_selectors == nullptr)
+    {
+      return 0uz;
+    }
+
+    size_t size = 1uz;
+    auto current = _selectors.get();
+    while (!current->IsLastInSelectorList())
+    {
+      if (current->IsFirstInComplexSelector())
+      {
+        ++size;
+      }
+
+      ++current;
+    }
+
+    return size;
+  }
+
+  bool CSSSelectorList::HasExplicitNestingParent() const noexcept
+  {
+    auto functor = [](RawPtr<const CSSSelector> selector) noexcept -> bool
+    {
+      return selector->HasExplicitNestingParent();
+    };
+
+    return ForEachSelector(functor);
+  }
+
+  bool CSSSelectorList::HasOnlyNestingSelector() const noexcept
+  {
+    if (ComponentCount() != 1uz)
+    {
+      return false;
+    }
+
+    auto singleSelector = _selectors.get();
+    // Selector should be a single selector
+    if (singleSelector->PrecedingComplexSelectorComponent())
+    {
+      return false;
+    }
+
+    return singleSelector->Match() == SelectorMatch::NestingParent;
+  }
+
+#pragma region Static utility functions
+
   CSSSelectorList CSSSelectorList::Join(const CSSSelectorList &a, const CSSSelectorList &b) noexcept
   {
     if (a.IsEmpty())
@@ -141,7 +216,7 @@ namespace Krys::HTML
     return CSSSelectorList {Krys::Move(selectors)};
   }
 
-  CSSSelectorList CSSSelectorList::CopySimpleSelector(const CSSSelector &simpleSelector) noexcept
+  CSSSelectorList CSSSelectorList::CopySimple(const CSSSelector &simpleSelector) noexcept
   {
     auto selectors = CreateUniqueArray<CSSSelector>(1uz);
 
@@ -153,7 +228,7 @@ namespace Krys::HTML
     return CSSSelectorList {Krys::Move(selectors)};
   }
 
-  CSSSelectorList CSSSelectorList::CopyComplexSelector(const CSSSelector &complexSelector) noexcept
+  CSSSelectorList CSSSelectorList::CopyComplex(const CSSSelector &complexSelector) noexcept
   {
     size_t length = 0uz;
     for (auto *selector = &complexSelector; selector;
@@ -175,68 +250,5 @@ namespace Krys::HTML
     return CSSSelectorList {Krys::Move(selectors)};
   }
 
-  size_t CSSSelectorList::ComponentCount() const noexcept
-  {
-    if (_selectors == nullptr)
-    {
-      return 0uz;
-    }
-
-    auto current = _selectors.get();
-    while (!current->IsLastInSelectorList())
-    {
-      ++current;
-    }
-
-    return std::distance(_selectors.get(), current) + 1uz;
-  }
-
-  size_t CSSSelectorList::SelectorCount() const noexcept
-  {
-    if (_selectors == nullptr)
-    {
-      return 0uz;
-    }
-
-    size_t size = 1uz;
-    auto current = _selectors.get();
-    while (!current->IsLastInSelectorList())
-    {
-      if (current->IsFirstInComplexSelector())
-      {
-        ++size;
-      }
-
-      ++current;
-    }
-
-    return size;
-  }
-
-  bool CSSSelectorList::HasExplicitNestingParent() const noexcept
-  {
-    auto functor = [](RawPtr<const CSSSelector> selector) noexcept -> bool
-    {
-      return selector->HasExplicitNestingParent();
-    };
-
-    return ForEachSelector(functor);
-  }
-
-  bool CSSSelectorList::HasOnlyNestingSelector() const noexcept
-  {
-    if (ComponentCount() != 1uz)
-    {
-      return false;
-    }
-
-    auto singleSelector = _selectors.get();
-    // Selector should be a single selector
-    if (singleSelector->PrecedingComplexSelectorComponent())
-    {
-      return false;
-    }
-
-    return singleSelector->Match() == SelectorMatch::NestingParent;
-  }
+#pragma endregion
 }
