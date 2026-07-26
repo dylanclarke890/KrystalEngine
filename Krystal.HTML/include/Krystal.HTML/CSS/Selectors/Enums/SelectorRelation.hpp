@@ -6,7 +6,8 @@ namespace Krys::HTML
 {
   /// @brief The relationship between two selectors in a CSSSelectorList. From the perspective of the second
   /// (rightmost) selector, so the relationship of `p` in the selector `div > p` is `SelectorRelation::Child`,
-  /// and the relationship of `p` in the selector `div p` is `SelectorRelation::Descendant`.
+  /// and the relationship of `p` in the selector `div p` is `SelectorRelation::Descendant` (`div` does not
+  /// have a relationship to any selector in both cases).
   enum class SelectorRelation : uint8
   {
     // @brief The selector forms a compound selector with the preceding selector. (e.g. `div.class`).
