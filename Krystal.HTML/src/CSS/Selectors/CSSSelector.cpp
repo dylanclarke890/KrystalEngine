@@ -31,6 +31,28 @@ namespace Krys::HTML
     }
   }
 
+  int64 CSSSelector::NthA() const noexcept
+  {
+    assert(HasFlag(_flags, CSSSelectorFlag::HasRareData));
+    return _data.RareData->NthA;
+  }
+
+  int64 CSSSelector::NthB() const noexcept
+  {
+    assert(HasFlag(_flags, CSSSelectorFlag::HasRareData));
+    return _data.RareData->NthB;
+  }
+
+  bool CSSSelector::MatchNth(int64 count) const noexcept
+  {
+    if (!HasFlag(_flags, CSSSelectorFlag::HasRareData))
+    {
+      return false;
+    }
+
+    return _data.RareData->MatchNth(count);
+  }
+
   bool CSSSelector::SimpleSelectorEqual(const CSSSelector &other) const noexcept
   {
     auto ValuesEqual = [&]
@@ -89,12 +111,21 @@ namespace Krys::HTML
   void CSSSelector::SetAttribute(const QualifiedName &name, IsCaseSensitive caseSensitive) noexcept
   {
     CreateRareData();
+
     _data.RareData->Attribute = name;
 
     if (!caseSensitive)
     {
       _flags = _flags | CSSSelectorFlag::CaseInsensitiveAttributeValueMatching;
     }
+  }
+
+  void CSSSelector::SetNth(int64 a, int64 b) noexcept
+  {
+    CreateRareData();
+
+    _data.RareData->NthA = a;
+    _data.RareData->NthB = b;
   }
 
   void CSSSelector::CreateRareData() noexcept

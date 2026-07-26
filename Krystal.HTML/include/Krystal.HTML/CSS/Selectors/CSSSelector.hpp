@@ -140,6 +140,12 @@ namespace Krys::HTML
       return nullptr;
     }
 
+    KRYS_NODISCARD int64 NthA() const noexcept;
+
+    KRYS_NODISCARD int64 NthB() const noexcept;
+
+    KRYS_NODISCARD bool MatchNth(int64 count) const noexcept;
+
 #pragma region Traversal
 
     KRYS_NODISCARD bool IsFirstInComplexSelector() const noexcept
@@ -272,6 +278,8 @@ namespace Krys::HTML
     void SetValue(const CSSOMStringAtom &value, MatchLowercase matchLowercase) noexcept;
 
     void SetAttribute(const QualifiedName &name, IsCaseSensitive caseSensitive) noexcept;
+
+    void SetNth(int64 a, int64 b) noexcept;
 
     void CreateRareData() noexcept;
 
