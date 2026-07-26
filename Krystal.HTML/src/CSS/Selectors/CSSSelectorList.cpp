@@ -81,6 +81,22 @@ namespace Krys::HTML
   {
   }
 
+  bool CSSSelectorList::operator==(const CSSSelectorList &other) const noexcept
+  {
+    for (auto a = begin(), b = other.begin(); a != end() || b != other.end(); ++a, ++b)
+    {
+      if (a == end() || b == other.end())
+      {
+        return false;
+      }
+      if (!ComplexSelectorsEqual(*a, *b))
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+
 #pragma endregion
 
   size_t CSSSelectorList::ComponentCount() const noexcept

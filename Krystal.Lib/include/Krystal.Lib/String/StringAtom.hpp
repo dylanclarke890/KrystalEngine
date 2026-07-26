@@ -9,11 +9,11 @@
 
 namespace Krys
 {
+  using StringAtomStorage = const utf8_string *;
+
   class StringAtomPool
   {
   public:
-    using InternedString = const utf8_string *;
-
     struct UTF8Hash
     {
       using is_transparent = void;
@@ -60,7 +60,7 @@ namespace Krys
   public:
     StringAtomPool() noexcept = default;
 
-    KRYS_NODISCARD InternedString GetOrAdd(utf8_stringview v) noexcept
+    KRYS_NODISCARD StringAtomStorage GetOrAdd(utf8_stringview v) noexcept
     {
       if (auto it = _strings.find(v); it != _strings.end())
       {
@@ -72,12 +72,12 @@ namespace Krys
       return std::addressof(*insertedIt);
     }
 
-    KRYS_NODISCARD InternedString GetOrAdd(const utf8_string &s) noexcept
+    KRYS_NODISCARD StringAtomStorage GetOrAdd(const utf8_string &s) noexcept
     {
       return GetOrAdd(utf8_stringview {s});
     }
 
-    KRYS_NODISCARD InternedString GetOrAdd(utf8_string &&s) noexcept
+    KRYS_NODISCARD StringAtomStorage GetOrAdd(utf8_string &&s) noexcept
     {
       if (auto it = _strings.find(utf8_stringview {s}); it != _strings.end())
       {
@@ -91,10 +91,8 @@ namespace Krys
 
   class StringAtom
   {
-    using InternedString = StringAtomPool::InternedString;
-
   private:
-    InternedString _ptr {nullptr};
+    StringAtomStorage _ptr {nullptr};
 
     static StringAtomPool &Pool()
     {
@@ -144,6 +142,10 @@ namespace Krys
     }
 
     StringAtom(utf8_string &&str) noexcept : _ptr(Pool().GetOrAdd(std::move(str)))
+    {
+    }
+
+    StringAtom(StringAtomStorage ptr) noexcept : _ptr(ptr)
     {
     }
 

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <None Include="cpp.hint" />
     <None Include="data\CSSProperties.json" />
     <None Include="data\_progress\DOM.txt" />
     <None Include="data\_progress\HTML.txt" />
@@ -43,6 +44,7 @@
     <ClCompile Include="src\CSS\CSSStyleSheet.cpp" />
     <ClCompile Include="src\CSS\Parser\CSSTokenizer.cpp" />
     <ClCompile Include="src\CSS\Properties\CSSProperty.cpp" />
+    <ClCompile Include="src\CSS\Selectors\CSSSelector.cpp" />
     <ClCompile Include="src\CSS\Selectors\CSSSelectorList.cpp" />
     <ClCompile Include="src\CSS\Selectors\CSSSelectorParser.cpp" />
     <ClCompile Include="src\CSS\Selectors\MutableCSSSelector.cpp" />

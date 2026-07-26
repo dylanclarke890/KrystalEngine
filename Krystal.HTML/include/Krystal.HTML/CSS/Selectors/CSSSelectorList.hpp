@@ -30,6 +30,8 @@ namespace Krys::HTML
 
     explicit CSSSelectorList(UniqueArray<CSSSelector> &&array) noexcept;
 
+    KRYS_NODISCARD bool operator==(const CSSSelectorList &other) const noexcept;
+
     KRYS_NODISCARD bool IsEmpty() const noexcept
     {
       return _selectors == nullptr;

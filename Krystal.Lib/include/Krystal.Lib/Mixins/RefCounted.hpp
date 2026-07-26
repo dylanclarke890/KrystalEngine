@@ -326,4 +326,10 @@ namespace Krys
       SubRefWeak();
     }
   };
+
+  template <typename T>
+  concept IsRefCounted = requires(T t) {
+    { t.AddRef() } noexcept;
+    { t.SubRef() } noexcept;
+  };
 }

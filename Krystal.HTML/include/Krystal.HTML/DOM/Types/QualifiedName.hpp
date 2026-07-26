@@ -1,8 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/DOM/Types/DOMString.hpp"
 #include "Krystal.HTML/HTML/Enums/Namespace.hpp"
 #include "Krystal.HTML/HTML/Enums/TagName.hpp"
-#include "Krystal.HTML/DOM/Types/DOMString.hpp"
 #include "Krystal.Lib/Mixins/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 
@@ -23,6 +23,19 @@ namespace Krys::HTML
                          HTML::TagName tagName, HTML::Namespace tagNamespace) noexcept;
 
     ~QualifiedNameStorage() noexcept;
+
+    KRYS_NODISCARD friend bool operator==(const QualifiedNameStorage &a,
+                                          const QualifiedNameStorage &b) noexcept
+    {
+      return a._namespaceURI == b._namespaceURI && a._namespacePrefix == b._namespacePrefix
+             && a._localName == b._localName;
+    }
+
+    KRYS_NODISCARD friend bool operator!=(const QualifiedNameStorage &a,
+                                          const QualifiedNameStorage &b) noexcept
+    {
+      return !(a == b);
+    }
   };
 
   /// @see https://dom.spec.whatwg.org/#concept-element-qualified-name
@@ -36,6 +49,8 @@ namespace Krys::HTML
 
     QualifiedName(DOMStringAtom namespaceURI, DOMStringAtom prefix, DOMStringAtom localName,
                   HTML::TagName tagName, HTML::Namespace tagNamespace) noexcept;
+
+    QualifiedName(const QualifiedName &other) noexcept = default;
 
     KRYS_NODISCARD TagName TagName() const noexcept
     {
@@ -80,6 +95,11 @@ namespace Krys::HTML
       {
         return DOMString {NamespacePrefix().View()} + u8":" + DOMString {LocalName().View()};
       }
+    }
+
+    KRYS_NODISCARD RawPtr<QualifiedNameStorage> get() const noexcept
+    {
+      return _storage.get();
     }
 
     KRYS_NODISCARD friend bool operator==(const QualifiedName &a, const QualifiedName &b) noexcept

@@ -9,10 +9,24 @@
 #include "Krystal.HTML/CSS/Selectors/Types/MatchLowercase.hpp"
 #include "Krystal.HTML/CSS/Types/CSSOMString.hpp"
 #include "Krystal.HTML/DOM/Types/QualifiedName.hpp"
+#include "Krystal.Lib/Types/Func.hpp"
 #include "Krystal.Lib/Types/Queue.hpp"
 
 namespace Krys::HTML
 {
+  struct PossiblyQuotedIdentifier
+  {
+    CSSOMStringAtom Identifier;
+    bool WasQuoted {false};
+
+    KRYS_NODISCARD bool operator==(const PossiblyQuotedIdentifier &) const noexcept = default;
+
+    KRYS_NODISCARD bool IsNull() const
+    {
+      return Identifier == CSSOMStringAtom::Null();
+    }
+  };
+
   /// @brief Represents a simple CSS selector that is part of a CSSSelectorList and may be part of a more
   /// complex selector. For optimisation purposes it does not store a pointer to it's preceding selector
   /// component but instead relies on the knowledge that it is stored in a flattened array and can access it's
@@ -25,6 +39,47 @@ namespace Krys::HTML
     friend class MutableCSSSelector;
     friend class CSSSelectorList;
 
+    struct RareData : public RefCounted<RareData>
+    {
+      // Used for :nth-*
+      int64 NthA {0};
+      int64 NthB {0};
+
+      // used for attribute selector
+      QualifiedName Attribute {NullQualifiedName()};
+
+      // Used for :contains and :nth-*
+      CSSOMStringAtom Argument {CSSOMStringAtom::Null()};
+
+      // Used for :active-view-transition-type, ::highlight, ::view-transition-{group, image-pair, new, old},
+      // ::part arguments.
+      SmallList<CSSOMStringAtom> ArgumentList;
+
+      // Used for :lang arguments.
+      SmallList<PossiblyQuotedIdentifier> LangList;
+
+      // Used for :is(), :matches(), and :not().
+      UniquePtr<CSSSelectorList> SubSelectors;
+
+      // For quirks mode, class and id are case-insensitive. In the case where uppercase letters are used in
+      // quirks mode, |MatchingValue| holds the lowercase class/id and |SerializingValue| holds the original
+      // string.
+      CSSOMStringAtom MatchingValue {CSSOMStringAtom::Null()};
+      CSSOMStringAtom SerializingValue {CSSOMStringAtom::Null()};
+
+      RareData(StringAtomStorage value) noexcept;
+
+      RareData(const RareData &other) noexcept;
+
+      ~RareData() noexcept = default;
+
+      bool Equals(const RareData &) const noexcept;
+
+      bool MatchNth(int64 count) const noexcept;
+
+      Ref<RareData> DeepCopy() const noexcept;
+    };
+
   private:
     SelectorMatch _match : BitCount<SelectorMatch>();
     SelectorRelation _relation : BitCount<SelectorRelation>();
@@ -32,18 +87,21 @@ namespace Krys::HTML
                                                           | CSSSelectorFlag::IsLastInComplexSelector};
     PseudoClassId _pseudoClass : BitCount<PseudoClassId>();
     PseudoElementId _pseudoElement : BitCount<PseudoElementId>();
-    QualifiedName _tagName {CSSOMStringAtom::Null(), CSSOMStringAtom::Null(), CSSOMStringAtom::Null()};
-    QualifiedName _attributeName {CSSOMStringAtom::Null(), CSSOMStringAtom::Null(), CSSOMStringAtom::Null()};
-    CSSOMStringAtom _matchingValue {CSSOMStringAtom::Null()};
-    CSSOMStringAtom _serializingValue {CSSOMStringAtom::Null()};
+
+    union DataUnion
+    {
+      StringAtomStorage Value;
+      RawPtr<QualifiedNameStorage> TagName;
+      RawPtr<RareData> RareData;
+    } _data;
+    static_assert(SameType<StringAtomStorage, const utf8_string *>, "StringAtomStorage type has changed.");
 
   public:
     CSSSelector() noexcept = default;
 
-    explicit CSSSelector(const QualifiedName &name) noexcept : CSSSelector()
-    {
-      _tagName = name;
-    }
+    explicit CSSSelector(const QualifiedName &name) noexcept;
+
+    ~CSSSelector() noexcept;
 
     KRYS_NODISCARD SelectorMatch Match() const noexcept
     {
@@ -70,6 +128,16 @@ namespace Krys::HTML
     KRYS_NODISCARD bool IsAttributeValueMatchingCaseInsensitive() const noexcept
     {
       return HasFlag(_flags, CSSSelectorFlag::CaseInsensitiveAttributeValueMatching);
+    }
+
+    KRYS_NODISCARD RawPtr<CSSSelectorList> SubSelectors() const noexcept
+    {
+      if (HasFlag(_flags, CSSSelectorFlag::HasRareData))
+      {
+        return _data.RareData->SubSelectors.get();
+      }
+
+      return nullptr;
     }
 
 #pragma region Traversal
@@ -142,6 +210,8 @@ namespace Krys::HTML
 
 #pragma endregion
 
+    KRYS_NODISCARD bool SimpleSelectorEqual(const CSSSelector &other) const noexcept;
+
   private:
     void SetMatch(SelectorMatch match) noexcept
     {
@@ -199,29 +269,11 @@ namespace Krys::HTML
       }
     }
 
-    void SetValue(const CSSOMStringAtom &value, MatchLowercase matchLowercase) noexcept
-    {
-      assert(Match() != SelectorMatch::Type);
+    void SetValue(const CSSOMStringAtom &value, MatchLowercase matchLowercase) noexcept;
 
-      auto matchingValue = value;
-      if (matchLowercase)
-      {
-        matchingValue = Krys::Text::ToASCIILowercase(value.View());
-      }
+    void SetAttribute(const QualifiedName &name, IsCaseSensitive caseSensitive) noexcept;
 
-      _matchingValue = Krys::Move(matchingValue);
-      _serializingValue = value;
-    }
-
-    void SetAttribute(const QualifiedName &name, IsCaseSensitive caseSensitive) noexcept
-    {
-      _attributeName = name;
-
-      if (caseSensitive)
-      {
-        _flags = _flags | CSSSelectorFlag::CaseInsensitiveAttributeValueMatching;
-      }
-    }
+    void CreateRareData() noexcept;
 
 #pragma region Traversal
 
@@ -238,47 +290,7 @@ namespace Krys::HTML
     using VisitFunc = Func<bool(const CSSSelector &selector)>;
 
     bool VisitSimpleSelectors(VisitFunctionalPseudoClasses visitFunctionalPseudoClasses,
-                              VisitOnlySubject visitOnlySubject, VisitFunc &&func) const noexcept
-    {
-      Queue<RawPtr<const CSSSelector>> worklist;
-      worklist.push(this);
-
-      while (!worklist.empty())
-      {
-        auto current = worklist.front();
-        worklist.pop();
-
-        // Effective C++ advices for this cast to deal with generic const/non-const member function.
-        if (func(*const_cast<RawPtr<CSSSelector>>(current)))
-        {
-          return true;
-        }
-
-        // TODO: Visit the selector list member (if any) recursively (such as: :has(<list>), :is(<list>),...)
-        if (visitFunctionalPseudoClasses)
-        {
-          // if (auto selectorList = current->selectorList())
-          // {
-          //   for (auto &selector : *selectorList)
-          //   {
-          //     worklist.push(&selector);
-          //   }
-          // }
-        }
-
-        // Visit the next simple selector
-        if (auto next = current->PrecedingComplexSelectorComponent())
-        {
-          // We stop visiting at the end of the compound selector (= when relation is anything else than
-          // subselector) if we are in subject only mode.
-          if (current->Relation() != SelectorRelation::Compounding || !visitOnlySubject)
-          {
-            worklist.push(next);
-          }
-        }
-      }
-      return false;
-    }
+                              VisitOnlySubject visitOnlySubject, VisitFunc &&func) const noexcept;
 
 #pragma endregion
 
@@ -305,4 +317,18 @@ namespace Krys::HTML
 
 #pragma endregion
   };
+
+  // In the AllowNonElementBackedPseudoElements mode `.foo::before` and `.foo` compare equal.
+  enum class ComplexSelectorsEqualMode : bool
+  {
+    Full,
+    IgnoreNonElementBackedPseudoElements
+  };
+
+  KRYS_NODISCARD bool
+    ComplexSelectorsEqual(const CSSSelector &a, const CSSSelector &b,
+                          ComplexSelectorsEqualMode mode = ComplexSelectorsEqualMode::Full) noexcept;
+
+  KRYS_NODISCARD bool IsElementBackedPseudoElement(PseudoElementId pseudoElement) noexcept;
+
 }

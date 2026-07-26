@@ -1577,6 +1577,9 @@
     <ClCompile Include="src\CSS\Selectors\CSSSelectorList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\CSS\Selectors\CSSSelector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\HTMLTagNames.in" />
@@ -1881,5 +1884,6 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\CSSProperties.json" />
+    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

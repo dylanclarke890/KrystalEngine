@@ -15,7 +15,9 @@ namespace Krys::HTML
     IsFirstInComplexSelector = 1 << 2,
     /// @brief Set when a selector is the last component of a complex selector (e.g. `p` in `div > p`).
     IsLastInComplexSelector = 1 << 3,
+    /// @brief Set when a selector has rare data.
+    HasRareData = 1 << 4,
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::CSSSelectorFlag, 5uz);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::CSSSelectorFlag, 6uz);
