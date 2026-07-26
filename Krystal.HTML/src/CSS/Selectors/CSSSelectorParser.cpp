@@ -133,31 +133,31 @@ namespace Krys::HTML
   {
     MutableCSSSelectorList selectors;
 
-    auto consumeForgiving = [&]()
+    auto consumeForgiving = [&]() noexcept -> void
     {
       auto initialRange = range;
-      auto unknownSelector = [&]
+      auto unknownSelector = [&]() noexcept -> UniquePtr<MutableCSSSelector>
       {
         auto unknownSelector = CreateUnique<MutableCSSSelector>();
         auto unknownRange = initialRange.RangeUntil(range);
 
         unknownSelector->SetMatch(SelectorMatch::ForgivingUnknown);
-        return unknownSelector;
+
+        // If the range contains a nesting selector, we mark this unknown selector as "nest containing" (it
+        // will be used during rule set building)
+        for (const CSSToken &token : unknownRange)
+        {
+          if (token.Type() == CSSTokenType::Delim && token.IdentCodePoints() == u8"&")
+          {
+            unknownSelector->SetMatch(SelectorMatch::ForgivingUnknownNestContaining);
+            break;
+          }
+        }
 
         // TODO: store the complete range content for serialization.
         // unknownSelector->SetValue(unknownRange.serialize());
 
-        // If the range contains a nesting selector, we mark this unknown selector as "nest containing" (it
-        // will be used during rule set building)
-        // TODO: do we need this
-        // for (const CSSToken &token : unknownRange)
-        //{
-        //   if (token.Type() == CSSTokenType::Delim && token.IdentCodePoints() == u8"&")
-        //   {
-        //     unknownSelector->setMatch(CSSSelector::Match::ForgivingUnknownNestContaining);
-        //     break;
-        //   }
-        // }
+        return unknownSelector;
       };
 
       auto selector = consumeSelector(range);
@@ -180,7 +180,6 @@ namespace Krys::HTML
     };
 
     consumeForgiving();
-
     while (!range.IsAtEnd() && range.Peek().Type() == CSSTokenType::Comma)
     {
       range.Discard();
