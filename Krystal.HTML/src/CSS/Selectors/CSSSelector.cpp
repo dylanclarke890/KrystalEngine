@@ -6,8 +6,8 @@ namespace Krys::HTML
   CSSSelector::CSSSelector(const QualifiedName &name) noexcept
       : _relation(SelectorRelation::Descendant), _match(SelectorMatch::Type)
   {
-    _data.TagName = name.get();
-    _data.TagName->AddRef();
+    _data.TagQualifiedName = name.get();
+    _data.TagQualifiedName->AddRef();
   }
 
   CSSSelector::~CSSSelector() noexcept
@@ -20,8 +20,8 @@ namespace Krys::HTML
     }
     else if (Match() == SelectorMatch::Type)
     {
-      _data.TagName->SubRef();
-      _data.TagName = nullptr;
+      _data.TagQualifiedName->SubRef();
+      _data.TagQualifiedName = nullptr;
       _match = SelectorMatch::None;
     }
     else if (_data.Value)
@@ -29,6 +29,40 @@ namespace Krys::HTML
       static_assert(!IsRefCounted<StringAtomStorage>,
                     "Must manually manage AddRef/SubRef for string atom here.");
     }
+  }
+
+  const CSSOMStringAtom &CSSSelector::Value() const noexcept
+  {
+    assert(Match() != SelectorMatch::Type);
+    if (HasFlag(_flags, CSSSelectorFlag::HasRareData))
+    {
+      return _data.RareData->MatchingValue;
+    }
+
+    return *reinterpret_cast<const CSSOMStringAtom *>(&_data.Value);
+  }
+
+  const CSSOMStringAtom &CSSSelector::SerializingValue() const noexcept
+  {
+    assert(Match() != SelectorMatch::Type);
+    if (HasFlag(_flags, CSSSelectorFlag::HasRareData))
+    {
+      return _data.RareData->SerializingValue;
+    }
+
+    return *reinterpret_cast<const CSSOMStringAtom *>(&_data.Value);
+  }
+
+  const QualifiedName &CSSSelector::TagQualifiedName() const noexcept
+  {
+    assert(Match() == SelectorMatch::Type);
+    return *reinterpret_cast<const QualifiedName *>(&_data.TagQualifiedName);
+  }
+
+  const CSSOMStringAtom &CSSSelector::TagLocalNameLower() const noexcept
+  {
+    assert(Match() == SelectorMatch::Type);
+    return TagQualifiedName().LocalNameLower();
   }
 
   int64 CSSSelector::NthA() const noexcept
@@ -64,7 +98,7 @@ namespace Krys::HTML
 
       if (Match() == SelectorMatch::Type)
       {
-        return *_data.TagName == *other._data.TagName;
+        return *_data.TagQualifiedName == *other._data.TagQualifiedName;
       }
 
       return _data.Value == other._data.Value;

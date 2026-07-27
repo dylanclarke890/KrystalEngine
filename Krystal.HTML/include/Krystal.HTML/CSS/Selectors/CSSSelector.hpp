@@ -91,7 +91,7 @@ namespace Krys::HTML
     union DataUnion
     {
       StringAtomStorage Value;
-      RawPtr<QualifiedNameStorage> TagName;
+      RawPtr<QualifiedNameStorage> TagQualifiedName;
       RawPtr<RareData> RareData;
     } _data;
 
@@ -124,6 +124,22 @@ namespace Krys::HTML
     {
       assert(_match == SelectorMatch::PseudoElement);
       return _pseudoElement;
+    }
+
+    KRYS_NODISCARD const CSSOMStringAtom &Value() const noexcept;
+
+    KRYS_NODISCARD const CSSOMStringAtom &SerializingValue() const noexcept;
+
+    KRYS_NODISCARD const QualifiedName &TagQualifiedName() const noexcept;
+
+    KRYS_NODISCARD const CSSOMStringAtom &TagLocalNameLower() const noexcept;
+
+    KRYS_NODISCARD const QualifiedName &Attribute() const noexcept
+    {
+      assert(IsAttributeSelector());
+      assert(HasFlag(_flags, CSSSelectorFlag::HasRareData));
+
+      return _data.RareData->Attribute;
     }
 
     KRYS_NODISCARD bool IsAttributeValueMatchingCaseInsensitive() const noexcept
@@ -165,6 +181,23 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool SimpleSelectorEqual(const CSSSelector &other) const noexcept;
 
+    KRYS_NODISCARD bool IsAttributeSelector() const noexcept
+    {
+      switch (Match())
+      {
+        case SelectorMatch::AttributeDash:
+        case SelectorMatch::AttributeEquals:
+        case SelectorMatch::AttributeExists:
+        case SelectorMatch::AttributeIncludes:
+        case SelectorMatch::AttributePrefix:
+        case SelectorMatch::AttributeSubstring:
+        case SelectorMatch::AttributeSuffix:
+        {
+          return true;
+        }
+      }
+    }
+
 #pragma region Traversal
 
     KRYS_NODISCARD bool IsFirstInComplexSelector() const noexcept
@@ -190,6 +223,16 @@ namespace Krys::HTML
       }
 
       return this + 1;
+    }
+
+    KRYS_NODISCARD RawPtr<const CSSSelector> PrecedingCompoundSelectorComponent() const noexcept
+    {
+      if (Relation() != SelectorRelation::Compounding)
+      {
+        return nullptr;
+      }
+
+      return PrecedingComplexSelectorComponent();
     }
 
     KRYS_NODISCARD RawPtr<const CSSSelector> FirstInCompoundSelector() const noexcept
@@ -221,16 +264,6 @@ namespace Krys::HTML
         selector = next;
       }
       return selector;
-    }
-
-    KRYS_NODISCARD RawPtr<const CSSSelector> PrecedingCompoundSelectorComponent() const noexcept
-    {
-      if (Relation() != SelectorRelation::Compounding)
-      {
-        return nullptr;
-      }
-
-      return PrecedingComplexSelectorComponent();
     }
 
 #pragma endregion
