@@ -74,7 +74,7 @@ namespace Krys::HTML
     }
 
     assert(flattenedSize == arrayIndex);
-    _selectors[arrayIndex - 1].SetIsLastInSelectorList(true);
+    _selectors[arrayIndex - 1uz].SetIsLastInSelectorList(true);
   }
 
   CSSSelectorList::CSSSelectorList(UniqueArray<CSSSelector> &&array) noexcept : _selectors(Krys::Move(array))
@@ -139,12 +139,8 @@ namespace Krys::HTML
 
   bool CSSSelectorList::HasExplicitNestingParent() const noexcept
   {
-    auto functor = [](RawPtr<const CSSSelector> selector) noexcept -> bool
-    {
-      return selector->HasExplicitNestingParent();
-    };
-
-    return ForEachSelector(functor);
+    return ForEachSelector([](RawPtr<const CSSSelector> selector) noexcept -> bool
+                           { return selector->HasExplicitNestingParent(); });
   }
 
   bool CSSSelectorList::HasOnlyNestingSelector() const noexcept
@@ -183,12 +179,12 @@ namespace Krys::HTML
 
     auto selectors = CreateUniqueArray<CSSSelector>(aComponentCount + bComponentCount);
 
-    for (size_t i = 0; i < aComponentCount; ++i)
+    for (size_t i = 0uz; i < aComponentCount; ++i)
     {
       new (NotNullTag {}, &selectors[i]) CSSSelector(a._selectors[i]);
     }
 
-    for (size_t i = 0; i < bComponentCount; ++i)
+    for (size_t i = 0uz; i < bComponentCount; ++i)
     {
       new (NotNullTag {}, &selectors[aComponentCount + i]) CSSSelector(b._selectors[i]);
     }
