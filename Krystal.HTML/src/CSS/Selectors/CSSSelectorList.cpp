@@ -74,7 +74,7 @@ namespace Krys::HTML
     }
 
     assert(flattenedSize == arrayIndex);
-    _selectors[arrayIndex - 1].SetIsLastInComplexSelector(true);
+    _selectors[arrayIndex - 1].SetIsLastInSelectorList(true);
   }
 
   CSSSelectorList::CSSSelectorList(UniqueArray<CSSSelector> &&array) noexcept : _selectors(Krys::Move(array))
