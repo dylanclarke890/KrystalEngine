@@ -629,12 +629,12 @@ namespace Krys::HTML
       range.Discard();
       range.DiscardWhitespace();
 
-      if (delim == '+')
+      if (delim == u8'+')
       {
         return SelectorRelation::NextSibling;
       }
 
-      if (delim == '~')
+      if (delim == u8'~')
       {
         return SelectorRelation::SubsequentSibling;
       }
