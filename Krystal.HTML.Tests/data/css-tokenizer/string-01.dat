@@ -1,58 +1,58 @@
-#data
+$data
 "foo"
 'foo'
-#tokens
+$tokens
 String(foo)
 Whitespace
 String(foo)
 
-#data
+$data
 "foo
-#tokens
+$tokens
 String(foo)
 
-#data
+$data
 "fo
 o"
-#tokens
+$tokens
 BadString
 Whitespace
 Ident(o)
 String()
 
-#data
+$data
 "fo\
 o"
-#tokens
+$tokens
 String(foo)
 
-#data
+$data
 "fo\
-#tokens
+$tokens
 String(fo)
 
-#data
+$data
 "esc\61 ped"
-#tokens
+$tokens
 String(escaped)
 
-#data
+$data
 "foo\"
-#tokens
+$tokens
 String(foo")
 
-#data
+$data
 "'foo'"
 '"foo"'
-#tokens
+$tokens
 String('foo')
 Whitespace
 String("foo")
 
-#data
+$data
 '\'foo\''
 "\"foo\""
-#tokens
+$tokens
 String('foo')
 Whitespace
 String("foo")

@@ -686,7 +686,7 @@ namespace Krys::HTML
           _ancestorRuleTypeStack.pop_back();
         }
 
-        auto nestedRules = Krys::Move(CurrentNestedContext().ParsedRules);
+        auto &&nestedRules = Krys::Move(CurrentNestedContext().ParsedRules);
         auto properties = CreateInternalStyleProperties(CurrentNestedContext().ParsedProperties);
 
         // We save memory by creating a simple StyleRule instead of a heavier StyleRuleWithNesting when we

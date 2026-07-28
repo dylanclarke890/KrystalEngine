@@ -1,15 +1,15 @@
-#data
+$data
 .
-#tokens
+$tokens
 Delim(.)
 
-#data
+$data
 .a
-#tokens
+$tokens
 Delim(.)
 Ident(a)
 
-#data
+$data
 .1
-#tokens
+$tokens
 Number(0.1)

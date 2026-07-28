@@ -1,76 +1,76 @@
-#data
+$data
 #1
-#tokens
+$tokens
 Hash(1)
 
-#data
+$data
 #-2
-#tokens
+$tokens
 Hash(-2)
 
-#data
+$data
 #--3
-#tokens
+$tokens
 Hash(--3)
 
-#data
+$data
 #---4
-#tokens
+$tokens
 Hash(---4)
 
-#data
+$data
 #a
-#tokens
+$tokens
 Hash(a)
 
-#data
+$data
 #-b
-#tokens
+$tokens
 Hash(-b)
 
-#data
+$data
 #--c
-#tokens
+$tokens
 Hash(--c)
 
-#data
+$data
 #---d
-#tokens
+$tokens
 Hash(---d)
 
-#data
+$data
 #_
-#tokens
+$tokens
 Hash(_)
 
-#data
+$data
 #_1
-#tokens
+$tokens
 Hash(_1)
 
-#data
+$data
 #-
-#tokens
+$tokens
 Hash(-)
 
-#data
+$data
 #+
-#tokens
+$tokens
 Delim(#)
 Delim(+)
 
-#data
+$data
 ##
-#tokens
+$tokens
 Delim(#)
 Delim(#)
 
-#data
+$data
 #
-#tokens
+$tokens
 Delim(#)
 
-#data
+$data
 #aa𐀀
-#tokens
+$tokens
 Hash(aa𐀀)

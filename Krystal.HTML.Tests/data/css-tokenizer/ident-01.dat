@@ -1,41 +1,41 @@
-﻿#data
+﻿$data
 foo
-#tokens
+$tokens
 Ident(foo)
 
-#data
+$data
 --
-#tokens
+$tokens
 Ident(--)
 
-#data
+$data
 --0
-#tokens
+$tokens
 Ident(--0)
 
-#data
+$data
 -\
-#tokens
+$tokens
 Ident(-�)
 
-#data
+$data
 --💅
-#tokens
+$tokens
 Ident(--💅)
 
-#data
+$data
 -§
-#tokens
+$tokens
 Delim(-)
 Delim(§)
 
-#data
+$data
 -×
-#tokens
+$tokens
 Delim(-)
 Delim(×)
 
-#data
+$data
 --a𐀀
-#tokens
+$tokens
 Ident(--a𐀀)

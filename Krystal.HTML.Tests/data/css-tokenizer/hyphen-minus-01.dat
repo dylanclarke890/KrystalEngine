@@ -1,29 +1,29 @@
-﻿#data
+﻿$data
 -
-#tokens
+$tokens
 Delim(-)
 
-#data
+$data
 -1
-#tokens
+$tokens
 Number(-1)
 
-#data
+$data
 -.1
-#tokens
+$tokens
 Number(-0.1)
 
-#data
+$data
 --1
-#tokens
+$tokens
 Ident(--1)
 
-#data
+$data
 -0
-#tokens
+$tokens
 Number(-0)
 
-#data
+$data
 -->
-#tokens
+$tokens
 CDC

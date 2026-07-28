@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML/CSS/Selectors/CSSSelectorParser.hpp"
-#include "Krystal.HTML.Tests/TestParsers/TestParserUtils.hpp"
+#include "Krystal.HTML.Tests/TestParserUtils.hpp"
 #include "Krystal.HTML/CSS/CSSImportRule.hpp"
 #include "Krystal.HTML/CSS/CSSNamespaceRule.hpp"
 #include "Krystal.HTML/CSS/CSSRuleList.hpp"

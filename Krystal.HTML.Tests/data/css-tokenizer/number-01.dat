@@ -1,96 +1,96 @@
-﻿#data
+﻿$data
 10
-#tokens
+$tokens
 Number(10)
 
-#data
+$data
 +10
-#tokens
+$tokens
 Number(10)
 
-#data
+$data
 -10
-#tokens
+$tokens
 Number(-10)
 
-#data
+$data
 0
-#tokens
+$tokens
 Number(0)
 
-#data
+$data
 +0
-#tokens
+$tokens
 Number(0)
 
-#data
+$data
 -0
-#tokens
+$tokens
 Number(-0)
 
-#data
+$data
 .0
-#tokens
+$tokens
 Number(0)
 
-#data
+$data
 .1
-#tokens
+$tokens
 Number(0.1)
 
-#data
+$data
 +.1
-#tokens
+$tokens
 Number(0.1)
 
-#data
+$data
 -.1
-#tokens
+$tokens
 Number(-0.1)
 
-#data
+$data
 1.1
-#tokens
+$tokens
 Number(1.1)
 
-#data
+$data
 +1.1
-#tokens
+$tokens
 Number(1.1)
 
-#data
+$data
 -1.1
-#tokens
+$tokens
 Number(-1.1)
 
-#data
+$data
 +1.1e2
-#tokens
+$tokens
 Number(110)
 
-#data
+$data
 -1.1e2
-#tokens
+$tokens
 Number(-110)
 
-#data
+$data
 -1.1e-3
-#tokens
+$tokens
 Number(-0.0011)
 
-#data
+$data
 -1.1e-3e
-#tokens
+$tokens
 Dimension(-0.0011, e)
 
-#data
+$data
 1e+
-#tokens
+$tokens
 Dimension(1, e)
 Delim(+)
 
-#data
+$data
 .2.7
-#tokens
+$tokens
 Number(0.2)
 Number(0.7)

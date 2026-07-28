@@ -1,20 +1,20 @@
-#data
+$data
 +
-#tokens
+$tokens
 Delim(+)
 
-#data
+$data
 +1
-#tokens
+$tokens
 Number(1)
 
-#data
+$data
 +.1
-#tokens
+$tokens
 Number(0.1)
 
-#data
+$data
 ++1
-#tokens
+$tokens
 Delim(+)
 Number(1)

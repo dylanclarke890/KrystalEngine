@@ -1,11 +1,208 @@
 ﻿#include "Krystal.HTML/HTML/Parser/HTMLTokenizer.hpp"
-#include "Krystal.HTML.Tests/TestParsers/HTMLTokenizerTestParser.hpp"
+#include "Krystal.HTML.Tests/TestParserUtils.hpp"
+#include "Krystal.HTML/HTML/Enums/HTMLParseError.hpp"
+#include "Krystal.HTML/HTML/Enums/TokenizerState.hpp"
+#include "Krystal.HTML/HTML/Parser/HTMLToken.hpp"
+#include "Krystal.Lib/Core/MagicEnum.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
+#include "Krystal.Text/StringConversion.hpp"
 
 namespace Krys::HTML::Tests
 {
   namespace
   {
-    void DoHTMLTokenizerTest(const HTMLTokenizerTest &test, size_t number, size_t total) noexcept
+    void SerializeHTMLToken(HTMLToken &token, DOMString &output) noexcept
+    {
+      switch (token.Type())
+      {
+        case HTMLTokenType::DOCTYPE:
+        {
+          auto doctype = token.ReleaseDOCTYPEData();
+          output += u8"DOCTYPE(";
+          output += token.Name();
+          output += u8", ";
+          output += DOMStringView(doctype->PublicIdentifier);
+          output += u8", ";
+          output += DOMStringView(doctype->SystemIdentifier);
+          output += u8", ";
+          output += u8"ForceQuirks=";
+          output += doctype->ForceQuirks ? u8"true" : u8"false";
+          output += u8")\n";
+          break;
+        }
+        case HTMLTokenType::Character:
+        {
+          output += u8"Character(";
+          output += DOMStringView(token.Data());
+          output += u8")\n";
+          break;
+        }
+        case HTMLTokenType::Comment:
+        {
+          output += u8"Comment(";
+          output += DOMStringView(token.Data());
+          output += u8")\n";
+          break;
+        }
+        case HTMLTokenType::StartTag:
+        case HTMLTokenType::EndTag:
+        {
+          if (token.Type() == HTMLTokenType::StartTag)
+          {
+            output += u8"StartTag(";
+          }
+          else
+          {
+            output += u8"EndTag(";
+          }
+
+          output += token.Name();
+
+          for (const auto &attribute : token.Attributes())
+          {
+            output += u8", ";
+            output += attribute.NameView();
+            output += u8"=\"";
+            output += attribute.ValueView();
+            output += u8"\"";
+          }
+
+          if (token.Type() == HTMLTokenType::StartTag)
+          {
+            output += u8", SelfClosing=";
+            output += token.IsSelfClosing() ? u8"true" : u8"false";
+          }
+
+          output += u8")\n";
+          break;
+        }
+        case HTMLTokenType::EndOfFile:
+        {
+          output += u8"EndOfFile\n";
+          break;
+        }
+      }
+    }
+
+    struct HTMLTokenizerTest
+    {
+      string Name;
+      utf8_string Html;
+      utf8_string Tokens;
+      TokenizerState InitialState {TokenizerState::Data};
+      TokenizerState ExpectedState {TokenizerState::Data};
+      bool AppendEOF {false};
+      bool CDATASectionAllowed {false};
+      List<HTMLTokenizerError> Errors {};
+    };
+
+    KRYS_NODISCARD List<HTMLTokenizerTest> ParseHTMLTokenizerTests(std::istream &stream) noexcept
+    {
+      List<HTMLTokenizerTest> tests;
+      HTMLTokenizerTest currentTest;
+
+      auto parse = [&](utf8_string sectionName, utf8_string data)
+      {
+        if (sectionName == u8"name")
+        {
+          if (!currentTest.Name.empty() && !currentTest.Html.empty())
+          {
+            tests.push_back(Krys::Move(currentTest));
+            currentTest = {};
+          }
+
+          currentTest.Name = string(data.begin(), data.end());
+        }
+        else if (sectionName == u8"data")
+        {
+          currentTest.Html = Krys::Move(data);
+          NormaliseData(currentTest.Html);
+        }
+        else if (sectionName == u8"tokens")
+        {
+          currentTest.Tokens = Krys::Move(data);
+          NormaliseData(currentTest.Tokens);
+        }
+        else if (sectionName == u8"initial-state")
+        {
+          NormaliseData(data);
+
+          auto state = magic_enum::enum_cast<TokenizerState>(
+            stringview(reinterpret_cast<const char *>(data.data()), data.size()),
+            magic_enum::case_insensitive);
+          if (state.has_value())
+          {
+            currentTest.InitialState = *state;
+          }
+        }
+        else if (sectionName == u8"expected-state")
+        {
+          NormaliseData(data);
+
+          auto state = magic_enum::enum_cast<TokenizerState>(
+            stringview(reinterpret_cast<const char *>(data.data()), data.size()),
+            magic_enum::case_insensitive);
+          if (state.has_value())
+          {
+            currentTest.ExpectedState = *state;
+          }
+        }
+        else if (sectionName == u8"append-eof")
+        {
+          currentTest.AppendEOF = true;
+        }
+        else if (sectionName == u8"cdata-allowed")
+        {
+          currentTest.CDATASectionAllowed = true;
+        }
+        else if (sectionName == u8"errors")
+        {
+          auto lines = SplitStringByNewline(data);
+
+          for (const auto &line : lines)
+          {
+            auto text = stringview(line);
+            // NOTE: errors are in the form "line:column ErrorName"
+
+            uint32 line = 0u;
+            auto [ptr1, ec1] = std::from_chars(text.data(), text.data() + text.size(), line);
+            text.remove_prefix(ptr1 - text.data());
+
+            text.remove_prefix(1uz); // skip ':'
+
+            uint32 column = 0u;
+            auto [ptr2, ec2] = std::from_chars(text.data(), text.data() + text.size(), column);
+            text.remove_prefix(ptr2 - text.data());
+
+            text.remove_prefix(1uz); // skip ' '
+
+            auto error = magic_enum::enum_cast<HTMLParseError>(text, magic_enum::case_insensitive);
+            if (error.has_value())
+            {
+              currentTest.Errors.push_back({
+                .Error = *error,
+                .Location =
+                  {
+                    .Line = line,
+                    .Column = column,
+                  },
+              });
+            }
+          }
+        }
+      };
+
+      ParseTestData(stream, "#", ::Krys::Move(parse));
+      if (!currentTest.Html.empty())
+      {
+        tests.push_back(Krys::Move(currentTest));
+      }
+
+      return tests;
+    }
+
+    void ExecuteHTMLTokenizerTest(const HTMLTokenizerTest &test, size_t number, size_t total) noexcept
     {
       HTMLInputStream inputStream;
       HTMLTokenizer tokenizer(inputStream, [allowed = test.CDATASectionAllowed]() { return allowed; });
@@ -72,18 +269,25 @@ namespace Krys::HTML::Tests
       CHECK(equal);
     }
 
-    void DoHTMLTokenizerTests(const List<HTMLTokenizerTest> &tests) noexcept
+    void RunTest(string filename) noexcept
     {
-      for (size_t i = 0uz; i < tests.size(); ++i)
-      {
-        DoHTMLTokenizerTest(tests[i], i, tests.size());
-      }
+      static string basedir = "data/html-tokenizer/";
+
+      auto file = OpenTestDataFile(basedir + filename);
+      REQUIRE(file.has_value());
+
+      auto tests = ParseHTMLTokenizerTests(*file);
+      REQUIRE(!tests.empty());
+
+      ExecuteTests(tests, ExecuteHTMLTokenizerTest);
     }
   }
 
-#define EXECUTE_HTML_TOKENIZER_TEST_CASE(testDataFile)                                                       \
-  EXECUTE_TEST_CASE("HTMLTokenizer", ParseHTMLTokenizerTests, DoHTMLTokenizerTests, "data/html-tokenizer/",  \
-                    testDataFile)
+#define EXECUTE_HTML_TOKENIZER_TEST_CASE(FileName)                                                           \
+  TEST_CASE("HTMLTokenizer(" FileName ")", "[HTML][HTMLTokenizer]")                                          \
+  {                                                                                                          \
+    RunTest(FileName);                                                                                       \
+  }
 
   EXECUTE_HTML_TOKENIZER_TEST_CASE("afterattributename-01.dat");
   EXECUTE_HTML_TOKENIZER_TEST_CASE("afterattributevaluequoted-01.dat");

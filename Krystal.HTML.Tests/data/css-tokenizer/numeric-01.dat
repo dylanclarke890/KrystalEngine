@@ -1,20 +1,20 @@
-#data
+$data
 -123.75e-2
-#tokens
+$tokens
 Number(-1.2375)
 
-#data
+$data
 -123.75e-2px
-#tokens
+$tokens
 Dimension(-1.2375, px)
 
-#data
+$data
 -123.75e-2%
-#tokens
+$tokens
 Percentage(-1.2375)
 
-#data
+$data
 1.2.3
-#tokens
+$tokens
 Number(1.2)
 Number(0.3)

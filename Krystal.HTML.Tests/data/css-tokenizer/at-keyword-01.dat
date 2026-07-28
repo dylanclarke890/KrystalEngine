@@ -1,50 +1,50 @@
-#data
+$data
 @foo
-#tokens
+$tokens
 AtKeyword(foo)
 
-#data
+$data
 @--
-#tokens
+$tokens
 AtKeyword(--)
 
-#data
+$data
 @-1
-#tokens
+$tokens
 Delim(@)
 Number(-1)
 
-#data
+$data
 @--1
-#tokens
+$tokens
 AtKeyword(--1)
 
-#data
+$data
 @\@
-#tokens
+$tokens
 AtKeyword(@)
 
-#data
+$data
 @_
-#tokens
+$tokens
 AtKeyword(_)
 
-#data
+$data
 @
-#tokens
+$tokens
 Delim(@)
 
-#data
+$data
 pvA3@\
 eBnP
-#tokens
+$tokens
 Ident(pvA3)
 Delim(@)
 Delim(\)
 Whitespace
 Ident(eBnP)
 
-#data
+$data
 @aa𐀀
-#tokens
+$tokens
 AtKeyword(aa𐀀)

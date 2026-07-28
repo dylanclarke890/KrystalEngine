@@ -80,9 +80,7 @@ namespace Krys::HTML::Tests
     }
   }
 
-  template <typename ParseFunc>
-  KRYS_NODISCARD inline auto ParseTestData(const string &filePath, ParseFunc &&func) noexcept
-    -> Maybe<decltype(func(std::declval<std::istream &>()))>
+  KRYS_NODISCARD inline Maybe<std::ifstream> OpenTestDataFile(const string &filePath) noexcept
   {
     std::ifstream file(filePath, std::ios::binary);
     if (!file.is_open())
@@ -91,15 +89,79 @@ namespace Krys::HTML::Tests
     }
 
     SkipUTF8FileBOM(file);
-    return func(file);
+    return file;
   }
 
-#define EXECUTE_TEST_CASE(name, parseFile, doTests, rootDir, testDataFile)                                   \
-  TEST_CASE(name "(" testDataFile ")", "[HTML][" name "]")                                                   \
-  {                                                                                                          \
-    auto tests = ParseTestData(rootDir##testDataFile, &parseFile);                                           \
-    REQUIRE(tests.has_value());                                                                              \
-    doTests(*tests);                                                                                         \
+  template <typename ParseSectionFunc>
+  KRYS_NODISCARD inline void ParseTestData(std::istream &stream, stringview newSectionDelimeter,
+                                           ParseSectionFunc &&parseSectionFunc) noexcept
+  {
+    utf8_string sectionName;
+    utf8_string data;
+
+    string line;
+    while (std::getline(stream, line))
+    {
+      if (!line.empty() && line.back() == '\r')
+      {
+        line.pop_back();
+      }
+
+      if (line.starts_with(newSectionDelimeter))
+      {
+        if (!sectionName.empty())
+        {
+          NormaliseData(data);
+          parseSectionFunc(sectionName, data);
+          sectionName.clear();
+          data.clear();
+        }
+
+        sectionName = ToUTF8(line.substr(newSectionDelimeter.size()));
+        continue;
+      }
+
+      data += ToUTF8(line) + u8"\n";
+      continue;
+    }
+
+    if (!sectionName.empty())
+    {
+      NormaliseData(data);
+      parseSectionFunc(sectionName, data);
+    }
+  }
+
+  template <typename T, typename ExecuteTestFunc>
+  inline void ExecuteTests(const List<T> &tests, ExecuteTestFunc &&func) noexcept
+  {
+    for (size_t i = 0uz; i < tests.size(); ++i)
+    {
+      func(tests[i], i, tests.size());
+    }
+  }
+
+  inline List<string> SplitStringByNewline(const utf8_string &str) noexcept
+  {
+    List<string> lines;
+    string currentLine;
+    for (const auto &ch : str)
+    {
+      if (ch == U'\n')
+      {
+        lines.push_back(Krys::Move(currentLine));
+        currentLine.clear();
+      }
+      else
+      {
+        currentLine += static_cast<char>(ch);
+      }
+    }
+    if (!currentLine.empty())
+    {
+      lines.push_back(Krys::Move(currentLine));
+    }
+    return lines;
   }
 
 #define UTF8_INFO(str) INFO(string(reinterpret_cast<const char *>(str.data()), str.size()));

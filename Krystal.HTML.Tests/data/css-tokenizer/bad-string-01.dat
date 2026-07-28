@@ -1,20 +1,20 @@
-#data
+$data
 "foo
 "
-#tokens
+$tokens
 BadString
 Whitespace
 String()
 
-#data
+$data
 "foo\
 "
-#tokens
+$tokens
 String(foo)
 
-#data
+$data
 "aa𐀀
 
-#tokens
+$tokens
 BadString
 Whitespace
