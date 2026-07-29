@@ -160,6 +160,22 @@ namespace Krys::HTML
     return singleSelector->Match() == SelectorMatch::NestingParent;
   }
 
+  CSSOMString CSSSelectorList::SelectorText() const noexcept
+  {
+    CSSOMString output;
+
+    for (const auto &selector : *this)
+    {
+      output += selector.SelectorText();
+      output += u8", ";
+    }
+
+    output.pop_back(); // Remove the last comma
+    output.pop_back(); // Remove the last space
+
+    return output;
+  }
+
 #pragma region Static utility functions
 
   CSSSelectorList CSSSelectorList::Join(const CSSSelectorList &a, const CSSSelectorList &b) noexcept

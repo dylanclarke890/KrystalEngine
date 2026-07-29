@@ -17,5 +17,7 @@ namespace Krys::HTML::Tests
     REQUIRE(result);
     REQUIRE(result->SelectorCount() == 1uz);
     REQUIRE(result->ComponentCount() == 1uz);
+
+    REQUIRE(result->SelectorText() == u8"div");
   }
 }

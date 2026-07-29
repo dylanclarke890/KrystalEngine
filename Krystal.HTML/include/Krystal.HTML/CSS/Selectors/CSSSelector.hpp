@@ -100,7 +100,7 @@ namespace Krys::HTML
   public:
     CSSSelector() noexcept = default;
 
-    explicit CSSSelector(const QualifiedName &name) noexcept;
+    explicit CSSSelector(const QualifiedName &name, bool tagIsForNamespaceRule = false) noexcept;
 
     ~CSSSelector() noexcept;
 
@@ -142,11 +142,6 @@ namespace Krys::HTML
       return _data.RareData->Attribute;
     }
 
-    KRYS_NODISCARD bool IsAttributeValueMatchingCaseInsensitive() const noexcept
-    {
-      return HasFlag(_flags, CSSSelectorFlag::CaseInsensitiveAttributeValueMatching);
-    }
-
     KRYS_NODISCARD const CSSOMStringAtom &Argument() const noexcept
     {
       return HasFlag(_flags, CSSSelectorFlag::HasRareData) ? _data.RareData->Argument
@@ -181,6 +176,16 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool SimpleSelectorEqual(const CSSSelector &other) const noexcept;
 
+    KRYS_NODISCARD bool IsAttributeValueMatchingCaseInsensitive() const noexcept
+    {
+      return HasFlag(_flags, CSSSelectorFlag::CaseInsensitiveAttributeValueMatching);
+    }
+
+    KRYS_NODISCARD bool IsImplicit() const noexcept
+    {
+      return HasFlag(_flags, CSSSelectorFlag::IsImplicit);
+    }
+
     KRYS_NODISCARD bool IsAttributeSelector() const noexcept
     {
       switch (Match())
@@ -196,7 +201,12 @@ namespace Krys::HTML
           return true;
         }
       }
+
+      return false;
     }
+
+    KRYS_NODISCARD CSSOMString SelectorText(CSSOMStringView separator = {},
+                                            CSSOMStringView rightside = {}) const noexcept;
 
 #pragma region Traversal
 

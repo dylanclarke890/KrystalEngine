@@ -17,7 +17,12 @@ namespace Krys::HTML
     IsLastInComplexSelector = 1 << 3,
     /// @brief Set when a selector has rare data.
     HasRareData = 1 << 4,
+    /// @brief Set when the type selector is for a namespace rule (e.g. `@namespace svg url(http://www.w3.org/2000/svg);`).
+    TagIsForNamespaceRule = 1 << 5,
+    /// @brief Set when a selector is implicit (it isn't written by a UA or author but is implied by the
+    /// CSSOM, e.g. `:root`).
+    IsImplicit = 1 << 6,
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::CSSSelectorFlag, 6uz);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::CSSSelectorFlag, 8uz);

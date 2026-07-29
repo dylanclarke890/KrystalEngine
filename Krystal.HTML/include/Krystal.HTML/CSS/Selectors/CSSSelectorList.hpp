@@ -55,6 +55,8 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool HasOnlyNestingSelector() const noexcept;
 
+    KRYS_NODISCARD CSSOMString SelectorText() const noexcept;
+
 #pragma region Iterator
 
     struct const_iterator

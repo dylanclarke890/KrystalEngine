@@ -1,13 +1,19 @@
 ﻿#include "Krystal.HTML/CSS/Selectors/CSSSelector.hpp"
+#include "Krystal.HTML/CSS/Parser/CSSSerializerIdioms.hpp"
 #include "Krystal.HTML/CSS/Selectors/CSSSelectorList.hpp"
 
 namespace Krys::HTML
 {
-  CSSSelector::CSSSelector(const QualifiedName &name) noexcept
+  CSSSelector::CSSSelector(const QualifiedName &name, bool tagIsForNamespaceRule) noexcept
       : _relation(SelectorRelation::Descendant), _match(SelectorMatch::Type)
   {
     _data.TagQualifiedName = name.get();
     _data.TagQualifiedName->AddRef();
+
+    if (tagIsForNamespaceRule)
+    {
+      _flags = _flags | CSSSelectorFlag::TagIsForNamespaceRule;
+    }
   }
 
   CSSSelector::~CSSSelector() noexcept
@@ -104,14 +110,158 @@ namespace Krys::HTML
       return _data.Value == other._data.Value;
     };
 
+    auto HasMatchingFlags = [](CSSSelectorFlag flags, CSSSelectorFlag otherFlags, CSSSelectorFlag mask)
+    {
+      return HasFlag(flags, mask) == HasFlag(otherFlags, mask);
+    };
+
     // Relation and selector list bits are ignored.
     return _match == other._match && _pseudoClass == other._pseudoClass
            && _pseudoElement == other._pseudoElement
-           && HasFlag(_flags, CSSSelectorFlag::HasRareData)
-                == HasFlag(other._flags, CSSSelectorFlag::HasRareData)
-           && HasFlag(_flags, CSSSelectorFlag::CaseInsensitiveAttributeValueMatching)
-                == HasFlag(other._flags, CSSSelectorFlag::CaseInsensitiveAttributeValueMatching)
-           && ValuesEqual();
+           && HasMatchingFlags(_flags, other._flags, CSSSelectorFlag::HasRareData)
+           && HasMatchingFlags(_flags, other._flags, CSSSelectorFlag::CaseInsensitiveAttributeValueMatching)
+           && HasMatchingFlags(_flags, other._flags, CSSSelectorFlag::TagIsForNamespaceRule)
+           && HasMatchingFlags(_flags, other._flags, CSSSelectorFlag::IsImplicit) && ValuesEqual();
+  }
+
+  CSSOMString CSSSelector::SelectorText(CSSOMStringView separator, CSSOMStringView rightside) const noexcept
+  {
+    auto SerializeIdentifierOrStar = [](const CSSOMStringAtom &identifier, utf32_string &output)
+    {
+      if (identifier == StarAtom())
+      {
+        output.push_back(U'*');
+      }
+      else
+      {
+        CSSSerializerIdioms::SerializeIdentifier(identifier.View(), output);
+      }
+    };
+
+    utf32_string output;
+
+    if (Match() == SelectorMatch::Type && !HasFlag(_flags, CSSSelectorFlag::TagIsForNamespaceRule))
+    {
+      if (auto &prefix = TagQualifiedName().NamespacePrefix(); prefix != CSSOMStringAtom::Null())
+      {
+        SerializeIdentifierOrStar(prefix, output);
+        output.push_back(U'|');
+      }
+
+      SerializeIdentifierOrStar(TagQualifiedName().LocalName(), output);
+    }
+
+    const auto *selector = this;
+    while (true)
+    {
+      if (selector->IsImplicit())
+      {
+        // Remove the space before the implicit selector.
+        separator = separator.substr(1);
+        break;
+      }
+      if (selector->Match() == SelectorMatch::Id)
+      {
+        output.push_back(U'#');
+        CSSSerializerIdioms::SerializeIdentifier(selector->SerializingValue().View(), output);
+      }
+      else if (selector->Match() == SelectorMatch::NestingParent)
+      {
+        output.push_back(U'&');
+      }
+      else if (selector->Match() == SelectorMatch::Class)
+      {
+        output.push_back(U'.');
+        CSSSerializerIdioms::SerializeIdentifier(selector->SerializingValue().View(), output);
+      }
+      else if (selector->Match() == SelectorMatch::ForgivingUnknown
+               || selector->Match() == SelectorMatch::ForgivingUnknownNestContaining)
+      {
+        output.append_range(Krys::Text::ConvertToUTF32(selector->Value().View()));
+      }
+      else if (selector->Match() == SelectorMatch::HasScope)
+      {
+        // Remove the space from the start to generate a relative selector string like in ":has(> foo)".
+        return CSSOMString(separator.substr(1)) + CSSOMString(rightside);
+      }
+      else if (selector->IsAttributeSelector())
+      {
+        output.push_back(U'[');
+        if (auto &prefix = selector->Attribute().NamespacePrefix(); prefix != CSSOMStringAtom::Empty())
+        {
+          SerializeIdentifierOrStar(prefix, output);
+          output.push_back(U'|');
+        }
+        SerializeIdentifierOrStar(selector->Attribute().LocalName(), output);
+        switch (selector->Match())
+        {
+          case SelectorMatch::AttributeEquals:
+          {
+            output.push_back(U'=');
+            break;
+          }
+          case SelectorMatch::AttributeExists:
+          {
+            // set has no operator or value, just the attrName
+            output.push_back(U']');
+            break;
+          }
+          case SelectorMatch::AttributeIncludes:
+          {
+            output.append(U"~=");
+            break;
+          }
+          case SelectorMatch::AttributeDash:
+          {
+            output.append(U"|=");
+            break;
+          }
+          case SelectorMatch::AttributePrefix:
+          {
+            output.append(U"^=");
+            break;
+          }
+          case SelectorMatch::AttributeSuffix:
+          {
+            output.append(U"$=");
+            break;
+          }
+          case SelectorMatch::AttributeSubstring:
+          {
+            output.append(U"*=");
+            break;
+          }
+          default:
+          {
+            break;
+          }
+        }
+
+        if (selector->Match() != SelectorMatch::AttributeExists)
+        {
+          CSSSerializerIdioms::SerializeString(selector->SerializingValue().View(), output);
+          if (selector->IsAttributeValueMatchingCaseInsensitive())
+          {
+            output.append(U" i]");
+          }
+          else
+          {
+            output.push_back(U']');
+          }
+        }
+      }
+
+      if (selector->Relation() != SelectorRelation::Compounding || !selector->PrecedingComplexSelectorComponent())
+      {
+        break;
+      }
+      selector = selector->PrecedingComplexSelectorComponent();
+    }
+
+    output.append(separator.begin(), separator.end());
+    output.append(rightside.begin(), rightside.end());
+
+    return Krys::Text::ConvertToUTF8(utf32_stringview(output));
   }
 
   void CSSSelector::SetValue(const CSSOMStringAtom &value, MatchLowercase matchLowercase) noexcept
