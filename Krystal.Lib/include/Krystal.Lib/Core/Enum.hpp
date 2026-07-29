@@ -68,8 +68,7 @@ namespace Krys
 
     if constexpr (Traits::BitwiseFlags)
     {
-      // The number of distinct values in a bitwise flags enum is equal to the number of bits needed plus one
-      // (for the zero value).
+      // TODO: this doesn't seem right
       return Traits::DistinctValues;
     }
     else
