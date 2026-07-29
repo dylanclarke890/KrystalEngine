@@ -116,13 +116,13 @@ namespace Krys::HTML::Tests
         }
         else if (sectionName == u8"data")
         {
+          NormaliseData(data);
           currentTest.Html = Krys::Move(data);
-          NormaliseData(currentTest.Html);
         }
         else if (sectionName == u8"tokens")
         {
+          NormaliseData(data);
           currentTest.Tokens = Krys::Move(data);
-          NormaliseData(currentTest.Tokens);
         }
         else if (sectionName == u8"initial-state")
         {
