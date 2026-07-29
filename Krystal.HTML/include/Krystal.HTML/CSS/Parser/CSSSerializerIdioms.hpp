@@ -32,7 +32,7 @@ namespace Krys::HTML
     static void SerializeIdentifier(CSSOMStringView identifier, utf32_string &output) noexcept
     {
       // TODO: need to iterate over the codepoints in the identifier instead of doing this
-      auto utf32Identifier = Krys::Text::ConvertToUTF32(utf8_stringview(identifier));
+      auto utf32Identifier = Krys::Text::ConvertToUTF32(identifier);
 
       bool isFirstCharacter = true;
       bool isSecondCharacter = false;
@@ -102,9 +102,37 @@ namespace Krys::HTML
     }
 
     /// @see https://drafts.csswg.org/cssom/#serialize-a-string
-    KRYS_NODISCARD static void SerializeString(CSSOMStringView str, utf32_string& output) noexcept
+    KRYS_NODISCARD static void SerializeString(CSSOMStringView str, utf32_string &output) noexcept
     {
-      // TODO
+      // TODO: need to iterate over the codepoints in the identifier instead of doing this
+      auto utf32Identifier = Krys::Text::ConvertToUTF32(str);
+
+      output.push_back(U'"');
+      for (char32 codepoint : utf32Identifier)
+      {
+        // If the character is NULL (U+0000), then the REPLACEMENT CHARACTER (U+FFFD).
+        if (codepoint == U'\0')
+        {
+          output += U'\uFFFD';
+        }
+        // If the character is in the range [\1-\1f] (U+0001 to U+001F) or is U+007F, then the character
+        // escaped as code point.
+        else if ((codepoint >= U'\1' && codepoint <= U'\x1F') || codepoint == U'\x7F')
+        {
+          EscapeCharacterAsCodePoint(codepoint, output);
+        }
+        // If the character is '"' (U+0022) or "\" (U+005C), the escaped character.
+        else if (codepoint == U'"' || codepoint == U'\\')
+        {
+          EscapeCharacter(codepoint, output);
+        }
+        // Otherwise, the character itself.
+        else
+        {
+          output.push_back(codepoint);
+        }
+      }
+      output.push_back(U'"');
     }
 
     /// @see https://drafts.csswg.org/cssom/#serialize-a-url

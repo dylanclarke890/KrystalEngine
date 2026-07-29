@@ -187,7 +187,8 @@ namespace Krys::HTML
       else if (selector->IsAttributeSelector())
       {
         output.push_back(U'[');
-        if (auto &prefix = selector->Attribute().NamespacePrefix(); prefix != CSSOMStringAtom::Empty())
+        if (auto &prefix = selector->Attribute().NamespacePrefix();
+            prefix != CSSOMStringAtom::Null() && prefix != CSSOMStringAtom::Empty())
         {
           SerializeIdentifierOrStar(prefix, output);
           output.push_back(U'|');
@@ -251,7 +252,8 @@ namespace Krys::HTML
         }
       }
 
-      if (selector->Relation() != SelectorRelation::Compounding || !selector->PrecedingComplexSelectorComponent())
+      if (selector->Relation() != SelectorRelation::Compounding
+          || !selector->PrecedingComplexSelectorComponent())
       {
         break;
       }
@@ -281,6 +283,7 @@ namespace Krys::HTML
 
     if (!HasFlag(_flags, CSSSelectorFlag::HasRareData))
     {
+      _data.Value = *reinterpret_cast<const StringAtomStorage *>(&matchingValue);
       // We're going to change StringAtomStorage to be ref-counted eventually so this is a reminder to make
       // sure we manage the ref-counting correctly here when that happens.
       static_assert(!IsRefCounted<StringAtomStorage>,

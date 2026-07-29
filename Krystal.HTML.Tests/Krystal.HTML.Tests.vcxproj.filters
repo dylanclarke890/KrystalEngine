@@ -341,5 +341,6 @@
     <None Include="data\css-tokenizer\fuzz-07.dat" />
     <None Include="data\css-tokenizer\fuzz-08.dat" />
     <None Include="data\css-tokenizer\fuzz-09.dat" />
+    <None Include="data\css-selector-parser\attribute-01.dat" />
   </ItemGroup>
 </Project>

@@ -267,7 +267,9 @@ namespace Krys::HTML
       return false;
     }
 
-    if (range.Peek().Type() != CSSTokenType::Delim || range.Peek().IdentCodePoints() != u8"|")
+    // early exit if this isn't a namespace prefix or it's a dash match (e.g. [foo|=bar])
+    if (range.Peek().Type() != CSSTokenType::Delim || range.Peek().IdentCodePoints() != u8"|"
+        || (range.Peek(1uz).Type() == CSSTokenType::Delim) && range.Peek(1uz).IdentCodePoints() == u8"=")
     {
       return true;
     }
@@ -411,8 +413,8 @@ namespace Krys::HTML
 
     QualifiedName qualifiedName =
       namespacePrefix == CSSOMStringAtom::Null()
-        ? QualifiedName(CSSOMStringAtom::Null(), attributeName, CSSOMStringAtom::Null())
-        : QualifiedName(namespacePrefix, attributeName, namespaceURI);
+        ? QualifiedName(CSSOMStringAtom::Null(), CSSOMStringAtom::Null(), attributeName)
+        : QualifiedName(namespaceURI, namespacePrefix, attributeName);
 
     auto selector = CreateUnique<MutableCSSSelector>();
 
