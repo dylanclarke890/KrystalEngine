@@ -689,7 +689,7 @@ namespace Krys::HTML
         auto &&nestedRules = Krys::Move(CurrentNestedContext().ParsedRules);
         auto properties = CreateInternalStyleProperties(CurrentNestedContext().ParsedProperties);
 
-        // We save memory by creating a simple StyleRule instead of a heavier StyleRuleWithNesting when we
+        // We save memory by creating a simple CSSStyleRule instead of a heavier CSSNestedDeclarations when we
         // don't need the CSS Nesting features.
         if (nestedRules.empty() && !selectors.HasExplicitNestingParent() && !IsStyleNestedParsingContext())
         {
@@ -708,6 +708,7 @@ namespace Krys::HTML
   RefPtr<CSSStyleRule> CSSParser::ConsumeKeyframeStyleRule(CSSTokenRange prelude,
                                                            CSSTokenRange block) noexcept
   {
+    // TODO:
     return nullptr;
   }
 
