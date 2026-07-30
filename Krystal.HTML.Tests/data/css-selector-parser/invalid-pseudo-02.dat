@@ -1,0 +1,7 @@
+$input
+::-apple-attachment-controls-container
+$expect-invalid
+
+$input
+::-internal-loading-auto-fill-button
+$expect-invalid

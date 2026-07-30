@@ -82,15 +82,24 @@ namespace Krys::HTML::Tests
       str = u8"\n--- INPUT ---\n" + test.Input;
       UTF8_INFO(str);
 
-      str = u8"--- EXPECTED OUTPUT ---\n" + test.Output;
-      UTF8_INFO(str);
+      if (test.ExpectInvalid)
+      {
+        str = u8"\n--- EXPECTED OUTPUT ---\n" + ToUTF8("Invalid selector");
+        bool isInvalid = !result.has_value();
+        CHECK(isInvalid);
+      }
+      else
+      {
+        str = u8"--- EXPECTED OUTPUT ---\n" + test.Output;
+        UTF8_INFO(str);
 
-      auto output = result ? result->SelectorText() : u8"";
-      str = u8"\n--- ACTUAL OUTPUT ---\n" + output;
-      UTF8_INFO(str);
+        auto output = result ? result->SelectorText() : u8"";
+        str = u8"\n--- ACTUAL OUTPUT ---\n" + output;
+        UTF8_INFO(str);
 
-      bool equal = output == test.Output;
-      CHECK(equal);
+        bool equal = output == test.Output;
+        CHECK(equal);
+      }
     }
 
     void RunTest(string filename) noexcept
@@ -120,6 +129,9 @@ namespace Krys::HTML::Tests
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("class-01.dat");
 
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("descendant-01.dat");
+
+  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("invalid-pseudo-01.dat");
+  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("invalid-pseudo-02.dat");
 
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("universal-01.dat");
 }
