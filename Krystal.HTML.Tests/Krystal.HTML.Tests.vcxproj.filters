@@ -344,5 +344,6 @@
     <None Include="data\css-selector-parser\attribute-01.dat" />
     <None Include="data\css-selector-parser\child-01.dat" />
     <None Include="data\css-selector-parser\descendant-01.dat" />
+    <None Include="data\css-selector-parser\class-01.dat" />
   </ItemGroup>
 </Project>

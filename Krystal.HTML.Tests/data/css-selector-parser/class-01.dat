@@ -1,0 +1,13 @@
+$input
+*.pastoral
+$output
+.pastoral
+
+$input
+.pastoral
+
+$input
+h1.pastoral
+
+$input
+p.pastoral.marine
