@@ -350,5 +350,21 @@
     <None Include="data\css-selector-parser\invalid-pseudo-02.dat" />
     <None Include="data\css-selector-parser\focus-visible-01.dat" />
     <None Include="data\css-selector-parser\id-01.dat" />
+    <None Include="data\css-selector-parser\an-plus-b-01.dat" />
+    <None Include="data\css-selector-parser\an-plus-b-02.dat" />
+    <None Include="data\css-selector-parser\has-01.dat" />
+    <None Include="data\css-selector-parser\has-02.dat" />
+    <None Include="data\css-selector-parser\heading-01.dat" />
+    <None Include="data\css-selector-parser\heading-02.dat" />
+    <None Include="data\css-selector-parser\not-01.dat" />
+    <None Include="data\css-selector-parser\not-02.dat" />
+    <None Include="data\css-selector-parser\part-01.dat" />
+    <None Include="data\css-selector-parser\part-02.dat" />
+    <None Include="data\css-selector-parser\sibling-01.dat" />
+    <None Include="data\css-selector-parser\slotted-01.dat" />
+    <None Include="data\css-selector-parser\slotted-02.dat" />
+    <None Include="data\css-selector-parser\state-01.dat" />
+    <None Include="data\css-selector-parser\state-02.dat" />
+    <None Include="data\css-selector-parser\where-01.dat" />
   </ItemGroup>
 </Project>

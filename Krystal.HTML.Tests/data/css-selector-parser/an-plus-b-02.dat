@@ -1,0 +1,255 @@
+$input
+:nth-child(n- 1 2)
+$expect-invalid
+
+$input
+:nth-child(n-b1)
+$expect-invalid
+
+$input
+:nth-child(n-+1)
+$expect-invalid
+
+$input
+:nth-child(n-1n)
+$expect-invalid
+
+$input
+:nth-child(-n -b1)
+$expect-invalid
+
+$input
+:nth-child(-1n- b1)
+$expect-invalid
+
+$input
+:nth-child(-n-13b1)
+$expect-invalid
+
+$input
+:nth-child(-n-+1)
+$expect-invalid
+
+$input
+:nth-child(-n+n)
+$expect-invalid
+
+$input
+:nth-child(+ 1n)
+$expect-invalid
+
+$input
+:nth-child(  n +12 3)
+$expect-invalid
+
+$input
+:nth-child(  12 n )
+$expect-invalid
+
+$input
+:nth-child(+12n-0+1)
+$expect-invalid
+
+$input
+:nth-child(+12N -- 1)
+$expect-invalid
+
+$input
+:nth-child(+12 N )
+$expect-invalid
+
+$input
+:nth-child(+ n + 7)
+$expect-invalid
+
+$input
+:nth-last-child(n- 1 2)
+$expect-invalid
+
+$input
+:nth-last-child(n-b1)
+$expect-invalid
+
+$input
+:nth-last-child(n-+1)
+$expect-invalid
+
+$input
+:nth-last-child(n-1n)
+$expect-invalid
+
+$input
+:nth-last-child(-n -b1)
+$expect-invalid
+
+$input
+:nth-last-child(-1n- b1)
+$expect-invalid
+
+$input
+:nth-last-child(-n-13b1)
+$expect-invalid
+
+$input
+:nth-last-child(-n-+1)
+$expect-invalid
+
+$input
+:nth-last-child(-n+n)
+$expect-invalid
+
+$input
+:nth-last-child(+ 1n)
+$expect-invalid
+
+$input
+:nth-last-child(  n +12 3)
+$expect-invalid
+
+$input
+:nth-last-child(  12 n )
+$expect-invalid
+
+$input
+:nth-last-child(+12n-0+1)
+$expect-invalid
+
+$input
+:nth-last-child(+12N -- 1)
+$expect-invalid
+
+$input
+:nth-last-child(+12 N )
+$expect-invalid
+
+$input
+:nth-last-child(+ n + 7)
+$expect-invalid
+
+$input
+:nth-of-type(n- 1 2)
+$expect-invalid
+
+$input
+:nth-of-type(n-b1)
+$expect-invalid
+
+$input
+:nth-of-type(n-+1)
+$expect-invalid
+
+$input
+:nth-of-type(n-1n)
+$expect-invalid
+
+$input
+:nth-of-type(-n -b1)
+$expect-invalid
+
+$input
+:nth-of-type(-1n- b1)
+$expect-invalid
+
+$input
+:nth-of-type(-n-13b1)
+$expect-invalid
+
+$input
+:nth-of-type(-n-+1)
+$expect-invalid
+
+$input
+:nth-of-type(-n+n)
+$expect-invalid
+
+$input
+:nth-of-type(+ 1n)
+$expect-invalid
+
+$input
+:nth-of-type(  n +12 3)
+$expect-invalid
+
+$input
+:nth-of-type(  12 n )
+$expect-invalid
+
+$input
+:nth-of-type(+12n-0+1)
+$expect-invalid
+
+$input
+:nth-of-type(+12N -- 1)
+$expect-invalid
+
+$input
+:nth-of-type(+12 N )
+$expect-invalid
+
+$input
+:nth-of-type(+ n + 7)
+$expect-invalid
+
+$input
+:nth-last-of-type(n- 1 2)
+$expect-invalid
+
+$input
+:nth-last-of-type(n-b1)
+$expect-invalid
+
+$input
+:nth-last-of-type(n-+1)
+$expect-invalid
+
+$input
+:nth-last-of-type(n-1n)
+$expect-invalid
+
+$input
+:nth-last-of-type(-n -b1)
+$expect-invalid
+
+$input
+:nth-last-of-type(-1n- b1)
+$expect-invalid
+
+$input
+:nth-last-of-type(-n-13b1)
+$expect-invalid
+
+$input
+:nth-last-of-type(-n-+1)
+$expect-invalid
+
+$input
+:nth-last-of-type(-n+n)
+$expect-invalid
+
+$input
+:nth-last-of-type(+ 1n)
+$expect-invalid
+
+$input
+:nth-last-of-type(  n +12 3)
+$expect-invalid
+
+$input
+:nth-last-of-type(  12 n )
+$expect-invalid
+
+$input
+:nth-last-of-type(+12n-0+1)
+$expect-invalid
+
+$input
+:nth-last-of-type(+12N -- 1)
+$expect-invalid
+
+$input
+:nth-last-of-type(+12 N )
+$expect-invalid
+
+$input
+:nth-last-of-type(+ n + 7)
+$expect-invalid

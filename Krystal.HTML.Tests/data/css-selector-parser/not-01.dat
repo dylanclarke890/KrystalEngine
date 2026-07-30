@@ -1,0 +1,67 @@
+$input
+button:not([disabled])
+
+$input
+*:not(foo)
+
+$output
+:not(foo)
+
+$input
+:not(:link):not(:visited)
+
+$input
+*|*:not(*)
+$output
+:not(*)
+
+$input
+:not(:hover)
+
+$input
+:not(*|*)
+$output
+:not(*)
+
+$input
+foo:not(bar)
+
+$input
+:not(:not(foo))
+
+$input
+:not(.a .b)
+
+$input
+:not(.a + .b)
+
+$input
+:not(.a .b ~ c)
+
+$input
+:not(span.a, div.b)
+
+$input
+:not(.a .b ~ c, .d .e)
+
+$input
+:not(:host)
+
+$input
+:not(:host(.a))
+
+$input
+:host(:not(.a))
+
+$input
+:not(:host(:not(.a)))
+
+$input
+:not([disabled][selected])
+$output
+:not([disabled][selected])
+
+$input
+:not([disabled],[selected])
+$output
+:not([disabled], [selected])

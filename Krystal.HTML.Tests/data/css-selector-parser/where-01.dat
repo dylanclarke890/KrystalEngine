@@ -1,0 +1,21 @@
+$input
+:where(ul,ol,.list) > [hidden]
+$output
+:where(ul, ol, .list) > [hidden]
+
+$input
+:where(:hover,:focus)
+$output
+:where(:hover, :focus)
+
+$input
+a:where(:not(:hover))
+
+$input
+:where(#a)
+
+$input
+.a.b ~ :where(.c.d ~ .e.f)
+
+$input
+.a.b ~ .c.d:where(span.e + .f, .g.h > .i.j .k)
