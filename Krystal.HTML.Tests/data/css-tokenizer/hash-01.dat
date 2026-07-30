@@ -1,57 +1,57 @@
-$data
+﻿$data
 #1
 $tokens
-Hash(1)
+Hash(1, Unrestricted)
 
 $data
 #-2
 $tokens
-Hash(-2)
+Hash(-2, Unrestricted)
 
 $data
 #--3
 $tokens
-Hash(--3)
+Hash(--3, Id)
 
 $data
 #---4
 $tokens
-Hash(---4)
+Hash(---4, Id)
 
 $data
 #a
 $tokens
-Hash(a)
+Hash(a, Id)
 
 $data
 #-b
 $tokens
-Hash(-b)
+Hash(-b, Id)
 
 $data
 #--c
 $tokens
-Hash(--c)
+Hash(--c, Id)
 
 $data
 #---d
 $tokens
-Hash(---d)
+Hash(---d, Id)
 
 $data
 #_
 $tokens
-Hash(_)
+Hash(_, Id)
 
 $data
 #_1
 $tokens
-Hash(_1)
+Hash(_1, Id)
 
 $data
 #-
 $tokens
-Hash(-)
+Hash(-, Unrestricted)
 
 $data
 #+
@@ -73,4 +73,4 @@ Delim(#)
 $data
 #aa𐀀
 $tokens
-Hash(aa𐀀)
+Hash(aa𐀀, Id)

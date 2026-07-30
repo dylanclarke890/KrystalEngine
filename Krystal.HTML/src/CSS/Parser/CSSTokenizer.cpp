@@ -47,11 +47,11 @@ namespace Krys::HTML
 
     if (current == U'#')
     {
-      if (IsIdentCodePoint(next) || StartsWithValidEscape(current, next))
+      if (IsIdentCodePoint(next) || StartsWithValidEscape(next, _inputStream.Peek(1uz)))
       {
         auto token = CSSToken {CSSTokenType::Hash};
 
-        if (StartsWithIdentifier(current, next, _inputStream.Peek(1uz)))
+        if (StartsWithIdentifier(next, _inputStream.Peek(1uz), _inputStream.Peek(2uz)))
         {
           token.HashType(HashTokenType::Id);
         }

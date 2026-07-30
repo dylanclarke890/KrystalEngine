@@ -48,6 +48,8 @@ namespace Krys::HTML::Tests
         {
           output += u8"Hash(";
           output += token.IdentCodePoints();
+          output += u8", ";
+          output += (token.HashType() == HashTokenType::Id ? u8"Id" : u8"Unrestricted");
           output += u8")\n";
           break;
         }
