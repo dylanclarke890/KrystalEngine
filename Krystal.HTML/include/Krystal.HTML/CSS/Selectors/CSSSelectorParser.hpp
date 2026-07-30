@@ -112,6 +112,13 @@ namespace Krys::HTML
 
     KRYS_NODISCARD UniquePtr<MutableCSSSelector> ConsumeRelativeNestedSelector(CSSTokenRange &range) noexcept;
 
+    /// @brief Prepends a type selector to the compound selector if needed, based on the namespace prefix and
+    /// element name.
+    /// @returns true if a type selector was prepended, false if not, or Null if an error occurred.
+    KRYS_NODISCARD Maybe<bool> PrependTypeSelectorIfNeeded(const CSSOMStringAtom &namespacePrefix,
+                                                           const CSSOMStringAtom &elementName,
+                                                           MutableCSSSelector &compoundSelector) noexcept;
+
 #pragma region Namespaces
 
     KRYS_NODISCARD const CSSOMStringAtom &DetermineNamespace(const CSSOMStringAtom &prefix) const noexcept;

@@ -453,7 +453,7 @@ namespace Krys::HTML
 #pragma region RareData
 
   CSSSelector::RareData::RareData(StringAtomStorage value) noexcept
-      : MatchingValue(value), SerializingValue(value)
+      : MatchingValue(value), SerializingValue(value), Attribute(AnyQualifiedName())
   {
   }
 

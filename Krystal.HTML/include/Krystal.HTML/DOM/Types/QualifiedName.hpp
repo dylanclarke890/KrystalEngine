@@ -115,6 +115,12 @@ namespace Krys::HTML
 
   KRYS_NODISCARD inline QualifiedName NullQualifiedName() noexcept
   {
-    return QualifiedName(DOMStringAtom::Null(), DOMStringAtom::Null(), DOMStringAtom::Null());
+    return QualifiedName(DOMStringAtom::Null(), DOMStringAtom::Null(), DOMStringAtom::Null(),
+                         TagName::Unknown, Namespace::None);
+  }
+
+  KRYS_NODISCARD inline QualifiedName AnyQualifiedName() noexcept
+  {
+    return QualifiedName(DOMStringAtom::Null(), StarAtom(), StarAtom(), TagName::Unknown, Namespace::Unknown);
   }
 }

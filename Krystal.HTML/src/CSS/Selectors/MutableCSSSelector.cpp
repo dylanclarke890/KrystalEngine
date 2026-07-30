@@ -48,4 +48,18 @@ namespace Krys::HTML
     first->SetRelation(relation);
     first->SetPrecedingComplexSelectorComponent(Krys::Move(selector));
   }
+
+  void MutableCSSSelector::AppendTagInComplexSelector(const QualifiedName &tagQualifiedName,
+                                                      bool tagIsForNamespaceRule) noexcept
+  {
+    // Make the current last selector the second to last.
+    auto currentLast = CreateUnique<MutableCSSSelector>();
+    currentLast->_selector = Krys::Move(_selector);
+    currentLast->_precedingComplexSelectorComponent = Krys::Move(_precedingComplexSelectorComponent);
+    _precedingComplexSelectorComponent = Krys::Move(currentLast);
+
+    // Change the last selector to be the tag selector.
+    _selector = CreateUnique<CSSSelector>(tagQualifiedName, tagIsForNamespaceRule);
+    _selector->SetRelation(SelectorRelation::Compounding);
+  }
 }

@@ -8,7 +8,9 @@ namespace Krys::HTML
   {
     Invalid,
     Lang,
+    Host,
+    Scope,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::PseudoClassId, 2uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::PseudoClassId, 4uz);

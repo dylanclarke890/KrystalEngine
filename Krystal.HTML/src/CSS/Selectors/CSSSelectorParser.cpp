@@ -606,8 +606,64 @@ namespace Krys::HTML
       return CreateUnique<MutableCSSSelector>(QualifiedName(namespaceURI, namespacePrefix, elementName));
     }
 
-    // PrependTypeSelectorIfNeeded(namespacePrefix, elementName, *compoundSelector);
+    if (PrependTypeSelectorIfNeeded(namespacePrefix, elementName, *compoundSelector) == Null)
+    {
+      return nullptr;
+    }
+
     return compoundSelector;
+  }
+
+  Maybe<bool> CSSSelectorParser::PrependTypeSelectorIfNeeded(const CSSOMStringAtom &namespacePrefix,
+                                                             const CSSOMStringAtom &elementName,
+                                                             MutableCSSSelector &compoundSelector) noexcept
+  {
+    bool isShadowDOM = compoundSelector.NeedsImplicitShadowCombinatorForMatching();
+
+    if (elementName == CSSOMStringAtom::Null() && DefaultNamespace() == StarAtom() && !isShadowDOM)
+    {
+      return false;
+    }
+
+    CSSOMStringAtom determinedElementName = elementName == CSSOMStringAtom::Null() ? StarAtom() : elementName;
+
+    CSSOMStringAtom namespaceURI = DetermineNamespace(namespacePrefix);
+    if (namespaceURI == CSSOMStringAtom::Null())
+    {
+      return Null; // Invalid namespace prefix, cannot determine namespace URI
+    }
+
+    CSSOMStringAtom determinedPrefix = namespacePrefix;
+    if (namespaceURI == DefaultNamespace())
+    {
+      determinedPrefix = CSSOMStringAtom::Null();
+    }
+
+    QualifiedName tag(namespaceURI, determinedPrefix, determinedElementName);
+
+    // *:host never matches, so we can't discard the *,
+    // otherwise we can't tell the difference between *:host and just :host.
+    //
+    // Also, selectors where we use a ShadowPseudo combinator between the
+    // element and the pseudo element for matching (custom pseudo elements,
+    // ::cue), we need a universal selector to set the combinator
+    // (relation) on in the cases where there are no simple selectors preceding
+    // the pseudo element.
+    bool isHostPseudo = compoundSelector.Match() == SelectorMatch::PseudoClass
+                        && compoundSelector.PseudoClass() == PseudoClassId::Host;
+    if (isHostPseudo && elementName == CSSOMStringAtom::Null() && namespacePrefix == CSSOMStringAtom::Null())
+    {
+      return false;
+    }
+
+    if (tag != AnyQualifiedName() || isHostPseudo || isShadowDOM)
+    {
+      compoundSelector.AppendTagInComplexSelector(tag, determinedPrefix == CSSOMStringAtom::Null()
+                                                         && determinedElementName == StarAtom()
+                                                         && !isHostPseudo);
+    }
+
+    return true;
   }
 
   SelectorRelation CSSSelectorParser::ConsumeCombinator(CSSTokenRange &range) noexcept

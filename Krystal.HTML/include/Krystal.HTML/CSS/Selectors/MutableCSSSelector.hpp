@@ -39,6 +39,9 @@ namespace Krys::HTML
     void PrependComplexSelectorComponent(SelectorRelation relation,
                                          UniquePtr<MutableCSSSelector> selector) noexcept;
 
+    void AppendTagInComplexSelector(const QualifiedName &tagQualifiedName,
+                                    bool tagIsForNamespaceRule) noexcept;
+
 #pragma region Basic setters and getters
 
     KRYS_NODISCARD RawPtr<MutableCSSSelector> PrecedingComplexSelectorComponent() const noexcept
@@ -112,6 +115,12 @@ namespace Krys::HTML
       }
 
       return selector;
+    }
+
+    KRYS_NODISCARD bool NeedsImplicitShadowCombinatorForMatching() const noexcept
+    {
+      // return Match() == SelectorMatch::PseudoElement;
+      return false; // TODO
     }
   };
 

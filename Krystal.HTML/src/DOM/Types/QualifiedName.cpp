@@ -11,8 +11,6 @@ namespace Krys::HTML
       : _namespaceURI(namespaceURI), _namespacePrefix(prefix), _localName(localName), _tagName(tagName),
         _namespace(tagNamespace)
   {
-    assert(_namespaceURI == DOMStringAtom::Null() || _namespaceURI != DOMStringAtom::Empty());
-    assert(_namespacePrefix == DOMStringAtom::Null() || _namespacePrefix != DOMStringAtom::Empty());
     assert(_localName != DOMStringAtom::Null() || _namespacePrefix != DOMStringAtom::Empty());
 
     if (_localName != DOMStringAtom::Null())
