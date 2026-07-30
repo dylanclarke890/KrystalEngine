@@ -130,6 +130,8 @@ namespace Krys::HTML::Tests
 
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("descendant-01.dat");
 
+  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("focus-visible-01.dat");
+
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("invalid-pseudo-01.dat");
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("invalid-pseudo-02.dat");
 

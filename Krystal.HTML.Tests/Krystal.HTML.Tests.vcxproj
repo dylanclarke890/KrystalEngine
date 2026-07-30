@@ -226,6 +226,7 @@
     <None Include="data\css-selector-parser\child-01.dat" />
     <None Include="data\css-selector-parser\class-01.dat" />
     <None Include="data\css-selector-parser\descendant-01.dat" />
+    <None Include="data\css-selector-parser\focus-visible-01.dat" />
     <None Include="data\css-selector-parser\invalid-pseudo-01.dat" />
     <None Include="data\css-selector-parser\invalid-pseudo-02.dat" />
     <None Include="data\css-selector-parser\universal-01.dat" />
