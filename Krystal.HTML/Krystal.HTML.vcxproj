@@ -19,7 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <None Include="data\CSSProperties.json" />
+    <None Include="codegen\generators\css\properties.py" />
+    <None Include="codegen\main.py" />
+    <None Include="data\CSS\CSSProperties.json" />
     <None Include="data\_progress\DOM.txt" />
     <None Include="data\_progress\HTML.txt" />
     <Text Include="data\HTMLEntityNames.in" />
@@ -832,6 +834,9 @@
       </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PreBuildEvent>
+      <Command>python "$(ProjectDir)codegen\main.py" "$(ProjectDir)\data"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>

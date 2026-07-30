@@ -172,7 +172,7 @@ namespace Krys::HTML
     {
       if (_ancestorRuleTypeStack.empty())
       {
-        return {};
+        return Null;
       }
 
       return _ancestorRuleTypeStack.back();

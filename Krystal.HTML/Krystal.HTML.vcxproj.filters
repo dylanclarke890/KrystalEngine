@@ -1883,6 +1883,8 @@
     <None Include="data\CSS\CSSStyleProperties.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\CSSProperties.json" />
+    <None Include="data\CSS\CSSProperties.json" />
+    <None Include="codegen\main.py" />
+    <None Include="codegen\generators\css\properties.py" />
   </ItemGroup>
 </Project>
