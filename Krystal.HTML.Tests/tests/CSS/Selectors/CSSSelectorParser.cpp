@@ -137,5 +137,7 @@ namespace Krys::HTML::Tests
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("invalid-pseudo-01.dat");
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("invalid-pseudo-02.dat");
 
+  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("sibling-01.dat");
+
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("universal-01.dat");
 }

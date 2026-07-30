@@ -1,0 +1,8 @@
+$input
+math + p
+
+$input
+h1.opener + h2
+
+$input
+h1 ~ pre
