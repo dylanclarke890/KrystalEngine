@@ -1884,6 +1884,5 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\CSSProperties.json" />
-    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

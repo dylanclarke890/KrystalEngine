@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <None Include="cpp.hint" />
     <None Include="data\CSSProperties.json" />
     <None Include="data\_progress\DOM.txt" />
     <None Include="data\_progress\HTML.txt" />
