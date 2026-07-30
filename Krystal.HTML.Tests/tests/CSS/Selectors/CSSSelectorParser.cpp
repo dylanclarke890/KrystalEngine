@@ -116,4 +116,6 @@ namespace Krys::HTML::Tests
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("attribute-01.dat");
 
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("child-01.dat");
+
+  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("descendant-01.dat");
 }

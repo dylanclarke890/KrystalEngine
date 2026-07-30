@@ -224,6 +224,7 @@
   <ItemGroup>
     <None Include="data\css-selector-parser\attribute-01.dat" />
     <None Include="data\css-selector-parser\child-01.dat" />
+    <None Include="data\css-selector-parser\descendant-01.dat" />
     <None Include="data\css-tokenizer\at-keyword-01.dat" />
     <None Include="data\css-tokenizer\bad-string-01.dat" />
     <None Include="data\css-tokenizer\bad-url-01.dat" />

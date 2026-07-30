@@ -1,0 +1,10 @@
+$input
+h1 em
+
+$input
+div * p
+
+$input
+div p *[href]
+$output
+div p [href]
