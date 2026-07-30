@@ -1,0 +1,10 @@
+$input
+h1#chapter1
+
+$input
+1#chapter1
+
+$input
+*#z98y
+$output
+#z98y
