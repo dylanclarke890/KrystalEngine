@@ -263,6 +263,39 @@ namespace Krys::HTML
     output.append(separator.begin(), separator.end());
     output.append(rightside.begin(), rightside.end());
 
+    if (auto *previousSelector = selector->PrecedingComplexSelectorComponent())
+    {
+      CSSOMString separator = [relation = selector->Relation()]() noexcept -> CSSOMString
+      {
+        switch (relation)
+        {
+          case SelectorRelation::Descendant:
+          {
+            return u8" ";
+          }
+          case SelectorRelation::Child:
+          {
+            return u8" > ";
+          }
+          case SelectorRelation::NextSibling:
+          {
+            return u8" + ";
+          }
+          case SelectorRelation::SubsequentSibling:
+          {
+            return u8" ~ ";
+          }
+          case SelectorRelation::Compounding:
+          default:
+          {
+            assert(false);
+            return u8"";
+          }
+        }
+      }();
+      return previousSelector->SelectorText(separator, Krys::Text::ConvertToUTF8(utf32_stringview(output)));
+    }
+
     return Krys::Text::ConvertToUTF8(utf32_stringview(output));
   }
 
