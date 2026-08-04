@@ -1,13 +1,14 @@
+from datetime import datetime
 import json
 import jsonschema
 import pathlib
 from jinja2 import Environment, FileSystemLoader
 
 def get_validated_data(dir: pathlib.Path):
-    data = json.loads((dir / "data.json").read_text())
+    instance = json.loads((dir / "data.json").read_text())
     schema = json.loads((dir / "data.schema.json").read_text())
-    jsonschema.validate(instance=data, schema=schema)
-    return data
+    jsonschema.validate(instance, schema)
+    return instance
 
 def kebab_case_to_pascal_case(kebab_case: str) -> str:
     return ''.join(word.capitalize() for word in kebab_case.split('-'))
@@ -26,6 +27,7 @@ def generate(project_root: str):
     for property_name, property_data in data["properties"].items():
         enum_value = EnumValue(property_name, kebab_case_to_pascal_case(property_name))
         if "longhands" in property_data.get("codegen-properties", {}):
+            # If the property has longhands, it is a shorthand property.
             shorthand_properties.append(enum_value)
         else:
             longhand_properties.append(enum_value)
@@ -40,6 +42,7 @@ def generate(project_root: str):
         "enum_values": [value.__dict__ for value in all_properties],
         "enum_type": "uint16",
         "enum_default": "Invalid",
+        "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     }
     
     output_dir = pathlib.Path(project_root) / "include" / "Krystal.HTML" / "CSS" / "Properties" / "Enums"
