@@ -1,0 +1,51 @@
+{
+  "properties": {
+    "margin": {
+      "codegen-properties": {
+        "parser-syntax": "<'margin-top'>{1,4}",
+        "longhands": [
+          "margin-top",
+          "margin-right",
+          "margin-bottom",
+          "margin-left"
+        ]
+      },
+      "specification": {
+        "category": "css-22",
+        "url": "https://www.w3.org/TR/CSS22/box.html#propdef-margin"
+      }
+    },
+    "margin-bottom": {
+      "initial": "0px",
+      "codegen-properties": { "parser-syntax": "<length-percentage> | auto" },
+      "specification": {
+        "category": "css-box-4",
+        "url": "https://drafts.csswg.org/css-box-4/#margin-physical"
+      }
+    },
+    "margin-left": {
+      "initial": "0px",
+      "codegen-properties": { "parser-syntax": "<length-percentage> | auto" },
+      "specification": {
+        "category": "css-box-4",
+        "url": "https://drafts.csswg.org/css-box-4/#margin-physical"
+      }
+    },
+    "margin-right": {
+      "initial": "0px",
+      "codegen-properties": { "parser-syntax": "<length-percentage> | auto" },
+      "specification": {
+        "category": "css-box-4",
+        "url": "https://drafts.csswg.org/css-box-4/#margin-physical"
+      }
+    },
+    "margin-top": {
+      "initial": "0px",
+      "codegen-properties": { "parser-syntax": "<length-percentage> | auto" },
+      "specification": {
+        "category": "css-box-4",
+        "url": "https://drafts.csswg.org/css-box-4/#margin-physical"
+      }
+    }
+  }
+}

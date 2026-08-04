@@ -68,7 +68,6 @@ namespace Krys
 
     if constexpr (Traits::BitwiseFlags)
     {
-      // TODO: this doesn't seem right
       return Traits::DistinctValues;
     }
     else

@@ -19,9 +19,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <None Include="codegen\css-properties\data.json" />
+    <None Include="codegen\css-properties\data.schema.json" />
+    <None Include="codegen\css-properties\generator.py" />
+    <None Include="codegen\enum.hpp.jinja" />
+    <None Include="codegen\enum\enum.hpp.jinja" />
+    <None Include="codegen\generators\css-properties\data.json" />
+    <None Include="codegen\generators\css-properties\data.schema.json" />
+    <None Include="codegen\generators\css-properties\generator.py" />
     <None Include="codegen\generators\css\properties.py" />
+    <None Include="codegen\generators\enum\enum.hpp.jinja" />
     <None Include="codegen\main.py" />
-    <None Include="data\CSS\CSSProperties.json" />
+    <None Include="codegen\templates\enum.hpp.jinja" />
     <None Include="data\_progress\DOM.txt" />
     <None Include="data\_progress\HTML.txt" />
     <Text Include="data\HTMLEntityNames.in" />
@@ -835,7 +844,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>python "$(ProjectDir)codegen\main.py" "$(ProjectDir)\data"</Command>
+      <Command>python "$(ProjectDir)codegen\main.py" "$(ProjectDir)"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

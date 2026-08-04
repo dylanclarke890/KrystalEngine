@@ -1883,8 +1883,17 @@
     <None Include="data\CSS\CSSStyleProperties.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\CSS\CSSProperties.json" />
     <None Include="codegen\main.py" />
     <None Include="codegen\generators\css\properties.py" />
+    <None Include="codegen\generators\css-properties\data.json" />
+    <None Include="codegen\generators\css-properties\generator.py" />
+    <None Include="codegen\generators\css-properties\data.schema.json" />
+    <None Include="codegen\generators\enum\enum.hpp.jinja" />
+    <None Include="codegen\enum\enum.hpp.jinja" />
+    <None Include="codegen\css-properties\data.json" />
+    <None Include="codegen\css-properties\data.schema.json" />
+    <None Include="codegen\css-properties\generator.py" />
+    <None Include="codegen\enum.hpp.jinja" />
+    <None Include="codegen\templates\enum.hpp.jinja" />
   </ItemGroup>
 </Project>
