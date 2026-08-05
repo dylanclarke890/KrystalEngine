@@ -1,5 +1,15 @@
 {
   "properties": {
+    "all": {
+      "codegen-properties": {
+        "parser-syntax": "initial | inherit | unset | revert | revert-layer",
+        "longhands": ["all"]
+      },
+      "specification": {
+        "category": "css-cascade-5",
+        "url": "https://www.w3.org/TR/css-cascade-5/#all-shorthand"
+      }
+    },
     "margin": {
       "codegen-properties": {
         "parser-syntax": "<'margin-top'>{1,4}",

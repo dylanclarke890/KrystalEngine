@@ -10,10 +10,19 @@
 
 namespace Krys::HTML
 {
+  {% if model.enum_comment %}
+  {{ model.enum_comment }}
+  {% endif %}
   enum class {{ model.enum_name }} : {{ model.enum_type }}
   {
+    {% if model.enum_default_comment %}
+    {{ model.enum_default_comment }}
+    {% endif %}
     {{ model.enum_default }} = 0,
   {% for value in model.enum_values %}
+    {% if value.comment %}
+    {{ value.comment }}
+    {% endif %}
     {{ value.value_name }}{{ "," if not loop.last }}
   {% endfor %}
   };
@@ -46,6 +55,10 @@ namespace Krys::HTML
       }
     }
   }
+  {% if model.additional_data %}
+  
+  {{ model.additional_data }}
+  {% endif %}
 }
 
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::{{ model.enum_name }}, {{ (model.enum_values | length) + 1 }}uz);

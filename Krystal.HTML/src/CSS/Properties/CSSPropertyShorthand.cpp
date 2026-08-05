@@ -1,4 +1,6 @@
 ﻿#include "Krystal.HTML/CSS/Properties/CSSPropertyShorthand.hpp"
+#include <array>
+#include <cassert>
 
 namespace Krys::HTML
 {
