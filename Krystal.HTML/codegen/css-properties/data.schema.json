@@ -15,7 +15,11 @@
                 "parser-syntax": { "type": "string" },
                 "longhands": {
                   "type": "array",
-                  "items": { "type": "string", "pattern": "^[a-zA-Z-]+$", "uniqueItems": true },
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z-]+$",
+                    "uniqueItems": true
+                  },
                   "minItems": 1
                 }
               },
@@ -25,10 +29,11 @@
             "specification": {
               "type": "object",
               "properties": {
-                "category": { "type": "string" },
+                "module": { "type": "string" },
                 "url": { "type": "string", "format": "uri" }
               },
-              "required": ["category", "url"]
+              "required": ["module", "url"],
+              "additionalProperties": false
             }
           },
           "required": ["codegen-properties", "specification"]
@@ -37,5 +42,6 @@
       "additionalProperties": false
     }
   },
-  "required": ["properties"]
+  "required": ["properties"],
+  "additionalProperties": false
 }

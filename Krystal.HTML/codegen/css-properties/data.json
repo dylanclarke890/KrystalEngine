@@ -6,7 +6,7 @@
         "longhands": ["all"]
       },
       "specification": {
-        "category": "css-cascade-5",
+        "module": "css-cascade-5",
         "url": "https://www.w3.org/TR/css-cascade-5/#all-shorthand"
       }
     },
@@ -21,23 +21,23 @@
         ]
       },
       "specification": {
-        "category": "css-22",
-        "url": "https://www.w3.org/TR/CSS22/box.html#propdef-margin"
+        "module": "css-box-4",
+        "url": "https://www.w3.org/TR/css-box-4/#propdef-margin"
       }
     },
     "margin-bottom": {
       "initial": "0px",
       "codegen-properties": { "parser-syntax": "<length-percentage> | auto" },
       "specification": {
-        "category": "css-box-4",
+        "module": "css-box-4",
         "url": "https://drafts.csswg.org/css-box-4/#margin-physical"
       }
     },
     "margin-left": {
       "initial": "0px",
-      "codegen-properties": { "parser-syntax": "<length-percentage> | auto" },
+      "codegen-properties": { "parser-syntax": "<length-percentage> | auto " },
       "specification": {
-        "category": "css-box-4",
+        "module": "css-box-4",
         "url": "https://drafts.csswg.org/css-box-4/#margin-physical"
       }
     },
@@ -45,7 +45,7 @@
       "initial": "0px",
       "codegen-properties": { "parser-syntax": "<length-percentage> | auto" },
       "specification": {
-        "category": "css-box-4",
+        "module": "css-box-4",
         "url": "https://drafts.csswg.org/css-box-4/#margin-physical"
       }
     },
@@ -53,8 +53,55 @@
       "initial": "0px",
       "codegen-properties": { "parser-syntax": "<length-percentage> | auto" },
       "specification": {
-        "category": "css-box-4",
+        "module": "css-box-4",
         "url": "https://drafts.csswg.org/css-box-4/#margin-physical"
+      }
+    },
+    "padding": {
+      "codegen-properties": {
+        "parser-syntax": "<'padding-top'>{1,4}",
+        "longhands": [
+          "padding-top",
+          "padding-right",
+          "padding-bottom",
+          "padding-left"
+        ]
+      },
+      "specification": {
+        "module": "css-box-4",
+        "url": "https://www.w3.org/TR/css-box-4/#propdef-padding"
+      }
+    },
+    "padding-bottom": {
+      "initial": "0px",
+      "codegen-properties": { "parser-syntax": "<length-percentage [0,∞]>" },
+      "specification": {
+        "module": "css-box-4",
+        "url": "https://drafts.csswg.org/css-box-4/#padding-physical"
+      }
+    },
+    "padding-left": {
+      "initial": "0px",
+      "codegen-properties": { "parser-syntax": "<length-percentage [0,∞]>" },
+      "specification": {
+        "module": "css-box-4",
+        "url": "https://drafts.csswg.org/css-box-4/#padding-physical"
+      }
+    },
+    "padding-right": {
+      "initial": "0px",
+      "codegen-properties": { "parser-syntax": "<length-percentage [0,∞]>" },
+      "specification": {
+        "module": "css-box-4",
+        "url": "https://drafts.csswg.org/css-box-4/#padding-physical"
+      }
+    },
+    "padding-top": {
+      "initial": "0px",
+      "codegen-properties": { "parser-syntax": "<length-percentage [0,∞]>" },
+      "specification": {
+        "module": "css-box-4",
+        "url": "https://drafts.csswg.org/css-box-4/#padding-physical"
       }
     }
   }

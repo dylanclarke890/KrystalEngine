@@ -11,7 +11,7 @@ namespace Krys::HTML
     }
 
     auto shorthands = MatchingShorthandsForLonghand(Id);
-    assert(shorthands.size() && ShorthandIndex >= 0 && ShorthandIndex < shorthands.size());
+    assert(shorthands.size() && ShorthandIndex < shorthands.size());
 
     return shorthands[ShorthandIndex].ShorthandId;
   }
