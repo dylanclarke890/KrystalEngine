@@ -1,5 +1,6 @@
 import pathlib
 from utils import EnumValue, GeneratorContext, get_validated_json, kebab_case_to_pascal_case, generator_metadata
+from collections import defaultdict
 
 GENERATOR_NAME = "css-properties.generator"
 
@@ -115,6 +116,10 @@ def __generate_css_property_shorthand_files(
     def preferred_order_for_shorthands(x):
         return (-shorthand_to_longhand_count[x], x.id.startswith("-"), not x.id.startswith("-webkit-"), x.id)
 
+    longhands_to_shorthand_data: defaultdict[tuple[CSSProperty, ...], list[str]] = defaultdict(list)
+    for longhand, shorthands in longhand_to_shorthand_data.items():
+        longhands_to_shorthand_data[tuple(sorted(shorthands, key=preferred_order_for_shorthands))].append(longhand)
+
     model.update(
         {
             "shorthand_to_longhand_data": [
@@ -122,8 +127,8 @@ def __generate_css_property_shorthand_files(
                 for shorthand, longhands in shorthand_to_longhand_data.items()
             ],
             "longhands_to_shorthand_data": [
-                LonghandsToShorthandData([longhand], [shorthand.id_pascal_case for shorthand in sorted(shorthands, key=preferred_order_for_shorthands)])
-                for longhand, shorthands in longhand_to_shorthand_data.items()
+                LonghandsToShorthandData(longhands, [shorthand.id_pascal_case for shorthand in shorthands])
+                for shorthands, longhands in longhands_to_shorthand_data.items()
             ],
             "shorthand_to_longhand_count": shorthand_to_longhand_count,
         }
