@@ -32,13 +32,18 @@ namespace Krys::HTML
   {
     switch (property)
     {
-      case CSSPropertyId::MarginTop:
-      case CSSPropertyId::MarginBottom:
-      case CSSPropertyId::MarginLeft:
-      case CSSPropertyId::MarginRight:
-      {
-        return CSSPropertyShorthandList {AllShorthand(), MarginShorthand()};
-      }
+{% for longhand_data in model.longhands_to_shorthand_data %}
+    {% for longhand_name in longhand_data.longhand_names %}
+        case CSSPropertyId::{{ longhand_name }}:
+    {% endfor %}
+        {
+            return CSSPropertyShorthandList {
+            {% for shorthand_name in longhand_data.shorthand_names %}
+                {{ shorthand_name }}Shorthand(),
+            {% endfor %}
+            };
+        }
+{% endfor %}
       default:
       {
         return {};
