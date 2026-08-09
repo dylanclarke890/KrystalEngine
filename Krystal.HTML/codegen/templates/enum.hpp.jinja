@@ -56,8 +56,9 @@ namespace Krys::HTML
     }
   }
 {% if model.additional_data %}
-  
-  {{ model.additional_data }}
+  {% for line in model.additional_data %}
+  {{ line }}
+  {% endfor %}
 {% endif %}
 }
 

@@ -45,7 +45,12 @@ def __generate_css_property_id_enum(
         "enum_type": "uint16",
         "enum_default": "Invalid",
         "enum_default_comment": "/// @brief Represents an invalid or unrecognized CSS property.",
-        "additional_data": f"constexpr size_t MaxShorthandPropertyId = {shorthand_property_count}uz;",
+        "additional_data": [
+            "constexpr size_t FirstShorthandCSSPropertyId = 1uz;",
+            f"constexpr size_t LastShorthandCSSPropertyId = {shorthand_property_count}uz;",
+            f"constexpr size_t FirstLonghandCSSPropertyId = {1 + shorthand_property_count}uz;",
+            f"constexpr size_t LastLonghandCSSPropertyId = {len(all_properties) - 1}uz;",
+        ],
     }
     model.update(generator_metadata(GENERATOR_NAME))
 

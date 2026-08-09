@@ -104,5 +104,17 @@ namespace Krys::HTML
     {
       return *_value;
     }
+
+    KRYS_NODISCARD static bool IsShorthand(CSSPropertyId id) noexcept
+    {
+      return static_cast<size_t>(id) >= FirstShorthandCSSPropertyId
+             && static_cast<size_t>(id) <= LastShorthandCSSPropertyId;
+    }
+
+    KRYS_NODISCARD static bool IsLonghand(CSSPropertyId id) noexcept
+    {
+      return static_cast<size_t>(id) >= FirstLonghandCSSPropertyId
+             && static_cast<size_t>(id) <= LastLonghandCSSPropertyId;
+    }
   };
 }

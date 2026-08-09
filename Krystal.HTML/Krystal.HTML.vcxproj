@@ -22,6 +22,9 @@
     <None Include="codegen\css-properties\data.json" />
     <None Include="codegen\css-properties\data.schema.json" />
     <None Include="codegen\css-properties\generator.py" />
+    <None Include="codegen\css-values\data.json" />
+    <None Include="codegen\css-values\data.schema.json" />
+    <None Include="codegen\css-values\generator.py" />
     <None Include="codegen\enum.hpp.jinja" />
     <None Include="codegen\enum\enum.hpp.jinja" />
     <None Include="codegen\generators\css-properties\data.json" />
@@ -60,6 +63,7 @@
     <ClCompile Include="src\CSS\Selectors\CSSSelectorParser.cpp" />
     <ClCompile Include="src\CSS\Selectors\MutableCSSSelector.cpp" />
     <ClCompile Include="src\CSS\StyleSheetContents.cpp" />
+    <ClCompile Include="src\CSS\Values\CSSPrimitiveValue.cpp" />
     <ClCompile Include="src\HTML\Algorithms\FormControlAlgorithms.cpp" />
     <ClCompile Include="src\HTML\Parser\HTMLDocumentParser.cpp" />
     <ClCompile Include="src\SVG\SVGCircleElement.cpp" />
@@ -132,6 +136,7 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\ParsedCSSPropertyList.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\ParsedCSSRuleList.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSInternalStyleProperties.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyParserState.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Enums\CSSPropertyFlag.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Enums\CSSPropertyId.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Enums\CSSRuleFlag.hpp" />
@@ -187,10 +192,12 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Types\IsImportant.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Types\MediaListOrDOMString.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Types\IsSetFromShorthand.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSPrimitiveValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSUnits.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSUnitCategory.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSUnitType.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSValueId.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSValueType.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\StaticRangeInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\BoundaryPointComparator.hpp" />

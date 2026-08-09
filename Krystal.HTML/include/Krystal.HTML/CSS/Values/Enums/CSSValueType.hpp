@@ -7,12 +7,8 @@ namespace Krys::HTML
   enum class CSSValueType : uint8
   {
     Invalid = 0,
-    Keyword,
-    Length,
-    Percentage,
-    Color,
-    Function,
+    Primitive,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSValueType, 6uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSValueType, 2uz);

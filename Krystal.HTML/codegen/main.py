@@ -38,6 +38,7 @@ def main():
     GENERATORS_TO_RUN = [
         # CSS
         "css-properties.generator",
+        "css-values.generator",
         # HTML
     ]
 

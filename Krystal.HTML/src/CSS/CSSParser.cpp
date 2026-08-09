@@ -497,7 +497,7 @@ namespace Krys::HTML
     const size_t oldPropertiesCount = CurrentNestedContext().ParsedProperties.size();
     if (propertyId != CSSPropertyId::Invalid)
     {
-      CSSPropertyParser::ParseValue(tokens, propertyId, ruleType, important,
+      (void)CSSPropertyParser::ParseValue(tokens, _context, propertyId, ruleType, important,
                                     CurrentNestedContext().ParsedProperties);
     }
 

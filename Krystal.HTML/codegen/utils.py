@@ -45,9 +45,9 @@ class GeneratorContext:
 class EnumValue:
     str_name: str
     value_name: str
-    comment: str
+    comment: str | None
 
-    def __init__(self, str_name: str, value_name: str, comment: str):
+    def __init__(self, str_name: str, value_name: str, comment: str | None = None):
         self.str_name = str_name
         self.value_name = value_name
         self.comment = comment

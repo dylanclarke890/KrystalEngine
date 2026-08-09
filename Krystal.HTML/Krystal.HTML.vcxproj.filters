@@ -1056,6 +1056,15 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\CSSParserContext.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyParserState.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSValueId.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSPrimitiveValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -1580,6 +1589,9 @@
     <ClCompile Include="src\CSS\Selectors\CSSSelector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\CSS\Values\CSSPrimitiveValue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\HTMLTagNames.in" />
@@ -1896,5 +1908,8 @@
     <None Include="codegen\enum.hpp.jinja" />
     <None Include="codegen\templates\enum.hpp.jinja" />
     <None Include="codegen\utils.py" />
+    <None Include="codegen\css-values\data.json" />
+    <None Include="codegen\css-values\data.schema.json" />
+    <None Include="codegen\css-values\generator.py" />
   </ItemGroup>
 </Project>
