@@ -504,15 +504,15 @@ namespace Krys::HTML
     return CurrentNestedContext().ParsedProperties.size() != oldPropertiesCount;
   }
 
-  IsImportant CSSParser::ConsumeTrailingImportantAndWhitespace(CSSTokenRange &range)
+  IsImportant CSSParser::ConsumeTrailingImportantAndWhitespace(CSSTokenRange &tokens)
   {
-    range.DiscardTrailingWhitespace();
-    if (range.Size() < 2uz)
+    tokens.DiscardTrailingWhitespace();
+    if (tokens.Size() < 2uz)
     {
       return IsImportant(false);
     }
 
-    auto removeImportantRange = range;
+    auto removeImportantRange = tokens;
     if (auto &last = removeImportantRange.ConsumeLast();
         last.Type() != CSSTokenType::Ident
         || !Krys::Text::ASCIICaseInsensitiveMatch(last.IdentCodePoints(), u8"important"))
@@ -528,7 +528,7 @@ namespace Krys::HTML
     }
 
     removeImportantRange.DiscardTrailingWhitespace();
-    range = removeImportantRange;
+    tokens = removeImportantRange;
     return IsImportant(true);
   }
 

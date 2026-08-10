@@ -28,6 +28,23 @@ namespace Krys::HTML
 {% endfor %}
   }
 
+  CSSPropertyShorthand LonghandsForShorthand(CSSPropertyId property) noexcept
+  {
+    switch (property)
+    {
+{% for shorthand_data in model.shorthand_to_longhand_data %}
+      case CSSPropertyId::{{ shorthand_data.shorthand_name }}:
+      {
+        return {{ shorthand_data.shorthand_name }}Shorthand();
+      }
+{% endfor %}
+      default:
+      {
+        return {};
+      }
+    }
+  }
+
   CSSPropertyShorthandList MatchingShorthandsForLonghand(CSSPropertyId property) noexcept
   {
     switch (property)

@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\CSS\CSSParser.cpp" />
+    <ClCompile Include="src\CSS\Properties\CSSPropertyConsumer.cpp" />
     <ClCompile Include="src\CSS\Properties\CSSPropertyParser.cpp" />
     <ClCompile Include="src\CSS\Properties\CSSPropertyShorthand.cpp" />
     <ClCompile Include="src\CSS\CSSRule.cpp" />
@@ -132,6 +133,7 @@
     <ClInclude Include="include\Krystal.HTML\CSS\CSSStyleProperties.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\CSSParserContext.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSParserMode.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyConsumer.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyParser.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\ParsedCSSPropertyList.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\ParsedCSSRuleList.hpp" />

@@ -1,12 +1,30 @@
 ﻿#include "Krystal.HTML/CSS/Properties/CSSPropertyParser.hpp"
+#include "Krystal.HTML/CSS/Properties/CSSPropertyConsumer.hpp"
+#include "Krystal.HTML/CSS/Properties/CSSPropertyShorthand.hpp"
+#include "Krystal.HTML/CSS/Values/CSSPrimitiveValue.hpp"
 
 namespace Krys::HTML
 {
   namespace
   {
-    KRYS_NODISCARD bool ParseShorthandStyleProperty(CSSTokenRange tokens, CSSPropertyParserState& state, ParsedCSSPropertyList &properties) noexcept
+    KRYS_NODISCARD RefPtr<CSSPrimitiveValue> ConsumeCSSWideKeywordValue(CSSTokenRange &tokens) noexcept
     {
-      return false;
+      auto tokensCopy = tokens;
+      auto &identifier = tokensCopy.Consume();
+
+      if (!tokensCopy.IsAtEnd())
+      {
+        return nullptr;
+      }
+
+      auto valueId = ParseCSSValueId(identifier.IdentCodePoints());
+      if (!CSSValue::IsCSSWideKeyword(valueId))
+      {
+        return nullptr;
+      }
+
+      tokens = tokensCopy;
+      return CreateRef<CSSPrimitiveValue>(valueId);
     }
   }
 
@@ -22,7 +40,7 @@ namespace Krys::HTML
       case CSSRuleType::Style:
       default:
       {
-        success = ConsumeStyleProperty(tokens, context, id, important, ruleType);
+        success = ConsumeStyleProperty(tokens, context, id, important, ruleType, properties);
         break;
       }
     }
@@ -41,12 +59,29 @@ namespace Krys::HTML
       .Important = important,
     };
 
+    auto tokensCopy = tokens;
     if (CSSProperty::IsShorthand(id))
     {
-      return ParseShorthandStyleProperty(tokens, state, properties);
+      if (auto cssWideKeywordValue = ConsumeCSSWideKeywordValue(tokensCopy))
+      {
+        for (auto longhand : LonghandsForShorthand(id).LonghandProperties)
+        {
+          properties.emplace_back(longhand, cssWideKeywordValue, important);
+          tokens = tokensCopy;
+        }
+        return true;
+      }
+
+      return CSSPropertyConsumer::ParseShorthandStyleProperty(tokens, state, properties);
     }
-    else
+
+    if (auto cssWideKeywordValue = ConsumeCSSWideKeywordValue(tokensCopy))
     {
+      properties.emplace_back(id, Krys::Move(cssWideKeywordValue), important);
+      tokens = tokensCopy;
+      return true;
     }
+
+    return CSSPropertyConsumer::ParseLonghandStyleProperty(tokens, state, properties);
   }
 }

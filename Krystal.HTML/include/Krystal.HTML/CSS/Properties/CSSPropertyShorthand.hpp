@@ -33,6 +33,9 @@ namespace Krys::HTML
 
   using CSSPropertyShorthandList = SmallList<CSSPropertyShorthand, 4uz>;
 
+  /// @brief Gets the list of longhand properties that are set by the given shorthand property.
+  KRYS_NODISCARD CSSPropertyShorthand LonghandsForShorthand(CSSPropertyId property) noexcept;
+
   /// @brief Gets the list of shorthands that set the given longhand property.
   KRYS_NODISCARD CSSPropertyShorthandList MatchingShorthandsForLonghand(CSSPropertyId property) noexcept;
 }

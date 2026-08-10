@@ -37,8 +37,8 @@ def main():
     project_root = get_project_root_from_args()
     GENERATORS_TO_RUN = [
         # CSS
-        "css-properties.generator",
         "css-values.generator",
+        "css-properties.generator",
         # HTML
     ]
 

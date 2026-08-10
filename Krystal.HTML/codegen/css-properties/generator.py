@@ -146,6 +146,15 @@ def __generate_css_property_shorthand_files(
     with open(output_filepath, "w") as cpp_file:
         cpp_file.write(output)
 
+def __generate__css_property_consumer_file(context: GeneratorContext, all_properties: list[CSSProperty]):
+    model: dict[str, object] = generator_metadata(GENERATOR_NAME)
+    template = context.template_env.get_template("css-property-consumer.cpp.jinja")
+    output = template.render(model=model)
+
+    output_filepath = context.project_root / "src" / "CSS" / "Properties" / "CSSPropertyConsumer.cpp"
+    with open(output_filepath, "w") as cpp_file:
+        cpp_file.write(output)
+
 
 def generate(context: GeneratorContext):
     properties_json = get_validated_json(pathlib.Path(__file__).parent)
@@ -163,3 +172,5 @@ def generate(context: GeneratorContext):
     __generate_css_property_id_enum(context, all_properties, len(shorthand_properties))
 
     __generate_css_property_shorthand_files(context, shorthand_properties, longhand_properties)
+
+    __generate__css_property_consumer_file(context, all_properties)
