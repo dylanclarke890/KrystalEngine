@@ -65,6 +65,7 @@
     <ClCompile Include="src\CSS\Selectors\MutableCSSSelector.cpp" />
     <ClCompile Include="src\CSS\StyleSheetContents.cpp" />
     <ClCompile Include="src\CSS\Values\CSSPrimitiveValue.cpp" />
+    <ClCompile Include="src\CSS\Values\Primitives\CSSPrimitiveNumericUnits.cpp" />
     <ClCompile Include="src\HTML\Algorithms\FormControlAlgorithms.cpp" />
     <ClCompile Include="src\HTML\Parser\HTMLDocumentParser.cpp" />
     <ClCompile Include="src\SVG\SVGCircleElement.cpp" />
@@ -201,6 +202,8 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSUnitType.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSValueId.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSValueType.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPrimitiveNumericRange.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPrimitiveNumericUnits.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\StaticRangeInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\BoundaryPointComparator.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Algorithms\DOMTreeAccessors.hpp" />

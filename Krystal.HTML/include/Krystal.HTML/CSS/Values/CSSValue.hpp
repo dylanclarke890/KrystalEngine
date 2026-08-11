@@ -13,11 +13,10 @@ namespace Krys::HTML
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();
 
-  private:
-    CSSValueType _type : BitCount<CSSValueType>();
-    CSSUnitType _unit : BitCount<CSSUnitType>();
-
   protected:
+    CSSValueType _type : BitCount<CSSValueType>();
+    CSSUnitType _unit : BitCount<CSSUnitType>() {CSSUnitType::Unknown};
+
     CSSValue(CSSValueType type) noexcept : _type(type)
     {
     }

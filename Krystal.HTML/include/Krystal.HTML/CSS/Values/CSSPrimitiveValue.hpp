@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/CSS/Properties/Enums/CSSPropertyId.hpp"
+#include "Krystal.HTML/CSS/Types/CSSOMString.hpp"
 #include "Krystal.HTML/CSS/Values/CSSValue.hpp"
 #include "Krystal.HTML/CSS/Values/Enums/CSSValueId.hpp"
 
@@ -8,10 +10,46 @@ namespace Krys::HTML
   class CSSPrimitiveValue : public CSSValue
   {
   private:
-    CSSValueId _valueId : BitCount<CSSValueId>() {CSSValueId::Invalid};
+    union ValueUnion
+    {
+      CSSPropertyId PropertyId;
+      CSSValueId ValueId;
+      double Number;
+      StringAtomStorage *String;
+    } _value;
 
   public:
-    CSSPrimitiveValue(CSSValueId valueId) noexcept;
+    explicit CSSPrimitiveValue(CSSValueId valueId) noexcept;
+
+    KRYS_NODISCARD bool IsPropertyId() const noexcept
+    {
+      return _unit == CSSUnitType::PropertyId;
+    }
+
+    KRYS_NODISCARD bool IsValueId() const noexcept
+    {
+      return _unit == CSSUnitType::ValueId;
+    }
+
+    KRYS_NODISCARD bool IsNumber() const noexcept
+    {
+      return _unit == CSSUnitType::Number;
+    }
+
+    KRYS_NODISCARD bool IsInteger() const noexcept
+    {
+      return _unit == CSSUnitType::Integer;
+    }
+
+    KRYS_NODISCARD bool IsPercentage() const noexcept
+    {
+      return _unit == CSSUnitType::Percentage;
+    }
+
+    KRYS_NODISCARD bool IsString() const noexcept
+    {
+      return _unit == CSSUnitType::String;
+    }
   };
 }
 

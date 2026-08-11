@@ -144,6 +144,7 @@
     <ClInclude Include="include\Krystal.Lib\Core\Move.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Tags.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\TypeCast.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\Visitor.hpp" />
     <ClInclude Include="include\Krystal.Lib\Detection\AddressSpaceBitSize.hpp" />
     <ClInclude Include="include\Krystal.Lib\Detection\NumberOfCores.hpp" />
     <ClInclude Include="include\Krystal.Lib\ForbidHeapAllocation.hpp" />
