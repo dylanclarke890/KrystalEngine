@@ -54,6 +54,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\CSS\Values\Primitives\CSSUnevaluatedCalc.cpp" />
     <ClCompile Include="src\CSS\CSSParser.cpp" />
     <ClCompile Include="src\CSS\Properties\CSSPropertyConsumer.cpp" />
     <ClCompile Include="src\CSS\Properties\CSSPropertyParser.cpp" />
@@ -129,6 +130,7 @@
     <ClCompile Include="src\SVG\SVGUseElement.cpp" />
     <ClInclude Include="include\Krystal.HTML\Constants\ElementNames.hpp" />
     <ClInclude Include="include\Krystal.HTML\Constants\TagNames.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Calc\CSSCalcValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\CSSCharsetRule.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\CSSFunctionDeclarations.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\CSSMarginDescriptors.hpp" />
@@ -207,11 +209,13 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSUnitType.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSValueId.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSValueType.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPrimitiveData.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPrimitiveKeywordList.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPrimitiveNumericConcepts.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPrimitiveNumericRange.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPrimitiveNumericRaw.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPrimitiveNumericUnits.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSUnevaluatedCalc.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\StaticRangeInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\BoundaryPointComparator.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Algorithms\DOMTreeAccessors.hpp" />

@@ -1089,6 +1089,15 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSValueConcepts.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPrimitiveData.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSUnevaluatedCalc.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Calc\CSSCalcValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -1620,6 +1629,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\CSS\Values\Primitives\CSSPrimitiveNumericUnits.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CSS\Values\Primitives\CSSUnevaluatedCalc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
