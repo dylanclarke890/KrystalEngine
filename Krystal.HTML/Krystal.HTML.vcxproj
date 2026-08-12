@@ -202,11 +202,15 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSPrimitiveValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSUnits.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSValue.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSValueConcepts.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSUnitCategory.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSUnitType.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSValueId.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSValueType.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPrimitiveKeywordList.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPrimitiveNumericConcepts.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPrimitiveNumericRange.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPrimitiveNumericRaw.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPrimitiveNumericUnits.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\StaticRangeInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\BoundaryPointComparator.hpp" />

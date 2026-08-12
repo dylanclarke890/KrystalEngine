@@ -9,7 +9,7 @@ namespace Krys
   template <typename A, typename... B>
   struct Visitor : Visitor<A>, Visitor<B...>
   {
-    Visitor(A a, B... b) noexcept : Visitor<A>(a), Visitor<B...>(b...) 
+    Visitor(A a, B... b) noexcept : Visitor<A>(a), Visitor<B...>(b...)
     {
     }
 
@@ -91,4 +91,83 @@ namespace Krys
   if constexpr (nextMin < MAX)                                                                               \
     return NEXT(nextMin, MAX);                                                                               \
   std::unreachable();
+
+  template <size_t Minimum, size_t Maximum, class F>
+  KRYS_NODISCARD KRYS_ALWAYS_INLINE decltype(auto) VisitAtIndex(size_t index, F &&f) noexcept
+  {
+#define KRYS_INDEX_VISIT_CASE(Min, Max, N) f.template operator()<Min + N>()
+#define KRYS_INDEX_VISIT_NEXT(Min, Max) VisitAtIndex<Min, Max>(index, std::forward<F>(f))
+
+    KRYS_UNROLLED_32_CASE_VISIT_SWITCH(index, Minimum, Maximum, KRYS_INDEX_VISIT_CASE, KRYS_INDEX_VISIT_NEXT)
+
+#undef KRYS_INDEX_VISIT_NEXT
+#undef KRYS_INDEX_VISIT_CASE
+  }
+
+  // `AsVariant` is used to allow subclasses of Variant to work with `SwitchOn`.
+
+  template <typename... Ts>
+  KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr Variant<Ts...> &AsVariant(Variant<Ts...> &v) noexcept
+  {
+    return v;
+  }
+
+  template <typename... Ts>
+  KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr const Variant<Ts...> &
+    AsVariant(const Variant<Ts...> &v) noexcept
+  {
+    return v;
+  }
+
+  template <typename... Ts>
+  KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr Variant<Ts...> &&AsVariant(Variant<Ts...> &&v) noexcept
+  {
+    return std::move(v);
+  }
+
+  template <typename... Ts>
+  KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr const Variant<Ts...> &&
+    AsVariant(const Variant<Ts...> &&v) noexcept
+  {
+    return std::move(v);
+  }
+
+  template <typename T>
+  concept HasSwitchOn = requires(T t) { t.SwitchOn([](const auto &) {}); };
+
+  template <typename Derived, typename Base>
+  concept DerivedFromOrConvertibleTo =
+    std::is_base_of_v<Base, Derived> || std::is_convertible_v<Derived, Base>;
+
+  template <class V, class... F>
+  requires(!HasSwitchOn<V>)
+  KRYS_ALWAYS_INLINE constexpr auto SwitchOn(V &&v, F &&...f) noexcept
+    -> decltype(std::visit(CreateVisitor(std::forward<F>(f)...), AsVariant(std::forward<V>(v))))
+  {
+    return std::visit(CreateVisitor(std::forward<F>(f)...), AsVariant(std::forward<V>(v)));
+  }
+
+  template <class V, class... F>
+  requires(HasSwitchOn<V>)
+  KRYS_ALWAYS_INLINE auto SwitchOn(V &&v, F &&...f) -> decltype(v.SwitchOn(std::forward<F>(f)...))
+  {
+    return v.SwitchOn(std::forward<F>(f)...);
+  }
+
+  template <class F, class Tuple>
+  KRYS_ALWAYS_INLINE constexpr decltype(auto) VisitTupleElementAtIndex(F &&f, size_t index,
+                                                                       Tuple &&tuple) noexcept
+  {
+    return VisitAtIndex<0, std::tuple_size_v<std::remove_cvref_t<Tuple>>>(
+      index,
+      [&]<size_t I>() { return std::invoke(std::forward<F>(f), std::get<I>(std::forward<Tuple>(tuple))); });
+  }
+
+  template <typename Tuple, typename... F>
+  KRYS_ALWAYS_INLINE constexpr auto SwitchOnTupleAtIndex(size_t index, Tuple &&tuple, F &&...f)
+    -> decltype(VisitTupleElementAtIndex(index, CreateVisitor(std::forward<F>(f)...),
+                                         std::forward<Tuple>(tuple)))
+  {
+    return VisitTupleElementAtIndex(CreateVisitor(std::forward<F>(f)...), index, std::forward<Tuple>(tuple));
+  }
 }
