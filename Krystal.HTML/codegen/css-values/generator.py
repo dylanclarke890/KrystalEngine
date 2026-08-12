@@ -39,3 +39,17 @@ def generate(context: GeneratorContext):
     )
     with open(output_filepath, "w") as hpp_file:
         hpp_file.write(output)
+
+    model = {
+        "keywords": [keyword.id_pascal_case for keyword in all_keywords],
+    }
+    model.update(generator_metadata(GENERATOR_NAME))
+
+    template = context.template_env.get_template("css-keyword-constants.hpp.jinja")
+    output = template.render(model=model)
+
+    output_filepath = (
+        context.project_root / "include" / "Krystal.HTML" / "CSS" / "Values" / "CSSKeywordConstants.hpp"
+    )
+    with open(output_filepath, "w") as hpp_file:
+        hpp_file.write(output)

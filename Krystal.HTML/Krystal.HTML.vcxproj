@@ -33,6 +33,9 @@
     <None Include="codegen\generators\css\properties.py" />
     <None Include="codegen\generators\enum\enum.hpp.jinja" />
     <None Include="codegen\main.py" />
+    <None Include="codegen\templates\css-keyword-constants.hpp.jinja" />
+    <None Include="codegen\templates\css-property-consumer.cpp.jinja" />
+    <None Include="codegen\templates\css-property-shorthand.cpp.jinja" />
     <None Include="codegen\templates\enum.hpp.jinja" />
     <None Include="codegen\utils.py" />
     <None Include="data\_progress\DOM.txt" />
@@ -195,6 +198,7 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Types\IsImportant.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Types\MediaListOrDOMString.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Types\IsSetFromShorthand.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSKeywordConstants.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSPrimitiveValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSUnits.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSValue.hpp" />

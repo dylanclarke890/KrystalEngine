@@ -284,12 +284,12 @@ namespace Krys::HTML
 #define KRYS_DEFINE_CSS_UNIT_LITERAL(type, name)                                                             \
   inline namespace Literals                                                                                  \
   {                                                                                                          \
-    consteval ValueLiteral<type> operator""_##name(long double value)                                        \
+    consteval ValueLiteral<type> operator""_css_##name(long double value)                                    \
     {                                                                                                        \
       return ValueLiteral<type> {static_cast<double>(value)};                                                \
     }                                                                                                        \
                                                                                                              \
-    consteval ValueLiteral<type> operator""_##name(unsigned long long value)                                 \
+    consteval ValueLiteral<type> operator""_css_##name(unsigned long long value)                             \
     {                                                                                                        \
       return ValueLiteral<type> {static_cast<double>(value)};                                                \
     }                                                                                                        \

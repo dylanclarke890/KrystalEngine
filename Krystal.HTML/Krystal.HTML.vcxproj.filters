@@ -1074,6 +1074,9 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPrimitiveNumericRange.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSKeywordConstants.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -1926,5 +1929,8 @@
     <None Include="codegen\css-values\data.json" />
     <None Include="codegen\css-values\data.schema.json" />
     <None Include="codegen\css-values\generator.py" />
+    <None Include="codegen\templates\css-keyword-constants.hpp.jinja" />
+    <None Include="codegen\templates\css-property-consumer.cpp.jinja" />
+    <None Include="codegen\templates\css-property-shorthand.cpp.jinja" />
   </ItemGroup>
 </Project>
