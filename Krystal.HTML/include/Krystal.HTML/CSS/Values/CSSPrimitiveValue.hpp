@@ -15,11 +15,13 @@ namespace Krys::HTML
       CSSPropertyId PropertyId;
       CSSValueId ValueId;
       double Number;
-      StringAtomStorage *String;
+      StringAtomStorage String;
     } _value;
 
   public:
     explicit CSSPrimitiveValue(CSSValueId valueId) noexcept;
+
+    explicit CSSPrimitiveValue(CSSOMString customIdentifier) noexcept;
 
     KRYS_NODISCARD bool IsPropertyId() const noexcept
     {

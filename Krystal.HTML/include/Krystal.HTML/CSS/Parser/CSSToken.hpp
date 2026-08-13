@@ -2,6 +2,7 @@
 
 #include "Krystal.HTML/CSS/Parser/Enums/CSSTokenType.hpp"
 #include "Krystal.HTML/CSS/Parser/Types/NumericValue.hpp"
+#include "Krystal.HTML/CSS/Values/Enums/CSSValueId.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/SmallList.hpp"
 #include "Krystal.Text/StringConversion.hpp"
@@ -78,6 +79,12 @@ namespace Krys::HTML
              || _type == CSSTokenType::String || _type == CSSTokenType::Url || _type == CSSTokenType::Delim);
 
       AppendDataInternal(codePoints);
+    }
+
+    KRYS_NODISCARD CSSValueId ValueId() const noexcept
+    {
+      assert(_type == CSSTokenType::Ident);
+      return ParseCSSValueId(IdentCodePoints());
     }
 
     void NumericValue(NumericValue value) noexcept

@@ -9,6 +9,12 @@ namespace Krys::HTML
     HTMLStandard,
     HTMLQuirks,
   };
+
+  KRYS_NODISCARD inline bool IsUnitlessValueParsingForcedForMode(CSSParserMode mode) noexcept
+  {
+    return false;
+  }
+
 }
 
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSParserMode, 2uz);

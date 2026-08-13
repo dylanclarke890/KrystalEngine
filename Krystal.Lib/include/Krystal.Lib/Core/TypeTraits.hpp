@@ -110,5 +110,8 @@ namespace Krys
   inline constexpr bool IsTypeComplete = false;
 
   template <typename T>
-  inline constexpr bool IsTypeComplete<T, std::void_t<decltype(sizeof(T))>> = true;
+  inline constexpr bool IsTypeComplete<T, void_t<decltype(sizeof(T))>> = true;
+
+  template <bool... Bs>
+  using AllTrue = std::is_same<std::integer_sequence<bool, true, Bs...>, std::integer_sequence<bool, Bs..., true>>;
 }

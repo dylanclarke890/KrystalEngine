@@ -1,0 +1,351 @@
+﻿#pragma once
+
+#include "Krystal.HTML/CSS/Parser/CSSToken.hpp"
+#include "Krystal.HTML/CSS/Parser/CSSTokenRange.hpp"
+#include "Krystal.HTML/CSS/Properties/CSSPropertyParserOptions.hpp"
+#include "Krystal.HTML/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.HTML/CSS/Values/Primitives/CSSPrimitiveNumeric.hpp"
+#include "Krystal.HTML/CSS/Values/Primitives/CSSPrimitiveNumericRange.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
+#include <cassert>
+#include <cmath>
+
+namespace Krys::HTML
+{
+  template <typename>
+  struct ConsumerDefinition;
+
+  /// @brief Used to check that a specialization of ConsumerDefinition exists.
+  struct HasConsumerDefinition
+  {
+  private:
+    template <typename T, typename U = decltype(ConsumerDefinition<T> {})>
+    KRYS_NODISCARD constexpr static bool Exists(int) noexcept
+    {
+      return true;
+    }
+
+    template <typename T>
+    KRYS_NODISCARD constexpr static bool Exists(char) noexcept
+    {
+      return false;
+    }
+
+  public:
+    template <typename T>
+    KRYS_NODISCARD constexpr static bool Check() noexcept
+    {
+      return Exists<T>(0);
+    }
+  };
+
+  // FIXME: Bailing on infinity during validation does not seem to match the intent of the spec,
+  // though due to the use of "implementation-defined" it may still be conforming. The spec states:
+  //
+  //   "When a value cannot be explicitly supported due to range/precision limitations, it must
+  //    be converted to the closest value supported by the implementation, but how the implementation
+  //    defines "closest" is implementation-defined as well."
+  //
+  // Angles have the additional restriction that:
+  //
+  //   "If an <angle> must be converted due to exceeding the implementation-defined range of supported
+  //    values, it must be clamped to the nearest supported multiple of 360deg."
+  //
+  // (https://drafts.csswg.org/css-values-4/#numeric-types)
+  //
+  // The infinity here is produced by the parser when a parsed number is no representable in
+  // as a double. A potentially more appropriate behavior would be to have the parser use
+  // std::numeric_limits<double>::max() instead. For angles, this would require further integration
+  // with the fast_float library (or whatever is currently being used to parse the number) to
+  // extract the correct modulo 360deg value.
+
+  /// @brief Shared validator for types dimensional types that need to canonicalize to support range
+  /// constraints other than 0 and +/-∞.
+  template <typename Raw, typename F>
+  KRYS_NODISCARD bool IsValidDimensionValue(Raw raw, F &&functor) noexcept
+  {
+    if (std::isinf(raw.value))
+    {
+      return false;
+    }
+
+    if constexpr (raw.range.min == -CSSRange::Inf && raw.range.max == CSSRange::Inf)
+    {
+      return true;
+    }
+    else if constexpr (raw.range.min == 0 && raw.range.max == CSSRange::Inf)
+    {
+      return raw.value >= 0;
+    }
+    else if constexpr (raw.range.min == -CSSRange::Inf && raw.range.max == 0)
+    {
+      return raw.value <= 0;
+    }
+    else
+    {
+      return functor();
+    }
+  }
+
+  /// @brief Shared validator for types that only support 0 and +/-∞ as valid range constraints.
+  template <typename Raw>
+  KRYS_NODISCARD bool IsValidNonCanonicalizableDimensionValue(Raw raw) noexcept
+  {
+    if (std::isinf(raw.value))
+    {
+      return false;
+    }
+
+    if constexpr (raw.range.min == -CSSRange::Inf && raw.range.max == CSSRange::Inf)
+    {
+      return true;
+    }
+    else if constexpr (raw.range.min == 0 && raw.range.max == CSSRange::Inf)
+    {
+      return raw.value >= 0;
+    }
+    else if constexpr (raw.range.min == -CSSRange::Inf && raw.range.max == 0)
+    {
+      return raw.value <= 0;
+    }
+  }
+
+  /// @brief Shared validator for types that always have their value in canonical units (number, percentage,
+  /// flex).
+  template <typename Raw>
+  KRYS_NODISCARD bool IsValidCanonicalValue(Raw raw) noexcept
+  {
+    if (std::isinf(raw.value))
+    {
+      return false;
+    }
+
+    if constexpr (raw.range.min == -CSSRange::Inf && raw.range.max == CSSRange::Inf)
+    {
+      return true;
+    }
+    else if constexpr (raw.range.max == CSSRange::Inf)
+    {
+      return raw.value >= raw.range.min;
+    }
+    else if constexpr (raw.range.min == -CSSRange::Inf)
+    {
+      return raw.value <= raw.range.max;
+    }
+    else
+    {
+      return raw.value >= raw.range.min && raw.value <= raw.range.max;
+    }
+  }
+
+  /// @brief Shared clamping utility.
+  template <typename Raw>
+  KRYS_NODISCARD Raw PerformParseTimeClamp(Raw raw) noexcept
+  {
+    static_assert(raw.range.clampOptions != RangeClampOptions::Default);
+
+    if constexpr (raw.range.clampOptions == RangeClampOptions::ClampLower)
+    {
+      return {std::max<typename Raw::ResolvedValueType>(raw.value, raw.range.min)};
+    }
+    else if constexpr (raw.range.clampOptions == RangeClampOptions::ClampUpper)
+    {
+      return {std::min<typename Raw::ResolvedValueType>(raw.value, raw.range.max)};
+    }
+    else if constexpr (raw.range.clampOptions == RangeClampOptions::ClampBoth)
+    {
+      return {std::clamp<typename Raw::ResolvedValueType>(raw.value, raw.range.min, raw.range.max)};
+    }
+  }
+
+  // Shared consumer for `Dimension` tokens.
+  template <typename Primitive, typename Validator>
+  struct DimensionConsumer
+  {
+    constexpr static CSSTokenType TokenType = CSSTokenType::Dimension;
+
+    KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(CSSTokenRange &range,
+                                                                 CSSPropertyParserState &state,
+                                                                 CSSCalcAllowedSymbols,
+                                                                 CSSPropertyParserOptions options) noexcept
+    {
+      assert(range.Peek().Type() == CSSTokenType::Dimension);
+
+      auto &token = range.Peek();
+
+      auto validatedUnit = Validator::Validate(token.UnitType(), state, options);
+      if (!validatedUnit)
+      {
+        return Null;
+      }
+
+      auto rawValue = typename Primitive::Raw {*validatedUnit, token.NumericValue()};
+
+      if constexpr (rawValue.range.ClampOptions != RangeClampOptions::Default)
+      {
+        rawValue = PerformParseTimeClamp(rawValue);
+      }
+
+      if (!Validator::IsValid(rawValue, options))
+      {
+        return Null;
+      }
+
+      range.Discard();
+      range.DiscardWhitespace();
+
+      return rawValue;
+    }
+  };
+
+  // Shared consumer for `Percentage` tokens.
+  template <typename Primitive, typename Validator>
+  struct PercentageConsumer
+  {
+    constexpr static CSSTokenType TokenType = CSSTokenType::Percentage;
+
+    KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(CSSTokenRange &range,
+                                                                 CSSPropertyParserState &,
+                                                                 CSSCalcAllowedSymbols,
+                                                                 CSSPropertyParserOptions options) noexcept
+    {
+      assert(range.Peek().Type() == CSSTokenType::Percentage);
+
+      auto rawValue = typename Primitive::Raw {PercentageUnit::Percentage, range.Peek().NumericValue()};
+
+      if constexpr (rawValue.range.ClampOptions != RangeClampOptions::Default)
+      {
+        rawValue = PerformParseTimeClamp(rawValue);
+      }
+
+      if (!Validator::IsValid(rawValue, options))
+      {
+        return Null;
+      }
+
+      range.Discard();
+      range.DiscardWhitespace();
+
+      return rawValue;
+    }
+  };
+
+  // Shared consumer for `Number` tokens.
+  template <typename Primitive, typename Validator>
+  struct NumberConsumer
+  {
+    constexpr static CSSTokenType TokenType = CSSTokenType::Number;
+
+    KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(CSSTokenRange &range,
+                                                                 CSSPropertyParserState &,
+                                                                 CSSCalcAllowedSymbols,
+                                                                 CSSPropertyParserOptions options) noexcept
+    {
+      assert(range.Peek().Type() == CSSTokenType::Number);
+
+      auto rawValue = typename Primitive::Raw {NumberUnit::Number, range.Peek().NumericValue()};
+
+      if constexpr (rawValue.range.ClampOptions != RangeClampOptions::Default)
+      {
+        rawValue = PerformParseTimeClamp(rawValue);
+      }
+
+      if (!Validator::IsValid(rawValue, options))
+      {
+        return Null;
+      }
+
+      range.Discard();
+      range.DiscardWhitespace();
+
+      return rawValue;
+    }
+  };
+
+  // Shared consumer for `Number` tokens for use by dimensional primitives that support "unitless" values.
+  template <typename Primitive, typename Validator, auto unit>
+  struct NumberConsumerForUnitlessValues
+  {
+    constexpr static CSSTokenType TokenType = CSSTokenType::Number;
+
+    KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(CSSTokenRange &range,
+                                                                 CSSPropertyParserState &state,
+                                                                 CSSCalcAllowedSymbols,
+                                                                 CSSPropertyParserOptions options) noexcept
+    {
+      assert(range.Peek().Type() == CSSTokenType::Number);
+
+      auto numericValue = range.Peek().NumericValue();
+      if (!Validator::ShouldAcceptUnitlessValue(numericValue, state, options))
+      {
+        return Null;
+      }
+
+      auto rawValue = typename Primitive::Raw {unit, numericValue};
+
+      if constexpr (rawValue.range.ClampOptions != RangeClampOptions::Default)
+      {
+        rawValue = PerformParseTimeClamp(rawValue);
+      }
+
+      if (!Validator::IsValid(rawValue, options))
+      {
+        return Null;
+      }
+
+      range.Discard();
+      range.DiscardWhitespace();
+
+      return rawValue;
+    }
+  };
+
+  // Shared consumer for `Function` tokens that processes `calc()` for the provided primitive.
+  template <typename Primitive>
+  struct FunctionConsumerForCalcValues
+  {
+    constexpr static CSSTokenType TokenType = CSSTokenType::Function;
+
+    KRYS_NODISCARD static Maybe<typename Primitive::Calc> Consume(CSSTokenRange &range,
+                                                                  CSSPropertyParserState &state,
+                                                                  CSSCalcAllowedSymbols symbolsAllowed,
+                                                                  CSSPropertyParserOptions options) noexcept
+    {
+      assert(range.Peek().Type() == CSSTokenType::Function);
+
+      auto rangeCopy = range;
+      if (auto value = CSSCalc::Value::Parse(rangeCopy, state, Primitive::category, Primitive::range,
+                                             Krys::Move(symbolsAllowed), options))
+      {
+        range = rangeCopy;
+        // TODO:: wtf are they returning here
+        return {{value.releaseNonNull()}};
+      }
+
+      return Null;
+    }
+  };
+
+  template <typename T>
+  struct KeywordConsumer
+  {
+    constexpr static CSSTokenType TokenType = CSSTokenType::Ident;
+
+    KRYS_NODISCARD static Maybe<T> Consume(CSSTokenRange &range, CSSPropertyParserState &,
+                                           CSSCalcAllowedSymbols, CSSPropertyParserOptions) noexcept
+    {
+      assert(range.Peek().Type() == CSSTokenType::Ident);
+
+      if (range.Peek().ValueId() == T::value)
+      {
+        range.Discard();
+        range.DiscardWhitespace();
+
+        return T {};
+      }
+
+      return Null;
+    }
+  };
+}
