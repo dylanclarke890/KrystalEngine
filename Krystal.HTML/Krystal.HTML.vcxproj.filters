@@ -1170,6 +1170,12 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPrimitiveNumericTypes.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\Percentage.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\TimeDefinitions.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">

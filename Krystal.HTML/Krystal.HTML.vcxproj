@@ -157,6 +157,7 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\PercentageDefinitions.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\ResolutionDefinitions.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\SymbolDefinitions.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\TimeDefinitions.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyConsumer.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyParser.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\ParsedCSSPropertyList.hpp" />
