@@ -169,6 +169,7 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\ParsedCSSRuleList.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSInternalStyleProperties.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyParserOptions.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyParsers.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyParserState.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Enums\CSSPropertyFlag.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Enums\CSSPropertyId.hpp" />

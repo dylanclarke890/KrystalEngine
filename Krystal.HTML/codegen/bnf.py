@@ -1,76 +1,56 @@
-
 import enum
 import re
 import collections
+from utils import stringify_iterable, StringEqualingEnum
 
-def stringify_iterable(iterable):
-    return (str(x) for x in iterable)
+BNF_ILLEGAL_TOKEN = "ILLEGAL"
+BNF_EOF_TOKEN = "EOF"
 
-def quote_iterable(iterable, *, mark='"', suffix=''):
-    return (f'{mark}{x}{mark}{suffix}' for x in iterable)
-
-def count_iterable(iterable):
-    return sum(1 for _ in iterable)
-
-class StringEqualingEnum(enum.Enum):
-    def __eq__(self, b):
-        if isinstance(b, str):
-            return self.name == b
-        else:
-            return self.name == b.name
-
-    def __hash__(self):
-        return id(self.name)
+BNFTokenInfo = collections.namedtuple("BNFTokens", ["name", "value"])
 
 
 class BNFToken(StringEqualingEnum):
     # Numbers.
-    FLOAT   = re.compile(r'\-?\d+\.\d+')
-    INT     = re.compile(r'\-?\d+')
+    FLOAT = re.compile(r"\-?\d+\.\d+")
+    INT = re.compile(r"\-?\d+")
 
     # Brackets.
-    LPAREN  = re.compile(r'\(')
-    RPAREN  = re.compile(r'\)')
-    LBRACE  = re.compile(r'\{')
-    RBRACE  = re.compile(r'\}')
-    LSQUARE = re.compile(r'\[')
-    RSQUARE = re.compile(r'\]')
-    LTLT    = re.compile(r'<<')
-    GTGT    = re.compile(r'>>')
-    LT      = re.compile(r'<')
-    GT      = re.compile(r'>')
-    SQUOTE  = re.compile(r'\'')
-    ATPAREN = re.compile(r'@\(')
+    LPAREN = re.compile(r"\(")
+    RPAREN = re.compile(r"\)")
+    LBRACE = re.compile(r"\{")
+    RBRACE = re.compile(r"\}")
+    LSQUARE = re.compile(r"\[")
+    RSQUARE = re.compile(r"\]")
+    LTLT = re.compile(r"<<")
+    GTGT = re.compile(r">>")
+    LT = re.compile(r"<")
+    GT = re.compile(r">")
+    SQUOTE = re.compile(r"\'")
+    ATPAREN = re.compile(r"@\(")
 
     # Multipliers.
-    HASH    = re.compile(r'#')
-    PLUS    = re.compile(r'\+')
-    STAR    = re.compile(r'\*')
-    NOT     = re.compile(r'!')
-    QMARK   = re.compile(r'\?')
+    HASH = re.compile(r"#")
+    PLUS = re.compile(r"\+")
+    STAR = re.compile(r"\*")
+    NOT = re.compile(r"!")
+    QMARK = re.compile(r"\?")
 
     # Combinators.
-    OROR    = re.compile(r'\|\|')
-    OR      = re.compile(r'\|')
-    ANDAND  = re.compile(r'&&')
-    COMMA   = re.compile(r',')
+    OROR = re.compile(r"\|\|")
+    OR = re.compile(r"\|")
+    ANDAND = re.compile(r"&&")
+    COMMA = re.compile(r",")
 
     # Literals
-    SLASH   = re.compile(r'/')
-    EQUAL   = re.compile(r'=')
+    SLASH = re.compile(r"/")
+    EQUAL = re.compile(r"=")
 
     # Identifiers.
-    FUNC    = re.compile(r'[_a-zA-Z\-][_a-zA-Z0-9\-]*\(')
-    ID      = re.compile(r'[_a-zA-Z\-][_a-zA-Z0-9\-]*')
+    FUNC = re.compile(r"[_a-zA-Z\-][_a-zA-Z0-9\-]*\(")
+    ID = re.compile(r"[_a-zA-Z\-][_a-zA-Z0-9\-]*")
 
     # Whitespace.
-    WHITESPACE = re.compile(r'(\t|\n|\s|\r)+')
-
-
-BNF_ILLEGAL_TOKEN = 'ILLEGAL'
-BNF_EOF_TOKEN     = 'EOF'
-
-BNFTokenInfo = collections.namedtuple("BNFTokens", ["name", "value"])
+    WHITESPACE = re.compile(r"(\t|\n|\s|\r)+")
 
 
 def BNFLexer(data):
@@ -89,14 +69,14 @@ def BNFLexer(data):
             # in case pattern doesn't match send the character as illegal
             yield BNFTokenInfo(BNF_ILLEGAL_TOKEN, data[position])
             position += 1
-    yield BNFTokenInfo(BNF_EOF_TOKEN, '\x00')
+    yield BNFTokenInfo(BNF_EOF_TOKEN, "\x00")
 
 
 class BNFRepetitionModifier:
     class Kind(enum.Enum):
-        EXACT       = '{A}'
-        AT_LEAST    = '{A,}'
-        BETWEEN     = '{A,B}'
+        EXACT = "{A}"
+        AT_LEAST = "{A,}"
+        BETWEEN = "{A,B}"
 
     def __init__(self):
         self.kind = None
@@ -107,12 +87,12 @@ class BNFRepetitionModifier:
         if self.kind is None:
             return "[UNSET RepetitionModifier]"
         elif self.kind == BNFRepetitionModifier.Kind.EXACT:
-            return '{' + str(self.min) + '}'
+            return "{" + str(self.min) + "}"
         elif self.kind == BNFRepetitionModifier.Kind.AT_LEAST:
-            return '{' + str(self.min) + ',}'
+            return "{" + str(self.min) + ",}"
         elif self.kind == BNFRepetitionModifier.Kind.BETWEEN:
-            return '{' + str(self.min) + ',' + str(self.max) + '}'
-        raise Exception("Unknown repetition kind: {self.kind}")
+            return "{" + str(self.min) + "," + str(self.max) + "}"
+        raise Exception(f"Unknown repetition kind: {self.kind}")
 
 
 # BNFAnnotations are introduced by trailing '@(foo=bar,baz bat)' and are an
@@ -126,14 +106,14 @@ class BNFAnnotation:
 
         def __str__(self):
             if self.value:
-                return str(self.name) + '=' + ','.join(stringify_iterable(self.value))
+                return str(self.name) + "=" + ",".join(stringify_iterable(self.value))
             return str(self.name)
 
     def __init__(self):
         self.directives = []
 
     def __str__(self):
-        return '@(' + ' '.join(stringify_iterable(self.directives)) + ')'
+        return "@(" + " ".join(stringify_iterable(self.directives)) + ")"
 
     def add_directive(self, directive):
         self.directives.append(directive)
@@ -142,21 +122,23 @@ class BNFAnnotation:
 # Node multipliers are introduced by trailing symbols like '#', '+', '*', and '{1,4}'.
 # https://drafts.csswg.org/css-values-4/#component-multipliers
 class BNFNodeMultiplier:
+    range: BNFRepetitionModifier
+
     class Kind(enum.Enum):
-        ZERO_OR_ONE                     = '?'
-        SPACE_SEPARATED_ZERO_OR_MORE    = '*'
-        SPACE_SEPARATED_ONE_OR_MORE     = '+'
-        SPACE_SEPARATED_EXACT           = '{A}'
-        SPACE_SEPARATED_AT_LEAST        = '{A,}'
-        SPACE_SEPARATED_BETWEEN         = '{A,B}'
-        COMMA_SEPARATED_ONE_OR_MORE     = '#'
-        COMMA_SEPARATED_EXACT           = '#{A}'
-        COMMA_SEPARATED_AT_LEAST        = '#{A,}'
-        COMMA_SEPARATED_BETWEEN         = '#{A,B}'
+        ZERO_OR_ONE = "?"
+        SPACE_SEPARATED_ZERO_OR_MORE = "*"
+        SPACE_SEPARATED_ONE_OR_MORE = "+"
+        SPACE_SEPARATED_EXACT = "{A}"
+        SPACE_SEPARATED_AT_LEAST = "{A,}"
+        SPACE_SEPARATED_BETWEEN = "{A,B}"
+        COMMA_SEPARATED_ONE_OR_MORE = "#"
+        COMMA_SEPARATED_EXACT = "#{A}"
+        COMMA_SEPARATED_AT_LEAST = "#{A,}"
+        COMMA_SEPARATED_BETWEEN = "#{A,B}"
 
     def __init__(self):
         self.kind = None
-        self.range = None
+        self.range = None  # type: ignore
         self.annotation = None
 
     def __str__(self):
@@ -167,30 +149,32 @@ class BNFNodeMultiplier:
     @property
     def stringified_without_annotation(self):
         if self.kind == BNFNodeMultiplier.Kind.ZERO_OR_ONE:
-            return '?'
+            return "?"
         elif self.kind == BNFNodeMultiplier.Kind.SPACE_SEPARATED_ZERO_OR_MORE:
-            return '*'
+            return "*"
         elif self.kind == BNFNodeMultiplier.Kind.SPACE_SEPARATED_ONE_OR_MORE:
-            return '+'
+            return "+"
         elif self.kind == BNFNodeMultiplier.Kind.SPACE_SEPARATED_EXACT:
-            return '{' + str(self.range.min) + '}'
+            return "{" + str(self.range.min) + "}"
         elif self.kind == BNFNodeMultiplier.Kind.SPACE_SEPARATED_AT_LEAST:
-            return '{' + str(self.range.min) + ',}'
+            return "{" + str(self.range.min) + ",}"
         elif self.kind == BNFNodeMultiplier.Kind.SPACE_SEPARATED_BETWEEN:
-            return '{' + str(self.range.min) + ',' + str(self.range.max) + '}'
+            return "{" + str(self.range.min) + "," + str(self.range.max) + "}"
         elif self.kind == BNFNodeMultiplier.Kind.COMMA_SEPARATED_ONE_OR_MORE:
-            return '#'
+            return "#"
         elif self.kind == BNFNodeMultiplier.Kind.COMMA_SEPARATED_EXACT:
-            return '#' + '{' + str(self.range.min) + '}'
+            return "#" + "{" + str(self.range.min) + "}"
         elif self.kind == BNFNodeMultiplier.Kind.COMMA_SEPARATED_AT_LEAST:
-            return '#' + '{' + str(self.range.min) + ',}'
+            return "#" + "{" + str(self.range.min) + ",}"
         elif self.kind == BNFNodeMultiplier.Kind.COMMA_SEPARATED_BETWEEN:
-            return '#' + '{' + str(self.range.min) + ',' + str(self.range.max) + '}'
-        return ''
+            return "#" + "{" + str(self.range.min) + "," + str(self.range.max) + "}"
+        return ""
 
     def add(self, multiplier):
         if self.annotation:
-            raise Exception("Invalid to stack another multiplier on top of a multiplier that has already received an annotation.")
+            raise Exception(
+                "Invalid to stack another multiplier on top of a multiplier that has already received an annotation."
+            )
 
         if self.kind is None:
             if isinstance(multiplier, BNFRepetitionModifier):
@@ -242,7 +226,7 @@ class BNFNodeMultiplier:
             raise Exception("Invalid to add an annotation to a multiplier node that already has an annotation.")
 
         SUPPORTED_DIRECTIVES = {
-            'no-single-item-opt': {
+            "no-single-item-opt": {
                 BNFNodeMultiplier.Kind.SPACE_SEPARATED_ZERO_OR_MORE,
                 BNFNodeMultiplier.Kind.SPACE_SEPARATED_ONE_OR_MORE,
                 BNFNodeMultiplier.Kind.SPACE_SEPARATED_AT_LEAST,
@@ -251,7 +235,7 @@ class BNFNodeMultiplier:
                 BNFNodeMultiplier.Kind.COMMA_SEPARATED_AT_LEAST,
                 BNFNodeMultiplier.Kind.COMMA_SEPARATED_BETWEEN,
             },
-            'type': {
+            "type": {
                 BNFNodeMultiplier.Kind.SPACE_SEPARATED_ZERO_OR_MORE,
                 BNFNodeMultiplier.Kind.SPACE_SEPARATED_ONE_OR_MORE,
                 BNFNodeMultiplier.Kind.SPACE_SEPARATED_BETWEEN,
@@ -260,17 +244,17 @@ class BNFNodeMultiplier:
                 BNFNodeMultiplier.Kind.COMMA_SEPARATED_BETWEEN,
                 BNFNodeMultiplier.Kind.COMMA_SEPARATED_EXACT,
             },
-            'default': {
+            "default": {
                 BNFNodeMultiplier.Kind.SPACE_SEPARATED_BETWEEN,
                 BNFNodeMultiplier.Kind.COMMA_SEPARATED_BETWEEN,
             },
-            'settings-flag' : '*',
+            "settings-flag": "*",
         }
 
         for directive in annotation.directives:
             if directive.name not in SUPPORTED_DIRECTIVES:
                 raise Exception(f"Unknown annotation directive '{directive}' for multiplier '{self}'.")
-            if SUPPORTED_DIRECTIVES[directive.name] != '*' and self.kind not in SUPPORTED_DIRECTIVES[directive.name]:
+            if SUPPORTED_DIRECTIVES[directive.name] != "*" and self.kind not in SUPPORTED_DIRECTIVES[directive.name]:
                 raise Exception(f"Unsupported annotation directive '{directive}' for multiplier '{self}'.")
 
         self.annotation = annotation
@@ -279,10 +263,10 @@ class BNFNodeMultiplier:
 # https://drafts.csswg.org/css-values-4/#component-combinators
 class BNFGroupingNode:
     class Kind(enum.Enum):
-        MATCH_ALL_ORDERED = ' '                # [ <length>    <integer>    <percentage> ]
-        MATCH_ONE = '|'                        # [ <length>  | <integer>  | <percentage> ]
-        MATCH_ALL_ANY_ORDER = '&&'             # [ <length> && <integer> && <percentage> ]
-        MATCH_ONE_OR_MORE_ANY_ORDER = '||'     # [ <length> || <integer> || <percentage> ]
+        MATCH_ALL_ORDERED = " "  # [ <length>    <integer>    <percentage> ]
+        MATCH_ONE = "|"  # [ <length>  | <integer>  | <percentage> ]
+        MATCH_ALL_ANY_ORDER = "&&"  # [ <length> && <integer> && <percentage> ]
+        MATCH_ONE_OR_MORE_ANY_ORDER = "||"  # [ <length> || <integer> || <percentage> ]
 
     def __init__(self, *, is_initial=False):
         self.kind = BNFGroupingNode.Kind.MATCH_ALL_ORDERED
@@ -298,14 +282,14 @@ class BNFGroupingNode:
     def stringified_without_multipliers(self):
         if self.is_initial:
             return self.stringified_without_brackets_or_multipliers
-        return '[ ' + self.stringified_without_brackets_or_multipliers + ' ]'
+        return "[ " + self.stringified_without_brackets_or_multipliers + " ]"
 
     @property
     def stringified_without_brackets_or_multipliers(self):
         if self.kind != BNFGroupingNode.Kind.MATCH_ALL_ORDERED:
-            join_string = ' ' + self.kind.value + ' '
+            join_string = " " + self.kind.value + " "
         else:
-            join_string = ' '
+            join_string = " "
 
         return join_string.join(stringify_iterable(self.members))
 
@@ -317,27 +301,27 @@ class BNFGroupingNode:
             raise Exception("Invalid to add an annotation to a grouping node that already has an annotation.")
 
         SUPPORTED_DIRECTIVES = {
-            'no-single-item-opt': {
+            "no-single-item-opt": {
                 BNFGroupingNode.Kind.MATCH_ALL_ORDERED,
                 BNFGroupingNode.Kind.MATCH_ALL_ANY_ORDER,
                 BNFGroupingNode.Kind.MATCH_ONE_OR_MORE_ANY_ORDER,
             },
-            'preserve-order': {
+            "preserve-order": {
                 BNFGroupingNode.Kind.MATCH_ALL_ANY_ORDER,
                 BNFGroupingNode.Kind.MATCH_ONE_OR_MORE_ANY_ORDER,
             },
-            'type': {
+            "type": {
                 BNFGroupingNode.Kind.MATCH_ALL_ORDERED,
                 BNFGroupingNode.Kind.MATCH_ALL_ANY_ORDER,
                 BNFGroupingNode.Kind.MATCH_ONE_OR_MORE_ANY_ORDER,
             },
-            'settings-flag' : '*',
+            "settings-flag": "*",
         }
 
         for directive in annotation.directives:
             if directive.name not in SUPPORTED_DIRECTIVES:
                 raise Exception(f"Unknown annotation directive '{directive}' for grouping '{self}'.")
-            if SUPPORTED_DIRECTIVES[directive.name] != '*' and self.kind not in SUPPORTED_DIRECTIVES[directive.name]:
+            if SUPPORTED_DIRECTIVES[directive.name] != "*" and self.kind not in SUPPORTED_DIRECTIVES[directive.name]:
                 raise Exception(f"Unsupported annotation directive '{directive}' for grouping '{self}'.")
 
         self.annotation = annotation
@@ -356,7 +340,7 @@ class BNFFunctionNode:
 
     @property
     def stringified_without_multipliers(self):
-        return self.name + '(' + self.parameter_group.stringified_without_brackets_or_multipliers + ')'
+        return self.name + "(" + self.parameter_group.stringified_without_brackets_or_multipliers + ")"
 
     @property
     def kind(self):
@@ -373,9 +357,7 @@ class BNFFunctionNode:
         if self.annotation:
             raise Exception("Invalid to add an annotation to a function node that already has an annotation.")
 
-        SUPPORTED_DIRECTIVES = {
-            'settings-flag'
-        }
+        SUPPORTED_DIRECTIVES = {"settings-flag"}
 
         for directive in annotation.directives:
             if directive.name not in SUPPORTED_DIRECTIVES:
@@ -392,7 +374,7 @@ class BNFReferenceNode:
 
         def __str__(self):
             if self.value:
-                return str(self.name) + '=' + str(self.value)
+                return str(self.name) + "=" + str(self.value)
             return str(self.name)
 
     class RangeAttribute:
@@ -401,7 +383,7 @@ class BNFReferenceNode:
             self.max = None
 
         def __str__(self):
-            return '[' + str(self.min) + ',' + str(self.max) + ']'
+            return "[" + str(self.min) + "," + str(self.max) + "]"
 
     def __init__(self, *, is_internal=False):
         self.name = None
@@ -417,19 +399,19 @@ class BNFReferenceNode:
     @property
     def stringified_without_multipliers(self):
         if self.is_internal:
-            prefix = '<<'
-            suffix = '>>'
+            prefix = "<<"
+            suffix = ">>"
         else:
-            prefix = '<'
-            suffix = '>'
+            prefix = "<"
+            suffix = ">"
 
         if self.is_function_reference:
-            name = self.name + '()'
+            name = str(self.name) + "()"
         else:
             name = self.name
 
         if self.attributes:
-            return prefix + str(name) + ' ' + ' '.join(stringify_iterable(self.attributes)) + suffix
+            return prefix + str(name) + " " + " ".join(stringify_iterable(self.attributes)) + suffix
         return prefix + str(name) + suffix
 
     def add_attribute(self, attribute):
@@ -439,9 +421,7 @@ class BNFReferenceNode:
         if self.annotation:
             raise Exception("Invalid to add an annotation to a reference node that already has an annotation.")
 
-        SUPPORTED_DIRECTIVES = {
-            'settings-flag'
-        }
+        SUPPORTED_DIRECTIVES = {"settings-flag"}
 
         for directive in annotation.directives:
             if directive.name not in SUPPORTED_DIRECTIVES:
@@ -468,8 +448,8 @@ class BNFKeywordNode:
             raise Exception("Invalid to add an annotation to a keyword node that already has an annotation.")
 
         SUPPORTED_DIRECTIVES = {
-            'aliased-to',
-            'settings-flag',
+            "aliased-to",
+            "settings-flag",
         }
 
         for directive in annotation.directives:
@@ -620,7 +600,7 @@ class BNFParser:
             PARSER_THUNKS[state.state](self, token, state)
 
         if self.state_stack[-1].state != BNFParserState.DONE:
-            raise Exception(f"Unexpected state '{state.state.name}' after processing all tokens")
+            raise Exception(f"Unexpected state '{state.state.name}' after processing all tokens") # type: ignore
 
         return self.root
 
@@ -638,7 +618,9 @@ class BNFParser:
         return self.state_stack[-1]
 
     def unexpected(self, token, state):
-        return Exception(f"Unexpected token '{token}' found while in state '{state.state.name}' while parsing '{self.data}'")
+        return Exception(
+            f"Unexpected token '{token}' found while in state '{state.state.name}' while parsing '{self.data}'"
+        )
 
     # COMMON ACTIONS.
 
@@ -734,7 +716,11 @@ class BNFParser:
 
     # BNFReferenceNode.StringAttribute. e.g. allows-quirks or excludes=auto,none
     def enter_new_string_attribute(self, token, state):
-        self.push(BNFParserState.REFERENCE_STRING_ATTRIBUTE_INITIAL, BNFReferenceNode.StringAttribute(token.value), self.top.node)
+        self.push(
+            BNFParserState.REFERENCE_STRING_ATTRIBUTE_INITIAL,
+            BNFReferenceNode.StringAttribute(token.value),
+            self.top.node,
+        )
         self.multiplier_target = None
         self.annotation_target = None
         return self.top
@@ -820,8 +806,8 @@ class BNFParser:
         self.annotation_target = literal
 
     def process_simple_multiplier(self, token, state):
-        self.multiplier_target.multiplier.add(token.value)
-        self.annotation_target = self.multiplier_target.multiplier
+        self.multiplier_target.multiplier.add(token.value) # type: ignore
+        self.annotation_target = self.multiplier_target.multiplier # type: ignore
 
     def process_combinator(self, token, state, known_kind):
         if known_kind and known_kind != BNFParser.COMBINATOR_FOR_TOKEN[token.name]:
@@ -1204,7 +1190,11 @@ class BNFParser:
         raise self.unexpected(token, state)
 
     def parse_REFERENCE_RANGE_ATTRIBUTE_INITIAL(self, token, state):
-        if token.name == BNFToken.INT or token.name == BNFToken.FLOAT or (token.name == BNFToken.ID and token.value == '-inf'):
+        if (
+            token.name == BNFToken.INT
+            or token.name == BNFToken.FLOAT
+            or (token.name == BNFToken.ID and token.value == "-inf")
+        ):
             self.transition_top(to=BNFParserState.REFERENCE_RANGE_ATTRIBUTE_SEEN_MIN)
             state.node.min = token.value
             return
@@ -1219,7 +1209,11 @@ class BNFParser:
         raise self.unexpected(token, state)
 
     def parse_REFERENCE_RANGE_ATTRIBUTE_SEEN_MIN_AND_COMMA(self, token, state):
-        if token.name == BNFToken.INT or token.name == BNFToken.FLOAT or (token.name == BNFToken.ID and token.value == 'inf'):
+        if (
+            token.name == BNFToken.INT
+            or token.name == BNFToken.FLOAT
+            or (token.name == BNFToken.ID and token.value == "inf")
+        ):
             self.transition_top(to=BNFParserState.REFERENCE_RANGE_ATTRIBUTE_SEEN_MAX)
             state.node.max = token.value
             return

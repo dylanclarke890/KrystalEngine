@@ -1,8 +1,21 @@
 ﻿import datetime
+import enum
 import json
 import pathlib
 from jinja2 import Environment, FileSystemLoader
 import jsonschema
+
+
+def stringify_iterable(iterable):
+    return (str(x) for x in iterable)
+
+
+def quote_iterable(iterable, *, mark='"', suffix=""):
+    return (f"{mark}{x}{mark}{suffix}" for x in iterable)
+
+
+def count_iterable(iterable):
+    return sum(1 for _ in iterable)
 
 
 def kebab_case_to_pascal_case(kebab_case: str) -> str:
@@ -10,8 +23,8 @@ def kebab_case_to_pascal_case(kebab_case: str) -> str:
 
 
 def get_validated_json(dir: pathlib.Path):
-    instance = json.loads((dir / "data.json").read_text(encoding='utf-8-sig'))
-    schema = json.loads((dir / "data.schema.json").read_text(encoding='utf-8-sig'))
+    instance = json.loads((dir / "data.json").read_text(encoding="utf-8-sig"))
+    schema = json.loads((dir / "data.schema.json").read_text(encoding="utf-8-sig"))
     jsonschema.validate(instance, schema)
     return instance
 
@@ -51,3 +64,14 @@ class EnumValue:
         self.str_name = str_name
         self.value_name = value_name
         self.comment = comment
+
+
+class StringEqualingEnum(enum.Enum):
+    def __eq__(self, b):
+        if isinstance(b, str):
+            return self.name == b
+        else:
+            return self.name == b.name
+
+    def __hash__(self):
+        return id(self.name)

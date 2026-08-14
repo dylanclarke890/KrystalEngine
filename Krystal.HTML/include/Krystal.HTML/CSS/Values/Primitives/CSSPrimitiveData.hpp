@@ -220,11 +220,12 @@ namespace Krys::HTML
     Payload payload;
     Index index;
 
-    PrimitiveData(Raw raw) : payload {raw.value}, index {raw}
+    PrimitiveData(Raw raw) : payload {raw.Value}, index {raw}
     {
     }
 
-    PrimitiveData(Calc calc) : payload {&calc.protectedCalc().leakRef()}, index {calc}
+    // TODO: fix this constructor
+    PrimitiveData(Calc calc) : payload {nullptr}, index {calc}
     {
     }
 

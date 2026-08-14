@@ -67,22 +67,22 @@ namespace Krys::HTML
   template <typename Raw, typename F>
   KRYS_NODISCARD bool IsValidDimensionValue(Raw raw, F &&functor) noexcept
   {
-    if (std::isinf(raw.value))
+    if (std::isinf(raw.Value))
     {
       return false;
     }
 
-    if constexpr (raw.range.min == -CSSRange::Inf && raw.range.max == CSSRange::Inf)
+    if constexpr (raw.Range.Min == -CSSRange::Inf && raw.Range.Max == CSSRange::Inf)
     {
       return true;
     }
-    else if constexpr (raw.range.min == 0 && raw.range.max == CSSRange::Inf)
+    else if constexpr (raw.Range.Min == 0 && raw.Range.Max == CSSRange::Inf)
     {
-      return raw.value >= 0;
+      return raw.Value >= 0;
     }
-    else if constexpr (raw.range.min == -CSSRange::Inf && raw.range.max == 0)
+    else if constexpr (raw.Range.Min == -CSSRange::Inf && raw.Range.Max == 0)
     {
-      return raw.value <= 0;
+      return raw.Value <= 0;
     }
     else
     {
@@ -94,22 +94,22 @@ namespace Krys::HTML
   template <typename Raw>
   KRYS_NODISCARD bool IsValidNonCanonicalizableDimensionValue(Raw raw) noexcept
   {
-    if (std::isinf(raw.value))
+    if (std::isinf(raw.Value))
     {
       return false;
     }
 
-    if constexpr (raw.range.min == -CSSRange::Inf && raw.range.max == CSSRange::Inf)
+    if constexpr (raw.Range.Min == -CSSRange::Inf && raw.Range.Max == CSSRange::Inf)
     {
       return true;
     }
-    else if constexpr (raw.range.min == 0 && raw.range.max == CSSRange::Inf)
+    else if constexpr (raw.Range.Min == 0 && raw.Range.Max == CSSRange::Inf)
     {
-      return raw.value >= 0;
+      return raw.Value >= 0;
     }
-    else if constexpr (raw.range.min == -CSSRange::Inf && raw.range.max == 0)
+    else if constexpr (raw.Range.Min == -CSSRange::Inf && raw.Range.Max == 0)
     {
-      return raw.value <= 0;
+      return raw.Value <= 0;
     }
   }
 
@@ -118,26 +118,26 @@ namespace Krys::HTML
   template <typename Raw>
   KRYS_NODISCARD bool IsValidCanonicalValue(Raw raw) noexcept
   {
-    if (std::isinf(raw.value))
+    if (std::isinf(raw.Value))
     {
       return false;
     }
 
-    if constexpr (raw.range.min == -CSSRange::Inf && raw.range.max == CSSRange::Inf)
+    if constexpr (raw.Range.Min == -CSSRange::Inf && raw.Range.Max == CSSRange::Inf)
     {
       return true;
     }
-    else if constexpr (raw.range.max == CSSRange::Inf)
+    else if constexpr (raw.Range.Max == CSSRange::Inf)
     {
-      return raw.value >= raw.range.min;
+      return raw.Value >= raw.Range.Min;
     }
-    else if constexpr (raw.range.min == -CSSRange::Inf)
+    else if constexpr (raw.Range.Min == -CSSRange::Inf)
     {
-      return raw.value <= raw.range.max;
+      return raw.Value <= raw.Range.Max;
     }
     else
     {
-      return raw.value >= raw.range.min && raw.value <= raw.range.max;
+      return raw.Value >= raw.Range.Min && raw.Value <= raw.Range.Max;
     }
   }
 
@@ -145,19 +145,19 @@ namespace Krys::HTML
   template <typename Raw>
   KRYS_NODISCARD Raw PerformParseTimeClamp(Raw raw) noexcept
   {
-    static_assert(raw.range.clampOptions != RangeClampOptions::Default);
+    static_assert(raw.Range.ClampOptions != RangeClampOptions::Default);
 
-    if constexpr (raw.range.clampOptions == RangeClampOptions::ClampLower)
+    if constexpr (raw.Range.ClampOptions == RangeClampOptions::ClampLower)
     {
-      return {std::max<typename Raw::ResolvedValueType>(raw.value, raw.range.min)};
+      return {std::max<typename Raw::ResolvedValueType>(raw.Value, raw.Range.Min)};
     }
-    else if constexpr (raw.range.clampOptions == RangeClampOptions::ClampUpper)
+    else if constexpr (raw.Range.ClampOptions == RangeClampOptions::ClampUpper)
     {
-      return {std::min<typename Raw::ResolvedValueType>(raw.value, raw.range.max)};
+      return {std::min<typename Raw::ResolvedValueType>(raw.Value, raw.Range.Max)};
     }
-    else if constexpr (raw.range.clampOptions == RangeClampOptions::ClampBoth)
+    else if constexpr (raw.Range.ClampOptions == RangeClampOptions::ClampBoth)
     {
-      return {std::clamp<typename Raw::ResolvedValueType>(raw.value, raw.range.min, raw.range.max)};
+      return {std::clamp<typename Raw::ResolvedValueType>(raw.Value, raw.Range.Min, raw.Range.Max)};
     }
   }
 
@@ -184,7 +184,7 @@ namespace Krys::HTML
 
       auto rawValue = typename Primitive::Raw {*validatedUnit, token.NumericValue()};
 
-      if constexpr (rawValue.range.ClampOptions != RangeClampOptions::Default)
+      if constexpr (Primitive::Raw::Range.ClampOptions != RangeClampOptions::Default)
       {
         rawValue = PerformParseTimeClamp(rawValue);
       }
@@ -202,7 +202,7 @@ namespace Krys::HTML
   };
 
   // Shared consumer for `Percentage` tokens.
-  template <typename Primitive, typename Validator>
+  template <typename Primitive, typename Validator, auto Unit>
   struct PercentageConsumer
   {
     constexpr static CSSTokenType TokenType = CSSTokenType::Percentage;
@@ -214,9 +214,9 @@ namespace Krys::HTML
     {
       assert(range.Peek().Type() == CSSTokenType::Percentage);
 
-      auto rawValue = typename Primitive::Raw {PercentageUnit::Percentage, range.Peek().NumericValue()};
+      auto rawValue = typename Primitive::Raw {Unit, range.Peek().NumericValue()};
 
-      if constexpr (rawValue.range.ClampOptions != RangeClampOptions::Default)
+      if constexpr (Primitive::Raw::Range.ClampOptions != RangeClampOptions::Default)
       {
         rawValue = PerformParseTimeClamp(rawValue);
       }
@@ -248,7 +248,7 @@ namespace Krys::HTML
 
       auto rawValue = typename Primitive::Raw {NumberUnit::Number, range.Peek().NumericValue()};
 
-      if constexpr (rawValue.range.ClampOptions != RangeClampOptions::Default)
+      if constexpr (Primitive::Raw::Range.ClampOptions != RangeClampOptions::Default)
       {
         rawValue = PerformParseTimeClamp(rawValue);
       }
@@ -266,7 +266,7 @@ namespace Krys::HTML
   };
 
   // Shared consumer for `Number` tokens for use by dimensional primitives that support "unitless" values.
-  template <typename Primitive, typename Validator, auto unit>
+  template <typename Primitive, typename Validator, auto Unit>
   struct NumberConsumerForUnitlessValues
   {
     constexpr static CSSTokenType TokenType = CSSTokenType::Number;
@@ -284,9 +284,9 @@ namespace Krys::HTML
         return Null;
       }
 
-      auto rawValue = typename Primitive::Raw {unit, numericValue};
+      auto rawValue = typename Primitive::Raw {Unit, numericValue};
 
-      if constexpr (rawValue.range.ClampOptions != RangeClampOptions::Default)
+      if constexpr (Primitive::Raw::Range.ClampOptions != RangeClampOptions::Default)
       {
         rawValue = PerformParseTimeClamp(rawValue);
       }
@@ -321,8 +321,8 @@ namespace Krys::HTML
                                            Krys::Move(symbolsAllowed), options))
       {
         range = rangeCopy;
-        // TODO:: wtf are they returning here
-        return {{value.releaseNonNull()}};
+        // TODO: fix this return type
+        return Null;
       }
 
       return Null;

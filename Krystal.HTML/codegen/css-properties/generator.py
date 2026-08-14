@@ -8,10 +8,244 @@ from bnf import BNFParser, BNFGroupingNode, BNFFunctionNode, BNFReferenceNode, B
 
 GENERATOR_NAME = "css-properties.generator"
 
+#region TermGenerator Classes (Code Emission)
 
-# ============================================================================
-# Code Generation Infrastructure (from WebKit)
-# ============================================================================
+class TermGenerator:
+    """Base class for term generators. Each term type has a generator."""
+
+    @staticmethod
+    def make(term: Term, keyword_fast_path_generator = None) -> "TermGenerator":
+        """Factory method to create appropriate generator for a term."""
+        if isinstance(term, GroupingTerm):
+            return TermGeneratorGroupingTerm(term)
+        elif isinstance(term, FunctionTerm):
+            return TermGeneratorFunctionTerm(term)
+        elif isinstance(term, ReferenceTerm):
+            return TermGeneratorReferenceTerm(term)
+        elif isinstance(term, KeywordTerm):
+            return TermGeneratorKeywordTerm(term)
+        elif isinstance(term, LiteralTerm):
+            return TermGeneratorLiteralTerm(term)
+        else:
+            raise Exception(f"Unknown term type: {type(term)}")
+
+    def generate_conditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
+        """Generate conditional code (if statement)."""
+        raise NotImplementedError
+
+    def generate_unconditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
+        """Generate unconditional code (direct return)."""
+        raise NotImplementedError
+
+    def has_unconditional_return(self) -> bool:
+        """Check if generate_unconditional produces an unconditional return statement."""
+        # By default, assume generators produce conditional code
+        return False
+
+
+class TermGeneratorReferenceTerm(TermGenerator):
+    """Generate code for reference terms like <color>."""
+
+    def __init__(self, term: ReferenceTerm, all_properties: dict[str, Any]|None = None):
+        self.term = term
+        self.all_properties = all_properties or {}
+
+    def generate_conditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
+        consumer_call = self._generate_consumer_call(range_string, state_string)
+        to.write(f"if (auto result = {consumer_call})")
+        with to.indent():
+            to.write("return result;")
+
+    def generate_unconditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
+        consumer_call = self._generate_consumer_call(range_string, state_string)
+        to.write(f"return {consumer_call};")
+
+    def has_unconditional_return(self) -> bool:
+        """Reference terms always produce an unconditional return."""
+        return True
+
+    def _generate_consumer_call(self, range_string: str, state_string: str) -> str:
+        """Generate the appropriate consumer call based on reference type."""
+        # Handle builtin types (like <length-percentage>)
+        if self.term.is_builtin:
+            return self.term.builtin.get_consumer_call(range_string, state_string) # type: ignore
+
+        # Handle property references with quotes (like <'margin-top'>)
+        # These have quotes in the name itself
+        if self.term.name.startswith("'") and self.term.name.endswith("'"):
+            # Internal references like <'margin-top'> should call the property's parser
+            # Strip quotes from the name
+            property_name = self.term.name.strip("'")
+            pascal_name = kebab_case_to_pascal_case(property_name)
+            return f"ParseCSS{pascal_name}Value({range_string}, {state_string})"
+
+        # Handle internal references (like <<values>>)
+        if self.term.is_internal:
+            # These reference internal grammar rules
+            formatted_name = kebab_case_to_pascal_case(self.term.name)
+            return f"Consume{formatted_name}({range_string}, {state_string})"
+
+        # Handle regular references (non-builtin, non-internal)
+        # These reference grammar rules or other generated parsers
+        formatted_name = kebab_case_to_pascal_case(self.term.name)
+        return f"Consume{formatted_name}({range_string}, {state_string})"
+
+    def _format_name(self) -> str:
+        """Format the reference name for use in C++."""
+        return kebab_case_to_pascal_case(self.term.name)
+
+
+class TermGeneratorKeywordTerm(TermGenerator):
+    """Generate code for keyword terms like 'auto', 'none'."""
+
+    def __init__(self, term: KeywordTerm):
+        self.term = term
+
+    def generate_conditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
+        # Use ConsumeIdent template for single keywords
+        keyword_id = kebab_case_to_pascal_case(self.term.value)
+        to.write(f"// {self.term.value}")
+        to.write(f"if (auto result = ConsumeIdent<CSSValueId::{keyword_id}>({range_string}))")
+        with to.indent():
+            to.write("return result;")
+
+    def generate_unconditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
+        keyword_id = kebab_case_to_pascal_case(self.term.value)
+        to.write(f"// {self.term.value}")
+        to.write(f"return ConsumeIdent<CSSValueId::{keyword_id}>({range_string});")
+
+    def has_unconditional_return(self) -> bool:
+        """Keyword terms always produce an unconditional return."""
+        return True
+
+
+class TermGeneratorLiteralTerm(TermGenerator):
+    """Generate code for literal terms like '/'."""
+    
+    def __init__(self, term: LiteralTerm):
+        self.term = term
+
+    def generate_conditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
+        to.write(f"if (ConsumeLiteral<'{self.term.value}'>({range_string}))")
+        with to.indent():
+            to.write("// Matched literal")
+
+    def generate_unconditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
+        to.write(f"ConsumeLiteral<'{self.term.value}'>({range_string});")
+
+    def has_unconditional_return(self) -> bool:
+        """Literal terms don't produce unconditional returns."""
+        return False
+
+
+class TermGeneratorFunctionTerm(TermGenerator):
+    """Generate code for function terms."""
+    
+    def __init__(self, term: FunctionTerm):
+        self.term = term
+
+    def generate_conditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
+        func_name = kebab_case_to_pascal_case(self.term.name)
+        to.write(f"if (auto result = Consume{func_name}({range_string}, {state_string}))")
+        with to.indent():
+            to.write("return result;")
+
+    def generate_unconditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
+        func_name = kebab_case_to_pascal_case(self.term.name)
+        to.write(f"return Consume{func_name}({range_string}, {state_string});")
+
+    def has_unconditional_return(self) -> bool:
+        """Function terms always produce an unconditional return."""
+        return True
+
+
+class TermGeneratorGroupingTerm(TermGenerator):
+    """Generate code for grouping terms."""
+
+    def __init__(self, term: GroupingTerm):
+        self.term = term
+        self.subgenerators = [TermGenerator.make(subterm) for subterm in term.subterms]
+
+    def _is_all_keywords(self) -> bool:
+        """Check if all subterms are keywords."""
+        return all(isinstance(subterm, KeywordTerm) for subterm in self.term.subterms)
+
+    def _get_keywords(self) -> list[str]:
+        """Get list of keyword values from subterms."""
+        return [subterm.value for subterm in self.term.subterms if isinstance(subterm, KeywordTerm)]
+
+    def generate_conditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
+        if self.term.kind == '|':
+            # Match one - optimize if all keywords
+            if self._is_all_keywords():
+                keywords = self._get_keywords()
+                keyword_ids = ', '.join(f'CSSValueId::{kebab_case_to_pascal_case(kw)}' for kw in keywords)
+                to.write(f"// {' | '.join(keywords)}")
+                to.write(f"if (auto result = ConsumeIdent<{keyword_ids}>({range_string}))")
+                with to.indent():
+                    to.write("return result;")
+            else:
+                # Mixed terms - generate individual conditionals
+                for gen in self.subgenerators:
+                    gen.generate_conditional(to=to, range_string=range_string, state_string=state_string)
+        elif self.term.kind == ' ':
+            # Match all ordered
+            to.write(f"// Match all ordered")
+            for gen in self.subgenerators:
+                gen.generate_unconditional(to=to, range_string=range_string, state_string=state_string)
+
+    def generate_unconditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
+        if self.term.kind == '|':
+            if self._is_all_keywords():
+                keywords = self._get_keywords()
+                keyword_ids = ', '.join(f'CSSValueId::{kebab_case_to_pascal_case(kw)}' for kw in keywords)
+                to.write(f"// {' | '.join(keywords)}")
+                to.write(f"return ConsumeIdent<{keyword_ids}>({range_string});")
+            else:
+                for gen in self.subgenerators:
+                    gen.generate_conditional(to=to, range_string=range_string, state_string=state_string)
+        elif self.term.kind == ' ':
+            for gen in self.subgenerators:
+                gen.generate_unconditional(to=to, range_string=range_string, state_string=state_string)
+
+    def has_unconditional_return(self) -> bool:
+        """Check if this grouping produces an unconditional return."""
+        if self.term.kind == '|':
+            # Match one: only if all keywords (optimized path)
+            return self._is_all_keywords()
+        elif self.term.kind == ' ':
+            # Match all ordered: only if ALL subterms have unconditional returns
+            return all(gen.has_unconditional_return() for gen in self.subgenerators)
+        return False
+
+
+class KeywordFastPathGenerator:
+    """Generates optimized fast-path for keyword-only properties."""
+    
+    def __init__(self, function_name: str, keywords: list[str]):
+        self.function_name = function_name
+        self.keywords = keywords
+
+    def generate_definition(self, *, to: Writer) -> None:
+        """Generate the keyword validation function."""
+        to.write(f"KRYS_NODISCARD inline bool {self.function_name}(CSSValueId keyword) noexcept")
+        to.write("{")
+        with to.indent():
+            to.write("switch (keyword) {")
+            with to.indent():
+                for keyword in self.keywords:
+                    keyword_id = kebab_case_to_pascal_case(keyword)
+                    to.write(f"case CSSValueId::{keyword_id}:")
+                to.write("    return true;")
+            to.write("default:")
+            with to.indent():
+                to.write("return false;")
+            to.write("}")
+        to.write("}")
+
+#endregion
+
+#region Code Generation Infrastructure (from WebKit)
 
 class Writer:
     """Utility for writing formatted C++ code with proper indentation."""
@@ -64,10 +298,9 @@ class Writer:
         """Get the written content."""
         return self.output.getvalue()
 
+#endregion
 
-# ============================================================================
-# Grammar/Parsing Term Classes (from WebKit)
-# ============================================================================
+#region Grammar/Parsing Term Classes (from WebKit)
 
 class Term:
     """Base class for all grammar terms."""
@@ -104,7 +337,18 @@ class BuiltinType:
             return ""  # Default range
 
         min_val, max_val = range_param
-        # Convert -inf/inf to CSSRange::Inf
+
+        # Use predefined constants when possible
+        # Convert to comparable form (handle both numbers and strings)
+        min_cmp = float(min_val) if isinstance(min_val, (int, float)) or (isinstance(min_val, str) and min_val not in ['-inf', 'inf']) else min_val
+        max_cmp = max_val
+
+        if (min_cmp == 0 or min_cmp == 0.0) and max_val == 'inf':
+            return "NonNegative"
+        elif min_val == '-inf' and max_val == 'inf':
+            return "All"
+
+        # Otherwise, build custom range
         min_str = '-CSSRange::Inf' if min_val == '-inf' else str(min_val)
         max_str = 'CSSRange::Inf' if max_val == 'inf' else str(max_val)
 
@@ -119,8 +363,7 @@ class BuiltinLengthPercentage(BuiltinType):
     """Builtin for <length-percentage> with optional range."""
     def get_consumer_call(self, range_string: str, state_string: str) -> str:
         range_template = f"<{self.value_range}>" if self.value_range else "<>"
-        # LengthPercentage uses PrimitiveNumeric<LengthPercentageRaw<R>>
-        type_param = f"PrimitiveNumeric<LengthPercentageRaw{range_template}>"
+        type_param = f"LengthPercentage{range_template}"
         return f"CSSPrimitiveValueResolver<{type_param}>::ConsumeAndResolve({range_string}, {state_string})"
 
 
@@ -128,7 +371,7 @@ class BuiltinLength(BuiltinType):
     """Builtin for <length> with optional range."""
     def get_consumer_call(self, range_string: str, state_string: str) -> str:
         range_template = f"<{self.value_range}>" if self.value_range else "<>"
-        type_param = f"PrimitiveNumeric<LengthRaw{range_template}>"
+        type_param = f"Length{range_template}"
         return f"CSSPrimitiveValueResolver<{type_param}>::ConsumeAndResolve({range_string}, {state_string})"
 
 
@@ -136,7 +379,7 @@ class BuiltinPercentage(BuiltinType):
     """Builtin for <percentage> with optional range."""
     def get_consumer_call(self, range_string: str, state_string: str) -> str:
         range_template = f"<{self.value_range}>" if self.value_range else "<>"
-        type_param = f"PrimitiveNumeric<PercentageRaw{range_template}>"
+        type_param = f"Percentage{range_template}"
         return f"CSSPrimitiveValueResolver<{type_param}>::ConsumeAndResolve({range_string}, {state_string})"
 
 
@@ -144,7 +387,7 @@ class BuiltinNumber(BuiltinType):
     """Builtin for <number> with optional range."""
     def get_consumer_call(self, range_string: str, state_string: str) -> str:
         range_template = f"<{self.value_range}>" if self.value_range else "<>"
-        type_param = f"PrimitiveNumeric<NumberRaw{range_template}>"
+        type_param = f"Number{range_template}"
         return f"CSSPrimitiveValueResolver<{type_param}>::ConsumeAndResolve({range_string}, {state_string})"
 
 
@@ -152,7 +395,7 @@ class BuiltinInteger(BuiltinType):
     """Builtin for <integer> with optional range."""
     def get_consumer_call(self, range_string: str, state_string: str) -> str:
         range_template = f"<{self.value_range}>" if self.value_range else "<>"
-        type_param = f"PrimitiveNumeric<IntegerRaw{range_template}>"
+        type_param = f"Integer{range_template}"
         return f"CSSPrimitiveValueResolver<{type_param}>::ConsumeAndResolve({range_string}, {state_string})"
 
 
@@ -160,7 +403,7 @@ class BuiltinAngle(BuiltinType):
     """Builtin for <angle> with optional range."""
     def get_consumer_call(self, range_string: str, state_string: str) -> str:
         range_template = f"<{self.value_range}>" if self.value_range else "<>"
-        type_param = f"PrimitiveNumeric<AngleRaw{range_template}>"
+        type_param = f"Angle{range_template}"
         return f"CSSPrimitiveValueResolver<{type_param}>::ConsumeAndResolve({range_string}, {state_string})"
 
 
@@ -168,7 +411,7 @@ class BuiltinTime(BuiltinType):
     """Builtin for <time> with optional range."""
     def get_consumer_call(self, range_string: str, state_string: str) -> str:
         range_template = f"<{self.value_range}>" if self.value_range else "<>"
-        type_param = f"PrimitiveNumeric<TimeRaw{range_template}>"
+        type_param = f"Time{range_template}"
         return f"CSSPrimitiveValueResolver<{type_param}>::ConsumeAndResolve({range_string}, {state_string})"
 
 
@@ -176,7 +419,7 @@ class BuiltinResolution(BuiltinType):
     """Builtin for <resolution> with optional range."""
     def get_consumer_call(self, range_string: str, state_string: str) -> str:
         range_template = f"<{self.value_range}>" if self.value_range else "<>"
-        type_param = f"PrimitiveNumeric<ResolutionRaw{range_template}>"
+        type_param = f"Resolution{range_template}"
         return f"CSSPrimitiveValueResolver<{type_param}>::ConsumeAndResolve({range_string}, {state_string})"
 
 
@@ -197,6 +440,7 @@ class BuiltinUrl(BuiltinType):
     def get_consumer_call(self, range_string: str, state_string: str) -> str:
         return f"ConsumeUrl({range_string}, {state_string})"
 
+#endregion
 
 # Map of builtin type names to their handler classes
 BUILTIN_TYPES = {
@@ -247,7 +491,7 @@ class ReferenceTerm(Term):
     def from_node(node: BNFReferenceNode) -> "ReferenceTerm":
         """Create from BNF node."""
         return ReferenceTerm(
-            name=node.name,
+            name=str(node.name),
             is_internal=node.is_internal,
             is_function_reference=node.is_function_reference,
             parameters=node.attributes
@@ -265,7 +509,7 @@ class LiteralTerm(Term):
 
     @staticmethod
     def from_node(node: BNFLiteralNode) -> "LiteralTerm":
-        return LiteralTerm(node.value)
+        return LiteralTerm(str(node.value))
 
 
 class KeywordTerm(Term):
@@ -361,7 +605,7 @@ class FunctionParameter:
 class FunctionSignature:
     """Represents a function signature."""
     
-    def __init__(self, result_type: str, name: str, parameters: list[FunctionParameter], scope: str = None):
+    def __init__(self, result_type: str, name: str, parameters: list[FunctionParameter], scope: str|None = None):
         self.result_type = result_type
         self.name = name
         self.parameters = parameters
@@ -385,210 +629,6 @@ class FunctionSignature:
         args = ", ".join(arguments)
         return f"{self.name}({args})"
 
-
-# ============================================================================
-# TermGenerator Classes (Code Emission)
-# ============================================================================
-
-class TermGenerator:
-    """Base class for term generators. Each term type has a generator."""
-    
-    @staticmethod
-    def make(term: Term, keyword_fast_path_generator = None) -> "TermGenerator":
-        """Factory method to create appropriate generator for a term."""
-        if isinstance(term, GroupingTerm):
-            return TermGeneratorGroupingTerm(term)
-        elif isinstance(term, FunctionTerm):
-            return TermGeneratorFunctionTerm(term)
-        elif isinstance(term, ReferenceTerm):
-            return TermGeneratorReferenceTerm(term)
-        elif isinstance(term, KeywordTerm):
-            return TermGeneratorKeywordTerm(term)
-        elif isinstance(term, LiteralTerm):
-            return TermGeneratorLiteralTerm(term)
-        else:
-            raise Exception(f"Unknown term type: {type(term)}")
-
-    def generate_conditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
-        """Generate conditional code (if statement)."""
-        raise NotImplementedError
-
-    def generate_unconditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
-        """Generate unconditional code (direct return)."""
-        raise NotImplementedError
-
-
-class TermGeneratorReferenceTerm(TermGenerator):
-    """Generate code for reference terms like <color>."""
-
-    def __init__(self, term: ReferenceTerm, all_properties: dict[str, Any]|None = None):
-        self.term = term
-        self.all_properties = all_properties or {}
-
-    def generate_conditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
-        consumer_call = self._generate_consumer_call(range_string, state_string)
-        to.write(f"if (auto result = {consumer_call})")
-        with to.indent():
-            to.write("return result;")
-
-    def generate_unconditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
-        consumer_call = self._generate_consumer_call(range_string, state_string)
-        to.write(f"return {consumer_call};")
-
-    def _generate_consumer_call(self, range_string: str, state_string: str) -> str:
-        """Generate the appropriate consumer call based on reference type."""
-        # Handle builtin types (like <length-percentage>)
-        if self.term.is_builtin:
-            return self.term.builtin.get_consumer_call(range_string, state_string)
-
-        # Handle property references with quotes (like <'margin-top'>)
-        # These have quotes in the name itself
-        if self.term.name.startswith("'") and self.term.name.endswith("'"):
-            # Internal references like <'margin-top'> should call the property's parser
-            # Strip quotes from the name
-            property_name = self.term.name.strip("'")
-            pascal_name = kebab_case_to_pascal_case(property_name)
-            return f"ParseCSS{pascal_name}Value({range_string}, {state_string})"
-
-        # Handle internal references (like <<values>>)
-        if self.term.is_internal:
-            # These reference internal grammar rules
-            formatted_name = kebab_case_to_pascal_case(self.term.name)
-            return f"Consume{formatted_name}({range_string}, {state_string})"
-
-        # Handle regular references (non-builtin, non-internal)
-        # These reference grammar rules or other generated parsers
-        formatted_name = kebab_case_to_pascal_case(self.term.name)
-        return f"Consume{formatted_name}({range_string}, {state_string})"
-
-    def _format_name(self) -> str:
-        """Format the reference name for use in C++."""
-        return kebab_case_to_pascal_case(self.term.name)
-
-
-class TermGeneratorKeywordTerm(TermGenerator):
-    """Generate code for keyword terms like 'auto', 'none'."""
-
-    def __init__(self, term: KeywordTerm):
-        self.term = term
-
-    def generate_conditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
-        # WebKit uses consumeIdent with a switch on the keyword ID
-        keyword_id = kebab_case_to_pascal_case(self.term.value)
-        to.write(f"// {self.term.value}")
-        to.write(f"switch (auto keyword = {range_string}.Peek().ValueId(); keyword) {{")
-        to.write(f"case CSSValueId::{keyword_id}:")
-        with to.indent():
-            to.write(f"{range_string}.Discard();")
-            to.write(f"{range_string}.DiscardWhitespace();")
-            to.write(f"return CreateRef<CSSPrimitiveValue>(CSSValueId::{keyword_id});")
-        to.write("default:")
-        with to.indent():
-            to.write("break;")
-        to.write("}")
-
-    def generate_unconditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
-        keyword_id = kebab_case_to_pascal_case(self.term.value)
-        to.write(f"// {self.term.value}")
-        to.write(f"switch (auto keyword = {range_string}.Peek().Id(); keyword) {{")
-        to.write(f"case CSSValueId::{keyword_id}:")
-        with to.indent():
-            to.write(f"{range_string}.Discard();")
-            to.write(f"{range_string}.DiscardWhitespace();")
-            to.write(f"return CreateRef<CSSPrimitiveValue>(CSSValueId::{keyword_id});")
-        to.write("default:")
-        with to.indent():
-            to.write("return nullptr;")
-        to.write("}")
-
-
-class TermGeneratorLiteralTerm(TermGenerator):
-    """Generate code for literal terms like '/'."""
-    
-    def __init__(self, term: LiteralTerm):
-        self.term = term
-
-    def generate_conditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
-        to.write(f"if (ConsumeLiteral<'{self.term.value}'>({range_string}))")
-        with to.indent():
-            to.write("// Matched literal")
-
-    def generate_unconditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
-        to.write(f"ConsumeLiteral<'{self.term.value}'>({range_string});")
-
-
-class TermGeneratorFunctionTerm(TermGenerator):
-    """Generate code for function terms."""
-    
-    def __init__(self, term: FunctionTerm):
-        self.term = term
-
-    def generate_conditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
-        func_name = kebab_case_to_pascal_case(self.term.name)
-        to.write(f"if (auto result = Consume{func_name}({range_string}, {state_string}))")
-        with to.indent():
-            to.write("return result;")
-
-    def generate_unconditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
-        func_name = kebab_case_to_pascal_case(self.term.name)
-        to.write(f"return Consume{func_name}({range_string}, {state_string});")
-
-
-class TermGeneratorGroupingTerm(TermGenerator):
-    """Generate code for grouping terms."""
-    
-    def __init__(self, term: GroupingTerm):
-        self.term = term
-        self.subgenerators = [TermGenerator.make(subterm) for subterm in term.subterms]
-
-    def generate_conditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
-        if self.term.kind == '|':
-            # Match one
-            for gen in self.subgenerators:
-                gen.generate_conditional(to=to, range_string=range_string, state_string=state_string)
-        elif self.term.kind == ' ':
-            # Match all ordered
-            to.write(f"// Match all ordered")
-            for gen in self.subgenerators:
-                gen.generate_unconditional(to=to, range_string=range_string, state_string=state_string)
-
-    def generate_unconditional(self, *, to: Writer, range_string: str, state_string: str) -> None:
-        if self.term.kind == '|':
-            for gen in self.subgenerators:
-                gen.generate_conditional(to=to, range_string=range_string, state_string=state_string)
-        elif self.term.kind == ' ':
-            for gen in self.subgenerators:
-                gen.generate_unconditional(to=to, range_string=range_string, state_string=state_string)
-
-
-class KeywordFastPathGenerator:
-    """Generates optimized fast-path for keyword-only properties."""
-    
-    def __init__(self, function_name: str, keywords: list[str]):
-        self.function_name = function_name
-        self.keywords = keywords
-
-    def generate_definition(self, *, to: Writer) -> None:
-        """Generate the keyword validation function."""
-        to.write(f"KRYS_NODISCARD inline bool {self.function_name}(CSSValueId keyword) noexcept")
-        to.write("{")
-        with to.indent():
-            to.write("switch (keyword) {")
-            with to.indent():
-                for keyword in self.keywords:
-                    keyword_id = kebab_case_to_pascal_case(keyword)
-                    to.write(f"case CSSValueId::{keyword_id}:")
-                to.write("    return true;")
-            to.write("default:")
-            with to.indent():
-                to.write("return false;")
-            to.write("}")
-        to.write("}")
-
-
-# ============================================================================
-# CSS Property Definition
-# ============================================================================
 
 class CSSProperty:
     id: str
@@ -659,11 +699,12 @@ class CSSProperty:
             generator = TermGenerator.make(self.grammar.root_term)
             generator.generate_unconditional(to=to, range_string="range", state_string="state")
 
-            to.write("")
-            to.write("return nullptr;")
+            # Only add return nullptr if the generator doesn't produce an unconditional return
+            if not generator.has_unconditional_return():
+                to.write("")
+                to.write("return nullptr;")
 
         to.write("}")
-
 
 def __generate_css_property_id_enum(
     context: GeneratorContext,
@@ -695,7 +736,6 @@ def __generate_css_property_id_enum(
     with open(output_filepath, "w") as hpp_file:
         hpp_file.write(output)
 
-
 class ShorthandToLonghandData:
     shorthand_name: str
     longhand_names: list[str]
@@ -704,7 +744,6 @@ class ShorthandToLonghandData:
         self.shorthand_name = shorthand
         self.longhand_names = longhands
 
-
 class LonghandsToShorthandData:
     longhand_names: list[str]
     shorthand_names: list[str]
@@ -712,7 +751,6 @@ class LonghandsToShorthandData:
     def __init__(self, longhand: list[str], shorthands: list[str]):
         self.longhand_names = longhand
         self.shorthand_names = shorthands
-
 
 def __generate_css_property_shorthand_files(
     context: GeneratorContext, shorthand_properties: list[CSSProperty], longhand_properties: list[CSSProperty]
@@ -787,44 +825,77 @@ def __generate__css_property_consumer_file(context: GeneratorContext, all_proper
     with open(output_filepath, "w") as cpp_file:
         cpp_file.write(output)
 
-
 def __generate_css_property_parsers_file(context: GeneratorContext, all_properties: list[CSSProperty]):
     properties_with_parsers = [prop for prop in all_properties if prop.has_parser()]
-    
+
     if not properties_with_parsers:
-        print("No properties with parsers found. Skipping CSSPropertyParsers.cpp generation.")
+        print("No properties with parsers found. Skipping CSSPropertyParsers generation.")
         return
 
-    writer = Writer()
-    
-    # Write header guards and includes
-    writer.write("#pragma once")
-    writer.write("")
-    writer.write("#include \"Krystal.HTML/CSS/Parser/CSSTokenRange.hpp\"")
-    writer.write("#include \"Krystal.HTML/CSS/Properties/CSSPropertyParserState.hpp\"")
-    writer.write("#include \"Krystal.HTML/CSS/Properties/Consumers/Primitives.hpp\"")
-    writer.write("#include \"Krystal.HTML/CSS/Values/CSSValue.hpp\"")
-    writer.write("#include \"Krystal.HTML/CSS/Values/Enums/CSSValueId.hpp\"")
-    writer.write("#include \"Krystal.HTML/CSS/Values/CSSPrimitiveValue.hpp\"")
-    writer.write("#include \"Krystal.HTML/CSS/Values/Primitives/CSSPrimitiveNumeric.hpp\"")
-    writer.write("#include \"Krystal.HTML/CSS/Values/Primitives/CSSPrimitiveNumericRange.hpp\"")
-    writer.write("#include \"Krystal.HTML/CSS/Values/Primitives/CSSPrimitiveNumericRaw.hpp\"")
-    writer.write("#include \"Krystal.Lib/Pointers/RefPtr.hpp\"")
-    writer.write("#include \"Krystal.Lib/Types/Maybe.hpp\"")
-    writer.write("")
-    writer.write("namespace Krys::HTML {")
-    writer.write("")
-    
-    # Generate each parser function
+    # Generate header file
+    writer_hpp = Writer()
+    writer_hpp.write("#pragma once")
+    writer_hpp.write("")
+    writer_hpp.write("#include \"Krystal.Lib/Pointers/RefPtr.hpp\"")
+    writer_hpp.write("#include \"Krystal.Lib/Types/Maybe.hpp\"")
+    writer_hpp.write("")
+    writer_hpp.write("namespace Krys::HTML {")
+    writer_hpp.write("")
+    writer_hpp.write("class CSSTokenRange;")
+    writer_hpp.write("struct CSSPropertyParserState;")
+    writer_hpp.write("class CSSValue;")
+    writer_hpp.write("")
+
+    # Declare each parser function
     for prop in properties_with_parsers:
-        prop.generate_parser_function(to=writer)
-        writer.write("")
-    
-    writer.write("}")
-    
-    output_filepath = context.project_root / "src" / "CSS" / "Properties" / "CSSPropertyParsers.cpp"
-    with open(output_filepath, "w") as cpp_file:
-        cpp_file.write(writer.get_content())
+        func_name = f"ParseCSS{prop.id_pascal_case}Value"
+        writer_hpp.write(f"KRYS_NODISCARD Maybe<RefPtr<CSSValue>> {func_name}(CSSTokenRange &tokens, CSSPropertyParserState &state) noexcept;")
+
+    writer_hpp.write("")
+    writer_hpp.write("}")
+
+    output_filepath_hpp = context.project_root / "include" / "Krystal.HTML" / "CSS" / "Properties" / "CSSPropertyParsers.hpp"
+    with open(output_filepath_hpp, "w") as hpp_file:
+        hpp_file.write(writer_hpp.get_content())
+
+    # Generate source file
+    writer_cpp = Writer()
+    writer_cpp.write("#include \"Krystal.HTML/CSS/Properties/CSSPropertyParsers.hpp\"")
+    writer_cpp.write("")
+    writer_cpp.write("#include \"Krystal.HTML/CSS/Parser/CSSTokenRange.hpp\"")
+    writer_cpp.write("#include \"Krystal.HTML/CSS/Properties/CSSPropertyParserState.hpp\"")
+    writer_cpp.write("#include \"Krystal.HTML/CSS/Properties/Consumers/Primitives.hpp\"")
+    writer_cpp.write("#include \"Krystal.HTML/CSS/Properties/Consumers/Ident.hpp\"")
+    writer_cpp.write("#include \"Krystal.HTML/CSS/Properties/Consumers/LengthPercentageDefinitions.hpp\"")
+    writer_cpp.write("#include \"Krystal.HTML/CSS/Properties/Consumers/LengthDefinitions.hpp\"")
+    writer_cpp.write("#include \"Krystal.HTML/CSS/Properties/Consumers/PercentageDefinitions.hpp\"")
+    writer_cpp.write("#include \"Krystal.HTML/CSS/Properties/Consumers/NumberDefinitions.hpp\"")
+    writer_cpp.write("#include \"Krystal.HTML/CSS/Properties/Consumers/IntegerDefinitions.hpp\"")
+    writer_cpp.write("#include \"Krystal.HTML/CSS/Properties/Consumers/AngleDefinitions.hpp\"")
+    writer_cpp.write("#include \"Krystal.HTML/CSS/Properties/Consumers/TimeDefinitions.hpp\"")
+    writer_cpp.write("#include \"Krystal.HTML/CSS/Properties/Consumers/ResolutionDefinitions.hpp\"")
+    writer_cpp.write("#include \"Krystal.HTML/CSS/Values/CSSValue.hpp\"")
+    writer_cpp.write("#include \"Krystal.HTML/CSS/Values/Enums/CSSValueId.hpp\"")
+    writer_cpp.write("#include \"Krystal.HTML/CSS/Values/CSSPrimitiveValue.hpp\"")
+    writer_cpp.write("#include \"Krystal.HTML/CSS/Values/Primitives/CSSPrimitiveNumeric.hpp\"")
+    writer_cpp.write("#include \"Krystal.HTML/CSS/Values/Primitives/CSSPrimitiveNumericRange.hpp\"")
+    writer_cpp.write("#include \"Krystal.HTML/CSS/Values/Primitives/CSSPrimitiveNumericRaw.hpp\"")
+    writer_cpp.write("#include \"Krystal.Lib/Pointers/RefPtr.hpp\"")
+    writer_cpp.write("#include \"Krystal.Lib/Types/Maybe.hpp\"")
+    writer_cpp.write("")
+    writer_cpp.write("namespace Krys::HTML {")
+    writer_cpp.write("")
+
+    # Generate each parser function implementation
+    for prop in properties_with_parsers:
+        prop.generate_parser_function(to=writer_cpp)
+        writer_cpp.write("")
+
+    writer_cpp.write("}")
+
+    output_filepath_cpp = context.project_root / "src" / "CSS" / "Properties" / "CSSPropertyParsers.cpp"
+    with open(output_filepath_cpp, "w") as cpp_file:
+        cpp_file.write(writer_cpp.get_content())
 
 
 def generate(context: GeneratorContext):

@@ -108,12 +108,12 @@ namespace Krys
   // Based on 'Detecting in C++ whether a type is defined, part 3: SFINAE and incomplete types'
   // <https://devblogs.microsoft.com/oldnewthing/20190710-00/?p=102678>
   template <typename, typename = void>
-  inline constexpr bool IsTypeComplete = false;
+  constexpr bool IsTypeComplete = false;
 
   template <typename T>
-  inline constexpr bool IsTypeComplete<T, void_t<decltype(sizeof(T))>> = true;
+  constexpr bool IsTypeComplete<T, void_t<decltype(sizeof(T))>> = true;
 
   template <bool... Bs>
-  using AllTrue =
-    std::is_same<std::integer_sequence<bool, true, Bs...>, std::integer_sequence<bool, Bs..., true>>;
+  constexpr bool AllTrue =
+    std::is_same<std::integer_sequence<bool, true, Bs...>, std::integer_sequence<bool, Bs..., true>>::value;
 }

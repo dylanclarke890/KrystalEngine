@@ -1,10 +1,12 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/CSS/Calc/CSSCalcValue.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/MetaConsumerDefinitions.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/MetaResolver.hpp"
 #include "Krystal.HTML/CSS/Values/CSSPrimitiveValue.hpp"
 #include "Krystal.HTML/CSS/Values/Primitives/CSSPrimitiveNumeric.hpp"
 #include "Krystal.HTML/CSS/Values/Primitives/CSSPrimitiveNumericTypes.hpp"
+#include "Krystal.HTML/CSS/Values/Primitives/CSSUnevaluatedCalc.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 
 namespace Krys::HTML
@@ -17,21 +19,22 @@ namespace Krys::HTML
     KRYS_NODISCARD static RefPtr<CSSPrimitiveValue> Resolve(NumericRaw auto value,
                                                             CSSPropertyParserOptions = {}) noexcept
     {
-      return CreateRef<CSSPrimitiveValue>(value.value, ToCSSUnitType(value.unit));
+      return CreateRef<CSSPrimitiveValue>(value.Value, ToCSSUnitType(value.Unit));
     }
 
     template <CSSRange R, typename T>
     KRYS_NODISCARD static RefPtr<CSSPrimitiveValue> Resolve(IntegerRaw<R, T> value,
                                                             CSSPropertyParserOptions) noexcept
     {
-      return CreateRef<CSSPrimitiveValue>(value.value);
+      return CreateRef<CSSPrimitiveValue>(value.Value);
     }
 
-    // KRYS_NODISCARD static RefPtr<CSSPrimitiveValue> resolve(CSS::Calc auto value,
-    //                                                         CSSPropertyParserOptions = {}) noexcept
-    //{
-    //   return CreateRef<CSSPrimitiveValue>(value);
-    // }
+    KRYS_NODISCARD static RefPtr<CSSPrimitiveValue> Resolve(Calc auto value,
+                                                            CSSPropertyParserOptions = {}) noexcept
+    {
+      // TODO: Implement calc() expression evaluation
+      return nullptr;
+    }
 
     KRYS_NODISCARD static RefPtr<CSSPrimitiveValue> Resolve(Numeric auto value,
                                                             CSSPropertyParserOptions options = {}) noexcept
@@ -51,7 +54,7 @@ namespace Krys::HTML
         {
           return SwitchOn(
             value, [&](const Percentage<pR, T>::Raw &raw) -> RefPtr<CSSPrimitiveValue>
-            { return CreateRef<CSSPrimitiveValue>(raw.value / 100.0, CSSUnitType::Number); },
+            { return CreateRef<CSSPrimitiveValue>(raw.Value / 100.0, CSSUnitType::Number); },
             [&](const Percentage<pR, T>::Calc &calc) -> RefPtr<CSSPrimitiveValue>
             { return Resolve(calc, options); });
         });

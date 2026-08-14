@@ -30,8 +30,9 @@ namespace Krys::HTML
     using ResolvedValueType = typename Raw::ResolvedValueType;
     using Data = PrimitiveData<PrimitiveNumeric<RawType>>;
     using Index = typename Data::Index;
-    static constexpr auto range = Raw::range;
-    static constexpr auto category = Raw::category;
+
+    constexpr static auto Range = Raw::Range;
+    constexpr static auto Category = Raw::Category;
 
     PrimitiveNumeric(Raw raw) : m_data {raw}
     {
@@ -144,11 +145,11 @@ namespace Krys::HTML
     {
       if constexpr (std::same_as<T, Calc>)
       {
-        return isCalc();
+        return IsCalc();
       }
       else if constexpr (std::same_as<T, Raw>)
       {
-        return isRaw();
+        return IsRaw();
       }
     }
 
@@ -157,31 +158,33 @@ namespace Krys::HTML
     {
       auto visitor = Krys::CreateVisitor(std::forward<F>(f)...);
 
-      if (isCalc())
-        return visitor(asCalc());
-      return visitor(asRaw());
+      if (IsCalc())
+      {
+        return visitor(AsCalc());
+      }
+      return visitor(AsRaw());
     }
 
-    bool isKnownZero() const
+    bool IsKnownZero() const
     {
-      return isRaw() && m_data.payload.number == 0;
+      return IsRaw() && m_data.payload.number == 0;
     }
-    bool isKnownNotZero() const
+    bool IsKnownNotZero() const
     {
-      return isRaw() && m_data.payload.number != 0;
+      return IsRaw() && m_data.payload.number != 0;
     }
 
-    bool isRaw() const
+    bool IsRaw() const
     {
-      return m_data.isRaw();
+      return m_data.IsRaw();
     }
-    bool isCalc() const
+    bool IsCalc() const
     {
-      return m_data.isCalc();
+      return m_data.IsCalc();
     }
-    bool isEmpty() const
+    bool IsEmpty() const
     {
-      return m_data.isEmpty();
+      return m_data.IsEmpty();
     }
 
   private:
@@ -192,13 +195,14 @@ namespace Krys::HTML
     {
     }
 
-    Raw asRaw() const
+    Raw AsRaw() const
     {
-      return m_data.asRaw();
+      return m_data.AsRaw();
     }
-    Calc asCalc() const
+
+    Calc AsCalc() const
     {
-      return m_data.asCalc();
+      return m_data.AsCalc();
     }
 
     Data m_data;

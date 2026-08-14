@@ -124,7 +124,7 @@ namespace Krys::HTML
   struct MetaConsumerUnroller<T, Ts...>
   {
     template <CSSTokenType TokenType, typename ResultType>
-    KRYS_NODISCARD static Maybe<ResultType> consume(CSSTokenRange &range, CSSPropertyParserState &state,
+    KRYS_NODISCARD static Maybe<ResultType> Consume(CSSTokenRange &range, CSSPropertyParserState &state,
                                                     CSSCalcAllowedSymbols symbolsAllowed,
                                                     CSSPropertyParserOptions options) noexcept
     {
@@ -141,7 +141,7 @@ namespace Krys::HTML
     }
 
     template <CSSTokenType TokenType, typename ResultType, typename F>
-    KRYS_NODISCARD static Maybe<ResultType> consume(CSSTokenRange &range, CSSPropertyParserState &state,
+    KRYS_NODISCARD static Maybe<ResultType> Consume(CSSTokenRange &range, CSSPropertyParserState &state,
                                                     CSSCalcAllowedSymbols symbolsAllowed,
                                                     CSSPropertyParserOptions options, F &&func) noexcept
     {
@@ -169,7 +169,7 @@ namespace Krys::HTML
   struct MetaConsumeResult
   {
     using TypeList = std::tuple<Ts...>;
-    using type = VariantOrSingle<TypeList>;
+    using type = VariantOrSingle<Ts...>;
   };
 
   // The `MetaConsumer` is the main driver of token consumption, dispatching

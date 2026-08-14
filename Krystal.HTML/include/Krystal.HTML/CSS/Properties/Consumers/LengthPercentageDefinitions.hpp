@@ -39,8 +39,8 @@ namespace Krys::HTML
   {
     using FunctionToken = FunctionConsumerForCalcValues<LengthPercentage<R, V>>;
     using DimensionToken = DimensionConsumer<LengthPercentage<R, V>, LengthPercentageValidator>;
-    using PercentageToken = PercentageConsumer<LengthPercentage<R, V>, LengthPercentageValidator>;
-    using NumberToken =
-      NumberConsumerForUnitlessValues<LengthPercentage<R, V>, LengthPercentageValidator, LengthUnit::Px>;
+    using PercentageToken = PercentageConsumer<LengthPercentage<R, V>, LengthPercentageValidator, LengthPercentageUnit::Percentage>;
+    using NumberToken = NumberConsumerForUnitlessValues<LengthPercentage<R, V>, LengthPercentageValidator,
+                                                        LengthPercentageUnit::Px>;
   };
 }

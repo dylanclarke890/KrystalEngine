@@ -68,7 +68,7 @@ namespace Krys::HTML
   template <CSSValueId Head, CSSValueId... Tail>
   KRYS_NODISCARD bool IdentMatches(CSSValueId valueId) noexcept
   {
-    return id == Head || IdentMatches<Tail...>(valueId);
+    return valueId == Head || IdentMatches<Tail...>(valueId);
   }
 
   template <CSSValueId... Names>

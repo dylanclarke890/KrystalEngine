@@ -23,6 +23,8 @@ namespace Krys::HTML
 
     explicit CSSPrimitiveValue(CSSOMString customIdentifier) noexcept;
 
+    CSSPrimitiveValue(double value, CSSUnitType unit) noexcept;
+    
     KRYS_NODISCARD bool IsPropertyId() const noexcept
     {
       return _unit == CSSUnitType::PropertyId;

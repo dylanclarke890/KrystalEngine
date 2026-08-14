@@ -17,4 +17,11 @@ namespace Krys::HTML
     auto atom = CSSOMStringAtom(customIdentifier);
     _value.String = *reinterpret_cast<const StringAtomStorage *>(atom.View().data());
   }
+
+  CSSPrimitiveValue::CSSPrimitiveValue(double value, CSSUnitType unit) noexcept
+      : CSSValue(CSSValueType::Primitive)
+  {
+    _unit = unit;
+    _value.Number = value;
+  }
 }

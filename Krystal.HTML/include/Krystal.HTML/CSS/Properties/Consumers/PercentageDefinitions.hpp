@@ -23,6 +23,6 @@ namespace Krys::HTML
   struct ConsumerDefinition<Percentage<R, V>>
   {
     using FunctionToken = FunctionConsumerForCalcValues<Percentage<R, V>>;
-    using PercentageToken = PercentageConsumer<Percentage<R, V>, PercentageValidator>;
+    using PercentageToken = PercentageConsumer<Percentage<R, V>, PercentageValidator, PercentageUnit::Percentage>;
   };
 }

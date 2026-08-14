@@ -39,7 +39,7 @@ namespace Krys::HTML
   {
     using FunctionToken = FunctionConsumerForCalcValues<AnglePercentage<R, V>>;
     using DimensionToken = DimensionConsumer<AnglePercentage<R, V>, AnglePercentageValidator>;
-    using PercentageToken = PercentageConsumer<AnglePercentage<R, V>, AnglePercentageValidator>;
+    using PercentageToken = PercentageConsumer<AnglePercentage<R, V>, AnglePercentageValidator, AnglePercentageUnit::Percentage>;
     using NumberToken =
       NumberConsumerForUnitlessValues<AnglePercentage<R, V>, AnglePercentageValidator, AngleUnit::Deg>;
   };
