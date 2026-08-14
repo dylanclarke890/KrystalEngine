@@ -143,6 +143,7 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSParserMode.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\AngleDefinitions.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\AnglePercentageDefinitions.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\CSSPrimitiveValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\FlexDefinitions.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\FrequencyDefinitions.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\IntegerDefinitions.hpp" />
@@ -155,7 +156,9 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\NumberDefinitions.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\Percentage.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\PercentageDefinitions.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\Primitives.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\ResolutionDefinitions.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\String.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\SymbolDefinitions.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\TimeDefinitions.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyConsumer.hpp" />
