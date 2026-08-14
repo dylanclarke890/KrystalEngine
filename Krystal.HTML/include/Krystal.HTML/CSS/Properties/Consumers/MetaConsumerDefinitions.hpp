@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/CSS/Calc/CSSCalcAllowedSymbols.hpp"
+#include "Krystal.HTML/CSS/Calc/CSSCalcValue.hpp"
 #include "Krystal.HTML/CSS/Parser/CSSToken.hpp"
 #include "Krystal.HTML/CSS/Parser/CSSTokenRange.hpp"
 #include "Krystal.HTML/CSS/Properties/CSSPropertyParserOptions.hpp"
@@ -174,7 +176,7 @@ namespace Krys::HTML
 
       auto &token = range.Peek();
 
-      auto validatedUnit = Validator::Validate(token.UnitType(), state, options);
+      auto validatedUnit = Validator::Validate(ParseCSSUnitType(token.Unit()), state, options);
       if (!validatedUnit)
       {
         return Null;
@@ -315,8 +317,8 @@ namespace Krys::HTML
       assert(range.Peek().Type() == CSSTokenType::Function);
 
       auto rangeCopy = range;
-      if (auto value = CSSCalc::Value::Parse(rangeCopy, state, Primitive::category, Primitive::range,
-                                             Krys::Move(symbolsAllowed), options))
+      if (auto value = CSSCalcValue::Parse(rangeCopy, state, Primitive::Category, Primitive::Range,
+                                           Krys::Move(symbolsAllowed), options))
       {
         range = rangeCopy;
         // TODO:: wtf are they returning here

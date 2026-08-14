@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <None Include="codegen\bnf.py" />
     <None Include="codegen\css-properties\data.json" />
     <None Include="codegen\css-properties\data.schema.json" />
     <None Include="codegen\css-properties\generator.py" />
@@ -54,6 +55,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\CSS\Properties\CSSPropertyParsers.cpp" />
     <ClCompile Include="src\CSS\Values\Primitives\CSSUnevaluatedCalc.cpp" />
     <ClCompile Include="src\CSS\CSSParser.cpp" />
     <ClCompile Include="src\CSS\Properties\CSSPropertyConsumer.cpp" />

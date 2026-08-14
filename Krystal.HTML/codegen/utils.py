@@ -1,4 +1,4 @@
-import datetime
+﻿import datetime
 import json
 import pathlib
 from jinja2 import Environment, FileSystemLoader
@@ -10,8 +10,8 @@ def kebab_case_to_pascal_case(kebab_case: str) -> str:
 
 
 def get_validated_json(dir: pathlib.Path):
-    instance = json.loads((dir / "data.json").read_text())
-    schema = json.loads((dir / "data.schema.json").read_text())
+    instance = json.loads((dir / "data.json").read_text(encoding='utf-8-sig'))
+    schema = json.loads((dir / "data.schema.json").read_text(encoding='utf-8-sig'))
     jsonschema.validate(instance, schema)
     return instance
 

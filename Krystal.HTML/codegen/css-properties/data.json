@@ -74,7 +74,7 @@
     },
     "padding-bottom": {
       "initial": "0px",
-      "codegen-properties": { "parser-syntax": "<length-percentage [0,∞]>" },
+      "codegen-properties": { "parser-syntax": "<length-percentage [0,inf]>" },
       "specification": {
         "module": "css-box-4",
         "url": "https://drafts.csswg.org/css-box-4/#padding-physical"
@@ -82,7 +82,7 @@
     },
     "padding-left": {
       "initial": "0px",
-      "codegen-properties": { "parser-syntax": "<length-percentage [0,∞]>" },
+      "codegen-properties": { "parser-syntax": "<length-percentage [0,inf]>" },
       "specification": {
         "module": "css-box-4",
         "url": "https://drafts.csswg.org/css-box-4/#padding-physical"
@@ -90,7 +90,7 @@
     },
     "padding-right": {
       "initial": "0px",
-      "codegen-properties": { "parser-syntax": "<length-percentage [0,∞]>" },
+      "codegen-properties": { "parser-syntax": "<length-percentage [0,inf]>" },
       "specification": {
         "module": "css-box-4",
         "url": "https://drafts.csswg.org/css-box-4/#padding-physical"
@@ -98,7 +98,7 @@
     },
     "padding-top": {
       "initial": "0px",
-      "codegen-properties": { "parser-syntax": "<length-percentage [0,∞]>" },
+      "codegen-properties": { "parser-syntax": "<length-percentage [0,inf]>" },
       "specification": {
         "module": "css-box-4",
         "url": "https://drafts.csswg.org/css-box-4/#padding-physical"

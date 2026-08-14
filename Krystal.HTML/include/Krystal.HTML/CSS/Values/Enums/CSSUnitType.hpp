@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Enum.hpp"
+#include "Krystal.Lib/String/String.hpp"
 
 namespace Krys::HTML
 {
@@ -92,6 +93,12 @@ namespace Krys::HTML
     PropertyId,
     ValueId,
   };
+
+  KRYS_NODISCARD constexpr CSSUnitType ParseCSSUnitType(utf8_stringview str) noexcept
+  {
+    // TODO: Implement parsing logic for CSSUnitType from string representation.
+    return CSSUnitType::Unknown;
+  }
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSUnitType, 76uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSUnitType, 77uz);

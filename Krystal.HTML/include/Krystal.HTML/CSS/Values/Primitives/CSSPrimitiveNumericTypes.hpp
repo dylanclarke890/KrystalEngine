@@ -13,13 +13,13 @@ namespace Krys::HTML
   template <CSSRange nR = All, CSSRange pR = nR, typename V = double>
   struct NumberOrPercentage
   {
+    using Number = Number<nR, V>;
+    using Percentage = Percentage<pR, V>;
+
   private:
     Variant<Number, Percentage> _value;
 
   public:
-    using Number = Number<nR, V>;
-    using Percentage = Percentage<pR, V>;
-
     NumberOrPercentage(Variant<Number, Percentage> &&value) noexcept
     {
       SwitchOn(Krys::Move(value), [this](auto &&alternative) { this->_value = Krys::Move(alternative); });
@@ -57,13 +57,13 @@ namespace Krys::HTML
   template <CSSRange nR = All, CSSRange pR = nR, typename V = double>
   struct NumberOrPercentageResolvedToNumber
   {
+    using Number = Number<nR, V>;
+    using Percentage = Percentage<pR, V>;
+
   private:
     Variant<Number, Percentage> _value;
 
   public:
-    using Number = Number<nR, V>;
-    using Percentage = Percentage<pR, V>;
-
     NumberOrPercentageResolvedToNumber(Variant<Number, Percentage> &&value) noexcept
     {
       SwitchOn(Krys::Move(value), [this](auto &&alternative) { this->_value = Krys::Move(alternative); });

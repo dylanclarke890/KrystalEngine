@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <type_traits>
+#include <utility>
 
 namespace Krys
 {
@@ -113,5 +114,6 @@ namespace Krys
   inline constexpr bool IsTypeComplete<T, void_t<decltype(sizeof(T))>> = true;
 
   template <bool... Bs>
-  using AllTrue = std::is_same<std::integer_sequence<bool, true, Bs...>, std::integer_sequence<bool, Bs..., true>>;
+  using AllTrue =
+    std::is_same<std::integer_sequence<bool, true, Bs...>, std::integer_sequence<bool, Bs..., true>>;
 }

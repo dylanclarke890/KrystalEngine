@@ -1721,6 +1721,9 @@
     <ClCompile Include="src\CSS\Values\Primitives\CSSUnevaluatedCalc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\CSS\Properties\CSSPropertyParsers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\HTMLTagNames.in" />
@@ -2043,5 +2046,6 @@
     <None Include="codegen\templates\css-keyword-constants.hpp.jinja" />
     <None Include="codegen\templates\css-property-consumer.cpp.jinja" />
     <None Include="codegen\templates\css-property-shorthand.cpp.jinja" />
+    <None Include="codegen\bnf.py" />
   </ItemGroup>
 </Project>

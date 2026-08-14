@@ -37,7 +37,7 @@ namespace Krys::HTML
     {
     }
 
-    PrimitiveNumeric(Calc calc) : m_data {WTF::move(calc)}
+    PrimitiveNumeric(Calc calc) : m_data {Krys::Move(calc)}
     {
     }
 
@@ -78,7 +78,7 @@ namespace Krys::HTML
     {
     }
 
-    PrimitiveNumeric(PrimitiveNumeric &&other) : m_data {WTF::move(other.m_data)}
+    PrimitiveNumeric(PrimitiveNumeric &&other) : m_data {Krys::Move(other.m_data)}
     {
     }
 
@@ -90,7 +90,7 @@ namespace Krys::HTML
 
     PrimitiveNumeric &operator=(PrimitiveNumeric &&other)
     {
-      m_data = WTF::move(other.m_data);
+      m_data = Krys::Move(other.m_data);
       return *this;
     }
 
