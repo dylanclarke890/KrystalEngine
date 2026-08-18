@@ -1,4 +1,4 @@
-#include "Krystal.HTML/CSS/Properties/CSSPropertyParsers.hpp"
+﻿#include "Krystal.HTML/CSS/Properties/CSSPropertyParsers.hpp"
 
 #include "Krystal.HTML/CSS/Parser/CSSTokenRange.hpp"
 #include "Krystal.HTML/CSS/Properties/CSSPropertyParserState.hpp"

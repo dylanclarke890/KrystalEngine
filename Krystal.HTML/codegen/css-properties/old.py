@@ -4,7 +4,7 @@ import io
 from typing import Any
 from utils import EnumValue, GeneratorContext, get_validated_json, kebab_case_to_pascal_case, generator_metadata
 from collections import defaultdict
-from bnf import BNFParser, BNFGroupingNode, BNFFunctionNode, BNFReferenceNode, BNFKeywordNode, BNFLiteralNode
+from css_bnf_parser import BNFParser, BNFGroupingNode, BNFFunctionNode, BNFReferenceNode, BNFKeywordNode, BNFLiteralNode
 
 GENERATOR_NAME = "css-properties.generator"
 
@@ -585,50 +585,6 @@ class Grammar:
         parser = BNFParser(parsing_context, key_path, grammar_string)
         root_node = parser.parse()
         return Grammar(name, Term.from_node(root_node))
-
-
-# ============================================================================
-# Code Generation Support Classes
-# ============================================================================
-
-class FunctionParameter:
-    """Represents a function parameter."""
-    
-    def __init__(self, param_type: str, name: str):
-        self.param_type = param_type
-        self.name = name
-
-    def __str__(self) -> str:
-        return f"{self.param_type} {self.name}"
-
-
-class FunctionSignature:
-    """Represents a function signature."""
-    
-    def __init__(self, result_type: str, name: str, parameters: list[FunctionParameter], scope: str|None = None):
-        self.result_type = result_type
-        self.name = name
-        self.parameters = parameters
-        self.scope = scope
-
-    @property
-    def declaration_string(self) -> str:
-        """Generate declaration string."""
-        params = ", ".join(str(p) for p in self.parameters)
-        if self.scope:
-            return f"{self.result_type} {self.scope}::{self.name}({params})"
-        return f"{self.result_type} {self.name}({params})"
-
-    @property
-    def definition_string(self) -> str:
-        """Generate definition string (same as declaration for now)."""
-        return self.declaration_string
-
-    def generate_call_string(self, arguments: list[str]) -> str:
-        """Generate a call to this function."""
-        args = ", ".join(arguments)
-        return f"{self.name}({args})"
-
 
 class CSSProperty:
     id: str

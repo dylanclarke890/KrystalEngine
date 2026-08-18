@@ -2030,16 +2030,12 @@
     <None Include="data\CSS\CSSStyleProperties.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="codegen\main.py" />
     <None Include="codegen\generators\css\properties.py" />
     <None Include="codegen\generators\css-properties\data.json" />
     <None Include="codegen\generators\css-properties\generator.py" />
     <None Include="codegen\generators\css-properties\data.schema.json" />
     <None Include="codegen\generators\enum\enum.hpp.jinja" />
     <None Include="codegen\enum\enum.hpp.jinja" />
-    <None Include="codegen\css-properties\data.json" />
-    <None Include="codegen\css-properties\data.schema.json" />
-    <None Include="codegen\css-properties\generator.py" />
     <None Include="codegen\enum.hpp.jinja" />
     <None Include="codegen\templates\enum.hpp.jinja" />
     <None Include="codegen\utils.py" />
@@ -2049,6 +2045,9 @@
     <None Include="codegen\templates\css-keyword-constants.hpp.jinja" />
     <None Include="codegen\templates\css-property-consumer.cpp.jinja" />
     <None Include="codegen\templates\css-property-shorthand.cpp.jinja" />
-    <None Include="codegen\bnf.py" />
+    <None Include="codegen\generator.py" />
+    <None Include="codegen\css-properties.json" />
+    <None Include="codegen\writer.py" />
+    <None Include="codegen\css-properties\old.py" />
   </ItemGroup>
 </Project>

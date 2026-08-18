@@ -19,26 +19,25 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <None Include="codegen\bnf.py" />
-    <None Include="codegen\css-properties\data.json" />
-    <None Include="codegen\css-properties\data.schema.json" />
-    <None Include="codegen\css-properties\generator.py" />
+    <None Include="codegen\css-properties.json" />
+    <None Include="codegen\css-properties\old.py" />
     <None Include="codegen\css-values\data.json" />
     <None Include="codegen\css-values\data.schema.json" />
     <None Include="codegen\css-values\generator.py" />
     <None Include="codegen\enum.hpp.jinja" />
     <None Include="codegen\enum\enum.hpp.jinja" />
+    <None Include="codegen\generator.py" />
     <None Include="codegen\generators\css-properties\data.json" />
     <None Include="codegen\generators\css-properties\data.schema.json" />
     <None Include="codegen\generators\css-properties\generator.py" />
     <None Include="codegen\generators\css\properties.py" />
     <None Include="codegen\generators\enum\enum.hpp.jinja" />
-    <None Include="codegen\main.py" />
     <None Include="codegen\templates\css-keyword-constants.hpp.jinja" />
     <None Include="codegen\templates\css-property-consumer.cpp.jinja" />
     <None Include="codegen\templates\css-property-shorthand.cpp.jinja" />
     <None Include="codegen\templates\enum.hpp.jinja" />
     <None Include="codegen\utils.py" />
+    <None Include="codegen\writer.py" />
     <None Include="data\_progress\DOM.txt" />
     <None Include="data\_progress\HTML.txt" />
     <Text Include="data\HTMLEntityNames.in" />
@@ -905,7 +904,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>python "$(ProjectDir)codegen\main.py" "$(ProjectDir)"</Command>
+      <Command>python "$(ProjectDir)\codegen\generator.py" --gperf-executable="c:\ProgramData\chocolatey\bin\gperf" --verbose --dump-unused-grammars --check-unused-grammars-values</Command>
     </PreBuildEvent>
     <CustomBuildStep>
       <Command>
