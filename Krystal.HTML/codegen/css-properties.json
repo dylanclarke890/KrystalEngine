@@ -2,107 +2,1747 @@
   "properties": {
     "all": {
       "codegen-properties": {
-        "parser-syntax": "initial | inherit | unset | revert | revert-layer",
-        "longhands": ["all"]
+        "longhands": ["all"],
+        "skip-style-extractor": true,
+        "skip-parser": true
       },
       "specification": {
-        "module": "css-cascade-5",
-        "url": "https://www.w3.org/TR/css-cascade-5/#all-shorthand"
+        "module": "css-cascade",
+        "url": "https://www.w3.org/TR/css-cascade-3/#all-shorthand"
+      }
+    },
+    "background-image": {
+      "animation-type": "discrete",
+      "initial": "none",
+      "values": ["none"],
+      "codegen-properties": {
+        "animation-wrapper": "CoordinatedValueListPropertyStyleTypeWrapper",
+        "animation-wrapper-comment": "Explicitly set to CoordinatedValueListPropertyStyleTypeWrapper to override 'discrete' animation-type.",
+        "coordinated-value-list-property": true,
+        "coordinated-value-list-property-name-for-methods": "Image",
+        "coordinated-value-list-property-item-type": "Style::ImageOrNone",
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "_nonInheritedData",
+          "backgroundData",
+          "background"
+        ],
+        "disables-native-appearance": true,
+        "medium-priority": true,
+        "separator": " ",
+        "parser-grammar": "<single-background-image>#"
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://drafts.csswg.org/css-backgrounds/#propdef-background-image"
+      }
+    },
+    "corner-shape": {
+      "animation-type": "discrete",
+      "initial": "round",
+      "codegen-properties": {
+        "settings-flag": "cssCornerShapeEnabled",
+        "longhands": [
+          "corner-top-left-shape",
+          "corner-top-right-shape",
+          "corner-bottom-right-shape",
+          "corner-bottom-left-shape"
+        ],
+        "disables-native-appearance": true,
+        "shorthand-pattern": "CoalescingQuad",
+        "parser-grammar": "<'corner-top-left-shape'>{1,4}",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-borders",
+        "url": "https://drafts.csswg.org/css-borders-4/#corner-shaping"
+      }
+    },
+    "corner-top-left-shape": {
+      "animation-type": "see prose",
+      "initial": "round",
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "corner-shape",
+          "resolver": "top-left"
+        },
+        "settings-flag": "cssCornerShapeEnabled",
+        "disables-native-appearance": true,
+        "render-style-initial-constexpr": true,
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.cornerShapes"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::CornerShapeValue",
+        "parser-grammar": "<corner-shape-value>"
+      },
+      "specification": {
+        "module": "css-borders",
+        "url": "https://drafts.csswg.org/css-borders-4/#corner-shaping"
+      }
+    },
+    "corner-top-right-shape": {
+      "animation-type": "see prose",
+      "initial": "round",
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "corner-shape",
+          "resolver": "top-right"
+        },
+        "settings-flag": "cssCornerShapeEnabled",
+        "disables-native-appearance": true,
+        "render-style-initial-constexpr": true,
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.cornerShapes"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::CornerShapeValue",
+        "parser-grammar": "<corner-shape-value>"
+      },
+      "specification": {
+        "module": "css-borders",
+        "url": "https://drafts.csswg.org/css-borders-4/#corner-shaping"
+      }
+    },
+    "corner-bottom-left-shape": {
+      "animation-type": "see prose",
+      "initial": "round",
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "corner-shape",
+          "resolver": "bottom-left"
+        },
+        "settings-flag": "cssCornerShapeEnabled",
+        "disables-native-appearance": true,
+        "render-style-initial-constexpr": true,
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.cornerShapes"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::CornerShapeValue",
+        "parser-grammar": "<corner-shape-value>"
+      },
+      "specification": {
+        "module": "css-borders",
+        "url": "https://drafts.csswg.org/css-borders-4/#corner-shaping"
+      }
+    },
+    "corner-bottom-right-shape": {
+      "animation-type": "see prose",
+      "initial": "round",
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "corner-shape",
+          "resolver": "bottom-right"
+        },
+        "settings-flag": "cssCornerShapeEnabled",
+        "disables-native-appearance": true,
+        "render-style-initial-constexpr": true,
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.cornerShapes"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::CornerShapeValue",
+        "parser-grammar": "<corner-shape-value>"
+      },
+      "specification": {
+        "module": "css-borders",
+        "url": "https://drafts.csswg.org/css-borders-4/#corner-shaping"
+      }
+    },
+    "corner-start-start-shape": {
+      "animation-type": "see prose",
+      "initial": "round",
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "corner-shape",
+          "resolver": "start-start"
+        },
+        "skip-style-builder": true,
+        "disables-native-appearance": true,
+        "parser-grammar": "<corner-shape-value>",
+        "settings-flag": "cssCornerShapeEnabled"
+      },
+      "specification": {
+        "module": "css-borders",
+        "url": "https://drafts.csswg.org/css-borders-4/#corner-shaping"
+      }
+    },
+    "corner-start-end-shape": {
+      "animation-type": "see prose",
+      "initial": "round",
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "corner-shape",
+          "resolver": "start-end"
+        },
+        "skip-style-builder": true,
+        "disables-native-appearance": true,
+        "parser-grammar": "<corner-shape-value>",
+        "parser-exported": true,
+        "settings-flag": "cssCornerShapeEnabled"
+      },
+      "specification": {
+        "module": "css-borders",
+        "url": "https://drafts.csswg.org/css-borders-4/#corner-shaping"
+      }
+    },
+    "corner-end-start-shape": {
+      "animation-type": "see prose",
+      "initial": "round",
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "corner-shape",
+          "resolver": "end-start"
+        },
+        "skip-style-builder": true,
+        "disables-native-appearance": true,
+        "parser-grammar": "<corner-shape-value>",
+        "settings-flag": "cssCornerShapeEnabled"
+      },
+      "specification": {
+        "module": "css-borders",
+        "url": "https://drafts.csswg.org/css-borders-4/#corner-shaping"
+      }
+    },
+    "corner-end-end-shape": {
+      "animation-type": "see prose",
+      "initial": "round",
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "corner-shape",
+          "resolver": "end-end"
+        },
+        "skip-style-builder": true,
+        "disables-native-appearance": true,
+        "parser-grammar": "<corner-shape-value>",
+        "settings-flag": "cssCornerShapeEnabled"
+      },
+      "specification": {
+        "module": "css-borders",
+        "url": "https://drafts.csswg.org/css-borders-4/#corner-shaping"
+      }
+    },
+    "d": {
+      "animation-type": "by computed value",
+      "initial": "none",
+      "values": ["none"],
+      "codegen-properties": {
+        "render-style-storage-path": ["m_svgStyle", "layoutData"],
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::SVGPathData",
+        "parser-grammar": "none | <path()>",
+        "settings-flag": "cssDPropertyEnabled"
+      },
+      "specification": {
+        "module": "svg",
+        "url": "https://www.w3.org/TR/SVG/paths.html#TheDProperty"
+      }
+    },
+    "direction": {
+      "animation-type": "not animatable",
+      "inherited": true,
+      "initial": "ltr",
+      "values": ["ltr", "rtl"],
+      "codegen-properties": {
+        "style-builder-custom": "Value",
+        "style-extractor-custom": true,
+        "render-style-has-explicitly-set-storage-path": [
+          "_nonInheritedData",
+          "miscData"
+        ],
+        "render-style-getter": "computedDirection",
+        "render-style-getter-custom": true,
+        "render-style-setter-custom": true,
+        "render-style-setter-returns-if-changed": true,
+        "render-style-storage-container": "struct",
+        "render-style-storage-path": ["_inheritedFlags"],
+        "render-style-storage-kind": "enum",
+        "render-style-type": "TextDirection",
+        "high-priority": true,
+        "parser-grammar": "<<values>>"
+      },
+      "specification": {
+        "module": "css-writing-modes",
+        "url": "https://www.w3.org/TR/css-writing-modes-3/#propdef-direction"
+      }
+    },
+    "display": {
+      "animation-type": "see prose",
+      "initial": "inline",
+      "values": [
+        "inline",
+        "block",
+        "flow",
+        "flow-root",
+        "list-item",
+        "inline-block",
+        "table",
+        "inline-table",
+        "table-row-group",
+        "table-header-group",
+        "table-footer-group",
+        "table-row",
+        "table-column-group",
+        "table-column",
+        "table-cell",
+        "table-caption",
+        "flex",
+        "inline-flex",
+        "grid",
+        "inline-grid",
+        {
+          "value": "grid-lanes",
+          "settings-flag": "gridLanesEnabled"
+        },
+        {
+          "value": "inline-grid-lanes",
+          "settings-flag": "gridLanesEnabled"
+        },
+        {
+          "value": "ruby",
+          "status": "unimplemented"
+        },
+        {
+          "value": "ruby-text-container",
+          "status": "unimplemented"
+        },
+        {
+          "value": "ruby-base",
+          "status": "unimplemented"
+        },
+        {
+          "value": "ruby-text",
+          "status": "unimplemented"
+        },
+        {
+          "value": "ruby-base-container",
+          "status": "unimplemented"
+        },
+        "contents",
+        "none",
+        {
+          "value": "-webkit-box",
+          "status": "obsolete",
+          "url": "https://compat.spec.whatwg.org/#css-keyword-mappings"
+        },
+        {
+          "value": "-webkit-inline-box",
+          "status": "obsolete",
+          "url": "https://compat.spec.whatwg.org/#css-keyword-mappings"
+        },
+        {
+          "value": "-webkit-flex",
+          "status": "obsolete"
+        },
+        {
+          "value": "-webkit-inline-flex",
+          "status": "obsolete"
+        },
+        {
+          "value": "compact",
+          "status": "removed",
+          "url": "https://www.w3.org/TR/REC-CSS2/visuren.html#compact",
+          "comment": "Removed in https://commits.webkit.org/r253917"
+        },
+        {
+          "value": "run-in",
+          "status": "removed",
+          "url": "https://www.w3.org/TR/css-display-3/#valdef-display-run-in",
+          "comment": "Removed in https://commits.webkit.org/r163560"
+        }
+      ],
+      "codegen-properties": {
+        "animation-wrapper": "NonNormalizedDiscreteWrapper<DisplayType>",
+        "animation-wrapper-requires-non-normalized-discrete-interpolation": true,
+        "high-priority": true,
+        "render-style-getter-constexpr": true,
+        "render-style-setter-custom": true,
+        "render-style-storage-name": "effectiveDisplay",
+        "render-style-storage-path": ["_nonInheritedFlags"],
+        "render-style-storage-container": "struct",
+        "render-style-storage-kind": "enum",
+        "render-style-type": "DisplayType",
+        "parser-function": "consumeDisplay",
+        "parser-grammar": "[ <display-outside> || <display-inside> ] | <display-listitem> | <display-internal> | <display-box> | <display-legacy> | <-webkit-display>",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for transforming parsed input to minimal form."
+      },
+      "specification": {
+        "module": "css-display",
+        "url": "https://drafts.csswg.org/css-display-4/#propdef-display"
+      }
+    },
+    "font": {
+      "inherited": true,
+      "codegen-properties": {
+        "longhands": [
+          "font-style",
+          "font-variant-caps",
+          "font-weight",
+          "font-width",
+          "font-size",
+          "line-height",
+          "font-family",
+          "font-size-adjust",
+          "font-kerning",
+          "font-variant-alternates",
+          "font-variant-ligatures",
+          "font-variant-numeric",
+          "font-variant-east-asian",
+          "font-variant-position",
+          "font-variant-emoji",
+          "font-feature-settings",
+          {
+            "value": "font-optical-sizing",
+            "enable-if": "ENABLE_VARIATION_FONTS"
+          },
+          {
+            "value": "font-variation-settings",
+            "enable-if": "ENABLE_VARIATION_FONTS"
+          }
+        ],
+        "parser-function": "consumeFontShorthand",
+        "parser-grammar": "[ [ <'font-style'> || <font-variant-css2> || <'font-weight'> || <font-width-css3> ]? <'font-size'> [ / <'line-height'> ]? <'font-family'> ] | <system-family-name>",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-fonts",
+        "url": "https://drafts.csswg.org/css-fonts-4/#font-prop"
+      }
+    },
+    "font-family": {
+      "animation-type": "discrete",
+      "inherited": true,
+      "initial": "@initial-font-family",
+      "initial-comment": "Current spec initial value is 'depends on user agent'",
+      "values": [
+        "serif",
+        "sans-serif",
+        "cursive",
+        "fantasy",
+        "monospace",
+        "math",
+        {
+          "value": "system-ui",
+          "status": "unimplemented"
+        },
+        {
+          "value": "emoji",
+          "status": "unimplemented"
+        },
+        {
+          "value": "fangsong",
+          "status": "unimplemented"
+        },
+        {
+          "value": "ui-serif",
+          "status": "unimplemented"
+        },
+        {
+          "value": "ui-sans-serif",
+          "status": "unimplemented"
+        },
+        {
+          "value": "ui-monospace",
+          "status": "unimplemented"
+        },
+        {
+          "value": "ui-rounded",
+          "status": "unimplemented"
+        },
+        {
+          "value": "-webkit-body",
+          "status": "non-standard"
+        }
+      ],
+      "codegen-properties": {
+        "style-extractor-custom": true,
+        "style-builder-custom": "All",
+        "high-priority": true,
+        "skip-render-style-initial": true,
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_inheritedData",
+          "fontData",
+          "fontCascade"
+        ],
+        "render-style-type": "Style::FontFamilies",
+        "parser-function": "consumeFontFamily",
+        "parser-grammar": "[ <family-name> | <generic-family> | <-webkit-generic-family> ]#",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for primitive <family-name>."
+      },
+      "specification": {
+        "module": "css-fonts",
+        "url": "https://drafts.csswg.org/css-fonts-4/#font-family-prop"
+      }
+    },
+    "font-size": {
+      "animation-type": "by computed value",
+      "inherited": true,
+      "initial": "medium",
+      "values": [
+        "x-small",
+        "xx-small",
+        "small",
+        "medium",
+        "large",
+        "x-large",
+        "xx-large",
+        "xxx-large",
+        "smaller",
+        "larger",
+        {
+          "value": "math",
+          "settings-flag": "cssMathDepthEnabled"
+        },
+        {
+          "value": "-webkit-xxx-large",
+          "status": "non-standard"
+        },
+        {
+          "value": "-webkit-ruby-text",
+          "status": "non-standard"
+        }
+      ],
+      "codegen-properties": {
+        "accepts-quirky-length": true,
+        "animation-wrapper": "FontSizeWrapper",
+        "animation-wrapper-requires-override-parameters": [],
+        "style-builder-custom": "All",
+        "style-extractor-custom": true,
+        "high-priority": true,
+        "skip-render-style-initial": true,
+        "render-style-getter": "specifiedFontSize",
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_inheritedData",
+          "fontData",
+          "fontCascade"
+        ],
+        "render-style-type": "float",
+        "parser-grammar": "<absolute-size> | <relative-size> | <length-percentage [0,inf]> | math@(settings-flag=cssMathDepthEnabled) | <-webkit-absolute-size> | <-webkit-relative-size>",
+        "parser-exported": true
+      },
+      "specification": {
+        "module": "css-fonts",
+        "url": "https://drafts.csswg.org/css-fonts-4/#font-size-prop"
+      }
+    },
+    "font-size-adjust": {
+      "animation-type": "by computed value",
+      "inherited": true,
+      "initial": "none",
+      "values": [
+        "none",
+        "ex-height",
+        "cap-height",
+        "ch-width",
+        "ic-width",
+        "ic-height",
+        "from-font"
+      ],
+      "codegen-properties": {
+        "font-property": true,
+        "high-priority": true,
+        "separator": " ",
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_inheritedData",
+          "fontData",
+          "fontCascade"
+        ],
+        "render-style-storage-kind": "value",
+        "render-style-type": "Style::FontSizeAdjust",
+        "parser-function": "consumeFontSizeAdjust",
+        "parser-function-allows-number-or-integer-input": true,
+        "parser-grammar": "none | [ [ ex-height | cap-height | ch-width | ic-width | ic-height ]? [ from-font | <number [0,inf]> ] ]",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for default values on optionals.",
+        "parser-grammar-comment": "Current spec grammar is 'none | <number [0,inf]>'"
+      },
+      "specification": {
+        "module": "css-fonts",
+        "url": "https://drafts.csswg.org/css-fonts-4/#font-size-adjust-prop"
+      }
+    },
+    "font-style": {
+      "animation-type": "by computed value",
+      "inherited": true,
+      "initial": "normal",
+      "values": ["normal", "italic", "oblique"],
+      "codegen-properties": {
+        "font-property": true,
+        "high-priority": true,
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_inheritedData",
+          "fontData",
+          "fontCascade"
+        ],
+        "render-style-storage-kind": "value",
+        "render-style-type": "Style::FontStyle",
+        "parser-function": "consumeFontStyle",
+        "parser-grammar": "normal | italic | [ oblique <angle>? ]",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for ordered groups with a keyword/literal first term differentiator."
+      },
+      "specification": {
+        "module": "css-fonts",
+        "url": "https://drafts.csswg.org/css-fonts-4/#font-style-prop"
+      }
+    },
+    "font-weight": {
+      "animation-type": "by computed value",
+      "inherited": true,
+      "initial": "normal",
+      "values": ["normal", "bold", "bolder", "lighter"],
+      "codegen-properties": {
+        "font-description-name-for-methods": "Weight",
+        "font-property": true,
+        "high-priority": true,
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_inheritedData",
+          "fontData",
+          "fontCascade"
+        ],
+        "render-style-storage-kind": "value",
+        "render-style-type": "Style::FontWeight",
+        "parser-grammar": "<font-weight-absolute> | bolder | lighter",
+        "parser-exported": true
+      },
+      "specification": {
+        "module": "css-fonts-4",
+        "url": "https://drafts.csswg.org/css-fonts-4/#font-weight-prop"
+      }
+    },
+    "font-width": {
+      "animation-type": "by computed value",
+      "inherited": true,
+      "initial": "normal",
+      "values": [
+        "normal",
+        "ultra-condensed",
+        "extra-condensed",
+        "condensed",
+        "semi-condensed",
+        "semi-expanded",
+        "expanded",
+        "extra-expanded",
+        "ultra-expanded"
+      ],
+      "codegen-properties": [
+        {
+          "enable-if": "ENABLE_VARIATION_FONTS",
+          "aliases": ["font-stretch"],
+          "font-description-name-for-methods": "Width",
+          "font-property": true,
+          "high-priority": true,
+          "render-style-storage-container": "opaque",
+          "render-style-storage-path": [
+            "m_inheritedData",
+            "fontData",
+            "fontCascade"
+          ],
+          "render-style-storage-kind": "value",
+          "render-style-type": "Style::FontWidth",
+          "parser-grammar": "<font-width-absolute> | <percentage [0,inf]>"
+        },
+        {
+          "enable-if": "!ENABLE_VARIATION_FONTS",
+          "aliases": ["font-stretch"],
+          "font-description-name-for-methods": "Width",
+          "font-property": true,
+          "high-priority": true,
+          "render-style-storage-container": "opaque",
+          "render-style-storage-path": [
+            "m_inheritedData",
+            "fontData",
+            "fontCascade"
+          ],
+          "render-style-storage-kind": "value",
+          "render-style-type": "Style::FontWidth",
+          "parser-grammar": "<font-width-absolute>"
+        }
+      ],
+      "specification": {
+        "module": "css-fonts-4",
+        "url": "https://drafts.csswg.org/css-fonts/#font-width-prop"
+      }
+    },
+    "font-variant": {
+      "animation-type": "discrete",
+      "inherited": true,
+      "initial": "normal",
+      "codegen-properties": {
+        "longhands": [
+          "font-variant-ligatures",
+          "font-variant-caps",
+          "font-variant-alternates",
+          "font-variant-numeric",
+          "font-variant-east-asian",
+          "font-variant-position",
+          "font-variant-emoji"
+        ],
+        "parser-function": "consumeFontVariantShorthand",
+        "parser-grammar": "normal | none | [ [ <common-lig-values> || <discretionary-lig-values> || <historical-lig-values> || <contextual-alt-values> ] || [ small-caps | all-small-caps | petite-caps | all-petite-caps | unicase | titling-caps ] || [ stylistic(<feature-value-name>) || historical-forms || styleset(<feature-value-name>#) || character-variant(<feature-value-name>#) || swash(<feature-value-name>) || ornaments(<feature-value-name>) || annotation(<feature-value-name>) ] || [ <numeric-figure-values> || <numeric-spacing-values> || <numeric-fraction-values> || ordinal || slashed-zero ] || [ <east-asian-variant-values> || <east-asian-width-values> || ruby ] || [ sub | super ] || [ text | emoji | unicode ] ]",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-fonts",
+        "url": "https://drafts.csswg.org/css-fonts-4/#propdef-font-variant"
+      }
+    },
+    "font-feature-settings": {
+      "animation-type": "discrete",
+      "inherited": true,
+      "initial": "normal",
+      "values": ["normal"],
+      "codegen-properties": {
+        "font-description-name-for-methods": "FeatureSettings",
+        "font-property": true,
+        "high-priority": true,
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_inheritedData",
+          "fontData",
+          "fontCascade"
+        ],
+        "render-style-storage-kind": "value",
+        "render-style-type": "Style::FontFeatureSettings",
+        "parser-grammar": "normal | <feature-tag-value>#@(no-single-item-opt)",
+        "parser-exported": true
+      },
+      "specification": {
+        "module": "css-fonts-4",
+        "url": "https://drafts.csswg.org/css-fonts-4/#propdef-font-feature-settings"
+      }
+    },
+    "font-variation-settings": {
+      "animation-type": "see prose",
+      "inherited": true,
+      "initial": "normal",
+      "values": ["normal"],
+      "codegen-properties": {
+        "enable-if": "ENABLE_VARIATION_FONTS",
+        "font-description-name-for-methods": "VariationSettings",
+        "font-property": true,
+        "high-priority": true,
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_inheritedData",
+          "fontData",
+          "fontCascade"
+        ],
+        "render-style-storage-kind": "value",
+        "render-style-type": "Style::FontVariationSettings",
+        "parser-grammar": "normal | <variation-tag-value>#@(no-single-item-opt)"
+      },
+      "specification": {
+        "module": "css-fonts-4",
+        "url": "https://drafts.csswg.org/css-fonts-4/#font-variation-settings-def"
+      }
+    },
+    "font-kerning": {
+      "animation-type": "discrete",
+      "inherited": true,
+      "initial": "auto",
+      "values": ["auto", "normal", "none"],
+      "codegen-properties": {
+        "aliases": ["-webkit-font-kerning"],
+        "font-description-name-for-methods": "Kerning",
+        "font-property": true,
+        "high-priority": true,
+        "style-builder-needs-system-font-shorthand-check": true,
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_inheritedData",
+          "fontData",
+          "fontCascade"
+        ],
+        "render-style-storage-kind": "enum",
+        "render-style-type": "Kerning",
+        "parser-grammar": "<<values>>"
+      },
+      "specification": {
+        "module": "css-fonts-4",
+        "url": "https://drafts.csswg.org/css-fonts-4/#font-kerning-prop"
+      }
+    },
+    "font-palette": {
+      "animation-type": "discrete",
+      "animation-type-comment": "Current spec animation type is 'by computed value'",
+      "inherited": true,
+      "initial": "normal",
+      "codegen-properties": {
+        "font-property": true,
+        "high-priority": true,
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_inheritedData",
+          "fontData",
+          "fontCascade"
+        ],
+        "render-style-storage-kind": "value",
+        "render-style-type": "Style::FontPalette",
+        "parser-grammar": "normal | light | dark | <palette-identifier>"
+      },
+      "specification": {
+        "module": "css-fonts",
+        "url": "https://drafts.csswg.org/css-fonts/#font-palette-prop"
+      }
+    },
+    "-webkit-font-smoothing": {
+      "animation-type": "not animatable (legacy)",
+      "inherited": true,
+      "initial": "auto",
+      "values": ["auto", "none", "antialiased", "subpixel-antialiased"],
+      "codegen-properties": {
+        "font-property": true,
+        "high-priority": true,
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_inheritedData",
+          "fontData",
+          "fontCascade"
+        ],
+        "render-style-storage-kind": "enum",
+        "render-style-type": "FontSmoothingMode",
+        "parser-grammar": "<<values>>"
+      },
+      "status": "non-standard"
+    },
+    "font-variant-ligatures": {
+      "animation-type": "discrete",
+      "inherited": true,
+      "initial": "normal",
+      "values": [
+        "normal",
+        "none",
+        "common-ligatures",
+        "no-common-ligatures",
+        "discretionary-ligatures",
+        "no-discretionary-ligatures",
+        "historical-ligatures",
+        "no-historical-ligatures",
+        "contextual",
+        "no-contextual"
+      ],
+      "codegen-properties": {
+        "font-description-name-for-methods": "VariantLigatures",
+        "font-property": true,
+        "high-priority": true,
+        "render-style-initial-constexpr": true,
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_inheritedData",
+          "fontData",
+          "fontCascade"
+        ],
+        "render-style-storage-kind": "value",
+        "render-style-type": "Style::FontVariantLigatures",
+        "parser-grammar": "normal | none | [ <common-lig-values> || <discretionary-lig-values> || <historical-lig-values> || <contextual-alt-values> ]@(no-single-item-opt)"
+      },
+      "specification": {
+        "module": "css-fonts-4",
+        "url": "https://drafts.csswg.org/css-fonts-4/#font-variant-ligatures-prop"
+      }
+    },
+    "font-variant-position": {
+      "animation-type": "discrete",
+      "inherited": true,
+      "initial": "normal",
+      "values": ["normal", "sub", "super"],
+      "codegen-properties": {
+        "font-description-name-for-methods": "VariantPosition",
+        "font-property": true,
+        "high-priority": true,
+        "style-builder-needs-system-font-shorthand-check": true,
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_inheritedData",
+          "fontData",
+          "fontCascade"
+        ],
+        "render-style-storage-kind": "enum",
+        "render-style-type": "FontVariantPosition",
+        "parser-grammar": "<<values>>",
+        "parser-exported": true
+      },
+      "specification": {
+        "module": "css-fonts",
+        "url": "https://drafts.csswg.org/css-fonts-4/#propdef-font-variant-position"
+      }
+    },
+    "font-variant-caps": {
+      "animation-type": "discrete",
+      "inherited": true,
+      "initial": "normal",
+      "values": [
+        "normal",
+        "small-caps",
+        "all-small-caps",
+        "petite-caps",
+        "all-petite-caps",
+        "unicase",
+        "titling-caps"
+      ],
+      "codegen-properties": {
+        "font-description-name-for-methods": "VariantCaps",
+        "font-property": true,
+        "high-priority": true,
+        "style-builder-needs-system-font-shorthand-check": true,
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_inheritedData",
+          "fontData",
+          "fontCascade"
+        ],
+        "render-style-storage-kind": "enum",
+        "render-style-type": "FontVariantCaps",
+        "parser-grammar": "<<values>>",
+        "parser-exported": true
+      },
+      "specification": {
+        "module": "css-fonts",
+        "url": "https://drafts.csswg.org/css-fonts-4/#font-variant-caps-prop"
+      }
+    },
+    "font-variant-numeric": {
+      "animation-type": "discrete",
+      "inherited": true,
+      "initial": "normal",
+      "values": [
+        "normal",
+        "lining-nums",
+        "oldstyle-nums",
+        "proportional-nums",
+        "tabular-nums",
+        "diagonal-fractions",
+        "stacked-fractions",
+        "ordinal",
+        "slashed-zero"
+      ],
+      "codegen-properties": {
+        "font-description-name-for-methods": "VariantNumeric",
+        "font-property": true,
+        "high-priority": true,
+        "render-style-initial-constexpr": true,
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_inheritedData",
+          "fontData",
+          "fontCascade"
+        ],
+        "render-style-storage-kind": "value",
+        "render-style-type": "Style::FontVariantNumeric",
+        "parser-grammar": "normal | [ <numeric-figure-values> || <numeric-spacing-values> || <numeric-fraction-values> || ordinal || slashed-zero ]@(no-single-item-opt)"
+      },
+      "specification": {
+        "module": "css-fonts",
+        "url": "https://drafts.csswg.org/css-fonts-4/#font-variant-numeric-prop"
+      }
+    },
+    "font-variant-alternates": {
+      "animation-type": "discrete",
+      "inherited": true,
+      "initial": "normal",
+      "codegen-properties": {
+        "font-description-name-for-methods": "VariantAlternates",
+        "font-property": true,
+        "high-priority": true,
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_inheritedData",
+          "fontData",
+          "fontCascade"
+        ],
+        "render-style-storage-kind": "value",
+        "render-style-type": "Style::FontVariantAlternates",
+        "parser-grammar": "normal | [ stylistic(<feature-value-name>) || historical-forms || styleset(<feature-value-name>#) || character-variant(<feature-value-name>#) || swash(<feature-value-name>) || ornaments(<feature-value-name>) || annotation(<feature-value-name>) ]@(no-single-item-opt)",
+        "parser-exported": true
+      },
+      "specification": {
+        "module": "css-fonts-4",
+        "url": "https://drafts.csswg.org/css-fonts-4/#font-variant-alternates-prop"
+      }
+    },
+    "font-variant-east-asian": {
+      "animation-type": "discrete",
+      "inherited": true,
+      "initial": "normal",
+      "values": [
+        "normal",
+        "jis78",
+        "jis83",
+        "jis90",
+        "jis04",
+        "simplified",
+        "traditional",
+        "full-width",
+        "proportional-width",
+        "ruby"
+      ],
+      "codegen-properties": {
+        "font-description-name-for-methods": "VariantEastAsian",
+        "font-property": true,
+        "high-priority": true,
+        "render-style-initial-constexpr": true,
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_inheritedData",
+          "fontData",
+          "fontCascade"
+        ],
+        "render-style-storage-kind": "value",
+        "render-style-type": "Style::FontVariantEastAsian",
+        "parser-grammar": "normal | [ <east-asian-variant-values> || <east-asian-width-values> || ruby ]@(no-single-item-opt)",
+        "parser-exported": true
+      },
+      "specification": {
+        "module": "css-fonts-4",
+        "url": "https://drafts.csswg.org/css-fonts-4/#font-variant-east-asian-prop"
+      }
+    },
+    "font-variant-emoji": {
+      "animation-type": "discrete",
+      "inherited": true,
+      "initial": "normal",
+      "values": ["normal", "text", "emoji", "unicode"],
+      "codegen-properties": {
+        "settings-flag": "cssFontVariantEmojiEnabled",
+        "font-description-name-for-methods": "VariantEmoji",
+        "font-property": true,
+        "high-priority": true,
+        "style-builder-needs-system-font-shorthand-check": true,
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_inheritedData",
+          "fontData",
+          "fontCascade"
+        ],
+        "render-style-storage-kind": "enum",
+        "render-style-type": "FontVariantEmoji",
+        "parser-grammar": "<<values>>",
+        "parser-exported": true
+      },
+      "specification": {
+        "module": "css-fonts",
+        "url": "https://drafts.csswg.org/css-fonts/#font-variant-emoji-prop"
+      }
+    },
+    "font-synthesis": {
+      "inherited": true,
+      "codegen-properties": {
+        "longhands": [
+          "font-synthesis-weight",
+          "font-synthesis-style",
+          "font-synthesis-small-caps"
+        ],
+        "parser-function": "consumeFontSynthesisShorthand",
+        "parser-grammar": "none | [ weight || style || small-caps || position]",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-fonts-4",
+        "url": "https://drafts.csswg.org/css-fonts-4/#font-synthesis"
+      }
+    },
+    "font-synthesis-weight": {
+      "animation-type": "discrete",
+      "inherited": true,
+      "initial": "auto",
+      "values": ["auto", "none"],
+      "codegen-properties": {
+        "font-property": true,
+        "high-priority": true,
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_inheritedData",
+          "fontData",
+          "fontCascade"
+        ],
+        "render-style-storage-kind": "enum",
+        "render-style-type": "FontSynthesisLonghandValue",
+        "parser-grammar": "<<values>>"
+      },
+      "specification": {
+        "module": "css-fonts-4",
+        "url": "https://drafts.csswg.org/css-fonts-4/#font-synthesis-weight"
+      }
+    },
+    "font-synthesis-style": {
+      "animation-type": "discrete",
+      "inherited": true,
+      "initial": "auto",
+      "values": ["auto", "none"],
+      "codegen-properties": {
+        "font-property": true,
+        "high-priority": true,
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_inheritedData",
+          "fontData",
+          "fontCascade"
+        ],
+        "render-style-storage-kind": "enum",
+        "render-style-type": "FontSynthesisLonghandValue",
+        "parser-grammar": "<<values>>"
+      },
+      "specification": {
+        "module": "css-fonts-4",
+        "url": "https://drafts.csswg.org/css-fonts-4/#font-synthesis-style"
+      }
+    },
+    "font-synthesis-small-caps": {
+      "animation-type": "discrete",
+      "inherited": true,
+      "initial": "auto",
+      "values": ["auto", "none"],
+      "codegen-properties": {
+        "font-property": true,
+        "high-priority": true,
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_inheritedData",
+          "fontData",
+          "fontCascade"
+        ],
+        "render-style-storage-kind": "enum",
+        "render-style-type": "FontSynthesisLonghandValue",
+        "parser-grammar": "<<values>>"
+      },
+      "specification": {
+        "module": "css-fonts-4",
+        "url": "https://drafts.csswg.org/css-fonts-4/#font-synthesis-small-caps"
+      }
+    },
+    "font-optical-sizing": {
+      "animation-type": "discrete",
+      "inherited": true,
+      "initial": "auto",
+      "values": ["auto", "none"],
+      "codegen-properties": {
+        "enable-if": "ENABLE_VARIATION_FONTS",
+        "font-description-name-for-methods": "OpticalSizing",
+        "font-property": true,
+        "high-priority": true,
+        "style-builder-needs-system-font-shorthand-check": true,
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_inheritedData",
+          "fontData",
+          "fontCascade"
+        ],
+        "render-style-storage-kind": "enum",
+        "render-style-type": "FontOpticalSizing",
+        "parser-grammar": "<<values>>"
+      },
+      "specification": {
+        "module": "css-fonts-4",
+        "url": "https://drafts.csswg.org/css-fonts-4/#font-optical-sizing-def"
+      }
+    },
+    "line-height": {
+      "animation-type": "by computed value",
+      "inherited": true,
+      "initial": "normal",
+      "values": ["normal"],
+      "codegen-properties": [
+        {
+          "enable-if": "ENABLE_TEXT_AUTOSIZING",
+          "animation-wrapper-requires-getter": "specifiedLineHeight",
+          "style-builder-custom": "All",
+          "style-extractor-custom": true,
+          "render-style-storage-path": ["m_inheritedData"],
+          "render-style-storage-kind": "reference",
+          "render-style-type": "Style::LineHeight",
+          "parser-grammar": "normal | <number [0,inf]> | <length-percentage [0,inf]>",
+          "parser-exported": true
+        },
+        {
+          "enable-if": "!ENABLE_TEXT_AUTOSIZING",
+          "style-extractor-custom": true,
+          "render-style-storage-path": ["m_inheritedData"],
+          "render-style-storage-kind": "reference",
+          "render-style-type": "Style::LineHeight",
+          "parser-grammar": "normal | <number [0,inf]> | <length-percentage [0,inf]>",
+          "parser-exported": true
+        }
+      ],
+      "specification": {
+        "module": "css-inline",
+        "url": "https://www.w3.org/TR/css-inline-3/#line-height-property"
       }
     },
     "margin": {
       "codegen-properties": {
-        "parser-syntax": "<'margin-top'>{1,4}",
         "longhands": [
           "margin-top",
           "margin-right",
           "margin-bottom",
           "margin-left"
-        ]
+        ],
+        "accepts-quirky-length": true,
+        "shorthand-pattern": "CoalescingQuad",
+        "parser-grammar": "<'margin-top'>{1,4}",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
       },
       "specification": {
-        "module": "css-box-4",
-        "url": "https://www.w3.org/TR/css-box-4/#propdef-margin"
+        "module": "css-22",
+        "url": "https://www.w3.org/TR/CSS22/box.html#propdef-margin"
+      }
+    },
+    "margin-block": {
+      "codegen-properties": {
+        "longhands": ["margin-block-start", "margin-block-end"],
+        "shorthand-pattern": "CoalescingPair",
+        "parser-grammar": "<'margin-left'>{1,2}",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#margin-properties"
+      }
+    },
+    "margin-block-end": {
+      "animation-type": "by computed value",
+      "initial": "0px",
+      "values": ["auto"],
+      "codegen-properties": {
+        "aliases": ["-webkit-margin-after"],
+        "skip-style-builder": true,
+        "logical-property-group": {
+          "name": "margin",
+          "resolver": "block-end"
+        },
+        "parser-grammar": "<margin-logical>"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#margin-properties"
+      }
+    },
+    "margin-block-start": {
+      "animation-type": "by computed value",
+      "initial": "0px",
+      "codegen-properties": {
+        "aliases": ["-webkit-margin-before"],
+        "skip-style-builder": true,
+        "logical-property-group": {
+          "name": "margin",
+          "resolver": "block-start"
+        },
+        "parser-grammar": "<margin-logical>"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#margin-properties"
       }
     },
     "margin-bottom": {
+      "animation-type": "by computed value",
       "initial": "0px",
-      "codegen-properties": { "parser-syntax": "<length-percentage> | auto" },
+      "values": ["auto"],
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "margin",
+          "resolver": "bottom"
+        },
+        "accepts-quirky-length": true,
+        "style-extractor-custom": true,
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "margin"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::MarginEdge",
+        "parser-grammar": "<length-percentage anchor-size=allowed> | auto"
+      },
       "specification": {
         "module": "css-box-4",
         "url": "https://drafts.csswg.org/css-box-4/#margin-physical"
       }
     },
-    "margin-left": {
+    "margin-inline": {
+      "codegen-properties": {
+        "longhands": ["margin-inline-start", "margin-inline-end"],
+        "shorthand-pattern": "CoalescingPair",
+        "parser-grammar": "<'margin-left'>{1,2}",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#margin-properties"
+      }
+    },
+    "margin-inline-end": {
+      "animation-type": "by computed value",
       "initial": "0px",
-      "codegen-properties": { "parser-syntax": "<length-percentage> | auto " },
+      "values": ["auto"],
+      "codegen-properties": {
+        "aliases": ["-webkit-margin-end"],
+        "skip-style-builder": true,
+        "logical-property-group": {
+          "name": "margin",
+          "resolver": "inline-end"
+        },
+        "parser-grammar": "<margin-logical>"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#margin-properties"
+      }
+    },
+    "margin-inline-start": {
+      "animation-type": "by computed value",
+      "initial": "0px",
+      "values": ["auto"],
+      "codegen-properties": {
+        "aliases": ["-webkit-margin-start"],
+        "skip-style-builder": true,
+        "logical-property-group": {
+          "name": "margin",
+          "resolver": "inline-start"
+        },
+        "parser-grammar": "<margin-logical>"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#margin-properties"
+      }
+    },
+    "margin-left": {
+      "animation-type": "by computed value",
+      "initial": "0px",
+      "values": ["auto"],
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "margin",
+          "resolver": "left"
+        },
+        "accepts-quirky-length": true,
+        "style-extractor-custom": true,
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "margin"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::MarginEdge",
+        "parser-grammar": "<length-percentage anchor-size=allowed> | auto"
+      },
       "specification": {
         "module": "css-box-4",
         "url": "https://drafts.csswg.org/css-box-4/#margin-physical"
       }
     },
     "margin-right": {
+      "animation-type": "by computed value",
       "initial": "0px",
-      "codegen-properties": { "parser-syntax": "<length-percentage> | auto" },
+      "values": ["auto"],
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "margin",
+          "resolver": "right"
+        },
+        "accepts-quirky-length": true,
+        "style-extractor-custom": true,
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "margin"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::MarginEdge",
+        "parser-grammar": "<length-percentage anchor-size=allowed> | auto"
+      },
       "specification": {
         "module": "css-box-4",
         "url": "https://drafts.csswg.org/css-box-4/#margin-physical"
       }
     },
     "margin-top": {
+      "animation-type": "by computed value",
       "initial": "0px",
-      "codegen-properties": { "parser-syntax": "<length-percentage> | auto" },
+      "values": ["auto"],
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "margin",
+          "resolver": "top"
+        },
+        "accepts-quirky-length": true,
+        "style-extractor-custom": true,
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "margin"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::MarginEdge",
+        "parser-grammar": "<length-percentage anchor-size=allowed> | auto"
+      },
       "specification": {
         "module": "css-box-4",
         "url": "https://drafts.csswg.org/css-box-4/#margin-physical"
       }
     },
+    "margin-trim": {
+      "animation-type": "discrete",
+      "initial": "none",
+      "values": [
+        "none",
+        "block",
+        "inline",
+        "block-start",
+        "inline-start",
+        "block-end",
+        "inline-end"
+      ],
+      "codegen-properties": {
+        "render-style-storage-path": ["m_nonInheritedData", "rareData"],
+        "render-style-storage-kind": "raw",
+        "render-style-type": "Style::MarginTrim",
+        "parser-function": "consumeMarginTrim",
+        "parser-grammar": "none | [ block || inline ] | [ block-start || inline-start || block-end || inline-end ]",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for transforming parsed input to minimal form."
+      },
+      "specification": {
+        "module": "css-box-4",
+        "url": "https://www.w3.org/TR/css-box-4/#margin-trim"
+      }
+    },
     "padding": {
       "codegen-properties": {
-        "parser-syntax": "<'padding-top'>{1,4}",
         "longhands": [
           "padding-top",
           "padding-right",
           "padding-bottom",
           "padding-left"
-        ]
+        ],
+        "accepts-quirky-length": true,
+        "shorthand-pattern": "CoalescingQuad",
+        "parser-grammar": "<'padding-top'>{1,4}",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
       },
       "specification": {
-        "module": "css-box-4",
-        "url": "https://www.w3.org/TR/css-box-4/#propdef-padding"
+        "module": "css-22",
+        "url": "https://www.w3.org/TR/CSS22/box.html#propdef-padding"
+      }
+    },
+    "padding-block": {
+      "codegen-properties": {
+        "longhands": ["padding-block-start", "padding-block-end"],
+        "shorthand-pattern": "CoalescingPair",
+        "parser-grammar": "<'padding-left'>{1,2}",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#padding-properties"
+      }
+    },
+    "padding-block-end": {
+      "animation-type": "by computed value",
+      "initial": "0px",
+      "codegen-properties": {
+        "aliases": ["-webkit-padding-after"],
+        "skip-style-builder": true,
+        "logical-property-group": {
+          "name": "padding",
+          "resolver": "block-end"
+        },
+        "parser-grammar": "<length-percentage [0,inf]>"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#padding-properties"
+      }
+    },
+    "padding-block-start": {
+      "animation-type": "by computed value",
+      "initial": "0px",
+      "codegen-properties": {
+        "aliases": ["-webkit-padding-before"],
+        "skip-style-builder": true,
+        "logical-property-group": {
+          "name": "padding",
+          "resolver": "block-start"
+        },
+        "parser-grammar": "<length-percentage [0,inf]>"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#padding-properties"
       }
     },
     "padding-bottom": {
+      "animation-type": "by computed value",
       "initial": "0px",
-      "codegen-properties": { "parser-syntax": "<length-percentage [0,inf]>" },
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "padding",
+          "resolver": "bottom"
+        },
+        "accepts-quirky-length": true,
+        "style-builder-custom": "All",
+        "style-extractor-custom": true,
+        "render-style-has-explicitly-set-storage-path": [
+          "m_nonInheritedData",
+          "surroundData"
+        ],
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "padding"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::PaddingEdge",
+        "parser-grammar": "<length-percentage [0,inf]>"
+      },
       "specification": {
-        "module": "css-box-4",
-        "url": "https://drafts.csswg.org/css-box-4/#padding-physical"
+        "module": "css-22",
+        "url": "https://www.w3.org/TR/CSS22/box.html#propdef-padding-bottom"
+      }
+    },
+    "padding-inline": {
+      "codegen-properties": {
+        "longhands": ["padding-inline-start", "padding-inline-end"],
+        "shorthand-pattern": "CoalescingPair",
+        "parser-grammar": "<'padding-left'>{1,2}",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#padding-properties"
+      }
+    },
+    "padding-inline-end": {
+      "animation-type": "by computed value",
+      "initial": "0px",
+      "codegen-properties": {
+        "aliases": ["-webkit-padding-end"],
+        "skip-style-builder": true,
+        "logical-property-group": {
+          "name": "padding",
+          "resolver": "inline-end"
+        },
+        "parser-grammar": "<length-percentage [0,inf]>"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#padding-properties"
+      }
+    },
+    "padding-inline-start": {
+      "animation-type": "by computed value",
+      "initial": "0px",
+      "codegen-properties": {
+        "aliases": ["-webkit-padding-start"],
+        "skip-style-builder": true,
+        "logical-property-group": {
+          "name": "padding",
+          "resolver": "inline-start"
+        },
+        "parser-grammar": "<length-percentage [0,inf]>"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#padding-properties"
       }
     },
     "padding-left": {
+      "animation-type": "by computed value",
       "initial": "0px",
-      "codegen-properties": { "parser-syntax": "<length-percentage [0,inf]>" },
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "padding",
+          "resolver": "left"
+        },
+        "accepts-quirky-length": true,
+        "style-builder-custom": "All",
+        "style-extractor-custom": true,
+        "render-style-has-explicitly-set-storage-path": [
+          "m_nonInheritedData",
+          "surroundData"
+        ],
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "padding"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::PaddingEdge",
+        "parser-grammar": "<length-percentage [0,inf]>"
+      },
       "specification": {
-        "module": "css-box-4",
-        "url": "https://drafts.csswg.org/css-box-4/#padding-physical"
+        "module": "css-22",
+        "url": "https://www.w3.org/TR/CSS22/box.html#propdef-padding-left"
       }
     },
     "padding-right": {
+      "animation-type": "by computed value",
       "initial": "0px",
-      "codegen-properties": { "parser-syntax": "<length-percentage [0,inf]>" },
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "padding",
+          "resolver": "right"
+        },
+        "accepts-quirky-length": true,
+        "style-builder-custom": "All",
+        "style-extractor-custom": true,
+        "render-style-has-explicitly-set-storage-path": [
+          "m_nonInheritedData",
+          "surroundData"
+        ],
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "padding"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::PaddingEdge",
+        "parser-grammar": "<length-percentage [0,inf]>"
+      },
       "specification": {
-        "module": "css-box-4",
-        "url": "https://drafts.csswg.org/css-box-4/#padding-physical"
+        "module": "css-22",
+        "url": "https://www.w3.org/TR/CSS22/box.html#propdef-padding-right"
       }
     },
     "padding-top": {
+      "animation-type": "by computed value",
       "initial": "0px",
-      "codegen-properties": { "parser-syntax": "<length-percentage [0,inf]>" },
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "padding",
+          "resolver": "top"
+        },
+        "accepts-quirky-length": true,
+        "style-builder-custom": "All",
+        "style-extractor-custom": true,
+        "render-style-has-explicitly-set-storage-path": [
+          "m_nonInheritedData",
+          "surroundData"
+        ],
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "padding"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::PaddingEdge",
+        "parser-grammar": "<length-percentage [0,inf]>"
+      },
       "specification": {
-        "module": "css-box-4",
-        "url": "https://drafts.csswg.org/css-box-4/#padding-physical"
+        "module": "css-22",
+        "url": "https://www.w3.org/TR/CSS22/box.html#propdef-padding-top"
+      }
+    },
+    "writing-mode": {
+      "animation-type": "not animatable",
+      "inherited": true,
+      "initial": "horizontal-tb",
+      "values": [
+        "horizontal-tb",
+        "vertical-lr",
+        "vertical-rl",
+        {
+          "value": "sideways-lr",
+          "settings-flag": "sidewaysWritingModesEnabled"
+        },
+        {
+          "value": "sideways-rl",
+          "settings-flag": "sidewaysWritingModesEnabled"
+        },
+        {
+          "value": "lr-tb",
+          "status": "deprecated"
+        },
+        {
+          "value": "rl-tb",
+          "status": "deprecated"
+        },
+        {
+          "value": "tb-rl",
+          "status": "deprecated"
+        },
+        {
+          "value": "lr",
+          "status": "deprecated"
+        },
+        {
+          "value": "rl",
+          "status": "deprecated"
+        },
+        {
+          "value": "tb",
+          "status": "deprecated"
+        },
+        {
+          "value": "horizontal-bt",
+          "status": "non-standard"
+        }
+      ],
+      "codegen-properties": {
+        "aliases": ["-webkit-writing-mode", "-epub-writing-mode"],
+        "style-builder-custom": "Value",
+        "style-extractor-custom": true,
+        "render-style-has-explicitly-set-storage-path": [
+          "m_nonInheritedData",
+          "miscData"
+        ],
+        "render-style-getter": "computedWritingMode",
+        "render-style-getter-custom": true,
+        "render-style-setter-custom": true,
+        "render-style-setter-returns-if-changed": true,
+        "render-style-storage-container": "struct",
+        "render-style-storage-path": ["m_inheritedFlags"],
+        "render-style-storage-kind": "enum",
+        "render-style-type": "StyleWritingMode",
+        "top-priority": true,
+        "top-priority-reason": "This is top priority because vi/vb units (depending on writing-mode) may be used by other properties",
+        "parser-grammar": "<<values>>"
+      },
+      "specification": {
+        "module": "css-writing-modes",
+        "url": "https://drafts.csswg.org/css-writing-modes-3/#propdef-writing-mode"
       }
     }
-  }
+  },
+  "descriptors": {},
+  "shared-grammar-rules": {}
 }
