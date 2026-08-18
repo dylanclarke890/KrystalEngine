@@ -1,34 +1,38 @@
-from collections.abc import Callable, Iterable
-import pathlib
-from typing import Any
-import functools
-from builtins import *  # pyright: ignore[reportWildcardImportFromLibrary]
-import subprocess
-import re
-import enum
-import collections
-import itertools
-from utils import time_stamp
-from writer import Writer
 import argparse
+from builtins import *  # pyright: ignore[reportWildcardImportFromLibrary]
+import collections
+from collections.abc import Callable, Iterable
+import enum
+import functools
+import itertools
 import json
+import pathlib
+import re
+import subprocess
+from typing import Any
+from writer import Writer
 
 GENERATOR_NAME = "css-values.generator"
 
 
-def main():
-    print(f"[{time_stamp()}]: Started running {GENERATOR_NAME}...")
+def parse_args() -> argparse.Namespace:
+    default_properties_json_path = pathlib.Path(__file__).parent / "css-properties.json"
 
     parser = argparse.ArgumentParser(description="Process CSS property definitions.")
-    current_dir = pathlib.Path(__file__).parent
-    parser.add_argument("--properties", default=current_dir / "css-properties.json")
-    parser.add_argument("--defines")
-    parser.add_argument("--gperf-executable")
-    parser.add_argument("-v", "--verbose", action="store_true")
-    parser.add_argument("--dump-unused-grammars", action="store_true")
-    parser.add_argument("--check-unused-grammars-values", action="store_true")
-    args = parser.parse_args()
+    parser.add_argument(
+        "--properties", default=default_properties_json_path, help="Path to the CSS properties JSON file."
+    )
+    parser.add_argument("--defines", default="", help="Comma-separated list of defines to enable for code generation.")
+    parser.add_argument("--gperf-executable", default="gperf", help="Path to the gperf executable.")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output.")
+    parser.add_argument("--dump-unused-grammars", action="store_true", help="Dump unused grammar rules.")
+    parser.add_argument("--check-unused-grammars-values", action="store_true", help="Check unused grammar values.")
 
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
     with open(args.properties, "r", encoding="utf-8") as properties_file:
         properties_json = json.load(properties_file)
 
@@ -38,10 +42,12 @@ def main():
         check_unused_grammars_values=args.check_unused_grammars_values,
         verbose=args.verbose,
     )
+
     parsing_context.parse_shared_grammar_rules()
+    assert parsing_context.parsed_shared_grammar_rules is not None
+
     parsing_context.parse_properties_and_descriptors()
     assert parsing_context.parsed_properties_and_descriptors is not None
-    assert parsing_context.parsed_shared_grammar_rules is not None
 
     if args.verbose:
         print(
@@ -56,9 +62,9 @@ def main():
     if args.dump_unused_grammars:
         for property in parsing_context.parsed_properties_and_descriptors.all_properties_and_descriptors:
             if property.codegen_properties.parser_grammar and property.codegen_properties.parser_grammar_unused:
-                print(str(property).rjust(40, " ") + "  " + str(property.codegen_properties.parser_grammar.root_term))
+                print(str(property).rjust(20, " ") + "  " + str(property.codegen_properties.parser_grammar.root_term))
                 print(
-                    "           ".rjust(40, " ") + "  " + str(property.codegen_properties.parser_grammar_unused_reason)
+                    "           ".rjust(20, " ") + "  " + str(property.codegen_properties.parser_grammar_unused_reason)
                 )
 
     generation_context = GenerationContext(
@@ -68,22 +74,22 @@ def main():
         gperf_executable=args.gperf_executable,
     )
 
-    generators = [
-        GenerateCSSPropertyInitialValues,
-        GenerateCSSPropertyNames,
-        GenerateCSSPropertyParsing,
-        GenerateCSSStylePropertiesPropertyNames,
-        GenerateStyleBuilderGenerated,
-        GenerateStyleChangedAnimatablePropertiesGenerated,
-        GenerateStyleComputedStyleProperties,
-        GenerateStyleExtractorGenerated,
-        GenerateStyleInterpolationWrapperMap,
-        GenerateStylePropertyShorthandFunctions,
-        GenerateRenderStyleProperties,
-    ]
-
-    for generator in generators:
+    [
         generator(generation_context).generate()
+        for generator in [
+            GenerateCSSPropertyInitialValues,
+            GenerateCSSPropertyNames,
+            GenerateCSSPropertyParsing,
+            GenerateCSSStylePropertiesPropertyNames,
+            GenerateStyleBuilderGenerated,
+            GenerateStyleChangedAnimatablePropertiesGenerated,
+            GenerateStyleComputedStyleProperties,
+            GenerateStyleExtractorGenerated,
+            GenerateStyleInterpolationWrapperMap,
+            GenerateStylePropertyShorthandFunctions,
+            GenerateRenderStyleProperties,
+        ]
+    ]
 
 
 # region Schema
@@ -7143,7 +7149,7 @@ class GenerateCSSPropertyInitialValues:
         return self.generation_context.properties_and_descriptors.style_properties
 
     def generate(self):
-        with open("CSSPropertyInitialValuesGeneratedInlines.hpp", "w") as output_file:
+        with open("Krystal.HTML/CSS/Properties/CSSPropertyInitialValuesGeneratedInlines.hpp", "w") as output_file:
             writer = Writer(output_file)
             writer.write_hpp_prelude(
                 generator_name=GENERATOR_NAME,
@@ -7648,9 +7654,7 @@ class GenerateCSSPropertyNames:
     def _generate_css_property_settings_operator_equal(self, *, to: Writer):
         first, *middle, last = (f"a.{flag} == b.{flag}" for flag in self.properties_and_descriptors.settings_flags)
 
-        with to.function_block(
-            signature="bool operator==(const CSSPropertySettings &a, const CSSPropertySettings &b)"
-        ):
+        with to.function_block(signature="bool operator==(const CSSPropertySettings &a, const CSSPropertySettings &b)"):
             to.write(f"return {first}")
             with to.indent():
                 to.write_lines((f"&& {expression}" for expression in middle))
@@ -8622,11 +8626,20 @@ class GenerateStyleBuilderGenerated:
                 if property.codegen_properties.is_logical:
                     raise Exception(f"Property '{property.name}' is logical but doesn't have skip-style-builder.")
 
-                if property.codegen_properties.style_builder_custom and "Initial" not in property.codegen_properties.style_builder_custom:
+                if (
+                    property.codegen_properties.style_builder_custom
+                    and "Initial" not in property.codegen_properties.style_builder_custom
+                ):
                     self._generate_style_builder_generated_cpp_initial_value_setter(to, property)
-                if property.codegen_properties.style_builder_custom and "Inherit" not in property.codegen_properties.style_builder_custom:
+                if (
+                    property.codegen_properties.style_builder_custom
+                    and "Inherit" not in property.codegen_properties.style_builder_custom
+                ):
                     self._generate_style_builder_generated_cpp_inherit_value_setter(to, property)
-                if property.codegen_properties.style_builder_custom and "Value" not in property.codegen_properties.style_builder_custom:
+                if (
+                    property.codegen_properties.style_builder_custom
+                    and "Value" not in property.codegen_properties.style_builder_custom
+                ):
                     self._generate_style_builder_generated_cpp_value_setter(to, property)
 
         to.write(f"}};")
@@ -8698,7 +8711,8 @@ class GenerateStyleBuilderGenerated:
         with open("StyleBuilderGenerated.cpp", "w") as output_file:
             writer = Writer(output_file)
             writer.write_autogenerated_heading(generator_name=GENERATOR_NAME)
-            writer.write_includes(headers=[
+            writer.write_includes(
+                headers=[
                     "CSSPrimitiveValueMappings.h",
                     "CSSProperty.h",
                     "RenderStyle+GettersInlines.h",
@@ -8706,7 +8720,9 @@ class GenerateStyleBuilderGenerated:
                     "StyleBuilderCustom.h",
                     "StyleBuilderState.h",
                     "StyleComputedStyle+InitialInlines.h",
-                    "StylePropertyShorthand.h",])
+                    "StylePropertyShorthand.h",
+                ]
+            )
 
             with writer.namespace(namespace="Krys::HTML"):
                 self._generate_style_builder_generated_cpp_builder_functions_class(to=writer)
@@ -8810,7 +8826,9 @@ class GenerateStyleExtractorGenerated:
             )
         to.write(f"}}")
 
-    def _generate_style_extractor_generated_cpp_shorthand_value_serialization_extractor(self, to: Writer, property: StyleProperty):
+    def _generate_style_extractor_generated_cpp_shorthand_value_serialization_extractor(
+        self, to: Writer, property: StyleProperty
+    ):
         to.write(
             f"static void extract{property.id_without_prefix}ShorthandSerialization(ExtractorState& extractorState, StringBuilder& builder, const CSS::SerializationContext& context)"
         )
@@ -8837,7 +8855,9 @@ class GenerateStyleExtractorGenerated:
 
         to.write(f"}}")
 
-    def _generate_style_extractor_generated_cpp_value_serialization_extractor(self, to: Writer, property: StyleProperty):
+    def _generate_style_extractor_generated_cpp_value_serialization_extractor(
+        self, to: Writer, property: StyleProperty
+    ):
         to.write(
             f"static void extract{property.id_without_prefix}Serialization(ExtractorState& extractorState, StringBuilder& builder, const CSS::SerializationContext& context)"
         )
@@ -9012,15 +9032,19 @@ class GenerateStyleExtractorGenerated:
         with open("StyleExtractorGenerated.cpp", "w") as output_file:
             writer = Writer(output_file)
 
-            writer.write_cpp_prelude(generator_name=GENERATOR_NAME, for_header="StyleExtractorGenerated.h", headers=[
-                "CSSPrimitiveValueMappings.h",
-                "CSSProperty.h",
-                "ColorSerialization.h",
-                "RenderStyle.h",
-                "StyleExtractorCustom.h",
-                "StyleExtractorState.h",
-                "StylePropertyShorthand.h",
-            ])
+            writer.write_cpp_prelude(
+                generator_name=GENERATOR_NAME,
+                for_header="StyleExtractorGenerated.h",
+                headers=[
+                    "CSSPrimitiveValueMappings.h",
+                    "CSSProperty.h",
+                    "ColorSerialization.h",
+                    "RenderStyle.h",
+                    "StyleExtractorCustom.h",
+                    "StyleExtractorState.h",
+                    "StylePropertyShorthand.h",
+                ],
+            )
 
             with writer.namespace(namespace="Krys::HTML"):
                 self._generate_style_extractor_generated_cpp_extractor_functions_class(to=writer)
@@ -9068,15 +9092,17 @@ class GenerateStylePropertyShorthandFunctions:
             to.write(f"StylePropertyShorthand {property.id_without_prefix}Shorthand()")
             to.write(f"{{")
             with to.indent():
-                to.write(
-                    f"static const CSSPropertyID {property.id_without_prefix}Properties[] = {{"
-                )
+                to.write(f"static const CSSPropertyID {property.id_without_prefix}Properties[] = {{")
 
                 with to.indent():
                     shorthand_to_longhand_count[property] = 0
-                    assert property.codegen_properties.longhands, f"Shorthand property '{property.name}' has no longhands."
+                    assert (
+                        property.codegen_properties.longhands
+                    ), f"Shorthand property '{property.name}' has no longhands."
                     for longhand in property.codegen_properties.longhands:
-                        assert type(longhand) is StyleProperty, f"Shorthand property '{property.name}' has a non-StyleProperty longhand '{longhand}'."
+                        assert (
+                            type(longhand) is StyleProperty
+                        ), f"Shorthand property '{property.name}' has a non-StyleProperty longhand '{longhand}'."
                         if longhand.name == "all":
                             for inner_property in self.style_properties.all_non_shorthands:
                                 if inner_property.name == "direction" or inner_property.name == "unicode-bidi":
@@ -9119,8 +9145,7 @@ class GenerateStylePropertyShorthandFunctions:
 
             for longhand, shorthands in sorted(list(longhand_to_shorthands.items()), key=lambda item: item[0].name):
                 shorthand_calls = [
-                    f"{p.id_without_prefix}Shorthand()"
-                    for p in sorted(shorthands, key=preferred_order_for_shorthands)
+                    f"{p.id_without_prefix}Shorthand()" for p in sorted(shorthands, key=preferred_order_for_shorthands)
                 ]
                 vector = f"StylePropertyShorthandVector{{{ ', '.join(shorthand_calls) }}}"
                 vector_to_longhands.setdefault(vector, [])
@@ -9143,9 +9168,13 @@ class GenerateStylePropertyShorthandFunctions:
         with open("StylePropertyShorthandFunctions.cpp", "w") as output_file:
             writer = Writer(output_file)
 
-            writer.write_cpp_prelude(generator_name=GENERATOR_NAME, for_header="StylePropertyShorthandFunctions.h", headers=[
-                "StylePropertyShorthand.h",
-            ])
+            writer.write_cpp_prelude(
+                generator_name=GENERATOR_NAME,
+                for_header="StylePropertyShorthandFunctions.h",
+                headers=[
+                    "StylePropertyShorthand.h",
+                ],
+            )
 
             with writer.namespace(namespace="Krys::HTML"):
                 longhand_to_shorthands = {}
@@ -9245,10 +9274,13 @@ class GenerateCSSPropertyParsing:
         with open("CSSPropertyParsing.h", "w") as output_file:
             writer = Writer(output_file)
 
-            writer.write_hpp_prelude(generator_name=GENERATOR_NAME, headers=[
-                "Krystal.HTML/CSS/Properties/CSSPropertyNames.hpp",
-                "Krystal.HTML/CSS/Values/CSSValueKeywords.hpp",
-            ])
+            writer.write_hpp_prelude(
+                generator_name=GENERATOR_NAME,
+                headers=[
+                    "Krystal.HTML/CSS/Properties/CSSPropertyNames.hpp",
+                    "Krystal.HTML/CSS/Values/CSSValueKeywords.hpp",
+                ],
+            )
 
             with writer.namespace(namespace="Krys::HTML"):
                 writer.write_forward_declarations(
@@ -9268,14 +9300,18 @@ class GenerateCSSPropertyParsing:
         with open("CSSPropertyParsing.cpp", "w") as output_file:
             writer = Writer(output_file)
 
-            writer.write_cpp_prelude(generator_name=GENERATOR_NAME, for_header="CSSPropertyParsing.h", headers=[
-                "CSSParserContext.h",
-                "CSSParserIdioms.h",
-                "CSSPropertyParser.h",
-                "CSSPropertyParserCustom.h",
-                "CSSPropertyParserState.h",
-                "DeprecatedGlobalSettings.h",
-            ])
+            writer.write_cpp_prelude(
+                generator_name=GENERATOR_NAME,
+                for_header="CSSPropertyParsing.h",
+                headers=[
+                    "CSSParserContext.h",
+                    "CSSParserIdioms.h",
+                    "CSSPropertyParser.h",
+                    "CSSPropertyParserCustom.h",
+                    "CSSPropertyParserState.h",
+                    "DeprecatedGlobalSettings.h",
+                ],
+            )
 
             with writer.namespace(namespace="Krys::HTML"):
                 writer.write_using_namespace_declarations(namespaces=["CSSPropertyParserHelpers"])
@@ -9564,7 +9600,9 @@ class GenerateStyleInterpolationWrapperMap:
         with open("StyleInterpolationWrapperMap.h", "w") as output_file:
             writer = Writer(output_file)
 
-            writer.write_hpp_prelude(generator_name=GENERATOR_NAME, headers=[
+            writer.write_hpp_prelude(
+                generator_name=GENERATOR_NAME,
+                headers=[
                     "CSSPropertyNames.h",
                     "<wtf/NeverDestroyed.h>",
                 ],
@@ -9581,10 +9619,12 @@ class GenerateStyleInterpolationWrapperMap:
         with open("StyleInterpolationWrapperMap.cpp", "w") as output_file:
             writer = Writer(output_file)
 
-            writer.write_cpp_prelude(generator_name=GENERATOR_NAME, for_header="StyleInterpolationWrapperMap.h", headers=[
-                       "StylePropertyShorthand.h",
-
-                ]
+            writer.write_cpp_prelude(
+                generator_name=GENERATOR_NAME,
+                for_header="StyleInterpolationWrapperMap.h",
+                headers=[
+                    "StylePropertyShorthand.h",
+                ],
             )
 
             writer.write("#define STYLE_INTERPOLATION_GENERATED_INCLUDE_TRAP 1")
@@ -9747,16 +9787,16 @@ class GenerateStyleInterpolationWrapperMap:
                 for property in self.properties_and_descriptors.all_unique:
                     if not property.codegen_properties.longhands:
                         # Don't include descriptors.
-                        if property in self.properties_and_descriptors.all_descriptor_only: # type: ignore
+                        if property in self.properties_and_descriptors.all_descriptor_only:  # type: ignore
                             to.write(f"nullptr, // {property.id} - not animatable (descriptor only)")
                             continue
                         # Don't include logical properties.
-                        if property.codegen_properties.is_logical: # type: ignore
+                        if property.codegen_properties.is_logical:  # type: ignore
                             to.write(f"nullptr, // {property.id} - logical, handled via resolution to physical")
                             continue
                         # Don't include not animatable properties.
-                        if not property.is_animatable: # type: ignore
-                            to.write(f"nullptr, // {property.id} - {property.animation_type}") # type: ignore
+                        if not property.is_animatable:  # type: ignore
+                            to.write(f"nullptr, // {property.id} - {property.animation_type}")  # type: ignore
                             continue
 
                         construction = (
@@ -9883,7 +9923,9 @@ class GenerateStyleComputedStyleProperties:
     def _generate_getter_function_declaration(self, *, to: Writer, function_name, annotations, return_type):
         to.write(f"{annotations}{return_type} {function_name}() const;")
 
-    def _generate_setter_function_declaration(self, *, to: Writer, function_name, annotations, return_type, argument_type):
+    def _generate_setter_function_declaration(
+        self, *, to: Writer, function_name, annotations, return_type, argument_type
+    ):
         to.write(f"{annotations}{return_type} {function_name}({argument_type});")
 
     def _generate_initial_function_declaration(self, *, to: Writer, function_name, annotations, return_type):
@@ -10019,7 +10061,9 @@ class GenerateStyleComputedStyleProperties:
         with open("StyleComputedStyleProperties.h", "w") as output_file:
             writer = Writer(output_file)
 
-            writer.write_hpp_prelude(generator_name=GENERATOR_NAME, headers=["Krystal.HTML/CSS/Properties/ComputedStyleBase.hpp"])
+            writer.write_hpp_prelude(
+                generator_name=GENERATOR_NAME, headers=["Krystal.HTML/CSS/Properties/ComputedStyleBase.hpp"]
+            )
             with writer.namespace(namespace="Krys::HTML"):
                 writer.write(f"class ComputedStyleProperties : public ComputedStyleBase {{")
                 writer.write(f"public:")
@@ -10184,9 +10228,7 @@ class GenerateStyleComputedStyleProperties:
         to.write(f"}}")
         to.newline()
 
-        to.write(
-            f"inline {getter_return_type} ComputedStyleProperties::{prefix.id_without_prefix}{edge}() const"
-        )
+        to.write(f"inline {getter_return_type} ComputedStyleProperties::{prefix.id_without_prefix}{edge}() const")
         to.write(f"{{")
         with to.indent():
             to.write(f"return {prefix.id_without_prefix}{edge}(writingMode());")
@@ -10220,9 +10262,7 @@ class GenerateStyleComputedStyleProperties:
         to.write(f"}}")
         to.newline()
 
-        to.write(
-            f"inline {getter_return_type} ComputedStyleProperties::{prefix.id_without_prefix}{edge}() const"
-        )
+        to.write(f"inline {getter_return_type} ComputedStyleProperties::{prefix.id_without_prefix}{edge}() const")
         to.write(f"{{")
         with to.indent():
             to.write(f"return {prefix.id_without_prefix}{edge}(writingMode());")
@@ -10246,9 +10286,7 @@ class GenerateStyleComputedStyleProperties:
         to.write(f"}}")
         to.newline()
 
-        to.write(
-            f"inline {getter_return_type} ComputedStyleProperties::{prefix.id_without_prefix}{edge}() const"
-        )
+        to.write(f"inline {getter_return_type} ComputedStyleProperties::{prefix.id_without_prefix}{edge}() const")
         to.write(f"{{")
         with to.indent():
             to.write(f"return {prefix.id_without_prefix}{edge}(writingMode());")
@@ -10718,7 +10756,14 @@ class GenerateStyleComputedStyleProperties:
     # Generate StyleComputedStyleProperties+InitialInlines.h
 
     def _generate_initial_inlines_function_definition(
-        self, *, to: Writer, function_name, annotations, return_type, initial_expression, requires_using_namespace_css_literals
+        self,
+        *,
+        to: Writer,
+        function_name,
+        annotations,
+        return_type,
+        initial_expression,
+        requires_using_namespace_css_literals,
     ):
         to.write(f"{annotations}{return_type} ComputedStyleProperties::{function_name}()")
         to.write(f"{{")
@@ -10779,7 +10824,9 @@ class GenerateStyleComputedStyleProperties:
                 ],
             )
 
-            with writer.namespace(namespace="Krys::HTML",):
+            with writer.namespace(
+                namespace="Krys::HTML",
+            ):
                 self._generate_initial_inlines_property_function_definitions(to=writer)
 
 
@@ -10840,7 +10887,9 @@ class GenerateRenderStyleProperties:
     def _generate_getter_function_declaration(self, *, to: Writer, function_name, annotations, return_type):
         to.write(f"{annotations}{return_type} {function_name}() const;")
 
-    def _generate_setter_function_declaration(self, *, to: Writer, function_name, annotations, return_type, argument_type):
+    def _generate_setter_function_declaration(
+        self, *, to: Writer, function_name, annotations, return_type, argument_type
+    ):
         to.write(f"{annotations}{return_type} {function_name}({argument_type});")
 
     def _generate_property_function_declarations(self, *, to: Writer):
@@ -10964,7 +11013,9 @@ class GenerateRenderStyleProperties:
         with open("RenderStyleProperties.h", "w") as output_file:
             writer = Writer(output_file)
 
-            writer.write_hpp_prelude(generator_name=GENERATOR_NAME, headers=["Krystal.HTML/CSS/Style/RenderStyleBase.hpp"])
+            writer.write_hpp_prelude(
+                generator_name=GENERATOR_NAME, headers=["Krystal.HTML/CSS/Style/RenderStyleBase.hpp"]
+            )
 
             with writer.namespace(namespace="Krys::HTML"):
                 writer.write(f"class RenderStyleProperties : public RenderStyleBase {{")
@@ -11131,7 +11182,15 @@ class GenerateRenderStyleProperties:
     # Generate RenderStyleProperties+SettersInlines.h
 
     def _generate_setters_inlines_function_definition(
-        self, *, to: Writer, function_name, annotations, return_type, argument_type, argument_name, forwarding_expression
+        self,
+        *,
+        to: Writer,
+        function_name,
+        annotations,
+        return_type,
+        argument_type,
+        argument_name,
+        forwarding_expression,
     ):
         to.write(f"{annotations}{return_type} RenderStyleProperties::{function_name}({argument_type} {argument_name})")
         to.write(f"{{")
@@ -11482,7 +11541,9 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
         to.write(f"}}")
         to.newline()
 
-    def _generate_conservatively_collect_changed_animatable_properties_recursive(self, *, to: Writer, tree_node, function_name):
+    def _generate_conservatively_collect_changed_animatable_properties_recursive(
+        self, *, to: Writer, tree_node, function_name
+    ):
         # First, recursively generate the collection functions for all child nodes, assuring they are callable.
         generated_children = []
 
@@ -11540,9 +11601,13 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
         with open("StyleChangedAnimatablePropertiesGenerated.cpp", "w") as output_file:
             writer = Writer(output_file)
 
-            writer.write_cpp_prelude(generator_name=GENERATOR_NAME, for_header="StyleChangedAnimatablePropertiesGenerated.h",headers=[
-                                "StyleChangedAnimatablePropertiesCustom.h",
-                            ])
+            writer.write_cpp_prelude(
+                generator_name=GENERATOR_NAME,
+                for_header="StyleChangedAnimatablePropertiesGenerated.h",
+                headers=[
+                    "StyleChangedAnimatablePropertiesCustom.h",
+                ],
+            )
             with writer.namespace(namespace="Krys::HTML"):
                 self._generate_conservatively_collect_changed_animatable_properties(to=writer)
 
