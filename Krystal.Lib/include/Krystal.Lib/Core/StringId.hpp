@@ -24,15 +24,14 @@ namespace Krys
 
     /// @brief Constructs a `StringId` with the given string to hash.
     /// @param text The string to hash.
-    explicit constexpr StringId(const string &text) noexcept
-        : _hash(Hash::fnv1a_32(text.c_str(), text.size()))
+    explicit constexpr StringId(const string &text) noexcept : _hash(fnv1a32(text.c_str(), text.size()))
     {
     }
 
     /// @brief Constructs a `StringId` with the given string to hash.
     /// @param text The string to hash.
     /// @param size The size of the string to hash.
-    constexpr StringId(const char *text, size_t size) noexcept : _hash(Hash::fnv1a_32(text, size))
+    constexpr StringId(const char *text, size_t size) noexcept : _hash(fnv1a32(text, size))
     {
     }
 

@@ -297,6 +297,13 @@ namespace Krys::detail
 
 namespace Krys
 {
+  template <typename T, typename Impl, typename PtrTraits, IsNullable Nullable>
+  constexpr bool IsSmartPtr<::Krys::detail::IntrusiveWeakPtr<T, Impl, PtrTraits, Nullable>> = true;
+
+  template <typename T, typename Impl, typename PtrTraits, IsNullable Nullable>
+  constexpr bool IsNullableSmartPtr<::Krys::detail::IntrusiveWeakPtr<T, Impl, PtrTraits, Nullable>> =
+    ::Krys::detail::IntrusiveWeakPtr<T, Impl, PtrTraits, Nullable>::nullable;
+
   template <typename T, typename Impl = WeakPtrImpl, typename PtrTraits = RawPtrTraits<WeakPtrImpl>>
   using WeakPtr = ::Krys::detail::IntrusiveWeakPtr<T, Impl, PtrTraits, IsNullable(true)>;
 

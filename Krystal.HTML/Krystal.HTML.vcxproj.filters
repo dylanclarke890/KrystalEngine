@@ -966,9 +966,6 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Enums\CSSPropertyFlag.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Enums\CSSPropertyId.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\NestedContextType.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1185,7 +1182,16 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\String.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyParsers.hpp">
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Enums\CSSPropertyId.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\InitialValues.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyShorthandFunctions.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyParsing.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1724,7 +1730,13 @@
     <ClCompile Include="src\CSS\Values\Primitives\CSSUnevaluatedCalc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\CSS\Properties\CSSPropertyParsers.cpp">
+    <ClCompile Include="src\CSS\Properties\Enums\CSSPropertyId.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CSS\Properties\CSSPropertyShorthandFunctions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CSS\Properties\CSSPropertyParsing.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -2039,15 +2051,18 @@
     <None Include="codegen\enum.hpp.jinja" />
     <None Include="codegen\templates\enum.hpp.jinja" />
     <None Include="codegen\utils.py" />
-    <None Include="codegen\css-values\data.json" />
+    <None Include="codegen\css-value-keywords.in" />
     <None Include="codegen\css-values\data.schema.json" />
     <None Include="codegen\css-values\generator.py" />
     <None Include="codegen\templates\css-keyword-constants.hpp.jinja" />
     <None Include="codegen\templates\css-property-consumer.cpp.jinja" />
     <None Include="codegen\templates\css-property-shorthand.cpp.jinja" />
-    <None Include="codegen\generator.py" />
     <None Include="codegen\css-properties.json" />
-    <None Include="codegen\writer.py" />
-    <None Include="codegen\css-properties\old.py" />
+    <None Include="data\CSSStyleProperties+PropertyNames.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="codegen\css_properties.py" />
+    <None Include="codegen\main.py" />
+    <None Include="codegen\css_value_keywords.py" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Core/Hash.hpp"
 #include <string>
 #include <string_view>
 

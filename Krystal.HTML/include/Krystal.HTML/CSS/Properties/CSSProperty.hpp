@@ -7,6 +7,7 @@
 #include "Krystal.HTML/CSS/Properties/Types/IsSetFromShorthand.hpp"
 #include "Krystal.HTML/CSS/Values/CSSValue.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
+#include "Krystal.Lib/Types/SmallList.hpp"
 
 namespace Krys::HTML
 {
@@ -17,6 +18,8 @@ namespace Krys::HTML
   /// `margin-inline-start` is also not counted as a shorthand for `margin-left` because it is a longhand
   /// property.
   constexpr inline uint8 MaxShorthandsPerProperty = 4u;
+
+  struct CSSParserContext;
 
   struct CSSPropertyMetadata
   {
@@ -107,14 +110,48 @@ namespace Krys::HTML
 
     KRYS_NODISCARD static bool IsShorthand(CSSPropertyId id) noexcept
     {
-      return static_cast<size_t>(id) >= FirstShorthandCSSPropertyId
-             && static_cast<size_t>(id) <= LastShorthandCSSPropertyId;
+      return static_cast<size_t>(id) >= static_cast<uint16>(FirstShorthandProperty)
+             && static_cast<size_t>(id) <= static_cast<uint16>(LastShorthandProperty);
     }
 
     KRYS_NODISCARD static bool IsLonghand(CSSPropertyId id) noexcept
     {
-      return static_cast<size_t>(id) >= FirstLonghandCSSPropertyId
-             && static_cast<size_t>(id) <= LastLonghandCSSPropertyId;
+      // TODO
+      return false;
     }
+
+    KRYS_NODISCARD static bool IsInheritedProperty(CSSPropertyId id) noexcept;
+
+    KRYS_NODISCARD static bool IsCornerShapeProperty(CSSPropertyId id) noexcept;
+
+    KRYS_NODISCARD static bool IsMarginProperty(CSSPropertyId id) noexcept;
+
+    KRYS_NODISCARD static bool IsPaddingProperty(CSSPropertyId id) noexcept;
+
+    KRYS_NODISCARD static SmallList<CSSOMString> AliasesForProperty(CSSPropertyId id) noexcept;
+
+    KRYS_NODISCARD static bool DisablesNativeAppearance(CSSPropertyId id) noexcept;
+
+    KRYS_NODISCARD static char32 ListValuedPropertySeparator(CSSPropertyId id) noexcept;
+
+    KRYS_NODISCARD static bool AllowsNumberOrIntegerInput(CSSPropertyId id) noexcept;
+
+    KRYS_NODISCARD static bool IsInLogicalPropertyGroup(CSSPropertyId id) noexcept;
+
+    KRYS_NODISCARD static bool
+      AreInSameLogicalPropertyGroupWithDifferentMappingLogic(CSSPropertyId id1, CSSPropertyId id2) noexcept;
+
+    KRYS_NODISCARD static bool IsDescriptorOnly(CSSPropertyId id) noexcept;
+
+    KRYS_NODISCARD static bool AcceptsQuirkyColor(CSSPropertyId id) noexcept;
+
+    KRYS_NODISCARD static bool AcceptsQuirkyLength(CSSPropertyId id) noexcept;
+
+    KRYS_NODISCARD static bool AcceptsQuirkyAngle(CSSPropertyId id) noexcept;
+
+    KRYS_NODISCARD static Span<const CSSValueId> ValidKeywordsForProperty(CSSPropertyId id) noexcept;
+
+    KRYS_NODISCARD static bool IsKeywordValidForPropertyValues(CSSPropertyId id, CSSValueId keyword,
+                                                               const CSSParserContext &context) noexcept;
   };
 }

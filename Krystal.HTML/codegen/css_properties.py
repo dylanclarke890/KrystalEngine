@@ -1,38 +1,22 @@
-import argparse
 from builtins import *  # pyright: ignore[reportWildcardImportFromLibrary]
+import argparse
 import collections
 from collections.abc import Callable, Iterable
 import enum
 import functools
 import itertools
 import json
-import pathlib
+import os
 import re
+import shutil
 import subprocess
-from typing import Any
-from writer import Writer
+from typing import Any, NamedTuple
+from utils import PROJECT_BASE, Writer, output_cpp_path, output_hpp_path
 
-GENERATOR_NAME = "css-values.generator"
-
-
-def parse_args() -> argparse.Namespace:
-    default_properties_json_path = pathlib.Path(__file__).parent / "css-properties.json"
-
-    parser = argparse.ArgumentParser(description="Process CSS property definitions.")
-    parser.add_argument(
-        "--properties", default=default_properties_json_path, help="Path to the CSS properties JSON file."
-    )
-    parser.add_argument("--defines", default="", help="Comma-separated list of defines to enable for code generation.")
-    parser.add_argument("--gperf-executable", default="gperf", help="Path to the gperf executable.")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output.")
-    parser.add_argument("--dump-unused-grammars", action="store_true", help="Dump unused grammar rules.")
-    parser.add_argument("--check-unused-grammars-values", action="store_true", help="Check unused grammar values.")
-
-    return parser.parse_args()
+GENERATOR_NAME = "codegen/css_properties.py"
 
 
-def main():
-    args = parse_args()
+def generate(args: argparse.Namespace):
     with open(args.properties, "r", encoding="utf-8") as properties_file:
         properties_json = json.load(properties_file)
 
@@ -78,16 +62,17 @@ def main():
         generator(generation_context).generate()
         for generator in [
             GenerateCSSPropertyInitialValues,
-            GenerateCSSPropertyNames,
+            GenerateCSSPropertyId,
             GenerateCSSPropertyParsing,
-            GenerateCSSStylePropertiesPropertyNames,
-            GenerateStyleBuilderGenerated,
-            GenerateStyleChangedAnimatablePropertiesGenerated,
-            GenerateStyleComputedStyleProperties,
-            GenerateStyleExtractorGenerated,
-            GenerateStyleInterpolationWrapperMap,
-            GenerateStylePropertyShorthandFunctions,
-            GenerateRenderStyleProperties,
+            GenerateCSSPropertyShorthandFunctions,
+            GenerateCSSStylePropertiesPropertyNamesIDL,
+            # TODO: Uncomment these generators when they are supported.
+            # GenerateStyleBuilderGenerated,
+            # GenerateStyleChangedAnimatablePropertiesGenerated,
+            # GenerateStyleComputedStyleProperties,
+            # GenerateStyleExtractorGenerated,
+            # GenerateStyleInterpolationWrapperMap,
+            # GenerateRenderStyleProperties,
         ]
     ]
 
@@ -1859,7 +1844,7 @@ class PropertiesAndDescriptors:
         return result
 
     def _compute_all_unique(self):
-        # NOTE: This is computes the ordered set of properties and descriptors that correspond to the CSSPropertyID
+        # NOTE: This is computes the ordered set of properties and descriptors that correspond to the CSSPropertyId
         # enumeration and related lookup tables and functions.
 
         result: list[StyleProperty | Descriptor] = list(self.style_properties.all)
@@ -1873,7 +1858,7 @@ class PropertiesAndDescriptors:
 
         # FIXME: It doesn't make a lot of sense to sort the descriptors like this, but this maintains
         # the current behavior and has no negative side effect. In the future, we should either separate
-        # the descriptors out of CSSPropertyID or the descriptor-only ones together in some fashion.
+        # the descriptors out of CSSPropertyId or the descriptor-only ones together in some fashion.
         return sorted(result, key=functools.cmp_to_key(StyleProperties._sort_by_descending_priority_and_name))
 
     def _compute_render_style_storage_model(self):
@@ -1944,7 +1929,7 @@ class PropertiesAndDescriptors:
         return [self.style_properties] + self.descriptors.descriptor_sets
 
     # Returns the set of properties and descriptors that have unique names, preferring style properties when
-    # there is a conflict. This set corresponds one-to-one in membership and order with CSSPropertyID.
+    # there is a conflict. This set corresponds one-to-one in membership and order with CSSPropertyId.
     @property
     def all_unique(self):
         if not self._all_unique:
@@ -5069,11 +5054,18 @@ class SharedGrammarRules:
 
 
 class SharedGrammarRuleConsumer(object):
+    @property
+    def is_exported(self) -> bool:
+        return False
+
     @staticmethod
     def make(shared_grammar_rule):
         if not shared_grammar_rule.exported:
             return SkipSharedGrammarRuleConsumer(shared_grammar_rule)
         return GeneratedSharedGrammarRuleConsumer(shared_grammar_rule)
+
+    def generate_export_declaration(self, *, to):
+        pass
 
 
 class SkipSharedGrammarRuleConsumer(SharedGrammarRuleConsumer):
@@ -5226,8 +5218,8 @@ class KeywordFastPathGenerator:
 
         return self.signature.generate_call_string(parameters)
 
-    def generate_definition(self, *, to):
-        to.write(f"static {self.signature.definition_string}")
+    def generate_definition(self, *, to: Writer):
+        to.write(f"KRYS_NODISCARD static {self.signature.definition_string}")
         to.write(f"{{")
 
         with to.indent():
@@ -5275,6 +5267,10 @@ class KeywordFastPathGenerator:
 
 
 class PropertyConsumer(object):
+    @property
+    def is_exported(self):
+        return False
+
     @staticmethod
     def make(property):
         if property.codegen_properties.longhands or property.codegen_properties.skip_parser:
@@ -5293,6 +5289,9 @@ class PropertyConsumer(object):
         raise Exception(
             f"Invalid property definition for '{property.id}'. Style properties must either specify values or a custom parser."
         )
+
+    def generate_export_declaration(self, *, to):
+        pass
 
 
 # Property consumer used for properties that should not be parsed.
@@ -5390,7 +5389,7 @@ class FastPathKeywordOnlyPropertyConsumer(PropertyConsumer):
         return FunctionSignature(
             result_type="RefPtr<CSSValue>",
             scope=FastPathKeywordOnlyPropertyConsumer._build_scope(property),
-            name=f"consume{property.name_for_parsing_methods}",
+            name=f"Consume{property.name_for_parsing_methods}",
             parameters=FastPathKeywordOnlyPropertyConsumer._build_parameters(keyword_fast_path_generator),
         )
 
@@ -5408,7 +5407,7 @@ class FastPathKeywordOnlyPropertyConsumer(PropertyConsumer):
 
     def generate_export_declaration(self, *, to):
         if self.is_exported:
-            to.write(f"static {self.signature.declaration_string};")
+            to.write(f"KRYS_NODISCARD static {self.signature.declaration_string};")
 
     def generate_definition(self, *, to):
         if self.is_exported:
@@ -5452,7 +5451,7 @@ class DirectPropertyConsumer(PropertyConsumer):
         return FunctionSignature(
             result_type="RefPtr<CSSValue>",
             scope=DirectPropertyConsumer._build_scope(property),
-            name=f"consume{property.name_for_parsing_methods}",
+            name=f"Consume{property.name_for_parsing_methods}",
             parameters=DirectPropertyConsumer._build_parameters(term_generator),
         )
 
@@ -5471,7 +5470,7 @@ class DirectPropertyConsumer(PropertyConsumer):
 
     def generate_export_declaration(self, *, to):
         if self.is_exported:
-            to.write(f"static {self.signature.declaration_string};")
+            to.write(f"KRYS_NODISCARD static {self.signature.declaration_string};")
 
     def generate_definition(self, *, to):
         if self.is_exported:
@@ -5487,7 +5486,7 @@ class DirectPropertyConsumer(PropertyConsumer):
         return None
 
 
-# Default property consumer. Uses `parser-grammar` to generate a `consume` function for the property.
+# Default property consumer. Uses `parser-grammar` to generate a `Consume*` function for the property.
 class GeneratedPropertyConsumer(PropertyConsumer):
     def __init__(self, property):
         self.property = property
@@ -5522,7 +5521,7 @@ class GeneratedPropertyConsumer(PropertyConsumer):
         return FunctionSignature(
             result_type="RefPtr<CSSValue>",
             scope=GeneratedPropertyConsumer._build_scope(property),
-            name=f"consume{property.name_for_parsing_methods}",
+            name=f"Consume{property.name_for_parsing_methods}",
             parameters=GeneratedPropertyConsumer._build_parameters(property, requires_state),
         )
 
@@ -5530,7 +5529,7 @@ class GeneratedPropertyConsumer(PropertyConsumer):
     def _build_keyword_fast_path_generator(property):
         if property.codegen_properties.parser_grammar.has_fast_path_keyword_terms:
             return KeywordFastPathGenerator(
-                f"isKeywordValidFor{property.name_for_parsing_methods}",
+                f"IsKeywordValidFor{property.name_for_parsing_methods}",
                 property.codegen_properties.parser_grammar.fast_path_keyword_terms_sorted_by_name,
             )
         return None
@@ -5547,13 +5546,13 @@ class GeneratedPropertyConsumer(PropertyConsumer):
 
     def generate_export_declaration(self, *, to):
         if self.is_exported:
-            to.write(f"static {self.signature.declaration_string};")
+            to.write(f"KRYS_NODISCARD static {self.signature.declaration_string};")
 
     def generate_definition(self, *, to):
         if self.is_exported:
             to.write(f"{self.signature.definition_string}")
         else:
-            to.write(f"static {self.signature.definition_string}")
+            to.write(f"KRYS_NODISCARD static {self.signature.definition_string}")
         to.write(f"{{")
         with to.indent():
             self.term_generator.generate_unconditional(to=to, range_string="range", state_string="state")
@@ -6964,10 +6963,15 @@ class FunctionParameter:
 
     @property
     def declaration_string(self):
+        if self.type.endswith("*") or self.type.endswith("&"):
+            return f"{self.type}{self.name}"
+
         return f"{self.type} {self.name}"
 
     @property
     def definition_string(self):
+        if self.type.endswith("*") or self.type.endswith("&"):
+            return f"{self.type}{self.name}"
         return f"{self.type} {self.name}"
 
 
@@ -6993,11 +6997,11 @@ class FunctionSignature:
 
     @property
     def declaration_string(self):
-        return f"{self.result_type} {self.name}({self._declaration_parameters_string})"
+        return f"{self.result_type} {self.name}({self._declaration_parameters_string}) noexcept"
 
     @property
     def definition_string(self):
-        return f"{self.result_type} {self._scope_string}{self.name}({self._definition_parameters_string})"
+        return f"{self.result_type} {self._scope_string}{self.name}({self._definition_parameters_string}) noexcept"
 
     @property
     def reference_string(self):
@@ -7095,14 +7099,18 @@ class GenerationContext:
         prologue: str | None = None,
         epilogue: str | None = None,
     ):
+        grouped_by_return_value = {}
+        for item in iterable:
+            grouped_by_return_value.setdefault(mapping(item), []).append(mapping_to_property(item).id)
+
         with to.function_block(signature=signature):
             if prologue:
                 to.write(prologue)
 
             with to.switch_block(expr="id"):
-                for item in iterable:
-                    with to.case_block(case=mapping_to_property(item).id):
-                        to.write(mapping(item))
+                for return_expr, property_ids in grouped_by_return_value.items():
+                    with to.multi_case_block(cases=property_ids):
+                        to.write(return_expr)
 
                 with to.default_case_block():
                     to.write(default)
@@ -7122,9 +7130,8 @@ class GenerationContext:
     ):
         with to.function_block(signature=signature):
             with to.switch_block(expr="id"):
-                for item in iterable:
-                    with to.case_block(case=mapping_to_property(item).id):
-                        to.write("return true;")
+                with to.multi_case_block(cases=[mapping_to_property(item).id for item in iterable]):
+                    to.write("return true;")
 
                 with to.default_case_block():
                     to.write("return false;")
@@ -7135,95 +7142,82 @@ class GenerationContext:
 # region Generators
 
 
-# Generates `CSSPropertyInitialValuesGeneratedInlines.hpp`.
 class GenerateCSSPropertyInitialValues:
+    """Generates `InitialValues.hpp`."""
+
     def __init__(self, generation_context: GenerationContext):
         self.generation_context = generation_context
 
-    @property
-    def properties_and_descriptors(self):
-        return self.generation_context.properties_and_descriptors
-
-    @property
-    def properties(self):
-        return self.generation_context.properties_and_descriptors.style_properties
-
     def generate(self):
-        with open("Krystal.HTML/CSS/Properties/CSSPropertyInitialValuesGeneratedInlines.hpp", "w") as output_file:
+        with open(output_hpp_path("Krystal.HTML/CSS/Properties/InitialValues.hpp"), "w") as output_file:
             writer = Writer(output_file)
-            writer.write_hpp_prelude(
+            writer.hpp_prelude(
                 generator_name=GENERATOR_NAME,
                 headers=[
-                    "Krystal.HTML/CSS/Properties/CSSPropertyNames.hpp",
+                    "Krystal.HTML/CSS/Properties/Enums/CSSPropertyId.hpp",
                     "Krystal.HTML/CSS/Values/CSSUnits.hpp",
-                    "Krystal.HTML/CSS/Values/CSSValueKeywords.hpp",
+                    "Krystal.HTML/CSS/Values/Enums/CSSValueId.hpp",
                     "Krystal.Lib/Types/Variant.hpp",
+                ],
+                system_headers=[
+                    "cassert",
                 ],
             )
 
             with writer.namespace(namespace="Krys::HTML"):
-                self._generate_css_property_initial_values_generated_inlines_hpp_types(to=writer)
+                with writer.struct_block(name="InitialNumericValue"):
+                    writer.write("double Number;")
+                    writer.write("CSSUnitType Type { CSSUnitType::Number };")
+
+                writer.newline()
+                writer.write(f"using InitialValue = Variant<CSSValueId, InitialNumericValue>;")
+
+                writer.newline()
                 self._generate_css_property_initial_values_generated_inlines_hpp_initial_value_for_longhand(to=writer)
 
-    # MARK: - Helper generator functions for CSSPropertyInitialValuesGeneratedInlines.hpp
-
-    def _generate_css_property_initial_values_generated_inlines_hpp_types(self, *, to: Writer):
-        with to.struct_block(name="InitialNumericValue"):
-            to.write("double Number;")
-            to.write("CSSUnitType Type { CSSUnitType::Number };")
-
-        to.write(f"using InitialValue = Variant<CSSValueId, InitialNumericValue>;")
-        to.newline()
-
     def _generate_css_property_initial_values_generated_inlines_hpp_initial_value_for_longhand(self, *, to: Writer):
+        initial_value_to_property_list: dict[InitialValue, list] = {}
+        for property in self.generation_context.properties_and_descriptors.style_properties.all_non_shorthands:
+            if property.codegen_properties.internal_only:
+                continue
+            if property.initial is None:
+                to.write_if(self.generation_context.verbose, f"// Skipping {property.id}, initial is None")
+                continue
+            if len(property.initial.list) != 1:
+                to.write_if(
+                    self.generation_context.verbose,
+                    f"// Skipping {property.id}, initial is a list with multiple values {property.initial.list}",
+                )
+                continue
+            if isinstance(property.initial.list[0], SpecialLiteral):
+                to.write_if(
+                    self.generation_context.verbose,
+                    f"// Skipping {property.id}, initial is a special value {property.initial.list}",
+                )
+                continue
+            initial_value_to_property_list.setdefault(property.initial, [])
+            initial_value_to_property_list[property.initial].append(property)
+
         with to.function_block(
-            signature="KRYS_NODISCARD static constexpr InitialValue InitialValueForLonghand(CSSPropertyId longhand) noexcept",
+            signature="KRYS_NODISCARD constexpr static InitialValue InitialValueForLonghand(CSSPropertyId longhand) noexcept",
         ):
             with to.switch_block(expr="longhand"):
-                initial_value_to_property_list = {}
-                for property in self.properties_and_descriptors.style_properties.all_non_shorthands:
-                    if property.codegen_properties.internal_only:
-                        continue
-                    if property.initial is None:
-                        to.write_if(
-                            self.generation_context.verbose, f"// Skipping {property.id_without_scope}, initial is None"
-                        )
-                        continue
-                    if len(property.initial.list) != 1:
-                        to.write_if(
-                            self.generation_context.verbose,
-                            f"// Skipping {property.id_without_scope}, initial is a list with multiple values {property.initial.list}",
-                        )
-                        continue
-                    if isinstance(property.initial.list[0], SpecialLiteral):
-                        to.write_if(
-                            self.generation_context.verbose,
-                            f"// Skipping {property.id_without_scope}, initial is a special value {property.initial.list}",
-                        )
-                        continue
-                    initial_value_to_property_list.setdefault(property.initial, [])
-                    initial_value_to_property_list[property.initial].append(property)
-
                 for initial, group in initial_value_to_property_list.items():
-                    for property in sorted(group, key=lambda x: x.id):
-                        to.write(f"case {property.id}:")
-
-                    with to.block():
+                    with to.multi_case_block(cases=[property.id for property in sorted(group, key=lambda x: x.id)]):
                         if isinstance(initial.list[0], NumericLiteral):
-                            with to.block():
-                                to.write(
-                                    f"return InitialNumericValue {{ {initial.list[0].digits}, {initial.list[0].cpp_unit_type} }};"
-                                )
+                            to.write(
+                                f"return InitialNumericValue {{ {initial.list[0].digits}, {initial.list[0].cpp_unit_type} }};"
+                            )
                         elif isinstance(initial.list[0], ValueKeywordName):
-                            with to.block():
-                                to.write(f"return {initial.list[0].id_without_scope};")
+                            to.write(f"return {initial.list[0].id};")
 
                 with to.default_case_block():
                     to.write(f"assert(false);")
 
 
-# Generates `CSSPropertyNames.hpp` and `CSSPropertyNames.cpp`.
-class GenerateCSSPropertyNames:
+class GenerateCSSPropertyId:
+    """Generates `CSSPropertyId.hpp` and `CSSPropertyId.cpp` (from `CSSPropertyId.gperf`)."""
+
     def __init__(self, generation_context: GenerationContext):
         self.generation_context = generation_context
 
@@ -7231,17 +7225,477 @@ class GenerateCSSPropertyNames:
     def properties_and_descriptors(self):
         return self.generation_context.properties_and_descriptors
 
-    @property
-    def properties(self):
-        return self.generation_context.properties_and_descriptors.style_properties
-
     def generate(self):
-        self.generate_css_property_names_h()
-        self.generate_css_property_names_gperf()
-        self.run_gperf()
+        self._generate_css_property_id_hpp()
+        self._generate_css_property_id_gperf()
+        self._run_gperf()
 
-    # Runs `gperf` on the output of the generated file CSSPropertyNames.gperf
-    def run_gperf(self):
+    # region CSSPropertyId.hpp
+
+    def _generate_css_property_id_hpp(self):
+        with open(output_hpp_path("Krystal.HTML/CSS/Properties/Enums/CSSPropertyId.hpp"), "w") as output_file:
+            writer = Writer(output_file)
+            writer.hpp_prelude(
+                generator_name=GENERATOR_NAME,
+                headers=[
+                    "Krystal.Lib/Types/Array.hpp",
+                    "Krystal.Lib/Types/Span.hpp",
+                    "Krystal.Lib/Core/Enum.hpp",
+                    "Krystal.HTML/CSS/Types/CSSOMString.hpp",
+                ],
+            )
+
+            with writer.namespace(namespace="Krys::HTML"):
+                self._generate_css_property_id_hpp_property_constants(to=writer)
+                self._generate_css_property_id_hpp_property_settings(to=writer)
+                self._generate_css_property_id_hpp_declarations(to=writer)
+            writer.newline()
+
+            with writer.namespace(namespace="Krys"):
+                writer.write_block("""\
+                  template<>
+                  struct DefaultHash<::Krys::HTML::CSSPropertyId> : IntegerHash<uint16>
+                  {
+                  };""")
+            writer.newline()
+
+            writer.write(
+                f"KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(::Krys::HTML::CSSPropertyId, ::Krys::HTML::CSSPropertyIdEnumValueCount);"
+            )
+            writer.newline()
+
+            with writer.namespace(namespace="std"):
+                writer.write_block("""\
+                  template<>
+                  struct iterator_traits<Krys::HTML::AllCSSPropertiesRange::Iterator>
+                  {
+                    using value_type = Krys::HTML::CSSPropertyId;
+                  };
+
+                  template<>
+                  struct iterator_traits<Krys::HTML::AllLonghandCSSPropertiesRange::Iterator>
+                  { 
+                    using value_type = Krys::HTML::CSSPropertyId;
+                  };""")
+
+    def _generate_css_property_id_hpp_property_constants(self, *, to: Writer):
+        first_shorthand_property = None
+        last_shorthand_property = None
+        first_top_priority_property = None
+        last_top_priority_property = None
+        first_high_priority_property = None
+        last_high_priority_property = None
+        first_medium_priority_property = None
+        last_medium_priority_property = None
+        first_low_priority_property = None
+        last_low_priority_property = None
+        first_logical_group_physical_property = None
+        last_logical_group_physical_property = None
+        first_logical_group_logical_property = None
+        last_logical_group_logical_property = None
+
+        first = GenerationContext.number_of_predefined_properties
+        count = GenerationContext.number_of_predefined_properties
+        max_length = 0
+        with to.enum_class_block(name="CSSPropertyId", underlying_type="uint16"):
+            to.enum_member(name="Invalid", value=0)
+            to.enum_member(name="Custom", value=1)
+            for property in self.generation_context.properties_and_descriptors.all_unique:
+                to.enum_member(name=property.id_without_prefix, value=count)
+
+                count += 1
+                max_length = max(len(property.name), max_length)
+
+                if property.codegen_properties.longhands:
+                    if not first_shorthand_property:
+                        first_shorthand_property = property
+                    last_shorthand_property = property
+                elif property.codegen_properties.top_priority:
+                    if not first_top_priority_property:
+                        first_top_priority_property = property
+                    last_top_priority_property = property
+                elif property.codegen_properties.high_priority:
+                    if not first_high_priority_property:
+                        first_high_priority_property = property
+                    last_high_priority_property = property
+                elif property.codegen_properties.medium_priority:
+                    if not first_medium_priority_property:
+                        first_medium_priority_property = property
+                    last_medium_priority_property = property
+                elif not property.codegen_properties.logical_property_group:
+                    if not first_low_priority_property:
+                        first_low_priority_property = property
+                    last_low_priority_property = property
+                elif property.codegen_properties.logical_property_group.logic == "physical":
+                    if not first_logical_group_physical_property:
+                        first_logical_group_physical_property = property
+                    last_logical_group_physical_property = property
+                elif property.codegen_properties.logical_property_group.logic == "logical":
+                    if not first_logical_group_logical_property:
+                        first_logical_group_logical_property = property
+                    last_logical_group_logical_property = property
+                else:
+                    raise Exception(
+                        f"{property.id_without_scope} is not part of any priority bucket. {property.codegen_properties.logical_property_group}"
+                    )
+        to.newline()
+
+        assert first_shorthand_property is not None
+        assert last_shorthand_property is not None
+        assert first_top_priority_property is not None
+        assert last_top_priority_property is not None
+        assert first_high_priority_property is not None
+        assert last_high_priority_property is not None
+        assert first_medium_priority_property is not None
+        assert last_medium_priority_property is not None
+        assert first_low_priority_property is not None
+        assert last_low_priority_property is not None
+        assert first_logical_group_physical_property is not None
+        assert last_logical_group_physical_property is not None
+        assert first_logical_group_logical_property is not None
+        assert last_logical_group_logical_property is not None
+
+        to.write(f'/// @brief Enum value of the first "real" CSS property, which excludes')
+        to.write(f"/// CSSProperty::Invalid and CSSProperty::Custom.")
+        to.write(f"constexpr uint16 FirstCSSProperty = {first};")
+        to.newline()
+
+        to.write(f"/// @brief Total number of enum values in the CSSPropertyId enum. If making an array")
+        to.write(f"/// that can be indexed into using the enum value, use this as the size.")
+        to.write(f"constexpr uint16 CSSPropertyIdEnumValueCount = {count};")
+        to.newline()
+
+        to.write(f'/// @brief Number of "real" CSS properties. This differs from CSSPropertyIdEnumValueCount,')
+        to.write(f"/// as this doesn't consider CSSProperty::Invalid and CSSProperty::Custom.")
+        to.write(f"constexpr uint16 NumCSSProperties = {count - first};")
+        to.write(f"constexpr auto MaxCSSPropertyNameLength = {max_length}uz;")
+        to.newline()
+
+        to.write(f"constexpr auto FirstTopPriorityProperty = {first_top_priority_property.id};")
+        to.write(f"constexpr auto LastTopPriorityProperty = {last_top_priority_property.id};")
+        to.write(f"constexpr auto FirstHighPriorityProperty = {first_high_priority_property.id};")
+        to.write(f"constexpr auto LastHighPriorityProperty = {last_high_priority_property.id};")
+        to.write(f"constexpr auto FirstMediumPriorityProperty = {first_medium_priority_property.id};")
+        to.write(f"constexpr auto LastMediumPriorityProperty = {last_medium_priority_property.id};")
+        to.write(f"constexpr auto FirstLowPriorityProperty = {first_low_priority_property.id};")
+        to.write(f"constexpr auto LastLowPriorityProperty = {last_low_priority_property.id};")
+        to.write(f"constexpr auto FirstLogicalGroupPhysicalProperty = {first_logical_group_physical_property.id};")
+        to.write(f"constexpr auto LastLogicalGroupPhysicalProperty = {last_logical_group_physical_property.id};")
+        to.write(f"constexpr auto FirstLogicalGroupLogicalProperty = {first_logical_group_logical_property.id};")
+        to.write(f"constexpr auto LastLogicalGroupLogicalProperty = {last_logical_group_logical_property.id};")
+        to.write(f"constexpr auto FirstLogicalGroupProperty = FirstLogicalGroupPhysicalProperty;")
+        to.write(f"constexpr auto LastLogicalGroupProperty = LastLogicalGroupLogicalProperty;")
+        to.write(f"constexpr auto FirstShorthandProperty = {first_shorthand_property.id};")
+        to.write(f"constexpr auto LastShorthandProperty = {last_shorthand_property.id};")
+        to.write(
+            f"constexpr auto NumCSSPropertyLonghands = static_cast<uint16>(FirstShorthandProperty) - FirstCSSProperty;"
+        )
+        to.newline()
+
+        to.write(
+            f"extern const Array<CSSPropertyId, {count_iterable(self.properties_and_descriptors.style_properties.all_computed)}uz> ComputedPropertyIds;"
+        )
+        to.newline()
+
+        with to.template_struct_block(template_signature="CSSPropertyId C", name="PropertyNameConstant"):
+            to.write(f"constexpr static auto value = C;")
+            to.write(f"constexpr bool operator==(const PropertyNameConstant &) const noexcept = default;")
+            to.write(f"constexpr bool operator==(CSSPropertyId other) const noexcept {{ return value == other; }}")
+        to.newline()
+
+    def _generate_css_property_id_hpp_property_settings(self, *, to: Writer):
+        settings_variable_declarations = (
+            f"bool {flag} : 1 {{ false }};" for flag in self.properties_and_descriptors.settings_flags
+        )
+
+        with to.struct_block(name="CSSPropertySettings"):
+            to.write_lines(settings_variable_declarations)
+            to.newline()
+            to.write(f"CSSPropertySettings() noexcept = default;")
+        to.newline()
+
+        to.write(f"KRYS_NODISCARD bool operator==(const CSSPropertySettings &, const CSSPropertySettings &) noexcept;")
+        to.newline()
+
+    def _generate_css_property_id_hpp_declarations(self, *, to: Writer):
+        to.write_block("""\
+            KRYS_NODISCARD bool IsInternal(CSSPropertyId id) noexcept;
+
+            KRYS_NODISCARD bool IsExposed(CSSPropertyId id, const CSSPropertySettings *) noexcept;
+            
+            KRYS_NODISCARD bool IsExposed(CSSPropertyId id, const CSSPropertySettings &) noexcept;
+
+            KRYS_NODISCARD CSSPropertyId FindCSSProperty(CSSOMStringView characters) noexcept;
+
+            KRYS_NODISCARD CSSOMStringView ToString(CSSPropertyId id) noexcept;
+
+            KRYS_NODISCARD CSSPropertyId CascadeAliasProperty(CSSPropertyId id) noexcept;
+
+            template<CSSPropertyId First, CSSPropertyId Last>
+            struct CSSPropertiesRange
+            {
+                struct Iterator
+                {
+                    uint16 Index { static_cast<uint16>(First) };
+
+                    constexpr CSSPropertyId operator*() const noexcept
+                    {
+                      return static_cast<CSSPropertyId>(Index);
+                    }
+                    
+                    constexpr Iterator &operator++() noexcept
+                    {
+                      ++Index;
+                      return *this;
+                    }
+                    
+                    constexpr bool operator==(std::nullptr_t) const noexcept
+                    {
+                      return Index > static_cast<uint16>(Last);
+                    }
+                };
+
+                KRYS_NODISCARD constexpr static Iterator begin() noexcept
+                {
+                  return {};
+                }
+                
+                KRYS_NODISCARD constexpr static std::nullptr_t end() noexcept
+                {
+                  return nullptr;
+                }
+                
+                KRYS_NODISCARD constexpr static uint16_t size() noexcept
+                {
+                  return Last - First + 1;
+                }
+            };
+
+            using AllCSSPropertiesRange = CSSPropertiesRange<static_cast<CSSPropertyId>(FirstCSSProperty), LastShorthandProperty>;
+            KRYS_NODISCARD constexpr AllCSSPropertiesRange AllCSSProperties() noexcept
+            {
+              return {};
+            }
+
+            using AllLonghandCSSPropertiesRange = CSSPropertiesRange<static_cast<CSSPropertyId>(FirstCSSProperty), LastLogicalGroupProperty>;
+            KRYS_NODISCARD constexpr AllLonghandCSSPropertiesRange AllLonghandCSSProperties() noexcept
+            {
+              return {};
+            }
+
+            KRYS_NODISCARD constexpr bool IsLonghand(CSSPropertyId property) noexcept
+            {
+                return static_cast<uint16>(property) >= FirstCSSProperty
+                    && static_cast<uint16>(property) < static_cast<uint16>(FirstShorthandProperty);
+            }
+
+            KRYS_NODISCARD constexpr bool IsShorthand(CSSPropertyId property) noexcept
+            {
+                return static_cast<uint16>(property) >= static_cast<uint16>(FirstShorthandProperty)
+                    && static_cast<uint16>(property) <= static_cast<uint16>(LastShorthandProperty);
+            }
+
+            KRYS_NODISCARD constexpr bool IsLogicalPropertyGroupProperty(CSSPropertyId property) noexcept
+            {
+                return static_cast<uint16>(property) >= static_cast<uint16>(FirstLogicalGroupPhysicalProperty)
+                    && static_cast<uint16>(property) <= static_cast<uint16>(LastLogicalGroupLogicalProperty);
+            }
+
+            KRYS_NODISCARD constexpr bool IsLogicalPropertyGroupPhysicalProperty(CSSPropertyId property) noexcept
+            {
+                return static_cast<uint16>(property) >= static_cast<uint16>(FirstLogicalGroupPhysicalProperty)
+                    && static_cast<uint16>(property) <= static_cast<uint16>(LastLogicalGroupPhysicalProperty);
+            }
+
+            KRYS_NODISCARD constexpr bool IsLogicalPropertyGroupLogicalProperty(CSSPropertyId property) noexcept
+            {
+                return static_cast<uint16>(property) >= static_cast<uint16>(FirstLogicalGroupLogicalProperty)
+                    && static_cast<uint16>(property) <= static_cast<uint16>(LastLogicalGroupLogicalProperty);
+            }""")
+
+    # endregion
+
+    def _generate_css_property_id_gperf(self):
+        with open("CSSPropertyId.gperf", "w") as output_file:
+            writer = Writer(output_file)
+
+            self._generate_gperf_prelude(to=writer)
+            self._generate_gperf_declarations(to=writer)
+            self._generate_gperf_keywords(to=writer)
+
+            writer._indentation_level += 1
+
+            self._generate_lookup_functions(to=writer)
+
+            self.generation_context.generate_property_id_switch_function_bool(
+                to=writer,
+                signature="bool IsInternal(CSSPropertyId id) noexcept",
+                iterable=(p for p in self.properties_and_descriptors.all_unique if p.codegen_properties.internal_only),
+            )
+
+            self._generate_is_exposed_functions(to=writer)
+            self._generate_is_inherited_property(to=writer)
+
+            self.generation_context.generate_property_id_switch_function(
+                to=writer,
+                signature="CSSPropertyId CascadeAliasProperty(CSSPropertyId id) noexcept",
+                iterable=(
+                    p
+                    for p in self.properties_and_descriptors.style_properties.all
+                    if p.codegen_properties.cascade_alias
+                ),
+                mapping=lambda p: f"return {p.codegen_properties.cascade_alias.id};",
+                default="return id;",
+            )
+
+            self.generation_context.generate_property_id_switch_function(
+                to=writer,
+                signature="SmallList<CSSOMString> CSSProperty::AliasesForProperty(CSSPropertyId id) noexcept",
+                iterable=(
+                    p for p in self.properties_and_descriptors.style_properties.all if p.codegen_properties.aliases
+                ),
+                mapping=lambda p: f"return {{ {', '.join(f'u8\"{alias}\"' for alias in p.codegen_properties.aliases)} }};",
+                default="return {};",
+            )
+
+            physical_properties = []
+            for _, property_group in sorted(
+                self.generation_context.properties_and_descriptors.style_properties.logical_property_groups.items(),
+                key=lambda x: x[0],
+            ):
+                kind = property_group["kind"]
+                destinations = LogicalPropertyGroup.logical_property_group_resolvers["physical"][kind]
+                for property in [property_group["physical"][a_destination] for a_destination in destinations]:
+                    physical_properties.append(property)
+
+            self.generation_context.generate_property_id_switch_function(
+                to=writer,
+                signature="char32 CSSProperty::ListValuedPropertySeparator(CSSPropertyId id) noexcept",
+                iterable=(
+                    p for p in self.properties_and_descriptors.style_properties.all if p.codegen_properties.separator
+                ),
+                mapping=lambda p: f"return '{ p.codegen_properties.separator[0] }';",
+                default="break;",
+                epilogue="return '\\0';",
+            )
+
+            self.generation_context.generate_property_id_switch_function_bool(
+                to=writer,
+                signature="bool CSSProperty::AllowsNumberOrIntegerInput(CSSPropertyId id) noexcept",
+                iterable=(
+                    p
+                    for p in self.properties_and_descriptors.style_properties.all
+                    if self._property_matches_number_or_integer(p)
+                ),
+            )
+
+            self.generation_context.generate_property_id_switch_function_bool(
+                to=writer,
+                signature="bool CSSProperty::DisablesNativeAppearance(CSSPropertyId id) noexcept",
+                iterable=(
+                    p
+                    for p in self.properties_and_descriptors.style_properties.all
+                    if p.codegen_properties.disables_native_appearance
+                ),
+            )
+
+            for group_name, property_group in sorted(
+                self.generation_context.properties_and_descriptors.style_properties.logical_property_groups.items(),
+                key=lambda x: x[0],
+            ):
+                properties = set()
+                for kind in ["logical", "physical"]:
+                    for property in property_group[kind].values():
+                        properties.add(property)
+                        if (
+                            property
+                            in self.generation_context.properties_and_descriptors.style_properties.shorthand_by_longhand
+                        ):
+                            properties.add(
+                                self.generation_context.properties_and_descriptors.style_properties.shorthand_by_longhand[
+                                    property
+                                ]
+                            )
+
+                group_id = PropertyName.convert_name_to_id(group_name)
+                self.generation_context.generate_property_id_switch_function_bool(
+                    to=writer,
+                    signature=f"bool CSSProperty::Is{group_id}Property(CSSPropertyId id) noexcept",
+                    iterable=sorted(properties, key=lambda x: x.name),
+                )
+
+            self.generation_context.generate_property_id_switch_function_bool(
+                to=writer,
+                signature="bool CSSProperty::IsInLogicalPropertyGroup(CSSPropertyId id) noexcept",
+                iterable=self.properties_and_descriptors.style_properties.all_in_logical_property_group,
+            )
+
+            self._generate_are_in_same_logical_property_group_with_different_mappings_logic(to=writer)
+
+            self._generate_physical_logical_conversion_function(
+                to=writer,
+                signature="CSSPropertyId CSSProperty::ResolveDirectionAwareProperty(CSSPropertyId id, WritingMode writingMode) noexcept",
+                source="logical",
+                destination="physical",
+                resolver_enum_prefix="LogicalBox",
+            )
+
+            self._generate_physical_logical_conversion_function(
+                to=writer,
+                signature="CSSPropertyId CSSProperty::UnresolvePhysicalProperty(CSSPropertyId id, WritingMode writingMode) noexcept",
+                source="physical",
+                destination="logical",
+                resolver_enum_prefix="Box",
+            )
+
+            self.generation_context.generate_property_id_switch_function_bool(
+                to=writer,
+                signature="bool CSSProperty::IsDescriptorOnly(CSSPropertyId id) noexcept",
+                iterable=self.properties_and_descriptors.all_descriptor_only,
+            )
+
+            self.generation_context.generate_property_id_switch_function_bool(
+                to=writer,
+                signature="bool CSSProperty::AcceptsQuirkyColor(CSSPropertyId id) noexcept",
+                iterable=(
+                    p
+                    for p in self.properties_and_descriptors.style_properties.all
+                    if p.codegen_properties.accepts_quirky_color
+                ),
+            )
+
+            self.generation_context.generate_property_id_switch_function_bool(
+                to=writer,
+                signature="bool CSSProperty::AcceptsQuirkyLength(CSSPropertyId id) noexcept",
+                iterable=(
+                    p
+                    for p in self.properties_and_descriptors.style_properties.all
+                    if p.codegen_properties.accepts_quirky_length
+                ),
+            )
+
+            self.generation_context.generate_property_id_switch_function_bool(
+                to=writer,
+                signature="bool CSSProperty::AcceptsQuirkyAngle(CSSPropertyId id) noexcept",
+                iterable=(
+                    p
+                    for p in self.properties_and_descriptors.style_properties.all
+                    if p.codegen_properties.accepts_quirky_angle
+                ),
+            )
+
+            # TODO: Re-enable this once we support animation properties.
+            # self._generate_animation_property_functions(to=writer)
+            # TODO: Re-enable this once we support global settings.
+            # self._generate_css_property_settings_constructor(to=writer)
+            self._generate_css_property_settings_operator_equal(to=writer)
+            self._generate_valid_keywords_for_property(to=writer)
+
+            writer.write("}")  # closes namespace Krys::HTML
+
+    def _run_gperf(self):
+        """Runs gperf on the generated CSSPropertyId.gperf file to produce CSSPropertyId.cpp."""
+
         if not self.generation_context.gperf_executable:
             return
 
@@ -7253,65 +7707,59 @@ class GenerateCSSPropertyNames:
                 "-n",
                 "-s",
                 "2",
-                "CSSPropertyNames.gperf",
-                "--output-file=CSSPropertyNames.cpp",
+                "CSSPropertyId.gperf",
+                "--output-file=CSSPropertyId.cpp",
             ]
         )
         if gperf_result_code != 0:
-            raise Exception(
-                f"Error when generating CSSPropertyNames.cpp from CSSPropertyNames.gperf: {gperf_result_code}"
-            )
+            raise Exception(f"Error when generating CSSPropertyId.cpp from CSSPropertyId.gperf: {gperf_result_code}")
 
-    # MARK: - Helper generator functions for CSSPropertyNames.h
+        # move the generated file to the correct output path (made generating it easier)
+        shutil.move("CSSPropertyId.cpp", output_cpp_path("CSS/Properties/Enums/CSSPropertyId.cpp"))
+        if not self.generation_context.verbose:
+            os.remove("CSSPropertyId.gperf")
 
-    def _generate_css_property_names_gperf_prelude(self, *, to: Writer):
-        to.write("%{")
-
-        to.write_cpp_prelude(
-            for_header="CSSPropertyNames.hpp",
-            generator_name=GENERATOR_NAME,
-            headers=[
-                "BoxSides.hpp",
-                "CSSParserContext.hpp",
-                "CSSProperty.hpp",
-                "CSSValueKeywords.hpp",
-                "Krystal.Lib/String/String.hpp",
-            ],
-        )
-
-        to.write_block("""
-            // Older versions of gperf like to use the `register` keyword.
-            #define register
-        """)
-
-        with to.namespace(namespace="Krys::HTML"):
-            all_computed_property_ids = (
-                f"{property.id}," for property in self.properties_and_descriptors.style_properties.all_computed
-            )
-
-            all_property_name_strings = quote_iterable(
-                (f"{property.name}" for property in self.properties_and_descriptors.all_unique), suffix="_s,"
+    def _generate_gperf_prelude(self, *, to: Writer):
+        with to.block(block_start="%{", block_end="%}", indent=False):
+            to.cpp_prelude(
+                for_header="Krystal.HTML/CSS/Properties/Enums/CSSPropertyId.hpp",
+                generator_name=GENERATOR_NAME,
+                headers=[
+                    "Krystal.HTML/CSS/Parser/CSSParserContext.hpp",
+                    "Krystal.HTML/CSS/Properties/CSSProperty.hpp",
+                    "Krystal.HTML/CSS/Values/Enums/CSSValueId.hpp",
+                    "Krystal.Lib/String/String.hpp",
+                    "Krystal.Lib/Types/SmallList.hpp",
+                ],
             )
 
             to.write_block("""\
-                static_assert(CSSPropertyIdEnumValueCount <= (std::numeric_limits<uint16>::max() + 1), "CSSPropertyId should fit into uint16.");
+                // Older versions of gperf like to use the `register` keyword.
+                #define register
             """)
 
-            to.write(
-                f"const Array<CSSPropertyId, {count_iterable(self.properties_and_descriptors.style_properties.all_computed)}> ComputedPropertyIds {{"
-            )
+            to.write("namespace Krys::HTML")
+            to.write("{")
             with to.indent():
-                to.write_lines(all_computed_property_ids)
-            to.write("};")
-            to.newline()
+                to.write_block("""\
+                    static_assert(CSSPropertyIdEnumValueCount <= (std::numeric_limits<uint16>::max() + 1), "CSSPropertyId should fit into uint16.");
+                """)
 
-            to.write("constexpr ASCIILiteral PropertyNameStrings[NumCSSProperties] = {")
-            with to.indent():
-                to.write_lines(all_property_name_strings)
-            to.write("};")
-            to.newline()
+                to.write(
+                    f"const Array<CSSPropertyId, {len(self.properties_and_descriptors.style_properties.all_computed)}> ComputedPropertyIds {{"
+                )
+                with to.indent():
+                    to.write_lines(
+                        f"{property.id}," for property in self.properties_and_descriptors.style_properties.all_computed
+                    )
+                to.write("};")
+                to.newline()
 
-        to.write("%}")
+                to.write("constexpr CSSOMStringView PropertyNameStrings[NumCSSProperties] = {")
+                with to.indent():
+                    to.write_lines(f'u8"{property.name}"' for property in self.properties_and_descriptors.all_unique)
+                to.write("};")
+                to.newline()
 
     def _generate_gperf_declarations(self, *, to: Writer):
         to.write_block("""\
@@ -7319,7 +7767,7 @@ class GenerateCSSPropertyNames:
             struct CSSPropertyHashTableEntry
             {
                 const char* name;
-                uint16_t id;
+                uint16 id;
             };
             %language=C++
             %readonly-tables
@@ -7327,8 +7775,7 @@ class GenerateCSSPropertyNames:
             %7bit
             %compare-strncmp
             %define class-name CSSPropertyNamesHash
-            %enum
-            """)
+            %enum""")
 
     def _generate_gperf_keywords(self, *, to: Writer):
         # Use a set to automatically deduplicate entries that would cause gperf hash collisions.
@@ -7337,12 +7784,12 @@ class GenerateCSSPropertyNames:
 
         # Add unique property names.
         for property in self.properties_and_descriptors.all_unique:
-            all_entries_set.add(f"{property.name}, {property.id}")
+            all_entries_set.add(f"{property.name}, static_cast<uint16>({property.id})")
 
         # Add aliases.
         for property in self.properties_and_descriptors.all_properties_and_descriptors:
             for alias in property.aliases:
-                all_entries_set.add(f"{alias}, {property.id}")
+                all_entries_set.add(f"{alias}, static_cast<uint16>({property.id})")
 
         # Sort for consistent output.
         all_property_names_and_aliases_with_ids = sorted(all_entries_set)
@@ -7352,68 +7799,30 @@ class GenerateCSSPropertyNames:
         to.write("%%")
 
     def _generate_lookup_functions(self, *, to: Writer):
-        to.write_block("""
-            KRYS_NODISCARD CSSPropertyId FindCSSProperty(const char* characters, unsigned length) noexcept
+        to.write_block("""\
+            CSSPropertyId FindCSSProperty(CSSOMStringView characters) noexcept
             {
-                auto* value = CSSPropertyNamesHash::in_word_set(characters, length);
-                return value ? static_cast<CSSPropertyId>(value->id) : CSSPropertyId::Invalid;
+              auto* value = CSSPropertyNamesHash::in_word_set(reinterpret_cast<const char*>(characters.data()), characters.length());
+              return value ? static_cast<CSSPropertyId>(value->id) : CSSPropertyId::Invalid;
             }
 
-            KRYS_NODISCARD ASCIILiteral NameLiteral(CSSPropertyId id) noexcept
+            CSSOMStringView ToString(CSSPropertyId id) noexcept
             {
-                if (id < firstCSSProperty)
-                {
-                    return { };
-                }
+              auto value = static_cast<uint16>(id);
+              if (value < FirstCSSProperty)
+              {
+                return {};
+              }
 
-                unsigned index = id - firstCSSProperty;
-                if (index >= numCSSProperties)
-                {
-                    return { };
-                }
+              size_t index = value - FirstCSSProperty;
+              if (index >= NumCSSProperties)
+              {
+                return {};
+              }
 
-                return PropertyNameStrings[index];
+              return PropertyNameStrings[index];
             }
-
-            KRYS_NODISCARD const CSSOMStringAtom& NameString(CSSPropertyId id) noexcept
-            {
-                if (id < firstCSSProperty)
-                    return CSSOMStringAtom::Null();
-                unsigned index = id - firstCSSProperty;
-                if (index >= numCSSProperties)
-                    return CSSOMStringAtom::Null();
-
-                static NeverDestroyed<std::array<AtomString, numCSSProperties>> atomStrings;
-                auto& string = atomStrings.get()[index];
-                if (string.isNull())
-                    string = PropertyNameStrings[index];
-                return string;
-            }
-
-            KRYS_NODISCARD CSSOMString NameForIDL(CSSPropertyId id) noexcept
-            {
-                Latin1Character characters[maxCSSPropertyNameLength];
-                const char* nameForCSS = NameLiteral(id);
-                if (!nameForCSS)
-                {
-                    return {};
-                }
-
-                auto* propertyNamePointer = nameForCSS;
-                auto* nextCharacter = characters;
-                while (char character = *propertyNamePointer++) {
-                    if (character == '-') {
-                        char nextCharacter = *propertyNamePointer++;
-                        if (!nextCharacter)
-                            break;
-                        character = (propertyNamePointer - 2 != nameForCSS) ? toASCIIUpper(nextCharacter) : nextCharacter;
-                    }
-                    *nextCharacter++ = character;
-                }
-                return std::span<const Latin1Character> { characters, nextCharacter };
-            }
-
-            """)
+          """)
 
     def _generate_physical_logical_conversion_function(
         self, *, to: Writer, signature, source, destination, resolver_enum_prefix
@@ -7423,7 +7832,7 @@ class GenerateCSSPropertyNames:
 
         with to.function_block(signature=signature):
             with to.switch_block(expr="id"):
-                for group_name, property_group in sorted(
+                for _, property_group in sorted(
                     self.properties_and_descriptors.style_properties.logical_property_groups.items(), key=lambda x: x[0]
                 ):
                     kind = property_group["kind"]
@@ -7438,7 +7847,7 @@ class GenerateCSSPropertyNames:
 
                         with to.case_block(case=property.id):
                             to.write(
-                                f"static constexpr CSSPropertyId properties[{len(properties)}] = {{ {', '.join(properties)} }};"
+                                f"constexpr static CSSPropertyId properties[{len(properties)}] = {{ {', '.join(properties)} }};"
                             )
                             to.write(
                                 f"return properties[static_cast<size_t>(Map{kind_as_id}{source_as_id}To{destination_as_id}(writingMode, {resolver_enum}))];"
@@ -7449,75 +7858,44 @@ class GenerateCSSPropertyNames:
         to.newline()
 
     def _generate_is_exposed_functions(self, *, to: Writer):
-        self.generation_context.generate_property_id_switch_function(
-            to=to,
-            signature="KRYS_NODISCARD static bool IsExposedNotInvalidAndNotInternal(CSSPropertyId id, const CSSPropertySettings &settings) noexcept",
-            iterable=self.properties_and_descriptors.all_unique_with_settings_flag,
-            mapping=lambda p: f"return settings.{p.codegen_properties.settings_flag};",
-            default="return true;",
-        )
+        with to.namespace(namespace=""):
+            self.generation_context.generate_property_id_switch_function(
+                to=to,
+                signature="KRYS_NODISCARD bool IsExposedNotInvalidAndNotInternal(CSSPropertyId id, const CSSPropertySettings &settings) noexcept",
+                iterable=self.properties_and_descriptors.all_unique_with_settings_flag,
+                mapping=lambda p: f"return settings.{p.codegen_properties.settings_flag};",
+                default="return true;",
+            )
+            to.newline()
 
-        self.generation_context.generate_property_id_switch_function(
-            to=to,
-            signature="KRYS_NODISCARD static bool IsExposedNotInvalidAndNotInternal(CSSPropertyId id, const Settings &settings) noexcept",
-            iterable=self.properties_and_descriptors.all_unique_with_settings_flag,
-            mapping=lambda p: f"return settings.{p.codegen_properties.settings_flag}();",
-            default="return true;",
-        )
-
-        to.write_block("""\
-            KRYS_NODISCARD static bool IsExposed(CSSPropertyId id, const CSSPropertySettings* settings) noexcept
-            {
-                if (id == CSSPropertyId::Invalid || IsInternal(id))
+            to.write_block("""\
+                KRYS_NODISCARD bool IsExposed(CSSPropertyId id, const CSSPropertySettings* settings) noexcept
                 {
+                  if (id == CSSPropertyId::Invalid || IsInternal(id))
+                  {
                     return false;
-                }
+                  }
 
-                if (!settings)
-                {
+                  if (!settings)
+                  {
                     return true;
+                  }
+
+                  return IsExposedNotInvalidAndNotInternal(id, *settings);
                 }
 
-                return IsExposedNotInvalidAndNotInternal(id, *settings);
-            }
-
-            KRYS_NODISCARD static bool IsExposed(CSSPropertyId id, const CSSPropertySettings& settings) noexcept
-            {
-                if (id == CSSPropertyId::Invalid || IsInternal(id))
+                KRYS_NODISCARD bool IsExposed(CSSPropertyId id, const CSSPropertySettings& settings) noexcept
                 {
+                  if (id == CSSPropertyId::Invalid || IsInternal(id))
+                  {
                     return false;
-                }
+                  }
 
-                return IsExposedNotInvalidAndNotInternal(id, settings);
-            }
+                  return IsExposedNotInvalidAndNotInternal(id, settings);
+                }""")
+            to.newline()
 
-            KRYS_NODISCARD static bool IsExposed(CSSPropertyId id, const Settings* settings) noexcept
-            {
-                if (id == CSSPropertyId::Invalid || IsInternal(id))
-                {
-                    return false;
-                }
-
-                if (!settings)
-                {
-                    return true;
-                }
-
-                return IsExposedNotInvalidAndNotInternal(id, *settings);
-            }
-
-            KRYS_NODISCARD static bool IsExposed(CSSPropertyId id, const Settings& settings) noexcept
-            {
-                if (id == CSSPropertyId::Invalid || IsInternal(id))
-                {
-                    return false;
-                }
-
-                return IsExposedNotInvalidAndNotInternal(id, settings);
-            }
-        """)
-
-    def _generate_is_inherited_property(self, *, to):
+    def _generate_is_inherited_property(self, *, to: Writer):
         all_inherited_and_ids = (
             f'{"true " if hasattr(property, "inherited") and property.inherited else "false"}, // {property.id}'  # type: ignore
             for property in self.properties_and_descriptors.all_unique
@@ -7529,17 +7907,18 @@ class GenerateCSSPropertyNames:
             to.write(f"true , // CSSPropertyId::Custom")
             to.write_lines(all_inherited_and_ids)
         to.write("};")
+        to.newline()
 
         to.write_block("""\
             bool CSSProperty::IsInheritedProperty(CSSPropertyId id) noexcept
             {
-                assert(id < CSSPropertyIdEnumValueCount);
-                assert(id != CSSPropertyId::Invalid);
-                return IsInheritedPropertyTable[id];
-            }
-            """)
+              assert(static_cast<size_t>(id) < CSSPropertyIdEnumValueCount);
+              assert(id != CSSPropertyId::Invalid);
+              return IsInheritedPropertyTable[static_cast<size_t>(id)];
+            }""")
+        to.newline()
 
-    def _generate_are_in_same_logical_property_group_with_different_mappings_logic(self, *, to):
+    def _generate_are_in_same_logical_property_group_with_different_mappings_logic(self, *, to: Writer):
         with to.function_block(
             signature="bool CSSProperty::AreInSameLogicalPropertyGroupWithDifferentMappingLogic(CSSPropertyId id1, CSSPropertyId id2) noexcept",
         ):
@@ -7606,7 +7985,7 @@ class GenerateCSSPropertyNames:
         with to.function_block(
             signature="Span<const CSSPropertyId> CSSProperty::AllAcceleratedAnimationProperties([[maybe_unused]] const Settings &settings) noexcept",
         ):
-            to.write("static constexpr Array propertiesExcludingThreadedOnly {")
+            to.write("constexpr static Array propertiesExcludingThreadedOnly {")
             with to.indent():
                 has_threaded_acceleration = False
                 for property in self.properties_and_descriptors.style_properties.all:
@@ -7617,9 +7996,10 @@ class GenerateCSSPropertyNames:
                         continue
                     to.write(f"{property.id},")
             to.write("};")
+            to.newline()
 
             if has_threaded_acceleration:
-                to.write("static constexpr std::array propertiesIncludingThreadedOnly {")
+                to.write("constexpr static Array propertiesIncludingThreadedOnly {")
                 with to.indent():
                     for property in self.properties_and_descriptors.style_properties.all:
                         if property.codegen_properties.animation_wrapper_acceleration is None:
@@ -7632,10 +8012,9 @@ class GenerateCSSPropertyNames:
                 )
                 with to.block():
                     to.write(f"return Span<const CSSPropertyId> {{ propertiesIncludingThreadedOnly }};")
+                to.newline()
 
             to.write(f"return Span<const CSSPropertyId> {{ propertiesExcludingThreadedOnly }};")
-
-        to.newline()
 
     def _generate_css_property_settings_constructor(self, *, to: Writer):
         first_settings_initializer, *remaining_settings_initializers = [
@@ -7677,7 +8056,7 @@ class GenerateCSSPropertyNames:
                     value for value in prop.values if hasattr(value, "value_keyword_name") and value.value_keyword_name
                 ]
                 if keyword_values:
-                    array_name = f"validKeywordsFor{prop.property_name.name_for_methods}"
+                    array_name = f"ValidKeywordsFor{prop.property_name.name_for_methods}"
                     # Skip if we've already generated an array with this name (handles aliases)
                     if array_name not in seen_array_names:
                         seen_array_names.add(array_name)
@@ -7686,7 +8065,7 @@ class GenerateCSSPropertyNames:
         # Generate static arrays for each property with values
         for prop, keywordValues, array_name in properties_with_values:
             value_ids = [value.value_keyword_name.id for value in keywordValues]
-            to.write(f"constexpr static Array<CSSValueId> {array_name} {{")
+            to.write(f"constexpr static Array<CSSValueId, {len(value_ids)}uz> {array_name} {{")
             with to.indent():
                 for value_id in value_ids:
                     to.write(f"{value_id},")
@@ -7701,7 +8080,7 @@ class GenerateCSSPropertyNames:
                     value for value in prop.values if hasattr(value, "value_keyword_name") and value.value_keyword_name
                 ]
                 if keyword_values:
-                    array_name = f"validKeywordsFor{prop.property_name.name_for_methods}"
+                    array_name = f"ValidKeywordsFor{prop.property_name.name_for_methods}"
                     all_properties_with_values.append((prop, keyword_values, array_name))
 
         with to.function_block(
@@ -7728,39 +8107,41 @@ class GenerateCSSPropertyNames:
                 properties_with_settings_flags.append((prop, keyword_values))
 
         # Generate helper functions for properties with settings-flagged keywords
-        for prop, keyword_values in properties_with_settings_flags:
-            func_name = f"isKeywordValidFor{prop.property_name.name_for_methods}Values"
-            with to.function_block(
-                signature=f"KRYS_NODISCARD static bool {func_name}(CSSValueId keyword, const CSSParserContext &context) noexcept",
-            ):
-                with to.switch_block(expr="keyword"):
-                    # Group keywords by their settings_flag (or lack thereof)
-                    # Keywords without settings_flag always return true
-                    keywords_without_flag = [value for value in keyword_values if not value.settings_flag]
-                    keywords_with_flag = [value for value in keyword_values if value.settings_flag]
+        with to.namespace(namespace=""):
+            for prop, keyword_values in properties_with_settings_flags:
+                func_name = f"IsKeywordValidFor{prop.property_name.name_for_methods}Values"
+                with to.function_block(
+                    signature=f"KRYS_NODISCARD bool {func_name}(CSSValueId keyword, const CSSParserContext &context) noexcept",
+                ):
+                    with to.switch_block(expr="keyword"):
+                        # Group keywords by their settings_flag (or lack thereof)
+                        # Keywords without settings_flag always return true
+                        keywords_without_flag = [value for value in keyword_values if not value.settings_flag]
+                        keywords_with_flag = [value for value in keyword_values if value.settings_flag]
 
-                    if keywords_without_flag:
-                        with to.multi_case_block(
-                            cases=[value.value_keyword_name.id for value in keywords_without_flag]
-                        ):
-                            to.write("return true;")
+                        if keywords_without_flag:
+                            with to.multi_case_block(
+                                cases=[value.value_keyword_name.id for value in keywords_without_flag]
+                            ):
+                                to.write("return true;")
 
-                    # Group keywords by their settings_flag for efficient switch generation
-                    flag_to_keywords = collections.defaultdict(list)
-                    for value in keywords_with_flag:
-                        flag_to_keywords[value.settings_flag].append(value)
+                        # Group keywords by their settings_flag for efficient switch generation
+                        flag_to_keywords = collections.defaultdict(list)
+                        for value in keywords_with_flag:
+                            flag_to_keywords[value.settings_flag].append(value)
 
-                    for flag, keywordValues in flag_to_keywords.items():
-                        with to.multi_case_block(cases=keywordValues):
-                            # Check if this is a function call (e.g., DeprecatedGlobalSettings::attachmentElementEnabled())
-                            if "::" in flag or "(" in flag:
-                                to.write(f"return {flag};")
-                            else:
-                                to.write(f"return context.{flag};")
+                        for flag, keywordValues in flag_to_keywords.items():
+                            with to.multi_case_block(cases=[value.value_keyword_name.id for value in keywordValues]):
+                                # Check if this is a function call (e.g., DeprecatedGlobalSettings::attachmentElementEnabled())
+                                if "::" in flag or "(" in flag:
+                                    to.write(f"return {flag};")
+                                else:
+                                    to.write(f"return context.{flag};")
 
-                    with to.default_case_block():
-                        to.write("return false;")
-            to.newline()
+                        with to.default_case_block():
+                            to.write("return false;")
+                to.newline()
+        to.newline()
 
         # Generate the main IsKeywordValidForPropertyValues switch function
         with to.function_block(
@@ -7768,8 +8149,7 @@ class GenerateCSSPropertyNames:
         ):
             with to.switch_block(expr="id"):
                 for prop, keyword_values, array_name in all_properties_with_values:
-                    to.write(f"case {prop.id}:")
-                    with to.indent():
+                    with to.case_block(case=prop.id):
                         # Check if this property has any keywords with settings flags
                         has_settings_flags = any(value.settings_flag for value in keyword_values)
                         if has_settings_flags:
@@ -7782,7 +8162,6 @@ class GenerateCSSPropertyNames:
 
                 with to.default_case_block():
                     to.write("return false;")
-        to.newline()
 
     def _term_matches_number_or_integer(self, term):
         if isinstance(term, MatchOneTerm):
@@ -7838,535 +8217,543 @@ class GenerateCSSPropertyNames:
             return "settings.ThreadedScrollDrivenAnimationsEnabled() || settings.ThreadedTimeBasedAnimationsEnabled()"
         return "true"
 
-    def generate_css_property_names_gperf(self):
-        with open("CSSPropertyNames.gperf", "w") as output_file:
-            writer = Writer(output_file)
 
-            self._generate_css_property_names_gperf_prelude(to=writer)
+class GenerateCSSPropertyParsing:
+    """Generates `CSSPropertyParsing.hpp` and `CSSPropertyParsing.cpp`"""
 
-            self._generate_gperf_declarations(to=writer)
-
-            self._generate_gperf_keywords(to=writer)
-
-            self._generate_lookup_functions(to=writer)
-
-            self.generation_context.generate_property_id_switch_function_bool(
-                to=writer,
-                signature="bool IsInternal(CSSPropertyID id) noexcept",
-                iterable=(p for p in self.properties_and_descriptors.all_unique if p.codegen_properties.internal_only),
-            )
-
-            self._generate_is_exposed_functions(to=writer)
-
-            self._generate_is_inherited_property(to=writer)
-
-            self.generation_context.generate_property_id_switch_function(
-                to=writer,
-                signature="CSSPropertyId CascadeAliasProperty(CSSPropertyId id) noexcept",
-                iterable=(
-                    p
-                    for p in self.properties_and_descriptors.style_properties.all
-                    if p.codegen_properties.cascade_alias
-                ),
-                mapping=lambda p: f"return {p.codegen_properties.cascade_alias.id};",
-                default="return id;",
-            )
-
-            self.generation_context.generate_property_id_switch_function(
-                to=writer,
-                signature="SmallList<CSSOMString> CSSProperty::AliasesForProperty(CSSPropertyId id) noexcept",
-                iterable=(
-                    p for p in self.properties_and_descriptors.style_properties.all if p.codegen_properties.aliases
-                ),
-                mapping=lambda p: f"return {{ {', '.join(quote_iterable(p.codegen_properties.aliases, suffix='_s'))} }};",
-                default="return { };",
-            )
-
-            physical_properties = []
-            for _, property_group in sorted(
-                self.generation_context.properties_and_descriptors.style_properties.logical_property_groups.items(),
-                key=lambda x: x[0],
-            ):
-                kind = property_group["kind"]
-                destinations = LogicalPropertyGroup.logical_property_group_resolvers["physical"][kind]
-                for property in [property_group["physical"][a_destination] for a_destination in destinations]:
-                    physical_properties.append(property)
-
-            self.generation_context.generate_property_id_switch_function(
-                to=writer,
-                signature="char32 CSSProperty::ListValuedPropertySeparator(CSSPropertyId id) noexcept",
-                iterable=(
-                    p for p in self.properties_and_descriptors.style_properties.all if p.codegen_properties.separator
-                ),
-                mapping=lambda p: f"return '{ p.codegen_properties.separator[0] }';",
-                default="break;",
-                epilogue="return '\\0';",
-            )
-
-            self.generation_context.generate_property_id_switch_function_bool(
-                to=writer,
-                signature="bool CSSProperty::AllowsNumberOrIntegerInput(CSSPropertyID id) noexcept",
-                iterable=(
-                    p
-                    for p in self.properties_and_descriptors.style_properties.all
-                    if self._property_matches_number_or_integer(p)
-                ),
-            )
-
-            self.generation_context.generate_property_id_switch_function_bool(
-                to=writer,
-                signature="bool CSSProperty::DisablesNativeAppearance(CSSPropertyID id) noexcept",
-                iterable=(
-                    p
-                    for p in self.properties_and_descriptors.style_properties.all
-                    if p.codegen_properties.disables_native_appearance
-                ),
-            )
-
-            for group_name, property_group in sorted(
-                self.generation_context.properties_and_descriptors.style_properties.logical_property_groups.items(),
-                key=lambda x: x[0],
-            ):
-                properties = set()
-                for kind in ["logical", "physical"]:
-                    for property in property_group[kind].values():
-                        properties.add(property)
-                        if (
-                            property
-                            in self.generation_context.properties_and_descriptors.style_properties.shorthand_by_longhand
-                        ):
-                            properties.add(
-                                self.generation_context.properties_and_descriptors.style_properties.shorthand_by_longhand[
-                                    property
-                                ]
-                            )
-
-                group_id = PropertyName.convert_name_to_id(group_name)
-                self.generation_context.generate_property_id_switch_function_bool(
-                    to=writer,
-                    signature=f"bool CSSProperty::Is{group_id}Property(CSSPropertyID id) noexcept",
-                    iterable=sorted(properties, key=lambda x: x.name),
-                )
-
-            self.generation_context.generate_property_id_switch_function_bool(
-                to=writer,
-                signature="bool CSSProperty::isInLogicalPropertyGroup(CSSPropertyID id) noexcept",
-                iterable=self.properties_and_descriptors.style_properties.all_in_logical_property_group,
-            )
-
-            self._generate_are_in_same_logical_property_group_with_different_mappings_logic(to=writer)
-
-            self._generate_physical_logical_conversion_function(
-                to=writer,
-                signature="CSSPropertyID CSSProperty::resolveDirectionAwareProperty(CSSPropertyID id, WritingMode writingMode)",
-                source="logical",
-                destination="physical",
-                resolver_enum_prefix="LogicalBox",
-            )
-
-            self._generate_physical_logical_conversion_function(
-                to=writer,
-                signature="CSSPropertyID CSSProperty::unresolvePhysicalProperty(CSSPropertyID id, WritingMode writingMode)",
-                source="physical",
-                destination="logical",
-                resolver_enum_prefix="Box",
-            )
-
-            self.generation_context.generate_property_id_switch_function_bool(
-                to=writer,
-                signature="bool CSSProperty::isDescriptorOnly(CSSPropertyID id)",
-                iterable=self.properties_and_descriptors.all_descriptor_only,
-            )
-
-            self.generation_context.generate_property_id_switch_function_bool(
-                to=writer,
-                signature="bool CSSProperty::acceptsQuirkyColor(CSSPropertyID id)",
-                iterable=(
-                    p
-                    for p in self.properties_and_descriptors.style_properties.all
-                    if p.codegen_properties.accepts_quirky_color
-                ),
-            )
-
-            self.generation_context.generate_property_id_switch_function_bool(
-                to=writer,
-                signature="bool CSSProperty::acceptsQuirkyLength(CSSPropertyID id)",
-                iterable=(
-                    p
-                    for p in self.properties_and_descriptors.style_properties.all
-                    if p.codegen_properties.accepts_quirky_length
-                ),
-            )
-
-            self.generation_context.generate_property_id_switch_function_bool(
-                to=writer,
-                signature="bool CSSProperty::acceptsQuirkyAngle(CSSPropertyID id)",
-                iterable=(
-                    p
-                    for p in self.properties_and_descriptors.style_properties.all
-                    if p.codegen_properties.accepts_quirky_angle
-                ),
-            )
-
-            self._generate_animation_property_functions(to=writer)
-
-            self._generate_css_property_settings_constructor(to=writer)
-
-            self._generate_css_property_settings_operator_equal(to=writer)
-
-            self._generate_valid_keywords_for_property(to=writer)
-
-    # MARK: - Helper generator functions for CSSPropertyNames.h
-
-    def _generate_css_property_names_h_property_constants(self, *, to):
-        to.write(f"enum CSSPropertyID : uint16_t {{")
-        with to.indent():
-            to.write(f"CSSPropertyInvalid = 0,")
-            to.write(f"CSSPropertyCustom = 1,")
-
-            first = GenerationContext.number_of_predefined_properties
-            count = GenerationContext.number_of_predefined_properties
-            max_length = 0
-            first_shorthand_property = None
-            last_shorthand_property = None
-            first_top_priority_property = None
-            last_top_priority_property = None
-            first_high_priority_property = None
-            last_high_priority_property = None
-            first_medium_priority_property = None
-            last_medium_priority_property = None
-            first_low_priority_property = None
-            last_low_priority_property = None
-            first_logical_group_physical_property = None
-            last_logical_group_physical_property = None
-            first_logical_group_logical_property = None
-            last_logical_group_logical_property = None
-
-            for property in self.properties_and_descriptors.all_unique:
-                if property.codegen_properties.longhands:
-                    if not first_shorthand_property:
-                        first_shorthand_property = property
-                    last_shorthand_property = property
-                elif property.codegen_properties.top_priority:
-                    if not first_top_priority_property:
-                        first_top_priority_property = property
-                    last_top_priority_property = property
-                elif property.codegen_properties.high_priority:
-                    if not first_high_priority_property:
-                        first_high_priority_property = property
-                    last_high_priority_property = property
-                elif property.codegen_properties.medium_priority:
-                    if not first_medium_priority_property:
-                        first_medium_priority_property = property
-                    last_medium_priority_property = property
-                elif not property.codegen_properties.logical_property_group:
-                    if not first_low_priority_property:
-                        first_low_priority_property = property
-                    last_low_priority_property = property
-                elif property.codegen_properties.logical_property_group.logic == "physical":
-                    if not first_logical_group_physical_property:
-                        first_logical_group_physical_property = property
-                    last_logical_group_physical_property = property
-                elif property.codegen_properties.logical_property_group.logic == "logical":
-                    if not first_logical_group_logical_property:
-                        first_logical_group_logical_property = property
-                    last_logical_group_logical_property = property
-                else:
-                    raise Exception(
-                        f"{property.id_without_scope} is not part of any priority bucket. {property.codegen_properties.logical_property_group}"
-                    )
-
-                to.write(f"{property.id_without_scope} = {count},")
-
-                count += 1
-                max_length = max(len(property.name), max_length)
-
-            assert first_shorthand_property is not None, "There should be at least one shorthand property."
-            assert last_shorthand_property is not None, "There should be at least one shorthand property."
-            assert first_top_priority_property is not None, "There should be at least one top priority property."
-            assert last_top_priority_property is not None, "There should be at least one top priority property."
-            assert first_high_priority_property is not None, "There should be at least one high priority property."
-            assert last_high_priority_property is not None, "There should be at least one high priority property."
-            assert first_medium_priority_property is not None, "There should be at least one medium priority property."
-            assert last_medium_priority_property is not None, "There should be at least one medium priority property."
-            assert first_low_priority_property is not None, "There should be at least one low priority property."
-            assert last_low_priority_property is not None, "There should be at least one low priority property."
-            assert (
-                first_logical_group_physical_property is not None
-            ), "There should be at least one logical group physical property."
-            assert (
-                last_logical_group_physical_property is not None
-            ), "There should be at least one logical group physical property."
-            assert (
-                first_logical_group_logical_property is not None
-            ), "There should be at least one logical group logical property."
-            assert (
-                last_logical_group_logical_property is not None
-            ), "There should be at least one logical group logical property."
-
-            num = count - first
-
-        to.write(f"}};")
-        to.newline()
-
-        to.write(f'// Enum value of the first "real" CSS property, which excludes')
-        to.write(f"// CSSPropertyInvalid and CSSPropertyCustom.")
-        to.write(f"constexpr uint16_t firstCSSProperty = {first};")
-
-        to.write(f"// Total number of enum values in the CSSPropertyID enum. If making an array")
-        to.write(f"// that can be indexed into using the enum value, use this as the size.")
-        to.write(f"constexpr uint16_t cssPropertyIDEnumValueCount = {count};")
-
-        to.write(f'// Number of "real" CSS properties. This differs from cssPropertyIDEnumValueCount,')
-        to.write(f"// as this doesn't consider CSSPropertyInvalid and CSSPropertyCustom.")
-        to.write(f"constexpr uint16_t numCSSProperties = {num};")
-
-        to.write(f"constexpr unsigned maxCSSPropertyNameLength = {max_length};")
-        to.write(f"constexpr auto firstTopPriorityProperty = {first_top_priority_property.id};")
-        to.write(f"constexpr auto lastTopPriorityProperty = {last_top_priority_property.id};")
-        to.write(f"constexpr auto firstHighPriorityProperty = {first_high_priority_property.id};")
-        to.write(f"constexpr auto lastHighPriorityProperty = {last_high_priority_property.id};")
-        to.write(f"constexpr auto firstMediumPriorityProperty = {first_medium_priority_property.id};")
-        to.write(f"constexpr auto lastMediumPriorityProperty = {last_medium_priority_property.id};")
-        to.write(f"constexpr auto firstLowPriorityProperty = {first_low_priority_property.id};")
-        to.write(f"constexpr auto lastLowPriorityProperty = {last_low_priority_property.id};")
-        to.write(f"constexpr auto firstLogicalGroupPhysicalProperty = {first_logical_group_physical_property.id};")
-        to.write(f"constexpr auto lastLogicalGroupPhysicalProperty = {last_logical_group_physical_property.id};")
-        to.write(f"constexpr auto firstLogicalGroupLogicalProperty = {first_logical_group_logical_property.id};")
-        to.write(f"constexpr auto lastLogicalGroupLogicalProperty = {last_logical_group_logical_property.id};")
-        to.write(f"constexpr auto firstLogicalGroupProperty = firstLogicalGroupPhysicalProperty;")
-        to.write(f"constexpr auto lastLogicalGroupProperty = lastLogicalGroupLogicalProperty;")
-        to.write(f"constexpr auto firstShorthandProperty = {first_shorthand_property.id};")
-        to.write(f"constexpr auto lastShorthandProperty = {last_shorthand_property.id};")
-        to.write(f"constexpr uint16_t numCSSPropertyLonghands = firstShorthandProperty - firstCSSProperty;")
-        to.newline()
-
-        to.write(
-            f"extern const std::array<CSSPropertyID, {count_iterable(self.properties_and_descriptors.style_properties.all_computed)}> computedPropertyIDs;"
-        )
-        to.newline()
-
-        to.write(f"template<CSSPropertyID C> struct PropertyNameConstant {{")
-        with to.indent():
-            to.write(f"static constexpr auto value = C;")
-            to.write(f"constexpr bool operator==(const PropertyNameConstant&) const = default;")
-            to.write(f"constexpr bool operator==(CSSPropertyID other) const {{ return value == other; }}")
-        to.write(f"}};")
-        to.newline()
-
-    def _generate_css_property_names_h_property_settings(self, *, to):
-        settings_variable_declarations = (
-            f"bool {flag} : 1 {{ false }};" for flag in self.properties_and_descriptors.settings_flags
-        )
-
-        to.write(f"struct CSSPropertySettings {{")
-        with to.indent():
-            to.write(f"WTF_DEPRECATED_MAKE_STRUCT_FAST_ALLOCATED(CSSPropertySettings);")
-            to.newline()
-
-            to.write_lines(settings_variable_declarations)
-            to.newline()
-
-            to.write(f"CSSPropertySettings() = default;")
-            to.write(f"explicit CSSPropertySettings(const Settings&);")
-        to.write(f"}};")
-        to.newline()
-
-        to.write(f"bool operator==(const CSSPropertySettings&, const CSSPropertySettings&);")
-        to.write(f"void add(Hasher&, const CSSPropertySettings&);")
-        to.newline()
-
-    def _generate_css_property_names_h_declarations(self, *, to):
-        to.write_block("""\
-            constexpr bool isLonghand(CSSPropertyID);
-            bool isInternal(CSSPropertyID);
-            bool isExposed(CSSPropertyID, const Settings*);
-            bool isExposed(CSSPropertyID, const Settings&);
-            bool isExposed(CSSPropertyID, const CSSPropertySettings*);
-            bool isExposed(CSSPropertyID, const CSSPropertySettings&);
-
-            CSSPropertyID findCSSProperty(const char* characters, unsigned length);
-            ASCIILiteral nameLiteral(CSSPropertyID);
-            const AtomString& nameString(CSSPropertyID);
-            String nameForIDL(CSSPropertyID);
-
-            CSSPropertyID cascadeAliasProperty(CSSPropertyID);
-
-            template<CSSPropertyID first, CSSPropertyID last> struct CSSPropertiesRange {
-                struct Iterator {
-                    uint16_t index { static_cast<uint16_t>(first) };
-                    constexpr CSSPropertyID operator*() const { return static_cast<CSSPropertyID>(index); }
-                    constexpr Iterator& operator++() { ++index; return *this; }
-                    constexpr bool operator==(std::nullptr_t) const { return index > static_cast<uint16_t>(last); }
-                };
-                static constexpr Iterator begin() { return { }; }
-                static constexpr std::nullptr_t end() { return nullptr; }
-                static constexpr uint16_t size() { return last - first + 1; }
-            };
-            using AllCSSPropertiesRange = CSSPropertiesRange<static_cast<CSSPropertyID>(firstCSSProperty), lastShorthandProperty>;
-            using AllLonghandCSSPropertiesRange = CSSPropertiesRange<static_cast<CSSPropertyID>(firstCSSProperty), lastLogicalGroupProperty>;
-            constexpr AllCSSPropertiesRange allCSSProperties() { return { }; }
-            constexpr AllLonghandCSSPropertiesRange allLonghandCSSProperties() { return { }; }
-
-            constexpr bool isLonghand(CSSPropertyID property)
-            {
-                return static_cast<uint16_t>(property) >= firstCSSProperty
-                    && static_cast<uint16_t>(property) < static_cast<uint16_t>(firstShorthandProperty);
-            }
-            constexpr bool isShorthand(CSSPropertyID property)
-            {
-                return static_cast<uint16_t>(property) >= static_cast<uint16_t>(firstShorthandProperty)
-                    && static_cast<uint16_t>(property) <= static_cast<uint16_t>(lastShorthandProperty);
-            }
-
-            constexpr bool isLogicalPropertyGroupProperty(CSSPropertyID property)
-            {
-                return static_cast<uint16_t>(property) >= static_cast<uint16_t>(firstLogicalGroupPhysicalProperty)
-                    && static_cast<uint16_t>(property) <= static_cast<uint16_t>(lastLogicalGroupLogicalProperty);
-            }
-
-            constexpr bool isLogicalPropertyGroupPhysicalProperty(CSSPropertyID property)
-            {
-                return static_cast<uint16_t>(property) >= static_cast<uint16_t>(firstLogicalGroupPhysicalProperty)
-                    && static_cast<uint16_t>(property) <= static_cast<uint16_t>(lastLogicalGroupPhysicalProperty);
-            }
-
-            constexpr bool isLogicalPropertyGroupLogicalProperty(CSSPropertyID property)
-            {
-                return static_cast<uint16_t>(property) >= static_cast<uint16_t>(firstLogicalGroupLogicalProperty)
-                    && static_cast<uint16_t>(property) <= static_cast<uint16_t>(lastLogicalGroupLogicalProperty);
-            }
-            """)
-
-    def _generate_css_property_names_h_hash_traits(self, *, to: Writer):
-        with to.namespace(namespace="Krys"):
-            to.write_block("""\
-                template<> struct DefaultHash<WebCore::CSSPropertyID> : IntHash<unsigned> { };
-
-                template<> struct HashTraits<WebCore::CSSPropertyID> : GenericHashTraits<WebCore::CSSPropertyID> {
-                    static const bool emptyValueIsZero = true;
-                    static void constructDeletedValue(WebCore::CSSPropertyID& slot) { slot = static_cast<WebCore::CSSPropertyID>(std::numeric_limits<uint16_t>::max()); }
-                    static bool isDeletedValue(WebCore::CSSPropertyID value) { return static_cast<uint16_t>(value) == std::numeric_limits<uint16_t>::max(); }
-                };
-                """)
-
-    def _generate_css_property_names_h_iterator_traits(self, *, to: Writer):
-        with to.namespace(namespace="std"):
-            to.write_block("""\
-                template<> struct iterator_traits<Krys::HTML::AllCSSPropertiesRange::Iterator> { using value_type = Krys::HTML::CSSPropertyId; };
-                template<> struct iterator_traits<Krys::HTML::AllLonghandCSSPropertiesRange::Iterator> { using value_type = Krys::HTML::CSSPropertyId; };
-                """)
-
-    def generate_css_property_names_h(self):
-        with open("CSSPropertyNames.h", "w") as output_file:
-            writer = Writer(output_file)
-            writer.write_hpp_prelude(generator_name=GENERATOR_NAME, headers=["Krystal.Lib/Types/Array.hpp"])
-
-            with writer.namespace(namespace="Krys::HTML"):
-                writer.write_forward_declarations(classes=["Settings"])
-
-                self._generate_css_property_names_h_property_constants(to=writer)
-                self._generate_css_property_names_h_property_settings(to=writer)
-                self._generate_css_property_names_h_declarations(to=writer)
-
-            self._generate_css_property_names_h_hash_traits(to=writer)
-            self._generate_css_property_names_h_iterator_traits(to=writer)
-
-
-# Generates `CSSStyleProperties+PropertyNames.idl`.
-class GenerateCSSStylePropertiesPropertyNames:
     def __init__(self, generation_context: GenerationContext):
         self.generation_context = generation_context
+
+        # Create a handler for each property and add it to the `property_consumers` map.
+        self.property_consumers = {
+            property: PropertyConsumer.make(property)
+            for property in generation_context.properties_and_descriptors.all_properties_and_descriptors
+        }
+        self.shared_grammar_rule_consumers = {
+            shared_grammar_rule: SharedGrammarRuleConsumer.make(shared_grammar_rule)
+            for shared_grammar_rule in generation_context.shared_grammar_rules.all
+        }
 
     @property
     def properties_and_descriptors(self):
         return self.generation_context.properties_and_descriptors
 
-    def generate(self):
-        self.generate_css_style_declaration_property_names_idl()
+    @property
+    def shared_grammar_rules(self):
+        return self.generation_context.shared_grammar_rules
 
-    # MARK: - Helper generator functions for CSSStyleProperties+PropertyNames.idl
+    @property
+    def all_property_consumers(self):
+        return (
+            self.property_consumers[property]
+            for property in self.properties_and_descriptors.all_properties_and_descriptors
+        )
 
-    def _generate_css_style_declaration_property_names_idl_typedefs(self, *, to):
-        to.write_block("""\
-            typedef USVString CSSOMString;
-            """)
+    @property
+    def all_shared_grammar_rule_consumers(self):
+        return (
+            self.shared_grammar_rule_consumers[shared_grammar_rule]
+            for shared_grammar_rule in self.shared_grammar_rules.all
+        )
 
-    def _generate_css_style_declaration_property_names_idl_open_interface(self, *, to):
-        to.write("partial interface CSSStyleProperties {")
+    @property
+    def all_property_parsing_collections(self):
+        ParsingCollection = collections.namedtuple(
+            "ParsingCollection", ["id", "name", "noun", "supports_shorthands", "consumers"]
+        )
 
-    def _generate_css_style_declaration_property_names_idl_close_interface(self, *, to):
-        to.write("};")
-
-    @staticmethod
-    def _convert_css_property_to_idl_attribute(name: str, *, lowercase_first: bool):
-        # https://drafts.csswg.org/cssom/#css-property-to-idl-attribute
-        output = ""
-        uppercase_next = False
-
-        if lowercase_first:
-            name = name[1:]
-
-        for character in name:
-            if character == "-":
-                uppercase_next = True
-            elif uppercase_next:
-                uppercase_next = False
-                output += character.upper()
-            else:
-                output += character
-
-        return output
-
-    def _generate_css_style_declaration_property_names_idl_section(
-        self,
-        *,
-        to: Writer,
-        comment,
-        names_and_aliases_with_properties,
-        variant,
-        convert_to_idl_attribute,
-        lowercase_first: bool = False,
-    ):
-        to.write_block(comment)
-
-        for name_or_alias, property in names_and_aliases_with_properties:
-            if convert_to_idl_attribute:
-                idl_attribute_name = GenerateCSSStylePropertiesPropertyNames._convert_css_property_to_idl_attribute(
-                    name_or_alias, lowercase_first=lowercase_first
+        result: list[ParsingCollection] = []
+        for set in self.properties_and_descriptors.all_sets:
+            result += [
+                ParsingCollection(
+                    set.id,
+                    set.name,
+                    set.noun,
+                    set.supports_shorthands,
+                    list(self.property_consumers[property] for property in set.all),
                 )
-            else:
-                idl_attribute_name = name_or_alias
-
-            extended_attributes_values = [
-                f"DelegateToSharedSyntheticAttribute=propertyValueFor{variant}IDLAttribute",
-                "CallWith=PropertyName",
             ]
-            if property.codegen_properties.settings_flag:
-                extended_attributes_values += [f"EnabledBySetting={property.codegen_properties.settings_flag}"]
+        return result
 
-            to.write(
-                f"[CEReactions=Needed, {', '.join(extended_attributes_values)}] attribute [LegacyNullToEmptyString] CSSOMString {idl_attribute_name};"
+    @property
+    def all_consumers_grouped_by_kind(self):
+        class ConsumerCollection(NamedTuple):
+            description: str
+            consumers: list[PropertyConsumer | SharedGrammarRuleConsumer]
+
+        return [
+            ConsumerCollection(f"{parsing_collection.name} {parsing_collection.noun}", parsing_collection.consumers)
+            for parsing_collection in self.all_property_parsing_collections
+        ] + [ConsumerCollection(f"shared", list(self.all_shared_grammar_rule_consumers))]
+
+    def generate(self):
+        self._generate_css_property_parsing_hpp()
+        self._generate_css_property_parsing_cpp()
+
+    def _generate_css_property_parsing_hpp(self):
+        with open(output_hpp_path("Krystal.HTML/CSS/Properties/CSSPropertyParsing.hpp"), "w") as output_file:
+            writer = Writer(output_file)
+            writer.hpp_prelude(
+                generator_name=GENERATOR_NAME,
+                headers=[
+                    "Krystal.HTML/CSS/Properties/Enums/CSSPropertyId.hpp",
+                    "Krystal.HTML/CSS/Values/Enums/CSSValueId.hpp",
+                    "Krystal.Lib/Pointers/RefPtr.hpp",
+                ],
             )
 
-    def generate_css_style_declaration_property_names_idl(self):
-        with open("CSSStyleProperties+PropertyNames.idl", "w") as output_file:
+            with writer.namespace(namespace="Krys::HTML"):
+                writer.forward_declarations(
+                    classes=[
+                        "CSSTokenRange",
+                        "CSSValue",
+                    ],
+                    structs=[
+                        "CSSPropertyParserResult",
+                        "CSSPropertyParserState",
+                    ],
+                )
+
+                with writer.struct_block(name="CSSPropertyParsing"):
+                    for parsing_collection in self.all_property_parsing_collections:
+                        writer.write(
+                            f"/// @brief Parse and return a single {'longhand ' if parsing_collection.supports_shorthands else ''}{parsing_collection.name} {parsing_collection.noun}."
+                        )
+                        func_name = f"Parse{parsing_collection.id}{'Longhand' if parsing_collection.supports_shorthands else ''}"
+                        writer.write(
+                            f"KRYS_NODISCARD static RefPtr<CSSValue> {func_name}(CSSTokenRange &tokens, CSSPropertyId id, CSSPropertyParserState &state) noexcept;"
+                        )
+                        writer.newline()
+
+                        if parsing_collection.supports_shorthands:
+                            writer.write(
+                                f"/// @brief Parse a shorthand {parsing_collection.name} {parsing_collection.noun}, adding longhands to the provided result collection."
+                            )
+                            writer.write("/// @returns true on success, false on failure.")
+                            writer.write(
+                                f"KRYS_NODISCARD static bool Parse{parsing_collection.id}Shorthand(CSSTokenRange &tokens, CSSPropertyId id, CSSPropertyParserState &state, CSSPropertyParserResult &result) noexcept;"
+                            )
+                            writer.newline()
+
+                        writer.write(f"/// @brief Fast path bare-keyword support.")
+                        writer.write(
+                            f"KRYS_NODISCARD static bool IsKeywordValidFor{parsing_collection.id}(CSSPropertyId id, CSSValueId keyword, CSSPropertyParserState &state) noexcept;"
+                        )
+                        writer.write(
+                            f"KRYS_NODISCARD static bool IsKeywordFastPathEligible{parsing_collection.id}(CSSPropertyId id) noexcept;"
+                        )
+                        writer.newline()
+
+                    writer.write(f"// Direct consumers.")
+                    for description, consumers in self.all_consumers_grouped_by_kind:
+                        exported_consumers = [consumer for consumer in consumers if consumer.is_exported]
+                        if exported_consumers:
+                            writer.newline()
+                            writer.write(f"// Exported {description} consumers.")
+                            for consumer in exported_consumers:
+                                consumer.generate_export_declaration(to=writer)
+
+    def _generate_css_property_parsing_cpp(self):
+        with open(output_cpp_path("CSS/Properties/CSSPropertyParsing.cpp"), "w") as output_file:
             writer = Writer(output_file)
-            writer.write_autogenerated_heading(generator_name=GENERATOR_NAME)
+            writer.cpp_prelude(
+                generator_name=GENERATOR_NAME,
+                for_header="Krystal.HTML/CSS/Properties/CSSPropertyParsing.hpp",
+                headers=[
+                    "Krystal.HTML/CSS/Parser/CSSParserContext.hpp",
+                    "Krystal.HTML/CSS/Parser/CSSParserIdioms.hpp",
+                    "Krystal.HTML/CSS/Properties/CSSPropertyParser.hpp",
+                    "Krystal.HTML/CSS/Properties/CSSPropertyParserCustom.hpp",
+                    "Krystal.HTML/CSS/Properties/CSSPropertyParserState.hpp",
+                ],
+            )
+
+            with writer.namespace(namespace="Krys::HTML"):
+                writer.using_namespace_declarations(namespaces=["CSSPropertyParserHelpers"])
+
+                self._generate_css_property_parsing_cpp_property_parsing_functions(to=writer)
+
+                for parsing_collection in self.all_property_parsing_collections:
+                    self._generate_css_property_parsing_cpp_parse_longhand_property(
+                        to=writer, parsing_collection=parsing_collection
+                    )
+                    self._generate_css_property_parsing_cpp_parse_shorthand_property(
+                        to=writer, parsing_collection=parsing_collection
+                    )
+
+                    keyword_fast_path_eligible_property_consumers = [
+                        consumer for consumer in parsing_collection.consumers if consumer.keyword_fast_path_generator
+                    ]
+
+                    self._generate_css_property_parsing_cpp_is_keyword_valid_for_property(
+                        to=writer,
+                        parsing_collection=parsing_collection,
+                        keyword_fast_path_eligible_property_consumers=keyword_fast_path_eligible_property_consumers,
+                    )
+
+                    self._generate_css_property_parsing_cpp_is_keyword_fast_path_eligible_for_property(
+                        to=writer,
+                        parsing_collection=parsing_collection,
+                        keyword_fast_path_eligible_property_consumers=keyword_fast_path_eligible_property_consumers,
+                    )
+
+    # MARK: - Helper generator functions for CSSPropertyParsing.cpp
+
+    def _generate_css_property_parsing_cpp_is_keyword_valid_for_property(
+        self, *, to: Writer, parsing_collection, keyword_fast_path_eligible_property_consumers
+    ):
+        if not keyword_fast_path_eligible_property_consumers:
+            to.write(
+                f"bool CSSPropertyParsing::IsKeywordValidFor{parsing_collection.id}(CSSPropertyId, CSSValueId, CSSPropertyParserState&)"
+            )
+            to.write(f"{{")
+            with to.indent():
+                to.write(f"return false;")
+            to.write(f"}}")
+            to.newline()
+            return
+
+        requires_state = any(
+            property_consumer.keyword_fast_path_generator.requires_state
+            for property_consumer in keyword_fast_path_eligible_property_consumers
+        )
+
+        self.generation_context.generate_property_id_switch_function(
+            to=to,
+            signature=f"bool CSSPropertyParsing::IsKeywordValidFor{parsing_collection.id}(CSSPropertyId id, CSSValueId keyword, CSSPropertyParserState&{' state' if requires_state else ''})",
+            iterable=keyword_fast_path_eligible_property_consumers,
+            mapping=lambda property_consumer: f"return {property_consumer.keyword_fast_path_generator.generate_call_string(keyword_string='keyword', state_string='state')};",
+            default="return false;",
+            mapping_to_property=lambda property_consumer: property_consumer.property,
+        )
+
+    def _generate_css_property_parsing_cpp_is_keyword_fast_path_eligible_for_property(
+        self, *, to: Writer, parsing_collection, keyword_fast_path_eligible_property_consumers
+    ):
+        if not keyword_fast_path_eligible_property_consumers:
+            to.write(f"bool CSSPropertyParsing::IsKeywordFastPathEligible{parsing_collection.id}(CSSPropertyId)")
+            to.write(f"{{")
+            with to.indent():
+                to.write(f"return false;")
+            to.write(f"}}")
+            to.newline()
+            return
+
+        self.generation_context.generate_property_id_switch_function_bool(
+            to=to,
+            signature=f"bool CSSPropertyParsing::IsKeywordFastPathEligible{parsing_collection.id}(CSSPropertyId id)",
+            iterable=keyword_fast_path_eligible_property_consumers,
+            mapping_to_property=lambda property_consumer: property_consumer.property,
+        )
+
+    def _generate_css_property_parsing_cpp_property_parsing_functions(self, *, to: Writer):
+        # First generate definitions for all the keyword-only fast path predicate functions.
+        for property_consumer in self.all_property_consumers:
+            keyword_fast_path_generator = property_consumer.keyword_fast_path_generator
+            if not keyword_fast_path_generator:
+                continue
+            keyword_fast_path_generator.generate_definition(to=to)
+
+        # Then all the non-exported consume functions (these will be static functions).
+        for property_consumer in self.all_property_consumers:
+            if not property_consumer.property.codegen_properties.parser_exported:
+                property_consumer.generate_definition(to=to)
+
+        # Then all the exported consume functions (these will be static members of the CSSPropertyParsing struct).
+        for property_consumer in self.all_property_consumers:
+            if property_consumer.property.codegen_properties.parser_exported:
+                property_consumer.generate_definition(to=to)
+
+        # And finally all the exported shared grammar rule consumers (these will be static members of the CSSPropertyParsing struct).
+        for shared_grammar_rule_consumer in self.all_shared_grammar_rule_consumers:
+            shared_grammar_rule_consumer.generate_definition(to=to)
+
+    def _generate_css_property_parsing_cpp_parse_longhand_property(self, *, to: Writer, parsing_collection):
+        to.write(
+            f"RefPtr<CSSValue> CSSPropertyParsing::Parse{parsing_collection.id}{'Longhand' if parsing_collection.supports_shorthands else ''}(CSSTokenRange &range, CSSPropertyId id, CSSPropertyParserState &state)"
+        )
+
+        to.write(f"{{")
+        with to.indent():
+            to.write(f"if (!isExposed(id, state.context.propertySettings) && !isInternal(id)) {{")
+            with to.indent():
+                to.write(
+                    f"// Allow internal properties as we use them to parse several internal-only-shorthands (e.g. background-repeat),"
+                )
+                to.write(
+                    f"// and to handle certain DOM-exposed values (e.g. -webkit-font-size-delta from execCommand('FontSizeDelta'))."
+                )
+                to.write(f"ASSERT_NOT_REACHED();")
+                to.write(f"return {{ }};")
+            to.write(f"}}")
+
+            # Build up a list of pairs of (property, return-expression-to-use-for-property).
+
+            PropertyReturnExpression = collections.namedtuple(
+                "PropertyReturnExpression", ["property", "return_expression"]
+            )
+            property_and_return_expressions = []
+
+            for consumer in parsing_collection.consumers:
+                return_expression = consumer.generate_call_string(range_string="range", state_string="state")
+
+                if return_expression is None:
+                    continue
+
+                property_and_return_expressions.append(PropertyReturnExpression(consumer.property, return_expression))
+
+            # Take the list of pairs of (value, return-expression-to-use-for-value), and
+            # group them by their 'return-expression' to avoid unnecessary duplication of
+            # return statements.
+
+            PropertiesReturnExpression = collections.namedtuple(
+                "PropertiesReturnExpression", ["properties", "return_expression"]
+            )
+
+            property_and_return_expressions_sorted_by_expression = sorted(
+                property_and_return_expressions, key=lambda x: x.return_expression
+            )
+            property_and_return_expressions_grouped_by_expression = []
+            for return_expression, group in itertools.groupby(
+                property_and_return_expressions_sorted_by_expression, lambda x: x.return_expression
+            ):
+                properties = [property_and_return_expression.property for property_and_return_expression in group]
+                property_and_return_expressions_grouped_by_expression.append(
+                    PropertiesReturnExpression(properties, return_expression)
+                )
+
+            def _sort_by_first_property(a, b):
+                return StyleProperties._sort_by_descending_priority_and_name(a.properties[0], b.properties[0])
+
+            to.write(f"switch (id) {{")
+            for properties, return_expression in sorted(
+                property_and_return_expressions_grouped_by_expression, key=functools.cmp_to_key(_sort_by_first_property)
+            ):
+                for property in properties:
+                    to.write(f"case {property.id}:")
+
+                with to.indent():
+                    to.write(f"return {return_expression};")
+
+            to.write(f"default:")
+            with to.indent():
+                to.write(f"return {{ }};")
+            to.write(f"}}")
+        to.write(f"}}")
+        to.newline()
+
+    def _generate_css_property_parsing_cpp_parse_shorthand_property(self, *, to: Writer, parsing_collection):
+        if not parsing_collection.supports_shorthands:
+            return
+        to.write(
+            f"bool CSSPropertyParsing::parse{parsing_collection.id}Shorthand(CSSParserTokenRange& range, CSSPropertyId id, CSS::PropertyParserState& state, CSS::PropertyParserResult& result)"
+        )
+
+        to.write(f"{{")
+        with to.indent():
+            to.write(f"ASSERT(isShorthand(id));")
+            to.newline()
+
+            to.write(f"switch (id) {{")
+
+            for consumer in parsing_collection.consumers:
+                if not consumer.property.codegen_properties.longhands:
+                    continue
+                if consumer.property.codegen_properties.skip_parser:
+                    continue
+
+                to.write(f"case {consumer.property.id}:")
+                with to.indent():
+                    if (
+                        consumer.property.codegen_properties.settings_flag
+                        and not consumer.property.codegen_properties.internal_only
+                    ):
+                        to.write(
+                            f"if (!state.context.propertySettings.{consumer.property.codegen_properties.settings_flag}) {{"
+                        )
+                        with to.indent():
+                            to.write(f"ASSERT_NOT_REACHED();")
+                            to.write(f"return false;")
+                        to.write(f"}}")
+
+                    if consumer.property.codegen_properties.parser_function:
+                        to.write(
+                            f"return CSS::PropertyParserCustom::{consumer.property.codegen_properties.parser_function}(range, state, {consumer.property.codegen_properties.parser_shorthand}(), result);"
+                        )
+                    elif consumer.property.codegen_properties.shorthand_parser_pattern:
+                        to.write(
+                            f"return CSS::PropertyParserCustom::consume{consumer.property.codegen_properties.shorthand_parser_pattern}Shorthand(range, state, {consumer.property.codegen_properties.parser_shorthand}(), result);"
+                        )
+                    else:
+                        raise Exception(f"Shorthand property '{consumer.property}' has unknown parsing method.")
+
+            to.write(f"default:")
+            with to.indent():
+                to.write(f"return false;")
+            to.write(f"}}")
+        to.write(f"}}")
+        to.newline()
+
+
+class GenerateCSSPropertyShorthandFunctions:
+    """Generates `CSSPropertyShorthandFunctions.hpp` and `CSSPropertyShorthandFunctions.cpp`."""
+
+    def __init__(self, generation_context: GenerationContext):
+        self.generation_context = generation_context
+
+    @property
+    def style_properties(self):
+        return self.generation_context.properties_and_descriptors.style_properties
+
+    def generate(self):
+        self._generate_style_property_shorthand_functions_hpp()
+        self._generate_style_property_shorthand_functions_cpp()
+
+    def _generate_style_property_shorthand_functions_hpp(self):
+        with open(output_hpp_path("Krystal.HTML/CSS/Properties/CSSPropertyShorthandFunctions.hpp"), "w") as output_file:
+            writer = Writer(output_file)
+            writer.hpp_prelude(
+                generator_name=GENERATOR_NAME,
+                headers=[
+                    "Krystal.HTML/CSS/Properties/Enums/CSSPropertyId.hpp",
+                    "Krystal.Lib/Core/Attributes.hpp",
+                ],
+            )
+
+            with writer.namespace(namespace="Krys::HTML"):
+                writer.forward_declarations(structs=["CSSPropertyShorthand"])
+                for property in self.style_properties.all_shorthands:
+                    writer.write(
+                        f"KRYS_NODISCARD CSSPropertyShorthand {property.id_without_prefix}Shorthand() noexcept;"
+                    )
+
+    def _generate_style_property_shorthand_functions_cpp(self):
+        with open(output_cpp_path("CSS/Properties/CSSPropertyShorthandFunctions.cpp"), "w") as output_file:
+            writer = Writer(output_file)
+            writer.cpp_prelude(
+                generator_name=GENERATOR_NAME,
+                for_header="Krystal.HTML/CSS/Properties/CSSPropertyShorthandFunctions.hpp",
+                headers=[
+                    "Krystal.HTML/CSS/Properties/CSSPropertyShorthand.hpp",
+                ],
+                system_headers=[
+                    "array",
+                ],
+            )
+
+            with writer.namespace(namespace="Krys::HTML"):
+                longhand_to_shorthands = {}
+                shorthand_to_longhand_count = {}
+
+                self._generate_style_property_shorthand_functions_accessors(
+                    to=writer,
+                    longhand_to_shorthands=longhand_to_shorthands,
+                    shorthand_to_longhand_count=shorthand_to_longhand_count,
+                )
+
+                self.generation_context.generate_property_id_switch_function(
+                    to=writer,
+                    signature="CSSPropertyShorthand ShorthandForProperty(CSSPropertyId id) noexcept",
+                    iterable=self.style_properties.all_shorthands,
+                    mapping=lambda p: f"return {p.id_without_prefix}Shorthand();",
+                    default="return {};",
+                )
+
+                self._generate_style_property_shorthand_functions_matching_shorthands_for_longhand(
+                    to=writer,
+                    longhand_to_shorthands=longhand_to_shorthands,
+                    shorthand_to_longhand_count=shorthand_to_longhand_count,
+                )
+
+    def _generate_style_property_shorthand_functions_accessors(
+        self, *, to: Writer, longhand_to_shorthands, shorthand_to_longhand_count
+    ):
+        for property in self.style_properties.all_shorthands:
+            with to.function_block(signature=f"CSSPropertyShorthand {property.id_without_prefix}Shorthand() noexcept"):
+                to.write("constexpr static CSSPropertyId properties[] = {")
+
+                with to.indent():
+                    shorthand_to_longhand_count[property] = 0
+                    assert property.codegen_properties.longhands
+                    for longhand in property.codegen_properties.longhands:
+                        assert (
+                            type(longhand) is StyleProperty
+                        ), f"Shorthand property '{property.name}' has a non-StyleProperty longhand '{longhand}'."
+                        if longhand.name == "all":
+                            for inner_property in self.style_properties.all_non_shorthands:
+                                if inner_property.name == "direction" or inner_property.name == "unicode-bidi":
+                                    continue
+                                longhand_to_shorthands.setdefault(inner_property, [])
+                                longhand_to_shorthands[inner_property].append(property)
+                                shorthand_to_longhand_count[property] += 1
+                                to.write(f"{inner_property.id},")
+                        else:
+                            longhand_to_shorthands.setdefault(longhand, [])
+                            longhand_to_shorthands[longhand].append(property)
+                            shorthand_to_longhand_count[property] += 1
+                            to.write(f"{longhand.id},")
+
+                to.write(f"}};")
+
+                to.newline()
+                to.write(f"return {{.ShorthandId = {property.id}, .LonghandProperties = properties}};")
+            to.newline()
+
+    def _generate_style_property_shorthand_functions_matching_shorthands_for_longhand(
+        self, *, to: Writer, longhand_to_shorthands, shorthand_to_longhand_count
+    ):
+        with to.function_block(
+            signature="CSSPropertyShorthandList MatchingShorthandsForLonghand(CSSPropertyId id) noexcept"
+        ):
+            with to.switch_block(expr="id"):
+                vector_to_longhands = {}
+
+                # https://drafts.csswg.org/cssom/#concept-shorthands-preferred-order
+                def preferred_order_for_shorthands(x):
+                    return (
+                        -shorthand_to_longhand_count[x],
+                        x.name.startswith("-"),
+                        not x.name.startswith("-webkit-"),
+                        x.name,
+                    )
+
+                for longhand, shorthands in sorted(list(longhand_to_shorthands.items()), key=lambda item: item[0].name):
+                    shorthand_calls = [
+                        f"{p.id_without_prefix}Shorthand()"
+                        for p in sorted(shorthands, key=preferred_order_for_shorthands)
+                    ]
+                    vector = f"CSSPropertyShorthandList {{{ ', '.join(shorthand_calls) }}}"
+                    vector_to_longhands.setdefault(vector, [])
+                    vector_to_longhands[vector].append(longhand)
+
+                for vector, longhands in sorted(list(vector_to_longhands.items()), key=lambda item: item[0]):
+                    with to.multi_case_block(cases=[longhand.id for longhand in longhands]):
+                        to.write(f"return {vector};")
+
+                with to.default_case_block():
+                    to.write("return {};")
+
+
+class GenerateCSSStylePropertiesPropertyNamesIDL:
+    """Generates `CSSStyleProperties+PropertyNames.idl`."""
+
+    def __init__(self, generation_context: GenerationContext):
+        self.generation_context = generation_context
+
+    def generate(self):
+        with open(PROJECT_BASE / "data" / "CSSStyleProperties+PropertyNames.idl", "w") as output_file:
+            writer = Writer(output_file)
+            writer.autogenerated_heading(generator_name=GENERATOR_NAME)
 
             name_or_alias_to_property = {}
-            for property in self.properties_and_descriptors.all_unique_non_internal_only:
+            for property in self.generation_context.properties_and_descriptors.all_unique_non_internal_only:
                 name_or_alias_to_property[property.name] = property
                 for alias in property.aliases:
                     name_or_alias_to_property[alias] = property
 
             names_and_aliases_with_properties = sorted(list(name_or_alias_to_property.items()), key=lambda x: x[0])
 
-            self._generate_css_style_declaration_property_names_idl_typedefs(to=writer)
-
-            self._generate_css_style_declaration_property_names_idl_open_interface(to=writer)
-
-            with writer.indent():
+            with writer.block(prologue="partial interface CSSStyleProperties", block_start="{", block_end="};"):
                 self._generate_css_style_declaration_property_names_idl_section(
                     to=writer,
                     comment="""\
@@ -8434,7 +8821,56 @@ class GenerateCSSStylePropertiesPropertyNames:
                     lowercase_first=True,
                 )
 
-            self._generate_css_style_declaration_property_names_idl_close_interface(to=writer)
+    @staticmethod
+    def _convert_css_property_to_idl_attribute(name: str, *, lowercase_first: bool):
+        # https://drafts.csswg.org/cssom/#css-property-to-idl-attribute
+        output = ""
+        uppercase_next = False
+
+        if lowercase_first:
+            name = name[1:]
+
+        for character in name:
+            if character == "-":
+                uppercase_next = True
+            elif uppercase_next:
+                uppercase_next = False
+                output += character.upper()
+            else:
+                output += character
+
+        return output
+
+    def _generate_css_style_declaration_property_names_idl_section(
+        self,
+        *,
+        to: Writer,
+        comment,
+        names_and_aliases_with_properties,
+        variant,
+        convert_to_idl_attribute,
+        lowercase_first: bool = False,
+    ):
+        to.write_block(comment)
+
+        for name_or_alias, property in names_and_aliases_with_properties:
+            if convert_to_idl_attribute:
+                idl_attribute_name = GenerateCSSStylePropertiesPropertyNamesIDL._convert_css_property_to_idl_attribute(
+                    name_or_alias, lowercase_first=lowercase_first
+                )
+            else:
+                idl_attribute_name = name_or_alias
+
+            extended_attributes_values = [
+                f"DelegateToSharedSyntheticAttribute=propertyValueFor{variant}IDLAttribute",
+                "CallWith=PropertyName",
+            ]
+            if property.codegen_properties.settings_flag:
+                extended_attributes_values += [f"EnabledBySetting={property.codegen_properties.settings_flag}"]
+
+            to.write(
+                f"[CEReactions=Needed, {', '.join(extended_attributes_values)}] attribute [LegacyNullToEmptyString] CSSOMString {idl_attribute_name};"
+            )
 
 
 # Generates `StyleBuilderGenerated.cpp`.
@@ -8646,12 +9082,12 @@ class GenerateStyleBuilderGenerated:
 
     def _generate_style_builder_generated_cpp_builder_generated_apply(self, *, to: Writer):
         to.write_block("""
-            void BuilderGenerated::applyProperty(CSSPropertyID id, BuilderState& builderState, CSSValue& value, ApplyValueType valueType)
+            void BuilderGenerated::applyProperty(CSSPropertyId id, BuilderState& builderState, CSSValue& value, ApplyValueType valueType)
             {
                 switch (id) {
-                case CSSPropertyID::CSSPropertyInvalid:
+                case CSSPropertyId::CSSPropertyInvalid:
                     break;
-                case CSSPropertyID::CSSPropertyCustom:
+                case CSSPropertyId::CSSPropertyCustom:
                     ASSERT_NOT_REACHED();
                     break;""")
 
@@ -8708,19 +9144,21 @@ class GenerateStyleBuilderGenerated:
         to.newline()
 
     def generate_style_builder_generated_cpp(self):
-        with open("StyleBuilderGenerated.cpp", "w") as output_file:
+        with open(output_cpp_path("CSS/Style/StyleBuilderGenerated.cpp"), "w") as output_file:
             writer = Writer(output_file)
-            writer.write_autogenerated_heading(generator_name=GENERATOR_NAME)
-            writer.write_includes(
+            writer.cpp_prelude(
+                generator_name=GENERATOR_NAME, for_header="Krystal.HTML/CSS/Style/StyleBuilderGenerated.hpp"
+            )
+            writer.includes(
                 headers=[
-                    "CSSPrimitiveValueMappings.h",
-                    "CSSProperty.h",
-                    "RenderStyle+GettersInlines.h",
-                    "RenderStyle+SettersInlines.h",
-                    "StyleBuilderCustom.h",
-                    "StyleBuilderState.h",
-                    "StyleComputedStyle+InitialInlines.h",
-                    "StylePropertyShorthand.h",
+                    "Krystal.HTML/CSS/Values/CSSPrimitiveValueMappings.hpp",
+                    "Krystal.HTML/CSS/Properties/CSSProperty.hpp",
+                    "Krystal.HTML/CSS/Style/RenderStyle+GettersInlines.hpp",
+                    "Krystal.HTML/CSS/Style/RenderStyle+SettersInlines.hpp",
+                    "Krystal.HTML/CSS/Style/StyleBuilderCustom.hpp",
+                    "Krystal.HTML/CSS/Style/StyleBuilderState.hpp",
+                    "Krystal.HTML/CSS/Style/StyleComputedStyle+InitialInlines.hpp",
+                    "Krystal.HTML/CSS/Properties/CSSPropertyShorthand.hpp",
                 ]
             )
 
@@ -8904,12 +9342,12 @@ class GenerateStyleExtractorGenerated:
 
     def _generate_style_extractor_generated_cpp_extractor_generated_extract_value(self, *, to: Writer):
         to.write_block("""
-            RefPtr<CSSValue> ExtractorGenerated::extractValue(ExtractorState& extractorState, CSSPropertyID id)
+            RefPtr<CSSValue> ExtractorGenerated::extractValue(ExtractorState& extractorState, CSSPropertyId id)
             {
                 switch (id) {
-                case CSSPropertyID::CSSPropertyInvalid:
+                case CSSPropertyId::CSSPropertyInvalid:
                     break;
-                case CSSPropertyID::CSSPropertyCustom:
+                case CSSPropertyId::CSSPropertyCustom:
                     ASSERT_NOT_REACHED();
                     break;""")
 
@@ -8967,12 +9405,12 @@ class GenerateStyleExtractorGenerated:
 
     def _generate_style_extractor_generated_cpp_extractor_generated_extract_serialization(self, *, to):
         to.write_block("""
-            void ExtractorGenerated::extractValueSerialization(ExtractorState& extractorState, StringBuilder& builder, const CSS::SerializationContext& context, CSSPropertyID id)
+            void ExtractorGenerated::extractValueSerialization(ExtractorState& extractorState, StringBuilder& builder, const CSS::SerializationContext& context, CSSPropertyId id)
             {
                 switch (id) {
-                case CSSPropertyID::CSSPropertyInvalid:
+                case CSSPropertyId::CSSPropertyInvalid:
                     break;
-                case CSSPropertyID::CSSPropertyCustom:
+                case CSSPropertyId::CSSPropertyCustom:
                     ASSERT_NOT_REACHED();
                     break;""")
 
@@ -9029,20 +9467,20 @@ class GenerateStyleExtractorGenerated:
         to.newline()
 
     def generate_style_extractor_generated_cpp(self):
-        with open("StyleExtractorGenerated.cpp", "w") as output_file:
+        with open(output_cpp_path("CSS/Style/StyleExtractorGenerated.cpp"), "w") as output_file:
             writer = Writer(output_file)
 
-            writer.write_cpp_prelude(
+            writer.cpp_prelude(
                 generator_name=GENERATOR_NAME,
-                for_header="StyleExtractorGenerated.h",
+                for_header="Krystal.HTML/CSS/Style/StyleExtractorGenerated.hpp",
                 headers=[
-                    "CSSPrimitiveValueMappings.h",
-                    "CSSProperty.h",
-                    "ColorSerialization.h",
-                    "RenderStyle.h",
-                    "StyleExtractorCustom.h",
-                    "StyleExtractorState.h",
-                    "StylePropertyShorthand.h",
+                    "Krystal.HTML/CSS/Values/CSSPrimitiveValueMappings.hpp",
+                    "Krystal.HTML/CSS/Properties/CSSProperty.hpp",
+                    "Krystal.HTML/CSS/Serialization/ColorSerialization.hpp",
+                    "Krystal.HTML/CSS/Style/RenderStyle.hpp",
+                    "Krystal.HTML/CSS/Style/StyleExtractorCustom.hpp",
+                    "Krystal.HTML/CSS/Style/StyleExtractorState.hpp",
+                    "Krystal.HTML/CSS/Properties/CSSPropertyShorthand.hpp",
                 ],
             )
 
@@ -9050,533 +9488,6 @@ class GenerateStyleExtractorGenerated:
                 self._generate_style_extractor_generated_cpp_extractor_functions_class(to=writer)
                 self._generate_style_extractor_generated_cpp_extractor_generated_extract_value(to=writer)
                 self._generate_style_extractor_generated_cpp_extractor_generated_extract_serialization(to=writer)
-
-
-# Generates `StylePropertyShorthandFunctions.hpp` and `StylePropertyShorthandFunctions.cpp`.
-class GenerateStylePropertyShorthandFunctions:
-    def __init__(self, generation_context: GenerationContext):
-        self.generation_context = generation_context
-
-    @property
-    def style_properties(self):
-        return self.generation_context.properties_and_descriptors.style_properties
-
-    def generate(self):
-        self.generate_style_property_shorthand_functions_h()
-        self.generate_style_property_shorthand_functions_cpp()
-
-    # MARK: - Helper generator functions for StylePropertyShorthandFunctions.h
-
-    def _generate_style_property_shorthand_functions_declarations(self, *, to):
-        # Skip non-shorthand properties (aka properties WITH longhands).
-        for property in self.style_properties.all_shorthands:
-            to.write(f"StylePropertyShorthand {property.id_without_prefix}Shorthand();")
-        to.newline()
-
-    def generate_style_property_shorthand_functions_h(self):
-        with open("StylePropertyShorthandFunctions.hpp", "w") as output_file:
-            writer = Writer(output_file)
-            writer.write_autogenerated_heading(generator_name=GENERATOR_NAME)
-            writer.write_header_pragma_once()
-            writer.write_forward_declarations(namespace="Krys::HTML", classes=["StylePropertyShorthand"])
-
-            with writer.namespace(namespace="Krys::HTML"):
-                self._generate_style_property_shorthand_functions_declarations(to=writer)
-
-    # MARK: - Helper generator functions for StylePropertyShorthandFunctions.cpp
-
-    def _generate_style_property_shorthand_functions_accessors(
-        self, *, to: Writer, longhand_to_shorthands, shorthand_to_longhand_count
-    ):
-        for property in self.style_properties.all_shorthands:
-            to.write(f"StylePropertyShorthand {property.id_without_prefix}Shorthand()")
-            to.write(f"{{")
-            with to.indent():
-                to.write(f"static const CSSPropertyID {property.id_without_prefix}Properties[] = {{")
-
-                with to.indent():
-                    shorthand_to_longhand_count[property] = 0
-                    assert (
-                        property.codegen_properties.longhands
-                    ), f"Shorthand property '{property.name}' has no longhands."
-                    for longhand in property.codegen_properties.longhands:
-                        assert (
-                            type(longhand) is StyleProperty
-                        ), f"Shorthand property '{property.name}' has a non-StyleProperty longhand '{longhand}'."
-                        if longhand.name == "all":
-                            for inner_property in self.style_properties.all_non_shorthands:
-                                if inner_property.name == "direction" or inner_property.name == "unicode-bidi":
-                                    continue
-                                longhand_to_shorthands.setdefault(inner_property, [])
-                                longhand_to_shorthands[inner_property].append(property)
-                                shorthand_to_longhand_count[property] += 1
-                                to.write(f"{inner_property.id},")
-                        else:
-                            longhand_to_shorthands.setdefault(longhand, [])
-                            longhand_to_shorthands[longhand].append(property)
-                            shorthand_to_longhand_count[property] += 1
-                            to.write(f"{longhand.id},")
-
-                to.write(f"}};")
-                to.write(
-                    f"return StylePropertyShorthand({property.id}, std::span {{ {property.id_without_prefix}Properties }});"
-                )
-            to.write(f"}}")
-            to.newline()
-
-    def _generate_style_property_shorthand_functions_matching_shorthands_for_longhand(
-        self, *, to: Writer, longhand_to_shorthands, shorthand_to_longhand_count
-    ):
-        to.write(f"StylePropertyShorthandVector matchingShorthandsForLonghand(CSSPropertyID id)")
-        to.write(f"{{")
-        with to.indent():
-            to.write(f"switch (id) {{")
-
-            vector_to_longhands = {}
-
-            # https://drafts.csswg.org/cssom/#concept-shorthands-preferred-order
-            def preferred_order_for_shorthands(x):
-                return (
-                    -shorthand_to_longhand_count[x],
-                    x.name.startswith("-"),
-                    not x.name.startswith("-webkit-"),
-                    x.name,
-                )
-
-            for longhand, shorthands in sorted(list(longhand_to_shorthands.items()), key=lambda item: item[0].name):
-                shorthand_calls = [
-                    f"{p.id_without_prefix}Shorthand()" for p in sorted(shorthands, key=preferred_order_for_shorthands)
-                ]
-                vector = f"StylePropertyShorthandVector{{{ ', '.join(shorthand_calls) }}}"
-                vector_to_longhands.setdefault(vector, [])
-                vector_to_longhands[vector].append(longhand)
-
-            for vector, longhands in sorted(list(vector_to_longhands.items()), key=lambda item: item[0]):
-                for longhand in longhands:
-                    to.write(f"case {longhand.id}:")
-                with to.indent():
-                    to.write(f"return {vector};")
-
-            to.write(f"default:")
-            with to.indent():
-                to.write(f"return {{ }};")
-            to.write(f"}}")
-        to.write(f"}}")
-        to.newline()
-
-    def generate_style_property_shorthand_functions_cpp(self):
-        with open("StylePropertyShorthandFunctions.cpp", "w") as output_file:
-            writer = Writer(output_file)
-
-            writer.write_cpp_prelude(
-                generator_name=GENERATOR_NAME,
-                for_header="StylePropertyShorthandFunctions.h",
-                headers=[
-                    "StylePropertyShorthand.h",
-                ],
-            )
-
-            with writer.namespace(namespace="Krys::HTML"):
-                longhand_to_shorthands = {}
-                shorthand_to_longhand_count = {}
-
-                self._generate_style_property_shorthand_functions_accessors(
-                    to=writer,
-                    longhand_to_shorthands=longhand_to_shorthands,
-                    shorthand_to_longhand_count=shorthand_to_longhand_count,
-                )
-
-                self.generation_context.generate_property_id_switch_function(
-                    to=writer,
-                    signature="StylePropertyShorthand shorthandForProperty(CSSPropertyID id)",
-                    iterable=self.style_properties.all_shorthands,
-                    mapping=lambda p: f"return {p.id_without_prefix}Shorthand();",
-                    default="return { };",
-                )
-
-                self._generate_style_property_shorthand_functions_matching_shorthands_for_longhand(
-                    to=writer,
-                    longhand_to_shorthands=longhand_to_shorthands,
-                    shorthand_to_longhand_count=shorthand_to_longhand_count,
-                )
-
-
-# Generates `CSSPropertyParsing.h` and `CSSPropertyParsing.cpp`.
-class GenerateCSSPropertyParsing:
-    def __init__(self, generation_context: GenerationContext):
-        self.generation_context = generation_context
-
-        # Create a handler for each property and add it to the `property_consumers` map.
-        self.property_consumers = {
-            property: PropertyConsumer.make(property)
-            for property in generation_context.properties_and_descriptors.all_properties_and_descriptors
-        }
-        self.shared_grammar_rule_consumers = {
-            shared_grammar_rule: SharedGrammarRuleConsumer.make(shared_grammar_rule)
-            for shared_grammar_rule in generation_context.shared_grammar_rules.all
-        }
-
-    def generate(self):
-        self.generate_css_property_parsing_h()
-        self.generate_css_property_parsing_cpp()
-
-    @property
-    def properties_and_descriptors(self):
-        return self.generation_context.properties_and_descriptors
-
-    @property
-    def shared_grammar_rules(self):
-        return self.generation_context.shared_grammar_rules
-
-    @property
-    def all_property_consumers(self):
-        return (
-            self.property_consumers[property]
-            for property in self.properties_and_descriptors.all_properties_and_descriptors
-        )
-
-    @property
-    def all_shared_grammar_rule_consumers(self):
-        return (
-            self.shared_grammar_rule_consumers[shared_grammar_rule]
-            for shared_grammar_rule in self.shared_grammar_rules.all
-        )
-
-    @property
-    def all_property_parsing_collections(self):
-        ParsingCollection = collections.namedtuple(
-            "ParsingCollection", ["id", "name", "noun", "supports_shorthands", "consumers"]
-        )
-
-        result = []
-        for set in self.properties_and_descriptors.all_sets:
-            result += [
-                ParsingCollection(
-                    set.id,
-                    set.name,
-                    set.noun,
-                    set.supports_shorthands,
-                    list(self.property_consumers[property] for property in set.all),
-                )
-            ]
-        return result
-
-    @property
-    def all_consumers_grouped_by_kind(self):
-        ConsumerCollection = collections.namedtuple("ConsumerCollection", ["description", "consumers"])
-
-        return [
-            ConsumerCollection(f"{parsing_collection.name} {parsing_collection.noun}", parsing_collection.consumers)
-            for parsing_collection in self.all_property_parsing_collections
-        ] + [ConsumerCollection(f"shared", list(self.all_shared_grammar_rule_consumers))]
-
-    def generate_css_property_parsing_h(self):
-        with open("CSSPropertyParsing.h", "w") as output_file:
-            writer = Writer(output_file)
-
-            writer.write_hpp_prelude(
-                generator_name=GENERATOR_NAME,
-                headers=[
-                    "Krystal.HTML/CSS/Properties/CSSPropertyNames.hpp",
-                    "Krystal.HTML/CSS/Values/CSSValueKeywords.hpp",
-                ],
-            )
-
-            with writer.namespace(namespace="Krys::HTML"):
-                writer.write_forward_declarations(
-                    classes=[
-                        "CSSTokenRange",
-                        "CSSValue",
-                    ],
-                    structs=[
-                        "CSSPropertyParserResult",
-                        "CSSPropertyParserState",
-                    ],
-                )
-
-                self._generate_css_property_parsing_h_property_parsing_declaration(to=writer)
-
-    def generate_css_property_parsing_cpp(self):
-        with open("CSSPropertyParsing.cpp", "w") as output_file:
-            writer = Writer(output_file)
-
-            writer.write_cpp_prelude(
-                generator_name=GENERATOR_NAME,
-                for_header="CSSPropertyParsing.h",
-                headers=[
-                    "CSSParserContext.h",
-                    "CSSParserIdioms.h",
-                    "CSSPropertyParser.h",
-                    "CSSPropertyParserCustom.h",
-                    "CSSPropertyParserState.h",
-                    "DeprecatedGlobalSettings.h",
-                ],
-            )
-
-            with writer.namespace(namespace="Krys::HTML"):
-                writer.write_using_namespace_declarations(namespaces=["CSSPropertyParserHelpers"])
-
-                self._generate_css_property_parsing_cpp_property_parsing_functions(to=writer)
-
-                for parsing_collection in self.all_property_parsing_collections:
-                    self._generate_css_property_parsing_cpp_parse_longhand_property(
-                        to=writer, parsing_collection=parsing_collection
-                    )
-                    self._generate_css_property_parsing_cpp_parse_shorthand_property(
-                        to=writer, parsing_collection=parsing_collection
-                    )
-
-                    keyword_fast_path_eligible_property_consumers = [
-                        consumer for consumer in parsing_collection.consumers if consumer.keyword_fast_path_generator
-                    ]
-
-                    self._generate_css_property_parsing_cpp_is_keyword_valid_for_property(
-                        to=writer,
-                        parsing_collection=parsing_collection,
-                        keyword_fast_path_eligible_property_consumers=keyword_fast_path_eligible_property_consumers,
-                    )
-
-                    self._generate_css_property_parsing_cpp_is_keyword_fast_path_eligible_for_property(
-                        to=writer,
-                        parsing_collection=parsing_collection,
-                        keyword_fast_path_eligible_property_consumers=keyword_fast_path_eligible_property_consumers,
-                    )
-
-    # MARK: - Helper generator functions for CSSPropertyParsing.h
-
-    def _generate_css_property_parsing_h_property_parsing_declaration(self, *, to):
-        to.write(f"struct CSSPropertyParsing {{")
-
-        with to.indent():
-            for parsing_collection in self.all_property_parsing_collections:
-                to.write(
-                    f"// Parse and return a single {'longhand ' if parsing_collection.supports_shorthands else ''}{parsing_collection.name} {parsing_collection.noun}."
-                )
-                to.write(
-                    f"static RefPtr<CSSValue> parse{parsing_collection.id}{'Longhand' if parsing_collection.supports_shorthands else ''}(CSSParserTokenRange&, CSSPropertyID, CSS::PropertyParserState&);"
-                )
-                if parsing_collection.supports_shorthands:
-                    to.write(
-                        f"// Parse a shorthand {parsing_collection.name} {parsing_collection.noun}, adding longhands to the provided result collection. Returns true on success, false on failure."
-                    )
-                    to.write(
-                        f"static bool parse{parsing_collection.id}Shorthand(CSSParserTokenRange&, CSSPropertyID, CSS::PropertyParserState&, CSS::PropertyParserResult&);"
-                    )
-                to.write(f"// Fast path bare-keyword support.")
-                to.write(
-                    f"static bool isKeywordValidFor{parsing_collection.id}(CSSPropertyID, CSSValueID, CSS::PropertyParserState&);"
-                )
-                to.write(f"static bool isKeywordFastPathEligible{parsing_collection.id}(CSSPropertyID);")
-                to.newline()
-
-            to.write(f"// Direct consumers.")
-
-            for description, consumers in self.all_consumers_grouped_by_kind:
-                if any(consumer.is_exported for consumer in consumers):
-                    to.newline()
-                    to.write(f"// Exported {description} consumers.")
-                    for consumer in (consumer for consumer in consumers if consumer.is_exported):
-                        consumer.generate_export_declaration(to=to)
-
-        to.write(f"}};")
-        to.newline()
-
-    # MARK: - Helper generator functions for CSSPropertyParsing.cpp
-
-    def _generate_css_property_parsing_cpp_is_keyword_valid_for_property(
-        self, *, to: Writer, parsing_collection, keyword_fast_path_eligible_property_consumers
-    ):
-        if not keyword_fast_path_eligible_property_consumers:
-            to.write(
-                f"bool CSSPropertyParsing::isKeywordValidFor{parsing_collection.id}(CSSPropertyID, CSSValueID, CSS::PropertyParserState&)"
-            )
-            to.write(f"{{")
-            with to.indent():
-                to.write(f"return false;")
-            to.write(f"}}")
-            to.newline()
-            return
-
-        requires_state = any(
-            property_consumer.keyword_fast_path_generator.requires_state
-            for property_consumer in keyword_fast_path_eligible_property_consumers
-        )
-
-        self.generation_context.generate_property_id_switch_function(
-            to=to,
-            signature=f"bool CSSPropertyParsing::isKeywordValidFor{parsing_collection.id}(CSSPropertyID id, CSSValueID keyword, CSS::PropertyParserState&{' state' if requires_state else ''})",
-            iterable=keyword_fast_path_eligible_property_consumers,
-            mapping=lambda property_consumer: f"return {property_consumer.keyword_fast_path_generator.generate_call_string(keyword_string='keyword', state_string='state')};",
-            default="return false;",
-            mapping_to_property=lambda property_consumer: property_consumer.property,
-        )
-
-    def _generate_css_property_parsing_cpp_is_keyword_fast_path_eligible_for_property(
-        self, *, to: Writer, parsing_collection, keyword_fast_path_eligible_property_consumers
-    ):
-        if not keyword_fast_path_eligible_property_consumers:
-            to.write(f"bool CSSPropertyParsing::isKeywordFastPathEligible{parsing_collection.id}(CSSPropertyID)")
-            to.write(f"{{")
-            with to.indent():
-                to.write(f"return false;")
-            to.write(f"}}")
-            to.newline()
-            return
-
-        self.generation_context.generate_property_id_switch_function_bool(
-            to=to,
-            signature=f"bool CSSPropertyParsing::isKeywordFastPathEligible{parsing_collection.id}(CSSPropertyID id)",
-            iterable=keyword_fast_path_eligible_property_consumers,
-            mapping_to_property=lambda property_consumer: property_consumer.property,
-        )
-
-    def _generate_css_property_parsing_cpp_property_parsing_functions(self, *, to: Writer):
-        # First generate definitions for all the keyword-only fast path predicate functions.
-        for property_consumer in self.all_property_consumers:
-            keyword_fast_path_generator = property_consumer.keyword_fast_path_generator
-            if not keyword_fast_path_generator:
-                continue
-            keyword_fast_path_generator.generate_definition(to=to)
-
-        # Then all the non-exported consume functions (these will be static functions).
-        for property_consumer in self.all_property_consumers:
-            if not property_consumer.property.codegen_properties.parser_exported:
-                property_consumer.generate_definition(to=to)
-
-        # Then all the exported consume functions (these will be static members of the CSSPropertyParsing struct).
-        for property_consumer in self.all_property_consumers:
-            if property_consumer.property.codegen_properties.parser_exported:
-                property_consumer.generate_definition(to=to)
-
-        # And finally all the exported shared grammar rule consumers (these will be static members of the CSSPropertyParsing struct).
-        for shared_grammar_rule_consumer in self.all_shared_grammar_rule_consumers:
-            shared_grammar_rule_consumer.generate_definition(to=to)
-
-    def _generate_css_property_parsing_cpp_parse_longhand_property(self, *, to: Writer, parsing_collection):
-        to.write(
-            f"RefPtr<CSSValue> CSSPropertyParsing::parse{parsing_collection.id}{'Longhand' if parsing_collection.supports_shorthands else ''}(CSSParserTokenRange& range, CSSPropertyID id, CSS::PropertyParserState& state)"
-        )
-
-        to.write(f"{{")
-        with to.indent():
-            to.write(f"if (!isExposed(id, state.context.propertySettings) && !isInternal(id)) {{")
-            with to.indent():
-                to.write(
-                    f"// Allow internal properties as we use them to parse several internal-only-shorthands (e.g. background-repeat),"
-                )
-                to.write(
-                    f"// and to handle certain DOM-exposed values (e.g. -webkit-font-size-delta from execCommand('FontSizeDelta'))."
-                )
-                to.write(f"ASSERT_NOT_REACHED();")
-                to.write(f"return {{ }};")
-            to.write(f"}}")
-
-            # Build up a list of pairs of (property, return-expression-to-use-for-property).
-
-            PropertyReturnExpression = collections.namedtuple(
-                "PropertyReturnExpression", ["property", "return_expression"]
-            )
-            property_and_return_expressions = []
-
-            for consumer in parsing_collection.consumers:
-                return_expression = consumer.generate_call_string(range_string="range", state_string="state")
-
-                if return_expression is None:
-                    continue
-
-                property_and_return_expressions.append(PropertyReturnExpression(consumer.property, return_expression))
-
-            # Take the list of pairs of (value, return-expression-to-use-for-value), and
-            # group them by their 'return-expression' to avoid unnecessary duplication of
-            # return statements.
-
-            PropertiesReturnExpression = collections.namedtuple(
-                "PropertiesReturnExpression", ["properties", "return_expression"]
-            )
-
-            property_and_return_expressions_sorted_by_expression = sorted(
-                property_and_return_expressions, key=lambda x: x.return_expression
-            )
-            property_and_return_expressions_grouped_by_expression = []
-            for return_expression, group in itertools.groupby(
-                property_and_return_expressions_sorted_by_expression, lambda x: x.return_expression
-            ):
-                properties = [property_and_return_expression.property for property_and_return_expression in group]
-                property_and_return_expressions_grouped_by_expression.append(
-                    PropertiesReturnExpression(properties, return_expression)
-                )
-
-            def _sort_by_first_property(a, b):
-                return StyleProperties._sort_by_descending_priority_and_name(a.properties[0], b.properties[0])
-
-            to.write(f"switch (id) {{")
-            for properties, return_expression in sorted(
-                property_and_return_expressions_grouped_by_expression, key=functools.cmp_to_key(_sort_by_first_property)
-            ):
-                for property in properties:
-                    to.write(f"case {property.id}:")
-
-                with to.indent():
-                    to.write(f"return {return_expression};")
-
-            to.write(f"default:")
-            with to.indent():
-                to.write(f"return {{ }};")
-            to.write(f"}}")
-        to.write(f"}}")
-        to.newline()
-
-    def _generate_css_property_parsing_cpp_parse_shorthand_property(self, *, to: Writer, parsing_collection):
-        if not parsing_collection.supports_shorthands:
-            return
-        to.write(
-            f"bool CSSPropertyParsing::parse{parsing_collection.id}Shorthand(CSSParserTokenRange& range, CSSPropertyID id, CSS::PropertyParserState& state, CSS::PropertyParserResult& result)"
-        )
-
-        to.write(f"{{")
-        with to.indent():
-            to.write(f"ASSERT(isShorthand(id));")
-            to.newline()
-
-            to.write(f"switch (id) {{")
-
-            for consumer in parsing_collection.consumers:
-                if not consumer.property.codegen_properties.longhands:
-                    continue
-                if consumer.property.codegen_properties.skip_parser:
-                    continue
-
-                to.write(f"case {consumer.property.id}:")
-                with to.indent():
-                    if (
-                        consumer.property.codegen_properties.settings_flag
-                        and not consumer.property.codegen_properties.internal_only
-                    ):
-                        to.write(
-                            f"if (!state.context.propertySettings.{consumer.property.codegen_properties.settings_flag}) {{"
-                        )
-                        with to.indent():
-                            to.write(f"ASSERT_NOT_REACHED();")
-                            to.write(f"return false;")
-                        to.write(f"}}")
-
-                    if consumer.property.codegen_properties.parser_function:
-                        to.write(
-                            f"return CSS::PropertyParserCustom::{consumer.property.codegen_properties.parser_function}(range, state, {consumer.property.codegen_properties.parser_shorthand}(), result);"
-                        )
-                    elif consumer.property.codegen_properties.shorthand_parser_pattern:
-                        to.write(
-                            f"return CSS::PropertyParserCustom::consume{consumer.property.codegen_properties.shorthand_parser_pattern}Shorthand(range, state, {consumer.property.codegen_properties.parser_shorthand}(), result);"
-                        )
-                    else:
-                        raise Exception(f"Shorthand property '{consumer.property}' has unknown parsing method.")
-
-            to.write(f"default:")
-            with to.indent():
-                to.write(f"return false;")
-            to.write(f"}}")
-        to.write(f"}}")
-        to.newline()
 
 
 # Generates `StyleInterpolationWrapperMap.h` and `StyleInterpolationWrapperMap.cpp`.
@@ -9597,38 +9508,35 @@ class GenerateStyleInterpolationWrapperMap:
         return self.generation_context.properties_and_descriptors.style_properties
 
     def generate_css_property_animation_wrapper_map_h(self):
-        with open("StyleInterpolationWrapperMap.h", "w") as output_file:
+        with open(output_hpp_path("Krystal.HTML/CSS/Style/StyleInterpolationWrapperMap.hpp"), "w") as output_file:
             writer = Writer(output_file)
 
-            writer.write_hpp_prelude(
+            writer.hpp_prelude(
                 generator_name=GENERATOR_NAME,
                 headers=[
-                    "CSSPropertyNames.h",
-                    "<wtf/NeverDestroyed.h>",
-                ],
-                system_headers=[
-                    "<array>",
+                    "Krystal.HTML/CSS/Properties/CSSPropertyNames.hpp",
+                    "Krystal.Lib/Types/Array.hpp",
                 ],
             )
 
             with writer.namespace(namespace="Krys::HTML"):
-                writer.write_forward_declarations(classes=["WrapperBase"])
+                writer.forward_declarations(classes=["WrapperBase"])
                 self._generate_css_property_animation_wrapper_map_h_wrapper_map_declaration(to=writer)
 
     def generate_css_property_animation_wrapper_map_cpp(self):
-        with open("StyleInterpolationWrapperMap.cpp", "w") as output_file:
+        with open(output_cpp_path("CSS/Style/StyleInterpolationWrapperMap.cpp"), "w") as output_file:
             writer = Writer(output_file)
 
-            writer.write_cpp_prelude(
+            writer.cpp_prelude(
                 generator_name=GENERATOR_NAME,
-                for_header="StyleInterpolationWrapperMap.h",
+                for_header="Krystal.HTML/CSS/Style/StyleInterpolationWrapperMap.hpp",
                 headers=[
-                    "StylePropertyShorthand.h",
+                    "Krystal.HTML/CSS/Properties/CSSPropertyShorthand.hpp",
                 ],
             )
 
             writer.write("#define STYLE_INTERPOLATION_GENERATED_INCLUDE_TRAP 1")
-            writer.write('#include "StyleInterpolationWrappers.h"')
+            writer.write('#include "Krystal.HTML/CSS/Style/StyleInterpolationWrappers.hpp"')
             writer.write("#undef STYLE_INTERPOLATION_GENERATED_INCLUDE_TRAP")
 
             with writer.namespace(namespace="Krys::HTML"):
@@ -9646,9 +9554,9 @@ class GenerateStyleInterpolationWrapperMap:
                     return map;
                 }
 
-                WrapperBase* wrapper(CSSPropertyID id)
+                WrapperBase* wrapper(CSSPropertyId id)
                 {
-                    if (id >= cssPropertyIDEnumValueCount)
+                    if (id >= CSSPropertyIdEnumValueCount)
                         return nullptr;
                     return m_wrappers[id];
                 }
@@ -9659,7 +9567,7 @@ class GenerateStyleInterpolationWrapperMap:
                 WrapperMap();
                 ~WrapperMap() = delete;
 
-                std::array<WrapperBase*, cssPropertyIDEnumValueCount> m_wrappers;
+                std::array<WrapperBase*, CSSPropertyIdEnumValueCount> m_wrappers;
             };""")
 
         to.newline()
@@ -9693,7 +9601,7 @@ class GenerateStyleInterpolationWrapperMap:
         if property.codegen_properties.animation_wrapper_requires_override_parameters is not None:
             property_wrapper_parameters = property.codegen_properties.animation_wrapper_requires_override_parameters
         else:
-            # Add CSSPropertyID
+            # Add CSSPropertyId
             property_wrapper_parameters = [property.id]
 
             # Compute style class.
@@ -9756,7 +9664,7 @@ class GenerateStyleInterpolationWrapperMap:
 
     def _generate_css_property_animation_wrapper_map_cpp_constructor(self, *, to):
         to.write_block("""\
-            static WrapperBase* makeShorthandWrapper(CSSPropertyID id, const std::array<WrapperBase*, cssPropertyIDEnumValueCount>& wrappers)
+            static WrapperBase* makeShorthandWrapper(CSSPropertyId id, const std::array<WrapperBase*, CSSPropertyIdEnumValueCount>& wrappers)
             {
                 auto shorthand = shorthandForProperty(id);
                 ASSERT(shorthand.length());
@@ -9781,8 +9689,8 @@ class GenerateStyleInterpolationWrapperMap:
             to.write(": m_wrappers {")
 
             with to.indent():
-                to.write(f"nullptr, // CSSPropertyID::CSSPropertyInvalid")
-                to.write(f"nullptr, // CSSPropertyID::CSSPropertyCustom")
+                to.write(f"nullptr, // CSSPropertyId::CSSPropertyInvalid")
+                to.write(f"nullptr, // CSSPropertyId::CSSPropertyCustom")
 
                 for property in self.properties_and_descriptors.all_unique:
                     if not property.codegen_properties.longhands:
@@ -10058,10 +9966,10 @@ class GenerateStyleComputedStyleProperties:
             to.newline()
 
     def generate_style_computed_style_properties_h(self):
-        with open("StyleComputedStyleProperties.h", "w") as output_file:
+        with open(output_hpp_path("Krystal.HTML/CSS/Style/StyleComputedStyleProperties.hpp"), "w") as output_file:
             writer = Writer(output_file)
 
-            writer.write_hpp_prelude(
+            writer.hpp_prelude(
                 generator_name=GENERATOR_NAME, headers=["Krystal.HTML/CSS/Properties/ComputedStyleBase.hpp"]
             )
             with writer.namespace(namespace="Krys::HTML"):
@@ -10385,19 +10293,20 @@ class GenerateStyleComputedStyleProperties:
                 )
 
     def generate_style_computed_style_properties_getters_inlines_h(self):
-        with open("StyleComputedStyleProperties+GettersInlines.h", "w") as output_file:
+        with open(
+            output_hpp_path("Krystal.HTML/CSS/Style/StyleComputedStyleProperties+GettersInlines.hpp"), "w"
+        ) as output_file:
             writer = Writer(output_file)
 
-            writer.write_autogenerated_heading(generator_name=GENERATOR_NAME)
-            writer.write_header_pragma_once()
+            writer.hpp_prelude(generator_name=GENERATOR_NAME)
 
             writer.write_block("""\
             #ifndef COMPUTED_STYLE_PROPERTIES_GETTERS_INLINES_INCLUDE_TRAP
-            #error "Please do not include this file anywhere except from StyleComputedStyle+GettersInlines.h."
+            #error "Please do not include this file anywhere except from StyleComputedStyle+GettersInlines.hpp."
             #endif
             """)
 
-            writer.write_includes(
+            writer.includes(
                 headers=["Krystal.HTML/CSS/Properties/StyleComputedStyleProperties+GettersCustomInlines.hpp"],
             )
 
@@ -10731,11 +10640,12 @@ class GenerateStyleComputedStyleProperties:
                 )
 
     def generate_style_computed_style_properties_setters_inlines_h(self):
-        with open("StyleComputedStyleProperties+SettersInlines.h", "w") as output_file:
+        with open(
+            output_hpp_path("Krystal.HTML/CSS/Style/StyleComputedStyleProperties+SettersInlines.hpp"), "w"
+        ) as output_file:
             writer = Writer(output_file)
 
-            writer.write_autogenerated_heading(generator_name=GENERATOR_NAME)
-            writer.write_header_pragma_once()
+            writer.hpp_prelude(generator_name=GENERATOR_NAME)
 
             writer.write_block("""\
                 #ifndef COMPUTED_STYLE_PROPERTIES_SETTERS_INLINES_INCLUDE_TRAP
@@ -10743,7 +10653,7 @@ class GenerateStyleComputedStyleProperties:
                 #endif
             """)
 
-            writer.write_includes(
+            writer.includes(
                 headers=[
                     "Krystal.HTML/CSS/Properties/StyleComputedStyleProperties+SettersCustomInlines.hpp",
                 ],
@@ -10806,20 +10716,21 @@ class GenerateStyleComputedStyleProperties:
                 )
 
     def generate_style_computed_style_properties_initial_inlines_h(self):
-        with open("StyleComputedStyleProperties+InitialInlines.h", "w") as output_file:
+        with open(
+            output_hpp_path("Krystal.HTML/CSS/Style/StyleComputedStyleProperties+InitialInlines.hpp"), "w"
+        ) as output_file:
             writer = Writer(output_file)
 
-            writer.write_autogenerated_heading(generator_name=GENERATOR_NAME)
-            writer.write_header_pragma_once()
+            writer.hpp_prelude(generator_name=GENERATOR_NAME)
 
             writer.write_block("""\
             #ifndef COMPUTED_STYLE_PROPERTIES_INITIAL_INLINES_INCLUDE_TRAP
-                #error "Please do not include this file anywhere except from StyleComputedStyle+InitialInlines.h."
+                #error "Please do not include this file anywhere except from StyleComputedStyle+InitialInlines.hpp."
             #endif
             """)
 
-            writer.write_includes(
-                system_headers=[
+            writer.includes(
+                headers=[
                     "Krystal.HTML/CSS/Properties/StyleComputedStyleProperties+InitialCustomInlines.hpp",
                 ],
             )
@@ -11010,12 +10921,10 @@ class GenerateRenderStyleProperties:
             to.newline()
 
     def generate_render_style_properties_h(self):
-        with open("RenderStyleProperties.h", "w") as output_file:
+        with open(output_hpp_path("Krystal.HTML/CSS/Style/RenderStyleProperties.hpp"), "w") as output_file:
             writer = Writer(output_file)
 
-            writer.write_hpp_prelude(
-                generator_name=GENERATOR_NAME, headers=["Krystal.HTML/CSS/Style/RenderStyleBase.hpp"]
-            )
+            writer.hpp_prelude(generator_name=GENERATOR_NAME, headers=["Krystal.HTML/CSS/Style/RenderStyleBase.hpp"])
 
             with writer.namespace(namespace="Krys::HTML"):
                 writer.write(f"class RenderStyleProperties : public RenderStyleBase {{")
@@ -11158,17 +11067,21 @@ class GenerateRenderStyleProperties:
                     )
 
     def generate_render_style_properties_getters_inlines_h(self):
-        with open("RenderStyleProperties+GettersInlines.h", "w") as output_file:
+        with open(
+            output_hpp_path("Krystal.HTML/CSS/Style/RenderStyleProperties+GettersInlines.hpp"), "w"
+        ) as output_file:
             writer = Writer(output_file)
 
-            writer.write_hpp_prelude(generator_name=GENERATOR_NAME)
+            writer.hpp_prelude(generator_name=GENERATOR_NAME)
 
             writer.write("#ifndef RENDER_STYLE_PROPERTIES_GETTERS_INLINES_INCLUDE_TRAP")
-            writer.write('#error "Please do not include this file anywhere except from RenderStyle+GettersInlines.h."')
+            writer.write(
+                '#error "Please do not include this file anywhere except from RenderStyle+GettersInlines.hpp."'
+            )
             writer.write("#endif")
             writer.newline()
 
-            writer.write_includes(
+            writer.includes(
                 headers=[
                     "Krystal/HTML/CSS/Style/RenderStyleBase+GettersInlines.hpp",
                     "Krystal/HTML/CSS/Style/StyleComputedStyle+GettersInlines.hpp",
@@ -11320,19 +11233,23 @@ class GenerateRenderStyleProperties:
                     )
 
     def generate_render_style_properties_setters_inlines_h(self):
-        with open("RenderStyleProperties+SettersInlines.h", "w") as output_file:
+        with open(
+            output_hpp_path("Krystal.HTML/CSS/Style/RenderStyleProperties+SettersInlines.hpp"), "w"
+        ) as output_file:
             writer = Writer(output_file)
-            writer.write_hpp_prelude(generator_name=GENERATOR_NAME)
+            writer.hpp_prelude(generator_name=GENERATOR_NAME)
 
             writer.write("#ifndef RENDER_STYLE_PROPERTIES_SETTERS_INLINES_INCLUDE_TRAP")
-            writer.write('#error "Please do not include this file anywhere except from RenderStyle+SettersInlines.h."')
+            writer.write(
+                '#error "Please do not include this file anywhere except from RenderStyle+SettersInlines.hpp."'
+            )
             writer.write("#endif")
             writer.newline()
 
-            writer.write_includes(
+            writer.includes(
                 headers=[
-                    "RenderStyleBase+SettersInlines.h",
-                    "StyleComputedStyle+SettersInlines.h",
+                    "Krystal.HTML/CSS/Style/RenderStyleBase+SettersInlines.hpp",
+                    "Krystal.HTML/CSS/Style/StyleComputedStyle+SettersInlines.hpp",
                 ],
             )
 
@@ -11598,14 +11515,14 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
         to.newline()
 
     def generate_style_changed_animatable_properties_generated_cpp(self):
-        with open("StyleChangedAnimatablePropertiesGenerated.cpp", "w") as output_file:
+        with open(output_cpp_path("CSS/Properties/StyleChangedAnimatablePropertiesGenerated.cpp"), "w") as output_file:
             writer = Writer(output_file)
 
-            writer.write_cpp_prelude(
+            writer.cpp_prelude(
                 generator_name=GENERATOR_NAME,
-                for_header="StyleChangedAnimatablePropertiesGenerated.h",
+                for_header="Krystal.HTML/CSS/Properties/StyleChangedAnimatablePropertiesGenerated.hpp",
                 headers=[
-                    "StyleChangedAnimatablePropertiesCustom.h",
+                    "Krystal.HTML/CSS/Properties/StyleChangedAnimatablePropertiesCustom.hpp",
                 ],
             )
             with writer.namespace(namespace="Krys::HTML"):
@@ -11613,6 +11530,3 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
 
 
 # endregion
-
-if __name__ == "__main__":
-    main()

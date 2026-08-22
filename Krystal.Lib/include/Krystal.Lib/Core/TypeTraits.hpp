@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include <cstddef>
 #include <type_traits>
 #include <utility>
 
@@ -116,4 +117,34 @@ namespace Krys
   template <bool... Bs>
   constexpr bool AllTrue =
     std::is_same<std::integer_sequence<bool, true, Bs...>, std::integer_sequence<bool, Bs..., true>>::value;
+
+  template <std::size_t>
+  struct SizedUnsignedTrait;
+
+  template <>
+  struct SizedUnsignedTrait<1uz>
+  {
+    using type = uint8_t;
+  };
+
+  template <>
+  struct SizedUnsignedTrait<2uz>
+  {
+    using type = uint16_t;
+  };
+
+  template <>
+  struct SizedUnsignedTrait<4uz>
+  {
+    using type = uint32_t;
+  };
+
+  template <>
+  struct SizedUnsignedTrait<8uz>
+  {
+    using type = uint64_t;
+  };
+
+  template <std::size_t N>
+  using sized_unsigned_t = SizedUnsignedTrait<N>::type;
 }

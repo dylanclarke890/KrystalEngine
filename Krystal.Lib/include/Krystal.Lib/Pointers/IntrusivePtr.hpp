@@ -1,9 +1,11 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Hash.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/ForbidHeapAllocation.hpp"
+#include "Krystal.Lib/Pointers/Concepts.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 #include <cassert>
@@ -420,4 +422,17 @@ namespace Krys
 
     return instrusive_ptr::NoRef(static_cast<RawPtr<T>>(source.release()));
   }
+
+  template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+  constexpr bool IsSmartPtr<IntrusivePtr<T, PtrTraits, RefPolicy, Nullable>> = true;
+
+  template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+  constexpr bool IsNullableSmartPtr<IntrusivePtr<T, PtrTraits, RefPolicy, Nullable>> =
+    IntrusivePtr<T, PtrTraits, RefPolicy, Nullable>::nullable;
+
+  template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+  struct DefaultHash<IntrusivePtr<T, PtrTraits, RefPolicy, Nullable>>
+      : public PtrHash<IntrusivePtr<T, PtrTraits, RefPolicy, Nullable>>
+  {
+  };
 }

@@ -124,7 +124,7 @@ namespace std
   {
     size_t operator()(const ::Krys::Text::ASCIILiteral &literal) const noexcept
     {
-      return ::Krys::Hash::fnv1a_32(literal.Characters(), literal.Length());
+      return ::Krys::fnv1a32(literal.Characters(), literal.Length());
     }
   };
 }

@@ -41,7 +41,7 @@
       "animation-type": "discrete",
       "initial": "round",
       "codegen-properties": {
-        "settings-flag": "cssCornerShapeEnabled",
+        "settings-flag": "CornerShapePropertyEnabled",
         "longhands": [
           "corner-top-left-shape",
           "corner-top-right-shape",
@@ -67,11 +67,11 @@
           "name": "corner-shape",
           "resolver": "top-left"
         },
-        "settings-flag": "cssCornerShapeEnabled",
+        "settings-flag": "CornerShapePropertyEnabled",
         "disables-native-appearance": true,
         "render-style-initial-constexpr": true,
         "render-style-storage-path": [
-          "m_nonInheritedData",
+          "_nonInheritedData",
           "surroundData",
           "border.cornerShapes"
         ],
@@ -93,11 +93,11 @@
           "name": "corner-shape",
           "resolver": "top-right"
         },
-        "settings-flag": "cssCornerShapeEnabled",
+        "settings-flag": "CornerShapePropertyEnabled",
         "disables-native-appearance": true,
         "render-style-initial-constexpr": true,
         "render-style-storage-path": [
-          "m_nonInheritedData",
+          "_nonInheritedData",
           "surroundData",
           "border.cornerShapes"
         ],
@@ -119,11 +119,11 @@
           "name": "corner-shape",
           "resolver": "bottom-left"
         },
-        "settings-flag": "cssCornerShapeEnabled",
+        "settings-flag": "CornerShapePropertyEnabled",
         "disables-native-appearance": true,
         "render-style-initial-constexpr": true,
         "render-style-storage-path": [
-          "m_nonInheritedData",
+          "_nonInheritedData",
           "surroundData",
           "border.cornerShapes"
         ],
@@ -145,11 +145,11 @@
           "name": "corner-shape",
           "resolver": "bottom-right"
         },
-        "settings-flag": "cssCornerShapeEnabled",
+        "settings-flag": "CornerShapePropertyEnabled",
         "disables-native-appearance": true,
         "render-style-initial-constexpr": true,
         "render-style-storage-path": [
-          "m_nonInheritedData",
+          "_nonInheritedData",
           "surroundData",
           "border.cornerShapes"
         ],
@@ -174,7 +174,7 @@
         "skip-style-builder": true,
         "disables-native-appearance": true,
         "parser-grammar": "<corner-shape-value>",
-        "settings-flag": "cssCornerShapeEnabled"
+        "settings-flag": "CornerShapePropertyEnabled"
       },
       "specification": {
         "module": "css-borders",
@@ -193,7 +193,7 @@
         "disables-native-appearance": true,
         "parser-grammar": "<corner-shape-value>",
         "parser-exported": true,
-        "settings-flag": "cssCornerShapeEnabled"
+        "settings-flag": "CornerShapePropertyEnabled"
       },
       "specification": {
         "module": "css-borders",
@@ -211,7 +211,7 @@
         "skip-style-builder": true,
         "disables-native-appearance": true,
         "parser-grammar": "<corner-shape-value>",
-        "settings-flag": "cssCornerShapeEnabled"
+        "settings-flag": "CornerShapePropertyEnabled"
       },
       "specification": {
         "module": "css-borders",
@@ -229,7 +229,7 @@
         "skip-style-builder": true,
         "disables-native-appearance": true,
         "parser-grammar": "<corner-shape-value>",
-        "settings-flag": "cssCornerShapeEnabled"
+        "settings-flag": "CornerShapePropertyEnabled"
       },
       "specification": {
         "module": "css-borders",
@@ -241,11 +241,11 @@
       "initial": "none",
       "values": ["none"],
       "codegen-properties": {
-        "render-style-storage-path": ["m_svgStyle", "layoutData"],
+        "render-style-storage-path": ["_svgStyle", "layoutData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::SVGPathData",
         "parser-grammar": "none | <path()>",
-        "settings-flag": "cssDPropertyEnabled"
+        "settings-flag": "DPropertyEnabled"
       },
       "specification": {
         "module": "svg",
@@ -306,11 +306,11 @@
         "inline-grid",
         {
           "value": "grid-lanes",
-          "settings-flag": "gridLanesEnabled"
+          "settings-flag": "GridLanesEnabled"
         },
         {
           "value": "inline-grid-lanes",
-          "settings-flag": "gridLanesEnabled"
+          "settings-flag": "GridLanesEnabled"
         },
         {
           "value": "ruby",
@@ -408,11 +408,11 @@
           "font-feature-settings",
           {
             "value": "font-optical-sizing",
-            "enable-if": "ENABLE_VARIATION_FONTS"
+            "enable-if": "KRYS_CSS_ENABLE_VARIATION_FONTS"
           },
           {
             "value": "font-variation-settings",
-            "enable-if": "ENABLE_VARIATION_FONTS"
+            "enable-if": "KRYS_CSS_ENABLE_VARIATION_FONTS"
           }
         ],
         "parser-function": "consumeFontShorthand",
@@ -477,12 +477,12 @@
         "skip-render-style-initial": true,
         "render-style-storage-container": "opaque",
         "render-style-storage-path": [
-          "m_inheritedData",
+          "_inheritedData",
           "fontData",
           "fontCascade"
         ],
         "render-style-type": "Style::FontFamilies",
-        "parser-function": "consumeFontFamily",
+        "parser-function": "ConsumeFontFamily",
         "parser-grammar": "[ <family-name> | <generic-family> | <-webkit-generic-family> ]#",
         "parser-grammar-unused": true,
         "parser-grammar-unused-reason": "Needs support for primitive <family-name>."
@@ -509,7 +509,7 @@
         "larger",
         {
           "value": "math",
-          "settings-flag": "cssMathDepthEnabled"
+          "settings-flag": "MathDepthEnabled"
         },
         {
           "value": "-webkit-xxx-large",
@@ -569,7 +569,7 @@
         ],
         "render-style-storage-kind": "value",
         "render-style-type": "Style::FontSizeAdjust",
-        "parser-function": "consumeFontSizeAdjust",
+        "parser-function": "ConsumeFontSizeAdjust",
         "parser-function-allows-number-or-integer-input": true,
         "parser-grammar": "none | [ [ ex-height | cap-height | ch-width | ic-width | ic-height ]? [ from-font | <number [0,inf]> ] ]",
         "parser-grammar-unused": true,
@@ -591,13 +591,13 @@
         "high-priority": true,
         "render-style-storage-container": "opaque",
         "render-style-storage-path": [
-          "m_inheritedData",
+          "_inheritedData",
           "fontData",
           "fontCascade"
         ],
         "render-style-storage-kind": "value",
         "render-style-type": "Style::FontStyle",
-        "parser-function": "consumeFontStyle",
+        "parser-function": "ConsumeFontStyle",
         "parser-grammar": "normal | italic | [ oblique <angle>? ]",
         "parser-grammar-unused": true,
         "parser-grammar-unused-reason": "Needs support for ordered groups with a keyword/literal first term differentiator."
@@ -618,7 +618,7 @@
         "high-priority": true,
         "render-style-storage-container": "opaque",
         "render-style-storage-path": [
-          "m_inheritedData",
+          "_inheritedData",
           "fontData",
           "fontCascade"
         ],
@@ -649,14 +649,14 @@
       ],
       "codegen-properties": [
         {
-          "enable-if": "ENABLE_VARIATION_FONTS",
+          "enable-if": "KRYS_CSS_ENABLE_VARIATION_FONTS",
           "aliases": ["font-stretch"],
           "font-description-name-for-methods": "Width",
           "font-property": true,
           "high-priority": true,
           "render-style-storage-container": "opaque",
           "render-style-storage-path": [
-            "m_inheritedData",
+            "_inheritedData",
             "fontData",
             "fontCascade"
           ],
@@ -665,14 +665,14 @@
           "parser-grammar": "<font-width-absolute> | <percentage [0,inf]>"
         },
         {
-          "enable-if": "!ENABLE_VARIATION_FONTS",
+          "enable-if": "!KRYS_CSS_ENABLE_VARIATION_FONTS",
           "aliases": ["font-stretch"],
           "font-description-name-for-methods": "Width",
           "font-property": true,
           "high-priority": true,
           "render-style-storage-container": "opaque",
           "render-style-storage-path": [
-            "m_inheritedData",
+            "_inheritedData",
             "fontData",
             "fontCascade"
           ],
@@ -700,7 +700,7 @@
           "font-variant-position",
           "font-variant-emoji"
         ],
-        "parser-function": "consumeFontVariantShorthand",
+        "parser-function": "ConsumeFontVariantShorthand",
         "parser-grammar": "normal | none | [ [ <common-lig-values> || <discretionary-lig-values> || <historical-lig-values> || <contextual-alt-values> ] || [ small-caps | all-small-caps | petite-caps | all-petite-caps | unicase | titling-caps ] || [ stylistic(<feature-value-name>) || historical-forms || styleset(<feature-value-name>#) || character-variant(<feature-value-name>#) || swash(<feature-value-name>) || ornaments(<feature-value-name>) || annotation(<feature-value-name>) ] || [ <numeric-figure-values> || <numeric-spacing-values> || <numeric-fraction-values> || ordinal || slashed-zero ] || [ <east-asian-variant-values> || <east-asian-width-values> || ruby ] || [ sub | super ] || [ text | emoji | unicode ] ]",
         "parser-grammar-unused": true,
         "parser-grammar-unused-reason": "Needs support for shorthand grammars."
@@ -721,7 +721,7 @@
         "high-priority": true,
         "render-style-storage-container": "opaque",
         "render-style-storage-path": [
-          "m_inheritedData",
+          "_inheritedData",
           "fontData",
           "fontCascade"
         ],
@@ -747,7 +747,7 @@
         "high-priority": true,
         "render-style-storage-container": "opaque",
         "render-style-storage-path": [
-          "m_inheritedData",
+          "_inheritedData",
           "fontData",
           "fontCascade"
         ],
@@ -773,7 +773,7 @@
         "style-builder-needs-system-font-shorthand-check": true,
         "render-style-storage-container": "opaque",
         "render-style-storage-path": [
-          "m_inheritedData",
+          "_inheritedData",
           "fontData",
           "fontCascade"
         ],
@@ -796,7 +796,7 @@
         "high-priority": true,
         "render-style-storage-container": "opaque",
         "render-style-storage-path": [
-          "m_inheritedData",
+          "_inheritedData",
           "fontData",
           "fontCascade"
         ],
@@ -819,7 +819,7 @@
         "high-priority": true,
         "render-style-storage-container": "opaque",
         "render-style-storage-path": [
-          "m_inheritedData",
+          "_inheritedData",
           "fontData",
           "fontCascade"
         ],
@@ -852,7 +852,7 @@
         "render-style-initial-constexpr": true,
         "render-style-storage-container": "opaque",
         "render-style-storage-path": [
-          "m_inheritedData",
+          "_inheritedData",
           "fontData",
           "fontCascade"
         ],
@@ -877,7 +877,7 @@
         "style-builder-needs-system-font-shorthand-check": true,
         "render-style-storage-container": "opaque",
         "render-style-storage-path": [
-          "m_inheritedData",
+          "_inheritedData",
           "fontData",
           "fontCascade"
         ],
@@ -911,7 +911,7 @@
         "style-builder-needs-system-font-shorthand-check": true,
         "render-style-storage-container": "opaque",
         "render-style-storage-path": [
-          "m_inheritedData",
+          "_inheritedData",
           "fontData",
           "fontCascade"
         ],
@@ -947,7 +947,7 @@
         "render-style-initial-constexpr": true,
         "render-style-storage-container": "opaque",
         "render-style-storage-path": [
-          "m_inheritedData",
+          "_inheritedData",
           "fontData",
           "fontCascade"
         ],
@@ -970,7 +970,7 @@
         "high-priority": true,
         "render-style-storage-container": "opaque",
         "render-style-storage-path": [
-          "m_inheritedData",
+          "_inheritedData",
           "fontData",
           "fontCascade"
         ],
@@ -1007,7 +1007,7 @@
         "render-style-initial-constexpr": true,
         "render-style-storage-container": "opaque",
         "render-style-storage-path": [
-          "m_inheritedData",
+          "_inheritedData",
           "fontData",
           "fontCascade"
         ],
@@ -1027,14 +1027,14 @@
       "initial": "normal",
       "values": ["normal", "text", "emoji", "unicode"],
       "codegen-properties": {
-        "settings-flag": "cssFontVariantEmojiEnabled",
+        "settings-flag": "FontVariantEmojiPropertyEnabled",
         "font-description-name-for-methods": "VariantEmoji",
         "font-property": true,
         "high-priority": true,
         "style-builder-needs-system-font-shorthand-check": true,
         "render-style-storage-container": "opaque",
         "render-style-storage-path": [
-          "m_inheritedData",
+          "_inheritedData",
           "fontData",
           "fontCascade"
         ],
@@ -1076,7 +1076,7 @@
         "high-priority": true,
         "render-style-storage-container": "opaque",
         "render-style-storage-path": [
-          "m_inheritedData",
+          "_inheritedData",
           "fontData",
           "fontCascade"
         ],
@@ -1099,7 +1099,7 @@
         "high-priority": true,
         "render-style-storage-container": "opaque",
         "render-style-storage-path": [
-          "m_inheritedData",
+          "_inheritedData",
           "fontData",
           "fontCascade"
         ],
@@ -1122,7 +1122,7 @@
         "high-priority": true,
         "render-style-storage-container": "opaque",
         "render-style-storage-path": [
-          "m_inheritedData",
+          "_inheritedData",
           "fontData",
           "fontCascade"
         ],
@@ -1148,7 +1148,7 @@
         "style-builder-needs-system-font-shorthand-check": true,
         "render-style-storage-container": "opaque",
         "render-style-storage-path": [
-          "m_inheritedData",
+          "_inheritedData",
           "fontData",
           "fontCascade"
         ],
@@ -1168,20 +1168,20 @@
       "values": ["normal"],
       "codegen-properties": [
         {
-          "enable-if": "ENABLE_TEXT_AUTOSIZING",
+          "enable-if": "KRYS_CSS_ENABLE_TEXT_AUTOSIZING",
           "animation-wrapper-requires-getter": "specifiedLineHeight",
           "style-builder-custom": "All",
           "style-extractor-custom": true,
-          "render-style-storage-path": ["m_inheritedData"],
+          "render-style-storage-path": ["_inheritedData"],
           "render-style-storage-kind": "reference",
           "render-style-type": "Style::LineHeight",
           "parser-grammar": "normal | <number [0,inf]> | <length-percentage [0,inf]>",
           "parser-exported": true
         },
         {
-          "enable-if": "!ENABLE_TEXT_AUTOSIZING",
+          "enable-if": "!KRYS_CSS_ENABLE_TEXT_AUTOSIZING",
           "style-extractor-custom": true,
-          "render-style-storage-path": ["m_inheritedData"],
+          "render-style-storage-path": ["_inheritedData"],
           "render-style-storage-kind": "reference",
           "render-style-type": "Style::LineHeight",
           "parser-grammar": "normal | <number [0,inf]> | <length-percentage [0,inf]>",
@@ -1272,7 +1272,7 @@
         "accepts-quirky-length": true,
         "style-extractor-custom": true,
         "render-style-storage-path": [
-          "m_nonInheritedData",
+          "_nonInheritedData",
           "surroundData",
           "margin"
         ],
@@ -1347,7 +1347,7 @@
         "accepts-quirky-length": true,
         "style-extractor-custom": true,
         "render-style-storage-path": [
-          "m_nonInheritedData",
+          "_nonInheritedData",
           "surroundData",
           "margin"
         ],
@@ -1373,7 +1373,7 @@
         "accepts-quirky-length": true,
         "style-extractor-custom": true,
         "render-style-storage-path": [
-          "m_nonInheritedData",
+          "_nonInheritedData",
           "surroundData",
           "margin"
         ],
@@ -1399,7 +1399,7 @@
         "accepts-quirky-length": true,
         "style-extractor-custom": true,
         "render-style-storage-path": [
-          "m_nonInheritedData",
+          "_nonInheritedData",
           "surroundData",
           "margin"
         ],
@@ -1426,10 +1426,10 @@
         "inline-end"
       ],
       "codegen-properties": {
-        "render-style-storage-path": ["m_nonInheritedData", "rareData"],
+        "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "raw",
         "render-style-type": "Style::MarginTrim",
-        "parser-function": "consumeMarginTrim",
+        "parser-function": "ConsumeMarginTrim",
         "parser-grammar": "none | [ block || inline ] | [ block-start || inline-start || block-end || inline-end ]",
         "parser-grammar-unused": true,
         "parser-grammar-unused-reason": "Needs support for transforming parsed input to minimal form."
@@ -1517,11 +1517,11 @@
         "style-builder-custom": "All",
         "style-extractor-custom": true,
         "render-style-has-explicitly-set-storage-path": [
-          "m_nonInheritedData",
+          "_nonInheritedData",
           "surroundData"
         ],
         "render-style-storage-path": [
-          "m_nonInheritedData",
+          "_nonInheritedData",
           "surroundData",
           "padding"
         ],
@@ -1594,11 +1594,11 @@
         "style-builder-custom": "All",
         "style-extractor-custom": true,
         "render-style-has-explicitly-set-storage-path": [
-          "m_nonInheritedData",
+          "_nonInheritedData",
           "surroundData"
         ],
         "render-style-storage-path": [
-          "m_nonInheritedData",
+          "_nonInheritedData",
           "surroundData",
           "padding"
         ],
@@ -1624,11 +1624,11 @@
         "style-builder-custom": "All",
         "style-extractor-custom": true,
         "render-style-has-explicitly-set-storage-path": [
-          "m_nonInheritedData",
+          "_nonInheritedData",
           "surroundData"
         ],
         "render-style-storage-path": [
-          "m_nonInheritedData",
+          "_nonInheritedData",
           "surroundData",
           "padding"
         ],
@@ -1654,11 +1654,11 @@
         "style-builder-custom": "All",
         "style-extractor-custom": true,
         "render-style-has-explicitly-set-storage-path": [
-          "m_nonInheritedData",
+          "_nonInheritedData",
           "surroundData"
         ],
         "render-style-storage-path": [
-          "m_nonInheritedData",
+          "_nonInheritedData",
           "surroundData",
           "padding"
         ],
@@ -1682,11 +1682,11 @@
         "vertical-rl",
         {
           "value": "sideways-lr",
-          "settings-flag": "sidewaysWritingModesEnabled"
+          "settings-flag": "SidewaysWritingModesEnabled"
         },
         {
           "value": "sideways-rl",
-          "settings-flag": "sidewaysWritingModesEnabled"
+          "settings-flag": "SidewaysWritingModesEnabled"
         },
         {
           "value": "lr-tb",
@@ -1722,15 +1722,15 @@
         "style-builder-custom": "Value",
         "style-extractor-custom": true,
         "render-style-has-explicitly-set-storage-path": [
-          "m_nonInheritedData",
+          "_nonInheritedData",
           "miscData"
         ],
-        "render-style-getter": "computedWritingMode",
+        "render-style-getter": "ComputedWritingMode",
         "render-style-getter-custom": true,
         "render-style-setter-custom": true,
         "render-style-setter-returns-if-changed": true,
         "render-style-storage-container": "struct",
-        "render-style-storage-path": ["m_inheritedFlags"],
+        "render-style-storage-path": ["_inheritedFlags"],
         "render-style-storage-kind": "enum",
         "render-style-type": "StyleWritingMode",
         "top-priority": true,

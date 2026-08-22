@@ -20,24 +20,24 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="codegen\css-properties.json" />
-    <None Include="codegen\css-properties\old.py" />
-    <None Include="codegen\css-values\data.json" />
+    <None Include="codegen\css-value-keywords.in" />
     <None Include="codegen\css-values\data.schema.json" />
     <None Include="codegen\css-values\generator.py" />
+    <None Include="codegen\css_properties.py" />
+    <None Include="codegen\css_value_keywords.py" />
     <None Include="codegen\enum.hpp.jinja" />
     <None Include="codegen\enum\enum.hpp.jinja" />
-    <None Include="codegen\generator.py" />
     <None Include="codegen\generators\css-properties\data.json" />
     <None Include="codegen\generators\css-properties\data.schema.json" />
     <None Include="codegen\generators\css-properties\generator.py" />
     <None Include="codegen\generators\css\properties.py" />
     <None Include="codegen\generators\enum\enum.hpp.jinja" />
+    <None Include="codegen\main.py" />
     <None Include="codegen\templates\css-keyword-constants.hpp.jinja" />
     <None Include="codegen\templates\css-property-consumer.cpp.jinja" />
     <None Include="codegen\templates\css-property-shorthand.cpp.jinja" />
     <None Include="codegen\templates\enum.hpp.jinja" />
     <None Include="codegen\utils.py" />
-    <None Include="codegen\writer.py" />
     <None Include="data\_progress\DOM.txt" />
     <None Include="data\_progress\HTML.txt" />
     <Text Include="data\HTMLEntityNames.in" />
@@ -54,7 +54,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\CSS\Properties\CSSPropertyParsers.cpp" />
+    <ClCompile Include="src\CSS\Properties\CSSPropertyParsing.cpp" />
+    <ClCompile Include="src\CSS\Properties\CSSPropertyShorthandFunctions.cpp" />
+    <ClCompile Include="src\CSS\Properties\Enums\CSSPropertyId.cpp" />
     <ClCompile Include="src\CSS\Values\Primitives\CSSUnevaluatedCalc.cpp" />
     <ClCompile Include="src\CSS\CSSParser.cpp" />
     <ClCompile Include="src\CSS\Properties\CSSPropertyConsumer.cpp" />
@@ -163,15 +165,16 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\SymbolDefinitions.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\TimeDefinitions.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyConsumer.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyParsing.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyShorthandFunctions.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Enums\CSSPropertyId.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyParser.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\ParsedCSSPropertyList.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\ParsedCSSRuleList.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSInternalStyleProperties.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyParserOptions.hpp" />
-    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyParsers.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyParserState.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Enums\CSSPropertyFlag.hpp" />
-    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Enums\CSSPropertyId.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Enums\CSSRuleFlag.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\CSSParser.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSAllowedBlockRules.hpp" />
@@ -202,6 +205,7 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSTokenType.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\NumericValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\CSSSerializerIdioms.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\InitialValues.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Selectors\CSSSelector.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Selectors\CSSSelectorList.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Selectors\CSSSelectorParser.hpp" />
@@ -793,6 +797,9 @@
     <None Include="data\CSS\Mixins\ElementCSSInlineStyle.idl" />
     <None Include="data\CSS\Mixins\Window.idl" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="data\CSSStyleProperties+PropertyNames.idl" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -904,7 +911,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>python "$(ProjectDir)\codegen\generator.py" --gperf-executable="c:\ProgramData\chocolatey\bin\gperf" --verbose --dump-unused-grammars --check-unused-grammars-values</Command>
+      <Command>python "$(ProjectDir)\codegen\main.py" --gperf-executable="c:\ProgramData\chocolatey\bin\gperf" --verbose --dump-unused-grammars --check-unused-grammars-values</Command>
     </PreBuildEvent>
     <CustomBuildStep>
       <Command>

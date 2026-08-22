@@ -1,8 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Core/Hash.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
+#include "Krystal.Lib/Pointers/Concepts.hpp"
 #include <memory>
 
 namespace Krys
@@ -25,4 +26,15 @@ namespace Krys
   {
     return Is<TExpected>(source.get());
   }
+
+  template <typename T>
+  constexpr bool IsSmartPtr<UniquePtr<T>> = true;
+
+  template <typename T>
+  constexpr bool IsNullableSmartPtr<UniquePtr<T>> = true;
+
+  template <typename P, typename Deleter>
+  struct DefaultHash<UniquePtr<P, Deleter>> : public PtrHash<UniquePtr<P, Deleter>>
+  {
+  };
 }

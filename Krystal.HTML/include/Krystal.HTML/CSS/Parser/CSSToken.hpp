@@ -84,7 +84,7 @@ namespace Krys::HTML
     KRYS_NODISCARD CSSValueId ValueId() const noexcept
     {
       assert(_type == CSSTokenType::Ident);
-      return ParseCSSValueId(IdentCodePoints());
+      return FindCSSValueKeyword(IdentCodePoints());
     }
 
     void NumericValue(NumericValue value) noexcept
