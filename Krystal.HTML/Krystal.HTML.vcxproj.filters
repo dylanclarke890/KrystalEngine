@@ -2049,14 +2049,8 @@
     <None Include="codegen\generators\enum\enum.hpp.jinja" />
     <None Include="codegen\enum\enum.hpp.jinja" />
     <None Include="codegen\enum.hpp.jinja" />
-    <None Include="codegen\templates\enum.hpp.jinja" />
     <None Include="codegen\utils.py" />
     <None Include="codegen\css-value-keywords.in" />
-    <None Include="codegen\css-values\data.schema.json" />
-    <None Include="codegen\css-values\generator.py" />
-    <None Include="codegen\templates\css-keyword-constants.hpp.jinja" />
-    <None Include="codegen\templates\css-property-consumer.cpp.jinja" />
-    <None Include="codegen\templates\css-property-shorthand.cpp.jinja" />
     <None Include="codegen\css-properties.json" />
     <None Include="data\CSSStyleProperties+PropertyNames.idl">
       <Filter>Source Files</Filter>
