@@ -4,11 +4,15 @@
 #include "Krystal.HTML/CSS/Types/CSSOMString.hpp"
 #include "Krystal.HTML/CSS/Values/CSSValue.hpp"
 #include "Krystal.HTML/CSS/Values/Enums/CSSValueId.hpp"
+#include "Krystal.Lib/NeverDestroyed.hpp"
 
 namespace Krys::HTML
 {
   class CSSPrimitiveValue : public CSSValue
   {
+    friend class StaticCSSValuePool;
+    friend LazyNeverDestroyed<CSSPrimitiveValue>;
+
   private:
     union ValueUnion
     {
@@ -18,13 +22,43 @@ namespace Krys::HTML
       StringAtomStorage String;
     } _value;
 
-  public:
-    explicit CSSPrimitiveValue(CSSValueId valueId) noexcept;
+    struct CreateImplicitInitialValueTag
+    {
+    };
 
-    explicit CSSPrimitiveValue(CSSOMString customIdentifier) noexcept;
+    constexpr inline static CreateImplicitInitialValueTag CreateImplicitInitialValue {};
+
+    explicit CSSPrimitiveValue(CSSValueId identifier) noexcept;
+
+    explicit CSSPrimitiveValue(CSSPropertyId property) noexcept;
+
+    CSSPrimitiveValue(CSSOMString value, CSSUnitType unit) noexcept;
 
     CSSPrimitiveValue(double value, CSSUnitType unit) noexcept;
-    
+
+    CSSPrimitiveValue(StaticCSSValueTag, CreateImplicitInitialValueTag) noexcept;
+
+    CSSPrimitiveValue(StaticCSSValueTag, CSSValueId keyword) noexcept;
+
+    CSSPrimitiveValue(StaticCSSValueTag, double value, CSSUnitType unit) noexcept;
+
+  public:
+    KRYS_NODISCARD static Ref<CSSPrimitiveValue> Create(CSSValueId identifier) noexcept;
+
+    KRYS_NODISCARD static Ref<CSSPrimitiveValue> Create(CSSPropertyId property) noexcept;
+
+    KRYS_NODISCARD static Ref<CSSPrimitiveValue> Create(CSSOMString value) noexcept;
+
+    KRYS_NODISCARD static Ref<CSSPrimitiveValue> CreateCustomIdent(CSSOMString value) noexcept;
+
+    KRYS_NODISCARD static Ref<CSSPrimitiveValue> Create(double value) noexcept;
+
+    KRYS_NODISCARD static Ref<CSSPrimitiveValue> Create(double value, CSSUnitType unit) noexcept;
+
+    KRYS_NODISCARD static Ref<CSSPrimitiveValue> CreateInteger(double value) noexcept;
+
+    KRYS_NODISCARD static CSSPrimitiveValue &ImplicitInitialValue() noexcept;
+
     KRYS_NODISCARD bool IsPropertyId() const noexcept
     {
       return _unit == CSSUnitType::PropertyId;

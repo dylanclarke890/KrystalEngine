@@ -30,7 +30,7 @@ namespace Krys::HTML
   {
     if (auto result = ConsumeIdentRaw(tokens))
     {
-      return CreateRef<CSSPrimitiveValue>(*result);
+      return CSSPrimitiveValue::Create(*result);
     }
 
     return nullptr;
@@ -56,7 +56,7 @@ namespace Krys::HTML
       return nullptr;
     }
 
-    return CreateRef<CSSPrimitiveValue>(*value);
+    return CSSPrimitiveValue::Create(*value);
   }
 
   template <typename... EmptyBaseCase>
@@ -96,7 +96,7 @@ namespace Krys::HTML
     const auto &token = tokens.Consume();
     tokens.DiscardWhitespace();
 
-    return CreateRef<CSSPrimitiveValue>(token.ValueId());
+    return CSSPrimitiveValue::Create(token.ValueId());
   }
 
   template <typename Predicate, typename... Args>
@@ -123,7 +123,7 @@ namespace Krys::HTML
       tokens.Discard();
       tokens.DiscardWhitespace();
 
-      return CreateRef<CSSPrimitiveValue>(keyword);
+      return CSSPrimitiveValue::Create(keyword);
     }
 
     return nullptr;
@@ -159,7 +159,7 @@ namespace Krys::HTML
       return nullptr;
     }
 
-    return CreateRef<CSSPrimitiveValue>(Krys::Move(*identifier));
+    return CSSPrimitiveValue::Create(Krys::Move(*identifier));
   }
 
   KRYS_NODISCARD RefPtr<CSSPrimitiveValue> ConsumeCustomIdentExcluding(CSSTokenRange &tokens,
@@ -201,7 +201,7 @@ namespace Krys::HTML
       return nullptr;
     }
 
-    return CreateRef<CSSPrimitiveValue>(Krys::Move(*identifier));
+    return CSSPrimitiveValue::Create(Krys::Move(*identifier));
   }
 
 #pragma endregion

@@ -47,7 +47,7 @@ def run_gperf(*, gperf_executable: str, filename: str, output_cpp_dir: str, remo
     output_path = os.path.join(output_cpp_dir, f"{filename}.cpp")
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     shutil.move(f"{filename}.cpp", output_path)
-    
+
     if remove_gperf_file:
         os.remove(f"{filename}.gperf")
 
@@ -179,6 +179,9 @@ class Writer:
 
     def function_block(self, *, signature: str):
         return Writer.Block(to=self, prologue=signature)
+
+    def lambda_block(self, *, signature: str):
+        return Writer.Block(to=self, prologue=signature, block_start="{", block_end="};")
 
     def switch_block(self, *, expr: str):
         return Writer.Block(to=self, prologue=f"switch ({expr})")

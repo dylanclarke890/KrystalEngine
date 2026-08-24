@@ -11,8 +11,9 @@
 
 namespace Krys::HTML
 {
-  /// @brief The maximum number of shorthands that can set a single property. This is usually 'all' and one
-  /// other. Logical properties are not counted as shorthands for physical properties and vice versa.
+  /// @brief The average number of shorthands that can set a single property (max is currently 6). This is
+  /// usually 'all' and one other. Logical properties are not counted as shorthands for physical properties
+  /// and vice versa.
   /// @example `margin-left` has two shorthands: `margin` and `all`. `margin-inline` is not counted as a
   /// shorthand for `margin-left` because it is a logical property and `margin-left` is a physical property.
   /// `margin-inline-start` is also not counted as a shorthand for `margin-left` because it is a longhand

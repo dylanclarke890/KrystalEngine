@@ -16,13 +16,25 @@ namespace Krys::HTML
   protected:
     CSSValueType _type : BitCount<CSSValueType>();
     CSSUnitType _unit : BitCount<CSSUnitType>() {CSSUnitType::Unknown};
+    bool _isImplicitInitialValue : 1 {false};
 
     CSSValue(CSSValueType type) noexcept : _type(type)
     {
     }
 
+    struct StaticCSSValueTag
+    {
+    };
+
+    constexpr inline static StaticCSSValueTag StaticCSSValue {};
+
   public:
     virtual ~CSSValue() noexcept = default;
+
+    KRYS_NODISCARD bool IsImplicitInitialValue() const noexcept
+    {
+      return _isImplicitInitialValue;
+    }
 
     KRYS_NODISCARD static bool IsCSSWideKeyword(CSSValueId id) noexcept
     {

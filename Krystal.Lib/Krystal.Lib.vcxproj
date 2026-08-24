@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.Lib\AlignedStorage.hpp" />
     <ClInclude Include="include\Krystal.Lib\Atomics.hpp" />
     <ClInclude Include="include\Krystal.Lib\Commands\CommandArena.hpp" />
     <ClInclude Include="include\Krystal.Lib\Commands\CommandList.hpp" />
@@ -159,6 +160,7 @@
     <ClInclude Include="include\Krystal.Lib\Mixins\NonCopyMovable.hpp" />
     <ClInclude Include="include\Krystal.Lib\Mixins\NonMovable.hpp" />
     <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp" />
+    <ClInclude Include="include\Krystal.Lib\NeverDestroyed.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\Concepts.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrFormatter.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrHasher.hpp" />

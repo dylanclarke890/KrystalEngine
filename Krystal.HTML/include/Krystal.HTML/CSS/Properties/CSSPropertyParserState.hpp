@@ -10,7 +10,7 @@ namespace Krys::HTML
   struct CSSPropertyParserState
   {
     const CSSParserContext &Context;
-    CSSPropertyId Property;
+    CSSPropertyId CurrentProperty;
     CSSRuleType CurrentRule;
     IsImportant Important;
   };

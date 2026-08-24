@@ -1,4 +1,4 @@
-from builtins import *  # pyright: ignore[reportWildcardImportFromLibrary]
+﻿from builtins import *  # pyright: ignore[reportWildcardImportFromLibrary]
 import argparse
 import collections
 from collections.abc import Callable, Iterable
@@ -4252,10 +4252,7 @@ class TermGeneratorMatchAllAnyOrderTerm(TermGenerator):
         if self.requires_state:
             lambda_declaration_parameters += ["CSSPropertyParserState &state"]
 
-        to.write(
-            f"auto ConsumeMatchAllAnyOrder = []({', '.join(lambda_declaration_parameters)}) -> RefPtr<CSSValue> {{"
-        )
-        with to.indent():
+        with to.lambda_block(signature=f"auto ConsumeMatchAllAnyOrder = []({', '.join(lambda_declaration_parameters)}) -> RefPtr<CSSValue>"):
             if self.term.settings_flag:
                 to.write(f"if (!state.context.{self.term.settings_flag})")
                 with to.indent():
@@ -4292,7 +4289,7 @@ class TermGeneratorMatchAllAnyOrderTerm(TermGenerator):
                         to.write(f"if (list.size() == 1)")
                         with to.indent():
                             to.write(f"return Krys::Move(list[0]); // single item optimization")
-                    to.write(f"return CSSValueList::createSpaceSeparated(WTF::move(list));")
+                    to.write(f"return CSSValueList::createSpaceSeparated(Krys::Move(list));")
                 else:
                     return_type_create = f"{self.term.type}::create"
 
@@ -4301,10 +4298,10 @@ class TermGeneratorMatchAllAnyOrderTerm(TermGenerator):
 
                     list_value_strings = []
                     for list_index in range(0, min_values - 1):
-                        list_value_strings.append(f"WTF::move(list[{list_index}])")
+                        list_value_strings.append(f"Krys::Move(list[{list_index}])")
 
                     for list_index in range(min_values - 1, max_values - 1):
-                        list_value_strings.append(f"WTF::move(list[{list_index}])")
+                        list_value_strings.append(f"Krys::Move(list[{list_index}])")
 
                         to.write(f"if (list.size() == {list_index + 1})")
                         with to.indent():
@@ -4313,7 +4310,7 @@ class TermGeneratorMatchAllAnyOrderTerm(TermGenerator):
                             else:
                                 to.write(f"return {return_type_create}({', '.join(list_value_strings)});")
 
-                    list_value_strings.append(f"WTF::move(list[{max_values - 1}])")
+                    list_value_strings.append(f"Krys::Move(list[{max_values - 1}])")
                     to.write(f"return {return_type_create}({', '.join(list_value_strings)});")
             else:
                 if self.term.type == "CSSValueList":
@@ -4330,17 +4327,13 @@ class TermGeneratorMatchAllAnyOrderTerm(TermGenerator):
                     return_value_strings.append(f"value{i}.releaseNonNull()")
 
                 to.write(f"return {return_type_create}({', '.join(return_value_strings)});")
-        to.write(f"}};")
 
-    def _generate_lambda_into_builder(self, *, to):
-        lambda_declaration_parameters = ["CSSTokenRange & range"]
+    def _generate_lambda_into_builder(self, *, to: Writer):
+        lambda_declaration_parameters = ["CSSTokenRange &range"]
         if self.requires_state:
-            lambda_declaration_parameters += ["CSS::PropertyParserState& state"]
+            lambda_declaration_parameters += ["CSSPropertyParserState &state"]
 
-        to.write(
-            f"auto consumeMatchAllAnyOrder = []({', '.join(lambda_declaration_parameters)}) -> std::optional<CSSValueListBuilder> {{"
-        )
-        with to.indent():
+        with to.lambda_block(signature=f"auto ConsumeMatchAllAnyOrder = []({', '.join(lambda_declaration_parameters)}) -> Maybe<CSSValueListBuilder>"):
             self._generate_consume_subterm_lambdas(to=to)
 
             if self.term.preserve_order:
@@ -4361,14 +4354,14 @@ class TermGeneratorMatchAllAnyOrderTerm(TermGenerator):
                         with to.indent():
                             to.write(f"return {{ }};")
 
-            to.write(f"return {{ WTF::move(list) }};")
+            to.write(f"return {{ Krys::Move(list) }};")
         to.write(f"}};")
 
     def _generate_call_string(self, *, range_string, state_string):
         parameters = [range_string]
         if self.requires_state:
             parameters += [state_string]
-        return f"consumeMatchAllAnyOrder({', '.join(parameters)})"
+        return f"ConsumeMatchAllAnyOrder({', '.join(parameters)})"
 
 
 # Generation support for a single `MatchOneOrMoreAnyOrderTerm`.
@@ -4414,9 +4407,9 @@ class TermGeneratorMatchOneOrMoreAnyOrderTerm(TermGenerator):
             to.write(f"CSSValueListBuilder list;")
 
         for i, subterm_generator in enumerate(self.subterm_generators):
-            inner_lambda_declaration_parameters = ["CSSTokenRange & range"]
+            inner_lambda_declaration_parameters = ["CSSTokenRange &range"]
             if subterm_generator.requires_state:
-                inner_lambda_declaration_parameters += ["CSS::PropertyParserState& state"]
+                inner_lambda_declaration_parameters += ["CSSPropertyParserState &state"]
 
             if self.term.preserve_order:
                 to.write(f"bool consumedValue{i} = false; // {str(subterm_generator)}")
@@ -4425,85 +4418,73 @@ class TermGeneratorMatchOneOrMoreAnyOrderTerm(TermGenerator):
                 to.write(f"RefPtr<CSSValue> value{i}; // {str(subterm_generator)}")
                 lambda_capture_list_parameters = [f"&value{i}"]
 
-            to.write(
-                f"auto tryConsumeTerm{i} = [{', '.join(lambda_capture_list_parameters)}]({', '.join(inner_lambda_declaration_parameters)}) -> bool {{"
-            )
-            with to.indent():
-                to.write(
-                    f"auto consumeTerm{i} = []({', '.join(inner_lambda_declaration_parameters)}) -> RefPtr<CSSValue> {{"
-                )
-                with to.indent():
+            with to.lambda_block(
+                signature=f"auto TryConsumeTerm{i} = [{', '.join(lambda_capture_list_parameters)}]({', '.join(inner_lambda_declaration_parameters)}) -> bool"
+            ):
+                with to.lambda_block(
+                    signature=f"auto ConsumeTerm{i} = []({', '.join(inner_lambda_declaration_parameters)}) -> RefPtr<CSSValue>"
+                ):
                     subterm_generator.generate_unconditional(to=to, range_string="range", state_string="state")
-                to.write(f"}};")
 
                 inner_lambda_call_parameters = ["range"]
                 if subterm_generator.requires_state:
                     inner_lambda_call_parameters += ["state"]
 
-                try_consume_strings.append(f"tryConsumeTerm{i}({', '.join(inner_lambda_call_parameters)})")
+                try_consume_strings.append(f"TryConsumeTerm{i}({', '.join(inner_lambda_call_parameters)})")
 
                 if self.term.preserve_order:
-                    to.write(f"if (consumedValue{i})")
-                    with to.indent():
+                    with to.block(prologue=f"if (consumedValue{i})"):
                         to.write(f"return false;")
 
-                    to.write(f"if (auto value = consumeTerm{i}({', '.join(inner_lambda_call_parameters)})) {{")
-                    with to.indent():
+                    with to.block(
+                        prologue=f"if (auto value = ConsumeTerm{i}({', '.join(inner_lambda_call_parameters)}))"
+                    ):
                         to.write(f"list.append(value.releaseNonNull());")
                         to.write(f"consumedValue{i} = true;")
                         to.write(f"return true;")
-                    to.write(f"}}")
                     to.write(f"return false;")
                 else:
-                    to.write(f"if (value{i})")
-                    with to.indent():
+                    with to.block(prologue=f"if (value{i})"):
                         to.write(f"return false;")
 
-                    to.write(f"value{i} = consumeTerm{i}({', '.join(inner_lambda_call_parameters)});")
+                    to.write(f"value{i} = ConsumeTerm{i}({', '.join(inner_lambda_call_parameters)});")
                     to.write(f"return !!value{i};")
-            to.write(f"}};")
 
-        to.write(f"for (size_t i = 0; i < {len(self.subterm_generators)} && !range.atEnd(); ++i) {{")
-        with to.indent():
+        to.write(f"for (size_t i = 0uz; i < {len(self.subterm_generators)} && !range.IsAtEnd(); ++i)")
+        with to.block():
             to.write(f"if ({' || '.join(try_consume_strings)})")
-            with to.indent():
+            with to.block():
                 to.write(f"continue;")
             to.write(f"break;")
-        to.write(f"}}")
 
-    def _generate_lambda(self, *, to):
-        lambda_declaration_parameters = ["CSSTokenRange & range"]
+    def _generate_lambda(self, *, to: Writer):
+        lambda_declaration_parameters = ["CSSTokenRange &range"]
         if self.requires_state:
-            lambda_declaration_parameters += ["CSS::PropertyParserState& state"]
+            lambda_declaration_parameters += ["CSSPropertyParserState &state"]
 
-        to.write(
-            f"auto consumeMatchOneOrMoreAnyOrder = []({', '.join(lambda_declaration_parameters)}) -> RefPtr<CSSValue> {{"
-        )
-        with to.indent():
+        with to.lambda_block(
+            signature=f"auto ConsumeMatchOneOrMoreAnyOrder = []({', '.join(lambda_declaration_parameters)}) -> RefPtr<CSSValue>"
+        ):
             if self.term.settings_flag:
-                to.write(f"if (!state.context.{self.term.settings_flag})")
-                with to.indent():
-                    to.write(f"return {{ }};")
+                with to.block(prologue=f"if (!state.Context.{self.term.settings_flag})"):
+                    to.write("return {};")
 
             self._generate_consume_subterm_lambdas(to=to)
 
             if not self.term.preserve_order:
                 to.write(f"CSSValueListBuilder list;")
                 for i, subterm_generator in enumerate(self.subterm_generators):
-                    to.write(f"if (value{i}) // {str(subterm_generator)}")
-                    with to.indent():
+                    with to.block(prologue=f"if (value{i}) // {str(subterm_generator)}"):
                         to.write(f"list.append(value{i}.releaseNonNull());")
 
-            to.write(f"if (list.isEmpty())")
-            with to.indent():
+            with to.block(prologue=f"if (list.IsEmpty())"):
                 to.write(f"return {{ }};")
 
             if self.term.type == "CSSValueList":
                 if self.term.single_value_optimization:
-                    to.write(f"if (list.size() == 1)")
-                    with to.indent():
-                        to.write(f"return WTF::move(list[0]); // single item optimization")
-                to.write(f"return CSSValueList::createSpaceSeparated(WTF::move(list));")
+                    with to.block(prologue=f"if (list.Size() == 1)"):
+                        to.write(f"return Krys::Move(list[0]); // single item optimization")
+                to.write(f"return CSSValueList::createSpaceSeparated(Krys::Move(list));")
             else:
                 return_type_create = f"{self.term.type}::create"
 
@@ -4512,51 +4493,46 @@ class TermGeneratorMatchOneOrMoreAnyOrderTerm(TermGenerator):
 
                 list_value_strings = []
                 for list_index in range(0, min_values - 1):
-                    list_value_strings.append(f"WTF::move(list[{list_index}])")
+                    list_value_strings.append(f"Krys::Move(list[{list_index}])")
 
                 for list_index in range(min_values - 1, max_values - 1):
-                    list_value_strings.append(f"WTF::move(list[{list_index}])")
+                    list_value_strings.append(f"Krys::Move(list[{list_index}])")
 
-                    to.write(f"if (list.size() == {list_index + 1})")
-                    with to.indent():
+                    with to.block(prologue=f"if (list.Size() == {list_index + 1})"):
                         if list_index == 0 and self.term.single_value_optimization:
-                            to.write(f"return WTF::move(list[0]); // single item optimization")
+                            to.write(f"return Krys::Move(list[0]); // single item optimization")
                         else:
                             to.write(f"return {return_type_create}({', '.join(list_value_strings)});")
 
-                list_value_strings.append(f"WTF::move(list[{max_values - 1}])")
+                list_value_strings.append(f"Krys::Move(list[{max_values - 1}])")
                 to.write(f"return {return_type_create}({', '.join(list_value_strings)});")
-        to.write(f"}};")
 
-    def _generate_lambda_into_builder(self, *, to):
-        lambda_declaration_parameters = ["CSSTokenRange & range"]
+    def _generate_lambda_into_builder(self, *, to: Writer):
+        lambda_declaration_parameters = ["CSSTokenRange &range"]
         if self.requires_state:
-            lambda_declaration_parameters += ["CSS::PropertyParserState& state"]
+            lambda_declaration_parameters += ["CSSPropertyParserState &state"]
 
-        to.write(
-            f"auto consumeMatchOneOrMoreAnyOrder = []({', '.join(lambda_declaration_parameters)}) -> std::optional<CSSValueListBuilder> {{"
-        )
-        with to.indent():
+        with to.lambda_block(
+            signature=f"auto ConsumeMatchOneOrMoreAnyOrder = []({', '.join(lambda_declaration_parameters)}) -> Maybe<CSSValueListBuilder>"
+        ):
             self._generate_consume_subterm_lambdas(to=to)
 
             if not self.term.preserve_order:
                 to.write(f"CSSValueListBuilder list;")
                 for i, subterm_generator in enumerate(self.subterm_generators):
-                    to.write(f"if (value{i}) // {str(subterm_generator)}")
-                    with to.indent():
+                    with to.block(prologue=f"if (value{i}) // {str(subterm_generator)}"):
                         to.write(f"list.append(value{i}.releaseNonNull());")
 
-            to.write(f"if (list.isEmpty())")
-            with to.indent():
-                to.write(f"return {{ }};")
-            to.write(f"return {{ WTF::move(list) }};")
-        to.write(f"}};")
+            with to.block(prologue=f"if (list.IsEmpty())"):
+                to.write("return {};")
+            to.newline()
+            to.write("return list;")
 
     def _generate_call_string(self, *, range_string, state_string):
         parameters = [range_string]
         if self.requires_state:
             parameters += [state_string]
-        return f"consumeMatchOneOrMoreAnyOrder({', '.join(parameters)})"
+        return f"ConsumeMatchOneOrMoreAnyOrder({', '.join(parameters)})"
 
 
 # Generation support for a single `ReferenceTerm`.
@@ -4578,10 +4554,7 @@ class TermGeneratorReferenceTerm(TermGenerator):
         to.write(f"// {str(self)}")
         if self.term.settings_flag is not None:
             self._generate_lambda(to=to)
-        to.write(
-            f"if (auto result = {self.generate_call_string(range_string=range_string, state_string=state_string)})"
-        )
-        with to.indent():
+        with to.block(prologue=f"if (auto result = {self.generate_call_string(range_string=range_string, state_string=state_string)})"):
             to.write(f"return result;")
 
     def generate_unconditional(self, *, to: Writer, range_string, state_string):
@@ -4590,50 +4563,50 @@ class TermGeneratorReferenceTerm(TermGenerator):
             self._generate_lambda(to=to)
         to.write(f"return {self.generate_call_string(range_string=range_string, state_string=state_string)};")
 
-    def generate_call_string(self, *, range_string, state_string):
+    def generate_call_string(self, *, range_string: str, state_string: str):
         if self.term.settings_flag is not None:
-            return f"consume{self.term.name.id_without_prefix}Reference({range_string}, {state_string})"
+            return f"Consume{self.term.name.id_without_prefix}Reference({range_string}, {state_string})"
         return self._generate_call_reference_string(range_string=range_string, state_string=state_string)
 
-    def _generate_call_reference_string(self, *, range_string, state_string):
+    def _generate_call_reference_string(self, *, range_string: str, state_string: str):
         if self.term.override_function:
             return f"{self.term.override_function}({range_string}, {state_string})"
         elif self.term.is_builtin:
             builtin = self.term.builtin
             if isinstance(builtin, BuiltinAngleConsumer):  # type: ignore
-                return f"CSSPrimitiveValueResolver<CSS::Angle<{builtin.value_range}>>::ConsumeAndResolve({range_string}, {state_string}, {{ .UnitlessZeroAngle = {builtin.unitless_zero} }})"
+                return f"CSSPrimitiveValueResolver<Angle<{builtin.value_range}>>::ConsumeAndResolve({range_string}, {state_string}, {{.UnitlessZeroAngle = {builtin.unitless_zero}}})"
             elif isinstance(builtin, BuiltinTimeConsumer):  # type: ignore
-                return f"CSSPrimitiveValueResolver<CSS::Time<{builtin.value_range}>>::ConsumeAndResolve({range_string}, {state_string})"
+                return f"CSSPrimitiveValueResolver<Time<{builtin.value_range}>>::ConsumeAndResolve({range_string}, {state_string})"
             elif isinstance(builtin, BuiltinLengthConsumer):  # type: ignore
-                return f"CSSPrimitiveValueResolver<CSS::Length<{builtin.value_range}>>::ConsumeAndResolve({range_string}, {state_string}, {{ .UnitlessZeroLength = {builtin.unitless_zero} }})"
+                return f"CSSPrimitiveValueResolver<Length<{builtin.value_range}>>::ConsumeAndResolve({range_string}, {state_string}, {{.UnitlessZeroLength = {builtin.unitless_zero}}})"
             elif isinstance(builtin, BuiltinLengthPercentageConsumer):  # type: ignore
-                return f"CSSPrimitiveValueResolver<CSS::LengthPercentage<{builtin.value_range}>>::ConsumeAndResolve({range_string}, {state_string}, {{ .AnchorPolicy = {builtin.anchor}, .AnchorSizePolicy = {builtin.anchor_size}, .UnitlessZeroLength = {builtin.unitless_zero} }})"
+                return f"CSSPrimitiveValueResolver<LengthPercentage<{builtin.value_range}>>::ConsumeAndResolve({range_string}, {state_string}, {{.AnchorPolicy = {builtin.anchor}, .AnchorSizePolicy = {builtin.anchor_size}, .UnitlessZeroLength = {builtin.unitless_zero}}})"
             elif isinstance(builtin, BuiltinIntegerConsumer):  # type: ignore
-                return f"CSSPrimitiveValueResolver<CSS::Integer<{builtin.value_range}>>::ConsumeAndResolve({range_string}, {state_string})"
+                return f"CSSPrimitiveValueResolver<Integer<{builtin.value_range}>>::ConsumeAndResolve({range_string}, {state_string})"
             elif isinstance(builtin, BuiltinNumberConsumer):  # type: ignore
-                return f"CSSPrimitiveValueResolver<CSS::Number<{builtin.value_range}>>::ConsumeAndResolve({range_string}, {state_string})"
+                return f"CSSPrimitiveValueResolver<Number<{builtin.value_range}>>::ConsumeAndResolve({range_string}, {state_string})"
             elif isinstance(builtin, BuiltinPercentageConsumer):  # type: ignore
-                return f"CSSPrimitiveValueResolver<CSS::Percentage<{builtin.value_range}>>::ConsumeAndResolve({range_string}, {state_string})"
+                return f"CSSPrimitiveValueResolver<Percentage<{builtin.value_range}>>::ConsumeAndResolve({range_string}, {state_string})"
             elif isinstance(builtin, BuiltinNumberOrPercentageResolvedToNumberConsumer):  # type: ignore
                 return f"ConsumePercentageDividedBy100OrNumber({range_string}, {state_string})"
             elif isinstance(builtin, BuiltinPositionConsumer):  # type: ignore
                 return f"ConsumePosition({range_string}, {state_string})"
             elif isinstance(builtin, BuiltinColorConsumer):  # type: ignore
                 if builtin.allowed_types:
-                    return f"ConsumeColor({range_string}, {state_string}, {{ .AllowedColorTypes = {{ {builtin.allowed_types} }} }})"
-                return f"ConsumeColor({range_string}, {state_string}, {{ .AllowedColorTypes = {{ }} }})"
+                    return f"ConsumeColor({range_string}, {state_string}, {{.AllowedColorTypes = {{ {builtin.allowed_types} }} }})"
+                return f"ConsumeColor({range_string}, {state_string}, {{.AllowedColorTypes = {{ }} }})"
             elif isinstance(builtin, BuiltinImageConsumer):  # type: ignore
                 if builtin.allowed_types:
-                    return f"ConsumeImage({range_string}, {state_string}, {{ .AllowedImageTypes = {{ {builtin.allowed_types} }} }})"
-                return f"ConsumeImage({range_string}, {state_string}, {{ .AllowedImageTypes = {{ }} }})"
+                    return f"ConsumeImage({range_string}, {state_string}, {{.AllowedImageTypes = {{ {builtin.allowed_types} }} }})"
+                return f"ConsumeImage({range_string}, {state_string}, {{.AllowedImageTypes = {{ }} }})"
             elif isinstance(builtin, BuiltinCustomIdentConsumer):  # type: ignore
                 if builtin.excluding:
-                    return f"ConsumeCustomIdentExcluding({range_string}, {{ { ', '.join(ValueKeywordName(id).id for id in builtin.excluding)} }})"
+                    return f"ConsumeCustomIdentExcluding({range_string}, {{{ ', '.join(ValueKeywordName(id).id for id in builtin.excluding)}}})"
                 return f"ConsumeCustomIdent({range_string})"
             elif isinstance(builtin, BuiltinURLConsumer):  # type: ignore
                 if builtin.allowed_modifiers:
-                    return f"ConsumeURL({range_string}, {state_string}, {{ {builtin.allowed_modifiers} }})"
-                return f"ConsumeURL({range_string}, {state_string}, {{ }})"
+                    return f"ConsumeURL({range_string}, {state_string}, {{{builtin.allowed_modifiers}}})"
+                return f"ConsumeURL({range_string}, {state_string}, {{}})"
             elif self.requires_state:
                 return f"Consume{self.term.name.id_without_prefix}({range_string}, {state_string})"
             else:
@@ -4641,19 +4614,16 @@ class TermGeneratorReferenceTerm(TermGenerator):
         else:
             return f"Consume{self.term.name.id_without_prefix}({range_string}, {state_string})"
 
-    def _generate_lambda(self, *, to):
+    def _generate_lambda(self, *, to: Writer):
         lambda_declaration_parameters = ["CSSTokenRange &range, CSSPropertyParserState &state"]
 
-        to.write(
-            f"auto Consume{self.term.name.id_without_prefix}Reference = []({', '.join(lambda_declaration_parameters)}) -> RefPtr<CSSValue> {{"
-        )
-        with to.indent():
+        with to.lambda_block(
+            signature=f"auto Consume{self.term.name.id_without_prefix}Reference = []({', '.join(lambda_declaration_parameters)}) -> RefPtr<CSSValue>"
+        ):
             if self.term.settings_flag:
-                to.write(f"if (!state.context.{self.term.settings_flag})")
-                with to.indent():
-                    to.write(f"return {{ }};")
+                with to.block(prologue=f"if (!state.context.{self.term.settings_flag})"):
+                    to.write("return {};")
             to.write(f"return {self._generate_call_reference_string(range_string='range', state_string='state')};")
-        to.write(f"}};")
 
     @property
     def requires_state(self):
@@ -4762,29 +4732,23 @@ class TermGeneratorNonFastPathKeywordTerm(TermGenerator):
         # Take the list of pairs of (value, return-expression-to-use-for-value), and
         # group them by their 'return-expression' to avoid unnecessary duplication of
         # return statements.
-        to.write(f"switch (auto keyword = {range_string}.Peek().ValueId(); keyword) {{")
-        for return_expression, group in itertools.groupby(
-            sorted(keyword_term_and_return_expressions, key=lambda x: x.return_expression),
-            lambda x: x.return_expression,
-        ):
-            for keyword_term, _ in group:
-                to.write(f"case {keyword_term.value.id}:")
+        with to.switch_block(expr=f"auto keyword = {range_string}.Peek().ValueId(); keyword"):
+            for return_expression, group in itertools.groupby(
+                sorted(keyword_term_and_return_expressions, key=lambda x: x.return_expression),
+                lambda x: x.return_expression,
+            ):
+                with to.multi_case_block(cases=[keyword_term.value.id for keyword_term, _ in group]):
+                    if return_expression.conditions:
+                        to.write(f"if ({' || '.join(return_expression.conditions)})")
+                        with to.block():
+                            to.write(f"{default_string};")
 
-            with to.indent():
-                if return_expression.conditions:
-                    to.write(f"if ({' || '.join(return_expression.conditions)})")
-                    with to.indent():
-                        to.write(f"{default_string};")
+                    to.write(f"{range_string}.Discard();")
+                    to.write(f"{range_string}.DiscardWhitespace();")
+                    to.write(f"return CreateRef<CSSPrimitiveValue>({return_expression.return_value});")
 
-                to.write(f"{range_string}.Discard();")
-                to.write(f"{range_string}.DiscardWhitespace();")
-                to.write(f"return CreateRef<CSSPrimitiveValue>({return_expression.return_value});")
-
-        to.write(f"default:")
-        with to.indent():
-            to.write(f"{default_string};")
-
-        to.write(f"}}")
+            with to.default_case_block():
+                to.write(f"{default_string};")
 
 
 # Generation support for a properties fast path eligible keyword terms.
@@ -4808,7 +4772,7 @@ class TermGeneratorFastPathKeywordTerms(TermGenerator):
         to.write(
             f"if (auto result = {self.generate_call_string(range_string=range_string, state_string=state_string)})"
         )
-        with to.indent():
+        with to.block():
             to.write(f"return result;")
 
     def generate_unconditional(self, *, to: Writer, range_string, state_string):
@@ -4820,7 +4784,7 @@ class TermGeneratorFastPathKeywordTerms(TermGenerator):
         parameters = [range_string, self.keyword_fast_path_generator.generate_reference_string()]
         if self.requires_state:
             parameters.append(state_string)
-        return f"consumeIdent({', '.join(parameters)})"
+        return f"ConsumeIdent({', '.join(parameters)})"
 
 
 # endregion
@@ -5219,10 +5183,7 @@ class KeywordFastPathGenerator:
         return self.signature.generate_call_string(parameters)
 
     def generate_definition(self, *, to: Writer):
-        to.write(f"KRYS_NODISCARD static {self.signature.definition_string}")
-        to.write(f"{{")
-
-        with to.indent():
+        with to.function_block(signature=f"KRYS_NODISCARD static {self.signature.definition_string}"):
             # Build up a list of pairs of (value, return-expression-to-use-for-value), taking
             # into account settings flags and mode checks for internal values. Leave the return
             # expression as an empty array for the default return expression "return true;".
@@ -5247,22 +5208,17 @@ class KeywordFastPathGenerator:
             # Take the list of pairs of (value, return-expression-to-use-for-value), and
             # group them by their 'return-expression' to avoid unnecessary duplication of
             # return statements.
-            to.write(f"switch (keyword) {{")
-            for return_expression, group in itertools.groupby(
-                sorted(keyword_term_and_return_expressions, key=lambda x: x.return_expression),
-                lambda x: x.return_expression,
-            ):
-                for keyword_term, _ in group:
-                    to.write(f"case {keyword_term.value.id}:")
-                with to.indent():
-                    to.write(f"return {' && '.join(return_expression or ['true'])};")
+            with to.switch_block(expr="keyword"):
+                for return_expression, group in itertools.groupby(
+                    sorted(keyword_term_and_return_expressions, key=lambda x: x.return_expression),
+                    lambda x: x.return_expression,
+                ):
+                    with to.multi_case_block(cases=[keyword_term.value.id for keyword_term, _ in group]):
+                        to.write(f"return {' && '.join(return_expression or ['true'])};")
 
-            to.write(f"default:")
-            with to.indent():
-                to.write(f"return false;")
+                with to.default_case_block():
+                    to.write(f"return false;")
 
-            to.write(f"}}")
-        to.write(f"}}")
         to.newline()
 
 
@@ -5357,7 +5313,7 @@ class FastPathKeywordOnlyPropertyConsumer(PropertyConsumer):
     def __init__(self, property):
         self.property = property
         self.keyword_fast_path_generator = KeywordFastPathGenerator(
-            f"isKeywordValidFor{property.name_for_parsing_methods}",
+            f"IsKeywordValidFor{property.name_for_parsing_methods}",
             property.codegen_properties.parser_grammar.fast_path_keyword_terms_sorted_by_name,
         )
         self.term_generator = TermGeneratorFastPathKeywordTerms(self.keyword_fast_path_generator)
@@ -8403,13 +8359,10 @@ class GenerateCSSPropertyParsing:
         self, *, to: Writer, parsing_collection, keyword_fast_path_eligible_property_consumers
     ):
         if not keyword_fast_path_eligible_property_consumers:
-            to.write(
-                f"bool CSSPropertyParsing::IsKeywordValidFor{parsing_collection.id}(CSSPropertyId, CSSValueId, CSSPropertyParserState&)"
-            )
-            to.write(f"{{")
-            with to.indent():
+            with to.function_block(
+                signature=f"bool CSSPropertyParsing::IsKeywordValidFor{parsing_collection.id}(CSSPropertyId id, CSSValueId keyword, CSSPropertyParserState &state) noexcept"
+            ):
                 to.write(f"return false;")
-            to.write(f"}}")
             to.newline()
             return
 
@@ -8420,7 +8373,7 @@ class GenerateCSSPropertyParsing:
 
         self.generation_context.generate_property_id_switch_function(
             to=to,
-            signature=f"bool CSSPropertyParsing::IsKeywordValidFor{parsing_collection.id}(CSSPropertyId id, CSSValueId keyword, CSSPropertyParserState&{' state' if requires_state else ''})",
+            signature=f"bool CSSPropertyParsing::IsKeywordValidFor{parsing_collection.id}(CSSPropertyId id, CSSValueId keyword, CSSPropertyParserState &{' state' if requires_state else ''}) noexcept",
             iterable=keyword_fast_path_eligible_property_consumers,
             mapping=lambda property_consumer: f"return {property_consumer.keyword_fast_path_generator.generate_call_string(keyword_string='keyword', state_string='state')};",
             default="return false;",
@@ -8431,17 +8384,15 @@ class GenerateCSSPropertyParsing:
         self, *, to: Writer, parsing_collection, keyword_fast_path_eligible_property_consumers
     ):
         if not keyword_fast_path_eligible_property_consumers:
-            to.write(f"bool CSSPropertyParsing::IsKeywordFastPathEligible{parsing_collection.id}(CSSPropertyId)")
-            to.write(f"{{")
-            with to.indent():
+            with to.function_block(
+                signature=f"bool CSSPropertyParsing::IsKeywordFastPathEligible{parsing_collection.id}(CSSPropertyId id) noexcept"
+            ):
                 to.write(f"return false;")
-            to.write(f"}}")
-            to.newline()
             return
 
         self.generation_context.generate_property_id_switch_function_bool(
             to=to,
-            signature=f"bool CSSPropertyParsing::IsKeywordFastPathEligible{parsing_collection.id}(CSSPropertyId id)",
+            signature=f"bool CSSPropertyParsing::IsKeywordFastPathEligible{parsing_collection.id}(CSSPropertyId id) noexcept",
             iterable=keyword_fast_path_eligible_property_consumers,
             mapping_to_property=lambda property_consumer: property_consumer.property,
         )
@@ -8470,22 +8421,19 @@ class GenerateCSSPropertyParsing:
 
     def _generate_css_property_parsing_cpp_parse_longhand_property(self, *, to: Writer, parsing_collection):
         to.write(
-            f"RefPtr<CSSValue> CSSPropertyParsing::Parse{parsing_collection.id}{'Longhand' if parsing_collection.supports_shorthands else ''}(CSSTokenRange &range, CSSPropertyId id, CSSPropertyParserState &state)"
+            f"RefPtr<CSSValue> CSSPropertyParsing::Parse{parsing_collection.id}{'Longhand' if parsing_collection.supports_shorthands else ''}(CSSTokenRange &range, CSSPropertyId id, CSSPropertyParserState &state) noexcept"
         )
-
-        to.write(f"{{")
-        with to.indent():
-            to.write(f"if (!isExposed(id, state.context.propertySettings) && !isInternal(id)) {{")
-            with to.indent():
+        with to.block():
+            to.write(f"if (!IsExposed(id, state.Context.PropertySettings) && !IsInternal(id))")
+            with to.block():
                 to.write(
                     f"// Allow internal properties as we use them to parse several internal-only-shorthands (e.g. background-repeat),"
                 )
                 to.write(
                     f"// and to handle certain DOM-exposed values (e.g. -webkit-font-size-delta from execCommand('FontSizeDelta'))."
                 )
-                to.write(f"ASSERT_NOT_REACHED();")
-                to.write(f"return {{ }};")
-            to.write(f"}}")
+                to.write(f"assert(false);")
+                to.write("return {};")
 
             # Build up a list of pairs of (property, return-expression-to-use-for-property).
 
@@ -8525,73 +8473,61 @@ class GenerateCSSPropertyParsing:
             def _sort_by_first_property(a, b):
                 return StyleProperties._sort_by_descending_priority_and_name(a.properties[0], b.properties[0])
 
-            to.write(f"switch (id) {{")
-            for properties, return_expression in sorted(
-                property_and_return_expressions_grouped_by_expression, key=functools.cmp_to_key(_sort_by_first_property)
-            ):
-                for property in properties:
-                    to.write(f"case {property.id}:")
+            with to.switch_block(expr="id"):
+                for group in sorted(
+                    property_and_return_expressions_grouped_by_expression,
+                    key=functools.cmp_to_key(_sort_by_first_property),
+                ):
+                    with to.multi_case_block(cases=[property.id for property in group.properties]):
+                        to.write(f"return {group.return_expression};")
 
-                with to.indent():
-                    to.write(f"return {return_expression};")
-
-            to.write(f"default:")
-            with to.indent():
-                to.write(f"return {{ }};")
-            to.write(f"}}")
-        to.write(f"}}")
+                with to.default_case_block():
+                    to.write("return {};")
         to.newline()
 
     def _generate_css_property_parsing_cpp_parse_shorthand_property(self, *, to: Writer, parsing_collection):
         if not parsing_collection.supports_shorthands:
             return
         to.write(
-            f"bool CSSPropertyParsing::parse{parsing_collection.id}Shorthand(CSSParserTokenRange& range, CSSPropertyId id, CSS::PropertyParserState& state, CSS::PropertyParserResult& result)"
+            f"bool CSSPropertyParsing::Parse{parsing_collection.id}Shorthand(CSSTokenRange &range, CSSPropertyId id, CSSPropertyParserState &state, CSSPropertyParserResult &result) noexcept"
         )
 
-        to.write(f"{{")
-        with to.indent():
-            to.write(f"ASSERT(isShorthand(id));")
+        with to.block():
+            to.write(f"assert(IsShorthand(id));")
             to.newline()
 
-            to.write(f"switch (id) {{")
+            with to.switch_block(expr="id"):
+                for consumer in parsing_collection.consumers:
+                    if not consumer.property.codegen_properties.longhands:
+                        continue
+                    if consumer.property.codegen_properties.skip_parser:
+                        continue
 
-            for consumer in parsing_collection.consumers:
-                if not consumer.property.codegen_properties.longhands:
-                    continue
-                if consumer.property.codegen_properties.skip_parser:
-                    continue
+                    with to.case_block(case=consumer.property.id):
+                        if (
+                            consumer.property.codegen_properties.settings_flag
+                            and not consumer.property.codegen_properties.internal_only
+                        ):
+                            to.write(
+                                f"if (!state.Context.PropertySettings.{consumer.property.codegen_properties.settings_flag})"
+                            )
+                            with to.block():
+                                to.write(f"assert(false);")
+                                to.write(f"return false;")
 
-                to.write(f"case {consumer.property.id}:")
-                with to.indent():
-                    if (
-                        consumer.property.codegen_properties.settings_flag
-                        and not consumer.property.codegen_properties.internal_only
-                    ):
-                        to.write(
-                            f"if (!state.context.propertySettings.{consumer.property.codegen_properties.settings_flag}) {{"
-                        )
-                        with to.indent():
-                            to.write(f"ASSERT_NOT_REACHED();")
-                            to.write(f"return false;")
-                        to.write(f"}}")
+                        if consumer.property.codegen_properties.parser_function:
+                            to.write(
+                                f"return CSSPropertyParserCustom::{consumer.property.codegen_properties.parser_function}(range, state, {consumer.property.codegen_properties.parser_shorthand}(), result);"
+                            )
+                        elif consumer.property.codegen_properties.shorthand_parser_pattern:
+                            to.write(
+                                f"return CSSPropertyParserCustom::Consume{consumer.property.codegen_properties.shorthand_parser_pattern}Shorthand(range, state, {consumer.property.codegen_properties.parser_shorthand}(), result);"
+                            )
+                        else:
+                            raise Exception(f"Shorthand property '{consumer.property}' has unknown parsing method.")
 
-                    if consumer.property.codegen_properties.parser_function:
-                        to.write(
-                            f"return CSS::PropertyParserCustom::{consumer.property.codegen_properties.parser_function}(range, state, {consumer.property.codegen_properties.parser_shorthand}(), result);"
-                        )
-                    elif consumer.property.codegen_properties.shorthand_parser_pattern:
-                        to.write(
-                            f"return CSS::PropertyParserCustom::consume{consumer.property.codegen_properties.shorthand_parser_pattern}Shorthand(range, state, {consumer.property.codegen_properties.parser_shorthand}(), result);"
-                        )
-                    else:
-                        raise Exception(f"Shorthand property '{consumer.property}' has unknown parsing method.")
-
-            to.write(f"default:")
-            with to.indent():
-                to.write(f"return false;")
-            to.write(f"}}")
-        to.write(f"}}")
+                with to.default_case_block():
+                    to.write(f"return false;")
         to.newline()
 
 
@@ -8621,7 +8557,7 @@ class GenerateCSSPropertyShorthandFunctions:
             )
 
             with writer.namespace(namespace="Krys::HTML"):
-                writer.forward_declarations(structs=["CSSPropertyShorthand"])
+                writer.forward_declarations(classes=["CSSPropertyShorthand"])
                 for property in self.style_properties.all_shorthands:
                     writer.write(
                         f"KRYS_NODISCARD CSSPropertyShorthand {property.id_without_prefix}Shorthand() noexcept;"
@@ -8955,7 +8891,7 @@ class GenerateStyleBuilderGenerated:
             f"auto inheritedValue = builderState.parentStyle().{property.codegen_properties.render_style_getter}();"
         )
         to.write(
-            f"builderState.{property.codegen_properties.font_description_setter.replace('set', 'setFontDescription', 1)}(WTF::move(inheritedValue));"
+            f"builderState.{property.codegen_properties.font_description_setter.replace('set', 'setFontDescription', 1)}(Krys::Move(inheritedValue));"
         )
 
     def _generate_font_property_value_setter(self, to: Writer, property, value):
@@ -9676,7 +9612,7 @@ class GenerateStyleInterpolationWrapperMap:
                     return wrapper;
                 });
 
-                return new ShorthandWrapper(id, WTF::move(longhandWrappers));
+                return new ShorthandWrapper(id, Krys::Move(longhandWrappers));
             }
             """)
 
@@ -9790,7 +9726,7 @@ class GenerateStyleComputedStyleProperties:
     ):
         # Compute the right side of the assignment expression for the setter expression.
         if storage_kind == "reference":
-            rhs = f"WTF::move({argument_name})"
+            rhs = f"Krys::Move({argument_name})"
         elif storage_kind == "enum":
             rhs = f"static_cast<unsigned>({argument_name})"
         elif storage_kind == "raw":
@@ -9996,7 +9932,7 @@ class GenerateStyleComputedStyleProperties:
                     writer.newline()
 
                     writer.write(
-                        f"ComputedStyleProperties(ComputedStyleProperties& a, ComputedStyleProperties&& b) : ComputedStyleBase {{ a, WTF::move(b) }} {{ }}"
+                        f"ComputedStyleProperties(ComputedStyleProperties& a, ComputedStyleProperties&& b) : ComputedStyleBase {{ a, Krys::Move(b) }} {{ }}"
                     )
 
                 writer.write(f"}};")
@@ -10476,10 +10412,10 @@ class GenerateStyleComputedStyleProperties:
         with to.indent():
             to.write(f"if (writingMode().isHorizontal())")
             with to.indent():
-                to.write(f"{horizontal.codegen_properties.render_style_setter}(WTF::move(value));")
+                to.write(f"{horizontal.codegen_properties.render_style_setter}(Krys::Move(value));")
             to.write(f"else")
             with to.indent():
-                to.write(f"{vertical.codegen_properties.render_style_setter}(WTF::move(value));")
+                to.write(f"{vertical.codegen_properties.render_style_setter}(Krys::Move(value));")
         to.write(f"}}")
         to.newline()
 
@@ -10493,18 +10429,18 @@ class GenerateStyleComputedStyleProperties:
             with to.indent():
                 to.write(f"if (writingMode().isInlineLeftToRight())")
                 with to.indent():
-                    to.write(f"{left.codegen_properties.render_style_setter}(WTF::move(value));")
+                    to.write(f"{left.codegen_properties.render_style_setter}(Krys::Move(value));")
                 to.write(f"else")
                 with to.indent():
-                    to.write(f"{right.codegen_properties.render_style_setter}(WTF::move(value));")
+                    to.write(f"{right.codegen_properties.render_style_setter}(Krys::Move(value));")
             to.write(f"}} else {{")
             with to.indent():
                 to.write(f"if (writingMode().isInlineTopToBottom())")
                 with to.indent():
-                    to.write(f"{top.codegen_properties.render_style_setter}(WTF::move(value));")
+                    to.write(f"{top.codegen_properties.render_style_setter}(Krys::Move(value));")
                 to.write(f"else")
                 with to.indent():
-                    to.write(f"{bottom.codegen_properties.render_style_setter}(WTF::move(value));")
+                    to.write(f"{bottom.codegen_properties.render_style_setter}(Krys::Move(value));")
             to.write(f"}}")
         to.write(f"}}")
         to.newline()
@@ -10518,16 +10454,16 @@ class GenerateStyleComputedStyleProperties:
             to.write(f"switch (writingMode().blockDirection()) {{")
             to.write(f"case FlowDirection::LeftToRight:")
             with to.indent():
-                to.write(f"return {left.codegen_properties.render_style_setter}(WTF::move(value));")
+                to.write(f"return {left.codegen_properties.render_style_setter}(Krys::Move(value));")
             to.write(f"case FlowDirection::RightToLeft:")
             with to.indent():
-                to.write(f"return {right.codegen_properties.render_style_setter}(WTF::move(value));")
+                to.write(f"return {right.codegen_properties.render_style_setter}(Krys::Move(value));")
             to.write(f"case FlowDirection::TopToBottom:")
             with to.indent():
-                to.write(f"return {top.codegen_properties.render_style_setter}(WTF::move(value));")
+                to.write(f"return {top.codegen_properties.render_style_setter}(Krys::Move(value));")
             to.write(f"case FlowDirection::BottomToTop:")
             with to.indent():
-                to.write(f"return {bottom.codegen_properties.render_style_setter}(WTF::move(value));")
+                to.write(f"return {bottom.codegen_properties.render_style_setter}(Krys::Move(value));")
             to.write(f"}}")
         to.write(f"}}")
         to.newline()
@@ -10540,10 +10476,10 @@ class GenerateStyleComputedStyleProperties:
         with to.indent():
             to.write(f"if (writingMode().isHorizontal())")
             with to.indent():
-                to.write(f"{left.codegen_properties.render_style_setter}(WTF::move(value));")
+                to.write(f"{left.codegen_properties.render_style_setter}(Krys::Move(value));")
             to.write(f"else")
             with to.indent():
-                to.write(f"{right.codegen_properties.render_style_setter}(WTF::move(value));")
+                to.write(f"{right.codegen_properties.render_style_setter}(Krys::Move(value));")
         to.write(f"}}")
         to.newline()
 
@@ -10761,7 +10697,7 @@ class GenerateRenderStyleProperties:
 
     def _compute_forwarding_expression(self, storage_kind, argument_name):
         if storage_kind == "reference":
-            return f"WTF::move({argument_name})"
+            return f"Krys::Move({argument_name})"
         else:
             return f"{argument_name}"
 
@@ -10948,7 +10884,7 @@ class GenerateRenderStyleProperties:
                     writer.newline()
 
                     writer.write(
-                        f"RenderStyleProperties(RenderStyleProperties& a, RenderStyleProperties&& b) : RenderStyleBase {{ a, WTF::move(b) }} {{ }}"
+                        f"RenderStyleProperties(RenderStyleProperties& a, RenderStyleProperties&& b) : RenderStyleBase {{ a, Krys::Move(b) }} {{ }}"
                     )
 
                 writer.write(f"}};")

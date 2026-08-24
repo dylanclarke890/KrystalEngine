@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/CSS/Values/CSSKeywordConstants.hpp"
+#include "Krystal.HTML/CSS/Values/Enums/CSSValueId.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/Visitor.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
@@ -11,7 +11,7 @@ namespace Krys::HTML
 {
   /// @brief Concept for use in generic contexts to filter on Constant keyword CSS types.
   template <typename Keyword>
-  concept PrimitiveKeyword = SameType<Keyword, KeywordConstant<Keyword::value>>;
+  concept PrimitiveKeyword = SameType<Keyword, ValueKeywordConstant<Keyword::value>>;
 
   /// @brief Concept for use in generic contexts to filter on keywords that are valid for the provided
   /// `Keywords` list.

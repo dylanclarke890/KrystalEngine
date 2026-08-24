@@ -8,10 +8,46 @@ namespace Krys::HTML
 {
   /// @brief Represents a shorthand property and the longhand properties it expands into.
   /// @example `margin` expands into `margin-top`, `margin-left`, `margin-bottom`, `margin-right`.
-  struct CSSPropertyShorthand
+  class CSSPropertyShorthand
   {
-    CSSPropertyId ShorthandId : BitCount<CSSPropertyId>() {CSSPropertyId::Invalid};
-    Span<const CSSPropertyId> LonghandProperties;
+  private:
+    Span<const CSSPropertyId> _properties;
+    CSSPropertyId _shorthandId {CSSPropertyId::Invalid};
+
+  public:
+    CSSPropertyShorthand() noexcept = default;
+
+    template <size_t NumProperties>
+    CSSPropertyShorthand(CSSPropertyId id, Span<const CSSPropertyId, NumProperties> properties) noexcept
+        : _properties(properties), _shorthandId(id)
+    {
+      static_assert(NumProperties != std::dynamic_extent);
+    }
+
+    KRYS_NODISCARD const CSSPropertyId *begin() const noexcept
+    {
+      return std::to_address(_properties.begin());
+    }
+
+    KRYS_NODISCARD const CSSPropertyId *end() const noexcept
+    {
+      return std::to_address(_properties.end());
+    }
+
+    KRYS_NODISCARD size_t Size() const noexcept
+    {
+      return _properties.size();
+    }
+
+    KRYS_NODISCARD CSSPropertyId Id() const noexcept
+    {
+      return _shorthandId;
+    }
+
+    KRYS_NODISCARD Span<const CSSPropertyId> Properties() const noexcept
+    {
+      return _properties;
+    }
   };
 
   /// @brief Finds the index of the shorthand property in the given list of shorthands. If the shorthand
@@ -21,7 +57,7 @@ namespace Krys::HTML
   {
     for (size_t i = 0uz; i < shorthands.size(); ++i)
     {
-      if (shorthands[i].ShorthandId == property)
+      if (shorthands[i].Id() == property)
       {
         return i;
       }
@@ -30,6 +66,9 @@ namespace Krys::HTML
     assert(false);
     return 0uz;
   }
+
+  // The implementation is generated in CSSPropertyShorthandFunctions.cpp.
+  KRYS_NODISCARD CSSPropertyShorthand ShorthandForProperty(CSSPropertyId) noexcept;
 
   using CSSPropertyShorthandList = SmallList<CSSPropertyShorthand, 4uz>;
 

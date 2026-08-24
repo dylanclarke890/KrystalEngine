@@ -363,6 +363,12 @@
     <ClInclude Include="include\Krystal.Lib\Core\Visitor.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\NeverDestroyed.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\AlignedStorage.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Events\EventManager.cpp">

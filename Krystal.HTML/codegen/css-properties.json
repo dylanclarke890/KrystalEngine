@@ -11,6 +11,345 @@
         "url": "https://www.w3.org/TR/css-cascade-3/#all-shorthand"
       }
     },
+    "animation": {
+      "codegen-properties": {
+        "aliases": ["-webkit-animation"],
+        "longhands": [
+          "animation-duration",
+          "animation-timing-function",
+          "animation-delay",
+          "animation-iteration-count",
+          "animation-direction",
+          "animation-fill-mode",
+          "animation-play-state",
+          "animation-name",
+          "animation-timeline",
+          "animation-range-start",
+          "animation-range-end"
+        ],
+        "parser-function": "ConsumeAnimationShorthand",
+        "parser-grammar": "<single-animation>#",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-animations",
+        "url": "https://www.w3.org/TR/css3-animations/#animation-shorthand-property",
+        "description": "Used to animate elements"
+      }
+    },
+    "animation-composition": {
+      "animation-type": "not animatable",
+      "initial": "replace",
+      "values": ["add", "accumulate", "replace"],
+      "codegen-properties": {
+        "coordinated-value-list-property": true,
+        "coordinated-value-list-property-name-for-methods": "CompositeOperation",
+        "coordinated-value-list-property-item-type": "CompositeOperation",
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "miscData",
+          "animations"
+        ],
+        "parser-grammar": "<single-animation-composition>#"
+      },
+      "specification": {
+        "module": "css-animations",
+        "url": "https://drafts.csswg.org/css-animations-2/#animation-composition"
+      }
+    },
+    "animation-delay": {
+      "animation-type": "not animatable",
+      "initial": "0s",
+      "codegen-properties": {
+        "aliases": ["-webkit-animation-delay"],
+        "coordinated-value-list-property": true,
+        "coordinated-value-list-property-name-for-methods": "Delay",
+        "coordinated-value-list-property-item-type": "Style::SingleAnimationDelay",
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "miscData",
+          "animations"
+        ],
+        "separator": ",",
+        "parser-grammar": "<time>#"
+      },
+      "specification": {
+        "module": "css-animations",
+        "url": "https://www.w3.org/TR/css3-animations/#animation-delay-property"
+      }
+    },
+    "animation-direction": {
+      "animation-type": "not animatable",
+      "initial": "normal",
+      "values": ["normal", "reverse", "alternate", "alternate-reverse"],
+      "codegen-properties": {
+        "aliases": ["-webkit-animation-direction"],
+        "coordinated-value-list-property": true,
+        "coordinated-value-list-property-name-for-methods": "Direction",
+        "coordinated-value-list-property-item-type": "AnimationDirection",
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "miscData",
+          "animations"
+        ],
+        "separator": ",",
+        "parser-grammar": "<single-animation-direction>#"
+      },
+      "specification": {
+        "module": "css-animations",
+        "url": "https://www.w3.org/TR/css3-animations/#animation-direction-property"
+      }
+    },
+    "animation-duration": {
+      "animation-type": "not animatable",
+      "initial": "auto",
+      "codegen-properties": {
+        "aliases": ["-webkit-animation-duration"],
+        "coordinated-value-list-property": true,
+        "coordinated-value-list-property-name-for-methods": "Duration",
+        "coordinated-value-list-property-item-type": "Style::SingleAnimationDuration",
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "miscData",
+          "animations"
+        ],
+        "style-extractor-custom": true,
+        "separator": ",",
+        "parser-grammar": "<single-animation-duration>#"
+      },
+      "specification": {
+        "module": "css-animations",
+        "url": "https://drafts.csswg.org/css-animations-2/#animation-duration",
+        "documentation-url": "https://developer.mozilla.org/en-US/docs/Web/CSS/animation-duration"
+      }
+    },
+    "animation-fill-mode": {
+      "animation-type": "not animatable",
+      "initial": "none",
+      "values": ["none", "forwards", "backwards", "both"],
+      "codegen-properties": {
+        "aliases": ["-webkit-animation-fill-mode"],
+        "coordinated-value-list-property": true,
+        "coordinated-value-list-property-name-for-methods": "FillMode",
+        "coordinated-value-list-property-item-type": "AnimationFillMode",
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "miscData",
+          "animations"
+        ],
+        "separator": ",",
+        "parser-grammar": "<single-animation-fill-mode>#"
+      },
+      "specification": {
+        "module": "css-animations",
+        "url": "https://www.w3.org/TR/css3-animations/#animation-fill-mode-property"
+      }
+    },
+    "animation-iteration-count": {
+      "animation-type": "not animatable",
+      "initial": "1",
+      "codegen-properties": {
+        "aliases": ["-webkit-animation-iteration-count"],
+        "coordinated-value-list-property": true,
+        "coordinated-value-list-property-name-for-methods": "IterationCount",
+        "coordinated-value-list-property-item-type": "Style::SingleAnimationIterationCount",
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "miscData",
+          "animations"
+        ],
+        "separator": ",",
+        "parser-grammar": "<single-animation-iteration-count>#"
+      },
+      "specification": {
+        "module": "css-animations",
+        "url": "https://www.w3.org/TR/css3-animations/#animation-iteration-count-property"
+      }
+    },
+    "animation-name": {
+      "animation-type": "not animatable",
+      "initial": "none",
+      "values": ["none"],
+      "codegen-properties": {
+        "aliases": ["-webkit-animation-name"],
+        "coordinated-value-list-property": true,
+        "coordinated-value-list-property-name-for-methods": "Name",
+        "coordinated-value-list-property-item-type": "Style::SingleAnimationName",
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "miscData",
+          "animations"
+        ],
+        "separator": ",",
+        "parser-grammar": "<single-animation-name>#"
+      },
+      "specification": {
+        "module": "css-animations",
+        "url": "https://www.w3.org/TR/css3-animations/#animation-name-property"
+      }
+    },
+    "animation-play-state": {
+      "animation-type": "not animatable",
+      "initial": "running",
+      "values": ["running", "paused"],
+      "codegen-properties": {
+        "aliases": ["-webkit-animation-play-state"],
+        "coordinated-value-list-property": true,
+        "coordinated-value-list-property-name-for-methods": "PlayState",
+        "coordinated-value-list-property-item-type": "AnimationPlayState",
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "miscData",
+          "animations"
+        ],
+        "separator": ",",
+        "parser-grammar": "<single-animation-play-state>#"
+      },
+      "specification": {
+        "module": "css-animations",
+        "url": "https://www.w3.org/TR/css3-animations/#animation-play-state-property"
+      }
+    },
+    "animation-range": {
+      "codegen-properties": {
+        "longhands": ["animation-range-start", "animation-range-end"],
+        "coordinated-value-list-property": true,
+        "separator": ",",
+        "settings-flag": "ScrollDrivenAnimationsEnabled",
+        "parser-function": "ConsumeAnimationRangeShorthand",
+        "parser-grammar": "[ <'animation-range-start'> <'animation-range-end'>? ]#",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "scroll-animations",
+        "url": "https://drafts.csswg.org/scroll-animations-1/#animation-range"
+      }
+    },
+    "animation-range-start": {
+      "animation-type": "not animatable",
+      "initial": "normal",
+      "values": [
+        "normal",
+        "cover",
+        "contain",
+        "entry",
+        "exit",
+        "entry-crossing",
+        "exit-crossing"
+      ],
+      "codegen-properties": {
+        "coordinated-value-list-property": true,
+        "coordinated-value-list-property-name-for-methods": "RangeStart",
+        "coordinated-value-list-property-item-type": "Style::SingleAnimationRangeStart",
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "miscData",
+          "animations"
+        ],
+        "separator": ",",
+        "parser-grammar": "<single-animation-range-start>#",
+        "settings-flag": "ScrollDrivenAnimationsEnabled"
+      },
+      "specification": {
+        "module": "scroll-animations",
+        "url": "https://drafts.csswg.org/scroll-animations-1/#propdef-animation-range-start"
+      }
+    },
+    "animation-range-end": {
+      "animation-type": "not animatable",
+      "initial": "normal",
+      "values": [
+        "normal",
+        "cover",
+        "contain",
+        "entry",
+        "exit",
+        "entry-crossing",
+        "exit-crossing"
+      ],
+      "codegen-properties": {
+        "coordinated-value-list-property": true,
+        "coordinated-value-list-property-name-for-methods": "RangeEnd",
+        "coordinated-value-list-property-item-type": "Style::SingleAnimationRangeEnd",
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "miscData",
+          "animations"
+        ],
+        "separator": ",",
+        "parser-grammar": "<single-animation-range-end>#",
+        "settings-flag": "ScrollDrivenAnimationsEnabled"
+      },
+      "specification": {
+        "module": "scroll-animations",
+        "url": "https://drafts.csswg.org/scroll-animations-1/#propdef-animation-range-end"
+      }
+    },
+    "animation-timeline": {
+      "animation-type": "not animatable",
+      "initial": "auto",
+      "values": ["auto", "none"],
+      "codegen-properties": {
+        "parser-grammar": "<single-animation-timeline>#",
+        "settings-flag": "ScrollDrivenAnimationsEnabled",
+        "coordinated-value-list-property": true,
+        "coordinated-value-list-property-name-for-methods": "Timeline",
+        "coordinated-value-list-property-item-type": "Style::SingleAnimationTimeline",
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "miscData",
+          "animations"
+        ]
+      },
+      "specification": {
+        "module": "css-animations",
+        "url": "https://drafts.csswg.org/css-animations-2/#animation-timeline"
+      }
+    },
+    "animation-timing-function": {
+      "animation-type": "not animatable",
+      "initial": "ease",
+      "values": [
+        "linear",
+        "ease",
+        "ease-in",
+        "ease-out",
+        "ease-in-out",
+        "step-start",
+        "step-end"
+      ],
+      "codegen-properties": {
+        "parser-grammar": "<easing-function>#",
+        "aliases": ["-webkit-animation-timing-function"],
+        "coordinated-value-list-property": true,
+        "coordinated-value-list-property-name-for-methods": "TimingFunction",
+        "coordinated-value-list-property-item-type": "Style::EasingFunction",
+        "render-style-storage-container": "opaque",
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "miscData",
+          "animations"
+        ],
+        "separator": ","
+      },
+      "specification": {
+        "module": "css-animations",
+        "url": "https://drafts.csswg.org/css-animations-1/#propdef-animation-timing-function"
+      }
+    },
     "background-image": {
       "animation-type": "discrete",
       "initial": "none",
@@ -35,6 +374,1422 @@
       "specification": {
         "module": "css-backgrounds",
         "url": "https://drafts.csswg.org/css-backgrounds/#propdef-background-image"
+      }
+    },
+    "border": {
+      "codegen-properties": {
+        "longhands": [
+          "border-top-width",
+          "border-right-width",
+          "border-bottom-width",
+          "border-left-width",
+          "border-top-style",
+          "border-right-style",
+          "border-bottom-style",
+          "border-left-style",
+          "border-top-color",
+          "border-right-color",
+          "border-bottom-color",
+          "border-left-color",
+          "border-image-source",
+          "border-image-slice",
+          "border-image-width",
+          "border-image-outset",
+          "border-image-repeat"
+        ],
+        "parser-function": "ConsumeBorderShorthand",
+        "parser-grammar": "<'border-top-width'> || <'border-top-style'> || <'border-top-color'>",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-shorthands"
+      }
+    },
+    "border-block": {
+      "codegen-properties": {
+        "longhands": [
+          "border-block-start-width",
+          "border-block-end-width",
+          "border-block-start-style",
+          "border-block-end-style",
+          "border-block-start-color",
+          "border-block-end-color"
+        ],
+        "parser-function": "ConsumeBorderBlockShorthand",
+        "parser-grammar": "<'border-block-start'>",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-shorthands"
+      }
+    },
+    "border-block-color": {
+      "codegen-properties": {
+        "longhands": ["border-block-start-color", "border-block-end-color"],
+        "shorthand-pattern": "CoalescingPair",
+        "parser-grammar": "<'border-top-color'>{1,2}",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-color"
+      }
+    },
+    "border-block-end": {
+      "codegen-properties": {
+        "aliases": ["-webkit-border-after"],
+        "longhands": [
+          "border-block-end-width",
+          "border-block-end-style",
+          "border-block-end-color"
+        ],
+        "shorthand-pattern": "StandardSpaceSeparated",
+        "parser-grammar": "<'border-top-width'> || <'border-top-style'> || <color>",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-shorthands"
+      }
+    },
+    "border-block-end-color": {
+      "animation-type": "by computed value",
+      "initial": "currentcolor",
+      "codegen-properties": {
+        "aliases": ["-webkit-border-after-color"],
+        "logical-property-group": {
+          "name": "border-color",
+          "resolver": "block-end"
+        },
+        "skip-style-builder": true,
+        "color-property": true,
+        "disables-native-appearance": true,
+        "parser-grammar": "<color>"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-color"
+      }
+    },
+    "border-block-end-style": {
+      "animation-type": "discrete",
+      "initial": "none",
+      "values": [
+        "none",
+        "hidden",
+        "inset",
+        "groove",
+        "outset",
+        "ridge",
+        "dotted",
+        "dashed",
+        "solid",
+        "double"
+      ],
+      "codegen-properties": {
+        "aliases": ["-webkit-border-after-style"],
+        "skip-style-builder": true,
+        "disables-native-appearance": true,
+        "logical-property-group": {
+          "name": "border-style",
+          "resolver": "block-end"
+        },
+        "parser-grammar": "<line-style>"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-style"
+      }
+    },
+    "border-block-end-width": {
+      "animation-type": "by computed value",
+      "initial": "medium",
+      "values": ["thin", "medium", "thick"],
+      "codegen-properties": {
+        "aliases": ["-webkit-border-after-width"],
+        "skip-style-builder": true,
+        "disables-native-appearance": true,
+        "logical-property-group": {
+          "name": "border-width",
+          "resolver": "block-end"
+        },
+        "parser-grammar": "<line-width>"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-width"
+      }
+    },
+    "border-block-start": {
+      "codegen-properties": {
+        "aliases": ["-webkit-border-before"],
+        "longhands": [
+          "border-block-start-width",
+          "border-block-start-style",
+          "border-block-start-color"
+        ],
+        "shorthand-pattern": "StandardSpaceSeparated",
+        "parser-grammar": "<'border-top-width'> || <'border-top-style'> || <color>",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-shorthands"
+      }
+    },
+    "border-block-start-color": {
+      "animation-type": "by computed value",
+      "initial": "currentcolor",
+      "codegen-properties": {
+        "aliases": ["-webkit-border-before-color"],
+        "logical-property-group": {
+          "name": "border-color",
+          "resolver": "block-start"
+        },
+        "skip-style-builder": true,
+        "color-property": true,
+        "disables-native-appearance": true,
+        "parser-grammar": "<color>"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-color"
+      }
+    },
+    "border-block-start-style": {
+      "animation-type": "discrete",
+      "initial": "none",
+      "values": [
+        "none",
+        "hidden",
+        "inset",
+        "groove",
+        "outset",
+        "ridge",
+        "dotted",
+        "dashed",
+        "solid",
+        "double"
+      ],
+      "codegen-properties": {
+        "aliases": ["-webkit-border-before-style"],
+        "skip-style-builder": true,
+        "disables-native-appearance": true,
+        "logical-property-group": {
+          "name": "border-style",
+          "resolver": "block-start"
+        },
+        "parser-grammar": "<line-style>"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-style"
+      }
+    },
+    "border-block-start-width": {
+      "animation-type": "by computed value",
+      "initial": "medium",
+      "values": ["thin", "medium", "thick"],
+      "codegen-properties": {
+        "aliases": ["-webkit-border-before-width"],
+        "skip-style-builder": true,
+        "disables-native-appearance": true,
+        "logical-property-group": {
+          "name": "border-width",
+          "resolver": "block-start"
+        },
+        "parser-grammar": "<line-width>"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-width"
+      }
+    },
+    "border-block-style": {
+      "codegen-properties": {
+        "longhands": ["border-block-start-style", "border-block-end-style"],
+        "shorthand-pattern": "CoalescingPair",
+        "parser-grammar": "<'border-top-style'>{1,2}",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-style"
+      }
+    },
+    "border-block-width": {
+      "codegen-properties": {
+        "longhands": ["border-block-start-width", "border-block-end-width"],
+        "shorthand-pattern": "CoalescingPair",
+        "parser-grammar": "<'border-top-width'>{1,2}",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-width"
+      }
+    },
+    "border-bottom": {
+      "codegen-properties": {
+        "longhands": [
+          "border-bottom-width",
+          "border-bottom-style",
+          "border-bottom-color"
+        ],
+        "shorthand-pattern": "StandardSpaceSeparated",
+        "parser-grammar": "<'border-top-width'> || <'border-top-style'> || <'border-top-color'>",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-shorthands"
+      }
+    },
+    "border-bottom-color": {
+      "animation-type": "by computed value",
+      "initial": "currentcolor",
+      "codegen-properties": {
+        "parser-grammar": "<color>",
+        "logical-property-group": {
+          "name": "border-color",
+          "resolver": "bottom"
+        },
+        "accepts-quirky-color": true,
+        "visited-link-color-support": true,
+        "color-property": true,
+        "disables-native-appearance": true,
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.colors()"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::Color",
+        "render-style-visited-link-storage-path": [
+          "m_nonInheritedData",
+          "miscData",
+          "visitedLinkColor",
+          "visitedLinkBorderColors"
+        ],
+        "render-style-visited-link-storage-container": "physical-group"
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-color"
+      }
+    },
+    "border-bottom-left-radius": {
+      "animation-type": "by computed value",
+      "initial": "0px",
+      "codegen-properties": {
+        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=CSSValuePair default=previous)",
+        "aliases": ["-webkit-border-bottom-left-radius"],
+        "logical-property-group": {
+          "name": "border-radius",
+          "resolver": "bottom-left"
+        },
+        "style-builder-custom": "All",
+        "disables-native-appearance": true,
+        "render-style-has-explicitly-set-storage-path": [
+          "m_nonInheritedData",
+          "surroundData"
+        ],
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.radii"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::BorderRadiusValue"
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-radius"
+      }
+    },
+    "border-bottom-right-radius": {
+      "animation-type": "by computed value",
+      "initial": "0px",
+      "codegen-properties": {
+        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=CSSValuePair default=previous)",
+        "aliases": ["-webkit-border-bottom-right-radius"],
+        "logical-property-group": {
+          "name": "border-radius",
+          "resolver": "bottom-right"
+        },
+        "style-builder-custom": "All",
+        "disables-native-appearance": true,
+        "render-style-has-explicitly-set-storage-path": [
+          "m_nonInheritedData",
+          "surroundData"
+        ],
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.radii"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::BorderRadiusValue"
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-radius"
+      }
+    },
+    "border-bottom-style": {
+      "animation-type": "discrete",
+      "initial": "none",
+      "values": [
+        "none",
+        "hidden",
+        "inset",
+        "groove",
+        "outset",
+        "ridge",
+        "dotted",
+        "dashed",
+        "solid",
+        "double"
+      ],
+      "codegen-properties": {
+        "parser-grammar": "<line-style>",
+        "logical-property-group": {
+          "name": "border-style",
+          "resolver": "bottom"
+        },
+        "disables-native-appearance": true,
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.styles()"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "enum",
+        "render-style-type": "BorderStyle"
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-style"
+      }
+    },
+    "border-bottom-width": {
+      "animation-type": "by computed value",
+      "initial": "medium",
+      "values": ["thin", "medium", "thick"],
+      "codegen-properties": {
+        "parser-grammar": "<line-width>",
+        "logical-property-group": {
+          "name": "border-width",
+          "resolver": "bottom"
+        },
+        "accepts-quirky-length": true,
+        "style-builder-custom": "Initial",
+        "disables-native-appearance": true,
+        "render-style-initial-constexpr": true,
+        "render-style-initial-custom": true,
+        "render-style-getter-custom": true,
+        "render-style-storage-name": "width",
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.edges.bottom()"
+        ],
+        "render-style-storage-container": "struct",
+        "render-style-storage-kind": "value",
+        "render-style-type": "Style::LineWidth"
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-width"
+      }
+    },
+    "border-collapse": {
+      "animation-type": "discrete",
+      "inherited": true,
+      "initial": "separate",
+      "values": ["collapse", "separate"],
+      "codegen-properties": {
+        "render-style-storage-path": ["m_inheritedFlags"],
+        "render-style-storage-container": "struct",
+        "render-style-storage-kind": "enum",
+        "render-style-type": "BorderCollapse",
+        "parser-grammar": "<<values>>"
+      },
+      "specification": {
+        "module": "css-22",
+        "url": "https://www.w3.org/TR/CSS22/tables.html#borders"
+      }
+    },
+    "border-color": {
+      "codegen-properties": {
+        "longhands": [
+          "border-top-color",
+          "border-right-color",
+          "border-bottom-color",
+          "border-left-color"
+        ],
+        "accepts-quirky-color": true,
+        "shorthand-pattern": "CoalescingQuad",
+        "parser-grammar": "<'border-top-color'>{1,4}",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-color"
+      }
+    },
+    "border-end-end-radius": {
+      "animation-type": "by computed value",
+      "initial": "0px",
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "border-radius",
+          "resolver": "end-end"
+        },
+        "skip-style-builder": true,
+        "disables-native-appearance": true,
+        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=CSSValuePair default=previous)"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://drafts.csswg.org/css-logical-1/#border-radius-properties"
+      }
+    },
+    "border-end-start-radius": {
+      "animation-type": "by computed value",
+      "initial": "0px",
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "border-radius",
+          "resolver": "end-start"
+        },
+        "skip-style-builder": true,
+        "disables-native-appearance": true,
+        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=CSSValuePair default=previous)"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://drafts.csswg.org/css-logical-1/#border-radius-properties"
+      }
+    },
+    "border-image": {
+      "codegen-properties": {
+        "longhands": [
+          "border-image-source",
+          "border-image-slice",
+          "border-image-width",
+          "border-image-outset",
+          "border-image-repeat"
+        ],
+        "parser-function": "ConsumeBorderImageShorthand",
+        "parser-grammar": "<border-image>",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-image"
+      }
+    },
+    "border-image-outset": {
+      "animation-type": "by computed value",
+      "initial": "0",
+      "codegen-properties": {
+        "disables-native-appearance": true,
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.borderImage",
+          "borderImage"
+        ],
+        "render-style-storage-container": "struct",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::BorderImageOutset",
+        "parser-grammar": "[ <number [0,inf]> | <length [0,inf]> ]{1,4}@(type=CSSQuadValue no-single-item-opt)",
+        "parser-exported": true
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-image-outset"
+      }
+    },
+    "border-image-repeat": {
+      "animation-type": "discrete",
+      "initial": "stretch",
+      "values": ["stretch", "repeat", "round", "space"],
+      "codegen-properties": {
+        "disables-native-appearance": true,
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.borderImage",
+          "borderImage"
+        ],
+        "render-style-storage-container": "struct",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::BorderImageRepeat",
+        "parser-grammar": "[ stretch | repeat | round | space ]{1,2}@(type=CSSValuePair default=previous)",
+        "parser-exported": true
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-image-repeat"
+      }
+    },
+    "border-image-slice": {
+      "animation-type": "by computed value",
+      "initial": "100%",
+      "values": ["fill"],
+      "codegen-properties": {
+        "disables-native-appearance": true,
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.borderImage",
+          "borderImage"
+        ],
+        "render-style-storage-container": "struct",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::BorderImageSlice",
+        "parser-function": "ConsumeBorderImageSlice",
+        "parser-function-allows-number-or-integer-input": true,
+        "parser-grammar": "[ <number [0,inf]> | <percentage [0,inf]> ]{1,4} && fill?",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for different parsing based on the current shorthand."
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-image-slice"
+      }
+    },
+    "border-image-source": {
+      "animation-type": "by computed value",
+      "animation-type-comment": "Current spec animation type is 'discrete'",
+      "initial": "none",
+      "values": ["none"],
+      "codegen-properties": {
+        "disables-native-appearance": true,
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.borderImage",
+          "borderImage"
+        ],
+        "render-style-storage-container": "struct",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::BorderImageSource",
+        "parser-grammar": "none | <image>"
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-image-source"
+      }
+    },
+    "border-image-width": {
+      "animation-type": "by computed value",
+      "initial": "1",
+      "values": ["auto"],
+      "codegen-properties": {
+        "style-extractor-custom": true,
+        "disables-native-appearance": true,
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.borderImage",
+          "borderImage"
+        ],
+        "render-style-storage-container": "struct",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::BorderImageWidth",
+        "parser-function": "ConsumeBorderImageWidth",
+        "parser-function-allows-number-or-integer-input": true,
+        "parser-grammar": "[ <length-percentage [0,inf]> | <number [0,inf]> | auto ]{1,4}",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for different parsing based on the current shorthand."
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-image-width"
+      }
+    },
+    "border-inline": {
+      "codegen-properties": {
+        "longhands": [
+          "border-inline-start-width",
+          "border-inline-end-width",
+          "border-inline-start-style",
+          "border-inline-end-style",
+          "border-inline-start-color",
+          "border-inline-end-color"
+        ],
+        "parser-function": "ConsumeBorderInlineShorthand",
+        "parser-grammar": "<'border-block-start'>",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-shorthands"
+      }
+    },
+    "border-inline-color": {
+      "codegen-properties": {
+        "longhands": ["border-inline-start-color", "border-inline-end-color"],
+        "shorthand-pattern": "CoalescingPair",
+        "parser-grammar": "<'border-top-color'>{1,2}",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-color"
+      }
+    },
+    "border-inline-end": {
+      "codegen-properties": {
+        "aliases": ["-webkit-border-end"],
+        "longhands": [
+          "border-inline-end-width",
+          "border-inline-end-style",
+          "border-inline-end-color"
+        ],
+        "shorthand-pattern": "StandardSpaceSeparated",
+        "parser-grammar": "<'border-top-width'> || <'border-top-style'> || <color>",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-shorthands"
+      }
+    },
+    "border-inline-end-color": {
+      "animation-type": "by computed value",
+      "initial": "currentcolor",
+      "codegen-properties": {
+        "aliases": ["-webkit-border-end-color"],
+        "logical-property-group": {
+          "name": "border-color",
+          "resolver": "inline-end"
+        },
+        "skip-style-builder": true,
+        "color-property": true,
+        "disables-native-appearance": true,
+        "parser-grammar": "<color>"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-color"
+      }
+    },
+    "border-inline-end-style": {
+      "animation-type": "discrete",
+      "initial": "none",
+      "values": [
+        "none",
+        "hidden",
+        "inset",
+        "groove",
+        "outset",
+        "ridge",
+        "dotted",
+        "dashed",
+        "solid",
+        "double"
+      ],
+      "codegen-properties": {
+        "aliases": ["-webkit-border-end-style"],
+        "skip-style-builder": true,
+        "disables-native-appearance": true,
+        "logical-property-group": {
+          "name": "border-style",
+          "resolver": "inline-end"
+        },
+        "parser-grammar": "<line-style>"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-style"
+      }
+    },
+    "border-inline-end-width": {
+      "animation-type": "by computed value",
+      "initial": "medium",
+      "values": ["thin", "medium", "thick"],
+      "codegen-properties": {
+        "aliases": ["-webkit-border-end-width"],
+        "skip-style-builder": true,
+        "disables-native-appearance": true,
+        "logical-property-group": {
+          "name": "border-width",
+          "resolver": "inline-end"
+        },
+        "parser-grammar": "<line-width>"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-width"
+      }
+    },
+    "border-inline-start": {
+      "codegen-properties": {
+        "aliases": ["-webkit-border-start"],
+        "longhands": [
+          "border-inline-start-width",
+          "border-inline-start-style",
+          "border-inline-start-color"
+        ],
+        "shorthand-pattern": "StandardSpaceSeparated",
+        "parser-grammar": "<'border-top-width'> || <'border-top-style'> || <color>",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-shorthands"
+      }
+    },
+    "border-inline-start-color": {
+      "animation-type": "by computed value",
+      "initial": "currentcolor",
+      "codegen-properties": {
+        "aliases": ["-webkit-border-start-color"],
+        "logical-property-group": {
+          "name": "border-color",
+          "resolver": "inline-start"
+        },
+        "skip-style-builder": true,
+        "color-property": true,
+        "disables-native-appearance": true,
+        "parser-grammar": "<color>"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-color"
+      }
+    },
+    "border-inline-start-style": {
+      "animation-type": "discrete",
+      "initial": "none",
+      "values": [
+        "none",
+        "hidden",
+        "inset",
+        "groove",
+        "outset",
+        "ridge",
+        "dotted",
+        "dashed",
+        "solid",
+        "double"
+      ],
+      "codegen-properties": {
+        "aliases": ["-webkit-border-start-style"],
+        "skip-style-builder": true,
+        "disables-native-appearance": true,
+        "logical-property-group": {
+          "name": "border-style",
+          "resolver": "inline-start"
+        },
+        "parser-grammar": "<line-style>"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-style"
+      }
+    },
+    "border-inline-start-width": {
+      "animation-type": "by computed value",
+      "initial": "medium",
+      "values": ["thin", "medium", "thick"],
+      "codegen-properties": {
+        "aliases": ["-webkit-border-start-width"],
+        "skip-style-builder": true,
+        "disables-native-appearance": true,
+        "logical-property-group": {
+          "name": "border-width",
+          "resolver": "inline-start"
+        },
+        "parser-grammar": "<line-width>"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-width"
+      }
+    },
+    "border-inline-style": {
+      "codegen-properties": {
+        "longhands": ["border-inline-start-style", "border-inline-end-style"],
+        "shorthand-pattern": "CoalescingPair",
+        "parser-grammar": "<'border-top-style'>{1,2}",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-style"
+      }
+    },
+    "border-inline-width": {
+      "codegen-properties": {
+        "longhands": ["border-inline-start-width", "border-inline-end-width"],
+        "shorthand-pattern": "CoalescingPair",
+        "parser-grammar": "<'border-top-width'>{1,2}",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://www.w3.org/TR/css-logical/#border-width"
+      }
+    },
+    "border-left": {
+      "codegen-properties": {
+        "longhands": [
+          "border-left-width",
+          "border-left-style",
+          "border-left-color"
+        ],
+        "shorthand-pattern": "StandardSpaceSeparated",
+        "parser-grammar": "<'border-top-width'> || <'border-top-style'> || <'border-top-color'>",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-shorthands"
+      }
+    },
+    "border-left-color": {
+      "animation-type": "by computed value",
+      "initial": "currentcolor",
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "border-color",
+          "resolver": "left"
+        },
+        "accepts-quirky-color": true,
+        "visited-link-color-support": true,
+        "color-property": true,
+        "disables-native-appearance": true,
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.colors()"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::Color",
+        "render-style-visited-link-storage-path": [
+          "m_nonInheritedData",
+          "miscData",
+          "visitedLinkColor",
+          "visitedLinkBorderColors"
+        ],
+        "render-style-visited-link-storage-container": "physical-group",
+        "parser-grammar": "<color>"
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-color"
+      }
+    },
+    "border-left-style": {
+      "animation-type": "discrete",
+      "initial": "none",
+      "values": [
+        "none",
+        "hidden",
+        "inset",
+        "groove",
+        "outset",
+        "ridge",
+        "dotted",
+        "dashed",
+        "solid",
+        "double"
+      ],
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "border-style",
+          "resolver": "left"
+        },
+        "disables-native-appearance": true,
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.styles()"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "enum",
+        "render-style-type": "BorderStyle",
+        "parser-grammar": "<line-style>"
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-style"
+      }
+    },
+    "border-left-width": {
+      "animation-type": "by computed value",
+      "initial": "medium",
+      "values": ["thin", "medium", "thick"],
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "border-width",
+          "resolver": "left"
+        },
+        "accepts-quirky-length": true,
+        "style-builder-custom": "Initial",
+        "disables-native-appearance": true,
+        "render-style-initial-constexpr": true,
+        "render-style-initial-custom": true,
+        "render-style-getter-custom": true,
+        "render-style-storage-name": "width",
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.edges.left()"
+        ],
+        "render-style-storage-container": "struct",
+        "render-style-storage-kind": "value",
+        "render-style-type": "Style::LineWidth",
+        "parser-grammar": "<line-width>"
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-width"
+      }
+    },
+    "border-radius": {
+      "codegen-properties": {
+        "longhands": [
+          "border-top-left-radius",
+          "border-top-right-radius",
+          "border-bottom-right-radius",
+          "border-bottom-left-radius"
+        ],
+        "parser-function": "ConsumeBorderRadiusShorthand",
+        "parser-grammar": "<length-percentage [0,inf]>{1,4} [ / <length-percentage [0,inf]>{1,4} ]?",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-radius"
+      }
+    },
+    "border-right": {
+      "codegen-properties": {
+        "longhands": [
+          "border-right-width",
+          "border-right-style",
+          "border-right-color"
+        ],
+        "shorthand-pattern": "StandardSpaceSeparated",
+        "parser-grammar": "<'border-top-width'> || <'border-top-style'> || <'border-top-color'>",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-shorthands"
+      }
+    },
+    "border-right-color": {
+      "animation-type": "by computed value",
+      "initial": "currentcolor",
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "border-color",
+          "resolver": "right"
+        },
+        "accepts-quirky-color": true,
+        "visited-link-color-support": true,
+        "color-property": true,
+        "disables-native-appearance": true,
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.colors()"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::Color",
+        "render-style-visited-link-storage-path": [
+          "m_nonInheritedData",
+          "miscData",
+          "visitedLinkColor",
+          "visitedLinkBorderColors"
+        ],
+        "render-style-visited-link-storage-container": "physical-group",
+        "parser-grammar": "<color>"
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-color"
+      }
+    },
+    "border-right-style": {
+      "animation-type": "discrete",
+      "initial": "none",
+      "values": [
+        "none",
+        "hidden",
+        "inset",
+        "groove",
+        "outset",
+        "ridge",
+        "dotted",
+        "dashed",
+        "solid",
+        "double"
+      ],
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "border-style",
+          "resolver": "right"
+        },
+        "disables-native-appearance": true,
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.styles()"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "enum",
+        "render-style-type": "BorderStyle",
+        "parser-grammar": "<line-style>"
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-style"
+      }
+    },
+    "border-right-width": {
+      "animation-type": "by computed value",
+      "initial": "medium",
+      "values": ["thin", "medium", "thick"],
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "border-width",
+          "resolver": "right"
+        },
+        "accepts-quirky-length": true,
+        "style-builder-custom": "Initial",
+        "disables-native-appearance": true,
+        "render-style-initial-constexpr": true,
+        "render-style-initial-custom": true,
+        "render-style-getter-custom": true,
+        "render-style-storage-name": "width",
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.edges.right()"
+        ],
+        "render-style-storage-container": "struct",
+        "render-style-storage-kind": "value",
+        "render-style-type": "Style::LineWidth",
+        "parser-grammar": "<line-width>"
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-width"
+      }
+    },
+    "border-start-end-radius": {
+      "animation-type": "by computed value",
+      "initial": "0px",
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "border-radius",
+          "resolver": "start-end"
+        },
+        "skip-style-builder": true,
+        "disables-native-appearance": true,
+        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=CSSValuePair default=previous)"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://drafts.csswg.org/css-logical-1/#border-radius-properties"
+      }
+    },
+    "border-start-start-radius": {
+      "animation-type": "by computed value",
+      "initial": "0px",
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "border-radius",
+          "resolver": "start-start"
+        },
+        "skip-style-builder": true,
+        "disables-native-appearance": true,
+        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=CSSValuePair default=previous)"
+      },
+      "specification": {
+        "module": "css-logical-props",
+        "url": "https://drafts.csswg.org/css-logical-1/#border-radius-properties"
+      }
+    },
+    "border-style": {
+      "codegen-properties": {
+        "longhands": [
+          "border-top-style",
+          "border-right-style",
+          "border-bottom-style",
+          "border-left-style"
+        ],
+        "shorthand-pattern": "CoalescingQuad",
+        "parser-grammar": "<'border-top-style'>{1,4}",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-style"
+      }
+    },
+    "border-top": {
+      "codegen-properties": {
+        "longhands": [
+          "border-top-width",
+          "border-top-style",
+          "border-top-color"
+        ],
+        "shorthand-pattern": "StandardSpaceSeparated",
+        "parser-grammar": "<'border-top-width'> || <'border-top-style'> || <'border-top-color'>",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-shorthands"
+      }
+    },
+    "border-top-color": {
+      "animation-type": "by computed value",
+      "initial": "currentcolor",
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "border-color",
+          "resolver": "top"
+        },
+        "accepts-quirky-color": true,
+        "visited-link-color-support": true,
+        "color-property": true,
+        "disables-native-appearance": true,
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.colors()"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::Color",
+        "render-style-visited-link-storage-path": [
+          "m_nonInheritedData",
+          "miscData",
+          "visitedLinkColor",
+          "visitedLinkBorderColors"
+        ],
+        "render-style-visited-link-storage-container": "physical-group",
+        "parser-grammar": "<color>"
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-color"
+      }
+    },
+    "border-top-left-radius": {
+      "animation-type": "by computed value",
+      "initial": "0px",
+      "codegen-properties": {
+        "aliases": ["-webkit-border-top-left-radius"],
+        "logical-property-group": {
+          "name": "border-radius",
+          "resolver": "top-left"
+        },
+        "style-builder-custom": "All",
+        "disables-native-appearance": true,
+        "render-style-has-explicitly-set-storage-path": [
+          "m_nonInheritedData",
+          "surroundData"
+        ],
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.radii"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::BorderRadiusValue",
+        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=CSSValuePair default=previous)"
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-radius"
+      }
+    },
+    "border-top-right-radius": {
+      "animation-type": "by computed value",
+      "initial": "0px",
+      "codegen-properties": {
+        "aliases": ["-webkit-border-top-right-radius"],
+        "logical-property-group": {
+          "name": "border-radius",
+          "resolver": "top-right"
+        },
+        "style-builder-custom": "All",
+        "disables-native-appearance": true,
+        "render-style-has-explicitly-set-storage-path": [
+          "m_nonInheritedData",
+          "surroundData"
+        ],
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.radii"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "reference",
+        "render-style-type": "Style::BorderRadiusValue",
+        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=CSSValuePair default=previous)"
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-radius"
+      }
+    },
+    "border-top-style": {
+      "animation-type": "discrete",
+      "initial": "none",
+      "values": [
+        "none",
+        "hidden",
+        "inset",
+        "groove",
+        "outset",
+        "ridge",
+        "dotted",
+        "dashed",
+        "solid",
+        "double"
+      ],
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "border-style",
+          "resolver": "top"
+        },
+        "disables-native-appearance": true,
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.styles()"
+        ],
+        "render-style-storage-container": "physical-group",
+        "render-style-storage-kind": "enum",
+        "render-style-type": "BorderStyle",
+        "parser-grammar": "<line-style>"
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-style"
+      }
+    },
+    "border-top-width": {
+      "animation-type": "by computed value",
+      "initial": "medium",
+      "values": ["thin", "medium", "thick"],
+      "codegen-properties": {
+        "logical-property-group": {
+          "name": "border-width",
+          "resolver": "top"
+        },
+        "accepts-quirky-length": true,
+        "style-builder-custom": "Initial",
+        "disables-native-appearance": true,
+        "render-style-initial-constexpr": true,
+        "render-style-initial-custom": true,
+        "render-style-getter-custom": true,
+        "render-style-storage-name": "width",
+        "render-style-storage-path": [
+          "m_nonInheritedData",
+          "surroundData",
+          "border.edges.top()"
+        ],
+        "render-style-storage-container": "struct",
+        "render-style-storage-kind": "value",
+        "render-style-type": "Style::LineWidth",
+        "parser-grammar": "<line-width>"
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-width"
+      }
+    },
+    "border-width": {
+      "codegen-properties": {
+        "longhands": [
+          "border-top-width",
+          "border-right-width",
+          "border-bottom-width",
+          "border-left-width"
+        ],
+        "accepts-quirky-length": true,
+        "shorthand-pattern": "CoalescingQuad",
+        "parser-grammar": "<'border-top-width'>{1,4}",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#the-border-width"
+      }
+    },
+    "color": {
+      "animation-type": "by computed value",
+      "inherited": true,
+      "initial": "Canvastext",
+      "codegen-properties": {
+        "parser-grammar": "<color>",
+        "accepts-quirky-color": true,
+        "animation-wrapper": "VisitedAffectedColorWrapper",
+        "visited-link-color-support": true,
+        "color-property": true,
+        "style-builder-custom": "All",
+        "style-extractor-custom": true,
+        "fast-path-inherited": true,
+        "render-style-initial-custom": true,
+        "render-style-getter-custom": true,
+        "render-style-getter-exported": true,
+        "render-style-getter-inline": false,
+        "render-style-has-explicitly-set-storage-path": ["m_inheritedFlags"],
+        "render-style-has-explicitly-set-storage-container": "struct",
+        "render-style-storage-path": ["m_inheritedData"],
+        "render-style-storage-kind": "reference",
+        "render-style-type": "WebCore::Color",
+        "render-style-visited-link-storage-path": ["m_inheritedData"]
+      },
+      "status": {
+        "comment": "All the values from CSS Color Level 3 are supported, as well as the 8- and 4-digit forms of hex color, and the color() function."
+      },
+      "specification": {
+        "module": "css-color",
+        "url": "https://www.w3.org/TR/css-color-4/#the-color-property"
       }
     },
     "corner-shape": {
@@ -376,7 +2131,7 @@
         "render-style-storage-container": "struct",
         "render-style-storage-kind": "enum",
         "render-style-type": "DisplayType",
-        "parser-function": "consumeDisplay",
+        "parser-function": "ConsumeDisplay",
         "parser-grammar": "[ <display-outside> || <display-inside> ] | <display-listitem> | <display-internal> | <display-box> | <display-legacy> | <-webkit-display>",
         "parser-grammar-unused": true,
         "parser-grammar-unused-reason": "Needs support for transforming parsed input to minimal form."
@@ -415,7 +2170,7 @@
             "enable-if": "KRYS_CSS_ENABLE_VARIATION_FONTS"
           }
         ],
-        "parser-function": "consumeFontShorthand",
+        "parser-function": "ConsumeFontShorthand",
         "parser-grammar": "[ [ <'font-style'> || <font-variant-css2> || <'font-weight'> || <font-width-css3> ]? <'font-size'> [ / <'line-height'> ]? <'font-family'> ] | <system-family-name>",
         "parser-grammar-unused": true,
         "parser-grammar-unused-reason": "Needs support for shorthand grammars."
@@ -536,7 +2291,7 @@
           "fontCascade"
         ],
         "render-style-type": "float",
-        "parser-grammar": "<absolute-size> | <relative-size> | <length-percentage [0,inf]> | math@(settings-flag=cssMathDepthEnabled) | <-webkit-absolute-size> | <-webkit-relative-size>",
+        "parser-grammar": "<absolute-size> | <relative-size> | <length-percentage [0,inf]> | math@(settings-flag=CSSMathDepthEnabled) | <-webkit-absolute-size> | <-webkit-relative-size>",
         "parser-exported": true
       },
       "specification": {
@@ -809,26 +2564,6 @@
         "url": "https://drafts.csswg.org/css-fonts/#font-palette-prop"
       }
     },
-    "-webkit-font-smoothing": {
-      "animation-type": "not animatable (legacy)",
-      "inherited": true,
-      "initial": "auto",
-      "values": ["auto", "none", "antialiased", "subpixel-antialiased"],
-      "codegen-properties": {
-        "font-property": true,
-        "high-priority": true,
-        "render-style-storage-container": "opaque",
-        "render-style-storage-path": [
-          "_inheritedData",
-          "fontData",
-          "fontCascade"
-        ],
-        "render-style-storage-kind": "enum",
-        "render-style-type": "FontSmoothingMode",
-        "parser-grammar": "<<values>>"
-      },
-      "status": "non-standard"
-    },
     "font-variant-ligatures": {
       "animation-type": "discrete",
       "inherited": true,
@@ -1056,7 +2791,7 @@
           "font-synthesis-style",
           "font-synthesis-small-caps"
         ],
-        "parser-function": "consumeFontSynthesisShorthand",
+        "parser-function": "ConsumeFontSynthesisShorthand",
         "parser-grammar": "none | [ weight || style || small-caps || position]",
         "parser-grammar-unused": true,
         "parser-grammar-unused-reason": "Needs support for shorthand grammars."

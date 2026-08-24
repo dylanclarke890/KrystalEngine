@@ -850,7 +850,6 @@ progress-bar
 slider-horizontal
 slider-vertical
 searchfield
--apple-pay-button enable-if=ENABLE_APPLE_PAY
 attachment enable-if=ENABLE_ATTACHMENT_ELEMENT
 borderless-attachment enable-if=ENABLE_ATTACHMENT_ELEMENT
 textarea

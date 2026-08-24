@@ -1071,9 +1071,6 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPrimitiveNumericRange.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSKeywordConstants.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPrimitiveKeywordList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1192,6 +1189,63 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyParsing.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyParserCustom.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyParserResult.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSValuePool.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSColorValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSValueList.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\Align.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\Anchor.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\Animation.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\Attr.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\Background.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\Box.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\Color.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\ColorAdjust.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\Content.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\CounterStyles.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\Display.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSColorType.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Borders\BorderRadius.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSValueAggregates.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1737,6 +1791,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\CSS\Properties\CSSPropertyParsing.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CSS\Properties\CSSPropertyParserResult.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CSS\Values\CSSValuePool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

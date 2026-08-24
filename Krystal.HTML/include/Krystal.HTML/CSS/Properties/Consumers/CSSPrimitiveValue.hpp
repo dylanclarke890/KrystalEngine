@@ -17,21 +17,22 @@ namespace Krys::HTML
     KRYS_NODISCARD static RefPtr<CSSPrimitiveValue> Resolve(NumericRaw auto value,
                                                             CSSPropertyParserOptions = {}) noexcept
     {
-      return CreateRef<CSSPrimitiveValue>(value.value, ToCSSUnitType(value.unit));
+      return CSSPrimitiveValue::Create(value.value, ToCSSUnitType(value.unit));
     }
 
     template <CSSRange R, typename T>
     KRYS_NODISCARD static RefPtr<CSSPrimitiveValue> Resolve(IntegerRaw<R, T> value,
                                                             CSSPropertyParserOptions) noexcept
     {
-      return CreateRef<CSSPrimitiveValue>(value.value);
+      return CSSPrimitiveValue::Create(value.value);
     }
 
-    // KRYS_NODISCARD static RefPtr<CSSPrimitiveValue> resolve(CSS::Calc auto value,
-    //                                                         CSSPropertyParserOptions = {}) noexcept
-    //{
-    //   return CSSPrimitiveValue::create(value.protectedCalc());
-    // }
+    KRYS_NODISCARD static RefPtr<CSSPrimitiveValue> Resolve(Calc auto value,
+                                                            CSSPropertyParserOptions = {}) noexcept
+    {
+      // TODO: Implement calc() expression evaluation
+      return nullptr;
+    }
 
     KRYS_NODISCARD static RefPtr<CSSPrimitiveValue> Resolve(Numeric auto value,
                                                             CSSPropertyParserOptions options = {}) noexcept
@@ -51,7 +52,7 @@ namespace Krys::HTML
         {
           return SwitchOn(
             value, [&](const Percentage<pR, T>::Raw &raw) -> RefPtr<CSSPrimitiveValue>
-            { return CreateRef<CSSPrimitiveValue>(raw.value / 100.0, CSSUnitType::Number); },
+            { return CSSPrimitiveValue::Create(raw.value / 100.0, CSSUnitType::Number); },
             [&](const Percentage<pR, T>::Calc &calc) -> RefPtr<CSSPrimitiveValue>
             { return Resolve(calc, options); });
         });

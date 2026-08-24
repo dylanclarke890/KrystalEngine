@@ -34,6 +34,6 @@ namespace Krys::HTML
     auto &token = tokens.Consume();
     tokens.DiscardWhitespace();
 
-    return CreateRef<CSSPrimitiveValue>(CSSOMString(token.IdentCodePoints()));
+    return CSSPrimitiveValue::Create(CSSOMString(token.IdentCodePoints()));
   }
 }
