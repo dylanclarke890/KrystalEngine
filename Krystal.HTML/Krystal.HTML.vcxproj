@@ -52,7 +52,9 @@
     <ClCompile Include="src\CSS\Properties\CSSPropertyParsing.cpp" />
     <ClCompile Include="src\CSS\Properties\CSSPropertyShorthandFunctions.cpp" />
     <ClCompile Include="src\CSS\Properties\Enums\CSSPropertyId.cpp" />
+    <ClCompile Include="src\CSS\Values\CSSValue.cpp" />
     <ClCompile Include="src\CSS\Values\CSSValuePool.cpp" />
+    <ClCompile Include="src\CSS\Values\CSSValueTypes.cpp" />
     <ClCompile Include="src\CSS\Values\Primitives\CSSUnevaluatedCalc.cpp" />
     <ClCompile Include="src\CSS\CSSParser.cpp" />
     <ClCompile Include="src\CSS\Properties\CSSPropertyConsumer.cpp" />
@@ -239,11 +241,14 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Types\MediaListOrDOMString.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Types\IsSetFromShorthand.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\Ident.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Borders\BorderImage.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Borders\BorderRadius.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSColorValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSValueAggregates.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSValueList.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSValueListBuilder.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSValuePool.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSValueTypes.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Enums\CSSColorType.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPrimitiveNumericTypes.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPrimitiveNumericTypesCanonicalization.hpp" />

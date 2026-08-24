@@ -51,4 +51,10 @@ namespace Krys::HTML
     auto &value = *CommonCSSValuePool->_identifierValues[static_cast<underlying_t<CSSValueId>>(identifier)];
     return ShareRef(value);
   }
+
+  class CSSValuePool
+  {
+  public:
+    KRYS_NODISCARD static CSSValuePool &MainThreadPool() noexcept;
+  };
 }

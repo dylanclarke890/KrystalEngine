@@ -5,7 +5,7 @@ namespace Krys::HTML
   LazyNeverDestroyed<StaticCSSValuePool> CommonCSSValuePool;
 
   StaticCSSValuePool::StaticCSSValuePool() noexcept
-      : _implicitInitialValue(CSSValue::StaticCSSValue, CSSPrimitiveValue::ImplicitInitialValue),
+      : _implicitInitialValue(CSSValue::StaticCSSValue, CSSPrimitiveValue::CreateImplicitInitialValue),
         _transparentColor(CSSValue::StaticCSSValue, WebCore::Color::transparentBlack),
         _whiteColor(CSSValue::StaticCSSValue, WebCore::Color::white),
         _blackColor(CSSValue::StaticCSSValue, WebCore::Color::black)
@@ -29,5 +29,11 @@ namespace Krys::HTML
   {
     static std::once_flag onceKey;
     std::call_once(onceKey, []() { CommonCSSValuePool.Construct(); });
+  }
+
+  CSSValuePool &CSSValuePool::MainThreadPool() noexcept
+  {
+    static MainThreadNeverDestroyed<CSSValuePool> pool;
+    return pool;
   }
 }

@@ -31,6 +31,8 @@ namespace Krys::HTML
   public:
     virtual ~CSSValue() noexcept = default;
 
+    KRYS_NODISCARD CSSValueId ValueId() const noexcept;
+
     KRYS_NODISCARD bool IsImplicitInitialValue() const noexcept
     {
       return _isImplicitInitialValue;

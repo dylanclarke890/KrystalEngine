@@ -5,6 +5,7 @@
 #include "Krystal.HTML/CSS/Values/CSSValue.hpp"
 #include "Krystal.HTML/CSS/Values/Enums/CSSValueId.hpp"
 #include "Krystal.Lib/NeverDestroyed.hpp"
+#include "Krystal.Lib/Pointers/RefPtr.hpp"
 
 namespace Krys::HTML
 {
@@ -47,9 +48,13 @@ namespace Krys::HTML
 
     KRYS_NODISCARD static Ref<CSSPrimitiveValue> Create(CSSPropertyId property) noexcept;
 
-    KRYS_NODISCARD static Ref<CSSPrimitiveValue> Create(CSSOMString value) noexcept;
+    KRYS_NODISCARD static Ref<CSSPrimitiveValue> Create(const CSSOMString &value) noexcept;
 
-    KRYS_NODISCARD static Ref<CSSPrimitiveValue> CreateCustomIdent(CSSOMString value) noexcept;
+    KRYS_NODISCARD static Ref<CSSPrimitiveValue> Create(const CSSOMStringAtom &value) noexcept;
+
+    KRYS_NODISCARD static Ref<CSSPrimitiveValue> CreateCustomIdent(const CSSOMString &value) noexcept;
+
+    KRYS_NODISCARD static Ref<CSSPrimitiveValue> CreateCustomIdent(const CSSOMStringAtom &value) noexcept;
 
     KRYS_NODISCARD static Ref<CSSPrimitiveValue> Create(double value) noexcept;
 
@@ -88,7 +93,80 @@ namespace Krys::HTML
     {
       return _unit == CSSUnitType::String;
     }
+
+    KRYS_NODISCARD bool IsCustomIdent() const noexcept
+    {
+      return _unit == CSSUnitType::CustomIdent;
+    }
   };
+
+  KRYS_NODISCARD inline CSSValueId ValueId(const CSSPrimitiveValue &value) noexcept
+  {
+    return value.ValueId();
+  }
+
+  KRYS_NODISCARD inline CSSValueId ValueId(const CSSPrimitiveValue *value) noexcept
+  {
+    return value ? ValueId(*value) : CSSValueId::Invalid;
+  }
+
+  KRYS_NODISCARD inline CSSValueId ValueId(const CSSValue &value) noexcept
+  {
+    auto *primitiveValue = DynamicDowncast<CSSPrimitiveValue>(value);
+    return primitiveValue ? ValueId(*primitiveValue) : CSSValueId::Invalid;
+  }
+
+  KRYS_NODISCARD inline CSSValueId ValueId(const CSSValue *value) noexcept
+  {
+    return value ? ValueId(*value) : CSSValueId::Invalid;
+  }
+
+  KRYS_NODISCARD inline bool IsValueId(const CSSPrimitiveValue &value, CSSValueId id) noexcept
+  {
+    return ValueId(value) == id;
+  }
+
+  KRYS_NODISCARD inline bool IsValueId(const CSSPrimitiveValue *value, CSSValueId id) noexcept
+  {
+    return value ? IsValueId(*value, id) : false;
+  }
+
+  KRYS_NODISCARD inline bool IsValueId(const RefPtr<CSSPrimitiveValue> &value, CSSValueId id) noexcept
+  {
+    return IsValueId(value.get(), id);
+  }
+
+  KRYS_NODISCARD inline bool IsValueId(const Ref<CSSPrimitiveValue> &value, CSSValueId id) noexcept
+  {
+    return IsValueId(value.get(), id);
+  }
+
+  KRYS_NODISCARD inline bool IsValueId(const CSSValue &value, CSSValueId id) noexcept
+  {
+    return ValueId(value) == id;
+  }
+
+  KRYS_NODISCARD inline bool IsValueId(const CSSValue *value, CSSValueId id) noexcept
+  {
+    return value ? IsValueId(*value, id) : false;
+  }
+
+  KRYS_NODISCARD inline bool IsValueId(const RefPtr<CSSValue> &value, CSSValueId id) noexcept
+  {
+    return IsValueId(value.get(), id);
+  }
+
+  KRYS_NODISCARD inline bool IsValueId(const Ref<CSSValue> &value, CSSValueId id) noexcept
+  {
+    return IsValueId(value.get(), id);
+  }
+
+  KRYS_NODISCARD inline bool IsCustomIdentValue(const CSSValue &value) noexcept
+  {
+    auto *primitiveValue = DynamicDowncast<CSSPrimitiveValue>(value);
+    return primitiveValue && primitiveValue->IsCustomIdent();
+  }
+
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::CSSPrimitiveValue)

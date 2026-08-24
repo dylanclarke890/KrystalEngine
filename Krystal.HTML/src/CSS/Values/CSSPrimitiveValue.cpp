@@ -125,14 +125,24 @@ namespace Krys::HTML
     return AdoptRef(*new CSSPrimitiveValue(value, type));
   }
 
-  Ref<CSSPrimitiveValue> CSSPrimitiveValue::Create(CSSOMString value) noexcept
+  Ref<CSSPrimitiveValue> CSSPrimitiveValue::Create(const CSSOMString &value) noexcept
   {
-    return AdoptRef(*new CSSPrimitiveValue(Krys::Move(value), CSSUnitType::String));
+    return AdoptRef(*new CSSPrimitiveValue(value, CSSUnitType::String));
   }
 
-  Ref<CSSPrimitiveValue> CSSPrimitiveValue::CreateCustomIdent(CSSOMString value) noexcept
+  Ref<CSSPrimitiveValue> CSSPrimitiveValue::Create(const CSSOMStringAtom &value) noexcept
   {
-    return AdoptRef(*new CSSPrimitiveValue(Krys::Move(value), CSSUnitType::CustomIdent));
+    return AdoptRef(*new CSSPrimitiveValue(CSSOMString(value.View()), CSSUnitType::String));
+  }
+
+  Ref<CSSPrimitiveValue> CSSPrimitiveValue::CreateCustomIdent(const CSSOMString &value) noexcept
+  {
+    return AdoptRef(*new CSSPrimitiveValue(value, CSSUnitType::CustomIdent));
+  }
+
+  Ref<CSSPrimitiveValue> CSSPrimitiveValue::CreateCustomIdent(const CSSOMStringAtom &value) noexcept
+  {
+    return AdoptRef(*new CSSPrimitiveValue(CSSOMString(value.View()), CSSUnitType::CustomIdent));
   }
 
   Ref<CSSPrimitiveValue> CSSPrimitiveValue::CreateInteger(double value) noexcept
