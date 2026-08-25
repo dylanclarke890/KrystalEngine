@@ -705,7 +705,7 @@ namespace Krys::HTML
     }
 
     constexpr MinimallySerializingSpaceSeparatedPoint(SpaceSeparatedPair<T> &&array) noexcept
-        : value {WTF::move(array)}
+        : value {Krys::Move(array)}
     {
     }
 

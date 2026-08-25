@@ -48,18 +48,21 @@ namespace Krys::HTML
   template <typename T>
   concept CompositeUnitEnum = UnitEnum<T> && requires { typename UnitTraits<T>::Composite; };
 
+  // Base template: handles cases where the second argument is not a tuple
   template <typename T, typename Tuple>
-  struct ContainsInTuple;
+  struct ContainsInTuple : std::false_type
+  {
+  };
 
-  // Specialization: unpack the tuple and check each type against T
-  template <typename T, typename... Us>
-  struct ContainsInTuple<T, std::tuple<Us...>> : std::disjunction<std::is_same<T, Us>...>
+  // Partial specialization: unpacks the tuple types and uses a fold expression
+  template <typename T, typename... Ts>
+  struct ContainsInTuple<T, std::tuple<Ts...>> : std::bool_constant<(std::is_same_v<T, Ts> || ...)>
   {
   };
 
   template <typename T, typename CompositeParent>
   concept NestedUnitEnumOf = UnitEnum<T> && CompositeUnitEnum<CompositeParent>
-                             && ContainsInTuple<typename UnitTraits<CompositeParent>::Composite, T>::value;
+                             && ContainsInTuple<T, typename UnitTraits<CompositeParent>::Composite>::value;
 
   template <auto unitValue>
   requires UnitEnum<decltype(unitValue)>

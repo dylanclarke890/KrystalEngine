@@ -212,8 +212,7 @@ namespace Krys::HTML
     Ref<CSSValue> operator()(CSSValuePool &pool, const FunctionNotation<Name, CSSType> &value, Args &&...args)
     {
       return CreateFunctionCSSValue(value.name,
-                                  CreateCSSValue(pool, value.parameters, std::forward<Args>(args)...));
+                                    CreateCSSValue(pool, value.parameters, std::forward<Args>(args)...));
     }
   };
-
 }

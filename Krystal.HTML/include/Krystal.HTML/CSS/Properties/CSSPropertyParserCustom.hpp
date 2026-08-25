@@ -45,6 +45,8 @@
 
 namespace Krys::HTML
 {
+  using namespace CSSPropertyParserHelpers;
+
   struct BorderShorthandComponents
   {
     RefPtr<CSSValue> Width;
@@ -938,8 +940,8 @@ namespace Krys::HTML
         }
 
         auto [positionX, positionY] = split(Krys::Move(*position));
-        x.append(CSSPositionXValue::create(Krys::Move(positionX)));
-        y.append(CSSPositionYValue::create(Krys::Move(positionY)));
+        x.push_back(CSSPositionXValue::Create(Krys::Move(positionX)));
+        y.push_back(CSSPositionYValue::Create(Krys::Move(positionY)));
       } while (ConsumeComma(tokens));
 
       if (!tokens.IsAtEnd())
@@ -1114,389 +1116,393 @@ namespace Krys::HTML
       return true;
     }
 
-    KRYS_NODISCARD static bool ConsumeGridItemPositionShorthand(CSSTokenRange &tokens,
-                                                                CSSPropertyParserState &state,
-                                                                const CSSPropertyShorthand &shorthand,
-                                                                CSSPropertyParserResult &result) noexcept
-    {
-      assert(shorthand.Id() == state.CurrentProperty);
-      assert(shorthand.Size() == 2uz);
+    // KRYS_NODISCARD static bool ConsumeGridItemPositionShorthand(CSSTokenRange &tokens,
+    //                                                             CSSPropertyParserState &state,
+    //                                                             const CSSPropertyShorthand &shorthand,
+    //                                                             CSSPropertyParserResult &result) noexcept
+    //{
+    //   assert(shorthand.Id() == state.CurrentProperty);
+    //   assert(shorthand.Size() == 2uz);
 
-      RefPtr<CSSValue> startValue = ConsumeGridLine(tokens, state);
-      if (!startValue)
-      {
-        return false;
-      }
+    // RefPtr<CSSValue> startValue = ConsumeGridLine(tokens, state);
+    // if (!startValue)
+    // {
+    //   return false;
+    // }
 
-      RefPtr<CSSValue> endValue;
-      if (ConsumeSlash(tokens))
-      {
-        endValue = ConsumeGridLine(tokens, state);
-        if (!endValue)
-        {
-          return false;
-        }
-      }
-      else
-      {
-        endValue = IsCustomIdentValue(*startValue) ? startValue : CSSPrimitiveValue::Create(CSSValueId::Auto);
-      }
+    // RefPtr<CSSValue> endValue;
+    // if (ConsumeSlash(tokens))
+    // {
+    //   endValue = ConsumeGridLine(tokens, state);
+    //   if (!endValue)
+    //   {
+    //     return false;
+    //   }
+    // }
+    // else
+    // {
+    //   endValue = IsCustomIdentValue(*startValue) ? startValue :
+    //   CSSPrimitiveValue::Create(CSSValueId::Auto);
+    // }
 
-      if (!tokens.IsAtEnd())
-      {
-        return false;
-      }
+    // if (!tokens.IsAtEnd())
+    // {
+    //   return false;
+    // }
 
-      auto longhands = shorthand.Properties();
-      result.AddPropertyForCurrentShorthand(state, longhands[0], Krys::Move(startValue));
-      result.AddPropertyForCurrentShorthand(state, longhands[1], Krys::Move(endValue));
+    // auto longhands = shorthand.Properties();
+    // result.AddPropertyForCurrentShorthand(state, longhands[0], Krys::Move(startValue));
+    // result.AddPropertyForCurrentShorthand(state, longhands[1], Krys::Move(endValue));
 
-      return true;
-    }
+    // return true;
+    // }
 
-    KRYS_NODISCARD static bool ConsumeGridTemplateShorthand(CSSTokenRange &tokens,
-                                                            CSSPropertyParserState &state,
-                                                            const CSSPropertyShorthand &shorthand,
-                                                            CSSPropertyParserResult &result) noexcept
-    {
-      CSSTokenRange rangeCopy = tokens;
-      RefPtr<CSSValue> rowsValue = ConsumeIdent<CSSValueId::None>(rangeCopy);
+    // KRYS_NODISCARD static bool ConsumeGridTemplateShorthand(CSSTokenRange &tokens,
+    //                                                         CSSPropertyParserState &state,
+    //                                                         const CSSPropertyShorthand &shorthand,
+    //                                                         CSSPropertyParserResult &result) noexcept
+    //{
+    //   CSSTokenRange rangeCopy = tokens;
+    //   RefPtr<CSSValue> rowsValue = ConsumeIdent<CSSValueId::None>(rangeCopy);
 
-      // 1- 'none' case.
-      if (rowsValue && tokens.IsAtEnd())
-      {
-        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateRows,
-                                              CSSPrimitiveValue::Create(CSSValueId::None));
-        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateColumns,
-                                              CSSPrimitiveValue::Create(CSSValueId::None));
-        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateAreas,
-                                              CSSPrimitiveValue::Create(CSSValueId::None));
+    // // 1- 'none' case.
+    // if (rowsValue && tokens.IsAtEnd())
+    // {
+    //   result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateRows,
+    //                                         CSSPrimitiveValue::Create(CSSValueId::None));
+    //   result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateColumns,
+    //                                         CSSPrimitiveValue::Create(CSSValueId::None));
+    //   result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateAreas,
+    //                                         CSSPrimitiveValue::Create(CSSValueId::None));
 
-        return true;
-      }
+    // return true;
+    // }
 
-      // 2- <grid-template-rows> / <grid-template-columns>
-      if (!rowsValue)
-      {
-        rowsValue = ConsumeGridTrackList(tokens, state, GridTemplate);
-      }
+    // // 2- <grid-template-rows> / <grid-template-columns>
+    // if (!rowsValue)
+    // {
+    //   rowsValue = ConsumeGridTrackList(tokens, state, GridTemplate);
+    // }
 
-      if (rowsValue)
-      {
-        if (!ConsumeSlash(tokens))
-        {
-          return false;
-        }
+    // if (rowsValue)
+    // {
+    //   if (!ConsumeSlash(tokens))
+    //   {
+    //     return false;
+    //   }
 
-        RefPtr columnsValue = ConsumeGridTemplatesRowsOrColumns(tokens, state);
-        if (!columnsValue || !tokens.IsAtEnd())
-        {
-          return false;
-        }
+    // RefPtr columnsValue = ConsumeGridTemplatesRowsOrColumns(tokens, state);
+    // if (!columnsValue || !tokens.IsAtEnd())
+    // {
+    //   return false;
+    // }
 
-        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateRows, Krys::Move(rowsValue));
-        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateColumns,
-                                              Krys::Move(columnsValue));
-        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateAreas,
-                                              CSSPrimitiveValue::Create(CSSValueId::None));
+    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateRows, Krys::Move(rowsValue));
+    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateColumns,
+    //                                       Krys::Move(columnsValue));
+    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateAreas,
+    //                                       CSSPrimitiveValue::Create(CSSValueId::None));
 
-        return true;
-      }
+    // return true;
+    // }
 
-      // 3- [ <line-names>? <string> <track-size>? <line-names>? ]+ [ / <track-list> ]?
+    // // 3- [ <line-names>? <string> <track-size>? <line-names>? ]+ [ / <track-list> ]?
 
-      tokens = rangeCopy;
+    // tokens = rangeCopy;
 
-      CSS::GridNamedAreaMap gridAreaMap;
-      CSSValueListBuilder templateRows;
+    // CSS::GridNamedAreaMap gridAreaMap;
+    // CSSValueListBuilder templateRows;
 
-      // Persists between loop iterations so we can use the same value for
-      // consecutive <line-names> values
-      RefPtr<CSSGridLineNamesValue> lineNames;
+    // // Persists between loop iterations so we can use the same value for
+    // // consecutive <line-names> values
+    // RefPtr<CSSGridLineNamesValue> lineNames;
 
-      do
-      {
-        // Handle leading <custom-ident>*.
-        auto previousLineNames = std::exchange(lineNames, ConsumeGridLineNames(tokens, state));
-        if (lineNames)
-        {
-          if (!previousLineNames)
-            templateRows.append(Krys::Move(lineNames));
-          else
-          {
-            SmallList<CSSOMString> combinedLineNames;
-            combinedLineNames.append(previousLineNames->names());
-            combinedLineNames.append(lineNames->names());
-            templateRows.back() = CSSGridLineNamesValue::create(combinedLineNames);
-          }
-        }
+    // do
+    // {
+    //   // Handle leading <custom-ident>*.
+    //   auto previousLineNames = std::exchange(lineNames, ConsumeGridLineNames(tokens, state));
+    //   if (lineNames)
+    //   {
+    //     if (!previousLineNames)
+    //       templateRows.append(Krys::Move(lineNames));
+    //     else
+    //     {
+    //       SmallList<CSSOMString> combinedLineNames;
+    //       combinedLineNames.append(previousLineNames->names());
+    //       combinedLineNames.append(lineNames->names());
+    //       templateRows.back() = CSSGridLineNamesValue::create(combinedLineNames);
+    //     }
+    //   }
 
-        // Handle a template-area's row.
-        auto row = ConsumeUnresolvedGridTemplateAreasRow(tokens, state);
-        if (!row || !CSS::addRow(gridAreaMap, *row))
-          return false;
+    // // Handle a template-area's row.
+    // auto row = ConsumeUnresolvedGridTemplateAreasRow(tokens, state);
+    // if (!row || !CSS::addRow(gridAreaMap, *row))
+    //   return false;
 
-        // Handle template-rows's track-size.
-        if (RefPtr value = ConsumeGridTrackSize(tokens, state))
-        {
-          templateRows.push_back(Krys::Move(value));
-        }
-        else
-        {
-          templateRows.push_back(CSSPrimitiveValue::Create(CSSValueId::Auto));
-        }
+    // // Handle template-rows's track-size.
+    // if (RefPtr value = ConsumeGridTrackSize(tokens, state))
+    // {
+    //   templateRows.push_back(Krys::Move(value));
+    // }
+    // else
+    // {
+    //   templateRows.push_back(CSSPrimitiveValue::Create(CSSValueId::Auto));
+    // }
 
-        // This will handle the trailing/leading <custom-ident>* in the grammar.
-        lineNames = ConsumeGridLineNames(tokens, state);
-        if (lineNames)
-          templateRows.append(*lineNames);
-      } while (!tokens.IsAtEnd()
-               && !(tokens.Peek().Type() == CSSTokenType::Delim && tokens.Peek().IdentCodePoints() == u8"/"));
+    // // This will handle the trailing/leading <custom-ident>* in the grammar.
+    // lineNames = ConsumeGridLineNames(tokens, state);
+    // if (lineNames)
+    //   templateRows.append(*lineNames);
+    // } while (!tokens.IsAtEnd()
+    //        && !(tokens.Peek().Type() == CSSTokenType::Delim && tokens.Peek().IdentCodePoints() == u8"/"));
 
-      RefPtr<CSSValue> columnsValue;
-      if (!tokens.IsAtEnd())
-      {
-        if (!ConsumeSlash(tokens))
-          return false;
-        columnsValue = ConsumeGridTrackList(tokens, state, GridTemplateNoRepeat);
-        if (!columnsValue || !tokens.IsAtEnd())
-          return false;
-      }
-      else
-      {
-        columnsValue = CSSPrimitiveValue::Create(CSSValueId::None);
-      }
-      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateRows,
-                                            CSSValueList::CreateSpaceSeparated(Krys::Move(templateRows)));
-      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateColumns,
-                                            Krys::Move(columnsValue));
-      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateAreas,
-                                            CSSGridTemplateAreasValue::Create({Krys::Move(gridAreaMap)}));
+    // RefPtr<CSSValue> columnsValue;
+    // if (!tokens.IsAtEnd())
+    // {
+    //   if (!ConsumeSlash(tokens))
+    //     return false;
+    //   columnsValue = ConsumeGridTrackList(tokens, state, GridTemplateNoRepeat);
+    //   if (!columnsValue || !tokens.IsAtEnd())
+    //     return false;
+    // }
+    // else
+    // {
+    //   columnsValue = CSSPrimitiveValue::Create(CSSValueId::None);
+    // }
+    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateRows,
+    //                                       CSSValueList::CreateSpaceSeparated(Krys::Move(templateRows)));
+    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateColumns,
+    //                                       Krys::Move(columnsValue));
+    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateAreas,
+    //                                       CSSGridTemplateAreasValue::Create({Krys::Move(gridAreaMap)}));
 
-      return true;
-    }
+    // return true;
+    // }
 
-    KRYS_NODISCARD static bool ConsumeGridShorthand(CSSTokenRange &tokens, CSSPropertyParserState &state,
-                                                    const CSSPropertyShorthand &shorthand,
-                                                    CSSPropertyParserResult &result) noexcept
-    {
-      assert(shorthand.Size() == 6);
+    // KRYS_NODISCARD static bool ConsumeGridShorthand(CSSTokenRange &tokens, CSSPropertyParserState &state,
+    //                                                 const CSSPropertyShorthand &shorthand,
+    //                                                 CSSPropertyParserResult &result) noexcept
+    //{
+    //   assert(shorthand.Size() == 6);
 
-      auto ConsumeImplicitGridAutoFlow = [](CSSTokenRange &range,
-                                            CSSValueId flowDirection) -> RefPtr<CSSValue>
-      {
-        // [ auto-flow && dense? ]
-        bool autoFlow = ConsumeIdentRaw<CSSValueId::AutoFlow>(range).has_value();
-        bool dense = ConsumeIdentRaw<CSSValueId::Dense>(range).has_value();
-        if (!autoFlow && (!dense || !ConsumeIdentRaw<CSSValueId::AutoFlow>(range)))
-        {
-          return nullptr;
-        }
+    // auto ConsumeImplicitGridAutoFlow = [](CSSTokenRange &range,
+    //                                       CSSValueId flowDirection) -> RefPtr<CSSValue>
+    // {
+    //   // [ auto-flow && dense? ]
+    //   bool autoFlow = ConsumeIdentRaw<CSSValueId::AutoFlow>(range).has_value();
+    //   bool dense = ConsumeIdentRaw<CSSValueId::Dense>(range).has_value();
+    //   if (!autoFlow && (!dense || !ConsumeIdentRaw<CSSValueId::AutoFlow>(range)))
+    //   {
+    //     return nullptr;
+    //   }
 
-        if (!dense)
-        {
-          return CSSValueList::CreateSpaceSeparated(CSSPrimitiveValue::Create(flowDirection));
-        }
+    // if (!dense)
+    // {
+    //   return CSSValueList::CreateSpaceSeparated(CSSPrimitiveValue::Create(flowDirection));
+    // }
 
-        if (flowDirection == CSSValueId::Row)
-        {
-          return CSSValueList::CreateSpaceSeparated(CSSPrimitiveValue::Create(CSSValueId::Dense));
-        }
+    // if (flowDirection == CSSValueId::Row)
+    // {
+    //   return CSSValueList::CreateSpaceSeparated(CSSPrimitiveValue::Create(CSSValueId::Dense));
+    // }
 
-        return CSSValueList::CreateSpaceSeparated(CSSPrimitiveValue::Create(flowDirection),
-                                                  CSSPrimitiveValue::Create(CSSValueId::Dense));
-      };
+    // return CSSValueList::CreateSpaceSeparated(CSSPrimitiveValue::Create(flowDirection),
+    //                                           CSSPrimitiveValue::Create(CSSValueId::Dense));
+    // };
 
-      CSSTokenRange rangeCopy = tokens;
+    // CSSTokenRange rangeCopy = tokens;
 
-      // 1- <grid-template>
-      if (ConsumeGridTemplateShorthand(tokens, state, GridTemplateShorthand(), result))
-      {
-        // It can only be specified the explicit or the implicit grid properties in a single grid declaration.
-        // The sub-properties not specified are set to their initial value, as normal for shorthands.
-        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoFlow,
-                                              CSSPrimitiveValue::Create(CSSValueId::Row));
-        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoColumns,
-                                              CSSPrimitiveValue::Create(CSSValueId::Auto));
-        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoRows,
-                                              CSSPrimitiveValue::Create(CSSValueId::Auto));
+    // // 1- <grid-template>
+    // if (ConsumeGridTemplateShorthand(tokens, state, GridTemplateShorthand(), result))
+    // {
+    //   // It can only be specified the explicit or the implicit grid properties in a single grid
+    //   declaration.
+    //   // The sub-properties not specified are set to their initial value, as normal for shorthands.
+    //   result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoFlow,
+    //                                         CSSPrimitiveValue::Create(CSSValueId::Row));
+    //   result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoColumns,
+    //                                         CSSPrimitiveValue::Create(CSSValueId::Auto));
+    //   result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoRows,
+    //                                         CSSPrimitiveValue::Create(CSSValueId::Auto));
 
-        return true;
-      }
+    // return true;
+    // }
 
-      tokens = rangeCopy;
+    // tokens = rangeCopy;
 
-      RefPtr<CSSValue> autoColumnsValue;
-      RefPtr<CSSValue> autoRowsValue;
-      RefPtr<CSSValue> templateRows;
-      RefPtr<CSSValue> templateColumns;
-      RefPtr<CSSValue> gridAutoFlow;
+    // RefPtr<CSSValue> autoColumnsValue;
+    // RefPtr<CSSValue> autoRowsValue;
+    // RefPtr<CSSValue> templateRows;
+    // RefPtr<CSSValue> templateColumns;
+    // RefPtr<CSSValue> gridAutoFlow;
 
-      if (tokens.Peek().ValueId() == CSSValueId::AutoFlow || tokens.Peek().ValueId() == CSSValueId::Dense)
-      {
-        // 2- [ auto-flow && dense? ] <grid-auto-rows>? / <grid-template-columns>
-        gridAutoFlow = ConsumeImplicitGridAutoFlow(tokens, CSSValueId::Row);
-        if (!gridAutoFlow || tokens.IsAtEnd())
-          return false;
-        if (ConsumeSlash(tokens))
-          autoRowsValue = CSSPrimitiveValue::Create(CSSValueId::Auto);
-        else
-        {
-          autoRowsValue = ConsumeGridTrackList(tokens, state, GridAuto);
-          if (!autoRowsValue)
-          {
-            return false;
-          }
+    // if (tokens.Peek().ValueId() == CSSValueId::AutoFlow || tokens.Peek().ValueId() == CSSValueId::Dense)
+    // {
+    //   // 2- [ auto-flow && dense? ] <grid-auto-rows>? / <grid-template-columns>
+    //   gridAutoFlow = ConsumeImplicitGridAutoFlow(tokens, CSSValueId::Row);
+    //   if (!gridAutoFlow || tokens.IsAtEnd())
+    //     return false;
+    //   if (ConsumeSlash(tokens))
+    //     autoRowsValue = CSSPrimitiveValue::Create(CSSValueId::Auto);
+    //   else
+    //   {
+    //     autoRowsValue = ConsumeGridTrackList(tokens, state, GridAuto);
+    //     if (!autoRowsValue)
+    //     {
+    //       return false;
+    //     }
 
-          if (!ConsumeSlash(tokens))
-          {
-            return false;
-          }
-        }
+    // if (!ConsumeSlash(tokens))
+    // {
+    //   return false;
+    // }
+    // }
 
-        if (tokens.IsAtEnd())
-        {
-          return false;
-        }
+    // if (tokens.IsAtEnd())
+    // {
+    //   return false;
+    // }
 
-        templateColumns = ConsumeGridTemplatesRowsOrColumns(tokens, state);
-        if (!templateColumns)
-        {
-          return false;
-        }
+    // templateColumns = ConsumeGridTemplatesRowsOrColumns(tokens, state);
+    // if (!templateColumns)
+    // {
+    //   return false;
+    // }
 
-        templateRows = CSSPrimitiveValue::Create(CSSValueId::None);
-        autoColumnsValue = CSSPrimitiveValue::Create(CSSValueId::Auto);
-      }
-      else
-      {
-        // 3- <grid-template-rows> / [ auto-flow && dense? ] <grid-auto-columns>?
-        templateRows = ConsumeGridTemplatesRowsOrColumns(tokens, state);
-        if (!templateRows)
-        {
-          return false;
-        }
+    // templateRows = CSSPrimitiveValue::Create(CSSValueId::None);
+    // autoColumnsValue = CSSPrimitiveValue::Create(CSSValueId::Auto);
+    // }
+    // else
+    // {
+    // // 3- <grid-template-rows> / [ auto-flow && dense? ] <grid-auto-columns>?
+    // templateRows = ConsumeGridTemplatesRowsOrColumns(tokens, state);
+    // if (!templateRows)
+    // {
+    //   return false;
+    // }
 
-        if (!ConsumeSlash(tokens) || tokens.IsAtEnd())
-        {
-          return false;
-        }
+    // if (!ConsumeSlash(tokens) || tokens.IsAtEnd())
+    // {
+    //   return false;
+    // }
 
-        gridAutoFlow = ConsumeImplicitGridAutoFlow(tokens, CSSValueId::Column);
-        if (!gridAutoFlow)
-        {
-          return false;
-        }
+    // gridAutoFlow = ConsumeImplicitGridAutoFlow(tokens, CSSValueId::Column);
+    // if (!gridAutoFlow)
+    // {
+    //   return false;
+    // }
 
-        if (tokens.IsAtEnd())
-        {
-          autoColumnsValue = CSSPrimitiveValue::Create(CSSValueId::Auto);
-        }
-        else
-        {
-          autoColumnsValue = ConsumeGridTrackList(tokens, state, GridAuto);
-          if (!autoColumnsValue)
-          {
-            return false;
-          }
-        }
+    // if (tokens.IsAtEnd())
+    // {
+    //   autoColumnsValue = CSSPrimitiveValue::Create(CSSValueId::Auto);
+    // }
+    // else
+    // {
+    //   autoColumnsValue = ConsumeGridTrackList(tokens, state, GridAuto);
+    //   if (!autoColumnsValue)
+    //   {
+    //     return false;
+    //   }
+    // }
 
-        templateColumns = CSSPrimitiveValue::Create(CSSValueId::None);
-        autoRowsValue = CSSPrimitiveValue::Create(CSSValueId::Auto);
-      }
+    // templateColumns = CSSPrimitiveValue::Create(CSSValueId::None);
+    // autoRowsValue = CSSPrimitiveValue::Create(CSSValueId::Auto);
+    // }
 
-      if (!tokens.IsAtEnd())
-      {
-        return false;
-      }
+    // if (!tokens.IsAtEnd())
+    // {
+    //   return false;
+    // }
 
-      // It can only be specified the explicit or the implicit grid properties in a single grid declaration.
-      // The sub-properties not specified are set to their initial value, as normal for shorthands.
-      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateColumns,
-                                            Krys::Move(templateColumns));
-      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateRows, Krys::Move(templateRows));
-      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateAreas,
-                                            CSSPrimitiveValue::Create(CSSValueId::None));
-      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoFlow, Krys::Move(gridAutoFlow));
-      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoColumns,
-                                            Krys::Move(autoColumnsValue));
-      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoRows, Krys::Move(autoRowsValue));
+    // // It can only be specified the explicit or the implicit grid properties in a single grid declaration.
+    // // The sub-properties not specified are set to their initial value, as normal for shorthands.
+    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateColumns,
+    //                                       Krys::Move(templateColumns));
+    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateRows,
+    // Krys::Move(templateRows)); result.AddPropertyForCurrentShorthand(state,
+    // CSSPropertyId::GridTemplateAreas,
+    //                                       CSSPrimitiveValue::Create(CSSValueId::None));
+    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoFlow, Krys::Move(gridAutoFlow));
+    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoColumns,
+    //                                       Krys::Move(autoColumnsValue));
+    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoRows, Krys::Move(autoRowsValue));
 
-      return true;
-    }
+    // return true;
+    // }
 
-    KRYS_NODISCARD static bool ConsumeGridAreaShorthand(CSSTokenRange &tokens, CSSPropertyParserState &state,
-                                                        const CSSPropertyShorthand &shorthand,
-                                                        CSSPropertyParserResult &result) noexcept
-    {
-      RefPtr rowStartValue = ConsumeGridLine(tokens, state);
-      if (!rowStartValue)
-      {
-        return false;
-      }
+    // KRYS_NODISCARD static bool ConsumeGridAreaShorthand(CSSTokenRange &tokens, CSSPropertyParserState
+    // &state,
+    //                                                     const CSSPropertyShorthand &shorthand,
+    //                                                     CSSPropertyParserResult &result) noexcept
+    //{
+    //   RefPtr rowStartValue = ConsumeGridLine(tokens, state);
+    //   if (!rowStartValue)
+    //   {
+    //     return false;
+    //   }
 
-      RefPtr<CSSValue> columnStartValue;
-      RefPtr<CSSValue> rowEndValue;
-      RefPtr<CSSValue> columnEndValue;
+    // RefPtr<CSSValue> columnStartValue;
+    // RefPtr<CSSValue> rowEndValue;
+    // RefPtr<CSSValue> columnEndValue;
 
-      if (ConsumeSlash(tokens))
-      {
-        columnStartValue = ConsumeGridLine(tokens, state);
-        if (!columnStartValue)
-        {
-          return false;
-        }
+    // if (ConsumeSlash(tokens))
+    // {
+    //   columnStartValue = ConsumeGridLine(tokens, state);
+    //   if (!columnStartValue)
+    //   {
+    //     return false;
+    //   }
 
-        if (ConsumeSlash(tokens))
-        {
-          rowEndValue = ConsumeGridLine(tokens, state);
-          if (!rowEndValue)
-          {
-            return false;
-          }
+    // if (ConsumeSlash(tokens))
+    // {
+    //   rowEndValue = ConsumeGridLine(tokens, state);
+    //   if (!rowEndValue)
+    //   {
+    //     return false;
+    //   }
 
-          if (ConsumeSlash(tokens))
-          {
-            columnEndValue = ConsumeGridLine(tokens, state);
-            if (!columnEndValue)
-            {
-              return false;
-            }
-          }
-        }
-      }
+    // if (ConsumeSlash(tokens))
+    // {
+    //   columnEndValue = ConsumeGridLine(tokens, state);
+    //   if (!columnEndValue)
+    //   {
+    //     return false;
+    //   }
+    // }
+    // }
+    // }
 
-      if (!tokens.IsAtEnd())
-      {
-        return false;
-      }
+    // if (!tokens.IsAtEnd())
+    // {
+    //   return false;
+    // }
 
-      if (!columnStartValue)
-      {
-        columnStartValue =
-          IsCustomIdentValue(*rowStartValue) ? rowStartValue : CSSPrimitiveValue::Create(CSSValueId::Auto);
-      }
+    // if (!columnStartValue)
+    // {
+    //   columnStartValue =
+    //     IsCustomIdentValue(*rowStartValue) ? rowStartValue : CSSPrimitiveValue::Create(CSSValueId::Auto);
+    // }
 
-      if (!rowEndValue)
-      {
-        rowEndValue =
-          IsCustomIdentValue(*rowStartValue) ? rowStartValue : CSSPrimitiveValue::Create(CSSValueId::Auto);
-      }
+    // if (!rowEndValue)
+    // {
+    //   rowEndValue =
+    //     IsCustomIdentValue(*rowStartValue) ? rowStartValue : CSSPrimitiveValue::Create(CSSValueId::Auto);
+    // }
 
-      if (!columnEndValue)
-      {
-        columnEndValue = IsCustomIdentValue(*columnStartValue) ? columnStartValue
-                                                               : CSSPrimitiveValue::Create(CSSValueId::Auto);
-      }
+    // if (!columnEndValue)
+    // {
+    //   columnEndValue = IsCustomIdentValue(*columnStartValue) ? columnStartValue
+    //                                                          : CSSPrimitiveValue::Create(CSSValueId::Auto);
+    // }
 
-      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridRowStart, Krys::Move(rowStartValue));
-      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridColumnStart,
-                                            Krys::Move(columnStartValue));
-      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridRowEnd, Krys::Move(rowEndValue));
-      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridColumnEnd, Krys::Move(columnEndValue));
+    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridRowStart, Krys::Move(rowStartValue));
+    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridColumnStart,
+    //                                       Krys::Move(columnStartValue));
+    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridRowEnd, Krys::Move(rowEndValue));
+    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridColumnEnd, Krys::Move(columnEndValue));
 
-      return true;
-    }
+    // return true;
+    // }
 
     KRYS_NODISCARD static bool ConsumeAlignShorthand(CSSTokenRange &tokens, CSSPropertyParserState &state,
                                                      const CSSPropertyShorthand &shorthand,

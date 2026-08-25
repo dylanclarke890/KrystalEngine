@@ -232,7 +232,10 @@ class Value:
         Value.schema.set_attributes_from_dictionary(dictionary, instance=self)
         self.value_keyword_name = ValueKeywordName(self.value)
         self.keyword_term = KeywordTerm(
-            self.value_keyword_name, comment=self.comment, settings_flag=self.settings_flag, status=self.status
+            self.value_keyword_name,
+            comment=self.comment,
+            settings_flag=self.settings_flag,
+            status=self.status.status if self.status else None,
         )
 
     def __str__(self):
@@ -265,20 +268,21 @@ class Value:
             return None
 
         if "status" in json_value and (
-            json_value["status"] == "unimplemented"
-            or json_value["status"] == "removed"
-            or json_value["status"] == "not considering"
+            json_value["status"].status == "unimplemented"
+            or json_value["status"].status == "removed"
+            or json_value["status"].status == "not considering"
         ):
             if parsing_context.verbose:
                 print(
-                    f"SKIPPED: value {json_value['value']} in {key_path} - 'status' designated as {json_value['status']}."
+                    f"SKIPPED: value {json_value['value']} in {key_path} - 'status' designated as {json_value['status'].status}."
                 )
             return None
 
-        if json_value.get("status", None) != "internal" and json_value["value"].startswith("-internal-"):
-            raise Exception(
-                f'Value "{json_value["value"]}" starts with "-internal-" but does not have "status": "internal" set.'
-            )
+        if json_value.get("status", None) is None or json_value["status"].status != "internal":
+            if json_value["value"].startswith("-internal-"):
+                raise Exception(
+                    f'Value "{json_value}" starts with "-internal-" but does not have "status": "internal" set.'
+                )
 
         return Value(**json_value)
 
@@ -956,10 +960,7 @@ class StyleProperty:
 
             if codegen_properties.parser_grammar and (
                 not codegen_properties.parser_grammar_unused
-                or (
-                    (codegen_properties.parser_grammar_unused and parsing_context.check_unused_grammars_values)
-                    or parsing_context.verbose
-                )
+                or (codegen_properties.parser_grammar_unused and parsing_context.check_unused_grammars_values)
             ):
                 codegen_properties.parser_grammar.check_against_values(json_value["values"])
 
@@ -1528,9 +1529,10 @@ class DescriptorCodeGenProperties:
                 del json_value["longhands"]
 
         if "parser-grammar" in json_value:
-            for entry_name in ["parser-function", "skip-parser", "longhands"]:
-                if entry_name in json_value:
-                    raise Exception(f"{key_path} can't have both 'parser-grammar' and '{entry_name}.")
+            if not json_value.get("parser-grammar-unused"):
+                for entry_name in ["parser-function", "skip-parser", "longhands"]:
+                    if entry_name in json_value:
+                        raise Exception(f"{key_path} can't have both 'parser-grammar' and '{entry_name}.")
             grammar = Grammar.from_string(parsing_context, f"{key_path}", name, json_value["parser-grammar"])
             grammar.perform_fixups(parsing_context.parsed_shared_grammar_rules)
             json_value["parser-grammar"] = grammar
@@ -2708,7 +2710,16 @@ class LiteralTerm:
 #   e.g. "auto" or "box"
 #
 class KeywordTerm:
-    def __init__(self, value, *, annotation=None, aliased_to=None, comment=None, settings_flag=None, status=None):
+    def __init__(
+        self,
+        value: ValueKeywordName,
+        *,
+        annotation: str | None = None,
+        aliased_to=None,
+        comment: str | None = None,
+        settings_flag: str | None = None,
+        status: str | None = None,
+    ):
         self.value = value
         self.aliased_to = aliased_to
         self.comment = comment
@@ -4021,7 +4032,7 @@ class TermGeneratorMatchAllOrderedTerm(TermGenerator):
         if self.requires_state:
             lambda_declaration_parameters += ["CSSPropertyParserState &state"]
 
-        to.write(f"auto consumeMatchAllOrdered = []({', '.join(lambda_declaration_parameters)}) -> RefPtr<CSSValue> {{")
+        to.write(f"auto ConsumeMatchAllOrdered = []({', '.join(lambda_declaration_parameters)}) -> RefPtr<CSSValue> {{")
         with to.indent():
             if self.term.settings_flag:
                 to.write(f"if (!state.context.{self.term.settings_flag})")
@@ -4122,7 +4133,7 @@ class TermGeneratorMatchAllOrderedTerm(TermGenerator):
                     inner_lambda_call_parameters += ["state"]
 
                 to.write(f"// {str(subterm_generator)}")
-                to.write(f"auto value{i} = consumeTerm{i}({', '.join(inner_lambda_call_parameters)});")
+                to.write(f"auto value{i} = ConsumeTerm{i}({', '.join(inner_lambda_call_parameters)});")
                 to.write(f"if (value{i})")
                 with to.indent():
                     to.write(f"list.append(value{i}.releaseNonNull());")
@@ -4252,7 +4263,9 @@ class TermGeneratorMatchAllAnyOrderTerm(TermGenerator):
         if self.requires_state:
             lambda_declaration_parameters += ["CSSPropertyParserState &state"]
 
-        with to.lambda_block(signature=f"auto ConsumeMatchAllAnyOrder = []({', '.join(lambda_declaration_parameters)}) -> RefPtr<CSSValue>"):
+        with to.lambda_block(
+            signature=f"auto ConsumeMatchAllAnyOrder = []({', '.join(lambda_declaration_parameters)}) -> RefPtr<CSSValue>"
+        ):
             if self.term.settings_flag:
                 to.write(f"if (!state.context.{self.term.settings_flag})")
                 with to.indent():
@@ -4333,7 +4346,9 @@ class TermGeneratorMatchAllAnyOrderTerm(TermGenerator):
         if self.requires_state:
             lambda_declaration_parameters += ["CSSPropertyParserState &state"]
 
-        with to.lambda_block(signature=f"auto ConsumeMatchAllAnyOrder = []({', '.join(lambda_declaration_parameters)}) -> Maybe<CSSValueListBuilder>"):
+        with to.lambda_block(
+            signature=f"auto ConsumeMatchAllAnyOrder = []({', '.join(lambda_declaration_parameters)}) -> Maybe<CSSValueListBuilder>"
+        ):
             self._generate_consume_subterm_lambdas(to=to)
 
             if self.term.preserve_order:
@@ -4554,7 +4569,9 @@ class TermGeneratorReferenceTerm(TermGenerator):
         to.write(f"// {str(self)}")
         if self.term.settings_flag is not None:
             self._generate_lambda(to=to)
-        with to.block(prologue=f"if (auto result = {self.generate_call_string(range_string=range_string, state_string=state_string)})"):
+        with to.block(
+            prologue=f"if (auto result = {self.generate_call_string(range_string=range_string, state_string=state_string)})"
+        ):
             to.write(f"return result;")
 
     def generate_unconditional(self, *, to: Writer, range_string, state_string):
@@ -4677,7 +4694,7 @@ class TermGeneratorReferenceTerm(TermGenerator):
 
 # Generation support for any keyword terms that are not fast-path eligible.
 class TermGeneratorNonFastPathKeywordTerm(TermGenerator):
-    def __init__(self, keyword_terms):
+    def __init__(self, keyword_terms: list[KeywordTerm]):
         self.keyword_terms = keyword_terms
         self.requires_state = any(keyword_term.requires_state for keyword_term in self.keyword_terms)
 
@@ -4818,7 +4835,7 @@ class Grammar:
 
     def check_against_values(self, values):
         if self.has_non_builtin_reference_terms:
-            # If the grammar has any  non-builtin references, the grammar is incomplete and this check cannot be performed.
+            # If the grammar has any non-builtin references, the grammar is incomplete and this check cannot be performed.
             return
 
         keywords_supported_by_grammar = self.supported_keywords
@@ -4828,7 +4845,7 @@ class Grammar:
         keywords_only_in_grammar = keywords_supported_by_grammar - keywords_listed_as_values
         if keywords_only_in_grammar:
             raise Exception(
-                f"ERROR: '{self.name}' Found some keywords in parser grammar not list in 'values' array: ({ ', '.join(quote_iterable((keyword for keyword in keywords_only_in_grammar), mark=mark)) })"
+                f"ERROR: '{self.name}' Found some keywords in parser grammar not listed in 'values' array: ({ ', '.join(quote_iterable((keyword for keyword in keywords_only_in_grammar), mark=mark)) })"
             )
         keywords_only_in_values = keywords_listed_as_values - keywords_supported_by_grammar
         if keywords_only_in_values:
@@ -4917,9 +4934,10 @@ class SharedGrammarRule:
         )
 
         if "grammar" in json_value:
-            for entry_name in ["grammar-function"]:
-                if entry_name in json_value:
-                    raise Exception(f"{key_path} can't have both 'parser-grammar' and '{entry_name}.")
+            if "grammar-unused" not in json_value or not json_value["grammar-unused"]:
+                for entry_name in ["grammar-function"]:
+                    if entry_name in json_value:
+                        raise Exception(f"{key_path} can't have both 'grammar' and '{entry_name}'.")
             json_value["grammar"] = Grammar.from_string(
                 parsing_context, f"{key_path}.{name}", name, json_value["grammar"]
             )
@@ -5077,7 +5095,7 @@ class GeneratedSharedGrammarRuleConsumer(SharedGrammarRuleConsumer):
         return FunctionSignature(
             result_type="RefPtr<CSSValue>",
             scope="CSSPropertyParsing",
-            name=f"consume{shared_grammar_rule.name_for_methods.id_without_prefix}",
+            name=f"Consume{shared_grammar_rule.name_for_methods.id_without_prefix}",
             parameters=GeneratedSharedGrammarRuleConsumer._build_parameters(requires_state),
         )
 
@@ -6973,9 +6991,11 @@ class FunctionSignature:
 class ParsingContext:
     class TopLevelObject:
         schema = Schema(
+            Schema.Entry("instructions", allowed_types=[list], required=True),
             Schema.Entry("properties", allowed_types=[dict], required=True),
             Schema.Entry("descriptors", allowed_types=[dict], required=True),
             Schema.Entry("shared-grammar-rules", allowed_types=[dict], required=True),
+            Schema.Entry("categories", allowed_types=[dict], required=True),
         )
 
     def __init__(

@@ -930,7 +930,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>python "$(ProjectDir)\codegen\main.py" --gperf-executable="c:\ProgramData\chocolatey\bin\gperf" --verbose --dump-unused-grammars --check-unused-grammars-values</Command>
+      <Command>python "$(ProjectDir)\codegen\main.py" --gperf-executable="c:\ProgramData\chocolatey\bin\gperf" --verbose</Command>
     </PreBuildEvent>
     <CustomBuildStep>
       <Command>
