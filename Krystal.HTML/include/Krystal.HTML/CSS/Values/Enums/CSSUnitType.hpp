@@ -56,6 +56,9 @@ namespace Krys::HTML
     dvb,
     dvi,
 
+    FirstViewportCSSUnitType = vw,
+    LastViewportCSSUnitType = dvi,
+
     cqw,
     cqh,
     cqi,
@@ -92,6 +95,8 @@ namespace Krys::HTML
 
     PropertyId,
     ValueId,
+
+    QuirkyEm,
   };
 
   KRYS_NODISCARD constexpr CSSUnitType ParseCSSUnitType(utf8_stringview str) noexcept

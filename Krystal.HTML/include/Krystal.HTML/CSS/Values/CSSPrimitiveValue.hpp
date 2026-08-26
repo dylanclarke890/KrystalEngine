@@ -98,6 +98,75 @@ namespace Krys::HTML
     {
       return _unit == CSSUnitType::CustomIdent;
     }
+
+    KRYS_NODISCARD bool IsCalculated() const noexcept
+    {
+      return _unit == CSSUnitType::Calc;
+    }
+
+    KRYS_NODISCARD bool IsCalculatedPercentageWithAngle() const noexcept
+    {
+      return _unit == CSSUnitType::CalcPercentageWithAngle;
+    }
+
+    KRYS_NODISCARD bool IsCalculatedPercentageWithLength() const noexcept
+    {
+      return _unit == CSSUnitType::CalcPercentageWithLength;
+    }
+
+    KRYS_NODISCARD bool IsLength() const noexcept
+    {
+      return IsLength(_unit);
+    }
+
+    KRYS_NODISCARD Maybe<bool> IsZero() const noexcept
+    {
+      if (IsCalculated())
+      {
+        return Null;
+      }
+
+      return !_value.Number;
+    }
+
+    KRYS_NODISCARD constexpr static bool IsFontIndependentLength(CSSUnitType type) noexcept
+    {
+      return type == CSSUnitType::px || type == CSSUnitType::cm || type == CSSUnitType::mm
+             || type == CSSUnitType::in || type == CSSUnitType::pt || type == CSSUnitType::pc;
+    }
+
+    KRYS_NODISCARD constexpr static bool IsRootFontRelativeLength(CSSUnitType type) noexcept
+    {
+      return type == CSSUnitType::rcap || type == CSSUnitType::rch || type == CSSUnitType::rem
+             || type == CSSUnitType::rex || type == CSSUnitType::ric || type == CSSUnitType::rlh;
+    }
+
+    KRYS_NODISCARD constexpr static bool IsFontRelativeLength(CSSUnitType type) noexcept
+    {
+      return type == CSSUnitType::em || type == CSSUnitType::ex || type == CSSUnitType::lh
+             || type == CSSUnitType::cap || type == CSSUnitType::ch || type == CSSUnitType::ic
+             || type == CSSUnitType::QuirkyEm || IsRootFontRelativeLength(type);
+    }
+
+    KRYS_NODISCARD constexpr static bool IsContainerPercentageLength(CSSUnitType type) noexcept
+    {
+      return type == CSSUnitType::cqw || type == CSSUnitType::cqh || type == CSSUnitType::cqi
+             || type == CSSUnitType::cqb || type == CSSUnitType::cqmin || type == CSSUnitType::cqmax;
+    }
+
+    KRYS_NODISCARD constexpr static bool IsLength(CSSUnitType type) noexcept
+    {
+      return type == CSSUnitType::em || type == CSSUnitType::ex || type == CSSUnitType::px
+             || type == CSSUnitType::cm || type == CSSUnitType::mm || type == CSSUnitType::in
+             || type == CSSUnitType::pt || type == CSSUnitType::pc || type == CSSUnitType::Q
+             || IsFontRelativeLength(type) || IsViewportPercentageLength(type)
+             || IsContainerPercentageLength(type) || type == CSSUnitType::QuirkyEm;
+    }
+
+    KRYS_NODISCARD constexpr static bool IsViewportPercentageLength(CSSUnitType type) noexcept
+    {
+      return type >= CSSUnitType::FirstViewportCSSUnitType && type <= CSSUnitType::LastViewportCSSUnitType;
+    }
   };
 
   KRYS_NODISCARD inline CSSValueId ValueId(const CSSPrimitiveValue &value) noexcept

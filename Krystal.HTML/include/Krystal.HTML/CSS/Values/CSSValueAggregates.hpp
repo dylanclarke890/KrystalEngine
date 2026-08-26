@@ -182,7 +182,7 @@ namespace Krys::HTML
   }                                                                                                          \
                                                                                                              \
   template <>                                                                                                \
-  constexpr bool TreatAsTupleLike<T> = true;
+  constexpr bool ::Krys::HTML::TreatAsTupleLike<T> = true;
 
 /// @brief Defines tuple-like conformance and that the type should be serialized as space separated.
 #define DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                  \

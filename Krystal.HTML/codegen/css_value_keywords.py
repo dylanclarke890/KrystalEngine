@@ -12,45 +12,9 @@ def generate(args: argparse.Namespace):
     parsing_context = ParsingContext(defines_string=args.defines, parsing_for_codegen=True, verbose=args.verbose)
 
     parsed_values: list[Value] = []
-    with open(args.values, "r") as values_file:
-        for line in values_file:
-            # Remove any text after a "//" comment string is started.
-            index = line.find("//")
-            if index != -1:
-                line = line[:index]
-
-            # Remove any trailing whitespace.
-            line = line.rstrip()
-
-            # If the line is empty at this point, we can just skip it.
-            if not line:
-                continue
-
-            # Parse the line into its constituent parts. A "value" and set of
-            # attributes (currently only two attributes, "enable-if" and "id"
-            # are supported).
-            parts = line.split(" ")
-
-            # The first part will always be the name.
-            name = parts[0]
-
-            # There may additionally be attributes of the form "foo=bar" after
-            # the name.
-            conditional = None
-            id = None
-
-            for attribute_string in parts[1:]:
-                conditional = attribute_from_attribute_string(conditional, "enable-if", attribute_string, name)
-                id = attribute_from_attribute_string(id, "id", attribute_string, name)
-
-            if conditional and not parsing_context.is_enabled(conditional=conditional):
-                if parsing_context.verbose:
-                    print(
-                        f"SKIPPED value {name} due to failing to satisfy 'enable-if' condition, '{conditional}', with active macro set"
-                    )
-                continue
-
-            parsed_values.append(Value(name, id, conditional))
+    for value_file_path in args.values:
+        with open(value_file_path, "r") as values_file:
+            extract_values_from_file(parsing_context, parsed_values, values_file)
 
     if args.verbose:
         print(f"{len(parsed_values)} values active for code generation")
@@ -64,6 +28,46 @@ def generate(args: argparse.Namespace):
         output_cpp_dir=output_cpp_path("CSS/Values/Enums"),
         remove_gperf_file=True,
     )
+
+def extract_values_from_file(parsing_context, parsed_values, values_file):
+    for line in values_file:
+            # Remove any text after a "//" comment string is started.
+        index = line.find("//")
+        if index != -1:
+            line = line[:index]
+
+            # Remove any trailing whitespace.
+        line = line.rstrip()
+
+            # If the line is empty at this point, we can just skip it.
+        if not line:
+            continue
+
+            # Parse the line into its constituent parts. A "value" and set of
+            # attributes (currently only two attributes, "enable-if" and "id"
+            # are supported).
+        parts = line.split(" ")
+
+            # The first part will always be the name.
+        name = parts[0]
+
+            # There may additionally be attributes of the form "foo=bar" after
+            # the name.
+        conditional = None
+        id = None
+
+        for attribute_string in parts[1:]:
+            conditional = attribute_from_attribute_string(conditional, "enable-if", attribute_string, name)
+            id = attribute_from_attribute_string(id, "id", attribute_string, name)
+
+        if conditional and not parsing_context.is_enabled(conditional=conditional):
+            if parsing_context.verbose:
+                print(
+                        f"SKIPPED value {name} due to failing to satisfy 'enable-if' condition, '{conditional}', with active macro set"
+                    )
+            continue
+
+        parsed_values.append(Value(name, id, conditional))
 
 
 class ParsingContext:

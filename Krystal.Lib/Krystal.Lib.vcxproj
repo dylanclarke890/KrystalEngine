@@ -149,6 +149,7 @@
     <ClInclude Include="include\Krystal.Lib\Detection\AddressSpaceBitSize.hpp" />
     <ClInclude Include="include\Krystal.Lib\Detection\NumberOfCores.hpp" />
     <ClInclude Include="include\Krystal.Lib\ForbidHeapAllocation.hpp" />
+    <ClInclude Include="include\Krystal.Lib\IndexedRange.hpp" />
     <ClInclude Include="include\Krystal.Lib\InlineContainers\Forward.hpp" />
     <ClInclude Include="include\Krystal.Lib\Mixins\NonCopyable.hpp" />
     <ClInclude Include="include\Krystal.Lib\Detection\Compiler.hpp" />
@@ -252,6 +253,7 @@
     <ClInclude Include="include\Krystal.Lib\Utils\ToUnderlying.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\Uninit.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\Unwrap.hpp" />
+    <ClInclude Include="include\Krystal.Lib\ZippedRange.hpp" />
     <ClInclude Include="third-party\llvm\ADT\ADL.h" />
     <ClInclude Include="third-party\llvm\Support\MemAlloc.h" />
     <ClInclude Include="third-party\llvm\ADT\SmallVector.h" />

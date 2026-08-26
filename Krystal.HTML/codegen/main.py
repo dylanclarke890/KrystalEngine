@@ -6,15 +6,17 @@ import css_value_keywords
 
 
 def parse_args() -> argparse.Namespace:
+    current_dir = pathlib.Path(__file__).parent
+
     parser = argparse.ArgumentParser(description="Process CSS property definitions.")
     parser.add_argument(
         "--properties",
-        default=pathlib.Path(__file__).parent / "css-properties.json",
+        default=current_dir / "css-properties.json",
         help="Path to the CSS properties JSON file.",
     )
     parser.add_argument(
         "--values",
-        default=pathlib.Path(__file__).parent / "css-value-keywords.in",
+        default=[current_dir / "css-value-keywords.in", current_dir / "svg-css-value-keywords.in"],
         help="Path to the CSS value keywords input file.",
     )
     parser.add_argument("--defines", default="", help="Comma-separated list of defines to enable for code generation.")
