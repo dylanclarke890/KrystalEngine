@@ -70,7 +70,7 @@ namespace Krys::HTML
   {
     using UnitType = decltype(unitValue);
 
-    constexpr static UnitType unit = unitValue;
+    constexpr static UnitType Unit = unitValue;
     double Value;
 
     constexpr explicit ValueLiteral(double initialValue) : Value {initialValue}
@@ -716,7 +716,7 @@ namespace Krys::HTML
     constexpr static auto Canonical = AngleUnit::Deg;
     constexpr static auto Category = NumericTypeCategory::Angle;
 
-    KRYS_NODISCARD consteval static bool isValidRangeForCategory(CSSRange)
+    KRYS_NODISCARD consteval static bool IsValidRangeForCategory(CSSRange)
     {
       return true;
     }

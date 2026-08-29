@@ -14,7 +14,7 @@ namespace Krys::HTML
   template <auto R, typename V>
   KRYS_NODISCARD double Canonicalize(AngleRaw<R, V> raw)
   {
-    return CanonicalizeAngle(raw.value, raw.unit);
+    return CanonicalizeAngle(raw.Value, raw.Unit);
   }
 
 #pragma endregion
@@ -29,7 +29,7 @@ namespace Krys::HTML
   template <auto R, typename V>
   KRYS_NODISCARD double Canonicalize(TimeRaw<R, V> raw)
   {
-    return CanonicalizeTime(raw.value, raw.unit);
+    return CanonicalizeTime(raw.Value, raw.Unit);
   }
 
 #pragma endregion
@@ -44,7 +44,7 @@ namespace Krys::HTML
   template <auto R, typename V>
   KRYS_NODISCARD double Canonicalize(FrequencyRaw<R, V> raw)
   {
-    return CanonicalizeFrequency(raw.value, raw.unit);
+    return CanonicalizeFrequency(raw.Value, raw.Unit);
   }
 
 #pragma endregion
@@ -59,7 +59,7 @@ namespace Krys::HTML
   template <auto R, typename V>
   KRYS_NODISCARD double Canonicalize(ResolutionRaw<R, V> raw)
   {
-    return CanonicalizeResolution(raw.value, raw.unit);
+    return CanonicalizeResolution(raw.Value, raw.Unit);
   }
 
 #pragma endregion

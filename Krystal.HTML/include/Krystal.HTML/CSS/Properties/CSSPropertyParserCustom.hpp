@@ -7,43 +7,73 @@
 #include "Krystal.HTML/CSS/Properties/Consumers/Anchor.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/AngleDefinitions.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/AnglePercentageDefinitions.hpp"
-#include "Krystal.HTML/CSS/Properties/Consumers/Animation.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/Animations.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/Attr.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/Background.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/Box.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/Color.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/ColorAdjust.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/ColorInterpolationMethod.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/Content.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/CounterStyles.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/CSSPrimitiveValue.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/Display.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/Easing.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/Filter.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/FlexDefinitions.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/Font.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/FrequencyDefinitions.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/Grid.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/Ident.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/Image.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/Inline.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/IntegerDefinitions.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/LengthDefinitions.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/LengthPercentageDefinitions.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/List.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/Lists.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/Masking.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/MetaConsumer.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/MetaConsumerDefinitions.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/MetaResolver.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/Motion.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/NumberDefinitions.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/Percentage.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/PercentageDefinitions.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/Position.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/PositionTry.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/Primitives.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/Ratio.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/ResolutionDefinitions.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/Scrollbars.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/ScrollSnap.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/Shapes.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/String.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/SVG.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/Syntax.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/TextDecoration.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/TimeDefinitions.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/Timeline.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/Transform.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/Transitions.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/UI.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/UnicodeRange.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/URL.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/ViewTransition.hpp"
+#include "Krystal.HTML/CSS/Properties/Consumers/WillChange.hpp"
 #include "Krystal.HTML/CSS/Properties/CSSPropertyParserResult.hpp"
 #include "Krystal.HTML/CSS/Properties/CSSPropertyParserState.hpp"
 #include "Krystal.HTML/CSS/Properties/CSSPropertyShorthand.hpp"
 #include "Krystal.HTML/CSS/Properties/CSSPropertyShorthandFunctions.hpp"
 #include "Krystal.HTML/CSS/Values/Borders/BorderImage.hpp"
 #include "Krystal.HTML/CSS/Values/Borders/BorderRadius.hpp"
+#include "Krystal.HTML/CSS/Values/CSSOffsetRotateValue.hpp"
 #include "Krystal.HTML/CSS/Values/CSSPositionValue.hpp"
 #include "Krystal.HTML/CSS/Values/CSSPrimitiveValue.hpp"
+#include "Krystal.HTML/CSS/Values/CSSQuadValue.hpp"
+#include "Krystal.HTML/CSS/Values/CSSTransformListValue.hpp"
 #include "Krystal.HTML/CSS/Values/CSSValueList.hpp"
+#include "Krystal.HTML/CSS/Values/CSSValuePair.hpp"
 #include "Krystal.HTML/CSS/Values/CSSValueTypes.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
 #include "Krystal.Lib/ZippedRange.hpp"
@@ -161,7 +191,7 @@ namespace Krys::HTML
     return CSSValueId::Invalid;
   }
 
-  class PropertyParserCustom
+  class CSSPropertyParserCustom
   {
   public:
     KRYS_NODISCARD static bool
@@ -400,6 +430,37 @@ namespace Krys::HTML
                                             CreateCSSValue(state.ValuePool, borderRadius->BottomRight()));
       result.AddPropertyForCurrentShorthand(state, CSSPropertyId::BorderBottomLeftRadius,
                                             CreateCSSValue(state.ValuePool, borderRadius->BottomLeft()));
+
+      return true;
+    }
+
+    KRYS_NODISCARD static bool ConsumeBorderSpacingShorthand(CSSTokenRange &range,
+                                                             CSSPropertyParserState &state,
+                                                             const CSSPropertyShorthand &,
+                                                             CSSPropertyParserResult &result)
+    {
+      RefPtr horizontalSpacing =
+        CSSPrimitiveValueResolver<Length<NonNegative>>::ConsumeAndResolve(range, state);
+      if (!horizontalSpacing)
+      {
+        return false;
+      }
+
+      RefPtr verticalSpacing = horizontalSpacing;
+      if (!range.IsAtEnd())
+      {
+        verticalSpacing = CSSPrimitiveValueResolver<Length<NonNegative>>::ConsumeAndResolve(range, state);
+      }
+
+      if (!verticalSpacing || !range.IsAtEnd())
+      {
+        return false;
+      }
+
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::WebkitBorderHorizontalSpacing,
+                                            Krys::Move(horizontalSpacing));
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::WebkitBorderVerticalSpacing,
+                                            Krys::Move(verticalSpacing));
 
       return true;
     }
@@ -1091,7 +1152,7 @@ namespace Krys::HTML
         {
           // 'auto' is a valid value for any of the two longhands, and at this point
           // we don't know which one(s) it is meant for. We need to see if there are other values first.
-          ConsumeIdent(tokens);
+          DiscardIdent(tokens);
         }
         else
         {
@@ -1125,393 +1186,428 @@ namespace Krys::HTML
       return true;
     }
 
-    // KRYS_NODISCARD static bool ConsumeGridItemPositionShorthand(CSSTokenRange &tokens,
-    //                                                             CSSPropertyParserState &state,
-    //                                                             const CSSPropertyShorthand &shorthand,
-    //                                                             CSSPropertyParserResult &result) noexcept
-    //{
-    //   assert(shorthand.Id() == state.CurrentProperty);
-    //   assert(shorthand.Size() == 2uz);
+    KRYS_NODISCARD static bool ConsumeGridItemPositionShorthand(CSSTokenRange &tokens,
+                                                                CSSPropertyParserState &state,
+                                                                const CSSPropertyShorthand &shorthand,
+                                                                CSSPropertyParserResult &result) noexcept
+    {
+      assert(shorthand.Id() == state.CurrentProperty);
+      assert(shorthand.Size() == 2uz);
 
-    // RefPtr<CSSValue> startValue = ConsumeGridLine(tokens, state);
-    // if (!startValue)
-    // {
-    //   return false;
-    // }
+      RefPtr<CSSValue> startValue = ConsumeGridLine(tokens, state);
+      if (!startValue)
+      {
+        return false;
+      }
 
-    // RefPtr<CSSValue> endValue;
-    // if (ConsumeSlash(tokens))
-    // {
-    //   endValue = ConsumeGridLine(tokens, state);
-    //   if (!endValue)
-    //   {
-    //     return false;
-    //   }
-    // }
-    // else
-    // {
-    //   endValue = IsCustomIdentValue(*startValue) ? startValue :
-    //   CSSPrimitiveValue::Create(CSSValueId::Auto);
-    // }
+      RefPtr<CSSValue> endValue;
+      if (ConsumeSlash(tokens))
+      {
+        endValue = ConsumeGridLine(tokens, state);
+        if (!endValue)
+        {
+          return false;
+        }
+      }
+      else
+      {
+        if (IsCustomIdentValue(*startValue))
+        {
+          endValue = startValue;
+        }
+        else
+        {
+          endValue = CSSPrimitiveValue::Create(CSSValueId::Auto);
+        }
+      }
 
-    // if (!tokens.IsAtEnd())
-    // {
-    //   return false;
-    // }
+      if (!tokens.IsAtEnd())
+      {
+        return false;
+      }
 
-    // auto longhands = shorthand.Properties();
-    // result.AddPropertyForCurrentShorthand(state, longhands[0], Krys::Move(startValue));
-    // result.AddPropertyForCurrentShorthand(state, longhands[1], Krys::Move(endValue));
+      auto longhands = shorthand.Properties();
+      result.AddPropertyForCurrentShorthand(state, longhands[0], Krys::Move(startValue));
+      result.AddPropertyForCurrentShorthand(state, longhands[1], Krys::Move(endValue));
 
-    // return true;
-    // }
+      return true;
+    }
 
-    // KRYS_NODISCARD static bool ConsumeGridTemplateShorthand(CSSTokenRange &tokens,
-    //                                                         CSSPropertyParserState &state,
-    //                                                         const CSSPropertyShorthand &shorthand,
-    //                                                         CSSPropertyParserResult &result) noexcept
-    //{
-    //   CSSTokenRange rangeCopy = tokens;
-    //   RefPtr<CSSValue> rowsValue = ConsumeIdent<CSSValueId::None>(rangeCopy);
+    KRYS_NODISCARD static bool ConsumeGridTemplateShorthand(CSSTokenRange &tokens,
+                                                            CSSPropertyParserState &state,
+                                                            const CSSPropertyShorthand &shorthand,
+                                                            CSSPropertyParserResult &result) noexcept
+    {
+      CSSTokenRange rangeCopy = tokens;
+      RefPtr<CSSValue> rowsValue = ConsumeIdent<CSSValueId::None>(rangeCopy);
 
-    // // 1- 'none' case.
-    // if (rowsValue && tokens.IsAtEnd())
-    // {
-    //   result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateRows,
-    //                                         CSSPrimitiveValue::Create(CSSValueId::None));
-    //   result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateColumns,
-    //                                         CSSPrimitiveValue::Create(CSSValueId::None));
-    //   result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateAreas,
-    //                                         CSSPrimitiveValue::Create(CSSValueId::None));
+      // 1- 'none' case.
+      if (rowsValue && tokens.IsAtEnd())
+      {
+        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateRows,
+                                              CSSPrimitiveValue::Create(CSSValueId::None));
+        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateColumns,
+                                              CSSPrimitiveValue::Create(CSSValueId::None));
+        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateAreas,
+                                              CSSPrimitiveValue::Create(CSSValueId::None));
 
-    // return true;
-    // }
+        return true;
+      }
 
-    // // 2- <grid-template-rows> / <grid-template-columns>
-    // if (!rowsValue)
-    // {
-    //   rowsValue = ConsumeGridTrackList(tokens, state, GridTemplate);
-    // }
+      // 2- <grid-template-rows> / <grid-template-columns>
+      if (!rowsValue)
+      {
+        rowsValue = ConsumeGridTrackList(tokens, state, GridTemplate);
+      }
 
-    // if (rowsValue)
-    // {
-    //   if (!ConsumeSlash(tokens))
-    //   {
-    //     return false;
-    //   }
+      if (rowsValue)
+      {
+        if (!ConsumeSlash(tokens))
+        {
+          return false;
+        }
 
-    // RefPtr columnsValue = ConsumeGridTemplatesRowsOrColumns(tokens, state);
-    // if (!columnsValue || !tokens.IsAtEnd())
-    // {
-    //   return false;
-    // }
+        RefPtr columnsValue = ConsumeGridTemplatesRowsOrColumns(tokens, state);
+        if (!columnsValue || !tokens.IsAtEnd())
+        {
+          return false;
+        }
 
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateRows, Krys::Move(rowsValue));
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateColumns,
-    //                                       Krys::Move(columnsValue));
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateAreas,
-    //                                       CSSPrimitiveValue::Create(CSSValueId::None));
+        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateRows, Krys::Move(rowsValue));
+        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateColumns,
+                                              Krys::Move(columnsValue));
+        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateAreas,
+                                              CSSPrimitiveValue::Create(CSSValueId::None));
 
-    // return true;
-    // }
+        return true;
+      }
 
-    // // 3- [ <line-names>? <string> <track-size>? <line-names>? ]+ [ / <track-list> ]?
+      // // 3- [ <line-names>? <string> <track-size>? <line-names>? ]+ [ / <track-list> ]?
 
-    // tokens = rangeCopy;
+      // tokens = rangeCopy;
 
-    // CSS::GridNamedAreaMap gridAreaMap;
-    // CSSValueListBuilder templateRows;
+      GridNamedAreaMap gridAreaMap;
+      CSSValueListBuilder templateRows;
 
-    // // Persists between loop iterations so we can use the same value for
-    // // consecutive <line-names> values
-    // RefPtr<CSSGridLineNamesValue> lineNames;
+      // Persists between loop iterations so we can use the same value for
+      // consecutive <line-names> values
+      RefPtr<CSSGridLineNamesValue> lineNames;
 
-    // do
-    // {
-    //   // Handle leading <custom-ident>*.
-    //   auto previousLineNames = std::exchange(lineNames, ConsumeGridLineNames(tokens, state));
-    //   if (lineNames)
-    //   {
-    //     if (!previousLineNames)
-    //       templateRows.append(Krys::Move(lineNames));
-    //     else
-    //     {
-    //       SmallList<CSSOMString> combinedLineNames;
-    //       combinedLineNames.append(previousLineNames->names());
-    //       combinedLineNames.append(lineNames->names());
-    //       templateRows.back() = CSSGridLineNamesValue::create(combinedLineNames);
-    //     }
-    //   }
+      do
+      {
+        // Handle leading <custom-ident>*.
+        auto previousLineNames = std::exchange(lineNames, ConsumeGridLineNames(tokens, state));
+        if (lineNames)
+        {
+          if (!previousLineNames)
+          {
+            templateRows.push_back(Krys::Move(lineNames));
+          }
+          else
+          {
+            SmallList<CSSOMString> combinedLineNames;
+            combinedLineNames.push_back(previousLineNames->names());
+            combinedLineNames.push_back(lineNames->names());
+            templateRows.back() = CSSGridLineNamesValue::Create(combinedLineNames);
+          }
+        }
 
-    // // Handle a template-area's row.
-    // auto row = ConsumeUnresolvedGridTemplateAreasRow(tokens, state);
-    // if (!row || !CSS::addRow(gridAreaMap, *row))
-    //   return false;
+        // Handle a template-area's row.
+        auto row = ConsumeUnresolvedGridTemplateAreasRow(tokens, state);
+        if (!row || !addRow(gridAreaMap, *row))
+        {
+          return false;
+        }
 
-    // // Handle template-rows's track-size.
-    // if (RefPtr value = ConsumeGridTrackSize(tokens, state))
-    // {
-    //   templateRows.push_back(Krys::Move(value));
-    // }
-    // else
-    // {
-    //   templateRows.push_back(CSSPrimitiveValue::Create(CSSValueId::Auto));
-    // }
+        // Handle template-rows's track-size.
+        if (RefPtr value = ConsumeGridTrackSize(tokens, state))
+        {
+          templateRows.push_back(Krys::Move(value));
+        }
+        else
+        {
+          templateRows.push_back(CSSPrimitiveValue::Create(CSSValueId::Auto));
+        }
 
-    // // This will handle the trailing/leading <custom-ident>* in the grammar.
-    // lineNames = ConsumeGridLineNames(tokens, state);
-    // if (lineNames)
-    //   templateRows.append(*lineNames);
-    // } while (!tokens.IsAtEnd()
-    //        && !(tokens.Peek().Type() == CSSTokenType::Delim && tokens.Peek().IdentCodePoints() == u8"/"));
+        // This will handle the trailing/leading <custom-ident>* in the grammar.
+        lineNames = ConsumeGridLineNames(tokens, state);
+        if (lineNames)
+        {
+          templateRows.push_back(*lineNames);
+        }
+      } while (!tokens.IsAtEnd()
+               && !(tokens.Peek().Type() == CSSTokenType::Delim && tokens.Peek().IdentCodePoints() == u8"/"));
 
-    // RefPtr<CSSValue> columnsValue;
-    // if (!tokens.IsAtEnd())
-    // {
-    //   if (!ConsumeSlash(tokens))
-    //     return false;
-    //   columnsValue = ConsumeGridTrackList(tokens, state, GridTemplateNoRepeat);
-    //   if (!columnsValue || !tokens.IsAtEnd())
-    //     return false;
-    // }
-    // else
-    // {
-    //   columnsValue = CSSPrimitiveValue::Create(CSSValueId::None);
-    // }
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateRows,
-    //                                       CSSValueList::CreateSpaceSeparated(Krys::Move(templateRows)));
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateColumns,
-    //                                       Krys::Move(columnsValue));
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateAreas,
-    //                                       CSSGridTemplateAreasValue::Create({Krys::Move(gridAreaMap)}));
+      RefPtr<CSSValue> columnsValue;
+      if (!tokens.IsAtEnd())
+      {
+        if (!ConsumeSlash(tokens))
+        {
+          return false;
+        }
 
-    // return true;
-    // }
+        columnsValue = ConsumeGridTrackList(tokens, state, GridTemplateNoRepeat);
+        if (!columnsValue || !tokens.IsAtEnd())
+        {
+          return false;
+        }
+      }
+      else
+      {
+        columnsValue = CSSPrimitiveValue::Create(CSSValueId::None);
+      }
 
-    // KRYS_NODISCARD static bool ConsumeGridShorthand(CSSTokenRange &tokens, CSSPropertyParserState &state,
-    //                                                 const CSSPropertyShorthand &shorthand,
-    //                                                 CSSPropertyParserResult &result) noexcept
-    //{
-    //   assert(shorthand.Size() == 6);
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateRows,
+                                            CSSValueList::CreateSpaceSeparated(Krys::Move(templateRows)));
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateColumns,
+                                            Krys::Move(columnsValue));
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateAreas,
+                                            CSSGridTemplateAreasValue::Create({Krys::Move(gridAreaMap)}));
 
-    // auto ConsumeImplicitGridAutoFlow = [](CSSTokenRange &range,
-    //                                       CSSValueId flowDirection) -> RefPtr<CSSValue>
-    // {
-    //   // [ auto-flow && dense? ]
-    //   bool autoFlow = ConsumeIdentRaw<CSSValueId::AutoFlow>(range).has_value();
-    //   bool dense = ConsumeIdentRaw<CSSValueId::Dense>(range).has_value();
-    //   if (!autoFlow && (!dense || !ConsumeIdentRaw<CSSValueId::AutoFlow>(range)))
-    //   {
-    //     return nullptr;
-    //   }
+      return true;
+    }
 
-    // if (!dense)
-    // {
-    //   return CSSValueList::CreateSpaceSeparated(CSSPrimitiveValue::Create(flowDirection));
-    // }
+    KRYS_NODISCARD static bool ConsumeGridShorthand(CSSTokenRange &tokens, CSSPropertyParserState &state,
+                                                    const CSSPropertyShorthand &shorthand,
+                                                    CSSPropertyParserResult &result) noexcept
+    {
+      assert(shorthand.Size() == 6);
 
-    // if (flowDirection == CSSValueId::Row)
-    // {
-    //   return CSSValueList::CreateSpaceSeparated(CSSPrimitiveValue::Create(CSSValueId::Dense));
-    // }
+      auto ConsumeImplicitGridAutoFlow = [](CSSTokenRange &range,
+                                            CSSValueId flowDirection) -> RefPtr<CSSValue>
+      {
+        // [ auto-flow && dense? ]
+        bool autoFlow = ConsumeIdentRaw<CSSValueId::AutoFlow>(range).has_value();
+        bool dense = ConsumeIdentRaw<CSSValueId::Dense>(range).has_value();
+        if (!autoFlow && (!dense || !ConsumeIdentRaw<CSSValueId::AutoFlow>(range)))
+        {
+          return nullptr;
+        }
 
-    // return CSSValueList::CreateSpaceSeparated(CSSPrimitiveValue::Create(flowDirection),
-    //                                           CSSPrimitiveValue::Create(CSSValueId::Dense));
-    // };
+        if (!dense)
+        {
+          return CSSValueList::CreateSpaceSeparated(CSSPrimitiveValue::Create(flowDirection));
+        }
 
-    // CSSTokenRange rangeCopy = tokens;
+        if (flowDirection == CSSValueId::Row)
+        {
+          return CSSValueList::CreateSpaceSeparated(CSSPrimitiveValue::Create(CSSValueId::Dense));
+        }
 
-    // // 1- <grid-template>
-    // if (ConsumeGridTemplateShorthand(tokens, state, GridTemplateShorthand(), result))
-    // {
-    //   // It can only be specified the explicit or the implicit grid properties in a single grid
-    //   declaration.
-    //   // The sub-properties not specified are set to their initial value, as normal for shorthands.
-    //   result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoFlow,
-    //                                         CSSPrimitiveValue::Create(CSSValueId::Row));
-    //   result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoColumns,
-    //                                         CSSPrimitiveValue::Create(CSSValueId::Auto));
-    //   result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoRows,
-    //                                         CSSPrimitiveValue::Create(CSSValueId::Auto));
+        return CSSValueList::CreateSpaceSeparated(CSSPrimitiveValue::Create(flowDirection),
+                                                  CSSPrimitiveValue::Create(CSSValueId::Dense));
+      };
 
-    // return true;
-    // }
+      CSSTokenRange rangeCopy = tokens;
 
-    // tokens = rangeCopy;
+      // 1- <grid-template>
+      if (ConsumeGridTemplateShorthand(tokens, state, GridTemplateShorthand(), result))
+      {
+        // It can only be specified the explicit or the implicit grid properties in a single grid
+        // declaration .
+        // The sub-properties not specified are set to their initial value, as normal for shorthands.
+        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoFlow,
+                                              CSSPrimitiveValue::Create(CSSValueId::Row));
+        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoColumns,
+                                              CSSPrimitiveValue::Create(CSSValueId::Auto));
+        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoRows,
+                                              CSSPrimitiveValue::Create(CSSValueId::Auto));
 
-    // RefPtr<CSSValue> autoColumnsValue;
-    // RefPtr<CSSValue> autoRowsValue;
-    // RefPtr<CSSValue> templateRows;
-    // RefPtr<CSSValue> templateColumns;
-    // RefPtr<CSSValue> gridAutoFlow;
+        return true;
+      }
 
-    // if (tokens.Peek().ValueId() == CSSValueId::AutoFlow || tokens.Peek().ValueId() == CSSValueId::Dense)
-    // {
-    //   // 2- [ auto-flow && dense? ] <grid-auto-rows>? / <grid-template-columns>
-    //   gridAutoFlow = ConsumeImplicitGridAutoFlow(tokens, CSSValueId::Row);
-    //   if (!gridAutoFlow || tokens.IsAtEnd())
-    //     return false;
-    //   if (ConsumeSlash(tokens))
-    //     autoRowsValue = CSSPrimitiveValue::Create(CSSValueId::Auto);
-    //   else
-    //   {
-    //     autoRowsValue = ConsumeGridTrackList(tokens, state, GridAuto);
-    //     if (!autoRowsValue)
-    //     {
-    //       return false;
-    //     }
+      tokens = rangeCopy;
 
-    // if (!ConsumeSlash(tokens))
-    // {
-    //   return false;
-    // }
-    // }
+      RefPtr<CSSValue> autoColumnsValue;
+      RefPtr<CSSValue> autoRowsValue;
+      RefPtr<CSSValue> templateRows;
+      RefPtr<CSSValue> templateColumns;
+      RefPtr<CSSValue> gridAutoFlow;
 
-    // if (tokens.IsAtEnd())
-    // {
-    //   return false;
-    // }
+      if (tokens.Peek().ValueId() == CSSValueId::AutoFlow || tokens.Peek().ValueId() == CSSValueId::Dense)
+      {
+        // 2- [ auto-flow && dense? ] <grid-auto-rows>? / <grid-template-columns>
+        gridAutoFlow = ConsumeImplicitGridAutoFlow(tokens, CSSValueId::Row);
+        if (!gridAutoFlow || tokens.IsAtEnd())
+          return false;
+        if (ConsumeSlash(tokens))
+          autoRowsValue = CSSPrimitiveValue::Create(CSSValueId::Auto);
+        else
+        {
+          autoRowsValue = ConsumeGridTrackList(tokens, state, GridAuto);
+          if (!autoRowsValue)
+          {
+            return false;
+          }
 
-    // templateColumns = ConsumeGridTemplatesRowsOrColumns(tokens, state);
-    // if (!templateColumns)
-    // {
-    //   return false;
-    // }
+          if (!ConsumeSlash(tokens))
+          {
+            return false;
+          }
+        }
 
-    // templateRows = CSSPrimitiveValue::Create(CSSValueId::None);
-    // autoColumnsValue = CSSPrimitiveValue::Create(CSSValueId::Auto);
-    // }
-    // else
-    // {
-    // // 3- <grid-template-rows> / [ auto-flow && dense? ] <grid-auto-columns>?
-    // templateRows = ConsumeGridTemplatesRowsOrColumns(tokens, state);
-    // if (!templateRows)
-    // {
-    //   return false;
-    // }
+        if (tokens.IsAtEnd())
+        {
+          return false;
+        }
 
-    // if (!ConsumeSlash(tokens) || tokens.IsAtEnd())
-    // {
-    //   return false;
-    // }
+        templateColumns = ConsumeGridTemplatesRowsOrColumns(tokens, state);
+        if (!templateColumns)
+        {
+          return false;
+        }
 
-    // gridAutoFlow = ConsumeImplicitGridAutoFlow(tokens, CSSValueId::Column);
-    // if (!gridAutoFlow)
-    // {
-    //   return false;
-    // }
+        templateRows = CSSPrimitiveValue::Create(CSSValueId::None);
+        autoColumnsValue = CSSPrimitiveValue::Create(CSSValueId::Auto);
+      }
+      else
+      {
+        // 3- <grid-template-rows> / [ auto-flow && dense? ] <grid-auto-columns>?
+        templateRows = ConsumeGridTemplatesRowsOrColumns(tokens, state);
+        if (!templateRows)
+        {
+          return false;
+        }
 
-    // if (tokens.IsAtEnd())
-    // {
-    //   autoColumnsValue = CSSPrimitiveValue::Create(CSSValueId::Auto);
-    // }
-    // else
-    // {
-    //   autoColumnsValue = ConsumeGridTrackList(tokens, state, GridAuto);
-    //   if (!autoColumnsValue)
-    //   {
-    //     return false;
-    //   }
-    // }
+        if (!ConsumeSlash(tokens) || tokens.IsAtEnd())
+        {
+          return false;
+        }
 
-    // templateColumns = CSSPrimitiveValue::Create(CSSValueId::None);
-    // autoRowsValue = CSSPrimitiveValue::Create(CSSValueId::Auto);
-    // }
+        gridAutoFlow = ConsumeImplicitGridAutoFlow(tokens, CSSValueId::Column);
+        if (!gridAutoFlow)
+        {
+          return false;
+        }
 
-    // if (!tokens.IsAtEnd())
-    // {
-    //   return false;
-    // }
+        if (tokens.IsAtEnd())
+        {
+          autoColumnsValue = CSSPrimitiveValue::Create(CSSValueId::Auto);
+        }
+        else
+        {
+          autoColumnsValue = ConsumeGridTrackList(tokens, state, GridAuto);
+          if (!autoColumnsValue)
+          {
+            return false;
+          }
+        }
 
-    // // It can only be specified the explicit or the implicit grid properties in a single grid declaration.
-    // // The sub-properties not specified are set to their initial value, as normal for shorthands.
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateColumns,
-    //                                       Krys::Move(templateColumns));
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateRows,
-    // Krys::Move(templateRows)); result.AddPropertyForCurrentShorthand(state,
-    // CSSPropertyId::GridTemplateAreas,
-    //                                       CSSPrimitiveValue::Create(CSSValueId::None));
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoFlow, Krys::Move(gridAutoFlow));
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoColumns,
-    //                                       Krys::Move(autoColumnsValue));
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoRows, Krys::Move(autoRowsValue));
+        templateColumns = CSSPrimitiveValue::Create(CSSValueId::None);
+        autoRowsValue = CSSPrimitiveValue::Create(CSSValueId::Auto);
+      }
 
-    // return true;
-    // }
+      if (!tokens.IsAtEnd())
+      {
+        return false;
+      }
 
-    // KRYS_NODISCARD static bool ConsumeGridAreaShorthand(CSSTokenRange &tokens, CSSPropertyParserState
-    // &state,
-    //                                                     const CSSPropertyShorthand &shorthand,
-    //                                                     CSSPropertyParserResult &result) noexcept
-    //{
-    //   RefPtr rowStartValue = ConsumeGridLine(tokens, state);
-    //   if (!rowStartValue)
-    //   {
-    //     return false;
-    //   }
+      // It can only be specified the explicit or the implicit grid properties in a single grid declaration.
+      // The sub-properties not specified are set to their initial value, as normal for shorthands.
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateColumns,
+                                            Krys::Move(templateColumns));
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateRows, Krys::Move(templateRows));
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridTemplateAreas,
+                                            CSSPrimitiveValue::Create(CSSValueId::None));
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoFlow, Krys::Move(gridAutoFlow));
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoColumns,
+                                            Krys::Move(autoColumnsValue));
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridAutoRows, Krys::Move(autoRowsValue));
 
-    // RefPtr<CSSValue> columnStartValue;
-    // RefPtr<CSSValue> rowEndValue;
-    // RefPtr<CSSValue> columnEndValue;
+      return true;
+    }
 
-    // if (ConsumeSlash(tokens))
-    // {
-    //   columnStartValue = ConsumeGridLine(tokens, state);
-    //   if (!columnStartValue)
-    //   {
-    //     return false;
-    //   }
+    KRYS_NODISCARD static bool ConsumeGridAreaShorthand(CSSTokenRange &tokens, CSSPropertyParserState &state,
+                                                        const CSSPropertyShorthand &shorthand,
+                                                        CSSPropertyParserResult &result) noexcept
+    {
+      RefPtr rowStartValue = ConsumeGridLine(tokens, state);
+      if (!rowStartValue)
+      {
+        return false;
+      }
 
-    // if (ConsumeSlash(tokens))
-    // {
-    //   rowEndValue = ConsumeGridLine(tokens, state);
-    //   if (!rowEndValue)
-    //   {
-    //     return false;
-    //   }
+      RefPtr<CSSValue> columnStartValue;
+      RefPtr<CSSValue> rowEndValue;
+      RefPtr<CSSValue> columnEndValue;
 
-    // if (ConsumeSlash(tokens))
-    // {
-    //   columnEndValue = ConsumeGridLine(tokens, state);
-    //   if (!columnEndValue)
-    //   {
-    //     return false;
-    //   }
-    // }
-    // }
-    // }
+      if (ConsumeSlash(tokens))
+      {
+        columnStartValue = ConsumeGridLine(tokens, state);
+        if (!columnStartValue)
+        {
+          return false;
+        }
 
-    // if (!tokens.IsAtEnd())
-    // {
-    //   return false;
-    // }
+        if (ConsumeSlash(tokens))
+        {
+          rowEndValue = ConsumeGridLine(tokens, state);
+          if (!rowEndValue)
+          {
+            return false;
+          }
 
-    // if (!columnStartValue)
-    // {
-    //   columnStartValue =
-    //     IsCustomIdentValue(*rowStartValue) ? rowStartValue : CSSPrimitiveValue::Create(CSSValueId::Auto);
-    // }
+          if (ConsumeSlash(tokens))
+          {
+            columnEndValue = ConsumeGridLine(tokens, state);
+            if (!columnEndValue)
+            {
+              return false;
+            }
+          }
+        }
+      }
 
-    // if (!rowEndValue)
-    // {
-    //   rowEndValue =
-    //     IsCustomIdentValue(*rowStartValue) ? rowStartValue : CSSPrimitiveValue::Create(CSSValueId::Auto);
-    // }
+      if (!tokens.IsAtEnd())
+      {
+        return false;
+      }
 
-    // if (!columnEndValue)
-    // {
-    //   columnEndValue = IsCustomIdentValue(*columnStartValue) ? columnStartValue
-    //                                                          : CSSPrimitiveValue::Create(CSSValueId::Auto);
-    // }
+      bool rowStartIsCustomIdent = IsCustomIdentValue(*rowStartValue);
+      if (!columnStartValue)
+      {
+        if (rowStartIsCustomIdent)
+        {
+          columnStartValue = rowStartValue;
+        }
+        else
+        {
+          columnStartValue = CSSPrimitiveValue::Create(CSSValueId::Auto);
+        }
+      }
 
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridRowStart, Krys::Move(rowStartValue));
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridColumnStart,
-    //                                       Krys::Move(columnStartValue));
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridRowEnd, Krys::Move(rowEndValue));
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridColumnEnd, Krys::Move(columnEndValue));
+      if (!rowEndValue)
+      {
+        if (rowStartIsCustomIdent)
+        {
+          rowEndValue = rowStartValue;
+        }
+        else
+        {
+          rowEndValue = CSSPrimitiveValue::Create(CSSValueId::Auto);
+        }
+      }
 
-    // return true;
-    // }
+      if (!columnEndValue)
+      {
+        if (IsCustomIdentValue(*columnStartValue))
+        {
+          columnEndValue = rowStartValue;
+        }
+        else
+        {
+          columnEndValue = CSSPrimitiveValue::Create(CSSValueId::Auto);
+        }
+      }
+
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridRowStart, Krys::Move(rowStartValue));
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridColumnStart,
+                                            Krys::Move(columnStartValue));
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridRowEnd, Krys::Move(rowEndValue));
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::GridColumnEnd, Krys::Move(columnEndValue));
+
+      return true;
+    }
 
     KRYS_NODISCARD static bool ConsumeAlignShorthand(CSSTokenRange &tokens, CSSPropertyParserState &state,
                                                      const CSSPropertyShorthand &shorthand,
@@ -1746,114 +1842,117 @@ namespace Krys::HTML
       return true;
     }
 
-    // KRYS_NODISCARD static bool ConsumeFontVariantShorthand(CSSTokenRange &tokens,
-    //                                                        CSSPropertyParserState &state,
-    //                                                        const CSSPropertyShorthand &shorthand,
-    //                                                        CSSPropertyParserResult &result) noexcept
-    //{
-    //   if (IdentMatches<CSSValueId::Normal, CSSValueId::None>(tokens.Peek().ValueId()))
-    //   {
-    //     result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantLigatures,
-    //                                           ConsumeIdent(tokens));
-    //     result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantCaps, nullptr);
-    //     result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantAlternates, nullptr);
-    //     result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantNumeric, nullptr);
-    //     result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantEastAsian, nullptr);
-    //     result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantPosition, nullptr);
-    //     result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantEmoji, nullptr);
-    //     return tokens.IsAtEnd();
-    //   }
+    KRYS_NODISCARD static bool ConsumeFontVariantShorthand(CSSTokenRange &tokens,
+                                                           CSSPropertyParserState &state,
+                                                           const CSSPropertyShorthand &shorthand,
+                                                           CSSPropertyParserResult &result) noexcept
+    {
+      if (IdentMatches<CSSValueId::Normal, CSSValueId::None>(tokens.Peek().ValueId()))
+      {
+        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantLigatures,
+                                              ConsumeIdent(tokens));
+        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantCaps, nullptr);
+        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantAlternates, nullptr);
+        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantNumeric, nullptr);
+        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantEastAsian, nullptr);
+        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantPosition, nullptr);
+        result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantEmoji, nullptr);
 
-    // RefPtr<CSSValue> capsValue;
-    // RefPtr<CSSValue> alternatesValue;
-    // RefPtr<CSSValue> positionValue;
-    // RefPtr<CSSValue> eastAsianValue;
-    // RefPtr<CSSValue> emojiValue;
-    // CSSFontVariantLigaturesParser ligaturesParser;
-    // CSSFontVariantNumericParser numericParser;
-    // auto implicitLigatures = IsImplicit(true);
-    // auto implicitNumeric = IsImplicit(true);
-    // do
-    // {
-    //   if (tokens.Peek().ValueId() == CSSValueId::Normal)
-    //   {
-    //     return false;
-    //   }
+        return tokens.IsAtEnd();
+      }
 
-    // if (!capsValue
-    //     && (capsValue = CSSPropertyParsing::ParseStylePropertyLonghand(
-    //           tokens, CSSPropertyId::FontVariantCaps, state)))
-    // {
-    //   continue;
-    // }
+      RefPtr<CSSValue> capsValue;
+      RefPtr<CSSValue> alternatesValue;
+      RefPtr<CSSValue> positionValue;
+      RefPtr<CSSValue> eastAsianValue;
+      RefPtr<CSSValue> emojiValue;
 
-    // if (!positionValue
-    //     && (positionValue = CSSPropertyParsing::ParseStylePropertyLonghand(
-    //           tokens, CSSPropertyId::FontVariantPosition, state)))
-    // {
-    //   continue;
-    // }
+      CSSFontVariantLigaturesParser ligaturesParser;
+      CSSFontVariantNumericParser numericParser;
 
-    // if (!alternatesValue
-    //     && (alternatesValue = CSSPropertyParsing::ParseStylePropertyLonghand(
-    //           tokens, CSSPropertyId::FontVariantAlternates, state)))
-    // {
-    //   continue;
-    // }
+      auto implicitLigatures = IsImplicit(true);
+      auto implicitNumeric = IsImplicit(true);
+      do
+      {
+        if (tokens.Peek().ValueId() == CSSValueId::Normal)
+        {
+          return false;
+        }
 
-    // auto ligaturesParseResult = ligaturesParser.consumeLigature(tokens);
-    // auto numericParseResult = numericParser.consumeNumeric(tokens);
-    // if (ligaturesParseResult == CSSFontVariantLigaturesParser::ParseResult::ConsumedValue)
-    // {
-    //   implicitLigatures = IsImplicit(false);
-    //   continue;
-    // }
-    // if (numericParseResult == CSSFontVariantNumericParser::ParseResult::ConsumedValue)
-    // {
-    //   implicitNumeric = IsImplicit(false);
-    //   continue;
-    // }
+        if (!capsValue
+            && (capsValue = CSSPropertyParsing::ParseStylePropertyLonghand(
+                  tokens, CSSPropertyId::FontVariantCaps, state)))
+        {
+          continue;
+        }
 
-    // if (ligaturesParseResult == CSSFontVariantLigaturesParser::ParseResult::DisallowedValue
-    //     || numericParseResult == CSSFontVariantNumericParser::ParseResult::DisallowedValue)
-    // {
-    //   return false;
-    // }
+        if (!positionValue
+            && (positionValue = CSSPropertyParsing::ParseStylePropertyLonghand(
+                  tokens, CSSPropertyId::FontVariantPosition, state)))
+        {
+          continue;
+        }
 
-    // if (!eastAsianValue
-    //     && (eastAsianValue = CSSPropertyParsing::ParseStylePropertyLonghand(
-    //           tokens, CSSPropertyId::FontVariantEastAsian, state)))
-    // {
-    //   continue;
-    // }
+        if (!alternatesValue
+            && (alternatesValue = CSSPropertyParsing::ParseStylePropertyLonghand(
+                  tokens, CSSPropertyId::FontVariantAlternates, state)))
+        {
+          continue;
+        }
 
-    // if (state.Context.PropertySettings.cssFontVariantEmojiEnabled && !emojiValue
-    //     && (emojiValue = CSSPropertyParsing::ParseStylePropertyLonghand(
-    //           tokens, CSSPropertyId::FontVariantEmoji, state)))
-    // {
-    //   continue;
-    // }
+        auto ligaturesParseResult = ligaturesParser.consumeLigature(tokens);
+        auto numericParseResult = numericParser.consumeNumeric(tokens);
 
-    // // Saw some value that didn't match anything else.
-    // return false;
-    // } while (!tokens.IsAtEnd());
+        if (ligaturesParseResult == CSSFontVariantLigaturesParser::ParseResult::ConsumedValue)
+        {
+          implicitLigatures = IsImplicit(false);
+          continue;
+        }
+        if (numericParseResult == CSSFontVariantNumericParser::ParseResult::ConsumedValue)
+        {
+          implicitNumeric = IsImplicit(false);
+          continue;
+        }
 
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantLigatures,
-    //                                       ligaturesParser.finalizeValue().releaseNonNull(),
-    //                                       implicitLigatures);
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantCaps, Krys::Move(capsValue));
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantAlternates,
-    //                                       Krys::Move(alternatesValue));
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantNumeric,
-    //                                       numericParser.finalizeValue().releaseNonNull(), implicitNumeric);
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantEastAsian,
-    //                                       Krys::Move(eastAsianValue));
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantPosition,
-    //                                       Krys::Move(positionValue));
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantEmoji, Krys::Move(emojiValue));
+        if (ligaturesParseResult == CSSFontVariantLigaturesParser::ParseResult::DisallowedValue
+            || numericParseResult == CSSFontVariantNumericParser::ParseResult::DisallowedValue)
+        {
+          return false;
+        }
 
-    // return true;
-    // }
+        if (!eastAsianValue
+            && (eastAsianValue = CSSPropertyParsing::ParseStylePropertyLonghand(
+                  tokens, CSSPropertyId::FontVariantEastAsian, state)))
+        {
+          continue;
+        }
+
+        if (state.Context.PropertySettings.cssFontVariantEmojiEnabled && !emojiValue
+            && (emojiValue = CSSPropertyParsing::ParseStylePropertyLonghand(
+                  tokens, CSSPropertyId::FontVariantEmoji, state)))
+        {
+          continue;
+        }
+
+        // Saw some value that didn't match anything else.
+        return false;
+      } while (!tokens.IsAtEnd());
+
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantLigatures,
+                                            ligaturesParser.finalizeValue(), implicitLigatures);
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantCaps, Krys::Move(capsValue));
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantAlternates,
+                                            Krys::Move(alternatesValue));
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantNumeric,
+                                            numericParser.finalizeValue(), implicitNumeric);
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantEastAsian,
+                                            Krys::Move(eastAsianValue));
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantPosition,
+                                            Krys::Move(positionValue));
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantEmoji, Krys::Move(emojiValue));
+
+      return true;
+    }
 
     KRYS_NODISCARD static bool ConsumeFontSynthesisShorthand(CSSTokenRange &tokens,
                                                              CSSPropertyParserState &state,
@@ -2325,7 +2424,7 @@ namespace Krys::HTML
         if (tokens.Peek().ValueId() == CSSValueId::None)
         {
           ++noneCount;
-          ConsumeIdent(tokens);
+          DiscardIdent(tokens);
           continue;
         }
 
@@ -2505,80 +2604,81 @@ namespace Krys::HTML
       return true;
     }
 
-    // KRYS_NODISCARD static bool ConsumeAnimationRangeShorthand(CSSTokenRange &tokens,
-    //                                                           CSSPropertyParserState &state,
-    //                                                           const CSSPropertyShorthand &shorthand,
-    //                                                           CSSPropertyParserResult &result) noexcept
-    //{
-    //   CSSValueListBuilder startList;
-    //   CSSValueListBuilder endList;
-    //   do
-    //   {
-    //     RefPtr start = ConsumeSingleAnimationRangeStart(tokens, state);
-    //     if (!start)
-    //     {
-    //       return false;
-    //     }
+    KRYS_NODISCARD static bool ConsumeAnimationRangeShorthand(CSSTokenRange &tokens,
+                                                              CSSPropertyParserState &state,
+                                                              const CSSPropertyShorthand &shorthand,
+                                                              CSSPropertyParserResult &result) noexcept
+    {
+      CSSValueListBuilder startList;
+      CSSValueListBuilder endList;
 
-    // RefPtr<CSSValue> end;
-    // tokens.DiscardWhitespace();
-    // if (tokens.IsAtEnd() || tokens.Peek().Type() == CSSTokenType::Comma)
-    // {
-    //   // From the spec: If <'animation-range-end'> is omitted and <'animation-range-start'> includes a
-    //   // component, then animation-range-end is set to that same and 100%. Otherwise, any omitted longhand
-    //   // is set to its initial value.
-    //   auto RangeEndValueForStartValue = [](const CSSValue &value)
-    //   {
-    //     auto IsRangeOffset = [](auto &value)
-    //     {
-    //       return value.IsLength() || value.IsPercentage() || value.IsCalculatedPercentageWithLength();
-    //     };
+      do
+      {
+        RefPtr<CSSValue> start = ConsumeSingleAnimationRangeStart(tokens, state);
+        if (!start)
+        {
+          return false;
+        }
+        tokens.DiscardWhitespace();
 
-    // if (auto *primitiveValue = DynamicDowncast<CSSPrimitiveValue>(value);
-    //     primitiveValue && IsRangeOffset(*primitiveValue))
-    // {
-    //   return CSSPrimitiveValue::Create(CSSValueId::Normal);
-    // }
+        RefPtr<CSSValue> end;
+        if (tokens.IsAtEnd() || tokens.Peek().Type() == CSSTokenType::Comma)
+        {
+          // From the spec: If <'animation-range-end'> is omitted and <'animation-range-start'> includes a
+          // component, then animation-range-end is set to that same and 100%. Otherwise, any omitted longhand
+          // is set to its initial value.
+          auto RangeEndValueForStartValue = [](const CSSValue &value)
+          {
+            auto IsRangeOffset = [](auto &value)
+            {
+              return value.IsLength() || value.IsPercentage() || value.IsCalculatedPercentageWithLength();
+            };
 
-    // return CSSPrimitiveValue::Create(value.ValueId());
-    // };
+            if (auto *primitiveValue = DynamicDowncast<CSSPrimitiveValue>(value);
+                primitiveValue && IsRangeOffset(*primitiveValue))
+            {
+              return CSSPrimitiveValue::Create(CSSValueId::Normal);
+            }
 
-    // if (RefPtr startPrimitiveValue = DynamicDowncast<CSSPrimitiveValue>(start))
-    // {
-    //   end = RangeEndValueForStartValue(*startPrimitiveValue);
-    // }
-    // else
-    // {
-    //   RefPtr startPair = Downcast<CSSValuePair>(start);
-    //   end = RangeEndValueForStartValue(startPair->first());
-    // }
-    // }
-    // else
-    // {
-    // end = ConsumeSingleAnimationRangeEnd(tokens, state);
-    // tokens.DiscardWhitespace();
-    // if (!end)
-    // {
-    //   return false;
-    // }
-    // }
+            return CSSPrimitiveValue::Create(value.ValueId());
+          };
 
-    // startList.push_back(Krys::Move(start));
-    // endList.push_back(Krys::Move(end));
-    // } while (ConsumeComma(tokens));
+          if (auto *startPrimitiveValue = DynamicDowncast<CSSPrimitiveValue>(start.get()))
+          {
+            end = RangeEndValueForStartValue(*startPrimitiveValue);
+          }
+          else
+          {
+            auto *startPair = Downcast<CSSValuePair>(start.get());
+            end = RangeEndValueForStartValue(startPair->First());
+          }
+        }
+        else
+        {
+          end = ConsumeSingleAnimationRangeEnd(tokens, state);
+          tokens.DiscardWhitespace();
+          if (!end)
+          {
+            return false;
+          }
+        }
 
-    // if (!tokens.IsAtEnd())
-    // {
-    //   return false;
-    // }
+        startList.push_back(Krys::Move(start));
+        endList.push_back(Krys::Move(end));
+      } while (ConsumeComma(tokens));
 
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::AnimationRangeStart,
-    //                                       CSSValueList::CreateCommaSeparated(Krys::Move(startList)));
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::AnimationRangeEnd,
-    //                                       CSSValueList::CreateCommaSeparated(Krys::Move(endList)));
+      if (!tokens.IsAtEnd())
+      {
+        return false;
+      }
 
-    // return true;
-    // }
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::AnimationRangeStart,
+                                            CSSValueList::CreateCommaSeparated(Krys::Move(startList)));
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::AnimationRangeEnd,
+                                            CSSValueList::CreateCommaSeparated(Krys::Move(endList)));
+
+      return true;
+    }
 
     KRYS_NODISCARD static bool ConsumeScrollTimelineShorthand(CSSTokenRange &tokens,
                                                               CSSPropertyParserState &state,
@@ -2631,78 +2731,94 @@ namespace Krys::HTML
       return true;
     }
 
-    // KRYS_NODISCARD static bool ConsumeViewTimelineShorthand(CSSTokenRange &tokens,
-    //                                                         CSSPropertyParserState &state,
-    //                                                         const CSSPropertyShorthand &shorthand,
-    //                                                         CSSPropertyParserResult &result) noexcept
-    //{
-    //   CSSValueListBuilder namesList;
-    //   CSSValueListBuilder axesList;
-    //   CSSValueListBuilder insetsList;
+    KRYS_NODISCARD static bool ConsumeViewTimelineShorthand(CSSTokenRange &tokens,
+                                                            CSSPropertyParserState &state,
+                                                            const CSSPropertyShorthand &shorthand,
+                                                            CSSPropertyParserResult &result) noexcept
+    {
+      CSSValueListBuilder namesList;
+      CSSValueListBuilder axesList;
+      CSSValueListBuilder insetsList;
 
-    // auto DefaultAxis = [] -> Ref<CSSValue>
-    // {
-    //   return CSSPrimitiveValue::Create(CSSValueId::Block);
-    // };
-    // auto DefaultInsets = [] -> Ref<CSSValue>
-    // {
-    //   return CSSPrimitiveValue::Create(CSSValueId::Auto);
-    // };
+      auto DefaultAxis = [] -> Ref<CSSValue>
+      {
+        return CSSPrimitiveValue::Create(CSSValueId::Block);
+      };
 
-    // do
-    // {
-    //   // A valid view-timeline-name is required.
-    //   if (auto name = CSSPropertyParsing::ConsumeSingleScrollTimelineName(tokens))
-    //   {
-    //     namesList.push_back(Krys::Move(name));
-    //   }
-    //   else
-    //   {
-    //     return false;
-    //   }
+      auto DefaultInsets = [] -> Ref<CSSValue>
+      {
+        return CSSPrimitiveValue::Create(CSSValueId::Auto);
+      };
 
-    // // Both a view-timeline-axis and a view-timeline-inset are optional.
-    // if (tokens.Peek().Type() != CSSTokenType::Comma && !tokens.IsAtEnd())
-    // {
-    //   RefPtr axis = CSSPropertyParsing::ConsumeAxis(tokens);
-    //   RefPtr insets = ConsumeSingleViewTimelineInsetItem(tokens, state);
+      do
+      {
+        // A valid view-timeline-name is required.
+        if (auto name = CSSPropertyParsing::ConsumeSingleScrollTimelineName(tokens))
+        {
+          namesList.push_back(Krys::Move(name));
+        }
+        else
+        {
+          return false;
+        }
 
-    // // Since the order of view-timeline-axis and view-timeline-inset is not guaranteed, let's try
-    // // view-timeline-axis again.
-    // if (!axis)
-    // {
-    //   axis = CSSPropertyParsing::ConsumeAxis(tokens);
-    // }
+        // Both a view-timeline-axis and a view-timeline-inset are optional.
+        if (tokens.Peek().Type() != CSSTokenType::Comma && !tokens.IsAtEnd())
+        {
+          RefPtr axis = CSSPropertyParsing::ConsumeAxis(tokens);
+          RefPtr insets = ConsumeSingleViewTimelineInsetItem(tokens, state);
 
-    // if (!axis && !insets)
-    // {
-    //   return false;
-    // }
+          // Since the order of view-timeline-axis and view-timeline-inset is not guaranteed, let's try
+          // view-timeline-axis again.
+          if (!axis)
+          {
+            axis = CSSPropertyParsing::ConsumeAxis(tokens);
+          }
 
-    // axesList.push_back(axis ? Krys::Move(axis) : DefaultAxis());
-    // insetsList.push_back(insets ? Krys::Move(insets) : DefaultInsets());
-    // }
-    // else
-    // {
-    // axesList.push_back(DefaultAxis());
-    // insetsList.push_back(DefaultInsets());
-    // }
-    // } while (ConsumeComma(tokens));
+          if (!axis && !insets)
+          {
+            return false;
+          }
 
-    // if (namesList.empty())
-    // {
-    //   return false;
-    // }
+          if (axis)
+          {
+            axesList.push_back(Krys::Move(axis));
+          }
+          else
+          {
+            axesList.push_back(DefaultAxis());
+          }
 
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::ViewTimelineName,
-    //                                       CSSValueList::CreateCommaSeparated(Krys::Move(namesList)));
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::ViewTimelineAxis,
-    //                                       CSSValueList::CreateCommaSeparated(Krys::Move(axesList)));
-    // result.AddPropertyForCurrentShorthand(state, CSSPropertyId::ViewTimelineInset,
-    //                                       CSSValueList::CreateCommaSeparated(Krys::Move(insetsList)));
+          if (insets)
+          {
+            axesList.push_back(Krys::Move(insets));
+          }
+          else
+          {
+            axesList.push_back(DefaultInsets());
+          }
+        }
+        else
+        {
+          axesList.push_back(DefaultAxis());
+          insetsList.push_back(DefaultInsets());
+        }
+      } while (ConsumeComma(tokens));
 
-    // return true;
-    // }
+      if (namesList.empty())
+      {
+        return false;
+      }
+
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::ViewTimelineName,
+                                            CSSValueList::CreateCommaSeparated(Krys::Move(namesList)));
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::ViewTimelineAxis,
+                                            CSSValueList::CreateCommaSeparated(Krys::Move(axesList)));
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::ViewTimelineInset,
+                                            CSSValueList::CreateCommaSeparated(Krys::Move(insetsList)));
+
+      return true;
+    }
 
     KRYS_NODISCARD static bool ConsumeLineClampShorthand(CSSTokenRange &tokens, CSSPropertyParserState &state,
                                                          const CSSPropertyShorthand &shorthand,
@@ -2720,7 +2836,7 @@ namespace Krys::HTML
         result.AddPropertyForCurrentShorthand(state, CSSPropertyId::BlockEllipsis,
                                               CSSPrimitiveValue::Create(CSSValueId::None));
 
-        ConsumeIdent(tokens);
+        DiscardIdent(tokens);
 
         return tokens.IsAtEnd();
       }
@@ -2773,7 +2889,7 @@ namespace Krys::HTML
         result.AddPropertyForCurrentShorthand(state, CSSPropertyId::TextBoxEdge,
                                               CSSPrimitiveValue::Create(CSSValueId::Auto));
 
-        ConsumeIdent(tokens);
+        DiscardIdent(tokens);
         return tokens.IsAtEnd();
       }
 

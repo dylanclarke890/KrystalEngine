@@ -77,4 +77,6 @@ namespace Krys::HTML
 
   /// @brief Gets the list of shorthands that set the given longhand property.
   KRYS_NODISCARD CSSPropertyShorthandList MatchingShorthandsForLonghand(CSSPropertyId property) noexcept;
+
+  KRYS_NODISCARD CSSPropertyShorthand TransitionShorthandForParsing() noexcept;
 }

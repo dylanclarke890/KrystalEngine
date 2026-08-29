@@ -10,7 +10,7 @@ namespace Krys::HTML
 {
   class CSSTokenRange;
   class CSSValue;
-  class CSSPropertyParserState;
+  struct CSSPropertyParserState;
 
   namespace CSSPropertyParserHelpers
   {

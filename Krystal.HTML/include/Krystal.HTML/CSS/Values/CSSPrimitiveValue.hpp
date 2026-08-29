@@ -129,6 +129,51 @@ namespace Krys::HTML
       return !_value.Number;
     }
 
+    KRYS_NODISCARD CSSOMString StringValue() const noexcept
+    {
+      switch (_unit)
+      {
+        case CSSUnitType::String:
+        case CSSUnitType::CustomIdent:
+        case CSSUnitType::FontFamily:
+        {
+          return *_value.String;
+        }
+        case CSSUnitType::ValueId:
+        {
+          return CSSOMString(ToString(_value.ValueId));
+        }
+        case CSSUnitType::PropertyId:
+        {
+          return CSSOMString(ToString(_value.PropertyId));
+        }
+        // case CSSUnitType::Attr:
+        // {
+        //   return protectedCssAttrValue()->cssText(CSS::defaultSerializationContext());
+        // }
+        default:
+        {
+          return {};
+        }
+      }
+    }
+
+    KRYS_NODISCARD CSSOMString CustomIdent() const noexcept
+    {
+      assert(IsCustomIdent());
+      return *_value.String;
+    }
+
+    KRYS_NODISCARD Maybe<double> ResolveAsNumberIfNotCalculated() const noexcept
+    {
+      if (IsCalculated())
+      {
+        return Null;
+      }
+
+      return _value.Number;
+    }
+
     KRYS_NODISCARD constexpr static bool IsFontIndependentLength(CSSUnitType type) noexcept
     {
       return type == CSSUnitType::px || type == CSSUnitType::cm || type == CSSUnitType::mm

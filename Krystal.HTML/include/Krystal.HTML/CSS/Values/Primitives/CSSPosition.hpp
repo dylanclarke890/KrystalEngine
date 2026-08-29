@@ -16,7 +16,7 @@ namespace Krys::HTML
     KRYS_NODISCARD bool operator==(const TwoComponentPositionHorizontal &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(TwoComponentPositionHorizontal, offset);
+  DEFINE_TYPE_WRAPPER_GET(TwoComponentPositionHorizontal, offset)
 
   struct TwoComponentPositionVertical
   {
@@ -27,7 +27,7 @@ namespace Krys::HTML
     KRYS_NODISCARD bool operator==(const TwoComponentPositionVertical &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(TwoComponentPositionVertical, offset);
+  DEFINE_TYPE_WRAPPER_GET(TwoComponentPositionVertical, offset)
 
   struct ThreeComponentPositionHorizontal
   {
@@ -36,7 +36,7 @@ namespace Krys::HTML
     KRYS_NODISCARD bool operator==(const ThreeComponentPositionHorizontal &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(ThreeComponentPositionHorizontal, offset);
+  DEFINE_TYPE_WRAPPER_GET(ThreeComponentPositionHorizontal, offset)
 
   struct ThreeComponentPositionVertical
   {
@@ -45,7 +45,7 @@ namespace Krys::HTML
     KRYS_NODISCARD bool operator==(const ThreeComponentPositionVertical &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(ThreeComponentPositionVertical, offset);
+  DEFINE_TYPE_WRAPPER_GET(ThreeComponentPositionVertical, offset)
 
   struct FourComponentPositionHorizontal
   {
@@ -56,7 +56,7 @@ namespace Krys::HTML
     KRYS_NODISCARD bool operator==(const FourComponentPositionHorizontal &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(FourComponentPositionHorizontal, offset);
+  DEFINE_TYPE_WRAPPER_GET(FourComponentPositionHorizontal, offset)
 
   struct FourComponentPositionVertical
   {
@@ -67,7 +67,7 @@ namespace Krys::HTML
     KRYS_NODISCARD bool operator==(const FourComponentPositionVertical &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(FourComponentPositionVertical, offset);
+  DEFINE_TYPE_WRAPPER_GET(FourComponentPositionVertical, offset)
 
   using TwoComponentPositionHorizontalVertical =
     SpaceSeparatedTuple<TwoComponentPositionHorizontal, TwoComponentPositionVertical>;
@@ -102,7 +102,7 @@ namespace Krys::HTML
 
     Kind value;
   };
-  DEFINE_TYPE_WRAPPER_GET(CSSPosition, value);
+  DEFINE_TYPE_WRAPPER_GET(CSSPosition, value)
 
   struct CSSPositionX
   {
@@ -123,7 +123,8 @@ namespace Krys::HTML
 
     Kind value;
   };
-  DEFINE_TYPE_WRAPPER_GET(CSSPositionX, value);
+
+  DEFINE_TYPE_WRAPPER_GET(CSSPositionX, value)
 
   struct CSSPositionY
   {
@@ -144,7 +145,8 @@ namespace Krys::HTML
 
     Kind value;
   };
-  DEFINE_TYPE_WRAPPER_GET(CSSPositionY, value);
+
+  DEFINE_TYPE_WRAPPER_GET(CSSPositionY, value)
 
   KRYS_NODISCARD bool IsCenterPosition(const CSSPosition &) noexcept;
 

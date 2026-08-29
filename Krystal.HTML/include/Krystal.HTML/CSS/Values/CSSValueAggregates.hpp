@@ -507,6 +507,146 @@ namespace Krys::HTML
 
 #pragma endregion
 
+#pragma region SpaceSeparatedList
+
+  /// @brief Wraps a variable number of elements of a single type, semantically marking them as serializing as
+  /// "space separated".
+  template <typename T, size_t inlineCapacity = 0>
+  struct SpaceSeparatedList
+  {
+    using Container = Krys::SmallList<T, inlineCapacity>;
+    using const_iterator = typename Container::const_iterator;
+    using const_reverse_iterator = typename Container::const_reverse_iterator;
+    using value_type = typename Container::value_type;
+
+    Container value;
+
+    SpaceSeparatedList() noexcept = default;
+
+    SpaceSeparatedList(std::initializer_list<T> initializerList) noexcept : value {initializerList}
+    {
+    }
+
+    SpaceSeparatedList(Container &&value) noexcept : value {Krys::Move(value)}
+    {
+    }
+
+    const_iterator begin() const noexcept
+    {
+      return value.begin();
+    }
+
+    const_iterator end() const noexcept
+    {
+      return value.end();
+    }
+
+    const_reverse_iterator rbegin() const noexcept
+    {
+      return value.rbegin();
+    }
+
+    const_reverse_iterator rend() const noexcept
+    {
+      return value.rend();
+    }
+
+    bool empty() const noexcept
+    {
+      return value.empty();
+    }
+
+    size_t size() const noexcept
+    {
+      return value.size();
+    }
+
+    const T &operator[](size_t i) const noexcept
+    {
+      return value[i];
+    }
+
+    bool operator==(const SpaceSeparatedList &) const noexcept = default;
+  };
+
+  template <typename T, size_t N>
+  constexpr auto TreatAsRangeLike<SpaceSeparatedList<T, N>> = true;
+
+  template <typename T, size_t N>
+  constexpr auto SerializationSeparator<SpaceSeparatedList<T, N>> = SerializationSeparatorType::Space;
+
+#pragma endregion
+
+#pragma region CommaSeparatedList
+
+  /// @brief Wraps a variable number of elements of a single type, semantically marking them as serializing as
+  /// "comma separated".
+  template <typename T, size_t inlineCapacity = 0>
+  struct CommaSeparatedList
+  {
+    using Container = Krys::SmallList<T, inlineCapacity>;
+    using const_iterator = typename Container::const_iterator;
+    using const_reverse_iterator = typename Container::const_reverse_iterator;
+    using value_type = typename Container::value_type;
+
+    Container value;
+
+    CommaSeparatedList() noexcept = default;
+
+    CommaSeparatedList(std::initializer_list<T> initializerList) noexcept : value {initializerList}
+    {
+    }
+
+    CommaSeparatedList(Container &&value) noexcept : value {Krys::Move(value)}
+    {
+    }
+
+    KRYS_NODISCARD const_iterator begin() const noexcept
+    {
+      return value.begin();
+    }
+
+    KRYS_NODISCARD const_iterator end() const noexcept
+    {
+      return value.end();
+    }
+
+    KRYS_NODISCARD const_reverse_iterator rbegin() const noexcept
+    {
+      return value.rbegin();
+    }
+
+    KRYS_NODISCARD const_reverse_iterator rend() const noexcept
+    {
+      return value.rend();
+    }
+
+    KRYS_NODISCARD bool empty() const noexcept
+    {
+      return value.empty();
+    }
+
+    KRYS_NODISCARD size_t size() const noexcept
+    {
+      return value.size();
+    }
+
+    KRYS_NODISCARD const T &operator[](size_t i) const noexcept
+    {
+      return value[i];
+    }
+
+    KRYS_NODISCARD bool operator==(const CommaSeparatedList &) const noexcept = default;
+  };
+
+  template <typename T, size_t N>
+  constexpr auto TreatAsRangeLike<CommaSeparatedList<T, N>> = true;
+
+  template <typename T, size_t N>
+  constexpr auto SerializationSeparator<CommaSeparatedList<T, N>> = SerializationSeparatorType::Comma;
+
+#pragma endregion
+
 #pragma region SpaceSeparatedTuple
 
   /// @brief Wraps a variadic list of types, semantically marking them as serializing as "space separated".
@@ -802,4 +942,178 @@ namespace Krys::HTML
     SerializationCoalescingType::Minimal;
 
 #pragma endregion
+}
+
+namespace std
+{
+  template <Krys::HTML::CSSValueId C, typename T>
+  class tuple_size<Krys::HTML::FunctionNotation<C, T>> : public std::integral_constant<size_t, 1>
+  {
+  };
+
+  template <size_t I, Krys::HTML::CSSValueId C, typename T>
+  class tuple_element<I, Krys::HTML::FunctionNotation<C, T>>
+  {
+  public:
+    using type = T;
+  };
+
+  template <typename T, size_t N>
+  class tuple_size<Krys::HTML::SpaceSeparatedArray<T, N>> : public std::integral_constant<size_t, N>
+  {
+  };
+
+  template <size_t I, typename T, size_t N>
+  class tuple_element<I, Krys::HTML::SpaceSeparatedArray<T, N>>
+  {
+  public:
+    using type = T;
+  };
+
+  template <typename T, size_t N>
+  class tuple_size<Krys::HTML::CommaSeparatedArray<T, N>> : public std::integral_constant<size_t, N>
+  {
+  };
+
+  template <size_t I, typename T, size_t N>
+  class tuple_element<I, Krys::HTML::CommaSeparatedArray<T, N>>
+  {
+  public:
+    using type = T;
+  };
+
+  template <typename... Ts>
+  class tuple_size<Krys::HTML::SpaceSeparatedTuple<Ts...>>
+      : public std::integral_constant<size_t, sizeof...(Ts)>
+  {
+  };
+
+  template <size_t I, typename... Ts>
+  class tuple_element<I, Krys::HTML::SpaceSeparatedTuple<Ts...>>
+  {
+  public:
+    using type = tuple_element_t<I, tuple<Ts...>>;
+  };
+
+  template <typename... Ts>
+  class tuple_size<Krys::HTML::CommaSeparatedTuple<Ts...>>
+      : public std::integral_constant<size_t, sizeof...(Ts)>
+  {
+  };
+
+  template <size_t I, typename... Ts>
+  class tuple_element<I, Krys::HTML::CommaSeparatedTuple<Ts...>>
+  {
+  public:
+    using type = tuple_element_t<I, tuple<Ts...>>;
+  };
+
+  template <typename T>
+  class tuple_size<Krys::HTML::MinimallySerializingSpaceSeparatedPair<T>>
+      : public std::integral_constant<size_t, 2>
+  {
+  };
+
+  template <size_t I, typename T>
+  class tuple_element<I, Krys::HTML::MinimallySerializingSpaceSeparatedPair<T>>
+  {
+  public:
+    using type = T;
+  };
+
+  template <typename T>
+  class tuple_size<Krys::HTML::SpaceSeparatedPoint<T>> : public std::integral_constant<size_t, 2>
+  {
+  };
+
+  template <size_t I, typename T>
+  class tuple_element<I, Krys::HTML::SpaceSeparatedPoint<T>>
+  {
+  public:
+    using type = T;
+  };
+
+  template <typename T>
+  class tuple_size<Krys::HTML::SpaceSeparatedSize<T>> : public std::integral_constant<size_t, 2>
+  {
+  };
+
+  template <size_t I, typename T>
+  class tuple_element<I, Krys::HTML::SpaceSeparatedSize<T>>
+  {
+  public:
+    using type = T;
+  };
+
+  template <typename T>
+  class tuple_size<Krys::HTML::MinimallySerializingSpaceSeparatedPoint<T>>
+      : public std::integral_constant<size_t, 2>
+  {
+  };
+
+  template <size_t I, typename T>
+  class tuple_element<I, Krys::HTML::MinimallySerializingSpaceSeparatedPoint<T>>
+  {
+  public:
+    using type = T;
+  };
+
+  template <typename T>
+  class tuple_size<Krys::HTML::MinimallySerializingSpaceSeparatedSize<T>>
+      : public std::integral_constant<size_t, 2>
+  {
+  };
+
+  template <size_t I, typename T>
+  class tuple_element<I, Krys::HTML::MinimallySerializingSpaceSeparatedSize<T>>
+  {
+  public:
+    using type = T;
+  };
+
+  // template <typename T>
+  // class tuple_size<Krys::HTML::SpaceSeparatedRectEdges<T>> : public std::integral_constant<size_t, 4>
+  // {
+  // };
+  // template <size_t I, typename T>
+  // class tuple_element<I, Krys::HTML::SpaceSeparatedRectEdges<T>>
+  // {
+  // public:
+  //   using type = T;
+  // };
+
+  // template <typename T>
+  // class tuple_size<Krys::HTML::CommaSeparatedRectEdges<T>> : public std::integral_constant<size_t, 4>
+  // {
+  // };
+  // template <size_t I, typename T>
+  // class tuple_element<I, Krys::HTML::CommaSeparatedRectEdges<T>>
+  // {
+  // public:
+  //   using type = T;
+  // };
+
+  // template <typename T>
+  // class tuple_size<Krys::HTML::MinimallySerializingSpaceSeparatedRectEdges<T>>
+  //     : public std::integral_constant<size_t, 4>
+  // {
+  // };
+  // template <size_t I, typename T>
+  // class tuple_element<I, Krys::HTML::MinimallySerializingSpaceSeparatedRectEdges<T>>
+  // {
+  // public:
+  //   using type = T;
+  // };
+
+  // template <typename T>
+  // class tuple_size<Krys::HTML::MinimallySerializingSpaceSeparatedRectCorners<T>>
+  //     : public std::integral_constant<size_t, 4>
+  // {
+  // };
+  // template <size_t I, typename T>
+  // class tuple_element<I, Krys::HTML::MinimallySerializingSpaceSeparatedRectCorners<T>>
+  // {
+  // public:
+  //   using type = T;
+  // };
 }

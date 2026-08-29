@@ -6,6 +6,16 @@
 
 namespace Krys::HTML
 {
+  struct AllowAnchor : StronglyTypedBool<AllowAnchor>
+  {
+    using Base::Base;
+  };
+
+  struct AllowAnchorSize : StronglyTypedBool<AllowAnchorSize>
+  {
+    using Base::Base;
+  };
+
   struct AllowUnitlessZero : StronglyTypedBool<AllowUnitlessZero>
   {
     using Base::Base;
@@ -13,7 +23,9 @@ namespace Krys::HTML
 
   struct CSSPropertyParserOptions
   {
-    Maybe<CSSParserMode> OverrideParserMode {Null};
+    AllowAnchor AnchorPolicy {false};
+
+    AllowAnchorSize AnchorSizePolicy {false};
 
     /// @brief Generally, unitless zero is forbidden for <angle> values, but in a few legacy cases, it is
     /// it can be allowed.
@@ -24,5 +36,7 @@ namespace Krys::HTML
     /// ambiguous with a <number> production, it can be forbidden.
     /// @see https://drafts.csswg.org/css-values-4/#lengths
     AllowUnitlessZero UnitlessZeroLength {true};
+
+    Maybe<CSSParserMode> OverrideParserMode {Null};
   };
 }

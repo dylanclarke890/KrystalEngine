@@ -11,7 +11,5 @@ namespace Krys::HTML
   // FIXME: Users of this function are likely getting incorrect results when used with calc() producing a
   // percent, as it is not getting divided by 100.
   KRYS_NODISCARD RefPtr<CSSPrimitiveValue>
-    ConsumePercentageDividedBy100OrNumber(CSSTokenRange &tokens, CSSPropertyParserState &state) noexcept
-  {
-  }
+    ConsumePercentageDividedBy100OrNumber(CSSTokenRange &tokens, CSSPropertyParserState &state) noexcept;
 }

@@ -193,6 +193,18 @@ namespace Krys::HTML
     ClampBoth
   };
 
+  // Options to indicate how the primitive should consider its value with regards to zoom.
+  // NOTE: This option is only meaningful for Style::Length`.
+  // FIXME: These options are temporary while `zoom` is moving from style building time to use time.
+  enum class RangeZoomOptions : bool
+  {
+    // `Default` indicates the value held in the primitive has had zoom applied to it.
+    Default,
+
+    // `Unzoomed` indicates the value held in the primitive has NOT had zoom applied to it.
+    Unzoomed
+  };
+
   /// @brief Representation for `CSS bracketed range notation`. Represents a closed range between (and
   /// including) `min` and `max`.
   /// @see https://drafts.csswg.org/css-values-4/#numeric-ranges
@@ -203,10 +215,11 @@ namespace Krys::HTML
     double Min {-Inf};
     double Max {Inf};
     RangeClampOptions ClampOptions {RangeClampOptions::Default};
+    RangeZoomOptions ZoomOptions {RangeZoomOptions::Default};
 
-    constexpr CSSRange(double min, double max,
-                    RangeClampOptions clampOptions = RangeClampOptions::Default) noexcept
-        : Min(min), Max(max), ClampOptions(clampOptions)
+    constexpr CSSRange(double min, double max, RangeClampOptions clampOptions = RangeClampOptions::Default,
+                       RangeZoomOptions zoomOptions = RangeZoomOptions::Default) noexcept
+        : Min(min), Max(max), ClampOptions(clampOptions), ZoomOptions(zoomOptions)
     {
     }
 
@@ -215,27 +228,43 @@ namespace Krys::HTML
 
   /// @brief Constant value for `[−∞,∞]`.
   constexpr auto All = CSSRange {-CSSRange::Inf, CSSRange::Inf};
+  constexpr auto AllUnzoomed =
+    CSSRange {-CSSRange::Inf, CSSRange::Inf, RangeClampOptions::Default, RangeZoomOptions::Unzoomed};
 
   /// @brief Constant value for `[0,∞]`.
   constexpr auto NonNegative = CSSRange {0, CSSRange::Inf};
+  constexpr auto NonNegativeUnzoomed =
+    CSSRange {0, CSSRange::Inf, RangeClampOptions::Default, RangeZoomOptions::Unzoomed};
 
   /// @brief Constant value for `[1,∞]`.
   constexpr auto Positive = CSSRange {1, CSSRange::Inf};
+  constexpr auto PositiveUnzoomed =
+    CSSRange {1, CSSRange::Inf, RangeClampOptions::Default, RangeZoomOptions::Unzoomed};
 
   /// @brief Constant value for `[0,1]`.
   constexpr auto ClosedUnitRange = CSSRange {0, 1};
+  constexpr auto ClosedUnitRangeUnzoomed =
+    CSSRange {0, 1, RangeClampOptions::Default, RangeZoomOptions::Unzoomed};
 
   /// @brief Constant value for `[0,1(clamp upper)]`.
   constexpr auto ClosedUnitRangeClampUpper = CSSRange {0, 1, RangeClampOptions::ClampUpper};
+  constexpr auto ClosedUnitRangeClampUpperUnzoomed =
+    CSSRange {0, 1, RangeClampOptions::ClampUpper, RangeZoomOptions::Unzoomed};
 
   /// @brief Constant value for `[0,1(clamp both)]`.
   constexpr auto ClosedUnitRangeClampBoth = CSSRange {0, 1, RangeClampOptions::ClampBoth};
+  constexpr auto ClosedUnitRangeClampBothUnzoomed =
+    CSSRange {0, 1, RangeClampOptions::ClampBoth, RangeZoomOptions::Unzoomed};
 
   /// @brief Constant value for `[0,100]`.
   constexpr auto ClosedPercentageRange = CSSRange {0, 100};
+  constexpr auto ClosedPercentageRangeUnzoomed =
+    CSSRange {0, 100, RangeClampOptions::Default, RangeZoomOptions::Unzoomed};
 
   /// @brief Constant value for `[0,100(clamp upper)]`.
   constexpr auto ClosedPercentageRangeClampUpper = CSSRange {0, 100, RangeClampOptions::ClampUpper};
+  constexpr auto ClosedPercentageRangeClampUpperUnzoomed =
+    CSSRange {0, 100, RangeClampOptions::ClampUpper, RangeZoomOptions::Unzoomed};
 
   /// @brief Clamps a floating point value to within `range`.
   template <CSSRange range, FloatingPoint T, typename U>

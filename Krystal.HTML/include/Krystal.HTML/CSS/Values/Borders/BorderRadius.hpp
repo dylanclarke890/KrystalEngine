@@ -63,3 +63,5 @@ namespace Krys::HTML
   // is used to know ahead of time if serialization is needed.
   KRYS_NODISCARD bool HasDefaultValue(const BorderRadius &borderRadius) noexcept;
 }
+
+DEFINE_TUPLE_LIKE_CONFORMANCE(Krys::HTML::BorderRadius, 2)

@@ -183,21 +183,22 @@ namespace Krys::HTML
   // result, an alternative overload of `consume` is provided which takes an additional
   // `functor` argument which gets called with the result:
   //
-  //    auto result = MetaConsumer<CSS::Percentage<R>, CSS::Number<R>>::consume(range, ...,
-  //        [](CSS::Percentage<R> percentage) { ... },
-  //        [](CSS::Number<R> number) { ... }
+  //    auto result = MetaConsumer<Percentage<R>, Number<R>>::Consume(range, ...,
+  //        [](Percentage<R> percentage) { ... },
+  //        [](Number<R> number) { ... }
   //    );
   template <typename T, typename... Ts>
   struct MetaConsumer
   {
-    static_assert(AllTrue<HasConsumerDefinition::Check<T>(), HasConsumerDefinition::Check<Ts>()...>);
+    static_assert(AllTrue<HasConsumerDefinition::Check<T>(), HasConsumerDefinition::Check<Ts>()...>,
+                  "ConsumerDefinition<T> is incomplete or has not been included.");
 
     using Unroller = MetaConsumerUnroller<T, Ts...>;
 
     template <typename... F>
     KRYS_NODISCARD static decltype(auto) Consume(CSSTokenRange &range, CSSPropertyParserState &state,
-                                  CSSCalcAllowedSymbols symbolsAllowed, CSSPropertyParserOptions options,
-                                  F &&...f) noexcept
+                                                 CSSCalcAllowedSymbols symbolsAllowed,
+                                                 CSSPropertyParserOptions options, F &&...f) noexcept
     {
       auto visitor = CreateVisitor(std::forward<F>(f)...);
       using ResultType = decltype(visitor(std::declval<T>()));
@@ -240,7 +241,7 @@ namespace Krys::HTML
     // continuation functor parameters.
     template <typename... F>
     KRYS_NODISCARD static decltype(auto) Consume(CSSTokenRange &range, CSSPropertyParserState &state,
-                                  CSSCalcAllowedSymbols symbolsAllowed, F &&...f) noexcept
+                                                 CSSCalcAllowedSymbols symbolsAllowed, F &&...f) noexcept
     {
       return Consume(range, state, Krys::Move(symbolsAllowed), {}, std::forward<F>(f)...);
     }
@@ -249,7 +250,7 @@ namespace Krys::HTML
     // continuation functor parameters.
     template <typename... F>
     KRYS_NODISCARD static decltype(auto) Consume(CSSTokenRange &range, CSSPropertyParserState &state,
-                                  CSSPropertyParserOptions options, F &&...f) noexcept
+                                                 CSSPropertyParserOptions options, F &&...f) noexcept
     {
       return Consume(range, state, {}, options, std::forward<F>(f)...);
     }
@@ -257,7 +258,8 @@ namespace Krys::HTML
     // Overloaded with the `CSSPropertyParserOptions` and `CSSCalcAllowedSymbols` parameters removed so they
     // can be defaulted when using the continuation functor parameters.
     template <typename... F>
-    KRYS_NODISCARD static decltype(auto) Consume(CSSTokenRange &range, CSSPropertyParserState &state, F &&...f) noexcept
+    KRYS_NODISCARD static decltype(auto) Consume(CSSTokenRange &range, CSSPropertyParserState &state,
+                                                 F &&...f) noexcept
     {
       return Consume(range, state, {}, {}, std::forward<F>(f)...);
     }
@@ -265,8 +267,8 @@ namespace Krys::HTML
     // Overloaded with no continuation functor parameters allowing a for simplified interface when returning a
     // single value / or Variant is acceptable.
     KRYS_NODISCARD static decltype(auto) Consume(CSSTokenRange &range, CSSPropertyParserState &state,
-                                  CSSCalcAllowedSymbols symbolsAllowed = {},
-                                  CSSPropertyParserOptions options = {}) noexcept
+                                                 CSSCalcAllowedSymbols symbolsAllowed = {},
+                                                 CSSPropertyParserOptions options = {}) noexcept
     {
       using ResultType = typename MetaConsumeResult<T, Ts...>::type;
 

@@ -1,5 +1,6 @@
 import enum
 import datetime
+import io
 import os
 import pathlib
 import subprocess
@@ -66,7 +67,6 @@ class StringEqualingEnum(enum.Enum):
     def __hash__(self):
         return id(self.name)
 
-
 class Writer:
     TAB_SIZE = 2
 
@@ -126,7 +126,7 @@ class Writer:
             self.to._indentation_level -= 1
             self.to.write("}")
 
-    def __init__(self, output):
+    def __init__(self, output: io.TextIOWrapper):
         self.output = output
         self._indentation_level = 0
         self._time_stamp = time_stamp()

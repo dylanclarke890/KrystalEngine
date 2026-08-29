@@ -39,7 +39,7 @@ namespace Krys::HTML
 
       auto rawValue = typename Primitive::Raw {IntegerUnit::Integer, range.Peek().NumericValue()};
 
-      if constexpr (rawValue.range.ClampOptions != RangeClampOptions::Default)
+      if constexpr (rawValue.Range.ClampOptions != RangeClampOptions::Default)
       {
         rawValue = PerformParseTimeClamp(rawValue);
       }

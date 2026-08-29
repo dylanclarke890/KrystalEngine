@@ -1482,33 +1482,6 @@
         "url": "https://drafts.csswg.org/css-writing-modes-3/#text-orientation"
       }
     },
-    "-webkit-text-orientation": {
-      "animation-type": "not animatable",
-      "inherited": true,
-      "initial": "mixed",
-      "values": [
-        "sideways",
-        {
-          "value": "sideways-right",
-          "status": "deprecated"
-        },
-        "mixed",
-        "upright"
-      ],
-      "codegen-properties": {
-        "aliases": ["-epub-text-orientation"],
-        "longhands": ["text-orientation"],
-        "shorthand-pattern": "Single",
-        "parser-function": "ConsumeWebkitTextOrientationShorthand",
-        "parser-grammar": "sideways-right@(aliased-to=sideways) | <'text-orientation'>",
-        "parser-grammar-unused": true,
-        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
-      },
-      "specification": {
-        "module": "css-writing-modes",
-        "url": "https://www.w3.org/TR/css-writing-modes-3/#text-orientation"
-      }
-    },
     "text-spacing-trim": {
       "animation-type": "discrete",
       "inherited": true,
@@ -8546,7 +8519,7 @@
           "transition-behavior"
         ],
         "parser-function": "ConsumeTransitionShorthand",
-        "parser-shorthand": "transitionShorthandForParsing",
+        "parser-shorthand": "TransitionShorthandForParsing",
         "parser-grammar": "<single-transition>#",
         "parser-grammar-unused": true,
         "parser-grammar-unused-reason": "Needs support for shorthand grammars."

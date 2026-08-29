@@ -8,13 +8,24 @@ namespace Krys::HTML
   {
     HTMLStandard,
     HTMLQuirks,
+    SVGAttribute,
+    UASheet,
   };
 
-  KRYS_NODISCARD inline bool IsUnitlessValueParsingForcedForMode(CSSParserMode mode) noexcept
+  KRYS_NODISCARD constexpr bool IsQuirksModeBehavior(CSSParserMode mode) noexcept
   {
-    return false;
+    return mode == CSSParserMode::HTMLQuirks;
   }
 
+  KRYS_NODISCARD constexpr bool IsUASheetBehavior(CSSParserMode mode) noexcept
+  {
+    return mode == CSSParserMode::UASheet;
+  }
+
+  KRYS_NODISCARD constexpr bool IsUnitlessValueParsingForcedForMode(CSSParserMode mode) noexcept
+  {
+    return mode == CSSParserMode::SVGAttribute;
+  }
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSParserMode, 2uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSParserMode, 4uz);

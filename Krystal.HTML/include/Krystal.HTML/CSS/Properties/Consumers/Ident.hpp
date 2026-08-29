@@ -36,6 +36,15 @@ namespace Krys::HTML
     return nullptr;
   }
 
+  void DiscardIdent(CSSTokenRange &tokens) noexcept
+  {
+    if (tokens.Peek().Type() == CSSTokenType::Ident)
+    {
+      tokens.Discard();
+      tokens.DiscardWhitespace();
+    }
+  }
+
   KRYS_NODISCARD Maybe<CSSValueId> ConsumeIdentRangeRaw(CSSTokenRange &tokens, CSSValueId lower,
                                                         CSSValueId upper) noexcept
   {
@@ -162,9 +171,9 @@ namespace Krys::HTML
     return CSSPrimitiveValue::Create(Krys::Move(*identifier));
   }
 
-  KRYS_NODISCARD RefPtr<CSSPrimitiveValue> ConsumeCustomIdentExcluding(CSSTokenRange &tokens,
-                                                                       Span<const CSSValueId> excluding,
-                                                                       bool shouldLowercase = false) noexcept
+  KRYS_NODISCARD RefPtr<CSSPrimitiveValue>
+    ConsumeCustomIdentExcluding(CSSTokenRange &tokens, std::initializer_list<const CSSValueId> excluding,
+                                bool shouldLowercase = false) noexcept
   {
     if (std::ranges::find(excluding, tokens.Peek().ValueId()) != excluding.end())
     {

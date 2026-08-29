@@ -20,8 +20,8 @@ namespace Krys::HTML
                                    [&]
                                    {
                                      auto canonicalValue = Canonicalize(raw);
-                                     return canonicalValue >= raw.range.min
-                                            && canonicalValue <= raw.range.max;
+                                     return canonicalValue >= raw.Range.Min
+                                            && canonicalValue <= raw.Range.Max;
                                    });
     }
 

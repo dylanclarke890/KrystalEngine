@@ -83,7 +83,31 @@ namespace Krys::HTML
 
     KRYS_NODISCARD CSSValueId ValueId() const noexcept
     {
-      assert(_type == CSSTokenType::Ident);
+      if (_type != CSSTokenType::Ident)
+      {
+        return CSSValueId::Invalid;
+      }
+
+      return FindCSSValueKeyword(IdentCodePoints());
+    }
+
+    KRYS_NODISCARD CSSPropertyId PropertyId() const noexcept
+    {
+      if (_type != CSSTokenType::Ident)
+      {
+        return CSSPropertyId::Invalid;
+      }
+
+      return FindCSSProperty(IdentCodePoints());
+    }
+
+    KRYS_NODISCARD CSSValueId FunctionId() const noexcept
+    {
+      if (_type != CSSTokenType::Function)
+      {
+        return CSSValueId::Invalid;
+      }
+
       return FindCSSValueKeyword(IdentCodePoints());
     }
 

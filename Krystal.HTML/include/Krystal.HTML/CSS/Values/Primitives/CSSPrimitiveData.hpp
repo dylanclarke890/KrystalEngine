@@ -385,7 +385,7 @@ namespace Krys::HTML
     requires NumericRaw<T> && NestedUnitEnumOf<typename T::UnitType, UnitType>
     constexpr bool operator==(const T &raw) const
     {
-      if (index != Index(UnitUpcast<UnitType>(raw.unit)))
+      if (index != Index(UnitUpcast<UnitType>(raw.Unit)))
       {
         return false;
       }
@@ -397,7 +397,7 @@ namespace Krys::HTML
     template <UnitType unitValue>
     bool operator==(const ValueLiteral<unitValue> &literal) const
     {
-      if (index != Index(literal.unit))
+      if (index != Index(literal.Unit))
       {
         return false;
       }
@@ -409,7 +409,7 @@ namespace Krys::HTML
     template <NestedUnitEnumOf<UnitType> E, E unitValue>
     bool operator==(const ValueLiteral<unitValue> &literal) const
     {
-      if (index != Index(UnitUpcast<UnitType>(literal.unit)))
+      if (index != Index(UnitUpcast<UnitType>(literal.Unit)))
       {
         return false;
       }

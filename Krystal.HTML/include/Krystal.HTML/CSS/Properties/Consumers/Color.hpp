@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/CSS/Values/Enums/CSSColorType.hpp"
+#include "Krystal.HTML/CSS/Values/Enums/ColorType.hpp"
 #include "Krystal.HTML/CSS/Values/Enums/CSSValueId.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"

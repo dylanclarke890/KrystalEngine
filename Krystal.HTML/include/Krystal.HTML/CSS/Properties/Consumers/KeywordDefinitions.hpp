@@ -5,8 +5,8 @@
 namespace Krys::HTML
 {
   template <CSSValueId Id>
-  struct ConsumerDefinition<KeywordConstant<Id>>
+  struct ConsumerDefinition<ValueKeywordConstant<Id>>
   {
-    using IdentToken = KeywordConsumer<KeywordConstant<Id>>;
+    using IdentToken = KeywordConsumer<ValueKeywordConstant<Id>>;
   };
 }
