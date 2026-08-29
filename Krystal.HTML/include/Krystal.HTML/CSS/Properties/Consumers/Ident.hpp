@@ -56,10 +56,10 @@ namespace Krys::HTML
     return ConsumeIdentRaw(tokens);
   }
 
-  KRYS_NODISCARD RefPtr<CSSPrimitiveValue> ConsumeIdentRange(CSSTokenRange &range, CSSValueId lower,
+  KRYS_NODISCARD RefPtr<CSSPrimitiveValue> ConsumeIdentRange(CSSTokenRange &tokens, CSSValueId lower,
                                                              CSSValueId upper) noexcept
   {
-    auto value = ConsumeIdentRangeRaw(range, lower, upper);
+    auto value = ConsumeIdentRangeRaw(tokens, lower, upper);
     if (!value)
     {
       return nullptr;

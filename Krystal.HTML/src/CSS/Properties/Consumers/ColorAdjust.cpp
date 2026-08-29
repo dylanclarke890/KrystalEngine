@@ -100,18 +100,18 @@ namespace Krys::HTML
   {
     CSSInputStream inputStream {CSSOMString(scheme)};
     auto tokenizer = CSSTokenizer(inputStream);
-    auto range = tokenizer.TokenRange();
+    auto tokens = tokenizer.TokenRange();
 
     // Handle leading whitespace.
-    range.DiscardWhitespace();
+    tokens.DiscardWhitespace();
 
     auto state = CSSPropertyParserState {.Context = context};
-    auto result = ConsumeUnresolvedColorScheme(range, state);
+    auto result = ConsumeUnresolvedColorScheme(tokens, state);
 
     // Handle trailing whitespace.
-    range.DiscardWhitespace();
+    tokens.DiscardWhitespace();
 
-    if (!range.IsAtEnd())
+    if (!tokens.IsAtEnd())
     {
       return {};
     }

@@ -5,6 +5,7 @@
 #include "Krystal.HTML/CSS/Values/CSSValueConcepts.hpp"
 #include "Krystal.HTML/CSS/Values/Enums/CSSValueId.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
+#include "Krystal.Lib/Core/Visitor.hpp"
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
 #include "Krystal.Lib/Types/Variant.hpp"
@@ -233,22 +234,22 @@ namespace Krys::HTML
   template <>                                                                                                \
   constexpr bool ::Krys::HTML::TreatAsVariantLike<T> = true;
 
-/// @brief Defines range-like conformance for a type.
+/// @brief Defines tokens-like conformance for a type.
 #define DEFINE_RANGE_LIKE_CONFORMANCE(T)                                                                     \
   template <>                                                                                                \
   constexpr bool ::Krys::HTML::TreatAsRangeLike<T> = true;
 
-/// @brief Defines range-like conformance and that the type should be serialized as space separated.
+/// @brief Defines tokens-like conformance and that the type should be serialized as space separated.
 #define DEFINE_SPACE_SEPARATED_RANGE_LIKE_CONFORMANCE(T)                                                     \
   DEFINE_RANGE_LIKE_CONFORMANCE(T)                                                                           \
   DEFINE_SERIALIZATION_SEPARATOR_FOR_TYPE(T, Krys::HTML::SerializationSeparatorType::Space)
 
-/// @brief Defines a range-like conformance and that the type should be serialized as comma separated.
+/// @brief Defines a tokens-like conformance and that the type should be serialized as comma separated.
 #define DEFINE_COMMA_SEPARATED_RANGE_LIKE_CONFORMANCE(T)                                                     \
   DEFINE_RANGE_LIKE_CONFORMANCE(T)                                                                           \
   DEFINE_SERIALIZATION_SEPARATOR_FOR_TYPE(T, Krys::HTML::SerializationSeparatorType::Comma)
 
-/// @brief Defines a range-like conformance and that the type should be serialized as slash separated.
+/// @brief Defines a tokens-like conformance and that the type should be serialized as slash separated.
 #define DEFINE_SLASH_SEPARATED_RANGE_LIKE_CONFORMANCE(T)                                                     \
   DEFINE_RANGE_LIKE_CONFORMANCE(T)                                                                           \
   DEFINE_SERIALIZATION_SEPARATOR_FOR_TYPE(T, Krys::HTML::SerializationSeparatorType::Slash)
@@ -940,6 +941,100 @@ namespace Krys::HTML
   template <typename T>
   constexpr auto SerializationCoalescing<MinimallySerializingSpaceSeparatedSize<T>> =
     SerializationCoalescingType::Minimal;
+
+#pragma endregion
+
+#pragma region ListOrNone
+
+  /// @brief Wraps a list and enforces the invariant that it is either created with a non-empty value or
+  /// `Keywords::None`.
+  template <typename T>
+  struct ListOrNone
+  {
+    using List = T;
+    using const_iterator = typename List::const_iterator;
+    using const_reverse_iterator = typename List::const_reverse_iterator;
+    using value_type = typename List::value_type;
+
+  protected:
+    // An empty list indicates the value `none`. This invariant is ensured
+    // with a release assert in the constructor.
+    List _value;
+
+  public:
+    ListOrNone(List &&list) : _value {Krys::Move(list)}
+    {
+      assert(!_value.empty());
+    }
+
+    ListOrNone(Keywords::None) : _value {}
+    {
+    }
+
+    KRYS_NODISCARD const_iterator begin() const noexcept
+    {
+      return _value.begin();
+    }
+
+    KRYS_NODISCARD const_iterator end() const noexcept
+    {
+      return _value.end();
+    }
+
+    KRYS_NODISCARD const_reverse_iterator rbegin() const noexcept
+    {
+      return _value.rbegin();
+    }
+    KRYS_NODISCARD const_reverse_iterator rend() const noexcept
+    {
+      return _value.rend();
+    }
+
+    KRYS_NODISCARD const value_type &first() const noexcept
+    {
+      return _value.first();
+    }
+    KRYS_NODISCARD const value_type &last() const noexcept
+    {
+      return _value.last();
+    }
+
+    KRYS_NODISCARD size_t size() const noexcept
+    {
+      return _value.size();
+    }
+    KRYS_NODISCARD const value_type &operator[](size_t i) const noexcept
+    {
+      return _value[i];
+    }
+
+    bool operator==(const ListOrNone &) const = default;
+
+    KRYS_NODISCARD bool IsNone() const noexcept
+    {
+      return _value.empty();
+    }
+    KRYS_NODISCARD bool IsList() const noexcept
+    {
+      return !_value.empty();
+    }
+
+    template <typename... F>
+    KRYS_NODISCARD decltype(auto) SwitchOn(F &&...f) const noexcept
+    {
+      auto visitor = Krys::CreateVisitor(std::forward<F>(f)...);
+
+      if (IsNone())
+      {
+        return visitor(Keywords::None {});
+      }
+
+      return visitor(_value);
+    }
+  };
+
+  template <typename T>
+  constexpr auto TreatAsVariantLike<ListOrNone<T>> = true;
 
 #pragma endregion
 }

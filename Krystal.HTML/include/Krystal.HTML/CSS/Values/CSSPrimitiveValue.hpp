@@ -6,9 +6,12 @@
 #include "Krystal.HTML/CSS/Values/Enums/CSSValueId.hpp"
 #include "Krystal.Lib/NeverDestroyed.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
+#include "Krystal.Lib/Utils/ClampTo.hpp"
 
 namespace Krys::HTML
 {
+  class CSSToLengthConversionData;
+
   class CSSPrimitiveValue : public CSSValue
   {
     friend class StaticCSSValuePool;
@@ -129,6 +132,37 @@ namespace Krys::HTML
       return !_value.Number;
     }
 
+    template <typename T = double>
+    KRYS_NODISCARD T Value(CSSUnitType targetUnit,
+                           const CSSToLengthConversionData &conversionData) const noexcept
+    {
+      return ClampTo<T>(DoubleValue(targetUnit, conversionData));
+    }
+
+    template <typename T = double>
+    KRYS_NODISCARD T ValueNoConversionDataRequired() const noexcept
+    {
+      return ClampTo<T>(DoubleValueNoConversionDataRequired());
+    }
+
+    template <typename T = double>
+    KRYS_NODISCARD T ValueNoConversionDataRequired(CSSUnitType targetUnit) const noexcept
+    {
+      return ClampTo<T>(DoubleValueNoConversionDataRequired(targetUnit));
+    }
+
+    KRYS_NODISCARD double DoubleValue(CSSUnitType targetUnit,
+                                      const CSSToLengthConversionData &) const noexcept;
+
+    KRYS_NODISCARD double DoubleValueNoConversionDataRequired(CSSUnitType targetUnit) const noexcept;
+
+    KRYS_NODISCARD double DoubleValueNoConversionDataRequired() const noexcept
+    {
+      assert(!IsCalculated());
+      return _value.Number;
+    }
+
+
     KRYS_NODISCARD CSSOMString StringValue() const noexcept
     {
       switch (_unit)
@@ -164,7 +198,8 @@ namespace Krys::HTML
       return *_value.String;
     }
 
-    KRYS_NODISCARD Maybe<double> ResolveAsNumberIfNotCalculated() const noexcept
+    template <typename T = double>
+    KRYS_NODISCARD Maybe<T> ResolveAsNumberIfNotCalculated() const noexcept
     {
       if (IsCalculated())
       {
@@ -172,6 +207,13 @@ namespace Krys::HTML
       }
 
       return _value.Number;
+    }
+
+    template <typename T = double>
+    KRYS_NODISCARD T ResolveAsPercentageNoConversionDataRequired() const noexcept
+    {
+      assert(IsPercentage());
+      return ValueNoConversionDataRequired<T>();
     }
 
     KRYS_NODISCARD constexpr static bool IsFontIndependentLength(CSSUnitType type) noexcept

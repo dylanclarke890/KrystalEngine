@@ -124,37 +124,37 @@ namespace Krys::HTML
   struct MetaConsumerUnroller<T, Ts...>
   {
     template <CSSTokenType TokenType, typename ResultType>
-    KRYS_NODISCARD static Maybe<ResultType> Consume(CSSTokenRange &range, CSSPropertyParserState &state,
+    KRYS_NODISCARD static Maybe<ResultType> Consume(CSSTokenRange &tokens, CSSPropertyParserState &state,
                                                     CSSCalcAllowedSymbols symbolsAllowed,
                                                     CSSPropertyParserOptions options) noexcept
     {
       using Consumer = MetaConsumerDispatcher<TokenType, ConsumerDefinition<T>>;
       if constexpr (Consumer::Supported)
       {
-        if (auto result = Consumer::Consume(range, state, symbolsAllowed, options))
+        if (auto result = Consumer::Consume(tokens, state, symbolsAllowed, options))
         {
           return {T {*result}};
         }
       }
-      return MetaConsumerUnroller<Ts...>::template Consume<TokenType, ResultType>(range, state,
+      return MetaConsumerUnroller<Ts...>::template Consume<TokenType, ResultType>(tokens, state,
                                                                                   symbolsAllowed, options);
     }
 
     template <CSSTokenType TokenType, typename ResultType, typename F>
-    KRYS_NODISCARD static Maybe<ResultType> Consume(CSSTokenRange &range, CSSPropertyParserState &state,
+    KRYS_NODISCARD static Maybe<ResultType> Consume(CSSTokenRange &tokens, CSSPropertyParserState &state,
                                                     CSSCalcAllowedSymbols symbolsAllowed,
                                                     CSSPropertyParserOptions options, F &&func) noexcept
     {
       using Consumer = MetaConsumerDispatcher<TokenType, ConsumerDefinition<T>>;
       if constexpr (Consumer::Supported)
       {
-        if (auto result = Consumer::Consume(range, state, symbolsAllowed, options))
+        if (auto result = Consumer::Consume(tokens, state, symbolsAllowed, options))
         {
           return func(T {*result});
         }
       }
       return MetaConsumerUnroller<Ts...>::template Consume<TokenType, ResultType>(
-        range, state, symbolsAllowed, options, std::forward<F>(func));
+        tokens, state, symbolsAllowed, options, std::forward<F>(func));
     }
   };
 
@@ -177,13 +177,13 @@ namespace Krys::HTML
   // An example use that attempts to consumer either a <number> or <percentage>
   // looks like (argument list elided for brevity):
   //
-  //    auto result = MetaConsumer<CSS::Percentage<R>, CSS::Number<R>>::consume(range, ...);
+  //    auto result = MetaConsumer<CSS::Percentage<R>, CSS::Number<R>>::consume(tokens, ...);
   //
   // If a caller wants to avoid the overhead of switching on the returned variant
   // result, an alternative overload of `consume` is provided which takes an additional
   // `functor` argument which gets called with the result:
   //
-  //    auto result = MetaConsumer<Percentage<R>, Number<R>>::Consume(range, ...,
+  //    auto result = MetaConsumer<Percentage<R>, Number<R>>::Consume(tokens, ...,
   //        [](Percentage<R> percentage) { ... },
   //        [](Number<R> number) { ... }
   //    );
@@ -196,39 +196,39 @@ namespace Krys::HTML
     using Unroller = MetaConsumerUnroller<T, Ts...>;
 
     template <typename... F>
-    KRYS_NODISCARD static decltype(auto) Consume(CSSTokenRange &range, CSSPropertyParserState &state,
+    KRYS_NODISCARD static decltype(auto) Consume(CSSTokenRange &tokens, CSSPropertyParserState &state,
                                                  CSSCalcAllowedSymbols symbolsAllowed,
                                                  CSSPropertyParserOptions options, F &&...f) noexcept
     {
       auto visitor = CreateVisitor(std::forward<F>(f)...);
       using ResultType = decltype(visitor(std::declval<T>()));
 
-      switch (range.Peek().Type())
+      switch (tokens.Peek().Type())
       {
         case CSSTokenType::Function:
         {
           return Unroller::template Consume<CSSTokenType::Function, ResultType>(
-            range, state, Krys::Move(symbolsAllowed), options, visitor);
+            tokens, state, Krys::Move(symbolsAllowed), options, visitor);
         }
         case CSSTokenType::Number:
         {
           return Unroller::template Consume<CSSTokenType::Number, ResultType>(
-            range, state, Krys::Move(symbolsAllowed), options, visitor);
+            tokens, state, Krys::Move(symbolsAllowed), options, visitor);
         }
         case CSSTokenType::Percentage:
         {
           return Unroller::template Consume<CSSTokenType::Percentage, ResultType>(
-            range, state, Krys::Move(symbolsAllowed), options, visitor);
+            tokens, state, Krys::Move(symbolsAllowed), options, visitor);
         }
         case CSSTokenType::Dimension:
         {
           return Unroller::template Consume<CSSTokenType::Dimension, ResultType>(
-            range, state, Krys::Move(symbolsAllowed), options, visitor);
+            tokens, state, Krys::Move(symbolsAllowed), options, visitor);
         }
         case CSSTokenType::Ident:
         {
           return Unroller::template Consume<CSSTokenType::Ident, ResultType>(
-            range, state, Krys::Move(symbolsAllowed), options, visitor);
+            tokens, state, Krys::Move(symbolsAllowed), options, visitor);
         }
         default:
         {
@@ -240,39 +240,39 @@ namespace Krys::HTML
     // Overloaded with the `CSSPropertyParserOptions` parameter removed so it can be defaulted when using the
     // continuation functor parameters.
     template <typename... F>
-    KRYS_NODISCARD static decltype(auto) Consume(CSSTokenRange &range, CSSPropertyParserState &state,
+    KRYS_NODISCARD static decltype(auto) Consume(CSSTokenRange &tokens, CSSPropertyParserState &state,
                                                  CSSCalcAllowedSymbols symbolsAllowed, F &&...f) noexcept
     {
-      return Consume(range, state, Krys::Move(symbolsAllowed), {}, std::forward<F>(f)...);
+      return Consume(tokens, state, Krys::Move(symbolsAllowed), {}, std::forward<F>(f)...);
     }
 
     // Overloaded with the `CSSCalcAllowedSymbols` parameter removed so it can be defaulted when using the
     // continuation functor parameters.
     template <typename... F>
-    KRYS_NODISCARD static decltype(auto) Consume(CSSTokenRange &range, CSSPropertyParserState &state,
+    KRYS_NODISCARD static decltype(auto) Consume(CSSTokenRange &tokens, CSSPropertyParserState &state,
                                                  CSSPropertyParserOptions options, F &&...f) noexcept
     {
-      return Consume(range, state, {}, options, std::forward<F>(f)...);
+      return Consume(tokens, state, {}, options, std::forward<F>(f)...);
     }
 
     // Overloaded with the `CSSPropertyParserOptions` and `CSSCalcAllowedSymbols` parameters removed so they
     // can be defaulted when using the continuation functor parameters.
     template <typename... F>
-    KRYS_NODISCARD static decltype(auto) Consume(CSSTokenRange &range, CSSPropertyParserState &state,
+    KRYS_NODISCARD static decltype(auto) Consume(CSSTokenRange &tokens, CSSPropertyParserState &state,
                                                  F &&...f) noexcept
     {
-      return Consume(range, state, {}, {}, std::forward<F>(f)...);
+      return Consume(tokens, state, {}, {}, std::forward<F>(f)...);
     }
 
     // Overloaded with no continuation functor parameters allowing a for simplified interface when returning a
     // single value / or Variant is acceptable.
-    KRYS_NODISCARD static decltype(auto) Consume(CSSTokenRange &range, CSSPropertyParserState &state,
+    KRYS_NODISCARD static decltype(auto) Consume(CSSTokenRange &tokens, CSSPropertyParserState &state,
                                                  CSSCalcAllowedSymbols symbolsAllowed = {},
                                                  CSSPropertyParserOptions options = {}) noexcept
     {
       using ResultType = typename MetaConsumeResult<T, Ts...>::type;
 
-      return Consume(range, state, Krys::Move(symbolsAllowed), options,
+      return Consume(tokens, state, Krys::Move(symbolsAllowed), options,
                      [](auto &&value) { return ResultType {Krys::Move(value)}; });
     }
   };

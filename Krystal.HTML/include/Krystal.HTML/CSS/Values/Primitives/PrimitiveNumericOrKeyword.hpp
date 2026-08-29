@@ -17,7 +17,7 @@ namespace Krys::HTML
     using Data = PrimitiveData<NumericType, Ks...>;
     using Index = typename Data::Index;
     using Keywords = typename Data::Keywords;
-    static constexpr auto range = NumericType::range;
+    static constexpr auto tokens = NumericType::tokens;
     static constexpr auto category = NumericType::category;
 
     // MARK: Constructors
@@ -64,7 +64,7 @@ namespace Krys::HTML
     template <typename... U>
     constexpr PrimitiveNumericOrKeyword(Variant<U...> &&variant)
         : m_data {WTF::switchOn(
-            WTF::move(variant), [](NumericType &&numeric) { return Data {WTF::move(numeric.m_data)}; },
+            Krys::Move(variant), [](NumericType &&numeric) { return Data {Krys::Move(numeric.m_data)}; },
             [](ValidKeywordForList<Keywords> auto keyword) { return Data {keyword}; })}
     {
     }

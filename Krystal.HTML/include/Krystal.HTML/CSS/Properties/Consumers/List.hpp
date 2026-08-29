@@ -40,29 +40,29 @@ namespace Krys::HTML
     constexpr inline auto OneOrMore = ListBounds::MinimumOf(1);
 
     template <char Separator, ListBounds Bounds, typename SubConsumer, typename... Args>
-    auto ConsumeListSeparatedByIntoBuilder(CSSTokenRange &range, SubConsumer &&subConsumer,
+    auto ConsumeListSeparatedByIntoBuilder(CSSTokenRange &tokens, SubConsumer &&subConsumer,
                                            Args &&...args) noexcept -> Maybe<CSSValueListBuilder>
     {
-      auto consumeSeparator = [](auto &range)
+      auto consumeSeparator = [](auto &tokens)
       {
         if constexpr (Separator == ',')
         {
-          return ConsumeComma(range);
+          return ConsumeComma(tokens);
         }
         else if constexpr (Separator == '/')
         {
-          return ConsumeSlash(range);
+          return ConsumeSlash(tokens);
         }
         else if constexpr (Separator == ' ')
         {
-          return !range.IsAtEnd();
+          return !tokens.IsAtEnd();
         }
       };
 
       CSSValueListBuilder list;
       do
       {
-        auto value = std::invoke(subConsumer, range, args...);
+        auto value = std::invoke(subConsumer, tokens, args...);
         if (!value)
         {
           if constexpr (Separator == ',')
@@ -80,7 +80,7 @@ namespace Krys::HTML
         }
 
         list.push_back(Krys::Move(value));
-      } while (consumeSeparator(range));
+      } while (consumeSeparator(tokens));
 
       if constexpr (Bounds.min > 0)
       {
@@ -102,11 +102,11 @@ namespace Krys::HTML
 
     template <char Separator, ListBounds Bounds, ListOptimization Optimization = ListOptimization::None,
               typename ListType = CSSValueList, typename SubConsumer, typename... Args>
-    auto ConsumeListSeparatedBy(CSSTokenRange &range, SubConsumer &&subConsumer, Args &&...args)
+    auto ConsumeListSeparatedBy(CSSTokenRange &tokens, SubConsumer &&subConsumer, Args &&...args)
       -> std::conditional_t<Optimization == ListOptimization::None, RefPtr<ListType>, RefPtr<CSSValue>>
     {
       auto list = ConsumeListSeparatedByIntoBuilder<Separator, Bounds>(
-        range, std::forward<SubConsumer>(subConsumer), std::forward<Args>(args)...);
+        tokens, std::forward<SubConsumer>(subConsumer), std::forward<Args>(args)...);
       if (!list)
         return nullptr;
 

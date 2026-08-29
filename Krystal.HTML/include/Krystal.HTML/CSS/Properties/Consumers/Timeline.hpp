@@ -10,14 +10,17 @@ namespace Krys::HTML
   struct CSSParserContext;
   class CSSValue;
 
-  namespace Style
+  enum class CSSValueId : uint16;
+
+  enum class SingleAnimationRangeType : bool
   {
-    enum class SingleAnimationRangeType : bool;
-  }
+    Start,
+    End
+  };
 
   namespace CSSPropertyParserHelpers
   {
-    KRYS_NODISCARD bool IsAnimationRangeKeyword(CSSValueId) noexcept;
+    KRYS_NODISCARD bool IsAnimationRangeKeyword(CSSValueId id) noexcept;
 
     // MARK: - Consumer functions
 
@@ -41,9 +44,9 @@ namespace Krys::HTML
 
     // <single-animation-range> = normal | <length-percentage> | <timeline-range-name> <length-percentage>?
     // https://drafts.csswg.org/scroll-animations-1/#propdef-animation-range-start
-    KRYS_NODISCARD RefPtr<CSSValue>
-      ConsumeSingleAnimationRange(CSSTokenRange &tokens, CSSPropertyParserState &state,
-                                  Style::SingleAnimationRangeType type) noexcept;
+    KRYS_NODISCARD RefPtr<CSSValue> ConsumeSingleAnimationRange(CSSTokenRange &tokens,
+                                                                CSSPropertyParserState &state,
+                                                                SingleAnimationRangeType type) noexcept;
 
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeSingleAnimationRangeStart(CSSTokenRange &tokens,
                                                                      CSSPropertyParserState &state) noexcept;
@@ -53,6 +56,6 @@ namespace Krys::HTML
 
     KRYS_NODISCARD RefPtr<CSSValue> ParseSingleAnimationRange(const CSSOMString &input,
                                                               const CSSParserContext &context,
-                                                              Style::SingleAnimationRangeType type) noexcept;
+                                                              SingleAnimationRangeType type) noexcept;
   }
 }

@@ -734,7 +734,7 @@ namespace Krys::HTML
         questionMarkIndex = start.find_first_of('?', questionMarkIndex + 1uz);
       }
 
-      // reuse the consumed string to store the end of the range, since we don't need it anymore
+      // reuse the consumed string to store the end of the tokens, since we don't need it anymore
       string &end = consumed;
 
       questionMarkIndex = end.find_first_of('?');

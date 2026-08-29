@@ -8351,7 +8351,7 @@ class GenerateCSSPropertyParsing:
                     "Krystal.HTML/CSS/Properties/CSSPropertyParser.hpp",
                     "Krystal.HTML/CSS/Properties/CSSPropertyParserCustom.hpp",
                     "Krystal.HTML/CSS/Properties/CSSPropertyParserState.hpp",
-                    "Krystal.HTML/CSS/Values/Enums/ColorType.hpp",
+                    "Krystal.HTML/CSS/Values/Color/ColorType.hpp",
                     "Krystal.HTML/CSS/Values/CSSFunctionValue.hpp",
                     "Krystal.HTML/CSS/Values/CSSValuePair.hpp",
                 ],

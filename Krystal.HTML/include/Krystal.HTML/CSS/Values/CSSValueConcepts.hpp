@@ -35,7 +35,7 @@ namespace Krys::HTML
   template <typename T>
   concept TupleLike = TreatAsTupleLike<T>;
 
-  // Types can specialize this and set the value to true to be treated as "range-like"
+  // Types can specialize this and set the value to true to be treated as "tokens-like"
   // for CSS value type algorithms.
   // Requirements: Types must have valid begin()/end() functions.
   template <typename>

@@ -93,7 +93,7 @@ namespace Krys::HTML
     /// @see https://drafts.csswg.org/css-syntax-3/#consume-a-declaration
     bool ConsumeDeclaration(CSSTokenRange &tokens, CSSRuleType ruleType) noexcept;
 
-    IsImportant ConsumeTrailingImportantAndWhitespace(CSSTokenRange &range);
+    IsImportant ConsumeTrailingImportantAndWhitespace(CSSTokenRange &tokens);
 
     /// @see https://drafts.csswg.org/css-syntax/#consume-the-remnants-of-a-bad-declaration
     void ConsumeBadDeclaration(CSSTokenRange &tokens, bool nested) noexcept;

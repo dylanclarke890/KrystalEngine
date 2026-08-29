@@ -24,10 +24,10 @@ namespace Krys::HTML
       return Base::Resolve(Krys::Move(consumeResult), options);
     }
 
-    KRYS_NODISCARD static ResultType ConsumeAndResolve(CSSTokenRange &range, CSSPropertyParserState &state,
+    KRYS_NODISCARD static ResultType ConsumeAndResolve(CSSTokenRange &tokens, CSSPropertyParserState &state,
                                                        CSSPropertyParserOptions options = {}) noexcept
     {
-      auto result = MetaConsumer<T, Ts...>::Consume(range, state, options);
+      auto result = MetaConsumer<T, Ts...>::Consume(tokens, state, options);
       if (!result)
       {
         return {};

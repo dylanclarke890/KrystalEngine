@@ -43,34 +43,34 @@ namespace Krys::HTML
   }
 
   MutableCSSSelectorList CSSSelectorParser::ParseMutableSelectorList(
-    CSSTokenRange &range, const CSSSelectorParserContext &context, RawPtr<StyleSheetContents> stylesheet,
+    CSSTokenRange &tokens, const CSSSelectorParserContext &context, RawPtr<StyleSheetContents> stylesheet,
     Maybe<NestedContextType> nestedContext, IsForgivingSelectorList isForgiving,
     DisallowPseudoElements disallowPseudoElements) noexcept
   {
     CSSSelectorParser parser(context, stylesheet, nestedContext, disallowPseudoElements);
-    range.DiscardWhitespace();
+    tokens.DiscardWhitespace();
 
     auto result = [&]() noexcept -> MutableCSSSelectorList
     {
       if (nestedContext && !isForgiving)
       {
-        return parser.ConsumeNestedSelectorList(range);
+        return parser.ConsumeNestedSelectorList(tokens);
       }
 
       if (nestedContext && isForgiving)
       {
-        return parser.ConsumeNestedComplexForgivingSelectorList(range);
+        return parser.ConsumeNestedComplexForgivingSelectorList(tokens);
       }
 
       if (isForgiving)
       {
-        return parser.ConsumeComplexForgivingSelectorList(range);
+        return parser.ConsumeComplexForgivingSelectorList(tokens);
       }
 
-      return parser.ConsumeComplexSelectorList(range);
+      return parser.ConsumeComplexSelectorList(tokens);
     }();
 
-    if (result.empty() || !range.IsAtEnd())
+    if (result.empty() || !tokens.IsAtEnd())
     {
       return {};
     }
@@ -81,23 +81,23 @@ namespace Krys::HTML
 #pragma region Selector List Parsing
 
   template <typename ConsumeSelector>
-  MutableCSSSelectorList CSSSelectorParser::ConsumeSelectorList(CSSTokenRange &range,
+  MutableCSSSelectorList CSSSelectorParser::ConsumeSelectorList(CSSTokenRange &tokens,
                                                                 ConsumeSelector &&consumeSelector) noexcept
   {
     MutableCSSSelectorList selectors;
-    auto selector = consumeSelector(range);
+    auto selector = consumeSelector(tokens);
     if (selector == nullptr)
     {
       return {};
     }
 
     selectors.push_back(Krys::Move(selector));
-    while (!range.IsAtEnd() && range.Peek().Type() == CSSTokenType::Comma)
+    while (!tokens.IsAtEnd() && tokens.Peek().Type() == CSSTokenType::Comma)
     {
-      range.Discard();
-      range.DiscardWhitespace();
+      tokens.Discard();
+      tokens.DiscardWhitespace();
 
-      selector = consumeSelector(range);
+      selector = consumeSelector(tokens);
       if (selector == nullptr)
       {
         return {};
@@ -109,41 +109,41 @@ namespace Krys::HTML
     return selectors;
   }
 
-  MutableCSSSelectorList CSSSelectorParser::ConsumeComplexSelectorList(CSSTokenRange &range) noexcept
+  MutableCSSSelectorList CSSSelectorParser::ConsumeComplexSelectorList(CSSTokenRange &tokens) noexcept
   {
-    return ConsumeSelectorList(range, [&](CSSTokenRange &range) { return ConsumeComplexSelector(range); });
+    return ConsumeSelectorList(tokens, [&](CSSTokenRange &tokens) { return ConsumeComplexSelector(tokens); });
   }
 
-  MutableCSSSelectorList CSSSelectorParser::ConsumeRelativeSelectorList(CSSTokenRange &range) noexcept
+  MutableCSSSelectorList CSSSelectorParser::ConsumeRelativeSelectorList(CSSTokenRange &tokens) noexcept
   {
-    return ConsumeSelectorList(range,
-                               [&](CSSTokenRange &range) { return ConsumeRelativeScopeSelector(range); });
+    return ConsumeSelectorList(tokens,
+                               [&](CSSTokenRange &tokens) { return ConsumeRelativeScopeSelector(tokens); });
   }
 
-  MutableCSSSelectorList CSSSelectorParser::ConsumeNestedSelectorList(CSSTokenRange &range) noexcept
+  MutableCSSSelectorList CSSSelectorParser::ConsumeNestedSelectorList(CSSTokenRange &tokens) noexcept
   {
-    return ConsumeSelectorList(range,
-                               [&](CSSTokenRange &range) { return ConsumeNestedComplexSelector(range); });
+    return ConsumeSelectorList(tokens,
+                               [&](CSSTokenRange &tokens) { return ConsumeNestedComplexSelector(tokens); });
   }
 
   template <typename ConsumeSelector>
   MutableCSSSelectorList
-    CSSSelectorParser::ConsumeForgivingSelectorList(CSSTokenRange &range,
+    CSSSelectorParser::ConsumeForgivingSelectorList(CSSTokenRange &tokens,
                                                     ConsumeSelector &&consumeSelector) noexcept
   {
     MutableCSSSelectorList selectors;
 
     auto consumeForgiving = [&]() noexcept -> void
     {
-      auto initialRange = range;
+      auto initialRange = tokens;
       auto unknownSelector = [&]() noexcept -> UniquePtr<MutableCSSSelector>
       {
         auto unknownSelector = CreateUnique<MutableCSSSelector>();
-        auto unknownRange = initialRange.RangeUntil(range);
+        auto unknownRange = initialRange.RangeUntil(tokens);
 
         unknownSelector->SetMatch(SelectorMatch::ForgivingUnknown);
 
-        // If the range contains a nesting selector, we mark this unknown selector as "nest containing" (it
+        // If the tokens contains a nesting selector, we mark this unknown selector as "nest containing" (it
         // will be used during rule set building)
         for (const CSSToken &token : unknownRange)
         {
@@ -154,22 +154,22 @@ namespace Krys::HTML
           }
         }
 
-        // TODO: store the complete range content for serialization.
+        // TODO: store the complete tokens content for serialization.
         // unknownSelector->SetValue(unknownRange.serialize());
 
         return unknownSelector;
       };
 
-      auto selector = consumeSelector(range);
+      auto selector = consumeSelector(tokens);
 
       // Range is not over and next token is not a comma (means there is more to this selector) so this
-      // selector is unknown. Consume until next comma and add the full range as an unknown selector to the
+      // selector is unknown. Consume until next comma and add the full tokens as an unknown selector to the
       // selector list.
-      if ((!range.IsAtEnd() && range.Peek().Type() != CSSTokenType::Comma) || selector == nullptr)
+      if ((!tokens.IsAtEnd() && tokens.Peek().Type() != CSSTokenType::Comma) || selector == nullptr)
       {
-        while (!range.IsAtEnd() && range.Peek().Type() != CSSTokenType::Comma)
+        while (!tokens.IsAtEnd() && tokens.Peek().Type() != CSSTokenType::Comma)
         {
-          range.Discard();
+          tokens.Discard();
         }
 
         selectors.push_back(unknownSelector());
@@ -180,37 +180,37 @@ namespace Krys::HTML
     };
 
     consumeForgiving();
-    while (!range.IsAtEnd() && range.Peek().Type() == CSSTokenType::Comma)
+    while (!tokens.IsAtEnd() && tokens.Peek().Type() == CSSTokenType::Comma)
     {
-      range.Discard();
-      range.DiscardWhitespace();
+      tokens.Discard();
+      tokens.DiscardWhitespace();
       consumeForgiving();
     }
 
     return selectors;
   }
 
-  MutableCSSSelectorList CSSSelectorParser::ConsumeComplexForgivingSelectorList(CSSTokenRange &range) noexcept
+  MutableCSSSelectorList CSSSelectorParser::ConsumeComplexForgivingSelectorList(CSSTokenRange &tokens) noexcept
   {
-    return ConsumeForgivingSelectorList(range,
-                                        [&](CSSTokenRange &range) { return ConsumeComplexSelector(range); });
+    return ConsumeForgivingSelectorList(tokens,
+                                        [&](CSSTokenRange &tokens) { return ConsumeComplexSelector(tokens); });
   }
 
   MutableCSSSelectorList
-    CSSSelectorParser::ConsumeNestedComplexForgivingSelectorList(CSSTokenRange &range) noexcept
+    CSSSelectorParser::ConsumeNestedComplexForgivingSelectorList(CSSTokenRange &tokens) noexcept
   {
-    return ConsumeForgivingSelectorList(range, [&](CSSTokenRange &range)
-                                        { return ConsumeNestedComplexSelector(range); });
+    return ConsumeForgivingSelectorList(tokens, [&](CSSTokenRange &tokens)
+                                        { return ConsumeNestedComplexSelector(tokens); });
   }
 
 #pragma endregion
 
 #pragma region Simple Selector Parsing
 
-  UniquePtr<MutableCSSSelector> CSSSelectorParser::ConsumeId(CSSTokenRange &range) noexcept
+  UniquePtr<MutableCSSSelector> CSSSelectorParser::ConsumeId(CSSTokenRange &tokens) noexcept
   {
-    assert(range.Peek().Type() == CSSTokenType::Hash);
-    if (range.Peek().HashType() != HashTokenType::Id)
+    assert(tokens.Peek().Type() == CSSTokenType::Hash);
+    if (tokens.Peek().HashType() != HashTokenType::Id)
     {
       return nullptr;
     }
@@ -218,18 +218,18 @@ namespace Krys::HTML
     auto selector = CreateUnique<MutableCSSSelector>();
     selector->SetMatch(SelectorMatch::Id);
 
-    auto &token = range.Consume();
+    auto &token = tokens.Consume();
     selector->SetValue(token.IdentCodePoints(), MatchLowercase(_context.Mode == CSSParserMode::HTMLQuirks));
     return selector;
   }
 
-  UniquePtr<MutableCSSSelector> CSSSelectorParser::ConsumeClass(CSSTokenRange &range) noexcept
+  UniquePtr<MutableCSSSelector> CSSSelectorParser::ConsumeClass(CSSTokenRange &tokens) noexcept
   {
-    assert(range.Peek().Type() == CSSTokenType::Delim);
-    assert(range.Peek().IdentCodePoints() == u8".");
+    assert(tokens.Peek().Type() == CSSTokenType::Delim);
+    assert(tokens.Peek().IdentCodePoints() == u8".");
 
-    range.Discard();
-    if (range.Peek().Type() != CSSTokenType::Ident)
+    tokens.Discard();
+    if (tokens.Peek().Type() != CSSTokenType::Ident)
     {
       return nullptr;
     }
@@ -237,25 +237,25 @@ namespace Krys::HTML
     auto selector = CreateUnique<MutableCSSSelector>();
     selector->SetMatch(SelectorMatch::Class);
 
-    auto &token = range.Consume();
+    auto &token = tokens.Consume();
     selector->SetValue(token.IdentCodePoints(), MatchLowercase(_context.Mode == CSSParserMode::HTMLQuirks));
 
     return selector;
   }
 
-  bool CSSSelectorParser::ConsumeName(CSSTokenRange &range, CSSOMStringAtom &name,
+  bool CSSSelectorParser::ConsumeName(CSSTokenRange &tokens, CSSOMStringAtom &name,
                                       CSSOMStringAtom &namespacePrefix) noexcept
   {
-    const CSSToken &firstToken = range.Peek();
+    const CSSToken &firstToken = tokens.Peek();
     if (firstToken.Type() == CSSTokenType::Ident)
     {
       name = firstToken.IdentCodePoints();
-      range.Discard();
+      tokens.Discard();
     }
     else if (firstToken.Type() == CSSTokenType::Delim && firstToken.IdentCodePoints() == StarAtom())
     {
       name = StarAtom();
-      range.Discard();
+      tokens.Discard();
     }
     else if (firstToken.Type() == CSSTokenType::Delim && firstToken.IdentCodePoints() == u8"|")
     {
@@ -268,22 +268,22 @@ namespace Krys::HTML
     }
 
     // early exit if this isn't a namespace prefix or it's a dash match (e.g. [foo|=bar])
-    if (range.Peek().Type() != CSSTokenType::Delim || range.Peek().IdentCodePoints() != u8"|"
-        || (range.Peek(1uz).Type() == CSSTokenType::Delim) && range.Peek(1uz).IdentCodePoints() == u8"=")
+    if (tokens.Peek().Type() != CSSTokenType::Delim || tokens.Peek().IdentCodePoints() != u8"|"
+        || (tokens.Peek(1uz).Type() == CSSTokenType::Delim) && tokens.Peek(1uz).IdentCodePoints() == u8"=")
     {
       return true;
     }
 
     namespacePrefix = name;
-    if (range.Peek(1uz).Type() == CSSTokenType::Ident)
+    if (tokens.Peek(1uz).Type() == CSSTokenType::Ident)
     {
-      range.Discard();
-      name = range.Consume().IdentCodePoints();
+      tokens.Discard();
+      name = tokens.Consume().IdentCodePoints();
     }
-    else if (range.Peek(1uz).Type() == CSSTokenType::Ident && range.Peek(1).IdentCodePoints() == StarAtom())
+    else if (tokens.Peek(1uz).Type() == CSSTokenType::Ident && tokens.Peek(1).IdentCodePoints() == StarAtom())
     {
-      range.Discard();
-      range.Discard();
+      tokens.Discard();
+      tokens.Discard();
       name = StarAtom();
     }
     else
@@ -296,22 +296,22 @@ namespace Krys::HTML
     return true;
   }
 
-  Maybe<SelectorMatch> CSSSelectorParser::ConsumeAttributeMatch(CSSTokenRange &range) noexcept
+  Maybe<SelectorMatch> CSSSelectorParser::ConsumeAttributeMatch(CSSTokenRange &tokens) noexcept
   {
-    assert(range.Peek().Type() == CSSTokenType::Delim);
+    assert(tokens.Peek().Type() == CSSTokenType::Delim);
 
-    auto EqualsFollows = [&range]() noexcept -> bool
+    auto EqualsFollows = [&tokens]() noexcept -> bool
     {
-      if (range.Peek().Type() == CSSTokenType::Delim && range.Peek().IdentCodePoints() == u8"=")
+      if (tokens.Peek().Type() == CSSTokenType::Delim && tokens.Peek().IdentCodePoints() == u8"=")
       {
-        range.Discard();
+        tokens.Discard();
         return true;
       }
       return false;
     };
 
-    const CSSToken &token = range.Consume();
-    range.DiscardWhitespace();
+    const CSSToken &token = tokens.Consume();
+    tokens.DiscardWhitespace();
 
     switch (token.IdentCodePoints()[0])
     {
@@ -367,15 +367,15 @@ namespace Krys::HTML
     return Null;
   }
 
-  Maybe<IsCaseSensitive> CSSSelectorParser::ConsumeAttributeCaseSensitiveFlag(CSSTokenRange &range) noexcept
+  Maybe<IsCaseSensitive> CSSSelectorParser::ConsumeAttributeCaseSensitiveFlag(CSSTokenRange &tokens) noexcept
   {
-    if (range.Peek().Type() != CSSTokenType::Ident)
+    if (tokens.Peek().Type() != CSSTokenType::Ident)
     {
       return IsCaseSensitive(true);
     }
 
-    const CSSToken &flag = range.Consume();
-    range.DiscardWhitespace();
+    const CSSToken &flag = tokens.Consume();
+    tokens.DiscardWhitespace();
 
     if (Krys::Text::ASCIICaseInsensitiveMatch(flag.IdentCodePoints(), u8"i"))
     {
@@ -390,11 +390,11 @@ namespace Krys::HTML
     return Null;
   }
 
-  UniquePtr<MutableCSSSelector> CSSSelectorParser::ConsumeAttribute(CSSTokenRange &range) noexcept
+  UniquePtr<MutableCSSSelector> CSSSelectorParser::ConsumeAttribute(CSSTokenRange &tokens) noexcept
   {
-    assert(range.Peek().Type() == CSSTokenType::OpenSquare);
+    assert(tokens.Peek().Type() == CSSTokenType::OpenSquare);
 
-    CSSTokenRange block = range.ConsumeBlock();
+    CSSTokenRange block = tokens.ConsumeBlock();
     block.DiscardWhitespace();
 
     CSSOMStringAtom namespacePrefix = CSSOMStringAtom::Null();
@@ -457,11 +457,11 @@ namespace Krys::HTML
     return selector;
   }
 
-  UniquePtr<MutableCSSSelector> CSSSelectorParser::ConsumeNesting(CSSTokenRange &range) noexcept
+  UniquePtr<MutableCSSSelector> CSSSelectorParser::ConsumeNesting(CSSTokenRange &tokens) noexcept
   {
-    assert(range.Peek().Type() == CSSTokenType::Delim);
-    assert(range.Peek().IdentCodePoints() == u8"&");
-    range.Discard();
+    assert(tokens.Peek().Type() == CSSTokenType::Delim);
+    assert(tokens.Peek().IdentCodePoints() == u8"&");
+    tokens.Discard();
 
     auto selector = CreateUnique<MutableCSSSelector>();
     selector->SetMatch(SelectorMatch::NestingParent);
@@ -469,43 +469,43 @@ namespace Krys::HTML
     return selector;
   }
 
-  UniquePtr<MutableCSSSelector> CSSSelectorParser::ConsumePseudo(CSSTokenRange &range) noexcept
+  UniquePtr<MutableCSSSelector> CSSSelectorParser::ConsumePseudo(CSSTokenRange &tokens) noexcept
   {
     return UniquePtr<MutableCSSSelector>();
   }
 
-  UniquePtr<MutableCSSSelector> CSSSelectorParser::ConsumeSimpleSelector(CSSTokenRange &range) noexcept
+  UniquePtr<MutableCSSSelector> CSSSelectorParser::ConsumeSimpleSelector(CSSTokenRange &tokens) noexcept
   {
-    const CSSToken &token = range.Peek();
+    const CSSToken &token = tokens.Peek();
     UniquePtr<MutableCSSSelector> selector = [&]() noexcept -> UniquePtr<MutableCSSSelector>
     {
       switch (token.Type())
       {
         case CSSTokenType::Hash:
         {
-          return ConsumeId(range);
+          return ConsumeId(tokens);
         }
         case CSSTokenType::Delim:
         {
           if (token.IdentCodePoints() == u8".")
           {
-            return ConsumeClass(range);
+            return ConsumeClass(tokens);
           }
 
           if (token.IdentCodePoints() == u8"&")
           {
-            return ConsumeNesting(range);
+            return ConsumeNesting(tokens);
           }
 
           break;
         }
         case CSSTokenType::OpenSquare:
         {
-          return ConsumeAttribute(range);
+          return ConsumeAttribute(tokens);
         }
         case CSSTokenType::Colon:
         {
-          return ConsumePseudo(range);
+          return ConsumePseudo(tokens);
         }
       }
 
@@ -538,18 +538,18 @@ namespace Krys::HTML
 
 #pragma endregion
 
-  UniquePtr<MutableCSSSelector> CSSSelectorParser::ConsumeCompoundSelector(CSSTokenRange &range) noexcept
+  UniquePtr<MutableCSSSelector> CSSSelectorParser::ConsumeCompoundSelector(CSSTokenRange &tokens) noexcept
   {
     assert(_precedingPseudoElement == nullptr || _disallowPseudoElements);
 
     CSSOMStringAtom namespacePrefix = CSSOMStringAtom::Null();
     CSSOMStringAtom elementName = CSSOMStringAtom::Null();
-    const bool hasName = ConsumeName(range, elementName, namespacePrefix);
+    const bool hasName = ConsumeName(tokens, elementName, namespacePrefix);
 
     UniquePtr<MutableCSSSelector> compoundSelector;
     if (!hasName)
     {
-      compoundSelector = ConsumeSimpleSelector(range);
+      compoundSelector = ConsumeSimpleSelector(tokens);
       if (compoundSelector == nullptr)
       {
         return nullptr;
@@ -560,7 +560,7 @@ namespace Krys::HTML
       }
     }
 
-    while (auto simpleSelector = ConsumeSimpleSelector(range))
+    while (auto simpleSelector = ConsumeSimpleSelector(tokens))
     {
       if (simpleSelector->Match() == SelectorMatch::PseudoElement)
       {
@@ -589,7 +589,7 @@ namespace Krys::HTML
     // @see [1]: https://drafts.csswg.org/selectors/#matches
     // @see [2]: https://drafts.csswg.org/selectors/#selector-subject
     SetForScope ignoreDefaultNamespace(_ignoreDefaultNamespace, _resistDefaultNamespace && !hasName
-                                                                  && IsAtEndIgnoringWhitespace(range));
+                                                                  && IsAtEndIgnoringWhitespace(tokens));
     if (compoundSelector == nullptr)
     {
       CSSOMStringAtom namespaceURI = DetermineNamespace(namespacePrefix);
@@ -666,26 +666,26 @@ namespace Krys::HTML
     return true;
   }
 
-  SelectorRelation CSSSelectorParser::ConsumeCombinator(CSSTokenRange &range) noexcept
+  SelectorRelation CSSSelectorParser::ConsumeCombinator(CSSTokenRange &tokens) noexcept
   {
     auto fallbackResult = SelectorRelation::Compounding;
-    while (range.Peek().Type() == CSSTokenType::Whitespace)
+    while (tokens.Peek().Type() == CSSTokenType::Whitespace)
     {
-      range.Discard();
+      tokens.Discard();
       fallbackResult = SelectorRelation::Descendant;
     }
 
-    if (range.Peek().Type() != CSSTokenType::Delim)
+    if (tokens.Peek().Type() != CSSTokenType::Delim)
     {
       return fallbackResult;
     }
 
-    auto delim = range.Peek().IdentCodePoints()[0];
+    auto delim = tokens.Peek().IdentCodePoints()[0];
 
     if (delim == u8'+' || delim == u8'~' || delim == u8'>')
     {
-      range.Discard();
-      range.DiscardWhitespace();
+      tokens.Discard();
+      tokens.DiscardWhitespace();
 
       if (delim == u8'+')
       {
@@ -703,14 +703,14 @@ namespace Krys::HTML
     return fallbackResult;
   }
 
-  UniquePtr<MutableCSSSelector> CSSSelectorParser::ConsumeComplexSelector(CSSTokenRange &range) noexcept
+  UniquePtr<MutableCSSSelector> CSSSelectorParser::ConsumeComplexSelector(CSSTokenRange &tokens) noexcept
   {
     auto HasPseudoElementForRightmostCompound = [](const MutableCSSSelector &selector) noexcept
     {
       return selector.Match() == SelectorMatch::PseudoElement;
     };
 
-    auto selector = ConsumeCompoundSelector(range);
+    auto selector = ConsumeCompoundSelector(tokens);
     if (selector == nullptr)
     {
       return nullptr;
@@ -725,13 +725,13 @@ namespace Krys::HTML
 
     while (true)
     {
-      auto combinator = ConsumeCombinator(range);
+      auto combinator = ConsumeCombinator(tokens);
       if (combinator == SelectorRelation::Compounding)
       {
         break;
       }
 
-      auto nextSelector = ConsumeCompoundSelector(range);
+      auto nextSelector = ConsumeCompoundSelector(tokens);
       if (nextSelector == nullptr)
       {
         return combinator == SelectorRelation::Descendant ? Krys::Move(selector) : nullptr;
@@ -759,15 +759,15 @@ namespace Krys::HTML
     return selector;
   }
 
-  UniquePtr<MutableCSSSelector> CSSSelectorParser::ConsumeNestedComplexSelector(CSSTokenRange &range) noexcept
+  UniquePtr<MutableCSSSelector> CSSSelectorParser::ConsumeNestedComplexSelector(CSSTokenRange &tokens) noexcept
   {
-    auto selector = ConsumeComplexSelector(range);
+    auto selector = ConsumeComplexSelector(tokens);
     if (selector != nullptr)
     {
       return selector;
     }
 
-    selector = ConsumeRelativeNestedSelector(range);
+    selector = ConsumeRelativeNestedSelector(tokens);
     if (selector != nullptr)
     {
       return selector;
@@ -776,15 +776,15 @@ namespace Krys::HTML
     return nullptr;
   }
 
-  UniquePtr<MutableCSSSelector> CSSSelectorParser::ConsumeRelativeScopeSelector(CSSTokenRange &range) noexcept
+  UniquePtr<MutableCSSSelector> CSSSelectorParser::ConsumeRelativeScopeSelector(CSSTokenRange &tokens) noexcept
   {
-    auto scopeCombinator = ConsumeCombinator(range);
+    auto scopeCombinator = ConsumeCombinator(tokens);
     if (scopeCombinator == SelectorRelation::Compounding)
     {
       scopeCombinator = SelectorRelation::Descendant;
     }
 
-    auto selector = ConsumeComplexSelector(range);
+    auto selector = ConsumeComplexSelector(tokens);
     if (selector == nullptr)
     {
       return nullptr;
@@ -806,9 +806,9 @@ namespace Krys::HTML
   }
 
   UniquePtr<MutableCSSSelector>
-    CSSSelectorParser::ConsumeRelativeNestedSelector(CSSTokenRange &range) noexcept
+    CSSSelectorParser::ConsumeRelativeNestedSelector(CSSTokenRange &tokens) noexcept
   {
-    auto scopeCombinator = ConsumeCombinator(range);
+    auto scopeCombinator = ConsumeCombinator(tokens);
 
     // Nesting should only work with ~ > + combinators in this function.
     // The descendant combinator is handled in another code path.
@@ -819,7 +819,7 @@ namespace Krys::HTML
       return nullptr;
     }
 
-    auto selector = ConsumeComplexSelector(range);
+    auto selector = ConsumeComplexSelector(tokens);
     if (selector == nullptr)
     {
       return nullptr;
@@ -871,10 +871,10 @@ namespace Krys::HTML
     return _stylesheet->DefaultNamespace();
   }
 
-  bool CSSSelectorParser::IsAtEndIgnoringWhitespace(CSSTokenRange range) const noexcept
+  bool CSSSelectorParser::IsAtEndIgnoringWhitespace(CSSTokenRange tokens) const noexcept
   {
-    range.DiscardWhitespace();
-    return range.IsAtEnd();
+    tokens.DiscardWhitespace();
+    return tokens.IsAtEnd();
   }
 
 #pragma endregion

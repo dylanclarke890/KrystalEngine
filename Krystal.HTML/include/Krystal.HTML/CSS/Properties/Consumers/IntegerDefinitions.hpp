@@ -25,19 +25,19 @@ namespace Krys::HTML
   {
     constexpr static CSSTokenType TokenType = CSSTokenType::Number;
 
-    KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(CSSTokenRange &range,
+    KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(CSSTokenRange &tokens,
                                                                  CSSPropertyParserState &,
                                                                  CSSCalcAllowedSymbols,
                                                                  CSSPropertyParserOptions options) noexcept
     {
-      assert(range.Peek().Type() == CSSTokenType::Number);
+      assert(tokens.Peek().Type() == CSSTokenType::Number);
 
-      if (range.Peek().NumericValueType() != NumericValueType::Integer)
+      if (tokens.Peek().NumericValueType() != NumericValueType::Integer)
       {
         return Null;
       }
 
-      auto rawValue = typename Primitive::Raw {IntegerUnit::Integer, range.Peek().NumericValue()};
+      auto rawValue = typename Primitive::Raw {IntegerUnit::Integer, tokens.Peek().NumericValue()};
 
       if constexpr (rawValue.Range.ClampOptions != RangeClampOptions::Default)
       {
@@ -49,8 +49,8 @@ namespace Krys::HTML
         return Null;
       }
 
-      range.Discard();
-      range.DiscardWhitespace();
+      tokens.Discard();
+      tokens.DiscardWhitespace();
 
       return rawValue;
     }

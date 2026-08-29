@@ -1450,9 +1450,9 @@ namespace Krys::HTML
     constexpr static auto Canonical = ResolutionUnit::Dppx;
     constexpr static auto Category = NumericTypeCategory::Resolution;
 
-    KRYS_NODISCARD consteval static bool IsValidRangeForCategory(CSSRange range) noexcept
+    KRYS_NODISCARD consteval static bool IsValidRangeForCategory(CSSRange tokens) noexcept
     {
-      return range.Min >= 0;
+      return tokens.Min >= 0;
     }
 
     KRYS_NODISCARD constexpr static Maybe<ResolutionUnit> Validate(CSSUnitType cssUnit) noexcept

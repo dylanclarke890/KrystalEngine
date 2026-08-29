@@ -167,14 +167,14 @@ namespace Krys::HTML
   {
     constexpr static CSSTokenType TokenType = CSSTokenType::Dimension;
 
-    KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(CSSTokenRange &range,
+    KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(CSSTokenRange &tokens,
                                                                  CSSPropertyParserState &state,
                                                                  CSSCalcAllowedSymbols,
                                                                  CSSPropertyParserOptions options) noexcept
     {
-      assert(range.Peek().Type() == CSSTokenType::Dimension);
+      assert(tokens.Peek().Type() == CSSTokenType::Dimension);
 
-      auto &token = range.Peek();
+      auto &token = tokens.Peek();
 
       auto validatedUnit = Validator::Validate(ParseCSSUnitType(token.Unit()), state, options);
       if (!validatedUnit)
@@ -194,8 +194,8 @@ namespace Krys::HTML
         return Null;
       }
 
-      range.Discard();
-      range.DiscardWhitespace();
+      tokens.Discard();
+      tokens.DiscardWhitespace();
 
       return rawValue;
     }
@@ -207,14 +207,14 @@ namespace Krys::HTML
   {
     constexpr static CSSTokenType TokenType = CSSTokenType::Percentage;
 
-    KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(CSSTokenRange &range,
+    KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(CSSTokenRange &tokens,
                                                                  CSSPropertyParserState &,
                                                                  CSSCalcAllowedSymbols,
                                                                  CSSPropertyParserOptions options) noexcept
     {
-      assert(range.Peek().Type() == CSSTokenType::Percentage);
+      assert(tokens.Peek().Type() == CSSTokenType::Percentage);
 
-      auto rawValue = typename Primitive::Raw {Unit, range.Peek().NumericValue()};
+      auto rawValue = typename Primitive::Raw {Unit, tokens.Peek().NumericValue()};
 
       if constexpr (Primitive::Raw::Range.ClampOptions != RangeClampOptions::Default)
       {
@@ -226,8 +226,8 @@ namespace Krys::HTML
         return Null;
       }
 
-      range.Discard();
-      range.DiscardWhitespace();
+      tokens.Discard();
+      tokens.DiscardWhitespace();
 
       return rawValue;
     }
@@ -239,14 +239,14 @@ namespace Krys::HTML
   {
     constexpr static CSSTokenType TokenType = CSSTokenType::Number;
 
-    KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(CSSTokenRange &range,
+    KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(CSSTokenRange &tokens,
                                                                  CSSPropertyParserState &,
                                                                  CSSCalcAllowedSymbols,
                                                                  CSSPropertyParserOptions options) noexcept
     {
-      assert(range.Peek().Type() == CSSTokenType::Number);
+      assert(tokens.Peek().Type() == CSSTokenType::Number);
 
-      auto rawValue = typename Primitive::Raw {NumberUnit::Number, range.Peek().NumericValue()};
+      auto rawValue = typename Primitive::Raw {NumberUnit::Number, tokens.Peek().NumericValue()};
 
       if constexpr (Primitive::Raw::Range.ClampOptions != RangeClampOptions::Default)
       {
@@ -258,8 +258,8 @@ namespace Krys::HTML
         return Null;
       }
 
-      range.Discard();
-      range.DiscardWhitespace();
+      tokens.Discard();
+      tokens.DiscardWhitespace();
 
       return rawValue;
     }
@@ -271,14 +271,14 @@ namespace Krys::HTML
   {
     constexpr static CSSTokenType TokenType = CSSTokenType::Number;
 
-    KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(CSSTokenRange &range,
+    KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(CSSTokenRange &tokens,
                                                                  CSSPropertyParserState &state,
                                                                  CSSCalcAllowedSymbols,
                                                                  CSSPropertyParserOptions options) noexcept
     {
-      assert(range.Peek().Type() == CSSTokenType::Number);
+      assert(tokens.Peek().Type() == CSSTokenType::Number);
 
-      auto numericValue = range.Peek().NumericValue();
+      auto numericValue = tokens.Peek().NumericValue();
       if (!Validator::ShouldAcceptUnitlessValue(numericValue, state, options))
       {
         return Null;
@@ -296,8 +296,8 @@ namespace Krys::HTML
         return Null;
       }
 
-      range.Discard();
-      range.DiscardWhitespace();
+      tokens.Discard();
+      tokens.DiscardWhitespace();
 
       return rawValue;
     }
@@ -309,18 +309,18 @@ namespace Krys::HTML
   {
     constexpr static CSSTokenType TokenType = CSSTokenType::Function;
 
-    KRYS_NODISCARD static Maybe<typename Primitive::Calc> Consume(CSSTokenRange &range,
+    KRYS_NODISCARD static Maybe<typename Primitive::Calc> Consume(CSSTokenRange &tokens,
                                                                   CSSPropertyParserState &state,
                                                                   CSSCalcAllowedSymbols symbolsAllowed,
                                                                   CSSPropertyParserOptions options) noexcept
     {
-      assert(range.Peek().Type() == CSSTokenType::Function);
+      assert(tokens.Peek().Type() == CSSTokenType::Function);
 
-      auto rangeCopy = range;
+      auto rangeCopy = tokens;
       if (auto value = CSSCalcValue::Parse(rangeCopy, state, Primitive::Category, Primitive::Range,
                                            Krys::Move(symbolsAllowed), options))
       {
-        range = rangeCopy;
+        tokens = rangeCopy;
         // TODO: fix this return type
         return Null;
       }
@@ -334,15 +334,15 @@ namespace Krys::HTML
   {
     constexpr static CSSTokenType TokenType = CSSTokenType::Ident;
 
-    KRYS_NODISCARD static Maybe<T> Consume(CSSTokenRange &range, CSSPropertyParserState &,
+    KRYS_NODISCARD static Maybe<T> Consume(CSSTokenRange &tokens, CSSPropertyParserState &,
                                            CSSCalcAllowedSymbols, CSSPropertyParserOptions) noexcept
     {
-      assert(range.Peek().Type() == CSSTokenType::Ident);
+      assert(tokens.Peek().Type() == CSSTokenType::Ident);
 
-      if (range.Peek().ValueId() == T::value)
+      if (tokens.Peek().ValueId() == T::value)
       {
-        range.Discard();
-        range.DiscardWhitespace();
+        tokens.Discard();
+        tokens.DiscardWhitespace();
 
         return T {};
       }

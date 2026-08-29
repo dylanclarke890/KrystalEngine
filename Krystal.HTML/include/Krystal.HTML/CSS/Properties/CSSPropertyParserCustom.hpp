@@ -90,7 +90,7 @@ namespace Krys::HTML
   };
 
   KRYS_NODISCARD inline Maybe<BorderShorthandComponents>
-    ConsumeBorderShorthandComponents(CSSTokenRange &range, CSSPropertyParserState &state) noexcept
+    ConsumeBorderShorthandComponents(CSSTokenRange &tokens, CSSPropertyParserState &state) noexcept
   {
     BorderShorthandComponents components {};
 
@@ -99,7 +99,7 @@ namespace Krys::HTML
       if (!components.Width)
       {
         components.Width =
-          CSSPropertyParsing::ParseStylePropertyLonghand(range, CSSPropertyId::BorderLeftWidth, state);
+          CSSPropertyParsing::ParseStylePropertyLonghand(tokens, CSSPropertyId::BorderLeftWidth, state);
 
         if (components.Width)
         {
@@ -110,7 +110,7 @@ namespace Krys::HTML
       if (!components.Style)
       {
         components.Style =
-          CSSPropertyParsing::ParseStylePropertyLonghand(range, CSSPropertyId::BorderLeftStyle, state);
+          CSSPropertyParsing::ParseStylePropertyLonghand(tokens, CSSPropertyId::BorderLeftStyle, state);
 
         if (components.Style)
         {
@@ -121,7 +121,7 @@ namespace Krys::HTML
       if (!components.Color)
       {
         components.Color =
-          CSSPropertyParsing::ParseStylePropertyLonghand(range, CSSPropertyId::BorderLeftColor, state);
+          CSSPropertyParsing::ParseStylePropertyLonghand(tokens, CSSPropertyId::BorderLeftColor, state);
 
         if (components.Color)
         {
@@ -137,7 +137,7 @@ namespace Krys::HTML
       return {};
     }
 
-    if (!range.IsAtEnd())
+    if (!tokens.IsAtEnd())
     {
       return {};
     }
@@ -434,25 +434,25 @@ namespace Krys::HTML
       return true;
     }
 
-    KRYS_NODISCARD static bool ConsumeBorderSpacingShorthand(CSSTokenRange &range,
+    KRYS_NODISCARD static bool ConsumeBorderSpacingShorthand(CSSTokenRange &tokens,
                                                              CSSPropertyParserState &state,
                                                              const CSSPropertyShorthand &,
                                                              CSSPropertyParserResult &result)
     {
       RefPtr horizontalSpacing =
-        CSSPrimitiveValueResolver<Length<NonNegative>>::ConsumeAndResolve(range, state);
+        CSSPrimitiveValueResolver<Length<NonNegative>>::ConsumeAndResolve(tokens, state);
       if (!horizontalSpacing)
       {
         return false;
       }
 
       RefPtr verticalSpacing = horizontalSpacing;
-      if (!range.IsAtEnd())
+      if (!tokens.IsAtEnd())
       {
-        verticalSpacing = CSSPrimitiveValueResolver<Length<NonNegative>>::ConsumeAndResolve(range, state);
+        verticalSpacing = CSSPrimitiveValueResolver<Length<NonNegative>>::ConsumeAndResolve(tokens, state);
       }
 
-      if (!verticalSpacing || !range.IsAtEnd())
+      if (!verticalSpacing || !tokens.IsAtEnd())
       {
         return false;
       }
@@ -1373,13 +1373,13 @@ namespace Krys::HTML
     {
       assert(shorthand.Size() == 6);
 
-      auto ConsumeImplicitGridAutoFlow = [](CSSTokenRange &range,
+      auto ConsumeImplicitGridAutoFlow = [](CSSTokenRange &tokens,
                                             CSSValueId flowDirection) -> RefPtr<CSSValue>
       {
         // [ auto-flow && dense? ]
-        bool autoFlow = ConsumeIdentRaw<CSSValueId::AutoFlow>(range).has_value();
-        bool dense = ConsumeIdentRaw<CSSValueId::Dense>(range).has_value();
-        if (!autoFlow && (!dense || !ConsumeIdentRaw<CSSValueId::AutoFlow>(range)))
+        bool autoFlow = ConsumeIdentRaw<CSSValueId::AutoFlow>(tokens).has_value();
+        bool dense = ConsumeIdentRaw<CSSValueId::Dense>(tokens).has_value();
+        if (!autoFlow && (!dense || !ConsumeIdentRaw<CSSValueId::AutoFlow>(tokens)))
         {
           return nullptr;
         }
@@ -1631,7 +1631,7 @@ namespace Krys::HTML
         return false;
       }
 
-      // If there are no more tokens, that prop2 should use re-use the original range. This is the equivalent
+      // If there are no more tokens, that prop2 should use re-use the original tokens. This is the equivalent
       // of copying and validating prop1.
       if (tokens.IsAtEnd())
       {

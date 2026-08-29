@@ -13,7 +13,7 @@ namespace Krys::HTML
     CSSTokenRange _savedRange;
 
   public:
-    CSSTokenRangeGuard(CSSTokenRange &range) noexcept : _range {range}, _savedRange {range}
+    CSSTokenRangeGuard(CSSTokenRange &tokens) noexcept : _range {tokens}, _savedRange {tokens}
     {
     }
 
