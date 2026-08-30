@@ -53,13 +53,13 @@ namespace Krys
   template <typename T, typename V>
   KRYS_NODISCARD constexpr bool HoldsAlternative(const V &v) noexcept
   {
-    return HoldsAlternativeDispatcher<V>::template holdsAlternative<T>(v);
+    return HoldsAlternativeDispatcher<V>::template HoldsAlternative<T>(v);
   }
 
   template <size_t I, typename V>
   KRYS_NODISCARD constexpr bool HoldsAlternative(const V &v) noexcept
   {
-    return HoldsAlternativeDispatcher<V>::template holdsAlternative<I>(v);
+    return HoldsAlternativeDispatcher<V>::template HoldsAlternative<I>(v);
   }
 
   /// @brief Utility macro for wrapping a variant in a struct
@@ -84,7 +84,7 @@ namespace Krys
   template <typename T>                                                                                      \
   KRYS_NODISCARD bool HoldsAlternative() const noexcept                                                      \
   {                                                                                                          \
-    return Krys::HoldsAlternative<T>(value);                                                                 \
+    return Krys::HoldsAlternative<T>(name);                                                                 \
   }                                                                                                          \
                                                                                                              \
   template <typename T>                                                                                      \

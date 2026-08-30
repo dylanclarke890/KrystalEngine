@@ -169,20 +169,28 @@ namespace Krys::HTML
     // MARK: Variant-Like Conformance
 
     template <typename T>
-    bool holdsAlternative() const
+    KRYS_NODISCARD bool HoldsAlternative() const noexcept
     {
       if constexpr (std::same_as<T, NumericType>)
+      {
         return isCalc() || isRaw();
+      }
       else if constexpr (std::same_as<T, Calc>)
+      {
         return isCalc();
+      }
       else if constexpr (std::same_as<T, Raw>)
+      {
         return isRaw();
+      }
       else if constexpr (ValidKeywordForList<T, Keywords>)
+      {
         return isKeyword<T>();
+      }
     }
 
     template <typename... F>
-    decltype(auto) SwitchOn(F &&...f) const
+    KRYS_NODISCARD decltype(auto) SwitchOn(F &&...f) const noexcept
     {
       return m_data.Visit(Krys::CreateVisitor(std::forward<F>(f)...));
     }
@@ -229,5 +237,22 @@ namespace Krys::HTML
     }
 
     Data m_data;
+  };
+}
+
+namespace Krys
+{
+  template <typename N, typename... Ks>
+  struct MarkableTraits<Krys::HTML::PrimitiveNumericOrKeyword<N, Ks...>>
+  {
+    static bool IsEmptyValue(const Krys::HTML::PrimitiveNumericOrKeyword<N, Ks...> &value)
+    {
+      return value.isEmpty();
+    }
+
+    static Krys::HTML::PrimitiveNumericOrKeyword<N, Ks...> EmptyValue()
+    {
+      return {Krys::HTML::PrimitiveDataEmptyToken {}};
+    }
   };
 }

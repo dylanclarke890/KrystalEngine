@@ -13,6 +13,8 @@ namespace Krys::HTML
   template <CSSRange nR = All, CSSRange pR = nR, typename V = double>
   struct NumberOrPercentage
   {
+    friend struct MarkableTraits<NumberOrPercentage>;
+
     using Number = Number<nR, V>;
     using Percentage = Percentage<pR, V>;
 
@@ -26,7 +28,7 @@ namespace Krys::HTML
   public:
     constexpr NumberOrPercentage(Variant<Number, Percentage> &&value) noexcept
     {
-      SwitchOn(Krys::Move(value), [this](auto &&alternative) { this->_value = Krys::Move(alternative); });
+      Krys::SwitchOn(Krys::Move(value), [this](auto &&alternative) { this->_value = Krys::Move(alternative); });
     }
 
     constexpr NumberOrPercentage(typename Number::Raw value) noexcept : _value {Number {Krys::Move(value)}}

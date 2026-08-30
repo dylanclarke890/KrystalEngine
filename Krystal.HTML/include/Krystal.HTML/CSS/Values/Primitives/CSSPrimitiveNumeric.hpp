@@ -24,6 +24,9 @@ namespace Krys::HTML
   template <NumericRaw RawType>
   struct PrimitiveNumeric
   {
+    template <typename>
+    friend struct PrimitiveDataMarkableTraits;
+
     template <Numeric, PrimitiveKeyword...>
     friend struct PrimitiveNumericOrKeyword;
 
@@ -303,13 +306,16 @@ namespace Krys::HTML
   {
     using Base = PrimitiveNumeric<AnglePercentageRaw<R, V>>;
     using Base::Base;
+    using MarkableTraits = PrimitiveDataMarkableTraits<AnglePercentage<R, V>>;
   };
+
 
   template <CSSRange R = All, typename V = float>
   struct LengthPercentage : PrimitiveNumeric<LengthPercentageRaw<R, V>>
   {
     using Base = PrimitiveNumeric<LengthPercentageRaw<R, V>>;
     using Base::Base;
+    using MarkableTraits = PrimitiveDataMarkableTraits<LengthPercentage<R, V>>;
   };
 
 #pragma endregion
