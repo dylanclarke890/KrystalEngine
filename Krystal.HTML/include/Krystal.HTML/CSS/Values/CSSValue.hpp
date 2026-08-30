@@ -66,6 +66,11 @@ namespace Krys::HTML
 
 #pragma region Type Checks
 
+    KRYS_NODISCARD bool IsCSSAppleColorFilterValue() const noexcept
+    {
+      return _type == CSSValueType::AppleColorFilter;
+    }
+
     KRYS_NODISCARD bool IsCSSAttrValue() const noexcept
     {
       return _type == CSSValueType::Attr;
@@ -109,6 +114,11 @@ namespace Krys::HTML
     KRYS_NODISCARD bool IsCSSCursorImageValue() const noexcept
     {
       return _type == CSSValueType::CursorImage;
+    }
+
+    KRYS_NODISCARD bool IsCSSFilterValue() const noexcept
+    {
+      return _type == CSSValueType::Filter;
     }
 
     KRYS_NODISCARD bool IsCSSGridAutoRepeatValue() const noexcept

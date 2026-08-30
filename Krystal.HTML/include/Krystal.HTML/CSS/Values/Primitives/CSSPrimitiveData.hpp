@@ -29,12 +29,28 @@ namespace Krys::HTML
     && (SameType<typename ChildPrimitiveData::Index,
                  typename ParentPrimitiveData::Index::NumericType::Base::Index>);
 
-  // MARK: - Index
+  // MARK: - Markable
 
   struct PrimitiveDataEmptyToken
   {
     constexpr bool operator==(const PrimitiveDataEmptyToken &) const = default;
   };
+
+  template <typename T>
+  struct PrimitiveDataMarkableTraits
+  {
+    KRYS_NODISCARD constexpr static bool IsEmptyValue(const T &value) noexcept
+    {
+      return value.IsEmpty();
+    }
+
+    KRYS_NODISCARD constexpr static T EmptyValue() noexcept
+    {
+      return T(PrimitiveDataEmptyToken {});
+    }
+  };
+
+  // MARK: - Index
 
   template <Numeric N, PrimitiveKeyword... Ks>
   struct PrimitiveDataIndex
@@ -100,28 +116,28 @@ namespace Krys::HTML
       return *this;
     }
 
-    constexpr explicit PrimitiveDataIndex(Storage storage) : storage {storage}
+    constexpr explicit PrimitiveDataIndex(Storage storage) noexcept : storage {storage}
     {
     }
 
-    constexpr PrimitiveDataIndex(UnitType unit) : storage {IndexStorageForUnit(unit)}
+    constexpr PrimitiveDataIndex(UnitType unit) noexcept : storage {IndexStorageForUnit(unit)}
     {
     }
 
-    constexpr PrimitiveDataIndex(const Raw &raw) : storage {IndexStorageForUnit(raw.Unit)}
+    constexpr PrimitiveDataIndex(const Raw &raw) noexcept : storage {IndexStorageForUnit(raw.Unit)}
     {
     }
 
-    constexpr PrimitiveDataIndex(const Calc &) : storage {IndexStorageForCalc}
+    constexpr PrimitiveDataIndex(const Calc &) noexcept : storage {IndexStorageForCalc}
     {
     }
 
-    constexpr PrimitiveDataIndex(ValidKeywordForList<Keywords> auto keyword)
+    constexpr PrimitiveDataIndex(ValidKeywordForList<Keywords> auto keyword) noexcept
         : storage {IndexStorageForKeyword(keyword)}
     {
     }
 
-    constexpr PrimitiveDataIndex(PrimitiveDataEmptyToken) : storage {IndexStorageForEmpty}
+    constexpr PrimitiveDataIndex(PrimitiveDataEmptyToken) noexcept : storage {IndexStorageForEmpty}
     {
     }
 
@@ -131,7 +147,7 @@ namespace Krys::HTML
 
     // MARK: Raw Unit
 
-    constexpr typename NumericType::Raw::UnitType Unit() const
+    constexpr typename NumericType::Raw::UnitType Unit() const noexcept
     {
       assert(IsRaw());
       return static_cast<UnitType>(storage);
@@ -140,7 +156,7 @@ namespace Krys::HTML
     // MARK: Keyword
 
     template <typename F>
-    constexpr decltype(auto) VisitKeyword(F &&f) const
+    constexpr decltype(auto) VisitKeyword(F &&f) const noexcept
     {
       assert(storage <= IndexStorageForLastKeyword);
       return Keywords::VisitKeywordAtOffset(storage - IndexStorageForFirstKeyword, std::forward<F>(f));
@@ -148,38 +164,38 @@ namespace Krys::HTML
 
     // MARK: Predicates
 
-    constexpr bool IsRaw() const
+    constexpr bool IsRaw() const noexcept
     {
       return storage >= IndexStorageForFirstRaw && storage <= IndexStorageForLastRaw;
     }
 
-    constexpr bool IsCalc() const
+    constexpr bool IsCalc() const noexcept
     {
       return storage == IndexStorageForCalc;
     }
 
-    constexpr bool IsKeyword(ValidKeywordForList<Keywords> auto keyword) const
+    constexpr bool IsKeyword(ValidKeywordForList<Keywords> auto keyword) const noexcept
     {
       return storage == IndexStorageForKeyword(keyword);
     }
 
-    constexpr bool IsEmpty() const
+    constexpr bool IsEmpty() const noexcept
     {
       return storage == IndexStorageForEmpty;
     }
 
-    constexpr bool IsMovedFrom() const
+    constexpr bool IsMovedFrom() const noexcept
     {
       return storage == IndexStorageForMovedFrom;
     }
 
-    void SetAsMovedFrom()
+    void SetAsMovedFrom() noexcept
     {
       storage = IndexStorageForMovedFrom;
     }
 
-    constexpr bool operator==(const PrimitiveDataIndex &) const = default;
-    constexpr bool operator==(Storage other) const
+    constexpr bool operator==(const PrimitiveDataIndex &) const noexcept = default;
+    constexpr bool operator==(Storage other) const noexcept
     {
       return storage == other;
     }

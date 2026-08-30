@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Types/Variant.hpp"
 #include <utility>
 
 namespace Krys
@@ -107,27 +108,25 @@ namespace Krys
   // `AsVariant` is used to allow subclasses of Variant to work with `SwitchOn`.
 
   template <typename... Ts>
-  KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr Variant<Ts...> &AsVariant(Variant<Ts...> &v) noexcept
+  KRYS_ALWAYS_INLINE constexpr Variant<Ts...> &AsVariant(Variant<Ts...> &v) noexcept
   {
     return v;
   }
 
   template <typename... Ts>
-  KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr const Variant<Ts...> &
-    AsVariant(const Variant<Ts...> &v) noexcept
+  KRYS_ALWAYS_INLINE constexpr const Variant<Ts...> &AsVariant(const Variant<Ts...> &v) noexcept
   {
     return v;
   }
 
   template <typename... Ts>
-  KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr Variant<Ts...> &&AsVariant(Variant<Ts...> &&v) noexcept
+  KRYS_ALWAYS_INLINE constexpr Variant<Ts...> &&AsVariant(Variant<Ts...> &&v) noexcept
   {
     return std::move(v);
   }
 
   template <typename... Ts>
-  KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr const Variant<Ts...> &&
-    AsVariant(const Variant<Ts...> &&v) noexcept
+  KRYS_ALWAYS_INLINE constexpr const Variant<Ts...> &&AsVariant(const Variant<Ts...> &&v) noexcept
   {
     return std::move(v);
   }

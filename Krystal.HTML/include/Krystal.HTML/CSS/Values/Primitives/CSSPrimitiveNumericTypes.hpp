@@ -17,40 +17,52 @@ namespace Krys::HTML
     using Percentage = Percentage<pR, V>;
 
   private:
-    Variant<Number, Percentage> _value;
+    Variant<PrimitiveDataEmptyToken, Number, Percentage> _value;
+
+    constexpr explicit NumberOrPercentage(PrimitiveDataEmptyToken token) noexcept : _value {Krys::Move(token)}
+    {
+    }
 
   public:
-    NumberOrPercentage(Variant<Number, Percentage> &&value) noexcept
+    constexpr NumberOrPercentage(Variant<Number, Percentage> &&value) noexcept
     {
       SwitchOn(Krys::Move(value), [this](auto &&alternative) { this->_value = Krys::Move(alternative); });
     }
 
-    NumberOrPercentage(typename Number::Raw value) noexcept : _value {Number {Krys::Move(value)}}
+    constexpr NumberOrPercentage(typename Number::Raw value) noexcept : _value {Number {Krys::Move(value)}}
     {
     }
 
-    NumberOrPercentage(Number value) noexcept : _value {Krys::Move(value)}
+    constexpr NumberOrPercentage(Number value) noexcept : _value {Krys::Move(value)}
     {
     }
 
-    NumberOrPercentage(typename Percentage::Raw value) noexcept : _value {Percentage {Krys::Move(value)}}
+    constexpr NumberOrPercentage(typename Percentage::Raw value) noexcept
+        : _value {Percentage {Krys::Move(value)}}
     {
     }
 
-    NumberOrPercentage(Percentage value) noexcept : _value {Krys::Move(value)}
+    constexpr NumberOrPercentage(Percentage value) noexcept : _value {Krys::Move(value)}
     {
     }
 
-    bool operator==(const NumberOrPercentage &) const noexcept = default;
+    constexpr bool operator==(const NumberOrPercentage &) const noexcept = default;
 
     template <typename... F>
-    KRYS_NODISCARD decltype(auto) SwitchOn(F &&...f) const noexcept
+    KRYS_NODISCARD constexpr decltype(auto) SwitchOn(F &&...f) const noexcept
     {
       auto visitor = CreateVisitor(std::forward<F>(f)...);
       using ResultType = decltype(visitor(std::declval<Number>()));
 
-      return SwitchOn([&](const Number &number) -> ResultType { return visitor(number); },
+      return SwitchOn([](PrimitiveDataEmptyToken) -> ResultType { assert(false); },
+                      [&](const Number &number) -> ResultType { return visitor(number); },
                       [&](const Percentage &percentage) -> ResultType { return visitor(percentage); });
+    }
+
+  private:
+    KRYS_NODISCARD constexpr bool IsEmpty() const noexcept
+    {
+      return std::holds_alternative<PrimitiveDataEmptyToken>(_value);
     }
   };
 
@@ -61,42 +73,54 @@ namespace Krys::HTML
     using Percentage = Percentage<pR, V>;
 
   private:
-    Variant<Number, Percentage> _value;
+    Variant<PrimitiveDataEmptyToken, Number, Percentage> _value;
+
+    constexpr explicit NumberOrPercentageResolvedToNumber(PrimitiveDataEmptyToken token) noexcept
+        : _value {Krys::Move(token)}
+    {
+    }
 
   public:
-    NumberOrPercentageResolvedToNumber(Variant<Number, Percentage> &&value) noexcept
+    constexpr NumberOrPercentageResolvedToNumber(Variant<Number, Percentage> &&value) noexcept
     {
       SwitchOn(Krys::Move(value), [this](auto &&alternative) { this->_value = Krys::Move(alternative); });
     }
 
-    NumberOrPercentageResolvedToNumber(typename Number::Raw value) noexcept
+    constexpr NumberOrPercentageResolvedToNumber(typename Number::Raw value) noexcept
         : _value {Number {Krys::Move(value)}}
     {
     }
 
-    NumberOrPercentageResolvedToNumber(Number value) noexcept : _value {Krys::Move(value)}
+    constexpr NumberOrPercentageResolvedToNumber(Number value) noexcept : _value {Krys::Move(value)}
     {
     }
 
-    NumberOrPercentageResolvedToNumber(typename Percentage::Raw value) noexcept
+    constexpr NumberOrPercentageResolvedToNumber(typename Percentage::Raw value) noexcept
         : _value {Percentage {Krys::Move(value)}}
     {
     }
 
-    NumberOrPercentageResolvedToNumber(Percentage value) noexcept : _value {Krys::Move(value)}
+    constexpr NumberOrPercentageResolvedToNumber(Percentage value) noexcept : _value {Krys::Move(value)}
     {
     }
 
-    bool operator==(const NumberOrPercentageResolvedToNumber &) const noexcept = default;
+    constexpr bool operator==(const NumberOrPercentageResolvedToNumber &) const noexcept = default;
 
     template <typename... F>
-    KRYS_NODISCARD decltype(auto) SwitchOn(F &&...f) const noexcept
+    KRYS_NODISCARD constexpr decltype(auto) SwitchOn(F &&...f) const noexcept
     {
       auto visitor = CreateVisitor(std::forward<F>(f)...);
       using ResultType = decltype(visitor(std::declval<Number>()));
 
-      return SwitchOn([&](const Number &number) -> ResultType { return visitor(number); },
+      return SwitchOn([](PrimitiveDataEmptyToken) -> ResultType { assert(false); },
+                      [&](const Number &number) -> ResultType { return visitor(number); },
                       [&](const Percentage &percentage) -> ResultType { return visitor(percentage); });
+    }
+
+  private:
+    KRYS_NODISCARD constexpr bool IsEmpty() const noexcept
+    {
+      return std::holds_alternative<PrimitiveDataEmptyToken>(_value);
     }
   };
 
@@ -105,4 +129,39 @@ namespace Krys::HTML
 
   template <auto nR, auto pR, typename V>
   constexpr auto TreatAsVariantLike<NumberOrPercentageResolvedToNumber<nR, pR, V>> = true;
+}
+
+namespace Krys
+{
+  template <Krys::HTML::CSSRange nR, Krys::HTML::CSSRange pR, typename V>
+  struct MarkableTraits<Krys::HTML::NumberOrPercentage<nR, pR, V>>
+  {
+    KRYS_NODISCARD constexpr static bool
+      IsEmptyValue(const Krys::HTML::NumberOrPercentage<nR, pR, V> &value) noexcept
+    {
+      return value.IsEmpty();
+    }
+
+    KRYS_NODISCARD constexpr static Krys::HTML::NumberOrPercentage<nR, pR, V> EmptyValue() noexcept
+    {
+      return Krys::HTML::NumberOrPercentage<nR, pR, V>(Krys::HTML::PrimitiveDataEmptyToken());
+    }
+  };
+
+  template <Krys::HTML::CSSRange nR, Krys::HTML::CSSRange pR, typename V>
+  struct MarkableTraits<Krys::HTML::NumberOrPercentageResolvedToNumber<nR, pR, V>>
+  {
+    KRYS_NODISCARD constexpr static bool
+      IsEmptyValue(const Krys::HTML::NumberOrPercentageResolvedToNumber<nR, pR, V> &value) noexcept
+    {
+      return value.IsEmpty();
+    }
+
+    KRYS_NODISCARD constexpr static Krys::HTML::NumberOrPercentageResolvedToNumber<nR, pR, V>
+      EmptyValue() noexcept
+    {
+      return Krys::HTML::NumberOrPercentageResolvedToNumber<nR, pR, V>(Krys::HTML::PrimitiveDataEmptyToken());
+    }
+  };
+
 }

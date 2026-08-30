@@ -257,7 +257,7 @@ namespace Krys::HTML
 /// @brief Defines an empty-like conformance for a type.
 #define DEFINE_EMPTY_LIKE_CONFORMANCE(T)                                                                     \
   template <>                                                                                                \
-  constexpr bool TreatAsEmptyLike<T> = true;
+  constexpr bool ::Krys::HTML::TreatAsEmptyLike<T> = true;
 
   template <typename T>
   constexpr bool TreatAsOptionalLike<Maybe<T>> = true;

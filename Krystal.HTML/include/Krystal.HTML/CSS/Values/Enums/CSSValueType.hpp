@@ -7,6 +7,7 @@ namespace Krys::HTML
   enum class CSSValueType : uint8
   {
     Invalid = 0,
+    AppleColorFilter,
     Attr,
     BackgroundRepeat,
     BorderImageSlice,
@@ -21,6 +22,7 @@ namespace Krys::HTML
     GridLine,
     GridLineNames,
     GridTemplateAreas,
+    Filter,
     Function,
     OffsetRotate,
     Position,
@@ -44,4 +46,4 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSValueType, 35uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSValueType, 37uz);

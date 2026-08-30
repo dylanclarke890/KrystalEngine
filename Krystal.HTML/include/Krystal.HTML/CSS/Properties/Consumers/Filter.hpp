@@ -6,12 +6,11 @@
 
 namespace Krys::HTML
 {
+  struct AppleColorFilter;
   class CSSTokenRange;
   class CSSValue;
   struct CSSPropertyParserState;
-  struct CSSFilter;
-  struct CSSAppleColorFilter;
-  struct StyleFilter;
+  struct Filter;
 
   namespace CSSPropertyParserHelpers
   {
@@ -26,11 +25,11 @@ namespace Krys::HTML
                                                             CSSPropertyParserState &state) noexcept;
 
     // MARK: <'filter'> consuming (unresolved)
-    KRYS_NODISCARD Maybe<CSSFilter> ConsumeUnresolvedFilter(CSSTokenRange &tokens,
-                                                            CSSPropertyParserState &state) noexcept;
+    KRYS_NODISCARD Maybe<Filter> ConsumeUnresolvedFilter(CSSTokenRange &tokens,
+                                                         CSSPropertyParserState &state) noexcept;
 
     // MARK: <'apple-color-filter'> consuming (unresolved)
-    KRYS_NODISCARD Maybe<CSSAppleColorFilter>
+    KRYS_NODISCARD Maybe<AppleColorFilter>
       ConsumeUnresolvedAppleColorFilter(CSSTokenRange &tokens, CSSPropertyParserState &state) noexcept;
 
     // MARK: <'filter'> parsing (raw)

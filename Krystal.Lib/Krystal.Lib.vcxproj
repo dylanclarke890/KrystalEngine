@@ -221,6 +221,7 @@
     <ClInclude Include="include\Krystal.Lib\Events\EventManager.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Hash.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Map.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\Markable.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Maybe.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\NTTPMaybe.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\NTTPString.hpp" />
