@@ -154,6 +154,21 @@ namespace Krys::HTML
       return !_value.Number;
     }
 
+    KRYS_NODISCARD Maybe<bool> IsNegative() const noexcept
+    {
+      if (IsCalculated())
+      {
+        return Null;
+      }
+
+      return _value.Number < 0.0;
+    }
+
+    KRYS_NODISCARD bool IsFlex() const noexcept
+    {
+      return _unit == CSSUnitType::fr;
+    }
+
     KRYS_NODISCARD constexpr static bool IsFontIndependentLength(CSSUnitType type) noexcept
     {
       return type == CSSUnitType::px || type == CSSUnitType::cm || type == CSSUnitType::mm
@@ -214,6 +229,35 @@ namespace Krys::HTML
       return ClampTo<T>(DoubleValueNoConversionDataRequired(targetUnit));
     }
 
+    template <typename T = double>
+    KRYS_NODISCARD Maybe<T> ResolveAsNumberIfNotCalculated() const noexcept
+    {
+      if (IsCalculated())
+      {
+        return Null;
+      }
+
+      return _value.Number;
+    }
+
+    template <typename T = int64>
+    KRYS_NODISCARD Maybe<T> ResolveAsIntegerIfNotCalculated() const noexcept
+    {
+      if (IsCalculated())
+      {
+        return Null;
+      }
+
+      return static_cast<T>(_value.Number);
+    }
+
+    template <typename T = double>
+    KRYS_NODISCARD T ResolveAsPercentageNoConversionDataRequired() const noexcept
+    {
+      assert(IsPercentage());
+      return ValueNoConversionDataRequired<T>();
+    }
+
     KRYS_NODISCARD double DoubleValue(CSSUnitType targetUnit,
                                       const CSSToLengthConversionData &) const noexcept;
 
@@ -259,24 +303,6 @@ namespace Krys::HTML
     {
       assert(IsCustomIdent());
       return *_value.String;
-    }
-
-    template <typename T = double>
-    KRYS_NODISCARD Maybe<T> ResolveAsNumberIfNotCalculated() const noexcept
-    {
-      if (IsCalculated())
-      {
-        return Null;
-      }
-
-      return _value.Number;
-    }
-
-    template <typename T = double>
-    KRYS_NODISCARD T ResolveAsPercentageNoConversionDataRequired() const noexcept
-    {
-      assert(IsPercentage());
-      return ValueNoConversionDataRequired<T>();
     }
   };
 

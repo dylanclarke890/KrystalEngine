@@ -59,3 +59,24 @@ namespace Krys::HTML
     KRYS_NODISCARD bool Equals(const CSSPositionYValue &other) const noexcept;
   };
 }
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::CSSPositionValue)
+  KRYS_NODISCARD static bool IsType(const Krys::HTML::CSSValue &value) noexcept
+  {
+    return value.IsCSSPositionValue();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::CSSPositionXValue)
+  KRYS_NODISCARD static bool IsType(const Krys::HTML::CSSValue &value) noexcept
+  {
+    return value.IsCSSPositionXValue();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::CSSPositionYValue)
+  KRYS_NODISCARD static bool IsType(const Krys::HTML::CSSValue &value) noexcept
+  {
+    return value.IsCSSPositionYValue();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

@@ -63,6 +63,7 @@
 #include "Krystal.HTML/CSS/Properties/Consumers/WillChange.hpp"
 #include "Krystal.HTML/CSS/Properties/CSSFontVariantLigaturesParser.hpp"
 #include "Krystal.HTML/CSS/Properties/CSSFontVariantNumericParser.hpp"
+#include "Krystal.HTML/CSS/Properties/CSSPropertyParser.hpp"
 #include "Krystal.HTML/CSS/Properties/CSSPropertyParserResult.hpp"
 #include "Krystal.HTML/CSS/Properties/CSSPropertyParserState.hpp"
 #include "Krystal.HTML/CSS/Properties/CSSPropertyShorthand.hpp"
@@ -77,6 +78,9 @@
 #include "Krystal.HTML/CSS/Values/CSSValueList.hpp"
 #include "Krystal.HTML/CSS/Values/CSSValuePair.hpp"
 #include "Krystal.HTML/CSS/Values/CSSValueTypes.hpp"
+#include "Krystal.HTML/CSS/Values/Grid/CSSGridLineNamesValue.hpp"
+#include "Krystal.HTML/CSS/Values/Grid/CSSGridNamedAreaMap.hpp"
+#include "Krystal.HTML/CSS/Values/Grid/CSSGridTemplateAreasValue.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
 #include "Krystal.Lib/ZippedRange.hpp"
 
@@ -1308,15 +1312,15 @@ namespace Krys::HTML
           else
           {
             SmallList<CSSOMString> combinedLineNames;
-            combinedLineNames.push_back(previousLineNames->names());
-            combinedLineNames.push_back(lineNames->names());
+            combinedLineNames.append(previousLineNames->Names().begin(), previousLineNames->Names().end());
+            combinedLineNames.append(lineNames->Names().begin(), lineNames->Names().end());
             templateRows.back() = CSSGridLineNamesValue::Create(combinedLineNames);
           }
         }
 
         // Handle a template-area's row.
         auto row = ConsumeUnresolvedGridTemplateAreasRow(tokens, state);
-        if (!row || !addRow(gridAreaMap, *row))
+        if (!row || !AddRow(gridAreaMap, *row))
         {
           return false;
         }
@@ -1335,7 +1339,7 @@ namespace Krys::HTML
         lineNames = ConsumeGridLineNames(tokens, state);
         if (lineNames)
         {
-          templateRows.push_back(*lineNames);
+          templateRows.push_back(Krys::Move(lineNames));
         }
       } while (!tokens.IsAtEnd()
                && !(tokens.Peek().Type() == CSSTokenType::Delim && tokens.Peek().IdentCodePoints() == u8"/"));

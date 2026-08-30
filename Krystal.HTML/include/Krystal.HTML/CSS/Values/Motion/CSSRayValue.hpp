@@ -11,3 +11,10 @@ namespace Krys::HTML
     KRYS_NODISCARD static Ref<CSSRayValue> Create(RayFunction ray) noexcept;
   };
 }
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::CSSRayValue)
+  KRYS_NODISCARD static bool IsType(const Krys::HTML::CSSValue &value) noexcept
+  {
+    return value.IsCSSRayValue();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

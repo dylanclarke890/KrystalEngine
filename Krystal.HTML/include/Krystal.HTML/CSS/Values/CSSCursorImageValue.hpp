@@ -12,3 +12,10 @@ namespace Krys::HTML
                                                           Ref<CSSValue> &&hotSpot) noexcept;
   };
 }
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::CSSCursorImageValue)
+  KRYS_NODISCARD static bool IsType(const Krys::HTML::CSSValue &value) noexcept
+  {
+    return value.IsCSSCursorImageValue();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

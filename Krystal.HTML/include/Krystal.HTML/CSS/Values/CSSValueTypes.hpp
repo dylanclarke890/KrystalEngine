@@ -35,7 +35,7 @@ namespace Krys::HTML
   KRYS_NODISCARD Ref<CSSValue> CreatePrimitiveCSSValue(const CSSOMString &str) noexcept;
 
   KRYS_NODISCARD Ref<CSSValue> CreateFunctionCSSValue(CSSValueId name, Ref<CSSValue> &&args) noexcept;
-
+    
   template <SerializationSeparatorType>
   KRYS_NODISCARD Ref<CSSValue> CreateCoalescingPairCSSValue(Ref<CSSValue> &&, Ref<CSSValue> &&) noexcept;
 

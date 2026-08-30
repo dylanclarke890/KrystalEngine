@@ -19,3 +19,10 @@ namespace Krys::HTML
                                                    Ref<CSSValue> third, Ref<CSSValue> fourth) noexcept;
   };
 }
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::CSSQuadValue)
+  KRYS_NODISCARD static bool IsType(const Krys::HTML::CSSValue &value) noexcept
+  {
+    return value.IsCSSQuadValue();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

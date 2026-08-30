@@ -16,3 +16,10 @@ namespace Krys::HTML
     KRYS_NODISCARD static Ref<CSSRectValue> Create(Rect rect) noexcept;
   };
 }
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::CSSRectValue)
+  KRYS_NODISCARD static bool IsType(const Krys::HTML::CSSValue &value) noexcept
+  {
+    return value.IsCSSRectValue();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

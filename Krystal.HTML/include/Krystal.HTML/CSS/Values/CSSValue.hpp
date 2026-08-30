@@ -57,20 +57,160 @@ namespace Krys::HTML
       }
     }
 
-#pragma region Type Checks
-
-    KRYS_NODISCARD bool IsCSSPrimitiveValue() const noexcept
-    {
-      return _type == CSSValueType::Primitive;
-    }
-
-#pragma endregion
-
     KRYS_NODISCARD bool Equals(const CSSValue &other) const noexcept;
 
     KRYS_NODISCARD bool operator==(const CSSValue &other) const noexcept
     {
       return Equals(other);
     }
+
+#pragma region Type Checks
+
+    KRYS_NODISCARD bool IsCSSAttrValue() const noexcept
+    {
+      return _type == CSSValueType::Attr;
+    }
+
+    KRYS_NODISCARD bool IsCSSColorValue() const noexcept
+    {
+      return _type == CSSValueType::Color;
+    }
+
+    KRYS_NODISCARD bool IsCSSColorSchemeValue() const noexcept
+    {
+      return _type == CSSValueType::ColorScheme;
+    }
+
+    KRYS_NODISCARD bool IsCSSCounterValue() const noexcept
+    {
+      return _type == CSSValueType::Counter;
+    }
+
+    KRYS_NODISCARD bool IsCSSCursorImageValue() const noexcept
+    {
+      return _type == CSSValueType::CursorImage;
+    }
+
+    KRYS_NODISCARD bool IsCSSGridAutoRepeatValue() const noexcept
+    {
+      return _type == CSSValueType::GridAutoRepeat;
+    }
+
+    KRYS_NODISCARD bool IsCSSGridIntegerRepeatValue() const noexcept
+    {
+      return _type == CSSValueType::GridIntegerRepeat;
+    }
+
+    KRYS_NODISCARD bool IsCSSGridLineValue() const noexcept
+    {
+      return _type == CSSValueType::GridLine;
+    }
+
+    KRYS_NODISCARD bool IsCSSGridLineNamesValue() const noexcept
+    {
+      return _type == CSSValueType::GridLineNames;
+    }
+
+    KRYS_NODISCARD bool IsCSSGridTemplateAreasValue() const noexcept
+    {
+      return _type == CSSValueType::GridTemplateAreas;
+    }
+
+    KRYS_NODISCARD bool IsCSSFunctionValue() const noexcept
+    {
+      return _type == CSSValueType::Function;
+    }
+
+    KRYS_NODISCARD bool IsCSSOffsetRotateValue() const noexcept
+    {
+      return _type == CSSValueType::OffsetRotate;
+    }
+
+    KRYS_NODISCARD bool IsCSSPositionValue() const noexcept
+    {
+      return _type == CSSValueType::Position;
+    }
+
+    KRYS_NODISCARD bool IsCSSPositionXValue() const noexcept
+    {
+      return _type == CSSValueType::PositionX;
+    }
+
+    KRYS_NODISCARD bool IsCSSPositionYValue() const noexcept
+    {
+      return _type == CSSValueType::PositionY;
+    }
+
+    KRYS_NODISCARD bool IsCSSPrimitiveValue() const noexcept
+    {
+      return _type == CSSValueType::Primitive;
+    }
+
+    KRYS_NODISCARD bool IsCSSQuadValue() const noexcept
+    {
+      return _type == CSSValueType::Quad;
+    }
+
+    KRYS_NODISCARD bool IsCSSRatioValue() const noexcept
+    {
+      return _type == CSSValueType::Ratio;
+    }
+
+    KRYS_NODISCARD bool IsCSSRayValue() const noexcept
+    {
+      return _type == CSSValueType::Ray;
+    }
+
+    KRYS_NODISCARD bool IsCSSRectValue() const noexcept
+    {
+      return _type == CSSValueType::Rect;
+    }
+
+    KRYS_NODISCARD bool IsCSSScrollValue() const noexcept
+    {
+      return _type == CSSValueType::Scroll;
+    }
+
+    KRYS_NODISCARD bool IsCSSSubgridValue() const noexcept
+    {
+      return _type == CSSValueType::Subgrid;
+    }
+
+    KRYS_NODISCARD bool IsCSSTextShadowPropertyValue() const noexcept
+    {
+      return _type == CSSValueType::TextShadowProperty;
+    }
+
+    KRYS_NODISCARD bool IsCSSTransformListValue() const noexcept
+    {
+      return _type == CSSValueType::TransformList;
+    }
+
+    KRYS_NODISCARD bool IsCSSUnicodeRangeValue() const noexcept
+    {
+      return _type == CSSValueType::UnicodeRange;
+    }
+
+    KRYS_NODISCARD bool IsCSSURLValue() const noexcept
+    {
+      return _type == CSSValueType::URL;
+    }
+
+    KRYS_NODISCARD bool IsCSSValueListValue() const noexcept
+    {
+      return _type == CSSValueType::ValueList;
+    }
+
+    KRYS_NODISCARD bool IsCSSValuePairValue() const noexcept
+    {
+      return _type == CSSValueType::ValuePair;
+    }
+
+    KRYS_NODISCARD bool IsCSSViewValue() const noexcept
+    {
+      return _type == CSSValueType::View;
+    }
+
+#pragma endregion
   };
 }

@@ -7,8 +7,36 @@ namespace Krys::HTML
   enum class CSSValueType : uint8
   {
     Invalid = 0,
+    Attr,
+    Color,
+    ColorScheme,
+    Counter,
+    CursorImage,
+    GridAutoRepeat,
+    GridIntegerRepeat,
+    GridLine,
+    GridLineNames,
+    GridTemplateAreas,
+    Function,
+    OffsetRotate,
+    Position,
+    PositionX,
+    PositionY,
     Primitive,
+    Quad,
+    Ratio,
+    Ray,
+    Rect,
+    Scroll,
+    Subgrid,
+    TextShadowProperty,
+    TransformList,
+    UnicodeRange,
+    URL,
+    ValueList,
+    ValuePair,
+    View,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSValueType, 2uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSValueType, 30uz);

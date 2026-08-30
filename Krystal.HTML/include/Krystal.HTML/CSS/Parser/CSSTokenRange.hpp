@@ -56,6 +56,13 @@ namespace Krys::HTML
       return token;
     }
 
+    KRYS_NODISCARD const CSSToken &ConsumeIncludingWhitespace() noexcept
+    {
+      auto &token = Consume();
+      DiscardWhitespace();
+      return token;
+    }
+
     KRYS_NODISCARD const CSSToken &ConsumeLast() noexcept
     {
       if (_tokens.empty())

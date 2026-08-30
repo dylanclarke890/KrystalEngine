@@ -37,11 +37,12 @@ namespace Krys::HTML
     KRYS_NODISCARD Maybe<GridNamedAreaMapRow>
       ConsumeUnresolvedGridTemplateAreasRow(CSSTokenRange &tokens, CSSPropertyParserState &state) noexcept;
 
-    KRYS_NODISCARD RefPtr<CSSGridLineNamesValue> CconsumeGridLineNames(CSSTokenRange &tokens,
-                                                                       CSSPropertyParserState &state,
-                                                                       AllowEmpty = AllowEmpty::No) noexcept;
+    KRYS_NODISCARD RefPtr<CSSGridLineNamesValue>
+      ConsumeGridLineNames(CSSTokenRange &tokens, CSSPropertyParserState &state,
+                           AllowEmpty allowEmpty = AllowEmpty::No) noexcept;
 
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeGridLine(CSSTokenRange &tokens, CSSPropertyParserState &state);
+    KRYS_NODISCARD RefPtr<CSSValue> ConsumeGridLine(CSSTokenRange &tokens,
+                                                    CSSPropertyParserState &state) noexcept;
 
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeGridTrackSize(CSSTokenRange &tokens,
                                                          CSSPropertyParserState &state) noexcept;
