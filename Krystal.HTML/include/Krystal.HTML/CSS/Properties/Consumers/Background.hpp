@@ -22,10 +22,23 @@ namespace Krys::HTML
       Yes
     };
 
+    // Legacy behavior needed by -webkit-border-image that makes fixed border slices also set the border
+    // widths.
+    enum class BorderImageWidthOverridesWidthForLength : bool
+    {
+      No,
+      Yes
+    };
+
     // <'border-radius'> = <length-percentage [0,∞]>{1,4} [ / <length-percentage [0,∞]>{1,4} ]?
     // https://drafts.csswg.org/css-backgrounds/#propdef-border-radius
     KRYS_NODISCARD Maybe<BorderRadius> ConsumeUnresolvedBorderRadius(CSSTokenRange &tokens,
                                                                      CSSPropertyParserState &state) noexcept;
+
+    // Non-standard -webkit-border-radius.
+    KRYS_NODISCARD Maybe<BorderRadius>
+      ConsumeUnresolvedWebKitBorderRadius(CSSTokenRange &tokens, CSSPropertyParserState &state) noexcept;
+
     // <'border-image-slice'> = [<number [0,∞]> | <percentage [0,∞]>]{1,4} && fill?
     // https://drafts.csswg.org/css-backgrounds/#propdef-border-image-slice
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeBorderImageSlice(
@@ -34,17 +47,26 @@ namespace Krys::HTML
 
     // <'border-image-width'> = [ <length-percentage [0,∞]> | <number [0,∞]> | auto ]{1,4}
     // https://drafts.csswg.org/css-backgrounds/#propdef-border-image-width
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeBorderImageWidth(CSSTokenRange &tokens,
-                                                            CSSPropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<CSSValue>
+      ConsumeBorderImageWidth(CSSTokenRange &tokens, CSSPropertyParserState &state,
+                              BorderImageWidthOverridesWidthForLength overridesWidth =
+                                BorderImageWidthOverridesWidthForLength::No) noexcept;
 
     // https://drafts.csswg.org/css-backgrounds/#border-image
     KRYS_NODISCARD Maybe<BorderImageComponents>
-      ConsumeBorderImageComponents(CSSTokenRange &tokens, CSSPropertyParserState &state) noexcept;
+      ConsumeBorderImageComponents(CSSTokenRange &tokens, CSSPropertyParserState &state,
+                                   BorderImageSliceFillDefault defaultFill = BorderImageSliceFillDefault::No,
+                                   BorderImageWidthOverridesWidthForLength overridesWidth =
+                                     BorderImageWidthOverridesWidthForLength::No) noexcept;
 
     // <bg-size> = [ <length-percentage [0,∞]> | auto ]{1,2} | cover | contain
     // https://drafts.csswg.org/css-backgrounds/#background-size
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeSingleBackgroundSize(CSSTokenRange &tokens,
                                                                 CSSPropertyParserState &state) noexcept;
+
+    // Non-standard.
+    KRYS_NODISCARD RefPtr<CSSValue> ConsumeSingleWebkitBackgroundSize(CSSTokenRange &tokens,
+                                                                      CSSPropertyParserState &state) noexcept;
 
     // <single-mask-size> = <bg-size>
     // https://drafts.fxtf.org/css-masking/#the-mask-size
@@ -60,6 +82,8 @@ namespace Krys::HTML
     // https://drafts.csswg.org/css-backgrounds/#propdef-box-shadow
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeBoxShadow(CSSTokenRange &tokens,
                                                      CSSPropertyParserState &state) noexcept;
+
+    RefPtr<CSSValue> ConsumeWebkitBoxReflect(CSSTokenRange &tokens, CSSPropertyParserState &state) noexcept;
 
     // MARK: Utilities for filling in rects / quads in the "margin" form.
 

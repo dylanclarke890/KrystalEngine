@@ -2440,6 +2440,23 @@
         "url": "https://www.w3.org/TR/css3-background/#background-size"
       }
     },
+    "-webkit-background-size": {
+      "codegen-properties": {
+        "longhands": ["background-size"],
+        "shorthand-pattern": "Single",
+        "parser-function": "ConsumeWebkitBackgroundSizeShorthand",
+        "parser-grammar": "<single-webkit-background-size>#",
+        "parser-grammar-unused": true,
+        "parser-grammar-unused-reason": "Needs support for shorthand grammars."
+      },
+      "status": {
+        "comment": "FIXME: Should be a cascade-alias like the other -webkit-background-* properties, rather than a shorthand. Differs from background-size only in the interpretation of a single value: '-webkit-background-size: l;' is equivalent to 'background-size: l l;' whereas 'background-size: l;' is equivalent to 'background-size: l auto;'"
+      },
+      "specification": {
+        "module": "css-backgrounds",
+        "url": "https://www.w3.org/TR/css3-background/#background-size"
+      }
+    },
     "baseline-shift": {
       "animation-type": "by computed value",
       "initial": "baseline",

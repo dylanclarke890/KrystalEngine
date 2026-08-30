@@ -71,6 +71,26 @@ namespace Krys::HTML
       return _type == CSSValueType::Attr;
     }
 
+    KRYS_NODISCARD bool IsCSSBackgroundRepeatValue() const noexcept
+    {
+      return _type == CSSValueType::BackgroundRepeat;
+    }
+
+    KRYS_NODISCARD bool IsCSSBorderImageSliceValue() const noexcept
+    {
+      return _type == CSSValueType::BorderImageSlice;
+    }
+
+    KRYS_NODISCARD bool IsCSSBorderImageWidthValue() const noexcept
+    {
+      return _type == CSSValueType::BorderImageWidth;
+    }
+
+    KRYS_NODISCARD bool IsCSSBoxShadowPropertyValue() const noexcept
+    {
+      return _type == CSSValueType::BoxShadowProperty;
+    }
+
     KRYS_NODISCARD bool IsCSSColorValue() const noexcept
     {
       return _type == CSSValueType::Color;
@@ -164,6 +184,11 @@ namespace Krys::HTML
     KRYS_NODISCARD bool IsCSSRectValue() const noexcept
     {
       return _type == CSSValueType::Rect;
+    }
+
+    KRYS_NODISCARD bool IsCSSReflectValue() const noexcept
+    {
+      return _type == CSSValueType::Reflect;
     }
 
     KRYS_NODISCARD bool IsCSSScrollValue() const noexcept

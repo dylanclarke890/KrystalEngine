@@ -170,6 +170,7 @@
     <ClInclude Include="include\Krystal.HTML\Constants\ElementNames.hpp" />
     <ClInclude Include="include\Krystal.HTML\Constants\TagNames.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Calc\CSSCalcAllowedSymbols.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Calc\CSSCalcTreeParser.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Calc\CSSCalcValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\CSSCharsetRule.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\CSSFunctionDeclarations.hpp" />
@@ -304,6 +305,13 @@
     <ClInclude Include="include\Krystal.HTML\CSS\StyleSheet.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\StyleSheetContents.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\StyleSheetList.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Background\BoxShadow.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Background\BoxShadowProperty.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Background\CSSBackgroundRepeatValue.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Background\CSSBoxShadowPropertyValue.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Background\CSSReflectValue.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Borders\CSSBorderImageSliceValue.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Borders\CSSBorderImageWidthValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Grid\GridArea.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Grid\GridPosition.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Grid\GridSpan.hpp" />

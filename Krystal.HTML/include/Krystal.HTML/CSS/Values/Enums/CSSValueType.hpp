@@ -8,6 +8,10 @@ namespace Krys::HTML
   {
     Invalid = 0,
     Attr,
+    BackgroundRepeat,
+    BorderImageSlice,
+    BorderImageWidth,
+    BoxShadowProperty,
     Color,
     ColorScheme,
     Counter,
@@ -27,6 +31,7 @@ namespace Krys::HTML
     Ratio,
     Ray,
     Rect,
+    Reflect,
     Scroll,
     Subgrid,
     TextShadowProperty,
@@ -39,4 +44,4 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSValueType, 30uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSValueType, 35uz);
