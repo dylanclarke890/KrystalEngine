@@ -251,11 +251,30 @@ namespace Krys::HTML
       return static_cast<T>(_value.Number);
     }
 
+    template <typename T = int64>
+    KRYS_NODISCARD T ResolveAsIntegerDeprecated() const noexcept
+    {
+      assert(IsInteger());
+      return ValueDeprecated<T>();
+    }
+
     template <typename T = double>
     KRYS_NODISCARD T ResolveAsPercentageNoConversionDataRequired() const noexcept
     {
       assert(IsPercentage());
       return ValueNoConversionDataRequired<T>();
+    }
+
+    template <typename T = double>
+    KRYS_NODISCARD T ValueDeprecated() const noexcept
+    {
+      return ClampTo<T>(DoubleValueDeprecated());
+    }
+
+    template <typename T = double>
+    KRYS_NODISCARD T ValueDeprecated(CSSUnitType targetUnit) const noexcept
+    {
+      return ClampTo<T>(DoubleValueDeprecated(targetUnit));
     }
 
     KRYS_NODISCARD double DoubleValue(CSSUnitType targetUnit,
@@ -266,6 +285,14 @@ namespace Krys::HTML
     KRYS_NODISCARD double DoubleValueNoConversionDataRequired() const noexcept
     {
       assert(!IsCalculated());
+      return _value.Number;
+    }
+
+    KRYS_NODISCARD double DoubleValueDeprecated() const noexcept
+    {
+      // TODO
+      // if (RefPtr calcValue = CSSCalcValue())
+      //   return calcValue->DoubleValueDeprecated();
       return _value.Number;
     }
 

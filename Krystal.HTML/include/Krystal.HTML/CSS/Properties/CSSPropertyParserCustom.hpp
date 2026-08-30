@@ -1045,6 +1045,25 @@ namespace Krys::HTML
       return true;
     }
 
+    KRYS_NODISCARD static bool ConsumeWebkitBackgroundSizeShorthand(CSSTokenRange &tokens,
+                                                                    CSSPropertyParserState &state,
+                                                                    const CSSPropertyShorthand &shorthand,
+                                                                    CSSPropertyParserResult &result) noexcept
+    {
+      auto backgroundSize = ConsumeListSeparatedBy<',', OneOrMore, ListOptimization::SingleValue>(
+        tokens, [](auto &tokens, auto &state) { return ConsumeSingleWebkitBackgroundSize(tokens, state); },
+        state);
+
+      if (!backgroundSize || !tokens.IsAtEnd())
+      {
+        return false;
+      }
+
+      result.AddPropertyForCurrentShorthand(state, CSSPropertyId::BackgroundSize, Krys::Move(backgroundSize));
+
+      return true;
+    }
+
     KRYS_NODISCARD static bool ConsumeMaskShorthand(CSSTokenRange &tokens, CSSPropertyParserState &state,
                                                     const CSSPropertyShorthand &shorthand,
                                                     CSSPropertyParserResult &result) noexcept

@@ -23,6 +23,11 @@ namespace Krys::HTML
       assert(index < _storage.size());
       return *_storage[index];
     }
+
+    KRYS_NODISCARD size_t Size() const noexcept
+    {
+      return _storage.size();
+    }
   };
 
   class CSSValueList final : public CSSValueContainingVector
