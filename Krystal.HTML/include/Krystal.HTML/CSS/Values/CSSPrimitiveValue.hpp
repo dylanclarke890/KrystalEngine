@@ -2,10 +2,12 @@
 
 #include "Krystal.HTML/CSS/Properties/Enums/CSSPropertyId.hpp"
 #include "Krystal.HTML/CSS/Types/CSSOMString.hpp"
+#include "Krystal.HTML/CSS/Values/CSSAttrValue.hpp"
 #include "Krystal.HTML/CSS/Values/CSSValue.hpp"
 #include "Krystal.HTML/CSS/Values/Enums/CSSValueId.hpp"
 #include "Krystal.Lib/NeverDestroyed.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
 #include "Krystal.Lib/Utils/ClampTo.hpp"
 
 namespace Krys::HTML
@@ -22,6 +24,7 @@ namespace Krys::HTML
     {
       CSSPropertyId PropertyId;
       CSSValueId ValueId;
+      const CSSAttrValue *Attr;
       double Number;
       StringAtomStorage String;
     } _value;
@@ -32,9 +35,13 @@ namespace Krys::HTML
 
     constexpr inline static CreateImplicitInitialValueTag CreateImplicitInitialValue {};
 
+#pragma region Constructors
+
     explicit CSSPrimitiveValue(CSSValueId identifier) noexcept;
 
     explicit CSSPrimitiveValue(CSSPropertyId property) noexcept;
+
+    explicit CSSPrimitiveValue(Ref<CSSAttrValue> attr) noexcept;
 
     CSSPrimitiveValue(CSSOMString value, CSSUnitType unit) noexcept;
 
@@ -46,7 +53,11 @@ namespace Krys::HTML
 
     CSSPrimitiveValue(StaticCSSValueTag, double value, CSSUnitType unit) noexcept;
 
+#pragma endregion
+
   public:
+#pragma region Static Creation
+
     KRYS_NODISCARD static Ref<CSSPrimitiveValue> Create(CSSValueId identifier) noexcept;
 
     KRYS_NODISCARD static Ref<CSSPrimitiveValue> Create(CSSPropertyId property) noexcept;
@@ -54,6 +65,8 @@ namespace Krys::HTML
     KRYS_NODISCARD static Ref<CSSPrimitiveValue> Create(const CSSOMString &value) noexcept;
 
     KRYS_NODISCARD static Ref<CSSPrimitiveValue> Create(const CSSOMStringAtom &value) noexcept;
+
+    KRYS_NODISCARD static Ref<CSSPrimitiveValue> Create(Ref<CSSAttrValue> value) noexcept;
 
     KRYS_NODISCARD static Ref<CSSPrimitiveValue> CreateCustomIdent(const CSSOMString &value) noexcept;
 
@@ -67,6 +80,10 @@ namespace Krys::HTML
 
     KRYS_NODISCARD static CSSPrimitiveValue &ImplicitInitialValue() noexcept;
 
+#pragma endregion
+
+#pragma region Type/Unit Checks
+
     KRYS_NODISCARD bool IsPropertyId() const noexcept
     {
       return _unit == CSSUnitType::PropertyId;
@@ -75,6 +92,11 @@ namespace Krys::HTML
     KRYS_NODISCARD bool IsValueId() const noexcept
     {
       return _unit == CSSUnitType::ValueId;
+    }
+
+    KRYS_NODISCARD bool IsAttr() const noexcept
+    {
+      return _unit == CSSUnitType::Attr;
     }
 
     KRYS_NODISCARD bool IsNumber() const noexcept
@@ -132,90 +154,6 @@ namespace Krys::HTML
       return !_value.Number;
     }
 
-    template <typename T = double>
-    KRYS_NODISCARD T Value(CSSUnitType targetUnit,
-                           const CSSToLengthConversionData &conversionData) const noexcept
-    {
-      return ClampTo<T>(DoubleValue(targetUnit, conversionData));
-    }
-
-    template <typename T = double>
-    KRYS_NODISCARD T ValueNoConversionDataRequired() const noexcept
-    {
-      return ClampTo<T>(DoubleValueNoConversionDataRequired());
-    }
-
-    template <typename T = double>
-    KRYS_NODISCARD T ValueNoConversionDataRequired(CSSUnitType targetUnit) const noexcept
-    {
-      return ClampTo<T>(DoubleValueNoConversionDataRequired(targetUnit));
-    }
-
-    KRYS_NODISCARD double DoubleValue(CSSUnitType targetUnit,
-                                      const CSSToLengthConversionData &) const noexcept;
-
-    KRYS_NODISCARD double DoubleValueNoConversionDataRequired(CSSUnitType targetUnit) const noexcept;
-
-    KRYS_NODISCARD double DoubleValueNoConversionDataRequired() const noexcept
-    {
-      assert(!IsCalculated());
-      return _value.Number;
-    }
-
-
-    KRYS_NODISCARD CSSOMString StringValue() const noexcept
-    {
-      switch (_unit)
-      {
-        case CSSUnitType::String:
-        case CSSUnitType::CustomIdent:
-        case CSSUnitType::FontFamily:
-        {
-          return *_value.String;
-        }
-        case CSSUnitType::ValueId:
-        {
-          return CSSOMString(ToString(_value.ValueId));
-        }
-        case CSSUnitType::PropertyId:
-        {
-          return CSSOMString(ToString(_value.PropertyId));
-        }
-        // case CSSUnitType::Attr:
-        // {
-        //   return protectedCssAttrValue()->cssText(CSS::defaultSerializationContext());
-        // }
-        default:
-        {
-          return {};
-        }
-      }
-    }
-
-    KRYS_NODISCARD CSSOMString CustomIdent() const noexcept
-    {
-      assert(IsCustomIdent());
-      return *_value.String;
-    }
-
-    template <typename T = double>
-    KRYS_NODISCARD Maybe<T> ResolveAsNumberIfNotCalculated() const noexcept
-    {
-      if (IsCalculated())
-      {
-        return Null;
-      }
-
-      return _value.Number;
-    }
-
-    template <typename T = double>
-    KRYS_NODISCARD T ResolveAsPercentageNoConversionDataRequired() const noexcept
-    {
-      assert(IsPercentage());
-      return ValueNoConversionDataRequired<T>();
-    }
-
     KRYS_NODISCARD constexpr static bool IsFontIndependentLength(CSSUnitType type) noexcept
     {
       return type == CSSUnitType::px || type == CSSUnitType::cm || type == CSSUnitType::mm
@@ -253,6 +191,92 @@ namespace Krys::HTML
     KRYS_NODISCARD constexpr static bool IsViewportPercentageLength(CSSUnitType type) noexcept
     {
       return type >= CSSUnitType::FirstViewportCSSUnitType && type <= CSSUnitType::LastViewportCSSUnitType;
+    }
+
+#pragma endregion
+
+    template <typename T = double>
+    KRYS_NODISCARD T Value(CSSUnitType targetUnit,
+                           const CSSToLengthConversionData &conversionData) const noexcept
+    {
+      return ClampTo<T>(DoubleValue(targetUnit, conversionData));
+    }
+
+    template <typename T = double>
+    KRYS_NODISCARD T ValueNoConversionDataRequired() const noexcept
+    {
+      return ClampTo<T>(DoubleValueNoConversionDataRequired());
+    }
+
+    template <typename T = double>
+    KRYS_NODISCARD T ValueNoConversionDataRequired(CSSUnitType targetUnit) const noexcept
+    {
+      return ClampTo<T>(DoubleValueNoConversionDataRequired(targetUnit));
+    }
+
+    KRYS_NODISCARD double DoubleValue(CSSUnitType targetUnit,
+                                      const CSSToLengthConversionData &) const noexcept;
+
+    KRYS_NODISCARD double DoubleValueNoConversionDataRequired(CSSUnitType targetUnit) const noexcept;
+
+    KRYS_NODISCARD double DoubleValueNoConversionDataRequired() const noexcept
+    {
+      assert(!IsCalculated());
+      return _value.Number;
+    }
+
+    KRYS_NODISCARD CSSOMString StringValue() const noexcept
+    {
+      switch (_unit)
+      {
+        case CSSUnitType::String:
+        case CSSUnitType::CustomIdent:
+        case CSSUnitType::FontFamily:
+        {
+          return *_value.String;
+        }
+        case CSSUnitType::ValueId:
+        {
+          return CSSOMString(ToString(_value.ValueId));
+        }
+        case CSSUnitType::PropertyId:
+        {
+          return CSSOMString(ToString(_value.PropertyId));
+        }
+        // TODO:
+        // case CSSUnitType::Attr:
+        // {
+        //   return protectedCssAttrValue()->cssText(CSS::defaultSerializationContext());
+        // }
+        default:
+        {
+          return {};
+        }
+      }
+    }
+
+    KRYS_NODISCARD CSSOMString CustomIdent() const noexcept
+    {
+      assert(IsCustomIdent());
+      return *_value.String;
+    }
+
+    template <typename T = double>
+    KRYS_NODISCARD Maybe<T> ResolveAsNumberIfNotCalculated() const noexcept
+    {
+      if (IsCalculated())
+      {
+        return Null;
+      }
+
+      return _value.Number;
+    }
+
+    template <typename T = double>
+    KRYS_NODISCARD T ResolveAsPercentageNoConversionDataRequired() const noexcept
+    {
+      assert(IsPercentage());
+      return ValueNoConversionDataRequired<T>();
     }
   };
 
@@ -320,7 +344,7 @@ namespace Krys::HTML
   KRYS_NODISCARD inline bool IsCustomIdentValue(const CSSValue &value) noexcept
   {
     auto *primitiveValue = DynamicDowncast<CSSPrimitiveValue>(value);
-    return primitiveValue && primitiveValue->IsCustomIdent();
+    return primitiveValue != nullptr && primitiveValue->IsCustomIdent();
   }
 
 }

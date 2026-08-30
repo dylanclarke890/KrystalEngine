@@ -1,5 +1,6 @@
 ﻿#include "Krystal.HTML/CSS/Values/CSSPrimitiveValue.hpp"
 #include "Krystal.HTML/CSS/Values/CSSValuePool.hpp"
+#include <algorithm>
 
 namespace Krys::HTML
 {
@@ -9,10 +10,16 @@ namespace Krys::HTML
     _value.ValueId = identifier;
   }
 
-  CSSPrimitiveValue::CSSPrimitiveValue(CSSPropertyId property) : CSSValue(CSSValueType::Primitive)
+  CSSPrimitiveValue::CSSPrimitiveValue(CSSPropertyId property) noexcept : CSSValue(CSSValueType::Primitive)
   {
     _unit = CSSUnitType::PropertyId;
     _value.PropertyId = property;
+  }
+
+  CSSPrimitiveValue::CSSPrimitiveValue(Ref<CSSAttrValue> attr) noexcept : CSSValue(CSSValueType::Primitive)
+  {
+    _unit = CSSUnitType::Attr;
+    _value.Attr = attr.release();
   }
 
   CSSPrimitiveValue::CSSPrimitiveValue(CSSOMString value, CSSUnitType unit) noexcept
@@ -62,7 +69,7 @@ namespace Krys::HTML
     // Casting to a signed integer first since casting a negative floating point value to an unsigned
     // integer is undefined behavior.
     size_t poolIndex = static_cast<size_t>(static_cast<int64>(value));
-    double roundTripValue = poolIndex;
+    double roundTripValue = static_cast<double>(poolIndex);
 
     if (std::ranges::equal(Span<const byte>(reinterpret_cast<const byte *>(&value), sizeof(double)),
                            Span<const byte>(reinterpret_cast<const byte *>(&roundTripValue), sizeof(double)))
@@ -81,7 +88,7 @@ namespace Krys::HTML
 
   Ref<CSSPrimitiveValue> CSSPrimitiveValue::Create(double value) noexcept
   {
-    if (auto* result = ValueFromPool(CommonCSSValuePool->_numberValues, value))
+    if (auto *result = ValueFromPool(CommonCSSValuePool->_numberValues, value))
     {
       return ShareRef(*result);
     }
@@ -133,6 +140,11 @@ namespace Krys::HTML
   Ref<CSSPrimitiveValue> CSSPrimitiveValue::Create(const CSSOMStringAtom &value) noexcept
   {
     return AdoptRef(*new CSSPrimitiveValue(CSSOMString(value.View()), CSSUnitType::String));
+  }
+
+  Ref<CSSPrimitiveValue> CSSPrimitiveValue::Create(Ref<CSSAttrValue> value) noexcept
+  {
+    return AdoptRef(*new CSSPrimitiveValue(Krys::Move(value)));
   }
 
   Ref<CSSPrimitiveValue> CSSPrimitiveValue::CreateCustomIdent(const CSSOMString &value) noexcept

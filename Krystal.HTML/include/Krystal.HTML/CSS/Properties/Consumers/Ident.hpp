@@ -9,7 +9,7 @@
 #include "Krystal.Text/ASCII.hpp"
 #include <ranges>
 
-namespace Krys::HTML
+namespace Krys::HTML::CSSPropertyParserHelpers
 {
 #pragma region <ident>
 

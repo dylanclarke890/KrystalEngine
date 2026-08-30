@@ -17,14 +17,14 @@ namespace Krys::HTML
         return nullptr;
       }
 
-      auto valueId = ParseCSSValueId(identifier.IdentCodePoints());
+      auto valueId = FindCSSValueKeyword(identifier.IdentCodePoints());
       if (!CSSValue::IsCSSWideKeyword(valueId))
       {
         return nullptr;
       }
 
       tokens = tokensCopy;
-      return CreateRef<CSSPrimitiveValue>(valueId);
+      return CSSPrimitiveValue::Create(valueId);
     }
   }
 
@@ -54,7 +54,7 @@ namespace Krys::HTML
   {
     auto state = CSSPropertyParserState {
       .Context = context,
-      .Property = id,
+      .CurrentProperty = id,
       .CurrentRule = ruleType,
       .Important = important,
     };
@@ -64,7 +64,7 @@ namespace Krys::HTML
     {
       if (auto cssWideKeywordValue = ConsumeCSSWideKeywordValue(tokensCopy))
       {
-        for (auto longhand : LonghandsForShorthand(id).LonghandProperties)
+        for (auto longhand : LonghandsForShorthand(id).Properties())
         {
           properties.emplace_back(longhand, cssWideKeywordValue, important);
           tokens = tokensCopy;

@@ -68,6 +68,7 @@
     <ClCompile Include="src\CSS\Properties\Consumers\Lists.cpp" />
     <ClCompile Include="src\CSS\Properties\Consumers\Masking.cpp" />
     <ClCompile Include="src\CSS\Properties\Consumers\Motion.cpp" />
+    <ClCompile Include="src\CSS\Properties\Consumers\Percentage.cpp" />
     <ClCompile Include="src\CSS\Properties\Consumers\Position.cpp" />
     <ClCompile Include="src\CSS\Properties\Consumers\PositionTry.cpp" />
     <ClCompile Include="src\CSS\Properties\Consumers\Primitives.cpp" />
@@ -96,9 +97,7 @@
     <ClCompile Include="src\CSS\Values\CSSValueTypes.cpp" />
     <ClCompile Include="src\CSS\Values\Primitives\CSSUnevaluatedCalc.cpp" />
     <ClCompile Include="src\CSS\CSSParser.cpp" />
-    <ClCompile Include="src\CSS\Properties\CSSPropertyConsumer.cpp" />
     <ClCompile Include="src\CSS\Properties\CSSPropertyParser.cpp" />
-    <ClCompile Include="src\CSS\Properties\CSSPropertyShorthand.cpp" />
     <ClCompile Include="src\CSS\CSSRule.cpp" />
     <ClCompile Include="src\CSS\CSSStyleSheet.cpp" />
     <ClCompile Include="src\CSS\Parser\CSSTokenizer.cpp" />
@@ -241,6 +240,8 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\URL.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\ViewTransition.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\Consumers\WillChange.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSFontVariantLigaturesParser.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSFontVariantNumericParser.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyConsumer.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyParserCustom.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSPropertyParserResult.hpp" />
@@ -315,6 +316,7 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Values\ColorAdjust\ColorScheme.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\ColorAdjust\CSSColorSchemeValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Color\Color.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSAttrValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSColorValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSCounterValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSCursorImageValue.hpp" />
@@ -323,6 +325,7 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSPositionValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSQuadValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSRatioValue.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSRectValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSScrollValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSTransformListValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSUnicodeRangeValue.hpp" />
@@ -335,6 +338,8 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSValueTypes.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSViewValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Color\ColorType.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Motion\CSSRayValue.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Motion\RayFunction.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPosition.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPrimitiveNumericTypes.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPrimitiveNumericTypesCanonicalization.hpp" />
@@ -359,6 +364,9 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSURL.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSURLModifiers.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\PrimitiveNumericOrKeyword.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\Quad.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\Rect.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\RectBase.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\TextDecoration\CSSTextShadowPropertyValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\TextDecoration\TextShadow.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\StaticRangeInit.hpp" />

@@ -6,7 +6,7 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 
-namespace Krys::HTML
+namespace Krys::HTML::CSSPropertyParserHelpers
 {
   // FIXME: Users of this function are likely getting incorrect results when used with calc() producing a
   // percent, as it is not getting divided by 100.

@@ -65,5 +65,12 @@ namespace Krys::HTML
     }
 
 #pragma endregion
+
+    KRYS_NODISCARD bool Equals(const CSSValue &other) const noexcept;
+
+    KRYS_NODISCARD bool operator==(const CSSValue &other) const noexcept
+    {
+      return Equals(other);
+    }
   };
 }

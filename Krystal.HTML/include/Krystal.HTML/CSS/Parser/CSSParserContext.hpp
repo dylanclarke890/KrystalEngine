@@ -9,6 +9,7 @@ namespace Krys::HTML
   {
     CSSParserMode Mode;
     CSSPropertySettings PropertySettings;
+    bool IsHTMLDocument : 1 {false};
     bool useSystemAppearance : 1 {false};
     bool shouldIgnoreImportRules : 1 {false};
 

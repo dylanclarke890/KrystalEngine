@@ -1413,6 +1413,33 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSRatioValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Motion\RayFunction.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Motion\CSSRayValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSRectValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\RectBase.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\Quad.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\Rect.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSAttrValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSFontVariantLigaturesParser.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Properties\CSSFontVariantNumericParser.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -1913,9 +1940,6 @@
     <ClCompile Include="src\CSS\CSSParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\CSS\Properties\CSSPropertyShorthand.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\CSS\Properties\CSSProperty.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1938,9 +1962,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\CSS\Values\CSSPrimitiveValue.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\CSS\Properties\CSSPropertyConsumer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\CSS\Values\Primitives\CSSPrimitiveNumericUnits.cpp">
@@ -2085,6 +2106,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\CSS\Values\Primitives\CSSRatio.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CSS\Properties\Consumers\Percentage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

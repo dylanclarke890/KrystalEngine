@@ -61,6 +61,8 @@
 #include "Krystal.HTML/CSS/Properties/Consumers/URL.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/ViewTransition.hpp"
 #include "Krystal.HTML/CSS/Properties/Consumers/WillChange.hpp"
+#include "Krystal.HTML/CSS/Properties/CSSFontVariantLigaturesParser.hpp"
+#include "Krystal.HTML/CSS/Properties/CSSFontVariantNumericParser.hpp"
 #include "Krystal.HTML/CSS/Properties/CSSPropertyParserResult.hpp"
 #include "Krystal.HTML/CSS/Properties/CSSPropertyParserState.hpp"
 #include "Krystal.HTML/CSS/Properties/CSSPropertyShorthand.hpp"
@@ -1900,8 +1902,8 @@ namespace Krys::HTML
           continue;
         }
 
-        auto ligaturesParseResult = ligaturesParser.consumeLigature(tokens);
-        auto numericParseResult = numericParser.consumeNumeric(tokens);
+        auto ligaturesParseResult = ligaturesParser.ConsumeLigature(tokens);
+        auto numericParseResult = numericParser.ConsumeNumeric(tokens);
 
         if (ligaturesParseResult == CSSFontVariantLigaturesParser::ParseResult::ConsumedValue)
         {
@@ -1939,12 +1941,12 @@ namespace Krys::HTML
       } while (!tokens.IsAtEnd());
 
       result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantLigatures,
-                                            ligaturesParser.finalizeValue(), implicitLigatures);
+                                            ligaturesParser.Finalize(), implicitLigatures);
       result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantCaps, Krys::Move(capsValue));
       result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantAlternates,
                                             Krys::Move(alternatesValue));
       result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantNumeric,
-                                            numericParser.finalizeValue(), implicitNumeric);
+                                            numericParser.Finalize(), implicitNumeric);
       result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantEastAsian,
                                             Krys::Move(eastAsianValue));
       result.AddPropertyForCurrentShorthand(state, CSSPropertyId::FontVariantPosition,
