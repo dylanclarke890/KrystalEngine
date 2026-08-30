@@ -7,8 +7,9 @@ namespace Krys::HTML
 {
   class CSSTokenRange;
   class CSSValue;
+
   struct CSSPropertyParserState;
-  class CSSEasingFunction;
+  struct EasingFunction;
 
   namespace CSSPropertyParserHelpers
   {
@@ -17,7 +18,7 @@ namespace Krys::HTML
     // https://drafts.csswg.org/css-easing/#typedef-easing-function
 
     // MARK: <easing-function> consuming (unresolved)
-    KRYS_NODISCARD Maybe<CSSEasingFunction>
+    KRYS_NODISCARD Maybe<EasingFunction>
       ConsumeUnresolvedEasingFunction(CSSTokenRange &tokens, CSSPropertyParserState &state) noexcept;
 
     // MARK: <easing-function> consuming (CSSValue)

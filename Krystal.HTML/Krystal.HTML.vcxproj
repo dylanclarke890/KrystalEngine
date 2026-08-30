@@ -313,6 +313,12 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Borders\CSSBorderImageSliceValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Borders\CSSBorderImageWidthValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Color\CurrentColor.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Easing\CSSEasingFunctionValue.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Easing\CubicBezierEasingFunction.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Easing\EasingFunction.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Easing\LinearEasingFunction.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Easing\SpringEasingFunction.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Easing\StepsEasingFunction.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Filter\AppleColorFilter.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Filter\AppleInvertLightnessFunction.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Filter\BlurFunction.hpp" />

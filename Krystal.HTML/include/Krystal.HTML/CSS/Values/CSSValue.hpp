@@ -116,11 +116,6 @@ namespace Krys::HTML
       return _type == CSSValueType::CursorImage;
     }
 
-    KRYS_NODISCARD bool IsCSSFilterValue() const noexcept
-    {
-      return _type == CSSValueType::Filter;
-    }
-
     KRYS_NODISCARD bool IsCSSGridAutoRepeatValue() const noexcept
     {
       return _type == CSSValueType::GridAutoRepeat;
@@ -144,6 +139,16 @@ namespace Krys::HTML
     KRYS_NODISCARD bool IsCSSGridTemplateAreasValue() const noexcept
     {
       return _type == CSSValueType::GridTemplateAreas;
+    }
+
+    KRYS_NODISCARD bool IsCSSEasingFunctionValue() const noexcept
+    {
+      return _type == CSSValueType::EasingFunction;
+    }
+
+    KRYS_NODISCARD bool IsCSSFilterValue() const noexcept
+    {
+      return _type == CSSValueType::Filter;
     }
 
     KRYS_NODISCARD bool IsCSSFunctionValue() const noexcept

@@ -277,8 +277,8 @@ namespace Krys::HTML
   {
     CSSOMStringAtom value;
 
-    bool operator==(const CustomIdentifier &) const = default;
-    bool operator==(const CSSOMStringAtom &other) const
+    bool operator==(const CustomIdentifier &) const noexcept = default;
+    bool operator==(const CSSOMStringAtom &other) const noexcept
     {
       return value == other;
     }
@@ -289,7 +289,7 @@ namespace Krys::HTML
   {
     CSSPropertyId value;
 
-    bool operator==(const PropertyIdentifier &) const = default;
+    constexpr bool operator==(const PropertyIdentifier &) const = default;
   };
 
 #pragma endregion
@@ -304,37 +304,37 @@ namespace Krys::HTML
     T parameters;
 
     // Forward * and -> to the parameters for convenience.
-    KRYS_NODISCARD const T &operator*() const noexcept
+    KRYS_NODISCARD constexpr const T &operator*() const noexcept
     {
       return parameters;
     }
 
-    KRYS_NODISCARD T &operator*() noexcept
+    KRYS_NODISCARD constexpr T &operator*() noexcept
     {
       return parameters;
     }
 
-    KRYS_NODISCARD const T *operator->() const noexcept
+    KRYS_NODISCARD constexpr const T *operator->() const noexcept
     {
       return &parameters;
     }
 
-    KRYS_NODISCARD T *operator->() noexcept
+    KRYS_NODISCARD constexpr T *operator->() noexcept
     {
       return &parameters;
     }
 
-    KRYS_NODISCARD operator const T &() const noexcept
+    KRYS_NODISCARD constexpr operator const T &() const noexcept
     {
       return parameters;
     }
 
-    KRYS_NODISCARD operator T &() noexcept
+    KRYS_NODISCARD constexpr operator T &() noexcept
     {
       return parameters;
     }
 
-    bool operator==(const FunctionNotation<C, T> &) const noexcept = default;
+    constexpr bool operator==(const FunctionNotation<C, T> &) const noexcept = default;
   };
 
   // Deduction guide for getter/setters that return values and take r-value references.
@@ -342,14 +342,14 @@ namespace Krys::HTML
   FunctionNotation(Keyword, T) -> FunctionNotation<Keyword::value, T>;
 
   template <CSSValueId C, typename T>
-  KRYS_NODISCARD bool operator==(const UniquePtr<FunctionNotation<C, T>> &a,
+  KRYS_NODISCARD constexpr bool operator==(const UniquePtr<FunctionNotation<C, T>> &a,
                                  const UniquePtr<FunctionNotation<C, T>> &b) noexcept
   {
     return a.get() == b.get();
   }
 
   template <size_t, CSSValueId C, typename T>
-  KRYS_NODISCARD const auto &get(const FunctionNotation<C, T> &function) noexcept
+  KRYS_NODISCARD constexpr const auto &get(const FunctionNotation<C, T> &function) noexcept
   {
     return function.parameters;
   }
@@ -491,7 +491,7 @@ namespace Krys::HTML
   CommaSeparatedArray(T, Ts...) -> CommaSeparatedArray<T, 1 + sizeof...(Ts)>;
 
   template <size_t I, typename T, size_t N>
-  KRYS_NODISCARD decltype(auto) get(const CommaSeparatedArray<T, N> &array) noexcept
+  KRYS_NODISCARD constexpr decltype(auto) get(const CommaSeparatedArray<T, N> &array) noexcept
   {
     return std::get<I>(array.value);
   }

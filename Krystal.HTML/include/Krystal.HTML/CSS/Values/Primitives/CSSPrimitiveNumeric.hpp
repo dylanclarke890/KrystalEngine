@@ -44,43 +44,41 @@ namespace Krys::HTML
   private:
     Data _data;
 
-    PrimitiveNumeric(PrimitiveDataEmptyToken token) : _data {token}
+    constexpr explicit PrimitiveNumeric(PrimitiveDataEmptyToken token) noexcept : _data {token}
     {
     }
 
   public:
-    PrimitiveNumeric(Raw raw) : _data {raw}
+    constexpr PrimitiveNumeric(Raw raw) noexcept : _data {raw}
     {
     }
 
-    PrimitiveNumeric(Calc calc) : _data {Krys::Move(calc)}
+    constexpr PrimitiveNumeric(Calc calc) noexcept : _data {Krys::Move(calc)}
     {
     }
 
     template <typename T>
-    requires Integral<T>
-             || FloatingPoint<T>
-             PrimitiveNumeric(T value)
-             requires(requires {
-               { Raw(value) };
-             })
+    requires(Integral<T> || FloatingPoint<T>)
+    constexpr PrimitiveNumeric(T value) noexcept
+    requires(requires {
+      { Raw(value) };
+    })
         : _data {Raw {value}}
     {
     }
 
     template <typename T>
-    requires Integral<T>
-             || FloatingPoint<T>
-             PrimitiveNumeric(UnitEnum auto unit, T value)
-             requires(requires {
-               { Raw(unit, value) };
-             })
+    requires(Integral<T> || FloatingPoint<T>)
+    constexpr PrimitiveNumeric(UnitEnum auto unit, T value) noexcept
+    requires(requires {
+      { Raw(unit, value) };
+    })
         : _data {Raw {unit, value}}
     {
     }
 
     template <UnitEnum E, E UnitValue>
-    constexpr PrimitiveNumeric(ValueLiteral<UnitValue> value)
+    constexpr PrimitiveNumeric(ValueLiteral<UnitValue> value) noexcept
     requires(requires {
       { Raw(value) };
     })
@@ -90,21 +88,21 @@ namespace Krys::HTML
 
     // MARK: Copy/Move Construction/Assignment
 
-    PrimitiveNumeric(const PrimitiveNumeric &other) : _data {other._data}
+    constexpr PrimitiveNumeric(const PrimitiveNumeric &other) noexcept : _data {other._data}
     {
     }
 
-    PrimitiveNumeric(PrimitiveNumeric &&other) : _data {Krys::Move(other._data)}
+    constexpr PrimitiveNumeric(PrimitiveNumeric &&other) noexcept : _data {Krys::Move(other._data)}
     {
     }
 
-    PrimitiveNumeric &operator=(const PrimitiveNumeric &other)
+    constexpr PrimitiveNumeric &operator=(const PrimitiveNumeric &other) noexcept
     {
       _data = other._data;
       return *this;
     }
 
-    PrimitiveNumeric &operator=(PrimitiveNumeric &&other)
+    constexpr PrimitiveNumeric &operator=(PrimitiveNumeric &&other) noexcept
     {
       _data = Krys::Move(other._data);
       return *this;
@@ -112,43 +110,43 @@ namespace Krys::HTML
 
     // MARK: Equality
 
-    bool operator==(const PrimitiveNumeric &other) const
+    constexpr bool operator==(const PrimitiveNumeric &other) const noexcept
     {
       return _data == other._data;
     }
 
-    bool operator==(const Raw &other) const
+    constexpr bool operator==(const Raw &other) const noexcept
     {
       return _data == other;
     }
 
     template <typename T>
     requires NumericRaw<T> && NestedUnitEnumOf<typename T::UnitType, UnitType>
-    constexpr bool operator==(const T &other) const
+    constexpr bool operator==(const T &other) const noexcept
     {
       return _data == other;
     }
 
     template <UnitType UnitValue>
-    bool operator==(const ValueLiteral<UnitValue> &other) const
+    constexpr bool operator==(const ValueLiteral<UnitValue> &other) const noexcept
     {
       return _data == other;
     }
 
     template <NestedUnitEnumOf<UnitType> E, E UnitValue>
-    bool operator==(const ValueLiteral<UnitValue> &other) const
+    constexpr bool operator==(const ValueLiteral<UnitValue> &other) const noexcept
     {
       return _data == other;
     }
 
     // MARK: Conditional Accessors
 
-    KRYS_NODISCARD Maybe<Raw> raw() const noexcept
+    KRYS_NODISCARD constexpr Maybe<Raw> raw() const noexcept
     {
       return _data.raw();
     }
 
-    KRYS_NODISCARD Maybe<Calc> calc() const noexcept
+    KRYS_NODISCARD constexpr Maybe<Calc> calc() const noexcept
     {
       return _data.calc();
     }
@@ -156,7 +154,7 @@ namespace Krys::HTML
     // MARK: Variant-Like Conformance
 
     template <typename T>
-    KRYS_NODISCARD bool HoldsAlternative() const noexcept
+    KRYS_NODISCARD constexpr bool HoldsAlternative() const noexcept
     {
       if constexpr (SameType<T, Calc>)
       {
@@ -169,7 +167,7 @@ namespace Krys::HTML
     }
 
     template <typename... F>
-    KRYS_NODISCARD decltype(auto) SwitchOn(F &&...f) const noexcept
+    KRYS_NODISCARD constexpr decltype(auto) SwitchOn(F &&...f) const noexcept
     {
       auto visitor = Krys::CreateVisitor(std::forward<F>(f)...);
 
@@ -181,38 +179,38 @@ namespace Krys::HTML
       return visitor(AsRaw());
     }
 
-    KRYS_NODISCARD bool IsKnownZero() const noexcept
+    KRYS_NODISCARD constexpr bool IsKnownZero() const noexcept
     {
       return IsRaw() && _data.payload.number == 0;
     }
 
-    KRYS_NODISCARD bool IsKnownNotZero() const noexcept
+    KRYS_NODISCARD constexpr bool IsKnownNotZero() const noexcept
     {
       return IsRaw() && _data.payload.number != 0;
     }
 
-    KRYS_NODISCARD bool IsRaw() const noexcept
+    KRYS_NODISCARD constexpr bool IsRaw() const noexcept
     {
       return _data.IsRaw();
     }
 
-    KRYS_NODISCARD bool IsCalc() const noexcept
+    KRYS_NODISCARD constexpr bool IsCalc() const noexcept
     {
       return _data.IsCalc();
     }
 
-    KRYS_NODISCARD bool IsEmpty() const noexcept
+    KRYS_NODISCARD constexpr bool IsEmpty() const noexcept
     {
       return _data.IsEmpty();
     }
 
   private:
-    Raw AsRaw() const noexcept
+    KRYS_NODISCARD constexpr Raw AsRaw() const noexcept
     {
       return _data.AsRaw();
     }
 
-    Calc AsCalc() const noexcept
+    KRYS_NODISCARD constexpr Calc AsCalc() const noexcept
     {
       return _data.AsCalc();
     }
@@ -308,7 +306,6 @@ namespace Krys::HTML
     using Base::Base;
     using MarkableTraits = PrimitiveDataMarkableTraits<AnglePercentage<R, V>>;
   };
-
 
   template <CSSRange R = All, typename V = float>
   struct LengthPercentage : PrimitiveNumeric<LengthPercentageRaw<R, V>>

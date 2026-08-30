@@ -22,6 +22,7 @@ namespace Krys::HTML
     GridLine,
     GridLineNames,
     GridTemplateAreas,
+    EasingFunction,
     Filter,
     Function,
     OffsetRotate,
@@ -46,4 +47,4 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSValueType, 37uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSValueType, 38uz);
