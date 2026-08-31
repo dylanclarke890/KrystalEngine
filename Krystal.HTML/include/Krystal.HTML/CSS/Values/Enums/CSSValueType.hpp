@@ -17,6 +17,7 @@ namespace Krys::HTML
     ColorScheme,
     Counter,
     CursorImage,
+    Gradient,
     GridAutoRepeat,
     GridIntegerRepeat,
     GridLine,
@@ -47,4 +48,4 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSValueType, 38uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSValueType, 39uz);

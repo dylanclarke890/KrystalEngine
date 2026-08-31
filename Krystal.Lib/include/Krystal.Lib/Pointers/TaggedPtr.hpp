@@ -86,8 +86,8 @@ namespace Krys
     using storage_type = uintptr_t;
     using tag_type = Enum;
 
-    static constexpr tag_type DefaultTag = DefaultEnumTag;
-    static constexpr storage_type TagMask32Bit = (1 << (alignof(remove_pointer_t<T>) - 1)) - 1;
+    constexpr static tag_type DefaultTag = DefaultEnumTag;
+    constexpr static storage_type TagMask32Bit = (1 << (alignof(remove_pointer_t<T>) - 1)) - 1;
 
     KRYS_NODISCARD constexpr static storage_type Wrap(const RawPtr<T> ptr, tag_type tag) noexcept
     {
@@ -100,8 +100,8 @@ namespace Krys
 
 #if KRYS_ADDRESS_SPACE(64)
     // Save the bottom four bits of the high byte for other uses.
-    static constexpr unsigned TagShift = sizeof(storage_type) * CHAR_BIT - CHAR_BIT + 4;
-    static constexpr storage_type PtrMask = (1ull << TagShift) - 1;
+    constexpr static unsigned TagShift = sizeof(storage_type) * CHAR_BIT - CHAR_BIT + 4;
+    constexpr static storage_type PtrMask = (1ull << TagShift) - 1;
 
     KRYS_NODISCARD constexpr static RawPtr<T> UnwrapPtr(storage_type storage) noexcept
     {
@@ -149,7 +149,7 @@ namespace Krys
     using storage_type = uintptr_t;
     using tag_type = unsigned;
 
-    static constexpr tag_type DefaultTag = 0;
+    constexpr static tag_type DefaultTag = 0;
 
     static storage_type Wrap(const RawPtr<T> ptr, tag_type) noexcept
     {

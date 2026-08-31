@@ -1575,6 +1575,12 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Easing\CSSEasingFunctionValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSGradientValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Images\Gradient.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">

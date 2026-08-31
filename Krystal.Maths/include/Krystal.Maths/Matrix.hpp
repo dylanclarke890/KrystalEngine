@@ -30,8 +30,8 @@
   using Mat##Columns##x##Rows##u = Matrix<unsigned int, Columns, Rows>;
 
 #define MATRIX_INTROSPECTION(columns, rows)                                                                  \
-  static constexpr int Rows = rows;                                                                          \
-  static constexpr int Columns = columns;                                                                    \
+  constexpr static int Rows = rows;                                                                          \
+  constexpr static int Columns = columns;                                                                    \
   using Type = Matrix<T, Columns, Rows>;                                                                     \
   using ComponentType = T;                                                                                   \
   using RowType = Vector<T, Columns>;                                                                        \
@@ -344,12 +344,12 @@ namespace Krys::Maths
   struct Traits<MATRIX_TYPE>
   {
     using ComponentType = T;
-    static constexpr bool IsVector = false;
-    static constexpr bool IsMatrix = true;
+    constexpr static bool IsVector = false;
+    constexpr static bool IsMatrix = true;
 
-    static constexpr int TotalComponents = C * R;
-    static constexpr int Columns = C;
-    static constexpr int Rows = R;
+    constexpr static int TotalComponents = C * R;
+    constexpr static int Columns = C;
+    constexpr static int Rows = R;
   };
 
   template <typename T>

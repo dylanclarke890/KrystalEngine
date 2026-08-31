@@ -411,19 +411,19 @@ namespace Krys::Serialisation
   template <>
   struct ArchiveTraits<XmlArchiveWriter>
   {
-    static constexpr bool IsWriter = true;
-    static constexpr bool IsReader = false;
-    static constexpr bool IsBinary = false;
-    static constexpr bool IsText = true;
+    constexpr static bool IsWriter = true;
+    constexpr static bool IsReader = false;
+    constexpr static bool IsBinary = false;
+    constexpr static bool IsText = true;
   };
 
   template <>
   struct ArchiveTraits<XmlArchiveReader>
   {
-    static constexpr bool IsWriter = false;
-    static constexpr bool IsReader = true;
-    static constexpr bool IsBinary = false;
-    static constexpr bool IsText = true;
+    constexpr static bool IsWriter = false;
+    constexpr static bool IsReader = true;
+    constexpr static bool IsBinary = false;
+    constexpr static bool IsText = true;
   };
 
   template <typename T>

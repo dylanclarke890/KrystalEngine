@@ -217,7 +217,7 @@ namespace Krys::Ranges
     }
 
     template <bool IsMutable, typename TInPlaceOrIterator, typename TRangeOrSentinel, typename... TArgs>
-    static constexpr bool IsReconstructible() noexcept
+    constexpr static bool IsReconstructible() noexcept
     {
       if constexpr (sizeof...(TArgs) == 0)
       {
@@ -417,13 +417,13 @@ namespace Krys::Ranges
   namespace Impl
   {
     template <bool IsMutable, typename... TArgs, typename Tpe>
-    static constexpr bool IsCascadingReconstructible(Tag<Tpe>) noexcept
+    constexpr static bool IsCascadingReconstructible(Tag<Tpe>) noexcept
     {
       return IsReconstructible<IsMutable, std::in_place_type_t<Tpe>, TArgs...>();
     }
 
     template <bool IsMutable, typename... TArgs, typename Tpe, typename... Tpes>
-    static constexpr bool IsCascadingReconstructible(Tag<Tpe, Tpes...>) noexcept
+    constexpr static bool IsCascadingReconstructible(Tag<Tpe, Tpes...>) noexcept
     {
       if constexpr (IsReconstructible<IsMutable, std::in_place_type_t<Tpe>, TArgs...>())
       {

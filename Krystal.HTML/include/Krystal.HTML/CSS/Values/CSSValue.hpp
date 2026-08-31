@@ -116,6 +116,11 @@ namespace Krys::HTML
       return _type == CSSValueType::CursorImage;
     }
 
+    KRYS_NODISCARD bool IsCSSGradientValue() const noexcept
+    {
+      return _type == CSSValueType::Gradient;
+    }
+
     KRYS_NODISCARD bool IsCSSGridAutoRepeatValue() const noexcept
     {
       return _type == CSSValueType::GridAutoRepeat;

@@ -38,7 +38,7 @@ namespace Krys::UI
   public:
     // This value was chosen based on empirical data:
     // 98% of analyzed layouts require less than 8 entries.
-    static constexpr int32 MaxCachedMeasurements = 8;
+    constexpr static int32 MaxCachedMeasurements = 8;
 
     NullableFloat ComputedFlexBasis = {};
     // Instead of recomputing the entire layout every single time, we cache some

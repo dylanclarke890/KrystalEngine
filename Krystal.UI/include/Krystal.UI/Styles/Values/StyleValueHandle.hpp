@@ -17,9 +17,9 @@ namespace Krys::UI
   {
     friend class StyleValuePool;
 
-    static constexpr uint16 HandleTypeMask = 0b0'000'000'000'000'111;
-    static constexpr uint16 HandleIndexedMask = 0b0'000'000'000'001'000;
-    static constexpr uint16 HandleValueMask = 0b1'111'111'111'110'000;
+    constexpr static uint16 HandleTypeMask = 0b0'000'000'000'000'111;
+    constexpr static uint16 HandleIndexedMask = 0b0'000'000'000'001'000;
+    constexpr static uint16 HandleValueMask = 0b1'111'111'111'110'000;
 
     enum class Type : uint8
     {
@@ -43,7 +43,7 @@ namespace Krys::UI
     uint16 _repr {0};
 
   public:
-    static constexpr StyleValueHandle Auto()
+    constexpr static StyleValueHandle Auto()
     {
       StyleValueHandle handle;
       handle.SetType(Type::Auto);

@@ -61,7 +61,7 @@ namespace llvm
     Size_T Size = 0, Capacity;
 
     /// The maximum value of the Size_T used.
-    static constexpr size_t SizeTypeMax()
+    constexpr static size_t SizeTypeMax()
     {
       return std::numeric_limits<Size_T>::max();
     }
@@ -414,7 +414,7 @@ namespace llvm
     friend class SmallVectorTemplateCommon<T>;
 
   protected:
-    static constexpr bool TakesParamByValue = false;
+    constexpr static bool TakesParamByValue = false;
     using ValueParamT = const T &;
 
     SmallVectorTemplateBase(size_t Size) : SmallVectorTemplateCommon<T>(Size)
@@ -582,7 +582,7 @@ namespace llvm
   protected:
     /// True if it's cheap enough to take parameters by value. Doing so avoids
     /// overhead related to mitigations for reference invalidation.
-    static constexpr bool TakesParamByValue = sizeof(T) <= 2 * sizeof(void *);
+    constexpr static bool TakesParamByValue = sizeof(T) <= 2 * sizeof(void *);
 
     /// Either const T& or T, depending on whether it's cheap enough to take
     /// parameters by value.
@@ -1347,7 +1347,7 @@ namespace llvm
     // 1. There is at least one inlined element.
     // 2. `sizeof(SmallVector<T>) <= kPreferredSmallVectorSizeof` unless
     // it contradicts 1.
-    static constexpr size_t kPreferredSmallVectorSizeof = 64;
+    constexpr static size_t kPreferredSmallVectorSizeof = 64;
 
     // static_assert that sizeof(T) is not "too big".
     //
@@ -1378,9 +1378,9 @@ namespace llvm
 
     // Discount the size of the header itself when calculating the maximum inline
     // bytes.
-    static constexpr size_t PreferredInlineBytes = kPreferredSmallVectorSizeof - sizeof(SmallVector<T, 0>);
-    static constexpr size_t NumElementsThatFit = PreferredInlineBytes / sizeof(T);
-    static constexpr size_t value = NumElementsThatFit == 0 ? 1 : NumElementsThatFit;
+    constexpr static size_t PreferredInlineBytes = kPreferredSmallVectorSizeof - sizeof(SmallVector<T, 0>);
+    constexpr static size_t NumElementsThatFit = PreferredInlineBytes / sizeof(T);
+    constexpr static size_t value = NumElementsThatFit == 0 ? 1 : NumElementsThatFit;
   };
 
   /// This is a 'vector' (really, a variable-sized array), optimized

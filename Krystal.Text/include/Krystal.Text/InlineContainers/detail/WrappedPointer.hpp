@@ -197,12 +197,12 @@ namespace std
     using element_type = typename Krys::Ranges::WrappedPointer<T>::element_type;
     using difference_type = typename Krys::Ranges::WrappedPointer<T>::difference_type;
 
-    static constexpr pointer pointer_to(element_type &iter) noexcept
+    constexpr static pointer pointer_to(element_type &iter) noexcept
     {
       return std::addressof(iter);
     }
 
-    static constexpr pointer to_address(const Krys::Ranges::WrappedPointer<T> &iter) noexcept(
+    constexpr static pointer to_address(const Krys::Ranges::WrappedPointer<T> &iter) noexcept(
       noexcept(std::to_address(iter.base())))
     {
       return std::to_address(iter.base());

@@ -7,7 +7,7 @@ namespace Krys
 {
   struct MonotonicTime
   {
-    static constexpr bool is_steady = true;
+    constexpr static bool is_steady = true;
 
     using duration = std::chrono::steady_clock::duration;
     using rep = duration::rep;

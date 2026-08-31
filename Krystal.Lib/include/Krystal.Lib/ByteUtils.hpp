@@ -56,7 +56,7 @@ namespace Krys
     }
 
     template <Endian::Type Src, Endian::Type Dst, Number T>
-    KRYS_NODISCARD static constexpr T AsNumeric(const byte *bytes) noexcept
+    KRYS_NODISCARD constexpr static T AsNumeric(const byte *bytes) noexcept
     {
       T value {};
       std::memcpy(&value, bytes, sizeof(T));
@@ -64,20 +64,20 @@ namespace Krys
     }
 
     template <Endian::Type Src, Endian::Type Dst, Number T>
-    KRYS_NODISCARD static constexpr T AsNumeric(const List<byte> &bytes) noexcept
+    KRYS_NODISCARD constexpr static T AsNumeric(const List<byte> &bytes) noexcept
     {
       return AsNumeric<Src, Dst, T>(bytes.data());
     }
 
     template <Endian::Type Src, Endian::Type Dst, Number T>
-    KRYS_NODISCARD static constexpr T AsNumeric(const byte *bytes, size_t offset) noexcept
+    KRYS_NODISCARD constexpr static T AsNumeric(const byte *bytes, size_t offset) noexcept
     {
       assert(offset + sizeof(T) <= sizeof(bytes));
       return AsNumeric<Src, Dst, T>(bytes + offset);
     }
 
     template <Endian::Type Src, Endian::Type Dst, Number T>
-    KRYS_NODISCARD static constexpr List<T> AsNumericArray(const List<byte> &bytes) noexcept
+    KRYS_NODISCARD constexpr static List<T> AsNumericArray(const List<byte> &bytes) noexcept
     {
       assert(bytes.size() % sizeof(T) == 0);
 
@@ -93,7 +93,7 @@ namespace Krys
     }
 
     template <Endian::Type Src, Endian::Type Dst, Number T>
-    KRYS_NODISCARD static constexpr Array<byte, sizeof(T)> ToBytes(T value) noexcept
+    KRYS_NODISCARD constexpr static Array<byte, sizeof(T)> ToBytes(T value) noexcept
     {
       Array<byte, sizeof(T)> bytes;
 
@@ -104,7 +104,7 @@ namespace Krys
     }
 
     template <Endian::Type Src, Endian::Type Dst, Number T>
-    KRYS_NODISCARD static constexpr void ToBytes(T value, Span<byte> out) noexcept
+    KRYS_NODISCARD constexpr static void ToBytes(T value, Span<byte> out) noexcept
     {
       assert(out.size() >= sizeof(T));
 
@@ -117,7 +117,7 @@ namespace Krys
     }
 
     template <typename T>
-    KRYS_NODISCARD static constexpr Span<byte> ToMutableBytes(T &object) noexcept
+    KRYS_NODISCARD constexpr static Span<byte> ToMutableBytes(T &object) noexcept
     {
       return Span<byte>(reinterpret_cast<byte *>(std::addressof(object)), sizeof(T));
     }
@@ -163,13 +163,13 @@ namespace Krys
       return Span<const byte>(reinterpret_cast<const byte *>(&object), sizeof(T));
     }
 
-    KRYS_NODISCARD static constexpr size_t AlignNext(size_t size, size_t alignment) noexcept
+    KRYS_NODISCARD constexpr static size_t AlignNext(size_t size, size_t alignment) noexcept
     {
       assert(alignment != 0 && (alignment & (alignment - 1)) == 0); // alignment must be a power of two
       return (size + alignment - 1) & ~(alignment - 1);
     }
 
-    KRYS_NODISCARD static constexpr size_t AlignPrev(size_t size, size_t alignment) noexcept
+    KRYS_NODISCARD constexpr static size_t AlignPrev(size_t size, size_t alignment) noexcept
     {
       assert(alignment != 0 && (alignment & (alignment - 1)) == 0); // alignment must be a power of two
       return size & ~(alignment - 1);

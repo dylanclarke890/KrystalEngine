@@ -18,7 +18,7 @@ namespace Krys::IO
     ReadFlags _flags;
 
   public:
-    static constexpr ReadFlags DefaultReadFlags = ReadFlags::None;
+    constexpr static ReadFlags DefaultReadFlags = ReadFlags::None;
 
     explicit NativeFileReader(const Path &path, ReadFlags flags = DefaultReadFlags);
 
@@ -70,7 +70,7 @@ namespace Krys::IO
     WriteFlags _flags;
 
   public:
-    static constexpr WriteFlags DefaultWriteFlags = WriteFlags::Create | WriteFlags::OpenAtEnd;
+    constexpr static WriteFlags DefaultWriteFlags = WriteFlags::Create | WriteFlags::OpenAtEnd;
 
     explicit NativeFileWriter(const Path &path, WriteFlags flags = DefaultWriteFlags);
 

@@ -27,7 +27,7 @@
   using Vec##length##u = Vector<unsigned int, length>;
 
 #define VECTOR_INTROSPECTION(length)                                                                         \
-  static constexpr int Length = length;                                                                      \
+  constexpr static int Length = length;                                                                      \
   using Type = Vector<T, Length>;                                                                            \
   using ComponentType = T;
 
@@ -290,12 +290,12 @@ namespace Krys::Maths
   struct Traits<VECTOR_TYPE>
   {
     using ComponentType = T;
-    static constexpr bool IsVector = true;
-    static constexpr bool IsMatrix = false;
+    constexpr static bool IsVector = true;
+    constexpr static bool IsMatrix = false;
 
-    static constexpr int TotalComponents = N;
-    static constexpr int Rows = N;
-    static constexpr int Columns = 1;
+    constexpr static int TotalComponents = N;
+    constexpr static int Rows = N;
+    constexpr static int Columns = 1;
   };
 
   template <typename T>

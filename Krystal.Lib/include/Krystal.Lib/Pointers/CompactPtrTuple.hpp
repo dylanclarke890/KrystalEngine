@@ -66,12 +66,12 @@ public:                                                                         
   public:
     using storage_type = uintptr_t;
 
-    static constexpr bool Is32Bit = false;
-    static constexpr bool IsCompactedType = true;
+    constexpr static bool Is32Bit = false;
+    constexpr static bool IsCompactedType = true;
 
   private:
     // 0x16 (encoded as 1) is within the first unmapped page for nullptr. Thus, it never appears.
-    static constexpr storage_type DeletedStorageValue = 1;
+    constexpr static storage_type DeletedStorageValue = 1;
 
     storage_type _ptr {0};
 
@@ -259,7 +259,7 @@ public:                                                                         
   {
     using storage_type = CompactPtr<T>;
 
-    static constexpr bool Is32Bit = storage_type::Is32Bit;
+    constexpr static bool Is32Bit = storage_type::Is32Bit;
 
     template <typename U>
     KRYS_ALWAYS_INLINE constexpr static RawPtr<T> exchange(storage_type &ptr, U &&newValue) noexcept
@@ -312,10 +312,10 @@ public:                                                                         
 
 #if KRYS_ADDRESS_SPACE(64)
   public:
-    static constexpr uint8 MaxPtrBits = 48;
+    constexpr static uint8 MaxPtrBits = 48;
     static_assert(KRYS_EFFECTIVE_ADDRESS_WIDTH <= MaxPtrBits);
 
-    static constexpr uint64_t PtrMask = (1ULL << MaxPtrBits) - 1;
+    constexpr static uint64_t PtrMask = (1ULL << MaxPtrBits) - 1;
 
     CompactPtrTuple(TPtr ptr, TData data) noexcept : _data(Encode(ptr, data))
     {

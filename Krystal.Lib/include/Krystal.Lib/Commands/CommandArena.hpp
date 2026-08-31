@@ -18,7 +18,7 @@ namespace Krys
   };
 
   /// @brief An arena for allocating command data. Commands must be standard layout types (PODs) and define a
-  /// static constexpr 'CommandType' Type member.
+  /// constexpr static 'CommandType' Type member.
   ///
   /// NOTE: CommandList's should only be used sequentially, you should not attempt to start a new command
   /// list while you are still pushing commands to a previous one.

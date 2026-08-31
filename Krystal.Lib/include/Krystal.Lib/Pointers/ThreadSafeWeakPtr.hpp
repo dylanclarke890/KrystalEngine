@@ -222,9 +222,9 @@ namespace Krys
     friend class ThreadSafeWeakHashSet;
 
   public:
-    static constexpr uintptr_t StrongOnlyFlag = 1;
-    static constexpr uintptr_t DestructionStartedFlag = 1ull << (sizeof(uintptr_t) * CHAR_BIT - 1);
-    static constexpr uintptr_t RefIncrement = 2;
+    constexpr static uintptr_t StrongOnlyFlag = 1;
+    constexpr static uintptr_t DestructionStartedFlag = 1ull << (sizeof(uintptr_t) * CHAR_BIT - 1);
+    constexpr static uintptr_t RefIncrement = 2;
 
   private:
     mutable Atomic<uintptr_t> _bits {RefIncrement + StrongOnlyFlag};

@@ -8,19 +8,19 @@ namespace Krys
     template <NTTPString Str>
     struct Template
     {
-      static constexpr auto value = Str;
+      constexpr static auto value = Str;
     };
 
     template <NTTPString Str>
     struct PartialTemplate
     {
-      static constexpr uint32 value = 0u;
+      constexpr static uint32 value = 0u;
     };
 
     template <>
     struct PartialTemplate<"Test">
     {
-      static constexpr uint32 value = 3u;
+      constexpr static uint32 value = 3u;
     };
   }
 

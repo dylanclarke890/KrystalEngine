@@ -3,7 +3,7 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Utils/ClampTo.hpp"
+#include "Krystal.Lib/Maths.hpp"
 #include <algorithm>
 
 namespace Krys::HTML

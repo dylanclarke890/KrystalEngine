@@ -83,7 +83,7 @@ namespace Krys::HTML
     constexpr static Storage IndexStorageForEmpty = std::numeric_limits<Storage>::max() - 1uz;
     constexpr static Storage IndexStorageForMovedFrom = std::numeric_limits<Storage>::max();
 
-    KRYS_NODISCARD static constexpr Storage IndexStorageForUnit(UnitType unit) noexcept
+    KRYS_NODISCARD constexpr static Storage IndexStorageForUnit(UnitType unit) noexcept
     {
       return IndexStorageForFirstRaw + ToUnderlying(unit);
     }

@@ -100,10 +100,10 @@ namespace Krys::Serialisation
   template <typename T>
   struct ArchiveTraits
   {
-    static constexpr bool IsWriter = false;
-    static constexpr bool IsReader = false;
-    static constexpr bool IsBinary = false;
-    static constexpr bool IsText = false;
+    constexpr static bool IsWriter = false;
+    constexpr static bool IsReader = false;
+    constexpr static bool IsBinary = false;
+    constexpr static bool IsText = false;
   };
 
   template <typename Archive>

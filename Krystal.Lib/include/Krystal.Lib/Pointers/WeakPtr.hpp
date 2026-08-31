@@ -28,12 +28,12 @@ namespace Krys::detail
     RefPtr<weak_pointer_impl, pointer_traits> _impl;
 
   public:
-    KRYS_NODISCARD static constexpr IntrusiveWeakPtr WithRef(RawPtr<const T> ptr) noexcept
+    KRYS_NODISCARD constexpr static IntrusiveWeakPtr WithRef(RawPtr<const T> ptr) noexcept
     {
       return IntrusiveWeakPtr(ptr);
     }
 
-    KRYS_NODISCARD static constexpr IntrusiveWeakPtr WithRef(const T &ref) noexcept
+    KRYS_NODISCARD constexpr static IntrusiveWeakPtr WithRef(const T &ref) noexcept
     {
       return IntrusiveWeakPtr(ref);
     }

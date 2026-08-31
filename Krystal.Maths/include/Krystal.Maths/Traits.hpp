@@ -12,11 +12,11 @@ namespace Krys::Maths
   {
     using ComponentType = T;
 
-    static constexpr bool IsVector = false;
-    static constexpr bool IsMatrix = false;
+    constexpr static bool IsVector = false;
+    constexpr static bool IsMatrix = false;
 
-    static constexpr int TotalComponents = 0;
-    static constexpr int Rows = 0;
-    static constexpr int Columns = 0;
+    constexpr static int TotalComponents = 0;
+    constexpr static int Rows = 0;
+    constexpr static int Columns = 0;
   };
 }

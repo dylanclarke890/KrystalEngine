@@ -20,7 +20,7 @@ namespace Krys::IO
     ReadFlags _flags;
 
   public:
-    static constexpr ReadFlags DefaultReadFlags = ReadFlags::None;
+    constexpr static ReadFlags DefaultReadFlags = ReadFlags::None;
 
     explicit MemoryStreamReader(List<byte> &buffer, ReadFlags flags = DefaultReadFlags) noexcept
         : _buffer(buffer), _flags(flags)
@@ -150,7 +150,7 @@ namespace Krys::IO
     WriteFlags _flags;
 
   public:
-    static constexpr WriteFlags DefaultWriteFlags = WriteFlags::None;
+    constexpr static WriteFlags DefaultWriteFlags = WriteFlags::None;
 
     explicit MemoryStreamWriter(List<byte> &buffer, WriteFlags flags = DefaultWriteFlags) noexcept
         : _buffer(buffer), _flags(flags)

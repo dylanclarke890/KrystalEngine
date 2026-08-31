@@ -39,7 +39,7 @@ namespace Krys
     pointer _ptr;
 
   public:
-    KRYS_NODISCARD static constexpr IntrusivePtr NoRef(RawPtr<T> ptr) noexcept
+    KRYS_NODISCARD constexpr static IntrusivePtr NoRef(RawPtr<T> ptr) noexcept
     {
       static_assert(!IsPointer<T>, "T must not be a pointer type.");
 
@@ -51,14 +51,14 @@ namespace Krys
       return IntrusivePtr(ptr);
     }
 
-    KRYS_NODISCARD static constexpr IntrusivePtr NoRef(T &ref) noexcept
+    KRYS_NODISCARD constexpr static IntrusivePtr NoRef(T &ref) noexcept
     {
       static_assert(!IsPointer<T>, "T must not be a pointer type.");
 
       return IntrusivePtr(&ref);
     }
 
-    KRYS_NODISCARD static constexpr IntrusivePtr WithRef(RawPtr<T> ptr) noexcept
+    KRYS_NODISCARD constexpr static IntrusivePtr WithRef(RawPtr<T> ptr) noexcept
     {
       static_assert(!IsPointer<T>, "T must not be a pointer type.");
 
@@ -70,7 +70,7 @@ namespace Krys
       return IntrusivePtr(RefPolicy::AddRef(ptr));
     }
 
-    KRYS_NODISCARD static constexpr IntrusivePtr WithRef(T &ref) noexcept
+    KRYS_NODISCARD constexpr static IntrusivePtr WithRef(T &ref) noexcept
     {
       static_assert(!IsPointer<T>, "T must not be a pointer type.");
 

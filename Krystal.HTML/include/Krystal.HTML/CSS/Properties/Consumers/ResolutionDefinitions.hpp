@@ -7,7 +7,7 @@ namespace Krys::HTML
 {
   struct ResolutionValidator
   {
-    KRYS_NODISCARD static constexpr Maybe<ResolutionUnit>
+    KRYS_NODISCARD constexpr static Maybe<ResolutionUnit>
       Validate(CSSUnitType unitType, CSSPropertyParserState &, CSSPropertyParserOptions) noexcept
     {
       return UnitTraits<ResolutionUnit>::Validate(unitType);

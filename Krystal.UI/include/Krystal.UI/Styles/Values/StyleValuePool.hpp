@@ -186,7 +186,7 @@ namespace Krys::UI
       }
     }
 
-    static constexpr bool IsIntegerPackable(float f)
+    constexpr static bool IsIntegerPackable(float f)
     {
       constexpr uint16_t kMaxInlineAbsValue = (1 << 11) - 1;
 
@@ -194,14 +194,14 @@ namespace Krys::UI
       return static_cast<float>(i) == f && i >= -kMaxInlineAbsValue && i <= +kMaxInlineAbsValue;
     }
 
-    static constexpr uint16_t PackInlineInteger(float value)
+    constexpr static uint16_t PackInlineInteger(float value)
     {
       uint16_t isNegative = value < 0 ? 1 : 0;
       return static_cast<uint16_t>((isNegative << 11)
                                    | (static_cast<int32_t>(value) * (isNegative != 0u ? -1 : 1)));
     }
 
-    static constexpr float UnpackInlineInteger(uint16_t value)
+    constexpr static float UnpackInlineInteger(uint16_t value)
     {
       constexpr uint16_t kValueSignMask = 0b0'000'100'000'000'000;
       constexpr uint16_t kValueMagnitudeMask = 0b0'000'011'111'111'111;

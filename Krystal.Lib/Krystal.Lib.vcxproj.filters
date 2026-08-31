@@ -375,10 +375,37 @@
     <ClInclude Include="include\Krystal.Lib\IndexedRange.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Utils\ClampTo.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types\Markable.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Types\Markable.hpp">
+    <ClInclude Include="include\Krystal.Lib\Color\ColorComponents.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Color\ColorMatrix.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Maths.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Color\ColorModels.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Color\ColorTransferFunctions.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Color\ColorTypes.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Color\AlphaPremultiplication.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Color\ColorInterpolationMethod.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Color\ColorUtilities.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Color\ColorSpace.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -8,7 +8,7 @@
 #include "Krystal.Lib/NeverDestroyed.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
-#include "Krystal.Lib/Utils/ClampTo.hpp"
+#include "Krystal.Lib/Maths.hpp"
 
 namespace Krys::HTML
 {

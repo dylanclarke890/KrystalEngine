@@ -24,7 +24,7 @@ namespace Krys::HTML::CSSPropertyParserHelpers
     // <ray-size> = closest-side | closest-corner | farthest-side | farthest-corner | sides
     // https://drafts.fxtf.org/motion-1/#ray-function
 
-    static constexpr auto sizeMappings = std::to_array<std::pair<CSSValueId, RaySize>>({
+    constexpr static auto sizeMappings = std::to_array<std::pair<CSSValueId, RaySize>>({
       {CSSValueId::ClosestSide, RaySize {Keywords::ClosestSide {}}},
       {CSSValueId::ClosestCorner, RaySize {Keywords::ClosestCorner {}}},
       {CSSValueId::FarthestSide, RaySize {Keywords::FarthestSide {}}},

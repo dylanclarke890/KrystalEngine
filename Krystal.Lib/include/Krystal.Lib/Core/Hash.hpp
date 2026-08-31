@@ -175,7 +175,7 @@ namespace Krys
     using PtrType = typename GetPtrHelper<T>::PtrType;
     using UnderlyingType = typename GetPtrHelper<T>::UnderlyingType;
 
-    static constexpr bool IsSafeToCompareToEmptyOrDeleted = true;
+    constexpr static bool IsSafeToCompareToEmptyOrDeleted = true;
 
     KRYS_NODISCARD constexpr static size_t Hash(add_const_t<UnderlyingType> *key) noexcept
     {

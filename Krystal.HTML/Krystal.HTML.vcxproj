@@ -313,6 +313,7 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Borders\CSSBorderImageSliceValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Borders\CSSBorderImageWidthValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Color\CurrentColor.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\CSSGradientValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Easing\CSSEasingFunctionValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Easing\CubicBezierEasingFunction.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Easing\EasingFunction.hpp" />
@@ -383,6 +384,7 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Grid\CSSGridTemplateAreasValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Grid\CSSSubgridValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Grid\GridTemplateAreas.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Values\Images\Gradient.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Motion\CSSRayValue.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Motion\RayFunction.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Values\Primitives\CSSPosition.hpp" />

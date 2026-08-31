@@ -135,6 +135,15 @@
   <ItemGroup>
     <ClInclude Include="include\Krystal.Lib\AlignedStorage.hpp" />
     <ClInclude Include="include\Krystal.Lib\Atomics.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Color\AlphaPremultiplication.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Color\ColorComponents.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Color\ColorInterpolationMethod.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Color\ColorMatrix.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Color\ColorModels.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Color\ColorSpace.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Color\ColorTransferFunctions.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Color\ColorTypes.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Color\ColorUtilities.hpp" />
     <ClInclude Include="include\Krystal.Lib\Commands\CommandArena.hpp" />
     <ClInclude Include="include\Krystal.Lib\Commands\CommandList.hpp" />
     <ClInclude Include="include\Krystal.Lib\Commands\CommandListReader.hpp" />
@@ -151,6 +160,7 @@
     <ClInclude Include="include\Krystal.Lib\ForbidHeapAllocation.hpp" />
     <ClInclude Include="include\Krystal.Lib\IndexedRange.hpp" />
     <ClInclude Include="include\Krystal.Lib\InlineContainers\Forward.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Maths.hpp" />
     <ClInclude Include="include\Krystal.Lib\Mixins\NonCopyable.hpp" />
     <ClInclude Include="include\Krystal.Lib\Detection\Compiler.hpp" />
     <ClInclude Include="include\Krystal.Lib\Detection\CPU.hpp" />
@@ -242,7 +252,6 @@
     <ClInclude Include="include\Krystal.Lib\Types\Numeric.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\UniqueArray.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Variant.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Utils\ClampTo.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\LosslessStaticCast.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\EBCO.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\Hijack.hpp" />

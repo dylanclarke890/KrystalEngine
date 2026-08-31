@@ -246,8 +246,8 @@ namespace magic_enum
     template <typename E, typename>
     struct enum_range
     {
-      static constexpr int min = MAGIC_ENUM_RANGE_MIN;
-      static constexpr int max = MAGIC_ENUM_RANGE_MAX;
+      constexpr static int min = MAGIC_ENUM_RANGE_MIN;
+      constexpr static int max = MAGIC_ENUM_RANGE_MAX;
     };
 
     template <typename E>
@@ -448,13 +448,13 @@ namespace magic_enum
         return string_view(data(), size());
       }
 
-      static constexpr char_type chars_[1] = {};
+      constexpr static char_type chars_[1] = {};
     };
 
     template <typename Op = std::equal_to<>>
     class case_insensitive
     {
-      static constexpr char_type to_lower(char_type c) noexcept
+      constexpr static char_type to_lower(char_type c) noexcept
       {
         return (c >= static_cast<char_type>('A') && c <= static_cast<char_type>('Z'))
                  ? static_cast<char_type>(c + (static_cast<char_type>('a') - static_cast<char_type>('A')))
@@ -1311,7 +1311,7 @@ namespace magic_enum
     template <typename Value>
     struct constexpr_hash_t<Value, std::enable_if_t<std::is_same_v<Value, string_view>>>
     {
-      static constexpr std::uint32_t crc_table[256] {
+      constexpr static std::uint32_t crc_table[256] {
         0x00'00'00'00L, 0x77'07'30'96L, 0xee'0e'61'2cL, 0x99'09'51'baL, 0x07'6d'c4'19L, 0x70'6a'f4'8fL,
         0xe9'63'a5'35L, 0x9e'64'95'a3L, 0x0e'db'88'32L, 0x79'dc'b8'a4L, 0xe0'd5'e9'1eL, 0x97'd2'd9'88L,
         0x09'b6'4c'2bL, 0x7e'b1'7c'bdL, 0xe7'b8'2d'07L, 0x90'bf'1d'91L, 0x1d'b7'10'64L, 0x6a'b0'20'f2L,

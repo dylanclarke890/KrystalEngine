@@ -6,10 +6,10 @@
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Core/Visitor.hpp"
+#include "Krystal.Lib/Maths.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
 #include <cassert>
-#include <numbers>
 
 namespace Krys::HTML
 {
@@ -471,148 +471,6 @@ namespace Krys::HTML
 #pragma endregion
 
 #pragma region <angle>
-
-#pragma region Angle Utils
-
-  constexpr double radiansPerDegreeDouble = std::numbers::pi / 180.0;
-  constexpr double degreesPerRadianDouble = 180.0 / std::numbers::pi;
-  constexpr double gradientsPerDegreeDouble = 400.0 / 360.0;
-  constexpr double degreesPerGradientDouble = 360.0 / 400.0;
-  constexpr double turnsPerDegreeDouble = 1.0 / 360.0;
-  constexpr double degreesPerTurnDouble = 360.0;
-  constexpr double radiansPerTurnDouble = 2.0 * std::numbers::pi;
-
-  KRYS_NODISCARD constexpr double deg2rad(double d) noexcept
-  {
-    return d * radiansPerDegreeDouble;
-  }
-
-  KRYS_NODISCARD constexpr double rad2deg(double r) noexcept
-  {
-    return r * degreesPerRadianDouble;
-  }
-
-  KRYS_NODISCARD constexpr double deg2grad(double d) noexcept
-  {
-    return d * gradientsPerDegreeDouble;
-  }
-
-  KRYS_NODISCARD constexpr double grad2deg(double g) noexcept
-  {
-    return g * degreesPerGradientDouble;
-  }
-
-  KRYS_NODISCARD constexpr double deg2turn(double d) noexcept
-  {
-    return d * turnsPerDegreeDouble;
-  }
-
-  KRYS_NODISCARD constexpr double turn2deg(double t) noexcept
-  {
-    return t * degreesPerTurnDouble;
-  }
-
-  // Note that these differ from the casting the double values above in their rounding errors.
-  constexpr float radiansPerDegreeFloat = std::numbers::pi_v<float> / 180.0f;
-  constexpr float degreesPerRadianFloat = 180.0f / std::numbers::pi_v<float>;
-  constexpr float gradientsPerDegreeFloat = 400.0f / 360.0f;
-  constexpr float degreesPerGradientFloat = 360.0f / 400.0f;
-  constexpr float turnsPerDegreeFloat = 1.0f / 360.0f;
-  constexpr float degreesPerTurnFloat = 360.0f;
-  constexpr float radiansPerTurnFloat = 2.0f * std::numbers::pi_v<float>;
-
-  KRYS_NODISCARD constexpr float deg2rad(float d) noexcept
-  {
-    return d * radiansPerDegreeFloat;
-  }
-
-  KRYS_NODISCARD constexpr float rad2deg(float r) noexcept
-  {
-    return r * degreesPerRadianFloat;
-  }
-
-  KRYS_NODISCARD constexpr float deg2grad(float d) noexcept
-  {
-    return d * gradientsPerDegreeFloat;
-  }
-
-  KRYS_NODISCARD constexpr float grad2deg(float g) noexcept
-  {
-    return g * degreesPerGradientFloat;
-  }
-
-  KRYS_NODISCARD constexpr float deg2turn(float d) noexcept
-  {
-    return d * turnsPerDegreeFloat;
-  }
-
-  KRYS_NODISCARD constexpr float turn2deg(float t) noexcept
-  {
-    return t * degreesPerTurnFloat;
-  }
-
-  // Treat these as conversions through the canonical unit for angles, which is degrees.
-  KRYS_NODISCARD constexpr double rad2grad(double r) noexcept
-  {
-    return deg2grad(rad2deg(r));
-  }
-
-  KRYS_NODISCARD constexpr double grad2rad(double g) noexcept
-  {
-    return deg2rad(grad2deg(g));
-  }
-
-  KRYS_NODISCARD constexpr double turn2grad(double t) noexcept
-  {
-    return deg2grad(turn2deg(t));
-  }
-
-  KRYS_NODISCARD constexpr double grad2turn(double g) noexcept
-  {
-    return deg2turn(grad2deg(g));
-  }
-
-  KRYS_NODISCARD constexpr double turn2rad(double t) noexcept
-  {
-    return deg2rad(turn2deg(t));
-  }
-
-  KRYS_NODISCARD constexpr double rad2turn(double r) noexcept
-  {
-    return deg2turn(rad2deg(r));
-  }
-
-  KRYS_NODISCARD constexpr float rad2grad(float r) noexcept
-  {
-    return deg2grad(rad2deg(r));
-  }
-
-  KRYS_NODISCARD constexpr float grad2rad(float g) noexcept
-  {
-    return deg2rad(grad2deg(g));
-  }
-
-  KRYS_NODISCARD constexpr float turn2grad(float t) noexcept
-  {
-    return deg2grad(turn2deg(t));
-  }
-
-  KRYS_NODISCARD constexpr float grad2turn(float g) noexcept
-  {
-    return deg2turn(grad2deg(g));
-  }
-
-  KRYS_NODISCARD constexpr float turn2rad(float t) noexcept
-  {
-    return deg2rad(turn2deg(t));
-  }
-
-  KRYS_NODISCARD constexpr float rad2turn(float r) noexcept
-  {
-    return deg2turn(rad2deg(r));
-  }
-
-#pragma endregion
 
   enum class AngleUnit : uint8
   {
@@ -1329,13 +1187,13 @@ namespace Krys::HTML
       return true;
     }
 
-    static constexpr Maybe<FrequencyUnit> Validate(CSSUnitType cssUnit) noexcept
+    constexpr static Maybe<FrequencyUnit> Validate(CSSUnitType cssUnit) noexcept
     {
       return ToFrequencyUnit(cssUnit);
     }
 
     template <FrequencyUnit To, typename T>
-    static constexpr T Convert(T value, FrequencyUnit unit) noexcept
+    constexpr static T Convert(T value, FrequencyUnit unit) noexcept
     {
       return ConvertFrequency<To, T>(value, unit);
     }

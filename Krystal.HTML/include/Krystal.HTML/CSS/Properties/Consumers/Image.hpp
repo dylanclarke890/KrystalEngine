@@ -1,4 +1,5 @@
 ﻿#pragma once
+#pragma once
 
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"

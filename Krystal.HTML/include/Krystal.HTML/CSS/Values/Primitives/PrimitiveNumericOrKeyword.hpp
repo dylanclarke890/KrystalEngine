@@ -17,8 +17,8 @@ namespace Krys::HTML
     using Data = PrimitiveData<NumericType, Ks...>;
     using Index = typename Data::Index;
     using Keywords = typename Data::Keywords;
-    static constexpr auto tokens = NumericType::tokens;
-    static constexpr auto category = NumericType::category;
+    constexpr static auto tokens = NumericType::tokens;
+    constexpr static auto category = NumericType::category;
 
     // MARK: Constructors
 

@@ -214,30 +214,30 @@ namespace Krys::Gfx
 
   namespace Colours
   {
-    static constexpr ColourbPremultiplied White {255, 255, 255, 255};
-    static constexpr ColourbPremultiplied Black {0, 0, 0, 255};
-    static constexpr ColourbPremultiplied Transparent {0, 0, 0, 0};
-    static constexpr ColourbPremultiplied Red {255, 0, 0, 255};
-    static constexpr ColourbPremultiplied Green {0, 128, 0, 255};
-    static constexpr ColourbPremultiplied Blue {0, 0, 255, 255};
-    static constexpr ColourbPremultiplied Gray25 {64, 64, 64, 255};
-    static constexpr ColourbPremultiplied Gray50 {128, 128, 128, 255};
-    static constexpr ColourbPremultiplied Gray75 {192, 192, 192, 255};
-    static constexpr ColourbPremultiplied Coral {255, 127, 79, 255};
-    static constexpr ColourbPremultiplied Yellow {255, 255, 0, 255};
-    static constexpr ColourbPremultiplied Orange {255, 165, 0, 255};
-    static constexpr ColourbPremultiplied Purple {128, 0, 128, 255};
-    static constexpr ColourbPremultiplied Pink {255, 191, 204, 255};
-    static constexpr ColourbPremultiplied Brown {165, 42, 42, 255};
-    static constexpr ColourbPremultiplied Cyan {0, 255, 255, 255};
-    static constexpr ColourbPremultiplied Magenta {255, 0, 255, 255};
-    static constexpr ColourbPremultiplied Lime {0, 255, 0, 255};
-    static constexpr ColourbPremultiplied Teal {0, 128, 128, 255};
-    static constexpr ColourbPremultiplied Indigo {74, 0, 130, 255};
-    static constexpr ColourbPremultiplied Maroon {128, 0, 0, 255};
-    static constexpr ColourbPremultiplied Olive {128, 128, 0, 255};
-    static constexpr ColourbPremultiplied Navy {0, 0, 128, 255};
-    static constexpr ColourbPremultiplied Beige {245, 245, 220, 255};
-    static constexpr ColourbPremultiplied Ivory {255, 255, 240, 255};
+    constexpr static ColourbPremultiplied White {255, 255, 255, 255};
+    constexpr static ColourbPremultiplied Black {0, 0, 0, 255};
+    constexpr static ColourbPremultiplied Transparent {0, 0, 0, 0};
+    constexpr static ColourbPremultiplied Red {255, 0, 0, 255};
+    constexpr static ColourbPremultiplied Green {0, 128, 0, 255};
+    constexpr static ColourbPremultiplied Blue {0, 0, 255, 255};
+    constexpr static ColourbPremultiplied Gray25 {64, 64, 64, 255};
+    constexpr static ColourbPremultiplied Gray50 {128, 128, 128, 255};
+    constexpr static ColourbPremultiplied Gray75 {192, 192, 192, 255};
+    constexpr static ColourbPremultiplied Coral {255, 127, 79, 255};
+    constexpr static ColourbPremultiplied Yellow {255, 255, 0, 255};
+    constexpr static ColourbPremultiplied Orange {255, 165, 0, 255};
+    constexpr static ColourbPremultiplied Purple {128, 0, 128, 255};
+    constexpr static ColourbPremultiplied Pink {255, 191, 204, 255};
+    constexpr static ColourbPremultiplied Brown {165, 42, 42, 255};
+    constexpr static ColourbPremultiplied Cyan {0, 255, 255, 255};
+    constexpr static ColourbPremultiplied Magenta {255, 0, 255, 255};
+    constexpr static ColourbPremultiplied Lime {0, 255, 0, 255};
+    constexpr static ColourbPremultiplied Teal {0, 128, 128, 255};
+    constexpr static ColourbPremultiplied Indigo {74, 0, 130, 255};
+    constexpr static ColourbPremultiplied Maroon {128, 0, 0, 255};
+    constexpr static ColourbPremultiplied Olive {128, 128, 0, 255};
+    constexpr static ColourbPremultiplied Navy {0, 0, 128, 255};
+    constexpr static ColourbPremultiplied Beige {245, 245, 220, 255};
+    constexpr static ColourbPremultiplied Ivory {255, 255, 240, 255};
   }
 }

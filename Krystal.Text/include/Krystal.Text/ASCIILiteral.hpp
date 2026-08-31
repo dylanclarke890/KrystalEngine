@@ -20,7 +20,7 @@ namespace Krys::Text
     Span<const char> _characters;
 
   public:
-    static constexpr ASCIILiteral From(const char *string) noexcept
+    constexpr static ASCIILiteral From(const char *string) noexcept
     {
       return ASCIILiteral {Span(string, std::char_traits<char>::length(string) + 1)};
     }

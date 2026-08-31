@@ -82,9 +82,9 @@ namespace Krys::UI
     using Length = StyleLength;
     using SizeLength = StyleSizeLength;
 
-    static constexpr float DefaultFlexGrow = 0.0f;
-    static constexpr float DefaultFlexShrink = 0.0f;
-    static constexpr float WebDefaultFlexShrink = 1.0f;
+    constexpr static float DefaultFlexGrow = 0.0f;
+    constexpr static float DefaultFlexShrink = 0.0f;
+    constexpr static float WebDefaultFlexShrink = 1.0f;
 
     void SetOpacity(float opacity) noexcept
     {

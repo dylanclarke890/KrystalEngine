@@ -94,19 +94,19 @@ namespace Krys::Serialisation
   template <>
   struct ArchiveTraits<BinaryArchiveWriter>
   {
-    static constexpr bool IsWriter = true;
-    static constexpr bool IsReader = false;
-    static constexpr bool IsBinary = true;
-    static constexpr bool IsText = false;
+    constexpr static bool IsWriter = true;
+    constexpr static bool IsReader = false;
+    constexpr static bool IsBinary = true;
+    constexpr static bool IsText = false;
   };
 
   template <>
   struct ArchiveTraits<BinaryArchiveReader>
   {
-    static constexpr bool IsWriter = false;
-    static constexpr bool IsReader = true;
-    static constexpr bool IsBinary = true;
-    static constexpr bool IsText = false;
+    constexpr static bool IsWriter = false;
+    constexpr static bool IsReader = true;
+    constexpr static bool IsBinary = true;
+    constexpr static bool IsText = false;
   };
 
   template <IsBinaryArchive Archive>
