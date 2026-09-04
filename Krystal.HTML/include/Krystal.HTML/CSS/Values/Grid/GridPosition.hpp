@@ -128,7 +128,7 @@ namespace Krys::HTML
     static void setMaxPositionForTesting(unsigned);
 
   private:
-    enum class GridPositionType : uint8_t
+    enum class GridPositionType : uint8
     {
       Auto,
       Explicit,

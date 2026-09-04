@@ -14,7 +14,7 @@
 namespace Krys::HTML
 {
   // https://www.w3.org/TR/css-values-4/#numeric-types
-  enum class NumericTypeCategory : uint8_t
+  enum class NumericTypeCategory : uint8
   {
     Integer,
     Number,

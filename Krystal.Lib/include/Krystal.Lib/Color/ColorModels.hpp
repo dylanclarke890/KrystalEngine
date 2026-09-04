@@ -68,8 +68,8 @@ namespace Krys
     return UnresolvedColorType<ColorType> {input};
   }
 
-  KRYS_NODISCARD constexpr ColorComponents<uint8_t, 4>
-    ResolveColorComponents(const ColorComponents<uint8_t, 4> &colorComponents) noexcept
+  KRYS_NODISCARD constexpr ColorComponents<uint8, 4>
+    ResolveColorComponents(const ColorComponents<uint8, 4> &colorComponents) noexcept
   {
     return colorComponents;
   }
@@ -116,7 +116,7 @@ namespace Krys
     }
 
     template <typename C>
-    requires SameType<typename C::ComponentType, uint8_t>
+    requires SameType<typename C::ComponentType, uint8>
     constexpr static C Resolve(C color) noexcept
     {
       return color;
@@ -161,10 +161,10 @@ namespace Krys
   };
 
   template <>
-  struct AlphaTraits<uint8_t>
+  struct AlphaTraits<uint8>
   {
-    constexpr static uint8_t transparent = 0;
-    constexpr static uint8_t opaque = 255;
+    constexpr static uint8 transparent = 0;
+    constexpr static uint8 opaque = 255;
   };
 
   // Analogous components categories as defined by CSS Color 4 -
@@ -442,9 +442,9 @@ namespace Krys
   };
 
   template <>
-  struct RGBModel<uint8_t, RGBBoundedness::Bounded>
+  struct RGBModel<uint8, RGBBoundedness::Bounded>
   {
-    constexpr static Array<ColorComponentInfo<uint8_t>, 3> componentInfo {
+    constexpr static Array<ColorComponentInfo<uint8>, 3> componentInfo {
       {{0, 255, ColorComponentType::Number, ColorComponentCategory::Reds},
        {0, 255, ColorComponentType::Number, ColorComponentCategory::Greens},
        {0, 255, ColorComponentType::Number, ColorComponentCategory::Blues}}};

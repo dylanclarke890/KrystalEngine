@@ -330,12 +330,12 @@ namespace Krys
   };
 
   template <>
-  struct DefaultHash<bool> : public IntegerHash<uint8_t>
+  struct DefaultHash<bool> : public IntegerHash<uint8>
   {
   };
 
   template <>
-  struct DefaultHash<uint8_t> : public IntegerHash<uint8_t>
+  struct DefaultHash<uint8> : public IntegerHash<uint8>
   {
   };
 

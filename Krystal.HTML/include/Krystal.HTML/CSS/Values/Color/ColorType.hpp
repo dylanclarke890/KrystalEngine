@@ -4,7 +4,7 @@
 
 namespace Krys::HTML
 {
-  enum class ColorType : uint8_t
+  enum class ColorType : uint8
   {
     Absolute = 0,     ///< Absolute color values (e.g., #RRGGBB, rgb(), hsl(), etc.)
     Current = 1 << 0, ///< The current color value (e.g., currentColor)

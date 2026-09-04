@@ -136,7 +136,10 @@
     <ClInclude Include="include\Krystal.Lib\AlignedStorage.hpp" />
     <ClInclude Include="include\Krystal.Lib\Atomics.hpp" />
     <ClInclude Include="include\Krystal.Lib\Color\AlphaPremultiplication.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Color\Color.hpp" />
     <ClInclude Include="include\Krystal.Lib\Color\ColorComponents.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Color\ColorConversion.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Color\ColorFlags.hpp" />
     <ClInclude Include="include\Krystal.Lib\Color\ColorInterpolationMethod.hpp" />
     <ClInclude Include="include\Krystal.Lib\Color\ColorMatrix.hpp" />
     <ClInclude Include="include\Krystal.Lib\Color\ColorModels.hpp" />
@@ -144,6 +147,7 @@
     <ClInclude Include="include\Krystal.Lib\Color\ColorTransferFunctions.hpp" />
     <ClInclude Include="include\Krystal.Lib\Color\ColorTypes.hpp" />
     <ClInclude Include="include\Krystal.Lib\Color\ColorUtilities.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Color\DestinationColorSpace.hpp" />
     <ClInclude Include="include\Krystal.Lib\Commands\CommandArena.hpp" />
     <ClInclude Include="include\Krystal.Lib\Commands\CommandList.hpp" />
     <ClInclude Include="include\Krystal.Lib\Commands\CommandListReader.hpp" />
