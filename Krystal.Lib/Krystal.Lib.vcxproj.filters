@@ -420,6 +420,12 @@
     <ClInclude Include="include\Krystal.Lib\Color\DestinationColorSpace.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Color\ColorLuminance.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Color\ColorInterpolation.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Events\EventManager.cpp">
@@ -432,6 +438,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Detection\NumberOfCores.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Color\Color.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Color\ColorConversion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Color\ColorLuminance.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Color\ColorInterpolation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

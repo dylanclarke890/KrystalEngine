@@ -102,7 +102,7 @@ namespace Krys
     friend constexpr ResolvedColorType<C> ResolvedColor(C) noexcept;
 
     explicit constexpr ResolvedColorType(ColorType color) noexcept
-        : ExposedColorType<ColorType, typename ColorType::Model> {resolve(color)}
+        : ExposedColorType<ColorType, typename ColorType::Model> {Resolve(color)}
     {
     }
 

@@ -77,7 +77,7 @@ namespace Krys
 
   KRYS_NODISCARD inline uint8 ConvertPrescaledSRGBAFloatToSRGBAByte(float value) noexcept
   {
-    return std::clamp(std::lround(value), 0l, 255l);
+    return static_cast<uint8>(std::clamp(std::lround(value), 0l, 255l));
   }
 
   template <typename T>
@@ -89,7 +89,7 @@ namespace Krys
   template <typename T>
   KRYS_NODISCARD constexpr T ConvertFloatAlphaTo(float value) noexcept
   {
-    return value / 255.0f;
+    return static_cast<T>(value / 255.0f);
   }
 
   template <typename ColorType, typename Functor>
@@ -107,7 +107,7 @@ namespace Krys
   }
 
   template <typename ColorType>
-  KRYS_NODISCARD constexpr auto ColorWithOverriddenAlpha(const ColorType &, uint8 overrideAlpha) noexcept
+  KRYS_NODISCARD constexpr auto ColorWithOverriddenAlpha(const ColorType &color, uint8 overrideAlpha) noexcept
   {
     auto copy = color.Unresolved();
     copy.alpha = ConvertByteAlphaTo<typename ColorType::ComponentType>(overrideAlpha);
@@ -115,7 +115,7 @@ namespace Krys
   }
 
   template <typename ColorType>
-  KRYS_NODISCARD constexpr auto ColorWithOverriddenAlpha(const ColorType &, float overrideAlpha) noexcept
+  KRYS_NODISCARD constexpr auto ColorWithOverriddenAlpha(const ColorType &color, float overrideAlpha) noexcept
   {
     auto copy = color.Unresolved();
     copy.alpha = ConvertFloatAlphaTo<typename ColorType::ComponentType>(overrideAlpha);
@@ -123,7 +123,7 @@ namespace Krys
   }
 
   template <typename ColorType>
-  KRYS_NODISCARD constexpr auto InvertedColorWithOverriddenAlpha(const ColorType &,
+  KRYS_NODISCARD constexpr auto InvertedColorWithOverriddenAlpha(const ColorType &color,
                                                                  uint8 overrideAlpha) noexcept
   {
     static_assert(ColorType::Model::isInvertible);
@@ -242,7 +242,9 @@ namespace Krys
   template <typename ComponentType>
   KRYS_NODISCARD inline ComponentType NormalizeHue(ComponentType hue) noexcept
   {
-    return std::fmod(std::fmod(hue, 360.0) + 360.0, 360.0);
+    constexpr auto threeSixty = static_cast<ComponentType>(360.0);
+    return static_cast<ComponentType>(
+      std::fmod(std::fmod(hue, threeSixty) + threeSixty, threeSixty));
   }
 
   template <typename ColorType>

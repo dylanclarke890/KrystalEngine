@@ -140,7 +140,9 @@
     <ClInclude Include="include\Krystal.Lib\Color\ColorComponents.hpp" />
     <ClInclude Include="include\Krystal.Lib\Color\ColorConversion.hpp" />
     <ClInclude Include="include\Krystal.Lib\Color\ColorFlags.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Color\ColorInterpolation.hpp" />
     <ClInclude Include="include\Krystal.Lib\Color\ColorInterpolationMethod.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Color\ColorLuminance.hpp" />
     <ClInclude Include="include\Krystal.Lib\Color\ColorMatrix.hpp" />
     <ClInclude Include="include\Krystal.Lib\Color\ColorModels.hpp" />
     <ClInclude Include="include\Krystal.Lib\Color\ColorSpace.hpp" />
@@ -276,6 +278,10 @@
     <ClInclude Include="include\Krystal.Lib\Core\MagicEnum.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Color\Color.cpp" />
+    <ClCompile Include="src\Color\ColorConversion.cpp" />
+    <ClCompile Include="src\Color\ColorInterpolation.cpp" />
+    <ClCompile Include="src\Color\ColorLuminance.cpp" />
     <ClCompile Include="src\Detection\NumberOfCores.cpp" />
     <ClCompile Include="src\Events\EventManager.cpp" />
     <ClCompile Include="third-party\llvm\Support\MemAlloc.cpp" />

@@ -4,6 +4,8 @@
 
 namespace Krys
 {
+  class DestinationColorSpace;
+
   enum class ColorSpace : uint8;
 
   template <typename Output, typename Input, typename = void>
@@ -84,6 +86,11 @@ namespace Krys
                                      ColorComponents<float, 4> inputColorComponents,
                                      ColorSpace outputColorSpace) noexcept;
 
+  KRYS_NODISCARD ColorComponents<float, 4>
+    ConvertAndResolveColorComponents(ColorSpace inputColorSpace,
+                                     ColorComponents<float, 4> inputColorComponents,
+                                     const DestinationColorSpace &outputColorSpace) noexcept;
+
   /// Looks for a an analogous component in `Output` of `Input[IndexInInput]`.
   /// For example, take the following:
   /// auto result = AnalogousComponentIndex<LCHA<float>, HSLA<float>, 0>;
@@ -126,8 +133,10 @@ namespace Krys
 
   // MARK: White Point.
 
-  constexpr Array<float, 3> D50WhitePoint {0.3457 / 0.3585, 1.0, (1.0 - 0.3457 - 0.3585) / 0.3585};
-  constexpr Array<float, 3> D65WhitePoint {0.3127 / 0.3290, 1.0, (1.0 - 0.3127 - 0.3290) / 0.3290};
+  constexpr Array<float, 3> D50WhitePoint {static_cast<float>(0.3457 / 0.3585), 1.0,
+                                           static_cast<float>((1.0 - 0.3457 - 0.3585) / 0.3585)};
+  constexpr Array<float, 3> D65WhitePoint {static_cast<float>(0.3127 / 0.3290), 1.0,
+                                           static_cast<float>((1.0 - 0.3127 - 0.3290) / 0.3290)};
 
   // MARK: Chromatic Adaptation conversions.
 
@@ -424,10 +433,14 @@ namespace Krys
 
       using InputWithReplacement = ColorTypeWithReplacementComponent<Input, float>;
       if constexpr (SameType<InputWithReplacement, Output>)
+      {
         return CreateFromComponents<InputWithReplacement>(
-          AsColorComponents(color.Resolved()).map([](uint8 value) -> float { return value / 255.0f; }));
+          AsColorComponents(color.Resolved()).Map([](uint8 value) -> float { return value / 255.0f; }));
+      }
       else
+      {
         return ConvertColor<Output>(ConvertColor<InputWithReplacement>(color));
+      }
     }
 
     KRYS_NODISCARD constexpr static Output HandleToByteConversion(const Input &color) noexcept
@@ -437,11 +450,16 @@ namespace Krys
 
       using OutputWithReplacement = ColorTypeWithReplacementComponent<Output, float>;
       if constexpr (SameType<OutputWithReplacement, Input>)
+      {
         return CreateFromComponents<Output>(
           AsColorComponents(color.Resolved())
-            .map([](float value) -> uint8 { return std::clamp(std::lround(value * 255.0f), 0l, 255l); }));
+            .Map([](float value) -> uint8
+                 { return static_cast<uint8>(std::clamp(std::lround(value * 255.0f), 0l, 255l)); }));
+      }
       else
+      {
         return ConvertColor<Output>(ConvertColor<OutputWithReplacement>(color));
+      }
     }
 
     template <typename ColorType>
@@ -449,8 +467,8 @@ namespace Krys
       typename ColorType::LinearCounterpart
     {
       auto [c1, c2, c3, alpha] = color.Resolved();
-      return {ColorType::TransferFunction::toLinear(c1), ColorType::TransferFunction::toLinear(c2),
-              ColorType::TransferFunction::toLinear(c3), alpha};
+      return {ColorType::TransferFunction::ToLinear(c1), ColorType::TransferFunction::ToLinear(c2),
+              ColorType::TransferFunction::ToLinear(c3), alpha};
     }
 
     template <typename ColorType>

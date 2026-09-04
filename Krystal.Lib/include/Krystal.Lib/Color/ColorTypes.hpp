@@ -82,7 +82,7 @@ namespace Krys
     static_assert(Integral<T>);
 
     constexpr auto componentInfo = ColorType::Model::componentInfo[Index];
-    return std::clamp<T>(c, componentInfo.min, componentInfo.max);
+    return static_cast<ColorType::ComponentType>(std::clamp<T>(c, componentInfo.min, componentInfo.max));
   }
 
   template <typename ColorType, unsigned Index>
@@ -92,7 +92,7 @@ namespace Krys
 
     if constexpr (componentInfo.type == ColorComponentType::Angle)
     {
-      return std::fmod(std::fmod(c, 360.0) + 360.0, 360.0);
+      return static_cast<float>(std::fmod(std::fmod(c, 360.0) + 360.0, 360.0));
     }
 
     if constexpr (componentInfo.min == -std::numeric_limits<float>::infinity()
@@ -482,7 +482,7 @@ namespace Krys
   }
 
   template <typename BoundedColorType, typename ColorType>
-  KRYS_NODISCARD constexpr Maybe<BoundedColorType> colorIfInGamut(ColorType color) noexcept
+  KRYS_NODISCARD constexpr Maybe<BoundedColorType> ColorIfInGamut(ColorType color) noexcept
   {
     static_assert(IsRGBBoundedType<BoundedColorType>);
     static_assert(SameType<BoundedColorType, typename ColorType::BoundedCounterpart>);
@@ -497,7 +497,7 @@ namespace Krys
   }
 
   template <typename BoundedColorType, typename ColorType>
-  KRYS_NODISCARD constexpr BoundedColorType clipToGamut(ColorType color) noexcept
+  KRYS_NODISCARD constexpr BoundedColorType ClipToGamut(ColorType color) noexcept
   {
     static_assert(IsRGBBoundedType<BoundedColorType>);
     static_assert(SameType<BoundedColorType, typename ColorType::BoundedCounterpart>);
