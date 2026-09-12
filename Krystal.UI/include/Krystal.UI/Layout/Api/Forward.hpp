@@ -1,16 +1,16 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Maths/Vector.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Maths/Vector.hpp"
 #include "Krystal.UI/Styles/Enums/MeasureMode.hpp"
 #include <limits>
 
-namespace Krys::UI
+namespace krys::UI
 {
   using NodeRef = class Node *;
   using NodeConstRef = const class Node *;
 
-  using Size = Maths::Vec2;
+  using Size = Vec2;
 
   /// @brief Returns the computed dimensions of the node, following the constraints of `widthMode` and
   /// `heightMode`:

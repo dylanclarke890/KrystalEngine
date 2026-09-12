@@ -1,0 +1,1050 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Krystal.Core\Types\Array.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Concepts.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\TypeTraits.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Numeric.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Attributes.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Detection\Compiler.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Base.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Utils\Move.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Detection\NumberOfCores.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Detection\CPU.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\TypeCast.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Assert.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Debug.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Detection\OS.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Utils\AlignedStorage.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\ASCII.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Utils\ForbidHeapAllocation.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Utils\Tags.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\Maybe.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Enum.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Detection\AddressSpaceBitSize.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\HashMap.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\Variant.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Utils\NeverDestroyed.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Utils\SetForScope.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\Markable.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\Base.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Visitor.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Macros.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\BoolOr.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\HashSet.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Utils\IndexedRange.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Utils\ZippedRange.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\Stack.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\Queue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\Pair.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\NTTPMaybe.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\NTTPString.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\String.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\Span.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Utils\StrongOrder.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Utils\NativeHandle.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\MagicEnum.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Endian.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\Expected.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\RefCounted.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Hash.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Utils\StringId.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\CanMakeCheckedPtr.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\CanMakeWeakPtr.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Atomics.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Utils\ByteUtils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Utils\Handle.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Color\AlphaPremultiplication.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Color\Color.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Color\ColorComponents.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Color\ColorConversion.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Color\ColorFlags.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Color\ColorInterpolation.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Color\ColorInterpolationMethod.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Color\ColorLuminance.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Color\ColorMatrix.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Color\ColorModels.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Color\ColorSpace.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Color\ColorTransferFunctions.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Color\ColorTypes.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Color\ColorUtilities.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Color\DestinationColorSpace.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\Func.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\List.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Time\Duration.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Time\MonotonicTime.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\IntrusivePtr.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\StronglyTypedValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\RefPtr.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\CheckedPtr.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\WeakPtr.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\llvm\ADT\ADL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\llvm\ADT\SmallVector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\llvm\Support\Compiler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\llvm\Support\MemAlloc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\SmallList.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\UniquePtr.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\WeakPtrImpl.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\WeakPtrFactory.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\ThreadSafeWeakPtr.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\InlineWeakPtr.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\CompactPtrTuple.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\CompactRefPtrTuple.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\CompactUniquePtrTuple.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\TaggedPtr.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\UniqueArray.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\Unicode.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Log\ILogger.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\cfg\argv.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\cfg\env.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\cfg\helpers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\cfg\helpers-inl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\backtracer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\backtracer-inl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\circular_q.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\console_globals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\file_helper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\file_helper-inl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\fmt_helper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\log_msg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\log_msg_buffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\log_msg_buffer-inl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\log_msg-inl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\mpmc_blocking_q.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\null_mutex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\os.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\os-inl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\periodic_worker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\periodic_worker-inl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\registry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\registry-inl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\synchronous_factory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\tcp_client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\tcp_client-windows.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\thread_pool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\thread_pool-inl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\udp_client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\udp_client-windows.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\details\windows_include.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\fmt\bundled\args.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\fmt\bundled\base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\fmt\bundled\chrono.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\fmt\bundled\color.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\fmt\bundled\compile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\fmt\bundled\core.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\fmt\bundled\format.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\fmt\bundled\format-inl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\fmt\bundled\os.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\fmt\bundled\ostream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\fmt\bundled\printf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\fmt\bundled\ranges.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\fmt\bundled\std.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\fmt\bundled\xchar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\fmt\bin_to_hex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\fmt\chrono.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\fmt\compile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\fmt\fmt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\fmt\ostr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\fmt\ranges.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\fmt\std.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\fmt\xchar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\android_sink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\ansicolor_sink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\ansicolor_sink-inl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\base_sink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\base_sink-inl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\basic_file_sink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\basic_file_sink-inl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\callback_sink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\daily_file_sink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\dist_sink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\dup_filter_sink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\hourly_file_sink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\kafka_sink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\mongo_sink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\msvc_sink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\null_sink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\ostream_sink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\qt_sinks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\ringbuffer_sink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\rotating_file_sink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\rotating_file_sink-inl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\sink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\sink-inl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\stdout_color_sinks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\stdout_color_sinks-inl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\stdout_sinks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\stdout_sinks-inl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\syslog_sink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\systemd_sink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\tcp_sink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\udp_sink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\win_eventlog_sink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\wincolor_sink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\sinks\wincolor_sink-inl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\async.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\async_logger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\async_logger-inl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\common-inl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\formatter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\fwd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\logger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\logger-inl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\mdc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\pattern_formatter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\pattern_formatter-inl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\spdlog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\spdlog-inl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\stopwatch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\tweakme.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\spdlog\version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Utils\ScopedProfiler.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Events\Event.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Events\EventManager.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Commands\CommandArena.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Commands\CommandList.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Commands\CommandListReader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Commands\CommandType.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\StringAtom.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\stb\stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\IO\Backends\NativeFileBackend.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\IO\Streams\MemoryStream.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\IO\Streams\NativeFileStream.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\IO\Streams\Stream.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\IO\Streams\StreamUtils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\IO\Common.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\IO\IFileBackend.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\IO\Image.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\IO\ImageLoader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\IO\Path.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\IO\VirtualFileSystem.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\Clamp.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\Clipspace.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\Compare.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\Conventions.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\Convert.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\Easing.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\EulerAngles.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\Format.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\Gauss.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\Hash.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\Interpolate.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\Maths.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\Matrix.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\MortonCodes.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\MovingAverage.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\Packing.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\Project.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\Quaternion.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\Random.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\Round.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\Swizzle.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\Traits.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\Transform.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Maths\Vector.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Serialisation\Archives\Adapters\RapidJsonStreamAdapters.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Serialisation\Archives\BaseArchive.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Serialisation\Archives\BinaryArchive.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Serialisation\Archives\JsonArchive.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Serialisation\Archives\XmlArchive.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Serialisation\Types\Generic\KeyValuePairContainer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Serialisation\Types\Array.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Serialisation\Types\HashMap.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Serialisation\Types\List.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Serialisation\Types\Pair.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Serialisation\Types\Quaternion.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Serialisation\Types\Vector.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Serialisation\Access.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Serialisation\Builtins.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Serialisation\Concepts.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidxml\include.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidxml\rapidxml.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidxml\rapidxml_iterators.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidxml\rapidxml_print.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidxml\rapidxml_utils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\error\en.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\error\error.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\internal\biginteger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\internal\clzll.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\internal\diyfp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\internal\dtoa.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\internal\ieee754.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\internal\itoa.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\internal\meta.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\internal\pow10.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\internal\regex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\internal\stack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\internal\strfunc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\internal\strtod.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\internal\swap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\msinttypes\inttypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\msinttypes\stdint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\allocators.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\cursorstreamwrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\document.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\encodedstream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\encodings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\filereadstream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\filewritestream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\fwd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\istreamwrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\memorybuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\memorystream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\ostreamwrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\pointer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\prettywriter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\rapidjson.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\reader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\schema.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\stream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\stringbuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\uri.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidjson\writer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\Encodings\Base.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\Encodings\Windows.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\Encodings\IBM.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\Encodings\GB18030.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\Encodings\ISO-8859.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\Encodings\PETSCII.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\Encodings\UTF.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\Encodings\Macintosh.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\Encodings\KOI8.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\Encodings\Tatar.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\Encodings\ShiftJIS.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\Encodings\EUC-KR-UHC.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\Encodings\Big5-HKSCS.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\Encodings\Atari.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\Encodings\ASCII.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\Encodings\Kamenicky.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\Encodings\KZ-1048.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\Encodings\All.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\Encodings\EncodingRegistry.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\Encodings\Encode.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\Encodings\Decode.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\Encodings\EncodingId.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Types\Any.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Detection\NumberOfCores.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="third-party\llvm\ADT\SmallVector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="third-party\llvm\Support\MemAlloc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Color\Color.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Color\ColorConversion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Color\ColorInterpolation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Color\ColorLuminance.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Log\SpdlogLogger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\ScopedProfiler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Events\EventManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="third-party\stb\stb.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IO\Backends\NativeFileBackend.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IO\Streams\NativeFileStream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IO\ImageLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IO\Path.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IO\VirtualFileSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="third-party\rapidxml\license.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="third-party\rapidxml\manual.html" />
+  </ItemGroup>
+</Project>

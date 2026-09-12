@@ -1,0 +1,5 @@
+﻿interface mixin NonElementParentNode {
+  Element? getElementById(dom::DOMString elementId);
+};
+Document includes NonElementParentNode;
+DocumentFragment includes NonElementParentNode;

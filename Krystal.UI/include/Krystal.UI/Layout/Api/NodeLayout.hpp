@@ -4,7 +4,7 @@
 #include "Krystal.UI/Styles/Enums/Direction.hpp"
 #include "Krystal.UI/Styles/Enums/Edge.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   float NodeLayoutGetLeft(NodeConstRef node);
 

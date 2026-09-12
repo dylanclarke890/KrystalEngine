@@ -1,30 +1,32 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Maths/Clamp.hpp"
+#include "Krystal.Core/Maths/Round.hpp"
+#include "Krystal.Core/Maths/Vector.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Gfx/Utils/MeshDataUtils.hpp"
-#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
-#include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Maths/Clamp.hpp"
-#include "Krystal.Maths/Round.hpp"
-#include "Krystal.Maths/Vector.hpp"
 #include "Krystal.UI/Geometry/BorderMetrics.hpp"
 #include "Krystal.UI/Geometry/Common.hpp"
 #include "Krystal.UI/Geometry/GeometryBackgroundBorder.hpp"
 #include "Krystal.UI/Geometry/RenderBox.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
-  struct GeometryUtils : NonCopyMovable<GeometryUtils>
+  class GeometryUtils
   {
     GeometryUtils() = delete;
     ~GeometryUtils() = delete;
 
+    KRYS_NON_COPY_MOVABLE(GeometryUtils);
+
+  public:
     static void GenerateBorderBackground(Gfx::MeshData &data, const RenderBox &renderBox,
                                          Gfx::ColourbPremultiplied backgroundColour,
                                          const Array<Gfx::ColourbPremultiplied, 4> &borderColours)
     {
       using namespace Gfx;
-      using namespace Maths;
 
       auto &borderWidths = renderBox.GetBorderWidths();
 
@@ -83,11 +85,9 @@ namespace Krys::UI
 #endif
     }
 
-    static BorderMetrics ComputeBorderMetrics(Maths::Vec2 outerPosition, EdgeSizes edgeSizes,
-                                              Maths::Vec2 innerSize, CornerSizes initialOuterRadii)
+    static BorderMetrics ComputeBorderMetrics(Vec2 outerPosition, EdgeSizes edgeSizes, Vec2 innerSize,
+                                              CornerSizes initialOuterRadii)
     {
-      using namespace Maths;
-
       BorderMetrics metrics = {};
 
       // Find the corner positions

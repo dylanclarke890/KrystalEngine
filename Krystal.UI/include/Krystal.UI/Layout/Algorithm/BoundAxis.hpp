@@ -1,13 +1,13 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/ComparisonHelpers.hpp"
-#include "Krystal.Lib/Types/NullableFloat.hpp"
+#include "Krystal.Core/ComparisonHelpers.hpp"
+#include "Krystal.Core/Types/NullableFloat.hpp"
 #include "Krystal.UI/Layout/Node/Node.hpp"
 #include "Krystal.UI/Styles/Enums/Dimension.hpp"
 #include "Krystal.UI/Styles/Enums/Direction.hpp"
 #include "Krystal.UI/Styles/Helpers/FlexDirection.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   inline float PaddingAndBorderForAxis(const Node *const node, const FlexDirection axis,
                                        const Direction direction, const float widthSize)

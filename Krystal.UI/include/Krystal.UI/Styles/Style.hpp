@@ -2,10 +2,10 @@
 
 #include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/Handle.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Types/NullableFloat.hpp"
-#include "Krystal.Lib/Utils/ToUnderlying.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Types/NullableFloat.hpp"
+#include "Krystal.Core/Utils/ToUnderlying.hpp"
 #include "Krystal.UI/Styles/Enums/Align.hpp"
 #include "Krystal.UI/Styles/Enums/BoxSizing.hpp"
 #include "Krystal.UI/Styles/Enums/Dimension.hpp"
@@ -28,7 +28,7 @@
 #include "Krystal.UI/Styles/Values/StyleValuePool.hpp"
 #include <stdexcept>
 
-namespace Krys::UI
+namespace krys::UI
 {
   class Style
   {

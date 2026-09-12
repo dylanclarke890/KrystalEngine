@@ -1,9 +1,9 @@
 ﻿#include "Krystal.UI/Styles/Values/UnitValue.hpp"
 #include <catch_all.hpp>
 
-namespace Krys::Tests
+namespace krys::tests
 {
-  using namespace Krys::UI;
+  using namespace krys::UI;
 
   TEST_CASE("UnitValue::Equality", "[UnitValue]")
   {

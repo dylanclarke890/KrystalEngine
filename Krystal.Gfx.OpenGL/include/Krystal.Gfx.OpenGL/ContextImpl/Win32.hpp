@@ -1,14 +1,14 @@
 ﻿#pragma once
 
 #include "Krystal.Gfx.OpenGL/Context.hpp"
-#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
-#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Types/List.hpp"
 
 #pragma comment(lib, "opengl32.lib")
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
-  class Context::ContextPlatformImpl : NonCopyMovable<Context>
+  class Context::ContextPlatformImpl
   {
   private:
     HWND _handle;

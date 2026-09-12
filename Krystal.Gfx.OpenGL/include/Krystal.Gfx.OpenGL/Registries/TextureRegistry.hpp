@@ -1,5 +1,11 @@
 ﻿#pragma once
 
+#include "Krystal.Core/IO/ImageLoader.hpp"
+#include "Krystal.Core/IO/Streams/Stream.hpp"
+#include "Krystal.Core/IO/VirtualFileSystem.hpp"
+#include "Krystal.Core/Types/Pair.hpp"
+#include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ImageRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ImageViewRegistry.hpp"
@@ -8,25 +14,18 @@
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Gfx/Resources/Texture.hpp"
-#include "Krystal.IO/ImageLoader.hpp"
-#include "Krystal.IO/Streams/Stream.hpp"
-#include "Krystal.IO/VirtualFileSystem.hpp"
-#include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types/Map.hpp"
-#include "Krystal.Lib/Types/Pair.hpp"
-#include "Krystal.Lib/Types/Span.hpp"
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
   class TextureRegistry final : public ITextureRegistry
   {
     using TextureManager = ResourceManager<Texture, TextureHandle>;
     using TextureCache = ResourceHandleCache<string, TextureHandle>;
 
-    const IO::Path BaseDirectory {"/textures/"};
+    const io::Path BaseDirectory {"/textures/"};
 
   private:
-    IO::VirtualFileSystem &_vfs;
+    io::VirtualFileSystem &_vfs;
     ImageRegistry &_images;
     ImageViewRegistry &_imageViews;
     SamplerRegistry &_samplers;
@@ -34,7 +33,7 @@ namespace Krys::Gfx::OpenGL
     TextureCache _cache;
 
   public:
-    TextureRegistry(IO::VirtualFileSystem &vfs, ImageRegistry &images, ImageViewRegistry &imageViews,
+    TextureRegistry(io::VirtualFileSystem &vfs, ImageRegistry &images, ImageViewRegistry &imageViews,
                     SamplerRegistry &samplers) noexcept
         : _vfs(vfs), _images(images), _imageViews(imageViews), _samplers(samplers)
     {
@@ -59,7 +58,7 @@ namespace Krys::Gfx::OpenGL
       return AddTexture(std::format("{}", unnamedTextureCounter++), std::move(texture));
     }
 
-    KRYS_NODISCARD TextureHandle Load(const IO::Path &path, const TextureDesc &desc = {}) noexcept override
+    KRYS_NODISCARD TextureHandle Load(const io::Path &path, const TextureDesc &desc = {}) noexcept override
     {
       auto key = path.ToString();
       if (auto existing = _cache.Get(key); existing.IsValid())
@@ -67,8 +66,8 @@ namespace Krys::Gfx::OpenGL
         return existing;
       }
 
-      UniquePtr<IO::IStreamReader> stream = _vfs.GetReader(BaseDirectory / path, IO::ReadFlags::None);
-      IO::ImageLoader loader;
+      UniquePtr<io::IStreamReader> stream = _vfs.GetReader(BaseDirectory / path, io::ReadFlags::None);
+      io::ImageLoader loader;
       auto imageResult = loader.Load(*stream, {.FlipVertically = true});
       assert(imageResult.has_value() && "Failed to load texture image.");
       auto &image = *imageResult;
@@ -88,7 +87,7 @@ namespace Krys::Gfx::OpenGL
         .ArrayLayers = 1,
       });
 
-      GLenum dataType = image.DataType == IO::ImageDataType::Float ? GL_FLOAT : GL_UNSIGNED_BYTE;
+      GLenum dataType = image.DataType == io::ImageDataType::Float ? GL_FLOAT : GL_UNSIGNED_BYTE;
       Image &img = _images.Get(imageHandle);
       img.UpdateData(image.Data, dataFormat, dataType);
 
@@ -120,9 +119,9 @@ namespace Krys::Gfx::OpenGL
       return AddTexture(key, std::move(texture));
     }
 
-    KRYS_NODISCARD TextureHandle LoadCubemap(const IO::Path &left, const IO::Path &right, const IO::Path &top,
-                                             const IO::Path &bottom, const IO::Path &front,
-                                             const IO::Path &back,
+    KRYS_NODISCARD TextureHandle LoadCubemap(const io::Path &left, const io::Path &right, const io::Path &top,
+                                             const io::Path &bottom, const io::Path &front,
+                                             const io::Path &back,
                                              const TextureDesc &desc = {}) noexcept override
     {
       auto key = left.ToString() + "|" + right.ToString() + "|" + top.ToString() + "|" + bottom.ToString()
@@ -132,13 +131,13 @@ namespace Krys::Gfx::OpenGL
         return existing;
       }
 
-      Array<IO::Path, 6> paths {right, left, top, bottom, front, back};
-      List<IO::Image> images {};
-      IO::ImageLoader loader;
+      Array<io::Path, 6> paths {right, left, top, bottom, front, back};
+      List<io::Image> images {};
+      io::ImageLoader loader;
 
       for (const auto &path : paths)
       {
-        UniquePtr<IO::IStreamReader> stream = _vfs.GetReader(BaseDirectory / path, IO::ReadFlags::None);
+        UniquePtr<io::IStreamReader> stream = _vfs.GetReader(BaseDirectory / path, io::ReadFlags::None);
         assert(stream != nullptr && "Failed to open cubemap face image.");
 
         auto imageResult = loader.Load(*stream, {.FlipVertically = false});
@@ -266,10 +265,10 @@ namespace Krys::Gfx::OpenGL
       return static_cast<uint32>(std::floor(std::log2(std::max(width, height)))) + 1u;
     }
 
-    static Pair<PixelFormat, GLenum> GetTextureFormat(const IO::Image &image,
+    static Pair<PixelFormat, GLenum> GetTextureFormat(const io::Image &image,
                                                       const TextureDesc &desc) noexcept
     {
-      if (image.DataType == IO::ImageDataType::Float)
+      if (image.DataType == io::ImageDataType::Float)
       {
         return GetFloatTextureFormat(image.Channels, true);
       }

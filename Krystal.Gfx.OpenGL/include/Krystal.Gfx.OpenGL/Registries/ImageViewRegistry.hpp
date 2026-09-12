@@ -1,13 +1,13 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ImageRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/ImageView.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Registries/IImageViewRegistry.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
   class ImageViewRegistry : public IImageViewRegistry
   {

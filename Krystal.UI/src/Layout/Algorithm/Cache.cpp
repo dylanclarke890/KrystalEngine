@@ -1,20 +1,20 @@
 ﻿#include "Krystal.UI/Layout/Algorithm/Cache.hpp"
-#include "Krystal.Lib/ComparisonHelpers.hpp"
+#include "Krystal.Core/ComparisonHelpers.hpp"
 #include "Krystal.UI/Layout/Algorithm/PixelGrid.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   static inline bool SizeIsExactAndMatchesOldMeasuredSize(SizingMode sizeMode, float size,
                                                           float lastComputedSize)
   {
-    return sizeMode == SizingMode::StretchFit && Krys::InexactEquals(size, lastComputedSize);
+    return sizeMode == SizingMode::StretchFit && krys::InexactEquals(size, lastComputedSize);
   }
 
   static inline bool OldSizeIsMaxContentAndStillFits(SizingMode sizeMode, float size,
                                                      SizingMode lastSizeMode, float lastComputedSize)
   {
     return sizeMode == SizingMode::FitContent && lastSizeMode == SizingMode::MaxContent
-           && (size >= lastComputedSize || Krys::InexactEquals(size, lastComputedSize));
+           && (size >= lastComputedSize || krys::InexactEquals(size, lastComputedSize));
   }
 
   static inline bool NewSizeIsStricterAndStillValid(SizingMode sizeMode, float size,
@@ -22,8 +22,8 @@ namespace Krys::UI
                                                     float lastComputedSize)
   {
     return lastSizeMode == SizingMode::FitContent && sizeMode == SizingMode::FitContent
-           && Krys::IsDefined(lastSize) && Krys::IsDefined(size) && Krys::IsDefined(lastComputedSize)
-           && lastSize > size && (lastComputedSize <= size || Krys::InexactEquals(size, lastComputedSize));
+           && krys::IsDefined(lastSize) && krys::IsDefined(size) && krys::IsDefined(lastComputedSize)
+           && lastSize > size && (lastComputedSize <= size || krys::InexactEquals(size, lastComputedSize));
   }
 
   bool CanUseCachedMeasurement(const SizingMode widthMode, const float availableWidth,
@@ -33,8 +33,8 @@ namespace Krys::UI
                                const float lastComputedWidth, const float lastComputedHeight,
                                const float marginRow, const float marginColumn, const Config *const config)
   {
-    if ((Krys::IsDefined(lastComputedHeight) && lastComputedHeight < 0)
-        || ((Krys::IsDefined(lastComputedWidth)) && lastComputedWidth < 0))
+    if ((krys::IsDefined(lastComputedHeight) && lastComputedHeight < 0)
+        || ((krys::IsDefined(lastComputedWidth)) && lastComputedWidth < 0))
     {
       return false;
     }
@@ -56,9 +56,9 @@ namespace Krys::UI
                            : lastAvailableHeight;
 
     const bool hasSameWidthSpec =
-      lastWidthMode == widthMode && Krys::InexactEquals(effectiveLastWidth, effectiveWidth);
+      lastWidthMode == widthMode && krys::InexactEquals(effectiveLastWidth, effectiveWidth);
     const bool hasSameHeightSpec =
-      lastHeightMode == heightMode && Krys::InexactEquals(effectiveLastHeight, effectiveHeight);
+      lastHeightMode == heightMode && krys::InexactEquals(effectiveLastHeight, effectiveHeight);
 
     const bool widthIsCompatible =
       hasSameWidthSpec

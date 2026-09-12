@@ -1,10 +1,10 @@
-﻿#include "Krystal.Lib/ComparisonHelpers.hpp"
+﻿#include "Krystal.Core/ComparisonHelpers.hpp"
 #include "Krystal.UI/Layout/LayoutEngine.hpp"
 #include <catch_all.hpp>
 
-namespace Krys::Tests
+namespace krys::tests
 {
-  using namespace Krys::UI;
+  using namespace krys::UI;
 
   struct _MeasureConstraint
   {
@@ -288,7 +288,7 @@ namespace Krys::Tests
     REQUIRE(100 == constraintList.constraints[0].width);
     REQUIRE(MeasureMode::AtMost == constraintList.constraints[0].widthMode);
 
-    REQUIRE(Krys::IsUndefined(constraintList.constraints[0].height));
+    REQUIRE(krys::IsUndefined(constraintList.constraints[0].height));
     REQUIRE(MeasureMode::Undefined == constraintList.constraints[0].heightMode);
 
     free(constraintList.constraints);
@@ -318,7 +318,7 @@ namespace Krys::Tests
 
     REQUIRE(1u == constraintList.length);
 
-    REQUIRE(Krys::IsUndefined(constraintList.constraints[0].width));
+    REQUIRE(krys::IsUndefined(constraintList.constraints[0].width));
     REQUIRE(MeasureMode::Undefined == constraintList.constraints[0].widthMode);
 
     REQUIRE(100 == constraintList.constraints[0].height);

@@ -1,0 +1,7 @@
+﻿[Exposed=Window]
+interface Text : CharacterData {
+  constructor(optional dom::DOMString data = "");
+
+  [NewObject] Text splitText(unsigned long offset);
+  readonly attribute dom::DOMString wholeText;
+};

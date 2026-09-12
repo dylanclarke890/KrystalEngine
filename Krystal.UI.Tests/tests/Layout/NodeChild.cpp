@@ -1,10 +1,10 @@
-﻿#include "Krystal.Lib/ComparisonHelpers.hpp"
+﻿#include "Krystal.Core/ComparisonHelpers.hpp"
 #include "Krystal.UI/Layout/LayoutEngine.hpp"
 #include <catch_all.hpp>
 
-namespace Krys::Tests
+namespace krys::tests
 {
-  using namespace Krys::UI;
+  using namespace krys::UI;
 
   TEST_CASE("LayoutEngine::reset_layout_when_child_removed", "[LayoutEngine]")
   {
@@ -26,8 +26,8 @@ namespace Krys::Tests
 
     REQUIRE(0 == NodeLayoutGetLeft(root_child0));
     REQUIRE(0 == NodeLayoutGetTop(root_child0));
-    REQUIRE(Krys::IsUndefined(NodeLayoutGetWidth(root_child0)));
-    REQUIRE(Krys::IsUndefined(NodeLayoutGetHeight(root_child0)));
+    REQUIRE(krys::IsUndefined(NodeLayoutGetWidth(root_child0)));
+    REQUIRE(krys::IsUndefined(NodeLayoutGetHeight(root_child0)));
 
     NodeDestroyRecursive(root);
     NodeDestroyRecursive(root_child0);

@@ -3,7 +3,7 @@
 #include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   struct PBRMaterialDesc
   {

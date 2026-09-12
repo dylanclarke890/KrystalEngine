@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Enum.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Numeric.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   enum class Wrap : uint8
   {
@@ -14,4 +14,4 @@ namespace Krys::UI
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::UI::Wrap, 3u)
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::UI::Wrap, 3u)

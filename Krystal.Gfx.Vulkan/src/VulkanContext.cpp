@@ -1,27 +1,29 @@
 ﻿#include "Krystal.Gfx.Vulkan/VulkanContext.hpp"
 
-#include "Krystal.Lib/Detection/OS.hpp"
+#include "Krystal.Core/Detection/OS.hpp"
 
 #if KRYS_OS(WINDOWS)
   #include "Krystal.Gfx.Vulkan/Hooks/vulkan_win32_hooks.hpp"
   #define KRYS_SURFACE_EXTENSION_NAME VK_KHR_WIN32_SURFACE_EXTENSION_NAME
 #endif
 
-#include "Krystal.IO/Streams/NativeFileStream.hpp"
-#include "Krystal.IO/Streams/StreamUtils.hpp"
-#include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Maths/Clipspace.hpp"
-#include "Krystal.Maths/Convert.hpp"
-#include "Krystal.Maths/Matrix.hpp"
-#include "Krystal.Maths/Transform.hpp"
-#include "Krystal.Maths/Vector.hpp"
+#include "Krystal.Core/IO/Streams/NativeFileStream.hpp"
+#include "Krystal.Core/IO/Streams/StreamUtils.hpp"
+#include "Krystal.Core/Maths/Clipspace.hpp"
+#include "Krystal.Core/Maths/Convert.hpp"
+#include "Krystal.Core/Maths/Matrix.hpp"
+#include "Krystal.Core/Maths/Transform.hpp"
+#include "Krystal.Core/Maths/Vector.hpp"
+#include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Types/HashSet.hpp"
 #include <chrono>
 #include <iostream>
 #include <ranges>
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
-  // Expected<UniquePtr<IContext>> CreateContext(NativeHandle windowHandle, uint32 width, uint32 height) noexcept
+  // Expected<UniquePtr<IContext>> CreateContext(NativeHandle windowHandle, uint32 width, uint32 height)
+  // noexcept
   //{
   //   try
   //   {
@@ -36,17 +38,17 @@ namespace Krys::Gfx
 
 namespace
 {
-  Krys::List<const char *> InstanceExtensions {VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
+  krys::List<const char *> InstanceExtensions {VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
                                                VK_KHR_SURFACE_EXTENSION_NAME, KRYS_SURFACE_EXTENSION_NAME};
 
-  Krys::List<const char *> DeviceExtensions {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+  krys::List<const char *> DeviceExtensions {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
-  Krys::List<const char *> ValidationLayers {"VK_LAYER_KHRONOS_validation"};
+  krys::List<const char *> ValidationLayers {"VK_LAYER_KHRONOS_validation"};
 
   struct TestVertex
   {
-    Krys::Maths::Vec2 Position;
-    Krys::Maths::Vec3 Color;
+    krys::Vec2 Position;
+    krys::Vec3 Color;
 
     static VkVertexInputBindingDescription GetBindingDescription()
     {
@@ -54,9 +56,9 @@ namespace
         .binding = 0, .stride = sizeof(TestVertex), .inputRate = VK_VERTEX_INPUT_RATE_VERTEX};
     }
 
-    static Krys::Array<VkVertexInputAttributeDescription, 2> GetAttributeDescriptions()
+    static krys::Array<VkVertexInputAttributeDescription, 2> GetAttributeDescriptions()
     {
-      return Krys::Array<VkVertexInputAttributeDescription, 2> {VkVertexInputAttributeDescription {
+      return krys::Array<VkVertexInputAttributeDescription, 2> {VkVertexInputAttributeDescription {
                                                                   .location = 0,
                                                                   .binding = 0,
                                                                   .format = VK_FORMAT_R32G32_SFLOAT,
@@ -73,17 +75,17 @@ namespace
 
   struct UniformBufferObject
   {
-    alignas(16) Krys::Maths::Mat4 model;
-    alignas(16) Krys::Maths::Mat4 view;
-    alignas(16) Krys::Maths::Mat4 proj;
+    alignas(16) krys::Mat4 model;
+    alignas(16) krys::Mat4 view;
+    alignas(16) krys::Mat4 proj;
   };
 
-  const Krys::List<TestVertex> vertices = {{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+  const krys::List<TestVertex> vertices = {{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
                                            {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
                                            {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
                                            {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}};
 
-  const Krys::List<Krys::uint16> indices = {0, 1, 2, 2, 3, 0};
+  const krys::List<krys::uint16> indices = {0, 1, 2, 2, 3, 0};
 
 #ifdef KRYS_BUILD_DEBUG
   bool EnableValidationLayers = false;
@@ -103,23 +105,23 @@ namespace
     return VK_FALSE;
   }
 
-  Krys::Expected<Krys::List<Krys::uint32>> LoadShaderCode(const Krys::string &filePath) noexcept
+  krys::Expected<krys::List<krys::uint32>> LoadShaderCode(const krys::string &filePath) noexcept
   {
-    using Reader = Krys::IO::NativeFileReader;
-    Reader fileStream {Krys::IO::Path(filePath)};
+    using Reader = krys::io::NativeFileReader;
+    Reader fileStream {krys::io::Path(filePath)};
 
-    return Krys::IO::StreamUtils::ReadAllAs<Krys::uint32>(fileStream);
+    return krys::io::StreamUtils::ReadAllAs<krys::uint32>(fileStream);
   }
 
-  VkShaderModule CreateShaderModule(VkDevice device, const Krys::List<Krys::uint32> &code) noexcept
+  VkShaderModule CreateShaderModule(VkDevice device, const krys::List<krys::uint32> &code) noexcept
   {
-    using namespace Krys::Gfx::Vulkan;
+    using namespace krys::Gfx::Vulkan;
 
     VkShaderModuleCreateInfo createInfo {
       .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
       .pNext = nullptr,
       .flags = 0,
-      .codeSize = code.size() * sizeof(Krys::uint32),
+      .codeSize = code.size() * sizeof(krys::uint32),
       .pCode = code.data(),
     };
 
@@ -130,7 +132,7 @@ namespace
   }
 }
 
-namespace Krys::Gfx::Vulkan
+namespace krys::Gfx::Vulkan
 {
   VulkanContext::VulkanContext(const ContextSettings &settings)
       : _windowHandle(settings.WindowHandle), _width(settings.Width), _height(settings.Height),
@@ -422,7 +424,7 @@ namespace Krys::Gfx::Vulkan
     List<VkExtensionProperties> availableExtensions(extensionCount);
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
 
-    Set<string> requiredExtensions(DeviceExtensions.begin(), DeviceExtensions.end());
+    HashSet<string> requiredExtensions(DeviceExtensions.begin(), DeviceExtensions.end());
     for (const auto &extension : availableExtensions)
     {
       requiredExtensions.erase(extension.extensionName);
@@ -459,7 +461,8 @@ namespace Krys::Gfx::Vulkan
   void VulkanContext::CreateDevice()
   {
     List<VkDeviceQueueCreateInfo> queueCreateInfos;
-    Set<uint32> uniqueQueueFamilies = {_queueFamilyIndices.GraphicsFamily, _queueFamilyIndices.PresentFamily};
+    HashSet<uint32> uniqueQueueFamilies = {_queueFamilyIndices.GraphicsFamily,
+                                           _queueFamilyIndices.PresentFamily};
 
     float queuePriority = 1.0f;
     for (uint32_t queueFamily : uniqueQueueFamilies)
@@ -537,7 +540,8 @@ namespace Krys::Gfx::Vulkan
       .oldSwapchain = VK_NULL_HANDLE,
     };
 
-    Set<uint32> queueFamilyIndices = {_queueFamilyIndices.GraphicsFamily, _queueFamilyIndices.PresentFamily};
+    HashSet<uint32> queueFamilyIndices = {_queueFamilyIndices.GraphicsFamily,
+                                          _queueFamilyIndices.PresentFamily};
     List<uint32> queueFamilyIndicesList(queueFamilyIndices.begin(), queueFamilyIndices.end());
 
     if (queueFamilyIndices.size() > 1)
@@ -1196,7 +1200,7 @@ namespace Krys::Gfx::Vulkan
     auto currentTime = std::chrono::high_resolution_clock::now();
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
-    using namespace Krys::Maths;
+    using namespace krys;
 
     UniformBufferObject ubo {
       .model = Rotate(Identity<Mat4>(), time * Radians(90.0f), Vec3(0.0f, 0.0f, 1.0f)),

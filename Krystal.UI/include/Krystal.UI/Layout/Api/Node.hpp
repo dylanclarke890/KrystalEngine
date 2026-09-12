@@ -1,12 +1,12 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Numeric.hpp"
 #include "Krystal.UI/Layout/Api/Forward.hpp"
 #include "Krystal.UI/Styles/Enums/Direction.hpp"
 #include "Krystal.UI/Styles/Enums/NodeType.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   /// @brief Heap allocates and returns a new node using default settings.
   KRYS_NODISCARD NodeRef NodeCreate();

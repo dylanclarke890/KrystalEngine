@@ -1,9 +1,9 @@
 ﻿#include "Krystal.UI/Layout/LayoutEngine.hpp"
 #include <catch_all.hpp>
 
-namespace Krys::Tests
+namespace krys::tests
 {
-  using namespace Krys::UI;
+  using namespace krys::UI;
 
   static void RecursivelyAssertProperNodeOwnership(NodeRef node)
   {

@@ -1,13 +1,13 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Enum.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Utils/ToUnderlying.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Utils/ToUnderlying.hpp"
 #include "Krystal.UI/Styles/Enums/Edge.hpp"
 #include <utility>
 
-namespace Krys::UI
+namespace krys::UI
 {
   enum class PhysicalEdge : uint32
   {

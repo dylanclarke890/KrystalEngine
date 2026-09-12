@@ -3,9 +3,9 @@
 #include "utils/TestUtil.hpp"
 #include <catch_all.hpp>
 
-namespace Krys::Tests
+namespace krys::tests
 {
-  using namespace Krys::UI;
+  using namespace krys::UI;
 
   TEST_CASE("LayoutEngine::cloning_shared_root", "[LayoutEngine]")
   {

@@ -1,12 +1,12 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Core/Attributes.hpp"
 #include "Krystal.UI/Styles/Enums/Display.hpp"
 #include <cstdint>
 #include <forward_list>
 #include <utility>
 
-namespace Krys::UI
+namespace krys::UI
 {
   class Node;
 

@@ -1,13 +1,13 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Gfx/Enums/FilterMode.hpp"
 #include "Krystal.Gfx/Enums/WrapMode.hpp"
-#include "Krystal.Lib/Core/Hash.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
 #include <compare>
 #include <type_traits>
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   struct SamplerDesc
   {
@@ -123,12 +123,12 @@ namespace Krys::Gfx
 namespace std
 {
   template <>
-  struct hash<Krys::Gfx::SamplerDesc>
+  struct hash<krys::Gfx::SamplerDesc>
   {
-    size_t operator()(const Krys::Gfx::SamplerDesc &desc) const noexcept
+    size_t operator()(const krys::Gfx::SamplerDesc &desc) const noexcept
     {
-      return Krys::Hash::Combine(desc.MinFilter, desc.MagFilter, desc.WrapS, desc.WrapT, desc.WrapR,
-                                          desc.AnisotropicLevel);
+      return krys::Hash::Combine(desc.MinFilter, desc.MagFilter, desc.WrapS, desc.WrapT, desc.WrapR,
+                                 desc.AnisotropicLevel);
     }
   };
 }

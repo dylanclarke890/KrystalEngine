@@ -1,16 +1,16 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Utils/Handle.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/Handle.hpp"
-#include "Krystal.Lib/Mixins/NonCopyable.hpp"
-#include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.UI/Layout/Algorithm/MeasureText.hpp"
 #include "Krystal.UI/Layout/LayoutEngine.hpp"
 #include <type_traits>
 
-namespace Krys::UI
+namespace krys::UI
 {
   struct ElementHandle : public Gfx::Handle<ElementHandle>
   {
@@ -27,11 +27,13 @@ namespace Krys::UI
     using Vertex = Gfx::Vertex::Position2D_ColourbPremultiplied_UV;
 
     Gfx::MeshHandle Mesh;
-    Maths::Vec2 Translation;
+    Vec2 Translation;
   };
 
-  class Element : NonCopyable<Element>
+  class Element
   {
+    KRYS_NON_COPYABLE(Element);
+
   public:
     ElementHandle Handle;
     ElementHandle Parent;
@@ -87,7 +89,7 @@ namespace Krys::UI
       return *this;
     }
 
-    void SetText(const utf8_string& text) noexcept
+    void SetText(const utf8_string &text) noexcept
     {
       if (!text.empty() && TextContent.Text.empty())
       {
@@ -111,11 +113,11 @@ namespace Krys::UI
 namespace std
 {
   template <>
-  struct hash<Krys::UI::ElementHandle>
+  struct hash<krys::UI::ElementHandle>
   {
-    KRYS_NODISCARD size_t operator()(const Krys::UI::ElementHandle &handle) const noexcept
+    KRYS_NODISCARD size_t operator()(const krys::UI::ElementHandle &handle) const noexcept
     {
-      return std::hash<Krys::uint32>()(handle.Id);
+      return std::hash<krys::uint32>()(handle.Id);
     }
   };
 }

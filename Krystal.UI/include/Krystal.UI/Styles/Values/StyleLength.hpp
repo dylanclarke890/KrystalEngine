@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Types/NullableFloat.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Core/Types/NullableFloat.hpp"
+#include "Krystal.Core/Numeric.hpp"
 #include "Krystal.UI/Styles/Enums/Unit.hpp"
 #include "Krystal.UI/Styles/Values/UnitValue.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   /// @brief Represents a CSS Value which may be one of:
   /// 1. Undefined
@@ -33,14 +33,14 @@ namespace Krys::UI
 
     constexpr static StyleLength Points(float value) noexcept
     {
-      return Krys::IsUndefined(value) || Krys::IsInf(value)
+      return krys::IsUndefined(value) || krys::IsInf(value)
                ? Undefined()
                : StyleLength {NullableFloat {value}, Unit::Point};
     }
 
     constexpr static StyleLength Percent(float value) noexcept
     {
-      return Krys::IsUndefined(value) || Krys::IsInf(value)
+      return krys::IsUndefined(value) || krys::IsInf(value)
                ? Undefined()
                : StyleLength {NullableFloat {value}, Unit::Percent};
     }
@@ -107,7 +107,7 @@ namespace Krys::UI
 
     constexpr bool InexactEquals(const StyleLength &other) const noexcept
     {
-      return _unit == other._unit && Krys::InexactEquals(_value, other._value);
+      return _unit == other._unit && krys::InexactEquals(_value, other._value);
     }
   };
 

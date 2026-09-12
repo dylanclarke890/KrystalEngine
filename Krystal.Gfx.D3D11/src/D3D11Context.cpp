@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Gfx.D3D11/D3D11Context.hpp"
-#include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types/Expected.hpp"
+#include "Krystal.Core/Types/Expected.hpp"
+#include "Krystal.Core/Types/String.hpp"
 
 #pragma comment(lib, "d3dcompiler.lib")
 #include <d3d11.h>
@@ -32,7 +32,7 @@ namespace
   static ID3D11InputLayout *pLayout;
 }
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   // Expected<UniquePtr<IContext>> CreateContext(NativeHandle windowHandle, uint32 width, uint32 height)
   // noexcept
@@ -48,7 +48,7 @@ namespace Krys::Gfx
   // }
 }
 
-namespace Krys::Gfx::D3D11
+namespace krys::Gfx::D3D11
 {
   D3D11Context::D3D11Context(const ContextSettings &settings)
       : _windowHandle(settings.WindowHandle.As<HWND>()), _vfs(*settings.VFS)

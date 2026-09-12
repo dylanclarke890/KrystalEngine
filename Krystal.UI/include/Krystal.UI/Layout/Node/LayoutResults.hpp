@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Types/NullableFloat.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Utils/ToUnderlying.hpp"
+#include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Types/NullableFloat.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Utils/ToUnderlying.hpp"
 #include "Krystal.UI/Layout/Api/Forward.hpp"
 #include "Krystal.UI/Layout/Node/CachedMeasurement.hpp"
 #include "Krystal.UI/Styles/Enums/Dimension.hpp"
@@ -11,7 +11,7 @@
 #include "Krystal.UI/Styles/Enums/Edge.hpp"
 #include "Krystal.UI/Styles/Enums/PhysicalEdge.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   struct LayoutResults
   {

@@ -2,7 +2,7 @@
 #include "Krystal.UI/Layout/Api/Node.hpp"
 #include "Krystal.UI/Layout/Node/Node.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   bool ConfigUpdateInvalidatesLayout(const Config &oldConfig, const Config &newConfig)
   {

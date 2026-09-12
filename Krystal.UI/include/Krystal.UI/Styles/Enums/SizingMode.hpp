@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Enum.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Numeric.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   /// @brief Corresponds to CSS auto box sizes. Missing "min-content".
   /// https://www.w3.org/TR/css-sizing-3/#auto-box-sizes & https://www.w3.org/TR/css-flexbox-1/#min-size-auto
@@ -29,4 +29,4 @@ namespace Krys::UI
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::UI::SizingMode, 3u)
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::UI::SizingMode, 3u)

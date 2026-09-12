@@ -1,10 +1,10 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Gfx/Handle.hpp"
-#include "Krystal.Lib/Types/Map.hpp"
 #include <cassert>
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   template <typename CacheKey, typename ResourceHandle>
   class ResourceHandleCache
@@ -15,7 +15,7 @@ namespace Krys::Gfx
       uint16 ReferenceCount {1u};
     };
 
-    Map<CacheKey, CacheResource> _cache;
+    HashMap<CacheKey, CacheResource> _cache;
 
   public:
     void Add(const CacheKey &key, ResourceHandle handle) noexcept

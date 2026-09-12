@@ -1,0 +1,39 @@
+﻿#pragma once
+
+#include "Krystal.Booey/CSS/CSSRule.hpp"
+
+namespace krys::boo::css
+{
+  class CSSRuleList;
+
+  /// @see https://drafts.csswg.org/cssom/#the-cssgroupingrule-interface
+  class CSSGroupingRule : public CSSRule
+  {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CSSGroupingRule);
+
+  public:
+    CSSGroupingRule(CSSStyleSheet *stylesheet) noexcept;
+
+    ~CSSGroupingRule() noexcept override = default;
+
+#pragma region CSSGroupingRule - https://drafts.csswg.org/cssom/#cssgroupingrule
+
+    /// @see https://drafts.csswg.org/cssom/#dom-cssgroupingrule-cssrules
+    KRYS_NODISCARD virtual RefPtr<CSSRuleList> CssRules() const noexcept = 0;
+
+    /// @see https://drafts.csswg.org/cssom/#dom-cssgroupingrule-insertrule
+    dom::ExceptionOr<uint32> InsertRule(const CSSOMString &rule, uint32 index) noexcept;
+
+    /// @see https://drafts.csswg.org/cssom/#dom-cssgroupingrule-deleterule
+    dom::ExceptionOr<void> DeleteRule(uint32 index) noexcept;
+
+#pragma endregion
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSGroupingRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+  {
+    return rule.IsCSSGroupingRule();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

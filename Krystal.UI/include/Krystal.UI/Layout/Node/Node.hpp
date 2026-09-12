@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Core/Enum.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types/NullableFloat.hpp"
-#include "Krystal.Lib/Types/StronglyTypedValue.hpp"
+#include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/NullableFloat.hpp"
+#include "Krystal.Core/Types/StronglyTypedValue.hpp"
 #include "Krystal.UI/Layout/Api/Forward.hpp"
 #include "Krystal.UI/Layout/Config/Config.hpp"
 #include "Krystal.UI/Layout/Node/LayoutableChildren.hpp"
@@ -19,7 +19,7 @@
 #include "Krystal.UI/Styles/Enums/PhysicalEdge.hpp"
 #include "Krystal.UI/Styles/Style.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   struct DirtyLayout : public StronglyTypedBool<DirtyLayout>
   {

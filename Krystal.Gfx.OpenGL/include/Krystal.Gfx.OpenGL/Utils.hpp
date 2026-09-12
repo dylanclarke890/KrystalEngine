@@ -6,7 +6,7 @@
 #include "Krystal.Gfx/Light.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
   class Utils
   {

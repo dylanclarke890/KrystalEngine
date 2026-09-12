@@ -4,7 +4,7 @@
 #include "Krystal.UI/Layout/Node/Node.hpp"
 #include "Krystal.UI/Styles/Helpers/FlexDirection.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   void CalculateLayout(Node *node, float ownerWidth, float ownerHeight, Direction ownerDirection);
 

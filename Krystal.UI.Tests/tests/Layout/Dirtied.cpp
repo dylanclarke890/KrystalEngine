@@ -2,9 +2,9 @@
 #include "Krystal.UI/Layout/Node/Node.hpp"
 #include <catch_all.hpp>
 
-namespace Krys::Tests
+namespace krys::tests
 {
-  using namespace Krys::UI;
+  using namespace krys::UI;
 
   static void _dirtied(NodeConstRef node)
   {

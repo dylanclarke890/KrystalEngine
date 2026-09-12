@@ -2,7 +2,7 @@
 #include "Krystal.UI/Layout/Algorithm/Align.hpp"
 #include "Krystal.UI/Layout/Event/Event.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   float CalculateBaseline(const Node *node)
   {

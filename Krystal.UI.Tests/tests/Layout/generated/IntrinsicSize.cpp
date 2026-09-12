@@ -2,9 +2,9 @@
 #include "Krystal.UI/Layout/LayoutEngine.hpp"
 #include <catch_all.hpp>
 
-namespace Krys::Tests
+namespace krys::tests
 {
-  using namespace Krys::UI;
+  using namespace krys::UI;
 
   TEST_CASE("LayoutEngine::contains_inner_text_long_word", "[LayoutEngine]")
   {

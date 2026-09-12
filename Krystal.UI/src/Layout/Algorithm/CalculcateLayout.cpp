@@ -1,6 +1,6 @@
-﻿#include "Krystal.Lib/ComparisonHelpers.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Types/NullableFloat.hpp"
+﻿#include "Krystal.Core/ComparisonHelpers.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Types/NullableFloat.hpp"
 #include "Krystal.UI/Layout/Algorithm/AbsoluteLayout.hpp"
 #include "Krystal.UI/Layout/Algorithm/Align.hpp"
 #include "Krystal.UI/Layout/Algorithm/Baseline.hpp"
@@ -20,7 +20,7 @@
 #include <cmath>
 #include <cstring>
 
-namespace Krys::UI
+namespace krys::UI
 {
   std::atomic<uint16> gCurrentGenerationCount(0);
 
@@ -69,7 +69,7 @@ namespace Krys::UI
     const bool isRowStyleDimDefined = child->HasDefiniteLength(Dimension::Width, ownerWidth);
     const bool isColumnStyleDimDefined = child->HasDefiniteLength(Dimension::Height, ownerHeight);
 
-    if (resolvedFlexBasis.HasValue() && Krys::IsDefined(mainAxisSize))
+    if (resolvedFlexBasis.HasValue() && krys::IsDefined(mainAxisSize))
     {
       if (!child->GetLayout().ComputedFlexBasis.HasValue()
           || (child->GetConfig()->IsExperimentalFeatureEnabled(ExperimentalFeature::WebFlexBasis)
@@ -77,7 +77,7 @@ namespace Krys::UI
       {
         const NullableFloat GetPaddingAndBorder =
           NullableFloat(PaddingAndBorderForAxis(child, mainAxis, direction, ownerWidth));
-        child->SetLayoutComputedFlexBasis(Krys::MaxOrDefined(resolvedFlexBasis, GetPaddingAndBorder));
+        child->SetLayoutComputedFlexBasis(krys::MaxOrDefined(resolvedFlexBasis, GetPaddingAndBorder));
       }
     }
     else if (isMainAxisRow && isRowStyleDimDefined)
@@ -87,7 +87,7 @@ namespace Krys::UI
         NullableFloat(PaddingAndBorderForAxis(child, FlexDirection::Row, direction, ownerWidth));
 
       child->SetLayoutComputedFlexBasis(
-        Krys::MaxOrDefined(child->GetResolvedDimension(direction, Dimension::Width, ownerWidth, ownerWidth),
+        krys::MaxOrDefined(child->GetResolvedDimension(direction, Dimension::Width, ownerWidth, ownerWidth),
                            GetPaddingAndBorder));
     }
     else if (!isMainAxisRow && isColumnStyleDimDefined)
@@ -96,7 +96,7 @@ namespace Krys::UI
       const NullableFloat GetPaddingAndBorder =
         NullableFloat(PaddingAndBorderForAxis(child, FlexDirection::Column, direction, ownerWidth));
       child->SetLayoutComputedFlexBasis(
-        Krys::MaxOrDefined(child->GetResolvedDimension(direction, Dimension::Height, ownerHeight, ownerWidth),
+        krys::MaxOrDefined(child->GetResolvedDimension(direction, Dimension::Height, ownerHeight, ownerWidth),
                            GetPaddingAndBorder));
     }
     else
@@ -128,7 +128,7 @@ namespace Krys::UI
       if ((!isMainAxisRow && node->GetStyle().GetOverflow() == Overflow::Scroll)
           || node->GetStyle().GetOverflow() != Overflow::Scroll)
       {
-        if (Krys::IsUndefined(childWidth) && Krys::IsDefined(width))
+        if (krys::IsUndefined(childWidth) && krys::IsDefined(width))
         {
           childWidth = width;
           childWidthSizingMode = SizingMode::FitContent;
@@ -138,7 +138,7 @@ namespace Krys::UI
       if ((isMainAxisRow && node->GetStyle().GetOverflow() == Overflow::Scroll)
           || node->GetStyle().GetOverflow() != Overflow::Scroll)
       {
-        if (Krys::IsUndefined(childHeight) && Krys::IsDefined(height))
+        if (krys::IsUndefined(childHeight) && krys::IsDefined(height))
         {
           childHeight = height;
           childHeightSizingMode = SizingMode::FitContent;
@@ -163,7 +163,7 @@ namespace Krys::UI
       // If child has no defined size in the cross axis and is set to stretch, set
       // the cross axis to be measured exactly with the available inner width
 
-      const bool hasExactWidth = Krys::IsDefined(width) && widthMode == SizingMode::StretchFit;
+      const bool hasExactWidth = krys::IsDefined(width) && widthMode == SizingMode::StretchFit;
       const bool childWidthStretch = ResolveChildAlignment(node, child) == Align::Stretch
                                      && childWidthSizingMode != SizingMode::StretchFit;
       if (!isMainAxisRow && !isRowStyleDimDefined && hasExactWidth && childWidthStretch)
@@ -177,7 +177,7 @@ namespace Krys::UI
         }
       }
 
-      const bool hasExactHeight = Krys::IsDefined(height) && heightMode == SizingMode::StretchFit;
+      const bool hasExactHeight = krys::IsDefined(height) && heightMode == SizingMode::StretchFit;
       const bool childHeightStretch = ResolveChildAlignment(node, child) == Align::Stretch
                                       && childHeightSizingMode != SizingMode::StretchFit;
       if (isMainAxisRow && !isColumnStyleDimDefined && hasExactHeight && childHeightStretch)
@@ -203,7 +203,7 @@ namespace Krys::UI
                               LayoutPassReason::kMeasureChild, layoutMarkerData, depth, generationCount);
 
       child->SetLayoutComputedFlexBasis(
-        NullableFloat(Krys::MaxOrDefined(child->GetLayout().GetMeasuredDimension(ToDimension(mainAxis)),
+        NullableFloat(krys::MaxOrDefined(child->GetLayout().GetMeasuredDimension(ToDimension(mainAxis)),
                                          PaddingAndBorderForAxis(child, mainAxis, direction, ownerWidth))));
     }
     child->SetLayoutComputedFlexBasisGeneration(generationCount);
@@ -238,12 +238,12 @@ namespace Krys::UI
       + layout.GetBorder(PhysicalEdge::Top) + layout.GetBorder(PhysicalEdge::Bottom);
 
     // We want to make sure we don't call measure with negative size
-    const float innerWidth = Krys::IsUndefined(availableWidth)
+    const float innerWidth = krys::IsUndefined(availableWidth)
                                ? availableWidth
-                               : Krys::MaxOrDefined(0.0f, availableWidth - GetPaddingAndBorderAxisRow);
-    const float innerHeight = Krys::IsUndefined(availableHeight)
+                               : krys::MaxOrDefined(0.0f, availableWidth - GetPaddingAndBorderAxisRow);
+    const float innerHeight = krys::IsUndefined(availableHeight)
                                 ? availableHeight
-                                : Krys::MaxOrDefined(0.0f, availableHeight - GetPaddingAndBorderAxisColumn);
+                                : krys::MaxOrDefined(0.0f, availableHeight - GetPaddingAndBorderAxisColumn);
 
     if (widthSizingMode == SizingMode::StretchFit && heightSizingMode == SizingMode::StretchFit)
     {
@@ -319,7 +319,7 @@ namespace Krys::UI
   static bool IsFixedSize(float dim, SizingMode sizingMode)
   {
     return sizingMode == SizingMode::StretchFit
-           || (Krys::IsDefined(dim) && sizingMode == SizingMode::FitContent && dim <= 0.0);
+           || (krys::IsDefined(dim) && sizingMode == SizingMode::FitContent && dim <= 0.0);
   }
 
   static bool MeasureNodeWithFixedSize(Node *const node, const Direction direction,
@@ -331,7 +331,7 @@ namespace Krys::UI
     {
       node->SetLayoutMeasuredDimension(
         BoundAxis(node, FlexDirection::Row, direction,
-                  Krys::IsUndefined(availableWidth)
+                  krys::IsUndefined(availableWidth)
                       || (widthSizingMode == SizingMode::FitContent && availableWidth < 0.0f)
                     ? 0.0f
                     : availableWidth,
@@ -340,7 +340,7 @@ namespace Krys::UI
 
       node->SetLayoutMeasuredDimension(
         BoundAxis(node, FlexDirection::Column, direction,
-                  Krys::IsUndefined(availableHeight)
+                  krys::IsUndefined(availableHeight)
                       || (heightSizingMode == SizingMode::FitContent && availableHeight < 0.0f)
                     ? 0.0f
                     : availableHeight,
@@ -396,7 +396,7 @@ namespace Krys::UI
     float availableInnerDim = availableDim - GetPaddingAndBorder;
     // Max dimension overrides predefined dimension value; Min dimension in turn
     // overrides both of the above
-    if (Krys::IsDefined(availableInnerDim))
+    if (krys::IsDefined(availableInnerDim))
     {
       // We want to make sure our available height does not violate min and max
       // constraints
@@ -410,7 +410,7 @@ namespace Krys::UI
 
       const float maxInnerDim =
         !maxDimensionOptional.HasValue() ? FLT_MAX : maxDimensionOptional.Value() - GetPaddingAndBorder;
-      availableInnerDim = Krys::MaxOrDefined(Krys::MinOrDefined(availableInnerDim, maxInnerDim), minInnerDim);
+      availableInnerDim = krys::MaxOrDefined(krys::MinOrDefined(availableInnerDim, maxInnerDim), minInnerDim);
     }
 
     return availableInnerDim;
@@ -436,8 +436,8 @@ namespace Krys::UI
       {
         if (child->IsNodeFlexible())
         {
-          if (singleFlexChild != nullptr || Krys::InexactEquals(child->ResolveFlexGrow(), 0.0f)
-              || Krys::InexactEquals(child->ResolveFlexShrink(), 0.0f))
+          if (singleFlexChild != nullptr || krys::InexactEquals(child->ResolveFlexGrow(), 0.0f)
+              || krys::InexactEquals(child->ResolveFlexShrink(), 0.0f))
           {
             // There is already a flexible child, or this flexible child doesn't
             // have flexGrow and flexShrink, abort
@@ -518,7 +518,7 @@ namespace Krys::UI
                          .Value();
       float updatedMainSize = childFlexBasis;
 
-      if (Krys::IsDefined(flexLine.Layout.RemainingFreeSpace) && flexLine.Layout.RemainingFreeSpace < 0)
+      if (krys::IsDefined(flexLine.Layout.RemainingFreeSpace) && flexLine.Layout.RemainingFreeSpace < 0)
       {
         flexShrinkScaledFactor = -currentLineChild->ResolveFlexShrink() * childFlexBasis;
         // Is this child able to shrink?
@@ -526,7 +526,7 @@ namespace Krys::UI
         {
           float childSize = std::numeric_limits<float>::quiet_NaN();
 
-          if (Krys::IsDefined(flexLine.Layout.TotalFlexShrinkScaledFactors)
+          if (krys::IsDefined(flexLine.Layout.TotalFlexShrinkScaledFactors)
               && flexLine.Layout.TotalFlexShrinkScaledFactors == 0)
           {
             childSize = childFlexBasis + flexShrinkScaledFactor;
@@ -542,7 +542,7 @@ namespace Krys::UI
                                       availableInnerWidth);
         }
       }
-      else if (Krys::IsDefined(flexLine.Layout.RemainingFreeSpace) && flexLine.Layout.RemainingFreeSpace > 0)
+      else if (krys::IsDefined(flexLine.Layout.RemainingFreeSpace) && flexLine.Layout.RemainingFreeSpace > 0)
       {
         flexGrowFactor = currentLineChild->ResolveFlexGrow();
 
@@ -592,7 +592,7 @@ namespace Krys::UI
       {
         childCrossSize = availableInnerCrossDim;
         childCrossSizingMode =
-          Krys::IsUndefined(childCrossSize) ? SizingMode::MaxContent : SizingMode::FitContent;
+          krys::IsUndefined(childCrossSize) ? SizingMode::MaxContent : SizingMode::FitContent;
       }
       else
       {
@@ -604,7 +604,7 @@ namespace Krys::UI
         const bool isLoosePercentageMeasurement =
           currentLineChild->GetProcessedDimension(ToDimension(crossAxis)).IsPercent()
           && sizingModeCrossDim != SizingMode::StretchFit;
-        childCrossSizingMode = Krys::IsUndefined(childCrossSize) || isLoosePercentageMeasurement
+        childCrossSizingMode = krys::IsUndefined(childCrossSize) || isLoosePercentageMeasurement
                                  ? SizingMode::MaxContent
                                  : SizingMode::StretchFit;
       }
@@ -666,14 +666,14 @@ namespace Krys::UI
         flexShrinkScaledFactor = -currentLineChild->ResolveFlexShrink() * childFlexBasis;
 
         // Is this child able to shrink?
-        if (Krys::IsDefined(flexShrinkScaledFactor) && flexShrinkScaledFactor != 0)
+        if (krys::IsDefined(flexShrinkScaledFactor) && flexShrinkScaledFactor != 0)
         {
           baseMainSize = childFlexBasis
                          + flexLine.Layout.RemainingFreeSpace / flexLine.Layout.TotalFlexShrinkScaledFactors
                              * flexShrinkScaledFactor;
           boundMainSize = BoundAxis(currentLineChild, mainAxis, direction, baseMainSize,
                                     availableInnerMainDim, availableInnerWidth);
-          if (Krys::IsDefined(baseMainSize) && Krys::IsDefined(boundMainSize)
+          if (krys::IsDefined(baseMainSize) && krys::IsDefined(boundMainSize)
               && baseMainSize != boundMainSize)
           {
             // By excluding this item's size and flex factor from remaining, this
@@ -687,12 +687,12 @@ namespace Krys::UI
           }
         }
       }
-      else if (Krys::IsDefined(flexLine.Layout.RemainingFreeSpace) && flexLine.Layout.RemainingFreeSpace > 0)
+      else if (krys::IsDefined(flexLine.Layout.RemainingFreeSpace) && flexLine.Layout.RemainingFreeSpace > 0)
       {
         flexGrowFactor = currentLineChild->ResolveFlexGrow();
 
         // Is this child able to grow?
-        if (Krys::IsDefined(flexGrowFactor) && flexGrowFactor != 0)
+        if (krys::IsDefined(flexGrowFactor) && flexGrowFactor != 0)
         {
           baseMainSize =
             childFlexBasis
@@ -700,7 +700,7 @@ namespace Krys::UI
           boundMainSize = BoundAxis(currentLineChild, mainAxis, direction, baseMainSize,
                                     availableInnerMainDim, availableInnerWidth);
 
-          if (Krys::IsDefined(baseMainSize) && Krys::IsDefined(boundMainSize)
+          if (krys::IsDefined(baseMainSize) && krys::IsDefined(boundMainSize)
               && baseMainSize != boundMainSize)
           {
             // By excluding this item's size and flex factor from remaining, this
@@ -797,7 +797,7 @@ namespace Krys::UI
           - leadingPaddingAndBorderMain - trailingPaddingAndBorderMain;
         const float occupiedSpaceByChildNodes = availableInnerMainDim - flexLine.Layout.RemainingFreeSpace;
         flexLine.Layout.RemainingFreeSpace =
-          Krys::MaxOrDefined(0.0f, minAvailableMainDim - occupiedSpaceByChildNodes);
+          krys::MaxOrDefined(0.0f, minAvailableMainDim - occupiedSpaceByChildNodes);
       }
       else
       {
@@ -903,15 +903,15 @@ namespace Krys::UI
             child->GetLayout().GetMeasuredDimension(Dimension::Height)
             + child->GetStyle().ComputeMarginForAxis(FlexDirection::Column, availableInnerWidth) - ascent;
 
-          maxAscentForCurrentLine = Krys::MaxOrDefined(maxAscentForCurrentLine, ascent);
-          maxDescentForCurrentLine = Krys::MaxOrDefined(maxDescentForCurrentLine, descent);
+          maxAscentForCurrentLine = krys::MaxOrDefined(maxAscentForCurrentLine, ascent);
+          maxDescentForCurrentLine = krys::MaxOrDefined(maxDescentForCurrentLine, descent);
         }
         else
         {
           // The cross dimension is the max of the elements dimension since
           // there can only be one element in that cross dimension in the case
           // when the items are not baseline aligned
-          flexLine.Layout.CrossDim = Krys::MaxOrDefined(
+          flexLine.Layout.CrossDim = krys::MaxOrDefined(
             flexLine.Layout.CrossDim, child->DimensionWithMargin(crossAxis, availableInnerWidth));
         }
       }
@@ -987,13 +987,13 @@ namespace Krys::UI
                                   const LayoutPassReason reason, LayoutData &layoutMarkerData,
                                   const uint32 depth, const uint16 generationCount)
   {
-    if (Krys::IsUndefined(availableWidth) && widthSizingMode != SizingMode::MaxContent)
+    if (krys::IsUndefined(availableWidth) && widthSizingMode != SizingMode::MaxContent)
     {
       throw std::invalid_argument(
         "availableWidth is indefinite so widthSizingMode must be SizingMode::MaxContent");
     }
 
-    if (Krys::IsUndefined(availableHeight) && heightSizingMode != SizingMode::MaxContent)
+    if (krys::IsUndefined(availableHeight) && heightSizingMode != SizingMode::MaxContent)
     {
       throw std::invalid_argument(
         "availableHeight is indefinite so heightSizingMode must be SizingMode::MaxContent");
@@ -1201,11 +1201,11 @@ namespace Krys::UI
         const float minInnerMainDim = isMainAxisRow ? minInnerWidth : minInnerHeight;
         const float maxInnerMainDim = isMainAxisRow ? maxInnerWidth : maxInnerHeight;
 
-        if (Krys::IsDefined(minInnerMainDim) && flexLine.SizeConsumed < minInnerMainDim)
+        if (krys::IsDefined(minInnerMainDim) && flexLine.SizeConsumed < minInnerMainDim)
         {
           availableInnerMainDim = minInnerMainDim;
         }
-        else if (Krys::IsDefined(maxInnerMainDim) && flexLine.SizeConsumed > maxInnerMainDim)
+        else if (krys::IsDefined(maxInnerMainDim) && flexLine.SizeConsumed > maxInnerMainDim)
         {
           availableInnerMainDim = maxInnerMainDim;
         }
@@ -1214,9 +1214,9 @@ namespace Krys::UI
           bool useLegacyStretchBehaviour = node->HasErrata(Errata::StretchFlexBasis);
 
           if (!useLegacyStretchBehaviour
-              && ((Krys::IsDefined(flexLine.Layout.TotalFlexGrowFactors)
+              && ((krys::IsDefined(flexLine.Layout.TotalFlexGrowFactors)
                    && flexLine.Layout.TotalFlexGrowFactors == 0)
-                  || (Krys::IsDefined(node->ResolveFlexGrow()) && node->ResolveFlexGrow() == 0)))
+                  || (krys::IsDefined(node->ResolveFlexGrow()) && node->ResolveFlexGrow() == 0)))
           {
             // If we don't have any children to flex or we can't flex the node
             // itself, space we've used is all space we need. Root node also
@@ -1228,7 +1228,7 @@ namespace Krys::UI
         }
       }
 
-      if (!sizeBasedOnContent && Krys::IsDefined(availableInnerMainDim))
+      if (!sizeBasedOnContent && krys::IsDefined(availableInnerMainDim))
       {
         flexLine.Layout.RemainingFreeSpace = availableInnerMainDim - flexLine.SizeConsumed;
       }
@@ -1338,11 +1338,11 @@ namespace Krys::UI
               auto alignContent = node->GetStyle().GetAlignContent();
               auto crossAxisDoesNotGrow = alignContent != Align::Stretch && isNodeFlexWrap;
               const SizingMode childWidthSizingMode =
-                Krys::IsUndefined(childWidth) || (!isMainAxisRow && crossAxisDoesNotGrow)
+                krys::IsUndefined(childWidth) || (!isMainAxisRow && crossAxisDoesNotGrow)
                   ? SizingMode::MaxContent
                   : SizingMode::StretchFit;
               const SizingMode childHeightSizingMode =
-                Krys::IsUndefined(childHeight) || (isMainAxisRow && crossAxisDoesNotGrow)
+                krys::IsUndefined(childHeight) || (isMainAxisRow && crossAxisDoesNotGrow)
                   ? SizingMode::MaxContent
                   : SizingMode::StretchFit;
 
@@ -1359,7 +1359,7 @@ namespace Krys::UI
             if (child->GetStyle().IsFlexStartMarginAuto(crossAxis, direction)
                 && child->GetStyle().IsFlexEndMarginAuto(crossAxis, direction))
             {
-              leadingCrossDim += Krys::MaxOrDefined(0.0f, remainingCrossDim / 2);
+              leadingCrossDim += krys::MaxOrDefined(0.0f, remainingCrossDim / 2);
             }
             else if (child->GetStyle().IsFlexEndMarginAuto(crossAxis, direction))
             {
@@ -1367,7 +1367,7 @@ namespace Krys::UI
             }
             else if (child->GetStyle().IsFlexStartMarginAuto(crossAxis, direction))
             {
-              leadingCrossDim += Krys::MaxOrDefined(0.0f, remainingCrossDim);
+              leadingCrossDim += krys::MaxOrDefined(0.0f, remainingCrossDim);
             }
             else if (alignItem == Align::FlexStart)
             {
@@ -1391,7 +1391,7 @@ namespace Krys::UI
 
       const float appliedCrossGap = lineCount != 0 ? crossAxisGap : 0.0f;
       totalLineCrossDim += flexLine.Layout.CrossDim + appliedCrossGap;
-      maxLineMainDim = Krys::MaxOrDefined(maxLineMainDim, flexLine.Layout.MainDim);
+      maxLineMainDim = krys::MaxOrDefined(maxLineMainDim, flexLine.Layout.MainDim);
     }
 
     // STEP 8: MULTI-LINE CONTENT ALIGNMENT
@@ -1469,7 +1469,7 @@ namespace Krys::UI
             }
             if (child->IsLayoutDimensionDefined(crossAxis))
             {
-              lineHeight = Krys::MaxOrDefined(
+              lineHeight = krys::MaxOrDefined(
                 lineHeight, child->GetLayout().GetMeasuredDimension(ToDimension(crossAxis))
                               + child->GetStyle().ComputeMarginForAxis(crossAxis, availableInnerWidth));
             }
@@ -1481,9 +1481,9 @@ namespace Krys::UI
               const float descent =
                 child->GetLayout().GetMeasuredDimension(Dimension::Height)
                 + child->GetStyle().ComputeMarginForAxis(FlexDirection::Column, availableInnerWidth) - ascent;
-              maxAscentForCurrentLine = Krys::MaxOrDefined(maxAscentForCurrentLine, ascent);
-              maxDescentForCurrentLine = Krys::MaxOrDefined(maxDescentForCurrentLine, descent);
-              lineHeight = Krys::MaxOrDefined(lineHeight, maxAscentForCurrentLine + maxDescentForCurrentLine);
+              maxAscentForCurrentLine = krys::MaxOrDefined(maxAscentForCurrentLine, ascent);
+              maxDescentForCurrentLine = krys::MaxOrDefined(maxDescentForCurrentLine, descent);
+              lineHeight = krys::MaxOrDefined(lineHeight, maxAscentForCurrentLine + maxDescentForCurrentLine);
             }
           }
         }
@@ -1549,9 +1549,9 @@ namespace Krys::UI
                          + child->GetStyle().ComputeMarginForAxis(crossAxis, availableInnerWidth))
                       : leadPerLine + lineHeight;
 
-                  if (!(Krys::InexactEquals(childWidth,
+                  if (!(krys::InexactEquals(childWidth,
                                             child->GetLayout().GetMeasuredDimension(Dimension::Width))
-                        && Krys::InexactEquals(childHeight,
+                        && krys::InexactEquals(childHeight,
                                                child->GetLayout().GetMeasuredDimension(Dimension::Height))))
                   {
                     CalculateLayoutInternal(child, childWidth, childHeight, direction, SizingMode::StretchFit,
@@ -1609,7 +1609,7 @@ namespace Krys::UI
              && node->GetStyle().GetOverflow() == Overflow::Scroll)
     {
       node->SetLayoutMeasuredDimension(
-        Krys::MaxOrDefined(Krys::MinOrDefined(availableInnerMainDim + GetPaddingAndBorderAxisMain,
+        krys::MaxOrDefined(krys::MinOrDefined(availableInnerMainDim + GetPaddingAndBorderAxisMain,
                                               BoundAxisWithinMinAndMax(node, direction, mainAxis,
                                                                        NullableFloat {maxLineMainDim},
                                                                        mainAxisOwnerSize, ownerWidth)
@@ -1633,8 +1633,8 @@ namespace Krys::UI
              && node->GetStyle().GetOverflow() == Overflow::Scroll)
     {
       node->SetLayoutMeasuredDimension(
-        Krys::MaxOrDefined(
-          Krys::MinOrDefined(
+        krys::MaxOrDefined(
+          krys::MinOrDefined(
             availableInnerCrossDim + GetPaddingAndBorderAxisCross,
             BoundAxisWithinMinAndMax(node, direction, crossAxis,
                                      NullableFloat {totalLineCrossDim + GetPaddingAndBorderAxisCross},
@@ -1780,8 +1780,8 @@ namespace Krys::UI
     }
     else if (performLayout)
     {
-      if (Krys::InexactEquals(layout->CachedLayout.AvailableWidth, availableWidth)
-          && Krys::InexactEquals(layout->CachedLayout.AvailableHeight, availableHeight)
+      if (krys::InexactEquals(layout->CachedLayout.AvailableWidth, availableWidth)
+          && krys::InexactEquals(layout->CachedLayout.AvailableHeight, availableHeight)
           && layout->CachedLayout.WidthSizingMode == widthSizingMode
           && layout->CachedLayout.HeightSizingMode == heightSizingMode)
       {
@@ -1792,8 +1792,8 @@ namespace Krys::UI
     {
       for (uint32_t i = 0; i < layout->NextCachedMeasurementsIndex; i++)
       {
-        if (Krys::InexactEquals(layout->CachedMeasurements[i].AvailableWidth, availableWidth)
-            && Krys::InexactEquals(layout->CachedMeasurements[i].AvailableHeight, availableHeight)
+        if (krys::InexactEquals(layout->CachedMeasurements[i].AvailableWidth, availableWidth)
+            && krys::InexactEquals(layout->CachedMeasurements[i].AvailableHeight, availableHeight)
             && layout->CachedMeasurements[i].WidthSizingMode == widthSizingMode
             && layout->CachedMeasurements[i].HeightSizingMode == heightSizingMode)
         {
@@ -1907,7 +1907,7 @@ namespace Krys::UI
     else
     {
       width = ownerWidth;
-      widthSizingMode = Krys::IsUndefined(width) ? SizingMode::MaxContent : SizingMode::StretchFit;
+      widthSizingMode = krys::IsUndefined(width) ? SizingMode::MaxContent : SizingMode::StretchFit;
     }
 
     float height = std::numeric_limits<float>::quiet_NaN();
@@ -1928,7 +1928,7 @@ namespace Krys::UI
     else
     {
       height = ownerHeight;
-      heightSizingMode = Krys::IsUndefined(height) ? SizingMode::MaxContent : SizingMode::StretchFit;
+      heightSizingMode = krys::IsUndefined(height) ? SizingMode::MaxContent : SizingMode::StretchFit;
     }
 
     if (CalculateLayoutInternal(node, width, height, ownerDirection, widthSizingMode, heightSizingMode,

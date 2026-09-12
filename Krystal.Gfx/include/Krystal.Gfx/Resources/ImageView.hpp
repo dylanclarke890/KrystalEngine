@@ -1,10 +1,10 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Image.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   struct SubResourceRange
   {

@@ -4,7 +4,7 @@
 #include "Krystal.UI/Styles/Enums/Errata.hpp"
 #include "Krystal.UI/Styles/Enums/ExperimentalFeature.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   /// @brief Allocates a set of configuration options. The configuration may be applied to multiple nodes
   /// (i.e. a single global config), or can be applied more granularly per-node.

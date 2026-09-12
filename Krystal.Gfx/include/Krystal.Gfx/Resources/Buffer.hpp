@@ -1,11 +1,11 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Gfx/Enums/BufferType.hpp"
 #include "Krystal.Gfx/Enums/BufferUsage.hpp"
-#include "Krystal.Lib/Types/Span.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   struct BufferDesc
   {

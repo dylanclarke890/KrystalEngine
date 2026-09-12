@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Types/NullableFloat.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Core/Types/NullableFloat.hpp"
+#include "Krystal.Core/Numeric.hpp"
 #include "Krystal.UI/Styles/Values/StyleLength.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
 #pragma pack(push)
 #pragma pack(1)

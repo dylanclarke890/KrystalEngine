@@ -1,6 +1,6 @@
 ﻿#define KRYS_GL_OVERRIDE_FUNCTIONS 0
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Core/Macros.hpp"
 #include <cassert>
 
 #ifdef MemoryBarrier
@@ -1572,7 +1572,7 @@ namespace
 #undef LoadGLVersion
 }
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
   bool InitialiseGLHooks() noexcept
   {
@@ -1588,7 +1588,7 @@ namespace Krys::Gfx::OpenGL
   }
 }
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
 #pragma region GL Core Functions
 

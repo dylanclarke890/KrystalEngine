@@ -1,19 +1,18 @@
 ﻿#include "Krystal.Gfx.OpenGL/Renderer.hpp"
+#include "Krystal.Core/Commands/CommandListReader.hpp"
+#include "Krystal.Core/Maths/Clamp.hpp"
+#include "Krystal.Core/Maths/Transform.hpp"
+#include "Krystal.Core/Text/Encodings/Decode.hpp"
+#include "Krystal.Core/Text/Encodings/UTF.hpp"
+#include "Krystal.Core/Types/Expected.hpp"
 #include "Krystal.Gfx.OpenGL/Debug.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/BufferBitFlags.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/FilterMode.hpp"
 #include "Krystal.Gfx/Commands.hpp"
 #include "Krystal.Gfx/Enums/BufferBitFlags.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/Commands/CommandListReader.hpp"
-#include "Krystal.Lib/Types/Expected.hpp"
-#include "Krystal.Maths/Clamp.hpp"
-#include "Krystal.Maths/Transform.hpp"
-#include "Krystal.Text/Decode/Decode.hpp"
-#include "Krystal.Text/Encodings/UTF8.hpp"
-#include "Krystal.Text/UnicodeCodePoint.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   Expected<UniquePtr<IRenderer>> CreateRenderer(IContext &context) noexcept
   {
@@ -28,7 +27,7 @@ namespace Krys::Gfx
   }
 }
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
   Renderer::Renderer(IContext &context) noexcept : _context(static_cast<Context &>(context))
   {
@@ -154,7 +153,7 @@ namespace Krys::Gfx::OpenGL
           }
           if (HasFlag(cmd.Clear, BufferBitFlags::Depth))
           {
-            glClearDepthf(Maths::Clamp(cmd.Depth, 0.f, 1.f));
+            glClearDepthf(Clamp(cmd.Depth, 0.f, 1.f));
           }
           if (HasFlag(cmd.Clear, BufferBitFlags::Stencil))
           {
@@ -292,7 +291,7 @@ namespace Krys::Gfx::OpenGL
         }
         default:
         {
-          KRYS_WARN("Unknown command type submitted to OpenGL renderer, skipping: {}", header.Type);
+          KRYS_LOG_WARN("Unknown command type submitted to OpenGL renderer, skipping: {}", header.Type);
           reader.SkipBytes(header.SizeInBytes);
           break;
         }
@@ -304,7 +303,7 @@ namespace Krys::Gfx::OpenGL
   }
 
   void Renderer::DrawTextOutlined(const utf8_string &text, FontHandle fontHandle, float ptSize,
-                                  const Maths::Vec2 &position, const ColourbPremultiplied &textColour,
+                                  const Vec2 &position, const ColourbPremultiplied &textColour,
                                   const ColourbPremultiplied &outlineColour, float outlineWidth) noexcept
   {
     Font &font = static_cast<FontRegistry &>(_context.Fonts()).Get(fontHandle);
@@ -334,7 +333,7 @@ namespace Krys::Gfx::OpenGL
   }
 
   void Renderer::DrawText(Font &font, Shader &shader, utf8_stringview text,
-                          const ColourbPremultiplied &textColour, const Maths::Vec2 &position, float ptSize)
+                          const ColourbPremultiplied &textColour, const Vec2 &position, float ptSize)
   {
     auto &fonts = static_cast<FontRegistry &>(_context.Fonts());
     auto &textures = static_cast<TextureRegistry &>(_context.Textures());
@@ -345,7 +344,7 @@ namespace Krys::Gfx::OpenGL
     if (font.Type() != FontType::Bitmap)
     {
       scale = fonts.PtSizeToPixels(ptSize) / font.SDFParams().EMSizeInPixels;
-      auto unitRange = Maths::Vec2(font.SDFParams().PixelRange) / Maths::Vec2(font.AtlasSize());
+      auto unitRange = Vec2(font.SDFParams().PixelRange) / Vec2(font.AtlasSize());
       shader.SetUniform("u_UnitRange", unitRange);
     }
 
@@ -357,14 +356,17 @@ namespace Krys::Gfx::OpenGL
     textures.Bind(font.AtlasTexture(), 0u);
 
     Buffer &buffer = buffers.Get(_glyphBuffer);
-    Maths::Vec2 cursor = position + Maths::Vec2 {0.f, font.Metrics().Ascender * scale};
+    Vec2 cursor = position + Vec2 {0.f, font.Metrics().Ascender * scale};
 
-    utf32_string result = Text::Decode(text, Text::utf8);
+    auto decodeResult = krys::text::Decode<krys::text::UTF8>(text);
+    krys_debug_assert(decodeResult.Error == krys::text::DecodeError::None);
+
+    auto &result = decodeResult.Output;
     auto count = result.size();
 
     while (count > 0)
     {
-      auto batchSize = Maths::Min(count, static_cast<size_t>(GlyphVertex::BatchSize));
+      auto batchSize = Min(count, static_cast<size_t>(GlyphVertex::BatchSize));
       utf32_stringview batch(result.data() + (result.size() - count), batchSize);
       count -= batchSize;
 
@@ -383,8 +385,9 @@ namespace Krys::Gfx::OpenGL
         const auto &glyph = characters.find(c);
         if (glyph == characters.end())
         {
-          // TODO(fix): this check is better than before but we should default to using a missing glyph character
-          //KRYS_WARN("Font '{}' does not contain glyph for character '{}'", font.Family().Id, c);
+          // TODO(fix): this check is better than before but we should default to using a missing glyph
+          // character
+          // KRYS_WARN("Font '{}' does not contain glyph for character '{}'", font.Family().Id, c);
           continue;
         }
 

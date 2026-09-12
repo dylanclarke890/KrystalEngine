@@ -5,9 +5,9 @@
 #include <functional>
 #include <memory>
 
-namespace Krys::Tests
+namespace krys::tests
 {
-  using namespace Krys::UI;
+  using namespace krys::UI;
 
   struct ConfigCloningTest
   {

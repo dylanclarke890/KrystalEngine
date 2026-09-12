@@ -1,9 +1,9 @@
 ﻿#include "Krystal.UI/Layout/LayoutEngine.hpp"
 #include <catch_all.hpp>
 
-namespace Krys::Tests
+namespace krys::tests
 {
-  using namespace Krys::UI;
+  using namespace krys::UI;
 
   static Size _measure(NodeConstRef /*node*/, float width, MeasureMode widthMode, float height,
                        MeasureMode heightMode)

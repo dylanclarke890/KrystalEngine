@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.UI/Layout/Node/Node.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   struct FlexLineRunningLayout
   {

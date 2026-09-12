@@ -1,0 +1,53 @@
+﻿[Exposed=Window]
+interface HTMLElement : Element {
+  [HTMLConstructor] constructor();
+
+  // metadata attributes
+  [CEReactions, Reflect] attribute dom::DOMString title;
+  [CEReactions, Reflect] attribute dom::DOMString lang;
+  [CEReactions] attribute boolean translate;
+  [CEReactions] attribute dom::DOMString dir;
+
+  // user interaction
+  [CEReactions] attribute (boolean or unrestricted double or dom::DOMString)? hidden;
+  [CEReactions, Reflect] attribute boolean inert;
+  undefined click();
+  [CEReactions, Reflect] attribute dom::DOMString accessKey;
+  readonly attribute dom::DOMString accessKeyLabel;
+  [CEReactions] attribute boolean draggable;
+  [CEReactions] attribute boolean spellcheck;
+  [CEReactions, ReflectSetter] attribute dom::DOMString writingSuggestions;
+  [CEReactions, ReflectSetter] attribute dom::DOMString autocapitalize;
+  [CEReactions] attribute boolean autocorrect;
+
+  [CEReactions] attribute [LegacyNullToEmptyString] dom::DOMString innerText;
+  [CEReactions] attribute [LegacyNullToEmptyString] dom::DOMString outerText;
+
+  ElementInternals attachInternals();
+
+  // The popover API
+  undefined showPopover(optional ShowPopoverOptions options = {});
+  undefined hidePopover();
+  boolean togglePopover(optional (TogglePopoverOptions or boolean) options = {});
+  [CEReactions] attribute dom::DOMString? popover;
+
+  [CEReactions, Reflect, ReflectRange=(0, 8)] attribute unsigned long headingOffset;
+  [CEReactions, Reflect] attribute boolean headingReset;
+};
+
+dictionary ShowPopoverOptions {
+  HTMLElement source;
+};
+
+dictionary TogglePopoverOptions : ShowPopoverOptions {
+  boolean force;
+};
+
+HTMLElement includes GlobalEventHandlers;
+HTMLElement includes ElementContentEditable;
+HTMLElement includes HTMLOrSVGOrMathMLElement;
+
+[Exposed=Window]
+interface HTMLUnknownElement : HTMLElement {
+  // Note: intentionally no [HTMLConstructor]
+};

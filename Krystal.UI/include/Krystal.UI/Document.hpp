@@ -1,22 +1,22 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Concepts.hpp"
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/Stack.hpp"
+#include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
-#include "Krystal.Lib/Core/Concepts.hpp"
-#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
-#include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Types/Stack.hpp"
 #include "Krystal.UI/Elements/Element.hpp"
 #include "Krystal.UI/Layout/Algorithm/MeasureText.hpp"
 #include "Krystal.UI/Layout/LayoutEngine.hpp"
 #include <cassert>
 
-namespace Krys::UI
+namespace krys::UI
 {
-  class Document : NonCopyMovable<Document>
+  class Document
   {
     using ElementManager = Gfx::ResourceManager<Element, ElementHandle>;
 

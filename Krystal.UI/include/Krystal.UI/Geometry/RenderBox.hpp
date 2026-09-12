@@ -1,53 +1,53 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Maths/Vector.hpp"
+#include "Krystal.Core/Maths/Vector.hpp"
+#include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.UI/Geometry/Common.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   /// @brief Provides the data needed to generate a mesh for a given element's box.
   class RenderBox
   {
   private:
-    Maths::Vec2 _fillSize;
-    Maths::Vec2 _borderOffset;
+    Vec2 _fillSize;
+    Vec2 _borderOffset;
     EdgeSizes _borderWidths;
     CornerSizes _borderRadii;
 
   public:
-    RenderBox(Maths::Vec2 fillSize, Maths::Vec2 borderOffset, EdgeSizes borderWidths, CornerSizes borderRadii)
+    RenderBox(Vec2 fillSize, Vec2 borderOffset, EdgeSizes borderWidths, CornerSizes borderRadii)
         : _fillSize(fillSize), _borderOffset(borderOffset), _borderWidths(borderWidths),
           _borderRadii(borderRadii)
     {
     }
 
     /// @brief Returns the size of the fill area of the box.
-    KRYS_NODISCARD Maths::Vec2 GetFillSize() const noexcept
+    KRYS_NODISCARD Vec2 GetFillSize() const noexcept
     {
       return _fillSize;
     }
 
     /// @brief Sets the size of the fill area of the box.
-    void SetFillSize(Maths::Vec2 value) noexcept
+    void SetFillSize(Vec2 value) noexcept
     {
       _fillSize = value;
     }
 
     /// @brief Returns the offset from the border area to the fill area of the box.
-    KRYS_NODISCARD Maths::Vec2 GetFillOffset() const noexcept
+    KRYS_NODISCARD Vec2 GetFillOffset() const noexcept
     {
       return {_borderWidths[3], _borderWidths[0]};
     }
 
     /// @brief Returns the offset to the border area of the box.
-    KRYS_NODISCARD Maths::Vec2 GetBorderOffset() const noexcept
+    KRYS_NODISCARD Vec2 GetBorderOffset() const noexcept
     {
       return _borderOffset;
     }
 
     /// @brief Sets the border offset.
-    void SetBorderOffset(Maths::Vec2 value) noexcept
+    void SetBorderOffset(Vec2 value) noexcept
     {
       _borderOffset = value;
     }

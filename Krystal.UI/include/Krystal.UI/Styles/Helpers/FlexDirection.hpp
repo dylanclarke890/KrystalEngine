@@ -6,7 +6,7 @@
 #include "Krystal.UI/Styles/Enums/FlexDirection.hpp"
 #include "Krystal.UI/Styles/Enums/PhysicalEdge.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   KRYS_NODISCARD constexpr inline FlexDirection ResolveDirection(const FlexDirection flexDirection,
                                                              const Direction direction) noexcept

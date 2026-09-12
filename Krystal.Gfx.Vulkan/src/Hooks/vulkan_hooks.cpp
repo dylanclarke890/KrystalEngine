@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Gfx.Vulkan/Hooks/vulkan_hooks.hpp"
 
-namespace Krys::Gfx::Vulkan::Hooks
+namespace krys::Gfx::Vulkan::Hooks
 {
 #define LOAD_VK_FUNC_PTR(name)                                                                               \
-  name = reinterpret_cast<PFN_##name>(::Krys::Gfx::Vulkan::vkGetInstanceProcAddr(nullptr, #name));           \
+  name = reinterpret_cast<PFN_##name>(::krys::Gfx::Vulkan::vkGetInstanceProcAddr(nullptr, #name));           \
   if (!name)                                                                                                 \
     return false;
 
@@ -20,7 +20,7 @@ namespace Krys::Gfx::Vulkan::Hooks
 #undef LOAD_VK_FUNC_PTR
 
 #define LOAD_VK_FUNC_PTR(name)                                                                               \
-  name = reinterpret_cast<PFN_##name>(::Krys::Gfx::Vulkan::vkGetInstanceProcAddr(instance, #name));          \
+  name = reinterpret_cast<PFN_##name>(::krys::Gfx::Vulkan::vkGetInstanceProcAddr(instance, #name));          \
   if (!name)                                                                                                 \
     return false;
 

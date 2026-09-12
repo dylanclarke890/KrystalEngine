@@ -3,9 +3,9 @@
 #include <catch_all.hpp>
 
 #include <ostream>
-namespace Krys::Tests
+namespace krys::tests
 {
-  using namespace Krys::UI;
+  using namespace krys::UI;
 
   static bool Equal(const Size &lhs, const Size &rhs)
   {

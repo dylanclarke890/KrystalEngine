@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Core/IO/VirtualFileSystem.hpp"
+#include "Krystal.Core/Macros.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/BufferRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/FontRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ImageRegistry.hpp"
@@ -12,19 +14,20 @@
 #include "Krystal.Gfx.OpenGL/Registries/TextureRegistry.hpp"
 #include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/IContext.hpp"
-#include "Krystal.IO/VirtualFileSystem.hpp"
-#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
-  class Context final : public IContext, NonCopyMovable<Context>
+  class Context final : public IContext
   {
+    KRYS_NON_COPY_MOVABLE(Context);
+
     class ContextPlatformImpl;
 
+  private:
     NativeHandle _windowHandle;
     uint32 _width;
     uint32 _height;
-    IO::VirtualFileSystem &_vfs;
+    io::VirtualFileSystem &_vfs;
     int _dpi;
     UniquePtr<ContextPlatformImpl> _platformImpl;
 

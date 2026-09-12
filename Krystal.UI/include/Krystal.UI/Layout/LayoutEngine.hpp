@@ -5,14 +5,14 @@
 #include "Krystal.UI/Layout/Api/Node.hpp"
 #include "Krystal.UI/Layout/Api/NodeLayout.hpp"
 #include "Krystal.UI/Layout/Api/NodeStyle.hpp"
-#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
+#include "Krystal.Core/Macros.hpp"
 #include <cassert>
 
-namespace Krys::UI
+namespace krys::UI
 {
   class LayoutEngine : NonCopyMovable<LayoutEngine>
   {
   public:
-    static void Reflow(class Element &element, Maths::Vec2 containingBlock);
+    static void Reflow(class Element &element, Vec2 containingBlock);
   };
 }

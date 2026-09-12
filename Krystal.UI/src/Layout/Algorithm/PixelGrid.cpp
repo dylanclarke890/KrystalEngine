@@ -1,7 +1,7 @@
 ﻿#include "Krystal.UI/Layout/Algorithm/PixelGrid.hpp"
-#include "Krystal.Lib/ComparisonHelpers.hpp"
+#include "Krystal.Core/ComparisonHelpers.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   static inline double RoundValueToPixelGridExact(const double value, const double pointScaleFactor,
                                                   const bool forceCeil, const bool forceFloor)
@@ -29,12 +29,12 @@ namespace Krys::UI
       ++fractial;
     }
 
-    if (Krys::InexactEquals(fractial, 0))
+    if (krys::InexactEquals(fractial, 0))
     {
       // First we check if the value is already rounded
       scaledValue = scaledValue - fractial;
     }
-    else if (Krys::InexactEquals(fractial, 1.0))
+    else if (krys::InexactEquals(fractial, 1.0))
     {
       scaledValue = scaledValue - fractial + 1.0;
     }
@@ -52,7 +52,7 @@ namespace Krys::UI
       // Finally we just round the value
       scaledValue =
         scaledValue - fractial
-        + (!std::isnan(fractial) && (fractial > 0.5 || Krys::InexactEquals(fractial, 0.5)) ? 1.0 : 0.0);
+        + (!std::isnan(fractial) && (fractial > 0.5 || krys::InexactEquals(fractial, 0.5)) ? 1.0 : 0.0);
     }
     return (std::isnan(scaledValue) || std::isnan(pointScaleFactor))
              ? std::numeric_limits<double>::quiet_NaN()
@@ -99,7 +99,7 @@ namespace Krys::UI
       // to whole number we want to check both floor and ceil numbers
 
       const double scaledNodeWidth = nodeWidth * pointScaleFactor;
-      const bool hasFractionalWidth = !Krys::InexactEquals(round(scaledNodeWidth), scaledNodeWidth);
+      const bool hasFractionalWidth = !krys::InexactEquals(round(scaledNodeWidth), scaledNodeWidth);
       node->GetLayout().SetDimension(
         Dimension::Width,
         (float)(RoundValueToPixelGridExact(absoluteNodeRight, pointScaleFactor,
@@ -108,7 +108,7 @@ namespace Krys::UI
                 - RoundValueToPixelGridExact(absoluteNodeLeft, pointScaleFactor, false, textRounding)));
 
       const double scaledNodeHeight = nodeHeight * pointScaleFactor;
-      const bool hasFractionalHeight = !Krys::InexactEquals(round(scaledNodeHeight), scaledNodeHeight);
+      const bool hasFractionalHeight = !krys::InexactEquals(round(scaledNodeHeight), scaledNodeHeight);
       node->GetLayout().SetDimension(
         Dimension::Height,
         (float)(RoundValueToPixelGridExact(absoluteNodeBottom, pointScaleFactor,

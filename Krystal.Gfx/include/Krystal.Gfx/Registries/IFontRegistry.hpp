@@ -1,14 +1,16 @@
 ﻿#pragma once
 
+#include "Krystal.Core/IO/Path.hpp"
+#include "Krystal.Core/Macros.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Font.hpp"
-#include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
-  class IFontRegistry : NonCopyMovable<IFontRegistry>
+  class IFontRegistry
   {
+    KRYS_NON_COPY_MOVABLE(IFontRegistry);
+
   protected:
     IFontRegistry() noexcept = default;
 
@@ -19,7 +21,8 @@ namespace Krys::Gfx
 
     virtual void Shutdown() noexcept = 0;
 
-    KRYS_NODISCARD virtual FontFamilyHandle Register(const utf8_string& name, const IO::Path &path) noexcept = 0;
+    KRYS_NODISCARD virtual FontFamilyHandle Register(const utf8_string &name,
+                                                     const io::Path &path) noexcept = 0;
 
     KRYS_NODISCARD virtual FontHandle Get(const FontDesc &desc) noexcept = 0;
 

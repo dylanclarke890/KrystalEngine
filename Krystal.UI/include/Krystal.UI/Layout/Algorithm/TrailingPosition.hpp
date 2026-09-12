@@ -4,7 +4,7 @@
 #include "Krystal.UI/Layout/Node/Node.hpp"
 #include "Krystal.UI/Styles/Helpers/FlexDirection.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   /// @brief Given an offset to an edge, returns the offset to the opposite edge on the same axis. This
   /// assumes that the width/height of both nodes is determined at this point.

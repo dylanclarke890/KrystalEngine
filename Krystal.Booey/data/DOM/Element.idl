@@ -1,0 +1,47 @@
+﻿[Exposed=Window]
+interface Element : Node {
+  readonly attribute dom::DOMString? namespaceURI;
+  readonly attribute dom::DOMString? prefix;
+  readonly attribute dom::DOMString localName;
+  readonly attribute dom::DOMString tagName;
+
+  [CEReactions] attribute dom::DOMString id;
+  [CEReactions] attribute dom::DOMString className;
+  [SameObject, PutForwards=value] readonly attribute DOMTokenList classList;
+  [CEReactions, Unscopable] attribute dom::DOMString slot;
+
+  boolean hasAttributes();
+  [SameObject] readonly attribute NamedNodeMap attributes;
+  sequence<dom::DOMString> getAttributeNames();
+  dom::DOMString? getAttribute(dom::DOMString qualifiedName);
+  dom::DOMString? getAttributeNS(dom::DOMString? namespace, dom::DOMString localName);
+  [CEReactions] undefined setAttribute(dom::DOMString qualifiedName, (TrustedType or dom::DOMString) value);
+  [CEReactions] undefined setAttributeNS(dom::DOMString? namespace, dom::DOMString qualifiedName, (TrustedType or dom::DOMString) value);
+  [CEReactions] undefined removeAttribute(dom::DOMString qualifiedName);
+  [CEReactions] undefined removeAttributeNS(dom::DOMString? namespace, dom::DOMString localName);
+  [CEReactions] boolean toggleAttribute(dom::DOMString qualifiedName, optional boolean force);
+  boolean hasAttribute(dom::DOMString qualifiedName);
+  boolean hasAttributeNS(dom::DOMString? namespace, dom::DOMString localName);
+
+  Attr? getAttributeNode(dom::DOMString qualifiedName);
+  Attr? getAttributeNodeNS(dom::DOMString? namespace, dom::DOMString localName);
+  [CEReactions] Attr? setAttributeNode(Attr attr);
+  [CEReactions] Attr? setAttributeNodeNS(Attr attr);
+  [CEReactions] Attr removeAttributeNode(Attr attr);
+
+  ShadowRoot attachShadow(ShadowRootInit init);
+  readonly attribute ShadowRoot? shadowRoot;
+
+  readonly attribute CustomElementRegistry? customElementRegistry;
+
+  Element? closest(dom::DOMString selectors);
+  boolean matches(dom::DOMString selectors);
+  boolean webkitMatchesSelector(dom::DOMString selectors); // legacy alias of .matches
+
+  HTMLCollection getElementsByTagName(dom::DOMString qualifiedName);
+  HTMLCollection getElementsByTagNameNS(dom::DOMString? namespace, dom::DOMString localName);
+  HTMLCollection getElementsByClassName(dom::DOMString classNames);
+
+  [CEReactions] Element? insertAdjacentElement(dom::DOMString where, Element element); // legacy
+  undefined insertAdjacentText(dom::DOMString where, dom::DOMString data); // legacy
+};

@@ -4,7 +4,7 @@
 #include "Krystal.UI/Layout/Algorithm/CalculateLayout.hpp"
 #include "Krystal.UI/Layout/Algorithm/TrailingPosition.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   static inline void SetFlexStartLayoutPosition(const Node *const parent, Node *child,
                                                 const Direction direction, const FlexDirection axis,
@@ -268,15 +268,15 @@ namespace Krys::UI
     // ratio calculation. One dimension being the anchor and the other being
     // flexible.
     const auto &childStyle = child->GetStyle();
-    if (Krys::IsUndefined(childWidth) ^ Krys::IsUndefined(childHeight))
+    if (krys::IsUndefined(childWidth) ^ krys::IsUndefined(childHeight))
     {
       if (childStyle.GetAspectRatio().HasValue())
       {
-        if (Krys::IsUndefined(childWidth))
+        if (krys::IsUndefined(childWidth))
         {
           childWidth = marginRow + (childHeight - marginColumn) * childStyle.GetAspectRatio().Value();
         }
-        else if (Krys::IsUndefined(childHeight))
+        else if (krys::IsUndefined(childHeight))
         {
           childHeight = marginColumn + (childWidth - marginRow) / childStyle.GetAspectRatio().Value();
         }
@@ -284,18 +284,18 @@ namespace Krys::UI
     }
 
     // If we're still missing one or the other dimension, measure the content.
-    if (Krys::IsUndefined(childWidth) || Krys::IsUndefined(childHeight))
+    if (krys::IsUndefined(childWidth) || krys::IsUndefined(childHeight))
     {
-      childWidthSizingMode = Krys::IsUndefined(childWidth) ? SizingMode::MaxContent : SizingMode::StretchFit;
+      childWidthSizingMode = krys::IsUndefined(childWidth) ? SizingMode::MaxContent : SizingMode::StretchFit;
       childHeightSizingMode =
-        Krys::IsUndefined(childHeight) ? SizingMode::MaxContent : SizingMode::StretchFit;
+        krys::IsUndefined(childHeight) ? SizingMode::MaxContent : SizingMode::StretchFit;
 
       // If the size of the owner is defined then try to constrain the absolute
       // child to that size as well. This allows text within the absolute child
       // to wrap to the size of its owner. This is the same behavior as many
       // browsers implement.
-      if (!isMainAxisRow && Krys::IsUndefined(childWidth) && widthMode != SizingMode::MaxContent
-          && Krys::IsDefined(containingBlockWidth) && containingBlockWidth > 0)
+      if (!isMainAxisRow && krys::IsUndefined(childWidth) && widthMode != SizingMode::MaxContent
+          && krys::IsDefined(containingBlockWidth) && containingBlockWidth > 0)
       {
         childWidth = containingBlockWidth;
         childWidthSizingMode = SizingMode::FitContent;

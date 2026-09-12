@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Enum.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Numeric.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   enum class BufferBitFlags : uint8
   {
@@ -15,4 +15,4 @@ namespace Krys::Gfx
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::Gfx::BufferBitFlags, 4u)
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::Gfx::BufferBitFlags, 4u)

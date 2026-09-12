@@ -1,0 +1,25 @@
+﻿[Exposed=Window]
+interface HTMLLinkElement : HTMLElement {
+  [HTMLConstructor] constructor();
+
+  [CEReactions, ReflectURL] attribute USVString href;
+  [CEReactions] attribute dom::DOMString? crossOrigin;
+  [CEReactions, Reflect] attribute dom::DOMString rel;
+  [CEReactions] attribute dom::DOMString as;
+  [SameObject, PutForwards=value, Reflect="rel"] readonly attribute DOMTokenList relList;
+  [CEReactions, Reflect] attribute dom::DOMString media;
+  [CEReactions, Reflect] attribute dom::DOMString integrity;
+  [CEReactions, Reflect] attribute dom::DOMString hreflang;
+  [CEReactions, Reflect] attribute dom::DOMString type;
+  [SameObject, PutForwards=value, Reflect] readonly attribute DOMTokenList sizes;
+  [CEReactions, Reflect] attribute USVString imageSrcset;
+  [CEReactions, Reflect] attribute dom::DOMString imageSizes;
+  [CEReactions] attribute dom::DOMString referrerPolicy;
+  [SameObject, PutForwards=value, Reflect] readonly attribute DOMTokenList blocking;
+  [CEReactions, Reflect] attribute boolean disabled;
+  [CEReactions] attribute dom::DOMString fetchPriority;
+
+  // also has obsolete members
+};
+
+HTMLLinkElement includes LinkStyle;

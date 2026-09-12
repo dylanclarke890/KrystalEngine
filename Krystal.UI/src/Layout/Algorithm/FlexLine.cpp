@@ -2,7 +2,7 @@
 #include "Krystal.UI/Layout/Algorithm/BoundAxis.hpp"
 #include "Krystal.UI/Styles/Helpers/FlexDirection.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   FlexLine CalculateFlexLine(Node *const node, const Direction ownerDirection, const float ownerWidth,
                              const float mainAxisOwnerSize, const float availableInnerWidth,

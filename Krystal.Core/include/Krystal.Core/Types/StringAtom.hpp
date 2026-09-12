@@ -1,0 +1,179 @@
+﻿#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/HashSet.hpp"
+#include "Krystal.Core/Types/String.hpp"
+#include <xutility>
+
+namespace krys
+{
+  using StringAtomStorage = const utf8_string *;
+
+  class StringAtomPool
+  {
+  public:
+    struct UTF8Hash
+    {
+      using is_transparent = void;
+
+      size_t operator()(utf8_stringview v) const noexcept
+      {
+        return std::hash<utf8_stringview> {}(v);
+      }
+
+      size_t operator()(const utf8_string &s) const noexcept
+      {
+        return (*this)(utf8_stringview {s});
+      }
+    };
+
+    struct UTF8KeyEqual
+    {
+      using is_transparent = void;
+
+      bool operator()(utf8_stringview a, utf8_stringview b) const noexcept
+      {
+        return a == b;
+      }
+
+      bool operator()(const utf8_string &a, utf8_stringview b) const noexcept
+      {
+        return utf8_stringview {a} == b;
+      }
+
+      bool operator()(utf8_stringview a, const utf8_string &b) const noexcept
+      {
+        return a == utf8_stringview {b};
+      }
+
+      bool operator()(const utf8_string &a, const utf8_string &b) const noexcept
+      {
+        return a == b;
+      }
+    };
+
+  private:
+    HashSet<utf8_string, UTF8Hash, UTF8KeyEqual> _strings;
+
+  public:
+    StringAtomPool() noexcept = default;
+
+    KRYS_NODISCARD StringAtomStorage GetOrAdd(utf8_stringview v) noexcept
+    {
+      if (auto it = _strings.find(v); it != _strings.end())
+      {
+        return std::addressof(*it);
+      }
+
+      // Only allocate when inserting a new unique string.
+      auto [insertedIt, wasInserted] = _strings.insert(utf8_string(v));
+      return std::addressof(*insertedIt);
+    }
+
+    KRYS_NODISCARD StringAtomStorage GetOrAdd(const utf8_string &s) noexcept
+    {
+      return GetOrAdd(utf8_stringview {s});
+    }
+
+    KRYS_NODISCARD StringAtomStorage GetOrAdd(utf8_string &&s) noexcept
+    {
+      if (auto it = _strings.find(utf8_stringview {s}); it != _strings.end())
+      {
+        return std::addressof(*it);
+      }
+
+      auto [insertedIt, wasInserted] = _strings.insert(std::move(s));
+      return std::addressof(*insertedIt);
+    }
+  };
+
+  class StringAtom
+  {
+  private:
+    StringAtomStorage _ptr {nullptr};
+
+    static StringAtomPool &Pool()
+    {
+      static StringAtomPool globalPool {};
+      return globalPool;
+    }
+
+    struct NullTag
+    {
+    };
+
+    struct EmptyTag
+    {
+    };
+
+    StringAtom(NullTag) noexcept : _ptr(nullptr)
+    {
+    }
+
+    StringAtom(EmptyTag) noexcept : _ptr(Pool().GetOrAdd(utf8_stringview {u8""}))
+    {
+    }
+
+  public:
+    KRYS_NODISCARD static const StringAtom &Null() noexcept
+    {
+      static StringAtom nullAtom = StringAtom(NullTag {});
+      return nullAtom;
+    }
+
+    KRYS_NODISCARD static const StringAtom &Empty() noexcept
+    {
+      static StringAtom emptyAtom = StringAtom(EmptyTag {});
+      return emptyAtom;
+    }
+
+    StringAtom(const char8 *str) noexcept : _ptr(Pool().GetOrAdd(utf8_stringview {str}))
+    {
+    }
+
+    StringAtom(utf8_stringview str) noexcept : _ptr(Pool().GetOrAdd(str))
+    {
+    }
+
+    StringAtom(const utf8_string &str) noexcept : _ptr(Pool().GetOrAdd(str))
+    {
+    }
+
+    StringAtom(utf8_string &&str) noexcept : _ptr(Pool().GetOrAdd(std::move(str)))
+    {
+    }
+
+    StringAtom(StringAtomStorage ptr) noexcept : _ptr(ptr)
+    {
+    }
+
+    KRYS_NODISCARD friend bool operator==(StringAtom a, StringAtom b) noexcept
+    {
+      return a._ptr == b._ptr;
+    }
+
+    KRYS_NODISCARD utf8_stringview View() const noexcept
+    {
+      return *_ptr;
+    }
+  };
+}
+
+namespace std
+{
+  template <>
+  struct hash<krys::StringAtom>
+  {
+    constexpr size_t operator()(const krys::StringAtom &qName) const noexcept
+    {
+      if (qName == krys::StringAtom::Null())
+      {
+        return 0;
+      }
+
+      return krys::Hash::Combine(qName.View().data());
+    }
+  };
+}

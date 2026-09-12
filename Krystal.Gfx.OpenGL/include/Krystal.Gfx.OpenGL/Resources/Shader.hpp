@@ -1,18 +1,21 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Maths/Matrix.hpp"
+#include "Krystal.Core/Maths/Vector.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/ShaderReflector.hpp"
-#include "Krystal.Lib/Mixins/NonCopyable.hpp"
-#include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Maths/Matrix.hpp"
-#include "Krystal.Maths/Vector.hpp"
 #include <cassert>
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
-  class Shader : NonCopyable<Shader>
+  class Shader
   {
+    KRYS_NON_COPYABLE(Shader);
+
+  private:
     GLuint _id {0u};
     ShaderLayout _layout {};
 
@@ -91,7 +94,7 @@ namespace Krys::Gfx::OpenGL
     template <typename T>
     void SetUniform(const string &uniformName, const T &value, bool required = false) const noexcept
     {
-      using namespace Krys::Maths;
+      using namespace krys;
 
       GLint location = glGetUniformLocation(_id, uniformName.c_str());
       if (location == -1)

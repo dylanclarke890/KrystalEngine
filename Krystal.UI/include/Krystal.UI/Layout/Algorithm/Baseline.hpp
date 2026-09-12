@@ -2,7 +2,7 @@
 
 #include "Krystal.UI/Layout/Node/Node.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   /// @brief Calculate baseline represented as an offset from the top edge of the node.
   float CalculateBaseline(const Node *node);

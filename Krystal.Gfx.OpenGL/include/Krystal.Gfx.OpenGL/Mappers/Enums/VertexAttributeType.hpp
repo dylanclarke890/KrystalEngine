@@ -3,7 +3,7 @@
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx/Enums/VertexAttributeType.hpp"
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
   KRYS_NODISCARD constexpr inline GLenum MapVertexAttributeType(VertexAttributeType type) noexcept
   {

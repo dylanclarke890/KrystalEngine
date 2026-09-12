@@ -1,13 +1,13 @@
 ﻿#include "Krystal.UI/Layout/Node/Node.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Utils/ToUnderlying.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Utils/ToUnderlying.hpp"
 #include "Krystal.UI/Layout/Config/Config.hpp"
 #include "Krystal.UI/Styles/Helpers/FlexDirection.hpp"
 #include <algorithm>
 #include <cstddef>
 #include <iostream>
 
-namespace Krys::UI
+namespace krys::UI
 {
   Node::Node() : Node(&Config::Defaults())
   {
@@ -45,7 +45,7 @@ namespace Krys::UI
   {
     const auto size = _measureFunc(this, availableWidth, widthMode, availableHeight, heightMode);
 
-    if (Krys::IsUndefined(size.y) || size.y < 0 || Krys::IsUndefined(size.x) || size.x < 0)
+    if (krys::IsUndefined(size.y) || size.y < 0 || krys::IsUndefined(size.x) || size.x < 0)
     {
       return {MaxOrDefined(0.0f, size.x), MaxOrDefined(0.0f, size.y)};
     }
@@ -66,7 +66,7 @@ namespace Krys::UI
   bool Node::IsLayoutDimensionDefined(const FlexDirection axis)
   {
     const float value = GetLayout().GetMeasuredDimension(ToDimension(axis));
-    return Krys::IsDefined(value) && value >= 0.0f;
+    return krys::IsDefined(value) && value >= 0.0f;
   }
 
   // Setters

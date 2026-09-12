@@ -1,14 +1,14 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Types/NullableFloat.hpp"
-#include "Krystal.Lib/SmallValueBuffer.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Core/Types/NullableFloat.hpp"
+#include "Krystal.Core/SmallValueBuffer.hpp"
+#include "Krystal.Core/Numeric.hpp"
 #include "Krystal.UI/Styles/Values/StyleLength.hpp"
 #include "Krystal.UI/Styles/Values/StyleSizeLength.hpp"
 #include "Krystal.UI/Styles/Values/StyleValueHandle.hpp"
 #include <cassert>
 
-namespace Krys::UI
+namespace krys::UI
 {
   /// @brief StyleValuePool allows compact storage for a sparse collection of assigned
   /// lengths and numbers. Values are referred to using StyleValueHandle. In most

@@ -1,16 +1,16 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Maths/Vector.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Utils/ByteUtils.hpp"
 #include "Krystal.Gfx.OpenGL/Debug.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/PrimitiveType.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Mesh.hpp"
 #include "Krystal.Gfx/Registries/IMeshRegistry.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Gfx/Utils/MeshDataUtils.hpp"
-#include "Krystal.Lib/ByteUtils.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Maths/Vector.hpp"
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
   class MeshRegistry final : public IMeshRegistry
   {
@@ -27,8 +27,6 @@ namespace Krys::Gfx::OpenGL
 
     void Startup() override
     {
-      using namespace Maths;
-
       MeshData data {};
       MeshDataUtils::GenerateQuad(data, Vec2 {-1.f}, Vec2 {2.f}, Colours::Transparent);
 
@@ -122,9 +120,9 @@ namespace Krys::Gfx::OpenGL
 
     MeshHandle CreateSphere() noexcept
     {
-      List<Maths::Vec3> positions;
-      List<Maths::Vec2> uv;
-      List<Maths::Vec3> normals;
+      List<Vec3> positions;
+      List<Vec2> uv;
+      List<Vec3> normals;
       List<uint> indices;
 
       const uint X_SEGMENTS = 64;

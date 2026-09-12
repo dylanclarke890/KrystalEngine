@@ -4,7 +4,7 @@
 
 namespace
 {
-  using namespace Krys::UI;
+  using namespace krys::UI;
 
   template <auto LayoutMember>
   float GetResolvedLayoutProperty(const NodeConstRef node, const Edge edge)
@@ -40,7 +40,7 @@ namespace
 
 }
 
-namespace Krys::UI
+namespace krys::UI
 {
   float NodeLayoutGetLeft(NodeConstRef node)
   {

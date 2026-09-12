@@ -1,9 +1,9 @@
 ﻿#include "Krystal.UI/Layout/LayoutEngine.hpp"
 #include <catch_all.hpp>
 
-namespace Krys::Tests
+namespace krys::tests
 {
-  using namespace Krys::UI;
+  using namespace krys::UI;
 
   static float _baseline(NodeConstRef node, const float /*width*/, const float /*height*/)
   {

@@ -2,9 +2,9 @@
 #include "Krystal.UI/Layout/Node/Node.hpp"
 #include <catch_all.hpp>
 #include <cstdio>
-namespace Krys::Tests
+namespace krys::tests
 {
-  using namespace Krys::UI;
+  using namespace krys::UI;
 
   TEST_CASE("LayoutEngine::layoutable_children_single_contents_node", "[LayoutEngine]")
   {

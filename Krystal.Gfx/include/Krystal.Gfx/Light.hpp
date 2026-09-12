@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Gfx/Colour.hpp"
-#include "Krystal.Maths/Vector.hpp"
+#include "Krystal.Core/Maths/Vector.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   struct LightColour
   {
@@ -38,21 +38,21 @@ namespace Krys::Gfx
 
   struct DirectionalLight
   {
-    Maths::Vec3 Direction;
+    Vec3 Direction;
     LightColour Colour;
   };
 
   struct PointLight
   {
-    Maths::Vec3 Position;
+    Vec3 Position;
     LightColour Colour;
     LightAttenuation Attenuation;
   };
 
   struct SpotLight
   {
-    Maths::Vec3 Position;
-    Maths::Vec3 Direction;
+    Vec3 Position;
+    Vec3 Direction;
     LightColour Colour;
     LightAttenuation Attenuation;
     float CutOffRadians;

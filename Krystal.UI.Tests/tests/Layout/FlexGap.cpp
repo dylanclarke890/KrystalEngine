@@ -2,9 +2,9 @@
 #include "Krystal.UI/Styles/Enums/Gutter.hpp"
 #include <catch_all.hpp>
 
-namespace Krys::Tests
+namespace krys::tests
 {
-  using namespace Krys::UI;
+  using namespace krys::UI;
 
   TEST_CASE("FlexGap::gap_negative_value", "[LayoutEngine]")
   {

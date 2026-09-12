@@ -2,7 +2,7 @@
 #include "Krystal.UI/Layout/Config/Config.hpp"
 #include <cassert>
 
-namespace Krys::UI
+namespace krys::UI
 {
   ConfigRef ConfigCreate()
   {

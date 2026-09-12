@@ -1,13 +1,13 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Gfx/Resources/Font.hpp"
-#include "Krystal.Lib/Core/Hash.hpp"
-#include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types/Map.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
 #include <type_traits>
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   struct TextShaderDesc
   {
@@ -22,7 +22,7 @@ namespace Krys::Gfx
 
   struct ShaderPreprocessorConfig
   {
-    Map<string, string> Defines {};
+    HashMap<string, string> Defines {};
 
     void Define(const string &key, const string &value) noexcept
     {
@@ -34,11 +34,11 @@ namespace Krys::Gfx
 namespace std
 {
   template <>
-  struct hash<Krys::Gfx::TextShaderDesc>
+  struct hash<krys::Gfx::TextShaderDesc>
   {
-    size_t operator()(const Krys::Gfx::TextShaderDesc &desc) const noexcept
+    size_t operator()(const krys::Gfx::TextShaderDesc &desc) const noexcept
     {
-      return Krys::Hash::Combine(desc.FontType, desc.EnableOutline);
+      return krys::Hash::Combine(desc.FontType, desc.EnableOutline);
     }
   };
 }

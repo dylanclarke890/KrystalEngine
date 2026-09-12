@@ -1,17 +1,17 @@
 ﻿#pragma once
 
+#include "Krystal.Core/IO/ImageLoader.hpp"
+#include "Krystal.Core/IO/VirtualFileSystem.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Gfx.Vulkan/Hooks/vulkan_hooks.hpp"
 #include "Krystal.Gfx/IContext.hpp"
-#include "Krystal.IO/ImageLoader.hpp"
-#include "Krystal.IO/VirtualFileSystem.hpp"
-#include "Krystal.Lib/Types/Maybe.hpp"
 
-namespace Krys::Gfx::Vulkan
+namespace krys::Gfx::Vulkan
 {
   struct QueueFamilyIndices
   {
-    Krys::uint32 GraphicsFamily {};
-    Krys::uint32 PresentFamily {};
+    krys::uint32 GraphicsFamily {};
+    krys::uint32 PresentFamily {};
   };
 
   struct SwapchainSupportDetails
@@ -25,7 +25,7 @@ namespace Krys::Gfx::Vulkan
   {
     NativeHandle _windowHandle = nullptr;
     uint32 _width = 0, _height = 0;
-    IO::VirtualFileSystem &_vfs;
+    io::VirtualFileSystem &_vfs;
 
     VkInstance _instance {VK_NULL_HANDLE};
     VkSurfaceKHR _surface = VK_NULL_HANDLE;

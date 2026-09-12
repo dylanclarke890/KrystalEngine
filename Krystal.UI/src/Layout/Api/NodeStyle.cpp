@@ -2,7 +2,7 @@
 #include "Krystal.UI/Layout/Node/Node.hpp"
 #include "Krystal.UI/Styles/Style.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   void NodeCopyStyle(NodeRef dstNode, NodeConstRef srcNode)
   {

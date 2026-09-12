@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Maths/Vector.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Maths/Vector.hpp"
+#include "Krystal.Core/Numeric.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   template <typename ColourType, ColourType AlphaDefault, bool PremultipliedAlpha>
   class Colour
@@ -182,28 +182,27 @@ namespace Krys::Gfx
       };
     }
 
-    KRYS_NODISCARD constexpr Maths::Vec3 ToVec3() const noexcept
+    KRYS_NODISCARD constexpr Vec3 ToVec3() const noexcept
     {
       if constexpr (SameType<ColourType, float>)
       {
-        return Maths::Vec3 {red, green, blue};
+        return Vec3 {red, green, blue};
       }
       else if constexpr (SameType<ColourType, uchar>)
       {
-        return Maths::Vec3 {(float)red / 255.f, (float)green / 255.f, (float)blue / 255.f};
+        return Vec3 {(float)red / 255.f, (float)green / 255.f, (float)blue / 255.f};
       }
     }
 
-    KRYS_NODISCARD constexpr Maths::Vec4 ToVec4() const noexcept
+    KRYS_NODISCARD constexpr Vec4 ToVec4() const noexcept
     {
       if constexpr (SameType<ColourType, float>)
       {
-        return Maths::Vec4 {red, green, blue, alpha};
+        return Vec4 {red, green, blue, alpha};
       }
       else if constexpr (SameType<ColourType, uchar>)
       {
-        return Maths::Vec4 {(float)red / 255.f, (float)green / 255.f, (float)blue / 255.f,
-                            (float)alpha / 255.f};
+        return Vec4 {(float)red / 255.f, (float)green / 255.f, (float)blue / 255.f, (float)alpha / 255.f};
       }
     }
   };

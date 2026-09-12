@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Enum.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Numeric.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   enum class Errata : uint8
   {
@@ -15,4 +15,4 @@ namespace Krys::UI
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::UI::Errata, 4u)
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::UI::Errata, 4u)

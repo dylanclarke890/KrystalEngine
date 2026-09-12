@@ -1,7 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Detection/OS.hpp"
 #include "Krystal.Gfx.Vulkan/Hooks/vulkan_hooks.hpp"
-#include "Krystal.Lib/Detection/OS.hpp"
 
 #if KRYS_OS(WINDOWS)
   #ifndef WIN32_LEAN_AND_MEAN
@@ -12,7 +12,7 @@
   #include <vulkan/vulkan_win32.h>
 #endif
 
-namespace Krys::Gfx::Vulkan
+namespace krys::Gfx::Vulkan
 {
 #define DECLARE_VK_FUNC_PTR(name) inline PFN_##name name = nullptr;
 

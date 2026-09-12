@@ -1,12 +1,12 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Types/Func.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Types/Func.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Numeric.hpp"
 #include "Krystal.UI/Layout/Api/Forward.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   enum struct LayoutType : int
   {

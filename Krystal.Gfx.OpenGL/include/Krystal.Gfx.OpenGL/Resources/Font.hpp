@@ -1,23 +1,25 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Maths/Vector.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Shader.hpp"
 #include "Krystal.Gfx.OpenGL/Utils.hpp"
 #include "Krystal.Gfx/Resources/Font.hpp"
-#include "Krystal.Lib/Mixins/NonCopyable.hpp"
-#include "Krystal.Lib/Types/Map.hpp"
-#include "Krystal.Lib/Types/Span.hpp"
-#include "Krystal.Maths/Vector.hpp"
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
-  class Font : NonCopyable<Font>
+  class Font
   {
+    KRYS_NON_COPYABLE(Font);
+
+  private:
     FontType _type {FontType::Bitmap};
     FontFamilyHandle _fontFamily;
     TextureHandle _atlasTexture;
     CharacterMap _characters;
-    Maths::Vec2u _atlasSize {0u};
+    Vec2u _atlasSize {0u};
     FontMetrics _metrics {};
     float _ptSize {0.f};
     SDFParams _sdfParams {};
@@ -123,7 +125,7 @@ namespace Krys::Gfx::OpenGL
       return _characters;
     }
 
-    KRYS_NODISCARD const Maths::Vec2u &AtlasSize() const noexcept
+    KRYS_NODISCARD const Vec2u &AtlasSize() const noexcept
     {
       return _atlasSize;
     }

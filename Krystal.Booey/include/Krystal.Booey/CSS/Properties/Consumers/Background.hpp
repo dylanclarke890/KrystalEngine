@@ -1,0 +1,138 @@
+﻿#pragma once
+
+#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include <cassert>
+
+namespace krys::boo::css
+{
+  class TokenRange;
+  class CSSValue;
+  struct CSSPropertyParserState;
+  struct BorderImageComponents;
+  struct BorderRadius;
+
+  namespace CSSPropertyParserHelpers
+  {
+    // Default value of the `fill` parameter for `border-image-slice`.
+    enum class BorderImageSliceFillDefault : bool
+    {
+      No,
+      Yes
+    };
+
+    // Legacy behavior needed by -webkit-border-image that makes fixed border slices also set the border
+    // widths.
+    enum class BorderImageWidthOverridesWidthForLength : bool
+    {
+      No,
+      Yes
+    };
+
+    // <'border-radius'> = <length-percentage [0,∞]>{1,4} [ / <length-percentage [0,∞]>{1,4} ]?
+    // https://drafts.csswg.org/css-backgrounds/#propdef-border-radius
+    KRYS_NODISCARD Maybe<BorderRadius> ConsumeUnresolvedBorderRadius(TokenRange &tokens,
+                                                                     CSSPropertyParserState &state) noexcept;
+
+    // Non-standard -webkit-border-radius.
+    KRYS_NODISCARD Maybe<BorderRadius>
+      ConsumeUnresolvedWebKitBorderRadius(TokenRange &tokens, CSSPropertyParserState &state) noexcept;
+
+    // <'border-image-slice'> = [<number [0,∞]> | <percentage [0,∞]>]{1,4} && fill?
+    // https://drafts.csswg.org/css-backgrounds/#propdef-border-image-slice
+    KRYS_NODISCARD RefPtr<CSSValue> ConsumeBorderImageSlice(
+      TokenRange &tokens, CSSPropertyParserState &state,
+      BorderImageSliceFillDefault fillDefault = BorderImageSliceFillDefault::No) noexcept;
+
+    // <'border-image-width'> = [ <length-percentage [0,∞]> | <number [0,∞]> | auto ]{1,4}
+    // https://drafts.csswg.org/css-backgrounds/#propdef-border-image-width
+    KRYS_NODISCARD RefPtr<CSSValue>
+      ConsumeBorderImageWidth(TokenRange &tokens, CSSPropertyParserState &state,
+                              BorderImageWidthOverridesWidthForLength overridesWidth =
+                                BorderImageWidthOverridesWidthForLength::No) noexcept;
+
+    // https://drafts.csswg.org/css-backgrounds/#border-image
+    KRYS_NODISCARD Maybe<BorderImageComponents>
+      ConsumeBorderImageComponents(TokenRange &tokens, CSSPropertyParserState &state,
+                                   BorderImageSliceFillDefault defaultFill = BorderImageSliceFillDefault::No,
+                                   BorderImageWidthOverridesWidthForLength overridesWidth =
+                                     BorderImageWidthOverridesWidthForLength::No) noexcept;
+
+    // <bg-size> = [ <length-percentage [0,∞]> | auto ]{1,2} | cover | contain
+    // https://drafts.csswg.org/css-backgrounds/#background-size
+    KRYS_NODISCARD RefPtr<CSSValue> ConsumeSingleBackgroundSize(TokenRange &tokens,
+                                                                CSSPropertyParserState &state) noexcept;
+
+    // Non-standard.
+    KRYS_NODISCARD RefPtr<CSSValue> ConsumeSingleWebkitBackgroundSize(TokenRange &tokens,
+                                                                      CSSPropertyParserState &state) noexcept;
+
+    // <single-mask-size> = <bg-size>
+    // https://drafts.fxtf.org/css-masking/#the-mask-size
+    KRYS_NODISCARD RefPtr<CSSValue> ConsumeSingleMaskSize(TokenRange &tokens,
+                                                          CSSPropertyParserState &state) noexcept;
+
+    // <repeat-style> = repeat-x | repeat-y | [repeat | space | round | no-repeat]{1,2}
+    // https://drafts.csswg.org/css-backgrounds/#typedef-repeat-style
+    KRYS_NODISCARD RefPtr<CSSValue> ConsumeRepeatStyle(TokenRange &tokens,
+                                                       CSSPropertyParserState &state) noexcept;
+
+    // <'box-shadow'> = none | <shadow>#
+    // https://drafts.csswg.org/css-backgrounds/#propdef-box-shadow
+    KRYS_NODISCARD RefPtr<CSSValue> ConsumeBoxShadow(TokenRange &tokens,
+                                                     CSSPropertyParserState &state) noexcept;
+
+    RefPtr<CSSValue> ConsumeWebkitBoxReflect(TokenRange &tokens, CSSPropertyParserState &state) noexcept;
+
+    // MARK: Utilities for filling in rects / quads in the "margin" form.
+
+    // - if only 1 value, `a`, is provided, set top, bottom, right & left to `a`.
+    // - if only 2 values, `a` and `b` are provided, set top & bottom to `a`, right & left to `b`.
+    // - if only 3 values, `a`, `b`, and `c` are provided, set top to `a`, right to `b`, bottom to `c`, & left
+    // to `b`.
+
+    template <typename Container, typename T>
+    KRYS_NODISCARD Container CompleteQuad(T a) noexcept
+    {
+      return Container {a, a, a, a};
+    }
+
+    template <typename Container, typename T>
+    KRYS_NODISCARD Container CompleteQuad(T a, T b) noexcept
+    {
+      return Container {a, b, a, b};
+    }
+
+    template <typename Container, typename T>
+    KRYS_NODISCARD Container CompleteQuad(T a, T b, T c) noexcept
+    {
+      return Container {a, b, c, b};
+    }
+
+    template <typename Container, typename T>
+    KRYS_NODISCARD Container CompleteQuadFromArray(Array<Maybe<T>, 4uz> optionals) noexcept
+    {
+      assert(optionals[0].has_value());
+
+      if (!optionals[1])
+      {
+        return CompleteQuad<Container>(krys::move(*optionals[0]));
+      }
+
+      if (!optionals[2])
+      {
+        return CompleteQuad<Container>(krys::move(*optionals[0]), krys::move(*optionals[1]));
+      }
+
+      if (!optionals[3])
+      {
+        return CompleteQuad<Container>(krys::move(*optionals[0]), krys::move(*optionals[1]),
+                                       krys::move(*optionals[2]));
+      }
+
+      return Container {krys::move(*optionals[0]), krys::move(*optionals[1]), krys::move(*optionals[2]),
+                        krys::move(*optionals[3])};
+    }
+  }
+}

@@ -1,10 +1,10 @@
-﻿#include "Krystal.Lib/ComparisonHelpers.hpp"
+﻿#include "Krystal.Core/ComparisonHelpers.hpp"
 #include "Krystal.UI/Layout/LayoutEngine.hpp"
 #include <catch_all.hpp>
 
-namespace Krys::Tests
+namespace krys::tests
 {
-  using namespace Krys::UI;
+  using namespace krys::UI;
 
   TEST_CASE("LayoutEngine::assert_default_values", "[LayoutEngine]")
   {
@@ -47,12 +47,12 @@ namespace Krys::Tests
     REQUIRE(NodeStyleGetPadding(root, Edge::Start).Type == Unit::Undefined);
     REQUIRE(NodeStyleGetPadding(root, Edge::End).Type == Unit::Undefined);
 
-    REQUIRE(Krys::IsUndefined(NodeStyleGetBorder(root, Edge::Left)));
-    REQUIRE(Krys::IsUndefined(NodeStyleGetBorder(root, Edge::Top)));
-    REQUIRE(Krys::IsUndefined(NodeStyleGetBorder(root, Edge::Right)));
-    REQUIRE(Krys::IsUndefined(NodeStyleGetBorder(root, Edge::Bottom)));
-    REQUIRE(Krys::IsUndefined(NodeStyleGetBorder(root, Edge::Start)));
-    REQUIRE(Krys::IsUndefined(NodeStyleGetBorder(root, Edge::End)));
+    REQUIRE(krys::IsUndefined(NodeStyleGetBorder(root, Edge::Left)));
+    REQUIRE(krys::IsUndefined(NodeStyleGetBorder(root, Edge::Top)));
+    REQUIRE(krys::IsUndefined(NodeStyleGetBorder(root, Edge::Right)));
+    REQUIRE(krys::IsUndefined(NodeStyleGetBorder(root, Edge::Bottom)));
+    REQUIRE(krys::IsUndefined(NodeStyleGetBorder(root, Edge::Start)));
+    REQUIRE(krys::IsUndefined(NodeStyleGetBorder(root, Edge::End)));
 
     REQUIRE(NodeStyleGetWidth(root).Type == Unit::Auto);
     REQUIRE(NodeStyleGetHeight(root).Type == Unit::Auto);
@@ -81,8 +81,8 @@ namespace Krys::Tests
     REQUIRE(0 == NodeLayoutGetBorder(root, Edge::Right));
     REQUIRE(0 == NodeLayoutGetBorder(root, Edge::Bottom));
 
-    REQUIRE(Krys::IsUndefined(NodeLayoutGetWidth(root)));
-    REQUIRE(Krys::IsUndefined(NodeLayoutGetHeight(root)));
+    REQUIRE(krys::IsUndefined(NodeLayoutGetWidth(root)));
+    REQUIRE(krys::IsUndefined(NodeLayoutGetHeight(root)));
     REQUIRE(Direction::Inherit == NodeLayoutGetDirection(root));
 
     NodeDestroyRecursive(root);

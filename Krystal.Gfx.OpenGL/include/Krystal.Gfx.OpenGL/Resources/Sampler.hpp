@@ -1,15 +1,17 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Macros.hpp"
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/FilterMode.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/WrapMode.hpp"
 #include "Krystal.Gfx/Resources/Sampler.hpp"
-#include "Krystal.Lib/Mixins/NonCopyable.hpp"
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
-  class Sampler : NonCopyable<Sampler>
+  class Sampler
   {
+    KRYS_NON_COPYABLE(Sampler);
+
   private:
     GLuint _id {0u};
     GLenum _minFilter {GL_LINEAR};

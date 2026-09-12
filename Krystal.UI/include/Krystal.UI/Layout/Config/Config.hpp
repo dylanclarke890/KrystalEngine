@@ -1,13 +1,13 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Numeric.hpp"
 #include "Krystal.UI/Layout/Api/Forward.hpp"
 #include "Krystal.UI/Styles/Enums/Errata.hpp"
 #include "Krystal.UI/Styles/Enums/ExperimentalFeature.hpp"
 #include <bitset>
 
-namespace Krys::UI
+namespace krys::UI
 {
 
   struct Config

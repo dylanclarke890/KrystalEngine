@@ -2,7 +2,7 @@
 #include <atomic>
 #include <memory>
 
-namespace Krys::UI
+namespace krys::UI
 {
   const char *LayoutPassReasonToString(const LayoutPassReason value)
   {
@@ -22,7 +22,7 @@ namespace Krys::UI
 
   namespace
   {
-    using namespace Krys;
+    using namespace krys;
 
     struct InternalNode
     {

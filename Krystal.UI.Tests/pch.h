@@ -15,6 +15,6 @@
 #include <tuple>
 #include <vector>
 
-#include "Krystal.Maths/Matrix.hpp"
-#include "Krystal.Maths/Vector.hpp"
+#include "Krystal.Core/Maths/Matrix.hpp"
+#include "Krystal.Core/Maths/Vector.hpp"
 #include "Krystal.UI/Layout/LayoutEngine.hpp"

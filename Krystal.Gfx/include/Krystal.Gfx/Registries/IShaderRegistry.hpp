@@ -1,12 +1,12 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/IO/Path.hpp"
+#include "Krystal.Core/Macros.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Shader.hpp"
-#include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   enum class BuiltinShader
   {
@@ -22,8 +22,10 @@ namespace Krys::Gfx
     Font_MTSDF_Outline,
   };
 
-  class IShaderRegistry : NonCopyMovable<ISamplerRegistry>
+  class IShaderRegistry
   {
+    KRYS_NON_COPY_MOVABLE(IShaderRegistry);
+
   protected:
     IShaderRegistry() noexcept = default;
 
@@ -34,10 +36,10 @@ namespace Krys::Gfx
 
     virtual void Shutdown() noexcept = 0;
 
-    KRYS_NODISCARD virtual ShaderHandle Load(const IO::Path &vertex, const IO::Path &fragment) noexcept = 0;
+    KRYS_NODISCARD virtual ShaderHandle Load(const io::Path &vertex, const io::Path &fragment) noexcept = 0;
 
-    KRYS_NODISCARD virtual ShaderHandle Load(const IO::Path &vertex, const IO::Path &geometry,
-                                             const IO::Path &fragment) noexcept = 0;
+    KRYS_NODISCARD virtual ShaderHandle Load(const io::Path &vertex, const io::Path &geometry,
+                                             const io::Path &fragment) noexcept = 0;
 
     KRYS_NODISCARD virtual ShaderHandle GetBuiltin(BuiltinShader shader) noexcept = 0;
 

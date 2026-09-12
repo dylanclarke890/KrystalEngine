@@ -2,7 +2,7 @@
 
 #include "Krystal.UI/Geometry/Common.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   /// @brief The background-border metrics specify an inner and an outer rectangular area, whose corners can
   /// be rounded.

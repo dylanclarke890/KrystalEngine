@@ -2,7 +2,7 @@
 
 #include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/Handle.hpp"
-#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.UI/Layout/Api/Node.hpp"
 #include "Krystal.UI/Styles/Enums/Align.hpp"
 #include "Krystal.UI/Styles/Enums/BoxSizing.hpp"
@@ -18,7 +18,7 @@
 #include "Krystal.UI/Styles/Enums/Wrap.hpp"
 #include "Krystal.UI/Styles/Values/UnitValue.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   void NodeCopyStyle(NodeRef dstNode, NodeConstRef srcNode);
 

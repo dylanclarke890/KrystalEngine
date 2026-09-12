@@ -1,0 +1,8 @@
+﻿[Exposed=Window]
+interface DOMImplementation {
+  [NewObject] DocumentType createDocumentType(dom::DOMString name, dom::DOMString publicId, dom::DOMString systemId);
+  [NewObject] XMLDocument createDocument(dom::DOMString? namespace, [LegacyNullToEmptyString] dom::DOMString qualifiedName, optional DocumentType? doctype = null);
+  [NewObject] Document createHTMLDocument(optional dom::DOMString title);
+
+  boolean hasFeature(); // useless; always returns true
+};

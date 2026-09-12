@@ -1,14 +1,16 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Macros.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Sampler.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
-  class ISamplerRegistry : NonCopyMovable<ISamplerRegistry>
+  class ISamplerRegistry
   {
+    KRYS_NON_COPY_MOVABLE(ISamplerRegistry);
+
   protected:
     ISamplerRegistry() noexcept = default;
 

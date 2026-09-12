@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.Core/IO/Path.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/TextureRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Material.hpp"
 #include "Krystal.Gfx/Handle.hpp"
@@ -7,11 +10,8 @@
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Gfx/Resources/Material.hpp"
-#include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types/Map.hpp"
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
   class MaterialRegistry final : public IMaterialRegistry
   {
@@ -78,7 +78,7 @@ namespace Krys::Gfx::OpenGL
         return cached;
       }
 
-      using namespace IO;
+      using namespace io;
       Path base = Path("/textures/pbr") / Path(name);
 
       PBRMaterialDesc desc;

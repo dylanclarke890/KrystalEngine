@@ -3,7 +3,7 @@
 #include "Krystal.UI/Layout/Config/Config.hpp"
 #include "Krystal.UI/Styles/Enums/SizingMode.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   bool CanUseCachedMeasurement(SizingMode widthMode, float availableWidth,
                                SizingMode heightMode, float availableHeight,

@@ -1,14 +1,14 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Log/ILogger.hpp"
+#include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Gfx.OpenGL/gl.hpp"
-#include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types/Map.hpp"
-#include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Log/ILogger.hpp"
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
   struct UniformInfo
   {
@@ -24,11 +24,11 @@ namespace Krys::Gfx::OpenGL
 
   struct BlockInfo
   {
-    string Name {};                      // block name
-    GLuint Index {};                     // program block index
-    GLuint Binding {};                   // Binding point
-    GLsizei DataSize {};                 // total block size in bytes
-    Map<string, UniformInfo> Members {}; // block uniforms
+    string Name {};                          // block name
+    GLuint Index {};                         // program block index
+    GLuint Binding {};                       // Binding point
+    GLsizei DataSize {};                     // total block size in bytes
+    HashMap<string, UniformInfo> Members {}; // block uniforms
   };
 
   struct SamplerInfo
@@ -61,11 +61,11 @@ namespace Krys::Gfx::OpenGL
 
   struct ShaderLayout
   {
-    Map<string, UniformInfo> Uniforms;
-    Map<string, BlockInfo> Blocks;
-    Map<string, SamplerInfo> Samplers;
-    Map<string, ProgramInputInfo> Inputs;
-    Map<string, ProgramOutputInfo> Outputs;
+    HashMap<string, UniformInfo> Uniforms;
+    HashMap<string, BlockInfo> Blocks;
+    HashMap<string, SamplerInfo> Samplers;
+    HashMap<string, ProgramInputInfo> Inputs;
+    HashMap<string, ProgramOutputInfo> Outputs;
   };
 
   struct ShaderReflector
@@ -86,7 +86,7 @@ namespace Krys::Gfx::OpenGL
 
     void LogReflectionInfo(const ShaderLayout &info) const noexcept
     {
-      Log::ILogger *logger = Log::GetGlobalLogger();
+      log::ILogger *logger = log::GetGlobalLogger();
       if (!logger)
         return;
 

@@ -1,15 +1,14 @@
 ﻿#pragma once
 
-#include "Krystal.UI/Styles/Enums/Align.hpp"
 #include "Krystal.UI/Layout/Node/Node.hpp"
+#include "Krystal.UI/Styles/Enums/Align.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   inline Align ResolveChildAlignment(const Node *node, const Node *child)
   {
-    const Align align = child->GetStyle().GetAlignSelf() == Align::Auto
-                                  ? node->GetStyle().GetAlignItems()
-                                  : child->GetStyle().GetAlignSelf();
+    const Align align = child->GetStyle().GetAlignSelf() == Align::Auto ? node->GetStyle().GetAlignItems()
+                                                                        : child->GetStyle().GetAlignSelf();
     if (align == Align::Baseline && IsColumn(node->GetStyle().GetFlexDirection()))
     {
       return Align::FlexStart;
@@ -31,7 +30,7 @@ namespace Krys::UI
       // Start instead of FlexStart (for row-reverse containers)
       case Align::SpaceAround:
       case Align::SpaceEvenly:  return Align::FlexStart;
-      default:                          return align;
+      default:                  return align;
     }
   }
 
@@ -51,7 +50,7 @@ namespace Krys::UI
       // Start instead of FlexStart (for row-reverse containers)
       case Justify::SpaceAround:
       case Justify::SpaceEvenly: return Justify::FlexStart;
-      default:                           return align;
+      default:                   return align;
     }
   }
 }

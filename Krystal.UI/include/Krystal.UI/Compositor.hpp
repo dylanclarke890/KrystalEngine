@@ -1,24 +1,24 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Commands/CommandList.hpp"
+#include "Krystal.Core/Debug.hpp"
+#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Types/Stack.hpp"
 #include "Krystal.Gfx/Commands.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/IRenderer.hpp"
 #include "Krystal.Gfx/Utils/MeshDataUtils.hpp"
-#include "Krystal.Lib/Commands/CommandList.hpp"
-#include "Krystal.Lib/Core/DebugBreak.hpp"
-#include "Krystal.Lib/Core/Hash.hpp"
-#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
-#include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Types/Stack.hpp"
 #include "Krystal.UI/Document.hpp"
 #include "Krystal.UI/Geometry/GeometryUtils.hpp"
 #include "Krystal.UI/Geometry/RenderBox.hpp"
 #include <cassert>
 #include <compare>
 
-namespace Krys::UI
+namespace krys::UI
 {
   struct Layer
   {
@@ -50,7 +50,7 @@ namespace Krys::UI
       }
     }
 
-    KRYS_NODISCARD Gfx::RenderTargetHandle Acquire(Maths::Vec2 size)
+    KRYS_NODISCARD Gfx::RenderTargetHandle Acquire(Vec2 size)
     {
       const uint32 Samples = 2u;
 
@@ -102,11 +102,11 @@ namespace Krys::UI
     }
   };
 
-  class Compositor : NonCopyMovable<Compositor>
+  class Compositor
   {
     struct RenderContext
     {
-      Maths::Vec2 Origin;
+      Vec2 Origin;
     };
 
     struct PostProcessTargets
@@ -123,7 +123,7 @@ namespace Krys::UI
     LayerPool _layerPool;
     CommandList _commands;
     Stack<Layer> _layerStack;
-    Maths::Vec2 _viewportSize;
+    Vec2 _viewportSize;
     PostProcessTargets _post;
 
   public:
@@ -141,7 +141,7 @@ namespace Krys::UI
         target = _context.RenderTargets().GetScreenRenderTarget();
       }
 
-      Maths::Vec2 dimensions = _context.RenderTargets().GetDimensions(target);
+      Vec2 dimensions = _context.RenderTargets().GetDimensions(target);
       if (_viewportSize != dimensions)
       {
         _viewportSize = dimensions;
@@ -209,8 +209,6 @@ namespace Krys::UI
 
     void RenderElement(Document &document, ElementHandle handle, const RenderContext &ctx)
     {
-      using namespace Maths;
-
       auto &element = document.Get(handle);
       NodeRef node = element.LayoutNode;
 
@@ -245,8 +243,7 @@ namespace Krys::UI
     void PaintElement(Element &element, const RenderContext &ctx)
     {
       using namespace Gfx;
-      using namespace Maths;
-
+      
       NodeRef node = element.LayoutNode;
       if (element.Geometries.empty())
       {
@@ -270,7 +267,7 @@ namespace Krys::UI
       for (auto &geometry : element.Geometries)
       {
         Mat4 transform = Identity<Mat4>();
-        transform = Maths::Translate(transform, Vec3 {ctx.Origin + geometry.Translation, 0.f});
+        transform = Translate(transform, Vec3 {ctx.Origin + geometry.Translation, 0.f});
 
         _commands.Push(Commands::DrawShape2D {
           .Mesh = geometry.Mesh,
@@ -303,8 +300,6 @@ namespace Krys::UI
 
     RenderBox BuildRenderBox(NodeRef node)
     {
-      using namespace Maths;
-
       float width = NodeLayoutGetWidth(node);
       float height = NodeLayoutGetHeight(node);
       Vec2 borderBoxSize = {width, height};
@@ -353,7 +348,6 @@ namespace Krys::UI
     void EndLayer(const Layer &layer, const RenderContext &ctx)
     {
       using namespace Gfx;
-      using namespace Maths;
 
       _layerStack.pop();
       // We don't clear here as we're in the process of compositing

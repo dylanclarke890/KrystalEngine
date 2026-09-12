@@ -1,12 +1,12 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Maths/Interpolate.hpp"
+#include "Krystal.Core/Maths/Vector.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Maths/Interpolate.hpp"
-#include "Krystal.Maths/Vector.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   using Vertex = Gfx::Vertex::Position2D_ColourbPremultiplied_UV;
   using Index = uint32;
@@ -17,8 +17,8 @@ namespace Krys::UI
 
   /// @brief Ordered by top-left, top-right, bottom-right, bottom-left.
   using CornerSizes = Array<float, 4>;
-  using CornerSizes2 = Array<Maths::Vec2, 4>;
-  using CornerPositions = Array<Maths::Vec2, 4>;
+  using CornerSizes2 = Array<Vec2, 4>;
+  using CornerPositions = Array<Vec2, 4>;
 
   enum class BoxEdge : uint8
   {

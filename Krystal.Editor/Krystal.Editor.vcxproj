@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -141,11 +141,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Krystal.Debug\Krystal.Debug.vcxproj">
-      <Project>{0d3fc524-252e-46af-977c-dc4eba9efac2}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Krystal.Engine\Krystal.Engine.vcxproj">
-      <Project>{1169be54-100b-4d6a-830f-50b29301e1cc}</Project>
+    <ProjectReference Include="..\Krystal.Core\Krystal.Core.vcxproj">
+      <Project>{e0409a19-301c-431e-aa7d-18d06500a709}</Project>
     </ProjectReference>
     <ProjectReference Include="..\Krystal.Gfx.OpenGL\Krystal.Gfx.OpenGL.vcxproj">
       <Project>{70dcee10-579e-44e3-b6a9-8fa5505f42d4}</Project>
@@ -153,35 +150,16 @@
     <ProjectReference Include="..\Krystal.Gfx\Krystal.Gfx.vcxproj">
       <Project>{f0f40133-75a2-4345-893f-f7e69e477155}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\Krystal.IO\Krystal.IO.vcxproj">
-      <Project>{85cea139-a547-4747-b050-05c8de66d591}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Krystal.Lib\Krystal.Lib.vcxproj">
-      <Project>{38f26636-5d57-4740-a8d2-df219340309a}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Krystal.Log\Krystal.Log.vcxproj">
-      <Project>{dfd59bfd-d1ba-4f1d-ab1a-ecd50440d091}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Krystal.Maths\Krystal.Maths.vcxproj">
-      <Project>{2c0a90e5-aa87-46b7-b599-e56a9dd5047b}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Krystal.Platform.Win32\Krystal.Platform.Win32.vcxproj">
-      <Project>{3112e8fb-ba78-4ca3-a1de-79baa4c348d5}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Krystal.Platform\Krystal.Platform.vcxproj">
-      <Project>{42e8c0a6-1f92-456b-a8b7-0050bfdf97e2}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Krystal.Text\Krystal.Text.vcxproj">
-      <Project>{55855c03-499d-4fda-a184-ace486fda228}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Krystal.UI\Krystal.UI.vcxproj">
-      <Project>{0ca51a50-7e1a-45c7-a23f-986b0cff5a35}</Project>
+    <ProjectReference Include="..\Krystal.PAL\Krystal.PAL.vcxproj">
+      <Project>{922c2c7b-d4cc-407f-9fa9-e5c89fa3aa0c}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\Entry.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.Editor\Application.hpp" />
     <ClInclude Include="include\Krystal.Editor\Editor.hpp" />
   </ItemGroup>
   <ItemGroup>

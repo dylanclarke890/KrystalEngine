@@ -1,57 +1,52 @@
 ﻿#include "Krystal.Gfx/Cameras/FirstPersonCamera.hpp"
+#include "Krystal.Core/Maths/Clamp.hpp"
+#include "Krystal.Core/Maths/Convert.hpp"
 
-#include "Krystal.Maths/Clamp.hpp"
-#include "Krystal.Maths/Convert.hpp"
-
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   // TODO(feat): we need to be able to lock the cursor to the center of the window when looking around
-  FirstPersonCamera::FirstPersonCamera(const Maths::Vec3 &position, const Maths::Vec3 &target,
-                                       const Maths::Vec3 &up, float fovY, float aspect, float nearPlane,
-                                       float farPlane) noexcept
+  FirstPersonCamera::FirstPersonCamera(const Vec3 &position, const Vec3 &target, const Vec3 &up, float fovY,
+                                       float aspect, float nearPlane, float farPlane) noexcept
       : _position(position), _up(up), _fovY(fovY), _aspect(aspect), _nearPlane(nearPlane), _farPlane(farPlane)
   {
-    using namespace Maths;
-
     _forward = Normalize(Vec3(0.0f, 0.0f, -1.0f));
     _right = Normalize(Cross(_forward, _up));
     _up = Normalize(Cross(_right, _forward));
   }
 
-  Maths::Mat4 FirstPersonCamera::ViewMatrix() const noexcept
+  Mat4 FirstPersonCamera::ViewMatrix() const noexcept
   {
-    return Maths::LookAt(_position, _position + _forward, _up);
+    return LookAt(_position, _position + _forward, _up);
   }
 
-  Maths::Mat4 FirstPersonCamera::ProjectionMatrix() const noexcept
+  Mat4 FirstPersonCamera::ProjectionMatrix() const noexcept
   {
-    return Maths::Perspective(_fovY, _aspect, _nearPlane, _farPlane);
+    return Perspective(_fovY, _aspect, _nearPlane, _farPlane);
   }
 
-  const Maths::Vec3 &FirstPersonCamera::Position() const noexcept
+  const Vec3 &FirstPersonCamera::Position() const noexcept
   {
     return _position;
   }
 
-  const Maths::Vec3 &FirstPersonCamera::Forward() const noexcept
+  const Vec3 &FirstPersonCamera::Forward() const noexcept
   {
     return _forward;
   }
 
-  const Maths::Vec3 &FirstPersonCamera::Up() const noexcept
+  const Vec3 &FirstPersonCamera::Up() const noexcept
   {
     return _up;
   }
 
-  const Maths::Vec3 &FirstPersonCamera::Right() const noexcept
+  const Vec3 &FirstPersonCamera::Right() const noexcept
   {
     return _right;
   }
 
-  void FirstPersonCamera::Update(double deltaTime, const Platform::Input &input) noexcept
+  void FirstPersonCamera::Update(double deltaTime, const pal::Input &input) noexcept
   {
-    using namespace Platform;
-    using namespace Maths;
+    using namespace pal;
 
     float cameraSpeed = 50.f * static_cast<float>(deltaTime);
 
@@ -96,7 +91,7 @@ namespace Krys::Gfx
 
       _yaw += deltaX;
       _pitch += deltaY;
-      _pitch = Maths::Clamp(_pitch, -89.0f, 89.0f);
+      _pitch = Clamp(_pitch, -89.0f, 89.0f);
 
       UpdateCameraVectors();
     }
@@ -105,7 +100,7 @@ namespace Krys::Gfx
     if (scrollDelta != 0.0)
     {
       _fovY -= (float)mouse.ScrollDelta();
-      _fovY = Maths::Clamp(_fovY, 1.0f, 45.0f);
+      _fovY = Clamp(_fovY, 1.0f, 45.0f);
     }
   }
 
@@ -116,7 +111,6 @@ namespace Krys::Gfx
 
   void FirstPersonCamera::UpdateCameraVectors() noexcept
   {
-    using namespace Maths;
     Vec3 front {};
     front.x = std::cos(Radians(_yaw)) * std::cos(Radians(_pitch));
     front.y = std::sin(Radians(_pitch));

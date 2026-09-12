@@ -2,7 +2,7 @@
 
 #include "Krystal.UI/Layout/Node/Node.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   /// @brief Round a point value to the nearest physical pixel based on DPI (pointScaleFactor)
   float RoundValueToPixelGrid(double value, double pointScaleFactor, bool forceCeil, bool forceFloor);

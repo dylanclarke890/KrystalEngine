@@ -1,19 +1,21 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Maths/Maths.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/Resources/Mesh.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
-#include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Maths/Maths.hpp"
 #include "Krystal.UI/Geometry/BorderMetrics.hpp"
 #include "Krystal.UI/Geometry/Common.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
-  class GeometryBackgroundBorder : NonCopyMovable<GeometryBackgroundBorder>
+  class GeometryBackgroundBorder
   {
+    KRYS_NON_COPY_MOVABLE(GeometryBackgroundBorder);
+
   private:
     GeometryMeshWriter &_writer;
 
@@ -95,8 +97,8 @@ namespace Krys::UI
   private:
 #pragma region Background
 
-    void DrawBackgroundCorner(BoxCorner corner, Maths::Vec2 innerPosition, Maths::Vec2 circleCenterPosition,
-                              float R, Maths::Vec2 r, Gfx::ColourbPremultiplied colour)
+    void DrawBackgroundCorner(BoxCorner corner, Vec2 innerPosition, Vec2 circleCenterPosition, float R,
+                              Vec2 r, Gfx::ColourbPremultiplied colour)
     {
       if (R == 0u || r.x <= 0u || r.y <= 0u)
       {
@@ -104,13 +106,13 @@ namespace Krys::UI
       }
       else if (r.x > 0u && r.y > 0u)
       {
-        const float a0 = float(+corner + 2u) * 0.5f * Maths::Pi<float>();
-        const float a1 = float(+corner + 3u) * 0.5f * Maths::Pi<float>();
+        const float a0 = float(+corner + 2u) * 0.5f * Pi<float>();
+        const float a1 = float(+corner + 3u) * 0.5f * Pi<float>();
         DrawArc(circleCenterPosition, r, a0, a1, colour, colour, GetNumPoints(R));
       }
     }
 
-    void DrawPoint(Maths::Vec2 position, Gfx::ColourbPremultiplied colour)
+    void DrawPoint(Vec2 position, Gfx::ColourbPremultiplied colour)
     {
       const size_t vertexOffset = _writer.TotalVertices();
       _writer.ResizeVertices(vertexOffset + 1u);
@@ -120,8 +122,8 @@ namespace Krys::UI
       vertices[vertexOffset].Colour = colour;
     }
 
-    void DrawArc(Maths::Vec2 centerPosition, Maths::Vec2 r, float a0, float a1,
-                 Gfx::ColourbPremultiplied colour0, Gfx::ColourbPremultiplied colour1, size_t numberOfPoints)
+    void DrawArc(Vec2 centerPosition, Vec2 r, float a0, float a1, Gfx::ColourbPremultiplied colour0,
+                 Gfx::ColourbPremultiplied colour1, size_t numberOfPoints)
     {
       assert(numberOfPoints >= 2 && r.x > 0 && r.y > 0);
 
@@ -132,8 +134,8 @@ namespace Krys::UI
       for (size_t i = 0u; i < numberOfPoints; i++)
       {
         const float t = float(i) / float(numberOfPoints - 1u);
-        const float a = Maths::Lerp(a0, a1, t);
-        const Maths::Vec2 unitVector(Maths::Cos(a), Maths::Sin(a));
+        const float a = Lerp(a0, a1, t);
+        const Vec2 unitVector(Cos(a), Sin(a));
 
         vertices[vertexOffset + i].Position = unitVector * r + centerPosition;
         vertices[vertexOffset + i].Colour = RoundedLerp(colour0, colour1, t);
@@ -167,12 +169,12 @@ namespace Krys::UI
 
 #pragma region Border
 
-    void DrawBorderCorner(BoxCorner corner, Maths::Vec2 outerPosition, Maths::Vec2 innerPosition,
-                          Maths::Vec2 circleCenterPosition, float R, Maths::Vec2 r,
-                          Gfx::ColourbPremultiplied colour0, Gfx::ColourbPremultiplied colour1)
+    void DrawBorderCorner(BoxCorner corner, Vec2 outerPosition, Vec2 innerPosition, Vec2 circleCenterPosition,
+                          float R, Vec2 r, Gfx::ColourbPremultiplied colour0,
+                          Gfx::ColourbPremultiplied colour1)
     {
-      const float a0 = float(+corner + 2u) * 0.5f * Maths::Pi<float>();
-      const float a1 = float(+corner + 3u) * 0.5f * Maths::Pi<float>();
+      const float a0 = float(+corner + 2u) * 0.5f * Pi<float>();
+      const float a1 = float(+corner + 3u) * 0.5f * Pi<float>();
 
       if (R == 0u)
       {
@@ -188,8 +190,8 @@ namespace Krys::UI
       }
     }
 
-    void DrawPointPoint(Maths::Vec2 outerPosition, Maths::Vec2 innerPosition,
-                        Gfx::ColourbPremultiplied colour0, Gfx::ColourbPremultiplied colour1)
+    void DrawPointPoint(Vec2 outerPosition, Vec2 innerPosition, Gfx::ColourbPremultiplied colour0,
+                        Gfx::ColourbPremultiplied colour1)
     {
       const bool isColourDifferent = (colour0 != colour1);
 
@@ -205,7 +207,7 @@ namespace Krys::UI
       }
     }
 
-    void DrawArcArc(Maths::Vec2 centerPosition, float R, Maths::Vec2 r, float a0, float a1,
+    void DrawArcArc(Vec2 centerPosition, float R, Vec2 r, float a0, float a1,
                     Gfx::ColourbPremultiplied colour, size_t numberOfPoints)
     {
       const size_t vertexOffset = _writer.TotalVertices();
@@ -220,8 +222,8 @@ namespace Krys::UI
       for (size_t i = 0; i < numberOfPoints; i++)
       {
         const float t = float(i) / float(numberOfPoints - 1u);
-        const float a = Maths::Lerp(a0, a1, t);
-        const Maths::Vec2 u(Maths::Cos(a), Maths::Sin(a));
+        const float a = Lerp(a0, a1, t);
+        const Vec2 u(Cos(a), Sin(a));
 
         vertices[vertexOffset + 2u * i + 0u].Position = u * r + centerPosition; // inner
         vertices[vertexOffset + 2u * i + 0u].Colour = colour;
@@ -242,7 +244,7 @@ namespace Krys::UI
       }
     }
 
-    void DrawArcArc(Maths::Vec2 centerPosition, float R, Maths::Vec2 r, float a0, float a1,
+    void DrawArcArc(Vec2 centerPosition, float R, Vec2 r, float a0, float a1,
                     Gfx::ColourbPremultiplied colour0, Gfx::ColourbPremultiplied colour1,
                     size_t numberOfPoints)
     {
@@ -257,7 +259,7 @@ namespace Krys::UI
       DrawArcArc(centerPosition, R, r, am, a1, colour1, n1);
     }
 
-    void DrawArcPoint(Maths::Vec2 centerPosition, Maths::Vec2 innerPosition, float R, float a0, float a1,
+    void DrawArcPoint(Vec2 centerPosition, Vec2 innerPosition, float R, float a0, float a1,
                       Gfx::ColourbPremultiplied colour, size_t numberOfPoints)
     {
       // vertices: [inner] + [arc points]
@@ -271,8 +273,8 @@ namespace Krys::UI
       for (size_t i = 0; i < numberOfPoints; i++)
       {
         const float t = float(i) / float(numberOfPoints - 1u);
-        const float a = Maths::Lerp(a0, a1, t);
-        const Maths::Vec2 u(Maths::Cos(a), Maths::Sin(a));
+        const float a = Lerp(a0, a1, t);
+        const Vec2 u(Cos(a), Sin(a));
 
         vertices[vertexOffset + 1u + i].Position = u * R + centerPosition;
         vertices[vertexOffset + 1u + i].Colour = colour;
@@ -292,7 +294,7 @@ namespace Krys::UI
       }
     }
 
-    void DrawArcPoint(Maths::Vec2 centerPosition, Maths::Vec2 innerPosition, float R, float a0, float a1,
+    void DrawArcPoint(Vec2 centerPosition, Vec2 innerPosition, float R, float a0, float a1,
                       Gfx::ColourbPremultiplied colour0, Gfx::ColourbPremultiplied colour1,
                       size_t numberOfPoints)
     {
@@ -326,7 +328,7 @@ namespace Krys::UI
 
     size_t GetNumPoints(float R) const
     {
-      return Maths::Clamp(RoundTo<size_t>(R / 6.f) + 3uz, 2uz, 100uz);
+      return Clamp(RoundTo<size_t>(R / 6.f) + 3uz, 2uz, 100uz);
     }
   };
 }

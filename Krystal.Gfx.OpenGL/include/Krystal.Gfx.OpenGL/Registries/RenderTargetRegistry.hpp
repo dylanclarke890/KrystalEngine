@@ -5,10 +5,10 @@
 #include "Krystal.Gfx.OpenGL/Resources/RenderTarget.hpp"
 #include "Krystal.Gfx/Registries/IRenderTargetRegistry.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Core/Numeric.hpp"
 #include <cassert>
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
   class RenderTargetRegistry : public IRenderTargetRegistry
   {
@@ -113,7 +113,7 @@ namespace Krys::Gfx::OpenGL
       return _renderTargets.Remove(handle);
     }
 
-    KRYS_NODISCARD Maths::Vec2 GetDimensions(RenderTargetHandle handle) noexcept override
+    KRYS_NODISCARD Vec2 GetDimensions(RenderTargetHandle handle) noexcept override
     {
       assert(handle.IsValid() && "Invalid render target handle.");
       auto *rt = _renderTargets.TryGet(handle);

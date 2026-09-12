@@ -4,7 +4,7 @@
 #include "Krystal.UI/Styles/Enums/SizingMode.hpp"
 #include <stdexcept>
 
-namespace Krys::UI
+namespace krys::UI
 {
   inline MeasureMode ToMeasureMode(SizingMode mode)
   {

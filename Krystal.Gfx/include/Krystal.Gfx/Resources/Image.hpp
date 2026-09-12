@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Gfx/Enums/ImageType.hpp"
 #include "Krystal.Gfx/Enums/PixelFormat.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   struct ImageDesc
   {

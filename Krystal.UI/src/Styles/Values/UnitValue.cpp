@@ -1,6 +1,6 @@
 ﻿#include "Krystal.UI/Styles/Values/UnitValue.hpp"
 
-namespace Krys::UI
+namespace krys::UI
 {
   const UnitValue UnitValue::Auto {0.0f, Unit::Auto};
   const UnitValue UnitValue::Undefined {0.0f, Unit::Undefined};

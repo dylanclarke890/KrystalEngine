@@ -1,20 +1,19 @@
 ﻿#pragma once
 
 #include "Krystal.Gfx.OpenGL/Registries/FontRegistry.hpp"
+#include "Krystal.Core/Debug.hpp"
+#include "Krystal.Core/Log/ILogger.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Utils/ByteUtils.hpp"
 #include "Krystal.Gfx.OpenGL/Context.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Font.hpp"
-#include "Krystal.Lib/ByteUtils.hpp"
-#include "Krystal.Lib/Core/DebugBreak.hpp"
-#include "Krystal.Lib/Types/Map.hpp"
-#include "Krystal.Log/ILogger.hpp"
-#include "Krystal.Platform/Platform.hpp"
+#include "Krystal.PAL/Platform.hpp"
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
   FontRegistry::FontRegistry(IContext &context) noexcept
-      : _context(static_cast<Context &>(context)),
-        _dpi(Platform::GetDPIForWindow(Platform::GetActiveWindow()))
+      : _context(static_cast<Context &>(context)), _dpi(pal::GetDPIForWindow(pal::GetActiveWindow()))
   {
   }
 
@@ -24,11 +23,11 @@ namespace Krys::Gfx::OpenGL
 
   void FontRegistry::Startup()
   {
-    const IO::Path defaultFontPath("data/assets/fonts/Antonio-Bold.ttf");
+    const io::Path defaultFontPath("data/assets/fonts/Antonio-Bold.ttf");
     _defaultFontFamily = Register(u8"Antonio", defaultFontPath);
     if (!_defaultFontFamily.IsValid())
     {
-      KRYS_ERROR("Failed to register default font '{}'", defaultFontPath.ToString());
+      KRYS_LOG_ERROR("Failed to register default font '{}'", defaultFontPath.ToString());
       KRYS_DEBUG_BREAK();
     }
   }
@@ -38,7 +37,7 @@ namespace Krys::Gfx::OpenGL
     // TODO(fix): Unload all fonts and font families
   }
 
-  FontFamilyHandle FontRegistry::Register(const utf8_string &name, const IO::Path &path) noexcept
+  FontFamilyHandle FontRegistry::Register(const utf8_string &name, const io::Path &path) noexcept
   {
     FontFamily fontFamily {name, path};
     FontFamilyHandle handle = _fontFamilies.Add(std::move(fontFamily));
@@ -65,7 +64,6 @@ namespace Krys::Gfx::OpenGL
     auto key = desc.Type == FontType::Bitmap ? desc : FontDesc {desc.Family, desc.Type, 0.f};
     if (FontHandle cached = _cache.Get(key); cached.IsValid())
     {
-      KRYS_DEBUG("Font cache hit.");
       return cached;
     }
 
@@ -81,8 +79,8 @@ namespace Krys::Gfx::OpenGL
 
     if (!expected.has_value())
     {
-      KRYS_ERROR("Failed to load font '{}': {}", _fontFamilies.Get(desc.Family).Path().ToString(),
-                 expected.error());
+      KRYS_LOG_ERROR("Failed to load font '{}': {}", _fontFamilies.Get(desc.Family).Path().ToString(),
+                     expected.error());
       return {};
     }
 
@@ -146,7 +144,7 @@ namespace Krys::Gfx::OpenGL
       auto expected = _loader.LoadBitmap(fontFamily.Path(), PtSizeToPixels(font.PtSize()));
       if (!expected.has_value())
       {
-        KRYS_ERROR("Failed to load font '{}'", fontFamily.Path().ToString());
+        KRYS_LOG_ERROR("Failed to load font '{}'", fontFamily.Path().ToString());
         KRYS_DEBUG_BREAK();
         continue;
       }
