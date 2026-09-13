@@ -11,15 +11,15 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLEmbedElement);
 
   public:
-    HTMLEmbedElement(Document &document) noexcept;
+    HTMLEmbedElement(dom::Document &document) noexcept;
 
 #pragma region HTMLEmbedElement - https://html.spec.whatwg.org/#htmlembedelement
 
     /// @see https://html.spec.whatwg.org/#dom-embed-src
-    KRYS_NODISCARD dom::ExceptionOr<USVString> Src() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-src
-    dom::ExceptionOr<void> Src(USVString &&value) noexcept;
+    dom::ExceptionOr<void> Src(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-type
     KRYS_NODISCARD dom::DOMString Type() const noexcept;

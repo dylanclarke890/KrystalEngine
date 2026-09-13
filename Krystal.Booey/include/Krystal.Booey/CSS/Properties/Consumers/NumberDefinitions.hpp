@@ -6,14 +6,14 @@ namespace krys::boo::css
 {
   struct NumberValidator
   {
-    KRYS_NODISCARD constexpr static Maybe<NumberUnit> Validate(CSSUnitType unitType, CSSPropertyParserState &,
-                                                               CSSPropertyParserOptions) noexcept
+    KRYS_NODISCARD constexpr static Maybe<NumberUnit> Validate(CSSUnitType unitType, PropertyParserState &,
+                                                               PropertyParserOptions) noexcept
     {
       return UnitTraits<NumberUnit>::Validate(unitType);
     }
 
     template <auto R, typename V>
-    KRYS_NODISCARD static bool IsValid(NumberRaw<R, V> raw, CSSPropertyParserOptions) noexcept
+    KRYS_NODISCARD static bool IsValid(NumberRaw<R, V> raw, PropertyParserOptions) noexcept
     {
       return IsValidCanonicalValue(raw);
     }

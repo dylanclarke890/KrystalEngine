@@ -2,7 +2,7 @@
 
 namespace krys::boo::svg
 {
-  SVGEllipseElement::SVGEllipseElement(Document &document) noexcept
+  SVGEllipseElement::SVGEllipseElement(dom::Document &document) noexcept
       : SVGElement(document, SVGElementInterface::Ellipse)
   {
   }

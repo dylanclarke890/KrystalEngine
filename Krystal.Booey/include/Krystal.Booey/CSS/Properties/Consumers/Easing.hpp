@@ -8,10 +8,10 @@ namespace krys::boo::css
   class TokenRange;
   class CSSValue;
 
-  struct CSSPropertyParserState;
+  struct PropertyParserState;
   struct EasingFunction;
 
-  namespace CSSPropertyParserHelpers
+  namespace PropertyParserHelpers
   {
     // <easing-function> = linear | ease | ease-in | ease-out | ease-in-out | step-start | step-end |
     // <linear()> | <cubic-bezier()> | <steps()> NOTE: also includes non-standard <spring()>.
@@ -19,10 +19,10 @@ namespace krys::boo::css
 
     // MARK: <easing-function> consuming (unresolved)
     KRYS_NODISCARD Maybe<EasingFunction>
-      ConsumeUnresolvedEasingFunction(TokenRange &tokens, CSSPropertyParserState &state) noexcept;
+      ConsumeUnresolvedEasingFunction(TokenRange &tokens, PropertyParserState &state) noexcept;
 
     // MARK: <easing-function> consuming (CSSValue)
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeEasingFunction(TokenRange &tokens,
-                                                          CSSPropertyParserState &state) noexcept;
+                                                          PropertyParserState &state) noexcept;
   }
 }

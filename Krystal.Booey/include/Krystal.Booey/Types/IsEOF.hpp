@@ -5,7 +5,7 @@
 
 namespace krys::boo
 {
-  constexpr inline char32 EOFMarker = U'\uFFFF';
+  constexpr char32 EOFMarker = U'\uFFFF';
 
   struct IsEOF : StronglyTypedBool<IsEOF>
   {

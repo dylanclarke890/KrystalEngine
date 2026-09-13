@@ -68,13 +68,13 @@ namespace krys::boo::html
 
     /// @brief Returns a pointer to the formatting entry whose node matches the given node, or nullptr if it
     /// wasn't found.
-    KRYS_NODISCARD FormattingListEntry *Find(const Element &node) noexcept;
+    KRYS_NODISCARD FormattingListEntry *Find(const dom::Element &node) noexcept;
 
     /// @brief Returns true if the list contains a formatting entry whose node matches the given node.
-    KRYS_NODISCARD bool Contains(const Element &node) const noexcept;
+    KRYS_NODISCARD bool Contains(const dom::Element &node) const noexcept;
 
     /// @brief Removes the formatting list entry whose node matches the given node, if present.
-    void Remove(const Element &node) noexcept;
+    void Remove(const dom::Element &node) noexcept;
 
     /// @brief Pops elements up to and including the last marker.
     /// @see https://html.spec.whatwg.org/#clear-the-list-of-active-formatting-elements-up-to-the-last-marker
@@ -118,13 +118,13 @@ namespace krys::boo::html
     };
 
     /// @brief Returns a bookmark positioned at the entry for the given node.
-    KRYS_NODISCARD Bookmark BookmarkFor(const Element &node) noexcept;
+    KRYS_NODISCARD Bookmark BookmarkFor(const dom::Element &node) noexcept;
 
     /// @brief Moves the bookmark to the position immediately after the given entry.
     void MoveBookmarkAfter(Bookmark &bookmark, const FormattingListEntry &entry) noexcept;
 
     /// @brief Removes the entry for node and adjusts bookmark if it falls at or after the removed entry.
-    void RemoveAndUpdateBookmark(const Element &node, Bookmark &bookmark) noexcept;
+    void RemoveAndUpdateBookmark(const dom::Element &node, Bookmark &bookmark) noexcept;
 
     /// @brief Inserts newItem at the bookmark position.
     void InsertAtBookmark(HTMLStackItem &&newItem, const Bookmark &bookmark) noexcept;

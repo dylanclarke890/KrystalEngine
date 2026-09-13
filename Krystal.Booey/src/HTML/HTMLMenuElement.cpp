@@ -3,7 +3,8 @@
 
 namespace krys::boo::html
 {
-  HTMLMenuElement::HTMLMenuElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Menu)
+  HTMLMenuElement::HTMLMenuElement(dom::Document &document) noexcept
+      : HTMLElement(document, HTMLElementInterface::Menu)
   {
   }
 
@@ -11,12 +12,12 @@ namespace krys::boo::html
 
   bool HTMLMenuElement::Compact() const noexcept
   {
-    return Attributes::Reflection::Reflect<bool>(*this, u8"compact");
+    return Reflection::Reflect<bool>(*this, u8"compact");
   }
 
   void HTMLMenuElement::Compact(bool value) noexcept
   {
-    Attributes::Reflection::Reflect<bool>(*this, u8"compact", krys::move(value));
+    Reflection::Reflect<bool>(*this, u8"compact", krys::move(value));
   }
 
 #pragma endregion

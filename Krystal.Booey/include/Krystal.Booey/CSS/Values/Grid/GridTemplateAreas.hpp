@@ -12,7 +12,7 @@ namespace krys::boo::css
   {
     GridNamedAreaMap map;
 
-    GridTemplateAreas(Keywords::None) noexcept : map {}
+    GridTemplateAreas(keywords::None) noexcept : map {}
     {
     }
 
@@ -36,7 +36,7 @@ namespace krys::boo::css
 
       if (IsNone())
       {
-        return visitor(Keywords::None {});
+        return visitor(keywords::None {});
       }
 
       return visitor(map);

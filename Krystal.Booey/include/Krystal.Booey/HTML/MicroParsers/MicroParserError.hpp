@@ -2,7 +2,7 @@
 
 #include "Krystal.Core/Enum.hpp"
 
-namespace krys::boo::html::MicroParsers
+namespace krys::boo::html
 {
   enum class MicroParserError
   {
@@ -14,4 +14,4 @@ namespace krys::boo::html::MicroParsers
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::MicroParsers::MicroParserError, 3uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::MicroParserError, 3uz);

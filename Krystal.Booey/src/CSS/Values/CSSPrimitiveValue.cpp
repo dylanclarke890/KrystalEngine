@@ -4,13 +4,13 @@
 
 namespace krys::boo::css
 {
-  CSSPrimitiveValue::CSSPrimitiveValue(CSSValueId identifier) noexcept : CSSValue(CSSValueType::Primitive)
+  CSSPrimitiveValue::CSSPrimitiveValue(ValueId identifier) noexcept : CSSValue(CSSValueType::Primitive)
   {
     _unit = CSSUnitType::ValueId;
     _value.ValueId = identifier;
   }
 
-  CSSPrimitiveValue::CSSPrimitiveValue(CSSPropertyId property) noexcept : CSSValue(CSSValueType::Primitive)
+  CSSPrimitiveValue::CSSPrimitiveValue(PropertyId property) noexcept : CSSValue(CSSValueType::Primitive)
   {
     _unit = CSSUnitType::PropertyId;
     _value.PropertyId = property;
@@ -39,12 +39,12 @@ namespace krys::boo::css
   }
 
   CSSPrimitiveValue::CSSPrimitiveValue(StaticCSSValueTag, CreateImplicitInitialValueTag) noexcept
-      : CSSPrimitiveValue(StaticCSSValue, CSSValueId::Initial)
+      : CSSPrimitiveValue(StaticCSSValue, ValueId::Initial)
   {
     _isImplicitInitialValue = true;
   }
 
-  CSSPrimitiveValue::CSSPrimitiveValue(StaticCSSValueTag, CSSValueId keyword) noexcept
+  CSSPrimitiveValue::CSSPrimitiveValue(StaticCSSValueTag, ValueId keyword) noexcept
       : CSSValue(CSSValueType::Primitive)
   {
     _unit = CSSUnitType::ValueId;
@@ -81,7 +81,7 @@ namespace krys::boo::css
     return nullptr;
   }
 
-  Ref<CSSPrimitiveValue> CSSPrimitiveValue::Create(CSSPropertyId property) noexcept
+  Ref<CSSPrimitiveValue> CSSPrimitiveValue::Create(PropertyId property) noexcept
   {
     return AdoptRef(*new CSSPrimitiveValue(property));
   }

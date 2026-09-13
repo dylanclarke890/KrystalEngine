@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLPictureElement);
 
   public:
-    HTMLPictureElement(Document &document) noexcept;
+    HTMLPictureElement(dom::Document &document) noexcept;
   };
 }
 

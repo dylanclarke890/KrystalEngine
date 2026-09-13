@@ -10,10 +10,8 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::dom::tests
 {
-  using namespace krys::boo;
-
   namespace
   {
     struct CommonTestData
@@ -22,7 +20,7 @@ namespace krys::tests
       Ref<ProcessingInstruction> Node;
 
       CommonTestData(dom::DOMString &&target, dom::DOMString &&value)
-          : Document(CreateRef<HTML::Document>()),
+          : Document(CreateRef<dom::Document>()),
             Node(*Document->CreateProcessingInstruction(krys::move(target), krys::move(value)))
       {
       }

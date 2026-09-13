@@ -3,7 +3,8 @@
 
 namespace krys::boo::html
 {
-  HTMLHtmlElement::HTMLHtmlElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Html)
+  HTMLHtmlElement::HTMLHtmlElement(dom::Document &document) noexcept
+      : HTMLElement(document, HTMLElementInterface::Html)
   {
   }
 
@@ -11,12 +12,12 @@ namespace krys::boo::html
 
   dom::DOMString HTMLHtmlElement::Version() const noexcept
   {
-    return Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"version").value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"version").value_or(u8"");
   }
 
   void HTMLHtmlElement::Version(dom::DOMString &&value) noexcept
   {
-    Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"version", krys::move(value));
+    Reflection::Reflect<dom::DOMString>(*this, u8"version", krys::move(value));
   }
 
 #pragma endregion

@@ -30,7 +30,7 @@ namespace krys::boo::css
     bool operator==(const LinearEasingParameters &) const noexcept = default;
   };
 
-  using LinearEasingFunction = FunctionNotation<CSSValueId::Linear, LinearEasingParameters>;
+  using LinearEasingFunction = FunctionNotation<ValueId::Linear, LinearEasingParameters>;
 
   DEFINE_TYPE_WRAPPER_GET(LinearEasingParameters, stops);
 

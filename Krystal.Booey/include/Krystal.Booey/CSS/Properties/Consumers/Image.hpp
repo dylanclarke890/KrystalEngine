@@ -4,7 +4,7 @@
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
   enum class AllowedImageType
   {
@@ -16,27 +16,27 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::CSSPropertyParserHelpers::AllowedImageType, 5uz)
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::PropertyParserHelpers::AllowedImageType, 5uz)
 
 namespace krys::boo::css
 {
   class CSSValue;
   class TokenRange;
-  struct CSSPropertyParserState;
+  struct PropertyParserState;
 
-  namespace CSSPropertyParserHelpers
+  namespace PropertyParserHelpers
   {
     // MARK: <image>
     // https://drafts.csswg.org/css-images-4/#image-values
 
     KRYS_NODISCARD RefPtr<CSSValue>
-      ConsumeImage(TokenRange &tokens, CSSPropertyParserState &state,
+      ConsumeImage(TokenRange &tokens, PropertyParserState &state,
                    AllowedImageType allowedImageTypes = AllowedImageType::URLFunction
                                                         | AllowedImageType::ImageSet
                                                         | AllowedImageType::GeneratedImage) noexcept;
 
     KRYS_NODISCARD RefPtr<CSSValue>
-      ConsumeImageOrNone(TokenRange &tokens, CSSPropertyParserState &state,
+      ConsumeImageOrNone(TokenRange &tokens, PropertyParserState &state,
                          AllowedImageType allowedImageTypes = AllowedImageType::URLFunction
                                                               | AllowedImageType::ImageSet
                                                               | AllowedImageType::GeneratedImage) noexcept;

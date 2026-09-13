@@ -117,7 +117,7 @@ namespace krys::text
   }
 
   template <typename T>
-  KRYS_NODISCARD std::basic_string<typename T::value_type> ToASCIIUpper(T &&input) noexcept
+  KRYS_NODISCARD std::basic_string<typename T::value_type> ToASCIIUpper(T input) noexcept
   {
     std::basic_string<typename T::value_type> result {};
     for (auto codePoint : input)
@@ -318,6 +318,8 @@ namespace krys::text
 
 #pragma region Comparison
 
+  // TODO: this is a bit clunky to use with string literals as they don't have .length etc., rework slightly
+  // to account for this
   template <typename A, typename B>
   KRYS_NODISCARD constexpr bool IsASCIICaselessEqual(A &&a, B &&b) noexcept
   {
@@ -340,9 +342,9 @@ namespace krys::text
   /// @brief Checks whether an ASCII character matches a pre-normalized ASCII literal.
   /// ignoring case on the input character.
   template <IsCharOrByte TChar>
-  KRYS_NODISCARD constexpr bool MatchesASCIINormalizedLiteral(TChar character, char expected) noexcept
+  KRYS_NODISCARD constexpr bool IsASCIICaselessEqual(TChar character, char expected) noexcept
   {
-    krys_debug_assert(ToASCIILowerUnchecked(expected) == expected);
+    krys_debug_assert(ToASCIILowerUnchecked<TChar>(expected) == expected);
 
     auto ch = static_cast<comparable_char_t<TChar>>(character);
     return ToASCIILowerUnchecked(ch) == static_cast<TChar>(expected);

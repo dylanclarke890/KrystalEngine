@@ -6,15 +6,15 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Image.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/String.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/CSSCounterValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValuePair.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
-  RefPtr<CSSValue> ConsumeQuotes(TokenRange &tokens, CSSPropertyParserState &) noexcept
+  RefPtr<CSSValue> ConsumeQuotes(TokenRange &tokens, PropertyParserState &) noexcept
   {
     // <'quotes'> = auto | none | match-parent | [ <string> <string> ]+
     // https://drafts.csswg.org/css-content-3/#propdef-quotes
@@ -22,7 +22,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     // FIXME: Support `match-parent`.
 
     auto id = tokens.Peek().ValueId();
-    if (id == CSSValueId::None || id == CSSValueId::Auto)
+    if (id == ValueId::None || id == ValueId::Auto)
     {
       return ConsumeIdent(tokens);
     }
@@ -47,7 +47,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return nullptr;
   }
 
-  static RefPtr<CSSValue> ConsumeCounterContent(TokenRange args, CSSPropertyParserState &state) noexcept
+  static RefPtr<CSSValue> ConsumeCounterContent(TokenRange args, PropertyParserState &state) noexcept
   {
     // counter()  =  counter( <counter-name>, <counter-style>? )
     // https://www.w3.org/TR/css-lists-3/#funcdef-counter
@@ -72,7 +72,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
     if (!counterStyle)
     {
-      counterStyle = CSSPrimitiveValue::Create(CSSValueId::Decimal);
+      counterStyle = CSSPrimitiveValue::Create(ValueId::Decimal);
     }
 
     if (!args.IsAtEnd())
@@ -84,7 +84,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   KRYS_NODISCARD static RefPtr<CSSValue> ConsumeCountersContent(TokenRange args,
-                                                                CSSPropertyParserState &state) noexcept
+                                                                PropertyParserState &state) noexcept
   {
     // counters() = counters( <counter-name>, <string>, <counter-style>? )
     // https://www.w3.org/TR/css-lists-3/#funcdef-counters
@@ -115,7 +115,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
     if (!counterStyle)
     {
-      counterStyle = CSSPrimitiveValue::Create(CSSValueId::Decimal);
+      counterStyle = CSSPrimitiveValue::Create(ValueId::Decimal);
     }
 
     if (!args.IsAtEnd())
@@ -126,14 +126,14 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return CSSCounterValue::Create(krys::move(identifier), krys::move(separator), krys::move(counterStyle));
   }
 
-  RefPtr<CSSValue> ConsumeContent(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeContent(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // Standard says this should be:
     //
     // <'content'> = normal | none | [ <content-replacement> | <content-list> ] [/ [ <string> | <counter> |
     // <attr()> ]+ ]? https://drafts.csswg.org/css-content-3/#propdef-content
 
-    if (IdentMatches<CSSValueId::None, CSSValueId::Normal>(tokens.Peek().ValueId()))
+    if (IdentMatches<ValueId::None, ValueId::Normal>(tokens.Peek().ValueId()))
     {
       return ConsumeIdent(tokens);
     }
@@ -159,24 +159,24 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
           if (!parsedValue)
           {
-            parsedValue = ConsumeIdent<CSSValueId::OpenQuote, CSSValueId::CloseQuote, CSSValueId::NoOpenQuote,
-                                       CSSValueId::NoCloseQuote>(tokens);
+            parsedValue = ConsumeIdent<ValueId::OpenQuote, ValueId::CloseQuote, ValueId::NoOpenQuote,
+                                       ValueId::NoCloseQuote>(tokens);
           }
         }
         if (!parsedValue)
         {
-          if (tokens.Peek().FunctionId() == CSSValueId::Attr)
+          if (tokens.Peek().FunctionId() == ValueId::Attr)
           {
             parsedValue = ConsumeAttr(ConsumeFunction(tokens), state);
           }
           // FIXME: Alt-text should support counters.
           else if (type == ContentListType::VisibleContent)
           {
-            if (tokens.Peek().FunctionId() == CSSValueId::Counter)
+            if (tokens.Peek().FunctionId() == ValueId::Counter)
             {
               parsedValue = ConsumeCounterContent(ConsumeFunction(tokens), state);
             }
-            else if (tokens.Peek().FunctionId() == CSSValueId::Counters)
+            else if (tokens.Peek().FunctionId() == ValueId::Counters)
             {
               parsedValue = ConsumeCountersContent(ConsumeFunction(tokens), state);
             }

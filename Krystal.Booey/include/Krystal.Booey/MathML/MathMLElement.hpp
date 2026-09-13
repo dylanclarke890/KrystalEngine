@@ -4,7 +4,7 @@
 
 namespace krys::boo::mathml
 {
-  class MathMLElement : public Element
+  class MathMLElement : public dom::Element
   {
   };
 }

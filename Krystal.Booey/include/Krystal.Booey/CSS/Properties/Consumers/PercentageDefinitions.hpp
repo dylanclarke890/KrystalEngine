@@ -7,13 +7,13 @@ namespace krys::boo::css
   struct PercentageValidator
   {
     KRYS_NODISCARD constexpr static Maybe<PercentageUnit>
-      Validate(CSSUnitType unitType, CSSPropertyParserState &, CSSPropertyParserOptions) noexcept
+      Validate(CSSUnitType unitType, PropertyParserState &, PropertyParserOptions) noexcept
     {
       return UnitTraits<PercentageUnit>::Validate(unitType);
     }
 
     template <auto R, typename V>
-    KRYS_NODISCARD static bool IsValid(PercentageRaw<R, V> raw, CSSPropertyParserOptions) noexcept
+    KRYS_NODISCARD static bool IsValid(PercentageRaw<R, V> raw, PropertyParserOptions) noexcept
     {
       return IsValidCanonicalValue(raw);
     }

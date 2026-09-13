@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Booey/CSS/Values/Enums/CSSValueId.hpp"
+#include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
@@ -10,11 +10,11 @@ namespace krys::boo::css
 {
   class TokenRange;
   class CSSValue;
-  struct CSSPropertyParserState;
+  struct PropertyParserState;
   using GridNamedAreaMapRow = SmallList<CSSOMString, 8uz>;
   class CSSGridLineNamesValue;
 
-  namespace CSSPropertyParserHelpers
+  namespace PropertyParserHelpers
   {
     // https://drafts.csswg.org/css-grid/
 
@@ -31,32 +31,32 @@ namespace krys::boo::css
       GridAuto
     };
 
-    KRYS_NODISCARD bool IsGridBreadthIdent(CSSValueId) noexcept;
+    KRYS_NODISCARD bool IsGridBreadthIdent(ValueId) noexcept;
 
     // Parses a single <string> token from a <'grid-template-areas'> production.
     KRYS_NODISCARD Maybe<GridNamedAreaMapRow>
-      ConsumeUnresolvedGridTemplateAreasRow(TokenRange &tokens, CSSPropertyParserState &state) noexcept;
+      ConsumeUnresolvedGridTemplateAreasRow(TokenRange &tokens, PropertyParserState &state) noexcept;
 
     KRYS_NODISCARD RefPtr<CSSGridLineNamesValue>
-      ConsumeGridLineNames(TokenRange &tokens, CSSPropertyParserState &state,
+      ConsumeGridLineNames(TokenRange &tokens, PropertyParserState &state,
                            AllowEmpty allowEmpty = AllowEmpty::No) noexcept;
 
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeGridLine(TokenRange &tokens,
-                                                    CSSPropertyParserState &state) noexcept;
+                                                    PropertyParserState &state) noexcept;
 
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeGridTrackSize(TokenRange &tokens,
-                                                         CSSPropertyParserState &state) noexcept;
+                                                         PropertyParserState &state) noexcept;
 
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeGridTrackList(TokenRange &tokens, CSSPropertyParserState &state,
+    KRYS_NODISCARD RefPtr<CSSValue> ConsumeGridTrackList(TokenRange &tokens, PropertyParserState &state,
                                                          TrackListType = TrackListType::GridAuto) noexcept;
 
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeGridTemplatesRowsOrColumns(TokenRange &tokens,
-                                                                      CSSPropertyParserState &state) noexcept;
+                                                                      PropertyParserState &state) noexcept;
 
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeGridTemplateAreas(TokenRange &tokens,
-                                                             CSSPropertyParserState &state) noexcept;
+                                                             PropertyParserState &state) noexcept;
 
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeGridAutoFlow(TokenRange &tokens,
-                                                        CSSPropertyParserState &state) noexcept;
+                                                        PropertyParserState &state) noexcept;
   }
 }

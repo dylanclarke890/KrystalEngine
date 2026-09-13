@@ -17,7 +17,7 @@ namespace krys::boo::dom
   class Element;
 
   using CustomElementRegistryOrDefault = Maybe<RefPtr<html::CustomElementRegistry>>;
-  constexpr inline auto DefaultCustomElementRegistry = null;
+  constexpr auto DefaultCustomElementRegistry = null;
 
   class ElementFactory
   {

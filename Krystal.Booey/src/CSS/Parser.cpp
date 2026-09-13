@@ -12,11 +12,11 @@
 #include "Krystal.Booey/CSS/MediaList.hpp"
 #include "Krystal.Booey/CSS/Parser/AtRuleType.hpp"
 #include "Krystal.Booey/CSS/Parser/Parser.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSInternalStyleProperties.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParser.hpp"
-#include "Krystal.Booey/CSS/Selectors/CSSSelector.hpp"
-#include "Krystal.Booey/CSS/Selectors/CSSSelectorList.hpp"
-#include "Krystal.Booey/CSS/Selectors/CSSSelectorParser.hpp"
+#include "Krystal.Booey/CSS/Properties/InternalStyleProperties.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParser.hpp"
+#include "Krystal.Booey/CSS/Selectors/Selector.hpp"
+#include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
+#include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
 
 namespace krys::boo::css
@@ -122,10 +122,10 @@ namespace krys::boo::css
     return AllowedRules::Regular;
   }
 
-  Ref<CSSInternalStyleProperties>
+  Ref<InternalStyleProperties>
     Parser::CreateInternalStyleProperties(ParsedPropertyList &properties) noexcept
   {
-    auto internalProperties = CreateRef<CSSInternalStyleProperties>();
+    auto internalProperties = CreateRef<InternalStyleProperties>();
 
     // TODO(Parser): Implement the logic to populate internalProperties with the provided properties.
 
@@ -478,7 +478,7 @@ namespace krys::boo::css
     auto &token = tokens.Consume();
     tokens.DiscardWhitespace();
 
-    auto propertyId = FindCSSPropertyId(token.IdentCodePoints());
+    auto propertyId = FindProperty(token.IdentCodePoints());
     if (tokens.Consume().Type() != TokenType::Colon)
     {
       // TODO(Parser): parse error (expected colon after property name).
@@ -494,9 +494,9 @@ namespace krys::boo::css
     }
 
     const size_t oldPropertiesCount = CurrentNestedContext().ParsedProperties.size();
-    if (propertyId != CSSPropertyId::Invalid)
+    if (propertyId != PropertyId::Invalid)
     {
-      (void)CSSPropertyParser::ParseValue(tokens, _context, propertyId, ruleType, important,
+      (void)PropertyParser::ParseValue(tokens, _context, propertyId, ruleType, important,
                                           CurrentNestedContext().ParsedProperties);
     }
 
@@ -662,7 +662,7 @@ namespace krys::boo::css
 
   RefPtr<CSSStyleRule> Parser::ConsumeStyleRule(TokenRange prelude, TokenRange block) noexcept
   {
-    auto mutableSelectors = CSSSelectorParser::ParseMutableSelectorList(
+    auto mutableSelectors = SelectorParser::ParseMutableSelectorList(
       prelude, {}, _stylesheet.get(), CurrentAncestorRuleType(), IsForgivingSelectorList(false),
       DisallowPseudoElements(false));
 
@@ -671,7 +671,7 @@ namespace krys::boo::css
       return nullptr;
     }
 
-    CSSSelectorList selectors {krys::move(mutableSelectors)};
+    SelectorList selectors {krys::move(mutableSelectors)};
     assert(!selectors.IsEmpty());
 
     RefPtr<CSSRule> styleRule;

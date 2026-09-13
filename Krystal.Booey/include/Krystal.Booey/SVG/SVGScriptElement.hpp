@@ -9,12 +9,12 @@ namespace krys::boo::svg
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGScriptElement);
 
   public:
-    SVGScriptElement(Document &document) noexcept;
+    SVGScriptElement(dom::Document &document) noexcept;
   };
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGScriptElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::Node &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
   {
     return target.IsSVGElement() && Downcast<krys::boo::svg::SVGElement>(target).IsSVGScriptElement();
   }

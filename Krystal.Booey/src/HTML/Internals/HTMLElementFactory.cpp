@@ -73,11 +73,10 @@
 #include "Krystal.Booey/HTML/HTMLUListElement.hpp"
 #include "Krystal.Booey/HTML/HTMLUnknownElement.hpp"
 #include "Krystal.Booey/HTML/HTMLVideoElement.hpp"
-#include "Krystal.Text/ASCII.hpp"
 
 namespace krys::boo::html
 {
-  RefPtr<HTMLElement> HTMLElementFactory::TryCreate(Document &document, TagName elementName) noexcept
+  RefPtr<HTMLElement> HTMLElementFactory::TryCreate(dom::Document &document, TagName elementName) noexcept
   {
     switch (elementName)
     {

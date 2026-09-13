@@ -12,23 +12,23 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLLinkElement);
 
   private:
-    UniquePtr<DOMTokenList> _relList;
-    UniquePtr<DOMTokenList> _sizes;
-    UniquePtr<DOMTokenList> _blocking;
+    UniquePtr<dom::DOMTokenList> _relList;
+    UniquePtr<dom::DOMTokenList> _sizes;
+    UniquePtr<dom::DOMTokenList> _blocking;
 
     /// @see https://html.spec.whatwg.org/#explicitly-enabled
     bool _explicitlyEnabled {false};
 
   public:
-    HTMLLinkElement(Document &document) noexcept;
+    HTMLLinkElement(dom::Document &document) noexcept;
 
 #pragma region HTMLLinkElement - https://html.spec.whatwg.org/#htmllinkelement
 
     /// @see https://html.spec.whatwg.org/#dom-link-href
-    KRYS_NODISCARD dom::ExceptionOr<USVString> Href() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Href() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-href
-    dom::ExceptionOr<void> Href(USVString &&value) noexcept;
+    dom::ExceptionOr<void> Href(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-crossorigin
     KRYS_NODISCARD Maybe<dom::DOMString> CrossOrigin() const noexcept;
@@ -49,7 +49,7 @@ namespace krys::boo::html
     void As(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-rellist
-    KRYS_NODISCARD DOMTokenList &RelList() noexcept;
+    KRYS_NODISCARD dom::DOMTokenList &RelList() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-media
     KRYS_NODISCARD dom::DOMString Media() const noexcept;
@@ -76,13 +76,13 @@ namespace krys::boo::html
     void Type(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-sizes
-    KRYS_NODISCARD DOMTokenList &Sizes() noexcept;
+    KRYS_NODISCARD dom::DOMTokenList &Sizes() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-imagesrcset
-    KRYS_NODISCARD dom::ExceptionOr<USVString> ImageSrcset() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> ImageSrcset() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-imagesrcset
-    dom::ExceptionOr<void> ImageSrcset(USVString &&value) noexcept;
+    dom::ExceptionOr<void> ImageSrcset(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-imagesizes
     KRYS_NODISCARD dom::DOMString ImageSizes() const noexcept;
@@ -97,7 +97,7 @@ namespace krys::boo::html
     void ReferrerPolicy(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-blocking
-    KRYS_NODISCARD DOMTokenList &Blocking() noexcept;
+    KRYS_NODISCARD dom::DOMTokenList &Blocking() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-disabled
     KRYS_NODISCARD bool Disabled() const noexcept;

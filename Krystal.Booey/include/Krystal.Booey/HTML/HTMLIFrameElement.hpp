@@ -12,18 +12,18 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLIFrameElement);
 
   private:
-    UniquePtr<DOMTokenList> _sandbox;
+    UniquePtr<dom::DOMTokenList> _sandbox;
 
   public:
-    HTMLIFrameElement(Document &document) noexcept;
+    HTMLIFrameElement(dom::Document &document) noexcept;
 
 #pragma region HTMLIFrameElement - https://html.spec.whatwg.org/#htmliframeelement
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-src
-    KRYS_NODISCARD dom::ExceptionOr<USVString> Src() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-src
-    dom::ExceptionOr<void> Src(USVString &&value) noexcept;
+    dom::ExceptionOr<void> Src(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-srcdoc
     KRYS_NODISCARD dom::DOMString SrcDoc() const noexcept;
@@ -44,7 +44,7 @@ namespace krys::boo::html
     void Name(dom::DOMString &&value) noexcept;
 
     /// @see  https://html.spec.whatwg.org/#dom-iframe-sandbox
-    KRYS_NODISCARD DOMTokenList &Sandbox() noexcept;
+    KRYS_NODISCARD dom::DOMTokenList &Sandbox() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-allow
     KRYS_NODISCARD dom::DOMString Allow() const noexcept;
@@ -111,10 +111,10 @@ namespace krys::boo::html
     void FrameBorder(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-longdesc
-    KRYS_NODISCARD dom::ExceptionOr<USVString> LongDesc() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> LongDesc() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-longdesc
-    dom::ExceptionOr<void> LongDesc(USVString &&value) noexcept;
+    dom::ExceptionOr<void> LongDesc(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-marginwidth
     KRYS_NODISCARD dom::DOMString MarginWidth() const noexcept;

@@ -10,10 +10,10 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLStyleElement);
 
   private:
-    UniquePtr<DOMTokenList> _blocking;
+    UniquePtr<dom::DOMTokenList> _blocking;
 
   public:
-    HTMLStyleElement(Document &document) noexcept;
+    HTMLStyleElement(dom::Document &document) noexcept;
 
 #pragma region HTMLStyleElement - https://html.spec.whatwg.org/#htmlstyleelement
 
@@ -30,7 +30,7 @@ namespace krys::boo::html
     void Media(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-style-blocking
-    KRYS_NODISCARD DOMTokenList &Blocking() noexcept;
+    KRYS_NODISCARD dom::DOMTokenList &Blocking() noexcept;
 
 #pragma endregion
 

@@ -9,7 +9,7 @@ namespace krys::boo::css
   struct ColorScheme
   {
     SpaceSeparatedList<CustomIdentifier> schemes;
-    Maybe<Keywords::Only> only;
+    Maybe<keywords::Only> only;
 
     // As an optimization, if `schemes` is empty, that indicates the
     // entire value should be considered `normal`.

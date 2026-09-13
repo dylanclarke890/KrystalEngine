@@ -12,10 +12,8 @@
 #include "Krystal.Core/Types/SmallList.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::dom::tests
 {
-  using namespace krys::boo;
-
   template <typename T>
   concept NonElementParentNodeMixin = requires(T &node, const T &constNode, dom::DOMStringView id) {
     { node.GetElementById(id) } -> SameType<RefPtr<Element>>;
@@ -30,7 +28,7 @@ namespace krys::tests
 
   template <typename T>
   concept DocumentOrShadowRootMixin = requires(T &node) {
-    { node.CustomElementRegistry() } -> SameType<RefPtr<CustomElementRegistry>>;
+    { node.CustomElementRegistry() } -> SameType<RefPtr<html::CustomElementRegistry>>;
   };
 
   TEST_CASE("Mixin::DocumentOrShadowRoot", "[HTML][Mixins]")
@@ -97,12 +95,12 @@ namespace krys::tests
 
   template <typename T>
   concept SlottableMixin = requires(T &node) {
-    { node.AssignedSlot() } -> SameType<RefPtr<HTMLSlotElement>>;
+    { node.AssignedSlot() } -> SameType<RefPtr<html::HTMLSlotElement>>;
   };
 
   TEST_CASE("Mixin::Slottable", "[HTML][Mixins]")
   {
     STATIC_REQUIRE(SlottableMixin<Element>);
-    STATIC_REQUIRE(SlottableMixin<krys::boo::Text>);
+    STATIC_REQUIRE(SlottableMixin<krys::boo::dom::Text>);
   }
 }

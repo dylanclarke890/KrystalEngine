@@ -6,12 +6,12 @@
 
 namespace krys::boo::css
 {
-  template <CSSValueId FilterFunction>
+  template <ValueId FilterFunction>
   struct CSSFilterFunctionDescriptor;
 
   // https://drafts.fxtf.org/filter-effects/#funcdef-filter-blur
   template <>
-  struct CSSFilterFunctionDescriptor<CSSValueId::Blur>
+  struct CSSFilterFunctionDescriptor<ValueId::Blur>
   {
     constexpr static bool IsPixelFilterFunction = true;
     constexpr static bool IsColorFilterFunction = false;
@@ -25,7 +25,7 @@ namespace krys::boo::css
 
   // https://drafts.fxtf.org/filter-effects/#funcdef-filter-brightness
   template <>
-  struct CSSFilterFunctionDescriptor<CSSValueId::Brightness>
+  struct CSSFilterFunctionDescriptor<ValueId::Brightness>
   {
     constexpr static bool IsPixelFilterFunction = true;
     constexpr static bool IsColorFilterFunction = true;
@@ -39,7 +39,7 @@ namespace krys::boo::css
 
   // https://drafts.fxtf.org/filter-effects/#funcdef-filter-contrast
   template <>
-  struct CSSFilterFunctionDescriptor<CSSValueId::Contrast>
+  struct CSSFilterFunctionDescriptor<ValueId::Contrast>
   {
     constexpr static bool IsPixelFilterFunction = true;
     constexpr static bool IsColorFilterFunction = true;
@@ -53,7 +53,7 @@ namespace krys::boo::css
 
   // https://drafts.fxtf.org/filter-effects/#funcdef-filter-drop-shadow
   template <>
-  struct CSSFilterFunctionDescriptor<CSSValueId::DropShadow>
+  struct CSSFilterFunctionDescriptor<ValueId::DropShadow>
   {
     constexpr static bool IsPixelFilterFunction = true;
     constexpr static bool IsColorFilterFunction = false;
@@ -70,7 +70,7 @@ namespace krys::boo::css
 
   // https://drafts.fxtf.org/filter-effects/#funcdef-filter-grayscale
   template <>
-  struct CSSFilterFunctionDescriptor<CSSValueId::Grayscale>
+  struct CSSFilterFunctionDescriptor<ValueId::Grayscale>
   {
     constexpr static bool IsPixelFilterFunction = true;
     constexpr static bool IsColorFilterFunction = true;
@@ -84,7 +84,7 @@ namespace krys::boo::css
 
   // https://drafts.fxtf.org/filter-effects/#funcdef-filter-hue-rotate
   template <>
-  struct CSSFilterFunctionDescriptor<CSSValueId::HueRotate>
+  struct CSSFilterFunctionDescriptor<ValueId::HueRotate>
   {
     constexpr static bool IsPixelFilterFunction = true;
     constexpr static bool IsColorFilterFunction = true;
@@ -97,7 +97,7 @@ namespace krys::boo::css
 
   // https://drafts.fxtf.org/filter-effects/#funcdef-filter-invert
   template <>
-  struct CSSFilterFunctionDescriptor<CSSValueId::Invert>
+  struct CSSFilterFunctionDescriptor<ValueId::Invert>
   {
     constexpr static bool IsPixelFilterFunction = true;
     constexpr static bool IsColorFilterFunction = true;
@@ -111,7 +111,7 @@ namespace krys::boo::css
 
   // https://drafts.fxtf.org/filter-effects/#funcdef-filter-opacity
   template <>
-  struct CSSFilterFunctionDescriptor<CSSValueId::Opacity>
+  struct CSSFilterFunctionDescriptor<ValueId::Opacity>
   {
     constexpr static bool IsPixelFilterFunction = true;
     constexpr static bool IsColorFilterFunction = true;
@@ -125,7 +125,7 @@ namespace krys::boo::css
 
   // https://drafts.fxtf.org/filter-effects/#funcdef-filter-saturate
   template <>
-  struct CSSFilterFunctionDescriptor<CSSValueId::Saturate>
+  struct CSSFilterFunctionDescriptor<ValueId::Saturate>
   {
     constexpr static bool IsPixelFilterFunction = true;
     constexpr static bool IsColorFilterFunction = true;
@@ -139,7 +139,7 @@ namespace krys::boo::css
 
   // https://drafts.fxtf.org/filter-effects/#funcdef-filter-sepia
   template <>
-  struct CSSFilterFunctionDescriptor<CSSValueId::Sepia>
+  struct CSSFilterFunctionDescriptor<ValueId::Sepia>
   {
     constexpr static bool IsPixelFilterFunction = true;
     constexpr static bool IsColorFilterFunction = true;
@@ -153,7 +153,7 @@ namespace krys::boo::css
 
   // Non-standard addition.
   template <>
-  struct CSSFilterFunctionDescriptor<CSSValueId::AppleInvertLightness>
+  struct CSSFilterFunctionDescriptor<ValueId::AppleInvertLightness>
   {
     constexpr static bool IsPixelFilterFunction = false;
     constexpr static bool IsColorFilterFunction = true;

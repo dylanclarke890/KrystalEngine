@@ -3,7 +3,7 @@
 
 namespace krys::boo::html
 {
-  HTMLProgressElement::HTMLProgressElement(Document &document) noexcept
+  HTMLProgressElement::HTMLProgressElement(dom::Document &document) noexcept
       : HTMLElement(document, HTMLElementInterface::Progress)
   {
   }
@@ -12,22 +12,22 @@ namespace krys::boo::html
 
   double HTMLProgressElement::Value() const noexcept
   {
-    return Attributes::Reflection::Reflect<double>(*this, u8"value");
+    return Reflection::Reflect<double>(*this, u8"value");
   }
 
   void HTMLProgressElement::Value(double value) noexcept
   {
-    Attributes::Reflection::Reflect<double>(*this, u8"value", krys::move(value));
+    Reflection::Reflect<double>(*this, u8"value", krys::move(value));
   }
 
   double HTMLProgressElement::Max() const noexcept
   {
-    return Attributes::Reflection::Reflect<double>(*this, u8"max");
+    return Reflection::Reflect<double>(*this, u8"max");
   }
 
   void HTMLProgressElement::Max(double value) noexcept
   {
-    Attributes::Reflection::Reflect<double>(*this, u8"max", krys::move(value));
+    Reflection::Reflect<double>(*this, u8"max", krys::move(value));
   }
 
 #pragma endregion

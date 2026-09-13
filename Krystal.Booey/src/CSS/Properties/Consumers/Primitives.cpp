@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
   bool ConsumeComma(TokenRange &tokens) noexcept
   {

@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLBodyElement);
 
   public:
-    HTMLBodyElement(Document &document) noexcept;
+    HTMLBodyElement(dom::Document &document) noexcept;
 
 #pragma region HTMLBodyElement Obsolete members - https://html.spec.whatwg.org/#HTMLBodyElement-partial
 

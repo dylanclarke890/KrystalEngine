@@ -25,7 +25,7 @@ namespace krys::boo::css
     constexpr bool operator==(const SpringEasingParameters &) const noexcept = default;
   };
 
-  using SpringEasingFunction = FunctionNotation<CSSValueId::Spring, SpringEasingParameters>;
+  using SpringEasingFunction = FunctionNotation<ValueId::Spring, SpringEasingParameters>;
 
   template <size_t I>
   KRYS_NODISCARD constexpr const auto &get(const SpringEasingParameters &value) noexcept

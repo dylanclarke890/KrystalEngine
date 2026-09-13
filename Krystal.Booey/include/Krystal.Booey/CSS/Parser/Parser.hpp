@@ -8,7 +8,7 @@
 #include "Krystal.Booey/CSS/Parser/Token.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSInternalStyleProperties.hpp"
+#include "Krystal.Booey/CSS/Properties/InternalStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/CSS/Rules/RuleType.hpp"
 #include "Krystal.Booey/URL/Url.hpp"
@@ -67,7 +67,7 @@ namespace krys::boo::css
     /// next allowed rules will be `Import` (`Charset` is not allowed after an `@import` rule).
     KRYS_NODISCARD static AllowedRules ComputeNextAllowedRules(AllowedRules current, CSSRule *ref) noexcept;
 
-    KRYS_NODISCARD static Ref<CSSInternalStyleProperties>
+    KRYS_NODISCARD static Ref<InternalStyleProperties>
       CreateInternalStyleProperties(ParsedPropertyList &properties) noexcept;
 
 #pragma region Parser Algorithms - https://drafts.csswg.org/css-syntax/#parser-algorithms

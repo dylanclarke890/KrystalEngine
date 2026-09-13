@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
+#include "Krystal.Booey/HTML/HTMLElement.hpp"
 
 namespace krys::boo::html
 {
@@ -11,10 +11,10 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLFormElement);
 
   private:
-    UniquePtr<DOMTokenList> _relList;
+    UniquePtr<dom::DOMTokenList> _relList;
 
   public:
-    HTMLFormElement(Document &document) noexcept;
+    HTMLFormElement(dom::Document &document) noexcept;
 
 #pragma region HTMLFormElement - https://html.spec.whatwg.org/#htmlformelement
 
@@ -25,10 +25,10 @@ namespace krys::boo::html
     void AcceptCharset(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-action
-    KRYS_NODISCARD dom::ExceptionOr<USVString> Action() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Action() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-action
-    dom::ExceptionOr<void> Action(USVString &&value) noexcept;
+    dom::ExceptionOr<void> Action(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-autocomplete
     KRYS_NODISCARD dom::DOMString Autocomplete() const noexcept;
@@ -79,7 +79,7 @@ namespace krys::boo::html
     void Rel(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-rellist
-    KRYS_NODISCARD DOMTokenList &RelList() noexcept;
+    KRYS_NODISCARD dom::DOMTokenList &RelList() noexcept;
 
     // TODO(HTMLFORMELEMENT, HTML): rest of form API:
     // [SameObject] readonly attribute HTMLFormControlsCollection elements;

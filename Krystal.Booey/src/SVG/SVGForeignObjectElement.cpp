@@ -2,7 +2,7 @@
 
 namespace krys::boo::svg
 {
-  SVGForeignObjectElement::SVGForeignObjectElement(Document &document) noexcept
+  SVGForeignObjectElement::SVGForeignObjectElement(dom::Document &document) noexcept
       : SVGElement(document, SVGElementInterface::ForeignObject)
   {
   }

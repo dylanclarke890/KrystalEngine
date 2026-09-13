@@ -4,29 +4,29 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/IntegerDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/List.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParsing.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValuePair.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
-  KRYS_NODISCARD static bool IsPredefinedCounterStyle(CSSValueId valueId) noexcept
+  KRYS_NODISCARD static bool IsPredefinedCounterStyle(ValueId valueId) noexcept
   {
     // https://drafts.csswg.org/css-counter-styles-3/#predefined-counters
 
-    return valueId >= CSSValueId::Disc && valueId <= CSSValueId::EthiopicNumeric;
+    return valueId >= ValueId::Disc && valueId <= ValueId::EthiopicNumeric;
   }
 
-  RefPtr<CSSValue> ConsumeCounterStyle(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeCounterStyle(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <counter-style> = <counter-style-name excluding=none> | <symbols()>
     // https://drafts.csswg.org/css-counter-styles-3/#typedef-counter-style
 
     // FIXME: Implement support for `symbols()`.
 
-    if (tokens.Peek().ValueId() == CSSValueId::None)
+    if (tokens.Peek().ValueId() == ValueId::None)
     {
       return nullptr;
     }
@@ -60,10 +60,10 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     }
 
     auto id = nameToken.ValueId();
-    if (IdentMatches<CSSValueId::None>(id)
+    if (IdentMatches<ValueId::None>(id)
         || (!IsUASheetBehavior(mode)
-            && IdentMatches<CSSValueId::Decimal, CSSValueId::Disc, CSSValueId::Circle, CSSValueId::Square,
-                            CSSValueId::DisclosureOpen, CSSValueId::DisclosureClosed>(id)))
+            && IdentMatches<ValueId::Decimal, ValueId::Disc, ValueId::Circle, ValueId::Square,
+                            ValueId::DisclosureOpen, ValueId::DisclosureClosed>(id)))
     {
       return CSSOMStringAtom::Null();
     }
@@ -72,13 +72,13 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return IsPredefinedCounterStyle(nameToken.ValueId()) ? krys::text::ToASCIILower(name) : name;
   }
 
-  RefPtr<CSSValue> ConsumeCounterStyleName(TokenRange &tokens, CSSPropertyParserState &) noexcept
+  RefPtr<CSSValue> ConsumeCounterStyleName(TokenRange &tokens, PropertyParserState &) noexcept
   {
     // <counter-style-name> is a <custom-ident> that is not an ASCII case-insensitive match for "none".
     // https://drafts.csswg.org/css-counter-styles-3/#typedef-counter-style-name
 
     auto valueId = tokens.Peek().ValueId();
-    if (valueId == CSSValueId::None)
+    if (valueId == ValueId::None)
     {
       return nullptr;
     }
@@ -92,13 +92,13 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return nullptr;
   }
 
-  RefPtr<CSSValue> ConsumeCounterStyleSystem(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeCounterStyleSystem(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'system'> = cyclic | numeric | alphabetic | symbolic | additive | [fixed <integer>?] | [ extends
     // <counter-style-name> ] https://drafts.csswg.org/css-counter-styles-3/#counter-style-system
 
-    if (auto ident = ConsumeIdent<CSSValueId::Cyclic, CSSValueId::Numeric, CSSValueId::Alphabetic,
-                                  CSSValueId::Symbolic, CSSValueId::Additive>(tokens))
+    if (auto ident = ConsumeIdent<ValueId::Cyclic, ValueId::Numeric, ValueId::Alphabetic,
+                                  ValueId::Symbolic, ValueId::Additive>(tokens))
     {
       return ident;
     }
@@ -106,11 +106,11 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     if (IsUASheetBehavior(state.Context.Mode))
     {
       auto internalKeyword =
-        ConsumeIdent<CSSValueId::InternalDisclosureClosed, CSSValueId::InternalDisclosureOpen,
-                     CSSValueId::InternalSimplifiedChineseInformal,
-                     CSSValueId::InternalSimplifiedChineseFormal,
-                     CSSValueId::InternalTraditionalChineseInformal,
-                     CSSValueId::InternalTraditionalChineseFormal, CSSValueId::InternalEthiopicNumeric>(
+        ConsumeIdent<ValueId::InternalDisclosureClosed, ValueId::InternalDisclosureOpen,
+                     ValueId::InternalSimplifiedChineseInformal,
+                     ValueId::InternalSimplifiedChineseFormal,
+                     ValueId::InternalTraditionalChineseInformal,
+                     ValueId::InternalTraditionalChineseFormal, ValueId::InternalEthiopicNumeric>(
           tokens);
       if (internalKeyword)
       {
@@ -118,7 +118,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       }
     }
 
-    if (auto ident = ConsumeIdent<CSSValueId::Fixed>(tokens))
+    if (auto ident = ConsumeIdent<ValueId::Fixed>(tokens))
     {
       if (tokens.IsAtEnd())
       {
@@ -136,7 +136,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       return CSSValuePair::Create(krys::move(ident), krys::move(firstSymbolValue));
     }
 
-    if (auto ident = ConsumeIdent<CSSValueId::Extends>(tokens))
+    if (auto ident = ConsumeIdent<ValueId::Extends>(tokens))
     {
       // There must be a `<counter-style-name>` following the `extends` keyword. If there isn't, this value is
       // invalid.
@@ -151,14 +151,14 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return nullptr;
   }
 
-  RefPtr<CSSValue> ConsumeCounterStyleRange(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeCounterStyleRange(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'tokens'> = [ [ <integer> | infinite ]{2} ]# | auto
     // https://drafts.csswg.org/css-counter-styles-3/#counter-style-tokens
 
     auto ConsumeCounterStyleRangeBound = [&](TokenRange &tokens) -> RefPtr<CSSPrimitiveValue>
     {
-      if (auto infinite = ConsumeIdent<CSSValueId::Infinite>(tokens))
+      if (auto infinite = ConsumeIdent<ValueId::Infinite>(tokens))
       {
         return infinite;
       }
@@ -171,7 +171,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       return nullptr;
     };
 
-    if (auto autoValue = ConsumeIdent<CSSValueId::Auto>(tokens))
+    if (auto autoValue = ConsumeIdent<ValueId::Auto>(tokens))
     {
       return autoValue;
     }
@@ -212,7 +212,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   RefPtr<CSSValue> ConsumeCounterStyleAdditiveSymbols(TokenRange &tokens,
-                                                      CSSPropertyParserState &state) noexcept
+                                                      PropertyParserState &state) noexcept
   {
     // <'additive-symbols'> = [ <integer [0,∞]> && <symbol> ]#
     // https://drafts.csswg.org/css-counter-styles-3/#descdef-counter-style-additive-symbols
@@ -223,7 +223,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       [&lastWeight](auto &tokens, auto &state) -> RefPtr<CSSValue>
       {
         auto integer = CSSPrimitiveValueResolver<Integer<NonNegative>>::ConsumeAndResolve(tokens, state);
-        auto symbol = CSSPropertyParsing::ConsumeSymbol(tokens, state);
+        auto symbol = PropertyParsing::ConsumeSymbol(tokens, state);
         if (!integer)
         {
           if (!symbol)

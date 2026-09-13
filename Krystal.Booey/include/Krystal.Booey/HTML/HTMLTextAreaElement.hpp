@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTextAreaElement);
 
   public:
-    HTMLTextAreaElement(Document &document) noexcept;
+    HTMLTextAreaElement(dom::Document &document) noexcept;
 
 #pragma region HTMLTextAreaElement - https://html.spec.whatwg.org/#htmltextareaelement
 

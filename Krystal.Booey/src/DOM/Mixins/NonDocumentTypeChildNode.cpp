@@ -5,7 +5,7 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 
-namespace krys::boo::dom::Mixins
+namespace krys::boo::dom::mixins
 {
   RefPtr<Element> NonDocumentTypeChildNode::PreviousElementSibling(CharacterData &node) noexcept
   {

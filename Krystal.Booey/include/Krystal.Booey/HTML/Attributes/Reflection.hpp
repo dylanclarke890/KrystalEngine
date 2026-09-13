@@ -2,18 +2,18 @@
 
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
+#include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/HTML/ElementInternals.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/NTTPMaybe.hpp"
 #include "Krystal.Core/Types/StronglyTypedValue.hpp"
 
-namespace krys::boo::html::Attributes
+namespace krys::boo::html
 {
   template <typename T>
   concept ReflectTarget = DerivedFrom<T, HTMLElement> || SameType<T, ElementInternals>;
@@ -22,7 +22,7 @@ namespace krys::boo::html::Attributes
   concept ReflectTypeDOMString = OneOf<T, dom::DOMString, Maybe<dom::DOMString>>;
 
   template <typename T>
-  concept ReflectURLType = OneOf<T, USVString>;
+  concept ReflectURLType = OneOf<T, dom::USVString>;
 
   // TODO(CONTENT-ATTRIBUTE-REFLECTION, HTML): FrozenArray<T>? is also one of the possible types.
   // NOTE: DOMTokenList is also a possible type for reflection but it just consists of returning a
@@ -41,7 +41,7 @@ namespace krys::boo::html::Attributes
 
   /// @brief Types that unconditionally return exceptions during reflection.
   template <typename T>
-  concept ReflectAlwaysReturnsExceptionOrT = OneOf<T, USVString>;
+  concept ReflectAlwaysReturnsExceptionOrT = OneOf<T, dom::USVString>;
 
   template <typename T>
   concept ReflectDefaultGetterType = OneOf<T, double, int32, uint32>;
@@ -69,8 +69,8 @@ namespace krys::boo::html::Attributes
 
   /// @brief Implements the logic for reflecting content attributes to IDL attributes and vice versa.
   /// Enumerated attributes and attributes that are limited to a set of known values
-  /// (dom::DOMString/Maybe<dom::DOMString>) are not handled by the generic Reflect functions and need to be handled
-  /// separately by the caller. This includes 'missing', 'default' and 'invalid' value handling.
+  /// (dom::DOMString/Maybe<dom::DOMString>) are not handled by the generic Reflect functions and need to be
+  /// handled separately by the caller. This includes 'missing', 'default' and 'invalid' value handling.
   /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflect
   class Reflection
   {
@@ -83,10 +83,10 @@ namespace krys::boo::html::Attributes
     using MaybeReflectRange = NTTPMaybe<ReflectRange<T>>;
 
     template <typename T>
-    constexpr static inline MaybeReflectDefault<T> NoDefaultValue = {};
+    constexpr static MaybeReflectDefault<T> NoDefaultValue = {};
 
     template <typename T>
-    constexpr static inline MaybeReflectRange<T> NoRange = {};
+    constexpr static MaybeReflectRange<T> NoRange = {};
 
     struct OnlyNonNegativeNumbers : public StronglyTypedBool<OnlyNonNegativeNumbers>
     {
@@ -134,7 +134,7 @@ namespace krys::boo::html::Attributes
       {
         return ReflectDOMString(target, name);
       }
-      else if constexpr (SameType<TValue, USVString>)
+      else if constexpr (SameType<TValue, dom::USVString>)
       {
         return ReflectUSVString<TreatedAsURL(false)>(target, name);
       }
@@ -174,7 +174,7 @@ namespace krys::boo::html::Attributes
       {
         ReflectDOMString(target, name, krys::move(value));
       }
-      else if constexpr (SameType<TValue, USVString>)
+      else if constexpr (SameType<TValue, dom::USVString>)
       {
         return ReflectUSVString<TreatedAsURL(false)>(target, name, krys::move(value));
       }
@@ -607,9 +607,10 @@ namespace krys::boo::html::Attributes
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#get-the-content-attribute
     KRYS_NODISCARD static Maybe<dom::DOMString> GetContentAttribute(const HTMLElement &element,
-                                                               dom::DOMStringAtom name) noexcept
+                                                                    dom::DOMStringAtom name) noexcept
     {
-      auto attribute = ElementAlgorithms::GetAttributeByNamespace(dom::DOMStringAtom::Null(), name, element);
+      auto attribute =
+        dom::ElementAlgorithms::GetAttributeByNamespace(dom::DOMStringAtom::Null(), name, element);
       if (attribute == nullptr)
       {
         return null;
@@ -619,15 +620,16 @@ namespace krys::boo::html::Attributes
     }
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#set-the-content-attribute
-    static void SetContentAttribute(HTMLElement &element, dom::DOMStringAtom name, dom::DOMString &&value) noexcept
+    static void SetContentAttribute(HTMLElement &element, dom::DOMStringAtom name,
+                                    dom::DOMString &&value) noexcept
     {
-      ElementAlgorithms::SetAttributeValue(element, name, krys::move(value));
+      dom::ElementAlgorithms::SetAttributeValue(element, name, krys::move(value));
     }
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#delete-the-content-attribute
     static void DeleteContentAttribute(HTMLElement &element, dom::DOMStringAtom name) noexcept
     {
-      ElementAlgorithms::RemoveAttributeByNamespace(dom::DOMStringAtom::Null(), name, element);
+      dom::ElementAlgorithms::RemoveAttributeByNamespace(dom::DOMStringAtom::Null(), name, element);
     }
 
 #pragma endregion
@@ -642,7 +644,7 @@ namespace krys::boo::html::Attributes
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#get-the-content-attribute
     KRYS_NODISCARD static Maybe<dom::DOMString> GetContentAttribute(const ElementInternals &internals,
-                                                               dom::DOMStringAtom name) noexcept
+                                                                    dom::DOMStringAtom name) noexcept
     {
       // TODO(impl): ELEMENT-INTERNALS
       return null;
@@ -668,14 +670,16 @@ namespace krys::boo::html::Attributes
     /// @brief Helper for getting reflected content attributes for 'DOMString/DOMString?' types. The handling
     /// for returning an empty string for null attributes is handled by the caller.
     template <ReflectTarget Target>
-    KRYS_NODISCARD static Maybe<dom::DOMString> ReflectDOMString(const Target &target, dom::DOMStringAtom name) noexcept
+    KRYS_NODISCARD static Maybe<dom::DOMString> ReflectDOMString(const Target &target,
+                                                                 dom::DOMStringAtom name) noexcept
     {
       return GetContentAttribute(target, name);
     }
 
     /// @brief Helper for setting reflected content attributes with 'DOMString?' type.
     template <ReflectTarget Target>
-    static void ReflectDOMString(Target &target, dom::DOMStringAtom name, Maybe<dom::DOMString> &&value) noexcept
+    static void ReflectDOMString(Target &target, dom::DOMStringAtom name,
+                                 Maybe<dom::DOMString> &&value) noexcept
     {
       if (!value.has_value())
       {
@@ -698,22 +702,22 @@ namespace krys::boo::html::Attributes
 
 #pragma region ReflectUSVString
 
-    /// @brief Helper for getting reflected content attributes with 'USVString' type.
+    /// @brief Helper for getting reflected content attributes with 'dom::USVString' type.
     template <TreatedAsURL AsUrl, ReflectTarget Target>
-    KRYS_NODISCARD static dom::ExceptionOr<USVString> ReflectUSVString(const Target &target,
-                                                                  dom::DOMStringAtom name) noexcept
+    KRYS_NODISCARD static dom::ExceptionOr<dom::USVString> ReflectUSVString(const Target &target,
+                                                                            dom::DOMStringAtom name) noexcept
     {
-      // SPEC-VIOLATION(USVString): Not supported.
-      return ExceptionCode::NotSupportedError;
+      // SPEC-VIOLATION(dom::USVString): Not supported.
+      return dom::ExceptionCode::NotSupportedError;
     }
 
-    /// @brief Helper for setting reflected content attributes with 'USVString' type.
+    /// @brief Helper for setting reflected content attributes with 'dom::USVString' type.
     template <TreatedAsURL AsUrl, ReflectTarget Target>
     KRYS_NODISCARD static dom::ExceptionOr<void> ReflectUSVString(Target &target, dom::DOMStringAtom name,
-                                                             USVString &&value) noexcept
+                                                                  dom::USVString &&value) noexcept
     {
-      // SPEC-VIOLATION(USVString): Not supported.
-      return ExceptionCode::NotSupportedError;
+      // SPEC-VIOLATION(dom::USVString): Not supported.
+      return dom::ExceptionCode::NotSupportedError;
     }
 
 #pragma endregion
@@ -756,7 +760,7 @@ namespace krys::boo::html::Attributes
       {
         if constexpr (OnlyNonNegative)
         {
-          auto parsedValue = MicroParsers::Numbers::ParseNonNegativeInteger(*contentAttributeValue);
+          auto parsedValue = Numbers::ParseNonNegativeInteger(*contentAttributeValue);
           if (parsedValue.Success() && parsedValue.Value <= std::numeric_limits<int32>::max())
           {
             return static_cast<int32>(parsedValue.Value);
@@ -764,7 +768,7 @@ namespace krys::boo::html::Attributes
         }
         else
         {
-          auto parsedValue = MicroParsers::Numbers::ParseInteger(*contentAttributeValue);
+          auto parsedValue = Numbers::ParseInteger(*contentAttributeValue);
           if (parsedValue.Success() && parsedValue.Value <= std::numeric_limits<int32>::max())
           {
             return static_cast<int32>(parsedValue.Value);
@@ -793,7 +797,7 @@ namespace krys::boo::html::Attributes
       {
         if (value < 0)
         {
-          return ExceptionCode::IndexSizeError;
+          return dom::ExceptionCode::IndexSizeError;
         }
       }
 
@@ -843,7 +847,7 @@ namespace krys::boo::html::Attributes
 
       if (contentAttributeValue.has_value())
       {
-        auto parsedValue = MicroParsers::Numbers::ParseNonNegativeInteger(*contentAttributeValue);
+        auto parsedValue = Numbers::ParseNonNegativeInteger(*contentAttributeValue);
         if (parsedValue.Success())
         {
           if (parsedValue >= minimum && parsedValue <= maximum)
@@ -879,7 +883,7 @@ namespace krys::boo::html::Attributes
       {
         if (value == 0)
         {
-          return ExceptionCode::IndexSizeError;
+          return dom::ExceptionCode::IndexSizeError;
         }
       }
 
@@ -922,7 +926,7 @@ namespace krys::boo::html::Attributes
       auto contentAttributeValue = GetContentAttribute(target, name);
       if (contentAttributeValue.has_value())
       {
-        auto parsedValue = MicroParsers::Numbers::ParseFloatingPoint(*contentAttributeValue);
+        auto parsedValue = Numbers::ParseFloatingPoint(*contentAttributeValue);
         if (parsedValue.Success())
         {
           if constexpr (!OnlyPositive)

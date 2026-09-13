@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLDivElement);
 
   public:
-    HTMLDivElement(Document &document) noexcept;
+    HTMLDivElement(dom::Document &document) noexcept;
 
 #pragma region HTMLDivElement Obsolete members - https://html.spec.whatwg.org/#HTMLDivElement-partial
 

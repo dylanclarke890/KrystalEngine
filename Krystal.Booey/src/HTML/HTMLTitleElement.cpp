@@ -4,7 +4,8 @@
 
 namespace krys::boo::html
 {
-  HTMLTitleElement::HTMLTitleElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Title)
+  HTMLTitleElement::HTMLTitleElement(dom::Document &document) noexcept
+      : HTMLElement(document, HTMLElementInterface::Title)
   {
   }
 
@@ -12,12 +13,12 @@ namespace krys::boo::html
 
   dom::DOMString HTMLTitleElement::Text() const noexcept
   {
-    return TextAlgorithms::ChildTextContent(*this);
+    return dom::TextAlgorithms::ChildTextContent(*this);
   }
 
   dom::ExceptionOr<void> HTMLTitleElement::Text(dom::DOMString &&value) noexcept
   {
-    return NodeAlgorithms::StringReplaceAll(std::move(value), *this);
+    return dom::NodeAlgorithms::StringReplaceAll(krys::move(value), *this);
   }
 
 #pragma endregion

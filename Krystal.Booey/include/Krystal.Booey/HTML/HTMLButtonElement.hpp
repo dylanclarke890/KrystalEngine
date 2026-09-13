@@ -11,7 +11,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLButtonElement);
 
   public:
-    HTMLButtonElement(Document &document) noexcept;
+    HTMLButtonElement(dom::Document &document) noexcept;
 
 #pragma region HTMLButtonElement - https://html.spec.whatwg.org/#htmlbuttonelement
 
@@ -35,10 +35,10 @@ namespace krys::boo::html
     // readonly attribute HTMLFormElement? form;
 
     /// @see https://html.spec.whatwg.org/#dom-button-formaction
-    KRYS_NODISCARD dom::ExceptionOr<USVString> FormAction() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> FormAction() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-formaction
-    dom::ExceptionOr<void> FormAction(USVString &&value) noexcept;
+    dom::ExceptionOr<void> FormAction(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-formenctype
     KRYS_NODISCARD dom::DOMString EncType() const noexcept;

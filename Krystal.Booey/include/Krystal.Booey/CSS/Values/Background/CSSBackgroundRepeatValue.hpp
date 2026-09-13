@@ -9,7 +9,8 @@ namespace krys::boo::css
   class CSSBackgroundRepeatValue final : public CSSValue
   {
   public:
-    KRYS_NODISCARD static Ref<CSSBackgroundRepeatValue> Create(CSSValueId repeatX, CSSValueId repeatY) noexcept;
+    KRYS_NODISCARD static Ref<CSSBackgroundRepeatValue> Create(css::ValueId repeatX,
+                                                               css::ValueId repeatY) noexcept;
   };
 }
 

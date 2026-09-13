@@ -1,9 +1,10 @@
-﻿#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
-#include "Krystal.Booey/HTML/HTMLDListElement.hpp"
+﻿#include "Krystal.Booey/HTML/HTMLDListElement.hpp"
+#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 
 namespace krys::boo::html
 {
-  HTMLDListElement::HTMLDListElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::DList)
+  HTMLDListElement::HTMLDListElement(dom::Document &document) noexcept
+      : HTMLElement(document, HTMLElementInterface::DList)
   {
   }
 
@@ -11,12 +12,12 @@ namespace krys::boo::html
 
   bool HTMLDListElement::Compact() const noexcept
   {
-    return Attributes::Reflection::Reflect<bool>(*this, u8"compact");
+    return Reflection::Reflect<bool>(*this, u8"compact");
   }
 
   void HTMLDListElement::Compact(bool value) noexcept
   {
-    Attributes::Reflection::Reflect<bool>(*this, u8"compact", krys::move(value));
+    Reflection::Reflect<bool>(*this, u8"compact", krys::move(value));
   }
 
 #pragma endregion

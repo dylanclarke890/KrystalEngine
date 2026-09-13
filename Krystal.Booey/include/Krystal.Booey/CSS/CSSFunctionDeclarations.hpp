@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/CSSRule.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSInternalStyleProperties.hpp"
+#include "Krystal.Booey/CSS/Properties/InternalStyleProperties.hpp"
 
 namespace krys::boo::css
 {
@@ -14,9 +14,9 @@ namespace krys::boo::css
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CSSFunctionDeclarations);
 
   protected:
-    Ref<CSSInternalStyleProperties> _style;
+    Ref<InternalStyleProperties> _style;
 
-    CSSFunctionDeclarations(Ref<CSSInternalStyleProperties> style, CSSStyleSheet *stylesheet) noexcept
+    CSSFunctionDeclarations(Ref<InternalStyleProperties> style, CSSStyleSheet *stylesheet) noexcept
         : CSSRule(RuleType::FunctionDeclarations, stylesheet), _style(krys::move(style))
     {
     }

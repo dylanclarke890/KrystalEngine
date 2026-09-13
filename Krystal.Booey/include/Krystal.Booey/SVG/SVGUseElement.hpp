@@ -9,7 +9,7 @@ namespace krys::boo::svg
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGUseElement);
 
   public:
-    SVGUseElement(Document &document) noexcept;
+    SVGUseElement(dom::Document &document) noexcept;
   };
 }
 

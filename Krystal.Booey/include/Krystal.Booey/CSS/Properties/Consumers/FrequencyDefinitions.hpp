@@ -8,13 +8,13 @@ namespace krys::boo::css
   struct FrequencyValidator
   {
     KRYS_NODISCARD constexpr static Maybe<FrequencyUnit>
-      Validate(CSSUnitType unitType, CSSPropertyParserState &, CSSPropertyParserOptions) noexcept
+      Validate(CSSUnitType unitType, PropertyParserState &, PropertyParserOptions) noexcept
     {
       return UnitTraits<FrequencyUnit>::Validate(unitType);
     }
 
     template <auto R, typename V>
-    KRYS_NODISCARD static bool IsValid(FrequencyRaw<R, V> raw, CSSPropertyParserOptions) noexcept
+    KRYS_NODISCARD static bool IsValid(FrequencyRaw<R, V> raw, PropertyParserOptions) noexcept
     {
       return IsValidDimensionValue(raw,
                                    [&]

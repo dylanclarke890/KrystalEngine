@@ -12,12 +12,12 @@
 
 namespace krys::boo::html
 {
-  bool RenderBlocking::AllowsAddingRenderBlockingElements(const Document &document) noexcept
+  bool RenderBlocking::AllowsAddingRenderBlockingElements(const dom::Document &document) noexcept
   {
     return document.ContentType() == u8"text/html" && document.Body() == nullptr;
   }
 
-  bool RenderBlocking::IsRenderBlocked(const Document &document) noexcept
+  bool RenderBlocking::IsRenderBlocked(const dom::Document &document) noexcept
   {
     return !document._renderBlockingElements.empty() || AllowsAddingRenderBlockingElements(document);
     // TODO(DOCUMENT, RENDER-BLOCKING): And if the current high resolution time given document's relevant
@@ -25,13 +25,13 @@ namespace krys::boo::html
     // https://html.spec.whatwg.org/#render-blocked
   }
 
-  bool RenderBlocking::IsRenderBlocking(const Element &element, const Document &document) noexcept
+  bool RenderBlocking::IsRenderBlocking(const dom::Element &element, const dom::Document &document) noexcept
   {
     return std::ranges::any_of(document._renderBlockingElements, [&element](const auto &renderBlockingElement)
                                { return renderBlockingElement.get() == &element; });
   }
 
-  void RenderBlocking::BlockRendering(Element &element) noexcept
+  void RenderBlocking::BlockRendering(dom::Element &element) noexcept
   {
     auto &document = element.NodeDocument();
     if (AllowsAddingRenderBlockingElements(document))
@@ -47,7 +47,7 @@ namespace krys::boo::html
     }
   }
 
-  void RenderBlocking::UnblockRendering(Element &element) noexcept
+  void RenderBlocking::UnblockRendering(dom::Element &element) noexcept
   {
     auto &document = element.NodeDocument();
 

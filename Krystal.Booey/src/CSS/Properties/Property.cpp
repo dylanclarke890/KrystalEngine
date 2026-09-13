@@ -1,17 +1,17 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Property.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyShorthand.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
 
 namespace krys::boo::css
 {
-  CSSPropertyId PropertyMetadata::ShorthandId() const noexcept
+  PropertyId PropertyMetadata::ShorthandId() const noexcept
   {
-    if (!HasFlag(Flags, CSSPropertyFlag::SetFromShorthand))
+    if (!HasFlag(Flags, PropertyFlag::SetFromShorthand))
     {
-      return CSSPropertyId::Invalid;
+      return PropertyId::Invalid;
     }
 
     auto shorthands = MatchingShorthandsForLonghand(Id);
-    assert(shorthands.size() && ShorthandIndex < shorthands.size());
+    krys_debug_assert(shorthands.size() && ShorthandIndex < shorthands.size());
 
     return shorthands[ShorthandIndex].Id();
   }

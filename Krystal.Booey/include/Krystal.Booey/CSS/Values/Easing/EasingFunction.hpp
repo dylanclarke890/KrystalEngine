@@ -12,19 +12,19 @@ namespace krys::boo::css
   {
     Variant<
       // <linear()>
-      Keywords::Linear, // Equivalent to linear(0, 1)
+      keywords::Linear, // Equivalent to linear(0, 1)
       LinearEasingFunction,
 
       // <cubic-bezier()>
-      Keywords::Ease,      // Equivalent to cubic-bezier(0.25, 0.1, 0.25, 1)
-      Keywords::EaseIn,    // Equivalent to cubic-bezier(0.42, 0, 1, 1)
-      Keywords::EaseOut,   // Equivalent to cubic-bezier(0, 0, 0.58, 1)
-      Keywords::EaseInOut, // Equivalent to cubic-bezier(0.42, 0, 0.58, 1)
+      keywords::Ease,      // Equivalent to cubic-bezier(0.25, 0.1, 0.25, 1)
+      keywords::EaseIn,    // Equivalent to cubic-bezier(0.42, 0, 1, 1)
+      keywords::EaseOut,   // Equivalent to cubic-bezier(0, 0, 0.58, 1)
+      keywords::EaseInOut, // Equivalent to cubic-bezier(0.42, 0, 0.58, 1)
       CubicBezierEasingFunction,
 
       // <steps()>
-      Keywords::StepStart, // Equivalent to steps(1, start)
-      Keywords::StepEnd,   // Equivalent to steps(1, end)
+      keywords::StepStart, // Equivalent to steps(1, start)
+      keywords::StepEnd,   // Equivalent to steps(1, end)
       StepsEasingFunction,
 
       // <spring()>

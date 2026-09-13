@@ -8,7 +8,7 @@ namespace krys::boo::css
   struct LengthPercentageValidator
   {
     KRYS_NODISCARD constexpr static Maybe<LengthPercentageUnit>
-      Validate(CSSUnitType unitType, CSSPropertyParserState &state, CSSPropertyParserOptions options) noexcept
+      Validate(CSSUnitType unitType, PropertyParserState &state, PropertyParserOptions options) noexcept
     {
       // NOTE: Percentages are handled explicitly by the PercentageValidator, so this only
       // needs to be concerned with the Length units.
@@ -21,14 +21,14 @@ namespace krys::boo::css
     }
 
     template <auto R, typename V>
-    KRYS_NODISCARD static bool IsValid(LengthPercentageRaw<R, V> raw, CSSPropertyParserOptions) noexcept
+    KRYS_NODISCARD static bool IsValid(LengthPercentageRaw<R, V> raw, PropertyParserOptions) noexcept
     {
       // Values other than 0 and +/-∞ are not supported for <length-percentage> numeric ranges currently.
       return IsValidNonCanonicalizableDimensionValue(raw);
     }
 
-    KRYS_NODISCARD static bool ShouldAcceptUnitlessValue(double value, CSSPropertyParserState &state,
-                                                         CSSPropertyParserOptions options) noexcept
+    KRYS_NODISCARD static bool ShouldAcceptUnitlessValue(double value, PropertyParserState &state,
+                                                         PropertyParserOptions options) noexcept
     {
       return LengthValidator::ShouldAcceptUnitlessValue(value, state, options);
     }

@@ -9,7 +9,7 @@
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 
-namespace krys::boo::dom::Mixins
+namespace krys::boo::dom::mixins
 {
   ExceptionOr<Ref<Node>> ParentNode::ConvertNodesIntoNode(const List<NodeOrString> &nodes,
                                                           Document &document) noexcept
@@ -68,7 +68,7 @@ namespace krys::boo::dom::Mixins
 
   size_t ParentNode::ChildElementCount(const ContainerNode &node) noexcept
   {
-    return krys::boo::Count(ConstChildElementRange(node));
+    return krys::boo::dom::Count(ConstChildElementRange(node));
   }
 
   ExceptionOr<void> ParentNode::Prepend(ContainerNode &parent, const List<NodeOrString> &nodes) noexcept

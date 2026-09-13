@@ -1,25 +1,23 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/MicroParserResult.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Text/ASCII.hpp"
 #include <charconv>
 
-namespace krys::boo::html::MicroParsers
+namespace krys::boo::html
 {
   /// @see https://html.spec.whatwg.org/#numbers
   class Numbers
   {
   public:
-    using position_variable = StringAlgorithms::position_variable;
+    using position_variable = infra::StringAlgorithms::position_variable;
 
     /// @see https://html.spec.whatwg.org/#rules-for-parsing-integers
     KRYS_NODISCARD static MicroParserResult<int64> ParseInteger(dom::DOMStringView input) noexcept
     {
       position_variable position = input.begin();
-      StringAlgorithms::SkipWhitespace(input, position);
+      infra::StringAlgorithms::SkipWhitespace(input, position);
 
       if (position == input.end())
       {
@@ -42,7 +40,7 @@ namespace krys::boo::html::MicroParsers
         return {.Error = MicroParserError::UnexpectedEndOfInput};
       }
 
-      if (!krys::Text::IsASCIIDigit(*position))
+      if (!krys::text::IsASCIIDigit(*position))
       {
         return {.Error = MicroParserError::InvalidCharacter};
       }
@@ -60,7 +58,7 @@ namespace krys::boo::html::MicroParsers
     KRYS_NODISCARD static MicroParserResult<uint64> ParseNonNegativeInteger(dom::DOMStringView input) noexcept
     {
       position_variable position = input.begin();
-      StringAlgorithms::SkipWhitespace(input, position);
+      infra::StringAlgorithms::SkipWhitespace(input, position);
 
       if (position == input.end())
       {
@@ -81,7 +79,7 @@ namespace krys::boo::html::MicroParsers
         return {.Error = MicroParserError::UnexpectedEndOfInput};
       }
 
-      if (!krys::Text::IsASCIIDigit(*position))
+      if (!krys::text::IsASCIIDigit(*position))
       {
         return {.Error = MicroParserError::InvalidCharacter};
       }
@@ -96,7 +94,7 @@ namespace krys::boo::html::MicroParsers
       constexpr char Exponent = 'e';
 
       position_variable position = input.begin();
-      StringAlgorithms::SkipWhitespace(input, position);
+      infra::StringAlgorithms::SkipWhitespace(input, position);
 
       if (position == input.end())
       {
@@ -130,7 +128,7 @@ namespace krys::boo::html::MicroParsers
 
     template <Number T>
     KRYS_NODISCARD static MicroParserResult<T> ParseNumber(Numbers::position_variable &position,
-                                                            dom::DOMStringView &input)
+                                                           dom::DOMStringView &input)
     {
       const char *from = reinterpret_cast<const char *>(&*position);
 
@@ -140,17 +138,18 @@ namespace krys::boo::html::MicroParsers
         constexpr char Exponent = 'e';
         constexpr char Plus = '+';
         constexpr char Minus = '-';
-        StringAlgorithms::AdvancePositionWhile(input, position,
-                                               [&](char8 c)
-                                               {
-                                                 return c == DecimalPoint || c == Plus || c == Minus
-                                                        || krys::Text::ToASCIILowerUnchecked(c) == Exponent
-                                                        || krys::Text::IsASCIIDigit<char8>(c);
-                                               });
+        infra::StringAlgorithms::AdvancePositionWhile(input, position,
+                                                      [&](char8 c)
+                                                      {
+                                                        return c == DecimalPoint || c == Plus || c == Minus
+                                                               || krys::text::ToASCIILowerUnchecked(c)
+                                                                    == Exponent
+                                                               || krys::text::IsASCIIDigit<char8>(c);
+                                                      });
       }
       else
       {
-        StringAlgorithms::AdvancePositionWhile(input, position, krys::Text::IsASCIIDigit<char8>);
+        infra::StringAlgorithms::AdvancePositionWhile(input, position, krys::text::IsASCIIDigit<char8>);
       }
 
       const char *to = reinterpret_cast<const char *>(input.data() + std::distance(input.begin(), position));

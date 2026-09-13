@@ -3,13 +3,13 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumer.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/NumberDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSRatioValue.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
-  Maybe<Ratio> ConsumeUnresolvedRatio(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  Maybe<Ratio> ConsumeUnresolvedRatio(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <ratio> = <number [0,∞]> [ / <number [0,∞]> ]?
     // https://drafts.csswg.org/css-values-4/#ratio-value
@@ -39,7 +39,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   Maybe<Ratio> ConsumeUnresolvedRatioWithBothNumeratorAndDenominator(TokenRange &tokens,
-                                                                     CSSPropertyParserState &state) noexcept
+                                                                     PropertyParserState &state) noexcept
   {
     // <ratio> = <number [0,∞]> [ / <number [0,∞]> ]?
     // https://drafts.csswg.org/css-values-4/#ratio-value
@@ -67,7 +67,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return Ratio {krys::move(*numerator), krys::move(*denominator)};
   }
 
-  RefPtr<CSSValue> ConsumeRatio(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeRatio(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     if (auto ratio = ConsumeUnresolvedRatio(tokens, state))
     {
@@ -78,7 +78,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   RefPtr<CSSValue> ConsumeRatioWithBothNumeratorAndDenominator(TokenRange &tokens,
-                                                               CSSPropertyParserState &state) noexcept
+                                                               PropertyParserState &state) noexcept
   {
     if (auto ratio = ConsumeUnresolvedRatioWithBothNumeratorAndDenominator(tokens, state))
     {

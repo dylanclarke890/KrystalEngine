@@ -1,11 +1,11 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Anchor.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValuePair.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
   // <position-area> syntax, rewritten for expository purpose:
   //
@@ -85,84 +85,84 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       Axisless
     };
 
-    KRYS_NODISCARD Maybe<KeywordType> GetKeywordType(CSSValueId id) noexcept
+    KRYS_NODISCARD Maybe<KeywordType> GetKeywordType(ValueId id) noexcept
     {
       switch (id)
       {
-        case CSSValueId::Left:
-        case CSSValueId::Right:
-        case CSSValueId::SpanLeft:
-        case CSSValueId::SpanRight:
-        case CSSValueId::XStart:
-        case CSSValueId::XEnd:
-        case CSSValueId::SpanXStart:
-        case CSSValueId::SpanXEnd:
-        case CSSValueId::SelfXStart:
-        case CSSValueId::SelfXEnd:
-        case CSSValueId::SpanSelfXStart:
-        case CSSValueId::SpanSelfXEnd:
+        case ValueId::Left:
+        case ValueId::Right:
+        case ValueId::SpanLeft:
+        case ValueId::SpanRight:
+        case ValueId::XStart:
+        case ValueId::XEnd:
+        case ValueId::SpanXStart:
+        case ValueId::SpanXEnd:
+        case ValueId::SelfXStart:
+        case ValueId::SelfXEnd:
+        case ValueId::SpanSelfXStart:
+        case ValueId::SpanSelfXEnd:
         {
           return KeywordType::PhysicalX;
         }
-        case CSSValueId::Top:
-        case CSSValueId::Bottom:
-        case CSSValueId::SpanTop:
-        case CSSValueId::SpanBottom:
-        case CSSValueId::YStart:
-        case CSSValueId::YEnd:
-        case CSSValueId::SpanYStart:
-        case CSSValueId::SpanYEnd:
-        case CSSValueId::SelfYStart:
-        case CSSValueId::SelfYEnd:
-        case CSSValueId::SpanSelfYStart:
-        case CSSValueId::SpanSelfYEnd:
+        case ValueId::Top:
+        case ValueId::Bottom:
+        case ValueId::SpanTop:
+        case ValueId::SpanBottom:
+        case ValueId::YStart:
+        case ValueId::YEnd:
+        case ValueId::SpanYStart:
+        case ValueId::SpanYEnd:
+        case ValueId::SelfYStart:
+        case ValueId::SelfYEnd:
+        case ValueId::SpanSelfYStart:
+        case ValueId::SpanSelfYEnd:
         {
           return KeywordType::PhysicalY;
         }
-        case CSSValueId::BlockStart:
-        case CSSValueId::BlockEnd:
-        case CSSValueId::SpanBlockStart:
-        case CSSValueId::SpanBlockEnd:
+        case ValueId::BlockStart:
+        case ValueId::BlockEnd:
+        case ValueId::SpanBlockStart:
+        case ValueId::SpanBlockEnd:
         {
           return KeywordType::LogicalBlock;
         }
-        case CSSValueId::InlineStart:
-        case CSSValueId::InlineEnd:
-        case CSSValueId::SpanInlineStart:
-        case CSSValueId::SpanInlineEnd:
+        case ValueId::InlineStart:
+        case ValueId::InlineEnd:
+        case ValueId::SpanInlineStart:
+        case ValueId::SpanInlineEnd:
         {
           return KeywordType::LogicalInline;
         }
-        case CSSValueId::SelfBlockStart:
-        case CSSValueId::SelfBlockEnd:
-        case CSSValueId::SpanSelfBlockStart:
-        case CSSValueId::SpanSelfBlockEnd:
+        case ValueId::SelfBlockStart:
+        case ValueId::SelfBlockEnd:
+        case ValueId::SpanSelfBlockStart:
+        case ValueId::SpanSelfBlockEnd:
         {
           return KeywordType::SelfLogicalBlock;
         }
-        case CSSValueId::SelfInlineStart:
-        case CSSValueId::SelfInlineEnd:
-        case CSSValueId::SpanSelfInlineStart:
-        case CSSValueId::SpanSelfInlineEnd:
+        case ValueId::SelfInlineStart:
+        case ValueId::SelfInlineEnd:
+        case ValueId::SpanSelfInlineStart:
+        case ValueId::SpanSelfInlineEnd:
         {
           return KeywordType::SelfLogicalInline;
         }
-        case CSSValueId::Start:
-        case CSSValueId::End:
-        case CSSValueId::SpanStart:
-        case CSSValueId::SpanEnd:
+        case ValueId::Start:
+        case ValueId::End:
+        case ValueId::SpanStart:
+        case ValueId::SpanEnd:
         {
           return KeywordType::Ambiguous;
         }
-        case CSSValueId::SelfStart:
-        case CSSValueId::SelfEnd:
-        case CSSValueId::SpanSelfStart:
-        case CSSValueId::SpanSelfEnd:
+        case ValueId::SelfStart:
+        case ValueId::SelfEnd:
+        case ValueId::SpanSelfStart:
+        case ValueId::SpanSelfEnd:
         {
           return KeywordType::SelfAmbiguous;
         }
-        case CSSValueId::Center:
-        case CSSValueId::SpanAll:
+        case ValueId::Center:
+        case ValueId::SpanAll:
         {
           return KeywordType::Axisless;
         }
@@ -278,31 +278,31 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       }
     }
 
-    KRYS_NODISCARD CSSValueId MakeAmbiguous(CSSValueId dim) noexcept
+    KRYS_NODISCARD ValueId MakeAmbiguous(ValueId dim) noexcept
     {
       switch (dim)
       {
-        case CSSValueId::BlockStart:          return CSSValueId::Start;
-        case CSSValueId::SpanBlockStart:      return CSSValueId::SpanStart;
-        case CSSValueId::SelfBlockStart:      return CSSValueId::SelfStart;
-        case CSSValueId::SpanSelfBlockStart:  return CSSValueId::SpanSelfStart;
+        case ValueId::BlockStart:          return ValueId::Start;
+        case ValueId::SpanBlockStart:      return ValueId::SpanStart;
+        case ValueId::SelfBlockStart:      return ValueId::SelfStart;
+        case ValueId::SpanSelfBlockStart:  return ValueId::SpanSelfStart;
 
-        case CSSValueId::BlockEnd:            return CSSValueId::End;
-        case CSSValueId::SpanBlockEnd:        return CSSValueId::SpanEnd;
-        case CSSValueId::SelfBlockEnd:        return CSSValueId::SelfEnd;
-        case CSSValueId::SpanSelfBlockEnd:    return CSSValueId::SpanSelfEnd;
+        case ValueId::BlockEnd:            return ValueId::End;
+        case ValueId::SpanBlockEnd:        return ValueId::SpanEnd;
+        case ValueId::SelfBlockEnd:        return ValueId::SelfEnd;
+        case ValueId::SpanSelfBlockEnd:    return ValueId::SpanSelfEnd;
 
-        case CSSValueId::InlineStart:         return CSSValueId::Start;
-        case CSSValueId::SpanInlineStart:     return CSSValueId::SpanStart;
-        case CSSValueId::SelfInlineStart:     return CSSValueId::SelfStart;
-        case CSSValueId::SpanSelfInlineStart: return CSSValueId::SpanSelfStart;
+        case ValueId::InlineStart:         return ValueId::Start;
+        case ValueId::SpanInlineStart:     return ValueId::SpanStart;
+        case ValueId::SelfInlineStart:     return ValueId::SelfStart;
+        case ValueId::SpanSelfInlineStart: return ValueId::SpanSelfStart;
 
-        case CSSValueId::InlineEnd:           return CSSValueId::End;
-        case CSSValueId::SpanInlineEnd:       return CSSValueId::SpanEnd;
-        case CSSValueId::SelfInlineEnd:       return CSSValueId::SelfEnd;
-        case CSSValueId::SpanSelfInlineEnd:   return CSSValueId::SpanSelfEnd;
+        case ValueId::InlineEnd:           return ValueId::End;
+        case ValueId::SpanInlineEnd:       return ValueId::SpanEnd;
+        case ValueId::SelfInlineEnd:       return ValueId::SelfEnd;
+        case ValueId::SpanSelfInlineEnd:   return ValueId::SpanSelfEnd;
 
-        case CSSValueId::Center:              return CSSValueId::Center;
+        case ValueId::Center:              return ValueId::Center;
 
         default:
         {
@@ -313,7 +313,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     }
   }
 
-  RefPtr<CSSValue> ValueForPositionArea(CSSValueId dim1, CSSValueId dim2, ValueType context) noexcept
+  RefPtr<CSSValue> ValueForPositionArea(ValueId dim1, ValueId dim2, ValueType context) noexcept
   {
     auto maybeDim1Type = GetKeywordType(dim1);
     if (!maybeDim1Type)
@@ -334,12 +334,12 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       return nullptr;
     }
 
-    if (dim1 == CSSValueId::SpanAll && IsTypeAxisExplicit(dim2Type))
+    if (dim1 == ValueId::SpanAll && IsTypeAxisExplicit(dim2Type))
     {
       return CSSPrimitiveValue::Create(dim2);
     }
 
-    if (IsTypeAxisExplicit(dim1Type) && dim2 == CSSValueId::SpanAll)
+    if (IsTypeAxisExplicit(dim1Type) && dim2 == ValueId::SpanAll)
     {
       return CSSPrimitiveValue::Create(dim1);
     }
@@ -372,7 +372,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return CSSValuePair::Create(CSSPrimitiveValue::Create(dim1), CSSPrimitiveValue::Create(dim2));
   }
 
-  RefPtr<CSSValue> ConsumePositionArea(TokenRange &tokens, CSSPropertyParserState &) noexcept
+  RefPtr<CSSValue> ConsumePositionArea(TokenRange &tokens, PropertyParserState &) noexcept
   {
     // <'position-area'> = none | <position-area>
     // https://drafts.csswg.org/css-anchor-position-1/#propdef-position-area
@@ -384,9 +384,9 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     }
 
     auto dim1 = *maybeDim1;
-    if (dim1 == CSSValueId::None)
+    if (dim1 == ValueId::None)
     {
-      return CSSPrimitiveValue::Create(CSSValueId::None);
+      return CSSPrimitiveValue::Create(ValueId::None);
     }
 
     auto maybeDim2 = ConsumeIdentRaw(tokens);

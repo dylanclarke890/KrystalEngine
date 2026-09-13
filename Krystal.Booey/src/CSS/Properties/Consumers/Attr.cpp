@@ -1,13 +1,13 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Attr.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/CSSAttrValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
-  RefPtr<CSSValue> ConsumeAttr(TokenRange tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeAttr(TokenRange tokens, PropertyParserState &state) noexcept
   {
     // Standard says this should be:
     //

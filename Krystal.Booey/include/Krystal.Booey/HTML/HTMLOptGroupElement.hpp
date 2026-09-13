@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLOptGroupElement);
 
   public:
-    HTMLOptGroupElement(Document &document) noexcept;
+    HTMLOptGroupElement(dom::Document &document) noexcept;
 
 #pragma region HTMLOptGroupElement - https://html.spec.whatwg.org/#htmloptgroupelement
 

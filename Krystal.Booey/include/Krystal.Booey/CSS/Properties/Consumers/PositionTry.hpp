@@ -5,14 +5,14 @@
 namespace krys::boo::css
 {
   class TokenRange;
-  struct CSSPropertyParserState;
+  struct PropertyParserState;
   class CSSValue;
 
-  namespace CSSPropertyParserHelpers
+  namespace PropertyParserHelpers
   {
     // MARK: <'position-try-fallbacks'>
     // https://drafts.csswg.org/css-anchor-position-1/#propdef-position-try-fallbacks
     KRYS_NODISCARD RefPtr<CSSValue> ConsumePositionTryFallbacks(TokenRange &tokens,
-                                                                CSSPropertyParserState &state) noexcept;
+                                                                PropertyParserState &state) noexcept;
   }
 }

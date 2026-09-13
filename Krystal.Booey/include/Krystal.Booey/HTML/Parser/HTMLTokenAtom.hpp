@@ -18,7 +18,7 @@ namespace krys::boo::html
     bool _isSelfClosing : 1 {false};
     bool _selfClosingTagAcknowledged : 1 {false};
     bool _dataReleased : 1 {false};
-    dom::DOMStringAtom _name {DOMStringAtom::Null()};
+    dom::DOMStringAtom _name {dom::DOMStringAtom::Null()};
     UniquePtr<DoctypeData> _doctypeData;
     dom::DOMString _data;
     ParsedAttributeList _attributes;

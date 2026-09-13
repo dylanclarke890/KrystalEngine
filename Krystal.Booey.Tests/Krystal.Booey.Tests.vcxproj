@@ -187,7 +187,7 @@
     <ClCompile Include="catch_main.cpp" />
     <ClCompile Include="tests\CSS\Parser\Parser.cpp" />
     <ClCompile Include="tests\CSS\Parser\Tokenizer.cpp" />
-    <ClCompile Include="tests\CSS\Selectors\CSSSelectorParser.cpp" />
+    <ClCompile Include="tests\CSS\Selectors\SelectorParser.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\EventDispatcher.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\MutationAlgorithms.cpp" />
     <ClCompile Include="tests\DOM\Internals\QualifiedNameCache.cpp" />
@@ -202,7 +202,7 @@
     <ClCompile Include="tests\HTML\Attributes\Reflection.cpp" />
     <ClCompile Include="tests\HTML\MicroParsers\Numbers.cpp" />
     <ClCompile Include="tests\HTML\Parser\HTMLDocumentParser.cpp" />
-    <ClCompile Include="tests\HTML\Parser\HTMLTokenizer.cpp" />
+    <ClCompile Include="tests\HTML\Parser\Tokenizer.cpp" />
     <ClCompile Include="tests\HTML\Parser\Loader\HTMLEncodingSniffer.cpp" />
     <ClCompile Include="tests\HTML\Parser\Loader\TextResourceDecoder.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\NameValidation.cpp" />
@@ -225,7 +225,7 @@
     <ClCompile Include="tests\DOM\ProcessingInstruction.cpp" />
     <ClCompile Include="tests\DOM\Text.cpp" />
     <ClCompile Include="tests\HTML\Parser\HTMLCharacterReference.cpp" />
-    <ClCompile Include="tests\HTML\Parser\HTMLInputStream.cpp" />
+    <ClCompile Include="tests\HTML\Parser\InputStream.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\TreeQueries.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\OrderedSet.cpp" />
     <ClCompile Include="tests\Infra\StringAlgorithms.cpp" />

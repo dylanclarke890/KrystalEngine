@@ -3,10 +3,8 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::dom::tests
 {
-  using namespace krys::boo;
-
   TEST_CASE("BoundaryPoint::ComparePositionTo", "[HTML][BoundaryPoint]")
   {
     auto document = CreateRef<Document>();

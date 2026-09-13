@@ -1,13 +1,13 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Display.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
   // Keep in sync with the single keyword value fast path of CSSParserFastPaths's parseDisplay.
-  RefPtr<CSSValue> ConsumeDisplay(TokenRange &range, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeDisplay(TokenRange &range, PropertyParserState &state) noexcept
   {
     // <'display'>        = [ <display-outside> || <display-inside> ] | <display-listitem> |
     // <display-internal> | <display-box> | <display-legacy> <display-outside>  = block | inline | run-in
@@ -26,30 +26,30 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     // Parse single keyword values
     auto singleKeyword = [&]()
     {
-      if (state.Context.gridLanesEnabled && range.Peek().ValueId() == CSSValueId::InlineGridLanes)
+      if (state.Context.gridLanesEnabled && range.Peek().ValueId() == ValueId::InlineGridLanes)
       {
         return ConsumeIdent(range);
       }
 
       return ConsumeIdent<
         // <display-box>
-        CSSValueId::Contents, CSSValueId::None,
+        ValueId::Contents, ValueId::None,
         // <display-internal>
-        CSSValueId::TableCaption, CSSValueId::TableCell, CSSValueId::TableColumnGroup,
-        CSSValueId::TableColumn, CSSValueId::TableHeaderGroup, CSSValueId::TableFooterGroup,
-        CSSValueId::TableRow, CSSValueId::TableRowGroup, CSSValueId::RubyBase, CSSValueId::RubyText,
+        ValueId::TableCaption, ValueId::TableCell, ValueId::TableColumnGroup,
+        ValueId::TableColumn, ValueId::TableHeaderGroup, ValueId::TableFooterGroup,
+        ValueId::TableRow, ValueId::TableRowGroup, ValueId::RubyBase, ValueId::RubyText,
         // <display-legacy>
-        CSSValueId::InlineBlock, CSSValueId::InlineFlex, CSSValueId::InlineGrid, CSSValueId::InlineTable,
+        ValueId::InlineBlock, ValueId::InlineFlex, ValueId::InlineGrid, ValueId::InlineTable,
         // Prefixed values
-        CSSValueId::WebkitInlineBox, CSSValueId::WebkitBox,
+        ValueId::WebkitInlineBox, ValueId::WebkitBox,
         // No layout support for the full <display-listitem> syntax, so treat it as <display-legacy>
-        CSSValueId::ListItem>(range);
+        ValueId::ListItem>(range);
     }();
 
-    auto AllowsValue = [&](CSSValueId value)
+    auto AllowsValue = [&](ValueId value)
     {
-      bool isRuby = value == CSSValueId::RubyBase || value == CSSValueId::RubyText
-                    || value == CSSValueId::BlockRuby || value == CSSValueId::Ruby;
+      bool isRuby = value == ValueId::RubyBase || value == ValueId::RubyText
+                    || value == ValueId::BlockRuby || value == ValueId::Ruby;
       return !isRuby || IsUASheetBehavior(state.Context.Mode);
     };
 
@@ -70,25 +70,25 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     }
 
     // Convert -webkit-flex/-webkit-inline-flex to flex/inline-flex
-    CSSValueId nextValueId = range.Peek().ValueId();
-    if (nextValueId == CSSValueId::WebkitInlineFlex || nextValueId == CSSValueId::WebkitFlex)
+    ValueId nextValueId = range.Peek().ValueId();
+    if (nextValueId == ValueId::WebkitInlineFlex || nextValueId == ValueId::WebkitFlex)
     {
       DiscardIdent(range);
-      return CSSPrimitiveValue::Create(nextValueId == CSSValueId::WebkitInlineFlex ? CSSValueId::InlineFlex
-                                                                                   : CSSValueId::Flex);
+      return CSSPrimitiveValue::Create(nextValueId == ValueId::WebkitInlineFlex ? ValueId::InlineFlex
+                                                                                   : ValueId::Flex);
     }
 
     // Parse [ <display-outside> || <display-inside> ]
-    Maybe<CSSValueId> parsedDisplayOutside;
-    Maybe<CSSValueId> parsedDisplayInside;
+    Maybe<ValueId> parsedDisplayOutside;
+    Maybe<ValueId> parsedDisplayInside;
     while (!range.IsAtEnd())
     {
       auto nextValueId = range.Peek().ValueId();
       switch (nextValueId)
       {
         // <display-outside>
-        case CSSValueId::Block:
-        case CSSValueId::Inline:
+        case ValueId::Block:
+        case ValueId::Inline:
         {
           if (parsedDisplayOutside)
           {
@@ -99,7 +99,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
           break;
         }
         // <display-inside>
-        case CSSValueId::GridLanes:
+        case ValueId::GridLanes:
         {
           if (!state.Context.gridLanesEnabled)
           {
@@ -108,12 +108,12 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
           KRYS_FALLTHROUGH;
         }
-        case CSSValueId::Flex:
-        case CSSValueId::Flow:
-        case CSSValueId::FlowRoot:
-        case CSSValueId::Grid:
-        case CSSValueId::Table:
-        case CSSValueId::Ruby:
+        case ValueId::Flex:
+        case ValueId::Flow:
+        case ValueId::FlowRoot:
+        case ValueId::Grid:
+        case ValueId::Table:
+        case ValueId::Ruby:
         {
           if (parsedDisplayInside)
           {
@@ -133,29 +133,29 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     }
 
     // Set defaults when one of the two values are unspecified
-    CSSValueId displayInside = parsedDisplayInside.value_or(CSSValueId::Flow);
+    ValueId displayInside = parsedDisplayInside.value_or(ValueId::Flow);
 
-    auto SelectShortValue = [&]() -> CSSValueId
+    auto SelectShortValue = [&]() -> ValueId
     {
-      if (!parsedDisplayOutside || *parsedDisplayOutside == CSSValueId::Inline)
+      if (!parsedDisplayOutside || *parsedDisplayOutside == ValueId::Inline)
       {
-        if (displayInside == CSSValueId::Ruby)
+        if (displayInside == ValueId::Ruby)
         {
-          return CSSValueId::Ruby;
+          return ValueId::Ruby;
         }
       }
 
-      if (!parsedDisplayOutside || *parsedDisplayOutside == CSSValueId::Block)
+      if (!parsedDisplayOutside || *parsedDisplayOutside == ValueId::Block)
       {
         // Alias display: flow to display: block
-        if (displayInside == CSSValueId::Flow)
+        if (displayInside == ValueId::Flow)
         {
-          return CSSValueId::Block;
+          return ValueId::Block;
         }
 
-        if (displayInside == CSSValueId::Ruby)
+        if (displayInside == ValueId::Ruby)
         {
-          return CSSValueId::BlockRuby;
+          return ValueId::BlockRuby;
         }
 
         return displayInside;
@@ -164,34 +164,34 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       // Convert `display: inline <display-inside>` to the equivalent short value
       switch (displayInside)
       {
-        case CSSValueId::Flex:
+        case ValueId::Flex:
         {
-          return CSSValueId::InlineFlex;
+          return ValueId::InlineFlex;
         }
-        case CSSValueId::Flow:
+        case ValueId::Flow:
         {
-          return CSSValueId::Inline;
+          return ValueId::Inline;
         }
-        case CSSValueId::FlowRoot:
+        case ValueId::FlowRoot:
         {
-          return CSSValueId::InlineBlock;
+          return ValueId::InlineBlock;
         }
-        case CSSValueId::Grid:
+        case ValueId::Grid:
         {
-          return CSSValueId::InlineGrid;
+          return ValueId::InlineGrid;
         }
-        case CSSValueId::GridLanes:
+        case ValueId::GridLanes:
         {
-          return CSSValueId::InlineGridLanes;
+          return ValueId::InlineGridLanes;
         }
-        case CSSValueId::Table:
+        case ValueId::Table:
         {
-          return CSSValueId::InlineTable;
+          return ValueId::InlineTable;
         }
         default:
         {
           assert(false);
-          return CSSValueId::Inline;
+          return ValueId::Inline;
         }
       }
     };

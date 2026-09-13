@@ -3,7 +3,8 @@
 
 namespace krys::boo::html
 {
-  HTMLMeterElement::HTMLMeterElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Meter)
+  HTMLMeterElement::HTMLMeterElement(dom::Document &document) noexcept
+      : HTMLElement(document, HTMLElementInterface::Meter)
   {
   }
 
@@ -11,62 +12,62 @@ namespace krys::boo::html
 
   double HTMLMeterElement::Value() const noexcept
   {
-    return Attributes::Reflection::Reflect<double>(*this, u8"value");
+    return Reflection::Reflect<double>(*this, u8"value");
   }
 
   void HTMLMeterElement::Value(double value) noexcept
   {
-    Attributes::Reflection::Reflect<double>(*this, u8"value", krys::move(value));
+    Reflection::Reflect<double>(*this, u8"value", krys::move(value));
   }
 
   double HTMLMeterElement::Min() const noexcept
   {
-    return Attributes::Reflection::Reflect<double>(*this, u8"min");
+    return Reflection::Reflect<double>(*this, u8"min");
   }
 
   void HTMLMeterElement::Min(double value) noexcept
   {
-    Attributes::Reflection::Reflect<double>(*this, u8"min", krys::move(value));
+    Reflection::Reflect<double>(*this, u8"min", krys::move(value));
   }
 
   double HTMLMeterElement::Max() const noexcept
   {
-    return Attributes::Reflection::Reflect<double>(*this, u8"max");
+    return Reflection::Reflect<double>(*this, u8"max");
   }
 
   void HTMLMeterElement::Max(double value) noexcept
   {
-    Attributes::Reflection::Reflect<double>(*this, u8"max", krys::move(value));
+    Reflection::Reflect<double>(*this, u8"max", krys::move(value));
   }
 
   double HTMLMeterElement::Low() const noexcept
   {
-    return Attributes::Reflection::Reflect<double>(*this, u8"low");
+    return Reflection::Reflect<double>(*this, u8"low");
   }
 
   void HTMLMeterElement::Low(double value) noexcept
   {
-    Attributes::Reflection::Reflect<double>(*this, u8"low", krys::move(value));
+    Reflection::Reflect<double>(*this, u8"low", krys::move(value));
   }
 
   double HTMLMeterElement::High() const noexcept
   {
-    return Attributes::Reflection::Reflect<double>(*this, u8"high");
+    return Reflection::Reflect<double>(*this, u8"high");
   }
 
   void HTMLMeterElement::High(double value) noexcept
   {
-    Attributes::Reflection::Reflect<double>(*this, u8"high", krys::move(value));
+    Reflection::Reflect<double>(*this, u8"high", krys::move(value));
   }
 
   double HTMLMeterElement::Optimum() const noexcept
   {
-    return Attributes::Reflection::Reflect<double>(*this, u8"optimum");
+    return Reflection::Reflect<double>(*this, u8"optimum");
   }
 
   void HTMLMeterElement::Optimum(double value) noexcept
   {
-    Attributes::Reflection::Reflect<double>(*this, u8"optimum", krys::move(value));
+    Reflection::Reflect<double>(*this, u8"optimum", krys::move(value));
   }
 
 #pragma endregion

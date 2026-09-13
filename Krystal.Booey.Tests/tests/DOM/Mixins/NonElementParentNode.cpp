@@ -9,10 +9,8 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::dom::tests
 {
-  using namespace krys::boo;
-
   TEST_CASE("NonElementParentNode::GetElementById returns the element with the given id if it exists in the "
             "descendants of the node",
             "[NonElementParentNode]")

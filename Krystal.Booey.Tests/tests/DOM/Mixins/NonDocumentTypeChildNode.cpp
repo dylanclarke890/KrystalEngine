@@ -10,10 +10,8 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::dom::tests
 {
-  using namespace krys::boo;
-
   namespace
   {
     struct CommonTestData
@@ -21,7 +19,7 @@ namespace krys::tests
       Ref<Document> Document;
       Ref<Element> Parent;
       Ref<Element> Child1;
-      Ref<HTML::Text> Child2;
+      Ref<krys::boo::dom::Text> Child2;
       Ref<Element> Child3;
 
       CommonTestData()
@@ -49,9 +47,9 @@ namespace krys::tests
   {
     CommonTestData data;
 
-    REQUIRE(Mixins::NonDocumentTypeChildNode::PreviousElementSibling(*data.Child1) == nullptr);
-    REQUIRE(Mixins::NonDocumentTypeChildNode::PreviousElementSibling(*data.Child2) == data.Child1);
-    REQUIRE(Mixins::NonDocumentTypeChildNode::PreviousElementSibling(*data.Child3) == data.Child1);
+    REQUIRE(mixins::NonDocumentTypeChildNode::PreviousElementSibling(*data.Child1) == nullptr);
+    REQUIRE(mixins::NonDocumentTypeChildNode::PreviousElementSibling(*data.Child2) == data.Child1);
+    REQUIRE(mixins::NonDocumentTypeChildNode::PreviousElementSibling(*data.Child3) == data.Child1);
   }
 
   TEST_CASE("NonDocumentTypeChildNode::NextElementSibling returns the first following sibling that is an "
@@ -60,8 +58,8 @@ namespace krys::tests
   {
     CommonTestData data;
 
-    REQUIRE(Mixins::NonDocumentTypeChildNode::NextElementSibling(*data.Child1) == data.Child3);
-    REQUIRE(Mixins::NonDocumentTypeChildNode::NextElementSibling(*data.Child2) == data.Child3);
-    REQUIRE(Mixins::NonDocumentTypeChildNode::NextElementSibling(*data.Child3) == nullptr);
+    REQUIRE(mixins::NonDocumentTypeChildNode::NextElementSibling(*data.Child1) == data.Child3);
+    REQUIRE(mixins::NonDocumentTypeChildNode::NextElementSibling(*data.Child2) == data.Child3);
+    REQUIRE(mixins::NonDocumentTypeChildNode::NextElementSibling(*data.Child3) == nullptr);
   }
 }

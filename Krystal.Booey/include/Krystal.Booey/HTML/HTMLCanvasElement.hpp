@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLCanvasElement);
 
   public:
-    HTMLCanvasElement(Document &document) noexcept;
+    HTMLCanvasElement(dom::Document &document) noexcept;
 
 #pragma region HTMLCanvasElement - https://html.spec.whatwg.org/#htmlcanvaselement
 

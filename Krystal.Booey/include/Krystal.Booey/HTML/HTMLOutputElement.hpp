@@ -10,15 +10,15 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLOutputElement);
 
   private:
-    UniquePtr<DOMTokenList> _htmlFor;
+    UniquePtr<dom::DOMTokenList> _htmlFor;
 
   public:
-    HTMLOutputElement(Document &document) noexcept;
+    HTMLOutputElement(dom::Document &document) noexcept;
 
 #pragma region HTMLOutputElement - https://html.spec.whatwg.org/#htmloutputelement
 
     /// @see https://html.spec.whatwg.org/#dom-output-htmlfor
-    KRYS_NODISCARD DOMTokenList &HtmlFor() noexcept;
+    KRYS_NODISCARD dom::DOMTokenList &HtmlFor() noexcept;
 
     // TODO(HTMLOUTPUT, HTML): Implement the form API.
     // readonly attribute HTMLFormElement? form;

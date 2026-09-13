@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/Enums/CSSValueId.hpp"
+#include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Visitor.hpp"
@@ -11,7 +11,7 @@ namespace krys::boo::css
 {
   /// @brief Concept for use in generic contexts to filter on Constant keyword CSS types.
   template <typename Keyword>
-  concept PrimitiveKeyword = SameType<Keyword, ValueKeywordConstant<Keyword::value>>;
+  concept PrimitiveKeyword = SameType<Keyword, KeywordValueConstant<Keyword::value>>;
 
   /// @brief Concept for use in generic contexts to filter on keywords that are valid for the provided
   /// `Keywords` list.

@@ -7,9 +7,9 @@
 #include <format>
 #include <fstream>
 
-namespace krys::boo::css::tests
+namespace krys::boo::tests
 {
-  KRYS_NODISCARD inline dom::DOMString ToUTF8(const string &s) noexcept
+  KRYS_NODISCARD inline utf8_string ToUTF8(const string &s) noexcept
   {
     return utf8_string(s.begin(), s.end());
   };
@@ -52,7 +52,7 @@ namespace krys::boo::css::tests
     }
   }
 
-  inline void Indent(dom::DOMString &output, size_t depth, dom::DOMString prefix = u8"| ") noexcept
+  inline void Indent(utf8_string &output, size_t depth, utf8_string prefix = u8"| ") noexcept
   {
     output += prefix;
 

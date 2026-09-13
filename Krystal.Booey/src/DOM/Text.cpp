@@ -5,14 +5,14 @@
 namespace krys::boo::dom
 {
   Text::Text(Document &document, DOMString &&data, CDATAConstructorTag) noexcept
-      : CharacterData(document, krys::move(data), HTML::NodeType::CDATA_SECTION_NODE)
+      : CharacterData(document, krys::move(data), dom::NodeType::CDATA_SECTION_NODE)
   {
   }
 
 #pragma region Text
 
   Text::Text(Document &document, DOMString &&data) noexcept
-      : CharacterData(document, krys::move(data), HTML::NodeType::TEXT_NODE)
+      : CharacterData(document, krys::move(data), dom::NodeType::TEXT_NODE)
   {
   }
 
@@ -46,9 +46,9 @@ namespace krys::boo::dom
 
 #pragma region Slottables
 
-  RefPtr<HTMLSlotElement> Text::AssignedSlot() noexcept
+  RefPtr<html::HTMLSlotElement> Text::AssignedSlot() noexcept
   {
-    return Mixins::Slottable::AssignedSlot(*this);
+    return mixins::Slottable::AssignedSlot(*this);
   }
 
 #pragma endregion

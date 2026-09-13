@@ -17,7 +17,7 @@ namespace krys::boo::css
     bool operator==(const DropShadow &) const = default;
   };
 
-  using DropShadowFunction = FunctionNotation<CSSValueId::DropShadow, DropShadow>;
+  using DropShadowFunction = FunctionNotation<ValueId::DropShadow, DropShadow>;
 
   template <size_t I>
   KRYS_NODISCARD const auto &get(const DropShadow &value) noexcept

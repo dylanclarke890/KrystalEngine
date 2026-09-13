@@ -131,27 +131,27 @@ namespace krys::text
     char16 Trail;
   };
 
-  KRYS_NODISCARD constexpr bool IsSurrogate(char16 value) noexcept
+  KRYS_NODISCARD constexpr bool IsSurrogate(char32 value) noexcept
   {
     return value >= FirstSurrogate && value <= LastSurrogate;
   }
 
-  KRYS_NODISCARD constexpr bool IsLeadSurrogate(char16 value) noexcept
+  KRYS_NODISCARD constexpr bool IsLeadSurrogate(char32 value) noexcept
   {
     return value >= FirstLeadSurrogate && value <= LastLeadSurrogate;
   }
 
-  KRYS_NODISCARD constexpr bool IsTrailSurrogate(char16 value) noexcept
+  KRYS_NODISCARD constexpr bool IsTrailSurrogate(char32 value) noexcept
   {
     return value >= FirstTrailSurrogate && value <= LastTrailSurrogate;
   }
 
-  KRYS_NODISCARD constexpr bool IsSingleUTF16(char16 value) noexcept
+  KRYS_NODISCARD constexpr bool IsSingleUTF16(char32 value) noexcept
   {
     return value < FirstLeadSurrogate || value > LastTrailSurrogate;
   }
 
-  KRYS_NODISCARD constexpr bool IsSingleOrLeadUTF16(char16 value) noexcept
+  KRYS_NODISCARD constexpr bool IsSingleOrLeadUTF16(char32 value) noexcept
   {
     return value <= LastLeadSurrogate || value > LastTrailSurrogate;
   }

@@ -4,7 +4,6 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
-#include "Krystal.Text/ASCII.hpp"
 #include <ranges>
 
 namespace krys::boo::dom
@@ -110,13 +109,13 @@ namespace krys::boo::dom
                                                [](const Ref<Attr> &attr) { return attr->Name(); })
                  | std::ranges::to<List<DOMString>>();
 
-    if (_associatedElement->NamespaceURI() == Namespaces::HTML
+    if (_associatedElement->NamespaceURI() == infra::Namespaces::HTML
         && Is<HTMLDocument>(_associatedElement->NodeDocument()))
     {
       List<DOMString> newNames;
       for (auto &name : names)
       {
-        if (name == krys::Text::ToASCIILowercase(name))
+        if (name == krys::text::ToASCIILower(name))
         {
           newNames.push_back(name);
         }

@@ -24,14 +24,15 @@ def generate(args: argparse.Namespace):
     generation_context.generate_css_value_id_gperf()
     run_gperf(
         gperf_executable=args.gperf_executable,
-        filename="CSSValueId",
-        output_cpp_dir=output_cpp_path("CSS/Values/Enums"),
+        filename="ValueId",
+        output_cpp_dir=output_cpp_path("CSS/Values"),
         remove_gperf_file=True,
     )
 
+
 def extract_values_from_file(parsing_context, parsed_values, values_file):
     for line in values_file:
-            # Remove any text after a "//" comment string is started.
+        # Remove any text after a "//" comment string is started.
         index = line.find("//")
         if index != -1:
             line = line[:index]
@@ -39,7 +40,7 @@ def extract_values_from_file(parsing_context, parsed_values, values_file):
             # Remove any trailing whitespace.
         line = line.rstrip()
 
-            # If the line is empty at this point, we can just skip it.
+        # If the line is empty at this point, we can just skip it.
         if not line:
             continue
 
@@ -48,11 +49,11 @@ def extract_values_from_file(parsing_context, parsed_values, values_file):
             # are supported).
         parts = line.split(" ")
 
-            # The first part will always be the name.
+        # The first part will always be the name.
         name = parts[0]
 
-            # There may additionally be attributes of the form "foo=bar" after
-            # the name.
+        # There may additionally be attributes of the form "foo=bar" after
+        # the name.
         conditional = None
         id = None
 
@@ -63,8 +64,8 @@ def extract_values_from_file(parsing_context, parsed_values, values_file):
         if conditional and not parsing_context.is_enabled(conditional=conditional):
             if parsing_context.verbose:
                 print(
-                        f"SKIPPED value {name} due to failing to satisfy 'enable-if' condition, '{conditional}', with active macro set"
-                    )
+                    f"SKIPPED value {name} due to failing to satisfy 'enable-if' condition, '{conditional}', with active macro set"
+                )
             continue
 
         parsed_values.append(Value(name, id, conditional))
@@ -117,7 +118,7 @@ class Value:
 
     @property
     def id(self):
-        return f"CSSValueId::{self.id_without_prefix}"
+        return f"ValueId::{self.id_without_prefix}"
 
 
 def attribute_from_attribute_string(
@@ -151,17 +152,17 @@ class GenerationContext:
     number_of_predefined_values = 1
 
     def generate_css_value_id_hpp(self):
-        with open(output_hpp_path("Krystal.HTML/CSS/Values/Enums/CSSValueId.hpp"), "w") as output_file:
+        with open(output_hpp_path("Krystal.Booey/CSS/Values/ValueId.hpp"), "w") as output_file:
             writer = Writer(output_file)
             writer.hpp_prelude(
                 generator_name=GENERATOR_NAME,
                 headers=[
-                    "Krystal.HTML/CSS/Parser/ParserContext.hpp",
-                    "Krystal.HTML/CSS/Types/CSSOMString.hpp",
+                    "Krystal.Booey/CSS/Parser/Context/ParserContext.hpp",
+                    "Krystal.Booey/CSS/Types/CSSOMString.hpp",
                 ],
             )
 
-            with writer.namespace(namespace="krys::boo"):
+            with writer.namespace(namespace="krys::boo::css"):
                 self._generate_hpp_property_constants(to=writer)
                 self._generate_hpp_forward_declarations(to=writer)
                 self._generate_hpp_constant_aliases(to=writer)
@@ -170,12 +171,12 @@ class GenerationContext:
             with writer.namespace(namespace="krys"):
                 writer.write_block("""\
                     template<> 
-                    struct DefaultHash<::krys::boo::CSSValueId> : IntegerHash<uint16>
+                    struct DefaultHash<::krys::boo::css::ValueId> : IntegerHash<uint16>
                     {
                     };
 
                     template<>
-                    struct HashTraits<::krys::boo::CSSValueId> : StrongEnumHashTraits<::krys::boo::CSSValueId>
+                    struct HashTraits<::krys::boo::css::ValueId> : StrongEnumHashTraits<::krys::boo::css::ValueId>
                     {
                     };""")
             writer.newline()
@@ -183,13 +184,13 @@ class GenerationContext:
             with writer.namespace(namespace="std"):
                 writer.write_block("""\
                     template<>
-                    struct iterator_traits<::krys::boo::AllCSSValueKeywordsRange::Iterator>
+                    struct iterator_traits<::krys::boo::css::AllValueKeywordsRange::Iterator>
                     {
-                      using value_type = ::krys::boo::CSSValueId;
+                      using value_type = ::krys::boo::css::ValueId;
                     };""")
 
     def _generate_hpp_property_constants(self, *, to: Writer):
-        with to.enum_class_block(name="CSSValueId", underlying_type="uint16"):
+        with to.enum_class_block(name="ValueId", underlying_type="uint16"):
             to.enum_member(name="Invalid", value=0)
             count = GenerationContext.number_of_predefined_values
             max_length = 0
@@ -200,29 +201,29 @@ class GenerationContext:
 
         last = count - 1
 
-        to.write(f"constexpr uint16 NumCSSValueKeywords = {count};")
-        to.write(f"constexpr uint16 LastCSSValueKeyword = {last};")
-        to.write(f"constexpr size_t MaxCSSValueKeywordLength = {max_length};")
+        to.write(f"constexpr uint16 TotalValueKeywords = {count};")
+        to.write(f"constexpr uint16 LastValueKeyword = {last};")
+        to.write(f"constexpr size_t MaxValueKeywordLength = {max_length};")
         to.newline()
 
     def _generate_hpp_forward_declarations(self, *, to: Writer):
         to.write_block("""\
-            KRYS_NODISCARD CSSValueId FindCSSValueKeyword(CSSOMStringView characters) noexcept;
+            KRYS_NODISCARD ValueId FindValueKeyword(CSSOMStringView characters) noexcept;
 
-            KRYS_NODISCARD CSSOMStringView ToString(CSSValueId id) noexcept;
+            KRYS_NODISCARD CSSOMStringView ToString(ValueId id) noexcept;
             
             /// @brief When serializing a CSS keyword, it should be converted to ASCII lowercase.
             /// @see https://drafts.csswg.org/cssom/#serialize-a-css-component-value
-            KRYS_NODISCARD CSSOMStringView ToLowercaseString(CSSValueId id) noexcept;
+            KRYS_NODISCARD CSSOMStringView ToLower(ValueId id) noexcept;
 
-            struct AllCSSValueKeywordsRange
+            struct AllValueKeywordsRange
             {
                 struct Iterator
                 {
                     uint16 Index {0u};
-                    constexpr CSSValueId operator*() const noexcept
+                    constexpr ValueId operator*() const noexcept
                     {
-                      return static_cast<CSSValueId>(Index);
+                      return static_cast<ValueId>(Index);
                     }
 
                     constexpr Iterator &operator++() noexcept
@@ -233,7 +234,7 @@ class GenerationContext:
 
                     KRYS_NODISCARD constexpr bool operator==(std::nullptr_t) const noexcept
                     {
-                      return Index >= NumCSSValueKeywords;
+                      return Index >= TotalValueKeywords;
                     }
                 };
 
@@ -249,30 +250,30 @@ class GenerationContext:
 
                 KRYS_NODISCARD constexpr static uint16 size() noexcept
                 {
-                  return NumCSSValueKeywords;
+                  return TotalValueKeywords;
                 }
             };
 
-            KRYS_NODISCARD constexpr AllCSSValueKeywordsRange AllCSSValueKeywords() noexcept
+            KRYS_NODISCARD constexpr AllValueKeywordsRange AllValueKeywords() noexcept
             {
               return {};
             }
             """)
 
     def _generate_hpp_constant_aliases(self, *, to: Writer):
-        with to.template_struct_block(template_signature="CSSValueId C", name="ValueKeywordConstant"):
+        with to.template_struct_block(template_signature="ValueId C", name="KeywordValueConstant"):
             to.write(f"constexpr static auto value = C;")
-            to.write(f"constexpr bool operator==(const ValueKeywordConstant &) const noexcept = default;")
-            to.write(f"constexpr bool operator==(CSSValueId other) const noexcept {{ return value == other; }}")
+            to.write(f"constexpr bool operator==(const KeywordValueConstant &) const noexcept = default;")
+            to.write(f"constexpr bool operator==(ValueId other) const noexcept {{ return value == other; }}")
         to.newline()
 
-        with to.namespace(namespace="Keywords"):
+        with to.namespace(namespace="keywords"):
             for value in self.values:
-                to.write(f"using {value.id_without_prefix} = ValueKeywordConstant<{value.id}>;")
+                to.write(f"using {value.id_without_prefix} = KeywordValueConstant<{value.id}>;")
                 to.newline()
 
     def generate_css_value_id_gperf(self):
-        with open("CSSValueId.gperf", "w") as output_file:
+        with open("ValueId.gperf", "w") as output_file:
             writer = Writer(output_file)
 
             self._generate_gperf_prelude(to=writer)
@@ -284,14 +285,13 @@ class GenerationContext:
     def _generate_gperf_prelude(self, *, to: Writer):
         with to.block(block_start="%{", block_end="%}", indent=False):
             to.cpp_prelude(
-                for_header="Krystal.HTML/CSS/Values/Enums/CSSValueId.hpp",
+                for_header="Krystal.Booey/CSS/Values/ValueId.hpp",
                 generator_name=GENERATOR_NAME,
                 headers=[
-                    "Krystal.HTML/CSS/Parser/ParserContext.hpp",
-                    "Krystal.HTML/CSS/Properties/CSSProperty.hpp",
-                    "Krystal.HTML/CSS/Values/Enums/CSSValueId.hpp",
-                    "Krystal.Lib/String/String.hpp",
-                    "Krystal.Lib/Types/SmallList.hpp",
+                    "Krystal.Booey/CSS/Parser/Context/ParserContext.hpp",
+                    "Krystal.Booey/CSS/Properties/Property.hpp",
+                    "Krystal.Core/Types/SmallList.hpp",
+                    "Krystal.Core/Types/String.hpp",
                 ],
             )
 
@@ -299,14 +299,14 @@ class GenerationContext:
                 // Older versions of gperf like to use the `register` keyword.
                 #define register""")
 
-            to.write("namespace krys::boo")
+            to.write("namespace krys::boo::css")
             to.write("{")
 
     def _generate_gperf_definition(self, *, to: Writer):
         to.newline()
         to.write_block("""\
             %struct-type
-            struct CSSValueHashTableEntry
+            struct ValueHashTableEntry
             {
                 const char* name;
                 uint16 id;
@@ -315,25 +315,25 @@ class GenerationContext:
             %readonly-tables
             %7bit
             %compare-strncmp
-            %define class-name CSSValueKeywordsHash
+            %define class-name ValueKeywordsHash
             %enum""")
 
         to.newline()
 
         to.write("%%")
         for value in self.values:
-            to.write(f"{value.name_lowercase}, {value.id_without_prefix}")
+            to.write(f"{value.name_lowercase}, static_cast<uint16>({value.id})")
         to.write("%%")
 
     def _generate_name_string_tables(self, *, to: Writer):
-        to.write(f"constexpr CSSOMStringView KeywordNamesList[NumCSSValueKeywords] = {{")
+        to.write(f"constexpr CSSOMStringView KeywordNamesList[TotalValueKeywords] = {{")
         with to.indent():
             to.write(f'u8"",')
             for value in self.values:
                 to.write(f'u8"{value.name}",')
         to.write("};")
 
-        to.write(f"constexpr CSSOMStringView KeywordNamesListLowercase[NumCSSValueKeywords] = {{")
+        to.write(f"constexpr CSSOMStringView KeywordNamesListLowercase[TotalValueKeywords] = {{")
         with to.indent():
             to.write(f'u8"",')
             for value in self.values:
@@ -342,28 +342,28 @@ class GenerationContext:
 
     def _generate_lookup_functions(self, *, to: Writer):
         to.write(textwrap.dedent("""
-            CSSValueId FindCSSValueKeyword(CSSOMStringView characters) noexcept
+            ValueId FindValueKeyword(CSSOMStringView characters) noexcept
             {
-                auto* value = CSSValueKeywordsHash::in_word_set(reinterpret_cast<const char*>(characters.data()), characters.size());
-                return value ? static_cast<CSSValueId>(value->id) : CSSValueId::Invalid;
+                auto* value = ValueKeywordsHash::in_word_set(reinterpret_cast<const char*>(characters.data()), characters.size());
+                return value ? static_cast<ValueId>(value->id) : ValueId::Invalid;
             }
 
-            CSSOMStringView ToString(CSSValueId id) noexcept
+            CSSOMStringView ToString(ValueId id) noexcept
             {
-                if (static_cast<uint16>(id) >= NumCSSValueKeywords)
+                if (static_cast<uint16>(id) >= TotalValueKeywords)
                 {
                     return {};
                 }
 
-                return KeywordNamesList[id];
+                return KeywordNamesList[static_cast<uint16>(id)];
             }
 
-            CSSOMStringView ToLowercaseString(CSSValueId id) noexcept
+            CSSOMStringView ToLower(ValueId id) noexcept
             {
-                if (static_cast<uint16>(id) >= NumCSSValueKeywords)
+                if (static_cast<uint16>(id) >= TotalValueKeywords)
                 {
                     return {};
                 }
 
-                return KeywordNamesListLowercase[id];
+                return KeywordNamesListLowercase[static_cast<uint16>(id)];
             }"""))

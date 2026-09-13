@@ -9,14 +9,14 @@ namespace krys::boo::css
 {
   using DeprecatedGradientPosition = SpaceSeparatedArray<NumberOrPercentage<>, 2>;
 
-  using Horizontal = Variant<Keywords::Left, Keywords::Right>;
-  using Vertical = Variant<Keywords::Top, Keywords::Bottom>;
+  using Horizontal = Variant<keywords::Left, keywords::Right>;
+  using Vertical = Variant<keywords::Top, keywords::Bottom>;
 
   using RadialGradientExtent =
-    Variant<Keywords::ClosestCorner, Keywords::ClosestSide, Keywords::FarthestCorner, Keywords::FarthestSide>;
+    Variant<keywords::ClosestCorner, keywords::ClosestSide, keywords::FarthestCorner, keywords::FarthestSide>;
   using PrefixedRadialGradientExtent =
-    Variant<Keywords::ClosestCorner, Keywords::ClosestSide, Keywords::FarthestCorner, Keywords::FarthestSide,
-            Keywords::Contain, Keywords::Cover>;
+    Variant<keywords::ClosestCorner, keywords::ClosestSide, keywords::FarthestCorner, keywords::FarthestSide,
+            keywords::Contain, keywords::Cover>;
 
   // MARK: - Gradient Color Interpolation Definitions.
 

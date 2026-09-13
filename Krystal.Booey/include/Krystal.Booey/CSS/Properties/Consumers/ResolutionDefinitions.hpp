@@ -8,13 +8,13 @@ namespace krys::boo::css
   struct ResolutionValidator
   {
     KRYS_NODISCARD constexpr static Maybe<ResolutionUnit>
-      Validate(CSSUnitType unitType, CSSPropertyParserState &, CSSPropertyParserOptions) noexcept
+      Validate(CSSUnitType unitType, PropertyParserState &, PropertyParserOptions) noexcept
     {
       return UnitTraits<ResolutionUnit>::Validate(unitType);
     }
 
     template <auto R, typename V>
-    KRYS_NODISCARD static bool IsValid(ResolutionRaw<R, V> raw, CSSPropertyParserOptions) noexcept
+    KRYS_NODISCARD static bool IsValid(ResolutionRaw<R, V> raw, PropertyParserOptions) noexcept
     {
       return IsValidDimensionValue(raw,
                                    [&]

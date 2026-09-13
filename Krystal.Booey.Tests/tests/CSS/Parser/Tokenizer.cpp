@@ -1,7 +1,7 @@
-﻿#include "Krystal.Booey.Tests/TestParserUtils.hpp"
+﻿#include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
+#include "Krystal.Booey.Tests/TestParserUtils.hpp"
 #include "Krystal.Booey/CSS/Parser/ParseError.hpp"
 #include "Krystal.Booey/CSS/Parser/Token.hpp"
-#include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include <catch_all.hpp>
@@ -15,7 +15,7 @@ namespace krys::boo::css::tests
 
     void SerializeNumericValue(const Token &token, dom::DOMString &output) noexcept
     {
-      output += ToUTF8(token.NumericValue());
+      output += krys::boo::tests::ToUTF8(token.NumericValue());
     }
 
     void SerializeCSSToken(const Token &token, dom::DOMString &output) noexcept
@@ -178,7 +178,7 @@ namespace krys::boo::css::tests
         SerializeCSSToken(token, output);
       }
 
-      NormaliseData(output);
+      krys::boo::tests::NormaliseData(output);
       return output;
     }
 
@@ -202,7 +202,7 @@ namespace krys::boo::css::tests
         {
           if (!currentTest.Css.empty())
           {
-            NormaliseData(currentTest.Tokens);
+            krys::boo::tests::NormaliseData(currentTest.Tokens);
             tests.push_back(::krys::move(currentTest));
             currentTest = {};
           }
@@ -218,7 +218,7 @@ namespace krys::boo::css::tests
         }
       };
 
-      ParseTestData(stream, "$", ::krys::move(parse));
+      krys::boo::tests::ParseTestData(stream, "$", ::krys::move(parse));
       if (!currentTest.Css.empty())
       {
         tests.push_back(::krys::move(currentTest));
@@ -229,8 +229,8 @@ namespace krys::boo::css::tests
 
     void ExecuteCSSTokenizerTest(const CSSTokenizerTest &test, size_t number, size_t total) noexcept
     {
-      utf8_string str =
-        u8"--- TEST " + ToUTF8(number + 1uz) + u8" OF " + ToUTF8(total) + u8" ---\n" + test.Css;
+      utf8_string str = u8"--- TEST " + krys::boo::tests::ToUTF8(number + 1uz) + u8" OF "
+                        + krys::boo::tests::ToUTF8(total) + u8" ---\n" + test.Css;
       UTF8_INFO(str);
 
       str = u8"--- EXPECTED TOKENS ---\n" + test.Tokens;
@@ -252,13 +252,13 @@ namespace krys::boo::css::tests
     {
       static string basedir = "data/css-tokenizer/";
 
-      auto file = OpenTestDataFile(basedir + filename);
+      auto file = krys::boo::tests::OpenTestDataFile(basedir + filename);
       REQUIRE(file.has_value());
 
       auto tests = ParseCSSTokenizerTests(*file);
       REQUIRE(!tests.empty());
 
-      ExecuteTests(tests, ExecuteCSSTokenizerTest);
+      krys::boo::tests::ExecuteTests(tests, ExecuteCSSTokenizerTest);
     }
   }
 

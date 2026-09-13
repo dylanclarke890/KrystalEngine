@@ -16,7 +16,7 @@ namespace krys::boo::css
     bool operator==(const Opacity &) const = default;
   };
 
-  using OpacityFunction = FunctionNotation<CSSValueId::Opacity, Opacity>;
+  using OpacityFunction = FunctionNotation<ValueId::Opacity, Opacity>;
 
   DEFINE_TYPE_WRAPPER_GET(Opacity, value);
 }

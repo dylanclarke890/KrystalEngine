@@ -3,7 +3,7 @@
 
 namespace krys::boo::html
 {
-  HTMLAudioElement::HTMLAudioElement(Document &document) noexcept
+  HTMLAudioElement::HTMLAudioElement(dom::Document &document) noexcept
       : HTMLMediaElement(document, HTMLElementInterface::Audio)
   {
   }

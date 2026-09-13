@@ -16,7 +16,7 @@ namespace krys::boo::dom
   class NodeList;
 }
 
-namespace krys::boo::dom::Mixins
+namespace krys::boo::dom::mixins
 {
   /// @see https://dom.spec.whatwg.org/#parentnode
   class ParentNode

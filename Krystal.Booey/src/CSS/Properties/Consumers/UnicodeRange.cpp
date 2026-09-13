@@ -1,13 +1,13 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/UnicodeRange.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSUnicodeRangeValue.hpp"
 #include "Krystal.Core/Text/Encodings/Decode.hpp"
 #include "Krystal.Core/Text/Encodings/Encode.hpp"
 #include "Krystal.Core/Text/Encodings/UTF.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
   namespace
   {

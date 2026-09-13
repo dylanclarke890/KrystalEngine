@@ -2,6 +2,9 @@
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Text/Encodings/Decode.hpp"
+#include "Krystal.Core/Text/Encodings/Encode.hpp"
+#include "Krystal.Core/Text/Encodings/UTF.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include <format>
 
@@ -31,7 +34,9 @@ namespace krys::boo::css
     static void SerializeIdentifier(CSSOMStringView identifier, utf32_string &output) noexcept
     {
       // TODO(string_conversion): need to iterate over the codepoints in the identifier instead of doing this
-      auto utf32Identifier = krys::Text::ConvertToUTF32(identifier);
+      auto decodeResult = krys::text::Decode<krys::text::UTF8>(identifier);
+      krys_debug_assert(decodeResult.Error == krys::text::DecodeError::None);
+      auto &utf32Identifier = decodeResult.Output;
 
       bool isFirstCharacter = true;
       bool isSecondCharacter = false;
@@ -104,7 +109,9 @@ namespace krys::boo::css
     KRYS_NODISCARD static void SerializeString(CSSOMStringView str, utf32_string &output) noexcept
     {
       // TODO(string_conversion): need to iterate over the codepoints in the identifier instead of doing this
-      auto utf32Identifier = krys::Text::ConvertToUTF32(str);
+      auto decodeResult = krys::text::Decode<krys::text::UTF8>(str);
+      krys_debug_assert(decodeResult.Error == krys::text::DecodeError::None);
+      auto &utf32Identifier = decodeResult.Output;
 
       output.push_back(U'"');
       for (char32 codepoint : utf32Identifier)

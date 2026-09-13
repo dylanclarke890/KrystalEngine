@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Core/Types/String.hpp"
 
 namespace krys::boo::MIMEType
 {
-  constexpr inline dom::DOMStringView TextHTML = u8"text/html";
-  constexpr inline dom::DOMStringView ApplicationXHTMLXML = u8"application/xhtml+xml";
-  constexpr inline dom::DOMStringView ImageSVGXML = u8"image/svg+xml";
-  constexpr inline dom::DOMStringView ApplicationMathMLXML = u8"application/mathml+xml";
+  constexpr utf8_stringview TextHTML = u8"text/html";
+  constexpr utf8_stringview ApplicationXHTMLXML = u8"application/xhtml+xml";
+  constexpr utf8_stringview ImageSVGXML = u8"image/svg+xml";
+  constexpr utf8_stringview ApplicationMathMLXML = u8"application/mathml+xml";
 }

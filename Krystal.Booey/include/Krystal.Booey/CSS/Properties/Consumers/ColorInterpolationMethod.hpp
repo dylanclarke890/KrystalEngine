@@ -8,13 +8,13 @@ namespace krys::boo::css
 {
   class TokenRange;
   class CSSRatio;
-  struct CSSPropertyParserState;
+  struct PropertyParserState;
   struct ColorInterpolationMethod;
 
-  namespace CSSPropertyParserHelpers
+  namespace PropertyParserHelpers
   {
     // MARK: <color-interpolation-method> consuming (raw)
     KRYS_NODISCARD Maybe<ColorInterpolationMethod>
-      ConsumeColorInterpolationMethod(TokenRange &tokens, CSSPropertyParserState &state) noexcept;
+      ConsumeColorInterpolationMethod(TokenRange &tokens, PropertyParserState &state) noexcept;
   }
 }

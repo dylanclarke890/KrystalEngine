@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLUListElement);
 
   public:
-    HTMLUListElement(Document &document) noexcept;
+    HTMLUListElement(dom::Document &document) noexcept;
 
 #pragma region HTMLUListElement Obsolete members - https://html.spec.whatwg.org/#HTMLUListElement-partial
 

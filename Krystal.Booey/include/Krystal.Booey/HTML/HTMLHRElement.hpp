@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLHRElement);
 
   public:
-    HTMLHRElement(Document &document) noexcept;
+    HTMLHRElement(dom::Document &document) noexcept;
 
 #pragma region HTMLHRElement Obsolete members - https://html.spec.whatwg.org/#HTMLHRElement-partial
 

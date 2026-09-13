@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLDetailsElement);
 
   public:
-    HTMLDetailsElement(Document &document) noexcept;
+    HTMLDetailsElement(dom::Document &document) noexcept;
 
 #pragma region HTMLDetailsElement - https://html.spec.whatwg.org/#htmldetailselement
 

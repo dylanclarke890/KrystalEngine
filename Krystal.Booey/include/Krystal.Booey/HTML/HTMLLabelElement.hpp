@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLLabelElement);
 
   public:
-    HTMLLabelElement(Document &document) noexcept;
+    HTMLLabelElement(dom::Document &document) noexcept;
 
 #pragma region HTMLLabelElement - https://html.spec.whatwg.org/#htmllabelelement
 

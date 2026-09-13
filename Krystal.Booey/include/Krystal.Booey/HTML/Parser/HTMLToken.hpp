@@ -1,17 +1,15 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/HTML/Enums/HTMLTokenType.hpp"
 #include "Krystal.Booey/HTML/Enums/ParsedAttributeFlags.hpp"
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Base.hpp"
+#include "Krystal.Core/Text/Encodings/Encode.hpp"
+#include "Krystal.Core/Text/Encodings/UTF.hpp"
 #include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/Span.hpp"
-#include "Krystal.Text/ASCIILiteral.hpp"
-#include "Krystal.Text/StringConversion.hpp"
-#include <cassert>
+#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo::html
 {
@@ -146,8 +144,9 @@ namespace krys::boo::html
       assert(_type == HTMLTokenType::DOCTYPE);
       assert(_doctypeData->HasPublicIdentifier);
 
-      auto converted = krys::Text::ConvertToUTF8(Span<char32>(&character, 1));
-      _doctypeData->PublicIdentifier.append(converted.begin(), converted.end());
+      auto encodeResult = krys::text::Encode<krys::text::UTF8>(Span<char32>(&character, 1));
+      krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
+      _doctypeData->PublicIdentifier.append(encodeResult.Output.begin(), encodeResult.Output.end());
     }
 
     void AppendToSystemIdentifier(char32 character)
@@ -155,8 +154,9 @@ namespace krys::boo::html
       assert(_type == HTMLTokenType::DOCTYPE);
       assert(_doctypeData->HasSystemIdentifier);
 
-      auto converted = krys::Text::ConvertToUTF8(Span<char32>(&character, 1));
-      _doctypeData->SystemIdentifier.append(converted.begin(), converted.end());
+      auto encodeResult = krys::text::Encode<krys::text::UTF8>(Span<char32>(&character, 1));
+      krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
+      _doctypeData->SystemIdentifier.append(encodeResult.Output.begin(), encodeResult.Output.end());
     }
 
     KRYS_NODISCARD UniquePtr<DoctypeData> ReleaseDOCTYPEData() noexcept
@@ -175,7 +175,7 @@ namespace krys::boo::html
 
       _type = HTMLTokenType::StartTag;
       _selfClosing = false;
-      
+
       _attributes.clear();
       _currentAttribute = nullptr;
 
@@ -193,7 +193,7 @@ namespace krys::boo::html
 
       _type = HTMLTokenType::EndTag;
       _selfClosing = false;
-      
+
       _attributes.clear();
       _currentAttribute = nullptr;
 
@@ -239,8 +239,9 @@ namespace krys::boo::html
       assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
       assert(_currentAttribute != nullptr);
 
-      auto converted = krys::Text::ConvertToUTF8(Span<char32>(&character, 1));
-      _currentAttribute->Name.append(converted.begin(), converted.end());
+      auto encodeResult = krys::text::Encode<krys::text::UTF8>(Span<char32>(&character, 1));
+      krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
+      _currentAttribute->Name.append(encodeResult.Output.begin(), encodeResult.Output.end());
     }
 
     void AppendToCurrentAttributeValue(char32 character) noexcept
@@ -248,8 +249,9 @@ namespace krys::boo::html
       assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
       assert(_currentAttribute != nullptr);
 
-      auto converted = krys::Text::ConvertToUTF8(Span<char32>(&character, 1));
-      _currentAttribute->Value.append(converted.begin(), converted.end());
+      auto encodeResult = krys::text::Encode<krys::text::UTF8>(Span<char32>(&character, 1));
+      krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
+      _currentAttribute->Value.append(encodeResult.Output.begin(), encodeResult.Output.end());
     }
 
     template <size_t N>
@@ -258,8 +260,9 @@ namespace krys::boo::html
       assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
       assert(_currentAttribute != nullptr);
 
-      auto converted = krys::Text::ConvertToUTF8(characters);
-      _currentAttribute->Value.append(converted.begin(), converted.end());
+      auto encodeResult = krys::text::Encode<krys::text::UTF8>(characters);
+      krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
+      _currentAttribute->Value.append(encodeResult.Output.begin(), encodeResult.Output.end());
     }
 
     void AppendToCurrentAttributeValue(Span<char32> characters)
@@ -267,8 +270,9 @@ namespace krys::boo::html
       assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
       assert(_currentAttribute != nullptr);
 
-      auto converted = krys::Text::ConvertToUTF8(characters);
-      _currentAttribute->Value.append(converted.begin(), converted.end());
+      auto encodeResult = krys::text::Encode<krys::text::UTF8>(characters);
+      krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
+      _currentAttribute->Value.append(encodeResult.Output.begin(), encodeResult.Output.end());
     }
 
     void SetSelfClosingFlag() noexcept
@@ -324,11 +328,10 @@ namespace krys::boo::html
       AppendToDataInternal(character);
     }
 
-    void AppendToComment(krys::Text::ASCIILiteral characters) noexcept
+    void AppendToComment(stringview characters) noexcept
     {
       assert(_type == HTMLTokenType::Comment);
-      auto span = characters.ToSpan();
-      _data.append(span.begin(), span.end());
+      _data.append(characters.begin(), characters.end());
     }
 
 #pragma endregion
@@ -351,14 +354,16 @@ namespace krys::boo::html
 
     void AppendToDataInternal(utf32_stringview characters) noexcept
     {
-      auto converted = krys::Text::ConvertToUTF8(characters);
-      _data.append(converted.begin(), converted.end());
+      auto encodeResult = krys::text::Encode<krys::text::UTF8>(characters);
+      krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
+      _data.append(encodeResult.Output.begin(), encodeResult.Output.end());
     }
 
     void AppendToDataInternal(Span<char32> characters) noexcept
     {
-      auto converted = krys::Text::ConvertToUTF8(characters);
-      _data.append(converted.begin(), converted.end());
+      auto encodeResult = krys::text::Encode<krys::text::UTF8>(characters);
+      krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
+      _data.append(encodeResult.Output.begin(), encodeResult.Output.end());
     }
   };
 }

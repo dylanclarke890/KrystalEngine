@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLMenuElement);
 
   public:
-    HTMLMenuElement(Document &document) noexcept;
+    HTMLMenuElement(dom::Document &document) noexcept;
 
 #pragma region HTMLMenuElement Obsolete members - https://html.spec.whatwg.org/#HTMLMenuElement-partial
 

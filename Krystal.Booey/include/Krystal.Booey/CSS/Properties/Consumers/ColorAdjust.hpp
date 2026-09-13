@@ -11,14 +11,14 @@ namespace krys::boo::css
 
   struct ColorScheme;
   struct ParserContext;
-  struct CSSPropertyParserState;
+  struct PropertyParserState;
 
   // <'color-scheme'> = normal | [ light | dark | <custom-ident> ]+ && only?
   // https://drafts.csswg.org/css-color-adjust/#propdef-color-scheme
 
   // MARK: <'color-scheme'> consuming (unresolved)
   KRYS_NODISCARD Maybe<ColorScheme> ConsumeUnresolvedColorScheme(TokenRange &tokens,
-                                                                 CSSPropertyParserState &state) noexcept;
+                                                                 PropertyParserState &state) noexcept;
 
   // MARK: <'color-scheme'> parsing (unresolved)
   KRYS_NODISCARD Maybe<ColorScheme> ParseUnresolvedColorScheme(const CSSOMString &scheme,
@@ -26,5 +26,5 @@ namespace krys::boo::css
 
   // MARK: <'color-scheme'> consuming (CSSValue)
   KRYS_NODISCARD RefPtr<CSSValue> ConsumeColorScheme(TokenRange &tokens,
-                                                     CSSPropertyParserState &state) noexcept;
+                                                     PropertyParserState &state) noexcept;
 }

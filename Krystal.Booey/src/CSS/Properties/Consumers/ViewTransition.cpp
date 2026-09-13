@@ -5,14 +5,14 @@
 #include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValueListBuilder.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
-  RefPtr<CSSValue> ConsumeViewTransitionTypes(TokenRange &tokens, CSSPropertyParserState &) noexcept
+  RefPtr<CSSValue> ConsumeViewTransitionTypes(TokenRange &tokens, PropertyParserState &) noexcept
   {
     // <'types'> = none | <custom-ident>+
     // https://www.w3.org/TR/css-view-transitions-2/#descdef-view-transition-types
 
-    if (tokens.Peek().ValueId() == CSSValueId::None)
+    if (tokens.Peek().ValueId() == ValueId::None)
     {
       return ConsumeIdent(tokens);
     }
@@ -20,7 +20,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     CSSValueListBuilder list;
     do
     {
-      if (tokens.Peek().ValueId() == CSSValueId::None)
+      if (tokens.Peek().ValueId() == ValueId::None)
       {
         return nullptr;
       }

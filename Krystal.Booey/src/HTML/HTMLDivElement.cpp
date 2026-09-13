@@ -3,7 +3,8 @@
 
 namespace krys::boo::html
 {
-  HTMLDivElement::HTMLDivElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Div)
+  HTMLDivElement::HTMLDivElement(dom::Document &document) noexcept
+      : HTMLElement(document, HTMLElementInterface::Div)
   {
   }
 
@@ -11,12 +12,12 @@ namespace krys::boo::html
 
   dom::DOMString HTMLDivElement::Align() const noexcept
   {
-    return Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
   }
 
   void HTMLDivElement::Align(dom::DOMString &&value) noexcept
   {
-    Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    Reflection::Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
   }
 
 #pragma endregion

@@ -8,10 +8,8 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::dom::tests
 {
-  using namespace krys::boo;
-
   namespace
   {
     struct CommonTestData
@@ -21,7 +19,7 @@ namespace krys::tests
       DOMTokenList &TokenList;
 
       CommonTestData()
-          : Document(CreateRef<HTML::Document>()), Element(Document->CreateElement(u8"div").Value()),
+          : Document(CreateRef<dom::Document>()), Element(Document->CreateElement(u8"div").Value()),
             TokenList(Element->ClassList())
       {
       }

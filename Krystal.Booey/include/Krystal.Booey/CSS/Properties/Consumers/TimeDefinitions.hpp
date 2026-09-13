@@ -7,14 +7,14 @@ namespace krys::boo::css
 {
   struct TimeValidator
   {
-    KRYS_NODISCARD constexpr static Maybe<TimeUnit> Validate(CSSUnitType unitType, CSSPropertyParserState &,
-                                                             CSSPropertyParserOptions) noexcept
+    KRYS_NODISCARD constexpr static Maybe<TimeUnit> Validate(CSSUnitType unitType, PropertyParserState &,
+                                                             PropertyParserOptions) noexcept
     {
       return UnitTraits<TimeUnit>::Validate(unitType);
     }
 
     template <auto R, typename V>
-    KRYS_NODISCARD static bool IsValid(TimeRaw<R, V> raw, CSSPropertyParserOptions) noexcept
+    KRYS_NODISCARD static bool IsValid(TimeRaw<R, V> raw, PropertyParserOptions) noexcept
     {
       return IsValidDimensionValue(raw,
                                    [&]

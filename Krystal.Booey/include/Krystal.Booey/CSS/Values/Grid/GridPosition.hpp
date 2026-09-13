@@ -46,15 +46,15 @@ namespace krys::boo::css
 
       if (name.value == CSSOMStringAtom::Null())
       {
-        return visitor(SpaceSeparatedTuple {Keywords::Span {}, position});
+        return visitor(SpaceSeparatedTuple {keywords::Span {}, position});
       }
 
       if (position == IntegerRaw<CSSRange {1, CSSRange::Inf}> {1})
       {
-        return visitor(SpaceSeparatedTuple {Keywords::Span {}, name});
+        return visitor(SpaceSeparatedTuple {keywords::Span {}, name});
       }
 
-      return visitor(SpaceSeparatedTuple {Keywords::Span {}, position, name});
+      return visitor(SpaceSeparatedTuple {keywords::Span {}, position, name});
     }
 
     bool operator==(const GridPositionSpan &) const = default;
@@ -68,7 +68,7 @@ namespace krys::boo::css
     using Explicit = GridPositionExplicit;
     using Span = GridPositionSpan;
 
-    GridPosition(Keywords::Auto)
+    GridPosition(keywords::Auto)
     {
     }
 
@@ -114,7 +114,7 @@ namespace krys::boo::css
 
       switch (m_type)
       {
-        case GridPositionType::Auto:          return visitor(Keywords::Auto {});
+        case GridPositionType::Auto:          return visitor(keywords::Auto {});
         case GridPositionType::Explicit:      return visitor(Explicit {{m_integerPosition}, m_namedGridLine});
         case GridPositionType::Span:          return visitor(Span {{m_integerPosition}, m_namedGridLine});
         case GridPositionType::NamedGridArea: return visitor(m_namedGridLine);

@@ -13,13 +13,13 @@ namespace krys::boo::html
     friend class HTMLTreeBuilder;
 
   private:
-    UniquePtr<DOMTokenList> _blocking;
-    Document *_parserDocument {nullptr};
+    UniquePtr<dom::DOMTokenList> _blocking;
+    dom::Document *_parserDocument {nullptr};
     bool _forceAsync : 1 {true};
     bool _alreadyStarted : 1 {false};
 
   public:
-    HTMLScriptElement(Document &document) noexcept;
+    HTMLScriptElement(dom::Document &document) noexcept;
 
 #pragma region HTMLScriptElement - https://html.spec.whatwg.org/#htmlscriptelement
 
@@ -30,10 +30,10 @@ namespace krys::boo::html
     void Type(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-src
-    KRYS_NODISCARD dom::ExceptionOr<USVString> Src() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-src
-    dom::ExceptionOr<void> Src(USVString &&value) noexcept;
+    dom::ExceptionOr<void> Src(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-nomodule
     KRYS_NODISCARD bool NoModule() const noexcept;
@@ -54,7 +54,7 @@ namespace krys::boo::html
     void Defer(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-blocking
-    KRYS_NODISCARD DOMTokenList &Blocking() noexcept;
+    KRYS_NODISCARD dom::DOMTokenList &Blocking() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-crossorigin
     KRYS_NODISCARD Maybe<dom::DOMString> CrossOrigin() const noexcept;

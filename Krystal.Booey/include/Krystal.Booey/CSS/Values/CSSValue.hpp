@@ -2,10 +2,10 @@
 
 #include "Krystal.Booey/CSS/Values/Enums/CSSUnitCategory.hpp"
 #include "Krystal.Booey/CSS/Values/Enums/CSSUnitType.hpp"
-#include "Krystal.Booey/CSS/Values/Enums/CSSValueId.hpp"
 #include "Krystal.Booey/CSS/Values/Enums/CSSValueType.hpp"
-#include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::css
 {
@@ -26,27 +26,27 @@ namespace krys::boo::css
     {
     };
 
-    constexpr inline static StaticCSSValueTag StaticCSSValue {};
+    constexpr static StaticCSSValueTag StaticCSSValue {};
 
   public:
     virtual ~CSSValue() noexcept = default;
 
-    KRYS_NODISCARD CSSValueId ValueId() const noexcept;
+    KRYS_NODISCARD css::ValueId ValueId() const noexcept;
 
     KRYS_NODISCARD bool IsImplicitInitialValue() const noexcept
     {
       return _isImplicitInitialValue;
     }
 
-    KRYS_NODISCARD static bool IsCSSWideKeyword(CSSValueId id) noexcept
+    KRYS_NODISCARD static bool IsCSSWideKeyword(css::ValueId id) noexcept
     {
       switch (id)
       {
-        case CSSValueId::Initial:
-        case CSSValueId::Inherit:
-        case CSSValueId::Unset:
-        case CSSValueId::Revert:
-        case CSSValueId::RevertLayer:
+        case css::ValueId::Initial:
+        case css::ValueId::Inherit:
+        case css::ValueId::Unset:
+        case css::ValueId::Revert:
+        case css::ValueId::RevertLayer:
         {
           return true;
         }

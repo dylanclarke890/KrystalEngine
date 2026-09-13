@@ -11,7 +11,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLInputElement);
 
   public:
-    HTMLInputElement(Document &document) noexcept;
+    HTMLInputElement(dom::Document &document) noexcept;
 
 #pragma region HTMLInputElement - https://html.spec.whatwg.org/#htmlinputelement
 
@@ -76,10 +76,10 @@ namespace krys::boo::html
     // attribute FileList? files;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formaction
-    KRYS_NODISCARD dom::ExceptionOr<USVString> FormAction() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> FormAction() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formaction
-    dom::ExceptionOr<void> FormAction(USVString &&value) noexcept;
+    dom::ExceptionOr<void> FormAction(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formenctype
     KRYS_NODISCARD dom::DOMString FormEnctype() const noexcept;
@@ -187,10 +187,10 @@ namespace krys::boo::html
     void Size(uint32 value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-src
-    KRYS_NODISCARD dom::ExceptionOr<USVString> Src() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-src
-    dom::ExceptionOr<void> Src(USVString &&value) noexcept;
+    dom::ExceptionOr<void> Src(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-step
     KRYS_NODISCARD dom::DOMString Step() const noexcept;

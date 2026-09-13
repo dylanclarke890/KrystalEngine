@@ -21,11 +21,11 @@ namespace krys::boo::html
     friend class ::krys::boo::dom::SlotAlgorithms;
 
   private:
-    List<Ref<Node>> _assignedNodes;
-    List<WeakRef<Node>> _manuallyAssignedNodes;
+    List<Ref<dom::Node>> _assignedNodes;
+    List<WeakRef<dom::Node>> _manuallyAssignedNodes;
 
   public:
-    HTMLSlotElement(Document &document) noexcept;
+    HTMLSlotElement(dom::Document &document) noexcept;
 
 #pragma region HTMLSlotElement - https://html.spec.whatwg.org/#htmlslotelement
 

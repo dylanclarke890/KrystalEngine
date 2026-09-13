@@ -3,17 +3,14 @@
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::html::tests
 {
-  using namespace krys::boo::Attributes;
-  using namespace krys::boo;
-
   namespace
   {
     class TestHTMLElement : public HTMLElement
     {
     public:
-      TestHTMLElement(Document &document) : HTMLElement(document)
+      TestHTMLElement(dom::Document &document) : HTMLElement(document)
       {
       }
     };
@@ -22,11 +19,11 @@ namespace krys::tests
 
     struct TestData
     {
-      Ref<Document> Document;
-      Ref<HTMLElement> Element;
+      Ref<dom::Document> Document;
+      Ref<html::HTMLElement> Element;
 
       TestData(Maybe<dom::DOMString> &&initialValue = null)
-          : Document(CreateRef<HTML::Document>()), Element(CreateRef<TestHTMLElement>(*Document))
+          : Document(CreateRef<dom::Document>()), Element(CreateRef<TestHTMLElement>(*Document))
       {
         if (initialValue != null)
         {
@@ -151,19 +148,16 @@ namespace krys::tests
       SECTION("uint32")
       {
         TestData data;
-        REQUIRE(Reflection::Reflect<uint32, ReflectDefault<uint32>(10)>(*data.Element, TestAttribute)
-                == 10);
+        REQUIRE(Reflection::Reflect<uint32, ReflectDefault<uint32>(10)>(*data.Element, TestAttribute) == 10);
 
         Reflection::Reflect<uint32, ReflectDefault<uint32>(10)>(*data.Element, TestAttribute, 5u);
-        REQUIRE(Reflection::Reflect<uint32, ReflectDefault<uint32>(10)>(*data.Element, TestAttribute)
-                == 5);
+        REQUIRE(Reflection::Reflect<uint32, ReflectDefault<uint32>(10)>(*data.Element, TestAttribute) == 5);
 
         // Values above MaxUnsignedLongValue should fall back to default.
         constexpr auto MaxUnsignedLongValue = 2'147'483'647u;
         Reflection::Reflect<uint32, ReflectDefault<uint32>(10)>(*data.Element, TestAttribute,
                                                                 MaxUnsignedLongValue + 1u);
-        REQUIRE(Reflection::Reflect<uint32, ReflectDefault<uint32>(10)>(*data.Element, TestAttribute)
-                == 10);
+        REQUIRE(Reflection::Reflect<uint32, ReflectDefault<uint32>(10)>(*data.Element, TestAttribute) == 10);
       }
 
       SECTION("double")
@@ -256,14 +250,12 @@ namespace krys::tests
     SECTION("[ReflectNonNegative][ReflectDefault] int32")
     {
       TestData data;
-      REQUIRE(Reflection::ReflectNonNegative<int32, ReflectDefault<int32>(99)>(*data.Element,
-                                                                               TestAttribute)
+      REQUIRE(Reflection::ReflectNonNegative<int32, ReflectDefault<int32>(99)>(*data.Element, TestAttribute)
               == 99);
 
       auto set3 = Reflection::ReflectNonNegative<int32>(*data.Element, TestAttribute, 3);
       REQUIRE_FALSE(set3.HasException());
-      REQUIRE(Reflection::ReflectNonNegative<int32, ReflectDefault<int32>(99)>(*data.Element,
-                                                                               TestAttribute)
+      REQUIRE(Reflection::ReflectNonNegative<int32, ReflectDefault<int32>(99)>(*data.Element, TestAttribute)
               == 3);
     }
   }
@@ -308,25 +300,26 @@ namespace krys::tests
     SECTION("[ReflectPositive][ReflectDefault] uint32")
     {
       TestData data;
-      REQUIRE(Reflection::ReflectPositive<uint32, ReflectDefault<uint32>(5)>(*data.Element,
-                                                                             TestAttribute)
+      REQUIRE(Reflection::ReflectPositive<uint32, ReflectDefault<uint32>(5)>(*data.Element, TestAttribute)
               == 5);
 
-      auto set3 = Reflection::ReflectPositive<uint32, ReflectDefault<uint32>(5)>(*data.Element, TestAttribute, 3u);
+      auto set3 =
+        Reflection::ReflectPositive<uint32, ReflectDefault<uint32>(5)>(*data.Element, TestAttribute, 3u);
       REQUIRE_FALSE(set3.HasException());
-      REQUIRE(Reflection::ReflectPositive<uint32, ReflectDefault<uint32>(5)>(*data.Element,
-                                                                             TestAttribute)
+      REQUIRE(Reflection::ReflectPositive<uint32, ReflectDefault<uint32>(5)>(*data.Element, TestAttribute)
               == 3);
     }
 
     SECTION("[ReflectPositive][ReflectDefault] double")
     {
       TestData data;
-      auto defVal = Reflection::ReflectPositive<double, ReflectDefault<double>(3.0)>(*data.Element, TestAttribute);
+      auto defVal =
+        Reflection::ReflectPositive<double, ReflectDefault<double>(3.0)>(*data.Element, TestAttribute);
       REQUIRE_THAT(defVal, Catch::Matchers::WithinRel(3.0));
 
       Reflection::ReflectPositive<double>(*data.Element, TestAttribute, 7.5);
-      auto newVal = Reflection::ReflectPositive<double, ReflectDefault<double>(3.0)>(*data.Element, TestAttribute);
+      auto newVal =
+        Reflection::ReflectPositive<double, ReflectDefault<double>(3.0)>(*data.Element, TestAttribute);
       REQUIRE_THAT(newVal, Catch::Matchers::WithinRel(7.5));
     }
   }
@@ -350,14 +343,14 @@ namespace krys::tests
     SECTION("[ReflectPositiveWithFallback][ReflectDefault] uint32")
     {
       TestData data;
-      REQUIRE(Reflection::ReflectPositiveWithFallback<uint32, ReflectDefault<uint32>(8)>(
-                *data.Element, TestAttribute)
+      REQUIRE(Reflection::ReflectPositiveWithFallback<uint32, ReflectDefault<uint32>(8)>(*data.Element,
+                                                                                         TestAttribute)
               == 8);
 
-      Reflection::ReflectPositiveWithFallback<uint32, ReflectDefault<uint32>(8)>(*data.Element,
-                                                                                 TestAttribute, 4u);
-      REQUIRE(Reflection::ReflectPositiveWithFallback<uint32, ReflectDefault<uint32>(8)>(
-                *data.Element, TestAttribute)
+      Reflection::ReflectPositiveWithFallback<uint32, ReflectDefault<uint32>(8)>(*data.Element, TestAttribute,
+                                                                                 4u);
+      REQUIRE(Reflection::ReflectPositiveWithFallback<uint32, ReflectDefault<uint32>(8)>(*data.Element,
+                                                                                         TestAttribute)
               == 4);
     }
   }

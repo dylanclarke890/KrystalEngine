@@ -3,7 +3,7 @@
 
 namespace krys::boo::html
 {
-  HTMLVideoElement::HTMLVideoElement(Document &document) noexcept
+  HTMLVideoElement::HTMLVideoElement(dom::Document &document) noexcept
       : HTMLMediaElement(document, HTMLElementInterface::Video)
   {
   }
@@ -12,22 +12,22 @@ namespace krys::boo::html
 
   uint32 HTMLVideoElement::Width() const noexcept
   {
-    return Attributes::Reflection::Reflect<uint32>(*this, u8"width");
+    return Reflection::Reflect<uint32>(*this, u8"width");
   }
 
   void HTMLVideoElement::Width(uint32 value) noexcept
   {
-    Attributes::Reflection::Reflect<uint32>(*this, u8"width", krys::move(value));
+    Reflection::Reflect<uint32>(*this, u8"width", krys::move(value));
   }
 
   uint32 HTMLVideoElement::Height() const noexcept
   {
-    return Attributes::Reflection::Reflect<uint32>(*this, u8"height");
+    return Reflection::Reflect<uint32>(*this, u8"height");
   }
 
   void HTMLVideoElement::Height(uint32 value) noexcept
   {
-    Attributes::Reflection::Reflect<uint32>(*this, u8"height", krys::move(value));
+    Reflection::Reflect<uint32>(*this, u8"height", krys::move(value));
   }
 
   uint32 HTMLVideoElement::VideoWidth() const noexcept
@@ -42,24 +42,24 @@ namespace krys::boo::html
     return 0u;
   }
 
-  dom::ExceptionOr<USVString> HTMLVideoElement::Poster() const noexcept
+  dom::ExceptionOr<dom::USVString> HTMLVideoElement::Poster() const noexcept
   {
-    return Attributes::Reflection::Reflect<USVString>(*this, u8"poster");
+    return Reflection::Reflect<dom::USVString>(*this, u8"poster");
   }
 
-  dom::ExceptionOr<void> HTMLVideoElement::Poster(USVString &&value) noexcept
+  dom::ExceptionOr<void> HTMLVideoElement::Poster(dom::USVString &&value) noexcept
   {
-    return Attributes::Reflection::Reflect<USVString>(*this, u8"poster", krys::move(value));
+    return Reflection::Reflect<dom::USVString>(*this, u8"poster", krys::move(value));
   }
 
   bool HTMLVideoElement::PlaysInline() const noexcept
   {
-    return Attributes::Reflection::Reflect<bool>(*this, u8"playsinline");
+    return Reflection::Reflect<bool>(*this, u8"playsinline");
   }
 
   void HTMLVideoElement::PlaysInline(bool value) noexcept
   {
-    Attributes::Reflection::Reflect<bool>(*this, u8"playsinline", krys::move(value));
+    Reflection::Reflect<bool>(*this, u8"playsinline", krys::move(value));
   }
 
 #pragma endregion

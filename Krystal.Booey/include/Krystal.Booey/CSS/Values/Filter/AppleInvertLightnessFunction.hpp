@@ -12,7 +12,7 @@ namespace krys::boo::css
   };
 
   using AppleInvertLightnessFunction =
-    FunctionNotation<CSSValueId::AppleInvertLightness, AppleInvertLightness>;
+    FunctionNotation<ValueId::AppleInvertLightness, AppleInvertLightness>;
 }
 
 DEFINE_EMPTY_LIKE_CONFORMANCE(krys::boo::css::AppleInvertLightness)

@@ -1,8 +1,9 @@
 ﻿#pragma once
+#pragma once
 
 #include "Krystal.Booey/CSS/Values/CSSColorValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/Enums/CSSValueId.hpp"
+#include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Utils/AlignedStorage.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
@@ -29,7 +30,7 @@ namespace krys::boo::css
     Array<AlignedStorage<CSSPrimitiveValue>, MaximumCacheableIntegerValue + 1uz> _pixelValues;
     Array<AlignedStorage<CSSPrimitiveValue>, MaximumCacheableIntegerValue + 1uz> _percentageValues;
     Array<AlignedStorage<CSSPrimitiveValue>, MaximumCacheableIntegerValue + 1uz> _numberValues;
-    Array<AlignedStorage<CSSPrimitiveValue>, NumCSSValueKeywords> _identifierValues;
+    Array<AlignedStorage<CSSPrimitiveValue>, TotalValueKeywords> _identifierValues;
 
     StaticCSSValuePool() noexcept;
 
@@ -44,11 +45,11 @@ namespace krys::boo::css
     return CommonCSSValuePool->_implicitInitialValue;
   }
 
-  inline Ref<CSSPrimitiveValue> CSSPrimitiveValue::Create(CSSValueId identifier) noexcept
+  inline Ref<CSSPrimitiveValue> CSSPrimitiveValue::Create(css::ValueId identifier) noexcept
   {
-    assert(static_cast<underlying_t<CSSValueId>>(identifier) < NumCSSValueKeywords);
+    assert(static_cast<underlying_t<css::ValueId>>(identifier) < TotalValueKeywords);
 
-    auto &value = *CommonCSSValuePool->_identifierValues[static_cast<underlying_t<CSSValueId>>(identifier)];
+    auto &value = *CommonCSSValuePool->_identifierValues[static_cast<underlying_t<css::ValueId>>(identifier)];
     return ShareRef(value);
   }
 

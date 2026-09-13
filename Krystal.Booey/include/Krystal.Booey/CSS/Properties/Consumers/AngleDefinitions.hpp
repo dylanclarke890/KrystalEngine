@@ -7,14 +7,14 @@ namespace krys::boo::css
 {
   struct AngleValidator
   {
-    KRYS_NODISCARD constexpr static Maybe<AngleUnit> Validate(CSSUnitType unitType, CSSPropertyParserState &,
-                                                              CSSPropertyParserOptions) noexcept
+    KRYS_NODISCARD constexpr static Maybe<AngleUnit> Validate(CSSUnitType unitType, PropertyParserState &,
+                                                              PropertyParserOptions) noexcept
     {
       return UnitTraits<AngleUnit>::Validate(unitType);
     }
 
     template <auto R, typename V>
-    KRYS_NODISCARD static bool IsValid(AngleRaw<R, V> raw, CSSPropertyParserOptions) noexcept
+    KRYS_NODISCARD static bool IsValid(AngleRaw<R, V> raw, PropertyParserOptions) noexcept
     {
       return IsValidDimensionValue(raw,
                                    [&]
@@ -25,8 +25,8 @@ namespace krys::boo::css
                                    });
     }
 
-    KRYS_NODISCARD static bool ShouldAcceptUnitlessValue(double value, CSSPropertyParserState &state,
-                                                         CSSPropertyParserOptions options) noexcept
+    KRYS_NODISCARD static bool ShouldAcceptUnitlessValue(double value, PropertyParserState &state,
+                                                         PropertyParserOptions options) noexcept
     {
       if (!value && options.UnitlessZeroAngle)
       {

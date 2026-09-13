@@ -11,10 +11,10 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLAreaElement);
 
   private:
-    UniquePtr<DOMTokenList> _relList;
+    UniquePtr<dom::DOMTokenList> _relList;
 
   public:
-    HTMLAreaElement(Document &document) noexcept;
+    HTMLAreaElement(dom::Document &document) noexcept;
 
 #pragma region HTMLAreaElement - https://html.spec.whatwg.org/#htmlareaelement
 
@@ -43,10 +43,10 @@ namespace krys::boo::html
     void Download(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-ping
-    KRYS_NODISCARD dom::ExceptionOr<USVString> Ping() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Ping() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-ping
-    dom::ExceptionOr<void> Ping(USVString &&value) noexcept;
+    dom::ExceptionOr<void> Ping(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-rel
     KRYS_NODISCARD dom::DOMString Rel() const noexcept;
@@ -55,7 +55,7 @@ namespace krys::boo::html
     void Rel(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-rellist
-    KRYS_NODISCARD DOMTokenList &RelList() noexcept;
+    KRYS_NODISCARD dom::DOMTokenList &RelList() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-referrerpolicy
     KRYS_NODISCARD dom::DOMString ReferrerPolicy() const noexcept;

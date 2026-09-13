@@ -1,17 +1,17 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Align.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValuePair.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
   namespace
   {
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeAlignmentBaseline(TokenRange &tokens,
-                                                             CSSPropertyParserState &state) noexcept
+                                                             PropertyParserState &state) noexcept
     {
-      assert(tokens.Peek().ValueId() == CSSValueId::Baseline);
+      assert(tokens.Peek().ValueId() == ValueId::Baseline);
 
       // FIXME: The spec states that <baseline-position> is defined as `<baseline-position> = [ first | last
       // ]? && baseline`, allowing any ordering, but tests expect `[ first | last ]` to always be precede
@@ -20,19 +20,19 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       tokens.Discard();
       tokens.DiscardWhitespace();
 
-      return CSSPrimitiveValue::Create(CSSValueId::Baseline);
+      return CSSPrimitiveValue::Create(ValueId::Baseline);
     }
 
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeAlignmentFirstBaseline(TokenRange &tokens,
-                                                                  CSSPropertyParserState &state) noexcept
+                                                                  PropertyParserState &state) noexcept
     {
-      assert(tokens.Peek().ValueId() == CSSValueId::First);
+      assert(tokens.Peek().ValueId() == ValueId::First);
 
       auto copy = tokens;
       copy.Discard();
       copy.DiscardWhitespace();
 
-      if (copy.Peek().ValueId() != CSSValueId::Baseline)
+      if (copy.Peek().ValueId() != ValueId::Baseline)
       {
         return nullptr;
       }
@@ -41,19 +41,19 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       tokens.Discard();
       tokens.DiscardWhitespace();
 
-      return CSSPrimitiveValue::Create(CSSValueId::Baseline);
+      return CSSPrimitiveValue::Create(ValueId::Baseline);
     }
 
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeAlignmentLastBaseline(TokenRange &tokens,
-                                                                 CSSPropertyParserState &state) noexcept
+                                                                 PropertyParserState &state) noexcept
     {
-      assert(tokens.Peek().ValueId() == CSSValueId::Last);
+      assert(tokens.Peek().ValueId() == ValueId::Last);
 
       auto copy = tokens;
       copy.Discard();
       copy.DiscardWhitespace();
 
-      if (copy.Peek().ValueId() != CSSValueId::Baseline)
+      if (copy.Peek().ValueId() != ValueId::Baseline)
       {
         return nullptr;
       }
@@ -62,16 +62,16 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       tokens.Discard();
       tokens.DiscardWhitespace();
 
-      return CSSValuePair::Create(CSSPrimitiveValue::Create(CSSValueId::Last),
-                                  CSSPrimitiveValue::Create(CSSValueId::Baseline));
+      return CSSValuePair::Create(CSSPrimitiveValue::Create(ValueId::Last),
+                                  CSSPrimitiveValue::Create(ValueId::Baseline));
     }
 
     template <typename F>
     KRYS_NODISCARD RefPtr<CSSValue>
-      ConsumeAlignmentOverflowPosition(TokenRange &tokens, CSSPropertyParserState &,
-                                       CSSValueId overflowSafety, F &&predicate) noexcept
+      ConsumeAlignmentOverflowPosition(TokenRange &tokens, PropertyParserState &,
+                                       ValueId overflowSafety, F &&predicate) noexcept
     {
-      assert(tokens.Peek().ValueId() == CSSValueId::Safe || tokens.Peek().ValueId() == CSSValueId::Unsafe);
+      assert(tokens.Peek().ValueId() == ValueId::Safe || tokens.Peek().ValueId() == ValueId::Unsafe);
 
       auto copy = tokens;
       copy.Discard();
@@ -91,7 +91,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     }
   }
 
-  RefPtr<CSSValue> ConsumeAlignContent(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeAlignContent(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'align-content'> = normal | <baseline-position> | <content-distribution> | <overflow-position>?
     // <content-position>
@@ -100,18 +100,18 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     switch (auto initial = tokens.Peek().ValueId(); initial)
     {
       // normal
-      case CSSValueId::Normal:
+      case ValueId::Normal:
       // <content-distribution>
-      case CSSValueId::SpaceBetween:
-      case CSSValueId::SpaceAround:
-      case CSSValueId::SpaceEvenly:
-      case CSSValueId::Stretch:
+      case ValueId::SpaceBetween:
+      case ValueId::SpaceAround:
+      case ValueId::SpaceEvenly:
+      case ValueId::Stretch:
       // <content-position>
-      case CSSValueId::Start:
-      case CSSValueId::End:
-      case CSSValueId::Center:
-      case CSSValueId::FlexStart:
-      case CSSValueId::FlexEnd:
+      case ValueId::Start:
+      case ValueId::End:
+      case ValueId::Center:
+      case ValueId::FlexStart:
+      case ValueId::FlexEnd:
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
@@ -119,32 +119,32 @@ namespace krys::boo::css::CSSPropertyParserHelpers
         return CSSPrimitiveValue::Create(initial);
       }
       // <baseline-position>
-      case CSSValueId::First:
+      case ValueId::First:
       {
         return ConsumeAlignmentFirstBaseline(tokens, state);
       }
-      case CSSValueId::Last:
+      case ValueId::Last:
       {
         return ConsumeAlignmentLastBaseline(tokens, state);
       }
-      case CSSValueId::Baseline:
+      case ValueId::Baseline:
       {
         return ConsumeAlignmentBaseline(tokens, state);
       }
       // <overflow-position>? <content-position>
-      case CSSValueId::Unsafe:
-      case CSSValueId::Safe:
+      case ValueId::Unsafe:
+      case ValueId::Safe:
       {
         return ConsumeAlignmentOverflowPosition(tokens, state, initial,
                                                 [](auto second)
                                                 {
                                                   switch (second)
                                                   {
-                                                    case CSSValueId::Start:
-                                                    case CSSValueId::End:
-                                                    case CSSValueId::Center:
-                                                    case CSSValueId::FlexStart:
-                                                    case CSSValueId::FlexEnd:
+                                                    case ValueId::Start:
+                                                    case ValueId::End:
+                                                    case ValueId::Center:
+                                                    case ValueId::FlexStart:
+                                                    case ValueId::FlexEnd:
                                                     {
                                                       return true;
                                                     }
@@ -162,7 +162,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     }
   }
 
-  RefPtr<CSSValue> ConsumeJustifyContent(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeJustifyContent(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'justify-content'> = normal | <content-distribution> | <overflow-position>? [ <content-position> |
     // left | right ]
@@ -171,20 +171,20 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     switch (auto initial = tokens.Peek().ValueId(); initial)
     {
       // normal
-      case CSSValueId::Normal:
+      case ValueId::Normal:
       // <content-distribution>
-      case CSSValueId::SpaceBetween:
-      case CSSValueId::SpaceAround:
-      case CSSValueId::SpaceEvenly:
-      case CSSValueId::Stretch:
+      case ValueId::SpaceBetween:
+      case ValueId::SpaceAround:
+      case ValueId::SpaceEvenly:
+      case ValueId::Stretch:
       // [ <content-position> | left | right ]
-      case CSSValueId::Start:
-      case CSSValueId::End:
-      case CSSValueId::Center:
-      case CSSValueId::FlexStart:
-      case CSSValueId::FlexEnd:
-      case CSSValueId::Left:
-      case CSSValueId::Right:
+      case ValueId::Start:
+      case ValueId::End:
+      case ValueId::Center:
+      case ValueId::FlexStart:
+      case ValueId::FlexEnd:
+      case ValueId::Left:
+      case ValueId::Right:
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
@@ -192,21 +192,21 @@ namespace krys::boo::css::CSSPropertyParserHelpers
         return CSSPrimitiveValue::Create(initial);
       }
       // <overflow-position>? [ <content-position> | left | right ]
-      case CSSValueId::Unsafe:
-      case CSSValueId::Safe:
+      case ValueId::Unsafe:
+      case ValueId::Safe:
       {
         return ConsumeAlignmentOverflowPosition(tokens, state, initial,
                                                 [](auto second)
                                                 {
                                                   switch (second)
                                                   {
-                                                    case CSSValueId::Start:
-                                                    case CSSValueId::End:
-                                                    case CSSValueId::Center:
-                                                    case CSSValueId::FlexStart:
-                                                    case CSSValueId::FlexEnd:
-                                                    case CSSValueId::Left:
-                                                    case CSSValueId::Right:
+                                                    case ValueId::Start:
+                                                    case ValueId::End:
+                                                    case ValueId::Center:
+                                                    case ValueId::FlexStart:
+                                                    case ValueId::FlexEnd:
+                                                    case ValueId::Left:
+                                                    case ValueId::Right:
                                                     {
                                                       return true;
                                                     }
@@ -224,7 +224,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     }
   }
 
-  RefPtr<CSSValue> ConsumeAlignSelf(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeAlignSelf(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'align-self'> = auto | normal | stretch | <baseline-position> | <overflow-position>? <self-position>
     // https://drafts.csswg.org/css-align/#propdef-align-self
@@ -232,11 +232,11 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     switch (auto initial = tokens.Peek().ValueId(); initial)
     {
       // auto
-      case CSSValueId::Auto:
+      case ValueId::Auto:
       // normal
-      case CSSValueId::Normal:
+      case ValueId::Normal:
       // stretch
-      case CSSValueId::Stretch:
+      case ValueId::Stretch:
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
@@ -244,7 +244,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
         return CSSPrimitiveValue::Create(initial);
       }
       // <self-position>
-      case CSSValueId::AnchorCenter:
+      case ValueId::AnchorCenter:
       {
         if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
         {
@@ -253,13 +253,13 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
         KRYS_FALLTHROUGH;
       }
-      case CSSValueId::Start:
-      case CSSValueId::End:
-      case CSSValueId::Center:
-      case CSSValueId::SelfStart:
-      case CSSValueId::SelfEnd:
-      case CSSValueId::FlexStart:
-      case CSSValueId::FlexEnd:
+      case ValueId::Start:
+      case ValueId::End:
+      case ValueId::Center:
+      case ValueId::SelfStart:
+      case ValueId::SelfEnd:
+      case ValueId::FlexStart:
+      case ValueId::FlexEnd:
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
@@ -267,21 +267,21 @@ namespace krys::boo::css::CSSPropertyParserHelpers
         return CSSPrimitiveValue::Create(initial);
       }
       // <baseline-position>
-      case CSSValueId::First:
+      case ValueId::First:
       {
         return ConsumeAlignmentFirstBaseline(tokens, state);
       }
-      case CSSValueId::Last:
+      case ValueId::Last:
       {
         return ConsumeAlignmentLastBaseline(tokens, state);
       }
-      case CSSValueId::Baseline:
+      case ValueId::Baseline:
       {
         return ConsumeAlignmentBaseline(tokens, state);
       }
       // <overflow-position>? <self-position>
-      case CSSValueId::Unsafe:
-      case CSSValueId::Safe:
+      case ValueId::Unsafe:
+      case ValueId::Safe:
       {
         return ConsumeAlignmentOverflowPosition(
           tokens, state, initial,
@@ -289,7 +289,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
           {
             switch (second)
             {
-              case CSSValueId::AnchorCenter:
+              case ValueId::AnchorCenter:
               {
                 if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
                 {
@@ -298,13 +298,13 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
                 KRYS_FALLTHROUGH;
               }
-              case CSSValueId::Start:
-              case CSSValueId::End:
-              case CSSValueId::Center:
-              case CSSValueId::SelfStart:
-              case CSSValueId::SelfEnd:
-              case CSSValueId::FlexStart:
-              case CSSValueId::FlexEnd:
+              case ValueId::Start:
+              case ValueId::End:
+              case ValueId::Center:
+              case ValueId::SelfStart:
+              case ValueId::SelfEnd:
+              case ValueId::FlexStart:
+              case ValueId::FlexEnd:
               {
                 return true;
               }
@@ -322,7 +322,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     }
   }
 
-  RefPtr<CSSValue> ConsumeJustifySelf(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeJustifySelf(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'justify-self'> = auto | normal | stretch | <baseline-position> | <overflow-position>? [
     // <self-position> | left | right ]
@@ -331,18 +331,18 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     switch (auto initial = tokens.Peek().ValueId(); initial)
     {
       // auto
-      case CSSValueId::Auto:
+      case ValueId::Auto:
       // normal
-      case CSSValueId::Normal:
+      case ValueId::Normal:
       // stretch
-      case CSSValueId::Stretch:
+      case ValueId::Stretch:
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
         return CSSPrimitiveValue::Create(initial);
       }
       // [ <self-position> | left | right ]
-      case CSSValueId::AnchorCenter:
+      case ValueId::AnchorCenter:
       {
         if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
         {
@@ -351,15 +351,15 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
         KRYS_FALLTHROUGH;
       }
-      case CSSValueId::Start:
-      case CSSValueId::End:
-      case CSSValueId::Center:
-      case CSSValueId::SelfStart:
-      case CSSValueId::SelfEnd:
-      case CSSValueId::FlexStart:
-      case CSSValueId::FlexEnd:
-      case CSSValueId::Left:
-      case CSSValueId::Right:
+      case ValueId::Start:
+      case ValueId::End:
+      case ValueId::Center:
+      case ValueId::SelfStart:
+      case ValueId::SelfEnd:
+      case ValueId::FlexStart:
+      case ValueId::FlexEnd:
+      case ValueId::Left:
+      case ValueId::Right:
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
@@ -367,21 +367,21 @@ namespace krys::boo::css::CSSPropertyParserHelpers
         return CSSPrimitiveValue::Create(initial);
       }
       // <baseline-position>
-      case CSSValueId::First:
+      case ValueId::First:
       {
         return ConsumeAlignmentFirstBaseline(tokens, state);
       }
-      case CSSValueId::Last:
+      case ValueId::Last:
       {
         return ConsumeAlignmentLastBaseline(tokens, state);
       }
-      case CSSValueId::Baseline:
+      case ValueId::Baseline:
       {
         return ConsumeAlignmentBaseline(tokens, state);
       }
       // <overflow-position>? [ <self-position> | left | right ]
-      case CSSValueId::Unsafe:
-      case CSSValueId::Safe:
+      case ValueId::Unsafe:
+      case ValueId::Safe:
       {
         return ConsumeAlignmentOverflowPosition(
           tokens, state, initial,
@@ -389,7 +389,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
           {
             switch (second)
             {
-              case CSSValueId::AnchorCenter:
+              case ValueId::AnchorCenter:
               {
                 if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
                 {
@@ -397,15 +397,15 @@ namespace krys::boo::css::CSSPropertyParserHelpers
                 }
                 KRYS_FALLTHROUGH;
               }
-              case CSSValueId::Start:
-              case CSSValueId::End:
-              case CSSValueId::Center:
-              case CSSValueId::SelfStart:
-              case CSSValueId::SelfEnd:
-              case CSSValueId::FlexStart:
-              case CSSValueId::FlexEnd:
-              case CSSValueId::Left:
-              case CSSValueId::Right:
+              case ValueId::Start:
+              case ValueId::End:
+              case ValueId::Center:
+              case ValueId::SelfStart:
+              case ValueId::SelfEnd:
+              case ValueId::FlexStart:
+              case ValueId::FlexEnd:
+              case ValueId::Left:
+              case ValueId::Right:
               {
                 return true;
               }
@@ -423,7 +423,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     }
   }
 
-  RefPtr<CSSValue> ConsumeAlignItems(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeAlignItems(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'align-items'> = normal | stretch | <baseline-position> | <overflow-position>? <self-position>
     // https://drafts.csswg.org/css-align/#propdef-align-items
@@ -431,9 +431,9 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     switch (auto initial = tokens.Peek().ValueId(); initial)
     {
       // normal
-      case CSSValueId::Normal:
+      case ValueId::Normal:
       // stretch
-      case CSSValueId::Stretch:
+      case ValueId::Stretch:
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
@@ -441,7 +441,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
         return CSSPrimitiveValue::Create(initial);
       }
       // <self-position>
-      case CSSValueId::AnchorCenter:
+      case ValueId::AnchorCenter:
       {
         if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
         {
@@ -450,13 +450,13 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
         KRYS_FALLTHROUGH;
       }
-      case CSSValueId::Start:
-      case CSSValueId::End:
-      case CSSValueId::Center:
-      case CSSValueId::SelfStart:
-      case CSSValueId::SelfEnd:
-      case CSSValueId::FlexStart:
-      case CSSValueId::FlexEnd:
+      case ValueId::Start:
+      case ValueId::End:
+      case ValueId::Center:
+      case ValueId::SelfStart:
+      case ValueId::SelfEnd:
+      case ValueId::FlexStart:
+      case ValueId::FlexEnd:
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
@@ -464,21 +464,21 @@ namespace krys::boo::css::CSSPropertyParserHelpers
         return CSSPrimitiveValue::Create(initial);
       }
       // <baseline-position>
-      case CSSValueId::First:
+      case ValueId::First:
       {
         return ConsumeAlignmentFirstBaseline(tokens, state);
       }
-      case CSSValueId::Last:
+      case ValueId::Last:
       {
         return ConsumeAlignmentLastBaseline(tokens, state);
       }
-      case CSSValueId::Baseline:
+      case ValueId::Baseline:
       {
         return ConsumeAlignmentBaseline(tokens, state);
       }
       // <overflow-position>? <self-position>
-      case CSSValueId::Unsafe:
-      case CSSValueId::Safe:
+      case ValueId::Unsafe:
+      case ValueId::Safe:
       {
         return ConsumeAlignmentOverflowPosition(
           tokens, state, initial,
@@ -486,7 +486,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
           {
             switch (second)
             {
-              case CSSValueId::AnchorCenter:
+              case ValueId::AnchorCenter:
               {
                 if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
                 {
@@ -495,13 +495,13 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
                 KRYS_FALLTHROUGH;
               }
-              case CSSValueId::Start:
-              case CSSValueId::End:
-              case CSSValueId::Center:
-              case CSSValueId::SelfStart:
-              case CSSValueId::SelfEnd:
-              case CSSValueId::FlexStart:
-              case CSSValueId::FlexEnd:
+              case ValueId::Start:
+              case ValueId::End:
+              case ValueId::Center:
+              case ValueId::SelfStart:
+              case ValueId::SelfEnd:
+              case ValueId::FlexStart:
+              case ValueId::FlexEnd:
               {
                 return true;
               }
@@ -517,7 +517,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     }
   }
 
-  RefPtr<CSSValue> ConsumeJustifyItems(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeJustifyItems(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'justify-items'> = normal | stretch | <baseline-position> | <overflow-position>? [ <self-position> |
     // left | right ] | legacy | legacy && [ left | right | center ]
@@ -526,9 +526,9 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     switch (auto initial = tokens.Peek().ValueId(); initial)
     {
       // normal
-      case CSSValueId::Normal:
+      case ValueId::Normal:
       // stretch
-      case CSSValueId::Stretch:
+      case ValueId::Stretch:
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
@@ -537,7 +537,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       }
       // [ <self-position> | left | right ] - NOTE: `left`, `right`, and `center` handled further below to
       // account for additional `legacy` keyword.
-      case CSSValueId::AnchorCenter:
+      case ValueId::AnchorCenter:
       {
         if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
         {
@@ -546,33 +546,33 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
         KRYS_FALLTHROUGH;
       }
-      case CSSValueId::Start:
-      case CSSValueId::End:
-      case CSSValueId::SelfStart:
-      case CSSValueId::SelfEnd:
-      case CSSValueId::FlexStart:
-      case CSSValueId::FlexEnd:
+      case ValueId::Start:
+      case ValueId::End:
+      case ValueId::SelfStart:
+      case ValueId::SelfEnd:
+      case ValueId::FlexStart:
+      case ValueId::FlexEnd:
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
         return CSSPrimitiveValue::Create(initial);
       }
       // <baseline-position>
-      case CSSValueId::First:
+      case ValueId::First:
       {
         return ConsumeAlignmentFirstBaseline(tokens, state);
       }
-      case CSSValueId::Last:
+      case ValueId::Last:
       {
         return ConsumeAlignmentLastBaseline(tokens, state);
       }
-      case CSSValueId::Baseline:
+      case ValueId::Baseline:
       {
         return ConsumeAlignmentBaseline(tokens, state);
       }
       // <overflow-position>? [ <self-position> | left | right ]
-      case CSSValueId::Unsafe:
-      case CSSValueId::Safe:
+      case ValueId::Unsafe:
+      case ValueId::Safe:
       {
         return ConsumeAlignmentOverflowPosition(
           tokens, state, initial,
@@ -580,7 +580,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
           {
             switch (second)
             {
-              case CSSValueId::AnchorCenter:
+              case ValueId::AnchorCenter:
               {
                 if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
                 {
@@ -589,15 +589,15 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
                 KRYS_FALLTHROUGH;
               }
-              case CSSValueId::Start:
-              case CSSValueId::End:
-              case CSSValueId::Center:
-              case CSSValueId::SelfStart:
-              case CSSValueId::SelfEnd:
-              case CSSValueId::FlexStart:
-              case CSSValueId::FlexEnd:
-              case CSSValueId::Left:
-              case CSSValueId::Right:
+              case ValueId::Start:
+              case ValueId::End:
+              case ValueId::Center:
+              case ValueId::SelfStart:
+              case ValueId::SelfEnd:
+              case ValueId::FlexStart:
+              case ValueId::FlexEnd:
+              case ValueId::Left:
+              case ValueId::Right:
               {
                 return true;
               }
@@ -610,16 +610,16 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       }
 
       // legacy | legacy && [ left | right | center ]
-      case CSSValueId::Legacy:
+      case ValueId::Legacy:
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
 
         switch (auto second = tokens.Peek().ValueId(); second)
         {
-          case CSSValueId::Left:
-          case CSSValueId::Right:
-          case CSSValueId::Center:
+          case ValueId::Left:
+          case ValueId::Right:
+          case ValueId::Center:
           {
             tokens.Discard();
             tokens.DiscardWhitespace();
@@ -633,16 +633,16 @@ namespace krys::boo::css::CSSPropertyParserHelpers
           }
         }
       }
-      case CSSValueId::Center:
-      case CSSValueId::Left:
-      case CSSValueId::Right:
+      case ValueId::Center:
+      case ValueId::Left:
+      case ValueId::Right:
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
 
         switch (auto second = tokens.Peek().ValueId(); second)
         {
-          case CSSValueId::Legacy:
+          case ValueId::Legacy:
           {
             tokens.Discard();
             tokens.DiscardWhitespace();

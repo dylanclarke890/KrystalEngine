@@ -1,10 +1,8 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::dom::tests
 {
-  using namespace krys::boo;
-
   TEST_CASE("NameValidation::IsValidNamespacePrefix", "[HTML][NameValidation]")
   {
     SECTION("Empty string is invalid")

@@ -10,7 +10,7 @@ namespace krys::boo::css
     using ResultType = R;
 
     KRYS_NODISCARD static ResultType Resolve(Variant<T, Ts...> &&consumeResult,
-                                             CSSPropertyParserOptions options = {}) noexcept
+                                             PropertyParserOptions options = {}) noexcept
     requires(sizeof...(Ts) > 0)
     {
       return SwitchOn(krys::move(consumeResult),
@@ -18,14 +18,14 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static ResultType Resolve(T &&consumeResult,
-                                             CSSPropertyParserOptions options = {}) noexcept
+                                             PropertyParserOptions options = {}) noexcept
     requires(sizeof...(Ts) == 0)
     {
       return Base::Resolve(krys::move(consumeResult), options);
     }
 
-    KRYS_NODISCARD static ResultType ConsumeAndResolve(TokenRange &tokens, CSSPropertyParserState &state,
-                                                       CSSPropertyParserOptions options = {}) noexcept
+    KRYS_NODISCARD static ResultType ConsumeAndResolve(TokenRange &tokens, PropertyParserState &state,
+                                                       PropertyParserOptions options = {}) noexcept
     {
       auto result = MetaConsumer<T, Ts...>::Consume(tokens, state, options);
       if (!result)

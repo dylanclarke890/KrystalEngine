@@ -2,7 +2,8 @@
 
 namespace krys::boo::html
 {
-  HTMLHeadElement::HTMLHeadElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Head)
+  HTMLHeadElement::HTMLHeadElement(dom::Document &document) noexcept
+      : HTMLElement(document, HTMLElementInterface::Head)
   {
   }
 }

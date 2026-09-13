@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLOListElement);
 
   public:
-    HTMLOListElement(Document &document) noexcept;
+    HTMLOListElement(dom::Document &document) noexcept;
 
 #pragma region HTMLOListElement https://html.spec.whatwg.org/#htmlolistelement
 

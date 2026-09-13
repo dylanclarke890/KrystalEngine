@@ -1,15 +1,15 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/HTML/Enums/AttributeState.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/NTTPString.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 
-namespace krys::boo::html::Attributes
+namespace krys::boo::html
 {
   struct KeywordStateMapping
   {
@@ -25,52 +25,52 @@ namespace krys::boo::html::Attributes
 
   KRYS_NODISCARD inline KeywordStateMapping TrueStateMapping() noexcept
   {
-    return KeywordStateMapping {DOMStringAtom(u8"true"), AttributeState::True};
+    return KeywordStateMapping {dom::DOMStringAtom(u8"true"), AttributeState::True};
   }
 
   KRYS_NODISCARD inline KeywordStateMapping FalseStateMapping() noexcept
   {
-    return KeywordStateMapping {DOMStringAtom(u8"false"), AttributeState::False};
+    return KeywordStateMapping {dom::DOMStringAtom(u8"false"), AttributeState::False};
   }
 
   KRYS_NODISCARD inline KeywordStateMapping YesStateMapping() noexcept
   {
-    return KeywordStateMapping {DOMStringAtom(u8"yes"), AttributeState::Yes};
+    return KeywordStateMapping {dom::DOMStringAtom(u8"yes"), AttributeState::Yes};
   }
 
   KRYS_NODISCARD inline KeywordStateMapping NoStateMapping() noexcept
   {
-    return KeywordStateMapping {DOMStringAtom(u8"no"), AttributeState::No};
+    return KeywordStateMapping {dom::DOMStringAtom(u8"no"), AttributeState::No};
   }
 
   KRYS_NODISCARD inline KeywordStateMapping OnStateMapping() noexcept
   {
-    return KeywordStateMapping {DOMStringAtom(u8"on"), AttributeState::On};
+    return KeywordStateMapping {dom::DOMStringAtom(u8"on"), AttributeState::On};
   }
 
   KRYS_NODISCARD inline KeywordStateMapping OffStateMapping() noexcept
   {
-    return KeywordStateMapping {DOMStringAtom(u8"off"), AttributeState::Off};
+    return KeywordStateMapping {dom::DOMStringAtom(u8"off"), AttributeState::Off};
   }
 
   KRYS_NODISCARD inline KeywordStateMapping NoneStateMapping() noexcept
   {
-    return KeywordStateMapping {DOMStringAtom(u8"none"), AttributeState::None};
+    return KeywordStateMapping {dom::DOMStringAtom(u8"none"), AttributeState::None};
   }
 
   KRYS_NODISCARD inline KeywordStateMapping AutoStateMapping() noexcept
   {
-    return KeywordStateMapping {DOMStringAtom(u8"auto"), AttributeState::Auto};
+    return KeywordStateMapping {dom::DOMStringAtom(u8"auto"), AttributeState::Auto};
   }
 
   KRYS_NODISCARD inline KeywordStateMapping DefaultStateMapping() noexcept
   {
-    return KeywordStateMapping {DOMStringAtom(u8"default"), AttributeState::Default};
+    return KeywordStateMapping {dom::DOMStringAtom(u8"default"), AttributeState::Default};
   }
 
   KRYS_NODISCARD inline KeywordStateMapping InheritStateMapping() noexcept
   {
-    return KeywordStateMapping {DOMStringAtom(u8"inherit"), AttributeState::Inherit};
+    return KeywordStateMapping {dom::DOMStringAtom(u8"inherit"), AttributeState::Inherit};
   }
 
   template <size_t N>
@@ -136,7 +136,8 @@ namespace krys::boo::html::Attributes
 
   public:
     template <OneOf<dom::DOMString, Maybe<dom::DOMString>> TContentAttributeValue>
-    KRYS_NODISCARD static TContentAttributeValue ResolveCanonicalKeyword(Maybe<dom::DOMString> &&value) noexcept
+    KRYS_NODISCARD static TContentAttributeValue
+      ResolveCanonicalKeyword(Maybe<dom::DOMString> &&value) noexcept
     {
       auto state = ResolveState(value);
       if constexpr (CanReturnNullResolvedState<Traits>)
@@ -168,11 +169,13 @@ namespace krys::boo::html::Attributes
 
       if constexpr (SameType<TContentAttributeValue, Maybe<dom::DOMString>>)
       {
-        return canonicalKeyword == dom::DOMStringAtom::Null() ? null : dom::DOMString(canonicalKeyword.View());
+        return canonicalKeyword == dom::DOMStringAtom::Null() ? null
+                                                              : dom::DOMString(canonicalKeyword.View());
       }
       else if constexpr (SameType<TContentAttributeValue, dom::DOMString>)
       {
-        return canonicalKeyword == dom::DOMStringAtom::Null() ? dom::DOMString {} : dom::DOMString(canonicalKeyword.View());
+        return canonicalKeyword == dom::DOMStringAtom::Null() ? dom::DOMString {}
+                                                              : dom::DOMString(canonicalKeyword.View());
       }
     }
 
@@ -197,9 +200,9 @@ namespace krys::boo::html::Attributes
 
       auto keywordMappings = Traits::StateMappings;
 
-      auto it =
-        std::find_if(keywordMappings.begin(), keywordMappings.end(), [&](auto &mapping)
-                     { return StringAlgorithms::ASCIICaseInsensitiveMatch(value, mapping.Keyword.View()); });
+      auto it = std::find_if(
+        keywordMappings.begin(), keywordMappings.end(), [&](auto &mapping)
+        { return infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, mapping.Keyword.View()); });
 
       if (it != keywordMappings.end())
       {

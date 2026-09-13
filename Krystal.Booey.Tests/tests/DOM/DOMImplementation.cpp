@@ -10,10 +10,8 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::dom::tests
 {
-  using namespace krys::boo;
-
   TEST_CASE("DOMImplementation::CreateDocumentType", "[Node][DOMImplementation]")
   {
     auto document = CreateRef<HTMLDocument>();

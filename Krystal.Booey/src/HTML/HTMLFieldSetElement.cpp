@@ -3,7 +3,7 @@
 
 namespace krys::boo::html
 {
-  HTMLFieldSetElement::HTMLFieldSetElement(Document &document) noexcept
+  HTMLFieldSetElement::HTMLFieldSetElement(dom::Document &document) noexcept
       : HTMLElement(document, HTMLElementInterface::FieldSet)
   {
   }
@@ -12,22 +12,22 @@ namespace krys::boo::html
 
   bool HTMLFieldSetElement::Disabled() const noexcept
   {
-    return Attributes::Reflection::Reflect<bool>(*this, u8"disabled");
+    return Reflection::Reflect<bool>(*this, u8"disabled");
   }
 
   void HTMLFieldSetElement::Disabled(bool value) noexcept
   {
-    Attributes::Reflection::Reflect<bool>(*this, u8"disabled", krys::move(value));
+    Reflection::Reflect<bool>(*this, u8"disabled", krys::move(value));
   }
 
   dom::DOMString HTMLFieldSetElement::Name() const noexcept
   {
-    return Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
   void HTMLFieldSetElement::Name(dom::DOMString &&value) noexcept
   {
-    return Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
+    return Reflection::Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }
 
 #pragma endregion

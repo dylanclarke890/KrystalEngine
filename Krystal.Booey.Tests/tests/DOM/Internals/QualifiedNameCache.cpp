@@ -1,12 +1,10 @@
 ﻿#include "Krystal.Booey/DOM/Internals/QualifiedNameCache.hpp"
-#include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::dom::tests
 {
-  using namespace krys::boo;
-
   TEST_CASE("QualifiedNameCache: Same namespace, prefix, and localName should share storage",
             "[HTML][QualifiedNameCache]")
   {
@@ -45,8 +43,8 @@ namespace krys::tests
   {
     auto qn1 = QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml"), dom::DOMStringAtom::Null(),
                              dom::DOMStringAtom(u8"div"));
-    auto qn2 = QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml"), dom::DOMStringAtom(u8"xhtml"),
-                             dom::DOMStringAtom(u8"div"));
+    auto qn2 = QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml"),
+                             dom::DOMStringAtom(u8"xhtml"), dom::DOMStringAtom(u8"div"));
 
     REQUIRE(qn1 != qn2);
   }
@@ -69,13 +67,13 @@ namespace krys::tests
   TEST_CASE("QualifiedNameCache: QualifiedName with TagName and Namespace", "[HTML][QualifiedNameCache]")
   {
     auto qn1 = QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml"), dom::DOMStringAtom::Null(),
-                             dom::DOMStringAtom(u8"div"), TagName::div, Namespace::HTML);
+                             dom::DOMStringAtom(u8"div"), html::TagName::div, html::Namespace::HTML);
     auto qn2 = QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml"), dom::DOMStringAtom::Null(),
-                             dom::DOMStringAtom(u8"div"), TagName::div, Namespace::HTML);
+                             dom::DOMStringAtom(u8"div"), html::TagName::div, html::Namespace::HTML);
 
     REQUIRE(qn1 == qn2);
-    REQUIRE(qn1.TagName() == TagName::div);
-    REQUIRE(qn1.Namespace() == Namespace::HTML);
+    REQUIRE(qn1.TagName() == html::TagName::div);
+    REQUIRE(qn1.Namespace() == html::Namespace::HTML);
   }
 
   TEST_CASE("QualifiedNameCache: Storage properties are accessible", "[HTML][QualifiedNameCache]")
@@ -110,8 +108,10 @@ namespace krys::tests
 
   TEST_CASE("QualifiedNameCache: null namespace and prefix", "[HTML][QualifiedNameCache]")
   {
-    auto qn1 = QualifiedName(dom::DOMStringAtom::Null(), dom::DOMStringAtom::Null(), dom::DOMStringAtom(u8"localName"));
-    auto qn2 = QualifiedName(dom::DOMStringAtom::Null(), dom::DOMStringAtom::Null(), dom::DOMStringAtom(u8"localName"));
+    auto qn1 = QualifiedName(dom::DOMStringAtom::Null(), dom::DOMStringAtom::Null(),
+                             dom::DOMStringAtom(u8"localName"));
+    auto qn2 = QualifiedName(dom::DOMStringAtom::Null(), dom::DOMStringAtom::Null(),
+                             dom::DOMStringAtom(u8"localName"));
 
     REQUIRE(qn1 == qn2);
     REQUIRE(qn1.NamespaceURI() == dom::DOMStringAtom::Null());
@@ -142,8 +142,8 @@ namespace krys::tests
 
   TEST_CASE("QualifiedNameCache: Name property with prefix", "[HTML][QualifiedNameCache]")
   {
-    auto qn = QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml"), dom::DOMStringAtom(u8"custom"),
-                            dom::DOMStringAtom(u8"element"));
+    auto qn = QualifiedName(dom::DOMStringAtom(u8"http://www.w3.org/1999/xhtml"),
+                            dom::DOMStringAtom(u8"custom"), dom::DOMStringAtom(u8"element"));
 
     REQUIRE(qn.Name() == u8"custom:element");
   }

@@ -3,14 +3,10 @@
 #include "Krystal.Booey/HTML/Enums/ContentType.hpp"
 #include "Krystal.Booey/HTML/Enums/EncodingSource.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLEncodingSniffer.hpp"
-#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Base.hpp"
+#include "Krystal.Core/Text/Encodings/Decode.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/StronglyTypedValue.hpp"
-#include "Krystal.Text/ASCII.hpp"
-#include "Krystal.Text/Codecs/ICodec.hpp"
-#include "Krystal.Text/Decode/Decode.hpp"
-#include "Krystal.Text/Unicode.hpp"
-#include <cassert>
 
 namespace krys::boo::html
 {

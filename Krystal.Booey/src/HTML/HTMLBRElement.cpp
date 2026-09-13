@@ -3,7 +3,8 @@
 
 namespace krys::boo::html
 {
-  HTMLBRElement::HTMLBRElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::BR)
+  HTMLBRElement::HTMLBRElement(dom::Document &document) noexcept
+      : HTMLElement(document, HTMLElementInterface::BR)
   {
   }
 
@@ -11,12 +12,12 @@ namespace krys::boo::html
 
   dom::DOMString HTMLBRElement::Clear() const noexcept
   {
-    return Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"clear").value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"clear").value_or(u8"");
   }
 
   void HTMLBRElement::Clear(dom::DOMString &&value) noexcept
   {
-    Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"clear", krys::move(value));
+    Reflection::Reflect<dom::DOMString>(*this, u8"clear", krys::move(value));
   }
 
 #pragma endregion

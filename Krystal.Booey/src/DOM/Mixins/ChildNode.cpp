@@ -9,15 +9,14 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 
-namespace krys::boo::dom::Mixins
+namespace krys::boo::dom::mixins
 {
   namespace
   {
     /// @brief Return the first node in the given range that isn't contained in the given list of nodes, or
     /// null if there are no such nodes.
     template <std::ranges::forward_range TRange>
-    KRYS_NODISCARD static Node *FirstViableSibling(TRange &&range,
-                                                          const List<NodeOrString> &nodes) noexcept
+    KRYS_NODISCARD static Node *FirstViableSibling(TRange &&range, const List<NodeOrString> &nodes) noexcept
     {
       for (auto &item : range)
       {
@@ -51,7 +50,7 @@ namespace krys::boo::dom::Mixins
     auto &parent = *childNode.ParentNode();
     auto *viablePreviousSibling = FirstViableSibling(PreviousSiblingRange(childNode), nodes);
 
-    auto node = Mixins::ParentNode::ConvertNodesIntoNode(nodes, childNode.NodeDocument());
+    auto node = ParentNode::ConvertNodesIntoNode(nodes, childNode.NodeDocument());
     if (node.HasException())
     {
       return node.ReleaseException();
@@ -79,7 +78,7 @@ namespace krys::boo::dom::Mixins
     auto &parent = *childNode.ParentNode();
     auto *viableNextSibling = FirstViableSibling(NextSiblingRange(childNode), nodes);
 
-    auto node = Mixins::ParentNode::ConvertNodesIntoNode(nodes, childNode.NodeDocument());
+    auto node = ParentNode::ConvertNodesIntoNode(nodes, childNode.NodeDocument());
     if (node.HasException())
     {
       return node.ReleaseException();
@@ -104,7 +103,7 @@ namespace krys::boo::dom::Mixins
     auto &parent = *childNode.ParentNode();
     auto *viableNextSibling = FirstViableSibling(NextSiblingRange(childNode), nodes);
 
-    auto node = Mixins::ParentNode::ConvertNodesIntoNode(nodes, childNode.NodeDocument());
+    auto node = ParentNode::ConvertNodesIntoNode(nodes, childNode.NodeDocument());
     if (node.HasException())
     {
       return node.ReleaseException();

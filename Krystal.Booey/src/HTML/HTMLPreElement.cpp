@@ -3,7 +3,8 @@
 
 namespace krys::boo::html
 {
-  HTMLPreElement::HTMLPreElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Pre)
+  HTMLPreElement::HTMLPreElement(dom::Document &document) noexcept
+      : HTMLElement(document, HTMLElementInterface::Pre)
   {
   }
 
@@ -11,12 +12,12 @@ namespace krys::boo::html
 
   int32 HTMLPreElement::Width() const noexcept
   {
-    return Attributes::Reflection::Reflect<int32>(*this, u8"width");
+    return Reflection::Reflect<int32>(*this, u8"width");
   }
 
   void HTMLPreElement::Width(int32 value) noexcept
   {
-    Attributes::Reflection::Reflect<int32>(*this, u8"width", krys::move(value));
+    Reflection::Reflect<int32>(*this, u8"width", krys::move(value));
   }
 
 #pragma endregion

@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLLIElement);
 
   public:
-    HTMLLIElement(Document &document) noexcept;
+    HTMLLIElement(dom::Document &document) noexcept;
 
 #pragma region HTMLLIElement - https://html.spec.whatwg.org/#htmllielement
 

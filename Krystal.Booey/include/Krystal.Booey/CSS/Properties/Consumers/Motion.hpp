@@ -5,14 +5,14 @@
 namespace krys::boo::css
 {
   class TokenRange;
-  struct CSSPropertyParserState;
+  struct PropertyParserState;
   class CSSValue;
 
-  namespace CSSPropertyParserHelpers
+  namespace PropertyParserHelpers
   {
     // <'offset-path'> = none | <offset-path> || <coord-box>
     // https://drafts.fxtf.org/motion-1/#propdef-offset-path
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeOffsetPath(TokenRange &tokens,
-                                                      CSSPropertyParserState &state) noexcept;
+                                                      PropertyParserState &state) noexcept;
   }
 }

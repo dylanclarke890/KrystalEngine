@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLFieldSetElement);
 
   public:
-    HTMLFieldSetElement(Document &document) noexcept;
+    HTMLFieldSetElement(dom::Document &document) noexcept;
 
 #pragma region HTMLFieldSetElement - https://html.spec.whatwg.org/#htmlfieldsetelement
 

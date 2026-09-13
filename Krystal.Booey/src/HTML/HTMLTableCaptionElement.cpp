@@ -3,7 +3,7 @@
 
 namespace krys::boo::html
 {
-  HTMLTableCaptionElement::HTMLTableCaptionElement(Document &document) noexcept
+  HTMLTableCaptionElement::HTMLTableCaptionElement(dom::Document &document) noexcept
       : HTMLElement(document, HTMLElementInterface::TableCaption)
   {
   }
@@ -12,12 +12,12 @@ namespace krys::boo::html
 
   dom::DOMString HTMLTableCaptionElement::Align() const noexcept
   {
-    return Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
   }
 
   void HTMLTableCaptionElement::Align(dom::DOMString &&value) noexcept
   {
-    Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    Reflection::Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
   }
 
 #pragma endregion

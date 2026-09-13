@@ -9,7 +9,7 @@ namespace krys::boo::css
 {
   struct TwoComponentPositionHorizontal
   {
-    Variant<Keywords::Left, Keywords::Right, Keywords::Center, Keywords::XStart, Keywords::XEnd,
+    Variant<keywords::Left, keywords::Right, keywords::Center, keywords::XStart, keywords::XEnd,
             LengthPercentage<>>
       offset;
 
@@ -20,7 +20,7 @@ namespace krys::boo::css
 
   struct TwoComponentPositionVertical
   {
-    Variant<Keywords::Top, Keywords::Bottom, Keywords::Center, Keywords::YStart, Keywords::YEnd,
+    Variant<keywords::Top, keywords::Bottom, keywords::Center, keywords::YStart, keywords::YEnd,
             LengthPercentage<>>
       offset;
 
@@ -31,7 +31,7 @@ namespace krys::boo::css
 
   struct ThreeComponentPositionHorizontal
   {
-    Variant<Keywords::Left, Keywords::Right, Keywords::Center, Keywords::XStart, Keywords::XEnd> offset;
+    Variant<keywords::Left, keywords::Right, keywords::Center, keywords::XStart, keywords::XEnd> offset;
 
     KRYS_NODISCARD bool operator==(const ThreeComponentPositionHorizontal &) const noexcept = default;
   };
@@ -40,7 +40,7 @@ namespace krys::boo::css
 
   struct ThreeComponentPositionVertical
   {
-    Variant<Keywords::Top, Keywords::Bottom, Keywords::Center, Keywords::YStart, Keywords::YEnd> offset;
+    Variant<keywords::Top, keywords::Bottom, keywords::Center, keywords::YStart, keywords::YEnd> offset;
 
     KRYS_NODISCARD bool operator==(const ThreeComponentPositionVertical &) const noexcept = default;
   };
@@ -49,7 +49,7 @@ namespace krys::boo::css
 
   struct FourComponentPositionHorizontal
   {
-    SpaceSeparatedTuple<Variant<Keywords::Left, Keywords::Right, Keywords::XStart, Keywords::XEnd>,
+    SpaceSeparatedTuple<Variant<keywords::Left, keywords::Right, keywords::XStart, keywords::XEnd>,
                         LengthPercentage<>>
       offset;
 
@@ -60,7 +60,7 @@ namespace krys::boo::css
 
   struct FourComponentPositionVertical
   {
-    SpaceSeparatedTuple<Variant<Keywords::Top, Keywords::Bottom, Keywords::YStart, Keywords::YEnd>,
+    SpaceSeparatedTuple<Variant<keywords::Top, keywords::Bottom, keywords::YStart, keywords::YEnd>,
                         LengthPercentage<>>
       offset;
 

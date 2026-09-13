@@ -10,19 +10,17 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::dom::tests
 {
-  using namespace krys::boo;
-
   namespace
   {
     struct CommonTestData
     {
       Ref<Document> Document;
-      Ref<HTML::Text> Node;
+      Ref<dom::Text> Node;
 
       CommonTestData()
-          : Document(CreateRef<HTML::Document>()), Node(CreateRef<HTML::Text>(*Document, u8"Hello, world!"))
+          : Document(CreateRef<dom::Document>()), Node(CreateRef<dom::Text>(*Document, u8"Hello, world!"))
       {
       }
     };
@@ -41,9 +39,9 @@ namespace krys::tests
 
   TEST_CASE("Text::SplitText updates live ranges", "[HTML][Text]")
   {
-    auto document = CreateRef<Document>();
+    auto document = CreateRef<dom::Document>();
     auto parent = CreateRef<TestElement>(*document);
-    auto text = CreateRef<HTML::Text>(*document, u8"Hello, world!");
+    auto text = CreateRef<dom::Text>(*document, u8"Hello, world!");
 
     REQUIRE_FALSE(parent->AppendChild(*text).HasException());
 
@@ -109,11 +107,11 @@ namespace krys::tests
 
   TEST_CASE("Text::WholeText", "[HTML][Text]")
   {
-    auto doc = CreateRef<Document>();
+    auto doc = CreateRef<dom::Document>();
     auto parent = CreateRef<TestElement>(*doc);
-    auto textNodeA = CreateRef<krys::boo::Text>(*doc, u8"Hello,");
-    auto textNodeB = CreateRef<krys::boo::Text>(*doc, u8" ");
-    auto textNodeC = CreateRef<krys::boo::Text>(*doc, u8"world!");
+    auto textNodeA = CreateRef<dom::Text>(*doc, u8"Hello,");
+    auto textNodeB = CreateRef<dom::Text>(*doc, u8" ");
+    auto textNodeC = CreateRef<dom::Text>(*doc, u8"world!");
     auto childNode = CreateRef<TestElement>(*doc);
 
     REQUIRE_FALSE(parent->AppendChild(*textNodeA).HasException());
@@ -133,16 +131,16 @@ namespace krys::tests
 
   TEST_CASE("Text::NodeName", "[HTML][Text]")
   {
-    auto doc = CreateRef<Document>();
-    auto textNode = CreateRef<krys::boo::Text>(*doc, u8"Hello, world!");
+    auto doc = CreateRef<dom::Document>();
+    auto textNode = CreateRef<dom::Text>(*doc, u8"Hello, world!");
 
     REQUIRE(textNode->NodeName() == u8"#text");
   }
 
   TEST_CASE("Text::NodeType", "[HTML][Text]")
   {
-    auto doc = CreateRef<Document>();
-    auto textNode = CreateRef<krys::boo::Text>(*doc, u8"Hello, world!");
+    auto doc = CreateRef<dom::Document>();
+    auto textNode = CreateRef<dom::Text>(*doc, u8"Hello, world!");
 
     REQUIRE(textNode->NodeType() == NodeType::TEXT_NODE);
   }

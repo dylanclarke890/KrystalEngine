@@ -10,18 +10,16 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::dom::tests
 {
-  using namespace krys::boo;
-
   namespace
   {
     struct CommonTestData
     {
-      Ref<Document> Document;
+      Ref<dom::Document> Document;
       Ref<DocumentFragment> Node;
 
-      CommonTestData() : Document(CreateRef<HTML::Document>()), Node(CreateRef<DocumentFragment>(*Document))
+      CommonTestData() : Document(CreateRef<dom::Document>()), Node(CreateRef<DocumentFragment>(*Document))
       {
       }
 
@@ -50,8 +48,8 @@ namespace krys::tests
   TEST_CASE("DocumentFragment::TextContent", "[HTML][DocumentFragment]")
   {
     CommonTestData data;
-    auto textNode1 = CreateRef<HTML::Text>(*data.Document, u8"Hello");
-    auto textNode2 = CreateRef<HTML::Text>(*data.Document, u8" world!");
+    auto textNode1 = CreateRef<dom::Text>(*data.Document, u8"Hello");
+    auto textNode2 = CreateRef<dom::Text>(*data.Document, u8" world!");
 
     REQUIRE_FALSE(data.Node->AppendChild(*textNode1).HasException());
     REQUIRE_FALSE(data.Node->AppendChild(*textNode2).HasException());

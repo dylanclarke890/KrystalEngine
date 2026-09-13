@@ -34,19 +34,19 @@ namespace krys::boo::css
       constexpr bool operator==(const Kind &) const noexcept = default;
     };
 
-    using JumpStart = Kind<Integer<CSSRange {1, CSSRange::Inf}>, Keywords::JumpStart>;
-    using JumpEnd = Kind<Integer<CSSRange {1, CSSRange::Inf}>, Keywords::JumpEnd, ShouldSerializeKeyword::No>;
-    using JumpBoth = Kind<Integer<CSSRange {1, CSSRange::Inf}>, Keywords::JumpBoth>;
-    using Start = Kind<Integer<CSSRange {1, CSSRange::Inf}>, Keywords::Start>;
-    using End = Kind<Integer<CSSRange {1, CSSRange::Inf}>, Keywords::End, ShouldSerializeKeyword::No>;
-    using JumpNone = Kind<Integer<CSSRange {2, CSSRange::Inf}>, Keywords::JumpNone>;
+    using JumpStart = Kind<Integer<CSSRange {1, CSSRange::Inf}>, keywords::JumpStart>;
+    using JumpEnd = Kind<Integer<CSSRange {1, CSSRange::Inf}>, keywords::JumpEnd, ShouldSerializeKeyword::No>;
+    using JumpBoth = Kind<Integer<CSSRange {1, CSSRange::Inf}>, keywords::JumpBoth>;
+    using Start = Kind<Integer<CSSRange {1, CSSRange::Inf}>, keywords::Start>;
+    using End = Kind<Integer<CSSRange {1, CSSRange::Inf}>, keywords::End, ShouldSerializeKeyword::No>;
+    using JumpNone = Kind<Integer<CSSRange {2, CSSRange::Inf}>, keywords::JumpNone>;
 
     Variant<JumpStart, JumpEnd, JumpBoth, Start, End, JumpNone> value;
 
     constexpr bool operator==(const StepsEasingParameters &) const noexcept = default;
   };
 
-  using StepsEasingFunction = FunctionNotation<CSSValueId::Steps, StepsEasingParameters>;
+  using StepsEasingFunction = FunctionNotation<ValueId::Steps, StepsEasingParameters>;
 
   DEFINE_TYPE_WRAPPER_GET(StepsEasingParameters, value);
 

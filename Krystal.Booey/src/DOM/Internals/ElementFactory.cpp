@@ -29,15 +29,15 @@ namespace krys::boo::dom
       registry = document.CustomElementRegistry();
     }
 
-    auto elementName = ParseTagName(krys::Text::ToASCIILowercase(name.LocalName().View()));
-    if (name.NamespaceURI() == Namespaces::HTML)
+    auto elementName = html::ParseTagName(krys::text::ToASCIILower(name.LocalName().View()));
+    if (name.NamespaceURI() == infra::Namespaces::HTML)
     {
-      result = CustomElementFactory::TryCreate(document, name, is, synchronousCustomElements,
-                                               registry.value().get());
+      result = html::CustomElementFactory::TryCreate(document, name, is, synchronousCustomElements,
+                                                     registry.value().get());
 
       if (result == nullptr)
       {
-        result = HTMLElementFactory::TryCreate(document, elementName);
+        result = html::HTMLElementFactory::TryCreate(document, elementName);
       }
 
       bool isValidCustomElementName = NameValidation::IsValidCustomElementName(name.LocalName().View());
@@ -45,11 +45,11 @@ namespace krys::boo::dom
       {
         if (isValidCustomElementName)
         {
-          result = CreateRefPtr<HTMLElement>(document);
+          result = CreateRefPtr<html::HTMLElement>(document);
         }
         else
         {
-          result = CreateRefPtr<HTMLUnknownElement>(document);
+          result = CreateRefPtr<html::HTMLUnknownElement>(document);
         }
       }
 
@@ -58,18 +58,18 @@ namespace krys::boo::dom
         result->_customElementState = CustomElementState::Undefined;
       }
     }
-    else if (name.NamespaceURI() == Namespaces::SVG)
+    else if (name.NamespaceURI() == infra::Namespaces::SVG)
     {
-      result = SVGElementFactory::TryCreate(document, elementName);
+      result = svg::SVGElementFactory::TryCreate(document, elementName);
 
       if (result == nullptr)
       {
-        result = CreateRefPtr<SVGUnknownElement>(document);
+        result = CreateRefPtr<svg::SVGUnknownElement>(document);
       }
     }
-    else if (name.NamespaceURI() == Namespaces::MathML)
+    else if (name.NamespaceURI() == infra::Namespaces::MathML)
     {
-      result = MathMLElementFactory::TryCreate(document, name);
+      result = mathml::MathMLElementFactory::TryCreate(document, name);
     }
 
     if (result == nullptr)

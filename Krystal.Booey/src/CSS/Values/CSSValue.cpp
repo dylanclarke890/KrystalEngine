@@ -3,9 +3,9 @@
 
 namespace krys::boo::css
 {
-  CSSValueId CSSValue::ValueId() const noexcept
+  ValueId CSSValue::ValueId() const noexcept
   {
     auto *value = DynamicDowncast<CSSPrimitiveValue>(*this);
-    return value ? value->ValueId() : CSSValueId::Invalid;
+    return value ? value->ValueId() : ValueId::Invalid;
   }
 }

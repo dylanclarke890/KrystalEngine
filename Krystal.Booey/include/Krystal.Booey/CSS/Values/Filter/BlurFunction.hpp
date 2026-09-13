@@ -16,7 +16,7 @@ namespace krys::boo::css
     bool operator==(const Blur &) const = default;
   };
 
-  using BlurFunction = FunctionNotation<CSSValueId::Blur, Blur>;
+  using BlurFunction = FunctionNotation<ValueId::Blur, Blur>;
 
   DEFINE_TYPE_WRAPPER_GET(Blur, value);
 }

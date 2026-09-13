@@ -6,14 +6,14 @@ namespace krys::boo::css
 {
   class TokenRange;
   class CSSValue;
-  struct CSSPropertyParserState;
+  struct PropertyParserState;
 
-  namespace CSSPropertyParserHelpers
+  namespace PropertyParserHelpers
   {
     /// @grammar <'margin-trim'>
     /// @see https://drafts.csswg.org/css-box/#margin-trim
     // https://drafts.csswg.org/css-box/#margin-trim
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeMarginTrim(TokenRange &tokens,
-                                                      CSSPropertyParserState &state) noexcept;
+                                                      PropertyParserState &state) noexcept;
   }
 }

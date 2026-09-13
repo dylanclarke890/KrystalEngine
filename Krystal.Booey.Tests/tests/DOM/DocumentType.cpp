@@ -8,17 +8,15 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::dom::tests
 {
-  using namespace krys::boo;
-
   struct CommonTestData
   {
-    Ref<Document> Document;
+    Ref<dom::Document> Document;
     Ref<DocumentType> DocType;
 
     CommonTestData(const dom::DOMString &name, const dom::DOMString &publicId, const dom::DOMString &systemId)
-        : Document(CreateRef<HTML::Document>()),
+        : Document(CreateRef<dom::Document>()),
           DocType(*Document->Implementation().CreateDocumentType(name, publicId, systemId))
     {
     }

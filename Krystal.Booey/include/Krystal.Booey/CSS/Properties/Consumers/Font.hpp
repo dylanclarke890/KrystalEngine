@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Booey/CSS/Values/Enums/CSSValueId.hpp"
+#include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/CSSPrimitiveNumericTypes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -25,34 +25,34 @@ namespace krys::boo::css
     enum class FamilyNamesIndex;
   }
 
-  namespace CSSPropertyParserHelpers
+  namespace PropertyParserHelpers
   {
     // MARK: - Font
 
     // normal | italic | oblique <angle [-90deg,90deg]>?
     using UnresolvedFontStyleObliqueAngle = Angle<CSSRange {-90, 90}>;
-    using UnresolvedFontStyle = Variant<CSSValueId, UnresolvedFontStyleObliqueAngle>;
+    using UnresolvedFontStyle = Variant<ValueId, UnresolvedFontStyleObliqueAngle>;
 
     // normal | small-caps
-    using UnresolvedFontVariantCaps = CSSValueId;
+    using UnresolvedFontVariantCaps = ValueId;
 
     // normal | bold | bolder | lighter | <number [1,1000]>
     using UnresolvedFontWeightNumber = Number<CSSRange {1, 1'000}>;
-    using UnresolvedFontWeight = Variant<CSSValueId, UnresolvedFontWeightNumber>;
+    using UnresolvedFontWeight = Variant<ValueId, UnresolvedFontWeightNumber>;
 
     // normal | <percentage [0,∞]> | ultra-condensed | extra-condensed | condensed | semi-condensed |
     // semi-expanded | expanded | extra-expanded | ultra-expanded
     using UnresolvedFontWidthPercentage = Percentage<NonNegative>;
-    using UnresolvedFontWidth = Variant<CSSValueId, UnresolvedFontWidthPercentage>;
+    using UnresolvedFontWidth = Variant<ValueId, UnresolvedFontWidthPercentage>;
 
     // <absolute-size> | <relative-size> | <length-percentage [0,∞]>
-    using UnresolvedFontSize = Variant<CSSValueId, LengthPercentage<NonNegative>>;
+    using UnresolvedFontSize = Variant<ValueId, LengthPercentage<NonNegative>>;
 
     // normal | <number [0,∞]> | <length-percentage [0,∞]>
-    using UnresolvedFontLineHeight = Variant<CSSValueId, Number<NonNegative>, LengthPercentage<NonNegative>>;
+    using UnresolvedFontLineHeight = Variant<ValueId, Number<NonNegative>, LengthPercentage<NonNegative>>;
 
     // [ <family-name> | <generic-family> ]#
-    using UnresolvedFontFamilyName = Variant<CSSValueId, CSSOMStringAtom>;
+    using UnresolvedFontFamilyName = Variant<ValueId, CSSOMStringAtom>;
     using UnresolvedFontFamily = SmallList<UnresolvedFontFamilyName>;
 
     struct UnresolvedFont
@@ -75,28 +75,28 @@ namespace krys::boo::css
     // MARK: 'font-style'
     // https://drafts.csswg.org/css-fonts-4/#font-style-prop
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeFontStyle(TokenRange &tokens,
-                                                     CSSPropertyParserState &state) noexcept;
+                                                     PropertyParserState &state) noexcept;
 
     // MARK: 'font-family'
     // https://drafts.csswg.org/css-fonts-4/#font-family-prop
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeFontFamily(TokenRange &tokens,
-                                                      CSSPropertyParserState &state) noexcept;
+                                                      PropertyParserState &state) noexcept;
 
     // Sub-production of 'font-family': <family-name>
     // https://drafts.csswg.org/css-fonts-4/#family-name-syntax
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeFamilyName(TokenRange &tokens,
-                                                      CSSPropertyParserState &state) noexcept;
+                                                      PropertyParserState &state) noexcept;
 
     // Sub-production of 'font-family': <generic-family>
     // https://drafts.csswg.org/css-fonts-4/#generic-family-name-syntax
-    KRYS_NODISCARD const CSSOMStringAtom &GenericFontFamily(CSSValueId) noexcept;
+    KRYS_NODISCARD const CSSOMStringAtom &GenericFontFamily(ValueId) noexcept;
 
-    KRYS_NODISCARD WebKitFontFamilyNames::FamilyNamesIndex GenericFontFamilyIndex(CSSValueId) noexcept;
+    KRYS_NODISCARD WebKitFontFamilyNames::FamilyNamesIndex GenericFontFamilyIndex(ValueId) noexcept;
 
     // MARK: 'font-size-adjust'
     // https://drafts.csswg.org/css-fonts-4/#font-size-adjust-prop
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeFontSizeAdjust(TokenRange &tokens,
-                                                          CSSPropertyParserState &state) noexcept;
+                                                          PropertyParserState &state) noexcept;
 
     // MARK: - @font-face descriptor consumers
 
@@ -106,17 +106,17 @@ namespace krys::boo::css
                                                          ScriptExecutionContext &) noexcept;
 
     KRYS_NODISCARD RefPtr<CSSValueList> ConsumeFontFaceSrc(TokenRange &tokens,
-                                                           CSSPropertyParserState &state) noexcept;
+                                                           PropertyParserState &state) noexcept;
 
     // Sub-production of 'src: <font-tech>
     // https://drafts.csswg.org/css-fonts-4/#font-tech-values
     KRYS_NODISCARD SmallList<FontTechnology> ConsumeFontTech(TokenRange &tokens,
-                                                             CSSPropertyParserState &state,
+                                                             PropertyParserState &state,
                                                              bool singleValue = false) noexcept;
 
     // Sub-production of 'src': <font-format>
     // https://drafts.csswg.org/css-fonts-4/#font-format-values
-    KRYS_NODISCARD CSSOMString ConsumeFontFormat(TokenRange &tokens, CSSPropertyParserState &state,
+    KRYS_NODISCARD CSSOMString ConsumeFontFormat(TokenRange &tokens, PropertyParserState &state,
                                                  bool rejectStringValues = false) noexcept;
 
     // MARK: @font-face 'size-adjust'
@@ -140,7 +140,7 @@ namespace krys::boo::css
                                                            ScriptExecutionContext &) noexcept;
 
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeFontFaceFontStyle(TokenRange &tokens,
-                                                             CSSPropertyParserState &state) noexcept;
+                                                             PropertyParserState &state) noexcept;
 
     // MARK: @font-face 'font-feature-settings'
     // https://drafts.csswg.org/css-fonts-4/#descdef-font-face-font-feature-settings
@@ -149,13 +149,13 @@ namespace krys::boo::css
     // Sub-production of 'font-feature-settings': <feature-tag-value>
     // https://drafts.csswg.org/css-fonts-4/#feature-tag-value
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeFeatureTagValue(TokenRange &tokens,
-                                                           CSSPropertyParserState &state) noexcept;
+                                                           PropertyParserState &state) noexcept;
 
     // MARK: @font-face 'font-variation-settings'
     // https://drafts.csswg.org/css-fonts-4/#descdef-font-face-font-variation-settings
     // Sub-production of 'font-variation-settings': <variation-tag-value>
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeVariationTagValue(TokenRange &tokens,
-                                                             CSSPropertyParserState &state) noexcept;
+                                                             PropertyParserState &state) noexcept;
 
     // MARK: @font-face 'font-width'
     // https://drafts.csswg.org/css-fonts-4/#descdef-font-face-font-width
@@ -176,16 +176,16 @@ namespace krys::boo::css
 
     // Template and inline implementations are at the bottom of the file for readability.
 
-    KRYS_NODISCARD constexpr bool IsSystemFontShorthand(CSSValueId valueId) noexcept
+    KRYS_NODISCARD constexpr bool IsSystemFontShorthand(ValueId valueId) noexcept
     {
       // This needs to stay in sync with SystemFontDatabase::FontShorthand.
-      // static_assert(CSSValueId::StatusBar - CSSValueId::Caption
+      // static_assert(ValueId::StatusBar - ValueId::Caption
       //              == static_cast<SystemFontDatabase::FontShorthandUnderlyingType>(
       //                SystemFontDatabase::FontShorthand::StatusBar));
-      return valueId >= CSSValueId::Caption && valueId <= CSSValueId::StatusBar;
+      return valueId >= ValueId::Caption && valueId <= ValueId::StatusBar;
     }
 
-    // inline SystemFontDatabase::FontShorthand lowerFontShorthand(CSSValueId valueId)
+    // inline SystemFontDatabase::FontShorthand lowerFontShorthand(ValueId valueId)
     //{
     //   // This needs to stay in sync with SystemFontDatabase::FontShorthand.
     //   ASSERT(isSystemFontShorthand(valueId));

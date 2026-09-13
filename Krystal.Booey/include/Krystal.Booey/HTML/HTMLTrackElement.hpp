@@ -15,7 +15,7 @@ namespace krys::boo::html
     TrackReadyState _readyState : BitCount<TrackReadyState>() {TrackReadyState::None};
 
   public:
-    HTMLTrackElement(Document &document) noexcept;
+    HTMLTrackElement(dom::Document &document) noexcept;
 
 #pragma region HTMLTrackElement - https://html.spec.whatwg.org/#htmltrackelement
 
@@ -26,10 +26,10 @@ namespace krys::boo::html
     void Kind(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-track-src
-    KRYS_NODISCARD dom::ExceptionOr<USVString> Src() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-track-src
-    dom::ExceptionOr<void> Src(USVString &&value) noexcept;
+    dom::ExceptionOr<void> Src(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-track-srclang
     KRYS_NODISCARD dom::DOMString SrcLang() const noexcept;

@@ -9,7 +9,7 @@
 
 namespace krys::boo::dom
 {
-  ShadowRoot::ShadowRoot(Document &document, RefPtr<krys::boo::CustomElementRegistry> &&registry,
+  ShadowRoot::ShadowRoot(Document &document, RefPtr<html::CustomElementRegistry> &&registry,
                          NodeFlags flags) noexcept
       : DocumentFragment(document, flags | NodeFlags::IsShadowRoot),
         _customElementRegistry(krys::move(registry))
@@ -29,7 +29,7 @@ namespace krys::boo::dom
 
 #pragma region DocumentOrShadowRoot Mixin - https://dom.spec.whatwg.org/#mixin-documentorshadowroot
 
-  RefPtr<CustomElementRegistry> ShadowRoot::CustomElementRegistry() const noexcept
+  RefPtr<html::CustomElementRegistry> ShadowRoot::CustomElementRegistry() const noexcept
   {
     return _customElementRegistry;
   }

@@ -24,7 +24,7 @@ namespace krys::boo::css
 
   constexpr CSSValueCreationInvoker CreateCSSValue {};
 
-  KRYS_NODISCARD Ref<CSSValue> CreatePrimitiveCSSValue(CSSValueId keyword) noexcept;
+  KRYS_NODISCARD Ref<CSSValue> CreatePrimitiveCSSValue(ValueId keyword) noexcept;
 
   KRYS_NODISCARD Ref<CSSValue> CreatePrimitiveCSSValue(const CustomIdentifier &identifer) noexcept;
 
@@ -34,7 +34,7 @@ namespace krys::boo::css
 
   KRYS_NODISCARD Ref<CSSValue> CreatePrimitiveCSSValue(const CSSOMString &str) noexcept;
 
-  KRYS_NODISCARD Ref<CSSValue> CreateFunctionCSSValue(CSSValueId name, Ref<CSSValue> &&args) noexcept;
+  KRYS_NODISCARD Ref<CSSValue> CreateFunctionCSSValue(ValueId name, Ref<CSSValue> &&args) noexcept;
     
   template <SerializationSeparatorType>
   KRYS_NODISCARD Ref<CSSValue> CreateCoalescingPairCSSValue(Ref<CSSValue> &&, Ref<CSSValue> &&) noexcept;
@@ -148,11 +148,11 @@ namespace krys::boo::css
   };
 
   // Specialization for `Constant`.
-  template <CSSValueId Id>
-  struct CSSValueCreation<ValueKeywordConstant<Id>>
+  template <ValueId Id>
+  struct CSSValueCreation<KeywordValueConstant<Id>>
   {
     template <typename... Args>
-    KRYS_NODISCARD Ref<CSSValue> operator()(CSSValuePool &, const ValueKeywordConstant<Id> &,
+    KRYS_NODISCARD Ref<CSSValue> operator()(CSSValuePool &, const KeywordValueConstant<Id> &,
                                             Args &&...) noexcept
     {
       return CreatePrimitiveCSSValue(Id);
@@ -205,7 +205,7 @@ namespace krys::boo::css
   };
 
   // Specialization for `FunctionNotation`.
-  template <CSSValueId Name, typename CSSType>
+  template <ValueId Name, typename CSSType>
   struct CSSValueCreation<FunctionNotation<Name, CSSType>>
   {
     template <typename... Args>

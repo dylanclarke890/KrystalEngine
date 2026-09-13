@@ -11,7 +11,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLImageElement);
 
   public:
-    HTMLImageElement(Document &document) noexcept;
+    HTMLImageElement(dom::Document &document) noexcept;
 
 #pragma region HTMLImageElement - https://html.spec.whatwg.org/#htmlimageelement
 
@@ -22,16 +22,16 @@ namespace krys::boo::html
     void Alt(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-src
-    KRYS_NODISCARD dom::ExceptionOr<USVString> Src() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-src
-    dom::ExceptionOr<void> Src(USVString &&value) noexcept;
+    dom::ExceptionOr<void> Src(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-srcset
-    KRYS_NODISCARD dom::ExceptionOr<USVString> SrcSet() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> SrcSet() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-srcset
-    dom::ExceptionOr<void> SrcSet(USVString &&value) noexcept;
+    dom::ExceptionOr<void> SrcSet(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-sizes
     KRYS_NODISCARD dom::DOMString Sizes() const noexcept;
@@ -85,7 +85,7 @@ namespace krys::boo::html
     KRYS_NODISCARD bool Complete() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-currentsrc
-    KRYS_NODISCARD USVString CurrentSrc() const noexcept;
+    KRYS_NODISCARD dom::USVString CurrentSrc() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-referrerpolicy
     KRYS_NODISCARD dom::DOMString ReferrerPolicy() const noexcept;
@@ -124,10 +124,10 @@ namespace krys::boo::html
     void Name(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-lowsrc
-    KRYS_NODISCARD dom::ExceptionOr<USVString> LowSrc() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> LowSrc() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-lowsrc
-    dom::ExceptionOr<void> LowSrc(USVString &&value) noexcept;
+    dom::ExceptionOr<void> LowSrc(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-align
     KRYS_NODISCARD dom::DOMString Align() const noexcept;
@@ -148,10 +148,10 @@ namespace krys::boo::html
     void VSpace(uint32 value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-longdesc
-    KRYS_NODISCARD dom::ExceptionOr<USVString> LongDesc() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> LongDesc() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-longdesc
-    dom::ExceptionOr<void> LongDesc(USVString &&value) noexcept;
+    dom::ExceptionOr<void> LongDesc(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-border
     KRYS_NODISCARD dom::DOMString Border() const noexcept;

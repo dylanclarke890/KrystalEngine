@@ -16,7 +16,7 @@ namespace krys::boo::css
     bool operator==(const Invert &) const = default;
   };
 
-  using InvertFunction = FunctionNotation<CSSValueId::Invert, Invert>;
+  using InvertFunction = FunctionNotation<ValueId::Invert, Invert>;
 
   DEFINE_TYPE_WRAPPER_GET(Invert, value);
 }

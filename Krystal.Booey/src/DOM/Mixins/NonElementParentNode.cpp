@@ -8,7 +8,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 
-namespace krys::boo::dom::Mixins
+namespace krys::boo::dom::mixins
 {
   RefPtr<Element> NonElementParentNode::GetElementById(ContainerNode &node, DOMStringView id) noexcept
   {

@@ -3,8 +3,9 @@
 
 namespace krys::boo::html
 {
-  HTMLSlotElement::HTMLSlotElement(Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Slot, HTMLElementFlags::None, NodeFlags::IsHTMLSlotElement)
+  HTMLSlotElement::HTMLSlotElement(dom::Document &document) noexcept
+      : HTMLElement(document, HTMLElementInterface::Slot, HTMLElementFlags::None,
+                    dom::NodeFlags::IsHTMLSlotElement)
   {
   }
 
@@ -12,12 +13,12 @@ namespace krys::boo::html
 
   dom::DOMString HTMLSlotElement::Name() const noexcept
   {
-    return Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
   void HTMLSlotElement::Name(dom::DOMString &&name) noexcept
   {
-    Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"name", krys::move(name));
+    Reflection::Reflect<dom::DOMString>(*this, u8"name", krys::move(name));
   }
 
 #pragma endregion

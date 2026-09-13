@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTitleElement);
 
   public:
-    HTMLTitleElement(Document &document) noexcept;
+    HTMLTitleElement(dom::Document &document) noexcept;
 
 #pragma region HTMLTitleElement - https://html.spec.whatwg.org/#htmltitleelement
 

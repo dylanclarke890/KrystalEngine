@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLParagraphElement);
 
   public:
-    HTMLParagraphElement(Document &document) noexcept;
+    HTMLParagraphElement(dom::Document &document) noexcept;
 
 #pragma region HTMLParagraphElement Obsolete members - https://html.spec.whatwg.org/#HTMLParagraphElement-partial
 

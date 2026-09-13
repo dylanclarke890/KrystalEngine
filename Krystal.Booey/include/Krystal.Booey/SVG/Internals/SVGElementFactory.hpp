@@ -26,41 +26,43 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
+namespace krys::boo::dom
+{
+  class Document;
+}
+
 namespace krys::boo::svg
 {
-  class CustomElementRegistry;
-  class Document;
-
   class SVGElementFactory
   {
   public:
-    KRYS_NODISCARD static RefPtr<SVGElement> TryCreate(Document &document, TagName elementName) noexcept
+    KRYS_NODISCARD static RefPtr<SVGElement> TryCreate(dom::Document &document, html::TagName elementName) noexcept
     {
       switch (elementName)
       {
-        case TagName::circle:
+        case html::TagName::circle:
         {
           return CreateRef<SVGCircleElement>(document);
         }
-        case TagName::desc:
+        case html::TagName::desc:
         {
           return CreateRef<SVGDescElement>(document);
         }
-        case TagName::svg:
+        case html::TagName::svg:
         {
           return CreateRef<SVGSvgElement>(document);
         }
-        case TagName::script:
+        case html::TagName::script:
         {
           return CreateRef<SVGScriptElement>(document);
         }
-        case TagName::title:
+        case html::TagName::title:
         {
           return CreateRef<SVGTitleElement>(document);
         }
-        case TagName::x:
-        case TagName::g:
-        case TagName::a:
+        case html::TagName::x:
+        case html::TagName::g:
+        case html::TagName::a:
         {
           // TODO: return correct element
           return CreateRef<SVGElement>(document);

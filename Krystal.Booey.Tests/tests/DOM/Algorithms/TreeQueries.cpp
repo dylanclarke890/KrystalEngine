@@ -5,10 +5,8 @@
 #include "Krystal.Booey/DOM/Text.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::dom::tests
 {
-  using namespace krys::boo;
-
 #pragma region Node Trees
 
   TEST_CASE("TreeQueries::Length", "[HTML][TreeQueries]")
@@ -16,7 +14,7 @@ namespace krys::tests
     auto doc = CreateRef<Document>();
     auto parent = CreateRef<TestElement>(*doc);
     auto child = CreateRef<TestElement>(*doc);
-    auto textNode = CreateRef<HTML::Text>(*doc, u8"Hello, world!");
+    auto textNode = CreateRef<krys::boo::dom::Text>(*doc, u8"Hello, world!");
 
     REQUIRE(TreeQueries::Length(*parent) == 0);
     REQUIRE(TreeQueries::Length(*child) == 0);
@@ -42,7 +40,7 @@ namespace krys::tests
     auto doc = CreateRef<Document>();
     auto parent = CreateRef<TestElement>(*doc);
     auto child = CreateRef<TestElement>(*doc);
-    auto textNode = CreateRef<HTML::Text>(*doc, u8"Hello, world!");
+    auto textNode = CreateRef<krys::boo::dom::Text>(*doc, u8"Hello, world!");
 
     REQUIRE(TreeQueries::IsEmpty(*parent));
     REQUIRE(TreeQueries::IsEmpty(*child));

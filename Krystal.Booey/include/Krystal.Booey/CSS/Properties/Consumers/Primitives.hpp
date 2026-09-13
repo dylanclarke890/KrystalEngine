@@ -7,7 +7,7 @@ namespace krys::boo::css
 {
   class TokenRange;
 
-  namespace CSSPropertyParserHelpers
+  namespace PropertyParserHelpers
   {
     // MARK: - Comma
     KRYS_NODISCARD bool ConsumeComma(TokenRange &tokens) noexcept;

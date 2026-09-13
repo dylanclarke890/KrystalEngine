@@ -4,8 +4,8 @@
 #include "Krystal.Booey/CSS/Calc/CSSCalcValue.hpp"
 #include "Krystal.Booey/CSS/Parser/Token.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserOptions.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserOptions.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/CSSPrimitiveNumeric.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/CSSPrimitiveNumericRange.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -168,9 +168,9 @@ namespace krys::boo::css
     constexpr static TokenType TokenType = TokenType::Dimension;
 
     KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(TokenRange &tokens,
-                                                                 CSSPropertyParserState &state,
+                                                                 PropertyParserState &state,
                                                                  CalcAllowedSymbols,
-                                                                 CSSPropertyParserOptions options) noexcept
+                                                                 PropertyParserOptions options) noexcept
     {
       assert(tokens.Peek().Type() == TokenType::Dimension);
 
@@ -208,9 +208,9 @@ namespace krys::boo::css
     constexpr static TokenType TokenType = TokenType::Percentage;
 
     KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(TokenRange &tokens,
-                                                                 CSSPropertyParserState &,
+                                                                 PropertyParserState &,
                                                                  CalcAllowedSymbols,
-                                                                 CSSPropertyParserOptions options) noexcept
+                                                                 PropertyParserOptions options) noexcept
     {
       assert(tokens.Peek().Type() == TokenType::Percentage);
 
@@ -240,9 +240,9 @@ namespace krys::boo::css
     constexpr static TokenType TokenType = TokenType::Number;
 
     KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(TokenRange &tokens,
-                                                                 CSSPropertyParserState &,
+                                                                 PropertyParserState &,
                                                                  CalcAllowedSymbols,
-                                                                 CSSPropertyParserOptions options) noexcept
+                                                                 PropertyParserOptions options) noexcept
     {
       assert(tokens.Peek().Type() == TokenType::Number);
 
@@ -272,9 +272,9 @@ namespace krys::boo::css
     constexpr static TokenType TokenType = TokenType::Number;
 
     KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(TokenRange &tokens,
-                                                                 CSSPropertyParserState &state,
+                                                                 PropertyParserState &state,
                                                                  CalcAllowedSymbols,
-                                                                 CSSPropertyParserOptions options) noexcept
+                                                                 PropertyParserOptions options) noexcept
     {
       assert(tokens.Peek().Type() == TokenType::Number);
 
@@ -310,9 +310,9 @@ namespace krys::boo::css
     constexpr static TokenType TokenType = TokenType::Function;
 
     KRYS_NODISCARD static Maybe<typename Primitive::Calc> Consume(TokenRange &tokens,
-                                                                  CSSPropertyParserState &state,
+                                                                  PropertyParserState &state,
                                                                   CalcAllowedSymbols symbolsAllowed,
-                                                                  CSSPropertyParserOptions options) noexcept
+                                                                  PropertyParserOptions options) noexcept
     {
       assert(tokens.Peek().Type() == TokenType::Function);
 
@@ -334,8 +334,8 @@ namespace krys::boo::css
   {
     constexpr static TokenType TokenType = TokenType::Ident;
 
-    KRYS_NODISCARD static Maybe<T> Consume(TokenRange &tokens, CSSPropertyParserState &,
-                                           CalcAllowedSymbols, CSSPropertyParserOptions) noexcept
+    KRYS_NODISCARD static Maybe<T> Consume(TokenRange &tokens, PropertyParserState &,
+                                           CalcAllowedSymbols, PropertyParserOptions) noexcept
     {
       assert(tokens.Peek().Type() == TokenType::Ident);
 

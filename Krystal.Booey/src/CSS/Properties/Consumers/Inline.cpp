@@ -1,11 +1,11 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Inline.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValuePair.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
   KRYS_NODISCARD static RefPtr<CSSValue> ConsumeTextEdge(TokenRange &range) noexcept
   {
@@ -13,15 +13,15 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     //               [ text | alphabetic | ideographic | ideographic-ink ]?
     // https://drafts.csswg.org/css-inline-3/#typedef-text-edge
 
-    auto firstValue = ConsumeIdent<CSSValueId::Text, CSSValueId::Cap, CSSValueId::Ex, CSSValueId::Ideographic,
-                                   CSSValueId::IdeographicInk>(range);
+    auto firstValue = ConsumeIdent<ValueId::Text, ValueId::Cap, ValueId::Ex, ValueId::Ideographic,
+                                   ValueId::IdeographicInk>(range);
     if (!firstValue)
     {
       return nullptr;
     }
 
-    auto secondValue = ConsumeIdent<CSSValueId::Text, CSSValueId::Alphabetic, CSSValueId::Ideographic,
-                                    CSSValueId::IdeographicInk>(range);
+    auto secondValue = ConsumeIdent<ValueId::Text, ValueId::Alphabetic, ValueId::Ideographic,
+                                    ValueId::IdeographicInk>(range);
 
     // https://drafts.csswg.org/css-inline-3/#text-edges
     // "If only one value is specified, both edges are assigned that same keyword if possible; else text is
@@ -33,9 +33,9 @@ namespace krys::boo::css::CSSPropertyParserHelpers
         return false;
       }
 
-      if (firstValue->ValueId() == CSSValueId::Cap || firstValue->ValueId() == CSSValueId::Ex)
+      if (firstValue->ValueId() == ValueId::Cap || firstValue->ValueId() == ValueId::Ex)
       {
-        return secondValue->ValueId() != CSSValueId::Text;
+        return secondValue->ValueId() != ValueId::Text;
       }
 
       return firstValue->ValueId() != secondValue->ValueId();
@@ -49,12 +49,12 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return CSSValuePair::Create(krys::move(firstValue), krys::move(secondValue));
   }
 
-  RefPtr<CSSValue> ConsumeLineFitEdge(TokenRange &range, CSSPropertyParserState &) noexcept
+  RefPtr<CSSValue> ConsumeLineFitEdge(TokenRange &range, PropertyParserState &) noexcept
   {
     // <'line-fit-edge'> = leading | <text-edge>
     // https://drafts.csswg.org/css-inline-3/#propdef-line-fit-edge
 
-    if (range.Peek().ValueId() == CSSValueId::Leading)
+    if (range.Peek().ValueId() == ValueId::Leading)
     {
       return ConsumeIdent(range);
     }
@@ -62,12 +62,12 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return ConsumeTextEdge(range);
   }
 
-  RefPtr<CSSValue> ConsumeTextBoxEdge(TokenRange &range, CSSPropertyParserState &) noexcept
+  RefPtr<CSSValue> ConsumeTextBoxEdge(TokenRange &range, PropertyParserState &) noexcept
   {
     // <'text-box-edge'> = auto | <text-edge>
     // https://drafts.csswg.org/css-inline-3/#propdef-text-box-edge
 
-    if (range.Peek().ValueId() == CSSValueId::Auto)
+    if (range.Peek().ValueId() == ValueId::Auto)
     {
       return ConsumeIdent(range);
     }

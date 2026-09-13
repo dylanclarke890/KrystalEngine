@@ -5,12 +5,12 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumer.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/String.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSURLValue.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/CSSURL.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
   // MARK: <url>
   // https://drafts.csswg.org/css-values/#urls
@@ -27,7 +27,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   // <referrer-policy-modifier> = referrer-policy( no-referrer | no-referrer-when-downgrade | same-origin |
   // origin | strict-origin | origin-when-cross-origin | strict-origin-when-cross-origin | unsafe-url)
 
-  Maybe<CSSURL> ConsumeURLRaw(TokenRange &tokens, CSSPropertyParserState &state,
+  Maybe<CSSURL> ConsumeURLRaw(TokenRange &tokens, PropertyParserState &state,
                               AllowedURLModifiers allowedURLModifiers) noexcept
   {
     auto &token = tokens.Peek();
@@ -47,7 +47,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
     switch (token.FunctionId())
     {
-      case CSSValueId::Url:
+      case ValueId::Url:
       {
         TokenRangeGuard guard {tokens};
 
@@ -78,7 +78,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
           {
             switch (args.Peek().FunctionId())
             {
-              case CSSValueId::CrossOrigin:
+              case ValueId::CrossOrigin:
               {
                 if (!HasFlag(allowedURLModifiers, AllowedURLModifiers::CrossOrigin))
                 {
@@ -91,7 +91,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
                 }
 
                 auto crossOriginArgs = ConsumeFunction(args);
-                auto crossOriginValue = MetaConsumer<Keywords::Anonymous, Keywords::UseCredentials>::Consume(
+                auto crossOriginValue = MetaConsumer<keywords::Anonymous, keywords::UseCredentials>::Consume(
                   crossOriginArgs, state);
 
                 if (!crossOriginValue || !crossOriginArgs.IsAtEnd())
@@ -102,7 +102,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
                 result->modifiers.crossOrigin = URLCrossOriginFunction {.parameters = {*crossOriginValue}};
                 break;
               }
-              case CSSValueId::Integrity:
+              case ValueId::Integrity:
               {
                 if (!state.Context.cssURLIntegrityModifierEnabled)
                 {
@@ -132,7 +132,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
                 break;
               }
-              case CSSValueId::ReferrerPolicy:
+              case ValueId::ReferrerPolicy:
               {
                 if (!HasFlag(allowedURLModifiers, AllowedURLModifiers::ReferrerPolicy))
                 {
@@ -146,10 +146,10 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
                 auto referrerPolicyArgs = ConsumeFunction(args);
                 auto referrerPolicyValue =
-                  MetaConsumer<Keywords::NoReferrer, Keywords::NoReferrerWhenDowngrade, Keywords::SameOrigin,
-                               Keywords::Origin, Keywords::StrictOrigin, Keywords::OriginWhenCrossOrigin,
-                               Keywords::StrictOriginWhenCrossOrigin,
-                               Keywords::UnsafeUrl>::Consume(referrerPolicyArgs, state);
+                  MetaConsumer<keywords::NoReferrer, keywords::NoReferrerWhenDowngrade, keywords::SameOrigin,
+                               keywords::Origin, keywords::StrictOrigin, keywords::OriginWhenCrossOrigin,
+                               keywords::StrictOriginWhenCrossOrigin,
+                               keywords::UnsafeUrl>::Consume(referrerPolicyArgs, state);
 
                 if (!referrerPolicyValue || !referrerPolicyArgs.IsAtEnd())
                 {
@@ -180,7 +180,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return {};
   }
 
-  RefPtr<CSSValue> ConsumeURL(TokenRange &tokens, CSSPropertyParserState &state,
+  RefPtr<CSSValue> ConsumeURL(TokenRange &tokens, PropertyParserState &state,
                               AllowedURLModifiers allowedURLModifiers) noexcept
   {
     if (auto rawURL = ConsumeURLRaw(tokens, state, allowedURLModifiers))

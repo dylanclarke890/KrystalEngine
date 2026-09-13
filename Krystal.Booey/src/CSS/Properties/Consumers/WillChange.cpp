@@ -1,20 +1,20 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/WillChange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValueListBuilder.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
   KRYS_NODISCARD RefPtr<CSSValue> ConsumeWillChange(TokenRange &tokens,
-                                                    CSSPropertyParserState &state) noexcept
+                                                    PropertyParserState &state) noexcept
   {
     // <'will-change'> = auto | <animateable-feature>#
     // https://drafts.csswg.org/css-will-change/#propdef-will-change
 
-    if (tokens.Peek().ValueId() == CSSValueId::Auto)
+    if (tokens.Peek().ValueId() == ValueId::Auto)
     {
       return ConsumeIdent(tokens);
     }
@@ -26,15 +26,15 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     {
       switch (tokens.Peek().ValueId())
       {
-        case CSSValueId::Contents:
-        case CSSValueId::ScrollPosition:
+        case ValueId::Contents:
+        case ValueId::ScrollPosition:
         {
           values.push_back(ConsumeIdent(tokens));
           break;
         }
-        case CSSValueId::None:
-        case CSSValueId::All:
-        case CSSValueId::Auto:
+        case ValueId::None:
+        case ValueId::All:
+        case ValueId::Auto:
         {
           return nullptr;
         }
@@ -45,18 +45,18 @@ namespace krys::boo::css::CSSPropertyParserHelpers
             return nullptr;
           }
 
-          CSSPropertyId propertyId = FindCSSPropertyId(tokens.Peek().IdentCodePoints());
-          if (propertyId == CSSPropertyId::WillChange)
+          PropertyId propertyId = FindProperty(tokens.Peek().IdentCodePoints());
+          if (propertyId == PropertyId::WillChange)
           {
             return nullptr;
           }
 
           if (!IsExposed(propertyId, &state.Context.PropertySettings))
           {
-            propertyId = CSSPropertyId::Invalid;
+            propertyId = PropertyId::Invalid;
           }
 
-          if (propertyId != CSSPropertyId::Invalid)
+          if (propertyId != PropertyId::Invalid)
           {
             values.push_back(CSSPrimitiveValue::Create(propertyId));
 

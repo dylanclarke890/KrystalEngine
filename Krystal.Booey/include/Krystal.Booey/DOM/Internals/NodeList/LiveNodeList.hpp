@@ -33,8 +33,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::LiveNodeList)
-  static bool IsType(const krys::boo::NodeList &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::LiveNodeList)
+  static bool IsType(const krys::boo::dom::NodeList &target) noexcept
   {
     return target.IsLiveNodeList();
   }

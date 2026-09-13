@@ -11,15 +11,15 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLBaseElement);
 
   public:
-    HTMLBaseElement(Document &document) noexcept;
+    HTMLBaseElement(dom::Document &document) noexcept;
 
 #pragma region HTMLBaseElement - https://html.spec.whatwg.org/#htmlbaseelement
 
     /// @see https://html.spec.whatwg.org/#dom-base-href
-    KRYS_NODISCARD dom::ExceptionOr<USVString> Href() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Href() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-base-href
-    dom::ExceptionOr<void> Href(USVString &&value) noexcept;
+    dom::ExceptionOr<void> Href(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-base-target
     KRYS_NODISCARD dom::DOMString Target() const noexcept;

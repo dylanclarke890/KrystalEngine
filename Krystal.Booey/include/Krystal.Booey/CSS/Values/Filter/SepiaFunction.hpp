@@ -16,7 +16,7 @@ namespace krys::boo::css
     bool operator==(const Sepia &) const = default;
   };
 
-  using SepiaFunction = FunctionNotation<CSSValueId::Sepia, Sepia>;
+  using SepiaFunction = FunctionNotation<ValueId::Sepia, Sepia>;
 
   DEFINE_TYPE_WRAPPER_GET(Sepia, value);
 }

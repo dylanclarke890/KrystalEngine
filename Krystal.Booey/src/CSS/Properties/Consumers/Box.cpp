@@ -4,26 +4,26 @@
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValueListBuilder.hpp"
-#include "Krystal.Booey/CSS/Values/Enums/CSSValueId.hpp"
+#include "Krystal.Booey/CSS/Values/ValueId.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
-  RefPtr<CSSValue> ConsumeMarginTrim(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeMarginTrim(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'margin-trim'> = none | [ block || inline ] | [ block-start || inline-start || block-end || inline-end
     // ] https://drafts.csswg.org/css-box/#margin-trim
 
     auto firstValue = tokens.Peek().ValueId();
-    if (firstValue == CSSValueId::None)
+    if (firstValue == ValueId::None)
     {
       return ConsumeIdent(tokens);
     }
 
     // FIXME: Multiple values should be appended in canonical order.
-    SmallList<CSSValueId, 4uz> idents;
-    if (firstValue == CSSValueId::Block || firstValue == CSSValueId::Inline)
+    SmallList<ValueId, 4uz> idents;
+    if (firstValue == ValueId::Block || firstValue == ValueId::Inline)
     {
-      while (auto ident = ConsumeIdentRaw<CSSValueId::Block, CSSValueId::Inline>(tokens))
+      while (auto ident = ConsumeIdentRaw<ValueId::Block, ValueId::Inline>(tokens))
       {
         if (std::ranges::contains(idents, *ident))
         {
@@ -35,8 +35,8 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     }
     else
     {
-      while (auto ident = ConsumeIdentRaw<CSSValueId::BlockStart, CSSValueId::BlockEnd,
-                                          CSSValueId::InlineStart, CSSValueId::InlineEnd>(tokens))
+      while (auto ident = ConsumeIdentRaw<ValueId::BlockStart, ValueId::BlockEnd,
+                                          ValueId::InlineStart, ValueId::InlineEnd>(tokens))
       {
         if (std::ranges::contains(idents, *ident))
         {
@@ -49,23 +49,23 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       // Try to serialize into either block or inline form
       if (idents.size() == 2uz)
       {
-        if (std::ranges::contains(idents, CSSValueId::BlockStart)
-            && std::ranges::contains(idents, CSSValueId::BlockEnd))
+        if (std::ranges::contains(idents, ValueId::BlockStart)
+            && std::ranges::contains(idents, ValueId::BlockEnd))
         {
-          return CSSPrimitiveValue::Create(CSSValueId::Block);
+          return CSSPrimitiveValue::Create(ValueId::Block);
         }
 
-        if (std::ranges::contains(idents, CSSValueId::InlineStart)
-            && std::ranges::contains(idents, CSSValueId::InlineEnd))
+        if (std::ranges::contains(idents, ValueId::InlineStart)
+            && std::ranges::contains(idents, ValueId::InlineEnd))
         {
-          return CSSPrimitiveValue::Create(CSSValueId::Inline);
+          return CSSPrimitiveValue::Create(ValueId::Inline);
         }
       }
       else if (idents.size() == 4uz)
       {
         CSSValueListBuilder list;
-        list.push_back(CSSPrimitiveValue::Create(CSSValueId::Block));
-        list.push_back(CSSPrimitiveValue::Create(CSSValueId::Inline));
+        list.push_back(CSSPrimitiveValue::Create(ValueId::Block));
+        list.push_back(CSSPrimitiveValue::Create(ValueId::Inline));
 
         return CSSValueList::CreateSpaceSeparated(krys::move(list));
       }

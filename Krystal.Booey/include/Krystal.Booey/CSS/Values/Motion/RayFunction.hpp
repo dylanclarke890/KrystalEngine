@@ -5,8 +5,8 @@
 
 namespace krys::boo::css
 {
-  using RaySize = Variant<Keywords::ClosestCorner, Keywords::ClosestSide, Keywords::FarthestCorner,
-                          Keywords::FarthestSide, Keywords::Sides>;
+  using RaySize = Variant<keywords::ClosestCorner, keywords::ClosestSide, keywords::FarthestCorner,
+                          keywords::FarthestSide, keywords::Sides>;
 
   // ray() = ray( <angle> && <ray-size>? && contain? && [at <position>]? )
   // <ray-size> = closest-side | closest-corner | farthest-side | farthest-corner | sides
@@ -15,13 +15,13 @@ namespace krys::boo::css
   {
     Angle<> angle;
     RaySize size;
-    Maybe<Keywords::Contain> contain;
+    Maybe<keywords::Contain> contain;
     Maybe<CSSPosition> position;
 
     KRYS_NODISCARD bool operator==(const Ray &) const noexcept = default;
   };
 
-  using RayFunction = FunctionNotation<CSSValueId::Ray, Ray>;
+  using RayFunction = FunctionNotation<ValueId::Ray, Ray>;
 
   template <size_t I>
   KRYS_NODISCARD const auto &get(const Ray &value) noexcept

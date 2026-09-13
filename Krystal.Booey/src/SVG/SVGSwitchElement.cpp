@@ -2,7 +2,7 @@
 
 namespace krys::boo::svg
 {
-  SVGSwitchElement::SVGSwitchElement(Document &document) noexcept
+  SVGSwitchElement::SVGSwitchElement(dom::Document &document) noexcept
       : SVGElement(document, SVGElementInterface::Switch)
   {
   }

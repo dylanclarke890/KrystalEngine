@@ -4,35 +4,35 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumer.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Position.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/Shapes.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/Shapes.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/URL.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParsing.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
 #include "Krystal.Booey/CSS/Values/Motion/CSSRayValue.hpp"
 #include "Krystal.Booey/CSS/Values/Motion/RayFunction.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/CSSPosition.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
   KRYS_NODISCARD static RefPtr<CSSValue> ConsumeRayFunction(TokenRange &range,
-                                                            CSSPropertyParserState &state) noexcept
+                                                            PropertyParserState &state) noexcept
   {
     // ray( <angle> && <ray-size>? && contain? && [at <position>]? )
     // <ray-size> = closest-side | closest-corner | farthest-side | farthest-corner | sides
     // https://drafts.fxtf.org/motion-1/#ray-function
 
-    constexpr static auto sizeMappings = std::to_array<std::pair<CSSValueId, RaySize>>({
-      {CSSValueId::ClosestSide, RaySize {Keywords::ClosestSide {}}},
-      {CSSValueId::ClosestCorner, RaySize {Keywords::ClosestCorner {}}},
-      {CSSValueId::FarthestSide, RaySize {Keywords::FarthestSide {}}},
-      {CSSValueId::FarthestCorner, RaySize {Keywords::FarthestCorner {}}},
-      {CSSValueId::Sides, RaySize {Keywords::Sides {}}},
+    constexpr static auto sizeMappings = std::to_array<std::pair<ValueId, RaySize>>({
+      {ValueId::ClosestSide, RaySize {keywords::ClosestSide {}}},
+      {ValueId::ClosestCorner, RaySize {keywords::ClosestCorner {}}},
+      {ValueId::FarthestSide, RaySize {keywords::FarthestSide {}}},
+      {ValueId::FarthestCorner, RaySize {keywords::FarthestCorner {}}},
+      {ValueId::Sides, RaySize {keywords::Sides {}}},
     });
 
-    if (range.Peek().Type() != TokenType::Function || range.Peek().FunctionId() != CSSValueId::Ray)
+    if (range.Peek().Type() != TokenType::Function || range.Peek().FunctionId() != ValueId::Ray)
     {
       return {};
     }
@@ -41,7 +41,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
     Maybe<Angle<>> angle;
     Maybe<RaySize> size;
-    Maybe<Keywords::Contain> contain;
+    Maybe<keywords::Contain> contain;
     Maybe<CSSPosition> position;
 
     auto ConsumeAngle = [&] -> bool
@@ -75,18 +75,18 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
     auto ConsumeContain = [&] -> bool
     {
-      if (contain || !ConsumeIdentRaw<CSSValueId::Contain>(args).has_value())
+      if (contain || !ConsumeIdentRaw<ValueId::Contain>(args).has_value())
       {
         return false;
       }
 
-      contain = Keywords::Contain {};
+      contain = keywords::Contain {};
       return true;
     };
 
     auto ConsumeAtPosition = [&] -> bool
     {
-      if (position || !ConsumeIdentRaw<CSSValueId::At>(args).has_value())
+      if (position || !ConsumeIdentRaw<ValueId::At>(args).has_value())
       {
         return false;
       }
@@ -112,11 +112,11 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     }
 
     return CSSRayValue::Create(
-      RayFunction {.parameters = Ray {krys::move(*angle), size.value_or(RaySize {Keywords::ClosestSide {}}),
+      RayFunction {.parameters = Ray {krys::move(*angle), size.value_or(RaySize {keywords::ClosestSide {}}),
                                       krys::move(contain), krys::move(position)}});
   }
 
-  RefPtr<CSSValue> ConsumeOffsetPath(TokenRange &range, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeOffsetPath(TokenRange &range, PropertyParserState &state) noexcept
   {
     // <'offset-path'> = none | <offset-path> || <coord-box>
     //
@@ -135,7 +135,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     //
     // https://drafts.fxtf.org/motion-1/#propdef-offset-path
 
-    if (range.Peek().ValueId() == CSSValueId::None)
+    if (range.Peek().ValueId() == ValueId::None)
     {
       return ConsumeIdent(range);
     }
@@ -182,7 +182,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       // being that the former does not contain "margin-box" as a valid term. However, the spec also has a few
       // examples using "margin-box", so there seems to be some abiguity to be resolved. See:
       // https://github.com/w3c/fxtf-drafts/issues/481.
-      box = CSSPropertyParsing::ConsumeGeometryBox(range);
+      box = PropertyParsing::ConsumeGeometryBox(range);
       return !!box;
     };
 
@@ -205,7 +205,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     }
 
     // Default value is border-box.
-    if (box && (box->ValueId() != CSSValueId::BorderBox || !hasShapeOrRay))
+    if (box && (box->ValueId() != ValueId::BorderBox || !hasShapeOrRay))
     {
       list.push_back(krys::move(box));
     }

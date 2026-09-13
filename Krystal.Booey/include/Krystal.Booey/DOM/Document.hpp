@@ -23,6 +23,7 @@ namespace krys::boo::html
   class HTMLHeadElement;
   class HTMLHtmlElement;
   class HTMLTitleElement;
+  class RenderBlocking;
 }
 
 namespace krys::boo::dom
@@ -53,7 +54,7 @@ namespace krys::boo::dom
     friend class LiveRangeUpdater;
     friend class MutationAlgorithms;
     friend class NodeAlgorithms;
-    friend class RenderBlocking;
+    friend class html::RenderBlocking;
 
   private:
     UniquePtr<DocumentRareData> _documentRareData;

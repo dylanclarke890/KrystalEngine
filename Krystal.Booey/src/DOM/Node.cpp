@@ -20,7 +20,7 @@
 
 namespace krys::boo::dom
 {
-  Node::Node(Document &document, HTML::NodeType type, NodeFlags flags) noexcept
+  Node::Node(Document &document, dom::NodeType type, NodeFlags flags) noexcept
       : EventTarget(EventTargetFlags::IsNode), _nodeType(type), _nodeDocument(ShareRefPtr(&document)),
         _parentNode(nullptr), _previousSibling(nullptr), _nextSibling(nullptr)
   {

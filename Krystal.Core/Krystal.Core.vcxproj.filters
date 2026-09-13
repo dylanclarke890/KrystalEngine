@@ -972,9 +972,6 @@
     <ClInclude Include="include\Krystal.Core\Text\Encodings\All.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Core\Text\Encodings\EncodingRegistry.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Core\Text\Encodings\Encode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -36,9 +36,6 @@
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGScriptElement.hpp"
-#include "Krystal.Text/ASCII.hpp"
-#include <cassert>
-#include <ranges>
 
 namespace krys::boo::dom
 {
@@ -152,7 +149,7 @@ namespace krys::boo::dom
 
     if (Is<HTMLDocument>(*this))
     {
-      localName = ::krys::Text::ToASCIILowercase(localName.View());
+      localName = ::krys::text::ToASCIILower(localName.View());
     }
 
     auto creationOptions = DocumentAlgorithms::FlattenElementCreationOptions(options, *this);
@@ -164,7 +161,7 @@ namespace krys::boo::dom
     DOMStringAtom namespaceURI = DOMStringAtom::Null();
     if (Is<HTMLDocument>(*this) || _contentType == u8"application/xhtml+xml")
     {
-      namespaceURI = Namespaces::HTML;
+      namespaceURI = infra::Namespaces::HTML;
     }
 
     return ElementFactory::Create(*this, {namespaceURI, DOMStringAtom::Null(), localName},
@@ -233,7 +230,7 @@ namespace krys::boo::dom
     }
 
     bool subtree = false;
-    RefPtr<HTML::CustomElementRegistry> registry = nullptr;
+    RefPtr<html::CustomElementRegistry> registry = nullptr;
     if (std::holds_alternative<bool>(options))
     {
       subtree = std::get<bool>(options);
@@ -299,7 +296,7 @@ namespace krys::boo::dom
 
     if (Is<HTMLDocument>(*this))
     {
-      localName = krys::Text::ToASCIILowercase(localName.View());
+      localName = krys::text::ToASCIILower(localName.View());
     }
 
     QualifiedName qualifiedName {DOMStringAtom::Null(), DOMStringAtom::Null(), localName};
@@ -362,7 +359,7 @@ namespace krys::boo::dom
   DOMString Document::Title() const noexcept
   {
     auto documentElement = DocumentElement();
-    if (Is<SVGElement>(*documentElement))
+    if (Is<svg::SVGElement>(*documentElement))
     {
       // TODO(DOCUMENT, SVG): If the document element is an SVG svg element, then let value be the child text
       // content of the first SVG title element that is a child of the document element.
@@ -370,13 +367,14 @@ namespace krys::boo::dom
     }
     else
     {
-      auto title = DOMTreeAccessors::GetTitleElement(*this);
+      auto title = html::DOMTreeAccessors::GetTitleElement(*this);
       if (title == nullptr)
       {
         return {};
       }
 
-      return StringAlgorithms::StripAndCollapseASCIIWhitespace(TextAlgorithms::ChildTextContent(*title));
+      return infra::StringAlgorithms::StripAndCollapseASCIIWhitespace(
+        TextAlgorithms::ChildTextContent(*title));
     }
 
     return {};
@@ -385,7 +383,7 @@ namespace krys::boo::dom
   ExceptionOr<void> Document::Title(DOMString &&value) noexcept
   {
     auto documentElement = DocumentElement();
-    if (Is<SVGElement>(*documentElement))
+    if (Is<svg::SVGElement>(*documentElement))
     {
       // TODO(DOCUMENT, SVG) - If the document element is an SVG svg element
       // If there is an SVG title element that is a child of the document element, let element be the first
@@ -394,10 +392,10 @@ namespace krys::boo::dom
       //   "title", and the SVG namespace. Insert element as the first child of the document element.
       // String replace all with the given value within element.
     }
-    else if (documentElement->NamespaceURI() == Namespaces::HTML)
+    else if (documentElement->NamespaceURI() == infra::Namespaces::HTML)
     {
       auto head = Head();
-      auto title = DOMTreeAccessors::GetTitleElement(*this);
+      auto title = html::DOMTreeAccessors::GetTitleElement(*this);
 
       if (head == nullptr && title == nullptr)
       {
@@ -406,7 +404,7 @@ namespace krys::boo::dom
 
       if (title == nullptr)
       {
-        title = ElementFactory::Create(*this, {Namespaces::HTML, DOMStringAtom::Null(), u8"title"});
+        title = ElementFactory::Create(*this, {infra::Namespaces::HTML, DOMStringAtom::Null(), u8"title"});
 
         if (auto append = MutationAlgorithms::Append(*documentElement, *title); append.HasException())
         {
@@ -425,7 +423,7 @@ namespace krys::boo::dom
 
   DOMString Document::Dir() const noexcept
   {
-    auto html = DOMTreeAccessors::GetHtmlElement(*this);
+    auto html = html::DOMTreeAccessors::GetHtmlElement(*this);
     if (html == nullptr)
     {
       return {};
@@ -436,7 +434,7 @@ namespace krys::boo::dom
 
   void Document::Dir(DOMString &&value) noexcept
   {
-    auto html = DOMTreeAccessors::GetHeadElement(*this);
+    auto html = html::DOMTreeAccessors::GetHeadElement(*this);
     if (html == nullptr)
     {
       return;
@@ -445,17 +443,17 @@ namespace krys::boo::dom
     html->Dir(krys::move(value));
   }
 
-  RefPtr<HTMLBodyElement> Document::Body() noexcept
+  RefPtr<html::HTMLBodyElement> Document::Body() noexcept
   {
-    return DOMTreeAccessors::GetBodyElement(*this);
+    return html::DOMTreeAccessors::GetBodyElement(*this);
   }
 
-  RefPtr<const HTMLBodyElement> Document::Body() const noexcept
+  RefPtr<const html::HTMLBodyElement> Document::Body() const noexcept
   {
-    return DOMTreeAccessors::GetBodyElement(*this);
+    return html::DOMTreeAccessors::GetBodyElement(*this);
   }
 
-  ExceptionOr<void> Document::Body(HTMLBodyElement &body) noexcept
+  ExceptionOr<void> Document::Body(html::HTMLBodyElement &body) noexcept
   {
     auto currentBody = Body();
     if (currentBody == &body)
@@ -488,14 +486,14 @@ namespace krys::boo::dom
     return {};
   }
 
-  RefPtr<HTMLHeadElement> Document::Head() noexcept
+  RefPtr<html::HTMLHeadElement> Document::Head() noexcept
   {
-    return DOMTreeAccessors::GetHeadElement(*this);
+    return html::DOMTreeAccessors::GetHeadElement(*this);
   }
 
-  RefPtr<const HTMLHeadElement> Document::Head() const noexcept
+  RefPtr<const html::HTMLHeadElement> Document::Head() const noexcept
   {
-    return DOMTreeAccessors::GetHeadElement(*this);
+    return html::DOMTreeAccessors::GetHeadElement(*this);
   }
 
   // TODO(DOCUMENT, HTML): Document::Images
@@ -533,7 +531,7 @@ namespace krys::boo::dom
   //{
   //}
 
-  HTMLOrSVGScriptElement Document::CurrentScript() noexcept
+  html::HTMLOrSVGScriptElement Document::CurrentScript() noexcept
   {
     // TODO(DOCUMENT, HTML): Current running script (will we even support this?)
     return {};
@@ -550,57 +548,57 @@ namespace krys::boo::dom
 
   RefPtr<const Element> Document::FirstElementChild() const noexcept
   {
-    return Mixins::ParentNode::FirstElementChild(*this);
+    return mixins::ParentNode::FirstElementChild(*this);
   }
 
   RefPtr<Element> Document::FirstElementChild() noexcept
   {
-    return Mixins::ParentNode::FirstElementChild(*this);
+    return mixins::ParentNode::FirstElementChild(*this);
   }
 
   RefPtr<const Element> Document::LastElementChild() const noexcept
   {
-    return Mixins::ParentNode::LastElementChild(*this);
+    return mixins::ParentNode::LastElementChild(*this);
   }
 
   RefPtr<Element> Document::LastElementChild() noexcept
   {
-    return Mixins::ParentNode::LastElementChild(*this);
+    return mixins::ParentNode::LastElementChild(*this);
   }
 
   size_t Document::ChildElementCount() const noexcept
   {
-    return Mixins::ParentNode::ChildElementCount(*this);
+    return mixins::ParentNode::ChildElementCount(*this);
   }
 
   ExceptionOr<void> Document::Prepend(const List<NodeOrString> &nodes) noexcept
   {
-    return Mixins::ParentNode::Prepend(*this, nodes);
+    return mixins::ParentNode::Prepend(*this, nodes);
   }
 
   ExceptionOr<void> Document::Append(const List<NodeOrString> &nodes) noexcept
   {
-    return Mixins::ParentNode::Append(*this, nodes);
+    return mixins::ParentNode::Append(*this, nodes);
   }
 
   ExceptionOr<void> Document::ReplaceChildren(const List<NodeOrString> &nodes) noexcept
   {
-    return Mixins::ParentNode::ReplaceChildren(*this, nodes);
+    return mixins::ParentNode::ReplaceChildren(*this, nodes);
   }
 
   ExceptionOr<void> Document::MoveBefore(Node &node, Node *refChild) noexcept
   {
-    return Mixins::ParentNode::MoveBefore(*this, node, refChild);
+    return mixins::ParentNode::MoveBefore(*this, node, refChild);
   }
 
   ExceptionOr<RefPtr<Element>> Document::QuerySelector(DOMStringView selectors) noexcept
   {
-    return Mixins::ParentNode::QuerySelector(*this, selectors);
+    return mixins::ParentNode::QuerySelector(*this, selectors);
   }
 
   ExceptionOr<Ref<NodeList>> Document::QuerySelectorAll(DOMStringView selectors) noexcept
   {
-    return Mixins::ParentNode::QuerySelectorAll(*this, selectors);
+    return mixins::ParentNode::QuerySelectorAll(*this, selectors);
   }
 
 #pragma endregion
@@ -609,19 +607,19 @@ namespace krys::boo::dom
 
   RefPtr<Element> Document::GetElementById(DOMStringView elementId) noexcept
   {
-    return Mixins::NonElementParentNode::GetElementById(*this, elementId);
+    return mixins::NonElementParentNode::GetElementById(*this, elementId);
   }
 
   RefPtr<const Element> Document::GetElementById(DOMStringView elementId) const noexcept
   {
-    return Mixins::NonElementParentNode::GetElementById(*this, elementId);
+    return mixins::NonElementParentNode::GetElementById(*this, elementId);
   }
 
 #pragma endregion
 
 #pragma region DocumentOrShadowRoot Mixin (DOM)
 
-  RefPtr<CustomElementRegistry> Document::CustomElementRegistry() const noexcept
+  RefPtr<html::CustomElementRegistry> Document::CustomElementRegistry() const noexcept
   {
     return _customElementRegistry;
   }
@@ -633,7 +631,7 @@ namespace krys::boo::dom
   RefPtr<Element> Document::ActiveElement() const noexcept
   {
     // TODO(DOCUMENTORSHADOWROOT, HTML): return the active element.
-    return RefPtr<Element>();
+    return nullptr;
   }
 
 #pragma endregion

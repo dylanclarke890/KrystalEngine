@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLHeadingElement);
 
   public:
-    HTMLHeadingElement(Document &document) noexcept;
+    HTMLHeadingElement(dom::Document &document) noexcept;
 
 #pragma region HTMLHeadingElement Obsolete members - https://html.spec.whatwg.org/#HTMLHeadingElement-partial
 

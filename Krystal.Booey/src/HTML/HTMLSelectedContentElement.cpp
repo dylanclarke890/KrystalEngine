@@ -2,7 +2,7 @@
 
 namespace krys::boo::html
 {
-  HTMLSelectedContentElement::HTMLSelectedContentElement(Document &document) noexcept
+  HTMLSelectedContentElement::HTMLSelectedContentElement(dom::Document &document) noexcept
       : HTMLElement(document, HTMLElementInterface::SelectedContent)
   {
   }

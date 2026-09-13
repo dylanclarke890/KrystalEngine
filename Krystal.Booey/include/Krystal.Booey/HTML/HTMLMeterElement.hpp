@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLMeterElement);
 
   public:
-    HTMLMeterElement(Document &document) noexcept;
+    HTMLMeterElement(dom::Document &document) noexcept;
 
 #pragma region HTMLMeterElement - https://html.spec.whatwg.org/#htmlmeterelement
 

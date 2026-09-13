@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Enums/CSSUnitType.hpp"
-#include "Krystal.Booey/CSS/Values/Enums/CSSValueId.hpp"
+#include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
@@ -13,7 +13,7 @@ namespace krys::boo::css
 {
   class CalcAllowedSymbols
   {
-    using AllowedSymbolsList = SmallList<std::tuple<CSSValueId, CSSUnitType>, 4uz>;
+    using AllowedSymbolsList = SmallList<std::tuple<ValueId, CSSUnitType>, 4uz>;
 
   private:
     AllowedSymbolsList _table;
@@ -31,7 +31,7 @@ namespace krys::boo::css
     CalcAllowedSymbols &operator=(CalcAllowedSymbols &&) noexcept = default;
     CalcAllowedSymbols(CalcAllowedSymbols &&) noexcept = default;
 
-    KRYS_NODISCARD Maybe<CSSUnitType> Get(CSSValueId id) const noexcept
+    KRYS_NODISCARD Maybe<CSSUnitType> Get(ValueId id) const noexcept
     {
       auto it = std::ranges::find_if(_table, [id](const auto &pair) { return std::get<0>(pair) == id; });
       if (it != _table.end())
@@ -42,7 +42,7 @@ namespace krys::boo::css
       return null;
     }
 
-    KRYS_NODISCARD bool Contains(CSSValueId id) const noexcept
+    KRYS_NODISCARD bool Contains(ValueId id) const noexcept
     {
       auto it = std::ranges::find_if(_table, [id](const auto &pair) { return std::get<0>(pair) == id; });
       return it != _table.end();

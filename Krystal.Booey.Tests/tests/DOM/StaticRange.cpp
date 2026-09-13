@@ -4,10 +4,8 @@
 #include "Krystal.Booey/DOM/DocumentType.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::dom::tests
 {
-  using namespace krys::boo;
-
   TEST_CASE("StaticRangeInit::Create", "[HTML][StaticRange]")
   {
     auto document = CreateRef<Document>();

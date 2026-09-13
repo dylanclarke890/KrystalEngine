@@ -5,10 +5,8 @@
 #include "Krystal.Booey/DOM/Text.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::dom::tests
 {
-  using namespace krys::boo;
-
   namespace
   {
     struct CommonTestData
@@ -82,7 +80,7 @@ namespace krys::tests
   {
     CommonTestData data;
 
-    auto textNode = CreateRef<HTML::Text>(*data.Document, u8"Hello, World!");
+    auto textNode = CreateRef<krys::boo::dom::Text>(*data.Document, u8"Hello, World!");
 
     REQUIRE_FALSE(data.Node->AppendChild(*textNode).HasException());
 
@@ -105,7 +103,7 @@ namespace krys::tests
     CommonTestData data;
 
     auto elementNode = CreateRef<TestElement>(*data.Document);
-    auto textNode = CreateRef<HTML::Text>(*data.Document, u8"Hello, World!");
+    auto textNode = CreateRef<krys::boo::dom::Text>(*data.Document, u8"Hello, World!");
 
     REQUIRE_FALSE(data.Node->AppendChild(*elementNode).HasException());
     REQUIRE_FALSE(data.Node->AppendChild(*textNode).HasException());

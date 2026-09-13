@@ -9,10 +9,8 @@
 #include "Krystal.Booey/DOM/Text.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::dom::tests
 {
-  using namespace krys::boo;
-
   namespace
   {
     struct CommonTestData
@@ -976,7 +974,7 @@ namespace krys::tests
       REQUIRE(extractedTextNode);
       REQUIRE(extractedTextNode->NodeType() == NodeType::TEXT_NODE);
 
-      REQUIRE(Downcast<HTML::Text>(extractedTextNode.get())->Data() == u8"world");
+      REQUIRE(Downcast<dom::Text>(extractedTextNode.get())->Data() == u8"world");
       REQUIRE(textNode->Data() == u8"Hello, !");
 
       REQUIRE(data.Range->StartContainer() == textNode);
@@ -1053,7 +1051,7 @@ namespace krys::tests
       REQUIRE(extractedTextNode);
       REQUIRE(extractedTextNode->NodeType() == NodeType::TEXT_NODE);
 
-      REQUIRE(Downcast<HTML::Text>(extractedTextNode.get())->Data() == u8"world");
+      REQUIRE(Downcast<dom::Text>(extractedTextNode.get())->Data() == u8"world");
       REQUIRE(textNode->Data() == u8"Hello, world!");
 
       REQUIRE(data.Range->StartContainer() == textNode);
@@ -1117,7 +1115,7 @@ namespace krys::tests
 
     SECTION("HierarchyRequestError if start container is a Text node with a null parent")
     {
-      auto node = CreateRef<HTML::Text>(*data.Document, u8"data");
+      auto node = CreateRef<dom::Text>(*data.Document, u8"data");
       REQUIRE_FALSE(data.Range->SetStart(*node, 0uz).HasException());
       REQUIRE(data.Range->InsertNode(*node) == ExceptionCode::HierarchyRequestError);
     }

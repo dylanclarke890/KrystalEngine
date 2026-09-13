@@ -3,7 +3,8 @@
 
 namespace krys::boo::html
 {
-  HTMLLabelElement::HTMLLabelElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Label)
+  HTMLLabelElement::HTMLLabelElement(dom::Document &document) noexcept
+      : HTMLElement(document, HTMLElementInterface::Label)
   {
   }
 
@@ -11,12 +12,12 @@ namespace krys::boo::html
 
   dom::DOMString HTMLLabelElement::HtmlFor() const noexcept
   {
-    return Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"for").value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"for").value_or(u8"");
   }
 
   void HTMLLabelElement::HtmlFor(dom::DOMString &&value) noexcept
   {
-    Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"for", krys::move(value));
+    Reflection::Reflect<dom::DOMString>(*this, u8"for", krys::move(value));
   }
 
 #pragma endregion

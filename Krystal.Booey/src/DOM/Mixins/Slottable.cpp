@@ -8,14 +8,14 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 
-namespace krys::boo::dom::Mixins
+namespace krys::boo::dom::mixins
 {
-  RefPtr<HTMLSlotElement> Slottable::AssignedSlot(Text &node) noexcept
+  RefPtr<html::HTMLSlotElement> Slottable::AssignedSlot(Text &node) noexcept
   {
     return ShareRefPtr(SlotAlgorithms::FindSlot(node, true));
   }
 
-  RefPtr<HTMLSlotElement> Slottable::AssignedSlot(Element &node) noexcept
+  RefPtr<html::HTMLSlotElement> Slottable::AssignedSlot(Element &node) noexcept
   {
     return ShareRefPtr(SlotAlgorithms::FindSlot(node, true));
   }

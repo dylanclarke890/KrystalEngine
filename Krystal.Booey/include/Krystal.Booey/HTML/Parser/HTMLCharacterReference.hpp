@@ -34,7 +34,7 @@ namespace krys::boo::html
     }
   };
 
-  constexpr inline static Array<NumericCharacterReferenceEntry, 27> NumericCharacterReferences = {
+  constexpr static Array<NumericCharacterReferenceEntry, 27> NumericCharacterReferences = {
     NumericCharacterReferenceEntry {0x80, 0x20AC}, // EURO SIGN (€)
     NumericCharacterReferenceEntry {0x82, 0x201A}, // SINGLE LOW-9 QUOTATION MARK (‚)
     NumericCharacterReferenceEntry {0x83, 0x0192}, // LATIN SMALL LETTER F WITH HOOK (ƒ)

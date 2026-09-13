@@ -236,7 +236,6 @@
     <ClInclude Include="include\Krystal.Core\Text\Encodings\Decode.hpp" />
     <ClInclude Include="include\Krystal.Core\Text\Encodings\Encode.hpp" />
     <ClInclude Include="include\Krystal.Core\Text\Encodings\EncodingId.hpp" />
-    <ClInclude Include="include\Krystal.Core\Text\Encodings\EncodingRegistry.hpp" />
     <ClInclude Include="include\Krystal.Core\Text\Encodings\All.hpp" />
     <ClInclude Include="include\Krystal.Core\Text\Encodings\ASCII.hpp" />
     <ClInclude Include="include\Krystal.Core\Text\Encodings\Atari.hpp" />

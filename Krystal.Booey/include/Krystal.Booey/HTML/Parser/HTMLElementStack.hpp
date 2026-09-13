@@ -21,7 +21,7 @@ namespace krys::boo::html
     KRYS_NODISCARD HTMLStackItem &Top() noexcept;
 
     /// @brief Get the stack item immediately below the top of the stack, or null if there is no such item.
-    KRYS_NODISCARD HTMLStackItem * OneBelowTop() noexcept;
+    KRYS_NODISCARD HTMLStackItem *OneBelowTop() noexcept;
 
     /// @brief Get the most recently added element (the current element).
     KRYS_NODISCARD HTMLStackItem &Bottom() noexcept;
@@ -51,14 +51,14 @@ namespace krys::boo::html
 
     /// @brief Pops elements off the stack until the given node has been encountered. The given node is not
     /// popped.
-    void PopUntil(const Element &node) noexcept;
+    void PopUntil(const dom::Element &node) noexcept;
 
     /// @brief Pops elements off the stack until the given tagname has been encountered. The given tagname is
     /// not popped.
     void PopUntil(TagName tagName, Namespace tagNamespace) noexcept;
 
     /// @brief Pops elements off the stack until the given node itself has been popped.
-    void PopUntilPopped(const Element &node) noexcept;
+    void PopUntilPopped(const dom::Element &node) noexcept;
 
     /// @brief Pops elements off the stack until the given tagname itself has been popped.
     void PopUntilPopped(TagName tagName, Namespace tagNamespace) noexcept;
@@ -96,7 +96,7 @@ namespace krys::boo::html
   public:
     KRYS_NODISCARD bool HasElementInScope(TagName targetNode) const noexcept;
 
-    KRYS_NODISCARD bool HasElementInScope(const Element &element) const noexcept;
+    KRYS_NODISCARD bool HasElementInScope(const dom::Element &element) const noexcept;
 
     KRYS_NODISCARD bool HasElementInListItemScope(TagName targetNode) const noexcept;
 
@@ -148,7 +148,7 @@ namespace krys::boo::html
       return _items.size();
     }
 
-    void Remove(const Element &node) noexcept
+    void Remove(const dom::Element &node) noexcept
     {
       auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item.Element() == &node; });
       if (it != _items.end())
@@ -157,10 +157,10 @@ namespace krys::boo::html
       }
     }
 
-    KRYS_NODISCARD bool Contains(const Element &node) const noexcept;
+    KRYS_NODISCARD bool Contains(const dom::Element &node) const noexcept;
 
     /// @brief Returns a pointer to the stack entry whose node matches the given node, or null.
-    KRYS_NODISCARD HTMLStackItem * Find(const ContainerNode &node) noexcept
+    KRYS_NODISCARD HTMLStackItem *Find(const dom::ContainerNode &node) noexcept
     {
       auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item.Element() == &node; });
       return it != _items.end() ? &*it : nullptr;
@@ -168,7 +168,7 @@ namespace krys::boo::html
 
     /// @brief Inserts the new element into the stack of open elements immediately below the position of
     /// reference.
-    void InsertBelow(HTMLStackItem &&newItem, const Element &reference) noexcept
+    void InsertBelow(HTMLStackItem &&newItem, const dom::Element &reference) noexcept
     {
       auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item.Element() == &reference; });
       assert(it != _items.end());
@@ -179,7 +179,7 @@ namespace krys::boo::html
     /// entry exists and is an element entry. Otherwise, returns null.
     /// @note This should always return a non-null entry for the situations in which it's used in the HTML
     /// tree builder algorithms.
-    KRYS_NODISCARD HTMLStackItem * EntryBefore(Element &node) noexcept
+    KRYS_NODISCARD HTMLStackItem *EntryBefore(dom::Element &node) noexcept
     {
       for (auto it = _items.rbegin(); it != _items.rend(); ++it)
       {
@@ -203,7 +203,7 @@ namespace krys::boo::html
     /// entry exists and is an element entry. Otherwise, returns null.
     /// @note This should always return a non-null entry for the situations in which it's used in the HTML
     /// tree builder algorithms.
-    KRYS_NODISCARD const HTMLStackItem *EntryBefore(Element &node) const noexcept
+    KRYS_NODISCARD const HTMLStackItem *EntryBefore(dom::Element &node) const noexcept
     {
       for (auto it = _items.rbegin(); it != _items.rend(); ++it)
       {

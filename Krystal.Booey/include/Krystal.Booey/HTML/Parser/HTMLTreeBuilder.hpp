@@ -188,17 +188,17 @@ namespace krys::boo::html
   struct InsertionLocation
   {
     /// @brief The parent into which the new node should be inserted.
-    ContainerNode *Parent;
+    dom::ContainerNode *Parent;
 
     /// @brief The child before which the new node should be inserted, or null if the new node should be
     /// appended to `Parent`.
-    Node *BeforeSibling {nullptr};
+    dom::Node *BeforeSibling {nullptr};
   };
 
   class HTMLTreeBuilder
   {
   private:
-    Document &_document;
+    dom::Document &_document;
 
     HTMLTokenizer &_tokenizer;
 
@@ -240,7 +240,8 @@ namespace krys::boo::html
     bool _ignoreNextNewline : 1 {false};
 
   public:
-    HTMLTreeBuilder(Document &document, HTMLTokenizer &tokenizer, Maybe<HTMLStackItem> &context) noexcept;
+    HTMLTreeBuilder(dom::Document &document, HTMLTokenizer &tokenizer,
+                    Maybe<HTMLStackItem> &context) noexcept;
 
     void ProcessToken(HTMLTokenAtom &&token) noexcept;
 
@@ -267,7 +268,7 @@ namespace krys::boo::html
       }
 
       auto &adjustedCurrentNode = AdjustedCurrentNode();
-      return adjustedCurrentNode.NamespaceURI() != Namespaces::HTML;
+      return adjustedCurrentNode.NamespaceURI() != infra::Namespaces::HTML;
     }
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#reset-the-insertion-mode-appropriately
@@ -288,10 +289,10 @@ namespace krys::boo::html
     void ProcessAccordingToRulesForForeignContent(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#current-node
-    KRYS_NODISCARD Element &CurrentNode() noexcept;
+    KRYS_NODISCARD dom::Element &CurrentNode() noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#adjusted-current-node
-    KRYS_NODISCARD Element &AdjustedCurrentNode() noexcept;
+    KRYS_NODISCARD dom::Element &AdjustedCurrentNode() noexcept;
 
     void ParseError(const HTMLTokenAtom &token) noexcept;
 
@@ -398,22 +399,22 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#appropriate-place-for-inserting-a-node
     KRYS_NODISCARD InsertionLocation
-      AppropriatePlaceToInsertNode(ContainerNode *targetOverride = nullptr) noexcept;
+      AppropriatePlaceToInsertNode(dom::ContainerNode *targetOverride = nullptr) noexcept;
 
     /// @see https://html.spec.whatwg.org/#adjusted-insertion-location
     KRYS_NODISCARD InsertionLocation
       AdjustedInsertionLocation(Maybe<InsertionLocation> location = null) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-an-element-at-the-adjusted-insertion-location
-    void InsertElementAtAdjustedInsertionLocation(Element &element,
+    void InsertElementAtAdjustedInsertionLocation(dom::Element &element,
                                                   Maybe<InsertionLocation> location = null) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-a-foreign-element
-    Ref<Element> InsertForeignElement(HTMLTokenAtom &&token, dom::DOMStringAtom namespaceURI,
-                                      bool onlyAddToElementStack) noexcept;
+    Ref<dom::Element> InsertForeignElement(HTMLTokenAtom &&token, dom::DOMStringAtom namespaceURI,
+                                           bool onlyAddToElementStack) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-an-html-element
-    Ref<Element> InsertHTMLElement(HTMLTokenAtom &&token) noexcept;
+    Ref<dom::Element> InsertHTMLElement(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-a-comment
     void InsertComment(dom::DOMStringView data, Maybe<InsertionLocation> location = null) noexcept;
@@ -428,12 +429,12 @@ namespace krys::boo::html
     void ParseGenericRCDATATextElement(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#create-an-element-for-the-token
-    KRYS_NODISCARD Ref<Element> CreateElement(dom::DOMStringAtom name, dom::DOMStringAtom namespaceURI,
-                                              const ParsedAttributeList &attributes,
-                                              ContainerNode &intendedParent) noexcept;
+    KRYS_NODISCARD Ref<dom::Element> CreateElement(dom::DOMStringAtom name, dom::DOMStringAtom namespaceURI,
+                                                   const ParsedAttributeList &attributes,
+                                                   dom::ContainerNode &intendedParent) noexcept;
 
-    KRYS_NODISCARD Ref<Element> CreateElement(const HTMLStackItem &item,
-                                              ContainerNode *intendedParent = nullptr) noexcept;
+    KRYS_NODISCARD Ref<dom::Element> CreateElement(const HTMLStackItem &item,
+                                                   dom::ContainerNode *intendedParent = nullptr) noexcept;
 
     void ReconstructActiveFormattingElements() noexcept;
 
@@ -468,15 +469,15 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm
     void RunAdoptionAgency(HTMLTokenAtom &token) noexcept;
 
-    HTMLStackItem * FurthestSpecialElementBlock(const Element &formattingElement) noexcept;
+    HTMLStackItem *FurthestSpecialElementBlock(const dom::Element &formattingElement) noexcept;
 
 #pragma endregion
 
 #pragma region IntegrationPoint Algorithms
 
-    KRYS_NODISCARD bool IsMathMLTextIntegrationPoint(const Element &element) const noexcept;
+    KRYS_NODISCARD bool IsMathMLTextIntegrationPoint(const dom::Element &element) const noexcept;
 
-    KRYS_NODISCARD bool IsHTMLIntegrationPoint(const Element &element) const noexcept;
+    KRYS_NODISCARD bool IsHTMLIntegrationPoint(const dom::Element &element) const noexcept;
 
 #pragma endregion
   };

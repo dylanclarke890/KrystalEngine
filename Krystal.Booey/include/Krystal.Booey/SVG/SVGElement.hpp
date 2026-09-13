@@ -6,7 +6,7 @@
 
 namespace krys::boo::svg
 {
-  class SVGElement : public Element
+  class SVGElement : public dom::Element
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGElement);
@@ -15,18 +15,19 @@ namespace krys::boo::svg
     SVGElementFlags _flags : BitCount<SVGElementFlags>() {SVGElementFlags::None};
     SVGElementInterface _interface : BitCount<SVGElementInterface>() {SVGElementInterface::None};
 
-    SVGElement(Document &document, SVGElementInterface interface,
-               SVGElementFlags flags = SVGElementFlags::None, NodeFlags nodeFlags = NodeFlags::None) noexcept;
+    SVGElement(dom::Document &document, SVGElementInterface interface,
+               SVGElementFlags flags = SVGElementFlags::None,
+               dom::NodeFlags nodeFlags = dom::NodeFlags::None) noexcept;
 
   public:
-    SVGElement(Document &document) noexcept;
+    SVGElement(dom::Document &document) noexcept;
 
   protected:
 #pragma region Type Checks
 
     KRYS_NODISCARD bool IsSVGCircleElement() const noexcept
     {
-     return _interface == SVGElementInterface::Circle;
+      return _interface == SVGElementInterface::Circle;
     }
 
     KRYS_NODISCARD bool IsSVGDefsElement() const noexcept
@@ -136,7 +137,7 @@ namespace krys::boo::svg
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::svg::SVGElement)
-  KRYS_NODISCARD static bool IsType(const krys::boo::svg::Node &target) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
   {
     return target.IsSVGElement();
   }

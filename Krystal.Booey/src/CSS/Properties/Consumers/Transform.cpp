@@ -9,15 +9,15 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Percentage.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/PercentageDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/CSSFunctionValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValueListBuilder.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
-  RefPtr<CSSValue> ConsumeRotate3dFunction(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeRotate3dFunction(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // https://drafts.csswg.org/css-transforms-2/#funcdef-rotate3d
     // rotate3d() = rotate3d( <number> , <number> , <number> , [ <angle> | <zero> ] )
@@ -74,7 +74,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     };
 
     auto functionId = tokens.Peek().FunctionId();
-    if (functionId != CSSValueId::Rotate3d)
+    if (functionId != ValueId::Rotate3d)
     {
       return {};
     }
@@ -96,7 +96,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return CSSFunctionValue::Create(functionId, krys::move(*parameters));
   }
 
-  RefPtr<CSSValue> ConsumeTranslateFunction(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeTranslateFunction(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // https://drafts.csswg.org/css-transforms-1/#funcdef-transform-translate
     // translate() = translate( <length-percentage> , <length-percentage>? )
@@ -132,7 +132,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     };
 
     auto functionId = tokens.Peek().FunctionId();
-    if (functionId != CSSValueId::Translate)
+    if (functionId != ValueId::Translate)
     {
       return {};
     }
@@ -154,7 +154,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return CSSFunctionValue::Create(functionId, krys::move(*parameters));
   }
 
-  RefPtr<CSSValue> ConsumeTranslate3dFunction(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeTranslate3dFunction(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // https://drafts.csswg.org/css-transforms-2/#funcdef-translate3d
     // translate3d() = translate3d( <length-percentage> , <length-percentage> , <length> )
@@ -198,7 +198,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     };
 
     auto functionId = tokens.Peek().FunctionId();
-    if (functionId != CSSValueId::Translate3d)
+    if (functionId != ValueId::Translate3d)
     {
       return {};
     }
@@ -220,12 +220,12 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return CSSFunctionValue::Create(functionId, krys::move(*parameters));
   }
 
-  RefPtr<CSSValue> ConsumeTranslate(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeTranslate(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // https://drafts.csswg.org/css-transforms-2/#propdef-translate
     // none | <length-percentage> [ <length-percentage> <length>? ]?
 
-    if (tokens.Peek().ValueId() == CSSValueId::None)
+    if (tokens.Peek().ValueId() == ValueId::None)
     {
       return ConsumeIdent(tokens);
     }
@@ -295,12 +295,12 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return CSSValueList::CreateSpaceSeparated(krys::move(x), krys::move(y), krys::move(z));
   }
 
-  RefPtr<CSSValue> ConsumeRotate(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeRotate(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // https://drafts.csswg.org/css-transforms-2/#propdef-rotate
     // none | <angle> | [ x | y | z | <number>{3} ] && <angle>
 
-    if (tokens.Peek().ValueId() == CSSValueId::None)
+    if (tokens.Peek().ValueId() == ValueId::None)
     {
       return ConsumeIdent(tokens);
     }
@@ -356,7 +356,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       }
 
       // Finally, attempt to parse one of the axis identifiers.
-      parsedValue = ConsumeIdent<CSSValueId::X, CSSValueId::Y, CSSValueId::Z>(tokens);
+      parsedValue = ConsumeIdent<ValueId::X, ValueId::Y, ValueId::Z>(tokens);
       // If we failed to find one of those identifiers or one was already specified, or we'd previously
       // encountered numbers to specify a rotation axis, then this value is invalid.
       if (!parsedValue || axisIdentifier || !list.empty())
@@ -399,12 +399,12 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
       if (KnownToBeNotZero(xIsZero) && KnownToBeZero(yIsZero) && KnownToBeZero(zIsZero))
       {
-        return CSSValueList::CreateSpaceSeparated(CSSPrimitiveValue::Create(CSSValueId::X), angle);
+        return CSSValueList::CreateSpaceSeparated(CSSPrimitiveValue::Create(ValueId::X), angle);
       }
 
       if (KnownToBeZero(xIsZero) && KnownToBeNotZero(yIsZero) && KnownToBeZero(zIsZero))
       {
-        return CSSValueList::CreateSpaceSeparated(CSSPrimitiveValue::Create(CSSValueId::Y), angle);
+        return CSSValueList::CreateSpaceSeparated(CSSPrimitiveValue::Create(ValueId::Y), angle);
       }
 
       if (KnownToBeZero(xIsZero) && KnownToBeZero(yIsZero) && KnownToBeNotZero(zIsZero))
@@ -421,7 +421,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       // The second valid case is if we have no item in the list, meaning we have either an optional rotation
       // axis using an identifier. In that case, we must add the axis identifier is specified and then add the
       // angle.
-      if (axisIdentifier && axisIdentifier->ValueId() != CSSValueId::Z)
+      if (axisIdentifier && axisIdentifier->ValueId() != ValueId::Z)
       {
         return CSSValueList::CreateSpaceSeparated(krys::move(axisIdentifier), krys::move(angle));
       }
@@ -432,12 +432,12 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return nullptr;
   }
 
-  RefPtr<CSSValue> ConsumeScale(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeScale(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // https://drafts.csswg.org/css-transforms-2/#propdef-scale
     // none | [ <number> | <percentage> ]{1,3}
 
-    if (tokens.Peek().ValueId() == CSSValueId::None)
+    if (tokens.Peek().ValueId() == ValueId::None)
     {
       return ConsumeIdent(tokens);
     }

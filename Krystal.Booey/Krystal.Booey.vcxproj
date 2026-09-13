@@ -74,6 +74,10 @@
     <Import Project="..\KrystalEngine.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
+    <CustomBuildBeforeTargets>Compile</CustomBuildBeforeTargets>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -126,6 +130,9 @@
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
+    <PreBuildEvent>
+      <Command>python "$(ProjectDir)\codegen\main.py" --gperf-executable="c:\ProgramData\chocolatey\bin\gperf" --verbose</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -153,6 +160,7 @@
     <Text Include="data\_progress\HTML.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="codegen\svg-css-value-keywords.in" />
     <None Include="data\CSSStyleProperties+PropertyNames.idl" />
     <None Include="data\CSS\CSSGroupingRule.idl" />
     <None Include="data\CSS\CSSImportRule.idl" />
@@ -264,6 +272,9 @@
     <ClInclude Include="include\Krystal.Booey\CSS\CSSStyleRule.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\CSSStyleSheet.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\CSSToLengthConversionData.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Properties\PropertyId.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Properties\PropertyParsing.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Properties\PropertyShorthandFunctions.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\RuleFlag.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\RuleType.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\MediaList.hpp" />
@@ -345,35 +356,32 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Properties\Consumers\URL.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Properties\Consumers\ViewTransition.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Properties\Consumers\WillChange.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Properties\CSSFontVariantLigaturesParser.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Properties\CSSFontVariantNumericParser.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Properties\CSSInternalStyleProperties.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Properties\FontVariantLigaturesParser.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Properties\FontVariantNumericParser.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Properties\InternalStyleProperties.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Properties\Property.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Properties\CSSPropertyConsumer.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Properties\CSSPropertyParser.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Properties\CSSPropertyParserCustom.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Properties\CSSPropertyParserOptions.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Properties\CSSPropertyParserResult.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Properties\CSSPropertyParserState.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Properties\CSSPropertyParsing.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Properties\CSSPropertyShorthand.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Properties\CSSPropertyShorthandFunctions.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Properties\CSSPropertyFlag.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Properties\CSSPropertyId.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Properties\PropertyConsumer.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Properties\PropertyParser.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Properties\PropertyParserCustom.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Properties\PropertyParserOptions.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Properties\PropertyParserResult.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Properties\PropertyParserState.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Properties\PropertyShorthand.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Properties\PropertyFlag.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Properties\InitialValues.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Properties\Types\IsImplicit.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Properties\Types\IsImportant.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Properties\Types\IsSetFromShorthand.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Selectors\CSSSelector.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Selectors\CSSSelectorList.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Selectors\CSSSelectorParser.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Selectors\CSSSelectorParserContext.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Selectors\Enums\CSSSelectorFlag.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Selectors\Selector.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Selectors\SelectorList.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Selectors\SelectorParser.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Selectors\SelectorParserContext.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Selectors\SelectorFlag.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Selectors\Enums\PseudoClassId.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Selectors\Enums\PseudoElementId.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Selectors\Enums\SelectorMatch.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Selectors\Enums\SelectorRelation.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Selectors\MutableCSSSelector.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Selectors\MutableSelector.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Selectors\Types\DisallowPseudoElements.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Selectors\Types\IsCaseSensitive.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Selectors\Types\IsForgivingSelectorList.hpp" />
@@ -435,7 +443,6 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Easing\StepsEasingFunction.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Enums\CSSUnitCategory.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Enums\CSSUnitType.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Enums\CSSValueId.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Enums\CSSValueType.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\AppleColorFilter.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\AppleInvertLightnessFunction.hpp" />
@@ -490,6 +497,7 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\RectBase.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\TextDecoration\CSSTextShadowPropertyValue.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\TextDecoration\TextShadow.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\ValueId.hpp" />
     <ClInclude Include="include\Krystal.Booey\DOM\AbortController.hpp" />
     <ClInclude Include="include\Krystal.Booey\DOM\AbortSignal.hpp" />
     <ClInclude Include="include\Krystal.Booey\DOM\AbstractRange.hpp" />
@@ -713,7 +721,7 @@
     <ClInclude Include="include\Krystal.Booey\HTML\Parser\HTMLElementStack.hpp" />
     <ClInclude Include="include\Krystal.Booey\HTML\Parser\HTMLEncodingSniffer.hpp" />
     <ClInclude Include="include\Krystal.Booey\HTML\Parser\HTMLFormattingElementList.hpp" />
-    <ClInclude Include="include\Krystal.Booey\HTML\Parser\HTMLInputStream.hpp" />
+    <ClInclude Include="include\Krystal.Booey\HTML\Parser\InputStream.hpp" />
     <ClInclude Include="include\Krystal.Booey\HTML\Parser\HTMLStackItem.hpp" />
     <ClInclude Include="include\Krystal.Booey\HTML\Parser\HTMLToken.hpp" />
     <ClInclude Include="include\Krystal.Booey\HTML\Parser\HTMLTokenAtom.hpp" />
@@ -723,7 +731,6 @@
     <ClInclude Include="include\Krystal.Booey\HTML\Types\HTMLOrSVGScriptElement.hpp" />
     <ClInclude Include="include\Krystal.Booey\Infra\Namespaces.hpp" />
     <ClInclude Include="include\Krystal.Booey\Infra\StringAlgorithms.hpp" />
-    <ClInclude Include="include\Krystal.Booey\Internals\MathMLElementFactory.hpp" />
     <ClInclude Include="include\Krystal.Booey\MathML\Internals\MathMLElementFactory.hpp" />
     <ClInclude Include="include\Krystal.Booey\MathML\MathMLElement.hpp" />
     <ClInclude Include="include\Krystal.Booey\Style\Color\Color.hpp" />
@@ -776,16 +783,13 @@
     <ClCompile Include="src\CSS\Properties\Consumers\Attr.cpp" />
     <ClCompile Include="src\CSS\Properties\Consumers\Background.cpp" />
     <ClCompile Include="src\CSS\Properties\Consumers\Box.cpp" />
-    <ClCompile Include="src\CSS\Properties\Consumers\Color.cpp" />
     <ClCompile Include="src\CSS\Properties\Consumers\ColorAdjust.cpp" />
     <ClCompile Include="src\CSS\Properties\Consumers\Content.cpp" />
     <ClCompile Include="src\CSS\Properties\Consumers\CounterStyles.cpp" />
     <ClCompile Include="src\CSS\Properties\Consumers\Display.cpp" />
     <ClCompile Include="src\CSS\Properties\Consumers\Easing.cpp" />
     <ClCompile Include="src\CSS\Properties\Consumers\Filter.cpp" />
-    <ClCompile Include="src\CSS\Properties\Consumers\Font.cpp" />
     <ClCompile Include="src\CSS\Properties\Consumers\Grid.cpp" />
-    <ClCompile Include="src\CSS\Properties\Consumers\Image.cpp" />
     <ClCompile Include="src\CSS\Properties\Consumers\Inline.cpp" />
     <ClCompile Include="src\CSS\Properties\Consumers\Lists.cpp" />
     <ClCompile Include="src\CSS\Properties\Consumers\Masking.cpp" />
@@ -797,7 +801,6 @@
     <ClCompile Include="src\CSS\Properties\Consumers\Ratio.cpp" />
     <ClCompile Include="src\CSS\Properties\Consumers\Scrollbars.cpp" />
     <ClCompile Include="src\CSS\Properties\Consumers\ScrollSnap.cpp" />
-    <ClCompile Include="src\CSS\Properties\Consumers\Shapes.cpp" />
     <ClCompile Include="src\CSS\Properties\Consumers\String.cpp" />
     <ClCompile Include="src\CSS\Properties\Consumers\SVG.cpp" />
     <ClCompile Include="src\CSS\Properties\Consumers\TextDecoration.cpp" />
@@ -810,15 +813,15 @@
     <ClCompile Include="src\CSS\Properties\Consumers\ViewTransition.cpp" />
     <ClCompile Include="src\CSS\Properties\Consumers\WillChange.cpp" />
     <ClCompile Include="src\CSS\Properties\Property.cpp" />
-    <ClCompile Include="src\CSS\Properties\CSSPropertyParser.cpp" />
-    <ClCompile Include="src\CSS\Properties\CSSPropertyParserResult.cpp" />
-    <ClCompile Include="src\CSS\Properties\CSSPropertyParsing.cpp" />
-    <ClCompile Include="src\CSS\Properties\CSSPropertyShorthandFunctions.cpp" />
-    <ClCompile Include="src\CSS\Properties\Enums\CSSPropertyId.cpp" />
-    <ClCompile Include="src\CSS\Selectors\CSSSelector.cpp" />
-    <ClCompile Include="src\CSS\Selectors\CSSSelectorList.cpp" />
-    <ClCompile Include="src\CSS\Selectors\CSSSelectorParser.cpp" />
-    <ClCompile Include="src\CSS\Selectors\MutableCSSSelector.cpp" />
+    <ClCompile Include="src\CSS\Properties\PropertyParser.cpp" />
+    <ClCompile Include="src\CSS\Properties\PropertyParserResult.cpp" />
+    <ClCompile Include="src\CSS\Properties\PropertyId.cpp" />
+    <ClCompile Include="src\CSS\Properties\PropertyParsing.cpp" />
+    <ClCompile Include="src\CSS\Properties\PropertyShorthandFunctions.cpp" />
+    <ClCompile Include="src\CSS\Selectors\Selector.cpp" />
+    <ClCompile Include="src\CSS\Selectors\SelectorList.cpp" />
+    <ClCompile Include="src\CSS\Selectors\SelectorParser.cpp" />
+    <ClCompile Include="src\CSS\Selectors\MutableSelector.cpp" />
     <ClCompile Include="src\CSS\StyleSheetContents.cpp" />
     <ClCompile Include="src\CSS\Values\CSSPrimitiveValue.cpp" />
     <ClCompile Include="src\CSS\Values\CSSValue.cpp" />
@@ -828,6 +831,7 @@
     <ClCompile Include="src\CSS\Values\Primitives\CSSPrimitiveNumericUnits.cpp" />
     <ClCompile Include="src\CSS\Values\Primitives\CSSRatio.cpp" />
     <ClCompile Include="src\CSS\Values\Primitives\CSSUnevaluatedCalc.cpp" />
+    <ClCompile Include="src\CSS\Values\ValueId.cpp" />
     <ClCompile Include="src\DOM\Algorithms\AbortAlgorithms.cpp" />
     <ClCompile Include="src\DOM\AbortController.cpp" />
     <ClCompile Include="src\DOM\AbortSignal.cpp" />

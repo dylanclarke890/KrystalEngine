@@ -11,15 +11,15 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLSourceElement);
 
   public:
-    HTMLSourceElement(Document &document) noexcept;
+    HTMLSourceElement(dom::Document &document) noexcept;
 
 #pragma region HTMLSourceElement - https://html.spec.whatwg.org/#htmlsourceelement
 
     /// @see https://html.spec.whatwg.org/#dom-source-src
-    KRYS_NODISCARD dom::ExceptionOr<USVString> Src() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-src
-    dom::ExceptionOr<void> Src(USVString &&value) noexcept;
+    dom::ExceptionOr<void> Src(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-type
     KRYS_NODISCARD dom::DOMString Type() const noexcept;
@@ -28,10 +28,10 @@ namespace krys::boo::html
     void Type(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-srcset
-    KRYS_NODISCARD dom::ExceptionOr<USVString> SrcSet() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> SrcSet() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-srcset
-    dom::ExceptionOr<void> SrcSet(USVString &&value) noexcept;
+    dom::ExceptionOr<void> SrcSet(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-sizes
     KRYS_NODISCARD dom::DOMString Sizes() const noexcept;

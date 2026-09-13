@@ -37,14 +37,14 @@ namespace krys::boo::dom
     Ref<XMLDocument> document = [&] -> Ref<XMLDocument>
     {
       RefPtr<XMLDocument> doc = nullptr;
-      if (namespaceUri == Namespaces::HTML)
+      if (namespaceUri == infra::Namespaces::HTML)
       {
         doc = CreateRefPtr<XHTMLDocument>();
         doc->_contentType = u8"application/xhtml+xml";
       }
-      else if (namespaceUri == Namespaces::SVG)
+      else if (namespaceUri == infra::Namespaces::SVG)
       {
-        doc = CreateRefPtr<SVGDocument>();
+        doc = CreateRefPtr<svg::SVGDocument>();
         doc->_contentType = u8"image/svg+xml";
       }
       else
@@ -101,13 +101,15 @@ namespace krys::boo::dom
       return appendResult.ReleaseException();
     }
 
-    auto htmlElement = ElementFactory::Create(*document, {Namespaces::HTML, DOMStringAtom::Null(), u8"html"});
+    auto htmlElement =
+      ElementFactory::Create(*document, {infra::Namespaces::HTML, DOMStringAtom::Null(), u8"html"});
     if (auto appendResult = document->AppendChild(*htmlElement); appendResult.HasException())
     {
       return appendResult.ReleaseException();
     }
 
-    auto headElement = ElementFactory::Create(*document, {Namespaces::HTML, DOMStringAtom::Null(), u8"head"});
+    auto headElement =
+      ElementFactory::Create(*document, {infra::Namespaces::HTML, DOMStringAtom::Null(), u8"head"});
     if (auto appendResult = document->AppendChild(*headElement); appendResult.HasException())
     {
       return appendResult.ReleaseException();
@@ -116,7 +118,7 @@ namespace krys::boo::dom
     if (title.has_value())
     {
       auto titleElement =
-        ElementFactory::Create(*document, {Namespaces::HTML, DOMStringAtom::Null(), u8"title"});
+        ElementFactory::Create(*document, {infra::Namespaces::HTML, DOMStringAtom::Null(), u8"title"});
       if (auto appendResult = headElement->AppendChild(*titleElement); appendResult.HasException())
       {
         return appendResult.ReleaseException();
@@ -130,7 +132,8 @@ namespace krys::boo::dom
       }
     }
 
-    auto bodyElement = ElementFactory::Create(*document, {Namespaces::HTML, DOMStringAtom::Null(), u8"body"});
+    auto bodyElement =
+      ElementFactory::Create(*document, {infra::Namespaces::HTML, DOMStringAtom::Null(), u8"body"});
     if (auto appendResult = document->AppendChild(*bodyElement); appendResult.HasException())
     {
       return appendResult.ReleaseException();

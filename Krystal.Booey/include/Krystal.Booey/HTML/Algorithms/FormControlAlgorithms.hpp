@@ -4,9 +4,13 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 
-namespace krys::boo::html
+namespace krys::boo::dom
 {
   class Element;
+}
+
+namespace krys::boo::html
+{
   class HTMLOptionElement;
   class HTMLSelectedContentElement;
   class HTMLSelectElement;
@@ -49,7 +53,7 @@ namespace krys::boo::html
     KRYS_NODISCARD static void UpdateNearestAncestorSelect(HTMLOptionElement &option) noexcept;
 
     /// @see https://html.spec.whatwg.org/#option-element-nearest-ancestor-select
-    KRYS_NODISCARD static HTMLSelectElement *NearestAncestorSelect(Element &element) noexcept;
+    KRYS_NODISCARD static HTMLSelectElement *NearestAncestorSelect(dom::Element &element) noexcept;
 
     /// @see https://html.spec.whatwg.org/#maybe-clone-an-option-into-selectedcontent
     static void MaybeCloneOptionIntoSelectedContent(HTMLOptionElement &option) noexcept;

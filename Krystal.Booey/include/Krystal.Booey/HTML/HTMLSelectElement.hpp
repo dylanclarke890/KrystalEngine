@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLSelectElement);
 
   public:
-    HTMLSelectElement(Document &document) noexcept;
+    HTMLSelectElement(dom::Document &document) noexcept;
 
 #pragma region HTMLSelectElement - https://html.spec.whatwg.org/#htmlselectelement
 

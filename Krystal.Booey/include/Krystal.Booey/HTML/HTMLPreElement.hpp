@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLPreElement);
 
   public:
-    HTMLPreElement(Document &document) noexcept;
+    HTMLPreElement(dom::Document &document) noexcept;
 
 #pragma region HTMLPreElement Obsolete members - https://html.spec.whatwg.org/#HTMLPreElement-partial
 

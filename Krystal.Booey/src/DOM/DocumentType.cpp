@@ -19,22 +19,22 @@ namespace krys::boo::dom
 
   ExceptionOr<void> DocumentType::Before(const List<NodeOrString> &nodes) noexcept
   {
-    return Mixins::ChildNode::Before(*this, nodes);
+    return mixins::ChildNode::Before(*this, nodes);
   }
 
   ExceptionOr<void> DocumentType::After(const List<NodeOrString> &nodes) noexcept
   {
-    return Mixins::ChildNode::After(*this, nodes);
+    return mixins::ChildNode::After(*this, nodes);
   }
 
   ExceptionOr<void> DocumentType::ReplaceWith(const List<NodeOrString> &nodes) noexcept
   {
-    return Mixins::ChildNode::ReplaceWith(*this, nodes);
+    return mixins::ChildNode::ReplaceWith(*this, nodes);
   }
 
   ExceptionOr<void> DocumentType::Remove() noexcept
   {
-    return Mixins::ChildNode::Remove(*this);
+    return mixins::ChildNode::Remove(*this);
   }
 
 #pragma endregion

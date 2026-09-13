@@ -3,17 +3,13 @@
 #include "Krystal.Booey/HTML/Enums/HTMLParseError.hpp"
 #include "Krystal.Booey/HTML/Enums/TokenizerState.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLCharacterReference.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLInputStream.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLToken.hpp"
+#include "Krystal.Booey/HTML/Parser/InputStream.hpp"
 #include "Krystal.Booey/Types/IsEOF.hpp"
-#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
-#include "Krystal.Text/ASCII.hpp"
-#include "Krystal.Text/StringConversion.hpp"
-#include "Krystal.Text/Unicode.hpp"
 #include <ranges>
 
 namespace krys::boo::html
@@ -85,7 +81,7 @@ namespace krys::boo::html
     TokenizerState _state : BitCount<TokenizerState>() {TokenizerState::Data};
     TokenizerState _characterReferenceReturnState : BitCount<TokenizerState>() {TokenizerState::Data};
     HTMLToken _token;
-    HTMLInputStream &_input;
+    InputStream &_input;
     SmallList<char32, 32u> _appropriateEndTagName;
     SmallList<char32, 32u> _bufferedEndTagName;
     Func<bool()> _isCDATASectionAllowed {nullptr};
@@ -103,7 +99,7 @@ namespace krys::boo::html
     List<HTMLTokenizerError> _parseErrors;
 
   public:
-    HTMLTokenizer(HTMLInputStream &input, Func<bool()> &&isCDATASectionAllowed) noexcept
+    HTMLTokenizer(InputStream &input, Func<bool()> &&isCDATASectionAllowed) noexcept
         : _input(input), _isCDATASectionAllowed(krys::move(isCDATASectionAllowed))
     {
     }
@@ -523,7 +519,7 @@ namespace krys::boo::html
       constexpr char32 NumberSign = U'#';
       constexpr char32 Semicolon = U';';
       constexpr char32 EndOfFile = EOFMarker;
-      constexpr char32 Replacement = krys::Text::Unicode::Replacement<char32>;
+      constexpr char32 Replacement = krys::text::UnicodeReplacementChar;
 
       char32 character = _input.NextInputCharacter();
       switch (_state)
@@ -645,9 +641,9 @@ namespace krys::boo::html
           {
             ADVANCE_PAST_NON_NEWLINE_TO(EndTagOpen);
           }
-          if (krys::Text::IsASCIIAlpha(character))
+          if (krys::text::IsASCIIAlpha(character))
           {
-            _token.BeginStartTag(krys::Text::ToASCIILower(character));
+            _token.BeginStartTag(krys::text::ToASCIILower(character));
             ADVANCE_PAST_NON_NEWLINE_TO(TagName);
           }
           if (character == QuestionMark)
@@ -669,9 +665,9 @@ namespace krys::boo::html
         END_STATE()
 
         BEGIN_STATE(EndTagOpen)
-          if (krys::Text::IsASCIIAlpha(character))
+          if (krys::text::IsASCIIAlpha(character))
           {
-            _token.BeginEndTag(krys::Text::ToASCIILower(character));
+            _token.BeginEndTag(krys::text::ToASCIILower(character));
             ADVANCE_PAST_NON_NEWLINE_TO(TagName);
           }
           if (character == GreaterThanSign)
@@ -704,9 +700,9 @@ namespace krys::boo::html
           {
             return EmitTagToken();
           }
-          if (krys::Text::IsASCIIUpper(character))
+          if (krys::text::IsASCIIUpper(character))
           {
-            _token.AppendToName(krys::Text::ToASCIILowerUnchecked(character));
+            _token.AppendToName(krys::text::ToASCIILowerUnchecked(character));
             ADVANCE_PAST_NON_NEWLINE_TO(TagName);
           }
           if (character == null)
@@ -739,10 +735,10 @@ namespace krys::boo::html
         END_STATE()
 
         BEGIN_STATE(RCDATAEndTagOpen)
-          if (krys::Text::IsASCIIAlpha(character))
+          if (krys::text::IsASCIIAlpha(character))
           {
             _temporaryBuffer.push_back(character);
-            AppendToPossibleEndTag(krys::Text::ToASCIILower(character));
+            AppendToPossibleEndTag(krys::text::ToASCIILower(character));
             ADVANCE_PAST_NON_NEWLINE_TO(RCDATAEndTagName);
           }
 
@@ -780,10 +776,10 @@ namespace krys::boo::html
               return CommitToCompleteEndTag();
             }
           }
-          if (krys::Text::IsASCIIAlpha(character))
+          if (krys::text::IsASCIIAlpha(character))
           {
             _temporaryBuffer.push_back(character);
-            AppendToPossibleEndTag(krys::Text::ToASCIILower(character));
+            AppendToPossibleEndTag(krys::text::ToASCIILower(character));
             ADVANCE_PAST_NON_NEWLINE_TO(RCDATAEndTagName);
           }
 
@@ -807,10 +803,10 @@ namespace krys::boo::html
         END_STATE()
 
         BEGIN_STATE(RAWTEXTEndTagOpen)
-          if (krys::Text::IsASCIIAlpha(character))
+          if (krys::text::IsASCIIAlpha(character))
           {
             _temporaryBuffer.push_back(character);
-            AppendToPossibleEndTag(krys::Text::ToASCIILower(character));
+            AppendToPossibleEndTag(krys::text::ToASCIILower(character));
             ADVANCE_PAST_NON_NEWLINE_TO(RAWTEXTEndTagName);
           }
 
@@ -848,10 +844,10 @@ namespace krys::boo::html
               return CommitToCompleteEndTag();
             }
           }
-          if (krys::Text::IsASCIIAlpha(character))
+          if (krys::text::IsASCIIAlpha(character))
           {
             _temporaryBuffer.push_back(character);
-            AppendToPossibleEndTag(krys::Text::ToASCIILower(character));
+            AppendToPossibleEndTag(krys::text::ToASCIILower(character));
             ADVANCE_PAST_NON_NEWLINE_TO(RAWTEXTEndTagName);
           }
 
@@ -880,10 +876,10 @@ namespace krys::boo::html
         END_STATE()
 
         BEGIN_STATE(ScriptDataEndTagOpen)
-          if (krys::Text::IsASCIIAlpha(character))
+          if (krys::text::IsASCIIAlpha(character))
           {
             _temporaryBuffer.push_back(character);
-            AppendToPossibleEndTag(krys::Text::ToASCIILower(character));
+            AppendToPossibleEndTag(krys::text::ToASCIILower(character));
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEndTagName);
           }
 
@@ -921,10 +917,10 @@ namespace krys::boo::html
               return CommitToCompleteEndTag();
             }
           }
-          if (krys::Text::IsASCIIAlpha(character))
+          if (krys::text::IsASCIIAlpha(character))
           {
             _temporaryBuffer.push_back(character);
-            AppendToPossibleEndTag(krys::Text::ToASCIILower(character));
+            AppendToPossibleEndTag(krys::text::ToASCIILower(character));
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEndTagName);
           }
 
@@ -1045,7 +1041,7 @@ namespace krys::boo::html
             assert(_bufferedEndTagName.empty());
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedEndTagOpen);
           }
-          if (krys::Text::IsASCIIAlpha(character))
+          if (krys::text::IsASCIIAlpha(character))
           {
             _temporaryBuffer.clear();
             BufferCharacter(LessThanSign);
@@ -1057,10 +1053,10 @@ namespace krys::boo::html
         END_STATE()
 
         BEGIN_STATE(ScriptDataEscapedEndTagOpen)
-          if (krys::Text::IsASCIIAlpha(character))
+          if (krys::text::IsASCIIAlpha(character))
           {
             _temporaryBuffer.push_back(character);
-            AppendToPossibleEndTag(krys::Text::ToASCIILower(character));
+            AppendToPossibleEndTag(krys::text::ToASCIILower(character));
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedEndTagName);
           }
 
@@ -1098,10 +1094,10 @@ namespace krys::boo::html
               return CommitToCompleteEndTag();
             }
           }
-          if (krys::Text::IsASCIIAlpha(character))
+          if (krys::text::IsASCIIAlpha(character))
           {
             _temporaryBuffer.push_back(character);
-            AppendToPossibleEndTag(krys::Text::ToASCIILower(character));
+            AppendToPossibleEndTag(krys::text::ToASCIILower(character));
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedEndTagName);
           }
 
@@ -1125,10 +1121,10 @@ namespace krys::boo::html
               ADVANCE_TO(ScriptDataEscaped);
             }
           }
-          if (krys::Text::IsASCIIAlpha(character))
+          if (krys::text::IsASCIIAlpha(character))
           {
             BufferCharacter(character);
-            _temporaryBuffer.push_back(krys::Text::ToASCIILower(character));
+            _temporaryBuffer.push_back(krys::text::ToASCIILower(character));
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapeStart);
           }
 
@@ -1246,10 +1242,10 @@ namespace krys::boo::html
               ADVANCE_TO(ScriptDataDoubleEscaped);
             }
           }
-          if (krys::Text::IsASCIIAlpha(character))
+          if (krys::text::IsASCIIAlpha(character))
           {
             BufferCharacter(character);
-            _temporaryBuffer.push_back(krys::Text::ToASCIILower(character));
+            _temporaryBuffer.push_back(krys::text::ToASCIILower(character));
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapeEnd);
           }
 
@@ -1287,9 +1283,9 @@ namespace krys::boo::html
           {
             ADVANCE_PAST_NON_NEWLINE_TO(BeforeAttributeValue);
           }
-          if (krys::Text::IsASCIIUpper(character))
+          if (krys::text::IsASCIIUpper(character))
           {
-            _token.AppendToCurrentAttributeName(krys::Text::ToASCIILowerUnchecked(character));
+            _token.AppendToCurrentAttributeName(krys::text::ToASCIILowerUnchecked(character));
             ADVANCE_PAST_NON_NEWLINE_TO(AttributeName);
           }
           if (character == null)
@@ -1529,29 +1525,27 @@ namespace krys::boo::html
         END_STATE()
 
         BEGIN_STATE(MarkupDeclarationOpen)
-          using krys::Text::operator""_s;
-
           if (character == HyphenMinus)
           {
-            auto result = _input.AdvancePast<false>("--"_s);
-            if (result == HTMLInputStream::MatchResult::Matched)
+            auto result = _input.AdvancePast<false>("--");
+            if (result == InputStream::MatchResult::Matched)
             {
               _token.BeginComment();
               SWITCH_TO(CommentStart);
             }
-            if (result == HTMLInputStream::MatchResult::NotEnoughCharacters)
+            if (result == InputStream::MatchResult::NotEnoughCharacters)
             {
               RETURN_IN_CURRENT_STATE(HasBufferedCharacterToken());
             }
           }
-          else if (krys::Text::MatchesASCIINormalizedLiteral(character, 'd'))
+          else if (krys::text::IsASCIICaselessEqual(character, 'd'))
           {
-            auto result = _input.AdvancePast("doctype"_s);
-            if (result == HTMLInputStream::MatchResult::Matched)
+            auto result = _input.AdvancePast("doctype");
+            if (result == InputStream::MatchResult::Matched)
             {
               SWITCH_TO(DOCTYPE);
             }
-            if (result == HTMLInputStream::MatchResult::NotEnoughCharacters)
+            if (result == InputStream::MatchResult::NotEnoughCharacters)
             {
               RETURN_IN_CURRENT_STATE(HasBufferedCharacterToken());
             }
@@ -1559,7 +1553,7 @@ namespace krys::boo::html
           else if (character == '[')
           {
             auto result = _input.AdvancePast<false>("[CDATA[");
-            if (result == HTMLInputStream::MatchResult::Matched)
+            if (result == InputStream::MatchResult::Matched)
             {
               if (_isCDATASectionAllowed())
               {
@@ -1569,11 +1563,11 @@ namespace krys::boo::html
               {
                 ParserError(HTMLParseError::CDATAInHTMLContent);
                 _token.BeginComment();
-                _token.AppendToComment("[CDATA["_s);
+                _token.AppendToComment("[CDATA[");
                 SWITCH_TO(BogusComment);
               }
             }
-            if (result == HTMLInputStream::MatchResult::NotEnoughCharacters)
+            if (result == InputStream::MatchResult::NotEnoughCharacters)
             {
               RETURN_IN_CURRENT_STATE(HasBufferedCharacterToken());
             }
@@ -1703,8 +1697,6 @@ namespace krys::boo::html
         END_STATE()
 
         BEGIN_STATE(CommentEnd)
-          using krys::Text::operator""_s;
-
           if (character == GreaterThanSign)
           {
             return EmitCommentToken(true);
@@ -1724,16 +1716,14 @@ namespace krys::boo::html
             return EmitCommentToken(false);
           }
 
-          _token.AppendToComment("--"_s);
+          _token.AppendToComment("--");
           RECONSUME_IN(Comment);
         END_STATE()
 
         BEGIN_STATE(CommentEndBang)
-          using krys::Text::operator""_s;
-
           if (character == HyphenMinus)
           {
-            _token.AppendToComment("--!"_s);
+            _token.AppendToComment("--!");
             ADVANCE_PAST_NON_NEWLINE_TO(CommentEndDash);
           }
           if (character == GreaterThanSign)
@@ -1747,7 +1737,7 @@ namespace krys::boo::html
             return EmitCommentToken(false);
           }
 
-          _token.AppendToComment("--!"_s);
+          _token.AppendToComment("--!");
           RECONSUME_IN(Comment);
         END_STATE()
 
@@ -1777,10 +1767,10 @@ namespace krys::boo::html
           {
             ADVANCE_TO(BeforeDOCTYPEName);
           }
-          if (krys::Text::IsASCIIUpper(character))
+          if (krys::text::IsASCIIUpper(character))
           {
             _token.BeginDOCTYPE();
-            _token.AppendToName(krys::Text::ToASCIILowerUnchecked(character));
+            _token.AppendToName(krys::text::ToASCIILowerUnchecked(character));
             ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEName);
           }
           if (character == null)
@@ -1819,9 +1809,9 @@ namespace krys::boo::html
           {
             return EmitDOCTYPEToken(true);
           }
-          if (krys::Text::IsASCIIUpper(character))
+          if (krys::text::IsASCIIUpper(character))
           {
-            _token.AppendToName(krys::Text::ToASCIILowerUnchecked(character));
+            _token.AppendToName(krys::text::ToASCIILowerUnchecked(character));
             ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEName);
           }
           if (character == null)
@@ -1842,8 +1832,6 @@ namespace krys::boo::html
         END_STATE()
 
         BEGIN_STATE(AfterDOCTYPEName)
-          using krys::Text::operator""_s;
-
           if (IsTokenizerWhitespace(character))
           {
             ADVANCE_TO(AfterDOCTYPEName);
@@ -1858,26 +1846,26 @@ namespace krys::boo::html
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(false);
           }
-          if (krys::Text::MatchesASCIINormalizedLiteral(character, 'p'))
+          if (krys::text::IsASCIICaselessEqual(character, 'p'))
           {
-            auto result = _input.AdvancePast("public"_s);
-            if (result == HTMLInputStream::MatchResult::Matched)
+            auto result = _input.AdvancePast("public");
+            if (result == InputStream::MatchResult::Matched)
             {
               SWITCH_TO(AfterDOCTYPEPublicKeyword);
             }
-            if (result == HTMLInputStream::MatchResult::NotEnoughCharacters)
+            if (result == InputStream::MatchResult::NotEnoughCharacters)
             {
               RETURN_IN_CURRENT_STATE(HasBufferedCharacterToken());
             }
           }
-          if (krys::Text::MatchesASCIINormalizedLiteral(character, 's'))
+          if (krys::text::IsASCIICaselessEqual(character, 's'))
           {
-            auto result = _input.AdvancePast("system"_s);
-            if (result == HTMLInputStream::MatchResult::Matched)
+            auto result = _input.AdvancePast("system");
+            if (result == InputStream::MatchResult::Matched)
             {
               SWITCH_TO(AfterDOCTYPESystemKeyword);
             }
-            if (result == HTMLInputStream::MatchResult::NotEnoughCharacters)
+            if (result == InputStream::MatchResult::NotEnoughCharacters)
             {
               RETURN_IN_CURRENT_STATE(HasBufferedCharacterToken());
             }
@@ -2283,7 +2271,7 @@ namespace krys::boo::html
           _temporaryBuffer.clear();
           _temporaryBuffer.push_back(Ampersand);
 
-          if (krys::Text::IsASCIIAlphanumeric(character))
+          if (krys::text::IsASCIIAlphanumeric(character))
           {
             _temporaryBuffer.push_back(character);
             _namedCharacterReferenceMatchEntries = SearchNamedCharacterReferences(_temporaryBuffer);
@@ -2337,7 +2325,7 @@ namespace krys::boo::html
             _temporaryBuffer.clear();
 
             if (CharacterReferenceWasConsumedAsPartOfAnAttribute() && match.Name.back() != Semicolon
-                && (character == EqualSign || krys::Text::IsASCIIAlphanumeric(character)))
+                && (character == EqualSign || krys::text::IsASCIIAlphanumeric(character)))
             {
               AppendToTemporaryBuffer(match.Name);
               AppendToTemporaryBuffer(nonMatchingCharacters);
@@ -2364,7 +2352,7 @@ namespace krys::boo::html
         END_STATE()
 
         BEGIN_STATE(AmbiguousAmpersand)
-          if (krys::Text::IsASCIIAlphanumeric(character))
+          if (krys::text::IsASCIIAlphanumeric(character))
           {
             if (CharacterReferenceWasConsumedAsPartOfAnAttribute())
             {
@@ -2387,7 +2375,7 @@ namespace krys::boo::html
 
         BEGIN_STATE(NumericCharacterReference)
           _characterReferenceCode = 0;
-          if (krys::Text::MatchesASCIINormalizedLiteral(character, 'x'))
+          if (krys::text::IsASCIICaselessEqual(character, 'x'))
           {
             _temporaryBuffer.push_back(character);
             ADVANCE_PAST_NON_NEWLINE_TO(HexadecimalCharacterReferenceStart);
@@ -2397,7 +2385,7 @@ namespace krys::boo::html
         END_STATE()
 
         BEGIN_STATE(HexadecimalCharacterReferenceStart)
-          if (krys::Text::IsASCIIHexDigit(character))
+          if (krys::text::IsASCIIHexDigit(character))
           {
             RECONSUME_IN(HexadecimalCharacterReference);
           }
@@ -2408,7 +2396,7 @@ namespace krys::boo::html
         END_STATE()
 
         BEGIN_STATE(DecimalCharacterReferenceStart)
-          if (krys::Text::IsASCIIDigit(character))
+          if (krys::text::IsASCIIDigit(character))
           {
             RECONSUME_IN(DecimalCharacterReference);
           }
@@ -2419,16 +2407,16 @@ namespace krys::boo::html
         END_STATE()
 
         BEGIN_STATE(HexadecimalCharacterReference)
-          if (krys::Text::IsASCIIDigit(character))
+          if (krys::text::IsASCIIDigit(character))
           {
             _characterReferenceCode *= 16;
             _characterReferenceCode += static_cast<int64>(character - '0');
             ADVANCE_PAST_NON_NEWLINE_TO(HexadecimalCharacterReference);
           }
-          if (krys::Text::IsASCIIHexDigit(character))
+          if (krys::text::IsASCIIHexDigit(character))
           {
             _characterReferenceCode *= 16;
-            _characterReferenceCode += static_cast<int64>(krys::Text::ToASCIIHexValue(character));
+            _characterReferenceCode += static_cast<int64>(krys::text::ToASCIIHexValue(character));
             ADVANCE_PAST_NON_NEWLINE_TO(HexadecimalCharacterReference);
           }
           if (character != Semicolon)
@@ -2440,7 +2428,7 @@ namespace krys::boo::html
         END_STATE()
 
         BEGIN_STATE(DecimalCharacterReference)
-          if (krys::Text::IsASCIIDigit(character))
+          if (krys::text::IsASCIIDigit(character))
           {
             _characterReferenceCode *= 10;
             _characterReferenceCode += static_cast<int64>(character - '0');
@@ -2465,17 +2453,17 @@ namespace krys::boo::html
             ParserError(HTMLParseError::CharacterReferenceOutsideUnicodeRange);
             _characterReferenceCode = Replacement;
           }
-          else if (krys::Text::Unicode::IsSurrogate(static_cast<char32>(_characterReferenceCode)))
+          else if (krys::text::IsSurrogate(static_cast<char32>(_characterReferenceCode)))
           {
             ParserError(HTMLParseError::SurrogateCharacterReference);
             _characterReferenceCode = Replacement;
           }
-          else if (krys::Text::Unicode::IsNonCharacter(static_cast<char32>(_characterReferenceCode)))
+          else if (krys::text::IsNonUnicodeCharacter(static_cast<char32>(_characterReferenceCode)))
           {
             ParserError(HTMLParseError::NonCharacterCharacterReference);
           }
           else if (_characterReferenceCode == '\x0D'
-                   || krys::Text::IsASCIINonWhitespaceControl(static_cast<char32>(_characterReferenceCode)))
+                   || krys::text::IsASCIINonWhitespaceControl(static_cast<char32>(_characterReferenceCode)))
           {
             ParserError(HTMLParseError::ControlCharacterReference);
           }

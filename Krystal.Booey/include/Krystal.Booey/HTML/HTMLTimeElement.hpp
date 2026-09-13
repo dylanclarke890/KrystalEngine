@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTimeElement);
 
   public:
-    HTMLTimeElement(Document &document) noexcept;
+    HTMLTimeElement(dom::Document &document) noexcept;
 
 #pragma region HTMLTimeElement - https://html.spec.whatwg.org/#htmltimeelement
 

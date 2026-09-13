@@ -3,19 +3,19 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Anchor.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/List.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValueListBuilder.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
-  RefPtr<CSSValue> ConsumePositionTryFallbacks(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumePositionTryFallbacks(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'position-try-fallbacks'> = none | [ [<dashed-ident> || <try-tactic>] | <'position-area'> ]#
     // https://drafts.csswg.org/css-anchor-position-1/#propdef-position-try-fallbacks
 
-    if (auto result = ConsumeIdent<CSSValueId::None>(tokens))
+    if (auto result = ConsumeIdent<ValueId::None>(tokens))
     {
       return result;
     }
@@ -25,7 +25,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       // Try to parse <'position-area'>
       auto rangeCopy = tokens;
       // consumePositionArea accepts 'none', so detect and reject it beforehand.
-      if (tokens.Peek().ValueId() == CSSValueId::None)
+      if (tokens.Peek().ValueId() == ValueId::None)
       {
         return nullptr;
       }
@@ -41,10 +41,10 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       // <try-tactic> = flip-block || flip-inline || flip-start || flip-x || flip-y
       auto tryRuleIdent = ConsumeDashedIdentRaw(tokens);
 
-      SmallList<CSSValueId, 5uz> tryTactics;
+      SmallList<ValueId, 5uz> tryTactics;
       while (auto tactic =
-               ConsumeIdentRaw<CSSValueId::FlipBlock, CSSValueId::FlipInline, CSSValueId::FlipStart,
-                               CSSValueId::FlipX, CSSValueId::FlipY>(tokens))
+               ConsumeIdentRaw<ValueId::FlipBlock, ValueId::FlipInline, ValueId::FlipStart,
+                               ValueId::FlipX, ValueId::FlipY>(tokens))
       {
         if (std::ranges::contains(tryTactics, *tactic))
         {

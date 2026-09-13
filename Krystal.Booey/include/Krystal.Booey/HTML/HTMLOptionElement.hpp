@@ -21,7 +21,7 @@ namespace krys::boo::html
     bool _selectedness {false};
 
   public:
-    HTMLOptionElement(Document &document) noexcept;
+    HTMLOptionElement(dom::Document &document) noexcept;
 
 #pragma region HTMLOptionElement - https://html.spec.whatwg.org/#htmloptionelement
 
@@ -73,9 +73,9 @@ namespace krys::boo::html
 
     void OnInsert() noexcept override;
 
-    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
+    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
 
-    void OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
+    void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
 
 #pragma endregion
   };

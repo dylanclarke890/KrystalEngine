@@ -10,10 +10,8 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::dom::mixins::tests
 {
-  using namespace krys::boo;
-
   TEST_CASE("ChildNode::Before", "[Mixins][ChildNode]")
   {
     auto document = CreateRef<HTMLDocument>();
@@ -23,7 +21,7 @@ namespace krys::tests
 
     REQUIRE_FALSE(parent->AppendChild(*element1).HasException());
 
-    REQUIRE_FALSE(Mixins::ChildNode::Before(*element1, {element2, u8"text"}).HasException());
+    REQUIRE_FALSE(mixins::ChildNode::Before(*element1, {element2, u8"text"}).HasException());
     REQUIRE(parent->FirstChild() == element2);
     REQUIRE(parent->LastChild() == element1);
     REQUIRE(parent->FirstChild()->NextSibling()->NodeType() == NodeType::TEXT_NODE);
@@ -42,7 +40,7 @@ namespace krys::tests
 
     REQUIRE_FALSE(parent->AppendChild(*element1).HasException());
 
-    REQUIRE_FALSE(Mixins::ChildNode::After(*element1, {element2, u8"text"}).HasException());
+    REQUIRE_FALSE(mixins::ChildNode::After(*element1, {element2, u8"text"}).HasException());
     REQUIRE(parent->FirstChild() == element1);
     REQUIRE(parent->FirstChild()->NextSibling() == element2);
     REQUIRE(parent->LastChild()->NodeType() == NodeType::TEXT_NODE);
@@ -61,7 +59,7 @@ namespace krys::tests
 
     REQUIRE_FALSE(parent->AppendChild(*element1).HasException());
 
-    REQUIRE_FALSE(Mixins::ChildNode::ReplaceWith(*element1, {element2, u8"text"}).HasException());
+    REQUIRE_FALSE(mixins::ChildNode::ReplaceWith(*element1, {element2, u8"text"}).HasException());
     REQUIRE(parent->FirstChild() == element2);
     REQUIRE(parent->LastChild()->NodeType() == NodeType::TEXT_NODE);
     REQUIRE(parent->LastChild()->NodeValue() == u8"text");
@@ -78,7 +76,7 @@ namespace krys::tests
 
     REQUIRE_FALSE(parent->AppendChild(*element).HasException());
 
-    REQUIRE_FALSE(Mixins::ChildNode::Remove(*element).HasException());
+    REQUIRE_FALSE(mixins::ChildNode::Remove(*element).HasException());
 
     REQUIRE(parent->FirstChild() == nullptr);
   }

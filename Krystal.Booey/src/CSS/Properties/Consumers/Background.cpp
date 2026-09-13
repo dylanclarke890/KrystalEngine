@@ -11,8 +11,8 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/NumberDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/PercentageDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParsing.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
 #include "Krystal.Booey/CSS/Values/Background/BoxShadow.hpp"
 #include "Krystal.Booey/CSS/Values/Background/BoxShadowProperty.hpp"
 #include "Krystal.Booey/CSS/Values/Background/CSSBackgroundRepeatValue.hpp"
@@ -26,7 +26,7 @@
 #include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValuePair.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
   template <typename ElementType>
   static void Complete4Sides(Array<ElementType, 4> &sides) noexcept
@@ -57,7 +57,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
   template <SupportWebKitBorderRadiusQuirk supportQuirk>
   KRYS_NODISCARD static Maybe<BorderRadius> ConsumeBorderRadius(TokenRange &tokens,
-                                                                CSSPropertyParserState &state) noexcept
+                                                                PropertyParserState &state) noexcept
   {
     // <'border-radius'> = <length-percentage [0,∞]>{1,4} [ / <length-percentage [0,∞]>{1,4} ]?
     // https://drafts.csswg.org/css-backgrounds/#propdef-border-radius
@@ -127,7 +127,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   Maybe<BorderRadius> ConsumeUnresolvedBorderRadius(TokenRange &tokens,
-                                                    CSSPropertyParserState &state) noexcept
+                                                    PropertyParserState &state) noexcept
   {
     // <'border-radius'> = <length-percentage [0,∞]>{1,4} [ / <length-percentage [0,∞]>{1,4} ]?
     // https://drafts.csswg.org/css-backgrounds/#propdef-border-radius
@@ -136,7 +136,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   Maybe<BorderRadius> ConsumeUnresolvedWebKitBorderRadius(TokenRange &tokens,
-                                                          CSSPropertyParserState &state) noexcept
+                                                          PropertyParserState &state) noexcept
   {
     // <'border-radius'> = <length-percentage [0,∞]>{1,4} [ / <length-percentage [0,∞]>{1,4} ]?
     // https://drafts.csswg.org/css-backgrounds/#propdef-border-radius
@@ -148,13 +148,13 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
   // MARK: - Border Image
 
-  RefPtr<CSSValue> ConsumeBorderImageSlice(TokenRange &tokens, CSSPropertyParserState &state,
+  RefPtr<CSSValue> ConsumeBorderImageSlice(TokenRange &tokens, PropertyParserState &state,
                                            BorderImageSliceFillDefault defaultFill) noexcept
   {
     // <'border-image-slice'> = [<number [0,∞]> | <percentage [0,∞]>]{1,4} && fill?
     // https://drafts.csswg.org/css-backgrounds/#propdef-border-image-slice
 
-    bool fill = ConsumeIdentRaw<CSSValueId::Fill>(tokens).has_value();
+    bool fill = ConsumeIdentRaw<ValueId::Fill>(tokens).has_value();
     Array<RefPtr<CSSPrimitiveValue>, 4uz> slices;
 
     for (auto &value : slices)
@@ -175,7 +175,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       return nullptr;
     }
 
-    if (ConsumeIdent<CSSValueId::Fill>(tokens))
+    if (ConsumeIdent<ValueId::Fill>(tokens))
     {
       if (fill)
       {
@@ -197,7 +197,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       {krys::move(slices[0]), krys::move(slices[1]), krys::move(slices[2]), krys::move(slices[3])}, fill);
   }
 
-  RefPtr<CSSValue> ConsumeBorderImageWidth(TokenRange &tokens, CSSPropertyParserState &state,
+  RefPtr<CSSValue> ConsumeBorderImageWidth(TokenRange &tokens, PropertyParserState &state,
                                            BorderImageWidthOverridesWidthForLength overridesWidth) noexcept
   {
     // <'border-image-width'> = [ <length-percentage [0,∞]> | <number [0,∞]> | auto ]{1,4}
@@ -230,7 +230,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
         continue;
       }
 
-      value = ConsumeIdent<CSSValueId::Auto>(tokens);
+      value = ConsumeIdent<ValueId::Auto>(tokens);
       if (!value)
       {
         break;
@@ -250,7 +250,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   Maybe<BorderImageComponents>
-    ConsumeBorderImageComponents(TokenRange &tokens, CSSPropertyParserState &state,
+    ConsumeBorderImageComponents(TokenRange &tokens, PropertyParserState &state,
                                  BorderImageSliceFillDefault defaultFill,
                                  BorderImageWidthOverridesWidthForLength overridesWidth) noexcept
   {
@@ -274,7 +274,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       }
       if (!components.Repeat)
       {
-        components.Repeat = CSSPropertyParsing::ConsumeBorderImageRepeat(tokens);
+        components.Repeat = PropertyParsing::ConsumeBorderImageRepeat(tokens);
         if (components.Repeat)
         {
           continue;
@@ -291,7 +291,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
             components.Width = ConsumeBorderImageWidth(tokens, state, overridesWidth);
             if (ConsumeSlash(tokens))
             {
-              components.Outset = CSSPropertyParsing::ConsumeBorderImageOutset(tokens, state);
+              components.Outset = PropertyParsing::ConsumeBorderImageOutset(tokens, state);
               if (!components.Outset)
               {
                 return {};
@@ -319,19 +319,19 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
   // MARK: - Background Size
 
-  template <CSSPropertyId property>
-  static RefPtr<CSSValue> ConsumeBackgroundSize(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  template <PropertyId property>
+  static RefPtr<CSSValue> ConsumeBackgroundSize(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <bg-size> = [ <length-percentage [0,∞]> | auto ]{1,2} | cover | contain
     // https://drafts.csswg.org/css-backgrounds/#propdef-background-size
 
-    if (IdentMatches<CSSValueId::Contain, CSSValueId::Cover>(tokens.Peek().ValueId()))
+    if (IdentMatches<ValueId::Contain, ValueId::Cover>(tokens.Peek().ValueId()))
     {
       return ConsumeIdent(tokens);
     }
 
     bool shouldCoalesce = true;
-    RefPtr<CSSPrimitiveValue> horizontal = ConsumeIdent<CSSValueId::Auto>(tokens);
+    RefPtr<CSSPrimitiveValue> horizontal = ConsumeIdent<ValueId::Auto>(tokens);
     if (!horizontal)
     {
       horizontal = CSSPrimitiveValueResolver<LengthPercentage<NonNegative>>::ConsumeAndResolve(tokens, state);
@@ -346,7 +346,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     RefPtr<CSSPrimitiveValue> vertical;
     if (!tokens.IsAtEnd())
     {
-      vertical = ConsumeIdent<CSSValueId::Auto>(tokens);
+      vertical = ConsumeIdent<ValueId::Auto>(tokens);
       if (!vertical)
       {
         vertical = CSSPrimitiveValueResolver<LengthPercentage<NonNegative>>::ConsumeAndResolve(tokens, state);
@@ -354,16 +354,16 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     }
     if (!vertical)
     {
-      if constexpr (property == CSSPropertyId::WebkitBackgroundSize)
+      if constexpr (property == PropertyId::WebkitBackgroundSize)
       {
         // Legacy syntax: "-webkit-background-size: 10px" is equivalent to "background-size: 10px 10px".
         vertical = horizontal;
       }
-      else if constexpr (property == CSSPropertyId::BackgroundSize)
+      else if constexpr (property == PropertyId::BackgroundSize)
       {
-        vertical = CSSPrimitiveValue::Create(CSSValueId::Auto);
+        vertical = CSSPrimitiveValue::Create(ValueId::Auto);
       }
-      else if constexpr (property == CSSPropertyId::MaskSize)
+      else if constexpr (property == PropertyId::MaskSize)
       {
         return horizontal;
       }
@@ -377,55 +377,53 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return CSSValuePair::CreateNonCoalescing(krys::move(horizontal), krys::move(vertical));
   }
 
-  RefPtr<CSSValue> ConsumeSingleBackgroundSize(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeSingleBackgroundSize(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <single-background-size> = <bg-size>
     // https://drafts.csswg.org/css-backgrounds/#background-size
 
-    return ConsumeBackgroundSize<CSSPropertyId::BackgroundSize>(tokens, state);
+    return ConsumeBackgroundSize<PropertyId::BackgroundSize>(tokens, state);
   }
 
   RefPtr<CSSValue> ConsumeSingleWebkitBackgroundSize(TokenRange &tokens,
-                                                     CSSPropertyParserState &state) noexcept
+                                                     PropertyParserState &state) noexcept
   {
     // Non-standard.
-    return ConsumeBackgroundSize<CSSPropertyId::WebkitBackgroundSize>(tokens, state);
+    return ConsumeBackgroundSize<PropertyId::WebkitBackgroundSize>(tokens, state);
   }
 
-  RefPtr<CSSValue> ConsumeSingleMaskSize(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeSingleMaskSize(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <single-mask-size> = <bg-size>
     // https://drafts.fxtf.org/css-masking/#the-mask-size
 
-    return ConsumeBackgroundSize<CSSPropertyId::MaskSize>(tokens, state);
+    return ConsumeBackgroundSize<PropertyId::MaskSize>(tokens, state);
   }
 
   // MARK: - Background Repeat
 
-  RefPtr<CSSValue> ConsumeRepeatStyle(TokenRange &tokens, CSSPropertyParserState &) noexcept
+  RefPtr<CSSValue> ConsumeRepeatStyle(TokenRange &tokens, PropertyParserState &) noexcept
   {
     // <repeat-style> = repeat-x | repeat-y | [repeat | space | round | no-repeat]{1,2}
     // https://drafts.csswg.org/css-backgrounds/#typedef-repeat-style
 
-    if (ConsumeIdentRaw<CSSValueId::RepeatX>(tokens))
+    if (ConsumeIdentRaw<ValueId::RepeatX>(tokens))
     {
-      return CSSBackgroundRepeatValue::Create(CSSValueId::Repeat, CSSValueId::NoRepeat);
+      return CSSBackgroundRepeatValue::Create(ValueId::Repeat, ValueId::NoRepeat);
     }
 
-    if (ConsumeIdentRaw<CSSValueId::RepeatY>(tokens))
+    if (ConsumeIdentRaw<ValueId::RepeatY>(tokens))
     {
-      return CSSBackgroundRepeatValue::Create(CSSValueId::NoRepeat, CSSValueId::Repeat);
+      return CSSBackgroundRepeatValue::Create(ValueId::NoRepeat, ValueId::Repeat);
     }
 
-    auto value1 =
-      ConsumeIdentRaw<CSSValueId::Repeat, CSSValueId::NoRepeat, CSSValueId::Round, CSSValueId::Space>(tokens);
+    auto value1 = ConsumeIdentRaw<ValueId::Repeat, ValueId::NoRepeat, ValueId::Round, ValueId::Space>(tokens);
     if (!value1)
     {
       return nullptr;
     }
 
-    auto value2 =
-      ConsumeIdentRaw<CSSValueId::Repeat, CSSValueId::NoRepeat, CSSValueId::Round, CSSValueId::Space>(tokens);
+    auto value2 = ConsumeIdentRaw<ValueId::Repeat, ValueId::NoRepeat, ValueId::Round, ValueId::Space>(tokens);
     if (!value2)
     {
       value2 = value1;
@@ -437,7 +435,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   // MARK: - Box Shadows
 
   KRYS_NODISCARD static Maybe<BoxShadow> ConsumeSingleUnresolvedBoxShadow(TokenRange &tokens,
-                                                                          CSSPropertyParserState &state,
+                                                                          PropertyParserState &state,
                                                                           bool isWebkitBoxShadow) noexcept
   {
     // <box-shadow> = <color>? && [<length>{2} <length [0,∞]>? <length>?] && inset?
@@ -450,7 +448,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     Maybe<Length<AllUnzoomed>> y;
     Maybe<Length<NonNegativeUnzoomed>> blur;
     Maybe<Length<AllUnzoomed>> spread;
-    Maybe<Keywords::Inset> inset;
+    Maybe<keywords::Inset> inset;
 
     for (size_t i = 0uz; i < 3uz; i++)
     {
@@ -467,7 +465,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
         break;
       }
 
-      if (nextToken.ValueId() == CSSValueId::Inset)
+      if (nextToken.ValueId() == ValueId::Inset)
       {
         if (inset)
         {
@@ -476,7 +474,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
         rangeCopy.Discard();
         rangeCopy.DiscardWhitespace();
-        inset = Keywords::Inset {};
+        inset = keywords::Inset {};
         continue;
       }
 
@@ -551,7 +549,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   KRYS_NODISCARD static Maybe<BoxShadowProperty::List>
-    ConsumeUnresolvedBoxShadowList(TokenRange &tokens, CSSPropertyParserState &state,
+    ConsumeUnresolvedBoxShadowList(TokenRange &tokens, PropertyParserState &state,
                                    bool isWebkitBoxShadow) noexcept
   {
     auto rangeCopy = tokens;
@@ -575,14 +573,14 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   KRYS_NODISCARD static Maybe<BoxShadowProperty> ConsumeUnresolvedBoxShadow(TokenRange &tokens,
-                                                                            CSSPropertyParserState &state,
+                                                                            PropertyParserState &state,
                                                                             bool isWebkitBoxShadow) noexcept
   {
-    if (tokens.Peek().ValueId() == CSSValueId::None)
+    if (tokens.Peek().ValueId() == ValueId::None)
     {
       tokens.Discard();
       tokens.DiscardWhitespace();
-      return BoxShadowProperty {Keywords::None {}};
+      return BoxShadowProperty {keywords::None {}};
     }
 
     if (auto boxShadowList = ConsumeUnresolvedBoxShadowList(tokens, state, isWebkitBoxShadow))
@@ -593,7 +591,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return {};
   }
 
-  RefPtr<CSSValue> ConsumeBoxShadow(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeBoxShadow(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'box-shadow'> = none | <shadow>#
     // https://drafts.csswg.org/css-backgrounds/#propdef-box-shadow
@@ -603,7 +601,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return nullptr;
   }
 
-  RefPtr<CSSValue> ConsumeWebkitBoxShadow(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeWebkitBoxShadow(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     if (auto property = ConsumeUnresolvedBoxShadow(tokens, state, true))
     {
@@ -615,15 +613,14 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
   // MARK: - Reflect (non-standard)
 
-  RefPtr<CSSValue> ConsumeWebkitBoxReflect(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeWebkitBoxReflect(TokenRange &tokens, PropertyParserState &state) noexcept
   {
-    if (tokens.Peek().ValueId() == CSSValueId::None)
+    if (tokens.Peek().ValueId() == ValueId::None)
     {
       return ConsumeIdent(tokens);
     }
 
-    auto direction =
-      ConsumeIdentRaw<CSSValueId::Above, CSSValueId::Below, CSSValueId::Left, CSSValueId::Right>(tokens);
+    auto direction = ConsumeIdentRaw<ValueId::Above, ValueId::Below, ValueId::Left, ValueId::Right>(tokens);
     if (!direction)
     {
       return nullptr;

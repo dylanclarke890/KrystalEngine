@@ -2,8 +2,8 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/CSSRule.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSInternalStyleProperties.hpp"
-#include "Krystal.Booey/CSS/Selectors/CSSSelectorList.hpp"
+#include "Krystal.Booey/CSS/Properties/InternalStyleProperties.hpp"
+#include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
 
 namespace krys::boo::css
 {
@@ -15,11 +15,11 @@ namespace krys::boo::css
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CSSStyleRule);
 
   private:
-    CSSSelectorList _selectors;
-    Ref<CSSInternalStyleProperties> _properties;
+    SelectorList _selectors;
+    Ref<InternalStyleProperties> _properties;
 
   public:
-    CSSStyleRule(CSSSelectorList &&selectors, Ref<CSSInternalStyleProperties> properties) noexcept
+    CSSStyleRule(SelectorList &&selectors, Ref<InternalStyleProperties> properties) noexcept
         : CSSRule(RuleType::Style, nullptr), _selectors(krys::move(selectors)),
           _properties(krys::move(properties))
     {

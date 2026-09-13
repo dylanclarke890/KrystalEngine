@@ -8,11 +8,11 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include <ranges>
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
 #pragma region <ident>
 
-  KRYS_NODISCARD Maybe<CSSValueId> ConsumeIdentRaw(TokenRange &tokens) noexcept
+  KRYS_NODISCARD Maybe<ValueId> ConsumeIdentRaw(TokenRange &tokens) noexcept
   {
     if (tokens.Peek().Type() != TokenType::Ident)
     {
@@ -44,8 +44,8 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     }
   }
 
-  KRYS_NODISCARD Maybe<CSSValueId> ConsumeIdentRangeRaw(TokenRange &tokens, CSSValueId lower,
-                                                        CSSValueId upper) noexcept
+  KRYS_NODISCARD Maybe<ValueId> ConsumeIdentRangeRaw(TokenRange &tokens, ValueId lower,
+                                                        ValueId upper) noexcept
   {
     if (tokens.Peek().ValueId() < lower || tokens.Peek().ValueId() > upper)
     {
@@ -55,8 +55,8 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return ConsumeIdentRaw(tokens);
   }
 
-  KRYS_NODISCARD RefPtr<CSSPrimitiveValue> ConsumeIdentRange(TokenRange &tokens, CSSValueId lower,
-                                                             CSSValueId upper) noexcept
+  KRYS_NODISCARD RefPtr<CSSPrimitiveValue> ConsumeIdentRange(TokenRange &tokens, ValueId lower,
+                                                             ValueId upper) noexcept
   {
     auto value = ConsumeIdentRangeRaw(tokens, lower, upper);
     if (!value)
@@ -68,19 +68,19 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   template <typename... EmptyBaseCase>
-  KRYS_NODISCARD bool IdentMatches(CSSValueId valueId) noexcept
+  KRYS_NODISCARD bool IdentMatches(ValueId valueId) noexcept
   {
     return false;
   }
 
-  template <CSSValueId Head, CSSValueId... Tail>
-  KRYS_NODISCARD bool IdentMatches(CSSValueId valueId) noexcept
+  template <ValueId Head, ValueId... Tail>
+  KRYS_NODISCARD bool IdentMatches(ValueId valueId) noexcept
   {
     return valueId == Head || IdentMatches<Tail...>(valueId);
   }
 
-  template <CSSValueId... Names>
-  KRYS_NODISCARD Maybe<CSSValueId> ConsumeIdentRaw(TokenRange &tokens) noexcept
+  template <ValueId... Names>
+  KRYS_NODISCARD Maybe<ValueId> ConsumeIdentRaw(TokenRange &tokens) noexcept
   {
     if (tokens.Peek().Type() != TokenType::Ident || !IdentMatches<Names...>(tokens.Peek().ValueId()))
     {
@@ -93,7 +93,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return token.ValueId();
   }
 
-  template <CSSValueId... Names>
+  template <ValueId... Names>
   KRYS_NODISCARD RefPtr<CSSPrimitiveValue> ConsumeIdent(TokenRange &tokens) noexcept
   {
     if (tokens.Peek().Type() != TokenType::Ident || !IdentMatches<Names...>(tokens.Peek().ValueId()))
@@ -108,7 +108,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   template <typename Predicate, typename... Args>
-  KRYS_NODISCARD Maybe<CSSValueId> ConsumeIdentRaw(TokenRange &tokens, Predicate &&predicate,
+  KRYS_NODISCARD Maybe<ValueId> ConsumeIdentRaw(TokenRange &tokens, Predicate &&predicate,
                                                    Args &&...args) noexcept
   {
     if (auto keyword = tokens.Peek().ValueId(); predicate(keyword, std::forward<Args>(args)...))
@@ -170,7 +170,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   KRYS_NODISCARD RefPtr<CSSPrimitiveValue>
-    ConsumeCustomIdentExcluding(TokenRange &tokens, std::initializer_list<const CSSValueId> excluding,
+    ConsumeCustomIdentExcluding(TokenRange &tokens, std::initializer_list<const ValueId> excluding,
                                 bool shouldLowercase = false) noexcept
   {
     if (std::ranges::find(excluding, tokens.Peek().ValueId()) != excluding.end())

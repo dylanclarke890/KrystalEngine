@@ -1,14 +1,14 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Parser/Context/ParserMode.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyId.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 
 namespace krys::boo::css
 {
   struct ParserContext
   {
     ParserMode Mode;
-    CSSPropertySettings PropertySettings;
+    PropertySettings PropertySettings;
     bool IsHTMLDocument : 1 {false};
     bool useSystemAppearance : 1 {false};
     bool shouldIgnoreImportRules : 1 {false};

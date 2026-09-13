@@ -10,29 +10,29 @@ namespace krys::boo::css
   class CSSFunctionValue final : public CSSValueContainingVector
   {
   private:
-    CSSValueId _name;
+    css::ValueId _name;
 
   public:
-    KRYS_NODISCARD static Ref<CSSFunctionValue> Create(CSSValueId name,
+    KRYS_NODISCARD static Ref<CSSFunctionValue> Create(css::ValueId name,
                                                        CSSValueListBuilder arguments) noexcept;
 
-    KRYS_NODISCARD static Ref<CSSFunctionValue> Create(CSSValueId name) noexcept;
+    KRYS_NODISCARD static Ref<CSSFunctionValue> Create(css::ValueId name) noexcept;
 
-    KRYS_NODISCARD static Ref<CSSFunctionValue> Create(CSSValueId name, Ref<CSSValue> argument) noexcept;
+    KRYS_NODISCARD static Ref<CSSFunctionValue> Create(css::ValueId name, Ref<CSSValue> argument) noexcept;
 
-    KRYS_NODISCARD static Ref<CSSFunctionValue> Create(CSSValueId name, Ref<CSSValue> firstArgument,
+    KRYS_NODISCARD static Ref<CSSFunctionValue> Create(css::ValueId name, Ref<CSSValue> firstArgument,
                                                        Ref<CSSValue> secondArgument) noexcept;
 
-    KRYS_NODISCARD static Ref<CSSFunctionValue> Create(CSSValueId name, Ref<CSSValue> firstArgument,
+    KRYS_NODISCARD static Ref<CSSFunctionValue> Create(css::ValueId name, Ref<CSSValue> firstArgument,
                                                        Ref<CSSValue> secondArgument,
                                                        Ref<CSSValue> thirdArgument) noexcept;
 
-    KRYS_NODISCARD static Ref<CSSFunctionValue> Create(CSSValueId name, Ref<CSSValue> firstArgument,
+    KRYS_NODISCARD static Ref<CSSFunctionValue> Create(css::ValueId name, Ref<CSSValue> firstArgument,
                                                        Ref<CSSValue> secondArgument,
                                                        Ref<CSSValue> thirdArgument,
                                                        Ref<CSSValue> fourthArgument) noexcept;
 
-    KRYS_NODISCARD CSSValueId Name() const noexcept
+    KRYS_NODISCARD css::ValueId Name() const noexcept
     {
       return _name;
     }

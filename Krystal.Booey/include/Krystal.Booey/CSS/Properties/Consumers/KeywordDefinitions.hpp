@@ -4,9 +4,9 @@
 
 namespace krys::boo::css
 {
-  template <CSSValueId Id>
-  struct ConsumerDefinition<ValueKeywordConstant<Id>>
+  template <ValueId Id>
+  struct ConsumerDefinition<KeywordValueConstant<Id>>
   {
-    using IdentToken = KeywordConsumer<ValueKeywordConstant<Id>>;
+    using IdentToken = KeywordConsumer<KeywordValueConstant<Id>>;
   };
 }

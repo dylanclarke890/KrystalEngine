@@ -8,7 +8,6 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
-#include "Krystal.Text/ASCII.hpp"
 
 namespace krys::boo::dom
 {
@@ -34,7 +33,7 @@ namespace krys::boo::dom
       return Exception {ExceptionCode::TypeError};
     }
 
-    auto lowercaseToken = krys::Text::ToASCIILowercase(token);
+    auto lowercaseToken = krys::text::ToASCIILower(token);
 
     return _isSupportedToken(_element->NodeDocument(), lowercaseToken);
   }

@@ -2,7 +2,7 @@
 
 namespace krys::boo::svg
 {
-  SVGPolylineElement::SVGPolylineElement(Document &document) noexcept
+  SVGPolylineElement::SVGPolylineElement(dom::Document &document) noexcept
       : SVGElement(document, SVGElementInterface::Polyline)
   {
   }

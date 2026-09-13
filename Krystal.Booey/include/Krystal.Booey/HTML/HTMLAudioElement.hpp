@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLAudioElement);
 
   public:
-    HTMLAudioElement(Document &document) noexcept;
+    HTMLAudioElement(dom::Document &document) noexcept;
   };
 }
 

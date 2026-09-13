@@ -10,10 +10,10 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLMediaElement);
 
   protected:
-    HTMLMediaElement(Document &document, HTMLElementInterface interface) noexcept;
+    HTMLMediaElement(dom::Document &document, HTMLElementInterface interface) noexcept;
 
   public:
-    HTMLMediaElement(Document &document) noexcept;
+    HTMLMediaElement(dom::Document &document) noexcept;
 
     // TODO(HTMLMediaElement, HTML): Implement the media element API.
   };

@@ -4,18 +4,14 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo::html::Attributes
-{
-  class Reflection;
-}
-
 namespace krys::boo::html
 {
   class HTMLElement;
+  class Reflection;
 
   class ElementInternals : public RefCounted<ElementInternals>
   {
-    friend class Attributes::Reflection;
+    friend class Reflection;
 
   private:
     WeakPtr<HTMLElement> _target;

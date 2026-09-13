@@ -2,7 +2,7 @@
 
 namespace krys::boo::html
 {
-  HTMLDataListElement::HTMLDataListElement(Document &document) noexcept
+  HTMLDataListElement::HTMLDataListElement(dom::Document &document) noexcept
       : HTMLElement(document, HTMLElementInterface::DataList)
   {
   }

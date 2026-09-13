@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::infra::tests
 {
   using namespace krys::boo;
 
@@ -122,7 +122,8 @@ namespace krys::tests
   {
     REQUIRE(StringAlgorithms::SplitOnComma(u8"   foo,   bar baz,qux  ")
             == List<dom::DOMString> {u8"foo", u8"bar baz", u8"qux"});
-    REQUIRE(StringAlgorithms::SplitOnComma(u8"foo,bar,baz") == List<dom::DOMString> {u8"foo", u8"bar", u8"baz"});
+    REQUIRE(StringAlgorithms::SplitOnComma(u8"foo,bar,baz")
+            == List<dom::DOMString> {u8"foo", u8"bar", u8"baz"});
     REQUIRE(StringAlgorithms::SplitOnComma(u8"   foo,bar,baz")
             == List<dom::DOMString> {u8"foo", u8"bar", u8"baz"});
     REQUIRE(StringAlgorithms::SplitOnComma(u8"foo,bar,baz   ")
@@ -136,7 +137,8 @@ namespace krys::tests
             == List<dom::DOMString> {u8"foo", u8"bar \r  baz"});
     REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo ,\n  bar \r    \f")
             == List<dom::DOMString> {u8"foo", u8"bar"});
-    REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo ,\n    \r    \f") == List<dom::DOMString> {u8"foo", u8""});
+    REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo ,\n    \r    \f")
+            == List<dom::DOMString> {u8"foo", u8""});
     REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo,") == List<dom::DOMString> {u8"foo"});
     REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo, ") == List<dom::DOMString> {u8"foo", u8""});
   }

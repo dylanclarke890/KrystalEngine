@@ -6,9 +6,9 @@ namespace krys::boo::css
 {
   class TokenRange;
   class CSSValue;
-  struct CSSPropertyParserState;
+  struct PropertyParserState;
 
-  namespace CSSPropertyParserHelpers
+  namespace PropertyParserHelpers
   {
     // https://drafts.csswg.org/css-syntax-3/#typedef-unicode-range-token
 

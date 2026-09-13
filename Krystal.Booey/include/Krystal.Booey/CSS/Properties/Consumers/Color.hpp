@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Color/ColorType.hpp"
-#include "Krystal.Booey/CSS/Values/Enums/CSSValueId.hpp"
+#include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
@@ -14,9 +14,9 @@ namespace krys::boo::css
   class PlatformColorResolutionState;
 
   struct ParserContext;
-  struct CSSPropertyParserState;
+  struct PropertyParserState;
 
-  namespace CSSPropertyParserHelpers
+  namespace PropertyParserHelpers
   {
     // Options to augment color parsing.
     struct CSSColorParsingOptions
@@ -25,27 +25,27 @@ namespace krys::boo::css
     };
 
     // MARK: Mode specific color settings.
-    KRYS_NODISCARD bool IsColorKeywordAllowed(CSSValueId keyword, const ParserContext &context) noexcept;
+    KRYS_NODISCARD bool IsColorKeywordAllowed(ValueId keyword, const ParserContext &context) noexcept;
 
     // MARK: <color> consuming (unresolved)
-    KRYS_NODISCARD Maybe<Color> ConsumeUnresolvedColor(TokenRange &tokens, CSSPropertyParserState &state,
+    KRYS_NODISCARD Maybe<Color> ConsumeUnresolvedColor(TokenRange &tokens, PropertyParserState &state,
                                                        const CSSColorParsingOptions & = {}) noexcept;
 
     // MARK: <color> consuming (CSSValue)
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeColor(TokenRange &tokens, CSSPropertyParserState &state,
+    KRYS_NODISCARD RefPtr<CSSValue> ConsumeColor(TokenRange &tokens, PropertyParserState &state,
                                                  const CSSColorParsingOptions & = {}) noexcept;
 
     // MARK: <color> consuming (raw)
-    KRYS_NODISCARD Color ConsumeColorRaw(TokenRange &tokens, CSSPropertyParserState &state,
+    KRYS_NODISCARD Color ConsumeColorRaw(TokenRange &tokens, PropertyParserState &state,
                                          const CSSColorParsingOptions &,
                                          PlatformColorResolutionState &) noexcept;
 
     // MARK: <dynamic-range-limit> (unresolved)
     KRYS_NODISCARD Maybe<DynamicRangeLimit>
-      ConsumeUnresolvedDynamicRangeLimit(TokenRange &tokens, CSSPropertyParserState &state) noexcept;
+      ConsumeUnresolvedDynamicRangeLimit(TokenRange &tokens, PropertyParserState &state) noexcept;
 
     // MARK: <dynamic-range-limit> (CSSValue)
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeDynamicRangeLimit(TokenRange &tokens,
-                                                             CSSPropertyParserState &state) noexcept;
+                                                             PropertyParserState &state) noexcept;
   }
 }

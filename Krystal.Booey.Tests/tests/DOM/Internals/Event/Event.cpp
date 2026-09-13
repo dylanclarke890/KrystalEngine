@@ -4,10 +4,8 @@
 #include "Krystal.Booey/DOM/EventTarget.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::dom::tests
 {
-  using namespace krys::boo;
-
   TEST_CASE("Event::IsTrusted should be false for events created via constructor", "[HTML][Event]")
   {
     auto event = CreateRef<Event>(EventNames::Click);

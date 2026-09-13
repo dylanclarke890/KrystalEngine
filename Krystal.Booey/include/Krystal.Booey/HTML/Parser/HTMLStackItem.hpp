@@ -13,20 +13,20 @@ namespace krys::boo::html
   private:
     TagName _name {TagName::Unknown};
     Namespace _namespace {Namespace::Unknown};
-    RefPtr<Element> _element;
+    RefPtr<dom::Element> _element;
     ParsedAttributeList _attributes;
 
   public:
     HTMLStackItem() noexcept = default;
 
-    HTMLStackItem(TagName tagName, Namespace tagNamespace, Element &element,
+    HTMLStackItem(TagName tagName, Namespace tagNamespace, dom::Element &element,
                   ParsedAttributeList &&attributes) noexcept
         : _name(tagName), _namespace(tagNamespace), _element(ShareRef(element)),
           _attributes(krys::move(attributes))
     {
     }
 
-    HTMLStackItem(TagName tagName, Namespace tagNamespace, Element &element,
+    HTMLStackItem(TagName tagName, Namespace tagNamespace, dom::Element &element,
                   const ParsedAttributeList &attributes) noexcept
         : _name(tagName), _namespace(tagNamespace), _element(ShareRef(element)), _attributes(attributes)
     {
@@ -42,7 +42,7 @@ namespace krys::boo::html
       return _namespace;
     }
 
-    KRYS_NODISCARD Element &Element() const noexcept
+    KRYS_NODISCARD dom::Element &Element() const noexcept
     {
       return *_element;
     }
@@ -53,7 +53,7 @@ namespace krys::boo::html
     }
 
     /// @brief Replaces the DOM element reference stored in this item while keeping the tag metadata.
-    void UpdateElement(HTML::Element &newElement) noexcept
+    void UpdateElement(dom::Element &newElement) noexcept
     {
       _element = ShareRef(newElement);
     }

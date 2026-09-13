@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLBRElement);
 
   public:
-    HTMLBRElement(Document &document) noexcept;
+    HTMLBRElement(dom::Document &document) noexcept;
 
 #pragma region HTMLBRElement Obsolete members - https://html.spec.whatwg.org/#HTMLBRElement-partial
 

@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLDialogElement);
 
   public:
-    HTMLDialogElement(Document &document) noexcept;
+    HTMLDialogElement(dom::Document &document) noexcept;
 
 #pragma region HTMLDialogElement - https://html.spec.whatwg.org/#htmldialogelement
 

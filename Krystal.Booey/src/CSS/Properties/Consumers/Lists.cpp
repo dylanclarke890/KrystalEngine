@@ -4,18 +4,18 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/IntegerDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/String.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValueListBuilder.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValuePair.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
-  KRYS_NODISCARD static RefPtr<CSSValue> ConsumeCounter(TokenRange &range, CSSPropertyParserState &state,
+  KRYS_NODISCARD static RefPtr<CSSValue> ConsumeCounter(TokenRange &range, PropertyParserState &state,
                                                         int defaultValue) noexcept
   {
-    if (range.Peek().ValueId() == CSSValueId::None)
+    if (range.Peek().ValueId() == ValueId::None)
     {
       return ConsumeIdent(range);
     }
@@ -43,7 +43,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return CSSValueList::CreateSpaceSeparated(krys::move(list));
   }
 
-  RefPtr<CSSValue> ConsumeCounterReset(TokenRange &range, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeCounterReset(TokenRange &range, PropertyParserState &state) noexcept
   {
     // <'counter-reset'> = [ <counter-name> <integer>? | <reversed-counter-name> <integer>? ]+ | none
     // https://drafts.csswg.org/css-lists/#propdef-counter-reset
@@ -53,7 +53,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return ConsumeCounter(range, state, 0);
   }
 
-  RefPtr<CSSValue> ConsumeCounterIncrement(TokenRange &range, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeCounterIncrement(TokenRange &range, PropertyParserState &state) noexcept
   {
     // <'counter-increment'> = [ <counter-name> <integer>? ]+ | none
     // https://drafts.csswg.org/css-lists/#propdef-counter-increment
@@ -61,7 +61,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return ConsumeCounter(range, state, 1);
   }
 
-  RefPtr<CSSValue> ConsumeCounterSet(TokenRange &range, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeCounterSet(TokenRange &range, PropertyParserState &state) noexcept
   {
     // <'counter-set'> = [ <counter-name> <integer>? ]+ | none
     // https://drafts.csswg.org/css-lists/#propdef-counter-set

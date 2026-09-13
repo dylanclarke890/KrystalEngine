@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/HTML/MicroParsers/MicroParserError.hpp"
 
-namespace krys::boo::html::MicroParsers
+namespace krys::boo::html
 {
   /// @brief Represents the result of a micro-parsing operation, containing either a successfully parsed value
   /// or an error.

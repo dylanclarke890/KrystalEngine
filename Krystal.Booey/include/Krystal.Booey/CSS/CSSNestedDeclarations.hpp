@@ -2,8 +2,8 @@
 
 #include "Krystal.Booey/CSS/CSSRule.hpp"
 #include "Krystal.Booey/CSS/Parser/Context/ParsedRuleList.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSInternalStyleProperties.hpp"
-#include "Krystal.Booey/CSS/Selectors/CSSSelectorList.hpp"
+#include "Krystal.Booey/CSS/Properties/InternalStyleProperties.hpp"
+#include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
 
 namespace krys::boo::css
 {
@@ -17,19 +17,19 @@ namespace krys::boo::css
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CSSNestedDeclarations);
 
   private:
-    CSSSelectorList _selectors;
-    RefPtr<CSSInternalStyleProperties> _properties;
+    SelectorList _selectors;
+    RefPtr<InternalStyleProperties> _properties;
     ParsedRuleList _nestedRules;
 
   public:
-    CSSNestedDeclarations(CSSSelectorList &&selectors, Ref<CSSInternalStyleProperties> properties,
+    CSSNestedDeclarations(SelectorList &&selectors, Ref<InternalStyleProperties> properties,
                           ParsedRuleList &&nestedRules) noexcept
         : CSSRule(RuleType::Style, nullptr), _selectors(krys::move(selectors)),
           _properties(krys::move(properties)), _nestedRules(krys::move(nestedRules))
     {
     }
 
-    CSSNestedDeclarations(Ref<CSSInternalStyleProperties> properties) noexcept
+    CSSNestedDeclarations(Ref<InternalStyleProperties> properties) noexcept
         : CSSRule(RuleType::Style, nullptr), _properties(krys::move(properties))
     {
     }

@@ -3,7 +3,7 @@
 
 namespace krys::boo::dom
 {
-  NodeIterator::NodeIterator(Node &root, HTML::WhatToShow whatToShow, RefPtr<NodeFilter> &&filter) noexcept
+  NodeIterator::NodeIterator(Node &root, dom::WhatToShow whatToShow, RefPtr<NodeFilter> &&filter) noexcept
       : TraversalBase(root, whatToShow, krys::move(filter)), _referenceNode(ShareRef(root)),
         _pointerBeforeReferenceNode(true)
   {

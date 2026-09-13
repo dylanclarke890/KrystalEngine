@@ -1,10 +1,8 @@
 ﻿#include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::html::tests
 {
-  using namespace krys::boo::MicroParsers;
-
   namespace
   {
     template <typename T>

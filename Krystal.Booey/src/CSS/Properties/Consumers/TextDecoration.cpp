@@ -5,15 +5,15 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/LengthDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/List.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumer.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/TextDecoration/CSSTextShadowPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/TextDecoration/TextShadow.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
   KRYS_NODISCARD static Maybe<TextShadow>
-    ConsumeSingleUnresolvedTextShadow(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+    ConsumeSingleUnresolvedTextShadow(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <single-text-shadow> = [ <color>? && <length>{2,3} ]
     // https://drafts.csswg.org/css-text-decor-3/#propdef-text-shadow
@@ -92,7 +92,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   KRYS_NODISCARD static Maybe<TextShadowProperty::List>
-    ConsumeUnresolvedTextShadowList(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+    ConsumeUnresolvedTextShadowList(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     auto rangeCopy = tokens;
 
@@ -115,14 +115,14 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   KRYS_NODISCARD static Maybe<TextShadowProperty>
-    ConsumeUnresolvedTextShadow(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+    ConsumeUnresolvedTextShadow(TokenRange &tokens, PropertyParserState &state) noexcept
   {
-    if (tokens.Peek().ValueId() == CSSValueId::None)
+    if (tokens.Peek().ValueId() == ValueId::None)
     {
       tokens.Discard();
       tokens.DiscardWhitespace();
 
-      return TextShadowProperty {Keywords::None {}};
+      return TextShadowProperty {keywords::None {}};
     }
 
     if (auto textShadowList = ConsumeUnresolvedTextShadowList(tokens, state))
@@ -136,8 +136,8 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   // NOTE: we're explicitly qualifying the function name here just to satisfy intellisense, which is having
   // trouble resolving the function name in this context for some reason.
   KRYS_NODISCARD RefPtr<CSSValue>
-    krys::boo::css::CSSPropertyParserHelpers::ConsumeTextShadow(TokenRange &tokens,
-                                                                CSSPropertyParserState &state) noexcept
+    krys::boo::css::PropertyParserHelpers::ConsumeTextShadow(TokenRange &tokens,
+                                                                PropertyParserState &state) noexcept
   {
     // <'text-shadow'> = none | [ <color>? && <length>{2,3} ]#
     // https://drafts.csswg.org/css-text-decor-3/#propdef-text-shadow

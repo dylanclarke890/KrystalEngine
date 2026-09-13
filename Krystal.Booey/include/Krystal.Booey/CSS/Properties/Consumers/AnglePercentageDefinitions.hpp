@@ -8,7 +8,7 @@ namespace krys::boo::css
   struct AnglePercentageValidator
   {
     KRYS_NODISCARD constexpr static Maybe<AnglePercentageUnit>
-      Validate(CSSUnitType unitType, CSSPropertyParserState &state, CSSPropertyParserOptions options) noexcept
+      Validate(CSSUnitType unitType, PropertyParserState &state, PropertyParserOptions options) noexcept
     {
       // NOTE: Percentages are handled explicitly by the PercentageValidator, so this only
       // needs to be concerned with the Angle units.
@@ -21,14 +21,14 @@ namespace krys::boo::css
     }
 
     template <auto R, typename V>
-    KRYS_NODISCARD static bool IsValid(AnglePercentageRaw<R, V> raw, CSSPropertyParserOptions) noexcept
+    KRYS_NODISCARD static bool IsValid(AnglePercentageRaw<R, V> raw, PropertyParserOptions) noexcept
     {
       // Values other than 0 and +/-∞ are not supported for <angle-percentage> numeric ranges currently.
       return IsValidNonCanonicalizableDimensionValue(raw);
     }
 
-    KRYS_NODISCARD static bool ShouldAcceptUnitlessValue(double value, CSSPropertyParserState &state,
-                                                         CSSPropertyParserOptions options) noexcept
+    KRYS_NODISCARD static bool ShouldAcceptUnitlessValue(double value, PropertyParserState &state,
+                                                         PropertyParserOptions options) noexcept
     {
       return AngleValidator::ShouldAcceptUnitlessValue(value, state, options);
     }

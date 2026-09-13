@@ -5,19 +5,19 @@
 namespace krys::boo::css
 {
   class TokenRange;
-  struct CSSPropertyParserState;
+  struct PropertyParserState;
   class CSSValue;
 
-  namespace CSSPropertyParserHelpers
+  namespace PropertyParserHelpers
   {
     // MARK: <'paint-order'> consuming
     // https://svgwg.org/svg2-draft/painting.html#PaintOrderProperty
     KRYS_NODISCARD RefPtr<CSSValue> ConsumePaintOrder(TokenRange &tokens,
-                                                      CSSPropertyParserState &state) noexcept;
+                                                      PropertyParserState &state) noexcept;
 
     // MARK: <'stroke-dasharray'> consuming
     // https://svgwg.org/svg2-draft/painting.html#StrokeDashing
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeStrokeDasharray(TokenRange &tokens,
-                                                           CSSPropertyParserState &state) noexcept;
+                                                           PropertyParserState &state) noexcept;
   }
 }

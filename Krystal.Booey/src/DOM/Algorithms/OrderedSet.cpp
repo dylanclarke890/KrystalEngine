@@ -6,7 +6,7 @@ namespace krys::boo::dom
 {
   List<DOMString> OrderedSet::Parser(DOMStringView input) noexcept
   {
-    auto inputTokens = StringAlgorithms::SplitOnWhitespace(input);
+    auto inputTokens = infra::StringAlgorithms::SplitOnWhitespace(input);
     List<DOMString> tokens;
     for (auto &token : inputTokens)
     {
@@ -20,6 +20,6 @@ namespace krys::boo::dom
 
   DOMString OrderedSet::Serializer(Span<DOMString> tokens) noexcept
   {
-    return StringAlgorithms::Concatenate(tokens, u8" ");
+    return infra::StringAlgorithms::Concatenate(tokens, u8" ");
   }
 }

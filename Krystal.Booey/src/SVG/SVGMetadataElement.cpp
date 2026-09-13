@@ -2,7 +2,7 @@
 
 namespace krys::boo::svg
 {
-  SVGMetadataElement::SVGMetadataElement(Document &document) noexcept
+  SVGMetadataElement::SVGMetadataElement(dom::Document &document) noexcept
       : SVGElement(document, SVGElementInterface::Metadata)
   {
   }

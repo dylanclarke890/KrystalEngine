@@ -3,7 +3,8 @@
 
 namespace krys::boo::html
 {
-  HTMLUListElement::HTMLUListElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::UList)
+  HTMLUListElement::HTMLUListElement(dom::Document &document) noexcept
+      : HTMLElement(document, HTMLElementInterface::UList)
   {
   }
 
@@ -11,22 +12,22 @@ namespace krys::boo::html
 
   bool HTMLUListElement::Compact() const noexcept
   {
-    return Attributes::Reflection::Reflect<bool>(*this, u8"compact");
+    return Reflection::Reflect<bool>(*this, u8"compact");
   }
 
   void HTMLUListElement::Compact(bool value) noexcept
   {
-    Attributes::Reflection::Reflect<bool>(*this, u8"compact", krys::move(value));
+    Reflection::Reflect<bool>(*this, u8"compact", krys::move(value));
   }
 
   dom::DOMString HTMLUListElement::Type() const noexcept
   {
-    return Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
   }
 
   void HTMLUListElement::Type(dom::DOMString &&value) noexcept
   {
-    Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
+    Reflection::Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
   }
 
 #pragma endregion

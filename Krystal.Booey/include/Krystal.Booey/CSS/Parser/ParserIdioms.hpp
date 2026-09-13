@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/CSSWideKeyword.hpp"
-#include "Krystal.Booey/CSS/Values/Enums/CSSValueId.hpp"
+#include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
 /// @see https://drafts.csswg.org/cssom/#common-parsing-idioms
@@ -29,21 +29,21 @@ namespace krys::boo::css
     return IsNameStartCodePoint(c) || krys::text::IsASCIIDigit(c) || c == '-';
   }
 
-  KRYS_NODISCARD constexpr bool IsValidCustomIdentifier(CSSValueId valueId) noexcept
+  KRYS_NODISCARD constexpr bool IsValidCustomIdentifier(ValueId valueId) noexcept
   {
     // "default" is obsolete as a CSS-wide keyword but is still not allowed as a custom identifier.
-    return !IsCSSWideKeyword(valueId) && valueId != CSSValueId::Default;
+    return !IsCSSWideKeyword(valueId) && valueId != ValueId::Default;
   }
 
   /// @see https://drafts.csswg.org/css-conditional-5/#propdef-container-name
-  KRYS_NODISCARD constexpr bool IsValidContainerNameIdentifier(CSSValueId valueId) noexcept
+  KRYS_NODISCARD constexpr bool IsValidContainerNameIdentifier(ValueId valueId) noexcept
   {
     switch (valueId)
     {
-      case CSSValueId::None:
-      case CSSValueId::And:
-      case CSSValueId::Or:
-      case CSSValueId::Not:  return false;
+      case ValueId::None:
+      case ValueId::And:
+      case ValueId::Or:
+      case ValueId::Not:  return false;
       default:               return IsValidCustomIdentifier(valueId);
     }
   }

@@ -10,7 +10,7 @@ namespace krys::boo::dom
   class Node;
 }
 
-namespace krys::boo::dom::Mixins
+namespace krys::boo::dom::mixins
 {
   /// @see https://dom.spec.whatwg.org/#childnode
   class ChildNode

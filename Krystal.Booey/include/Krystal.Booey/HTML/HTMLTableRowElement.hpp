@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTableRowElement);
 
   public:
-    HTMLTableRowElement(Document &document) noexcept;
+    HTMLTableRowElement(dom::Document &document) noexcept;
 
 #pragma region HTMLTableRowElement - https://html.spec.whatwg.org/#htmltablerowelement
 

@@ -11,7 +11,7 @@ namespace krys::boo::css
   class CSSGridAutoRepeatValue final : public CSSValue
   {
   public:
-    KRYS_NODISCARD static Ref<CSSGridAutoRepeatValue> Create(CSSValueId id,
+    KRYS_NODISCARD static Ref<CSSGridAutoRepeatValue> Create(css::ValueId id,
                                                              CSSValueListBuilder builder) noexcept;
   };
 }

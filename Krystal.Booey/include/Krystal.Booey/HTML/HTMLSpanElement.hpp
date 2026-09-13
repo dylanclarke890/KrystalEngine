@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLSpanElement);
 
   public:
-    HTMLSpanElement(Document &document) noexcept;
+    HTMLSpanElement(dom::Document &document) noexcept;
   };
 }
 

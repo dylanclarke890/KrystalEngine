@@ -12,7 +12,7 @@ namespace krys::boo::css
 {
   class TokenRange;
 
-  namespace CSSPropertyParserHelpers
+  namespace PropertyParserHelpers
   {
     enum class ListOptimization : bool
     {
@@ -36,8 +36,8 @@ namespace krys::boo::css
       }
     };
 
-    constexpr inline auto ZeroOrMore = ListBounds::MinimumOf(0);
-    constexpr inline auto OneOrMore = ListBounds::MinimumOf(1);
+    constexpr auto ZeroOrMore = ListBounds::MinimumOf(0);
+    constexpr auto OneOrMore = ListBounds::MinimumOf(1);
 
     template <char Separator, ListBounds Bounds, typename SubConsumer, typename... Args>
     auto ConsumeListSeparatedByIntoBuilder(TokenRange &tokens, SubConsumer &&subConsumer,

@@ -9,7 +9,7 @@
 
 namespace krys::boo::dom
 {
-  CharacterData::CharacterData(Document &document, DOMString &&data, HTML::NodeType type,
+  CharacterData::CharacterData(Document &document, DOMString &&data, dom::NodeType type,
                                NodeFlags flags) noexcept
       : Node(document, type, flags | NodeFlags::IsCharacterData), _data {krys::move(data)}
   {
@@ -53,22 +53,22 @@ namespace krys::boo::dom
 
   ExceptionOr<void> CharacterData::Before(const List<NodeOrString> &nodes) noexcept
   {
-    return Mixins::ChildNode::Before(*this, nodes);
+    return mixins::ChildNode::Before(*this, nodes);
   }
 
   ExceptionOr<void> CharacterData::After(const List<NodeOrString> &nodes) noexcept
   {
-    return Mixins::ChildNode::After(*this, nodes);
+    return mixins::ChildNode::After(*this, nodes);
   }
 
   ExceptionOr<void> CharacterData::ReplaceWith(const List<NodeOrString> &nodes) noexcept
   {
-    return Mixins::ChildNode::ReplaceWith(*this, nodes);
+    return mixins::ChildNode::ReplaceWith(*this, nodes);
   }
 
   ExceptionOr<void> CharacterData::Remove() noexcept
   {
-    return Mixins::ChildNode::Remove(*this);
+    return mixins::ChildNode::Remove(*this);
   }
 
 #pragma endregion
@@ -77,22 +77,22 @@ namespace krys::boo::dom
 
   RefPtr<const Element> CharacterData::PreviousElementSibling() const noexcept
   {
-    return Mixins::NonDocumentTypeChildNode::PreviousElementSibling(*this);
+    return mixins::NonDocumentTypeChildNode::PreviousElementSibling(*this);
   }
 
   RefPtr<Element> CharacterData::PreviousElementSibling() noexcept
   {
-    return Mixins::NonDocumentTypeChildNode::PreviousElementSibling(*this);
+    return mixins::NonDocumentTypeChildNode::PreviousElementSibling(*this);
   }
 
   RefPtr<const Element> CharacterData::NextElementSibling() const noexcept
   {
-    return Mixins::NonDocumentTypeChildNode::NextElementSibling(*this);
+    return mixins::NonDocumentTypeChildNode::NextElementSibling(*this);
   }
 
   RefPtr<Element> CharacterData::NextElementSibling() noexcept
   {
-    return Mixins::NonDocumentTypeChildNode::NextElementSibling(*this);
+    return mixins::NonDocumentTypeChildNode::NextElementSibling(*this);
   }
 
 #pragma endregion

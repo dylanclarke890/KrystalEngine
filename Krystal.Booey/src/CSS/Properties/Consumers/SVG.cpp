@@ -5,39 +5,39 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/LengthPercentageDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/NumberDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValueListBuilder.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
-  RefPtr<CSSValue> ConsumePaintOrder(TokenRange &range, CSSPropertyParserState &) noexcept
+  RefPtr<CSSValue> ConsumePaintOrder(TokenRange &range, PropertyParserState &) noexcept
   {
     // <'paint-order'> = normal | [ fill || stroke || markers ]
     // https://svgwg.org/svg2-draft/painting.html#PaintOrderProperty
 
-    if (range.Peek().ValueId() == CSSValueId::Normal)
+    if (range.Peek().ValueId() == ValueId::Normal)
     {
       return ConsumeIdent(range);
     }
 
-    SmallList<CSSValueId, 3uz> paintTypeList;
+    SmallList<ValueId, 3uz> paintTypeList;
     RefPtr<CSSPrimitiveValue> fill;
     RefPtr<CSSPrimitiveValue> stroke;
     RefPtr<CSSPrimitiveValue> markers;
     do
     {
-      CSSValueId id = range.Peek().ValueId();
-      if (id == CSSValueId::Fill && !fill)
+      ValueId id = range.Peek().ValueId();
+      if (id == ValueId::Fill && !fill)
       {
         fill = ConsumeIdent(range);
       }
-      else if (id == CSSValueId::Stroke && !stroke)
+      else if (id == ValueId::Stroke && !stroke)
       {
         stroke = ConsumeIdent(range);
       }
-      else if (id == CSSValueId::Markers && !markers)
+      else if (id == ValueId::Markers && !markers)
       {
         markers = ConsumeIdent(range);
       }
@@ -52,26 +52,26 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     // After parsing we serialize the paint-order list. Since it is not possible to
     // pop a last list items from CSSValueList without bigger cost, we create the
     // list after parsing.
-    CSSValueId firstPaintOrderType = paintTypeList[0];
+    ValueId firstPaintOrderType = paintTypeList[0];
     CSSValueListBuilder paintOrderList;
     switch (firstPaintOrderType)
     {
-      case CSSValueId::Fill:
-      case CSSValueId::Stroke:
+      case ValueId::Fill:
+      case ValueId::Stroke:
       {
-        paintOrderList.push_back(firstPaintOrderType == CSSValueId::Fill ? krys::move(fill)
+        paintOrderList.push_back(firstPaintOrderType == ValueId::Fill ? krys::move(fill)
                                                                          : krys::move(stroke));
-        if (paintTypeList.size() > 1uz && paintTypeList[1] == CSSValueId::Markers)
+        if (paintTypeList.size() > 1uz && paintTypeList[1] == ValueId::Markers)
         {
           paintOrderList.push_back(krys::move(markers));
         }
 
         break;
       }
-      case CSSValueId::Markers:
+      case ValueId::Markers:
       {
         paintOrderList.push_back(krys::move(markers));
-        if (paintTypeList.size() > 1uz && paintTypeList[1] == CSSValueId::Stroke)
+        if (paintTypeList.size() > 1uz && paintTypeList[1] == ValueId::Stroke)
         {
           paintOrderList.push_back(krys::move(stroke));
         }
@@ -88,13 +88,13 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return CSSValueList::CreateSpaceSeparated(krys::move(paintOrderList));
   }
 
-  RefPtr<CSSValue> ConsumeStrokeDasharray(TokenRange &range, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeStrokeDasharray(TokenRange &range, PropertyParserState &state) noexcept
   {
     // <'stroke-dasharray'> = none | [ [ <length-percentage> | <number> ]+ ]#
     // https://svgwg.org/svg2-draft/painting.html#StrokeDashing
 
-    CSSValueId id = range.Peek().ValueId();
-    if (id == CSSValueId::None)
+    ValueId id = range.Peek().ValueId();
+    if (id == ValueId::None)
     {
       return ConsumeIdent(range);
     }

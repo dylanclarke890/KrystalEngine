@@ -8,31 +8,31 @@ namespace krys::boo::css
 {
   class TokenRange;
   class CSSValue;
-  struct CSSPropertyParserState;
+  struct PropertyParserState;
   struct CSSTransform;
   struct ParserContext;
 
-  namespace CSSPropertyParserHelpers
+  namespace PropertyParserHelpers
   {
     // MARK: <rotate3d()> consuming (CSSValue)
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeRotate3dFunction(TokenRange &tokens,
-                                                            CSSPropertyParserState &state) noexcept;
+                                                            PropertyParserState &state) noexcept;
     // MARK: <translate()> consuming (CSSValue)
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeTranslateFunction(TokenRange &tokens,
-                                                             CSSPropertyParserState &state) noexcept;
+                                                             PropertyParserState &state) noexcept;
     // MARK: <translate3d()> consuming (CSSValue)
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeTranslate3dFunction(TokenRange &tokens,
-                                                               CSSPropertyParserState &state) noexcept;
+                                                               PropertyParserState &state) noexcept;
 
     // MARK: <'translate'> consuming (CSSValue)
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeTranslate(TokenRange &tokens,
-                                                     CSSPropertyParserState &state) noexcept;
+                                                     PropertyParserState &state) noexcept;
     // MARK: <'scale'> consuming (CSSValue)
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeScale(TokenRange &tokens,
-                                                 CSSPropertyParserState &state) noexcept;
+                                                 PropertyParserState &state) noexcept;
     // MARK: <'rotate'> consuming (CSSValue)
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeRotate(TokenRange &tokens,
-                                                  CSSPropertyParserState &state) noexcept;
+                                                  PropertyParserState &state) noexcept;
 
     // MARK: <'transform'> parsing (raw)
     KRYS_NODISCARD Maybe<CSSTransform> ParseTransformRaw(const CSSOMString &str,

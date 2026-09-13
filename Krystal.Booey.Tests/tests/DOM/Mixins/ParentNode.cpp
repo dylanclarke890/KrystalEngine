@@ -11,10 +11,8 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::dom::tests
 {
-  using namespace krys::boo;
-
   TEST_CASE("ParentNode::ConvertNodesIntoNode", "[Mixins][ParentNode]")
   {
     auto document = CreateRef<HTMLDocument>();
@@ -43,8 +41,8 @@ namespace krys::tests
         REQUIRE_FALSE(result.HasException());
 
         auto &textNode = result.Value();
-        REQUIRE(Is<HTML::Text>(textNode));
-        REQUIRE(Downcast<HTML::Text>(*textNode).Data() == u8"Hello");
+        REQUIRE(Is<krys::boo::dom::Text>(textNode));
+        REQUIRE(Downcast<krys::boo::dom::Text>(*textNode).Data() == u8"Hello");
       }
     }
 
@@ -64,8 +62,8 @@ namespace krys::tests
       auto &element = Downcast<Element>(*fragment.FirstChild());
       REQUIRE(element.TagName() == u8"DIV");
 
-      REQUIRE(Is<HTML::Text>(fragment.LastChild()));
-      auto &textNode = Downcast<HTML::Text>(*fragment.LastChild());
+      REQUIRE(Is<krys::boo::dom::Text>(fragment.LastChild()));
+      auto &textNode = Downcast<krys::boo::dom::Text>(*fragment.LastChild());
       REQUIRE(textNode.Data() == u8"Hello");
 
       REQUIRE_FALSE(element.Remove().HasException());
@@ -78,7 +76,7 @@ namespace krys::tests
     auto document = CreateRef<HTMLDocument>();
 
     Ref<Element> parent = document->CreateElement(u8"div").Value();
-    Ref<HTML::Text> child1 = document->CreateTextNode(u8"Hello");
+    Ref<krys::boo::dom::Text> child1 = document->CreateTextNode(u8"Hello");
     Ref<Element> child2 = document->CreateElement(u8"span").Value();
     Ref<Element> child3 = document->CreateElement(u8"p").Value();
 
@@ -103,7 +101,7 @@ namespace krys::tests
     auto document = CreateRef<HTMLDocument>();
 
     Ref<Element> parent = document->CreateElement(u8"div").Value();
-    Ref<HTML::Text> child1 = document->CreateTextNode(u8"Hello");
+    Ref<krys::boo::dom::Text> child1 = document->CreateTextNode(u8"Hello");
     Ref<Element> child2 = document->CreateElement(u8"span").Value();
     Ref<Element> child3 = document->CreateElement(u8"p").Value();
 
@@ -127,7 +125,7 @@ namespace krys::tests
   {
     auto document = CreateRef<HTMLDocument>();
     Ref<Element> parent = document->CreateElement(u8"div").Value();
-    Ref<HTML::Text> child1 = document->CreateTextNode(u8"Hello");
+    Ref<krys::boo::dom::Text> child1 = document->CreateTextNode(u8"Hello");
     Ref<Element> child2 = document->CreateElement(u8"span").Value();
     Ref<Element> child3 = document->CreateElement(u8"p").Value();
 

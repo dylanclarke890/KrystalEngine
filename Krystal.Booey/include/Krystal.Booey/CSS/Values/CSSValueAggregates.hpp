@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Properties/CSSPropertyId.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValueConcepts.hpp"
-#include "Krystal.Booey/CSS/Values/Enums/CSSValueId.hpp"
+#include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
@@ -287,7 +287,7 @@ namespace krys::boo::css
   /// @brief Used to represent an arbitrary property identifier.
   struct PropertyIdentifier
   {
-    CSSPropertyId value;
+    PropertyId value;
 
     constexpr bool operator==(const PropertyIdentifier &) const = default;
   };
@@ -296,7 +296,7 @@ namespace krys::boo::css
 
 #pragma region FunctionNotation
 
-  template <CSSValueId C, typename T>
+  template <ValueId C, typename T>
   struct FunctionNotation
   {
     constexpr static auto name = C;
@@ -341,20 +341,20 @@ namespace krys::boo::css
   template <typename Keyword, typename T>
   FunctionNotation(Keyword, T) -> FunctionNotation<Keyword::value, T>;
 
-  template <CSSValueId C, typename T>
+  template <ValueId C, typename T>
   KRYS_NODISCARD constexpr bool operator==(const UniquePtr<FunctionNotation<C, T>> &a,
                                            const UniquePtr<FunctionNotation<C, T>> &b) noexcept
   {
     return a.get() == b.get();
   }
 
-  template <size_t, CSSValueId C, typename T>
+  template <size_t, ValueId C, typename T>
   KRYS_NODISCARD constexpr const auto &get(const FunctionNotation<C, T> &function) noexcept
   {
     return function.parameters;
   }
 
-  template <CSSValueId C, typename T>
+  template <ValueId C, typename T>
   constexpr bool TreatAsTupleLike<FunctionNotation<C, T>> = true;
 
 #pragma endregion
@@ -947,7 +947,7 @@ namespace krys::boo::css
 #pragma region ListOrNone
 
   /// @brief Wraps a list and enforces the invariant that it is either created with a non-empty value or
-  /// `Keywords::None`.
+  /// `keywords::None`.
   template <typename T>
   struct ListOrNone
   {
@@ -967,7 +967,7 @@ namespace krys::boo::css
       assert(!_value.empty());
     }
 
-    ListOrNone(Keywords::None) : _value {}
+    ListOrNone(keywords::None) : _value {}
     {
     }
 
@@ -1026,7 +1026,7 @@ namespace krys::boo::css
 
       if (IsNone())
       {
-        return visitor(Keywords::None {});
+        return visitor(keywords::None {});
       }
 
       return visitor(_value);
@@ -1041,12 +1041,12 @@ namespace krys::boo::css
 
 namespace std
 {
-  template <krys::boo::css::CSSValueId C, typename T>
+  template <krys::boo::css::ValueId C, typename T>
   class tuple_size<krys::boo::css::FunctionNotation<C, T>> : public std::integral_constant<size_t, 1>
   {
   };
 
-  template <size_t I, krys::boo::css::CSSValueId C, typename T>
+  template <size_t I, krys::boo::css::ValueId C, typename T>
   class tuple_element<I, krys::boo::css::FunctionNotation<C, T>>
   {
   public:

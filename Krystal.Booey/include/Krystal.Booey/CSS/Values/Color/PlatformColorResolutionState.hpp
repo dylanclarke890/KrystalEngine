@@ -17,37 +17,37 @@ namespace krys::boo::css
 
     // Colors to use that usually get resolved dynamically using Document & RenderStyle.
 
-    /// @brief For CSSValueId::Currentcolor
+    /// @brief For ValueId::Currentcolor
     KRYS_NODISCARD virtual krys::Color CurrentColor() const noexcept
     {
       return {};
     }
 
-    /// @brief For CSSValueId::InternalDocumentTextColor
+    /// @brief For ValueId::InternalDocumentTextColor
     KRYS_NODISCARD virtual krys::Color InternalDocumentTextColor() const noexcept
     {
       return {};
     }
 
-    /// @brief For CSSValueId::WebkitLink [Style::ForVisitedLink::No]
+    /// @brief For ValueId::WebkitLink [Style::ForVisitedLink::No]
     KRYS_NODISCARD virtual krys::Color WebkitLink() const noexcept
     {
       return {};
     }
 
-    /// @brief For CSSValueId::WebkitLink [Style::ForVisitedLink::Yes]
+    /// @brief For ValueId::WebkitLink [Style::ForVisitedLink::Yes]
     KRYS_NODISCARD virtual krys::Color WebkitLinkVisited() const noexcept
     {
       return {};
     }
 
-    /// @brief For CSSValueId::WebkitActiveLink
+    /// @brief For ValueId::WebkitActiveLink
     KRYS_NODISCARD virtual krys::Color WebkitActiveLink() const noexcept
     {
       return {};
     }
 
-    /// @brief For CSSValueId::WebkitFocusRingColor
+    /// @brief For ValueId::WebkitFocusRingColor
     KRYS_NODISCARD virtual krys::Color WebkitFocusRingColor() const noexcept
     {
       return {};

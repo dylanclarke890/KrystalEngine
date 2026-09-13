@@ -14,10 +14,8 @@
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::dom::tests
 {
-  using namespace krys::boo;
-
   namespace
   {
     struct CommonTestData
@@ -26,7 +24,7 @@ namespace krys::tests
       Ref<TestElement> Node;
 
       CommonTestData(bool appendChild = false)
-          : Document(CreateRef<HTML::Document>()), Node(CreateRef<TestElement>(*Document))
+          : Document(CreateRef<dom::Document>()), Node(CreateRef<TestElement>(*Document))
       {
         if (appendChild)
         {
@@ -260,7 +258,7 @@ namespace krys::tests
 
     SECTION("With only an empty text node")
     {
-      auto emptyTextNode = CreateRef<HTML::Text>(*data.Document);
+      auto emptyTextNode = CreateRef<dom::Text>(*data.Document);
       REQUIRE_FALSE(data.Node->AppendChild(*emptyTextNode).HasException());
 
       REQUIRE_FALSE(data.Node->Normalize().HasException());
@@ -271,8 +269,8 @@ namespace krys::tests
     {
       CommonTestData data {};
 
-      auto textNode1 = CreateRef<HTML::Text>(*data.Document);
-      auto textNode2 = CreateRef<HTML::Text>(*data.Document);
+      auto textNode1 = CreateRef<dom::Text>(*data.Document, u8"Hello");
+      auto textNode2 = CreateRef<dom::Text>(*data.Document, u8" world!");
 
       REQUIRE_FALSE(data.Node->AppendChild(*textNode1).HasException());
 
@@ -320,14 +318,14 @@ namespace krys::tests
 
     SECTION("Attr")
     {
-      auto attribute = document->CreateAttributeNS(Namespaces::XML, u8"xml:name");
+      auto attribute = document->CreateAttributeNS(infra::Namespaces::XML, u8"xml:name");
       REQUIRE_FALSE(attribute.HasException());
       attribute->Value(u8"value");
 
       auto clone = attribute->CloneNode();
 
       auto &attributeClone = Downcast<Attr>(*clone.Value());
-      REQUIRE(attributeClone.NamespaceURI() == Namespaces::XML);
+      REQUIRE(attributeClone.NamespaceURI() == infra::Namespaces::XML);
       REQUIRE(attributeClone.LocalName() == u8"name");
       REQUIRE(attributeClone.Prefix() == u8"xml");
       REQUIRE(attributeClone.Value() == u8"value");
@@ -335,23 +333,23 @@ namespace krys::tests
 
     SECTION("Text")
     {
-      auto textNode = CreateRef<HTML::Text>(*document, u8"text");
+      auto textNode = CreateRef<dom::Text>(*document, u8"text");
 
       auto clone = textNode->CloneNode();
       REQUIRE(clone.HasValue());
 
-      auto &textNodeClone = Downcast<HTML::Text>(*clone.Value());
+      auto &textNodeClone = Downcast<dom::Text>(*clone.Value());
       REQUIRE(textNodeClone.Data() == u8"text");
     }
 
     SECTION("Comment")
     {
-      auto comment = CreateRef<HTML::Comment>(*document, u8"text");
+      auto comment = CreateRef<dom::Comment>(*document, u8"text");
 
       auto clone = comment->CloneNode();
       REQUIRE(clone.HasValue());
 
-      auto &commentClone = Downcast<HTML::Comment>(*clone.Value());
+      auto &commentClone = Downcast<dom::Comment>(*clone.Value());
       REQUIRE(commentClone.Data() == u8"text");
     }
 
@@ -363,7 +361,7 @@ namespace krys::tests
       REQUIRE(clone.HasValue());
 
       REQUIRE(clone->NodeType() == NodeType::PROCESSING_INSTRUCTION_NODE);
-      auto &processingInstructionClone = Downcast<HTML::ProcessingInstruction>(*clone.Value());
+      auto &processingInstructionClone = Downcast<dom::ProcessingInstruction>(*clone.Value());
 
       REQUIRE(processingInstructionClone.Target() == u8"target");
       REQUIRE(processingInstructionClone.Data() == u8"data");
@@ -572,7 +570,7 @@ namespace krys::tests
 
     SECTION("Node that is none of the above returns it's parent element's namespace prefix")
     {
-      auto textNode = CreateRef<HTML::Text>(*data.Document, u8"");
+      auto textNode = CreateRef<dom::Text>(*data.Document, u8"");
 
       SECTION("returns null if parent element is null")
       {
@@ -599,12 +597,12 @@ namespace krys::tests
 
       SECTION("returns XML namespace if prefix is 'xml'")
       {
-        REQUIRE(element->LookupNamespaceURI(u8"xml") == Namespaces::XML);
+        REQUIRE(element->LookupNamespaceURI(u8"xml") == infra::Namespaces::XML);
       }
 
       SECTION("returns XMLNS namespace if prefix is 'xmlns'")
       {
-        REQUIRE(element->LookupNamespaceURI(u8"xmlns") == Namespaces::XMLNS);
+        REQUIRE(element->LookupNamespaceURI(u8"xmlns") == infra::Namespaces::XMLNS);
       }
 
       SECTION("returns it's namespace when non null and it's prefix matches")
@@ -687,7 +685,7 @@ namespace krys::tests
 
     SECTION("Node that is none of the above returns it's parent element's namespace")
     {
-      auto textNode = CreateRef<HTML::Text>(*data.Document, u8"");
+      auto textNode = CreateRef<dom::Text>(*data.Document, u8"");
 
       SECTION("returns null if parent element is null")
       {

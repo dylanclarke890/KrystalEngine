@@ -14,7 +14,7 @@ namespace krys::boo::css
     SpaceSeparatedPoint<Length<AllUnzoomed>> location;
     Maybe<Length<NonNegativeUnzoomed>> blur;
     Maybe<Length<AllUnzoomed>> spread;
-    Maybe<Keywords::Inset> inset;
+    Maybe<keywords::Inset> inset;
     bool isWebkitBoxShadow;
 
     KRYS_NODISCARD bool operator==(const BoxShadow &) const noexcept = default;
@@ -44,7 +44,6 @@ namespace krys::boo::css
       return value.inset;
     }
   }
-
 }
 
 DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::css::BoxShadow, 5)

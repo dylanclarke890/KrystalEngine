@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLLegendElement);
 
   public:
-    HTMLLegendElement(Document &document) noexcept;
+    HTMLLegendElement(dom::Document &document) noexcept;
 
 #pragma region HTMLLegendElement - https://html.spec.whatwg.org/#htmllegendelement
 

@@ -2,7 +2,7 @@
 
 namespace krys::boo::svg
 {
-  SVGCircleElement::SVGCircleElement(Document &document) noexcept
+  SVGCircleElement::SVGCircleElement(dom::Document &document) noexcept
       : SVGElement(document, SVGElementInterface::Circle)
   {
   }

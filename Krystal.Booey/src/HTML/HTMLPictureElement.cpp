@@ -2,7 +2,7 @@
 
 namespace krys::boo::html
 {
-  HTMLPictureElement::HTMLPictureElement(Document &document) noexcept
+  HTMLPictureElement::HTMLPictureElement(dom::Document &document) noexcept
       : HTMLElement(document, HTMLElementInterface::Picture)
   {
   }

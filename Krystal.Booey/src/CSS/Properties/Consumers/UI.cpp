@@ -5,16 +5,16 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Image.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/NumberDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/CSSCursorImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValueListBuilder.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValuePair.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
-  RefPtr<CSSValue> ConsumeCursor(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeCursor(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <cursor> = [ [ <url> | <url-set> ] [<x> <y>]? ]#? [ auto | default | none | context-menu | help |
     // pointer | progress | wait | cell | crosshair | text | vertical-text | alias | copy | move | no-drop |
@@ -45,22 +45,22 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       }
     }
 
-    CSSValueId id = tokens.Peek().ValueId();
+    ValueId id = tokens.Peek().ValueId();
     RefPtr<CSSValue> cursorType;
-    if (id == CSSValueId::Hand)
+    if (id == ValueId::Hand)
     {
       if (state.Context.Mode != ParserMode::HTMLQuirks) // Non-standard behavior
       {
         return nullptr;
       }
 
-      cursorType = CSSPrimitiveValue::Create(CSSValueId::Pointer);
+      cursorType = CSSPrimitiveValue::Create(ValueId::Pointer);
 
       tokens.Discard();
       tokens.DiscardWhitespace();
     }
-    else if ((id >= CSSValueId::Auto && id <= CSSValueId::WebkitZoomOut) || id == CSSValueId::Copy
-             || id == CSSValueId::None)
+    else if ((id >= ValueId::Auto && id <= ValueId::WebkitZoomOut) || id == ValueId::Copy
+             || id == ValueId::None)
     {
       cursorType = ConsumeIdent(tokens);
     }

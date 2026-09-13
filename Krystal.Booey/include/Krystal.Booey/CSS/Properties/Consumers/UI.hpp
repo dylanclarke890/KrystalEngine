@@ -6,13 +6,13 @@ namespace krys::boo::css
 {
   class TokenRange;
   class CSSValue;
-  struct CSSPropertyParserState;
+  struct PropertyParserState;
 
-  namespace CSSPropertyParserHelpers
+  namespace PropertyParserHelpers
   {
     // MARK: <'cursor'> consuming
     // https://drafts.csswg.org/css-ui/#propdef-cursor
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeCursor(TokenRange &tokens,
-                                                  CSSPropertyParserState &state) noexcept;
+                                                  PropertyParserState &state) noexcept;
   }
 }

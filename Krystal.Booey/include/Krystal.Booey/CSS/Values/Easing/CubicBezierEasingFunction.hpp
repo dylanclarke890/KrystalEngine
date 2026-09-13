@@ -16,7 +16,7 @@ namespace krys::boo::css
     constexpr bool operator==(const CubicBezierEasingParameters &) const noexcept = default;
   };
 
-  using CubicBezierEasingFunction = FunctionNotation<CSSValueId::CubicBezier, CubicBezierEasingParameters>;
+  using CubicBezierEasingFunction = FunctionNotation<ValueId::CubicBezier, CubicBezierEasingParameters>;
 
   DEFINE_TYPE_WRAPPER_GET(CubicBezierEasingParameters, value);
 }

@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLMapElement);
 
   public:
-    HTMLMapElement(Document &document) noexcept;
+    HTMLMapElement(dom::Document &document) noexcept;
 
 #pragma region HTMLMapElement - https://html.spec.whatwg.org/#htmlmapelement
 
@@ -22,7 +22,7 @@ namespace krys::boo::html
 
     // TODO(HTMLMapElement, HTML): Implement Areas().
     /// @see https://html.spec.whatwg.org/#dom-map-areas
-    Ref<HTMLCollection> Areas() noexcept;
+    Ref<dom::HTMLCollection> Areas() noexcept;
 
 #pragma endregion
   };

@@ -11,15 +11,15 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTemplateElement);
 
   private:
-    Ref<DocumentFragment> _content;
+    Ref<dom::DocumentFragment> _content;
 
   public:
-    HTMLTemplateElement(Document &document) noexcept;
+    HTMLTemplateElement(dom::Document &document) noexcept;
 
 #pragma region HTMLTemplateElement - https://html.spec.whatwg.org/#htmltemplateelement
 
     /// @see https://html.spec.whatwg.org/#dom-template-content
-    RefPtr<DocumentFragment> Content() const noexcept;
+    RefPtr<dom::DocumentFragment> Content() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootmode
     KRYS_NODISCARD dom::DOMString ShadowRootMode() const noexcept;

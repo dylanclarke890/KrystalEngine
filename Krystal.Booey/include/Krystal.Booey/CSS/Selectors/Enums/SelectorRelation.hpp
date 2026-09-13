@@ -4,7 +4,7 @@
 
 namespace krys::boo::css
 {
-  /// @brief The relationship between two selectors in a CSSSelectorList. From the perspective of the second
+  /// @brief The relationship between two selectors in a SelectorList. From the perspective of the second
   /// (rightmost) selector, so the relationship of `p` in the selector `div > p` is `SelectorRelation::Child`,
   /// and the relationship of `p` in the selector `div p` is `SelectorRelation::Descendant` (`div` does not
   /// have a relationship to any selector in both cases).

@@ -3,7 +3,7 @@
 
 namespace krys::boo::html
 {
-  HTMLCanvasElement::HTMLCanvasElement(Document &document) noexcept
+  HTMLCanvasElement::HTMLCanvasElement(dom::Document &document) noexcept
       : HTMLElement(document, HTMLElementInterface::Canvas)
   {
   }
@@ -12,22 +12,22 @@ namespace krys::boo::html
 
   uint32 HTMLCanvasElement::Width() const noexcept
   {
-    return Attributes::Reflection::Reflect<uint32>(*this, u8"width");
+    return Reflection::Reflect<uint32>(*this, u8"width");
   }
 
   void HTMLCanvasElement::Width(uint32 value) noexcept
   {
-    Attributes::Reflection::Reflect<uint32>(*this, u8"width", krys::move(value));
+    Reflection::Reflect<uint32>(*this, u8"width", krys::move(value));
   }
 
   uint32 HTMLCanvasElement::Height() const noexcept
   {
-    return Attributes::Reflection::Reflect<uint32>(*this, u8"height");
+    return Reflection::Reflect<uint32>(*this, u8"height");
   }
 
   void HTMLCanvasElement::Height(uint32 value) noexcept
   {
-    Attributes::Reflection::Reflect<uint32>(*this, u8"height", krys::move(value));
+    Reflection::Reflect<uint32>(*this, u8"height", krys::move(value));
   }
 
 #pragma endregion

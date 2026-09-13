@@ -11,15 +11,15 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLQuoteElement);
 
   public:
-    HTMLQuoteElement(Document &document) noexcept;
+    HTMLQuoteElement(dom::Document &document) noexcept;
 
 #pragma region HTMLQuoteElement - https://html.spec.whatwg.org/#htmlquoteelement
 
     /// @see https://html.spec.whatwg.org/#dom-quote-cite
-    KRYS_NODISCARD dom::ExceptionOr<USVString> Cite() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Cite() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-quote-cite
-    dom::ExceptionOr<void> Cite(USVString &&value) noexcept;
+    dom::ExceptionOr<void> Cite(dom::USVString &&value) noexcept;
 
 #pragma endregion
   };

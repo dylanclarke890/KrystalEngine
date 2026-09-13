@@ -3,20 +3,21 @@
 
 namespace krys::boo::html
 {
-  HTMLQuoteElement::HTMLQuoteElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Quote)
+  HTMLQuoteElement::HTMLQuoteElement(dom::Document &document) noexcept
+      : HTMLElement(document, HTMLElementInterface::Quote)
   {
   }
 
 #pragma region HTMLQuoteElement
 
-  dom::ExceptionOr<USVString> HTMLQuoteElement::Cite() const noexcept
+  dom::ExceptionOr<dom::USVString> HTMLQuoteElement::Cite() const noexcept
   {
-    return Attributes::Reflection::ReflectURL<USVString>(*this, u8"cite");
+    return Reflection::ReflectURL<dom::USVString>(*this, u8"cite");
   }
 
-  dom::ExceptionOr<void> HTMLQuoteElement::Cite(USVString &&value) noexcept
+  dom::ExceptionOr<void> HTMLQuoteElement::Cite(dom::USVString &&value) noexcept
   {
-    return Attributes::Reflection::ReflectURL<USVString>(*this, u8"cite", krys::move(value));
+    return Reflection::ReflectURL<dom::USVString>(*this, u8"cite", krys::move(value));
   }
 
 #pragma endregion

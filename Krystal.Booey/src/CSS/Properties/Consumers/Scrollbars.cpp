@@ -2,17 +2,17 @@
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Color.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValuePair.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
-  RefPtr<CSSValue> ConsumeScrollbarColor(TokenRange &range, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeScrollbarColor(TokenRange &range, PropertyParserState &state) noexcept
   {
     // <'scrollbar-color'> = auto | <color>{2}
     // https://drafts.csswg.org/css-scrollbars/#propdef-scrollbar-color
 
-    if (auto ident = ConsumeIdent<CSSValueId::Auto>(range))
+    if (auto ident = ConsumeIdent<ValueId::Auto>(range))
     {
       return ident;
     }

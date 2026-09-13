@@ -33,9 +33,9 @@ namespace krys::boo::dom
   {
     auto qualifiedName = _qualifiedName.Name();
 
-    if (NamespaceURI() == Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
+    if (NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
-      qualifiedName = krys::Text::ToASCIIUppercase(qualifiedName);
+      qualifiedName = krys::text::ToASCIIUpper(qualifiedName);
     }
 
     return qualifiedName;
@@ -131,9 +131,9 @@ namespace krys::boo::dom
       return Exception {ExceptionCode::InvalidCharacterError};
     }
 
-    if (NamespaceURI() == Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
+    if (NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
-      qualifiedName = krys::Text::ToASCIILowercase(qualifiedName.View());
+      qualifiedName = krys::text::ToASCIILower(qualifiedName.View());
     }
 
     // SPEC-VIOLATION(TRUSTED-TYPES): Let verifiedValue be the result of calling get trusted type compliant
@@ -194,9 +194,9 @@ namespace krys::boo::dom
       return Exception {ExceptionCode::InvalidCharacterError};
     }
 
-    if (NamespaceURI() == Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
+    if (NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
-      qualifiedName = krys::Text::ToASCIILowercase(qualifiedName.View());
+      qualifiedName = krys::text::ToASCIILower(qualifiedName.View());
     }
 
     auto it = std::find_if(_attributes.begin(), _attributes.end(),
@@ -226,9 +226,9 @@ namespace krys::boo::dom
 
   bool Element::HasAttribute(DOMStringAtom qualifiedName) const noexcept
   {
-    if (NamespaceURI() == Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
+    if (NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
-      qualifiedName = krys::Text::ToASCIILowercase(qualifiedName.View());
+      qualifiedName = krys::text::ToASCIILower(qualifiedName.View());
     }
 
     return std::ranges::any_of(_attributes, [&](const Ref<Attr> &a) { return a->Name() == qualifiedName; });
@@ -382,22 +382,22 @@ namespace krys::boo::dom
 
   ExceptionOr<void> Element::Before(const List<NodeOrString> &nodes) noexcept
   {
-    return Mixins::ChildNode::Before(*this, nodes);
+    return mixins::ChildNode::Before(*this, nodes);
   }
 
   ExceptionOr<void> Element::After(const List<NodeOrString> &nodes) noexcept
   {
-    return Mixins::ChildNode::After(*this, nodes);
+    return mixins::ChildNode::After(*this, nodes);
   }
 
   ExceptionOr<void> Element::ReplaceWith(const List<NodeOrString> &nodes) noexcept
   {
-    return Mixins::ChildNode::ReplaceWith(*this, nodes);
+    return mixins::ChildNode::ReplaceWith(*this, nodes);
   }
 
   ExceptionOr<void> Element::Remove() noexcept
   {
-    return Mixins::ChildNode::Remove(*this);
+    return mixins::ChildNode::Remove(*this);
   }
 
 #pragma endregion
@@ -406,22 +406,22 @@ namespace krys::boo::dom
 
   RefPtr<const Element> Element::PreviousElementSibling() const noexcept
   {
-    return Mixins::NonDocumentTypeChildNode::PreviousElementSibling(*this);
+    return mixins::NonDocumentTypeChildNode::PreviousElementSibling(*this);
   }
 
   RefPtr<Element> Element::PreviousElementSibling() noexcept
   {
-    return Mixins::NonDocumentTypeChildNode::PreviousElementSibling(*this);
+    return mixins::NonDocumentTypeChildNode::PreviousElementSibling(*this);
   }
 
   RefPtr<const Element> Element::NextElementSibling() const noexcept
   {
-    return Mixins::NonDocumentTypeChildNode::NextElementSibling(*this);
+    return mixins::NonDocumentTypeChildNode::NextElementSibling(*this);
   }
 
   RefPtr<Element> Element::NextElementSibling() noexcept
   {
-    return Mixins::NonDocumentTypeChildNode::NextElementSibling(*this);
+    return mixins::NonDocumentTypeChildNode::NextElementSibling(*this);
   }
 
 #pragma endregion
@@ -435,66 +435,66 @@ namespace krys::boo::dom
 
   RefPtr<const Element> Element::FirstElementChild() const noexcept
   {
-    return Mixins::ParentNode::FirstElementChild(*this);
+    return mixins::ParentNode::FirstElementChild(*this);
   }
 
   RefPtr<Element> Element::FirstElementChild() noexcept
   {
-    return Mixins::ParentNode::FirstElementChild(*this);
+    return mixins::ParentNode::FirstElementChild(*this);
   }
 
   RefPtr<const Element> Element::LastElementChild() const noexcept
   {
-    return Mixins::ParentNode::LastElementChild(*this);
+    return mixins::ParentNode::LastElementChild(*this);
   }
 
   RefPtr<Element> Element::LastElementChild() noexcept
   {
-    return Mixins::ParentNode::LastElementChild(*this);
+    return mixins::ParentNode::LastElementChild(*this);
   }
 
   size_t Element::ChildElementCount() const noexcept
   {
-    return Mixins::ParentNode::ChildElementCount(*this);
+    return mixins::ParentNode::ChildElementCount(*this);
   }
 
   ExceptionOr<void> Element::Prepend(const List<NodeOrString> &nodes) noexcept
   {
-    return Mixins::ParentNode::Prepend(*this, nodes);
+    return mixins::ParentNode::Prepend(*this, nodes);
   }
 
   ExceptionOr<void> Element::Append(const List<NodeOrString> &nodes) noexcept
   {
-    return Mixins::ParentNode::Append(*this, nodes);
+    return mixins::ParentNode::Append(*this, nodes);
   }
 
   ExceptionOr<void> Element::ReplaceChildren(const List<NodeOrString> &nodes) noexcept
   {
-    return Mixins::ParentNode::ReplaceChildren(*this, nodes);
+    return mixins::ParentNode::ReplaceChildren(*this, nodes);
   }
 
   ExceptionOr<void> Element::MoveBefore(Node &node, Node *refChild) noexcept
   {
-    return Mixins::ParentNode::MoveBefore(*this, node, refChild);
+    return mixins::ParentNode::MoveBefore(*this, node, refChild);
   }
 
   ExceptionOr<RefPtr<Element>> Element::QuerySelector(DOMStringView selectors) noexcept
   {
-    return Mixins::ParentNode::QuerySelector(*this, selectors);
+    return mixins::ParentNode::QuerySelector(*this, selectors);
   }
 
   ExceptionOr<Ref<NodeList>> Element::QuerySelectorAll(DOMStringView selectors) noexcept
   {
-    return Mixins::ParentNode::QuerySelectorAll(*this, selectors);
+    return mixins::ParentNode::QuerySelectorAll(*this, selectors);
   }
 
 #pragma endregion
 
 #pragma region Slottable
 
-  RefPtr<HTMLSlotElement> Element::AssignedSlot() noexcept
+  RefPtr<html::HTMLSlotElement> Element::AssignedSlot() noexcept
   {
-    return Mixins::Slottable::AssignedSlot(*this);
+    return mixins::Slottable::AssignedSlot(*this);
   }
 
 #pragma endregion

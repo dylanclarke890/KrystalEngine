@@ -16,7 +16,7 @@ namespace krys::boo::css
     bool operator==(const Contrast &) const = default;
   };
 
-  using ContrastFunction = FunctionNotation<CSSValueId::Contrast, Contrast>;
+  using ContrastFunction = FunctionNotation<ValueId::Contrast, Contrast>;
 
   DEFINE_TYPE_WRAPPER_GET(Contrast, value);
 }

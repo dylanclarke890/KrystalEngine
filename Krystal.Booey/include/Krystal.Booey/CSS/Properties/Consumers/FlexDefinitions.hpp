@@ -6,14 +6,14 @@ namespace krys::boo::css
 {
   struct FlexValidator
   {
-    KRYS_NODISCARD constexpr static Maybe<FlexUnit> Validate(CSSUnitType unitType, CSSPropertyParserState &,
-                                                             CSSPropertyParserOptions) noexcept
+    KRYS_NODISCARD constexpr static Maybe<FlexUnit> Validate(CSSUnitType unitType, PropertyParserState &,
+                                                             PropertyParserOptions) noexcept
     {
       return UnitTraits<FlexUnit>::Validate(unitType);
     }
 
     template <auto R, typename V>
-    KRYS_NODISCARD static bool IsValid(FlexRaw<R, V> raw, CSSPropertyParserOptions) noexcept
+    KRYS_NODISCARD static bool IsValid(FlexRaw<R, V> raw, PropertyParserOptions) noexcept
     {
       return IsValidCanonicalValue(raw);
     }

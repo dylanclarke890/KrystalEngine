@@ -3,7 +3,7 @@
 
 namespace krys::boo::html
 {
-  HTMLLegendElement::HTMLLegendElement(Document &document) noexcept
+  HTMLLegendElement::HTMLLegendElement(dom::Document &document) noexcept
       : HTMLElement(document, HTMLElementInterface::Legend)
   {
   }
@@ -16,12 +16,12 @@ namespace krys::boo::html
 
   dom::DOMString HTMLLegendElement::Align() const noexcept
   {
-    return Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
   }
 
   void HTMLLegendElement::Align(dom::DOMString &&value) noexcept
   {
-    Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    Reflection::Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
   }
 
 #pragma endregion

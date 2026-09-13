@@ -16,7 +16,7 @@ namespace krys::boo::css
     bool operator==(const Grayscale &) const = default;
   };
 
-  using GrayscaleFunction = FunctionNotation<CSSValueId::Grayscale, Grayscale>;
+  using GrayscaleFunction = FunctionNotation<ValueId::Grayscale, Grayscale>;
 
   DEFINE_TYPE_WRAPPER_GET(Grayscale, value);
 }

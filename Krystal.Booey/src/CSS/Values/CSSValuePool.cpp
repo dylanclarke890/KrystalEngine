@@ -6,9 +6,9 @@ namespace krys::boo::css
 
   StaticCSSValuePool::StaticCSSValuePool() noexcept
       : _implicitInitialValue(CSSValue::StaticCSSValue, CSSPrimitiveValue::CreateImplicitInitialValue),
-        _transparentColor(CSSValue::StaticCSSValue, WebCore::Color::transparentBlack),
-        _whiteColor(CSSValue::StaticCSSValue, WebCore::Color::white),
-        _blackColor(CSSValue::StaticCSSValue, WebCore::Color::black)
+        _transparentColor(CSSValue::StaticCSSValue, krys::Color::transparentBlack),
+        _whiteColor(CSSValue::StaticCSSValue, krys::Color::white),
+        _blackColor(CSSValue::StaticCSSValue, krys::Color::black)
   {
     for (auto keyword : AllCSSValueKeywords())
     {

@@ -77,7 +77,7 @@ namespace krys::boo::dom
         return ShareRef(element);
       }
 
-      if (element.NamespaceURI() == Namespaces::HTML
+      if (element.NamespaceURI() == infra::Namespaces::HTML
           && ElementAlgorithms::GetAttributeValue(element, u8"name") == name)
       {
         return ShareRef(element);
@@ -131,7 +131,7 @@ namespace krys::boo::dom
         supportedNames.push_back(id);
       }
 
-      if (element.NamespaceURI() == Namespaces::HTML)
+      if (element.NamespaceURI() == infra::Namespaces::HTML)
       {
         auto name = ElementAlgorithms::GetAttributeValue(element, u8"name");
         if (!name.empty() && !std::ranges::contains(supportedNames, name))

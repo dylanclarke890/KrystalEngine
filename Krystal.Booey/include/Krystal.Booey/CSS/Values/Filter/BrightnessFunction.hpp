@@ -16,7 +16,7 @@ namespace krys::boo::css
     bool operator==(const Brightness &) const = default;
   };
 
-  using BrightnessFunction = FunctionNotation<CSSValueId::Brightness, Brightness>;
+  using BrightnessFunction = FunctionNotation<ValueId::Brightness, Brightness>;
 
   DEFINE_TYPE_WRAPPER_GET(Brightness, value);
 }

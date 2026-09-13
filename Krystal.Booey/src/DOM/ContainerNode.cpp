@@ -5,7 +5,7 @@
 
 namespace krys::boo::dom
 {
-  ContainerNode::ContainerNode(Document &document, HTML::NodeType type, NodeFlags flags) noexcept
+  ContainerNode::ContainerNode(Document &document, dom::NodeType type, NodeFlags flags) noexcept
       : Node(document, type, flags | NodeFlags::IsContainerNode), _firstChild(nullptr), _lastChild(nullptr)
   {
   }

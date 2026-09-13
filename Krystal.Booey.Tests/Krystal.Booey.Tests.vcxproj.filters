@@ -24,7 +24,7 @@
     <ClCompile Include="tests\HTML\Parser\Loader\TextResourceDecoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\HTML\Parser\HTMLInputStream.cpp">
+    <ClCompile Include="tests\HTML\Parser\InputStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tests\HTML\Parser\HTMLCharacterReference.cpp">
@@ -153,13 +153,13 @@
     <ClCompile Include="tests\CSS\Parser\Tokenizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\HTML\Parser\HTMLTokenizer.cpp">
+    <ClCompile Include="tests\HTML\Parser\Tokenizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tests\CSS\Parser\Parser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\CSS\Selectors\CSSSelectorParser.cpp">
+    <ClCompile Include="tests\CSS\Selectors\SelectorParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

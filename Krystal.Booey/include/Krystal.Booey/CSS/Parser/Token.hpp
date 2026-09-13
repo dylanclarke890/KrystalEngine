@@ -2,8 +2,8 @@
 
 #include "Krystal.Booey/CSS/Parser/NumericValue.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenType.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyId.hpp"
-#include "Krystal.Booey/CSS/Values/Enums/CSSValueId.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
+#include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Text/Encodings/Encode.hpp"
 #include "Krystal.Core/Text/Encodings/UTF.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
@@ -83,34 +83,34 @@ namespace krys::boo::css
       AppendDataInternal(codePoints);
     }
 
-    KRYS_NODISCARD CSSValueId ValueId() const noexcept
+    KRYS_NODISCARD css::ValueId ValueId() const noexcept
     {
       if (_type != TokenType::Ident)
       {
-        return CSSValueId::Invalid;
+        return ValueId::Invalid;
       }
 
-      return FindCSSValueKeyword(IdentCodePoints());
+      return FindValueKeyword(IdentCodePoints());
     }
 
-    KRYS_NODISCARD CSSPropertyId PropertyId() const noexcept
+    KRYS_NODISCARD PropertyId PropertyId() const noexcept
     {
       if (_type != TokenType::Ident)
       {
-        return CSSPropertyId::Invalid;
+        return PropertyId::Invalid;
       }
 
-      return FindCSSPropertyId(IdentCodePoints());
+      return FindProperty(IdentCodePoints());
     }
 
-    KRYS_NODISCARD CSSValueId FunctionId() const noexcept
+    KRYS_NODISCARD css::ValueId FunctionId() const noexcept
     {
       if (_type != TokenType::Function)
       {
-        return CSSValueId::Invalid;
+        return css::ValueId::Invalid;
       }
 
-      return FindCSSValueKeyword(IdentCodePoints());
+      return FindValueKeyword(IdentCodePoints());
     }
 
     void NumericValue(NumericValue value) noexcept

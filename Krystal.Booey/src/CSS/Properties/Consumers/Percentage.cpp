@@ -3,13 +3,13 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/CSSPrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/NumberDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/PercentageDefinitions.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
   RefPtr<CSSPrimitiveValue> ConsumePercentageDividedBy100OrNumber(TokenRange &tokens,
-                                                                  CSSPropertyParserState &state) noexcept
+                                                                  PropertyParserState &state) noexcept
   {
     using NumberConsumer = ConsumerDefinition<Number<>>;
     using PercentageConsumer = ConsumerDefinition<Percentage<>>;

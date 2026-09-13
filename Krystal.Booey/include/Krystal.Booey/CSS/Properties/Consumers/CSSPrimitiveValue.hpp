@@ -15,27 +15,27 @@ namespace krys::boo::css
   struct CSSPrimitiveValueResolverBase
   {
     KRYS_NODISCARD static RefPtr<CSSPrimitiveValue> Resolve(NumericRaw auto value,
-                                                            CSSPropertyParserOptions = {}) noexcept
+                                                            PropertyParserOptions = {}) noexcept
     {
       return CSSPrimitiveValue::Create(value.Value, ToCSSUnitType(value.Unit));
     }
 
     template <CSSRange R, typename T>
     KRYS_NODISCARD static RefPtr<CSSPrimitiveValue> Resolve(IntegerRaw<R, T> value,
-                                                            CSSPropertyParserOptions) noexcept
+                                                            PropertyParserOptions) noexcept
     {
       return CSSPrimitiveValue::Create(value.Value);
     }
 
     KRYS_NODISCARD static RefPtr<CSSPrimitiveValue> Resolve(Calc auto value,
-                                                            CSSPropertyParserOptions = {}) noexcept
+                                                            PropertyParserOptions = {}) noexcept
     {
       // TODO: Implement calc() expression evaluation
       return nullptr;
     }
 
     KRYS_NODISCARD static RefPtr<CSSPrimitiveValue> Resolve(Numeric auto value,
-                                                            CSSPropertyParserOptions options = {}) noexcept
+                                                            PropertyParserOptions options = {}) noexcept
     {
       return SwitchOn(krys::move(value), [&](auto &&value) { return Resolve(krys::move(value), options); });
     }
@@ -43,7 +43,7 @@ namespace krys::boo::css
     template <CSSRange nR, CSSRange pR, typename T>
     KRYS_NODISCARD static RefPtr<CSSPrimitiveValue>
       Resolve(const NumberOrPercentageResolvedToNumber<nR, pR, T> &value,
-              CSSPropertyParserOptions options = {}) noexcept
+              PropertyParserOptions options = {}) noexcept
     {
       return SwitchOn(
         value,

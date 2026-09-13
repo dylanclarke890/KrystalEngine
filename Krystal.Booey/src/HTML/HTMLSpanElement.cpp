@@ -2,7 +2,8 @@
 
 namespace krys::boo::html
 {
-  HTMLSpanElement::HTMLSpanElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Span)
+  HTMLSpanElement::HTMLSpanElement(dom::Document &document) noexcept
+      : HTMLElement(document, HTMLElementInterface::Span)
   {
   }
 }

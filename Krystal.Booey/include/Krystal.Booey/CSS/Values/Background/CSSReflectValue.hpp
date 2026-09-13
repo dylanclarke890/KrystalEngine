@@ -9,7 +9,7 @@ namespace krys::boo::css
   class CSSReflectValue final : public CSSValue
   {
   public:
-    KRYS_NODISCARD static Ref<CSSReflectValue> Create(CSSValueId direction, Ref<CSSValue> offset,
+    KRYS_NODISCARD static Ref<CSSReflectValue> Create(css::ValueId direction, Ref<CSSValue> offset,
                                                       RefPtr<CSSValue> mask) noexcept;
   };
 }

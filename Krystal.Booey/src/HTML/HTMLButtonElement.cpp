@@ -3,7 +3,7 @@
 
 namespace krys::boo::html
 {
-  HTMLButtonElement::HTMLButtonElement(Document &document) noexcept
+  HTMLButtonElement::HTMLButtonElement(dom::Document &document) noexcept
       : HTMLElement(document, HTMLElementInterface::Button)
   {
   }
@@ -12,102 +12,102 @@ namespace krys::boo::html
 
   dom::DOMString HTMLButtonElement::Command() const noexcept
   {
-    return Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"command").value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"command").value_or(u8"");
   }
 
   void HTMLButtonElement::Command(dom::DOMString &&value) noexcept
   {
-    Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"command", krys::move(value));
+    Reflection::Reflect<dom::DOMString>(*this, u8"command", krys::move(value));
   }
 
   bool HTMLButtonElement::Disabled() const noexcept
   {
-    return Attributes::Reflection::Reflect<bool>(*this, u8"disabled");
+    return Reflection::Reflect<bool>(*this, u8"disabled");
   }
 
   void HTMLButtonElement::Disabled(bool value) noexcept
   {
-    Attributes::Reflection::Reflect<bool>(*this, u8"disabled", krys::move(value));
+    Reflection::Reflect<bool>(*this, u8"disabled", krys::move(value));
   }
 
-  dom::ExceptionOr<USVString> HTMLButtonElement::FormAction() const noexcept
+  dom::ExceptionOr<dom::USVString> HTMLButtonElement::FormAction() const noexcept
   {
-    return Attributes::Reflection::Reflect<USVString>(*this, u8"formaction");
+    return Reflection::Reflect<dom::USVString>(*this, u8"formaction");
   }
 
-  dom::ExceptionOr<void> HTMLButtonElement::FormAction(USVString &&value) noexcept
+  dom::ExceptionOr<void> HTMLButtonElement::FormAction(dom::USVString &&value) noexcept
   {
-    return Attributes::Reflection::ReflectSetter<USVString>(*this, u8"formaction", krys::move(value));
+    return Reflection::ReflectSetter<dom::USVString>(*this, u8"formaction", krys::move(value));
   }
 
   dom::DOMString HTMLButtonElement::EncType() const noexcept
   {
-    return Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"formenctype").value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"formenctype").value_or(u8"");
   }
 
   void HTMLButtonElement::EncType(dom::DOMString &&value) noexcept
   {
-    Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"formenctype", krys::move(value));
+    Reflection::Reflect<dom::DOMString>(*this, u8"formenctype", krys::move(value));
   }
 
   dom::DOMString HTMLButtonElement::FormMethod() const noexcept
   {
-    return Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"formmethod").value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"formmethod").value_or(u8"");
   }
 
   void HTMLButtonElement::FormMethod(dom::DOMString &&value) noexcept
   {
-    Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"formmethod", krys::move(value));
+    Reflection::Reflect<dom::DOMString>(*this, u8"formmethod", krys::move(value));
   }
 
   bool HTMLButtonElement::FormNoValidate() const noexcept
   {
-    return Attributes::Reflection::Reflect<bool>(*this, u8"formnovalidate");
+    return Reflection::Reflect<bool>(*this, u8"formnovalidate");
   }
 
   void HTMLButtonElement::FormNoValidate(bool value) noexcept
   {
-    Attributes::Reflection::Reflect<bool>(*this, u8"formnovalidate", krys::move(value));
+    Reflection::Reflect<bool>(*this, u8"formnovalidate", krys::move(value));
   }
 
   dom::DOMString HTMLButtonElement::FormTarget() const noexcept
   {
-    return Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"formtarget").value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"formtarget").value_or(u8"");
   }
 
   void HTMLButtonElement::FormTarget(dom::DOMString &&value) noexcept
   {
-    Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"formtarget", krys::move(value));
+    Reflection::Reflect<dom::DOMString>(*this, u8"formtarget", krys::move(value));
   }
 
   dom::DOMString HTMLButtonElement::Name() const noexcept
   {
-    return Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
   void HTMLButtonElement::Name(dom::DOMString &&value) noexcept
   {
-    Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
+    Reflection::Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }
 
   dom::DOMString HTMLButtonElement::Type() const noexcept
   {
-    return Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
   }
 
   void HTMLButtonElement::Type(dom::DOMString &&value) noexcept
   {
-    Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
+    Reflection::Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
   }
 
   dom::DOMString HTMLButtonElement::Value() const noexcept
   {
-    return Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"value").value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"value").value_or(u8"");
   }
 
   void HTMLButtonElement::Value(dom::DOMString &&value) noexcept
   {
-    Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"value", krys::move(value));
+    Reflection::Reflect<dom::DOMString>(*this, u8"value", krys::move(value));
   }
 
 #pragma endregion

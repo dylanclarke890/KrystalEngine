@@ -602,7 +602,7 @@ namespace krys::boo::dom
     }
 
     ContainerNode *parent = referenceNode == nullptr ? Downcast<ContainerNode>(_start.Container.get())
-                                                            : referenceNode->ParentNode();
+                                                     : referenceNode->ParentNode();
 
     if (auto preInsertValid = MutationAlgorithms::EnsurePreInsertValidity(node, *parent, referenceNode);
         preInsertValid.HasException())
@@ -924,7 +924,7 @@ namespace krys::boo::dom
   }
 
   Node *Range::FirstPartiallyContainedChild(Node &commonAncestor, Node &startContainer,
-                                                   Node &endContainer) const noexcept
+                                            Node &endContainer) const noexcept
   {
     if (!TreeQueries::IsInclusiveAncestor(startContainer, endContainer))
     {
@@ -941,7 +941,7 @@ namespace krys::boo::dom
   }
 
   Node *Range::LastPartiallyContainedChild(Node &commonAncestor, Node &startContainer,
-                                                  Node &endContainer) const noexcept
+                                           Node &endContainer) const noexcept
   {
     if (!TreeQueries::IsInclusiveAncestor(endContainer, startContainer))
     {

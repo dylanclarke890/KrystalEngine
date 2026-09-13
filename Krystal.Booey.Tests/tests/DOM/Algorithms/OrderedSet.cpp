@@ -1,10 +1,8 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/OrderedSet.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::dom::tests
 {
-  using namespace krys::boo;
-
   TEST_CASE("OrderedSet::Parser", "[HTML][OrderedSet]")
   {
     REQUIRE(OrderedSet::Parser(u8"") == List<dom::DOMString> {});

@@ -28,7 +28,7 @@ namespace krys::boo::html
     auto size = element.GetAttribute(u8"size");
     if (size.has_value())
     {
-      if (auto result = MicroParsers::Numbers::ParseNonNegativeInteger(*size); result.Success())
+      if (auto result = Numbers::ParseNonNegativeInteger(*size); result.Success())
       {
         return result.Value;
       }
@@ -67,29 +67,29 @@ namespace krys::boo::html
       if (Is<HTMLSelectElement>(node) || Is<HTMLHRElement>(node) || Is<HTMLOptionElement>(node)
           || Is<HTMLDataListElement>(node))
       {
-        node = TreeQueries::NextSkippingChildren(*node, &select);
+        node = dom::TreeQueries::NextSkippingChildren(*node, &select);
         continue;
       }
 
       if (Is<HTMLOptGroupElement>(node))
       {
-        for (auto &ancestor : AncestorRange(*node))
+        for (auto &ancestor : dom::AncestorRange(*node))
         {
           if (Is<HTMLOptGroupElement>(ancestor))
           {
-            node = TreeQueries::NextSkippingChildren(*node, &select);
+            node = dom::TreeQueries::NextSkippingChildren(*node, &select);
             continue;
           }
 
           if (Is<HTMLSelectElement>(ancestor))
           {
-            node = TreeQueries::Next(*node, &select);
+            node = dom::TreeQueries::Next(*node, &select);
             continue;
           }
         }
       }
 
-      node = TreeQueries::Next(*node, &select);
+      node = dom::TreeQueries::Next(*node, &select);
     }
 
     // SPEC(4):  Return options.
@@ -165,7 +165,7 @@ namespace krys::boo::html
 
     // SPEC(2): Let selectedcontent be the first selectedcontent element descendant of select in tree order if
     // any such element exists; otherwise return null.
-    auto range = DescendantRange(select);
+    auto range = dom::DescendantRange(select);
     auto selectedcontentIt =
       First(range, [](auto &&node)
             { return Is<HTMLElement>(node) && Is<HTMLSelectedContentElement>(Downcast<HTMLElement>(node)); });
@@ -189,20 +189,20 @@ namespace krys::boo::html
     HTMLOptionElement &option, HTMLSelectedContentElement &selectedcontent) noexcept
   {
     // SPEC(1): Let documentFragment be a new DocumentFragment whose node document is option's node document.
-    auto documentFragment = CreateRef<DocumentFragment>(option.NodeDocument());
+    auto documentFragment = CreateRef<dom::DocumentFragment>(option.NodeDocument());
 
     // SPEC(2):For each child of option's children:
-    for (auto &child : ChildNodeRange(option))
+    for (auto &child : dom::ChildNodeRange(option))
     {
       // SPEC(2.1): Let childClone be the result of running clone given child with subtree set to true.
-      auto childClone = NodeAlgorithms::CloneNode(child, nullptr, true);
+      auto childClone = dom::NodeAlgorithms::CloneNode(child, nullptr, true);
 
       // SPEC(2.2): Append childClone to documentFragment.
       documentFragment->AppendChild(*childClone.Value());
     }
 
     // SPEC(3): Replace all with documentFragment within selectedcontent.
-    (void)MutationAlgorithms::ReplaceAll(documentFragment.get(), selectedcontent);
+    (void)dom::MutationAlgorithms::ReplaceAll(documentFragment.get(), selectedcontent);
   }
 
 #pragma endregion
@@ -237,17 +237,17 @@ namespace krys::boo::html
     option._cachedNearestSelectElement = newSelect;
   }
 
-  HTMLSelectElement *FormControlAlgorithms::NearestAncestorSelect(Element &element) noexcept
+  HTMLSelectElement *FormControlAlgorithms::NearestAncestorSelect(dom::Element &element) noexcept
   {
     // SPEC(1): Let ancestorOptgroup be null.
     HTMLOptGroupElement *ancestorOptgroup = nullptr;
 
-    SmallElementList ancestors;
-    for (auto &ancestor : AncestorRange(element))
+    dom::SmallElementList ancestors;
+    for (auto &ancestor : dom::AncestorRange(element))
     {
-      if (Is<Element>(ancestor))
+      if (Is<dom::Element>(ancestor))
       {
-        ancestors.push_back(ShareRef(Downcast<Element>(ancestor)));
+        ancestors.push_back(ShareRef(Downcast<dom::Element>(ancestor)));
       }
     }
 

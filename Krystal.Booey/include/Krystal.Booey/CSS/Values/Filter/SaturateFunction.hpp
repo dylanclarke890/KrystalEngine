@@ -16,7 +16,7 @@ namespace krys::boo::css
     bool operator==(const Saturate &) const = default;
   };
 
-  using SaturateFunction = FunctionNotation<CSSValueId::Saturate, Saturate>;
+  using SaturateFunction = FunctionNotation<ValueId::Saturate, Saturate>;
 
   DEFINE_TYPE_WRAPPER_GET(Saturate, value);
 }

@@ -1,10 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Types/String.hpp"
-#include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Text/ASCII.hpp"
+#include "Krystal.Core/Base.hpp"
 
 namespace krys::boo::html
 {
@@ -15,15 +11,10 @@ namespace krys::boo::html
     HTML,
     CSS
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::ContentType, 3u)
-
-namespace krys::boo::html
-{
   KRYS_NODISCARD inline ContentType DetermineContentType(const string &mimeType) noexcept
   {
-    string lowerMimeType = krys::Text::ToASCIILowercase(mimeType);
+    string lowerMimeType = krys::text::ToASCIILower(mimeType);
 
     if (lowerMimeType == "text/css")
     {
@@ -38,3 +29,5 @@ namespace krys::boo::html
     return ContentType::PlainText;
   }
 }
+
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::ContentType, 3u)

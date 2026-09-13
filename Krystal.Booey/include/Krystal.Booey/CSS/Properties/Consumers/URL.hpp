@@ -4,7 +4,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
   enum class AllowedURLModifiers
   {
@@ -15,25 +15,25 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::CSSPropertyParserHelpers::AllowedURLModifiers, 4uz)
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::PropertyParserHelpers::AllowedURLModifiers, 4uz)
 
 namespace krys::boo::css
 {
   class CSSValue;
   class TokenRange;
 
-  struct CSSPropertyParserState;
+  struct PropertyParserState;
   struct CSSURL;
 
-  namespace CSSPropertyParserHelpers
+  namespace PropertyParserHelpers
   {
     // MARK: <url>
     // https://drafts.csswg.org/css-values/#urls
 
-    KRYS_NODISCARD Maybe<CSSURL> ConsumeURLRaw(TokenRange &tokens, CSSPropertyParserState &state,
+    KRYS_NODISCARD Maybe<CSSURL> ConsumeURLRaw(TokenRange &tokens, PropertyParserState &state,
                                                AllowedURLModifiers allowed) noexcept;
 
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeURL(TokenRange &tokens, CSSPropertyParserState &state,
+    KRYS_NODISCARD RefPtr<CSSValue> ConsumeURL(TokenRange &tokens, PropertyParserState &state,
                                                AllowedURLModifiers allowed) noexcept;
   }
 }

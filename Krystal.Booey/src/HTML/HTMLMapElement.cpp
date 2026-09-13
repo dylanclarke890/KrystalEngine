@@ -3,7 +3,8 @@
 
 namespace krys::boo::html
 {
-  HTMLMapElement::HTMLMapElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Map)
+  HTMLMapElement::HTMLMapElement(dom::Document &document) noexcept
+      : HTMLElement(document, HTMLElementInterface::Map)
   {
   }
 
@@ -11,12 +12,12 @@ namespace krys::boo::html
 
   dom::DOMString HTMLMapElement::Name() const noexcept
   {
-    return Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
   void HTMLMapElement::Name(dom::DOMString &&value) noexcept
   {
-    Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
+    Reflection::Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }
 
 #pragma endregion

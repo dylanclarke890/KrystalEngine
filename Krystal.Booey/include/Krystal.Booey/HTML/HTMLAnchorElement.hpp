@@ -11,10 +11,10 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLAnchorElement);
 
   private:
-    UniquePtr<DOMTokenList> _relList;
+    UniquePtr<dom::DOMTokenList> _relList;
 
   public:
-    HTMLAnchorElement(Document &document) noexcept;
+    HTMLAnchorElement(dom::Document &document) noexcept;
 
 #pragma region HTMLAnchorElement - https://html.spec.whatwg.org/#htmlanchorelement
 
@@ -25,10 +25,10 @@ namespace krys::boo::html
     void Download(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-ping
-    KRYS_NODISCARD dom::ExceptionOr<USVString> Ping() const noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Ping() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-ping
-    dom::ExceptionOr<void> Ping(USVString &&value) noexcept;
+    dom::ExceptionOr<void> Ping(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-rel
     KRYS_NODISCARD dom::DOMString Rel() const noexcept;
@@ -37,7 +37,7 @@ namespace krys::boo::html
     void Rel(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-rellist
-    KRYS_NODISCARD DOMTokenList &RelList() noexcept;
+    KRYS_NODISCARD dom::DOMTokenList &RelList() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-text
     KRYS_NODISCARD dom::DOMString Text() const noexcept;

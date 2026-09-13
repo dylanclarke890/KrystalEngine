@@ -8,7 +8,7 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/PercentageDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/URL.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/Color/Color.hpp"
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/Filter/AppleColorFilter.hpp"
@@ -17,11 +17,11 @@
 #include "Krystal.Booey/CSS/Values/Filter/Filter.hpp"
 #include "Krystal.Booey/CSS/Values/Filter/FilterFunctionDescriptor.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
-  template <CSSValueId FilterFunction>
+  template <ValueId FilterFunction>
   KRYS_NODISCARD static decltype(auto)
-    ConsumeNumberOrPercentFilterParameter(TokenRange &args, CSSPropertyParserState &state) noexcept
+    ConsumeNumberOrPercentFilterParameter(TokenRange &args, PropertyParserState &state) noexcept
   {
     if constexpr (FilterFunctionAllowsValuesGreaterThanOne<FilterFunction>())
     {
@@ -35,7 +35,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   KRYS_NODISCARD static Maybe<AppleInvertLightnessFunction>
-    ConsumeFilterAppleInvertLightness(TokenRange &range, CSSPropertyParserState &) noexcept
+    ConsumeFilterAppleInvertLightness(TokenRange &range, PropertyParserState &) noexcept
   {
     // <-apple-invert-lightness()> = -apple-invert-lightness()
     // Non-standard
@@ -50,7 +50,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   KRYS_NODISCARD static Maybe<BlurFunction> ConsumeFilterBlur(TokenRange &range,
-                                                              CSSPropertyParserState &state) noexcept
+                                                              PropertyParserState &state) noexcept
   {
     // blur() = blur( <length [0,∞]>? )
     // https://drafts.fxtf.org/filter-effects/#funcdef-filter-blur
@@ -71,7 +71,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   KRYS_NODISCARD static Maybe<BrightnessFunction>
-    ConsumeFilterBrightness(TokenRange &range, CSSPropertyParserState &state) noexcept
+    ConsumeFilterBrightness(TokenRange &range, PropertyParserState &state) noexcept
   {
     // brightness() = brightness( [ <number [0,∞]> | <percentage [0,∞]> ]? )
     // https://drafts.fxtf.org/filter-effects/#funcdef-filter-brightness
@@ -92,7 +92,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   KRYS_NODISCARD static Maybe<ContrastFunction> ConsumeFilterContrast(TokenRange &range,
-                                                                      CSSPropertyParserState &state) noexcept
+                                                                      PropertyParserState &state) noexcept
   {
     // contrast() = contrast( [ <number [0,∞]> | <percentage [0,∞]> ]? )
     // https://drafts.fxtf.org/filter-effects/#funcdef-filter-contrast
@@ -113,7 +113,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   KRYS_NODISCARD static Maybe<DropShadowFunction>
-    ConsumeFilterDropShadow(TokenRange &range, CSSPropertyParserState &state) noexcept
+    ConsumeFilterDropShadow(TokenRange &range, PropertyParserState &state) noexcept
   {
     // drop-shadow() = drop-shadow( [ <color>? && [<length>{2} <length [0,∞]>?] ] )
     // https://drafts.fxtf.org/filter-effects/#funcdef-filter-drop-shadow
@@ -186,7 +186,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   KRYS_NODISCARD static Maybe<GrayscaleFunction>
-    ConsumeFilterGrayscale(TokenRange &range, CSSPropertyParserState &state) noexcept
+    ConsumeFilterGrayscale(TokenRange &range, PropertyParserState &state) noexcept
   {
     // grayscale() = grayscale( [ <number [0,1(clamp upper)] > | <percentage [0,100(clamp upper)]> ]? )
     // https://drafts.fxtf.org/filter-effects/#funcdef-filter-grayscale
@@ -207,7 +207,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   KRYS_NODISCARD static Maybe<HueRotateFunction>
-    ConsumeFilterHueRotate(TokenRange &range, CSSPropertyParserState &state) noexcept
+    ConsumeFilterHueRotate(TokenRange &range, PropertyParserState &state) noexcept
   {
     // hue-rotate() = hue-rotate( [ <angle> | <zero> ]? )
     // https://drafts.fxtf.org/filter-effects/#funcdef-filter-hue-rotate
@@ -229,7 +229,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   KRYS_NODISCARD static Maybe<InvertFunction> ConsumeFilterInvert(TokenRange &range,
-                                                                  CSSPropertyParserState &state) noexcept
+                                                                  PropertyParserState &state) noexcept
   {
     // invert() = invert( [ <number [0,1(clamp upper)] > | <percentage [0,100(clamp upper)]> ]? )
     // https://drafts.fxtf.org/filter-effects/#funcdef-filter-invert
@@ -250,7 +250,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   KRYS_NODISCARD static Maybe<OpacityFunction> ConsumeFilterOpacity(TokenRange &range,
-                                                                    CSSPropertyParserState &state) noexcept
+                                                                    PropertyParserState &state) noexcept
   {
     // opacity() = opacity( [ <number [0,1(clamp upper)] > | <percentage [0,100(clamp upper)]> ]? )
     // https://drafts.fxtf.org/filter-effects/#funcdef-filter-opacity
@@ -271,7 +271,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   KRYS_NODISCARD static Maybe<SaturateFunction> ConsumeFilterSaturate(TokenRange &range,
-                                                                      CSSPropertyParserState &state) noexcept
+                                                                      PropertyParserState &state) noexcept
   {
     // saturate() = saturate( [ <number [0,∞]> | <percentage [0,∞]> ]? )
     // https://drafts.fxtf.org/filter-effects/#funcdef-filter-saturate
@@ -292,7 +292,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   KRYS_NODISCARD static Maybe<SepiaFunction> ConsumeFilterSepia(TokenRange &range,
-                                                                CSSPropertyParserState &state) noexcept
+                                                                PropertyParserState &state) noexcept
   {
     // sepia() = sepia( [ <number [0,1(clamp upper)] > | <percentage [0,100(clamp upper)]> ]? )
     // https://drafts.fxtf.org/filter-effects/#funcdef-filter-sepia
@@ -313,7 +313,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   KRYS_NODISCARD static Maybe<FilterValueList> ConsumeUnresolvedFilterValueList(TokenRange &range,
-                                                                                CSSPropertyParserState &state)
+                                                                                PropertyParserState &state)
   {
     // <filter-value-list> = [ <filter-function> | <url> ]+
     // <filter-function> = <blur()> | <brightness()> | <contrast()> | <drop-shadow()> | <grayscale()> |
@@ -345,7 +345,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
       switch (rangeCopy.Peek().FunctionId())
       {
-        case CSSValueId::Blur:
+        case ValueId::Blur:
         {
           if (!AppendOnSuccess(ConsumeFilterBlur(rangeCopy, state)))
           {
@@ -354,7 +354,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
           break;
         }
-        case CSSValueId::Brightness:
+        case ValueId::Brightness:
         {
           if (!AppendOnSuccess(ConsumeFilterBrightness(rangeCopy, state)))
           {
@@ -363,7 +363,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
           break;
         }
-        case CSSValueId::Contrast:
+        case ValueId::Contrast:
         {
           if (!AppendOnSuccess(ConsumeFilterContrast(rangeCopy, state)))
           {
@@ -372,7 +372,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
           break;
         }
-        case CSSValueId::DropShadow:
+        case ValueId::DropShadow:
         {
           if (!AppendOnSuccess(ConsumeFilterDropShadow(rangeCopy, state)))
           {
@@ -381,7 +381,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
           break;
         }
-        case CSSValueId::Grayscale:
+        case ValueId::Grayscale:
         {
           if (!AppendOnSuccess(ConsumeFilterGrayscale(rangeCopy, state)))
           {
@@ -390,7 +390,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
           break;
         }
-        case CSSValueId::HueRotate:
+        case ValueId::HueRotate:
         {
           if (!AppendOnSuccess(ConsumeFilterHueRotate(rangeCopy, state)))
           {
@@ -399,7 +399,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
           break;
         }
-        case CSSValueId::Invert:
+        case ValueId::Invert:
         {
           if (!AppendOnSuccess(ConsumeFilterInvert(rangeCopy, state)))
           {
@@ -408,7 +408,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
           break;
         }
-        case CSSValueId::Opacity:
+        case ValueId::Opacity:
         {
           if (!AppendOnSuccess(ConsumeFilterOpacity(rangeCopy, state)))
           {
@@ -417,7 +417,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
           break;
         }
-        case CSSValueId::Saturate:
+        case ValueId::Saturate:
         {
           if (!AppendOnSuccess(ConsumeFilterSaturate(rangeCopy, state)))
           {
@@ -426,7 +426,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
           break;
         }
-        case CSSValueId::Sepia:
+        case ValueId::Sepia:
         {
           if (!AppendOnSuccess(ConsumeFilterSepia(rangeCopy, state)))
           {
@@ -447,13 +447,13 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return {krys::move(list)};
   }
 
-  Maybe<Filter> ConsumeUnresolvedFilter(TokenRange &range, CSSPropertyParserState &state) noexcept
+  Maybe<Filter> ConsumeUnresolvedFilter(TokenRange &range, PropertyParserState &state) noexcept
   {
-    if (range.Peek().ValueId() == CSSValueId::None)
+    if (range.Peek().ValueId() == ValueId::None)
     {
       range.Discard();
       range.DiscardWhitespace();
-      return Filter {Keywords::None {}};
+      return Filter {keywords::None {}};
     }
 
     if (auto filterValueList = ConsumeUnresolvedFilterValueList(range, state))
@@ -464,7 +464,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return {};
   }
 
-  RefPtr<CSSValue> ConsumeFilter(TokenRange &range, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeFilter(TokenRange &range, PropertyParserState &state) noexcept
   {
     if (auto property = ConsumeUnresolvedFilter(range, state))
     {
@@ -477,7 +477,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   // MARK: - <-apple-color-filter>
 
   KRYS_NODISCARD static Maybe<AppleColorFilter::List>
-    ConsumeUnresolvedAppleColorFilterValueList(TokenRange &range, CSSPropertyParserState &state) noexcept
+    ConsumeUnresolvedAppleColorFilterValueList(TokenRange &range, PropertyParserState &state) noexcept
   {
     // <-apple-color-filter-value-list = <-apple-color-filter-function>+
     // <-apple-color-filter-function> = <-apple-invert-lightness() | <brightness()> | <contrast()> |
@@ -502,7 +502,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     {
       switch (rangeCopy.Peek().FunctionId())
       {
-        case CSSValueId::AppleInvertLightness:
+        case ValueId::AppleInvertLightness:
         {
           if (!AppendOnSuccess(ConsumeFilterAppleInvertLightness(rangeCopy, state)))
           {
@@ -511,7 +511,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
           break;
         }
-        case CSSValueId::Brightness:
+        case ValueId::Brightness:
         {
           if (!AppendOnSuccess(ConsumeFilterBrightness(rangeCopy, state)))
           {
@@ -520,7 +520,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
           break;
         }
-        case CSSValueId::Contrast:
+        case ValueId::Contrast:
         {
           if (!AppendOnSuccess(ConsumeFilterContrast(rangeCopy, state)))
           {
@@ -529,7 +529,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
           break;
         }
-        case CSSValueId::Grayscale:
+        case ValueId::Grayscale:
         {
           if (!AppendOnSuccess(ConsumeFilterGrayscale(rangeCopy, state)))
           {
@@ -538,7 +538,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
           break;
         }
-        case CSSValueId::HueRotate:
+        case ValueId::HueRotate:
         {
           if (!AppendOnSuccess(ConsumeFilterHueRotate(rangeCopy, state)))
           {
@@ -547,7 +547,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
           break;
         }
-        case CSSValueId::Invert:
+        case ValueId::Invert:
         {
           if (!AppendOnSuccess(ConsumeFilterInvert(rangeCopy, state)))
           {
@@ -556,7 +556,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
           break;
         }
-        case CSSValueId::Opacity:
+        case ValueId::Opacity:
         {
           if (!AppendOnSuccess(ConsumeFilterOpacity(rangeCopy, state)))
           {
@@ -565,7 +565,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
           break;
         }
-        case CSSValueId::Saturate:
+        case ValueId::Saturate:
         {
           if (!AppendOnSuccess(ConsumeFilterSaturate(rangeCopy, state)))
           {
@@ -573,7 +573,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
           }
           break;
         }
-        case CSSValueId::Sepia:
+        case ValueId::Sepia:
         {
           if (!AppendOnSuccess(ConsumeFilterSepia(rangeCopy, state)))
           {
@@ -591,13 +591,13 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   Maybe<AppleColorFilter> ConsumeUnresolvedAppleColorFilter(TokenRange &range,
-                                                            CSSPropertyParserState &state) noexcept
+                                                            PropertyParserState &state) noexcept
   {
-    if (range.Peek().ValueId() == CSSValueId::None)
+    if (range.Peek().ValueId() == ValueId::None)
     {
       range.Discard();
       range.DiscardWhitespace();
-      return AppleColorFilter {Keywords::None {}};
+      return AppleColorFilter {keywords::None {}};
     }
 
     if (auto filterValueList = ConsumeUnresolvedAppleColorFilterValueList(range, state))
@@ -608,7 +608,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return {};
   }
 
-  RefPtr<CSSValue> ConsumeAppleColorFilter(TokenRange &range, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeAppleColorFilter(TokenRange &range, PropertyParserState &state) noexcept
   {
     if (auto property = ConsumeUnresolvedAppleColorFilter(range, state))
     {
@@ -628,7 +628,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   // // Handle leading whitespace.
   // range.consumeWhitespace();
 
-  // auto state = CSSPropertyParserState {.context = context};
+  // auto state = PropertyParserState {.context = context};
   // auto filter = consumeUnresolvedFilter(range, state);
   // if (!filter)
   //   return {};

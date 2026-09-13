@@ -1,18 +1,18 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/Enums/CSSValueId.hpp"
+#include "Krystal.Booey/CSS/Values/ValueId.hpp"
 
 namespace krys::boo::css
 {
-  KRYS_NODISCARD constexpr bool IsCSSWideKeyword(CSSValueId valueId) noexcept
+  KRYS_NODISCARD constexpr bool IsCSSWideKeyword(ValueId valueId) noexcept
   {
     switch (valueId)
     {
-      case CSSValueId::Initial:
-      case CSSValueId::Inherit:
-      case CSSValueId::Unset:
-      case CSSValueId::Revert:
-      case CSSValueId::RevertLayer:
+      case ValueId::Initial:
+      case ValueId::Inherit:
+      case ValueId::Unset:
+      case ValueId::Revert:
+      case ValueId::RevertLayer:
       {
         return true;
       }

@@ -3,18 +3,18 @@
 #include "Krystal.Booey/CSS/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/ColorAdjust/ColorScheme.hpp"
 #include "Krystal.Booey/CSS/Values/ColorAdjust/CSSColorSchemeValue.hpp"
 
 namespace krys::boo::css
 {
-  Maybe<ColorScheme> ConsumeUnresolvedColorScheme(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  Maybe<ColorScheme> ConsumeUnresolvedColorScheme(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'color-scheme'> = normal | [ light | dark | <custom-ident> ]+ && only?
     // https://drafts.csswg.org/css-color-adjust/#propdef-color-scheme
 
-    if (tokens.Peek().ValueId() == CSSValueId::Normal)
+    if (tokens.Peek().ValueId() == ValueId::Normal)
     {
       tokens.Discard();
       tokens.DiscardWhitespace();
@@ -25,12 +25,12 @@ namespace krys::boo::css
 
     Maybe<ColorScheme> result = ColorScheme {.schemes = {}, .only = {}};
 
-    if (tokens.Peek().ValueId() == CSSValueId::Only)
+    if (tokens.Peek().ValueId() == ValueId::Only)
     {
       tokens.Discard();
       tokens.DiscardWhitespace();
 
-      result->only = Keywords::Only {};
+      result->only = keywords::Only {};
     }
 
     while (!tokens.IsAtEnd())
@@ -40,17 +40,17 @@ namespace krys::boo::css
         return {};
       }
 
-      CSSValueId id = tokens.Peek().ValueId();
+      ValueId id = tokens.Peek().ValueId();
 
       switch (id)
       {
-        case CSSValueId::Normal:
+        case ValueId::Normal:
         {
           // `normal` is only allowed as a single value, and was handled earlier.
           // Don't allow it in the list.
           return {};
         }
-        case CSSValueId::Only:
+        case ValueId::Only:
         {
           // `only` can either appear first, handled before the loop, or last,
           // handled here.
@@ -61,7 +61,7 @@ namespace krys::boo::css
 
           tokens.Discard();
           tokens.DiscardWhitespace();
-          result->only = Keywords::Only {};
+          result->only = keywords::Only {};
 
           if (!tokens.IsAtEnd())
           {
@@ -104,7 +104,7 @@ namespace krys::boo::css
     // Handle leading whitespace.
     tokens.DiscardWhitespace();
 
-    auto state = CSSPropertyParserState {.Context = context};
+    auto state = PropertyParserState {.Context = context};
     auto result = ConsumeUnresolvedColorScheme(tokens, state);
 
     // Handle trailing whitespace.
@@ -118,7 +118,7 @@ namespace krys::boo::css
     return result;
   }
 
-  RefPtr<CSSValue> ConsumeColorScheme(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeColorScheme(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     auto colorScheme = ConsumeUnresolvedColorScheme(tokens, state);
     if (!colorScheme)

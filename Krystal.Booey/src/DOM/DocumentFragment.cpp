@@ -42,57 +42,57 @@ namespace krys::boo::dom
 
   RefPtr<const Element> DocumentFragment::FirstElementChild() const noexcept
   {
-    return Mixins::ParentNode::FirstElementChild(*this);
+    return mixins::ParentNode::FirstElementChild(*this);
   }
 
   RefPtr<Element> DocumentFragment::FirstElementChild() noexcept
   {
-    return Mixins::ParentNode::FirstElementChild(*this);
+    return mixins::ParentNode::FirstElementChild(*this);
   }
 
   RefPtr<const Element> DocumentFragment::LastElementChild() const noexcept
   {
-    return Mixins::ParentNode::LastElementChild(*this);
+    return mixins::ParentNode::LastElementChild(*this);
   }
 
   RefPtr<Element> DocumentFragment::LastElementChild() noexcept
   {
-    return Mixins::ParentNode::LastElementChild(*this);
+    return mixins::ParentNode::LastElementChild(*this);
   }
 
   size_t DocumentFragment::ChildElementCount() const noexcept
   {
-    return Mixins::ParentNode::ChildElementCount(*this);
+    return mixins::ParentNode::ChildElementCount(*this);
   }
 
   ExceptionOr<void> DocumentFragment::Prepend(const List<NodeOrString> &nodes) noexcept
   {
-    return Mixins::ParentNode::Prepend(*this, nodes);
+    return mixins::ParentNode::Prepend(*this, nodes);
   }
 
   ExceptionOr<void> DocumentFragment::Append(const List<NodeOrString> &nodes) noexcept
   {
-    return Mixins::ParentNode::Append(*this, nodes);
+    return mixins::ParentNode::Append(*this, nodes);
   }
 
   ExceptionOr<void> DocumentFragment::ReplaceChildren(const List<NodeOrString> &nodes) noexcept
   {
-    return Mixins::ParentNode::ReplaceChildren(*this, nodes);
+    return mixins::ParentNode::ReplaceChildren(*this, nodes);
   }
 
   ExceptionOr<void> DocumentFragment::MoveBefore(Node &node, Node *refChild) noexcept
   {
-    return Mixins::ParentNode::MoveBefore(*this, node, refChild);
+    return mixins::ParentNode::MoveBefore(*this, node, refChild);
   }
 
   ExceptionOr<RefPtr<Element>> DocumentFragment::QuerySelector(DOMStringView selectors) noexcept
   {
-    return Mixins::ParentNode::QuerySelector(*this, selectors);
+    return mixins::ParentNode::QuerySelector(*this, selectors);
   }
 
   ExceptionOr<Ref<NodeList>> DocumentFragment::QuerySelectorAll(DOMStringView selectors) noexcept
   {
-    return Mixins::ParentNode::QuerySelectorAll(*this, selectors);
+    return mixins::ParentNode::QuerySelectorAll(*this, selectors);
   }
 
 #pragma endregion
@@ -101,12 +101,12 @@ namespace krys::boo::dom
 
   RefPtr<Element> DocumentFragment::GetElementById(DOMStringView elementId) noexcept
   {
-    return Mixins::NonElementParentNode::GetElementById(*this, elementId);
+    return mixins::NonElementParentNode::GetElementById(*this, elementId);
   }
 
   RefPtr<const Element> DocumentFragment::GetElementById(DOMStringView elementId) const noexcept
   {
-    return Mixins::NonElementParentNode::GetElementById(*this, elementId);
+    return mixins::NonElementParentNode::GetElementById(*this, elementId);
   }
 
 #pragma endregion

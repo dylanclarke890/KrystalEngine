@@ -12,7 +12,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLSelectedContentElement);
 
   public:
-    HTMLSelectedContentElement(Document &document) noexcept;
+    HTMLSelectedContentElement(dom::Document &document) noexcept;
 
     // TODO(HTMLSelectedContentElement): implement disabled properly
     KRYS_NODISCARD bool Disabled() const noexcept

@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Properties/CSSPropertyId.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/CSSAttrValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValue.hpp"
-#include "Krystal.Booey/CSS/Values/Enums/CSSValueId.hpp"
+#include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Maths/Base.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -22,8 +22,8 @@ namespace krys::boo::css
   private:
     union ValueUnion
     {
-      CSSPropertyId PropertyId;
-      CSSValueId ValueId;
+      PropertyId PropertyId;
+      css::ValueId ValueId;
       const CSSAttrValue *Attr;
       double Number;
       StringAtomStorage String;
@@ -33,13 +33,13 @@ namespace krys::boo::css
     {
     };
 
-    constexpr inline static CreateImplicitInitialValueTag CreateImplicitInitialValue {};
+    constexpr static CreateImplicitInitialValueTag CreateImplicitInitialValue {};
 
 #pragma region Constructors
 
-    explicit CSSPrimitiveValue(CSSValueId identifier) noexcept;
+    explicit CSSPrimitiveValue(css::ValueId identifier) noexcept;
 
-    explicit CSSPrimitiveValue(CSSPropertyId property) noexcept;
+    explicit CSSPrimitiveValue(PropertyId property) noexcept;
 
     explicit CSSPrimitiveValue(Ref<CSSAttrValue> attr) noexcept;
 
@@ -49,7 +49,7 @@ namespace krys::boo::css
 
     CSSPrimitiveValue(StaticCSSValueTag, CreateImplicitInitialValueTag) noexcept;
 
-    CSSPrimitiveValue(StaticCSSValueTag, CSSValueId keyword) noexcept;
+    CSSPrimitiveValue(StaticCSSValueTag, css::ValueId keyword) noexcept;
 
     CSSPrimitiveValue(StaticCSSValueTag, double value, CSSUnitType unit) noexcept;
 
@@ -58,9 +58,9 @@ namespace krys::boo::css
   public:
 #pragma region Static Creation
 
-    KRYS_NODISCARD static Ref<CSSPrimitiveValue> Create(CSSValueId identifier) noexcept;
+    KRYS_NODISCARD static Ref<CSSPrimitiveValue> Create(css::ValueId identifier) noexcept;
 
-    KRYS_NODISCARD static Ref<CSSPrimitiveValue> Create(CSSPropertyId property) noexcept;
+    KRYS_NODISCARD static Ref<CSSPrimitiveValue> Create(PropertyId property) noexcept;
 
     KRYS_NODISCARD static Ref<CSSPrimitiveValue> Create(const CSSOMString &value) noexcept;
 
@@ -333,63 +333,63 @@ namespace krys::boo::css
     }
   };
 
-  KRYS_NODISCARD inline CSSValueId ValueId(const CSSPrimitiveValue &value) noexcept
+  KRYS_NODISCARD inline ValueId GetValueId(const CSSPrimitiveValue &value) noexcept
   {
     return value.ValueId();
   }
 
-  KRYS_NODISCARD inline CSSValueId ValueId(const CSSPrimitiveValue *value) noexcept
+  KRYS_NODISCARD inline ValueId GetValueId(const CSSPrimitiveValue *value) noexcept
   {
-    return value ? ValueId(*value) : CSSValueId::Invalid;
+    return value ? GetValueId(*value) : ValueId::Invalid;
   }
 
-  KRYS_NODISCARD inline CSSValueId ValueId(const CSSValue &value) noexcept
+  KRYS_NODISCARD inline ValueId GetValueId(const CSSValue &value) noexcept
   {
     auto *primitiveValue = DynamicDowncast<CSSPrimitiveValue>(value);
-    return primitiveValue ? ValueId(*primitiveValue) : CSSValueId::Invalid;
+    return primitiveValue ? GetValueId(*primitiveValue) : ValueId::Invalid;
   }
 
-  KRYS_NODISCARD inline CSSValueId ValueId(const CSSValue *value) noexcept
+  KRYS_NODISCARD inline ValueId GetValueId(const CSSValue *value) noexcept
   {
-    return value ? ValueId(*value) : CSSValueId::Invalid;
+    return value ? GetValueId(*value) : ValueId::Invalid;
   }
 
-  KRYS_NODISCARD inline bool IsValueId(const CSSPrimitiveValue &value, CSSValueId id) noexcept
+  KRYS_NODISCARD inline bool IsValueId(const CSSPrimitiveValue &value, ValueId id) noexcept
   {
-    return ValueId(value) == id;
+    return GetValueId(value) == id;
   }
 
-  KRYS_NODISCARD inline bool IsValueId(const CSSPrimitiveValue *value, CSSValueId id) noexcept
-  {
-    return value ? IsValueId(*value, id) : false;
-  }
-
-  KRYS_NODISCARD inline bool IsValueId(const RefPtr<CSSPrimitiveValue> &value, CSSValueId id) noexcept
-  {
-    return IsValueId(value.get(), id);
-  }
-
-  KRYS_NODISCARD inline bool IsValueId(const Ref<CSSPrimitiveValue> &value, CSSValueId id) noexcept
-  {
-    return IsValueId(value.get(), id);
-  }
-
-  KRYS_NODISCARD inline bool IsValueId(const CSSValue &value, CSSValueId id) noexcept
-  {
-    return ValueId(value) == id;
-  }
-
-  KRYS_NODISCARD inline bool IsValueId(const CSSValue *value, CSSValueId id) noexcept
+  KRYS_NODISCARD inline bool IsValueId(const CSSPrimitiveValue *value, ValueId id) noexcept
   {
     return value ? IsValueId(*value, id) : false;
   }
 
-  KRYS_NODISCARD inline bool IsValueId(const RefPtr<CSSValue> &value, CSSValueId id) noexcept
+  KRYS_NODISCARD inline bool IsValueId(const RefPtr<CSSPrimitiveValue> &value, ValueId id) noexcept
   {
     return IsValueId(value.get(), id);
   }
 
-  KRYS_NODISCARD inline bool IsValueId(const Ref<CSSValue> &value, CSSValueId id) noexcept
+  KRYS_NODISCARD inline bool IsValueId(const Ref<CSSPrimitiveValue> &value, ValueId id) noexcept
+  {
+    return IsValueId(value.get(), id);
+  }
+
+  KRYS_NODISCARD inline bool IsValueId(const CSSValue &value, ValueId id) noexcept
+  {
+    return GetValueId(value) == id;
+  }
+
+  KRYS_NODISCARD inline bool IsValueId(const CSSValue *value, ValueId id) noexcept
+  {
+    return value ? IsValueId(*value, id) : false;
+  }
+
+  KRYS_NODISCARD inline bool IsValueId(const RefPtr<CSSValue> &value, ValueId id) noexcept
+  {
+    return IsValueId(value.get(), id);
+  }
+
+  KRYS_NODISCARD inline bool IsValueId(const Ref<CSSValue> &value, ValueId id) noexcept
   {
     return IsValueId(value.get(), id);
   }

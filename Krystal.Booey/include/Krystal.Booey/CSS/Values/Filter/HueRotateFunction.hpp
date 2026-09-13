@@ -16,7 +16,7 @@ namespace krys::boo::css
     bool operator==(const HueRotate &) const = default;
   };
 
-  using HueRotateFunction = FunctionNotation<CSSValueId::HueRotate, HueRotate>;
+  using HueRotateFunction = FunctionNotation<ValueId::HueRotate, HueRotate>;
 
   DEFINE_TYPE_WRAPPER_GET(HueRotate, value);
 }

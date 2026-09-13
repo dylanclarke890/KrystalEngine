@@ -9,21 +9,19 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include <catch_all.hpp>
 
-namespace krys::tests
+namespace krys::boo::dom::tests
 {
-  using namespace krys::boo;
-
   namespace
   {
     struct CommonTestData
     {
-      Ref<Document> Document;
-      Ref<HTML::Text> Node;
-      Ref<Range> FullRange;
-      Ref<Range> PartialRange;
+      Ref<dom::Document> Document;
+      Ref<dom::Text> Node;
+      Ref<dom::Range> FullRange;
+      Ref<dom::Range> PartialRange;
 
       CommonTestData()
-          : Document(CreateRef<HTML::Document>()), Node(CreateRef<HTML::Text>(*Document, u8"Hello, world!")),
+          : Document(CreateRef<dom::Document>()), Node(CreateRef<dom::Text>(*Document, u8"Hello, world!")),
             FullRange(Document->CreateRange()), PartialRange(Document->CreateRange())
       {
         FullRange->SetStart(*Node, 0uz);

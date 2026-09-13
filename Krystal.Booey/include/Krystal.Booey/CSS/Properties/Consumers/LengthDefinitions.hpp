@@ -7,20 +7,20 @@ namespace krys::boo::css
   struct LengthValidator
   {
     KRYS_NODISCARD constexpr static Maybe<LengthUnit>
-      Validate(CSSUnitType unitType, CSSPropertyParserState &state, CSSPropertyParserOptions options) noexcept
+      Validate(CSSUnitType unitType, PropertyParserState &state, PropertyParserOptions options) noexcept
     {
       return UnitTraits<LengthUnit>::Validate(unitType);
     }
 
     template <auto R, typename V>
-    KRYS_NODISCARD static bool IsValid(LengthRaw<R, V> raw, CSSPropertyParserOptions) noexcept
+    KRYS_NODISCARD static bool IsValid(LengthRaw<R, V> raw, PropertyParserOptions) noexcept
     {
       // Values other than 0 and +/-∞ are not supported for <length> numeric ranges currently.
       return IsValidNonCanonicalizableDimensionValue(raw);
     }
 
-    KRYS_NODISCARD static bool ShouldAcceptUnitlessValue(double value, CSSPropertyParserState &state,
-                                                         CSSPropertyParserOptions options) noexcept
+    KRYS_NODISCARD static bool ShouldAcceptUnitlessValue(double value, PropertyParserState &state,
+                                                         PropertyParserOptions options) noexcept
     {
       if (!value && options.UnitlessZeroLength)
       {

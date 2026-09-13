@@ -10,7 +10,7 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLUnknownElement);
 
   public:
-    HTMLUnknownElement(Document &document) noexcept;
+    HTMLUnknownElement(dom::Document &document) noexcept;
   };
 }
 

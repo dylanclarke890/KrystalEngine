@@ -6,16 +6,16 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/NumberDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/PercentageDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/Easing/CSSEasingFunctionValue.hpp"
 #include "Krystal.Booey/CSS/Values/Easing/EasingFunction.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
   // MARK: - <steps()>
 
   KRYS_NODISCARD static Maybe<EasingFunction>
-    ConsumeUnresolvedStepsEasingFunction(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+    ConsumeUnresolvedStepsEasingFunction(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <steps-easing-function> = steps( <integer>, <steps-easing-function-position>? )
     // <steps-easing-function-position> = jump-start | jump-end | jump-none | jump-both | start | end
@@ -30,7 +30,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     //                         | steps( <integer [2,∞]>, jump-none )
     // https://drafts.csswg.org/css-easing-2/#funcdef-steps
 
-    assert(tokens.Peek().FunctionId() == CSSValueId::Steps);
+    assert(tokens.Peek().FunctionId() == ValueId::Steps);
     auto rangeCopy = tokens;
     auto args = ConsumeFunction(rangeCopy);
 
@@ -49,17 +49,17 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     {
       switch (args.ConsumeIncludingWhitespace().ValueId())
       {
-        case CSSValueId::JumpStart:
+        case ValueId::JumpStart:
         {
           parameters = {StepsEasingParameters::JumpStart {krys::move(*steps)}};
           break;
         }
-        case CSSValueId::JumpEnd:
+        case ValueId::JumpEnd:
         {
           parameters = {StepsEasingParameters::JumpEnd {krys::move(*steps)}};
           break;
         }
-        case CSSValueId::JumpNone:
+        case ValueId::JumpNone:
         {
           // "The first parameter specifies the number of intervals in the function. It must be a
           //  positive integer greater than 0 unless the second parameter is jump-none in which
@@ -77,17 +77,17 @@ namespace krys::boo::css::CSSPropertyParserHelpers
           break;
         }
 
-        case CSSValueId::JumpBoth:
+        case ValueId::JumpBoth:
         {
           parameters = {StepsEasingParameters::JumpBoth {krys::move(*steps)}};
           break;
         }
-        case CSSValueId::Start:
+        case ValueId::Start:
         {
           parameters = {StepsEasingParameters::Start {krys::move(*steps)}};
           break;
         }
-        case CSSValueId::End:
+        case ValueId::End:
         {
           parameters = {StepsEasingParameters::End {krys::move(*steps)}};
           break;
@@ -116,8 +116,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   // MARK: - <linear()>
 
   KRYS_NODISCARD static Maybe<LinearEasingParameters::Stop::Length>
-    ConsumeUnresolvedLinearEasingFunctionStopLength(TokenRange &args,
-                                                    CSSPropertyParserState &state) noexcept
+    ConsumeUnresolvedLinearEasingFunctionStopLength(TokenRange &args, PropertyParserState &state) noexcept
   {
     // <linear-easing-function-stop-length> = <percentage>{0,2}
 
@@ -130,7 +129,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   KRYS_NODISCARD static Maybe<LinearEasingParameters::Stop>
-    ConsumeUnresolvedLinearEasingFunctionStop(TokenRange &args, CSSPropertyParserState &state) noexcept
+    ConsumeUnresolvedLinearEasingFunctionStop(TokenRange &args, PropertyParserState &state) noexcept
   {
     // <linear-easing-function-stop> = <number> && <percentage>{0,2}
 
@@ -145,12 +144,12 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   KRYS_NODISCARD static Maybe<EasingFunction>
-    ConsumeUnresolvedLinearEasingFunction(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+    ConsumeUnresolvedLinearEasingFunction(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <linear()> = linear( [ <number> && <percentage>{0,2} ]# )
     // https://drafts.csswg.org/css-easing-2/#funcdef-linear
 
-    assert(tokens.Peek().FunctionId() == CSSValueId::Linear);
+    assert(tokens.Peek().FunctionId() == ValueId::Linear);
     auto rangeCopy = tokens;
     auto args = ConsumeFunction(rangeCopy);
 
@@ -185,12 +184,12 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   // MARK: - <cubic-bezier()>
 
   KRYS_NODISCARD static Maybe<EasingFunction>
-    ConsumeUnresolvedCubicBezierEasingFunction(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+    ConsumeUnresolvedCubicBezierEasingFunction(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <cubic-bezier()> = cubic-bezier( [ <number [0,1]>, <number> ]#{2} )
     // https://drafts.csswg.org/css-easing-2/#funcdef-cubic-bezier
 
-    assert(tokens.Peek().FunctionId() == CSSValueId::CubicBezier);
+    assert(tokens.Peek().FunctionId() == ValueId::CubicBezier);
     auto rangeCopy = tokens;
     auto args = ConsumeFunction(rangeCopy);
 
@@ -250,12 +249,12 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   // MARK: - <spring()>
 
   KRYS_NODISCARD static Maybe<EasingFunction>
-    ConsumeUnresolvedSpringEasingFunction(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+    ConsumeUnresolvedSpringEasingFunction(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <spring()> = spring( <number [>0,∞]> <number [>0,∞]> <number [0,∞]> <number> )
     // Non-standard
 
-    assert(tokens.Peek().FunctionId() == CSSValueId::Spring);
+    assert(tokens.Peek().FunctionId() == ValueId::Spring);
 
     if (!state.Context.springTimingFunctionEnabled)
     {
@@ -307,7 +306,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   // MARK: - <easing-function>
 
   Maybe<EasingFunction> ConsumeUnresolvedEasingFunction(TokenRange &tokens,
-                                                        CSSPropertyParserState &state) noexcept
+                                                        PropertyParserState &state) noexcept
   {
     // <easing-function> = linear | ease | ease-in | ease-out | ease-in-out | step-start | step-end |
     // <linear()> | <cubic-bezier()> | <steps()> NOTE: also includes non-standard <spring()>.
@@ -315,44 +314,44 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
     switch (tokens.Peek().ValueId())
     {
-      case CSSValueId::Linear:
+      case ValueId::Linear:
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
-        return EasingFunction {Keywords::Linear {}};
+        return EasingFunction {keywords::Linear {}};
       }
-      case CSSValueId::Ease:
+      case ValueId::Ease:
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
-        return EasingFunction {Keywords::Ease {}};
+        return EasingFunction {keywords::Ease {}};
       }
-      case CSSValueId::EaseIn:
+      case ValueId::EaseIn:
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
-        return EasingFunction {Keywords::EaseIn {}};
+        return EasingFunction {keywords::EaseIn {}};
       }
-      case CSSValueId::EaseOut:
+      case ValueId::EaseOut:
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
-        return EasingFunction {Keywords::EaseOut {}};
+        return EasingFunction {keywords::EaseOut {}};
       }
-      case CSSValueId::EaseInOut:
+      case ValueId::EaseInOut:
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
-        return EasingFunction {Keywords::EaseInOut {}};
+        return EasingFunction {keywords::EaseInOut {}};
       }
-      case CSSValueId::StepStart:
+      case ValueId::StepStart:
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
         return EasingFunction {StepsEasingFunction {
           .parameters = {StepsEasingParameters::Start {Integer<CSSRange {1, CSSRange::Inf}> {1}}}}};
       }
-      case CSSValueId::StepEnd:
+      case ValueId::StepEnd:
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
@@ -367,19 +366,19 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
     switch (tokens.Peek().FunctionId())
     {
-      case CSSValueId::Linear:
+      case ValueId::Linear:
       {
         return ConsumeUnresolvedLinearEasingFunction(tokens, state);
       }
-      case CSSValueId::CubicBezier:
+      case ValueId::CubicBezier:
       {
         return ConsumeUnresolvedCubicBezierEasingFunction(tokens, state);
       }
-      case CSSValueId::Steps:
+      case ValueId::Steps:
       {
         return ConsumeUnresolvedStepsEasingFunction(tokens, state);
       }
-      case CSSValueId::Spring:
+      case ValueId::Spring:
       {
         return ConsumeUnresolvedSpringEasingFunction(tokens, state);
       }
@@ -392,16 +391,16 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return {};
   }
 
-  RefPtr<CSSValue> ConsumeEasingFunction(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeEasingFunction(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // Avoid allocation of a CSSEasingFunctionValue when the result is a just a value ID.
     switch (tokens.Peek().ValueId())
     {
-      case CSSValueId::Linear:
-      case CSSValueId::Ease:
-      case CSSValueId::EaseIn:
-      case CSSValueId::EaseOut:
-      case CSSValueId::EaseInOut:
+      case ValueId::Linear:
+      case ValueId::Ease:
+      case ValueId::EaseIn:
+      case ValueId::EaseOut:
+      case ValueId::EaseInOut:
       {
         return ConsumeIdent(tokens);
       }

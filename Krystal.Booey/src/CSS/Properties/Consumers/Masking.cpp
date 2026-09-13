@@ -6,22 +6,22 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Shapes.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/URL.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParsing.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSRectValue.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
 #include "Krystal.Booey/CSS/Values/CSSValueListBuilder.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
-  RefPtr<CSSValue> ConsumeClipRectFunction(TokenRange &tokens, CSSPropertyParserState &state) noexcept
+  RefPtr<CSSValue> ConsumeClipRectFunction(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // rect() = rect( <top>, <right>, <bottom>, <left> )
     // "<top>, <right>, <bottom>, and <left> may either have a <length> value or auto."
     // https://drafts.fxtf.org/css-masking/#funcdef-clip-rect
 
-    if (tokens.Peek().FunctionId() != CSSValueId::Rect)
+    if (tokens.Peek().FunctionId() != ValueId::Rect)
     {
       return nullptr;
     }
@@ -30,7 +30,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
     auto ConsumeClipComponent = [&] -> RefPtr<CSSPrimitiveValue>
     {
-      if (args.Peek().ValueId() == CSSValueId::Auto)
+      if (args.Peek().ValueId() == ValueId::Auto)
       {
         return ConsumeIdent(args);
       }
@@ -74,14 +74,14 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   RefPtr<CSSValue>
-    krys::boo::css::CSSPropertyParserHelpers::ConsumeClipPath(TokenRange &tokens,
-                                                              CSSPropertyParserState &state) noexcept
+    krys::boo::css::PropertyParserHelpers::ConsumeClipPath(TokenRange &tokens,
+                                                              PropertyParserState &state) noexcept
   {
     // <'clip-path'> = none | <clip-source> | [ <basic-shape> || <geometry-box> ]
     // <clip-source> = <url>
     // https://drafts.fxtf.org/css-masking/#propdef-clip-path
 
-    if (tokens.Peek().ValueId() == CSSValueId::None)
+    if (tokens.Peek().ValueId() == ValueId::None)
     {
       return ConsumeIdent(tokens);
     }
@@ -112,7 +112,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
         return false;
       }
 
-      box = CSSPropertyParsing::ConsumeGeometryBox(tokens);
+      box = PropertyParsing::ConsumeGeometryBox(tokens);
       return !!box;
     };
 
@@ -134,7 +134,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       list.push_back(krys::move(shape));
     }
     // Default value is border-box.
-    if (box && (box->ValueId() != CSSValueId::BorderBox || !hasShape))
+    if (box && (box->ValueId() != ValueId::BorderBox || !hasShape))
     {
       list.push_back(krys::move(box));
     }

@@ -7,13 +7,17 @@
 #include "Krystal.Booey/HTML/Enums/HTMLElementInterface.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::html
+namespace krys::boo::dom
 {
   class Document;
+}
+
+namespace krys::boo::html
+{
   class ElementInternals;
 
   /// @see https://html.spec.whatwg.org/#htmlelement
-  class HTMLElement : public krys::boo::dom::Element
+  class HTMLElement : public dom::Element
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLElement);
@@ -23,12 +27,12 @@ namespace krys::boo::html
     HTMLElementInterface _interface : BitCount<HTMLElementInterface>() {HTMLElementInterface::None};
 
   protected:
-    HTMLElement(Document &document, HTMLElementInterface interface,
+    HTMLElement(dom::Document &document, HTMLElementInterface interface,
                 HTMLElementFlags flags = HTMLElementFlags::None,
                 dom::NodeFlags nodeFlags = dom::NodeFlags::None) noexcept;
 
   public:
-    HTMLElement(Document &document) noexcept;
+    HTMLElement(dom::Document &document) noexcept;
 
 #pragma region HTMLElement - https://html.spec.whatwg.org/#htmlelement
 
@@ -129,7 +133,7 @@ namespace krys::boo::html
     void OuterText(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-attachinternals
-    KRYS_NODISCARD dom::ExceptionOr<Ref<html::ElementInternals>> AttachInternals() noexcept;
+    KRYS_NODISCARD dom::ExceptionOr<Ref<ElementInternals>> AttachInternals() noexcept;
 
     // TODO(HTMLELEMENT, POPOVER, HTML): Implement the popover API.
     // The popover API - https://html.spec.whatwg.org/#dom-showpopover
@@ -190,7 +194,7 @@ namespace krys::boo::html
       // process internal resource links given insertedNode's node document.
     }
 
-    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override
+    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override
     {
       // TODO(HTMLELEMENT): Implement the removal steps for an HTMLElement.
 
@@ -214,7 +218,7 @@ namespace krys::boo::html
       // algorithm given removedNode, false, false, false, and null.
     }
 
-    void OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override
+    void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override
     {
       // TODO(HTMLELEMENT): Implement the move steps for an HTMLElement.
 

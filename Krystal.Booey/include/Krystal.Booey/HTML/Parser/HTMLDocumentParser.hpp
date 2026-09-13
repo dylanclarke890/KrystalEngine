@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLElementStack.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLInputStream.hpp"
+#include "Krystal.Booey/HTML/Parser/InputStream.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLToken.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLTokenAtom.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLTokenizer.hpp"
@@ -16,7 +16,7 @@ namespace krys::boo::html
   class HTMLDocumentParser : public RefCounted<HTMLDocumentParser>
   {
     HTMLDocument &_document;
-    HTMLInputStream _input;
+    InputStream _input;
     HTMLTokenizer _tokenizer;
     HTMLTreeBuilder _treeBuilder;
     Maybe<HTMLStackItem> _fragmentParsingContext;
@@ -37,7 +37,7 @@ namespace krys::boo::html
 
     void PumpTokenizer() noexcept;
 
-    KRYS_NODISCARD HTMLInputStream &InputStream() noexcept
+    KRYS_NODISCARD InputStream &InputStream() noexcept
     {
       return _input;
     }

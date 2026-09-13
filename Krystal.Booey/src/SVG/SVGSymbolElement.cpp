@@ -2,7 +2,7 @@
 
 namespace krys::boo::svg
 {
-  SVGSymbolElement::SVGSymbolElement(Document &document) noexcept
+  SVGSymbolElement::SVGSymbolElement(dom::Document &document) noexcept
       : SVGElement(document, SVGElementInterface::Symbol)
   {
   }

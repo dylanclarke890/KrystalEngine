@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Core/Text/Encodings/EncodingRegistry.hpp"
+#include "Krystal.Core/Text/Encodings/Base.hpp"
 
 namespace krys::text
 {

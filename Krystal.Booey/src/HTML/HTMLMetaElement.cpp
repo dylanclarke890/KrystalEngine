@@ -10,50 +10,51 @@ namespace krys::boo::html
 {
 #pragma region HTMLMetaElement
 
-  HTMLMetaElement::HTMLMetaElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Meta)
+  HTMLMetaElement::HTMLMetaElement(dom::Document &document) noexcept
+      : HTMLElement(document, HTMLElementInterface::Meta)
   {
   }
 
   dom::DOMString HTMLMetaElement::Name() const noexcept
   {
-    return Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
   void HTMLMetaElement::Name(dom::DOMString &&value) noexcept
   {
-    Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
+    Reflection::Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }
 
   dom::DOMString HTMLMetaElement::HttpEquiv() const noexcept
   {
     // TODO(HTMLMETAELEMENT, HTML)" 'http-equiv' is an enumerated attribute, don't think it's limited to known
     // values though.
-    return Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"http-equiv").value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"http-equiv").value_or(u8"");
   }
 
   void HTMLMetaElement::HttpEquiv(dom::DOMString &&value) noexcept
   {
-    Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"http-equiv", krys::move(value));
+    Reflection::Reflect<dom::DOMString>(*this, u8"http-equiv", krys::move(value));
   }
 
   dom::DOMString HTMLMetaElement::Content() const noexcept
   {
-    return Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"content").value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"content").value_or(u8"");
   }
 
   void HTMLMetaElement::Content(dom::DOMString &&value) noexcept
   {
-    Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"content", krys::move(value));
+    Reflection::Reflect<dom::DOMString>(*this, u8"content", krys::move(value));
   }
 
   dom::DOMString HTMLMetaElement::Media() const noexcept
   {
-    return Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"media").value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"media").value_or(u8"");
   }
 
   void HTMLMetaElement::Media(dom::DOMString &&value) noexcept
   {
-    Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"media", krys::move(value));
+    Reflection::Reflect<dom::DOMString>(*this, u8"media", krys::move(value));
   }
 
 #pragma endregion
@@ -62,12 +63,12 @@ namespace krys::boo::html
 
   dom::DOMString HTMLMetaElement::Scheme() const noexcept
   {
-    return Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"scheme").value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"scheme").value_or(u8"");
   }
 
   void HTMLMetaElement::Scheme(dom::DOMString &&value) noexcept
   {
-    Attributes::Reflection::Reflect<dom::DOMString>(*this, u8"scheme", krys::move(value));
+    Reflection::Reflect<dom::DOMString>(*this, u8"scheme", krys::move(value));
   }
 
 #pragma endregion

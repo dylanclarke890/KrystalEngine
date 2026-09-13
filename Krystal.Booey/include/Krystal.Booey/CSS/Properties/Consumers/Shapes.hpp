@@ -7,9 +7,9 @@ namespace krys::boo::css
 {
   class TokenRange;
   class CSSValue;
-  struct CSSPropertyParserState;
+  struct PropertyParserState;
 
-  namespace CSSPropertyParserHelpers
+  namespace PropertyParserHelpers
   {
     enum class PathParsingOption : uint8_t
     {
@@ -20,18 +20,18 @@ namespace krys::boo::css
 
     // <basic-shape> = <circle()> | <ellipse() | <inset()> | <path()> | <polygon()> | <rect()> | <shape()> |
     // <xywh()> https://drafts.csswg.org/css-shapes/#typedef-basic-shape
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeBasicShape(TokenRange &tokens, CSSPropertyParserState &state,
+    KRYS_NODISCARD RefPtr<CSSValue> ConsumeBasicShape(TokenRange &tokens, PropertyParserState &state,
                                                       PathParsingOption pathParsingOptions) noexcept;
 
     // <path()> = path( <'fill-rule'>? , <string> )
     // https://drafts.csswg.org/css-shapes/#funcdef-basic-shape-path
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumePath(TokenRange &tokens, CSSPropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<CSSValue> ConsumePath(TokenRange &tokens, PropertyParserState &state) noexcept;
 
     // <'shape-outside'> = none | [ <basic-shape> || <shape-box> ] | <image>
     // https://drafts.csswg.org/css-shapes/#propdef-shape-outside
     KRYS_NODISCARD RefPtr<CSSValue> ConsumeShapeOutside(TokenRange &tokens,
-                                                        CSSPropertyParserState &state) noexcept;
+                                                        PropertyParserState &state) noexcept;
   }
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::CSSPropertyParserHelpers::PathParsingOption, 3uz);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::PropertyParserHelpers::PathParsingOption, 3uz);

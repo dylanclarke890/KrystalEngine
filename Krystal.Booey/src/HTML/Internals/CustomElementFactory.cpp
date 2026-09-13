@@ -11,7 +11,7 @@
 
 namespace krys::boo::html
 {
-  RefPtr<HTMLElement> CustomElementFactory::TryCreate(Document &document, const QualifiedName &name,
+  RefPtr<HTMLElement> CustomElementFactory::TryCreate(dom::Document &document, const dom::QualifiedName &name,
                                                       dom::DOMStringAtom is, bool synchronousCustomElements,
                                                       CustomElementRegistry *registry) noexcept
   {

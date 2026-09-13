@@ -1,15 +1,15 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/Enums/CSSValueId.hpp"
+#include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
 {
   class TokenRange;
   class CSSValue;
-  struct CSSPropertyParserState;
+  struct PropertyParserState;
 
-  namespace CSSPropertyParserHelpers
+  namespace PropertyParserHelpers
   {
     enum class ValueType
     {
@@ -32,12 +32,12 @@ namespace krys::boo::css
     //
     // Returns null if the keywords aren't valid/compatible. Otherwise, return a
     // CSSPrimitiveValue or CSSValuePair depending on if the keywords can be collapsed.
-    KRYS_NODISCARD RefPtr<CSSValue> ValueForPositionArea(CSSValueId dimension1, CSSValueId dimension2,
+    KRYS_NODISCARD RefPtr<CSSValue> ValueForPositionArea(ValueId dimension1, ValueId dimension2,
                                                          ValueType type) noexcept;
 
     /// @grammar <'position-area'>
     /// @see https://drafts.csswg.org/css-anchor-position-1/#propdef-position-area
     KRYS_NODISCARD RefPtr<CSSValue> ConsumePositionArea(TokenRange &tokens,
-                                                        CSSPropertyParserState &state) noexcept;
+                                                        PropertyParserState &state) noexcept;
   }
 }

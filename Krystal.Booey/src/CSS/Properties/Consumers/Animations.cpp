@@ -6,14 +6,14 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/PercentageDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Timeline.hpp"
-#include "Krystal.Booey/CSS/Properties/CSSPropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
 
-  SmallList<Pair<CSSValueId, double>> ConsumeKeyframeKeyList(TokenRange &tokens,
-                                                             CSSPropertyParserState &state) noexcept
+  SmallList<Pair<ValueId, double>> ConsumeKeyframeKeyList(TokenRange &tokens,
+                                                             PropertyParserState &state) noexcept
   {
     // <keyframe-selector> = from | to | <percentage [0,100]> | <timeline-tokens-name> <percentage>
     // https://drafts.csswg.org/css-animations-1/#typedef-keyframe-selector
@@ -49,13 +49,13 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       return {};
     };
 
-    auto TimelineRange = [&](TokenRange &tokens, CSSValueId id) -> Maybe<Pair<CSSValueId, double>>
+    auto TimelineRange = [&](TokenRange &tokens, ValueId id) -> Maybe<Pair<ValueId, double>>
     {
       if (IsAnimationRangeKeyword(id))
       {
         // "normal" will be considered valid by isAnimationRangeKeyword() but is not valid for a @keyframes
         // rule.
-        if (id == CSSValueId::Normal)
+        if (id == ValueId::Normal)
         {
           return {};
         }
@@ -70,7 +70,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       return {};
     };
 
-    SmallList<Pair<CSSValueId, double>> result;
+    SmallList<Pair<ValueId, double>> result;
     while (true)
     {
       tokens.DiscardWhitespace();
@@ -78,13 +78,13 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       if (auto tokenValue = ConsumeIdent(tokens))
       {
         auto valueId = tokenValue->ValueId();
-        if (valueId == CSSValueId::From)
+        if (valueId == ValueId::From)
         {
-          result.push_back({CSSValueId::Normal, 0});
+          result.push_back({ValueId::Normal, 0});
         }
-        else if (valueId == CSSValueId::To)
+        else if (valueId == ValueId::To)
         {
-          result.push_back({CSSValueId::Normal, 1});
+          result.push_back({ValueId::Normal, 1});
         }
         else if (auto pair = TimelineRange(tokens, valueId))
         {
@@ -98,7 +98,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       else if (auto convertedPercentage =
                  ConsumeAndConvertPercentage(tokens, RestrictedToZeroToHundredRange::Yes))
       {
-        result.push_back({CSSValueId::Normal, *convertedPercentage});
+        result.push_back({ValueId::Normal, *convertedPercentage});
       }
       else
       {
@@ -117,7 +117,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     }
   }
 
-  SmallList<Pair<CSSValueId, double>> ParseKeyframeKeyList(const CSSOMString &string,
+  SmallList<Pair<ValueId, double>> ParseKeyframeKeyList(const CSSOMString &string,
                                                            const ParserContext &context) noexcept
   {
     auto inputStream = InputStream(CSSOMString(string));
@@ -127,7 +127,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     // Handle leading whitespace.
     tokens.DiscardWhitespace();
 
-    auto state = CSSPropertyParserState {.Context = context};
+    auto state = PropertyParserState {.Context = context};
     auto result = ConsumeKeyframeKeyList(tokens, state);
 
     // Handle trailing whitespace.
@@ -141,7 +141,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return result;
   }
 
-  RefPtr<CSSValue> ConsumeKeyframesName(TokenRange &tokens, CSSPropertyParserState &) noexcept
+  RefPtr<CSSValue> ConsumeKeyframesName(TokenRange &tokens, PropertyParserState &) noexcept
   {
     // <keyframes-name> = <custom-ident> | <string>
     // https://drafts.csswg.org/css-animations/#typedef-keyframes-name
@@ -151,8 +151,8 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       auto &token = tokens.Consume();
       tokens.DiscardWhitespace();
 
-      auto valueId = FindCSSValueKeyword(token.IdentCodePoints());
-      if (IsValidCustomIdentifier(valueId) && valueId != CSSValueId::None)
+      auto valueId = FindValueKeyword(token.IdentCodePoints());
+      if (IsValidCustomIdentifier(valueId) && valueId != ValueId::None)
       {
         return CSSPrimitiveValue::CreateCustomIdent(token.IdentCodePoints());
       }
