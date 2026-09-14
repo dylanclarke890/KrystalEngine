@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Transform.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/AngleDefinitions.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/CSSPrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/LengthDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/LengthPercentageDefinitions.hpp"
@@ -10,21 +10,21 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/PercentageDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/CSSFunctionValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueListBuilder.hpp"
+#include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
-  RefPtr<CSSValue> ConsumeRotate3dFunction(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeRotate3dFunction(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // https://drafts.csswg.org/css-transforms-2/#funcdef-rotate3d
     // rotate3d() = rotate3d( <number> , <number> , <number> , [ <angle> | <zero> ] )
 
-    auto consumeParameters = [](auto &args, auto &state) -> Maybe<CSSValueListBuilder>
+    auto consumeParameters = [](auto &args, auto &state) -> Maybe<ValueListBuilder>
     {
-      auto firstValue = CSSPrimitiveValueResolver<Number<>>::ConsumeAndResolve(args, state);
+      auto firstValue = PrimitiveValueResolver<Number<>>::ConsumeAndResolve(args, state);
       if (!firstValue)
       {
         return {};
@@ -35,7 +35,7 @@ namespace krys::boo::css::PropertyParserHelpers
         return {};
       }
 
-      auto secondValue = CSSPrimitiveValueResolver<Number<>>::ConsumeAndResolve(args, state);
+      auto secondValue = PrimitiveValueResolver<Number<>>::ConsumeAndResolve(args, state);
       if (!secondValue)
       {
         return {};
@@ -46,7 +46,7 @@ namespace krys::boo::css::PropertyParserHelpers
         return {};
       }
 
-      auto thirdValue = CSSPrimitiveValueResolver<Number<>>::ConsumeAndResolve(args, state);
+      auto thirdValue = PrimitiveValueResolver<Number<>>::ConsumeAndResolve(args, state);
       if (!thirdValue)
       {
         return {};
@@ -57,14 +57,14 @@ namespace krys::boo::css::PropertyParserHelpers
         return {};
       }
 
-      auto angle = CSSPrimitiveValueResolver<Angle<>>::ConsumeAndResolve(
+      auto angle = PrimitiveValueResolver<Angle<>>::ConsumeAndResolve(
         args, state, {.UnitlessZeroAngle = AllowUnitlessZero(true)});
       if (!angle)
       {
         return {};
       }
 
-      CSSValueListBuilder parameters;
+      ValueListBuilder parameters;
       parameters.push_back(krys::move(firstValue));
       parameters.push_back(krys::move(secondValue));
       parameters.push_back(krys::move(thirdValue));
@@ -93,19 +93,19 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     tokens = rangeCopy;
-    return CSSFunctionValue::Create(functionId, krys::move(*parameters));
+    return FunctionValue::Create(functionId, krys::move(*parameters));
   }
 
-  RefPtr<CSSValue> ConsumeTranslateFunction(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeTranslateFunction(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // https://drafts.csswg.org/css-transforms-1/#funcdef-transform-translate
     // translate() = translate( <length-percentage> , <length-percentage>? )
 
-    auto consumeParameters = [](auto &args, auto &state) -> std::optional<CSSValueListBuilder>
+    auto consumeParameters = [](auto &args, auto &state) -> std::optional<ValueListBuilder>
     {
-      CSSValueListBuilder arguments;
+      ValueListBuilder arguments;
 
-      auto firstValue = CSSPrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(args, state);
+      auto firstValue = PrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(args, state);
       if (!firstValue)
       {
         return {};
@@ -114,7 +114,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
       if (ConsumeComma(args))
       {
-        auto secondValue = CSSPrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(args, state);
+        auto secondValue = PrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(args, state);
         if (!secondValue)
         {
           return {};
@@ -151,17 +151,17 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     tokens = rangeCopy;
-    return CSSFunctionValue::Create(functionId, krys::move(*parameters));
+    return FunctionValue::Create(functionId, krys::move(*parameters));
   }
 
-  RefPtr<CSSValue> ConsumeTranslate3dFunction(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeTranslate3dFunction(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // https://drafts.csswg.org/css-transforms-2/#funcdef-translate3d
     // translate3d() = translate3d( <length-percentage> , <length-percentage> , <length> )
 
-    auto consumeParameters = [](auto &args, auto &state) -> std::optional<CSSValueListBuilder>
+    auto consumeParameters = [](auto &args, auto &state) -> std::optional<ValueListBuilder>
     {
-      auto firstValue = CSSPrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(args, state);
+      auto firstValue = PrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(args, state);
       if (!firstValue)
       {
         return {};
@@ -172,7 +172,7 @@ namespace krys::boo::css::PropertyParserHelpers
         return {};
       }
 
-      auto secondValue = CSSPrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(args, state);
+      auto secondValue = PrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(args, state);
       if (!secondValue)
       {
         return {};
@@ -183,13 +183,13 @@ namespace krys::boo::css::PropertyParserHelpers
         return {};
       }
 
-      auto thirdValue = CSSPrimitiveValueResolver<Length<>>::ConsumeAndResolve(args, state);
+      auto thirdValue = PrimitiveValueResolver<Length<>>::ConsumeAndResolve(args, state);
       if (!thirdValue)
       {
         return {};
       }
 
-      CSSValueListBuilder parameters;
+      ValueListBuilder parameters;
       parameters.push_back(krys::move(firstValue));
       parameters.push_back(krys::move(secondValue));
       parameters.push_back(krys::move(thirdValue));
@@ -217,10 +217,10 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     tokens = rangeCopy;
-    return CSSFunctionValue::Create(functionId, krys::move(*parameters));
+    return FunctionValue::Create(functionId, krys::move(*parameters));
   }
 
-  RefPtr<CSSValue> ConsumeTranslate(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeTranslate(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // https://drafts.csswg.org/css-transforms-2/#propdef-translate
     // none | <length-percentage> [ <length-percentage> <length>? ]?
@@ -237,7 +237,7 @@ namespace krys::boo::css::PropertyParserHelpers
     // translate() function. If the second value is missing, it defaults to 0px. If three values are given,
     // this specifies a 3d translation, equivalent to the translate3d() function.
 
-    auto x = CSSPrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(tokens, state);
+    auto x = PrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(tokens, state);
     if (!x)
     {
       return nullptr;
@@ -247,10 +247,10 @@ namespace krys::boo::css::PropertyParserHelpers
 
     if (tokens.IsAtEnd())
     {
-      return CSSValueList::CreateSpaceSeparated(krys::move(x));
+      return ValueList::CreateSpaceSeparated(krys::move(x));
     }
 
-    auto y = CSSPrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(tokens, state);
+    auto y = PrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(tokens, state);
     if (!y)
     {
       return nullptr;
@@ -267,13 +267,13 @@ namespace krys::boo::css::PropertyParserHelpers
     {
       if (!haveNonZeroY)
       {
-        return CSSValueList::CreateSpaceSeparated(krys::move(x));
+        return ValueList::CreateSpaceSeparated(krys::move(x));
       }
 
-      return CSSValueList::CreateSpaceSeparated(krys::move(x), krys::move(y));
+      return ValueList::CreateSpaceSeparated(krys::move(x), krys::move(y));
     }
 
-    auto z = CSSPrimitiveValueResolver<Length<>>::ConsumeAndResolve(tokens, state);
+    auto z = PrimitiveValueResolver<Length<>>::ConsumeAndResolve(tokens, state);
     if (!z)
     {
       return nullptr;
@@ -284,18 +284,18 @@ namespace krys::boo::css::PropertyParserHelpers
 
     if (!haveNonZeroY && !haveNonZeroZ)
     {
-      return CSSValueList::CreateSpaceSeparated(krys::move(x));
+      return ValueList::CreateSpaceSeparated(krys::move(x));
     }
 
     if (!haveNonZeroZ)
     {
-      return CSSValueList::CreateSpaceSeparated(krys::move(x), krys::move(y));
+      return ValueList::CreateSpaceSeparated(krys::move(x), krys::move(y));
     }
 
-    return CSSValueList::CreateSpaceSeparated(krys::move(x), krys::move(y), krys::move(z));
+    return ValueList::CreateSpaceSeparated(krys::move(x), krys::move(y), krys::move(z));
   }
 
-  RefPtr<CSSValue> ConsumeRotate(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeRotate(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // https://drafts.csswg.org/css-transforms-2/#propdef-rotate
     // none | <angle> | [ x | y | z | <number>{3} ] && <angle>
@@ -316,14 +316,14 @@ namespace krys::boo::css::PropertyParserHelpers
     // explicitly by giving three numbers representing the x, y, and z components of an origin-centered
     // vector, equivalent to the rotate3d() function.
 
-    CSSValueListBuilder list;
-    RefPtr<CSSPrimitiveValue> angle;
-    RefPtr<CSSPrimitiveValue> axisIdentifier;
+    ValueListBuilder list;
+    RefPtr<PrimitiveValue> angle;
+    RefPtr<PrimitiveValue> axisIdentifier;
 
     while (!tokens.IsAtEnd())
     {
       // First, attempt to parse a number, which might be in a series of 3 specifying the rotation axis.
-      auto parsedValue = CSSPrimitiveValueResolver<Number<>>::ConsumeAndResolve(tokens, state);
+      auto parsedValue = PrimitiveValueResolver<Number<>>::ConsumeAndResolve(tokens, state);
       if (parsedValue)
       {
         // If we've encountered an axis identifier, then this value is invalid.
@@ -340,7 +340,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
       // Then, attempt to parse an angle. We try this as a fallback rather than the first option because
       // a unitless 0 angle would be consumed as an angle.
-      parsedValue = CSSPrimitiveValueResolver<Angle<>>::ConsumeAndResolve(tokens, state);
+      parsedValue = PrimitiveValueResolver<Angle<>>::ConsumeAndResolve(tokens, state);
       if (parsedValue)
       {
         // If we had already parsed an angle or numbers but not 3 in a row, this value is invalid.
@@ -393,27 +393,27 @@ namespace krys::boo::css::PropertyParserHelpers
 
       // Now we must check the values since if we have a vector in the x, y or z axis alone we must serialize
       // to the matching identifier.
-      auto xIsZero = Downcast<CSSPrimitiveValue>(list[0].get())->IsZero();
-      auto yIsZero = Downcast<CSSPrimitiveValue>(list[1].get())->IsZero();
-      auto zIsZero = Downcast<CSSPrimitiveValue>(list[2].get())->IsZero();
+      auto xIsZero = Downcast<PrimitiveValue>(list[0].get())->IsZero();
+      auto yIsZero = Downcast<PrimitiveValue>(list[1].get())->IsZero();
+      auto zIsZero = Downcast<PrimitiveValue>(list[2].get())->IsZero();
 
       if (KnownToBeNotZero(xIsZero) && KnownToBeZero(yIsZero) && KnownToBeZero(zIsZero))
       {
-        return CSSValueList::CreateSpaceSeparated(CSSPrimitiveValue::Create(ValueId::X), angle);
+        return ValueList::CreateSpaceSeparated(PrimitiveValue::Create(ValueId::X), angle);
       }
 
       if (KnownToBeZero(xIsZero) && KnownToBeNotZero(yIsZero) && KnownToBeZero(zIsZero))
       {
-        return CSSValueList::CreateSpaceSeparated(CSSPrimitiveValue::Create(ValueId::Y), angle);
+        return ValueList::CreateSpaceSeparated(PrimitiveValue::Create(ValueId::Y), angle);
       }
 
       if (KnownToBeZero(xIsZero) && KnownToBeZero(yIsZero) && KnownToBeNotZero(zIsZero))
       {
-        return CSSValueList::CreateSpaceSeparated(angle);
+        return ValueList::CreateSpaceSeparated(angle);
       }
 
       list.push_back(krys::move(angle));
-      return CSSValueList::CreateSpaceSeparated(krys::move(list));
+      return ValueList::CreateSpaceSeparated(krys::move(list));
     }
 
     if (list.empty())
@@ -423,16 +423,16 @@ namespace krys::boo::css::PropertyParserHelpers
       // angle.
       if (axisIdentifier && axisIdentifier->ValueId() != ValueId::Z)
       {
-        return CSSValueList::CreateSpaceSeparated(krys::move(axisIdentifier), krys::move(angle));
+        return ValueList::CreateSpaceSeparated(krys::move(axisIdentifier), krys::move(angle));
       }
 
-      return CSSValueList::CreateSpaceSeparated(krys::move(angle));
+      return ValueList::CreateSpaceSeparated(krys::move(angle));
     }
 
     return nullptr;
   }
 
-  RefPtr<CSSValue> ConsumeScale(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeScale(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // https://drafts.csswg.org/css-transforms-2/#propdef-scale
     // none | [ <number> | <percentage> ]{1,3}
@@ -461,7 +461,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     if (tokens.IsAtEnd())
     {
-      return CSSValueList::CreateSpaceSeparated(krys::move(x));
+      return ValueList::CreateSpaceSeparated(krys::move(x));
     }
 
     auto y = ConsumePercentageDividedBy100OrNumber(tokens, state);
@@ -479,10 +479,10 @@ namespace krys::boo::css::PropertyParserHelpers
     {
       if (!xValue || !yValue || *xValue != *yValue)
       {
-        return CSSValueList::CreateSpaceSeparated(krys::move(x), krys::move(y));
+        return ValueList::CreateSpaceSeparated(krys::move(x), krys::move(y));
       }
 
-      return CSSValueList::CreateSpaceSeparated(krys::move(x));
+      return ValueList::CreateSpaceSeparated(krys::move(x));
     }
 
     auto z = ConsumePercentageDividedBy100OrNumber(tokens, state);
@@ -495,14 +495,14 @@ namespace krys::boo::css::PropertyParserHelpers
 
     if (zValue != 1.0)
     {
-      return CSSValueList::CreateSpaceSeparated(krys::move(x), krys::move(y), krys::move(z));
+      return ValueList::CreateSpaceSeparated(krys::move(x), krys::move(y), krys::move(z));
     }
 
     if (!xValue || !yValue || *xValue != *yValue)
     {
-      return CSSValueList::CreateSpaceSeparated(krys::move(x), krys::move(y));
+      return ValueList::CreateSpaceSeparated(krys::move(x), krys::move(y));
     }
 
-    return CSSValueList::CreateSpaceSeparated(krys::move(x));
+    return ValueList::CreateSpaceSeparated(krys::move(x));
   }
 }

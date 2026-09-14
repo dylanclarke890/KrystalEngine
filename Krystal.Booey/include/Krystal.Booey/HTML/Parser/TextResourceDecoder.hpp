@@ -1,10 +1,12 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Core/EncodingRegistry.hpp"
 #include "Krystal.Booey/HTML/Enums/ContentType.hpp"
 #include "Krystal.Booey/HTML/Enums/EncodingSource.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLEncodingSniffer.hpp"
 #include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/Text/Encodings/Decode.hpp"
+#include "Krystal.Core/Text/ICodec.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/StronglyTypedValue.hpp"
 
@@ -30,9 +32,8 @@ namespace krys::boo::html
       Tentative,
     };
 
-    krys::Text::CodecRegistry *_registry;
     ContentType _contentType {ContentType::PlainText};
-    krys::Text::ICodec *_decoder {nullptr};
+    krys::text::ICodec *_decoder {nullptr};
     EncodingSource _source {EncodingSource::Default};
     Confidence _confidence {Confidence::Tentative};
     bool _useBOMDetection : 1 = true;
@@ -44,13 +45,11 @@ namespace krys::boo::html
     List<byte> _buffer;
 
   public:
-    TextResourceDecoder(krys::Text::CodecRegistry &registry, ContentType contentType,
-                        const string &charset) noexcept
-        : TextResourceDecoder(registry, contentType)
+    TextResourceDecoder(ContentType contentType, utf8_stringview charset) noexcept : _contentType(contentType)
     {
       if (!charset.empty())
       {
-        if (auto *codec = registry.Find(charset))
+        if (auto *codec = EncodingRegistry().Find(charset))
         {
           _decoder = codec;
           _source = EncodingSource::Transport;
@@ -59,9 +58,8 @@ namespace krys::boo::html
       }
     }
 
-    TextResourceDecoder(krys::Text::CodecRegistry &registry, const string &mimeType,
-                        const string &charset) noexcept
-        : TextResourceDecoder(registry, DetermineContentType(mimeType), charset)
+    TextResourceDecoder(const string &mimeType, utf8_stringview charset) noexcept
+        : TextResourceDecoder(DetermineContentType(mimeType), charset)
     {
     }
 
@@ -142,14 +140,14 @@ namespace krys::boo::html
         }
 
         // Final chunk: emit replacement and finish
-        result.Output.push_back(krys::Text::Unicode::Replacement<char32>);
+        result.Output.push_back(krys::text::UnicodeReplacementChar);
 
         ResetForReuse();
 
         return result.Output;
       }
 
-      assert(result.ErrorCode != krys::Text::EncodingError::InsufficientOutputSpace);
+      krys_debug_assert(result.ErrorCode != krys::Text::EncodingError::InsufficientOutputSpace);
       return result.Output;
     }
 
@@ -170,11 +168,13 @@ namespace krys::boo::html
     void EnsureDecoder()
     {
       if (_decoder)
+      {
         return;
+      }
 
-      using krys::Text::operator""_s;
-      _decoder = _registry.get().Find("utf-8"_s);
-      assert(_decoder);
+      _decoder = EncodingRegistry().Find(u8"utf-8");
+      krys_assert(_decoder);
+
       _source = EncodingSource::Default;
       _confidence = Confidence::Tentative;
     }

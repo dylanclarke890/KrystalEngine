@@ -7,7 +7,7 @@
 #include "Krystal.Booey/CSS/Properties/Types/IsImplicit.hpp"
 #include "Krystal.Booey/CSS/Properties/Types/IsImportant.hpp"
 #include "Krystal.Booey/CSS/Properties/Types/IsSetFromShorthand.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValue.hpp"
+#include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/Span.hpp"
@@ -42,15 +42,15 @@ namespace krys::boo::css
   {
   private:
     PropertyMetadata _metadata;
-    Ref<CSSValue> _value;
+    Ref<css::Value> _value;
 
   public:
-    Property(const PropertyMetadata &metadata, Ref<CSSValue> &&value) noexcept
+    Property(const PropertyMetadata &metadata, Ref<css::Value> &&value) noexcept
         : _metadata(metadata), _value(krys::move(value))
     {
     }
 
-    Property(PropertyId id, Ref<CSSValue> &&value, IsImportant important = IsImportant(false),
+    Property(PropertyId id, Ref<css::Value> &&value, IsImportant important = IsImportant(false),
              IsImplicit implicit = IsImplicit(false),
              IsSetFromShorthand setFromShorthand = IsSetFromShorthand(false),
              uint8 shorthandIndex = 0u) noexcept
@@ -102,12 +102,12 @@ namespace krys::boo::css
       return _metadata.ShorthandIndex;
     }
 
-    KRYS_NODISCARD CSSValue &Value() noexcept
+    KRYS_NODISCARD css::Value &Value() noexcept
     {
       return *_value;
     }
 
-    KRYS_NODISCARD const CSSValue &Value() const noexcept
+    KRYS_NODISCARD const css::Value &Value() const noexcept
     {
       return *_value;
     }

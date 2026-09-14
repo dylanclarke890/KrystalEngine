@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/CSSValueTypes.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/CSSPrimitiveNumericTypes.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
+#include "Krystal.Booey/CSS/Values/Types.hpp"
 
 namespace krys::boo::css
 {
@@ -15,7 +15,7 @@ namespace krys::boo::css
   struct SpringEasingParameters
   {
     constexpr static auto NextAfterZero = std::numeric_limits<double>::denorm_min();
-    constexpr static auto Positive = CSSRange {NextAfterZero, CSSRange::Inf};
+    constexpr static auto Positive = Range {NextAfterZero, Range::Inf};
 
     Number<Positive> mass;
     Number<Positive> stiffness;

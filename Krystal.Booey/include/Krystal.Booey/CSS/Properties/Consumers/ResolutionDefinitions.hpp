@@ -1,14 +1,14 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumerDefinitions.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/CSSPrimitiveNumericTypesCanonicalization.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypesCanonicalization.hpp"
 
 namespace krys::boo::css
 {
   struct ResolutionValidator
   {
-    KRYS_NODISCARD constexpr static Maybe<ResolutionUnit>
-      Validate(CSSUnitType unitType, PropertyParserState &, PropertyParserOptions) noexcept
+    KRYS_NODISCARD constexpr static Maybe<ResolutionUnit> Validate(UnitType unitType, PropertyParserState &,
+                                                                   PropertyParserOptions) noexcept
     {
       return UnitTraits<ResolutionUnit>::Validate(unitType);
     }
@@ -26,7 +26,7 @@ namespace krys::boo::css
     }
   };
 
-  template <CSSRange R, typename V>
+  template <Range R, typename V>
   struct ConsumerDefinition<Resolution<R, V>>
   {
     using FunctionToken = FunctionConsumerForCalcValues<Resolution<R, V>>;

@@ -2,13 +2,13 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueListBuilder.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
-  KRYS_NODISCARD RefPtr<CSSValue> ConsumeWillChange(TokenRange &tokens,
+  KRYS_NODISCARD RefPtr<Value> ConsumeWillChange(TokenRange &tokens,
                                                     PropertyParserState &state) noexcept
   {
     // <'will-change'> = auto | <animateable-feature>#
@@ -21,7 +21,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     // Every comma-separated list of identifiers is a valid will-change value, unless the list includes an
     // explicitly disallowed identifier.
-    CSSValueListBuilder values;
+    ValueListBuilder values;
     while (!tokens.IsAtEnd())
     {
       switch (tokens.Peek().ValueId())
@@ -58,7 +58,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
           if (propertyId != PropertyId::Invalid)
           {
-            values.push_back(CSSPrimitiveValue::Create(propertyId));
+            values.push_back(PrimitiveValue::Create(propertyId));
 
             tokens.Discard();
             tokens.DiscardWhitespace();
@@ -84,6 +84,6 @@ namespace krys::boo::css::PropertyParserHelpers
       }
     }
 
-    return CSSValueList::CreateCommaSeparated(krys::move(values));
+    return ValueList::CreateCommaSeparated(krys::move(values));
   }
 }

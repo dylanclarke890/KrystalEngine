@@ -7,7 +7,7 @@ namespace krys::boo::css
   struct LengthValidator
   {
     KRYS_NODISCARD constexpr static Maybe<LengthUnit>
-      Validate(CSSUnitType unitType, PropertyParserState &state, PropertyParserOptions options) noexcept
+      Validate(UnitType unitType, PropertyParserState &state, PropertyParserOptions options) noexcept
     {
       return UnitTraits<LengthUnit>::Validate(unitType);
     }
@@ -37,7 +37,7 @@ namespace krys::boo::css
     }
   };
 
-  template <CSSRange R, typename V>
+  template <Range R, typename V>
   struct ConsumerDefinition<Length<R, V>>
   {
     using FunctionToken = FunctionConsumerForCalcValues<Length<R, V>>;

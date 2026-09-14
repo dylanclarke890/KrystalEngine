@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/Primitives/CSSPrimitiveNumeric.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/PrimitiveNumeric.hpp"
 
 namespace krys::boo::css
 {

@@ -1,13 +1,13 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumerDefinitions.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/CSSPrimitiveNumericTypesCanonicalization.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypesCanonicalization.hpp"
 
 namespace krys::boo::css
 {
   struct AngleValidator
   {
-    KRYS_NODISCARD constexpr static Maybe<AngleUnit> Validate(CSSUnitType unitType, PropertyParserState &,
+    KRYS_NODISCARD constexpr static Maybe<AngleUnit> Validate(UnitType unitType, PropertyParserState &,
                                                               PropertyParserOptions) noexcept
     {
       return UnitTraits<AngleUnit>::Validate(unitType);
@@ -43,7 +43,7 @@ namespace krys::boo::css
     }
   };
 
-  template <CSSRange R, typename V>
+  template <Range R, typename V>
   struct ConsumerDefinition<Angle<R, V>>
   {
     using FunctionToken = FunctionConsumerForCalcValues<Angle<R, V>>;

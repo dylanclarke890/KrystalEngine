@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/CSSValueAggregates.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/CSSPrimitiveNumericTypes.hpp"
+#include "Krystal.Booey/CSS/Values/Aggregates.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 
 namespace krys::boo::css
 {

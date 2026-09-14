@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/CSSValueAggregates.hpp"
-#include "Krystal.Booey/CSS/Values/Grid/CSSGridNamedAreaMap.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/CSSPrimitiveNumericTypes.hpp"
+#include "Krystal.Booey/CSS/Values/Grid/GridNamedAreaMap.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
+#include "Krystal.Booey/CSS/Values/Types.hpp"
 
 namespace krys::boo::css
 {

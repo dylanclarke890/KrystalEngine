@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Types/Markable.hpp"
+
 namespace krys::boo::css
 {
   class Color

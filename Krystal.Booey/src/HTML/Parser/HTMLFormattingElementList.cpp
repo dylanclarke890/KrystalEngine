@@ -91,13 +91,13 @@ namespace krys::boo::html
     return nullptr;
   }
 
-  bool HTMLFormattingElementList::Contains(const Element &node) const noexcept
+  bool HTMLFormattingElementList::Contains(const dom::Element &node) const noexcept
   {
     return std::ranges::any_of(_formattingElements, [&](const FormattingListEntry &entry)
                                { return entry.IsFormattingElement() && &entry.Item().Element() == &node; });
   }
 
-  FormattingListEntry *HTMLFormattingElementList::Find(const Element &node) noexcept
+  FormattingListEntry *HTMLFormattingElementList::Find(const dom::Element &node) noexcept
   {
     auto it =
       std::ranges::find_if(_formattingElements, [&](const FormattingListEntry &entry)
@@ -106,7 +106,7 @@ namespace krys::boo::html
     return it != _formattingElements.end() ? &*it : nullptr;
   }
 
-  void HTMLFormattingElementList::Remove(const Element &node) noexcept
+  void HTMLFormattingElementList::Remove(const dom::Element &node) noexcept
   {
     auto it =
       std::ranges::find_if(_formattingElements, [&](const FormattingListEntry &entry)
@@ -139,7 +139,8 @@ namespace krys::boo::html
 
 #pragma region Bookmark
 
-  HTMLFormattingElementList::Bookmark HTMLFormattingElementList::BookmarkFor(const Element &node) noexcept
+  HTMLFormattingElementList::Bookmark
+    HTMLFormattingElementList::BookmarkFor(const dom::Element &node) noexcept
   {
     for (size_t i = 0uz; i < _formattingElements.size(); ++i)
     {
@@ -167,7 +168,8 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLFormattingElementList::RemoveAndUpdateBookmark(const Element &node, Bookmark &bookmark) noexcept
+  void HTMLFormattingElementList::RemoveAndUpdateBookmark(const dom::Element &node,
+                                                          Bookmark &bookmark) noexcept
   {
     auto it =
       std::ranges::find_if(_formattingElements, [&](const FormattingListEntry &entry)

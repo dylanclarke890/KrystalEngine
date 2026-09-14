@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Properties/PropertyParserResult.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 
 namespace krys::boo::css
 {
@@ -10,7 +10,7 @@ namespace krys::boo::css
   }
 
   void PropertyParserResult::AddProperty(PropertyParserState &state, PropertyId property,
-                                         PropertyId currentShorthand, RefPtr<CSSValue> &&value,
+                                         PropertyId currentShorthand, RefPtr<Value> &&value,
                                          IsImportant important, IsImplicit implicit) noexcept
   {
     size_t shorthandIndex = 0uz;
@@ -39,7 +39,7 @@ namespace krys::boo::css
     else
     {
       krys_debug_assert(setFromShorthand);
-      AddProperty(Property(property, ShareRef(CSSPrimitiveValue::ImplicitInitialValue()), important,
+      AddProperty(Property(property, ShareRef(PrimitiveValue::ImplicitInitialValue()), important,
                            IsImplicit(true), setFromShorthand, static_cast<uint8>(shorthandIndex)));
     }
   }
@@ -47,7 +47,7 @@ namespace krys::boo::css
 #pragma region Utils
 
   void PropertyParserResult::AddPropertyForCurrentShorthand(PropertyParserState &state, PropertyId longhand,
-                                                            RefPtr<CSSValue> &&value,
+                                                            RefPtr<Value> &&value,
                                                             IsImplicit implicit) noexcept
   {
     AddProperty(state, longhand, state.CurrentProperty, krys::move(value), state.Important, implicit);
@@ -55,7 +55,7 @@ namespace krys::boo::css
 
   void PropertyParserResult::AddPropertyForAllLonghandsOfShorthand(PropertyParserState &state,
                                                                    PropertyId shorthand,
-                                                                   RefPtr<CSSValue> &&value,
+                                                                   RefPtr<Value> &&value,
                                                                    IsImportant important,
                                                                    IsImplicit implicit) noexcept
   {
@@ -66,7 +66,7 @@ namespace krys::boo::css
   }
 
   void PropertyParserResult::AddPropertyForAllLonghandsOfCurrentShorthand(PropertyParserState &state,
-                                                                          RefPtr<CSSValue> &&value,
+                                                                          RefPtr<Value> &&value,
                                                                           IsImplicit implicit) noexcept
   {
     AddPropertyForAllLonghandsOfShorthand(state, state.CurrentProperty, krys::move(value), state.Important,

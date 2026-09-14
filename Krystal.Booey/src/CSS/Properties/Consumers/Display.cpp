@@ -2,12 +2,12 @@
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
   // Keep in sync with the single keyword value fast path of CSSParserFastPaths's parseDisplay.
-  RefPtr<CSSValue> ConsumeDisplay(TokenRange &range, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeDisplay(TokenRange &range, PropertyParserState &state) noexcept
   {
     // <'display'>        = [ <display-outside> || <display-inside> ] | <display-listitem> |
     // <display-internal> | <display-box> | <display-legacy> <display-outside>  = block | inline | run-in
@@ -74,7 +74,7 @@ namespace krys::boo::css::PropertyParserHelpers
     if (nextValueId == ValueId::WebkitInlineFlex || nextValueId == ValueId::WebkitFlex)
     {
       DiscardIdent(range);
-      return CSSPrimitiveValue::Create(nextValueId == ValueId::WebkitInlineFlex ? ValueId::InlineFlex
+      return PrimitiveValue::Create(nextValueId == ValueId::WebkitInlineFlex ? ValueId::InlineFlex
                                                                                    : ValueId::Flex);
     }
 
@@ -202,6 +202,6 @@ namespace krys::boo::css::PropertyParserHelpers
       return nullptr;
     }
 
-    return CSSPrimitiveValue::Create(shortValue);
+    return PrimitiveValue::Create(shortValue);
   }
 }

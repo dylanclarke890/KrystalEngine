@@ -6,8 +6,8 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/List.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumer.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/TextDecoration/CSSTextShadowPropertyValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/TextDecoration/TextShadowPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/TextDecoration/TextShadow.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
@@ -135,7 +135,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
   // NOTE: we're explicitly qualifying the function name here just to satisfy intellisense, which is having
   // trouble resolving the function name in this context for some reason.
-  KRYS_NODISCARD RefPtr<CSSValue>
+  KRYS_NODISCARD RefPtr<Value>
     krys::boo::css::PropertyParserHelpers::ConsumeTextShadow(TokenRange &tokens,
                                                                 PropertyParserState &state) noexcept
   {
@@ -144,7 +144,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     if (auto property = ConsumeUnresolvedTextShadow(tokens, state))
     {
-      return CSSTextShadowPropertyValue::Create({krys::move(*property)});
+      return TextShadowPropertyValue::Create({krys::move(*property)});
     }
 
     return nullptr;

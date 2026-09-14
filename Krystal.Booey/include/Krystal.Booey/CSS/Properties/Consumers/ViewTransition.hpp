@@ -5,13 +5,13 @@
 namespace krys::boo::css
 {
   class TokenRange;
-  class CSSValue;
+  class Value;
   struct PropertyParserState;
 
   namespace PropertyParserHelpers
   {
     // For @view-transition descriptor
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeViewTransitionTypes(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeViewTransitionTypes(TokenRange &tokens,
                                                                PropertyParserState &state) noexcept;
   }
 }

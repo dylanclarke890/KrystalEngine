@@ -1,10 +1,12 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Core/EncodingRegistry.hpp"
 #include "Krystal.Core/Base.hpp"
+#include "Krystal.Core/Text/ICodec.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 
 namespace krys::boo::html
@@ -14,8 +16,7 @@ namespace krys::boo::html
     HTMLEncodingSniffer() = delete;
     ~HTMLEncodingSniffer() = delete;
 
-    KRYS_NODISCARD static krys::Text::ICodec *Detect(Span<const byte> bytes,
-                                                     const krys::Text::CodecRegistry &codecRegistry) noexcept
+    KRYS_NODISCARD static krys::text::ICodec *Detect(Span<const byte> bytes) noexcept
     {
       for (size_t i = 0uz; i < bytes.size(); i++)
       {
@@ -42,7 +43,7 @@ namespace krys::boo::html
           string charset;
 
           AttributeResult attribute;
-          Set<string> attributeList;
+          HashSet<string> attributeList;
           do
           {
             attribute = GetAttribute(bytes, i);
@@ -63,7 +64,7 @@ namespace krys::boo::html
             {
               if (charset.empty())
               {
-                charset = ExtractCharacterEncodingFromMeta(attribute.Value, codecRegistry);
+                charset = ExtractCharacterEncodingFromMeta(attribute.Value);
                 if (!charset.empty())
                 {
                   needPragma = true;
@@ -83,19 +84,19 @@ namespace krys::boo::html
             continue;
           }
 
-          using namespace krys::Text;
+          return nullptr;
+          // TODO: fix this
+          // ASCIILiteral canonicalName = codecRegistry.LabelToName(charset);
+          // if (canonicalName == u8"UTF-16LE" || canonicalName == u8"UTF-16BE")
+          //{
+          //  canonicalName = u8"UTF-8";
+          //}
+          // else if (canonicalName == u8"x-user-defined")
+          //{
+          //  canonicalName = u8"windows-1252";
+          //}
 
-          ASCIILiteral canonicalName = codecRegistry.LabelToName(charset);
-          if (canonicalName == "UTF-16LE"_s || canonicalName == "UTF-16BE"_s)
-          {
-            canonicalName = "UTF-8"_s;
-          }
-          else if (canonicalName == "x-user-defined"_s)
-          {
-            canonicalName = "windows-1252"_s;
-          }
-
-          return codecRegistry.Find(canonicalName);
+          // return codecRegistry.Find(canonicalName);
         }
 
         // We're reading some other element that's not a meta tag, skip it.
@@ -106,11 +107,11 @@ namespace krys::boo::html
             break;
           }
 
-          if (krys::Text::IsASCIIAlpha(bytes[i + 1uz]))
+          if (krys::text::IsASCIIAlpha(bytes[i + 1uz]))
           {
             for (i += 2uz; i < bytes.size(); i++)
             {
-              if (krys::Text::IsASCIIWhitespace(bytes[i]) || bytes[i] == byte {'>'})
+              if (krys::text::IsASCIIWhitespace(bytes[i]) || bytes[i] == byte {'>'})
               {
                 break;
               }
@@ -134,6 +135,7 @@ namespace krys::boo::html
           }
         }
       }
+
       return nullptr;
     }
 
@@ -264,8 +266,7 @@ namespace krys::boo::html
     }
 
     /// @see https://html.spec.whatwg.org/#extracting-character-encodings-from-meta-elements
-    KRYS_NODISCARD static string
-      ExtractCharacterEncodingFromMeta(string &meta, const krys::text::CodecRegistry &codecRegistry)
+    KRYS_NODISCARD static string ExtractCharacterEncodingFromMeta(string &meta)
     {
       for (char &ch : meta)
       {

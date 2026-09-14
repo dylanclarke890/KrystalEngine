@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
+#include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 
 namespace krys::boo::css
@@ -14,7 +14,7 @@ namespace krys::boo::css
     bool _sawDiscretionaryLigaturesValue = false;
     bool _sawHistoricalLigaturesValue = false;
     bool _sawContextualLigaturesValue = false;
-    CSSValueListBuilder _result;
+    ValueListBuilder _result;
 
   public:
     enum class ParseResult : uint8
@@ -85,14 +85,14 @@ namespace krys::boo::css
       return ParseResult::ConsumedValue;
     }
 
-    KRYS_NODISCARD RefPtr<CSSValue> Finalize() noexcept
+    KRYS_NODISCARD RefPtr<Value> Finalize() noexcept
     {
       if (_result.empty())
       {
-        return CSSPrimitiveValue::Create(ValueId::Normal);
+        return PrimitiveValue::Create(ValueId::Normal);
       }
 
-      return CSSValueList::CreateSpaceSeparated(krys::move(_result));
+      return ValueList::CreateSpaceSeparated(krys::move(_result));
     }
   };
 

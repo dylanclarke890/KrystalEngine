@@ -8,7 +8,7 @@ namespace krys::boo::css
   struct LengthPercentageValidator
   {
     KRYS_NODISCARD constexpr static Maybe<LengthPercentageUnit>
-      Validate(CSSUnitType unitType, PropertyParserState &state, PropertyParserOptions options) noexcept
+      Validate(UnitType unitType, PropertyParserState &state, PropertyParserOptions options) noexcept
     {
       // NOTE: Percentages are handled explicitly by the PercentageValidator, so this only
       // needs to be concerned with the Length units.
@@ -34,7 +34,7 @@ namespace krys::boo::css
     }
   };
 
-  template <CSSRange R, typename V>
+  template <Range R, typename V>
   struct ConsumerDefinition<LengthPercentage<R, V>>
   {
     using FunctionToken = FunctionConsumerForCalcValues<LengthPercentage<R, V>>;

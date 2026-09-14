@@ -8,7 +8,7 @@
 namespace krys::boo::css
 {
   class TokenRange;
-  class CSSValue;
+  class Value;
   struct PropertyParserState;
   struct BorderImageComponents;
   struct BorderRadius;
@@ -41,13 +41,13 @@ namespace krys::boo::css
 
     // <'border-image-slice'> = [<number [0,∞]> | <percentage [0,∞]>]{1,4} && fill?
     // https://drafts.csswg.org/css-backgrounds/#propdef-border-image-slice
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeBorderImageSlice(
+    KRYS_NODISCARD RefPtr<Value> ConsumeBorderImageSlice(
       TokenRange &tokens, PropertyParserState &state,
       BorderImageSliceFillDefault fillDefault = BorderImageSliceFillDefault::No) noexcept;
 
     // <'border-image-width'> = [ <length-percentage [0,∞]> | <number [0,∞]> | auto ]{1,4}
     // https://drafts.csswg.org/css-backgrounds/#propdef-border-image-width
-    KRYS_NODISCARD RefPtr<CSSValue>
+    KRYS_NODISCARD RefPtr<Value>
       ConsumeBorderImageWidth(TokenRange &tokens, PropertyParserState &state,
                               BorderImageWidthOverridesWidthForLength overridesWidth =
                                 BorderImageWidthOverridesWidthForLength::No) noexcept;
@@ -61,29 +61,29 @@ namespace krys::boo::css
 
     // <bg-size> = [ <length-percentage [0,∞]> | auto ]{1,2} | cover | contain
     // https://drafts.csswg.org/css-backgrounds/#background-size
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeSingleBackgroundSize(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeSingleBackgroundSize(TokenRange &tokens,
                                                                 PropertyParserState &state) noexcept;
 
     // Non-standard.
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeSingleWebkitBackgroundSize(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeSingleWebkitBackgroundSize(TokenRange &tokens,
                                                                       PropertyParserState &state) noexcept;
 
     // <single-mask-size> = <bg-size>
     // https://drafts.fxtf.org/css-masking/#the-mask-size
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeSingleMaskSize(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeSingleMaskSize(TokenRange &tokens,
                                                           PropertyParserState &state) noexcept;
 
     // <repeat-style> = repeat-x | repeat-y | [repeat | space | round | no-repeat]{1,2}
     // https://drafts.csswg.org/css-backgrounds/#typedef-repeat-style
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeRepeatStyle(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeRepeatStyle(TokenRange &tokens,
                                                        PropertyParserState &state) noexcept;
 
     // <'box-shadow'> = none | <shadow>#
     // https://drafts.csswg.org/css-backgrounds/#propdef-box-shadow
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeBoxShadow(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeBoxShadow(TokenRange &tokens,
                                                      PropertyParserState &state) noexcept;
 
-    RefPtr<CSSValue> ConsumeWebkitBoxReflect(TokenRange &tokens, PropertyParserState &state) noexcept;
+    RefPtr<Value> ConsumeWebkitBoxReflect(TokenRange &tokens, PropertyParserState &state) noexcept;
 
     // MARK: Utilities for filling in rects / quads in the "margin" form.
 

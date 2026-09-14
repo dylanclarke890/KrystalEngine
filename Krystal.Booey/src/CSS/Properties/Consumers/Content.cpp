@@ -7,14 +7,14 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/String.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/CSSCounterValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValuePair.hpp"
+#include "Krystal.Booey/CSS/Values/CounterValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
-  RefPtr<CSSValue> ConsumeQuotes(TokenRange &tokens, PropertyParserState &) noexcept
+  RefPtr<Value> ConsumeQuotes(TokenRange &tokens, PropertyParserState &) noexcept
   {
     // <'quotes'> = auto | none | match-parent | [ <string> <string> ]+
     // https://drafts.csswg.org/css-content-3/#propdef-quotes
@@ -27,7 +27,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return ConsumeIdent(tokens);
     }
 
-    CSSValueListBuilder values;
+    ValueListBuilder values;
     while (!tokens.IsAtEnd())
     {
       auto parsedValue = ConsumeString(tokens);
@@ -41,13 +41,13 @@ namespace krys::boo::css::PropertyParserHelpers
 
     if (values.size() && !(values.size() % 2))
     {
-      return CSSValueList::CreateSpaceSeparated(krys::move(values));
+      return ValueList::CreateSpaceSeparated(krys::move(values));
     }
 
     return nullptr;
   }
 
-  static RefPtr<CSSValue> ConsumeCounterContent(TokenRange args, PropertyParserState &state) noexcept
+  static RefPtr<Value> ConsumeCounterContent(TokenRange args, PropertyParserState &state) noexcept
   {
     // counter()  =  counter( <counter-name>, <counter-style>? )
     // https://www.w3.org/TR/css-lists-3/#funcdef-counter
@@ -60,7 +60,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     CSSOMStringAtom identifier {*maybeIdent};
 
-    RefPtr<CSSValue> counterStyle;
+    RefPtr<Value> counterStyle;
     if (ConsumeComma(args))
     {
       counterStyle = ConsumeCounterStyle(args, state);
@@ -72,7 +72,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     if (!counterStyle)
     {
-      counterStyle = CSSPrimitiveValue::Create(ValueId::Decimal);
+      counterStyle = PrimitiveValue::Create(ValueId::Decimal);
     }
 
     if (!args.IsAtEnd())
@@ -80,10 +80,10 @@ namespace krys::boo::css::PropertyParserHelpers
       return nullptr;
     }
 
-    return CSSCounterValue::Create(krys::move(identifier), CSSOMStringAtom::Null(), krys::move(counterStyle));
+    return CounterValue::Create(krys::move(identifier), CSSOMStringAtom::Null(), krys::move(counterStyle));
   }
 
-  KRYS_NODISCARD static RefPtr<CSSValue> ConsumeCountersContent(TokenRange args,
+  KRYS_NODISCARD static RefPtr<Value> ConsumeCountersContent(TokenRange args,
                                                                 PropertyParserState &state) noexcept
   {
     // counters() = counters( <counter-name>, <string>, <counter-style>? )
@@ -103,7 +103,7 @@ namespace krys::boo::css::PropertyParserHelpers
     CSSOMStringAtom separator = args.Consume().IdentCodePoints();
     args.DiscardWhitespace();
 
-    RefPtr<CSSValue> counterStyle;
+    RefPtr<Value> counterStyle;
     if (ConsumeComma(args))
     {
       counterStyle = ConsumeCounterStyle(args, state);
@@ -115,7 +115,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     if (!counterStyle)
     {
-      counterStyle = CSSPrimitiveValue::Create(ValueId::Decimal);
+      counterStyle = PrimitiveValue::Create(ValueId::Decimal);
     }
 
     if (!args.IsAtEnd())
@@ -123,10 +123,10 @@ namespace krys::boo::css::PropertyParserHelpers
       return nullptr;
     }
 
-    return CSSCounterValue::Create(krys::move(identifier), krys::move(separator), krys::move(counterStyle));
+    return CounterValue::Create(krys::move(identifier), krys::move(separator), krys::move(counterStyle));
   }
 
-  RefPtr<CSSValue> ConsumeContent(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeContent(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // Standard says this should be:
     //
@@ -144,12 +144,12 @@ namespace krys::boo::css::PropertyParserHelpers
       AltText
     };
 
-    auto ConsumeContentList = [&](CSSValueListBuilder &values, ContentListType type) -> bool
+    auto ConsumeContentList = [&](ValueListBuilder &values, ContentListType type) -> bool
     {
       bool shouldEnd = false;
       do
       {
-        RefPtr<CSSValue> parsedValue = ConsumeString(tokens);
+        RefPtr<Value> parsedValue = ConsumeString(tokens);
         if (type == ContentListType::VisibleContent)
         {
           if (!parsedValue)
@@ -204,7 +204,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return true;
     };
 
-    CSSValueListBuilder visibleContent;
+    ValueListBuilder visibleContent;
     if (!ConsumeContentList(visibleContent, ContentListType::VisibleContent))
     {
       return nullptr;
@@ -213,17 +213,17 @@ namespace krys::boo::css::PropertyParserHelpers
     // Consume alt-text content if there is any.
     if (ConsumeSlash(tokens))
     {
-      CSSValueListBuilder altText;
+      ValueListBuilder altText;
       if (!ConsumeContentList(altText, ContentListType::AltText))
       {
         return nullptr;
       }
 
-      return CSSValuePair::CreateSlashSeparated(
-        CSSValueList::CreateSpaceSeparated(krys::move(visibleContent)),
-        CSSValueList::CreateSpaceSeparated(krys::move(altText)));
+      return ValuePair::CreateSlashSeparated(
+        ValueList::CreateSpaceSeparated(krys::move(visibleContent)),
+        ValueList::CreateSpaceSeparated(krys::move(altText)));
     }
 
-    return CSSValueList::CreateSpaceSeparated(krys::move(visibleContent));
+    return ValueList::CreateSpaceSeparated(krys::move(visibleContent));
   }
 }

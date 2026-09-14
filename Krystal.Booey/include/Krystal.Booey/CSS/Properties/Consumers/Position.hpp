@@ -2,14 +2,14 @@
 
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/CSSPosition.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/Position.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::css
 {
   class TokenRange;
-  class CSSValue;
+  class Value;
   struct PropertyParserState;
 
   namespace PropertyParserHelpers
@@ -17,38 +17,38 @@ namespace krys::boo::css
     // MARK: <position> | <bg-position>
     // https://drafts.csswg.org/css-values/#position
 
-    // MARK: <position> (CSSValue)
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumePosition(TokenRange &tokens,
+    // MARK: <position> (Value)
+    KRYS_NODISCARD RefPtr<Value> ConsumePosition(TokenRange &tokens,
                                                     PropertyParserState &state) noexcept;
 
-    // MARK: <position-x> (CSSValue)
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumePositionX(TokenRange &tokens,
+    // MARK: <position-x> (Value)
+    KRYS_NODISCARD RefPtr<Value> ConsumePositionX(TokenRange &tokens,
                                                      PropertyParserState &state) noexcept;
 
-    // MARK: <position-y> (CSSValue)
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumePositionY(TokenRange &tokens,
+    // MARK: <position-y> (Value)
+    KRYS_NODISCARD RefPtr<Value> ConsumePositionY(TokenRange &tokens,
                                                      PropertyParserState &state) noexcept;
 
     // MARK: <position> (unresolved)
-    KRYS_NODISCARD Maybe<CSSPosition> ConsumePositionUnresolved(TokenRange &tokens,
+    KRYS_NODISCARD Maybe<Position> ConsumePositionUnresolved(TokenRange &tokens,
                                                                 PropertyParserState &state) noexcept;
 
     // MARK: <bg-position> (unresolved)
-    KRYS_NODISCARD Maybe<CSSPosition>
+    KRYS_NODISCARD Maybe<Position>
       ConsumeBackgroundPositionUnresolved(TokenRange &tokens, PropertyParserState &state) noexcept;
 
     // MARK: <position-x> (unresolved)
-    KRYS_NODISCARD Maybe<CSSPositionX> ConsumePositionXUnresolved(TokenRange &tokens,
+    KRYS_NODISCARD Maybe<PositionX> ConsumePositionXUnresolved(TokenRange &tokens,
                                                                   PropertyParserState &state) noexcept;
 
     // MARK: <position-y> (unresolved)
-    KRYS_NODISCARD Maybe<CSSPositionY> ConsumePositionYUnresolved(TokenRange &tokens,
+    KRYS_NODISCARD Maybe<PositionY> ConsumePositionYUnresolved(TokenRange &tokens,
                                                                   PropertyParserState &state) noexcept;
 
     // MARK: Subset / Special case parsers.
 
     // NOTE: This is only used by the `<-webkit-radial-gradient()>` and `<transform-origin>` parsers.
-    KRYS_NODISCARD Maybe<CSSPosition>
+    KRYS_NODISCARD Maybe<Position>
       ConsumeOneOrTwoComponentPositionUnresolved(TokenRange &tokens,
                                                  PropertyParserState &state) noexcept;
 

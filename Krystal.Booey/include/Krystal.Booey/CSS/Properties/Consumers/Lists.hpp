@@ -6,17 +6,17 @@ namespace krys::boo::css
 {
   class TokenRange;
   struct PropertyParserState;
-  class CSSValue;
+  class Value;
 
   namespace PropertyParserHelpers
   {
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeCounterReset(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeCounterReset(TokenRange &tokens,
                                                         PropertyParserState &state) noexcept;
 
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeCounterIncrement(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeCounterIncrement(TokenRange &tokens,
                                                             PropertyParserState &state) noexcept;
 
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeCounterSet(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeCounterSet(TokenRange &tokens,
                                                       PropertyParserState &state) noexcept;
   }
 }

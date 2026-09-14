@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/CSSValueTypes.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/CSSPrimitiveNumericTypes.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
+#include "Krystal.Booey/CSS/Values/Types.hpp"
 
 namespace krys::boo::css
 {
@@ -34,12 +34,12 @@ namespace krys::boo::css
       constexpr bool operator==(const Kind &) const noexcept = default;
     };
 
-    using JumpStart = Kind<Integer<CSSRange {1, CSSRange::Inf}>, keywords::JumpStart>;
-    using JumpEnd = Kind<Integer<CSSRange {1, CSSRange::Inf}>, keywords::JumpEnd, ShouldSerializeKeyword::No>;
-    using JumpBoth = Kind<Integer<CSSRange {1, CSSRange::Inf}>, keywords::JumpBoth>;
-    using Start = Kind<Integer<CSSRange {1, CSSRange::Inf}>, keywords::Start>;
-    using End = Kind<Integer<CSSRange {1, CSSRange::Inf}>, keywords::End, ShouldSerializeKeyword::No>;
-    using JumpNone = Kind<Integer<CSSRange {2, CSSRange::Inf}>, keywords::JumpNone>;
+    using JumpStart = Kind<Integer<Range {1, Range::Inf}>, keywords::JumpStart>;
+    using JumpEnd = Kind<Integer<Range {1, Range::Inf}>, keywords::JumpEnd, ShouldSerializeKeyword::No>;
+    using JumpBoth = Kind<Integer<Range {1, Range::Inf}>, keywords::JumpBoth>;
+    using Start = Kind<Integer<Range {1, Range::Inf}>, keywords::Start>;
+    using End = Kind<Integer<Range {1, Range::Inf}>, keywords::End, ShouldSerializeKeyword::No>;
+    using JumpNone = Kind<Integer<Range {2, Range::Inf}>, keywords::JumpNone>;
 
     Variant<JumpStart, JumpEnd, JumpBoth, Start, End, JumpNone> value;
 
@@ -78,5 +78,5 @@ namespace std
 }
 
 template <typename T, typename K, auto shouldSerializeKeyword>
-constexpr bool
-  krys::boo::css::TreatAsTupleLike<krys::boo::css::StepsEasingParameters::Kind<T, K, shouldSerializeKeyword>> = true;
+constexpr bool krys::boo::css::TreatAsTupleLike<
+  krys::boo::css::StepsEasingParameters::Kind<T, K, shouldSerializeKeyword>> = true;

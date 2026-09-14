@@ -7,7 +7,7 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/PercentageDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/Easing/CSSEasingFunctionValue.hpp"
+#include "Krystal.Booey/CSS/Values/Easing/EasingFunctionValue.hpp"
 #include "Krystal.Booey/CSS/Values/Easing/EasingFunction.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
@@ -37,7 +37,7 @@ namespace krys::boo::css::PropertyParserHelpers
     // Stash args so we can re-parse if we get `jump-none`.
     auto stashedArgs = args;
 
-    auto steps = MetaConsumer<Integer<CSSRange {1, CSSRange::Inf}>>::Consume(args, state);
+    auto steps = MetaConsumer<Integer<Range {1, Range::Inf}>>::Consume(args, state);
     if (!steps)
     {
       return {};
@@ -67,7 +67,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
           // Re-parse `steps` to account for different type requirement.
           auto stepsJumpNone =
-            MetaConsumer<Integer<CSSRange {2, CSSRange::Inf}>>::Consume(stashedArgs, state);
+            MetaConsumer<Integer<Range {2, Range::Inf}>>::Consume(stashedArgs, state);
           if (!stepsJumpNone)
           {
             return {};
@@ -349,14 +349,14 @@ namespace krys::boo::css::PropertyParserHelpers
         tokens.Discard();
         tokens.DiscardWhitespace();
         return EasingFunction {StepsEasingFunction {
-          .parameters = {StepsEasingParameters::Start {Integer<CSSRange {1, CSSRange::Inf}> {1}}}}};
+          .parameters = {StepsEasingParameters::Start {Integer<Range {1, Range::Inf}> {1}}}}};
       }
       case ValueId::StepEnd:
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
         return EasingFunction {StepsEasingFunction {
-          .parameters = {StepsEasingParameters::End {Integer<CSSRange {1, CSSRange::Inf}> {1}}}}};
+          .parameters = {StepsEasingParameters::End {Integer<Range {1, Range::Inf}> {1}}}}};
       }
       default:
       {
@@ -391,9 +391,9 @@ namespace krys::boo::css::PropertyParserHelpers
     return {};
   }
 
-  RefPtr<CSSValue> ConsumeEasingFunction(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeEasingFunction(TokenRange &tokens, PropertyParserState &state) noexcept
   {
-    // Avoid allocation of a CSSEasingFunctionValue when the result is a just a value ID.
+    // Avoid allocation of a EasingFunctionValue when the result is a just a value ID.
     switch (tokens.Peek().ValueId())
     {
       case ValueId::Linear:
@@ -412,7 +412,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     if (auto value = ConsumeUnresolvedEasingFunction(tokens, state))
     {
-      return CSSEasingFunctionValue::Create(krys::move(*value));
+      return EasingFunctionValue::Create(krys::move(*value));
     }
 
     return {};

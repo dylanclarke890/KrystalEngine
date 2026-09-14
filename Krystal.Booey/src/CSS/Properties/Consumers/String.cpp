@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/String.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
@@ -17,7 +17,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return token.IdentCodePoints();
   }
 
-  RefPtr<CSSPrimitiveValue> ConsumeString(TokenRange &tokens) noexcept
+  RefPtr<PrimitiveValue> ConsumeString(TokenRange &tokens) noexcept
   {
     if (tokens.Peek().Type() != TokenType::String)
     {
@@ -27,6 +27,6 @@ namespace krys::boo::css::PropertyParserHelpers
     auto &token = tokens.Consume();
     tokens.DiscardWhitespace();
 
-    return CSSPrimitiveValue::Create(CSSOMString(token.IdentCodePoints()));
+    return PrimitiveValue::Create(CSSOMString(token.IdentCodePoints()));
   }
 }

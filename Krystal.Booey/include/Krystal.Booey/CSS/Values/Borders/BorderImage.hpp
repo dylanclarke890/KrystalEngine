@@ -4,17 +4,17 @@
 
 namespace krys::boo::css
 {
-  class CSSValue;
-  class CSSValueList;
+  class Value;
+  class ValueList;
 
   struct BorderImageComponents
   {
-    RefPtr<CSSValue> Source;
-    RefPtr<CSSValue> Slice;
-    RefPtr<CSSValue> Width;
-    RefPtr<CSSValue> Outset;
-    RefPtr<CSSValue> Repeat;
+    RefPtr<Value> Source;
+    RefPtr<Value> Slice;
+    RefPtr<Value> Width;
+    RefPtr<Value> Outset;
+    RefPtr<Value> Repeat;
   };
 
-  KRYS_NODISCARD Ref<CSSValueList> CreateBorderImageValue(BorderImageComponents &&components) noexcept;
+  KRYS_NODISCARD Ref<ValueList> CreateBorderImageValue(BorderImageComponents &&components) noexcept;
 }

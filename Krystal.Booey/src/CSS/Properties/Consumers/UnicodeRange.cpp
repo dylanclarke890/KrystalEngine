@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/UnicodeRange.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSUnicodeRangeValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/UnicodeRangeValue.hpp"
 #include "Krystal.Core/Text/Encodings/Decode.hpp"
 #include "Krystal.Core/Text/Encodings/Encode.hpp"
 #include "Krystal.Core/Text/Encodings/UTF.hpp"
@@ -212,7 +212,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return UnicodeRange {start, end};
   }
 
-  RefPtr<CSSValue> ConsumeUnicodeRangeToken(TokenRange &tokens) noexcept
+  RefPtr<Value> ConsumeUnicodeRangeToken(TokenRange &tokens) noexcept
   {
     auto rangeCopy = tokens;
 
@@ -227,6 +227,6 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     tokens = rangeCopy;
-    return CSSUnicodeRangeValue::Create(unicodeRange->start, unicodeRange->end);
+    return UnicodeRangeValue::Create(unicodeRange->start, unicodeRange->end);
   }
 }

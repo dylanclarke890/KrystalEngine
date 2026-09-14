@@ -1,13 +1,13 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/ViewTransition.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueListBuilder.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
-  RefPtr<CSSValue> ConsumeViewTransitionTypes(TokenRange &tokens, PropertyParserState &) noexcept
+  RefPtr<Value> ConsumeViewTransitionTypes(TokenRange &tokens, PropertyParserState &) noexcept
   {
     // <'types'> = none | <custom-ident>+
     // https://www.w3.org/TR/css-view-transitions-2/#descdef-view-transition-types
@@ -17,7 +17,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return ConsumeIdent(tokens);
     }
 
-    CSSValueListBuilder list;
+    ValueListBuilder list;
     do
     {
       if (tokens.Peek().ValueId() == ValueId::None)
@@ -39,6 +39,6 @@ namespace krys::boo::css::PropertyParserHelpers
       list.push_back(krys::move(type));
     } while (!tokens.IsAtEnd());
 
-    return CSSValueList::CreateSpaceSeparated(krys::move(list));
+    return ValueList::CreateSpaceSeparated(krys::move(list));
   }
 }

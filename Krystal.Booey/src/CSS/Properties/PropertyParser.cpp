@@ -1,13 +1,14 @@
 ﻿#include "Krystal.Booey/CSS/Properties/PropertyParser.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyConsumer.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/IsGlobalKeyword.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 
 namespace krys::boo::css
 {
   namespace
   {
-    KRYS_NODISCARD RefPtr<CSSPrimitiveValue> ConsumeCSSWideKeywordValue(TokenRange &tokens) noexcept
+    KRYS_NODISCARD RefPtr<PrimitiveValue> ConsumeCSSWideKeywordValue(TokenRange &tokens) noexcept
     {
       auto tokensCopy = tokens;
       auto &identifier = tokensCopy.Consume();
@@ -18,13 +19,13 @@ namespace krys::boo::css
       }
 
       auto valueId = FindValueKeyword(identifier.IdentCodePoints());
-      if (!CSSValue::IsCSSWideKeyword(valueId))
+      if (!IsGlobalKeyword(valueId))
       {
         return nullptr;
       }
 
       tokens = tokensCopy;
-      return CSSPrimitiveValue::Create(valueId);
+      return PrimitiveValue::Create(valueId);
     }
   }
 

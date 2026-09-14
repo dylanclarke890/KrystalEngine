@@ -2,12 +2,12 @@
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/CSSAttrValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/AttrValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
-  RefPtr<CSSValue> ConsumeAttr(TokenRange tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeAttr(TokenRange tokens, PropertyParserState &state) noexcept
   {
     // Standard says this should be:
     //
@@ -42,10 +42,10 @@ namespace krys::boo::css::PropertyParserHelpers
       return nullptr;
     }
 
-    RefPtr<CSSValue> fallback;
+    RefPtr<Value> fallback;
     if (tokens.Peek().Type() == TokenType::String)
     {
-      fallback = CSSPrimitiveValue::Create(tokens.Consume().IdentCodePoints());
+      fallback = PrimitiveValue::Create(tokens.Consume().IdentCodePoints());
       tokens.DiscardWhitespace();
     }
 
@@ -54,10 +54,10 @@ namespace krys::boo::css::PropertyParserHelpers
       return nullptr;
     }
 
-    auto attr = CSSAttrValue::Create(krys::move(attrName), krys::move(fallback));
+    auto attr = AttrValue::Create(krys::move(attrName), krys::move(fallback));
 
-    // FIXME: Consider moving to a CSSFunctionValue with a custom-ident rather than a special CSS_ATTR
+    // FIXME: Consider moving to a FunctionValue with a custom-ident rather than a special CSS_ATTR
     // primitive value.
-    return CSSPrimitiveValue::Create(krys::move(attr));
+    return PrimitiveValue::Create(krys::move(attr));
   }
 }

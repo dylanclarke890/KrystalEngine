@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/CSSWideKeyword.hpp"
+#include "Krystal.Booey/CSS/Values/IsGlobalKeyword.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
@@ -32,7 +32,7 @@ namespace krys::boo::css
   KRYS_NODISCARD constexpr bool IsValidCustomIdentifier(ValueId valueId) noexcept
   {
     // "default" is obsolete as a CSS-wide keyword but is still not allowed as a custom identifier.
-    return !IsCSSWideKeyword(valueId) && valueId != ValueId::Default;
+    return !IsGlobalKeyword(valueId) && valueId != ValueId::Default;
   }
 
   /// @see https://drafts.csswg.org/css-conditional-5/#propdef-container-name

@@ -1,4 +1,4 @@
-{
+﻿{
   "instructions": [
     "CSS Properties",
     "",
@@ -2882,7 +2882,7 @@
         "render-style-storage-container": "physical-group",
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::BorderRadiusValue",
-        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=CSSValuePair default=previous)"
+        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=ValuePair default=previous)"
       },
       "specification": {
         "module": "css-backgrounds",
@@ -2912,7 +2912,7 @@
         "render-style-storage-container": "physical-group",
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::BorderRadiusValue",
-        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=CSSValuePair default=previous)"
+        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=ValuePair default=previous)"
       },
       "specification": {
         "module": "css-backgrounds",
@@ -3032,7 +3032,7 @@
         },
         "skip-style-builder": true,
         "disables-native-appearance": true,
-        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=CSSValuePair default=previous)"
+        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=ValuePair default=previous)"
       },
       "specification": {
         "module": "css-logical-props",
@@ -3049,7 +3049,7 @@
         },
         "skip-style-builder": true,
         "disables-native-appearance": true,
-        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=CSSValuePair default=previous)"
+        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=ValuePair default=previous)"
       },
       "specification": {
         "module": "css-logical-props",
@@ -3089,7 +3089,7 @@
         "render-style-storage-container": "struct",
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::BorderImageOutset",
-        "parser-grammar": "[ <number [0,inf]> | <length [0,inf]> ]{1,4}@(type=CSSQuadValue no-single-item-opt)",
+        "parser-grammar": "[ <number [0,inf]> | <length [0,inf]> ]{1,4}@(type=QuadValue no-single-item-opt)",
         "parser-exported": true
       },
       "specification": {
@@ -3112,7 +3112,7 @@
         "render-style-storage-container": "struct",
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::BorderImageRepeat",
-        "parser-grammar": "[ stretch | repeat | round | space ]{1,2}@(type=CSSValuePair default=previous)",
+        "parser-grammar": "[ stretch | repeat | round | space ]{1,2}@(type=ValuePair default=previous)",
         "parser-exported": true
       },
       "specification": {
@@ -3739,7 +3739,7 @@
         },
         "skip-style-builder": true,
         "disables-native-appearance": true,
-        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=CSSValuePair default=previous)"
+        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=ValuePair default=previous)"
       },
       "specification": {
         "module": "css-logical-props",
@@ -3756,7 +3756,7 @@
         },
         "skip-style-builder": true,
         "disables-native-appearance": true,
-        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=CSSValuePair default=previous)"
+        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=ValuePair default=previous)"
       },
       "specification": {
         "module": "css-logical-props",
@@ -3855,7 +3855,7 @@
         "render-style-storage-container": "physical-group",
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::BorderRadiusValue",
-        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=CSSValuePair default=previous)"
+        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=ValuePair default=previous)"
       },
       "specification": {
         "module": "css-backgrounds",
@@ -3885,7 +3885,7 @@
         "render-style-storage-container": "physical-group",
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::BorderRadiusValue",
-        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=CSSValuePair default=previous)"
+        "parser-grammar": "<length-percentage [0,inf]>{1,2}@(type=ValuePair default=previous)"
       },
       "specification": {
         "module": "css-backgrounds",
@@ -5968,7 +5968,7 @@
         "render-style-storage-container": "struct",
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::MaskBorderOutset",
-        "parser-grammar": "[ <number [0,inf]> | <length [0,inf]> ]{1,4}@(type=CSSQuadValue no-single-item-opt)"
+        "parser-grammar": "[ <number [0,inf]> | <length [0,inf]> ]{1,4}@(type=QuadValue no-single-item-opt)"
       },
       "specification": {
         "module": "css-masking",
@@ -5990,7 +5990,7 @@
         "render-style-storage-container": "struct",
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::MaskBorderRepeat",
-        "parser-grammar": "[ stretch | repeat | round | space ]{1,2}@(type=CSSValuePair default=previous)"
+        "parser-grammar": "[ stretch | repeat | round | space ]{1,2}@(type=ValuePair default=previous)"
       },
       "specification": {
         "module": "css-masking",
@@ -6962,7 +6962,7 @@
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::OffsetRotate",
-        "parser-grammar": "[ [ auto | reverse ] || <angle> ]@(type=CSSOffsetRotateValue)"
+        "parser-grammar": "[ [ auto | reverse ] || <angle> ]@(type=OffsetRotateValue)"
       },
       "specification": {
         "module": "css-motion-path",
@@ -9125,7 +9125,7 @@
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::ContainIntrinsicSize",
-        "parser-grammar": "[ auto? [ none | <length [0,inf]> ] ]@(type=CSSValuePair)",
+        "parser-grammar": "[ auto? [ none | <length [0,inf]> ] ]@(type=ValuePair)",
         "parser-exported": true
       },
       "specification": {
@@ -9145,7 +9145,7 @@
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::ContainIntrinsicSize",
-        "parser-grammar": "[ auto? [ none | <length [0,inf]> ] ]@(type=CSSValuePair)",
+        "parser-grammar": "[ auto? [ none | <length [0,inf]> ] ]@(type=ValuePair)",
         "parser-exported": true
       },
       "specification": {
@@ -9163,7 +9163,7 @@
           "name": "contain-intrinsic-size",
           "resolver": "block"
         },
-        "parser-grammar": "[ auto? [ none | <length [0,inf]> ] ]@(type=CSSValuePair)"
+        "parser-grammar": "[ auto? [ none | <length [0,inf]> ] ]@(type=ValuePair)"
       },
       "specification": {
         "module": "css-sizing",
@@ -9180,7 +9180,7 @@
           "name": "contain-intrinsic-size",
           "resolver": "inline"
         },
-        "parser-grammar": "[ auto? [ none | <length [0,inf]> ] ]@(type=CSSValuePair)"
+        "parser-grammar": "[ auto? [ none | <length [0,inf]> ] ]@(type=ValuePair)"
       },
       "specification": {
         "module": "css-sizing",
@@ -10463,7 +10463,7 @@
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::WebkitInitialLetter",
-        "parser-grammar": "normal | <number [0,inf]>{1,2}@(type=CSSValuePair default=previous)",
+        "parser-grammar": "normal | <number [0,inf]>{1,2}@(type=ValuePair default=previous)",
         "parser-grammar-comment": "Spec does not match our implementation. Spec is 'normal | [ <number [1,inf]> <integer [1,inf]> ] | [ <number [1,inf]> && [ drop | raise ]? ]'"
       },
       "status": {
@@ -11777,7 +11777,7 @@
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::ScrollSnapAlign",
-        "parser-grammar": "[ none | start | end | center ]{1,2}@(type=CSSValuePair default=previous)"
+        "parser-grammar": "[ none | start | end | center ]{1,2}@(type=ValuePair default=previous)"
       },
       "specification": {
         "module": "css-scroll-snap",
@@ -11891,7 +11891,7 @@
         "parser-function": "ConsumeScrollbarColor",
         "parser-grammar": "auto | <color>{2}",
         "parser-grammar-unused": true,
-        "parser-grammar-unused-reason": "Needs support for non-coalescing CSSValuePair."
+        "parser-grammar-unused-reason": "Needs support for non-coalescing ValuePair."
       },
       "specification": {
         "module": "css-scrollbars",
@@ -11909,7 +11909,7 @@
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::ScrollbarGutter",
-        "parser-grammar": "auto | [ stable && both-edges? ]@(type=CSSValuePair)"
+        "parser-grammar": "auto | [ stable && both-edges? ]@(type=ValuePair)"
       },
       "specification": {
         "module": "css-overflow",
@@ -12516,7 +12516,7 @@
           "parser-function": "ConsumeCounterStyleRange",
           "parser-grammar": "[ [ <integer> | infinite ]{2} ]# | auto",
           "parser-grammar-unused": true,
-          "parser-grammar-unused-reason": "Needs support for non-coalescing CSSValuePair and custom validation of lists."
+          "parser-grammar-unused-reason": "Needs support for non-coalescing ValuePair and custom validation of lists."
         },
         "specification": {
           "module": "css-counter-styles",
@@ -12744,7 +12744,7 @@
       },
       "override-colors": {
         "codegen-properties": {
-          "parser-grammar": "[ <integer [0,inf]> <color allowed-types=absolute> ]@(type=CSSValuePair)#@(no-single-item-opt)"
+          "parser-grammar": "[ <integer [0,inf]> <color allowed-types=absolute> ]@(type=ValuePair)#@(no-single-item-opt)"
         },
         "specification": {
           "module": "css-fonts-4",
@@ -12755,7 +12755,7 @@
     "@page": {
       "size": {
         "codegen-properties": {
-          "parser-grammar": "<length [0,inf]>{1,2}@(type=CSSValuePair) | auto | [ <page-size> || [ portrait | landscape ] ]@(type=CSSValuePair)"
+          "parser-grammar": "<length [0,inf]>{1,2}@(type=ValuePair) | auto | [ <page-size> || [ portrait | landscape ] ]@(type=ValuePair)"
         },
         "specification": {
           "module": "css-page",
@@ -13849,7 +13849,7 @@
       }
     },
     "<transform-list>": {
-      "grammar": "<transform-function>+@(type=CSSTransformListValue no-single-item-opt)",
+      "grammar": "<transform-function>+@(type=TransformListValue no-single-item-opt)",
       "exported": true,
       "specification": {
         "module": "css-transforms",
@@ -14131,7 +14131,7 @@
       "grammar-function": "ConsumeSingleViewTimelineInsetItem",
       "grammar": "<single-view-timeline-inset>{1,2}",
       "grammar-unused": true,
-      "grammar-unused-reason": "Needs support for non-coalescing CSSValuePair.",
+      "grammar-unused-reason": "Needs support for non-coalescing ValuePair.",
       "specification": {
         "module": "scroll-animations",
         "url": "https://drafts.csswg.org/scroll-animations-1/#propdef-view-timeline-inset"

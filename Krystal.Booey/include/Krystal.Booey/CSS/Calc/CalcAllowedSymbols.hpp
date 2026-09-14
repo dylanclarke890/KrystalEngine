@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/Enums/CSSUnitType.hpp"
+#include "Krystal.Booey/CSS/Values/UnitType.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -13,7 +13,7 @@ namespace krys::boo::css
 {
   class CalcAllowedSymbols
   {
-    using AllowedSymbolsList = SmallList<std::tuple<ValueId, CSSUnitType>, 4uz>;
+    using AllowedSymbolsList = SmallList<std::tuple<ValueId, UnitType>, 4uz>;
 
   private:
     AllowedSymbolsList _table;
@@ -31,7 +31,7 @@ namespace krys::boo::css
     CalcAllowedSymbols &operator=(CalcAllowedSymbols &&) noexcept = default;
     CalcAllowedSymbols(CalcAllowedSymbols &&) noexcept = default;
 
-    KRYS_NODISCARD Maybe<CSSUnitType> Get(ValueId id) const noexcept
+    KRYS_NODISCARD Maybe<UnitType> Get(ValueId id) const noexcept
     {
       auto it = std::ranges::find_if(_table, [id](const auto &pair) { return std::get<0>(pair) == id; });
       if (it != _table.end())

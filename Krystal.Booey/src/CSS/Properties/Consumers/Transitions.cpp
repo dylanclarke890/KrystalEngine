@@ -2,13 +2,13 @@
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
   namespace
   {
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeSingleTransitionPropertyIdent(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeSingleTransitionPropertyIdent(TokenRange &tokens,
                                                                          const Token &token) noexcept
     {
       if (token.ValueId() == ValueId::All)
@@ -21,14 +21,14 @@ namespace krys::boo::css::PropertyParserHelpers
         tokens.Discard();
         tokens.DiscardWhitespace();
 
-        return CSSPrimitiveValue::Create(property);
+        return PrimitiveValue::Create(property);
       }
 
       return ConsumeCustomIdent(tokens);
     }
   }
 
-  RefPtr<CSSValue> ConsumeSingleTransitionPropertyOrNone(TokenRange &tokens,
+  RefPtr<Value> ConsumeSingleTransitionPropertyOrNone(TokenRange &tokens,
                                                          PropertyParserState &state) noexcept
   {
     // This variant of ConsumeSingleTransitionProperty is used for the slightly different
@@ -51,7 +51,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return ConsumeSingleTransitionPropertyIdent(tokens, token);
   }
 
-  RefPtr<CSSValue> ConsumeSingleTransitionProperty(TokenRange &tokens,
+  RefPtr<Value> ConsumeSingleTransitionProperty(TokenRange &tokens,
                                                    PropertyParserState &state) noexcept
   {
     // "The <custom-ident> production in <single-transition-property> also excludes the keyword

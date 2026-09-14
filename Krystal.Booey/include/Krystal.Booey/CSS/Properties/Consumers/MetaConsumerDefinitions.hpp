@@ -1,13 +1,13 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Calc/CalcAllowedSymbols.hpp"
-#include "Krystal.Booey/CSS/Calc/CSSCalcValue.hpp"
+#include "Krystal.Booey/CSS/Calc/Value.hpp"
 #include "Krystal.Booey/CSS/Parser/Token.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserOptions.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/CSSPrimitiveNumeric.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/CSSPrimitiveNumericRange.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/PrimitiveNumeric.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include <cassert>
@@ -72,15 +72,15 @@ namespace krys::boo::css
       return false;
     }
 
-    if constexpr (raw.Range.Min == -CSSRange::Inf && raw.Range.Max == CSSRange::Inf)
+    if constexpr (raw.Range.Min == -Range::Inf && raw.Range.Max == Range::Inf)
     {
       return true;
     }
-    else if constexpr (raw.Range.Min == 0 && raw.Range.Max == CSSRange::Inf)
+    else if constexpr (raw.Range.Min == 0 && raw.Range.Max == Range::Inf)
     {
       return raw.Value >= 0;
     }
-    else if constexpr (raw.Range.Min == -CSSRange::Inf && raw.Range.Max == 0)
+    else if constexpr (raw.Range.Min == -Range::Inf && raw.Range.Max == 0)
     {
       return raw.Value <= 0;
     }
@@ -99,15 +99,15 @@ namespace krys::boo::css
       return false;
     }
 
-    if constexpr (raw.Range.Min == -CSSRange::Inf && raw.Range.Max == CSSRange::Inf)
+    if constexpr (raw.Range.Min == -Range::Inf && raw.Range.Max == Range::Inf)
     {
       return true;
     }
-    else if constexpr (raw.Range.Min == 0 && raw.Range.Max == CSSRange::Inf)
+    else if constexpr (raw.Range.Min == 0 && raw.Range.Max == Range::Inf)
     {
       return raw.Value >= 0;
     }
-    else if constexpr (raw.Range.Min == -CSSRange::Inf && raw.Range.Max == 0)
+    else if constexpr (raw.Range.Min == -Range::Inf && raw.Range.Max == 0)
     {
       return raw.Value <= 0;
     }
@@ -123,15 +123,15 @@ namespace krys::boo::css
       return false;
     }
 
-    if constexpr (raw.Range.Min == -CSSRange::Inf && raw.Range.Max == CSSRange::Inf)
+    if constexpr (raw.Range.Min == -Range::Inf && raw.Range.Max == Range::Inf)
     {
       return true;
     }
-    else if constexpr (raw.Range.Max == CSSRange::Inf)
+    else if constexpr (raw.Range.Max == Range::Inf)
     {
       return raw.Value >= raw.Range.Min;
     }
-    else if constexpr (raw.Range.Min == -CSSRange::Inf)
+    else if constexpr (raw.Range.Min == -Range::Inf)
     {
       return raw.Value <= raw.Range.Max;
     }
@@ -176,7 +176,7 @@ namespace krys::boo::css
 
       auto &token = tokens.Peek();
 
-      auto validatedUnit = Validator::Validate(ParseCSSUnitType(token.Unit()), state, options);
+      auto validatedUnit = Validator::Validate(ParseUnitType(token.Unit()), state, options);
       if (!validatedUnit)
       {
         return null;
@@ -207,8 +207,7 @@ namespace krys::boo::css
   {
     constexpr static TokenType TokenType = TokenType::Percentage;
 
-    KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(TokenRange &tokens,
-                                                                 PropertyParserState &,
+    KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(TokenRange &tokens, PropertyParserState &,
                                                                  CalcAllowedSymbols,
                                                                  PropertyParserOptions options) noexcept
     {
@@ -239,8 +238,7 @@ namespace krys::boo::css
   {
     constexpr static TokenType TokenType = TokenType::Number;
 
-    KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(TokenRange &tokens,
-                                                                 PropertyParserState &,
+    KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(TokenRange &tokens, PropertyParserState &,
                                                                  CalcAllowedSymbols,
                                                                  PropertyParserOptions options) noexcept
     {
@@ -317,7 +315,7 @@ namespace krys::boo::css
       assert(tokens.Peek().Type() == TokenType::Function);
 
       auto rangeCopy = tokens;
-      if (auto value = CSSCalcValue::Parse(rangeCopy, state, Primitive::Category, Primitive::Range,
+      if (auto value = calc::Value::Parse(rangeCopy, state, Primitive::Category, Primitive::Range,
                                            krys::move(symbolsAllowed), options))
       {
         tokens = rangeCopy;
@@ -334,8 +332,8 @@ namespace krys::boo::css
   {
     constexpr static TokenType TokenType = TokenType::Ident;
 
-    KRYS_NODISCARD static Maybe<T> Consume(TokenRange &tokens, PropertyParserState &,
-                                           CalcAllowedSymbols, PropertyParserOptions) noexcept
+    KRYS_NODISCARD static Maybe<T> Consume(TokenRange &tokens, PropertyParserState &, CalcAllowedSymbols,
+                                           PropertyParserOptions) noexcept
     {
       assert(tokens.Peek().Type() == TokenType::Ident);
 

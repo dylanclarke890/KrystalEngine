@@ -20,7 +20,7 @@ KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::PropertyParserHelpers::AllowedImag
 
 namespace krys::boo::css
 {
-  class CSSValue;
+  class Value;
   class TokenRange;
   struct PropertyParserState;
 
@@ -29,13 +29,13 @@ namespace krys::boo::css
     // MARK: <image>
     // https://drafts.csswg.org/css-images-4/#image-values
 
-    KRYS_NODISCARD RefPtr<CSSValue>
+    KRYS_NODISCARD RefPtr<Value>
       ConsumeImage(TokenRange &tokens, PropertyParserState &state,
                    AllowedImageType allowedImageTypes = AllowedImageType::URLFunction
                                                         | AllowedImageType::ImageSet
                                                         | AllowedImageType::GeneratedImage) noexcept;
 
-    KRYS_NODISCARD RefPtr<CSSValue>
+    KRYS_NODISCARD RefPtr<Value>
       ConsumeImageOrNone(TokenRange &tokens, PropertyParserState &state,
                          AllowedImageType allowedImageTypes = AllowedImageType::URLFunction
                                                               | AllowedImageType::ImageSet

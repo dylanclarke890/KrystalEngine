@@ -6,7 +6,7 @@ namespace krys::boo::css
 {
   struct NumberValidator
   {
-    KRYS_NODISCARD constexpr static Maybe<NumberUnit> Validate(CSSUnitType unitType, PropertyParserState &,
+    KRYS_NODISCARD constexpr static Maybe<NumberUnit> Validate(UnitType unitType, PropertyParserState &,
                                                                PropertyParserOptions) noexcept
     {
       return UnitTraits<NumberUnit>::Validate(unitType);
@@ -19,7 +19,7 @@ namespace krys::boo::css
     }
   };
 
-  template <CSSRange R, typename V>
+  template <Range R, typename V>
   struct ConsumerDefinition<Number<R, V>>
   {
     using FunctionToken = FunctionConsumerForCalcValues<Number<R, V>>;

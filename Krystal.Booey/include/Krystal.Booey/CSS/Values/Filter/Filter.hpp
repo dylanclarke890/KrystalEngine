@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/CSSValueTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Filter/BlurFunction.hpp"
 #include "Krystal.Booey/CSS/Values/Filter/BrightnessFunction.hpp"
 #include "Krystal.Booey/CSS/Values/Filter/ContrastFunction.hpp"
@@ -12,6 +11,8 @@
 #include "Krystal.Booey/CSS/Values/Filter/OpacityFunction.hpp"
 #include "Krystal.Booey/CSS/Values/Filter/SaturateFunction.hpp"
 #include "Krystal.Booey/CSS/Values/Filter/SepiaFunction.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
+#include "Krystal.Booey/CSS/Values/Types.hpp"
 
 namespace krys::boo::css
 {
@@ -21,24 +22,24 @@ namespace krys::boo::css
                                   GrayscaleFunction, HueRotateFunction, InvertFunction, OpacityFunction,
                                   SaturateFunction, SepiaFunction, FilterReference>;
 
-  struct FilterValue
+  struct FilterData
   {
     FilterValueKind value;
 
     template <typename T>
     requires std::constructible_from<FilterValueKind, T>
-    FilterValue(T &&value) : value(std::forward<T>(value))
+    FilterData(T &&value) : value(std::forward<T>(value))
     {
     }
 
-    KRYS_FORWARD_VARIANT_FUNCTIONS(FilterValue, value)
+    KRYS_FORWARD_VARIANT_FUNCTIONS(FilterData, value)
 
-    bool operator==(const FilterValue &) const = default;
+    bool operator==(const FilterData &) const = default;
   };
 
   // <filter-value-list> = [ <filter-function> | <url> ]+
   // https://drafts.fxtf.org/filter-effects/#typedef-filter-value-list
-  using FilterValueList = SpaceSeparatedList<FilterValue>;
+  using FilterValueList = SpaceSeparatedList<FilterData>;
 
   // <'filter'> = none | <filter-value-list>
   // https://drafts.fxtf.org/filter-effects/#propdef-filter
@@ -48,5 +49,5 @@ namespace krys::boo::css
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::css::FilterValue)
+DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::css::FilterData)
 DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::css::Filter)

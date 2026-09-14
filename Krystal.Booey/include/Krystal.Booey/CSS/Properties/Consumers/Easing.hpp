@@ -6,7 +6,7 @@
 namespace krys::boo::css
 {
   class TokenRange;
-  class CSSValue;
+  class Value;
 
   struct PropertyParserState;
   struct EasingFunction;
@@ -21,8 +21,8 @@ namespace krys::boo::css
     KRYS_NODISCARD Maybe<EasingFunction>
       ConsumeUnresolvedEasingFunction(TokenRange &tokens, PropertyParserState &state) noexcept;
 
-    // MARK: <easing-function> consuming (CSSValue)
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeEasingFunction(TokenRange &tokens,
+    // MARK: <easing-function> consuming (Value)
+    KRYS_NODISCARD RefPtr<Value> ConsumeEasingFunction(TokenRange &tokens,
                                                           PropertyParserState &state) noexcept;
   }
 }

@@ -4,13 +4,13 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/List.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueListBuilder.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
-  RefPtr<CSSValue> ConsumePositionTryFallbacks(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumePositionTryFallbacks(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'position-try-fallbacks'> = none | [ [<dashed-ident> || <try-tactic>] | <'position-area'> ]#
     // https://drafts.csswg.org/css-anchor-position-1/#propdef-position-try-fallbacks
@@ -20,7 +20,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return result;
     }
 
-    auto ConsumeFallback = [&](TokenRange &tokens) -> RefPtr<CSSValue>
+    auto ConsumeFallback = [&](TokenRange &tokens) -> RefPtr<Value>
     {
       // Try to parse <'position-area'>
       auto rangeCopy = tokens;
@@ -59,14 +59,14 @@ namespace krys::boo::css::PropertyParserHelpers
         tryRuleIdent = ConsumeDashedIdentRaw(tokens);
       }
 
-      CSSValueListBuilder list;
+      ValueListBuilder list;
       if (tryRuleIdent)
       {
-        list.push_back(CSSPrimitiveValue::CreateCustomIdent(*tryRuleIdent));
+        list.push_back(PrimitiveValue::CreateCustomIdent(*tryRuleIdent));
       }
       for (auto tactic : tryTactics)
       {
-        list.push_back(CSSPrimitiveValue::Create(tactic));
+        list.push_back(PrimitiveValue::Create(tactic));
       }
 
       // At least one @position-try rule ident or tactic must be present.
@@ -75,7 +75,7 @@ namespace krys::boo::css::PropertyParserHelpers
         return nullptr;
       }
 
-      return CSSValueList::CreateSpaceSeparated(krys::move(list));
+      return ValueList::CreateSpaceSeparated(krys::move(list));
     };
 
     return ConsumeListSeparatedBy<',', OneOrMore, ListOptimization::SingleValue>(tokens, ConsumeFallback);

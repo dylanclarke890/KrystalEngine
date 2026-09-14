@@ -1,0 +1,536 @@
+﻿#pragma once
+
+#include "Krystal.Booey/CSS/Calc/Value.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/Concepts.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/NumericRaw.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/PrimitiveKeywordList.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/UnevaluatedCalc.hpp"
+#include "Krystal.Core/Concepts.hpp"
+#include "Krystal.Core/TypeTraits.hpp"
+#include <limits>
+
+namespace krys::boo::css
+{
+  // `PrimitiveData` is a bespoke implementation of `Variant<Numeric, Keywords...>`
+  // optimized for memory use by allowing numeric types with multiple unit representations
+  // (e.g. <length>, <angle>, etc.) to utilize multiple indices for a single smaller payload.
+  //
+  // FIXME: Generalize this concept to support arbitrary types through traits.
+
+  // MARK: - Concepts
+
+  // Concept for use checking if a `ChildPrimitiveData`'s types are a subset of
+  // `ParentPrimitiveData`'s types.
+  // FIXME: Currently limited to the case of Parent<NumericA, KeywordB, ...> and Child == NumericA.
+  template <typename ChildPrimitiveData, typename ParentPrimitiveData>
+  concept SubsumesChildPrimitiveData =
+    (!SameType<ChildPrimitiveData, ParentPrimitiveData>)
+    && (SameType<typename ChildPrimitiveData::Index,
+                 typename ParentPrimitiveData::Index::NumericType::Base::Index>);
+
+  // MARK: - Markable
+
+  struct PrimitiveDataEmptyToken
+  {
+    constexpr bool operator==(const PrimitiveDataEmptyToken &) const = default;
+  };
+
+  template <typename T>
+  struct PrimitiveDataMarkableTraits
+  {
+    KRYS_NODISCARD constexpr static bool IsEmptyValue(const T &value) noexcept
+    {
+      return value.IsEmpty();
+    }
+
+    KRYS_NODISCARD constexpr static T EmptyValue() noexcept
+    {
+      return T(PrimitiveDataEmptyToken {});
+    }
+  };
+
+  // MARK: - Index
+
+  template <Numeric N, PrimitiveKeyword... Ks>
+  struct PrimitiveDataIndex
+  {
+    using NumericType = N;
+    using Keywords = PrimitiveKeywordList<Ks...>;
+
+    using Raw = typename N::Raw;
+    using Calc = typename N::Calc;
+    using UnitType = typename N::UnitType;
+    using UnitTraits = typename N::UnitTraits;
+    using Storage = underlying_t<typename N::UnitType>;
+
+    // The potential values for the `index` are:
+    //  - 0 ... # of units - 1                              -> Raw
+    //  - # of units                                        -> Calc
+    //  - # of units + 1 ... # of units + # of keywords     -> Constant<Id>
+    //
+    // (... gap ...)
+    //
+    //  - max(index_type) - 1                               -> Empty (for Markable)
+    //  - max(index_type)                                   -> Moved from
+
+    constexpr static Storage IndexStorageForFirstRaw = 0uz;
+    constexpr static Storage IndexStorageForLastRaw = UnitTraits::Count - 1uz;
+    constexpr static Storage IndexStorageForCalc = UnitTraits::Count;
+    constexpr static Storage IndexStorageForFirstKeyword = UnitTraits::Count + 1uz;
+    constexpr static Storage IndexStorageForLastKeyword = UnitTraits::Count + Keywords::Count;
+    // (... gap ...)
+    constexpr static Storage IndexStorageForEmpty = std::numeric_limits<Storage>::max() - 1uz;
+    constexpr static Storage IndexStorageForMovedFrom = std::numeric_limits<Storage>::max();
+
+    KRYS_NODISCARD constexpr static Storage IndexStorageForUnit(UnitType unit) noexcept
+    {
+      return IndexStorageForFirstRaw + ToUnderlying(unit);
+    }
+
+    KRYS_NODISCARD static consteval Storage
+      IndexStorageForKeyword(ValidKeywordForList<Keywords> auto keyword) noexcept
+    {
+      return IndexStorageForFirstKeyword + Keywords::OffsetForKeyword(keyword);
+    }
+
+    static_assert(UnitTraits::Count + Keywords::Count + 2uz <= std::numeric_limits<Storage>::max());
+
+    // MARK: Construction
+
+    PrimitiveDataIndex(const PrimitiveDataIndex<N, Ks...> &) noexcept = default;
+
+    template <typename T>
+    requires(Keywords::Count != 0uz)
+            && (requires { requires SameType<T, PrimitiveDataIndex<typename N::Base>>; })
+    PrimitiveDataIndex(const T &other) : storage {other.storage}
+    {
+    }
+
+    template <typename T>
+    requires(Keywords::Count != 0uz)
+            && (requires { requires SameType<T, PrimitiveDataIndex<typename N::Base>>; })
+    PrimitiveDataIndex &operator=(const T &other)
+    {
+      storage = other.storage;
+      return *this;
+    }
+
+    constexpr explicit PrimitiveDataIndex(Storage storage) noexcept : storage {storage}
+    {
+    }
+
+    constexpr PrimitiveDataIndex(UnitType unit) noexcept : storage {IndexStorageForUnit(unit)}
+    {
+    }
+
+    constexpr PrimitiveDataIndex(const Raw &raw) noexcept : storage {IndexStorageForUnit(raw.Unit)}
+    {
+    }
+
+    constexpr PrimitiveDataIndex(const Calc &) noexcept : storage {IndexStorageForCalc}
+    {
+    }
+
+    constexpr PrimitiveDataIndex(ValidKeywordForList<Keywords> auto keyword) noexcept
+        : storage {IndexStorageForKeyword(keyword)}
+    {
+    }
+
+    constexpr PrimitiveDataIndex(PrimitiveDataEmptyToken) noexcept : storage {IndexStorageForEmpty}
+    {
+    }
+
+    // MARK: Assignment
+
+    PrimitiveDataIndex &operator=(const PrimitiveDataIndex<N, Ks...> &) noexcept = default;
+
+    // MARK: Raw Unit
+
+    constexpr typename NumericType::Raw::UnitType Unit() const noexcept
+    {
+      assert(IsRaw());
+      return static_cast<UnitType>(storage);
+    }
+
+    // MARK: Keyword
+
+    template <typename F>
+    constexpr decltype(auto) VisitKeyword(F &&f) const noexcept
+    {
+      assert(storage <= IndexStorageForLastKeyword);
+      return Keywords::VisitKeywordAtOffset(storage - IndexStorageForFirstKeyword, std::forward<F>(f));
+    }
+
+    // MARK: Predicates
+
+    constexpr bool IsRaw() const noexcept
+    {
+      return storage >= IndexStorageForFirstRaw && storage <= IndexStorageForLastRaw;
+    }
+
+    constexpr bool IsCalc() const noexcept
+    {
+      return storage == IndexStorageForCalc;
+    }
+
+    constexpr bool IsKeyword(ValidKeywordForList<Keywords> auto keyword) const noexcept
+    {
+      return storage == IndexStorageForKeyword(keyword);
+    }
+
+    constexpr bool IsEmpty() const noexcept
+    {
+      return storage == IndexStorageForEmpty;
+    }
+
+    constexpr bool IsMovedFrom() const noexcept
+    {
+      return storage == IndexStorageForMovedFrom;
+    }
+
+    void SetAsMovedFrom() noexcept
+    {
+      storage = IndexStorageForMovedFrom;
+    }
+
+    constexpr bool operator==(const PrimitiveDataIndex &) const noexcept = default;
+    constexpr bool operator==(Storage other) const noexcept
+    {
+      return storage == other;
+    }
+
+    Storage storage;
+  };
+
+  // MARK: - Payload
+
+  union PrimitiveDataPayload
+  {
+    double number;
+    calc::Value *calc;
+
+    PrimitiveDataPayload(double number) noexcept : number {number}
+    {
+    }
+
+    PrimitiveDataPayload(calc::Value *calc) noexcept : calc {calc}
+    {
+    }
+  };
+
+  // MARK: - PrimitiveData
+
+  template <Numeric N, PrimitiveKeyword... Ks>
+  struct PrimitiveData
+  {
+    using Index = PrimitiveDataIndex<N, Ks...>;
+    using Payload = PrimitiveDataPayload;
+
+    using Keywords = typename Index::Keywords;
+    using Raw = typename N::Raw;
+    using Calc = typename N::Calc;
+    using UnitType = typename N::UnitType;
+    using UnitTraits = typename N::UnitTraits;
+
+    Payload payload;
+    Index index;
+
+    PrimitiveData(Raw raw) noexcept : payload {raw.Value}, index {raw}
+    {
+    }
+
+    // TODO: fix this constructor
+    PrimitiveData(Calc calc) noexcept : payload {nullptr}, index {calc}
+    {
+    }
+
+    PrimitiveData(ValidKeywordForList<Keywords> auto keyword) noexcept : payload {0.0}, index {keyword}
+    {
+    }
+
+    PrimitiveData(PrimitiveDataEmptyToken token) noexcept : payload {0.0}, index {token}
+    {
+    }
+
+    PrimitiveData(const PrimitiveData &other) noexcept : payload {other.payload}, index {other.index}
+    {
+      if (IsCalc())
+      {
+        UnevaluatedCalcAddRef(payload.calc);
+      }
+    }
+
+    PrimitiveData(PrimitiveData &&other) noexcept : payload {other.payload}, index {other.index}
+    {
+      other.SetAsMovedFrom();
+    }
+
+    PrimitiveData &operator=(const PrimitiveData &other) noexcept
+    {
+      if (IsCalc())
+      {
+        UnevaluatedCalcSubRef(payload.calc);
+      }
+      if (other.IsCalc())
+      {
+        UnevaluatedCalcAddRef(other.payload.calc);
+      }
+
+      index = other.index;
+      payload = other.payload;
+
+      return *this;
+    }
+
+    PrimitiveData &operator=(PrimitiveData &&other) noexcept
+    {
+      if (IsCalc())
+      {
+        UnevaluatedCalcSubRef(payload.calc);
+      }
+
+      index = other.index;
+      payload = other.payload;
+
+      other.SetAsMovedFrom();
+
+      return *this;
+    }
+
+    // MARK: Constructor/Assignment for NumericType-only PrimitiveData
+    // Allows PrimitiveNumeric<T> to be efficiently assigned to PrimitiveNumericOrKeyword<T, Ks...>.
+
+    template <SubsumesChildPrimitiveData<PrimitiveData> T>
+    PrimitiveData(const T &other) noexcept : payload {other.payload}, index {other.index}
+    {
+      if (other.IsCalc())
+      {
+        UnevaluatedCalcAddRef(other.payload.calc);
+      }
+    }
+
+    template <SubsumesChildPrimitiveData<PrimitiveData> T>
+    PrimitiveData(T &&other) noexcept : payload {other.payload}, index {other.index}
+    {
+      other.SetAsMovedFrom();
+    }
+
+    template <SubsumesChildPrimitiveData<PrimitiveData> T>
+    PrimitiveData &operator=(const T &other) noexcept
+    {
+      if (IsCalc())
+      {
+        UnevaluatedCalcSubRef(payload.calc);
+      }
+      if (other.IsCalc())
+      {
+        UnevaluatedCalcAddRef(other.payload.calc);
+      }
+
+      index = other.index;
+      payload = other.payload;
+
+      return *this;
+    }
+
+    template <SubsumesChildPrimitiveData<PrimitiveData> T>
+    PrimitiveData &operator=(T &&other) noexcept
+    {
+      if (IsCalc())
+      {
+        UnevaluatedCalcSubRef(payload.calc);
+      }
+
+      index = other.index;
+      payload = other.payload;
+
+      other.SetAsMovedFrom();
+
+      return *this;
+    }
+
+    ~PrimitiveData() noexcept
+    {
+      if (IsCalc())
+      {
+        UnevaluatedCalcSubRef(payload.calc);
+      }
+    }
+
+    bool operator==(const PrimitiveData &other) const noexcept
+    {
+      if (index != other.index)
+      {
+        return false;
+      }
+
+      if (IsCalc())
+      {
+        return AsCalc() == other.AsCalc();
+      }
+
+      return payload.number == other.payload.number;
+    }
+
+    bool operator==(ValidKeywordForList<Keywords> auto other) const noexcept
+    {
+      return index == Index(other);
+    }
+
+    bool operator==(const Raw &raw) const
+    {
+      if (index != Index(raw))
+      {
+        return false;
+      }
+
+      krys_debug_assert(IsRaw());
+      return payload.number == raw.value;
+    }
+
+    bool operator==(const Calc &calc) const noexcept
+    {
+      if (!IsCalc())
+      {
+        return false;
+      }
+
+      return AsCalc() == calc;
+    }
+
+    template <typename T>
+    requires NumericRaw<T> && NestedUnitEnumOf<typename T::UnitType, UnitType>
+    constexpr bool operator==(const T &raw) const noexcept
+    {
+      if (index != Index(UnitUpcast<UnitType>(raw.Unit)))
+      {
+        return false;
+      }
+
+      krys_debug_assert(IsRaw());
+      return payload.number == raw.value;
+    }
+
+    template <UnitType unitValue>
+    bool operator==(const ValueLiteral<unitValue> &literal) const noexcept
+    {
+      if (index != Index(literal.Unit))
+      {
+        return false;
+      }
+
+      krys_debug_assert(IsRaw());
+      return payload.number == literal.value;
+    }
+
+    template <NestedUnitEnumOf<UnitType> E, E unitValue>
+    bool operator==(const ValueLiteral<unitValue> &literal) const noexcept
+    {
+      if (index != Index(UnitUpcast<UnitType>(literal.Unit)))
+      {
+        return false;
+      }
+
+      krys_debug_assert(IsRaw());
+      return payload.number == literal.value;
+    }
+
+    // MARK: Conditional Accessors
+
+    Maybe<Raw> raw() const noexcept
+    {
+      if (IsRaw())
+      {
+        return AsRaw();
+      }
+
+      return null;
+    }
+
+    Maybe<Calc> calc() const noexcept
+    {
+      if (IsCalc())
+      {
+        return AsCalc();
+      }
+
+      return null;
+    }
+
+    // MARK: Accessors
+
+    Raw AsRaw() const noexcept
+    {
+      assert(IsRaw());
+      return Raw {index.Unit(), payload.number};
+    }
+
+    Calc AsCalc() const noexcept
+    {
+      assert(IsCalc());
+      return Calc {*payload.calc};
+    }
+
+    constexpr bool IsRaw() const noexcept
+    {
+      return index.IsRaw();
+    }
+
+    constexpr bool IsCalc() const noexcept
+    {
+      return index.IsCalc();
+    }
+
+    constexpr bool IsKeyword(ValidKeywordForList<Keywords> auto keyword) const noexcept
+    {
+      return index.IsKeyword(keyword);
+    }
+
+    constexpr bool IsEmpty() const noexcept
+    {
+      return index.IsEmpty();
+    }
+
+    constexpr bool IsMovedFrom() const noexcept
+    {
+      return index.IsMovedFrom();
+    }
+
+    template <typename T>
+    bool HoldsAlternative() const noexcept
+    {
+      if constexpr (SameType<T, Calc>)
+      {
+        return index.IsCalc();
+      }
+      else if constexpr (SameType<T, Raw>)
+      {
+        return index.IsRaw();
+      }
+      else if constexpr (ValidKeywordForList<T, Keywords>)
+      {
+        return index.IsKeyword(T {});
+      }
+    }
+
+    template <typename F>
+    decltype(auto) Visit(F &&f) const noexcept
+    {
+      if (IsRaw())
+      {
+        return f(AsRaw());
+      }
+      if (IsCalc())
+      {
+        return f(AsCalc());
+      }
+      return index.VisitKeyword(std::forward<F>(f));
+    }
+
+    void SetAsMovedFrom() noexcept
+    {
+      index.SetAsMovedFrom();
+      payload.number = 0;
+    }
+  };
+}

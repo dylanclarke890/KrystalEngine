@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/Parser/InputStream.hpp"
 #include <catch_all.hpp>
 
-namespace krys::boo::dom::tests
+namespace krys::boo::html::tests
 {
   TEST_CASE("InputStream: basic iteration", "[HTML][InputStream]")
   {
@@ -121,19 +121,19 @@ namespace krys::boo::dom::tests
     InputStream stream;
     stream.Append(u8"aBcDeF", IsEOF(true));
 
-    auto result = stream.AdvancePast<false>(krys::Text::ASCIILiteral::From("aBc"));
+    auto result = stream.AdvancePast<false>("aBc");
     REQUIRE(result == InputStream::MatchResult::Matched);
     REQUIRE(stream.NextInputCharacter() == U'D');
 
-    result = stream.AdvancePast<>(krys::Text::ASCIILiteral::From("dE"));
+    result = stream.AdvancePast<>("dE");
     REQUIRE(result == InputStream::MatchResult::Matched);
     REQUIRE(stream.NextInputCharacter() == U'F');
 
-    result = stream.AdvancePast<>(krys::Text::ASCIILiteral::From("XYZ"));
+    result = stream.AdvancePast<>("XYZ");
     REQUIRE(result == InputStream::MatchResult::NotEnoughCharacters);
     REQUIRE(stream.NextInputCharacter() == U'F');
 
-    result = stream.AdvancePast<>(krys::Text::ASCIILiteral::From("G"));
+    result = stream.AdvancePast<>("G");
     REQUIRE(result == InputStream::MatchResult::DidNotMatch);
     REQUIRE(stream.NextInputCharacter() == U'F');
   }
@@ -206,7 +206,7 @@ namespace krys::boo::dom::tests
     }
 
     stream.Peek();
-    (void)stream.AdvancePast<false>(krys::Text::ASCIILiteral::From("text")); // 'text'
+    (void)stream.AdvancePast<false>("text");
     {
       const auto &loc = stream.GetCurrentLocation();
       REQUIRE(loc.Line == 4uz);

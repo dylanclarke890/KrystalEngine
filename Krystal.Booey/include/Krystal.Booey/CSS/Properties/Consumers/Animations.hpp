@@ -8,7 +8,7 @@
 namespace krys::boo::css
 {
   class TokenRange;
-  class CSSValue;
+  class Value;
   struct PropertyParserState;
 
   namespace PropertyParserHelpers
@@ -24,6 +24,6 @@ namespace krys::boo::css
 
     /// @grammar <keyframes-name>
     /// @see https://drafts.csswg.org/css-animations/#typedef-keyframes-name
-    RefPtr<CSSValue> ConsumeKeyframesName(TokenRange &tokens, PropertyParserState &state)noexcept;
+    RefPtr<Value> ConsumeKeyframesName(TokenRange &tokens, PropertyParserState &state)noexcept;
   }
 }

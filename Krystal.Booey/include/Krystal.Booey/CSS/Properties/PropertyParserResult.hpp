@@ -9,7 +9,7 @@
 
 namespace krys::boo::css
 {
-  class CSSValue;
+  class Value;
 
   /// @brief Represents the result of parsing a CSS property.
   struct PropertyParserResult
@@ -18,22 +18,22 @@ namespace krys::boo::css
 
     void AddProperty(Property &&property) noexcept;
 
-    // Bottleneck where the CSSValue is added to the CSSProperty vector.
+    // Bottleneck where the Value is added to the CSSProperty vector.
     void AddProperty(PropertyParserState &state, PropertyId property, PropertyId currentShorthand,
-                     RefPtr<CSSValue> &&value, IsImportant important,
+                     RefPtr<Value> &&value, IsImportant important,
                      IsImplicit implicit = IsImplicit(false)) noexcept;
 
 #pragma region Utils
 
     void AddPropertyForCurrentShorthand(PropertyParserState &state, PropertyId property,
-                                        RefPtr<CSSValue> &&value,
+                                        RefPtr<Value> &&value,
                                         IsImplicit implicit = IsImplicit(false)) noexcept;
 
     void AddPropertyForAllLonghandsOfShorthand(PropertyParserState &state, PropertyId shorthand,
-                                               RefPtr<CSSValue> &&value, IsImportant important,
+                                               RefPtr<Value> &&value, IsImportant important,
                                                IsImplicit implicit = IsImplicit(false)) noexcept;
 
-    void AddPropertyForAllLonghandsOfCurrentShorthand(PropertyParserState &, RefPtr<CSSValue> &&value,
+    void AddPropertyForAllLonghandsOfCurrentShorthand(PropertyParserState &, RefPtr<Value> &&value,
                                                       IsImplicit implicit = IsImplicit(false)) noexcept;
 
 #pragma endregion

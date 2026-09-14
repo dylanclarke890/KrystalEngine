@@ -75,7 +75,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
+    <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
@@ -214,6 +214,7 @@
     <ClCompile Include="tests\Maths\Transform.cpp" />
     <ClCompile Include="tests\Maths\Vector.cpp" />
     <ClCompile Include="tests\RefCounted.cpp" />
+    <ClCompile Include="tests\Text\EncodingRegistry.cpp" />
     <ClCompile Include="tests\Text\Encodings\ASCII.cpp" />
     <ClCompile Include="tests\Text\Unicode.cpp" />
     <ClCompile Include="tests\Types\CheckedPtr.cpp" />

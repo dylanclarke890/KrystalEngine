@@ -1,14 +1,14 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/CounterStyles.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/CSSPrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/IntegerDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/List.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValuePair.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
@@ -19,7 +19,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return valueId >= ValueId::Disc && valueId <= ValueId::EthiopicNumeric;
   }
 
-  RefPtr<CSSValue> ConsumeCounterStyle(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeCounterStyle(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <counter-style> = <counter-style-name excluding=none> | <symbols()>
     // https://drafts.csswg.org/css-counter-styles-3/#typedef-counter-style
@@ -72,7 +72,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return IsPredefinedCounterStyle(nameToken.ValueId()) ? krys::text::ToASCIILower(name) : name;
   }
 
-  RefPtr<CSSValue> ConsumeCounterStyleName(TokenRange &tokens, PropertyParserState &) noexcept
+  RefPtr<Value> ConsumeCounterStyleName(TokenRange &tokens, PropertyParserState &) noexcept
   {
     // <counter-style-name> is a <custom-ident> that is not an ASCII case-insensitive match for "none".
     // https://drafts.csswg.org/css-counter-styles-3/#typedef-counter-style-name
@@ -92,7 +92,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return nullptr;
   }
 
-  RefPtr<CSSValue> ConsumeCounterStyleSystem(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeCounterStyleSystem(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'system'> = cyclic | numeric | alphabetic | symbolic | additive | [fixed <integer>?] | [ extends
     // <counter-style-name> ] https://drafts.csswg.org/css-counter-styles-3/#counter-style-system
@@ -127,13 +127,13 @@ namespace krys::boo::css::PropertyParserHelpers
 
       // If we have the `fixed` keyword but the tokens is not at the end, the next token must be a integer.
       // If it's not, this value is invalid.
-      auto firstSymbolValue = CSSPrimitiveValueResolver<Integer<>>::ConsumeAndResolve(tokens, state);
+      auto firstSymbolValue = PrimitiveValueResolver<Integer<>>::ConsumeAndResolve(tokens, state);
       if (!firstSymbolValue)
       {
         return nullptr;
       }
 
-      return CSSValuePair::Create(krys::move(ident), krys::move(firstSymbolValue));
+      return ValuePair::Create(krys::move(ident), krys::move(firstSymbolValue));
     }
 
     if (auto ident = ConsumeIdent<ValueId::Extends>(tokens))
@@ -146,24 +146,24 @@ namespace krys::boo::css::PropertyParserHelpers
         return nullptr;
       }
 
-      return CSSValuePair::Create(krys::move(ident), krys::move(parsedCounterStyleName));
+      return ValuePair::Create(krys::move(ident), krys::move(parsedCounterStyleName));
     }
     return nullptr;
   }
 
-  RefPtr<CSSValue> ConsumeCounterStyleRange(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeCounterStyleRange(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'tokens'> = [ [ <integer> | infinite ]{2} ]# | auto
     // https://drafts.csswg.org/css-counter-styles-3/#counter-style-tokens
 
-    auto ConsumeCounterStyleRangeBound = [&](TokenRange &tokens) -> RefPtr<CSSPrimitiveValue>
+    auto ConsumeCounterStyleRangeBound = [&](TokenRange &tokens) -> RefPtr<PrimitiveValue>
     {
       if (auto infinite = ConsumeIdent<ValueId::Infinite>(tokens))
       {
         return infinite;
       }
 
-      if (auto integer = CSSPrimitiveValueResolver<Integer<>>::ConsumeAndResolve(tokens, state))
+      if (auto integer = PrimitiveValueResolver<Integer<>>::ConsumeAndResolve(tokens, state))
       {
         return integer;
       }
@@ -178,7 +178,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     auto tokensList = ConsumeListSeparatedBy<',', OneOrMore>(
       tokens,
-      [&](auto &tokens) -> RefPtr<CSSValue>
+      [&](auto &tokens) -> RefPtr<Value>
       {
         auto lowerBound = ConsumeCounterStyleRangeBound(tokens);
         if (!lowerBound)
@@ -200,7 +200,7 @@ namespace krys::boo::css::PropertyParserHelpers
           return nullptr;
         }
 
-        return CSSValuePair::CreateNonCoalescing(krys::move(lowerBound), krys::move(upperBound));
+        return ValuePair::CreateNonCoalescing(krys::move(lowerBound), krys::move(upperBound));
       });
 
     if (!tokens.IsAtEnd() || !tokensList || !tokensList->Size())
@@ -211,7 +211,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return tokensList;
   }
 
-  RefPtr<CSSValue> ConsumeCounterStyleAdditiveSymbols(TokenRange &tokens,
+  RefPtr<Value> ConsumeCounterStyleAdditiveSymbols(TokenRange &tokens,
                                                       PropertyParserState &state) noexcept
   {
     // <'additive-symbols'> = [ <integer [0,∞]> && <symbol> ]#
@@ -220,9 +220,9 @@ namespace krys::boo::css::PropertyParserHelpers
     Maybe<int64> lastWeight;
     auto values = ConsumeListSeparatedBy<',', OneOrMore>(
       tokens,
-      [&lastWeight](auto &tokens, auto &state) -> RefPtr<CSSValue>
+      [&lastWeight](auto &tokens, auto &state) -> RefPtr<Value>
       {
-        auto integer = CSSPrimitiveValueResolver<Integer<NonNegative>>::ConsumeAndResolve(tokens, state);
+        auto integer = PrimitiveValueResolver<Integer<NonNegative>>::ConsumeAndResolve(tokens, state);
         auto symbol = PropertyParsing::ConsumeSymbol(tokens, state);
         if (!integer)
         {
@@ -231,7 +231,7 @@ namespace krys::boo::css::PropertyParserHelpers
             return nullptr;
           }
 
-          integer = CSSPrimitiveValueResolver<Integer<NonNegative>>::ConsumeAndResolve(tokens, state);
+          integer = PrimitiveValueResolver<Integer<NonNegative>>::ConsumeAndResolve(tokens, state);
           if (!integer)
           {
             return nullptr;
@@ -252,7 +252,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
         lastWeight = weight;
 
-        return CSSValuePair::Create(krys::move(integer), krys::move(symbol));
+        return ValuePair::Create(krys::move(integer), krys::move(symbol));
       },
       state);
 

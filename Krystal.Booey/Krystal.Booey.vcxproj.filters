@@ -271,7 +271,7 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Calc\CalcTreeParser.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Calc\CSSCalcValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Calc\Value.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\RuleFlag.hpp">
@@ -376,7 +376,7 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Properties\Consumers\CounterStyles.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Properties\Consumers\CSSPrimitiveValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Properties\Consumers\PrimitiveValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Properties\Consumers\Display.hpp">
@@ -616,13 +616,13 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Background\BoxShadowProperty.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Background\CSSBackgroundRepeatValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Background\BackgroundRepeatValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Background\CSSBoxShadowPropertyValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Background\BoxShadowPropertyValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Background\CSSReflectValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Background\ReflectValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Borders\BorderImage.hpp">
@@ -631,10 +631,10 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Borders\BorderRadius.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Borders\CSSBorderImageSliceValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Borders\BorderImageSliceValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Borders\CSSBorderImageWidthValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Borders\BorderImageWidthValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Color\Color.hpp">
@@ -658,10 +658,10 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Values\ColorAdjust\ColorScheme.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\ColorAdjust\CSSColorSchemeValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\ColorAdjust\ColorSchemeValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Easing\CSSEasingFunctionValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Easing\EasingFunctionValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Easing\CubicBezierEasingFunction.hpp">
@@ -679,13 +679,13 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Easing\StepsEasingFunction.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Enums\CSSUnitCategory.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\UnitCategory.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Enums\CSSUnitType.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\UnitType.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Enums\CSSValueType.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\ValueType.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\AppleColorFilter.hpp">
@@ -703,10 +703,10 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\ContrastFunction.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\CSSAppleColorFilterValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\AppleColorFilterValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\CSSFilterValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\FilterValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\DropShadowFunction.hpp">
@@ -742,25 +742,25 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\SepiaFunction.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\CSSGridAutoRepeatValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\GridAutoRepeatValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\CSSGridIntegerRepeatValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\GridIntegerRepeatValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\CSSGridLineNamesValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\GridLineNamesValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\CSSGridLineValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\GridLineValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\CSSGridNamedAreaMap.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\GridNamedAreaMap.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\CSSGridTemplateAreasValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\GridTemplateAreasValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\CSSSubgridValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\SubgridValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\GridArea.hpp">
@@ -781,52 +781,52 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Images\Gradient.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Motion\CSSRayValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Motion\RayValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Motion\RayFunction.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSPosition.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\Position.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSPrimitiveData.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\PrimitiveData.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSPrimitiveKeywordList.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\PrimitiveKeywordList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSPrimitiveNumeric.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\PrimitiveNumeric.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSPrimitiveNumericConcepts.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\Concepts.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSPrimitiveNumericRange.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\Range.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSPrimitiveNumericRaw.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\NumericRaw.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSPrimitiveNumericTypes.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\NumericTypes.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSPrimitiveNumericTypesCanonicalization.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\NumericTypesCanonicalization.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSPrimitiveNumericUnits.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\Units.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSRatio.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\Ratio.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSUnevaluatedCalc.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\UnevaluatedCalc.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSURL.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\URL.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSURLModifiers.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\URLModifiers.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\PrimitiveNumericOrKeyword.hpp">
@@ -841,91 +841,91 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\RectBase.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\TextDecoration\CSSTextShadowPropertyValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\TextDecoration\TextShadowPropertyValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Values\TextDecoration\TextShadow.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSAttrValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\AttrValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSColorValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\ColorValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSCounterValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\CounterValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSCursorImageValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\CursorImageValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSFunctionValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\FunctionValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSGradientValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\GradientValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSOffsetRotateValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\OffsetRotateValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSPositionValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\PositionValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSPrimitiveValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\PrimitiveValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSQuadValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\QuadValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSRatioValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\RatioValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSRectValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\RectValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSScrollValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\ScrollValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSTransformListValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\TransformListValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSUnicodeRangeValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\UnicodeRangeValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSUnits.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Units.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSURLValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\UrlValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Value.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSValueAggregates.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Aggregates.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSValueConcepts.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Concepts.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSValueList.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\ValueList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSValueListBuilder.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\ValueListBuilder.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSValuePair.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\ValuePair.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSValuePool.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\ValuePool.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSValueTypes.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Types.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSViewValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\ViewValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSWideKeyword.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\IsGlobalKeyword.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\CSSCharsetRule.hpp">
@@ -1450,9 +1450,6 @@
     <ClInclude Include="include\Krystal.Booey\HTML\Parser\HTMLElementStack.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\HTML\Parser\HTMLEncodingSniffer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Booey\HTML\Parser\HTMLFormattingElementList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1472,9 +1469,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\HTML\Parser\HTMLTreeBuilder.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\HTML\Parser\TextResourceDecoder.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\HTML\Types\HTMLOrSVGScriptElement.hpp">
@@ -1816,6 +1810,12 @@
     <ClInclude Include="include\Krystal.Booey\Core\BoxSides.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\Core\EncodingRegistry.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\NumericTypesValueCreation.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -1950,25 +1950,22 @@
     <ClCompile Include="src\CSS\Selectors\MutableSelector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\CSS\Values\Primitives\CSSPrimitiveNumericUnits.cpp">
+    <ClCompile Include="src\CSS\Values\Primitives\Units.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\CSS\Values\Primitives\CSSRatio.cpp">
+    <ClCompile Include="src\CSS\Values\Primitives\Ratio.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\CSS\Values\Primitives\CSSUnevaluatedCalc.cpp">
+    <ClCompile Include="src\CSS\Values\Primitives\UnevaluatedCalc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\CSS\Values\CSSPrimitiveValue.cpp">
+    <ClCompile Include="src\CSS\Values\PrimitiveValue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\CSS\Values\CSSValue.cpp">
+    <ClCompile Include="src\CSS\Values\Value.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\CSS\Values\CSSValuePool.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\CSS\Values\CSSValueTypes.cpp">
+    <ClCompile Include="src\CSS\Values\Types.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\CSS\Parser.cpp">
@@ -2460,9 +2457,6 @@
     <ClCompile Include="src\SVG\SVGUseElement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\CSS\Values\Enums\CSSValueId.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\DOM\Algorithms\AbortAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -2476,6 +2470,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\CSS\Values\ValueId.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\EncodingRegistry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

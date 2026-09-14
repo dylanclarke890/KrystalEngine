@@ -6,9 +6,9 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/String.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSURLValue.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/CSSURL.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/UrlValue.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/URL.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
@@ -180,12 +180,12 @@ namespace krys::boo::css::PropertyParserHelpers
     return {};
   }
 
-  RefPtr<CSSValue> ConsumeURL(TokenRange &tokens, PropertyParserState &state,
+  RefPtr<Value> ConsumeURL(TokenRange &tokens, PropertyParserState &state,
                               AllowedURLModifiers allowedURLModifiers) noexcept
   {
     if (auto rawURL = ConsumeURLRaw(tokens, state, allowedURLModifiers))
     {
-      return CSSURLValue::Create(krys::move(*rawURL));
+      return UrlValue::Create(krys::move(*rawURL));
     }
 
     return nullptr;

@@ -1,14 +1,14 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Align.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValuePair.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
   namespace
   {
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeAlignmentBaseline(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeAlignmentBaseline(TokenRange &tokens,
                                                              PropertyParserState &state) noexcept
     {
       assert(tokens.Peek().ValueId() == ValueId::Baseline);
@@ -20,10 +20,10 @@ namespace krys::boo::css::PropertyParserHelpers
       tokens.Discard();
       tokens.DiscardWhitespace();
 
-      return CSSPrimitiveValue::Create(ValueId::Baseline);
+      return PrimitiveValue::Create(ValueId::Baseline);
     }
 
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeAlignmentFirstBaseline(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeAlignmentFirstBaseline(TokenRange &tokens,
                                                                   PropertyParserState &state) noexcept
     {
       assert(tokens.Peek().ValueId() == ValueId::First);
@@ -41,10 +41,10 @@ namespace krys::boo::css::PropertyParserHelpers
       tokens.Discard();
       tokens.DiscardWhitespace();
 
-      return CSSPrimitiveValue::Create(ValueId::Baseline);
+      return PrimitiveValue::Create(ValueId::Baseline);
     }
 
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeAlignmentLastBaseline(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeAlignmentLastBaseline(TokenRange &tokens,
                                                                  PropertyParserState &state) noexcept
     {
       assert(tokens.Peek().ValueId() == ValueId::Last);
@@ -62,12 +62,12 @@ namespace krys::boo::css::PropertyParserHelpers
       tokens.Discard();
       tokens.DiscardWhitespace();
 
-      return CSSValuePair::Create(CSSPrimitiveValue::Create(ValueId::Last),
-                                  CSSPrimitiveValue::Create(ValueId::Baseline));
+      return ValuePair::Create(PrimitiveValue::Create(ValueId::Last),
+                                  PrimitiveValue::Create(ValueId::Baseline));
     }
 
     template <typename F>
-    KRYS_NODISCARD RefPtr<CSSValue>
+    KRYS_NODISCARD RefPtr<Value>
       ConsumeAlignmentOverflowPosition(TokenRange &tokens, PropertyParserState &,
                                        ValueId overflowSafety, F &&predicate) noexcept
     {
@@ -83,15 +83,15 @@ namespace krys::boo::css::PropertyParserHelpers
         tokens.Discard();
         tokens.DiscardWhitespace();
 
-        return CSSValuePair::Create(CSSPrimitiveValue::Create(overflowSafety),
-                                    CSSPrimitiveValue::Create(position));
+        return ValuePair::Create(PrimitiveValue::Create(overflowSafety),
+                                    PrimitiveValue::Create(position));
       }
 
       return nullptr;
     }
   }
 
-  RefPtr<CSSValue> ConsumeAlignContent(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeAlignContent(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'align-content'> = normal | <baseline-position> | <content-distribution> | <overflow-position>?
     // <content-position>
@@ -116,7 +116,7 @@ namespace krys::boo::css::PropertyParserHelpers
         tokens.Discard();
         tokens.DiscardWhitespace();
 
-        return CSSPrimitiveValue::Create(initial);
+        return PrimitiveValue::Create(initial);
       }
       // <baseline-position>
       case ValueId::First:
@@ -162,7 +162,7 @@ namespace krys::boo::css::PropertyParserHelpers
     }
   }
 
-  RefPtr<CSSValue> ConsumeJustifyContent(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeJustifyContent(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'justify-content'> = normal | <content-distribution> | <overflow-position>? [ <content-position> |
     // left | right ]
@@ -189,7 +189,7 @@ namespace krys::boo::css::PropertyParserHelpers
         tokens.Discard();
         tokens.DiscardWhitespace();
 
-        return CSSPrimitiveValue::Create(initial);
+        return PrimitiveValue::Create(initial);
       }
       // <overflow-position>? [ <content-position> | left | right ]
       case ValueId::Unsafe:
@@ -224,7 +224,7 @@ namespace krys::boo::css::PropertyParserHelpers
     }
   }
 
-  RefPtr<CSSValue> ConsumeAlignSelf(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeAlignSelf(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'align-self'> = auto | normal | stretch | <baseline-position> | <overflow-position>? <self-position>
     // https://drafts.csswg.org/css-align/#propdef-align-self
@@ -241,7 +241,7 @@ namespace krys::boo::css::PropertyParserHelpers
         tokens.Discard();
         tokens.DiscardWhitespace();
 
-        return CSSPrimitiveValue::Create(initial);
+        return PrimitiveValue::Create(initial);
       }
       // <self-position>
       case ValueId::AnchorCenter:
@@ -264,7 +264,7 @@ namespace krys::boo::css::PropertyParserHelpers
         tokens.Discard();
         tokens.DiscardWhitespace();
 
-        return CSSPrimitiveValue::Create(initial);
+        return PrimitiveValue::Create(initial);
       }
       // <baseline-position>
       case ValueId::First:
@@ -322,7 +322,7 @@ namespace krys::boo::css::PropertyParserHelpers
     }
   }
 
-  RefPtr<CSSValue> ConsumeJustifySelf(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeJustifySelf(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'justify-self'> = auto | normal | stretch | <baseline-position> | <overflow-position>? [
     // <self-position> | left | right ]
@@ -339,7 +339,7 @@ namespace krys::boo::css::PropertyParserHelpers
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
-        return CSSPrimitiveValue::Create(initial);
+        return PrimitiveValue::Create(initial);
       }
       // [ <self-position> | left | right ]
       case ValueId::AnchorCenter:
@@ -364,7 +364,7 @@ namespace krys::boo::css::PropertyParserHelpers
         tokens.Discard();
         tokens.DiscardWhitespace();
 
-        return CSSPrimitiveValue::Create(initial);
+        return PrimitiveValue::Create(initial);
       }
       // <baseline-position>
       case ValueId::First:
@@ -423,7 +423,7 @@ namespace krys::boo::css::PropertyParserHelpers
     }
   }
 
-  RefPtr<CSSValue> ConsumeAlignItems(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeAlignItems(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'align-items'> = normal | stretch | <baseline-position> | <overflow-position>? <self-position>
     // https://drafts.csswg.org/css-align/#propdef-align-items
@@ -438,7 +438,7 @@ namespace krys::boo::css::PropertyParserHelpers
         tokens.Discard();
         tokens.DiscardWhitespace();
 
-        return CSSPrimitiveValue::Create(initial);
+        return PrimitiveValue::Create(initial);
       }
       // <self-position>
       case ValueId::AnchorCenter:
@@ -461,7 +461,7 @@ namespace krys::boo::css::PropertyParserHelpers
         tokens.Discard();
         tokens.DiscardWhitespace();
 
-        return CSSPrimitiveValue::Create(initial);
+        return PrimitiveValue::Create(initial);
       }
       // <baseline-position>
       case ValueId::First:
@@ -517,7 +517,7 @@ namespace krys::boo::css::PropertyParserHelpers
     }
   }
 
-  RefPtr<CSSValue> ConsumeJustifyItems(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeJustifyItems(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'justify-items'> = normal | stretch | <baseline-position> | <overflow-position>? [ <self-position> |
     // left | right ] | legacy | legacy && [ left | right | center ]
@@ -533,7 +533,7 @@ namespace krys::boo::css::PropertyParserHelpers
         tokens.Discard();
         tokens.DiscardWhitespace();
 
-        return CSSPrimitiveValue::Create(initial);
+        return PrimitiveValue::Create(initial);
       }
       // [ <self-position> | left | right ] - NOTE: `left`, `right`, and `center` handled further below to
       // account for additional `legacy` keyword.
@@ -555,7 +555,7 @@ namespace krys::boo::css::PropertyParserHelpers
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
-        return CSSPrimitiveValue::Create(initial);
+        return PrimitiveValue::Create(initial);
       }
       // <baseline-position>
       case ValueId::First:
@@ -624,12 +624,12 @@ namespace krys::boo::css::PropertyParserHelpers
             tokens.Discard();
             tokens.DiscardWhitespace();
 
-            return CSSValuePair::Create(CSSPrimitiveValue::Create(initial),
-                                        CSSPrimitiveValue::Create(second));
+            return ValuePair::Create(PrimitiveValue::Create(initial),
+                                        PrimitiveValue::Create(second));
           }
           default:
           {
-            return CSSPrimitiveValue::Create(initial);
+            return PrimitiveValue::Create(initial);
           }
         }
       }
@@ -648,12 +648,12 @@ namespace krys::boo::css::PropertyParserHelpers
             tokens.DiscardWhitespace();
 
             // NOTE: Order is flipped to canonicalize to 'legacy *foo*' for serialization.
-            return CSSValuePair::Create(CSSPrimitiveValue::Create(second),
-                                        CSSPrimitiveValue::Create(initial));
+            return ValuePair::Create(PrimitiveValue::Create(second),
+                                        PrimitiveValue::Create(initial));
           }
           default:
           {
-            return CSSPrimitiveValue::Create(initial);
+            return PrimitiveValue::Create(initial);
           }
         }
       }

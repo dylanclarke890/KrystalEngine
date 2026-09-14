@@ -9,15 +9,15 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/URL.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
-#include "Krystal.Booey/CSS/Values/Motion/CSSRayValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/CSS/Values/Motion/RayValue.hpp"
 #include "Krystal.Booey/CSS/Values/Motion/RayFunction.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/CSSPosition.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/Position.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
-  KRYS_NODISCARD static RefPtr<CSSValue> ConsumeRayFunction(TokenRange &range,
+  KRYS_NODISCARD static RefPtr<Value> ConsumeRayFunction(TokenRange &range,
                                                             PropertyParserState &state) noexcept
   {
     // ray( <angle> && <ray-size>? && contain? && [at <position>]? )
@@ -42,7 +42,7 @@ namespace krys::boo::css::PropertyParserHelpers
     Maybe<Angle<>> angle;
     Maybe<RaySize> size;
     Maybe<keywords::Contain> contain;
-    Maybe<CSSPosition> position;
+    Maybe<Position> position;
 
     auto ConsumeAngle = [&] -> bool
     {
@@ -111,12 +111,12 @@ namespace krys::boo::css::PropertyParserHelpers
       return {};
     }
 
-    return CSSRayValue::Create(
+    return RayValue::Create(
       RayFunction {.parameters = Ray {krys::move(*angle), size.value_or(RaySize {keywords::ClosestSide {}}),
                                       krys::move(contain), krys::move(position)}});
   }
 
-  RefPtr<CSSValue> ConsumeOffsetPath(TokenRange &range, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeOffsetPath(TokenRange &range, PropertyParserState &state) noexcept
   {
     // <'offset-path'> = none | <offset-path> || <coord-box>
     //
@@ -146,8 +146,8 @@ namespace krys::boo::css::PropertyParserHelpers
       return url;
     }
 
-    RefPtr<CSSValue> shapeOrRay;
-    RefPtr<CSSValue> box;
+    RefPtr<Value> shapeOrRay;
+    RefPtr<Value> box;
 
     auto ConsumeRay = [&]() -> bool
     {
@@ -198,7 +198,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     bool hasShapeOrRay = !!shapeOrRay;
 
-    CSSValueListBuilder list;
+    ValueListBuilder list;
     if (shapeOrRay)
     {
       list.push_back(krys::move(shapeOrRay));
@@ -215,6 +215,6 @@ namespace krys::boo::css::PropertyParserHelpers
       return nullptr;
     }
 
-    return CSSValueList::CreateSpaceSeparated(krys::move(list));
+    return ValueList::CreateSpaceSeparated(krys::move(list));
   }
 }

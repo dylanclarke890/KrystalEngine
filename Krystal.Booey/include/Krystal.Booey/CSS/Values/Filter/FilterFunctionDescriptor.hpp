@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/CSS/Values/Color/CurrentColor.hpp"
 #include "Krystal.Booey/CSS/Values/Filter/FilterOperationType.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/CSSPrimitiveNumericTypes.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 
 namespace krys::boo::css
 {

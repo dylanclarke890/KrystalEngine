@@ -7,7 +7,7 @@
 namespace krys::boo::css
 {
   class TokenRange;
-  class CSSValue;
+  class Value;
 
   struct ColorScheme;
   struct ParserContext;
@@ -24,7 +24,7 @@ namespace krys::boo::css
   KRYS_NODISCARD Maybe<ColorScheme> ParseUnresolvedColorScheme(const CSSOMString &scheme,
                                                                const ParserContext &context) noexcept;
 
-  // MARK: <'color-scheme'> consuming (CSSValue)
-  KRYS_NODISCARD RefPtr<CSSValue> ConsumeColorScheme(TokenRange &tokens,
+  // MARK: <'color-scheme'> consuming (Value)
+  KRYS_NODISCARD RefPtr<Value> ConsumeColorScheme(TokenRange &tokens,
                                                      PropertyParserState &state) noexcept;
 }

@@ -1,18 +1,18 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/SVG.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/CSSPrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/LengthPercentageDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/NumberDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueListBuilder.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
-  RefPtr<CSSValue> ConsumePaintOrder(TokenRange &range, PropertyParserState &) noexcept
+  RefPtr<Value> ConsumePaintOrder(TokenRange &range, PropertyParserState &) noexcept
   {
     // <'paint-order'> = normal | [ fill || stroke || markers ]
     // https://svgwg.org/svg2-draft/painting.html#PaintOrderProperty
@@ -23,9 +23,9 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     SmallList<ValueId, 3uz> paintTypeList;
-    RefPtr<CSSPrimitiveValue> fill;
-    RefPtr<CSSPrimitiveValue> stroke;
-    RefPtr<CSSPrimitiveValue> markers;
+    RefPtr<PrimitiveValue> fill;
+    RefPtr<PrimitiveValue> stroke;
+    RefPtr<PrimitiveValue> markers;
     do
     {
       ValueId id = range.Peek().ValueId();
@@ -50,10 +50,10 @@ namespace krys::boo::css::PropertyParserHelpers
     } while (!range.IsAtEnd());
 
     // After parsing we serialize the paint-order list. Since it is not possible to
-    // pop a last list items from CSSValueList without bigger cost, we create the
+    // pop a last list items from ValueList without bigger cost, we create the
     // list after parsing.
     ValueId firstPaintOrderType = paintTypeList[0];
-    CSSValueListBuilder paintOrderList;
+    ValueListBuilder paintOrderList;
     switch (firstPaintOrderType)
     {
       case ValueId::Fill:
@@ -85,10 +85,10 @@ namespace krys::boo::css::PropertyParserHelpers
       }
     }
 
-    return CSSValueList::CreateSpaceSeparated(krys::move(paintOrderList));
+    return ValueList::CreateSpaceSeparated(krys::move(paintOrderList));
   }
 
-  RefPtr<CSSValue> ConsumeStrokeDasharray(TokenRange &range, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeStrokeDasharray(TokenRange &range, PropertyParserState &state) noexcept
   {
     // <'stroke-dasharray'> = none | [ [ <length-percentage> | <number> ]+ ]#
     // https://svgwg.org/svg2-draft/painting.html#StrokeDashing
@@ -99,12 +99,12 @@ namespace krys::boo::css::PropertyParserHelpers
       return ConsumeIdent(range);
     }
 
-    CSSValueListBuilder dashes;
+    ValueListBuilder dashes;
     do
     {
       // FIXME: Figure out and document why overrideParserMode is explicitly set to HTMLStandardMode here or
       // remove the special case.
-      auto dash = CSSPrimitiveValueResolver<LengthPercentage<NonNegative>>::ConsumeAndResolve(
+      auto dash = PrimitiveValueResolver<LengthPercentage<NonNegative>>::ConsumeAndResolve(
         range, state,
         {
           .UnitlessZeroLength = AllowUnitlessZero(false),
@@ -113,7 +113,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
       if (!dash)
       {
-        dash = CSSPrimitiveValueResolver<Number<NonNegative>>::ConsumeAndResolve(range, state);
+        dash = PrimitiveValueResolver<Number<NonNegative>>::ConsumeAndResolve(range, state);
       }
 
       if (!dash || (ConsumeComma(range) && range.IsAtEnd()))
@@ -124,6 +124,6 @@ namespace krys::boo::css::PropertyParserHelpers
       dashes.push_back(krys::move(dash));
     } while (!range.IsAtEnd());
 
-    return CSSValueList::CreateCommaSeparated(krys::move(dashes));
+    return ValueList::CreateCommaSeparated(krys::move(dashes));
   }
 }

@@ -3,7 +3,7 @@
 #include "Krystal.Booey/CSS/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/CSS/Parser/Token.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include <ranges>
@@ -12,7 +12,7 @@ namespace krys::boo::css::PropertyParserHelpers
 {
 #pragma region <ident>
 
-  KRYS_NODISCARD Maybe<ValueId> ConsumeIdentRaw(TokenRange &tokens) noexcept
+  KRYS_NODISCARD inline Maybe<ValueId> ConsumeIdentRaw(TokenRange &tokens) noexcept
   {
     if (tokens.Peek().Type() != TokenType::Ident)
     {
@@ -25,17 +25,17 @@ namespace krys::boo::css::PropertyParserHelpers
     return token.ValueId();
   }
 
-  KRYS_NODISCARD RefPtr<CSSPrimitiveValue> ConsumeIdent(TokenRange &tokens) noexcept
+  KRYS_NODISCARD inline RefPtr<PrimitiveValue> ConsumeIdent(TokenRange &tokens) noexcept
   {
     if (auto result = ConsumeIdentRaw(tokens))
     {
-      return CSSPrimitiveValue::Create(*result);
+      return PrimitiveValue::Create(*result);
     }
 
     return nullptr;
   }
 
-  void DiscardIdent(TokenRange &tokens) noexcept
+  inline void DiscardIdent(TokenRange &tokens) noexcept
   {
     if (tokens.Peek().Type() == TokenType::Ident)
     {
@@ -44,8 +44,8 @@ namespace krys::boo::css::PropertyParserHelpers
     }
   }
 
-  KRYS_NODISCARD Maybe<ValueId> ConsumeIdentRangeRaw(TokenRange &tokens, ValueId lower,
-                                                        ValueId upper) noexcept
+  KRYS_NODISCARD inline Maybe<ValueId> ConsumeIdentRangeRaw(TokenRange &tokens, ValueId lower,
+                                                            ValueId upper) noexcept
   {
     if (tokens.Peek().ValueId() < lower || tokens.Peek().ValueId() > upper)
     {
@@ -55,8 +55,8 @@ namespace krys::boo::css::PropertyParserHelpers
     return ConsumeIdentRaw(tokens);
   }
 
-  KRYS_NODISCARD RefPtr<CSSPrimitiveValue> ConsumeIdentRange(TokenRange &tokens, ValueId lower,
-                                                             ValueId upper) noexcept
+  KRYS_NODISCARD inline RefPtr<PrimitiveValue> ConsumeIdentRange(TokenRange &tokens, ValueId lower,
+                                                                    ValueId upper) noexcept
   {
     auto value = ConsumeIdentRangeRaw(tokens, lower, upper);
     if (!value)
@@ -64,7 +64,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return nullptr;
     }
 
-    return CSSPrimitiveValue::Create(*value);
+    return PrimitiveValue::Create(*value);
   }
 
   template <typename... EmptyBaseCase>
@@ -94,7 +94,7 @@ namespace krys::boo::css::PropertyParserHelpers
   }
 
   template <ValueId... Names>
-  KRYS_NODISCARD RefPtr<CSSPrimitiveValue> ConsumeIdent(TokenRange &tokens) noexcept
+  KRYS_NODISCARD RefPtr<PrimitiveValue> ConsumeIdent(TokenRange &tokens) noexcept
   {
     if (tokens.Peek().Type() != TokenType::Ident || !IdentMatches<Names...>(tokens.Peek().ValueId()))
     {
@@ -104,12 +104,12 @@ namespace krys::boo::css::PropertyParserHelpers
     const auto &token = tokens.Consume();
     tokens.DiscardWhitespace();
 
-    return CSSPrimitiveValue::Create(token.ValueId());
+    return PrimitiveValue::Create(token.ValueId());
   }
 
   template <typename Predicate, typename... Args>
   KRYS_NODISCARD Maybe<ValueId> ConsumeIdentRaw(TokenRange &tokens, Predicate &&predicate,
-                                                   Args &&...args) noexcept
+                                                Args &&...args) noexcept
   {
     if (auto keyword = tokens.Peek().ValueId(); predicate(keyword, std::forward<Args>(args)...))
     {
@@ -123,7 +123,7 @@ namespace krys::boo::css::PropertyParserHelpers
   }
 
   template <typename Predicate, typename... Args>
-  KRYS_NODISCARD RefPtr<CSSPrimitiveValue> ConsumeIdent(TokenRange &tokens, Predicate &&predicate,
+  KRYS_NODISCARD RefPtr<PrimitiveValue> ConsumeIdent(TokenRange &tokens, Predicate &&predicate,
                                                         Args &&...args) noexcept
   {
     if (auto keyword = tokens.Peek().ValueId(); predicate(keyword, std::forward<Args>(args)...))
@@ -131,7 +131,7 @@ namespace krys::boo::css::PropertyParserHelpers
       tokens.Discard();
       tokens.DiscardWhitespace();
 
-      return CSSPrimitiveValue::Create(keyword);
+      return PrimitiveValue::Create(keyword);
     }
 
     return nullptr;
@@ -141,8 +141,8 @@ namespace krys::boo::css::PropertyParserHelpers
 
 #pragma region <custom-ident> - https://drafts.csswg.org/css-values/#custom-idents
 
-  KRYS_NODISCARD Maybe<CSSOMString> ConsumeCustomIdentRaw(TokenRange &tokens,
-                                                          bool shouldLowercase = false) noexcept
+  KRYS_NODISCARD inline Maybe<CSSOMString> ConsumeCustomIdentRaw(TokenRange &tokens,
+                                                                 bool shouldLowercase = false) noexcept
   {
     if (tokens.Peek().Type() != TokenType::Ident || !IsValidCustomIdentifier(tokens.Peek().ValueId()))
     {
@@ -157,8 +157,8 @@ namespace krys::boo::css::PropertyParserHelpers
     return shouldLowercase ? krys::text::ToASCIILower(identifier) : CSSOMString(identifier);
   }
 
-  KRYS_NODISCARD RefPtr<CSSPrimitiveValue> ConsumeCustomIdent(TokenRange &tokens,
-                                                              bool shouldLowercase = false) noexcept
+  KRYS_NODISCARD inline RefPtr<PrimitiveValue> ConsumeCustomIdent(TokenRange &tokens,
+                                                                     bool shouldLowercase = false) noexcept
   {
     auto identifier = ConsumeCustomIdentRaw(tokens, shouldLowercase);
     if (!identifier.has_value())
@@ -166,10 +166,10 @@ namespace krys::boo::css::PropertyParserHelpers
       return nullptr;
     }
 
-    return CSSPrimitiveValue::Create(krys::move(*identifier));
+    return PrimitiveValue::Create(krys::move(*identifier));
   }
 
-  KRYS_NODISCARD RefPtr<CSSPrimitiveValue>
+  KRYS_NODISCARD inline RefPtr<PrimitiveValue>
     ConsumeCustomIdentExcluding(TokenRange &tokens, std::initializer_list<const ValueId> excluding,
                                 bool shouldLowercase = false) noexcept
   {
@@ -185,8 +185,8 @@ namespace krys::boo::css::PropertyParserHelpers
 
 #pragma region <dashed-ident> - https://drafts.csswg.org/css-values/#dashed-idents
 
-  KRYS_NODISCARD Maybe<CSSOMString> ConsumeDashedIdentRaw(TokenRange &tokens,
-                                                          bool shouldLowercase = false) noexcept
+  KRYS_NODISCARD inline Maybe<CSSOMString> ConsumeDashedIdentRaw(TokenRange &tokens,
+                                                                 bool shouldLowercase = false) noexcept
   {
     auto tokensCopy = tokens;
 
@@ -200,7 +200,8 @@ namespace krys::boo::css::PropertyParserHelpers
     return identifier;
   }
 
-  RefPtr<CSSPrimitiveValue> ConsumeDashedIdent(TokenRange &tokens, bool shouldLowercase = false) noexcept
+  KRYS_NODISCARD inline RefPtr<PrimitiveValue> ConsumeDashedIdent(TokenRange &tokens,
+                                                                     bool shouldLowercase = false) noexcept
   {
     auto identifier = ConsumeDashedIdentRaw(tokens, shouldLowercase);
     if (!identifier.has_value())
@@ -208,7 +209,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return nullptr;
     }
 
-    return CSSPrimitiveValue::Create(krys::move(*identifier));
+    return PrimitiveValue::Create(krys::move(*identifier));
   }
 
 #pragma endregion

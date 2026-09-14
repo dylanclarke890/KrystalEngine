@@ -2,12 +2,12 @@
 #include "Krystal.Booey/CSS/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/CSSPrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/PercentageDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Timeline.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
@@ -31,7 +31,7 @@ namespace krys::boo::css::PropertyParserHelpers
       // We will eventually want to return a CSS value that can be kept as-is on a
       // BlendingKeyframe so that resolution happens when we have the necessary context
       // when the keyframes are associated with a target element.
-      if (auto percentageValue = CSSPrimitiveValueResolver<Percentage<>>::ConsumeAndResolve(tokens, state))
+      if (auto percentageValue = PrimitiveValueResolver<Percentage<>>::ConsumeAndResolve(tokens, state))
       {
         // TODO: I'm using ResolveAsPercentageNoConversionDataRequired() here instead of
         // ResolveAsPercentageDeprecated()
@@ -141,7 +141,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return result;
   }
 
-  RefPtr<CSSValue> ConsumeKeyframesName(TokenRange &tokens, PropertyParserState &) noexcept
+  RefPtr<Value> ConsumeKeyframesName(TokenRange &tokens, PropertyParserState &) noexcept
   {
     // <keyframes-name> = <custom-ident> | <string>
     // https://drafts.csswg.org/css-animations/#typedef-keyframes-name
@@ -154,10 +154,10 @@ namespace krys::boo::css::PropertyParserHelpers
       auto valueId = FindValueKeyword(token.IdentCodePoints());
       if (IsValidCustomIdentifier(valueId) && valueId != ValueId::None)
       {
-        return CSSPrimitiveValue::CreateCustomIdent(token.IdentCodePoints());
+        return PrimitiveValue::CreateCustomIdent(token.IdentCodePoints());
       }
 
-      return CSSPrimitiveValue::Create(token.IdentCodePoints());
+      return PrimitiveValue::Create(token.IdentCodePoints());
     }
 
     return ConsumeCustomIdent(tokens);

@@ -11,7 +11,7 @@ namespace krys::boo::html
   }
 
   CustomElementRegistry *
-    CustomElementAlgorithms::EffectiveGlobalCustomElementRegistry(Document &document) noexcept
+    CustomElementAlgorithms::EffectiveGlobalCustomElementRegistry(dom::Document &document) noexcept
   {
     if (IsGlobalCustomElementRegistry(document._customElementRegistry.get()))
     {
@@ -29,7 +29,7 @@ namespace krys::boo::html
       return nullptr;
     }
 
-    if (namespaceURI != Namespaces::HTML)
+    if (namespaceURI != infra::Namespaces::HTML)
     {
       return nullptr;
     }

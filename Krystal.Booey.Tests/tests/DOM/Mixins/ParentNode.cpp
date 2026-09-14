@@ -24,7 +24,7 @@ namespace krys::boo::dom::tests
         List<NodeOrString> nodes;
         nodes.emplace_back(document->CreateElement(u8"div").Value());
 
-        auto result = Mixins::ParentNode::ConvertNodesIntoNode(nodes, *document);
+        auto result = mixins::ParentNode::ConvertNodesIntoNode(nodes, *document);
         REQUIRE_FALSE(result.HasException());
 
         REQUIRE(Is<Element>(result.Value()));
@@ -37,7 +37,7 @@ namespace krys::boo::dom::tests
         List<NodeOrString> nodes;
         nodes.emplace_back(u8"Hello");
 
-        auto result = Mixins::ParentNode::ConvertNodesIntoNode(nodes, *document);
+        auto result = mixins::ParentNode::ConvertNodesIntoNode(nodes, *document);
         REQUIRE_FALSE(result.HasException());
 
         auto &textNode = result.Value();
@@ -52,7 +52,7 @@ namespace krys::boo::dom::tests
       nodes.emplace_back(document->CreateElement(u8"div").Value());
       nodes.emplace_back(u8"Hello");
 
-      auto result = Mixins::ParentNode::ConvertNodesIntoNode(nodes, *document);
+      auto result = mixins::ParentNode::ConvertNodesIntoNode(nodes, *document);
       REQUIRE_FALSE(result.HasException());
 
       REQUIRE(Is<DocumentFragment>(result.Value()));
@@ -80,16 +80,16 @@ namespace krys::boo::dom::tests
     Ref<Element> child2 = document->CreateElement(u8"span").Value();
     Ref<Element> child3 = document->CreateElement(u8"p").Value();
 
-    REQUIRE(Mixins::ParentNode::FirstElementChild(*parent) == nullptr);
+    REQUIRE(mixins::ParentNode::FirstElementChild(*parent) == nullptr);
 
     REQUIRE_FALSE(parent->AppendChild(*child1).HasException());
-    REQUIRE(Mixins::ParentNode::FirstElementChild(*parent) == nullptr);
+    REQUIRE(mixins::ParentNode::FirstElementChild(*parent) == nullptr);
 
     REQUIRE_FALSE(parent->AppendChild(*child2).HasException());
-    REQUIRE(Mixins::ParentNode::FirstElementChild(*parent) == child2);
+    REQUIRE(mixins::ParentNode::FirstElementChild(*parent) == child2);
 
     REQUIRE_FALSE(parent->AppendChild(*child3).HasException());
-    REQUIRE(Mixins::ParentNode::FirstElementChild(*parent) == child2);
+    REQUIRE(mixins::ParentNode::FirstElementChild(*parent) == child2);
 
     REQUIRE_FALSE(child1->Remove().HasException());
     REQUIRE_FALSE(child2->Remove().HasException());
@@ -105,16 +105,16 @@ namespace krys::boo::dom::tests
     Ref<Element> child2 = document->CreateElement(u8"span").Value();
     Ref<Element> child3 = document->CreateElement(u8"p").Value();
 
-    REQUIRE(Mixins::ParentNode::LastElementChild(*parent) == nullptr);
+    REQUIRE(mixins::ParentNode::LastElementChild(*parent) == nullptr);
 
     REQUIRE_FALSE(parent->AppendChild(*child1).HasException());
-    REQUIRE(Mixins::ParentNode::LastElementChild(*parent) == nullptr);
+    REQUIRE(mixins::ParentNode::LastElementChild(*parent) == nullptr);
 
     REQUIRE_FALSE(parent->AppendChild(*child2).HasException());
-    REQUIRE(Mixins::ParentNode::LastElementChild(*parent) == child2);
+    REQUIRE(mixins::ParentNode::LastElementChild(*parent) == child2);
 
     REQUIRE_FALSE(parent->AppendChild(*child3).HasException());
-    REQUIRE(Mixins::ParentNode::LastElementChild(*parent) == child3);
+    REQUIRE(mixins::ParentNode::LastElementChild(*parent) == child3);
 
     REQUIRE_FALSE(child1->Remove().HasException());
     REQUIRE_FALSE(child2->Remove().HasException());
@@ -129,16 +129,16 @@ namespace krys::boo::dom::tests
     Ref<Element> child2 = document->CreateElement(u8"span").Value();
     Ref<Element> child3 = document->CreateElement(u8"p").Value();
 
-    REQUIRE(Mixins::ParentNode::ChildElementCount(*parent) == 0uz);
+    REQUIRE(mixins::ParentNode::ChildElementCount(*parent) == 0uz);
 
     REQUIRE_FALSE(parent->AppendChild(*child1).HasException());
-    REQUIRE(Mixins::ParentNode::ChildElementCount(*parent) == 0uz);
+    REQUIRE(mixins::ParentNode::ChildElementCount(*parent) == 0uz);
 
     REQUIRE_FALSE(parent->AppendChild(*child2).HasException());
-    REQUIRE(Mixins::ParentNode::ChildElementCount(*parent) == 1uz);
+    REQUIRE(mixins::ParentNode::ChildElementCount(*parent) == 1uz);
 
     REQUIRE_FALSE(parent->AppendChild(*child3).HasException());
-    REQUIRE(Mixins::ParentNode::ChildElementCount(*parent) == 2uz);
+    REQUIRE(mixins::ParentNode::ChildElementCount(*parent) == 2uz);
 
     REQUIRE_FALSE(child1->Remove().HasException());
     REQUIRE_FALSE(child2->Remove().HasException());
@@ -151,7 +151,7 @@ namespace krys::boo::dom::tests
     Ref<Element> parent = document->CreateElement(u8"div").Value();
     Ref<Element> element = document->CreateElement(u8"span").Value();
 
-    REQUIRE_FALSE(Mixins::ParentNode::Prepend(*parent, {element, u8"text"}).HasException());
+    REQUIRE_FALSE(mixins::ParentNode::Prepend(*parent, {element, u8"text"}).HasException());
     REQUIRE(parent->FirstChild() == element);
     REQUIRE(parent->LastChild()->NodeType() == NodeType::TEXT_NODE);
     REQUIRE(parent->LastChild()->NodeValue() == u8"text");
@@ -165,7 +165,7 @@ namespace krys::boo::dom::tests
     Ref<Element> parent = document->CreateElement(u8"div").Value();
     Ref<Element> element = document->CreateElement(u8"span").Value();
 
-    REQUIRE_FALSE(Mixins::ParentNode::Append(*parent, {element, u8"text"}).HasException());
+    REQUIRE_FALSE(mixins::ParentNode::Append(*parent, {element, u8"text"}).HasException());
     REQUIRE(parent->FirstChild() == element);
     REQUIRE(parent->LastChild()->NodeType() == NodeType::TEXT_NODE);
     REQUIRE(parent->LastChild()->NodeValue() == u8"text");
@@ -181,13 +181,13 @@ namespace krys::boo::dom::tests
     Ref<Element> element1 = document->CreateElement(u8"span").Value();
     Ref<Element> element2 = document->CreateElement(u8"p").Value();
 
-    REQUIRE_FALSE(Mixins::ParentNode::ReplaceChildren(*parent, {element1, u8"text"}).HasException());
+    REQUIRE_FALSE(mixins::ParentNode::ReplaceChildren(*parent, {element1, u8"text"}).HasException());
 
     REQUIRE(parent->FirstChild() == element1);
     REQUIRE(parent->LastChild()->NodeType() == NodeType::TEXT_NODE);
     REQUIRE(parent->LastChild()->NodeValue() == u8"text");
 
-    REQUIRE_FALSE(Mixins::ParentNode::ReplaceChildren(*parent, {element2}).HasException());
+    REQUIRE_FALSE(mixins::ParentNode::ReplaceChildren(*parent, {element2}).HasException());
 
     REQUIRE(parent->FirstChild() == element2);
     REQUIRE(parent->LastChild() == element2);
@@ -209,7 +209,7 @@ namespace krys::boo::dom::tests
     REQUIRE(parent->FirstChild() == element1);
     REQUIRE(parent->LastChild() == element2);
 
-    REQUIRE_FALSE(Mixins::ParentNode::MoveBefore(*parent, *element2, element1.get()).HasException());
+    REQUIRE_FALSE(mixins::ParentNode::MoveBefore(*parent, *element2, element1.get()).HasException());
 
     REQUIRE(parent->FirstChild() == element2);
     REQUIRE(parent->LastChild() == element1);

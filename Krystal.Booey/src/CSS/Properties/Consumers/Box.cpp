@@ -1,14 +1,14 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Box.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueListBuilder.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
-  RefPtr<CSSValue> ConsumeMarginTrim(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeMarginTrim(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'margin-trim'> = none | [ block || inline ] | [ block-start || inline-start || block-end || inline-end
     // ] https://drafts.csswg.org/css-box/#margin-trim
@@ -52,31 +52,31 @@ namespace krys::boo::css::PropertyParserHelpers
         if (std::ranges::contains(idents, ValueId::BlockStart)
             && std::ranges::contains(idents, ValueId::BlockEnd))
         {
-          return CSSPrimitiveValue::Create(ValueId::Block);
+          return PrimitiveValue::Create(ValueId::Block);
         }
 
         if (std::ranges::contains(idents, ValueId::InlineStart)
             && std::ranges::contains(idents, ValueId::InlineEnd))
         {
-          return CSSPrimitiveValue::Create(ValueId::Inline);
+          return PrimitiveValue::Create(ValueId::Inline);
         }
       }
       else if (idents.size() == 4uz)
       {
-        CSSValueListBuilder list;
-        list.push_back(CSSPrimitiveValue::Create(ValueId::Block));
-        list.push_back(CSSPrimitiveValue::Create(ValueId::Inline));
+        ValueListBuilder list;
+        list.push_back(PrimitiveValue::Create(ValueId::Block));
+        list.push_back(PrimitiveValue::Create(ValueId::Inline));
 
-        return CSSValueList::CreateSpaceSeparated(krys::move(list));
+        return ValueList::CreateSpaceSeparated(krys::move(list));
       }
     }
 
-    CSSValueListBuilder list;
+    ValueListBuilder list;
     for (auto ident : idents)
     {
-      list.push_back(CSSPrimitiveValue::Create(ident));
+      list.push_back(PrimitiveValue::Create(ident));
     }
 
-    return CSSValueList::CreateSpaceSeparated(krys::move(list));
+    return ValueList::CreateSpaceSeparated(krys::move(list));
   }
 }

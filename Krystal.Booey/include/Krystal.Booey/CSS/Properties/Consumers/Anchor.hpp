@@ -6,7 +6,7 @@
 namespace krys::boo::css
 {
   class TokenRange;
-  class CSSValue;
+  class Value;
   struct PropertyParserState;
 
   namespace PropertyParserHelpers
@@ -17,7 +17,7 @@ namespace krys::boo::css
       Computed
     };
 
-    // Take two keywords that make up a <position-area> and build a CSSValue that
+    // Take two keywords that make up a <position-area> and build a Value that
     // minimizes the serialization of position-area. The minimization done depends on
     // the context where the value is used.
     //
@@ -31,13 +31,13 @@ namespace krys::boo::css
     // opposite axis or axisless, remove the explicit-ness. (e.g "block-start inline-end" becomes "start end")
     //
     // Returns null if the keywords aren't valid/compatible. Otherwise, return a
-    // CSSPrimitiveValue or CSSValuePair depending on if the keywords can be collapsed.
-    KRYS_NODISCARD RefPtr<CSSValue> ValueForPositionArea(ValueId dimension1, ValueId dimension2,
+    // PrimitiveValue or ValuePair depending on if the keywords can be collapsed.
+    KRYS_NODISCARD RefPtr<Value> ValueForPositionArea(ValueId dimension1, ValueId dimension2,
                                                          ValueType type) noexcept;
 
     /// @grammar <'position-area'>
     /// @see https://drafts.csswg.org/css-anchor-position-1/#propdef-position-area
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumePositionArea(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumePositionArea(TokenRange &tokens,
                                                         PropertyParserState &state) noexcept;
   }
 }

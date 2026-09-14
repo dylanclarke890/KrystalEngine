@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/CSSValueTypes.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/CSSPrimitiveNumericTypes.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
+#include "Krystal.Booey/CSS/Values/Types.hpp"
 
 namespace krys::boo::css
 {
@@ -11,8 +11,7 @@ namespace krys::boo::css
     constexpr bool operator==(const AppleInvertLightness &) const = default;
   };
 
-  using AppleInvertLightnessFunction =
-    FunctionNotation<ValueId::AppleInvertLightness, AppleInvertLightness>;
+  using AppleInvertLightnessFunction = FunctionNotation<ValueId::AppleInvertLightness, AppleInvertLightness>;
 }
 
 DEFINE_EMPTY_LIKE_CONFORMANCE(krys::boo::css::AppleInvertLightness)

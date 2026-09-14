@@ -21,11 +21,10 @@
 #include "Krystal.Booey/SVG/SVGScriptElement.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
-#include "Krystal.Text/ASCII.hpp"
 
 namespace krys::boo::html
 {
-  HTMLTreeBuilder::HTMLTreeBuilder(Document &document, HTMLTokenizer &tokenizer,
+  HTMLTreeBuilder::HTMLTreeBuilder(dom::Document &document, HTMLTokenizer &tokenizer,
                                    Maybe<HTMLStackItem> &context) noexcept
       : _document(document), _tokenizer(tokenizer), _context(context)
   {
@@ -70,7 +69,7 @@ namespace krys::boo::html
     }
 
     auto &adjustedCurrentNode = AdjustedCurrentNode();
-    if (adjustedCurrentNode.NamespaceURI() == Namespaces::HTML)
+    if (adjustedCurrentNode.NamespaceURI() == infra::Namespaces::HTML)
     {
       return true;
     }
@@ -91,7 +90,7 @@ namespace krys::boo::html
       }
     }
 
-    if (adjustedCurrentNode.NamespaceURI() == Namespaces::MathML
+    if (adjustedCurrentNode.NamespaceURI() == infra::Namespaces::MathML
         && adjustedCurrentNode.LocalName() == u8"annotation-xml" && token.Type() == HTMLTokenType::StartTag
         && token.Name() == u8"svg")
     {
@@ -149,14 +148,14 @@ namespace krys::boo::html
       while (true)
       {
         auto &currentNode = CurrentNode();
-        if (!Is<Element>(currentNode))
+        if (!Is<dom::Element>(currentNode))
         {
           _openElementStack.Pop();
           continue;
         }
 
         if (!IsMathMLTextIntegrationPoint(currentNode) && !IsHTMLIntegrationPoint(currentNode)
-            && currentNode.NamespaceURI() != Namespaces::HTML)
+            && currentNode.NamespaceURI() != infra::Namespaces::HTML)
         {
           _openElementStack.Pop();
           continue;
@@ -287,11 +286,11 @@ namespace krys::boo::html
         }
 
         auto &adjustedCurrentNode = AdjustedCurrentNode();
-        if (adjustedCurrentNode.NamespaceURI() == Namespaces::MathML)
+        if (adjustedCurrentNode.NamespaceURI() == infra::Namespaces::MathML)
         {
           AdjustMathMLAttributes(token);
         }
-        else if (adjustedCurrentNode.NamespaceURI() == Namespaces::SVG)
+        else if (adjustedCurrentNode.NamespaceURI() == infra::Namespaces::SVG)
         {
           constexpr static Array<Array<dom::DOMStringView, 2uz>, 37uz> svgTagNameAdjustments = {
             Array<dom::DOMStringView, 2uz> {u8"altglyph", u8"altGlyph"},
@@ -372,14 +371,14 @@ namespace krys::boo::html
           return;
         }
 
-        if (token.Name() == TagNames::HTML::script && Is<SVGScriptElement>(CurrentNode()))
+        if (token.Name() == TagNames::HTML::script && Is<svg::SVGScriptElement>(CurrentNode()))
         {
           ScriptTag();
           return;
         }
 
-        if (StringAlgorithms::ASCIICaseInsensitiveMatch(CurrentNode().LocalName().View(),
-                                                        token.Name().View()))
+        if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(CurrentNode().LocalName().View(),
+                                                               token.Name().View()))
         {
           ParseError(token);
         }
@@ -393,14 +392,14 @@ namespace krys::boo::html
             return;
           }
 
-          if (StringAlgorithms::ASCIICaseInsensitiveMatch(node.Element().LocalName().View(),
-                                                          token.Name().View()))
+          if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(node.Element().LocalName().View(),
+                                                                 token.Name().View()))
           {
             _openElementStack.PopUntilPopped(node.Element());
             return;
           }
 
-          if (node.Element().NamespaceURI() != Namespaces::HTML)
+          if (node.Element().NamespaceURI() != infra::Namespaces::HTML)
           {
             continue;
           }
@@ -414,12 +413,12 @@ namespace krys::boo::html
     }
   }
 
-  Element &HTMLTreeBuilder::CurrentNode() noexcept
+  dom::Element &HTMLTreeBuilder::CurrentNode() noexcept
   {
     return _openElementStack.Bottom().Element();
   }
 
-  Element &HTMLTreeBuilder::AdjustedCurrentNode() noexcept
+  dom::Element &HTMLTreeBuilder::AdjustedCurrentNode() noexcept
   {
     if (_context.has_value() && _openElementStack.Size() == 1uz)
     {
@@ -611,15 +610,16 @@ namespace krys::boo::html
           _document.AppendChild(**doctype);
         }
 
-        if (!DocumentAlgorithms::IsIFrameSrcdocDocument(_document) && !_document._parserCannotChangeTheMode)
+        if (!dom::DocumentAlgorithms::IsIFrameSrcdocDocument(_document)
+            && !_document._parserCannotChangeTheMode)
         {
           if (IsQuirksModeDOCTYPE(token))
           {
-            _document._quirksMode = QuirksMode::Quirks;
+            _document._quirksMode = dom::QuirksMode::Quirks;
           }
           else if (IsLimitedQuirksModeDOCTYPE(token))
           {
-            _document._quirksMode = QuirksMode::LimitedQuirks;
+            _document._quirksMode = dom::QuirksMode::LimitedQuirks;
           }
         }
 
@@ -628,14 +628,14 @@ namespace krys::boo::html
       }
     }
 
-    if (!DocumentAlgorithms::IsIFrameSrcdocDocument(_document))
+    if (!dom::DocumentAlgorithms::IsIFrameSrcdocDocument(_document))
     {
       ParseError(token);
     }
 
     if (!_document._parserCannotChangeTheMode)
     {
-      _document._quirksMode = QuirksMode::Quirks;
+      _document._quirksMode = dom::QuirksMode::Quirks;
     }
 
     _insertionMode = InsertionMode::BeforeHTML;
@@ -670,7 +670,7 @@ namespace krys::boo::html
       {
         if (token.Name() == TagNames::HTML::html)
         {
-          auto html = CreateElement(token.Name(), Namespaces::HTML, token.Attributes(), _document);
+          auto html = CreateElement(token.Name(), infra::Namespaces::HTML, token.Attributes(), _document);
           _document.AppendChild(*html);
           _openElementStack.Push({TagName::html, Namespace::HTML, *html, krys::move(token.Attributes())});
 
@@ -693,8 +693,9 @@ namespace krys::boo::html
       }
     }
 
-    auto html = ElementFactory::Create(_document, QualifiedName(Namespaces::HTML, dom::DOMStringAtom::Null(),
-                                                                u8"html", TagName::html, Namespace::HTML));
+    auto html = dom::ElementFactory::Create(
+      _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(), u8"html",
+                                    TagName::html, Namespace::HTML));
     _document.AppendChild(*html);
     _openElementStack.Push({TagName::html, Namespace::HTML, *html, {}});
 
@@ -757,9 +758,9 @@ namespace krys::boo::html
       }
     }
 
-    _head =
-      ElementFactory::Create(_document, QualifiedName(Namespaces::HTML, dom::DOMStringAtom::Null(),
-                                                      TagNames::HTML::head, TagName::head, Namespace::HTML));
+    _head = dom::ElementFactory::Create(
+      _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(), TagNames::HTML::head,
+                                    TagName::head, Namespace::HTML));
     InsertElementAtAdjustedInsertionLocation(*_head);
     _openElementStack.Push({TagName::head, Namespace::HTML, *_head, {}});
 
@@ -857,7 +858,7 @@ namespace krys::boo::html
           {
             auto adjustedInsertionLocation = AppropriatePlaceToInsertNode();
 
-            auto element = CreateElement(token.Name(), Namespaces::HTML, token.Attributes(),
+            auto element = CreateElement(token.Name(), infra::Namespaces::HTML, token.Attributes(),
                                          *adjustedInsertionLocation.Parent);
             auto &script = Downcast<HTMLScriptElement>(*element);
 
@@ -1160,9 +1161,9 @@ namespace krys::boo::html
       }
     }
 
-    auto body =
-      ElementFactory::Create(_document, QualifiedName(Namespaces::HTML, dom::DOMStringAtom::Null(),
-                                                      TagNames::HTML::body, TagName::body, Namespace::HTML));
+    auto body = dom::ElementFactory::Create(
+      _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(), TagNames::HTML::body,
+                                    TagName::body, Namespace::HTML));
     InsertElementAtAdjustedInsertionLocation(*body);
     _openElementStack.Push({TagName::body, Namespace::HTML, *body, {}});
 
@@ -1286,7 +1287,7 @@ namespace krys::boo::html
             }
 
             auto &bodyElement = Downcast<HTMLBodyElement>(_openElementStack[1].Element());
-            (void)MutationAlgorithms::Remove(bodyElement);
+            (void)dom::MutationAlgorithms::Remove(bodyElement);
             _openElementStack.PopUntil(_openElementStack.Top().Element());
             InsertHTMLElement(krys::move(token));
 
@@ -1593,7 +1594,7 @@ namespace krys::boo::html
           }
           case TagName::table:
           {
-            if (_document._quirksMode != QuirksMode::Quirks
+            if (_document._quirksMode != dom::QuirksMode::Quirks
                 && _openElementStack.HasElementInButtonScope(TagName::p))
             {
               ClosePElement(token);
@@ -1639,7 +1640,8 @@ namespace krys::boo::html
             {
               if (attr.NameView() == u8"type")
               {
-                hasHiddenType = StringAlgorithms::ASCIICaseInsensitiveMatch(attr.ValueView(), u8"hidden");
+                hasHiddenType =
+                  infra::StringAlgorithms::ASCIICaseInsensitiveMatch(attr.ValueView(), u8"hidden");
                 break;
               }
             }
@@ -1853,7 +1855,7 @@ namespace krys::boo::html
             ReconstructActiveFormattingElements();
             AdjustMathMLAttributes(token);
             AdjustForeignAttributes(token);
-            InsertForeignElement(krys::move(token), Namespaces::MathML, false);
+            InsertForeignElement(krys::move(token), infra::Namespaces::MathML, false);
 
             if (token.IsSelfClosing())
             {
@@ -1868,7 +1870,7 @@ namespace krys::boo::html
             ReconstructActiveFormattingElements();
             AdjustSVGAttributes(token);
             AdjustForeignAttributes(token);
-            InsertForeignElement(krys::move(token), Namespaces::SVG, false);
+            InsertForeignElement(krys::move(token), infra::Namespaces::SVG, false);
 
             if (token.IsSelfClosing())
             {
@@ -2037,9 +2039,9 @@ namespace krys::boo::html
             if (!_openElementStack.HasElementInButtonScope(TagName::p))
             {
               ParseError(token);
-              auto pElement = ElementFactory::Create(
-                _document, QualifiedName(Namespaces::HTML, dom::DOMStringAtom::Null(), TagNames::HTML::p,
-                                         TagName::p, Namespace::HTML));
+              auto pElement = dom::ElementFactory::Create(
+                _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(),
+                                              TagNames::HTML::p, TagName::p, Namespace::HTML));
               InsertElementAtAdjustedInsertionLocation(*pElement);
               _openElementStack.Push({TagName::p, Namespace::HTML, *pElement, {}});
             }
@@ -2312,9 +2314,9 @@ namespace krys::boo::html
           {
             _openElementStack.PopUntilTableContext();
 
-            auto colgroup = ElementFactory::Create(
-              _document, QualifiedName(Namespaces::HTML, dom::DOMStringAtom::Null(), TagNames::HTML::colgroup,
-                                       TagName::colgroup, Namespace::HTML));
+            auto colgroup = dom::ElementFactory::Create(
+              _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(),
+                                            TagNames::HTML::colgroup, TagName::colgroup, Namespace::HTML));
             InsertElementAtAdjustedInsertionLocation(*colgroup);
             _openElementStack.Push({TagName::colgroup, Namespace::HTML, *colgroup, {}});
 
@@ -2339,9 +2341,9 @@ namespace krys::boo::html
           {
             _openElementStack.PopUntilTableContext();
 
-            auto tbody = ElementFactory::Create(
-              _document, QualifiedName(Namespaces::HTML, dom::DOMStringAtom::Null(), TagNames::HTML::tbody,
-                                       TagName::tbody, Namespace::HTML));
+            auto tbody = dom::ElementFactory::Create(
+              _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(),
+                                            TagNames::HTML::tbody, TagName::tbody, Namespace::HTML));
             InsertElementAtAdjustedInsertionLocation(*tbody);
             _openElementStack.Push({TagName::tbody, Namespace::HTML, *tbody, {}});
 
@@ -2378,7 +2380,7 @@ namespace krys::boo::html
                                                [](const ParsedAttribute &attr)
                                                {
                                                  return attr.NameView() == u8"type"
-                                                        && StringAlgorithms::ASCIICaseInsensitiveMatch(
+                                                        && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(
                                                           attr.ValueView(), u8"hidden");
                                                });
 
@@ -2484,8 +2486,8 @@ namespace krys::boo::html
     bool hasNonWhitespace = false;
     for (const auto &chars : _pendingTableCharacterTokens)
     {
-      if (hasNonWhitespace =
-            std::ranges::any_of(chars, [](char8 ch) { return !StringAlgorithms::IsASCIIWhitespace(ch); }))
+      if (hasNonWhitespace = std::ranges::any_of(chars, [](char8 ch)
+                                                 { return !infra::StringAlgorithms::IsASCIIWhitespace(ch); }))
       {
         break;
       }
@@ -2734,9 +2736,9 @@ namespace krys::boo::html
 
             _openElementStack.PopUntilTableBodyContext();
 
-            auto tr = ElementFactory::Create(_document,
-                                             QualifiedName(Namespaces::HTML, dom::DOMStringAtom::Null(),
-                                                           TagNames::HTML::tr, TagName::tr, Namespace::HTML));
+            auto tr = dom::ElementFactory::Create(
+              _document, dom::QualifiedName(infra::Namespaces::HTML, dom::DOMStringAtom::Null(),
+                                            TagNames::HTML::tr, TagName::tr, Namespace::HTML));
             InsertElementAtAdjustedInsertionLocation(*tr);
             _openElementStack.Push({TagName::tr, Namespace::HTML, *tr, {}});
 
@@ -3551,7 +3553,7 @@ namespace krys::boo::html
   {
     auto [parent, beforeSibling] = AdjustedInsertionLocation();
 
-    if (Is<Document>(parent))
+    if (Is<dom::Document>(parent))
     {
       return;
     }
@@ -3562,22 +3564,22 @@ namespace krys::boo::html
       previousSibling = parent->LastChild();
     }
 
-    if (Is<HTML::Text>(previousSibling))
+    if (Is<dom::Text>(previousSibling))
     {
-      auto &textNode = Downcast<HTML::Text>(*previousSibling);
+      auto &textNode = Downcast<dom::Text>(*previousSibling);
       textNode.AppendData(krys::move(data));
     }
     else
     {
-      auto textNode = CreateRef<HTML::Text>(parent->NodeDocument(), krys::move(data));
+      auto textNode = CreateRef<dom::Text>(parent->NodeDocument(), krys::move(data));
       // NOTE: We purposely ignore the error here if it happens.
-      (void)MutationAlgorithms::Insert(*textNode, *parent, beforeSibling);
+      (void)dom::MutationAlgorithms::Insert(*textNode, *parent, beforeSibling);
     }
   }
 
   bool HTMLTreeBuilder::RemoveNulls(HTMLTokenAtom &token) noexcept
   {
-    assert(token.Type() == HTMLTokenType::Character);
+    krys_debug_assert(token.Type() == HTMLTokenType::Character);
 
     auto removed = std::erase_if(token._data, [](char8 ch) { return ch == '\0'; });
     if (removed > 0uz)
@@ -3590,10 +3592,10 @@ namespace krys::boo::html
 
   bool HTMLTreeBuilder::RemoveNonWhitespace(HTMLTokenAtom &token) noexcept
   {
-    assert(token.Type() == HTMLTokenType::Character);
+    krys_debug_assert(token.Type() == HTMLTokenType::Character);
 
     auto removed =
-      std::erase_if(token._data, [](char8 ch) { return !StringAlgorithms::IsASCIIWhitespace(ch); });
+      std::erase_if(token._data, [](char8 ch) { return !infra::StringAlgorithms::IsASCIIWhitespace(ch); });
     if (removed > 0uz)
     {
       ParseError(token);
@@ -3604,11 +3606,11 @@ namespace krys::boo::html
 
   bool HTMLTreeBuilder::SkipLeadingWhitespace(HTMLTokenAtom &token) noexcept
   {
-    assert(token.Type() == HTMLTokenType::Character);
+    krys_debug_assert(token.Type() == HTMLTokenType::Character);
 
     auto begin = token.Characters().begin();
     auto position = begin;
-    StringAlgorithms::SkipWhitespace(token.Characters(), position);
+    infra::StringAlgorithms::SkipWhitespace(token.Characters(), position);
 
     token._data.erase(0uz, std::distance(begin, position));
     return !token.Characters().empty();
@@ -3616,11 +3618,11 @@ namespace krys::boo::html
 
   bool HTMLTreeBuilder::InsertLeadingWhitespace(HTMLTokenAtom &token) noexcept
   {
-    assert(token.Type() == HTMLTokenType::Character);
+    krys_debug_assert(token.Type() == HTMLTokenType::Character);
 
     auto begin = token.Characters().begin();
     auto position = begin;
-    StringAlgorithms::SkipWhitespace(token.Characters(), position);
+    infra::StringAlgorithms::SkipWhitespace(token.Characters(), position);
 
     if (position != begin)
     {
@@ -3633,7 +3635,7 @@ namespace krys::boo::html
 
   bool HTMLTreeBuilder::InsertLeadingWhitespaceAndNulls(HTMLTokenAtom &token) noexcept
   {
-    assert(token.Type() == HTMLTokenType::Character);
+    krys_debug_assert(token.Type() == HTMLTokenType::Character);
 
     constexpr static dom::DOMStringView Replacement = u8"\uFFFD";
 
@@ -3650,8 +3652,9 @@ namespace krys::boo::html
 
     auto begin = token.Characters().begin();
     auto position = begin;
-    StringAlgorithms::AdvancePositionWhile(token.Characters(), position, [](char8 ch)
-                                           { return ch == '\0' || StringAlgorithms::IsASCIIWhitespace(ch); });
+    infra::StringAlgorithms::AdvancePositionWhile(
+      token.Characters(), position,
+      [](char8 ch) { return ch == '\0' || infra::StringAlgorithms::IsASCIIWhitespace(ch); });
 
     if (position != begin)
     {
@@ -3674,8 +3677,7 @@ namespace krys::boo::html
 
 #pragma region Insertion Algorithms
 
-  InsertionLocation
-    HTMLTreeBuilder::AppropriatePlaceToInsertNode(ContainerNode *targetOverride) noexcept
+  InsertionLocation HTMLTreeBuilder::AppropriatePlaceToInsertNode(dom::ContainerNode *targetOverride) noexcept
   {
     // SPEC(1): If there was an override target specified, then let target be the override target.
     // Otherwise, let target be the current node.
@@ -3814,14 +3816,14 @@ namespace krys::boo::html
     return adjustedInsertionLocation;
   }
 
-  void HTMLTreeBuilder::InsertElementAtAdjustedInsertionLocation(Element &element,
+  void HTMLTreeBuilder::InsertElementAtAdjustedInsertionLocation(dom::Element &element,
                                                                  Maybe<InsertionLocation> location) noexcept
   {
     // SPEC(1): Let insertionLocation be the adjusted insertion location.
     auto [parent, beforeSibling] = AdjustedInsertionLocation(location);
 
     // SPEC(2): If it is not possible to insert element at insertionLocation, abort these steps.
-    if (auto result = MutationAlgorithms::EnsurePreInsertValidity(element, *parent, beforeSibling);
+    if (auto result = dom::MutationAlgorithms::EnsurePreInsertValidity(element, *parent, beforeSibling);
         result.HasException())
     {
       return;
@@ -3837,7 +3839,7 @@ namespace krys::boo::html
 
     // SPEC(4): Insert element at insertionLocation.
     // NOTE: We purposely ignore the error here if it happens.
-    (void)MutationAlgorithms::Insert(element, *parent, beforeSibling);
+    (void)dom::MutationAlgorithms::Insert(element, *parent, beforeSibling);
 
     // SPEC(5): If the parser was not created as part of the HTML fragment parsing algorithm, then pop the
     // element queue from element's relevant agent's custom element reactions stack, and invoke custom element
@@ -3849,8 +3851,9 @@ namespace krys::boo::html
     }
   }
 
-  Ref<Element> HTMLTreeBuilder::InsertForeignElement(HTMLTokenAtom &&token, dom::DOMStringAtom namespaceURI,
-                                                     bool onlyAddToElementStack) noexcept
+  Ref<dom::Element> HTMLTreeBuilder::InsertForeignElement(HTMLTokenAtom &&token,
+                                                          dom::DOMStringAtom namespaceURI,
+                                                          bool onlyAddToElementStack) noexcept
   {
     auto [parent, beforeSibling] = AppropriatePlaceToInsertNode();
     auto element = CreateElement(token.Name(), namespaceURI, token.Attributes(), *parent);
@@ -3869,18 +3872,18 @@ namespace krys::boo::html
     return element;
   }
 
-  Ref<Element> HTMLTreeBuilder::InsertHTMLElement(HTMLTokenAtom &&token) noexcept
+  Ref<dom::Element> HTMLTreeBuilder::InsertHTMLElement(HTMLTokenAtom &&token) noexcept
   {
-    return InsertForeignElement(krys::move(token), Namespaces::HTML, false);
+    return InsertForeignElement(krys::move(token), infra::Namespaces::HTML, false);
   }
 
   void HTMLTreeBuilder::InsertComment(dom::DOMStringView data, Maybe<InsertionLocation> position) noexcept
   {
     auto [parent, beforeSibling] = AdjustedInsertionLocation(position);
-    auto commentNode = CreateRef<Comment>(parent->NodeDocument(), dom::DOMString(data));
+    auto commentNode = CreateRef<dom::Comment>(parent->NodeDocument(), dom::DOMString(data));
 
     // NOTE: We purposely ignore the error here if it happens.
-    (void)MutationAlgorithms::Insert(*commentNode, *parent, beforeSibling);
+    (void)dom::MutationAlgorithms::Insert(*commentNode, *parent, beforeSibling);
   }
 
   void HTMLTreeBuilder::AppendCommentToDocument(dom::DOMStringView data) noexcept
@@ -3906,9 +3909,9 @@ namespace krys::boo::html
     _insertionMode = InsertionMode::Text;
   }
 
-  Ref<Element> HTMLTreeBuilder::CreateElement(dom::DOMStringAtom name, dom::DOMStringAtom namespaceURI,
-                                              const ParsedAttributeList &attributes,
-                                              ContainerNode &intendedParent) noexcept
+  Ref<dom::Element> HTMLTreeBuilder::CreateElement(dom::DOMStringAtom name, dom::DOMStringAtom namespaceURI,
+                                                   const ParsedAttributeList &attributes,
+                                                   dom::ContainerNode &intendedParent) noexcept
   {
     auto &document = intendedParent.NodeDocument();
     auto is = [&]() -> dom::DOMStringAtom
@@ -3937,13 +3940,14 @@ namespace krys::boo::html
       // Push a new element queue onto document's relevant agent's custom element reactions stack.
     }
 
-    auto element = ElementFactory::Create(document, {namespaceURI, dom::DOMStringAtom::Null(), name}, is,
-                                          willExecuteScript, registry);
+    auto element = dom::ElementFactory::Create(document, {namespaceURI, dom::DOMStringAtom::Null(), name}, is,
+                                               willExecuteScript, registry);
     for (auto &attr : attributes)
     {
       if (attr.Flags == ParsedAttributeFlags::None)
       {
-        ElementAlgorithms::SetAttributeValue(*element, attr.NameView(), dom::DOMString(attr.ValueView()));
+        dom::ElementAlgorithms::SetAttributeValue(*element, attr.NameView(),
+                                                  dom::DOMString(attr.ValueView()));
       }
       else
       {
@@ -3953,22 +3957,22 @@ namespace krys::boo::html
 
         if (HasFlag(attr.Flags, ParsedAttributeFlags::IsXML))
         {
-          namespaceUri = Namespaces::XML;
-          prefix = NamespacePrefixes::XML;
+          namespaceUri = infra::Namespaces::XML;
+          prefix = infra::NamespacePrefixes::XML;
           prefixLength = 4uz; // xml + :
         }
 
         if (HasFlag(attr.Flags, ParsedAttributeFlags::IsXLink))
         {
-          namespaceUri = Namespaces::XLink;
-          prefix = NamespacePrefixes::XLink;
+          namespaceUri = infra::Namespaces::XLink;
+          prefix = infra::NamespacePrefixes::XLink;
           prefixLength = 6uz; // xlink + :
         }
 
         if (HasFlag(attr.Flags, ParsedAttributeFlags::IsXMLNS))
         {
-          namespaceUri = Namespaces::XMLNS;
-          prefix = NamespacePrefixes::XMLNS;
+          namespaceUri = infra::Namespaces::XMLNS;
+          prefix = infra::NamespacePrefixes::XMLNS;
 
           if (HasFlag(attr.Flags, ParsedAttributeFlags::HasPrefix))
           {
@@ -3977,8 +3981,8 @@ namespace krys::boo::html
         }
 
         auto localName = attr.NameView().substr(prefixLength, attr.NameView().size() - prefixLength);
-        ElementAlgorithms::SetAttributeValue(*element, localName, dom::DOMString(attr.ValueView()), prefix,
-                                             namespaceUri);
+        dom::ElementAlgorithms::SetAttributeValue(*element, localName, dom::DOMString(attr.ValueView()),
+                                                  prefix, namespaceUri);
       }
     }
 
@@ -4010,8 +4014,8 @@ namespace krys::boo::html
     return element;
   }
 
-  Ref<Element> HTMLTreeBuilder::CreateElement(const HTMLStackItem &item,
-                                              ContainerNode *intendedParent) noexcept
+  Ref<dom::Element> HTMLTreeBuilder::CreateElement(const HTMLStackItem &item,
+                                                   dom::ContainerNode *intendedParent) noexcept
   {
     auto &node = item.Element();
     auto &parent = intendedParent != nullptr ? *intendedParent : *node.ParentNode();
@@ -4250,7 +4254,7 @@ namespace krys::boo::html
     if (data.HasSystemIdentifier)
     {
       auto systemIdentifier = dom::DOMStringView(data.SystemIdentifier.begin(), data.SystemIdentifier.end());
-      if (StringAlgorithms::ASCIICaseInsensitiveMatch(
+      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(
             systemIdentifier, u8"http://www.ibm.com/data/dtd/v11/ibmxhtml1-transitional.dtd"))
       {
         return true;
@@ -4263,7 +4267,7 @@ namespace krys::boo::html
 
       auto Matches = [publicIdentifier](dom::DOMStringView identifier)
       {
-        return StringAlgorithms::ASCIICaseInsensitiveMatch(publicIdentifier, identifier);
+        return infra::StringAlgorithms::ASCIICaseInsensitiveMatch(publicIdentifier, identifier);
       };
 
       auto StartsWith = [publicIdentifier](dom::DOMStringView identifier)
@@ -4274,7 +4278,7 @@ namespace krys::boo::html
         }
 
         auto publicIdentifierPrefix = publicIdentifier.substr(0uz, identifier.size());
-        return StringAlgorithms::ASCIICaseInsensitiveMatch(publicIdentifierPrefix, identifier);
+        return infra::StringAlgorithms::ASCIICaseInsensitiveMatch(publicIdentifierPrefix, identifier);
       };
 
       if (Matches(u8"-//W3O//DTD W3 HTML Strict 3.0//EN//") || Matches(u8"-/W3C/DTD HTML 4.0 Transitional/EN")
@@ -4360,7 +4364,7 @@ namespace krys::boo::html
         }
 
         auto publicIdentifierPrefix = publicIdentifier.substr(0uz, identifier.size());
-        return StringAlgorithms::ASCIICaseInsensitiveMatch(publicIdentifierPrefix, identifier);
+        return infra::StringAlgorithms::ASCIICaseInsensitiveMatch(publicIdentifierPrefix, identifier);
       };
 
       if (StartsWith(u8"-//W3C//DTD XHTML 1.0 Frameset//")
@@ -4422,7 +4426,7 @@ namespace krys::boo::html
       //       list otherwise
       //     - has the tag name subject.
       // If there is no such element, then act as described in the "any other end tag" entry above and return.
-      HTMLStackItem * formattingElement =
+      HTMLStackItem *formattingElement =
         _activeFormattingElements.FindFromLastMarker(subject, Namespace::HTML);
 
       if (formattingElement == nullptr)
@@ -4460,7 +4464,7 @@ namespace krys::boo::html
 
       // SPEC(4.7): Let furthestBlock be the topmost node in the stack of open elements that is lower in the
       // stack than formattingElement, and is an element in the special category. There might not be one.
-      HTMLStackItem * furthestBlock = FurthestSpecialElementBlock(formattingElementNode);
+      HTMLStackItem *furthestBlock = FurthestSpecialElementBlock(formattingElementNode);
 
       // SPEC(4.8) - If there is no furthestBlock, then the UA must first pop all the nodes from the bottom of
       // the stack of open elements, from the current node up to and including formattingElement, then remove
@@ -4478,25 +4482,25 @@ namespace krys::boo::html
 
       // SPEC(4.9): Let commonAncestor be the element immediately above formattingElement in the stack of open
       // elements.
-      HTMLStackItem * commonAncestor = _openElementStack.EntryBefore(formattingElementNode);
+      HTMLStackItem *commonAncestor = _openElementStack.EntryBefore(formattingElementNode);
 
       // SPEC(4.10): Let a bookmark note the position of formattingElement in the list of active formatting
       // elements relative to the elements on either side of it in the list.
       auto bookmark = _activeFormattingElements.BookmarkFor(formattingElementNode);
 
       // SPEC(4.11): Let node and lastNode be furthestBlock.
-      Element *node = &furthestBlockNode;
-      Element *lastNode = node;
+      dom::Element *node = &furthestBlockNode;
+      dom::Element *lastNode = node;
 
       // SPEC(4.12): Let innerLoopCounter be 0.
       size_t innerLoopCounter = 0uz;
 
-      auto ElementAbove = [&](Element &node) -> Element *
+      auto ElementAbove = [&](dom::Element &node) -> dom::Element *
       {
-        HTMLStackItem * entry = _openElementStack.EntryBefore(node);
+        HTMLStackItem *entry = _openElementStack.EntryBefore(node);
         return entry != nullptr ? &entry->Element() : nullptr;
       };
-      Element *immediatelyAbove = ElementAbove(*node);
+      dom::Element *immediatelyAbove = ElementAbove(*node);
 
       // SPEC(4.13): While true:
       while (true)
@@ -4508,7 +4512,7 @@ namespace krys::boo::html
         // node is no longer in the stack of open elements (e.g. because it got removed by this algorithm),
         // the element that was immediately above node in the stack of open elements before node was removed.
         node = immediatelyAbove;
-        assert(node != nullptr);
+        krys_debug_assert(node != nullptr);
 
         // NOTE: Fetch the next node now in case the stack item gets destroyed.
         immediatelyAbove = ElementAbove(*node);
@@ -4553,7 +4557,7 @@ namespace krys::boo::html
         }
 
         // SPEC(4.13.8): Append lastNode to node.
-        (void)MutationAlgorithms::Append(*lastNode, *node);
+        (void)dom::MutationAlgorithms::Append(*lastNode, *node);
 
         // SPEC(4.13.9): Set lastNode to node.
         lastNode = node;
@@ -4562,7 +4566,7 @@ namespace krys::boo::html
       // SPEC(4.14): Insert whatever lastNode ended up being in the previous step at the appropriate place for
       // inserting a node, but using commonAncestor as the override target.
       auto location = AppropriatePlaceToInsertNode(&commonAncestor->Element());
-      (void)MutationAlgorithms::Insert(*lastNode, *location.Parent, location.BeforeSibling);
+      (void)dom::MutationAlgorithms::Insert(*lastNode, *location.Parent, location.BeforeSibling);
 
       // SPEC(4.15): Create an element for the token for which formattingElement was created, in the HTML
       // namespace, with furthestBlock as the intended parent.
@@ -4572,11 +4576,11 @@ namespace krys::boo::html
       // the last step.
       while (auto *child = furthestBlockNode.FirstChild())
       {
-        (void)MutationAlgorithms::Append(*child, *newElement);
+        (void)dom::MutationAlgorithms::Append(*child, *newElement);
       }
 
       // SPEC(4.17): Append that new element to furthestBlock.
-      (void)MutationAlgorithms::Append(*newElement, furthestBlockNode);
+      (void)dom::MutationAlgorithms::Append(*newElement, furthestBlockNode);
 
       auto newTagName = formattingElement->TagName();
       auto newTagNamespace = formattingElement->Namespace();
@@ -4598,8 +4602,7 @@ namespace krys::boo::html
     }
   }
 
-  HTMLStackItem *
-    HTMLTreeBuilder::FurthestSpecialElementBlock(const Element &formattingElement) noexcept
+  HTMLStackItem *HTMLTreeBuilder::FurthestSpecialElementBlock(const dom::Element &formattingElement) noexcept
   {
     // Get the index of the formatting element in the open element stack.
     size_t formattingIndex = std::distance(
@@ -4624,9 +4627,9 @@ namespace krys::boo::html
 
 #pragma region IntegrationPoint Algorithms
 
-  bool HTMLTreeBuilder::IsMathMLTextIntegrationPoint(const Element &element) const noexcept
+  bool HTMLTreeBuilder::IsMathMLTextIntegrationPoint(const dom::Element &element) const noexcept
   {
-    if (element.NamespaceURI() == Namespaces::MathML)
+    if (element.NamespaceURI() == infra::Namespaces::MathML)
     {
       auto name = ParseTagName(element.LocalName().View());
       switch (name)
@@ -4645,9 +4648,9 @@ namespace krys::boo::html
     return false;
   }
 
-  bool HTMLTreeBuilder::IsHTMLIntegrationPoint(const Element &element) const noexcept
+  bool HTMLTreeBuilder::IsHTMLIntegrationPoint(const dom::Element &element) const noexcept
   {
-    if (element.NamespaceURI() == Namespaces::MathML)
+    if (element.NamespaceURI() == infra::Namespaces::MathML)
     {
       if (element.LocalName() == u8"annotation-xml")
       {
@@ -4655,8 +4658,8 @@ namespace krys::boo::html
         if (attr.has_value())
         {
           auto &encoding = attr.value();
-          if (StringAlgorithms::ASCIICaseInsensitiveMatch(encoding, u8"text/html")
-              || StringAlgorithms::ASCIICaseInsensitiveMatch(encoding, u8"application/xhtml+xml"))
+          if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(encoding, u8"text/html")
+              || infra::StringAlgorithms::ASCIICaseInsensitiveMatch(encoding, u8"application/xhtml+xml"))
           {
             return true;
           }
@@ -4665,7 +4668,7 @@ namespace krys::boo::html
         return false;
       }
     }
-    else if (element.NamespaceURI() == Namespaces::SVG)
+    else if (element.NamespaceURI() == infra::Namespaces::SVG)
     {
       auto name = ParseTagName(element.LocalName().View());
       switch (name)

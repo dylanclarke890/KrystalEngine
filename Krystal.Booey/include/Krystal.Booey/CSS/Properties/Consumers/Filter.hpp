@@ -8,7 +8,7 @@ namespace krys::boo::css
 {
   struct AppleColorFilter;
   class TokenRange;
-  class CSSValue;
+  class Value;
   struct PropertyParserState;
   struct Filter;
 
@@ -16,12 +16,12 @@ namespace krys::boo::css
   {
     // https://drafts.fxtf.org/filter-effects/#FilterProperty
 
-    // MARK: <'filter'> consuming (CSSValue)
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeFilter(TokenRange &tokens,
+    // MARK: <'filter'> consuming (Value)
+    KRYS_NODISCARD RefPtr<Value> ConsumeFilter(TokenRange &tokens,
                                                   PropertyParserState &state) noexcept;
 
-    // MARK: <'-apple-color-filter'> consuming (CSSValue)
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeAppleColorFilter(TokenRange &tokens,
+    // MARK: <'-apple-color-filter'> consuming (Value)
+    KRYS_NODISCARD RefPtr<Value> ConsumeAppleColorFilter(TokenRange &tokens,
                                                             PropertyParserState &state) noexcept;
 
     // MARK: <'filter'> consuming (unresolved)

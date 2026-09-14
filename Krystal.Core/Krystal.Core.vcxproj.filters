@@ -984,6 +984,12 @@
     <ClInclude Include="include\Krystal.Core\Types\Any.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\EncodingRegistry.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Text\ICodec.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Detection\NumberOfCores.cpp">

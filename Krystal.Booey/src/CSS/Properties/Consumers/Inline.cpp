@@ -2,12 +2,12 @@
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValuePair.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
-  KRYS_NODISCARD static RefPtr<CSSValue> ConsumeTextEdge(TokenRange &range) noexcept
+  KRYS_NODISCARD static RefPtr<Value> ConsumeTextEdge(TokenRange &range) noexcept
   {
     // <text-edge> = [ text | cap | ex | ideographic | ideographic-ink ]
     //               [ text | alphabetic | ideographic | ideographic-ink ]?
@@ -46,10 +46,10 @@ namespace krys::boo::css::PropertyParserHelpers
       return firstValue;
     }
 
-    return CSSValuePair::Create(krys::move(firstValue), krys::move(secondValue));
+    return ValuePair::Create(krys::move(firstValue), krys::move(secondValue));
   }
 
-  RefPtr<CSSValue> ConsumeLineFitEdge(TokenRange &range, PropertyParserState &) noexcept
+  RefPtr<Value> ConsumeLineFitEdge(TokenRange &range, PropertyParserState &) noexcept
   {
     // <'line-fit-edge'> = leading | <text-edge>
     // https://drafts.csswg.org/css-inline-3/#propdef-line-fit-edge
@@ -62,7 +62,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return ConsumeTextEdge(range);
   }
 
-  RefPtr<CSSValue> ConsumeTextBoxEdge(TokenRange &range, PropertyParserState &) noexcept
+  RefPtr<Value> ConsumeTextBoxEdge(TokenRange &range, PropertyParserState &) noexcept
   {
     // <'text-box-edge'> = auto | <text-edge>
     // https://drafts.csswg.org/css-inline-3/#propdef-text-box-edge

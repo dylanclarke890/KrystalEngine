@@ -2,12 +2,12 @@
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValueList.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
-  RefPtr<CSSValue> ConsumeScrollSnapType(TokenRange &tokens, PropertyParserState &) noexcept
+  RefPtr<Value> ConsumeScrollSnapType(TokenRange &tokens, PropertyParserState &) noexcept
   {
     // <'scroll-snap-type'> = none | [ x | y | block | inline | both ] [ mandatory | proximity
     // ]?@(default=proximity) https://drafts.csswg.org/css-scroll-snap-1/#scroll-snap-type
@@ -21,19 +21,19 @@ namespace krys::boo::css::PropertyParserHelpers
 
     if (*firstValue == ValueId::None)
     {
-      return CSSPrimitiveValue::Create(ValueId::None);
+      return PrimitiveValue::Create(ValueId::None);
     }
 
     // We only add the second value if it is not the initial value as described in specification
-    // so that serialization of this CSSValueList produces the canonical serialization.
+    // so that serialization of this ValueList produces the canonical serialization.
 
     auto secondValue = ConsumeIdentRaw<ValueId::Proximity, ValueId::Mandatory>(tokens);
     if (secondValue.value_or(ValueId::Proximity) == ValueId::Proximity)
     {
-      return CSSPrimitiveValue::Create(*firstValue);
+      return PrimitiveValue::Create(*firstValue);
     }
 
-    return CSSValueList::CreateSpaceSeparated(CSSPrimitiveValue::Create(*firstValue),
-                                              CSSPrimitiveValue::Create(ValueId::Mandatory));
+    return ValueList::CreateSpaceSeparated(PrimitiveValue::Create(*firstValue),
+                                              PrimitiveValue::Create(ValueId::Mandatory));
   }
 }

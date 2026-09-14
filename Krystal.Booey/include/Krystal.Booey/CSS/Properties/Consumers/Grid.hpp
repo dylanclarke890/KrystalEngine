@@ -9,10 +9,10 @@
 namespace krys::boo::css
 {
   class TokenRange;
-  class CSSValue;
+  class Value;
   struct PropertyParserState;
   using GridNamedAreaMapRow = SmallList<CSSOMString, 8uz>;
-  class CSSGridLineNamesValue;
+  class GridLineNamesValue;
 
   namespace PropertyParserHelpers
   {
@@ -37,26 +37,26 @@ namespace krys::boo::css
     KRYS_NODISCARD Maybe<GridNamedAreaMapRow>
       ConsumeUnresolvedGridTemplateAreasRow(TokenRange &tokens, PropertyParserState &state) noexcept;
 
-    KRYS_NODISCARD RefPtr<CSSGridLineNamesValue>
+    KRYS_NODISCARD RefPtr<GridLineNamesValue>
       ConsumeGridLineNames(TokenRange &tokens, PropertyParserState &state,
                            AllowEmpty allowEmpty = AllowEmpty::No) noexcept;
 
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeGridLine(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeGridLine(TokenRange &tokens,
                                                     PropertyParserState &state) noexcept;
 
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeGridTrackSize(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeGridTrackSize(TokenRange &tokens,
                                                          PropertyParserState &state) noexcept;
 
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeGridTrackList(TokenRange &tokens, PropertyParserState &state,
+    KRYS_NODISCARD RefPtr<Value> ConsumeGridTrackList(TokenRange &tokens, PropertyParserState &state,
                                                          TrackListType = TrackListType::GridAuto) noexcept;
 
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeGridTemplatesRowsOrColumns(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeGridTemplatesRowsOrColumns(TokenRange &tokens,
                                                                       PropertyParserState &state) noexcept;
 
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeGridTemplateAreas(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeGridTemplateAreas(TokenRange &tokens,
                                                              PropertyParserState &state) noexcept;
 
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeGridAutoFlow(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeGridAutoFlow(TokenRange &tokens,
                                                         PropertyParserState &state) noexcept;
   }
 }

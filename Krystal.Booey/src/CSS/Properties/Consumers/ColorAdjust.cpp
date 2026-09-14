@@ -5,7 +5,7 @@
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/ColorAdjust/ColorScheme.hpp"
-#include "Krystal.Booey/CSS/Values/ColorAdjust/CSSColorSchemeValue.hpp"
+#include "Krystal.Booey/CSS/Values/ColorAdjust/ColorSchemeValue.hpp"
 
 namespace krys::boo::css
 {
@@ -118,7 +118,7 @@ namespace krys::boo::css
     return result;
   }
 
-  RefPtr<CSSValue> ConsumeColorScheme(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeColorScheme(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     auto colorScheme = ConsumeUnresolvedColorScheme(tokens, state);
     if (!colorScheme)
@@ -126,6 +126,6 @@ namespace krys::boo::css
       return {};
     }
 
-    return CSSColorSchemeValue::Create(krys::move(*colorScheme));
+    return ColorSchemeValue::Create(krys::move(*colorScheme));
   }
 }

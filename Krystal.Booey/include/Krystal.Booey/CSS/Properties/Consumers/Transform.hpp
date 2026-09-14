@@ -7,31 +7,31 @@
 namespace krys::boo::css
 {
   class TokenRange;
-  class CSSValue;
+  class Value;
   struct PropertyParserState;
   struct CSSTransform;
   struct ParserContext;
 
   namespace PropertyParserHelpers
   {
-    // MARK: <rotate3d()> consuming (CSSValue)
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeRotate3dFunction(TokenRange &tokens,
+    // MARK: <rotate3d()> consuming (Value)
+    KRYS_NODISCARD RefPtr<Value> ConsumeRotate3dFunction(TokenRange &tokens,
                                                             PropertyParserState &state) noexcept;
-    // MARK: <translate()> consuming (CSSValue)
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeTranslateFunction(TokenRange &tokens,
+    // MARK: <translate()> consuming (Value)
+    KRYS_NODISCARD RefPtr<Value> ConsumeTranslateFunction(TokenRange &tokens,
                                                              PropertyParserState &state) noexcept;
-    // MARK: <translate3d()> consuming (CSSValue)
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeTranslate3dFunction(TokenRange &tokens,
+    // MARK: <translate3d()> consuming (Value)
+    KRYS_NODISCARD RefPtr<Value> ConsumeTranslate3dFunction(TokenRange &tokens,
                                                                PropertyParserState &state) noexcept;
 
-    // MARK: <'translate'> consuming (CSSValue)
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeTranslate(TokenRange &tokens,
+    // MARK: <'translate'> consuming (Value)
+    KRYS_NODISCARD RefPtr<Value> ConsumeTranslate(TokenRange &tokens,
                                                      PropertyParserState &state) noexcept;
-    // MARK: <'scale'> consuming (CSSValue)
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeScale(TokenRange &tokens,
+    // MARK: <'scale'> consuming (Value)
+    KRYS_NODISCARD RefPtr<Value> ConsumeScale(TokenRange &tokens,
                                                  PropertyParserState &state) noexcept;
-    // MARK: <'rotate'> consuming (CSSValue)
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeRotate(TokenRange &tokens,
+    // MARK: <'rotate'> consuming (Value)
+    KRYS_NODISCARD RefPtr<Value> ConsumeRotate(TokenRange &tokens,
                                                   PropertyParserState &state) noexcept;
 
     // MARK: <'transform'> parsing (raw)

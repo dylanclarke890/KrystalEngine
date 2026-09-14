@@ -1,20 +1,20 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/UI.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/CSSPrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Image.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/NumberDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/CSSCursorImageValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueListBuilder.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValuePair.hpp"
+#include "Krystal.Booey/CSS/Values/CursorImageValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
-  RefPtr<CSSValue> ConsumeCursor(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeCursor(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <cursor> = [ [ <url> | <url-set> ] [<x> <y>]? ]#? [ auto | default | none | context-menu | help |
     // pointer | progress | wait | cell | crosshair | text | vertical-text | alias | copy | move | no-drop |
@@ -22,23 +22,23 @@ namespace krys::boo::css::PropertyParserHelpers
     // sw-resize | w-resize | ew-resize | ns-resize | nesw-resize | nwse-resize | col-resize | row-resize |
     // all-scroll | zoom-in | zoom-out ] https://drafts.csswg.org/css-ui/#propdef-cursor
 
-    CSSValueListBuilder list;
+    ValueListBuilder list;
     while (auto image =
              ConsumeImage(tokens, state, AllowedImageType::URLFunction | AllowedImageType::ImageSet))
     {
-      RefPtr<CSSValuePair> hotSpot;
-      if (auto x = CSSPrimitiveValueResolver<Number<>>::ConsumeAndResolve(tokens, state))
+      RefPtr<ValuePair> hotSpot;
+      if (auto x = PrimitiveValueResolver<Number<>>::ConsumeAndResolve(tokens, state))
       {
-        auto y = CSSPrimitiveValueResolver<Number<>>::ConsumeAndResolve(tokens, state);
+        auto y = PrimitiveValueResolver<Number<>>::ConsumeAndResolve(tokens, state);
         if (!y)
         {
           return nullptr;
         }
 
-        hotSpot = CSSValuePair::CreateNonCoalescing(krys::move(x), krys::move(y));
+        hotSpot = ValuePair::CreateNonCoalescing(krys::move(x), krys::move(y));
       }
 
-      list.push_back(CSSCursorImageValue::Create(krys::move(image), krys::move(hotSpot)));
+      list.push_back(CursorImageValue::Create(krys::move(image), krys::move(hotSpot)));
       if (!ConsumeComma(tokens))
       {
         return nullptr;
@@ -46,7 +46,7 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     ValueId id = tokens.Peek().ValueId();
-    RefPtr<CSSValue> cursorType;
+    RefPtr<Value> cursorType;
     if (id == ValueId::Hand)
     {
       if (state.Context.Mode != ParserMode::HTMLQuirks) // Non-standard behavior
@@ -54,7 +54,7 @@ namespace krys::boo::css::PropertyParserHelpers
         return nullptr;
       }
 
-      cursorType = CSSPrimitiveValue::Create(ValueId::Pointer);
+      cursorType = PrimitiveValue::Create(ValueId::Pointer);
 
       tokens.Discard();
       tokens.DiscardWhitespace();
@@ -75,6 +75,6 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     list.push_back(krys::move(cursorType));
-    return CSSValueList::CreateCommaSeparated(krys::move(list));
+    return ValueList::CreateCommaSeparated(krys::move(list));
   }
 }

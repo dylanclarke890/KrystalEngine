@@ -75,7 +75,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
+    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
     <CustomBuildBeforeTargets>Compile</CustomBuildBeforeTargets>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -131,7 +131,7 @@
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
-      <Command>python "$(ProjectDir)\codegen\main.py" --gperf-executable="c:\ProgramData\chocolatey\bin\gperf" --verbose</Command>
+      <Command>python "$(ProjectDir)\codegen\main.py" --gperf-executable="c:\ProgramData\chocolatey\bin\gperf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -255,7 +255,7 @@
     <ClInclude Include="include\Krystal.Booey\Core\WritingMode.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Calc\CalcAllowedSymbols.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Calc\CalcTreeParser.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Calc\CSSCalcValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Calc\Value.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\CSSCharsetRule.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\CSSFunctionDeclarations.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\CSSGroupingRule.hpp" />
@@ -312,7 +312,7 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Properties\Consumers\ColorInterpolationMethod.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Properties\Consumers\Content.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Properties\Consumers\CounterStyles.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Properties\Consumers\CSSPrimitiveValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Properties\Consumers\PrimitiveValue.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Properties\Consumers\Display.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Properties\Consumers\Easing.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Properties\Consumers\Filter.hpp" />
@@ -395,64 +395,65 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Types\MediaListOrDOMString.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Background\BoxShadow.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Background\BoxShadowProperty.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Background\CSSBackgroundRepeatValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Background\CSSBoxShadowPropertyValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Background\CSSReflectValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Background\BackgroundRepeatValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Background\BoxShadowPropertyValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Background\ReflectValue.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Borders\BorderImage.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Borders\BorderRadius.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Borders\CSSBorderImageSliceValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Borders\CSSBorderImageWidthValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Borders\BorderImageSliceValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Borders\BorderImageWidthValue.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\ColorAdjust\ColorScheme.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\ColorAdjust\CSSColorSchemeValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\ColorAdjust\ColorSchemeValue.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Color\Color.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Color\ColorType.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Color\CurrentColor.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Color\HexColor.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Color\KeywordColor.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Color\PlatformColorResolutionState.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSAttrValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSColorValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSCounterValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSCursorImageValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSFunctionValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSGradientValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSOffsetRotateValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSPositionValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSPrimitiveValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSQuadValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSRatioValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSRectValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSScrollValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSTransformListValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSUnicodeRangeValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSUnits.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSURLValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSValueAggregates.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSValueConcepts.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSValueList.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSValueListBuilder.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSValuePair.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSValuePool.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSValueTypes.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSViewValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\CSSWideKeyword.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Easing\CSSEasingFunctionValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\AttrValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\ColorValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\CounterValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\CursorImageValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\FunctionValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\GradientValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\OffsetRotateValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\PositionValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\PrimitiveValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\QuadValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\RatioValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\RectValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\ScrollValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\TransformListValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\UnicodeRangeValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\NumericTypesValueCreation.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Units.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\UrlValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Value.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Aggregates.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Concepts.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\ValueList.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\ValueListBuilder.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\ValuePair.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\ValuePool.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Types.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\ViewValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\IsGlobalKeyword.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Easing\EasingFunctionValue.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Easing\CubicBezierEasingFunction.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Easing\EasingFunction.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Easing\LinearEasingFunction.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Easing\SpringEasingFunction.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Easing\StepsEasingFunction.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Enums\CSSUnitCategory.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Enums\CSSUnitType.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Enums\CSSValueType.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\UnitCategory.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\UnitType.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\ValueType.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\AppleColorFilter.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\AppleInvertLightnessFunction.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\BlurFunction.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\BrightnessFunction.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\ContrastFunction.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\CSSAppleColorFilterValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\CSSFilterValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\AppleColorFilterValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\FilterValue.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\DropShadowFunction.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\Filter.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\FilterFunctionDescriptor.hpp" />
@@ -464,40 +465,40 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\OpacityFunction.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\SaturateFunction.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Filter\SepiaFunction.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\CSSGridAutoRepeatValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\CSSGridIntegerRepeatValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\CSSGridLineNamesValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\CSSGridLineValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\CSSGridNamedAreaMap.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\CSSGridTemplateAreasValue.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\CSSSubgridValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\GridAutoRepeatValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\GridIntegerRepeatValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\GridLineNamesValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\GridLineValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\GridNamedAreaMap.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\GridTemplateAreasValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\SubgridValue.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\GridArea.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\GridPosition.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\GridSpan.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\GridTemplateAreas.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Grid\GridTrackSizingDirection.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Images\Gradient.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Motion\CSSRayValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Motion\RayValue.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Motion\RayFunction.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSPosition.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSPrimitiveData.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSPrimitiveKeywordList.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSPrimitiveNumeric.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSPrimitiveNumericConcepts.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSPrimitiveNumericRange.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSPrimitiveNumericRaw.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSPrimitiveNumericTypes.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSPrimitiveNumericTypesCanonicalization.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSPrimitiveNumericUnits.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSRatio.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSUnevaluatedCalc.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSURL.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\CSSURLModifiers.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\Position.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\PrimitiveData.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\PrimitiveKeywordList.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\PrimitiveNumeric.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\Concepts.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\Range.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\NumericRaw.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\NumericTypes.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\NumericTypesCanonicalization.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\Units.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\Ratio.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\UnevaluatedCalc.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\URL.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\URLModifiers.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\PrimitiveNumericOrKeyword.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\Quad.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\Rect.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\RectBase.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\TextDecoration\CSSTextShadowPropertyValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\TextDecoration\TextShadowPropertyValue.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\TextDecoration\TextShadow.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\ValueId.hpp" />
     <ClInclude Include="include\Krystal.Booey\DOM\AbortController.hpp" />
@@ -721,7 +722,6 @@
     <ClInclude Include="include\Krystal.Booey\HTML\Parser\HTMLCharacterReference.hpp" />
     <ClInclude Include="include\Krystal.Booey\HTML\Parser\HTMLDocumentParser.hpp" />
     <ClInclude Include="include\Krystal.Booey\HTML\Parser\HTMLElementStack.hpp" />
-    <ClInclude Include="include\Krystal.Booey\HTML\Parser\HTMLEncodingSniffer.hpp" />
     <ClInclude Include="include\Krystal.Booey\HTML\Parser\HTMLFormattingElementList.hpp" />
     <ClInclude Include="include\Krystal.Booey\HTML\Parser\InputStream.hpp" />
     <ClInclude Include="include\Krystal.Booey\HTML\Parser\HTMLStackItem.hpp" />
@@ -729,7 +729,6 @@
     <ClInclude Include="include\Krystal.Booey\HTML\Parser\HTMLTokenAtom.hpp" />
     <ClInclude Include="include\Krystal.Booey\HTML\Parser\HTMLTokenizer.hpp" />
     <ClInclude Include="include\Krystal.Booey\HTML\Parser\HTMLTreeBuilder.hpp" />
-    <ClInclude Include="include\Krystal.Booey\HTML\Parser\TextResourceDecoder.hpp" />
     <ClInclude Include="include\Krystal.Booey\HTML\Types\HTMLOrSVGScriptElement.hpp" />
     <ClInclude Include="include\Krystal.Booey\Infra\Namespaces.hpp" />
     <ClInclude Include="include\Krystal.Booey\Infra\StringAlgorithms.hpp" />
@@ -769,12 +768,14 @@
     <ClInclude Include="include\Krystal.Booey\Types\SourceLocation.hpp" />
     <ClInclude Include="include\Krystal.Booey\URL\Url.hpp" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="include\Krystal.Booey\Core\EncodingRegistry.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\Core\EncodingRegistry.cpp" />
     <ClCompile Include="src\CSS\Parser.cpp" />
     <ClCompile Include="src\CSS\CSSRule.cpp" />
     <ClCompile Include="src\CSS\CSSStyleSheet.cpp" />
@@ -825,14 +826,12 @@
     <ClCompile Include="src\CSS\Selectors\SelectorParser.cpp" />
     <ClCompile Include="src\CSS\Selectors\MutableSelector.cpp" />
     <ClCompile Include="src\CSS\StyleSheetContents.cpp" />
-    <ClCompile Include="src\CSS\Values\CSSPrimitiveValue.cpp" />
-    <ClCompile Include="src\CSS\Values\CSSValue.cpp" />
-    <ClCompile Include="src\CSS\Values\CSSValuePool.cpp" />
-    <ClCompile Include="src\CSS\Values\CSSValueTypes.cpp" />
-    <ClCompile Include="src\CSS\Values\Enums\CSSValueId.cpp" />
-    <ClCompile Include="src\CSS\Values\Primitives\CSSPrimitiveNumericUnits.cpp" />
-    <ClCompile Include="src\CSS\Values\Primitives\CSSRatio.cpp" />
-    <ClCompile Include="src\CSS\Values\Primitives\CSSUnevaluatedCalc.cpp" />
+    <ClCompile Include="src\CSS\Values\PrimitiveValue.cpp" />
+    <ClCompile Include="src\CSS\Values\Value.cpp" />
+    <ClCompile Include="src\CSS\Values\Types.cpp" />
+    <ClCompile Include="src\CSS\Values\Primitives\Units.cpp" />
+    <ClCompile Include="src\CSS\Values\Primitives\Ratio.cpp" />
+    <ClCompile Include="src\CSS\Values\Primitives\UnevaluatedCalc.cpp" />
     <ClCompile Include="src\CSS\Values\ValueId.cpp" />
     <ClCompile Include="src\DOM\Algorithms\AbortAlgorithms.cpp" />
     <ClCompile Include="src\DOM\AbortController.cpp" />

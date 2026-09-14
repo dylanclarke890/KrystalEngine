@@ -9,7 +9,7 @@ namespace krys::boo::css
 {
   class Color;
   class TokenRange;
-  class CSSValue;
+  class Value;
   class DynamicRangeLimit;
   class PlatformColorResolutionState;
 
@@ -31,8 +31,8 @@ namespace krys::boo::css
     KRYS_NODISCARD Maybe<Color> ConsumeUnresolvedColor(TokenRange &tokens, PropertyParserState &state,
                                                        const CSSColorParsingOptions & = {}) noexcept;
 
-    // MARK: <color> consuming (CSSValue)
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeColor(TokenRange &tokens, PropertyParserState &state,
+    // MARK: <color> consuming (Value)
+    KRYS_NODISCARD RefPtr<Value> ConsumeColor(TokenRange &tokens, PropertyParserState &state,
                                                  const CSSColorParsingOptions & = {}) noexcept;
 
     // MARK: <color> consuming (raw)
@@ -44,8 +44,8 @@ namespace krys::boo::css
     KRYS_NODISCARD Maybe<DynamicRangeLimit>
       ConsumeUnresolvedDynamicRangeLimit(TokenRange &tokens, PropertyParserState &state) noexcept;
 
-    // MARK: <dynamic-range-limit> (CSSValue)
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeDynamicRangeLimit(TokenRange &tokens,
+    // MARK: <dynamic-range-limit> (Value)
+    KRYS_NODISCARD RefPtr<Value> ConsumeDynamicRangeLimit(TokenRange &tokens,
                                                              PropertyParserState &state) noexcept;
   }
 }

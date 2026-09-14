@@ -11,15 +11,15 @@ namespace krys::boo::css
   class PropertyShorthand
   {
   private:
-    Span<const PropertyId> _properties;
     PropertyId _shorthandId {PropertyId::Invalid};
+    Span<const PropertyId> _properties;
 
   public:
     PropertyShorthand() noexcept = default;
 
     template <size_t NumProperties>
     PropertyShorthand(PropertyId id, Span<const PropertyId, NumProperties> properties) noexcept
-        : _properties(properties), _shorthandId(id)
+        : _shorthandId(id), _properties(properties)
     {
       static_assert(NumProperties != std::dynamic_extent);
     }
@@ -52,8 +52,8 @@ namespace krys::boo::css
 
   /// @brief Finds the index of the shorthand property in the given list of shorthands. If the shorthand
   /// property is not found, an assertion will fail.
-  KRYS_NODISCARD constexpr size_t
-    IndexOfShorthandProperty(PropertyId property, Span<const PropertyShorthand> shorthands) noexcept
+  KRYS_NODISCARD constexpr size_t IndexOfShorthandProperty(PropertyId property,
+                                                           Span<const PropertyShorthand> shorthands) noexcept
   {
     for (size_t i = 0uz; i < shorthands.size(); ++i)
     {
@@ -70,13 +70,13 @@ namespace krys::boo::css
   // The implementation is generated in PropertyShorthandFunctions.cpp.
   KRYS_NODISCARD PropertyShorthand ShorthandForProperty(PropertyId) noexcept;
 
-  using CSSPropertyShorthandList = SmallList<PropertyShorthand, 4uz>;
+  using PropertyShorthandList = SmallList<PropertyShorthand, 4uz>;
 
   /// @brief Gets the list of longhand properties that are set by the given shorthand property.
   KRYS_NODISCARD PropertyShorthand LonghandsForShorthand(PropertyId property) noexcept;
 
   /// @brief Gets the list of shorthands that set the given longhand property.
-  KRYS_NODISCARD CSSPropertyShorthandList MatchingShorthandsForLonghand(PropertyId property) noexcept;
+  KRYS_NODISCARD PropertyShorthandList MatchingShorthandsForLonghand(PropertyId property) noexcept;
 
   KRYS_NODISCARD PropertyShorthand TransitionShorthandForParsing() noexcept;
 }

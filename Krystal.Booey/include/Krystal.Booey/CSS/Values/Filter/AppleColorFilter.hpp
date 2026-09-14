@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/CSSValueTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Filter/AppleInvertLightnessFunction.hpp"
 #include "Krystal.Booey/CSS/Values/Filter/BrightnessFunction.hpp"
 #include "Krystal.Booey/CSS/Values/Filter/ContrastFunction.hpp"
@@ -10,7 +9,8 @@
 #include "Krystal.Booey/CSS/Values/Filter/OpacityFunction.hpp"
 #include "Krystal.Booey/CSS/Values/Filter/SaturateFunction.hpp"
 #include "Krystal.Booey/CSS/Values/Filter/SepiaFunction.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/CSSPrimitiveNumericTypes.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
+#include "Krystal.Booey/CSS/Values/Types.hpp"
 
 namespace krys::boo::css
 {
@@ -24,24 +24,24 @@ namespace krys::boo::css
     Variant<AppleInvertLightnessFunction, BrightnessFunction, ContrastFunction, GrayscaleFunction,
             HueRotateFunction, InvertFunction, OpacityFunction, SaturateFunction, SepiaFunction>;
 
-  struct AppleColorFilterValue
+  struct AppleColorFilterData
   {
     AppleColorFilterValueKind value;
 
     template <typename T>
     requires std::constructible_from<AppleColorFilterValueKind, T>
-    AppleColorFilterValue(T &&value) : value(std::forward<T>(value))
+    AppleColorFilterData(T &&value) : value(std::forward<T>(value))
     {
     }
 
-    KRYS_FORWARD_VARIANT_FUNCTIONS(AppleColorFilterValue, value)
+    KRYS_FORWARD_VARIANT_FUNCTIONS(AppleColorFilterData, value)
 
-    bool operator==(const AppleColorFilterValue &) const = default;
+    bool operator==(const AppleColorFilterData &) const = default;
   };
 
   // <apple-color-filter-value-list> = [ <apple-color-filter-function> | <url> ]+
   // (Equivalent of https://drafts.fxtf.org/filter-effects/#typedef-filter-value-list)
-  using AppleColorFilterValueList = SpaceSeparatedList<AppleColorFilterValue>;
+  using AppleColorFilterValueList = SpaceSeparatedList<AppleColorFilterData>;
 
   // <'-apple-color-filter'> = none | <-apple-color-filter-value-list>
   // (Equivalent of https://drafts.fxtf.org/filter-effects/#propdef-filter)
@@ -51,5 +51,5 @@ namespace krys::boo::css
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::css::AppleColorFilterValue)
+DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::css::AppleColorFilterData)
 DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::css::AppleColorFilter)

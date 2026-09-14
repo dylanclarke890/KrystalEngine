@@ -2,8 +2,8 @@
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValuePair.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
@@ -313,7 +313,7 @@ namespace krys::boo::css::PropertyParserHelpers
     }
   }
 
-  RefPtr<CSSValue> ValueForPositionArea(ValueId dim1, ValueId dim2, ValueType context) noexcept
+  RefPtr<Value> ValueForPositionArea(ValueId dim1, ValueId dim2, ValueType context) noexcept
   {
     auto maybeDim1Type = GetKeywordType(dim1);
     if (!maybeDim1Type)
@@ -336,12 +336,12 @@ namespace krys::boo::css::PropertyParserHelpers
 
     if (dim1 == ValueId::SpanAll && IsTypeAxisExplicit(dim2Type))
     {
-      return CSSPrimitiveValue::Create(dim2);
+      return PrimitiveValue::Create(dim2);
     }
 
     if (IsTypeAxisExplicit(dim1Type) && dim2 == ValueId::SpanAll)
     {
-      return CSSPrimitiveValue::Create(dim1);
+      return PrimitiveValue::Create(dim1);
     }
 
     // Ensure the X/block axis keyword goes first in the pair.
@@ -369,10 +369,10 @@ namespace krys::boo::css::PropertyParserHelpers
       }
     }
 
-    return CSSValuePair::Create(CSSPrimitiveValue::Create(dim1), CSSPrimitiveValue::Create(dim2));
+    return ValuePair::Create(PrimitiveValue::Create(dim1), PrimitiveValue::Create(dim2));
   }
 
-  RefPtr<CSSValue> ConsumePositionArea(TokenRange &tokens, PropertyParserState &) noexcept
+  RefPtr<Value> ConsumePositionArea(TokenRange &tokens, PropertyParserState &) noexcept
   {
     // <'position-area'> = none | <position-area>
     // https://drafts.csswg.org/css-anchor-position-1/#propdef-position-area
@@ -386,7 +386,7 @@ namespace krys::boo::css::PropertyParserHelpers
     auto dim1 = *maybeDim1;
     if (dim1 == ValueId::None)
     {
-      return CSSPrimitiveValue::Create(ValueId::None);
+      return PrimitiveValue::Create(ValueId::None);
     }
 
     auto maybeDim2 = ConsumeIdentRaw(tokens);
@@ -397,7 +397,7 @@ namespace krys::boo::css::PropertyParserHelpers
         return nullptr;
       }
 
-      return CSSPrimitiveValue::Create(dim1);
+      return PrimitiveValue::Create(dim1);
     }
 
     auto dim2 = *maybeDim2;

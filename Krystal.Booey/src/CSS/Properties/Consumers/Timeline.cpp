@@ -1,16 +1,16 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Timeline.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/CSSPrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/LengthPercentageDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSScrollValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValuePair.hpp"
-#include "Krystal.Booey/CSS/Values/CSSViewValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ScrollValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePair.hpp"
+#include "Krystal.Booey/CSS/Values/ViewValue.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
@@ -20,7 +20,7 @@ namespace krys::boo::css::PropertyParserHelpers
                         ValueId::Exit, ValueId::EntryCrossing, ValueId::ExitCrossing>(id);
   }
 
-  RefPtr<CSSValue> ConsumeAnimationTimelineScroll(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeAnimationTimelineScroll(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <scroll()> = scroll( [ <scroller> || <axis> ]? )
     // <scroller> = root | nearest | self
@@ -36,7 +36,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     if (args.IsAtEnd())
     {
-      return CSSScrollValue::Create(nullptr, nullptr);
+      return ScrollValue::Create(nullptr, nullptr);
     }
 
     auto scroller = PropertyParsing::ConsumeScroller(args);
@@ -55,10 +55,10 @@ namespace krys::boo::css::PropertyParserHelpers
       return nullptr;
     }
 
-    return CSSScrollValue::Create(krys::move(scroller), krys::move(axis));
+    return ScrollValue::Create(krys::move(scroller), krys::move(axis));
   }
 
-  RefPtr<CSSValue> ConsumeAnimationTimelineView(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeAnimationTimelineView(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <view()> = view( [ <axis> || <'view-timeline-inset'> ]? )
     // <axis> = block | inline | x | y
@@ -74,7 +74,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     if (!args.IsAtEnd())
     {
-      return CSSViewValue::Create();
+      return ViewValue::Create();
     }
 
     auto axis = PropertyParsing::ConsumeAxis(args);
@@ -94,10 +94,10 @@ namespace krys::boo::css::PropertyParserHelpers
       return nullptr;
     }
 
-    return CSSViewValue::Create(krys::move(axis), krys::move(startInset), krys::move(endInset));
+    return ViewValue::Create(krys::move(axis), krys::move(startInset), krys::move(endInset));
   }
 
-  RefPtr<CSSValue> ConsumeSingleViewTimelineInsetItem(TokenRange &tokens,
+  RefPtr<Value> ConsumeSingleViewTimelineInsetItem(TokenRange &tokens,
                                                       PropertyParserState &state) noexcept
   {
     // <single-view-timeline-inset-item-item> = <single-view-timeline-inset>{1,2}
@@ -113,14 +113,14 @@ namespace krys::boo::css::PropertyParserHelpers
     {
       if (endInset != startInset)
       {
-        return CSSValuePair::CreateNonCoalescing(krys::move(startInset), krys::move(endInset));
+        return ValuePair::CreateNonCoalescing(krys::move(startInset), krys::move(endInset));
       }
     }
 
     return startInset;
   }
 
-  RefPtr<CSSValue> ParseSingleViewTimelineInsetItem(const CSSOMString &string,
+  RefPtr<Value> ParseSingleViewTimelineInsetItem(const CSSOMString &string,
                                                     const ParserContext &context) noexcept
   {
     auto inputStream = InputStream(CSSOMString(string));
@@ -144,7 +144,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return result;
   }
 
-  RefPtr<CSSValue> ConsumeSingleAnimationRange(TokenRange &tokens, PropertyParserState &state,
+  RefPtr<Value> ConsumeSingleAnimationRange(TokenRange &tokens, PropertyParserState &state,
                                                SingleAnimationRangeType type) noexcept
   {
     // <'animation-tokens-{start|end}'> = normal | <length-percentage> | <timeline-tokens-name>
@@ -178,34 +178,34 @@ namespace krys::boo::css::PropertyParserHelpers
         return nullptr;
       }
 
-      if (auto offset = CSSPrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(tokens, state))
+      if (auto offset = PrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(tokens, state))
       {
         if (IsDefault(*offset))
         {
           return name;
         }
 
-        return CSSValuePair::CreateNonCoalescing(krys::move(name), krys::move(offset));
+        return ValuePair::CreateNonCoalescing(krys::move(name), krys::move(offset));
       }
 
       return name;
     }
 
-    return CSSPrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(tokens, state);
+    return PrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(tokens, state);
   }
 
-  RefPtr<CSSValue> ConsumeSingleAnimationRangeStart(TokenRange &tokens,
+  RefPtr<Value> ConsumeSingleAnimationRangeStart(TokenRange &tokens,
                                                     PropertyParserState &state) noexcept
   {
     return ConsumeSingleAnimationRange(tokens, state, SingleAnimationRangeType::Start);
   }
 
-  RefPtr<CSSValue> ConsumeSingleAnimationRangeEnd(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeSingleAnimationRangeEnd(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     return ConsumeSingleAnimationRange(tokens, state, SingleAnimationRangeType::End);
   }
 
-  RefPtr<CSSValue> ParseSingleAnimationRange(const CSSOMString &string, const ParserContext &context,
+  RefPtr<Value> ParseSingleAnimationRange(const CSSOMString &string, const ParserContext &context,
                                              SingleAnimationRangeType type) noexcept
   {
     auto inputStream = InputStream(CSSOMString(string));

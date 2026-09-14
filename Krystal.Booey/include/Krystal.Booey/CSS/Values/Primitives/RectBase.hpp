@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/CSSValue.hpp"
+#include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
@@ -8,18 +8,18 @@ namespace krys::boo::css
   class RectBase
   {
   private:
-    const Ref<const CSSValue> _top;
-    const Ref<const CSSValue> _right;
-    const Ref<const CSSValue> _bottom;
-    const Ref<const CSSValue> _left;
+    const Ref<const Value> _top;
+    const Ref<const Value> _right;
+    const Ref<const Value> _bottom;
+    const Ref<const Value> _left;
 
   protected:
-    explicit RectBase(Ref<CSSValue> value) noexcept
+    explicit RectBase(Ref<Value> value) noexcept
         : _top(value), _right(value), _bottom(value), _left(krys::move(value))
     {
     }
 
-    RectBase(Ref<CSSValue> top, Ref<CSSValue> right, Ref<CSSValue> bottom, Ref<CSSValue> left) noexcept
+    RectBase(Ref<Value> top, Ref<Value> right, Ref<Value> bottom, Ref<Value> left) noexcept
         : _top(krys::move(top)), _right(krys::move(right)), _bottom(krys::move(bottom)),
           _left(krys::move(left))
     {
@@ -28,19 +28,19 @@ namespace krys::boo::css
     ~RectBase() noexcept = default;
 
   public:
-    KRYS_NODISCARD const CSSValue &Top() const noexcept
+    KRYS_NODISCARD const Value &Top() const noexcept
     {
       return *_top;
     }
-    KRYS_NODISCARD const CSSValue &Right() const noexcept
+    KRYS_NODISCARD const Value &Right() const noexcept
     {
       return *_right;
     }
-    KRYS_NODISCARD const CSSValue &Bottom() const noexcept
+    KRYS_NODISCARD const Value &Bottom() const noexcept
     {
       return *_bottom;
     }
-    KRYS_NODISCARD const CSSValue &Left() const noexcept
+    KRYS_NODISCARD const Value &Left() const noexcept
     {
       return *_left;
     }

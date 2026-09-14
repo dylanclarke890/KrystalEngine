@@ -18,12 +18,6 @@
     <ClCompile Include="catch_main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\HTML\Parser\Loader\HTMLEncodingSniffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\HTML\Parser\Loader\TextResourceDecoder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="tests\HTML\Parser\InputStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

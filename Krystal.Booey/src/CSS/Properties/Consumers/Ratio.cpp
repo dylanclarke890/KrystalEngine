@@ -4,8 +4,8 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/NumberDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSRatioValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/RatioValue.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
@@ -67,22 +67,22 @@ namespace krys::boo::css::PropertyParserHelpers
     return Ratio {krys::move(*numerator), krys::move(*denominator)};
   }
 
-  RefPtr<CSSValue> ConsumeRatio(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeRatio(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     if (auto ratio = ConsumeUnresolvedRatio(tokens, state))
     {
-      return CSSRatioValue::Create(krys::move(*ratio));
+      return RatioValue::Create(krys::move(*ratio));
     }
 
     return nullptr;
   }
 
-  RefPtr<CSSValue> ConsumeRatioWithBothNumeratorAndDenominator(TokenRange &tokens,
+  RefPtr<Value> ConsumeRatioWithBothNumeratorAndDenominator(TokenRange &tokens,
                                                                PropertyParserState &state) noexcept
   {
     if (auto ratio = ConsumeUnresolvedRatioWithBothNumeratorAndDenominator(tokens, state))
     {
-      return CSSRatioValue::Create(krys::move(*ratio));
+      return RatioValue::Create(krys::move(*ratio));
     }
 
     return nullptr;

@@ -233,6 +233,7 @@
     <ClInclude Include="include\Krystal.Core\Maths\Traits.hpp" />
     <ClInclude Include="include\Krystal.Core\Maths\Transform.hpp" />
     <ClInclude Include="include\Krystal.Core\Maths\Vector.hpp" />
+    <ClInclude Include="include\Krystal.Core\Text\EncodingRegistry.hpp" />
     <ClInclude Include="include\Krystal.Core\Text\Encodings\Decode.hpp" />
     <ClInclude Include="include\Krystal.Core\Text\Encodings\Encode.hpp" />
     <ClInclude Include="include\Krystal.Core\Text\Encodings\EncodingId.hpp" />
@@ -254,6 +255,7 @@
     <ClInclude Include="include\Krystal.Core\Text\Encodings\Tatar.hpp" />
     <ClInclude Include="include\Krystal.Core\Text\Encodings\UTF.hpp" />
     <ClInclude Include="include\Krystal.Core\Text\Encodings\Windows.hpp" />
+    <ClInclude Include="include\Krystal.Core\Text\ICodec.hpp" />
     <ClInclude Include="include\Krystal.Core\Time\Duration.hpp" />
     <ClInclude Include="include\Krystal.Core\Time\MonotonicTime.hpp" />
     <ClInclude Include="include\Krystal.Core\Types\Any.hpp" />

@@ -10,10 +10,10 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/URL.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/Color/Color.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/Filter/AppleColorFilter.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/CSSAppleColorFilterValue.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/CSSFilterValue.hpp"
+#include "Krystal.Booey/CSS/Values/Filter/AppleColorFilterValue.hpp"
+#include "Krystal.Booey/CSS/Values/Filter/FilterValue.hpp"
 #include "Krystal.Booey/CSS/Values/Filter/Filter.hpp"
 #include "Krystal.Booey/CSS/Values/Filter/FilterFunctionDescriptor.hpp"
 
@@ -464,11 +464,11 @@ namespace krys::boo::css::PropertyParserHelpers
     return {};
   }
 
-  RefPtr<CSSValue> ConsumeFilter(TokenRange &range, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeFilter(TokenRange &range, PropertyParserState &state) noexcept
   {
     if (auto property = ConsumeUnresolvedFilter(range, state))
     {
-      return CSSFilterValue::Create({krys::move(*property)});
+      return FilterValue::Create({krys::move(*property)});
     }
 
     return nullptr;
@@ -608,11 +608,11 @@ namespace krys::boo::css::PropertyParserHelpers
     return {};
   }
 
-  RefPtr<CSSValue> ConsumeAppleColorFilter(TokenRange &range, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeAppleColorFilter(TokenRange &range, PropertyParserState &state) noexcept
   {
     if (auto property = ConsumeUnresolvedAppleColorFilter(range, state))
     {
-      return CSSAppleColorFilterValue::Create({krys::move(*property)});
+      return AppleColorFilterValue::Create({krys::move(*property)});
     }
 
     return nullptr;

@@ -7,7 +7,7 @@ namespace krys::boo::css
   class Rect final : public RectBase
   {
   public:
-    Rect(Ref<CSSValue> top, Ref<CSSValue> right, Ref<CSSValue> bottom, Ref<CSSValue> left)noexcept
+    Rect(Ref<Value> top, Ref<Value> right, Ref<Value> bottom, Ref<Value> left)noexcept
         : RectBase(krys::move(top), krys::move(right), krys::move(bottom), krys::move(left))
     {
     }

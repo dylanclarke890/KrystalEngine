@@ -3,19 +3,18 @@
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLElementStack.hpp"
-#include "Krystal.Booey/HTML/Parser/InputStream.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLToken.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLTokenAtom.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLTokenizer.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLTreeBuilder.hpp"
-#include "Krystal.Booey/HTML/Parser/TextResourceDecoder.hpp"
+#include "Krystal.Booey/HTML/Parser/InputStream.hpp"
 #include "Krystal.Core/Macros.hpp"
 
 namespace krys::boo::html
 {
   class HTMLDocumentParser : public RefCounted<HTMLDocumentParser>
   {
-    HTMLDocument &_document;
+    dom::HTMLDocument &_document;
     InputStream _input;
     HTMLTokenizer _tokenizer;
     HTMLTreeBuilder _treeBuilder;
@@ -28,11 +27,12 @@ namespace krys::boo::html
     bool _paused {false};
 
   public:
-    HTMLDocumentParser(HTMLDocument &document) noexcept;
+    HTMLDocumentParser(dom::HTMLDocument &document) noexcept;
 
     /// @see https://html.spec.whatwg.org/#html-fragment-parsing-algorithm
-    KRYS_NODISCARD static SmallNodeList
-      ParseFragment(Element &contextElement, utf8_string &&input, bool allowDeclarativeShadowRoots = false,
+    KRYS_NODISCARD static dom::SmallNodeList
+      ParseFragment(dom::Element &contextElement, utf8_string &&input,
+                    bool allowDeclarativeShadowRoots = false,
                     ParserScriptingMode scriptingMode = ParserScriptingMode::Inert) noexcept;
 
     void PumpTokenizer() noexcept;

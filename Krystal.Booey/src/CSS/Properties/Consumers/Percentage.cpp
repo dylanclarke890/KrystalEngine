@@ -1,14 +1,14 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Percentage.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/CSSPrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/NumberDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/PercentageDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
-  RefPtr<CSSPrimitiveValue> ConsumePercentageDividedBy100OrNumber(TokenRange &tokens,
+  RefPtr<PrimitiveValue> ConsumePercentageDividedBy100OrNumber(TokenRange &tokens,
                                                                   PropertyParserState &state) noexcept
   {
     using NumberConsumer = ConsumerDefinition<Number<>>;
@@ -22,12 +22,12 @@ namespace krys::boo::css::PropertyParserHelpers
       {
         if (auto value = NumberConsumer::FunctionToken::Consume(tokens, state, {}, {}))
         {
-          return CSSPrimitiveValueResolver<Number<>>::Resolve(*value);
+          return PrimitiveValueResolver<Number<>>::Resolve(*value);
         }
 
         if (auto value = PercentageConsumer::FunctionToken::Consume(tokens, state, {}, {}))
         {
-          return CSSPrimitiveValueResolver<Percentage<>>::Resolve(*value);
+          return PrimitiveValueResolver<Percentage<>>::Resolve(*value);
         }
 
         break;
@@ -36,7 +36,7 @@ namespace krys::boo::css::PropertyParserHelpers
       {
         if (auto value = NumberConsumer::NumberToken::Consume(tokens, state, {}, {}))
         {
-          return CSSPrimitiveValueResolver<Number<>>::Resolve(*value);
+          return PrimitiveValueResolver<Number<>>::Resolve(*value);
         }
 
         break;
@@ -45,7 +45,7 @@ namespace krys::boo::css::PropertyParserHelpers
       {
         if (auto value = PercentageConsumer::PercentageToken::Consume(tokens, state, {}, {}))
         {
-          return CSSPrimitiveValue::Create(value->Value / 100.0);
+          return PrimitiveValue::Create(value->Value / 100.0);
         }
 
         break;

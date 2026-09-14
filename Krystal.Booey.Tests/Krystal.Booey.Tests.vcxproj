@@ -203,8 +203,6 @@
     <ClCompile Include="tests\HTML\MicroParsers\Numbers.cpp" />
     <ClCompile Include="tests\HTML\Parser\HTMLDocumentParser.cpp" />
     <ClCompile Include="tests\HTML\Parser\Tokenizer.cpp" />
-    <ClCompile Include="tests\HTML\Parser\Loader\HTMLEncodingSniffer.cpp" />
-    <ClCompile Include="tests\HTML\Parser\Loader\TextResourceDecoder.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\NameValidation.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\Mixins.cpp" />
     <ClCompile Include="tests\DOM\Mixins\NonElementParentNode.cpp" />

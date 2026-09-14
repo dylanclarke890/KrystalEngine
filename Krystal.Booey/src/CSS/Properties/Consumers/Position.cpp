@@ -1,14 +1,14 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Position.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/CSSPrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/LengthPercentageDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumer.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPositionValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueAggregates.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/CSSPosition.hpp"
+#include "Krystal.Booey/CSS/Values/Aggregates.hpp"
+#include "Krystal.Booey/CSS/Values/PositionValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/Position.hpp"
 #include "Krystal.Core/Visitor.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
@@ -51,7 +51,7 @@ namespace krys::boo::css::PropertyParserHelpers
   //   [ [ top | bottom | y-start | y-end ] <length-percentage> ]
   // ]
 
-  // MARK: Unresolved CSSPosition
+  // MARK: Unresolved Position
 
   using PositionUnresolvedComponent = Variant<
     // Horizontal
@@ -173,24 +173,24 @@ namespace krys::boo::css::PropertyParserHelpers
     return {};
   }
 
-  KRYS_NODISCARD static Maybe<CSSPosition>
+  KRYS_NODISCARD static Maybe<Position>
     PositionUnresolvedFromOneComponent(PositionUnresolvedComponent &&component) noexcept
   {
     // <position-one> = [ left | center | right | top | bottom | x-start | x-end | y-start | y-end |
     // <length-percentage> ]
 
     return krys::SwitchOn(
-      krys::move(component), []<IsHorizontalOnlyComponent C>(C &&component) -> Maybe<CSSPosition>
+      krys::move(component), []<IsHorizontalOnlyComponent C>(C &&component) -> Maybe<Position>
       { return TwoComponentPositionHorizontalVertical {{krys::move(component)}, {keywords::Center {}}}; },
-      []<IsVerticalOnlyComponent C>(C &&component) -> Maybe<CSSPosition>
+      []<IsVerticalOnlyComponent C>(C &&component) -> Maybe<Position>
       { return TwoComponentPositionHorizontalVertical {{keywords::Center {}}, {krys::move(component)}}; },
-      [](keywords::Center &&) -> Maybe<CSSPosition>
+      [](keywords::Center &&) -> Maybe<Position>
       { return TwoComponentPositionHorizontalVertical {{keywords::Center {}}, {keywords::Center {}}}; },
-      [](LengthPercentage<> &&component) -> Maybe<CSSPosition>
+      [](LengthPercentage<> &&component) -> Maybe<Position>
       { return TwoComponentPositionHorizontalVertical {{krys::move(component)}, {keywords::Center {}}}; });
   }
 
-  KRYS_NODISCARD static Maybe<CSSPosition>
+  KRYS_NODISCARD static Maybe<Position>
     PositionUnresolvedFromTwoComponents(PositionUnresolvedComponent &&component1,
                                         PositionUnresolvedComponent &&component2) noexcept
   {
@@ -204,72 +204,72 @@ namespace krys::boo::css::PropertyParserHelpers
 
     return krys::SwitchOn(
       krys::move(component1),
-      [&]<IsHorizontalOnlyComponent C1>(C1 &&component1) -> Maybe<CSSPosition>
+      [&]<IsHorizontalOnlyComponent C1>(C1 &&component1) -> Maybe<Position>
       {
         // `component2` must be in the set [ top | center | bottom | y-start | y-end | <length-percentage> ]
         return krys::SwitchOn(
           krys::move(component2),
-          [&]<IsVerticalSecondComponent C2>(C2 &&component2) -> Maybe<CSSPosition>
+          [&]<IsVerticalSecondComponent C2>(C2 &&component2) -> Maybe<Position>
           {
             return TwoComponentPositionHorizontalVertical {{krys::move(component1)},
                                                            {krys::move(component2)}};
           },
-          [](auto &&) -> Maybe<CSSPosition> { return {}; });
+          [](auto &&) -> Maybe<Position> { return {}; });
       },
-      [&]<IsVerticalOnlyComponent C1>(C1 &&component1) -> Maybe<CSSPosition>
+      [&]<IsVerticalOnlyComponent C1>(C1 &&component1) -> Maybe<Position>
       {
         // `component2` must be in the set [ left | center | right | x-start | x-end ] (NOTE:
         // <length-percentage> is NOT allowed).
         return krys::SwitchOn(
           krys::move(component2),
-          [&]<IsHorizontalSecondComponent C2>(C2 &&component2) -> Maybe<CSSPosition>
+          [&]<IsHorizontalSecondComponent C2>(C2 &&component2) -> Maybe<Position>
           {
             return TwoComponentPositionHorizontalVertical {{krys::move(component2)},
                                                            {krys::move(component1)}};
           },
-          [](auto &&) -> Maybe<CSSPosition> { return {}; });
+          [](auto &&) -> Maybe<Position> { return {}; });
       },
-      [&](keywords::Center &&component1) -> Maybe<CSSPosition>
+      [&](keywords::Center &&component1) -> Maybe<Position>
       {
         // `component2` can be anything.
         return krys::SwitchOn(
           krys::move(component2),
-          [&]<IsHorizontalOnlyComponent C2>(C2 &&component2) -> Maybe<CSSPosition>
+          [&]<IsHorizontalOnlyComponent C2>(C2 &&component2) -> Maybe<Position>
           {
             return TwoComponentPositionHorizontalVertical {{krys::move(component2)},
                                                            {krys::move(component1)}};
           },
-          [&]<IsVerticalOnlyComponent C2>(C2 &&component2) -> Maybe<CSSPosition>
+          [&]<IsVerticalOnlyComponent C2>(C2 &&component2) -> Maybe<Position>
           {
             return TwoComponentPositionHorizontalVertical {{krys::move(component1)},
                                                            {krys::move(component2)}};
           },
-          [&](keywords::Center &&component2) -> Maybe<CSSPosition>
+          [&](keywords::Center &&component2) -> Maybe<Position>
           {
             return TwoComponentPositionHorizontalVertical {{krys::move(component1)},
                                                            {krys::move(component2)}};
           },
-          [&](LengthPercentage<> &&component2) -> Maybe<CSSPosition>
+          [&](LengthPercentage<> &&component2) -> Maybe<Position>
           {
             return TwoComponentPositionHorizontalVertical {{krys::move(component1)},
                                                            {krys::move(component2)}};
           });
       },
-      [&](LengthPercentage<> &&component1) -> Maybe<CSSPosition>
+      [&](LengthPercentage<> &&component1) -> Maybe<Position>
       {
         // `component2` must be in the set [ top | center | bottom | y-start | y-end | <length-percentage> ]
         return krys::SwitchOn(
           krys::move(component2),
-          [&]<IsVerticalSecondComponent C2>(C2 &&component2) -> Maybe<CSSPosition>
+          [&]<IsVerticalSecondComponent C2>(C2 &&component2) -> Maybe<Position>
           {
             return TwoComponentPositionHorizontalVertical {{krys::move(component1)},
                                                            {krys::move(component2)}};
           },
-          [](auto &&) -> Maybe<CSSPosition> { return {}; });
+          [](auto &&) -> Maybe<Position> { return {}; });
       });
   }
 
-  KRYS_NODISCARD static Maybe<CSSPosition>
+  KRYS_NODISCARD static Maybe<Position>
     PositionUnresolvedFromThreeComponents(PositionUnresolvedComponent &&component1,
                                           PositionUnresolvedComponent &&component2,
                                           PositionUnresolvedComponent &&component3) noexcept
@@ -286,12 +286,12 @@ namespace krys::boo::css::PropertyParserHelpers
 
     return krys::SwitchOn(
       krys::move(component1),
-      [&]<IsHorizontalOnlyComponent C1>(C1 &&component1) -> Maybe<CSSPosition>
+      [&]<IsHorizontalOnlyComponent C1>(C1 &&component1) -> Maybe<Position>
       {
         // `component2` must be in the set [ top | bottom | y-start | y-end | <length-percentage> ]
         return krys::SwitchOn(
           krys::move(component2),
-          [&]<IsVerticalOnlyComponent C2>(C2 &&component2) -> Maybe<CSSPosition>
+          [&]<IsVerticalOnlyComponent C2>(C2 &&component2) -> Maybe<Position>
           {
             // `component3` must be <length-percentage>
             if (!std::holds_alternative<LengthPercentage<>>(component3))
@@ -301,35 +301,35 @@ namespace krys::boo::css::PropertyParserHelpers
               {{krys::move(component2), std::get<LengthPercentage<>>(component3)}},
             };
           },
-          [&](LengthPercentage<> &&component2) -> Maybe<CSSPosition>
+          [&](LengthPercentage<> &&component2) -> Maybe<Position>
           {
             // `component3` must be in the set [ center | top | bottom | y-start | y-end ]
             return krys::SwitchOn(
               krys::move(component3),
-              [&]<IsVerticalOnlyComponent C3>(C3 &&component3) -> Maybe<CSSPosition>
+              [&]<IsVerticalOnlyComponent C3>(C3 &&component3) -> Maybe<Position>
               {
                 return ThreeComponentPositionHorizontalVerticalLengthFirst {
                   {{krys::move(component1), krys::move(component2)}},
                   {{krys::move(component3)}},
                 };
               },
-              [&](keywords::Center &&component3) -> Maybe<CSSPosition>
+              [&](keywords::Center &&component3) -> Maybe<Position>
               {
                 return ThreeComponentPositionHorizontalVerticalLengthFirst {
                   {{krys::move(component1), krys::move(component2)}},
                   {{krys::move(component3)}},
                 };
               },
-              [](auto &&) -> Maybe<CSSPosition> { return {}; });
+              [](auto &&) -> Maybe<Position> { return {}; });
           },
-          [](auto &&) -> Maybe<CSSPosition> { return {}; });
+          [](auto &&) -> Maybe<Position> { return {}; });
       },
-      [&]<IsVerticalOnlyComponent C1>(C1 &&component1) -> Maybe<CSSPosition>
+      [&]<IsVerticalOnlyComponent C1>(C1 &&component1) -> Maybe<Position>
       {
         // `component2` must be in the set [ left | right | x-start | x-end | <length-percentage> ]
         return krys::SwitchOn(
           krys::move(component2),
-          [&]<IsHorizontalOnlyComponent C2>(C2 &&component2) -> Maybe<CSSPosition>
+          [&]<IsHorizontalOnlyComponent C2>(C2 &&component2) -> Maybe<Position>
           {
             // `component3` must be <length-percentage>
             if (!std::holds_alternative<LengthPercentage<>>(component3))
@@ -339,30 +339,30 @@ namespace krys::boo::css::PropertyParserHelpers
               {{krys::move(component1)}},
             };
           },
-          [&](LengthPercentage<> &&component2) -> Maybe<CSSPosition>
+          [&](LengthPercentage<> &&component2) -> Maybe<Position>
           {
             // `component3` must be in the set [ center | left | right | x-start | x-end ]
             return krys::SwitchOn(
               krys::move(component3),
-              [&]<IsHorizontalOnlyComponent C3>(C3 &&component3) -> Maybe<CSSPosition>
+              [&]<IsHorizontalOnlyComponent C3>(C3 &&component3) -> Maybe<Position>
               {
                 return ThreeComponentPositionHorizontalVerticalLengthSecond {
                   {{krys::move(component3)}},
                   {{krys::move(component1), krys::move(component2)}},
                 };
               },
-              [&](keywords::Center &&component3) -> Maybe<CSSPosition>
+              [&](keywords::Center &&component3) -> Maybe<Position>
               {
                 return ThreeComponentPositionHorizontalVerticalLengthSecond {
                   {{krys::move(component3)}},
                   {{krys::move(component1), krys::move(component2)}},
                 };
               },
-              [](auto &&) -> Maybe<CSSPosition> { return {}; });
+              [](auto &&) -> Maybe<Position> { return {}; });
           },
-          [](auto &&) -> Maybe<CSSPosition> { return {}; });
+          [](auto &&) -> Maybe<Position> { return {}; });
       },
-      [&](keywords::Center &&component1) -> Maybe<CSSPosition>
+      [&](keywords::Center &&component1) -> Maybe<Position>
       {
         // `component3` must be <length-percentage>
         if (!std::holds_alternative<LengthPercentage<>>(component3))
@@ -373,30 +373,30 @@ namespace krys::boo::css::PropertyParserHelpers
         // `component2` must be in the set [ left | right | x-start | x-end | top | bottom | y-start | y-end ]
         return krys::SwitchOn(
           krys::move(component2),
-          [&]<IsHorizontalOnlyComponent C2>(C2 &&component2) -> Maybe<CSSPosition>
+          [&]<IsHorizontalOnlyComponent C2>(C2 &&component2) -> Maybe<Position>
           {
             return ThreeComponentPositionHorizontalVerticalLengthFirst {
               {{krys::move(component2), std::get<LengthPercentage<>>(component3)}},
               {{krys::move(component1)}},
             };
           },
-          [&]<IsVerticalOnlyComponent C2>(C2 &&component2) -> Maybe<CSSPosition>
+          [&]<IsVerticalOnlyComponent C2>(C2 &&component2) -> Maybe<Position>
           {
             return ThreeComponentPositionHorizontalVerticalLengthSecond {
               {{krys::move(component1)}},
               {{krys::move(component2), std::get<LengthPercentage<>>(component3)}},
             };
           },
-          [](auto &&) -> Maybe<CSSPosition> { return {}; });
+          [](auto &&) -> Maybe<Position> { return {}; });
       },
-      [&](LengthPercentage<> &&) -> Maybe<CSSPosition>
+      [&](LengthPercentage<> &&) -> Maybe<Position>
       {
         // `<length-percentage>` is invalid for the first component of three component position values.
         return {};
       });
   }
 
-  KRYS_NODISCARD static Maybe<CSSPosition> PositionUnresolvedFromFourComponents(
+  KRYS_NODISCARD static Maybe<Position> PositionUnresolvedFromFourComponents(
     PositionUnresolvedComponent &&component1, PositionUnresolvedComponent &&component2,
     PositionUnresolvedComponent &&component3, PositionUnresolvedComponent &&component4) noexcept
   {
@@ -412,47 +412,47 @@ namespace krys::boo::css::PropertyParserHelpers
 
     return krys::SwitchOn(
       krys::move(component1),
-      [&]<IsHorizontalOnlyComponent C1>(C1 &&component1) -> Maybe<CSSPosition>
+      [&]<IsHorizontalOnlyComponent C1>(C1 &&component1) -> Maybe<Position>
       {
         // `component3` must be in the set [ top | bottom | y-start | y-end ]
         return krys::SwitchOn(
           krys::move(component3),
-          [&]<IsVerticalOnlyComponent C3>(C3 &&component3) -> Maybe<CSSPosition>
+          [&]<IsVerticalOnlyComponent C3>(C3 &&component3) -> Maybe<Position>
           {
             return FourComponentPositionHorizontalVertical {
               {{krys::move(component1), std::get<LengthPercentage<>>(component2)}},
               {{krys::move(component3), std::get<LengthPercentage<>>(component4)}},
             };
           },
-          [](auto &&) -> Maybe<CSSPosition> { return {}; });
+          [](auto &&) -> Maybe<Position> { return {}; });
       },
-      [&]<IsVerticalOnlyComponent C1>(C1 &&component1) -> Maybe<CSSPosition>
+      [&]<IsVerticalOnlyComponent C1>(C1 &&component1) -> Maybe<Position>
       {
         // `component3` must be in the set [ left | right | x-start | x-end ]
         return krys::SwitchOn(
           krys::move(component3),
-          [&]<IsHorizontalOnlyComponent C3>(C3 &&component3) -> Maybe<CSSPosition>
+          [&]<IsHorizontalOnlyComponent C3>(C3 &&component3) -> Maybe<Position>
           {
             return FourComponentPositionHorizontalVertical {
               {{krys::move(component3), std::get<LengthPercentage<>>(component4)}},
               {{krys::move(component1), std::get<LengthPercentage<>>(component2)}},
             };
           },
-          [](auto &&) -> Maybe<CSSPosition> { return {}; });
+          [](auto &&) -> Maybe<Position> { return {}; });
       },
-      [&](keywords::Center &&) -> Maybe<CSSPosition>
+      [&](keywords::Center &&) -> Maybe<Position>
       {
         // `center` is invalid for the first component of four component position values.
         return {};
       },
-      [&](LengthPercentage<> &&) -> Maybe<CSSPosition>
+      [&](LengthPercentage<> &&) -> Maybe<Position>
       {
         // `<length-percentage>` is invalid for the first component of four component position values.
         return {};
       });
   }
 
-  Maybe<CSSPosition> ConsumePositionUnresolved(TokenRange &tokens, PropertyParserState &state) noexcept
+  Maybe<Position> ConsumePositionUnresolved(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     auto rangeCopy = tokens;
 
@@ -503,8 +503,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return position;
   }
 
-  Maybe<CSSPosition> ConsumeBackgroundPositionUnresolved(TokenRange &tokens,
-                                                         PropertyParserState &state) noexcept
+  Maybe<Position> ConsumeBackgroundPositionUnresolved(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     auto rangeCopy = tokens;
 
@@ -565,7 +564,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return position;
   }
 
-  Maybe<CSSPositionX> ConsumePositionXUnresolved(TokenRange &tokens, PropertyParserState &state) noexcept
+  Maybe<PositionX> ConsumePositionXUnresolved(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     if (tokens.Peek().Type() == TokenType::Ident)
     {
@@ -577,11 +576,11 @@ namespace krys::boo::css::PropertyParserHelpers
           tokens.DiscardWhitespace();
           if (auto lengthPercentage = MetaConsumer<LengthPercentage<>>::Consume(tokens, state))
           {
-            return CSSPositionX {
+            return PositionX {
               FourComponentPositionHorizontal {{keywords::Left {}, krys::move(*lengthPercentage)}}};
           }
 
-          return CSSPositionX {TwoComponentPositionHorizontal {keywords::Left {}}};
+          return PositionX {TwoComponentPositionHorizontal {keywords::Left {}}};
         }
         case ValueId::Right:
         {
@@ -589,11 +588,11 @@ namespace krys::boo::css::PropertyParserHelpers
           tokens.DiscardWhitespace();
           if (auto lengthPercentage = MetaConsumer<LengthPercentage<>>::Consume(tokens, state))
           {
-            return CSSPositionX {
+            return PositionX {
               FourComponentPositionHorizontal {{keywords::Right {}, krys::move(*lengthPercentage)}}};
           }
 
-          return CSSPositionX {TwoComponentPositionHorizontal {keywords::Right {}}};
+          return PositionX {TwoComponentPositionHorizontal {keywords::Right {}}};
         }
         case ValueId::XStart:
         {
@@ -606,11 +605,11 @@ namespace krys::boo::css::PropertyParserHelpers
           tokens.DiscardWhitespace();
           if (auto lengthPercentage = MetaConsumer<LengthPercentage<>>::Consume(tokens, state))
           {
-            return CSSPositionX {
+            return PositionX {
               FourComponentPositionHorizontal {{keywords::XStart {}, krys::move(*lengthPercentage)}}};
           }
 
-          return CSSPositionX {TwoComponentPositionHorizontal {keywords::XStart {}}};
+          return PositionX {TwoComponentPositionHorizontal {keywords::XStart {}}};
         }
         case ValueId::XEnd:
         {
@@ -622,17 +621,17 @@ namespace krys::boo::css::PropertyParserHelpers
           tokens.DiscardWhitespace();
           if (auto lengthPercentage = MetaConsumer<LengthPercentage<>>::Consume(tokens, state))
           {
-            return CSSPositionX {
+            return PositionX {
               FourComponentPositionHorizontal {{keywords::XEnd {}, krys::move(*lengthPercentage)}}};
           }
 
-          return CSSPositionX {TwoComponentPositionHorizontal {keywords::XEnd {}}};
+          return PositionX {TwoComponentPositionHorizontal {keywords::XEnd {}}};
         }
         case ValueId::Center:
         {
           tokens.Discard();
           tokens.DiscardWhitespace();
-          return CSSPositionX {TwoComponentPositionHorizontal {keywords::Center {}}};
+          return PositionX {TwoComponentPositionHorizontal {keywords::Center {}}};
         }
         default:
         {
@@ -643,13 +642,13 @@ namespace krys::boo::css::PropertyParserHelpers
 
     if (auto lengthPercentage = MetaConsumer<LengthPercentage<>>::Consume(tokens, state))
     {
-      return CSSPositionX {TwoComponentPositionHorizontal {krys::move(*lengthPercentage)}};
+      return PositionX {TwoComponentPositionHorizontal {krys::move(*lengthPercentage)}};
     }
 
     return {};
   }
 
-  Maybe<CSSPositionY> ConsumePositionYUnresolved(TokenRange &tokens, PropertyParserState &state) noexcept
+  Maybe<PositionY> ConsumePositionYUnresolved(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     if (tokens.Peek().Type() == TokenType::Ident)
     {
@@ -661,11 +660,11 @@ namespace krys::boo::css::PropertyParserHelpers
           tokens.DiscardWhitespace();
           if (auto lengthPercentage = MetaConsumer<LengthPercentage<>>::Consume(tokens, state))
           {
-            return CSSPositionY {
+            return PositionY {
               FourComponentPositionVertical {{keywords::Top {}, krys::move(*lengthPercentage)}}};
           }
 
-          return CSSPositionY {TwoComponentPositionVertical {keywords::Top {}}};
+          return PositionY {TwoComponentPositionVertical {keywords::Top {}}};
         }
         case ValueId::Bottom:
         {
@@ -673,11 +672,11 @@ namespace krys::boo::css::PropertyParserHelpers
           tokens.DiscardWhitespace();
           if (auto lengthPercentage = MetaConsumer<LengthPercentage<>>::Consume(tokens, state))
           {
-            return CSSPositionY {
+            return PositionY {
               FourComponentPositionVertical {{keywords::Bottom {}, krys::move(*lengthPercentage)}}};
           }
 
-          return CSSPositionY {TwoComponentPositionVertical {keywords::Bottom {}}};
+          return PositionY {TwoComponentPositionVertical {keywords::Bottom {}}};
         }
         case ValueId::YStart:
         {
@@ -690,11 +689,11 @@ namespace krys::boo::css::PropertyParserHelpers
           tokens.DiscardWhitespace();
           if (auto lengthPercentage = MetaConsumer<LengthPercentage<>>::Consume(tokens, state))
           {
-            return CSSPositionY {
+            return PositionY {
               FourComponentPositionVertical {{keywords::YStart {}, krys::move(*lengthPercentage)}}};
           }
 
-          return CSSPositionY {TwoComponentPositionVertical {keywords::YStart {}}};
+          return PositionY {TwoComponentPositionVertical {keywords::YStart {}}};
         }
         case ValueId::YEnd:
         {
@@ -707,17 +706,17 @@ namespace krys::boo::css::PropertyParserHelpers
           tokens.DiscardWhitespace();
           if (auto lengthPercentage = MetaConsumer<LengthPercentage<>>::Consume(tokens, state))
           {
-            return CSSPositionY {
+            return PositionY {
               FourComponentPositionVertical {{keywords::YEnd {}, krys::move(*lengthPercentage)}}};
           }
 
-          return CSSPositionY {TwoComponentPositionVertical {keywords::YEnd {}}};
+          return PositionY {TwoComponentPositionVertical {keywords::YEnd {}}};
         }
         case ValueId::Center:
         {
           tokens.Discard();
           tokens.DiscardWhitespace();
-          return CSSPositionY {TwoComponentPositionVertical {keywords::Center {}}};
+          return PositionY {TwoComponentPositionVertical {keywords::Center {}}};
         }
         default:
         {
@@ -728,14 +727,14 @@ namespace krys::boo::css::PropertyParserHelpers
 
     if (auto lengthPercentage = MetaConsumer<LengthPercentage<>>::Consume(tokens, state))
     {
-      return CSSPositionY {TwoComponentPositionVertical {krys::move(*lengthPercentage)}};
+      return PositionY {TwoComponentPositionVertical {krys::move(*lengthPercentage)}};
     }
 
     return {};
   }
 
-  Maybe<CSSPosition> ConsumeOneOrTwoComponentPositionUnresolved(TokenRange &tokens,
-                                                                PropertyParserState &state) noexcept
+  Maybe<Position> ConsumeOneOrTwoComponentPositionUnresolved(TokenRange &tokens,
+                                                             PropertyParserState &state) noexcept
   {
     auto rangeCopy = tokens;
 
@@ -888,33 +887,33 @@ namespace krys::boo::css::PropertyParserHelpers
     return {};
   }
 
-  // MARK: CSSValue
+  // MARK: Value
 
-  RefPtr<CSSValue> ConsumePosition(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumePosition(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     if (auto position = ConsumePositionUnresolved(tokens, state))
     {
-      return CSSPositionValue::Create(krys::move(*position));
+      return PositionValue::Create(krys::move(*position));
     }
 
     return nullptr;
   }
 
-  RefPtr<CSSValue> ConsumePositionX(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumePositionX(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     if (auto positionX = ConsumePositionXUnresolved(tokens, state))
     {
-      return CSSPositionXValue::Create(krys::move(*positionX));
+      return PositionXValue::Create(krys::move(*positionX));
     }
 
     return nullptr;
   }
 
-  RefPtr<CSSValue> ConsumePositionY(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumePositionY(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     if (auto positionY = ConsumePositionYUnresolved(tokens, state))
     {
-      return CSSPositionYValue::Create(krys::move(*positionY));
+      return PositionYValue::Create(krys::move(*positionY));
     }
 
     return nullptr;

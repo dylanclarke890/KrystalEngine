@@ -16,7 +16,7 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/ColorInterpolationMethod.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Content.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/CounterStyles.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/CSSPrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Display.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Easing.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Filter.hpp"
@@ -70,17 +70,18 @@
 #include "Krystal.Booey/CSS/Properties/PropertyShorthandFunctions.hpp"
 #include "Krystal.Booey/CSS/Values/Borders/BorderImage.hpp"
 #include "Krystal.Booey/CSS/Values/Borders/BorderRadius.hpp"
-#include "Krystal.Booey/CSS/Values/CSSOffsetRotateValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPositionValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSQuadValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSTransformListValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValuePair.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueTypes.hpp"
-#include "Krystal.Booey/CSS/Values/Grid/CSSGridLineNamesValue.hpp"
-#include "Krystal.Booey/CSS/Values/Grid/CSSGridNamedAreaMap.hpp"
-#include "Krystal.Booey/CSS/Values/Grid/CSSGridTemplateAreasValue.hpp"
+#include "Krystal.Booey/CSS/Values/OffsetRotateValue.hpp"
+#include "Krystal.Booey/CSS/Values/PositionValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/QuadValue.hpp"
+#include "Krystal.Booey/CSS/Values/TransformListValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePair.hpp"
+#include "Krystal.Booey/CSS/Values/Grid/GridLineNamesValue.hpp"
+#include "Krystal.Booey/CSS/Values/Grid/GridNamedAreaMap.hpp"
+#include "Krystal.Booey/CSS/Values/Grid/GridTemplateAreasValue.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypesValueCreation.hpp"
+#include "Krystal.Booey/CSS/Values/Types.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Utils/ZippedRange.hpp"
 
@@ -90,9 +91,9 @@ namespace krys::boo::css
 
   struct BorderShorthandComponents
   {
-    RefPtr<CSSValue> Width;
-    RefPtr<CSSValue> Style;
-    RefPtr<CSSValue> Color;
+    RefPtr<Value> Width;
+    RefPtr<Value> Style;
+    RefPtr<Value> Color;
   };
 
   KRYS_NODISCARD inline Maybe<BorderShorthandComponents>
@@ -208,7 +209,7 @@ namespace krys::boo::css
       assert(state.CurrentProperty == shorthand.Id());
       assert(shorthand.Size() <= 6); // Existing shorthands have at most 6 longhands.
 
-      Array<RefPtr<CSSValue>, 6> longhands;
+      Array<RefPtr<Value>, 6> longhands;
       auto shorthandProperties = shorthand.Properties();
 
       do
@@ -285,8 +286,8 @@ namespace krys::boo::css
       }
 
       RefPtr right = PropertyParsing::ParseStylePropertyLonghand(tokens, longhands[1], state);
-      RefPtr<CSSValue> bottom;
-      RefPtr<CSSValue> left;
+      RefPtr<Value> bottom;
+      RefPtr<Value> left;
       if (right)
       {
         bottom = PropertyParsing::ParseStylePropertyLonghand(tokens, longhands[2], state);
@@ -438,7 +439,7 @@ namespace krys::boo::css
                                                              PropertyParserResult &result)
     {
       RefPtr horizontalSpacing =
-        CSSPrimitiveValueResolver<Length<NonNegative>>::ConsumeAndResolve(tokens, state);
+        PrimitiveValueResolver<Length<NonNegative>>::ConsumeAndResolve(tokens, state);
       if (!horizontalSpacing)
       {
         return false;
@@ -447,7 +448,7 @@ namespace krys::boo::css
       RefPtr verticalSpacing = horizontalSpacing;
       if (!tokens.IsAtEnd())
       {
-        verticalSpacing = CSSPrimitiveValueResolver<Length<NonNegative>>::ConsumeAndResolve(tokens, state);
+        verticalSpacing = PrimitiveValueResolver<Length<NonNegative>>::ConsumeAndResolve(tokens, state);
       }
 
       if (!verticalSpacing || !tokens.IsAtEnd())
@@ -467,13 +468,13 @@ namespace krys::boo::css
                                                          const PropertyShorthand &shorthand,
                                                          PropertyParserResult &result) noexcept
     {
-      auto ConsumeAnimationValueForShorthand = [&](PropertyId property) -> RefPtr<CSSValue>
+      auto ConsumeAnimationValueForShorthand = [&](PropertyId property) -> RefPtr<Value>
       {
         switch (property)
         {
           case PropertyId::AnimationDelay:
           {
-            return CSSPrimitiveValueResolver<Time<>>::ConsumeAndResolve(tokens, state);
+            return PrimitiveValueResolver<Time<>>::ConsumeAndResolve(tokens, state);
           }
           case PropertyId::AnimationDirection:
           {
@@ -532,7 +533,7 @@ namespace krys::boo::css
       assert(longhandCount <= maxLonghandCount);
 
       auto shorthandProperties = shorthand.Properties();
-      Array<CSSValueListBuilder, maxLonghandCount> longhands;
+      Array<ValueListBuilder, maxLonghandCount> longhands;
 
       auto IsResetOnlyLonghand = [](PropertyId longhand)
       {
@@ -583,7 +584,7 @@ namespace krys::boo::css
         {
           if (!parsedLonghand[i] && !IsResetOnlyLonghand(shorthandProperties[i]))
           {
-            longhands[i].push_back(ShareRef(CSSPrimitiveValue::ImplicitInitialValue()));
+            longhands[i].push_back(ShareRef(PrimitiveValue::ImplicitInitialValue()));
           }
 
           parsedLonghand[i] = false;
@@ -600,7 +601,7 @@ namespace krys::boo::css
         else
         {
           result.AddPropertyForCurrentShorthand(state, shorthandProperties[i],
-                                                CSSValueList::CreateCommaSeparated(krys::move(list)));
+                                                ValueList::CreateCommaSeparated(krys::move(list)));
         }
       }
 
@@ -611,7 +612,7 @@ namespace krys::boo::css
                                                           const PropertyShorthand &shorthand,
                                                           PropertyParserResult &result) noexcept
     {
-      auto IsValidTransitionPropertyList = [](PropertyId property, const CSSValueListBuilder &valueList)
+      auto IsValidTransitionPropertyList = [](PropertyId property, const ValueListBuilder &valueList)
       {
         // If there is more than one <single-transition> in the shorthand, and any of the transitions
         // has none as the <single-transition-property>, then the declaration is invalid.
@@ -631,17 +632,17 @@ namespace krys::boo::css
         return true;
       };
 
-      auto ConsumeTransitionValueForShorthand = [&](PropertyId property) -> RefPtr<CSSValue>
+      auto ConsumeTransitionValueForShorthand = [&](PropertyId property) -> RefPtr<Value>
       {
         switch (property)
         {
           case PropertyId::TransitionDelay:
           {
-            return CSSPrimitiveValueResolver<Time<>>::ConsumeAndResolve(tokens, state);
+            return PrimitiveValueResolver<Time<>>::ConsumeAndResolve(tokens, state);
           }
           case PropertyId::TransitionDuration:
           {
-            return CSSPrimitiveValueResolver<Time<NonNegative>>::ConsumeAndResolve(tokens, state);
+            return PrimitiveValueResolver<Time<NonNegative>>::ConsumeAndResolve(tokens, state);
           }
           case PropertyId::TransitionProperty:
           {
@@ -669,7 +670,7 @@ namespace krys::boo::css
       const size_t maxLonghandCount = 11uz;
       assert(longhandCount <= maxLonghandCount);
 
-      Array<CSSValueListBuilder, maxLonghandCount> longhands;
+      Array<ValueListBuilder, maxLonghandCount> longhands;
       auto shorthandProperties = shorthand.Properties();
 
       do
@@ -704,7 +705,7 @@ namespace krys::boo::css
         {
           if (!parsedLonghand[i])
           {
-            longhands[i].push_back(ShareRef(CSSPrimitiveValue::ImplicitInitialValue()));
+            longhands[i].push_back(ShareRef(PrimitiveValue::ImplicitInitialValue()));
           }
           parsedLonghand[i] = false;
         }
@@ -721,7 +722,7 @@ namespace krys::boo::css
       for (size_t i = 0uz; i < longhandCount; ++i)
       {
         result.AddPropertyForCurrentShorthand(state, shorthandProperties[i],
-                                              CSSValueList::CreateCommaSeparated(krys::move(longhands[i])));
+                                              ValueList::CreateCommaSeparated(krys::move(longhands[i])));
       }
 
       return tokens.IsAtEnd();
@@ -733,7 +734,7 @@ namespace krys::boo::css
     {
       assert(shorthand.Id() == state.CurrentProperty);
 
-      auto ConsumeBackgroundComponent = [&](PropertyId property) -> RefPtr<CSSValue>
+      auto ConsumeBackgroundComponent = [&](PropertyId property) -> RefPtr<Value>
       {
         switch (property)
         {
@@ -824,7 +825,7 @@ namespace krys::boo::css
         longhandCount -= MaskBorderShorthand().Size();
       }
 
-      Array<CSSValueListBuilder, 10uz> longhands;
+      Array<ValueListBuilder, 10uz> longhands;
       assert(longhandCount <= 10uz);
 
       do
@@ -833,7 +834,7 @@ namespace krys::boo::css
         bool clipIsBorderArea = false;
 
         Array<bool, 10uz> parsedLonghand = {};
-        RefPtr<CSSValue> originValue;
+        RefPtr<Value> originValue;
         do
         {
           bool foundProperty = false;
@@ -842,8 +843,8 @@ namespace krys::boo::css
             if (parsedLonghand[i])
               continue;
 
-            RefPtr<CSSValue> value;
-            RefPtr<CSSValue> valueY;
+            RefPtr<Value> value;
+            RefPtr<Value> valueY;
             PropertyId property = shorthandProperties[i];
 
             if (property == PropertyId::BackgroundPositionX)
@@ -857,8 +858,8 @@ namespace krys::boo::css
               }
 
               auto [positionX, positionY] = Split(krys::move(*position));
-              value = CSSPositionXValue::Create(krys::move(positionX));
-              valueY = CSSPositionYValue::Create(krys::move(positionY));
+              value = PositionXValue::Create(krys::move(positionX));
+              valueY = PositionYValue::Create(krys::move(positionY));
             }
             else if (property == PropertyId::BackgroundSize)
             {
@@ -955,13 +956,13 @@ namespace krys::boo::css
 
           if (clipIsBorderArea && (property == PropertyId::BackgroundOrigin) && !parsedLonghand[i])
           {
-            longhands[i].push_back(CSSPrimitiveValue::Create(ValueId::BorderBox));
+            longhands[i].push_back(PrimitiveValue::Create(ValueId::BorderBox));
             continue;
           }
 
           if (!parsedLonghand[i])
           {
-            longhands[i].push_back(ShareRef(CSSPrimitiveValue::ImplicitInitialValue()));
+            longhands[i].push_back(ShareRef(PrimitiveValue::ImplicitInitialValue()));
           }
         }
       } while (ConsumeComma(tokens));
@@ -981,7 +982,7 @@ namespace krys::boo::css
         else
         {
           result.AddPropertyForCurrentShorthand(state, property,
-                                                CSSValueList::CreateCommaSeparated(krys::move(longhands[i])));
+                                                ValueList::CreateCommaSeparated(krys::move(longhands[i])));
         }
       }
 
@@ -995,8 +996,8 @@ namespace krys::boo::css
     {
       assert(shorthand.Id() == state.CurrentProperty);
 
-      CSSValueListBuilder x;
-      CSSValueListBuilder y;
+      ValueListBuilder x;
+      ValueListBuilder y;
       do
       {
         auto position = ConsumeBackgroundPositionUnresolved(tokens, state);
@@ -1006,8 +1007,8 @@ namespace krys::boo::css
         }
 
         auto [positionX, positionY] = Split(krys::move(*position));
-        x.push_back(CSSPositionXValue::Create(krys::move(positionX)));
-        y.push_back(CSSPositionYValue::Create(krys::move(positionY)));
+        x.push_back(PositionXValue::Create(krys::move(positionX)));
+        y.push_back(PositionYValue::Create(krys::move(positionY)));
       } while (ConsumeComma(tokens));
 
       if (!tokens.IsAtEnd())
@@ -1015,8 +1016,8 @@ namespace krys::boo::css
         return false;
       }
 
-      RefPtr<CSSValue> resultX;
-      RefPtr<CSSValue> resultY;
+      RefPtr<Value> resultX;
+      RefPtr<Value> resultY;
       if (x.size() == 1uz)
       {
         resultX = krys::move(x[0]);
@@ -1024,8 +1025,8 @@ namespace krys::boo::css
       }
       else
       {
-        resultX = CSSValueList::CreateCommaSeparated(krys::move(x));
-        resultY = CSSValueList::CreateCommaSeparated(krys::move(y));
+        resultX = ValueList::CreateCommaSeparated(krys::move(x));
+        resultY = ValueList::CreateCommaSeparated(krys::move(y));
       }
 
       auto longhands = shorthand.Properties();
@@ -1075,16 +1076,16 @@ namespace krys::boo::css
                                                             const PropertyShorthand &shorthand,
                                                             PropertyParserResult &result) noexcept
     {
-      CSSValueListBuilder x;
-      CSSValueListBuilder y;
+      ValueListBuilder x;
+      ValueListBuilder y;
       do
       {
         auto position = ConsumePositionUnresolved(tokens, state);
         if (!position)
           return false;
         auto [positionX, positionY] = Split(krys::move(*position));
-        x.push_back(CSSPositionXValue::Create(krys::move(positionX)));
-        y.push_back(CSSPositionYValue::Create(krys::move(positionY)));
+        x.push_back(PositionXValue::Create(krys::move(positionX)));
+        y.push_back(PositionYValue::Create(krys::move(positionY)));
       } while (ConsumeComma(tokens));
 
       if (!tokens.IsAtEnd())
@@ -1092,8 +1093,8 @@ namespace krys::boo::css
         return false;
       }
 
-      RefPtr<CSSValue> resultX;
-      RefPtr<CSSValue> resultY;
+      RefPtr<Value> resultX;
+      RefPtr<Value> resultY;
       if (x.size() == 1uz)
       {
         resultX = krys::move(x[0]);
@@ -1101,8 +1102,8 @@ namespace krys::boo::css
       }
       else
       {
-        resultX = CSSValueList::CreateCommaSeparated(krys::move(x));
-        resultY = CSSValueList::CreateCommaSeparated(krys::move(y));
+        resultX = ValueList::CreateCommaSeparated(krys::move(x));
+        resultY = ValueList::CreateCommaSeparated(krys::move(y));
       }
 
       auto longhands = shorthand.Properties();
@@ -1146,9 +1147,9 @@ namespace krys::boo::css
       }
 
       result.AddPropertyForCurrentShorthand(state, PropertyId::OverflowX,
-                                            CSSPrimitiveValue::Create(xValueId));
+                                            PrimitiveValue::Create(xValueId));
       result.AddPropertyForCurrentShorthand(state, PropertyId::OverflowY,
-                                            CSSPrimitiveValue::Create(yValueId));
+                                            PrimitiveValue::Create(yValueId));
 
       return true;
     }
@@ -1157,8 +1158,8 @@ namespace krys::boo::css
                                                        const PropertyShorthand &shorthand,
                                                        PropertyParserResult &result) noexcept
     {
-      RefPtr<CSSValue> columnWidth;
-      RefPtr<CSSValue> columnCount;
+      RefPtr<Value> columnWidth;
+      RefPtr<Value> columnCount;
 
       for (size_t propertiesParsed = 0uz; propertiesParsed < 2uz && !tokens.IsAtEnd(); ++propertiesParsed)
       {
@@ -1208,13 +1209,13 @@ namespace krys::boo::css
       assert(shorthand.Id() == state.CurrentProperty);
       assert(shorthand.Size() == 2uz);
 
-      RefPtr<CSSValue> startValue = ConsumeGridLine(tokens, state);
+      RefPtr<Value> startValue = ConsumeGridLine(tokens, state);
       if (!startValue)
       {
         return false;
       }
 
-      RefPtr<CSSValue> endValue;
+      RefPtr<Value> endValue;
       if (ConsumeSlash(tokens))
       {
         endValue = ConsumeGridLine(tokens, state);
@@ -1231,7 +1232,7 @@ namespace krys::boo::css
         }
         else
         {
-          endValue = CSSPrimitiveValue::Create(ValueId::Auto);
+          endValue = PrimitiveValue::Create(ValueId::Auto);
         }
       }
 
@@ -1252,17 +1253,17 @@ namespace krys::boo::css
                                                             PropertyParserResult &result) noexcept
     {
       TokenRange rangeCopy = tokens;
-      RefPtr<CSSValue> rowsValue = ConsumeIdent<ValueId::None>(rangeCopy);
+      RefPtr<Value> rowsValue = ConsumeIdent<ValueId::None>(rangeCopy);
 
       // 1- 'none' case.
       if (rowsValue && tokens.IsAtEnd())
       {
         result.AddPropertyForCurrentShorthand(state, PropertyId::GridTemplateRows,
-                                              CSSPrimitiveValue::Create(ValueId::None));
+                                              PrimitiveValue::Create(ValueId::None));
         result.AddPropertyForCurrentShorthand(state, PropertyId::GridTemplateColumns,
-                                              CSSPrimitiveValue::Create(ValueId::None));
+                                              PrimitiveValue::Create(ValueId::None));
         result.AddPropertyForCurrentShorthand(state, PropertyId::GridTemplateAreas,
-                                              CSSPrimitiveValue::Create(ValueId::None));
+                                              PrimitiveValue::Create(ValueId::None));
 
         return true;
       }
@@ -1290,7 +1291,7 @@ namespace krys::boo::css
         result.AddPropertyForCurrentShorthand(state, PropertyId::GridTemplateColumns,
                                               krys::move(columnsValue));
         result.AddPropertyForCurrentShorthand(state, PropertyId::GridTemplateAreas,
-                                              CSSPrimitiveValue::Create(ValueId::None));
+                                              PrimitiveValue::Create(ValueId::None));
 
         return true;
       }
@@ -1300,11 +1301,11 @@ namespace krys::boo::css
       // tokens = rangeCopy;
 
       GridNamedAreaMap gridAreaMap;
-      CSSValueListBuilder templateRows;
+      ValueListBuilder templateRows;
 
       // Persists between loop iterations so we can use the same value for
       // consecutive <line-names> values
-      RefPtr<CSSGridLineNamesValue> lineNames;
+      RefPtr<GridLineNamesValue> lineNames;
 
       do
       {
@@ -1321,7 +1322,7 @@ namespace krys::boo::css
             SmallList<CSSOMString> combinedLineNames;
             combinedLineNames.append(previousLineNames->Names().begin(), previousLineNames->Names().end());
             combinedLineNames.append(lineNames->Names().begin(), lineNames->Names().end());
-            templateRows.back() = CSSGridLineNamesValue::Create(combinedLineNames);
+            templateRows.back() = GridLineNamesValue::Create(combinedLineNames);
           }
         }
 
@@ -1339,7 +1340,7 @@ namespace krys::boo::css
         }
         else
         {
-          templateRows.push_back(CSSPrimitiveValue::Create(ValueId::Auto));
+          templateRows.push_back(PrimitiveValue::Create(ValueId::Auto));
         }
 
         // This will handle the trailing/leading <custom-ident>* in the grammar.
@@ -1351,7 +1352,7 @@ namespace krys::boo::css
       } while (!tokens.IsAtEnd()
                && !(tokens.Peek().Type() == TokenType::Delim && tokens.Peek().IdentCodePoints() == u8"/"));
 
-      RefPtr<CSSValue> columnsValue;
+      RefPtr<Value> columnsValue;
       if (!tokens.IsAtEnd())
       {
         if (!ConsumeSlash(tokens))
@@ -1367,14 +1368,14 @@ namespace krys::boo::css
       }
       else
       {
-        columnsValue = CSSPrimitiveValue::Create(ValueId::None);
+        columnsValue = PrimitiveValue::Create(ValueId::None);
       }
 
       result.AddPropertyForCurrentShorthand(state, PropertyId::GridTemplateRows,
-                                            CSSValueList::CreateSpaceSeparated(krys::move(templateRows)));
+                                            ValueList::CreateSpaceSeparated(krys::move(templateRows)));
       result.AddPropertyForCurrentShorthand(state, PropertyId::GridTemplateColumns, krys::move(columnsValue));
       result.AddPropertyForCurrentShorthand(state, PropertyId::GridTemplateAreas,
-                                            CSSGridTemplateAreasValue::Create({krys::move(gridAreaMap)}));
+                                            GridTemplateAreasValue::Create({krys::move(gridAreaMap)}));
 
       return true;
     }
@@ -1385,7 +1386,7 @@ namespace krys::boo::css
     {
       assert(shorthand.Size() == 6);
 
-      auto ConsumeImplicitGridAutoFlow = [](TokenRange &tokens, ValueId flowDirection) -> RefPtr<CSSValue>
+      auto ConsumeImplicitGridAutoFlow = [](TokenRange &tokens, ValueId flowDirection) -> RefPtr<Value>
       {
         // [ auto-flow && dense? ]
         bool autoFlow = ConsumeIdentRaw<ValueId::AutoFlow>(tokens).has_value();
@@ -1397,16 +1398,16 @@ namespace krys::boo::css
 
         if (!dense)
         {
-          return CSSValueList::CreateSpaceSeparated(CSSPrimitiveValue::Create(flowDirection));
+          return ValueList::CreateSpaceSeparated(PrimitiveValue::Create(flowDirection));
         }
 
         if (flowDirection == ValueId::Row)
         {
-          return CSSValueList::CreateSpaceSeparated(CSSPrimitiveValue::Create(ValueId::Dense));
+          return ValueList::CreateSpaceSeparated(PrimitiveValue::Create(ValueId::Dense));
         }
 
-        return CSSValueList::CreateSpaceSeparated(CSSPrimitiveValue::Create(flowDirection),
-                                                  CSSPrimitiveValue::Create(ValueId::Dense));
+        return ValueList::CreateSpaceSeparated(PrimitiveValue::Create(flowDirection),
+                                                  PrimitiveValue::Create(ValueId::Dense));
       };
 
       TokenRange rangeCopy = tokens;
@@ -1418,22 +1419,22 @@ namespace krys::boo::css
         // declaration .
         // The sub-properties not specified are set to their initial value, as normal for shorthands.
         result.AddPropertyForCurrentShorthand(state, PropertyId::GridAutoFlow,
-                                              CSSPrimitiveValue::Create(ValueId::Row));
+                                              PrimitiveValue::Create(ValueId::Row));
         result.AddPropertyForCurrentShorthand(state, PropertyId::GridAutoColumns,
-                                              CSSPrimitiveValue::Create(ValueId::Auto));
+                                              PrimitiveValue::Create(ValueId::Auto));
         result.AddPropertyForCurrentShorthand(state, PropertyId::GridAutoRows,
-                                              CSSPrimitiveValue::Create(ValueId::Auto));
+                                              PrimitiveValue::Create(ValueId::Auto));
 
         return true;
       }
 
       tokens = rangeCopy;
 
-      RefPtr<CSSValue> autoColumnsValue;
-      RefPtr<CSSValue> autoRowsValue;
-      RefPtr<CSSValue> templateRows;
-      RefPtr<CSSValue> templateColumns;
-      RefPtr<CSSValue> gridAutoFlow;
+      RefPtr<Value> autoColumnsValue;
+      RefPtr<Value> autoRowsValue;
+      RefPtr<Value> templateRows;
+      RefPtr<Value> templateColumns;
+      RefPtr<Value> gridAutoFlow;
 
       if (tokens.Peek().ValueId() == ValueId::AutoFlow || tokens.Peek().ValueId() == ValueId::Dense)
       {
@@ -1442,7 +1443,7 @@ namespace krys::boo::css
         if (!gridAutoFlow || tokens.IsAtEnd())
           return false;
         if (ConsumeSlash(tokens))
-          autoRowsValue = CSSPrimitiveValue::Create(ValueId::Auto);
+          autoRowsValue = PrimitiveValue::Create(ValueId::Auto);
         else
         {
           autoRowsValue = ConsumeGridTrackList(tokens, state, GridAuto);
@@ -1468,8 +1469,8 @@ namespace krys::boo::css
           return false;
         }
 
-        templateRows = CSSPrimitiveValue::Create(ValueId::None);
-        autoColumnsValue = CSSPrimitiveValue::Create(ValueId::Auto);
+        templateRows = PrimitiveValue::Create(ValueId::None);
+        autoColumnsValue = PrimitiveValue::Create(ValueId::Auto);
       }
       else
       {
@@ -1493,7 +1494,7 @@ namespace krys::boo::css
 
         if (tokens.IsAtEnd())
         {
-          autoColumnsValue = CSSPrimitiveValue::Create(ValueId::Auto);
+          autoColumnsValue = PrimitiveValue::Create(ValueId::Auto);
         }
         else
         {
@@ -1504,8 +1505,8 @@ namespace krys::boo::css
           }
         }
 
-        templateColumns = CSSPrimitiveValue::Create(ValueId::None);
-        autoRowsValue = CSSPrimitiveValue::Create(ValueId::Auto);
+        templateColumns = PrimitiveValue::Create(ValueId::None);
+        autoRowsValue = PrimitiveValue::Create(ValueId::Auto);
       }
 
       if (!tokens.IsAtEnd())
@@ -1519,7 +1520,7 @@ namespace krys::boo::css
                                             krys::move(templateColumns));
       result.AddPropertyForCurrentShorthand(state, PropertyId::GridTemplateRows, krys::move(templateRows));
       result.AddPropertyForCurrentShorthand(state, PropertyId::GridTemplateAreas,
-                                            CSSPrimitiveValue::Create(ValueId::None));
+                                            PrimitiveValue::Create(ValueId::None));
       result.AddPropertyForCurrentShorthand(state, PropertyId::GridAutoFlow, krys::move(gridAutoFlow));
       result.AddPropertyForCurrentShorthand(state, PropertyId::GridAutoColumns, krys::move(autoColumnsValue));
       result.AddPropertyForCurrentShorthand(state, PropertyId::GridAutoRows, krys::move(autoRowsValue));
@@ -1537,9 +1538,9 @@ namespace krys::boo::css
         return false;
       }
 
-      RefPtr<CSSValue> columnStartValue;
-      RefPtr<CSSValue> rowEndValue;
-      RefPtr<CSSValue> columnEndValue;
+      RefPtr<Value> columnStartValue;
+      RefPtr<Value> rowEndValue;
+      RefPtr<Value> columnEndValue;
 
       if (ConsumeSlash(tokens))
       {
@@ -1582,7 +1583,7 @@ namespace krys::boo::css
         }
         else
         {
-          columnStartValue = CSSPrimitiveValue::Create(ValueId::Auto);
+          columnStartValue = PrimitiveValue::Create(ValueId::Auto);
         }
       }
 
@@ -1594,7 +1595,7 @@ namespace krys::boo::css
         }
         else
         {
-          rowEndValue = CSSPrimitiveValue::Create(ValueId::Auto);
+          rowEndValue = PrimitiveValue::Create(ValueId::Auto);
         }
       }
 
@@ -1606,7 +1607,7 @@ namespace krys::boo::css
         }
         else
         {
-          columnEndValue = CSSPrimitiveValue::Create(ValueId::Auto);
+          columnEndValue = PrimitiveValue::Create(ValueId::Auto);
         }
       }
 
@@ -1664,10 +1665,10 @@ namespace krys::boo::css
                                                          PropertyParserResult &result) noexcept
     {
       // https://drafts.csswg.org/css-rhythm/#block-step
-      RefPtr<CSSValue> size;
-      RefPtr<CSSValue> insert;
-      RefPtr<CSSValue> align;
-      RefPtr<CSSValue> round;
+      RefPtr<Value> size;
+      RefPtr<Value> insert;
+      RefPtr<Value> align;
+      RefPtr<Value> round;
 
       for (size_t propertiesParsed = 0uz; propertiesParsed < 4uz && !tokens.IsAtEnd(); ++propertiesParsed)
       {
@@ -1703,22 +1704,22 @@ namespace krys::boo::css
       // Fill in default values if one was missing.
       if (!size)
       {
-        size = CSSPrimitiveValue::Create(ValueId::None);
+        size = PrimitiveValue::Create(ValueId::None);
       }
 
       if (!insert)
       {
-        insert = CSSPrimitiveValue::Create(ValueId::MarginBox);
+        insert = PrimitiveValue::Create(ValueId::MarginBox);
       }
 
       if (!align)
       {
-        align = CSSPrimitiveValue::Create(ValueId::Auto);
+        align = PrimitiveValue::Create(ValueId::Auto);
       }
 
       if (!round)
       {
-        round = CSSPrimitiveValue::Create(ValueId::Up);
+        round = PrimitiveValue::Create(ValueId::Up);
       }
 
       result.AddPropertyForCurrentShorthand(state, PropertyId::BlockStepSize, krys::move(size));
@@ -1748,7 +1749,7 @@ namespace krys::boo::css
       // // Parsing (correctly) doesn't re-run in response to updateStyleAfterChangeInEnvironment().
       // // Instead, we store sentinel values, later replaced by environment-sensitive values
       // // inside Style::BuilderCustom and Style::BuilderConverter.
-      // result.AddPropertyForAllLonghandsOfCurrentShorthand(state, CSSPrimitiveValue::Create(systemFont),
+      // result.AddPropertyForAllLonghandsOfCurrentShorthand(state, PrimitiveValue::Create(systemFont),
       //                                                     IsImplicit(true));
 
       // return true;
@@ -1756,7 +1757,7 @@ namespace krys::boo::css
 
       TokenRangeGuard guard {tokens};
 
-      Array<RefPtr<CSSValue>, 7> values;
+      Array<RefPtr<Value>, 7> values;
       auto &fontStyle = values[0];
       auto &fontVariantCaps = values[1];
       auto &fontWeight = values[2];
@@ -1867,11 +1868,11 @@ namespace krys::boo::css
         return tokens.IsAtEnd();
       }
 
-      RefPtr<CSSValue> capsValue;
-      RefPtr<CSSValue> alternatesValue;
-      RefPtr<CSSValue> positionValue;
-      RefPtr<CSSValue> eastAsianValue;
-      RefPtr<CSSValue> emojiValue;
+      RefPtr<Value> capsValue;
+      RefPtr<Value> alternatesValue;
+      RefPtr<Value> positionValue;
+      RefPtr<Value> eastAsianValue;
+      RefPtr<Value> emojiValue;
 
       FontVariantLigaturesParser ligaturesParser;
       FontVariantNumericParser numericParser;
@@ -1970,9 +1971,9 @@ namespace krys::boo::css
         result.AddPropertyForCurrentShorthand(state, PropertyId::FontSynthesisSmallCaps,
                                               ConsumeIdent(tokens));
         result.AddPropertyForCurrentShorthand(state, PropertyId::FontSynthesisStyle,
-                                              CSSPrimitiveValue::Create(ValueId::None));
+                                              PrimitiveValue::Create(ValueId::None));
         result.AddPropertyForCurrentShorthand(state, PropertyId::FontSynthesisWeight,
-                                              CSSPrimitiveValue::Create(ValueId::None));
+                                              PrimitiveValue::Create(ValueId::None));
         return tokens.IsAtEnd();
       }
 
@@ -2037,13 +2038,13 @@ namespace krys::boo::css
 
       result.AddPropertyForCurrentShorthand(
         state, PropertyId::FontSynthesisWeight,
-        CSSPrimitiveValue::Create(foundWeight ? ValueId::Auto : ValueId::None));
+        PrimitiveValue::Create(foundWeight ? ValueId::Auto : ValueId::None));
       result.AddPropertyForCurrentShorthand(
         state, PropertyId::FontSynthesisStyle,
-        CSSPrimitiveValue::Create(foundStyle ? ValueId::Auto : ValueId::None));
+        PrimitiveValue::Create(foundStyle ? ValueId::Auto : ValueId::None));
       result.AddPropertyForCurrentShorthand(
         state, PropertyId::FontSynthesisSmallCaps,
-        CSSPrimitiveValue::Create(foundSmallCaps ? ValueId::Auto : ValueId::None));
+        PrimitiveValue::Create(foundSmallCaps ? ValueId::Auto : ValueId::None));
 
       return true;
     }
@@ -2060,14 +2061,14 @@ namespace krys::boo::css
           case ValueId::None:
           {
             result.AddPropertyForCurrentShorthand(state, PropertyId::TextDecorationSkipInk,
-                                                  CSSPrimitiveValue::Create(ValueId::None));
+                                                  PrimitiveValue::Create(ValueId::None));
             return tokens.IsAtEnd();
           }
           case ValueId::Auto:
           case ValueId::Ink:
           {
             result.AddPropertyForCurrentShorthand(state, PropertyId::TextDecorationSkipInk,
-                                                  CSSPrimitiveValue::Create(ValueId::Auto));
+                                                  PrimitiveValue::Create(ValueId::Auto));
             return tokens.IsAtEnd();
           }
           default:
@@ -2139,15 +2140,15 @@ namespace krys::boo::css
         }
       };
 
-      RefPtr<CSSPrimitiveValue> flexGrow;
-      RefPtr<CSSPrimitiveValue> flexShrink;
-      RefPtr<CSSPrimitiveValue> flexBasis;
+      RefPtr<PrimitiveValue> flexGrow;
+      RefPtr<PrimitiveValue> flexShrink;
+      RefPtr<PrimitiveValue> flexBasis;
 
       if (tokens.Peek().ValueId() == ValueId::None)
       {
-        flexGrow = CSSPrimitiveValue::Create(0);
-        flexShrink = CSSPrimitiveValue::Create(0);
-        flexBasis = CSSPrimitiveValue::Create(ValueId::Auto);
+        flexGrow = PrimitiveValue::Create(0);
+        flexShrink = PrimitiveValue::Create(0);
+        flexBasis = PrimitiveValue::Create(ValueId::Auto);
 
         tokens.Discard();
         tokens.DiscardWhitespace();
@@ -2157,7 +2158,7 @@ namespace krys::boo::css
         size_t index = 0uz;
         while (!tokens.IsAtEnd() && index++ < 3uz)
         {
-          if (auto number = CSSPrimitiveValueResolver<Number<NonNegative>>::ConsumeAndResolve(tokens, state))
+          if (auto number = PrimitiveValueResolver<Number<NonNegative>>::ConsumeAndResolve(tokens, state))
           {
             if (!flexGrow)
             {
@@ -2170,7 +2171,7 @@ namespace krys::boo::css
             else if (number->IsZero() == true) // flex only allows a basis of 0 (sans units) if flex-grow and
                                                // flex-shrink values have already been set.
             {
-              flexBasis = CSSPrimitiveValue::Create(0, CSSUnitType::px);
+              flexBasis = PrimitiveValue::Create(0, UnitType::px);
             }
             else
             {
@@ -2187,7 +2188,7 @@ namespace krys::boo::css
             if (!flexBasis)
             {
               flexBasis =
-                CSSPrimitiveValueResolver<LengthPercentage<NonNegative>>::ConsumeAndResolve(tokens, state);
+                PrimitiveValueResolver<LengthPercentage<NonNegative>>::ConsumeAndResolve(tokens, state);
             }
 
             if (index == 2uz && !tokens.IsAtEnd())
@@ -2203,12 +2204,12 @@ namespace krys::boo::css
 
         if (!flexGrow)
         {
-          flexGrow = CSSPrimitiveValue::Create(1);
+          flexGrow = PrimitiveValue::Create(1);
         }
 
         if (!flexShrink)
         {
-          flexShrink = CSSPrimitiveValue::Create(1);
+          flexShrink = PrimitiveValue::Create(1);
         }
 
         // FIXME: Using % here is a hack to work around intrinsic sizing implementation being
@@ -2217,7 +2218,7 @@ namespace krys::boo::css
         // scenarios.
         if (!flexBasis)
         {
-          flexBasis = CSSPrimitiveValue::Create(0, CSSUnitType::Percentage);
+          flexBasis = PrimitiveValue::Create(0, UnitType::Percentage);
         }
       }
 
@@ -2249,7 +2250,7 @@ namespace krys::boo::css
         return false;
       }
 
-      result.AddPropertyForCurrentShorthand(state, PropertyId::BreakAfter, CSSPrimitiveValue::Create(value));
+      result.AddPropertyForCurrentShorthand(state, PropertyId::BreakAfter, PrimitiveValue::Create(value));
 
       return true;
     }
@@ -2270,7 +2271,7 @@ namespace krys::boo::css
         return false;
       }
 
-      result.AddPropertyForCurrentShorthand(state, PropertyId::BreakBefore, CSSPrimitiveValue::Create(value));
+      result.AddPropertyForCurrentShorthand(state, PropertyId::BreakBefore, PrimitiveValue::Create(value));
 
       return true;
     }
@@ -2291,7 +2292,7 @@ namespace krys::boo::css
         return false;
       }
 
-      result.AddPropertyForCurrentShorthand(state, PropertyId::BreakInside, CSSPrimitiveValue::Create(value));
+      result.AddPropertyForCurrentShorthand(state, PropertyId::BreakInside, PrimitiveValue::Create(value));
 
       return true;
     }
@@ -2305,7 +2306,7 @@ namespace krys::boo::css
         tokens.DiscardWhitespace();
 
         bool atEnd = tokens.IsAtEnd();
-        auto resultZ = CSSPrimitiveValueResolver<Length<>>::ConsumeAndResolve(tokens, state);
+        auto resultZ = PrimitiveValueResolver<Length<>>::ConsumeAndResolve(tokens, state);
         if ((!resultZ && !atEnd) || !tokens.IsAtEnd())
         {
           return false;
@@ -2313,9 +2314,9 @@ namespace krys::boo::css
 
         auto [positionX, positionY] = Split(krys::move(*position));
         result.AddPropertyForCurrentShorthand(state, PropertyId::TransformOriginX,
-                                              CSSPositionXValue::Create(krys::move(positionX)));
+                                              PositionXValue::Create(krys::move(positionX)));
         result.AddPropertyForCurrentShorthand(state, PropertyId::TransformOriginY,
-                                              CSSPositionYValue::Create(krys::move(positionY)));
+                                              PositionYValue::Create(krys::move(positionY)));
         result.AddPropertyForCurrentShorthand(state, PropertyId::TransformOriginZ, resultZ);
 
         return true;
@@ -2333,9 +2334,9 @@ namespace krys::boo::css
       {
         auto [positionX, positionY] = Split(krys::move(*position));
         result.AddPropertyForCurrentShorthand(state, PropertyId::PerspectiveOriginX,
-                                              CSSPositionXValue::Create(krys::move(positionX)));
+                                              PositionXValue::Create(krys::move(positionX)));
         result.AddPropertyForCurrentShorthand(state, PropertyId::PerspectiveOriginY,
-                                              CSSPositionYValue::Create(krys::move(positionY)));
+                                              PositionYValue::Create(krys::move(positionY)));
         return true;
       }
 
@@ -2366,8 +2367,8 @@ namespace krys::boo::css
         return false;
 
       // Only parse offset-distance and offset-rotate if offset-path is specified.
-      RefPtr<CSSValue> offsetDistance;
-      RefPtr<CSSValue> offsetRotate;
+      RefPtr<Value> offsetDistance;
+      RefPtr<Value> offsetRotate;
       if (offsetPath)
       {
         // Try to parse offset-distance first. If successful, parse the following offset-rotate.
@@ -2384,7 +2385,7 @@ namespace krys::boo::css
       }
 
       // Parse out offset-anchor. Only parse if the prefix slash is present.
-      RefPtr<CSSValue> offsetAnchor;
+      RefPtr<Value> offsetAnchor;
       if (ConsumeSlash(tokens))
       {
         // offset-anchor must follow the slash.
@@ -2408,9 +2409,9 @@ namespace krys::boo::css
                                                          const PropertyShorthand &shorthand,
                                                          PropertyParserResult &result) noexcept
     {
-      RefPtr<CSSValue> position;
-      RefPtr<CSSValue> image;
-      RefPtr<CSSValue> type;
+      RefPtr<Value> position;
+      RefPtr<Value> image;
+      RefPtr<Value> type;
       unsigned noneCount = 0;
 
       while (!tokens.IsAtEnd())
@@ -2454,14 +2455,14 @@ namespace krys::boo::css
       {
         // Using implicit none for list-style-image is how we serialize "none" instead of "none none".
         image = nullptr;
-        type = CSSPrimitiveValue::Create(ValueId::None);
+        type = PrimitiveValue::Create(ValueId::None);
       }
       else if (noneCount == 1uz)
       {
         // Use implicit none for list-style-image, but non-implicit for type.
         if (!type)
         {
-          type = CSSPrimitiveValue::Create(ValueId::None);
+          type = PrimitiveValue::Create(ValueId::None);
         }
       }
 
@@ -2490,7 +2491,7 @@ namespace krys::boo::css
         return false;
       }
 
-      RefPtr<CSSValue> overscrollBehaviorY;
+      RefPtr<Value> overscrollBehaviorY;
       tokens.DiscardWhitespace();
       if (tokens.IsAtEnd())
       {
@@ -2525,7 +2526,7 @@ namespace krys::boo::css
       }
 
       bool sawSlash = false;
-      auto ConsumeSlashType = [&]() -> RefPtr<CSSValue>
+      auto ConsumeSlashType = [&]() -> RefPtr<Value>
       {
         if (tokens.IsAtEnd())
         {
@@ -2572,7 +2573,7 @@ namespace krys::boo::css
         return false;
       }
 
-      RefPtr<CSSValue> containIntrinsicHeight;
+      RefPtr<Value> containIntrinsicHeight;
       tokens.DiscardWhitespace();
       if (tokens.IsAtEnd())
       {
@@ -2600,47 +2601,47 @@ namespace krys::boo::css
                                                               const PropertyShorthand &shorthand,
                                                               PropertyParserResult &result) noexcept
     {
-      CSSValueListBuilder startList;
-      CSSValueListBuilder endList;
+      ValueListBuilder startList;
+      ValueListBuilder endList;
 
       do
       {
-        RefPtr<CSSValue> start = ConsumeSingleAnimationRangeStart(tokens, state);
+        RefPtr<Value> start = ConsumeSingleAnimationRangeStart(tokens, state);
         if (!start)
         {
           return false;
         }
         tokens.DiscardWhitespace();
 
-        RefPtr<CSSValue> end;
+        RefPtr<Value> end;
         if (tokens.IsAtEnd() || tokens.Peek().Type() == TokenType::Comma)
         {
           // From the spec: If <'animation-range-end'> is omitted and <'animation-range-start'> includes a
           // component, then animation-range-end is set to that same and 100%. Otherwise, any omitted longhand
           // is set to its initial value.
-          auto RangeEndValueForStartValue = [](const CSSValue &value)
+          auto RangeEndValueForStartValue = [](const Value &value)
           {
             auto IsRangeOffset = [](auto &value)
             {
               return value.IsLength() || value.IsPercentage() || value.IsCalculatedPercentageWithLength();
             };
 
-            if (auto *primitiveValue = DynamicDowncast<CSSPrimitiveValue>(value);
+            if (auto *primitiveValue = DynamicDowncast<PrimitiveValue>(value);
                 primitiveValue && IsRangeOffset(*primitiveValue))
             {
-              return CSSPrimitiveValue::Create(ValueId::Normal);
+              return PrimitiveValue::Create(ValueId::Normal);
             }
 
-            return CSSPrimitiveValue::Create(value.ValueId());
+            return PrimitiveValue::Create(value.ValueId());
           };
 
-          if (auto *startPrimitiveValue = DynamicDowncast<CSSPrimitiveValue>(start.get()))
+          if (auto *startPrimitiveValue = DynamicDowncast<PrimitiveValue>(start.get()))
           {
             end = RangeEndValueForStartValue(*startPrimitiveValue);
           }
           else
           {
-            auto *startPair = Downcast<CSSValuePair>(start.get());
+            auto *startPair = Downcast<ValuePair>(start.get());
             end = RangeEndValueForStartValue(startPair->First());
           }
         }
@@ -2664,9 +2665,9 @@ namespace krys::boo::css
       }
 
       result.AddPropertyForCurrentShorthand(state, PropertyId::AnimationRangeStart,
-                                            CSSValueList::CreateCommaSeparated(krys::move(startList)));
+                                            ValueList::CreateCommaSeparated(krys::move(startList)));
       result.AddPropertyForCurrentShorthand(state, PropertyId::AnimationRangeEnd,
-                                            CSSValueList::CreateCommaSeparated(krys::move(endList)));
+                                            ValueList::CreateCommaSeparated(krys::move(endList)));
 
       return true;
     }
@@ -2675,8 +2676,8 @@ namespace krys::boo::css
                                                               const PropertyShorthand &shorthand,
                                                               PropertyParserResult &result) noexcept
     {
-      CSSValueListBuilder namesList;
-      CSSValueListBuilder axesList;
+      ValueListBuilder namesList;
+      ValueListBuilder axesList;
 
       do
       {
@@ -2693,7 +2694,7 @@ namespace krys::boo::css
         // A scroll-timeline-axis is optional.
         if (tokens.Peek().Type() == TokenType::Comma || tokens.IsAtEnd())
         {
-          axesList.push_back(CSSPrimitiveValue::Create(ValueId::Block));
+          axesList.push_back(PrimitiveValue::Create(ValueId::Block));
         }
         else if (auto axis = PropertyParsing::ConsumeAxis(tokens))
         {
@@ -2711,11 +2712,11 @@ namespace krys::boo::css
       }
 
       result.AddPropertyForCurrentShorthand(state, PropertyId::ScrollTimelineName,
-                                            CSSValueList::CreateCommaSeparated(krys::move(namesList)));
+                                            ValueList::CreateCommaSeparated(krys::move(namesList)));
       if (!axesList.empty())
       {
         result.AddPropertyForCurrentShorthand(state, PropertyId::ScrollTimelineAxis,
-                                              CSSValueList::CreateCommaSeparated(krys::move(axesList)));
+                                              ValueList::CreateCommaSeparated(krys::move(axesList)));
       }
 
       return true;
@@ -2725,18 +2726,18 @@ namespace krys::boo::css
                                                             const PropertyShorthand &shorthand,
                                                             PropertyParserResult &result) noexcept
     {
-      CSSValueListBuilder namesList;
-      CSSValueListBuilder axesList;
-      CSSValueListBuilder insetsList;
+      ValueListBuilder namesList;
+      ValueListBuilder axesList;
+      ValueListBuilder insetsList;
 
-      auto DefaultAxis = [] -> Ref<CSSValue>
+      auto DefaultAxis = [] -> Ref<Value>
       {
-        return CSSPrimitiveValue::Create(ValueId::Block);
+        return PrimitiveValue::Create(ValueId::Block);
       };
 
-      auto DefaultInsets = [] -> Ref<CSSValue>
+      auto DefaultInsets = [] -> Ref<Value>
       {
-        return CSSPrimitiveValue::Create(ValueId::Auto);
+        return PrimitiveValue::Create(ValueId::Auto);
       };
 
       do
@@ -2800,11 +2801,11 @@ namespace krys::boo::css
       }
 
       result.AddPropertyForCurrentShorthand(state, PropertyId::ViewTimelineName,
-                                            CSSValueList::CreateCommaSeparated(krys::move(namesList)));
+                                            ValueList::CreateCommaSeparated(krys::move(namesList)));
       result.AddPropertyForCurrentShorthand(state, PropertyId::ViewTimelineAxis,
-                                            CSSValueList::CreateCommaSeparated(krys::move(axesList)));
+                                            ValueList::CreateCommaSeparated(krys::move(axesList)));
       result.AddPropertyForCurrentShorthand(state, PropertyId::ViewTimelineInset,
-                                            CSSValueList::CreateCommaSeparated(krys::move(insetsList)));
+                                            ValueList::CreateCommaSeparated(krys::move(insetsList)));
 
       return true;
     }
@@ -2819,19 +2820,19 @@ namespace krys::boo::css
       {
         // Sets max-lines to none, continue to auto, and block-ellipsis to none.
         result.AddPropertyForCurrentShorthand(state, PropertyId::MaxLines,
-                                              CSSPrimitiveValue::Create(ValueId::None));
+                                              PrimitiveValue::Create(ValueId::None));
         result.AddPropertyForCurrentShorthand(state, PropertyId::Continue,
-                                              CSSPrimitiveValue::Create(ValueId::Auto));
+                                              PrimitiveValue::Create(ValueId::Auto));
         result.AddPropertyForCurrentShorthand(state, PropertyId::BlockEllipsis,
-                                              CSSPrimitiveValue::Create(ValueId::None));
+                                              PrimitiveValue::Create(ValueId::None));
 
         DiscardIdent(tokens);
 
         return tokens.IsAtEnd();
       }
 
-      RefPtr<CSSValue> maxLines;
-      RefPtr<CSSValue> blockEllipsis;
+      RefPtr<Value> maxLines;
+      RefPtr<Value> blockEllipsis;
 
       for (size_t propertiesParsed = 0uz; propertiesParsed < 2uz && !tokens.IsAtEnd(); ++propertiesParsed)
       {
@@ -2851,17 +2852,17 @@ namespace krys::boo::css
 
       if (!blockEllipsis)
       {
-        blockEllipsis = CSSPrimitiveValue::Create(ValueId::Auto);
+        blockEllipsis = PrimitiveValue::Create(ValueId::Auto);
       }
 
       if (!maxLines)
       {
-        maxLines = CSSPrimitiveValue::Create(ValueId::None);
+        maxLines = PrimitiveValue::Create(ValueId::None);
       }
 
       result.AddPropertyForCurrentShorthand(state, PropertyId::MaxLines, krys::move(maxLines));
       result.AddPropertyForCurrentShorthand(state, PropertyId::Continue,
-                                            CSSPrimitiveValue::Create(ValueId::Discard));
+                                            PrimitiveValue::Create(ValueId::Discard));
       result.AddPropertyForCurrentShorthand(state, PropertyId::BlockEllipsis, krys::move(blockEllipsis));
       return tokens.IsAtEnd();
     }
@@ -2874,16 +2875,16 @@ namespace krys::boo::css
       {
         // if the single keyword normal is specified, it sets text-box-trim to none and text-box-edge to auto.
         result.AddPropertyForCurrentShorthand(state, PropertyId::TextBoxTrim,
-                                              CSSPrimitiveValue::Create(ValueId::None));
+                                              PrimitiveValue::Create(ValueId::None));
         result.AddPropertyForCurrentShorthand(state, PropertyId::TextBoxEdge,
-                                              CSSPrimitiveValue::Create(ValueId::Auto));
+                                              PrimitiveValue::Create(ValueId::Auto));
 
         DiscardIdent(tokens);
         return tokens.IsAtEnd();
       }
 
-      RefPtr<CSSValue> textBoxTrim;
-      RefPtr<CSSValue> textBoxEdge;
+      RefPtr<Value> textBoxTrim;
+      RefPtr<Value> textBoxEdge;
 
       for (size_t propertiesParsed = 0uz; propertiesParsed < 2uz && !tokens.IsAtEnd(); ++propertiesParsed)
       {
@@ -2909,13 +2910,13 @@ namespace krys::boo::css
       // Omitting the text-box-edge value sets it to auto (the initial value)
       if (!textBoxEdge)
       {
-        textBoxEdge = CSSPrimitiveValue::Create(ValueId::Auto);
+        textBoxEdge = PrimitiveValue::Create(ValueId::Auto);
       }
 
       // Omitting the text-box-trim value sets it to both (not the initial value)
       if (!textBoxTrim)
       {
-        textBoxTrim = CSSPrimitiveValue::Create(ValueId::TrimBoth);
+        textBoxTrim = PrimitiveValue::Create(ValueId::TrimBoth);
       }
 
       result.AddPropertyForCurrentShorthand(state, PropertyId::TextBoxTrim, krys::move(textBoxTrim));
@@ -2928,8 +2929,8 @@ namespace krys::boo::css
                                                         const PropertyShorthand &shorthand,
                                                         PropertyParserResult &result) noexcept
     {
-      RefPtr<CSSValue> mode;
-      RefPtr<CSSValue> style;
+      RefPtr<Value> mode;
+      RefPtr<Value> style;
 
       for (size_t propertiesParsed = 0uz; propertiesParsed < 2uz && !tokens.IsAtEnd(); ++propertiesParsed)
       {
@@ -2955,12 +2956,12 @@ namespace krys::boo::css
       // Fill in default values if one was missing from the multi-value syntax.
       if (!mode)
       {
-        mode = CSSPrimitiveValue::Create(ValueId::Wrap);
+        mode = PrimitiveValue::Create(ValueId::Wrap);
       }
 
       if (!style)
       {
-        style = CSSPrimitiveValue::Create(ValueId::Auto);
+        style = PrimitiveValue::Create(ValueId::Auto);
       }
 
       result.AddPropertyForCurrentShorthand(state, PropertyId::TextWrapMode, krys::move(mode));
@@ -2973,8 +2974,8 @@ namespace krys::boo::css
                                                           const PropertyShorthand &shorthand,
                                                           PropertyParserResult &result) noexcept
     {
-      RefPtr<CSSValue> whiteSpaceCollapse;
-      RefPtr<CSSValue> textWrapMode;
+      RefPtr<Value> whiteSpaceCollapse;
+      RefPtr<Value> textWrapMode;
 
       // Single value syntax.
       auto singleValueKeyword =
@@ -2986,26 +2987,26 @@ namespace krys::boo::css
         {
           case ValueId::Normal:
           {
-            whiteSpaceCollapse = CSSPrimitiveValue::Create(ValueId::Collapse);
-            textWrapMode = CSSPrimitiveValue::Create(ValueId::Wrap);
+            whiteSpaceCollapse = PrimitiveValue::Create(ValueId::Collapse);
+            textWrapMode = PrimitiveValue::Create(ValueId::Wrap);
             break;
           }
           case ValueId::Pre:
           {
-            whiteSpaceCollapse = CSSPrimitiveValue::Create(ValueId::Preserve);
-            textWrapMode = CSSPrimitiveValue::Create(ValueId::Nowrap);
+            whiteSpaceCollapse = PrimitiveValue::Create(ValueId::Preserve);
+            textWrapMode = PrimitiveValue::Create(ValueId::Nowrap);
             break;
           }
           case ValueId::PreLine:
           {
-            whiteSpaceCollapse = CSSPrimitiveValue::Create(ValueId::PreserveBreaks);
-            textWrapMode = CSSPrimitiveValue::Create(ValueId::Wrap);
+            whiteSpaceCollapse = PrimitiveValue::Create(ValueId::PreserveBreaks);
+            textWrapMode = PrimitiveValue::Create(ValueId::Wrap);
             break;
           }
           case ValueId::PreWrap:
           {
-            whiteSpaceCollapse = CSSPrimitiveValue::Create(ValueId::Preserve);
-            textWrapMode = CSSPrimitiveValue::Create(ValueId::Wrap);
+            whiteSpaceCollapse = PrimitiveValue::Create(ValueId::Preserve);
+            textWrapMode = PrimitiveValue::Create(ValueId::Wrap);
             break;
           }
           default:
@@ -3044,12 +3045,12 @@ namespace krys::boo::css
       // Fill in default values if one was missing from the multi-value syntax.
       if (!whiteSpaceCollapse)
       {
-        whiteSpaceCollapse = CSSPrimitiveValue::Create(ValueId::Collapse);
+        whiteSpaceCollapse = PrimitiveValue::Create(ValueId::Collapse);
       }
 
       if (!textWrapMode)
       {
-        textWrapMode = CSSPrimitiveValue::Create(ValueId::Wrap);
+        textWrapMode = PrimitiveValue::Create(ValueId::Wrap);
       }
 
       result.AddPropertyForCurrentShorthand(state, PropertyId::WhiteSpaceCollapse,
@@ -3084,7 +3085,7 @@ namespace krys::boo::css
         return false;
       }
 
-      Ref<CSSValue> markerRef = krys::move(marker);
+      Ref<Value> markerRef = krys::move(marker);
 
       result.AddPropertyForCurrentShorthand(state, PropertyId::MarkerStart, markerRef);
       result.AddPropertyForCurrentShorthand(state, PropertyId::MarkerMid, markerRef);

@@ -2,7 +2,7 @@
 #include "Krystal.Booey/CSS/Calc/CalcTreeParser.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Color.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/CSSPrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Image.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/LengthDefinitions.hpp"
@@ -15,16 +15,16 @@
 #include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
 #include "Krystal.Booey/CSS/Values/Background/BoxShadow.hpp"
 #include "Krystal.Booey/CSS/Values/Background/BoxShadowProperty.hpp"
-#include "Krystal.Booey/CSS/Values/Background/CSSBackgroundRepeatValue.hpp"
-#include "Krystal.Booey/CSS/Values/Background/CSSBoxShadowPropertyValue.hpp"
-#include "Krystal.Booey/CSS/Values/Background/CSSReflectValue.hpp"
+#include "Krystal.Booey/CSS/Values/Background/BackgroundRepeatValue.hpp"
+#include "Krystal.Booey/CSS/Values/Background/BoxShadowPropertyValue.hpp"
+#include "Krystal.Booey/CSS/Values/Background/ReflectValue.hpp"
 #include "Krystal.Booey/CSS/Values/Borders/BorderImage.hpp"
 #include "Krystal.Booey/CSS/Values/Borders/BorderRadius.hpp"
-#include "Krystal.Booey/CSS/Values/Borders/CSSBorderImageSliceValue.hpp"
-#include "Krystal.Booey/CSS/Values/Borders/CSSBorderImageWidthValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValuePair.hpp"
+#include "Krystal.Booey/CSS/Values/Borders/BorderImageSliceValue.hpp"
+#include "Krystal.Booey/CSS/Values/Borders/BorderImageWidthValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
@@ -148,21 +148,21 @@ namespace krys::boo::css::PropertyParserHelpers
 
   // MARK: - Border Image
 
-  RefPtr<CSSValue> ConsumeBorderImageSlice(TokenRange &tokens, PropertyParserState &state,
+  RefPtr<Value> ConsumeBorderImageSlice(TokenRange &tokens, PropertyParserState &state,
                                            BorderImageSliceFillDefault defaultFill) noexcept
   {
     // <'border-image-slice'> = [<number [0,∞]> | <percentage [0,∞]>]{1,4} && fill?
     // https://drafts.csswg.org/css-backgrounds/#propdef-border-image-slice
 
     bool fill = ConsumeIdentRaw<ValueId::Fill>(tokens).has_value();
-    Array<RefPtr<CSSPrimitiveValue>, 4uz> slices;
+    Array<RefPtr<PrimitiveValue>, 4uz> slices;
 
     for (auto &value : slices)
     {
-      value = CSSPrimitiveValueResolver<Percentage<NonNegative>>::ConsumeAndResolve(tokens, state);
+      value = PrimitiveValueResolver<Percentage<NonNegative>>::ConsumeAndResolve(tokens, state);
       if (!value)
       {
-        value = CSSPrimitiveValueResolver<Number<NonNegative>>::ConsumeAndResolve(tokens, state);
+        value = PrimitiveValueResolver<Number<NonNegative>>::ConsumeAndResolve(tokens, state);
       }
 
       if (!value)
@@ -193,22 +193,22 @@ namespace krys::boo::css::PropertyParserHelpers
       fill = true;
     }
 
-    return CSSBorderImageSliceValue::Create(
+    return BorderImageSliceValue::Create(
       {krys::move(slices[0]), krys::move(slices[1]), krys::move(slices[2]), krys::move(slices[3])}, fill);
   }
 
-  RefPtr<CSSValue> ConsumeBorderImageWidth(TokenRange &tokens, PropertyParserState &state,
+  RefPtr<Value> ConsumeBorderImageWidth(TokenRange &tokens, PropertyParserState &state,
                                            BorderImageWidthOverridesWidthForLength overridesWidth) noexcept
   {
     // <'border-image-width'> = [ <length-percentage [0,∞]> | <number [0,∞]> | auto ]{1,4}
     // https://drafts.csswg.org/css-backgrounds/#propdef-border-image-width
 
-    Array<RefPtr<CSSPrimitiveValue>, 4> widths;
+    Array<RefPtr<PrimitiveValue>, 4> widths;
 
     bool hasLength = false;
     for (auto &value : widths)
     {
-      value = CSSPrimitiveValueResolver<Number<NonNegative>>::ConsumeAndResolve(tokens, state);
+      value = PrimitiveValueResolver<Number<NonNegative>>::ConsumeAndResolve(tokens, state);
       if (value)
       {
         continue;
@@ -218,7 +218,7 @@ namespace krys::boo::css::PropertyParserHelpers
       // remove the special case.
       // FIXME: As this falls into the "<length> ambiguous with <number>" case, this should probably be
       // `.unitlessZeroLength = UnitlessZeroQuirk::Forbid` in case the order of checks ever changes.
-      if (auto numericValue = CSSPrimitiveValueResolver<LengthPercentage<NonNegative>>::ConsumeAndResolve(
+      if (auto numericValue = PrimitiveValueResolver<LengthPercentage<NonNegative>>::ConsumeAndResolve(
             tokens, state, {.OverrideParserMode = ParserMode::HTMLStandard}))
       {
         if (numericValue->IsLength())
@@ -244,7 +244,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     Complete4Sides(widths);
 
-    return CSSBorderImageWidthValue::Create(
+    return BorderImageWidthValue::Create(
       {krys::move(widths[0]), krys::move(widths[1]), krys::move(widths[2]), krys::move(widths[3])},
       overridesWidth == BorderImageWidthOverridesWidthForLength::Yes && hasLength);
   }
@@ -320,7 +320,7 @@ namespace krys::boo::css::PropertyParserHelpers
   // MARK: - Background Size
 
   template <PropertyId property>
-  static RefPtr<CSSValue> ConsumeBackgroundSize(TokenRange &tokens, PropertyParserState &state) noexcept
+  static RefPtr<Value> ConsumeBackgroundSize(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <bg-size> = [ <length-percentage [0,∞]> | auto ]{1,2} | cover | contain
     // https://drafts.csswg.org/css-backgrounds/#propdef-background-size
@@ -331,10 +331,10 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     bool shouldCoalesce = true;
-    RefPtr<CSSPrimitiveValue> horizontal = ConsumeIdent<ValueId::Auto>(tokens);
+    RefPtr<PrimitiveValue> horizontal = ConsumeIdent<ValueId::Auto>(tokens);
     if (!horizontal)
     {
-      horizontal = CSSPrimitiveValueResolver<LengthPercentage<NonNegative>>::ConsumeAndResolve(tokens, state);
+      horizontal = PrimitiveValueResolver<LengthPercentage<NonNegative>>::ConsumeAndResolve(tokens, state);
 
       if (!horizontal)
       {
@@ -343,13 +343,13 @@ namespace krys::boo::css::PropertyParserHelpers
       shouldCoalesce = false;
     }
 
-    RefPtr<CSSPrimitiveValue> vertical;
+    RefPtr<PrimitiveValue> vertical;
     if (!tokens.IsAtEnd())
     {
       vertical = ConsumeIdent<ValueId::Auto>(tokens);
       if (!vertical)
       {
-        vertical = CSSPrimitiveValueResolver<LengthPercentage<NonNegative>>::ConsumeAndResolve(tokens, state);
+        vertical = PrimitiveValueResolver<LengthPercentage<NonNegative>>::ConsumeAndResolve(tokens, state);
       }
     }
     if (!vertical)
@@ -361,7 +361,7 @@ namespace krys::boo::css::PropertyParserHelpers
       }
       else if constexpr (property == PropertyId::BackgroundSize)
       {
-        vertical = CSSPrimitiveValue::Create(ValueId::Auto);
+        vertical = PrimitiveValue::Create(ValueId::Auto);
       }
       else if constexpr (property == PropertyId::MaskSize)
       {
@@ -371,13 +371,13 @@ namespace krys::boo::css::PropertyParserHelpers
 
     if (shouldCoalesce)
     {
-      return CSSValuePair::Create(krys::move(horizontal), krys::move(vertical));
+      return ValuePair::Create(krys::move(horizontal), krys::move(vertical));
     }
 
-    return CSSValuePair::CreateNonCoalescing(krys::move(horizontal), krys::move(vertical));
+    return ValuePair::CreateNonCoalescing(krys::move(horizontal), krys::move(vertical));
   }
 
-  RefPtr<CSSValue> ConsumeSingleBackgroundSize(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeSingleBackgroundSize(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <single-background-size> = <bg-size>
     // https://drafts.csswg.org/css-backgrounds/#background-size
@@ -385,14 +385,14 @@ namespace krys::boo::css::PropertyParserHelpers
     return ConsumeBackgroundSize<PropertyId::BackgroundSize>(tokens, state);
   }
 
-  RefPtr<CSSValue> ConsumeSingleWebkitBackgroundSize(TokenRange &tokens,
+  RefPtr<Value> ConsumeSingleWebkitBackgroundSize(TokenRange &tokens,
                                                      PropertyParserState &state) noexcept
   {
     // Non-standard.
     return ConsumeBackgroundSize<PropertyId::WebkitBackgroundSize>(tokens, state);
   }
 
-  RefPtr<CSSValue> ConsumeSingleMaskSize(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeSingleMaskSize(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <single-mask-size> = <bg-size>
     // https://drafts.fxtf.org/css-masking/#the-mask-size
@@ -402,19 +402,19 @@ namespace krys::boo::css::PropertyParserHelpers
 
   // MARK: - Background Repeat
 
-  RefPtr<CSSValue> ConsumeRepeatStyle(TokenRange &tokens, PropertyParserState &) noexcept
+  RefPtr<Value> ConsumeRepeatStyle(TokenRange &tokens, PropertyParserState &) noexcept
   {
     // <repeat-style> = repeat-x | repeat-y | [repeat | space | round | no-repeat]{1,2}
     // https://drafts.csswg.org/css-backgrounds/#typedef-repeat-style
 
     if (ConsumeIdentRaw<ValueId::RepeatX>(tokens))
     {
-      return CSSBackgroundRepeatValue::Create(ValueId::Repeat, ValueId::NoRepeat);
+      return BackgroundRepeatValue::Create(ValueId::Repeat, ValueId::NoRepeat);
     }
 
     if (ConsumeIdentRaw<ValueId::RepeatY>(tokens))
     {
-      return CSSBackgroundRepeatValue::Create(ValueId::NoRepeat, ValueId::Repeat);
+      return BackgroundRepeatValue::Create(ValueId::NoRepeat, ValueId::Repeat);
     }
 
     auto value1 = ConsumeIdentRaw<ValueId::Repeat, ValueId::NoRepeat, ValueId::Round, ValueId::Space>(tokens);
@@ -429,7 +429,7 @@ namespace krys::boo::css::PropertyParserHelpers
       value2 = value1;
     }
 
-    return CSSBackgroundRepeatValue::Create(*value1, *value2);
+    return BackgroundRepeatValue::Create(*value1, *value2);
   }
 
   // MARK: - Box Shadows
@@ -591,21 +591,21 @@ namespace krys::boo::css::PropertyParserHelpers
     return {};
   }
 
-  RefPtr<CSSValue> ConsumeBoxShadow(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeBoxShadow(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'box-shadow'> = none | <shadow>#
     // https://drafts.csswg.org/css-backgrounds/#propdef-box-shadow
 
     if (auto property = ConsumeUnresolvedBoxShadow(tokens, state, false))
-      return CSSBoxShadowPropertyValue::Create({krys::move(*property)});
+      return BoxShadowPropertyValue::Create({krys::move(*property)});
     return nullptr;
   }
 
-  RefPtr<CSSValue> ConsumeWebkitBoxShadow(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeWebkitBoxShadow(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     if (auto property = ConsumeUnresolvedBoxShadow(tokens, state, true))
     {
-      return CSSBoxShadowPropertyValue::Create({krys::move(*property)});
+      return BoxShadowPropertyValue::Create({krys::move(*property)});
     }
 
     return nullptr;
@@ -613,7 +613,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
   // MARK: - Reflect (non-standard)
 
-  RefPtr<CSSValue> ConsumeWebkitBoxReflect(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeWebkitBoxReflect(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     if (tokens.Peek().ValueId() == ValueId::None)
     {
@@ -628,21 +628,21 @@ namespace krys::boo::css::PropertyParserHelpers
 
     // FIXME: Does not seem right to create "0px" here. We'd like to omit "0px" when serializing if there is
     // also no image.
-    RefPtr<CSSPrimitiveValue> offset;
+    RefPtr<PrimitiveValue> offset;
     if (tokens.IsAtEnd())
     {
-      offset = CSSPrimitiveValue::Create(0, CSSUnitType::px);
+      offset = PrimitiveValue::Create(0, UnitType::px);
     }
     else
     {
-      offset = CSSPrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(tokens, state);
+      offset = PrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(tokens, state);
       if (!offset)
       {
         return nullptr;
       }
     }
 
-    RefPtr<CSSValue> mask;
+    RefPtr<Value> mask;
     if (!tokens.IsAtEnd())
     {
       auto components = ConsumeBorderImageComponents(tokens, state, BorderImageSliceFillDefault::Yes);
@@ -653,6 +653,6 @@ namespace krys::boo::css::PropertyParserHelpers
       mask = CreateBorderImageValue(krys::move(*components));
     }
 
-    return CSSReflectValue::Create(*direction, krys::move(offset), krys::move(mask));
+    return ReflectValue::Create(*direction, krys::move(offset), krys::move(mask));
   }
 }

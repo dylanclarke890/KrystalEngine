@@ -1,13 +1,13 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumerDefinitions.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/CSSPrimitiveNumericTypesCanonicalization.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypesCanonicalization.hpp"
 
 namespace krys::boo::css
 {
   struct TimeValidator
   {
-    KRYS_NODISCARD constexpr static Maybe<TimeUnit> Validate(CSSUnitType unitType, PropertyParserState &,
+    KRYS_NODISCARD constexpr static Maybe<TimeUnit> Validate(UnitType unitType, PropertyParserState &,
                                                              PropertyParserOptions) noexcept
     {
       return UnitTraits<TimeUnit>::Validate(unitType);
@@ -26,7 +26,7 @@ namespace krys::boo::css
     }
   };
 
-  template <CSSRange R, typename V>
+  template <Range R, typename V>
   struct ConsumerDefinition<Time<R, V>>
   {
     using FunctionToken = FunctionConsumerForCalcValues<Time<R, V>>;

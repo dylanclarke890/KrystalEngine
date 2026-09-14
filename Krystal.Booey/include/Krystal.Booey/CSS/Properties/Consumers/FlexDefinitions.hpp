@@ -6,7 +6,7 @@ namespace krys::boo::css
 {
   struct FlexValidator
   {
-    KRYS_NODISCARD constexpr static Maybe<FlexUnit> Validate(CSSUnitType unitType, PropertyParserState &,
+    KRYS_NODISCARD constexpr static Maybe<FlexUnit> Validate(UnitType unitType, PropertyParserState &,
                                                              PropertyParserOptions) noexcept
     {
       return UnitTraits<FlexUnit>::Validate(unitType);
@@ -19,7 +19,7 @@ namespace krys::boo::css
     }
   };
 
-  template <CSSRange R, typename V>
+  template <Range R, typename V>
   struct ConsumerDefinition<Flex<R, V>>
   {
     using FunctionToken = FunctionConsumerForCalcValues<Flex<R, V>>;

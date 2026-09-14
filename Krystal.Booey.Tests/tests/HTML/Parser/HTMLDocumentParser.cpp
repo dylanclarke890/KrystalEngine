@@ -15,42 +15,41 @@
 #include "Krystal.Booey/HTML/Parser/HTMLTokenizer.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGElementFactory.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
-#include "Krystal.Text/StringConversion.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <catch_all.hpp>
 #include <filesystem>
 
-namespace krys::boo::Tests
+namespace krys::boo::html::tests
 {
   namespace
   {
 #pragma region Serialize
 
-    void SerializeNode(Node &node, dom::DOMString &output, size_t depth) noexcept
+    void SerializeNode(dom::Node &node, dom::DOMString &output, size_t depth) noexcept
     {
       switch (node.NodeType())
       {
-        case NodeType::ELEMENT_NODE:
+        case dom::NodeType::ELEMENT_NODE:
         {
-          auto &element = Downcast<Element>(node);
+          auto &element = Downcast<dom::Element>(node);
 
-          Indent(output, depth);
+          krys::boo::tests::Indent(output, depth);
 
           auto localName = dom::DOMString(element.LocalName().View());
           auto namespaceName = [&] -> dom::DOMString
           {
-            if (element.NamespaceURI() == Namespaces::HTML)
+            if (element.NamespaceURI() == infra::Namespaces::HTML)
             {
               return u8"";
             }
-            else if (element.NamespaceURI() == Namespaces::SVG)
+            else if (element.NamespaceURI() == infra::Namespaces::SVG)
             {
               return u8"svg ";
             }
-            else if (element.NamespaceURI() == Namespaces::MathML)
+            else if (element.NamespaceURI() == infra::Namespaces::MathML)
             {
               return u8"math ";
             }
@@ -69,19 +68,19 @@ namespace krys::boo::Tests
             auto localName = dom::DOMString(attr->LocalName().View());
             auto namespaceName = [&] -> dom::DOMString
             {
-              if (attr->NamespaceURI() == Namespaces::HTML)
+              if (attr->NamespaceURI() == infra::Namespaces::HTML)
               {
                 return u8"";
               }
-              else if (attr->NamespaceURI() == Namespaces::XML)
+              else if (attr->NamespaceURI() == infra::Namespaces::XML)
               {
                 return u8"xml ";
               }
-              else if (attr->NamespaceURI() == Namespaces::XMLNS)
+              else if (attr->NamespaceURI() == infra::Namespaces::XMLNS)
               {
                 return u8"xmlns ";
               }
-              else if (attr->NamespaceURI() == Namespaces::XLink)
+              else if (attr->NamespaceURI() == infra::Namespaces::XLink)
               {
                 return u8"xlink ";
               }
@@ -101,39 +100,39 @@ namespace krys::boo::Tests
 
           for (auto &[name, value] : attributes)
           {
-            Indent(output, depth + 1uz);
+            krys::boo::tests::Indent(output, depth + 1uz);
             output += name + u8"=\"" + value + u8"\"\n";
           }
 
-          if (element.NamespaceURI() == Namespaces::HTML && element.LocalName() == u8"template")
+          if (element.NamespaceURI() == infra::Namespaces::HTML && element.LocalName() == u8"template")
           {
-            Indent(output, depth + 1uz);
+            krys::boo::tests::Indent(output, depth + 1uz);
             output += u8"content\n";
 
-            for (auto &child : ChildNodeRange(*Downcast<HTMLTemplateElement>(element).Content()))
+            for (auto &child : dom::ChildNodeRange(*Downcast<HTMLTemplateElement>(element).Content()))
             {
               SerializeNode(child, output, depth + 2uz);
             }
           }
           break;
         }
-        case NodeType::TEXT_NODE:
+        case dom::NodeType::TEXT_NODE:
         {
-          Indent(output, depth);
-          output += u8'"' + Downcast<HTML::Text>(node).Data() + u8"\"\n";
+          krys::boo::tests::Indent(output, depth);
+          output += u8'"' + Downcast<dom::Text>(node).Data() + u8"\"\n";
           break;
         }
-        case NodeType::COMMENT_NODE:
+        case dom::NodeType::COMMENT_NODE:
         {
-          Indent(output, depth);
-          output += u8"<!-- " + Downcast<Comment>(node).Data() + u8" -->\n";
+          krys::boo::tests::Indent(output, depth);
+          output += u8"<!-- " + Downcast<dom::Comment>(node).Data() + u8" -->\n";
           break;
         }
-        case NodeType::DOCUMENT_TYPE_NODE:
+        case dom::NodeType::DOCUMENT_TYPE_NODE:
         {
-          auto &documentType = Downcast<DocumentType>(node);
+          auto &documentType = Downcast<dom::DocumentType>(node);
 
-          krys::boo::Tests::Indent(output, depth);
+          krys::boo::tests::Indent(output, depth);
 
           output += u8"<!DOCTYPE ";
           output += documentType.Name();
@@ -152,25 +151,25 @@ namespace krys::boo::Tests
         }
       }
 
-      if (auto *containerNode = DynamicDowncast<ContainerNode>(node))
+      if (auto *containerNode = DynamicDowncast<dom::ContainerNode>(node))
       {
-        for (auto &child : ChildNodeRange(*containerNode))
+        for (auto &child : dom::ChildNodeRange(*containerNode))
         {
           SerializeNode(child, output, depth + 1uz);
         }
       }
     }
 
-    KRYS_NODISCARD static dom::DOMString SerializeDocument(Document &document) noexcept
+    KRYS_NODISCARD static dom::DOMString SerializeDocument(dom::Document &document) noexcept
     {
       dom::DOMString output = u8"#document\n";
 
-      for (auto &child : ChildNodeRange(document))
+      for (auto &child : dom::ChildNodeRange(document))
       {
         SerializeNode(child, output, 0uz);
       }
 
-      NormaliseData(output);
+      krys::boo::tests::NormaliseData(output);
       return output;
     }
 
@@ -208,7 +207,7 @@ namespace krys::boo::Tests
         else if (sectionName == u8"document")
         {
           currentTest.Expected = u8"#document\n" + data;
-          NormaliseData(currentTest.Expected);
+          krys::boo::tests::NormaliseData(currentTest.Expected);
         }
         else if (sectionName == u8"document-fragment")
         {
@@ -230,7 +229,7 @@ namespace krys::boo::Tests
         }
       };
 
-      ParseTestData(stream, "#", ::krys::move(parse));
+      krys::boo::tests::ParseTestData(stream, "#", ::krys::move(parse));
       if (!currentTest.Input.empty())
       {
         tests.push_back(::krys::move(currentTest));
@@ -239,7 +238,7 @@ namespace krys::boo::Tests
       return tests;
     }
 
-    static Ref<HTMLDocumentParser> CreateParser(HTMLDocument &document, utf8_string &&input) noexcept
+    static Ref<HTMLDocumentParser> CreateParser(dom::HTMLDocument &document, utf8_string &&input) noexcept
     {
       auto parser = CreateRef<HTMLDocumentParser>(document);
       parser->InputStream().Append(krys::move(input), IsEOF(true));
@@ -252,11 +251,12 @@ namespace krys::boo::Tests
       dom::DOMString output;
       if (test.FragmentContext.has_value())
       {
-        auto document = CreateRef<Document>();
+        auto document = CreateRef<dom::Document>();
         TagName fragmentTagName = ParseTagName(*test.FragmentContext);
-        QualifiedName qName = QualifiedName {Namespaces::HTML, dom::DOMStringAtom::Null(),
-                                             test.FragmentContext.value(), fragmentTagName, Namespace::HTML};
-        auto element = ElementFactory::Create(*document, qName, dom::DOMStringAtom::Null());
+        dom::QualifiedName qName =
+          dom::QualifiedName {infra::Namespaces::HTML, dom::DOMStringAtom::Null(),
+                              test.FragmentContext.value(), fragmentTagName, Namespace::HTML};
+        auto element = dom::ElementFactory::Create(*document, qName, dom::DOMStringAtom::Null());
         auto result = HTMLDocumentParser::ParseFragment(
           *element, utf8_string(test.Input), false, test.ScriptingMode.value_or(ParserScriptingMode::Inert));
 
@@ -265,11 +265,11 @@ namespace krys::boo::Tests
         {
           SerializeNode(*child, output, 0uz);
         }
-        NormaliseData(output);
+        krys::boo::tests::NormaliseData(output);
       }
       else
       {
-        auto document = CreateRef<HTMLDocument>();
+        auto document = CreateRef<dom::HTMLDocument>();
         auto parser = CreateParser(*document, utf8_string(test.Input));
 
         if (test.ScriptingMode.has_value())
@@ -282,8 +282,8 @@ namespace krys::boo::Tests
         output = SerializeDocument(*document);
       }
 
-      utf8_string str =
-        u8"--- TEST " + ToUTF8(number + 1uz) + u8" OF " + ToUTF8(total) + u8" ---\n" + test.Input;
+      utf8_string str = u8"--- TEST " + krys::boo::tests::ToUTF8(number + 1uz) + u8" OF "
+                        + krys::boo::tests::ToUTF8(total) + u8" ---\n" + test.Input;
       UTF8_INFO(str);
 
       str = u8"--- FRAGMENT CONTEXT ---\n#document-fragment\n" + test.FragmentContext.value_or(u8"none");
@@ -303,39 +303,39 @@ namespace krys::boo::Tests
     {
       static string basedir = "data/html-tree-builder/";
 
-      auto file = OpenTestDataFile(basedir + filename);
+      auto file = krys::boo::tests::OpenTestDataFile(basedir + filename);
       REQUIRE(file.has_value());
 
       auto tests = ParseHTMLTreeBuilderTests(*file);
       REQUIRE(!tests.empty());
 
-      ExecuteTests(tests, ExecuteHTMLTreeBuilderTest);
+      krys::boo::tests::ExecuteTests(tests, ExecuteHTMLTreeBuilderTest);
     }
   }
 }
 
 #pragma region Test Parser Tests
 
-namespace krys::boo::Tests
+namespace krys::boo::html::tests
 {
   namespace
   {
-    Ref<Element> CreateElement(Document &document, const dom::DOMString &tagName)
+    Ref<dom::Element> CreateElement(dom::Document &document, const dom::DOMString &tagName)
     {
       auto element = document.CreateElement(tagName);
       REQUIRE(element.HasValue());
       return *element;
     }
 
-    Ref<SVGElement> CreateSVGElement(Document &document, const dom::DOMString &tagName) noexcept
+    Ref<svg::SVGElement> CreateSVGElement(dom::Document &document, const dom::DOMString &tagName) noexcept
     {
-      auto element = document.CreateElementNS(Namespaces::SVG, tagName);
+      auto element = document.CreateElementNS(infra::Namespaces::SVG, tagName);
       REQUIRE(element.HasValue());
       return *element;
     }
 
-    Ref<DocumentType> CreateDocumentType(Document &document, const dom::DOMString &name, const dom::DOMString &publicId,
-                                         const dom::DOMString &systemId)
+    Ref<dom::DocumentType> CreateDocumentType(dom::Document &document, const dom::DOMString &name,
+                                              const dom::DOMString &publicId, const dom::DOMString &systemId)
     {
       auto element = document.Implementation().CreateDocumentType(name, publicId, systemId);
       REQUIRE(element.HasValue());
@@ -351,7 +351,7 @@ namespace krys::boo::Tests
 
   TEST_CASE("DumpNode should serialize a complete HTML document correctly", "[HTML][TreeConstruction]")
   {
-    Ref<Document> document = CreateRef<Document>();
+    Ref<dom::Document> document = CreateRef<dom::Document>();
 
     auto doctype = CreateDocumentType(*document, u8"html", u8"", u8"");
     REQUIRE_FALSE(document->AppendChild(*doctype).HasException());
@@ -688,7 +688,7 @@ namespace krys::boo::Tests
 #define EXECUTE_HTML_PARSER_TEST_CASE(FileName)                                                              \
   TEST_CASE("HTMLDocumentParser(" FileName ")", "[HTML][HTMLDocumentParser]")                                \
   {                                                                                                          \
-    ::krys::boo::Tests::RunTest(FileName);                                                                  \
+    krys::boo::html::tests::RunTest(FileName);                                                               \
   }
 
 EXECUTE_HTML_PARSER_TEST_CASE("adoption-01.dat");

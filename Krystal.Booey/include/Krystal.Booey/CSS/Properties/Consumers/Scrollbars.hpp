@@ -6,13 +6,13 @@ namespace krys::boo::css
 {
   class TokenRange;
   struct PropertyParserState;
-  class CSSValue;
+  class Value;
 
   namespace PropertyParserHelpers
   {
     // MARK: <'scrollbar-color'> consuming
     // https://drafts.csswg.org/css-scrollbars/#propdef-scrollbar-color
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeScrollbarColor(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeScrollbarColor(TokenRange &tokens,
                                                           PropertyParserState &state) noexcept;
   }
 }

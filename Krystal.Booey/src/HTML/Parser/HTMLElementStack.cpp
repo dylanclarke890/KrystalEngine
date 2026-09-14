@@ -62,7 +62,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLElementStack::PopUntil(const Element &node) noexcept
+  void HTMLElementStack::PopUntil(const dom::Element &node) noexcept
   {
     while (&Bottom().Element() != &node)
     {
@@ -78,7 +78,7 @@ namespace krys::boo::html
     }
   }
 
-  void HTMLElementStack::PopUntilPopped(const Element &node) noexcept
+  void HTMLElementStack::PopUntilPopped(const dom::Element &node) noexcept
   {
     while (true)
     {
@@ -411,7 +411,7 @@ namespace krys::boo::html
     return false;
   }
 
-  bool HTMLElementStack::HasElementInScope(const Element &element) const noexcept
+  bool HTMLElementStack::HasElementInScope(const dom::Element &element) const noexcept
   {
     auto it = _items.rbegin();
     while (it != _items.rend())
@@ -509,7 +509,7 @@ namespace krys::boo::html
 
 #pragma endregion
 
-  bool HTMLElementStack::Contains(const Element &node) const noexcept
+  bool HTMLElementStack::Contains(const dom::Element &node) const noexcept
   {
     return std::ranges::any_of(_items, [&](const auto &item) { return &item.Element() == &node; });
   }

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/CSSValueAggregates.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/CSSPrimitiveNumericTypes.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
+#include "Krystal.Booey/CSS/Values/Types.hpp"
 
 namespace krys::boo::css
 {
@@ -34,7 +34,7 @@ namespace krys::boo::css
   // <grid-line-span> = [ span && [ <integer [1,∞]> || <custom-ident>  ] ]
   struct GridPositionSpan
   {
-    using Position = Integer<CSSRange {1, CSSRange::Inf}>;
+    using Position = Integer<Range {1, Range::Inf}>;
 
     Position position {1};
     CustomIdentifier name {CSSOMStringAtom::Null()};
@@ -49,7 +49,7 @@ namespace krys::boo::css
         return visitor(SpaceSeparatedTuple {keywords::Span {}, position});
       }
 
-      if (position == IntegerRaw<CSSRange {1, CSSRange::Inf}> {1})
+      if (position == IntegerRaw<Range {1, Range::Inf}> {1})
       {
         return visitor(SpaceSeparatedTuple {keywords::Span {}, name});
       }

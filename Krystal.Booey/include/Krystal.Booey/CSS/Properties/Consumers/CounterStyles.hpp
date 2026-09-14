@@ -7,7 +7,7 @@
 namespace krys::boo::css
 {
   class TokenRange;
-  class CSSValue;
+  class Value;
   struct PropertyParserState;
 
   namespace PropertyParserHelpers
@@ -15,7 +15,7 @@ namespace krys::boo::css
     // https://drafts.csswg.org/css-counter-styles-3/
 
     // MARK: <counter-style> consumer
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeCounterStyle(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeCounterStyle(TokenRange &tokens,
                                                         PropertyParserState &state) noexcept;
 
     // MARK: @counter-style consumer
@@ -23,13 +23,13 @@ namespace krys::boo::css
       TokenRange &tokens, ParserMode mode = ParserMode::HTMLStandard) noexcept;
 
     // MARK: @counter-style descriptor consumers
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeCounterStyleName(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeCounterStyleName(TokenRange &tokens,
                                                             PropertyParserState &state) noexcept;
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeCounterStyleSystem(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeCounterStyleSystem(TokenRange &tokens,
                                                               PropertyParserState &state) noexcept;
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeCounterStyleRange(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeCounterStyleRange(TokenRange &tokens,
                                                              PropertyParserState &state) noexcept;
-    KRYS_NODISCARD RefPtr<CSSValue>
+    KRYS_NODISCARD RefPtr<Value>
       ConsumeCounterStyleAdditiveSymbols(TokenRange &tokens, PropertyParserState &state) noexcept;
   }
 }

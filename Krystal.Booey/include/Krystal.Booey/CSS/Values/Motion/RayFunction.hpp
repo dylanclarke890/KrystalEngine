@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/CSSValueTypes.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/CSSPosition.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/Position.hpp"
+#include "Krystal.Booey/CSS/Values/Types.hpp"
 
 namespace krys::boo::css
 {
@@ -16,7 +16,7 @@ namespace krys::boo::css
     Angle<> angle;
     RaySize size;
     Maybe<keywords::Contain> contain;
-    Maybe<CSSPosition> position;
+    Maybe<Position> position;
 
     KRYS_NODISCARD bool operator==(const Ray &) const noexcept = default;
   };

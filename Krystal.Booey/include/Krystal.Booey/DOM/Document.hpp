@@ -18,11 +18,14 @@
 
 namespace krys::boo::html
 {
+  class CustomElementAlgorithms;
   class CustomElementRegistry;
   class HTMLBodyElement;
+  class HTMLDocumentParser;
   class HTMLHeadElement;
   class HTMLHtmlElement;
   class HTMLTitleElement;
+  class HTMLTreeBuilder;
   class RenderBlocking;
 }
 
@@ -44,16 +47,17 @@ namespace krys::boo::dom
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Document);
     KRYS_TYPE_CAST_TRAITS_ACCESS();
 
-    friend class CustomElementAlgorithms;
     friend class DocumentAlgorithms;
     friend class DocumentRareData;
     friend class DOMImplementation;
     friend class HTMLCollectionAlgorithms;
-    friend class HTMLDocumentParser;
-    friend class HTMLTreeBuilder;
     friend class LiveRangeUpdater;
     friend class MutationAlgorithms;
     friend class NodeAlgorithms;
+
+    friend class html::CustomElementAlgorithms;
+    friend class html::HTMLDocumentParser;
+    friend class html::HTMLTreeBuilder;
     friend class html::RenderBlocking;
 
   private:

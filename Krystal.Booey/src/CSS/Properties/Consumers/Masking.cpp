@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Masking.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/CSSPrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/LengthDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
@@ -8,14 +8,14 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/URL.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
-#include "Krystal.Booey/CSS/Values/CSSPrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSRectValue.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueListBuilder.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/RectValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
-  RefPtr<CSSValue> ConsumeClipRectFunction(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeClipRectFunction(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // rect() = rect( <top>, <right>, <bottom>, <left> )
     // "<top>, <right>, <bottom>, and <left> may either have a <length> value or auto."
@@ -28,14 +28,14 @@ namespace krys::boo::css::PropertyParserHelpers
 
     TokenRange args = ConsumeFunction(tokens);
 
-    auto ConsumeClipComponent = [&] -> RefPtr<CSSPrimitiveValue>
+    auto ConsumeClipComponent = [&] -> RefPtr<PrimitiveValue>
     {
       if (args.Peek().ValueId() == ValueId::Auto)
       {
         return ConsumeIdent(args);
       }
 
-      return CSSPrimitiveValueResolver<Length<>>::ConsumeAndResolve(args, state);
+      return PrimitiveValueResolver<Length<>>::ConsumeAndResolve(args, state);
     };
 
     // Support both rect(t, r, b, l) and rect(t r b l).
@@ -69,11 +69,11 @@ namespace krys::boo::css::PropertyParserHelpers
       return nullptr;
     }
 
-    return CSSRectValue::Create(
+    return RectValue::Create(
       Rect {krys::move(top), krys::move(right), krys::move(bottom), krys::move(left)});
   }
 
-  RefPtr<CSSValue>
+  RefPtr<Value>
     krys::boo::css::PropertyParserHelpers::ConsumeClipPath(TokenRange &tokens,
                                                               PropertyParserState &state) noexcept
   {
@@ -91,8 +91,8 @@ namespace krys::boo::css::PropertyParserHelpers
       return url;
     }
 
-    RefPtr<CSSValue> shape;
-    RefPtr<CSSValue> box;
+    RefPtr<Value> shape;
+    RefPtr<Value> box;
 
     auto ConsumeShape = [&]() -> bool
     {
@@ -128,7 +128,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     bool hasShape = !!shape;
 
-    CSSValueListBuilder list;
+    ValueListBuilder list;
     if (shape)
     {
       list.push_back(krys::move(shape));
@@ -144,6 +144,6 @@ namespace krys::boo::css::PropertyParserHelpers
       return nullptr;
     }
 
-    return CSSValueList::CreateSpaceSeparated(krys::move(list));
+    return ValueList::CreateSpaceSeparated(krys::move(list));
   }
 }

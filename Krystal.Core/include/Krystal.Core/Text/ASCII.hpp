@@ -69,6 +69,13 @@ namespace krys::text
   }
 
   template <IsCharOrByte TChar>
+  KRYS_NODISCARD constexpr bool IsASCIIUpper(TChar c) noexcept
+  {
+    auto ch = static_cast<comparable_char_t<TChar>>(c);
+    return ch >= 'A' && ch <= 'Z';
+  }
+
+  template <IsCharOrByte TChar>
   KRYS_NODISCARD constexpr TChar ToASCIILower(TChar c) noexcept
   {
     using char_t = sized_unsigned_t<TChar>;
@@ -100,13 +107,6 @@ namespace krys::text
     }
 
     return result;
-  }
-
-  template <IsCharOrByte TChar>
-  KRYS_NODISCARD constexpr bool IsASCIIUpper(TChar c) noexcept
-  {
-    auto ch = static_cast<comparable_char_t<TChar>>(c);
-    return ch >= 'A' && ch <= 'Z';
   }
 
   template <IsCharOrByte TChar>

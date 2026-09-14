@@ -8,7 +8,7 @@ namespace krys::boo::css
   struct IntegerValidator
   {
     KRYS_NODISCARD constexpr static Maybe<IntegerUnit>
-      Validate(CSSUnitType unitType, PropertyParserState &, PropertyParserOptions) noexcept
+      Validate(UnitType unitType, PropertyParserState &, PropertyParserOptions) noexcept
     {
       return UnitTraits<IntegerUnit>::Validate(unitType);
     }
@@ -56,7 +56,7 @@ namespace krys::boo::css
     }
   };
 
-  template <CSSRange R, typename IntType>
+  template <Range R, typename IntType>
   struct ConsumerDefinition<Integer<R, IntType>>
   {
     using FunctionToken = FunctionConsumerForCalcValues<Integer<R, IntType>>;

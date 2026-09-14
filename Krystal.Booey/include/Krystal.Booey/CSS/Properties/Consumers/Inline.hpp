@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/CSSValue.hpp"
+#include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
@@ -12,12 +12,12 @@ namespace krys::boo::css
   {
     // MARK: <'line-fit-edge'> consuming
     // https://drafts.csswg.org/css-inline-3/#propdef-line-fit-edge
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeLineFitEdge(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeLineFitEdge(TokenRange &tokens,
                                                        PropertyParserState &state) noexcept;
 
     // MARK: <'text-box-edge'> consuming
     // https://drafts.csswg.org/css-inline-3/#propdef-text-box-edge
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeTextBoxEdge(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeTextBoxEdge(TokenRange &tokens,
                                                        PropertyParserState &state) noexcept;
   }
 }

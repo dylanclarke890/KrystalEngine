@@ -6,8 +6,8 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumerDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserOptions.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/CSSPrimitiveNumeric.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/CSSPrimitiveNumericRange.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/PrimitiveNumeric.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
@@ -38,8 +38,7 @@ namespace krys::boo::css
   };
 
   template <typename Consumer>
-  struct MetaConsumerDispatcher<TokenType::Number, Consumer,
-                                typename void_t<typename Consumer::NumberToken>>
+  struct MetaConsumerDispatcher<TokenType::Number, Consumer, typename void_t<typename Consumer::NumberToken>>
   {
     constexpr static bool Supported = true;
 

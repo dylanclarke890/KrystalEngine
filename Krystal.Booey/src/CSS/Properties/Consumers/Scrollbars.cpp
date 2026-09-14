@@ -3,11 +3,11 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Color.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValuePair.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
-  RefPtr<CSSValue> ConsumeScrollbarColor(TokenRange &range, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeScrollbarColor(TokenRange &range, PropertyParserState &state) noexcept
   {
     // <'scrollbar-color'> = auto | <color>{2}
     // https://drafts.csswg.org/css-scrollbars/#propdef-scrollbar-color
@@ -21,7 +21,7 @@ namespace krys::boo::css::PropertyParserHelpers
     {
       if (auto trackColor = ConsumeColor(range, state))
       {
-        return CSSValuePair::CreateNonCoalescing(krys::move(thumbColor), krys::move(trackColor));
+        return ValuePair::CreateNonCoalescing(krys::move(thumbColor), krys::move(trackColor));
       }
     }
 

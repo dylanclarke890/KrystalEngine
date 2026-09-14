@@ -6,7 +6,7 @@
 namespace krys::boo::css
 {
   class TokenRange;
-  class CSSValue;
+  class Value;
   struct PropertyParserState;
 
   namespace PropertyParserHelpers
@@ -20,16 +20,16 @@ namespace krys::boo::css
 
     // <basic-shape> = <circle()> | <ellipse() | <inset()> | <path()> | <polygon()> | <rect()> | <shape()> |
     // <xywh()> https://drafts.csswg.org/css-shapes/#typedef-basic-shape
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeBasicShape(TokenRange &tokens, PropertyParserState &state,
+    KRYS_NODISCARD RefPtr<Value> ConsumeBasicShape(TokenRange &tokens, PropertyParserState &state,
                                                       PathParsingOption pathParsingOptions) noexcept;
 
     // <path()> = path( <'fill-rule'>? , <string> )
     // https://drafts.csswg.org/css-shapes/#funcdef-basic-shape-path
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumePath(TokenRange &tokens, PropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumePath(TokenRange &tokens, PropertyParserState &state) noexcept;
 
     // <'shape-outside'> = none | [ <basic-shape> || <shape-box> ] | <image>
     // https://drafts.csswg.org/css-shapes/#propdef-shape-outside
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeShapeOutside(TokenRange &tokens,
+    KRYS_NODISCARD RefPtr<Value> ConsumeShapeOutside(TokenRange &tokens,
                                                         PropertyParserState &state) noexcept;
   }
 }

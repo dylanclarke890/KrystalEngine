@@ -19,7 +19,7 @@ KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::PropertyParserHelpers::AllowedURLM
 
 namespace krys::boo::css
 {
-  class CSSValue;
+  class Value;
   class TokenRange;
 
   struct PropertyParserState;
@@ -33,7 +33,7 @@ namespace krys::boo::css
     KRYS_NODISCARD Maybe<CSSURL> ConsumeURLRaw(TokenRange &tokens, PropertyParserState &state,
                                                AllowedURLModifiers allowed) noexcept;
 
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeURL(TokenRange &tokens, PropertyParserState &state,
+    KRYS_NODISCARD RefPtr<Value> ConsumeURL(TokenRange &tokens, PropertyParserState &state,
                                                AllowedURLModifiers allowed) noexcept;
   }
 }

@@ -5,7 +5,7 @@
 namespace krys::boo::css
 {
   class TokenRange;
-  class CSSValue;
+  class Value;
   struct PropertyParserState;
 
   namespace PropertyParserHelpers
@@ -13,6 +13,6 @@ namespace krys::boo::css
     // https://drafts.csswg.org/css-syntax-3/#typedef-unicode-range-token
 
     // MARK: <unicode-range-token> consuming (value)
-    KRYS_NODISCARD RefPtr<CSSValue> ConsumeUnicodeRangeToken(TokenRange &tokens) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumeUnicodeRangeToken(TokenRange &tokens) noexcept;
   }
 }

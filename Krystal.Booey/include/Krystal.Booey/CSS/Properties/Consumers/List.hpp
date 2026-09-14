@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueList.hpp"
-#include "Krystal.Booey/CSS/Values/CSSValueListBuilder.hpp"
+#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Numeric.hpp"
@@ -41,7 +41,7 @@ namespace krys::boo::css
 
     template <char Separator, ListBounds Bounds, typename SubConsumer, typename... Args>
     auto ConsumeListSeparatedByIntoBuilder(TokenRange &tokens, SubConsumer &&subConsumer,
-                                           Args &&...args) noexcept -> Maybe<CSSValueListBuilder>
+                                           Args &&...args) noexcept -> Maybe<ValueListBuilder>
     {
       auto consumeSeparator = [](auto &tokens)
       {
@@ -59,7 +59,7 @@ namespace krys::boo::css
         }
       };
 
-      CSSValueListBuilder list;
+      ValueListBuilder list;
       do
       {
         auto value = std::invoke(subConsumer, tokens, args...);
@@ -101,9 +101,9 @@ namespace krys::boo::css
     }
 
     template <char Separator, ListBounds Bounds, ListOptimization Optimization = ListOptimization::None,
-              typename ListType = CSSValueList, typename SubConsumer, typename... Args>
+              typename ListType = ValueList, typename SubConsumer, typename... Args>
     auto ConsumeListSeparatedBy(TokenRange &tokens, SubConsumer &&subConsumer, Args &&...args)
-      -> std::conditional_t<Optimization == ListOptimization::None, RefPtr<ListType>, RefPtr<CSSValue>>
+      -> std::conditional_t<Optimization == ListOptimization::None, RefPtr<ListType>, RefPtr<Value>>
     {
       auto list = ConsumeListSeparatedByIntoBuilder<Separator, Bounds>(
         tokens, std::forward<SubConsumer>(subConsumer), std::forward<Args>(args)...);
@@ -118,19 +118,19 @@ namespace krys::boo::css
         }
       }
 
-      if constexpr (SameType<ListType, CSSValueList>)
+      if constexpr (SameType<ListType, ValueList>)
       {
         if constexpr (Separator == ',')
         {
-          return CSSValueList::CreateCommaSeparated(krys::move(*list));
+          return ValueList::CreateCommaSeparated(krys::move(*list));
         }
         else if constexpr (Separator == '/')
         {
-          return CSSValueList::CreateSlashSeparated(krys::move(*list));
+          return ValueList::CreateSlashSeparated(krys::move(*list));
         }
         else if constexpr (Separator == ' ')
         {
-          return CSSValueList::CreateSpaceSeparated(krys::move(*list));
+          return ValueList::CreateSpaceSeparated(krys::move(*list));
         }
       }
       else
