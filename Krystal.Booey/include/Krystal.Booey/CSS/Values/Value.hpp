@@ -22,11 +22,11 @@ namespace krys::boo::css
     {
     }
 
-    struct StaticCSSValueTag
+    struct StaticValueTag
     {
     };
 
-    constexpr static StaticCSSValueTag StaticCSSValue {};
+    constexpr static StaticValueTag StaticValue {};
 
   public:
     virtual ~Value() noexcept = default;

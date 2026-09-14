@@ -15,8 +15,7 @@ namespace krys::boo::css
   struct CSSValueCreationInvoker
   {
     template <typename CSSType, typename... Args>
-    KRYS_NODISCARD Ref<Value> operator()(ValuePool &pool, const CSSType &value,
-                                            Args &&...args) const noexcept
+    KRYS_NODISCARD Ref<Value> operator()(ValuePool &pool, const CSSType &value, Args &&...args) const noexcept
     {
       return CSSValueCreation<CSSType> {}(pool, value, std::forward<Args>(args)...);
     }
@@ -41,15 +40,15 @@ namespace krys::boo::css
 
   template <>
   KRYS_NODISCARD Ref<Value>
-    CreateCoalescingPairCSSValue<SerializationSeparatorType::Space>(Ref<Value> &&,
-                                                                    Ref<Value> &&) noexcept;
+    CreateCoalescingPairCSSValue<SerializationSeparatorType::Space>(Ref<Value> &&, Ref<Value> &&) noexcept;
 
   template <SerializationSeparatorType>
-  KRYS_NODISCARD Ref<Value> CreateCoalescingQuadCSSValue(Ref<Value> &&, Ref<Value> &&,
-                                                            Ref<Value> &&, Ref<Value> &&) noexcept;
+  KRYS_NODISCARD Ref<Value> CreateCoalescingQuadCSSValue(Ref<Value> &&, Ref<Value> &&, Ref<Value> &&,
+                                                         Ref<Value> &&) noexcept;
   template <>
-  KRYS_NODISCARD Ref<Value> CreateCoalescingQuadCSSValue<SerializationSeparatorType::Space>(
-    Ref<Value> &&, Ref<Value> &&, Ref<Value> &&, Ref<Value> &&) noexcept;
+  KRYS_NODISCARD Ref<Value>
+    CreateCoalescingQuadCSSValue<SerializationSeparatorType::Space>(Ref<Value> &&, Ref<Value> &&,
+                                                                    Ref<Value> &&, Ref<Value> &&) noexcept;
 
   template <SerializationSeparatorType>
   KRYS_NODISCARD Ref<Value> CreateListCSSValue(ValueListBuilder &&) noexcept;
@@ -152,8 +151,7 @@ namespace krys::boo::css
   struct CSSValueCreation<KeywordValueConstant<Id>>
   {
     template <typename... Args>
-    KRYS_NODISCARD Ref<Value> operator()(ValuePool &, const KeywordValueConstant<Id> &,
-                                            Args &&...) noexcept
+    KRYS_NODISCARD Ref<Value> operator()(ValuePool &, const KeywordValueConstant<Id> &, Args &&...) noexcept
     {
       return CreatePrimitiveCSSValue(Id);
     }
@@ -165,7 +163,7 @@ namespace krys::boo::css
   {
     template <typename... Args>
     KRYS_NODISCARD Ref<Value> operator()(ValuePool &, const CustomIdentifier &customIdentifier,
-                                            Args &&...) noexcept
+                                         Args &&...) noexcept
     {
       return CreatePrimitiveCSSValue(customIdentifier);
     }

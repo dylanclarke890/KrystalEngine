@@ -252,6 +252,21 @@
     <ClInclude Include="include\Krystal.Booey\Constants\MIMETypes.hpp" />
     <ClInclude Include="include\Krystal.Booey\Constants\TagNames.hpp" />
     <ClInclude Include="include\Krystal.Booey\Core\BoxSides.hpp" />
+    <ClInclude Include="include\Krystal.Booey\Core\Color\AlphaPremultiplication.hpp" />
+    <ClInclude Include="include\Krystal.Booey\Core\Color\Color.hpp" />
+    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorComponents.hpp" />
+    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorConversion.hpp" />
+    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorFlags.hpp" />
+    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorInterpolation.hpp" />
+    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorInterpolationMethod.hpp" />
+    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorLuminance.hpp" />
+    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorMatrix.hpp" />
+    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorModels.hpp" />
+    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorSpace.hpp" />
+    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorTransferFunctions.hpp" />
+    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorTypes.hpp" />
+    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorUtilities.hpp" />
+    <ClInclude Include="include\Krystal.Booey\Core\Color\DestinationColorSpace.hpp" />
     <ClInclude Include="include\Krystal.Booey\Core\WritingMode.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Calc\CalcAllowedSymbols.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Calc\CalcTreeParser.hpp" />
@@ -412,6 +427,7 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Color\PlatformColorResolutionState.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\AttrValue.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\ColorValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Color\ResolvedColor.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\CounterValue.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\CursorImageValue.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\FunctionValue.hpp" />
@@ -776,6 +792,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\Core\EncodingRegistry.cpp" />
+    <ClCompile Include="src\Core\Color\Color.cpp" />
+    <ClCompile Include="src\Core\Color\ColorConversion.cpp" />
+    <ClCompile Include="src\Core\Color\ColorInterpolation.cpp" />
+    <ClCompile Include="src\Core\Color\ColorLuminance.cpp" />
     <ClCompile Include="src\CSS\Parser.cpp" />
     <ClCompile Include="src\CSS\CSSRule.cpp" />
     <ClCompile Include="src\CSS\CSSStyleSheet.cpp" />
@@ -826,6 +846,7 @@
     <ClCompile Include="src\CSS\Selectors\SelectorParser.cpp" />
     <ClCompile Include="src\CSS\Selectors\MutableSelector.cpp" />
     <ClCompile Include="src\CSS\StyleSheetContents.cpp" />
+    <ClCompile Include="src\CSS\Values\ColorValue.cpp" />
     <ClCompile Include="src\CSS\Values\PrimitiveValue.cpp" />
     <ClCompile Include="src\CSS\Values\Value.cpp" />
     <ClCompile Include="src\CSS\Values\Types.cpp" />
@@ -833,6 +854,7 @@
     <ClCompile Include="src\CSS\Values\Primitives\Ratio.cpp" />
     <ClCompile Include="src\CSS\Values\Primitives\UnevaluatedCalc.cpp" />
     <ClCompile Include="src\CSS\Values\ValueId.cpp" />
+    <ClCompile Include="src\CSS\Values\ValuePool.cpp" />
     <ClCompile Include="src\DOM\Algorithms\AbortAlgorithms.cpp" />
     <ClCompile Include="src\DOM\AbortController.cpp" />
     <ClCompile Include="src\DOM\AbortSignal.cpp" />

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Core/Color/Color.hpp"
-#include "Krystal.Core/Color/ColorTypes.hpp"
+#include "Krystal.Booey/Core/Color/Color.hpp"
+#include "Krystal.Booey/Core/Color/ColorTypes.hpp"
 
 namespace krys::boo::css
 {
@@ -14,9 +14,10 @@ namespace krys::boo::css
     bool operator==(const HexColor &) const = default;
   };
 
-  KRYS_NODISCARD inline krys::Color CreateColor(const HexColor &unresolved, PlatformColorResolutionState &) noexcept
+  KRYS_NODISCARD inline boo::Color CreateColor(const HexColor &unresolved,
+                                               PlatformColorResolutionState &) noexcept
   {
-    return krys::Color {unresolved.value};
+    return boo::Color {unresolved.value};
   }
 
   KRYS_NODISCARD constexpr bool ContainsCurrentColor(const HexColor &) noexcept

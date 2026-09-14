@@ -13,11 +13,11 @@ namespace krys::boo::css
   class ValueList;
   class ValuePool;
 
-  class StaticCSSValuePool
+  class StaticValuePool
   {
     friend class PrimitiveValue;
     friend class ValuePool;
-    friend class LazyNeverDestroyed<StaticCSSValuePool>;
+    friend class LazyNeverDestroyed<StaticValuePool>;
 
   private:
     PrimitiveValue _implicitInitialValue;
@@ -32,24 +32,24 @@ namespace krys::boo::css
     Array<AlignedStorage<PrimitiveValue>, MaximumCacheableIntegerValue + 1uz> _numberValues;
     Array<AlignedStorage<PrimitiveValue>, TotalValueKeywords> _identifierValues;
 
-    StaticCSSValuePool() noexcept;
+    StaticValuePool() noexcept;
 
   public:
     static void Init() noexcept;
   };
 
-  extern LazyNeverDestroyed<StaticCSSValuePool> CommonCSSValuePool;
+  extern LazyNeverDestroyed<StaticValuePool> CommonValuePool;
 
   inline PrimitiveValue &PrimitiveValue::ImplicitInitialValue() noexcept
   {
-    return CommonCSSValuePool->_implicitInitialValue;
+    return CommonValuePool->_implicitInitialValue;
   }
 
   inline Ref<PrimitiveValue> PrimitiveValue::Create(css::ValueId identifier) noexcept
   {
     krys_debug_assert(static_cast<underlying_t<css::ValueId>>(identifier) < TotalValueKeywords);
 
-    auto &value = *CommonCSSValuePool->_identifierValues[static_cast<underlying_t<css::ValueId>>(identifier)];
+    auto &value = *CommonValuePool->_identifierValues[static_cast<underlying_t<css::ValueId>>(identifier)];
     return ShareRef(value);
   }
 

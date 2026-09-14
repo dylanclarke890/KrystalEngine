@@ -43,13 +43,13 @@ namespace krys::boo::css
     _value.Number = value;
   }
 
-  PrimitiveValue::PrimitiveValue(StaticCSSValueTag, CreateImplicitInitialValueTag) noexcept
-      : PrimitiveValue(StaticCSSValue, ValueId::Initial)
+  PrimitiveValue::PrimitiveValue(StaticValueTag, CreateImplicitInitialValueTag) noexcept
+      : PrimitiveValue(StaticValue, ValueId::Initial)
   {
     _isImplicitInitialValue = true;
   }
 
-  PrimitiveValue::PrimitiveValue(StaticCSSValueTag, css::ValueId keyword) noexcept
+  PrimitiveValue::PrimitiveValue(StaticValueTag, css::ValueId keyword) noexcept
       : css::Value(ValueType::Primitive)
   {
     _unit = UnitType::ValueId;
@@ -60,7 +60,7 @@ namespace krys::boo::css
     AddRef();
   }
 
-  PrimitiveValue::PrimitiveValue(StaticCSSValueTag, double number, UnitType type) noexcept
+  PrimitiveValue::PrimitiveValue(StaticValueTag, double number, UnitType type) noexcept
       : PrimitiveValue(number, type)
   {
     // TODO: we should handle this like webkit (by having ref count increment by 2 so a value of 1 is reserved
@@ -93,7 +93,7 @@ namespace krys::boo::css
 
   Ref<PrimitiveValue> PrimitiveValue::Create(double value) noexcept
   {
-    if (auto *result = ValueFromPool(CommonCSSValuePool->_numberValues, value))
+    if (auto *result = ValueFromPool(CommonValuePool->_numberValues, value))
     {
       return ShareRef(*result);
     }
@@ -107,7 +107,7 @@ namespace krys::boo::css
     {
       case UnitType::Number:
       {
-        if (auto *result = ValueFromPool(CommonCSSValuePool->_numberValues, value))
+        if (auto *result = ValueFromPool(CommonValuePool->_numberValues, value))
         {
           return ShareRef(*result);
         }
@@ -115,7 +115,7 @@ namespace krys::boo::css
       }
       case UnitType::Percentage:
       {
-        if (auto *result = ValueFromPool(CommonCSSValuePool->_percentageValues, value))
+        if (auto *result = ValueFromPool(CommonValuePool->_percentageValues, value))
         {
           return ShareRef(*result);
         }
@@ -123,7 +123,7 @@ namespace krys::boo::css
       }
       case UnitType::px:
       {
-        if (auto *result = ValueFromPool(CommonCSSValuePool->_pixelValues, value))
+        if (auto *result = ValueFromPool(CommonValuePool->_pixelValues, value))
         {
           return ShareRef(*result);
         }

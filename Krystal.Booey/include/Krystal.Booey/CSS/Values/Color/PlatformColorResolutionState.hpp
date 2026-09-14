@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Core/Color/Color.hpp"
+#include "Krystal.Booey/Core/Color/Color.hpp"
 #include "Krystal.Booey/CSS/CSSToLengthConversionData.hpp"
 
 namespace krys::boo::css
@@ -18,37 +18,37 @@ namespace krys::boo::css
     // Colors to use that usually get resolved dynamically using Document & RenderStyle.
 
     /// @brief For ValueId::Currentcolor
-    KRYS_NODISCARD virtual krys::Color CurrentColor() const noexcept
+    KRYS_NODISCARD virtual boo::Color CurrentColor() const noexcept
     {
       return {};
     }
 
     /// @brief For ValueId::InternalDocumentTextColor
-    KRYS_NODISCARD virtual krys::Color InternalDocumentTextColor() const noexcept
+    KRYS_NODISCARD virtual boo::Color InternalDocumentTextColor() const noexcept
     {
       return {};
     }
 
     /// @brief For ValueId::WebkitLink [Style::ForVisitedLink::No]
-    KRYS_NODISCARD virtual krys::Color WebkitLink() const noexcept
+    KRYS_NODISCARD virtual boo::Color WebkitLink() const noexcept
     {
       return {};
     }
 
     /// @brief For ValueId::WebkitLink [Style::ForVisitedLink::Yes]
-    KRYS_NODISCARD virtual krys::Color WebkitLinkVisited() const noexcept
+    KRYS_NODISCARD virtual boo::Color WebkitLinkVisited() const noexcept
     {
       return {};
     }
 
     /// @brief For ValueId::WebkitActiveLink
-    KRYS_NODISCARD virtual krys::Color WebkitActiveLink() const noexcept
+    KRYS_NODISCARD virtual boo::Color WebkitActiveLink() const noexcept
     {
       return {};
     }
 
     /// @brief For ValueId::WebkitFocusRingColor
-    KRYS_NODISCARD virtual krys::Color WebkitFocusRingColor() const noexcept
+    KRYS_NODISCARD virtual boo::Color WebkitFocusRingColor() const noexcept
     {
       return {};
     }
@@ -81,49 +81,49 @@ namespace krys::boo::css
     //   2. If a delegate has been set, calling the associated delegate function,
     //      storing the result below, and returning that color.
     //   3. Returning the invalid `Color` value.
-    mutable Maybe<krys::Color> ResolvedCurrentColor = null;
-    mutable Maybe<krys::Color> ResolvedInternalDocumentTextColor = null;
-    mutable Maybe<krys::Color> ResolvedWebkitLink = null;
-    mutable Maybe<krys::Color> ResolvedWebkitLinkVisited = null;
-    mutable Maybe<krys::Color> ResolvedWebkitActiveLink = null;
-    mutable Maybe<krys::Color> ResolvedWebkitFocusRingColor = null;
+    mutable Maybe<boo::Color> ResolvedCurrentColor = null;
+    mutable Maybe<boo::Color> ResolvedInternalDocumentTextColor = null;
+    mutable Maybe<boo::Color> ResolvedWebkitLink = null;
+    mutable Maybe<boo::Color> ResolvedWebkitLinkVisited = null;
+    mutable Maybe<boo::Color> ResolvedWebkitActiveLink = null;
+    mutable Maybe<boo::Color> ResolvedWebkitFocusRingColor = null;
 
-    KRYS_NODISCARD krys::Color CurrentColor() const noexcept
+    KRYS_NODISCARD boo::Color CurrentColor() const noexcept
     {
       return ResolveColor(ResolvedCurrentColor, &PlatformColorResolutionDelegate::CurrentColor);
     }
 
-    KRYS_NODISCARD krys::Color InternalDocumentTextColor() const noexcept
+    KRYS_NODISCARD boo::Color InternalDocumentTextColor() const noexcept
     {
       return ResolveColor(ResolvedInternalDocumentTextColor,
                           &PlatformColorResolutionDelegate::InternalDocumentTextColor);
     }
 
-    KRYS_NODISCARD krys::Color WebkitLink() const noexcept
+    KRYS_NODISCARD boo::Color WebkitLink() const noexcept
     {
       return ResolveColor(ResolvedWebkitLink, &PlatformColorResolutionDelegate::WebkitLink);
     }
 
-    KRYS_NODISCARD krys::Color WebkitLinkVisited() const noexcept
+    KRYS_NODISCARD boo::Color WebkitLinkVisited() const noexcept
     {
       return ResolveColor(ResolvedWebkitLinkVisited, &PlatformColorResolutionDelegate::WebkitLinkVisited);
     }
 
-    KRYS_NODISCARD krys::Color WebkitActiveLink() const noexcept
+    KRYS_NODISCARD boo::Color WebkitActiveLink() const noexcept
     {
       return ResolveColor(ResolvedWebkitActiveLink, &PlatformColorResolutionDelegate::WebkitActiveLink);
     }
 
-    KRYS_NODISCARD krys::Color WebkitFocusRingColor() const noexcept
+    KRYS_NODISCARD boo::Color WebkitFocusRingColor() const noexcept
     {
       return ResolveColor(ResolvedWebkitFocusRingColor,
                           &PlatformColorResolutionDelegate::WebkitFocusRingColor);
     }
 
   private:
-    KRYS_NODISCARD krys::Color ResolveColor(Maybe<krys::Color> &existing,
-                                            krys::Color (PlatformColorResolutionDelegate::*resolver)()
-                                              const) const noexcept
+    KRYS_NODISCARD boo::Color ResolveColor(Maybe<boo::Color> &existing,
+                                           boo::Color (PlatformColorResolutionDelegate::*resolver)()
+                                             const) const noexcept
     {
       if (existing)
       {

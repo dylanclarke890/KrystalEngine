@@ -1,44 +1,40 @@
-﻿#include "Krystal.Booey/CSS/Values/CSSValuePool.hpp"
-#include "Krystal.Core/Color/Color.hpp"
+﻿#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
+#include "Krystal.Booey/Core/Color/Color.hpp"
 
 namespace krys::boo::css
 {
-  LazyNeverDestroyed<StaticCSSValuePool> CommonCSSValuePool;
+  ValuePool &ValuePool::MainThreadPool() noexcept
+  {
+    static MainThreadNeverDestroyed<ValuePool> pool;
+    return pool;
+  }
 
-  StaticCSSValuePool::StaticCSSValuePool() noexcept
-      : _implicitInitialValue(CSSValue::StaticCSSValue, CSSPrimitiveValue::CreateImplicitInitialValue),
-        _transparentColor(CSSValue::StaticCSSValue, krys::Color::transparentBlack),
-        _whiteColor(CSSValue::StaticCSSValue, krys::Color::white),
-        _blackColor(CSSValue::StaticCSSValue, krys::Color::black)
+  LazyNeverDestroyed<StaticValuePool> CommonValuePool;
+
+  StaticValuePool::StaticValuePool() noexcept
+      : _implicitInitialValue(Value::StaticValue, PrimitiveValue::CreateImplicitInitialValue),
+        _transparentColor(Value::StaticValue, boo::Color::transparentBlack),
+        _whiteColor(Value::StaticValue, boo::Color::white), _blackColor(Value::StaticValue, boo::Color::black)
   {
     for (auto keyword : AllValueKeywords())
     {
-      new (_identifierValues[ToUnderlying(keyword)].get())
-        CSSPrimitiveValue {CSSValue::StaticCSSValue, keyword};
+      new (_identifierValues[ToUnderlying(keyword)].get()) PrimitiveValue {Value::StaticValue, keyword};
     }
 
-    for (double i = 0; i <= MaximumCacheableIntegerValue; ++i)
+    for (size_t i = 0uz; i <= MaximumCacheableIntegerValue; ++i)
     {
-      new (_pixelValues[static_cast<size_t>(i)].get())
-        CSSPrimitiveValue(CSSValue::StaticCSSValue, i, UnitType::px);
+      double v = static_cast<double>(i);
 
-      new (_percentageValues[static_cast<size_t>(i)].get())
-        CSSPrimitiveValue(CSSValue::StaticCSSValue, i, UnitType::Percentage);
-
-      new (_numberValues[static_cast<size_t>(i)].get())
-        CSSPrimitiveValue(CSSValue::StaticCSSValue, i, UnitType::Number);
+      new (_pixelValues[i].get()) PrimitiveValue(Value::StaticValue, v, UnitType::px);
+      new (_percentageValues[i].get()) PrimitiveValue(Value::StaticValue, v, UnitType::Percentage);
+      new (_numberValues[i].get()) PrimitiveValue(Value::StaticValue, v, UnitType::Number);
     }
   }
 
-  void StaticCSSValuePool::Init() noexcept
+  void StaticValuePool::Init() noexcept
   {
     static std::once_flag onceKey;
-    std::call_once(onceKey, []() { CommonCSSValuePool.Construct(); });
-  }
 
-  CSSValuePool &CSSValuePool::MainThreadPool() noexcept
-  {
-    static MainThreadNeverDestroyed<CSSValuePool> pool;
-    return pool;
+    std::call_once(onceKey, []() { CommonValuePool.Construct(); });
   }
 }

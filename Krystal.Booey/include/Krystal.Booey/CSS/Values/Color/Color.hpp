@@ -1,6 +1,10 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Values/Color/HexColor.hpp"
+#include "Krystal.Booey/CSS/Values/Color/KeywordColor.hpp"
+#include "Krystal.Booey/CSS/Values/Color/ResolvedColor.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
+#include "Krystal.Core/Types/Variant.hpp"
 
 namespace krys::boo::css
 {
@@ -14,7 +18,7 @@ namespace krys::boo::css
       constexpr bool operator==(const EmptyToken &) const = default;
     };
 
-    using ColorKind = Variant<EmptyToken>;
+    using ColorKind = Variant<EmptyToken, ResolvedColor, KeywordColor, HexColor>;
 
   private:
     ColorKind value;
@@ -22,6 +26,15 @@ namespace krys::boo::css
     explicit constexpr Color(EmptyToken) noexcept;
 
   public:
+    explicit Color(ResolvedColor color) noexcept;
+
+    explicit Color(KeywordColor color) noexcept;
+
+    explicit Color(HexColor color) noexcept;
+
+    /// @brief Return an absolute color if possible, otherwise an invalid color.
+    /// @see https://drafts.csswg.org/css-color-5/#absolute-color
+    KRYS_NODISCARD boo::Color AbsoluteColor() const noexcept;
   };
 }
 

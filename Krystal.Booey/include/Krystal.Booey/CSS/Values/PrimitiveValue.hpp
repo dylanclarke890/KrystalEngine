@@ -21,7 +21,7 @@ namespace krys::boo::css
 
   class PrimitiveValue : public Value
   {
-    friend class StaticCSSValuePool;
+    friend class StaticValuePool;
     friend LazyNeverDestroyed<PrimitiveValue>;
 
   private:
@@ -55,11 +55,11 @@ namespace krys::boo::css
 
     PrimitiveValue(double value, UnitType unit) noexcept;
 
-    PrimitiveValue(StaticCSSValueTag, CreateImplicitInitialValueTag) noexcept;
+    PrimitiveValue(StaticValueTag, CreateImplicitInitialValueTag) noexcept;
 
-    PrimitiveValue(StaticCSSValueTag, css::ValueId keyword) noexcept;
+    PrimitiveValue(StaticValueTag, css::ValueId keyword) noexcept;
 
-    PrimitiveValue(StaticCSSValueTag, double value, UnitType unit) noexcept;
+    PrimitiveValue(StaticValueTag, double value, UnitType unit) noexcept;
 
 #pragma endregion
 

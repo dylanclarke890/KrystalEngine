@@ -2,8 +2,8 @@
 
 #include "Krystal.Booey/CSS/Values/Color/ColorType.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
 {
@@ -11,9 +11,9 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
   class DynamicRangeLimit;
-  class PlatformColorResolutionState;
 
   struct ParserContext;
+  struct PlatformColorResolutionState;
   struct PropertyParserState;
 
   namespace PropertyParserHelpers
@@ -33,7 +33,7 @@ namespace krys::boo::css
 
     // MARK: <color> consuming (Value)
     KRYS_NODISCARD RefPtr<Value> ConsumeColor(TokenRange &tokens, PropertyParserState &state,
-                                                 const CSSColorParsingOptions & = {}) noexcept;
+                                              const CSSColorParsingOptions & = {}) noexcept;
 
     // MARK: <color> consuming (raw)
     KRYS_NODISCARD Color ConsumeColorRaw(TokenRange &tokens, PropertyParserState &state,
@@ -46,6 +46,6 @@ namespace krys::boo::css
 
     // MARK: <dynamic-range-limit> (Value)
     KRYS_NODISCARD RefPtr<Value> ConsumeDynamicRangeLimit(TokenRange &tokens,
-                                                             PropertyParserState &state) noexcept;
+                                                          PropertyParserState &state) noexcept;
   }
 }
