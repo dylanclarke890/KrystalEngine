@@ -251,6 +251,8 @@
     <ClInclude Include="include\Krystal.Booey\Constants\EventNames.hpp" />
     <ClInclude Include="include\Krystal.Booey\Constants\MIMETypes.hpp" />
     <ClInclude Include="include\Krystal.Booey\Constants\TagNames.hpp" />
+    <ClInclude Include="include\Krystal.Booey\Core\BoxSides.hpp" />
+    <ClInclude Include="include\Krystal.Booey\Core\WritingMode.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Calc\CalcAllowedSymbols.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Calc\CalcTreeParser.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Calc\CSSCalcValue.hpp" />

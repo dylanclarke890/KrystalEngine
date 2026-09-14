@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Core/BoxSides.hpp"
+#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyFlag.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Properties/Types/IsImplicit.hpp"
@@ -109,6 +111,12 @@ namespace krys::boo::css
     {
       return *_value;
     }
+
+    KRYS_NODISCARD static PropertyId ResolveDirectionAwareProperty(PropertyId id,
+                                                                   WritingMode writingMode) noexcept;
+
+    KRYS_NODISCARD static PropertyId UnresolvePhysicalProperty(PropertyId id,
+                                                               WritingMode writingMode) noexcept;
 
     KRYS_NODISCARD static bool IsShorthand(PropertyId id) noexcept
     {

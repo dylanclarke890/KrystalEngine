@@ -8229,7 +8229,7 @@ class GeneratePropertyId:
     def _generate_css_property_settings_operator_equal(self, *, to: Writer):
         first, *middle, last = (f"a.{flag} == b.{flag}" for flag in self.properties_and_descriptors.settings_flags)
 
-        with to.function_block(signature="bool operator==(const PropertySettings &a, const PropertySettings &b)"):
+        with to.function_block(signature="bool operator==(const PropertySettings &a, const PropertySettings &b) noexcept"):
             to.write(f"return {first}")
             with to.indent():
                 to.write_lines((f"&& {expression}" for expression in middle))
@@ -8565,6 +8565,7 @@ class GeneratePropertyParsing:
                     "Krystal.Booey/CSS/Properties/PropertyParser.hpp",
                     "Krystal.Booey/CSS/Properties/PropertyParserCustom.hpp",
                     "Krystal.Booey/CSS/Properties/PropertyParserState.hpp",
+                    "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp",
                     "Krystal.Booey/CSS/Values/Color/ColorType.hpp",
                     "Krystal.Booey/CSS/Values/CSSFunctionValue.hpp",
                     "Krystal.Booey/CSS/Values/CSSValuePair.hpp",
@@ -8815,7 +8816,7 @@ class GeneratePropertyShorthandFunctions:
                 ],
             )
 
-            with writer.namespace(namespace="krys::boo"):
+            with writer.namespace(namespace="krys::boo::css"):
                 writer.forward_declarations(classes=["PropertyShorthand"])
                 for property in self.style_properties.all_shorthands:
                     writer.write(f"KRYS_NODISCARD PropertyShorthand {property.id_without_prefix}Shorthand() noexcept;")
@@ -8834,7 +8835,7 @@ class GeneratePropertyShorthandFunctions:
                 ],
             )
 
-            with writer.namespace(namespace="krys::boo"):
+            with writer.namespace(namespace="krys::boo::css"):
                 longhand_to_shorthands = {}
                 shorthand_to_longhand_count = {}
 
@@ -10221,20 +10222,20 @@ class GenerateStyleComputedStyleProperties:
                 writer.write(f"protected:")
 
                 with writer.indent():
-                    writer.write(f"ComputedStyleProperties(ComputedStyleProperties&&) = default;")
-                    writer.write(f"ComputedStyleProperties& operator=(ComputedStyleProperties&&) = default;")
+                    writer.write(f"ComputedStyleProperties(ComputedStyleProperties&&) noexcept = default;")
+                    writer.write(f"ComputedStyleProperties& operator=(ComputedStyleProperties&&) noexcept = default;")
                     writer.newline()
 
                     writer.write(
-                        f"ComputedStyleProperties(CreateDefaultStyleTag tag) : ComputedStyleBase {{ tag }} {{ }}"
+                        f"ComputedStyleProperties(CreateDefaultStyleTag tag) noexcept : ComputedStyleBase {{ tag }} {{ }}"
                     )
                     writer.write(
-                        f"ComputedStyleProperties(const ComputedStyleProperties& other, CloneTag tag) : ComputedStyleBase {{ other, tag }} {{ }}"
+                        f"ComputedStyleProperties(const ComputedStyleProperties& other, CloneTag tag) noexcept: ComputedStyleBase {{ other, tag }} {{ }}"
                     )
                     writer.newline()
 
                     writer.write(
-                        f"ComputedStyleProperties(ComputedStyleProperties& a, ComputedStyleProperties&& b) : ComputedStyleBase {{ a, krys::move(b) }} {{ }}"
+                        f"ComputedStyleProperties(ComputedStyleProperties& a, ComputedStyleProperties&& b) noexcept : ComputedStyleBase {{ a, krys::move(b) }} {{ }}"
                     )
 
                 writer.write(f"}};")
@@ -11268,18 +11269,18 @@ class GenerateRenderStyleProperties:
                 writer.write(f"protected:")
 
                 with writer.indent():
-                    writer.write(f"RenderStyleProperties(RenderStyleProperties&&) = default;")
-                    writer.write(f"RenderStyleProperties& operator=(RenderStyleProperties&&) = default;")
+                    writer.write(f"RenderStyleProperties(RenderStyleProperties&&) noexcept = default;")
+                    writer.write(f"RenderStyleProperties& operator=(RenderStyleProperties&&) noexcept = default;")
                     writer.newline()
 
-                    writer.write(f"RenderStyleProperties(CreateDefaultStyleTag tag) : RenderStyleBase {{ tag }} {{ }}")
+                    writer.write(f"RenderStyleProperties(CreateDefaultStyleTag tag) noexcept : RenderStyleBase {{ tag }} {{ }}")
                     writer.write(
-                        f"RenderStyleProperties(const RenderStyleProperties& other, CloneTag tag) : RenderStyleBase {{ other, tag }} {{ }}"
+                        f"RenderStyleProperties(const RenderStyleProperties& other, CloneTag tag) noexcept : RenderStyleBase {{ other, tag }} {{ }}"
                     )
                     writer.newline()
 
                     writer.write(
-                        f"RenderStyleProperties(RenderStyleProperties& a, RenderStyleProperties&& b) : RenderStyleBase {{ a, krys::move(b) }} {{ }}"
+                        f"RenderStyleProperties(RenderStyleProperties& a, RenderStyleProperties&& b) noexcept : RenderStyleBase {{ a, krys::move(b) }} {{ }}"
                     )
 
                 writer.write(f"}};")

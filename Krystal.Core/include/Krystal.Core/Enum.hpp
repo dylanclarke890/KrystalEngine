@@ -75,10 +75,17 @@ namespace krys
   }
 
   template <BitwiseFlagsEnum TEnum>
-  constexpr TEnum operator|(TEnum lhs, TEnum rhs) noexcept
+  KRYS_NODISCARD constexpr TEnum operator|(TEnum lhs, TEnum rhs) noexcept
   {
     using U = underlying_t<TEnum>;
     return static_cast<TEnum>(static_cast<U>(lhs) | static_cast<U>(rhs));
+  }
+
+  template <Integral T, BitwiseFlagsEnum TEnum>
+  KRYS_NODISCARD constexpr T operator|(T lhs, TEnum rhs) noexcept
+  {
+    using U = underlying_t<TEnum>;
+    return static_cast<T>(lhs | static_cast<U>(rhs));
   }
 
   template <BitwiseFlagsEnum TEnum>
@@ -88,11 +95,25 @@ namespace krys
     return lhs;
   }
 
+  template <Integral T, BitwiseFlagsEnum TEnum>
+  constexpr T &operator|=(T &lhs, TEnum rhs) noexcept
+  {
+    lhs = lhs | rhs;
+    return lhs;
+  }
+
   template <BitwiseFlagsEnum TEnum>
-  constexpr TEnum operator&(TEnum lhs, TEnum rhs) noexcept
+  KRYS_NODISCARD constexpr TEnum operator&(TEnum lhs, TEnum rhs) noexcept
   {
     using U = underlying_t<TEnum>;
     return static_cast<TEnum>(static_cast<U>(lhs) & static_cast<U>(rhs));
+  }
+
+  template <Integral T, BitwiseFlagsEnum TEnum>
+  KRYS_NODISCARD constexpr T operator&(T lhs, TEnum rhs) noexcept
+  {
+    using U = underlying_t<TEnum>;
+    return static_cast<T>(lhs & static_cast<U>(rhs));
   }
 
   template <BitwiseFlagsEnum TEnum>
@@ -102,18 +123,32 @@ namespace krys
     return lhs;
   }
 
+  template <Integral T, BitwiseFlagsEnum TEnum>
+  constexpr T &operator&=(T &lhs, TEnum rhs) noexcept
+  {
+    lhs = lhs & rhs;
+    return lhs;
+  }
+
   template <BitwiseFlagsEnum TEnum>
-  constexpr TEnum operator~(TEnum value) noexcept
+  KRYS_NODISCARD constexpr TEnum operator~(TEnum value) noexcept
   {
     using U = underlying_t<TEnum>;
     return static_cast<TEnum>(~static_cast<U>(value));
   }
 
   template <BitwiseFlagsEnum TEnum>
-  constexpr TEnum operator^(TEnum lhs, TEnum rhs) noexcept
+  KRYS_NODISCARD constexpr TEnum operator^(TEnum lhs, TEnum rhs) noexcept
   {
     using U = underlying_t<TEnum>;
     return static_cast<TEnum>(static_cast<U>(lhs) ^ static_cast<U>(rhs));
+  }
+
+  template <Integral T, BitwiseFlagsEnum TEnum>
+  KRYS_NODISCARD constexpr T operator^(T lhs, TEnum rhs) noexcept
+  {
+    using U = underlying_t<TEnum>;
+    return static_cast<T>(lhs ^ static_cast<U>(rhs));
   }
 
   template <BitwiseFlagsEnum TEnum>
