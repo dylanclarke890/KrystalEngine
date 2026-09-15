@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-// Standard Library Headers - Expensive template-heavy headers
 #include <algorithm>
 #include <chrono>
 #include <concepts>

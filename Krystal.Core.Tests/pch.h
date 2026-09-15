@@ -1,9 +1,5 @@
 ﻿#pragma once
 
-// Catch2 Testing Framework - Most expensive header
-#include <catch_all.hpp>
-
-// Standard Library Headers - Expensive template-heavy headers
 #include <chrono>
 #include <format>
 #include <functional>
@@ -14,6 +10,8 @@
 #include <string_view>
 #include <tuple>
 #include <vector>
+
+#include <catch_all.hpp>
 
 #include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/Maths/Matrix.hpp"

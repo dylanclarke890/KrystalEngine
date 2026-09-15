@@ -1,9 +1,5 @@
 ﻿#pragma once
 
-// Catch2 Testing Framework - Most expensive header (22s+ compile time)
-#include <catch_all.hpp>
-
-// Standard Library Headers - Expensive template-heavy headers
 #include <chrono>
 #include <format>
 #include <functional>
@@ -15,13 +11,14 @@
 #include <tuple>
 #include <vector>
 
-// Commonly used Krystal.HTML headers
-#include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+#include <catch_all.hpp>
+
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
+#include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/EventTarget.hpp"
 #include "Krystal.Booey/DOM/Node.hpp"
-#include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
-#include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
