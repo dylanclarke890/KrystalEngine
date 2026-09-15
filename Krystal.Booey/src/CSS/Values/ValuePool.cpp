@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
-#include "Krystal.Booey/Core/Color/Color.hpp"
+#include "Krystal.Booey/Graphics/Color/Color.hpp"
 
 namespace krys::boo::css
 {

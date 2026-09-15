@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/Color/Color.hpp"
-#include "Krystal.Booey/CSS/CSSToLengthConversionData.hpp"
+#include "Krystal.Booey/Graphics/Color/Color.hpp"
+#include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
 
 namespace krys::boo::css
 {
@@ -64,7 +64,7 @@ namespace krys::boo::css
 
     // Conversion data needed to evaluate `calc()` expressions with relative length units.
     // If unset, colors that require conversion data will return the invalid Color.
-    Maybe<CSSToLengthConversionData> conversionData = null;
+    Maybe<ToLengthConversionData> conversionData = null;
 
     // Whether links should be resolved to the visited style.
     Style::ForVisitedLink forVisitedLink = Style::ForVisitedLink::No;

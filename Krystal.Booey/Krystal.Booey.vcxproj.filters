@@ -1684,12 +1684,6 @@
     <ClInclude Include="include\Krystal.Booey\MathML\MathMLElement.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\Style\Color\Color.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\Style\Color\ColorOptions.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Booey\SVG\Enums\SVGElementFlags.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1813,49 +1807,49 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Primitives\NumericTypesValueCreation.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\Core\Color\AlphaPremultiplication.hpp">
+    <ClInclude Include="include\Krystal.Booey\Graphics\Color\AlphaPremultiplication.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\Core\Color\Color.hpp">
+    <ClInclude Include="include\Krystal.Booey\Graphics\Color\Color.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorComponents.hpp">
+    <ClInclude Include="include\Krystal.Booey\Graphics\Color\ColorComponents.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorConversion.hpp">
+    <ClInclude Include="include\Krystal.Booey\Graphics\Color\ColorConversion.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorFlags.hpp">
+    <ClInclude Include="include\Krystal.Booey\Graphics\Color\ColorFlags.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorInterpolation.hpp">
+    <ClInclude Include="include\Krystal.Booey\Graphics\Color\ColorInterpolation.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorInterpolationMethod.hpp">
+    <ClInclude Include="include\Krystal.Booey\Graphics\Color\ColorInterpolationMethod.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorLuminance.hpp">
+    <ClInclude Include="include\Krystal.Booey\Graphics\Color\ColorLuminance.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorMatrix.hpp">
+    <ClInclude Include="include\Krystal.Booey\Graphics\Color\ColorMatrix.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorModels.hpp">
+    <ClInclude Include="include\Krystal.Booey\Graphics\Color\ColorModels.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorSpace.hpp">
+    <ClInclude Include="include\Krystal.Booey\Graphics\Color\ColorSpace.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorTransferFunctions.hpp">
+    <ClInclude Include="include\Krystal.Booey\Graphics\Color\ColorTransferFunctions.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorTypes.hpp">
+    <ClInclude Include="include\Krystal.Booey\Graphics\Color\ColorTypes.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\Core\Color\ColorUtilities.hpp">
+    <ClInclude Include="include\Krystal.Booey\Graphics\Color\ColorUtilities.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\Core\Color\DestinationColorSpace.hpp">
+    <ClInclude Include="include\Krystal.Booey\Graphics\Color\DestinationColorSpace.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Color\ResolvedColor.hpp">
@@ -1864,7 +1858,7 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Color\AbsoluteColor.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\ComputedStyleDependencies.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\ComputedStyleDependencies.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\Core\IterationStatus.hpp">
@@ -1928,6 +1922,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Parser\CustomPropertySyntax.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\Style\BuilderState.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\NoConversionDataRequiredTag.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\SerialisationContext.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -2592,7 +2595,7 @@
     <ClCompile Include="src\CSS\Values\ValuePool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\CSS\Values\ColorValue.cpp">
+    <ClCompile Include="src\CSS\Values\Color\ColorValue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Core\Color\Color.cpp">
@@ -2605,6 +2608,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Core\Color\ColorLuminance.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CSS\ComputedStyleDependencies.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CSS\Values\SerialisationContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

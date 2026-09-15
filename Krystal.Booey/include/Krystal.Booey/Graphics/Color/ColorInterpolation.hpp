@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/Color/AlphaPremultiplication.hpp"
-#include "Krystal.Booey/Core/Color/ColorInterpolationMethod.hpp"
-#include "Krystal.Booey/Core/Color/ColorTypes.hpp"
-#include "Krystal.Booey/Core/Color/ColorUtilities.hpp"
+#include "Krystal.Booey/Graphics/Color/AlphaPremultiplication.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorInterpolationMethod.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorTypes.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorUtilities.hpp"
 
 namespace krys::boo
 {

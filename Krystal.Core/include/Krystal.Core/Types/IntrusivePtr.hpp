@@ -8,6 +8,7 @@
 #include "Krystal.Core/TypeTraits.hpp"
 #include "Krystal.Core/Utils/ForbidHeapAllocation.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
+#include <xutility>
 
 namespace krys
 {
@@ -430,4 +431,18 @@ namespace krys
   template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
   constexpr bool IsNullableSmartPtr<IntrusivePtr<T, PtrTraits, RefPolicy, Nullable>> =
     IntrusivePtr<T, PtrTraits, RefPolicy, Nullable>::nullable;
+}
+
+namespace std
+{
+  template <typename T, typename PtrTraits, typename RefPolicy, krys::IsNullable Nullable>
+  struct hash<krys::IntrusivePtr<T, PtrTraits, RefPolicy, Nullable>>
+  {
+    using argument_type = krys::IntrusivePtr<T, PtrTraits, RefPolicy, Nullable>;
+    using result_type = size_t;
+    constexpr result_type operator()(const argument_type &ptr) const noexcept
+    {
+      return krys::Hash::Combine(ptr.get());
+    }
+  };
 }

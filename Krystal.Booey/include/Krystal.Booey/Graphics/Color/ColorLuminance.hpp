@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/Color/ColorConversion.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorConversion.hpp"
 
 namespace krys::boo
 {

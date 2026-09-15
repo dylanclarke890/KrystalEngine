@@ -1,8 +1,8 @@
-﻿#include "Krystal.Booey/Core/Color/ColorConversion.hpp"
-#include "Krystal.Booey/Core/Color/Color.hpp"
-#include "Krystal.Booey/Core/Color/ColorSpace.hpp"
-#include "Krystal.Booey/Core/Color/ColorUtilities.hpp"
-#include "Krystal.Booey/Core/Color/DestinationColorSpace.hpp"
+﻿#include "Krystal.Booey/Graphics/Color/ColorConversion.hpp"
+#include "Krystal.Booey/Graphics/Color/Color.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorSpace.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorUtilities.hpp"
+#include "Krystal.Booey/Graphics/Color/DestinationColorSpace.hpp"
 #include <numeric>
 
 namespace krys::boo

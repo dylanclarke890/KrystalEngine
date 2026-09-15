@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/Core/IterationStatus.hpp"
 #include "Krystal.Booey/CSS/Values/Aggregates.hpp"
-#include "Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp"
+#include "Krystal.Booey/CSS/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
 #include "Krystal.Booey/URL/Url.hpp"

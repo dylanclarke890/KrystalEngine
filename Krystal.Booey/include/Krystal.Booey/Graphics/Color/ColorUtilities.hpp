@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/Color/ColorComponents.hpp"
-#include "Krystal.Booey/Core/Color/ColorTypes.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorComponents.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorTypes.hpp"
 #include "Krystal.Core/Maths/Base.hpp"
 
 namespace krys::boo

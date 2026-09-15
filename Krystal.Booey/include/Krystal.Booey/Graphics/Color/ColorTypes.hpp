@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/Color/ColorComponents.hpp"
-#include "Krystal.Booey/Core/Color/ColorMatrix.hpp"
-#include "Krystal.Booey/Core/Color/ColorModels.hpp"
-#include "Krystal.Booey/Core/Color/ColorTransferFunctions.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorComponents.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorMatrix.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorModels.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorTransferFunctions.hpp"
 
 namespace krys::boo
 {

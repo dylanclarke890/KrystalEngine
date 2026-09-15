@@ -17,7 +17,7 @@ namespace krys::boo::css::calc
 
 namespace krys::boo::css
 {
-  class CSSToLengthConversionData;
+  class ToLengthConversionData;
 
   class PrimitiveValue : public Value
   {
@@ -221,7 +221,7 @@ namespace krys::boo::css
 
 #pragma endregion
 
-    KRYS_NODISCARD double DoubleValue(UnitType targetUnit, const CSSToLengthConversionData &) const noexcept;
+    KRYS_NODISCARD double DoubleValue(UnitType targetUnit, const ToLengthConversionData &) const noexcept;
 
     KRYS_NODISCARD double DoubleValueDeprecated() const noexcept
     {
@@ -241,7 +241,7 @@ namespace krys::boo::css
 
     template <typename T = double>
     KRYS_NODISCARD T Value(UnitType targetUnit,
-                           const CSSToLengthConversionData &conversionData) const noexcept
+                           const ToLengthConversionData &conversionData) const noexcept
     {
       return ClampTo<T>(DoubleValue(targetUnit, conversionData));
     }

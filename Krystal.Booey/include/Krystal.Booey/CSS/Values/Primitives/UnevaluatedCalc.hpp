@@ -36,12 +36,12 @@ namespace krys::boo::css
     // void SerializationForCSS(StringBuilder &, const CSS::SerializationContext &) const;
     // void CollectComputedStyleDependencies(ComputedStyleDependencies &) const;
 
-    // UnevaluatedCalcBase SimplifyBase(const CSSToLengthConversionData &, const CSSCalcSymbolTable &) const;
+    // UnevaluatedCalcBase SimplifyBase(const ToLengthConversionData &, const CSSCalcSymbolTable &) const;
 
     // double evaluate(CSS::Category, const Style::BuilderState &) const;
     // double evaluate(CSS::Category, const Style::BuilderState &, const CSSCalcSymbolTable &) const;
-    // double evaluate(CSS::Category, const CSSToLengthConversionData &) const;
-    // double evaluate(CSS::Category, const CSSToLengthConversionData &, const CSSCalcSymbolTable &) const;
+    // double evaluate(CSS::Category, const ToLengthConversionData &) const;
+    // double evaluate(CSS::Category, const ToLengthConversionData &, const CSSCalcSymbolTable &) const;
     // double evaluate(CSS::Category, NoConversionDataRequiredToken) const;
     // double evaluate(CSS::Category, NoConversionDataRequiredToken, const CSSCalcSymbolTable &) const;
 

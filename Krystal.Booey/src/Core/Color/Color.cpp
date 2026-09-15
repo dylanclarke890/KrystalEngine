@@ -1,5 +1,5 @@
-﻿#include "Krystal.Booey/Core/Color/Color.hpp"
-#include "Krystal.Booey/Core/Color/ColorLuminance.hpp"
+﻿#include "Krystal.Booey/Graphics/Color/Color.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorLuminance.hpp"
 
 namespace krys::boo
 {

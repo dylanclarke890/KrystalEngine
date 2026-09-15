@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
-#include "Krystal.Booey/Core/Color/Color.hpp"
+#include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"

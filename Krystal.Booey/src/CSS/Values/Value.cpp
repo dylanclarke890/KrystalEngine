@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Values/Value.hpp"
-#include "Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp"
+#include "Krystal.Booey/CSS/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 
 namespace krys::boo::css

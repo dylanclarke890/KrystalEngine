@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/Color/Color.hpp"
+#include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/CSS/Values/Color/ColorType.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 

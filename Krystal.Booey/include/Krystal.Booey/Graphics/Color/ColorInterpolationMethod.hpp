@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/Color/AlphaPremultiplication.hpp"
-#include "Krystal.Booey/Core/Color/ColorTypes.hpp"
+#include "Krystal.Booey/Graphics/Color/AlphaPremultiplication.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorTypes.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
 namespace krys::boo

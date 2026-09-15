@@ -1,7 +1,7 @@
-﻿#include "Krystal.Booey/CSS/Values/ColorValue.hpp"
-#include "Krystal.Booey/Core/Color/Color.hpp"
+﻿#include "Krystal.Booey/CSS/Values/Color/ColorValue.hpp"
 #include "Krystal.Booey/CSS/Values/Color/ResolvedColor.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Graphics/Color/Color.hpp"
 
 namespace krys::boo::css
 {

@@ -17,14 +17,13 @@ namespace krys::boo::css
     bool ViewportDimensions {false};
     bool Anchors {false};
 
-    KRYS_NODISCARD bool isComputationallyIndependent() const noexcept
+    KRYS_NODISCARD bool IsComputationallyIndependent() const noexcept
     {
       return Properties.empty() && RootProperties.empty() && !ContainerDimensions && !Anchors;
     }
 
     /// @brief Checks to see if the provided conversion data is sufficient to resolve the provided
     /// dependencies.
-    KRYS_NODISCARD bool
-      CanResolveDependenciesWithConversionData(const ToLengthConversionData &) const noexcept;
+    KRYS_NODISCARD bool CanResolveWith(const ToLengthConversionData &conversionData) const noexcept;
   };
 }

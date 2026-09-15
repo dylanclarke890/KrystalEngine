@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Core/Color/ColorTypes.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorTypes.hpp"
 #include "Krystal.Core/Assert.hpp"
 
 namespace krys::boo

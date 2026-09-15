@@ -1,5 +1,5 @@
-﻿#include "Krystal.Booey/Core/Color/ColorInterpolation.hpp"
-#include "Krystal.Booey/Core/Color/Color.hpp"
+﻿#include "Krystal.Booey/Graphics/Color/ColorInterpolation.hpp"
+#include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Core/Visitor.hpp"
 
 namespace krys::boo
