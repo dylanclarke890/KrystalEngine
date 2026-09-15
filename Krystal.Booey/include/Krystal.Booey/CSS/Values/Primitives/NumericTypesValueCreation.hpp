@@ -8,7 +8,7 @@
 namespace krys::boo::css
 {
   template <NumericRaw CSSType>
-  struct CSSValueCreation<CSSType>
+  struct ValueCreation<CSSType>
   {
     Ref<Value> operator()(ValuePool &, const CSSType &raw)
     {
@@ -17,7 +17,7 @@ namespace krys::boo::css
   };
 
   template <Calc CSSType>
-  struct CSSValueCreation<CSSType>
+  struct ValueCreation<CSSType>
   {
     Ref<Value> operator()(ValuePool &, const CSSType &calc)
     {

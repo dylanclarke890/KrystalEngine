@@ -118,3 +118,11 @@
     #define KRYS_EMPTY_BASE_CLASS
   #endif
 #endif
+
+#if !defined(KRYS_NOESCAPE)
+  #if KRYS_COMPILER(CLANG)
+    #define KRYS_NOESCAPE [[clang::noescape]]
+  #else
+    #define KRYS_NOESCAPE
+  #endif
+#endif

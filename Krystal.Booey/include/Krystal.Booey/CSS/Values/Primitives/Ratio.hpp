@@ -31,7 +31,7 @@ namespace krys::boo::css
 
   /// @brief `Ratio` is special-cased to return a `RatioValue`.
   template <>
-  struct CSSValueCreation<Ratio>
+  struct ValueCreation<Ratio>
   {
     KRYS_NODISCARD Ref<Value> operator()(ValuePool &, const Ratio &) noexcept;
   };

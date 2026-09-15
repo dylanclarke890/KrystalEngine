@@ -272,6 +272,7 @@
     <ClInclude Include="include\Krystal.Core\Macros.hpp" />
     <ClInclude Include="include\Krystal.Core\MagicEnum.hpp" />
     <ClInclude Include="include\Krystal.Core\Maths\Base.hpp" />
+    <ClInclude Include="include\Krystal.Core\Utils\Apply.hpp" />
     <ClInclude Include="include\Krystal.Core\Utils\ByteUtils.hpp" />
     <ClInclude Include="include\Krystal.Core\Utils\Handle.hpp" />
     <ClInclude Include="include\Krystal.Core\Utils\NeverDestroyed.hpp" />

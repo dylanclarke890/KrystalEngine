@@ -3,7 +3,7 @@
 
 namespace krys::boo::css
 {
-  Ref<Value> CSSValueCreation<Ratio>::operator()(ValuePool &, const Ratio &ratio) noexcept
+  Ref<Value> ValueCreation<Ratio>::operator()(ValuePool &, const Ratio &ratio) noexcept
   {
     return RatioValue::Create(ratio);
   }

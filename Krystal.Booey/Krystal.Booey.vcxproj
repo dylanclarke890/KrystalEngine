@@ -267,6 +267,7 @@
     <ClInclude Include="include\Krystal.Booey\Core\Color\ColorTypes.hpp" />
     <ClInclude Include="include\Krystal.Booey\Core\Color\ColorUtilities.hpp" />
     <ClInclude Include="include\Krystal.Booey\Core\Color\DestinationColorSpace.hpp" />
+    <ClInclude Include="include\Krystal.Booey\Core\IterationStatus.hpp" />
     <ClInclude Include="include\Krystal.Booey\Core\WritingMode.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Calc\CalcAllowedSymbols.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Calc\CalcTreeParser.hpp" />
@@ -419,6 +420,7 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Borders\BorderImageWidthValue.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\ColorAdjust\ColorScheme.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\ColorAdjust\ColorSchemeValue.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Color\AbsoluteColor.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Color\Color.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Color\ColorType.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Color\CurrentColor.hpp" />
@@ -428,6 +430,7 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Values\AttrValue.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\ColorValue.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Color\ResolvedColor.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\ComputedStyleDependencies.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\CounterValue.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\CursorImageValue.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\FunctionValue.hpp" />

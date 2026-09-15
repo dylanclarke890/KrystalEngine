@@ -945,6 +945,9 @@
     <ClInclude Include="include\Krystal.Core\Text\ICodec.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Core\Utils\Apply.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Detection\NumberOfCores.cpp">

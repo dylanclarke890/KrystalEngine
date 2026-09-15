@@ -423,13 +423,13 @@ namespace krys::boo::css
       }
 
       result.AddPropertyForCurrentShorthand(state, PropertyId::BorderTopLeftRadius,
-                                            CreateCSSValue(state.ValuePool, borderRadius->TopLeft()));
+                                            CreateValue(state.ValuePool, borderRadius->TopLeft()));
       result.AddPropertyForCurrentShorthand(state, PropertyId::BorderTopRightRadius,
-                                            CreateCSSValue(state.ValuePool, borderRadius->TopRight()));
+                                            CreateValue(state.ValuePool, borderRadius->TopRight()));
       result.AddPropertyForCurrentShorthand(state, PropertyId::BorderBottomRightRadius,
-                                            CreateCSSValue(state.ValuePool, borderRadius->BottomRight()));
+                                            CreateValue(state.ValuePool, borderRadius->BottomRight()));
       result.AddPropertyForCurrentShorthand(state, PropertyId::BorderBottomLeftRadius,
-                                            CreateCSSValue(state.ValuePool, borderRadius->BottomLeft()));
+                                            CreateValue(state.ValuePool, borderRadius->BottomLeft()));
 
       return true;
     }

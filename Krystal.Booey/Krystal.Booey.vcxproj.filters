@@ -1864,6 +1864,15 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Values\Color\ResolvedColor.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Color\AbsoluteColor.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\ComputedStyleDependencies.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\Core\IterationStatus.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
