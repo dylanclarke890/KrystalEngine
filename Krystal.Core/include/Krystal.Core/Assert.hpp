@@ -76,4 +76,8 @@ namespace krys
 #define krys_unreachable()                                                                                   \
   krys_assert_msg(false, "Unreachable code reached");                                                        \
   std::unreachable()
+
+#define krys_not_implemented()                                                                               \
+  krys_assert_msg(false, "Not implemented");                                                                 \
+  std::unreachable()
 }

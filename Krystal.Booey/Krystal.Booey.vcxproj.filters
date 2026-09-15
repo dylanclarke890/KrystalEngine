@@ -292,22 +292,22 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Parser\ParseError.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Parser\Context\ParserMode.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Parser\ParserMode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Parser\TokenType.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Parser\Context\NestedParserContext.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Parser\NestedParserContext.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Parser\NumericValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Parser\Context\ParsedPropertyList.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Properties\ParsedPropertyList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Parser\Context\ParsedRuleList.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Rules\ParsedRuleList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Parser\InputStream.hpp">
@@ -316,7 +316,7 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Parser\Parser.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Parser\Context\ParserContext.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Parser\ParserContext.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Parser\ParserIdioms.hpp">
@@ -536,9 +536,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Properties\Property.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Properties\PropertyConsumer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Properties\PropertyParser.hpp">
@@ -850,7 +847,7 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Values\AttrValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\ColorValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Color\ColorValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Values\CounterValue.hpp">
@@ -862,7 +859,7 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Values\FunctionValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\GradientValue.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Images\GradientValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Values\OffsetRotateValue.hpp">
@@ -925,7 +922,7 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Values\ViewValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\IsGlobalKeyword.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\GlobalKeyword.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\CSSCharsetRule.hpp">
@@ -979,7 +976,7 @@
     <ClInclude Include="include\Krystal.Booey\CSS\CSSStyleSheet.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\CSSToLengthConversionData.hpp">
+    <ClInclude Include="include\Krystal.Booey\CSS\ToLengthConversionData.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\MediaList.hpp">
@@ -1871,6 +1868,66 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\Core\IterationStatus.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Parser\ParserFastPaths.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\CanvasValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\CrossFadeValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\CustomPropertyValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\DynamicRangeLimitValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\FilterImageValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\FontFeatureValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\FontStyleRangeValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\FontStyleWithAngleValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\FontVariationValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Images\ImageSetValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Images\ImageValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Images\NamedImageValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Images\PaintImageValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\PathValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\PendingSubstitutionValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\Position\PositionValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\VariableReferenceValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Parser\VariableParser.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Parser\CustomPropertySyntax.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

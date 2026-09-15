@@ -9,6 +9,8 @@
 
 namespace krys::boo::css
 {
+  struct ComputedStyleDependencies;
+
   class Value : public RefCounted<Value>
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();
@@ -45,6 +47,8 @@ namespace krys::boo::css
       return Equals(other);
     }
 
+    KRYS_NODISCARD css::ComputedStyleDependencies ComputedStyleDependencies() const noexcept;
+
 #pragma region Type Checks
 
     KRYS_NODISCARD bool IsAppleColorFilterValue() const noexcept
@@ -62,6 +66,11 @@ namespace krys::boo::css
       return _type == ValueType::BackgroundRepeat;
     }
 
+    KRYS_NODISCARD bool IsBasicShapeValue() const noexcept
+    {
+      return _type == ValueType::BasicShape;
+    }
+
     KRYS_NODISCARD bool IsBorderImageSliceValue() const noexcept
     {
       return _type == ValueType::BorderImageSlice;
@@ -75,6 +84,11 @@ namespace krys::boo::css
     KRYS_NODISCARD bool IsBoxShadowPropertyValue() const noexcept
     {
       return _type == ValueType::BoxShadowProperty;
+    }
+
+    KRYS_NODISCARD bool IsCanvasValue() const noexcept
+    {
+      return _type == ValueType::Canvas;
     }
 
     KRYS_NODISCARD bool IsColorValue() const noexcept
@@ -92,9 +106,64 @@ namespace krys::boo::css
       return _type == ValueType::Counter;
     }
 
+    KRYS_NODISCARD bool IsCrossFadeValue() const noexcept
+    {
+      return _type == ValueType::CrossFade;
+    }
+
     KRYS_NODISCARD bool IsCursorImageValue() const noexcept
     {
       return _type == ValueType::CursorImage;
+    }
+
+    KRYS_NODISCARD bool IsCustomPropertyValue() const noexcept
+    {
+      return _type == ValueType::CustomProperty;
+    }
+
+    KRYS_NODISCARD bool IsDynamicRangeLimitValue() const noexcept
+    {
+      return _type == ValueType::DynamicRangeLimit;
+    }
+
+    KRYS_NODISCARD bool IsEasingFunctionValue() const noexcept
+    {
+      return _type == ValueType::EasingFunction;
+    }
+
+    KRYS_NODISCARD bool IsFilterImageValue() const noexcept
+    {
+      return _type == ValueType::FilterImage;
+    }
+
+    KRYS_NODISCARD bool IsFilterValue() const noexcept
+    {
+      return _type == ValueType::Filter;
+    }
+
+    KRYS_NODISCARD bool IsFontFeatureValue() const noexcept
+    {
+      return _type == ValueType::FontFeature;
+    }
+
+    KRYS_NODISCARD bool IsFontStyleRangeValue() const noexcept
+    {
+      return _type == ValueType::FontStyleRange;
+    }
+
+    KRYS_NODISCARD bool IsFontStyleWithAngleValue() const noexcept
+    {
+      return _type == ValueType::FontStyleWithAngle;
+    }
+
+    KRYS_NODISCARD bool IsFontVariationValue() const noexcept
+    {
+      return _type == ValueType::FontVariation;
+    }
+
+    KRYS_NODISCARD bool IsFunctionValue() const noexcept
+    {
+      return _type == ValueType::Function;
     }
 
     KRYS_NODISCARD bool IsGradientValue() const noexcept
@@ -127,24 +196,39 @@ namespace krys::boo::css
       return _type == ValueType::GridTemplateAreas;
     }
 
-    KRYS_NODISCARD bool IsEasingFunctionValue() const noexcept
+    KRYS_NODISCARD bool IsImageValue() const noexcept
     {
-      return _type == ValueType::EasingFunction;
+      return _type == ValueType::Image;
     }
 
-    KRYS_NODISCARD bool IsFilterValue() const noexcept
+    KRYS_NODISCARD bool IsImageSetValue() const noexcept
     {
-      return _type == ValueType::Filter;
+      return _type == ValueType::ImageSet;
     }
 
-    KRYS_NODISCARD bool IsFunctionValue() const noexcept
+    KRYS_NODISCARD bool IsNamedImageValue() const noexcept
     {
-      return _type == ValueType::Function;
+      return _type == ValueType::NamedImage;
     }
 
     KRYS_NODISCARD bool IsOffsetRotateValue() const noexcept
     {
       return _type == ValueType::OffsetRotate;
+    }
+
+    KRYS_NODISCARD bool IsPaintImageValue() const noexcept
+    {
+      return _type == ValueType::PaintImage;
+    }
+
+    KRYS_NODISCARD bool IsPathValue() const noexcept
+    {
+      return _type == ValueType::Path;
+    }
+
+    KRYS_NODISCARD bool IsPendingSubstitutionValue() const noexcept
+    {
+      return _type == ValueType::PendingSubstitution;
     }
 
     KRYS_NODISCARD bool IsPositionValue() const noexcept
@@ -230,6 +314,11 @@ namespace krys::boo::css
     KRYS_NODISCARD bool IsValuePairValue() const noexcept
     {
       return _type == ValueType::ValuePair;
+    }
+
+    KRYS_NODISCARD bool IsVariableReferenceValue() const noexcept
+    {
+      return _type == ValueType::VariableReference;
     }
 
     KRYS_NODISCARD bool IsViewValue() const noexcept

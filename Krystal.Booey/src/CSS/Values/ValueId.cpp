@@ -1,4 +1,4 @@
-/* C++ code produced by gperf version 3.1 */
+﻿/* C++ code produced by gperf version 3.1 */
 /* Command-line: 'c:\\ProgramData\\chocolatey\\lib\\gperf\\tools\\gperf.exe' --key-positions='*' -D -n -s 2 --output-file=ValueId.cpp ValueId.gperf  */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -36,7 +36,7 @@
 //   regenerated.
 // </auto-generated>
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
-#include "Krystal.Booey/CSS/Parser/Context/ParserContext.hpp"
+#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/String.hpp"

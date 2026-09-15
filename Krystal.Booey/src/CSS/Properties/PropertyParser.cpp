@@ -1,88 +1,1034 @@
 ﻿#include "Krystal.Booey/CSS/Properties/PropertyParser.hpp"
-#include "Krystal.Booey/CSS/Properties/PropertyConsumer.hpp"
-#include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
-#include "Krystal.Booey/CSS/Values/IsGlobalKeyword.hpp"
+#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
+#include "Krystal.Booey/CSS/Parser/CustomPropertySyntax.hpp"
+#include "Krystal.Booey/CSS/Parser/ParserFastPaths.hpp"
+#include "Krystal.Booey/CSS/Parser/ParserIdioms.hpp"
+#include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
+#include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
+#include "Krystal.Booey/CSS/Parser/VariableParser.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/AngleDefinitions.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/Color.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/Image.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/IntegerDefinitions.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/LengthDefinitions.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/LengthPercentageDefinitions.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/List.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/NumberDefinitions.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PercentageDefinitions.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/ResolutionDefinitions.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/String.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/TimeDefinitions.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/URL.hpp"
+#include "Krystal.Booey/CSS/Properties/ParsedPropertyList.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserResult.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
+#include "Krystal.Booey/CSS/Rules/RuleType.hpp"
+#include "Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp"
+#include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
+#include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
+#include "Krystal.Booey/CSS/Values/GlobalKeyword.hpp"
+#include "Krystal.Booey/CSS/Values/PendingSubstitutionValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/TransformListValue.hpp"
+#include "Krystal.Booey/CSS/Values/UrlValue.hpp"
+#include "Krystal.Booey/CSS/Values/VariableReferenceValue.hpp"
+#include "Krystal.Core/Types/Pair.hpp"
+#include <memory>
+
+#include "StyleBuilder.h"
+#include "StyleCustomProperty.h"
+#include "StylePrimitiveNumericTypes+CSSValueConversion.h"
+#include "StylePropertyShorthand.h"
+#include "StylePropertyShorthandFunctions.h"
 
 namespace krys::boo::css
 {
-  namespace
+#pragma region Custom Properties
+
+  KRYS_NODISCARD static Pair<RefPtr<Value>, CustomPropertySyntax::Type>
+    ConsumeCustomPropertyValueWithSyntax(TokenRange &tokens, PropertyParserState &state,
+                                         const CustomPropertySyntax &syntax) noexcept;
+
+  KRYS_NODISCARD static Maybe<Variant<Ref<const style::CustomProperty>, GlobalKeyword>>
+    ConsumeTypedCustomPropertyValue(TokenRange &tokens, PropertyParserState &state,
+                                    const CSSOMStringAtom &name, const CustomPropertySyntax &syntax,
+                                    style::BuilderState &builderState) noexcept;
+
+#pragma endregion
+
+#pragma region Root Consumers
+
+  // Style properties.
+  KRYS_NODISCARD static bool ConsumeStyleProperty(TokenRange &, const ParserContext &, PropertyId,
+                                                  IsImportant, RuleType, PropertyParserResult &) noexcept;
+
+  // @font-face descriptors.
+  KRYS_NODISCARD static bool ConsumeFontFaceDescriptor(TokenRange &, const ParserContext &, PropertyId,
+                                                       PropertyParserResult &) noexcept;
+
+  // @font-palette-values descriptors.
+  KRYS_NODISCARD static bool ConsumeFontPaletteValuesDescriptor(TokenRange &, const ParserContext &,
+                                                                PropertyId, PropertyParserResult &) noexcept;
+
+  // @counter-style descriptors.
+  KRYS_NODISCARD static bool ConsumeCounterStyleDescriptor(TokenRange &, const ParserContext &, PropertyId,
+                                                           PropertyParserResult &) noexcept;
+
+  // @keyframe descriptors.
+  KRYS_NODISCARD static bool ConsumeKeyframeDescriptor(TokenRange &, const ParserContext &, PropertyId,
+                                                       IsImportant, PropertyParserResult &) noexcept;
+
+  // @page descriptors.
+  KRYS_NODISCARD static bool ConsumePageDescriptor(TokenRange &, const ParserContext &, PropertyId,
+                                                   IsImportant, PropertyParserResult &) noexcept;
+
+  // @property descriptors.
+  KRYS_NODISCARD static bool ConsumePropertyDescriptor(TokenRange &, const ParserContext &, PropertyId,
+                                                       PropertyParserResult &) noexcept;
+
+  // @view-transition descriptors.
+  KRYS_NODISCARD static bool ConsumeViewTransitionDescriptor(TokenRange &, const ParserContext &, PropertyId,
+                                                             PropertyParserResult &) noexcept;
+
+  // @position-try descriptors.
+  KRYS_NODISCARD static bool ConsumePositionTryDescriptor(TokenRange &, const ParserContext &, PropertyId,
+                                                          IsImportant, PropertyParserResult &) noexcept;
+
+  // @function descriptors.
+  KRYS_NODISCARD static bool ConsumeFunctionDescriptor(TokenRange &, const ParserContext &, PropertyId,
+                                                       PropertyParserResult &) noexcept;
+
+  // @-internal-base-appearance descriptors.
+  KRYS_NODISCARD static bool ConsumeInternalBaseAppearanceDescriptor(TokenRange &, const ParserContext &,
+                                                                     PropertyId, IsImportant,
+                                                                     PropertyParserResult &) noexcept;
+
+#pragma endregion
+
+#pragma region PropertyId Parsing
+
+  // template <typename CharacterType>
+  // KRYS_NODISCARD static PropertyId PropertyId(std::span<const CharacterType> characters)
+  //{
+  //   std::array<char, maxCSSPropertyNameLength> buffer;
+  //   for (size_t i = 0; i != characters.size(); ++i)
+  //   {
+  //     auto character = characters[i];
+  //     if (!character || !isASCII(character))
+  //       return CSSPropertyInvalid;
+  //     buffer[i] = toASCIILower(character);
+  //   }
+  //   return findCSSProperty(buffer.data(), characters.size());
+  // }
+
+  // KRYS_NODISCARD PropertyId PropertyId(CSSOMStringView string)
+  //{
+  //   auto length = string.length();
+  //   if (!length)
+  //     return CSSPropertyInvalid;
+  //   if (length > maxCSSPropertyNameLength)
+  //     return CSSPropertyInvalid;
+  //   return string.is8Bit() ? PropertyId(string.span8()) : PropertyId(string.span16());
+  // }
+
+  // MARK: - ValueId parsing
+
+  // FIXME: Remove this mechanism entirely once we can do it without breaking the web.
+  // KRYS_NODISCARD static bool isAppleLegacyCSSValueKeyword(std::span<const char> characters)
+  //{
+  //  return spanHasPrefix(characters.subspan(1), "apple-"_span)
+  //         && !spanHasPrefix(characters.subspan(7), "system"_span)
+  //         && !spanHasPrefix(characters.subspan(7), "pay"_span)
+  //         && !spanHasPrefix(characters.subspan(7), "wireless"_span);
+  //}
+
+  // template <typename CharacterType>
+  // KRYS_NODISCARD static ValueId cssValueKeywordID(std::span<const CharacterType> characters)
+  //{
+  //   ASSERT(!characters.empty()); // Otherwise buffer[0] would access uninitialized memory below.
+
+  // std::array<char, maxCSSValueKeywordLength + 1> buffer; // 1 to turn "apple" into "webkit"
+
+  // for (size_t i = 0uz; i != characters.size(); ++i)
+  // {
+  //   auto character = characters[i];
+  //   if (!character || !isASCII(character))
+  //     return CSSValueInvalid;
+  //   buffer[i] = toASCIILower(character);
+  // }
+
+  // // In most cases, if the prefix is -apple-, change it to -webkit-. This makes the string one character
+  // // longer.
+  // auto length = characters.size();
+  // std::span bufferSpan {buffer};
+  // if (buffer[0] == '-' && isAppleLegacyCSSValueKeyword(bufferSpan.first(length)))
+  // {
+  //   memmoveSpan(bufferSpan.subspan(7), bufferSpan.subspan(6, length - 6));
+  //   memcpySpan(bufferSpan.subspan(1), "webkit"_span);
+  //   ++length;
+  // }
+
+  // return findCSSValueKeyword(bufferSpan.first(length));
+  // }
+
+  // KRYS_NODISCARD ValueId cssValueKeywordID(CSSOMStringView string)
+  //{
+  //   size_t length = string.length();
+  //   if (!length)
+  //     return CSSValueInvalid;
+  //   if (length > maxCSSValueKeywordLength)
+  //     return CSSValueInvalid;
+
+  // return string.is8Bit() ? cssValueKeywordID(string.span8()) : cssValueKeywordID(string.span16());
+  // }
+
+#pragma endregion
+
+#pragma region Custom Property Name Validation
+
+  bool IsCustomPropertyName(CSSOMStringView propertyName) noexcept
   {
-    KRYS_NODISCARD RefPtr<PrimitiveValue> ConsumeCSSWideKeywordValue(TokenRange &tokens) noexcept
-    {
-      auto tokensCopy = tokens;
-      auto &identifier = tokensCopy.Consume();
-
-      if (!tokensCopy.IsAtEnd())
-      {
-        return nullptr;
-      }
-
-      auto valueId = FindValueKeyword(identifier.IdentCodePoints());
-      if (!IsGlobalKeyword(valueId))
-      {
-        return nullptr;
-      }
-
-      tokens = tokensCopy;
-      return PrimitiveValue::Create(valueId);
-    }
+    return propertyName.length() > 2 && propertyName[0] == '-' && propertyName[1] == '-';
   }
 
-  bool PropertyParser::ParseValue(TokenRange tokens, const ParserContext &context, PropertyId id,
-                                  RuleType ruleType, IsImportant important,
-                                  ParsedPropertyList &properties) noexcept
-  {
-    tokens.DiscardWhitespace();
+#pragma endregion
 
-    bool success = false;
+#pragma region GlobalKeyword Consumer
+
+  KRYS_NODISCARD static RefPtr<PrimitiveValue> ConsumeGlobalKeywordValue(TokenRange &range) noexcept
+  {
+    auto rangeCopy = range;
+    auto valueId = rangeCopy.ConsumeIncludingWhitespace().ValueId();
+
+    if (!rangeCopy.IsAtEnd())
+    {
+      return nullptr;
+    }
+
+    if (!IsGlobalKeyword(valueId))
+    {
+      return nullptr;
+    }
+
+    range = rangeCopy;
+    return PrimitiveValue::Create(valueId);
+  }
+
+  KRYS_NODISCARD static Maybe<GlobalKeyword> ConsumeGlobalKeyword(TokenRange &range) noexcept
+  {
+    auto rangeCopy = range;
+    auto valueId = rangeCopy.ConsumeIncludingWhitespace().ValueId();
+    if (!rangeCopy.IsAtEnd())
+    {
+      return {};
+    }
+
+    auto keyword = ParseGlobalKeyword(valueId);
+    if (!keyword)
+    {
+      return {};
+    }
+
+    range = rangeCopy;
+    return keyword;
+  }
+
+#pragma endregion
+
+#pragma region FunctionValue Consumer
+
+  static bool ConsumeFunctionArgument(TokenRange &range, size_t index, PropertyId property,
+                                      PropertyParserState &state, PropertyParserResult &result) noexcept
+  {
+    auto argument = PropertyParserHelpers::ConsumeArgument(range, index);
+    if (!argument)
+    {
+      return false;
+    }
+
+    const auto &context = state.Context;
+    auto important = state.Important;
+    auto ruleType = state.CurrentRule;
+    return ConsumeStyleProperty(*argument, context, property, important, ruleType, result);
+  }
+
+  static bool ConsumeInternalAutoBaseFunction(TokenRange &range, PropertyId property,
+                                              PropertyParserState &state,
+                                              PropertyParserResult &result) noexcept
+  {
+    // -internal-auto-base() = -internal-auto-base( <auto value>, <base value> )
+
+    if (!state.Context.cssInternalAutoBaseParsingEnabled)
+    {
+      return false;
+    }
+
+    if (range.Peek().FunctionId() != ValueId::InternalAutoBase)
+    {
+      return false;
+    }
+
+    auto args = PropertyParserHelpers::ConsumeFunction(range);
+
+    ParsedPropertyList autoProperties;
+    PropertyParserResult autoResult {autoProperties};
+
+    if (!ConsumeFunctionArgument(args, 0, property, state, autoResult))
+    {
+      return false;
+    }
+
+    ParsedPropertyList baseProperties;
+    PropertyParserResult baseResult {baseProperties};
+
+    if (!ConsumeFunctionArgument(args, 1, property, state, baseResult))
+    {
+      return false;
+    }
+
+    if (autoProperties.size() != baseProperties.size())
+    {
+      return false;
+    }
+
+    for (size_t index = 0uz; index < autoProperties.size(); ++index)
+    {
+      const Property &autoProperty = autoProperties[index];
+      const Property &baseProperty = baseProperties[index];
+
+      auto value = FunctionValue::Create(ValueId::InternalAutoBase, ShareRef(autoProperty.Value()),
+                                         ShareRef(baseProperty.Value()));
+      result.AddProperty(Property(autoProperty.Metadata(), krys::move(value)));
+    }
+
+    return true;
+  }
+#pragma endregion
+
+#pragma region Parser entry points
+
+  bool PropertyParser::ParseValue(PropertyId property, IsImportant important, TokenRange range,
+                                  const ParserContext &context, ParsedPropertyList &parsedProperties,
+                                  RuleType ruleType) noexcept
+  {
+    int initialParsedPropertiesSize = parsedProperties.size();
+
+    range.DiscardWhitespace();
+
+    PropertyParserResult result {parsedProperties};
+
+    bool parseSuccess;
     switch (ruleType)
     {
-      case RuleType::Style:
+      case RuleType::CounterStyle:
+      {
+        parseSuccess = ConsumeCounterStyleDescriptor(range, context, property, result);
+        break;
+      }
+      case RuleType::FontFace:
+      {
+        parseSuccess = ConsumeFontFaceDescriptor(range, context, property, result);
+        break;
+      }
+      case RuleType::FontPaletteValues:
+      {
+        parseSuccess = ConsumeFontPaletteValuesDescriptor(range, context, property, result);
+        break;
+      }
+      case RuleType::Keyframe:
+      {
+        parseSuccess = ConsumeKeyframeDescriptor(range, context, property, important, result);
+        break;
+      }
+      case RuleType::Page:
+      {
+        parseSuccess = ConsumePageDescriptor(range, context, property, important, result);
+        break;
+      }
+      case RuleType::Property:
+      {
+        parseSuccess = ConsumePropertyDescriptor(range, context, property, result);
+        break;
+      }
+      case RuleType::ViewTransition:
+      {
+        parseSuccess = ConsumeViewTransitionDescriptor(range, context, property, result);
+        break;
+      }
+      case RuleType::PositionTry:
+      {
+        parseSuccess = ConsumePositionTryDescriptor(range, context, property, important, result);
+        break;
+      }
+      case RuleType::Function:
+      {
+        parseSuccess = ConsumeFunctionDescriptor(range, context, property, result);
+        break;
+      }
+      case RuleType::InternalBaseAppearance:
+      {
+        parseSuccess = ConsumeInternalBaseAppearanceDescriptor(range, context, property, important, result);
+        break;
+      }
       default:
       {
-        success = ConsumeStyleProperty(tokens, context, id, important, ruleType, properties);
+        parseSuccess = ConsumeStyleProperty(range, context, property, important, ruleType, result);
         break;
       }
     }
 
-    return success;
+    if (!parseSuccess)
+    {
+      // TODO: webkit used shrink here, check this is correct.
+      parsedProperties.resize(initialParsedPropertiesSize);
+    }
+
+    return parseSuccess;
   }
 
-  bool PropertyParser::ConsumeStyleProperty(TokenRange &tokens, const ParserContext &context, PropertyId id,
-                                            IsImportant important, RuleType ruleType,
-                                            ParsedPropertyList &properties) noexcept
+  RefPtr<Value> PropertyParser::ParseStylePropertyLonghand(PropertyId property, const CSSOMString &string,
+                                                           const ParserContext &context) noexcept
+  {
+    krys_assert(!Property::IsShorthand(property));
+
+    if (string.empty())
+    {
+      return nullptr;
+    }
+
+    auto state = PropertyParserState {
+      .Context = context,
+      .CurrentProperty = property,
+      .CurrentRule = RuleType::Style,
+      .Important = IsImportant(false),
+    };
+
+    if (auto value = ParserFastPaths::MaybeParseValue(property, string, state))
+    {
+      return ShareRefPtr(&*value);
+    }
+
+    InputStream inputStream {CSSOMString(string)};
+    Tokenizer tokenizer(inputStream);
+
+    auto range = tokenizer.Tokens();
+    range.DiscardWhitespace();
+
+    if (auto value = ConsumeGlobalKeywordValue(range))
+    {
+      return value;
+    }
+
+    auto value = PropertyParsing::ParseStylePropertyLonghand(range, property, state);
+    if (!value || !range.IsAtEnd())
+    {
+      return nullptr;
+    }
+
+    return value;
+  }
+
+  RefPtr<Value> PropertyParser::ParseStylePropertyLonghand(PropertyId property, TokenRange range,
+                                                           const ParserContext &context) noexcept
+  {
+    krys_assert(!Property::IsShorthand(property));
+
+    range.DiscardWhitespace();
+
+    if (auto value = ConsumeGlobalKeywordValue(range))
+    {
+      return value;
+    }
+
+    auto state = PropertyParserState {
+      .Context = context,
+      .CurrentProperty = property,
+      .CurrentRule = RuleType::Style,
+      .Important = IsImportant(false),
+    };
+
+    auto value = PropertyParsing::ParseStylePropertyLonghand(range, property, state);
+    if (!value || !range.IsAtEnd())
+    {
+      return nullptr;
+    }
+
+    return value;
+  }
+
+  RefPtr<Value> PropertyParser::ParseCounterStyleDescriptor(PropertyId property, const CSSOMString &string,
+                                                            const ParserContext &context) noexcept
+  {
+    InputStream inputStream {CSSOMString(string)};
+    Tokenizer tokenizer(inputStream);
+    auto range = tokenizer.Tokens();
+
+    // Handle leading whitespace.
+    range.DiscardWhitespace();
+
+    auto state = PropertyParserState {
+      .Context = context,
+      .CurrentProperty = property,
+      .CurrentRule = RuleType::CounterStyle,
+      .Important = IsImportant(false),
+    };
+
+    auto result = PropertyParsing::ParseCounterStyleDescriptor(range, property, state);
+
+    // Handle trailing whitespace.
+    range.DiscardWhitespace();
+    if (!range.IsAtEnd())
+    {
+      return nullptr;
+    }
+
+    return result;
+  }
+
+#pragma endregion
+
+#pragma region Custom Properties
+
+  Maybe<Variant<Ref<const style::CustomProperty>, GlobalKeyword>>
+    PropertyParser::ParseTypedCustomPropertyValue(const CSSOMStringAtom &name,
+                                                  const CustomPropertySyntax &syntax, TokenRange range,
+                                                  style::BuilderState &builderState,
+                                                  const ParserContext &context) noexcept
   {
     auto state = PropertyParserState {
       .Context = context,
-      .CurrentProperty = id,
-      .CurrentRule = ruleType,
-      .Important = important,
+      .CurrentProperty = PropertyId::Custom,
+      .CurrentRule = RuleType::Style,
+      .Important = IsImportant(false),
     };
 
-    auto tokensCopy = tokens;
-    if (Property::IsShorthand(id))
+    auto value = ConsumeTypedCustomPropertyValue(range, state, name, syntax, builderState);
+    if (!value || !range.IsAtEnd())
     {
-      if (auto cssWideKeywordValue = ConsumeCSSWideKeywordValue(tokensCopy))
-      {
-        for (auto longhand : LonghandsForShorthand(id).Properties())
-        {
-          properties.emplace_back(longhand, cssWideKeywordValue, important);
-          tokens = tokensCopy;
-        }
-        return true;
-      }
-
-      return PropertyConsumer::ParseShorthandStyleProperty(tokens, state, properties);
+      return {};
     }
 
-    if (auto cssWideKeywordValue = ConsumeCSSWideKeywordValue(tokensCopy))
+    return value;
+  }
+
+  RefPtr<const style::CustomProperty> PropertyParser::ParseTypedCustomPropertyInitialValue(
+    const CSSOMStringAtom &name, const CustomPropertySyntax &syntax, TokenRange range,
+    style::BuilderState &builderState, const ParserContext &context) noexcept
+  {
+    if (syntax.IsUniversal())
     {
-      properties.emplace_back(id, krys::move(cssWideKeywordValue), important);
-      tokens = tokensCopy;
+      return VariableParser::ParseInitialValueForUniversalSyntax(name, range);
+    }
+
+    auto state = PropertyParserState {
+      .Context = context,
+      .CurrentProperty = PropertyId::Custom,
+      .CurrentRule = RuleType::Style,
+      .Important = IsImportant(false),
+    };
+
+    auto value = ConsumeTypedCustomPropertyValue(range, state, name, syntax, builderState);
+    if (!value || !range.IsAtEnd())
+    {
+      return {};
+    }
+
+    return krys::SwitchOn(
+      *value, [](const Ref<const style::CustomProperty> &resolved) -> RefPtr<const style::CustomProperty>
+      { return resolved; },
+      [](const GlobalKeyword &) -> RefPtr<const style::CustomProperty> { return nullptr; });
+  }
+
+  ComputedStyleDependencies PropertyParser::CollectParsedCustomPropertyValueDependencies(
+    const CustomPropertySyntax &syntax, TokenRange range, const ParserContext &context) noexcept
+  {
+    if (syntax.IsUniversal())
+    {
+      return {};
+    }
+
+    range.DiscardWhitespace();
+
+    auto state = PropertyParserState {
+      .Context = context,
+      .CurrentProperty = PropertyId::Custom,
+      .CurrentRule = RuleType::Style,
+      .Important = IsImportant(false),
+    };
+
+    auto [value, syntaxType] = ConsumeCustomPropertyValueWithSyntax(range, state, syntax);
+    if (!value)
+    {
+      return {};
+    }
+
+    return value->ComputedStyleDependencies();
+  }
+
+  bool PropertyParser::IsValidCustomPropertyValueForSyntax(const CustomPropertySyntax &syntax,
+                                                           TokenRange range,
+                                                           const ParserContext &context) noexcept
+  {
+    if (syntax.IsUniversal())
+    {
       return true;
     }
 
-    return PropertyConsumer::ParseLonghandStyleProperty(tokens, state, properties);
+    range.DiscardWhitespace();
+
+    auto state = PropertyParserState {
+      .Context = context,
+      .CurrentProperty = PropertyId::Custom,
+      .CurrentRule = RuleType::Style,
+      .Important = IsImportant(false),
+    };
+
+    return !!ConsumeCustomPropertyValueWithSyntax(range, state, syntax).first;
   }
+
+  Maybe<GlobalKeyword> PropertyParser::ParseGlobalKeyword(TokenRange tokens) noexcept
+  {
+    return ConsumeGlobalKeyword(tokens);
+  }
+
+  Pair<RefPtr<Value>, CustomPropertySyntax::Type>
+    ConsumeCustomPropertyValueWithSyntax(TokenRange &range, PropertyParserState &state,
+                                         const CustomPropertySyntax &syntax) noexcept
+  {
+    krys_assert(!syntax.IsUniversal());
+
+    auto rangeCopy = range;
+
+    auto ConsumeSingleValue = [&](auto &range, auto &component) -> RefPtr<Value>
+    {
+      switch (component.type)
+      {
+        case CustomPropertySyntax::Type::Length:
+          return CSSPrimitiveValueResolver<CSS::Length<>>::ConsumeAndResolve(range, state);
+        case CustomPropertySyntax::Type::LengthPercentage:
+          return CSSPrimitiveValueResolver<CSS::LengthPercentage<>>::ConsumeAndResolve(range, state);
+        case CustomPropertySyntax::Type::CustomIdent:
+          if (RefPtr value = ConsumeCustomIdent(range))
+          {
+            if (component.ident.isNull() || value->stringValue() == component.ident)
+              return value;
+          }
+          return nullptr;
+        case CustomPropertySyntax::Type::Percentage:
+          return CSSPrimitiveValueResolver<CSS::Percentage<>>::ConsumeAndResolve(range, state);
+        case CustomPropertySyntax::Type::Integer:
+          return CSSPrimitiveValueResolver<CSS::Integer<>>::ConsumeAndResolve(range, state);
+        case CustomPropertySyntax::Type::Number:
+          return CSSPrimitiveValueResolver<CSS::Number<>>::ConsumeAndResolve(range, state);
+        case CustomPropertySyntax::Type::Angle:
+          return CSSPrimitiveValueResolver<CSS::Angle<>>::ConsumeAndResolve(range, state);
+        case CustomPropertySyntax::Type::Time:
+          return CSSPrimitiveValueResolver<CSS::Time<>>::ConsumeAndResolve(range, state);
+        case CustomPropertySyntax::Type::Resolution:
+          return CSSPrimitiveValueResolver<CSS::Resolution<>>::ConsumeAndResolve(range, state);
+        case CustomPropertySyntax::Type::Color: return ConsumeColor(range, state);
+        case CustomPropertySyntax::Type::Image:
+          return ConsumeImage(range, state,
+                              {AllowedImageType::URLFunction, AllowedImageType::GeneratedImage});
+        case CustomPropertySyntax::Type::URL:         return ConsumeURL(range, state, {});
+        case CustomPropertySyntax::Type::CSSOMString: return ConsumeString(range);
+        case CustomPropertySyntax::Type::TransformFunction:
+          return CSSPropertyParsing::ConsumeTransformFunction(range, state);
+        case CustomPropertySyntax::Type::TransformList:
+          return CSSPropertyParsing::ConsumeTransformList(range, state);
+        case CustomPropertySyntax::Type::Unknown: return nullptr;
+      }
+      ASSERT_NOT_REACHED();
+      return nullptr;
+    };
+
+    auto ConsumeComponent = [&](auto &range, const auto &component) -> RefPtr<Value>
+    {
+      switch (component.multiplier)
+      {
+        case CustomPropertySyntax::Multiplier::Single: return ConsumeSingleValue(range, component);
+        case CustomPropertySyntax::Multiplier::CommaList:
+          return ConsumeListSeparatedBy<',', OneOrMore>(range, [&](auto &range)
+                                                        { return ConsumeSingleValue(range, component); });
+        case CustomPropertySyntax::Multiplier::SpaceList:
+          return ConsumeListSeparatedBy<' ', OneOrMore>(range, [&](auto &range)
+                                                        { return ConsumeSingleValue(range, component); });
+      }
+      ASSERT_NOT_REACHED();
+      return nullptr;
+    };
+
+    for (auto &component : syntax.definition)
+    {
+      if (RefPtr value = ConsumeComponent(range, component))
+      {
+        if (range.IsAtEnd())
+          return {value, component.type};
+      }
+      range = rangeCopy;
+    }
+    return {nullptr, CustomPropertySyntax::Type::Unknown};
+  }
+
+  Maybe<Variant<Ref<const style::CustomProperty>, GlobalKeyword>>
+    ConsumeTypedCustomPropertyValue(TokenRange &range, PropertyParserState &state,
+                                    const CSSOMStringAtom &name, const CustomPropertySyntax &syntax,
+                                    style::BuilderState &builderState) noexcept
+  {
+    if (syntax.isUniversal())
+      return {
+        {Style::CustomProperty::CreateForVariableData(name, CSSVariableData::Create(range.ConsumeAll()))}};
+
+    range.DiscardWhitespace();
+
+    if (auto keyword = ConsumeCSSWideKeyword(range))
+      return {{*keyword}};
+
+    auto [value, syntaxType] = ConsumeCustomPropertyValueWithSyntax(range, state, syntax);
+    if (!value)
+      return {};
+
+    auto resolveSyntaxValue = [&, syntaxType =
+                                    syntaxType](const Value &value) -> Maybe<Style::CustomProperty::Value>
+    {
+      switch (syntaxType)
+      {
+        case CustomPropertySyntax::Type::LengthPercentage:
+          return Style::toStyleFromCSSValue<Style::LengthPercentage<>>(builderState,
+                                                                       downcast<PrimitiveValue>(value));
+        case CustomPropertySyntax::Type::Length:
+          return Style::toStyleFromCSSValue<Style::Length<>>(builderState, downcast<PrimitiveValue>(value));
+        case CustomPropertySyntax::Type::Integer:
+        case CustomPropertySyntax::Type::Number:
+          return Style::toStyleFromCSSValue<Style::Number<>>(builderState, downcast<PrimitiveValue>(value));
+        case CustomPropertySyntax::Type::Percentage:
+          return Style::toStyleFromCSSValue<Style::Percentage<>>(builderState,
+                                                                 downcast<PrimitiveValue>(value));
+        case CustomPropertySyntax::Type::Angle:
+          return Style::toStyleFromCSSValue<Style::Angle<>>(builderState, downcast<PrimitiveValue>(value));
+        case CustomPropertySyntax::Type::Time:
+          return Style::toStyleFromCSSValue<Style::Time<>>(builderState, downcast<PrimitiveValue>(value));
+        case CustomPropertySyntax::Type::Resolution:
+          return Style::toStyleFromCSSValue<Style::Resolution<>>(builderState,
+                                                                 downcast<PrimitiveValue>(value));
+        case CustomPropertySyntax::Type::Color:
+          return Style::toStyleFromCSSValue<Style::Color>(builderState, value, Style::ForVisitedLink::No);
+        case CustomPropertySyntax::Type::Image:
+        {
+          auto styleImage = builderState.createStyleImage(value);
+          if (!styleImage)
+            return {};
+          return Style::ImageWrapper {styleImage.releaseNonNull()};
+        }
+        case CustomPropertySyntax::Type::URL:
+          return Style::toStyle(downcast<CSSURLValue>(value).url(), builderState);
+        case CustomPropertySyntax::Type::CustomIdent:
+          return CustomIdentifier {CSSOMStringAtom {downcast<PrimitiveValue>(value).stringValue()}};
+        case CustomPropertySyntax::Type::CSSOMString: return downcast<PrimitiveValue>(value).stringValue();
+        case CustomPropertySyntax::Type::TransformFunction:
+        case CustomPropertySyntax::Type::TransformList:
+          return Style::toStyleFromCSSValue<Style::TransformFunction>(builderState, value);
+        case CustomPropertySyntax::Type::Unknown: return {};
+      }
+      ASSERT_NOT_REACHED();
+      return {};
+    };
+
+    if (is<CSSValueList>(value.get()) || is<CSSTransformListValue>(value.get()))
+    {
+      Ref valueList = downcast<CSSValueContainingVector>(value.releaseNonNull());
+      auto syntaxValueList = Style::CustomProperty::ValueList {{}, valueList->separator()};
+      for (Ref listValue : valueList.get())
+      {
+        auto syntaxValue = resolveSyntaxValue(listValue);
+        if (!syntaxValue)
+          return {};
+        syntaxValueList.values.append(WTF::move(*syntaxValue));
+      }
+      return {{Style::CustomProperty::CreateForValueList(name, WTF::move(syntaxValueList))}};
+    };
+
+    auto syntaxValue = resolveSyntaxValue(*value);
+    if (!syntaxValue)
+      return {};
+
+    return {{Style::CustomProperty::CreateForValue(name, WTF::move(*syntaxValue))}};
+  }
+
+#pragma endregion
+
+#pragma region Root Consumers
+
+  bool ConsumeStyleProperty(TokenRange &range, const ParserContext &context, PropertyId property,
+                            IsImportant important, RuleType ruleType, PropertyParserResult &result)
+  {
+    if (Property::isDescriptorOnly(property))
+      return false;
+
+    auto state = PropertyParserState {
+      .Context = context,
+      .currentRule = ruleType,
+      .currentProperty = property,
+      .important = important,
+    };
+
+    if (ConsumeInternalAutoBaseFunction(range, property, state, result))
+      return true;
+
+    if (WebCore::isShorthand(property))
+    {
+      auto rangeCopy = range;
+      if (RefPtr keywordValue = ConsumeCSSWideKeywordValue(rangeCopy))
+      {
+        result.addPropertyForAllLonghandsOfCurrentShorthand(state, WTF::move(keywordValue));
+        range = rangeCopy;
+        return true;
+      }
+
+      auto originalRange = range;
+
+      if (CSSPropertyParsing::parseStylePropertyShorthand(range, property, state, result))
+        return true;
+
+      if (CSSVariableParser::containsValidVariableReferences(originalRange, context))
+      {
+        result.addPropertyForAllLonghandsOfCurrentShorthand(
+          state, CSSPendingSubstitutionValue::Create(
+                   property, CSSVariableReferenceValue::Create(originalRange, context)));
+        return true;
+      }
+    }
+    else
+    {
+      auto rangeCopy = range;
+      if (RefPtr keywordValue = ConsumeCSSWideKeywordValue(rangeCopy))
+      {
+        result.addProperty(state, property, CSSPropertyInvalid, WTF::move(keywordValue), important);
+        range = rangeCopy;
+        return true;
+      }
+
+      auto originalRange = range;
+
+      RefPtr parsedValue = CSSPropertyParsing::parseStylePropertyLonghand(range, property, state);
+      if (parsedValue && range.IsAtEnd())
+      {
+        result.addProperty(state, property, CSSPropertyInvalid, WTF::move(parsedValue), important);
+        return true;
+      }
+
+      if (CSSVariableParser::containsValidVariableReferences(originalRange, context))
+      {
+        result.addProperty(state, property, CSSPropertyInvalid,
+                           CSSVariableReferenceValue::Create(originalRange, context), important);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool ConsumeFontFaceDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
+                                 PropertyParserResult &result)
+  {
+    auto state = PropertyParserState {
+      .Context = context,
+      .currentRule = RuleType::FontFace,
+      .currentProperty = property,
+      .important = IsImportant::No,
+    };
+
+    RefPtr parsedValue = CSSPropertyParsing::parseFontFaceDescriptor(range, property, state);
+    if (!parsedValue || !range.IsAtEnd())
+      return false;
+
+    result.addProperty(state, property, CSSPropertyInvalid, WTF::move(parsedValue), IsImportant::No);
+    return true;
+  }
+
+  bool ConsumeFontPaletteValuesDescriptor(TokenRange &range, const ParserContext &context,
+                                          PropertyId property, PropertyParserResult &result)
+  {
+    auto state = PropertyParserState {
+      .Context = context,
+      .currentRule = RuleType::FontPaletteValues,
+      .currentProperty = property,
+      .important = IsImportant::No,
+    };
+
+    RefPtr parsedValue = CSSPropertyParsing::parseFontPaletteValuesDescriptor(range, property, state);
+    if (!parsedValue || !range.IsAtEnd())
+      return false;
+
+    result.addProperty(state, property, CSSPropertyInvalid, WTF::move(parsedValue), IsImportant::No);
+    return true;
+  }
+
+  bool ConsumeCounterStyleDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
+                                     PropertyParserResult &result)
+  {
+    auto state = PropertyParserState {
+      .Context = context,
+      .currentRule = RuleType::CounterStyle,
+      .currentProperty = property,
+      .important = IsImportant::No,
+    };
+
+    RefPtr parsedValue = CSSPropertyParsing::parseCounterStyleDescriptor(range, property, state);
+    if (!parsedValue || !range.IsAtEnd())
+      return false;
+
+    result.addProperty(state, property, CSSPropertyInvalid, WTF::move(parsedValue), IsImportant::No);
+    return true;
+  }
+
+  bool ConsumeKeyframeDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
+                                 IsImportant important, PropertyParserResult &result)
+  {
+    // https://www.w3.org/TR/css-animations-1/#keyframes
+    // The <declaration-list> inside of <keyframe-block> accepts any CSS property except those
+    // defined in this specification, but does accept the animation-timing-function property and
+    // interprets it specially.
+    switch (property)
+    {
+      case PropertyId::Animation:
+      case PropertyId::AnimationDelay:
+      case PropertyId::AnimationDirection:
+      case PropertyId::AnimationDuration:
+      case PropertyId::AnimationFillMode:
+      case PropertyId::AnimationIterationCount:
+      case PropertyId::AnimationName:
+      case PropertyId::AnimationPlayState:      return false;
+      default:                                  return ConsumeStyleProperty(range, context, property, important, RuleType::Keyframe, result);
+    }
+  }
+
+  bool ConsumePageDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
+                             IsImportant important, PropertyParserResult &result)
+  {
+    // Does not apply in @page per-spec.
+    if (property == CSSPropertyPage)
+      return false;
+
+    auto state = PropertyParserState {
+      .Context = context,
+      .currentRule = RuleType::Page,
+      .currentProperty = property,
+      .important = IsImportant::No,
+    };
+
+    if (RefPtr parsedValue = CSSPropertyParsing::parsePageDescriptor(range, property, state))
+    {
+      if (!range.IsAtEnd())
+        return false;
+
+      result.addProperty(state, property, CSSPropertyInvalid, WTF::move(parsedValue), IsImportant::No);
+      return true;
+    }
+
+    return ConsumeStyleProperty(range, context, property, important, RuleType::Page, result);
+  }
+
+  bool ConsumePropertyDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
+                                 PropertyParserResult &result)
+  {
+    auto state = PropertyParserState {
+      .Context = context,
+      .currentRule = RuleType::Property,
+      .currentProperty = property,
+      .important = IsImportant::No,
+    };
+
+    RefPtr parsedValue = CSSPropertyParsing::parsePropertyDescriptor(range, property, state);
+    if (!parsedValue || !range.IsAtEnd())
+      return false;
+
+    result.addProperty(state, property, CSSPropertyInvalid, WTF::move(parsedValue), IsImportant::No);
+    return true;
+  }
+
+  bool ConsumeViewTransitionDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
+                                       PropertyParserResult &result)
+  {
+    ASSERT(context.propertySettings.crossDocumentViewTransitionsEnabled);
+
+    auto state = PropertyParserState {
+      .Context = context,
+      .currentRule = RuleType::ViewTransition,
+      .currentProperty = property,
+      .important = IsImportant::No,
+    };
+
+    RefPtr parsedValue = CSSPropertyParsing::parseViewTransitionDescriptor(range, property, state);
+    if (!parsedValue || !range.IsAtEnd())
+      return false;
+
+    result.addProperty(state, property, CSSPropertyInvalid, WTF::move(parsedValue), IsImportant::No);
+    return true;
+  }
+
+  // Checks whether a CSS property is allowed in @position-try.
+  static bool propertyAllowedInPositionTryRule(PropertyId property)
+  {
+    return Property::isInsetProperty(property) || Property::isMarginProperty(property)
+           || Property::isSizingProperty(property) || property == CSSPropertyAlignSelf
+           || property == CSSPropertyJustifySelf || property == CSSPropertyPlaceSelf
+           || property == CSSPropertyPositionAnchor || property == CSSPropertyPositionArea;
+  }
+
+  bool ConsumePositionTryDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
+                                    IsImportant important, PropertyParserResult &result)
+  {
+    ASSERT(context.propertySettings.cssAnchorPositioningEnabled);
+
+    // Per spec, !important is not allowed and makes the whole declaration invalid.
+    if (important == IsImportant::Yes)
+      return false;
+
+    if (!propertyAllowedInPositionTryRule(property))
+      return false;
+
+    return ConsumeStyleProperty(range, context, property, important, RuleType::PositionTry, result);
+  }
+
+  bool ConsumeFunctionDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
+                                 PropertyParserResult &result)
+  {
+    ASSERT(context.propertySettings.cssFunctionAtRuleEnabled);
+
+    auto state = PropertyParserState {
+      .Context = context,
+      .currentRule = RuleType::Function,
+      .currentProperty = property,
+      .important = IsImportant::No,
+    };
+
+    RefPtr parsedValue = CSSPropertyParsing::parseFunctionDescriptor(range, property, state);
+    if (!parsedValue || !range.IsAtEnd())
+      return false;
+
+    result.addProperty(state, property, CSSPropertyInvalid, WTF::move(parsedValue), IsImportant::No);
+    return true;
+  }
+
+  bool ConsumeInternalBaseAppearanceDescriptor(TokenRange &range, const ParserContext &context,
+                                               PropertyId property, IsImportant important,
+                                               PropertyParserResult &result)
+  {
+    krys_assert(context.Mode == ParserMode::UASheet);
+
+    if (property == PropertyId::Appearance)
+    {
+      return false;
+    }
+
+    return ConsumeStyleProperty(range, context, property, important, RuleType::InternalBaseAppearance,
+                                result);
+  }
+
+#pragma endregion
 }

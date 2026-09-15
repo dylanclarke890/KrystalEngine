@@ -112,6 +112,11 @@ namespace krys::boo::css
       return *_value;
     }
 
+    KRYS_NODISCARD PropertyMetadata Metadata() const noexcept
+    {
+      return _metadata;
+    }
+
     KRYS_NODISCARD static PropertyId ResolveDirectionAwareProperty(PropertyId id,
                                                                    WritingMode writingMode) noexcept;
 
@@ -127,6 +132,7 @@ namespace krys::boo::css
     KRYS_NODISCARD static bool IsLonghand(PropertyId id) noexcept
     {
       // TODO
+      krys_assert(false);
       return false;
     }
 

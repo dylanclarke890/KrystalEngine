@@ -2,7 +2,7 @@
 
 namespace krys::boo::css
 {
-  class CSSToLengthConversionData
+  class ToLengthConversionData
   {
   };
 }

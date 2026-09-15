@@ -23,7 +23,13 @@ namespace krys::boo::css
     FontFeatureValues,
     Viewport,
     FunctionDeclarations,
+    FontPaletteValues,
+    Property,
+    ViewTransition,
+    PositionTry,
+    Function,
+    InternalBaseAppearance,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::RuleType, 17uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::RuleType, 22uz);

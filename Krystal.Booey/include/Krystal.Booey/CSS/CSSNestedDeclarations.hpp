@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/CSSRule.hpp"
-#include "Krystal.Booey/CSS/Parser/Context/ParsedRuleList.hpp"
+#include "Krystal.Booey/CSS/Rules/ParsedRuleList.hpp"
 #include "Krystal.Booey/CSS/Properties/InternalStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
 

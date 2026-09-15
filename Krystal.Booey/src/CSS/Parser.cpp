@@ -1,4 +1,5 @@
-﻿#include "Krystal.Booey/CSS/CSSCharsetRule.hpp"
+﻿#include "Krystal.Booey/CSS/Parser/Parser.hpp"
+#include "Krystal.Booey/CSS/CSSCharsetRule.hpp"
 #include "Krystal.Booey/CSS/CSSFunctionDeclarations.hpp"
 #include "Krystal.Booey/CSS/CSSGroupingRule.hpp"
 #include "Krystal.Booey/CSS/CSSImportRule.hpp"
@@ -11,7 +12,6 @@
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/MediaList.hpp"
 #include "Krystal.Booey/CSS/Parser/AtRuleType.hpp"
-#include "Krystal.Booey/CSS/Parser/Parser.hpp"
 #include "Krystal.Booey/CSS/Properties/InternalStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParser.hpp"
 #include "Krystal.Booey/CSS/Selectors/Selector.hpp"
@@ -32,15 +32,14 @@ namespace krys::boo::css
 
 #pragma region Parser Entry Points
 
-  Parser::Parser(CSSOMString &&input, const ParserContext &context,
-                       StyleSheetContents *stylesheet) noexcept
+  Parser::Parser(CSSOMString &&input, const ParserContext &context, StyleSheetContents *stylesheet) noexcept
       : _inputStream(krys::move(input)), _context(context), _tokenizer(_inputStream),
         _ruleListNestingLevel(0uz), _stylesheet(ShareRefPtr(stylesheet))
   {
   }
 
   RefPtr<CSSStyleSheet> Parser::ParseStylesheet(CSSOMString &&input, const ParserContext &context,
-                                                   StyleSheetContents &stylesheet) noexcept
+                                                StyleSheetContents &stylesheet) noexcept
   {
     Parser parser(krys::move(input), context, &stylesheet);
 
@@ -48,7 +47,7 @@ namespace krys::boo::css
   }
 
   RefPtr<CSSRule> Parser::ParseRule(CSSOMString &&input, const ParserContext &context,
-                                       AllowedRules allowedRules) noexcept
+                                    AllowedRules allowedRules) noexcept
   {
     Parser parser(krys::move(input), context, nullptr);
     if (!parser.PumpTokenizer())
@@ -122,8 +121,7 @@ namespace krys::boo::css
     return AllowedRules::Regular;
   }
 
-  Ref<InternalStyleProperties>
-    Parser::CreateInternalStyleProperties(ParsedPropertyList &properties) noexcept
+  Ref<InternalStyleProperties> Parser::CreateInternalStyleProperties(ParsedPropertyList &properties) noexcept
   {
     auto internalProperties = CreateRef<InternalStyleProperties>();
 
@@ -180,8 +178,7 @@ namespace krys::boo::css
     }
   }
 
-  RefPtr<CSSRule> Parser::ConsumeAtRule(TokenRange &tokens, AllowedRules allowedRules,
-                                           bool nested) noexcept
+  RefPtr<CSSRule> Parser::ConsumeAtRule(TokenRange &tokens, AllowedRules allowedRules, bool nested) noexcept
   {
     assert(tokens.Peek().Type() == TokenType::AtKeyword);
 
@@ -247,7 +244,7 @@ namespace krys::boo::css
   }
 
   RefPtr<CSSRule> Parser::ConsumeQualifiedRule(TokenRange &tokens, AllowedRules allowedRules,
-                                                  bool nested) noexcept
+                                               bool nested) noexcept
   {
     // Parsing a selector (aka a component value) should stop at the first semicolon (and goes to error
     // recovery) instead of consuming the whole list of declarations (in nested context). At top level (aka
@@ -312,7 +309,7 @@ namespace krys::boo::css
   }
 
   void Parser::ConsumeBlockContents(TokenRange tokens, AllowedBlockRules allowedBlockRules,
-                                       RuleType ruleType) noexcept
+                                    RuleType ruleType) noexcept
   {
     assert(allowedBlockRules != AllowedBlockRules::None);
     assert(CurrentNestedContext().ParsedRules.empty());
@@ -473,7 +470,7 @@ namespace krys::boo::css
 
   bool Parser::ConsumeDeclaration(TokenRange &tokens, RuleType ruleType) noexcept
   {
-    assert(tokens.Peek().Type() == TokenType::Ident);
+    krys_debug_assert(tokens.Peek().Type() == TokenType::Ident);
 
     auto &token = tokens.Consume();
     tokens.DiscardWhitespace();
@@ -496,8 +493,8 @@ namespace krys::boo::css
     const size_t oldPropertiesCount = CurrentNestedContext().ParsedProperties.size();
     if (propertyId != PropertyId::Invalid)
     {
-      (void)PropertyParser::ParseValue(tokens, _context, propertyId, ruleType, important,
-                                          CurrentNestedContext().ParsedProperties);
+      (void)PropertyParser::ParseValue(propertyId, important, tokens, _context,
+                                       CurrentNestedContext().ParsedProperties, ruleType);
     }
 
     return CurrentNestedContext().ParsedProperties.size() != oldPropertiesCount;
@@ -662,9 +659,9 @@ namespace krys::boo::css
 
   RefPtr<CSSStyleRule> Parser::ConsumeStyleRule(TokenRange prelude, TokenRange block) noexcept
   {
-    auto mutableSelectors = SelectorParser::ParseMutableSelectorList(
-      prelude, {}, _stylesheet.get(), CurrentAncestorRuleType(), IsForgivingSelectorList(false),
-      DisallowPseudoElements(false));
+    auto mutableSelectors =
+      SelectorParser::ParseMutableSelectorList(prelude, {}, _stylesheet.get(), CurrentAncestorRuleType(),
+                                               IsForgivingSelectorList(false), DisallowPseudoElements(false));
 
     if (mutableSelectors.empty())
     {

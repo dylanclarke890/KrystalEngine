@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Parser/Context/ParsedPropertyList.hpp"
-#include "Krystal.Booey/CSS/Parser/Context/ParsedRuleList.hpp"
+#include "Krystal.Booey/CSS/Properties/ParsedPropertyList.hpp"
+#include "Krystal.Booey/CSS/Rules/ParsedRuleList.hpp"
 #include "Krystal.Core/Enum.hpp"
 
 namespace krys::boo::css

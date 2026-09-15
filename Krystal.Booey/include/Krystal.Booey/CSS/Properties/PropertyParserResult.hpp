@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Parser/Context/ParsedPropertyList.hpp"
+#include "Krystal.Booey/CSS/Properties/ParsedPropertyList.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"

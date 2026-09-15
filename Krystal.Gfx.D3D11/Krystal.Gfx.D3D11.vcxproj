@@ -25,9 +25,6 @@
     <ProjectReference Include="..\Krystal.Core\Krystal.Core.vcxproj">
       <Project>{e0409a19-301c-431e-aa7d-18d06500a709}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\Krystal.Gfx.Lib\Krystal.Gfx.Lib.vcxproj">
-      <Project>{9033b349-4104-46b5-af4d-3ddedfc44176}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\Krystal.Gfx\Krystal.Gfx.vcxproj">
       <Project>{f0f40133-75a2-4345-893f-f7e69e477155}</Project>
     </ProjectReference>

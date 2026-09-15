@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Parser/Context/NestedParserContext.hpp"
+#include "Krystal.Booey/CSS/Parser/NestedParserContext.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"

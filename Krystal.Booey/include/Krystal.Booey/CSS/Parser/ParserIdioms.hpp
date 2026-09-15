@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/IsGlobalKeyword.hpp"
+#include "Krystal.Booey/CSS/Values/GlobalKeyword.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
@@ -44,7 +44,7 @@ namespace krys::boo::css
       case ValueId::And:
       case ValueId::Or:
       case ValueId::Not:  return false;
-      default:               return IsValidCustomIdentifier(valueId);
+      default:            return IsValidCustomIdentifier(valueId);
     }
   }
 }
