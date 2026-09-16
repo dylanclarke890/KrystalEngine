@@ -9,13 +9,13 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/URL.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Values/AppleColorFilterValue.hpp"
 #include "Krystal.Booey/CSS/Values/Color/Color.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/Filter/AppleColorFilter.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/AppleColorFilterValue.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/FilterValue.hpp"
 #include "Krystal.Booey/CSS/Values/Filter/Filter.hpp"
 #include "Krystal.Booey/CSS/Values/Filter/FilterFunctionDescriptor.hpp"
+#include "Krystal.Booey/CSS/Values/FilterValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
@@ -70,8 +70,8 @@ namespace krys::boo::css::PropertyParserHelpers
     return BlurFunction {.parameters = {Blur::Parameter {krys::move(*parsedValue)}}};
   }
 
-  KRYS_NODISCARD static Maybe<BrightnessFunction>
-    ConsumeFilterBrightness(TokenRange &range, PropertyParserState &state) noexcept
+  KRYS_NODISCARD static Maybe<BrightnessFunction> ConsumeFilterBrightness(TokenRange &range,
+                                                                          PropertyParserState &state) noexcept
   {
     // brightness() = brightness( [ <number [0,∞]> | <percentage [0,∞]> ]? )
     // https://drafts.fxtf.org/filter-effects/#funcdef-filter-brightness
@@ -112,8 +112,8 @@ namespace krys::boo::css::PropertyParserHelpers
     return ContrastFunction {.parameters = {Contrast::Parameter {krys::move(*parsedValue)}}};
   }
 
-  KRYS_NODISCARD static Maybe<DropShadowFunction>
-    ConsumeFilterDropShadow(TokenRange &range, PropertyParserState &state) noexcept
+  KRYS_NODISCARD static Maybe<DropShadowFunction> ConsumeFilterDropShadow(TokenRange &range,
+                                                                          PropertyParserState &state) noexcept
   {
     // drop-shadow() = drop-shadow( [ <color>? && [<length>{2} <length [0,∞]>?] ] )
     // https://drafts.fxtf.org/filter-effects/#funcdef-filter-drop-shadow
@@ -185,8 +185,8 @@ namespace krys::boo::css::PropertyParserHelpers
                                               .stdDeviation = krys::move(stdDeviation)}};
   }
 
-  KRYS_NODISCARD static Maybe<GrayscaleFunction>
-    ConsumeFilterGrayscale(TokenRange &range, PropertyParserState &state) noexcept
+  KRYS_NODISCARD static Maybe<GrayscaleFunction> ConsumeFilterGrayscale(TokenRange &range,
+                                                                        PropertyParserState &state) noexcept
   {
     // grayscale() = grayscale( [ <number [0,1(clamp upper)] > | <percentage [0,100(clamp upper)]> ]? )
     // https://drafts.fxtf.org/filter-effects/#funcdef-filter-grayscale
@@ -206,8 +206,8 @@ namespace krys::boo::css::PropertyParserHelpers
     return GrayscaleFunction {.parameters = {Grayscale::Parameter {krys::move(*parsedValue)}}};
   }
 
-  KRYS_NODISCARD static Maybe<HueRotateFunction>
-    ConsumeFilterHueRotate(TokenRange &range, PropertyParserState &state) noexcept
+  KRYS_NODISCARD static Maybe<HueRotateFunction> ConsumeFilterHueRotate(TokenRange &range,
+                                                                        PropertyParserState &state) noexcept
   {
     // hue-rotate() = hue-rotate( [ <angle> | <zero> ]? )
     // https://drafts.fxtf.org/filter-effects/#funcdef-filter-hue-rotate

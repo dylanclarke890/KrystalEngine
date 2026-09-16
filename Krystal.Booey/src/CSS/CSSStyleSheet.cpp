@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
-#include "Krystal.Booey/CSS/CSSImportRule.hpp"
-#include "Krystal.Booey/CSS/CSSNamespaceRule.hpp"
-#include "Krystal.Booey/CSS/CSSRuleList.hpp"
 #include "Krystal.Booey/CSS/MediaList.hpp"
 #include "Krystal.Booey/CSS/Parser/Parser.hpp"
+#include "Krystal.Booey/CSS/Rules/CSSOM/CSSImportRule.hpp"
+#include "Krystal.Booey/CSS/Rules/CSSOM/CSSNamespaceRule.hpp"
+#include "Krystal.Booey/CSS/Rules/CSSOM/CSSRuleList.hpp"
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
 
 namespace krys::boo::css
@@ -60,7 +60,7 @@ namespace krys::boo::css
     if (_constructed && Is<CSSImportRule>(parsedRule))
     {
       return dom::Exception {dom::ExceptionCode::SyntaxError,
-                        u8"Cannot insert an @import rule in a constructed CSSStyleSheet object"};
+                             u8"Cannot insert an @import rule in a constructed CSSStyleSheet object"};
     }
 
     bool isNamespace = Is<CSSNamespaceRule>(parsedRule);

@@ -1,47 +1,80 @@
-﻿#pragma once
+﻿/*
+ * (C) 1999-2003 Lars Knoll (knoll@kde.org)
+ * (C) 2002-2003 Dirk Mueller (mueller@kde.org)
+ * Copyright (C) 2002-2025 Apple Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
 
-#include "Krystal.Booey/CSS/CSSRule.hpp"
-#include "Krystal.Booey/DOM/Types/USVString.hpp"
+#pragma once
 
-namespace krys::boo::css
+#include <WebCore/CSSRule.h>
+
+namespace WebCore
 {
+
   class MediaList;
-  class CSSStyleSheet;
+  class StyleRuleImport;
 
-  /// @see https://drafts.csswg.org/cssom/#the-cssimportrule-interface
-  class CSSImportRule : public CSSRule
+  namespace MQ
   {
-    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CSSImportRule);
-
-  public:
-    CSSImportRule(CSSStyleSheet *stylesheet) noexcept;
-
-    ~CSSImportRule() noexcept override = default;
-
-#pragma region CSSImportRule - https://drafts.csswg.org/cssom/#cssimportrule
-
-    /// @see https://drafts.csswg.org/cssom/#dom-cssimportrule-href
-    KRYS_NODISCARD dom::USVString Href() const noexcept;
-
-    /// @see https://drafts.csswg.org/cssom/#dom-cssimportrule-media
-    KRYS_NODISCARD RefPtr<MediaList> Media() const noexcept;
-
-    /// @see https://drafts.csswg.org/cssom/#dom-cssimportrule-stylesheet
-    KRYS_NODISCARD RefPtr<CSSStyleSheet> StyleSheet() const noexcept;
-
-    /// @see https://drafts.csswg.org/cssom/#dom-cssimportrule-layername
-    KRYS_NODISCARD Maybe<CSSOMString> LayerName() const noexcept;
-
-    /// @see https://drafts.csswg.org/cssom/#dom-cssimportrule-supportstext
-    KRYS_NODISCARD Maybe<CSSOMString> SupportsText() const noexcept;
-
-#pragma endregion
-  };
-}
-
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSImportRule)
-  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
-  {
-    return rule.IsCSSImportRule();
+    struct MediaQuery;
+    using MediaQueryList = Vector<MediaQuery>;
   }
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();
+
+  class CSSImportRule final : public CSSRule
+  {
+  public:
+    static Ref<CSSImportRule> create(StyleRuleImport &rule, CSSStyleSheet *sheet)
+    {
+      return adoptRef(*new CSSImportRule(rule, sheet));
+    }
+
+    virtual ~CSSImportRule();
+
+    WEBCORE_EXPORT String href() const;
+    WEBCORE_EXPORT MediaList &media() const;
+    WEBCORE_EXPORT CSSStyleSheet *styleSheet() const;
+    RefPtr<CSSStyleSheet> protectedStyleSheet() const;
+    String layerName() const;
+    String supportsText() const;
+
+  private:
+    friend class MediaList;
+
+    CSSImportRule(StyleRuleImport &, CSSStyleSheet *);
+
+    StyleRuleType styleRuleType() const final
+    {
+      return StyleRuleType::Import;
+    }
+    String cssText() const final;
+    String cssText(const CSS::SerializationContext &) const final;
+    void reattach(StyleRuleBase &) final;
+    void getChildStyleSheets(HashSet<RefPtr<CSSStyleSheet>> &) final;
+
+    String cssTextInternal(const String &urlString) const;
+    const MQ::MediaQueryList &mediaQueries() const;
+    void setMediaQueries(MQ::MediaQueryList &&);
+
+    const Ref<StyleRuleImport> m_importRule;
+    mutable RefPtr<MediaList> m_mediaCSSOMWrapper;
+    mutable RefPtr<CSSStyleSheet> m_styleSheetCSSOMWrapper;
+  };
+
+} // namespace WebCore
+
+SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSImportRule, StyleRuleType::Import)

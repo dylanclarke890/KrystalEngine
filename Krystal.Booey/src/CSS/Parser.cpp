@@ -1,19 +1,18 @@
 ﻿#include "Krystal.Booey/CSS/Parser/Parser.hpp"
-#include "Krystal.Booey/CSS/CSSCharsetRule.hpp"
-#include "Krystal.Booey/CSS/CSSFunctionDeclarations.hpp"
-#include "Krystal.Booey/CSS/CSSGroupingRule.hpp"
-#include "Krystal.Booey/CSS/CSSImportRule.hpp"
-#include "Krystal.Booey/CSS/CSSNamespaceRule.hpp"
-#include "Krystal.Booey/CSS/CSSNestedDeclarations.hpp"
-#include "Krystal.Booey/CSS/CSSRule.hpp"
-#include "Krystal.Booey/CSS/CSSRuleList.hpp"
 #include "Krystal.Booey/CSS/CSSStyleProperties.hpp"
-#include "Krystal.Booey/CSS/CSSStyleRule.hpp"
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/MediaList.hpp"
 #include "Krystal.Booey/CSS/Parser/AtRuleType.hpp"
 #include "Krystal.Booey/CSS/Properties/InternalStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParser.hpp"
+#include "Krystal.Booey/CSS/Rules/CSSOM/CSSFunctionDeclarations.hpp"
+#include "Krystal.Booey/CSS/Rules/CSSOM/CSSGroupingRule.hpp"
+#include "Krystal.Booey/CSS/Rules/CSSOM/CSSImportRule.hpp"
+#include "Krystal.Booey/CSS/Rules/CSSOM/CSSNamespaceRule.hpp"
+#include "Krystal.Booey/CSS/Rules/CSSOM/CSSNestedDeclarations.hpp"
+#include "Krystal.Booey/CSS/Rules/CSSOM/CSSRule.hpp"
+#include "Krystal.Booey/CSS/Rules/CSSOM/CSSRuleList.hpp"
+#include "Krystal.Booey/CSS/Rules/CSSOM/CSSStyleRule.hpp"
 #include "Krystal.Booey/CSS/Selectors/Selector.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
@@ -103,10 +102,10 @@ namespace krys::boo::css
 
     assert(current <= AllowedRules::Regular);
 
-    if (Is<CSSCharsetRule>(ref))
-    {
-      return AllowedRules::Import;
-    }
+    //if (Is<CSSCharsetRule>(ref))
+    //{
+    //  return AllowedRules::Import;
+    //}
 
     if (Is<CSSImportRule>(ref))
     {
@@ -199,10 +198,10 @@ namespace krys::boo::css
     {
       tokens.Discard(); // consume semicolon if present
 
-      if (atRuleType == AtRuleType::Charset && allowedRules == AllowedRules::Charset)
-      {
-        return ConsumeCharsetRule(prelude);
-      }
+      // if (atRuleType == AtRuleType::Charset && allowedRules == AllowedRules::Charset)
+      //{
+      //   return ConsumeCharsetRule(prelude);
+      // }
 
       if (atRuleType == AtRuleType::Import && allowedRules <= AllowedRules::Import)
       {
@@ -597,21 +596,21 @@ namespace krys::boo::css
 
 #pragma region At-Rule Consumers
 
-  RefPtr<CSSCharsetRule> Parser::ConsumeCharsetRule(TokenRange prelude) noexcept
-  {
-    // @charset <string> ;
+  // RefPtr<CSSCharsetRule> Parser::ConsumeCharsetRule(TokenRange prelude) noexcept
+  //{
+  //   // @charset <string> ;
 
-    const Token &encoding = prelude.Consume();
-    prelude.DiscardWhitespace();
+  // const Token &encoding = prelude.Consume();
+  // prelude.DiscardWhitespace();
 
-    if (encoding.Type() != TokenType::String || !prelude.IsAtEnd())
-    {
-      // TODO(Parser): parse error (expected a single string).
-      return nullptr;
-    }
+  // if (encoding.Type() != TokenType::String || !prelude.IsAtEnd())
+  // {
+  //   // TODO(Parser): parse error (expected a single string).
+  //   return nullptr;
+  // }
 
-    return AdoptRefPtr<CSSCharsetRule>(new CSSCharsetRule(nullptr));
-  }
+  // return AdoptRefPtr<CSSCharsetRule>(new CSSCharsetRule(nullptr));
+  // }
 
   RefPtr<CSSImportRule> Parser::ConsumeImportRule(TokenRange prelude) noexcept
   {

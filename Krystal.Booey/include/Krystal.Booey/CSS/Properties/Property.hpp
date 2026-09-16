@@ -131,9 +131,15 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static bool IsLonghand(PropertyId id) noexcept
     {
-      // TODO
-      krys_assert(false);
-      return false;
+      return static_cast<size_t>(id) >= static_cast<uint16>(FirstProperty)
+             && static_cast<size_t>(id) < static_cast<uint16>(FirstShorthandProperty);
+    }
+
+    /// @brief Checks if a property is a sizing property
+    /// @see https://drafts.csswg.org/css-sizing-3/#sizing-property
+    KRYS_NODISCARD static bool IsSizingProperty(PropertyId id) noexcept
+    {
+      return IsSizeProperty(id) || IsMaxSizeProperty(id) || IsMinSizeProperty(id);
     }
 
     KRYS_NODISCARD static bool IsInheritedProperty(PropertyId id) noexcept;

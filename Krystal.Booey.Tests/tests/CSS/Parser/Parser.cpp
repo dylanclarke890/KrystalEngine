@@ -1,23 +1,22 @@
-﻿#include "Krystal.Booey/CSS/CSSCharsetRule.hpp"
-#include "Krystal.Booey/CSS/CSSImportRule.hpp"
-#include "Krystal.Booey/CSS/CSSNamespaceRule.hpp"
-#include "Krystal.Booey/CSS/CSSRuleList.hpp"
+﻿#include "Krystal.Booey/CSS/Parser/Parser.hpp"
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/MediaList.hpp"
-#include "Krystal.Booey/CSS/Parser/Parser.hpp"
+#include "Krystal.Booey/CSS/Rules/CSSOM/CSSImportRule.hpp"
+#include "Krystal.Booey/CSS/Rules/CSSOM/CSSNamespaceRule.hpp"
+#include "Krystal.Booey/CSS/Rules/CSSOM/CSSRuleList.hpp"
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
 #include <catch_all.hpp>
 
 namespace krys::boo::css::tests
 {
-  TEST_CASE("Parser::ParseRule - @charset", "[Parser]")
-  {
-    utf8_string input = u8"@charset \"utf-8\";";
-    auto rule = Parser::ParseRule(krys::move(input), {}, AllowedRules::Charset);
+  // TEST_CASE("Parser::ParseRule - @charset", "[Parser]")
+  //{
+  //   utf8_string input = u8"@charset \"utf-8\";";
+  //   auto rule = Parser::ParseRule(krys::move(input), {}, AllowedRules::Charset);
 
-    REQUIRE(rule != nullptr);
-    REQUIRE(Is<CSSCharsetRule>(rule));
-  }
+  // REQUIRE(rule != nullptr);
+  // REQUIRE(Is<CSSCharsetRule>(rule));
+  // }
 
   TEST_CASE("Parser::ParseRule - @namespace", "[Parser]")
   {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Apple Inc. All rights reserved.
+ * Copyright (C) 2025 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,34 +23,9 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include "CSSGroupingRule.h"
-
-namespace WebCore
-{
-
-  class StyleRuleScope;
-
-  class CSSScopeRule final : public CSSGroupingRule
-  {
-  public:
-    static Ref<CSSScopeRule> create(StyleRuleScope &, CSSStyleSheet *parent);
-
-    String cssText() const final;
-    String start() const;
-    String end() const;
-
-  private:
-    const StyleRuleScope &styleRuleScope() const;
-
-    CSSScopeRule(StyleRuleScope &, CSSStyleSheet *);
-    StyleRuleType styleRuleType() const final
-    {
-      return StyleRuleType::Scope;
-    }
-  };
-
-} // namespace WebCore
-
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSScopeRule, StyleRuleType::Scope)
+[
+    EnabledBySetting=CSSFunctionAtRuleEnabled,
+    Exposed=Window
+] interface CSSFunctionDeclarations : CSSRule {
+  [SameObject, PutForwards=cssText] readonly attribute CSSFunctionDescriptors style;
+};

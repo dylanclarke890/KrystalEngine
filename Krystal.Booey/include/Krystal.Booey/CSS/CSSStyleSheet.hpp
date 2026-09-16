@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/StyleSheet.hpp"
 #include "Krystal.Booey/CSS/Types/MediaListOrDOMString.hpp"
 #include "Krystal.Booey/DOM/Node.hpp"
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
@@ -123,8 +124,7 @@ namespace krys::boo::css
     /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-media
     KRYS_NODISCARD RefPtr<MediaList> Media() const noexcept final
     {
-      // TODO(CSSStyleSheet): Implement Media()
-      return nullptr;
+      krys_not_implemented();
     }
 
     /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-disabled

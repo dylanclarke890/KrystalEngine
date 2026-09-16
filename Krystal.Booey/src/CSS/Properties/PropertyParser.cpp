@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Properties/PropertyParser.hpp"
-#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
+#include "Krystal.Booey/CSS/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Parser/CustomPropertySyntax.hpp"
+#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserFastPaths.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
@@ -27,7 +28,6 @@
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
 #include "Krystal.Booey/CSS/Rules/RuleType.hpp"
-#include "Krystal.Booey/CSS/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
 #include "Krystal.Booey/CSS/Values/GlobalKeyword.hpp"
@@ -119,7 +119,7 @@ namespace krys::boo::css
   //   {
   //     auto character = characters[i];
   //     if (!character || !isASCII(character))
-  //       return CSSPropertyInvalid;
+  //       return PropertyId::Invalid;
   //     buffer[i] = toASCIILower(character);
   //   }
   //   return findCSSProperty(buffer.data(), characters.size());
@@ -129,9 +129,9 @@ namespace krys::boo::css
   //{
   //   auto length = string.length();
   //   if (!length)
-  //     return CSSPropertyInvalid;
+  //     return PropertyId::Invalid;
   //   if (length > maxCSSPropertyNameLength)
-  //     return CSSPropertyInvalid;
+  //     return PropertyId::Invalid;
   //   return string.is8Bit() ? PropertyId(string.span8()) : PropertyId(string.span16());
   // }
 
@@ -608,69 +608,121 @@ namespace krys::boo::css
       switch (component.type)
       {
         case CustomPropertySyntax::Type::Length:
-          return CSSPrimitiveValueResolver<CSS::Length<>>::ConsumeAndResolve(range, state);
+        {
+          return PrimitiveValueResolver<Length<>>::ConsumeAndResolve(range, state);
+        }
         case CustomPropertySyntax::Type::LengthPercentage:
-          return CSSPrimitiveValueResolver<CSS::LengthPercentage<>>::ConsumeAndResolve(range, state);
+        {
+          return PrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(range, state);
+        }
         case CustomPropertySyntax::Type::CustomIdent:
-          if (RefPtr value = ConsumeCustomIdent(range))
+        {
+          if (RefPtr value = PropertyParserHelpers::ConsumeCustomIdent(range))
           {
-            if (component.ident.isNull() || value->stringValue() == component.ident)
+            if (component.ident == CSSOMStringAtom::Null() || value->StringValue() == component.ident)
+            {
               return value;
+            }
           }
+
           return nullptr;
+        }
         case CustomPropertySyntax::Type::Percentage:
-          return CSSPrimitiveValueResolver<CSS::Percentage<>>::ConsumeAndResolve(range, state);
+        {
+          return PrimitiveValueResolver<Percentage<>>::ConsumeAndResolve(range, state);
+        }
         case CustomPropertySyntax::Type::Integer:
-          return CSSPrimitiveValueResolver<CSS::Integer<>>::ConsumeAndResolve(range, state);
+        {
+          return PrimitiveValueResolver<Integer<>>::ConsumeAndResolve(range, state);
+        }
         case CustomPropertySyntax::Type::Number:
-          return CSSPrimitiveValueResolver<CSS::Number<>>::ConsumeAndResolve(range, state);
+        {
+          return PrimitiveValueResolver<Number<>>::ConsumeAndResolve(range, state);
+        }
         case CustomPropertySyntax::Type::Angle:
-          return CSSPrimitiveValueResolver<CSS::Angle<>>::ConsumeAndResolve(range, state);
+        {
+          return PrimitiveValueResolver<Angle<>>::ConsumeAndResolve(range, state);
+        }
         case CustomPropertySyntax::Type::Time:
-          return CSSPrimitiveValueResolver<CSS::Time<>>::ConsumeAndResolve(range, state);
+        {
+          return PrimitiveValueResolver<Time<>>::ConsumeAndResolve(range, state);
+        }
         case CustomPropertySyntax::Type::Resolution:
-          return CSSPrimitiveValueResolver<CSS::Resolution<>>::ConsumeAndResolve(range, state);
-        case CustomPropertySyntax::Type::Color: return ConsumeColor(range, state);
+        {
+          return PrimitiveValueResolver<Resolution<>>::ConsumeAndResolve(range, state);
+        }
+        case CustomPropertySyntax::Type::Color:
+        {
+          return PropertyParserHelpers::ConsumeColor(range, state);
+        }
         case CustomPropertySyntax::Type::Image:
-          return ConsumeImage(range, state,
-                              {AllowedImageType::URLFunction, AllowedImageType::GeneratedImage});
-        case CustomPropertySyntax::Type::URL:         return ConsumeURL(range, state, {});
-        case CustomPropertySyntax::Type::CSSOMString: return ConsumeString(range);
+        {
+          return PropertyParserHelpers::ConsumeImage(
+            range, state,
+            PropertyParserHelpers::AllowedImageType::URLFunction
+              | PropertyParserHelpers::AllowedImageType::GeneratedImage);
+        }
+        case CustomPropertySyntax::Type::URL:
+        {
+          return PropertyParserHelpers::ConsumeURL(range, state, {});
+        }
+        case CustomPropertySyntax::Type::String:
+        {
+          return PropertyParserHelpers::ConsumeString(range);
+        }
         case CustomPropertySyntax::Type::TransformFunction:
-          return CSSPropertyParsing::ConsumeTransformFunction(range, state);
+        {
+          return PropertyParsing::ConsumeTransformFunction(range, state);
+        }
         case CustomPropertySyntax::Type::TransformList:
-          return CSSPropertyParsing::ConsumeTransformList(range, state);
-        case CustomPropertySyntax::Type::Unknown: return nullptr;
+        {
+          return PropertyParsing::ConsumeTransformList(range, state);
+        }
+        case CustomPropertySyntax::Type::Unknown:
+        {
+          return nullptr;
+        }
       }
-      ASSERT_NOT_REACHED();
-      return nullptr;
+
+      krys_unreachable();
     };
 
     auto ConsumeComponent = [&](auto &range, const auto &component) -> RefPtr<Value>
     {
       switch (component.multiplier)
       {
-        case CustomPropertySyntax::Multiplier::Single: return ConsumeSingleValue(range, component);
+        case CustomPropertySyntax::Multiplier::Single:
+        {
+          return ConsumeSingleValue(range, component);
+        }
         case CustomPropertySyntax::Multiplier::CommaList:
-          return ConsumeListSeparatedBy<',', OneOrMore>(range, [&](auto &range)
-                                                        { return ConsumeSingleValue(range, component); });
+        {
+          return PropertyParserHelpers::ConsumeListSeparatedBy<',', PropertyParserHelpers::OneOrMore>(
+            range, [&](auto &range) { return ConsumeSingleValue(range, component); });
+        }
         case CustomPropertySyntax::Multiplier::SpaceList:
-          return ConsumeListSeparatedBy<' ', OneOrMore>(range, [&](auto &range)
-                                                        { return ConsumeSingleValue(range, component); });
+        {
+          return PropertyParserHelpers::ConsumeListSeparatedBy<' ', PropertyParserHelpers::OneOrMore>(
+            range, [&](auto &range) { return ConsumeSingleValue(range, component); });
+        }
       }
-      ASSERT_NOT_REACHED();
-      return nullptr;
+
+      krys_unreachable();
     };
 
-    for (auto &component : syntax.definition)
+    for (auto &component : syntax.Definition)
     {
       if (RefPtr value = ConsumeComponent(range, component))
       {
         if (range.IsAtEnd())
+        {
           return {value, component.type};
+        }
       }
+
       range = rangeCopy;
     }
+
     return {nullptr, CustomPropertySyntax::Type::Unknown};
   }
 
@@ -679,84 +731,122 @@ namespace krys::boo::css
                                     const CSSOMStringAtom &name, const CustomPropertySyntax &syntax,
                                     style::BuilderState &builderState) noexcept
   {
-    if (syntax.isUniversal())
-      return {
-        {Style::CustomProperty::CreateForVariableData(name, CSSVariableData::Create(range.ConsumeAll()))}};
+    if (syntax.IsUniversal())
+    {
+      return {{style::CustomProperty::CreateForVariableData(name, VariableData::Create(range.ConsumeAll()))}};
+    }
 
     range.DiscardWhitespace();
 
-    if (auto keyword = ConsumeCSSWideKeyword(range))
+    if (auto keyword = ConsumeGlobalKeyword(range))
+    {
       return {{*keyword}};
+    }
 
     auto [value, syntaxType] = ConsumeCustomPropertyValueWithSyntax(range, state, syntax);
     if (!value)
+    {
       return {};
+    }
 
-    auto resolveSyntaxValue = [&, syntaxType =
-                                    syntaxType](const Value &value) -> Maybe<Style::CustomProperty::Value>
+    auto ResolveSyntaxValue = [&, syntaxType =
+                                    syntaxType](const Value &value) -> Maybe<style::CustomProperty::Value>
     {
       switch (syntaxType)
       {
         case CustomPropertySyntax::Type::LengthPercentage:
-          return Style::toStyleFromCSSValue<Style::LengthPercentage<>>(builderState,
-                                                                       downcast<PrimitiveValue>(value));
+        {
+          return style::toStyleFromCSSValue<style::LengthPercentage<>>(builderState,
+                                                                       Downcast<PrimitiveValue>(value));
+        }
         case CustomPropertySyntax::Type::Length:
-          return Style::toStyleFromCSSValue<Style::Length<>>(builderState, downcast<PrimitiveValue>(value));
+        {
+          return style::toStyleFromCSSValue<style::Length<>>(builderState, Downcast<PrimitiveValue>(value));
+        }
         case CustomPropertySyntax::Type::Integer:
         case CustomPropertySyntax::Type::Number:
-          return Style::toStyleFromCSSValue<Style::Number<>>(builderState, downcast<PrimitiveValue>(value));
+        {
+          return style::toStyleFromCSSValue<style::Number<>>(builderState, Downcast<PrimitiveValue>(value));
+        }
         case CustomPropertySyntax::Type::Percentage:
-          return Style::toStyleFromCSSValue<Style::Percentage<>>(builderState,
-                                                                 downcast<PrimitiveValue>(value));
+        {
+          return style::toStyleFromCSSValue<style::Percentage<>>(builderState,
+                                                                 Downcast<PrimitiveValue>(value));
+        }
         case CustomPropertySyntax::Type::Angle:
-          return Style::toStyleFromCSSValue<Style::Angle<>>(builderState, downcast<PrimitiveValue>(value));
+        {
+          return style::toStyleFromCSSValue<style::Angle<>>(builderState, Downcast<PrimitiveValue>(value));
+        }
         case CustomPropertySyntax::Type::Time:
-          return Style::toStyleFromCSSValue<Style::Time<>>(builderState, downcast<PrimitiveValue>(value));
+        {
+          return style::toStyleFromCSSValue<style::Time<>>(builderState, Downcast<PrimitiveValue>(value));
+        }
         case CustomPropertySyntax::Type::Resolution:
-          return Style::toStyleFromCSSValue<Style::Resolution<>>(builderState,
-                                                                 downcast<PrimitiveValue>(value));
+        {
+          return style::toStyleFromCSSValue<style::Resolution<>>(builderState,
+                                                                 Downcast<PrimitiveValue>(value));
+        }
         case CustomPropertySyntax::Type::Color:
-          return Style::toStyleFromCSSValue<Style::Color>(builderState, value, Style::ForVisitedLink::No);
+        {
+          return style::toStyleFromCSSValue<style::Color>(builderState, value, style::ForVisitedLink::No);
+        }
         case CustomPropertySyntax::Type::Image:
         {
           auto styleImage = builderState.createStyleImage(value);
           if (!styleImage)
+          {
             return {};
+          }
+
           return Style::ImageWrapper {styleImage.releaseNonNull()};
         }
         case CustomPropertySyntax::Type::URL:
+        {
           return Style::toStyle(downcast<CSSURLValue>(value).url(), builderState);
+        }
         case CustomPropertySyntax::Type::CustomIdent:
+        {
           return CustomIdentifier {CSSOMStringAtom {downcast<PrimitiveValue>(value).stringValue()}};
-        case CustomPropertySyntax::Type::CSSOMString: return downcast<PrimitiveValue>(value).stringValue();
+        }
+        case CustomPropertySyntax::Type::String:
+        {
+          return Downcast<PrimitiveValue>(value).StringValue();
+        }
         case CustomPropertySyntax::Type::TransformFunction:
         case CustomPropertySyntax::Type::TransformList:
+        {
           return Style::toStyleFromCSSValue<Style::TransformFunction>(builderState, value);
+        }
         case CustomPropertySyntax::Type::Unknown: return {};
       }
-      ASSERT_NOT_REACHED();
-      return {};
+
+      krys_unreachable();
     };
 
-    if (is<CSSValueList>(value.get()) || is<CSSTransformListValue>(value.get()))
+    if (Is<ValueList>(value.get()) || Is<TransformListValue>(value.get()))
     {
-      Ref valueList = downcast<CSSValueContainingVector>(value.releaseNonNull());
-      auto syntaxValueList = Style::CustomProperty::ValueList {{}, valueList->separator()};
-      for (Ref listValue : valueList.get())
+      auto *valueList = Downcast<ValueWithSmallList>(value.get());
+      auto syntaxValueList = style::CustomProperty::ValueList {{}, valueList->separator()};
+      for (Ref listValue : valueList)
       {
-        auto syntaxValue = resolveSyntaxValue(listValue);
+        auto syntaxValue = ResolveSyntaxValue(listValue);
         if (!syntaxValue)
+        {
           return {};
-        syntaxValueList.values.append(WTF::move(*syntaxValue));
+        }
+        syntaxValueList.values.append(krys::move(*syntaxValue));
       }
-      return {{Style::CustomProperty::CreateForValueList(name, WTF::move(syntaxValueList))}};
+
+      return {{style::CustomProperty::CreateForValueList(name, krys::move(syntaxValueList))}};
     };
 
-    auto syntaxValue = resolveSyntaxValue(*value);
+    auto syntaxValue = ResolveSyntaxValue(*value);
     if (!syntaxValue)
+    {
       return {};
+    }
 
-    return {{Style::CustomProperty::CreateForValue(name, WTF::move(*syntaxValue))}};
+    return {{style::CustomProperty::CreateForValue(name, krys::move(*syntaxValue))}};
   }
 
 #pragma endregion
@@ -766,65 +856,69 @@ namespace krys::boo::css
   bool ConsumeStyleProperty(TokenRange &range, const ParserContext &context, PropertyId property,
                             IsImportant important, RuleType ruleType, PropertyParserResult &result)
   {
-    if (Property::isDescriptorOnly(property))
+    if (Property::IsDescriptorOnly(property))
+    {
       return false;
+    }
 
     auto state = PropertyParserState {
       .Context = context,
-      .currentRule = ruleType,
-      .currentProperty = property,
-      .important = important,
+      .CurrentProperty = property,
+      .CurrentRule = ruleType,
+      .Important = important,
     };
 
     if (ConsumeInternalAutoBaseFunction(range, property, state, result))
       return true;
 
-    if (WebCore::isShorthand(property))
+    if (Property::IsShorthand(property))
     {
       auto rangeCopy = range;
-      if (RefPtr keywordValue = ConsumeCSSWideKeywordValue(rangeCopy))
+      if (RefPtr keywordValue = ConsumeGlobalKeywordValue(rangeCopy))
       {
-        result.addPropertyForAllLonghandsOfCurrentShorthand(state, WTF::move(keywordValue));
+        result.AddPropertyForAllLonghandsOfCurrentShorthand(state, krys::move(keywordValue));
         range = rangeCopy;
         return true;
       }
 
       auto originalRange = range;
 
-      if (CSSPropertyParsing::parseStylePropertyShorthand(range, property, state, result))
-        return true;
-
-      if (CSSVariableParser::containsValidVariableReferences(originalRange, context))
+      if (PropertyParsing::ParseStylePropertyShorthand(range, property, state, result))
       {
-        result.addPropertyForAllLonghandsOfCurrentShorthand(
-          state, CSSPendingSubstitutionValue::Create(
-                   property, CSSVariableReferenceValue::Create(originalRange, context)));
+        return true;
+      }
+
+      if (VariableParser::ContainsValidVariableReferences(originalRange, context))
+      {
+        result.AddPropertyForAllLonghandsOfCurrentShorthand(
+          state,
+          PendingSubstitutionValue::Create(property, VariableReferenceValue::Create(originalRange, context)));
         return true;
       }
     }
     else
     {
       auto rangeCopy = range;
-      if (RefPtr keywordValue = ConsumeCSSWideKeywordValue(rangeCopy))
+      if (RefPtr keywordValue = ConsumeGlobalKeywordValue(rangeCopy))
       {
-        result.addProperty(state, property, CSSPropertyInvalid, WTF::move(keywordValue), important);
+        result.AddProperty(state, property, PropertyId::Invalid, krys::move(keywordValue), important);
         range = rangeCopy;
         return true;
       }
 
       auto originalRange = range;
 
-      RefPtr parsedValue = CSSPropertyParsing::parseStylePropertyLonghand(range, property, state);
+      RefPtr parsedValue = PropertyParsing::ParseStylePropertyLonghand(range, property, state);
       if (parsedValue && range.IsAtEnd())
       {
-        result.addProperty(state, property, CSSPropertyInvalid, WTF::move(parsedValue), important);
+        result.AddProperty(state, property, PropertyId::Invalid, krys::move(parsedValue), important);
         return true;
       }
 
-      if (CSSVariableParser::containsValidVariableReferences(originalRange, context))
+      if (VariableParser::ContainsValidVariableReferences(originalRange, context))
       {
-        result.addProperty(state, property, CSSPropertyInvalid,
-                           CSSVariableReferenceValue::Create(originalRange, context), important);
+        result.AddProperty(state, property, PropertyId::Invalid,
+                           VariableReferenceValue::Create(originalRange, context), important);
         return true;
       }
     }
@@ -837,16 +931,18 @@ namespace krys::boo::css
   {
     auto state = PropertyParserState {
       .Context = context,
-      .currentRule = RuleType::FontFace,
-      .currentProperty = property,
-      .important = IsImportant::No,
+      .CurrentProperty = property,
+      .CurrentRule = RuleType::FontFace,
+      .Important = IsImportant(false),
     };
 
-    RefPtr parsedValue = CSSPropertyParsing::parseFontFaceDescriptor(range, property, state);
+    RefPtr parsedValue = PropertyParsing::ParseFontFaceDescriptor(range, property, state);
     if (!parsedValue || !range.IsAtEnd())
+    {
       return false;
+    }
 
-    result.addProperty(state, property, CSSPropertyInvalid, WTF::move(parsedValue), IsImportant::No);
+    result.AddProperty(state, property, PropertyId::Invalid, krys::move(parsedValue), IsImportant(false));
     return true;
   }
 
@@ -855,16 +951,18 @@ namespace krys::boo::css
   {
     auto state = PropertyParserState {
       .Context = context,
-      .currentRule = RuleType::FontPaletteValues,
-      .currentProperty = property,
-      .important = IsImportant::No,
+      .CurrentProperty = property,
+      .CurrentRule = RuleType::FontPaletteValues,
+      .Important = IsImportant(false),
     };
 
-    RefPtr parsedValue = CSSPropertyParsing::parseFontPaletteValuesDescriptor(range, property, state);
+    RefPtr parsedValue = PropertyParsing::ParseFontPaletteValuesDescriptor(range, property, state);
     if (!parsedValue || !range.IsAtEnd())
+    {
       return false;
+    }
 
-    result.addProperty(state, property, CSSPropertyInvalid, WTF::move(parsedValue), IsImportant::No);
+    result.AddProperty(state, property, PropertyId::Invalid, krys::move(parsedValue), IsImportant(false));
     return true;
   }
 
@@ -873,16 +971,18 @@ namespace krys::boo::css
   {
     auto state = PropertyParserState {
       .Context = context,
-      .currentRule = RuleType::CounterStyle,
-      .currentProperty = property,
-      .important = IsImportant::No,
+      .CurrentProperty = property,
+      .CurrentRule = RuleType::CounterStyle,
+      .Important = IsImportant(false),
     };
 
-    RefPtr parsedValue = CSSPropertyParsing::parseCounterStyleDescriptor(range, property, state);
+    RefPtr parsedValue = PropertyParsing::ParseCounterStyleDescriptor(range, property, state);
     if (!parsedValue || !range.IsAtEnd())
+    {
       return false;
+    }
 
-    result.addProperty(state, property, CSSPropertyInvalid, WTF::move(parsedValue), IsImportant::No);
+    result.AddProperty(state, property, PropertyId::Invalid, krys::move(parsedValue), IsImportant(false));
     return true;
   }
 
@@ -911,22 +1011,26 @@ namespace krys::boo::css
                              IsImportant important, PropertyParserResult &result)
   {
     // Does not apply in @page per-spec.
-    if (property == CSSPropertyPage)
+    if (property == PropertyId::Page)
+    {
       return false;
+    }
 
     auto state = PropertyParserState {
       .Context = context,
-      .currentRule = RuleType::Page,
-      .currentProperty = property,
-      .important = IsImportant::No,
+      .CurrentProperty = property,
+      .CurrentRule = RuleType::Page,
+      .Important = IsImportant(false),
     };
 
-    if (RefPtr parsedValue = CSSPropertyParsing::parsePageDescriptor(range, property, state))
+    if (RefPtr parsedValue = PropertyParsing::ParsePageDescriptor(range, property, state))
     {
       if (!range.IsAtEnd())
+      {
         return false;
+      }
 
-      result.addProperty(state, property, CSSPropertyInvalid, WTF::move(parsedValue), IsImportant::No);
+      result.AddProperty(state, property, PropertyId::Invalid, krys::move(parsedValue), IsImportant(false));
       return true;
     }
 
@@ -938,88 +1042,98 @@ namespace krys::boo::css
   {
     auto state = PropertyParserState {
       .Context = context,
-      .currentRule = RuleType::Property,
-      .currentProperty = property,
-      .important = IsImportant::No,
+      .CurrentProperty = property,
+      .CurrentRule = RuleType::Property,
+      .Important = IsImportant(false),
     };
 
-    RefPtr parsedValue = CSSPropertyParsing::parsePropertyDescriptor(range, property, state);
+    RefPtr parsedValue = PropertyParsing::ParsePropertyDescriptor(range, property, state);
     if (!parsedValue || !range.IsAtEnd())
+    {
       return false;
+    }
 
-    result.addProperty(state, property, CSSPropertyInvalid, WTF::move(parsedValue), IsImportant::No);
+    result.AddProperty(state, property, PropertyId::Invalid, krys::move(parsedValue), IsImportant(false));
     return true;
   }
 
   bool ConsumeViewTransitionDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
                                        PropertyParserResult &result)
   {
-    ASSERT(context.propertySettings.crossDocumentViewTransitionsEnabled);
+    krys_debug_assert(context.PropertySettings.crossDocumentViewTransitionsEnabled);
 
     auto state = PropertyParserState {
       .Context = context,
-      .currentRule = RuleType::ViewTransition,
-      .currentProperty = property,
-      .important = IsImportant::No,
+      .CurrentProperty = property,
+      .CurrentRule = RuleType::ViewTransition,
+      .Important = IsImportant(false),
     };
 
-    RefPtr parsedValue = CSSPropertyParsing::parseViewTransitionDescriptor(range, property, state);
+    RefPtr parsedValue = PropertyParsing::ParseViewTransitionDescriptor(range, property, state);
     if (!parsedValue || !range.IsAtEnd())
+    {
       return false;
+    }
 
-    result.addProperty(state, property, CSSPropertyInvalid, WTF::move(parsedValue), IsImportant::No);
+    result.AddProperty(state, property, PropertyId::Invalid, krys::move(parsedValue), IsImportant(false));
     return true;
   }
 
   // Checks whether a CSS property is allowed in @position-try.
-  static bool propertyAllowedInPositionTryRule(PropertyId property)
+  KRYS_NODISCARD static bool PropertyAllowedInPositionTryRule(PropertyId property) noexcept
   {
-    return Property::isInsetProperty(property) || Property::isMarginProperty(property)
-           || Property::isSizingProperty(property) || property == CSSPropertyAlignSelf
-           || property == CSSPropertyJustifySelf || property == CSSPropertyPlaceSelf
-           || property == CSSPropertyPositionAnchor || property == CSSPropertyPositionArea;
+    return Property::IsInsetProperty(property) || Property::IsMarginProperty(property)
+           || Property::IsSizingProperty(property) || property == PropertyId::AlignSelf
+           || property == PropertyId::JustifySelf || property == PropertyId::PlaceSelf
+           || property == PropertyId::PositionAnchor || property == PropertyId::PositionArea;
   }
 
   bool ConsumePositionTryDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
-                                    IsImportant important, PropertyParserResult &result)
+                                    IsImportant important, PropertyParserResult &result) noexcept
   {
-    ASSERT(context.propertySettings.cssAnchorPositioningEnabled);
+    krys_debug_assert(context.PropertySettings.cssAnchorPositioningEnabled);
 
     // Per spec, !important is not allowed and makes the whole declaration invalid.
-    if (important == IsImportant::Yes)
+    if (important)
+    {
       return false;
+    }
 
-    if (!propertyAllowedInPositionTryRule(property))
+    if (!PropertyAllowedInPositionTryRule(property))
+    {
       return false;
+    }
 
     return ConsumeStyleProperty(range, context, property, important, RuleType::PositionTry, result);
   }
 
   bool ConsumeFunctionDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
-                                 PropertyParserResult &result)
+                                 PropertyParserResult &result) noexcept
   {
-    ASSERT(context.propertySettings.cssFunctionAtRuleEnabled);
+    krys_debug_assert(context.PropertySettings.cssFunctionAtRuleEnabled);
 
     auto state = PropertyParserState {
       .Context = context,
-      .currentRule = RuleType::Function,
-      .currentProperty = property,
-      .important = IsImportant::No,
+      .CurrentProperty = property,
+      .CurrentRule = RuleType::Function,
+      .Important = IsImportant(false),
     };
 
-    RefPtr parsedValue = CSSPropertyParsing::parseFunctionDescriptor(range, property, state);
+    RefPtr parsedValue = PropertyParsing::ParseFunctionDescriptor(range, property, state);
     if (!parsedValue || !range.IsAtEnd())
+    {
       return false;
+    }
 
-    result.addProperty(state, property, CSSPropertyInvalid, WTF::move(parsedValue), IsImportant::No);
+    result.AddProperty(state, property, PropertyId::Invalid, krys::move(parsedValue), IsImportant(false));
     return true;
   }
 
   bool ConsumeInternalBaseAppearanceDescriptor(TokenRange &range, const ParserContext &context,
                                                PropertyId property, IsImportant important,
-                                               PropertyParserResult &result)
+                                               PropertyParserResult &result) noexcept
   {
-    krys_assert(context.Mode == ParserMode::UASheet);
+    krys_debug_assert(context.Mode == ParserMode::UASheet);
 
     if (property == PropertyId::Appearance)
     {

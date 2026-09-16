@@ -5,7 +5,7 @@
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/ColorAdjust/ColorScheme.hpp"
-#include "Krystal.Booey/CSS/Values/ColorAdjust/ColorSchemeValue.hpp"
+#include "Krystal.Booey/CSS/Values/ColorSchemeValue.hpp"
 
 namespace krys::boo::css
 {

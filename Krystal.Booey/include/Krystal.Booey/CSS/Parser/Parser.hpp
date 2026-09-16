@@ -17,7 +17,6 @@
 namespace krys::boo::css
 {
   class CSSRule;
-  class CSSCharsetRule;
   class CSSImportRule;
   class CSSNamespaceRule;
   class CSSStyleRule;
@@ -117,7 +116,7 @@ namespace krys::boo::css
 
 #pragma region At-Rule Consumers
 
-    KRYS_NODISCARD RefPtr<CSSCharsetRule> ConsumeCharsetRule(TokenRange prelude) noexcept;
+    //KRYS_NODISCARD RefPtr<CSSCharsetRule> ConsumeCharsetRule(TokenRange prelude) noexcept;
 
     KRYS_NODISCARD RefPtr<CSSImportRule> ConsumeImportRule(TokenRange prelude) noexcept;
 

@@ -7,8 +7,8 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/PercentageDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/Easing/EasingFunctionValue.hpp"
 #include "Krystal.Booey/CSS/Values/Easing/EasingFunction.hpp"
+#include "Krystal.Booey/CSS/Values/EasingFunctionValue.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
@@ -66,8 +66,7 @@ namespace krys::boo::css::PropertyParserHelpers
           //  case it must be a positive integer greater than 1."
 
           // Re-parse `steps` to account for different type requirement.
-          auto stepsJumpNone =
-            MetaConsumer<Integer<Range {2, Range::Inf}>>::Consume(stashedArgs, state);
+          auto stepsJumpNone = MetaConsumer<Integer<Range {2, Range::Inf}>>::Consume(stashedArgs, state);
           if (!stepsJumpNone)
           {
             return {};

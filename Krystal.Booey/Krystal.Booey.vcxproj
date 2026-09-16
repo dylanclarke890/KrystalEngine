@@ -46,7 +46,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -142,7 +142,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <ForcedIncludeFiles>pch.h</ForcedIncludeFiles>
@@ -158,8 +158,6 @@
   <ItemGroup>
     <Text Include="data\_progress\DOM.txt" />
     <Text Include="data\_progress\HTML.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="codegen\svg-css-value-keywords.in" />
     <None Include="data\CSSStyleProperties+PropertyNames.idl" />
     <None Include="data\CSS\CSSPageDescriptors.idl" />
@@ -225,8 +223,6 @@
     <None Include="data\HTML\HTMLMetaElement.idl" />
     <None Include="data\HTML\HTMLStyleElement.idl" />
     <None Include="data\HTML\HTMLTitleElement.idl" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="codegen\css-properties.json" />
     <None Include="codegen\css-value-keywords.in" />
     <None Include="codegen\css_properties.py" />
@@ -236,6 +232,34 @@
     <None Include="data\EventInterfaces.in" />
     <None Include="data\HTMLEntityNames.in" />
     <None Include="data\HTMLTagNames.in" />
+    <None Include="data\CSS\Rule\CSSConditionRule.idl" />
+    <None Include="data\CSS\Rule\CSSContainerRule.idl" />
+    <None Include="data\CSS\Rule\CSSCounterStyleRule.idl" />
+    <None Include="data\CSS\Rule\CSSFontFaceRule.idl" />
+    <None Include="data\CSS\Rule\CSSFontFeatureValuesRule.idl" />
+    <None Include="data\CSS\Rule\CSSFontPaletteValuesRule.idl" />
+    <None Include="data\CSS\Rule\CSSFunctionRule.idl" />
+    <None Include="data\CSS\Rule\CSSGroupingRule.idl" />
+    <None Include="data\CSS\Rule\CSSImportRule.idl" />
+    <None Include="data\CSS\Rule\CSSKeyframeRule.idl" />
+    <None Include="data\CSS\Rule\CSSKeyframesRule.idl" />
+    <None Include="data\CSS\Rule\CSSLayerBlockRule.idl" />
+    <None Include="data\CSS\Rule\CSSLayerStatementRule.idl" />
+    <None Include="data\CSS\Rule\CSSMediaRule.idl" />
+    <None Include="data\CSS\Rule\CSSNamespaceRule.idl" />
+    <None Include="data\CSS\Rule\CSSPageRule.idl" />
+    <None Include="data\CSS\Rule\CSSPositionTryRule.idl" />
+    <None Include="data\CSS\Rule\CSSPropertyRule.idl" />
+    <None Include="data\CSS\Rule\CSSRule.idl" />
+    <None Include="data\CSS\Rule\CSSRuleList.idl" />
+    <None Include="data\CSS\Rule\CSSScopeRule.idl" />
+    <None Include="data\CSS\Rule\CSSStartingStyleRule.idl" />
+    <None Include="data\CSS\Rule\CSSStyleRule+Typedom.idl" />
+    <None Include="data\CSS\Rule\CSSStyleRule.idl" />
+    <None Include="data\CSS\Rule\CSSSupportsRule.idl" />
+    <None Include="data\CSS\Rule\CSSViewTransitionRule.idl" />
+    <None Include="data\CSS\Rule\CSSFunctionDeclarations.idl" />
+    <None Include="data\CSS\Rule\CSSNestedDeclarations.idl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.Booey\Constants\Attributes.hpp" />
@@ -249,18 +273,31 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSFontFaceRule.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSFontFeatureValuesRule.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSFontPaletteValuesRule.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSFunctionDeclarations.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSFunctionRule.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSGroupingRule.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSImportRule.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSInternalBaseAppearanceRule.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSKeyframeRule.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSKeyframesRule.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSLayerBlockRule.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSLayerStatementRule.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSMediaRule.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSNamespaceRule.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSNestedDeclarations.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSPageRule.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSPositionTryRule.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSPropertyRule.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSRule.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSRuleList.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSScopeRule.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSStartingStyleRule.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSStyleRule.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSSupportsRule.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSViewTransitionRule.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\BasicShapeValue.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\NoConversionDataRequiredTag.hpp" />
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\PositionValue.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Values\SerialisationContext.hpp" />
     <ClInclude Include="include\Krystal.Booey\Graphics\Color\AlphaPremultiplication.hpp" />
     <ClInclude Include="include\Krystal.Booey\Graphics\Color\Color.hpp" />
@@ -282,20 +319,10 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Calc\CalcAllowedSymbols.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Calc\CalcTreeParser.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Calc\Value.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\CSSFunctionDeclarations.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSGroupingRule.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSImportRule.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\CSSMarginDescriptors.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSMediaRule.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSNamespaceRule.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\CSSNestedDeclarations.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\CSSPageDescriptors.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSPageRule.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSRule.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSRuleList.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\CSSStyleDeclaration.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\CSSStyleProperties.hpp" />
-    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSStyleRule.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\CSSStyleSheet.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Parser\CustomPropertySyntax.hpp" />
     <ClInclude Include="include\Krystal.Booey\CSS\Parser\VariableParser.hpp" />
@@ -1049,34 +1076,6 @@
     <ProjectReference Include="..\Krystal.Core\Krystal.Core.vcxproj">
       <Project>{e0409a19-301c-431e-aa7d-18d06500a709}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="data\CSS\Rule\CSSConditionRule.idl" />
-    <None Include="data\CSS\Rule\CSSContainerRule.idl" />
-    <None Include="data\CSS\Rule\CSSCounterStyleRule.idl" />
-    <None Include="data\CSS\Rule\CSSFontFaceRule.idl" />
-    <None Include="data\CSS\Rule\CSSFontFeatureValuesRule.idl" />
-    <None Include="data\CSS\Rule\CSSFontPaletteValuesRule.idl" />
-    <None Include="data\CSS\Rule\CSSFunctionRule.idl" />
-    <None Include="data\CSS\Rule\CSSGroupingRule.idl" />
-    <None Include="data\CSS\Rule\CSSImportRule.idl" />
-    <None Include="data\CSS\Rule\CSSKeyframeRule.idl" />
-    <None Include="data\CSS\Rule\CSSKeyframesRule.idl" />
-    <None Include="data\CSS\Rule\CSSLayerBlockRule.idl" />
-    <None Include="data\CSS\Rule\CSSLayerStatementRule.idl" />
-    <None Include="data\CSS\Rule\CSSMediaRule.idl" />
-    <None Include="data\CSS\Rule\CSSNamespaceRule.idl" />
-    <None Include="data\CSS\Rule\CSSPageRule.idl" />
-    <None Include="data\CSS\Rule\CSSPositionTryRule.idl" />
-    <None Include="data\CSS\Rule\CSSPropertyRule.idl" />
-    <None Include="data\CSS\Rule\CSSRule.idl" />
-    <None Include="data\CSS\Rule\CSSRuleList.idl" />
-    <None Include="data\CSS\Rule\CSSScopeRule.idl" />
-    <None Include="data\CSS\Rule\CSSStartingStyleRule.idl" />
-    <None Include="data\CSS\Rule\CSSStyleRule+Typedom.idl" />
-    <None Include="data\CSS\Rule\CSSStyleRule.idl" />
-    <None Include="data\CSS\Rule\CSSSupportsRule.idl" />
-    <None Include="data\CSS\Rule\CSSViewTransitionRule.idl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -2,7 +2,6 @@
 #include "Krystal.Booey/CSS/Calc/CalcTreeParser.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Color.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Image.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/LengthDefinitions.hpp"
@@ -11,18 +10,19 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/NumberDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/PercentageDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
 #include "Krystal.Booey/CSS/Values/Background/BoxShadow.hpp"
 #include "Krystal.Booey/CSS/Values/Background/BoxShadowProperty.hpp"
-#include "Krystal.Booey/CSS/Values/Background/BackgroundRepeatValue.hpp"
-#include "Krystal.Booey/CSS/Values/Background/BoxShadowPropertyValue.hpp"
-#include "Krystal.Booey/CSS/Values/Background/ReflectValue.hpp"
+#include "Krystal.Booey/CSS/Values/BackgroundRepeatValue.hpp"
+#include "Krystal.Booey/CSS/Values/BorderImageSliceValue.hpp"
+#include "Krystal.Booey/CSS/Values/BorderImageWidthValue.hpp"
 #include "Krystal.Booey/CSS/Values/Borders/BorderImage.hpp"
 #include "Krystal.Booey/CSS/Values/Borders/BorderRadius.hpp"
-#include "Krystal.Booey/CSS/Values/Borders/BorderImageSliceValue.hpp"
-#include "Krystal.Booey/CSS/Values/Borders/BorderImageWidthValue.hpp"
+#include "Krystal.Booey/CSS/Values/BoxShadowPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ReflectValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 
@@ -126,8 +126,7 @@ namespace krys::boo::css::PropertyParserHelpers
                          .Vertical = CompleteQuadFromArray<BorderRadius::Axis>(krys::move(verticalRadii))};
   }
 
-  Maybe<BorderRadius> ConsumeUnresolvedBorderRadius(TokenRange &tokens,
-                                                    PropertyParserState &state) noexcept
+  Maybe<BorderRadius> ConsumeUnresolvedBorderRadius(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'border-radius'> = <length-percentage [0,∞]>{1,4} [ / <length-percentage [0,∞]>{1,4} ]?
     // https://drafts.csswg.org/css-backgrounds/#propdef-border-radius
@@ -149,7 +148,7 @@ namespace krys::boo::css::PropertyParserHelpers
   // MARK: - Border Image
 
   RefPtr<Value> ConsumeBorderImageSlice(TokenRange &tokens, PropertyParserState &state,
-                                           BorderImageSliceFillDefault defaultFill) noexcept
+                                        BorderImageSliceFillDefault defaultFill) noexcept
   {
     // <'border-image-slice'> = [<number [0,∞]> | <percentage [0,∞]>]{1,4} && fill?
     // https://drafts.csswg.org/css-backgrounds/#propdef-border-image-slice
@@ -198,7 +197,7 @@ namespace krys::boo::css::PropertyParserHelpers
   }
 
   RefPtr<Value> ConsumeBorderImageWidth(TokenRange &tokens, PropertyParserState &state,
-                                           BorderImageWidthOverridesWidthForLength overridesWidth) noexcept
+                                        BorderImageWidthOverridesWidthForLength overridesWidth) noexcept
   {
     // <'border-image-width'> = [ <length-percentage [0,∞]> | <number [0,∞]> | auto ]{1,4}
     // https://drafts.csswg.org/css-backgrounds/#propdef-border-image-width
@@ -385,8 +384,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return ConsumeBackgroundSize<PropertyId::BackgroundSize>(tokens, state);
   }
 
-  RefPtr<Value> ConsumeSingleWebkitBackgroundSize(TokenRange &tokens,
-                                                     PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeSingleWebkitBackgroundSize(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // Non-standard.
     return ConsumeBackgroundSize<PropertyId::WebkitBackgroundSize>(tokens, state);

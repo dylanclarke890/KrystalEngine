@@ -1,22 +1,22 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Grid.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/IntegerDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/LengthPercentageDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/Grid/GridAutoRepeatValue.hpp"
-#include "Krystal.Booey/CSS/Values/Grid/GridIntegerRepeatValue.hpp"
-#include "Krystal.Booey/CSS/Values/Grid/GridLineNamesValue.hpp"
-#include "Krystal.Booey/CSS/Values/Grid/GridLineValue.hpp"
 #include "Krystal.Booey/CSS/Values/Grid/GridNamedAreaMap.hpp"
-#include "Krystal.Booey/CSS/Values/Grid/GridTemplateAreasValue.hpp"
-#include "Krystal.Booey/CSS/Values/Grid/SubgridValue.hpp"
 #include "Krystal.Booey/CSS/Values/Grid/GridPosition.hpp"
+#include "Krystal.Booey/CSS/Values/GridAutoRepeatValue.hpp"
+#include "Krystal.Booey/CSS/Values/GridIntegerRepeatValue.hpp"
+#include "Krystal.Booey/CSS/Values/GridLineNamesValue.hpp"
+#include "Krystal.Booey/CSS/Values/GridLineValue.hpp"
+#include "Krystal.Booey/CSS/Values/GridTemplateAreasValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/SubgridValue.hpp"
 #include "Krystal.Core/Text/Encodings/Decode.hpp"
 #include "Krystal.Core/Text/Encodings/Encode.hpp"
 #include "Krystal.Core/Text/Encodings/UTF.hpp"
@@ -133,8 +133,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     RefPtr<PrimitiveValue> spanValue;
     RefPtr<PrimitiveValue> gridLineName;
-    RefPtr<PrimitiveValue> numericValue =
-      PrimitiveValueResolver<Integer<>>::ConsumeAndResolve(tokens, state);
+    RefPtr<PrimitiveValue> numericValue = PrimitiveValueResolver<Integer<>>::ConsumeAndResolve(tokens, state);
 
     if (numericValue)
     {
@@ -185,8 +184,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return nullptr; // An <integer> value of zero makes the declaration invalid.
     }
 
-    return GridLineValue::Create(krys::move(spanValue), krys::move(numericValue),
-                                    krys::move(gridLineName));
+    return GridLineValue::Create(krys::move(spanValue), krys::move(numericValue), krys::move(gridLineName));
   }
 
   KRYS_NODISCARD static bool IsGridTrackFixedSized(const PrimitiveValue &primitiveValue) noexcept
@@ -226,7 +224,7 @@ namespace krys::boo::css::PropertyParserHelpers
   }
 
   KRYS_NODISCARD static RefPtr<PrimitiveValue> ConsumeGridBreadth(TokenRange &tokens,
-                                                                     PropertyParserState &state) noexcept
+                                                                  PropertyParserState &state) noexcept
   {
     // <track-breadth>       = <length-percentage [0,∞]> | <flex [0,∞]> | min-content | max-content | auto
     // https://drafts.csswg.org/css-grid/#typedef-track-breadth
@@ -256,7 +254,7 @@ namespace krys::boo::css::PropertyParserHelpers
   }
 
   KRYS_NODISCARD static RefPtr<Value> ConsumeFitContent(TokenRange &tokens,
-                                                           PropertyParserState &state) noexcept
+                                                        PropertyParserState &state) noexcept
   {
     TokenRange rangeCopy = tokens;
     TokenRange args = ConsumeFunction(rangeCopy);
@@ -305,8 +303,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
       tokens = rangeCopy;
 
-      return FunctionValue::Create(ValueId::Minmax, krys::move(minTrackBreadth),
-                                      krys::move(maxTrackBreadth));
+      return FunctionValue::Create(ValueId::Minmax, krys::move(minTrackBreadth), krys::move(maxTrackBreadth));
     }
 
     if (token.FunctionId() == ValueId::FitContent)
@@ -318,7 +315,7 @@ namespace krys::boo::css::PropertyParserHelpers
   }
 
   RefPtr<GridLineNamesValue> ConsumeGridLineNames(TokenRange &tokens, PropertyParserState &,
-                                                     AllowEmpty allowEmpty) noexcept
+                                                  AllowEmpty allowEmpty) noexcept
   {
     TokenRange rangeCopy = tokens;
     if (rangeCopy.ConsumeIncludingWhitespace().Type() != TokenType::OpenSquare)
@@ -359,8 +356,7 @@ namespace krys::boo::css::PropertyParserHelpers
     if (!isAutoRepeat)
     {
       repetitions =
-        PrimitiveValueResolver<Integer<Range {1, Range::Inf}, size_t>>::ConsumeAndResolve(args,
-                                                                                                   state);
+        PrimitiveValueResolver<Integer<Range {1, Range::Inf}, size_t>>::ConsumeAndResolve(args, state);
       if (!repetitions)
       {
         return false;
@@ -423,8 +419,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return true;
   }
 
-  KRYS_NODISCARD static bool ConsumeSubgridNameRepeatFunction(TokenRange &tokens,
-                                                              PropertyParserState &state,
+  KRYS_NODISCARD static bool ConsumeSubgridNameRepeatFunction(TokenRange &tokens, PropertyParserState &state,
                                                               ValueListBuilder &list,
                                                               bool &isAutoRepeat) noexcept
   {
@@ -435,8 +430,7 @@ namespace krys::boo::css::PropertyParserHelpers
     if (!isAutoRepeat)
     {
       repetitions =
-        PrimitiveValueResolver<Integer<Range {1, Range::Inf}, size_t>>::ConsumeAndResolve(args,
-                                                                                                   state);
+        PrimitiveValueResolver<Integer<Range {1, Range::Inf}, size_t>>::ConsumeAndResolve(args, state);
       if (!repetitions)
       {
         return false;
@@ -478,7 +472,7 @@ namespace krys::boo::css::PropertyParserHelpers
   }
 
   RefPtr<Value> ConsumeGridTrackList(TokenRange &tokens, PropertyParserState &state,
-                                        TrackListType trackListType) noexcept
+                                     TrackListType trackListType) noexcept
   {
     bool seenAutoRepeat = false;
     if (trackListType == GridTemplate && tokens.Peek().ValueId() == ValueId::Subgrid)
@@ -582,8 +576,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return ValueList::CreateSpaceSeparated(krys::move(values));
   }
 
-  RefPtr<Value> ConsumeGridTemplatesRowsOrColumns(TokenRange &tokens,
-                                                     PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeGridTemplatesRowsOrColumns(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // none | <track-list> | <auto-track-list> | subgrid <line-name-list>?
     // https://drafts.csswg.org/css-grid/#track-sizing

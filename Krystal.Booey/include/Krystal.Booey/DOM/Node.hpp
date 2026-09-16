@@ -1,20 +1,21 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Dicts/GetRootNodeOptions.hpp"
-#include "Krystal.Booey/DOM/Enums/DocumentPosition.hpp"
-#include "Krystal.Booey/DOM/Enums/NodeFlags.hpp"
-#include "Krystal.Booey/DOM/Enums/NodeType.hpp"
-#include "Krystal.Booey/DOM/EventTarget.hpp"
-#include "Krystal.Booey/DOM/Internals/RareData/NodeRareData.hpp"
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Core/Base.hpp"
-#include "Krystal.Core/CanMakeCheckedPtr.hpp"
-#include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/CheckedPtr.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#ifndef __INTELLISENSE__
 
+  #include "Krystal.Booey/DOM/Dicts/GetRootNodeOptions.hpp"
+  #include "Krystal.Booey/DOM/Enums/DocumentPosition.hpp"
+  #include "Krystal.Booey/DOM/Enums/NodeFlags.hpp"
+  #include "Krystal.Booey/DOM/Enums/NodeType.hpp"
+  #include "Krystal.Booey/DOM/EventTarget.hpp"
+  #include "Krystal.Booey/DOM/Internals/RareData/NodeRareData.hpp"
+  #include "Krystal.Booey/DOM/Types/DOMString.hpp"
+  #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+  #include "Krystal.Core/Base.hpp"
+  #include "Krystal.Core/CanMakeCheckedPtr.hpp"
+  #include "Krystal.Core/TypeCast.hpp"
+  #include "Krystal.Core/Types/CheckedPtr.hpp"
+  #include "Krystal.Core/Types/RefPtr.hpp"
+  #include "Krystal.Core/Types/UniquePtr.hpp"
 namespace krys::boo::dom
 {
   class ContainerNode;
@@ -52,7 +53,7 @@ namespace krys::boo::dom
   public:
     virtual ~Node() noexcept = default;
 
-#pragma region Node - https://dom.spec.whatwg.org/#node
+  #pragma region Node - https://dom.spec.whatwg.org/#node
 
     /// @see https://dom.spec.whatwg.org/#dom-node-nodetype
     KRYS_NODISCARD NodeType NodeType() const noexcept
@@ -201,7 +202,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-node-appendchild
     ExceptionOr<Node &> AppendChild(Node &newChild) noexcept;
 
-#pragma endregion
+  #pragma endregion
 
     /// @brief Helper function to get the node document of a node. This is the same as OwnerDocument except it
     /// always returns the document, even for documents themselves.
@@ -215,7 +216,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#get-the-parent
     KRYS_NODISCARD EventTarget *GetParent(Event &event) const noexcept override;
 
-#pragma region Tree Scope
+  #pragma region Tree Scope
 
     /// @see https://dom.spec.whatwg.org/#concept-shadow-tree
     KRYS_NODISCARD bool IsInShadowTree() const noexcept
@@ -229,9 +230,9 @@ namespace krys::boo::dom
       return IsConnected() && !IsInShadowTree();
     }
 
-#pragma endregion
+  #pragma endregion
 
-#pragma region Registered Observers
+  #pragma region Registered Observers
 
     /// @see https://dom.spec.whatwg.org/#registered-observer-list
     KRYS_NODISCARD List<Ref<RegisteredObserver>> &RegisteredObservers() noexcept;
@@ -239,9 +240,9 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#registered-observer-list
     KRYS_NODISCARD List<Ref<TransientRegisteredObserver>> &TransientRegisteredObservers() noexcept;
 
-#pragma endregion
+  #pragma endregion
 
-#pragma region Extension Hooks
+  #pragma region Extension Hooks
 
     virtual void OnInsert() noexcept
     {
@@ -274,9 +275,9 @@ namespace krys::boo::dom
     {
     }
 
-#pragma endregion
+  #pragma endregion
 
-#pragma region Type Checks
+  #pragma region Type Checks
 
     KRYS_NODISCARD bool IsAttributeNode() const noexcept
     {
@@ -378,9 +379,9 @@ namespace krys::boo::dom
       return HasNodeFlag(NodeFlags::IsMathMLElement) && HasNodeFlag(NodeFlags::IsUnknownElement);
     }
 
-#pragma endregion
+  #pragma endregion
 
-#pragma region Relationships
+  #pragma region Relationships
 
     /// @warn Be careful when modifying node relationships. Node constraints are not checked.
     void SetParentNode(ContainerNode *parent) noexcept
@@ -400,9 +401,9 @@ namespace krys::boo::dom
       _previousSibling = ShareCheckedPtr(sibling);
     }
 
-#pragma endregion
+  #pragma endregion
 
-#pragma region Node Flags
+  #pragma region Node Flags
 
     void SetNodeFlag(NodeFlags flag) noexcept
     {
@@ -419,7 +420,7 @@ namespace krys::boo::dom
       return HasFlag(_flags, flag);
     }
 
-#pragma endregion
+  #pragma endregion
   };
 }
 
@@ -429,3 +430,4 @@ KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::Node)
     return target.IsNode();
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();
+#endif

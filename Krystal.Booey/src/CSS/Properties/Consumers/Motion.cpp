@@ -9,16 +9,16 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/URL.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/ValueList.hpp"
-#include "Krystal.Booey/CSS/Values/Motion/RayValue.hpp"
 #include "Krystal.Booey/CSS/Values/Motion/RayFunction.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Position.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/RayValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValueList.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
   KRYS_NODISCARD static RefPtr<Value> ConsumeRayFunction(TokenRange &range,
-                                                            PropertyParserState &state) noexcept
+                                                         PropertyParserState &state) noexcept
   {
     // ray( <angle> && <ray-size>? && contain? && [at <position>]? )
     // <ray-size> = closest-side | closest-corner | farthest-side | farthest-corner | sides

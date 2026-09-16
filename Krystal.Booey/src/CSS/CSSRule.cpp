@@ -1,10 +1,10 @@
-﻿#include "Krystal.Booey/CSS/CSSRule.hpp"
-#include "Krystal.Booey/CSS/CSSImportRule.hpp"
-#include "Krystal.Booey/CSS/CSSNamespaceRule.hpp"
-#include "Krystal.Booey/CSS/CSSRuleList.hpp"
-#include "Krystal.Booey/CSS/CSSStyleRule.hpp"
+﻿#include "Krystal.Booey/CSS/Rules/CSSOM/CSSRule.hpp"
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/MediaList.hpp"
+#include "Krystal.Booey/CSS/Rules/CSSOM/CSSImportRule.hpp"
+#include "Krystal.Booey/CSS/Rules/CSSOM/CSSNamespaceRule.hpp"
+#include "Krystal.Booey/CSS/Rules/CSSOM/CSSRuleList.hpp"
+#include "Krystal.Booey/CSS/Rules/CSSOM/CSSStyleRule.hpp"
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
 
 namespace krys::boo::css

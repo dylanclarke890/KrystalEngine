@@ -5,15 +5,15 @@
 #include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
 {
   class CSSStyleSheet;
   class MediaList;
 
-  /// @see hhttps://drafts.csswg.org/cssom/#the-stylesheet-interface
+  /// @see https://drafts.csswg.org/cssom/#the-stylesheet-interface
   class StyleSheet : public RefCounted<StyleSheet>
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();

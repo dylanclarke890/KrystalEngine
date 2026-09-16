@@ -7,8 +7,8 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumer.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/TextDecoration/TextShadowPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/TextDecoration/TextShadow.hpp"
+#include "Krystal.Booey/CSS/Values/TextShadowPropertyValue.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
@@ -137,7 +137,7 @@ namespace krys::boo::css::PropertyParserHelpers
   // trouble resolving the function name in this context for some reason.
   KRYS_NODISCARD RefPtr<Value>
     krys::boo::css::PropertyParserHelpers::ConsumeTextShadow(TokenRange &tokens,
-                                                                PropertyParserState &state) noexcept
+                                                             PropertyParserState &state) noexcept
   {
     // <'text-shadow'> = none | [ <color>? && <length>{2,3} ]#
     // https://drafts.csswg.org/css-text-decor-3/#propdef-text-shadow

@@ -56,6 +56,13 @@ namespace krys::boo::css
       return token;
     }
 
+    KRYS_NODISCARD TokenRange ConsumeAll() noexcept
+    {
+      auto range = _tokens;
+      _tokens = {};
+      return TokenRange(range);
+    }
+
     KRYS_NODISCARD const Token &ConsumeIncludingWhitespace() noexcept
     {
       auto &token = Consume();

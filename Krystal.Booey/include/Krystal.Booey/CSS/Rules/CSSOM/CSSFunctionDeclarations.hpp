@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2023 Apple Inc. All rights reserved.
+﻿/*
+ * Copyright (C) 2025 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,32 +25,42 @@
 
 #pragma once
 
-#include "CSSGroupingRule.h"
+#include "CSSRule.h"
 
 namespace WebCore
 {
 
-  class StyleRuleScope;
+  class CSSFunctionDescriptors;
+  class StyleRuleFunctionDeclarations;
 
-  class CSSScopeRule final : public CSSGroupingRule
+  class CSSFunctionDeclarations final : public CSSRule
   {
   public:
-    static Ref<CSSScopeRule> create(StyleRuleScope &, CSSStyleSheet *parent);
+    static Ref<CSSFunctionDeclarations> create(StyleRuleFunctionDeclarations &rule, CSSStyleSheet *sheet)
+    {
+      return adoptRef(*new CSSFunctionDeclarations(rule, sheet));
+    };
 
-    String cssText() const final;
-    String start() const;
-    String end() const;
+    virtual ~CSSFunctionDeclarations();
+
+    CSSFunctionDescriptors &style();
 
   private:
-    const StyleRuleScope &styleRuleScope() const;
+    CSSFunctionDeclarations(StyleRuleFunctionDeclarations &, CSSStyleSheet *);
 
-    CSSScopeRule(StyleRuleScope &, CSSStyleSheet *);
+    String cssText() const final;
+    String cssTextInternal(StringBuilder &declarations, StringBuilder &rules) const;
+
+    void reattach(StyleRuleBase &) final;
     StyleRuleType styleRuleType() const final
     {
-      return StyleRuleType::Scope;
+      return StyleRuleType::FunctionDeclarations;
     }
+
+    Ref<StyleRuleFunctionDeclarations> m_styleRule;
+    RefPtr<CSSFunctionDescriptors> m_descriptorsCSSOMWrapper;
   };
 
 } // namespace WebCore
 
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSScopeRule, StyleRuleType::Scope)
+SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSFunctionDeclarations, StyleRuleType::FunctionDeclarations)

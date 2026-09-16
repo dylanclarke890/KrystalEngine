@@ -299,6 +299,12 @@
     <None Include="data\CSS\Rule\CSSViewTransitionRule.idl">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="data\CSS\Rule\CSSFunctionDeclarations.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CSS\Rule\CSSNestedDeclarations.idl">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.Booey\Constants\Attributes.hpp">
@@ -973,46 +979,16 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Values\GlobalKeyword.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\CSSFunctionDeclarations.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSGroupingRule.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSImportRule.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\CSSMarginDescriptors.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSMediaRule.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSNamespaceRule.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\CSSNestedDeclarations.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\CSSPageDescriptors.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSPageRule.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSRule.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSRuleList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\CSSStyleDeclaration.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\CSSStyleProperties.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSStyleRule.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\CSSStyleSheet.hpp">
@@ -1954,9 +1930,6 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Values\PendingSubstitutionValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Booey\CSS\Values\PositionValue.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Values\VariableReferenceValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1973,6 +1946,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Values\SerialisationContext.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\PositionValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Values\BasicShapeValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSConditionRule.hpp">
@@ -1993,10 +1972,22 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSFontPaletteValuesRule.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSFunctionDeclarations.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSFunctionRule.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSGroupingRule.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSImportRule.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSInternalBaseAppearanceRule.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSKeyframeRule.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSKeyframesRule.hpp">
@@ -2008,16 +1999,37 @@
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSLayerStatementRule.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSMediaRule.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSNamespaceRule.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSNestedDeclarations.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSPageRule.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSPositionTryRule.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSPropertyRule.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSRule.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSRuleList.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSScopeRule.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSStartingStyleRule.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSStyleRule.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Booey\CSS\Rules\CSSOM\CSSSupportsRule.hpp">

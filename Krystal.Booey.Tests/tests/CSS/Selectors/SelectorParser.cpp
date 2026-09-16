@@ -1,11 +1,11 @@
 ﻿#include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
 #include "Krystal.Booey.Tests/TestParserUtils.hpp"
-#include "Krystal.Booey/CSS/CSSImportRule.hpp"
-#include "Krystal.Booey/CSS/CSSNamespaceRule.hpp"
-#include "Krystal.Booey/CSS/CSSRuleList.hpp"
-#include "Krystal.Booey/CSS/CSSStyleRule.hpp"
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/MediaList.hpp"
+#include "Krystal.Booey/CSS/Rules/CSSOM/CSSImportRule.hpp"
+#include "Krystal.Booey/CSS/Rules/CSSOM/CSSNamespaceRule.hpp"
+#include "Krystal.Booey/CSS/Rules/CSSOM/CSSRuleList.hpp"
+#include "Krystal.Booey/CSS/Rules/CSSOM/CSSStyleRule.hpp"
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
 #include <catch_all.hpp>
 

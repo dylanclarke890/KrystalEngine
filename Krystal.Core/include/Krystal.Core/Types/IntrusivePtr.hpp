@@ -220,9 +220,11 @@ namespace krys
     template <typename X = T, typename TMember>
     constexpr TMember &operator->*(TMember X::*memptr) const noexcept
     {
+#ifndef __INTELLISENSE__
       static_assert(SameType<T, X>, "T must be the same as X");
       krys_assert(PtrTraits::unwrap(_ptr) != nullptr);
       return PtrTraits::unwrap(_ptr)->*memptr;
+#endif
     }
 
     KRYS_NODISCARD constexpr T *get() const noexcept KRYS_LIFETIME_BOUND
