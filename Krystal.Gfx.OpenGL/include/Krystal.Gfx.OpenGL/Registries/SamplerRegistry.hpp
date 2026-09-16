@@ -7,11 +7,9 @@
 #include "Krystal.Gfx/Registries/ISamplerRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Hash.hpp"
-#include "Krystal.Lib/Types/Map.hpp"
+#include "Krystal.Core/Attributes.hpp"
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
   class SamplerRegistry final : public ISamplerRegistry
   {

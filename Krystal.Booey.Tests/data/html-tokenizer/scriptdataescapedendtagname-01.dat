@@ -1,0 +1,33 @@
+#name
+switches to BeforeAttributeName when parsing whitespace and end tag name matches start tag
+#data
+<script></script 
+#expected-state
+BeforeAttributeName
+#tokens
+StartTag(script, SelfClosing=false)
+
+#name
+switches to SelfClosingStartTag when parsing solidus and end tag name matches start tag
+#data
+<script></script/
+#expected-state
+SelfClosingStartTag
+#tokens
+StartTag(script, SelfClosing=false)
+
+#name
+emits end tag token when parsing GreaterThanSign end tag name matches start tag
+#data
+<script></script>
+#tokens
+StartTag(script, SelfClosing=false)
+EndTag(script)
+
+#name
+allows mixed case
+#data
+<script></ScRiPt>
+#tokens
+StartTag(script, SelfClosing=false)
+EndTag(script)

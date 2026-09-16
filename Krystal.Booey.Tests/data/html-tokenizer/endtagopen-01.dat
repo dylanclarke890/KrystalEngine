@@ -1,0 +1,46 @@
+#name
+Switches to TagName after parsing valid tag name start
+#data
+div
+#initial-state
+EndTagOpen
+#expected-state
+TagName
+#tokens
+
+#name
+Switches to Data if parsing GreaterThanSign (emits nothing)
+#data
+>
+#initial-state
+EndTagOpen
+#expected-state
+Data
+#tokens
+#errors
+1:1 MissingEndTagName
+
+#name
+Emits LessThanSign and Solidus if EOF encountered
+#data
+/
+#initial-state
+TagOpen
+#append-eof
+#tokens
+Character(</)
+EndOfFile
+#errors
+1:2 EOFBeforeTagName
+
+#name
+Switches to BogusComment if first character invalid
+#data
+*
+#initial-state
+EndTagOpen
+#expected-state
+BogusComment
+#tokens
+#errors
+1:1 InvalidFirstCharacterOfTagName

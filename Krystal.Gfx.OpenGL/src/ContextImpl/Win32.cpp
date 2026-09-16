@@ -10,7 +10,7 @@
 
 #include <stdexcept>
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
   bool InitialiseWGLHooks(HDC deviceContext) noexcept;
   bool InitialiseGLHooks() noexcept;
@@ -76,11 +76,11 @@ namespace
     }
 
     {
-      auto result = Krys::Gfx::OpenGL::InitialiseWGLHooks(deviceContext);
+      auto result = krys::Gfx::OpenGL::InitialiseWGLHooks(deviceContext);
       if (!result)
         throw std::runtime_error("Failed to initialize WGL hooks.");
 
-      result = Krys::Gfx::OpenGL::InitialiseGLHooks();
+      result = krys::Gfx::OpenGL::InitialiseGLHooks();
       if (!result)
         throw std::runtime_error("Failed to initialize OpenGL hooks.");
     }
@@ -113,9 +113,9 @@ namespace
 #include "Krystal.Gfx.OpenGL/ContextImpl/Win32.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/wgl.hpp"
-#include "Krystal.Lib/Detection/OS.hpp"
+#include "Krystal.Core/Detection/OS.hpp"
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
   Context::ContextPlatformImpl::ContextPlatformImpl(NativeHandle nativeHandle)
       : _handle(nativeHandle.As<HWND>()), _deviceContext(nullptr), _renderingContext(nullptr)
@@ -136,7 +136,7 @@ namespace Krys::Gfx::OpenGL
 
   void Context::ContextPlatformImpl::SetupPixelFormat() const
   {
-    using namespace Krys::Gfx::OpenGL;
+    using namespace krys::Gfx::OpenGL;
 
     auto attributes = GetPixelFormatAttributes();
     int pixelFormat = 0;

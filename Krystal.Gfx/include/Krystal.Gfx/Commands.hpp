@@ -1,22 +1,22 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Commands/CommandType.hpp"
+#include "Krystal.Core/Maths/Vector.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/Enums/BufferBitFlags.hpp"
 #include "Krystal.Gfx/Enums/FilterMode.hpp"
 #include "Krystal.Gfx/Handle.hpp"
-#include "Krystal.Lib/Commands/CommandType.hpp"
-#include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Maths/Vector.hpp"
 
-namespace Krys::Gfx::Commands
+namespace krys::Gfx::Commands
 {
   struct SetScissor
   {
     constexpr static CommandType Type = KRYS_CMD_TYPE("SetScissor");
 
-    Maths::Vec2 Position;
-    Maths::Vec2 Size;
+    Vec2 Position;
+    Vec2 Size;
   };
 
   struct ClearScissor
@@ -28,8 +28,8 @@ namespace Krys::Gfx::Commands
   {
     constexpr static CommandType Type = KRYS_CMD_TYPE("SetViewport");
 
-    Maths::Vec2 Position;
-    Maths::Vec2 Size;
+    Vec2 Position;
+    Vec2 Size;
   };
 
   struct BindRenderTarget
@@ -54,12 +54,12 @@ namespace Krys::Gfx::Commands
     constexpr static CommandType Type = KRYS_CMD_TYPE("BlitRenderTarget");
 
     RenderTargetHandle Source;
-    Maths::Vec2 SourcePosition;
-    Maths::Vec2 SourceSize;
+    Vec2 SourcePosition;
+    Vec2 SourceSize;
 
     RenderTargetHandle Destination;
-    Maths::Vec2 DestinationPosition;
-    Maths::Vec2 DestinationSize;
+    Vec2 DestinationPosition;
+    Vec2 DestinationSize;
 
     FilterMode Filter {FilterMode::Linear};
     BufferBitFlags Mask {BufferBitFlags::Colour};
@@ -86,7 +86,7 @@ namespace Krys::Gfx::Commands
 
     MeshHandle Mesh;
     Gfx::TextureHandle Texture;
-    Maths::Mat4 Transform;
+    Mat4 Transform;
     uint32 InstanceCount {1u};
   };
 
@@ -95,7 +95,7 @@ namespace Krys::Gfx::Commands
     constexpr static CommandType Type = KRYS_CMD_TYPE("DrawText");
 
     utf8_stringview Text;
-    Maths::Vec2 Position;
+    Vec2 Position;
     FontFamilyHandle FontFamily;
     float FontSize {16.f};
     Gfx::ColourbPremultiplied Colour {Gfx::Colours::Black};

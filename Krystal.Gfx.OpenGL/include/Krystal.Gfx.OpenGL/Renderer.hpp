@@ -1,19 +1,19 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Commands/CommandList.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Gfx.OpenGL/Context.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/InstanceData.hpp"
 #include "Krystal.Gfx/IRenderer.hpp"
-#include "Krystal.Lib/Commands/CommandList.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
   struct GlyphVertex
   {
-    Maths::Vec2 Position {};
-    Maths::Vec2 UV {};
+    Vec2 Position {};
+    Vec2 UV {};
 
     constexpr static uint32 BatchSize = 4'096;
     constexpr static uint32 VerticesPerGlyph = 6; // 2 triangles per glyph
@@ -58,10 +58,9 @@ namespace Krys::Gfx::OpenGL
 
   private:
     void DrawText(Font &font, Shader &shader, utf8_stringview text, const ColourbPremultiplied &textColour,
-                  const Maths::Vec2 &position, float ptSize);
+                  const Vec2 &position, float ptSize);
 
-    void DrawTextOutlined(const utf8_string &text, FontHandle fontHandle, float ptSize,
-                          const Maths::Vec2 &position,
+    void DrawTextOutlined(const utf8_string &text, FontHandle fontHandle, float ptSize, const Vec2 &position,
                           const ColourbPremultiplied &textColour = Colours::Black,
                           const ColourbPremultiplied &outlineColour = Colours::White,
                           float outlineWidth = 3.f) noexcept;

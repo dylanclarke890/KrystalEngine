@@ -1,18 +1,17 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Maths/Vector.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/Handle.hpp"
-#include "Krystal.Lib/Mixins/NonCopyable.hpp"
-#include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Maths/Vector.hpp"
 #include <variant>
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
-  using MaterialParameterValue =
-    std::variant<bool, int32, uint32, float, Maths::Vec2, Maths::Vec3, Maths::Vec4, TextureHandle>;
+  using MaterialParameterValue = std::variant<bool, int32, uint32, float, Vec2, Vec3, Vec4, TextureHandle>;
 
   enum class MaterialParameterType
   {
@@ -34,8 +33,11 @@ namespace Krys::Gfx::OpenGL
     MaterialParameterValue Value;
   };
 
-  struct Material : NonCopyable<Material>
+  struct Material
   {
+    KRYS_NON_COPYABLE(Material);
+
+  public:
     string Name;
     ShaderHandle Shader;
     List<MaterialParameter> Parameters;

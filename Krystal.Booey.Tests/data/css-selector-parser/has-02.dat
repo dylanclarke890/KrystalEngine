@@ -1,0 +1,23 @@
+$input
+:has
+$expect-invalid
+
+$input
+.a:has
+$expect-invalid
+
+$input
+.a:has b
+$expect-invalid
+
+$input
+:has()
+$expect-invalid
+
+$input
+:has(123)
+$expect-invalid
+
+$input
+:has(.a, 123)
+$expect-invalid

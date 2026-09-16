@@ -1,0 +1,41 @@
+#name
+emits comment when parsing GreaterThanSign
+#data
+<!--comment-->
+#tokens
+Comment(comment)
+
+#name
+switches to CommentEndBang when parsing Exclamation
+#data
+<!--comment--!
+#expected-state
+CommentEndBang
+#tokens
+
+#name
+remains in CommentEnd when parsing HyphenMinus
+#data
+<!--comment---
+#expected-state
+CommentEnd
+#tokens
+
+#name
+emits comment with parser error followed by EOF when parsing EOF
+#data
+<!--comment--
+#append-eof
+#tokens
+Comment(comment)
+EndOfFile
+#errors
+1:14 EOFInComment
+
+#name
+reconsumes in Comment with parser error for anything else
+#data
+<!--comment--a
+#expected-state
+Comment
+#tokens

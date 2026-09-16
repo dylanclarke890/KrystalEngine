@@ -1,15 +1,16 @@
 ﻿#define KRYS_WGL_OVERRIDE_FUNCTIONS 0
 #include "Krystal.Gfx.OpenGL/Hooks/wgl.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
-#include "Krystal.Lib/String/StringUtils.hpp"
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/String.hpp"
 #include <algorithm>
 #include <cassert>
 
 namespace
 {
-  using ::Krys::string;
+  using ::krys::string;
   template <typename T>
-  using List = ::Krys::List<T>;
+  using List = ::krys::List<T>;
 
   using PFNWGLGETCURRENTDCPROC = HDC(WINAPI *)(void);
   using PFNWGLGETCURRENTCONTEXTPROC = HGLRC(WINAPI *)(void);
@@ -82,6 +83,40 @@ namespace
     }
     return true;
   }
+
+  static List<string> SplitStringOnWhitespace(const string &str) noexcept
+  {
+    // only needs to check for 0x20
+    List<string> result;
+    size_t start = 0;
+    while (start < str.size())
+    {
+      // Skip leading whitespace
+      while (start < str.size() && str[start] == ' ')
+      {
+        ++start;
+      }
+
+      if (start >= str.size())
+      {
+        break;
+      }
+
+      // Find the end of the word
+      size_t end = start;
+      while (end < str.size() && str[end] != ' ')
+      {
+        ++end;
+      }
+
+      // Extract the word and add it to the result
+      result.push_back(str.substr(start, end - start));
+      // Move to the next word
+      start = end;
+    }
+
+    return result;
+  }
 }
 
 namespace
@@ -129,7 +164,7 @@ namespace
   }
 }
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
   bool InitialiseWGLHooks(HDC deviceContext) noexcept
   {
@@ -140,7 +175,7 @@ namespace Krys::Gfx::OpenGL
     LoadExtension(ARB_extensions_string);
 
     // Ensure we have the WGL extensions we need.
-    SupportedExtensions = StringUtils::Split(wglGetExtensionsStringARB(deviceContext), " ");
+    SupportedExtensions = SplitStringOnWhitespace(wglGetExtensionsStringARB(deviceContext));
     if (!RequiredExtensionsAreSupported())
     {
       assert(false && "Required WGL extensions are not supported by the system.");
@@ -162,7 +197,7 @@ namespace Krys::Gfx::OpenGL
 }
 
 // WGL hook definitions
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
 #pragma region WGL Core Functions
 

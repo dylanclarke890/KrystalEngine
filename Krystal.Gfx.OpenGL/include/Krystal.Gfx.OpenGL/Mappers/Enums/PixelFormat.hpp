@@ -1,10 +1,10 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx/Enums/PixelFormat.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
   KRYS_NODISCARD constexpr inline GLenum MapPixelFormat(PixelFormat format) noexcept
   {

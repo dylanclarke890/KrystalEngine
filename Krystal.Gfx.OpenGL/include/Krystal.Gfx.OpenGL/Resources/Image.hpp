@@ -1,14 +1,16 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx/Resources/Image.hpp"
-#include "Krystal.Lib/Mixins/NonCopyable.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
-  class Image : NonCopyable<Image>
+  class Image
   {
+    KRYS_NON_COPYABLE(Image);
+
   private:
     GLuint _id {0u};
     GLenum _target {GL_TEXTURE_2D};

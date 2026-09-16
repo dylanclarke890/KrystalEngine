@@ -1,17 +1,19 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Utils.hpp"
 #include "Krystal.Gfx/Resources/Mesh.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/Mixins/NonCopyable.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Types/Span.hpp"
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
-  class Mesh : NonCopyable<Mesh>
+  class Mesh
   {
+    KRYS_NON_COPYABLE(Mesh);
+
   private:
     GLuint _vao {0u};
     GLuint _vbo {0u};

@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Handle.hpp"
+#include "Krystal.Core/Utils/Handle.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   struct ImageHandle : Handle<ImageHandle>
   {

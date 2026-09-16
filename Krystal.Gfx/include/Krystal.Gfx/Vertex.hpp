@@ -1,14 +1,14 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Maths/Vector.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/StronglyTypedValue.hpp"
 #include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/Enums/VertexAttributeType.hpp"
 #include "Krystal.Gfx/Enums/VertexInputRate.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Types/StronglyTypedValue.hpp"
-#include "Krystal.Maths/Vector.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   struct IsNormalized : public StronglyTypedBool<IsNormalized>
   {
@@ -68,8 +68,8 @@ namespace Krys::Gfx
   {
     struct Position2D_UV
     {
-      Maths::Vec2 Position;
-      Maths::Vec2 TexCoord;
+      Vec2 Position;
+      Vec2 TexCoord;
 
       constexpr static VertexBufferLayout Layout()
       {
@@ -82,9 +82,9 @@ namespace Krys::Gfx
 
     struct Position2D_Colourf_UV
     {
-      Maths::Vec2 Position;
+      Vec2 Position;
       Colourf Colour;
-      Maths::Vec2 TexCoord;
+      Vec2 TexCoord;
 
       constexpr static VertexBufferLayout Layout()
       {
@@ -98,9 +98,9 @@ namespace Krys::Gfx
 
     struct Position2D_ColourbPremultiplied_UV
     {
-      Maths::Vec2 Position;
+      Vec2 Position;
       ColourbPremultiplied Colour;
-      Maths::Vec2 TexCoord;
+      Vec2 TexCoord;
 
       constexpr static VertexBufferLayout Layout()
       {
@@ -114,8 +114,8 @@ namespace Krys::Gfx
 
     struct Position3D_UV
     {
-      Maths::Vec3 Position;
-      Maths::Vec2 TexCoord;
+      Vec3 Position;
+      Vec2 TexCoord;
 
       constexpr static VertexBufferLayout Layout()
       {
@@ -128,8 +128,8 @@ namespace Krys::Gfx
 
     struct Position3D_Normal
     {
-      Maths::Vec3 Position;
-      Maths::Vec3 Normal;
+      Vec3 Position;
+      Vec3 Normal;
 
       constexpr static VertexBufferLayout Layout()
       {
@@ -142,9 +142,9 @@ namespace Krys::Gfx
 
     struct Position3D_Colourf_UV
     {
-      Maths::Vec3 Position;
+      Vec3 Position;
       Colourf Colour;
-      Maths::Vec2 TexCoord;
+      Vec2 TexCoord;
 
       constexpr static VertexBufferLayout Layout()
       {
@@ -158,9 +158,9 @@ namespace Krys::Gfx
 
     struct Position3D_Normal_UV
     {
-      Maths::Vec3 Position;
-      Maths::Vec3 Normal;
-      Maths::Vec2 TexCoord;
+      Vec3 Position;
+      Vec3 Normal;
+      Vec2 TexCoord;
 
       constexpr static VertexBufferLayout Layout()
       {

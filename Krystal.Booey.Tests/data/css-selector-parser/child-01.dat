@@ -1,0 +1,7 @@
+$input
+body > p
+
+$input
+div ol>li p
+$output
+div ol > li p

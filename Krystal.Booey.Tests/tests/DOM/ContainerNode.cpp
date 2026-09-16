@@ -1,0 +1,237 @@
+﻿#include "Krystal.Booey/DOM/ContainerNode.hpp"
+#include "Krystal.Booey.Tests/DOM/TestElement.hpp"
+#include "Krystal.Booey/DOM/AbortSignal.hpp"
+#include "Krystal.Booey/DOM/Attr.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/NodeList.hpp"
+#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include <catch_all.hpp>
+
+namespace krys::boo::dom::tests
+{
+  TEST_CASE("ContainerNode::HasChildNodes", "[ContainerNode]")
+  {
+    Ref<Document> doc = CreateRef<Document>();
+    auto container = CreateRef<TestElement>(*doc);
+    REQUIRE_FALSE(container->HasChildNodes());
+
+    auto child = CreateRef<TestElement>(*doc);
+    auto appendResult = container->AppendChild(*child);
+    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE(container->HasChildNodes());
+
+    container->RemoveChild(*child);
+  }
+
+  TEST_CASE("ContainerNode::ChildNodes", "[ContainerNode]")
+  {
+    Ref<Document> doc = CreateRef<Document>();
+    auto container = CreateRef<TestElement>(*doc);
+    auto childA = CreateRef<TestElement>(*doc);
+    auto childB = CreateRef<TestElement>(*doc);
+
+    auto result = container->AppendChild(*childA);
+    REQUIRE_FALSE(result.HasException());
+
+    result = container->AppendChild(*childB);
+    REQUIRE_FALSE(result.HasException());
+
+    Ref<NodeList> childNodes = container->ChildNodes();
+    REQUIRE(childNodes->Length() == 2uz);
+    REQUIRE(childNodes->Item(0uz) == childA.get());
+    REQUIRE(childNodes->Item(1uz) == childB.get());
+
+    container->RemoveChild(*childA);
+    container->RemoveChild(*childB);
+  }
+
+  TEST_CASE("ContainerNode::FirstChild", "[ContainerNode]")
+  {
+    Ref<Document> doc = CreateRef<Document>();
+    auto container = CreateRef<TestElement>(*doc);
+    auto childA = CreateRef<TestElement>(*doc);
+    auto childB = CreateRef<TestElement>(*doc);
+
+    auto result = container->AppendChild(*childA);
+    REQUIRE_FALSE(result.HasException());
+    REQUIRE(container->FirstChild() == childA.get());
+
+    result = container->InsertBefore(*childB, childA.get());
+    REQUIRE_FALSE(result.HasException());
+    REQUIRE(container->FirstChild() == childB.get());
+
+    container->RemoveChild(*childA);
+    container->RemoveChild(*childB);
+  }
+
+  TEST_CASE("ContainerNode::LastChild", "[ContainerNode]")
+  {
+    Ref<Document> doc = CreateRef<Document>();
+    auto container = CreateRef<TestElement>(*doc);
+    auto childA = CreateRef<TestElement>(*doc);
+    auto childB = CreateRef<TestElement>(*doc);
+
+    auto result = container->AppendChild(*childA);
+    REQUIRE_FALSE(result.HasException());
+    REQUIRE(container->LastChild() == childA.get());
+
+    result = container->AppendChild(*childB);
+    REQUIRE_FALSE(result.HasException());
+    REQUIRE(container->LastChild() == childB.get());
+
+    container->RemoveChild(*childA);
+    container->RemoveChild(*childB);
+  }
+
+  TEST_CASE("ContainerNode::AppendChild/RemoveChild", "[ContainerNode]")
+  {
+    Ref<Document> doc = CreateRef<Document>();
+    auto parent = CreateRef<TestElement>(*doc);
+    auto childA = CreateRef<TestElement>(*doc);
+    auto childB = CreateRef<TestElement>(*doc);
+
+    // Append childA
+    {
+      auto result = parent->AppendChild(*childA);
+      REQUIRE(!result.HasException());
+
+      REQUIRE(parent->FirstChild() == childA.get());
+      REQUIRE(parent->LastChild() == childA.get());
+
+      REQUIRE(childA->ParentNode() == parent.get());
+      REQUIRE(!childA->PreviousSibling());
+      REQUIRE(!childA->NextSibling());
+    }
+
+    // Append childB
+    {
+      auto result = parent->AppendChild(*childB);
+      REQUIRE(!result.HasException());
+
+      REQUIRE(parent->FirstChild() == childA.get());
+      REQUIRE(parent->LastChild() == childB.get());
+
+      REQUIRE(childB->ParentNode() == parent.get());
+      REQUIRE(!childA->PreviousSibling());
+      REQUIRE(childA->NextSibling() == childB.get());
+      REQUIRE(childB->PreviousSibling() == childA.get());
+      REQUIRE(!childB->NextSibling());
+    }
+
+    // Append childA again - moves to end
+    {
+      auto result = parent->AppendChild(*childA);
+      REQUIRE(!result.HasException());
+
+      REQUIRE(parent->FirstChild() == childB.get());
+      REQUIRE(parent->LastChild() == childA.get());
+
+      REQUIRE(childA->ParentNode() == parent.get());
+      REQUIRE(!childB->PreviousSibling());
+      REQUIRE(childB->NextSibling() == childA.get());
+      REQUIRE(childA->PreviousSibling() == childB.get());
+      REQUIRE(!childA->NextSibling());
+    }
+
+    // Remove childB using RemoveChild
+    {
+      auto result = parent->RemoveChild(*childB);
+      REQUIRE(!result.HasException());
+
+      REQUIRE(parent->FirstChild() == childA.get());
+      REQUIRE(parent->LastChild() == childA.get());
+
+      REQUIRE(childA->ParentNode() == parent.get());
+      REQUIRE(!childA->PreviousSibling());
+      REQUIRE(!childA->NextSibling());
+    }
+
+    parent->RemoveChild(*childA);
+  }
+
+  TEST_CASE("ContainerNode::InsertBefore", "[ContainerNode]")
+  {
+    Ref<Document> doc = CreateRef<Document>();
+    auto parent = CreateRef<TestElement>(*doc);
+    auto childA = CreateRef<TestElement>(*doc);
+    auto childB = CreateRef<TestElement>(*doc);
+    auto childC = CreateRef<TestElement>(*doc);
+
+    auto result = parent->AppendChild(*childA);
+    REQUIRE(!result.HasException());
+
+    result = parent->AppendChild(*childB);
+    REQUIRE(!result.HasException());
+
+    // Inserting child before itself does nothing
+    {
+      result = parent->InsertBefore(*childA, childA.get());
+      REQUIRE(!result.HasException());
+
+      REQUIRE(parent->FirstChild() == childA.get());
+      REQUIRE(childA->ParentNode() == parent.get());
+
+      REQUIRE(parent->LastChild() == childB.get());
+      REQUIRE(childB->ParentNode() == parent.get());
+
+      REQUIRE(!childA->PreviousSibling());
+      REQUIRE(childA->NextSibling() == childB.get());
+
+      REQUIRE(childB->PreviousSibling() == childA.get());
+      REQUIRE(!childB->NextSibling());
+    }
+
+    // Insertion with new node
+    {
+      result = parent->InsertBefore(*childC, childA.get());
+      REQUIRE(!result.HasException());
+
+      REQUIRE(parent->FirstChild() == childC.get());
+      REQUIRE(childC->ParentNode() == parent.get());
+
+      REQUIRE(parent->LastChild() == childB.get());
+      REQUIRE(childB->ParentNode() == parent.get());
+
+      REQUIRE(!childC->PreviousSibling());
+      REQUIRE(childC->NextSibling() == childA.get());
+
+      REQUIRE(childA->PreviousSibling() == childC.get());
+      REQUIRE(childA->NextSibling() == childB.get());
+      REQUIRE(childB->PreviousSibling() == childA.get());
+
+      REQUIRE(childC->NextSibling() == childA.get());
+      REQUIRE(!childB->NextSibling());
+    }
+
+    parent->RemoveChild(*childA);
+    parent->RemoveChild(*childB);
+    parent->RemoveChild(*childC);
+  }
+
+  TEST_CASE("ContainerNode::ReplaceChild", "[ContainerNode]")
+  {
+    Ref<Document> doc = CreateRef<Document>();
+    auto parent = CreateRef<TestElement>(*doc);
+    auto childA = CreateRef<TestElement>(*doc);
+    auto childB = CreateRef<TestElement>(*doc);
+
+    auto result = parent->AppendChild(*childA);
+    REQUIRE(!result.HasException());
+
+    result = parent->AppendChild(*childB);
+    REQUIRE(!result.HasException());
+
+    SECTION("Replace with same child does nothing")
+    {
+      result = parent->ReplaceChild(*childA, *childA);
+      REQUIRE(!result.HasException());
+      REQUIRE(parent->FirstChild() == childA.get());
+      REQUIRE(childB->PreviousSibling() == childA.get());
+    }
+
+    parent->RemoveChild(*childA);
+    parent->RemoveChild(*childB);
+  }
+}

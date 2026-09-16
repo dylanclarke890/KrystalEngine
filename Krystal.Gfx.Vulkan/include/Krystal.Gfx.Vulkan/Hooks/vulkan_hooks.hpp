@@ -1,12 +1,12 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/NativeHandle.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Utils/NativeHandle.hpp"
 
 #define VK_NO_PROTOTYPES
 #include <vulkan/vulkan.h>
 
-namespace Krys::Gfx::Vulkan
+namespace krys::Gfx::Vulkan
 {
   namespace Hooks
   {

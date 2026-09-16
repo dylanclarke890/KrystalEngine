@@ -1,0 +1,26 @@
+#name
+switches to CommentEnd when parsing HyphenMinus
+#data
+<!--com--
+#expected-state
+CommentEnd
+#tokens
+
+#name
+emits comment with parser error followed by EOF when parsing EOF
+#data
+<!--com-
+#append-eof
+#tokens
+Comment(com)
+EndOfFile
+#errors
+1:9 EOFInComment
+
+#name
+reconsumes in Comment for anything else
+#data
+<!--com-a
+#expected-state
+Comment
+#tokens

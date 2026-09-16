@@ -1,0 +1,31 @@
+#name
+Switches to RAWTEXTEndTagOpen after parsing solidus
+#data
+/
+#initial-state
+RAWTEXTLessThanSign
+#expected-state
+RAWTEXTEndTagOpen
+#tokens
+
+#name
+emits less than sign after parsing non solidus
+#data
+©
+#initial-state
+RAWTEXTLessThanSign
+#expected-state
+RAWTEXT
+#tokens
+Character(<©)
+
+#name
+Emits LessThanSign if EOF reached
+#data
+<
+#initial-state
+RAWTEXT
+#append-eof
+#tokens
+Character(<)
+EndOfFile

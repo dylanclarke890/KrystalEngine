@@ -1,0 +1,76 @@
+﻿$data
+#1
+$tokens
+Hash(1, Unrestricted)
+
+$data
+#-2
+$tokens
+Hash(-2, Unrestricted)
+
+$data
+#--3
+$tokens
+Hash(--3, Id)
+
+$data
+#---4
+$tokens
+Hash(---4, Id)
+
+$data
+#a
+$tokens
+Hash(a, Id)
+
+$data
+#-b
+$tokens
+Hash(-b, Id)
+
+$data
+#--c
+$tokens
+Hash(--c, Id)
+
+$data
+#---d
+$tokens
+Hash(---d, Id)
+
+$data
+#_
+$tokens
+Hash(_, Id)
+
+$data
+#_1
+$tokens
+Hash(_1, Id)
+
+$data
+#-
+$tokens
+Hash(-, Unrestricted)
+
+$data
+#+
+$tokens
+Delim(#)
+Delim(+)
+
+$data
+##
+$tokens
+Delim(#)
+Delim(#)
+
+$data
+#
+$tokens
+Delim(#)
+
+$data
+#aa𐀀
+$tokens
+Hash(aa𐀀, Id)

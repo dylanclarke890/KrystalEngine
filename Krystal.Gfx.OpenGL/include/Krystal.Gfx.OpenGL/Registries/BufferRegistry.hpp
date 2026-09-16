@@ -6,7 +6,7 @@
 #include "Krystal.Gfx/Registries/IBufferRegistry.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
   class BufferRegistry : public IBufferRegistry
   {

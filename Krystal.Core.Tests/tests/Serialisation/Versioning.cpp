@@ -1,0 +1,130 @@
+﻿#include "Krystal.Core/IO/Streams/MemoryStream.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Serialisation/Access.hpp"
+#include "Krystal.Core/Serialisation/Archives/BinaryArchive.hpp"
+#include "Krystal.Core/Serialisation/Archives/JsonArchive.hpp"
+#include "Krystal.Core/Serialisation/Archives/XmlArchive.hpp"
+#include "Krystal.Core/Serialisation/Types/List.hpp"
+#include <catch_all.hpp>
+
+namespace krys::tests
+{
+  using namespace krys::Serialisation;
+
+  struct VersionedType1
+  {
+    int A {0};
+    float B {0};
+
+  private:
+    KRYS_ACCESS_FRIEND();
+    KRYS_CLASS_VERSION(1);
+
+    template <typename Archive>
+    void Load(Archive &archive, const Version) noexcept
+    {
+      archive(A, B);
+    }
+
+    template <typename Archive>
+    void Save(Archive &archive, const Version) const noexcept
+    {
+      archive(A, B);
+    }
+  };
+
+  struct VersionedType2
+  {
+    int A {0};
+    float B {0};
+    string C {};
+  };
+
+}
+
+KRYS_CLASS_VERSION_TRAIT(krys::tests::VersionedType2, 2);
+
+namespace krys::tests
+{
+  template <typename Archive>
+  void Save(Archive &archive, const VersionedType2 &value, const Version version) noexcept
+  {
+    archive(value.A, value.B);
+
+    if (version >= 2)
+    {
+      archive(value.C);
+    }
+  }
+
+  template <typename Archive>
+  void Load(Archive &archive, VersionedType2 &value, const Version version) noexcept
+  {
+    archive(value.A, value.B);
+
+    if (version >= 2)
+    {
+      archive(value.C);
+    }
+  }
+
+  template <typename ArchiveReader, typename ArchiveWriter>
+  void TestArchiveVersioning()
+  {
+    VersionedType1 input1 {.A = 42, .B = 3.14f};
+    VersionedType2 output {};
+    List<byte> data;
+
+    {
+      io::MemoryStreamWriter stream(data);
+      ArchiveWriter archive(stream);
+      archive(KRYS_NAMED_FIELD(input1));
+    }
+
+    {
+      io::MemoryStreamReader stream(data);
+      ArchiveReader archive(stream);
+      archive(output);
+    }
+
+    REQUIRE(input1.A == output.A);
+    REQUIRE(input1.B == output.B);
+    REQUIRE(output.C.empty());
+
+    string xml = string((char *)data.data(), data.size());
+
+    data.clear();
+    VersionedType2 input2 {.A = 69, .B = 23.48f, .C = "Hello world!"};
+
+    {
+      io::MemoryStreamWriter stream(data);
+      ArchiveWriter archive(stream);
+      archive(input2);
+    }
+
+    {
+      io::MemoryStreamReader stream(data);
+      ArchiveReader archive(stream);
+      archive(output);
+    }
+
+    REQUIRE(input2.A == output.A);
+    REQUIRE(input2.B == output.B);
+    REQUIRE(input2.C == output.C);
+  }
+
+  TEST_CASE("BinaryArchive Versioning", "[BinaryArchive][Versioning]")
+  {
+    TestArchiveVersioning<BinaryArchiveReader, BinaryArchiveWriter>();
+  }
+
+  TEST_CASE("JsonArchive Versioning", "[JsonArchive][Versioning]")
+  {
+    TestArchiveVersioning<JsonArchiveReader, JsonArchiveWriter>();
+  }
+
+  TEST_CASE("XmlArchive Versioning", "[XmlArchive][Versioning]")
+  {
+    TestArchiveVersioning<XmlArchiveReader, XmlArchiveWriter>();
+  }
+}

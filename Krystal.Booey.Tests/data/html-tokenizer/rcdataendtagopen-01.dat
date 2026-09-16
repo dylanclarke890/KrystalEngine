@@ -1,0 +1,31 @@
+#name
+Switches to RCDATAEndTagName after parsing alpha
+#data
+a
+#initial-state
+RCDATAEndTagOpen
+#expected-state
+RCDATAEndTagName
+#tokens
+
+#name
+emits less than sign and solidus after parsing non alpha
+#data
+©
+#initial-state
+RCDATAEndTagOpen
+#expected-state
+RCDATA
+#tokens
+Character(</©)
+
+#name
+emits less than sign and solidus if EOF reached
+#data
+</
+#initial-state
+RCDATA
+#append-eof
+#tokens
+Character(</)
+EndOfFile

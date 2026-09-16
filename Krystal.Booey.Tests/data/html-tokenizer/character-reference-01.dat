@@ -1,0 +1,16 @@
+#name
+Non-character reference
+#data
+&_
+#tokens
+Character(&_)
+
+#name
+Multiple character references
+#data
+&copy;&Agrave&#128;&#X152;&a;
+#tokens
+Character(©À€Œ&a;)
+#errors
+1:14 MissingSemicolonAfterCharacterReference
+1:29 UnknownNamedCharacterReference

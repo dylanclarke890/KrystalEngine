@@ -1,0 +1,55 @@
+#name
+ignores whitespace and stays in the same state when parsing whitespace
+#data
+   
+
+#initial-state
+AfterAttributeName
+#expected-state
+AfterAttributeName
+#tokens
+
+#name
+switches to SelfClosingStartTag when parsing Solidus
+#data
+/
+#initial-state
+AfterAttributeName
+#expected-state
+SelfClosingStartTag
+#tokens
+
+#name
+switches to BeforeAttributeValue after parsing an EqualsSign
+#data
+<a b=
+#initial-state
+Data
+#expected-state
+BeforeAttributeValue
+#tokens
+
+#name
+switches to Data and emits the current tag when parsing GreaterThanSign
+#data
+<div b>
+#tokens
+StartTag(div, b="", SelfClosing=false)
+
+#name
+Emits EOF token if EOF is reached
+#data
+<div b 
+#append-eof
+#tokens
+EndOfFile
+#errors
+1:8 EOFInTag
+
+#name
+treats any other character as the start of a new attribute name
+#data
+<div a b
+#expected-state
+AttributeName
+#tokens

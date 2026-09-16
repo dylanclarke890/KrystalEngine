@@ -1,0 +1,68 @@
+﻿#pragma once
+
+#include "Krystal.Core/Enum.hpp"
+
+namespace krys::boo::css
+{
+  enum class ValueType : uint8
+  {
+    Invalid = 0,
+    AppleColorFilter,
+    Attr,
+    BackgroundRepeat,
+    BasicShape,
+    BorderImageSlice,
+    BorderImageWidth,
+    BoxShadowProperty,
+    Canvas,
+    Color,
+    ColorScheme,
+    Counter,
+    CrossFade,
+    CursorImage,
+    CustomProperty,
+    DynamicRangeLimit,
+    Gradient,
+    GridAutoRepeat,
+    GridIntegerRepeat,
+    GridLine,
+    GridLineNames,
+    GridTemplateAreas,
+    EasingFunction,
+    Filter,
+    FilterImage,
+    FontFeature,
+    FontStyleRange,
+    FontStyleWithAngle,
+    FontVariation,
+    Function,
+    Image,
+    ImageSet,
+    NamedImage,
+    OffsetRotate,
+    PaintImage,
+    Path,
+    PendingSubstitution,
+    Position,
+    PositionX,
+    PositionY,
+    Primitive,
+    Quad,
+    Ratio,
+    Ray,
+    Rect,
+    Reflect,
+    Scroll,
+    Subgrid,
+    TextShadowProperty,
+    TransformList,
+    UnicodeRange,
+    Url,
+    ValueList,
+    ValuePair,
+    VariableReference,
+    View,
+  };
+}
+
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::ValueType, 56uz);

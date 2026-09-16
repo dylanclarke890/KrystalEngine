@@ -1,13 +1,13 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Maths/Vector.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/Pair.hpp"
+#include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Gfx/Resources/Image.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Types/Pair.hpp"
-#include "Krystal.Lib/Types/Variant.hpp"
-#include "Krystal.Maths/Vector.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   enum class AttachmentType
   {
@@ -34,7 +34,7 @@ namespace Krys::Gfx
 
   struct ClearColourValue
   {
-    std::variant<Maths::Vec4f, Maths::Vec4i, Maths::Vec4u> Value;
+    std::variant<Vec4f, Vec4i, Vec4u> Value;
   };
 
   enum class AttachmentClearValueType : uint8
@@ -54,19 +54,19 @@ namespace Krys::Gfx
     AttachmentClearValueType Type;
     Variant<ClearColourValue, DepthValue, StencilValue, DepthStencilValue> Value;
 
-    KRYS_NODISCARD constexpr static AttachmentClearValue Colour(const Maths::Vec4f &colour) noexcept
+    KRYS_NODISCARD constexpr static AttachmentClearValue Colour(const Vec4f &colour) noexcept
     {
       return AttachmentClearValue {.Type = AttachmentClearValueType::Colour,
                                    .Value = ClearColourValue {colour}};
     }
 
-    KRYS_NODISCARD constexpr static AttachmentClearValue Colour(const Maths::Vec4i &colour) noexcept
+    KRYS_NODISCARD constexpr static AttachmentClearValue Colour(const Vec4i &colour) noexcept
     {
       return AttachmentClearValue {.Type = AttachmentClearValueType::Colour,
                                    .Value = ClearColourValue {colour}};
     }
 
-    KRYS_NODISCARD constexpr static AttachmentClearValue Colour(const Maths::Vec4u &colour) noexcept
+    KRYS_NODISCARD constexpr static AttachmentClearValue Colour(const Vec4u &colour) noexcept
     {
       return AttachmentClearValue {.Type = AttachmentClearValueType::Colour,
                                    .Value = ClearColourValue {colour}};

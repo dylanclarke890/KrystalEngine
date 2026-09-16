@@ -1,0 +1,35 @@
+﻿#pragma once
+
+#include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumerDefinitions.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypesCanonicalization.hpp"
+
+namespace krys::boo::css
+{
+  struct FrequencyValidator
+  {
+    KRYS_NODISCARD constexpr static Maybe<FrequencyUnit> Validate(UnitType unitType, PropertyParserState &,
+                                                                  PropertyParserOptions) noexcept
+    {
+      return UnitTraits<FrequencyUnit>::Validate(unitType);
+    }
+
+    template <auto R, typename V>
+    KRYS_NODISCARD static bool IsValid(FrequencyRaw<R, V> raw, PropertyParserOptions) noexcept
+    {
+      return IsValidDimensionValue(raw,
+                                   [&]
+                                   {
+                                     auto canonicalValue = Canonicalize(raw);
+                                     return canonicalValue >= raw.Range.Min
+                                            && canonicalValue <= raw.Range.Max;
+                                   });
+    }
+  };
+
+  template <Range R, typename V>
+  struct ConsumerDefinition<Frequency<R, V>>
+  {
+    using FunctionToken = FunctionConsumerForCalcValues<Frequency<R, V>>;
+    using DimensionToken = DimensionConsumer<Frequency<R, V>, FrequencyValidator>;
+  };
+}

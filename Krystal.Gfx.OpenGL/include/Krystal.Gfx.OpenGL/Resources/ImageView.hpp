@@ -1,14 +1,16 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx/Resources/ImageView.hpp"
-#include "Krystal.Lib/Mixins/NonCopyable.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
-  class ImageView : NonCopyable<ImageView>
+  class ImageView
   {
+    KRYS_NON_COPYABLE(ImageView);
+
   private:
     GLuint _id {0u};
     ImageHandle _imageHandle;

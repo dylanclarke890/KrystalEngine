@@ -1,0 +1,27 @@
+$input
+:not()
+$expect-invalid
+
+$input
+:not(:not())
+$expect-invalid
+
+$input
+:not(::before)
+$expect-invalid
+
+$input
+:not(:unknownpseudo)
+$expect-invalid
+
+$input
+:not(.a, :unknownpseudo)
+$expect-invalid
+
+$input
+:not(:unknownpseudo, .a)
+$expect-invalid
+
+$input
+:host(:not(.a .b))
+$expect-invalid

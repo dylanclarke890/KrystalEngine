@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Core/Numeric.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   enum class PixelFormat : uint8
   {

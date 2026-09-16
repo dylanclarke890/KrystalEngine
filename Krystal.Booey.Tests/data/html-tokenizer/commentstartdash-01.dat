@@ -1,0 +1,35 @@
+#name
+switches to CommentEnd when parsing HyphenMinus
+#data
+<!----
+#expected-state
+CommentEnd
+#tokens
+
+#name
+switches to Data and emits comment with parser error when parsing GreaterThanSign
+#data
+<!--->
+#tokens
+Comment()
+#errors
+1:6 AbruptClosingOfEmptyComment
+
+#name
+Emits comment and then EOF when EOF reached
+#data
+<!---comment
+#append-eof
+#tokens
+Comment(-comment)
+EndOfFile
+#errors
+1:13 EOFInComment
+
+#name
+reconsumes in Comment for anything else
+#data
+<!---c
+#expected-state
+Comment
+#tokens

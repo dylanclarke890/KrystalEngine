@@ -1,0 +1,6 @@
+﻿[Exposed=Window]
+interface DocumentType : Node {
+  readonly attribute dom::DOMString name;
+  readonly attribute dom::DOMString publicId;
+  readonly attribute dom::DOMString systemId;
+};

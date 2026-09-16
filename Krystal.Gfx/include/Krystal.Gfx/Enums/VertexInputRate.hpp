@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Enum.hpp"
+#include "Krystal.Core/Enum.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   enum class VertexInputRate : uint8
   {
@@ -11,4 +11,4 @@ namespace Krys::Gfx
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::Gfx::VertexInputRate, 2u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::Gfx::VertexInputRate, 2u);

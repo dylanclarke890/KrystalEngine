@@ -1,0 +1,27 @@
+#name
+emits comment when parsing GreaterThanSign
+#data
+<!--a<!-->
+#tokens
+Comment(a<!)
+
+#name
+emits comment with parser error followed by EOF when parsing EOF
+#data
+<!--a<!--
+#append-eof
+#tokens
+Comment(a<!)
+EndOfFile
+#errors
+1:10 EOFInComment
+
+#name
+reconsumes in Comment for anything else
+#data
+<!--a<!--b
+#expected-state
+Comment
+#tokens
+#errors
+1:10 NestedComment

@@ -1,19 +1,22 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Buffer.hpp"
-#include "Krystal.Gfx.OpenGL/Resources/Shader.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Mesh.hpp"
-#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
-#include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Gfx.OpenGL/Resources/Shader.hpp"
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
-  struct Debug : NonCopyMovable<Debug>
+  class Debug
   {
     Debug() = delete;
     ~Debug() = delete;
 
+    KRYS_NON_COPY_MOVABLE(Debug);
+
+  public:
     static void SetName(Shader &shader, stringview debugName) noexcept
     {
       SetName(GL_PROGRAM, shader.Id(), debugName);

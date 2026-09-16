@@ -1,0 +1,60 @@
+#name
+Basic named character reference
+#data
+&copy;
+#tokens
+Character(©)
+
+#name
+missing semicolon
+#data
+&Agrave
+#append-eof
+#tokens
+Character(À)
+EndOfFile
+#errors
+1:8 MissingSemicolonAfterCharacterReference
+
+#name
+no match, incomplete reference
+#data
+&nonentity
+#expected-state
+AmbiguousAmpersand
+#tokens
+Character(&nonentity)
+
+#name
+no match, ends in semicolon
+#data
+&nonentity;
+#tokens
+Character(&nonentity;)
+#errors
+1:11 UnknownNamedCharacterReference
+
+#name
+mixed case reference
+#data
+&vsupnE;
+#tokens
+Character(⫌︀)
+
+#name
+partial match with valid prefix
+#data
+&notit;
+#tokens
+Character(¬it;)
+#errors
+1:6 MissingSemicolonAfterCharacterReference
+
+#name
+EOF in middle of otherwise valid reference
+#data
+&co
+#append-eof
+#tokens
+Character(&co)
+EndOfFile

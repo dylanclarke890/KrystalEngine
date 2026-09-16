@@ -1,34 +1,34 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Hash.hpp"
 #include "Krystal.Gfx/Colour.hpp"
-#include "Krystal.Lib/Core/Hash.hpp"
 
 namespace std
 {
   template <>
-  struct hash<Krys::Gfx::Colourf>
+  struct hash<krys::Gfx::Colourf>
   {
-    size_t operator()(const Krys::Gfx::Colourf &colour) const
+    size_t operator()(const krys::Gfx::Colourf &colour) const
     {
-      return Krys::Hash::Combine(colour.red, colour.green, colour.blue, colour.alpha);
+      return krys::Hash::Combine(colour.red, colour.green, colour.blue, colour.alpha);
     }
   };
 
   template <>
-  struct hash<Krys::Gfx::Colourb>
+  struct hash<krys::Gfx::Colourb>
   {
-    size_t operator()(const Krys::Gfx::Colourb &colour) const
+    size_t operator()(const krys::Gfx::Colourb &colour) const
     {
-      return Krys::Hash::Combine(colour.red, colour.green, colour.blue, colour.alpha);
+      return krys::Hash::Combine(colour.red, colour.green, colour.blue, colour.alpha);
     }
   };
 
   template <>
-  struct hash<Krys::Gfx::ColourbPremultiplied>
+  struct hash<krys::Gfx::ColourbPremultiplied>
   {
-    size_t operator()(const Krys::Gfx::ColourbPremultiplied &colour) const
+    size_t operator()(const krys::Gfx::ColourbPremultiplied &colour) const
     {
-      return Krys::Hash::Combine(colour.red, colour.green, colour.blue, colour.alpha);
+      return krys::Hash::Combine(colour.red, colour.green, colour.blue, colour.alpha);
     }
   };
 }

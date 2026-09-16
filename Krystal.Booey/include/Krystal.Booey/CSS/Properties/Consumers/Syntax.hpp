@@ -1,0 +1,18 @@
+﻿#pragma once
+
+#include "Krystal.Core/Types/RefPtr.hpp"
+
+namespace krys::boo::css
+{
+  class TokenRange;
+  class Value;
+  struct PropertyParserState;
+
+  namespace PropertyParserHelpers
+  {
+    // MARK: <declaration-value> consuming
+    // https://drafts.csswg.org/css-syntax-3/#typedef-declaration-value
+    KRYS_NODISCARD RefPtr<Value> ConsumeDeclarationValue(TokenRange &tokens,
+                                                            PropertyParserState &state) noexcept;
+  }
+}

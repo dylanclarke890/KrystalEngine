@@ -1,0 +1,15 @@
+#name
+switches to CommentLessThanSignBangDash when parsing HyphenMinus
+#data
+<!--a<!-
+#expected-state
+CommentLessThanSignBangDash
+#tokens
+
+#name
+reconsumes in Comment for anything else
+#data
+<!--a<!b
+#expected-state
+Comment
+#tokens

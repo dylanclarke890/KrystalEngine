@@ -1,0 +1,31 @@
+#name
+Switches to ScriptDataEndTagName after parsing alpha
+#data
+a
+#initial-state
+ScriptDataEndTagOpen
+#expected-state
+ScriptDataEndTagName
+#tokens
+
+#name
+emits less than sign and solidus after parsing non alpha
+#data
+©
+#initial-state
+ScriptDataEndTagOpen
+#expected-state
+ScriptData
+#tokens
+Character(</©)
+
+#name
+emits less than sign and solidus if EOF reached
+#data
+</
+#initial-state
+ScriptData
+#append-eof
+#tokens
+Character(</)
+EndOfFile

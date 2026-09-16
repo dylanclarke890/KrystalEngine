@@ -1,0 +1,38 @@
+#name
+ignores whitespace and stays in the same state when parsing whitespace
+#data
+   	
+
+#initial-state
+AfterDOCTYPESystemIdentifier
+#expected-state
+AfterDOCTYPESystemIdentifier
+#tokens
+
+#name
+switches to Data and emits DOCTYPE when parsing GreaterThanSign
+#data
+<!DOCTYPE HTML SYSTEM "id">
+#tokens
+DOCTYPE(html, , id, ForceQuirks=false)
+
+#name
+emits DOCTYPE with force-quirks when EOF reached
+#data
+<!DOCTYPE HTML SYSTEM "id"
+#append-eof
+#tokens
+DOCTYPE(html, , id, ForceQuirks=true)
+EndOfFile
+#errors
+1:27 EOFInDOCTYPE
+
+#name
+treats anything else as unexpected and switches to BogusDOCTYPE
+#data
+<!DOCTYPE HTML SYSTEM "id"a
+#expected-state
+BogusDOCTYPE
+#tokens
+#errors
+1:27 UnexpectedCharacterAfterDOCTYPESystemIdentifier

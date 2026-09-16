@@ -1,31 +1,33 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Maths/Vector.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/Resources/Mesh.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
-#include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Maths/Vector.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
-  class MeshDataUtils : NonCopyMovable<MeshDataUtils>
+  class MeshDataUtils
   {
     MeshDataUtils() = delete;
     ~MeshDataUtils() = delete;
 
+    KRYS_NON_COPY_MOVABLE(MeshDataUtils);
+
   public:
-    static void GenerateQuad(MeshData &data, const Maths::Vec2 &origin, const Maths::Vec2 &dimensions,
+    static void GenerateQuad(MeshData &data, const Vec2 &origin, const Vec2 &dimensions,
                              const ColourbPremultiplied &colour) noexcept
     {
-      GenerateQuad(data, origin, dimensions, colour, Maths::Vec2 {0.f, 0.f}, Maths::Vec2 {1.f, 1.f});
+      GenerateQuad(data, origin, dimensions, colour, Vec2 {0.f, 0.f}, Vec2 {1.f, 1.f});
     }
 
-    static void GenerateQuad(MeshData &data, const Maths::Vec2 &origin, const Maths::Vec2 &dimensions,
-                             const ColourbPremultiplied &colour, const Maths::Vec2 &topLeftTexCoord,
-                             const Maths::Vec2 &bottomRightTexCoord) noexcept
+    static void GenerateQuad(MeshData &data, const Vec2 &origin, const Vec2 &dimensions,
+                             const ColourbPremultiplied &colour, const Vec2 &topLeftTexCoord,
+                             const Vec2 &bottomRightTexCoord) noexcept
     {
       using Vertex = Vertex::Position2D_ColourbPremultiplied_UV;
 
@@ -45,17 +47,17 @@ namespace Krys::Gfx
         vertices[0].Colour = colour;
         vertices[0].TexCoord = topLeftTexCoord;
 
-        vertices[1].Position = Maths::Vec2(origin.x + dimensions.x, origin.y);
+        vertices[1].Position = Vec2(origin.x + dimensions.x, origin.y);
         vertices[1].Colour = colour;
-        vertices[1].TexCoord = Maths::Vec2(bottomRightTexCoord.x, topLeftTexCoord.y);
+        vertices[1].TexCoord = Vec2(bottomRightTexCoord.x, topLeftTexCoord.y);
 
         vertices[2].Position = origin + dimensions;
         vertices[2].Colour = colour;
         vertices[2].TexCoord = bottomRightTexCoord;
 
-        vertices[3].Position = Maths::Vec2(origin.x, origin.y + dimensions.y);
+        vertices[3].Position = Vec2(origin.x, origin.y + dimensions.y);
         vertices[3].Colour = colour;
-        vertices[3].TexCoord = Maths::Vec2(topLeftTexCoord.x, bottomRightTexCoord.y);
+        vertices[3].TexCoord = Vec2(topLeftTexCoord.x, bottomRightTexCoord.y);
 
         data.Vertices.resize(data.Vertices.size() + TotalVerticesSizeInBytes);
         std::memcpy(&data.Vertices[v0], vertices.data(), TotalVerticesSizeInBytes);

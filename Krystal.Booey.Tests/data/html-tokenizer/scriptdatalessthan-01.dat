@@ -1,0 +1,42 @@
+#name
+Switches to ScriptDataEndTagOpen after parsing solidus
+#data
+/
+#initial-state
+ScriptDataLessThanSign
+#expected-state
+ScriptDataEndTagOpen
+#tokens
+
+#name
+emits LessThanSign after parsing non solidus
+#data
+©
+#initial-state
+ScriptDataLessThanSign
+#expected-state
+ScriptData
+#tokens
+Character(<©)
+
+#name
+Emits LessThanSign if EOF reached
+#data
+<
+#initial-state
+ScriptData
+#append-eof
+#tokens
+Character(<)
+EndOfFile
+
+#name
+Switches to ScriptDataEscapeStart after parsing ExclamationMark and emits LessThanSign and ExclamationMark
+#data
+!
+#initial-state
+ScriptDataLessThanSign
+#expected-state
+ScriptDataEscapeStart
+#tokens
+Character(<!)

@@ -1,5 +1,11 @@
 ﻿#pragma once
 
+#include "Krystal.Core/IO/VirtualFileSystem.hpp"
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/Expected.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Utils/NativeHandle.hpp"
 #include "Krystal.Gfx/ICamera.hpp"
 #include "Krystal.Gfx/Registries/IBufferRegistry.hpp"
 #include "Krystal.Gfx/Registries/IFontRegistry.hpp"
@@ -11,21 +17,15 @@
 #include "Krystal.Gfx/Registries/ISamplerRegistry.hpp"
 #include "Krystal.Gfx/Registries/IShaderRegistry.hpp"
 #include "Krystal.Gfx/Registries/ITextureRegistry.hpp"
-#include "Krystal.IO/VirtualFileSystem.hpp"
-#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
-#include "Krystal.Lib/NativeHandle.hpp"
-#include "Krystal.Lib/Pointers/UniquePtr.hpp"
-#include "Krystal.Lib/Types/Expected.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   struct ContextSettings
   {
     NativeHandle WindowHandle {nullptr};
     uint32 Width {0u};
     uint32 Height {0u};
-    IO::VirtualFileSystem *VFS {nullptr};
+    io::VirtualFileSystem *VFS {nullptr};
   };
 
   Expected<UniquePtr<class IContext>> CreateContext(const ContextSettings &settings) noexcept;
@@ -39,8 +39,10 @@ namespace Krys::Gfx
     Vulkan,
   };
 
-  class IContext : NonCopyMovable<IContext>
+  class IContext
   {
+    KRYS_NON_COPY_MOVABLE(IContext);
+
   protected:
     IContext() noexcept = default;
 

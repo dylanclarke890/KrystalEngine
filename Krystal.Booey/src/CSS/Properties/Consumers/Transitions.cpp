@@ -1,0 +1,76 @@
+﻿#include "Krystal.Booey/CSS/Properties/Consumers/Transitions.hpp"
+#include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+
+namespace krys::boo::css::PropertyParserHelpers
+{
+  namespace
+  {
+    KRYS_NODISCARD RefPtr<Value> ConsumeSingleTransitionPropertyIdent(TokenRange &tokens,
+                                                                         const Token &token) noexcept
+    {
+      if (token.ValueId() == ValueId::All)
+      {
+        return ConsumeIdent(tokens);
+      }
+
+      if (auto property = token.PropertyId(); property != PropertyId::Invalid)
+      {
+        tokens.Discard();
+        tokens.DiscardWhitespace();
+
+        return PrimitiveValue::Create(property);
+      }
+
+      return ConsumeCustomIdent(tokens);
+    }
+  }
+
+  RefPtr<Value> ConsumeSingleTransitionPropertyOrNone(TokenRange &tokens,
+                                                         PropertyParserState &state) noexcept
+  {
+    // This variant of ConsumeSingleTransitionProperty is used for the slightly different
+    // parse rules used for the 'transition' shorthand which allows 'none':
+    //
+    // <single-transition-or-none> = [ none | <single-transition-property> ]
+    // https://drafts.csswg.org/css-transitions/#single-transition-property
+
+    auto &token = tokens.Peek();
+    if (token.Type() != TokenType::Ident)
+    {
+      return nullptr;
+    }
+
+    if (token.ValueId() == ValueId::None)
+    {
+      return ConsumeIdent(tokens);
+    }
+
+    return ConsumeSingleTransitionPropertyIdent(tokens, token);
+  }
+
+  RefPtr<Value> ConsumeSingleTransitionProperty(TokenRange &tokens,
+                                                   PropertyParserState &state) noexcept
+  {
+    // "The <custom-ident> production in <single-transition-property> also excludes the keyword
+    // none, in addition to the keywords always excluded from <custom-ident>."
+    //
+    // <single-transition-property> = all | <custom-ident>;
+    // https://drafts.csswg.org/css-transitions/#single-transition-property
+
+    auto &token = tokens.Peek();
+    if (token.Type() != TokenType::Ident)
+    {
+      return nullptr;
+    }
+
+    if (token.ValueId() == ValueId::None)
+    {
+      return nullptr;
+    }
+
+    return ConsumeSingleTransitionPropertyIdent(tokens, token);
+  }
+}

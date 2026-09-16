@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #ifndef KRYS_GL_OVERRIDE_FUNCTIONS
   #define KRYS_GL_OVERRIDE_FUNCTIONS 0

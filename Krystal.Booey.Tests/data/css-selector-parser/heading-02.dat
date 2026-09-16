@@ -1,0 +1,71 @@
+$input
+:heading()
+$expect-invalid
+
+$input
+:heading(1.0)
+$expect-invalid
+
+$input
+:heading(1.4)
+$expect-invalid
+
+$input
+:heading(n)
+$expect-invalid
+
+$input
+:heading(odd)
+$expect-invalid
+
+$input
+:heading(even)
+$expect-invalid
+
+$input
+:heading(2n)
+$expect-invalid
+
+$input
+:heading(2n+1)
+$expect-invalid
+
+$input
+:heading(2n+2)
+$expect-invalid
+
+$input
+:heading(-n+3)
+$expect-invalid
+
+$input
+:heading(2n, 3n)
+$expect-invalid
+
+$input
+:heading(2, 3n)
+$expect-invalid
+
+$input
+:heading(2 of .foo)
+$expect-invalid
+
+$input
+:heading(2n of .foo)
+$expect-invalid
+
+$input
+:heading(calc(1))
+$expect-invalid
+
+$input
+:heading(max(1, 2))
+$expect-invalid
+
+$input
+:heading(min(1, 2)
+$expect-invalid
+
+$input
+:heading(var(--level))
+$expect-invalid

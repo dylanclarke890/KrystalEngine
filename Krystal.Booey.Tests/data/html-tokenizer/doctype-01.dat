@@ -1,0 +1,38 @@
+#name
+ignores whitespace and switches to BeforeDOCTYPEName when parsing whitespace
+#data
+<!DOCTYPE   	
+
+#expected-state
+BeforeDOCTYPEName
+#tokens
+
+#name
+emits DOCTYPE token with force-quirks when parsing GreaterThanSign
+#data
+<!DOCTYPE>
+#tokens
+DOCTYPE(, , , ForceQuirks=true)
+#errors
+1:10 MissingDOCTYPEName
+
+#name
+emits DOCTYPE token with force-quirks when EOF reached
+#data
+<!DOCTYPE
+#append-eof
+#tokens
+DOCTYPE(, , , ForceQuirks=true)
+EndOfFile
+#errors
+1:10 EOFInDOCTYPE
+
+#name
+treats anything else as missing whitespace before DOCTYPE name
+#data
+<!DOCTYPEa
+#expected-state
+DOCTYPEName
+#tokens
+#errors
+1:10 MissingWhitespaceBeforeDOCTYPEName

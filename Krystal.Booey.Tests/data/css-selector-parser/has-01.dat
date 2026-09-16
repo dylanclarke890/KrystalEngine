@@ -1,0 +1,74 @@
+$input
+:has(a)
+
+$input
+:has(#a)
+
+$input
+:has(.a)
+
+$input
+:has([a])
+
+$input
+:has([a="b"])
+
+$input
+:has([a|="b"])
+
+$input
+:has(:hover)
+
+$input
+*:has(.a)
+$output
+:has(.a)
+
+$input
+.a:has(.b)
+
+$input
+.a:has(> .b)
+
+$input
+.a:has(~ .b)
+
+$input
+.a:has(+ .b)
+
+$input
+.a:has(.b) .c
+
+$input
+.a .b:has(.c)
+
+$input
+.a .b:has(.c .d)
+
+$input
+.a .b:has(.c .d) .e
+
+$input
+.a:has(.b:is(.c .d))
+
+$input
+.a:is(.b:has(.c) .d)
+
+$input
+.a:not(:has(.b))
+
+$input
+.a:has(:not(.b))
+
+$input
+.a:has(.b):has(.c)
+
+$input
+*|*:has(*)
+$output
+:has(*)
+
+$input
+:has(*|*)
+$output
+:has(*)

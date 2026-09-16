@@ -1,10 +1,10 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/Types/List.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   template <typename T>
   struct InstanceData

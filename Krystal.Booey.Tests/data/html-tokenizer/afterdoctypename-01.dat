@@ -1,0 +1,28 @@
+#name
+ignores whitespace and stays in the same state when parsing whitespace
+#data
+   	
+
+#initial-state
+AfterDOCTYPEName
+#expected-state
+AfterDOCTYPEName
+#tokens
+
+#name
+switches to Data and emits DOCTYPE when parsing GreaterThanSign
+#data
+<!DOCTYPE HTML5>
+#tokens
+DOCTYPE(html5, , , ForceQuirks=false)
+
+#name
+emits DOCTYPE with force-quirks when EOF reached
+#data
+<!DOCTYPE HTML5
+#append-eof
+#tokens
+DOCTYPE(html5, , , ForceQuirks=true)
+EndOfFile
+#errors
+1:16 EOFInDOCTYPE

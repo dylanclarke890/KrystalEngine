@@ -1,0 +1,8 @@
+$input
+:focus-visible
+
+$input
+a:focus-visible
+
+$input
+:focus:not(:focus-visible)

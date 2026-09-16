@@ -1,13 +1,13 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Gfx/Enums/MeshType.hpp"
 #include "Krystal.Gfx/Enums/PrimitiveType.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types/Span.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   struct MeshData
   {

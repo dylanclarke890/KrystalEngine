@@ -1,14 +1,16 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Macros.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Image.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
-  class IImageRegistry : NonCopyMovable<IImageRegistry>
+  class IImageRegistry
   {
+    KRYS_NON_COPY_MOVABLE(IImageRegistry);
+
   protected:
     IImageRegistry() noexcept = default;
 

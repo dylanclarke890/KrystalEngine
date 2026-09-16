@@ -1,19 +1,22 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Maths/Vector.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/RenderTarget.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
-#include "Krystal.Maths/Vector.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
-  class IRenderTargetRegistry : NonCopyMovable<IRenderTargetRegistry>
+  class IRenderTargetRegistry
   {
-  public:
-    IRenderTargetRegistry() = default;
+    KRYS_NON_COPY_MOVABLE(IRenderTargetRegistry);
 
-    virtual ~IRenderTargetRegistry() = default;
+  protected:
+    IRenderTargetRegistry() noexcept = default;
+
+  public:
+    virtual ~IRenderTargetRegistry() noexcept = default;
 
     virtual void Startup() = 0;
 
@@ -26,7 +29,7 @@ namespace Krys::Gfx
     virtual bool Destroy(RenderTargetHandle handle) noexcept = 0;
 
     /// @brief Get the dimensions of a render target.
-    virtual KRYS_NODISCARD Maths::Vec2 GetDimensions(RenderTargetHandle handle) noexcept = 0;
+    virtual KRYS_NODISCARD Vec2 GetDimensions(RenderTargetHandle handle) noexcept = 0;
 
     /// @brief Gets the image handle for a specific colour attachment of a render target.
     virtual KRYS_NODISCARD ImageHandle GetColourAttachmentImage(RenderTargetHandle handle,

@@ -1,0 +1,54 @@
+﻿[Exposed=Window]
+interface Document : Node {
+  constructor();
+
+  [SameObject] readonly attribute DOMImplementation implementation;
+  readonly attribute USVString URL;
+  readonly attribute USVString documentURI;
+  readonly attribute dom::DOMString compatMode;
+  readonly attribute dom::DOMString characterSet;
+  readonly attribute dom::DOMString charset; // legacy alias of .characterSet
+  readonly attribute dom::DOMString inputEncoding; // legacy alias of .characterSet
+  readonly attribute dom::DOMString contentType;
+
+  readonly attribute DocumentType? doctype;
+  readonly attribute Element? documentElement;
+  HTMLCollection getElementsByTagName(dom::DOMString qualifiedName);
+  HTMLCollection getElementsByTagNameNS(dom::DOMString? namespace, dom::DOMString localName);
+  HTMLCollection getElementsByClassName(dom::DOMString classNames);
+
+  [CEReactions, NewObject] Element createElement(dom::DOMString localName, optional (dom::DOMString or ElementCreationOptions) options = {});
+  [CEReactions, NewObject] Element createElementNS(dom::DOMString? namespace, dom::DOMString qualifiedName, optional (dom::DOMString or ElementCreationOptions) options = {});
+  [NewObject] DocumentFragment createDocumentFragment();
+  [NewObject] Text createTextNode(dom::DOMString data);
+  [NewObject] CDATASection createCDATASection(dom::DOMString data);
+  [NewObject] Comment createComment(dom::DOMString data);
+  [NewObject] ProcessingInstruction createProcessingInstruction(dom::DOMString target, dom::DOMString data);
+
+  [CEReactions, NewObject] Node importNode(Node node, optional (boolean or ImportNodeOptions) options = false);
+  [CEReactions] Node adoptNode(Node node);
+
+  [NewObject] Attr createAttribute(dom::DOMString localName);
+  [NewObject] Attr createAttributeNS(dom::DOMString? namespace, dom::DOMString qualifiedName);
+
+  [NewObject] Event createEvent(dom::DOMString interface); // legacy
+
+  [NewObject] Range createRange();
+
+  // NodeFilter.SHOW_ALL = 0xFFFFFFFF
+  [NewObject] NodeIterator createNodeIterator(Node root, optional unsigned long whatToShow = 0xFFFFFFFF, optional NodeFilter? filter = null);
+  [NewObject] TreeWalker createTreeWalker(Node root, optional unsigned long whatToShow = 0xFFFFFFFF, optional NodeFilter? filter = null);
+};
+
+[Exposed=Window]
+interface XMLDocument : Document {};
+
+dictionary ElementCreationOptions {
+  CustomElementRegistry? customElementRegistry;
+  dom::DOMString is;
+};
+
+dictionary ImportNodeOptions {
+  CustomElementRegistry customElementRegistry;
+  boolean selfOnly = false;
+};

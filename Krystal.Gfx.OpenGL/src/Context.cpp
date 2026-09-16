@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Gfx.OpenGL/Context.hpp"
-#include "Krystal.Lib/Detection/OS.hpp"
+#include "Krystal.Core/Detection/OS.hpp"
 
 #if KRYS_OS(WINDOWS)
   #include "Krystal.Gfx.OpenGL/ContextImpl/Win32.hpp"
@@ -7,42 +7,42 @@
   #error "Unsupported platform for OpenGL context creation."
 #endif
 
+#include "Krystal.Core/Debug.hpp"
+#include "Krystal.Core/Log/ILogger.hpp"
+#include "Krystal.Core/Maths/Clipspace.hpp"
+#include "Krystal.Core/Maths/Convert.hpp"
+#include "Krystal.Core/Maths/Interpolate.hpp"
+#include "Krystal.Core/Maths/Matrix.hpp"
+#include "Krystal.Core/Maths/Transform.hpp"
+#include "Krystal.Core/Maths/Vector.hpp"
+#include "Krystal.Core/Time/MonotonicTime.hpp"
+#include "Krystal.Core/Types/Expected.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Buffer.hpp"
 #include "Krystal.Gfx.OpenGL/Utils.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/Light.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/Core/DebugBreak.hpp"
-#include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Time/MonotonicTime.hpp"
-#include "Krystal.Lib/Types/Expected.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types/Map.hpp"
-#include "Krystal.Log/ILogger.hpp"
-#include "Krystal.Maths/Clipspace.hpp"
-#include "Krystal.Maths/Convert.hpp"
-#include "Krystal.Maths/Interpolate.hpp"
-#include "Krystal.Maths/Matrix.hpp"
-#include "Krystal.Maths/Transform.hpp"
-#include "Krystal.Maths/Vector.hpp"
-#include "Krystal.Platform/Platform.hpp"
+#include "Krystal.PAL/Platform.hpp"
 #include <format>
 #include <random>
 
 namespace
 {
-  using namespace Krys;
-  using namespace Krys::Gfx;
-  using namespace Krys::Gfx::OpenGL;
-  using namespace Krys::Maths;
+  using namespace krys;
+  using namespace krys::Gfx;
+  using namespace krys::Gfx::OpenGL;
+  using namespace krys;
 
 #pragma region Debug Output
 
   void DebugMessageCallback(GLenum source, GLenum type, uint id, GLenum severity, GLsizei, const char *msg,
                             const void *)
   {
-    auto *logger = Log::GetGlobalLogger();
+    auto *logger = log::GetGlobalLogger();
     if (logger == nullptr)
     {
       return;
@@ -137,16 +137,16 @@ namespace
     uint32 Height {};
   };
 
-  Map<string, TextureHandle> textureHandles;
-  Map<string, ShaderHandle> shaderHandles;
-  Map<string, MaterialHandle> materialHandles;
-  Map<string, MeshHandle> meshHandles;
-  Map<string, BufferHandle> bufferHandles;
-  Map<string, GLuint> VAOs;
+  HashMap<string, TextureHandle> textureHandles;
+  HashMap<string, ShaderHandle> shaderHandles;
+  HashMap<string, MaterialHandle> materialHandles;
+  HashMap<string, MeshHandle> meshHandles;
+  HashMap<string, BufferHandle> bufferHandles;
+  HashMap<string, GLuint> VAOs;
 
   Mat4 ScreenOrthoProjection;
 
-  Map<string, FrameBufferData> shadowMaps;
+  HashMap<string, FrameBufferData> shadowMaps;
 
   FrameBufferData pingPongFBOs[2];
 
@@ -598,7 +598,7 @@ namespace
   }
 }
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   Expected<UniquePtr<IContext>> CreateContext(const ContextSettings &settings) noexcept
   {
@@ -613,11 +613,11 @@ namespace Krys::Gfx
   }
 }
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
   Context::Context(const ContextSettings &settings)
       : _windowHandle(settings.WindowHandle), _width(settings.Width), _height(settings.Height),
-        _vfs(*settings.VFS), _dpi(Platform::GetDPIForWindow(_windowHandle)),
+        _vfs(*settings.VFS), _dpi(krys::pal::GetDPIForWindow(_windowHandle)),
         _platformImpl(CreateUnique<ContextPlatformImpl>(settings.WindowHandle)), _buffers(), _images(),
         _imageViews(_images), _samplers(), _shaders(_vfs), _meshes(),
         _textures(_vfs, _images, _imageViews, _samplers), _renderTargets(_images, _imageViews),
@@ -644,7 +644,8 @@ namespace Krys::Gfx::OpenGL
 
     // Shaders
     {
-      using namespace IO;
+      using namespace io;
+
       shaderHandles["model"] = _shaders.Load(Path("model.vert"), Path("model.frag"));
       shaderHandles["instanced-model"] =
         _shaders.Load(Path("instanced-model.vert"), Path("instanced-model.frag"));
@@ -704,17 +705,18 @@ namespace Krys::Gfx::OpenGL
     }
 
     {
-      // models["backpack"] = CreateUnique<Model>(IO::Path("data/assets/models/backpack/backpack.obj"));
+      // models["backpack"] = CreateUnique<Model>(io::Path("data/assets/models/backpack/backpack.obj"));
     }
 
     // Textures
     {
-      textureHandles["hdr-environment"] = _textures.Load(IO::Path("newport-loft.hdr"));
+      textureHandles["hdr-environment"] = _textures.Load(io::Path("newport-loft.hdr"));
     }
 
     // PBR textures
     {
-      using namespace IO;
+      using namespace io;
+
       ShaderHandle shader = shaderHandles.at("pbr-with-maps");
       materialHandles["rusted-iron"] = _materials.LoadPBRMaterial("rusted-iron", shader);
       materialHandles["gold"] = _materials.LoadPBRMaterial("gold", shader);
@@ -762,7 +764,7 @@ namespace Krys::Gfx::OpenGL
     }
 
     glViewport(0, 0, _width, _height);
-    KRYS_INFO("Viewport set to {}x{}", _width, _height);
+    KRYS_LOG_INFO("Viewport set to {}x{}", _width, _height);
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
@@ -844,7 +846,7 @@ namespace Krys::Gfx::OpenGL
 
     for (uint i = 0; i < sizeof(lightPositions) / sizeof(lightPositions[0]); ++i)
     {
-      auto time = static_cast<float>(Seconds(MonotonicTime::Now()).count());
+      auto time = static_cast<float>(seconds(MonotonicTime::Now()).count());
       Vec3 newPos = lightPositions[i] + Vec3(std::sin(time * 5.0f), 0.0f, 0.0f);
       shader.SetUniform("lightPositions[" + std::to_string(i) + "]", newPos);
       shader.SetUniform("lightColors[" + std::to_string(i) + "]", lightColors[i]);

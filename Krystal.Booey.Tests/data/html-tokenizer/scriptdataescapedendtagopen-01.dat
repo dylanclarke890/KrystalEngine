@@ -1,0 +1,33 @@
+#name
+Switches to ScriptDataEscapedEndTagName after parsing alpha
+#data
+a
+#initial-state
+ScriptDataEscapedEndTagOpen
+#expected-state
+ScriptDataEscapedEndTagName
+#tokens
+
+#name
+emits less than sign and solidus after parsing non alpha
+#data
+©
+#initial-state
+ScriptDataEscapedEndTagOpen
+#expected-state
+ScriptDataEscaped
+#tokens
+Character(</©)
+
+#name
+emits less than sign and solidus if EOF reached
+#data
+</
+#initial-state
+ScriptDataEscaped
+#append-eof
+#tokens
+Character(</)
+EndOfFile
+#errors
+1:3 EOFInScriptHTMLCommentLikeText

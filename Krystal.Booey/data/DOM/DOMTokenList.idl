@@ -1,0 +1,13 @@
+﻿[Exposed=Window]
+interface DOMTokenList {
+  readonly attribute unsigned long length;
+  getter dom::DOMString? item(unsigned long index);
+  boolean contains(dom::DOMString token);
+  [CEReactions] undefined add(dom::DOMString... tokens);
+  [CEReactions] undefined remove(dom::DOMString... tokens);
+  [CEReactions] boolean toggle(dom::DOMString token, optional boolean force);
+  [CEReactions] boolean replace(dom::DOMString token, dom::DOMString newToken);
+  boolean supports(dom::DOMString token);
+  [CEReactions] stringifier attribute dom::DOMString value;
+  iterable<dom::DOMString>;
+};

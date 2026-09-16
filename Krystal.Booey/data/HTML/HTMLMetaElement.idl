@@ -1,0 +1,11 @@
+﻿[Exposed=Window]
+interface HTMLMetaElement : HTMLElement {
+  [HTMLConstructor] constructor();
+
+  [CEReactions, Reflect] attribute dom::DOMString name;
+  [CEReactions, Reflect="http-equiv"] attribute dom::DOMString httpEquiv;
+  [CEReactions, Reflect] attribute dom::DOMString content;
+  [CEReactions, Reflect] attribute dom::DOMString media;
+
+  // also has obsolete members
+};

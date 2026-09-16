@@ -1,0 +1,96 @@
+﻿#name
+switches to Data and emits the current tag when parsing GreaterThanSign
+#data
+<div b>
+#tokens
+StartTag(div, b="", SelfClosing=false)
+
+#name
+switches to Data and emits EOF when EOF reached
+#data
+<div b
+#append-eof
+#tokens
+EndOfFile
+#errors
+1:7 EOFInTag
+
+#name
+switches to Data and emits the current tag with parser error when parsing Solidus GreaterThanSign
+#data
+<div b/>
+#tokens
+StartTag(div, b="", SelfClosing=true)
+
+#name
+ignores whitespace and switches to AfterAttributeName when parsing whitespace
+#data
+<div b   
+
+#expected-state
+AfterAttributeName
+#tokens
+
+#name
+switches to SelfClosingStartTag when parsing Solidus
+#data
+<div b/
+#expected-state
+SelfClosingStartTag
+#tokens
+
+#name
+parses attribute name and switches to BeforeAttributeValue when parsing EqualsSign
+#data
+<div b=
+#expected-state
+BeforeAttributeValue
+#tokens
+
+#name
+appends to attribute name when parsing valid attribute name characters
+#data
+<div data-value=
+#expected-state
+BeforeAttributeValue
+#tokens
+
+#name
+Replaces null character with U+FFFD in attribute name
+#data
+<div data value=
+#expected-state
+BeforeAttributeValue
+#tokens
+#errors
+1:10 UnexpectedNullCharacter
+
+#name
+Treats QuotationMark as anything else but with parse error
+#data
+<div data"value=
+#expected-state
+BeforeAttributeValue
+#tokens
+#errors
+1:10 UnexpectedCharacterInAttributeName
+
+#name
+Treats Apostrophe as anything else but with parse error
+#data
+<div data'value=
+#expected-state
+BeforeAttributeValue
+#tokens
+#errors
+1:10 UnexpectedCharacterInAttributeName
+
+#name
+Treats LessThanSign as anything else but with parse error
+#data
+<div data<value=
+#expected-state
+BeforeAttributeValue
+#tokens
+#errors
+1:10 UnexpectedCharacterInAttributeName

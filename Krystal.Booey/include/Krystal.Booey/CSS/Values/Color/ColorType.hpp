@@ -1,0 +1,15 @@
+﻿#pragma once
+
+#include "Krystal.Core/Enum.hpp"
+
+namespace krys::boo::css
+{
+  enum class ColorType : uint8
+  {
+    Absolute = 0,     ///< Absolute color values (e.g., #RRGGBB, rgb(), hsl(), etc.)
+    Current = 1 << 0, ///< The current color value (e.g., currentColor)
+    System = 1 << 1   ///< System color values (e.g., ButtonFace, Highlight, etc.)
+  };
+}
+
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::ColorType, 3uz);

@@ -1,15 +1,15 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Concepts.hpp"
-#include "Krystal.Lib/Core/Move.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types/Maybe.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Types/Queue.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Concepts.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/Queue.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <cassert>
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   template <typename T>
   concept Resource = MoveConstructible<T> && MoveAssignable<T> && !CopyConstructible<T> && !CopyAssignable<T>;
@@ -38,7 +38,7 @@ namespace Krys::Gfx
       }
 
       ResourceEntry &entry = _resources[index];
-      entry.Resource = Krys::Move(resource);
+      entry.Resource = krys::move(resource);
 
       return CreateHandle(index, entry.Generation);
     }
@@ -53,7 +53,7 @@ namespace Krys::Gfx
       uint16 generation = GetGeneration(handle);
 
       ResourceEntry &entry = GetResourceEntry(index, generation, false);
-      entry.Resource = Krys::Move(resource);
+      entry.Resource = krys::move(resource);
     }
 
     KRYS_NODISCARD T &Get(THandle handle)

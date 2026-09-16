@@ -1,7 +1,6 @@
-﻿#include "Krystal.Editor/Editor.hpp"
-#include "Krystal.Engine/Application.hpp"
-#include "Krystal.Lib/Core/Move.hpp"
-#include "Krystal.Lib/Detection/OS.hpp"
+﻿#include "Krystal.Core/Detection/OS.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Editor/Editor.hpp"
 
 #if KRYS_OS(WINDOWS)
   #define WIN32_LEAN_AND_MEAN
@@ -50,7 +49,7 @@
 
 int main(int argc, char **argv)
 {
-  using namespace Krys;
+  using namespace krys;
 
   ApplicationSettings settings {};
   settings.Name = "Krystal Editor";
@@ -70,7 +69,7 @@ int main(int argc, char **argv)
     return -1;
   }
 
-  UniquePtr<Editor> editor = ::Krys::Move(result.value());
+  UniquePtr<Editor> editor = ::krys::move(result.value());
   editor->Run();
 
   return 0;

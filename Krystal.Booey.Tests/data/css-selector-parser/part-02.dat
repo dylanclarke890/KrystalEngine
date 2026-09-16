@@ -1,0 +1,19 @@
+$input
+:part()
+$expect-invalid
+
+$input
+:part(0)
+$expect-invalid
+
+$input
+:part('foo')
+$expect-invalid
+
+$input
+:part([foo])
+$expect-invalid
+
+$input
+::part(foo) + ::part(bar)
+$expect-invalid

@@ -1,21 +1,19 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/IO/Path.hpp"
+#include "Krystal.Core/Maths/Vector.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/StronglyTypedValue.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Move.hpp"
-#include "Krystal.Lib/Mixins/NonCopyable.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types/Map.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Types/StronglyTypedValue.hpp"
-#include "Krystal.Maths/Vector.hpp"
-#include "Krystal.Text/UnicodeCodePoint.hpp"
 #include <compare>
 #include <type_traits>
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   enum class FontType : uint8
   {
@@ -52,14 +50,14 @@ namespace Krys::Gfx
 
   struct Character
   {
-    Maths::Vec2u Size {};    // Size of glyph
-    Maths::Vec2i Bearing {}; // Offset from baseline to left/top of glyph
-    int32 Advance {0u};      // Offset to advance to next glyph
-    Maths::Vec2 UVMin;       // (u0, v0)
-    Maths::Vec2 UVMax;       // (u1, v1)
+    Vec2u Size {};      // Size of glyph
+    Vec2i Bearing {};   // Offset from baseline to left/top of glyph
+    int32 Advance {0u}; // Offset to advance to next glyph
+    Vec2 UVMin;         // (u0, v0)
+    Vec2 UVMax;         // (u1, v1)
   };
 
-  using CharacterMap = Map<Text::UnicodeCodePoint, Character>;
+  using CharacterMap = HashMap<char32, Character>;
 
   struct FontMetrics
   {
@@ -78,7 +76,7 @@ namespace Krys::Gfx
 
   struct FontAtlasData
   {
-    Maths::Vec2u Size;
+    Vec2u Size;
     List<uint8> Pixels;
     CharacterMap Characters;
     FontMetrics Metrics;
@@ -88,36 +86,38 @@ namespace Krys::Gfx
 namespace std
 {
   template <>
-  struct hash<Krys::Gfx::FontDesc>
+  struct hash<krys::Gfx::FontDesc>
   {
-    size_t operator()(const Krys::Gfx::FontDesc &desc) const noexcept
+    size_t operator()(const krys::Gfx::FontDesc &desc) const noexcept
     {
-      size_t h1 = std::hash<Krys::uint8>()(static_cast<Krys::uint8>(desc.Type));
+      size_t h1 = std::hash<krys::uint8>()(static_cast<krys::uint8>(desc.Type));
       size_t h2 = std::hash<float>()(desc.Size);
       return h1 ^ (h2 << 1);
     }
   };
 }
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
-  class FontFamily : NonCopyable<FontFamily>
+  class FontFamily
   {
+    KRYS_NON_COPYABLE(FontFamily);
+
   private:
     utf8_string _name;
-    IO::Path _path;
+    io::Path _path;
     List<FontHandle> _fonts;
 
   public:
-    FontFamily(utf8_string name, const IO::Path &path) noexcept : _name(name), _path(path)
+    FontFamily(utf8_string name, const io::Path &path) noexcept : _name(name), _path(path)
     {
     }
 
     ~FontFamily() = default;
 
     FontFamily(FontFamily &&other) noexcept
-        : _name(std::exchange(other._name, utf8_string {})), _path(std::exchange(other._path, IO::Path {})),
-          _fonts(Krys::Move(other._fonts))
+        : _name(std::exchange(other._name, utf8_string {})), _path(std::exchange(other._path, io::Path {})),
+          _fonts(krys::move(other._fonts))
     {
     }
 
@@ -126,8 +126,8 @@ namespace Krys::Gfx
       if (this != &other)
       {
         _name = std::exchange(other._name, utf8_string {});
-        _path = std::exchange(other._path, IO::Path {});
-        _fonts = Krys::Move(other._fonts);
+        _path = std::exchange(other._path, io::Path {});
+        _fonts = krys::move(other._fonts);
       }
       return *this;
     }
@@ -137,7 +137,7 @@ namespace Krys::Gfx
       return _name;
     }
 
-    KRYS_NODISCARD const IO::Path &Path() const noexcept
+    KRYS_NODISCARD const io::Path &Path() const noexcept
     {
       return _path;
     }

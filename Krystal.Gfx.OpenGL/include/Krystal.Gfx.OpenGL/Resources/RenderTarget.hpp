@@ -1,15 +1,15 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Maths/Clipspace.hpp"
+#include "Krystal.Core/Maths/Matrix.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx/Resources/RenderTarget.hpp"
-#include "Krystal.Lib/Mixins/NonCopyable.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Maths/Clipspace.hpp"
-#include "Krystal.Maths/Matrix.hpp"
 #include <cassert>
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
   struct RenderTargetAttachment
   {
@@ -18,8 +18,11 @@ namespace Krys::Gfx::OpenGL
     GLuint Texture {0u};
   };
 
-  class RenderTarget : NonCopyable<RenderTarget>
+  class RenderTarget
   {
+    KRYS_NON_COPYABLE(RenderTarget);
+
+  private:
     uint32 _width {0u};
     uint32 _height {0u};
     GLuint _fbo {0u};
@@ -213,9 +216,9 @@ namespace Krys::Gfx::OpenGL
     }
 
     /// @brief Get an ortho projection matrix that has the origin at the top-left corner.
-    KRYS_NODISCARD Maths::Mat4 GetProjectionMatrix() const noexcept
+    KRYS_NODISCARD Mat4 GetProjectionMatrix() const noexcept
     {
-      return Maths::Ortho(0.f, static_cast<float>(_width), static_cast<float>(_height), 0.f);
+      return Ortho(0.f, static_cast<float>(_width), static_cast<float>(_height), 0.f);
     }
 
     /// @brief Sets the dimensions of the render target. NOTE: Does not resize attachments.

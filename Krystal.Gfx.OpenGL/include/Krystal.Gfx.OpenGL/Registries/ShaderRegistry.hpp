@@ -1,33 +1,32 @@
 ﻿#pragma once
 
-#include "Krystal.Debug/ScopedProfiler.hpp"
+#include "Krystal.Core/IO/Streams/StreamUtils.hpp"
+#include "Krystal.Core/IO/VirtualFileSystem.hpp"
+#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Utils/ScopedProfiler.hpp"
 #include "Krystal.Gfx.OpenGL/Debug.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Shader.hpp"
 #include "Krystal.Gfx/Registries/IShaderRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
-#include "Krystal.IO/Streams/StreamUtils.hpp"
-#include "Krystal.IO/VirtualFileSystem.hpp"
-#include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types/Map.hpp"
 
-namespace Krys::Gfx::OpenGL
+namespace krys::Gfx::OpenGL
 {
   class ShaderRegistry final : public IShaderRegistry
   {
     using ShaderManager = ResourceManager<Shader, ShaderHandle>;
     using ShaderHandleCache = ResourceHandleCache<string, ShaderHandle>;
 
-    const IO::Path BaseDirectory {"/shaders/"};
+    const io::Path BaseDirectory {"/shaders/"};
 
   private:
-    IO::VirtualFileSystem &_vfs;
+    io::VirtualFileSystem &_vfs;
     ShaderManager _shaders;
     ShaderHandleCache _cache;
-    Map<BuiltinShader, ShaderHandle> _builtins;
+    HashMap<BuiltinShader, ShaderHandle> _builtins;
 
   public:
-    ShaderRegistry(IO::VirtualFileSystem &vfs) noexcept : _vfs(vfs), _shaders(), _cache()
+    ShaderRegistry(io::VirtualFileSystem &vfs) noexcept : _vfs(vfs), _shaders(), _cache()
     {
     }
 
@@ -41,7 +40,7 @@ namespace Krys::Gfx::OpenGL
     {
     }
 
-    KRYS_NODISCARD ShaderHandle Load(const IO::Path &vertex, const IO::Path &fragment) noexcept override
+    KRYS_NODISCARD ShaderHandle Load(const io::Path &vertex, const io::Path &fragment) noexcept override
     {
       auto key = vertex.ToString() + "|" + fragment.ToString();
       if (auto cached = _cache.Get(key); cached.IsValid())
@@ -53,8 +52,8 @@ namespace Krys::Gfx::OpenGL
       return AddShader(key, std::move(shader));
     }
 
-    KRYS_NODISCARD ShaderHandle Load(const IO::Path &vertex, const IO::Path &geometry,
-                                     const IO::Path &fragment) noexcept override
+    KRYS_NODISCARD ShaderHandle Load(const io::Path &vertex, const io::Path &geometry,
+                                     const io::Path &fragment) noexcept override
     {
       auto key = vertex.ToString() + "|" + geometry.ToString() + "|" + fragment.ToString();
       if (auto cached = _cache.Get(key); cached.IsValid())
@@ -66,7 +65,7 @@ namespace Krys::Gfx::OpenGL
       return AddShader(key, std::move(shader));
     }
 
-    KRYS_NODISCARD ShaderHandle Load(const IO::Path &vertex, const IO::Path &fragment,
+    KRYS_NODISCARD ShaderHandle Load(const io::Path &vertex, const io::Path &fragment,
                                      const ShaderPreprocessorConfig &config) noexcept
     {
       string defines {};
@@ -87,7 +86,7 @@ namespace Krys::Gfx::OpenGL
 
     KRYS_NODISCARD ShaderHandle GetBuiltin(BuiltinShader builtin) noexcept override
     {
-      // auto profiler = Krys::Debug::ScopedProfiler("GetBuiltin");
+      // auto profiler = krys::Debug::ScopedProfiler("GetBuiltin");
 
       if (auto it = _builtins.find(builtin); it != _builtins.end())
       {
@@ -164,12 +163,12 @@ namespace Krys::Gfx::OpenGL
       return handle;
     }
 
-    KRYS_NODISCARD string ReadFile(const IO::Path &filepath) noexcept
+    KRYS_NODISCARD string ReadFile(const io::Path &filepath) noexcept
     {
-      UniquePtr<IO::IStreamReader> reader = _vfs.GetReader(BaseDirectory / filepath, IO::ReadFlags::None);
+      UniquePtr<io::IStreamReader> reader = _vfs.GetReader(BaseDirectory / filepath, io::ReadFlags::None);
       assert(reader != nullptr && "Failed to create stream reader for shader file.");
 
-      auto result = IO::StreamUtils::ReadAllText(*reader);
+      auto result = io::StreamUtils::ReadAllText(*reader);
       assert(result.has_value() && "Failed to read shader file.");
 
       return result.value();
@@ -198,29 +197,29 @@ namespace Krys::Gfx::OpenGL
         cfg.Define("FEATURE_OUTLINE", "1");
       }
 
-      const auto vertexShader = IO::Path("text-shader.vert");
-      const auto fragmentShader = IO::Path("text-shader.frag");
+      const auto vertexShader = io::Path("text-shader.vert");
+      const auto fragmentShader = io::Path("text-shader.frag");
       return Load(vertexShader, fragmentShader, cfg);
     }
 
     KRYS_NODISCARD ShaderHandle GetBuiltin_Shape2DColour()
     {
-      const auto vertexShader = IO::Path("2d-shape.vert");
-      const auto fragmentShader = IO::Path("2d-shape-colour.frag");
+      const auto vertexShader = io::Path("2d-shape.vert");
+      const auto fragmentShader = io::Path("2d-shape-colour.frag");
       return Load(vertexShader, fragmentShader);
     }
 
     KRYS_NODISCARD ShaderHandle GetBuiltin_Shape2DTexture()
     {
-      const auto vertexShader = IO::Path("2d-shape.vert");
-      const auto fragmentShader = IO::Path("2d-shape-texture.frag");
+      const auto vertexShader = io::Path("2d-shape.vert");
+      const auto fragmentShader = io::Path("2d-shape-texture.frag");
       return Load(vertexShader, fragmentShader);
     }
 
     KRYS_NODISCARD ShaderHandle GetBuiltin_PostProcessPassthrough()
     {
-      const auto vertexShader = IO::Path("post-process.vert");
-      const auto fragmentShader = IO::Path("post-process-passthrough.frag");
+      const auto vertexShader = io::Path("post-process.vert");
+      const auto fragmentShader = io::Path("post-process-passthrough.frag");
       return Load(vertexShader, fragmentShader);
     }
   };

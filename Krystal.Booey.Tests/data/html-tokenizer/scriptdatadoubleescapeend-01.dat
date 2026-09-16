@@ -1,0 +1,98 @@
+﻿#name
+switches to ScriptDataDoubleEscaped after parsing Solidus if temporary buffer is not 'script'
+#data
+/
+#initial-state
+ScriptDataDoubleEscapeEnd
+#expected-state
+ScriptDataDoubleEscaped
+#tokens
+Character(/)
+
+#name
+switches to ScriptDataDoubleEscaped after parsing whitespace if temporary buffer is not 'script'
+#data
+>
+#initial-state
+ScriptDataDoubleEscapeEnd
+#expected-state
+ScriptDataDoubleEscaped
+#tokens
+Character(>)
+
+#name
+switches to ScriptDataEscaped after parsing whitespace if temporary buffer is 'script'
+#data
+ 
+#initial-state
+ScriptDataDoubleEscapeEnd
+#expected-state
+ScriptDataDoubleEscaped
+#tokens
+Character( )
+
+#name
+switches to ScriptDataEscaped after parsing Solidus if temporary buffer is 'script'
+#data
+script 
+#initial-state
+ScriptDataDoubleEscapeEnd
+#expected-state
+ScriptDataEscaped
+#tokens
+Character(script )
+
+#name
+switches to ScriptDataEscaped after parsing GreaterThanSign if temporary buffer is 'script'
+#data
+script/
+#initial-state
+ScriptDataDoubleEscapeEnd
+#expected-state
+ScriptDataEscaped
+#tokens
+Character(script/)
+
+#name
+continues building temporary buffer when parsing ASCII alpha
+#data
+script>
+#initial-state
+ScriptDataDoubleEscapeEnd
+#expected-state
+ScriptDataEscaped
+#tokens
+Character(script>)
+
+#name
+switches to ScriptDataDoubleEscaped if not ASCII alpha
+#data
+sCr
+#initial-state
+ScriptDataDoubleEscapeEnd
+#expected-state
+ScriptDataDoubleEscapeEnd
+#tokens
+Character(sCr)
+
+#name
+Batches non-ASCII characters
+#data
+©
+#initial-state
+ScriptDataDoubleEscapeEnd
+#expected-state
+ScriptDataDoubleEscaped
+#tokens
+Character(©)
+
+#name
+switches to ScriptDataDoubleEscaped after parsing GreaterThanSign if temporary buffer is not 'script'
+#data
+>
+#initial-state
+ScriptDataDoubleEscapeEnd
+#expected-state
+ScriptDataDoubleEscaped
+#tokens
+Character(>)

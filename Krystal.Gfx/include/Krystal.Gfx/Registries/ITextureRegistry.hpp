@@ -1,11 +1,11 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/IO/Path.hpp"
+#include "Krystal.Core/Macros.hpp"
 #include "Krystal.Gfx/Handle.hpp"
-#include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
   struct TextureDesc
   {
@@ -14,8 +14,10 @@ namespace Krys::Gfx
     uint32 MaxMipLevels {0u};
   };
 
-  class ITextureRegistry : NonCopyMovable<ITextureRegistry>
+  class ITextureRegistry
   {
+    KRYS_NON_COPY_MOVABLE(ITextureRegistry);
+
   protected:
     ITextureRegistry() noexcept = default;
 
@@ -29,11 +31,11 @@ namespace Krys::Gfx
     KRYS_NODISCARD virtual TextureHandle Create(ImageViewHandle imageView,
                                                 SamplerHandle sampler) noexcept = 0;
 
-    KRYS_NODISCARD virtual TextureHandle Load(const IO::Path &path, const TextureDesc &desc) noexcept = 0;
+    KRYS_NODISCARD virtual TextureHandle Load(const io::Path &path, const TextureDesc &desc) noexcept = 0;
 
-    KRYS_NODISCARD virtual TextureHandle LoadCubemap(const IO::Path &left, const IO::Path &right,
-                                                     const IO::Path &top, const IO::Path &bottom,
-                                                     const IO::Path &front, const IO::Path &back,
+    KRYS_NODISCARD virtual TextureHandle LoadCubemap(const io::Path &left, const io::Path &right,
+                                                     const io::Path &top, const io::Path &bottom,
+                                                     const io::Path &front, const io::Path &back,
                                                      const TextureDesc &desc = {}) noexcept = 0;
 
     virtual bool Unload(TextureHandle handle) noexcept = 0;

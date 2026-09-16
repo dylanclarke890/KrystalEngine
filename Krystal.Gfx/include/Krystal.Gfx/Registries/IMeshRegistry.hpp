@@ -1,17 +1,19 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Mesh.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Types/Span.hpp"
 
-namespace Krys::Gfx
+namespace krys::Gfx
 {
-  class IMeshRegistry : NonCopyMovable<IMeshRegistry>
+  class IMeshRegistry
   {
+    KRYS_NON_COPY_MOVABLE(IMeshRegistry);
+
   protected:
     IMeshRegistry() noexcept = default;
 
