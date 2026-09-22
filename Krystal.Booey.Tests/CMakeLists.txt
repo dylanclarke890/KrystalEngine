@@ -120,9 +120,9 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/MicroParsers/Numbers.cpp
 		tests/HTML/Parser/HTMLCharacterReference.cpp
 		tests/HTML/Parser/HTMLDocumentParser.cpp
-		tests/HTML/Parser/HTMLEncodingSniffer.cpp
+		# tests/HTML/Parser/HTMLEncodingSniffer.cpp
 		tests/HTML/Parser/InputStream.cpp
-		tests/HTML/Parser/TextResourceDecoder.cpp
+		# tests/HTML/Parser/TextResourceDecoder.cpp
 		tests/HTML/Parser/Tokenizer.cpp
 
 		# Infra

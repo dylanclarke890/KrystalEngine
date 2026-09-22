@@ -185,6 +185,8 @@ namespace krys::Gfx::D3D11
 
   void D3D11Context::Render(ICamera &camera) noexcept
   {
+    (void)camera;
+    
     FLOAT clearColor[4] = {0.3f, 0.3f, 0.3f, 1.0f};
     _context->ClearRenderTargetView(_backbuffer, clearColor);
 

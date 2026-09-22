@@ -17,17 +17,16 @@ namespace krys::boo::dom
   {
     // NOTE: `target` is intentionally a raw pointer instead of a reference as we reassign the target later
     // on, would be a pain to do with a reference.
-    assert(target);
+    krys_debug_assert(target);
     event._dispatched = true;
 
     auto *targetOverride = target;
     if (legacyTargetOverrideFlag) // only used by HTML and only when target is a Window object.
     {
-      assert(target->IsWindow());
-
+      krys_debug_assert(target->IsWindow());
       // SPEC-VIOLATION(DOM, HTML): We don't actually implement Window. Might implement in the future.
       // If legacy target override flag is given, let targetOverride be target’s associated Document.
-      assert(false && "Not implemented");
+      krys_not_implemented();
     }
 
     EventTarget *activationTarget = nullptr;

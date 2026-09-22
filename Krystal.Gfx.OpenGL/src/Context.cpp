@@ -56,7 +56,7 @@ namespace
       case GL_DEBUG_SEVERITY_MEDIUM:       message += std::format("OPENGL ({0}): {1}", id, msg); break;
       case GL_DEBUG_SEVERITY_LOW:          message += std::format("OPENGL ({0}): {1}", id, msg); break;
       case GL_DEBUG_SEVERITY_NOTIFICATION: message += std::format("OPENGL ({0}): {1}", id, msg); break;
-      default:                             assert(false && "Unknown enum value: OpenGL severity level"); break;
+      default: assert(false && "Unknown enum value: OpenGL severity level"); break;
     }
     message += "\n";
 
@@ -72,7 +72,7 @@ namespace
       case GL_DEBUG_TYPE_PUSH_GROUP:          message += "Push Group"; break;
       case GL_DEBUG_TYPE_POP_GROUP:           message += "Pop Group"; break;
       case GL_DEBUG_TYPE_OTHER:               message += "Other"; break;
-      default:                                assert(false && "Unknown enum value: OpenGL message type"); break;
+      default: assert(false && "Unknown enum value: OpenGL message type"); break;
     }
     message += "\n";
 
@@ -94,7 +94,7 @@ namespace
       case GL_DEBUG_SEVERITY_MEDIUM:       logger->Error(message); break;
       case GL_DEBUG_SEVERITY_LOW:          logger->Warn(message); break;
       case GL_DEBUG_SEVERITY_NOTIFICATION: logger->Info(message); break;
-      default:                             assert(false && "Unknown enum value: OpenGL severity level"); break;
+      default: assert(false && "Unknown enum value: OpenGL severity level"); break;
     }
 
     if (severity != GL_DEBUG_SEVERITY_NOTIFICATION && severity != GL_DEBUG_SEVERITY_LOW)
@@ -798,65 +798,67 @@ namespace krys::Gfx::OpenGL
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    auto &shader = _shaders.Get(shaderHandles.at("pbr-with-maps"));
-    shader.Bind();
-    shader.SetUniform("camPos", camera.Position());
-
-    auto &sphere = _meshes.Get(meshHandles.at("sphere"));
-    sphere.Bind();
-
-    glBindTextureUnit(0, shadowMaps["irradiance-cubemap"].ColorTextures[0]);
-    glBindTextureUnit(1, shadowMaps["prefilter-cubemap"].ColorTextures[0]);
-    glBindTextureUnit(2, shadowMaps["brdf-lut"].ColorTextures[0]);
-
     {
-      Mat4 model = Translate(Identity<Mat4>(), Vec3(-5.0, 0.0, 2.0));
-      auto &material = _materials.Get(materialHandles.at("rusted-iron"));
-      DrawPBRObject(sphere, shader, material, model, _textures);
-    }
-    {
-      Mat4 model = Translate(Identity<Mat4>(), Vec3(-3.0, 0.0, 2.0));
-      auto &material = _materials.Get(materialHandles.at("gold"));
-      DrawPBRObject(sphere, shader, material, model, _textures);
-    }
-    {
-      Mat4 model = Translate(Identity<Mat4>(), Vec3(-1.0, 0.0, 2.0));
-      auto &material = _materials.Get(materialHandles.at("grass"));
-      DrawPBRObject(sphere, shader, material, model, _textures);
-    }
-    {
-      Mat4 model = Translate(Identity<Mat4>(), Vec3(1.0, 0.0, 2.0));
-      auto &material = _materials.Get(materialHandles.at("plastic"));
-      DrawPBRObject(sphere, shader, material, model, _textures);
-    }
-    {
-      Mat4 model = Translate(Identity<Mat4>(), Vec3(3.0, 0.0, 2.0));
-      auto &material = _materials.Get(materialHandles.at("wall"));
-      DrawPBRObject(sphere, shader, material, model, _textures);
-    }
+      auto &shader = _shaders.Get(shaderHandles.at("pbr-with-maps"));
+      shader.Bind();
+      shader.SetUniform("camPos", camera.Position());
 
-    Vec3 lightPositions[] = {
-      Vec3(-10.0f, 10.0f, 10.0f),
-      Vec3(10.0f, 10.0f, 10.0f),
-      Vec3(-10.0f, -10.0f, 10.0f),
-      Vec3(10.0f, -10.0f, 10.0f),
-    };
-    Vec3 lightColors[] = {Vec3(300.0f, 300.0f, 300.0f), Vec3(300.0f, 300.0f, 300.0f),
-                          Vec3(300.0f, 300.0f, 300.0f), Vec3(300.0f, 300.0f, 300.0f)};
+      auto &sphere = _meshes.Get(meshHandles.at("sphere"));
+      sphere.Bind();
 
-    for (uint i = 0; i < sizeof(lightPositions) / sizeof(lightPositions[0]); ++i)
-    {
-      auto time = static_cast<float>(seconds(MonotonicTime::Now()).count());
-      Vec3 newPos = lightPositions[i] + Vec3(std::sin(time * 5.0f), 0.0f, 0.0f);
-      shader.SetUniform("lightPositions[" + std::to_string(i) + "]", newPos);
-      shader.SetUniform("lightColors[" + std::to_string(i) + "]", lightColors[i]);
+      glBindTextureUnit(0, shadowMaps["irradiance-cubemap"].ColorTextures[0]);
+      glBindTextureUnit(1, shadowMaps["prefilter-cubemap"].ColorTextures[0]);
+      glBindTextureUnit(2, shadowMaps["brdf-lut"].ColorTextures[0]);
 
-      Mat4 model = Identity<Mat4>();
-      model = Translate(model, newPos);
-      model = Scale(model, Vec3(0.5f));
-      shader.SetUniform("model", model);
-      shader.SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
-      sphere.Draw();
+      {
+        Mat4 model = Translate(Identity<Mat4>(), Vec3(-5.0, 0.0, 2.0));
+        auto &material = _materials.Get(materialHandles.at("rusted-iron"));
+        DrawPBRObject(sphere, shader, material, model, _textures);
+      }
+      {
+        Mat4 model = Translate(Identity<Mat4>(), Vec3(-3.0, 0.0, 2.0));
+        auto &material = _materials.Get(materialHandles.at("gold"));
+        DrawPBRObject(sphere, shader, material, model, _textures);
+      }
+      {
+        Mat4 model = Translate(Identity<Mat4>(), Vec3(-1.0, 0.0, 2.0));
+        auto &material = _materials.Get(materialHandles.at("grass"));
+        DrawPBRObject(sphere, shader, material, model, _textures);
+      }
+      {
+        Mat4 model = Translate(Identity<Mat4>(), Vec3(1.0, 0.0, 2.0));
+        auto &material = _materials.Get(materialHandles.at("plastic"));
+        DrawPBRObject(sphere, shader, material, model, _textures);
+      }
+      {
+        Mat4 model = Translate(Identity<Mat4>(), Vec3(3.0, 0.0, 2.0));
+        auto &material = _materials.Get(materialHandles.at("wall"));
+        DrawPBRObject(sphere, shader, material, model, _textures);
+      }
+
+      Vec3 lightPositions[] = {
+        Vec3(-10.0f, 10.0f, 10.0f),
+        Vec3(10.0f, 10.0f, 10.0f),
+        Vec3(-10.0f, -10.0f, 10.0f),
+        Vec3(10.0f, -10.0f, 10.0f),
+      };
+      Vec3 lightColors[] = {Vec3(300.0f, 300.0f, 300.0f), Vec3(300.0f, 300.0f, 300.0f),
+                            Vec3(300.0f, 300.0f, 300.0f), Vec3(300.0f, 300.0f, 300.0f)};
+  
+      for (uint i = 0; i < sizeof(lightPositions) / sizeof(lightPositions[0]); ++i)
+      {
+        auto time = static_cast<float>(seconds(MonotonicTime::Now()).count());
+        Vec3 newPos = lightPositions[i] + Vec3(std::sin(time * 5.0f), 0.0f, 0.0f);
+        shader.SetUniform("lightPositions[" + std::to_string(i) + "]", newPos);
+        shader.SetUniform("lightColors[" + std::to_string(i) + "]", lightColors[i]);
+  
+        Mat4 model = Identity<Mat4>();
+        model = Translate(model, newPos);
+        model = Scale(model, Vec3(0.5f));
+        shader.SetUniform("model", model);
+        shader.SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
+        sphere.Draw();
+      }
     }
 
     {

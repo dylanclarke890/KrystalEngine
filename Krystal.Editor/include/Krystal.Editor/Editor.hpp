@@ -71,10 +71,9 @@ namespace krys
         });
 
       _context->Events->On<WindowCloseEvent>(
-        [&](const auto &event)
+        [&](const auto &)
         {
           Stop();
-
           return true;
         });
     }

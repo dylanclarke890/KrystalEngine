@@ -99,6 +99,9 @@ namespace
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType,
     const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData, void *pUserData)
   {
+    (void)messageSeverity;
+    (void)messageType;
+    (void)pUserData;
     // TODO(fix): use the engine logger
     std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
 
@@ -353,8 +356,8 @@ namespace krys::Gfx::Vulkan
 
   bool VulkanContext::IsDeviceSuitable(VkPhysicalDevice device)
   {
-    auto indices = FindQueueFamilyIndices(device);
-    if (!indices.has_value() || !AreDeviceExtensionsSupported(device))
+    auto queueIndices = FindQueueFamilyIndices(device);
+    if (!queueIndices.has_value() || !AreDeviceExtensionsSupported(device))
     {
       return false;
     }
@@ -365,14 +368,14 @@ namespace krys::Gfx::Vulkan
       return false;
     }
 
-    _queueFamilyIndices = indices.value();
+    _queueFamilyIndices = queueIndices.value();
 
     return true;
   }
 
   Maybe<QueueFamilyIndices> VulkanContext::FindQueueFamilyIndices(VkPhysicalDevice device) const
   {
-    QueueFamilyIndices indices;
+    QueueFamilyIndices queueIndices;
 
     uint32 queueFamilyCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
@@ -396,7 +399,7 @@ namespace krys::Gfx::Vulkan
       const auto &queueFamily = queueFamilies[i];
       if (!isGraphicsFamilyFound && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
       {
-        indices.GraphicsFamily = i;
+        queueIndices.GraphicsFamily = i;
         isGraphicsFamilyFound = VK_TRUE;
       }
 
@@ -404,7 +407,7 @@ namespace krys::Gfx::Vulkan
       {
         vkGetPhysicalDeviceSurfaceSupportKHR(device, i, _surface, &isPresentFamilyFound);
         if (isPresentFamilyFound)
-          indices.PresentFamily = i;
+          queueIndices.PresentFamily = i;
       }
 
       if (IsComplete())
@@ -412,7 +415,10 @@ namespace krys::Gfx::Vulkan
     }
 
     if (IsComplete())
-      return indices;
+    {
+      return queueIndices;
+    }
+    
     return std::nullopt;
   }
 
@@ -1296,6 +1302,8 @@ namespace krys::Gfx::Vulkan
 
   void VulkanContext::Render(ICamera &camera) noexcept
   {
+    (void)camera;
+    
     vkWaitForFences(_device, 1, &_inFlightFences[_currentFrame], VK_TRUE, UINT64_MAX);
 
     VkResult result =

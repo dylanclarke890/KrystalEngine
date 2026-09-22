@@ -1,7 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/Parser/HTMLEncodingSniffer.hpp"
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Text/Codecs/BasicCodec.hpp"
 #include "Krystal.Text/Codecs/CodecRegistry.hpp"
 #include "Krystal.Text/Codecs/ICodec.hpp"
 #include "Krystal.Text/Encodings/ASCII.hpp"

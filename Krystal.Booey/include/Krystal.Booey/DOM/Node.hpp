@@ -1,21 +1,20 @@
 ﻿#pragma once
 
-#ifndef __INTELLISENSE__
+#include "Krystal.Booey/DOM/Dicts/GetRootNodeOptions.hpp"
+#include "Krystal.Booey/DOM/Enums/DocumentPosition.hpp"
+#include "Krystal.Booey/DOM/Enums/NodeFlags.hpp"
+#include "Krystal.Booey/DOM/Enums/NodeType.hpp"
+#include "Krystal.Booey/DOM/EventTarget.hpp"
+#include "Krystal.Booey/DOM/Internals/RareData/NodeRareData.hpp"
+#include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+#include "Krystal.Core/Base.hpp"
+#include "Krystal.Core/CanMakeCheckedPtr.hpp"
+#include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/CheckedPtr.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 
-  #include "Krystal.Booey/DOM/Dicts/GetRootNodeOptions.hpp"
-  #include "Krystal.Booey/DOM/Enums/DocumentPosition.hpp"
-  #include "Krystal.Booey/DOM/Enums/NodeFlags.hpp"
-  #include "Krystal.Booey/DOM/Enums/NodeType.hpp"
-  #include "Krystal.Booey/DOM/EventTarget.hpp"
-  #include "Krystal.Booey/DOM/Internals/RareData/NodeRareData.hpp"
-  #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-  #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-  #include "Krystal.Core/Base.hpp"
-  #include "Krystal.Core/CanMakeCheckedPtr.hpp"
-  #include "Krystal.Core/TypeCast.hpp"
-  #include "Krystal.Core/Types/CheckedPtr.hpp"
-  #include "Krystal.Core/Types/RefPtr.hpp"
-  #include "Krystal.Core/Types/UniquePtr.hpp"
 namespace krys::boo::dom
 {
   class ContainerNode;
@@ -430,4 +429,3 @@ KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::Node)
     return target.IsNode();
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();
-#endif

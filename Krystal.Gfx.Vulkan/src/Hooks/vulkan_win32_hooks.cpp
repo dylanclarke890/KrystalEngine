@@ -9,18 +9,24 @@ namespace krys::Gfx::Vulkan
   {
     bool HookCreateInstanceFunction() noexcept
     {
-      HMODULE VulkanLibrary = LoadLibraryA("vulkan-1.dll");
+      VulkanLibrary = LoadLibraryA("vulkan-1.dll");
+      
       if (!VulkanLibrary)
+      {
         return false;
+      }
 
       vkGetInstanceProcAddr =
         reinterpret_cast<PFN_vkGetInstanceProcAddr>(GetProcAddress(VulkanLibrary, "vkGetInstanceProcAddr"));
       if (vkGetInstanceProcAddr == nullptr)
+      {
         return false;
+      }
 
       vkCreateInstance =
         reinterpret_cast<PFN_vkCreateInstance>(vkGetInstanceProcAddr(VK_NULL_HANDLE, "vkCreateInstance"));
-      return vkCreateInstance != nullptr;
+      
+        return vkCreateInstance != nullptr;
     }
 
 #define LOAD_VK_FUNC_PTR(name)                                                                               \

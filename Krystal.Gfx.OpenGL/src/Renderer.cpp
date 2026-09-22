@@ -36,12 +36,7 @@ namespace krys::Gfx::OpenGL
   void Renderer::Startup()
   {
     auto &buffers = static_cast<BufferRegistry &>(_context.Buffers());
-    auto &meshes = static_cast<MeshRegistry &>(_context.Meshes());
-    auto &renderTargets = static_cast<RenderTargetRegistry &>(_context.RenderTargets());
-    auto &shaders = static_cast<ShaderRegistry &>(_context.Shaders());
-
     _state.CurrentRenderTarget = _context.RenderTargets().GetScreenRenderTarget();
-    auto &rt = renderTargets.Get(_state.CurrentRenderTarget);
 
     uint32 maxGlyphVertices = GlyphVertex::VerticesPerGlyph * GlyphVertex::BatchSize;
     _glyphBuffer = buffers.Create({

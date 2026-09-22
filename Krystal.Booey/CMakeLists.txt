@@ -669,7 +669,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/Parser/HTMLCharacterReference.hpp
       include/Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp
       include/Krystal.Booey/HTML/Parser/HTMLElementStack.hpp
-      include/Krystal.Booey/HTML/Parser/HTMLEncodingSniffer.hpp
+      # include/Krystal.Booey/HTML/Parser/HTMLEncodingSniffer.hpp
       include/Krystal.Booey/HTML/Parser/HTMLFormattingElementList.hpp
       include/Krystal.Booey/HTML/Parser/HTMLStackItem.hpp
       include/Krystal.Booey/HTML/Parser/HTMLToken.hpp
@@ -677,7 +677,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/Parser/HTMLTokenizer.hpp
       include/Krystal.Booey/HTML/Parser/HTMLTreeBuilder.hpp
       include/Krystal.Booey/HTML/Parser/InputStream.hpp
-      include/Krystal.Booey/HTML/Parser/TextResourceDecoder.hpp
+      # include/Krystal.Booey/HTML/Parser/TextResourceDecoder.hpp
       include/Krystal.Booey/HTML/Types/HTMLOrSVGScriptElement.hpp
 
       # Infra
