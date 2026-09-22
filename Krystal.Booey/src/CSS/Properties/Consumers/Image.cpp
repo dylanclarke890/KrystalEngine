@@ -11,11 +11,11 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/URL.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/Images/Gradient.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 
-namespace krys::boo::css::CSSPropertyParserHelpers
+namespace krys::boo::css::PropertyParserHelpers
 {
   // Used by radial gradient consumers internally.
   enum class ShapeKeyword : bool
@@ -62,8 +62,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
       return null;
     }
 
-    auto vertical =
-      ConsumeDeprecatedGradientPositionComponent<ValueId::Top, ValueId::Bottom>(tokens, state);
+    auto vertical = ConsumeDeprecatedGradientPositionComponent<ValueId::Top, ValueId::Bottom>(tokens, state);
     if (!vertical)
     {
       return null;
@@ -72,8 +71,8 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return {{krys::move(*horizontal), krys::move(*vertical)}};
   }
 
-  KRYS_NODISCARD static Maybe<Color>
-    ConsumeDeprecatedGradientStopColor(TokenRange &tokens, PropertyParserState &state) noexcept
+  KRYS_NODISCARD static Maybe<Color> ConsumeDeprecatedGradientStopColor(TokenRange &tokens,
+                                                                        PropertyParserState &state) noexcept
   {
     if (tokens.Peek().ValueId() == ValueId::Currentcolor)
     {
@@ -165,8 +164,8 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     return {{krys::move(stops)}};
   }
 
-  KRYS_NODISCARD static RefPtr<Value>
-    ConsumeDeprecatedLinearGradient(TokenRange &tokens, PropertyParserState &state) noexcept
+  KRYS_NODISCARD static RefPtr<Value> ConsumeDeprecatedLinearGradient(TokenRange &tokens,
+                                                                      PropertyParserState &state) noexcept
   {
     if (!ConsumeComma(tokens))
     {
@@ -203,8 +202,8 @@ namespace krys::boo::css::CSSPropertyParserHelpers
                      .stops = krys::move(*stops)}});
   }
 
-  KRYS_NODISCARD static RefPtr<Value>
-    ConsumeDeprecatedRadialGradient(TokenRange &tokens, PropertyParserState &state) noexcept
+  KRYS_NODISCARD static RefPtr<Value> ConsumeDeprecatedRadialGradient(TokenRange &tokens,
+                                                                      PropertyParserState &state) noexcept
   {
     if (!ConsumeComma(tokens))
     {
@@ -270,7 +269,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   }
 
   KRYS_NODISCARD static RefPtr<Value> ConsumeDeprecatedGradient(TokenRange &tokens,
-                                                                   PropertyParserState &state) noexcept
+                                                                PropertyParserState &state) noexcept
   {
     switch (tokens.ConsumeIncludingWhitespace().ValueId())
     {
@@ -298,8 +297,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     Yes
   };
 
-  KRYS_NODISCARD static Maybe<Color> ConsumeStopColor(TokenRange &tokens,
-                                                      PropertyParserState &state) noexcept
+  KRYS_NODISCARD static Maybe<Color> ConsumeStopColor(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     return ConsumeUnresolvedColor(tokens, state);
   }
@@ -382,7 +380,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
   KRYS_NODISCARD static bool StopColorIs8Bit(const Color &color) noexcept
   {
-    return color.isKeyword() || color.absoluteColor().tryGetAsSRGBABytes();
+    return color.IsKeyword() || color.AbsoluteColor().TryGetAsSRGBABytes();
   }
 
   KRYS_NODISCARD static bool StopColorIs8Bit(const Markable<Color> &color) noexcept
@@ -406,8 +404,10 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     auto defaultColorInterpolationMethod = CSS::GradientColorInterpolationMethod::Default::SRGB;
     for (auto &stop : stops)
     {
-      if (stopColorIs8Bit(stop.color))
+      if (StopColorIs8Bit(stop.color))
+      {
         continue;
+      }
 
       defaultColorInterpolationMethod = CSS::GradientColorInterpolationMethod::Default::OKLab;
       break;
@@ -452,11 +452,10 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     //
     // see https://www.w3.org/TR/2011/WD-css3-images-20110217/#linear-gradients.
 
-    KRYS_NODISCARD constexpr static auto verticalMappings =
-      std::to_array<std::pair<ValueId, CSS::Vertical>>({
-        {CSSValueTop, CSS::Vertical {CSS::Keyword::Top {}}},
-        {CSSValueBottom, CSS::Vertical {CSS::Keyword::Bottom {}}},
-      });
+    KRYS_NODISCARD constexpr static auto verticalMappings = std::to_array<std::pair<ValueId, CSS::Vertical>>({
+      {CSSValueTop, CSS::Vertical {CSS::Keyword::Top {}}},
+      {CSSValueBottom, CSS::Vertical {CSS::Keyword::Bottom {}}},
+    });
     KRYS_NODISCARD constexpr static SortedArrayMap verticalMap {verticalMappings};
 
     KRYS_NODISCARD constexpr static auto horizontalMappings =
@@ -677,8 +676,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   // https://drafts.csswg.org/css-images-4/#linear-gradients
 
   template <ValueId Name>
-  KRYS_NODISCARD static RefPtr<CSSValue> consumeLinearGradient(TokenRange &tokens,
-                                                               PropertyParserState &state)
+  KRYS_NODISCARD static RefPtr<CSSValue> consumeLinearGradient(TokenRange &tokens, PropertyParserState &state)
   {
     // <side-or-corner> = [left | right] || [top | bottom]
     // linear-gradient() = linear-gradient(
@@ -686,11 +684,10 @@ namespace krys::boo::css::CSSPropertyParserHelpers
     //   <color-stop-list>
     // )
 
-    KRYS_NODISCARD constexpr static auto verticalMappings =
-      std::to_array<std::pair<ValueId, CSS::Vertical>>({
-        {CSSValueTop, CSS::Vertical {CSS::Keyword::Top {}}},
-        {CSSValueBottom, CSS::Vertical {CSS::Keyword::Bottom {}}},
-      });
+    KRYS_NODISCARD constexpr static auto verticalMappings = std::to_array<std::pair<ValueId, CSS::Vertical>>({
+      {CSSValueTop, CSS::Vertical {CSS::Keyword::Top {}}},
+      {CSSValueBottom, CSS::Vertical {CSS::Keyword::Bottom {}}},
+    });
     KRYS_NODISCARD constexpr static SortedArrayMap verticalMap {verticalMappings};
 
     KRYS_NODISCARD constexpr static auto horizontalMappings =
@@ -794,8 +791,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   // https://drafts.csswg.org/css-images-4/#radial-gradients
 
   template <ValueId Name>
-  KRYS_NODISCARD static RefPtr<CSSValue> consumeRadialGradient(TokenRange &tokens,
-                                                               PropertyParserState &state)
+  KRYS_NODISCARD static RefPtr<CSSValue> consumeRadialGradient(TokenRange &tokens, PropertyParserState &state)
   {
     // radial-gradient() = radial-gradient(
     //   [[ <ending-shape> || <size> ]? [ at <position> ]? ] || <color-interpolation-method>,
@@ -1042,8 +1038,7 @@ namespace krys::boo::css::CSSPropertyParserHelpers
   // https://drafts.csswg.org/css-images-4/#conic-gradient-syntax
 
   template <ValueId Name>
-  KRYS_NODISCARD static RefPtr<CSSValue> consumeConicGradient(TokenRange &tokens,
-                                                              PropertyParserState &state)
+  KRYS_NODISCARD static RefPtr<CSSValue> consumeConicGradient(TokenRange &tokens, PropertyParserState &state)
   {
     // conic-gradient() = conic-gradient(
     //   [ [ from <angle> ]? [ at <position> ]? ] || <color-interpolation-method>,
@@ -1113,8 +1108,8 @@ namespace krys::boo::css::CSSPropertyParserHelpers
 
   // MARK: <cross-fade()>
 
-  KRYS_NODISCARD static RefPtr<CSSValue> consumeCrossFade(TokenRange &args, PropertyParserState &state,
-                                                          ValueId FunctionId)
+  KRYS_NODISCARD static RefPtr<Value> consumeCrossFade(TokenRange &args, PropertyParserState &state,
+                                                       ValueId FunctionId) noexcept
   {
     // FIXME: The current CSS Images spec has a pretty different construction than is being parsed here:
     //

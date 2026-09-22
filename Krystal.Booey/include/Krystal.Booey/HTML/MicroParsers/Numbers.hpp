@@ -90,9 +90,6 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#rules-for-parsing-floating-point-number-values
     KRYS_NODISCARD static MicroParserResult<double> ParseFloatingPoint(dom::DOMStringView input) noexcept
     {
-      constexpr char DecimalPoint = '.';
-      constexpr char Exponent = 'e';
-
       position_variable position = input.begin();
       infra::StringAlgorithms::SkipWhitespace(input, position);
 

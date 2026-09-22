@@ -20,7 +20,14 @@ namespace krys::boo::css::calc
                                                  CalcAllowedSymbols symbolsAllowed,
                                                  PropertyParserOptions options) noexcept
     {
-      return nullptr;
+      (void)tokens;
+      (void)state;
+      (void)category;
+      (void)range;
+      (void)symbolsAllowed;
+      (void)options;
+
+      krys_not_implemented();
     }
   };
 }

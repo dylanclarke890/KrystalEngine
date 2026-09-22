@@ -70,7 +70,8 @@ namespace krys
     }
     else
     {
-      return std::bit_width(static_cast<underlying_t<TEnum>>((Traits::DistinctValues - 1uz)));
+      return static_cast<uint8>(
+        std::bit_width(static_cast<underlying_t<TEnum>>((Traits::DistinctValues - 1uz))));
     }
   }
 

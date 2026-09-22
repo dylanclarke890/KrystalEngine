@@ -4,12 +4,6 @@
 
 namespace krys::boo
 {
-  namespace
-  {
-    constexpr auto oneEighty = 360.0f;
-    constexpr auto threeSixty = 360.0f;
-  }
-
   std::pair<float, float> FixupHueComponentsPriorToInterpolation(HueInterpolationMethod method,
                                                                  float component1, float component2) noexcept
   {
@@ -17,10 +11,10 @@ namespace krys::boo
     {
       // https://drafts.csswg.org/css-color-4/#hue-shorter
       auto difference = theta2 - theta1;
-      if (difference > oneEighty)
-        return {theta1 + threeSixty, theta2};
-      if (difference < -oneEighty)
-        return {theta1, theta2 + threeSixty};
+      if (difference > 180.f)
+        return {theta1 + 360.f, theta2};
+      if (difference < -180.f)
+        return {theta1, theta2 + 360.f};
       return {theta1, theta2};
     };
 
@@ -28,14 +22,14 @@ namespace krys::boo
     {
       // https://drafts.csswg.org/css-color-4/#hue-longer
       auto difference = theta2 - theta1;
-      if (difference > 0 && difference < oneEighty)
+      if (difference > 0 && difference < 180.f)
       {
-        return {theta1 + threeSixty, theta2};
+        return {theta1 + 360.f, theta2};
       }
 
-      if (difference > -oneEighty && difference <= 0)
+      if (difference > -180.f && difference <= 0)
       {
-        return {theta1, theta2 + threeSixty};
+        return {theta1, theta2 + 360.f};
       }
 
       return {theta1, theta2};
@@ -46,7 +40,7 @@ namespace krys::boo
       // https://drafts.csswg.org/css-color-4/#hue-increasing
       if (theta2 < theta1)
       {
-        return {theta1, theta2 + threeSixty};
+        return {theta1, theta2 + 360.f};
       }
 
       return {theta1, theta2};
@@ -57,7 +51,7 @@ namespace krys::boo
       // https://drafts.csswg.org/css-color-4/#hue-decreasing
       if (theta1 < theta2)
       {
-        return {theta1 + threeSixty, theta2};
+        return {theta1 + 360.f, theta2};
       }
 
       return {theta1, theta2};

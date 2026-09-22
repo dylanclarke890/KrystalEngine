@@ -6,6 +6,7 @@
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/HashSet.hpp"
 
 namespace krys::boo::dom
 {
@@ -16,16 +17,12 @@ namespace krys::boo::dom
 namespace krys::boo::css
 {
   class CSSStyleSheet;
-  class RuleBase;
   class Rule;
+  class RuleBase;
   class RuleWithNesting;
 
   struct ParserContext;
-
-  namespace CSS
-  {
-    struct SerializationContext;
-  }
+  struct SerialisationContext;
 
   class CSSRule : public RefCounted<CSSRule>, public CanMakeWeakPtr<CSSRule>
   {
@@ -37,6 +34,12 @@ namespace krys::boo::css
       CSSRule *_parentRule;
       CSSStyleSheet *_parentStyleSheet;
     };
+
+  protected:
+    explicit CSSRule(CSSStyleSheet *parent) noexcept
+        : _hasCachedSelectorText(false), _parentIsRule(false), _parentStyleSheet(parent)
+    {
+    }
 
   public:
     virtual ~CSSRule() = default;
@@ -55,7 +58,7 @@ namespace krys::boo::css
 
     virtual void Reattach(RuleBase &rule) noexcept = 0;
 
-    void SetParentStyleSheet(CSSStyleSheet *stylesheet) noexcept
+    void SetParentStyleSheet(CSSStyleSheet *styleSheet) noexcept
     {
       _parentIsRule = false;
       _parentStyleSheet = styleSheet;
@@ -77,22 +80,22 @@ namespace krys::boo::css
       return _parentStyleSheet;
     }
 
-    KRYS_NODISCARD CSSRule *ParentRule() const
+    KRYS_NODISCARD CSSRule *ParentRule() const noexcept
     {
       return _parentIsRule ? _parentRule : nullptr;
     }
 
-    KRYS_NODISCARD bool HasStyleRuleAncestor() const;
+    KRYS_NODISCARD bool HasStyleRuleAncestor() const noexcept;
 
     KRYS_NODISCARD NestedParserContext NestedContext() const noexcept;
 
-    KRYS_NODISCARD virtual RefPtr<RuleWithNesting> PrepareChildStyleRuleForNesting(Rule &);
+    KRYS_NODISCARD virtual RefPtr<RuleWithNesting> PrepareChildStyleRuleForNesting(Rule &) noexcept;
 
-    virtual void GetChildStyleSheets(HashSet<RefPtr<CSSStyleSheet>> &)
+    virtual void GetChildStyleSheets(HashSet<RefPtr<CSSStyleSheet>> &) noexcept
     {
     }
 
-    ExceptionOr<void> SetCssText(const String &);
+    dom::ExceptionOr<void> SetCssText(const CSSOMString &) noexcept;
 
     KRYS_NODISCARD virtual bool IsGroupingRule() const noexcept
     {
@@ -100,20 +103,16 @@ namespace krys::boo::css
     }
 
   protected:
-    explicit CSSRule(CSSStyleSheet *parent) noexcept
-        : _hasCachedSelectorText(false), _parentIsRule(false), _parentStyleSheet(parent)
-    {
-    }
-
-    bool HasCachedSelectorText() const
+    KRYS_NODISCARD bool HasCachedSelectorText() const noexcept
     {
       return _hasCachedSelectorText;
     }
-    void SetHasCachedSelectorText(bool hasCachedSelectorText) const
+
+    void SetHasCachedSelectorText(bool hasCachedSelectorText) const noexcept
     {
       _hasCachedSelectorText = hasCachedSelectorText;
     }
 
-    const ParserContext &ParserContext() const;
+    KRYS_NODISCARD const ParserContext &ParserContext() const noexcept;
   };
 }

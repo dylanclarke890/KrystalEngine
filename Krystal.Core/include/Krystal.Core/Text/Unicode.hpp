@@ -173,8 +173,8 @@ namespace krys::text
 
     auto transformed = value - 0x10000;
 
-    char16 highValue = transformed >> 10;
-    char16 lowValue = transformed & 0b1'111'111'111;
+    char16 highValue = static_cast<char16>(transformed >> 10);
+    char16 lowValue = static_cast<char16>(transformed & 0b1'111'111'111);
 
     char16 highTag = 0b110110 << 10;
     char16 lowTag = 0b110111 << 10;

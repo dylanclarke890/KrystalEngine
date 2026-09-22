@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Types/String.hpp"
+
 namespace krys::boo::Attributes
 {
   constexpr utf8_stringview Id = u8"id";

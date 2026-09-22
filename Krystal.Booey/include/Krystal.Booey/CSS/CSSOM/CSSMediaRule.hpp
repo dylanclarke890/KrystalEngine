@@ -57,7 +57,7 @@ namespace krys::boo::css
       return StyleRuleType::Media;
     }
     String cssText() const final;
-    String cssText(const CSS::SerializationContext &) const final;
+    String cssText(const SerialisationContext &) const final;
     String conditionText() const final;
 
     const MQ::MediaQueryList &mediaQueries() const;

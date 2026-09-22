@@ -1322,10 +1322,13 @@ namespace llvm
   /// We need the storage to be properly aligned even for small-size of 0 so that
   /// the pointer math in \a SmallVectorTemplateCommon::getFirstEl() is
   /// well-defined.
+#pragma warning(push)
+#pragma warning(disable : 4'324)
   template <typename T>
   struct alignas(T) SmallVectorStorage<T, 0>
   {
   };
+#pragma warning(pop)
 
   /// Forward declaration of SmallVector so that
   /// calculateSmallVectorDefaultInlinedElements can reference

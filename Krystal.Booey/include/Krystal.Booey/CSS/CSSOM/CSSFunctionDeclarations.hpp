@@ -1,66 +1,41 @@
-﻿/*
- * Copyright (C) 2025 Apple Inc. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
- * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
- * THE POSSIBILITY OF SUCH DAMAGE.
- */
+﻿#pragma once
 
-#pragma once
-
-#include "CSSRule.h"
+#include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 
 namespace krys::boo::css
 {
-
   class CSSFunctionDescriptors;
-  class StyleRuleFunctionDeclarations;
+  class FunctionDeclarationsRule;
 
   class CSSFunctionDeclarations final : public CSSRule
   {
   public:
-    static Ref<CSSFunctionDeclarations> create(StyleRuleFunctionDeclarations &rule, CSSStyleSheet *sheet)
+    KRYS_NODISCARD static Ref<CSSFunctionDeclarations> Create(FunctionDeclarationsRule &rule,
+                                                              CSSStyleSheet *sheet) noexcept
     {
-      return adoptRef(*new CSSFunctionDeclarations(rule, sheet));
+      return AdoptRef(*new CSSFunctionDeclarations(rule, sheet));
     };
 
-    virtual ~CSSFunctionDeclarations();
+    virtual ~CSSFunctionDeclarations() noexcept;
 
-    CSSFunctionDescriptors &style();
+    KRYS_NODISCARD CSSFunctionDescriptors &Style() noexcept;
 
   private:
-    CSSFunctionDeclarations(StyleRuleFunctionDeclarations &, CSSStyleSheet *);
+    CSSFunctionDeclarations(FunctionDeclarationsRule &rule, CSSStyleSheet *sheet) noexcept;
 
-    String cssText() const final;
-    String cssTextInternal(StringBuilder &declarations, StringBuilder &rules) const;
+    CSSOMString CssText() const noexcept final;
+    CSSOMString CssTextInternal(CSSOMString &declarations, StringBuilder &rules) const noexcept;
 
-    void reattach(StyleRuleBase &) final;
-    StyleRuleType styleRuleType() const final
+    void Reattach(RuleBase &) noexcept final;
+
+    RuleType Type() const noexcept final
     {
-      return StyleRuleType::FunctionDeclarations;
+      return RuleType::FunctionDeclarations;
     }
 
-    Ref<StyleRuleFunctionDeclarations> m_styleRule;
-    RefPtr<CSSFunctionDescriptors> m_descriptorsCSSOMWrapper;
+    Ref<FunctionDeclarationsRule> _rule;
+    RefPtr<CSSFunctionDescriptors> _descriptorsCSSOMWrapper;
   };
-
-} // namespace krys::boo::css
+}
 
 SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSFunctionDeclarations, StyleRuleType::FunctionDeclarations)

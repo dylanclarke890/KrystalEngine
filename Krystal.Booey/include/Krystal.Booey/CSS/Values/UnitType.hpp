@@ -101,8 +101,9 @@ namespace krys::boo::css
 
   KRYS_NODISCARD constexpr UnitType ParseUnitType(utf8_stringview str) noexcept
   {
+    (void)str;
     // TODO: Implement parsing logic for UnitType from string representation.
-    return UnitType::Unknown;
+    krys_not_implemented();
   }
 }
 

@@ -75,7 +75,6 @@ namespace krys::boo::css
     {
       for (size_t i = 0uz; i < n; ++i)
       {
-        auto ch = Peek(i);
         if (Peek(i) == U'\n')
         {
           _currentLocation.Line++;

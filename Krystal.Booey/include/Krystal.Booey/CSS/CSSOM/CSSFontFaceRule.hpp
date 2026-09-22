@@ -1,62 +1,49 @@
-/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * (C) 2002-2003 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2002, 2006, 2008, 2012 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
 #pragma once
 
-#include <WebCore/CSSRule.h>
+#include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 
 namespace krys::boo::css
 {
-
   class CSSFontFaceDescriptors;
-  class StyleRuleFontFace;
+  class FontFaceRule;
 
   class CSSFontFaceRule final : public CSSRule
   {
+  private:
+    Ref<StyleRuleFontFace> _fontFaceRule;
+    RefPtr<CSSFontFaceDescriptors> _propertiesCSSOMWrapper;
+
+    CSSFontFaceRule(FontFaceRule &rule, CSSStyleSheet *parent) noexcept;
+
   public:
-    static Ref<CSSFontFaceRule> create(StyleRuleFontFace &rule, CSSStyleSheet *sheet)
+    virtual ~CSSFontFaceRule() noexcept;
+
+    KRYS_NODISCARD static Ref<CSSFontFaceRule> create(FontFaceRule &rule, CSSStyleSheet *sheet) noexcept
     {
-      return adoptRef(*new CSSFontFaceRule(rule, sheet));
+      return AdoptRef(*new CSSFontFaceRule(rule, sheet));
     }
 
-    virtual ~CSSFontFaceRule();
-
-    CSSFontFaceDescriptors &style();
+    KRYS_NODISCARD CSSFontFaceDescriptors &Style() noexcept;
 
   private:
-    CSSFontFaceRule(StyleRuleFontFace &, CSSStyleSheet *parent);
-
-    StyleRuleType styleRuleType() const final
+    KRYS_NODISCARD RuleType Type() const noexcept final
     {
-      return StyleRuleType::FontFace;
+      return RuleType::FontFace;
     }
-    String cssText() const final;
-    String cssText(const CSS::SerializationContext &) const final;
-    String cssTextInternal(const String &declarations) const;
-    void reattach(StyleRuleBase &) final;
 
-    Ref<StyleRuleFontFace> m_fontFaceRule;
-    RefPtr<CSSFontFaceDescriptors> m_propertiesCSSOMWrapper;
+    KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+
+    KRYS_NODISCARD CSSOMString CssText(const SerialisationContext &context) const noexcept final;
+
+    KRYS_NODISCARD CSSOMString CssTextInternal(const CSSOMString &declarations) const noexcept;
+
+    void Reattach(RuleBase &rule) noexcept final;
   };
+}
 
-} // namespace krys::boo::css
-
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSFontFaceRule, StyleRuleType::FontFace)
+KRYS_SPECIALIZE_TYPE_TRAITS_BEGIN(krys::boo::css::CSSFontFaceRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+  {
+    return rule.Type() == krys::boo::css::RuleType::FontFace;
+  }
+KRYS_SPECIALIZE_TYPE_TRAITS_END()

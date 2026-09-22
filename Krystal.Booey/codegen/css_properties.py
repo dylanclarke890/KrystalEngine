@@ -8,8 +8,6 @@ import itertools
 import json
 import os
 import re
-import shutil
-import subprocess
 from typing import Any, NamedTuple
 from utils import Writer, run_gperf
 
@@ -7735,7 +7733,7 @@ class GeneratePropertyId:
 
             self.generation_context.generate_property_id_switch_function_bool(
                 to=writer,
-                signature="bool IsInternal(PropertyId id) noexcept",
+                signature="bool IsInternal(KRYS_MAYBE_UNUSED PropertyId id) noexcept",
                 iterable=(p for p in self.properties_and_descriptors.all_unique if p.codegen_properties.internal_only),
             )
 
@@ -9305,7 +9303,7 @@ class GenerateStyleExtractorGenerated:
         self, to: Writer, property: StyleProperty
     ):
         with to.function_block(
-            signature=f"static void extract{property.id_without_prefix}ShorthandSerialization(ExtractorState& extractorState, StringBuilder& builder, const CSS::SerializationContext& context) noexcept"
+            signature=f"static void extract{property.id_without_prefix}ShorthandSerialization(ExtractorState& extractorState, StringBuilder& builder, const SerialisationContext& context) noexcept"
         ):
             to.write(
                 f"extract{property.codegen_properties.shorthand_style_extractor_pattern}ShorthandSerialization(extractorState, builder, context, {property.id_without_prefix}Shorthand());"
@@ -9331,7 +9329,7 @@ class GenerateStyleExtractorGenerated:
         self, to: Writer, property: StyleProperty
     ):
         to.write(
-            f"static void extract{property.id_without_prefix}Serialization(ExtractorState& extractorState, StringBuilder& builder, const CSS::SerializationContext& context)"
+            f"static void extract{property.id_without_prefix}Serialization(ExtractorState& extractorState, StringBuilder& builder, const SerialisationContext& context)"
         )
         to.write(f"{{")
 
@@ -9439,7 +9437,7 @@ class GenerateStyleExtractorGenerated:
 
     def _generate_style_extractor_generated_cpp_extractor_generated_extract_serialization(self, *, to):
         to.write_block("""
-            void ExtractorGenerated::extractValueSerialization(ExtractorState& extractorState, StringBuilder& builder, const CSS::SerializationContext& context, PropertyId id)
+            void ExtractorGenerated::extractValueSerialization(ExtractorState& extractorState, StringBuilder& builder, const SerialisationContext& context, PropertyId id)
             {
                 switch (id) {
                 case PropertyId::CSSPropertyInvalid:

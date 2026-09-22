@@ -83,7 +83,7 @@ namespace krys::boo::css::PropertyParserHelpers
     Maybe<ValueId> parsedDisplayInside;
     while (!range.IsAtEnd())
     {
-      auto nextValueId = range.Peek().ValueId();
+      nextValueId = range.Peek().ValueId();
       switch (nextValueId)
       {
         // <display-outside>

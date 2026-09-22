@@ -9,12 +9,17 @@ namespace krys::boo::css
     KRYS_NODISCARD constexpr static Maybe<LengthUnit>
       Validate(UnitType unitType, PropertyParserState &state, PropertyParserOptions options) noexcept
     {
+      (void)state;
+      (void)options;
+
       return UnitTraits<LengthUnit>::Validate(unitType);
     }
 
     template <auto R, typename V>
-    KRYS_NODISCARD static bool IsValid(LengthRaw<R, V> raw, PropertyParserOptions) noexcept
+    KRYS_NODISCARD static bool IsValid(LengthRaw<R, V> raw, PropertyParserOptions options) noexcept
     {
+      (void)options;
+
       // Values other than 0 and +/-∞ are not supported for <length> numeric ranges currently.
       return IsValidNonCanonicalizableDimensionValue(raw);
     }

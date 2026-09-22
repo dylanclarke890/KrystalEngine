@@ -13,24 +13,40 @@ namespace krys::boo::css
                                  const CustomIdentifier &identifier) noexcept
   {
     // TODO: Implement serialization for CustomIdentifier
+    (void)builder;
+    (void)context;
+    (void)identifier;
+    krys_not_implemented();
   }
 
   void SerializePropertyIdentifier(CSSOMString &builder, const SerializationContext &context,
                                    const PropertyIdentifier &identifier) noexcept
   {
     // TODO: Implement serialization for PropertyIdentifier
+    (void)builder;
+    (void)context;
+    (void)identifier;
+    krys_not_implemented();
   }
 
   void SerializeString(CSSOMString &builder, const SerializationContext &context,
                        const CSSOMStringAtom &atom) noexcept
   {
     // TODO: Implement serialization for CSSOMStringAtom
+    (void)builder;
+    (void)context;
+    (void)atom;
+    krys_not_implemented();
   }
 
   void SerializeString(CSSOMString &builder, const SerializationContext &context,
                        const CSSOMString &string) noexcept
   {
     // TODO: Implement serialization for CSSOMString
+    (void)builder;
+    (void)context;
+    (void)string;
+    krys_not_implemented();
   }
 
 #pragma endregion

@@ -109,14 +109,15 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     OptionalRadiiForAxis verticalRadii;
-    for (size_t i = 0uz; i < 4uz && !tokens.IsAtEnd(); ++i)
+    for (size_t j = 0uz; j < 4uz && !tokens.IsAtEnd(); ++j)
     {
-      verticalRadii[i] = MetaConsumer<LengthPercentage<NonNegative>>::Consume(tokens, state);
-      if (!verticalRadii[i])
+      verticalRadii[j] = MetaConsumer<LengthPercentage<NonNegative>>::Consume(tokens, state);
+      if (!verticalRadii[j])
       {
         return {};
       }
     }
+
     if (!verticalRadii[0] || !tokens.IsAtEnd())
     {
       return {};

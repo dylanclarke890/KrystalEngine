@@ -1,80 +1,71 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * (C) 2002-2003 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2002-2025 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
+﻿#pragma once
 
-#pragma once
-
-#include <WebCore/CSSRule.h>
+#include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 
 namespace krys::boo::css
 {
-
   class MediaList;
-  class StyleRuleImport;
+  class ImportRule;
 
-  namespace MQ
-  {
-    struct MediaQuery;
-    using MediaQueryList = Vector<MediaQuery>;
-  }
+  //namespace MQ
+  //{
+  //  struct MediaQuery;
+  //  using MediaQueryList = SmallList<MediaQuery>;
+  //}
 
   class CSSImportRule final : public CSSRule
   {
-  public:
-    static Ref<CSSImportRule> create(StyleRuleImport &rule, CSSStyleSheet *sheet)
-    {
-      return adoptRef(*new CSSImportRule(rule, sheet));
-    }
-
-    virtual ~CSSImportRule();
-
-    String href() const;
-    MediaList &media() const;
-    CSSStyleSheet *styleSheet() const;
-    RefPtr<CSSStyleSheet> protectedStyleSheet() const;
-    String layerName() const;
-    String supportsText() const;
-
-  private:
     friend class MediaList;
 
-    CSSImportRule(StyleRuleImport &, CSSStyleSheet *);
+  private:
+    const Ref<ImportRule> _importRule;
+    mutable RefPtr<MediaList> _mediaCSSOMWrapper;
+    mutable RefPtr<CSSStyleSheet> _styleSheetCSSOMWrapper;
 
-    StyleRuleType styleRuleType() const final
+    CSSImportRule(ImportRule &rule, CSSStyleSheet *sheet) noexcept;
+
+  public:
+    KRYS_NODISCARD static Ref<CSSImportRule> Create(ImportRule &rule, CSSStyleSheet *sheet) noexcept
     {
-      return StyleRuleType::Import;
+      return AdoptRef(*new CSSImportRule(rule, sheet));
     }
-    String cssText() const final;
-    String cssText(const CSS::SerializationContext &) const final;
-    void reattach(StyleRuleBase &) final;
-    void getChildStyleSheets(HashSet<RefPtr<CSSStyleSheet>> &) final;
 
-    String cssTextInternal(const String &urlString) const;
-    const MQ::MediaQueryList &mediaQueries() const;
-    void setMediaQueries(MQ::MediaQueryList &&);
+    virtual ~CSSImportRule() noexcept;
 
-    const Ref<StyleRuleImport> m_importRule;
-    mutable RefPtr<MediaList> m_mediaCSSOMWrapper;
-    mutable RefPtr<CSSStyleSheet> m_styleSheetCSSOMWrapper;
+    CSSOMString href() const noexcept;
+
+    MediaList &media() const noexcept;
+
+    CSSStyleSheet *styleSheet() const noexcept;
+
+    CSSOMString layerName() const noexcept;
+
+    CSSOMString supportsText() const noexcept;
+
+    RuleType Type() const noexcept final
+    {
+      return RuleType::Import;
+    }
+
+    CSSOMString CssText() const noexcept final;
+
+    CSSOMString CssText(const SerialisationContext &context) const noexcept final;
+
+    void Reattach(RuleBase &rule) noexcept final;
+
+    void GetChildStyleSheets(HashSet<RefPtr<CSSStyleSheet>> &) noexcept final;
+
+    CSSOMString CssTextInternal(const CSSOMString &urlString) const noexcept;
+
+    //const MQ::MediaQueryList &mediaQueries() const noexcept;
+
+    //void setMediaQueries(MQ::MediaQueryList &&) noexcept;
   };
+}
 
-} // namespace krys::boo::css
-
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSImportRule, StyleRuleType::Import)
+KRYS_SPECIALIZE_TYPE_TRAITS_BEGIN(krys::boo::css::CSSImportRule)
+  KRYS_NO_DISCARD static bool isType(const krys::boo::css::CSSRule &rule) noexcept
+  {
+    return rule.Type() == krys::boo::css::RuleType::Import;
+  }
+KRYS_SPECIALIZE_TYPE_TRAITS_END()

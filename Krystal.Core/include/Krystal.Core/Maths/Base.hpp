@@ -27,8 +27,10 @@ namespace krys
     {
       return value != value;
     }
-
-    return false;
+    else
+    {
+      return false;
+    }
   }
 
   KRYS_NODISCARD constexpr uint16 FastMultiplyBy255(uint16 value) noexcept

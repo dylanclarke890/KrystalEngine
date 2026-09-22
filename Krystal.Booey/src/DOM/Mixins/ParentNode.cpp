@@ -136,13 +136,17 @@ namespace krys::boo::dom::mixins
                                                          DOMStringView selectors) noexcept
   {
     // TODO(impl): CSS-SELECTORS
-    return Exception {ExceptionCode::NotSupportedError};
+    (void)parent;
+    (void)selectors;
+    krys_not_implemented();
   }
 
   ExceptionOr<Ref<NodeList>> ParentNode::QuerySelectorAll(ContainerNode &parent,
                                                           DOMStringView selectors) noexcept
   {
     // TODO(impl): CSS-SELECTORS
-    return Exception {ExceptionCode::NotSupportedError};
+    (void)parent;
+    (void)selectors;
+    krys_not_implemented();
   }
 }

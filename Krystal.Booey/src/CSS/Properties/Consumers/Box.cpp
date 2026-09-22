@@ -8,7 +8,7 @@
 
 namespace krys::boo::css::PropertyParserHelpers
 {
-  RefPtr<Value> ConsumeMarginTrim(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeMarginTrim(TokenRange &tokens, PropertyParserState &) noexcept
   {
     // <'margin-trim'> = none | [ block || inline ] | [ block-start || inline-start || block-end || inline-end
     // ] https://drafts.csswg.org/css-box/#margin-trim

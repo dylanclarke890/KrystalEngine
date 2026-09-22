@@ -13,7 +13,8 @@ namespace krys::boo::css
 
   KRYS_NODISCARD constexpr bool IsElementBackedPseudoElement(PseudoElementId pseudoElement) noexcept
   {
-    return false;
+    (void)pseudoElement;
+    krys_not_implemented();
   }
 }
 

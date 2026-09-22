@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
-#include "Krystal.Booey/CSS/CSSImportRule.hpp"
-#include "Krystal.Booey/CSS/CSSNamespaceRule.hpp"
-#include "Krystal.Booey/CSS/CSSRuleList.hpp"
-#include "Krystal.Booey/CSS/CSSStyleRule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSImportRule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSNamespaceRule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSRuleList.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleRule.hpp"
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/MediaList.hpp"
 

@@ -393,7 +393,10 @@ namespace krys::boo
                                      ColorComponents<float, 4> inputColorComponents,
                                      const DestinationColorSpace &outputColorSpace) noexcept
   {
-    return {};
+    (void)inputColorSpace;
+    (void)inputColorComponents;
+    (void)outputColorSpace;
+    krys_not_implemented();
     // TODO:
     // return CallWithColorType(
     //  inputColorComponents, inputColorSpace,
@@ -410,5 +413,4 @@ namespace krys::boo
     // return AsColorComponents(ConvertColor<SRGBA<float>>(inputColor).Resolved());
     // });
   }
-
 }

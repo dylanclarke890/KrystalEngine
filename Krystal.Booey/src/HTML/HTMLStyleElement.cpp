@@ -14,12 +14,14 @@ namespace krys::boo::html
   bool HTMLStyleElement::Disabled() const noexcept
   {
     // TODO(HTMLSTYLEELEMENT, HTML): get the disabled state of this' associated stylesheet.
-    return false;
+    krys_not_implemented();
   }
 
   void HTMLStyleElement::Disabled(bool value) noexcept
   {
     // TODO(HTMLSTYLEELEMENT, HTML): set the disabled state of this' associated stylesheet.
+    (void)value;
+    krys_not_implemented();
   }
 
   dom::DOMString HTMLStyleElement::Media() const noexcept

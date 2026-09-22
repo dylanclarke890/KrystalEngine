@@ -94,24 +94,23 @@ namespace krys::boo
     {
       return static_cast<float>(std::fmod(std::fmod(c, 360.0) + 360.0, 360.0));
     }
-
-    if constexpr (componentInfo.min == -std::numeric_limits<float>::infinity()
-                  && componentInfo.max == std::numeric_limits<float>::infinity())
+    else if constexpr (componentInfo.min == -std::numeric_limits<float>::infinity()
+                       && componentInfo.max == std::numeric_limits<float>::infinity())
     {
       return c;
     }
-
-    if constexpr (componentInfo.min == -std::numeric_limits<float>::infinity())
+    else if constexpr (componentInfo.min == -std::numeric_limits<float>::infinity())
     {
       return std::min(c, componentInfo.max);
     }
-
-    if constexpr (componentInfo.max == std::numeric_limits<float>::infinity())
+    else if constexpr (componentInfo.max == std::numeric_limits<float>::infinity())
     {
       return std::max(c, componentInfo.min);
     }
-
-    return std::clamp(c, componentInfo.min, componentInfo.max);
+    else
+    {
+      return std::clamp(c, componentInfo.min, componentInfo.max);
+    }
   }
 
   template <typename ColorType, unsigned Index, typename T>

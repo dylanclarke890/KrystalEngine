@@ -221,7 +221,7 @@ namespace krys::text
     auto ch = static_cast<sized_unsigned_t<TChar>>(c);
     krys_debug_assert(IsASCIIHexDigit<TChar>(ch));
 
-    return ch < 'A' ? ch - '0' : (ch - 'A' + 10u) & 0xFu;
+    return static_cast<uint8>(ch < 'A' ? ch - '0' : (ch - 'A' + 10u) & 0xFu);
   }
 
   template <IsCharOrByte TChar>

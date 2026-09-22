@@ -33,7 +33,7 @@ namespace krys::boo::css
 
     // bool RequiresConversionData() const;
 
-    // void SerializationForCSS(StringBuilder &, const CSS::SerializationContext &) const;
+    // void SerializationForCSS(StringBuilder &, const SerialisationContext &) const;
     // void CollectComputedStyleDependencies(ComputedStyleDependencies &) const;
 
     // UnevaluatedCalcBase SimplifyBase(const ToLengthConversionData &, const CSSCalcSymbolTable &) const;

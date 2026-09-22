@@ -1,139 +1,119 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * (C) 2002-2003 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2002-2024 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
+﻿#pragma once
 
-#pragma once
-
-#include <wtf/AbstractRefCounted.h>
-#include <wtf/RefCounted.h>
-#include <wtf/RefPtr.h>
-#include <wtf/TZoneMallocInlines.h>
-#include <wtf/Vector.h>
+#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/SmallList.hpp"
 
 namespace krys::boo::css
 {
-
   class CSSRule;
   class CSSStyleSheet;
 
   class CSSRuleList : public AbstractRefCounted
   {
-    WTF_MAKE_NONCOPYABLE(CSSRuleList);
-
-  public:
-    virtual ~CSSRuleList();
-
-    virtual unsigned length() const = 0;
-    virtual CSSRule *item(unsigned index) const = 0;
-    bool isSupportedPropertyIndex(unsigned index) const
-    {
-      return item(index);
-    }
-
-    virtual CSSStyleSheet *styleSheet() const = 0;
+    KRYS_NON_COPYABLE(CSSRuleList);
 
   protected:
-    CSSRuleList();
+    CSSRuleList() noexcept;
+
+  public:
+    virtual ~CSSRuleList() noexcept;
+
+    KRYS_NODISCARD virtual size_t Length() const noexcept = 0;
+
+    KRYS_NODISCARD virtual CSSRule *Item(size_t index) const noexcept = 0;
+
+    KRYS_NODISCARD bool IsSupportedPropertyIndex(size_t index) const noexcept
+    {
+      return Item(index);
+    }
+
+    KRYS_NODISCARD virtual CSSStyleSheet *StyleSheet() const noexcept = 0;
   };
 
   class StaticCSSRuleList final : public CSSRuleList, public RefCounted<StaticCSSRuleList>
   {
+  private:
+    SmallList<RefPtr<CSSRule>> _rules;
+
+    StaticCSSRuleList() noexcept;
+
   public:
-    void ref() const final
+    ~StaticCSSRuleList() noexcept;
+
+    void AddRef() const noexcept final
     {
-      RefCounted::ref();
-    }
-    void deref() const final
-    {
-      RefCounted::deref();
+      RefCounted::AddRef();
     }
 
-    static Ref<StaticCSSRuleList> create()
+    void SubRef() const noexcept final
     {
-      return adoptRef(*new StaticCSSRuleList);
+      RefCounted::SubRef();
     }
 
-    Vector<RefPtr<CSSRule>> &rules()
+    KRYS_NODISCARD static Ref<StaticCSSRuleList> Create() noexcept
     {
-      return m_rules;
+      return AdoptRef(*new StaticCSSRuleList);
     }
 
-    CSSStyleSheet *styleSheet() const final
+    KRYS_NODISCARD SmallList<RefPtr<CSSRule>> &Rules() noexcept
+    {
+      return _rules;
+    }
+
+    KRYS_NODISCARD CSSStyleSheet *StyleSheet() const noexcept final
     {
       return nullptr;
     }
 
-    ~StaticCSSRuleList();
-
   private:
-    StaticCSSRuleList();
-
-    unsigned length() const final
+    KRYS_NODISCARD size_t Length() const noexcept final
     {
-      return m_rules.size();
-    }
-    CSSRule *item(unsigned index) const final
-    {
-      return index < m_rules.size() ? m_rules[index].get() : nullptr;
+      return _rules.size();
     }
 
-    Vector<RefPtr<CSSRule>> m_rules;
+    KRYS_NODISCARD CSSRule *Item(unsigned index) const noexcept final
+    {
+      return index < _rules.size() ? _rules[index].get() : nullptr;
+    }
   };
 
-  // The rule owns the live list.
-  template <class Rule>
+  template <typename Rule>
   class LiveCSSRuleList final : public CSSRuleList
   {
-    WTF_MAKE_TZONE_ALLOCATED_TEMPLATE(LiveCSSRuleList);
+  private:
+    // The rule owns the live list.
+    Rule &_rule;
 
   public:
-    LiveCSSRuleList(Rule &rule) : m_rule(rule)
+    LiveCSSRuleList(Rule &rule) noexcept : _rule(rule)
     {
     }
 
-    void ref() const final
+    void AddRef() const noexcept final
     {
-      m_rule.ref();
+      _rule.AddRef();
     }
-    void deref() const final
+
+    void SubRef() const noexcept final
     {
-      m_rule.deref();
+      _rule.SubRef();
     }
 
   private:
-    unsigned length() const final
+    KRYS_NODISCARD size_t Length() const noexcept final
     {
-      return m_rule.length();
-    }
-    CSSRule *item(unsigned index) const final
-    {
-      return m_rule.item(index);
-    }
-    CSSStyleSheet *styleSheet() const final
-    {
-      return m_rule.parentStyleSheet();
+      return _rule.Length();
     }
 
-    Rule &m_rule;
+    KRYS_NODISCARD CSSRule *Item(size_t index) const noexcept final
+    {
+      return _rule.Item(index);
+    }
+
+    KRYS_NODISCARD CSSStyleSheet *StyleSheet() const noexcept final
+    {
+      return _rule.StyleSheet();
+    }
   };
-
-  WTF_MAKE_TZONE_ALLOCATED_TEMPLATE_IMPL(template <class Rule>, LiveCSSRuleList<Rule>);
-
-} // namespace krys::boo::css
+}

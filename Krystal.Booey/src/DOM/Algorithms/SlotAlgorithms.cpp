@@ -17,19 +17,19 @@ namespace krys::boo::dom
     return Is<Element>(node) || Is<Text>(node);
   }
 
-  bool SlotAlgorithms::IsSlottable(const Text &node) noexcept
+  bool SlotAlgorithms::IsSlottable(const Text &) noexcept
   {
     return true;
   }
 
-  bool SlotAlgorithms::IsSlottable(const Element &node) noexcept
+  bool SlotAlgorithms::IsSlottable(const Element &) noexcept
   {
     return true;
   }
 
   html::HTMLSlotElement *SlotAlgorithms::DefaultSlot(Node &node) noexcept
   {
-    assert(Is<ShadowRoot>(TreeQueries::Root(node)));
+    krys_debug_assert(Is<ShadowRoot>(TreeQueries::Root(node)));
 
     for (auto &descendant : DescendantRange(TreeQueries::Root(node)))
     {
@@ -47,7 +47,7 @@ namespace krys::boo::dom
 
   const html::HTMLSlotElement *SlotAlgorithms::DefaultSlot(const Node &node) noexcept
   {
-    assert(Is<ShadowRoot>(TreeQueries::Root(node)));
+    krys_debug_assert(Is<ShadowRoot>(TreeQueries::Root(node)));
 
     for (auto &descendant : ConstDescendantRange(TreeQueries::Root(node)))
     {
@@ -119,7 +119,7 @@ namespace krys::boo::dom
 
   html::HTMLSlotElement *SlotAlgorithms::FindSlot(Node &slottable, bool open) noexcept
   {
-    assert(IsSlottable(slottable));
+    krys_debug_assert(IsSlottable(slottable));
 
     Element *parent = slottable.ParentElement();
 

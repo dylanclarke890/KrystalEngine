@@ -9,6 +9,8 @@ namespace krys::Gfx
                                        float aspect, float nearPlane, float farPlane) noexcept
       : _position(position), _up(up), _fovY(fovY), _aspect(aspect), _nearPlane(nearPlane), _farPlane(farPlane)
   {
+    // TODO(fix): target is not referenced?
+    (void)target;
     _forward = Normalize(Vec3(0.0f, 0.0f, -1.0f));
     _right = Normalize(Cross(_forward, _up));
     _up = Normalize(Cross(_right, _forward));

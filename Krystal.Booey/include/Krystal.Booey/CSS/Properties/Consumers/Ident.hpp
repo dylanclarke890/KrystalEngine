@@ -70,6 +70,7 @@ namespace krys::boo::css::PropertyParserHelpers
   template <typename... EmptyBaseCase>
   KRYS_NODISCARD bool IdentMatches(ValueId valueId) noexcept
   {
+    (void)valueId;
     return false;
   }
 

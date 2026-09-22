@@ -379,7 +379,9 @@ namespace krys::boo::html
   case TokenizerState::stateName:                                                                            \
   stateName:                                                                                                 \
   {                                                                                                          \
-    constexpr auto currentState = TokenizerState::stateName;
+    constexpr auto currentState = TokenizerState::stateName;                                                 \
+    (void)currentState;
+
 #define END_STATE()                                                                                          \
   assert(false);                                                                                             \
   break;                                                                                                     \

@@ -206,8 +206,8 @@ namespace krys::boo::css
                                                                       const PropertyShorthand &shorthand,
                                                                       PropertyParserResult &result) noexcept
     {
-      assert(state.CurrentProperty == shorthand.Id());
-      assert(shorthand.Size() <= 6); // Existing shorthands have at most 6 longhands.
+      krys_debug_assert(state.CurrentProperty == shorthand.Id());
+      krys_debug_assert(shorthand.Size() <= 6); // Existing shorthands have at most 6 longhands.
 
       Array<RefPtr<Value>, 6> longhands;
       auto shorthandProperties = shorthand.Properties();
@@ -248,8 +248,8 @@ namespace krys::boo::css
                                                               const PropertyShorthand &shorthand,
                                                               PropertyParserResult &result) noexcept
     {
-      assert(state.CurrentProperty == shorthand.Id());
-      assert(shorthand.Size() == 2uz);
+      krys_debug_assert(state.CurrentProperty == shorthand.Id());
+      krys_debug_assert(shorthand.Size() == 2uz);
 
       auto longhands = shorthand.Properties();
       auto start = PropertyParsing::ParseStylePropertyLonghand(tokens, longhands[0], state);
@@ -275,8 +275,8 @@ namespace krys::boo::css
                                                               const PropertyShorthand &shorthand,
                                                               PropertyParserResult &result) noexcept
     {
-      assert(state.CurrentProperty == shorthand.Id());
-      assert(shorthand.Size() == 4uz);
+      krys_debug_assert(state.CurrentProperty == shorthand.Id());
+      krys_debug_assert(shorthand.Size() == 4uz);
 
       auto longhands = shorthand.Properties();
       auto top = PropertyParsing::ParseStylePropertyLonghand(tokens, longhands[0], state);
@@ -328,6 +328,8 @@ namespace krys::boo::css
                                                       const PropertyShorthand &shorthand,
                                                       PropertyParserResult &result) noexcept
     {
+      (void)shorthand;
+
       auto components = ConsumeBorderShorthandComponents(tokens, state);
       if (!components)
       {
@@ -353,6 +355,8 @@ namespace krys::boo::css
                                                             const PropertyShorthand &shorthand,
                                                             PropertyParserResult &result) noexcept
     {
+      (void)shorthand;
+
       auto components = ConsumeBorderShorthandComponents(tokens, state);
       if (!components)
       {
@@ -373,6 +377,8 @@ namespace krys::boo::css
                                                            const PropertyShorthand &shorthand,
                                                            PropertyParserResult &result) noexcept
     {
+      (void)shorthand;
+
       auto components = ConsumeBorderImageComponents(tokens, state);
       if (!components)
       {
@@ -397,6 +403,8 @@ namespace krys::boo::css
                                                            const PropertyShorthand &shorthand,
                                                            PropertyParserResult &result) noexcept
     {
+      (void)shorthand;
+
       auto components = ConsumeBorderShorthandComponents(tokens, state);
       if (!components)
       {
@@ -416,6 +424,9 @@ namespace krys::boo::css
                                                             const PropertyShorthand &shorthand,
                                                             PropertyParserResult &result) noexcept
     {
+      (void)shorthand;
+
+
       auto borderRadius = ConsumeUnresolvedBorderRadius(tokens, state);
       if (!borderRadius.has_value())
       {
@@ -438,6 +449,8 @@ namespace krys::boo::css
                                                              const PropertyShorthand &,
                                                              PropertyParserResult &result)
     {
+      (void)shorthand;
+
       RefPtr horizontalSpacing =
         PrimitiveValueResolver<Length<NonNegative>>::ConsumeAndResolve(tokens, state);
       if (!horizontalSpacing)
@@ -522,7 +535,7 @@ namespace krys::boo::css
           }
           default:
           {
-            assert(false);
+            krys_debug_assert(false);
             return nullptr;
           }
         }
@@ -530,7 +543,7 @@ namespace krys::boo::css
 
       const size_t longhandCount = shorthand.Size();
       const size_t maxLonghandCount = 11uz;
-      assert(longhandCount <= maxLonghandCount);
+      krys_debug_assert(longhandCount <= maxLonghandCount);
 
       auto shorthandProperties = shorthand.Properties();
       Array<ValueListBuilder, maxLonghandCount> longhands;
@@ -660,7 +673,7 @@ namespace krys::boo::css
           }
           default:
           {
-            assert(false);
+            krys_debug_assert(false);
             return nullptr;
           }
         }
@@ -668,7 +681,7 @@ namespace krys::boo::css
 
       const size_t longhandCount = shorthand.Size();
       const size_t maxLonghandCount = 11uz;
-      assert(longhandCount <= maxLonghandCount);
+      krys_debug_assert(longhandCount <= maxLonghandCount);
 
       Array<ValueListBuilder, maxLonghandCount> longhands;
       auto shorthandProperties = shorthand.Properties();
@@ -732,7 +745,7 @@ namespace krys::boo::css
                                                           const PropertyShorthand &shorthand,
                                                           PropertyParserResult &result) noexcept
     {
-      assert(shorthand.Id() == state.CurrentProperty);
+      krys_debug_assert(shorthand.Id() == state.CurrentProperty);
 
       auto ConsumeBackgroundComponent = [&](PropertyId property) -> RefPtr<Value>
       {
@@ -826,7 +839,7 @@ namespace krys::boo::css
       }
 
       Array<ValueListBuilder, 10uz> longhands;
-      assert(longhandCount <= 10uz);
+      krys_debug_assert(longhandCount <= 10uz);
 
       do
       {
@@ -994,7 +1007,7 @@ namespace krys::boo::css
                                                                   const PropertyShorthand &shorthand,
                                                                   PropertyParserResult &result) noexcept
     {
-      assert(shorthand.Id() == state.CurrentProperty);
+      krys_debug_assert(shorthand.Id() == state.CurrentProperty);
 
       ValueListBuilder x;
       ValueListBuilder y;
@@ -1206,8 +1219,8 @@ namespace krys::boo::css
                                                                 const PropertyShorthand &shorthand,
                                                                 PropertyParserResult &result) noexcept
     {
-      assert(shorthand.Id() == state.CurrentProperty);
-      assert(shorthand.Size() == 2uz);
+      krys_debug_assert(shorthand.Id() == state.CurrentProperty);
+      krys_debug_assert(shorthand.Size() == 2uz);
 
       RefPtr<Value> startValue = ConsumeGridLine(tokens, state);
       if (!startValue)
@@ -1384,7 +1397,7 @@ namespace krys::boo::css
                                                     const PropertyShorthand &shorthand,
                                                     PropertyParserResult &result) noexcept
     {
-      assert(shorthand.Size() == 6);
+      krys_debug_assert(shorthand.Size() == 6);
 
       auto ConsumeImplicitGridAutoFlow = [](TokenRange &tokens, ValueId flowDirection) -> RefPtr<Value>
       {
@@ -1629,8 +1642,8 @@ namespace krys::boo::css
       //   <'place-self'>    https://drafts.csswg.org/css-align/#propdef-place-self
       //   <'gap'>           https://drafts.csswg.org/css-align/#propdef-gap
 
-      assert(shorthand.Id() == state.CurrentProperty);
-      assert(shorthand.Size() == 2);
+      krys_debug_assert(shorthand.Id() == state.CurrentProperty);
+      krys_debug_assert(shorthand.Size() == 2);
       auto longhands = shorthand.Properties();
 
       auto rangeCopy = tokens;
@@ -2030,7 +2043,7 @@ namespace krys::boo::css
           }
           default:
           {
-            assert(false);
+            krys_debug_assert(false);
             return false;
           }
         }
@@ -2073,7 +2086,7 @@ namespace krys::boo::css
           }
           default:
           {
-            assert(false);
+            krys_debug_assert(false);
             return false;
           }
         }
@@ -2478,7 +2491,7 @@ namespace krys::boo::css
                                                                   const PropertyShorthand &shorthand,
                                                                   PropertyParserResult &result) noexcept
     {
-      assert(shorthand.Size() == 2);
+      krys_debug_assert(shorthand.Size() == 2);
 
       if (tokens.IsAtEnd())
       {
@@ -2559,8 +2572,8 @@ namespace krys::boo::css
                                                                     const PropertyShorthand &shorthand,
                                                                     PropertyParserResult &result) noexcept
     {
-      assert(shorthand.Size() == 2);
-      assert(IsExposed(PropertyId::ContainIntrinsicSize, &state.Context.PropertySettings));
+      krys_debug_assert(shorthand.Size() == 2);
+      krys_debug_assert(IsExposed(PropertyId::ContainIntrinsicSize, &state.Context.PropertySettings));
 
       if (tokens.IsAtEnd())
       {
@@ -2814,7 +2827,7 @@ namespace krys::boo::css
                                                          const PropertyShorthand &shorthand,
                                                          PropertyParserResult &result) noexcept
     {
-      assert(state.Context.PropertySettings.cssLineClampEnabled);
+      krys_debug_assert(state.Context.PropertySettings.cssLineClampEnabled);
 
       if (tokens.Peek().ValueId() == ValueId::None)
       {
@@ -3011,7 +3024,7 @@ namespace krys::boo::css
           }
           default:
           {
-            assert(false);
+            krys_debug_assert(false);
             return false;
           }
         }

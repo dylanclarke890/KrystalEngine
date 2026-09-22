@@ -196,6 +196,8 @@ namespace krys::boo::html
 
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override
     {
+      (void)isSubtreeRoot;
+      (void)oldAncestor;
       // TODO(HTMLELEMENT): Implement the removal steps for an HTMLElement.
 
       // Let document be removedNode's node document.
@@ -220,6 +222,8 @@ namespace krys::boo::html
 
     void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override
     {
+      (void)isSubtreeRoot;
+      (void)oldAncestor;
       // TODO(HTMLELEMENT): Implement the move steps for an HTMLElement.
 
       // If movedNode is an element whose namespace is the HTML namespace, and this standard defines HTML

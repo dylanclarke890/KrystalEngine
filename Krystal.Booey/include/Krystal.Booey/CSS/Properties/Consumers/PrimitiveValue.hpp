@@ -30,8 +30,8 @@ namespace krys::boo::css
     KRYS_NODISCARD static RefPtr<PrimitiveValue> Resolve(Calc auto value,
                                                             PropertyParserOptions = {}) noexcept
     {
-      // TODO: Implement calc() expression evaluation
-      return nullptr;
+      (void)value;
+      krys_not_implemented();
     }
 
     KRYS_NODISCARD static RefPtr<PrimitiveValue> Resolve(Numeric auto value,

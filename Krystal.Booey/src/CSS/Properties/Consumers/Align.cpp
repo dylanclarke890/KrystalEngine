@@ -8,8 +8,7 @@ namespace krys::boo::css::PropertyParserHelpers
 {
   namespace
   {
-    KRYS_NODISCARD RefPtr<Value> ConsumeAlignmentBaseline(TokenRange &tokens,
-                                                             PropertyParserState &state) noexcept
+    KRYS_NODISCARD RefPtr<Value> ConsumeAlignmentBaseline(TokenRange &tokens, PropertyParserState &) noexcept
     {
       assert(tokens.Peek().ValueId() == ValueId::Baseline);
 
@@ -24,7 +23,7 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     KRYS_NODISCARD RefPtr<Value> ConsumeAlignmentFirstBaseline(TokenRange &tokens,
-                                                                  PropertyParserState &state) noexcept
+                                                               PropertyParserState &) noexcept
     {
       assert(tokens.Peek().ValueId() == ValueId::First);
 
@@ -45,7 +44,7 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     KRYS_NODISCARD RefPtr<Value> ConsumeAlignmentLastBaseline(TokenRange &tokens,
-                                                                 PropertyParserState &state) noexcept
+                                                              PropertyParserState &) noexcept
     {
       assert(tokens.Peek().ValueId() == ValueId::Last);
 
@@ -63,13 +62,13 @@ namespace krys::boo::css::PropertyParserHelpers
       tokens.DiscardWhitespace();
 
       return ValuePair::Create(PrimitiveValue::Create(ValueId::Last),
-                                  PrimitiveValue::Create(ValueId::Baseline));
+                               PrimitiveValue::Create(ValueId::Baseline));
     }
 
     template <typename F>
-    KRYS_NODISCARD RefPtr<Value>
-      ConsumeAlignmentOverflowPosition(TokenRange &tokens, PropertyParserState &,
-                                       ValueId overflowSafety, F &&predicate) noexcept
+    KRYS_NODISCARD RefPtr<Value> ConsumeAlignmentOverflowPosition(TokenRange &tokens, PropertyParserState &,
+                                                                  ValueId overflowSafety,
+                                                                  F &&predicate) noexcept
     {
       assert(tokens.Peek().ValueId() == ValueId::Safe || tokens.Peek().ValueId() == ValueId::Unsafe);
 
@@ -83,8 +82,7 @@ namespace krys::boo::css::PropertyParserHelpers
         tokens.Discard();
         tokens.DiscardWhitespace();
 
-        return ValuePair::Create(PrimitiveValue::Create(overflowSafety),
-                                    PrimitiveValue::Create(position));
+        return ValuePair::Create(PrimitiveValue::Create(overflowSafety), PrimitiveValue::Create(position));
       }
 
       return nullptr;
@@ -624,8 +622,7 @@ namespace krys::boo::css::PropertyParserHelpers
             tokens.Discard();
             tokens.DiscardWhitespace();
 
-            return ValuePair::Create(PrimitiveValue::Create(initial),
-                                        PrimitiveValue::Create(second));
+            return ValuePair::Create(PrimitiveValue::Create(initial), PrimitiveValue::Create(second));
           }
           default:
           {
@@ -648,8 +645,7 @@ namespace krys::boo::css::PropertyParserHelpers
             tokens.DiscardWhitespace();
 
             // NOTE: Order is flipped to canonicalize to 'legacy *foo*' for serialization.
-            return ValuePair::Create(PrimitiveValue::Create(second),
-                                        PrimitiveValue::Create(initial));
+            return ValuePair::Create(PrimitiveValue::Create(second), PrimitiveValue::Create(initial));
           }
           default:
           {

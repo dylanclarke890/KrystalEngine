@@ -260,29 +260,33 @@ namespace krys::boo::html
   dom::DOMString HTMLElement::InnerText() const noexcept
   {
     // TODO(HTMLELEMENT, HTML): Implement InnerText() setter method.
-    return {};
+    krys_not_implemented();
   }
 
   void HTMLElement::InnerText(dom::DOMString &&value) noexcept
   {
     // TODO(HTMLELEMENT, HTML): Implement InnerText() getter method.
+    (void)value;
+    krys_not_implemented();
   }
 
   dom::DOMString HTMLElement::OuterText() const noexcept
   {
     // TODO(HTMLELEMENT, HTML): Implement OuterText() method.
-    return {};
+    krys_not_implemented();
   }
 
   void HTMLElement::OuterText(dom::DOMString &&value) noexcept
   {
     // TODO(HTMLELEMENT, HTML): Implement OuterText() getter method.
+    (void)value;
+    krys_not_implemented();
   }
 
   dom::ExceptionOr<Ref<ElementInternals>> HTMLElement::AttachInternals() noexcept
   {
     // TODO(HTMLELEMENT, ELEMENTINTERNALS, HTML): Implement AttachInternals() method.
-    return dom::ExceptionCode::NotSupportedError;
+    krys_not_implemented();
   }
 
   uint32 HTMLElement::HeadingOffset() const noexcept

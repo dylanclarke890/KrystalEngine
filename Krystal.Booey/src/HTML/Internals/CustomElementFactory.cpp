@@ -28,6 +28,7 @@ namespace krys::boo::html
     }
 
     // TODO(impl): CUSTOM-ELEMENTS
-    return nullptr;
+    (void)synchronousCustomElements;
+    krys_not_implemented();
   }
 }

@@ -104,6 +104,10 @@ namespace krys::boo::css
                                                  CalcAllowedSymbols allowedSymbols,
                                                  PropertyParserOptions options) noexcept
     {
+      (void)tokens;
+      (void)state;
+      (void)allowedSymbols;
+      (void)options;
       return null;
     }
 
@@ -112,6 +116,11 @@ namespace krys::boo::css
                                                  CalcAllowedSymbols allowedSymbols,
                                                  PropertyParserOptions options, F &&func) noexcept
     {
+      (void)tokens;
+      (void)state;
+      (void)allowedSymbols;
+      (void)options;
+      (void)func;
       return null;
     }
   };
