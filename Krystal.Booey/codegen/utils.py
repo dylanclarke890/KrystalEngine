@@ -2,27 +2,10 @@ import enum
 import datetime
 import io
 import os
-import pathlib
 import subprocess
 import shutil
 import textwrap
 from typing import Iterable
-
-PROJECT_BASE = pathlib.Path(__file__).parent.parent
-PROJECT_HPP_BASE = PROJECT_BASE / "include"
-PROJECT_CPP_BASE = PROJECT_BASE / "src"
-
-
-def output_hpp_path(relative_path: str) -> str:
-    path = str(PROJECT_HPP_BASE / relative_path)
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    return path
-
-
-def output_cpp_path(relative_path: str) -> str:
-    path = str(PROJECT_CPP_BASE / relative_path)
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    return path
 
 
 def run_gperf(*, gperf_executable: str, filename: str, output_cpp_dir: str, remove_gperf_file: bool):

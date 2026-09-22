@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Core/IO/Path.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 namespace krys::io::tests
 {

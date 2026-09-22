@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Core/Text/Encodings/ASCII.hpp"
 #include "Krystal.Core/Text/Encodings/Decode.hpp"
 #include "Krystal.Core/Text/Encodings/Encode.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 namespace krys::text::tests
 {

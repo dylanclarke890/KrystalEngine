@@ -7,7 +7,7 @@
 #include "Krystal.Booey/CSS/Rules/CSSOM/CSSRuleList.hpp"
 #include "Krystal.Booey/CSS/Rules/CSSOM/CSSStyleRule.hpp"
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::css::tests
 {
@@ -105,7 +105,7 @@ namespace krys::boo::css::tests
 
     void RunTest(string filename) noexcept
     {
-      static string basedir = "data/css-selector-parser/";
+      static string basedir = KRYS_BOOEY_TESTS_DATA_DIR "/css-selector-parser/";
 
       auto file = krys::boo::tests::OpenTestDataFile(basedir + filename);
       REQUIRE(file.has_value());

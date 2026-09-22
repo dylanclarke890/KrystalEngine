@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Core/Maths/Clipspace.hpp"
 #include "Krystal.Core/Detection/Compiler.hpp"
 #include "Krystal.Core/Maths/Convert.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 namespace krys::tests
 {

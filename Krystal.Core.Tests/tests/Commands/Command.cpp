@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Core/Commands/CommandArena.hpp"
 #include "Krystal.Core/Commands/CommandList.hpp"
 #include "Krystal.Core/Commands/CommandListReader.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 namespace krys::tests
 {

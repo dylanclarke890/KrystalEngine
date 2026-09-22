@@ -4,7 +4,7 @@
 #include "Krystal.Booey/CSS/Parser/Token.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::css::tests
 {
@@ -250,7 +250,7 @@ namespace krys::boo::css::tests
 
     void RunTest(string filename) noexcept
     {
-      static string basedir = "data/css-tokenizer/";
+      static string basedir = KRYS_BOOEY_TESTS_DATA_DIR "/css-tokenizer/";
 
       auto file = krys::boo::tests::OpenTestDataFile(basedir + filename);
       REQUIRE(file.has_value());

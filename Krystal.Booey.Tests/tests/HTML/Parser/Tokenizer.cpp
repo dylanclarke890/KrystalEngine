@@ -270,7 +270,7 @@ namespace krys::boo::html::Tests
 
     void RunTest(string filename) noexcept
     {
-      static string basedir = "data/html-tokenizer/";
+      static string basedir = KRYS_BOOEY_TESTS_DATA_DIR "/html-tokenizer/";
 
       auto file = tests::OpenTestDataFile(basedir + filename);
       REQUIRE(file.has_value());

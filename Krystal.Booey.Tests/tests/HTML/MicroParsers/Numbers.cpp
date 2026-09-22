@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::html::tests
 {

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Core/IO/Backends/NativeFileBackend.hpp"
 #include "Krystal.Core/IO/Common.hpp"
 #include "Krystal.Core/IO/Path.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 #include <fstream>
 
 namespace krys::io::tests

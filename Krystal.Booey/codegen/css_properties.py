@@ -11,13 +11,13 @@ import re
 import shutil
 import subprocess
 from typing import Any, NamedTuple
-from utils import PROJECT_BASE, Writer, output_cpp_path, output_hpp_path
+from utils import Writer, run_gperf
 
 GENERATOR_NAME = "codegen/css_properties.py"
 
 
 def generate(args: argparse.Namespace):
-    with open(args.properties, "r", encoding="utf-8") as properties_file:
+    with open(args.properties, "r", encoding="utf-8-sig") as properties_file:
         properties_json = json.load(properties_file)
 
     parsing_context = ParsingContext(
@@ -56,6 +56,8 @@ def generate(args: argparse.Namespace):
         parsing_context.parsed_shared_grammar_rules,
         verbose=args.verbose,
         gperf_executable=args.gperf_executable,
+        output_hpp_dir=args.output_headers_dir,
+        output_cpp_dir=args.output_sources_dir,
     )
 
     [
@@ -65,7 +67,6 @@ def generate(args: argparse.Namespace):
             GeneratePropertyId,
             GeneratePropertyParsing,
             GeneratePropertyShorthandFunctions,
-            GenerateCSSStylePropertiesPropertyNamesIDL,
             # TODO: Uncomment these generators when they are supported.
             # GenerateStyleBuilderGenerated,
             # GenerateStyleChangedAnimatablePropertiesGenerated,
@@ -7263,13 +7264,22 @@ class GenerationContext:
         *,
         verbose: bool,
         gperf_executable: str,
+        output_hpp_dir: str,
+        output_cpp_dir: str,
     ):
         self.properties_and_descriptors = properties_and_descriptors
         self.shared_grammar_rules = shared_grammar_rules
         self.verbose = verbose
         self.gperf_executable = gperf_executable
+        self.output_hpp_dir = output_hpp_dir
+        self.output_cpp_dir = output_cpp_dir
 
     # Shared generation constants.
+    def output_hpp_path(self, relative_path: str) -> str:
+        return os.path.join(self.output_hpp_dir, relative_path)
+
+    def output_cpp_path(self, relative_path: str) -> str:
+        return os.path.join(self.output_cpp_dir, relative_path)
 
     number_of_predefined_properties = 2
 
@@ -7335,7 +7345,7 @@ class GenerateInitialValues:
         self.generation_context = generation_context
 
     def generate(self):
-        with open(output_hpp_path("Krystal.Booey/CSS/Properties/InitialValues.hpp"), "w") as output_file:
+        with open(self.generation_context.output_hpp_path("Krystal.Booey/CSS/Properties/InitialValues.hpp"), "w") as output_file:
             writer = Writer(output_file)
             writer.hpp_prelude(
                 generator_name=GENERATOR_NAME,
@@ -7419,12 +7429,17 @@ class GeneratePropertyId:
     def generate(self):
         self._generate_property_id_hpp()
         self._generate_property_id_gperf()
-        self._run_gperf()
+        run_gperf(
+            gperf_executable=self.generation_context.gperf_executable,
+            filename="PropertyId",
+            output_cpp_dir=os.path.join(self.generation_context.output_cpp_dir, "CSS/Properties"),
+            remove_gperf_file=True,
+        )
 
     # region PropertyId.hpp
 
     def _generate_property_id_hpp(self):
-        with open(output_hpp_path("Krystal.Booey/CSS/Properties/PropertyId.hpp"), "w") as output_file:
+        with open(self.generation_context.output_hpp_path("Krystal.Booey/CSS/Properties/PropertyId.hpp"), "w") as output_file:
             writer = Writer(output_file)
             writer.hpp_prelude(
                 generator_name=GENERATOR_NAME,
@@ -7884,42 +7899,13 @@ class GeneratePropertyId:
 
             writer.write("}")  # closes namespace krys::boo
 
-    def _run_gperf(self):
-        """Runs gperf on the generated PropertyId.gperf file to produce PropertyId.cpp."""
-
-        if not self.generation_context.gperf_executable:
-            return
-
-        gperf_result_code = subprocess.call(
-            [
-                self.generation_context.gperf_executable,
-                "--key-positions=*",
-                "-D",
-                "-n",
-                "-s",
-                "2",
-                "PropertyId.gperf",
-                "--output-file=PropertyId.cpp",
-            ]
-        )
-        if gperf_result_code != 0:
-            raise Exception(f"Error when generating PropertyId.cpp from PropertyId.gperf: {gperf_result_code}")
-
-        # move the generated file to the correct output path (made generating it easier)
-        shutil.move(
-            "PropertyId.cpp",
-            output_cpp_path("CSS/Properties/PropertyId.cpp"),
-        )
-        if not self.generation_context.verbose:
-            os.remove("PropertyId.gperf")
-
     def _generate_gperf_prelude(self, *, to: Writer):
         with to.block(block_start="%{", block_end="%}", indent=False):
             to.cpp_prelude(
                 for_header="Krystal.Booey/CSS/Properties/PropertyId.hpp",
                 generator_name=GENERATOR_NAME,
                 headers=[
-                    "Krystal.Booey/CSS/Parser/Context/ParserContext.hpp",
+                    "Krystal.Booey/CSS/Parser/ParserContext.hpp",
                     "Krystal.Booey/CSS/Properties/Property.hpp",
                     "Krystal.Booey/CSS/Values/ValueId.hpp",
                     "Krystal.Core/Types/SmallList.hpp",
@@ -8491,7 +8477,7 @@ class GeneratePropertyParsing:
         self._generate_property_parsing_cpp()
 
     def _generate_property_parsing_hpp(self):
-        with open(output_hpp_path("Krystal.Booey/CSS/Properties/PropertyParsing.hpp"), "w") as output_file:
+        with open(self.generation_context.output_hpp_path("Krystal.Booey/CSS/Properties/PropertyParsing.hpp"), "w") as output_file:
             writer = Writer(output_file)
             writer.hpp_prelude(
                 generator_name=GENERATOR_NAME,
@@ -8554,13 +8540,13 @@ class GeneratePropertyParsing:
                                 consumer.generate_export_declaration(to=writer)
 
     def _generate_property_parsing_cpp(self):
-        with open(output_cpp_path("CSS/Properties/PropertyParsing.cpp"), "w") as output_file:
+        with open(self.generation_context.output_cpp_path("CSS/Properties/PropertyParsing.cpp"), "w") as output_file:
             writer = Writer(output_file)
             writer.cpp_prelude(
                 generator_name=GENERATOR_NAME,
                 for_header="Krystal.Booey/CSS/Properties/PropertyParsing.hpp",
                 headers=[
-                    "Krystal.Booey/CSS/Parser/Context/ParserContext.hpp",
+                    "Krystal.Booey/CSS/Parser/ParserContext.hpp",
                     "Krystal.Booey/CSS/Parser/ParserIdioms.hpp",
                     "Krystal.Booey/CSS/Properties/PropertyParser.hpp",
                     "Krystal.Booey/CSS/Properties/PropertyParserCustom.hpp",
@@ -8804,7 +8790,7 @@ class GeneratePropertyShorthandFunctions:
 
     def _generate_style_property_shorthand_functions_hpp(self):
         with open(
-            output_hpp_path("Krystal.Booey/CSS/Properties/PropertyShorthandFunctions.hpp"),
+            self.generation_context.output_hpp_path("Krystal.Booey/CSS/Properties/PropertyShorthandFunctions.hpp"),
             "w",
         ) as output_file:
             writer = Writer(output_file)
@@ -8822,7 +8808,7 @@ class GeneratePropertyShorthandFunctions:
                     writer.write(f"KRYS_NODISCARD PropertyShorthand {property.id_without_prefix}Shorthand() noexcept;")
 
     def _generate_style_property_shorthand_functions_cpp(self):
-        with open(output_cpp_path("CSS/Properties/PropertyShorthandFunctions.cpp"), "w") as output_file:
+        with open(self.generation_context.output_cpp_path("CSS/Properties/PropertyShorthandFunctions.cpp"), "w") as output_file:
             writer = Writer(output_file)
             writer.cpp_prelude(
                 generator_name=GENERATOR_NAME,
@@ -8932,151 +8918,6 @@ class GeneratePropertyShorthandFunctions:
 
                 with to.default_case_block():
                     to.write("return {};")
-
-
-class GenerateCSSStylePropertiesPropertyNamesIDL:
-    """Generates `CSSStyleProperties+PropertyNames.idl`."""
-
-    def __init__(self, generation_context: GenerationContext):
-        self.generation_context = generation_context
-
-    def generate(self):
-        with open(PROJECT_BASE / "data" / "CSSStyleProperties+PropertyNames.idl", "w") as output_file:
-            writer = Writer(output_file)
-            writer.autogenerated_heading(generator_name=GENERATOR_NAME)
-
-            name_or_alias_to_property = {}
-            for property in self.generation_context.properties_and_descriptors.all_unique_non_internal_only:
-                name_or_alias_to_property[property.name] = property
-                for alias in property.aliases:
-                    name_or_alias_to_property[alias] = property
-
-            names_and_aliases_with_properties = sorted(list(name_or_alias_to_property.items()), key=lambda x: x[0])
-
-            with writer.block(
-                prologue="partial interface CSSStyleProperties",
-                block_start="{",
-                block_end="};",
-            ):
-                self._generate_css_style_declaration_property_names_idl_section(
-                    to=writer,
-                    comment="""\
-                        // For each CSS property property that is a supported CSS property, the following
-                        // partial interface applies where camel-cased attribute is obtained by running the
-                        // CSS property to IDL attribute algorithm for property.
-                        // Example: font-size -> element.style.fontSize
-                        // Example: -webkit-transform -> element.style.WebkitTransform
-                        // [CEReactions] attribute [LegacyNullToEmptyString] CSSOMString _camel_cased_attribute;
-                        """,
-                    names_and_aliases_with_properties=names_and_aliases_with_properties,
-                    variant="CamelCased",
-                    convert_to_idl_attribute=True,
-                    lowercase_first=False,
-                )
-
-                self._generate_css_style_declaration_property_names_idl_section(
-                    to=writer,
-                    comment="""
-                        // For each CSS property property that is a supported CSS property and that begins
-                        // with the string -webkit-, the following partial interface applies where webkit-cased
-                        // attribute is obtained by running the CSS property to IDL attribute algorithm for
-                        // property, with the lowercase first flag set.
-                        // Example: -webkit-transform -> element.style.webkitTransform
-                        // [CEReactions] attribute [LegacyNullToEmptyString] CSSOMString _webkit_cased_attribute;
-                        """,
-                    names_and_aliases_with_properties=filter(
-                        lambda item: item[0].startswith("-webkit-"),
-                        names_and_aliases_with_properties,
-                    ),
-                    variant="WebKitCased",
-                    convert_to_idl_attribute=True,
-                    lowercase_first=True,
-                )
-
-                self._generate_css_style_declaration_property_names_idl_section(
-                    to=writer,
-                    comment="""
-                        // For each CSS property property that is a supported CSS property, except for
-                        // properties that have no "-" (U+002D) in the property name, the following partial
-                        // interface applies where dashed attribute is property.
-                        // Example: font-size -> element.style['font-size']
-                        // Example: -webkit-transform -> element.style.['-webkit-transform']
-                        // [CEReactions] attribute [LegacyNullToEmptyString] CSSOMString _dashed_attribute;
-                        """,
-                    names_and_aliases_with_properties=filter(
-                        lambda item: "-" in item[0], names_and_aliases_with_properties
-                    ),
-                    variant="Dashed",
-                    convert_to_idl_attribute=False,
-                )
-
-                self._generate_css_style_declaration_property_names_idl_section(
-                    to=writer,
-                    comment="""
-                        // Non-standard. Special case properties starting with -epub- like is done for
-                        // -webkit-, where attribute is obtained by running the CSS property to IDL attribute
-                        // algorithm for property, with the lowercase first flag set.
-                        // Example: -epub-caption-side -> element.style.epubCaptionSide
-                        """,
-                    names_and_aliases_with_properties=filter(
-                        lambda item: item[0].startswith("-epub-"),
-                        names_and_aliases_with_properties,
-                    ),
-                    variant="EpubCased",
-                    convert_to_idl_attribute=True,
-                    lowercase_first=True,
-                )
-
-    @staticmethod
-    def _convert_css_property_to_idl_attribute(name: str, *, lowercase_first: bool):
-        # https://drafts.csswg.org/cssom/#css-property-to-idl-attribute
-        output = ""
-        uppercase_next = False
-
-        if lowercase_first:
-            name = name[1:]
-
-        for character in name:
-            if character == "-":
-                uppercase_next = True
-            elif uppercase_next:
-                uppercase_next = False
-                output += character.upper()
-            else:
-                output += character
-
-        return output
-
-    def _generate_css_style_declaration_property_names_idl_section(
-        self,
-        *,
-        to: Writer,
-        comment,
-        names_and_aliases_with_properties,
-        variant,
-        convert_to_idl_attribute,
-        lowercase_first: bool = False,
-    ):
-        to.write_block(comment)
-
-        for name_or_alias, property in names_and_aliases_with_properties:
-            if convert_to_idl_attribute:
-                idl_attribute_name = GenerateCSSStylePropertiesPropertyNamesIDL._convert_css_property_to_idl_attribute(
-                    name_or_alias, lowercase_first=lowercase_first
-                )
-            else:
-                idl_attribute_name = name_or_alias
-
-            extended_attributes_values = [
-                f"DelegateToSharedSyntheticAttribute=propertyValueFor{variant}IDLAttribute",
-                "CallWith=PropertyName",
-            ]
-            if property.codegen_properties.settings_flag:
-                extended_attributes_values += [f"EnabledBySetting={property.codegen_properties.settings_flag}"]
-
-            to.write(
-                f"[CEReactions=Needed, {', '.join(extended_attributes_values)}] attribute [LegacyNullToEmptyString] CSSOMString {idl_attribute_name};"
-            )
 
 
 # Generates `StyleBuilderGenerated.cpp`.
@@ -9348,7 +9189,7 @@ class GenerateStyleBuilderGenerated:
         to.newline()
 
     def generate_style_builder_generated_cpp(self):
-        with open(output_cpp_path("CSS/Style/StyleBuilderGenerated.cpp"), "w") as output_file:
+        with open(self.generation_context.output_cpp_path("CSS/Style/StyleBuilderGenerated.cpp"), "w") as output_file:
             writer = Writer(output_file)
             writer.cpp_prelude(
                 generator_name=GENERATOR_NAME,
@@ -9660,7 +9501,7 @@ class GenerateStyleExtractorGenerated:
         to.newline()
 
     def generate_style_extractor_generated_cpp(self):
-        with open(output_cpp_path("CSS/Style/StyleExtractorGenerated.cpp"), "w") as output_file:
+        with open(self.generation_context.output_cpp_path("CSS/Style/StyleExtractorGenerated.cpp"), "w") as output_file:
             writer = Writer(output_file)
 
             writer.cpp_prelude(
@@ -9702,7 +9543,7 @@ class GenerateStyleInterpolationWrapperMap:
 
     def generate_css_property_animation_wrapper_map_h(self):
         with open(
-            output_hpp_path("Krystal.Booey/CSS/Style/StyleInterpolationWrapperMap.hpp"),
+            self.generation_context.output_hpp_path("Krystal.Booey/CSS/Style/StyleInterpolationWrapperMap.hpp"),
             "w",
         ) as output_file:
             writer = Writer(output_file)
@@ -9720,7 +9561,7 @@ class GenerateStyleInterpolationWrapperMap:
                 self._generate_css_property_animation_wrapper_map_h_wrapper_map_declaration(to=writer)
 
     def generate_css_property_animation_wrapper_map_cpp(self):
-        with open(output_cpp_path("CSS/Style/StyleInterpolationWrapperMap.cpp"), "w") as output_file:
+        with open(self.generation_context.output_cpp_path("CSS/Style/StyleInterpolationWrapperMap.cpp"), "w") as output_file:
             writer = Writer(output_file)
 
             writer.cpp_prelude(
@@ -10212,7 +10053,7 @@ class GenerateStyleComputedStyleProperties:
 
     def generate_style_computed_style_properties_h(self):
         with open(
-            output_hpp_path("Krystal.Booey/CSS/Style/StyleComputedStyleProperties.hpp"),
+            self.generation_context.output_hpp_path("Krystal.Booey/CSS/Style/StyleComputedStyleProperties.hpp"),
             "w",
         ) as output_file:
             writer = Writer(output_file)
@@ -10561,7 +10402,7 @@ class GenerateStyleComputedStyleProperties:
 
     def generate_style_computed_style_properties_getters_inlines_h(self):
         with open(
-            output_hpp_path("Krystal.Booey/CSS/Style/StyleComputedStyleProperties+GettersInlines.hpp"),
+            self.generation_context.output_hpp_path("Krystal.Booey/CSS/Style/StyleComputedStyleProperties+GettersInlines.hpp"),
             "w",
         ) as output_file:
             writer = Writer(output_file)
@@ -10945,7 +10786,7 @@ class GenerateStyleComputedStyleProperties:
 
     def generate_style_computed_style_properties_setters_inlines_h(self):
         with open(
-            output_hpp_path("Krystal.Booey/CSS/Style/StyleComputedStyleProperties+SettersInlines.hpp"),
+            self.generation_context.output_hpp_path("Krystal.Booey/CSS/Style/StyleComputedStyleProperties+SettersInlines.hpp"),
             "w",
         ) as output_file:
             writer = Writer(output_file)
@@ -11022,7 +10863,7 @@ class GenerateStyleComputedStyleProperties:
 
     def generate_style_computed_style_properties_initial_inlines_h(self):
         with open(
-            output_hpp_path("Krystal.Booey/CSS/Style/StyleComputedStyleProperties+InitialInlines.hpp"),
+            self.generation_context.output_hpp_path("Krystal.Booey/CSS/Style/StyleComputedStyleProperties+InitialInlines.hpp"),
             "w",
         ) as output_file:
             writer = Writer(output_file)
@@ -11260,7 +11101,7 @@ class GenerateRenderStyleProperties:
             to.newline()
 
     def generate_render_style_properties_h(self):
-        with open(output_hpp_path("Krystal.Booey/CSS/Style/RenderStyleProperties.hpp"), "w") as output_file:
+        with open(self.generation_context.output_hpp_path("Krystal.Booey/CSS/Style/RenderStyleProperties.hpp"), "w") as output_file:
             writer = Writer(output_file)
 
             writer.hpp_prelude(
@@ -11436,7 +11277,7 @@ class GenerateRenderStyleProperties:
 
     def generate_render_style_properties_getters_inlines_h(self):
         with open(
-            output_hpp_path("Krystal.Booey/CSS/Style/RenderStyleProperties+GettersInlines.hpp"),
+            self.generation_context.output_hpp_path("Krystal.Booey/CSS/Style/RenderStyleProperties+GettersInlines.hpp"),
             "w",
         ) as output_file:
             writer = Writer(output_file)
@@ -11613,7 +11454,7 @@ class GenerateRenderStyleProperties:
 
     def generate_render_style_properties_setters_inlines_h(self):
         with open(
-            output_hpp_path("Krystal.Booey/CSS/Style/RenderStyleProperties+SettersInlines.hpp"),
+            self.generation_context.output_hpp_path("Krystal.Booey/CSS/Style/RenderStyleProperties+SettersInlines.hpp"),
             "w",
         ) as output_file:
             writer = Writer(output_file)
@@ -11902,7 +11743,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
 
     def generate_style_changed_animatable_properties_generated_cpp(self):
         with open(
-            output_cpp_path("CSS/Properties/StyleChangedAnimatablePropertiesGenerated.cpp"),
+            self.generation_context.output_cpp_path("CSS/Properties/StyleChangedAnimatablePropertiesGenerated.cpp"),
             "w",
         ) as output_file:
             writer = Writer(output_file)

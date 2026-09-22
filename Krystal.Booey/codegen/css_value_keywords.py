@@ -2,8 +2,8 @@
 import re
 import textwrap
 
-from css_properties import output_cpp_path
-from utils import output_hpp_path, run_gperf, Writer
+import os
+from utils import run_gperf, Writer
 
 GENERATOR_NAME = "codegen/css_value_keywords.py"
 
@@ -19,13 +19,17 @@ def generate(args: argparse.Namespace):
     if args.verbose:
         print(f"{len(parsed_values)} values active for code generation")
 
-    generation_context = GenerationContext(parsed_values, verbose=args.verbose, gperf_executable=args.gperf_executable)
+    output_hpp_dir = args.output_headers_dir
+
+    generation_context = GenerationContext(parsed_values, verbose=args.verbose, gperf_executable=args.gperf_executable, output_hpp_dir=output_hpp_dir)
     generation_context.generate_css_value_id_hpp()
     generation_context.generate_css_value_id_gperf()
+
+    output_cpp_dir = args.output_sources_dir
     run_gperf(
         gperf_executable=args.gperf_executable,
         filename="ValueId",
-        output_cpp_dir=output_cpp_path("CSS/Values"),
+        output_cpp_dir=os.path.join(output_cpp_dir, "CSS/Values"),
         remove_gperf_file=True,
     )
 
@@ -142,22 +146,23 @@ def attribute_from_attribute_string(
 
 
 class GenerationContext:
-    def __init__(self, values: list[Value], *, verbose: bool, gperf_executable: str):
+    def __init__(self, values: list[Value], *, verbose: bool, gperf_executable: str, output_hpp_dir: str):
         self.values = values
         self.verbose = verbose
         self.gperf_executable = gperf_executable
+        self.output_hpp_dir = output_hpp_dir
 
     # Shared generation constants.
 
     number_of_predefined_values = 1
 
     def generate_css_value_id_hpp(self):
-        with open(output_hpp_path("Krystal.Booey/CSS/Values/ValueId.hpp"), "w") as output_file:
+        with open(os.path.join(self.output_hpp_dir, "Krystal.Booey/CSS/Values/ValueId.hpp"), "w") as output_file:
             writer = Writer(output_file)
             writer.hpp_prelude(
                 generator_name=GENERATOR_NAME,
                 headers=[
-                    "Krystal.Booey/CSS/Parser/Context/ParserContext.hpp",
+                    "Krystal.Booey/CSS/Parser/ParserContext.hpp",
                     "Krystal.Booey/CSS/Types/CSSOMString.hpp",
                 ],
             )
@@ -288,7 +293,7 @@ class GenerationContext:
                 for_header="Krystal.Booey/CSS/Values/ValueId.hpp",
                 generator_name=GENERATOR_NAME,
                 headers=[
-                    "Krystal.Booey/CSS/Parser/Context/ParserContext.hpp",
+                    "Krystal.Booey/CSS/Parser/ParserContext.hpp",
                     "Krystal.Booey/CSS/Properties/Property.hpp",
                     "Krystal.Core/Types/SmallList.hpp",
                     "Krystal.Core/Types/String.hpp",

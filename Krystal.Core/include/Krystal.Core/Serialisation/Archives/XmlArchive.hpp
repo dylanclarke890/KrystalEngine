@@ -9,7 +9,8 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/Stack.hpp"
-#include "rapidxml/include.hpp"
+#include "rapidxml/rapidxml.hpp"
+#include "rapidxml/rapidxml_print.hpp"
 #include <format>
 #include <sstream>
 

@@ -1,4 +1,5 @@
 import argparse
+import os
 import pathlib
 
 import css_properties
@@ -19,6 +20,17 @@ def parse_args() -> argparse.Namespace:
         default=[current_dir / "css-value-keywords.in", current_dir / "svg-css-value-keywords.in"],
         help="Path to the CSS value keywords input file.",
     )
+    parser.add_argument(
+        "--output-headers-dir",
+        required=True,
+        help="Path to the output directory for generated header files.",
+    )
+    parser.add_argument(
+        "--output-sources-dir",
+        required=True,
+        help="Path to the output directory for generated source files.",
+    )
+
     parser.add_argument("--defines", default="", help="Comma-separated list of defines to enable for code generation.")
     parser.add_argument("--gperf-executable", default="gperf", help="Path to the gperf executable.")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output.")
@@ -30,6 +42,10 @@ def parse_args() -> argparse.Namespace:
 
 def main():
     args = parse_args()
+
+    os.makedirs(args.output_headers_dir, exist_ok=True)
+    os.makedirs(args.output_sources_dir, exist_ok=True)
+
     css_value_keywords.generate(args)
     css_properties.generate(args)
 

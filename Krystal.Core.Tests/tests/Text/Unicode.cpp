@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Core/Text/Unicode.hpp"
 #include <bit>
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 namespace krys::text::tests
 {

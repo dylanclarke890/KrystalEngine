@@ -1,0 +1,16 @@
+{
+  "dependencies": [
+    "catch2",
+    "freetype",
+    "rapidjson",
+    "rapidxml",
+    "spdlog",
+    "freetype",
+    "vulkan-headers",
+    {
+      "name": "msdfgen",
+      "default-features": false,
+      "features": [ "extensions" ]
+    }
+  ]
+}

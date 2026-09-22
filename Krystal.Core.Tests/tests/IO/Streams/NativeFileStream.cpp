@@ -2,12 +2,11 @@
 #include "Krystal.Core/IO/Common.hpp"
 #include "Krystal.Core/IO/Path.hpp"
 #include "Krystal.Core/Types/Array.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
+#include "catch2/catch_tostring.hpp"
 
-namespace krys::tests
+namespace krys::io::tests
 {
-  using namespace krys::io;
-
   TEST_CASE("NativeFileReader", "[IO][Streams]")
   {
     // Setup test file

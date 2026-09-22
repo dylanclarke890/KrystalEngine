@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/DOM/BoundaryPoint.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::dom::tests
 {

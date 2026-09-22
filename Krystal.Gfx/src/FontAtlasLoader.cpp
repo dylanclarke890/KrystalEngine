@@ -4,15 +4,18 @@
 #include "Krystal.Core/Maths/Round.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
-#include <algorithm>
-#include <ft2build.h>
-#include <stb_rect_pack.h>
+
+#include "stb/stb_rect_pack.h"
+
+#include "ft2build.h"
 #include FT_FREETYPE_H
 
-#include <ext/import-font.h>
-#include <msdf-atlas-gen.h>
-#include <msdfgen-ext.h>
-#include <msdfgen.h>
+#include <algorithm>
+
+#include "msdf-atlas-gen/msdf-atlas-gen.h"
+#include "msdfgen/msdfgen.h"
+#include "msdfgen/msdfgen-ext.h"
+#include "msdfgen/ext/import-font.h"
 
 namespace
 {

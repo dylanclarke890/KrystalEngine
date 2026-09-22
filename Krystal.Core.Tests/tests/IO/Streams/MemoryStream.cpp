@@ -2,7 +2,7 @@
 #include "Krystal.Core/IO/Common.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 namespace krys::tests
 {

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Core/Types/StringAtom.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 namespace krys::tests
 {

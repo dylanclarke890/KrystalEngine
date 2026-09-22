@@ -1,7 +1,0 @@
-#pragma once
-
-#define MSDFGEN_VERSION_MAJOR 1
-#define MSDFGEN_VERSION_MINOR 10
-#define MSDFGEN_VERSION_PATCH 0
-
-#define MSDFGEN_USE_CPP11

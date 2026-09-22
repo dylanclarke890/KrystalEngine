@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Core/Text/EncodingRegistry.hpp"
 #include "Krystal.Core/Text/Encodings/UTF.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 namespace krys::text::tests
 {

@@ -2,8 +2,8 @@
 
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
-#include "Krystal.Core/Color/AlphaPremultiplication.hpp"
-#include "Krystal.Core/Color/ColorInterpolationMethod.hpp"
+#include "Krystal.Booey/Graphics/Color/AlphaPremultiplication.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorInterpolationMethod.hpp"
 
 namespace krys::boo::css
 {
