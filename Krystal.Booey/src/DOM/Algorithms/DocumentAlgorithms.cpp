@@ -157,6 +157,7 @@ namespace krys::boo::dom
   bool DocumentAlgorithms::IsIFrameSrcdocDocument(const Document &document) noexcept
   {
     // TODO(impl): DOCUMENT - this is a Document whose URL matches about:srcdoc.
-    return false;
+    (void)document;
+    krys_not_implemented();
   }
 }

@@ -344,7 +344,7 @@ namespace krys::text
   template <IsCharOrByte TChar>
   KRYS_NODISCARD constexpr bool IsASCIICaselessEqual(TChar character, char expected) noexcept
   {
-    krys_debug_assert(ToASCIILowerUnchecked<TChar>(expected) == expected);
+    krys_debug_assert(ToASCIILowerUnchecked<TChar>(expected) == static_cast<TChar>(expected));
 
     auto ch = static_cast<comparable_char_t<TChar>>(character);
     return ToASCIILowerUnchecked(ch) == static_cast<TChar>(expected);

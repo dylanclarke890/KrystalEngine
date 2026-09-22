@@ -346,14 +346,14 @@ namespace krys::boo::dom
 
   ExceptionOr<Ref<Document>> Document::ParseHTMLUnsafe(DOMStringView html) noexcept
   {
-    // TODO(DOCUMENT, HTML): implement this method.
-    return ExceptionCode::NotSupportedError;
+    (void)html;
+    krys_not_implemented();
   }
 
   ExceptionOr<Ref<Document>> Document::ParseHTML(DOMStringView &html) noexcept
   {
-    // TODO(DOCUMENT, HTML): implement this method.
-    return ExceptionCode::NotSupportedError;
+    (void)html;
+    krys_not_implemented();
   }
 
   DOMString Document::Title() const noexcept

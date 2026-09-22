@@ -311,13 +311,15 @@ namespace krys::boo::dom
   RefPtr<Element> Element::Closest(DOMStringView selectors) noexcept
   {
     // TODO(impl): CSS-SELECTORS
-    return nullptr;
+    (void)selectors;
+    krys_not_implemented();
   }
 
   bool Element::Matches(DOMStringView selectors) const noexcept
   {
     // TODO(impl): CSS-SELECTORS
-    return false;
+    (void)selectors;
+    krys_not_implemented();
   }
 
   Ref<HTMLCollection> Element::GetElementsByTagName(DOMStringAtom qualifiedName) noexcept

@@ -192,9 +192,6 @@ namespace krys::boo::dom
       current = host;
     }
 
-    // The spec handles the necessary cases to ensure we never get here, but we need this to satisfy the
-    // compiler that current is always valid.
-    std::unreachable();
-    return current;
+    krys_unreachable();
   }
 }

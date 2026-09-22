@@ -34,7 +34,7 @@ namespace krys::boo::dom::tests
       {
       }
 
-      void HandleEvent(Event &e) noexcept override
+      void HandleEvent(Event &) noexcept override
       {
         _target.value = 1;
       }

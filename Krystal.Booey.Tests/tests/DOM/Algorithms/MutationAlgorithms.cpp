@@ -225,7 +225,6 @@ namespace krys::boo::dom::tests
 
         SECTION("Document already has a DocumentType child returns a HierarchyRequestError")
         {
-          auto docType = document->Implementation().CreateDocumentType(u8"html", u8"", u8"").Value();
           auto childDocType = document->Implementation().CreateDocumentType(u8"html", u8"", u8"").Value();
 
           REQUIRE_FALSE(document->AppendChild(*childDocType).HasException());
@@ -493,7 +492,6 @@ namespace krys::boo::dom::tests
     {
       SECTION("newParent has an element child")
       {
-        auto otherElement = CreateRef<TestElement>(*document);
         REQUIRE_FALSE(element->AppendChild(*otherElement).HasException());
 
         REQUIRE(MutationAlgorithms::Move(*otherElement, *document, nullptr)

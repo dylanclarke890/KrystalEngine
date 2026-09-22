@@ -114,11 +114,13 @@ namespace krys::boo::html
   dom::DOMString HTMLScriptElement::Text() const noexcept
   {
     // TODO(HTMLSCRIPTELEMENT): Implement the text attribute.
-    return u8"";
+    krys_not_implemented();
   }
 
   void HTMLScriptElement::Text(dom::DOMString &&value) noexcept
   {
+    (void)value;
+    krys_not_implemented();
     // TODO(HTMLSCRIPTELEMENT): Implement the text attribute.
   }
 

@@ -12,6 +12,10 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
+  class Element;
+  class Attr;
+  class Node;
+
   class ElementAlgorithms
   {
   public:

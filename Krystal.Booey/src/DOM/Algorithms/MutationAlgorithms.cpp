@@ -174,9 +174,9 @@ namespace krys::boo::dom
 
     if (auto *documentFragment = DynamicDowncast<DocumentFragment>(node))
     {
-      while (auto *child = documentFragment->FirstChild())
+      while (auto *fragmentChild = documentFragment->FirstChild())
       {
-        auto result = Remove(*child, SuppressObservers(true));
+        auto result = Remove(*fragmentChild, SuppressObservers(true));
         if (result.HasException())
         {
           return result.ReleaseException();
@@ -200,7 +200,6 @@ namespace krys::boo::dom
       && Downcast<Element>(parent).ShadowRoot()->SlotAssignment() == SlotAssignmentMode::Named;
     bool isParentRootShadowRoot = Is<ShadowRoot>(TreeQueries::Root(parent));
 
-    auto &parentRoot = TreeQueries::Root(parent);
     auto *slotParent = DynamicDowncast<html::HTMLSlotElement>(parent);
     for (auto &target : nodes)
     {
@@ -226,17 +225,17 @@ namespace krys::boo::dom
       }
       else
       {
-        if (auto *previousSibling = child->PreviousSibling())
+        if (auto *childPreviousSibling = child->PreviousSibling())
         {
-          previousSibling->SetNextSibling(target.get());
-          target->SetPreviousSibling(previousSibling);
+          childPreviousSibling->SetNextSibling(target.get());
+          target->SetPreviousSibling(childPreviousSibling);
 
           child->SetPreviousSibling(target.get());
           target->SetNextSibling(child);
         }
         else
         {
-          assert(parent.FirstChild() == child);
+          krys_debug_assert(parent.FirstChild() == child);
           parent.SetFirstChild(target.get());
 
           child->SetPreviousSibling(target.get());

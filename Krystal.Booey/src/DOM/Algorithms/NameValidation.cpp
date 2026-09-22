@@ -84,9 +84,10 @@ namespace krys::boo::dom
     // TODO: we need to iterate over codepoints instead of decoding the entire string at once
     auto decodeResult = krys::text::Decode<krys::text::UTF8>(name);
     krys_debug_assert(decodeResult.Error == krys::text::DecodeError::None);
+    
     auto &utf32 = decodeResult.Output;
-    auto ch = utf32[0];
-    if (ch != ':' && ch != '_' && !(ch >= 0x0080 && ch <= 0x10FFF))
+    auto first = utf32[0];
+    if (first != ':' && first != '_' && !(first >= 0x0080 && first <= 0x10FFF))
     {
       return false;
     }
@@ -105,7 +106,7 @@ namespace krys::boo::dom
       }
     }
 
-    return false;
+    return true;
   }
 
   bool NameValidation::IsValidDocTypeName(DOMStringView name) noexcept

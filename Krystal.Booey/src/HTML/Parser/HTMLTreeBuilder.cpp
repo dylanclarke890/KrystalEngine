@@ -2486,8 +2486,9 @@ namespace krys::boo::html
     bool hasNonWhitespace = false;
     for (const auto &chars : _pendingTableCharacterTokens)
     {
-      if (hasNonWhitespace = std::ranges::any_of(chars, [](char8 ch)
-                                                 { return !infra::StringAlgorithms::IsASCIIWhitespace(ch); }))
+      hasNonWhitespace = std::ranges::any_of(chars, [](char8 ch)
+                                                 { return !infra::StringAlgorithms::IsASCIIWhitespace(ch); });
+      if (hasNonWhitespace)
       {
         break;
       }

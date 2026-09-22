@@ -429,7 +429,7 @@ namespace krys::text
       return EncodeOneUnmappableCodePointError<TEncoding>();
     }
 
-    return EncodeOneSuccess<TEncoding>((*it).Index);
+    return EncodeOneSuccess<TEncoding>(static_cast<typename TEncoding::code_unit>((*it).Index));
   }
 
   template <Encoding TEncoding>
@@ -448,7 +448,7 @@ namespace krys::text
       return EncodeOneUnmappableCodePointError<TEncoding>();
     }
 
-    return EncodeOneSuccess<TEncoding>((*it).Index);
+    return EncodeOneSuccess<TEncoding>(static_cast<typename TEncoding::code_unit>((*it).Index));
   }
 
 #pragma endregion

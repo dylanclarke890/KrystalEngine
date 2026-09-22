@@ -14,8 +14,10 @@ namespace krys::boo::dom
 
   Ref<AbortSignal> AbortSignal::Timeout(size_t milliseconds) noexcept
   {
-    auto signal = CreateRef<AbortSignal>();
-
+    (void)milliseconds;
+    krys_not_implemented();
+    
+    // auto signal = CreateRef<AbortSignal>();
     // SPEC-VIOLATION(DOM): global objects not currently supported.
     // TODO(impl): ABORT - timeout abort signal. We don't have task queues or timers yet.
     // Let global be signal’s relevant global object.
@@ -24,8 +26,6 @@ namespace krys::boo::dom
     //   "TimeoutError" DOMException.
     //   For the duration of this timeout, if signal has any event listeners
     //   registered for its abort event, there must be a strong reference from global to signal.
-
-    return signal;
   }
 
   Ref<AbortSignal> AbortSignal::Any(const List<Ref<AbortSignal>> &signals) noexcept

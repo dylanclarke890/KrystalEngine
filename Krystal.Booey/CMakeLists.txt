@@ -65,23 +65,23 @@ set(KRYSTAL_BOOEY_CODEGEN_SCRIPT_ARGS
   --output-sources-dir=${KRYSTAL_BOOEY_SOURCES_OUTPUT_DIR}
 )
 
-add_custom_command(
-  OUTPUT
-    ${KRYSTAL_BOOEY_GENERATED_HEADERS}
-    ${KRYSTAL_BOOEY_GENERATED_SOURCES}
-  COMMAND 
-    ${Python3_EXECUTABLE} "${KRYSTAL_BOOEY_CODEGEN_DIR}/main.py" ${KRYSTAL_BOOEY_CODEGEN_SCRIPT_ARGS}
-  DEPENDS
-    ${KRYSTAL_BOOEY_CODEGEN_INPUTS}
-  WORKING_DIRECTORY
-    ${KRYSTAL_BOOEY_CODEGEN_DIR}
-  COMMENT
-    "Running Krystal.Booey code generation..."
-  VERBATIM
-)
+# add_custom_command(
+#   OUTPUT
+#     ${KRYSTAL_BOOEY_GENERATED_HEADERS}
+#     ${KRYSTAL_BOOEY_GENERATED_SOURCES}
+#   COMMAND 
+#     ${Python3_EXECUTABLE} "${KRYSTAL_BOOEY_CODEGEN_DIR}/main.py" ${KRYSTAL_BOOEY_CODEGEN_SCRIPT_ARGS}
+#   DEPENDS
+#     ${KRYSTAL_BOOEY_CODEGEN_INPUTS}
+#   WORKING_DIRECTORY
+#     ${KRYSTAL_BOOEY_CODEGEN_DIR}
+#   COMMENT
+#     "Running Krystal.Booey code generation..."
+#   VERBATIM
+# )
 
 target_precompile_headers(Krystal.Booey
-  PRIVATE
+  PUBLIC
     <algorithm>
     <chrono>
     <concepts>
@@ -97,18 +97,19 @@ target_precompile_headers(Krystal.Booey
     <type_traits>
     <variant>
     <vector>
-    "include/Krystal.Booey/DOM/AbortSignal.hpp"
-    "include/Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
-    "include/Krystal.Booey/DOM/Attr.hpp"
-    "include/Krystal.Booey/DOM/Document.hpp"
-    "include/Krystal.Booey/DOM/EventTarget.hpp"
-    "include/Krystal.Booey/DOM/Node.hpp"
-    "include/Krystal.Booey/DOM/ShadowRoot.hpp"
-    "include/Krystal.Booey/DOM/Types/DOMString.hpp"
-    "include/Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-    "include/Krystal.Booey/DOM/Types/USVString.hpp"
-    "include/Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
-    "include/Krystal.Booey/HTML/HTMLSlotElement.hpp"
+    
+    include/Krystal.Booey/DOM/AbortSignal.hpp
+    include/Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp
+    include/Krystal.Booey/DOM/Attr.hpp
+    include/Krystal.Booey/DOM/Document.hpp
+    include/Krystal.Booey/DOM/EventTarget.hpp
+    include/Krystal.Booey/DOM/Node.hpp
+    include/Krystal.Booey/DOM/ShadowRoot.hpp
+    include/Krystal.Booey/DOM/Types/DOMString.hpp
+    include/Krystal.Booey/DOM/Types/ExceptionOr.hpp
+    include/Krystal.Booey/DOM/Types/USVString.hpp
+    include/Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp
+    include/Krystal.Booey/HTML/HTMLSlotElement.hpp
 )
 
 target_sources(Krystal.Booey
@@ -118,7 +119,7 @@ target_sources(Krystal.Booey
       include
       ${KRYSTAL_BOOEY_HEADER_OUTPUT_DIR}
     FILES
-      ${KRYSTAL_BOOEY_GENERATED_HEADERS}
+      # ${KRYSTAL_BOOEY_GENERATED_HEADERS}
 
       # Constants
       include/Krystal.Booey/Constants/Attributes.hpp
@@ -132,300 +133,300 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/Core/IterationStatus.hpp
       include/Krystal.Booey/Core/WritingMode.hpp
 
-      # CSS
-      include/Krystal.Booey/CSS/Calc/CalcAllowedSymbols.hpp
-      include/Krystal.Booey/CSS/Calc/CalcTreeParser.hpp
-      include/Krystal.Booey/CSS/Calc/Value.hpp
-      include/Krystal.Booey/CSS/ComputedStyleDependencies.hpp
-      include/Krystal.Booey/CSS/CSSMarginDescriptors.hpp
-      include/Krystal.Booey/CSS/CSSPageDescriptors.hpp
-      include/Krystal.Booey/CSS/CSSStyleDeclaration.hpp
-      include/Krystal.Booey/CSS/CSSStyleProperties.hpp
-      include/Krystal.Booey/CSS/CSSStyleSheet.hpp
-      include/Krystal.Booey/CSS/MediaList.hpp
-      include/Krystal.Booey/CSS/Parser/AllowedBlockRules.hpp
-      include/Krystal.Booey/CSS/Parser/AllowedRules.hpp
-      include/Krystal.Booey/CSS/Parser/AtRuleType.hpp
-      include/Krystal.Booey/CSS/Parser/CustomPropertySyntax.hpp
-      include/Krystal.Booey/CSS/Parser/InputStream.hpp
-      include/Krystal.Booey/CSS/Parser/NestedParserContext.hpp
-      include/Krystal.Booey/CSS/Parser/NumericValue.hpp
-      include/Krystal.Booey/CSS/Parser/ParseError.hpp
-      include/Krystal.Booey/CSS/Parser/Parser.hpp
-      include/Krystal.Booey/CSS/Parser/ParserContext.hpp
-      include/Krystal.Booey/CSS/Parser/ParserFastPaths.hpp
-      include/Krystal.Booey/CSS/Parser/ParserIdioms.hpp
-      include/Krystal.Booey/CSS/Parser/ParserMode.hpp
-      include/Krystal.Booey/CSS/Parser/SerializerIdioms.hpp
-      include/Krystal.Booey/CSS/Parser/Token.hpp
-      include/Krystal.Booey/CSS/Parser/Tokenizer.hpp
-      include/Krystal.Booey/CSS/Parser/TokenRange.hpp
-      include/Krystal.Booey/CSS/Parser/TokenRangeGuard.hpp
-      include/Krystal.Booey/CSS/Parser/TokenType.hpp
-      include/Krystal.Booey/CSS/Parser/VariableParser.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Align.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Anchor.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/AngleDefinitions.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/AnglePercentageDefinitions.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Animations.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Attr.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Background.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Box.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Color.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/ColorAdjust.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/ColorInterpolationMethod.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Content.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/CounterStyles.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Display.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Easing.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Filter.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/FlexDefinitions.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Font.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/FrequencyDefinitions.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Grid.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Ident.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Image.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Inline.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/IntegerDefinitions.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/KeywordDefinitions.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/LengthDefinitions.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/LengthPercentageDefinitions.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/List.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Lists.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Masking.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/MetaConsumer.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/MetaConsumerDefinitions.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/MetaResolver.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Motion.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/NumberDefinitions.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Percentage.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/PercentageDefinitions.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Position.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/PositionTry.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Ratio.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/ResolutionDefinitions.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Scrollbars.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/ScrollSnap.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Shapes.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/String.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/SVG.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Syntax.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/TextDecoration.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/TimeDefinitions.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Timeline.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Transform.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/Transitions.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/UI.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/UnicodeRange.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/URL.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/ViewTransition.hpp
-      include/Krystal.Booey/CSS/Properties/Consumers/WillChange.hpp
-      include/Krystal.Booey/CSS/Properties/FontVariantLigaturesParser.hpp
-      include/Krystal.Booey/CSS/Properties/FontVariantNumericParser.hpp
-      include/Krystal.Booey/CSS/Properties/InternalStyleProperties.hpp
-      include/Krystal.Booey/CSS/Properties/ParsedPropertyList.hpp
-      include/Krystal.Booey/CSS/Properties/Property.hpp
-      include/Krystal.Booey/CSS/Properties/PropertyFlag.hpp
-      include/Krystal.Booey/CSS/Properties/PropertyParser.hpp
-      include/Krystal.Booey/CSS/Properties/PropertyParserCustom.hpp
-      include/Krystal.Booey/CSS/Properties/PropertyParserOptions.hpp
-      include/Krystal.Booey/CSS/Properties/PropertyParserResult.hpp
-      include/Krystal.Booey/CSS/Properties/PropertyParserState.hpp
-      include/Krystal.Booey/CSS/Properties/PropertyParsing.hpp
-      include/Krystal.Booey/CSS/Properties/Types/IsImplicit.hpp
-      include/Krystal.Booey/CSS/Properties/Types/IsImportant.hpp
-      include/Krystal.Booey/CSS/Properties/Types/IsSetFromShorthand.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSConditionRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSContainerRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSCounterStyleRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSFontFaceRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSFontFeatureValuesRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSFontPaletteValuesRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSFunctionDeclarations.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSFunctionRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSGroupingRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSImportRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSInternalBaseAppearanceRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSKeyframeRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSKeyframesRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSLayerBlockRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSLayerStatementRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSMediaRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSNamespaceRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSNestedDeclarations.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSPageRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSPositionTryRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSPropertyRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSRuleList.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSScopeRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSStartingStyleRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSStyleRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSSupportsRule.hpp
-      include/Krystal.Booey/CSS/CSSOM/CSSViewTransitionRule.hpp
-      include/Krystal.Booey/CSS/Rules/ParsedRuleList.hpp
-      include/Krystal.Booey/CSS/Rules/RuleFlag.hpp
-      include/Krystal.Booey/CSS/Rules/RuleType.hpp
-      include/Krystal.Booey/CSS/Selectors/Enums/PseudoClassId.hpp
-      include/Krystal.Booey/CSS/Selectors/Enums/PseudoElementId.hpp
-      include/Krystal.Booey/CSS/Selectors/Enums/SelectorMatch.hpp
-      include/Krystal.Booey/CSS/Selectors/Enums/SelectorRelation.hpp
-      include/Krystal.Booey/CSS/Selectors/MutableSelector.hpp
-      include/Krystal.Booey/CSS/Selectors/Selector.hpp
-      include/Krystal.Booey/CSS/Selectors/SelectorFlag.hpp
-      include/Krystal.Booey/CSS/Selectors/SelectorList.hpp
-      include/Krystal.Booey/CSS/Selectors/SelectorParser.hpp
-      include/Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp
-      include/Krystal.Booey/CSS/Selectors/Types/DisallowPseudoElements.hpp
-      include/Krystal.Booey/CSS/Selectors/Types/IsCaseSensitive.hpp
-      include/Krystal.Booey/CSS/Selectors/Types/IsForgivingSelectorList.hpp
-      include/Krystal.Booey/CSS/Selectors/Types/MatchLowercase.hpp
-      include/Krystal.Booey/CSS/StyleSheet.hpp
-      include/Krystal.Booey/CSS/StyleSheetContents.hpp
-      include/Krystal.Booey/CSS/StyleSheetList.hpp
-      include/Krystal.Booey/CSS/ToLengthConversionData.hpp
-      include/Krystal.Booey/CSS/Types/CSSOMString.hpp
-      include/Krystal.Booey/CSS/Types/MediaListOrDOMString.hpp
-      include/Krystal.Booey/CSS/Values/Aggregates.hpp
-      include/Krystal.Booey/CSS/Values/AppleColorFilterValue.hpp
-      include/Krystal.Booey/CSS/Values/AttrValue.hpp
-      include/Krystal.Booey/CSS/Values/Background/BoxShadow.hpp
-      include/Krystal.Booey/CSS/Values/Background/BoxShadowProperty.hpp
-      include/Krystal.Booey/CSS/Values/BackgroundRepeatValue.hpp
-      include/Krystal.Booey/CSS/Values/BasicShapeValue.hpp
-      include/Krystal.Booey/CSS/Values/BorderImageSliceValue.hpp
-      include/Krystal.Booey/CSS/Values/BorderImageWidthValue.hpp
-      include/Krystal.Booey/CSS/Values/Borders/BorderImage.hpp
-      include/Krystal.Booey/CSS/Values/Borders/BorderRadius.hpp
-      include/Krystal.Booey/CSS/Values/BoxShadowPropertyValue.hpp
-      include/Krystal.Booey/CSS/Values/CanvasValue.hpp
-      include/Krystal.Booey/CSS/Values/Color/AbsoluteColor.hpp
-      include/Krystal.Booey/CSS/Values/Color/Color.hpp
-      include/Krystal.Booey/CSS/Values/Color/ColorType.hpp
-      include/Krystal.Booey/CSS/Values/Color/ColorValue.hpp
-      include/Krystal.Booey/CSS/Values/Color/CurrentColor.hpp
-      include/Krystal.Booey/CSS/Values/Color/HexColor.hpp
-      include/Krystal.Booey/CSS/Values/Color/KeywordColor.hpp
-      include/Krystal.Booey/CSS/Values/Color/PlatformColorResolutionState.hpp
-      include/Krystal.Booey/CSS/Values/Color/ResolvedColor.hpp
-      include/Krystal.Booey/CSS/Values/ColorAdjust/ColorScheme.hpp
-      include/Krystal.Booey/CSS/Values/ColorSchemeValue.hpp
-      include/Krystal.Booey/CSS/Values/Concepts.hpp
-      include/Krystal.Booey/CSS/Values/CounterValue.hpp
-      include/Krystal.Booey/CSS/Values/CrossFadeValue.hpp
-      include/Krystal.Booey/CSS/Values/CursorImageValue.hpp
-      include/Krystal.Booey/CSS/Values/CustomPropertyValue.hpp
-      include/Krystal.Booey/CSS/Values/DynamicRangeLimitValue.hpp
-      include/Krystal.Booey/CSS/Values/Easing/CubicBezierEasingFunction.hpp
-      include/Krystal.Booey/CSS/Values/Easing/EasingFunction.hpp
-      include/Krystal.Booey/CSS/Values/Easing/LinearEasingFunction.hpp
-      include/Krystal.Booey/CSS/Values/Easing/SpringEasingFunction.hpp
-      include/Krystal.Booey/CSS/Values/Easing/StepsEasingFunction.hpp
-      include/Krystal.Booey/CSS/Values/EasingFunctionValue.hpp
-      include/Krystal.Booey/CSS/Values/Filter/AppleColorFilter.hpp
-      include/Krystal.Booey/CSS/Values/Filter/AppleInvertLightnessFunction.hpp
-      include/Krystal.Booey/CSS/Values/Filter/BlurFunction.hpp
-      include/Krystal.Booey/CSS/Values/Filter/BrightnessFunction.hpp
-      include/Krystal.Booey/CSS/Values/Filter/ContrastFunction.hpp
-      include/Krystal.Booey/CSS/Values/Filter/DropShadowFunction.hpp
-      include/Krystal.Booey/CSS/Values/Filter/Filter.hpp
-      include/Krystal.Booey/CSS/Values/Filter/FilterFunctionDescriptor.hpp
-      include/Krystal.Booey/CSS/Values/Filter/FilterOperationType.hpp
-      include/Krystal.Booey/CSS/Values/Filter/FilterReference.hpp
-      include/Krystal.Booey/CSS/Values/Filter/GrayscaleFunction.hpp
-      include/Krystal.Booey/CSS/Values/Filter/HueRotateFunction.hpp
-      include/Krystal.Booey/CSS/Values/Filter/InvertFunction.hpp
-      include/Krystal.Booey/CSS/Values/Filter/OpacityFunction.hpp
-      include/Krystal.Booey/CSS/Values/Filter/SaturateFunction.hpp
-      include/Krystal.Booey/CSS/Values/Filter/SepiaFunction.hpp
-      include/Krystal.Booey/CSS/Values/FilterImageValue.hpp
-      include/Krystal.Booey/CSS/Values/FilterValue.hpp
-      include/Krystal.Booey/CSS/Values/FontFeatureValue.hpp
-      include/Krystal.Booey/CSS/Values/FontStyleRangeValue.hpp
-      include/Krystal.Booey/CSS/Values/FontStyleWithAngleValue.hpp
-      include/Krystal.Booey/CSS/Values/FontVariationValue.hpp
-      include/Krystal.Booey/CSS/Values/FunctionValue.hpp
-      include/Krystal.Booey/CSS/Values/GlobalKeyword.hpp
-      include/Krystal.Booey/CSS/Values/GradientValue.hpp
-      include/Krystal.Booey/CSS/Values/Grid/GridArea.hpp
-      include/Krystal.Booey/CSS/Values/Grid/GridNamedAreaMap.hpp
-      include/Krystal.Booey/CSS/Values/Grid/GridPosition.hpp
-      include/Krystal.Booey/CSS/Values/Grid/GridSpan.hpp
-      include/Krystal.Booey/CSS/Values/Grid/GridTemplateAreas.hpp
-      include/Krystal.Booey/CSS/Values/Grid/GridTrackSizingDirection.hpp
-      include/Krystal.Booey/CSS/Values/GridAutoRepeatValue.hpp
-      include/Krystal.Booey/CSS/Values/GridIntegerRepeatValue.hpp
-      include/Krystal.Booey/CSS/Values/GridLineNamesValue.hpp
-      include/Krystal.Booey/CSS/Values/GridLineValue.hpp
-      include/Krystal.Booey/CSS/Values/GridTemplateAreasValue.hpp
-      include/Krystal.Booey/CSS/Values/Images/Gradient.hpp
-      include/Krystal.Booey/CSS/Values/ImageSetValue.hpp
-      include/Krystal.Booey/CSS/Values/ImageValue.hpp
-      include/Krystal.Booey/CSS/Values/Motion/RayFunction.hpp
-      include/Krystal.Booey/CSS/Values/NamedImageValue.hpp
-      include/Krystal.Booey/CSS/Values/NoConversionDataRequiredTag.hpp
-      include/Krystal.Booey/CSS/Values/OffsetRotateValue.hpp
-      include/Krystal.Booey/CSS/Values/PaintImageValue.hpp
-      include/Krystal.Booey/CSS/Values/PathValue.hpp
-      include/Krystal.Booey/CSS/Values/PendingSubstitutionValue.hpp
-      include/Krystal.Booey/CSS/Values/PositionValue.hpp
-      include/Krystal.Booey/CSS/Values/Primitives/Concepts.hpp
-      include/Krystal.Booey/CSS/Values/Primitives/NumericRaw.hpp
-      include/Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp
-      include/Krystal.Booey/CSS/Values/Primitives/NumericTypesCanonicalization.hpp
-      include/Krystal.Booey/CSS/Values/Primitives/NumericTypesValueCreation.hpp
-      include/Krystal.Booey/CSS/Values/Primitives/Position.hpp
-      include/Krystal.Booey/CSS/Values/Primitives/PrimitiveData.hpp
-      include/Krystal.Booey/CSS/Values/Primitives/PrimitiveKeywordList.hpp
-      include/Krystal.Booey/CSS/Values/Primitives/PrimitiveNumeric.hpp
-      include/Krystal.Booey/CSS/Values/Primitives/PrimitiveNumericOrKeyword.hpp
-      include/Krystal.Booey/CSS/Values/Primitives/Quad.hpp
-      include/Krystal.Booey/CSS/Values/Primitives/Range.hpp
-      include/Krystal.Booey/CSS/Values/Primitives/Ratio.hpp
-      include/Krystal.Booey/CSS/Values/Primitives/Rect.hpp
-      include/Krystal.Booey/CSS/Values/Primitives/RectBase.hpp
-      include/Krystal.Booey/CSS/Values/Primitives/UnevaluatedCalc.hpp
-      include/Krystal.Booey/CSS/Values/Primitives/Units.hpp
-      include/Krystal.Booey/CSS/Values/Primitives/URL.hpp
-      include/Krystal.Booey/CSS/Values/Primitives/URLModifiers.hpp
-      include/Krystal.Booey/CSS/Values/PrimitiveValue.hpp
-      include/Krystal.Booey/CSS/Values/QuadValue.hpp
-      include/Krystal.Booey/CSS/Values/RatioValue.hpp
-      include/Krystal.Booey/CSS/Values/RayValue.hpp
-      include/Krystal.Booey/CSS/Values/RectValue.hpp
-      include/Krystal.Booey/CSS/Values/ReflectValue.hpp
-      include/Krystal.Booey/CSS/Values/ScrollValue.hpp
-      include/Krystal.Booey/CSS/Values/SerialisationContext.hpp
-      include/Krystal.Booey/CSS/Values/Shapes/BasicShape.hpp
-      include/Krystal.Booey/CSS/Values/Shapes/CircleFunction.hpp
-      include/Krystal.Booey/CSS/Values/Shapes/EllipseFunction.hpp
-      include/Krystal.Booey/CSS/Values/Shapes/FillRule.hpp
-      include/Krystal.Booey/CSS/Values/Shapes/InsetFunction.hpp
-      include/Krystal.Booey/CSS/Values/Shapes/PathFunction.hpp
-      include/Krystal.Booey/CSS/Values/Shapes/PolygonFunction.hpp
-      include/Krystal.Booey/CSS/Values/Shapes/RectFunction.hpp
-      include/Krystal.Booey/CSS/Values/Shapes/ShapeFunction.hpp
-      include/Krystal.Booey/CSS/Values/Shapes/XywhFunction.hpp
-      include/Krystal.Booey/CSS/Values/SubgridValue.hpp
-      include/Krystal.Booey/CSS/Values/TextDecoration/TextShadow.hpp
-      include/Krystal.Booey/CSS/Values/TextShadowPropertyValue.hpp
-      include/Krystal.Booey/CSS/Values/TransformListValue.hpp
-      include/Krystal.Booey/CSS/Values/Types.hpp
-      include/Krystal.Booey/CSS/Values/UnicodeRangeValue.hpp
-      include/Krystal.Booey/CSS/Values/UnitCategory.hpp
-      include/Krystal.Booey/CSS/Values/Units.hpp
-      include/Krystal.Booey/CSS/Values/UnitType.hpp
-      include/Krystal.Booey/CSS/Values/UrlValue.hpp
-      include/Krystal.Booey/CSS/Values/Value.hpp
-      include/Krystal.Booey/CSS/Values/ValueList.hpp
-      include/Krystal.Booey/CSS/Values/ValueListBuilder.hpp
-      include/Krystal.Booey/CSS/Values/ValuePair.hpp
-      include/Krystal.Booey/CSS/Values/ValuePool.hpp
-      include/Krystal.Booey/CSS/Values/ValueType.hpp
-      include/Krystal.Booey/CSS/Values/VariableReferenceValue.hpp
-      include/Krystal.Booey/CSS/Values/ViewValue.hpp
+      # # CSS
+      # include/Krystal.Booey/CSS/Calc/CalcAllowedSymbols.hpp
+      # include/Krystal.Booey/CSS/Calc/CalcTreeParser.hpp
+      # include/Krystal.Booey/CSS/Calc/Value.hpp
+      # include/Krystal.Booey/CSS/ComputedStyleDependencies.hpp
+      # include/Krystal.Booey/CSS/CSSMarginDescriptors.hpp
+      # include/Krystal.Booey/CSS/CSSPageDescriptors.hpp
+      # include/Krystal.Booey/CSS/CSSStyleDeclaration.hpp
+      # include/Krystal.Booey/CSS/CSSStyleProperties.hpp
+      # include/Krystal.Booey/CSS/CSSStyleSheet.hpp
+      # include/Krystal.Booey/CSS/MediaList.hpp
+      # include/Krystal.Booey/CSS/Parser/AllowedBlockRules.hpp
+      # include/Krystal.Booey/CSS/Parser/AllowedRules.hpp
+      # include/Krystal.Booey/CSS/Parser/AtRuleType.hpp
+      # include/Krystal.Booey/CSS/Parser/CustomPropertySyntax.hpp
+      # include/Krystal.Booey/CSS/Parser/InputStream.hpp
+      # include/Krystal.Booey/CSS/Parser/NestedParserContext.hpp
+      # include/Krystal.Booey/CSS/Parser/NumericValue.hpp
+      # include/Krystal.Booey/CSS/Parser/ParseError.hpp
+      # include/Krystal.Booey/CSS/Parser/Parser.hpp
+      # include/Krystal.Booey/CSS/Parser/ParserContext.hpp
+      # include/Krystal.Booey/CSS/Parser/ParserFastPaths.hpp
+      # include/Krystal.Booey/CSS/Parser/ParserIdioms.hpp
+      # include/Krystal.Booey/CSS/Parser/ParserMode.hpp
+      # include/Krystal.Booey/CSS/Parser/SerializerIdioms.hpp
+      # include/Krystal.Booey/CSS/Parser/Token.hpp
+      # include/Krystal.Booey/CSS/Parser/Tokenizer.hpp
+      # include/Krystal.Booey/CSS/Parser/TokenRange.hpp
+      # include/Krystal.Booey/CSS/Parser/TokenRangeGuard.hpp
+      # include/Krystal.Booey/CSS/Parser/TokenType.hpp
+      # include/Krystal.Booey/CSS/Parser/VariableParser.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Align.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Anchor.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/AngleDefinitions.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/AnglePercentageDefinitions.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Animations.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Attr.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Background.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Box.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Color.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/ColorAdjust.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/ColorInterpolationMethod.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Content.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/CounterStyles.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Display.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Easing.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Filter.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/FlexDefinitions.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Font.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/FrequencyDefinitions.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Grid.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Ident.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Image.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Inline.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/IntegerDefinitions.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/KeywordDefinitions.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/LengthDefinitions.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/LengthPercentageDefinitions.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/List.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Lists.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Masking.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/MetaConsumer.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/MetaConsumerDefinitions.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/MetaResolver.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Motion.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/NumberDefinitions.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Percentage.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/PercentageDefinitions.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Position.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/PositionTry.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Ratio.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/ResolutionDefinitions.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Scrollbars.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/ScrollSnap.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Shapes.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/String.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/SVG.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Syntax.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/TextDecoration.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/TimeDefinitions.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Timeline.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Transform.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/Transitions.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/UI.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/UnicodeRange.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/URL.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/ViewTransition.hpp
+      # include/Krystal.Booey/CSS/Properties/Consumers/WillChange.hpp
+      # include/Krystal.Booey/CSS/Properties/FontVariantLigaturesParser.hpp
+      # include/Krystal.Booey/CSS/Properties/FontVariantNumericParser.hpp
+      # include/Krystal.Booey/CSS/Properties/InternalStyleProperties.hpp
+      # include/Krystal.Booey/CSS/Properties/ParsedPropertyList.hpp
+      # include/Krystal.Booey/CSS/Properties/Property.hpp
+      # include/Krystal.Booey/CSS/Properties/PropertyFlag.hpp
+      # include/Krystal.Booey/CSS/Properties/PropertyParser.hpp
+      # include/Krystal.Booey/CSS/Properties/PropertyParserCustom.hpp
+      # include/Krystal.Booey/CSS/Properties/PropertyParserOptions.hpp
+      # include/Krystal.Booey/CSS/Properties/PropertyParserResult.hpp
+      # include/Krystal.Booey/CSS/Properties/PropertyParserState.hpp
+      # include/Krystal.Booey/CSS/Properties/PropertyParsing.hpp
+      # include/Krystal.Booey/CSS/Properties/Types/IsImplicit.hpp
+      # include/Krystal.Booey/CSS/Properties/Types/IsImportant.hpp
+      # include/Krystal.Booey/CSS/Properties/Types/IsSetFromShorthand.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSConditionRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSContainerRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSCounterStyleRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSFontFaceRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSFontFeatureValuesRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSFontPaletteValuesRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSFunctionDeclarations.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSFunctionRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSGroupingRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSImportRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSInternalBaseAppearanceRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSKeyframeRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSKeyframesRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSLayerBlockRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSLayerStatementRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSMediaRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSNamespaceRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSNestedDeclarations.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSPageRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSPositionTryRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSPropertyRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSRuleList.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSScopeRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSStartingStyleRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSStyleRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSSupportsRule.hpp
+      # include/Krystal.Booey/CSS/CSSOM/CSSViewTransitionRule.hpp
+      # include/Krystal.Booey/CSS/Rules/ParsedRuleList.hpp
+      # include/Krystal.Booey/CSS/Rules/RuleFlag.hpp
+      # include/Krystal.Booey/CSS/Rules/RuleType.hpp
+      # include/Krystal.Booey/CSS/Selectors/Enums/PseudoClassId.hpp
+      # include/Krystal.Booey/CSS/Selectors/Enums/PseudoElementId.hpp
+      # include/Krystal.Booey/CSS/Selectors/Enums/SelectorMatch.hpp
+      # include/Krystal.Booey/CSS/Selectors/Enums/SelectorRelation.hpp
+      # include/Krystal.Booey/CSS/Selectors/MutableSelector.hpp
+      # include/Krystal.Booey/CSS/Selectors/Selector.hpp
+      # include/Krystal.Booey/CSS/Selectors/SelectorFlag.hpp
+      # include/Krystal.Booey/CSS/Selectors/SelectorList.hpp
+      # include/Krystal.Booey/CSS/Selectors/SelectorParser.hpp
+      # include/Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp
+      # include/Krystal.Booey/CSS/Selectors/Types/DisallowPseudoElements.hpp
+      # include/Krystal.Booey/CSS/Selectors/Types/IsCaseSensitive.hpp
+      # include/Krystal.Booey/CSS/Selectors/Types/IsForgivingSelectorList.hpp
+      # include/Krystal.Booey/CSS/Selectors/Types/MatchLowercase.hpp
+      # include/Krystal.Booey/CSS/StyleSheet.hpp
+      # include/Krystal.Booey/CSS/StyleSheetContents.hpp
+      # include/Krystal.Booey/CSS/StyleSheetList.hpp
+      # include/Krystal.Booey/CSS/ToLengthConversionData.hpp
+      # include/Krystal.Booey/CSS/Types/CSSOMString.hpp
+      # include/Krystal.Booey/CSS/Types/MediaListOrDOMString.hpp
+      # include/Krystal.Booey/CSS/Values/Aggregates.hpp
+      # include/Krystal.Booey/CSS/Values/AppleColorFilterValue.hpp
+      # include/Krystal.Booey/CSS/Values/AttrValue.hpp
+      # include/Krystal.Booey/CSS/Values/Background/BoxShadow.hpp
+      # include/Krystal.Booey/CSS/Values/Background/BoxShadowProperty.hpp
+      # include/Krystal.Booey/CSS/Values/BackgroundRepeatValue.hpp
+      # include/Krystal.Booey/CSS/Values/BasicShapeValue.hpp
+      # include/Krystal.Booey/CSS/Values/BorderImageSliceValue.hpp
+      # include/Krystal.Booey/CSS/Values/BorderImageWidthValue.hpp
+      # include/Krystal.Booey/CSS/Values/Borders/BorderImage.hpp
+      # include/Krystal.Booey/CSS/Values/Borders/BorderRadius.hpp
+      # include/Krystal.Booey/CSS/Values/BoxShadowPropertyValue.hpp
+      # include/Krystal.Booey/CSS/Values/CanvasValue.hpp
+      # include/Krystal.Booey/CSS/Values/Color/AbsoluteColor.hpp
+      # include/Krystal.Booey/CSS/Values/Color/Color.hpp
+      # include/Krystal.Booey/CSS/Values/Color/ColorType.hpp
+      # include/Krystal.Booey/CSS/Values/Color/ColorValue.hpp
+      # include/Krystal.Booey/CSS/Values/Color/CurrentColor.hpp
+      # include/Krystal.Booey/CSS/Values/Color/HexColor.hpp
+      # include/Krystal.Booey/CSS/Values/Color/KeywordColor.hpp
+      # include/Krystal.Booey/CSS/Values/Color/PlatformColorResolutionState.hpp
+      # include/Krystal.Booey/CSS/Values/Color/ResolvedColor.hpp
+      # include/Krystal.Booey/CSS/Values/ColorAdjust/ColorScheme.hpp
+      # include/Krystal.Booey/CSS/Values/ColorSchemeValue.hpp
+      # include/Krystal.Booey/CSS/Values/Concepts.hpp
+      # include/Krystal.Booey/CSS/Values/CounterValue.hpp
+      # include/Krystal.Booey/CSS/Values/CrossFadeValue.hpp
+      # include/Krystal.Booey/CSS/Values/CursorImageValue.hpp
+      # include/Krystal.Booey/CSS/Values/CustomPropertyValue.hpp
+      # include/Krystal.Booey/CSS/Values/DynamicRangeLimitValue.hpp
+      # include/Krystal.Booey/CSS/Values/Easing/CubicBezierEasingFunction.hpp
+      # include/Krystal.Booey/CSS/Values/Easing/EasingFunction.hpp
+      # include/Krystal.Booey/CSS/Values/Easing/LinearEasingFunction.hpp
+      # include/Krystal.Booey/CSS/Values/Easing/SpringEasingFunction.hpp
+      # include/Krystal.Booey/CSS/Values/Easing/StepsEasingFunction.hpp
+      # include/Krystal.Booey/CSS/Values/EasingFunctionValue.hpp
+      # include/Krystal.Booey/CSS/Values/Filter/AppleColorFilter.hpp
+      # include/Krystal.Booey/CSS/Values/Filter/AppleInvertLightnessFunction.hpp
+      # include/Krystal.Booey/CSS/Values/Filter/BlurFunction.hpp
+      # include/Krystal.Booey/CSS/Values/Filter/BrightnessFunction.hpp
+      # include/Krystal.Booey/CSS/Values/Filter/ContrastFunction.hpp
+      # include/Krystal.Booey/CSS/Values/Filter/DropShadowFunction.hpp
+      # include/Krystal.Booey/CSS/Values/Filter/Filter.hpp
+      # include/Krystal.Booey/CSS/Values/Filter/FilterFunctionDescriptor.hpp
+      # include/Krystal.Booey/CSS/Values/Filter/FilterOperationType.hpp
+      # include/Krystal.Booey/CSS/Values/Filter/FilterReference.hpp
+      # include/Krystal.Booey/CSS/Values/Filter/GrayscaleFunction.hpp
+      # include/Krystal.Booey/CSS/Values/Filter/HueRotateFunction.hpp
+      # include/Krystal.Booey/CSS/Values/Filter/InvertFunction.hpp
+      # include/Krystal.Booey/CSS/Values/Filter/OpacityFunction.hpp
+      # include/Krystal.Booey/CSS/Values/Filter/SaturateFunction.hpp
+      # include/Krystal.Booey/CSS/Values/Filter/SepiaFunction.hpp
+      # include/Krystal.Booey/CSS/Values/FilterImageValue.hpp
+      # include/Krystal.Booey/CSS/Values/FilterValue.hpp
+      # include/Krystal.Booey/CSS/Values/FontFeatureValue.hpp
+      # include/Krystal.Booey/CSS/Values/FontStyleRangeValue.hpp
+      # include/Krystal.Booey/CSS/Values/FontStyleWithAngleValue.hpp
+      # include/Krystal.Booey/CSS/Values/FontVariationValue.hpp
+      # include/Krystal.Booey/CSS/Values/FunctionValue.hpp
+      # include/Krystal.Booey/CSS/Values/GlobalKeyword.hpp
+      # include/Krystal.Booey/CSS/Values/GradientValue.hpp
+      # include/Krystal.Booey/CSS/Values/Grid/GridArea.hpp
+      # include/Krystal.Booey/CSS/Values/Grid/GridNamedAreaMap.hpp
+      # include/Krystal.Booey/CSS/Values/Grid/GridPosition.hpp
+      # include/Krystal.Booey/CSS/Values/Grid/GridSpan.hpp
+      # include/Krystal.Booey/CSS/Values/Grid/GridTemplateAreas.hpp
+      # include/Krystal.Booey/CSS/Values/Grid/GridTrackSizingDirection.hpp
+      # include/Krystal.Booey/CSS/Values/GridAutoRepeatValue.hpp
+      # include/Krystal.Booey/CSS/Values/GridIntegerRepeatValue.hpp
+      # include/Krystal.Booey/CSS/Values/GridLineNamesValue.hpp
+      # include/Krystal.Booey/CSS/Values/GridLineValue.hpp
+      # include/Krystal.Booey/CSS/Values/GridTemplateAreasValue.hpp
+      # include/Krystal.Booey/CSS/Values/Images/Gradient.hpp
+      # include/Krystal.Booey/CSS/Values/ImageSetValue.hpp
+      # include/Krystal.Booey/CSS/Values/ImageValue.hpp
+      # include/Krystal.Booey/CSS/Values/Motion/RayFunction.hpp
+      # include/Krystal.Booey/CSS/Values/NamedImageValue.hpp
+      # include/Krystal.Booey/CSS/Values/NoConversionDataRequiredTag.hpp
+      # include/Krystal.Booey/CSS/Values/OffsetRotateValue.hpp
+      # include/Krystal.Booey/CSS/Values/PaintImageValue.hpp
+      # include/Krystal.Booey/CSS/Values/PathValue.hpp
+      # include/Krystal.Booey/CSS/Values/PendingSubstitutionValue.hpp
+      # include/Krystal.Booey/CSS/Values/PositionValue.hpp
+      # include/Krystal.Booey/CSS/Values/Primitives/Concepts.hpp
+      # include/Krystal.Booey/CSS/Values/Primitives/NumericRaw.hpp
+      # include/Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp
+      # include/Krystal.Booey/CSS/Values/Primitives/NumericTypesCanonicalization.hpp
+      # include/Krystal.Booey/CSS/Values/Primitives/NumericTypesValueCreation.hpp
+      # include/Krystal.Booey/CSS/Values/Primitives/Position.hpp
+      # include/Krystal.Booey/CSS/Values/Primitives/PrimitiveData.hpp
+      # include/Krystal.Booey/CSS/Values/Primitives/PrimitiveKeywordList.hpp
+      # include/Krystal.Booey/CSS/Values/Primitives/PrimitiveNumeric.hpp
+      # include/Krystal.Booey/CSS/Values/Primitives/PrimitiveNumericOrKeyword.hpp
+      # include/Krystal.Booey/CSS/Values/Primitives/Quad.hpp
+      # include/Krystal.Booey/CSS/Values/Primitives/Range.hpp
+      # include/Krystal.Booey/CSS/Values/Primitives/Ratio.hpp
+      # include/Krystal.Booey/CSS/Values/Primitives/Rect.hpp
+      # include/Krystal.Booey/CSS/Values/Primitives/RectBase.hpp
+      # include/Krystal.Booey/CSS/Values/Primitives/UnevaluatedCalc.hpp
+      # include/Krystal.Booey/CSS/Values/Primitives/Units.hpp
+      # include/Krystal.Booey/CSS/Values/Primitives/URL.hpp
+      # include/Krystal.Booey/CSS/Values/Primitives/URLModifiers.hpp
+      # include/Krystal.Booey/CSS/Values/PrimitiveValue.hpp
+      # include/Krystal.Booey/CSS/Values/QuadValue.hpp
+      # include/Krystal.Booey/CSS/Values/RatioValue.hpp
+      # include/Krystal.Booey/CSS/Values/RayValue.hpp
+      # include/Krystal.Booey/CSS/Values/RectValue.hpp
+      # include/Krystal.Booey/CSS/Values/ReflectValue.hpp
+      # include/Krystal.Booey/CSS/Values/ScrollValue.hpp
+      # include/Krystal.Booey/CSS/Values/SerialisationContext.hpp
+      # include/Krystal.Booey/CSS/Values/Shapes/BasicShape.hpp
+      # include/Krystal.Booey/CSS/Values/Shapes/CircleFunction.hpp
+      # include/Krystal.Booey/CSS/Values/Shapes/EllipseFunction.hpp
+      # include/Krystal.Booey/CSS/Values/Shapes/FillRule.hpp
+      # include/Krystal.Booey/CSS/Values/Shapes/InsetFunction.hpp
+      # include/Krystal.Booey/CSS/Values/Shapes/PathFunction.hpp
+      # include/Krystal.Booey/CSS/Values/Shapes/PolygonFunction.hpp
+      # include/Krystal.Booey/CSS/Values/Shapes/RectFunction.hpp
+      # include/Krystal.Booey/CSS/Values/Shapes/ShapeFunction.hpp
+      # include/Krystal.Booey/CSS/Values/Shapes/XywhFunction.hpp
+      # include/Krystal.Booey/CSS/Values/SubgridValue.hpp
+      # include/Krystal.Booey/CSS/Values/TextDecoration/TextShadow.hpp
+      # include/Krystal.Booey/CSS/Values/TextShadowPropertyValue.hpp
+      # include/Krystal.Booey/CSS/Values/TransformListValue.hpp
+      # include/Krystal.Booey/CSS/Values/Types.hpp
+      # include/Krystal.Booey/CSS/Values/UnicodeRangeValue.hpp
+      # include/Krystal.Booey/CSS/Values/UnitCategory.hpp
+      # include/Krystal.Booey/CSS/Values/Units.hpp
+      # include/Krystal.Booey/CSS/Values/UnitType.hpp
+      # include/Krystal.Booey/CSS/Values/UrlValue.hpp
+      # include/Krystal.Booey/CSS/Values/Value.hpp
+      # include/Krystal.Booey/CSS/Values/ValueList.hpp
+      # include/Krystal.Booey/CSS/Values/ValueListBuilder.hpp
+      # include/Krystal.Booey/CSS/Values/ValuePair.hpp
+      # include/Krystal.Booey/CSS/Values/ValuePool.hpp
+      # include/Krystal.Booey/CSS/Values/ValueType.hpp
+      # include/Krystal.Booey/CSS/Values/VariableReferenceValue.hpp
+      # include/Krystal.Booey/CSS/Values/ViewValue.hpp
 
       # DOM
       include/Krystal.Booey/DOM/AbortController.hpp
@@ -728,7 +729,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/URL/Url.hpp
 
   PRIVATE
-    ${KRYSTAL_BOOEY_GENERATED_SOURCES}
+    # ${KRYSTAL_BOOEY_GENERATED_SOURCES}
 
     # Core
     src/Core/Color/Color.cpp
@@ -738,67 +739,67 @@ target_sources(Krystal.Booey
     src/Core/EncodingRegistry.cpp
 
     # CSS
-    src/CSS/ComputedStyleDependencies.cpp
-    src/CSS/CSSRule.cpp
-    src/CSS/CSSStyleSheet.cpp
-    src/CSS/Parser.cpp
-    src/CSS/Parser/Tokenizer.cpp
-    src/CSS/Properties/Consumers/Align.cpp
-    src/CSS/Properties/Consumers/Anchor.cpp
-    src/CSS/Properties/Consumers/Animations.cpp
-    src/CSS/Properties/Consumers/Attr.cpp
-    src/CSS/Properties/Consumers/Background.cpp
-    src/CSS/Properties/Consumers/Box.cpp
-    src/CSS/Properties/Consumers/Color.cpp
-    src/CSS/Properties/Consumers/ColorAdjust.cpp
-    src/CSS/Properties/Consumers/Content.cpp
-    src/CSS/Properties/Consumers/CounterStyles.cpp
-    src/CSS/Properties/Consumers/Display.cpp
-    src/CSS/Properties/Consumers/Easing.cpp
-    src/CSS/Properties/Consumers/Filter.cpp
-    src/CSS/Properties/Consumers/Font.cpp
-    src/CSS/Properties/Consumers/Grid.cpp
-    src/CSS/Properties/Consumers/Image.cpp
-    src/CSS/Properties/Consumers/Inline.cpp
-    src/CSS/Properties/Consumers/Lists.cpp
-    src/CSS/Properties/Consumers/Masking.cpp
-    src/CSS/Properties/Consumers/Motion.cpp
-    src/CSS/Properties/Consumers/Percentage.cpp
-    src/CSS/Properties/Consumers/Position.cpp
-    src/CSS/Properties/Consumers/PositionTry.cpp
-    src/CSS/Properties/Consumers/Primitives.cpp
-    src/CSS/Properties/Consumers/Ratio.cpp
-    src/CSS/Properties/Consumers/Scrollbars.cpp
-    src/CSS/Properties/Consumers/ScrollSnap.cpp
-    src/CSS/Properties/Consumers/Shapes.cpp
-    src/CSS/Properties/Consumers/String.cpp
-    src/CSS/Properties/Consumers/SVG.cpp
-    src/CSS/Properties/Consumers/TextDecoration.cpp
-    src/CSS/Properties/Consumers/Timeline.cpp
-    src/CSS/Properties/Consumers/Transform.cpp
-    src/CSS/Properties/Consumers/Transitions.cpp
-    src/CSS/Properties/Consumers/UI.cpp
-    src/CSS/Properties/Consumers/UnicodeRange.cpp
-    src/CSS/Properties/Consumers/URL.cpp
-    src/CSS/Properties/Consumers/ViewTransition.cpp
-    src/CSS/Properties/Consumers/WillChange.cpp
-    src/CSS/Properties/Property.cpp
-    src/CSS/Properties/PropertyParser.cpp
-    src/CSS/Properties/PropertyParserResult.cpp
-    src/CSS/Selectors/MutableSelector.cpp
-    src/CSS/Selectors/Selector.cpp
-    src/CSS/Selectors/SelectorList.cpp
-    src/CSS/Selectors/SelectorParser.cpp
-    src/CSS/StyleSheetContents.cpp
-    src/CSS/Values/Color/ColorValue.cpp
-    src/CSS/Values/Primitives/Ratio.cpp
-    src/CSS/Values/Primitives/UnevaluatedCalc.cpp
-    src/CSS/Values/Primitives/Units.cpp
-    src/CSS/Values/PrimitiveValue.cpp
-    src/CSS/Values/SerialisationContext.cpp
-    src/CSS/Values/Types.cpp
-    src/CSS/Values/Value.cpp
-    src/CSS/Values/ValuePool.cpp
+    # src/CSS/ComputedStyleDependencies.cpp
+    # src/CSS/CSSRule.cpp
+    # src/CSS/CSSStyleSheet.cpp
+    # src/CSS/Parser.cpp
+    # src/CSS/Parser/Tokenizer.cpp
+    # src/CSS/Properties/Consumers/Align.cpp
+    # src/CSS/Properties/Consumers/Anchor.cpp
+    # src/CSS/Properties/Consumers/Animations.cpp
+    # src/CSS/Properties/Consumers/Attr.cpp
+    # src/CSS/Properties/Consumers/Background.cpp
+    # src/CSS/Properties/Consumers/Box.cpp
+    # src/CSS/Properties/Consumers/Color.cpp
+    # src/CSS/Properties/Consumers/ColorAdjust.cpp
+    # src/CSS/Properties/Consumers/Content.cpp
+    # src/CSS/Properties/Consumers/CounterStyles.cpp
+    # src/CSS/Properties/Consumers/Display.cpp
+    # src/CSS/Properties/Consumers/Easing.cpp
+    # src/CSS/Properties/Consumers/Filter.cpp
+    # src/CSS/Properties/Consumers/Font.cpp
+    # src/CSS/Properties/Consumers/Grid.cpp
+    # src/CSS/Properties/Consumers/Image.cpp
+    # src/CSS/Properties/Consumers/Inline.cpp
+    # src/CSS/Properties/Consumers/Lists.cpp
+    # src/CSS/Properties/Consumers/Masking.cpp
+    # src/CSS/Properties/Consumers/Motion.cpp
+    # src/CSS/Properties/Consumers/Percentage.cpp
+    # src/CSS/Properties/Consumers/Position.cpp
+    # src/CSS/Properties/Consumers/PositionTry.cpp
+    # src/CSS/Properties/Consumers/Primitives.cpp
+    # src/CSS/Properties/Consumers/Ratio.cpp
+    # src/CSS/Properties/Consumers/Scrollbars.cpp
+    # src/CSS/Properties/Consumers/ScrollSnap.cpp
+    # src/CSS/Properties/Consumers/Shapes.cpp
+    # src/CSS/Properties/Consumers/String.cpp
+    # src/CSS/Properties/Consumers/SVG.cpp
+    # src/CSS/Properties/Consumers/TextDecoration.cpp
+    # src/CSS/Properties/Consumers/Timeline.cpp
+    # src/CSS/Properties/Consumers/Transform.cpp
+    # src/CSS/Properties/Consumers/Transitions.cpp
+    # src/CSS/Properties/Consumers/UI.cpp
+    # src/CSS/Properties/Consumers/UnicodeRange.cpp
+    # src/CSS/Properties/Consumers/URL.cpp
+    # src/CSS/Properties/Consumers/ViewTransition.cpp
+    # src/CSS/Properties/Consumers/WillChange.cpp
+    # src/CSS/Properties/Property.cpp
+    # src/CSS/Properties/PropertyParser.cpp
+    # src/CSS/Properties/PropertyParserResult.cpp
+    # src/CSS/Selectors/MutableSelector.cpp
+    # src/CSS/Selectors/Selector.cpp
+    # src/CSS/Selectors/SelectorList.cpp
+    # src/CSS/Selectors/SelectorParser.cpp
+    # src/CSS/StyleSheetContents.cpp
+    # src/CSS/Values/Color/ColorValue.cpp
+    # src/CSS/Values/Primitives/Ratio.cpp
+    # src/CSS/Values/Primitives/UnevaluatedCalc.cpp
+    # src/CSS/Values/Primitives/Units.cpp
+    # src/CSS/Values/PrimitiveValue.cpp
+    # src/CSS/Values/SerialisationContext.cpp
+    # src/CSS/Values/Types.cpp
+    # src/CSS/Values/Value.cpp
+    # src/CSS/Values/ValuePool.cpp
 
     # DOM
     src/DOM/AbortController.cpp

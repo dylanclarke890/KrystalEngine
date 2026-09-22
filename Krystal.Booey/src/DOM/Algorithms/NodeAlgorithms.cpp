@@ -520,7 +520,7 @@ namespace krys::boo::dom
 
     if (namespaceUri == u8"*" && localName == u8"*")
     {
-      return CreateRef<LiveHTMLCollection>(root, [](const Element &node) { return true; });
+      return CreateRef<LiveHTMLCollection>(root, [](const Element &) { return true; });
     }
 
     if (namespaceUri == u8"*")

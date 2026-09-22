@@ -41,8 +41,10 @@ namespace krys
     {
       return true;
     }
-
-    return TypeCastTraits<const Target, const Source>::IsOfType(source);
+    else
+    {
+      return TypeCastTraits<const Target, const Source>::IsOfType(source);
+    }
   }
 
   template <typename Target, typename Source>
@@ -54,13 +56,15 @@ namespace krys
     {
       return false;
     }
-
+    
     if constexpr (SameType<Target, Source>)
     {
       return true;
     }
-
-    return TypeCastTraits<const Target, const Source>::IsOfType(*source);
+    else
+    {
+      return TypeCastTraits<const Target, const Source>::IsOfType(*source);
+    }
   }
 
   template <typename... Ts, typename Source>

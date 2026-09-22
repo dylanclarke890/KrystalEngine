@@ -56,8 +56,10 @@ namespace krys::boo
     {
       return ClampTo<T>(result, 0, 1);
     }
-
-    return result;
+    else
+    {
+      return result;
+    }
   }
 
   template <typename T, TransferFunctionMode mode>
@@ -69,8 +71,10 @@ namespace krys::boo
     {
       return ClampTo<T>(result, 0, 1);
     }
-
-    return result;
+    else
+    {
+      return result;
+    }
   }
 
 #pragma endregion

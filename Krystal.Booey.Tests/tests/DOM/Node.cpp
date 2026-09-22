@@ -267,8 +267,6 @@ namespace krys::boo::dom::tests
 
     SECTION("with children")
     {
-      CommonTestData data {};
-
       auto textNode1 = CreateRef<dom::Text>(*data.Document, u8"Hello");
       auto textNode2 = CreateRef<dom::Text>(*data.Document, u8" world!");
 

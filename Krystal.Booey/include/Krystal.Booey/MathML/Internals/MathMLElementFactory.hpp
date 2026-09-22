@@ -20,7 +20,9 @@ namespace krys::boo::mathml
                                                           const dom::QualifiedName &name) noexcept
     {
       // TODO(impl): MATHML-ELEMENTS
-      return nullptr;
+      (void)document;
+      (void)name;
+      krys_not_implemented();
     }
   };
 }

@@ -86,6 +86,8 @@ namespace krys::boo::dom
   void ElementAlgorithms::HandleAttributeChanges(Attr &attribute, Element &element, DOMStringView oldValue,
                                                  DOMStringView newValue) noexcept
   {
+    (void)newValue;
+    
     MutationObserverAlgorithms::QueueMutationRecord(MutationRecordType::Attributes, ShareRef(element),
                                                     attribute.LocalName(), attribute.NamespaceURI(), oldValue,
                                                     {}, {}, nullptr, nullptr);

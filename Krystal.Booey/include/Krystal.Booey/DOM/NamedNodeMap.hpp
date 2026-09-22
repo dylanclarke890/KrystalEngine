@@ -6,7 +6,9 @@
 #include "Krystal.Core/Types/CheckedPtr.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include <algorithm>
 
 namespace krys::boo::dom
 {

@@ -47,19 +47,37 @@ target_precompile_headers(Krystal.Booey.Tests
     <variant>
     <vector>
 
-    catch2/catch_test_macros.hpp
-    catch2/matchers/catch_matchers_floating_point.hpp
+	# TODO: how do we precompile headers from another library??
+    # catch2/catch_test_macros.hpp
+    # catch2/matchers/catch_matchers_floating_point.hpp
+
+	"include/Krystal.Booey/DOM/AbortSignal.hpp"
+    "include/Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
+    "include/Krystal.Booey/DOM/Attr.hpp"
+    "include/Krystal.Booey/DOM/Document.hpp"
+    "include/Krystal.Booey/DOM/EventTarget.hpp"
+    "include/Krystal.Booey/DOM/Node.hpp"
+    "include/Krystal.Booey/DOM/ShadowRoot.hpp"
+    "include/Krystal.Booey/DOM/Types/DOMString.hpp"
+    "include/Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+    "include/Krystal.Booey/DOM/Types/USVString.hpp"
+    "include/Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+    "include/Krystal.Booey/HTML/HTMLSlotElement.hpp"
 )
 
 target_sources(Krystal.Booey.Tests
-	PRIVATE
+  PUBLIC
+    FILE_SET HEADERS
+    BASE_DIRS
+      include
+    FILES
 		include/Krystal.Booey.Tests/DOM/TestElement.hpp
 		include/Krystal.Booey.Tests/TestParserUtils.hpp
-
+	PRIVATE
 		# CSS
-		tests/CSS/Parser/Parser.cpp
-		tests/CSS/Parser/Tokenizer.cpp
-		tests/CSS/Selectors/SelectorParser.cpp
+		# tests/CSS/Parser/Parser.cpp
+		# tests/CSS/Parser/Tokenizer.cpp
+		# tests/CSS/Selectors/SelectorParser.cpp
 
 		# DOM
 		tests/DOM/Algorithms/EventDispatcher.cpp

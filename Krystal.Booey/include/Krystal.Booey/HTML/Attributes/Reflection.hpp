@@ -875,8 +875,10 @@ namespace krys::boo::html
       {
         return *DefaultValue;
       }
-
-      return static_cast<uint32>(minimum);
+      else
+      {
+        return static_cast<uint32>(minimum);
+      }
     }
 
     /// @brief Helper for setting reflected content attributes with 'unsigned long' type.

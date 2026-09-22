@@ -310,6 +310,7 @@ namespace krys::boo::dom
 
   void SlotAlgorithms::SignalSlotChange(html::HTMLSlotElement &slot) noexcept
   {
+    (void)slot;
     // TODO(impl): SLOTTABLES - Append slot to slot’s relevant agent’s signal slots
     // TODO(impl): MUTATION-OBSERVERS - Queue a mutation observer microtask.
   }

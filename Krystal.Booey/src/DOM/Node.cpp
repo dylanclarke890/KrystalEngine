@@ -208,6 +208,9 @@ namespace krys::boo::dom
                    | DocumentPosition::DOCUMENT_POSITION_FOLLOWING;
           }
         }
+
+        (void)element1;
+        // TODO: are we missing part of the implementation here? element1 is not referenced
       }
     }
 
@@ -365,6 +368,8 @@ namespace krys::boo::dom
 
   EventTarget *Node::GetParent(Event &event) const noexcept
   {
+    (void)event;
+    
     if (SlotAlgorithms::IsAssigned(*this))
     {
       return SlotAlgorithms::GetAssignedSlot(*this);

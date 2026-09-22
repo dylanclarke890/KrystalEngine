@@ -65,8 +65,8 @@ namespace krys::boo::html::tests
           for (size_t i = 0; i < element.Attributes().Length(); ++i)
           {
             auto attr = element.Attributes().Item(i);
-            auto localName = dom::DOMString(attr->LocalName().View());
-            auto namespaceName = [&] -> dom::DOMString
+            auto attrLocalName = dom::DOMString(attr->LocalName().View());
+            auto attrNamespaceName = [&] -> dom::DOMString
             {
               if (attr->NamespaceURI() == infra::Namespaces::HTML)
               {
@@ -92,7 +92,7 @@ namespace krys::boo::html::tests
 
             auto &value = attr->Value();
 
-            attributes.push_back({namespaceName + localName, value});
+            attributes.push_back({attrNamespaceName + attrLocalName, value});
           }
 
           std::sort(attributes.begin(), attributes.end(),

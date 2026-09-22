@@ -312,6 +312,9 @@ namespace krys::boo::dom
                                     EventPhaseType phase, bool invocationTargetInShadowTree,
                                     bool *legacyOutputDidListenersThrowFlag) noexcept
   {
+    (void)invocationTargetInShadowTree;
+    (void)legacyOutputDidListenersThrowFlag;
+
     bool found = false;
 
     for (auto &listener : listeners)

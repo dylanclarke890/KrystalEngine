@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include <format>

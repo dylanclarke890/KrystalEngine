@@ -13,7 +13,7 @@ namespace krys::boo::dom::tests
     auto CreateEmptyObserver = []()
     {
       return CreateRef<MutationObserver>(
-        [](const List<MutationRecord> &records, MutationObserver &observer) {});
+        [](const List<MutationRecord> &records, MutationObserver &observer) {(void)records; (void)observer;});
     };
   }
 

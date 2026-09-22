@@ -23,7 +23,7 @@ namespace krys::boo::html
   public:
     void Append(utf8_string &&chunk, IsEOF isEOF = IsEOF(false)) noexcept
     {
-      assert(_data.empty() || _data.back() != EOFMarker);
+      krys_debug_assert(_data.empty() || _data.back() != EOFMarker);
 
       if (!chunk.empty())
       {
@@ -40,7 +40,7 @@ namespace krys::boo::html
 
     void Insert(utf8_string &&chunk) noexcept
     {
-      assert(_insertionPosition != utf32_string::npos);
+      krys_debug_assert(_insertionPosition != utf32_string::npos);
 
       if (!chunk.empty())
       {
@@ -157,7 +157,7 @@ namespace krys::boo::html
 #if KRYS_DEBUG
       for (auto character : characters)
       {
-        assert(character != '\n' && character != '\r' && character != EOFMarker);
+        krys_debug_assert(character != '\n' && character != '\r' && character != EOFMarker);
       }
 #endif
 
