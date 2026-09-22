@@ -47,22 +47,21 @@ target_precompile_headers(Krystal.Booey.Tests
     <variant>
     <vector>
 
-	# TODO: how do we precompile headers from another library??
-    # catch2/catch_test_macros.hpp
-    # catch2/matchers/catch_matchers_floating_point.hpp
+    <catch2/catch_test_macros.hpp>
+    <catch2/matchers/catch_matchers_floating_point.hpp>
 
-	"include/Krystal.Booey/DOM/AbortSignal.hpp"
-    "include/Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
-    "include/Krystal.Booey/DOM/Attr.hpp"
-    "include/Krystal.Booey/DOM/Document.hpp"
-    "include/Krystal.Booey/DOM/EventTarget.hpp"
-    "include/Krystal.Booey/DOM/Node.hpp"
-    "include/Krystal.Booey/DOM/ShadowRoot.hpp"
-    "include/Krystal.Booey/DOM/Types/DOMString.hpp"
-    "include/Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-    "include/Krystal.Booey/DOM/Types/USVString.hpp"
-    "include/Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
-    "include/Krystal.Booey/HTML/HTMLSlotElement.hpp"
+    <Krystal.Booey/DOM/AbortSignal.hpp>
+    <Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp>
+    <Krystal.Booey/DOM/Attr.hpp>
+    <Krystal.Booey/DOM/Document.hpp>
+    <Krystal.Booey/DOM/EventTarget.hpp>
+    <Krystal.Booey/DOM/Node.hpp>
+    <Krystal.Booey/DOM/ShadowRoot.hpp>
+    <Krystal.Booey/DOM/Types/DOMString.hpp>
+    <Krystal.Booey/DOM/Types/ExceptionOr.hpp>
+    <Krystal.Booey/DOM/Types/USVString.hpp>
+    <Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp>
+    <Krystal.Booey/HTML/HTMLSlotElement.hpp>
 )
 
 target_sources(Krystal.Booey.Tests

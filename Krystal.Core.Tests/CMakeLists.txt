@@ -48,19 +48,6 @@ target_precompile_headers(Krystal.Core.Tests
 
     <catch2/catch_test_macros.hpp>
     <catch2/matchers/catch_matchers_floating_point.hpp>
-
-    <Krystal.Booey/DOM/AbortSignal.hpp>
-    <Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp>
-    <Krystal.Booey/DOM/Attr.hpp>
-    <Krystal.Booey/DOM/Document.hpp>
-    <Krystal.Booey/DOM/EventTarget.hpp>
-    <Krystal.Booey/DOM/Node.hpp>
-    <Krystal.Booey/DOM/ShadowRoot.hpp>
-    <Krystal.Booey/DOM/Types/DOMString.hpp>
-    <Krystal.Booey/DOM/Types/ExceptionOr.hpp>
-    <Krystal.Booey/DOM/Types/USVString.hpp>
-    <Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp>
-    <Krystal.Booey/HTML/HTMLSlotElement.hpp>
 )
 
 target_sources(Krystal.Core.Tests
