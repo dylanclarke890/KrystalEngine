@@ -19,7 +19,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 #include <filesystem>
 
 namespace krys::boo::html::tests
@@ -301,7 +301,7 @@ namespace krys::boo::html::tests
 
     static void RunTest(string filename) noexcept
     {
-      static string basedir = "data/html-tree-builder/";
+      static string basedir = KRYS_BOOEY_TESTS_DATA_DIR "/html-tree-builder/";
 
       auto file = krys::boo::tests::OpenTestDataFile(basedir + filename);
       REQUIRE(file.has_value());

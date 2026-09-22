@@ -4,7 +4,7 @@
 #include "Krystal.Core/Serialisation/Archives/BinaryArchive.hpp"
 #include "Krystal.Core/Serialisation/Archives/JsonArchive.hpp"
 #include "Krystal.Core/Serialisation/Archives/XmlArchive.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 namespace krys::tests
 {

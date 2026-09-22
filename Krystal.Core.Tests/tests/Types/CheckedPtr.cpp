@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Core/Types/CheckedPtr.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 namespace krys::tests
 {

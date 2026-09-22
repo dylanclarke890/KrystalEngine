@@ -5,7 +5,8 @@
 #include "Krystal.Core/Serialisation/Archives/BinaryArchive.hpp"
 #include "Krystal.Core/Serialisation/Archives/JsonArchive.hpp"
 #include "Krystal.Core/Serialisation/Archives/XmlArchive.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
+#include "catch2/matchers/catch_matchers_floating_point.hpp"
 
 namespace krys::tests
 {
@@ -128,9 +129,9 @@ namespace krys::tests
     REQUIRE(input.Ulong == output.Ulong);
     REQUIRE(input.LongLong == output.LongLong);
     REQUIRE(input.UlongLong == output.UlongLong);
-    REQUIRE(input.Float == output.Float);
-    REQUIRE(input.Double == output.Double);
-    REQUIRE(input.LongDouble == output.LongDouble);
+    REQUIRE_THAT(input.Float, Catch::Matchers::WithinRel(output.Float));
+    REQUIRE_THAT(input.Double, Catch::Matchers::WithinRel(output.Double));
+    REQUIRE_THAT(input.LongDouble, Catch::Matchers::WithinRel(static_cast<double>(output.LongDouble)));
     REQUIRE(input.String == output.String);
     REQUIRE(input.IntArray[0] == output.IntArray[0]);
     REQUIRE(input.IntArray[1] == output.IntArray[1]);

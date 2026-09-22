@@ -164,7 +164,7 @@ namespace krys::io
     }
   }
 
-  uint64 NativeFileReader::Size() const noexcept
+  size_t NativeFileReader::Size() const noexcept
   {
     if (!IsOpen())
     {
@@ -361,12 +361,12 @@ namespace krys::io
     return _stream.good();
   }
 
-  uint64 NativeFileWriter::Size() const noexcept
+  size_t NativeFileWriter::Size() const noexcept
   {
     return _size;
   }
 
-  uint64 NativeFileWriter::Position() noexcept
+  size_t NativeFileWriter::Position() noexcept
   {
     if (!NativeFileWriter::IsOpen())
     {

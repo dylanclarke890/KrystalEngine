@@ -1,13 +1,13 @@
 ﻿#include "Krystal.Core/IO/ImageLoader.hpp"
 #include "Krystal.Core/IO/Path.hpp"
 #include "Krystal.Core/IO/Streams/NativeFileStream.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 namespace krys::io::tests
 {
   TEST_CASE("LoadImage", "[IO][Images]")
   {
-    auto stream = NativeFileReader(Path("data/io/24bpp-320x240.bmp"));
+    auto stream = NativeFileReader(Path(KRYS_CORE_TESTS_DATA_DIR "/io/24bpp-320x240.bmp"));
     REQUIRE(stream.IsOpen());
 
     ImageLoader loader;

@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Callbacks/NodeFilter.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::dom::tests
 {

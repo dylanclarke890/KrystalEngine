@@ -2,7 +2,7 @@
 #include "Krystal.Core/IO/Backends/NativeFileBackend.hpp"
 #include "Krystal.Core/IO/Path.hpp"
 #include "Krystal.Core/IO/Streams/Stream.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 #include <filesystem>
 #include <fstream>
 
@@ -69,8 +69,8 @@ namespace krys::io::tests
     // --- Build VFS: more specific alias (/data) should win over (/)
     VirtualFileSystemBuilder builder;
     auto vfs = builder.Mount<NativeFileBackend>(Path("/"), Path(base))
-                 .Mount<NativeFileBackend>(Path("/data"), Path(data))
-                 .Build();
+                   .Mount<NativeFileBackend>(Path("/data"), Path(data))
+                   .Build();
 
     REQUIRE(vfs != nullptr);
 
@@ -108,7 +108,7 @@ namespace krys::io::tests
         REQUIRE(w != nullptr);
 
         const char *text = "hello-new";
-        Span<const byte> d {reinterpret_cast<const byte *>(text), std::strlen(text)};
+        Span<const byte> d{reinterpret_cast<const byte *>(text), std::strlen(text)};
 
         REQUIRE(w->Write(d));
         w->Flush();
@@ -125,7 +125,7 @@ namespace krys::io::tests
         REQUIRE(w != nullptr);
 
         const char *text = "root-file";
-        Span<const byte> d {reinterpret_cast<const byte *>(text), std::strlen(text)};
+        Span<const byte> d{reinterpret_cast<const byte *>(text), std::strlen(text)};
         REQUIRE(w->Write(d));
         w->Flush();
       }
@@ -210,7 +210,7 @@ namespace krys::io::tests
         REQUIRE(w != nullptr);
 
         const char *msg = "to-be-deleted";
-        Span<const byte> d {reinterpret_cast<const byte *>(msg), std::strlen(msg)};
+        Span<const byte> d{reinterpret_cast<const byte *>(msg), std::strlen(msg)};
 
         REQUIRE(w->Write(d));
       }
@@ -223,7 +223,7 @@ namespace krys::io::tests
         REQUIRE(w != nullptr);
 
         const char *msg = "recreated";
-        Span<const byte> d {reinterpret_cast<const byte *>(msg), std::strlen(msg)};
+        Span<const byte> d{reinterpret_cast<const byte *>(msg), std::strlen(msg)};
         REQUIRE(w->Write(d));
       }
       auto r = vfs->GetReader(p, ReadFlags::None);

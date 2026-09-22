@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 namespace krys::tests
 {

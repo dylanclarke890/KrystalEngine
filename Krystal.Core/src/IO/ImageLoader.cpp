@@ -2,7 +2,7 @@
 #include "Krystal.Core/IO/Streams/Stream.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Span.hpp"
-#include <stb/stb_image.h>
+#include "stb/stb_image.h"
 
 namespace
 {

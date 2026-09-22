@@ -5,7 +5,7 @@
 #include "Krystal.Text/Codecs/CodecRegistry.hpp"
 #include "Krystal.Text/Codecs/ICodec.hpp"
 #include "Krystal.Text/Encodings/ASCII.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 namespace
 {

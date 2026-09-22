@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
-#include "Krystal.Booey/CSS/CSSCharsetRule.hpp"
 #include "Krystal.Booey/CSS/CSSImportRule.hpp"
 #include "Krystal.Booey/CSS/CSSNamespaceRule.hpp"
 #include "Krystal.Booey/CSS/CSSRuleList.hpp"

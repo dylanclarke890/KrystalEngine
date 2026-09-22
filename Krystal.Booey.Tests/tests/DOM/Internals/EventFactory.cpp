@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/DOM/EventTarget.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::dom::tests
 {

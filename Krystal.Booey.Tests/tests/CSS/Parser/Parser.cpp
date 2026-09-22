@@ -5,7 +5,7 @@
 #include "Krystal.Booey/CSS/Rules/CSSOM/CSSNamespaceRule.hpp"
 #include "Krystal.Booey/CSS/Rules/CSSOM/CSSRuleList.hpp"
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::css::tests
 {

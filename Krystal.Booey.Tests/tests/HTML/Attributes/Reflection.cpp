@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::html::tests
 {

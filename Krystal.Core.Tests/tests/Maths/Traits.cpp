@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Core/Maths/Traits.hpp"
 #include "Krystal.Core/Maths/Matrix.hpp"
 #include "Krystal.Core/Maths/Vector.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 namespace krys::tests
 {

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/DOM/Internals/QualifiedNameCache.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
-#include <catch_all.hpp>
+#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::dom::tests
 {
