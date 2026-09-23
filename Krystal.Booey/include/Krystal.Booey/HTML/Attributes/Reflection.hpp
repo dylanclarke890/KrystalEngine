@@ -649,7 +649,6 @@ namespace krys::boo::html
       // TODO(impl): ELEMENT-INTERNALS
       (void)internals;
       (void)name;
-      krys_not_implemented();
     }
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#set-the-content-attribute
@@ -660,7 +659,6 @@ namespace krys::boo::html
       (void)internals;
       (void)name;
       (void)value;
-      krys_not_implemented();
     }
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#delete-the-content-attribute
@@ -669,7 +667,6 @@ namespace krys::boo::html
       // TODO(impl): ELEMENT-INTERNALS
       (void)internals;
       (void)name;
-      krys_not_implemented();
     }
 
 #pragma endregion

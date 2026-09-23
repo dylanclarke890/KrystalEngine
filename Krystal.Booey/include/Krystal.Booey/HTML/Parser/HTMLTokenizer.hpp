@@ -1026,7 +1026,7 @@ namespace krys::boo::html
           if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
-            BufferCharacter(Null);
+            BufferCharacter(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscaped);
           }
           if (character == EndOfFile) KRYS_UNLIKELY

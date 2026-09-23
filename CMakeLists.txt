@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.30)
 project(Krystal)
 
 set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+set(CMAKE_VS_JUST_MY_CODE_DEBUGGING ON CACHE BOOL "Enable Just My Code Debugging")
+set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "ProgramDatabase" CACHE STRING "MSVC debug information format")
 
 # Third-party - stb
 add_subdirectory(third-party/stb)

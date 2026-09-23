@@ -51,9 +51,14 @@ namespace krys::boo::css
       RefCounted::SubRef();
     }
 
+    uint32 GetRefCount() const noexcept final
+    {
+      return RefCounted::GetRefCount();
+    }
+
     KRYS_NODISCARD static Ref<StaticCSSRuleList> Create() noexcept
     {
-      return AdoptRef(*new StaticCSSRuleList);
+      return AdoptRef<StaticCSSRuleList>(*new StaticCSSRuleList());
     }
 
     KRYS_NODISCARD SmallList<RefPtr<CSSRule>> &Rules() noexcept
@@ -72,7 +77,7 @@ namespace krys::boo::css
       return _rules.size();
     }
 
-    KRYS_NODISCARD CSSRule *Item(unsigned index) const noexcept final
+    KRYS_NODISCARD CSSRule *Item(size_t index) const noexcept final
     {
       return index < _rules.size() ? _rules[index].get() : nullptr;
     }
@@ -82,7 +87,7 @@ namespace krys::boo::css
   class LiveCSSRuleList final : public CSSRuleList
   {
   private:
-    // The rule owns the live list.
+    /// @brief The rule owns the live list.
     Rule &_rule;
 
   public:

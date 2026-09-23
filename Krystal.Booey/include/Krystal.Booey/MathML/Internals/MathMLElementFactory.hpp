@@ -22,7 +22,7 @@ namespace krys::boo::mathml
       // TODO(impl): MATHML-ELEMENTS
       (void)document;
       (void)name;
-      krys_not_implemented();
+      return nullptr;
     }
   };
 }

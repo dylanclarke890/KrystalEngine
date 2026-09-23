@@ -71,7 +71,7 @@ namespace krys::text
 
         if (state == Accept)
         {
-          return DecodeOneSuccess<UTF8>(static_cast<char32>(codePoint));
+          return DecodeOneSuccess<UTF8>(static_cast<char32>(codePoint), CodeUnitsConsumed(consumed));
         }
         else if (state == Reject)
         {

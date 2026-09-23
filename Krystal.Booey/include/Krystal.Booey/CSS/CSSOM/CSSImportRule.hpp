@@ -63,9 +63,9 @@ namespace krys::boo::css
   };
 }
 
-KRYS_SPECIALIZE_TYPE_TRAITS_BEGIN(krys::boo::css::CSSImportRule)
-  KRYS_NO_DISCARD static bool isType(const krys::boo::css::CSSRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSImportRule)
+  KRYS_NODISCARD static bool isType(const krys::boo::css::CSSRule &rule) noexcept
   {
     return rule.Type() == krys::boo::css::RuleType::Import;
   }
-KRYS_SPECIALIZE_TYPE_TRAITS_END()
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

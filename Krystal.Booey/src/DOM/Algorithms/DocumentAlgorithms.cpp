@@ -158,6 +158,6 @@ namespace krys::boo::dom
   {
     // TODO(impl): DOCUMENT - this is a Document whose URL matches about:srcdoc.
     (void)document;
-    krys_not_implemented();
+    return false;
   }
 }

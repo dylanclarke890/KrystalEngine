@@ -10,7 +10,7 @@ namespace krys::boo::css
   class CSSFontFaceRule final : public CSSRule
   {
   private:
-    Ref<StyleRuleFontFace> _fontFaceRule;
+    Ref<FontFaceRule> _rule;
     RefPtr<CSSFontFaceDescriptors> _propertiesCSSOMWrapper;
 
     CSSFontFaceRule(FontFaceRule &rule, CSSStyleSheet *parent) noexcept;
@@ -41,9 +41,9 @@ namespace krys::boo::css
   };
 }
 
-KRYS_SPECIALIZE_TYPE_TRAITS_BEGIN(krys::boo::css::CSSFontFaceRule)
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSFontFaceRule)
   KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
   {
     return rule.Type() == krys::boo::css::RuleType::FontFace;
   }
-KRYS_SPECIALIZE_TYPE_TRAITS_END()
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

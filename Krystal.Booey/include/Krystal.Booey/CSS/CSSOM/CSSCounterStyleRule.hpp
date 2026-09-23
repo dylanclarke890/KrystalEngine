@@ -177,16 +177,16 @@ namespace krys::boo::css
   CSSCounterStyleDescriptors::System toCounterStyleSystemEnum(const CSSValue *);
 }
 
-KRYS_SPECIALIZE_TYPE_TRAITS_BEGIN(krys::boo::css::CSSCounterStyleRule)
-  KRYS_NO_DISCARD static bool isType(const krys::boo::css::CSSRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSCounterStyleRule)
+  KRYS_NODISCARD static bool isType(const krys::boo::css::CSSRule &rule) noexcept
   {
     return rule.Type() == krys::boo::css::RuleType::CounterStyle;
   }
-KRYS_SPECIALIZE_TYPE_TRAITS_END()
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
 
-KRYS_SPECIALIZE_TYPE_TRAITS_BEGIN(krys::boo::css::RuleBase)
-  KRYS_NO_DISCARD static bool isType(const krys::boo::css::CounterStyleRule &rule) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::RuleBase)
+  KRYS_NODISCARD static bool isType(const krys::boo::css::CounterStyleRule &rule) noexcept
   {
     return rule.IsCounterStyleRule();
   }
-KRYS_SPECIALIZE_TYPE_TRAITS_END()
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
