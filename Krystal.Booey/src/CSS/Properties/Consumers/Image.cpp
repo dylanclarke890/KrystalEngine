@@ -439,7 +439,7 @@ namespace krys::boo::css::PropertyParserHelpers
   // https://compat.spec.whatwg.org/#css-gradients-webkit-linear-gradient
 
   template <ValueId Name>
-  KRYS_NODISCARD static RefPtr<CSSValue> consumePrefixedLinearGradient(TokenRange &tokens,
+  KRYS_NODISCARD static RefPtr<Value> consumePrefixedLinearGradient(TokenRange &tokens,
                                                                        PropertyParserState &state)
   {
     // https://compat.spec.whatwg.org/#css-gradients-webkit-linear-gradient/ states that
@@ -537,7 +537,7 @@ namespace krys::boo::css::PropertyParserHelpers
   // https://compat.spec.whatwg.org/#css-gradients-webkit-radial-gradient
 
   template <ValueId Name>
-  KRYS_NODISCARD static RefPtr<CSSValue> consumePrefixedRadialGradient(TokenRange &tokens,
+  KRYS_NODISCARD static RefPtr<Value> consumePrefixedRadialGradient(TokenRange &tokens,
                                                                        PropertyParserState &state)
   {
     // https://compat.spec.whatwg.org/#css-gradients-webkit-radial-gradient/ states that
@@ -676,7 +676,7 @@ namespace krys::boo::css::PropertyParserHelpers
   // https://drafts.csswg.org/css-images-4/#linear-gradients
 
   template <ValueId Name>
-  KRYS_NODISCARD static RefPtr<CSSValue> consumeLinearGradient(TokenRange &tokens, PropertyParserState &state)
+  KRYS_NODISCARD static RefPtr<Value> consumeLinearGradient(TokenRange &tokens, PropertyParserState &state)
   {
     // <side-or-corner> = [left | right] || [top | bottom]
     // linear-gradient() = linear-gradient(
@@ -791,7 +791,7 @@ namespace krys::boo::css::PropertyParserHelpers
   // https://drafts.csswg.org/css-images-4/#radial-gradients
 
   template <ValueId Name>
-  KRYS_NODISCARD static RefPtr<CSSValue> consumeRadialGradient(TokenRange &tokens, PropertyParserState &state)
+  KRYS_NODISCARD static RefPtr<Value> consumeRadialGradient(TokenRange &tokens, PropertyParserState &state)
   {
     // radial-gradient() = radial-gradient(
     //   [[ <ending-shape> || <size> ]? [ at <position> ]? ] || <color-interpolation-method>,
@@ -1038,7 +1038,7 @@ namespace krys::boo::css::PropertyParserHelpers
   // https://drafts.csswg.org/css-images-4/#conic-gradient-syntax
 
   template <ValueId Name>
-  KRYS_NODISCARD static RefPtr<CSSValue> consumeConicGradient(TokenRange &tokens, PropertyParserState &state)
+  KRYS_NODISCARD static RefPtr<Value> consumeConicGradient(TokenRange &tokens, PropertyParserState &state)
   {
     // conic-gradient() = conic-gradient(
     //   [ [ from <angle> ]? [ at <position> ]? ] || <color-interpolation-method>,
@@ -1142,7 +1142,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
   // MARK: <-webkit-canvas()>
 
-  KRYS_NODISCARD static RefPtr<CSSValue> consumeWebkitCanvas(TokenRange &args)
+  KRYS_NODISCARD static RefPtr<Value> consumeWebkitCanvas(TokenRange &args)
   {
     if (args.Peek().Type() != TokenType::Ident)
       return nullptr;
@@ -1151,7 +1151,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
   // MARK: <-webkit-named-image()>
 
-  KRYS_NODISCARD static RefPtr<CSSValue> consumeWebkitNamedImage(TokenRange &args)
+  KRYS_NODISCARD static RefPtr<Value> consumeWebkitNamedImage(TokenRange &args)
   {
     if (args.Peek().Type() != TokenType::Ident)
       return nullptr;
@@ -1160,7 +1160,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
   // MARK: <filter()>
 
-  KRYS_NODISCARD static RefPtr<CSSValue> consumeFilterImage(TokenRange &args, PropertyParserState &state)
+  KRYS_NODISCARD static RefPtr<Value> consumeFilterImage(TokenRange &args, PropertyParserState &state)
   {
     // FIXME: The current Filter Effects spec has a different construction than is being parsed here:
     //
@@ -1182,7 +1182,7 @@ namespace krys::boo::css::PropertyParserHelpers
   // MARK: <paint()>
   // https://drafts.css-houdini.org/css-paint-api/#funcdef-paint
 
-  KRYS_NODISCARD static RefPtr<CSSValue> consumeCustomPaint(TokenRange &args, PropertyParserState &state)
+  KRYS_NODISCARD static RefPtr<Value> consumeCustomPaint(TokenRange &args, PropertyParserState &state)
   {
     if (!state.context.cssPaintingAPIEnabled)
       return nullptr;
@@ -1302,7 +1302,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return result;
   }
 
-  KRYS_NODISCARD static RefPtr<CSSValue> consumeImageSet(TokenRange &args, PropertyParserState &state,
+  KRYS_NODISCARD static RefPtr<Value> consumeImageSet(TokenRange &args, PropertyParserState &state,
                                                          OptionSet<AllowedImageType> allowedImageTypes)
   {
     CSSValueListBuilder imageSet;
@@ -1320,7 +1320,7 @@ namespace krys::boo::css::PropertyParserHelpers
   // MARK: <image>
   // https://drafts.csswg.org/css-images-4/#image-values
 
-  RefPtr<CSSValue> consumeImage(TokenRange &tokens, PropertyParserState &state,
+  RefPtr<Value> consumeImage(TokenRange &tokens, PropertyParserState &state,
                                 OptionSet<AllowedImageType> allowedImageTypes)
   {
     if (tokens.Peek().Type() == StringToken && allowedImageTypes.contains(AllowedImageType::RawStringAsURL))
@@ -1334,7 +1334,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     if (tokens.Peek().Type() == FunctionToken)
     {
-      auto consumeGeneratedImage = [&](auto consumer) -> RefPtr<CSSValue>
+      auto consumeGeneratedImage = [&](auto consumer) -> RefPtr<Value>
       {
         if (!allowedImageTypes.contains(AllowedImageType::GeneratedImage))
           return nullptr;
@@ -1347,7 +1347,7 @@ namespace krys::boo::css::PropertyParserHelpers
         return result;
       };
 
-      auto consumeImageSetImage = [&](auto consumer) -> RefPtr<CSSValue>
+      auto consumeImageSetImage = [&](auto consumer) -> RefPtr<Value>
       {
         if (!allowedImageTypes.contains(AllowedImageType::ImageSet))
           return nullptr;
@@ -1439,7 +1439,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
   // MARK: <image> | none
 
-  RefPtr<CSSValue> ConsumeImageOrNone(TokenRange &tokens, PropertyParserState &state,
+  RefPtr<Value> ConsumeImageOrNone(TokenRange &tokens, PropertyParserState &state,
                                       AllowedImageType allowedImageTypes) noexcept
   {
     if (tokens.Peek().ValueId() == ValueId::None)

@@ -179,6 +179,17 @@ namespace krys::boo::css
       return TokenRange(_tokens.first(end._tokens.data() - _tokens.data()));
     }
 
+    CSSOMString Serialise(TokenSerialisationMode mode) const
+    {
+      CSSOMString builder;
+      for (size_t i = 0; i < _tokens.size(); ++i)
+      {
+        _tokens[i].Serialise(builder, (i + 1) == _tokens.size() ? nullptr : &_tokens[i + 1], mode);
+      }
+
+      return builder;
+    }
+
     auto begin() const noexcept
     {
       return _tokens.begin();

@@ -50,9 +50,9 @@ namespace krys::boo::css
     String cssTextInternal(StringBuilder &declarations, StringBuilder &rules) const;
 
     void reattach(StyleRuleBase &) final;
-    StyleRuleType styleRuleType() const final
+    RuleType RuleType() const final
     {
-      return StyleRuleType::NestedDeclarations;
+      return RuleType::NestedDeclarations;
     }
 
     Ref<StyleRuleNestedDeclarations> m_styleRule;
@@ -61,4 +61,4 @@ namespace krys::boo::css
 
 } // namespace krys::boo::css
 
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSNestedDeclarations, StyleRuleType::NestedDeclarations)
+SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSNestedDeclarations, RuleType::NestedDeclarations)

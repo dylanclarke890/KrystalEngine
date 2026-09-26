@@ -30,14 +30,14 @@
 #pragma once
 
 #include "CSSGroupingRule.h"
-#include "StyleRuleType.h"
+#include "RuleType.h"
 
 namespace krys::boo::css
 {
 
   class StyleRuleLayer;
 
-  using CascadeLayerName = Vector<AtomString>;
+  using CascadeLayerName = SmallList<CSSOMStringAtom>;
 
   class CSSLayerBlockRule final : public CSSGroupingRule
   {
@@ -49,9 +49,9 @@ namespace krys::boo::css
 
   private:
     CSSLayerBlockRule(StyleRuleLayer &, CSSStyleSheet *);
-    StyleRuleType styleRuleType() const final
+    RuleType RuleType() const final
     {
-      return StyleRuleType::LayerBlock;
+      return RuleType::LayerBlock;
     }
   };
 
@@ -59,4 +59,4 @@ namespace krys::boo::css
 
 } // namespace krys::boo::css
 
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSLayerBlockRule, StyleRuleType::LayerBlock)
+SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSLayerBlockRule, RuleType::LayerBlock)

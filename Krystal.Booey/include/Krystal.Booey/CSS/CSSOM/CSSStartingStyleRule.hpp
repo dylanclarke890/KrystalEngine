@@ -19,12 +19,12 @@ namespace krys::boo::css
   private:
     CSSStartingStyleRule(StyleRuleStartingStyle &, CSSStyleSheet *);
 
-    StyleRuleType styleRuleType() const final
+    RuleType RuleType() const final
     {
-      return StyleRuleType::StartingStyle;
+      return RuleType::StartingStyle;
     }
   };
 
 }
 
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSStartingStyleRule, StyleRuleType::StartingStyle)
+SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSStartingStyleRule, RuleType::StartingStyle)

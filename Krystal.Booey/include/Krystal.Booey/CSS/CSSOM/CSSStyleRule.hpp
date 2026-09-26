@@ -51,9 +51,9 @@ namespace krys::boo::css
     CSSStyleRule(StyleRule &, CSSStyleSheet *);
     CSSStyleRule(StyleRuleWithNesting &, CSSStyleSheet *);
 
-    StyleRuleType styleRuleType() const final
+    RuleType RuleType() const final
     {
-      return StyleRuleType::Style;
+      return RuleType::Style;
     }
     String cssText() const final;
     String cssText(const SerialisationContext &) const final;
@@ -62,7 +62,7 @@ namespace krys::boo::css
     void getChildStyleSheets(HashSet<RefPtr<CSSStyleSheet>> &) final;
 
     String generateSelectorText() const;
-    Vector<Ref<StyleRuleBase>> nestedRules() const;
+    SmallList<Ref<StyleRuleBase>> nestedRules() const;
     void cssTextForRules(StringBuilder &rules) const;
     void cssTextForRulesWithReplacementURLs(StringBuilder &rules, const SerialisationContext &) const;
 
@@ -70,10 +70,10 @@ namespace krys::boo::css
     const Ref<DeclaredStylePropertyMap> m_styleMap;
     RefPtr<StyleRuleCSSStyleProperties> m_propertiesCSSOMWrapper;
 
-    mutable Vector<RefPtr<CSSRule>> m_childRuleCSSOMWrappers;
+    mutable SmallList<RefPtr<CSSRule>> m_childRuleCSSOMWrappers;
     const std::unique_ptr<CSSRuleList> m_ruleListCSSOMWrapper;
   };
 
 } // namespace krys::boo::css
 
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSStyleRule, StyleRuleType::Style)
+SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSStyleRule, RuleType::Style)

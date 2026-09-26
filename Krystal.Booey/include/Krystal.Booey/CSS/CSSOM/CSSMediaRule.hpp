@@ -30,9 +30,9 @@ namespace krys::boo::css
 
     CSSMediaRule(StyleRuleMedia &, CSSStyleSheet *) noexcept;
 
-    StyleRuleType styleRuleType() const noexcept final
+    RuleType RuleType() const noexcept final
     {
-      return StyleRuleType::Media;
+      return RuleType::Media;
     }
     String cssText() const noexcept final;
     String cssText(const SerialisationContext &) const noexcept final;
@@ -46,4 +46,4 @@ namespace krys::boo::css
 
 }
 
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSMediaRule, StyleRuleType::Media)
+SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSMediaRule, RuleType::Media)

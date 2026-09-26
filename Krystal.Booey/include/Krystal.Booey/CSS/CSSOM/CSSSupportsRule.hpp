@@ -17,12 +17,12 @@ namespace krys::boo::css
 
   private:
     CSSSupportsRule(StyleRuleSupports &, CSSStyleSheet *);
-    StyleRuleType styleRuleType() const final
+    RuleType RuleType() const final
     {
-      return StyleRuleType::Supports;
+      return RuleType::Supports;
     }
   };
 
 }
 
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSSupportsRule, StyleRuleType::Supports)
+SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSSupportsRule, RuleType::Supports)

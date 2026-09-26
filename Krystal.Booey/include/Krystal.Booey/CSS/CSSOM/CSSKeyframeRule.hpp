@@ -40,7 +40,7 @@ namespace krys::boo::css
   {
   public:
     static Ref<StyleRuleKeyframe> create(Ref<StyleProperties> &&);
-    static Ref<StyleRuleKeyframe> create(Vector<std::pair<CSSValueID, double>> &&keys,
+    static Ref<StyleRuleKeyframe> create(SmallList<std::pair<CSSValueID, double>> &&keys,
                                          Ref<StyleProperties> &&);
     ~StyleRuleKeyframe();
 
@@ -67,7 +67,7 @@ namespace krys::boo::css
       m_keys.append(key);
     }
 
-    const Vector<Key> &keys() const
+    const SmallList<Key> &keys() const
     {
       return m_keys;
     };
@@ -82,10 +82,10 @@ namespace krys::boo::css
 
   private:
     explicit StyleRuleKeyframe(Ref<StyleProperties> &&);
-    StyleRuleKeyframe(Vector<Key> &&, Ref<StyleProperties> &&);
+    StyleRuleKeyframe(SmallList<Key> &&, Ref<StyleProperties> &&);
 
     Ref<StyleProperties> m_properties;
-    Vector<Key> m_keys;
+    SmallList<Key> m_keys;
   };
 
   class CSSKeyframeRule final : public CSSRule
@@ -113,9 +113,9 @@ namespace krys::boo::css
   private:
     CSSKeyframeRule(StyleRuleKeyframe &, CSSKeyframesRule *parent);
 
-    StyleRuleType styleRuleType() const final
+    RuleType RuleType() const final
     {
-      return StyleRuleType::Keyframe;
+      return RuleType::Keyframe;
     }
 
     const Ref<StyleRuleKeyframe> m_keyframe;
@@ -129,6 +129,6 @@ namespace krys::boo::css
 SPECIALIZE_TYPE_TRAITS_BEGIN(WebCore::CSSKeyframeRule)
 static bool isType(const WebCore::CSSRule &rule)
 {
-  return rule.styleRuleType() == WebCore::StyleRuleType::Keyframe;
+  return rule.RuleType() == WebCore::RuleType::Keyframe;
 }
 SPECIALIZE_TYPE_TRAITS_END()

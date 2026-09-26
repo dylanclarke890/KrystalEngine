@@ -43,13 +43,13 @@ namespace krys::boo::css
     virtual ~CSSLayerStatementRule();
 
     String cssText() const final;
-    Vector<String> nameList() const;
+    SmallList<String> nameList() const;
 
   private:
     CSSLayerStatementRule(StyleRuleLayer &, CSSStyleSheet *);
-    StyleRuleType styleRuleType() const final
+    RuleType RuleType() const final
     {
-      return StyleRuleType::LayerStatement;
+      return RuleType::LayerStatement;
     }
     void reattach(StyleRuleBase &) final;
 
@@ -58,4 +58,4 @@ namespace krys::boo::css
 
 } // namespace krys::boo::css
 
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSLayerStatementRule, StyleRuleType::LayerStatement)
+SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSLayerStatementRule, RuleType::LayerStatement)

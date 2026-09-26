@@ -38,4 +38,4 @@ namespace krys::boo::css
   };
 }
 
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSFunctionDeclarations, StyleRuleType::FunctionDeclarations)
+SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSFunctionDeclarations, RuleType::FunctionDeclarations)

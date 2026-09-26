@@ -47,9 +47,9 @@ namespace krys::boo::css
 
   private:
     CSSPropertyRule(StyleRuleProperty &, CSSStyleSheet *);
-    StyleRuleType styleRuleType() const final
+    RuleType RuleType() const final
     {
-      return StyleRuleType::Property;
+      return RuleType::Property;
     }
     void reattach(StyleRuleBase &) final;
 
@@ -58,4 +58,4 @@ namespace krys::boo::css
 
 } // namespace krys::boo::css
 
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSPropertyRule, StyleRuleType::Property)
+SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSPropertyRule, RuleType::Property)

@@ -29,4 +29,4 @@ namespace krys::boo::css
   };
 }
 
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSScopeRule, StyleRuleType::Scope)
+SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSScopeRule, RuleType::Scope)

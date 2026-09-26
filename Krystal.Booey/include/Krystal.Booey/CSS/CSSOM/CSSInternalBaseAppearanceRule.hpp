@@ -46,12 +46,12 @@ namespace krys::boo::css
   private:
     CSSInternalBaseAppearanceRule(StyleRuleInternalBaseAppearance &, CSSStyleSheet *);
 
-    StyleRuleType styleRuleType() const final
+    RuleType RuleType() const final
     {
-      return StyleRuleType::InternalBaseAppearance;
+      return RuleType::InternalBaseAppearance;
     }
   };
 
 } // namespace krys::boo::css
 
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSInternalBaseAppearanceRule, StyleRuleType::InternalBaseAppearance)
+SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSInternalBaseAppearanceRule, RuleType::InternalBaseAppearance)

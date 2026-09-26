@@ -42,15 +42,15 @@ namespace krys::boo::css
 
     virtual ~CSSNamespaceRule();
 
-    AtomString namespaceURI() const;
-    AtomString prefix() const;
+    CSSOMStringAtom namespaceURI() const;
+    CSSOMStringAtom prefix() const;
 
   private:
     CSSNamespaceRule(StyleRuleNamespace &, CSSStyleSheet *);
 
-    StyleRuleType styleRuleType() const final
+    RuleType RuleType() const final
     {
-      return StyleRuleType::Namespace;
+      return RuleType::Namespace;
     }
     String cssText() const final;
     void reattach(StyleRuleBase &) final;
@@ -60,4 +60,4 @@ namespace krys::boo::css
 
 } // namespace krys::boo::css
 
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSNamespaceRule, StyleRuleType::Namespace)
+SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSNamespaceRule, RuleType::Namespace)

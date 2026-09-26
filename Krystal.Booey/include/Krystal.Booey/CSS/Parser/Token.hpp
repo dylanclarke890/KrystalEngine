@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Parser/NumericValue.hpp"
+#include "Krystal.Booey/CSS/Parser/TokenSerialisationMode.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenType.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
@@ -164,6 +165,182 @@ namespace krys::boo::css
     KRYS_NODISCARD bool IsBlockEnd() const noexcept
     {
       return _blockType == BlockTokenType::End;
+    }
+
+    void Serialise(CSSOMString &builder, const Token *nextToken = nullptr,
+                   TokenSerialisationMode mode = TokenSerialisationMode::Normal) const noexcept
+    {
+      //struct NextTokenNeedsCommentBuilder
+      //{
+      //  constexpr NextTokenNeedsCommentBuilder(std::initializer_list<TokenType> tokens) noexcept
+      //  {
+      //    for (auto token : tokens)
+      //    {
+      //      Buffer[static_cast<size_t>(token)] = true;
+      //    }
+      //  }
+
+      //  Array<bool, EnumTraits<TokenType>::DistinctValues> Buffer {false};
+      //};
+
+      //// This is currently only used for @supports CSSOM. To keep our implementation
+      //// simple we handle some of the edge cases incorrectly (see comments below).
+      //auto AppendCommentIfNeeded = [&](const NextTokenNeedsCommentBuilder &tokensNeedingComment,
+      //                                 auto... delimitersNeedingComment) noexcept
+      //{
+      //  if (!nextToken)
+      //  {
+      //    return;
+      //  }
+
+      //  TokenType nextType = nextToken->Type();
+      //  if (tokensNeedingComment.Buffer[nextType])
+      //  {
+      //    builder.push_back(u8"/**/");
+      //    return;
+      //  }
+
+      //  if (nextType == TokenType::Delim
+      //      && ((delimitersNeedingComment == nextToken->IdentCodePoints()[0]) || ... || false))
+      //  {
+      //    builder.push_back(u8"/**/");
+      //    return;
+      //  }
+      //};
+
+      //switch (Type())
+      //{
+      //  case TokenType::Ident:
+      //  {
+      //    SerializeIdentifier(value().toString(), builder);
+      //    AppendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl,
+      //                           TokenType::Number, TokenType::Percentage, TokenType::Dimension,
+      //                           TokenType::CDC, TokenType::OpenParen},
+      //                          '-');
+      //  }
+      //    break;
+      //  case TokenType::Function:
+      //    SerializeIdentifier(value().toString(), builder);
+      //    builder.append('(');
+      //    break;
+      //  case TokenType::AtKeyword:
+      //    builder.append('@');
+      //    SerializeIdentifier(value().toString(), builder);
+      //    AppendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl, TokenType::Number,
+      //                           TokenType::Percentage, TokenType::Dimension, TokenType::CDC},
+      //                          '-');
+      //    break;
+      //  case TokenType::Hash:
+      //    builder.append('#');
+      //    SerializeIdentifier(value().toString(), builder, (getHashTokenType() == TokenType::HashUnrestricted));
+      //    AppendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl, TokenType::Number,
+      //                           TokenType::Percentage, TokenType::Dimension, TokenType::CDC},
+      //                          '-');
+      //    break;
+      //  case TokenType::Url:
+      //    builder.append("url("_s);
+      //    SerializeIdentifier(value().toString(), builder);
+      //    builder.append(')');
+      //    break;
+      //  case TokenType::Delimiter:
+      //    switch (delimiter())
+      //    {
+      //      case '\\': builder.append("\\\n"_s); break;
+
+      //      case '#':
+      //      case '-':
+      //        builder.append(delimiter());
+      //        appendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl, TokenType::Number,
+      //                               TokenType::Percentage, TokenType::Dimension},
+      //                              '-');
+      //        break;
+
+      //      case '@':
+      //        builder.append('@');
+      //        appendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl}, '-');
+      //        break;
+
+      //      case '.':
+      //      case '+':
+      //        builder.append(delimiter());
+      //        appendCommentIfNeeded({TokenType::Number, TokenType::Percentage, TokenType::Dimension});
+      //        break;
+
+      //      case '/':
+      //        builder.append('/');
+      //        // Weirdly Clang errors if you try to use the fold expression in
+      //        // buildNextTokenNeedsCommentTable() because the true value is unused. So we just build the
+      //        // table by hand here instead. See: rdar://69710661
+      //        appendCommentIfNeeded({}, '*');
+      //        break;
+
+      //      default: builder.append(delimiter()); break;
+      //    }
+      //    break;
+      //  case TokenType::Number:
+      //    if (mode == SerializationMode::CustomProperty)
+      //      builder.append(originalText());
+      //    else
+      //    {
+      //      if (m_numericSign == PlusSign)
+      //        builder.append('+');
+      //      builder.append(numericValue());
+      //    }
+      //    appendCommentIfNeeded(
+      //      {TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl, TokenType::Number, TokenType::Percentage, TokenType::Dimension},
+      //      '%');
+      //    break;
+      //  case TokenType::Percentage:
+      //    if (mode == SerializationMode::CustomProperty)
+      //      builder.append(originalText(), '%');
+      //    else
+      //      builder.append(numericValue(), '%');
+      //    break;
+      //  case TokenType::Dimension:
+      //    if (mode == SerializationMode::CustomProperty && m_nonUnitPrefixLength)
+      //      builder.append(originalText());
+      //    else
+      //    {
+      //      builder.append(numericValue());
+      //      serializeIdentifier(unitString().toString(), builder);
+      //    }
+      //    appendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl, TokenType::Number,
+      //                           TokenType::Percentage, TokenType::Dimension, TokenType::CDC},
+      //                          '-');
+      //    break;
+      //  case TokenType::String:         serializeString(value().toString(), builder); break;
+
+      //  case TokenType::IncludeMatch:   builder.append("~="_s); break;
+      //  case TokenType::DashMatch:      builder.append("|="_s); break;
+      //  case TokenType::PrefixMatch:    builder.append("^="_s); break;
+      //  case TokenType::SuffixMatch:    builder.append("$="_s); break;
+      //  case TokenType::SubstringMatch: builder.append("*="_s); break;
+      //  case TokenType::Column:         builder.append("||"_s); break;
+      //  case TokenType::CDO:            builder.append("<!--"_s); break;
+      //  case TokenType::CDC:            builder.append("-->"_s); break;
+      //  case TokenType::BadString:      builder.append("'\n"_s); break;
+      //  case TokenType::BadUrl:         builder.append("url(()"_s); break;
+      //  case TokenType::NonNewlineWhitespace:
+      //  {
+      //    auto count = mode == SerializationMode::CustomProperty ? m_whitespaceCount : 1;
+      //    for (decltype(count) i = 0; i < count; ++i)
+      //      builder.append(' ');
+      //    break;
+      //  }
+      //  case TokenType::Newline:          builder.append(mode == SerializationMode::CustomProperty ? '\n' : ' '); break;
+      //  case TokenType::Colon:            builder.append(':'); break;
+      //  case TokenType::Semicolon:        builder.append(';'); break;
+      //  case TokenType::Comma:            builder.append(','); break;
+      //  case TokenType::LeftParenthesis:  builder.append('('); break;
+      //  case TokenType::RightParenthesis: builder.append(')'); break;
+      //  case TokenType::LeftBracket:      builder.append('['); break;
+      //  case TokenType::RightBracket:     builder.append(']'); break;
+      //  case TokenType::LeftBrace:        builder.append('{'); break;
+      //  case TokenType::RightBrace:       builder.append('}'); break;
+
+      //  case TokenType::EndOfFile:
+      //  case TokenType::Comment:          ASSERT_NOT_REACHED(); break;
+      //}
     }
 
   private:

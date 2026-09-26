@@ -52,9 +52,9 @@ namespace krys::boo::css
   private:
     CSSFontPaletteValuesRule(StyleRuleFontPaletteValues &, CSSStyleSheet *parent);
 
-    StyleRuleType styleRuleType() const final
+    RuleType RuleType() const final
     {
-      return StyleRuleType::FontPaletteValues;
+      return RuleType::FontPaletteValues;
     }
     String cssText() const final;
     void reattach(StyleRuleBase &) final;
@@ -64,4 +64,4 @@ namespace krys::boo::css
 
 } // namespace krys::boo::css
 
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSFontPaletteValuesRule, StyleRuleType::FontPaletteValues)
+SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSFontPaletteValuesRule, RuleType::FontPaletteValues)

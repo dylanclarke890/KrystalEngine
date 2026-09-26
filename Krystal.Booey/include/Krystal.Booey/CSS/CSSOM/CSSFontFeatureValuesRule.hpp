@@ -15,13 +15,13 @@ namespace krys::boo::css
     }
     virtual ~CSSFontFeatureValuesRule() = default;
 
-    const Vector<AtomString> &fontFamilies() const
+    const SmallList<CSSOMStringAtom> &fontFamilies() const
     {
       return m_fontFeatureValuesRule->fontFamilies();
     }
 
     // Used by the CSSOM.
-    AtomString fontFamily() const
+    CSSOMStringAtom fontFamily() const
     {
       StringBuilder builder;
       bool first = true;
@@ -40,9 +40,9 @@ namespace krys::boo::css
   private:
     CSSFontFeatureValuesRule(StyleRuleFontFeatureValues &, CSSStyleSheet *parent);
 
-    StyleRuleType styleRuleType() const final
+    RuleType RuleType() const final
     {
-      return StyleRuleType::FontFeatureValues;
+      return RuleType::FontFeatureValues;
     }
     String cssText() const final;
     void reattach(StyleRuleBase &) final;
@@ -63,9 +63,9 @@ namespace krys::boo::css
   private:
     CSSFontFeatureValuesBlockRule(StyleRuleFontFeatureValuesBlock &, CSSStyleSheet *parent);
 
-    StyleRuleType styleRuleType() const final
+    RuleType RuleType() const final
     {
-      return StyleRuleType::FontFeatureValuesBlock;
+      return RuleType::FontFeatureValuesBlock;
     }
     String cssText() const final;
     void reattach(StyleRuleBase &) final;
@@ -75,5 +75,5 @@ namespace krys::boo::css
 
 } // namespace krys::boo::css
 
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSFontFeatureValuesRule, StyleRuleType::FontFeatureValues)
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSFontFeatureValuesBlockRule, StyleRuleType::FontFeatureValuesBlock)
+SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSFontFeatureValuesRule, RuleType::FontFeatureValues)
+SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSFontFeatureValuesBlockRule, RuleType::FontFeatureValuesBlock)

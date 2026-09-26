@@ -4,14 +4,14 @@
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 #include <WebCore/StyleProperties.h>
 #include <WebCore/StyleRule.h>
-#include <wtf/text/AtomString.h>
+#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 
 namespace krys::boo::css
 {
   class CounterStyleRule final : public RuleBase
   {
   public:
-    static Ref<CounterStyleRule> create(const AtomString &, CSSCounterStyleDescriptors &&);
+    static Ref<CounterStyleRule> create(const CSSOMStringAtom &, CSSCounterStyleDescriptors &&);
     ~CounterStyleRule();
 
     Ref<CounterStyleRule> copy() const
@@ -28,7 +28,7 @@ namespace krys::boo::css
       return m_descriptors;
     };
 
-    const AtomString &name() const
+    const CSSOMStringAtom &name() const
     {
       return m_name;
     }
@@ -72,32 +72,33 @@ namespace krys::boo::css
     {
       return {};
     }
-    bool newValueInvalidOrEqual(CSSPropertyID, const RefPtr<CSSValue> newValue) const;
+    bool newValueInvalidOrEqual(CSSPropertyID, const RefPtr<Value> newValue) const;
 
-    void setName(const AtomString &name)
+    void setName(const CSSOMStringAtom &name)
     {
       m_name = name;
     }
 
   private:
-    explicit StyleRuleCounterStyle(const AtomString &, CSSCounterStyleDescriptors &&);
+    explicit StyleRuleCounterStyle(const CSSOMStringAtom &, CSSCounterStyleDescriptors &&);
     StyleRuleCounterStyle(const StyleRuleCounterStyle &) = default;
 
-    AtomString m_name;
+    CSSOMStringAtom m_name;
     CSSCounterStyleDescriptors m_descriptors;
   };
 
   class CSSCounterStyleRule final : public CSSRule
   {
   public:
-    static Ref<CSSCounterStyleRule> create(StyleRuleCounterStyle &, CSSStyleSheet *);
-    virtual ~CSSCounterStyleRule();
+    virtual ~CSSCounterStyleRule() noexcept;
+
+    KRYS_NODISCARD static Ref<CSSCounterStyleRule> Create(CounterStyleRule &rule, CSSStyleSheet *sheet) noexcept;
 
     String cssText() const final;
     void reattach(StyleRuleBase &) final;
-    StyleRuleType styleRuleType() const final
+    RuleType RuleType() const final
     {
-      return StyleRuleType::CounterStyle;
+      return RuleType::CounterStyle;
     }
 
     String name() const
@@ -161,7 +162,7 @@ namespace krys::boo::css
     CSSCounterStyleRule(StyleRuleCounterStyle &, CSSStyleSheet *parent);
 
     bool setterInternal(CSSPropertyID, const String &);
-    RefPtr<CSSValue> cssValueFromText(CSSPropertyID, const String &);
+    RefPtr<Value> cssValueFromText(CSSPropertyID, const String &);
     const CSSCounterStyleDescriptors &descriptors() const
     {
       return m_counterStyleRule->descriptors();
@@ -174,7 +175,7 @@ namespace krys::boo::css
     Ref<StyleRuleCounterStyle> m_counterStyleRule;
   };
 
-  CSSCounterStyleDescriptors::System toCounterStyleSystemEnum(const CSSValue *);
+  CSSCounterStyleDescriptors::System toCounterStyleSystemEnum(const Value *);
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSCounterStyleRule)

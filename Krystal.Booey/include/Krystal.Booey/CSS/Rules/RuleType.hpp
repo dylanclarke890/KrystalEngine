@@ -15,12 +15,14 @@ namespace krys::boo::css
     NestedDeclarations,
     Page,
     Style,
+    StyleWithNesting,
     FontFace,
     Keyframes,
     Keyframe,
     CounterStyle,
     Supports,
     FontFeatureValues,
+    FontFeatureValuesBlock,
     Viewport,
     FunctionDeclarations,
     FontPaletteValues,
@@ -29,6 +31,11 @@ namespace krys::boo::css
     PositionTry,
     Function,
     InternalBaseAppearance,
+    Scope,
+    StartingStyle,
+    Container,
+    LayerBlock,
+    LayerStatement,
   };
 }
 

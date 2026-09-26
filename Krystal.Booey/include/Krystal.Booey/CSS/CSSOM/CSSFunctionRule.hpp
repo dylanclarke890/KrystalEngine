@@ -45,7 +45,7 @@ namespace krys::boo::css
     };
 
     String name() const;
-    Vector<FunctionParameter> getParameters() const;
+    SmallList<FunctionParameter> getParameters() const;
     String returnType() const;
 
     String cssText() const final;
@@ -54,12 +54,12 @@ namespace krys::boo::css
     const StyleRuleFunction &styleRuleFunction() const;
 
     CSSFunctionRule(StyleRuleFunction &, CSSStyleSheet *);
-    StyleRuleType styleRuleType() const final
+    RuleType RuleType() const final
     {
-      return StyleRuleType::Function;
+      return RuleType::Function;
     }
   };
 
 } // namespace krys::boo::css
 
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSFunctionRule, StyleRuleType::Function)
+SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSFunctionRule, RuleType::Function)

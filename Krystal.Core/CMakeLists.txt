@@ -212,6 +212,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Types/Maybe.hpp
       include/Krystal.Core/Types/NTTPMaybe.hpp
       include/Krystal.Core/Types/NTTPString.hpp
+      include/Krystal.Core/Types/Packed.hpp
       include/Krystal.Core/Types/Pair.hpp
       include/Krystal.Core/Types/Queue.hpp
       include/Krystal.Core/Types/RefPtr.hpp
@@ -232,9 +233,11 @@ target_sources(Krystal.Core
 
       # Utils
       include/Krystal.Core/Utils/AlignedStorage.hpp
+      include/Krystal.Core/Utils/AllowCompactPointers.hpp
       include/Krystal.Core/Utils/Apply.hpp
       include/Krystal.Core/Utils/ByteUtils.hpp
       include/Krystal.Core/Utils/ForbidHeapAllocation.hpp
+      include/Krystal.Core/Utils/GetPtrHelper.hpp
       include/Krystal.Core/Utils/Handle.hpp
       include/Krystal.Core/Utils/IndexedRange.hpp
       include/Krystal.Core/Utils/Move.hpp
@@ -245,6 +248,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Utils/StringId.hpp
       include/Krystal.Core/Utils/StrongOrder.hpp
       include/Krystal.Core/Utils/Tags.hpp
+      include/Krystal.Core/Utils/UnalignedAccess.hpp
       include/Krystal.Core/Utils/ZippedRange.hpp
 
   PRIVATE

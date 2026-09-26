@@ -3,7 +3,7 @@
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 #include "StyleProperties.h"
 #include "StyleRule.h"
-#include <wtf/text/AtomString.h>
+#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 
 namespace krys::boo::css
 {
@@ -32,7 +32,7 @@ namespace krys::boo::css
     {
       return navigation().value_or(ViewTransitionNavigation::None);
     }
-    Vector<AtomString> types() const
+    SmallList<CSSOMStringAtom> types() const
     {
       return m_types;
     }
@@ -42,7 +42,7 @@ namespace krys::boo::css
     StyleRuleViewTransition(const StyleRuleViewTransition &) = default;
 
     std::optional<ViewTransitionNavigation> m_navigation;
-    Vector<AtomString> m_types;
+    SmallList<CSSOMStringAtom> m_types;
   };
 
   class CSSViewTransitionRule final : public CSSRule
@@ -55,13 +55,13 @@ namespace krys::boo::css
 
     String cssText() const final;
     void reattach(StyleRuleBase &) final;
-    StyleRuleType styleRuleType() const final
+    RuleType RuleType() const final
     {
-      return StyleRuleType::ViewTransition;
+      return RuleType::ViewTransition;
     }
 
-    AtomString navigation() const;
-    Vector<AtomString> types() const
+    CSSOMStringAtom navigation() const;
+    SmallList<CSSOMStringAtom> types() const
     {
       return Ref {m_viewTransitionRule}->types();
     }
@@ -74,7 +74,7 @@ namespace krys::boo::css
 
 } // namespace krys::boo::css
 
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSViewTransitionRule, StyleRuleType::ViewTransition)
+SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSViewTransitionRule, RuleType::ViewTransition)
 
 SPECIALIZE_TYPE_TRAITS_BEGIN(WebCore::StyleRuleViewTransition)
 static bool isType(const WebCore::StyleRuleBase &rule)

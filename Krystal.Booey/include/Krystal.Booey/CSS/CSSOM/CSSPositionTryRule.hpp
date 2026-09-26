@@ -39,14 +39,14 @@ namespace krys::boo::css
   class StyleRulePositionTry final : public StyleRuleBase
   {
   public:
-    static Ref<StyleRulePositionTry> create(AtomString &&name, Ref<StyleProperties> &&);
+    static Ref<StyleRulePositionTry> create(CSSOMStringAtom &&name, Ref<StyleProperties> &&);
 
     Ref<StyleRulePositionTry> copy() const
     {
       return adoptRef(*new StyleRulePositionTry(*this));
     }
 
-    AtomString name() const
+    CSSOMStringAtom name() const
     {
       return m_name;
     }
@@ -66,10 +66,10 @@ namespace krys::boo::css
     }
 
   private:
-    explicit StyleRulePositionTry(AtomString &&name, Ref<StyleProperties> &&);
+    explicit StyleRulePositionTry(CSSOMStringAtom &&name, Ref<StyleProperties> &&);
     StyleRulePositionTry(const StyleRulePositionTry &);
 
-    AtomString m_name;
+    CSSOMStringAtom m_name;
     Ref<StyleProperties> m_properties;
   };
 
@@ -79,9 +79,9 @@ namespace krys::boo::css
     static Ref<CSSPositionTryRule> create(StyleRulePositionTry &, CSSStyleSheet *);
     virtual ~CSSPositionTryRule();
 
-    StyleRuleType styleRuleType() const
+    RuleType RuleType() const
     {
-      return StyleRuleType::PositionTry;
+      return RuleType::PositionTry;
     }
 
     String cssText() const;
@@ -92,7 +92,7 @@ namespace krys::boo::css
       return m_positionTryRule;
     }
 
-    AtomString name() const;
+    CSSOMStringAtom name() const;
     CSSPositionTryDescriptors &style();
 
   private:
@@ -114,6 +114,6 @@ SPECIALIZE_TYPE_TRAITS_END()
 SPECIALIZE_TYPE_TRAITS_BEGIN(WebCore::CSSPositionTryRule)
 static bool isType(const WebCore::CSSRule &rule)
 {
-  return rule.styleRuleType() == WebCore::StyleRuleType::PositionTry;
+  return rule.RuleType() == WebCore::RuleType::PositionTry;
 }
 SPECIALIZE_TYPE_TRAITS_END()

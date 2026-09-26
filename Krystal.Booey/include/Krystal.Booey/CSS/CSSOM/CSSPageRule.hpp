@@ -48,9 +48,9 @@ namespace krys::boo::css
   private:
     CSSPageRule(StyleRulePage &, CSSStyleSheet *);
 
-    StyleRuleType styleRuleType() const final
+    RuleType RuleType() const final
     {
-      return StyleRuleType::Page;
+      return RuleType::Page;
     }
     String cssText() const final;
     void reattach(StyleRuleBase &) final;
@@ -64,6 +64,6 @@ namespace krys::boo::css
 SPECIALIZE_TYPE_TRAITS_BEGIN(WebCore::CSSPageRule)
 static bool isType(const WebCore::CSSRule &rule)
 {
-  return rule.styleRuleType() == WebCore::StyleRuleType::Page;
+  return rule.RuleType() == WebCore::RuleType::Page;
 }
 SPECIALIZE_TYPE_TRAITS_END()

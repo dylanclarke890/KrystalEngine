@@ -28,8 +28,8 @@
 #include "CSSRule.h"
 #include "StyleRule.h"
 #include <memory>
-#include <wtf/Forward.h>
-#include <wtf/text/AtomString.h>
+
+#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 
 namespace krys::boo::css
 {
@@ -41,20 +41,20 @@ namespace krys::boo::css
   class StyleRuleKeyframes final : public StyleRuleBase
   {
   public:
-    static Ref<StyleRuleKeyframes> create(const AtomString &name);
+    static Ref<StyleRuleKeyframes> create(const CSSOMStringAtom &name);
     ~StyleRuleKeyframes();
 
-    const Vector<Ref<StyleRuleKeyframe>> &keyframes() const;
+    const SmallList<Ref<StyleRuleKeyframe>> &keyframes() const;
 
     void parserAppendKeyframe(RefPtr<StyleRuleKeyframe> &&);
     void wrapperAppendKeyframe(Ref<StyleRuleKeyframe> &&);
     void wrapperRemoveKeyframe(unsigned);
 
-    const AtomString &name() const
+    const CSSOMStringAtom &name() const
     {
       return m_name;
     }
-    void setName(const AtomString &name)
+    void setName(const CSSOMStringAtom &name)
     {
       m_name = name;
     }
@@ -69,11 +69,11 @@ namespace krys::boo::css
     void shrinkToFit();
 
   private:
-    explicit StyleRuleKeyframes(const AtomString &);
+    explicit StyleRuleKeyframes(const CSSOMStringAtom &);
     StyleRuleKeyframes(const StyleRuleKeyframes &);
 
-    mutable Vector<Ref<StyleRuleKeyframe>> m_keyframes;
-    AtomString m_name;
+    mutable SmallList<Ref<StyleRuleKeyframe>> m_keyframes;
+    CSSOMStringAtom m_name;
   };
 
   class CSSKeyframesRule final : public CSSRule
@@ -86,18 +86,18 @@ namespace krys::boo::css
 
     virtual ~CSSKeyframesRule();
 
-    StyleRuleType styleRuleType() const final
+    RuleType RuleType() const final
     {
-      return StyleRuleType::Keyframes;
+      return RuleType::Keyframes;
     }
     String cssText() const final;
     void reattach(StyleRuleBase &) final;
 
-    const AtomString &name() const
+    const CSSOMStringAtom &name() const
     {
       return m_keyframesRule->name();
     }
-    void setName(const AtomString &);
+    void setName(const CSSOMStringAtom &);
 
     CSSRuleList &cssRules();
 
@@ -117,13 +117,13 @@ namespace krys::boo::css
     CSSKeyframesRule(StyleRuleKeyframes &, CSSStyleSheet *parent);
 
     Ref<StyleRuleKeyframes> m_keyframesRule;
-    mutable Vector<RefPtr<CSSKeyframeRule>> m_childRuleCSSOMWrappers;
+    mutable SmallList<RefPtr<CSSKeyframeRule>> m_childRuleCSSOMWrappers;
     const std::unique_ptr<CSSRuleList> m_ruleListCSSOMWrapper;
   };
 
 } // namespace krys::boo::css
 
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSKeyframesRule, StyleRuleType::Keyframes)
+SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSKeyframesRule, RuleType::Keyframes)
 
 SPECIALIZE_TYPE_TRAITS_BEGIN(WebCore::StyleRuleKeyframes)
 static bool isType(const WebCore::StyleRuleBase &rule)
