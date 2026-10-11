@@ -1,151 +1,129 @@
-﻿/*
- * Copyright (C) 2011, 2012 Google Inc. All rights reserved.
- * Copyright (C) 2024 Samuel Weinig <sam@webkit.org>
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
- *
- *     * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above
- * copyright notice, this list of conditions and the following disclaimer
- * in the documentation and/or other materials provided with the
- * distribution.
- *     * Neither the name of Google Inc. nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+﻿#pragma once
 
-#pragma once
+#include "Krystal.Booey/CSS/Calc/Tree.hpp"
+#include "Krystal.Booey/CSS/Values/NoConversionDataRequiredTag.hpp"
+#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 
-#include <WebCore/CSSCalcTree.h>
-#include <wtf/Ref.h>
-#include <wtf/RefCounted.h>
+namespace krys::boo::style
+{
+  class RenderStyle;
+}
+
+namespace krys::boo::style::calc
+{
+  class Value;
+}
 
 namespace krys::boo::css
 {
+  class TokenRange;
+  class ToLengthConversionData;
 
-  namespace Style
-  {
-    namespace Calculation
-    {
-      class Value;
-    }
-  }
-
-  namespace CSS
-  {
-    struct PropertyParserState;
-    struct Range;
-    enum class Category : uint8_t;
-  }
-
-  class CSSCalcSymbolTable;
-  class CSSCalcSymbolsAllowed;
-  class CSSParserTokenRange;
-  class CSSToLengthConversionData;
-  class RenderStyle;
-
+  struct ComputedStyleDependencies;
   struct ParserContext;
-  struct CSSPropertyParserOptions;
-  struct NoConversionDataRequiredToken;
+  struct PropertyParserOptions;
+  struct PropertyParserState;
+  struct Range;
 
-  enum CSSValueID : uint16_t;
+  enum class Category : uint8;
+  enum class UnitType : uint8;
+  enum class ValueId : uint16;
+}
 
-  enum class CSSUnitType : uint8_t;
+namespace krys::boo::css::calc
+{
+  class AllowedSymbols;
+  class SymbolTable;
 
-  namespace CSSCalc
+  /// @brief Boxes a `calc::Tree` along with the `css::Category` and `css::Range` used to construct it.
+  class Value final : public RefCounted<Value>
   {
+  private:
+    css::Category _category;
+    css::Range _range;
+    calc::Tree _tree;
 
-    // Boxes a `CSSCalc::Tree` along with the `Style::Calculation::Category` and `CSS::Range` used to
-    // construct it.
-    class Value final : public RefCounted<Value>
+    explicit Value(css::Category, css::Range, calc::Tree &&tree);
+
+  public:
+    ~Value() noexcept;
+
+    KRYS_NODISCARD static RefPtr<Value> Parse(TokenRange &tokens, PropertyParserState &state,
+                                              Category category, Range range, AllowedSymbols,
+                                              PropertyParserOptions) noexcept;
+
+    KRYS_NODISCARD static Ref<Value> Create(const style::calc::Value &, const style::RenderStyle &) noexcept;
+    KRYS_NODISCARD static Ref<Value> Create(Category category, Range range, calc::Tree &&tree) noexcept;
+
+    /// @brief Creates a copy of the calc::Tree with non-canonical dimensions and any symbols present in the
+    /// provided symbol table resolved.
+    KRYS_NODISCARD Ref<Value> CopySimplified(const ToLengthConversionData &) const noexcept;
+
+    KRYS_NODISCARD Ref<Value> CopySimplified(const ToLengthConversionData &,
+                                             const SymbolTable &symbols) const noexcept;
+
+    KRYS_NODISCARD Ref<Value> CopySimplified(NoConversionDataRequiredTag) const noexcept;
+
+    KRYS_NODISCARD Ref<Value> CopySimplified(NoConversionDataRequiredTag,
+                                             const SymbolTable &symbols) const noexcept;
+
+    KRYS_NODISCARD css::Category Category() const noexcept
     {
-    public:
-      static RefPtr<Value> parse(CSSParserTokenRange &, CSS::PropertyParserState &, CSS::Category, CSS::Range,
-                                 CSSCalcSymbolsAllowed, CSSPropertyParserOptions);
+      return _category;
+    }
 
-      static Ref<Value> create(const Style::Calculation::Value &, const RenderStyle &);
-      static Ref<Value> create(CSS::Category, CSS::Range, CSSCalc::Tree &&);
+    KRYS_NODISCARD css::Range Range() const noexcept
+    {
+      return _range;
+    }
 
-      ~Value();
+    KRYS_NODISCARD const calc::Tree &Tree() const noexcept
+    {
+      return _tree;
+    }
 
-      // Creates a copy of the CSSCalc::Tree with non-canonical dimensions and any symbols present in the
-      // provided symbol table resolved.
-      Ref<Value> copySimplified(const CSSToLengthConversionData &) const;
-      Ref<Value> copySimplified(const CSSToLengthConversionData &, const CSSCalcSymbolTable &) const;
-      Ref<Value> copySimplified(NoConversionDataRequiredToken) const;
-      Ref<Value> copySimplified(NoConversionDataRequiredToken, const CSSCalcSymbolTable &) const;
+    KRYS_NODISCARD UnitType PrimitiveType() const noexcept;
 
-      CSS::Category category() const
-      {
-        return m_category;
-      }
-      CSS::Range range() const
-      {
-        return m_range;
-      }
-
-      CSSUnitType primitiveType() const;
-
-      // Returns whether the CSSCalc::Tree requires `CSSToLengthConversionData` to fully resolve.
-      bool requiresConversionData() const
-      {
-        return m_tree.requiresConversionData;
-      };
-
-      double doubleValue(const CSSToLengthConversionData &) const;
-      double doubleValue(const CSSToLengthConversionData &, const CSSCalcSymbolTable &) const;
-      double doubleValue(NoConversionDataRequiredToken) const;
-      double doubleValue(NoConversionDataRequiredToken, const CSSCalcSymbolTable &) const;
-      double doubleValueDeprecated() const;
-
-      double computeLengthPx(const CSSToLengthConversionData &) const;
-      double computeLengthPx(const CSSToLengthConversionData &, const CSSCalcSymbolTable &) const;
-
-      Ref<Style::Calculation::Value> createCalculationValue(NoConversionDataRequiredToken) const;
-      Ref<Style::Calculation::Value> createCalculationValue(NoConversionDataRequiredToken,
-                                                            const CSSCalcSymbolTable &) const;
-      Ref<Style::Calculation::Value> createCalculationValue(const CSSToLengthConversionData &) const;
-      Ref<Style::Calculation::Value> createCalculationValue(const CSSToLengthConversionData &,
-                                                            const CSSCalcSymbolTable &) const;
-
-      void collectComputedStyleDependencies(ComputedStyleDependencies &) const;
-
-      String cssText(const CSS::SerializationContext &) const;
-      bool equals(const Value &) const;
-
-      void dump(TextStream &) const;
-
-      const CSSCalc::Tree &tree() const
-      {
-        return m_tree;
-      }
-
-    private:
-      explicit Value(CSS::Category, CSS::Range, CSSCalc::Tree &&);
-
-      double clampToPermittedRange(double) const;
-
-      CSS::Category m_category;
-      CSS::Range m_range;
-      Tree m_tree;
+    /// @brief Checks whether calc::Tree requires `ToLengthConversionData` to fully resolve.
+    KRYS_NODISCARD bool RequiresConversionData() const
+    {
+      return _tree.RequiresConversionData;
     };
 
-    TextStream &operator<<(TextStream &, const Value &);
+    KRYS_NODISCARD double DoubleValue(const ToLengthConversionData &) const noexcept;
 
-  } // namespace CSSCalc
-} // namespace krys::boo::css
+    KRYS_NODISCARD double DoubleValue(const ToLengthConversionData &,
+                                      const SymbolTable &symbols) const noexcept;
+
+    KRYS_NODISCARD double DoubleValue(NoConversionDataRequiredTag) const noexcept;
+
+    KRYS_NODISCARD double DoubleValue(NoConversionDataRequiredTag, const SymbolTable &symbols) const noexcept;
+
+    KRYS_NODISCARD double DoubleValueDeprecated() const noexcept;
+
+    KRYS_NODISCARD double ComputeLengthPx(const ToLengthConversionData &) const noexcept;
+
+    KRYS_NODISCARD double ComputeLengthPx(const ToLengthConversionData &,
+                                          const SymbolTable &symbols) const noexcept;
+
+    KRYS_NODISCARD Ref<style::calc::Value> CreateCalculationValue(NoConversionDataRequiredTag) const noexcept;
+
+    KRYS_NODISCARD Ref<style::calc::Value> CreateCalculationValue(NoConversionDataRequiredTag,
+                                                                  const SymbolTable &symbols) const noexcept;
+
+    KRYS_NODISCARD Ref<style::calc::Value> CreateCalculationValue(const ToLengthConversionData &) const;
+
+    KRYS_NODISCARD Ref<style::calc::Value> CreateCalculationValue(const ToLengthConversionData &,
+                                                                  const SymbolTable &symbols) const;
+
+    KRYS_NODISCARD bool Equals(const Value &value) const noexcept;
+
+    CSSOMString CssText(const SerialisationContext &context) const noexcept;
+
+    void CollectComputedStyleDependencies(ComputedStyleDependencies &dependencies) const noexcept;
+
+  private:
+    KRYS_NODISCARD double ClampToPermittedRange(double value) const noexcept;
+  };
+}

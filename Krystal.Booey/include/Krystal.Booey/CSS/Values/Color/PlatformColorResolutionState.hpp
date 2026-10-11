@@ -7,7 +7,7 @@ namespace krys::boo::css
 {
   enum class LightDarkColorAppearance : bool;
 
-  // Used to resolve a CSS::Color to a krys::Color (platform color) without going through Style::Color / style
+  // Used to resolve a css::Color to a krys::Color (platform color) without going through style::Color / style
   // building.
 
   class PlatformColorResolutionDelegate
@@ -67,14 +67,14 @@ namespace krys::boo::css
     Maybe<ToLengthConversionData> conversionData = null;
 
     // Whether links should be resolved to the visited style.
-    Style::ForVisitedLink forVisitedLink = Style::ForVisitedLink::No;
+    style::ForVisitedLink forVisitedLink = style::ForVisitedLink::No;
 
-    // Options to pass when resolving any other keyword with CSS::colorFromKeyword()
-    StyleColorOptions keywordOptions = {};
+    // Options to pass when resolving any other keyword with css::ColorFromKeyword()
+    style::ColorOptions keywordOptions = {};
 
     // Appearance used to select from a light-dark() color function.
     // If unset, light-dark() colors will return the invalid Color.
-    Maybe<LightDarkColorAppearance> appearance = std::nullopt;
+    Maybe<LightDarkColorAppearance> appearance = null;
 
     // Colors are resolved:
     //   1. Checking if the color is set below, and if it is, returning it.

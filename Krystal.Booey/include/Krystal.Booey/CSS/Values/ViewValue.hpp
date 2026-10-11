@@ -12,6 +12,13 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static Ref<ViewValue> Create(Ref<Value> axis, Ref<Value> startInset,
                                                 Ref<Value> endInset) noexcept;
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool Equals(const ViewValue &other) const noexcept;
+
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
   };
 }
 

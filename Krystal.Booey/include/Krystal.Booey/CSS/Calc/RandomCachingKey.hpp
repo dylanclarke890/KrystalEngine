@@ -1,139 +1,109 @@
-/*
- * Copyright (C) 2024-2025 Samuel Weinig <sam@webkit.org>
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 #pragma once
 
-#include <optional>
-#include <WebCore/CSSCalcTree.h>
-#include <wtf/Hasher.h>
-#include <wtf/HashFunctions.h>
-#include <wtf/HashTraits.h>
+#include "Krystal.Booey/CSS/Calc/Tree.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::css
+namespace krys::boo::css::calc
 {
-  namespace CSSCalc
+  struct RandomCachingKey
   {
+    using IdentifierVariant = Variant<Random::SharingOptions::Auto, CSSOMStringAtom,
+                                      krys::HashTableDeletedValueTag, krys::HashTableEmptyValueTag>;
 
-    struct RandomCachingKey
+    IdentifierVariant Identifier;
+
+    RandomCachingKey(Variant<Random::SharingOptions::Auto, CSSOMStringAtom> &&Identifier) noexcept
+        : Identifier {krys::SwitchOn(krys::move(Identifier), [](auto &&alternative)
+                                     { return IdentifierVariant {krys::move(alternative)}; })}
     {
-      using Identifier = Variant<Random::SharingOptions::Auto, CSSOMStringAtom, WTF::HashTableDeletedValueType,
-                                 WTF::HashTableEmptyValueType>;
-      Identifier identifier;
-
-      RandomCachingKey(Variant<Random::SharingOptions::Auto, CSSOMStringAtom> &&identifier)
-          : identifier {WTF::switchOn(WTF::move(identifier),
-                                      [](auto &&alternative) { return Identifier {WTF::move(alternative)}; })}
-      {
-      }
-
-      RandomCachingKey(const Variant<Random::SharingOptions::Auto, CSSOMStringAtom> &identifier)
-          : identifier {
-              WTF::switchOn(identifier, [](const auto &alternative) { return Identifier {alternative}; })}
-      {
-      }
-
-      explicit RandomCachingKey(WTF::HashTableDeletedValueType) : identifier {WTF::HashTableDeletedValue}
-      {
-      }
-
-      explicit RandomCachingKey(WTF::HashTableEmptyValueType) : identifier {WTF::HashTableEmptyValue}
-      {
-      }
-
-      bool isHashTableDeletedValue() const
-      {
-        return std::holds_alternative<WTF::HashTableDeletedValueType>(identifier);
-      }
-      bool isHashTableEmptyValue() const
-      {
-        return std::holds_alternative<WTF::HashTableEmptyValueType>(identifier);
-      }
-
-      bool operator==(const RandomCachingKey &) const = default;
-    };
-
-  } // namespace CSSCalc
-} // namespace krys::boo::css
-
-namespace WTF
-{
-
-  struct CSSCalcRandomCachingKeyHash
-  {
-    static unsigned hash(const WebCore::CSSCalc::RandomCachingKey &key)
-    {
-      Hasher hasher;
-      add(hasher, key.identifier.index());
-      WTF::switchOn(
-        key.identifier,
-        [&](const WebCore::CSSCalc::Random::SharingOptions::Auto &autoValue)
-        {
-          add(hasher, autoValue.property);
-          add(hasher, autoValue.index);
-        },
-        [&](const CSSOMStringAtom &string) { add(hasher, string); },
-        [](const WTF::HashTableDeletedValueType &) { RELEASE_ASSERT_NOT_REACHED(); },
-        [](const WTF::HashTableEmptyValueType &) { RELEASE_ASSERT_NOT_REACHED(); });
-      return hasher.hash();
     }
-    static bool equal(const WebCore::CSSCalc::RandomCachingKey &a,
-                      const WebCore::CSSCalc::RandomCachingKey &b)
+
+    RandomCachingKey(const Variant<Random::SharingOptions::Auto, CSSOMStringAtom> &Identifier) noexcept
+        : Identifier {krys::SwitchOn(Identifier,
+                                     [](const auto &alternative) { return IdentifierVariant {alternative}; })}
+    {
+    }
+
+    explicit RandomCachingKey(krys::HashTableDeletedValueTag) noexcept
+        : Identifier {krys::HashTableDeletedValueTag {}}
+    {
+    }
+
+    explicit RandomCachingKey(krys::HashTableEmptyValueTag) noexcept
+        : Identifier {krys::HashTableEmptyValueTag {}}
+    {
+    }
+
+    KRYS_NODISCARD bool IsHashTableDeletedValue() const noexcept
+    {
+      return std::holds_alternative<krys::HashTableDeletedValueTag>(Identifier);
+    }
+
+    KRYS_NODISCARD bool IsHashTableEmptyValue() const noexcept
+    {
+      return std::holds_alternative<krys::HashTableEmptyValueTag>(Identifier);
+    }
+
+    bool operator==(const RandomCachingKey &) const noexcept = default;
+  };
+
+  struct RandomCachingKeyHash
+  {
+    constexpr static bool SafeToCompareToEmptyOrDeleted = true;
+
+    KRYS_NODISCARD static size_t Hash(const krys::boo::css::calc::RandomCachingKey &key) noexcept
+    {
+      return krys::SwitchOn(
+        key.Identifier, [&](const krys::boo::css::calc::Random::SharingOptions::Auto &autoValue)
+        { return krys::Hash::Combine(key.Identifier.index(), autoValue.Property, autoValue.Index); },
+        [&](const krys::boo::css::CSSOMStringAtom &string)
+        { return krys::Hash::Combine(key.Identifier.index(), string); }, [](const HashTableDeletedValueTag &)
+        { krys_unreachable(); }, [](const HashTableEmptyValueTag &) { krys_unreachable(); });
+    }
+
+    KRYS_NODISCARD static bool Equal(const krys::boo::css::calc::RandomCachingKey &a,
+                                     const krys::boo::css::calc::RandomCachingKey &b) noexcept
     {
       return a == b;
     }
-    static const bool safeToCompareToEmptyOrDeleted = true;
+  };
+}
+
+namespace krys
+{
+  template <>
+  struct HashTraits<krys::boo::css::calc::RandomCachingKey>
+      : public GenericHashTraits<krys::boo::css::calc::RandomCachingKey>
+  {
+    constexpr static bool HasIsEmptyValueFunction = true;
+    constexpr static bool EmptyValueIsZero = false;
+
+    KRYS_NODISCARD static krys::boo::css::calc::RandomCachingKey EmptyValue() noexcept
+    {
+      return krys::boo::css::calc::RandomCachingKey(HashTableEmptyValueTag {});
+    }
+
+    KRYS_NODISCARD static bool IsEmptyValue(const krys::boo::css::calc::RandomCachingKey &value) noexcept
+    {
+      return value.IsHashTableEmptyValue();
+    }
+
+    static void ConstructDeletedValue(krys::boo::css::calc::RandomCachingKey &slot) noexcept
+    {
+      new (NotNullTag {}, &slot) krys::boo::css::calc::RandomCachingKey(HashTableDeletedValueTag {});
+    }
+
+    KRYS_NODISCARD static bool IsDeletedValue(const krys::boo::css::calc::RandomCachingKey &slot) noexcept
+    {
+      return slot.IsHashTableDeletedValue();
+    }
   };
 
   template <>
-  struct HashTraits<WebCore::CSSCalc::RandomCachingKey>
-      : GenericHashTraits<WebCore::CSSCalc::RandomCachingKey>
-  {
-    static WebCore::CSSCalc::RandomCachingKey emptyValue()
-    {
-      return WebCore::CSSCalc::RandomCachingKey(HashTableEmptyValue);
-    }
-    static bool isEmptyValue(const WebCore::CSSCalc::RandomCachingKey &value)
-    {
-      return value.isHashTableEmptyValue();
-    }
-    static void constructDeletedValue(WebCore::CSSCalc::RandomCachingKey &slot)
-    {
-      new (NotNull, &slot) WebCore::CSSCalc::RandomCachingKey(HashTableDeletedValue);
-    }
-    static bool isDeletedValue(const WebCore::CSSCalc::RandomCachingKey &slot)
-    {
-      return slot.isHashTableDeletedValue();
-    }
-
-    static const bool hasIsEmptyValueFunction = true;
-    static const bool emptyValueIsZero = false;
-  };
-
-  template <>
-  struct DefaultHash<WebCore::CSSCalc::RandomCachingKey> : CSSCalcRandomCachingKeyHash
+  struct DefaultHash<krys::boo::css::calc::RandomCachingKey>
+      : public krys::boo::css::calc::RandomCachingKeyHash
   {
   };
-
-} // namespace WTF
+}

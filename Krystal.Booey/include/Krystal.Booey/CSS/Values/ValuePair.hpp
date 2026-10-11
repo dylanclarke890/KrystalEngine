@@ -16,6 +16,13 @@ namespace krys::boo::css
     KRYS_NODISCARD static Ref<ValuePair> CreateNonCoalescing(Ref<Value> &&first,
                                                              Ref<Value> &&second) noexcept;
 
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool Equals(const ValuePair &other) const noexcept;
+
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
+
     KRYS_NODISCARD Value &First() noexcept;
 
     KRYS_NODISCARD Value &Second() noexcept;

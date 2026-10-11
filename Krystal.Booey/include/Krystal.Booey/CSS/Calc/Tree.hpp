@@ -1,1456 +1,1458 @@
-/*
- * Copyright (C) 2024-2025 Samuel Weinig <sam@webkit.org>
- * Copyright (C) 2024 Apple Inc. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 #pragma once
 
-#include <WebCore/CSSCalcType.h>
-#include <WebCore/CSSPrimitiveNumeric.h>
-#include <WebCore/CSSPrimitiveNumericRange.h>
-#include <WebCore/CSSUnits.h>
-#include <WebCore/CSSValueKeywords.h>
-#include <wtf/StdLibExtras.h>
+#include "Krystal.Booey/CSS/Calc/CalcType.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include <wtf/TZoneMalloc.h>
-#include <wtf/SmallList.h>
+#include "Krystal.Booey/CSS/Values/Primitives/PrimitiveNumeric.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
+#include "Krystal.Booey/CSS/Values/Units.hpp"
+#include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
+
+namespace krys::boo::style
+{
+  enum class AnchorSizeDimension : uint8;
+}
 
 namespace krys::boo::css
 {
+  enum class UnitType : uint8;
+}
 
-  namespace Style
+namespace krys::boo::css::calc
+{
+  // Math Operators.
+  struct Sum;
+  struct Product;
+  struct Negate;
+  struct Invert;
+
+  // Math Functions.
+  struct Min;
+  struct Max;
+  struct Clamp;
+  struct RoundNearest;
+  struct RoundUp;
+  struct RoundDown;
+  struct RoundToZero;
+  struct Mod;
+  struct Rem;
+  struct Sin;
+  struct Cos;
+  struct Tan;
+  struct Asin;
+  struct Acos;
+  struct Atan;
+  struct Atan2;
+  struct Pow;
+  struct Sqrt;
+  struct Hypot;
+  struct Log;
+  struct Exp;
+  struct Abs;
+  struct Sign;
+  struct Random;
+  struct Progress;
+
+  // CSS Anchor Positioning functions.
+  struct Anchor;
+  struct AnchorSize;
+
+  template <typename Operation>
+  concept Leaf = requires(Operation) { Operation::IsLeaf == true; };
+
+  template <typename Operation>
+  concept Numeric = requires(Operation) { Operation::IsNumeric == true; };
+
+  // Leaf Values
+  struct Number
   {
-    enum class AnchorSizeDimension : uint8_t;
-  }
+    constexpr static bool IsLeaf = true;
+    constexpr static bool IsNumeric = true;
 
-  enum class CSSUnitType : uint8_t;
+    double Value;
 
-  namespace CSSCalc
+    bool operator==(const Number &) const noexcept = default;
+  };
+
+  struct Percentage
   {
+    constexpr static bool IsLeaf = true;
+    constexpr static bool IsNumeric = true;
 
-    // Math Operators.
-    struct Sum;
-    struct Product;
-    struct Negate;
-    struct Invert;
+    double Value;
+    Type::PercentHintValue Hint;
 
-    // Math Functions.
-    struct Min;
-    struct Max;
-    struct Clamp;
-    struct RoundNearest;
-    struct RoundUp;
-    struct RoundDown;
-    struct RoundToZero;
-    struct Mod;
-    struct Rem;
-    struct Sin;
-    struct Cos;
-    struct Tan;
-    struct Asin;
-    struct Acos;
-    struct Atan;
-    struct Atan2;
-    struct Pow;
-    struct Sqrt;
-    struct Hypot;
-    struct Log;
-    struct Exp;
-    struct Abs;
-    struct Sign;
-    struct Random;
-    struct Progress;
+    bool operator==(const Percentage &) const noexcept = default;
+  };
 
-    // CSS Anchor Positioning functions.
-    struct Anchor;
-    struct AnchorSize;
+  enum class Dimension : uint8_t
+  {
+    Length,
+    Angle,
+    Time,
+    Frequency,
+    Resolution,
+    Flex
+  };
 
-    template <typename Op>
-    concept Leaf = requires(Op) { Op::isLeaf == true; };
+  struct CanonicalDimension
+  {
+    constexpr static bool IsLeaf = true;
+    constexpr static bool IsNumeric = true;
 
-    template <typename Op>
-    concept Numeric = requires(Op) { Op::isNumeric == true; };
+    double Value;
+    Dimension Dimension;
 
-    // Leaf Values
-    struct Number
+    bool operator==(const CanonicalDimension &) const noexcept = default;
+  };
+
+  struct NonCanonicalDimension
+  {
+    constexpr static bool IsLeaf = true;
+    constexpr static bool IsNumeric = true;
+
+    double Value;
+    UnitType Unit;
+
+    bool operator==(const NonCanonicalDimension &) const noexcept = default;
+  };
+
+  struct Symbol
+  {
+    constexpr static bool IsLeaf = true;
+
+    ValueId Id;
+    UnitType Unit;
+
+    bool operator==(const Symbol &) const noexcept = default;
+  };
+
+  // Tree Counting Functions - https://drafts.csswg.org/css-values-5/#tree-counting
+  // NOTE: As these functions don't have any parameters, they are leaf nodes.
+
+  struct SiblingCount
+  {
+    constexpr static bool IsLeaf = true;
+    constexpr static auto Id = ValueId::SiblingCount;
+
+    // <sibling-count()> = sibling-count()
+    //     - INPUT: none
+    //     - OUTPUT: integer
+
+    bool operator==(const SiblingCount &) const noexcept = default;
+  };
+
+  struct SiblingIndex
+  {
+    constexpr static bool IsLeaf = true;
+    constexpr static auto Id = ValueId::SiblingIndex;
+
+    // <sibling-Index()> = sibling-Index()
+    //     - INPUT: none
+    //     - OUTPUT: integer
+
+    bool operator==(const SiblingIndex &) const noexcept = default;
+  };
+
+  template <typename Operation>
+  struct IndirectNode
+  {
+    Type Type;
+    UniquePtr<Operation> Op;
+
+    KRYS_NODISCARD const Operation &operator*() const noexcept
     {
-      static constexpr bool isLeaf = true;
-      static constexpr bool isNumeric = true;
-
-      double value;
-
-      bool operator==(const Number &) const = default;
-    };
-
-    struct Percentage
-    {
-      static constexpr bool isLeaf = true;
-      static constexpr bool isNumeric = true;
-
-      double value;
-      Type::PercentHintValue hint;
-
-      bool operator==(const Percentage &) const = default;
-    };
-
-    struct CanonicalDimension
-    {
-      static constexpr bool isLeaf = true;
-      static constexpr bool isNumeric = true;
-
-      enum class Dimension : uint8_t
-      {
-        Length,
-        Angle,
-        Time,
-        Frequency,
-        Resolution,
-        Flex
-      };
-
-      double value;
-      Dimension dimension;
-
-      bool operator==(const CanonicalDimension &) const = default;
-    };
-
-    struct NonCanonicalDimension
-    {
-      static constexpr bool isLeaf = true;
-      static constexpr bool isNumeric = true;
-
-      double value;
-      CSSUnitType unit;
-
-      bool operator==(const NonCanonicalDimension &) const = default;
-    };
-
-    struct Symbol
-    {
-      static constexpr bool isLeaf = true;
-
-      CSSValueID id;
-      CSSUnitType unit;
-
-      bool operator==(const Symbol &) const = default;
-    };
-
-    // Tree Counting Functions - https://drafts.csswg.org/css-values-5/#tree-counting
-    // NOTE: As these functions don't have any parameters, they are leaf nodes.
-
-    struct SiblingCount
-    {
-      static constexpr bool isLeaf = true;
-      static constexpr auto id = CSSValueSiblingCount;
-
-      // <sibling-count()> = sibling-count()
-      //     - INPUT: none
-      //     - OUTPUT: integer
-
-      bool operator==(const SiblingCount &) const = default;
-    };
-
-    struct SiblingIndex
-    {
-      static constexpr bool isLeaf = true;
-      static constexpr auto id = CSSValueSiblingIndex;
-
-      // <sibling-index()> = sibling-index()
-      //     - INPUT: none
-      //     - OUTPUT: integer
-
-      bool operator==(const SiblingIndex &) const = default;
-    };
-
-    template <typename Op>
-    struct IndirectNode
-    {
-      Type type;
-      UniqueRef<Op> op;
-
-      // Forward * and -> to the operation for convenience.
-      const Op &operator*() const
-      {
-        return op.get();
-      }
-      Op &operator*()
-      {
-        return op.get();
-      }
-      const Op *operator->() const
-      {
-        return op.ptr();
-      }
-      Op *operator->()
-      {
-        return op.ptr();
-      }
-      operator const Op &() const
-      {
-        return op.get();
-      }
-      operator Op &()
-      {
-        return op.get();
-      }
-
-      bool operator==(const IndirectNode<Op> &other) const
-      {
-        return type == other.type && arePointingToEqualData(op, other.op);
-      }
-    };
-
-    using Node = Variant<
-      Number, Percentage, CanonicalDimension, NonCanonicalDimension, Symbol, SiblingCount, SiblingIndex,
-      IndirectNode<Sum>, IndirectNode<Product>, IndirectNode<Negate>, IndirectNode<Invert>, IndirectNode<Min>,
-      IndirectNode<Max>, IndirectNode<Clamp>, IndirectNode<RoundNearest>, IndirectNode<RoundUp>,
-      IndirectNode<RoundDown>, IndirectNode<RoundToZero>, IndirectNode<Mod>, IndirectNode<Rem>,
-      IndirectNode<Sin>, IndirectNode<Cos>, IndirectNode<Tan>, IndirectNode<Asin>, IndirectNode<Acos>,
-      IndirectNode<Atan>, IndirectNode<Atan2>, IndirectNode<Pow>, IndirectNode<Sqrt>, IndirectNode<Hypot>,
-      IndirectNode<Log>, IndirectNode<Exp>, IndirectNode<Abs>, IndirectNode<Sign>, IndirectNode<Random>,
-      IndirectNode<Progress>, IndirectNode<Anchor>, IndirectNode<AnchorSize>>;
-
-    struct Child
-    {
-      Node value;
-
-      template <typename T>
-      requires std::constructible_from<Node, T>
-      Child(T &&);
-
-      FORWARD_VARIANT_FUNCTIONS(Child, value)
-
-      bool operator==(const Child &) const = default;
-    };
-
-    struct ChildOrNone
-    {
-      Variant<Child, CSS::Keyword::None> value;
-
-      ChildOrNone(Child &&);
-      ChildOrNone(CSS::Keyword::None);
-
-      FORWARD_VARIANT_FUNCTIONS(ChildOrNone, value)
-
-      bool operator==(const ChildOrNone &) const = default;
-    };
-
-    struct Children
-    {
-      using iterator = typename SmallList<Child>::iterator;
-      using reverse_iterator = typename SmallList<Child>::reverse_iterator;
-      using const_iterator = typename SmallList<Child>::const_iterator;
-      using const_reverse_iterator = typename SmallList<Child>::const_reverse_iterator;
-      using value_type = typename SmallList<Child>::value_type;
-
-      SmallList<Child> value;
-
-      Children(Children &&);
-      Children(SmallList<Child> &&);
-      Children &operator=(Children &&);
-      Children &operator=(SmallList<Child> &&);
-
-      iterator begin() LIFETIME_BOUND;
-      iterator end() LIFETIME_BOUND;
-      reverse_iterator rbegin() LIFETIME_BOUND;
-      reverse_iterator rend() LIFETIME_BOUND;
-
-      const_iterator begin() const LIFETIME_BOUND;
-      const_iterator end() const LIFETIME_BOUND;
-      const_reverse_iterator rbegin() const LIFETIME_BOUND;
-      const_reverse_iterator rend() const LIFETIME_BOUND;
-
-      bool isEmpty() const;
-      size_t size() const;
-
-      Child &operator[](size_t i) LIFETIME_BOUND;
-      const Child &operator[](size_t i) const LIFETIME_BOUND;
-
-      bool operator==(const Children &) const = default;
-    };
-
-    enum class Stage : bool
-    {
-      Specified,
-      Computed
-    };
-
-    struct Tree
-    {
-      Child root;
-      Type type;
-      Stage stage;
-
-      // `requiresConversionData` is used both to both indicate whether eager evaluation of the tree (at parse
-      // time) is possible or not and to trigger a warning in `CSSCalcValue::doubleValueDeprecated` that the
-      // evaluation results will be incorrect.
-      bool requiresConversionData = false;
-
-      bool operator==(const Tree &) const = default;
-    };
-
-    struct Sum
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Sum);
-
-      Children children;
-
-      bool operator==(const Sum &) const = default;
-    };
-
-    struct Product
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Product);
-
-      Children children;
-
-      bool operator==(const Product &) const = default;
-    };
-
-    struct Negate
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Negate);
-
-      Child a;
-
-      bool operator==(const Negate &) const = default;
-    };
-
-    struct Invert
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Invert);
-
-      Child a;
-
-      bool operator==(const Invert &) const = default;
-    };
-
-    // Math Functions
-
-    // Comparison Functions - https://drafts.csswg.org/css-values-4/#comp-func
-    struct Min
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Min);
-      static constexpr auto id = CSSValueMin;
-
-      // <min()>   = min( <calc-sum># )
-      //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
-      //     - OUTPUT: consistent type
-      static constexpr auto input = AllowedTypes::Any;
-      static constexpr auto merge = MergePolicy::Consistent;
-      static constexpr auto output = OutputTransform::None;
-
-      Children children;
-
-      bool operator==(const Min &) const = default;
-    };
-
-    struct Max
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Max);
-      static constexpr auto id = CSSValueMax;
-
-      // <max()>   = max( <calc-sum># )
-      //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
-      //     - OUTPUT: consistent type
-      static constexpr auto input = AllowedTypes::Any;
-      static constexpr auto merge = MergePolicy::Consistent;
-      static constexpr auto output = OutputTransform::None;
-
-      Children children;
-
-      bool operator==(const Max &) const = default;
-    };
-
-    struct Clamp
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Clamp);
-      static constexpr auto id = CSSValueClamp;
-
-      // <clamp()> = clamp( [ <calc-sum> | none ], <calc-sum>, [ <calc-sum> | none ] )
-      //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
-      //     - OUTPUT: consistent type
-      static constexpr auto input = AllowedTypes::Any;
-      static constexpr auto merge = MergePolicy::Consistent;
-      static constexpr auto output = OutputTransform::None;
-
-      ChildOrNone min;
-      Child val;
-      ChildOrNone max;
-
-      bool operator==(const Clamp &) const = default;
-    };
-
-    // Stepped Value Functions - https://drafts.csswg.org/css-values-4/#round-func
-    struct RoundNearest
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(RoundNearest);
-      static constexpr auto id = CSSValueNearest;
-
-      // <round()> = round( <rounding-strategy>?, <calc-sum>, <calc-sum> )
-      //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
-      //     - OUTPUT: consistent type
-      static constexpr auto input = AllowedTypes::Any;
-      static constexpr auto merge = MergePolicy::Consistent;
-      static constexpr auto output = OutputTransform::None;
-
-      // -- and --
-
-      // <round()> = round( <rounding-strategy>?, <calc-sum> )
-      //     - INPUT: "consistent" <number>
-      //     - OUTPUT: consistent type
-
-      // NOTE: This is special cased in the code.
-
-      Child a;
-      std::optional<Child> b;
-
-      bool operator==(const RoundNearest &) const = default;
-    };
-
-    struct RoundUp
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(RoundUp);
-      static constexpr auto id = CSSValueUp;
-
-      // <round()> = round( <rounding-strategy>?, <calc-sum>, <calc-sum> )
-      //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
-      //     - OUTPUT: consistent type
-      static constexpr auto input = AllowedTypes::Any;
-      static constexpr auto merge = MergePolicy::Consistent;
-      static constexpr auto output = OutputTransform::None;
-
-      // -- and --
-
-      // <round()> = round( <rounding-strategy>?, <calc-sum> )
-      //     - INPUT: "consistent" <number>
-      //     - OUTPUT: consistent type
-
-      // NOTE: This is special cased in the code.
-
-      Child a;
-      std::optional<Child> b;
-
-      bool operator==(const RoundUp &) const = default;
-    };
-
-    struct RoundDown
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(RoundDown);
-      static constexpr auto id = CSSValueDown;
-
-      // <round()> = round( <rounding-strategy>?, <calc-sum>, <calc-sum> )
-      //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
-      //     - OUTPUT: consistent type
-      static constexpr auto input = AllowedTypes::Any;
-      static constexpr auto merge = MergePolicy::Consistent;
-      static constexpr auto output = OutputTransform::None;
-
-      // -- and --
-
-      // <round()> = round( <rounding-strategy>?, <calc-sum> )
-      //     - INPUT: "consistent" <number>
-      //     - OUTPUT: consistent type
-
-      // NOTE: This is special cased in the code.
-
-      Child a;
-      std::optional<Child> b;
-
-      bool operator==(const RoundDown &) const = default;
-    };
-
-    struct RoundToZero
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(RoundToZero);
-      static constexpr auto id = CSSValueToZero;
-
-      // <round()> = round( <rounding-strategy>?, <calc-sum>, <calc-sum> )
-      //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
-      //     - OUTPUT: consistent type
-      static constexpr auto input = AllowedTypes::Any;
-      static constexpr auto merge = MergePolicy::Consistent;
-      static constexpr auto output = OutputTransform::None;
-
-      // -- and --
-
-      // <round()> = round( <rounding-strategy>?, <calc-sum> )
-      //     - INPUT: "consistent" <number>
-      //     - OUTPUT: consistent type
-
-      // NOTE: This is special cased in the code.
-
-      Child a;
-      std::optional<Child> b;
-
-      bool operator==(const RoundToZero &) const = default;
-    };
-
-    struct Mod
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Mod);
-      static constexpr auto id = CSSValueMod;
-
-      // <mod()>   = mod( <calc-sum>, <calc-sum> )
-      //     - INPUT: "same" <number>, <dimension>, or <percentage>
-      //     - OUTPUT: same type
-      static constexpr auto input = AllowedTypes::Any;
-      // FIXME: Spec says this should enforce same type, but tests indicate it should be consistent type.
-      static constexpr auto merge = MergePolicy::Consistent;
-      static constexpr auto output = OutputTransform::None;
-
-      Child a;
-      Child b;
-
-      bool operator==(const Mod &) const = default;
-    };
-
-    struct Rem
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Rem);
-      static constexpr auto id = CSSValueRem;
-
-      // <rem()>   = rem( <calc-sum>, <calc-sum> )
-      //     - INPUT: "same" <number>, <dimension>, or <percentage>
-      //     - OUTPUT: same type
-      static constexpr auto input = AllowedTypes::Any;
-      // FIXME: Spec says this should enforce same type, but tests indicate it should be consistent type.
-      static constexpr auto merge = MergePolicy::Consistent;
-      static constexpr auto output = OutputTransform::None;
-
-      Child a;
-      Child b;
-
-      bool operator==(const Rem &) const = default;
-    };
-
-    // Trigonometric Functions - https://drafts.csswg.org/css-values-4/#trig-funcs
-    struct Sin
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Sin);
-      static constexpr auto id = CSSValueSin;
-
-      // <sin()>   = sin( <calc-sum> )
-      //     - INPUT: <number> or <angle>
-      //     - OUTPUT: <number> "made consistent"
-      static constexpr auto input = AllowedTypes::NumberOrAngle;
-      static constexpr auto output = OutputTransform::NumberMadeConsistent;
-
-      Child a;
-
-      bool operator==(const Sin &) const = default;
-    };
-
-    struct Cos
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Cos);
-      static constexpr auto id = CSSValueCos;
-
-      // <cos()>   = cos( <calc-sum> )
-      //     - INPUT: <number> or <angle>
-      //     - OUTPUT: <number> "made consistent"
-      static constexpr auto input = AllowedTypes::NumberOrAngle;
-      static constexpr auto output = OutputTransform::NumberMadeConsistent;
-
-      Child a;
-
-      bool operator==(const Cos &) const = default;
-    };
-
-    struct Tan
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Tan);
-      static constexpr auto id = CSSValueTan;
-
-      // <tan()>   = tan( <calc-sum> )
-      //     - INPUT: <number> or <angle>
-      //     - OUTPUT: <number> "made consistent"
-      static constexpr auto input = AllowedTypes::NumberOrAngle;
-      static constexpr auto output = OutputTransform::NumberMadeConsistent;
-
-      Child a;
-
-      bool operator==(const Tan &) const = default;
-    };
-
-    struct Asin
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Asin);
-      static constexpr auto id = CSSValueAsin;
-
-      // <asin()>  = asin( <calc-sum> )
-      //     - INPUT: <number>
-      //     - OUTPUT: <angle> "made consistent"
-      static constexpr auto input = AllowedTypes::Number;
-      static constexpr auto output = OutputTransform::AngleMadeConsistent;
-
-      Child a;
-
-      bool operator==(const Asin &) const = default;
-    };
-
-    struct Acos
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Acos);
-      static constexpr auto id = CSSValueAcos;
-
-      // <acos()>  = acos( <calc-sum> )
-      //     - INPUT: <number>
-      //     - OUTPUT: <angle> "made consistent"
-      static constexpr auto input = AllowedTypes::Number;
-      static constexpr auto output = OutputTransform::AngleMadeConsistent;
-
-      Child a;
-
-      bool operator==(const Acos &) const = default;
-    };
-
-    struct Atan
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Atan);
-      static constexpr auto id = CSSValueAtan;
-
-      // <atan()>  = atan( <calc-sum> )
-      //     - INPUT: <number>
-      //     - OUTPUT: <angle> "made consistent"
-      static constexpr auto input = AllowedTypes::Number;
-      static constexpr auto output = OutputTransform::AngleMadeConsistent;
-
-      Child a;
-
-      bool operator==(const Atan &) const = default;
-    };
-
-    struct Atan2
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Atan2);
-      static constexpr auto id = CSSValueAtan2;
-
-      // <atan2()> = atan2( <calc-sum>, <calc-sum> )
-      //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
-      //     - OUTPUT: <angle> "made consistent"
-      static constexpr auto input = AllowedTypes::Any;
-      static constexpr auto merge = MergePolicy::Consistent;
-      static constexpr auto output = OutputTransform::AngleMadeConsistent;
-
-      Child a;
-      Child b;
-
-      bool operator==(const Atan2 &) const = default;
-    };
-
-    // Exponential Functions - https://drafts.csswg.org/css-values-4/#exponent-funcs
-    struct Pow
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Pow);
-      static constexpr auto id = CSSValuePow;
-
-      // <pow()>   = pow( <calc-sum>, <calc-sum> )
-      //     - INPUT: "consistent" <number>
-      //     - OUTPUT: consistent type
-      static constexpr auto input = AllowedTypes::Number;
-      static constexpr auto merge = MergePolicy::Consistent;
-      static constexpr auto output = OutputTransform::None;
-
-      Child a;
-      Child b;
-
-      bool operator==(const Pow &) const = default;
-    };
-
-    struct Sqrt
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Sqrt);
-      static constexpr auto id = CSSValueSqrt;
-
-      // <sqrt()>  = sqrt( <calc-sum> )
-      //     - INPUT: <number>
-      //     - OUTPUT: <number> "made consistent"
-      static constexpr auto input = AllowedTypes::Number;
-      static constexpr auto output = OutputTransform::NumberMadeConsistent;
-
-      Child a;
-
-      bool operator==(const Sqrt &) const = default;
-    };
-
-    struct Hypot
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Hypot);
-      static constexpr auto id = CSSValueHypot;
-
-      // <hypot()> = hypot( <calc-sum># )
-      //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
-      //     - OUTPUT: consistent type
-      static constexpr auto input = AllowedTypes::Any;
-      static constexpr auto merge = MergePolicy::Consistent;
-      static constexpr auto output = OutputTransform::None;
-
-      Children children;
-
-      bool operator==(const Hypot &) const = default;
-    };
-
-    struct Log
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Log);
-      static constexpr auto id = CSSValueLog;
-
-      // <log()>   = log( <calc-sum>, <calc-sum>? )
-      //     - INPUT: <number>
-      //     - OUTPUT: <number> "made consistent"
-      static constexpr auto input = AllowedTypes::Number;
-      static constexpr auto merge = MergePolicy::Consistent;
-      static constexpr auto output = OutputTransform::NumberMadeConsistent;
-
-      Child a;
-      std::optional<Child> b;
-
-      bool operator==(const Log &) const = default;
-    };
-
-    struct Exp
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Exp);
-      static constexpr auto id = CSSValueExp;
-
-      // <exp()>   = exp( <calc-sum> )
-      //     - INPUT: <number>
-      //     - OUTPUT: <number> "made consistent"
-      static constexpr auto input = AllowedTypes::Number;
-      static constexpr auto output = OutputTransform::NumberMadeConsistent;
-
-      Child a;
-
-      bool operator==(const Exp &) const = default;
-    };
-
-    // Sign-Related Functions - https://drafts.csswg.org/css-values-4/#sign-funcs
-    struct Abs
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Abs);
-      static constexpr auto id = CSSValueAbs;
-
-      // <abs()>   = abs( <calc-sum> )
-      //     - INPUT: any
-      //     - OUTPUT: input type
-      static constexpr auto input = AllowedTypes::Any;
-      static constexpr auto output = OutputTransform::None;
-
-      Child a;
-
-      bool operator==(const Abs &) const = default;
-    };
-
-    struct Sign
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Sign);
-      static constexpr auto id = CSSValueSign;
-
-      // <sign()>  = sign( <calc-sum> )
-      //     - INPUT: any
-      //     - OUTPUT: <number> "made consistent"
-      static constexpr auto input = AllowedTypes::Any;
-      static constexpr auto output = OutputTransform::NumberMadeConsistent;
-
-      Child a;
-
-      bool operator==(const Sign &) const = default;
-    };
-
-    // Random Function - https://drafts.csswg.org/css-values-5/#random
-    struct Random
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Random);
-      static constexpr auto id = CSSValueRandom;
-
-      // <random-value-sharing> = [ [ auto | <dashed-ident> ] || element-shared ] | fixed <number [0,1]>
-      struct SharingOptions
-      {
-        struct Auto
-        {
-          CSSPropertyID property;
-          unsigned index;
-
-          bool operator==(const Auto &) const = default;
-        };
-        Variant<Auto, CSSOMStringAtom> identifier;
-        std::optional<CSS::Keyword::ElementShared> elementShared;
-
-        bool operator==(const SharingOptions &) const = default;
-      };
-      struct SharingFixed
-      {
-        CSS::Number<CSS::ClosedUnitRange> value;
-
-        bool operator==(const SharingFixed &) const = default;
-      };
-      using Sharing = Variant<SharingOptions, SharingFixed>;
-
-      // <random()> = random( <random-value-sharing>? , <calc-sum>, <calc-sum>, <calc-sum>? )
-      //     - INPUT: "same" <number>, <dimension>, or <percentage>
-      //     - OUTPUT: same type
-      static constexpr auto input = AllowedTypes::Any;
-      static constexpr auto merge = MergePolicy::Same;
-      static constexpr auto output = OutputTransform::None;
-
-      Sharing sharing;
-      Child min;
-      Child max;
-      std::optional<Child> step;
-
-      bool operator==(const Random &) const = default;
-    };
-
-    // Progress-Related Functions - https://drafts.csswg.org/css-values-5/#progress
-    struct Progress
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Progress);
-      static constexpr auto id = CSSValueProgress;
-
-      // <progress()> = progress( <calc-sum>, <calc-sum>, <calc-sum> )
-      //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
-      //     - OUTPUT: <number> "made consistent"
-      static constexpr auto input = AllowedTypes::Any;
-      static constexpr auto merge = MergePolicy::Consistent;
-      static constexpr auto output = OutputTransform::NumberMadeConsistent;
-
-      Child value;
-      Child start;
-      Child end;
-
-      bool operator==(const Progress &) const = default;
-    };
-
-    // Anchor Positioning Related Functions - https://drafts.csswg.org/css-anchor-position-1/
-
-    struct AnchorSide
-    {
-      // <anchor-side> = inside | outside | top | left | right | bottom | start | end | self-start | self-end
-      // | <percentage> | center
-      Variant<CSSValueID, Child> value;
-
-      AnchorSide(CSSValueID);
-      AnchorSide(Child &&);
-
-      FORWARD_VARIANT_FUNCTIONS(AnchorSide, value)
-
-      bool operator==(const AnchorSide &) const = default;
-    };
-
-    struct Anchor
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(Anchor);
-      static constexpr auto id = CSSValueAnchor;
-
-      // <anchor()> = anchor( <anchor-element>? && <anchor-side>, <length-percentage>? )
-
-      // Can't use Style::ScopedName here, since the scope ordinal is not available at
-      // parsing time.
-      CSSOMStringAtom elementName;
-      AnchorSide side;
-      std::optional<Child> fallback;
-
-      bool operator==(const Anchor &) const = default;
-    };
-
-    struct AnchorSize
-    {
-      WTF_MAKE_STRUCT_TZONE_ALLOCATED(AnchorSize);
-      static constexpr auto id = CSSValueAnchorSize;
-
-      // anchor-size() = anchor-size( [ <anchor-element> || <anchor-size> ]? , <length-percentage>? )
-      // <anchor-element> = <dashed-ident>
-      // <anchor-size> = width | height | block | inline | self-block | self-inline
-
-      // Can't use Style::ScopedName here, since the scope ordinal is not available at
-      // parsing time.
-      CSSOMStringAtom elementName;                              // <anchor-element>
-      std::optional<Style::AnchorSizeDimension> dimension; // <anchor-size>
-      std::optional<Child> fallback;
-
-      bool operator==(const AnchorSize &) const = default;
-    };
-
-    // MARK: TextStream
-
-    TextStream &operator<<(TextStream &, Tree);
-
-    // MARK: Construction
-
-    // Default implementation of ChildConstruction used for all indirect nodes.
-    template <typename Op>
-    struct ChildConstruction
-    {
-      static Child make(Op &&op, Type type)
-      {
-        return Child {IndirectNode<Op> {type, makeUniqueRef<Op>(WTF::move(op))}};
-      }
-    };
-
-    // Specialized implementation of ChildConstruction for leaf nodes, needed to avoid `makeUniqueRef`.
-    template <Leaf T>
-    struct ChildConstruction<T>
-    {
-      static Child make(T &&op, Type)
-      {
-        return Child {WTF::move(op)};
-      }
-      static Child make(T &&op)
-      {
-        return Child {WTF::move(op)};
-      }
-    };
-
-    template <typename Op>
-    Child makeChild(Op op)
-    {
-      return ChildConstruction<Op>::make(WTF::move(op));
+      return *Op;
     }
 
-    template <typename Op>
-    Child makeChild(Op op, Type type)
+    KRYS_NODISCARD Operation &operator*() noexcept
     {
-      return ChildConstruction<Op>::make(WTF::move(op), type);
+      return *Op;
     }
 
-    // MARK: CSSCalc::Type Evaluation
-
-    // Gets the type stored in the IndirectNode.
-    template <typename T>
-    inline Type getType(const IndirectNode<T> &root)
+    KRYS_NODISCARD const Operation *operator->() const noexcept
     {
-      return root.type;
+      return Op.get();
     }
 
-    // Gets the Type representing a CanonicalDimension::Dimension.
-    Type getType(CanonicalDimension::Dimension);
-
-    // Gets the Type of the leaf node.
-    Type getType(const Number &);
-    Type getType(const Percentage &);
-    Type getType(const NonCanonicalDimension &);
-    Type getType(const CanonicalDimension &);
-    Type getType(const Symbol &);
-    Type getType(const SiblingCount &);
-    Type getType(const SiblingIndex &);
-
-    // Gets the Type of the child node.
-    Type getType(const Child &);
-
-    // Constructs the nodes's type from it the types of its arguments. Returns `std::nullopt` on failure.
-    std::optional<Type> toType(const Sum &);
-    std::optional<Type> toType(const Product &);
-    std::optional<Type> toType(const Negate &);
-    std::optional<Type> toType(const Invert &);
-    std::optional<Type> toType(const Min &);
-    std::optional<Type> toType(const Max &);
-    std::optional<Type> toType(const Clamp &);
-    std::optional<Type> toType(const RoundNearest &);
-    std::optional<Type> toType(const RoundUp &);
-    std::optional<Type> toType(const RoundDown &);
-    std::optional<Type> toType(const RoundToZero &);
-    std::optional<Type> toType(const Mod &);
-    std::optional<Type> toType(const Rem &);
-    std::optional<Type> toType(const Sin &);
-    std::optional<Type> toType(const Cos &);
-    std::optional<Type> toType(const Tan &);
-    std::optional<Type> toType(const Asin &);
-    std::optional<Type> toType(const Acos &);
-    std::optional<Type> toType(const Atan &);
-    std::optional<Type> toType(const Atan2 &);
-    std::optional<Type> toType(const Pow &);
-    std::optional<Type> toType(const Sqrt &);
-    std::optional<Type> toType(const Hypot &);
-    std::optional<Type> toType(const Log &);
-    std::optional<Type> toType(const Exp &);
-    std::optional<Type> toType(const Abs &);
-    std::optional<Type> toType(const Sign &);
-    std::optional<Type> toType(const Random &);
-    std::optional<Type> toType(const Progress &);
-
-    // MARK: CSSUnitType Evaluation
-
-    // Maps CanonicalDimension::Dimension to its CSSUnitType counterpart.
-    constexpr CSSUnitType toCSSUnit(const CanonicalDimension::Dimension &dimension)
+    KRYS_NODISCARD Operation *operator->() noexcept
     {
-      switch (dimension)
-      {
-        case CanonicalDimension::Dimension::Length:     return CSSUnitType::CSS_PX;
-        case CanonicalDimension::Dimension::Angle:      return CSSUnitType::CSS_DEG;
-        case CanonicalDimension::Dimension::Time:       return CSSUnitType::CSS_S;
-        case CanonicalDimension::Dimension::Frequency:  return CSSUnitType::CSS_HZ;
-        case CanonicalDimension::Dimension::Resolution: return CSSUnitType::CSS_DPPX;
-        case CanonicalDimension::Dimension::Flex:       return CSSUnitType::CSS_FR;
-      }
-
-      ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-      return CSSUnitType::CSS_PX;
+      return Op.get();
     }
 
-    // Maps Numeric type to its CSSUnitType counterpart.
-    constexpr CSSUnitType toCSSUnit(const Number &)
+    KRYS_NODISCARD operator const Operation &() const noexcept
     {
-      return CSSUnitType::CSS_NUMBER;
-    }
-    constexpr CSSUnitType toCSSUnit(const Percentage &)
-    {
-      return CSSUnitType::CSS_PERCENTAGE;
-    }
-    constexpr CSSUnitType toCSSUnit(const CanonicalDimension &dimension)
-    {
-      return toCSSUnit(dimension.dimension);
-    }
-    constexpr CSSUnitType toCSSUnit(const NonCanonicalDimension &dimension)
-    {
-      return dimension.unit;
+      return *Op;
     }
 
-    // MARK: Predicates
-
-    inline bool isNumeric(const Child &root)
+    KRYS_NODISCARD operator Operation &() noexcept
     {
-      return WTF::switchOn(
-        root, []<Numeric T>(const T &) { return true; }, [](const auto &) { return false; });
+      return *Op;
     }
 
-    // Convenience constructors
-
-    // Makes the appropriate child type (number, percentage, canonical-dimensions, non-canonical-dimension)
-    // based on the CSSUnitType.
-    Child makeNumeric(double, CSSUnitType);
-
-    inline Sum add(Child &&a, Child &&b)
+    KRYS_NODISCARD bool operator==(const IndirectNode<Operation> &other) const noexcept
     {
-      SmallList<Child> sumChildren;
-      sumChildren.append(WTF::move(a));
-      sumChildren.append(WTF::move(b));
-      return Sum {.children = WTF::move(sumChildren)};
+      return Type == other.Type && (Op.get() == other.Op.get() || *Op == *other.Op);
     }
+  };
 
-    inline Product multiply(Child &&a, Child &&b)
-    {
-      SmallList<Child> productChildren;
-      productChildren.append(WTF::move(a));
-      productChildren.append(WTF::move(b));
-      return Product {.children = WTF::move(productChildren)};
-    }
+  using Node =
+    Variant<Number, Percentage, CanonicalDimension, NonCanonicalDimension, Symbol, SiblingCount, SiblingIndex,
+            IndirectNode<Sum>, IndirectNode<Product>, IndirectNode<Negate>, IndirectNode<Invert>,
+            IndirectNode<Min>, IndirectNode<Max>, IndirectNode<Clamp>, IndirectNode<RoundNearest>,
+            IndirectNode<RoundUp>, IndirectNode<RoundDown>, IndirectNode<RoundToZero>, IndirectNode<Mod>,
+            IndirectNode<Rem>, IndirectNode<Sin>, IndirectNode<Cos>, IndirectNode<Tan>, IndirectNode<Asin>,
+            IndirectNode<Acos>, IndirectNode<Atan>, IndirectNode<Atan2>, IndirectNode<Pow>,
+            IndirectNode<Sqrt>, IndirectNode<Hypot>, IndirectNode<Log>, IndirectNode<Exp>, IndirectNode<Abs>,
+            IndirectNode<Sign>, IndirectNode<Random>, IndirectNode<Progress>, IndirectNode<Anchor>,
+            IndirectNode<AnchorSize>>;
 
-    inline Sum subtract(Child &&a, Child &&b)
-    {
-      return add(WTF::move(a), makeChild(Negate {.a = WTF::move(b)}, getType(b)));
-    }
-
-    inline Child makeChildWithValueBasedOn(double value, const Number &)
-    {
-      return makeChild(Number {.value = value});
-    }
-
-    inline Child makeChildWithValueBasedOn(double value, const Percentage &a)
-    {
-      return makeChild(Percentage {.value = value, .hint = a.hint});
-    }
-
-    inline Child makeChildWithValueBasedOn(double value, const CanonicalDimension &a)
-    {
-      return makeChild(CanonicalDimension {.value = value, .dimension = a.dimension});
-    }
-
-    inline Child makeChildWithValueBasedOn(double value, const NonCanonicalDimension &a)
-    {
-      return makeChild(NonCanonicalDimension {.value = value, .unit = a.unit});
-    }
-
-    // MARK: Tuple Conformance
-
-    // get<> overload (along with std::tuple_size and std::tuple_element below) to support destructuring of
-    // operation nodes.
-
-    template <size_t I>
-    const auto &get(const Sum &root)
-    {
-      static_assert(!I);
-      return root.children;
-    }
-
-    template <size_t I>
-    const auto &get(const Product &root)
-    {
-      static_assert(!I);
-      return root.children;
-    }
-
-    template <size_t I>
-    const auto &get(const Negate &root)
-    {
-      static_assert(!I);
-      return root.a;
-    }
-
-    template <size_t I>
-    const auto &get(const Invert &root)
-    {
-      static_assert(!I);
-      return root.a;
-    }
-
-    template <size_t I>
-    const auto &get(const Min &root)
-    {
-      static_assert(!I);
-      return root.children;
-    }
-
-    template <size_t I>
-    const auto &get(const Max &root)
-    {
-      static_assert(!I);
-      return root.children;
-    }
-
-    template <size_t I>
-    const auto &get(const Clamp &root)
-    {
-      if constexpr (!I)
-        return root.min;
-      else if constexpr (I == 1)
-        return root.val;
-      else if constexpr (I == 2)
-        return root.max;
-    }
-
-    template <size_t I>
-    const auto &get(const RoundNearest &root)
-    {
-      if constexpr (!I)
-        return root.a;
-      else if constexpr (I == 1)
-        return root.b;
-    }
-
-    template <size_t I>
-    const auto &get(const RoundUp &root)
-    {
-      if constexpr (!I)
-        return root.a;
-      else if constexpr (I == 1)
-        return root.b;
-    }
-
-    template <size_t I>
-    const auto &get(const RoundDown &root)
-    {
-      if constexpr (!I)
-        return root.a;
-      else if constexpr (I == 1)
-        return root.b;
-    }
-
-    template <size_t I>
-    const auto &get(const RoundToZero &root)
-    {
-      if constexpr (!I)
-        return root.a;
-      else if constexpr (I == 1)
-        return root.b;
-    }
-
-    template <size_t I>
-    const auto &get(const Mod &root)
-    {
-      if constexpr (!I)
-        return root.a;
-      else if constexpr (I == 1)
-        return root.b;
-    }
-
-    template <size_t I>
-    const auto &get(const Rem &root)
-    {
-      if constexpr (!I)
-        return root.a;
-      else if constexpr (I == 1)
-        return root.b;
-    }
-
-    template <size_t I>
-    const auto &get(const Sin &root)
-    {
-      static_assert(!I);
-      return root.a;
-    }
-
-    template <size_t I>
-    const auto &get(const Cos &root)
-    {
-      static_assert(!I);
-      return root.a;
-    }
-
-    template <size_t I>
-    const auto &get(const Tan &root)
-    {
-      static_assert(!I);
-      return root.a;
-    }
-
-    template <size_t I>
-    const auto &get(const Asin &root)
-    {
-      static_assert(!I);
-      return root.a;
-    }
-
-    template <size_t I>
-    const auto &get(const Acos &root)
-    {
-      static_assert(!I);
-      return root.a;
-    }
-
-    template <size_t I>
-    const auto &get(const Atan &root)
-    {
-      static_assert(!I);
-      return root.a;
-    }
-
-    template <size_t I>
-    const auto &get(const Atan2 &root)
-    {
-      if constexpr (!I)
-        return root.a;
-      else if constexpr (I == 1)
-        return root.b;
-    }
-
-    template <size_t I>
-    const auto &get(const Pow &root)
-    {
-      if constexpr (!I)
-        return root.a;
-      else if constexpr (I == 1)
-        return root.b;
-    }
-
-    template <size_t I>
-    const auto &get(const Sqrt &root)
-    {
-      static_assert(!I);
-      return root.a;
-    }
-
-    template <size_t I>
-    const auto &get(const Hypot &root)
-    {
-      static_assert(!I);
-      return root.children;
-    }
-
-    template <size_t I>
-    const auto &get(const Log &root)
-    {
-      if constexpr (!I)
-        return root.a;
-      else if constexpr (I == 1)
-        return root.b;
-    }
-
-    template <size_t I>
-    const auto &get(const Exp &root)
-    {
-      static_assert(!I);
-      return root.a;
-    }
-
-    template <size_t I>
-    const auto &get(const Abs &root)
-    {
-      static_assert(!I);
-      return root.a;
-    }
-
-    template <size_t I>
-    const auto &get(const Sign &root)
-    {
-      static_assert(!I);
-      return root.a;
-    }
-
-    template <size_t I>
-    const auto &get(const Random &root)
-    {
-      if constexpr (!I)
-        return root.sharing;
-      else if constexpr (I == 1)
-        return root.min;
-      else if constexpr (I == 2)
-        return root.max;
-      else if constexpr (I == 3)
-        return root.step;
-    }
-
-    template <size_t I>
-    const auto &get(const Progress &root)
-    {
-      if constexpr (!I)
-        return root.value;
-      else if constexpr (I == 1)
-        return root.start;
-      else if constexpr (I == 2)
-        return root.end;
-    }
-
-    // MARK: Child Definition
+  struct Child
+  {
+    Node Value;
 
     template <typename T>
     requires std::constructible_from<Node, T>
-    Child::Child(T &&value) : value(std::forward<T>(value))
+    Child(T &&) noexcept;
+
+    KRYS_FORWARD_VARIANT_FUNCTIONS(Child, Value)
+
+    bool operator==(const Child &) const noexcept = default;
+  };
+
+  struct ChildOrNone
+  {
+    Variant<Child, keywords::None> Value;
+
+    ChildOrNone(Child &&) noexcept;
+    ChildOrNone(keywords::None) noexcept;
+
+    KRYS_FORWARD_VARIANT_FUNCTIONS(ChildOrNone, Value)
+
+    bool operator==(const ChildOrNone &) const noexcept = default;
+  };
+
+  struct Children
+  {
+    using iterator = typename SmallList<Child>::iterator;
+    using reverse_iterator = typename SmallList<Child>::reverse_iterator;
+    using const_iterator = typename SmallList<Child>::const_iterator;
+    using const_reverse_iterator = typename SmallList<Child>::const_reverse_iterator;
+    using value_type = typename SmallList<Child>::value_type;
+
+    SmallList<Child> Value;
+
+    Children(Children &&) noexcept;
+    Children(SmallList<Child> &&) noexcept;
+    Children &operator=(Children &&) noexcept;
+    Children &operator=(SmallList<Child> &&) noexcept;
+
+    KRYS_NODISCARD iterator begin() noexcept;
+    KRYS_NODISCARD iterator end() noexcept;
+    KRYS_NODISCARD reverse_iterator rbegin() noexcept;
+    KRYS_NODISCARD reverse_iterator rend() noexcept;
+
+    KRYS_NODISCARD const_iterator begin() const noexcept;
+    KRYS_NODISCARD const_iterator end() const noexcept;
+    KRYS_NODISCARD const_reverse_iterator rbegin() const noexcept;
+    KRYS_NODISCARD const_reverse_iterator rend() const noexcept;
+
+    KRYS_NODISCARD bool empty() const noexcept;
+    KRYS_NODISCARD size_t size() const noexcept;
+
+    Child &operator[](size_t i) noexcept;
+    const Child &operator[](size_t i) const noexcept;
+
+    bool operator==(const Children &) const noexcept = default;
+  };
+
+  enum class Stage : bool
+  {
+    Specified,
+    Computed
+  };
+
+  struct Tree
+  {
+    Child Root;
+    Type Type;
+    Stage Stage;
+
+    // `RequiresConversionData` is used both to both indicate whether eager evaluation of the tree (at parse
+    // time) is possible or not and to trigger a warning in `css::calc::Value::DoubleValueDeprecated` that the
+    // evaluation results will be incorrect.
+    bool RequiresConversionData = false;
+
+    bool operator==(const Tree &) const noexcept = default;
+  };
+
+  struct Sum
+  {
+    Children Children;
+
+    bool operator==(const Sum &) const noexcept = default;
+  };
+
+  struct Product
+  {
+    Children Children;
+
+    bool operator==(const Product &) const noexcept = default;
+  };
+
+  struct Negate
+  {
+    Child A;
+
+    bool operator==(const Negate &) const noexcept = default;
+  };
+
+  struct Invert
+  {
+    Child A;
+
+    bool operator==(const Invert &) const noexcept = default;
+  };
+
+  // Math Functions
+
+  // Comparison Functions - https://drafts.csswg.org/css-values-4/#comp-func
+  struct Min
+  {
+    constexpr static auto Id = ValueId::Min;
+
+    // <Min()>   = Min( <calc-sum># )
+    //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
+    //     - OUTPUT: consistent Type
+    constexpr static auto Input = AllowedTypes::Any;
+    constexpr static auto Merge = MergePolicy::Consistent;
+    constexpr static auto Output = OutputTransform::None;
+
+    Children Children;
+
+    bool operator==(const Min &) const noexcept = default;
+  };
+
+  struct Max
+  {
+    constexpr static auto Id = ValueId::Max;
+
+    // <Max()>   = Max( <calc-sum># )
+    //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
+    //     - OUTPUT: consistent Type
+    constexpr static auto Input = AllowedTypes::Any;
+    constexpr static auto Merge = MergePolicy::Consistent;
+    constexpr static auto Output = OutputTransform::None;
+
+    Children Children;
+
+    bool operator==(const Max &) const noexcept = default;
+  };
+
+  struct Clamp
+  {
+    constexpr static auto Id = ValueId::Clamp;
+
+    // <clamp()> = clamp( [ <calc-sum> | none ], <calc-sum>, [ <calc-sum> | none ] )
+    //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
+    //     - OUTPUT: consistent Type
+    constexpr static auto Input = AllowedTypes::Any;
+    constexpr static auto Merge = MergePolicy::Consistent;
+    constexpr static auto Output = OutputTransform::None;
+
+    ChildOrNone Min;
+    Child Val;
+    ChildOrNone Max;
+
+    bool operator==(const Clamp &) const noexcept = default;
+  };
+
+  // Stepped Value Functions - https://drafts.csswg.org/css-values-4/#round-func
+  struct RoundNearest
+  {
+    constexpr static auto Id = ValueId::Nearest;
+
+    // <round()> = round( <rounding-strategy>?, <calc-sum>, <calc-sum> )
+    //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
+    //     - OUTPUT: consistent Type
+    constexpr static auto Input = AllowedTypes::Any;
+    constexpr static auto Merge = MergePolicy::Consistent;
+    constexpr static auto Output = OutputTransform::None;
+
+    // -- and --
+
+    // <round()> = round( <rounding-strategy>?, <calc-sum> )
+    //     - INPUT: "consistent" <number>
+    //     - OUTPUT: consistent Type
+
+    // NOTE: This is special cased in the code.
+
+    Child A;
+    Maybe<Child> B;
+
+    bool operator==(const RoundNearest &) const noexcept = default;
+  };
+
+  struct RoundUp
+  {
+    constexpr static auto Id = ValueId::Up;
+
+    // <round()> = round( <rounding-strategy>?, <calc-sum>, <calc-sum> )
+    //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
+    //     - OUTPUT: consistent Type
+    constexpr static auto Input = AllowedTypes::Any;
+    constexpr static auto Merge = MergePolicy::Consistent;
+    constexpr static auto Output = OutputTransform::None;
+
+    // -- and --
+
+    // <round()> = round( <rounding-strategy>?, <calc-sum> )
+    //     - INPUT: "consistent" <number>
+    //     - OUTPUT: consistent Type
+
+    // NOTE: This is special cased in the code.
+
+    Child A;
+    Maybe<Child> B;
+
+    bool operator==(const RoundUp &) const noexcept = default;
+  };
+
+  struct RoundDown
+  {
+    constexpr static auto Id = ValueId::Down;
+
+    // <round()> = round( <rounding-strategy>?, <calc-sum>, <calc-sum> )
+    //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
+    //     - OUTPUT: consistent Type
+    constexpr static auto Input = AllowedTypes::Any;
+    constexpr static auto Merge = MergePolicy::Consistent;
+    constexpr static auto Output = OutputTransform::None;
+
+    // -- and --
+
+    // <round()> = round( <rounding-strategy>?, <calc-sum> )
+    //     - INPUT: "consistent" <number>
+    //     - OUTPUT: consistent Type
+
+    // NOTE: This is special cased in the code.
+
+    Child A;
+    Maybe<Child> B;
+
+    bool operator==(const RoundDown &) const noexcept = default;
+  };
+
+  struct RoundToZero
+  {
+    constexpr static auto Id = ValueId::ToZero;
+
+    // <round()> = round( <rounding-strategy>?, <calc-sum>, <calc-sum> )
+    //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
+    //     - OUTPUT: consistent Type
+    constexpr static auto Input = AllowedTypes::Any;
+    constexpr static auto Merge = MergePolicy::Consistent;
+    constexpr static auto Output = OutputTransform::None;
+
+    // -- and --
+
+    // <round()> = round( <rounding-strategy>?, <calc-sum> )
+    //     - INPUT: "consistent" <number>
+    //     - OUTPUT: consistent Type
+
+    // NOTE: This is special cased in the code.
+
+    Child A;
+    Maybe<Child> B;
+
+    bool operator==(const RoundToZero &) const noexcept = default;
+  };
+
+  struct Mod
+  {
+    constexpr static auto Id = ValueId::Mod;
+
+    // <mod()>   = mod( <calc-sum>, <calc-sum> )
+    //     - INPUT: "same" <number>, <dimension>, or <percentage>
+    //     - OUTPUT: same Type
+    constexpr static auto Input = AllowedTypes::Any;
+    // FIXME: Spec says this should enforce same Type, but tests indicate it should be consistent Type.
+    constexpr static auto Merge = MergePolicy::Consistent;
+    constexpr static auto Output = OutputTransform::None;
+
+    Child A;
+    Child B;
+
+    bool operator==(const Mod &) const noexcept = default;
+  };
+
+  struct Rem
+  {
+    constexpr static auto Id = ValueId::Rem;
+
+    // <rem()>   = rem( <calc-sum>, <calc-sum> )
+    //     - INPUT: "same" <number>, <dimension>, or <percentage>
+    //     - OUTPUT: same Type
+    constexpr static auto Input = AllowedTypes::Any;
+    // FIXME: Spec says this should enforce same Type, but tests indicate it should be consistent Type.
+    constexpr static auto Merge = MergePolicy::Consistent;
+    constexpr static auto Output = OutputTransform::None;
+
+    Child A;
+    Child B;
+
+    bool operator==(const Rem &) const noexcept = default;
+  };
+
+  // Trigonometric Functions - https://drafts.csswg.org/css-values-4/#trig-funcs
+  struct Sin
+  {
+    constexpr static auto Id = ValueId::Sin;
+
+    // <sin()>   = sin( <calc-sum> )
+    //     - INPUT: <number> or <angle>
+    //     - OUTPUT: <number> "made consistent"
+    constexpr static auto Input = AllowedTypes::NumberOrAngle;
+    constexpr static auto Output = OutputTransform::NumberMadeConsistent;
+
+    Child A;
+
+    bool operator==(const Sin &) const noexcept = default;
+  };
+
+  struct Cos
+  {
+    constexpr static auto Id = ValueId::Cos;
+
+    // <cos()>   = cos( <calc-sum> )
+    //     - INPUT: <number> or <angle>
+    //     - OUTPUT: <number> "made consistent"
+    constexpr static auto Input = AllowedTypes::NumberOrAngle;
+    constexpr static auto Output = OutputTransform::NumberMadeConsistent;
+
+    Child A;
+
+    bool operator==(const Cos &) const noexcept = default;
+  };
+
+  struct Tan
+  {
+    constexpr static auto Id = ValueId::Tan;
+
+    // <tan()>   = tan( <calc-sum> )
+    //     - INPUT: <number> or <angle>
+    //     - OUTPUT: <number> "made consistent"
+    constexpr static auto Input = AllowedTypes::NumberOrAngle;
+    constexpr static auto Output = OutputTransform::NumberMadeConsistent;
+
+    Child A;
+
+    bool operator==(const Tan &) const noexcept = default;
+  };
+
+  struct Asin
+  {
+    constexpr static auto Id = ValueId::Asin;
+
+    // <asin()>  = asin( <calc-sum> )
+    //     - INPUT: <number>
+    //     - OUTPUT: <angle> "made consistent"
+    constexpr static auto Input = AllowedTypes::Number;
+    constexpr static auto Output = OutputTransform::AngleMadeConsistent;
+
+    Child A;
+
+    bool operator==(const Asin &) const noexcept = default;
+  };
+
+  struct Acos
+  {
+    constexpr static auto Id = ValueId::Acos;
+
+    // <acos()>  = acos( <calc-sum> )
+    //     - INPUT: <number>
+    //     - OUTPUT: <angle> "made consistent"
+    constexpr static auto Input = AllowedTypes::Number;
+    constexpr static auto Output = OutputTransform::AngleMadeConsistent;
+
+    Child A;
+
+    bool operator==(const Acos &) const noexcept = default;
+  };
+
+  struct Atan
+  {
+    constexpr static auto Id = ValueId::Atan;
+
+    // <atan()>  = atan( <calc-sum> )
+    //     - INPUT: <number>
+    //     - OUTPUT: <angle> "made consistent"
+    constexpr static auto Input = AllowedTypes::Number;
+    constexpr static auto Output = OutputTransform::AngleMadeConsistent;
+
+    Child A;
+
+    bool operator==(const Atan &) const noexcept = default;
+  };
+
+  struct Atan2
+  {
+    constexpr static auto Id = ValueId::Atan2;
+
+    // <atan2()> = atan2( <calc-sum>, <calc-sum> )
+    //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
+    //     - OUTPUT: <angle> "made consistent"
+    constexpr static auto Input = AllowedTypes::Any;
+    constexpr static auto Merge = MergePolicy::Consistent;
+    constexpr static auto Output = OutputTransform::AngleMadeConsistent;
+
+    Child A;
+    Child B;
+
+    bool operator==(const Atan2 &) const noexcept = default;
+  };
+
+  // Exponential Functions - https://drafts.csswg.org/css-values-4/#exponent-funcs
+  struct Pow
+  {
+    constexpr static auto Id = ValueId::Pow;
+
+    // <pow()>   = pow( <calc-sum>, <calc-sum> )
+    //     - INPUT: "consistent" <number>
+    //     - OUTPUT: consistent Type
+    constexpr static auto Input = AllowedTypes::Number;
+    constexpr static auto Merge = MergePolicy::Consistent;
+    constexpr static auto Output = OutputTransform::None;
+
+    Child A;
+    Child B;
+
+    bool operator==(const Pow &) const noexcept = default;
+  };
+
+  struct Sqrt
+  {
+    constexpr static auto Id = ValueId::Sqrt;
+
+    // <sqrt()>  = sqrt( <calc-sum> )
+    //     - INPUT: <number>
+    //     - OUTPUT: <number> "made consistent"
+    constexpr static auto Input = AllowedTypes::Number;
+    constexpr static auto Output = OutputTransform::NumberMadeConsistent;
+
+    Child A;
+
+    bool operator==(const Sqrt &) const noexcept = default;
+  };
+
+  struct Hypot
+  {
+    constexpr static auto Id = ValueId::Hypot;
+
+    // <hypot()> = hypot( <calc-sum># )
+    //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
+    //     - OUTPUT: consistent Type
+    constexpr static auto Input = AllowedTypes::Any;
+    constexpr static auto Merge = MergePolicy::Consistent;
+    constexpr static auto Output = OutputTransform::None;
+
+    Children Children;
+
+    bool operator==(const Hypot &) const noexcept = default;
+  };
+
+  struct Log
+  {
+    constexpr static auto Id = ValueId::Log;
+
+    // <log()>   = log( <calc-sum>, <calc-sum>? )
+    //     - INPUT: <number>
+    //     - OUTPUT: <number> "made consistent"
+    constexpr static auto Input = AllowedTypes::Number;
+    constexpr static auto Merge = MergePolicy::Consistent;
+    constexpr static auto Output = OutputTransform::NumberMadeConsistent;
+
+    Child A;
+    Maybe<Child> B;
+
+    bool operator==(const Log &) const noexcept = default;
+  };
+
+  struct Exp
+  {
+    constexpr static auto Id = ValueId::Exp;
+
+    // <exp()>   = exp( <calc-sum> )
+    //     - INPUT: <number>
+    //     - OUTPUT: <number> "made consistent"
+    constexpr static auto Input = AllowedTypes::Number;
+    constexpr static auto Output = OutputTransform::NumberMadeConsistent;
+
+    Child A;
+
+    bool operator==(const Exp &) const noexcept = default;
+  };
+
+  // Sign-Related Functions - https://drafts.csswg.org/css-values-4/#sign-funcs
+  struct Abs
+  {
+    constexpr static auto Id = ValueId::Abs;
+
+    // <abs()>   = abs( <calc-sum> )
+    //     - INPUT: any
+    //     - OUTPUT: Input Type
+    constexpr static auto Input = AllowedTypes::Any;
+    constexpr static auto Output = OutputTransform::None;
+
+    Child A;
+
+    bool operator==(const Abs &) const noexcept = default;
+  };
+
+  struct Sign
+  {
+    constexpr static auto Id = ValueId::Sign;
+
+    // <sign()>  = sign( <calc-sum> )
+    //     - INPUT: any
+    //     - OUTPUT: <number> "made consistent"
+    constexpr static auto Input = AllowedTypes::Any;
+    constexpr static auto Output = OutputTransform::NumberMadeConsistent;
+
+    Child A;
+
+    bool operator==(const Sign &) const noexcept = default;
+  };
+
+  // Random Function - https://drafts.csswg.org/css-values-5/#random
+  struct Random
+  {
+    constexpr static auto Id = ValueId::Random;
+
+    // <random-value-sharing> = [ [ auto | <dashed-ident> ] || element-shared ] | fixed <number [0,1]>
+    struct SharingOptions
     {
+      struct Auto
+      {
+        PropertyId Property;
+        size_t Index;
+
+        bool operator==(const Auto &) const noexcept = default;
+      };
+
+      Variant<Auto, CSSOMStringAtom> Identifier;
+      Maybe<keywords::ElementShared> ElementShared;
+
+      bool operator==(const SharingOptions &) const noexcept = default;
+    };
+
+    struct SharingFixed
+    {
+      css::Number<css::ClosedUnitRange> Value;
+
+      bool operator==(const SharingFixed &) const noexcept = default;
+    };
+
+    using SharingType = Variant<SharingOptions, SharingFixed>;
+
+    // <random()> = random( <random-value-sharing>? , <calc-sum>, <calc-sum>, <calc-sum>? )
+    //     - INPUT: "same" <number>, <dimension>, or <percentage>
+    //     - OUTPUT: same Type
+    constexpr static auto Input = AllowedTypes::Any;
+    constexpr static auto Merge = MergePolicy::Same;
+    constexpr static auto Output = OutputTransform::None;
+
+    SharingType Sharing;
+    Child Min;
+    Child Max;
+    Maybe<Child> Step;
+
+    bool operator==(const Random &) const noexcept = default;
+  };
+
+  // Progress-Related Functions - https://drafts.csswg.org/css-values-5/#progress
+  struct Progress
+  {
+    constexpr static auto Id = ValueId::Progress;
+
+    // <progress()> = progress( <calc-sum>, <calc-sum>, <calc-sum> )
+    //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
+    //     - OUTPUT: <number> "made consistent"
+    constexpr static auto Input = AllowedTypes::Any;
+    constexpr static auto Merge = MergePolicy::Consistent;
+    constexpr static auto Output = OutputTransform::NumberMadeConsistent;
+
+    Child Value;
+    Child Start;
+    Child End;
+
+    bool operator==(const Progress &) const noexcept = default;
+  };
+
+  // Anchor Positioning Related Functions - https://drafts.csswg.org/css-anchor-position-1/
+
+  struct AnchorSide
+  {
+    // <anchor-Side> = inside | outside | top | left | right | bottom | start | end | self-start | self-end
+    // | <percentage> | center
+    Variant<ValueId, Child> Value;
+
+    AnchorSide(ValueId) noexcept;
+    AnchorSide(Child &&) noexcept;
+
+    KRYS_FORWARD_VARIANT_FUNCTIONS(AnchorSide, Value)
+
+    bool operator==(const AnchorSide &) const noexcept = default;
+  };
+
+  struct Anchor
+  {
+    constexpr static auto Id = ValueId::Anchor;
+
+    // <anchor()> = anchor( <anchor-element>? && <anchor-Side>, <length-percentage>? )
+
+    // Can't use Style::ScopedName here, since the scope ordinal is not available at
+    // parsing time.
+    CSSOMStringAtom ElementName;
+    AnchorSide Side;
+    Maybe<Child> Fallback;
+
+    bool operator==(const Anchor &) const noexcept = default;
+  };
+
+  struct AnchorSize
+  {
+    constexpr static auto Id = ValueId::AnchorSize;
+
+    // anchor-size() = anchor-size( [ <anchor-element> || <anchor-size> ]? , <length-percentage>? )
+    // <anchor-element> = <dashed-ident>
+    // <anchor-size> = width | height | block | inline | self-block | self-inline
+
+    // Can't use style::ScopedName here, since the scope ordinal is not available at
+    // parsing time.
+    CSSOMStringAtom ElementName;                 // <anchor-element>
+    Maybe<style::AnchorSizeDimension> Dimension; // <anchor-size>
+    Maybe<Child> Fallback;
+
+    bool operator==(const AnchorSize &) const noexcept = default;
+  };
+
+  // MARK: Construction
+
+  // Default implementation of ChildConstruction used for all indirect nodes.
+  template <typename Operation>
+  struct ChildConstruction
+  {
+    KRYS_NODISCARD static Child Create(Operation &&Op, Type Type) noexcept
+    {
+      return Child {IndirectNode<Operation> {Type, CreateUnique<Operation>(krys::move(Op))}};
+    }
+  };
+
+  // Specialized implementation of ChildConstruction for leaf nodes, needed to avoid `makeUniqueRef`.
+  template <Leaf T>
+  struct ChildConstruction<T>
+  {
+    KRYS_NODISCARD static Child Create(T &&op, Type) noexcept
+    {
+      return Child {krys::move(op)};
     }
 
-    // MARK: ChildOrNone Definition
-
-    inline ChildOrNone::ChildOrNone(Child &&child) : value(WTF::move(child))
+    KRYS_NODISCARD static Child Create(T &&op) noexcept
     {
+      return Child {krys::move(op)};
+    }
+  };
+
+  template <typename Operation>
+  Child CreateChild(Operation op) noexcept
+  {
+    return ChildConstruction<Operation>::Create(krys::move(op));
+  }
+
+  template <typename Operation>
+  Child CreateChild(Operation op, Type Type) noexcept
+  {
+    return ChildConstruction<Operation>::Create(krys::move(op), Type);
+  }
+
+  // MARK: CSSCalc::Type Evaluation
+
+  // Gets the Type stored in the IndirectNode.
+  template <typename T>
+  KRYS_NODISCARD inline Type GetType(const IndirectNode<T> &root) noexcept
+  {
+    return root.Type;
+  }
+
+  // Gets the Type representing A CanonicalDimension::Dimension.
+  KRYS_NODISCARD Type GetType(Dimension) noexcept;
+
+  // Gets the Type of the leaf node.
+  KRYS_NODISCARD Type GetType(const Number &) noexcept;
+  KRYS_NODISCARD Type GetType(const Percentage &) noexcept;
+  KRYS_NODISCARD Type GetType(const NonCanonicalDimension &) noexcept;
+  KRYS_NODISCARD Type GetType(const CanonicalDimension &) noexcept;
+  KRYS_NODISCARD Type GetType(const Symbol &) noexcept;
+  KRYS_NODISCARD Type GetType(const SiblingCount &) noexcept;
+  KRYS_NODISCARD Type GetType(const SiblingIndex &) noexcept;
+
+  // Gets the Type of the child node.
+  KRYS_NODISCARD Type GetType(const Child &) noexcept;
+
+  // Constructs the nodes's Type from it the types of its arguments. Returns `std::nullopt` on failure.
+  KRYS_NODISCARD Maybe<Type> ToType(const Sum &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Product &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Negate &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Invert &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Min &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Max &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Clamp &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const RoundNearest &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const RoundUp &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const RoundDown &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const RoundToZero &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Mod &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Rem &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Sin &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Cos &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Tan &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Asin &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Acos &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Atan &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Atan2 &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Pow &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Sqrt &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Hypot &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Log &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Exp &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Abs &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Sign &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Random &) noexcept;
+  KRYS_NODISCARD Maybe<Type> ToType(const Progress &) noexcept;
+
+  // MARK: UnitType Evaluation
+
+  // Maps CanonicalDimension::Dimension to its UnitType counterpart.
+  KRYS_NODISCARD constexpr UnitType ToUnit(const Dimension &dimension) noexcept
+  {
+    switch (dimension)
+    {
+      case Dimension::Length:     return UnitType::px;
+      case Dimension::Angle:      return UnitType::deg;
+      case Dimension::Time:       return UnitType::s;
+      case Dimension::Frequency:  return UnitType::hz;
+      case Dimension::Resolution: return UnitType::dppx;
+      case Dimension::Flex:       return UnitType::fr;
     }
 
-    inline ChildOrNone::ChildOrNone(CSS::Keyword::None none) : value(none)
+    krys_unreachable();
+  }
+
+  /// @brief Maps Numeric Type to its UnitType counterpart.
+  KRYS_NODISCARD constexpr UnitType ToUnit(const Number &) noexcept
+  {
+    return UnitType::Number;
+  }
+
+  KRYS_NODISCARD constexpr UnitType ToUnit(const Percentage &) noexcept
+  {
+    return UnitType::Percentage;
+  }
+
+  KRYS_NODISCARD constexpr UnitType ToUnit(const CanonicalDimension &dimension) noexcept
+  {
+    return ToUnit(dimension.Dimension);
+  }
+
+  KRYS_NODISCARD constexpr UnitType ToUnit(const NonCanonicalDimension &dimension) noexcept
+  {
+    return dimension.Unit;
+  }
+
+  // MARK: Predicates
+
+  KRYS_NODISCARD inline bool IsNumeric(const Child &root) noexcept
+  {
+    return krys::SwitchOn(
+      root, []<Numeric T>(const T &) { return true; }, [](const auto &) { return false; });
+  }
+
+  // Convenience constructors
+
+  /// @brief Creates the appropriate child Type (number, percentage, canonical-dimensions,
+  /// non-canonical-dimension) based on the UnitType.
+  KRYS_NODISCARD Child CreateNumeric(double, UnitType) noexcept;
+
+  KRYS_NODISCARD inline Sum Add(Child &&a, Child &&b) noexcept
+  {
+    SmallList<Child> sumChildren;
+    sumChildren.push_back(krys::move(a));
+    sumChildren.push_back(krys::move(b));
+
+    return Sum {.Children = krys::move(sumChildren)};
+  }
+
+  KRYS_NODISCARD inline Product Multiply(Child &&a, Child &&b) noexcept
+  {
+    SmallList<Child> productChildren;
+    productChildren.push_back(krys::move(a));
+    productChildren.push_back(krys::move(b));
+
+    return Product {.Children = krys::move(productChildren)};
+  }
+
+  KRYS_NODISCARD inline Sum Subtract(Child &&a, Child &&b) noexcept
+  {
+    return Add(krys::move(a), CreateChild(Negate {.A = krys::move(b)}, GetType(b)));
+  }
+
+  KRYS_NODISCARD inline Child CreateChildWithValueBasedOn(double value, const Number &) noexcept
+  {
+    return CreateChild(Number {.Value = value});
+  }
+
+  KRYS_NODISCARD inline Child CreateChildWithValueBasedOn(double value, const Percentage &a) noexcept
+  {
+    return CreateChild(Percentage {.Value = value, .Hint = a.Hint});
+  }
+
+  KRYS_NODISCARD inline Child CreateChildWithValueBasedOn(double value, const CanonicalDimension &a) noexcept
+  {
+    return CreateChild(CanonicalDimension {.Value = value, .Dimension = a.Dimension});
+  }
+
+  KRYS_NODISCARD inline Child CreateChildWithValueBasedOn(double value,
+                                                          const NonCanonicalDimension &a) noexcept
+  {
+    return CreateChild(NonCanonicalDimension {.Value = value, .Unit = a.Unit});
+  }
+
+  // MARK: Tuple Conformance
+
+  // get<> overload (along with std::tuple_size and std::tuple_element below) to support destructuring of
+  // operation nodes.
+
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Sum &root) noexcept
+  {
+    static_assert(I == 0);
+    return root.Children;
+  }
+
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Product &root) noexcept
+  {
+    static_assert(I == 0);
+    return root.Children;
+  }
+
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Negate &root) noexcept
+  {
+    static_assert(I == 0);
+    return root.A;
+  }
+
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Invert &root) noexcept
+  {
+    static_assert(I == 0);
+    return root.A;
+  }
+
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Min &root) noexcept
+  {
+    static_assert(I == 0);
+    return root.Children;
+  }
+
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Max &root) noexcept
+  {
+    static_assert(I == 0);
+    return root.Children;
+  }
+
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Clamp &root) noexcept
+  {
+    if constexpr (I == 0)
     {
+      return root.Min;
     }
-
-    // MARK: Children Definition
-
-    inline Children::Children(Children &&other) : value(WTF::move(other.value))
+    else if constexpr (I == 1)
     {
+      return root.Val;
     }
-
-    inline Children::Children(SmallList<Child> &&other) : value(WTF::move(other))
+    else if constexpr (I == 2)
     {
+      return root.Max;
     }
+  }
 
-    inline Children &Children::operator=(Children &&other)
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const RoundNearest &root) noexcept
+  {
+    if constexpr (I == 0)
     {
-      value = WTF::move(other.value);
-      return *this;
+      return root.A;
     }
-
-    inline Children &Children::operator=(SmallList<Child> &&other)
+    else if constexpr (I == 1)
     {
-      value = WTF::move(other);
-      return *this;
+      return root.B;
     }
+  }
 
-    inline Children::iterator Children::begin()
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const RoundUp &root) noexcept
+  {
+    if constexpr (I == 0)
     {
-      return value.begin();
+      return root.A;
     }
-
-    inline Children::iterator Children::end()
+    else if constexpr (I == 1)
     {
-      return value.end();
+      return root.B;
     }
+  }
 
-    inline Children::reverse_iterator Children::rbegin()
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const RoundDown &root) noexcept
+  {
+    if constexpr (I == 0)
     {
-      return value.rbegin();
+      return root.A;
     }
-
-    inline Children::reverse_iterator Children::rend()
+    else if constexpr (I == 1)
     {
-      return value.rend();
+      return root.B;
     }
+  }
 
-    inline Children::const_iterator Children::begin() const
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const RoundToZero &root) noexcept
+  {
+    if constexpr (I == 0)
     {
-      return value.begin();
+      return root.A;
     }
-
-    inline Children::const_iterator Children::end() const
+    else if constexpr (I == 1)
     {
-      return value.end();
+      return root.B;
     }
+  }
 
-    inline Children::const_reverse_iterator Children::rbegin() const
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Mod &root) noexcept
+  {
+    if constexpr (I == 0)
     {
-      return value.rbegin();
+      return root.A;
     }
-
-    inline Children::const_reverse_iterator Children::rend() const
+    else if constexpr (I == 1)
     {
-      return value.rend();
+      return root.B;
     }
+  }
 
-    inline bool Children::isEmpty() const
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Rem &root) noexcept
+  {
+    if constexpr (I == 0)
     {
-      return value.isEmpty();
+      return root.A;
     }
-
-    inline size_t Children::size() const
+    else if constexpr (I == 1)
     {
-      return value.size();
+      return root.B;
     }
+  }
 
-    inline Child &Children::operator[](size_t i)
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Sin &root) noexcept
+  {
+    static_assert(I == 0);
+    return root.A;
+  }
+
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Cos &root) noexcept
+  {
+    static_assert(I == 0);
+    return root.A;
+  }
+
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Tan &root) noexcept
+  {
+    static_assert(I == 0);
+    return root.A;
+  }
+
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Asin &root) noexcept
+  {
+    static_assert(I == 0);
+    return root.A;
+  }
+
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Acos &root) noexcept
+  {
+    static_assert(I == 0);
+    return root.A;
+  }
+
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Atan &root) noexcept
+  {
+    static_assert(I == 0);
+    return root.A;
+  }
+
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Atan2 &root) noexcept
+  {
+    if constexpr (I == 0)
     {
-      return value[i];
+      return root.A;
     }
-
-    inline const Child &Children::operator[](size_t i) const
+    else if constexpr (I == 1)
     {
-      return value[i];
+      return root.B;
     }
+  }
 
-    // AnchorSize
-
-    inline AnchorSide::AnchorSide(CSSValueID valueID) : value(valueID)
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Pow &root) noexcept
+  {
+    if constexpr (I == 0)
     {
+      return root.A;
     }
-
-    inline AnchorSide::AnchorSide(Child &&child) : value(WTF::move(child))
+    else if constexpr (I == 1)
     {
+      return root.B;
     }
+  }
 
-    // MARK: Size assertions
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Sqrt &root) noexcept
+  {
+    static_assert(I == 0);
+    return root.A;
+  }
 
-    static_assert(sizeof(Child) <= 24, "Child should stay small");
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Hypot &root) noexcept
+  {
+    static_assert(I == 0);
+    return root.Children;
+  }
 
-  } // namespace CSSCalc
-} // namespace krys::boo::css
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Log &root) noexcept
+  {
+    if constexpr (I == 0)
+    {
+      return root.A;
+    }
+    else if constexpr (I == 1)
+    {
+      return root.B;
+    }
+  }
+
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Exp &root) noexcept
+  {
+    static_assert(I == 0);
+    return root.A;
+  }
+
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Abs &root) noexcept
+  {
+    static_assert(I == 0);
+    return root.A;
+  }
+
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Sign &root) noexcept
+  {
+    static_assert(I == 0);
+    return root.A;
+  }
+
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Random &root) noexcept
+  {
+    if constexpr (I == 0)
+    {
+      return root.Sharing;
+    }
+    else if constexpr (I == 1)
+    {
+      return root.Min;
+    }
+    else if constexpr (I == 2)
+    {
+      return root.Max;
+    }
+    else if constexpr (I == 3)
+    {
+      return root.Step;
+    }
+  }
+
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Progress &root) noexcept
+  {
+    if constexpr (I == 0)
+    {
+      return root.Value;
+    }
+    else if constexpr (I == 1)
+    {
+      return root.Start;
+    }
+    else if constexpr (I == 2)
+    {
+      return root.End;
+    }
+  }
+
+  // MARK: Child Definition
+
+  template <typename T>
+  requires std::constructible_from<Node, T>
+  Child::Child(T &&Value) noexcept : Value(std::forward<T>(Value))
+  {
+  }
+
+  // MARK: ChildOrNone Definition
+
+  inline ChildOrNone::ChildOrNone(Child &&child) noexcept : Value(krys::move(child))
+  {
+  }
+
+  inline ChildOrNone::ChildOrNone(keywords::None none) noexcept : Value(none)
+  {
+  }
+
+  // MARK: Children Definition
+
+  inline Children::Children(Children &&other) noexcept : Value(krys::move(other.Value))
+  {
+  }
+
+  inline Children::Children(SmallList<Child> &&other) noexcept : Value(krys::move(other))
+  {
+  }
+
+  inline Children &Children::operator=(Children &&other) noexcept
+  {
+    Value = krys::move(other.Value);
+    return *this;
+  }
+
+  inline Children &Children::operator=(SmallList<Child> &&other) noexcept
+  {
+    Value = krys::move(other);
+    return *this;
+  }
+
+  inline Children::iterator Children::begin() noexcept
+  {
+    return Value.begin();
+  }
+
+  inline Children::iterator Children::end() noexcept
+  {
+    return Value.end();
+  }
+
+  inline Children::reverse_iterator Children::rbegin() noexcept
+  {
+    return Value.rbegin();
+  }
+
+  inline Children::reverse_iterator Children::rend() noexcept
+  {
+    return Value.rend();
+  }
+
+  inline Children::const_iterator Children::begin() const noexcept
+  {
+    return Value.begin();
+  }
+
+  inline Children::const_iterator Children::end() const noexcept
+  {
+    return Value.end();
+  }
+
+  inline Children::const_reverse_iterator Children::rbegin() const noexcept
+  {
+    return Value.rbegin();
+  }
+
+  inline Children::const_reverse_iterator Children::rend() const noexcept
+  {
+    return Value.rend();
+  }
+
+  inline bool Children::empty() const noexcept
+  {
+    return Value.empty();
+  }
+
+  inline size_t Children::size() const noexcept
+  {
+    return Value.size();
+  }
+
+  inline Child &Children::operator[](size_t i) noexcept
+  {
+    return Value[i];
+  }
+
+  inline const Child &Children::operator[](size_t i) const noexcept
+  {
+    return Value[i];
+  }
+
+  // AnchorSize
+
+  inline AnchorSide::AnchorSide(ValueId valueId) noexcept : Value(valueId)
+  {
+  }
+
+  inline AnchorSide::AnchorSide(Child &&child) noexcept : Value(krys::move(child))
+  {
+  }
+
+  // MARK: Size assertions
+
+  static_assert(sizeof(Child) <= 24, "Child should stay small");
+}
 
 namespace std
 {
 
-#define OP_TUPLE_LIKE_CONFORMANCE(op, numberOfArguments)                                                     \
+#define OP_TUPLE_LIKE_CONFORMANCE(Op, numberOfArguments)                                                     \
   template <>                                                                                                \
-  class tuple_size<WebCore::CSSCalc::op> : public std::integral_constant<size_t, numberOfArguments>          \
+  class tuple_size<krys::boo::css::calc::Op> : public std::integral_constant<size_t, numberOfArguments>      \
   {                                                                                                          \
   };                                                                                                         \
   template <size_t I>                                                                                        \
-  class tuple_element<I, WebCore::CSSCalc::op>                                                               \
+  class tuple_element<I, krys::boo::css::calc::Op>                                                           \
   {                                                                                                          \
   public:                                                                                                    \
-    using type = decltype(WebCore::CSSCalc::get<I>(std::declval<WebCore::CSSCalc::op>()));                   \
+    using Type = decltype(krys::boo::css::calc::get<I>(std::declval<krys::boo::css::calc::Op>()));           \
   }
 
   OP_TUPLE_LIKE_CONFORMANCE(Sum, 1);
@@ -1482,10 +1484,9 @@ namespace std
   OP_TUPLE_LIKE_CONFORMANCE(Sign, 1);
   OP_TUPLE_LIKE_CONFORMANCE(Progress, 3);
   OP_TUPLE_LIKE_CONFORMANCE(Random, 4);
-  // FIXME (webkit.org/b/280798): make Anchor and AnchorSize tuple-like
+  // FIXME (webkit.org/B/280798): make Anchor and AnchorSize tuple-like
   OP_TUPLE_LIKE_CONFORMANCE(Anchor, 0);
   OP_TUPLE_LIKE_CONFORMANCE(AnchorSize, 0);
 
 #undef OP_TUPLE_LIKE_CONFORMANCE
-
-} // namespace std
+}

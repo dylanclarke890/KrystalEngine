@@ -15,12 +15,17 @@ namespace krys::boo::css
   public:
     KRYS_NODISCARD static Ref<PositionValue> Create(Position &&position) noexcept;
 
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool Equals(const PositionValue &other) const noexcept;
+
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
+
     KRYS_NODISCARD const Position &Position() const noexcept
     {
       return _position;
     }
-
-    KRYS_NODISCARD bool Equals(const PositionValue &other) const noexcept;
   };
 
   class PositionXValue final : public Value
@@ -33,12 +38,17 @@ namespace krys::boo::css
   public:
     KRYS_NODISCARD static Ref<PositionXValue> Create(PositionX &&position) noexcept;
 
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool Equals(const PositionXValue &other) const noexcept;
+
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
+
     KRYS_NODISCARD const PositionX &Position() const noexcept
     {
       return _position;
     }
-
-    KRYS_NODISCARD bool Equals(const PositionXValue &other) const noexcept;
   };
 
   class PositionYValue final : public Value
@@ -51,12 +61,17 @@ namespace krys::boo::css
   public:
     KRYS_NODISCARD static Ref<PositionYValue> Create(PositionY &&position) noexcept;
 
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool Equals(const PositionYValue &other) const noexcept;
+
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
+
     KRYS_NODISCARD const PositionY &Position() const noexcept
     {
       return _position;
     }
-
-    KRYS_NODISCARD bool Equals(const PositionYValue &other) const noexcept;
   };
 }
 

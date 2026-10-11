@@ -7,8 +7,31 @@ namespace krys::boo::css
 {
   class AttrValue final : public Value
   {
+  private:
+    CSSOMString _attr;
+    RefPtr<Value> _fallback;
+
+    AttrValue(CSSOMString attr, RefPtr<Value> fallback) noexcept
+        : Value(ValueType::Attr), _attr(krys::move(attr)), _fallback(krys::move(fallback))
+    {
+    }
+
   public:
-    KRYS_NODISCARD static Ref<AttrValue> Create(CSSOMStringAtom attr, RefPtr<Value> fallback) noexcept;
+    KRYS_NODISCARD static Ref<AttrValue> Create(CSSOMString attr, RefPtr<Value> fallback = nullptr) noexcept;
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool Equals(const AttrValue &other) const noexcept;
+
+    KRYS_NODISCARD const CSSOMString AttributeName() const noexcept
+    {
+      return _attr;
+    }
+
+    KRYS_NODISCARD const Value *Fallback() const noexcept
+    {
+      return _fallback.get();
+    }
   };
 }
 

@@ -1,24 +1,46 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Core/IterationStatus.hpp"
+#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/UnitCategory.hpp"
 #include "Krystal.Booey/CSS/Values/UnitType.hpp"
-#include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Booey/CSS/Values/ValueSeparator.hpp"
 #include "Krystal.Booey/CSS/Values/ValueType.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/Func.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
+
+namespace krys::boo
+{
+  class CachedResource;
+}
 
 namespace krys::boo::css
 {
+  class CSSStyleDeclaration;
+  class PrimitiveValue;
+  class Quad;
+  class Rect;
+  class ToLengthConversionData;
+
   struct ComputedStyleDependencies;
+  struct SerialisationContext;
+
+  enum class PropertyId : uint16;
+  enum class ValueId : uint16;
 
   class Value : public RefCounted<Value>
   {
+  public:
     KRYS_TYPE_CAST_TRAITS_ACCESS();
 
   protected:
     ValueType _type : BitCount<ValueType>();
     UnitType _unit : BitCount<UnitType>() {UnitType::Unknown};
+    ValueSeparator _valueSeparator : BitCount<ValueSeparator>() {ValueSeparator::SpaceSeparator};
     bool _isImplicitInitialValue : 1 {false};
+    mutable bool _hasCachedCSSText : 1 {false};
 
     Value(ValueType type) noexcept : _type(type)
     {
@@ -31,23 +53,45 @@ namespace krys::boo::css
     constexpr static StaticValueTag StaticValue {};
 
   public:
-    virtual ~Value() noexcept = default;
+    // NOTE: intentionally not virtual for performance reasons.
+    // virtual ~Value() noexcept;
 
-    KRYS_NODISCARD css::ValueId ValueId() const noexcept;
+    KRYS_NODISCARD ValueType Type() const noexcept
+    {
+      return _type;
+    }
 
     KRYS_NODISCARD bool IsImplicitInitialValue() const noexcept
     {
       return _isImplicitInitialValue;
     }
 
-    KRYS_NODISCARD bool Equals(const Value &other) const noexcept;
+    KRYS_NODISCARD IterationStatus VisitChildren(const Func<IterationStatus(Value &)> &) const noexcept;
 
+    KRYS_NODISCARD bool Equals(const Value &other) const noexcept;
     KRYS_NODISCARD bool operator==(const Value &other) const noexcept
     {
       return Equals(other);
     }
 
+    void CollectComputedStyleDependencies(css::ComputedStyleDependencies &dependencies) const noexcept;
     KRYS_NODISCARD css::ComputedStyleDependencies ComputedStyleDependencies() const noexcept;
+    KRYS_NODISCARD bool CanResolveDependenciesWith(const ToLengthConversionData &) const noexcept;
+
+    KRYS_NODISCARD CSSOMString CssText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool TraverseSubresources(const Func<bool(const CachedResource &)> &func) const noexcept;
+    KRYS_NODISCARD bool MayDependOnBaseUrl() const noexcept;
+
+    KRYS_NODISCARD bool CustomMayDependOnBaseUrl() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD IterationStatus CustomVisitChildren(const Func<IterationStatus(Value &)> &) const
+    {
+      return IterationStatus::Continue;
+    }
 
 #pragma region Type Checks
 
@@ -84,11 +128,6 @@ namespace krys::boo::css
     KRYS_NODISCARD bool IsBoxShadowPropertyValue() const noexcept
     {
       return _type == ValueType::BoxShadowProperty;
-    }
-
-    KRYS_NODISCARD bool IsCanvasValue() const noexcept
-    {
-      return _type == ValueType::Canvas;
     }
 
     KRYS_NODISCARD bool IsColorValue() const noexcept
@@ -139,6 +178,21 @@ namespace krys::boo::css
     KRYS_NODISCARD bool IsFilterValue() const noexcept
     {
       return _type == ValueType::Filter;
+    }
+
+    KRYS_NODISCARD bool IsFontValue() const noexcept
+    {
+      return _type == ValueType::Font;
+    }
+
+    KRYS_NODISCARD bool IsFontFaceSrcLocalValue() const noexcept
+    {
+      return _type == ValueType::FontFaceSrcLocal;
+    }
+
+    KRYS_NODISCARD bool IsFontFaceSrcResourceValue() const noexcept
+    {
+      return _type == ValueType::FontFaceSrcResource;
     }
 
     KRYS_NODISCARD bool IsFontFeatureValue() const noexcept
@@ -204,6 +258,11 @@ namespace krys::boo::css
     KRYS_NODISCARD bool IsImageSetValue() const noexcept
     {
       return _type == ValueType::ImageSet;
+    }
+
+    KRYS_NODISCARD bool IsImageSetOptionValue() const noexcept
+    {
+      return _type == ValueType::ImageSetOption;
     }
 
     KRYS_NODISCARD bool IsNamedImageValue() const noexcept
@@ -326,6 +385,79 @@ namespace krys::boo::css
       return _type == ValueType::View;
     }
 
+    KRYS_NODISCARD bool ContainsValueList() const noexcept
+    {
+      return _type >= ValueType::ValueWithSmallList;
+    }
+
 #pragma endregion
+
+    KRYS_NODISCARD inline bool IsValueId() const noexcept;
+    KRYS_NODISCARD css::ValueId ValueId() const noexcept;
+
+    KRYS_NODISCARD inline bool IsCustomIdent() const noexcept;
+    KRYS_NODISCARD inline CSSOMString CustomIdent() const noexcept;
+
+    KRYS_NODISCARD inline bool IsString() const noexcept;
+    KRYS_NODISCARD inline CSSOMString String() const noexcept;
+
+    KRYS_NODISCARD inline bool IsInteger() const noexcept;
+    KRYS_NODISCARD inline int64 Integer(const ToLengthConversionData &) const noexcept;
+    KRYS_NODISCARD inline int64 IntegerDeprecated() const noexcept;
+
+  protected:
+    void operator delete(Value *, std::destroying_delete_t) noexcept;
+
+    KRYS_NODISCARD ValueSeparator Separator() const noexcept
+    {
+      return _valueSeparator;
+    }
+
+  private:
+    template <typename Visitor>
+    constexpr decltype(auto) VisitDerived(Visitor &&) noexcept;
+
+    template <typename Visitor>
+    constexpr decltype(auto) VisitDerived(Visitor &&) const noexcept;
+
+    KRYS_NODISCARD static bool
+      CustomTraverseSubresources(const Func<bool(const CachedResource &)> &func) noexcept;
   };
+
+  template <typename TValue>
+  KRYS_NODISCARD bool CompareValueList(const SmallList<Ref<TValue>> &firstVector,
+                                       const SmallList<Ref<TValue>> &secondVector) noexcept
+  {
+    size_t size = firstVector.size();
+    if (size != secondVector.size())
+    {
+      return false;
+    }
+
+    for (size_t i = 0uz; i < size; ++i)
+    {
+      const Ref<TValue> &firstPtr = firstVector[i];
+      const Ref<TValue> &secondPtr = secondVector[i];
+      if (firstPtr.get() == secondPtr.get() || firstPtr->Equals(secondPtr))
+      {
+        continue;
+      }
+
+      return false;
+    }
+
+    return true;
+  }
+
+  template <typename TValue>
+  KRYS_NODISCARD bool CompareValuePtr(const RefPtr<TValue> &first, const RefPtr<TValue> &second) noexcept
+  {
+    return first ? second && first->Equals(*second) : !second;
+  }
+
+  template <typename TValue>
+  KRYS_NODISCARD bool CompareValue(const Ref<TValue> &first, const Ref<TValue> &second) noexcept
+  {
+    return first->Equals(*second);
+  }
 }

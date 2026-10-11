@@ -1,9 +1,11 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Core/IterationStatus.hpp"
-#include "Krystal.Booey/CSS/Values/Aggregates.hpp"
 #include "Krystal.Booey/CSS/ComputedStyleDependencies.hpp"
+#include "Krystal.Booey/CSS/Values/Aggregates.hpp"
+#include "Krystal.Booey/CSS/Values/Concepts.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
+#include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
 #include "Krystal.Booey/URL/Url.hpp"
 #include "Krystal.Core/Types/Func.hpp"
@@ -15,24 +17,24 @@ namespace krys::boo::css
 {
   class ValuePool;
 
-#pragma region Serialization
+#pragma region Serialisation
 
-  struct SerializationContext;
+  struct SerialisationContext;
 
   template <typename CSSType>
-  struct Serializer;
+  struct Serialiser;
 
-  struct SerializeInvoker
+  struct SerialiseInvoker
   {
     template <typename CSSType, typename... Rest>
-    void operator()(CSSOMString &builder, const SerializationContext &context, const CSSType &value,
+    void operator()(CSSOMString &builder, const SerialisationContext &context, const CSSType &value,
                     Rest &&...rest) const noexcept
     {
-      Serializer<CSSType> {}(builder, context, value, std::forward<Rest>(rest)...);
+      Serialiser<CSSType> {}(builder, context, value, std::forward<Rest>(rest)...);
     }
 
     template <typename CSSType, typename... Rest>
-    KRYS_NODISCARD CSSOMString operator()(const SerializationContext &context, const CSSType &value,
+    KRYS_NODISCARD CSSOMString operator()(const SerialisationContext &context, const CSSType &value,
                                           Rest &&...rest) const noexcept
     {
       CSSOMString builder;
@@ -41,20 +43,20 @@ namespace krys::boo::css
     }
   };
 
-  constexpr SerializeInvoker Serialize {};
+  constexpr SerialiseInvoker Serialise {};
 
-  void SerializeCustomIdentifier(CSSOMString &, const SerializationContext &,
+  void SerializeCustomIdentifier(CSSOMString &, const SerialisationContext &,
                                  const CustomIdentifier &) noexcept;
 
-  void SerializePropertyIdentifier(CSSOMString &, const SerializationContext &,
+  void SerializePropertyIdentifier(CSSOMString &, const SerialisationContext &,
                                    const PropertyIdentifier &) noexcept;
 
-  void SerializeString(CSSOMString &, const SerializationContext &, const CSSOMStringAtom &) noexcept;
+  void SerializeString(CSSOMString &, const SerialisationContext &, const CSSOMStringAtom &) noexcept;
 
-  void SerializeString(CSSOMString &, const SerializationContext &, const CSSOMString &) noexcept;
+  void SerializeString(CSSOMString &, const SerialisationContext &, const CSSOMString &) noexcept;
 
   template <typename CSSType, typename... Rest>
-  void SerializeOnOptionalLike(CSSOMString &builder, const SerializationContext &context,
+  void SerializeOnOptionalLike(CSSOMString &builder, const SerialisationContext &context,
                                const CSSType &value, Rest &&...rest) noexcept
   {
     if (!value)
@@ -62,11 +64,11 @@ namespace krys::boo::css
       return;
     }
 
-    Serialize(builder, context, *value, std::forward<Rest>(rest)...);
+    Serialise(builder, context, *value, std::forward<Rest>(rest)...);
   }
 
   template <typename CSSType, typename... Rest>
-  void SerializeOnTupleLike(CSSOMString &builder, const SerializationContext &context, const CSSType &value,
+  void SerializeOnTupleLike(CSSOMString &builder, const SerialisationContext &context, const CSSType &value,
                             string separator, Rest &&...rest) noexcept
   {
     string swappedSeparator = "";
@@ -79,19 +81,19 @@ namespace krys::boo::css
         }
 
         builder.append(std::exchange(swappedSeparator, separator));
-        Serialize(builder, context, *element, rest...);
+        Serialise(builder, context, *element, rest...);
       },
       [&](const auto &element)
       {
         builder.append(std::exchange(swappedSeparator, separator));
-        Serialize(builder, context, element, rest...);
+        Serialise(builder, context, element, rest...);
       });
 
-    std::apply([&](const auto &...x) { (..., caller(x)); }, value);
+    krys::apply([&](const auto &...x) { (..., caller(x)); }, value);
   }
 
   template <typename CSSType, typename... Rest>
-  void SerializeOnTupleLikeCoalescing(CSSOMString &builder, const SerializationContext &context,
+  void SerializeOnTupleLikeCoalescing(CSSOMString &builder, const SerialisationContext &context,
                                       const CSSType &value, string separator, Rest &&...rest) noexcept
   {
     if constexpr (std::tuple_size_v<CSSType> == 2)
@@ -103,7 +105,7 @@ namespace krys::boo::css
         return;
       }
 
-      Serialize(builder, context, get<0>(value), std::forward<Rest>(rest)...);
+      Serialise(builder, context, get<0>(value), std::forward<Rest>(rest)...);
     }
     else if constexpr (std::tuple_size_v<CSSType> == 4)
     {
@@ -128,46 +130,46 @@ namespace krys::boo::css
                              std::forward<Rest>(rest)...);
         return;
       }
-      Serialize(builder, context, get<0>(value), std::forward<Rest>(rest)...);
+      Serialise(builder, context, get<0>(value), std::forward<Rest>(rest)...);
     }
   }
 
   template <typename CSSType, typename... Rest>
-  void SerializeOnRangeLike(CSSOMString &builder, const SerializationContext &context, const CSSType &value,
+  void SerializeOnRangeLike(CSSOMString &builder, const SerialisationContext &context, const CSSType &value,
                             string separator, Rest &&...rest) noexcept
   {
     string swappedSeparator = "";
     for (const auto &element : value)
     {
       builder.append(std::exchange(swappedSeparator, separator));
-      Serialize(builder, context, element, rest...);
+      Serialise(builder, context, element, rest...);
     }
   }
 
   template <typename CSSType, typename... Rest>
-  void SerializeOnVariantLike(CSSOMString &builder, const SerializationContext &context, const CSSType &value,
+  void SerializeOnVariantLike(CSSOMString &builder, const SerialisationContext &context, const CSSType &value,
                               Rest &&...rest) noexcept
   {
     krys::SwitchOn(value, [&](const auto &alternative)
-                   { Serialize(builder, context, alternative, std::forward<Rest>(rest)...); });
+                   { Serialise(builder, context, alternative, std::forward<Rest>(rest)...); });
   }
 
   // Constrained for `TreatAsEmptyLike`.
   template <EmptyLike CSSType>
-  struct Serializer<CSSType>
+  struct Serialiser<CSSType>
   {
     template <typename... Rest>
-    void operator()(CSSOMString &builder, const SerializationContext &, const CSSType &, Rest &&...) noexcept
+    void operator()(CSSOMString &builder, const SerialisationContext &, const CSSType &, Rest &&...) noexcept
     {
     }
   };
 
   // Constrained for `TreatAsOptionalLike`.
   template <OptionalLike CSSType>
-  struct Serializer<CSSType>
+  struct Serialiser<CSSType>
   {
     template <typename... Rest>
-    void operator()(CSSOMString &builder, const SerializationContext &context, const CSSType &value,
+    void operator()(CSSOMString &builder, const SerialisationContext &context, const CSSType &value,
                     Rest &&...rest) noexcept
     {
       SerializeOnOptionalLike(builder, context, value, std::forward<Rest>(rest)...);
@@ -176,10 +178,10 @@ namespace krys::boo::css
 
   // Constrained for `TreatAsTupleLike`.
   template <TupleLike CSSType>
-  struct Serializer<CSSType>
+  struct Serialiser<CSSType>
   {
     template <typename... Rest>
-    void operator()(CSSOMString &builder, const SerializationContext &context, const CSSType &value,
+    void operator()(CSSOMString &builder, const SerialisationContext &context, const CSSType &value,
                     Rest &&...rest) noexcept
     {
       if constexpr (SerializationCoalescing<CSSType> == SerializationCoalescingType::Minimal)
@@ -197,10 +199,10 @@ namespace krys::boo::css
 
   // Constrained for `TreatAsRangeLike`.
   template <RangeLike CSSType>
-  struct Serializer<CSSType>
+  struct Serialiser<CSSType>
   {
     template <typename... Rest>
-    void operator()(CSSOMString &builder, const SerializationContext &context, const CSSType &value,
+    void operator()(CSSOMString &builder, const SerialisationContext &context, const CSSType &value,
                     Rest &&...rest) noexcept
     {
       SerializeOnRangeLike(builder, context, value, SerializationSeparatorString<CSSType>,
@@ -210,10 +212,10 @@ namespace krys::boo::css
 
   // Constrained for `TreatAsVariantLike`.
   template <VariantLike CSSType>
-  struct Serializer<CSSType>
+  struct Serialiser<CSSType>
   {
     template <typename... Rest>
-    void operator()(CSSOMString &builder, const SerializationContext &context, const CSSType &value,
+    void operator()(CSSOMString &builder, const SerialisationContext &context, const CSSType &value,
                     Rest &&...rest) noexcept
     {
       SerializeOnVariantLike(builder, context, value, std::forward<Rest>(rest)...);
@@ -222,10 +224,10 @@ namespace krys::boo::css
 
   // Specialization for `KeywordValueConstant`.
   template <ValueId C>
-  struct Serializer<KeywordValueConstant<C>>
+  struct Serialiser<KeywordValueConstant<C>>
   {
     template <typename... Rest>
-    void operator()(CSSOMString &builder, const SerializationContext &, const KeywordValueConstant<C> &value,
+    void operator()(CSSOMString &builder, const SerialisationContext &, const KeywordValueConstant<C> &value,
                     Rest &&...) noexcept
     {
       builder.append(ToLower(value.value));
@@ -234,10 +236,10 @@ namespace krys::boo::css
 
   // Specialization for `CustomIdentifier`.
   template <>
-  struct Serializer<CustomIdentifier>
+  struct Serialiser<CustomIdentifier>
   {
     template <typename... Rest>
-    void operator()(CSSOMString &builder, const SerializationContext &context, const CustomIdentifier &value,
+    void operator()(CSSOMString &builder, const SerialisationContext &context, const CustomIdentifier &value,
                     Rest &&...) noexcept
     {
       SerializeCustomIdentifier(builder, context, value);
@@ -246,10 +248,10 @@ namespace krys::boo::css
 
   // Specialization for `PropertyIdentifier`.
   template <>
-  struct Serializer<PropertyIdentifier>
+  struct Serialiser<PropertyIdentifier>
   {
     template <typename... Rest>
-    void operator()(CSSOMString &builder, const SerializationContext &context,
+    void operator()(CSSOMString &builder, const SerialisationContext &context,
                     const PropertyIdentifier &value, Rest &&...) noexcept
     {
       SerializePropertyIdentifier(builder, context, value);
@@ -258,10 +260,10 @@ namespace krys::boo::css
 
   // Specialization for `CSSOMString`.
   template <>
-  struct Serializer<CSSOMString>
+  struct Serialiser<CSSOMString>
   {
     template <typename... Rest>
-    void operator()(CSSOMString &builder, const SerializationContext &context, const CSSOMString &value,
+    void operator()(CSSOMString &builder, const SerialisationContext &context, const CSSOMString &value,
                     Rest &&...) noexcept
     {
       SerializeString(builder, context, value);
@@ -270,10 +272,10 @@ namespace krys::boo::css
 
   // Specialization for `CSSOMStringAtom`.
   template <>
-  struct Serializer<CSSOMStringAtom>
+  struct Serialiser<CSSOMStringAtom>
   {
     template <typename... Rest>
-    void operator()(CSSOMString &builder, const SerializationContext &context, const CSSOMStringAtom &value,
+    void operator()(CSSOMString &builder, const SerialisationContext &context, const CSSOMStringAtom &value,
                     Rest &&...) noexcept
     {
       SerializeString(builder, context, value);
@@ -282,14 +284,14 @@ namespace krys::boo::css
 
   // Specialization for `FunctionNotation`.
   template <ValueId Name, typename CSSType>
-  struct Serializer<FunctionNotation<Name, CSSType>>
+  struct Serialiser<FunctionNotation<Name, CSSType>>
   {
     template <typename... Rest>
-    void operator()(CSSOMString &builder, const SerializationContext &context,
+    void operator()(CSSOMString &builder, const SerialisationContext &context,
                     const FunctionNotation<Name, CSSType> &value, Rest &&...rest) noexcept
     {
       builder.append(ToLower(value.name), '(');
-      Serialize(builder, context, value.parameters, std::forward<Rest>(rest)...);
+      Serialise(builder, context, value.parameters, std::forward<Rest>(rest)...);
       builder.append(')');
     }
   };
@@ -297,6 +299,8 @@ namespace krys::boo::css
 #pragma endregion
 
 #pragma region ComputedStyleDependencies
+
+  struct ComputedStyleDependencies;
 
   template <typename CSSType>
   struct ComputedStyleDependenciesCollector;
@@ -765,7 +769,7 @@ namespace krys::boo::css
           [&](const auto &element)
           { list.push_back(CreateValue(pool, element, std::forward<Args>(args)...)); });
 
-        apply([&](const auto &...x) { (..., caller(x)); }, value);
+        krys::apply([&](const auto &...x) { (..., caller(x)); }, value);
 
         return CreateListValue<SerializationSeparator<CSSType>>(krys::move(list));
       }

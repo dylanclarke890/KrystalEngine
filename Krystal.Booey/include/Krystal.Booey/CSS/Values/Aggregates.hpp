@@ -1,10 +1,14 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Core/RectCorners.hpp"
+#include "Krystal.Booey/Core/RectEdges.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/Concepts.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
@@ -635,6 +639,207 @@ namespace krys::boo::css
 
 #pragma endregion
 
+  // Wraps a variable (though known at construction) number of elements of a single type, semantically marking
+  // them as serializing as "space separated".
+  template <typename T>
+  struct SpaceSeparatedFixedList
+  {
+    using Container = WTF::FixedVector<T>;
+    using const_iterator = typename Container::const_iterator;
+    using const_reverse_iterator = typename Container::const_reverse_iterator;
+    using value_type = typename Container::value_type;
+
+    SpaceSeparatedFixedList() = default;
+
+    SpaceSeparatedFixedList(std::initializer_list<T> initializerList) : value {initializerList}
+    {
+    }
+
+    SpaceSeparatedFixedList(Container &&value) : value {WTF::move(value)}
+    {
+    }
+
+    SpaceSeparatedFixedList(T &&value) : value {WTF::move(value)}
+    {
+    }
+
+    template <typename SizedRange, typename Mapper>
+    static SpaceSeparatedFixedList map(SizedRange &&range, NOESCAPE Mapper &&mapper)
+    {
+      return Container::map(std::forward<SizedRange>(range), std::forward<Mapper>(mapper));
+    }
+
+    template <std::invocable<size_t> Generator>
+    static SpaceSeparatedFixedList createWithSizeFromGenerator(size_t size, NOESCAPE Generator &&generator)
+    {
+      return Container::createWithSizeFromGenerator(size, std::forward<Generator>(generator));
+    }
+
+    const_iterator begin() const LIFETIME_BOUND
+    {
+      return value.begin();
+    }
+    const_iterator end() const LIFETIME_BOUND
+    {
+      return value.end();
+    }
+    const_reverse_iterator rbegin() const LIFETIME_BOUND
+    {
+      return value.rbegin();
+    }
+    const_reverse_iterator rend() const LIFETIME_BOUND
+    {
+      return value.rend();
+    }
+
+    bool isEmpty() const
+    {
+      return value.isEmpty();
+    }
+    size_t size() const
+    {
+      return value.size();
+    }
+    const T &operator[](size_t i) const LIFETIME_BOUND
+    {
+      return value[i];
+    }
+
+    const T &first() const LIFETIME_BOUND
+    {
+      return value.first();
+    }
+    const T &last() const LIFETIME_BOUND
+    {
+      return value.last();
+    }
+
+    bool contains(const auto &x) const
+    {
+      return value.contains(x);
+    }
+    bool containsIf(NOESCAPE const Invocable<bool(const value_type &)> auto &f) const
+    {
+      return value.containsIf(f);
+    }
+
+    template <typename F>
+    decltype(auto) map(F &&functor) const
+    {
+      return value.map(std::forward<F>(functor));
+    }
+
+    bool operator==(const SpaceSeparatedFixedList &) const = default;
+
+    Container value;
+  };
+
+  template <typename T>
+  constexpr auto TreatAsRangeLike<SpaceSeparatedFixedList<T>> = true;
+  template <typename T>
+  constexpr auto SerializationSeparator<SpaceSeparatedFixedList<T>> = SerializationSeparatorType::Space;
+
+  // Wraps a variable (though known at construction) number of elements of a single type, semantically marking
+  // them as serializing as "comma separated".
+  template <typename T>
+  struct CommaSeparatedFixedList
+  {
+    using Container = WTF::FixedVector<T>;
+    using const_iterator = typename Container::const_iterator;
+    using const_reverse_iterator = typename Container::const_reverse_iterator;
+    using value_type = typename Container::value_type;
+
+    CommaSeparatedFixedList() = default;
+
+    CommaSeparatedFixedList(std::initializer_list<T> initializerList) : value {initializerList}
+    {
+    }
+
+    CommaSeparatedFixedList(Container &&value) : value {WTF::move(value)}
+    {
+    }
+
+    CommaSeparatedFixedList(T &&value) : value {WTF::move(value)}
+    {
+    }
+
+    template <typename SizedRange, typename Mapper>
+    static CommaSeparatedFixedList map(SizedRange &&range, NOESCAPE Mapper &&mapper)
+    {
+      return Container::map(std::forward<SizedRange>(range), std::forward<Mapper>(mapper));
+    }
+
+    template <std::invocable<size_t> Generator>
+    static CommaSeparatedFixedList createWithSizeFromGenerator(size_t size, NOESCAPE Generator &&generator)
+    {
+      return Container::createWithSizeFromGenerator(size, std::forward<Generator>(generator));
+    }
+
+    const_iterator begin() const LIFETIME_BOUND
+    {
+      return value.begin();
+    }
+    const_iterator end() const LIFETIME_BOUND
+    {
+      return value.end();
+    }
+    const_reverse_iterator rbegin() const LIFETIME_BOUND
+    {
+      return value.rbegin();
+    }
+    const_reverse_iterator rend() const LIFETIME_BOUND
+    {
+      return value.rend();
+    }
+
+    bool isEmpty() const
+    {
+      return value.isEmpty();
+    }
+    size_t size() const
+    {
+      return value.size();
+    }
+    const T &operator[](size_t i) const LIFETIME_BOUND
+    {
+      return value[i];
+    }
+
+    const T &first() const LIFETIME_BOUND
+    {
+      return value.first();
+    }
+    const T &last() const LIFETIME_BOUND
+    {
+      return value.last();
+    }
+
+    bool contains(const auto &x) const
+    {
+      return value.contains(x);
+    }
+    bool containsIf(NOESCAPE const Invocable<bool(const value_type &)> auto &f) const
+    {
+      return value.containsIf(f);
+    }
+
+    template <typename F>
+    decltype(auto) map(F &&functor) const
+    {
+      return value.map(std::forward<F>(functor));
+    }
+
+    bool operator==(const CommaSeparatedFixedList &) const = default;
+
+    Container value;
+  };
+
+  template <typename T>
+  constexpr auto TreatAsRangeLike<CommaSeparatedFixedList<T>> = true;
+
+  template <typename T>
+  constexpr auto SerializationSeparator<CommaSeparatedFixedList<T>> = SerializationSeparatorType::Comma;
+
 #pragma region SpaceSeparatedTuple
 
   /// @brief Wraps a variadic list of types, semantically marking them as serializing as "space separated".
@@ -784,12 +989,12 @@ namespace krys::boo::css
 
     KRYS_NODISCARD constexpr bool operator==(const SpaceSeparatedSize<T> &) const noexcept = default;
 
-    KRYS_NODISCARD const T &width() const noexcept
+    KRYS_NODISCARD const T &Width() const noexcept
     {
       return get<0>(value);
     }
 
-    KRYS_NODISCARD const T &height() const noexcept
+    KRYS_NODISCARD const T &Height() const noexcept
     {
       return get<1>(value);
     }
@@ -901,12 +1106,12 @@ namespace krys::boo::css
     KRYS_NODISCARD constexpr bool
       operator==(const MinimallySerializingSpaceSeparatedSize<T> &) const noexcept = default;
 
-    KRYS_NODISCARD constexpr const T &width() const noexcept
+    KRYS_NODISCARD constexpr const T &Width() const noexcept
     {
       return get<0>(value);
     }
 
-    KRYS_NODISCARD constexpr const T &height() const noexcept
+    KRYS_NODISCARD constexpr const T &Height() const noexcept
     {
       return get<1>(value);
     }
@@ -927,6 +1132,250 @@ namespace krys::boo::css
 
   template <typename T>
   constexpr auto SerializationCoalescing<MinimallySerializingSpaceSeparatedSize<T>> =
+    SerializationCoalescingType::Minimal;
+
+#pragma endregion
+
+#pragma region SpaceSeparatedRectEdges
+
+  /// @brief Wraps a quad of elements of a single type representing the edges of a rect, semantically marking
+  /// them as serializing as "space separated".
+  template <typename T>
+  struct SpaceSeparatedRectEdges : public RectEdges<T>
+  {
+    using value_type = T;
+
+    constexpr SpaceSeparatedRectEdges(T repeat) noexcept : RectEdges<T> {repeat, repeat, repeat, repeat}
+    {
+    }
+
+    constexpr SpaceSeparatedRectEdges(T top, T right, T bottom, T left) noexcept
+        : RectEdges<T> {krys::move(top), krys::move(right), krys::move(bottom), krys::move(left)}
+    {
+    }
+
+    constexpr SpaceSeparatedRectEdges(RectEdges<T> &&rectEdges) noexcept
+        : RectEdges<T> {krys::move(rectEdges)}
+    {
+    }
+
+    constexpr bool operator==(const SpaceSeparatedRectEdges<T> &) const noexcept = default;
+  };
+
+  template <size_t I, typename T>
+  KRYS_NODISCARD const auto &get(const SpaceSeparatedRectEdges<T> &rectEdges) noexcept
+  {
+    if constexpr (!I)
+    {
+      return rectEdges.Top();
+    }
+    else if constexpr (I == 1)
+    {
+      return rectEdges.Right();
+    }
+    else if constexpr (I == 2)
+    {
+      return rectEdges.Bottom();
+    }
+    else if constexpr (I == 3)
+    {
+      return rectEdges.Left();
+    }
+  }
+
+  template <typename T>
+  constexpr auto TreatAsTupleLike<SpaceSeparatedRectEdges<T>> = true;
+
+  template <typename T>
+  constexpr auto SerializationSeparator<SpaceSeparatedRectEdges<T>> = SerializationSeparatorType::Space;
+
+#pragma endregion
+
+#pragma region CommaSeparatedRectEdges
+
+  /// @brief Wraps a quad of elements of a single type representing the edges of a rect, semantically marking
+  /// them as serializing as "comma separated".
+  template <typename T>
+  struct CommaSeparatedRectEdges : public RectEdges<T>
+  {
+    using value_type = T;
+
+    constexpr CommaSeparatedRectEdges(T repeat) noexcept : RectEdges<T> {repeat, repeat, repeat, repeat}
+    {
+    }
+
+    constexpr CommaSeparatedRectEdges(T top, T right, T bottom, T left) noexcept
+        : RectEdges<T> {krys::move(top), krys::move(right), krys::move(bottom), krys::move(left)}
+    {
+    }
+
+    constexpr CommaSeparatedRectEdges(RectEdges<T> &&rectEdges) noexcept
+        : RectEdges<T> {krys::move(rectEdges)}
+    {
+    }
+
+    constexpr bool operator==(const CommaSeparatedRectEdges<T> &) const noexcept = default;
+  };
+
+  template <size_t I, typename T>
+  KRYS_NODISCARD const auto &get(const CommaSeparatedRectEdges<T> &rectEdges) noexcept
+  {
+    if constexpr (!I)
+    {
+      return rectEdges.Top();
+    }
+    else if constexpr (I == 1)
+    {
+      return rectEdges.Right();
+    }
+    else if constexpr (I == 2)
+    {
+      return rectEdges.Bottom();
+    }
+    else if constexpr (I == 3)
+    {
+      return rectEdges.Left();
+    }
+  }
+
+  template <typename T>
+  constexpr bool TreatAsTupleLike<CommaSeparatedRectEdges<T>> = true;
+
+  template <typename T>
+  constexpr auto SerializationSeparator<CommaSeparatedRectEdges<T>> = SerializationSeparatorType::Comma;
+
+#pragma endregion
+
+#pragma region MinimallySerializingSpaceSeparatedRectEdges
+
+  /// @brief A set of 4 values parsed and interpreted in the same manner as defined for the margin shorthand.
+  ///
+  /// <minimally-serializing-rect-edges> = <type>{1,4}
+  ///
+  /// - if only 1 value, `a`, is provided, set top, bottom, right & left to `a`.
+  /// - if only 2 values, `a` and `b` are provided, set top & bottom to `a`, right & left to `b`.
+  /// - if only 3 values, `a`, `b`, and `c` are provided, set top to `a`, right to `b`, bottom to `c`, & left
+  /// to `b`.
+  ///
+  /// As the name implies, the benefit of using this over `SpaceSeparatedRectEdges` directly
+  /// is that this will serialize in its minimal form, checking for element equality and only
+  /// serializing what is necessary.
+  template <typename T>
+  struct MinimallySerializingSpaceSeparatedRectEdges : public RectEdges<T>
+  {
+    using value_type = T;
+
+    constexpr MinimallySerializingSpaceSeparatedRectEdges(T value) noexcept
+        : RectEdges<T> {value, value, value, value}
+    {
+    }
+
+    constexpr MinimallySerializingSpaceSeparatedRectEdges(T top, T right, T bottom, T left) noexcept
+        : RectEdges<T> {krys::move(top), krys::move(right), krys::move(bottom), krys::move(left)}
+    {
+    }
+
+    constexpr MinimallySerializingSpaceSeparatedRectEdges(RectEdges<T> &&rectEdges) noexcept
+        : RectEdges<T> {krys::move(rectEdges)}
+    {
+    }
+
+    constexpr bool
+      operator==(const MinimallySerializingSpaceSeparatedRectEdges<T> &) const noexcept = default;
+  };
+
+  template <size_t I, typename T>
+  KRYS_NODISCARD decltype(auto) get(const MinimallySerializingSpaceSeparatedRectEdges<T> &value) noexcept
+  {
+    if constexpr (!I)
+    {
+      return value.Top();
+    }
+    else if constexpr (I == 1)
+    {
+      return value.Right();
+    }
+    else if constexpr (I == 2)
+    {
+      return value.Bottom();
+    }
+    else if constexpr (I == 3)
+    {
+      return value.Left();
+    }
+  }
+
+  template <typename T>
+  constexpr bool TreatAsTupleLike<MinimallySerializingSpaceSeparatedRectEdges<T>> = true;
+
+  template <typename T>
+  constexpr auto SerializationSeparator<MinimallySerializingSpaceSeparatedRectEdges<T>> =
+    SerializationSeparatorType::Space;
+
+  template <typename T>
+  constexpr auto SerializationCoalescing<MinimallySerializingSpaceSeparatedRectEdges<T>> =
+    SerializationCoalescingType::Minimal;
+
+#pragma endregion
+
+#pragma region MinimallySerializingSpaceSeparatedRectCorners
+
+  template <typename T>
+  struct MinimallySerializingSpaceSeparatedRectCorners : public RectCorners<T>
+  {
+    using value_type = T;
+
+    constexpr MinimallySerializingSpaceSeparatedRectCorners(T value) noexcept
+        : RectCorners<T> {value, value, value, value}
+    {
+    }
+
+    constexpr MinimallySerializingSpaceSeparatedRectCorners(T topLeft, T topRight, T bottomLeft,
+                                                            T bottomRight) noexcept
+        : RectCorners<T> {krys::move(topLeft), krys::move(topRight), krys::move(bottomLeft),
+                          krys::move(bottomRight)}
+    {
+    }
+
+    constexpr MinimallySerializingSpaceSeparatedRectCorners(RectCorners<T> &&rectCorners) noexcept
+        : RectCorners<T> {krys::move(rectCorners)}
+    {
+    }
+
+    constexpr bool
+      operator==(const MinimallySerializingSpaceSeparatedRectCorners<T> &) const noexcept = default;
+  };
+
+  template <size_t I, typename T>
+  KRYS_NODISCARD decltype(auto) get(const MinimallySerializingSpaceSeparatedRectCorners<T> &value) noexcept
+  {
+    if constexpr (!I)
+    {
+      return value.TopLeft();
+    }
+    else if constexpr (I == 1)
+    {
+      return value.TopRight();
+    }
+    else if constexpr (I == 2)
+    {
+      return value.BottomLeft();
+    }
+    else if constexpr (I == 3)
+    {
+      return value.BottomRight();
+    }
+  }
+
+  template <typename T>
+  constexpr bool TreatAsTupleLike<MinimallySerializingSpaceSeparatedRectCorners<T>> = true;
+
+  template <typename T>
+  constexpr auto SerializationSeparator<MinimallySerializingSpaceSeparatedRectCorners<T>> =
+    SerializationSeparatorType::Space;
+
+  template <typename T>
+  constexpr auto SerializationCoalescing<MinimallySerializingSpaceSeparatedRectCorners<T>> =
     SerializationCoalescingType::Minimal;
 
 #pragma endregion
@@ -1022,6 +1471,696 @@ namespace krys::boo::css
 
   template <typename T>
   constexpr auto TreatAsVariantLike<ListOrNone<T>> = true;
+
+  // Concept to constrain types to only those that derive from `ListOrNone`.
+  template <typename T>
+  concept ListOrNoneDerived = IsBaseOfTemplate<ListOrNone, T>;
+
+#pragma endregion
+
+#pragma region ListOrDefault
+
+  // Wraps a list and makes it so that when the list is empty, it looks to clients like it has a single
+  // "default" item in instead.
+  template <typename T, typename Defaulter>
+  struct ListOrDefault
+  {
+    // Special value to construct the empty (e.g. list with just the default value) list.
+    struct DefaultValueToken
+    {
+    };
+    constexpr static DefaultValueToken DefaultValue {};
+
+    using List = T;
+    using value_type = typename List::value_type;
+
+    // Iterator that iterates a fictitious single item list, [default value], if the underlying list is empty,
+    // or the underlying list.
+    struct const_iterator
+    {
+      typename List::const_iterator it;
+      bool atEndForDefault;
+      const ListOrDefault<List, Defaulter> *owner;
+
+      using iterator_category = std::forward_iterator_tag;
+      using value_type = typename List::value_type;
+      using difference_type = std::ptrdiff_t;
+      using pointer = const value_type *;
+      using reference = const value_type &;
+
+      const value_type &operator*() const
+      {
+        if (owner->IsDefault())
+          return owner->defaulter();
+        return *it;
+      }
+
+      const_iterator &operator++()
+      {
+        if (owner->IsDefault())
+        {
+          atEndForDefault = true;
+        }
+        else
+        {
+          ++it;
+        }
+        return *this;
+      }
+
+      const_iterator operator++(int)
+      {
+        auto result = *this;
+        ++*this;
+        return result;
+      }
+
+      bool operator==(const const_iterator &other) const = default;
+    };
+
+    ListOrDefault(List &&list, Defaulter &&defaulter = Defaulter()) noexcept
+        : value {krys::move(list)}, defaulter {krys::move(defaulter)}
+    {
+    }
+
+    ListOrDefault(DefaultValueToken, Defaulter &&defaulter = Defaulter()) noexcept
+        : value {}, defaulter {krys::move(defaulter)}
+    {
+    }
+
+    const_iterator begin() const noexcept
+    {
+      return {.it = value.begin(), .atEndForDefault = !IsDefault(), .owner = this};
+    }
+
+    const_iterator end() const noexcept
+    {
+      return {.it = value.end(), .atEndForDefault = true, .owner = this};
+    }
+
+    size_t Size() const noexcept
+    {
+      return IsDefault() ? 1 : value.size();
+    }
+
+    const value_type &operator[](size_t i) const noexcept
+    {
+      return IsDefault() ? defaulter() : value[i];
+    }
+
+    bool Contains(const auto &x) const noexcept
+    {
+      return IsDefault() ? (x == defaulter()) : value.Contains(x);
+    }
+    bool ContainsIf(const Invocable<bool(const value_type &)> auto &f) const noexcept
+    {
+      return IsDefault() ? f(defaulter()) : value.ContainsIf(f);
+    }
+
+    bool IsDefault() const noexcept
+    {
+      return value.IsEmpty();
+    }
+
+    bool operator==(const ListOrDefault &) const noexcept = default;
+
+  private:
+    friend struct const_iterator;
+
+    List value;
+    KRYS_NO_UNIQUE_ADDRESS Defaulter defaulter;
+  };
+
+  template <typename List, typename Defaulter>
+  constexpr auto TreatAsRangeLike<ListOrDefault<List, Defaulter>> = true;
+  template <typename List, typename Defaulter>
+  constexpr auto SerializationSeparator<ListOrDefault<List, Defaulter>> = SerializationSeparator<List>;
+
+  // Concept to constrain types to only those that derive from `ListOrDefault`.
+  template <typename T>
+  concept ListOrDefaultDerived = IsBaseOfTemplate<ListOrDefault, T>;
+
+// Helper to define a range-like conformance for a type that derives from `ListOrDefault`.
+#define DEFINE_RANGE_LIKE_CONFORMANCE_FOR_LIST_OR_DEFAULT_DERIVED_TYPE(t)                                    \
+  DEFINE_RANGE_LIKE_CONFORMANCE(t)                                                                           \
+  template <>                                                                                                \
+  constexpr auto krys::boo::css::SerializationSeparator<t> =                                                 \
+    krys::boo::css::SerializationSeparator<typename t::List>;
+
+#pragma endregion
+
+#pragma region ListOrNull
+
+  // Wraps a list and behaves as `optional-like`, using the `list.IsEmpty()` as the nullopt state.
+  template <typename T>
+  struct ListOrNull
+  {
+    using List = T;
+    using const_iterator = typename List::const_iterator;
+    using const_reverse_iterator = typename List::const_reverse_iterator;
+    using value_type = typename List::value_type;
+
+    ListOrNull(List &&list) noexcept : _value {krys::move(list)}
+    {
+      krys_assert(!_value.IsEmpty());
+    }
+
+    ListOrNull(std::nullopt_t) noexcept : _value {}
+    {
+    }
+
+    ListOrNull() noexcept : _value {}
+    {
+    }
+
+    KRYS_NODISCARD const_iterator begin() const noexcept
+    {
+      return _value.begin();
+    }
+
+    KRYS_NODISCARD const_iterator end() const noexcept
+    {
+      return _value.end();
+    }
+
+    KRYS_NODISCARD const_reverse_iterator rbegin() const noexcept
+    {
+      return _value.rbegin();
+    }
+
+    KRYS_NODISCARD const_reverse_iterator rend() const noexcept
+    {
+      return _value.rend();
+    }
+
+    KRYS_NODISCARD const value_type &First() const noexcept
+    {
+      return _value.first();
+    }
+
+    KRYS_NODISCARD const value_type &Last() const noexcept
+    {
+      return _value.last();
+    }
+
+    KRYS_NODISCARD size_t Size() const
+    {
+      return _value.size();
+    }
+
+    KRYS_NODISCARD const value_type &operator[](size_t i) const noexcept
+    {
+      return _value[i];
+    }
+
+    KRYS_NODISCARD bool Contains(const auto &x) const
+    {
+      return _value.Contains(x);
+    }
+
+    KRYS_NODISCARD bool ContainsIf(const Invocable<bool(const value_type &)> auto &f) const
+    {
+      return _value.ContainsIf(f);
+    }
+
+    KRYS_NODISCARD bool operator==(const ListOrNull &) const = default;
+
+    KRYS_NODISCARD bool IsNull() const
+    {
+      return _value.IsEmpty();
+    }
+
+    KRYS_NODISCARD bool IsList() const
+    {
+      return !_value.IsEmpty();
+    }
+
+    KRYS_NODISCARD const List *TryList() const noexcept
+    {
+      return IsList() ? &_value : nullptr;
+    }
+
+    // Returns the underlying list regardless of whether or not it is empty.
+    KRYS_NODISCARD const List &List() const noexcept
+    {
+      return _value;
+    }
+
+    explicit operator bool() const
+    {
+      return !_value.IsEmpty();
+    }
+
+    const List *operator->() const noexcept
+    {
+      return &_value;
+    }
+
+    const List &operator*() const noexcept
+    {
+      return _value;
+    }
+
+  protected:
+    List _value;
+  };
+
+  template <typename List>
+  constexpr auto TreatAsOptionalLike<ListOrNull<List>> = true;
+
+#pragma endregion
+
+#pragma region EnumSetOrKeyword
+
+  // Wraps an `EnumSet` and enforces the invariant that it is either created with a non-empty value or
+  // specified keyword. Required to be subclassed, passing the derived type as the first template parameter.
+  template <typename Derived, typename T, typename K>
+  struct EnumSetOrKeywordBase
+  {
+    using Base = EnumSetOrKeywordBase<Derived, T, K>;
+    using EnumSet = T;
+    using Keyword = K;
+    using value_type = typename EnumSet::value_type;
+
+    constexpr EnumSetOrKeywordBase(EnumSet &&list) noexcept : _value {krys::move(list)}
+    {
+      krys_assert(!_value.IsEmpty());
+    }
+
+    constexpr EnumSetOrKeywordBase(Keyword) noexcept : _value {}
+    {
+    }
+
+    constexpr EnumSetOrKeywordBase(value_type value) noexcept : EnumSetOrKeywordBase {EnumSet {value}}
+    {
+    }
+
+    constexpr EnumSetOrKeywordBase(std::initializer_list<value_type> initializerList) noexcept
+        : EnumSetOrKeywordBase {EnumSet {initializerList}}
+    {
+    }
+
+    constexpr static Derived FromRaw(typename EnumSet::StorageType rawValue) noexcept
+    {
+      if (!rawValue)
+        return Keyword {};
+      return EnumSet::FromRaw(rawValue);
+    }
+
+    constexpr typename EnumSet::StorageType ToRaw() const noexcept
+    {
+      return _value.ToRaw();
+    }
+
+    KRYS_NODISCARD constexpr bool Contains(value_type e) const noexcept
+    {
+      return _value.Contains(e);
+    }
+
+    KRYS_NODISCARD constexpr bool ContainsAny(EnumSet other) const noexcept
+    {
+      return _value.ContainsAny(other.value);
+    }
+
+    KRYS_NODISCARD constexpr bool ContainsAll(EnumSet other) const noexcept
+    {
+      return _value.ContainsAll(other.value);
+    }
+
+    KRYS_NODISCARD constexpr bool ContainsOnly(EnumSet other) const noexcept
+    {
+      return _value.ContainsOnly(other.value);
+    }
+
+    KRYS_NODISCARD constexpr decltype(auto) begin() const noexcept
+    {
+      return _value.begin();
+    }
+
+    KRYS_NODISCARD constexpr decltype(auto) end() const noexcept
+    {
+      return _value.end();
+    }
+
+    KRYS_NODISCARD constexpr size_t Size() const noexcept
+    {
+      return _value.Size();
+    }
+
+    KRYS_NODISCARD constexpr bool Contains(const auto &x) const noexcept
+    {
+      return _value.Contains(x);
+    }
+
+    constexpr bool operator==(const EnumSetOrKeywordBase &) const noexcept = default;
+
+    KRYS_NODISCARD constexpr bool IsKeyword() const noexcept
+    {
+      return _value.IsEmpty();
+    }
+
+    KRYS_NODISCARD constexpr bool IsEnumSet() const noexcept
+    {
+      return !_value.IsEmpty();
+    }
+
+    KRYS_NODISCARD constexpr const EnumSet *TryEnumSet() const noexcept
+    {
+      return IsEnumSet() ? &_value : nullptr;
+    }
+
+    template <typename... F>
+    KRYS_NODISCARD constexpr decltype(auto) SwitchOn(F &&...f) const noexcept
+    {
+      auto visitor = krys::CreateVisitor(std::forward<F>(f)...);
+
+      if (IsKeyword())
+      {
+        return visitor(Keyword {});
+      }
+
+      return visitor(_value);
+    }
+
+  protected:
+    // An empty enum set indicates the value is `Keyword`. This invariant is ensured
+    // with a release assert in the constructor.
+    EnumSet _value;
+  };
+
+  // Concept to constrain types to only those that derive from `EnumSetOrKeywordBase`.
+  template <typename T>
+  concept EnumSetOrKeywordBaseDerived = IsBaseOfTemplate<EnumSetOrKeywordBase, T>;
+
+#pragma endregion
+
+#pragma region ValueOrKeyword
+
+  /// @brief Wraps a `markable` type and enforces the invariant that it is either created with a non-empty
+  /// value or the provided keyword.
+  template <typename T, typename K, typename Traits = MarkableTraits<T>>
+  struct ValueOrKeyword
+  {
+    using Base = ValueOrKeyword<T, K, Traits>;
+    using Value = T;
+    using Keyword = K;
+
+  protected:
+    constexpr ValueOrKeyword(Maybe<Value> &&value) : _value {krys::move(value)}
+    {
+    }
+
+    Markable<Value, Traits> _value {};
+
+  public:
+    constexpr ValueOrKeyword(Keyword) noexcept
+    {
+    }
+
+    constexpr ValueOrKeyword(Value &&value) noexcept : _value {krys::move(value)}
+    {
+    }
+
+    KRYS_NODISCARD constexpr bool IsKeyword() const noexcept
+    {
+      return !_value;
+    }
+
+    KRYS_NODISCARD constexpr bool IsValue() const noexcept
+    {
+      return !!_value;
+    }
+
+    KRYS_NODISCARD constexpr Maybe<Value> TryValue() const noexcept
+    {
+      return _value;
+    }
+
+    template <typename U>
+    KRYS_NODISCARD constexpr bool HoldsAlternative() const noexcept
+    {
+      if constexpr (SameType<U, Keyword>)
+      {
+        return IsKeyword();
+      }
+      else if constexpr (SameType<U, Value>)
+      {
+        return IsValue();
+      }
+    }
+
+    template <typename... F>
+    KRYS_NODISCARD constexpr decltype(auto) SwitchOn(F &&...f) const noexcept
+    {
+      auto visitor = krys::CreateVisitor(std::forward<F>(f)...);
+
+      if (IsKeyword())
+      {
+        return visitor(Keyword {});
+      }
+
+      return visitor(*_value);
+    }
+
+    constexpr bool operator==(const ValueOrKeyword &) const noexcept = default;
+  };
+
+  template <typename T, typename K, typename Traits>
+  constexpr auto TreatAsVariantLike<ValueOrKeyword<T, K, Traits>> = true;
+
+  // Concept to constrain types to only those that derive from `ValueOrKeyword`.
+  template <typename T>
+  concept ValueOrKeywordDerived = IsBaseOfTemplate<ValueOrKeyword, T>;
+
+#pragma endregion
+
+#pragma region SpaceSeparatedEnumSet
+
+  // Wraps an enum set, semantically marking it as serializing as "space separated".
+  template <IsEnum T>
+  struct SpaceSeparatedEnumSet
+  {
+    using Container = EnumSet<T>;
+    using StorageType = typename Container::StorageType;
+    using const_iterator = typename Container::iterator;
+    using value_type = T;
+
+    Container value;
+
+    constexpr SpaceSeparatedEnumSet() noexcept = default;
+
+    constexpr SpaceSeparatedEnumSet(std::initializer_list<T> initializerList) noexcept
+        : value {initializerList}
+    {
+    }
+
+    constexpr SpaceSeparatedEnumSet(Container &&value) noexcept : value {krys::move(value)}
+    {
+    }
+
+    template <typename SizedRange, typename Mapper>
+    KRYS_NODISCARD static SpaceSeparatedEnumSet Map(SizedRange &&range, Mapper &&mapper) noexcept
+    {
+      Container result;
+      for (auto &&value : range)
+      {
+        result.Add(mapper(value));
+      }
+
+      return result;
+    }
+
+    KRYS_NODISCARD constexpr static SpaceSeparatedEnumSet FromRaw(StorageType rawValue) noexcept
+    {
+      return Container::FromRaw(rawValue);
+    }
+
+    KRYS_NODISCARD constexpr StorageType ToRaw() const noexcept
+    {
+      return value.ToRaw();
+    }
+
+    KRYS_NODISCARD constexpr const_iterator begin() const noexcept
+    {
+      return value.begin();
+    }
+
+    KRYS_NODISCARD constexpr const_iterator end() const noexcept
+    {
+      return value.end();
+    }
+
+    KRYS_NODISCARD constexpr bool IsEmpty() const noexcept
+    {
+      return value.IsEmpty();
+    }
+
+    KRYS_NODISCARD constexpr size_t Size() const noexcept
+    {
+      return value.Size();
+    }
+
+    KRYS_NODISCARD constexpr bool Contains(T e) const noexcept
+    {
+      return value.Contains(e);
+    }
+
+    KRYS_NODISCARD constexpr bool ContainsAny(Container other) const noexcept
+    {
+      return value.ContainsAny(other);
+    }
+
+    KRYS_NODISCARD constexpr bool ContainsAll(Container other) const noexcept
+    {
+      return value.ContainsAll(other);
+    }
+
+    KRYS_NODISCARD constexpr bool ContainsOnly(Container other) const noexcept
+    {
+      return value.ContainsOnly(other);
+    }
+
+    constexpr friend SpaceSeparatedEnumSet operator&(SpaceSeparatedEnumSet lhs,
+                                                     SpaceSeparatedEnumSet rhs) noexcept
+    {
+      return lhs.value & rhs.value;
+    }
+
+    constexpr friend SpaceSeparatedEnumSet operator-(SpaceSeparatedEnumSet lhs,
+                                                     SpaceSeparatedEnumSet rhs) noexcept
+    {
+      return lhs.value - rhs.value;
+    }
+
+    constexpr friend SpaceSeparatedEnumSet operator^(SpaceSeparatedEnumSet lhs,
+                                                     SpaceSeparatedEnumSet rhs) noexcept
+    {
+      return lhs.value ^ rhs.value;
+    }
+
+    constexpr bool operator==(const SpaceSeparatedEnumSet &) const noexcept = default;
+  };
+
+  template <typename T>
+  constexpr auto TreatAsRangeLike<SpaceSeparatedEnumSet<T>> = true;
+
+  template <typename T>
+  constexpr auto SerializationSeparator<SpaceSeparatedEnumSet<T>> = SerializationSeparatorType::Space;
+
+#pragma endregion
+
+#pragma region CommaSeparatedEnumSet
+
+  // Wraps an enum set, semantically marking it as serializing as "comma separated".
+  template <IsEnum T>
+  struct CommaSeparatedEnumSet
+  {
+    using Container = EnumSet<T>;
+    using StorageType = typename Container::StorageType;
+    using const_iterator = typename Container::iterator;
+    using value_type = T;
+
+    Container value;
+
+    constexpr CommaSeparatedEnumSet() noexcept = default;
+
+    constexpr CommaSeparatedEnumSet(std::initializer_list<T> initializerList) noexcept
+        : value {initializerList}
+    {
+    }
+
+    constexpr CommaSeparatedEnumSet(Container &&value) noexcept : value {krys::move(value)}
+    {
+    }
+
+    template <typename SizedRange, typename Mapper>
+    KRYS_NODISCARD constexpr static CommaSeparatedEnumSet Map(SizedRange &&range, Mapper &&mapper) noexcept
+    {
+      Container result;
+      for (auto &&value : range)
+      {
+        result.Add(mapper(value));
+      }
+
+      return result;
+    }
+
+    KRYS_NODISCARD constexpr static CommaSeparatedEnumSet FromRaw(StorageType rawValue) noexcept
+    {
+      return Container::FromRaw(rawValue);
+    }
+
+    KRYS_NODISCARD constexpr StorageType ToRaw() const noexcept
+    {
+      return value.ToRaw();
+    }
+
+    KRYS_NODISCARD constexpr const_iterator begin() const noexcept
+    {
+      return value.begin();
+    }
+
+    KRYS_NODISCARD constexpr const_iterator end() const noexcept
+    {
+      return value.end();
+    }
+
+    KRYS_NODISCARD constexpr bool IsEmpty() const noexcept
+    {
+      return value.IsEmpty();
+    }
+
+    KRYS_NODISCARD constexpr size_t Size() const noexcept
+    {
+      return value.Size();
+    }
+
+    KRYS_NODISCARD constexpr bool Contains(T e) const noexcept
+    {
+      return value.Contains(e);
+    }
+
+    KRYS_NODISCARD constexpr bool ContainsAny(Container other) const noexcept
+    {
+      return value.ContainsAny(other);
+    }
+
+    KRYS_NODISCARD constexpr bool ContainsAll(Container other) const noexcept
+    {
+      return value.ContainsAll(other);
+    }
+
+    KRYS_NODISCARD constexpr bool ContainsOnly(Container other) const noexcept
+    {
+      return value.ContainsOnly(other);
+    }
+
+    constexpr friend CommaSeparatedEnumSet operator&(CommaSeparatedEnumSet lhs,
+                                                     CommaSeparatedEnumSet rhs) noexcept
+    {
+      return lhs.value & rhs.value;
+    }
+
+    constexpr friend CommaSeparatedEnumSet operator-(CommaSeparatedEnumSet lhs,
+                                                     CommaSeparatedEnumSet rhs) noexcept
+    {
+      return lhs.value - rhs.value;
+    }
+
+    constexpr friend CommaSeparatedEnumSet operator^(CommaSeparatedEnumSet lhs,
+                                                     CommaSeparatedEnumSet rhs) noexcept
+    {
+      return lhs.value ^ rhs.value;
+    }
+
+    bool operator==(const CommaSeparatedEnumSet &) const noexcept = default;
+  };
+
+  template <typename T>
+  constexpr auto TreatAsRangeLike<CommaSeparatedEnumSet<T>> = true;
+
+  template <typename T>
+  constexpr auto SerializationSeparator<CommaSeparatedEnumSet<T>> = SerializationSeparatorType::Comma;
 
 #pragma endregion
 }
@@ -1153,49 +2292,53 @@ namespace std
     using type = T;
   };
 
-  // template <typename T>
-  // class tuple_size<krys::boo::SpaceSeparatedRectEdges<T>> : public std::integral_constant<size_t, 4>
-  // {
-  // };
-  // template <size_t I, typename T>
-  // class tuple_element<I, krys::boo::SpaceSeparatedRectEdges<T>>
-  // {
-  // public:
-  //   using type = T;
-  // };
+  template <typename T>
+  class tuple_size<krys::boo::css::SpaceSeparatedRectEdges<T>> : public std::integral_constant<size_t, 4>
+  {
+  };
 
-  // template <typename T>
-  // class tuple_size<krys::boo::CommaSeparatedRectEdges<T>> : public std::integral_constant<size_t, 4>
-  // {
-  // };
-  // template <size_t I, typename T>
-  // class tuple_element<I, krys::boo::CommaSeparatedRectEdges<T>>
-  // {
-  // public:
-  //   using type = T;
-  // };
+  template <size_t I, typename T>
+  class tuple_element<I, krys::boo::css::SpaceSeparatedRectEdges<T>>
+  {
+  public:
+    using type = T;
+  };
 
-  // template <typename T>
-  // class tuple_size<krys::boo::MinimallySerializingSpaceSeparatedRectEdges<T>>
-  //     : public std::integral_constant<size_t, 4>
-  // {
-  // };
-  // template <size_t I, typename T>
-  // class tuple_element<I, krys::boo::MinimallySerializingSpaceSeparatedRectEdges<T>>
-  // {
-  // public:
-  //   using type = T;
-  // };
+  template <typename T>
+  class tuple_size<krys::boo::css::CommaSeparatedRectEdges<T>> : public std::integral_constant<size_t, 4>
+  {
+  };
 
-  // template <typename T>
-  // class tuple_size<krys::boo::MinimallySerializingSpaceSeparatedRectCorners<T>>
-  //     : public std::integral_constant<size_t, 4>
-  // {
-  // };
-  // template <size_t I, typename T>
-  // class tuple_element<I, krys::boo::MinimallySerializingSpaceSeparatedRectCorners<T>>
-  // {
-  // public:
-  //   using type = T;
-  // };
+  template <size_t I, typename T>
+  class tuple_element<I, krys::boo::css::CommaSeparatedRectEdges<T>>
+  {
+  public:
+    using type = T;
+  };
+
+  template <typename T>
+  class tuple_size<krys::boo::css::MinimallySerializingSpaceSeparatedRectEdges<T>>
+      : public std::integral_constant<size_t, 4>
+  {
+  };
+
+  template <size_t I, typename T>
+  class tuple_element<I, krys::boo::css::MinimallySerializingSpaceSeparatedRectEdges<T>>
+  {
+  public:
+    using type = T;
+  };
+
+  template <typename T>
+  class tuple_size<krys::boo::css::MinimallySerializingSpaceSeparatedRectCorners<T>>
+      : public std::integral_constant<size_t, 4>
+  {
+  };
+
+  template <size_t I, typename T>
+  class tuple_element<I, krys::boo::css::MinimallySerializingSpaceSeparatedRectCorners<T>>
+  {
+  public:
+    using type = T;
+  };
 }

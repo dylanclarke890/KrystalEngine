@@ -7,9 +7,16 @@ namespace krys::boo::css
   class TransformListValue final : public ValueWithSmallList
   {
   public:
-    KRYS_NODISCARD static Ref<TransformListValue> Create(ValueListBuilder) noexcept;
+    KRYS_NODISCARD static Ref<TransformListValue> Create(ValueListBuilder values) noexcept;
 
-    KRYS_NODISCARD static Ref<TransformListValue> Create(Ref<Value>) noexcept;
+    KRYS_NODISCARD static Ref<TransformListValue> Create(Ref<Value> value) noexcept;
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool Equals(const TransformListValue &other) const noexcept;
+
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
   };
 }
 

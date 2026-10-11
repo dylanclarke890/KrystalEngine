@@ -14,6 +14,13 @@ namespace krys::boo::css
   public:
     KRYS_NODISCARD static Ref<GridIntegerRepeatValue> Create(Ref<PrimitiveValue> repetitions,
                                                              ValueListBuilder builder) noexcept;
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool Equals(const GridIntegerRepeatValue &other) const noexcept;
+
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
   };
 }
 

@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Values/Color/AbsoluteColor.hpp"
 #include "Krystal.Booey/CSS/Values/Color/HexColor.hpp"
 #include "Krystal.Booey/CSS/Values/Color/KeywordColor.hpp"
 #include "Krystal.Booey/CSS/Values/Color/ResolvedColor.hpp"
@@ -8,6 +9,19 @@
 
 namespace krys::boo::css
 {
+  // The following color kinds are forward declared and stored in UniqueRefs to
+  // avoid unnecessarily growing the size of Color for the uncommon cases.
+  struct ColorLayers;
+  struct ColorMix;
+  struct ContrastColor;
+  struct LightDarkColor;
+
+  template <typename Descriptor>
+  struct AbsoluteColor;
+
+  template <typename Descriptor>
+  struct RelativeColor;
+
   class Color
   {
   public:
@@ -35,6 +49,8 @@ namespace krys::boo::css
     /// @brief Return an absolute color if possible, otherwise an invalid color.
     /// @see https://drafts.csswg.org/css-color-5/#absolute-color
     KRYS_NODISCARD boo::Color AbsoluteColor() const noexcept;
+
+    KRYS_NODISCARD bool operator==(const Color &other) const noexcept;
   };
 }
 

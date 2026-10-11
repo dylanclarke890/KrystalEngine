@@ -14,7 +14,6 @@ namespace krys::boo::css
     BorderImageSlice,
     BorderImageWidth,
     BoxShadowProperty,
-    Canvas,
     Color,
     ColorScheme,
     Counter,
@@ -31,6 +30,9 @@ namespace krys::boo::css
     EasingFunction,
     Filter,
     FilterImage,
+    Font,
+    FontFaceSrcLocal,
+    FontFaceSrcResource,
     FontFeature,
     FontStyleRange,
     FontStyleWithAngle,
@@ -38,6 +40,7 @@ namespace krys::boo::css
     Function,
     Image,
     ImageSet,
+    ImageSetOption,
     NamedImage,
     OffsetRotate,
     PaintImage,
@@ -58,11 +61,12 @@ namespace krys::boo::css
     TransformList,
     UnicodeRange,
     Url,
-    ValueList,
     ValuePair,
     VariableReference,
     View,
+    ValueWithSmallList,
+    ValueList,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::ValueType, 56uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::ValueType, 60uz);

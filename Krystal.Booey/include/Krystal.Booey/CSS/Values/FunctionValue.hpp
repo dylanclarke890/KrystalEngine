@@ -30,6 +30,13 @@ namespace krys::boo::css
                                                     Ref<Value> secondArgument, Ref<Value> thirdArgument,
                                                     Ref<Value> fourthArgument) noexcept;
 
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool Equals(const FunctionValue &other) const noexcept;
+
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
+
     KRYS_NODISCARD css::ValueId Name() const noexcept
     {
       return _name;

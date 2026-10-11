@@ -250,6 +250,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Utils/Tags.hpp
       include/Krystal.Core/Utils/UnalignedAccess.hpp
       include/Krystal.Core/Utils/ZippedRange.hpp
+      include/Krystal.Core/Utils/ZipTuple.hpp
 
   PRIVATE
     # Detection

@@ -9,6 +9,13 @@ namespace krys::boo::css
   {
   public:
     KRYS_NODISCARD static Ref<UnicodeRangeValue> Create(char32 start, char32 end) noexcept;
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool Equals(const UnicodeRangeValue &other) const noexcept;
+
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
   };
 }
 

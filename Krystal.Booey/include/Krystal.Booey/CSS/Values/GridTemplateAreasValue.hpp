@@ -20,6 +20,13 @@ namespace krys::boo::css
     KRYS_NODISCARD static Ref<GridTemplateAreasValue> Create(GridTemplateAreas &&areas) noexcept;
 
     KRYS_NODISCARD static Ref<GridTemplateAreasValue> Create(const GridTemplateAreas &areas) noexcept;
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool Equals(const GridTemplateAreasValue &other) const noexcept;
+
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
   };
 }
 

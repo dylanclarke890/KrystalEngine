@@ -19,7 +19,7 @@ namespace krys::boo::css
   namespace PropertyParserHelpers
   {
     // Options to augment color parsing.
-    struct CSSColorParsingOptions
+    struct ColorParsingOptions
     {
       ColorType AllowedColorTypes = ColorType::Absolute | ColorType::Current | ColorType::System;
     };
@@ -29,15 +29,15 @@ namespace krys::boo::css
 
     // MARK: <color> consuming (unresolved)
     KRYS_NODISCARD Maybe<Color> ConsumeUnresolvedColor(TokenRange &tokens, PropertyParserState &state,
-                                                       const CSSColorParsingOptions & = {}) noexcept;
+                                                       const ColorParsingOptions & = {}) noexcept;
 
     // MARK: <color> consuming (Value)
     KRYS_NODISCARD RefPtr<Value> ConsumeColor(TokenRange &tokens, PropertyParserState &state,
-                                              const CSSColorParsingOptions & = {}) noexcept;
+                                              const ColorParsingOptions & = {}) noexcept;
 
     // MARK: <color> consuming (raw)
     KRYS_NODISCARD Color ConsumeColorRaw(TokenRange &tokens, PropertyParserState &state,
-                                         const CSSColorParsingOptions &,
+                                         const ColorParsingOptions &,
                                          PlatformColorResolutionState &) noexcept;
 
     // MARK: <dynamic-range-limit> (unresolved)
@@ -47,5 +47,11 @@ namespace krys::boo::css
     // MARK: <dynamic-range-limit> (Value)
     KRYS_NODISCARD RefPtr<Value> ConsumeDynamicRangeLimit(TokenRange &tokens,
                                                           PropertyParserState &state) noexcept;
+
+    // FIXME: All callers are not getting the right Settings, keyword resolution and calc resolution
+    // when using this function and should switch to parseColorRaw().
+    KRYS_NODISCARD boo::Color
+      DeprecatedParseColorRawWithoutContext(const CSSOMString &str,
+                                            const ColorParsingOptions & = {}) noexcept;
   }
 }

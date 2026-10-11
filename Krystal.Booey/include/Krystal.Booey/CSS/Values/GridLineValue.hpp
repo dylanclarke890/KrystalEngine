@@ -13,6 +13,13 @@ namespace krys::boo::css
     KRYS_NODISCARD static Ref<GridLineValue> Create(RefPtr<PrimitiveValue> spanValue,
                                                     RefPtr<PrimitiveValue> numericValue,
                                                     RefPtr<PrimitiveValue> gridLineName) noexcept;
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool Equals(const GridLineValue &other) const noexcept;
+
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
   };
 }
 

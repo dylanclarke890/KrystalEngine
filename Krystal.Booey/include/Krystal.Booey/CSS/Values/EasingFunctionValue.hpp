@@ -9,6 +9,13 @@ namespace krys::boo::css
   {
   public:
     KRYS_NODISCARD static Ref<EasingFunctionValue> Create(EasingFunction function) noexcept;
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool Equals(const EasingFunctionValue &other) const noexcept;
+
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
   };
 }
 

@@ -8,10 +8,11 @@
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include <tuple>
+#include <ranges>
 
 namespace krys::boo::css
 {
-  class CalcAllowedSymbols
+  class AllowedSymbols
   {
     using AllowedSymbolsList = SmallList<std::tuple<ValueId, UnitType>, 4uz>;
 
@@ -19,17 +20,17 @@ namespace krys::boo::css
     AllowedSymbolsList _table;
 
   public:
-    CalcAllowedSymbols() noexcept = default;
+    AllowedSymbols() noexcept = default;
 
-    CalcAllowedSymbols(AllowedSymbolsList &&mappings) noexcept : _table(krys::move(mappings))
+    AllowedSymbols(AllowedSymbolsList &&mappings) noexcept : _table(krys::move(mappings))
     {
     }
 
-    CalcAllowedSymbols &operator=(const CalcAllowedSymbols &) noexcept = default;
-    CalcAllowedSymbols(const CalcAllowedSymbols &) noexcept = default;
+    AllowedSymbols &operator=(const AllowedSymbols &) noexcept = default;
+    AllowedSymbols(const AllowedSymbols &) noexcept = default;
 
-    CalcAllowedSymbols &operator=(CalcAllowedSymbols &&) noexcept = default;
-    CalcAllowedSymbols(CalcAllowedSymbols &&) noexcept = default;
+    AllowedSymbols &operator=(AllowedSymbols &&) noexcept = default;
+    AllowedSymbols(AllowedSymbols &&) noexcept = default;
 
     KRYS_NODISCARD Maybe<UnitType> Get(ValueId id) const noexcept
     {

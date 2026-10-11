@@ -1855,5 +1855,12 @@ namespace krys::boo::css
     return SwitchOnUnitType(unit, [](auto alternative) { return UnitString(alternative); });
   }
 
+  template <auto unit, typename T>
+  KRYS_NODISCARD constexpr decltype(auto) ConvertToValueInUnitsOf(T value) noexcept
+  requires SameType<typename T::UnitType, decltype(unit)>
+  {
+    return UnitTraits<typename T::UnitType>::template Convert<unit>(value.Value, value.Unit);
+  }
+
 #pragma endregion
 }

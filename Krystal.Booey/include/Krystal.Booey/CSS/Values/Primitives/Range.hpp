@@ -61,7 +61,7 @@ namespace krys::boo::css
     {
     }
 
-    constexpr bool operator==(const Range &) const = default;
+    constexpr bool operator==(const Range &) const noexcept = default;
   };
 
   /// @brief Constant value for `[−∞,∞]`.

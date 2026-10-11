@@ -9,6 +9,13 @@ namespace krys::boo::css
   {
   public:
     KRYS_NODISCARD static Ref<RatioValue> Create(Ratio ratio) noexcept;
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool Equals(const RatioValue &other) const noexcept;
+
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
   };
 }
 

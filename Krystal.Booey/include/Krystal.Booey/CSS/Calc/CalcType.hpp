@@ -1,4 +1,5 @@
 #pragma once
+#pragma once
 
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Numeric.hpp"
@@ -159,7 +160,7 @@ namespace krys::boo::css::calc
       return Multiply(*a, b);
     }
 
-    KRYS_NODISCARD static Type Invert(Type);
+    KRYS_NODISCARD static Type Invert(Type) noexcept;
 
     KRYS_NODISCARD static Maybe<Type> SameType(Type, Type) noexcept;
 
@@ -192,7 +193,7 @@ namespace krys::boo::css::calc
         case BaseType::Percent:    return Percent;
       }
 
-      std::unreachable();
+      krys_unreachable();
     }
 
     KRYS_NODISCARD constexpr Exponent operator[](BaseType type) const noexcept
@@ -208,7 +209,7 @@ namespace krys::boo::css::calc
         case BaseType::Percent:    return Percent;
       }
 
-      std::unreachable();
+      krys_unreachable();
     }
 
     KRYS_NODISCARD constexpr Exponent &operator[](calc::PercentHint hint) noexcept
@@ -223,7 +224,7 @@ namespace krys::boo::css::calc
         case PercentHint::Flex:       return Flex;
       }
 
-      std::unreachable();
+      krys_unreachable();
     }
 
     KRYS_NODISCARD constexpr Exponent operator[](calc::PercentHint hint) const noexcept
@@ -238,7 +239,7 @@ namespace krys::boo::css::calc
         case PercentHint::Flex:       return Flex;
       }
 
-      std::unreachable();
+      krys_unreachable();
     }
 
     constexpr void ApplyPercentHint(calc::PercentHint hint) noexcept
@@ -298,22 +299,7 @@ namespace krys::boo::css::calc
 
     template <Match... M>
     KRYS_NODISCARD constexpr bool
-      MatchesAny(MatchingContext context = {.AllowsPercentHint = false}) const noexcept
-    {
-      if (!TypeMatcher<M...>::MatchesAny(*this))
-      {
-        return false;
-      }
-
-      // If the context in which the value is used does not allow <percentage> values, then the type must
-      // additionally have a null percent hint to be considered matching.
-      if (PercentHint && !context.AllowsPercentHint)
-      {
-        return false;
-      }
-
-      return true;
-    }
+      MatchesAny(MatchingContext context = {.AllowsPercentHint = false}) const noexcept;
 
     KRYS_NODISCARD bool Matches(Category category) const noexcept;
 
@@ -426,6 +412,24 @@ namespace krys::boo::css::calc
       }
     }
   };
+
+  template <Type::Match... M>
+  constexpr bool Type::MatchesAny(MatchingContext context) const noexcept
+  {
+    if (!TypeMatcher<M...>::MatchesAny(*this))
+    {
+      return false;
+    }
+
+    // If the context in which the value is used does not allow <percentage> values, then the type must
+    // additionally have a null percent hint to be considered matching.
+    if (PercentHint && !context.AllowsPercentHint)
+    {
+      return false;
+    }
+
+    return true;
+  }
 
   // Policy to apply to validate argument types.
   enum class AllowedTypes

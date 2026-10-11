@@ -90,9 +90,16 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static Ref<PrimitiveValue> CreateInteger(double value) noexcept;
 
-    KRYS_NODISCARD static PrimitiveValue &ImplicitInitialValue() noexcept;
-
 #pragma endregion
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool Equals(const PrimitiveValue &other) const noexcept;
+
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
+
+    KRYS_NODISCARD static PrimitiveValue &ImplicitInitialValue() noexcept;
 
 #pragma region Type/Unit Checks
 
@@ -240,8 +247,7 @@ namespace krys::boo::css
     }
 
     template <typename T = double>
-    KRYS_NODISCARD T Value(UnitType targetUnit,
-                           const ToLengthConversionData &conversionData) const noexcept
+    KRYS_NODISCARD T Value(UnitType targetUnit, const ToLengthConversionData &conversionData) const noexcept
     {
       return ClampTo<T>(DoubleValue(targetUnit, conversionData));
     }

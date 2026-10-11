@@ -9,6 +9,13 @@ namespace krys::boo::css
   {
   public:
     KRYS_NODISCARD static Ref<OffsetRotateValue> Create(RefPtr<Value> modifier, RefPtr<Value> angle) noexcept;
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool Equals(const OffsetRotateValue &other) const noexcept;
+
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
   };
 }
 

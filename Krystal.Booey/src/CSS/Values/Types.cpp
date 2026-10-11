@@ -9,7 +9,7 @@ namespace krys::boo::css
 {
 #pragma region Serialize
 
-  void SerializeCustomIdentifier(CSSOMString &builder, const SerializationContext &context,
+  void SerializeCustomIdentifier(CSSOMString &builder, const SerialisationContext &context,
                                  const CustomIdentifier &identifier) noexcept
   {
     // TODO: Implement serialization for CustomIdentifier
@@ -19,7 +19,7 @@ namespace krys::boo::css
     krys_not_implemented();
   }
 
-  void SerializePropertyIdentifier(CSSOMString &builder, const SerializationContext &context,
+  void SerializePropertyIdentifier(CSSOMString &builder, const SerialisationContext &context,
                                    const PropertyIdentifier &identifier) noexcept
   {
     // TODO: Implement serialization for PropertyIdentifier
@@ -29,7 +29,7 @@ namespace krys::boo::css
     krys_not_implemented();
   }
 
-  void SerializeString(CSSOMString &builder, const SerializationContext &context,
+  void SerializeString(CSSOMString &builder, const SerialisationContext &context,
                        const CSSOMStringAtom &atom) noexcept
   {
     // TODO: Implement serialization for CSSOMStringAtom
@@ -39,7 +39,7 @@ namespace krys::boo::css
     krys_not_implemented();
   }
 
-  void SerializeString(CSSOMString &builder, const SerializationContext &context,
+  void SerializeString(CSSOMString &builder, const SerialisationContext &context,
                        const CSSOMString &string) noexcept
   {
     // TODO: Implement serialization for CSSOMString

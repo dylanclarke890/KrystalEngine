@@ -17,6 +17,13 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static Ref<QuadValue> Create(Ref<Value> first, Ref<Value> second, Ref<Value> third,
                                                 Ref<Value> fourth) noexcept;
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool Equals(const QuadValue &other) const noexcept;
+
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
   };
 }
 

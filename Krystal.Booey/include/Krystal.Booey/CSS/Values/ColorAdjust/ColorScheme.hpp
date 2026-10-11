@@ -8,14 +8,14 @@ namespace krys::boo::css
   // https://drafts.csswg.org/css-color-adjust/#propdef-color-scheme
   struct ColorScheme
   {
-    SpaceSeparatedList<CustomIdentifier> schemes;
-    Maybe<keywords::Only> only;
+    SpaceSeparatedList<CustomIdentifier> Schemes;
+    Maybe<keywords::Only> Only;
 
     // As an optimization, if `schemes` is empty, that indicates the
     // entire value should be considered `normal`.
     KRYS_NODISCARD bool IsNormal() const noexcept
     {
-      return schemes.empty();
+      return Schemes.empty();
     }
 
     KRYS_NODISCARD bool operator==(const ColorScheme &) const noexcept = default;
@@ -26,11 +26,11 @@ namespace krys::boo::css
   {
     if constexpr (!I)
     {
-      return colorScheme.schemes;
+      return colorScheme.Schemes;
     }
     else if constexpr (I == 1)
     {
-      return colorScheme.only;
+      return colorScheme.Only;
     }
   }
 }

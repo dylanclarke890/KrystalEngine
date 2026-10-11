@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/URL.hpp"
+#include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
@@ -10,6 +10,13 @@ namespace krys::boo::css
   {
   public:
     KRYS_NODISCARD static Ref<UrlValue> Create(const CSSURL &url) noexcept;
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool Equals(const UrlValue &other) const noexcept;
+
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
   };
 }
 

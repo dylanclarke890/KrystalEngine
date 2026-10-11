@@ -10,7 +10,7 @@ namespace krys::boo::css
   private:
     AppleColorFilter _filter;
 
-    AppleColorFilterValue(AppleColorFilter) noexcept;
+    explicit AppleColorFilterValue(AppleColorFilter filter) noexcept;
 
   public:
     KRYS_NODISCARD static Ref<AppleColorFilterValue> Create(AppleColorFilter filter) noexcept;
@@ -19,6 +19,13 @@ namespace krys::boo::css
     {
       return _filter;
     }
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool Equals(const AppleColorFilterValue &other) const noexcept;
+
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
   };
 }
 

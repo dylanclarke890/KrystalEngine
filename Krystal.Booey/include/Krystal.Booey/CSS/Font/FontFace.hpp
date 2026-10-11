@@ -115,7 +115,7 @@ namespace krys::boo::css
       bool operator==(const UnicodeRange &) const = default;
     };
 
-    std::span<const UnicodeRange> ranges() const LIFETIME_BOUND
+    std::span<const UnicodeRange> ranges() const noexcept
     {
       ASSERT(m_status != Status::Failure);
       return m_ranges.span();

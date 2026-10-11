@@ -11,6 +11,13 @@ namespace krys::boo::css
   public:
     KRYS_NODISCARD static Ref<CounterValue> Create(CSSOMStringAtom identifier, CSSOMStringAtom separator,
                                                    Ref<Value> counterStyle) noexcept;
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool Equals(const CounterValue &other) const noexcept;
+
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
   };
 }
 

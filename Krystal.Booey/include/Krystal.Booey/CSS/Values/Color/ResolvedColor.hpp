@@ -8,24 +8,49 @@ namespace krys::boo::css
 
   struct ResolvedColor
   {
-    boo::Color value;
+    boo::Color Value;
 
-    bool operator==(const ResolvedColor &) const = default;
+    bool operator==(const ResolvedColor &) const noexcept = default;
   };
 
-  KRYS_NODISCARD inline boo::Color CreateColor(const ResolvedColor &unresolved,
+  KRYS_NODISCARD inline boo::Color CreateColor(const ResolvedColor &color,
                                                PlatformColorResolutionState &) noexcept
   {
-    return unresolved.value;
+    return color.Value;
   }
 
-  KRYS_NODISCARD constexpr bool containsColorSchemeDependentColor(const ResolvedColor &) noexcept
+  KRYS_NODISCARD constexpr bool ContainsColorSchemeDependentColor(const ResolvedColor &) noexcept
   {
     return false;
   }
 
-  KRYS_NODISCARD constexpr bool containsCurrentColor(const ResolvedColor &) noexcept
+  KRYS_NODISCARD constexpr bool ContainsCurrentColor(const ResolvedColor &) noexcept
   {
     return false;
   }
+
+  template <>
+  struct Serialiser<ResolvedColor>
+  {
+    void operator()(CSSOMString &builder, const SerialisationContext &context,
+                    const ResolvedColor &value) noexcept;
+  };
+
+  template <>
+  struct ComputedStyleDependenciesCollector<ResolvedColor>
+  {
+    constexpr void operator()(ComputedStyleDependencies &, const ResolvedColor &) noexcept
+    {
+    }
+  };
+
+  template <>
+  struct ValueChildrenVisitor<ResolvedColor>
+  {
+    constexpr IterationStatus operator()(const Func<IterationStatus(css::Value &)> &,
+                                         const ResolvedColor &) noexcept
+    {
+      return IterationStatus::Continue;
+    }
+  };
 }
