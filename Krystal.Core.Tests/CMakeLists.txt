@@ -53,6 +53,10 @@ target_precompile_headers(Krystal.Core.Tests
 target_sources(Krystal.Core.Tests
 	PRIVATE tests/RefCounted.cpp
 
+  # Types
+	PRIVATE tests/Types/FixedVector.cpp
+	PRIVATE tests/Types/ListHashSet.cpp
+
   # Commands
 	PRIVATE tests/Commands/Command.cpp
 	

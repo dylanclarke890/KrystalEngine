@@ -202,12 +202,14 @@ target_sources(Krystal.Core
       include/Krystal.Core/Types/CompactRefPtrTuple.hpp
       include/Krystal.Core/Types/CompactUniquePtrTuple.hpp
       include/Krystal.Core/Types/Expected.hpp
+      include/Krystal.Core/Types/FixedVector.hpp
       include/Krystal.Core/Types/Func.hpp
       include/Krystal.Core/Types/HashMap.hpp
       include/Krystal.Core/Types/HashSet.hpp
       include/Krystal.Core/Types/InlineWeakPtr.hpp
       include/Krystal.Core/Types/IntrusivePtr.hpp
       include/Krystal.Core/Types/List.hpp
+      include/Krystal.Core/Types/ListHashSet.hpp
       include/Krystal.Core/Types/Markable.hpp
       include/Krystal.Core/Types/Maybe.hpp
       include/Krystal.Core/Types/NTTPMaybe.hpp
