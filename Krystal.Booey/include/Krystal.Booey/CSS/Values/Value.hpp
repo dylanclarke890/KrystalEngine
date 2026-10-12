@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/Core/IterationStatus.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
@@ -431,7 +431,7 @@ namespace krys::boo::css
 #pragma endregion
 
     KRYS_NODISCARD inline bool IsValueId() const noexcept;
-    KRYS_NODISCARD css::ValueId ValueId() const noexcept;
+    KRYS_NODISCARD inline css::ValueId ValueId() const noexcept;
 
     KRYS_NODISCARD inline bool IsCustomIdent() const noexcept;
     KRYS_NODISCARD inline CSSOMString CustomIdent() const noexcept;

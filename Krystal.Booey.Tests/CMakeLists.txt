@@ -78,6 +78,10 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Parser/KeywordLookup.cpp
 		tests/CSS/Parser/Token.cpp
 		tests/CSS/Parser/Tokenizer.cpp
+		tests/CSS/Values/Aggregates.cpp
+		tests/CSS/Values/NumericTypesSerialisation.cpp
+		tests/CSS/Values/PrimitiveValue.cpp
+		tests/CSS/Values/Units.cpp
 		# tests/CSS/Selectors/SelectorParser.cpp
 
 		# DOM

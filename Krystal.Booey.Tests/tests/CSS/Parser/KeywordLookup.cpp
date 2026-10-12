@@ -1,4 +1,4 @@
-#include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
+﻿#include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
 #include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::css::tests

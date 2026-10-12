@@ -1,4 +1,4 @@
-#include "Krystal.Booey/CSS/Markup.hpp"
+﻿#include "Krystal.Booey/CSS/Markup.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserIdioms.hpp"
 #include "Krystal.Core/Text/Encodings/UTF.hpp"
 #include "Krystal.Core/Text/Unicode.hpp"

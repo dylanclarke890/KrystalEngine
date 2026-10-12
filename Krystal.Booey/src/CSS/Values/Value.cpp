@@ -1,4 +1,4 @@
-#include "Krystal.Booey/CSS/Values/Value.hpp"
+﻿#include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Hash.hpp"
 #include "Krystal.Booey/CSS/ComputedStyleDependencies.hpp"
@@ -446,11 +446,5 @@ namespace krys::boo::css
         std::destroy_at(&value);
         ::operator delete(&value);
       });
-  }
-
-  css::ValueId Value::ValueId() const noexcept
-  {
-    auto *value = DynamicDowncast<PrimitiveValue>(*this);
-    return value ? value->ValueId() : ValueId::Invalid;
   }
 }

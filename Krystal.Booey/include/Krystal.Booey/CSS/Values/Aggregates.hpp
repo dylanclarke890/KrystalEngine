@@ -397,7 +397,7 @@ namespace krys::boo::css
   constexpr bool TreatAsTupleLike<SpaceSeparatedArray<T, N>> = true;
 
   template <typename T, size_t N>
-  constexpr bool SerializationSeparator<SpaceSeparatedArray<T, N>> = SerializationSeparatorType::Space;
+  constexpr auto SerializationSeparator<SpaceSeparatedArray<T, N>> = SerializationSeparatorType::Space;
 
   /// @brief Convenience for representing a two element array.
   template <typename T>
@@ -1648,7 +1648,7 @@ namespace krys::boo::css
   public:
     ListOrNone(List &&list) : _value {krys::move(list)}
     {
-      assert(!_value.empty());
+      krys_assert(!_value.isEmpty());
     }
 
     ListOrNone(keywords::None) : _value {}
@@ -1696,11 +1696,11 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsNone() const noexcept
     {
-      return _value.empty();
+      return _value.isEmpty();
     }
     KRYS_NODISCARD bool IsList() const noexcept
     {
-      return !_value.empty();
+      return !_value.isEmpty();
     }
 
     template <typename... F>
@@ -1806,7 +1806,7 @@ namespace krys::boo::css
       return {.it = value.end(), .atEndForDefault = true, .owner = this};
     }
 
-    size_t Size() const noexcept
+    size_t size() const noexcept
     {
       return IsDefault() ? 1 : value.size();
     }
@@ -1816,20 +1816,20 @@ namespace krys::boo::css
       return IsDefault() ? defaulter() : value[i];
     }
 
-    bool Contains(const auto &x) const noexcept
+    bool contains(const auto &x) const noexcept
     {
-      return IsDefault() ? (x == defaulter()) : value.Contains(x);
+      return IsDefault() ? (x == defaulter()) : value.contains(x);
     }
     template <typename Predicate>
     requires std::predicate<Predicate, const value_type &>
-    bool ContainsIf(const Predicate &f) const noexcept
+    bool containsIf(const Predicate &f) const noexcept
     {
-      return IsDefault() ? f(defaulter()) : value.ContainsIf(f);
+      return IsDefault() ? f(defaulter()) : value.containsIf(f);
     }
 
     bool IsDefault() const noexcept
     {
-      return value.IsEmpty();
+      return value.isEmpty();
     }
 
     bool operator==(const ListOrDefault &) const noexcept = default;
@@ -1872,7 +1872,7 @@ namespace krys::boo::css
 
     ListOrNull(List &&list) noexcept : _value {krys::move(list)}
     {
-      krys_assert(!_value.IsEmpty());
+      krys_assert(!_value.isEmpty());
     }
 
     ListOrNull(std::nullopt_t) noexcept : _value {}
@@ -1903,17 +1903,17 @@ namespace krys::boo::css
       return _value.rend();
     }
 
-    KRYS_NODISCARD const value_type &First() const noexcept
+    KRYS_NODISCARD const value_type &first() const noexcept
     {
       return _value.first();
     }
 
-    KRYS_NODISCARD const value_type &Last() const noexcept
+    KRYS_NODISCARD const value_type &last() const noexcept
     {
       return _value.last();
     }
 
-    KRYS_NODISCARD size_t Size() const
+    KRYS_NODISCARD size_t size() const
     {
       return _value.size();
     }
@@ -1923,28 +1923,28 @@ namespace krys::boo::css
       return _value[i];
     }
 
-    KRYS_NODISCARD bool Contains(const auto &x) const
+    KRYS_NODISCARD bool contains(const auto &x) const
     {
-      return _value.Contains(x);
+      return _value.contains(x);
     }
 
     template <typename Predicate>
     requires std::predicate<Predicate, const value_type &>
-    KRYS_NODISCARD bool ContainsIf(const Predicate &f) const
+    KRYS_NODISCARD bool containsIf(const Predicate &f) const
     {
-      return _value.ContainsIf(f);
+      return _value.containsIf(f);
     }
 
     KRYS_NODISCARD bool operator==(const ListOrNull &) const = default;
 
     KRYS_NODISCARD bool IsNull() const
     {
-      return _value.IsEmpty();
+      return _value.isEmpty();
     }
 
     KRYS_NODISCARD bool IsList() const
     {
-      return !_value.IsEmpty();
+      return !_value.isEmpty();
     }
 
     KRYS_NODISCARD const List *TryList() const noexcept
@@ -1953,14 +1953,14 @@ namespace krys::boo::css
     }
 
     // Returns the underlying list regardless of whether or not it is empty.
-    KRYS_NODISCARD const List &List() const noexcept
+    KRYS_NODISCARD const List &GetList() const noexcept
     {
       return _value;
     }
 
     explicit operator bool() const
     {
-      return !_value.IsEmpty();
+      return !_value.isEmpty();
     }
 
     const List *operator->() const noexcept
@@ -2031,17 +2031,17 @@ namespace krys::boo::css
 
     KRYS_NODISCARD constexpr bool ContainsAny(EnumSet other) const noexcept
     {
-      return _value.ContainsAny(other.value);
+      return _value.ContainsAny(other);
     }
 
     KRYS_NODISCARD constexpr bool ContainsAll(EnumSet other) const noexcept
     {
-      return _value.ContainsAll(other.value);
+      return _value.ContainsAll(other);
     }
 
     KRYS_NODISCARD constexpr bool ContainsOnly(EnumSet other) const noexcept
     {
-      return _value.ContainsOnly(other.value);
+      return _value.ContainsOnly(other);
     }
 
     KRYS_NODISCARD constexpr decltype(auto) begin() const noexcept

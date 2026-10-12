@@ -103,6 +103,16 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Types/CSSOMString.hpp
   include/Krystal.Booey/CSS/Values/GlobalKeyword.hpp
   include/Krystal.Booey/CSS/Markup.hpp
+
+  # Slice 2: Values (Value.cpp and PrimitiveValue.cpp aren't built yet; they need every Value subclass)
+  include/Krystal.Booey/CSS/Values/PrimitiveValue.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp
+  include/Krystal.Booey/CSS/Values/UnitCategory.hpp
+  include/Krystal.Booey/CSS/Values/Units.hpp
+  include/Krystal.Booey/CSS/Values/UnitType.hpp
+  include/Krystal.Booey/CSS/Values/Value.hpp
+  include/Krystal.Booey/CSS/Values/ValueSeparator.hpp
+  include/Krystal.Booey/CSS/Values/ValueType.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -115,6 +125,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Parser/KeywordLookup.cpp
   src/CSS/Parser/Token.cpp
   src/CSS/Parser/Tokenizer.cpp
+
+  # Slice 2: Values
+  src/CSS/Values/Primitives/NumericTypesSerialisation.cpp
 )
 
 target_precompile_headers(Krystal.Booey

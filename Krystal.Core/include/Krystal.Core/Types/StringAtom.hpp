@@ -158,6 +158,12 @@ namespace krys
     {
       return *_ptr;
     }
+
+    /// @brief The interned string. Stays valid for the lifetime of the program.
+    KRYS_NODISCARD StringAtomStorage Storage() const noexcept
+    {
+      return _ptr;
+    }
   };
 }
 

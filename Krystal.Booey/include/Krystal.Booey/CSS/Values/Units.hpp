@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Values/UnitCategory.hpp"
 #include "Krystal.Booey/CSS/Values/UnitType.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Maths/Base.hpp"
 
 namespace krys::boo::css
 {
@@ -146,6 +147,7 @@ namespace krys::boo::css
       case UnitType::Unknown:
       case UnitType::ValueId:
       case UnitType::CustomIdent:
+      case UnitType::QuirkyEm:
       {
         return UnitCategory::Other;
       }
@@ -203,6 +205,84 @@ namespace krys::boo::css
 
   KRYS_NODISCARD constexpr UnitType CanonicalUnitTypeForUnitType(UnitType unitType) noexcept
   {
-    return CanonicalUnitTypeForCategory(UnitCategory(unitType));
+    return CanonicalUnitTypeForCategory(UnitCategoryForType(unitType));
+  }
+
+  KRYS_NODISCARD constexpr double ConversionToCanonicalUnitsScaleFactor(UnitType unit) noexcept
+  {
+    switch (unit)
+    {
+      case UnitType::ms:   return secsPerMs;
+      case UnitType::cm:   return pxPerCm;
+      case UnitType::dpcm: return dppxPerDpcm;
+      case UnitType::mm:   return pxPerMm;
+      case UnitType::Q:    return pxPerQ;
+      case UnitType::in:   return pxPerInch;
+      case UnitType::dpi:  return dppxPerDpi;
+      case UnitType::pt:   return pxPerPt;
+      case UnitType::pc:   return pxPerPc;
+      case UnitType::rad:  return degreesPerRadianDouble;
+      case UnitType::grad: return degreesPerGradientDouble;
+      case UnitType::turn: return degreesPerTurnDouble;
+      case UnitType::khz:  return hertzPerKilohertz;
+      default:             return 1.0;
+    }
+  }
+
+  KRYS_NODISCARD constexpr bool ConversionToCanonicalUnitRequiresConversionData(UnitType unit) noexcept
+  {
+    switch (unit)
+    {
+      case UnitType::cm:
+      case UnitType::mm:
+      case UnitType::Q:
+      case UnitType::in:
+      case UnitType::pt:
+      case UnitType::pc:
+      case UnitType::em:
+      case UnitType::ex:
+      case UnitType::lh:
+      case UnitType::cap:
+      case UnitType::ch:
+      case UnitType::ic:
+      case UnitType::rcap:
+      case UnitType::rch:
+      case UnitType::rem:
+      case UnitType::rex:
+      case UnitType::ric:
+      case UnitType::rlh:
+      case UnitType::vw:
+      case UnitType::vh:
+      case UnitType::vmin:
+      case UnitType::vmax:
+      case UnitType::vb:
+      case UnitType::vi:
+      case UnitType::svw:
+      case UnitType::svh:
+      case UnitType::svmin:
+      case UnitType::svmax:
+      case UnitType::svb:
+      case UnitType::svi:
+      case UnitType::lvw:
+      case UnitType::lvh:
+      case UnitType::lvmin:
+      case UnitType::lvmax:
+      case UnitType::lvb:
+      case UnitType::lvi:
+      case UnitType::dvw:
+      case UnitType::dvh:
+      case UnitType::dvmin:
+      case UnitType::dvmax:
+      case UnitType::dvb:
+      case UnitType::dvi:
+      case UnitType::cqw:
+      case UnitType::cqh:
+      case UnitType::cqi:
+      case UnitType::cqb:
+      case UnitType::cqmin:
+      case UnitType::cqmax: return true;
+
+      default: return false;
+    }
   }
 }

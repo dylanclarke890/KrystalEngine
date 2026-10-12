@@ -107,4 +107,4 @@ namespace krys::boo::css
   }
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::UnitType, 77uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::UnitType, 78uz);

@@ -1,4 +1,4 @@
-#include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
+﻿#include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include <cstring>

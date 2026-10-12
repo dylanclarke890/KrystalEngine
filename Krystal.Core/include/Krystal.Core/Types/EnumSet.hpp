@@ -1,5 +1,8 @@
+﻿#pragma once
+
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include <bit>
 #include <initializer_list>
 
 namespace krys
@@ -17,7 +20,10 @@ namespace krys
     {
       if constexpr (EnumTraits<E>::DistinctValues > 0u)
       {
-        return std::bit_ceil((static_cast<size_t>(EnumTraits<E>::DistinctValues) >> 3) + 1);
+        static_assert(EnumTraits<E>::DistinctValues <= 64u, "EnumSet supports at most 64 enum values");
+
+        // Bytes needed for the highest value's bit, rounded up to a power of two.
+        return std::bit_ceil(((static_cast<size_t>(EnumTraits<E>::DistinctValues) - 1uz) >> 3) + 1uz);
       }
 
       return 8uz;
@@ -53,7 +59,7 @@ namespace krys
       constexpr bool operator==(const Iterator &) const noexcept = default;
     };
 
-    using StorageType = sized_unsigned_t<StorageSize()>;
+    using StorageType = unsigned_of_size_t<StorageSize()>;
 
     using value_type = E;
     using iterator = Iterator<StorageType>;

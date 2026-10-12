@@ -1,4 +1,4 @@
-#include "Krystal.Core/Enum.hpp"
+﻿#include "Krystal.Core/Enum.hpp"
 
 namespace krys::boo::css
 {

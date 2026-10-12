@@ -1,4 +1,4 @@
-#include "Krystal.Booey/CSS/Parser/Token.hpp"
+﻿#include "Krystal.Booey/CSS/Parser/Token.hpp"
 #include "Krystal.Booey/CSS/Markup.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include <charconv>

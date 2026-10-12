@@ -1,4 +1,4 @@
-#include "Krystal.Booey/CSS/Parser/InputStream.hpp"
+﻿#include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/Token.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Core/Types/List.hpp"
