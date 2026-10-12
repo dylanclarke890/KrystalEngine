@@ -27,6 +27,7 @@ namespace krys::boo::css
       case LengthUnit::Pt:    return u8"pt";
       case LengthUnit::Pc:    return u8"pc";
       case LengthUnit::Em:    return u8"em";
+      case LengthUnit::QuirkyEm: return u8"em";
       case LengthUnit::Ex:    return u8"ex";
       case LengthUnit::Lh:    return u8"lh";
       case LengthUnit::Cap:   return u8"cap";

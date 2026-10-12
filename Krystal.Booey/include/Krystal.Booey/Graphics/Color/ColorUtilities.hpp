@@ -3,6 +3,9 @@
 #include "Krystal.Booey/Graphics/Color/ColorComponents.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorTypes.hpp"
 #include "Krystal.Core/Maths/Base.hpp"
+#include <algorithm>
+#include <cmath>
+#include <functional>
 
 namespace krys::boo
 {
@@ -23,7 +26,7 @@ namespace krys::boo
     return CreateFromComponentsClampingExceptAlpha<SRGBA<float>>(r / a, g / a, b / a, a);
   }
 
-  KRYS_NODISCARD constexpr SRGBA<uint8> PremultipliedFlooring(SRGBA<uint8> color)
+  KRYS_NODISCARD constexpr SRGBA<uint8> PremultipliedFlooring(SRGBA<uint8> color) noexcept
   {
     auto [r, g, b, a] = color.Resolved();
     if (!a)
@@ -40,7 +43,7 @@ namespace krys::boo
       FastDivideBy255(r * a), FastDivideBy255(g * a), FastDivideBy255(b * a), a);
   }
 
-  KRYS_NODISCARD constexpr SRGBA<uint8> PremultipliedCeiling(SRGBA<uint8> color)
+  KRYS_NODISCARD constexpr SRGBA<uint8> PremultipliedCeiling(SRGBA<uint8> color) noexcept
   {
     auto [r, g, b, a] = color.Resolved();
     if (!a)
@@ -81,15 +84,33 @@ namespace krys::boo
   }
 
   template <typename T>
-  KRYS_NODISCARD constexpr T ConvertByteAlphaTo(uint8 value) noexcept
+  KRYS_NODISCARD constexpr T ConvertByteAlphaTo(uint8 value) noexcept;
+
+  template <>
+  KRYS_NODISCARD constexpr uint8 ConvertByteAlphaTo<uint8>(uint8 value) noexcept
   {
     return value;
   }
 
-  template <typename T>
-  KRYS_NODISCARD constexpr T ConvertFloatAlphaTo(float value) noexcept
+  template <>
+  KRYS_NODISCARD constexpr float ConvertByteAlphaTo<float>(uint8 value) noexcept
   {
-    return static_cast<T>(value / 255.0f);
+    return value / 255.0f;
+  }
+
+  template <typename T>
+  KRYS_NODISCARD T ConvertFloatAlphaTo(float value) noexcept;
+
+  template <>
+  KRYS_NODISCARD inline uint8 ConvertFloatAlphaTo<uint8>(float value) noexcept
+  {
+    return static_cast<uint8>(std::clamp(std::lround(value * 255.0f), 0l, 255l));
+  }
+
+  template <>
+  KRYS_NODISCARD inline float ConvertFloatAlphaTo<float>(float value) noexcept
+  {
+    return ClampedAlpha(value);
   }
 
   template <typename ColorType, typename Functor>
@@ -110,15 +131,15 @@ namespace krys::boo
   KRYS_NODISCARD constexpr auto ColorWithOverriddenAlpha(const ColorType &color, uint8 overrideAlpha) noexcept
   {
     auto copy = color.Unresolved();
-    copy.alpha = ConvertByteAlphaTo<typename ColorType::ComponentType>(overrideAlpha);
+    copy.Alpha = ConvertByteAlphaTo<typename ColorType::ComponentType>(overrideAlpha);
     return copy;
   }
 
   template <typename ColorType>
-  KRYS_NODISCARD constexpr auto ColorWithOverriddenAlpha(const ColorType &color, float overrideAlpha) noexcept
+  KRYS_NODISCARD auto ColorWithOverriddenAlpha(const ColorType &color, float overrideAlpha) noexcept
   {
     auto copy = color.Unresolved();
-    copy.alpha = ConvertFloatAlphaTo<typename ColorType::ComponentType>(overrideAlpha);
+    copy.Alpha = ConvertFloatAlphaTo<typename ColorType::ComponentType>(overrideAlpha);
     return copy;
   }
 
@@ -126,14 +147,14 @@ namespace krys::boo
   KRYS_NODISCARD constexpr auto InvertedColorWithOverriddenAlpha(const ColorType &color,
                                                                  uint8 overrideAlpha) noexcept
   {
-    static_assert(ColorType::Model::isInvertible);
+    static_assert(ColorType::Model::IsInvertible);
 
     auto components = AsColorComponents(color.Resolved());
     auto copy = components;
 
     for (size_t i = 0uz; i < 3uz; ++i)
     {
-      copy[i] = ColorType::Model::componentInfo[i].max - components[i];
+      copy[i] = ColorType::Model::ComponentInfo[i].Max - components[i];
     }
 
     copy[3] = ConvertByteAlphaTo<typename ColorType::ComponentType>(overrideAlpha);
@@ -142,17 +163,16 @@ namespace krys::boo
   }
 
   template <typename ColorType>
-  KRYS_NODISCARD constexpr auto InvertedColorWithOverriddenAlpha(const ColorType &color,
-                                                                 float overrideAlpha) noexcept
+  KRYS_NODISCARD auto InvertedColorWithOverriddenAlpha(const ColorType &color, float overrideAlpha) noexcept
   {
-    static_assert(ColorType::Model::isInvertible);
+    static_assert(ColorType::Model::IsInvertible);
 
     auto components = AsColorComponents(color.Resolved());
     auto copy = components;
 
     for (size_t i = 0uz; i < 3uz; ++i)
     {
-      copy[i] = ColorType::Model::componentInfo[i].max - components[i];
+      copy[i] = ColorType::Model::ComponentInfo[i].Max - components[i];
     }
 
     copy[3] = ConvertFloatAlphaTo<typename ColorType::ComponentType>(overrideAlpha);
@@ -166,7 +186,7 @@ namespace krys::boo
   KRYS_NODISCARD constexpr bool IsBlack(const ColorType &color) noexcept
   {
     auto resolvedColor = color.Resolved();
-    return resolvedColor.lightness == 0 && resolvedColor.alpha == AlphaTraits<float>::opaque;
+    return resolvedColor.Lightness == 0 && resolvedColor.Alpha == AlphaTraits<float>::Opaque;
   }
 
   template <typename ColorType>
@@ -174,7 +194,7 @@ namespace krys::boo
   KRYS_NODISCARD constexpr bool IsBlack(const ColorType &color) noexcept
   {
     auto [c1, c2, c3, alpha] = color.Resolved();
-    return c1 == 0 && c2 == 0 && c3 == 0 && alpha == AlphaTraits<typename ColorType::ComponentType>::opaque;
+    return c1 == 0 && c2 == 0 && c3 == 0 && alpha == AlphaTraits<typename ColorType::ComponentType>::Opaque;
   }
 
   template <typename ColorType>
@@ -182,14 +202,14 @@ namespace krys::boo
   KRYS_NODISCARD constexpr bool IsBlack(const ColorType &color) noexcept
   {
     auto resolvedColor = color.Resolved();
-    return resolvedColor.blackness == 100 && resolvedColor.alpha == AlphaTraits<float>::opaque;
+    return resolvedColor.Blackness == 100 && resolvedColor.Alpha == AlphaTraits<float>::Opaque;
   }
 
   template <WhitePoint W>
   KRYS_NODISCARD constexpr bool IsBlack(const XYZA<float, W> &color) noexcept
   {
     auto resolvedColor = color.Resolved();
-    return resolvedColor.y == 0 && resolvedColor.alpha == AlphaTraits<float>::opaque;
+    return resolvedColor.Y == 0 && resolvedColor.Alpha == AlphaTraits<float>::Opaque;
   }
 
   template <typename ColorType>
@@ -197,7 +217,7 @@ namespace krys::boo
   KRYS_NODISCARD constexpr bool IsWhite(const ColorType &color) noexcept
   {
     auto resolvedColor = color.Resolved();
-    return resolvedColor.lightness == 100 && resolvedColor.alpha == AlphaTraits<float>::opaque;
+    return resolvedColor.Lightness == 100 && resolvedColor.Alpha == AlphaTraits<float>::Opaque;
   }
 
   template <typename ColorType>
@@ -205,7 +225,7 @@ namespace krys::boo
   KRYS_NODISCARD constexpr bool IsWhite(const ColorType &color) noexcept
   {
     auto resolvedColor = color.Resolved();
-    return resolvedColor.lightness == 1 && resolvedColor.alpha == AlphaTraits<float>::opaque;
+    return resolvedColor.Lightness == 1 && resolvedColor.Alpha == AlphaTraits<float>::Opaque;
   }
 
   template <typename ColorType>
@@ -213,7 +233,7 @@ namespace krys::boo
   KRYS_NODISCARD constexpr bool IsWhite(const ColorType &color) noexcept
   {
     auto [c1, c2, c3, alpha] = color.Resolved();
-    return c1 == 1 && c2 == 1 && c3 == 1 && alpha == AlphaTraits<float>::opaque;
+    return c1 == 1 && c2 == 1 && c3 == 1 && alpha == AlphaTraits<float>::Opaque;
   }
 
   template <typename ColorType>
@@ -221,7 +241,7 @@ namespace krys::boo
   KRYS_NODISCARD constexpr bool IsWhite(const ColorType &color) noexcept
   {
     auto [c1, c2, c3, alpha] = color.Resolved();
-    return c1 == 255 && c2 == 255 && c3 == 255 && alpha == AlphaTraits<uint8>::opaque;
+    return c1 == 255 && c2 == 255 && c3 == 255 && alpha == AlphaTraits<uint8>::Opaque;
   }
 
   template <typename ColorType>
@@ -229,27 +249,13 @@ namespace krys::boo
   KRYS_NODISCARD constexpr bool IsWhite(const ColorType &color) noexcept
   {
     auto resolvedColor = color.Resolved();
-    return resolvedColor.whiteness == 100 && resolvedColor.alpha == AlphaTraits<float>::opaque;
+    return resolvedColor.Whiteness == 100 && resolvedColor.Alpha == AlphaTraits<float>::Opaque;
   }
 
   template <WhitePoint W>
   KRYS_NODISCARD constexpr bool IsWhite(const XYZA<float, W> &color) noexcept
   {
     auto resolvedColor = color.Resolved();
-    return resolvedColor.y == 1 && resolvedColor.alpha == AlphaTraits<float>::opaque;
-  }
-
-  template <typename ComponentType>
-  KRYS_NODISCARD inline ComponentType NormalizeHue(ComponentType hue) noexcept
-  {
-    constexpr auto threeSixty = static_cast<ComponentType>(360.0);
-    return static_cast<ComponentType>(std::fmod(std::fmod(hue, threeSixty) + threeSixty, threeSixty));
-  }
-
-  template <typename ColorType>
-  KRYS_NODISCARD constexpr ColorType
-    CreateColorTypeByNormalizingComponents(const ColorComponents<float, 4> &colorComponents) noexcept
-  {
-    return CreateFromComponentsClamping<ColorType>(colorComponents);
+    return resolvedColor.Y == 1 && resolvedColor.Alpha == AlphaTraits<float>::Opaque;
   }
 }

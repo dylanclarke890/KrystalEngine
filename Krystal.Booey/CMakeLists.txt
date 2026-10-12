@@ -181,6 +181,8 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/Core/BoxSides.hpp
       include/Krystal.Booey/Core/EncodingRegistry.hpp
       include/Krystal.Booey/Core/IterationStatus.hpp
+      include/Krystal.Booey/Core/MathExtras.hpp
+      include/Krystal.Booey/Core/NumberFormatting.hpp
       include/Krystal.Booey/Core/WritingMode.hpp
 
       # CSS
@@ -303,21 +305,27 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/XMLDocument.hpp
 
       # Graphics
+      include/Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp
+      include/Krystal.Booey/Graphics/Animation/CompositeOperation.hpp
+      include/Krystal.Booey/Graphics/Animation/IterationCompositeOperation.hpp
       include/Krystal.Booey/Graphics/Color/AlphaPremultiplication.hpp
       include/Krystal.Booey/Graphics/Color/Color.hpp
+      include/Krystal.Booey/Graphics/Color/ColorBlending.hpp
       include/Krystal.Booey/Graphics/Color/ColorComponents.hpp
       include/Krystal.Booey/Graphics/Color/ColorConversion.hpp
       include/Krystal.Booey/Graphics/Color/ColorFlags.hpp
+      include/Krystal.Booey/Graphics/Color/ColorHash.hpp
       include/Krystal.Booey/Graphics/Color/ColorInterpolation.hpp
       include/Krystal.Booey/Graphics/Color/ColorInterpolationMethod.hpp
       include/Krystal.Booey/Graphics/Color/ColorLuminance.hpp
       include/Krystal.Booey/Graphics/Color/ColorMatrix.hpp
       include/Krystal.Booey/Graphics/Color/ColorModels.hpp
+      include/Krystal.Booey/Graphics/Color/ColorNormalization.hpp
+      include/Krystal.Booey/Graphics/Color/ColorSerialisation.hpp
       include/Krystal.Booey/Graphics/Color/ColorSpace.hpp
       include/Krystal.Booey/Graphics/Color/ColorTransferFunctions.hpp
       include/Krystal.Booey/Graphics/Color/ColorTypes.hpp
       include/Krystal.Booey/Graphics/Color/ColorUtilities.hpp
-      include/Krystal.Booey/Graphics/Color/DestinationColorSpace.hpp
 
       # HTML
       include/Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp
@@ -488,6 +496,7 @@ target_sources(Krystal.Booey
 
     # Core
     src/Core/EncodingRegistry.cpp
+    src/Core/NumberFormatting.cpp
 
     # CSS (see KRYSTAL_BOOEY_CSS_SOURCES)
     ${KRYSTAL_BOOEY_CSS_SOURCES}
@@ -558,9 +567,12 @@ target_sources(Krystal.Booey
 
     # Graphics
     src/Graphics/Color/Color.cpp
+    src/Graphics/Color/ColorBlending.cpp
     src/Graphics/Color/ColorConversion.cpp
     src/Graphics/Color/ColorInterpolation.cpp
+    src/Graphics/Color/ColorInterpolationMethod.cpp
     src/Graphics/Color/ColorLuminance.cpp
+    src/Graphics/Color/ColorSerialisation.cpp
 
     # HTML
     src/HTML/Algorithms/CustomElementAlgorithms.cpp

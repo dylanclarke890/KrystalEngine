@@ -69,9 +69,9 @@ namespace krys::boo::css
 
   template <typename CSSType, typename... Rest>
   void SerializeOnTupleLike(CSSOMString &builder, const SerialisationContext &context, const CSSType &value,
-                            string separator, Rest &&...rest) noexcept
+                            CSSOMStringView separator, Rest &&...rest) noexcept
   {
-    string swappedSeparator = "";
+    CSSOMStringView swappedSeparator = u8"";
     auto caller = krys::CreateVisitor(
       [&]<OptionalLike T>(const T &element)
       {
@@ -94,7 +94,7 @@ namespace krys::boo::css
 
   template <typename CSSType, typename... Rest>
   void SerializeOnTupleLikeCoalescing(CSSOMString &builder, const SerialisationContext &context,
-                                      const CSSType &value, string separator, Rest &&...rest) noexcept
+                                      const CSSType &value, CSSOMStringView separator, Rest &&...rest) noexcept
   {
     if constexpr (std::tuple_size_v<CSSType> == 2)
     {
@@ -136,9 +136,9 @@ namespace krys::boo::css
 
   template <typename CSSType, typename... Rest>
   void SerializeOnRangeLike(CSSOMString &builder, const SerialisationContext &context, const CSSType &value,
-                            string separator, Rest &&...rest) noexcept
+                            CSSOMStringView separator, Rest &&...rest) noexcept
   {
-    string swappedSeparator = "";
+    CSSOMStringView swappedSeparator = u8"";
     for (const auto &element : value)
     {
       builder.append(std::exchange(swappedSeparator, separator));
@@ -159,7 +159,7 @@ namespace krys::boo::css
   struct Serialiser<CSSType>
   {
     template <typename... Rest>
-    void operator()(CSSOMString &builder, const SerialisationContext &, const CSSType &, Rest &&...) noexcept
+    void operator()(CSSOMString &, const SerialisationContext &, const CSSType &, Rest &&...) noexcept
     {
     }
   };
@@ -290,17 +290,16 @@ namespace krys::boo::css
     void operator()(CSSOMString &builder, const SerialisationContext &context,
                     const FunctionNotation<Name, CSSType> &value, Rest &&...rest) noexcept
     {
-      builder.append(ToLower(value.name), '(');
+      builder.append(ToLower(value.name));
+      builder.push_back(u8'(');
       Serialise(builder, context, value.parameters, std::forward<Rest>(rest)...);
-      builder.append(')');
+      builder.push_back(u8')');
     }
   };
 
 #pragma endregion
 
 #pragma region ComputedStyleDependencies
-
-  struct ComputedStyleDependencies;
 
   template <typename CSSType>
   struct ComputedStyleDependenciesCollector;
@@ -739,18 +738,15 @@ namespace krys::boo::css
       else if constexpr (std::tuple_size_v<CSSType> == 2
                          && SerializationCoalescing<CSSType> == SerializationCoalescingType::Minimal)
       {
-        return CreateCoalescingPairValue<SerializationSeparator<CSSType>>(
-          CreateValue(pool, get<0>(value), std::forward<Args>(args)...),
-          CreateValue(pool, get<1>(value), std::forward<Args>(args)...));
+        return CreateCoalescingPairValue<SerializationSeparator<CSSType>>(CreateValue(pool, get<0>(value), args...),
+                                                                          CreateValue(pool, get<1>(value), args...));
       }
       else if constexpr (std::tuple_size_v<CSSType> == 4
                          && SerializationCoalescing<CSSType> == SerializationCoalescingType::Minimal)
       {
         return CreateCoalescingQuadValue<SerializationSeparator<CSSType>>(
-          CreateValue(pool, get<0>(value), std::forward<Args>(args)...),
-          CreateValue(pool, get<1>(value), std::forward<Args>(args)...),
-          CreateValue(pool, get<2>(value), std::forward<Args>(args)...),
-          CreateValue(pool, get<3>(value), std::forward<Args>(args)...));
+          CreateValue(pool, get<0>(value), args...), CreateValue(pool, get<1>(value), args...),
+          CreateValue(pool, get<2>(value), args...), CreateValue(pool, get<3>(value), args...));
       }
       else
       {
@@ -764,10 +760,10 @@ namespace krys::boo::css
               return;
             }
 
-            list.push_back(CreateValue(pool, *element, std::forward<Args>(args)...));
+            list.push_back(CreateValue(pool, *element, args...));
           },
           [&](const auto &element)
-          { list.push_back(CreateValue(pool, element, std::forward<Args>(args)...)); });
+          { list.push_back(CreateValue(pool, element, args...)); });
 
         krys::apply([&](const auto &...x) { (..., caller(x)); }, value);
 
@@ -786,7 +782,7 @@ namespace krys::boo::css
       ValueListBuilder list;
       for (const auto &element : value)
       {
-        list.push_back(CreateValue(pool, element, std::forward<Args>(args)...));
+        list.push_back(CreateValue(pool, element, args...));
       }
 
       return CreateListValue<SerializationSeparator<CSSType>>(krys::move(list));

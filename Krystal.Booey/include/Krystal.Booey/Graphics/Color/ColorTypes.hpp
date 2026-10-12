@@ -81,35 +81,35 @@ namespace krys::boo
   {
     static_assert(Integral<T>);
 
-    constexpr auto componentInfo = ColorType::Model::componentInfo[Index];
-    return static_cast<ColorType::ComponentType>(std::clamp<T>(c, componentInfo.min, componentInfo.max));
+    constexpr auto componentInfo = ColorType::Model::ComponentInfo[Index];
+    return static_cast<ColorType::ComponentType>(std::clamp<T>(c, componentInfo.Min, componentInfo.Max));
   }
 
   template <typename ColorType, unsigned Index>
   KRYS_NODISCARD constexpr float ClampedComponent(float c) noexcept
   {
-    constexpr auto componentInfo = ColorType::Model::componentInfo[Index];
+    constexpr auto componentInfo = ColorType::Model::ComponentInfo[Index];
 
-    if constexpr (componentInfo.type == ColorComponentType::Angle)
+    if constexpr (componentInfo.Type == ColorComponentType::Angle)
     {
       return static_cast<float>(std::fmod(std::fmod(c, 360.0) + 360.0, 360.0));
     }
-    else if constexpr (componentInfo.min == -std::numeric_limits<float>::infinity()
-                       && componentInfo.max == std::numeric_limits<float>::infinity())
+    else if constexpr (componentInfo.Min == -std::numeric_limits<float>::infinity()
+                       && componentInfo.Max == std::numeric_limits<float>::infinity())
     {
       return c;
     }
-    else if constexpr (componentInfo.min == -std::numeric_limits<float>::infinity())
+    else if constexpr (componentInfo.Min == -std::numeric_limits<float>::infinity())
     {
-      return std::min(c, componentInfo.max);
+      return std::min(c, componentInfo.Max);
     }
-    else if constexpr (componentInfo.max == std::numeric_limits<float>::infinity())
+    else if constexpr (componentInfo.Max == std::numeric_limits<float>::infinity())
     {
-      return std::max(c, componentInfo.min);
+      return std::max(c, componentInfo.Min);
     }
     else
     {
-      return std::clamp(c, componentInfo.min, componentInfo.max);
+      return std::clamp(c, componentInfo.Min, componentInfo.Max);
     }
   }
 
@@ -122,7 +122,8 @@ namespace krys::boo
   template <typename T, typename ComponentType = T>
   KRYS_NODISCARD constexpr ComponentType ClampedAlpha(T alpha) noexcept
   {
-    return std::clamp<T>(alpha, AlphaTraits<ComponentType>::transparent, AlphaTraits<ComponentType>::opaque);
+    return static_cast<ComponentType>(
+      std::clamp<T>(alpha, AlphaTraits<ComponentType>::Transparent, AlphaTraits<ComponentType>::Opaque));
   }
 
   template <typename ColorType, typename T>
@@ -152,7 +153,7 @@ namespace krys::boo
   {
     return CreateFromComponents<ColorType>(ColorComponents {
       ClampedComponent<ColorType, 0>(c1), ClampedComponent<ColorType, 1>(c2),
-      ClampedComponent<ColorType, 2>(c3), AlphaTraits<typename ColorType::ComponentType>::opaque});
+      ClampedComponent<ColorType, 2>(c3), AlphaTraits<typename ColorType::ComponentType>::Opaque});
   }
 
   template <typename ColorType, typename T>
@@ -194,19 +195,19 @@ namespace krys::boo
         continue;
       }
 
-      // "Component at index %d is %f and is less than the allowed minimum %f", i, components[i], ColorType::Model::componentInfo[i].min
-      krys_assert(components[i] >= ColorType::Model::componentInfo[i].min);
+      // "Component at index %d is %f and is less than the allowed minimum %f", i, components[i], ColorType::Model::ComponentInfo[i].Min
+      krys_assert(components[i] >= ColorType::Model::ComponentInfo[i].Min);
       
-      // "Component at index %d is %f and is greater than the allowed maximum %f", i, components[i], ColorType::Model::componentInfo[i].max)
-      krys_assert(components[i] <= ColorType::Model::componentInfo[i].max;
+      // "Component at index %d is %f and is greater than the allowed maximum %f", i, components[i], ColorType::Model::ComponentInfo[i].Max)
+      krys_assert(components[i] <= ColorType::Model::ComponentInfo[i].Max;
     }
 
     if (!IsNaN(components[3]))
     {
-      // "Alpha is %f and is less than the allowed minimum (transparent) %f", components[3], AlphaTraits<typename ColorType::ComponentType>::transparent
-      krys_assert(components[3] >= AlphaTraits<typename ColorType::ComponentType>::transparent);
-      // "Alpha is %f and is greater than the allowed maximum (opaque) %f", components[3], AlphaTraits<typename ColorType::ComponentType>::opaque
-      krys_assert(components[3] <= AlphaTraits<typename ColorType::ComponentType>::opaque);
+      // "Alpha is %f and is less than the allowed minimum (transparent) %f", components[3], AlphaTraits<typename ColorType::ComponentType>::Transparent
+      krys_assert(components[3] >= AlphaTraits<typename ColorType::ComponentType>::Transparent);
+      // "Alpha is %f and is greater than the allowed maximum (opaque) %f", components[3], AlphaTraits<typename ColorType::ComponentType>::Opaque
+      krys_assert(components[3] <= AlphaTraits<typename ColorType::ComponentType>::Opaque);
     }
   }
 
@@ -270,7 +271,7 @@ namespace krys::boo
                     "Only uint8 based color types are supported.");
 
       auto copy = static_cast<const Parent *>(this)->Unresolved();
-      copy.alpha = overrideAlpha;
+      copy.Alpha = overrideAlpha;
       return copy;
     }
   };
@@ -291,17 +292,17 @@ namespace krys::boo
     using TransferFunction = TF;
     using Descriptor = D;
 
-    constexpr static auto whitePoint = D::whitePoint;
+    constexpr static auto WhitePoint = D::WhitePoint;
 
   protected:
-    T red;
-    T green;
-    T blue;
-    T alpha;
+    T Red;
+    T Green;
+    T Blue;
+    T Alpha;
 
   public:
-    constexpr RGBAType(T red, T green, T blue, T alpha = AlphaTraits<T>::opaque) noexcept
-        : red {red}, green {green}, blue {blue}, alpha {alpha}
+    constexpr RGBAType(T red, T green, T blue, T alpha = AlphaTraits<T>::Opaque) noexcept
+        : Red {red}, Green {green}, Blue {blue}, Alpha {alpha}
     {
       AssertInRange(*static_cast<const ColorType *>(this));
     }
@@ -344,8 +345,8 @@ namespace krys::boo
     using RGBAType<T, D, BoundedLinearEncoded<T, D>, RGBModel<T, RGBBoundedness::Bounded>,
                    typename D::template TransferFunction<T, TransferFunctionMode::Clamped>>::RGBAType;
 
-    constexpr static auto linearToXYZ = D::linearToXYZ;
-    constexpr static auto xyzToLinear = D::xyzToLinear;
+    constexpr static auto LinearToXYZ = D::LinearToXYZ;
+    constexpr static auto XyzToLinear = D::XyzToLinear;
 
     using GammaEncodedCounterpart = BoundedGammaEncoded<T, D>;
     using ExtendedCounterpart = ExtendedLinearEncoded<T, D>;
@@ -375,12 +376,12 @@ namespace krys::boo
     using RGBAType<T, D, ExtendedLinearEncoded<T, D>, RGBModel<T, RGBBoundedness::Extended>,
                    typename D::template TransferFunction<T, TransferFunctionMode::Unclamped>>::RGBAType;
 
-    constexpr static auto linearToXYZ = D::linearToXYZ;
-    constexpr static auto xyzToLinear = D::xyzToLinear;
+    constexpr static auto LinearToXYZ = D::LinearToXYZ;
+    constexpr static auto XyzToLinear = D::XyzToLinear;
 
     using GammaEncodedCounterpart = ExtendedGammaEncoded<T, D>;
     using BoundedCounterpart = BoundedLinearEncoded<T, D>;
-    using Reference = XYZA<T, D::whitePoint>;
+    using Reference = XYZA<T, D::WhitePoint>;
   };
 
   template <typename, typename = void>
@@ -509,14 +510,14 @@ namespace krys::boo
     template <typename T, TransferFunctionMode Mode>
     using TransferFunction = SRGBTransferFunction<T, Mode>;
 
-    constexpr static auto whitePoint = WhitePoint::D65;
+    constexpr static auto WhitePoint = boo::WhitePoint::D65;
 
     // https://drafts.csswg.org/css-color/#color-conversion-code
-    constexpr static ColorMatrix<3, 3> xyzToLinear {
+    constexpr static ColorMatrix<3, 3> XyzToLinear {
       12831.0 / 3959.0,   -329.0 / 214.0,  -1974.0 / 3959.0,  -851781.0 / 878810.0, 1648619.0 / 878810.0,
       36519.0 / 878810.0, 705.0 / 12673.0, -2585.0 / 12673.0, 705.0 / 667.0,
     };
-    constexpr static ColorMatrix<3, 3> linearToXYZ {
+    constexpr static ColorMatrix<3, 3> LinearToXYZ {
       506752.0 / 1228815.0, 87881.0 / 245763.0,  12673.0 / 70218.0,
       87098.0 / 409605.0,   175762.0 / 245763.0, 12673.0 / 175545.0,
       7918.0 / 409605.0,    87881.0 / 737289.0,  1001167.0 / 1053270.0,
@@ -540,16 +541,16 @@ namespace krys::boo
     template <typename T, TransferFunctionMode Mode>
     using TransferFunction = A98RGBTransferFunction<T, Mode>;
 
-    constexpr static auto whitePoint = WhitePoint::D65;
+    constexpr static auto WhitePoint = boo::WhitePoint::D65;
 
     // https://drafts.csswg.org/css-color/#color-conversion-code
-    constexpr static ColorMatrix<3, 3> xyzToLinear {
+    constexpr static ColorMatrix<3, 3> XyzToLinear {
       1829569.0 / 896150.0, -506331.0 / 896150.0,  -308931.0 / 896150.0,
       -851781.0 / 878810.0, 1648619.0 / 878810.0,  36519.0 / 878810.0,
       16779.0 / 1248040.0,  -147721.0 / 1248040.0, 1266979.0 / 1248040.0,
     };
 
-    constexpr static ColorMatrix<3, 3> linearToXYZ {
+    constexpr static ColorMatrix<3, 3> LinearToXYZ {
       573536.0 / 994567.0,  263643.0 / 1420810.0,  187206.0 / 994567.0,
       591459.0 / 1989134.0, 6239551.0 / 9945670.0, 374412.0 / 4972835.0,
       53769.0 / 1989134.0,  351524.0 / 4972835.0,  4929758.0 / 4972835.0,
@@ -573,15 +574,15 @@ namespace krys::boo
     template <typename T, TransferFunctionMode Mode>
     using TransferFunction = SRGBTransferFunction<T, Mode>;
 
-    constexpr static auto whitePoint = WhitePoint::D65;
+    constexpr static auto WhitePoint = boo::WhitePoint::D65;
 
     // https://drafts.csswg.org/css-color/#color-conversion-code
-    constexpr static ColorMatrix<3, 3> xyzToLinear {
+    constexpr static ColorMatrix<3, 3> XyzToLinear {
       446124.0 / 178915.0, -333277.0 / 357830.0, -72051.0 / 178915.0, -14852.0 / 17905.0,  63121.0 / 35810.0,
       423.0 / 17905.0,     11844.0 / 330415.0,   -50337.0 / 660830.0, 316169.0 / 330415.0,
     };
 
-    constexpr static ColorMatrix<3, 3> linearToXYZ {
+    constexpr static ColorMatrix<3, 3> LinearToXYZ {
       608311.0 / 1250200.0,
       189793.0 / 714400.0,
       198249.0 / 1000160.0,
@@ -611,15 +612,15 @@ namespace krys::boo
     template <typename T, TransferFunctionMode Mode>
     using TransferFunction = ProPhotoRGBTransferFunction<T, Mode>;
 
-    constexpr static auto whitePoint = WhitePoint::D50;
+    constexpr static auto WhitePoint = boo::WhitePoint::D50;
 
     // https://drafts.csswg.org/css-color/#color-conversion-code
-    constexpr static ColorMatrix<3, 3> xyzToLinear {
+    constexpr static ColorMatrix<3, 3> XyzToLinear {
       1.34578688164715830,  -0.25557208737979464, -0.05110186497554526,
       -0.54463070512490190, 1.50824774284514680,  0.02052744743642139,
       0.00000000000000000,  0.00000000000000000,  1.21196754563894520};
 
-    constexpr static ColorMatrix<3, 3> linearToXYZ {
+    constexpr static ColorMatrix<3, 3> LinearToXYZ {
       0.79776664490064230, 0.13518129740053308, 0.03134773412839220, 0.28807482881940130, 0.71183523424187300,
       0.00008993693872564, 0.00000000000000000, 0.00000000000000000, 0.82510460251046020};
   };
@@ -641,15 +642,15 @@ namespace krys::boo
     template <typename T, TransferFunctionMode Mode>
     using TransferFunction = Rec2020TransferFunction<T, Mode>;
 
-    constexpr static auto whitePoint = WhitePoint::D65;
+    constexpr static auto WhitePoint = boo::WhitePoint::D65;
 
     // https://drafts.csswg.org/css-color/#color-conversion-code
-    constexpr static ColorMatrix<3, 3> xyzToLinear {
+    constexpr static ColorMatrix<3, 3> XyzToLinear {
       30757411.0 / 17917100.0,  -6372589.0 / 17917100.0, -4539589.0 / 17917100.0,
       -19765991.0 / 29648200.0, 47925759.0 / 29648200.0, 467509.0 / 29648200.0,
       792561.0 / 44930125.0,    -1921689.0 / 44930125.0, 42328811.0 / 44930125.0,
     };
-    constexpr static ColorMatrix<3, 3> linearToXYZ {
+    constexpr static ColorMatrix<3, 3> LinearToXYZ {
       63426534.0 / 99577255.0,
       20160776.0 / 139408157.0,
       47086771.0 / 278816314.0,
@@ -682,24 +683,24 @@ namespace krys::boo
     using ComponentType = T;
     using Model = LabModel<T>;
 
-    constexpr static auto whitePoint = WhitePoint::D50;
+    constexpr static auto WhitePoint = boo::WhitePoint::D50;
 
-    using Reference = XYZA<T, whitePoint>;
+    using Reference = XYZA<T, WhitePoint>;
 
   protected:
-    T lightness;
-    T a;
-    T b;
-    T alpha;
+    T Lightness;
+    T A;
+    T B;
+    T Alpha;
 
   public:
-    constexpr Lab(T lightness, T a, T b, T alpha = AlphaTraits<T>::opaque) noexcept
-        : lightness {lightness}, a {a}, b {b}, alpha {alpha}
+    constexpr Lab(T lightness, T a, T b, T alpha = AlphaTraits<T>::Opaque) noexcept
+        : Lightness {lightness}, A {a}, B {b}, Alpha {alpha}
     {
       AssertInRange(*this);
     }
 
-    constexpr Lab() : Lab {0, 0, 0, 0}
+    constexpr Lab() noexcept : Lab {0, 0, 0, 0}
     {
     }
 
@@ -726,19 +727,19 @@ namespace krys::boo
     using ComponentType = T;
     using Model = LCHModel<T>;
 
-    constexpr static auto whitePoint = WhitePoint::D50;
+    constexpr static auto WhitePoint = boo::WhitePoint::D50;
 
     using Reference = Lab<T>;
 
   protected:
-    T lightness;
-    T chroma;
-    T hue;
-    T alpha;
+    T Lightness;
+    T Chroma;
+    T Hue;
+    T Alpha;
 
   public:
-    constexpr LCHA(T lightness, T chroma, T hue, T alpha = AlphaTraits<T>::opaque) noexcept
-        : lightness {lightness}, chroma {chroma}, hue {hue}, alpha {alpha}
+    constexpr LCHA(T lightness, T chroma, T hue, T alpha = AlphaTraits<T>::Opaque) noexcept
+        : Lightness {lightness}, Chroma {chroma}, Hue {hue}, Alpha {alpha}
     {
       AssertInRange(*this);
     }
@@ -770,19 +771,19 @@ namespace krys::boo
     using ComponentType = T;
     using Model = OKLabModel<T>;
 
-    constexpr static auto whitePoint = WhitePoint::D65;
+    constexpr static auto WhitePoint = boo::WhitePoint::D65;
 
-    using Reference = XYZA<T, whitePoint>;
+    using Reference = XYZA<T, WhitePoint>;
 
   protected:
-    T lightness;
-    T a;
-    T b;
-    T alpha;
+    T Lightness;
+    T A;
+    T B;
+    T Alpha;
 
   public:
-    constexpr OKLab(T lightness, T a, T b, T alpha = AlphaTraits<T>::opaque) noexcept
-        : lightness {lightness}, a {a}, b {b}, alpha {alpha}
+    constexpr OKLab(T lightness, T a, T b, T alpha = AlphaTraits<T>::Opaque) noexcept
+        : Lightness {lightness}, A {a}, B {b}, Alpha {alpha}
     {
       AssertInRange(*this);
     }
@@ -815,19 +816,19 @@ namespace krys::boo
     using ComponentType = T;
     using Model = OKLCHModel<T>;
 
-    constexpr static auto whitePoint = WhitePoint::D65;
+    constexpr static auto WhitePoint = boo::WhitePoint::D65;
 
     using Reference = OKLab<T>;
 
   protected:
-    T lightness;
-    T chroma;
-    T hue;
-    T alpha;
+    T Lightness;
+    T Chroma;
+    T Hue;
+    T Alpha;
 
   public:
-    constexpr OKLCHA(T lightness, T chroma, T hue, T alpha = AlphaTraits<T>::opaque) noexcept
-        : lightness {lightness}, chroma {chroma}, hue {hue}, alpha {alpha}
+    constexpr OKLCHA(T lightness, T chroma, T hue, T alpha = AlphaTraits<T>::Opaque) noexcept
+        : Lightness {lightness}, Chroma {chroma}, Hue {hue}, Alpha {alpha}
     {
       AssertInRange(*this);
     }
@@ -860,19 +861,19 @@ namespace krys::boo
     using ComponentType = T;
     using Model = HSLModel<T>;
 
-    constexpr static auto whitePoint = WhitePoint::D65;
+    constexpr static auto WhitePoint = boo::WhitePoint::D65;
 
     using Reference = ExtendedSRGBA<T>;
 
   protected:
-    T hue;
-    T saturation;
-    T lightness;
-    T alpha;
+    T Hue;
+    T Saturation;
+    T Lightness;
+    T Alpha;
 
   public:
-    constexpr HSLA(T hue, T saturation, T lightness, T alpha = AlphaTraits<T>::opaque) noexcept
-        : hue {hue}, saturation {saturation}, lightness {lightness}, alpha {alpha}
+    constexpr HSLA(T hue, T saturation, T lightness, T alpha = AlphaTraits<T>::Opaque) noexcept
+        : Hue {hue}, Saturation {saturation}, Lightness {lightness}, Alpha {alpha}
     {
       AssertInRange(*this);
     }
@@ -905,19 +906,19 @@ namespace krys::boo
     using ComponentType = T;
     using Model = HWBModel<T>;
 
-    constexpr static auto whitePoint = WhitePoint::D65;
+    constexpr static auto WhitePoint = boo::WhitePoint::D65;
 
     using Reference = ExtendedSRGBA<T>;
 
   protected:
-    T hue;
-    T whiteness;
-    T blackness;
-    T alpha;
+    T Hue;
+    T Whiteness;
+    T Blackness;
+    T Alpha;
 
   public:
-    constexpr HWBA(T hue, T whiteness, T blackness, T alpha = AlphaTraits<T>::opaque) noexcept
-        : hue {hue}, whiteness {whiteness}, blackness {blackness}, alpha {alpha}
+    constexpr HWBA(T hue, T whiteness, T blackness, T alpha = AlphaTraits<T>::Opaque) noexcept
+        : Hue {hue}, Whiteness {whiteness}, Blackness {blackness}, Alpha {alpha}
     {
       AssertInRange(*this);
     }
@@ -951,17 +952,17 @@ namespace krys::boo
     using Model = XYZModel<T>;
     using ReferenceXYZ = XYZA<T, W>;
 
-    constexpr static auto whitePoint = W;
+    constexpr static auto WhitePoint = W;
 
   protected:
-    T x;
-    T y;
-    T z;
-    T alpha;
+    T X;
+    T Y;
+    T Z;
+    T Alpha;
 
   public:
-    constexpr XYZA(T x, T y, T z, T alpha = AlphaTraits<T>::opaque) noexcept
-        : x {x}, y {y}, z {z}, alpha {alpha}
+    constexpr XYZA(T x, T y, T z, T alpha = AlphaTraits<T>::Opaque) noexcept
+        : X {x}, Y {y}, Z {z}, Alpha {alpha}
     {
       AssertInRange(*this);
     }
@@ -982,7 +983,7 @@ namespace krys::boo
   };
 
   template <typename ColorType>
-  constexpr bool IsXYZA = SameType<XYZA<typename ColorType::ComponentType, ColorType::whitePoint>, ColorType>;
+  constexpr bool IsXYZA = SameType<XYZA<typename ColorType::ComponentType, ColorType::WhitePoint>, ColorType>;
 
 #pragma endregion
 
@@ -992,14 +993,14 @@ namespace krys::boo
   {
     struct RGBA
     {
-      uint32 value;
+      uint32 Value;
 
-      constexpr explicit RGBA(uint32 rgba) noexcept : value {rgba}
+      constexpr explicit RGBA(uint32 rgba) noexcept : Value {rgba}
       {
       }
 
       constexpr explicit RGBA(ResolvedColorType<SRGBA<uint8>> color) noexcept
-          : value {static_cast<uint32>(color.red << 24 | color.green << 16 | color.blue << 8 | color.alpha)}
+          : Value {static_cast<uint32>(color.Red << 24 | color.Green << 16 | color.Blue << 8 | color.Alpha)}
       {
       }
 
@@ -1010,14 +1011,14 @@ namespace krys::boo
 
     struct ARGB
     {
-      uint32 value;
+      uint32 Value;
 
-      constexpr explicit ARGB(uint32 argb) noexcept : value {argb}
+      constexpr explicit ARGB(uint32 argb) noexcept : Value {argb}
       {
       }
 
       constexpr explicit ARGB(ResolvedColorType<SRGBA<uint8>> color) noexcept
-          : value {static_cast<uint32>(color.alpha << 24 | color.red << 16 | color.green << 8 | color.blue)}
+          : Value {static_cast<uint32>(color.Alpha << 24 | color.Red << 16 | color.Green << 8 | color.Blue)}
       {
       }
 
@@ -1030,13 +1031,13 @@ namespace krys::boo
 
   KRYS_NODISCARD constexpr SRGBA<uint8> AsSRGBA(PackedColor::RGBA color) noexcept
   {
-    return {static_cast<uint8>(color.value >> 24), static_cast<uint8>(color.value >> 16),
-            static_cast<uint8>(color.value >> 8), static_cast<uint8>(color.value)};
+    return {static_cast<uint8>(color.Value >> 24), static_cast<uint8>(color.Value >> 16),
+            static_cast<uint8>(color.Value >> 8), static_cast<uint8>(color.Value)};
   }
 
   KRYS_NODISCARD constexpr SRGBA<uint8> AsSRGBA(PackedColor::ARGB color) noexcept
   {
-    return {static_cast<uint8>(color.value >> 16), static_cast<uint8>(color.value >> 8),
-            static_cast<uint8>(color.value), static_cast<uint8>(color.value >> 24)};
+    return {static_cast<uint8>(color.Value >> 16), static_cast<uint8>(color.Value >> 8),
+            static_cast<uint8>(color.Value), static_cast<uint8>(color.Value >> 24)};
   }
 }

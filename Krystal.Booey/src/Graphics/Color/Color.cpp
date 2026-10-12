@@ -1,10 +1,12 @@
 ﻿#include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorLuminance.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
+#include <algorithm>
 
 namespace krys::boo
 {
-  constexpr static auto lightenedBlack = SRGBA<uint8_t> {84, 84, 84};
-  constexpr static auto darkenedWhite = SRGBA<uint8_t> {171, 171, 171};
+  constexpr static auto lightenedBlack = SRGBA<uint8> {84, 84, 84};
+  constexpr static auto darkenedWhite = SRGBA<uint8> {171, 171, 171};
 
   Color Color::Lightened() const noexcept
   {
@@ -24,7 +26,7 @@ namespace krys::boo
 
     float multiplier = std::min(1.0f, v + 0.33f) / v;
 
-    return ConvertColor<SRGBA<uint8_t>>(SRGBA<float> {multiplier * r, multiplier * g, multiplier * b, a});
+    return ConvertColor<SRGBA<uint8>>(SRGBA<float> {multiplier * r, multiplier * g, multiplier * b, a});
   }
 
   Color Color::Darkened() const noexcept
@@ -40,7 +42,7 @@ namespace krys::boo
     float v = std::max({r, g, b});
     float multiplier = std::max(0.0f, (v - 0.33f) / v);
 
-    return ConvertColor<SRGBA<uint8_t>>(SRGBA<float> {multiplier * r, multiplier * g, multiplier * b, a});
+    return ConvertColor<SRGBA<uint8>>(SRGBA<float> {multiplier * r, multiplier * g, multiplier * b, a});
   }
 
   double Color::Lightness() const noexcept
@@ -61,7 +63,7 @@ namespace krys::boo
     return CallOnUnderlyingType(
       [&]<typename ColorType>(const ColorType &underlyingColor)
       {
-        if constexpr (SameType<ColorType, SRGBA<uint8_t>>)
+        if constexpr (SameType<ColorType, SRGBA<uint8>>)
         {
           return false;
         }
@@ -97,7 +99,7 @@ namespace krys::boo
         // FIXME: Determine if there is a meaningful understanding of inversion that works
         // better for non-invertible color types like Lab or consider removing this in favor
         // of alternatives.
-        if constexpr (ColorType::Model::isInvertible)
+        if constexpr (ColorType::Model::IsInvertible)
         {
           return InvertedColorWithOverriddenAlpha(underlyingColor, alpha);
         }
@@ -117,7 +119,7 @@ namespace krys::boo
 
     if (IsOutOfLine())
     {
-      return {ShareRef(DecodedOutOfLineComponents(_colorAndFlags)), Space(), ColorFlags::Semantic};
+      return {ProtectedAsOutOfLine(), Space(), ColorFlags::Semantic};
     }
 
     return {AsInline(), ColorFlags::Semantic};
@@ -130,18 +132,13 @@ namespace krys::boo
     return ConvertAndResolveColorComponents(inputColorSpace, components, outputColorSpace);
   }
 
-  ColorComponents<float, 4>
-    Color::ToResolvedColorComponentsInColorSpace(const DestinationColorSpace &outputColorSpace) const noexcept
-  {
-    auto [inputColorSpace, components] = ColorSpaceAndResolvedColorComponents();
-    return ConvertAndResolveColorComponents(inputColorSpace, components, outputColorSpace);
-  }
-
-  std::pair<ColorSpace, ColorComponents<float, 4>>
-    Color::ColorSpaceAndResolvedColorComponents() const noexcept
+  Pair<ColorSpace, ColorComponents<float, 4>> Color::ColorSpaceAndResolvedColorComponents() const noexcept
   {
     if (IsOutOfLine())
-      return {Space(), ResolveColorComponents(ShareRef(AsOutOfLine())->ResolvedComponents())};
+    {
+      return {Space(), ResolveColorComponents(ProtectedAsOutOfLine()->ResolvedComponents())};
+    }
+
     return {ColorSpace::SRGB, AsColorComponents(ConvertColor<SRGBA<float>>(AsInline()).Resolved())};
   }
 
@@ -159,7 +156,12 @@ namespace krys::boo
 
   Color::DebugRGBAData Color::DebugRGBA() const noexcept
   {
-    auto [r, g, b, a] = ToColorTypeLossy<SRGBA<uint8_t>>().Resolved();
+    auto [r, g, b, a] = ToColorTypeLossy<SRGBA<uint8>>().Resolved();
     return {r, g, b, a};
+  }
+
+  utf8_string Color::DebugDescription() const noexcept
+  {
+    return SerialisationForRenderTreeAsText(*this);
   }
 }

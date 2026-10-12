@@ -1,8 +1,12 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include <algorithm>
+#include <cmath>
 
-// Transfer functions for colors that can be gamma encoded.
+// Transfer functions for colors that can be Gamma encoded.
 namespace krys::boo
 {
   enum class TransferFunctionMode : uint8
@@ -21,7 +25,7 @@ namespace krys::boo
   template <typename T, TransferFunctionMode mode>
   struct ProPhotoRGBTransferFunction
   {
-    constexpr static T gamma = static_cast<T>(1.8);
+    constexpr static T Gamma = static_cast<T>(1.8);
 
     KRYS_NODISCARD static T ToGammaEncoded(T) noexcept;
     KRYS_NODISCARD static T ToLinear(T) noexcept;
@@ -30,9 +34,9 @@ namespace krys::boo
   template <typename T, TransferFunctionMode mode>
   struct Rec2020TransferFunction
   {
-    constexpr static T alpha = static_cast<T>(1.09929682680944);
-    constexpr static T beta = static_cast<T>(0.018053968510807);
-    constexpr static T gamma = static_cast<T>(0.45);
+    constexpr static T Alpha = static_cast<T>(1.09929682680944);
+    constexpr static T Beta = static_cast<T>(0.018053968510807);
+    constexpr static T Gamma = static_cast<T>(0.45);
 
     KRYS_NODISCARD static T ToGammaEncoded(T) noexcept;
     KRYS_NODISCARD static T ToLinear(T) noexcept;
@@ -91,7 +95,7 @@ namespace krys::boo
         return 16.0f * c;
       }
 
-      return ClampTo<T>(std::pow(c, 1.0f / gamma), 0, 1);
+      return ClampTo<T>(std::pow(c, 1.0f / Gamma), 0, 1);
     }
     else
     {
@@ -101,7 +105,7 @@ namespace krys::boo
       }
 
       float sign = std::signbit(c) ? -1.0f : 1.0f;
-      return std::pow(c, 1.0f / gamma) * sign;
+      return std::pow(std::abs(c), 1.0f / Gamma) * sign;
     }
   }
 
@@ -115,7 +119,7 @@ namespace krys::boo
         return c / 16.0f;
       }
 
-      return ClampTo<T>(std::pow(c, gamma), 0, 1);
+      return ClampTo<T>(std::pow(c, Gamma), 0, 1);
     }
     else
     {
@@ -125,7 +129,7 @@ namespace krys::boo
       }
 
       float sign = std::signbit(c) ? -1.0f : 1.0f;
-      return std::pow(c, gamma) * sign;
+      return std::pow(std::abs(c), Gamma) * sign;
     }
   }
 
@@ -138,22 +142,22 @@ namespace krys::boo
   {
     if constexpr (mode == TransferFunctionMode::Clamped)
     {
-      if (c <= beta)
+      if (c <= Beta)
       {
         return 4.5f * c;
       }
 
-      return ClampTo<T>(alpha * std::pow(c, gamma) - (alpha - 1.0f), 0, 1);
+      return ClampTo<T>(Alpha * std::pow(c, Gamma) - (Alpha - 1.0f), 0, 1);
     }
     else
     {
-      if (std::abs(c) <= beta)
+      if (std::abs(c) <= Beta)
       {
         return 4.5f * c;
       }
 
       float sign = std::signbit(c) ? -1.0f : 1.0f;
-      return (alpha * std::pow(c, gamma) - (alpha - 1.0f)) * sign;
+      return (Alpha * std::pow(std::abs(c), Gamma) - (Alpha - 1.0f)) * sign;
     }
   }
 
@@ -162,22 +166,22 @@ namespace krys::boo
   {
     if constexpr (mode == TransferFunctionMode::Clamped)
     {
-      if (c < beta * 4.5f)
+      if (c < Beta * 4.5f)
       {
         return c / 4.5f;
       }
 
-      return ClampTo<T>(std::pow((c + alpha - 1.0f) / alpha, 1.0f / gamma), 0, 1);
+      return ClampTo<T>(std::pow((c + Alpha - 1.0f) / Alpha, 1.0f / Gamma), 0, 1);
     }
     else
     {
-      if (std::abs(c) < beta * 4.5f)
+      if (std::abs(c) < Beta * 4.5f)
       {
         return c / 4.5f;
       }
 
       float sign = std::signbit(c) ? -1.0f : 1.0f;
-      return std::pow((c + alpha - 1.0f) / alpha, 1.0f / gamma) * sign;
+      return std::pow((std::abs(c) + Alpha - 1.0f) / Alpha, 1.0f / Gamma) * sign;
     }
   }
 

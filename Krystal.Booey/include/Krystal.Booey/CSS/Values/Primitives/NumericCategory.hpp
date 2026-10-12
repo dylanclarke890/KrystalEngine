@@ -1,7 +1,10 @@
+﻿#pragma once
+
 #include "Krystal.Core/Enum.hpp"
 
 namespace krys::boo::css
 {
+  /// @see https://www.w3.org/TR/css-values-4/#numeric-types
   enum class Category : uint8
   {
     Integer,

@@ -11,13 +11,13 @@ namespace krys::boo::css
 
   struct SerialisationContext
   {
-    SerialisationContext() noexcept = default;
+    SerialisationContext() noexcept;
 
     SerialisationContext(HashMap<CSSOMString, CSSOMString> &&replacementUrlStrings,
                          HashMap<Ref<CSSStyleSheet>, CSSOMString> &&replacementUrlStringsForStyleSheet,
                          bool shouldUseResolvedURLInCSSText) noexcept;
 
-    ~SerialisationContext() noexcept = default;
+    ~SerialisationContext() noexcept;
 
     HashMap<CSSOMString, CSSOMString> ReplacementUrlStrings;
     HashMap<Ref<CSSStyleSheet>, CSSOMString> ReplacementUrlStringsForStyleSheet;

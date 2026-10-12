@@ -2,8 +2,8 @@
 
 #include "Krystal.Booey/Graphics/Color/AlphaPremultiplication.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorInterpolationMethod.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorNormalization.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorTypes.hpp"
-#include "Krystal.Booey/Graphics/Color/ColorUtilities.hpp"
 
 namespace krys::boo
 {
@@ -75,7 +75,7 @@ namespace krys::boo
     }
 
     auto [fixedupComponent1, fixedupComponent2] = FixupHueComponentsPriorToInterpolation(
-      interpolationMethodColorSpace.hueInterpolationMethod, componentFromColor1, componentFromColor2);
+      interpolationMethodColorSpace.HueInterpolationMethod, componentFromColor1, componentFromColor2);
     return InterpolateComponentWithoutAccountingForNaN(fixedupComponent1, color1Multiplier, fixedupComponent2,
                                                        color2Multiplier);
   }
@@ -84,10 +84,10 @@ namespace krys::boo
 
   struct PremultipliedAlphaState
   {
-    float alphaForPremultiplicationOfColor1;
-    float alphaForPremultiplicationOfColor2;
-    float alphaForUnpremultiplication;
-    float resultAlpha;
+    float AlphaForPremultiplicationOfColor1;
+    float AlphaForPremultiplicationOfColor2;
+    float AlphaForUnpremultiplication;
+    float ResultAlpha;
   };
 
   inline PremultipliedAlphaState InterpolateAlphaPremulitplied(float alphaForColor1, double color1Multiplier,
@@ -128,9 +128,9 @@ namespace krys::boo
     PremultipliedAlphaState interpolatedAlpha) noexcept
   {
     using ColorType = typename InterpolationMethodColorSpace::ColorType;
-    constexpr auto componentInfo = ColorType::Model::componentInfo;
+    constexpr auto componentInfo = ColorType::Model::ComponentInfo;
 
-    if constexpr (componentInfo[I].type == ColorComponentType::Angle)
+    if constexpr (componentInfo[I].Type == ColorComponentType::Angle)
     {
       return InterpolateHue(interpolationMethodColorSpace, colorComponents1[I], color1Multiplier,
                             colorComponents2[I], color2Multiplier);
@@ -148,19 +148,19 @@ namespace krys::boo
       }
 
       auto premultipliedComponent1 =
-        colorComponents1[I] * interpolatedAlpha.alphaForPremultiplicationOfColor1;
+        colorComponents1[I] * interpolatedAlpha.AlphaForPremultiplicationOfColor1;
       auto premultipliedComponent2 =
-        colorComponents2[I] * interpolatedAlpha.alphaForPremultiplicationOfColor2;
+        colorComponents2[I] * interpolatedAlpha.AlphaForPremultiplicationOfColor2;
 
       auto premultipliedResult = InterpolateComponentWithoutAccountingForNaN(
         premultipliedComponent1, color1Multiplier, premultipliedComponent2, color2Multiplier);
 
-      if (interpolatedAlpha.alphaForUnpremultiplication == 0.0f)
+      if (interpolatedAlpha.AlphaForUnpremultiplication == 0.0f)
       {
         return premultipliedResult;
       }
 
-      return premultipliedResult / interpolatedAlpha.alphaForUnpremultiplication;
+      return premultipliedResult / interpolatedAlpha.AlphaForUnpremultiplication;
     }
   }
 
@@ -179,9 +179,9 @@ namespace krys::boo
     double color1Multiplier, ColorComponents<float, 4> colorComponents2, double color2Multiplier) noexcept
   {
     using ColorType = typename InterpolationMethodColorSpace::ColorType;
-    constexpr auto componentInfo = ColorType::Model::componentInfo;
+    constexpr auto componentInfo = ColorType::Model::ComponentInfo;
 
-    if constexpr (componentInfo[I].type == ColorComponentType::Angle)
+    if constexpr (componentInfo[I].Type == ColorComponentType::Angle)
     {
       return InterpolateHue(interpolationMethodColorSpace, colorComponents1[I], color1Multiplier,
                             colorComponents2[I], color2Multiplier);
@@ -220,7 +220,7 @@ namespace krys::boo
 
       return CreateColorTypeByNormalizingComponents<typename InterpolationMethodColorSpace::ColorType>(
         {interpolatedComponent1, interpolatedComponent2, interpolatedComponent3,
-         interpolatedAlpha.resultAlpha});
+         interpolatedAlpha.ResultAlpha});
     }
     else
     {

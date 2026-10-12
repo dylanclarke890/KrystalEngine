@@ -16,7 +16,7 @@ namespace krys::boo::css
   /// @brief Concept for use in generic contexts to filter on keywords that are valid for the provided
   /// `Keywords` list.
   template <typename Keyword, typename KeywordsList>
-  concept ValidKeywordForList = PrimitiveKeyword<Keyword> && KeywordsList::isValidKeyword(Keyword());
+  concept ValidKeywordForList = PrimitiveKeyword<Keyword> && KeywordsList::IsValidKeyword(Keyword());
 
   template <PrimitiveKeyword... Ks>
   struct PrimitiveKeywordList

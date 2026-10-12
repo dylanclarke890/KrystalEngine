@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Graphics/Color/ColorInterpolation.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Visitor.hpp"
 
 namespace krys::boo
@@ -11,10 +12,16 @@ namespace krys::boo
     {
       // https://drafts.csswg.org/css-color-4/#hue-shorter
       auto difference = theta2 - theta1;
-      if (difference > 180.f)
-        return {theta1 + 360.f, theta2};
-      if (difference < -180.f)
-        return {theta1, theta2 + 360.f};
+      if (difference > 180.0f)
+      {
+        return {theta1 + 360.0f, theta2};
+      }
+
+      if (difference < -180.0f)
+      {
+        return {theta1, theta2 + 360.0f};
+      }
+
       return {theta1, theta2};
     };
 
@@ -81,18 +88,18 @@ namespace krys::boo
       }
     }
 
-    std::unreachable();
+    krys_unreachable();
   }
 
   Color InterpolateColors(ColorInterpolationMethod colorInterpolationMethod, Color color1,
                           double color1Multiplier, Color color2, double color2Multiplier) noexcept
   {
     return krys::SwitchOn(
-      colorInterpolationMethod.colorSpace,
+      colorInterpolationMethod.ColorSpace,
       [&]<typename MethodColorSpace>(const MethodColorSpace &colorSpace) -> Color
       {
         using ColorType = typename MethodColorSpace::ColorType;
-        switch (colorInterpolationMethod.alphaPremultiplication)
+        switch (colorInterpolationMethod.AlphaPremultiplication)
         {
           case AlphaPremultiplication::Premultiplied:
           {
@@ -108,7 +115,7 @@ namespace krys::boo
           }
         }
 
-        std::unreachable();
+        krys_unreachable();
       });
   }
 }

@@ -1,51 +1,52 @@
 ﻿#include "Krystal.Booey/Graphics/Color/ColorConversion.hpp"
-#include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSpace.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorUtilities.hpp"
-#include "Krystal.Booey/Graphics/Color/DestinationColorSpace.hpp"
 #include <numeric>
 
 namespace krys::boo
 {
   // MARK: Lab-Like to LCH-Like conversion utilities.
 
-  template <typename LCHLike, typename LabLike>
-  KRYS_NODISCARD LCHLike ConvertToPolarForm(const LabLike &color) noexcept
+  namespace
   {
-    // https://drafts.csswg.org/css-color/#lab-to-lch
-    auto [lightness, a, b, alpha] = color.Resolved();
-
-    constexpr float epsilon = static_cast<float>(LabLike::Model::achromaticEpsilon);
-
-    bool achromatic = std::abs(a) < epsilon && std::abs(b) < epsilon;
-
-    if (achromatic)
+    template <typename LCHLike, typename LabLike>
+    KRYS_NODISCARD LCHLike ConvertToPolarForm(const LabLike &color) noexcept
     {
-      return {lightness, 0, std::numeric_limits<float>::quiet_NaN(), alpha};
+      // https://drafts.csswg.org/css-color/#lab-to-lch
+      auto [lightness, a, b, alpha] = color.Resolved();
+
+      constexpr float epsilon = static_cast<float>(LabLike::Model::AchromaticEpsilon);
+
+      bool achromatic = std::abs(a) < epsilon && std::abs(b) < epsilon;
+
+      if (achromatic)
+      {
+        return {lightness, 0, std::numeric_limits<float>::quiet_NaN(), alpha};
+      }
+
+      float chroma = std::hypot(a, b);
+      float hue = rad2deg(atan2(b, a));
+
+      return {lightness, chroma, hue >= 0.0f ? hue : hue + 360.0f, alpha};
     }
 
-    float chroma = std::hypot(a, b);
-    float hue = rad2deg(atan2(b, a));
-
-    return {lightness, chroma, hue >= 0.0f ? hue : hue + 360.0f, alpha};
-  }
-
-  template <typename LabLike, typename LCHLike>
-  KRYS_NODISCARD LabLike convertToRectangularForm(const LCHLike &color) noexcept
-  {
-    // https://drafts.csswg.org/css-color/#lch-to-lab
-    auto [lightness, chroma, hue, alpha] = color.Resolved();
-
-    if (std::isnan(color.Unresolved().hue))
+    template <typename LabLike, typename LCHLike>
+    KRYS_NODISCARD LabLike ConvertToRectangularForm(const LCHLike &color) noexcept
     {
-      return {lightness, 0, 0, alpha};
+      // https://drafts.csswg.org/css-color/#lch-to-lab
+      auto [lightness, chroma, hue, alpha] = color.Resolved();
+
+      if (std::isnan(color.Unresolved().Hue))
+      {
+        return {lightness, 0, 0, alpha};
+      }
+
+      float hueAngleRadians = deg2rad(hue);
+      float a = chroma * std::cos(hueAngleRadians);
+      float b = chroma * std::sin(hueAngleRadians);
+
+      return {lightness, a, b, alpha};
     }
-
-    float hueAngleRadians = deg2rad(hue);
-    float a = chroma * std::cos(hueAngleRadians);
-    float b = chroma * std::sin(hueAngleRadians);
-
-    return {lightness, a, b, alpha};
   }
 
   // MARK: HSL conversions.
@@ -284,7 +285,7 @@ namespace krys::boo
 
   Lab<float> ColorConversion<Lab<float>, LCHA<float>>::Convert(const LCHA<float> &color) noexcept
   {
-    return convertToRectangularForm<Lab<float>>(color);
+    return ConvertToRectangularForm<Lab<float>>(color);
   }
 
   // MARK: OKLab conversions.
@@ -368,7 +369,7 @@ namespace krys::boo
 
   OKLab<float> ColorConversion<OKLab<float>, OKLCHA<float>>::Convert(const OKLCHA<float> &color) noexcept
   {
-    return convertToRectangularForm<OKLab<float>>(color);
+    return ConvertToRectangularForm<OKLab<float>>(color);
   }
 
   // MARK: Conversion functions for raw color components with associated color spaces.
@@ -386,31 +387,5 @@ namespace krys::boo
           outputColorSpace, [&]<typename OutputColorType>()
           { return AsColorComponents(ConvertColor<OutputColorType>(inputColor).Resolved()); });
       });
-  }
-
-  ColorComponents<float, 4>
-    ConvertAndResolveColorComponents(ColorSpace inputColorSpace,
-                                     ColorComponents<float, 4> inputColorComponents,
-                                     const DestinationColorSpace &outputColorSpace) noexcept
-  {
-    (void)inputColorSpace;
-    (void)inputColorComponents;
-    (void)outputColorSpace;
-    krys_not_implemented();
-    // TODO:
-    // return CallWithColorType(
-    //  inputColorComponents, inputColorSpace,
-    //  [outputColorSpace](const auto &inputColor)
-    //  {
-    //    if (outputColorSpace == DestinationColorSpace::SRGB())
-    //      return AsColorComponents(ConvertColor<SRGBA<float>>(inputColor).Resolved());
-    //    if (outputColorSpace == DestinationColorSpace::LinearSRGB())
-    //      return AsColorComponents(ConvertColor<LinearSRGBA<float>>(inputColor).Resolved());
-    //    if (outputColorSpace == DestinationColorSpace::DisplayP3())
-    //      return AsColorComponents(ConvertColor<DisplayP3<float>>(inputColor).Resolved());
-
-    // krys_assert(false);
-    // return AsColorComponents(ConvertColor<SRGBA<float>>(inputColor).Resolved());
-    // });
   }
 }

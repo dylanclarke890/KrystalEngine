@@ -15,13 +15,13 @@ namespace krys::boo
     // to XYZA<float, WhitePoint::D65> in its entirety is unnecessary to get just the Y
     // component. For instance, for SRGBA<float>, this could be done as:
     //
-    //     convertColor<LinearSRGBA<float>>(color) * LinearSRGBA<float>::linearToXYZ.row(1)
+    //     convertColor<LinearSRGBA<float>>(color) * LinearSRGBA<float>::LinearToXYZ.row(1)
     //
     // (for a hypothetical row() function on ColorMatrix). We would probably want to implement
     // this in ColorConversion.h as a sibling function to convertColor which can get a channel
     // of a color in another space in this kind of optimal way.
 
-    return ConvertColor<XYZA<float, WhitePoint::D65>>(color).Resolved().y;
+    return ConvertColor<XYZA<float, WhitePoint::D65>>(color).Resolved().Y;
   }
 
   KRYS_NODISCARD constexpr double ContrastRatio(double relativeLuminanceA, double relativeLuminanceB) noexcept

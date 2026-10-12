@@ -371,7 +371,7 @@ namespace krys::boo::css
 
   bool Value::CanResolveDependenciesWith(const ToLengthConversionData &conversionData) const noexcept
   {
-    return ComputedStyleDependencies().CanResolveWith(conversionData);
+    return ComputedStyleDependencies().CanResolveDependenciesWithConversionData(conversionData);
   }
 
   bool Value::Equals(const Value &other) const noexcept

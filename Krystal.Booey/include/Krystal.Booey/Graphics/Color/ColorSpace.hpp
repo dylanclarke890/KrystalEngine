@@ -37,137 +37,137 @@ namespace krys::boo
   template <typename T>
   struct ColorSpaceMapping<A98RGB<T>>
   {
-    constexpr static auto colorSpace {ColorSpace::A98RGB};
+    constexpr static auto ColorSpace {boo::ColorSpace::A98RGB};
   };
 
   template <typename T>
   struct ColorSpaceMapping<DisplayP3<T>>
   {
-    constexpr static auto colorSpace {ColorSpace::DisplayP3};
+    constexpr static auto ColorSpace {boo::ColorSpace::DisplayP3};
   };
 
   template <typename T>
   struct ColorSpaceMapping<ExtendedA98RGB<T>>
   {
-    constexpr static auto colorSpace {ColorSpace::ExtendedA98RGB};
+    constexpr static auto ColorSpace {boo::ColorSpace::ExtendedA98RGB};
   };
 
   template <typename T>
   struct ColorSpaceMapping<ExtendedDisplayP3<T>>
   {
-    constexpr static auto colorSpace {ColorSpace::ExtendedDisplayP3};
+    constexpr static auto ColorSpace {boo::ColorSpace::ExtendedDisplayP3};
   };
 
   template <typename T>
   struct ColorSpaceMapping<ExtendedLinearDisplayP3<T>>
   {
-    constexpr static auto colorSpace {ColorSpace::ExtendedLinearDisplayP3};
+    constexpr static auto ColorSpace {boo::ColorSpace::ExtendedLinearDisplayP3};
   };
 
   template <typename T>
   struct ColorSpaceMapping<ExtendedLinearSRGBA<T>>
   {
-    constexpr static auto colorSpace {ColorSpace::ExtendedLinearSRGB};
+    constexpr static auto ColorSpace {boo::ColorSpace::ExtendedLinearSRGB};
   };
 
   template <typename T>
   struct ColorSpaceMapping<ExtendedProPhotoRGB<T>>
   {
-    constexpr static auto colorSpace {ColorSpace::ExtendedProPhotoRGB};
+    constexpr static auto ColorSpace {boo::ColorSpace::ExtendedProPhotoRGB};
   };
 
   template <typename T>
   struct ColorSpaceMapping<ExtendedRec2020<T>>
   {
-    constexpr static auto colorSpace {ColorSpace::ExtendedRec2020};
+    constexpr static auto ColorSpace {boo::ColorSpace::ExtendedRec2020};
   };
 
   template <typename T>
   struct ColorSpaceMapping<ExtendedSRGBA<T>>
   {
-    constexpr static auto colorSpace {ColorSpace::ExtendedSRGB};
+    constexpr static auto ColorSpace {boo::ColorSpace::ExtendedSRGB};
   };
 
   template <typename T>
   struct ColorSpaceMapping<HSLA<T>>
   {
-    constexpr static auto colorSpace {ColorSpace::HSL};
+    constexpr static auto ColorSpace {boo::ColorSpace::HSL};
   };
 
   template <typename T>
   struct ColorSpaceMapping<HWBA<T>>
   {
-    constexpr static auto colorSpace {ColorSpace::HWB};
+    constexpr static auto ColorSpace {boo::ColorSpace::HWB};
   };
 
   template <typename T>
   struct ColorSpaceMapping<LCHA<T>>
   {
-    constexpr static auto colorSpace {ColorSpace::LCH};
+    constexpr static auto ColorSpace {boo::ColorSpace::LCH};
   };
 
   template <typename T>
   struct ColorSpaceMapping<Lab<T>>
   {
-    constexpr static auto colorSpace {ColorSpace::Lab};
+    constexpr static auto ColorSpace {boo::ColorSpace::Lab};
   };
 
   template <typename T>
   struct ColorSpaceMapping<LinearDisplayP3<T>>
   {
-    constexpr static auto colorSpace {ColorSpace::LinearDisplayP3};
+    constexpr static auto ColorSpace {boo::ColorSpace::LinearDisplayP3};
   };
 
   template <typename T>
   struct ColorSpaceMapping<LinearSRGBA<T>>
   {
-    constexpr static auto colorSpace {ColorSpace::LinearSRGB};
+    constexpr static auto ColorSpace {boo::ColorSpace::LinearSRGB};
   };
 
   template <typename T>
   struct ColorSpaceMapping<OKLab<T>>
   {
-    constexpr static auto colorSpace {ColorSpace::OKLab};
+    constexpr static auto ColorSpace {boo::ColorSpace::OKLab};
   };
 
   template <typename T>
   struct ColorSpaceMapping<OKLCHA<T>>
   {
-    constexpr static auto colorSpace {ColorSpace::OKLCH};
+    constexpr static auto ColorSpace {boo::ColorSpace::OKLCH};
   };
 
   template <typename T>
   struct ColorSpaceMapping<ProPhotoRGB<T>>
   {
-    constexpr static auto colorSpace {ColorSpace::ProPhotoRGB};
+    constexpr static auto ColorSpace {boo::ColorSpace::ProPhotoRGB};
   };
 
   template <typename T>
   struct ColorSpaceMapping<Rec2020<T>>
   {
-    constexpr static auto colorSpace {ColorSpace::Rec2020};
+    constexpr static auto ColorSpace {boo::ColorSpace::Rec2020};
   };
 
   template <typename T>
   struct ColorSpaceMapping<SRGBA<T>>
   {
-    constexpr static auto colorSpace {ColorSpace::SRGB};
+    constexpr static auto ColorSpace {boo::ColorSpace::SRGB};
   };
 
   template <typename T>
   struct ColorSpaceMapping<XYZA<T, WhitePoint::D50>>
   {
-    constexpr static auto colorSpace {ColorSpace::XYZ_D50};
+    constexpr static auto ColorSpace {boo::ColorSpace::XYZ_D50};
   };
 
   template <typename T>
   struct ColorSpaceMapping<XYZA<T, WhitePoint::D65>>
   {
-    constexpr static auto colorSpace {ColorSpace::XYZ_D65};
+    constexpr static auto ColorSpace {boo::ColorSpace::XYZ_D65};
   };
 
   template <typename ColorType>
-  constexpr ColorSpace ColorSpaceFor = ColorSpaceMapping<CanonicalColorType<ColorType>>::colorSpace;
+  constexpr ColorSpace ColorSpaceFor = ColorSpaceMapping<CanonicalColorType<ColorType>>::ColorSpace;
 
   template <typename T, typename Functor>
   KRYS_NODISCARD constexpr decltype(auto) CallWithColorType(ColorSpace colorSpace, Functor &&functor) noexcept

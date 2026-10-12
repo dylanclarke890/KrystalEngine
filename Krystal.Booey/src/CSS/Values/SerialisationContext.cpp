@@ -1,14 +1,13 @@
 ﻿#include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
-#include "Krystal.Booey/CSS/CSSOM/CSSImportRule.hpp"
-#include "Krystal.Booey/CSS/CSSOM/CSSNamespaceRule.hpp"
-#include "Krystal.Booey/CSS/CSSOM/CSSRuleList.hpp"
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
-#include "Krystal.Booey/CSS/MediaList.hpp"
-#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
 namespace krys::boo::css
 {
+  SerialisationContext::SerialisationContext() noexcept = default;
+
+  SerialisationContext::~SerialisationContext() noexcept = default;
+
   SerialisationContext::SerialisationContext(
     HashMap<CSSOMString, CSSOMString> &&replacementUrlStrings,
     HashMap<Ref<CSSStyleSheet>, CSSOMString> &&replacementUrlStringsForStyleSheet,

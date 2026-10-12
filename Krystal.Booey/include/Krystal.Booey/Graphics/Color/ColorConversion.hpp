@@ -5,8 +5,6 @@
 
 namespace krys::boo
 {
-  class DestinationColorSpace;
-
   enum class ColorSpace : uint8;
 
   template <typename Output, typename Input, typename = void>
@@ -34,9 +32,53 @@ namespace krys::boo
     return ColorConversion<CanonicalColorType<Output>, CanonicalColorType<Input>>::Convert(color);
   }
 
+  // MARK: Specialized converters
+
+  /// @brief Looks for a an analogous component in `Output` of `Input[IndexInInput]`.
+  /// For example, take the following:
+  ///
+  ///   auto result = AnalogousComponentIndex<LCHA<float>, HSLA<float>, 0>;
+  ///
+  /// This returns "2", because the input component specified (the hue in HSLA)
+  /// is analogous to component "2" in the output (the hue in LCHA).
+  ///
+  /// If there is no analogous component, `null` is returned.
+  template <typename Output, typename Input, unsigned IndexInInput>
+  KRYS_NODISCARD constexpr Maybe<unsigned> AnalogousComponentIndex() noexcept
+  {
+    if constexpr (IndexInInput == 3)
+    {
+      return 3; // Special case alpha, it always should carry forward.
+    }
+    else
+    {
+      constexpr auto inputCategory = Input::Model::ComponentInfo[IndexInInput].Category;
+      if constexpr (!inputCategory)
+      {
+        return null;
+      }
+      else if constexpr (*inputCategory == Output::Model::ComponentInfo[0].Category)
+      {
+        return 0;
+      }
+      else if constexpr (*inputCategory == Output::Model::ComponentInfo[1].Category)
+      {
+        return 1;
+      }
+      else if constexpr (*inputCategory == Output::Model::ComponentInfo[2].Category)
+      {
+        return 2;
+      }
+      else
+      {
+        return null;
+      }
+    }
+  }
+
   /// @brief Utility to update appropriate component in `output` if an analogous component
   /// in `input` is missing (which is encoded as NaN in color types).
-  template <typename Output, typename Input, size_t IndexInInput>
+  template <typename Output, typename Input, unsigned IndexInInput>
   constexpr void TryToCarryForwardComponentIfMissing(const ColorComponents<float, 4> &input,
                                                      ColorComponents<float, 4> &output) noexcept
   {
@@ -86,51 +128,6 @@ namespace krys::boo
     ConvertAndResolveColorComponents(ColorSpace inputColorSpace,
                                      ColorComponents<float, 4> inputColorComponents,
                                      ColorSpace outputColorSpace) noexcept;
-
-  KRYS_NODISCARD ColorComponents<float, 4>
-    ConvertAndResolveColorComponents(ColorSpace inputColorSpace,
-                                     ColorComponents<float, 4> inputColorComponents,
-                                     const DestinationColorSpace &outputColorSpace) noexcept;
-
-  /// Looks for a an analogous component in `Output` of `Input[IndexInInput]`.
-  /// For example, take the following:
-  /// auto result = AnalogousComponentIndex<LCHA<float>, HSLA<float>, 0>;
-  ///
-  /// This returns "2", because the input component specified (the hue in HSLA)
-  /// is analogous to component "2" in the output (the hue in LCHA).
-  /// If there is no analogous component, `null` is returned.
-  template <typename Output, typename Input, unsigned IndexInInput>
-  KRYS_NODISCARD constexpr Maybe<size_t> AnalogousComponentIndex() noexcept
-  {
-    if constexpr (IndexInInput == 3)
-    {
-      return 3; // Special case alpha, it always should carry forward.
-    }
-    else
-    {
-      constexpr auto inputCategory = Input::Model::componentInfo[IndexInInput].category;
-      if constexpr (!inputCategory)
-      {
-        return null;
-      }
-      else if constexpr (*inputCategory == Output::Model::componentInfo[0].category)
-      {
-        return 0;
-      }
-      else if constexpr (*inputCategory == Output::Model::componentInfo[1].category)
-      {
-        return 1;
-      }
-      else if constexpr (*inputCategory == Output::Model::componentInfo[2].category)
-      {
-        return 2;
-      }
-      else
-      {
-        return null;
-      }
-    }
-  }
 
   // MARK: White Point.
 
@@ -182,7 +179,7 @@ namespace krys::boo
   //         [ 0,             0,             β_dst / β_src ]
   //
   //  6. Finally, use the scale to compute the adaptation transform
-  //     (what is stored ChromaticAdaptation.matrix) as the concatenation
+  //     (what is stored ChromaticAdaptation.Matrix) as the concatenation
   //     of the toCone, scale and fromCone transforms.
   //
   //     let adaptation = fromCone * scale * toCone
@@ -193,7 +190,7 @@ namespace krys::boo
   template <>
   struct ChromaticAdaptation<WhitePoint::D65, WhitePoint::D50>
   {
-    constexpr static ColorMatrix<3, 3> matrix {
+    constexpr static ColorMatrix<3, 3> Matrix {
       1.0479297925449969,    0.022946870601609652, -0.05019226628920524,
       0.02962780877005599,   0.9904344267538799,   -0.017073799063418826,
       -0.009243040646204504, 0.015055191490298152, 0.7518742814281371};
@@ -202,7 +199,7 @@ namespace krys::boo
   template <>
   struct ChromaticAdaptation<WhitePoint::D50, WhitePoint::D65>
   {
-    constexpr static ColorMatrix<3, 3> matrix {
+    constexpr static ColorMatrix<3, 3> Matrix {
       0.955473421488075,    -0.02309845494876471,  0.06325924320057072,
       -0.0283697093338637,  1.0099953980813041,    0.021041441191917323,
       0.012314014864481998, -0.020507649298898964, 1.330365926242124};
@@ -307,7 +304,7 @@ namespace krys::boo
     auto [L1, a1, b1, alpha1] = ConvertColor<OKLab<float>>(color1).Resolved();
     auto [L2, a2, b2, alpha2] = ConvertColor<OKLab<float>>(color2).Resolved();
 
-    auto deltaL = (L1 / 100.0f) - (L2 / 100.0f);
+    auto deltaL = L1 - L2;
     auto deltaA = a1 - a2;
     auto deltaB = b1 - b2;
 
@@ -328,44 +325,35 @@ namespace krys::boo
 
   // Main conversion.
 
-  // ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
-  // ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐
-  //  Matrix Conversions    ┌───────────┐│┌───────────┐
-  // │                      │ XYZ (D50) │││ XYZ (D65) │ │
-  //                        └─────▲─────┘│└─────▲─────┘
-  // │                            │      │      │ │
-  // ┌─────────────────────────┬───────────┘      │
-  // └───────────┬───────────────────────────────┬───────────────────────────────┬───────────────────────────────┬─────────────────────────┐
-  // │        │                │                  │                  │                               │ │ │ │ │
-  // │                         │                  │                  │                               │ │ │ │
-  // │        │                │                  │                  │                               │ │ │ │ │
-  // │          ProPhotoRGB───────────────────┐   │   SRGB──────────────────────────┐
-  // DisplayP3─────────────────────┐ A98RGB────────────────────────┐ Rec2020───────────────────────┐ │ │ │ │
-  // ┌────────────────┐│   │   │           ┌────────────────┐│ │           ┌────────────────┐│ │
-  // ┌────────────────┐│ │           ┌────────────────┐│ │        │ │          │     ┌─────▶︎ LinearExtended ││
-  // │   │     ┌─────▶︎ LinearExtended ││ │     ┌─────▶︎ LinearExtended ││ │     ┌─────▶︎ LinearExtended ││ │
-  // ┌─────▶︎ LinearExtended ││          │ │        │ │     │     └────────▲───────┘│   │   │     │
-  // └────────▲───────┘│ │     │     └────────▲───────┘│ │     │     └────────▲───────┘│ │     │
-  // └────────▲───────┘│ │        │ │         ─│─ ─ ─│─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─│─ ─│─ ─│─ ─ ─│─ ─ ─ ─ ─ ─ ─ ┼ ─
-  // ─ ─ ─│─│─ ─ ─│─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─│─│─ ─ ─│─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─│─│─ ─ ─│─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─│─ │
-  // │          │┌────────┐          │        │   │   │┌────────┐          │        │ │┌────────┐          │
-  // │ │┌────────┐          │        │ │┌────────┐          │        │          │ │          ││ Linear │ │ │
-  // │   ││ Linear │          │        │ ││ Linear │          │        │ ││ Linear │          │        │ ││
-  // Linear │          │        │          │ │          │└────▲───┘          │        │   │   │└────▲───┘ │ │
-  // │└────▲───┘          │        │ │└────▲───┘          │        │ │└────▲───┘          │        │ │ │ │ │
-  // │        │   │   │     │              │        │ │     │              │        │ │     │              │
-  // │ │     │              │        │          │
-  // ┌───────────┐    │┌────────┐ ┌────────────────┐│   │   │┌────────┐ ┌────────────────┐│ │┌────────┐
-  // ┌────────────────┐│ │┌────────┐ ┌────────────────┐│ │┌────────┐ ┌────────────────┐│    ┌───────────┐ │
-  // Lab    │    ││ Gamma  │─│ GammaExtended  ││   │   ││ Gamma  │─│ GammaExtended  ││ ││ Gamma  │─│
-  // GammaExtended  ││ ││ Gamma  │─│ GammaExtended  ││ ││ Gamma  │─│ GammaExtended  ││    │   OKLab   │
-  // └─────▲─────┘    │└────────┘ └────────────────┘│   │   │└────▲───┘ └────────────────┘│ │└────────┘
-  // └────────────────┘│ │└────────┘ └────────────────┘│ │└────────┘ └────────────────┘│    └─────▲─────┘
-  // │          └─────────────────────────────┘   │   └─────┼───────────────────────┘
-  // └─────────────────────────────┘ └─────────────────────────────┘ └─────────────────────────────┘ │ │ │
-  // ┌──┴──────────┐ │ │                                            │      │             │ │
-  // ┌───────────┐                                      │┌───────────┐ ┌───────────┐ ┌───────────┐ │    LCH │
-  // ││    HSL    │ │    HWB    │ │   OKLCH   │ └───────────┘ │└───────────┘ └───────────┘ └───────────┘
+  // clang-format off
+  //                ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐
+  //                 Matrix Conversions    ┌───────────┐│┌───────────┐
+  //                │                      │ XYZ (D50) │││ XYZ (D65) │                                                                                                                      │
+  //                                       └─────▲─────┘│└─────▲─────┘
+  //                │                            │      │      │                                                                                                                            │
+  //       ┌─────────────────────────┬───────────┘      │      └───────────┬───────────────────────────────┬───────────────────────────────┬───────────────────────────────┬─────────────────────────┐
+  //       │        │                │                  │                  │                               │                               │                               │                │        │
+  //       │                         │                  │                  │                               │                               │                               │                         │
+  //       │        │                │                  │                  │                               │                               │                               │                │        │
+  //       │          ProPhotoRGB───────────────────┐   │   SRGB──────────────────────────┐ DisplayP3─────────────────────┐ A98RGB────────────────────────┐ Rec2020───────────────────────┐          │
+  //       │        │ │           ┌────────────────┐│   │   │           ┌────────────────┐│ │           ┌────────────────┐│ │           ┌────────────────┐│ │           ┌────────────────┐│ │        │
+  //       │          │     ┌─────▶︎ LinearExtended ││   │   │     ┌─────▶︎ LinearExtended ││ │     ┌─────▶︎ LinearExtended ││ │     ┌─────▶︎ LinearExtended ││ │     ┌─────▶︎ LinearExtended ││          │
+  //       │        │ │     │     └────────▲───────┘│   │   │     │     └────────▲───────┘│ │     │     └────────▲───────┘│ │     │     └────────▲───────┘│ │     │     └────────▲───────┘│ │        │
+  //       │         ─│─ ─ ─│─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─│─ ─│─ ─│─ ─ ─│─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─│─│─ ─ ─│─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─│─│─ ─ ─│─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─│─│─ ─ ─│─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─│─         │
+  //       │          │┌────────┐          │        │   │   │┌────────┐          │        │ │┌────────┐          │        │ │┌────────┐          │        │ │┌────────┐          │        │          │
+  //       │          ││ Linear │          │        │   │   ││ Linear │          │        │ ││ Linear │          │        │ ││ Linear │          │        │ ││ Linear │          │        │          │
+  //       │          │└────▲───┘          │        │   │   │└────▲───┘          │        │ │└────▲───┘          │        │ │└────▲───┘          │        │ │└────▲───┘          │        │          │
+  //       │          │     │              │        │   │   │     │              │        │ │     │              │        │ │     │              │        │ │     │              │        │          │
+  // ┌───────────┐    │┌────────┐ ┌────────────────┐│   │   │┌────────┐ ┌────────────────┐│ │┌────────┐ ┌────────────────┐│ │┌────────┐ ┌────────────────┐│ │┌────────┐ ┌────────────────┐│    ┌───────────┐
+  // │    Lab    │    ││ Gamma  │─│ GammaExtended  ││   │   ││ Gamma  │─│ GammaExtended  ││ ││ Gamma  │─│ GammaExtended  ││ ││ Gamma  │─│ GammaExtended  ││ ││ Gamma  │─│ GammaExtended  ││    │   OKLab   │
+  // └─────▲─────┘    │└────────┘ └────────────────┘│   │   │└────▲───┘ └────────────────┘│ │└────────┘ └────────────────┘│ │└────────┘ └────────────────┘│ │└────────┘ └────────────────┘│    └─────▲─────┘
+  //       │          └─────────────────────────────┘   │   └─────┼───────────────────────┘ └─────────────────────────────┘ └─────────────────────────────┘ └─────────────────────────────┘          │
+  //       │                                            │      ┌──┴──────────┐                                                                                                                       │
+  //       │                                            │      │             │                                                                                                                       │
+  // ┌───────────┐                                      │┌───────────┐ ┌───────────┐                                                                                                           ┌───────────┐
+  // │    LCH    │                                      ││    HSL    │ │    HWB    │                                                                                                           │   OKLCH   │
+  // └───────────┘                                      │└───────────┘ └───────────┘                                                                                                           └───────────┘
+  // clang-format on
 
   template <typename Output, typename Input, typename>
   struct ColorConversion
@@ -501,19 +489,21 @@ namespace krys::boo
     {
       static_assert(IsSameRGBTypeFamily<Output, Input>);
 
-      // RGB Family────────────────────┐
-      // │           ┌────────────────┐│
-      // │     ┌─────▶︎ LinearExtended ││
-      // │     │     └────────▲───────┘│
-      // │     │              │        │
-      // │┌────────┐          │        │
-      // ││ Linear │          │        │
-      // │└────▲───┘          │        │
-      // │     │              │        │
-      // │┌────────┐ ┌────────────────┐│
-      // ││ Gamma  │─│ GammaExtended  ││
-      // │└────────┘ └────────────────┘│
-      // └─────────────────────────────┘
+      // clang-format off
+      //  RGB Family────────────────────┐
+      //  │           ┌────────────────┐│
+      //  │     ┌─────▶︎ LinearExtended ││
+      //  │     │     └────────▲───────┘│
+      //  │     │              │        │
+      //  │┌────────┐          │        │
+      //  ││ Linear │          │        │
+      //  │└────▲───┘          │        │
+      //  │     │              │        │
+      //  │┌────────┐ ┌────────────────┐│
+      //  ││ Gamma  │─│ GammaExtended  ││
+      //  │└────────┘ └────────────────┘│
+      //  └─────────────────────────────┘
+      // clang-format on
 
       // This handles conversions between any two of these within the same family, so SRGBLinear -> SRGB, but
       // not SRGBLinear -> A98RGB.
@@ -558,27 +548,22 @@ namespace krys::boo
       static_assert((IsRGBLinearEncodedType<Input> && IsRGBExtendedType<Input>) || IsXYZA<Input>);
       static_assert((IsRGBLinearEncodedType<Output> && IsRGBExtendedType<Output>) || IsXYZA<Output>);
 
-      // ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
-      // ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐
-      //  Matrix Conversions    ┌───────────┐│┌───────────┐
-      // │                      │ XYZ (D50) │││ XYZ (D65) │ │
-      //                        └─────▲─────┘│└─────▲─────┘
-      // │                            │      │      │ │
-      //                  ┌───────────┘      │
-      //                  └───────────┬───────────────────────────────┬───────────────────────────────┬───────────────────────────────┐
-      // │                │                  │                  │                               │ │ │ │
-      //                  │                  │                  │                               │ │ │
-      // │                │                  │                  │                               │ │ │ │
-      //   ProPhotoRGB───────────────────┐   │   SRGB──────────────────────────┐
-      //   DisplayP3─────────────────────┐ A98RGB────────────────────────┐ Rec2020───────────────────────┐
-      // │ │           ┌────────────────┐│   │   │           ┌────────────────┐│ │ ┌────────────────┐│ │
-      // ┌────────────────┐│ │           ┌────────────────┐│ │
-      //   │     ┌─────▶︎ LinearExtended ││   │   │     ┌─────▶︎ LinearExtended ││ │     ┌─────▶︎ LinearExtended
-      //   ││ │     ┌─────▶︎ LinearExtended ││ │     ┌─────▶︎ LinearExtended ││
-      // │ │     │     └────────▲───────┘│   │   │     │     └────────▲───────┘│ │     │ └────────▲───────┘│ │
-      // │     └────────▲───────┘│ │     │     └────────▲───────┘│ │
-      //  ─│─ ─ ─│─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─│─ ─│─ ─│─ ─ ─│─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─│─│─ ─ ─│─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─
-      //  ─│─│─ ─ ─│─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─│─│─ ─ ─│─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─│─
+      // clang-format off
+      //  ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐
+      //   Matrix Conversions    ┌───────────┐│┌───────────┐
+      //  │                      │ XYZ (D50) │││ XYZ (D65) │                                                                                                                      │
+      //                         └─────▲─────┘│└─────▲─────┘
+      //  │                            │      │      │                                                                                                                            │
+      //                   ┌───────────┘      │      └───────────┬───────────────────────────────┬───────────────────────────────┬───────────────────────────────┐
+      //  │                │                  │                  │                               │                               │                               │                │
+      //                   │                  │                  │                               │                               │                               │
+      //  │                │                  │                  │                               │                               │                               │                │
+      //    ProPhotoRGB───────────────────┐   │   SRGB──────────────────────────┐ DisplayP3─────────────────────┐ A98RGB────────────────────────┐ Rec2020───────────────────────┐
+      //  │ │           ┌────────────────┐│   │   │           ┌────────────────┐│ │           ┌────────────────┐│ │           ┌────────────────┐│ │           ┌────────────────┐│ │
+      //    │     ┌─────▶︎ LinearExtended ││   │   │     ┌─────▶︎ LinearExtended ││ │     ┌─────▶︎ LinearExtended ││ │     ┌─────▶︎ LinearExtended ││ │     ┌─────▶︎ LinearExtended ││
+      //  │ │     │     └────────▲───────┘│   │   │     │     └────────▲───────┘│ │     │     └────────▲───────┘│ │     │     └────────▲───────┘│ │     │     └────────▲───────┘│ │
+      //   ─│─ ─ ─│─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─│─ ─│─ ─│─ ─ ─│─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─│─│─ ─ ─│─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─│─│─ ─ ─│─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─│─│─ ─ ─│─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─│─
+      // clang-format on
 
       // This handles conversions between extended linear color types that can be converted using pre-defined
       // 3x3 matrices.
@@ -594,42 +579,42 @@ namespace krys::boo
           ApplyMatricesToColorComponents(AsColorComponents(color.Resolved()), matrices...));
       };
 
-      if constexpr (Input::whitePoint == Output::whitePoint)
+      if constexpr (Input::WhitePoint == Output::WhitePoint)
       {
         if constexpr (IsXYZA<Input>)
         {
-          return ApplyMatrices(color, Output::xyzToLinear);
+          return ApplyMatrices(color, Output::XyzToLinear);
         }
         else if constexpr (IsXYZA<Output>)
         {
-          return ApplyMatrices(color, Input::linearToXYZ);
+          return ApplyMatrices(color, Input::LinearToXYZ);
         }
         else
         {
-          return ApplyMatrices(color, Input::linearToXYZ, Output::xyzToLinear);
+          return ApplyMatrices(color, Input::LinearToXYZ, Output::XyzToLinear);
         }
       }
       else
       {
         if constexpr (IsXYZA<Input> && IsXYZA<Output>)
         {
-          return ApplyMatrices(color, ChromaticAdaptation<Input::whitePoint, Output::whitePoint>::matrix);
+          return ApplyMatrices(color, ChromaticAdaptation<Input::WhitePoint, Output::WhitePoint>::Matrix);
         }
         else if constexpr (IsXYZA<Input>)
         {
-          return ApplyMatrices(color, ChromaticAdaptation<Input::whitePoint, Output::whitePoint>::matrix,
-                               Output::xyzToLinear);
+          return ApplyMatrices(color, ChromaticAdaptation<Input::WhitePoint, Output::WhitePoint>::Matrix,
+                               Output::XyzToLinear);
         }
         else if constexpr (IsXYZA<Output>)
         {
-          return ApplyMatrices(color, Input::linearToXYZ,
-                               ChromaticAdaptation<Input::whitePoint, Output::whitePoint>::matrix);
+          return ApplyMatrices(color, Input::LinearToXYZ,
+                               ChromaticAdaptation<Input::WhitePoint, Output::WhitePoint>::Matrix);
         }
         else
         {
-          return ApplyMatrices(color, Input::linearToXYZ,
-                               ChromaticAdaptation<Input::whitePoint, Output::whitePoint>::matrix,
-                               Output::xyzToLinear);
+          return ApplyMatrices(color, Input::LinearToXYZ,
+                               ChromaticAdaptation<Input::WhitePoint, Output::WhitePoint>::Matrix,
+                               Output::XyzToLinear);
         }
       }
     }

@@ -73,6 +73,9 @@ target_sources(Krystal.Booey.Tests
 		include/Krystal.Booey.Tests/DOM/TestElement.hpp
 		include/Krystal.Booey.Tests/TestParserUtils.hpp
 	PRIVATE
+		# Core
+		tests/Core/NumberFormatting.cpp
+
 		# CSS
 		# tests/CSS/Parser/Parser.cpp
 		tests/CSS/Parser/KeywordLookup.cpp
@@ -83,6 +86,14 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Values/PrimitiveValue.cpp
 		tests/CSS/Values/Units.cpp
 		# tests/CSS/Selectors/SelectorParser.cpp
+
+		# Graphics
+		tests/Graphics/Color/Color.cpp
+		tests/Graphics/Color/ColorBlending.cpp
+		tests/Graphics/Color/ColorConversion.cpp
+		tests/Graphics/Color/ColorInterpolation.cpp
+		tests/Graphics/Color/ColorSerialisation.cpp
+		tests/Graphics/Color/ColorUtilities.cpp
 
 		# DOM
 		tests/DOM/Algorithms/EventDispatcher.cpp
