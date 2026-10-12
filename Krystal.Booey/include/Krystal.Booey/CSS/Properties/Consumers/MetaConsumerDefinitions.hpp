@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Calc/CalcAllowedSymbols.hpp"
+#include "Krystal.Booey/CSS/Calc/AllowedSymbols.hpp"
 #include "Krystal.Booey/CSS/Calc/Value.hpp"
 #include "Krystal.Booey/CSS/Parser/Token.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
@@ -8,9 +8,10 @@
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/PrimitiveNumeric.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include <cassert>
+#include <algorithm>
 #include <cmath>
 
 namespace krys::boo::css
@@ -168,11 +169,10 @@ namespace krys::boo::css
     constexpr static TokenType TokenType = TokenType::Dimension;
 
     KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(TokenRange &tokens,
-                                                                 PropertyParserState &state,
-                                                                 CalcAllowedSymbols,
+                                                                 PropertyParserState &state, AllowedSymbols,
                                                                  PropertyParserOptions options) noexcept
     {
-      assert(tokens.Peek().Type() == TokenType::Dimension);
+      krys_debug_assert(tokens.Peek().Type() == TokenType::Dimension);
 
       auto &token = tokens.Peek();
 
@@ -208,10 +208,10 @@ namespace krys::boo::css
     constexpr static TokenType TokenType = TokenType::Percentage;
 
     KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(TokenRange &tokens, PropertyParserState &,
-                                                                 CalcAllowedSymbols,
+                                                                 AllowedSymbols,
                                                                  PropertyParserOptions options) noexcept
     {
-      assert(tokens.Peek().Type() == TokenType::Percentage);
+      krys_debug_assert(tokens.Peek().Type() == TokenType::Percentage);
 
       auto rawValue = typename Primitive::Raw {Unit, tokens.Peek().NumericValue()};
 
@@ -239,10 +239,10 @@ namespace krys::boo::css
     constexpr static TokenType TokenType = TokenType::Number;
 
     KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(TokenRange &tokens, PropertyParserState &,
-                                                                 CalcAllowedSymbols,
+                                                                 AllowedSymbols,
                                                                  PropertyParserOptions options) noexcept
     {
-      assert(tokens.Peek().Type() == TokenType::Number);
+      krys_debug_assert(tokens.Peek().Type() == TokenType::Number);
 
       auto rawValue = typename Primitive::Raw {NumberUnit::Number, tokens.Peek().NumericValue()};
 
@@ -270,11 +270,10 @@ namespace krys::boo::css
     constexpr static TokenType TokenType = TokenType::Number;
 
     KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(TokenRange &tokens,
-                                                                 PropertyParserState &state,
-                                                                 CalcAllowedSymbols,
+                                                                 PropertyParserState &state, AllowedSymbols,
                                                                  PropertyParserOptions options) noexcept
     {
-      assert(tokens.Peek().Type() == TokenType::Number);
+      krys_debug_assert(tokens.Peek().Type() == TokenType::Number);
 
       auto numericValue = tokens.Peek().NumericValue();
       if (!Validator::ShouldAcceptUnitlessValue(numericValue, state, options))
@@ -309,18 +308,17 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static Maybe<typename Primitive::Calc> Consume(TokenRange &tokens,
                                                                   PropertyParserState &state,
-                                                                  CalcAllowedSymbols symbolsAllowed,
+                                                                  AllowedSymbols symbolsAllowed,
                                                                   PropertyParserOptions options) noexcept
     {
-      assert(tokens.Peek().Type() == TokenType::Function);
+      krys_debug_assert(tokens.Peek().Type() == TokenType::Function);
 
       auto rangeCopy = tokens;
       if (auto value = calc::Value::Parse(rangeCopy, state, Primitive::Category, Primitive::Range,
-                                           krys::move(symbolsAllowed), options))
+                                          krys::move(symbolsAllowed), options))
       {
         tokens = rangeCopy;
-        // TODO: fix this return type
-        return null;
+        return typename Primitive::Calc {*value};
       }
 
       return null;
@@ -332,12 +330,12 @@ namespace krys::boo::css
   {
     constexpr static TokenType TokenType = TokenType::Ident;
 
-    KRYS_NODISCARD static Maybe<T> Consume(TokenRange &tokens, PropertyParserState &, CalcAllowedSymbols,
+    KRYS_NODISCARD static Maybe<T> Consume(TokenRange &tokens, PropertyParserState &, AllowedSymbols,
                                            PropertyParserOptions) noexcept
     {
-      assert(tokens.Peek().Type() == TokenType::Ident);
+      krys_debug_assert(tokens.Peek().Type() == TokenType::Ident);
 
-      if (tokens.Peek().ValueId() == T::value)
+      if (tokens.Peek().ValueId() == T::Value)
       {
         tokens.Discard();
         tokens.DiscardWhitespace();

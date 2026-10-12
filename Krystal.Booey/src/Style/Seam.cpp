@@ -176,6 +176,11 @@ namespace krys::boo
     krys_unreachable();
   }
 
+  float AdjustFloatForAbsoluteZoom(float, const RenderStyle &) noexcept
+  {
+    krys_unreachable();
+  }
+
   const RenderView *RenderViewOf(const dom::Document &) noexcept
   {
     krys_unreachable();
@@ -249,7 +254,8 @@ namespace krys::boo::style
     krys_unreachable();
   }
 
-  double BuilderState::LookupCSSRandomBaseValue(const css::calc::RandomCachingKey &, Maybe<css::keywords::ElementShared>) const noexcept
+  double BuilderState::LookupCSSRandomBaseValue(const css::calc::RandomCachingKey &,
+                                                Maybe<css::keywords::ElementShared>) const noexcept
   {
     krys_unreachable();
   }
@@ -264,17 +270,21 @@ namespace krys::boo::style
     krys_unreachable();
   }
 
-  Maybe<double> AnchorPositionEvaluator::Evaluate(BuilderState &, Maybe<ScopedName>, AnchorPositionEvaluator::Side) noexcept
+  Maybe<double> AnchorPositionEvaluator::Evaluate(BuilderState &, Maybe<ScopedName>,
+                                                  AnchorPositionEvaluator::Side) noexcept
   {
     krys_unreachable();
   }
 
-  Maybe<double> AnchorPositionEvaluator::EvaluateSize(BuilderState &, Maybe<ScopedName>, Maybe<AnchorSizeDimension>) noexcept
+  Maybe<double> AnchorPositionEvaluator::EvaluateSize(BuilderState &, Maybe<ScopedName>,
+                                                      Maybe<AnchorSizeDimension>) noexcept
   {
     krys_unreachable();
   }
 
-  RefPtr<const dom::Element> ContainerQueryEvaluator::SelectContainer(css::cq::Axis, const css::CSSOMString &, const dom::Element &, ContainerQueryEvaluator::SelectionMode) noexcept
+  RefPtr<const dom::Element>
+    ContainerQueryEvaluator::SelectContainer(css::cq::Axis, const css::CSSOMString &, const dom::Element &,
+                                             ContainerQueryEvaluator::SelectionMode) noexcept
   {
     krys_unreachable();
   }

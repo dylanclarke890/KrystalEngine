@@ -8,20 +8,22 @@ namespace krys::boo::css
   ToLengthConversionData::ToLengthConversionData() noexcept = default;
   ToLengthConversionData::ToLengthConversionData(const ToLengthConversionData &) noexcept = default;
   ToLengthConversionData::ToLengthConversionData(ToLengthConversionData &&) noexcept = default;
+  ToLengthConversionData &
+    ToLengthConversionData::operator=(const ToLengthConversionData &) noexcept = default;
+  ToLengthConversionData &ToLengthConversionData::operator=(ToLengthConversionData &&) noexcept = default;
 
   ToLengthConversionData::ToLengthConversionData(const RenderStyle &style,
                                                  style::BuilderState &builderState) noexcept
-      : _style(&style), _rootStyle(builderState.RootElementStyle()), _parentStyle(&builderState.ParentStyle()),
-        _renderView(RenderViewOf(builderState.GetDocument())),
+      : _style(&style), _rootStyle(builderState.RootElementStyle()),
+        _parentStyle(&builderState.ParentStyle()), _renderView(RenderViewOf(builderState.GetDocument())),
         _elementForContainerUnitResolution(ShareRefPtr(builderState.GetElement())),
         _styleBuilderState(ShareCheckedPtr(&builderState))
   {
   }
 
-  ToLengthConversionData::ToLengthConversionData(const RenderStyle &style, const RenderStyle *rootStyle,
-                                                 const RenderStyle *parentStyle,
-                                                 const boo::RenderView *renderView,
-                                                 const dom::Element *elementForContainerUnitResolution) noexcept
+  ToLengthConversionData::ToLengthConversionData(
+    const RenderStyle &style, const RenderStyle *rootStyle, const RenderStyle *parentStyle,
+    const boo::RenderView *renderView, const dom::Element *elementForContainerUnitResolution) noexcept
       : _style(&style), _rootStyle(rootStyle), _parentStyle(parentStyle), _renderView(renderView),
         _elementForContainerUnitResolution(ShareRefPtr(elementForContainerUnitResolution)), _zoom(1.f)
   {
@@ -122,6 +124,11 @@ namespace krys::boo::css
     {
       _styleBuilderState->SetUsesContainerUnits();
     }
+  }
+
+  style::BuilderState *ToLengthConversionData::StyleBuilderState() const noexcept
+  {
+    return _styleBuilderState.get();
   }
 
   CheckedPtr<style::BuilderState> ToLengthConversionData::ProtectedStyleBuilderState() const noexcept

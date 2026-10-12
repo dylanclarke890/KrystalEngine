@@ -157,10 +157,14 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/AnchorSizeDimension.hpp
 
   # Slice 3: Colour, layer 3b (calc evaluation and Style calc, against the Style seam)
+  include/Krystal.Booey/CSS/Calc/TreeEvaluation.hpp
+  include/Krystal.Booey/CSS/Calc/TreeMappings.hpp
+  include/Krystal.Booey/CSS/Calc/TreeSimplification.hpp
   include/Krystal.Booey/CSS/Queries/ContainerQueryAxis.hpp
   include/Krystal.Booey/CSS/ToLengthConversionData.hpp
   include/Krystal.Booey/Graphics/FloatSize.hpp
   include/Krystal.Booey/Style/Calc/Tree.hpp
+  include/Krystal.Booey/Style/Calc/TreeConversion.hpp
   include/Krystal.Booey/Style/Calc/TreeCopy.hpp
   include/Krystal.Booey/Style/Calc/TreeEvaluation.hpp
   include/Krystal.Booey/Style/Calc/TreeTraversal.hpp
@@ -170,6 +174,19 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Seam.hpp
   include/Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp
   include/Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp
+
+  # Slice 3: Colour, layer 3c (calc parsing and the property-parser pieces it needs)
+  include/Krystal.Booey/CSS/Calc/TreeParser.hpp
+  include/Krystal.Booey/CSS/Parser/TokenRangeGuard.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Ident.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/MetaConsumer.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/MetaConsumerDefinitions.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/NumberDefinitions.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp
+  include/Krystal.Booey/CSS/Properties/PropertyParserOptions.hpp
+  include/Krystal.Booey/CSS/Properties/PropertyParserState.hpp
+  include/Krystal.Booey/CSS/Properties/Types/IsImportant.hpp
+  include/Krystal.Booey/CSS/Rules/RuleType.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -192,8 +209,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/SerialisationContext.cpp
   src/CSS/Values/Types.cpp
 
-  # Slice 3: Colour, layer 3a (calc, Style-free half; ValueEvaluation.cpp and UnevaluatedCalcEvaluation.cpp
-  # need Style and are part of 3b)
+  # Slice 3: Colour, layer 3a (calc, Style-free half)
   src/CSS/Calc/CalcType.cpp
   src/CSS/Calc/Tree.cpp
   src/CSS/Calc/TreeComputedStyleDependencies.cpp
@@ -205,13 +221,23 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/Primitives/UnevaluatedCalc.cpp
 
   # Slice 3: Colour, layer 3b (calc evaluation and Style calc, against the Style seam)
+  src/CSS/Calc/TreeEvaluation.cpp
+  src/CSS/Calc/TreeSimplification.cpp
+  src/CSS/Calc/ValueEvaluation.cpp
   src/CSS/ToLengthConversionData.cpp
+  src/CSS/Values/Primitives/UnevaluatedCalcEvaluation.cpp
   src/Style/Calc/Tree.cpp
+  src/Style/Calc/TreeConversion.cpp
   src/Style/Calc/TreeCopy.cpp
   src/Style/Calc/TreeEvaluation.cpp
   src/Style/Calc/Value.cpp
   src/Style/Seam.cpp
   src/Style/Values/Primitives/LengthResolution.cpp
+
+  # Slice 3: Colour, layer 3c (calc parsing and the property-parser pieces it needs)
+  src/CSS/Calc/TreeParser.cpp
+  src/CSS/Calc/ValueParsing.cpp
+  src/CSS/Properties/Consumers/Primitives.cpp
 )
 
 target_precompile_headers(Krystal.Booey

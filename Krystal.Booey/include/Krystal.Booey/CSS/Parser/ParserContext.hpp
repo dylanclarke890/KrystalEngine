@@ -7,7 +7,7 @@ namespace krys::boo::css
 {
   struct ParserContext
   {
-    ParserMode Mode;
+    ParserMode Mode {ParserMode::HTMLStandard};
     PropertySettings PropertySettings;
     bool IsHTMLDocument : 1 {false};
     bool useSystemAppearance : 1 {false};

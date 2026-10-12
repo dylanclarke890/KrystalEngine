@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Calc/CalcAllowedSymbols.hpp"
+#include "Krystal.Booey/CSS/Calc/AllowedSymbols.hpp"
 #include "Krystal.Booey/CSS/Parser/Token.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumerDefinitions.hpp"
@@ -11,8 +11,6 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
-#include <cassert>
-#include <cmath>
 
 namespace krys::boo::css
 {
@@ -101,7 +99,7 @@ namespace krys::boo::css
   {
     template <TokenType, typename ResultType>
     KRYS_NODISCARD static std::nullopt_t Consume(TokenRange &tokens, PropertyParserState &state,
-                                                 CalcAllowedSymbols allowedSymbols,
+                                                 AllowedSymbols allowedSymbols,
                                                  PropertyParserOptions options) noexcept
     {
       (void)tokens;
@@ -113,8 +111,8 @@ namespace krys::boo::css
 
     template <TokenType, typename ResultType, typename F>
     KRYS_NODISCARD static std::nullopt_t Consume(TokenRange &tokens, PropertyParserState &state,
-                                                 CalcAllowedSymbols allowedSymbols,
-                                                 PropertyParserOptions options, F &&func) noexcept
+                                                 AllowedSymbols allowedSymbols, PropertyParserOptions options,
+                                                 F &&func) noexcept
     {
       (void)tokens;
       (void)state;
@@ -133,7 +131,7 @@ namespace krys::boo::css
   {
     template <TokenType TokenType, typename ResultType>
     KRYS_NODISCARD static Maybe<ResultType> Consume(TokenRange &tokens, PropertyParserState &state,
-                                                    CalcAllowedSymbols symbolsAllowed,
+                                                    AllowedSymbols symbolsAllowed,
                                                     PropertyParserOptions options) noexcept
     {
       using Consumer = MetaConsumerDispatcher<TokenType, ConsumerDefinition<T>>;
@@ -150,7 +148,7 @@ namespace krys::boo::css
 
     template <TokenType TokenType, typename ResultType, typename F>
     KRYS_NODISCARD static Maybe<ResultType> Consume(TokenRange &tokens, PropertyParserState &state,
-                                                    CalcAllowedSymbols symbolsAllowed,
+                                                    AllowedSymbols symbolsAllowed,
                                                     PropertyParserOptions options, F &&func) noexcept
     {
       using Consumer = MetaConsumerDispatcher<TokenType, ConsumerDefinition<T>>;
@@ -205,8 +203,8 @@ namespace krys::boo::css
 
     template <typename... F>
     KRYS_NODISCARD static decltype(auto) Consume(TokenRange &tokens, PropertyParserState &state,
-                                                 CalcAllowedSymbols symbolsAllowed,
-                                                 PropertyParserOptions options, F &&...f) noexcept
+                                                 AllowedSymbols symbolsAllowed, PropertyParserOptions options,
+                                                 F &&...f) noexcept
     {
       auto visitor = CreateVisitor(std::forward<F>(f)...);
       using ResultType = decltype(visitor(std::declval<T>()));
@@ -249,12 +247,12 @@ namespace krys::boo::css
     // continuation functor parameters.
     template <typename... F>
     KRYS_NODISCARD static decltype(auto) Consume(TokenRange &tokens, PropertyParserState &state,
-                                                 CalcAllowedSymbols symbolsAllowed, F &&...f) noexcept
+                                                 AllowedSymbols symbolsAllowed, F &&...f) noexcept
     {
       return Consume(tokens, state, krys::move(symbolsAllowed), {}, std::forward<F>(f)...);
     }
 
-    // Overloaded with the `CalcAllowedSymbols` parameter removed so it can be defaulted when using the
+    // Overloaded with the `AllowedSymbols` parameter removed so it can be defaulted when using the
     // continuation functor parameters.
     template <typename... F>
     KRYS_NODISCARD static decltype(auto) Consume(TokenRange &tokens, PropertyParserState &state,
@@ -263,7 +261,7 @@ namespace krys::boo::css
       return Consume(tokens, state, {}, options, std::forward<F>(f)...);
     }
 
-    // Overloaded with the `PropertyParserOptions` and `CalcAllowedSymbols` parameters removed so they
+    // Overloaded with the `PropertyParserOptions` and `AllowedSymbols` parameters removed so they
     // can be defaulted when using the continuation functor parameters.
     template <typename... F>
     KRYS_NODISCARD static decltype(auto) Consume(TokenRange &tokens, PropertyParserState &state,
@@ -275,7 +273,7 @@ namespace krys::boo::css
     // Overloaded with no continuation functor parameters allowing a for simplified interface when returning a
     // single value / or Variant is acceptable.
     KRYS_NODISCARD static decltype(auto) Consume(TokenRange &tokens, PropertyParserState &state,
-                                                 CalcAllowedSymbols symbolsAllowed = {},
+                                                 AllowedSymbols symbolsAllowed = {},
                                                  PropertyParserOptions options = {}) noexcept
     {
       using ResultType = typename MetaConsumeResult<T, Ts...>::type;

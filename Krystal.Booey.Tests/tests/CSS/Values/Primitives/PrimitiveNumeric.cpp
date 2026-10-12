@@ -202,8 +202,36 @@ namespace krys::boo::css::tests
     using Component = Variant<Number<>, Symbol>;
     auto replaced = ReplaceSymbol(Component {Symbol {SymbolRaw {ValueId::R}}}, symbols);
     CHECK(replaced == Number<> {128.0});
+  }
 
-    // FIXME: test EvaluateCalcIfNoConversionDataRequired once calc evaluation is built (layer 3b).
+  TEST_CASE("PrimitiveNumeric(calc evaluation)", "[CSS][Primitives][PrimitiveNumeric]")
+  {
+    // calc(1in + 4px) doesn't need conversion data, so it evaluates to a raw value in the canonical unit.
+    auto absolute = Length<>::Calc {calc::Value::Create(
+      Category::Length, All,
+      calc::Tree {.Root = calc::CreateChild(
+                    calc::Add(calc::CreateNumeric(1.0, UnitType::in), calc::CreateNumeric(4.0, UnitType::px)),
+                    calc::Type::CreateLength()),
+                  .Type = calc::Type::CreateLength(),
+                  .Stage = calc::Stage::Specified})};
+    CHECK(absolute.Evaluate(Category::Length, NoConversionDataRequiredTag {}) == 100.0);
+    CHECK(EvaluateCalc(absolute, NoConversionDataRequiredTag {}, {}) == LengthRaw<> {LengthUnit::Px, 100.0});
+
+    auto evaluated = EvaluateCalcIfNoConversionDataRequired(Length<> {absolute}, {});
+    CHECK(evaluated == Length<> {LengthRaw<> {LengthUnit::Px, 100.0}});
+
+    // calc(5em) needs conversion data, so it stays a calc.
+    auto em = Length<> {Length<>::Calc {CreateEmCalc()}};
+    CHECK(EvaluateCalcIfNoConversionDataRequired(em, {}).IsCalc());
+
+    // Symbols are resolved from the table.
+    SymbolTable symbols {{ValueId::R, UnitType::Number, 128.0}};
+    auto symbol = Number<>::Calc {calc::Value::Create(
+      Category::Number, All,
+      calc::Tree {.Root = calc::CreateChild(calc::Symbol {.Id = ValueId::R, .Unit = UnitType::Number}),
+                  .Type = calc::Type::CreateNumber(),
+                  .Stage = calc::Stage::Specified})};
+    CHECK(EvaluateCalcIfNoConversionDataRequired(Number<> {symbol}, symbols) == Number<> {128.0});
   }
 
   TEST_CASE("PrimitiveNumericOrKeyword", "[CSS][Primitives][PrimitiveNumeric]")

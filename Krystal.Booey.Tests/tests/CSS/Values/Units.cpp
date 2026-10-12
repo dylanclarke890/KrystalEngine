@@ -1,9 +1,35 @@
 ﻿#include "Krystal.Booey/CSS/Values/Units.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey/CSS/Values/UnitType.hpp"
 
 namespace krys::boo::css::tests
 {
+  TEST_CASE("ParseUnitType", "[CSS][Units]")
+  {
+    CHECK(ParseUnitType(u8"px") == UnitType::px);
+    CHECK(ParseUnitType(u8"PX") == UnitType::px);
+    CHECK(ParseUnitType(u8"Em") == UnitType::em);
+    CHECK(ParseUnitType(u8"q") == UnitType::Q);
+    CHECK(ParseUnitType(u8"Q") == UnitType::Q);
+    CHECK(ParseUnitType(u8"s") == UnitType::s);
+    CHECK(ParseUnitType(u8"x") == UnitType::x);
+    CHECK(ParseUnitType(u8"kHz") == UnitType::khz);
+    CHECK(ParseUnitType(u8"dvmax") == UnitType::dvmax);
+    CHECK(ParseUnitType(u8"cqmin") == UnitType::cqmin);
+    CHECK(ParseUnitType(u8"dppx") == UnitType::dppx);
+    CHECK(ParseUnitType(u8"turn") == UnitType::turn);
+    CHECK(ParseUnitType(u8"__qem") == UnitType::QuirkyEm);
+
+    CHECK(ParseUnitType(u8"") == UnitType::Unknown);
+    CHECK(ParseUnitType(u8"foo") == UnitType::Unknown);
+    CHECK(ParseUnitType(u8"pxx") == UnitType::Unknown);
+    CHECK(ParseUnitType(u8"%") == UnitType::Unknown);
+    CHECK(ParseUnitType(u8"number") == UnitType::Unknown);
+
+    static_assert(ParseUnitType(u8"rem") == UnitType::rem);
+  }
+
   TEST_CASE("UnitCategoryForType", "[CSS][Units]")
   {
     CHECK(UnitCategoryForType(UnitType::Number) == UnitCategory::Number);

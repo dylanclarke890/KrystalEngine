@@ -1,8 +1,9 @@
 ﻿#include "Krystal.Booey/CSS/Calc/SymbolTable.hpp"
 #include "Krystal.Booey/CSS/Calc/Value.hpp"
+#include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/NoConversionDataRequiredTag.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/UnevaluatedCalc.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Seam.hpp"
 
 namespace krys::boo::css
 {
@@ -14,13 +15,13 @@ namespace krys::boo::css
 
   double UnevaluatedCalcBase::Evaluate(Category category, const style::BuilderState &state) const noexcept
   {
-    return Evaluate(category, state.CSSToLengthConversionData(), {});
+    return Evaluate(category, state.CssToLengthConversionData(), {});
   }
 
   double UnevaluatedCalcBase::Evaluate(Category category, const style::BuilderState &state,
                                        const SymbolTable &symbolTable) const noexcept
   {
-    return Evaluate(category, state.CSSToLengthConversionData(), symbolTable);
+    return Evaluate(category, state.CssToLengthConversionData(), symbolTable);
   }
 
   double UnevaluatedCalcBase::Evaluate(Category category,

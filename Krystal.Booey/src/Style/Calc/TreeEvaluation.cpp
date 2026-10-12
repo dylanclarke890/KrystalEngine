@@ -6,8 +6,8 @@
 
 namespace krys::boo::style::calc
 {
-  static auto Evaluate(const css::keywords::None &, double percentResolutionLength, const ZoomFactor &) noexcept
-    -> css::keywords::None;
+  static auto Evaluate(const css::keywords::None &, double percentResolutionLength,
+                       const ZoomFactor &) noexcept -> css::keywords::None;
   static auto Evaluate(const ChildOrNone &, double percentResolutionLength, const ZoomFactor &) noexcept
     -> Variant<double, css::keywords::None>;
   static auto Evaluate(const Maybe<Child> &, double percentResolutionLength, const ZoomFactor &) noexcept
@@ -52,17 +52,15 @@ namespace krys::boo::style::calc
   Variant<double, css::keywords::None> Evaluate(const ChildOrNone &root, double percentResolutionLength,
                                                 const ZoomFactor &usedZoom) noexcept
   {
-    return krys::SwitchOn(root,
-                          [&](const auto &root) {
-                            return Variant<double, css::keywords::None> {
-                              Evaluate(root, percentResolutionLength, usedZoom)};
-                          });
+    return krys::SwitchOn(
+      root, [&](const auto &root)
+      { return Variant<double, css::keywords::None> {Evaluate(root, percentResolutionLength, usedZoom)}; });
   }
 
   double Evaluate(const Child &root, double percentResolutionLength, const ZoomFactor &usedZoom) noexcept
   {
-    return krys::SwitchOn(root,
-                          [&](const auto &root) { return Evaluate(root, percentResolutionLength, usedZoom); });
+    return krys::SwitchOn(root, [&](const auto &root)
+                          { return Evaluate(root, percentResolutionLength, usedZoom); });
   }
 
   Maybe<double> Evaluate(const Maybe<Child> &root, double percentResolutionLength,
@@ -146,9 +144,9 @@ namespace krys::boo::style::calc
   double Evaluate(const IndirectNode<Op> &root, double percentResolutionLength,
                   const ZoomFactor &usedZoom) noexcept
   {
-    return krys::apply([&](const auto &...x)
-                       { return ExecuteMathOperation<Op>(Evaluate(x, percentResolutionLength, usedZoom)...); },
-                       *root);
+    return krys::apply(
+      [&](const auto &...x)
+      { return ExecuteMathOperation<Op>(Evaluate(x, percentResolutionLength, usedZoom)...); }, *root);
   }
 
   double Evaluate(const Tree &tree, double percentResolutionLength, const ZoomFactor &zoomFactor) noexcept

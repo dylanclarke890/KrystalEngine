@@ -1,10 +1,10 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/CSS/Queries/ContainerQueryAxis.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
-#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/Graphics/FloatSize.hpp"
 #include "Krystal.Booey/Style/AnchorSizeDimension.hpp"
 #include "Krystal.Booey/Style/ScopedName.hpp"
@@ -147,6 +147,8 @@ namespace krys::boo
     KRYS_NODISCARD float ContentBoxWidth() const noexcept;
     KRYS_NODISCARD float ContentBoxHeight() const noexcept;
   };
+
+  KRYS_NODISCARD float AdjustFloatForAbsoluteZoom(float, const RenderStyle &) noexcept;
 
   /// @brief Collapses `document.renderView()`.
   KRYS_NODISCARD const RenderView *RenderViewOf(const dom::Document &) noexcept;

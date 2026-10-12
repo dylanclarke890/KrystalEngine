@@ -45,13 +45,15 @@ namespace krys::boo::css
     ToLengthConversionData(const ToLengthConversionData &) noexcept;
 
     ToLengthConversionData(ToLengthConversionData &&) noexcept;
+    ToLengthConversionData &operator=(const ToLengthConversionData &) noexcept;
+    ToLengthConversionData &operator=(ToLengthConversionData &&) noexcept;
 
     /// @brief This is used during style building. The 'zoom' property is taken into account.
     ToLengthConversionData(const RenderStyle &, style::BuilderState &) noexcept;
 
     /// @brief This constructor ignores the `zoom` property.
-    ToLengthConversionData(const RenderStyle &, const RenderStyle *rootStyle,
-                           const RenderStyle *parentStyle, const boo::RenderView *,
+    ToLengthConversionData(const RenderStyle &, const RenderStyle *rootStyle, const RenderStyle *parentStyle,
+                           const boo::RenderView *,
                            const dom::Element *elementForContainerUnitResolution = nullptr) noexcept;
 
     ~ToLengthConversionData() noexcept;
@@ -145,10 +147,7 @@ namespace krys::boo::css
 
     void SetUsesContainerUnits() const noexcept;
 
-    KRYS_NODISCARD style::BuilderState *StyleBuilderState() const noexcept
-    {
-      return _styleBuilderState.get();
-    }
+    KRYS_NODISCARD style::BuilderState *StyleBuilderState() const noexcept;
 
     KRYS_NODISCARD CheckedPtr<style::BuilderState> ProtectedStyleBuilderState() const noexcept;
   };

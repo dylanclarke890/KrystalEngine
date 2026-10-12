@@ -1,6 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Calc/SymbolTable.hpp"
 #include "Krystal.Booey/CSS/Calc/TreeEvaluation.hpp"
-#include "Krystal.Booey/CSS/Calc/TreeParser.hpp"
 #include "Krystal.Booey/CSS/Calc/TreeSimplification.hpp"
 #include "Krystal.Booey/CSS/Calc/Value.hpp"
 #include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
@@ -8,38 +7,12 @@
 #include "Krystal.Booey/CSS/Values/Primitives/NumericCategory.hpp"
 #include "Krystal.Booey/Style/Calc/TreeConversion.hpp"
 #include "Krystal.Booey/Style/Calc/Value.hpp"
+#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
 
 namespace krys::boo::css::calc
 {
-  RefPtr<Value> Value::Parse(TokenRange &tokens, PropertyParserState &state, css::Category category,
-                             css::Range range, AllowedSymbols symbolsAllowed,
-                             PropertyParserOptions propertyOptions) noexcept
-  {
-    auto parserOptions = ParserOptions {
-      .Category = category,
-      .Range = range,
-      .AllowedSymbols = krys::move(symbolsAllowed),
-      .PropertyOptions = propertyOptions,
-    };
-    auto simplificationOptions = SimplificationOptions {
-      .Category = category,
-      .Range = range,
-      .ConversionData = null,
-      .SymbolTable = {},
-      .AllowZeroValueLengthRemovalFromSum = false,
-    };
-
-    auto tree = ParseAndSimplify(tokens, state, parserOptions, simplificationOptions);
-    if (!tree)
-    {
-      return nullptr;
-    }
-
-    return AdoptRefPtr(new Value(category, range, krys::move(*tree)));
-  }
-
-  Ref<Value> Value::Create(const style::calc::Value &value, const style::RenderStyle &style) noexcept
+  Ref<Value> Value::Create(const style::calc::Value &value, const RenderStyle &style) noexcept
   {
     auto category = value.GetCategory();
     auto range = value.GetRange();

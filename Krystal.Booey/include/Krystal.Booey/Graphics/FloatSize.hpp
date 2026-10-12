@@ -60,7 +60,8 @@ namespace krys::boo
 
     KRYS_NODISCARD constexpr bool IsZero() const noexcept
     {
-      return std::abs(_width) < Limits<float>::epsilon() && std::abs(_height) < Limits<float>::epsilon();
+      return (_width < 0 ? -_width : _width) < Limits<float>::epsilon()
+             && (_height < 0 ? -_height : _height) < Limits<float>::epsilon();
     }
 
     KRYS_NODISCARD constexpr float AspectRatio() const noexcept
@@ -157,7 +158,8 @@ namespace krys::boo
 
     KRYS_NODISCARD constexpr bool IsNaN() const noexcept
     {
-      return std::isnan(_width);
+      // NaN is the only value that isn't equal to itself.
+      return _width != _width;
     }
 
     KRYS_NODISCARD friend constexpr bool operator==(const FloatSize &, const FloatSize &) noexcept = default;

@@ -190,6 +190,12 @@ namespace krys::boo::css
       return builder;
     }
 
+    /// @brief The tokens remaining in the range.
+    KRYS_NODISCARD Span<const Token> Tokens() const noexcept
+    {
+      return _tokens;
+    }
+
     auto begin() const noexcept
     {
       return _tokens.begin();

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Calc/SymbolTable.hpp"
 #include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
@@ -65,8 +65,8 @@ namespace krys::boo::css::calc
     /// @brief Contains information needed to convert length units into their canonical forms.
     Maybe<ToLengthConversionData> ConversionData;
 
-    /// @brief Contains information needed to convert unresolved symbols into Numeric values.
-    SymbolTable SymbolTable;
+    /// @brief Contains information needed to convert unresolved symbols into numeric values.
+    css::SymbolTable SymbolTable;
 
     /// @brief Allows removal of 0 value lengths (px, em, etc.) from Sum operations.
     bool AllowZeroValueLengthRemovalFromSum = false;

@@ -7,7 +7,7 @@
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
-namespace krys::boo::style
+namespace krys::boo
 {
   class RenderStyle;
 }
@@ -48,7 +48,7 @@ namespace krys::boo::css::calc
     KRYS_NODISCARD static RefPtr<Value> Parse(TokenRange &, PropertyParserState &, css::Category, css::Range,
                                               AllowedSymbols, PropertyParserOptions) noexcept;
 
-    KRYS_NODISCARD static Ref<Value> Create(const style::calc::Value &, const style::RenderStyle &) noexcept;
+    KRYS_NODISCARD static Ref<Value> Create(const style::calc::Value &, const RenderStyle &) noexcept;
     KRYS_NODISCARD static Ref<Value> Create(css::Category, css::Range, calc::Tree &&) noexcept;
 
     ~Value() noexcept;

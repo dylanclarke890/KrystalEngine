@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
+#include "Krystal.Booey/Core/BoxSides.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Units.hpp"
 #include "Krystal.Booey/CSS/Values/Units.hpp"
-#include "Krystal.Booey/Core/BoxSides.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
@@ -12,7 +12,8 @@
 
 namespace krys::boo::style
 {
-  static double AdjustValueForPageZoom(double dimension, const css::ToLengthConversionData &conversionData) noexcept
+  static double AdjustValueForPageZoom(double dimension,
+                                       const css::ToLengthConversionData &conversionData) noexcept
   {
     if (conversionData.RangeZoomOption() != css::RangeZoomOptions::Unzoomed)
     {
@@ -73,9 +74,10 @@ namespace krys::boo::style
       case Q:  return css::pxPerQ * value;
       case In: return css::pxPerInch * value;
       case Pt: return css::pxPerPt * value;
-      case Pc: return css::pxPerPc * value;
+      case Pc:
+        return css::pxPerPc * value;
 
-      // MARK: "font dependent" and "root font dependent" resolution
+        // MARK: "font dependent" and "root font dependent" resolution
 
       case Em:
       case QuirkyEm:
@@ -127,64 +129,80 @@ namespace krys::boo::style
         return fontCascadeForUnit->MetricsOfPrimaryFont().IdeogramWidth().value_or(0) * value;
       }
 
-      // MARK: "viewport percentage" resolution
+        // MARK: "viewport percentage" resolution
 
-      case Vh:
-        return renderView ? renderView->SizeForCSSDefaultViewportUnits().Height() / 100.0 * value : 0;
-      case Vw:
-        return renderView ? renderView->SizeForCSSDefaultViewportUnits().Width() / 100.0 * value : 0;
+      case Vh: return renderView ? renderView->SizeForCSSDefaultViewportUnits().Height() / 100.0 * value : 0;
+      case Vw: return renderView ? renderView->SizeForCSSDefaultViewportUnits().Width() / 100.0 * value : 0;
       case Vmax:
-        return renderView ? renderView->SizeForCSSDefaultViewportUnits().MaxDimension() / 100.0 * value : value;
+        return renderView ? renderView->SizeForCSSDefaultViewportUnits().MaxDimension() / 100.0 * value
+                          : value;
       case Vmin:
-        return renderView ? renderView->SizeForCSSDefaultViewportUnits().MinDimension() / 100.0 * value : value;
+        return renderView ? renderView->SizeForCSSDefaultViewportUnits().MinDimension() / 100.0 * value
+                          : value;
       case Vb:
-        return renderView ? LengthOfViewportPhysicalAxisForLogicalAxis(LogicalBoxAxis::Block, renderView->SizeForCSSDefaultViewportUnits(), *renderView) / 100.0 * value
-                          : 0;
+        return renderView
+                 ? LengthOfViewportPhysicalAxisForLogicalAxis(
+                     LogicalBoxAxis::Block, renderView->SizeForCSSDefaultViewportUnits(), *renderView)
+                     / 100.0 * value
+                 : 0;
       case Vi:
-        return renderView ? LengthOfViewportPhysicalAxisForLogicalAxis(LogicalBoxAxis::Inline, renderView->SizeForCSSDefaultViewportUnits(), *renderView) / 100.0 * value
-                          : 0;
-      case Svh:
-        return renderView ? renderView->SizeForCSSSmallViewportUnits().Height() / 100.0 * value : 0;
-      case Svw:
-        return renderView ? renderView->SizeForCSSSmallViewportUnits().Width() / 100.0 * value : 0;
+        return renderView
+                 ? LengthOfViewportPhysicalAxisForLogicalAxis(
+                     LogicalBoxAxis::Inline, renderView->SizeForCSSDefaultViewportUnits(), *renderView)
+                     / 100.0 * value
+                 : 0;
+      case Svh: return renderView ? renderView->SizeForCSSSmallViewportUnits().Height() / 100.0 * value : 0;
+      case Svw: return renderView ? renderView->SizeForCSSSmallViewportUnits().Width() / 100.0 * value : 0;
       case Svmax:
         return renderView ? renderView->SizeForCSSSmallViewportUnits().MaxDimension() / 100.0 * value : value;
       case Svmin:
         return renderView ? renderView->SizeForCSSSmallViewportUnits().MinDimension() / 100.0 * value : value;
       case Svb:
-        return renderView ? LengthOfViewportPhysicalAxisForLogicalAxis(LogicalBoxAxis::Block, renderView->SizeForCSSSmallViewportUnits(), *renderView) / 100.0 * value
+        return renderView ? LengthOfViewportPhysicalAxisForLogicalAxis(
+                              LogicalBoxAxis::Block, renderView->SizeForCSSSmallViewportUnits(), *renderView)
+                              / 100.0 * value
                           : 0;
       case Svi:
-        return renderView ? LengthOfViewportPhysicalAxisForLogicalAxis(LogicalBoxAxis::Inline, renderView->SizeForCSSSmallViewportUnits(), *renderView) / 100.0 * value
+        return renderView ? LengthOfViewportPhysicalAxisForLogicalAxis(
+                              LogicalBoxAxis::Inline, renderView->SizeForCSSSmallViewportUnits(), *renderView)
+                              / 100.0 * value
                           : 0;
-      case Lvh:
-        return renderView ? renderView->SizeForCSSLargeViewportUnits().Height() / 100.0 * value : 0;
-      case Lvw:
-        return renderView ? renderView->SizeForCSSLargeViewportUnits().Width() / 100.0 * value : 0;
+      case Lvh: return renderView ? renderView->SizeForCSSLargeViewportUnits().Height() / 100.0 * value : 0;
+      case Lvw: return renderView ? renderView->SizeForCSSLargeViewportUnits().Width() / 100.0 * value : 0;
       case Lvmax:
         return renderView ? renderView->SizeForCSSLargeViewportUnits().MaxDimension() / 100.0 * value : value;
       case Lvmin:
         return renderView ? renderView->SizeForCSSLargeViewportUnits().MinDimension() / 100.0 * value : value;
       case Lvb:
-        return renderView ? LengthOfViewportPhysicalAxisForLogicalAxis(LogicalBoxAxis::Block, renderView->SizeForCSSLargeViewportUnits(), *renderView) / 100.0 * value
+        return renderView ? LengthOfViewportPhysicalAxisForLogicalAxis(
+                              LogicalBoxAxis::Block, renderView->SizeForCSSLargeViewportUnits(), *renderView)
+                              / 100.0 * value
                           : 0;
       case Lvi:
-        return renderView ? LengthOfViewportPhysicalAxisForLogicalAxis(LogicalBoxAxis::Inline, renderView->SizeForCSSLargeViewportUnits(), *renderView) / 100.0 * value
+        return renderView ? LengthOfViewportPhysicalAxisForLogicalAxis(
+                              LogicalBoxAxis::Inline, renderView->SizeForCSSLargeViewportUnits(), *renderView)
+                              / 100.0 * value
                           : 0;
-      case Dvh:
-        return renderView ? renderView->SizeForCSSDynamicViewportUnits().Height() / 100.0 * value : 0;
-      case Dvw:
-        return renderView ? renderView->SizeForCSSDynamicViewportUnits().Width() / 100.0 * value : 0;
+      case Dvh: return renderView ? renderView->SizeForCSSDynamicViewportUnits().Height() / 100.0 * value : 0;
+      case Dvw: return renderView ? renderView->SizeForCSSDynamicViewportUnits().Width() / 100.0 * value : 0;
       case Dvmax:
-        return renderView ? renderView->SizeForCSSDynamicViewportUnits().MaxDimension() / 100.0 * value : value;
+        return renderView ? renderView->SizeForCSSDynamicViewportUnits().MaxDimension() / 100.0 * value
+                          : value;
       case Dvmin:
-        return renderView ? renderView->SizeForCSSDynamicViewportUnits().MinDimension() / 100.0 * value : value;
+        return renderView ? renderView->SizeForCSSDynamicViewportUnits().MinDimension() / 100.0 * value
+                          : value;
       case Dvb:
-        return renderView ? LengthOfViewportPhysicalAxisForLogicalAxis(LogicalBoxAxis::Block, renderView->SizeForCSSDynamicViewportUnits(), *renderView) / 100.0 * value
-                          : 0;
+        return renderView
+                 ? LengthOfViewportPhysicalAxisForLogicalAxis(
+                     LogicalBoxAxis::Block, renderView->SizeForCSSDynamicViewportUnits(), *renderView)
+                     / 100.0 * value
+                 : 0;
       case Dvi:
-        return renderView ? LengthOfViewportPhysicalAxisForLogicalAxis(LogicalBoxAxis::Inline, renderView->SizeForCSSDynamicViewportUnits(), *renderView) / 100.0 * value
-                          : 0;
+        return renderView
+                 ? LengthOfViewportPhysicalAxisForLogicalAxis(
+                     LogicalBoxAxis::Inline, renderView->SizeForCSSDynamicViewportUnits(), *renderView)
+                     / 100.0 * value
+                 : 0;
 
       case Lh:
       case Rlh:
@@ -203,16 +221,17 @@ namespace krys::boo::style
     krys_unreachable();
   }
 
-  static double AdjustZoomStateForFontRelativeUnitsIfNeeded(double value,
-                                                            const css::ToLengthConversionData &conversionData) noexcept
+  static double
+    AdjustZoomStateForFontRelativeUnitsIfNeeded(double value,
+                                                const css::ToLengthConversionData &conversionData) noexcept
   {
     // Apply text zoom for font-relative units when evaluationTimeZoomEnabled with unzoomed range option.
     // computedSizeForRangeZoomOption returns unzoomed font size when rangeZoomOption is Unzoomed,
     // so we need to multiply by text zoom to get the correct final value.
     // We explicitly use zoomWithTextZoomFactor() here instead of conversionData.zoom() because
     // zoomWithTextZoomFactor() is guaranteed to return only the text zoom factor (not page zoom or other zoom
-    // types) when evaluationTimeZoomEnabled is true. This ensures font-relative units scale correctly with text
-    // zoom while remaining independent of other zoom mechanisms.
+    // types) when evaluationTimeZoomEnabled is true. This ensures font-relative units scale correctly with
+    // text zoom while remaining independent of other zoom mechanisms.
     if (conversionData.EvaluationTimeZoomEnabled()
         && conversionData.RangeZoomOption() == css::RangeZoomOptions::Unzoomed)
     {
@@ -287,9 +306,11 @@ namespace krys::boo::style
       case Q:  value = css::pxPerQ * value; break;
       case In: value = css::pxPerInch * value; break;
       case Pt: value = css::pxPerPt * value; break;
-      case Pc: value = css::pxPerPc * value; break;
+      case Pc:
+        value = css::pxPerPc * value;
+        break;
 
-      // MARK: "font dependent" resolution
+        // MARK: "font dependent" resolution
 
       case Em:
       case QuirkyEm:
@@ -316,7 +337,8 @@ namespace krys::boo::style
           // element's font spacing.
           value *= conversionData.ParentStyle()
                      ? conversionData.ParentStyle()->ComputedLineHeight()
-                     : static_cast<float>(conversionData.FontCascadeForFontUnits().MetricsOfPrimaryFont().IntLineSpacing());
+                     : static_cast<float>(
+                         conversionData.FontCascadeForFontUnits().MetricsOfPrimaryFont().IntLineSpacing());
         }
         else if (auto fixedLineHeight = conversionData.Style()->EvaluateFixedLineHeight(
                    ZoomFactor {conversionData.Zoom(), conversionData.Style()->DeviceScaleFactor()}))
@@ -333,7 +355,7 @@ namespace krys::boo::style
         break;
       }
 
-      // MARK: "root font dependent" resolution
+        // MARK: "root font dependent" resolution
 
       case Rcap:
       case Rch:
@@ -366,25 +388,38 @@ namespace krys::boo::style
         break;
       }
 
-      // MARK: "viewport-percentage" resolution
+        // MARK: "viewport-percentage" resolution
 
       case Vh:
-        return value * AdjustValueForPageZoom(conversionData.DefaultViewportFactor().Height(), conversionData);
+        return value
+               * AdjustValueForPageZoom(conversionData.DefaultViewportFactor().Height(), conversionData);
 
       case Vw:
         return value * AdjustValueForPageZoom(conversionData.DefaultViewportFactor().Width(), conversionData);
 
       case Vmax:
-        return value * AdjustValueForPageZoom(conversionData.DefaultViewportFactor().MaxDimension(), conversionData);
+        return value
+               * AdjustValueForPageZoom(conversionData.DefaultViewportFactor().MaxDimension(),
+                                        conversionData);
 
       case Vmin:
-        return value * AdjustValueForPageZoom(conversionData.DefaultViewportFactor().MinDimension(), conversionData);
+        return value
+               * AdjustValueForPageZoom(conversionData.DefaultViewportFactor().MinDimension(),
+                                        conversionData);
 
       case Vb:
-        return value * AdjustValueForPageZoom(LengthOfViewportPhysicalAxisForLogicalAxis(LogicalBoxAxis::Block, conversionData.DefaultViewportFactor(), conversionData.Style()), conversionData);
+        return value
+               * AdjustValueForPageZoom(
+                 LengthOfViewportPhysicalAxisForLogicalAxis(
+                   LogicalBoxAxis::Block, conversionData.DefaultViewportFactor(), conversionData.Style()),
+                 conversionData);
 
       case Vi:
-        return value * AdjustValueForPageZoom(LengthOfViewportPhysicalAxisForLogicalAxis(LogicalBoxAxis::Inline, conversionData.DefaultViewportFactor(), conversionData.Style()), conversionData);
+        return value
+               * AdjustValueForPageZoom(
+                 LengthOfViewportPhysicalAxisForLogicalAxis(
+                   LogicalBoxAxis::Inline, conversionData.DefaultViewportFactor(), conversionData.Style()),
+                 conversionData);
 
       case Svh:
         return value * AdjustValueForPageZoom(conversionData.SmallViewportFactor().Height(), conversionData);
@@ -393,16 +428,26 @@ namespace krys::boo::style
         return value * AdjustValueForPageZoom(conversionData.SmallViewportFactor().Width(), conversionData);
 
       case Svmax:
-        return value * AdjustValueForPageZoom(conversionData.SmallViewportFactor().MaxDimension(), conversionData);
+        return value
+               * AdjustValueForPageZoom(conversionData.SmallViewportFactor().MaxDimension(), conversionData);
 
       case Svmin:
-        return value * AdjustValueForPageZoom(conversionData.SmallViewportFactor().MinDimension(), conversionData);
+        return value
+               * AdjustValueForPageZoom(conversionData.SmallViewportFactor().MinDimension(), conversionData);
 
       case Svb:
-        return value * AdjustValueForPageZoom(LengthOfViewportPhysicalAxisForLogicalAxis(LogicalBoxAxis::Block, conversionData.SmallViewportFactor(), conversionData.Style()), conversionData);
+        return value
+               * AdjustValueForPageZoom(
+                 LengthOfViewportPhysicalAxisForLogicalAxis(
+                   LogicalBoxAxis::Block, conversionData.SmallViewportFactor(), conversionData.Style()),
+                 conversionData);
 
       case Svi:
-        return value * AdjustValueForPageZoom(LengthOfViewportPhysicalAxisForLogicalAxis(LogicalBoxAxis::Inline, conversionData.SmallViewportFactor(), conversionData.Style()), conversionData);
+        return value
+               * AdjustValueForPageZoom(
+                 LengthOfViewportPhysicalAxisForLogicalAxis(
+                   LogicalBoxAxis::Inline, conversionData.SmallViewportFactor(), conversionData.Style()),
+                 conversionData);
 
       case Lvh:
         return value * AdjustValueForPageZoom(conversionData.LargeViewportFactor().Height(), conversionData);
@@ -411,36 +456,59 @@ namespace krys::boo::style
         return value * AdjustValueForPageZoom(conversionData.LargeViewportFactor().Width(), conversionData);
 
       case Lvmax:
-        return value * AdjustValueForPageZoom(conversionData.LargeViewportFactor().MaxDimension(), conversionData);
+        return value
+               * AdjustValueForPageZoom(conversionData.LargeViewportFactor().MaxDimension(), conversionData);
 
       case Lvmin:
-        return value * AdjustValueForPageZoom(conversionData.LargeViewportFactor().MinDimension(), conversionData);
+        return value
+               * AdjustValueForPageZoom(conversionData.LargeViewportFactor().MinDimension(), conversionData);
 
       case Lvb:
-        return value * AdjustValueForPageZoom(LengthOfViewportPhysicalAxisForLogicalAxis(LogicalBoxAxis::Block, conversionData.LargeViewportFactor(), conversionData.Style()), conversionData);
+        return value
+               * AdjustValueForPageZoom(
+                 LengthOfViewportPhysicalAxisForLogicalAxis(
+                   LogicalBoxAxis::Block, conversionData.LargeViewportFactor(), conversionData.Style()),
+                 conversionData);
 
       case Lvi:
-        return value * AdjustValueForPageZoom(LengthOfViewportPhysicalAxisForLogicalAxis(LogicalBoxAxis::Inline, conversionData.LargeViewportFactor(), conversionData.Style()), conversionData);
+        return value
+               * AdjustValueForPageZoom(
+                 LengthOfViewportPhysicalAxisForLogicalAxis(
+                   LogicalBoxAxis::Inline, conversionData.LargeViewportFactor(), conversionData.Style()),
+                 conversionData);
 
       case Dvh:
-        return value * AdjustValueForPageZoom(conversionData.DynamicViewportFactor().Height(), conversionData);
+        return value
+               * AdjustValueForPageZoom(conversionData.DynamicViewportFactor().Height(), conversionData);
 
       case Dvw:
         return value * AdjustValueForPageZoom(conversionData.DynamicViewportFactor().Width(), conversionData);
 
       case Dvmax:
-        return value * AdjustValueForPageZoom(conversionData.DynamicViewportFactor().MaxDimension(), conversionData);
+        return value
+               * AdjustValueForPageZoom(conversionData.DynamicViewportFactor().MaxDimension(),
+                                        conversionData);
 
       case Dvmin:
-        return value * AdjustValueForPageZoom(conversionData.DynamicViewportFactor().MinDimension(), conversionData);
+        return value
+               * AdjustValueForPageZoom(conversionData.DynamicViewportFactor().MinDimension(),
+                                        conversionData);
 
       case Dvb:
-        return value * AdjustValueForPageZoom(LengthOfViewportPhysicalAxisForLogicalAxis(LogicalBoxAxis::Block, conversionData.DynamicViewportFactor(), conversionData.Style()), conversionData);
+        return value
+               * AdjustValueForPageZoom(
+                 LengthOfViewportPhysicalAxisForLogicalAxis(
+                   LogicalBoxAxis::Block, conversionData.DynamicViewportFactor(), conversionData.Style()),
+                 conversionData);
 
       case Dvi:
-        return value * AdjustValueForPageZoom(LengthOfViewportPhysicalAxisForLogicalAxis(LogicalBoxAxis::Inline, conversionData.DynamicViewportFactor(), conversionData.Style()), conversionData);
+        return value
+               * AdjustValueForPageZoom(
+                 LengthOfViewportPhysicalAxisForLogicalAxis(
+                   LogicalBoxAxis::Inline, conversionData.DynamicViewportFactor(), conversionData.Style()),
+                 conversionData);
 
-      // MARK: "container-percentage" resolution
+        // MARK: "container-percentage" resolution
 
       case Cqw:
       {

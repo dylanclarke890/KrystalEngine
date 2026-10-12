@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Calc/AllowedSymbols.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserOptions.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
+#include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::css
@@ -13,7 +14,6 @@ namespace krys::boo::css
   struct PropertyParserState;
 
   enum class Category : uint8;
-  enum class ValueId : uint16;
 }
 
 namespace krys::boo::css::calc
@@ -31,13 +31,13 @@ namespace krys::boo::css::calc
 
     /// @brief Contains additional symbols that can be used in the calculation. These will need to be resolved
     /// before the calculation can be resolved.
-    AllowedSymbols AllowedSymbols;
+    css::AllowedSymbols AllowedSymbols;
 
     /// @brief Contains options about the specific property the calc() is intended to be used with.
     css::PropertyParserOptions PropertyOptions;
   };
 
-  /// @brief Parses and simplifies the provided TokenRange into a Tree. Returns null on failure.
+  /// @brief Parses and simplifies the provided TokenRange into a Tree. Returns `null` on failure.
   KRYS_NODISCARD Maybe<Tree> ParseAndSimplify(TokenRange &tokens, css::PropertyParserState &state,
                                               const ParserOptions &options,
                                               const SimplificationOptions &simplifyOptions) noexcept;

@@ -76,7 +76,8 @@ namespace krys::boo::css::calc
     return none;
   }
 
-  Maybe<Variant<double, keywords::None>> Evaluate(const ChildOrNone &root, const EvaluationOptions &options) noexcept
+  Maybe<Variant<double, keywords::None>> Evaluate(const ChildOrNone &root,
+                                                  const EvaluationOptions &options) noexcept
   {
     return krys::SwitchOn(root,
                           [&](const auto &root) -> Maybe<Variant<double, keywords::None>>
@@ -221,7 +222,8 @@ namespace krys::boo::css::calc
       root->Sharing,
       [&](const Random::SharingOptions &sharingOptions) -> Maybe<double>
       {
-        if (!sharingOptions.ElementShared.has_value() && !options.ConversionData->StyleBuilderState()->GetElement())
+        if (!sharingOptions.ElementShared.has_value()
+            && !options.ConversionData->StyleBuilderState()->GetElement())
         {
           return null;
         }
@@ -234,7 +236,10 @@ namespace krys::boo::css::calc
         return sharingFixed.Value.SwitchOn(
           [&](const css::Number<css::ClosedUnitRange>::Raw &raw) -> Maybe<double> { return raw.Value; },
           [&](const css::Number<css::ClosedUnitRange>::Calc &calc) -> Maybe<double>
-          { return calc.Evaluate(css::Category::Number, *options.ConversionData->ProtectedStyleBuilderState()); });
+          {
+            return calc.Evaluate(css::Category::Number,
+                                 *options.ConversionData->ProtectedStyleBuilderState());
+          });
       });
     if (!randomBaseValue)
     {
@@ -270,7 +275,8 @@ namespace krys::boo::css::calc
     return result;
   }
 
-  Maybe<double> Evaluate(const IndirectNode<AnchorSize> &anchorSize, const EvaluationOptions &options) noexcept
+  Maybe<double> Evaluate(const IndirectNode<AnchorSize> &anchorSize,
+                         const EvaluationOptions &options) noexcept
   {
     if (!options.ConversionData || !options.ConversionData->StyleBuilderState())
     {
@@ -282,12 +288,12 @@ namespace krys::boo::css::calc
     Maybe<style::ScopedName> anchorSizeScopedName;
     if (anchorSize->ElementName != CSSOMStringAtom::Null())
     {
-      anchorSizeScopedName =
-        style::ScopedName {.Name = anchorSize->ElementName, .ScopeOrdinal = builderState->StyleScopeOrdinal()};
+      anchorSizeScopedName = style::ScopedName {.Name = anchorSize->ElementName,
+                                                .ScopeOrdinal = builderState->StyleScopeOrdinal()};
     }
 
-    auto result =
-      style::AnchorPositionEvaluator::EvaluateSize(*builderState, anchorSizeScopedName, anchorSize->Dimension);
+    auto result = style::AnchorPositionEvaluator::EvaluateSize(*builderState, anchorSizeScopedName,
+                                                               anchorSize->Dimension);
 
     if (!result && anchorSize->Fallback)
     {
@@ -306,8 +312,7 @@ namespace krys::boo::css::calc
   Maybe<double> Evaluate(const IndirectNode<Op> &root, const EvaluationOptions &options) noexcept
   {
     return krys::apply([&](const auto &...x)
-                       { return ExecuteMathOperationAfterUnwrapping<Op>(Evaluate(x, options)...); },
-                       *root);
+                       { return ExecuteMathOperationAfterUnwrapping<Op>(Evaluate(x, options)...); }, *root);
   }
 
   Maybe<double> EvaluateDouble(const Tree &tree, const EvaluationOptions &options) noexcept
@@ -320,8 +325,7 @@ namespace krys::boo::css::calc
     auto builderState = options.ConversionData->ProtectedStyleBuilderState();
 
     auto side = krys::SwitchOn(
-      anchor.Side,
-      [&](const Child &percentage) -> style::AnchorPositionEvaluator::Side
+      anchor.Side, [&](const Child &percentage) -> style::AnchorPositionEvaluator::Side
       { return Evaluate(percentage, options).value_or(0) / 100; },
       [&](ValueId sideId) -> style::AnchorPositionEvaluator::Side { return sideId; });
 

@@ -24,7 +24,8 @@ namespace krys::boo::css::calc
 {
   static auto CopyAndSimplify(const Random::SharingType &, const SimplificationOptions &) noexcept
     -> Random::SharingType;
-  static auto CopyAndSimplify(const keywords::None &, const SimplificationOptions &) noexcept -> keywords::None;
+  static auto CopyAndSimplify(const keywords::None &, const SimplificationOptions &) noexcept
+    -> keywords::None;
   static auto CopyAndSimplify(const Children &, const SimplificationOptions &) noexcept -> Children;
   static auto CopyAndSimplify(const ChildOrNone &, const SimplificationOptions &) noexcept -> ChildOrNone;
   template <typename T>
@@ -152,7 +153,9 @@ namespace krys::boo::css::calc
                                          const Maybe<ToLengthConversionData> &conversionData) noexcept
   {
     auto makeCanonical = [&](double value, calc::Dimension dimension) -> Maybe<CanonicalDimension>
-    { return CanonicalDimension {.Value = value, .Dimension = dimension}; };
+    {
+      return CanonicalDimension {.Value = value, .Dimension = dimension};
+    };
 
     auto tryMakeCanonical = [&](double value, LengthUnit lengthUnit) -> Maybe<CanonicalDimension>
     {
@@ -223,15 +226,16 @@ namespace krys::boo::css::calc
       }
 
       // <angle>
-      case UnitType::rad:  return makeCanonical(root.Value * degreesPerRadianDouble, calc::Dimension::Angle);
-      case UnitType::grad: return makeCanonical(root.Value * degreesPerGradientDouble, calc::Dimension::Angle);
+      case UnitType::rad: return makeCanonical(root.Value * degreesPerRadianDouble, calc::Dimension::Angle);
+      case UnitType::grad:
+        return makeCanonical(root.Value * degreesPerGradientDouble, calc::Dimension::Angle);
       case UnitType::turn: return makeCanonical(root.Value * degreesPerTurnDouble, calc::Dimension::Angle);
 
       // <time>
-      case UnitType::ms: return makeCanonical(root.Value * secsPerMs, calc::Dimension::Time);
+      case UnitType::ms:   return makeCanonical(root.Value * secsPerMs, calc::Dimension::Time);
 
       // <frequency>
-      case UnitType::khz: return makeCanonical(root.Value * hertzPerKilohertz, calc::Dimension::Frequency);
+      case UnitType::khz:  return makeCanonical(root.Value * hertzPerKilohertz, calc::Dimension::Frequency);
 
       // <resolution>
       case UnitType::x:    return makeCanonical(root.Value * dppxPerX, calc::Dimension::Resolution);
@@ -286,13 +290,15 @@ namespace krys::boo::css::calc
           return null;
         }
 
-        return CreateChildWithValueBasedOn(ExecuteMathOperation<Op>(numericA.Value, numericB.Value), numericA);
+        return CreateChildWithValueBasedOn(ExecuteMathOperation<Op>(numericA.Value, numericB.Value),
+                                           numericA);
       },
       [](const auto &, const auto &) -> Maybe<Child> { return null; });
   }
 
   template <typename Op, typename Completion>
-  static Maybe<Child> SimplifyForOperationWithCompletion(Child &a, Child &b, const SimplificationOptions &options,
+  static Maybe<Child> SimplifyForOperationWithCompletion(Child &a, Child &b,
+                                                         const SimplificationOptions &options,
                                                          Completion &&completion) noexcept
   {
     return SwitchTogether(
@@ -353,8 +359,8 @@ namespace krys::boo::css::calc
       root.A,
       [&](const Number &a) -> Maybe<Child>
       {
-        return CreateChild(
-          CanonicalDimension {.Value = ExecuteMathOperation<Op>(a.Value), .Dimension = calc::Dimension::Angle});
+        return CreateChild(CanonicalDimension {.Value = ExecuteMathOperation<Op>(a.Value),
+                                               .Dimension = calc::Dimension::Angle});
       },
       [](const auto &) -> Maybe<Child> { return null; });
   }
@@ -366,13 +372,13 @@ namespace krys::boo::css::calc
 
     // This function implements shared logic for Min and Max simplification:
 
-    //   5.1. For each node child of root’s children:
-    //        If child is a numeric value with enough information to compare magnitudes with another child of
-    //        the same unit (see note in previous step), and there are other children of root that are numeric
-    //        values with the same unit, combine all such children with the appropriate operator per root, and
-    //        replace child with the result, removing all other child nodes involved.
-    //   5.2. If root has only one child, return the child.
-    //   5.3. Otherwise, return root.
+    // 5.1. For each node child of root’s children:
+    //      If child is a numeric value with enough information to compare magnitudes with another child of
+    //      the same unit (see note in previous step), and there are other children of root that are numeric
+    //      values with the same unit, combine all such children with the appropriate operator per root, and
+    //      replace child with the result, removing all other child nodes involved.
+    // 5.2. If root has only one child, return the child.
+    // 5.3. Otherwise, return root.
 
     // --
 
@@ -528,8 +534,8 @@ namespace krys::boo::css::calc
     // NOTE: This implements the non-canonical dimension relevant parts of the numeric value simplification
     // steps.
 
-    // 1.2. If root is a dimension that is not expressed in its canonical unit, and there is enough information
-    // available to convert it to the canonical unit, do so, and return the value.
+    // 1.2. If root is a dimension that is not expressed in its canonical unit, and there is enough
+    // information available to convert it to the canonical unit, do so, and return the value.
     if (auto canonical = Canonicalize(root, options.ConversionData))
     {
       return CreateChild(krys::move(*canonical));
@@ -562,8 +568,8 @@ namespace krys::boo::css::calc
       return null;
     }
 
-    return CreateChild(
-      Number {.Value = static_cast<double>(options.ConversionData->ProtectedStyleBuilderState()->SiblingCount())});
+    return CreateChild(Number {
+      .Value = static_cast<double>(options.ConversionData->ProtectedStyleBuilderState()->SiblingCount())});
   }
 
   Maybe<Child> Simplify(SiblingIndex &, const SimplificationOptions &options) noexcept
@@ -577,8 +583,8 @@ namespace krys::boo::css::calc
       return null;
     }
 
-    return CreateChild(
-      Number {.Value = static_cast<double>(options.ConversionData->ProtectedStyleBuilderState()->SiblingIndex())});
+    return CreateChild(Number {
+      .Value = static_cast<double>(options.ConversionData->ProtectedStyleBuilderState()->SiblingIndex())});
   }
 
   Maybe<Child> Simplify(Sum &root, const SimplificationOptions &options) noexcept
@@ -609,14 +615,14 @@ namespace krys::boo::css::calc
       root.Children = krys::move(newChildren);
     }
 
-    // 8.2. For each set of root’s children that are numeric values with identical units, remove those children
-    // and replace them with a single numeric value containing the sum of the removed nodes, and with the same
-    // unit. (E.g. combine numbers, combine percentages, combine px values, etc.)
-    // 8.3. If root has only a single child at this point, return the child.
-    // 8.4. Otherwise, return root
+    // 8.2. For each set of root’s children that are numeric values with identical units, remove those
+    // children and replace them with a single numeric value containing the sum of the removed nodes, and with
+    // the same unit. (E.g. combine numbers, combine percentages, combine px values, etc.) 8.3. If root has
+    // only a single child at this point, return the child. 8.4. Otherwise, return root
 
     // These steps are implemented as a two phase procedure.
-    //    1. Iterate children to find "merge/removal opportunities", counting the total number of opportunities
+    //    1. Iterate children to find "merge/removal opportunities", counting the total number of
+    //    opportunities
     //       that will happen, and storing the index of the first child of each type in a lookup table.
     //    2. Perform merges and removals based on data from step 1.
     //
@@ -731,8 +737,8 @@ namespace krys::boo::css::calc
     auto combinedChildrenSize = root.Children.size() - childrenToRemoveTotal;
 
     // If the new size is 0, we removed too much. Return a single 0 value of type `length` to keep things
-    // valid. A value of type `length` is returned because the only kind of node that can be removed is of type
-    // `length`.
+    // valid. A value of type `length` is returned because the only kind of node that can be removed is of
+    // type `length`.
     if (!combinedChildrenSize)
     {
       return CreateChild(CanonicalDimension {.Value = 0, .Dimension = calc::Dimension::Length});
@@ -849,8 +855,8 @@ namespace krys::boo::css::calc
       }
     }
 
-    // If `numericProduct` has a value and `newChildren` is empty, that means all the children were numbers and
-    // the product can be returned directly.
+    // If `numericProduct` has a value and `newChildren` is empty, that means all the children were numbers
+    // and the product can be returned directly.
     if (numericProduct)
     {
       if (newChildren.empty())
@@ -872,8 +878,7 @@ namespace krys::boo::css::calc
       if (newChildren.size() == 1)
       {
         auto replacement = krys::SwitchOn(
-          newChildren[0],
-          [&]<Numeric T>(T &numeric) -> Maybe<Child>
+          newChildren[0], [&]<Numeric T>(T &numeric) -> Maybe<Child>
           { return CreateChildWithValueBasedOn(numeric.Value * numericProduct->Value, numeric); },
           [&](IndirectNode<Sum> &sum) -> Maybe<Child>
           {
@@ -893,8 +898,7 @@ namespace krys::boo::css::calc
           [&](IndirectNode<Invert> &invert) -> Maybe<Child>
           {
             return krys::SwitchOn(
-              invert->A,
-              [&]<Numeric T>(const T &child) -> Maybe<Child>
+              invert->A, [&]<Numeric T>(const T &child) -> Maybe<Child>
               { return CreateChildWithValueBasedOn(child.Value * numericProduct->Value, child); },
               [](const auto &) -> Maybe<Child> { return null; });
           },
@@ -913,11 +917,11 @@ namespace krys::boo::css::calc
 
     root.Children = krys::move(newChildren);
 
-    // 9.4. If root contains only numeric values and/or Invert nodes containing numeric values, and multiplying
-    // the types of all the children (noting that the type of an Invert node is the inverse of its child’s type)
-    // results in a type that matches any of the types that a math function can resolve to, return the result of
-    // multiplying all the values of the children (noting that the value of an Invert node is the reciprocal of
-    // its child’s value), expressed in the result’s canonical unit.
+    // 9.4. If root contains only numeric values and/or Invert nodes containing numeric values, and
+    // multiplying the types of all the children (noting that the type of an Invert node is the inverse of its
+    // child’s type) results in a type that matches any of the types that a math function can resolve to,
+    // return the result of multiplying all the values of the children (noting that the value of an Invert
+    // node is the reciprocal of its child’s value), expressed in the result’s canonical unit.
 
     struct ProductResult
     {
@@ -951,7 +955,8 @@ namespace krys::boo::css::calc
         },
         [&](const CanonicalDimension &canonicalDimension) -> bool
         {
-          auto multipliedType = calc::Type::Multiply(productResult.Type, GetType(canonicalDimension.Dimension));
+          auto multipliedType =
+            calc::Type::Multiply(productResult.Type, GetType(canonicalDimension.Dimension));
           if (!multipliedType)
           {
             return false;
@@ -1110,7 +1115,8 @@ namespace krys::boo::css::calc
         }
 
         // Negating one factor negates the product.
-        krys::SwitchOn(a->Children[0], [&]<Numeric T>(T &child) { child.Value = -child.Value; }, [](auto &) {});
+        krys::SwitchOn(
+          a->Children[0], [&]<Numeric T>(T &child) { child.Value = -child.Value; }, [](auto &) {});
 
         return Child {krys::move(a)};
       },
@@ -1125,8 +1131,8 @@ namespace krys::boo::css::calc
       root.A,
       [&](Number &a) -> Maybe<Child>
       {
-        // 7.1. If root’s child is a number (not a percentage or dimension) return the reciprocal of the child’s
-        // value.
+        // 7.1. If root’s child is a number (not a percentage or dimension) return the reciprocal of the
+        // child’s value.
         return CreateChild(Number {.Value = (1.0 / a.Value)});
       },
       [](IndirectNode<Invert> &a) -> Maybe<Child>
@@ -1160,8 +1166,8 @@ namespace krys::boo::css::calc
 
     // FIXME: Are any of these transforms kosher?
     // If only MIN and VAL have matching units, we can transform clamp(MIN, VAL, MAX) aka (max(MIN, min(VAL,
-    // MAX)) into a min(newVAL, MAX). If only VAL and MAX have matching units, we can transform clamp(MIN, VAL,
-    // MAX) aka (max(MIN, min(VAL, MAX)) into a max(MIN, newVAL).
+    // MAX)) into a min(newVAL, MAX). If only VAL and MAX have matching units, we can transform clamp(MIN,
+    // VAL, MAX) aka (max(MIN, min(VAL, MAX)) into a max(MIN, newVAL).
 
     return krys::SwitchOn(
       root.Val,
@@ -1240,7 +1246,8 @@ namespace krys::boo::css::calc
             return null;
           }
 
-          return CreateChildWithValueBasedOn(ExecuteMathOperation<Clamp>(min.Value, val.Value, max.Value), val);
+          return CreateChildWithValueBasedOn(ExecuteMathOperation<Clamp>(min.Value, val.Value, max.Value),
+                                             val);
         }
       },
       [](const auto &) -> Maybe<Child> { return null; });
@@ -1608,9 +1615,9 @@ namespace krys::boo::css::calc
     if (!result)
     {
       // https://drafts.csswg.org/css-anchor-position-1/#anchor-valid
-      // "If any of these conditions are false, the anchor() function resolves to its specified fallback value.
-      // If no fallback value is specified, it makes the declaration referencing it invalid at computed-value
-      // time."
+      // "If any of these conditions are false, the anchor() function resolves to its specified fallback
+      // value. If no fallback value is specified, it makes the declaration referencing it invalid at
+      // computed-value time."
 
       if (!anchor.Fallback)
       {
@@ -1701,7 +1708,8 @@ namespace krys::boo::css::calc
   }
 
   template <typename Op>
-  static Op CopyAndSimplifyChildren(const IndirectNode<Op> &root, const SimplificationOptions &options) noexcept
+  static Op CopyAndSimplifyChildren(const IndirectNode<Op> &root,
+                                    const SimplificationOptions &options) noexcept
   {
     return krys::apply([&](const auto &...x) { return Op {CopyAndSimplify(x, options)...}; }, *root);
   }
@@ -1759,7 +1767,8 @@ namespace krys::boo::css::calc
     // is possible by utilizing the provided `SimplificationOptions` if that should be necessary.
 
     return krys::SwitchOn(
-      tree.Root, [&](const Number &) -> bool { return false; }, [&](const Percentage &) -> bool { return false; },
+      tree.Root, [&](const Number &) -> bool { return false; },
+      [&](const Percentage &) -> bool { return false; },
       [&](const CanonicalDimension &) -> bool { return false; }, [&](const auto &) -> bool { return true; });
   }
 }

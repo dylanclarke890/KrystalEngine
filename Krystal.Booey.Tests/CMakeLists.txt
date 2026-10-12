@@ -81,11 +81,18 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Calc/Executor.cpp
 		tests/CSS/Calc/SymbolTable.cpp
 		tests/CSS/Calc/Tree.cpp
+		tests/CSS/Calc/TreeEvaluation.cpp
+		tests/CSS/Calc/TreeParser.cpp
 		tests/CSS/Calc/TreeSerialisation.cpp
+		tests/CSS/Calc/TreeSimplification.cpp
+		tests/CSS/Calc/Value.cpp
 		# tests/CSS/Parser/Parser.cpp
 		tests/CSS/Parser/KeywordLookup.cpp
 		tests/CSS/Parser/Token.cpp
 		tests/CSS/Parser/Tokenizer.cpp
+		tests/CSS/Properties/Consumers/Ident.cpp
+		tests/CSS/Properties/Consumers/MetaConsumer.cpp
+		tests/CSS/Properties/Consumers/Primitives.cpp
 		tests/CSS/Values/Aggregates.cpp
 		tests/CSS/Values/NumericTypesSerialisation.cpp
 		tests/CSS/Values/Primitives/NumericRaw.cpp
@@ -97,12 +104,18 @@ target_sources(Krystal.Booey.Tests
 		# tests/CSS/Selectors/SelectorParser.cpp
 
 		# Graphics
+		tests/Graphics/FloatSize.cpp
 		tests/Graphics/Color/Color.cpp
 		tests/Graphics/Color/ColorBlending.cpp
 		tests/Graphics/Color/ColorConversion.cpp
 		tests/Graphics/Color/ColorInterpolation.cpp
 		tests/Graphics/Color/ColorSerialisation.cpp
 		tests/Graphics/Color/ColorUtilities.cpp
+
+		# Style
+		tests/Style/Calc/Tree.cpp
+		tests/Style/ScopedName.cpp
+		tests/Style/Values/Primitives/LengthResolution.cpp
 
 		# DOM
 		tests/DOM/Algorithms/EventDispatcher.cpp

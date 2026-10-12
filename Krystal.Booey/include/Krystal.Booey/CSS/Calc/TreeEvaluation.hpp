@@ -1,14 +1,15 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
+#include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::css
 {
   class SymbolTable;
 
-  enum class Category : uint8_t;
+  enum class Category : uint8;
 }
 
 namespace krys::boo::css::calc
@@ -28,7 +29,7 @@ namespace krys::boo::css::calc
     Maybe<ToLengthConversionData> ConversionData;
 
     /// @brief Contains information needed to convert unresolved symbols into numeric values.
-    const SymbolTable &SymbolTable;
+    const css::SymbolTable &SymbolTable;
   };
 
   KRYS_NODISCARD Maybe<double> EvaluateDouble(const Tree &tree, const EvaluationOptions &options) noexcept;
