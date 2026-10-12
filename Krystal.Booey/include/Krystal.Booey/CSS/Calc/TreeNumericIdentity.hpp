@@ -1,13 +1,14 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Calc/Tree.hpp"
 #include "Krystal.Booey/CSS/Values/Units.hpp"
+#include "Krystal.Core/Enum.hpp"
 
 namespace krys::boo::css::calc
 {
   // `NumericIdentity` is used to assign a densely packed unique identifier for each possible numeric type
   // allowed in a `calc()` expression. This allows the construction of fixed size (specifically sized to
-  // `numberOfNumericIdentityTypes`) lookup tables needed in expression simplification.
+  // `NumberOfNumericIdentityTypes`) lookup tables needed in expression simplification.
 
   enum class NumericIdentity : uint8
   {
@@ -80,6 +81,8 @@ namespace krys::boo::css::calc
     DPI,
     DPCM
   };
+
+  constexpr uint8 NumberOfNumericIdentityTypes = static_cast<uint8>(NumericIdentity::DPCM) + 1;
 
   KRYS_NODISCARD constexpr NumericIdentity ToNumericIdentity(const Number &) noexcept
   {
@@ -270,4 +273,5 @@ namespace krys::boo::css::calc
   }
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::calc::NumericIdentity, 64uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::calc::NumericIdentity,
+                                   krys::boo::css::calc::NumberOfNumericIdentityTypes);

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/NoConversionDataRequiredTag.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
@@ -6,6 +6,8 @@
 
 namespace krys::boo::css
 {
+  class SymbolTable;
+
   // MARK: - Requires Conversion Data
 
   KRYS_NODISCARD inline bool RequiresConversionData(Numeric auto const &primitive) noexcept
@@ -20,14 +22,15 @@ namespace krys::boo::css
 
   template <Calc T>
   KRYS_NODISCARD typename T::Raw EvaluateCalc(const T &calc, NoConversionDataRequiredTag tag,
-                                              const calc::SymbolTable &symbolTable) noexcept
+                                              const SymbolTable &symbolTable) noexcept
   {
-    return {calc.Evaluate(T::Category, tag, symbolTable)};
+    // Evaluation produces a value in the canonical unit.
+    return {T::UnitTraits::Canonical, calc.Evaluate(T::Category, tag, symbolTable)};
   }
 
   template <typename T>
-  KRYS_NODISCARD constexpr T EvaluateCalc(const T &component, NoConversionDataRequiredTag tag,
-                                          const calc::SymbolTable &symbols) noexcept
+  KRYS_NODISCARD constexpr T EvaluateCalc(const T &component, NoConversionDataRequiredTag,
+                                          const SymbolTable &) noexcept
   {
     return component;
   }
@@ -35,7 +38,7 @@ namespace krys::boo::css
   template <typename... Ts>
   KRYS_NODISCARD Variant<Ts...>
     EvaluateCalcIfNoConversionDataRequired(const Variant<Ts...> &component,
-                                           const calc::SymbolTable &symbolTable) noexcept
+                                           const SymbolTable &symbolTable) noexcept
   {
     return krys::SwitchOn(component,
                           [&](const auto &alternative) -> Variant<Ts...>
@@ -51,7 +54,7 @@ namespace krys::boo::css
 
   template <Numeric T>
   KRYS_NODISCARD T EvaluateCalcIfNoConversionDataRequired(const T &component,
-                                                          const calc::SymbolTable &symbolTable) noexcept
+                                                          const SymbolTable &symbolTable) noexcept
   {
     return krys::SwitchOn(component,
                           [&](const auto &alternative) -> T
@@ -66,8 +69,8 @@ namespace krys::boo::css
   }
 
   template <typename T>
-  decltype(auto) EvaluateCalcIfNoConversionDataRequired(const std::optional<T> &component,
-                                                        const calc::SymbolTable &symbolTable) noexcept
+  decltype(auto) EvaluateCalcIfNoConversionDataRequired(const Maybe<T> &component,
+                                                        const SymbolTable &symbolTable) noexcept
   {
     return component ? std::make_optional(EvaluateCalcIfNoConversionDataRequired(*component, symbolTable))
                      : null;

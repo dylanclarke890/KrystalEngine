@@ -1,4 +1,4 @@
-add_library(Krystal.Booey STATIC)
+﻿add_library(Krystal.Booey STATIC)
 
 target_link_libraries(Krystal.Booey
   PUBLIC 
@@ -128,6 +128,33 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/Primitives/Units.hpp
   include/Krystal.Booey/CSS/Values/SerialisationContext.hpp
   include/Krystal.Booey/CSS/Values/Types.hpp
+
+  # Slice 3: Colour, layer 3a (calc, Style-free half)
+  include/Krystal.Booey/CSS/Calc/AllowedSymbols.hpp
+  include/Krystal.Booey/CSS/Calc/CalcType.hpp
+  include/Krystal.Booey/CSS/Calc/Executor.hpp
+  include/Krystal.Booey/CSS/Calc/Operator.hpp
+  include/Krystal.Booey/CSS/Calc/RandomCachingKey.hpp
+  include/Krystal.Booey/CSS/Calc/RandomCachingKeyMap.hpp
+  include/Krystal.Booey/CSS/Calc/SymbolTable.hpp
+  include/Krystal.Booey/CSS/Calc/Tree.hpp
+  include/Krystal.Booey/CSS/Calc/TreeComputedStyleDependencies.hpp
+  include/Krystal.Booey/CSS/Calc/TreeCopy.hpp
+  include/Krystal.Booey/CSS/Calc/TreeNumericIdentity.hpp
+  include/Krystal.Booey/CSS/Calc/TreeSerialisation.hpp
+  include/Krystal.Booey/CSS/Calc/TreeTraversal.hpp
+  include/Krystal.Booey/CSS/Calc/Value.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/NumericTypesCanonicalization.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/NumericTypesComputedStyleDependencies.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/NumericTypesEvaluateCalc.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/NumericTypesSymbolReplacement.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/NumericTypesValueVisitation.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/PrimitiveData.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/PrimitiveNumeric.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/PrimitiveNumericOrKeyword.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/UnevaluatedCalc.hpp
+  include/Krystal.Booey/Style/AnchorSizeDimension.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -149,6 +176,18 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/Primitives/Units.cpp
   src/CSS/Values/SerialisationContext.cpp
   src/CSS/Values/Types.cpp
+
+  # Slice 3: Colour, layer 3a (calc, Style-free half; ValueEvaluation.cpp and UnevaluatedCalcEvaluation.cpp
+  # need Style and are part of 3b)
+  src/CSS/Calc/CalcType.cpp
+  src/CSS/Calc/Tree.cpp
+  src/CSS/Calc/TreeComputedStyleDependencies.cpp
+  src/CSS/Calc/TreeCopy.cpp
+  src/CSS/Calc/TreeSerialisation.cpp
+  src/CSS/Calc/Value.cpp
+  src/CSS/Values/Primitives/NumericTypesComputedStyleDependencies.cpp
+  src/CSS/Values/Primitives/NumericTypesSymbolReplacement.cpp
+  src/CSS/Values/Primitives/UnevaluatedCalc.cpp
 )
 
 target_precompile_headers(Krystal.Booey

@@ -1,8 +1,8 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Calc/Tree.hpp"
-#include "Krystal.Core/Visitor.hpp"
 #include "Krystal.Core/Utils/Apply.hpp"
+#include "Krystal.Core/Visitor.hpp"
 
 namespace krys::boo::css::calc
 {
@@ -10,10 +10,10 @@ namespace krys::boo::css::calc
 
   // MARK: - ForAllChildren
 
-  /// @brief `ForAllChildren` will call the provided `functor` on all direct children of the provided node.
-  /// This will include values of type `Child`, `ChildOrNone` and `Maybe<Child>`.
+  // `ForAllChildren` will call the provided `functor` on all direct children of the provided node. This
+  // will include values of type `Child`, `ChildOrNone` and `Maybe<Child>`.
   template <typename F, Leaf Op>
-  void ForAllChildren(const auto &, const F &) noexcept
+  void ForAllChildren(const Op &, const F &) noexcept
   {
     // No children.
   }
@@ -61,7 +61,14 @@ namespace krys::boo::css::calc
   template <typename F>
   void ForAllChildren(const Child &root, const F &functor) noexcept
   {
-    krys::SwitchOn(root, [&](const auto &root) { ForAllChildren(*root, functor); });
+    krys::SwitchOn(root,
+                   [&]<typename T>(const T &node)
+                   {
+                     if constexpr (!Leaf<T>)
+                     {
+                       ForAllChildren(*node, functor);
+                     }
+                   });
   }
 
   // MARK: - ForAllChildNodes
@@ -104,7 +111,7 @@ namespace krys::boo::css::calc
         krys::SwitchOn(root, [&](const Child &root) { functor(root); }, [&](const keywords::None &) {});
       }
 
-      void operator()(const Child &root)
+      void operator()(const Child &root) noexcept
       {
         functor(root);
       }
@@ -125,6 +132,13 @@ namespace krys::boo::css::calc
   template <typename F>
   void ForAllChildNodes(const Child &root, const F &functor) noexcept
   {
-    krys::SwitchOn(root, [&](const auto &root) { ForAllChildNodes(*root, functor); });
+    krys::SwitchOn(root,
+                   [&]<typename T>(const T &node)
+                   {
+                     if constexpr (!Leaf<T>)
+                     {
+                       ForAllChildNodes(*node, functor);
+                     }
+                   });
   }
 }

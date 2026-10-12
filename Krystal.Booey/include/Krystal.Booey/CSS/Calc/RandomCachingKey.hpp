@@ -1,9 +1,11 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Calc/Tree.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Core/Hash.hpp"
-#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/Variant.hpp"
+#include "Krystal.Core/TypeTraits.hpp"
+#include "Krystal.Core/Utils/Tags.hpp"
 
 namespace krys::boo::css::calc
 {
@@ -14,14 +16,14 @@ namespace krys::boo::css::calc
 
     IdentifierVariant Identifier;
 
-    RandomCachingKey(Variant<Random::SharingOptions::Auto, CSSOMStringAtom> &&Identifier) noexcept
-        : Identifier {krys::SwitchOn(krys::move(Identifier), [](auto &&alternative)
+    RandomCachingKey(Variant<Random::SharingOptions::Auto, CSSOMStringAtom> &&identifier) noexcept
+        : Identifier {krys::SwitchOn(krys::move(identifier), [](auto &&alternative)
                                      { return IdentifierVariant {krys::move(alternative)}; })}
     {
     }
 
-    RandomCachingKey(const Variant<Random::SharingOptions::Auto, CSSOMStringAtom> &Identifier) noexcept
-        : Identifier {krys::SwitchOn(Identifier,
+    RandomCachingKey(const Variant<Random::SharingOptions::Auto, CSSOMStringAtom> &identifier) noexcept
+        : Identifier {krys::SwitchOn(identifier,
                                      [](const auto &alternative) { return IdentifierVariant {alternative}; })}
     {
     }
@@ -46,27 +48,50 @@ namespace krys::boo::css::calc
       return std::holds_alternative<krys::HashTableEmptyValueTag>(Identifier);
     }
 
-    bool operator==(const RandomCachingKey &) const noexcept = default;
+    KRYS_NODISCARD bool operator==(const RandomCachingKey &other) const noexcept
+    {
+      if (Identifier.index() != other.Identifier.index())
+      {
+        return false;
+      }
+
+      return krys::SwitchOn(
+        Identifier, [&](const Random::SharingOptions::Auto &autoValue)
+        { return autoValue == std::get<Random::SharingOptions::Auto>(other.Identifier); },
+        [&](const CSSOMStringAtom &string) { return string == std::get<CSSOMStringAtom>(other.Identifier); },
+        [](const krys::HashTableDeletedValueTag &) { return true; },
+        [](const krys::HashTableEmptyValueTag &) { return true; });
+    }
   };
 
   struct RandomCachingKeyHash
   {
-    constexpr static bool SafeToCompareToEmptyOrDeleted = true;
+    constexpr static bool IsSafeToCompareToEmptyOrDeleted = true;
 
-    KRYS_NODISCARD static size_t Hash(const krys::boo::css::calc::RandomCachingKey &key) noexcept
+    KRYS_NODISCARD static size_t Hash(const RandomCachingKey &key) noexcept
     {
       return krys::SwitchOn(
-        key.Identifier, [&](const krys::boo::css::calc::Random::SharingOptions::Auto &autoValue)
-        { return krys::Hash::Combine(key.Identifier.index(), autoValue.Property, autoValue.Index); },
-        [&](const krys::boo::css::CSSOMStringAtom &string)
-        { return krys::Hash::Combine(key.Identifier.index(), string); }, [](const HashTableDeletedValueTag &)
-        { krys_unreachable(); }, [](const HashTableEmptyValueTag &) { krys_unreachable(); });
+        key.Identifier,
+        [&](const Random::SharingOptions::Auto &autoValue) -> size_t
+        {
+          return krys::Hash::Combine(key.Identifier.index(), ToUnderlying(autoValue.Property),
+                                     autoValue.Index);
+        },
+        [&](const CSSOMStringAtom &string) -> size_t
+        { return krys::Hash::Combine(key.Identifier.index(), string); },
+        [](const krys::HashTableDeletedValueTag &) -> size_t { krys_unreachable(); },
+        [](const krys::HashTableEmptyValueTag &) -> size_t { krys_unreachable(); });
     }
 
-    KRYS_NODISCARD static bool Equal(const krys::boo::css::calc::RandomCachingKey &a,
-                                     const krys::boo::css::calc::RandomCachingKey &b) noexcept
+    KRYS_NODISCARD static bool Equal(const RandomCachingKey &a, const RandomCachingKey &b) noexcept
     {
       return a == b;
+    }
+
+    // Lets `HashMap` use this as its hasher.
+    KRYS_NODISCARD size_t operator()(const RandomCachingKey &key) const noexcept
+    {
+      return Hash(key);
     }
   };
 }

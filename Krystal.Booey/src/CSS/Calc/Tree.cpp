@@ -1,6 +1,4 @@
-#include "Krystal.Booey/CSS/Calc/Tree.hpp"
-#include "Krystal.Booey/CSS/Calc/TreeSerialisation.hpp"
-#include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
+﻿#include "Krystal.Booey/CSS/Calc/Tree.hpp"
 #include "Krystal.Booey/CSS/Values/Units.hpp"
 
 namespace krys::boo::css::calc
@@ -29,7 +27,10 @@ namespace krys::boo::css::calc
       {
         return CreateChild(CanonicalDimension {.Value = value, .Dimension = Dimension::Angle});
       }
-      case UnitType::s: return CreateChild(CanonicalDimension {.Value = value, .Dimension = Dimension::Time});
+      case UnitType::s:
+      {
+        return CreateChild(CanonicalDimension {.Value = value, .Dimension = Dimension::Time});
+      }
       case UnitType::hz:
       {
         return CreateChild(CanonicalDimension {.Value = value, .Dimension = Dimension::Frequency});

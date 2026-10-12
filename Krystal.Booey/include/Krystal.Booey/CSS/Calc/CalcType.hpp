@@ -1,5 +1,4 @@
-#pragma once
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Numeric.hpp"
@@ -48,12 +47,12 @@ namespace krys::boo::css::calc
       enum class InternalValue : uint8
       {
         None = 0,
-        Length = static_cast<uint8>(PercentHint::Length),
-        Angle = static_cast<uint8>(PercentHint::Angle),
-        Time = static_cast<uint8>(PercentHint::Time),
-        Frequency = static_cast<uint8>(PercentHint::Frequency),
-        Resolution = static_cast<uint8>(PercentHint::Resolution),
-        Flex = static_cast<uint8>(PercentHint::Flex)
+        Length = static_cast<uint8>(calc::PercentHint::Length),
+        Angle = static_cast<uint8>(calc::PercentHint::Angle),
+        Time = static_cast<uint8>(calc::PercentHint::Time),
+        Frequency = static_cast<uint8>(calc::PercentHint::Frequency),
+        Resolution = static_cast<uint8>(calc::PercentHint::Resolution),
+        Flex = static_cast<uint8>(calc::PercentHint::Flex)
       };
 
       InternalValue _value;
@@ -63,7 +62,7 @@ namespace krys::boo::css::calc
       {
       }
 
-      constexpr PercentHintValue(PercentHint hint) noexcept : _value {static_cast<InternalValue>(hint)}
+      constexpr PercentHintValue(calc::PercentHint hint) noexcept : _value {static_cast<InternalValue>(hint)}
       {
       }
 
@@ -176,8 +175,9 @@ namespace krys::boo::css::calc
 
     KRYS_NODISCARD constexpr static decltype(auto) AllPotentialPercentHintTypes() noexcept
     {
-      return std::to_array({PercentHint::Length, PercentHint::Angle, PercentHint::Time,
-                            PercentHint::Frequency, PercentHint::Resolution, PercentHint::Flex});
+      return std::to_array({calc::PercentHint::Length, calc::PercentHint::Angle, calc::PercentHint::Time,
+                            calc::PercentHint::Frequency, calc::PercentHint::Resolution,
+                            calc::PercentHint::Flex});
     }
 
     KRYS_NODISCARD constexpr Exponent &operator[](BaseType type) noexcept
@@ -216,12 +216,12 @@ namespace krys::boo::css::calc
     {
       switch (hint)
       {
-        case PercentHint::Length:     return Length;
-        case PercentHint::Angle:      return Angle;
-        case PercentHint::Time:       return Time;
-        case PercentHint::Frequency:  return Frequency;
-        case PercentHint::Resolution: return Resolution;
-        case PercentHint::Flex:       return Flex;
+        case calc::PercentHint::Length:     return Length;
+        case calc::PercentHint::Angle:      return Angle;
+        case calc::PercentHint::Time:       return Time;
+        case calc::PercentHint::Frequency:  return Frequency;
+        case calc::PercentHint::Resolution: return Resolution;
+        case calc::PercentHint::Flex:       return Flex;
       }
 
       krys_unreachable();
@@ -231,12 +231,12 @@ namespace krys::boo::css::calc
     {
       switch (hint)
       {
-        case PercentHint::Length:     return Length;
-        case PercentHint::Angle:      return Angle;
-        case PercentHint::Time:       return Time;
-        case PercentHint::Frequency:  return Frequency;
-        case PercentHint::Resolution: return Resolution;
-        case PercentHint::Flex:       return Flex;
+        case calc::PercentHint::Length:     return Length;
+        case calc::PercentHint::Angle:      return Angle;
+        case calc::PercentHint::Time:       return Time;
+        case calc::PercentHint::Frequency:  return Frequency;
+        case calc::PercentHint::Resolution: return Resolution;
+        case calc::PercentHint::Flex:       return Flex;
       }
 
       krys_unreachable();
@@ -358,7 +358,7 @@ namespace krys::boo::css::calc
         case BaseType::Percent:    return ComputeCheck<Type::Match::Percent>();
       }
 
-      std::unreachable();
+      krys_unreachable();
     }
 
     static bool MatchesAny(Type type) noexcept
@@ -507,7 +507,7 @@ namespace krys::boo::css::calc
   };
 
   template <OutputTransform Transform>
-  inline Maybe<Type> TransformType(Type a) noexcept
+  KRYS_NODISCARD Maybe<Type> TransformType(Type a) noexcept
   {
     if constexpr (Transform == OutputTransform::None)
     {
@@ -524,7 +524,7 @@ namespace krys::boo::css::calc
   }
 
   template <OutputTransform Transform>
-  inline Maybe<Type> TransformType(Maybe<Type> a) noexcept
+  KRYS_NODISCARD Maybe<Type> TransformType(Maybe<Type> a) noexcept
   {
     if (!a)
     {

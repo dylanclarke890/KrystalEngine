@@ -1,4 +1,4 @@
-add_executable(Krystal.Booey.Tests)
+﻿add_executable(Krystal.Booey.Tests)
 
 target_link_libraries(Krystal.Booey.Tests
   PRIVATE
@@ -77,6 +77,11 @@ target_sources(Krystal.Booey.Tests
 		tests/Core/NumberFormatting.cpp
 
 		# CSS
+		tests/CSS/Calc/CalcType.cpp
+		tests/CSS/Calc/Executor.cpp
+		tests/CSS/Calc/SymbolTable.cpp
+		tests/CSS/Calc/Tree.cpp
+		tests/CSS/Calc/TreeSerialisation.cpp
 		# tests/CSS/Parser/Parser.cpp
 		tests/CSS/Parser/KeywordLookup.cpp
 		tests/CSS/Parser/Token.cpp
@@ -84,6 +89,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Values/Aggregates.cpp
 		tests/CSS/Values/NumericTypesSerialisation.cpp
 		tests/CSS/Values/Primitives/NumericRaw.cpp
+		tests/CSS/Values/Primitives/PrimitiveNumeric.cpp
 		tests/CSS/Values/Primitives/Units.cpp
 		tests/CSS/Values/PrimitiveValue.cpp
 		tests/CSS/Values/Types.cpp

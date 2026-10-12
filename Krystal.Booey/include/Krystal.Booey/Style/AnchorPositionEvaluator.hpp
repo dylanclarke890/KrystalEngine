@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Krystal.Booey/Core/WritingMode.hpp"
+#include "Krystal.Booey/Style/AnchorSizeDimension.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/DOM/EventTarget.hpp"
 #include "Krystal.Core/Types/CheckedPtr.hpp"
@@ -168,17 +169,6 @@ namespace krys::boo::style
   using AnchorPositionedStates = HashMap<AnchorPositionedKey, UniquePtr<AnchorPositionedState>>;
 
   using AnchorsForAnchorName = HashMap<ResolvedScopedName, SmallList<WeakRef<const RenderBoxModelObject>>>;
-
-  // https://drafts.csswg.org/css-anchor-position-1/#typedef-anchor-size
-  enum class AnchorSizeDimension : uint8_t
-  {
-    Width,
-    Height,
-    Block,
-    Inline,
-    SelfBlock,
-    SelfInline
-  };
 
   struct ResolvedAnchor
   {

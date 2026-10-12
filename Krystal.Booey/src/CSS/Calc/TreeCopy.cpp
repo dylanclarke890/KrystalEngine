@@ -1,4 +1,4 @@
-#include "Krystal.Booey/CSS/Calc/TreeCopy.hpp"
+﻿#include "Krystal.Booey/CSS/Calc/TreeCopy.hpp"
 #include "Krystal.Booey/CSS/Calc/Tree.hpp"
 #include "Krystal.Core/Utils/Apply.hpp"
 
@@ -13,7 +13,7 @@ namespace krys::boo::css::calc
   KRYS_NODISCARD static auto Copy(const Child &) noexcept -> Child;
 
   template <Leaf Op>
-  Child Copy(const Op &) noexcept;
+  static Child Copy(const Op &) noexcept;
   template <typename Op>
   static auto Copy(const IndirectNode<Op> &) noexcept -> Child;
   static auto Copy(const IndirectNode<Anchor> &) noexcept -> Child;
@@ -53,7 +53,8 @@ namespace krys::boo::css::calc
 
   Children Copy(const Children &children) noexcept
   {
-    SmallList<Child> copyChildren;
+    List<Child> copyChildren;
+    copyChildren.reserve(children.size());
     for (const auto &child : children)
     {
       copyChildren.push_back(Copy(child));
@@ -68,7 +69,7 @@ namespace krys::boo::css::calc
   }
 
   template <Leaf Op>
-  Child Copy(const Op &root) noexcept
+  static Child Copy(const Op &root) noexcept
   {
     return {root};
   }
@@ -110,5 +111,4 @@ namespace krys::boo::css::calc
                  .Stage = tree.Stage,
                  .RequiresConversionData = tree.RequiresConversionData};
   }
-
 }

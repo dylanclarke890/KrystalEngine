@@ -1,6 +1,7 @@
-#include "Krystal.Booey/CSS/Calc/CalcType.hpp"
+﻿#include "Krystal.Booey/CSS/Calc/CalcType.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericCategory.hpp"
 #include "Krystal.Booey/CSS/Values/Units.hpp"
+#include "Krystal.Core/Maths/Base.hpp"
 
 namespace krys::boo::css::calc
 {
@@ -139,16 +140,14 @@ namespace krys::boo::css::calc
     {
       // If finalType[baseType] exists, increment its value by power. Otherwise, set finalType[baseType] to
       // power.
-      finalType[baseType] = static_cast<int8>(type1[baseType] + type2[baseType]);
-
-      // TODO: revisit this later, for now accept that overflow may happen.
       // NOTE: This is amended in our implementation to return `failure` if exponent would overflow.
-      // auto checkedExponent = checkedSum<int8>(type1[baseType], type2[baseType]);
-      // if (checkedExponent.hasOverflowed())
-      // {
-      //   return null;
-      // }
-      // finalType[baseType] = checkedExponent.value();
+      const int32 exponent = int32 {type1[baseType]} + int32 {type2[baseType]};
+      if (exponent < Limits<Exponent>::min() || exponent > Limits<Exponent>::max())
+      {
+        return null;
+      }
+
+      finalType[baseType] = static_cast<Exponent>(exponent);
     }
 
     // Set finalType’s percent hint to type1’s percent hint.
@@ -171,7 +170,7 @@ namespace krys::boo::css::calc
     // 2. For each unit → exponent of type, set result[unit] to (-1 * exponent).
     for (auto unit : Type::AllBaseTypes())
     {
-      result[unit] = -1 * type[unit];
+      result[unit] = static_cast<Exponent>(-1 * type[unit]);
     }
 
     // 3. Return result.
@@ -359,11 +358,11 @@ namespace krys::boo::css::calc
       }
       case css::Category::LengthPercentage:
       {
-        return PercentHint::Length;
+        return calc::PercentHint::Length;
       }
       case css::Category::AnglePercentage:
       {
-        return PercentHint::Angle;
+        return calc::PercentHint::Angle;
       }
     }
 

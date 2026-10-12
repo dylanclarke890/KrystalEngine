@@ -53,7 +53,7 @@ namespace krys::boo::css
 
   KRYS_NODISCARD inline double CanonicalizeResolution(double value, ResolutionUnit unit) noexcept
   {
-    return ConvertResolution<ResolutionUnit::Dpi>(value, unit);
+    return ConvertResolution<ResolutionUnit::Dppx>(value, unit);
   }
 
   template <auto R, typename V>

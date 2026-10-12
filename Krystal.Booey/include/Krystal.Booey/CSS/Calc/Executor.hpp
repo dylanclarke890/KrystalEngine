@@ -1,24 +1,25 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Calc/Operator.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
+#include <cmath>
 #include <numbers>
 #include <numeric>
 #include <ranges>
 
-/// @summary Contains maths operations used by css::calc::Tree and style::calc::Tree.
 namespace krys::boo::css::calc
 {
+  // This file contains an implementation of math operations used by calc::Tree and style::calc::Tree.
+
   template <typename Range>
-  concept FloatingPointRange = requires(Range range) {
-    { *range.begin() } -> FloatingPoint;
-    { *range.end() } -> FloatingPoint;
-  };
+  concept FloatingPointRange =
+    std::ranges::input_range<Range> && FloatingPoint<std::ranges::range_value_t<Range>>;
 
   template <auto>
   struct OperatorExecutor;
@@ -59,7 +60,7 @@ namespace krys::boo::css::calc
     }
 
     template <typename T, std::invocable<const T &> Functor>
-    KRYS_NODISCARD double operator()(const SmallList<T> &range, Functor &&functor) const noexcept
+    KRYS_NODISCARD double operator()(const List<T> &range, Functor &&functor) const noexcept
     {
       return ExecuteOperation<Operator::Sum>(range | std::views::transform(std::forward<Functor>(functor)));
     }
@@ -95,7 +96,7 @@ namespace krys::boo::css::calc
     }
 
     template <typename T, std::invocable<const T &> Functor>
-    KRYS_NODISCARD double operator()(const SmallList<T> &range, Functor &&functor) const noexcept
+    KRYS_NODISCARD double operator()(const List<T> &range, Functor &&functor) const noexcept
     {
       return ExecuteOperation<Operator::Product>(range
                                                  | std::views::transform(std::forward<Functor>(functor)));
@@ -165,7 +166,7 @@ namespace krys::boo::css::calc
     }
 
     template <typename T, std::invocable<const T &> Functor>
-    KRYS_NODISCARD double operator()(const SmallList<T> &range, Functor &&functor) const noexcept
+    KRYS_NODISCARD double operator()(const List<T> &range, Functor &&functor) const noexcept
     {
       return ExecuteOperation<Operator::Min>(range | std::views::transform(std::forward<Functor>(functor)));
     }
@@ -207,14 +208,20 @@ namespace krys::boo::css::calc
     KRYS_NODISCARD T operator()(T val, T max) const noexcept
     {
       if (std::isnan(val))
+      {
         return val;
+      }
+
       if (std::isnan(max))
+      {
         return max;
+      }
+
       return std::max(val, max);
     }
 
     template <typename T, std::invocable<const T &> Functor>
-    KRYS_NODISCARD double operator()(const SmallList<T> &range, Functor &&functor) const noexcept
+    KRYS_NODISCARD double operator()(const List<T> &range, Functor &&functor) const noexcept
     {
       return ExecuteOperation<Operator::Max>(range | std::views::transform(std::forward<Functor>(functor)));
     }
@@ -318,9 +325,13 @@ namespace krys::boo::css::calc
       if (!std::isinf(valueToRound) && std::isinf(roundingInterval))
       {
         if (!valueToRound)
+        {
           return valueToRound;
+        }
+
         return std::signbit(valueToRound) ? -Limits<double>::infinity() : +0.0;
       }
+
       return GetNearestMultiples(valueToRound, roundingInterval).first;
     }
 
@@ -516,7 +527,7 @@ namespace krys::boo::css::calc
     }
 
     template <typename T, std::invocable<const T &> Functor>
-    double operator()(const SmallList<T> &range, Functor &&functor) const noexcept
+    KRYS_NODISCARD double operator()(const List<T> &range, Functor &&functor) const noexcept
     {
       return ExecuteOperation<Operator::Hypot>(range | std::views::transform(std::forward<Functor>(functor)));
     }

@@ -5,13 +5,13 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
+#include <algorithm>
 #include <tuple>
-#include <ranges>
 
 namespace krys::boo::css
 {
+  /// @brief The symbols a calc() may reference, and the unit each one resolves to.
   class AllowedSymbols
   {
     using AllowedSymbolsList = SmallList<std::tuple<ValueId, UnitType>, 4uz>;
@@ -45,8 +45,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool Contains(ValueId id) const noexcept
     {
-      auto it = std::ranges::find_if(_table, [id](const auto &pair) { return std::get<0>(pair) == id; });
-      return it != _table.end();
+      return Get(id).has_value();
     }
   };
 }

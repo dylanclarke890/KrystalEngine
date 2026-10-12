@@ -1,7 +1,8 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
+#include "Krystal.Core/Attributes.hpp"
 
 namespace krys::boo::css
 {
@@ -15,10 +16,10 @@ namespace krys::boo::css::calc
 
   struct SerialisationOptions
   {
-    /// @brief The allowed numeric range for the calculated result.
-    css::Range range;
+    // `Range` represents the allowed numeric range for the calculated result.
+    css::Range Range;
 
-    /// @brief The context used for CSS serialization state.
+    // `SerialisationContext` is the context used for CSS serialisation state.
     const css::SerialisationContext &SerialisationContext;
   };
 

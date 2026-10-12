@@ -1,13 +1,16 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Calc/CalcType.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/PrimitiveNumeric.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
 #include "Krystal.Booey/CSS/Values/Units.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Types/Variant.hpp"
 
 namespace krys::boo::style
 {
@@ -86,7 +89,7 @@ namespace krys::boo::css::calc
     bool operator==(const Percentage &) const noexcept = default;
   };
 
-  enum class Dimension : uint8_t
+  enum class Dimension : uint8
   {
     Length,
     Angle,
@@ -102,7 +105,7 @@ namespace krys::boo::css::calc
     constexpr static bool IsNumeric = true;
 
     double Value;
-    Dimension Dimension;
+    calc::Dimension Dimension;
 
     bool operator==(const CanonicalDimension &) const noexcept = default;
   };
@@ -148,7 +151,7 @@ namespace krys::boo::css::calc
     constexpr static bool IsLeaf = true;
     constexpr static auto Id = ValueId::SiblingIndex;
 
-    // <sibling-Index()> = sibling-Index()
+    // <sibling-index()> = sibling-index()
     //     - INPUT: none
     //     - OUTPUT: integer
 
@@ -158,7 +161,7 @@ namespace krys::boo::css::calc
   template <typename Operation>
   struct IndirectNode
   {
-    Type Type;
+    calc::Type Type;
     UniquePtr<Operation> Op;
 
     KRYS_NODISCARD const Operation &operator*() const noexcept
@@ -193,7 +196,7 @@ namespace krys::boo::css::calc
 
     KRYS_NODISCARD bool operator==(const IndirectNode<Operation> &other) const noexcept
     {
-      return Type == other.Type && (Op.get() == other.Op.get() || *Op == *other.Op);
+      return Type == other.Type && (Op == other.Op || (Op && other.Op && *Op == *other.Op));
     }
   };
 
@@ -235,18 +238,18 @@ namespace krys::boo::css::calc
 
   struct Children
   {
-    using iterator = typename SmallList<Child>::iterator;
-    using reverse_iterator = typename SmallList<Child>::reverse_iterator;
-    using const_iterator = typename SmallList<Child>::const_iterator;
-    using const_reverse_iterator = typename SmallList<Child>::const_reverse_iterator;
-    using value_type = typename SmallList<Child>::value_type;
+    using iterator = typename List<Child>::iterator;
+    using reverse_iterator = typename List<Child>::reverse_iterator;
+    using const_iterator = typename List<Child>::const_iterator;
+    using const_reverse_iterator = typename List<Child>::const_reverse_iterator;
+    using value_type = typename List<Child>::value_type;
 
-    SmallList<Child> Value;
+    List<Child> Value;
 
     Children(Children &&) noexcept;
-    Children(SmallList<Child> &&) noexcept;
+    Children(List<Child> &&) noexcept;
     Children &operator=(Children &&) noexcept;
-    Children &operator=(SmallList<Child> &&) noexcept;
+    Children &operator=(List<Child> &&) noexcept;
 
     KRYS_NODISCARD iterator begin() noexcept;
     KRYS_NODISCARD iterator end() noexcept;
@@ -276,8 +279,8 @@ namespace krys::boo::css::calc
   struct Tree
   {
     Child Root;
-    Type Type;
-    Stage Stage;
+    calc::Type Type;
+    calc::Stage Stage;
 
     // `RequiresConversionData` is used both to both indicate whether eager evaluation of the tree (at parse
     // time) is possible or not and to trigger a warning in `css::calc::Value::DoubleValueDeprecated` that the
@@ -289,14 +292,14 @@ namespace krys::boo::css::calc
 
   struct Sum
   {
-    Children Children;
+    calc::Children Children;
 
     bool operator==(const Sum &) const noexcept = default;
   };
 
   struct Product
   {
-    Children Children;
+    calc::Children Children;
 
     bool operator==(const Product &) const noexcept = default;
   };
@@ -322,14 +325,14 @@ namespace krys::boo::css::calc
   {
     constexpr static auto Id = ValueId::Min;
 
-    // <Min()>   = Min( <calc-sum># )
+    // <min()>   = min( <calc-sum># )
     //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
-    //     - OUTPUT: consistent Type
+    //     - OUTPUT: consistent type
     constexpr static auto Input = AllowedTypes::Any;
     constexpr static auto Merge = MergePolicy::Consistent;
     constexpr static auto Output = OutputTransform::None;
 
-    Children Children;
+    calc::Children Children;
 
     bool operator==(const Min &) const noexcept = default;
   };
@@ -338,14 +341,14 @@ namespace krys::boo::css::calc
   {
     constexpr static auto Id = ValueId::Max;
 
-    // <Max()>   = Max( <calc-sum># )
+    // <max()>   = max( <calc-sum># )
     //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
-    //     - OUTPUT: consistent Type
+    //     - OUTPUT: consistent type
     constexpr static auto Input = AllowedTypes::Any;
     constexpr static auto Merge = MergePolicy::Consistent;
     constexpr static auto Output = OutputTransform::None;
 
-    Children Children;
+    calc::Children Children;
 
     bool operator==(const Max &) const noexcept = default;
   };
@@ -356,7 +359,7 @@ namespace krys::boo::css::calc
 
     // <clamp()> = clamp( [ <calc-sum> | none ], <calc-sum>, [ <calc-sum> | none ] )
     //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
-    //     - OUTPUT: consistent Type
+    //     - OUTPUT: consistent type
     constexpr static auto Input = AllowedTypes::Any;
     constexpr static auto Merge = MergePolicy::Consistent;
     constexpr static auto Output = OutputTransform::None;
@@ -375,7 +378,7 @@ namespace krys::boo::css::calc
 
     // <round()> = round( <rounding-strategy>?, <calc-sum>, <calc-sum> )
     //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
-    //     - OUTPUT: consistent Type
+    //     - OUTPUT: consistent type
     constexpr static auto Input = AllowedTypes::Any;
     constexpr static auto Merge = MergePolicy::Consistent;
     constexpr static auto Output = OutputTransform::None;
@@ -384,7 +387,7 @@ namespace krys::boo::css::calc
 
     // <round()> = round( <rounding-strategy>?, <calc-sum> )
     //     - INPUT: "consistent" <number>
-    //     - OUTPUT: consistent Type
+    //     - OUTPUT: consistent type
 
     // NOTE: This is special cased in the code.
 
@@ -400,7 +403,7 @@ namespace krys::boo::css::calc
 
     // <round()> = round( <rounding-strategy>?, <calc-sum>, <calc-sum> )
     //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
-    //     - OUTPUT: consistent Type
+    //     - OUTPUT: consistent type
     constexpr static auto Input = AllowedTypes::Any;
     constexpr static auto Merge = MergePolicy::Consistent;
     constexpr static auto Output = OutputTransform::None;
@@ -409,7 +412,7 @@ namespace krys::boo::css::calc
 
     // <round()> = round( <rounding-strategy>?, <calc-sum> )
     //     - INPUT: "consistent" <number>
-    //     - OUTPUT: consistent Type
+    //     - OUTPUT: consistent type
 
     // NOTE: This is special cased in the code.
 
@@ -425,7 +428,7 @@ namespace krys::boo::css::calc
 
     // <round()> = round( <rounding-strategy>?, <calc-sum>, <calc-sum> )
     //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
-    //     - OUTPUT: consistent Type
+    //     - OUTPUT: consistent type
     constexpr static auto Input = AllowedTypes::Any;
     constexpr static auto Merge = MergePolicy::Consistent;
     constexpr static auto Output = OutputTransform::None;
@@ -434,7 +437,7 @@ namespace krys::boo::css::calc
 
     // <round()> = round( <rounding-strategy>?, <calc-sum> )
     //     - INPUT: "consistent" <number>
-    //     - OUTPUT: consistent Type
+    //     - OUTPUT: consistent type
 
     // NOTE: This is special cased in the code.
 
@@ -450,7 +453,7 @@ namespace krys::boo::css::calc
 
     // <round()> = round( <rounding-strategy>?, <calc-sum>, <calc-sum> )
     //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
-    //     - OUTPUT: consistent Type
+    //     - OUTPUT: consistent type
     constexpr static auto Input = AllowedTypes::Any;
     constexpr static auto Merge = MergePolicy::Consistent;
     constexpr static auto Output = OutputTransform::None;
@@ -459,7 +462,7 @@ namespace krys::boo::css::calc
 
     // <round()> = round( <rounding-strategy>?, <calc-sum> )
     //     - INPUT: "consistent" <number>
-    //     - OUTPUT: consistent Type
+    //     - OUTPUT: consistent type
 
     // NOTE: This is special cased in the code.
 
@@ -475,9 +478,9 @@ namespace krys::boo::css::calc
 
     // <mod()>   = mod( <calc-sum>, <calc-sum> )
     //     - INPUT: "same" <number>, <dimension>, or <percentage>
-    //     - OUTPUT: same Type
+    //     - OUTPUT: same type
     constexpr static auto Input = AllowedTypes::Any;
-    // FIXME: Spec says this should enforce same Type, but tests indicate it should be consistent Type.
+    // FIXME: Spec says this should enforce same type, but tests indicate it should be consistent type.
     constexpr static auto Merge = MergePolicy::Consistent;
     constexpr static auto Output = OutputTransform::None;
 
@@ -493,9 +496,9 @@ namespace krys::boo::css::calc
 
     // <rem()>   = rem( <calc-sum>, <calc-sum> )
     //     - INPUT: "same" <number>, <dimension>, or <percentage>
-    //     - OUTPUT: same Type
+    //     - OUTPUT: same type
     constexpr static auto Input = AllowedTypes::Any;
-    // FIXME: Spec says this should enforce same Type, but tests indicate it should be consistent Type.
+    // FIXME: Spec says this should enforce same type, but tests indicate it should be consistent type.
     constexpr static auto Merge = MergePolicy::Consistent;
     constexpr static auto Output = OutputTransform::None;
 
@@ -620,7 +623,7 @@ namespace krys::boo::css::calc
 
     // <pow()>   = pow( <calc-sum>, <calc-sum> )
     //     - INPUT: "consistent" <number>
-    //     - OUTPUT: consistent Type
+    //     - OUTPUT: consistent type
     constexpr static auto Input = AllowedTypes::Number;
     constexpr static auto Merge = MergePolicy::Consistent;
     constexpr static auto Output = OutputTransform::None;
@@ -652,12 +655,12 @@ namespace krys::boo::css::calc
 
     // <hypot()> = hypot( <calc-sum># )
     //     - INPUT: "consistent" <number>, <dimension>, or <percentage>
-    //     - OUTPUT: consistent Type
+    //     - OUTPUT: consistent type
     constexpr static auto Input = AllowedTypes::Any;
     constexpr static auto Merge = MergePolicy::Consistent;
     constexpr static auto Output = OutputTransform::None;
 
-    Children Children;
+    calc::Children Children;
 
     bool operator==(const Hypot &) const noexcept = default;
   };
@@ -701,7 +704,7 @@ namespace krys::boo::css::calc
 
     // <abs()>   = abs( <calc-sum> )
     //     - INPUT: any
-    //     - OUTPUT: Input Type
+    //     - OUTPUT: input type
     constexpr static auto Input = AllowedTypes::Any;
     constexpr static auto Output = OutputTransform::None;
 
@@ -736,7 +739,7 @@ namespace krys::boo::css::calc
       struct Auto
       {
         PropertyId Property;
-        size_t Index;
+        uint32 Index;
 
         bool operator==(const Auto &) const noexcept = default;
       };
@@ -758,7 +761,7 @@ namespace krys::boo::css::calc
 
     // <random()> = random( <random-value-sharing>? , <calc-sum>, <calc-sum>, <calc-sum>? )
     //     - INPUT: "same" <number>, <dimension>, or <percentage>
-    //     - OUTPUT: same Type
+    //     - OUTPUT: same type
     constexpr static auto Input = AllowedTypes::Any;
     constexpr static auto Merge = MergePolicy::Same;
     constexpr static auto Output = OutputTransform::None;
@@ -794,7 +797,7 @@ namespace krys::boo::css::calc
 
   struct AnchorSide
   {
-    // <anchor-Side> = inside | outside | top | left | right | bottom | start | end | self-start | self-end
+    // <anchor-side> = inside | outside | top | left | right | bottom | start | end | self-start | self-end
     // | <percentage> | center
     Variant<ValueId, Child> Value;
 
@@ -810,7 +813,7 @@ namespace krys::boo::css::calc
   {
     constexpr static auto Id = ValueId::Anchor;
 
-    // <anchor()> = anchor( <anchor-element>? && <anchor-Side>, <length-percentage>? )
+    // <anchor()> = anchor( <anchor-element>? && <anchor-side>, <length-percentage>? )
 
     // Can't use Style::ScopedName here, since the scope ordinal is not available at
     // parsing time.
@@ -829,7 +832,7 @@ namespace krys::boo::css::calc
     // <anchor-element> = <dashed-ident>
     // <anchor-size> = width | height | block | inline | self-block | self-inline
 
-    // Can't use style::ScopedName here, since the scope ordinal is not available at
+    // Can't use Style::ScopedName here, since the scope ordinal is not available at
     // parsing time.
     CSSOMStringAtom ElementName;                 // <anchor-element>
     Maybe<style::AnchorSizeDimension> Dimension; // <anchor-size>
@@ -844,13 +847,13 @@ namespace krys::boo::css::calc
   template <typename Operation>
   struct ChildConstruction
   {
-    KRYS_NODISCARD static Child Create(Operation &&Op, Type Type) noexcept
+    KRYS_NODISCARD static Child Create(Operation &&op, Type type) noexcept
     {
-      return Child {IndirectNode<Operation> {Type, CreateUnique<Operation>(krys::move(Op))}};
+      return Child {IndirectNode<Operation> {type, CreateUnique<Operation>(krys::move(op))}};
     }
   };
 
-  // Specialized implementation of ChildConstruction for leaf nodes, needed to avoid `makeUniqueRef`.
+  // Specialized implementation of ChildConstruction for leaf nodes, needed to avoid `CreateUnique`.
   template <Leaf T>
   struct ChildConstruction<T>
   {
@@ -866,30 +869,30 @@ namespace krys::boo::css::calc
   };
 
   template <typename Operation>
-  Child CreateChild(Operation op) noexcept
+  KRYS_NODISCARD Child CreateChild(Operation op) noexcept
   {
     return ChildConstruction<Operation>::Create(krys::move(op));
   }
 
   template <typename Operation>
-  Child CreateChild(Operation op, Type Type) noexcept
+  KRYS_NODISCARD Child CreateChild(Operation op, Type type) noexcept
   {
-    return ChildConstruction<Operation>::Create(krys::move(op), Type);
+    return ChildConstruction<Operation>::Create(krys::move(op), type);
   }
 
-  // MARK: CSSCalc::Type Evaluation
+  // MARK: Type Evaluation
 
-  // Gets the Type stored in the IndirectNode.
+  // Gets the type stored in the IndirectNode.
   template <typename T>
   KRYS_NODISCARD inline Type GetType(const IndirectNode<T> &root) noexcept
   {
     return root.Type;
   }
 
-  // Gets the Type representing A CanonicalDimension::Dimension.
+  // Gets the Type representing a Dimension.
   KRYS_NODISCARD Type GetType(Dimension) noexcept;
 
-  // Gets the Type of the leaf node.
+  // Gets the type of the leaf node.
   KRYS_NODISCARD Type GetType(const Number &) noexcept;
   KRYS_NODISCARD Type GetType(const Percentage &) noexcept;
   KRYS_NODISCARD Type GetType(const NonCanonicalDimension &) noexcept;
@@ -898,10 +901,10 @@ namespace krys::boo::css::calc
   KRYS_NODISCARD Type GetType(const SiblingCount &) noexcept;
   KRYS_NODISCARD Type GetType(const SiblingIndex &) noexcept;
 
-  // Gets the Type of the child node.
+  // Gets the type of the child node.
   KRYS_NODISCARD Type GetType(const Child &) noexcept;
 
-  // Constructs the nodes's Type from it the types of its arguments. Returns `std::nullopt` on failure.
+  // Constructs the nodes's type from it the types of its arguments. Returns `null` on failure.
   KRYS_NODISCARD Maybe<Type> ToType(const Sum &) noexcept;
   KRYS_NODISCARD Maybe<Type> ToType(const Product &) noexcept;
   KRYS_NODISCARD Maybe<Type> ToType(const Negate &) noexcept;
@@ -934,7 +937,7 @@ namespace krys::boo::css::calc
 
   // MARK: UnitType Evaluation
 
-  // Maps CanonicalDimension::Dimension to its UnitType counterpart.
+  // Maps Dimension to its UnitType counterpart.
   KRYS_NODISCARD constexpr UnitType ToUnit(const Dimension &dimension) noexcept
   {
     switch (dimension)
@@ -950,7 +953,7 @@ namespace krys::boo::css::calc
     krys_unreachable();
   }
 
-  /// @brief Maps Numeric Type to its UnitType counterpart.
+  // Maps Numeric type to its UnitType counterpart.
   KRYS_NODISCARD constexpr UnitType ToUnit(const Number &) noexcept
   {
     return UnitType::Number;
@@ -981,13 +984,13 @@ namespace krys::boo::css::calc
 
   // Convenience constructors
 
-  /// @brief Creates the appropriate child Type (number, percentage, canonical-dimensions,
-  /// non-canonical-dimension) based on the UnitType.
+  // Creates the appropriate child type (number, percentage, canonical-dimensions, non-canonical-dimension)
+  // based on the UnitType.
   KRYS_NODISCARD Child CreateNumeric(double, UnitType) noexcept;
 
   KRYS_NODISCARD inline Sum Add(Child &&a, Child &&b) noexcept
   {
-    SmallList<Child> sumChildren;
+    List<Child> sumChildren;
     sumChildren.push_back(krys::move(a));
     sumChildren.push_back(krys::move(b));
 
@@ -996,7 +999,7 @@ namespace krys::boo::css::calc
 
   KRYS_NODISCARD inline Product Multiply(Child &&a, Child &&b) noexcept
   {
-    SmallList<Child> productChildren;
+    List<Child> productChildren;
     productChildren.push_back(krys::move(a));
     productChildren.push_back(krys::move(b));
 
@@ -1329,7 +1332,7 @@ namespace krys::boo::css::calc
 
   template <typename T>
   requires std::constructible_from<Node, T>
-  Child::Child(T &&Value) noexcept : Value(std::forward<T>(Value))
+  Child::Child(T &&value) noexcept : Value(std::forward<T>(value))
   {
   }
 
@@ -1349,7 +1352,7 @@ namespace krys::boo::css::calc
   {
   }
 
-  inline Children::Children(SmallList<Child> &&other) noexcept : Value(krys::move(other))
+  inline Children::Children(List<Child> &&other) noexcept : Value(krys::move(other))
   {
   }
 
@@ -1359,7 +1362,7 @@ namespace krys::boo::css::calc
     return *this;
   }
 
-  inline Children &Children::operator=(SmallList<Child> &&other) noexcept
+  inline Children &Children::operator=(List<Child> &&other) noexcept
   {
     Value = krys::move(other);
     return *this;
@@ -1452,7 +1455,7 @@ namespace std
   class tuple_element<I, krys::boo::css::calc::Op>                                                           \
   {                                                                                                          \
   public:                                                                                                    \
-    using Type = decltype(krys::boo::css::calc::get<I>(std::declval<krys::boo::css::calc::Op>()));           \
+    using type = decltype(krys::boo::css::calc::get<I>(std::declval<krys::boo::css::calc::Op>()));           \
   }
 
   OP_TUPLE_LIKE_CONFORMANCE(Sum, 1);
@@ -1484,7 +1487,7 @@ namespace std
   OP_TUPLE_LIKE_CONFORMANCE(Sign, 1);
   OP_TUPLE_LIKE_CONFORMANCE(Progress, 3);
   OP_TUPLE_LIKE_CONFORMANCE(Random, 4);
-  // FIXME (webkit.org/B/280798): make Anchor and AnchorSize tuple-like
+  // FIXME (webkit.org/b/280798): make Anchor and AnchorSize tuple-like
   OP_TUPLE_LIKE_CONFORMANCE(Anchor, 0);
   OP_TUPLE_LIKE_CONFORMANCE(AnchorSize, 0);
 

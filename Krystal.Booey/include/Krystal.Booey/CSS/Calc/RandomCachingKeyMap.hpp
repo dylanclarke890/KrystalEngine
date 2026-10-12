@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Calc/RandomCachingKey.hpp"
 #include "Krystal.Core/RefCounted.hpp"
@@ -28,15 +28,12 @@ namespace krys::boo::css::calc
         return it->second;
       }
 
-      // TODO: probably want to do this better but works for now.
-      std::random_device rd;
-      std::mt19937 gen {rd()};
-      std::uniform_real_distribution<double> dis(0.0, 1.0);
+      // TODO: upstream uses a cryptographically random unit interval (noting it probably doesn't need to be);
+      // a per-thread Mersenne Twister is enough here.
+      thread_local std::mt19937_64 generator {std::random_device {}()};
+      std::uniform_real_distribution<double> distribution {0.0, 1.0};
 
-      auto next = dis(gen);
-      _map[key] = next;
-
-      return next;
+      return _map.emplace(key, distribution(generator)).first->second;
     }
   };
 }
