@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
 #include "Krystal.Booey/CSS/Parser/NumericValue.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenSerialisationMode.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenType.hpp"
@@ -18,6 +19,12 @@ namespace krys::boo::css
   class Token
   {
   private:
+    using ValueIdStorage = std::underlying_type_t<css::ValueId>;
+
+    /// @brief Marks `_valueId` as not looked up yet.
+    constexpr static ValueIdStorage UncachedValueId = std::numeric_limits<ValueIdStorage>::max();
+    static_assert(TotalValueKeywords < UncachedValueId);
+
     TokenType _type : BitCount<TokenType>() {TokenType::Uninitialized};
     BlockTokenType _blockType : BitCount<BlockTokenType>() {BlockTokenType::None};
     HashTokenType _hashType : BitCount<HashTokenType>() {HashTokenType::Unrestricted};
@@ -27,6 +34,7 @@ namespace krys::boo::css
     char32 _delimiter {0};
     char32 _unicodeRangeStart {0};
     char32 _unicodeRangeEnd {0};
+    mutable ValueIdStorage _valueId {UncachedValueId};
     SmallList<char8, 32uz> _codePoints;
 
   public:
@@ -46,7 +54,8 @@ namespace krys::boo::css
       AppendDataInternal(utf32_stringview(&codePoint, 1uz));
     }
 
-    Token(TokenType type, utf32_stringview codePoints) noexcept : _type(type)
+    Token(TokenType type, utf32_stringview codePoints, BlockTokenType blockType = BlockTokenType::None) noexcept
+        : _type(type), _blockType(blockType)
     {
       krys_debug_assert(_type == TokenType::Ident || _type == TokenType::Function || _type == TokenType::Url
                         || _type == TokenType::String);
@@ -119,7 +128,7 @@ namespace krys::boo::css
         return css::ValueId::Invalid;
       }
 
-      return FindValueKeyword(IdentCodePoints());
+      return IdentOrFunctionId();
     }
 
     KRYS_NODISCARD css::ValueId FunctionId() const noexcept
@@ -129,7 +138,7 @@ namespace krys::boo::css
         return css::ValueId::Invalid;
       }
 
-      return FindValueKeyword(IdentCodePoints());
+      return IdentOrFunctionId();
     }
 
     KRYS_NODISCARD css::PropertyId PropertyId() const noexcept
@@ -139,7 +148,7 @@ namespace krys::boo::css
         return css::PropertyId::Invalid;
       }
 
-      return FindProperty(IdentCodePoints());
+      return PropertyIdFromName(IdentCodePoints());
     }
 
     void NumericValue(css::NumericValue value) noexcept
@@ -212,8 +221,29 @@ namespace krys::boo::css
                    TokenSerialisationMode mode = TokenSerialisationMode::Normal) const noexcept;
 
   private:
+    KRYS_NODISCARD css::ValueId IdentOrFunctionId() const noexcept
+    {
+      krys_debug_assert(_type == TokenType::Ident || _type == TokenType::Function);
+
+      if (_valueId == UncachedValueId)
+      {
+        _valueId = static_cast<ValueIdStorage>(ValueIdFromName(IdentCodePoints()));
+      }
+
+      return static_cast<css::ValueId>(_valueId);
+    }
+
     void AppendDataInternal(utf32_stringview codePoints) noexcept
     {
+      _valueId = UncachedValueId;
+
+      // Empty strings and URLs are valid, but Encode reports empty input as an error.
+      if (codePoints.empty())
+      {
+        _codePoints.clear();
+        return;
+      }
+
       auto encodeResult = krys::text::Encode<krys::text::UTF8>(codePoints);
       krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
       _codePoints.assign(encodeResult.Output.begin(), encodeResult.Output.end());

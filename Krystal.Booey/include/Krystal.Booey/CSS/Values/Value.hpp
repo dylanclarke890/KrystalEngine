@@ -32,6 +32,9 @@ namespace krys::boo::css
 
   class Value : public RefCounted<Value>
   {
+    // Needs access to the protected operator delete.
+    friend class RefCounted<Value>;
+
   public:
     KRYS_TYPE_CAST_TRAITS_ACCESS();
 

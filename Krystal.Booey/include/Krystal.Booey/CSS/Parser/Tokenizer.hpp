@@ -113,6 +113,10 @@ namespace krys::boo::css
     /// @brief Creates a Token for a block start token (e.g., `{`, `[`, `(`).
     KRYS_NODISCARD Token BlockStart(TokenType type) noexcept;
 
+    /// @brief Creates a Token for a named block start token (e.g. a function token), which opens a block
+    /// of `blockType`.
+    KRYS_NODISCARD Token BlockStart(TokenType blockType, TokenType type, utf32_stringview name) noexcept;
+
     /// @brief Creates a Token for a block start token (e.g., `}`, `]`, `)`). May not actually be classed
     /// as a block end token depending on the current block stack.
     KRYS_NODISCARD Token BlockEnd(TokenType type) noexcept;

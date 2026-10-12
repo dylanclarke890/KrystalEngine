@@ -192,7 +192,6 @@ namespace krys::boo::css
         break;
       case TokenType::UnicodeRange:
       {
-        // Not in WebKit, which has no unicode-range token.
         auto range = _unicodeRangeStart == _unicodeRangeEnd
                      ? std::format("U+{:X}", static_cast<uint32>(_unicodeRangeStart))
                      : std::format("U+{:X}-{:X}", static_cast<uint32>(_unicodeRangeStart),

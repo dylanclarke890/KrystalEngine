@@ -293,8 +293,6 @@ class GenerationContext:
                 for_header="Krystal.Booey/CSS/Values/ValueId.hpp",
                 generator_name=GENERATOR_NAME,
                 headers=[
-                    "Krystal.Booey/CSS/Parser/ParserContext.hpp",
-                    "Krystal.Booey/CSS/Properties/Property.hpp",
                     "Krystal.Core/Types/SmallList.hpp",
                     "Krystal.Core/Types/String.hpp",
                 ],

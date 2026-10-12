@@ -75,7 +75,9 @@ target_sources(Krystal.Booey.Tests
 	PRIVATE
 		# CSS
 		# tests/CSS/Parser/Parser.cpp
-		# tests/CSS/Parser/Tokenizer.cpp
+		tests/CSS/Parser/KeywordLookup.cpp
+		tests/CSS/Parser/Token.cpp
+		tests/CSS/Parser/Tokenizer.cpp
 		# tests/CSS/Selectors/SelectorParser.cpp
 
 		# DOM

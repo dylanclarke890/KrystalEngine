@@ -89,6 +89,7 @@ add_custom_command(
 set(KRYSTAL_BOOEY_CSS_HEADERS
   # Slice 1: Tokenizer
   include/Krystal.Booey/CSS/Parser/InputStream.hpp
+  include/Krystal.Booey/CSS/Parser/KeywordLookup.hpp
   include/Krystal.Booey/CSS/Parser/NumericValue.hpp
   include/Krystal.Booey/CSS/Parser/ParseError.hpp
   include/Krystal.Booey/CSS/Parser/ParserContext.hpp
@@ -111,6 +112,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
 
   # Slice 1: Tokenizer
   src/CSS/Markup.cpp
+  src/CSS/Parser/KeywordLookup.cpp
   src/CSS/Parser/Token.cpp
   src/CSS/Parser/Tokenizer.cpp
 )

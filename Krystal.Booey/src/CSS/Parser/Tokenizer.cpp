@@ -308,7 +308,7 @@ namespace krys::boo::css
       if (next == U'"' || next == U'\''
           || (IsWhitespace(next) && (_inputStream.Peek(1uz) == U'"' || _inputStream.Peek(1uz) == U'\'')))
       {
-        return Token {TokenType::Function, string};
+        return BlockStart(TokenType::OpenParen, TokenType::Function, string);
       }
 
       return ConsumeUrlToken();
@@ -317,7 +317,7 @@ namespace krys::boo::css
     if (_inputStream.NextInputCharacter() == U'(')
     {
       _inputStream.Consume();
-      return Token {TokenType::Function, string};
+      return BlockStart(TokenType::OpenParen, TokenType::Function, string);
     }
 
     return Token {TokenType::Ident, string};
@@ -819,6 +819,14 @@ namespace krys::boo::css
 
     _blockStack.push_back(type);
     return Token(type, BlockTokenType::Start);
+  }
+
+  Token Tokenizer::BlockStart(TokenType blockType, TokenType type, utf32_stringview name) noexcept
+  {
+    krys_debug_assert(blockType == TokenType::OpenParen && type == TokenType::Function);
+
+    _blockStack.push_back(blockType);
+    return Token(type, name, BlockTokenType::Start);
   }
 
   Token Tokenizer::BlockEnd(TokenType type) noexcept
