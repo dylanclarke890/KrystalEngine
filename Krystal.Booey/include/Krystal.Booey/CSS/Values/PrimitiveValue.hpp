@@ -347,6 +347,12 @@ namespace krys::boo::css
       krys_debug_assert(IsCustomIdent());
       return *_value.String;
     }
+
+    KRYS_NODISCARD css::PropertyId PropertyId() const noexcept
+    {
+      krys_debug_assert(IsPropertyId());
+      return _value.PropertyId;
+    }
   };
 
   KRYS_NODISCARD inline ValueId GetValueId(const PrimitiveValue &value) noexcept

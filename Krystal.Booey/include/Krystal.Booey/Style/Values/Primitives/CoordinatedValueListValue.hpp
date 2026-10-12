@@ -1,146 +1,122 @@
-/*
- * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 #pragma once
 
-#include <WebCore/StyleValueTypes.h>
-#include <wtf/StdLibExtras.h>
+#include "Krystal.Booey\Style\Values\Types.hpp"
 
-namespace WebCore
+/// @summary Utilities and macros for implementing coordinating list property groups.
+/// @see https://drafts.csswg.org/css-values-4/#coordinating-list-property
+namespace krys::boo::style
 {
-  namespace Style
+
+  template <typename T>
+  concept CoordinatedValueListValue = requires(T value) {
+    { T::ComputedValueUsesUsedValues } -> SameType<const bool &>;
+    { T::BaseProperty.Value } -> SameType<const css::PropertyId &>;
+    { value.Clone(std::declval<const T &>()) } -> SameType<T>;
+    { value.IsInitial() } -> SameType<bool>;
+  };
+
+  enum class CoordinatedValueListPropertyState : uint8
   {
+    Unset,
+    Set,
+    Filled,
+  };
 
-    // Utilities and macros for implementing coordinating list property groups.
-    // https://drafts.csswg.org/css-values-4/#coordinating-list-property
+  template <css::PropertyId>
+  struct CoordinatedValueListPropertyAccessor;
 
-    template <typename T>
-    concept CoordinatedValueListValue = requires(T value) {
-      { T::computedValueUsesUsedValues } -> std::same_as<const bool &>;
-      { T::baseProperty.value } -> std::same_as<const CSSPropertyID &>;
-      { value.clone(std::declval<const T &>()) } -> std::same_as<T>;
-      { value.isInitial() } -> std::same_as<bool>;
-    };
+  template <css::PropertyId>
+  struct CoordinatedValueListPropertyConstAccessor;
 
-    enum class CoordinatedValueListPropertyState : uint8_t
-    {
-      Unset,
-      Set,
-      Filled,
-    };
+#define KRYS_DECLARE_COORDINATED_VALUE_LIST_PROPERTY(ownerType, property, type, lowercaseName,               \
+                                                     uppercaseName)                                          \
+  css::PropertyNameConstant<css::PropertyId::##property> {},
 
-    template <CSSPropertyID>
-    struct CoordinatedValueListPropertyAccessor;
-    template <CSSPropertyID>
-    struct CoordinatedValueListPropertyConstAccessor;
-
-#define DECLARE_COORDINATED_VALUE_LIST_PROPERTY(ownerType, property, type, lowercaseName, uppercaseName)     \
-  PropertyNameConstant<CSSProperty##property> {},
-
-#define INTERNAL_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_COMMON(ownerType, property, type,          \
-                                                                         lowercaseName, uppercaseName)       \
-  static type initial()                                                                                      \
+#define KRYS_INTERNAL_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_COMMON(ownerType, property, type,     \
+                                                                              name)                          \
+  static type Initial()                                                                                      \
   {                                                                                                          \
-    return ownerType::initial##uppercaseName();                                                              \
+    return ownerType::Initial##name();                                                                       \
   }                                                                                                          \
-  bool isUnset() const                                                                                       \
+  bool IsUnset() const noexcept                                                                              \
   {                                                                                                          \
-    return value.is##uppercaseName##Unset();                                                                 \
+    return value.Is##name##Unset();                                                                          \
   }                                                                                                          \
-  bool isSet() const                                                                                         \
+  bool IsSet() const noexcept                                                                                \
   {                                                                                                          \
-    return value.is##uppercaseName##Set();                                                                   \
+    return value.Is##name##Set();                                                                            \
   }                                                                                                          \
-  bool isFilled() const                                                                                      \
+  bool IsFilled() const noexcept                                                                             \
   {                                                                                                          \
-    return value.is##uppercaseName##Filled();                                                                \
+    return value.Is##name##Filled();                                                                         \
   }                                                                                                          \
-  CoordinatedValueListPropertyState state() const                                                            \
+  CoordinatedValueListPropertyState State() const noexcept                                                   \
   {                                                                                                          \
-    return value.lowercaseName##State();                                                                     \
+    return value.name##State();                                                                              \
   }
 
-#define DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_REFERENCE(ownerType, property, type, lowercaseName, \
-                                                                   uppercaseName)                            \
+#define KRYS_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_REFERENCE(ownerType, property, type,           \
+                                                                        lowercaseName, uppercaseName)        \
   template <>                                                                                                \
-  struct CoordinatedValueListPropertyAccessor<CSSProperty##property>                                         \
+  struct CoordinatedValueListPropertyAccessor<css::PropertyId::##property>                                   \
   {                                                                                                          \
     using Type = type;                                                                                       \
                                                                                                              \
     ownerType &value;                                                                                        \
                                                                                                              \
-    const type &get() const                                                                                  \
+    const type &Get() const noexcept                                                                         \
     {                                                                                                        \
       return value.lowercaseName();                                                                          \
     }                                                                                                        \
-    void set(type &&lowercaseName)                                                                           \
+    void Set(type &&lowercaseName) noexcept                                                                  \
     {                                                                                                        \
-      value.set##uppercaseName(WTF::move(lowercaseName));                                                    \
+      value.Set##uppercaseName(WTF::move(lowercaseName));                                                    \
     }                                                                                                        \
-    void fill(type &&lowercaseName)                                                                          \
+    void Fill(type &&lowercaseName) noexcept                                                                 \
     {                                                                                                        \
-      value.fill##uppercaseName(WTF::move(lowercaseName));                                                   \
+      value.Fill##uppercaseName(WTF::move(lowercaseName));                                                   \
     }                                                                                                        \
-    void clear()                                                                                             \
+    void Clear() noexcept                                                                                    \
     {                                                                                                        \
-      value.clear##uppercaseName();                                                                          \
+      value.Clear##uppercaseName();                                                                          \
     }                                                                                                        \
                                                                                                              \
-    INTERNAL_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_COMMON(ownerType, property, type,              \
-                                                                     lowercaseName, uppercaseName)           \
+    KRYS_INTERNAL_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_COMMON(ownerType, property, type,         \
+                                                                          uppercaseName)                     \
                                                                                                              \
-    bool operator==(const CoordinatedValueListPropertyAccessor<CSSProperty##property> &other) const          \
+    bool operator==(                                                                                         \
+      const CoordinatedValueListPropertyAccessor<css::PropertyId::##property> &other) const noexcept         \
     {                                                                                                        \
-      return get() == other.get() && state() == other.state();                                               \
+      return Get() == other.Get() && State() == other.State();                                               \
     }                                                                                                        \
   };                                                                                                         \
                                                                                                              \
   template <>                                                                                                \
-  struct CoordinatedValueListPropertyConstAccessor<CSSProperty##property>                                    \
+  struct CoordinatedValueListPropertyConstAccessor<css::PropertyId::##property>                              \
   {                                                                                                          \
     using Type = type;                                                                                       \
                                                                                                              \
     const ownerType &value;                                                                                  \
                                                                                                              \
-    const type &get() const                                                                                  \
+    const type &Get() const noexcept                                                                         \
     {                                                                                                        \
       return value.lowercaseName();                                                                          \
     }                                                                                                        \
                                                                                                              \
-    INTERNAL_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_COMMON(ownerType, property, type,              \
-                                                                     lowercaseName, uppercaseName)           \
+    KRYS_INTERNAL_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_COMMON(ownerType, property, type,         \
+                                                                          uppercaseName)                     \
                                                                                                              \
-    bool operator==(const CoordinatedValueListPropertyConstAccessor<CSSProperty##property> &other) const     \
+    bool operator==(                                                                                         \
+      const CoordinatedValueListPropertyConstAccessor<css::PropertyId::##property> &other) const noexcept    \
     {                                                                                                        \
-      return get() == other.get() && state() == other.state();                                               \
+      return Get() == other.Get() && State() == other.State();                                               \
     }                                                                                                        \
   };
 
 #define DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_VALUE(ownerType, property, type, lowercaseName,     \
                                                                uppercaseName)                                \
   template <>                                                                                                \
-  struct CoordinatedValueListPropertyAccessor<CSSProperty##property>                                         \
+  struct CoordinatedValueListPropertyAccessor<css::PropertyId::##property>                                   \
   {                                                                                                          \
     using Type = type;                                                                                       \
                                                                                                              \
@@ -166,14 +142,14 @@ namespace WebCore
     INTERNAL_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_COMMON(ownerType, property, type,              \
                                                                      lowercaseName, uppercaseName)           \
                                                                                                              \
-    bool operator==(const CoordinatedValueListPropertyAccessor<CSSProperty##property> &other) const          \
+    bool operator==(const CoordinatedValueListPropertyAccessor<css::PropertyId::##property> &other) const    \
     {                                                                                                        \
       return get() == other.get() && state() == other.state();                                               \
     }                                                                                                        \
   };                                                                                                         \
                                                                                                              \
   template <>                                                                                                \
-  struct CoordinatedValueListPropertyConstAccessor<CSSProperty##property>                                    \
+  struct CoordinatedValueListPropertyConstAccessor<css::PropertyId::##property>                              \
   {                                                                                                          \
     using Type = type;                                                                                       \
                                                                                                              \
@@ -187,7 +163,8 @@ namespace WebCore
     INTERNAL_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_COMMON(ownerType, property, type,              \
                                                                      lowercaseName, uppercaseName)           \
                                                                                                              \
-    bool operator==(const CoordinatedValueListPropertyConstAccessor<CSSProperty##property> &other) const     \
+    bool                                                                                                     \
+      operator==(const CoordinatedValueListPropertyConstAccessor<css::PropertyId::##property> &other) const  \
     {                                                                                                        \
       return get() == other.get() && state() == other.state();                                               \
     }                                                                                                        \
@@ -201,7 +178,7 @@ namespace WebCore
 #define DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_SHORTHAND(ownerType, property, type, lowercaseName, \
                                                                    uppercaseName)                            \
   template <>                                                                                                \
-  struct CoordinatedValueListPropertyAccessor<CSSProperty##property>                                         \
+  struct CoordinatedValueListPropertyAccessor<css::PropertyId::##property>                                   \
   {                                                                                                          \
     using Type = type;                                                                                       \
                                                                                                              \
@@ -243,7 +220,7 @@ namespace WebCore
   };                                                                                                         \
                                                                                                              \
   template <>                                                                                                \
-  struct CoordinatedValueListPropertyConstAccessor<CSSProperty##property>                                    \
+  struct CoordinatedValueListPropertyConstAccessor<css::PropertyId::##property>                              \
   {                                                                                                          \
     using Type = type;                                                                                       \
                                                                                                              \
@@ -358,62 +335,60 @@ namespace WebCore
   INTERNAL_DECLARE_COORDINATED_VALUE_LIST_GETTER_AND_SETTERS_COMMON(ownerType, property, type,               \
                                                                     lowercaseName, uppercaseName)
 
-    // Applies the provided functor to each property of the CoordinatedValueList value, invoking the functor
-    // with each properties CSSPropertyID as the first template argument, and then and'ing the results.
-    template <CoordinatedValueListValue T, typename F>
-    constexpr bool allOfCoordinatedValueListProperties(NOESCAPE F &&f)
-    {
-      return WTF::apply([&]<typename... Ts>(const Ts &...)
-                        { return (f.template operator()<Ts::value>() && ...); }, T::properties);
-    }
+  // Applies the provided functor to each property of the CoordinatedValueList value, invoking the functor
+  // with each properties css::PropertyId as the first template argument, and then and'ing the results.
+  template <CoordinatedValueListValue T, typename F>
+  constexpr bool allOfCoordinatedValueListProperties(NOESCAPE F &&f)
+  {
+    return WTF::apply([&]<typename... Ts>(const Ts &...)
+                      { return (f.template operator()<Ts::value>() && ...); }, T::properties);
+  }
 
-    // Applies the provided functor to each property of the CoordinatedValueList value, invoking the functor
-    // with each properties CSSPropertyID as the first template argument, and then or'ing the results.
-    template <CoordinatedValueListValue T, typename F>
-    constexpr bool anyOfCoordinatedValueListProperties(NOESCAPE F &&f)
-    {
-      return WTF::apply([&]<typename... Ts>(const Ts &...)
-                        { return (f.template operator()<Ts::value>() || ...); }, T::properties);
-    }
+  // Applies the provided functor to each property of the CoordinatedValueList value, invoking the functor
+  // with each properties css::PropertyId as the first template argument, and then or'ing the results.
+  template <CoordinatedValueListValue T, typename F>
+  constexpr bool anyOfCoordinatedValueListProperties(NOESCAPE F &&f)
+  {
+    return WTF::apply([&]<typename... Ts>(const Ts &...)
+                      { return (f.template operator()<Ts::value>() || ...); }, T::properties);
+  }
 
-    // Applies the provided functor to each property of the CoordinatedValueList value, invoking the functor
-    // with each properties CSSPropertyID as the first template argument.
-    template <CoordinatedValueListValue T, typename F>
-    constexpr void eachCoordinatedValueListProperties(NOESCAPE F &&f)
-    {
-      WTF::apply([&]<typename... Ts>(const Ts &...) { (f.template operator()<Ts::value>(), ...); },
-                 T::properties);
-    }
+  // Applies the provided functor to each property of the CoordinatedValueList value, invoking the functor
+  // with each properties css::PropertyId as the first template argument.
+  template <CoordinatedValueListValue T, typename F>
+  constexpr void eachCoordinatedValueListProperties(NOESCAPE F &&f)
+  {
+    WTF::apply([&]<typename... Ts>(const Ts &...) { (f.template operator()<Ts::value>(), ...); },
+               T::properties);
+  }
 
-    template <CoordinatedValueListValue T>
-    bool allNonBasePropertiesAreUnsetOrFilled(const T &value)
-    {
-      return allOfCoordinatedValueListProperties<T>(
-        [&value]<CSSPropertyID propertyID>()
+  template <CoordinatedValueListValue T>
+  bool allNonBasePropertiesAreUnsetOrFilled(const T &value)
+  {
+    return allOfCoordinatedValueListProperties<T>(
+      [&value]<css::PropertyId propertyID>()
+      {
+        using PropertyAccessor = CoordinatedValueListPropertyConstAccessor<propertyID>;
+
+        if constexpr (propertyID == T::baseProperty)
         {
-          using PropertyAccessor = CoordinatedValueListPropertyConstAccessor<propertyID>;
-
-          if constexpr (propertyID == T::baseProperty)
-          {
-            return true;
-          }
-          else
-          {
-            return !PropertyAccessor {value}.isSet();
-          }
-        });
-    }
-
-    template <CoordinatedValueListValue T>
-    bool allPropertiesAreUnsetOrFilled(const T &value)
-    {
-      return allOfCoordinatedValueListProperties<T>(
-        [&value]<CSSPropertyID propertyID>()
+          return true;
+        }
+        else
         {
-          using PropertyAccessor = CoordinatedValueListPropertyConstAccessor<propertyID>;
           return !PropertyAccessor {value}.isSet();
-        });
-    }
+        }
+      });
+  }
 
-  } // namespace Style
-} // namespace WebCore
+  template <CoordinatedValueListValue T>
+  bool allPropertiesAreUnsetOrFilled(const T &value)
+  {
+    return allOfCoordinatedValueListProperties<T>(
+      [&value]<css::PropertyId propertyID>()
+      {
+        using PropertyAccessor = CoordinatedValueListPropertyConstAccessor<propertyID>;
+        return !PropertyAccessor {value}.isSet();
+      });
+  }
+}

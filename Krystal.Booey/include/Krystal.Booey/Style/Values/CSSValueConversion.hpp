@@ -162,13 +162,13 @@ namespace krys::boo::style
 
   // Specialization for `SpaceSeparatedListHashSet`.
   template <typename T>
-  struct CSSValueConversion<SpaceSeparatedListHashSet<T>>
+  struct CSSValueConversion<css::SpaceSeparatedListHashSet<T>>
   {
-    SpaceSeparatedListHashSet<T> operator()(BuilderState &state, const css::Value &value)
+    css::SpaceSeparatedListHashSet<T> operator()(BuilderState &state, const css::Value &value)
     {
       if (auto list = dynamicDowncast<CSSValueList>(value))
       {
-        return SpaceSeparatedListHashSet<T>::map(*list, [&](const css::Value &element)
+        return css::SpaceSeparatedListHashSet<T>::map(*list, [&](const css::Value &element)
                                                  { return ConvertCSSValueToStyle<T>(state, element); });
       }
       return {ConvertCSSValueToStyle<T>(state, value)};
@@ -177,13 +177,13 @@ namespace krys::boo::style
 
   // Specialization for `CommaSeparatedListHashSet`.
   template <typename T>
-  struct CSSValueConversion<CommaSeparatedListHashSet<T>>
+  struct CSSValueConversion<css::CommaSeparatedListHashSet<T>>
   {
-    CommaSeparatedListHashSet<T> operator()(BuilderState &state, const css::Value &value)
+    css::CommaSeparatedListHashSet<T> operator()(BuilderState &state, const css::Value &value)
     {
       if (auto list = dynamicDowncast<CSSValueList>(value))
       {
-        return CommaSeparatedListHashSet<T>::map(*list, [&](const css::Value &element)
+        return css::CommaSeparatedListHashSet<T>::map(*list, [&](const css::Value &element)
                                                  { return ConvertCSSValueToStyle<T>(state, element); });
       }
       return {ConvertCSSValueToStyle<T>(state, value)};
