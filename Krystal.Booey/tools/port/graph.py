@@ -1,7 +1,8 @@
 ﻿"""Walks WebKit's #include graph from a set of entry files to find what needs porting.
 
 Text-based, no preprocessor: includes inside #if blocks are followed but tagged as conditional.
-Only files under FOLLOW_PREFIXES are traversed; every other include is a boundary, listed but not followed.
+Only files under FOLLOW_PREFIXES (or --follow) are traversed; every other include is a boundary, listed but not
+followed.
 """
 
 import argparse
@@ -83,7 +84,7 @@ def scan_includes(path: pathlib.Path) -> list[tuple[str, str, bool]]:
     return includes
 
 
-def walk(resolver: Resolver, entries: list[str], follow_impl: bool):
+def walk(resolver: Resolver, entries: list[str], follow_impl: bool, follow_prefixes: tuple[str, ...]):
     files: dict[str, int] = {}  # webcore path -> hops from entries
     included_by: dict[str, set[str]] = collections.defaultdict(set)
     conditional: set[str] = set()  # includes only ever reached through #if blocks
@@ -113,7 +114,7 @@ def walk(resolver: Resolver, entries: list[str], follow_impl: bool):
                 if kind in ("unresolved", "ambiguous"):
                     problems[kind][key].add(rel)
                     continue
-                if kind != "webcore" or not key.startswith(FOLLOW_PREFIXES):
+                if kind != "webcore" or not key.startswith(follow_prefixes):
                     group = "wtf" if kind == "wtf" else key.split("/", 1)[0] if kind == "webcore" else "external"
                     boundaries[group][key].add(rel)
                     continue
@@ -155,6 +156,9 @@ def main() -> int:
     parser.add_argument("--webkit-root", type=pathlib.Path, default=DEFAULT_WEBKIT_ROOT)
     parser.add_argument("--headers-only", action="store_true",
                         help="Don't follow the .cpp of non-entry headers (interface dependencies only).")
+    parser.add_argument("--follow", nargs="+", default=list(FOLLOW_PREFIXES), metavar="PREFIX",
+                        help=f"Path prefixes to traverse instead of {', '.join(FOLLOW_PREFIXES)} "
+                             "(e.g. platform/graphics/).")
     parser.add_argument("--out", type=pathlib.Path, help="Write the markdown report here instead of stdout.")
     args = parser.parse_args()
 
@@ -163,7 +167,7 @@ def main() -> int:
         if not (resolver.webcore / entry).exists():
             parser.error(f"entry not found: {entry}")
 
-    result = walk(resolver, args.entries, follow_impl=not args.headers_only)
+    result = walk(resolver, args.entries, follow_impl=not args.headers_only, follow_prefixes=tuple(args.follow))
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)
         with args.out.open("w", encoding="utf-8", newline="\n") as out:
