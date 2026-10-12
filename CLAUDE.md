@@ -1,4 +1,4 @@
-# KrystalEngine
+﻿# KrystalEngine
 
 C++ game engine (latest standard, CMake + vcpkg). Formatting is owned by `.clang-format` — run it rather than hand-formatting.
 Composed of multiple modules, each with its own `CMakeLists.txt` and `include/<Module>`/`src` structure.
@@ -61,6 +61,7 @@ Use `struct` for policy/trait/plain-data types with all-public members.
 
 ## Files and comments
 
+- Always create files as UTF-8 with BOM (never plain UTF-8 or Windows-1252), and keep the BOM when rewriting a file.
 - Headers: `#pragma once`, then project includes as `"<Module>/..."` (e.g. `"Krystal.Core/..."`), then std headers. Headers go under `include/<Module>/`, sources under `src/` in the same folder structure.
 - Third-party sources (not managed by vcpkg) go under `third-party/` and are included with `<...>`.
 - Doxygen `///` with `@brief`, plus `@param`/`@return`/`@note`/`@attention` where they add something. Use `//` for implementation notes.
