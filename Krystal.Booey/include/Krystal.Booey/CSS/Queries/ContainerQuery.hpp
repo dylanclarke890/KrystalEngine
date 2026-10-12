@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Krystal.Booey/CSS/Queries/ContainerQueryAxis.hpp"
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryTypes.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 
@@ -25,14 +26,6 @@ namespace krys::boo::css::cq
     const mq::FeatureSchema &Orientation();
   };
 
-  enum class Axis : uint8
-  {
-    Block = 1 << 0,
-    Inline = 1 << 1,
-    Width = 1 << 2,
-    Height = 1 << 3,
-  };
-
   KRYS_NODISCARD Axis RequiredAxesForFeature(const mq::Feature &feature) noexcept;
 
   enum class ContainsUnknownFeature : bool
@@ -50,7 +43,4 @@ namespace krys::boo::css::cq
   };
 
   void Serialise(CSSOMString &builder, const ContainerQuery &query) noexcept;
-}
-
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::cq::Axis, 4uz);
 }

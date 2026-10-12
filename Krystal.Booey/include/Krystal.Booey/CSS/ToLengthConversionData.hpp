@@ -10,13 +10,13 @@ namespace krys::boo
 {
   class FloatSize;
   class FontCascade;
+  class RenderStyle;
+  class RenderView;
 }
 
 namespace krys::boo::style
 {
   class BuilderState;
-  class RenderStyle;
-  class RenderView;
 }
 
 namespace krys::boo::dom
@@ -29,10 +29,10 @@ namespace krys::boo::css
   class ToLengthConversionData
   {
   private:
-    const style::RenderStyle *_style {nullptr};
-    const style::RenderStyle *_rootStyle {nullptr};
-    const style::RenderStyle *_parentStyle {nullptr};
-    const style::RenderView *_renderView {nullptr};
+    const RenderStyle *_style {nullptr};
+    const RenderStyle *_rootStyle {nullptr};
+    const RenderStyle *_parentStyle {nullptr};
+    const boo::RenderView *_renderView {nullptr};
     RefPtr<const dom::Element> _elementForContainerUnitResolution;
     Maybe<float> _zoom;
     Maybe<PropertyId> _propertyToCompute;
@@ -42,31 +42,31 @@ namespace krys::boo::css
   public:
     ToLengthConversionData() noexcept;
 
-    ToLengthConversionData(const ToLengthConversionData &other) noexcept;
+    ToLengthConversionData(const ToLengthConversionData &) noexcept;
 
-    ToLengthConversionData(ToLengthConversionData &&other) noexcept;
+    ToLengthConversionData(ToLengthConversionData &&) noexcept;
 
     /// @brief This is used during style building. The 'zoom' property is taken into account.
-    ToLengthConversionData(const style::RenderStyle &, style::BuilderState &) noexcept;
+    ToLengthConversionData(const RenderStyle &, style::BuilderState &) noexcept;
 
     /// @brief This constructor ignores the `zoom` property.
-    ToLengthConversionData(const style::RenderStyle &, const style::RenderStyle *rootStyle,
-                           const style::RenderStyle *parentStyle, const style::RenderView *,
+    ToLengthConversionData(const RenderStyle &, const RenderStyle *rootStyle,
+                           const RenderStyle *parentStyle, const boo::RenderView *,
                            const dom::Element *elementForContainerUnitResolution = nullptr) noexcept;
 
     ~ToLengthConversionData() noexcept;
 
-    KRYS_NODISCARD const style::RenderStyle *Style() const noexcept
+    KRYS_NODISCARD const RenderStyle *Style() const noexcept
     {
       return _style;
     }
 
-    KRYS_NODISCARD const style::RenderStyle *RootStyle() const noexcept
+    KRYS_NODISCARD const RenderStyle *RootStyle() const noexcept
     {
       return _rootStyle;
     }
 
-    KRYS_NODISCARD const style::RenderStyle *ParentStyle() const noexcept
+    KRYS_NODISCARD const RenderStyle *ParentStyle() const noexcept
     {
       return _parentStyle;
     }
@@ -95,7 +95,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool EvaluationTimeZoomEnabled() const noexcept;
 
-    KRYS_NODISCARD const style::RenderView *RenderView() const noexcept
+    KRYS_NODISCARD const boo::RenderView *GetRenderView() const noexcept
     {
       return _renderView;
     }
@@ -123,7 +123,7 @@ namespace krys::boo::css
       copy._zoom = 1.f;
       copy._propertyToCompute = PropertyId::FontSize;
       return copy;
-    };
+    }
 
     KRYS_NODISCARD ToLengthConversionData CopyWithAdjustedZoom(
       float zoom, RangeZoomOptions rangeZoomOption = RangeZoomOptions::Default) const noexcept
@@ -149,5 +149,7 @@ namespace krys::boo::css
     {
       return _styleBuilderState.get();
     }
+
+    KRYS_NODISCARD CheckedPtr<style::BuilderState> ProtectedStyleBuilderState() const noexcept;
   };
 }

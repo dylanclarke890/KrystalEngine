@@ -1,21 +1,22 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Calc/Operator.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
+#include "Krystal.Core/Visitor.hpp"
 #include <tuple>
 
-/// @summary `style::calc::Tree` is A reduced representation of `css::calc::Tree` used in cases where
-/// everything else (e.g all non-canonical dimensions) has been resolved except percentages, which can't be
-/// resolved until they are used as they need some Value To resolve against. Currently, these are only used by
-/// the `Length` type To represent <length-dimension> values, but are implemented generically so can be used
-/// for any <*-dimension> type if the need ever arises.
 namespace krys::boo::style::calc
 {
+  // `style::calc::Tree` is a reduced representation of `css::calc::Tree` used in cases where everything else
+  // (e.g all non-canonical dimensions) has been resolved except percentages, which can't be resolved until
+  // they are used as they need some value to resolve against. Currently, these are only used by the `Length`
+  // type to represent <length-percentage> values, but are implemented generically so can be used for any
+  // <*-percentage> type if the need ever arises.
+
   // Container.
   struct Tree;
 
@@ -97,7 +98,7 @@ namespace krys::boo::style::calc
   {
     UniquePtr<TOperation> Op;
 
-    // Forward * and -> To the operation for convenience.
+    // Forward * and -> to the operation for convenience.
     KRYS_NODISCARD const TOperation &operator*() const noexcept
     {
       return *Op;
@@ -130,7 +131,7 @@ namespace krys::boo::style::calc
 
     KRYS_NODISCARD bool operator==(const IndirectNode<TOperation> &other) const noexcept
     {
-      return *Op == *other.Op;
+      return Op == other.Op || (Op && other.Op && *Op == *other.Op);
     }
   };
 
@@ -150,7 +151,7 @@ namespace krys::boo::style::calc
 
     template <typename T>
     requires std::constructible_from<Node, T>
-    Child(T &&);
+    Child(T &&) noexcept;
 
     KRYS_FORWARD_VARIANT_FUNCTIONS(Child, Value)
 
@@ -161,8 +162,8 @@ namespace krys::boo::style::calc
   {
     Variant<Child, css::keywords::None> Value;
 
-    ChildOrNone(Child &&);
-    ChildOrNone(css::keywords::None);
+    ChildOrNone(Child &&) noexcept;
+    ChildOrNone(css::keywords::None) noexcept;
 
     KRYS_FORWARD_VARIANT_FUNCTIONS(ChildOrNone, Value)
 
@@ -171,18 +172,18 @@ namespace krys::boo::style::calc
 
   struct Children
   {
-    using iterator = typename SmallList<Child>::iterator;
-    using reverse_iterator = typename SmallList<Child>::reverse_iterator;
-    using const_iterator = typename SmallList<Child>::const_iterator;
-    using const_reverse_iterator = typename SmallList<Child>::const_reverse_iterator;
-    using value_type = typename SmallList<Child>::value_type;
+    using iterator = typename List<Child>::iterator;
+    using reverse_iterator = typename List<Child>::reverse_iterator;
+    using const_iterator = typename List<Child>::const_iterator;
+    using const_reverse_iterator = typename List<Child>::const_reverse_iterator;
+    using value_type = typename List<Child>::value_type;
 
-    SmallList<Child> Value;
+    List<Child> Value;
 
     Children(Children &&) noexcept;
-    Children(SmallList<Child> &&) noexcept;
+    Children(List<Child> &&) noexcept;
     Children &operator=(Children &&) noexcept;
-    Children &operator=(SmallList<Child> &&) noexcept;
+    Children &operator=(List<Child> &&) noexcept;
 
     KRYS_NODISCARD iterator begin() noexcept;
     KRYS_NODISCARD iterator end() noexcept;
@@ -210,7 +211,7 @@ namespace krys::boo::style::calc
     KRYS_NODISCARD bool operator==(const Tree &) const noexcept = default;
   };
 
-  size_t ComputeDepth(const Tree &);
+  KRYS_NODISCARD size_t ComputeDepth(const Tree &) noexcept;
 
   // Math Operators.
 
@@ -218,7 +219,7 @@ namespace krys::boo::style::calc
   {
     constexpr static auto Op = css::calc::Operator::Sum;
 
-    Children Children;
+    calc::Children Children;
 
     KRYS_NODISCARD bool operator==(const Sum &) const noexcept = default;
   };
@@ -227,7 +228,7 @@ namespace krys::boo::style::calc
   {
     constexpr static auto Op = css::calc::Operator::Product;
 
-    Children Children;
+    calc::Children Children;
 
     KRYS_NODISCARD bool operator==(const Product &) const noexcept = default;
   };
@@ -257,7 +258,7 @@ namespace krys::boo::style::calc
   {
     constexpr static auto Op = css::calc::Operator::Min;
 
-    Children Children;
+    calc::Children Children;
 
     KRYS_NODISCARD bool operator==(const Min &) const noexcept = default;
   };
@@ -266,7 +267,7 @@ namespace krys::boo::style::calc
   {
     constexpr static auto Op = css::calc::Operator::Max;
 
-    Children Children;
+    calc::Children Children;
 
     KRYS_NODISCARD bool operator==(const Max &) const noexcept = default;
   };
@@ -432,7 +433,7 @@ namespace krys::boo::style::calc
   {
     constexpr static auto Op = css::calc::Operator::Hypot;
 
-    Children Children;
+    calc::Children Children;
 
     KRYS_NODISCARD bool operator==(const Hypot &) const noexcept = default;
   };
@@ -475,7 +476,7 @@ namespace krys::boo::style::calc
     KRYS_NODISCARD bool operator==(const Sign &) const noexcept = default;
   };
 
-  // Progress-Related Functions - https://drafts.csswg.org/css-values-5/#CurrentProgress
+  // Progress-Related Functions - https://drafts.csswg.org/css-values-5/#progress
   struct Progress
   {
     constexpr static auto Op = css::calc::Operator::Progress;
@@ -512,7 +513,7 @@ namespace krys::boo::style::calc
   {
     constexpr static auto Op = css::calc::Operator::Blend;
 
-    double CurrentProgress;
+    double Progress;
     Child From;
     Child To;
 
@@ -533,7 +534,7 @@ namespace krys::boo::style::calc
     }
   };
 
-  // Specialized implementation of ChildConstruction for Number, needed To avoid `CreateUnique`.
+  // Specialized implementation of ChildConstruction for Number, needed to avoid `CreateUnique`.
   template <>
   struct ChildConstruction<Number>
   {
@@ -543,7 +544,7 @@ namespace krys::boo::style::calc
     }
   };
 
-  // Specialized implementation of ChildConstruction for Percentage, needed To avoid `CreateUnique`.
+  // Specialized implementation of ChildConstruction for Percentage, needed to avoid `CreateUnique`.
   template <>
   struct ChildConstruction<Percentage>
   {
@@ -553,7 +554,7 @@ namespace krys::boo::style::calc
     }
   };
 
-  // Specialized implementation of ChildConstruction for Dimension, needed To avoid `CreateUnique`.
+  // Specialized implementation of ChildConstruction for Dimension, needed to avoid `CreateUnique`.
   template <>
   struct ChildConstruction<Dimension>
   {
@@ -588,7 +589,7 @@ namespace krys::boo::style::calc
 
   KRYS_NODISCARD inline Child Add(Child &&a, Child &&b) noexcept
   {
-    SmallList<Child> sumChildren;
+    List<Child> sumChildren;
     sumChildren.push_back(krys::move(a));
     sumChildren.push_back(krys::move(b));
     return CreateChild(Sum {.Children = krys::move(sumChildren)});
@@ -596,7 +597,7 @@ namespace krys::boo::style::calc
 
   KRYS_NODISCARD inline Child Multiply(Child &&a, Child &&b) noexcept
   {
-    SmallList<Child> productChildren;
+    List<Child> productChildren;
     productChildren.push_back(krys::move(a));
     productChildren.push_back(krys::move(b));
     return CreateChild(Product {.Children = krys::move(productChildren)});
@@ -609,12 +610,12 @@ namespace krys::boo::style::calc
 
   KRYS_NODISCARD inline Child BlendChildren(Child &&from, Child &&to, double progress) noexcept
   {
-    return CreateChild(Blend {.CurrentProgress = progress, .From = krys::move(from), .To = krys::move(to)});
+    return CreateChild(Blend {.Progress = progress, .From = krys::move(from), .To = krys::move(to)});
   }
 
   // MARK: Tuple Conformance
 
-  // get<> overload (along with std::tuple_size and std::tuple_element below) To support destructuring of
+  // get<> overload (along with std::tuple_size and std::tuple_element below) to support destructuring of
   // operation nodes.
 
   template <size_t I>
@@ -913,7 +914,7 @@ namespace krys::boo::style::calc
   {
     if constexpr (!I)
     {
-      return root.CurrentProgress;
+      return root.Progress;
     }
     else if constexpr (I == 1)
     {
@@ -949,7 +950,7 @@ namespace krys::boo::style::calc
   {
   }
 
-  inline Children::Children(SmallList<Child> &&other) noexcept : Value(krys::move(other))
+  inline Children::Children(List<Child> &&other) noexcept : Value(krys::move(other))
   {
   }
 
@@ -959,7 +960,7 @@ namespace krys::boo::style::calc
     return *this;
   }
 
-  inline Children &Children::operator=(SmallList<Child> &&other) noexcept
+  inline Children &Children::operator=(List<Child> &&other) noexcept
   {
     Value = krys::move(other);
     return *this;

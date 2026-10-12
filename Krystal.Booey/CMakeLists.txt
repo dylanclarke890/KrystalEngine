@@ -155,6 +155,21 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/Primitives/PrimitiveNumericOrKeyword.hpp
   include/Krystal.Booey/CSS/Values/Primitives/UnevaluatedCalc.hpp
   include/Krystal.Booey/Style/AnchorSizeDimension.hpp
+
+  # Slice 3: Colour, layer 3b (calc evaluation and Style calc, against the Style seam)
+  include/Krystal.Booey/CSS/Queries/ContainerQueryAxis.hpp
+  include/Krystal.Booey/CSS/ToLengthConversionData.hpp
+  include/Krystal.Booey/Graphics/FloatSize.hpp
+  include/Krystal.Booey/Style/Calc/Tree.hpp
+  include/Krystal.Booey/Style/Calc/TreeCopy.hpp
+  include/Krystal.Booey/Style/Calc/TreeEvaluation.hpp
+  include/Krystal.Booey/Style/Calc/TreeTraversal.hpp
+  include/Krystal.Booey/Style/Calc/Value.hpp
+  include/Krystal.Booey/Style/ScopedName.hpp
+  include/Krystal.Booey/Style/ScopeOrdinal.hpp
+  include/Krystal.Booey/Style/Seam.hpp
+  include/Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp
+  include/Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -188,6 +203,15 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/Primitives/NumericTypesComputedStyleDependencies.cpp
   src/CSS/Values/Primitives/NumericTypesSymbolReplacement.cpp
   src/CSS/Values/Primitives/UnevaluatedCalc.cpp
+
+  # Slice 3: Colour, layer 3b (calc evaluation and Style calc, against the Style seam)
+  src/CSS/ToLengthConversionData.cpp
+  src/Style/Calc/Tree.cpp
+  src/Style/Calc/TreeCopy.cpp
+  src/Style/Calc/TreeEvaluation.cpp
+  src/Style/Calc/Value.cpp
+  src/Style/Seam.cpp
+  src/Style/Values/Primitives/LengthResolution.cpp
 )
 
 target_precompile_headers(Krystal.Booey
