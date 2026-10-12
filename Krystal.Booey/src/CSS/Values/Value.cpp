@@ -1,4 +1,6 @@
-﻿#include "Krystal.Booey/CSS/Values/Value.hpp"
+#include "Krystal.Booey/CSS/Values/Value.hpp"
+#include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Hash.hpp"
 #include "Krystal.Booey/CSS/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
@@ -395,6 +397,40 @@ namespace krys::boo::css
     }
 
     return false;
+  }
+
+  bool Value::AddHash(size_t &seed) const noexcept
+  {
+    // To match Equals() a single item list could have the same hash as the item.
+    // FIXME: Some Style::Builder functions can only handle list values.
+
+    seed = Hash::Combine(seed, _type);
+
+    return VisitDerived([&](auto &typedThis) { return typedThis.AddDerivedHash(seed); });
+  }
+
+  bool Value::AddDerivedHash(size_t &seed) const noexcept
+  {
+    seed = Hash::Combine(seed, this);
+    return false;
+  }
+
+  bool Value::IsCSSLocalURL(CSSOMStringView relativeURL) noexcept
+  {
+    return relativeURL.empty() || relativeURL.starts_with(u8'#');
+  }
+
+  CSSOMStringView Value::SeparatorCSSText(ValueSeparator separator) noexcept
+  {
+    switch (separator)
+    {
+      case ValueSeparator::SpaceSeparator: return u8" ";
+      case ValueSeparator::CommaSeparator: return u8", ";
+      case ValueSeparator::SlashSeparator: return u8" / ";
+    }
+
+    krys_debug_assert(false);
+    return u8" ";
   }
 
   CSSOMString Value::CssText(const SerialisationContext &context) const noexcept

@@ -10,4 +10,4 @@ namespace krys::boo::css
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::ValueSeparator, 4uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::ValueSeparator, 3uz);

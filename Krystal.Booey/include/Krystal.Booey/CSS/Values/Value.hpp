@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "Krystal.Booey/Core/IterationStatus.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
@@ -6,10 +6,12 @@
 #include "Krystal.Booey/CSS/Values/UnitType.hpp"
 #include "Krystal.Booey/CSS/Values/ValueSeparator.hpp"
 #include "Krystal.Booey/CSS/Values/ValueType.hpp"
+#include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/SmallList.hpp"
 
 namespace krys::boo
 {
@@ -35,6 +37,8 @@ namespace krys::boo::css
     // Needs access to the protected operator delete.
     friend class RefCounted<Value>;
 
+    KRYS_NON_COPYABLE(Value);
+
   public:
     KRYS_TYPE_CAST_TRAITS_ACCESS();
 
@@ -45,7 +49,7 @@ namespace krys::boo::css
     bool _isImplicitInitialValue : 1 {false};
     mutable bool _hasCachedCSSText : 1 {false};
 
-    Value(ValueType type) noexcept : _type(type)
+    explicit Value(ValueType type) noexcept : _type(type)
     {
     }
 
@@ -86,12 +90,21 @@ namespace krys::boo::css
     KRYS_NODISCARD bool TraverseSubresources(const Func<bool(const CachedResource &)> &func) const noexcept;
     KRYS_NODISCARD bool MayDependOnBaseUrl() const noexcept;
 
+    /// @brief Returns false if the hash is computed from the Value pointer instead of the underlying values.
+    KRYS_NODISCARD bool AddHash(size_t &seed) const noexcept;
+
+    /// @brief Empty URLs and fragment-only URLs should not be resolved relative to the base URL.
+    /// @see https://www.w3.org/TR/css-values-4/#local-urls
+    KRYS_NODISCARD static bool IsCSSLocalURL(CSSOMStringView relativeURL) noexcept;
+
+    KRYS_NODISCARD static CSSOMStringView SeparatorCSSText(ValueSeparator separator) noexcept;
+
     KRYS_NODISCARD bool CustomMayDependOnBaseUrl() const noexcept
     {
       return false;
     }
 
-    KRYS_NODISCARD IterationStatus CustomVisitChildren(const Func<IterationStatus(Value &)> &) const
+    KRYS_NODISCARD IterationStatus CustomVisitChildren(const Func<IterationStatus(Value &)> &) const noexcept
     {
       return IterationStatus::Continue;
     }
@@ -131,6 +144,11 @@ namespace krys::boo::css
     KRYS_NODISCARD bool IsBoxShadowPropertyValue() const noexcept
     {
       return _type == ValueType::BoxShadowProperty;
+    }
+
+    KRYS_NODISCARD bool IsCanvasValue() const noexcept
+    {
+      return _type == ValueType::Canvas;
     }
 
     KRYS_NODISCARD bool IsColorValue() const noexcept
@@ -388,9 +406,26 @@ namespace krys::boo::css
       return _type == ValueType::View;
     }
 
+    KRYS_NODISCARD bool HasVariableReferences() const noexcept
+    {
+      return IsVariableReferenceValue() || IsPendingSubstitutionValue();
+    }
+
+    KRYS_NODISCARD bool IsImageGeneratorValue() const noexcept
+    {
+      return _type >= ValueType::Canvas && _type <= ValueType::Gradient;
+    }
+
+    /// @brief True for all image-like values except CursorImageValues; these are the values that correspond
+    /// to the CSS <image> production.
+    KRYS_NODISCARD bool IsImage() const noexcept
+    {
+      return IsImageValue() || IsImageSetValue() || IsImageGeneratorValue();
+    }
+
     KRYS_NODISCARD bool ContainsValueList() const noexcept
     {
-      return _type >= ValueType::ValueWithSmallList;
+      return _type >= ValueType::ValueList;
     }
 
 #pragma endregion
@@ -408,12 +443,22 @@ namespace krys::boo::css
     KRYS_NODISCARD inline int64 Integer(const ToLengthConversionData &) const noexcept;
     KRYS_NODISCARD inline int64 IntegerDeprecated() const noexcept;
 
+    KRYS_NODISCARD inline const Value &First() const noexcept;  // ValuePair
+    KRYS_NODISCARD inline const Value &Second() const noexcept; // ValuePair
+    KRYS_NODISCARD inline const Quad &GetQuad() const noexcept; // QuadValue
+    KRYS_NODISCARD inline const Rect &GetRect() const noexcept; // RectValue
+
   protected:
     void operator delete(Value *, std::destroying_delete_t) noexcept;
 
     KRYS_NODISCARD ValueSeparator Separator() const noexcept
     {
       return _valueSeparator;
+    }
+
+    KRYS_NODISCARD CSSOMStringView SeparatorCSSText() const noexcept
+    {
+      return SeparatorCSSText(Separator());
     }
 
   private:
@@ -425,6 +470,9 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static bool
       CustomTraverseSubresources(const Func<bool(const CachedResource &)> &func) noexcept;
+
+    // FIXME: Add custom hash functions for all derived classes and remove this function.
+    KRYS_NODISCARD bool AddDerivedHash(size_t &seed) const noexcept;
   };
 
   template <typename TValue>
@@ -441,7 +489,7 @@ namespace krys::boo::css
     {
       const Ref<TValue> &firstPtr = firstVector[i];
       const Ref<TValue> &secondPtr = secondVector[i];
-      if (firstPtr.get() == secondPtr.get() || firstPtr->Equals(secondPtr))
+      if (firstPtr.get() == secondPtr.get() || firstPtr->Equals(*secondPtr))
       {
         continue;
       }

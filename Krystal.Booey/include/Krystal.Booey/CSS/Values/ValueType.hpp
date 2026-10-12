@@ -1,12 +1,27 @@
-﻿#pragma once
+#pragma once
 
 #include "Krystal.Core/Enum.hpp"
 
 namespace krys::boo::css
 {
+  /// @note The order matters: Value::IsImageGeneratorValue() and Value::ContainsValueList() check ranges.
   enum class ValueType : uint8
   {
-    Invalid = 0,
+    Primitive,
+
+    // Image classes.
+    Image,
+    ImageSetOption,
+    CursorImage,
+    // Image generator classes.
+    Canvas,
+    PaintImage,
+    NamedImage,
+    CrossFade,
+    FilterImage,
+    Gradient,
+
+    // Other non-list classes.
     AppleColorFilter,
     Attr,
     BackgroundRepeat,
@@ -17,19 +32,10 @@ namespace krys::boo::css
     Color,
     ColorScheme,
     Counter,
-    CrossFade,
-    CursorImage,
     CustomProperty,
     DynamicRangeLimit,
-    Gradient,
-    GridAutoRepeat,
-    GridIntegerRepeat,
-    GridLine,
-    GridLineNames,
-    GridTemplateAreas,
     EasingFunction,
     Filter,
-    FilterImage,
     Font,
     FontFaceSrcLocal,
     FontFaceSrcResource,
@@ -37,36 +43,38 @@ namespace krys::boo::css
     FontStyleRange,
     FontStyleWithAngle,
     FontVariation,
-    Function,
-    Image,
-    ImageSet,
-    ImageSetOption,
-    NamedImage,
+    GridLineNames,
+    GridLine,
+    GridTemplateAreas,
     OffsetRotate,
-    PaintImage,
     Path,
     PendingSubstitution,
     Position,
     PositionX,
     PositionY,
-    Primitive,
     Quad,
     Ratio,
     Ray,
     Rect,
     Reflect,
     Scroll,
-    Subgrid,
     TextShadowProperty,
-    TransformList,
-    UnicodeRange,
     Url,
+    UnicodeRange,
     ValuePair,
     VariableReference,
     View,
-    ValueWithSmallList,
+
+    // Classes that contain lists, which derive from ValueWithSmallList.
     ValueList,
+    Function,
+    GridAutoRepeat,
+    GridIntegerRepeat,
+    ImageSet,
+    Subgrid,
+    TransformList,
+    // Do not append classes here unless they derive from ValueWithSmallList.
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::ValueType, 60uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::ValueType, 59uz);
