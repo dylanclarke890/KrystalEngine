@@ -6,8 +6,8 @@
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/Concepts.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
-#include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
 #include "Krystal.Core/Types/ListHashSet.hpp"
@@ -26,9 +26,9 @@
 
 namespace krys::boo::css
 {
-#pragma region SerializationSeparatorType
+#pragma region SerialisationSeparatorType
 
-  enum class SerializationSeparatorType : uint8
+  enum class SerialisationSeparatorType : uint8
   {
     None,
     Space,
@@ -39,20 +39,20 @@ namespace krys::boo::css
   /// @brief Types that specialize TreatAsTupleLike or TreatAsRangeLike can specialize this to indicate how to
   /// serialize the gaps between elements.
   template <typename>
-  constexpr SerializationSeparatorType SerializationSeparator = SerializationSeparatorType::None;
+  constexpr SerialisationSeparatorType SerialisationSeparator = SerialisationSeparatorType::None;
 
-#define DEFINE_SERIALIZATION_SEPARATOR_FOR_TYPE(T, separator)                                                \
+#define DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, separator)                                                \
   namespace krys::boo::css                                                                                   \
   {                                                                                                          \
     template <>                                                                                              \
-    constexpr SerializationSeparatorType SerializationSeparator<T> = separator;                              \
+    constexpr SerialisationSeparatorType SerialisationSeparator<T> = separator;                              \
   }
 
 #pragma endregion
 
-#pragma region SerializationCoalescingType
+#pragma region SerialisationCoalescingType
 
-  enum class SerializationCoalescingType : uint8
+  enum class SerialisationCoalescingType : uint8
   {
     None,
     Minimal
@@ -61,34 +61,34 @@ namespace krys::boo::css
   /// @brief Types that specialize TreatAsTupleLike and have size 2 or 4 can specialize this to indicate how
   /// to serialize identical elements.
   template <typename>
-  constexpr SerializationCoalescingType SerializationCoalescing = SerializationCoalescingType::None;
+  constexpr SerialisationCoalescingType SerialisationCoalescing = SerialisationCoalescingType::None;
 
-#define DEFINE_SERIALIZATION_COALESCING_FOR_TYPE(T, coalescing)                                              \
+#define DEFINE_SERIALISATION_COALESCING_FOR_TYPE(T, coalescing)                                              \
   namespace krys::boo::css                                                                                   \
   {                                                                                                          \
     template <>                                                                                              \
-    constexpr SerializationCoalescingType SerializationCoalescing<T> = coalescing;                           \
+    constexpr SerialisationCoalescingType SerialisationCoalescing<T> = coalescing;                           \
   }
 
 #pragma endregion
 
-#pragma region SerializationSeparatorStringForType
+#pragma region SerialisationSeparatorStringForType
 
-  template <SerializationSeparatorType>
-  constexpr CSSOMStringView SerializationSeparatorStringForType = u8"";
-
-  template <>
-  constexpr CSSOMStringView SerializationSeparatorStringForType<SerializationSeparatorType::Space> = u8" ";
+  template <SerialisationSeparatorType>
+  constexpr CSSOMStringView SerialisationSeparatorStringForType = u8"";
 
   template <>
-  constexpr CSSOMStringView SerializationSeparatorStringForType<SerializationSeparatorType::Comma> = u8", ";
+  constexpr CSSOMStringView SerialisationSeparatorStringForType<SerialisationSeparatorType::Space> = u8" ";
 
   template <>
-  constexpr CSSOMStringView SerializationSeparatorStringForType<SerializationSeparatorType::Slash> = u8" / ";
+  constexpr CSSOMStringView SerialisationSeparatorStringForType<SerialisationSeparatorType::Comma> = u8", ";
+
+  template <>
+  constexpr CSSOMStringView SerialisationSeparatorStringForType<SerialisationSeparatorType::Slash> = u8" / ";
 
   template <typename T>
-  constexpr CSSOMStringView SerializationSeparatorString =
-    SerializationSeparatorStringForType<SerializationSeparator<T>>;
+  constexpr CSSOMStringView SerialisationSeparatorString =
+    SerialisationSeparatorStringForType<SerialisationSeparator<T>>;
 
 #pragma endregion
 
@@ -97,9 +97,9 @@ namespace krys::boo::css
   /// @brief Defines a simple `get()` implementation for a single value `name`.
 #define DEFINE_TYPE_WRAPPER_GET(T, name)                                                                     \
   template <size_t>                                                                                          \
-  KRYS_NODISCARD const auto &get(const T &value) noexcept                                                    \
+  KRYS_NODISCARD const auto &get(const T &wrapper) noexcept                                                  \
   {                                                                                                          \
-    return value.name;                                                                                       \
+    return wrapper.name;                                                                                     \
   }
 
 /// @brief Defines a type by extending another type via inheritance.
@@ -124,41 +124,41 @@ namespace krys::boo::css
   {                                                                                                          \
     using Wrapped = wrapped;                                                                                 \
                                                                                                              \
-    wrapped value;                                                                                           \
+    wrapped Value;                                                                                           \
                                                                                                              \
     template <typename... Args>                                                                              \
     wrapper(Args &&...args) noexcept                                                                         \
     requires(requires {                                                                                      \
       { wrapped(args...) };                                                                                  \
     })                                                                                                       \
-        : value(std::forward<Args>(args)...)                                                                 \
+        : Value(std::forward<Args>(args)...)                                                                 \
     {                                                                                                        \
     }                                                                                                        \
                                                                                                              \
     const Wrapped &operator*() const noexcept                                                                \
     {                                                                                                        \
-      return value;                                                                                          \
+      return Value;                                                                                          \
     }                                                                                                        \
                                                                                                              \
     Wrapped &operator*() noexcept                                                                            \
     {                                                                                                        \
-      return value;                                                                                          \
+      return Value;                                                                                          \
     }                                                                                                        \
                                                                                                              \
     const Wrapped *operator->() const noexcept                                                               \
     {                                                                                                        \
-      return &value;                                                                                         \
+      return &Value;                                                                                         \
     }                                                                                                        \
                                                                                                              \
     Wrapped *operator->() noexcept                                                                           \
     {                                                                                                        \
-      return &value;                                                                                         \
+      return &Value;                                                                                         \
     }                                                                                                        \
                                                                                                              \
     template <size_t>                                                                                        \
     friend KRYS_NODISCARD const auto &get(const wrapper &self) noexcept                                      \
     {                                                                                                        \
-      return self.value;                                                                                     \
+      return self.Value;                                                                                     \
     }                                                                                                        \
                                                                                                              \
     bool operator==(const wrapper &) const noexcept = default;                                               \
@@ -187,43 +187,43 @@ namespace krys::boo::css
 /// @brief Defines tuple-like conformance and that the type should be serialized as space separated.
 #define DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                  \
   DEFINE_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                                        \
-  DEFINE_SERIALIZATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerializationSeparatorType::Space)
+  DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerialisationSeparatorType::Space)
 
 /// @brief Defines tuple-like conformance and that the type should be serialized as coalescing and space
 /// separated.
 #define DEFINE_COALESCING_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                       \
   static_assert(numberOfArguments == 2 || numberOfArguments == 4);                                           \
   DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                        \
-  DEFINE_SERIALIZATION_COALESCING_FOR_TYPE(T, krys::boo::css::SerializationCoalescingType::Minimal)
+  DEFINE_SERIALISATION_COALESCING_FOR_TYPE(T, krys::boo::css::SerialisationCoalescingType::Minimal)
 
 /// @brief Defines tuple-like conformance and that the type should be serialized as comma separated.
 #define DEFINE_COMMA_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                  \
   DEFINE_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                                        \
-  DEFINE_SERIALIZATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerializationSeparatorType::Comma)
+  DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerialisationSeparatorType::Comma)
 
 /// @brief Defines tuple-like conformance and that the type should be serialized as coalescing and comma
 /// separated.
 #define DEFINE_COALESCING_COMMA_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                       \
   static_assert(numberOfArguments == 2 || numberOfArguments == 4);                                           \
   DEFINE_COMMA_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                        \
-  DEFINE_SERIALIZATION_COALESCING_FOR_TYPE(T, krys::boo::css::SerializationCoalescingType::Minimal)
+  DEFINE_SERIALISATION_COALESCING_FOR_TYPE(T, krys::boo::css::SerialisationCoalescingType::Minimal)
 
 /// @brief Defines tuple-like conformance and that the type should be serialized as slash separated.
 #define DEFINE_SLASH_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                  \
   DEFINE_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                                        \
-  DEFINE_SERIALIZATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerializationSeparatorType::Slash)
+  DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerialisationSeparatorType::Slash)
 
 /// @brief Defines tuple-like conformance and that the type should be serialized as coalescing and slash
 /// separated.
 #define DEFINE_COALESCING_SLASH_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                       \
   static_assert(numberOfArguments == 2 || numberOfArguments == 4);                                           \
   DEFINE_SLASH_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                        \
-  DEFINE_SERIALIZATION_COALESCING_FOR_TYPE(T, krys::boo::css::SerializationCoalescingType::Minimal)
+  DEFINE_SERIALISATION_COALESCING_FOR_TYPE(T, krys::boo::css::SerialisationCoalescingType::Minimal)
 
 /// @brief Defines tuple-like conformance based on the type being extended.
 #define DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_EXTENDER(T)                                                   \
   DEFINE_TUPLE_LIKE_CONFORMANCE(T, std::tuple_size_v<T::Wrapped>)                                            \
-  DEFINE_SERIALIZATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerializationSeparator<T::Wrapped>)
+  DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerialisationSeparator<T::Wrapped>)
 
 /// @brief Defines tuple-like conformance for a wrapper type.
 #define DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(T) DEFINE_TUPLE_LIKE_CONFORMANCE(T, 1)
@@ -241,17 +241,17 @@ namespace krys::boo::css
 /// @brief Defines tokens-like conformance and that the type should be serialized as space separated.
 #define DEFINE_SPACE_SEPARATED_RANGE_LIKE_CONFORMANCE(T)                                                     \
   DEFINE_RANGE_LIKE_CONFORMANCE(T)                                                                           \
-  DEFINE_SERIALIZATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerializationSeparatorType::Space)
+  DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerialisationSeparatorType::Space)
 
 /// @brief Defines a tokens-like conformance and that the type should be serialized as comma separated.
 #define DEFINE_COMMA_SEPARATED_RANGE_LIKE_CONFORMANCE(T)                                                     \
   DEFINE_RANGE_LIKE_CONFORMANCE(T)                                                                           \
-  DEFINE_SERIALIZATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerializationSeparatorType::Comma)
+  DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerialisationSeparatorType::Comma)
 
 /// @brief Defines a tokens-like conformance and that the type should be serialized as slash separated.
 #define DEFINE_SLASH_SEPARATED_RANGE_LIKE_CONFORMANCE(T)                                                     \
   DEFINE_RANGE_LIKE_CONFORMANCE(T)                                                                           \
-  DEFINE_SERIALIZATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerializationSeparatorType::Slash)
+  DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerialisationSeparatorType::Slash)
 
 /// @brief Defines an empty-like conformance for a type.
 #define DEFINE_EMPTY_LIKE_CONFORMANCE(T)                                                                     \
@@ -274,19 +274,19 @@ namespace krys::boo::css
   /// @brief Used to represent an arbitrary custom identifier.
   struct CustomIdentifier
   {
-    CSSOMStringAtom value;
+    CSSOMStringAtom Value;
 
     bool operator==(const CustomIdentifier &) const noexcept = default;
     bool operator==(const CSSOMStringAtom &other) const noexcept
     {
-      return value == other;
+      return Value == other;
     }
   };
 
   /// @brief Used to represent an arbitrary property identifier.
   struct PropertyIdentifier
   {
-    PropertyId value;
+    PropertyId Value;
 
     constexpr bool operator==(const PropertyIdentifier &) const = default;
   };
@@ -298,39 +298,39 @@ namespace krys::boo::css
   template <ValueId C, typename T>
   struct FunctionNotation
   {
-    constexpr static auto name = C;
+    constexpr static auto Name = C;
 
-    T parameters;
+    T Parameters;
 
     // Forward * and -> to the parameters for convenience.
     KRYS_NODISCARD constexpr const T &operator*() const noexcept
     {
-      return parameters;
+      return Parameters;
     }
 
     KRYS_NODISCARD constexpr T &operator*() noexcept
     {
-      return parameters;
+      return Parameters;
     }
 
     KRYS_NODISCARD constexpr const T *operator->() const noexcept
     {
-      return &parameters;
+      return &Parameters;
     }
 
     KRYS_NODISCARD constexpr T *operator->() noexcept
     {
-      return &parameters;
+      return &Parameters;
     }
 
     KRYS_NODISCARD constexpr operator const T &() const noexcept
     {
-      return parameters;
+      return Parameters;
     }
 
     KRYS_NODISCARD constexpr operator T &() noexcept
     {
-      return parameters;
+      return Parameters;
     }
 
     constexpr bool operator==(const FunctionNotation<C, T> &) const noexcept = default;
@@ -338,7 +338,7 @@ namespace krys::boo::css
 
   // Deduction guide for getter/setters that return values and take r-value references.
   template <typename Keyword, typename T>
-  FunctionNotation(Keyword, T) -> FunctionNotation<Keyword::value, T>;
+  FunctionNotation(Keyword, T) -> FunctionNotation<Keyword::Value, T>;
 
   template <ValueId C, typename T>
   KRYS_NODISCARD constexpr bool operator==(const UniquePtr<FunctionNotation<C, T>> &a,
@@ -350,7 +350,7 @@ namespace krys::boo::css
   template <size_t, ValueId C, typename T>
   KRYS_NODISCARD constexpr const auto &get(const FunctionNotation<C, T> &function) noexcept
   {
-    return function.parameters;
+    return function.Parameters;
   }
 
   template <ValueId C, typename T>
@@ -368,15 +368,15 @@ namespace krys::boo::css
     using Array = std::array<T, N>;
     using value_type = T;
 
-    std::array<T, N> value;
+    std::array<T, N> Value;
 
     template <typename... Ts>
     requires(sizeof...(Ts) == N && krys::AllTrue<ConvertibleTo<Ts, T>...>)
-    constexpr SpaceSeparatedArray(Ts... values) noexcept : value(std::forward<Ts>(values)...)
+    constexpr SpaceSeparatedArray(Ts... values) noexcept : Value(std::forward<Ts>(values)...)
     {
     }
 
-    constexpr SpaceSeparatedArray(std::array<T, N> &&array) noexcept : value(krys::move(array))
+    constexpr SpaceSeparatedArray(std::array<T, N> &&array) noexcept : Value(krys::move(array))
     {
     }
 
@@ -390,14 +390,14 @@ namespace krys::boo::css
   template <size_t I, typename T, size_t N>
   KRYS_NODISCARD decltype(auto) get(const SpaceSeparatedArray<T, N> &array) noexcept
   {
-    return std::get<I>(array.value);
+    return std::get<I>(array.Value);
   }
 
   template <typename T, size_t N>
   constexpr bool TreatAsTupleLike<SpaceSeparatedArray<T, N>> = true;
 
   template <typename T, size_t N>
-  constexpr auto SerializationSeparator<SpaceSeparatedArray<T, N>> = SerializationSeparatorType::Space;
+  constexpr auto SerialisationSeparator<SpaceSeparatedArray<T, N>> = SerialisationSeparatorType::Space;
 
   /// @brief Convenience for representing a two element array.
   template <typename T>
@@ -405,58 +405,58 @@ namespace krys::boo::css
 
 #pragma endregion
 
-#pragma region MinimallySerializingSpaceSeparatedPair
+#pragma region MinimallySerialisingSpaceSeparatedPair
 
   /// @brief Wraps a pair of elements of a single type, semantically marking them as serializing as "space
   /// separated" and "minimally serializing".
   template <typename T>
-  struct MinimallySerializingSpaceSeparatedPair
+  struct MinimallySerialisingSpaceSeparatedPair
   {
     using Array = SpaceSeparatedPair<T>;
     using value_type = T;
 
-    SpaceSeparatedPair<T> value;
+    SpaceSeparatedPair<T> Value;
 
-    constexpr MinimallySerializingSpaceSeparatedPair(T p1, T p2) noexcept
-        : value {krys::move(p1), krys::move(p2)}
+    constexpr MinimallySerialisingSpaceSeparatedPair(T p1, T p2) noexcept
+        : Value {krys::move(p1), krys::move(p2)}
     {
     }
 
-    constexpr MinimallySerializingSpaceSeparatedPair(SpaceSeparatedPair<T> &&array) noexcept
-        : value {krys::move(array)}
+    constexpr MinimallySerialisingSpaceSeparatedPair(SpaceSeparatedPair<T> &&array) noexcept
+        : Value {krys::move(array)}
     {
     }
 
     KRYS_NODISCARD constexpr bool
-      operator==(const MinimallySerializingSpaceSeparatedPair<T> &) const noexcept = default;
+      operator==(const MinimallySerialisingSpaceSeparatedPair<T> &) const noexcept = default;
 
     KRYS_NODISCARD constexpr const T &first() const noexcept
     {
-      return get<0>(value);
+      return get<0>(Value);
     }
 
     KRYS_NODISCARD constexpr const T &second() const noexcept
     {
-      return get<1>(value);
+      return get<1>(Value);
     }
   };
 
   template <size_t I, typename T>
-  KRYS_NODISCARD decltype(auto) get(const MinimallySerializingSpaceSeparatedPair<T> &size) noexcept
+  KRYS_NODISCARD decltype(auto) get(const MinimallySerialisingSpaceSeparatedPair<T> &size) noexcept
   {
-    return get<I>(size.value);
+    return get<I>(size.Value);
   }
 
   template <typename T>
-  constexpr bool TreatAsTupleLike<MinimallySerializingSpaceSeparatedPair<T>> = true;
+  constexpr bool TreatAsTupleLike<MinimallySerialisingSpaceSeparatedPair<T>> = true;
 
   template <typename T>
-  constexpr auto SerializationSeparator<MinimallySerializingSpaceSeparatedPair<T>> =
-    SerializationSeparatorType::Space;
+  constexpr auto SerialisationSeparator<MinimallySerialisingSpaceSeparatedPair<T>> =
+    SerialisationSeparatorType::Space;
 
   template <typename T>
-  constexpr auto SerializationCoalescing<MinimallySerializingSpaceSeparatedPair<T>> =
-    SerializationCoalescingType::Minimal;
+  constexpr auto SerialisationCoalescing<MinimallySerialisingSpaceSeparatedPair<T>> =
+    SerialisationCoalescingType::Minimal;
 
 #pragma endregion
 
@@ -470,15 +470,15 @@ namespace krys::boo::css
     using Array = std::array<T, N>;
     using value_type = T;
 
-    std::array<T, N> value;
+    std::array<T, N> Value;
 
     template <typename... Ts>
     requires(sizeof...(Ts) == N && krys::AllTrue<ConvertibleTo<Ts, T>...>)
-    constexpr CommaSeparatedArray(Ts... values) noexcept : value(std::forward<Ts>(values)...)
+    constexpr CommaSeparatedArray(Ts... values) noexcept : Value(std::forward<Ts>(values)...)
     {
     }
 
-    constexpr CommaSeparatedArray(std::array<T, N> &&array) noexcept : value(krys::move(array))
+    constexpr CommaSeparatedArray(std::array<T, N> &&array) noexcept : Value(krys::move(array))
     {
     }
 
@@ -492,14 +492,14 @@ namespace krys::boo::css
   template <size_t I, typename T, size_t N>
   KRYS_NODISCARD constexpr decltype(auto) get(const CommaSeparatedArray<T, N> &array) noexcept
   {
-    return std::get<I>(array.value);
+    return std::get<I>(array.Value);
   }
 
   template <typename T, size_t N>
   constexpr auto TreatAsTupleLike<CommaSeparatedArray<T, N>> = true;
 
   template <typename T, size_t N>
-  constexpr auto SerializationSeparator<CommaSeparatedArray<T, N>> = SerializationSeparatorType::Comma;
+  constexpr auto SerialisationSeparator<CommaSeparatedArray<T, N>> = SerialisationSeparatorType::Comma;
 
   // Convenience for representing a two element array.
   template <typename T>
@@ -519,51 +519,51 @@ namespace krys::boo::css
     using const_reverse_iterator = typename Container::const_reverse_iterator;
     using value_type = typename Container::value_type;
 
-    Container value;
+    Container Value;
 
     SpaceSeparatedList() noexcept = default;
 
-    SpaceSeparatedList(std::initializer_list<T> initializerList) noexcept : value {initializerList}
+    SpaceSeparatedList(std::initializer_list<T> initializerList) noexcept : Value {initializerList}
     {
     }
 
-    SpaceSeparatedList(Container &&value) noexcept : value {krys::move(value)}
+    SpaceSeparatedList(Container &&container) noexcept : Value {krys::move(container)}
     {
     }
 
     const_iterator begin() const noexcept
     {
-      return value.begin();
+      return Value.begin();
     }
 
     const_iterator end() const noexcept
     {
-      return value.end();
+      return Value.end();
     }
 
     const_reverse_iterator rbegin() const noexcept
     {
-      return value.rbegin();
+      return Value.rbegin();
     }
 
     const_reverse_iterator rend() const noexcept
     {
-      return value.rend();
+      return Value.rend();
     }
 
     bool empty() const noexcept
     {
-      return value.empty();
+      return Value.empty();
     }
 
     size_t size() const noexcept
     {
-      return value.size();
+      return Value.size();
     }
 
     const T &operator[](size_t i) const noexcept
     {
-      return value[i];
+      return Value[i];
     }
 
     template <typename SizedRange, typename Mapper>
@@ -583,12 +583,12 @@ namespace krys::boo::css
 
     bool contains(const auto &item) const
     {
-      return std::ranges::find(value, item) != value.end();
+      return std::ranges::find(Value, item) != Value.end();
     }
 
     bool containsIf(const auto &predicate) const
     {
-      return std::ranges::find_if(value, predicate) != value.end();
+      return std::ranges::find_if(Value, predicate) != Value.end();
     }
 
     template <typename Mapper>
@@ -596,8 +596,8 @@ namespace krys::boo::css
     {
       using Result = std::remove_cvref_t<std::invoke_result_t<Mapper, const T &>>;
       SmallList<Result, inlineCapacity> result;
-      result.reserve(value.size());
-      for (const auto &item : value)
+      result.reserve(Value.size());
+      for (const auto &item : Value)
       {
         result.emplace_back(std::invoke(mapper, item));
       }
@@ -616,7 +616,7 @@ namespace krys::boo::css
   constexpr auto TreatAsRangeLike<SpaceSeparatedList<T, N>> = true;
 
   template <typename T, size_t N>
-  constexpr auto SerializationSeparator<SpaceSeparatedList<T, N>> = SerializationSeparatorType::Space;
+  constexpr auto SerialisationSeparator<SpaceSeparatedList<T, N>> = SerialisationSeparatorType::Space;
 
 #pragma endregion
 
@@ -632,51 +632,51 @@ namespace krys::boo::css
     using const_reverse_iterator = typename Container::const_reverse_iterator;
     using value_type = typename Container::value_type;
 
-    Container value;
+    Container Value;
 
     CommaSeparatedList() noexcept = default;
 
-    CommaSeparatedList(std::initializer_list<T> initializerList) noexcept : value {initializerList}
+    CommaSeparatedList(std::initializer_list<T> initializerList) noexcept : Value {initializerList}
     {
     }
 
-    CommaSeparatedList(Container &&value) noexcept : value {krys::move(value)}
+    CommaSeparatedList(Container &&container) noexcept : Value {krys::move(container)}
     {
     }
 
     KRYS_NODISCARD const_iterator begin() const noexcept
     {
-      return value.begin();
+      return Value.begin();
     }
 
     KRYS_NODISCARD const_iterator end() const noexcept
     {
-      return value.end();
+      return Value.end();
     }
 
     KRYS_NODISCARD const_reverse_iterator rbegin() const noexcept
     {
-      return value.rbegin();
+      return Value.rbegin();
     }
 
     KRYS_NODISCARD const_reverse_iterator rend() const noexcept
     {
-      return value.rend();
+      return Value.rend();
     }
 
     KRYS_NODISCARD bool empty() const noexcept
     {
-      return value.empty();
+      return Value.empty();
     }
 
     KRYS_NODISCARD size_t size() const noexcept
     {
-      return value.size();
+      return Value.size();
     }
 
     KRYS_NODISCARD const T &operator[](size_t i) const noexcept
     {
-      return value[i];
+      return Value[i];
     }
 
     template <typename SizedRange, typename Mapper>
@@ -696,12 +696,12 @@ namespace krys::boo::css
 
     bool contains(const auto &item) const
     {
-      return std::ranges::find(value, item) != value.end();
+      return std::ranges::find(Value, item) != Value.end();
     }
 
     bool containsIf(const auto &predicate) const
     {
-      return std::ranges::find_if(value, predicate) != value.end();
+      return std::ranges::find_if(Value, predicate) != Value.end();
     }
 
     template <typename Mapper>
@@ -709,8 +709,8 @@ namespace krys::boo::css
     {
       using Result = std::remove_cvref_t<std::invoke_result_t<Mapper, const T &>>;
       SmallList<Result, inlineCapacity> result;
-      result.reserve(value.size());
-      for (const auto &item : value)
+      result.reserve(Value.size());
+      for (const auto &item : Value)
       {
         result.emplace_back(std::invoke(mapper, item));
       }
@@ -729,7 +729,7 @@ namespace krys::boo::css
   constexpr auto TreatAsRangeLike<CommaSeparatedList<T, N>> = true;
 
   template <typename T, size_t N>
-  constexpr auto SerializationSeparator<CommaSeparatedList<T, N>> = SerializationSeparatorType::Comma;
+  constexpr auto SerialisationSeparator<CommaSeparatedList<T, N>> = SerialisationSeparatorType::Comma;
 
 #pragma endregion
 
@@ -743,15 +743,15 @@ namespace krys::boo::css
     using const_iterator = typename Container::const_iterator;
     using value_type = typename Container::value_type;
 
-    Container value;
+    Container Value;
 
     SpaceSeparatedListHashSet() = default;
 
-    SpaceSeparatedListHashSet(std::initializer_list<T> initializerList) : value {initializerList}
+    SpaceSeparatedListHashSet(std::initializer_list<T> initializerList) : Value {initializerList}
     {
     }
 
-    SpaceSeparatedListHashSet(Container &&container) : value {krys::move(container)}
+    SpaceSeparatedListHashSet(Container &&container) : Value {krys::move(container)}
     {
     }
 
@@ -768,27 +768,27 @@ namespace krys::boo::css
 
     const_iterator begin() const noexcept
     {
-      return value.begin();
+      return Value.begin();
     }
 
     const_iterator end() const noexcept
     {
-      return value.end();
+      return Value.end();
     }
 
     bool isEmpty() const noexcept
     {
-      return value.isEmpty();
+      return Value.isEmpty();
     }
 
     size_t size() const noexcept
     {
-      return value.size();
+      return Value.size();
     }
 
     bool contains(const T &item) const
     {
-      return value.contains(item);
+      return Value.contains(item);
     }
 
     bool operator==(const SpaceSeparatedListHashSet &) const = default;
@@ -798,7 +798,7 @@ namespace krys::boo::css
   constexpr auto TreatAsRangeLike<SpaceSeparatedListHashSet<T>> = true;
 
   template <typename T>
-  constexpr auto SerializationSeparator<SpaceSeparatedListHashSet<T>> = SerializationSeparatorType::Space;
+  constexpr auto SerialisationSeparator<SpaceSeparatedListHashSet<T>> = SerialisationSeparatorType::Space;
 
 #pragma endregion
 
@@ -812,15 +812,15 @@ namespace krys::boo::css
     using const_iterator = typename Container::const_iterator;
     using value_type = typename Container::value_type;
 
-    Container value;
+    Container Value;
 
     CommaSeparatedListHashSet() = default;
 
-    CommaSeparatedListHashSet(std::initializer_list<T> initializerList) : value {initializerList}
+    CommaSeparatedListHashSet(std::initializer_list<T> initializerList) : Value {initializerList}
     {
     }
 
-    CommaSeparatedListHashSet(Container &&container) : value {krys::move(container)}
+    CommaSeparatedListHashSet(Container &&container) : Value {krys::move(container)}
     {
     }
 
@@ -837,27 +837,27 @@ namespace krys::boo::css
 
     const_iterator begin() const noexcept
     {
-      return value.begin();
+      return Value.begin();
     }
 
     const_iterator end() const noexcept
     {
-      return value.end();
+      return Value.end();
     }
 
     bool isEmpty() const noexcept
     {
-      return value.isEmpty();
+      return Value.isEmpty();
     }
 
     size_t size() const noexcept
     {
-      return value.size();
+      return Value.size();
     }
 
     bool contains(const T &item) const
     {
-      return value.contains(item);
+      return Value.contains(item);
     }
 
     bool operator==(const CommaSeparatedListHashSet &) const = default;
@@ -867,7 +867,7 @@ namespace krys::boo::css
   constexpr auto TreatAsRangeLike<CommaSeparatedListHashSet<T>> = true;
 
   template <typename T>
-  constexpr auto SerializationSeparator<CommaSeparatedListHashSet<T>> = SerializationSeparatorType::Comma;
+  constexpr auto SerialisationSeparator<CommaSeparatedListHashSet<T>> = SerialisationSeparatorType::Comma;
 
 #pragma endregion
 
@@ -883,15 +883,15 @@ namespace krys::boo::css
 
     SpaceSeparatedFixedList() = default;
 
-    SpaceSeparatedFixedList(std::initializer_list<T> initializerList) : value {initializerList}
+    SpaceSeparatedFixedList(std::initializer_list<T> initializerList) : Value {initializerList}
     {
     }
 
-    SpaceSeparatedFixedList(Container &&value) : value {krys::move(value)}
+    SpaceSeparatedFixedList(Container &&container) : Value {krys::move(container)}
     {
     }
 
-    SpaceSeparatedFixedList(T &&value) : value {krys::move(value)}
+    SpaceSeparatedFixedList(T &&element) : Value {krys::move(element)}
     {
     }
 
@@ -908,76 +908,77 @@ namespace krys::boo::css
     }
 
     template <std::invocable<size_t> Generator>
-    static SpaceSeparatedFixedList createWithSizeFromGenerator(size_t size, KRYS_NOESCAPE Generator &&generator)
+    static SpaceSeparatedFixedList createWithSizeFromGenerator(size_t size,
+                                                               KRYS_NOESCAPE Generator &&generator)
     {
       return Container::createWithSizeFromGenerator(size, std::forward<Generator>(generator));
     }
 
     const_iterator begin() const KRYS_LIFETIME_BOUND
     {
-      return value.begin();
+      return Value.begin();
     }
     const_iterator end() const KRYS_LIFETIME_BOUND
     {
-      return value.end();
+      return Value.end();
     }
     const_reverse_iterator rbegin() const KRYS_LIFETIME_BOUND
     {
-      return value.rbegin();
+      return Value.rbegin();
     }
     const_reverse_iterator rend() const KRYS_LIFETIME_BOUND
     {
-      return value.rend();
+      return Value.rend();
     }
 
     bool isEmpty() const
     {
-      return value.isEmpty();
+      return Value.isEmpty();
     }
     size_t size() const
     {
-      return value.size();
+      return Value.size();
     }
     const T &operator[](size_t i) const KRYS_LIFETIME_BOUND
     {
-      return value[i];
+      return Value[i];
     }
 
     const T &first() const KRYS_LIFETIME_BOUND
     {
-      return value.first();
+      return Value.first();
     }
     const T &last() const KRYS_LIFETIME_BOUND
     {
-      return value.last();
+      return Value.last();
     }
 
     bool contains(const auto &x) const
     {
-      return value.contains(x);
+      return Value.contains(x);
     }
     template <typename Predicate>
     requires std::predicate<Predicate, const value_type &>
     bool containsIf(KRYS_NOESCAPE const Predicate &f) const
     {
-      return value.containsIf(f);
+      return Value.containsIf(f);
     }
 
     template <typename F>
     decltype(auto) map(F &&functor) const
     {
-      return value.map(std::forward<F>(functor));
+      return Value.map(std::forward<F>(functor));
     }
 
     bool operator==(const SpaceSeparatedFixedList &) const = default;
 
-    Container value;
+    Container Value;
   };
 
   template <typename T>
   constexpr auto TreatAsRangeLike<SpaceSeparatedFixedList<T>> = true;
   template <typename T>
-  constexpr auto SerializationSeparator<SpaceSeparatedFixedList<T>> = SerializationSeparatorType::Space;
+  constexpr auto SerialisationSeparator<SpaceSeparatedFixedList<T>> = SerialisationSeparatorType::Space;
 
   // Wraps a variable (though known at construction) number of elements of a single type, semantically marking
   // them as serializing as "comma separated".
@@ -991,15 +992,15 @@ namespace krys::boo::css
 
     CommaSeparatedFixedList() = default;
 
-    CommaSeparatedFixedList(std::initializer_list<T> initializerList) : value {initializerList}
+    CommaSeparatedFixedList(std::initializer_list<T> initializerList) : Value {initializerList}
     {
     }
 
-    CommaSeparatedFixedList(Container &&value) : value {krys::move(value)}
+    CommaSeparatedFixedList(Container &&container) : Value {krys::move(container)}
     {
     }
 
-    CommaSeparatedFixedList(T &&value) : value {krys::move(value)}
+    CommaSeparatedFixedList(T &&element) : Value {krys::move(element)}
     {
     }
 
@@ -1016,77 +1017,78 @@ namespace krys::boo::css
     }
 
     template <std::invocable<size_t> Generator>
-    static CommaSeparatedFixedList createWithSizeFromGenerator(size_t size, KRYS_NOESCAPE Generator &&generator)
+    static CommaSeparatedFixedList createWithSizeFromGenerator(size_t size,
+                                                               KRYS_NOESCAPE Generator &&generator)
     {
       return Container::createWithSizeFromGenerator(size, std::forward<Generator>(generator));
     }
 
     const_iterator begin() const KRYS_LIFETIME_BOUND
     {
-      return value.begin();
+      return Value.begin();
     }
     const_iterator end() const KRYS_LIFETIME_BOUND
     {
-      return value.end();
+      return Value.end();
     }
     const_reverse_iterator rbegin() const KRYS_LIFETIME_BOUND
     {
-      return value.rbegin();
+      return Value.rbegin();
     }
     const_reverse_iterator rend() const KRYS_LIFETIME_BOUND
     {
-      return value.rend();
+      return Value.rend();
     }
 
     bool isEmpty() const
     {
-      return value.isEmpty();
+      return Value.isEmpty();
     }
     size_t size() const
     {
-      return value.size();
+      return Value.size();
     }
     const T &operator[](size_t i) const KRYS_LIFETIME_BOUND
     {
-      return value[i];
+      return Value[i];
     }
 
     const T &first() const KRYS_LIFETIME_BOUND
     {
-      return value.first();
+      return Value.first();
     }
     const T &last() const KRYS_LIFETIME_BOUND
     {
-      return value.last();
+      return Value.last();
     }
 
     bool contains(const auto &x) const
     {
-      return value.contains(x);
+      return Value.contains(x);
     }
     template <typename Predicate>
     requires std::predicate<Predicate, const value_type &>
     bool containsIf(KRYS_NOESCAPE const Predicate &f) const
     {
-      return value.containsIf(f);
+      return Value.containsIf(f);
     }
 
     template <typename F>
     decltype(auto) map(F &&functor) const
     {
-      return value.map(std::forward<F>(functor));
+      return Value.map(std::forward<F>(functor));
     }
 
     bool operator==(const CommaSeparatedFixedList &) const = default;
 
-    Container value;
+    Container Value;
   };
 
   template <typename T>
   constexpr auto TreatAsRangeLike<CommaSeparatedFixedList<T>> = true;
 
   template <typename T>
-  constexpr auto SerializationSeparator<CommaSeparatedFixedList<T>> = SerializationSeparatorType::Comma;
+  constexpr auto SerialisationSeparator<CommaSeparatedFixedList<T>> = SerialisationSeparatorType::Comma;
 
 #pragma region SpaceSeparatedTuple
 
@@ -1096,18 +1098,18 @@ namespace krys::boo::css
   {
     using Tuple = std::tuple<Ts...>;
 
-    std::tuple<Ts...> value;
+    std::tuple<Ts...> Value;
 
     constexpr SpaceSeparatedTuple(Ts &&...values) noexcept
-        : value(std::make_tuple(std::forward<Ts>(values)...))
+        : Value(std::make_tuple(std::forward<Ts>(values)...))
     {
     }
 
-    constexpr SpaceSeparatedTuple(const Ts &...values) noexcept : value(std::make_tuple(values...))
+    constexpr SpaceSeparatedTuple(const Ts &...values) noexcept : Value(std::make_tuple(values...))
     {
     }
 
-    constexpr SpaceSeparatedTuple(std::tuple<Ts...> &&tuple) noexcept : value(krys::move(tuple))
+    constexpr SpaceSeparatedTuple(std::tuple<Ts...> &&tuple) noexcept : Value(krys::move(tuple))
     {
     }
 
@@ -1117,14 +1119,14 @@ namespace krys::boo::css
   template <size_t I, typename... Ts>
   KRYS_NODISCARD decltype(auto) get(const SpaceSeparatedTuple<Ts...> &tuple) noexcept
   {
-    return std::get<I>(tuple.value);
+    return std::get<I>(tuple.Value);
   }
 
   template <typename... Ts>
   constexpr bool TreatAsTupleLike<SpaceSeparatedTuple<Ts...>> = true;
 
   template <typename... Ts>
-  constexpr auto SerializationSeparator<SpaceSeparatedTuple<Ts...>> = SerializationSeparatorType::Space;
+  constexpr auto SerialisationSeparator<SpaceSeparatedTuple<Ts...>> = SerialisationSeparatorType::Space;
 
 #pragma endregion
 
@@ -1136,18 +1138,18 @@ namespace krys::boo::css
   {
     using Tuple = std::tuple<Ts...>;
 
-    std::tuple<Ts...> value;
+    std::tuple<Ts...> Value;
 
     constexpr CommaSeparatedTuple(Ts &&...values) noexcept
-        : value(std::make_tuple(std::forward<Ts>(values)...))
+        : Value(std::make_tuple(std::forward<Ts>(values)...))
     {
     }
 
-    constexpr CommaSeparatedTuple(const Ts &...values) noexcept : value(std::make_tuple(values...))
+    constexpr CommaSeparatedTuple(const Ts &...values) noexcept : Value(std::make_tuple(values...))
     {
     }
 
-    constexpr CommaSeparatedTuple(std::tuple<Ts...> &&tuple) noexcept : value(krys::move(tuple))
+    constexpr CommaSeparatedTuple(std::tuple<Ts...> &&tuple) noexcept : Value(krys::move(tuple))
     {
     }
 
@@ -1157,14 +1159,14 @@ namespace krys::boo::css
   template <size_t I, typename... Ts>
   KRYS_NODISCARD decltype(auto) get(const CommaSeparatedTuple<Ts...> &tuple) noexcept
   {
-    return std::get<I>(tuple.value);
+    return std::get<I>(tuple.Value);
   }
 
   template <typename... Ts>
   constexpr bool TreatAsTupleLike<CommaSeparatedTuple<Ts...>> = true;
 
   template <typename... Ts>
-  constexpr auto SerializationSeparator<CommaSeparatedTuple<Ts...>> = SerializationSeparatorType::Comma;
+  constexpr auto SerialisationSeparator<CommaSeparatedTuple<Ts...>> = SerialisationSeparatorType::Comma;
 
 #pragma endregion
 
@@ -1178,13 +1180,13 @@ namespace krys::boo::css
     using Array = SpaceSeparatedPair<T>;
     using value_type = T;
 
-    SpaceSeparatedPair<T> value;
+    SpaceSeparatedPair<T> Value;
 
-    constexpr SpaceSeparatedPoint(T p1, T p2) noexcept : value(krys::move(p1), krys::move(p2))
+    constexpr SpaceSeparatedPoint(T p1, T p2) noexcept : Value(krys::move(p1), krys::move(p2))
     {
     }
 
-    constexpr SpaceSeparatedPoint(SpaceSeparatedPair<T> &&array) noexcept : value(krys::move(array))
+    constexpr SpaceSeparatedPoint(SpaceSeparatedPair<T> &&array) noexcept : Value(krys::move(array))
     {
     }
 
@@ -1192,26 +1194,26 @@ namespace krys::boo::css
 
     KRYS_NODISCARD const T &x() const noexcept
     {
-      return get<0>(value);
+      return get<0>(Value);
     }
 
     KRYS_NODISCARD const T &y() const noexcept
     {
-      return get<1>(value);
+      return get<1>(Value);
     }
   };
 
   template <size_t I, typename T>
   KRYS_NODISCARD decltype(auto) get(const SpaceSeparatedPoint<T> &point) noexcept
   {
-    return get<I>(point.value);
+    return get<I>(point.Value);
   }
 
   template <typename T>
   constexpr bool TreatAsTupleLike<SpaceSeparatedPoint<T>> = true;
 
   template <typename T>
-  constexpr auto SerializationSeparator<SpaceSeparatedPoint<T>> = SerializationSeparatorType::Space;
+  constexpr auto SerialisationSeparator<SpaceSeparatedPoint<T>> = SerialisationSeparatorType::Space;
 
 #pragma endregion
 
@@ -1225,13 +1227,13 @@ namespace krys::boo::css
     using Array = SpaceSeparatedPair<T>;
     using value_type = T;
 
-    SpaceSeparatedPair<T> value;
+    SpaceSeparatedPair<T> Value;
 
-    constexpr SpaceSeparatedSize(T p1, T p2) noexcept : value(krys::move(p1), krys::move(p2))
+    constexpr SpaceSeparatedSize(T p1, T p2) noexcept : Value(krys::move(p1), krys::move(p2))
     {
     }
 
-    constexpr SpaceSeparatedSize(SpaceSeparatedPair<T> &&array) noexcept : value(krys::move(array))
+    constexpr SpaceSeparatedSize(SpaceSeparatedPair<T> &&array) noexcept : Value(krys::move(array))
     {
     }
 
@@ -1239,148 +1241,148 @@ namespace krys::boo::css
 
     KRYS_NODISCARD const T &Width() const noexcept
     {
-      return get<0>(value);
+      return get<0>(Value);
     }
 
     KRYS_NODISCARD const T &Height() const noexcept
     {
-      return get<1>(value);
+      return get<1>(Value);
     }
   };
 
   template <size_t I, typename T>
   KRYS_NODISCARD decltype(auto) get(const SpaceSeparatedSize<T> &size) noexcept
   {
-    return get<I>(size.value);
+    return get<I>(size.Value);
   }
 
   template <typename T>
   constexpr bool TreatAsTupleLike<SpaceSeparatedSize<T>> = true;
 
   template <typename T>
-  constexpr auto SerializationSeparator<SpaceSeparatedSize<T>> = SerializationSeparatorType::Space;
+  constexpr auto SerialisationSeparator<SpaceSeparatedSize<T>> = SerialisationSeparatorType::Space;
 
 #pragma endregion
 
-#pragma region MinimallySerializingSpaceSeparatedPoint
+#pragma region MinimallySerialisingSpaceSeparatedPoint
 
   /// @brief Wraps a pair of elements of a single type representing a point, semantically marking them as
   /// serializing as "space separated" and "minimally serializing".
   template <typename T>
-  struct MinimallySerializingSpaceSeparatedPoint
+  struct MinimallySerialisingSpaceSeparatedPoint
   {
     using Array = SpaceSeparatedPair<T>;
     using value_type = T;
 
-    SpaceSeparatedPair<T> value;
+    SpaceSeparatedPair<T> Value;
 
     template <typename U>
-    constexpr MinimallySerializingSpaceSeparatedPoint(U p1) noexcept : value(p1, p1)
+    constexpr MinimallySerialisingSpaceSeparatedPoint(U p1) noexcept : Value(p1, p1)
     {
     }
 
     template <typename U>
-    constexpr MinimallySerializingSpaceSeparatedPoint(U p1, U p2) noexcept
-        : value(krys::move(p1), krys::move(p2))
+    constexpr MinimallySerialisingSpaceSeparatedPoint(U p1, U p2) noexcept
+        : Value(krys::move(p1), krys::move(p2))
     {
     }
 
-    constexpr MinimallySerializingSpaceSeparatedPoint(SpaceSeparatedPair<T> &&array) noexcept
-        : value {krys::move(array)}
+    constexpr MinimallySerialisingSpaceSeparatedPoint(SpaceSeparatedPair<T> &&array) noexcept
+        : Value {krys::move(array)}
     {
     }
 
     KRYS_NODISCARD constexpr bool
-      operator==(const MinimallySerializingSpaceSeparatedPoint<T> &) const noexcept = default;
+      operator==(const MinimallySerialisingSpaceSeparatedPoint<T> &) const noexcept = default;
 
     KRYS_NODISCARD const T &x() const noexcept
     {
-      return get<0>(value);
+      return get<0>(Value);
     }
 
     KRYS_NODISCARD const T &y() const noexcept
     {
-      return get<1>(value);
+      return get<1>(Value);
     }
   };
 
   template <size_t I, typename T>
-  decltype(auto) get(const MinimallySerializingSpaceSeparatedPoint<T> &point) noexcept
+  decltype(auto) get(const MinimallySerialisingSpaceSeparatedPoint<T> &point) noexcept
   {
-    return get<I>(point.value);
+    return get<I>(point.Value);
   }
 
   template <typename T>
-  constexpr bool TreatAsTupleLike<MinimallySerializingSpaceSeparatedPoint<T>> = true;
+  constexpr bool TreatAsTupleLike<MinimallySerialisingSpaceSeparatedPoint<T>> = true;
 
   template <typename T>
-  constexpr auto SerializationSeparator<MinimallySerializingSpaceSeparatedPoint<T>> =
-    SerializationSeparatorType::Space;
+  constexpr auto SerialisationSeparator<MinimallySerialisingSpaceSeparatedPoint<T>> =
+    SerialisationSeparatorType::Space;
 
   template <typename T>
-  constexpr auto SerializationCoalescing<MinimallySerializingSpaceSeparatedPoint<T>> =
-    SerializationCoalescingType::Minimal;
+  constexpr auto SerialisationCoalescing<MinimallySerialisingSpaceSeparatedPoint<T>> =
+    SerialisationCoalescingType::Minimal;
 
 #pragma endregion
 
-#pragma region MinimallySerializingSpaceSeparatedSize
+#pragma region MinimallySerialisingSpaceSeparatedSize
 
   // Wraps a pair of elements of a single type representing a size, semantically marking them as serializing
   // as "space separated" and "minimally serializing".
   template <typename T>
-  struct MinimallySerializingSpaceSeparatedSize
+  struct MinimallySerialisingSpaceSeparatedSize
   {
     using Array = SpaceSeparatedPair<T>;
     using value_type = T;
 
-    SpaceSeparatedPair<T> value;
+    SpaceSeparatedPair<T> Value;
 
     template <typename U>
-    constexpr MinimallySerializingSpaceSeparatedSize(U p1) noexcept : value(p1, p1)
+    constexpr MinimallySerialisingSpaceSeparatedSize(U p1) noexcept : Value(p1, p1)
     {
     }
 
     template <typename U>
-    constexpr MinimallySerializingSpaceSeparatedSize(U p1, U p2) noexcept
-        : value(krys::move(p1), krys::move(p2))
+    constexpr MinimallySerialisingSpaceSeparatedSize(U p1, U p2) noexcept
+        : Value(krys::move(p1), krys::move(p2))
     {
     }
 
-    constexpr MinimallySerializingSpaceSeparatedSize(SpaceSeparatedPair<T> &&array) noexcept
-        : value(krys::move(array))
+    constexpr MinimallySerialisingSpaceSeparatedSize(SpaceSeparatedPair<T> &&array) noexcept
+        : Value(krys::move(array))
     {
     }
 
     KRYS_NODISCARD constexpr bool
-      operator==(const MinimallySerializingSpaceSeparatedSize<T> &) const noexcept = default;
+      operator==(const MinimallySerialisingSpaceSeparatedSize<T> &) const noexcept = default;
 
     KRYS_NODISCARD constexpr const T &Width() const noexcept
     {
-      return get<0>(value);
+      return get<0>(Value);
     }
 
     KRYS_NODISCARD constexpr const T &Height() const noexcept
     {
-      return get<1>(value);
+      return get<1>(Value);
     }
   };
 
   template <size_t I, typename T>
-  KRYS_NODISCARD decltype(auto) get(const MinimallySerializingSpaceSeparatedSize<T> &size) noexcept
+  KRYS_NODISCARD decltype(auto) get(const MinimallySerialisingSpaceSeparatedSize<T> &size) noexcept
   {
-    return get<I>(size.value);
+    return get<I>(size.Value);
   }
 
   template <typename T>
-  constexpr bool TreatAsTupleLike<MinimallySerializingSpaceSeparatedSize<T>> = true;
+  constexpr bool TreatAsTupleLike<MinimallySerialisingSpaceSeparatedSize<T>> = true;
 
   template <typename T>
-  constexpr auto SerializationSeparator<MinimallySerializingSpaceSeparatedSize<T>> =
-    SerializationSeparatorType::Space;
+  constexpr auto SerialisationSeparator<MinimallySerialisingSpaceSeparatedSize<T>> =
+    SerialisationSeparatorType::Space;
 
   template <typename T>
-  constexpr auto SerializationCoalescing<MinimallySerializingSpaceSeparatedSize<T>> =
-    SerializationCoalescingType::Minimal;
+  constexpr auto SerialisationCoalescing<MinimallySerialisingSpaceSeparatedSize<T>> =
+    SerialisationCoalescingType::Minimal;
 
 #pragma endregion
 
@@ -1435,7 +1437,7 @@ namespace krys::boo::css
   constexpr auto TreatAsTupleLike<SpaceSeparatedRectEdges<T>> = true;
 
   template <typename T>
-  constexpr auto SerializationSeparator<SpaceSeparatedRectEdges<T>> = SerializationSeparatorType::Space;
+  constexpr auto SerialisationSeparator<SpaceSeparatedRectEdges<T>> = SerialisationSeparatorType::Space;
 
 #pragma endregion
 
@@ -1490,11 +1492,11 @@ namespace krys::boo::css
   constexpr bool TreatAsTupleLike<CommaSeparatedRectEdges<T>> = true;
 
   template <typename T>
-  constexpr auto SerializationSeparator<CommaSeparatedRectEdges<T>> = SerializationSeparatorType::Comma;
+  constexpr auto SerialisationSeparator<CommaSeparatedRectEdges<T>> = SerialisationSeparatorType::Comma;
 
 #pragma endregion
 
-#pragma region MinimallySerializingSpaceSeparatedRectEdges
+#pragma region MinimallySerialisingSpaceSeparatedRectEdges
 
   /// @brief A set of 4 values parsed and interpreted in the same manner as defined for the margin shorthand.
   ///
@@ -1509,122 +1511,121 @@ namespace krys::boo::css
   /// is that this will serialize in its minimal form, checking for element equality and only
   /// serializing what is necessary.
   template <typename T>
-  struct MinimallySerializingSpaceSeparatedRectEdges : public RectEdges<T>
+  struct MinimallySerialisingSpaceSeparatedRectEdges : public RectEdges<T>
   {
     using value_type = T;
 
-    constexpr MinimallySerializingSpaceSeparatedRectEdges(T value) noexcept
-        : RectEdges<T> {value, value, value, value}
+    constexpr MinimallySerialisingSpaceSeparatedRectEdges(T all) noexcept : RectEdges<T> {all, all, all, all}
     {
     }
 
-    constexpr MinimallySerializingSpaceSeparatedRectEdges(T top, T right, T bottom, T left) noexcept
+    constexpr MinimallySerialisingSpaceSeparatedRectEdges(T top, T right, T bottom, T left) noexcept
         : RectEdges<T> {krys::move(top), krys::move(right), krys::move(bottom), krys::move(left)}
     {
     }
 
-    constexpr MinimallySerializingSpaceSeparatedRectEdges(RectEdges<T> &&rectEdges) noexcept
+    constexpr MinimallySerialisingSpaceSeparatedRectEdges(RectEdges<T> &&rectEdges) noexcept
         : RectEdges<T> {krys::move(rectEdges)}
     {
     }
 
     constexpr bool
-      operator==(const MinimallySerializingSpaceSeparatedRectEdges<T> &) const noexcept = default;
+      operator==(const MinimallySerialisingSpaceSeparatedRectEdges<T> &) const noexcept = default;
   };
 
   template <size_t I, typename T>
-  KRYS_NODISCARD decltype(auto) get(const MinimallySerializingSpaceSeparatedRectEdges<T> &value) noexcept
+  KRYS_NODISCARD decltype(auto) get(const MinimallySerialisingSpaceSeparatedRectEdges<T> &edges) noexcept
   {
     if constexpr (!I)
     {
-      return value.Top();
+      return edges.Top();
     }
     else if constexpr (I == 1)
     {
-      return value.Right();
+      return edges.Right();
     }
     else if constexpr (I == 2)
     {
-      return value.Bottom();
+      return edges.Bottom();
     }
     else if constexpr (I == 3)
     {
-      return value.Left();
+      return edges.Left();
     }
   }
 
   template <typename T>
-  constexpr bool TreatAsTupleLike<MinimallySerializingSpaceSeparatedRectEdges<T>> = true;
+  constexpr bool TreatAsTupleLike<MinimallySerialisingSpaceSeparatedRectEdges<T>> = true;
 
   template <typename T>
-  constexpr auto SerializationSeparator<MinimallySerializingSpaceSeparatedRectEdges<T>> =
-    SerializationSeparatorType::Space;
+  constexpr auto SerialisationSeparator<MinimallySerialisingSpaceSeparatedRectEdges<T>> =
+    SerialisationSeparatorType::Space;
 
   template <typename T>
-  constexpr auto SerializationCoalescing<MinimallySerializingSpaceSeparatedRectEdges<T>> =
-    SerializationCoalescingType::Minimal;
+  constexpr auto SerialisationCoalescing<MinimallySerialisingSpaceSeparatedRectEdges<T>> =
+    SerialisationCoalescingType::Minimal;
 
 #pragma endregion
 
-#pragma region MinimallySerializingSpaceSeparatedRectCorners
+#pragma region MinimallySerialisingSpaceSeparatedRectCorners
 
   template <typename T>
-  struct MinimallySerializingSpaceSeparatedRectCorners : public RectCorners<T>
+  struct MinimallySerialisingSpaceSeparatedRectCorners : public RectCorners<T>
   {
     using value_type = T;
 
-    constexpr MinimallySerializingSpaceSeparatedRectCorners(T value) noexcept
-        : RectCorners<T> {value, value, value, value}
+    constexpr MinimallySerialisingSpaceSeparatedRectCorners(T all) noexcept
+        : RectCorners<T> {all, all, all, all}
     {
     }
 
-    constexpr MinimallySerializingSpaceSeparatedRectCorners(T topLeft, T topRight, T bottomLeft,
+    constexpr MinimallySerialisingSpaceSeparatedRectCorners(T topLeft, T topRight, T bottomLeft,
                                                             T bottomRight) noexcept
         : RectCorners<T> {krys::move(topLeft), krys::move(topRight), krys::move(bottomLeft),
                           krys::move(bottomRight)}
     {
     }
 
-    constexpr MinimallySerializingSpaceSeparatedRectCorners(RectCorners<T> &&rectCorners) noexcept
+    constexpr MinimallySerialisingSpaceSeparatedRectCorners(RectCorners<T> &&rectCorners) noexcept
         : RectCorners<T> {krys::move(rectCorners)}
     {
     }
 
     constexpr bool
-      operator==(const MinimallySerializingSpaceSeparatedRectCorners<T> &) const noexcept = default;
+      operator==(const MinimallySerialisingSpaceSeparatedRectCorners<T> &) const noexcept = default;
   };
 
   template <size_t I, typename T>
-  KRYS_NODISCARD decltype(auto) get(const MinimallySerializingSpaceSeparatedRectCorners<T> &value) noexcept
+  KRYS_NODISCARD decltype(auto) get(const MinimallySerialisingSpaceSeparatedRectCorners<T> &corners) noexcept
   {
     if constexpr (!I)
     {
-      return value.TopLeft();
+      return corners.TopLeft();
     }
     else if constexpr (I == 1)
     {
-      return value.TopRight();
+      return corners.TopRight();
     }
     else if constexpr (I == 2)
     {
-      return value.BottomLeft();
+      return corners.BottomLeft();
     }
     else if constexpr (I == 3)
     {
-      return value.BottomRight();
+      return corners.BottomRight();
     }
   }
 
   template <typename T>
-  constexpr bool TreatAsTupleLike<MinimallySerializingSpaceSeparatedRectCorners<T>> = true;
+  constexpr bool TreatAsTupleLike<MinimallySerialisingSpaceSeparatedRectCorners<T>> = true;
 
   template <typename T>
-  constexpr auto SerializationSeparator<MinimallySerializingSpaceSeparatedRectCorners<T>> =
-    SerializationSeparatorType::Space;
+  constexpr auto SerialisationSeparator<MinimallySerialisingSpaceSeparatedRectCorners<T>> =
+    SerialisationSeparatorType::Space;
 
   template <typename T>
-  constexpr auto SerializationCoalescing<MinimallySerializingSpaceSeparatedRectCorners<T>> =
-    SerializationCoalescingType::Minimal;
+  constexpr auto SerialisationCoalescing<MinimallySerialisingSpaceSeparatedRectCorners<T>> =
+    SerialisationCoalescingType::Minimal;
 
 #pragma endregion
 
@@ -1787,49 +1788,49 @@ namespace krys::boo::css
     };
 
     ListOrDefault(List &&list, Defaulter &&defaulter = Defaulter()) noexcept
-        : value {krys::move(list)}, defaulter {krys::move(defaulter)}
+        : Value {krys::move(list)}, defaulter {krys::move(defaulter)}
     {
     }
 
     ListOrDefault(DefaultValueToken, Defaulter &&defaulter = Defaulter()) noexcept
-        : value {}, defaulter {krys::move(defaulter)}
+        : Value {}, defaulter {krys::move(defaulter)}
     {
     }
 
     const_iterator begin() const noexcept
     {
-      return {.it = value.begin(), .atEndForDefault = !IsDefault(), .owner = this};
+      return {.it = Value.begin(), .atEndForDefault = !IsDefault(), .owner = this};
     }
 
     const_iterator end() const noexcept
     {
-      return {.it = value.end(), .atEndForDefault = true, .owner = this};
+      return {.it = Value.end(), .atEndForDefault = true, .owner = this};
     }
 
     size_t size() const noexcept
     {
-      return IsDefault() ? 1 : value.size();
+      return IsDefault() ? 1 : Value.size();
     }
 
     const value_type &operator[](size_t i) const noexcept
     {
-      return IsDefault() ? defaulter() : value[i];
+      return IsDefault() ? defaulter() : Value[i];
     }
 
     bool contains(const auto &x) const noexcept
     {
-      return IsDefault() ? (x == defaulter()) : value.contains(x);
+      return IsDefault() ? (x == defaulter()) : Value.contains(x);
     }
     template <typename Predicate>
     requires std::predicate<Predicate, const value_type &>
     bool containsIf(const Predicate &f) const noexcept
     {
-      return IsDefault() ? f(defaulter()) : value.containsIf(f);
+      return IsDefault() ? f(defaulter()) : Value.containsIf(f);
     }
 
     bool IsDefault() const noexcept
     {
-      return value.isEmpty();
+      return Value.isEmpty();
     }
 
     bool operator==(const ListOrDefault &) const noexcept = default;
@@ -1837,14 +1838,14 @@ namespace krys::boo::css
   private:
     friend struct const_iterator;
 
-    List value;
+    List Value;
     KRYS_NO_UNIQUE_ADDRESS Defaulter defaulter;
   };
 
   template <typename List, typename Defaulter>
   constexpr auto TreatAsRangeLike<ListOrDefault<List, Defaulter>> = true;
   template <typename List, typename Defaulter>
-  constexpr auto SerializationSeparator<ListOrDefault<List, Defaulter>> = SerializationSeparator<List>;
+  constexpr auto SerialisationSeparator<ListOrDefault<List, Defaulter>> = SerialisationSeparator<List>;
 
   // Concept to constrain types to only those that derive from `ListOrDefault`.
   template <typename T>
@@ -1854,8 +1855,8 @@ namespace krys::boo::css
 #define DEFINE_RANGE_LIKE_CONFORMANCE_FOR_LIST_OR_DEFAULT_DERIVED_TYPE(t)                                    \
   DEFINE_RANGE_LIKE_CONFORMANCE(t)                                                                           \
   template <>                                                                                                \
-  constexpr auto krys::boo::css::SerializationSeparator<t> =                                                 \
-    krys::boo::css::SerializationSeparator<typename t::List>;
+  constexpr auto krys::boo::css::SerialisationSeparator<t> =                                                 \
+    krys::boo::css::SerialisationSeparator<typename t::List>;
 
 #pragma endregion
 
@@ -2003,7 +2004,7 @@ namespace krys::boo::css
     {
     }
 
-    constexpr EnumSetOrKeywordBase(value_type value) noexcept : EnumSetOrKeywordBase {EnumSet {value}}
+    constexpr EnumSetOrKeywordBase(value_type element) noexcept : EnumSetOrKeywordBase {EnumSet {element}}
     {
     }
 
@@ -2118,7 +2119,7 @@ namespace krys::boo::css
     using Keyword = K;
 
   protected:
-    constexpr ValueOrKeyword(Maybe<Value> &&value) : _value {krys::move(value)}
+    constexpr ValueOrKeyword(Maybe<Value> &&maybeValue) : _value {krys::move(maybeValue)}
     {
     }
 
@@ -2129,7 +2130,7 @@ namespace krys::boo::css
     {
     }
 
-    constexpr ValueOrKeyword(Value &&value) noexcept : _value {krys::move(value)}
+    constexpr ValueOrKeyword(Value &&initialValue) noexcept : _value {krys::move(initialValue)}
     {
     }
 
@@ -2197,16 +2198,16 @@ namespace krys::boo::css
     using const_iterator = typename Container::iterator;
     using value_type = T;
 
-    Container value;
+    Container Value;
 
     constexpr SpaceSeparatedEnumSet() noexcept = default;
 
     constexpr SpaceSeparatedEnumSet(std::initializer_list<T> initializerList) noexcept
-        : value {initializerList}
+        : Value {initializerList}
     {
     }
 
-    constexpr SpaceSeparatedEnumSet(Container &&value) noexcept : value {krys::move(value)}
+    constexpr SpaceSeparatedEnumSet(Container &&container) noexcept : Value {krys::move(container)}
     {
     }
 
@@ -2214,9 +2215,9 @@ namespace krys::boo::css
     KRYS_NODISCARD static SpaceSeparatedEnumSet Map(SizedRange &&range, Mapper &&mapper) noexcept
     {
       Container result;
-      for (auto &&value : range)
+      for (auto &&Value : range)
       {
-        result.Add(mapper(value));
+        result.Add(mapper(Value));
       }
 
       return result;
@@ -2229,65 +2230,65 @@ namespace krys::boo::css
 
     KRYS_NODISCARD constexpr StorageType ToRaw() const noexcept
     {
-      return value.ToRaw();
+      return Value.ToRaw();
     }
 
     KRYS_NODISCARD constexpr const_iterator begin() const noexcept
     {
-      return value.begin();
+      return Value.begin();
     }
 
     KRYS_NODISCARD constexpr const_iterator end() const noexcept
     {
-      return value.end();
+      return Value.end();
     }
 
     KRYS_NODISCARD constexpr bool IsEmpty() const noexcept
     {
-      return value.IsEmpty();
+      return Value.IsEmpty();
     }
 
     KRYS_NODISCARD constexpr size_t Size() const noexcept
     {
-      return value.Size();
+      return Value.Size();
     }
 
     KRYS_NODISCARD constexpr bool Contains(T e) const noexcept
     {
-      return value.Contains(e);
+      return Value.Contains(e);
     }
 
     KRYS_NODISCARD constexpr bool ContainsAny(Container other) const noexcept
     {
-      return value.ContainsAny(other);
+      return Value.ContainsAny(other);
     }
 
     KRYS_NODISCARD constexpr bool ContainsAll(Container other) const noexcept
     {
-      return value.ContainsAll(other);
+      return Value.ContainsAll(other);
     }
 
     KRYS_NODISCARD constexpr bool ContainsOnly(Container other) const noexcept
     {
-      return value.ContainsOnly(other);
+      return Value.ContainsOnly(other);
     }
 
     constexpr friend SpaceSeparatedEnumSet operator&(SpaceSeparatedEnumSet lhs,
                                                      SpaceSeparatedEnumSet rhs) noexcept
     {
-      return lhs.value & rhs.value;
+      return lhs.Value & rhs.Value;
     }
 
     constexpr friend SpaceSeparatedEnumSet operator-(SpaceSeparatedEnumSet lhs,
                                                      SpaceSeparatedEnumSet rhs) noexcept
     {
-      return lhs.value - rhs.value;
+      return lhs.Value - rhs.Value;
     }
 
     constexpr friend SpaceSeparatedEnumSet operator^(SpaceSeparatedEnumSet lhs,
                                                      SpaceSeparatedEnumSet rhs) noexcept
     {
-      return lhs.value ^ rhs.value;
+      return lhs.Value ^ rhs.Value;
     }
 
     constexpr bool operator==(const SpaceSeparatedEnumSet &) const noexcept = default;
@@ -2297,7 +2298,7 @@ namespace krys::boo::css
   constexpr auto TreatAsRangeLike<SpaceSeparatedEnumSet<T>> = true;
 
   template <typename T>
-  constexpr auto SerializationSeparator<SpaceSeparatedEnumSet<T>> = SerializationSeparatorType::Space;
+  constexpr auto SerialisationSeparator<SpaceSeparatedEnumSet<T>> = SerialisationSeparatorType::Space;
 
 #pragma endregion
 
@@ -2312,16 +2313,16 @@ namespace krys::boo::css
     using const_iterator = typename Container::iterator;
     using value_type = T;
 
-    Container value;
+    Container Value;
 
     constexpr CommaSeparatedEnumSet() noexcept = default;
 
     constexpr CommaSeparatedEnumSet(std::initializer_list<T> initializerList) noexcept
-        : value {initializerList}
+        : Value {initializerList}
     {
     }
 
-    constexpr CommaSeparatedEnumSet(Container &&value) noexcept : value {krys::move(value)}
+    constexpr CommaSeparatedEnumSet(Container &&container) noexcept : Value {krys::move(container)}
     {
     }
 
@@ -2329,9 +2330,9 @@ namespace krys::boo::css
     KRYS_NODISCARD constexpr static CommaSeparatedEnumSet Map(SizedRange &&range, Mapper &&mapper) noexcept
     {
       Container result;
-      for (auto &&value : range)
+      for (auto &&Value : range)
       {
-        result.Add(mapper(value));
+        result.Add(mapper(Value));
       }
 
       return result;
@@ -2344,65 +2345,65 @@ namespace krys::boo::css
 
     KRYS_NODISCARD constexpr StorageType ToRaw() const noexcept
     {
-      return value.ToRaw();
+      return Value.ToRaw();
     }
 
     KRYS_NODISCARD constexpr const_iterator begin() const noexcept
     {
-      return value.begin();
+      return Value.begin();
     }
 
     KRYS_NODISCARD constexpr const_iterator end() const noexcept
     {
-      return value.end();
+      return Value.end();
     }
 
     KRYS_NODISCARD constexpr bool IsEmpty() const noexcept
     {
-      return value.IsEmpty();
+      return Value.IsEmpty();
     }
 
     KRYS_NODISCARD constexpr size_t Size() const noexcept
     {
-      return value.Size();
+      return Value.Size();
     }
 
     KRYS_NODISCARD constexpr bool Contains(T e) const noexcept
     {
-      return value.Contains(e);
+      return Value.Contains(e);
     }
 
     KRYS_NODISCARD constexpr bool ContainsAny(Container other) const noexcept
     {
-      return value.ContainsAny(other);
+      return Value.ContainsAny(other);
     }
 
     KRYS_NODISCARD constexpr bool ContainsAll(Container other) const noexcept
     {
-      return value.ContainsAll(other);
+      return Value.ContainsAll(other);
     }
 
     KRYS_NODISCARD constexpr bool ContainsOnly(Container other) const noexcept
     {
-      return value.ContainsOnly(other);
+      return Value.ContainsOnly(other);
     }
 
     constexpr friend CommaSeparatedEnumSet operator&(CommaSeparatedEnumSet lhs,
                                                      CommaSeparatedEnumSet rhs) noexcept
     {
-      return lhs.value & rhs.value;
+      return lhs.Value & rhs.Value;
     }
 
     constexpr friend CommaSeparatedEnumSet operator-(CommaSeparatedEnumSet lhs,
                                                      CommaSeparatedEnumSet rhs) noexcept
     {
-      return lhs.value - rhs.value;
+      return lhs.Value - rhs.Value;
     }
 
     constexpr friend CommaSeparatedEnumSet operator^(CommaSeparatedEnumSet lhs,
                                                      CommaSeparatedEnumSet rhs) noexcept
     {
-      return lhs.value ^ rhs.value;
+      return lhs.Value ^ rhs.Value;
     }
 
     bool operator==(const CommaSeparatedEnumSet &) const noexcept = default;
@@ -2412,16 +2413,16 @@ namespace krys::boo::css
   constexpr auto TreatAsRangeLike<CommaSeparatedEnumSet<T>> = true;
 
   template <typename T>
-  constexpr auto SerializationSeparator<CommaSeparatedEnumSet<T>> = SerializationSeparatorType::Comma;
+  constexpr auto SerialisationSeparator<CommaSeparatedEnumSet<T>> = SerialisationSeparatorType::Comma;
 
 #pragma endregion
 
   template <typename RangeLike>
   struct NonEmptyRangeLikeMarkableTraits
   {
-    static bool IsEmptyValue(const RangeLike &value)
+    static bool IsEmptyValue(const RangeLike &range)
     {
-      return std::ranges::empty(value);
+      return std::ranges::empty(range);
     }
 
     static RangeLike EmptyValue()
@@ -2436,9 +2437,9 @@ namespace krys
   template <>
   struct MarkableTraits<boo::css::CustomIdentifier>
   {
-    static bool IsEmptyValue(const boo::css::CustomIdentifier &value)
+    static bool IsEmptyValue(const boo::css::CustomIdentifier &identifier)
     {
-      return value.value == boo::css::CSSOMStringAtom::Null();
+      return identifier.Value == boo::css::CSSOMStringAtom::Null();
     }
 
     static boo::css::CustomIdentifier EmptyValue()
@@ -2513,13 +2514,13 @@ namespace std
   };
 
   template <typename T>
-  class tuple_size<krys::boo::css::MinimallySerializingSpaceSeparatedPair<T>>
+  class tuple_size<krys::boo::css::MinimallySerialisingSpaceSeparatedPair<T>>
       : public std::integral_constant<size_t, 2>
   {
   };
 
   template <size_t I, typename T>
-  class tuple_element<I, krys::boo::css::MinimallySerializingSpaceSeparatedPair<T>>
+  class tuple_element<I, krys::boo::css::MinimallySerialisingSpaceSeparatedPair<T>>
   {
   public:
     using type = T;
@@ -2550,26 +2551,26 @@ namespace std
   };
 
   template <typename T>
-  class tuple_size<krys::boo::css::MinimallySerializingSpaceSeparatedPoint<T>>
+  class tuple_size<krys::boo::css::MinimallySerialisingSpaceSeparatedPoint<T>>
       : public std::integral_constant<size_t, 2>
   {
   };
 
   template <size_t I, typename T>
-  class tuple_element<I, krys::boo::css::MinimallySerializingSpaceSeparatedPoint<T>>
+  class tuple_element<I, krys::boo::css::MinimallySerialisingSpaceSeparatedPoint<T>>
   {
   public:
     using type = T;
   };
 
   template <typename T>
-  class tuple_size<krys::boo::css::MinimallySerializingSpaceSeparatedSize<T>>
+  class tuple_size<krys::boo::css::MinimallySerialisingSpaceSeparatedSize<T>>
       : public std::integral_constant<size_t, 2>
   {
   };
 
   template <size_t I, typename T>
-  class tuple_element<I, krys::boo::css::MinimallySerializingSpaceSeparatedSize<T>>
+  class tuple_element<I, krys::boo::css::MinimallySerialisingSpaceSeparatedSize<T>>
   {
   public:
     using type = T;
@@ -2600,26 +2601,26 @@ namespace std
   };
 
   template <typename T>
-  class tuple_size<krys::boo::css::MinimallySerializingSpaceSeparatedRectEdges<T>>
+  class tuple_size<krys::boo::css::MinimallySerialisingSpaceSeparatedRectEdges<T>>
       : public std::integral_constant<size_t, 4>
   {
   };
 
   template <size_t I, typename T>
-  class tuple_element<I, krys::boo::css::MinimallySerializingSpaceSeparatedRectEdges<T>>
+  class tuple_element<I, krys::boo::css::MinimallySerialisingSpaceSeparatedRectEdges<T>>
   {
   public:
     using type = T;
   };
 
   template <typename T>
-  class tuple_size<krys::boo::css::MinimallySerializingSpaceSeparatedRectCorners<T>>
+  class tuple_size<krys::boo::css::MinimallySerialisingSpaceSeparatedRectCorners<T>>
       : public std::integral_constant<size_t, 4>
   {
   };
 
   template <size_t I, typename T>
-  class tuple_element<I, krys::boo::css::MinimallySerializingSpaceSeparatedRectCorners<T>>
+  class tuple_element<I, krys::boo::css::MinimallySerialisingSpaceSeparatedRectCorners<T>>
   {
   public:
     using type = T;

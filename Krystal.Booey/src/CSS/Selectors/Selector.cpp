@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Selectors/Selector.hpp"
-#include "Krystal.Booey/CSS/Parser/SerializerIdioms.hpp"
+#include "Krystal.Booey/CSS/Parser/SerialiserIdioms.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
 
 namespace krys::boo::css
@@ -48,12 +48,12 @@ namespace krys::boo::css
     return *reinterpret_cast<const CSSOMStringAtom *>(&_data.Value);
   }
 
-  const CSSOMStringAtom &Selector::SerializingValue() const noexcept
+  const CSSOMStringAtom &Selector::SerialisingValue() const noexcept
   {
     assert(Match() != SelectorMatch::Type);
     if (HasFlag(_flags, SelectorFlag::HasRareData))
     {
-      return _data.RareData->SerializingValue;
+      return _data.RareData->SerialisingValue;
     }
 
     return *reinterpret_cast<const CSSOMStringAtom *>(&_data.Value);
@@ -126,7 +126,7 @@ namespace krys::boo::css
 
   CSSOMString Selector::SelectorText(CSSOMStringView separator, CSSOMStringView rightside) const noexcept
   {
-    auto SerializeIdentifierOrStar = [](const CSSOMStringAtom &identifier, utf32_string &output)
+    auto SerialiseIdentifierOrStar = [](const CSSOMStringAtom &identifier, utf32_string &output)
     {
       if (identifier == dom::StarAtom())
       {
@@ -134,7 +134,7 @@ namespace krys::boo::css
       }
       else
       {
-        SerializerIdioms::SerializeIdentifier(identifier.View(), output);
+        SerialiserIdioms::SerialiseIdentifier(identifier.View(), output);
       }
     };
 
@@ -144,11 +144,11 @@ namespace krys::boo::css
     {
       if (auto &prefix = TagQualifiedName().NamespacePrefix(); prefix != CSSOMStringAtom::Null())
       {
-        SerializeIdentifierOrStar(prefix, output);
+        SerialiseIdentifierOrStar(prefix, output);
         output.push_back(U'|');
       }
 
-      SerializeIdentifierOrStar(TagQualifiedName().LocalName(), output);
+      SerialiseIdentifierOrStar(TagQualifiedName().LocalName(), output);
     }
 
     const auto *selector = this;
@@ -163,7 +163,7 @@ namespace krys::boo::css
       if (selector->Match() == SelectorMatch::Id)
       {
         output.push_back(U'#');
-        SerializerIdioms::SerializeIdentifier(selector->SerializingValue().View(), output);
+        SerialiserIdioms::SerialiseIdentifier(selector->SerialisingValue().View(), output);
       }
       else if (selector->Match() == SelectorMatch::NestingParent)
       {
@@ -172,7 +172,7 @@ namespace krys::boo::css
       else if (selector->Match() == SelectorMatch::Class)
       {
         output.push_back(U'.');
-        SerializerIdioms::SerializeIdentifier(selector->SerializingValue().View(), output);
+        SerialiserIdioms::SerialiseIdentifier(selector->SerialisingValue().View(), output);
       }
       else if (selector->Match() == SelectorMatch::ForgivingUnknown
                || selector->Match() == SelectorMatch::ForgivingUnknownNestContaining)
@@ -192,10 +192,10 @@ namespace krys::boo::css
         if (auto &prefix = selector->Attribute().NamespacePrefix();
             prefix != CSSOMStringAtom::Null() && prefix != CSSOMStringAtom::Empty())
         {
-          SerializeIdentifierOrStar(prefix, output);
+          SerialiseIdentifierOrStar(prefix, output);
           output.push_back(U'|');
         }
-        SerializeIdentifierOrStar(selector->Attribute().LocalName(), output);
+        SerialiseIdentifierOrStar(selector->Attribute().LocalName(), output);
         switch (selector->Match())
         {
           case SelectorMatch::AttributeEquals:
@@ -242,7 +242,7 @@ namespace krys::boo::css
 
         if (selector->Match() != SelectorMatch::AttributeExists)
         {
-          SerializerIdioms::SerializeString(selector->SerializingValue().View(), output);
+          SerialiserIdioms::SerialiseString(selector->SerialisingValue().View(), output);
           if (selector->IsAttributeValueMatchingCaseInsensitive())
           {
             output.append(U" i]");
@@ -332,7 +332,7 @@ namespace krys::boo::css
     }
 
     _data.RareData->MatchingValue = krys::move(matchingValue);
-    _data.RareData->SerializingValue = value;
+    _data.RareData->SerialisingValue = value;
   }
 
   void Selector::SetAttribute(const dom::QualifiedName &name, IsCaseSensitive caseSensitive) noexcept
@@ -493,12 +493,12 @@ namespace krys::boo::css
 #pragma region RareData
 
   Selector::RareData::RareData(StringAtomStorage value) noexcept
-      : MatchingValue(value), SerializingValue(value), Attribute(dom::AnyQualifiedName())
+      : MatchingValue(value), SerialisingValue(value), Attribute(dom::AnyQualifiedName())
   {
   }
 
   Selector::RareData::RareData(const RareData &other) noexcept
-      : MatchingValue(other.MatchingValue), SerializingValue(other.SerializingValue), NthA(other.NthA),
+      : MatchingValue(other.MatchingValue), SerialisingValue(other.SerialisingValue), NthA(other.NthA),
         NthB(other.NthB), Attribute(other.Attribute), Argument(other.Argument),
         ArgumentList(other.ArgumentList), LangList(other.LangList)
   {
@@ -517,10 +517,10 @@ namespace krys::boo::css
         return false;
       }
     }
-    return MatchingValue == other.MatchingValue && SerializingValue == other.SerializingValue
+    return MatchingValue == other.MatchingValue && SerialisingValue == other.SerialisingValue
            && NthA == other.NthA && NthB == other.NthB && Attribute == other.Attribute
            && Argument == other.Argument && ArgumentList == other.ArgumentList && LangList == other.LangList
-           && SerializingValue == other.SerializingValue;
+           && SerialisingValue == other.SerialisingValue;
   }
 
   bool Selector::RareData::MatchNth(int64 count) const noexcept

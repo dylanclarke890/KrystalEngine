@@ -254,27 +254,27 @@ namespace krys::boo::style
   };
 
   template <typename T>
-  struct ToCSSMapping<css::MinimallySerializingSpaceSeparatedPair<T>>
+  struct ToCSSMapping<css::MinimallySerialisingSpaceSeparatedPair<T>>
   {
-    using type = css::MinimallySerializingSpaceSeparatedPair<CSSType<T>>;
+    using type = css::MinimallySerialisingSpaceSeparatedPair<CSSType<T>>;
   };
 
   template <typename T>
-  struct ToCSSMapping<css::MinimallySerializingSpaceSeparatedPoint<T>>
+  struct ToCSSMapping<css::MinimallySerialisingSpaceSeparatedPoint<T>>
   {
-    using type = css::MinimallySerializingSpaceSeparatedPoint<CSSType<T>>;
+    using type = css::MinimallySerialisingSpaceSeparatedPoint<CSSType<T>>;
   };
 
   template <typename T>
-  struct ToCSSMapping<css::MinimallySerializingSpaceSeparatedSize<T>>
+  struct ToCSSMapping<css::MinimallySerialisingSpaceSeparatedSize<T>>
   {
-    using type = css::MinimallySerializingSpaceSeparatedSize<CSSType<T>>;
+    using type = css::MinimallySerialisingSpaceSeparatedSize<CSSType<T>>;
   };
 
   template <typename T>
-  struct ToCSSMapping<css::MinimallySerializingSpaceSeparatedRectEdges<T>>
+  struct ToCSSMapping<css::MinimallySerialisingSpaceSeparatedRectEdges<T>>
   {
-    using type = css::MinimallySerializingSpaceSeparatedRectEdges<CSSType<T>>;
+    using type = css::MinimallySerialisingSpaceSeparatedRectEdges<CSSType<T>>;
   };
 
   // Standard Range-Like type mappings:
@@ -534,27 +534,27 @@ namespace krys::boo::style
   };
 
   template <typename T>
-  struct ToStyleMapping<css::MinimallySerializingSpaceSeparatedPair<T>>
+  struct ToStyleMapping<css::MinimallySerialisingSpaceSeparatedPair<T>>
   {
-    using type = css::MinimallySerializingSpaceSeparatedPair<StyleType<T>>;
+    using type = css::MinimallySerialisingSpaceSeparatedPair<StyleType<T>>;
   };
 
   template <typename T>
-  struct ToStyleMapping<css::MinimallySerializingSpaceSeparatedPoint<T>>
+  struct ToStyleMapping<css::MinimallySerialisingSpaceSeparatedPoint<T>>
   {
-    using type = css::MinimallySerializingSpaceSeparatedPoint<StyleType<T>>;
+    using type = css::MinimallySerialisingSpaceSeparatedPoint<StyleType<T>>;
   };
 
   template <typename T>
-  struct ToStyleMapping<css::MinimallySerializingSpaceSeparatedSize<T>>
+  struct ToStyleMapping<css::MinimallySerialisingSpaceSeparatedSize<T>>
   {
-    using type = css::MinimallySerializingSpaceSeparatedSize<StyleType<T>>;
+    using type = css::MinimallySerialisingSpaceSeparatedSize<StyleType<T>>;
   };
 
   template <typename T>
-  struct ToStyleMapping<css::MinimallySerializingSpaceSeparatedRectEdges<T>>
+  struct ToStyleMapping<css::MinimallySerialisingSpaceSeparatedRectEdges<T>>
   {
-    using type = css::MinimallySerializingSpaceSeparatedRectEdges<StyleType<T>>;
+    using type = css::MinimallySerialisingSpaceSeparatedRectEdges<StyleType<T>>;
   };
 
   // Standard Range-Like type mappings:
@@ -713,23 +713,23 @@ namespace krys::boo::style
                                               const StyleType &value, Rest &&...rest) noexcept
     {
       if constexpr (std::tuple_size_v<StyleType> == 1
-                    && css::SerializationSeparator<StyleType> == css::SerializationSeparatorType::None)
+                    && css::SerialisationSeparator<StyleType> == css::SerialisationSeparatorType::None)
       {
         return CreateCSSValue(pool, style, get<0>(value), std::forward<Rest>(rest)...);
       }
       else if constexpr (std::tuple_size_v<StyleType> == 2
-                         && css::SerializationCoalescing<StyleType>
-                              == css::SerializationCoalescingType::Minimal)
+                         && css::SerialisationCoalescing<StyleType>
+                              == css::SerialisationCoalescingType::Minimal)
       {
-        return css::CreateCoalescingPairValue<css::SerializationSeparator<StyleType>>(
+        return css::CreateCoalescingPairValue<css::SerialisationSeparator<StyleType>>(
           CreateCSSValue(pool, style, get<0>(value), rest...),
           CreateCSSValue(pool, style, get<1>(value), rest...));
       }
       else if constexpr (std::tuple_size_v<StyleType> == 4
-                         && css::SerializationCoalescing<StyleType>
-                              == css::SerializationCoalescingType::Minimal)
+                         && css::SerialisationCoalescing<StyleType>
+                              == css::SerialisationCoalescingType::Minimal)
       {
-        return css::CreateCoalescingQuadValue<css::SerializationSeparator<StyleType>>(
+        return css::CreateCoalescingQuadValue<css::SerialisationSeparator<StyleType>>(
           CreateCSSValue(pool, style, get<0>(value), rest...),
           CreateCSSValue(pool, style, get<1>(value), rest...),
           CreateCSSValue(pool, style, get<2>(value), rest...),
@@ -752,7 +752,7 @@ namespace krys::boo::style
           [&](const auto &element) { list.push_back(CreateCSSValue(pool, style, element, rest...)); });
 
         krys::apply([&](const auto &...x) { (..., caller(x)); }, value);
-        return css::CreateListValue<css::SerializationSeparator<StyleType>>(krys::move(list));
+        return css::CreateListValue<css::SerialisationSeparator<StyleType>>(krys::move(list));
       }
     }
   };
@@ -772,7 +772,7 @@ namespace krys::boo::style
         list.push_back(CreateCSSValue(pool, style, element, rest...));
       }
 
-      return css::CreateListValue<css::SerializationSeparator<StyleType>>(krys::move(list));
+      return css::CreateListValue<css::SerialisationSeparator<StyleType>>(krys::move(list));
     }
   };
 
@@ -959,7 +959,7 @@ namespace krys::boo::style
   template <typename StyleType>
   struct Serialiser;
 
-  struct SerializeInvoker
+  struct SerialiseInvoker
   {
     template <typename StyleType, typename... Rest>
     void operator()(css::CSSOMString &builder, const css::SerialisationContext &context,
@@ -979,7 +979,7 @@ namespace krys::boo::style
     }
   };
 
-  constexpr SerializeInvoker Serialise {};
+  constexpr SerialiseInvoker Serialise {};
 
   template <typename StyleType, typename... Rest>
   void SerialisationForCSSOnOptionalLike(css::CSSOMString &builder, const css::SerialisationContext &context,
@@ -1119,16 +1119,16 @@ namespace krys::boo::style
     void operator()(css::CSSOMString &builder, const css::SerialisationContext &context,
                     const RenderStyle &style, const StyleType &value, Rest &&...rest) noexcept
     {
-      if constexpr (css::SerializationCoalescing<StyleType> == css::SerializationCoalescingType::Minimal)
+      if constexpr (css::SerialisationCoalescing<StyleType> == css::SerialisationCoalescingType::Minimal)
       {
         SerialisationForCSSOnTupleLikeCoalescing(builder, context, style, value,
-                                                 css::SerializationSeparatorString<StyleType>,
+                                                 css::SerialisationSeparatorString<StyleType>,
                                                  std::forward<Rest>(rest)...);
       }
       else
       {
         SerialisationForCSSOnTupleLike(builder, context, style, value,
-                                       css::SerializationSeparatorString<StyleType>,
+                                       css::SerialisationSeparatorString<StyleType>,
                                        std::forward<Rest>(rest)...);
       }
     }
@@ -1143,7 +1143,7 @@ namespace krys::boo::style
                     const RenderStyle &style, const StyleType &value, Rest &&...rest) noexcept
     {
       SerialisationForCSSOnRangeLike(builder, context, style, value,
-                                     css::SerializationSeparatorString<StyleType>,
+                                     css::SerialisationSeparatorString<StyleType>,
                                      std::forward<Rest>(rest)...);
     }
   };
@@ -2460,9 +2460,9 @@ namespace krys::boo::style
     }
   };
 
-  // Specialization for `css::MinimallySerializingSpaceSeparatedPoint`.
+  // Specialization for `css::MinimallySerialisingSpaceSeparatedPoint`.
   template <typename T>
-  struct IsEmpty<css::MinimallySerializingSpaceSeparatedPoint<T>>
+  struct IsEmpty<css::MinimallySerialisingSpaceSeparatedPoint<T>>
   {
     KRYS_NODISCARD bool operator()(const auto &value) noexcept
     {
@@ -2470,9 +2470,9 @@ namespace krys::boo::style
     }
   };
 
-  // Specialization for `css::MinimallySerializingSpaceSeparatedSize`.
+  // Specialization for `css::MinimallySerialisingSpaceSeparatedSize`.
   template <typename T>
-  struct IsEmpty<css::MinimallySerializingSpaceSeparatedSize<T>>
+  struct IsEmpty<css::MinimallySerialisingSpaceSeparatedSize<T>>
   {
     KRYS_NODISCARD bool operator()(const auto &value) noexcept
     {
@@ -2527,9 +2527,9 @@ namespace krys::boo::style
     }
   };
 
-  // Specialization for `css::MinimallySerializingSpaceSeparatedPoint`.
+  // Specialization for `css::MinimallySerialisingSpaceSeparatedPoint`.
   template <typename T>
-  struct IsKnownEmpty<css::MinimallySerializingSpaceSeparatedPoint<T>>
+  struct IsKnownEmpty<css::MinimallySerialisingSpaceSeparatedPoint<T>>
   {
     KRYS_NODISCARD bool operator()(const auto &value) noexcept
     {
@@ -2537,9 +2537,9 @@ namespace krys::boo::style
     }
   };
 
-  // Specialization for `css::MinimallySerializingSpaceSeparatedSize`.
+  // Specialization for `css::MinimallySerialisingSpaceSeparatedSize`.
   template <typename T>
-  struct IsKnownEmpty<css::MinimallySerializingSpaceSeparatedSize<T>>
+  struct IsKnownEmpty<css::MinimallySerialisingSpaceSeparatedSize<T>>
   {
     KRYS_NODISCARD bool operator()(const auto &value) noexcept
     {

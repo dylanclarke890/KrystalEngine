@@ -51,8 +51,9 @@ namespace krys::boo::css
   /// @brief Concept to check if a type, `T`, is one of the types `CompositeParent` composes over.
   /// e.g. `NestedUnitEnumOf<LengthUnit, LengthPercentageUnit> == true`
   template <typename T, typename CompositeParent>
-  concept NestedUnitEnumOf = UnitEnum<T> && CompositeUnitEnum<CompositeParent>
-                             && detail::ContainsInTuple<T, typename UnitTraits<CompositeParent>::Composite>::value;
+  concept NestedUnitEnumOf =
+    UnitEnum<T> && CompositeUnitEnum<CompositeParent>
+    && detail::ContainsInTuple<T, typename UnitTraits<CompositeParent>::Composite>::value;
 
   // Forward declaration of PrimitiveNumericRaw needed to create a hard constraint for the NumericRaw
   // concept below.

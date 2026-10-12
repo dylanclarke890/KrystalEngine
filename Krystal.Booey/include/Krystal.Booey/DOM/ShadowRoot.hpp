@@ -57,7 +57,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-shadowroot-serializable
-    KRYS_NODISCARD bool Serializable() const noexcept
+    KRYS_NODISCARD bool Serialisable() const noexcept
     {
       return _serializable;
     }

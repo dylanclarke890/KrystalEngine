@@ -49,7 +49,7 @@ namespace krys::boo::css::cq
     ContainsUnknownFeature ContainsUnknownFeature;
   };
 
-  void Serialize(CSSOMString &builder, const ContainerQuery &query) noexcept;
+  void Serialise(CSSOMString &builder, const ContainerQuery &query) noexcept;
 }
 
 KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::cq::Axis, 4uz);

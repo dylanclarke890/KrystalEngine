@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include "ColorSerialization.h"
+#include "ColorSerialisation.h"
 #include "CSSColor.h"
 #include "CSSColorDescriptors.h"
 #include "CSSPlatformColorResolutionState.h"
@@ -103,12 +103,12 @@ namespace WebCore
     }
 
     template <typename D>
-    struct Serialize<RelativeColor<D>>
+    struct Serialise<RelativeColor<D>>
     {
-      void operator()(StringBuilder &builder, const SerializationContext &context,
+      void operator()(StringBuilder &builder, const SerialisationContext &context,
                       const RelativeColor<D> &value)
       {
-        if constexpr (D::usesColorFunctionForSerialization)
+        if constexpr (D::usesColorFunctionForSerialisation)
         {
           builder.append("color(from "_s);
           serializationForCSS(builder, context, value.origin);

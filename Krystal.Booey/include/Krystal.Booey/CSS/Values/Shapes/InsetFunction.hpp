@@ -10,7 +10,7 @@ namespace krys::boo::css
     // https://drafts.csswg.org/css-shapes-1/#funcdef-basic-shape-inset
     struct Inset
     {
-      using Insets = MinimallySerializingSpaceSeparatedRectEdges<LengthPercentage<>>;
+      using Insets = MinimallySerialisingSpaceSeparatedRectEdges<LengthPercentage<>>;
 
       Insets Insets;
       BorderRadius Radii;

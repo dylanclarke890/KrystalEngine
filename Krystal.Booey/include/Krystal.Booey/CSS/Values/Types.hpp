@@ -45,18 +45,18 @@ namespace krys::boo::css
 
   constexpr SerialiseInvoker Serialise {};
 
-  void SerializeCustomIdentifier(CSSOMString &, const SerialisationContext &,
+  void SerialiseCustomIdentifier(CSSOMString &, const SerialisationContext &,
                                  const CustomIdentifier &) noexcept;
 
-  void SerializePropertyIdentifier(CSSOMString &, const SerialisationContext &,
+  void SerialisePropertyIdentifier(CSSOMString &, const SerialisationContext &,
                                    const PropertyIdentifier &) noexcept;
 
-  void SerializeString(CSSOMString &, const SerialisationContext &, const CSSOMStringAtom &) noexcept;
+  void SerialiseString(CSSOMString &, const SerialisationContext &, const CSSOMStringAtom &) noexcept;
 
-  void SerializeString(CSSOMString &, const SerialisationContext &, const CSSOMString &) noexcept;
+  void SerialiseString(CSSOMString &, const SerialisationContext &, const CSSOMString &) noexcept;
 
   template <typename CSSType, typename... Rest>
-  void SerializeOnOptionalLike(CSSOMString &builder, const SerialisationContext &context,
+  void SerialiseOnOptionalLike(CSSOMString &builder, const SerialisationContext &context,
                                const CSSType &value, Rest &&...rest) noexcept
   {
     if (!value)
@@ -68,7 +68,7 @@ namespace krys::boo::css
   }
 
   template <typename CSSType, typename... Rest>
-  void SerializeOnTupleLike(CSSOMString &builder, const SerialisationContext &context, const CSSType &value,
+  void SerialiseOnTupleLike(CSSOMString &builder, const SerialisationContext &context, const CSSType &value,
                             CSSOMStringView separator, Rest &&...rest) noexcept
   {
     CSSOMStringView swappedSeparator = u8"";
@@ -93,14 +93,15 @@ namespace krys::boo::css
   }
 
   template <typename CSSType, typename... Rest>
-  void SerializeOnTupleLikeCoalescing(CSSOMString &builder, const SerialisationContext &context,
-                                      const CSSType &value, CSSOMStringView separator, Rest &&...rest) noexcept
+  void SerialiseOnTupleLikeCoalescing(CSSOMString &builder, const SerialisationContext &context,
+                                      const CSSType &value, CSSOMStringView separator,
+                                      Rest &&...rest) noexcept
   {
     if constexpr (std::tuple_size_v<CSSType> == 2)
     {
       if (get<0>(value) != get<1>(value))
       {
-        SerializeOnTupleLike(builder, context, std::tuple {get<0>(value), get<1>(value)}, separator,
+        SerialiseOnTupleLike(builder, context, std::tuple {get<0>(value), get<1>(value)}, separator,
                              std::forward<Rest>(rest)...);
         return;
       }
@@ -111,7 +112,7 @@ namespace krys::boo::css
     {
       if (get<3>(value) != get<1>(value))
       {
-        SerializeOnTupleLike(builder, context,
+        SerialiseOnTupleLike(builder, context,
                              std::tuple {get<0>(value), get<1>(value), get<2>(value), get<3>(value)},
                              separator, std::forward<Rest>(rest)...);
         return;
@@ -119,14 +120,14 @@ namespace krys::boo::css
 
       if (get<2>(value) != get<0>(value))
       {
-        SerializeOnTupleLike(builder, context, std::tuple {get<0>(value), get<1>(value), get<2>(value)},
+        SerialiseOnTupleLike(builder, context, std::tuple {get<0>(value), get<1>(value), get<2>(value)},
                              separator, std::forward<Rest>(rest)...);
         return;
       }
 
       if (get<1>(value) != get<0>(value))
       {
-        SerializeOnTupleLike(builder, context, std::tuple {get<0>(value), get<1>(value)}, separator,
+        SerialiseOnTupleLike(builder, context, std::tuple {get<0>(value), get<1>(value)}, separator,
                              std::forward<Rest>(rest)...);
         return;
       }
@@ -135,7 +136,7 @@ namespace krys::boo::css
   }
 
   template <typename CSSType, typename... Rest>
-  void SerializeOnRangeLike(CSSOMString &builder, const SerialisationContext &context, const CSSType &value,
+  void SerialiseOnRangeLike(CSSOMString &builder, const SerialisationContext &context, const CSSType &value,
                             CSSOMStringView separator, Rest &&...rest) noexcept
   {
     CSSOMStringView swappedSeparator = u8"";
@@ -147,7 +148,7 @@ namespace krys::boo::css
   }
 
   template <typename CSSType, typename... Rest>
-  void SerializeOnVariantLike(CSSOMString &builder, const SerialisationContext &context, const CSSType &value,
+  void SerialiseOnVariantLike(CSSOMString &builder, const SerialisationContext &context, const CSSType &value,
                               Rest &&...rest) noexcept
   {
     krys::SwitchOn(value, [&](const auto &alternative)
@@ -172,7 +173,7 @@ namespace krys::boo::css
     void operator()(CSSOMString &builder, const SerialisationContext &context, const CSSType &value,
                     Rest &&...rest) noexcept
     {
-      SerializeOnOptionalLike(builder, context, value, std::forward<Rest>(rest)...);
+      SerialiseOnOptionalLike(builder, context, value, std::forward<Rest>(rest)...);
     }
   };
 
@@ -184,14 +185,14 @@ namespace krys::boo::css
     void operator()(CSSOMString &builder, const SerialisationContext &context, const CSSType &value,
                     Rest &&...rest) noexcept
     {
-      if constexpr (SerializationCoalescing<CSSType> == SerializationCoalescingType::Minimal)
+      if constexpr (SerialisationCoalescing<CSSType> == SerialisationCoalescingType::Minimal)
       {
-        SerializeOnTupleLikeCoalescing(builder, context, value, SerializationSeparatorString<CSSType>,
+        SerialiseOnTupleLikeCoalescing(builder, context, value, SerialisationSeparatorString<CSSType>,
                                        std::forward<Rest>(rest)...);
       }
       else
       {
-        SerializeOnTupleLike(builder, context, value, SerializationSeparatorString<CSSType>,
+        SerialiseOnTupleLike(builder, context, value, SerialisationSeparatorString<CSSType>,
                              std::forward<Rest>(rest)...);
       }
     }
@@ -205,7 +206,7 @@ namespace krys::boo::css
     void operator()(CSSOMString &builder, const SerialisationContext &context, const CSSType &value,
                     Rest &&...rest) noexcept
     {
-      SerializeOnRangeLike(builder, context, value, SerializationSeparatorString<CSSType>,
+      SerialiseOnRangeLike(builder, context, value, SerialisationSeparatorString<CSSType>,
                            std::forward<Rest>(rest)...);
     }
   };
@@ -218,7 +219,7 @@ namespace krys::boo::css
     void operator()(CSSOMString &builder, const SerialisationContext &context, const CSSType &value,
                     Rest &&...rest) noexcept
     {
-      SerializeOnVariantLike(builder, context, value, std::forward<Rest>(rest)...);
+      SerialiseOnVariantLike(builder, context, value, std::forward<Rest>(rest)...);
     }
   };
 
@@ -230,7 +231,7 @@ namespace krys::boo::css
     void operator()(CSSOMString &builder, const SerialisationContext &, const KeywordValueConstant<C> &value,
                     Rest &&...) noexcept
     {
-      builder.append(ToLower(value.value));
+      builder.append(ToLower(value.Value));
     }
   };
 
@@ -242,7 +243,7 @@ namespace krys::boo::css
     void operator()(CSSOMString &builder, const SerialisationContext &context, const CustomIdentifier &value,
                     Rest &&...) noexcept
     {
-      SerializeCustomIdentifier(builder, context, value);
+      SerialiseCustomIdentifier(builder, context, value);
     }
   };
 
@@ -254,7 +255,7 @@ namespace krys::boo::css
     void operator()(CSSOMString &builder, const SerialisationContext &context,
                     const PropertyIdentifier &value, Rest &&...) noexcept
     {
-      SerializePropertyIdentifier(builder, context, value);
+      SerialisePropertyIdentifier(builder, context, value);
     }
   };
 
@@ -266,7 +267,7 @@ namespace krys::boo::css
     void operator()(CSSOMString &builder, const SerialisationContext &context, const CSSOMString &value,
                     Rest &&...) noexcept
     {
-      SerializeString(builder, context, value);
+      SerialiseString(builder, context, value);
     }
   };
 
@@ -278,7 +279,7 @@ namespace krys::boo::css
     void operator()(CSSOMString &builder, const SerialisationContext &context, const CSSOMStringAtom &value,
                     Rest &&...) noexcept
     {
-      SerializeString(builder, context, value);
+      SerialiseString(builder, context, value);
     }
   };
 
@@ -290,9 +291,9 @@ namespace krys::boo::css
     void operator()(CSSOMString &builder, const SerialisationContext &context,
                     const FunctionNotation<Name, CSSType> &value, Rest &&...rest) noexcept
     {
-      builder.append(ToLower(value.name));
+      builder.append(ToLower(value.Name));
       builder.push_back(u8'(');
-      Serialise(builder, context, value.parameters, std::forward<Rest>(rest)...);
+      Serialise(builder, context, value.Parameters, std::forward<Rest>(rest)...);
       builder.push_back(u8')');
     }
   };
@@ -684,32 +685,32 @@ namespace krys::boo::css
 
   KRYS_NODISCARD Ref<Value> CreateFunctionValue(ValueId name, Ref<Value> &&args) noexcept;
 
-  template <SerializationSeparatorType>
+  template <SerialisationSeparatorType>
   KRYS_NODISCARD Ref<Value> CreateCoalescingPairValue(Ref<Value> &&, Ref<Value> &&) noexcept;
 
   template <>
   KRYS_NODISCARD Ref<Value>
-    CreateCoalescingPairValue<SerializationSeparatorType::Space>(Ref<Value> &&, Ref<Value> &&) noexcept;
+    CreateCoalescingPairValue<SerialisationSeparatorType::Space>(Ref<Value> &&, Ref<Value> &&) noexcept;
 
-  template <SerializationSeparatorType>
+  template <SerialisationSeparatorType>
   KRYS_NODISCARD Ref<Value> CreateCoalescingQuadValue(Ref<Value> &&, Ref<Value> &&, Ref<Value> &&,
                                                       Ref<Value> &&) noexcept;
   template <>
   KRYS_NODISCARD Ref<Value>
-    CreateCoalescingQuadValue<SerializationSeparatorType::Space>(Ref<Value> &&, Ref<Value> &&, Ref<Value> &&,
+    CreateCoalescingQuadValue<SerialisationSeparatorType::Space>(Ref<Value> &&, Ref<Value> &&, Ref<Value> &&,
                                                                  Ref<Value> &&) noexcept;
 
-  template <SerializationSeparatorType>
+  template <SerialisationSeparatorType>
   KRYS_NODISCARD Ref<Value> CreateListValue(ValueListBuilder &&) noexcept;
 
   template <>
-  KRYS_NODISCARD Ref<Value> CreateListValue<SerializationSeparatorType::Space>(ValueListBuilder &&) noexcept;
+  KRYS_NODISCARD Ref<Value> CreateListValue<SerialisationSeparatorType::Space>(ValueListBuilder &&) noexcept;
 
   template <>
-  KRYS_NODISCARD Ref<Value> CreateListValue<SerializationSeparatorType::Comma>(ValueListBuilder &&) noexcept;
+  KRYS_NODISCARD Ref<Value> CreateListValue<SerialisationSeparatorType::Comma>(ValueListBuilder &&) noexcept;
 
   template <>
-  KRYS_NODISCARD Ref<Value> CreateListValue<SerializationSeparatorType::Slash>(ValueListBuilder &&) noexcept;
+  KRYS_NODISCARD Ref<Value> CreateListValue<SerialisationSeparatorType::Slash>(ValueListBuilder &&) noexcept;
 
   // Constrained for `TreatAsVariantLike`.
   template <VariantLike CSSType>
@@ -731,20 +732,20 @@ namespace krys::boo::css
     KRYS_NODISCARD Ref<Value> operator()(ValuePool &pool, const CSSType &value, Args &&...args) noexcept
     {
       if constexpr (std::tuple_size_v<CSSType> == 1
-                    && SerializationSeparator<CSSType> == SerializationSeparatorType::None)
+                    && SerialisationSeparator<CSSType> == SerialisationSeparatorType::None)
       {
         return CreateValue(pool, get<0>(value), std::forward<Args>(args)...);
       }
       else if constexpr (std::tuple_size_v<CSSType> == 2
-                         && SerializationCoalescing<CSSType> == SerializationCoalescingType::Minimal)
+                         && SerialisationCoalescing<CSSType> == SerialisationCoalescingType::Minimal)
       {
-        return CreateCoalescingPairValue<SerializationSeparator<CSSType>>(CreateValue(pool, get<0>(value), args...),
-                                                                          CreateValue(pool, get<1>(value), args...));
+        return CreateCoalescingPairValue<SerialisationSeparator<CSSType>>(
+          CreateValue(pool, get<0>(value), args...), CreateValue(pool, get<1>(value), args...));
       }
       else if constexpr (std::tuple_size_v<CSSType> == 4
-                         && SerializationCoalescing<CSSType> == SerializationCoalescingType::Minimal)
+                         && SerialisationCoalescing<CSSType> == SerialisationCoalescingType::Minimal)
       {
-        return CreateCoalescingQuadValue<SerializationSeparator<CSSType>>(
+        return CreateCoalescingQuadValue<SerialisationSeparator<CSSType>>(
           CreateValue(pool, get<0>(value), args...), CreateValue(pool, get<1>(value), args...),
           CreateValue(pool, get<2>(value), args...), CreateValue(pool, get<3>(value), args...));
       }
@@ -762,12 +763,11 @@ namespace krys::boo::css
 
             list.push_back(CreateValue(pool, *element, args...));
           },
-          [&](const auto &element)
-          { list.push_back(CreateValue(pool, element, args...)); });
+          [&](const auto &element) { list.push_back(CreateValue(pool, element, args...)); });
 
         krys::apply([&](const auto &...x) { (..., caller(x)); }, value);
 
-        return CreateListValue<SerializationSeparator<CSSType>>(krys::move(list));
+        return CreateListValue<SerialisationSeparator<CSSType>>(krys::move(list));
       }
     }
   };
@@ -785,7 +785,7 @@ namespace krys::boo::css
         list.push_back(CreateValue(pool, element, args...));
       }
 
-      return CreateListValue<SerializationSeparator<CSSType>>(krys::move(list));
+      return CreateListValue<SerialisationSeparator<CSSType>>(krys::move(list));
     }
   };
 
@@ -853,8 +853,8 @@ namespace krys::boo::css
     Ref<Value> operator()(ValuePool &pool, const FunctionNotation<Name, CSSType> &value,
                           Args &&...args) noexcept
     {
-      return CreateFunctionValue(value.name,
-                                 CreateValue(pool, value.parameters, std::forward<Args>(args)...));
+      return CreateFunctionValue(value.Name,
+                                 CreateValue(pool, value.Parameters, std::forward<Args>(args)...));
     }
   };
 

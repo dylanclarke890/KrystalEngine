@@ -87,12 +87,12 @@ namespace krys::boo::tests
     CHECK(SerialisationForHTML(SRGBA<float> {1, 0, 0, 1}) == u8"#ff0000");
     CHECK(SerialisationForRenderTreeAsText(SRGBA<float> {1, 0, 0, 1}) == u8"rgb(255, 0, 0)");
 
-    Color colorFunction {SRGBA<float> {1, 0, 0, 1}, ColorFlags::UseColorFunctionSerialization};
+    Color colorFunction {SRGBA<float> {1, 0, 0, 1}, ColorFlags::UseColorFunctionSerialisation};
     CHECK(SerialisationForCSS(colorFunction) == u8"color(srgb 1 0 0)");
     CHECK(SerialisationForHTML(colorFunction) == u8"color(srgb 1 0 0)");
     CHECK(SerialisationForRenderTreeAsText(colorFunction) == u8"color(srgb 1 0 0)");
 
-    Color bytesColorFunction {SRGBA<uint8> {255, 0, 0, 255}, ColorFlags::UseColorFunctionSerialization};
+    Color bytesColorFunction {SRGBA<uint8> {255, 0, 0, 255}, ColorFlags::UseColorFunctionSerialisation};
     CHECK(SerialisationForCSS(bytesColorFunction) == u8"color(srgb 1 0 0)");
   }
 
@@ -104,7 +104,7 @@ namespace krys::boo::tests
     CHECK(SerialisationForRenderTreeAsText(HSLA<float> {0, 100, 50, 1}) == u8"#FF0000");
 
     // With color() serialisation, missing components are carried forward into sRGB.
-    Color hsl {HSLA<float> {0, 0, 100, 1}, ColorFlags::UseColorFunctionSerialization};
+    Color hsl {HSLA<float> {0, 0, 100, 1}, ColorFlags::UseColorFunctionSerialisation};
     CHECK(SerialisationForCSS(hsl) == u8"color(srgb 1 1 1)");
   }
 

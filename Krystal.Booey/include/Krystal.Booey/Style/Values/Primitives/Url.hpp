@@ -80,12 +80,12 @@ namespace WebCore
       auto operator()(BuilderState &, const CSSValue &) -> URL;
     };
 
-    // MARK: Serialization
+    // MARK: Serialisation
 
     template <>
-    struct Serialize<URL>
+    struct Serialise<URL>
     {
-      void operator()(StringBuilder &, const CSS::SerializationContext &, const RenderStyle &, const URL &);
+      void operator()(StringBuilder &, const CSS::SerialisationContext &, const RenderStyle &, const URL &);
     };
 
     // MARK: Logging

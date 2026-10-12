@@ -681,14 +681,14 @@ namespace krys::boo::css
 
   CSSOMString PrimitiveValue::FormatNumberValue(CSSOMStringView suffix) const noexcept
   {
-    return FormatCSSNumberValue(SerializableNumber {.Value = _value.Number, .Suffix = suffix});
+    return FormatCSSNumberValue(SerialisableNumber {.Value = _value.Number, .Suffix = suffix});
   }
 
   CSSOMString PrimitiveValue::FormatIntegerValue(CSSOMStringView suffix) const noexcept
   {
     if (!std::isfinite(_value.Number))
     {
-      return FormatNonfiniteCSSNumberValue(SerializableNumber {.Value = _value.Number, .Suffix = suffix});
+      return FormatNonfiniteCSSNumberValue(SerialisableNumber {.Value = _value.Number, .Suffix = suffix});
     }
 
     // FIXME: Shortest round-trip formatting like WTF's numberToString; share with Token's number formatting.
@@ -711,14 +711,14 @@ namespace krys::boo::css
       case UnitType::Calc:       return ProtectedCSSCalcValue()->CssText(context);
       // FIXME: This isn't correct.
       case UnitType::Dimension:  return FormatNumberValue(u8"");
-      case UnitType::FontFamily: return SerializeFontFamily(*_value.String);
+      case UnitType::FontFamily: return SerialiseFontFamily(*_value.String);
       case UnitType::Integer:    return FormatIntegerValue(u8"");
       case UnitType::QuirkyEm:   return FormatNumberValue(u8"em");
-      case UnitType::String:     return SerializeString(*_value.String);
+      case UnitType::String:     return SerialiseString(*_value.String);
       case UnitType::CustomIdent:
       {
         CSSOMString builder;
-        SerializeIdentifier(*_value.String, builder);
+        SerialiseIdentifier(*_value.String, builder);
         return builder;
       }
 

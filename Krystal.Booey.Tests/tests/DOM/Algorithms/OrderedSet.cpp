@@ -16,15 +16,15 @@ namespace krys::boo::dom::tests
   {
     {
       auto input = List<dom::DOMString> {};
-      REQUIRE(OrderedSet::Serializer(input) == u8"");
+      REQUIRE(OrderedSet::Serialiser(input) == u8"");
     }
     {
       auto input = List<dom::DOMString> {u8"foo"};
-      REQUIRE(OrderedSet::Serializer(input) == u8"foo");
+      REQUIRE(OrderedSet::Serialiser(input) == u8"foo");
     }
     {
       auto input = List<dom::DOMString> {u8"foo", u8"bar"};
-      REQUIRE(OrderedSet::Serializer(input) == u8"foo bar");
+      REQUIRE(OrderedSet::Serialiser(input) == u8"foo bar");
     }
   }
 }

@@ -34,18 +34,18 @@ namespace WebCore
   {
 
     template <EnumWithoutValueRepresentation T>
-    struct Serialize<T>
+    struct Serialise<T>
     {
-      void operator()(StringBuilder &builder, const CSS::SerializationContext &, const RenderStyle &, T value)
+      void operator()(StringBuilder &builder, const CSS::SerialisationContext &, const RenderStyle &, T value)
       {
-        builder.append(nameLiteralForSerialization(toCSSValueID(value)));
+        builder.append(nameLiteralForSerialisation(toCSSValueID(value)));
       }
     };
 
     template <EnumWithValueRepresentation T>
-    struct Serialize<T>
+    struct Serialise<T>
     {
-      void operator()(StringBuilder &builder, const CSS::SerializationContext &context,
+      void operator()(StringBuilder &builder, const CSS::SerialisationContext &context,
                       const RenderStyle &style, const T &value)
       {
         return valueRepresentation(value, [&](const auto &alternative)

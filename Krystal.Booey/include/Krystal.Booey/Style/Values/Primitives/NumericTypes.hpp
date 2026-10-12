@@ -155,10 +155,10 @@ namespace WebCore
     // Standard Sizes
     using LengthPercentageSpaceSeparatedSizeAll = SpaceSeparatedSize<LengthPercentageAll>;
     using LengthPercentageSpaceSeparatedSizeNonnegative = SpaceSeparatedSize<LengthPercentageNonnegative>;
-    using LengthPercentageMinimallySerializingSpaceSeparatedSizeAll =
-      MinimallySerializingSpaceSeparatedSize<LengthPercentageAll>;
-    using LengthPercentageMinimallySerializingSpaceSeparatedSizeNonnegative =
-      MinimallySerializingSpaceSeparatedSize<LengthPercentageNonnegative>;
+    using LengthPercentageMinimallySerialisingSpaceSeparatedSizeAll =
+      MinimallySerialisingSpaceSeparatedSize<LengthPercentageAll>;
+    using LengthPercentageMinimallySerialisingSpaceSeparatedSizeNonnegative =
+      MinimallySerialisingSpaceSeparatedSize<LengthPercentageNonnegative>;
 
     // MARK: CSS -> Style
 

@@ -4,25 +4,26 @@
 
 namespace krys::boo::css
 {
-  void SerializeCustomIdentifier(CSSOMString &builder, const SerialisationContext &,
+  void SerialiseCustomIdentifier(CSSOMString &builder, const SerialisationContext &,
                                  const CustomIdentifier &value) noexcept
   {
-    SerializeIdentifier(CSSOMString {value.value.View()}, builder);
+    SerialiseIdentifier(CSSOMString {value.Value.View()}, builder);
   }
 
-  void SerializePropertyIdentifier(CSSOMString &builder, const SerialisationContext &,
+  void SerialisePropertyIdentifier(CSSOMString &builder, const SerialisationContext &,
                                    const PropertyIdentifier &value) noexcept
   {
-    builder.append(ToString(value.value));
+    builder.append(ToString(value.Value));
   }
 
-  void SerializeString(CSSOMString &builder, const SerialisationContext &, const CSSOMStringAtom &value) noexcept
+  void SerialiseString(CSSOMString &builder, const SerialisationContext &,
+                       const CSSOMStringAtom &value) noexcept
   {
-    css::SerializeString(CSSOMString {value.View()}, builder);
+    css::SerialiseString(CSSOMString {value.View()}, builder);
   }
 
-  void SerializeString(CSSOMString &builder, const SerialisationContext &, const CSSOMString &value) noexcept
+  void SerialiseString(CSSOMString &builder, const SerialisationContext &, const CSSOMString &value) noexcept
   {
-    css::SerializeString(value, builder);
+    css::SerialiseString(value, builder);
   }
 }

@@ -109,33 +109,33 @@ namespace krys::boo::css
     switch (_type)
     {
       case TokenType::Ident:
-        SerializeIdentifier(CSSOMString(IdentCodePoints()), builder);
+        SerialiseIdentifier(CSSOMString(IdentCodePoints()), builder);
         appendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl,
                                TokenType::Number, TokenType::Percentage, TokenType::Dimension, TokenType::CDC,
                                TokenType::OpenParen},
                               '-');
         break;
       case TokenType::Function:
-        SerializeIdentifier(CSSOMString(IdentCodePoints()), builder);
+        SerialiseIdentifier(CSSOMString(IdentCodePoints()), builder);
         builder.push_back(u8'(');
         break;
       case TokenType::AtKeyword:
         builder.push_back(u8'@');
-        SerializeIdentifier(CSSOMString(IdentCodePoints()), builder);
+        SerialiseIdentifier(CSSOMString(IdentCodePoints()), builder);
         appendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl,
                                TokenType::Number, TokenType::Percentage, TokenType::Dimension, TokenType::CDC},
                               '-');
         break;
       case TokenType::Hash:
         builder.push_back(u8'#');
-        SerializeIdentifier(CSSOMString(IdentCodePoints()), builder, _hashType == HashTokenType::Unrestricted);
+        SerialiseIdentifier(CSSOMString(IdentCodePoints()), builder, _hashType == HashTokenType::Unrestricted);
         appendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl,
                                TokenType::Number, TokenType::Percentage, TokenType::Dimension, TokenType::CDC},
                               '-');
         break;
       case TokenType::Url:
         AppendASCII("url(", builder);
-        SerializeIdentifier(CSSOMString(IdentCodePoints()), builder);
+        SerialiseIdentifier(CSSOMString(IdentCodePoints()), builder);
         builder.push_back(u8')');
         break;
       case TokenType::Delim:
@@ -185,7 +185,7 @@ namespace krys::boo::css
       case TokenType::Dimension:
         // FIXME: Same as Number for TokenSerialisationMode::CustomProperty.
         AppendNumber(_numericValue, builder);
-        SerializeIdentifier(CSSOMString(Unit()), builder);
+        SerialiseIdentifier(CSSOMString(Unit()), builder);
         appendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl,
                                TokenType::Number, TokenType::Percentage, TokenType::Dimension, TokenType::CDC},
                               '-');
@@ -199,7 +199,7 @@ namespace krys::boo::css
         AppendASCII(range, builder);
         break;
       }
-      case TokenType::String: SerializeString(CSSOMString(IdentCodePoints()), builder); break;
+      case TokenType::String: SerialiseString(CSSOMString(IdentCodePoints()), builder); break;
 
       case TokenType::CDO:       AppendASCII("<!--", builder); break;
       case TokenType::CDC:       AppendASCII("-->", builder); break;

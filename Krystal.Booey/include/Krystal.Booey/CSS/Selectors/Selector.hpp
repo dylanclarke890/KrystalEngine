@@ -64,10 +64,10 @@ namespace krys::boo::css
       UniquePtr<SelectorList> SubSelectors;
 
       // For quirks mode, class and id are case-insensitive. In the case where uppercase letters are used in
-      // quirks mode, |MatchingValue| holds the lowercase class/id and |SerializingValue| holds the original
+      // quirks mode, |MatchingValue| holds the lowercase class/id and |SerialisingValue| holds the original
       // string.
       CSSOMStringAtom MatchingValue {CSSOMStringAtom::Null()};
-      CSSOMStringAtom SerializingValue {CSSOMStringAtom::Null()};
+      CSSOMStringAtom SerialisingValue {CSSOMStringAtom::Null()};
 
       RareData(StringAtomStorage value) noexcept;
 
@@ -130,7 +130,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD const CSSOMStringAtom &Value() const noexcept;
 
-    KRYS_NODISCARD const CSSOMStringAtom &SerializingValue() const noexcept;
+    KRYS_NODISCARD const CSSOMStringAtom &SerialisingValue() const noexcept;
 
     KRYS_NODISCARD const dom::QualifiedName &TagQualifiedName() const noexcept;
 

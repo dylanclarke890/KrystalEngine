@@ -459,7 +459,7 @@ namespace krys::boo::css
   {
     using To = ToPosition;
     using By = ByCoordinatePair;
-    using SizeOfEllipse = MinimallySerializingSpaceSeparatedSize<LengthPercentage<>>;
+    using SizeOfEllipse = MinimallySerialisingSpaceSeparatedSize<LengthPercentage<>>;
 
     constexpr static auto Name = ValueId::Arc;
 

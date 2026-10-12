@@ -108,17 +108,18 @@ namespace krys::boo::css
   template <Range range, FloatingPoint T, typename U>
   KRYS_NODISCARD constexpr T ClampToRange(U value) noexcept
   {
-    return ClampTo<T>(value, std::max<T>(range.Min, -std::numeric_limits<T>::max()),
-                      std::min<T>(range.Max, std::numeric_limits<T>::max()));
+    return ClampTo<T>(value, std::max<T>(static_cast<T>(range.Min), -std::numeric_limits<T>::max()),
+                      std::min<T>(static_cast<T>(range.Max), std::numeric_limits<T>::max()));
   }
 
   /// @brief Clamps a floating point value to within `range` and within additional provided range.
   template <Range range, FloatingPoint T, typename U>
   KRYS_NODISCARD constexpr T ClampToRange(U value, T additionalMinimum, T additionalMaximum) noexcept
   {
-    return ClampTo<T>(value,
-                      std::max<T>(std::max<T>(range.Min, -std::numeric_limits<T>::max()), additionalMinimum),
-                      std::min<T>(std::min<T>(range.Max, std::numeric_limits<T>::max()), additionalMaximum));
+    return ClampTo<T>(
+      value,
+      std::max<T>(std::max<T>(static_cast<T>(range.Min), -std::numeric_limits<T>::max()), additionalMinimum),
+      std::min<T>(std::min<T>(static_cast<T>(range.Max), std::numeric_limits<T>::max()), additionalMaximum));
   }
 
   /// @brief Clamps an unsigned integral value to within `range`.
@@ -129,11 +130,12 @@ namespace krys::boo::css
 
     if constexpr (range.Max == Range::Inf)
     {
-      return ClampTo<T>(value, range.Min, std::numeric_limits<T>::max());
+      return ClampTo<T>(value, static_cast<T>(range.Min), std::numeric_limits<T>::max());
     }
     else
     {
-      return ClampTo<T>(value, range.Min, std::min<T>(range.Max, std::numeric_limits<T>::max()));
+      return ClampTo<T>(value, static_cast<T>(range.Min),
+                        std::min<T>(static_cast<T>(range.Max), std::numeric_limits<T>::max()));
     }
   }
 
@@ -148,17 +150,17 @@ namespace krys::boo::css
     else if constexpr (range.Min == -Range::Inf)
     {
       return ClampTo<T>(value, std::numeric_limits<T>::min(),
-                        std::min<T>(range.Max, std::numeric_limits<T>::max()));
+                        std::min<T>(static_cast<T>(range.Max), std::numeric_limits<T>::max()));
     }
     else if constexpr (range.Max == Range::Inf)
     {
-      return ClampTo<T>(value, std::max<T>(range.Min, std::numeric_limits<T>::min()),
+      return ClampTo<T>(value, std::max<T>(static_cast<T>(range.Min), std::numeric_limits<T>::min()),
                         std::numeric_limits<T>::max());
     }
     else
     {
-      return ClampTo<T>(value, std::max<T>(range.Min, std::numeric_limits<T>::min()),
-                        std::min<T>(range.Max, std::numeric_limits<T>::max()));
+      return ClampTo<T>(value, std::max<T>(static_cast<T>(range.Min), std::numeric_limits<T>::min()),
+                        std::min<T>(static_cast<T>(range.Max), std::numeric_limits<T>::max()));
     }
   }
 
@@ -166,8 +168,9 @@ namespace krys::boo::css
   template <Range range, FloatingPoint T>
   KRYS_NODISCARD constexpr bool IsWithinRange(T value) noexcept
   {
-    return !std::isnan(value) && value >= std::max<T>(range.Min, -std::numeric_limits<T>::max())
-           && value <= std::min<T>(range.Max, std::numeric_limits<T>::max());
+    return !std::isnan(value)
+           && value >= std::max<T>(static_cast<T>(range.Min), -std::numeric_limits<T>::max())
+           && value <= std::min<T>(static_cast<T>(range.Max), std::numeric_limits<T>::max());
   }
 
   /// @brief Checks if a signed integral value is within `range`.
@@ -181,17 +184,17 @@ namespace krys::boo::css
     else if constexpr (range.Min == -Range::Inf)
     {
       return value >= std::numeric_limits<T>::min()
-             && value <= std::min<T>(range.Max, std::numeric_limits<T>::max());
+             && value <= std::min<T>(static_cast<T>(range.Max), std::numeric_limits<T>::max());
     }
     else if constexpr (range.Max == Range::Inf)
     {
-      return value >= std::max<T>(range.Min, std::numeric_limits<T>::min())
+      return value >= std::max<T>(static_cast<T>(range.Min), std::numeric_limits<T>::min())
              && value <= std::numeric_limits<T>::max();
     }
     else
     {
-      return value >= std::max<T>(range.Min, std::numeric_limits<T>::min())
-             && value <= std::min<T>(range.Max, std::numeric_limits<T>::max());
+      return value >= std::max<T>(static_cast<T>(range.Min), std::numeric_limits<T>::min())
+             && value <= std::min<T>(static_cast<T>(range.Max), std::numeric_limits<T>::max());
     }
   }
 
@@ -203,13 +206,13 @@ namespace krys::boo::css
 
     if constexpr (range.Max == Range::Inf)
     {
-      return value >= std::max<T>(range.Min, std::numeric_limits<T>::min())
+      return value >= std::max<T>(static_cast<T>(range.Min), std::numeric_limits<T>::min())
              && value <= std::numeric_limits<T>::max();
     }
     else
     {
-      return value >= std::max<T>(range.Min, std::numeric_limits<T>::min())
-             && value <= std::min<T>(range.Max, std::numeric_limits<T>::max());
+      return value >= std::max<T>(static_cast<T>(range.Min), std::numeric_limits<T>::min())
+             && value <= std::min<T>(static_cast<T>(range.Max), std::numeric_limits<T>::max());
     }
   }
 }

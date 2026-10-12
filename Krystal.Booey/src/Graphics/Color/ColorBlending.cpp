@@ -31,7 +31,7 @@ namespace krys::boo
           }
           else if constexpr (SameType<ColorType, ExtendedSRGBA<float>>)
           {
-            return !color.UsesColorFunctionSerialization();
+            return !color.UsesColorFunctionSerialisation();
           }
           else
           {

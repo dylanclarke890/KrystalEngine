@@ -18,7 +18,7 @@ namespace krys::boo::dom
     return tokens;
   }
 
-  DOMString OrderedSet::Serializer(Span<DOMString> tokens) noexcept
+  DOMString OrderedSet::Serialiser(Span<DOMString> tokens) noexcept
   {
     return infra::StringAlgorithms::Concatenate(tokens, u8" ");
   }

@@ -59,20 +59,20 @@ namespace krys::boo::css
       return string.empty();
     }
 
-    void SerializeCharacter(char32 c, CSSOMString &appendTo) noexcept
+    void SerialiseCharacter(char32 c, CSSOMString &appendTo) noexcept
     {
       appendTo.push_back(u8'\\');
       AppendCodePoint(c, appendTo);
     }
 
-    void SerializeCharacterAsCodePoint(char32 c, CSSOMString &appendTo) noexcept
+    void SerialiseCharacterAsCodePoint(char32 c, CSSOMString &appendTo) noexcept
     {
       auto hex = std::format("\\{:x} ", static_cast<uint32>(c));
       appendTo.append(hex.begin(), hex.end());
     }
   }
 
-  void SerializeIdentifier(const CSSOMString &identifier, CSSOMString &appendTo, bool skipStartChecks) noexcept
+  void SerialiseIdentifier(const CSSOMString &identifier, CSSOMString &appendTo, bool skipStartChecks) noexcept
   {
     bool isFirst = !skipStartChecks;
     bool isSecond = false;
@@ -87,11 +87,11 @@ namespace krys::boo::css
                        else if (c <= 0x1F || c == 0x7F
                                 || (0x30 <= c && c <= 0x39 && (isFirst || (isSecond && isFirstCharHyphen))))
                        {
-                         SerializeCharacterAsCodePoint(c, appendTo);
+                         SerialiseCharacterAsCodePoint(c, appendTo);
                        }
                        else if (c == U'-' && isFirst && isLast)
                        {
-                         SerializeCharacter(c, appendTo);
+                         SerialiseCharacter(c, appendTo);
                        }
                        else if (0x80 <= c || c == U'-' || c == U'_' || (0x30 <= c && c <= 0x39)
                                 || (0x41 <= c && c <= 0x5A) || (0x61 <= c && c <= 0x7A))
@@ -100,7 +100,7 @@ namespace krys::boo::css
                        }
                        else
                        {
-                         SerializeCharacter(c, appendTo);
+                         SerialiseCharacter(c, appendTo);
                        }
 
                        if (isFirst)
@@ -116,7 +116,7 @@ namespace krys::boo::css
                      });
   }
 
-  void SerializeString(const CSSOMString &string, CSSOMString &appendTo) noexcept
+  void SerialiseString(const CSSOMString &string, CSSOMString &appendTo) noexcept
   {
     appendTo.push_back(u8'"');
 
@@ -125,11 +125,11 @@ namespace krys::boo::css
                      {
                        if (c <= 0x1F || c == 0x7F)
                        {
-                         SerializeCharacterAsCodePoint(c, appendTo);
+                         SerialiseCharacterAsCodePoint(c, appendTo);
                        }
                        else if (c == U'"' || c == U'\\')
                        {
-                         SerializeCharacter(c, appendTo);
+                         SerialiseCharacter(c, appendTo);
                        }
                        else
                        {
@@ -140,23 +140,23 @@ namespace krys::boo::css
     appendTo.push_back(u8'"');
   }
 
-  CSSOMString SerializeString(const CSSOMString &value) noexcept
+  CSSOMString SerialiseString(const CSSOMString &value) noexcept
   {
     CSSOMString builder;
-    SerializeString(value, builder);
+    SerialiseString(value, builder);
     return builder;
   }
 
-  CSSOMString SerializeURL(const CSSOMString &value) noexcept
+  CSSOMString SerialiseURL(const CSSOMString &value) noexcept
   {
     CSSOMString builder = u8"url(";
-    SerializeString(value, builder);
+    SerialiseString(value, builder);
     builder.push_back(u8')');
     return builder;
   }
 
-  CSSOMString SerializeFontFamily(const CSSOMString &value) noexcept
+  CSSOMString SerialiseFontFamily(const CSSOMString &value) noexcept
   {
-    return IsCSSTokenizerIdentifier(value) ? value : SerializeString(value);
+    return IsCSSTokenizerIdentifier(value) ? value : SerialiseString(value);
   }
 }

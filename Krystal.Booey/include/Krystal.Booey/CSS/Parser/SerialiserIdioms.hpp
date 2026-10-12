@@ -11,7 +11,7 @@
 namespace krys::boo::css
 {
   /// @see https://drafts.csswg.org/cssom/#common-serializing-idioms
-  class SerializerIdioms
+  class SerialiserIdioms
   {
   public:
     /// @see https://drafts.csswg.org/cssom/#escape-a-character
@@ -31,7 +31,7 @@ namespace krys::boo::css
     }
 
     /// @see https://drafts.csswg.org/cssom/#serialize-an-identifier
-    static void SerializeIdentifier(CSSOMStringView identifier, utf32_string &output) noexcept
+    static void SerialiseIdentifier(CSSOMStringView identifier, utf32_string &output) noexcept
     {
       // TODO(string_conversion): need to iterate over the codepoints in the identifier instead of doing this
       auto decodeResult = krys::text::Decode<krys::text::UTF8>(identifier);
@@ -99,14 +99,14 @@ namespace krys::boo::css
     }
 
     /// @see https://drafts.csswg.org/cssom/#css-serialize-a-function
-    KRYS_NODISCARD static CSSOMString SerializeFunction(const CSSOMString &func) noexcept
+    KRYS_NODISCARD static CSSOMString SerialiseFunction(const CSSOMString &func) noexcept
     {
       // TODO:
       return {};
     }
 
     /// @see https://drafts.csswg.org/cssom/#serialize-a-string
-    KRYS_NODISCARD static void SerializeString(CSSOMStringView str, utf32_string &output) noexcept
+    KRYS_NODISCARD static void SerialiseString(CSSOMStringView str, utf32_string &output) noexcept
     {
       // TODO(string_conversion): need to iterate over the codepoints in the identifier instead of doing this
       auto decodeResult = krys::text::Decode<krys::text::UTF8>(str);
@@ -142,28 +142,28 @@ namespace krys::boo::css
     }
 
     /// @see https://drafts.csswg.org/cssom/#serialize-a-url
-    KRYS_NODISCARD static CSSOMString SerializeUrl(const CSSOMString &str) noexcept
+    KRYS_NODISCARD static CSSOMString SerialiseUrl(const CSSOMString &str) noexcept
     {
       // TODO:
       return {};
     }
 
     /// @see https://drafts.csswg.org/cssom/#serialize-a-local
-    KRYS_NODISCARD static CSSOMString SerializeLocal(const CSSOMString &str) noexcept
+    KRYS_NODISCARD static CSSOMString SerialiseLocal(const CSSOMString &str) noexcept
     {
       // TODO:
       return {};
     }
 
     /// @see https://drafts.csswg.org/cssom/#serialize-a-comma-separated-list
-    KRYS_NODISCARD static CSSOMString SerializeCommaSeparatedList(const List<CSSOMString> &str) noexcept
+    KRYS_NODISCARD static CSSOMString SerialiseCommaSeparatedList(const List<CSSOMString> &str) noexcept
     {
       // TODO:
       return {};
     }
 
     /// @see https://drafts.csswg.org/cssom/#serialize-a-whitespace-separated-list
-    KRYS_NODISCARD static CSSOMString SerializeWhitespaceeparatedList(const List<CSSOMString> &str) noexcept
+    KRYS_NODISCARD static CSSOMString SerialiseWhitespaceeparatedList(const List<CSSOMString> &str) noexcept
     {
       // TODO:
       return {};

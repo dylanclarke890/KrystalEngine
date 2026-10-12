@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Types.hpp"
 
@@ -65,7 +65,7 @@ namespace krys::boo::css
   struct ValueChildrenVisitor<SymbolRaw>
   {
     KRYS_NODISCARD constexpr IterationStatus operator()(const Func<IterationStatus(css::Value &)> &,
-                                         const SymbolRaw &) noexcept
+                                                        const SymbolRaw &) noexcept
     {
       return IterationStatus::Continue;
     }
@@ -74,7 +74,8 @@ namespace krys::boo::css
   template <>
   struct ValueChildrenVisitor<Symbol>
   {
-    KRYS_NODISCARD constexpr IterationStatus operator()(const Func<IterationStatus(css::Value &)> &, const Symbol &) noexcept
+    KRYS_NODISCARD constexpr IterationStatus operator()(const Func<IterationStatus(css::Value &)> &,
+                                                        const Symbol &) noexcept
     {
       return IterationStatus::Continue;
     }

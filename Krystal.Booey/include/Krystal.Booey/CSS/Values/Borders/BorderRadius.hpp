@@ -10,7 +10,7 @@ namespace krys::boo::css
   struct BorderRadius
   {
     using Axis = SpaceSeparatedArray<LengthPercentage<NonNegative>, 4>;
-    using Corner = MinimallySerializingSpaceSeparatedSize<LengthPercentage<NonNegative>>;
+    using Corner = MinimallySerialisingSpaceSeparatedSize<LengthPercentage<NonNegative>>;
 
     Axis Horizontal;
     Axis Vertical;

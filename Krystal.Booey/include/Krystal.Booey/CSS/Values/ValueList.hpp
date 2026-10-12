@@ -109,7 +109,7 @@ namespace krys::boo::css
 
     void SerialiseItems(CSSOMString &builder, const SerialisationContext &context) const noexcept;
 
-    KRYS_NODISCARD CSSOMString SerializeItems(const SerialisationContext &context) const noexcept;
+    KRYS_NODISCARD CSSOMString SerialiseItems(const SerialisationContext &context) const noexcept;
 
     KRYS_NODISCARD bool ItemsEqual(const ValueWithSmallList &items) const noexcept;
 

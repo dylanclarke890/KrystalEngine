@@ -240,9 +240,9 @@ namespace krys::boo
       return HasFlag(Flags(), ColorFlagsIncludingPrivate::Semantic);
     }
 
-    KRYS_NODISCARD bool UsesColorFunctionSerialization() const noexcept
+    KRYS_NODISCARD bool UsesColorFunctionSerialisation() const noexcept
     {
-      return HasFlag(Flags(), ColorFlagsIncludingPrivate::UseColorFunctionSerialization);
+      return HasFlag(Flags(), ColorFlagsIncludingPrivate::UseColorFunctionSerialisation);
     }
 
     /// @note Named `Space` rather than `ColorSpace` so it doesn't hide the `ColorSpace` type.

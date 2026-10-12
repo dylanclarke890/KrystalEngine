@@ -39,7 +39,7 @@ namespace krys::boo::css
     // Longhands set by mask and background shorthands can have comma-separated lists with implicit initial
     // values in them. We need to serialize those lists with the actual values, not as "initial". Doing this
     // for all CSSValueList with comma separators is better than checking the property is one of those
-    // longhands. Serializing this way is harmless for other properties; those won't have any implicit initial
+    // longhands. Serialising this way is harmless for other properties; those won't have any implicit initial
     // values.
     if (auto *list = DynamicDowncast<ValueList>(value);
         list && list->Separator() == ValueSeparator::CommaSeparator)

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/Aggregates.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo::css::tests
 {
@@ -121,34 +121,38 @@ namespace krys::boo::css::tests
 
   TEST_CASE("Aggregates(serialization traits)", "[CSS][Aggregates]")
   {
-    STATIC_CHECK(SerializationSeparator<SpaceSeparatedArray<int, 3>> == SerializationSeparatorType::Space);
-    STATIC_CHECK(SerializationSeparator<CommaSeparatedArray<int, 3>> == SerializationSeparatorType::Comma);
-    STATIC_CHECK(SerializationSeparator<SpaceSeparatedList<int>> == SerializationSeparatorType::Space);
-    STATIC_CHECK(SerializationSeparator<CommaSeparatedList<int>> == SerializationSeparatorType::Comma);
-    STATIC_CHECK(SerializationSeparator<SpaceSeparatedFixedList<int>> == SerializationSeparatorType::Space);
-    STATIC_CHECK(SerializationSeparator<CommaSeparatedFixedList<int>> == SerializationSeparatorType::Comma);
-    STATIC_CHECK(SerializationSeparator<SpaceSeparatedListHashSet<int>> == SerializationSeparatorType::Space);
-    STATIC_CHECK(SerializationSeparator<CommaSeparatedListHashSet<int>> == SerializationSeparatorType::Comma);
-    STATIC_CHECK(SerializationSeparator<SpaceSeparatedTuple<int, float>> == SerializationSeparatorType::Space);
-    STATIC_CHECK(SerializationSeparator<CommaSeparatedTuple<int, float>> == SerializationSeparatorType::Comma);
-    STATIC_CHECK(SerializationSeparator<SpaceSeparatedRectEdges<int>> == SerializationSeparatorType::Space);
-    STATIC_CHECK(SerializationSeparator<CommaSeparatedRectEdges<int>> == SerializationSeparatorType::Comma);
-    STATIC_CHECK(SerializationSeparator<SpaceSeparatedEnumSet<TestFlag>> == SerializationSeparatorType::Space);
-    STATIC_CHECK(SerializationSeparator<CommaSeparatedEnumSet<TestFlag>> == SerializationSeparatorType::Comma);
-    STATIC_CHECK(SerializationSeparator<ListOrDefault<CommaSeparatedList<int>, SevenDefaulter>>
-                 == SerializationSeparatorType::Comma);
-    STATIC_CHECK(SerializationSeparator<int> == SerializationSeparatorType::None);
+    STATIC_CHECK(SerialisationSeparator<SpaceSeparatedArray<int, 3>> == SerialisationSeparatorType::Space);
+    STATIC_CHECK(SerialisationSeparator<CommaSeparatedArray<int, 3>> == SerialisationSeparatorType::Comma);
+    STATIC_CHECK(SerialisationSeparator<SpaceSeparatedList<int>> == SerialisationSeparatorType::Space);
+    STATIC_CHECK(SerialisationSeparator<CommaSeparatedList<int>> == SerialisationSeparatorType::Comma);
+    STATIC_CHECK(SerialisationSeparator<SpaceSeparatedFixedList<int>> == SerialisationSeparatorType::Space);
+    STATIC_CHECK(SerialisationSeparator<CommaSeparatedFixedList<int>> == SerialisationSeparatorType::Comma);
+    STATIC_CHECK(SerialisationSeparator<SpaceSeparatedListHashSet<int>> == SerialisationSeparatorType::Space);
+    STATIC_CHECK(SerialisationSeparator<CommaSeparatedListHashSet<int>> == SerialisationSeparatorType::Comma);
+    STATIC_CHECK(SerialisationSeparator<SpaceSeparatedTuple<int, float>>
+                 == SerialisationSeparatorType::Space);
+    STATIC_CHECK(SerialisationSeparator<CommaSeparatedTuple<int, float>>
+                 == SerialisationSeparatorType::Comma);
+    STATIC_CHECK(SerialisationSeparator<SpaceSeparatedRectEdges<int>> == SerialisationSeparatorType::Space);
+    STATIC_CHECK(SerialisationSeparator<CommaSeparatedRectEdges<int>> == SerialisationSeparatorType::Comma);
+    STATIC_CHECK(SerialisationSeparator<SpaceSeparatedEnumSet<TestFlag>>
+                 == SerialisationSeparatorType::Space);
+    STATIC_CHECK(SerialisationSeparator<CommaSeparatedEnumSet<TestFlag>>
+                 == SerialisationSeparatorType::Comma);
+    STATIC_CHECK(SerialisationSeparator<ListOrDefault<CommaSeparatedList<int>, SevenDefaulter>>
+                 == SerialisationSeparatorType::Comma);
+    STATIC_CHECK(SerialisationSeparator<int> == SerialisationSeparatorType::None);
 
-    STATIC_CHECK(SerializationCoalescing<MinimallySerializingSpaceSeparatedPair<int>>
-                 == SerializationCoalescingType::Minimal);
-    STATIC_CHECK(SerializationCoalescing<MinimallySerializingSpaceSeparatedRectEdges<int>>
-                 == SerializationCoalescingType::Minimal);
-    STATIC_CHECK(SerializationCoalescing<SpaceSeparatedPair<int>> == SerializationCoalescingType::None);
+    STATIC_CHECK(SerialisationCoalescing<MinimallySerialisingSpaceSeparatedPair<int>>
+                 == SerialisationCoalescingType::Minimal);
+    STATIC_CHECK(SerialisationCoalescing<MinimallySerialisingSpaceSeparatedRectEdges<int>>
+                 == SerialisationCoalescingType::Minimal);
+    STATIC_CHECK(SerialisationCoalescing<SpaceSeparatedPair<int>> == SerialisationCoalescingType::None);
 
-    STATIC_CHECK(SerializationSeparatorString<SpaceSeparatedList<int>> == u8" ");
-    STATIC_CHECK(SerializationSeparatorString<CommaSeparatedList<int>> == u8", ");
-    STATIC_CHECK(SerializationSeparatorStringForType<SerializationSeparatorType::Slash> == u8" / ");
-    STATIC_CHECK(SerializationSeparatorString<int> == u8"");
+    STATIC_CHECK(SerialisationSeparatorString<SpaceSeparatedList<int>> == u8" ");
+    STATIC_CHECK(SerialisationSeparatorString<CommaSeparatedList<int>> == u8", ");
+    STATIC_CHECK(SerialisationSeparatorStringForType<SerialisationSeparatorType::Slash> == u8" / ");
+    STATIC_CHECK(SerialisationSeparatorString<int> == u8"");
   }
 
   TEST_CASE("Aggregates(like-ness traits)", "[CSS][Aggregates]")
@@ -156,7 +160,7 @@ namespace krys::boo::css::tests
     STATIC_CHECK(TreatAsTupleLike<SpaceSeparatedArray<int, 2>>);
     STATIC_CHECK(TreatAsTupleLike<CommaSeparatedTuple<int, float>>);
     STATIC_CHECK(TreatAsTupleLike<SpaceSeparatedPoint<int>>);
-    STATIC_CHECK(TreatAsTupleLike<MinimallySerializingSpaceSeparatedRectCorners<int>>);
+    STATIC_CHECK(TreatAsTupleLike<MinimallySerialisingSpaceSeparatedRectCorners<int>>);
     STATIC_CHECK(TreatAsTupleLike<FunctionNotation<ValueId::Calc, int>>);
     STATIC_CHECK(TreatAsRangeLike<SpaceSeparatedList<int>>);
     STATIC_CHECK(TreatAsRangeLike<CommaSeparatedEnumSet<TestFlag>>);
@@ -172,9 +176,9 @@ namespace krys::boo::css::tests
     STATIC_CHECK(std::tuple_size_v<SpaceSeparatedArray<int, 3>> == 3);
     STATIC_CHECK(std::tuple_size_v<CommaSeparatedTuple<int, float, double>> == 3);
     STATIC_CHECK(std::tuple_size_v<SpaceSeparatedPoint<int>> == 2);
-    STATIC_CHECK(std::tuple_size_v<MinimallySerializingSpaceSeparatedSize<int>> == 2);
+    STATIC_CHECK(std::tuple_size_v<MinimallySerialisingSpaceSeparatedSize<int>> == 2);
     STATIC_CHECK(std::tuple_size_v<SpaceSeparatedRectEdges<int>> == 4);
-    STATIC_CHECK(std::tuple_size_v<MinimallySerializingSpaceSeparatedRectCorners<int>> == 4);
+    STATIC_CHECK(std::tuple_size_v<MinimallySerialisingSpaceSeparatedRectCorners<int>> == 4);
     STATIC_CHECK(std::tuple_size_v<FunctionNotation<ValueId::Calc, int>> == 1);
   }
 
@@ -195,7 +199,7 @@ namespace krys::boo::css::tests
   TEST_CASE("Aggregates(FunctionNotation)", "[CSS][Aggregates]")
   {
     FunctionNotation<ValueId::Calc, int> function {5};
-    STATIC_CHECK(FunctionNotation<ValueId::Calc, int>::name == ValueId::Calc);
+    STATIC_CHECK(FunctionNotation<ValueId::Calc, int>::Name == ValueId::Calc);
     CHECK(*function == 5);
     CHECK(get<0>(function) == 5);
     const int &asParameters = function;
@@ -218,7 +222,7 @@ namespace krys::boo::css::tests
     CommaSeparatedPair<int> comma {4, 5};
     CHECK(get<1>(comma) == 5);
 
-    MinimallySerializingSpaceSeparatedPair<int> pair {1, 2};
+    MinimallySerialisingSpaceSeparatedPair<int> pair {1, 2};
     CHECK(pair.first() == 1);
     CHECK(pair.second() == 2);
     CHECK(get<1>(pair) == 2);
@@ -243,14 +247,14 @@ namespace krys::boo::css::tests
     CHECK(size.Width() == 3);
     CHECK(size.Height() == 4);
 
-    MinimallySerializingSpaceSeparatedPoint<int> repeatedPoint {5};
+    MinimallySerialisingSpaceSeparatedPoint<int> repeatedPoint {5};
     CHECK(repeatedPoint.x() == 5);
     CHECK(repeatedPoint.y() == 5);
 
-    MinimallySerializingSpaceSeparatedSize<int> minimalSize {6, 7};
+    MinimallySerialisingSpaceSeparatedSize<int> minimalSize {6, 7};
     CHECK(minimalSize.Width() == 6);
     CHECK(minimalSize.Height() == 7);
-    CHECK(minimalSize == MinimallySerializingSpaceSeparatedSize<int> {6, 7});
+    CHECK(minimalSize == MinimallySerialisingSpaceSeparatedSize<int> {6, 7});
   }
 
   TEST_CASE("Aggregates(rect edges and corners)", "[CSS][Aggregates]")
@@ -266,10 +270,10 @@ namespace krys::boo::css::tests
     CHECK(get<0>(repeated) == 9);
     CHECK(get<3>(repeated) == 9);
 
-    MinimallySerializingSpaceSeparatedRectEdges<int> minimal {1, 2, 1, 2};
+    MinimallySerialisingSpaceSeparatedRectEdges<int> minimal {1, 2, 1, 2};
     CHECK(get<2>(minimal) == 1);
 
-    MinimallySerializingSpaceSeparatedRectCorners<int> corners {1, 2, 3, 4};
+    MinimallySerialisingSpaceSeparatedRectCorners<int> corners {1, 2, 3, 4};
     CHECK(get<0>(corners) == 1);
     CHECK(get<1>(corners) == 2);
     CHECK(get<2>(corners) == 3);
@@ -312,8 +316,8 @@ namespace krys::boo::css::tests
     auto mapped = CommaSeparatedFixedList<int>::map(List<int> {1, 2}, [](int x) { return x * 10; });
     CHECK(ToList(mapped) == List<int> {10, 20});
 
-    auto generated =
-      SpaceSeparatedFixedList<int>::createWithSizeFromGenerator(3, [](size_t i) { return static_cast<int>(i); });
+    auto generated = SpaceSeparatedFixedList<int>::createWithSizeFromGenerator(
+      3, [](size_t i) { return static_cast<int>(i); });
     CHECK(ToList(generated) == List<int> {0, 1, 2});
   }
 
@@ -344,7 +348,8 @@ namespace krys::boo::css::tests
     CHECK(list[0] == 1);
     CHECK(ToList(list) == List<int> {1, 2});
 
-    CHECK(none.SwitchOn([](keywords::None) { return 0; }, [](const SpaceSeparatedList<int> &) { return 1; }) == 0);
+    CHECK(none.SwitchOn([](keywords::None) { return 0; }, [](const SpaceSeparatedList<int> &) { return 1; })
+          == 0);
     CHECK(list.SwitchOn([](keywords::None) { return 0; },
                         [](const SpaceSeparatedList<int> &l) { return static_cast<int>(l.size()); })
           == 2);
@@ -419,8 +424,9 @@ namespace krys::boo::css::tests
     CHECK(roundTrip == set);
     CHECK(TestEnumSetOrNone::FromRaw(0).IsKeyword());
 
-    CHECK(set.SwitchOn([](keywords::None) { return 0uz; }, [](const EnumSet<TestFlag> &s) { return s.Size(); })
-          == 2uz);
+    CHECK(
+      set.SwitchOn([](keywords::None) { return 0uz; }, [](const EnumSet<TestFlag> &s) { return s.Size(); })
+      == 2uz);
   }
 
   TEST_CASE("Aggregates(ValueOrKeyword)", "[CSS][Aggregates]")
@@ -456,7 +462,8 @@ namespace krys::boo::css::tests
     CHECK((set - other) == SpaceSeparatedEnumSet<TestFlag> {TestFlag::A});
     CHECK((set ^ other) == SpaceSeparatedEnumSet<TestFlag> {TestFlag::A, TestFlag::B});
 
-    auto mapped = CommaSeparatedEnumSet<TestFlag>::Map(List<int> {1, 2}, [](int x) { return static_cast<TestFlag>(x); });
+    auto mapped =
+      CommaSeparatedEnumSet<TestFlag>::Map(List<int> {1, 2}, [](int x) { return static_cast<TestFlag>(x); });
     CHECK(mapped == CommaSeparatedEnumSet<TestFlag> {TestFlag::B, TestFlag::C});
   }
 
@@ -475,8 +482,8 @@ namespace krys::boo::css::tests
 
     STATIC_CHECK(TreatAsTupleLike<MacroSpacePair>);
     STATIC_CHECK(std::tuple_size_v<MacroSpacePair> == 2);
-    STATIC_CHECK(SerializationSeparator<MacroSpacePair> == SerializationSeparatorType::Slash);
-    STATIC_CHECK(SerializationCoalescing<MacroSpacePair> == SerializationCoalescingType::Minimal);
+    STATIC_CHECK(SerialisationSeparator<MacroSpacePair> == SerialisationSeparatorType::Slash);
+    STATIC_CHECK(SerialisationCoalescing<MacroSpacePair> == SerialisationCoalescingType::Minimal);
 
     MacroWrapper wrapper {1, 2};
     STATIC_CHECK(TreatAsTupleLike<MacroWrapper>);
@@ -488,12 +495,12 @@ namespace krys::boo::css::tests
     MacroExtender extender {3, 4};
     STATIC_CHECK(TreatAsTupleLike<MacroExtender>);
     STATIC_CHECK(std::tuple_size_v<MacroExtender> == 2);
-    STATIC_CHECK(SerializationSeparator<MacroExtender> == SerializationSeparatorType::Comma);
+    STATIC_CHECK(SerialisationSeparator<MacroExtender> == SerialisationSeparatorType::Comma);
     CHECK(get<0>(extender) == 3);
     CHECK(get<1>(extender) == 4);
 
     STATIC_CHECK(TreatAsRangeLike<MacroRange>);
-    STATIC_CHECK(SerializationSeparator<MacroRange> == SerializationSeparatorType::Space);
+    STATIC_CHECK(SerialisationSeparator<MacroRange> == SerialisationSeparatorType::Space);
 
     STATIC_CHECK(TreatAsEmptyLike<MacroEmpty>);
   }

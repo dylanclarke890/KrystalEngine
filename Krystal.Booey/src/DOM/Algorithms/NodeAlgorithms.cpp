@@ -93,7 +93,7 @@ namespace krys::boo::dom
         }
 
         if (auto attach = ElementAlgorithms::AttachShadowRoot(
-              *elementCopy, shadowRoot->Mode(), Clonable(true), Serializable(shadowRoot->Serializable()),
+              *elementCopy, shadowRoot->Mode(), Clonable(true), Serialisable(shadowRoot->Serialisable()),
               DelegatesFocus(shadowRoot->DelegatesFocus()), shadowRoot->SlotAssignment(),
               shadowRootRegistry.get());
             attach.HasException())

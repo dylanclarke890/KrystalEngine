@@ -166,9 +166,9 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD utf8_string SerialisationForCSS(SRGBA<uint8> color,
-                                                   bool useColorFunctionSerialization) noexcept
+                                                   bool useColorFunctionSerialisation) noexcept
     {
-      if (useColorFunctionSerialization)
+      if (useColorFunctionSerialisation)
       {
         return SerialisationUsingColorFunction(color);
       }
@@ -207,9 +207,9 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD utf8_string SerialisationForHTML(SRGBA<uint8> color,
-                                                    bool useColorFunctionSerialization) noexcept
+                                                    bool useColorFunctionSerialisation) noexcept
     {
-      if (useColorFunctionSerialization)
+      if (useColorFunctionSerialisation)
       {
         return SerialisationUsingColorFunction(color);
       }
@@ -228,9 +228,9 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD utf8_string SerialisationForRenderTreeAsText(SRGBA<uint8> color,
-                                                                bool useColorFunctionSerialization) noexcept
+                                                                bool useColorFunctionSerialisation) noexcept
     {
-      if (useColorFunctionSerialization)
+      if (useColorFunctionSerialisation)
       {
         return SerialisationUsingColorFunction(color);
       }
@@ -252,9 +252,9 @@ namespace krys::boo
     // MARK: SRGBA<float> overloads
 
     KRYS_NODISCARD utf8_string SerialisationForCSS(const SRGBA<float> &color,
-                                                   bool useColorFunctionSerialization) noexcept
+                                                   bool useColorFunctionSerialisation) noexcept
     {
-      if (useColorFunctionSerialization)
+      if (useColorFunctionSerialisation)
       {
         return SerialisationUsingColorFunction(color);
       }
@@ -263,9 +263,9 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD utf8_string SerialisationForHTML(const SRGBA<float> &color,
-                                                    bool useColorFunctionSerialization) noexcept
+                                                    bool useColorFunctionSerialisation) noexcept
     {
-      if (useColorFunctionSerialization)
+      if (useColorFunctionSerialisation)
       {
         return SerialisationUsingColorFunction(color);
       }
@@ -274,9 +274,9 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD utf8_string SerialisationForRenderTreeAsText(const SRGBA<float> &color,
-                                                                bool useColorFunctionSerialization) noexcept
+                                                                bool useColorFunctionSerialisation) noexcept
     {
-      return SerialisationForCSS(color, useColorFunctionSerialization);
+      return SerialisationForCSS(color, useColorFunctionSerialisation);
     }
 
     // MARK: Color types always serialised with color()
@@ -316,13 +316,13 @@ namespace krys::boo
 
     template <SerialisedAsLegacyRGB ColorType>
     KRYS_NODISCARD utf8_string SerialisationForCSS(const ColorType &color,
-                                                   bool useColorFunctionSerialization) noexcept
+                                                   bool useColorFunctionSerialisation) noexcept
     {
       // FIXME: The spec is not completely clear on whether missing components should be
       // carried forward here, but it seems like people are leaning toward thinking they
       // should be. See https://github.com/w3c/csswg-drafts/issues/10254.
 
-      if (useColorFunctionSerialization)
+      if (useColorFunctionSerialisation)
       {
         return SerialisationUsingColorFunction(
           ConvertColorCarryingForwardMissing<ExtendedSRGBA<float>>(color));
@@ -333,17 +333,17 @@ namespace krys::boo
 
     template <SerialisedAsLegacyRGB ColorType>
     KRYS_NODISCARD utf8_string SerialisationForHTML(const ColorType &color,
-                                                    bool useColorFunctionSerialization) noexcept
+                                                    bool useColorFunctionSerialisation) noexcept
     {
-      return SerialisationForHTML(ConvertColor<SRGBA<uint8>>(color), useColorFunctionSerialization);
+      return SerialisationForHTML(ConvertColor<SRGBA<uint8>>(color), useColorFunctionSerialisation);
     }
 
     template <SerialisedAsLegacyRGB ColorType>
     KRYS_NODISCARD utf8_string SerialisationForRenderTreeAsText(const ColorType &color,
-                                                                bool useColorFunctionSerialization) noexcept
+                                                                bool useColorFunctionSerialisation) noexcept
     {
       return SerialisationForRenderTreeAsText(ConvertColor<SRGBA<uint8>>(color),
-                                              useColorFunctionSerialization);
+                                              useColorFunctionSerialisation);
     }
 
     // MARK: Lab<float>, LCHA<float>, OKLab<float> and OKLCHA<float> overloads
@@ -372,16 +372,16 @@ namespace krys::boo
 
     template <SerialisedWithOwnFunction ColorType>
     KRYS_NODISCARD utf8_string SerialisationForHTML(const ColorType &color,
-                                                    bool useColorFunctionSerialization) noexcept
+                                                    bool useColorFunctionSerialisation) noexcept
     {
-      return SerialisationForCSS(color, useColorFunctionSerialization);
+      return SerialisationForCSS(color, useColorFunctionSerialisation);
     }
 
     template <SerialisedWithOwnFunction ColorType>
     KRYS_NODISCARD utf8_string SerialisationForRenderTreeAsText(const ColorType &color,
-                                                                bool useColorFunctionSerialization) noexcept
+                                                                bool useColorFunctionSerialisation) noexcept
     {
-      return SerialisationForCSS(color, useColorFunctionSerialization);
+      return SerialisationForCSS(color, useColorFunctionSerialisation);
     }
   }
 
@@ -389,21 +389,21 @@ namespace krys::boo
   {
     return color.CallOnUnderlyingType(
       [&](const auto &underlyingColor)
-      { return SerialisationForCSS(underlyingColor, color.UsesColorFunctionSerialization()); });
+      { return SerialisationForCSS(underlyingColor, color.UsesColorFunctionSerialisation()); });
   }
 
   utf8_string SerialisationForHTML(const Color &color) noexcept
   {
     return color.CallOnUnderlyingType(
       [&](const auto &underlyingColor)
-      { return SerialisationForHTML(underlyingColor, color.UsesColorFunctionSerialization()); });
+      { return SerialisationForHTML(underlyingColor, color.UsesColorFunctionSerialisation()); });
   }
 
   utf8_string SerialisationForRenderTreeAsText(const Color &color) noexcept
   {
     return color.CallOnUnderlyingType(
       [&](const auto &underlyingColor)
-      { return SerialisationForRenderTreeAsText(underlyingColor, color.UsesColorFunctionSerialization()); });
+      { return SerialisationForRenderTreeAsText(underlyingColor, color.UsesColorFunctionSerialisation()); });
   }
 
   utf8_stringview Serialisation(ColorSpace colorSpace) noexcept

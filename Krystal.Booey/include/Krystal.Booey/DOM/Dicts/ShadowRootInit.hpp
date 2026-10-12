@@ -20,7 +20,7 @@ namespace krys::boo::dom
     using Base::Base;
   };
 
-  struct Serializable : public StronglyTypedBool<Serializable>
+  struct Serialisable : public StronglyTypedBool<Serialisable>
   {
     using Base::Base;
   };
@@ -32,7 +32,7 @@ namespace krys::boo::dom
     DelegatesFocus DelegatesFocus {false};
     SlotAssignmentMode SlotAssignment {SlotAssignmentMode::Named};
     Clonable Clonable {false};
-    Serializable Serializable {false};
+    Serialisable Serialisable {false};
     html::CustomElementRegistry *CustomElementRegistry {nullptr};
   };
 }

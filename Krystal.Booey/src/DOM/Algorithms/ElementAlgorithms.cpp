@@ -262,7 +262,7 @@ namespace krys::boo::dom
   }
 
   ExceptionOr<void> ElementAlgorithms::AttachShadowRoot(Element &element, ShadowRootMode mode,
-                                                        Clonable clonable, Serializable serializable,
+                                                        Clonable clonable, Serialisable serializable,
                                                         DelegatesFocus delegatesFocus,
                                                         SlotAssignmentMode slotAssignment,
                                                         html::CustomElementRegistry *registry) noexcept

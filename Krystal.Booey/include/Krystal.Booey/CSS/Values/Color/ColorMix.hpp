@@ -71,9 +71,9 @@ namespace WebCore
     bool containsColorSchemeDependentColor(const ColorMix &);
 
     template <>
-    struct Serialize<ColorMix>
+    struct Serialise<ColorMix>
     {
-      void operator()(StringBuilder &, const SerializationContext &, const ColorMix &);
+      void operator()(StringBuilder &, const SerialisationContext &, const ColorMix &);
     };
     template <>
     struct ComputedStyleDependenciesCollector<ColorMix>

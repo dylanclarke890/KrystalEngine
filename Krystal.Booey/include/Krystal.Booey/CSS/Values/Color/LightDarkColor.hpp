@@ -62,9 +62,9 @@ namespace WebCore
     }
 
     template <>
-    struct Serialize<LightDarkColor>
+    struct Serialise<LightDarkColor>
     {
-      void operator()(StringBuilder &, const SerializationContext &, const LightDarkColor &);
+      void operator()(StringBuilder &, const SerialisationContext &, const LightDarkColor &);
     };
     template <>
     struct ComputedStyleDependenciesCollector<LightDarkColor>

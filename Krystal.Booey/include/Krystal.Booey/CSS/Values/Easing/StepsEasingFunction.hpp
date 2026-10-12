@@ -19,13 +19,13 @@ namespace krys::boo::css
   // https://drafts.csswg.org/css-easing-2/#funcdef-steps
   struct StepsEasingParameters
   {
-    enum class ShouldSerializeKeyword : bool
+    enum class ShouldSerialiseKeyword : bool
     {
       No,
       Yes
     };
 
-    template <typename T, typename Keyword, auto shouldSerializeKeyword = ShouldSerializeKeyword::Yes>
+    template <typename T, typename Keyword, auto shouldSerialiseKeyword = ShouldSerialiseKeyword::Yes>
     struct Kind
     {
       constexpr static Keyword keyword = Keyword {};
@@ -35,10 +35,10 @@ namespace krys::boo::css
     };
 
     using JumpStart = Kind<Integer<Range {1, Range::Inf}>, keywords::JumpStart>;
-    using JumpEnd = Kind<Integer<Range {1, Range::Inf}>, keywords::JumpEnd, ShouldSerializeKeyword::No>;
+    using JumpEnd = Kind<Integer<Range {1, Range::Inf}>, keywords::JumpEnd, ShouldSerialiseKeyword::No>;
     using JumpBoth = Kind<Integer<Range {1, Range::Inf}>, keywords::JumpBoth>;
     using Start = Kind<Integer<Range {1, Range::Inf}>, keywords::Start>;
-    using End = Kind<Integer<Range {1, Range::Inf}>, keywords::End, ShouldSerializeKeyword::No>;
+    using End = Kind<Integer<Range {1, Range::Inf}>, keywords::End, ShouldSerialiseKeyword::No>;
     using JumpNone = Kind<Integer<Range {2, Range::Inf}>, keywords::JumpNone>;
 
     Variant<JumpStart, JumpEnd, JumpBoth, Start, End, JumpNone> value;
@@ -50,9 +50,9 @@ namespace krys::boo::css
 
   DEFINE_TYPE_WRAPPER_GET(StepsEasingParameters, value);
 
-  template <size_t I, typename T, typename K, auto shouldSerializeKeyword>
+  template <size_t I, typename T, typename K, auto shouldSerialiseKeyword>
   KRYS_NODISCARD constexpr const auto &
-    get(const StepsEasingParameters::Kind<T, K, shouldSerializeKeyword> &value) noexcept
+    get(const StepsEasingParameters::Kind<T, K, shouldSerialiseKeyword> &value) noexcept
   {
     return value.steps;
   }
@@ -62,14 +62,14 @@ DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::StepsEasingParameters, 1)
 
 namespace std
 {
-  template <typename T, typename K, auto shouldSerializeKeyword>
-  class tuple_size<krys::boo::css::StepsEasingParameters::Kind<T, K, shouldSerializeKeyword>>
+  template <typename T, typename K, auto shouldSerialiseKeyword>
+  class tuple_size<krys::boo::css::StepsEasingParameters::Kind<T, K, shouldSerialiseKeyword>>
       : public std::integral_constant<size_t, 1>
   {
   };
 
-  template <size_t I, typename T, typename K, auto shouldSerializeKeyword>
-  class tuple_element<I, krys::boo::css::StepsEasingParameters::Kind<T, K, shouldSerializeKeyword>>
+  template <size_t I, typename T, typename K, auto shouldSerialiseKeyword>
+  class tuple_element<I, krys::boo::css::StepsEasingParameters::Kind<T, K, shouldSerialiseKeyword>>
   {
   public:
     using type = T;
@@ -77,6 +77,6 @@ namespace std
 
 }
 
-template <typename T, typename K, auto shouldSerializeKeyword>
+template <typename T, typename K, auto shouldSerialiseKeyword>
 constexpr bool krys::boo::css::TreatAsTupleLike<
-  krys::boo::css::StepsEasingParameters::Kind<T, K, shouldSerializeKeyword>> = true;
+  krys::boo::css::StepsEasingParameters::Kind<T, K, shouldSerialiseKeyword>> = true;

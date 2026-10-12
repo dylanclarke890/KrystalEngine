@@ -11,7 +11,7 @@ namespace krys::boo::html::Tests
 {
   namespace
   {
-    void SerializeHTMLToken(HTMLToken &token, dom::DOMString &output) noexcept
+    void SerialiseHTMLToken(HTMLToken &token, dom::DOMString &output) noexcept
     {
       switch (token.Type())
       {
@@ -223,7 +223,7 @@ namespace krys::boo::html::Tests
         {
           break;
         }
-        SerializeHTMLToken(*token, tokens);
+        SerialiseHTMLToken(*token, tokens);
       }
 
       tests::NormaliseData(tokens);

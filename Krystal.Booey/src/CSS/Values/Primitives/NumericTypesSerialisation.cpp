@@ -23,7 +23,7 @@ namespace krys::boo::css
     }
   }
 
-  void FormatNonfiniteCSSNumberValue(CSSOMString &builder, const SerializableNumber &number) noexcept
+  void FormatNonfiniteCSSNumberValue(CSSOMString &builder, const SerialisableNumber &number) noexcept
   {
     builder.append(FormatNonfiniteCSSNumberValuePrefix(number.Value));
     if (!number.Suffix.empty())
@@ -33,14 +33,14 @@ namespace krys::boo::css
     builder.append(number.Suffix);
   }
 
-  CSSOMString FormatNonfiniteCSSNumberValue(const SerializableNumber &number) noexcept
+  CSSOMString FormatNonfiniteCSSNumberValue(const SerialisableNumber &number) noexcept
   {
     CSSOMString builder;
     FormatNonfiniteCSSNumberValue(builder, number);
     return builder;
   }
 
-  void FormatCSSNumberValue(CSSOMString &builder, const SerializableNumber &number) noexcept
+  void FormatCSSNumberValue(CSSOMString &builder, const SerialisableNumber &number) noexcept
   {
     if (!std::isfinite(number.Value))
     {
@@ -52,7 +52,7 @@ namespace krys::boo::css
     builder.append(number.Suffix);
   }
 
-  CSSOMString FormatCSSNumberValue(const SerializableNumber &number) noexcept
+  CSSOMString FormatCSSNumberValue(const SerialisableNumber &number) noexcept
   {
     CSSOMString builder;
     FormatCSSNumberValue(builder, number);

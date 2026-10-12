@@ -267,9 +267,9 @@ class GenerationContext:
 
     def _generate_hpp_constant_aliases(self, *, to: Writer):
         with to.template_struct_block(template_signature="ValueId C", name="KeywordValueConstant"):
-            to.write(f"constexpr static auto value = C;")
+            to.write(f"constexpr static auto Value = C;")
             to.write(f"constexpr bool operator==(const KeywordValueConstant &) const noexcept = default;")
-            to.write(f"constexpr bool operator==(ValueId other) const noexcept {{ return value == other; }}")
+            to.write(f"constexpr bool operator==(ValueId other) const noexcept {{ return Value == other; }}")
         to.newline()
 
         with to.namespace(namespace="keywords"):

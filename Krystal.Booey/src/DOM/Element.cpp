@@ -288,7 +288,7 @@ namespace krys::boo::dom
     }
 
     if (auto attachResult =
-          ElementAlgorithms::AttachShadowRoot(*this, init.Mode, init.Clonable, init.Serializable,
+          ElementAlgorithms::AttachShadowRoot(*this, init.Mode, init.Clonable, init.Serialisable,
                                               init.DelegatesFocus, init.SlotAssignment, registry);
         attachResult.HasException())
     {

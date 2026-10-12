@@ -198,7 +198,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-value
     KRYS_NODISCARD DOMString Value() const noexcept
     {
-      return SerializeSteps();
+      return SerialiseSteps();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-value
@@ -244,7 +244,7 @@ namespace krys::boo::dom
     void UpdateSteps() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-dtl-serialize
-    KRYS_NODISCARD DOMString SerializeSteps() const noexcept;
+    KRYS_NODISCARD DOMString SerialiseSteps() const noexcept;
 
     KRYS_NODISCARD ExceptionOr<void> ValidateToken(DOMStringView token) const noexcept
     {

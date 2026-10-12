@@ -46,10 +46,10 @@ namespace krys::boo::dom
       return;
     }
 
-    ElementAlgorithms::SetAttributeValue(*_element, _attributeName, OrderedSet::Serializer(_tokens));
+    ElementAlgorithms::SetAttributeValue(*_element, _attributeName, OrderedSet::Serialiser(_tokens));
   }
 
-  DOMString DOMTokenList::SerializeSteps() const noexcept
+  DOMString DOMTokenList::SerialiseSteps() const noexcept
   {
     return ElementAlgorithms::GetAttributeValue(*_element, _attributeName);
   }

@@ -286,26 +286,26 @@ namespace WebCore
       }
     };
 
-    // MARK: - MinimallySerializingSpaceSeparatedSize
+    // MARK: - MinimallySerialisingSpaceSeparatedSize
 
     template <typename T>
-    struct Evaluation<MinimallySerializingSpaceSeparatedSize<T>, FloatSize>
+    struct Evaluation<MinimallySerialisingSpaceSeparatedSize<T>, FloatSize>
     {
-      auto operator()(const MinimallySerializingSpaceSeparatedSize<T> &value, FloatSize referenceBox)
+      auto operator()(const MinimallySerialisingSpaceSeparatedSize<T> &value, FloatSize referenceBox)
         -> FloatSize
       requires HasTwoParameterEvaluate<T, float, float>
       {
         return {evaluate<float>(value.width(), referenceBox.width()),
                 evaluate<float>(value.height(), referenceBox.height())};
       }
-      auto operator()(const MinimallySerializingSpaceSeparatedSize<T> &value, FloatSize referenceBox,
+      auto operator()(const MinimallySerialisingSpaceSeparatedSize<T> &value, FloatSize referenceBox,
                       ZoomNeeded token) -> FloatSize
       requires HasThreeParameterEvaluate<T, float, float, ZoomNeeded>
       {
         return {evaluate<float>(value.width(), referenceBox.width(), token),
                 evaluate<float>(value.height(), referenceBox.height(), token)};
       }
-      auto operator()(const MinimallySerializingSpaceSeparatedSize<T> &value, FloatSize referenceBox,
+      auto operator()(const MinimallySerialisingSpaceSeparatedSize<T> &value, FloatSize referenceBox,
                       ZoomFactor zoom) -> FloatSize
       requires HasThreeParameterEvaluate<T, float, float, ZoomFactor>
       {
@@ -314,23 +314,23 @@ namespace WebCore
       }
     };
     template <typename T>
-    struct Evaluation<MinimallySerializingSpaceSeparatedSize<T>, LayoutSize>
+    struct Evaluation<MinimallySerialisingSpaceSeparatedSize<T>, LayoutSize>
     {
-      auto operator()(const MinimallySerializingSpaceSeparatedSize<T> &value, LayoutSize referenceBox)
+      auto operator()(const MinimallySerialisingSpaceSeparatedSize<T> &value, LayoutSize referenceBox)
         -> LayoutSize
       requires HasTwoParameterEvaluate<T, LayoutUnit, LayoutUnit>
       {
         return {evaluate<LayoutUnit>(value.width(), referenceBox.width()),
                 evaluate<LayoutUnit>(value.height(), referenceBox.height())};
       }
-      auto operator()(const MinimallySerializingSpaceSeparatedSize<T> &value, LayoutSize referenceBox,
+      auto operator()(const MinimallySerialisingSpaceSeparatedSize<T> &value, LayoutSize referenceBox,
                       ZoomNeeded token) -> LayoutSize
       requires HasThreeParameterEvaluate<T, LayoutUnit, LayoutUnit, ZoomNeeded>
       {
         return {evaluate<LayoutUnit>(value.width(), referenceBox.width(), token),
                 evaluate<LayoutUnit>(value.height(), referenceBox.height(), token)};
       }
-      auto operator()(const MinimallySerializingSpaceSeparatedSize<T> &value, LayoutSize referenceBox,
+      auto operator()(const MinimallySerialisingSpaceSeparatedSize<T> &value, LayoutSize referenceBox,
                       ZoomFactor zoom) -> LayoutSize
       requires HasThreeParameterEvaluate<T, LayoutUnit, LayoutUnit, ZoomFactor>
       {

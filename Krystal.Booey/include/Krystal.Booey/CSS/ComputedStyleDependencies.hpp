@@ -23,7 +23,9 @@ namespace krys::boo::css
       return Properties.empty() && RootProperties.empty() && !ContainerDimensions && !Anchors;
     }
 
-    /// @brief Checks to see if the provided conversion data is sufficient to resolve the provided dependencies.
-    KRYS_NODISCARD bool CanResolveDependenciesWithConversionData(const ToLengthConversionData &conversionData) const noexcept;
+    /// @brief Checks to see if the provided conversion data is sufficient to resolve the provided
+    /// dependencies.
+    KRYS_NODISCARD bool
+      CanResolveDependenciesWithConversionData(const ToLengthConversionData &conversionData) const noexcept;
   };
 }

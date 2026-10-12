@@ -105,6 +105,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Markup.hpp
 
   # Slice 2: Values (Value.cpp and PrimitiveValue.cpp aren't built yet; they need every Value subclass)
+  include/Krystal.Booey/CSS/Values/Aggregates.hpp
   include/Krystal.Booey/CSS/Values/PrimitiveValue.hpp
   include/Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp
   include/Krystal.Booey/CSS/Values/UnitCategory.hpp
@@ -113,6 +114,20 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/Value.hpp
   include/Krystal.Booey/CSS/Values/ValueSeparator.hpp
   include/Krystal.Booey/CSS/Values/ValueType.hpp
+
+  # Slice 3: Colour, layer 2 (CSS numeric primitives and value types, calc-free half)
+  include/Krystal.Booey/CSS/ComputedStyleDependencies.hpp
+  include/Krystal.Booey/CSS/Values/Concepts.hpp
+  include/Krystal.Booey/CSS/Values/NoConversionDataRequiredTag.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/Concepts.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/NumericCategory.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/NumericRaw.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/PrimitiveKeywordList.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/Range.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/Symbol.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/Units.hpp
+  include/Krystal.Booey/CSS/Values/SerialisationContext.hpp
+  include/Krystal.Booey/CSS/Values/Types.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -128,6 +143,12 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
 
   # Slice 2: Values
   src/CSS/Values/Primitives/NumericTypesSerialisation.cpp
+
+  # Slice 3: Colour, layer 2 (ComputedStyleDependencies.cpp and TypesValueCreation.cpp aren't built yet)
+  src/CSS/Values/Primitives/Symbol.cpp
+  src/CSS/Values/Primitives/Units.cpp
+  src/CSS/Values/SerialisationContext.cpp
+  src/CSS/Values/Types.cpp
 )
 
 target_precompile_headers(Krystal.Booey

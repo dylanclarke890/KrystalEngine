@@ -7935,7 +7935,7 @@ class GeneratePropertyId:
 
                 to.write("constexpr CSSOMStringView PropertyNameStrings[TotalProperties] = {")
                 with to.indent():
-                    to.write_lines(f'u8"{property.name}"' for property in self.properties_and_descriptors.all_unique)
+                    to.write_lines(f'u8"{property.name}",' for property in self.properties_and_descriptors.all_unique)
                 to.write("};")
                 to.newline()
 
@@ -9274,7 +9274,7 @@ class GenerateStyleExtractorGenerated:
         ):
             to.write(f"{GenerateStyleExtractorGenerated.wrap_in_serializer(property, 'value')};")
         to.write(
-            f"extractCoordinatedValueListSerialization<{property.id_or_cascade_alias_id}>(extractorState, builder, context, extractorState.style.{property.method_name_for_get_coordinated_value_list}(), mapper);"
+            f"extractCoordinatedValueListSerialisation<{property.id_or_cascade_alias_id}>(extractorState, builder, context, extractorState.style.{property.method_name_for_get_coordinated_value_list}(), mapper);"
         )
 
     # All other property value getters.
@@ -9303,10 +9303,10 @@ class GenerateStyleExtractorGenerated:
         self, to: Writer, property: StyleProperty
     ):
         with to.function_block(
-            signature=f"static void extract{property.id_without_prefix}ShorthandSerialization(ExtractorState& extractorState, StringBuilder& builder, const SerialisationContext& context) noexcept"
+            signature=f"static void extract{property.id_without_prefix}ShorthandSerialisation(ExtractorState& extractorState, StringBuilder& builder, const SerialisationContext& context) noexcept"
         ):
             to.write(
-                f"extract{property.codegen_properties.shorthand_style_extractor_pattern}ShorthandSerialization(extractorState, builder, context, {property.id_without_prefix}Shorthand());"
+                f"extract{property.codegen_properties.shorthand_style_extractor_pattern}ShorthandSerialisation(extractorState, builder, context, {property.id_without_prefix}Shorthand());"
             )
 
     # Longhand property value getter.
@@ -9329,7 +9329,7 @@ class GenerateStyleExtractorGenerated:
         self, to: Writer, property: StyleProperty
     ):
         to.write(
-            f"static void extract{property.id_without_prefix}Serialization(ExtractorState& extractorState, StringBuilder& builder, const SerialisationContext& context)"
+            f"static void extract{property.id_without_prefix}Serialisation(ExtractorState& extractorState, StringBuilder& builder, const SerialisationContext& context)"
         )
         to.write(f"{{")
 
@@ -9437,7 +9437,7 @@ class GenerateStyleExtractorGenerated:
 
     def _generate_style_extractor_generated_cpp_extractor_generated_extract_serialization(self, *, to):
         to.write_block("""
-            void ExtractorGenerated::extractValueSerialization(ExtractorState& extractorState, StringBuilder& builder, const SerialisationContext& context, PropertyId id)
+            void ExtractorGenerated::extractValueSerialisation(ExtractorState& extractorState, StringBuilder& builder, const SerialisationContext& context, PropertyId id)
             {
                 switch (id) {
                 case PropertyId::CSSPropertyInvalid:
@@ -9478,18 +9478,18 @@ class GenerateStyleExtractorGenerated:
                             f"// Logical properties are handled by recursing using the direction resolved property."
                         )
                         to.write(
-                            f"extractValueSerialization(extractorState, builder, context, Property::resolveDirectionAwareProperty(id, extractorState.style.writingMode()));"
+                            f"extractValueSerialisation(extractorState, builder, context, Property::resolveDirectionAwareProperty(id, extractorState.style.writingMode()));"
                         )
                         to.write(f"return;")
                     elif property.codegen_properties.longhands:
                         to.write(f"ASSERT(isShorthand(id));")
                         to.write(
-                            f"{scope_for_function(property)}::extract{property.id_without_prefix}ShorthandSerialization(extractorState, builder, context);"
+                            f"{scope_for_function(property)}::extract{property.id_without_prefix}ShorthandSerialisation(extractorState, builder, context);"
                         )
                         to.write(f"return;")
                     else:
                         to.write(
-                            f"{scope_for_function(property)}::extract{property.id_without_prefix}Serialization(extractorState, builder, context);"
+                            f"{scope_for_function(property)}::extract{property.id_without_prefix}Serialisation(extractorState, builder, context);"
                         )
                         to.write(f"return;")
 
@@ -9508,7 +9508,7 @@ class GenerateStyleExtractorGenerated:
                 headers=[
                     "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp",
                     "Krystal.Booey/CSS/Properties/Property.hpp",
-                    "Krystal.Booey/CSS/Serialization/ColorSerialization.hpp",
+                    "Krystal.Booey/CSS/Serialisation/ColorSerialisation.hpp",
                     "Krystal.Booey/CSS/Style/RenderStyle.hpp",
                     "Krystal.Booey/CSS/Style/StyleExtractorCustom.hpp",
                     "Krystal.Booey/CSS/Style/StyleExtractorState.hpp",

@@ -26,7 +26,7 @@ namespace krys::boo::css::PropertyParserHelpers
     // https://drafts.csswg.org/css-inline-3/#text-edges
     // "If only one value is specified, both edges are assigned that same keyword if possible; else text is
     // assumed as the missing value."
-    auto shouldSerializeSecondValue = [&]()
+    auto shouldSerialiseSecondValue = [&]()
     {
       if (!secondValue)
       {
@@ -41,7 +41,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return firstValue->ValueId() != secondValue->ValueId();
     }();
 
-    if (!shouldSerializeSecondValue)
+    if (!shouldSerialiseSecondValue)
     {
       return firstValue;
     }

@@ -71,4 +71,20 @@ namespace krys::boo::css::tests
     REQUIRE(name.size() == MaxValueKeywordLength);
     CHECK(ValueIdFromName(name) == ValueId::Invalid);
   }
+
+  TEST_CASE("ToString(PropertyId) round trips", "[CSS][KeywordLookup]")
+  {
+    // Regression: the generated name table had no commas between entries, so every name after the first was
+    // empty.
+    for (auto id : AllProperties())
+    {
+      auto name = ToString(id);
+      INFO(static_cast<uint32>(id));
+      REQUIRE_FALSE(name.empty());
+      CHECK(FindProperty(name) == id);
+    }
+
+    CHECK(ToString(PropertyId::BackgroundColor) == u8"background-color");
+    CHECK(ToString(PropertyId::Invalid).empty());
+  }
 }

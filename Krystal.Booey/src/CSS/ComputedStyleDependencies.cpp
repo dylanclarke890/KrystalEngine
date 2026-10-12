@@ -3,7 +3,8 @@
 
 namespace krys::boo::css
 {
-  bool ComputedStyleDependencies::CanResolveDependenciesWithConversionData(const ToLengthConversionData &conversionData) const noexcept
+  bool ComputedStyleDependencies::CanResolveDependenciesWithConversionData(
+    const ToLengthConversionData &conversionData) const noexcept
   {
     if (!RootProperties.empty() && !conversionData.RootStyle())
     {

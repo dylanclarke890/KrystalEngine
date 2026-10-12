@@ -9,7 +9,7 @@ namespace krys::boo::css::tests
   {
     KRYS_NODISCARD string Format(double value, CSSOMStringView suffix = u8"") noexcept
     {
-      auto formatted = FormatCSSNumberValue(SerializableNumber {.Value = value, .Suffix = suffix});
+      auto formatted = FormatCSSNumberValue(SerialisableNumber {.Value = value, .Suffix = suffix});
       return string(reinterpret_cast<const char *>(formatted.data()), formatted.size());
     }
   }
@@ -65,7 +65,7 @@ namespace krys::boo::css::tests
   TEST_CASE("FormatCSSNumberValue(appends)", "[CSS][NumericTypesSerialisation]")
   {
     CSSOMString builder = u8"width: ";
-    FormatCSSNumberValue(builder, SerializableNumber {.Value = 2.5, .Suffix = u8"px"});
+    FormatCSSNumberValue(builder, SerialisableNumber {.Value = 2.5, .Suffix = u8"px"});
     CHECK(string(reinterpret_cast<const char *>(builder.data()), builder.size()) == "width: 2.5px");
   }
 }

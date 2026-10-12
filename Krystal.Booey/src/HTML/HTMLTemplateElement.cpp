@@ -60,12 +60,12 @@ namespace krys::boo::html
     Reflection::Reflect<bool>(*this, u8"shadowrootclonable", krys::move(value));
   }
 
-  bool HTMLTemplateElement::ShadowRootSerializable() const noexcept
+  bool HTMLTemplateElement::ShadowRootSerialisable() const noexcept
   {
     return Reflection::Reflect<bool>(*this, u8"shadowrootserializable");
   }
 
-  void HTMLTemplateElement::ShadowRootSerializable(bool value) noexcept
+  void HTMLTemplateElement::ShadowRootSerialisable(bool value) noexcept
   {
     Reflection::Reflect<bool>(*this, u8"shadowrootserializable", krys::move(value));
   }

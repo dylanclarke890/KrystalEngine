@@ -75,7 +75,7 @@ namespace krys::boo::dom
 
     /// @see https://dom.spec.whatwg.org/#concept-attach-a-shadow-root
     KRYS_NODISCARD static ExceptionOr<void> AttachShadowRoot(Element &element, ShadowRootMode mode,
-                                                             Clonable clonable, Serializable serializable,
+                                                             Clonable clonable, Serialisable serializable,
                                                              DelegatesFocus delegatesFocus,
                                                              SlotAssignmentMode slotAssignment,
                                                              html::CustomElementRegistry *registry) noexcept;

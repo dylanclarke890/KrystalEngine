@@ -57,12 +57,12 @@ namespace krys::boo::css
   }
 
   template <typename D>
-  struct Serialize<AbsoluteColor<D>>
+  struct Serialise<AbsoluteColor<D>>
   {
-    void operator()(StringBuilder &builder, const SerializationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const AbsoluteColor<D> &value)
     {
-      if constexpr (D::usesColorFunctionForSerialization)
+      if constexpr (D::usesColorFunctionForSerialisation)
         builder.append("color("_s, serialization(ColorSpaceFor<typename D::ColorType>), ' ');
       else
         builder.append(D::serializationFunctionName, '(');

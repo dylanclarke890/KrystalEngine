@@ -330,7 +330,7 @@ namespace krys::boo::tests
     CHECK(EqualIgnoringSemanticColor(inlineSemantic, inlineColor));
     CHECK(EqualIgnoringSemanticColor(inlineColor, inlineColor));
     CHECK_FALSE(
-      EqualIgnoringSemanticColor(inlineColor, Color {Color::red, ColorFlags::UseColorFunctionSerialization}));
+      EqualIgnoringSemanticColor(inlineColor, Color {Color::red, ColorFlags::UseColorFunctionSerialisation}));
 
     Color outOfLine {SRGBA<float> {1, 0, 0, 1}};
     Color outOfLineSemantic = outOfLine.SemanticColor();

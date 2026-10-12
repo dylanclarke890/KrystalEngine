@@ -11,7 +11,7 @@ namespace krys::boo::css
 {
   /// @brief Concept for use in generic contexts to filter on Constant keyword CSS types.
   template <typename Keyword>
-  concept PrimitiveKeyword = SameType<Keyword, KeywordValueConstant<Keyword::value>>;
+  concept PrimitiveKeyword = SameType<Keyword, KeywordValueConstant<Keyword::Value>>;
 
   /// @brief Concept for use in generic contexts to filter on keywords that are valid for the provided
   /// `Keywords` list.

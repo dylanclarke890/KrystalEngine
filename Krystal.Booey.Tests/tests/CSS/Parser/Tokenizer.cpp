@@ -11,14 +11,14 @@ namespace krys::boo::css::tests
   namespace
   {
 
-#pragma region Serialize
+#pragma region Serialise
 
-    void SerializeNumericValue(const Token &token, dom::DOMString &output) noexcept
+    void SerialiseNumericValue(const Token &token, dom::DOMString &output) noexcept
     {
       output += krys::boo::tests::ToUTF8(token.NumericValue());
     }
 
-    void SerializeCSSToken(const Token &token, dom::DOMString &output) noexcept
+    void SerialiseCSSToken(const Token &token, dom::DOMString &output) noexcept
     {
       switch (token.Type())
       {
@@ -86,21 +86,21 @@ namespace krys::boo::css::tests
         case TokenType::Number:
         {
           output += u8"Number(";
-          SerializeNumericValue(token, output);
+          SerialiseNumericValue(token, output);
           output += u8")\n";
           break;
         }
         case TokenType::Percentage:
         {
           output += u8"Percentage(";
-          SerializeNumericValue(token, output);
+          SerialiseNumericValue(token, output);
           output += u8")\n";
           break;
         }
         case TokenType::Dimension:
         {
           output += u8"Dimension(";
-          SerializeNumericValue(token, output);
+          SerialiseNumericValue(token, output);
           output += u8", ";
           output += token.Unit();
           output += u8")\n";
@@ -169,13 +169,13 @@ namespace krys::boo::css::tests
       }
     }
 
-    KRYS_NODISCARD dom::DOMString SerializeCSSTokens(TokenRange tokens) noexcept
+    KRYS_NODISCARD dom::DOMString SerialiseCSSTokens(TokenRange tokens) noexcept
     {
       dom::DOMString output;
 
       for (auto &token : tokens)
       {
-        SerializeCSSToken(token, output);
+        SerialiseCSSToken(token, output);
       }
 
       krys::boo::tests::NormaliseData(output);
@@ -240,7 +240,7 @@ namespace krys::boo::css::tests
       Tokenizer tokenizer(inputStream);
       REQUIRE(tokenizer.PumpTokenizer());
 
-      auto actual = SerializeCSSTokens(tokenizer.Tokens());
+      auto actual = SerialiseCSSTokens(tokenizer.Tokens());
       str = u8"\n--- ACTUAL TOKENS ---\n" + actual;
       UTF8_INFO(str);
 
