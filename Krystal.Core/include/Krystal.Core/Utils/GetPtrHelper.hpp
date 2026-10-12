@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
 
