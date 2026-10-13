@@ -1,12 +1,11 @@
-#include "Krystal.Booey/CSS/Values/AttrValue.hpp"
+﻿#include "Krystal.Booey/CSS/Values/AttrValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/Types.hpp"
 
 namespace krys::boo::css
 {
-  Ref<AttrValue> AttrValue::Create(CSSOMString attr, RefPtr<Value> fallback) noexcept
+  Ref<AttrValue> AttrValue::Create(CSSOMString attributeName, RefPtr<Value> fallback) noexcept
   {
-    return AdoptRef(*new AttrValue(krys::move(attr), krys::move(fallback)));
+    return AdoptRef(*new AttrValue(krys::move(attributeName), krys::move(fallback)));
   }
 
   bool AttrValue::Equals(const AttrValue &other) const noexcept
@@ -16,28 +15,28 @@ namespace krys::boo::css
 
     if (fallback && otherFallback)
     {
-      return _attr == other._attr && fallback->StringValue() == otherFallback->StringValue();
+      return _attributeName == other._attributeName
+             && fallback->StringValue() == otherFallback->StringValue();
     }
-
     if (fallback || otherFallback)
     {
       return false;
     }
-
-    return _attr == other._attr;
+    return _attributeName == other._attributeName;
   }
 
   CSSOMString AttrValue::CustomCSSText(const SerialisationContext &context) const noexcept
   {
     auto *fallback = DynamicDowncast<PrimitiveValue>(_fallback.get());
 
-    CSSOMString result = u8"attr(" + _attr;
+    CSSOMString result {u8"attr("};
+    result.append(_attributeName);
     if (fallback && !fallback->StringValue().empty())
     {
-      result += u8", " + fallback->CssText(context);
+      result.append(u8", ");
+      result.append(fallback->CssText(context));
     }
-    result += u8")";
-
+    result.push_back(u8')');
     return result;
   }
 }

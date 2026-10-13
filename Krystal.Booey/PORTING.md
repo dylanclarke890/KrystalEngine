@@ -40,10 +40,10 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Slice 3, layer 6 (2026-10-12): Style colour (`style::Color` and its currentcolor-dependent kinds, conversion from `css::Color`, serialisation, blending), Style `DynamicRangeLimit` and `PlatformDynamicRangeLimit`, and the `Opacity` struct built and tested, against a testable seam (`RenderStyle` can be constructed); see the layer 6 section.
 - Slice 3 is committed (up to `225dbc61`).
 - Slice 4, Value subclasses (2026-10-12): `ValuePair`, `ValueList`/`ValueContainingList`, `FunctionValue`, `QuadValue`, `RectValue` and `RatioValue` reviewed and compile (compile-only; `Ratio` itself is tested); see the Slice 4 section.
-- Slice 4, tier 1 started (2026-10-12): `BackgroundRepeatValue`, `BorderImageSliceValue`, `BorderImageWidthValue`, `ReflectValue`, `UnicodeRangeValue` and the five font values (`FontVariationValue`, `FontFeatureValue`, `FontStyleWithAngleValue`, `FontStyleRangeValue`, `FontValue`) reviewed and compile (compile-only); `Graphics/FontTaggedSettings.hpp` ported and tested.
+- Slice 4, tier 1 done (2026-10-12): `BackgroundRepeatValue`, `BorderImageSliceValue`, `BorderImageWidthValue`, `ReflectValue`, `UnicodeRangeValue` and the five font values (`FontVariationValue`, `FontFeatureValue`, `FontStyleWithAngleValue`, `FontStyleRangeValue`, `FontValue`), `GridLineNamesValue`, `GridLineValue`, `SubgridValue`, `TransformListValue`, `GridAutoRepeatValue`, `GridIntegerRepeatValue`, `CounterValue`, `OffsetRotateValue` and `AttrValue` reviewed and compile (compile-only), so tier 1 is done; `Graphics/FontTaggedSettings.hpp` ported and tested.
 
 **Open / next candidates:**
-- Slice 4 (Value subclasses): the generic types are done; next are the specific value types, one at a time, in the order under Slice 4's *Order* (tier 1 in progress: items 1–10 done; next `GridLineNamesValue`/`GridLineValue`).
+- Slice 4 (Value subclasses): the generic types are done; next are the specific value types, one at a time, in the order under Slice 4's *Order* (tier 1 done; next tier 2, starting with `PositionValue`/`PositionXValue`/`PositionYValue`).
 - Slice 3 (colour), bottom-up: (1) Graphics/Color, (2) calc-free numeric primitives, (3a) Style-free calc, (3b) calc evaluation and Style calc and (3c) calc parsing are done. (4a) `LayoutUnit` and the point/size types and (4b) Style numerics are done. (5a) the CSS colour types, (5b) the colour parser and (5c) `ColorValue`/`ValuePool` (compile-only) are done. (6) Style colour is done (its CSSValue half is deferred, see below). Slice 3 is complete apart from the Value-dependent pieces.
 - Deferred from layer 6 (needs `Style/BuilderChecking.hpp` and the raw-WebKit `ValueList`/`ValuePair`/`FunctionValue`/`BuilderState` it includes): `CSSValueConversion<Color>`, `CSSValueCreation<Color>`, `CSSValueConversion<DynamicRangeLimit>`, `CSSValueCreation<DynamicRangeLimit>` and `CSSValueConversion<Opacity>`. They come with the other `+CSSValueConversion`/`+CSSValueCreation` headers.
 - Waiting on `PrimitiveValue.cpp`/`Value.cpp` linking: `PropertyParserState::Pool` is a pointer (TODO: back to a reference defaulting to `MainThreadPool()`), `ColorValueConsumers.cpp` and `ColorAdjustValueConsumers.cpp` compile but should merge back into `Color.cpp`/`ColorAdjust.cpp`, `ValuePool::CreateFontFaceValue` (also needs `ValueList`/`PropertyParser`) and `ParserFastPaths::MaybeParseValue` aren't written, nothing in 5c is tested, and the Style `+CSSValueConversion`/`+CSSValueCreation` headers (numerics, `LengthWrapper`, `PrimitiveKeyword`) are still raw WebKit.
@@ -52,6 +52,7 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - The Style seam (`Style/Seam.hpp`, `src/Style/Seam.cpp`) stands in for `RenderStyle`, `RenderView`, `RenderBox`, the font types, `Style::BuilderState`, `AnchorPositionEvaluator`, `ContainerQueryEvaluator` and the `Document` colour API. Each placeholder is replaced when its slice is ported; see the layer 3b and layer 6 sections. Since layer 6, `RenderStyle` can be constructed (colour state only); its other members are still unreachable.
 - `Value.cpp` and `PrimitiveValue.cpp` can't build until every `Value` subclass compiles (`VisitDerived`). The `AbsoluteColorResolver.hpp` blocker found by a trial compile of `PrimitiveValue.cpp` is fixed (5a), and `ValuePool.hpp`/`ColorValue.hpp` build (5c).
 - `CSS/Values/Concepts.hpp` (`CSSValueConcepts.h`) compiles but isn't reviewed.
+- Krystal.Core: the `IntrusivePtr` `Downcast`/`DynamicDowncast` overloads can't be called with an explicit target and `Downcast` rejects null (see the `CounterValue`/`OffsetRotateValue` entry); `OffsetRotateValue.cpp` has a FIXME workaround.
 - `CSS/Properties/Property.hpp` (`CSSProperty.h`) isn't reviewed, but compiles (the generated `PropertyId.cpp` defines its static functions); the colour parser and `AngleValidator` use `AcceptsQuirkyColor`/`AcceptsQuirkyAngle` from it.
 - Callers still using the case-sensitive raw lookups: `src/CSS/Parser.cpp:477`, `Consumers/Animations.cpp:154`, `Consumers/WillChange.cpp:48` (switch to `PropertyIdFromName`/`ValueIdFromName`); delete the commented-out originals in `src/CSS/Properties/PropertyParser.cpp`.
 - Tokenizer doesn't keep numeric original text or whitespace counts, so `TokenSerialisationMode::CustomProperty` behaves like `Normal` (FIXMEs in `src/CSS/Parser/Token.cpp`).
@@ -228,10 +229,10 @@ Graph from `css/CSSPrimitiveValue.cpp` (headers-only): 125 files (`tools/port/ou
 **Bugs fixed:**
 - `PrimitiveValue(CSSOMString, UnitType)` stored the string's *character data* reinterpreted as a pointer (`*reinterpret_cast<const StringAtomStorage *>(atom.View().data())`). Now stores the atom's storage; added `StringAtom::Storage()` to Krystal.Core.
 - No destructor: `Attr` and `Calc` references were leaked, and the serialised-text cache entry was never removed. Added `~PrimitiveValue`.
-- `Value::ValueId()` called `PrimitiveValue::ValueId()`, which didn't exist, so it resolved back to `Value::ValueId()` (infinite recursion). Added `PrimitiveValue::ValueId()`; `Value`'s inline `IsValueId`/`ValueId`/`IsCustomIdent`/`CustomIdent`/`IsString`/`String`/`IsInteger`/`Integer`/`IntegerDeprecated` are now defined in `PrimitiveValue.hpp` like upstream (they were declared but never defined).
+- `Value::ValueId()` called `PrimitiveValue::ValueId()`, which didn't exist, so it resolved back to `Value::ValueId()` (infinite recursion). Added `PrimitiveValue::ValueId()`.
 - Type checks used the stored unit instead of `PrimitiveType()`, so a `calc()` resolving to a number/percentage/length wasn't one (`IsNumber`, `IsInteger`, `IsPercentage`, `IsLength`, `IsFlex`, …). Now upstream's split of `PrimitiveType()` vs `PrimitiveUnitType()`.
 - `PropertyId()` asserted for non-property values; upstream returns `Invalid`.
-- `ValueDeprecated(UnitType)` called a `DoubleValueDeprecated(UnitType)` that didn't exist; `Create(ValueId)`, `Equals`, `CustomCSSText`, `CustomVisitChildren`, `DoubleValue*`… were declared but never defined.
+- `ValueDeprecated(UnitType)` called a `DoubleValueDeprecated(UnitType)` that didn't exist.
 - `ValueFromPool` cast the double to an integer before range-checking (undefined behaviour for large or NaN values). Range-checked first.
 - `UnitType`'s enum traits said 77 values; it has 78 (`QuirkyEm` was outside the range).
 - `UnitCategoryForType` had no case for `QuirkyEm` (fell through to `krys_unreachable`). Upstream: `Other`.
@@ -260,7 +261,7 @@ Tests (constexpr/static parts only): `tests/CSS/Values/Units.cpp`, `NumericTypes
 
 ## Slice 3: Colour
 
-Entry: `css/CSSColorValue.cpp` (headers-only graph: 42 files, `tools/port/out/color-value.md`; with every `css/values/color` file as an entry: 158 files, `tools/port/out/color.md`, which reaches the style builder through `CSSLightDarkColor.cpp`/`CSSKeywordColor.cpp`). `ColorValue` itself is a thin wrapper; the work is in `css::Color` (Krystal has 4 of upstream's 43 alternatives and no `.cpp`s under `CSS/Values/Color`). Decision (2026-10-12): full colour slice, bottom-up, building and testing each layer; layer 1 (Graphics/Color) first, then re-plan.
+Entry: `css/CSSColorValue.cpp` (headers-only graph: 42 files, `tools/port/out/color-value.md`; with every `css/values/color` file as an entry: 158 files, `tools/port/out/color.md`, which reaches the style builder through `CSSLightDarkColor.cpp`/`CSSKeywordColor.cpp`). `ColorValue` itself is a thin wrapper; the work is in `css::Color` (Krystal has 4 of upstream's 43 alternatives). Decision (2026-10-12): full colour slice, bottom-up, building and testing each layer; layer 1 (Graphics/Color) first, then re-plan.
 
 ### Layer 1: Graphics/Color (2026-10-12)
 
@@ -330,7 +331,7 @@ Graph: `tools/port/out/primitives.md`. Upstream's `CSSValueTypes.h` reaches `CSS
 | `css/values/primitives/CSSPrimitiveNumericUnits.h`, `.cpp` | `have` | `CSS/Values/Primitives/Units.hpp`, `src/.../Units.cpp` | on | tested. Switch tables and conversions compared mechanically with upstream (every case/return pair matches). |
 | `css/values/primitives/CSSPrimitiveNumericRaw.h` | `have` | `CSS/Values/Primitives/NumericRaw.hpp` | on | tested. |
 | `css/values/primitives/CSSPrimitiveKeywordList.h` | `have` | `CSS/Values/Primitives/PrimitiveKeywordList.hpp` | on | tested. |
-| `css/values/primitives/CSSSymbol.h`, `.cpp` | `have` | `CSS/Values/Primitives/Symbol.hpp`, `src/.../Symbol.cpp` | on | tested. The `.cpp` was missing (serialisers declared, never defined). |
+| `css/values/primitives/CSSSymbol.h`, `.cpp` | `have` | `CSS/Values/Primitives/Symbol.hpp`, `src/.../Symbol.cpp` | on | tested. |
 | `css/values/CSSNoConversionDataRequiredToken.h` | `have` | `CSS/Values/NoConversionDataRequiredTag.hpp` | on | Renamed `…Tag`. |
 | `css/ComputedStyleDependencies.h`, `.cpp` | `have` | `CSS/ComputedStyleDependencies.hpp`, `src/CSS/ComputedStyleDependencies.cpp` | header | tested. The `.cpp` needs `ToLengthConversionData` (unreviewed): layer 3. |
 | `css/values/CSSValueTypes.h`, `.cpp` | `have` | `CSS/Values/Types.hpp`, `src/.../Types.cpp`, `src/.../TypesValueCreation.cpp` | on (not `TypesValueCreation.cpp`) | tested. The value-creation half needs `ValueList`/`ValuePair`/`QuadValue`/`FunctionValue`: build it with the Values slice. |
@@ -416,7 +417,6 @@ Graph from `css/calc/CSSCalcValue.h`, `CSSCalcTree.h`, the calc-dependent primit
   - `SymbolReplacement`/`EvaluateCalc` referred to a non-existent `calc::SymbolTable`.
   - `TypesMinusSymbol` produced a `brigand::list`, because Core's `VariantOrSingle` takes a pack; it now uses `brigand::wrap`.
   - `EvaluateCalc` built the raw value from a bare double, which only compiles for single-unit types (upstream bug). It now passes the canonical unit.
-- `ComputedStyleDependenciesCollector<LengthUnit>` and `ReplaceSymbol(Symbol)` were declared but never defined.
 - `RandomCachingKey`:
   - the hasher used `SafeToCompareToEmptyOrDeleted`, but Core's name is `IsSafeToCompareToEmptyOrDeleted`;
   - the hasher had no `operator()`, so `HashMap` couldn't use it;
@@ -667,7 +667,6 @@ Graph from every `css/values/color` file (headers-only): 156 files (`tools/port/
 **Bugs fixed:**
 - `ColorType::Absolute` was `0`, so `IsColorKeyword(id, types)` never accepted absolute colour keywords; the other flags were off by one bit from upstream.
 - `css::Color` had 4 of 43 alternatives, no copy/move/destructor, no `SwitchOn`, and its `AbsoluteColor()` member hid the `AbsoluteColor<D>` template.
-- `KeywordColor`, `HexColor`, `ResolvedColor`, `ColorLayers`, `ColorMix`, `ContrastColor`, `LightDarkColor`, `DynamicRangeLimit` and `PlatformColorResolutionState`'s delegate had no `.cpp`: every declared function was undefined.
 - `AbsoluteColorResolver.hpp`, `RelativeColor.hpp`, `RelativeColorResolver.hpp`, `ColorMix.hpp`, `ColorMixResolver.hpp`, `LightDarkColor.hpp` and `Convert/ToTypedColor.hpp` were raw or half-converted WebKit (`WebCore::`, `WTF::switchOn`, `StringBuilder`).
 - `ColorDescriptors.hpp`: `flagsForRelative` was lowercase (no descriptor had a `FlagsForRelative`, so relative colours couldn't resolve); the component results were `VariantOrSingle<brigand::list<…>>`, which with Core's pack-based `VariantOrSingle` made each component a `brigand::list` instead of a variant (now `brigand::wrap<List, VariantOrSingle>`, as in 3a).
 - `Convert/ToColor.hpp`: the struct and function templates both named `ConvertToColor` (ill-formed); `Color` named `css::Color` instead of the platform colour; member names were lowercase (`saturation`, `whiteness`, …).
@@ -705,7 +704,6 @@ Graph from `css/parser/CSSPropertyParserConsumer+Color.cpp`, `+ColorAdjust.cpp` 
 | `wtf/SortedArrayMap.h`, `wtf/text/MakeString.h` | `wont` | | | `switch`; `std::to_string` + `append`. |
 
 **Bugs fixed:**
-- `Color.cpp` was an empty namespace: every declared colour consumer was undefined.
 - `Color.hpp`: `ConsumeColorRaw` returned `Color`, which inside `css` is `css::Color`, not the platform colour; `DynamicRangeLimit` was forward-declared as a `class` (it's a `struct`; C4099 is an error under `/WX`); `ParseColorRaw`/`ParseColorRawSimple`/`ParseColorRawGeneral` were missing.
 - `ColorInterpolationMethod.hpp` forward-declared `css::ColorInterpolationMethod`; the type is `boo::ColorInterpolationMethod`, so the declaration named a type that doesn't exist.
 - `ColorAdjust`: the functions weren't in `PropertyParserHelpers`; the designated initialisers and member accesses used `schemes`/`only` (the members are `Schemes`/`Only`); `ParseUnresolvedColorScheme` never pumped the tokenizer, so it always parsed an empty range and returned null; it included `ColorSchemeValue.hpp` (layer 5c).
@@ -739,11 +737,10 @@ Graph from `css/CSSValuePool.cpp`, `CSSColorValue.cpp`, `CSSDynamicRangeLimitVal
 | `css/CSSPrimitiveValueMappings.h`, `CSSValueList.h`, `parser/CSSPropertyParser.h` | | | off | Only `createFontFaceValue`. |
 
 **Bugs fixed:**
-- `ValuePool` was an empty class: no constructor, caches, `createColorValue`, `createFontFamilyValue` or `drain`, so the 5b Value-returning colour consumers couldn't compile.
 - `ColorValue::CustomVisitChildren` returned `Continue` without visiting the colour, so values nested in a colour (e.g. `calc()` in `rgb()`) were skipped by `CollectComputedStyleDependencies` and other child walks.
 - `ColorValue::AbsoluteColor` called `css::Color::AbsoluteColor()`, renamed `GetAbsoluteColor()` in 5a; `ColorValue.cpp` was missing the `KeywordColor.hpp` include for `IsAbsoluteColorKeyword`/`ColorFromAbsoluteKeyword`.
 - `ColorValue`'s single-argument constructors weren't `explicit`.
-- `DynamicRangeLimitValue` had no data member, constructor, `Create` or `.cpp`, and wasn't `final`.
+- `DynamicRangeLimitValue` wasn't `final`.
 - `ColorSchemeValue` wasn't `final`, its constructor wasn't `explicit`, and its `.cpp` had no BOM.
 - `PrimitiveValue::Create(ValueId)` only debug-asserted the keyword range; upstream release-asserts (`krys_assert`).
 
@@ -853,7 +850,6 @@ Graph from `css/CSSValuePair.cpp` (headers-only): 3 files (`CSSValuePair.cpp`, `
 | `css/CSSValuePair.h`, `.cpp` | `have` | `CSS/Values/ValuePair.hpp`, `src/CSS/Values/ValuePair.cpp` | on (compile-only) | `createNoncoalescing` → `CreateNonCoalescing` (existing callers). Defines `Value::First()`/`Second()`. |
 
 **Bugs fixed:**
-- `ValuePair` was declarations only: no data members, constructor or `.cpp`, so every `Create*`, `CustomCSSText`, `Equals`, `CustomVisitChildren`, `First`/`Second` (and `Value::First()`/`Second()`) was undefined.
 - No `const` `First()`/`Second()`.
 - `Create*` took `Ref<Value> &&`; now by value like upstream, so callers can pass a `Ref<Derived>` lvalue copy.
 
@@ -877,7 +873,6 @@ Graph from `css/CSSValueList.cpp` (headers-only): 22 files (`tools/port/out/valu
 | `CSSValueListBuilder` (in `CSSValueList.h`) | `have` | `CSS/Values/ValueListBuilder.hpp` | on | `SmallList<Ref<Value>, 4>`. |
 
 **Bugs fixed:**
-- No `.cpp`: every constructor, `Create*`, `HasValue`, `SerialiseItems`, `ItemsEqual`, `ContainsSingleEqualItem`, `CopyValues`, `operator[]`, `CustomVisitChildren`, `CustomTraverseSubresources`, `CustomCSSText` and `Equals` was undefined.
 - No `AddDerivedHash`, so lists hashed by pointer.
 - `Get` used raw `assert`; `CustomTraverseSubresources` wasn't `noexcept`; `ValueList(ValueSeparator)` wasn't `noexcept`.
 - `Create*` took `ValueListBuilder &&`; now by value like upstream.
@@ -903,7 +898,6 @@ Graph from `css/CSSFunctionValue.cpp` (headers-only): 4 files (`CSSFunctionValue
 | `CSSValueKeywords.h`, `CSSPropertyNames.h` (`DefaultHash`) | `have` | `codegen/css_value_keywords.py`, `codegen/css_properties.py` | | See bugs. |
 
 **Bugs fixed:**
-- No `.cpp`, no constructors: every `Create`, `CustomCSSText`, `Equals` and the hash were undefined.
 - It declared its own `CustomVisitChildren` and `Length` (never defined), hiding `ValueContainingList`'s.
 - Generated code: `DefaultHash<ValueId>` and `DefaultHash<PropertyId>` derived from `IntegerHash<uint16>`, whose `Hash(uint16)` doesn't accept the enum, so hashing either (`Hash::Combine(seed, valueId)`, also in the unbuilt `PrimitiveValue::AddDerivedHash`) failed to compile. They now define `Hash`/`Equal` on the enum, forwarding to `IntegerHash<uint16>`. Tested in `tests/CSS/Parser/KeywordLookup.cpp`.
 
@@ -924,7 +918,6 @@ Graph from `css/CSSQuadValue.cpp` (headers-only): 5 files (`CSSQuadValue.cpp`, `
 | `css/RectBase.h` | `have` | `CSS/Values/RectBase.hpp` | on | Shared with `Rect` (reviewed with `RectValue`). |
 
 **Bugs fixed:**
-- `QuadValue` was declarations only: no data members, constructor or `.cpp`, so every `Create`, `CustomCSSText` and `Equals` was undefined.
 - It declared its own `CustomVisitChildren` (never defined; upstream has none), hiding `Value`'s default.
 
 **Added (upstream API):** `Create(Quad)`, `GetQuad` (and `Value::GetQuad()`), `CanBeCoalesced`.
@@ -946,7 +939,6 @@ Graph from `css/CSSRectValue.cpp` (headers-only): 5 files (`CSSRectValue.cpp`, `
 | `css/Rect.h` | `have` | `CSS/Values/Rect.hpp` | on | `generateCSSString` → `GenerateCSSString`. |
 
 **Bugs fixed:**
-- No `.cpp`: the constructor, `Create`, `CustomCSSText` and `Equals` were undefined.
 - It declared its own `CustomVisitChildren` (never defined; upstream has none), hiding `Value`'s default.
 - `RectValue` wasn't `final`.
 
@@ -968,7 +960,6 @@ Graph from `css/CSSRatioValue.cpp` (headers-only): 23 files (`tools/port/out/rat
 | `css/values/primitives/CSSRatio.h`, `.cpp` | `have` | `CSS/Values/Primitives/Ratio.hpp`, `src/CSS/Values/Primitives/Ratio.cpp` | on | tested. `numerator`/`denominator` → `Numerator`/`Denominator`. |
 
 **Bugs fixed:**
-- `RatioValue` was declarations only: no data member, constructor or `.cpp`, so `Create`, `CustomCSSText`, `Equals` and `CustomVisitChildren` were undefined.
 - `RatioValue` wasn't `final`.
 
 **Added (upstream API):** `GetRatio`.
@@ -1023,8 +1014,6 @@ Graph from `css/CSSReflectValue.cpp` (headers-only): 22 files (`tools/port/out/r
 | `css/CSSReflectValue.h`, `.cpp` | `have` | `CSS/Values/ReflectValue.hpp`, `src/CSS/Values/ReflectValue.cpp` | on (compile-only) | `direction()`/`offset()`/`mask()` → `Direction()`/`Offset()`/`Mask()`. |
 
 **Bugs fixed:**
-- `ReflectValue` was declarations only: no data members, constructor or `.cpp`, so `Create`, `CustomCSSText`, `Equals` and `CustomVisitChildren` were undefined (`Consumers/Background.cpp` calls `Create`).
-- No accessors.
 - `CustomVisitChildren` was missing `KRYS_NOESCAPE`; it's now defined inline, like upstream.
 - The header included `Quad.hpp` for nothing.
 
@@ -1043,9 +1032,7 @@ Graph from `css/CSSUnicodeRangeValue.cpp` (headers-only): 3 files (`CSSUnicodeRa
 | `css/CSSUnicodeRangeValue.h`, `.cpp` | `have` | `CSS/Values/UnicodeRangeValue.hpp`, `src/CSS/Values/UnicodeRangeValue.cpp` | on (compile-only) | `from()`/`to()` → `From()`/`To()`. |
 
 **Bugs fixed:**
-- `UnicodeRangeValue` was declarations only: no data members, constructor or `.cpp`, so `Create`, `CustomCSSText` and `Equals` were undefined (`Consumers/UnicodeRange.cpp` calls `Create`).
 - It declared its own `CustomVisitChildren` (never defined; upstream has none), hiding `Value`'s default.
-- No accessors.
 
 **Added (upstream API):** `From`, `To`.
 
@@ -1068,7 +1055,6 @@ Tests: none (compile-only: `CssText` dispatches through `Value.cpp`). Full Booey
 | `css/CSSFontValue.h`, `.cpp` | `have` | `CSS/Values/FontValue.hpp`, `src/CSS/Values/FontValue.cpp` | on (compile-only) | Public members `style`, `variant`, ... → `Style`, `Variant`, `Weight`, `Width`, `Size`, `LineHeight`, `Family`. |
 
 **Bugs fixed:**
-- All five were declarations only: no data members, constructors, `Create` or `.cpp`, so `CustomCSSText`, `Equals` and `CustomVisitChildren` were undefined. They're now complete.
 - `FontStyleRangeValue` and `FontValue` declared a `CustomVisitChildren` without `KRYS_NOESCAPE`; none of the five were `final`. `FontValue.hpp` had no BOM.
 
 **Added (upstream API):** every member of the five classes (above); `FontTag`, `FontFeatureTag`, `FourCharacterTagHash`, `FourCharacterTagHashTraits`, `FontTaggedSetting`, `FontTaggedSettings`, `FontFeature`, `FontFeatureSettings`, `FontVariationSettings`.
@@ -1084,6 +1070,76 @@ Tests: none (compile-only: `CssText` dispatches through `Value.cpp`). Full Booey
 - `CSS/Font/FontFace.hpp` and `Style/BuilderState.hpp` (unreviewed) still include the raw `FontTaggedSettings.h`; switch them when their slices come.
 
 Tests: `tests/Graphics/FontTaggedSettings.cpp` (tag creation, settings, sorted insert/replace, iteration, equality, tag and setting hashes, deleted-value traits): 5 cases / 31 assertions. The five value classes are compile-only. Full Booey suite: 836 cases / 653242 assertions; all pass except 2 expected failures.
+
+### Grid line values (2026-10-12)
+
+`GridLineNamesValue`, `GridLineValue` (tier 1 items 11–12). Graphs from `css/CSSGridLineNamesValue.cpp` (headers-only): 4 files, only `CSSMarkup.h` beyond the class (reviewed in slice 1); `css/CSSGridLineValue.cpp`: 22 files, all through `CSSPrimitiveValue.h` (reviewed). `tools/port/out/grid-line-names-value.md`, `grid-line-value.md`.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/CSSGridLineNamesValue.h`, `.cpp` | `have` | `CSS/Values/GridLineNamesValue.hpp`, `src/CSS/Values/GridLineNamesValue.cpp` | on (compile-only) | `names()` → `Names()`; `serializeIdentifier` → `SerialiseIdentifier`. |
+| `css/CSSGridLineValue.h`, `.cpp` | `have` | `CSS/Values/GridLineValue.hpp`, `src/CSS/Values/GridLineValue.cpp` | on (compile-only) | `spanValue()`/`numericValue()`/`gridLineName()` and their `protected*` versions → PascalCase. |
+
+**Bugs fixed:**
+- Both declared their own `CustomVisitChildren` (never defined; upstream has none), hiding `Value`'s default.
+- `GridLineNamesValue::Create` returned `RefPtr`; now `Ref` like upstream (the unbuilt callers assign it to a `RefPtr`).
+
+**Added (upstream API):** `GridLineValue::SpanValue`, `ProtectedSpanValue`, `NumericValue`, `ProtectedNumericValue`, `GridLineName`, `ProtectedGridLineName`.
+
+**Differences:**
+- `GridLineValue`'s constructor and `Create` take the three `RefPtr`s by value (upstream: `RefPtr&&`).
+- `makeStringByJoining(parts, " ")` is a local append lambda (no intermediate list).
+- No `AddDerivedHash` on either, like upstream: both hash by pointer.
+
+Tests: none (compile-only: `CssText` dispatches through `Value.cpp`). Full Booey suite: 836 cases / 653242 assertions; all pass except 2 expected failures.
+
+### `ValueContainingList` subclasses (2026-10-12)
+
+`SubgridValue`, `TransformListValue`, `GridAutoRepeatValue`, `GridIntegerRepeatValue` (tier 1 items 13–16). Graphs from each `css/CSS<name>.cpp` (headers-only): 4 files each (class, `CSSValueList.h`, `CSSValue.h`), plus `CSSPrimitiveValue.h` for `GridIntegerRepeatValue` (23 files, all reviewed). `tools/port/out/subgrid-value.md`, `transform-list-value.md`, `grid-auto-repeat-value.md`, `grid-integer-repeat-value.md`.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/CSSSubgridValue.h`, `.cpp` | `have` | `CSS/Values/SubgridValue.hpp`, `src/CSS/Values/SubgridValue.cpp` | on (compile-only) | |
+| `css/CSSTransformListValue.h`, `.cpp` | `have` | `CSS/Values/TransformListValue.hpp`, `src/CSS/Values/TransformListValue.cpp` | on (compile-only) | |
+| `css/CSSGridAutoRepeatValue.h`, `.cpp` | `have` | `CSS/Values/GridAutoRepeatValue.hpp`, `src/CSS/Values/GridAutoRepeatValue.cpp` | on (compile-only) | `autoRepeatID()` → `AutoRepeatID()`. |
+| `css/CSSGridIntegerRepeatValue.h`, `.cpp` | `have` | `CSS/Values/GridIntegerRepeatValue.hpp`, `src/CSS/Values/GridIntegerRepeatValue.cpp` | on (compile-only) | `repetitions()` → `Repetitions()`. |
+
+**Bugs fixed:**
+- `GridAutoRepeatValue` and `GridIntegerRepeatValue` derived from `Value` instead of `ValueContainingList`, although their `ValueType`s sit in the list range (`ContainsValueList()`), so `Downcast<ValueContainingList>` on them would have been undefined behaviour.
+- Each declared its own `CustomVisitChildren` (never defined), hiding `ValueContainingList`'s. Upstream only overrides it in `GridIntegerRepeatValue` (list items, then the repetitions), which is now defined inline.
+- `SubgridValue`, `GridAutoRepeatValue` and `GridIntegerRepeatValue` included `Grid/GridTemplateAreas.hpp` (tier 2, unreviewed) for nothing.
+
+**Added (upstream API):** `GridAutoRepeatValue::AutoRepeatID`, `GridIntegerRepeatValue::Repetitions`, the `TransformListValue::Create(Ref<Value>)` definition.
+
+**Differences:** `GridIntegerRepeatValue::Create` takes `Ref<PrimitiveValue>` by value (upstream: `Ref&&`). No `AddDerivedHash` overrides, like upstream: the list hash from `ValueContainingList` applies (the grid repeats' extra state isn't hashed).
+
+Tests: none (compile-only: `CssText` dispatches through `Value.cpp`). Full Booey suite: 836 cases / 653242 assertions; all pass except 2 expected failures.
+
+### `CounterValue`, `OffsetRotateValue`, `AttrValue` (2026-10-12)
+
+Tier 1 items 17–19; tier 1 is done. Graphs from each `css/CSS<name>.cpp` (headers-only; `tools/port/out/counter-value.md`, `offset-rotate-value.md`, `attr-value.md`). `CounterValue` adds only `CSSMarkup.h` (slice 1) beyond `CSSPrimitiveValue.h`; `OffsetRotateValue`'s `.cpp` includes `CSSValuePool.h` (layer 5c; 44 files, all reviewed) but uses nothing from it; `AttrValue` adds nothing.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/CSSCounterValue.h`, `.cpp` | `have` | `CSS/Values/CounterValue.hpp`, `src/CSS/Values/CounterValue.cpp` | on (compile-only) | `identifier()`/`separator()`/`counterStyle()`/`counterStyleCSSText()` → PascalCase. |
+| `css/CSSOffsetRotateValue.h`, `.cpp` | `have` | `CSS/Values/OffsetRotateValue.hpp`, `src/CSS/Values/OffsetRotateValue.cpp` | on (compile-only) | `modifier()` → `Modifier()`, `angle()` → `GetAngle()` (would hide `css::Angle`), `isInitialValue()` → `IsInitialValue()`. |
+| `css/CSSAttrValue.h`, `.cpp` | `have` | `CSS/Values/AttrValue.hpp`, `src/CSS/Values/AttrValue.cpp` | on (compile-only) | Header was already built through `PrimitiveValue.hpp`. |
+
+**Bugs fixed:**
+- `CounterValue`'s and `OffsetRotateValue`'s `CustomVisitChildren` declarations lacked `KRYS_NOESCAPE`; they're now defined inline like upstream. `CounterValue` wasn't `final`.
+- `AttrValue` matched upstream; tidied only (`_attr` → `_attributeName`, the `.cpp` gained a BOM and lost an unused `Types.hpp` include, string building no longer allocates temporaries).
+
+**Added (upstream API):** `CounterValue::Identifier`, `Separator`, `CounterStyle`, `CounterStyleCSSText`; `OffsetRotateValue::Modifier`, `GetAngle`, `IsInitialValue` and the constructor's asserts (modifier is a keyword, angle is an angle, at least one is set).
+
+**Krystal.Core bug found (not fixed, outside the slice):** the `IntrusivePtr` overloads of `Downcast`/`DynamicDowncast` (`Types/IntrusivePtr.hpp`) can't be called as `Downcast<Target>(ptr)`: their first template parameter is both the explicit target and the source's pointee, so deduction fails. `Downcast` also asserts the pointer is non-null, where WTF's `RefPtr` downcast allows null. Nothing calls them yet. `OffsetRotateValue::Create` works around it (FIXME) by downcasting the raw pointer and re-adopting it.
+
+**Differences:**
+- `CounterValue::Equals` uses `CompareValue` instead of `arePointingToEqualData` (same result; see the font values).
+- `ASSERT_NOT_REACHED` in `CounterStyleCSSText` → `krys_debug_assert_msg(false, ...)`, still returning an empty string (not `krys_unreachable()`, which would be undefined behaviour in release).
+- `OffsetRotateValue.cpp` doesn't include `ValuePool.hpp` (upstream includes `CSSValuePool.h` for `StringBuilder` only).
+- No `AddDerivedHash` on any of them, like upstream: all hash by pointer.
+
+Tests: none (compile-only: `CssText` dispatches through `Value.cpp`). Full Booey suite: 836 cases / 653242 assertions; all pass except 2 expected failures.
 
 ## Deferred: Values (from the tokenizer graph)
 
