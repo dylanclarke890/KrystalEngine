@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/CounterStyles.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/IntegerDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/List.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
@@ -97,8 +97,8 @@ namespace krys::boo::css::PropertyParserHelpers
     // <'system'> = cyclic | numeric | alphabetic | symbolic | additive | [fixed <integer>?] | [ extends
     // <counter-style-name> ] https://drafts.csswg.org/css-counter-styles-3/#counter-style-system
 
-    if (auto ident = ConsumeIdent<ValueId::Cyclic, ValueId::Numeric, ValueId::Alphabetic,
-                                  ValueId::Symbolic, ValueId::Additive>(tokens))
+    if (auto ident = ConsumeIdent<ValueId::Cyclic, ValueId::Numeric, ValueId::Alphabetic, ValueId::Symbolic,
+                                  ValueId::Additive>(tokens))
     {
       return ident;
     }
@@ -107,11 +107,9 @@ namespace krys::boo::css::PropertyParserHelpers
     {
       auto internalKeyword =
         ConsumeIdent<ValueId::InternalDisclosureClosed, ValueId::InternalDisclosureOpen,
-                     ValueId::InternalSimplifiedChineseInformal,
-                     ValueId::InternalSimplifiedChineseFormal,
-                     ValueId::InternalTraditionalChineseInformal,
-                     ValueId::InternalTraditionalChineseFormal, ValueId::InternalEthiopicNumeric>(
-          tokens);
+                     ValueId::InternalSimplifiedChineseInformal, ValueId::InternalSimplifiedChineseFormal,
+                     ValueId::InternalTraditionalChineseInformal, ValueId::InternalTraditionalChineseFormal,
+                     ValueId::InternalEthiopicNumeric>(tokens);
       if (internalKeyword)
       {
         return internalKeyword;
@@ -211,8 +209,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return tokensList;
   }
 
-  RefPtr<Value> ConsumeCounterStyleAdditiveSymbols(TokenRange &tokens,
-                                                      PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeCounterStyleAdditiveSymbols(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'additive-symbols'> = [ <integer [0,∞]> && <symbol> ]#
     // https://drafts.csswg.org/css-counter-styles-3/#descdef-counter-style-additive-symbols

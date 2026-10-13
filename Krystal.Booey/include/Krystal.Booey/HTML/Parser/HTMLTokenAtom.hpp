@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
+#include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/HTML/Enums/HTMLTokenType.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLToken.hpp"
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include <cassert>
 

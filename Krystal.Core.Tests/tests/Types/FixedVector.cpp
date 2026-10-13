@@ -25,9 +25,8 @@ namespace krys::tests
   {
     const std::array source {1, 2, 3};
     auto mapped = FixedVector<int>::map(source, [](int value) { return value * 2; });
-    auto generated = FixedVector<int>::createWithSizeFromGenerator(3, [](size_t index) {
-      return static_cast<int>(index + 1);
-    });
+    auto generated = FixedVector<int>::createWithSizeFromGenerator(3, [](size_t index)
+                                                                   { return static_cast<int>(index + 1); });
     const FixedVector<int> expectedMapped {2, 4, 6};
     const FixedVector<int> expectedGenerated {1, 2, 3};
     const std::vector expected {3, 5, 7};

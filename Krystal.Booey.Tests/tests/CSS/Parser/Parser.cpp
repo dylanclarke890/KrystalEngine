@@ -1,11 +1,11 @@
 ﻿#include "Krystal.Booey/CSS/Parser/Parser.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/MediaList.hpp"
 #include "Krystal.Booey/CSS/Rules/CSSOM/CSSImportRule.hpp"
 #include "Krystal.Booey/CSS/Rules/CSSOM/CSSNamespaceRule.hpp"
 #include "Krystal.Booey/CSS/Rules/CSSOM/CSSRuleList.hpp"
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
-#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::css::tests
 {

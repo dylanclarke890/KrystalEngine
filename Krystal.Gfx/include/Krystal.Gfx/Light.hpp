@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Core/Maths/Vector.hpp"
+#include "Krystal.Gfx/Colour.hpp"
 
 namespace krys::Gfx
 {
@@ -12,7 +12,8 @@ namespace krys::Gfx
     Colourf Specular;
 
     constexpr LightColour() noexcept
-        : Ambient(Colourf(0.2f, 0.2f, 0.2f)), Diffuse(Colourf(0.5f, 0.5f, 0.5f)), Specular(Colourf(1.0f, 1.0f, 1.0f))
+        : Ambient(Colourf(0.2f, 0.2f, 0.2f)), Diffuse(Colourf(0.5f, 0.5f, 0.5f)),
+          Specular(Colourf(1.0f, 1.0f, 1.0f))
     {
     }
 

@@ -42,7 +42,7 @@ namespace krys::text
       {
         return it->second;
       }
-     
+
       return nullptr;
     }
   };

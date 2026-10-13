@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Core/IO/ImageLoader.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Core/IO/Path.hpp"
 #include "Krystal.Core/IO/Streams/NativeFileStream.hpp"
-#include "catch2/catch_test_macros.hpp"
 
 namespace krys::io::tests
 {

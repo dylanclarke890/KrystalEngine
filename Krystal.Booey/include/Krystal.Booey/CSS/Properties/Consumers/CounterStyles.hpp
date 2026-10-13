@@ -15,8 +15,7 @@ namespace krys::boo::css
     // https://drafts.csswg.org/css-counter-styles-3/
 
     // MARK: <counter-style> consumer
-    KRYS_NODISCARD RefPtr<Value> ConsumeCounterStyle(TokenRange &tokens,
-                                                        PropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumeCounterStyle(TokenRange &tokens, PropertyParserState &state) noexcept;
 
     // MARK: @counter-style consumer
     KRYS_NODISCARD CSSOMStringAtom ConsumeCounterStyleNameInPrelude(
@@ -24,12 +23,12 @@ namespace krys::boo::css
 
     // MARK: @counter-style descriptor consumers
     KRYS_NODISCARD RefPtr<Value> ConsumeCounterStyleName(TokenRange &tokens,
-                                                            PropertyParserState &state) noexcept;
+                                                         PropertyParserState &state) noexcept;
     KRYS_NODISCARD RefPtr<Value> ConsumeCounterStyleSystem(TokenRange &tokens,
-                                                              PropertyParserState &state) noexcept;
+                                                           PropertyParserState &state) noexcept;
     KRYS_NODISCARD RefPtr<Value> ConsumeCounterStyleRange(TokenRange &tokens,
-                                                             PropertyParserState &state) noexcept;
-    KRYS_NODISCARD RefPtr<Value>
-      ConsumeCounterStyleAdditiveSymbols(TokenRange &tokens, PropertyParserState &state) noexcept;
+                                                          PropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumeCounterStyleAdditiveSymbols(TokenRange &tokens,
+                                                                    PropertyParserState &state) noexcept;
   }
 }

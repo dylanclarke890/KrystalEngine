@@ -13,13 +13,13 @@
 #include <algorithm>
 
 #pragma warning(push)
-#pragma warning(disable: 4505) // unreferenced function with internal linkage was removed
-#pragma warning(disable: 4458) // declaration of 'identifier' hides class member
+#pragma warning(disable : 4'505) // unreferenced function with internal linkage was removed
+#pragma warning(disable : 4'458) // declaration of 'identifier' hides class member
 
 #include "msdf-atlas-gen/msdf-atlas-gen.h"
-#include "msdfgen/msdfgen.h"
-#include "msdfgen/msdfgen-ext.h"
 #include "msdfgen/ext/import-font.h"
+#include "msdfgen/msdfgen-ext.h"
+#include "msdfgen/msdfgen.h"
 
 #pragma warning(pop)
 

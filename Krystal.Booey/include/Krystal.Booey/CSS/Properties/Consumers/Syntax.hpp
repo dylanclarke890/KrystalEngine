@@ -13,6 +13,6 @@ namespace krys::boo::css
     // MARK: <declaration-value> consuming
     // https://drafts.csswg.org/css-syntax-3/#typedef-declaration-value
     KRYS_NODISCARD RefPtr<Value> ConsumeDeclarationValue(TokenRange &tokens,
-                                                            PropertyParserState &state) noexcept;
+                                                         PropertyParserState &state) noexcept;
   }
 }

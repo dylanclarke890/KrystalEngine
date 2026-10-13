@@ -3,9 +3,9 @@
 #include "Krystal.Booey/CSS/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/PercentageDefinitions.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Timeline.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
@@ -14,7 +14,7 @@ namespace krys::boo::css::PropertyParserHelpers
 {
 
   SmallList<Pair<ValueId, double>> ConsumeKeyframeKeyList(TokenRange &tokens,
-                                                             PropertyParserState &state) noexcept
+                                                          PropertyParserState &state) noexcept
   {
     // <keyframe-selector> = from | to | <percentage [0,100]> | <timeline-tokens-name> <percentage>
     // https://drafts.csswg.org/css-animations-1/#typedef-keyframe-selector
@@ -119,7 +119,7 @@ namespace krys::boo::css::PropertyParserHelpers
   }
 
   SmallList<Pair<ValueId, double>> ParseKeyframeKeyList(const CSSOMString &string,
-                                                           const ParserContext &context) noexcept
+                                                        const ParserContext &context) noexcept
   {
     auto inputStream = InputStream(CSSOMString(string));
     auto tokenizer = Tokenizer(inputStream);

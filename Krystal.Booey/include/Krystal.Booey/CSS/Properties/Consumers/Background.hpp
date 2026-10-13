@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 #include <cassert>
 
 namespace krys::boo::css
@@ -62,26 +62,24 @@ namespace krys::boo::css
     // <bg-size> = [ <length-percentage [0,∞]> | auto ]{1,2} | cover | contain
     // https://drafts.csswg.org/css-backgrounds/#background-size
     KRYS_NODISCARD RefPtr<Value> ConsumeSingleBackgroundSize(TokenRange &tokens,
-                                                                PropertyParserState &state) noexcept;
+                                                             PropertyParserState &state) noexcept;
 
     // Non-standard.
     KRYS_NODISCARD RefPtr<Value> ConsumeSingleWebkitBackgroundSize(TokenRange &tokens,
-                                                                      PropertyParserState &state) noexcept;
+                                                                   PropertyParserState &state) noexcept;
 
     // <single-mask-size> = <bg-size>
     // https://drafts.fxtf.org/css-masking/#the-mask-size
     KRYS_NODISCARD RefPtr<Value> ConsumeSingleMaskSize(TokenRange &tokens,
-                                                          PropertyParserState &state) noexcept;
+                                                       PropertyParserState &state) noexcept;
 
     // <repeat-style> = repeat-x | repeat-y | [repeat | space | round | no-repeat]{1,2}
     // https://drafts.csswg.org/css-backgrounds/#typedef-repeat-style
-    KRYS_NODISCARD RefPtr<Value> ConsumeRepeatStyle(TokenRange &tokens,
-                                                       PropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumeRepeatStyle(TokenRange &tokens, PropertyParserState &state) noexcept;
 
     // <'box-shadow'> = none | <shadow>#
     // https://drafts.csswg.org/css-backgrounds/#propdef-box-shadow
-    KRYS_NODISCARD RefPtr<Value> ConsumeBoxShadow(TokenRange &tokens,
-                                                     PropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumeBoxShadow(TokenRange &tokens, PropertyParserState &state) noexcept;
 
     RefPtr<Value> ConsumeWebkitBoxReflect(TokenRange &tokens, PropertyParserState &state) noexcept;
 

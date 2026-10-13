@@ -546,8 +546,7 @@ namespace krys::boo::dom
     return nullptr;
   }
 
-  Node *TreeQueries::PreviousSkippingChildren(const Node &current,
-                                                     const Node *stayWithin) noexcept
+  Node *TreeQueries::PreviousSkippingChildren(const Node &current, const Node *stayWithin) noexcept
   {
     if (&current == stayWithin)
     {
@@ -657,7 +656,7 @@ namespace krys::boo::dom
     return it == std::ranges::end(children) ? nullptr : Downcast<Element>(&*it);
   }
 
-  const html::HTMLElement * TreeQueries::NextHTMLElementSibling(const Node &current) noexcept
+  const html::HTMLElement *TreeQueries::NextHTMLElementSibling(const Node &current) noexcept
   {
     auto siblings = ConstNextSiblingRange(current);
     auto it = FirstOfType<html::HTMLElement>(siblings);
@@ -671,7 +670,7 @@ namespace krys::boo::dom
     return it == std::ranges::end(siblings) ? nullptr : Downcast<html::HTMLElement>(&*it);
   }
 
-  const html::HTMLElement * TreeQueries::PreviousHTMLElementSibling(const Node &current) noexcept
+  const html::HTMLElement *TreeQueries::PreviousHTMLElementSibling(const Node &current) noexcept
   {
     auto siblings = ConstPreviousSiblingRange(current);
     auto it = FirstOfType<html::HTMLElement>(siblings);
@@ -685,7 +684,7 @@ namespace krys::boo::dom
     return it == std::ranges::end(siblings) ? nullptr : Downcast<html::HTMLElement>(&*it);
   }
 
-  const html::HTMLElement * TreeQueries::FirstHTMLElementChild(const ContainerNode &node) noexcept
+  const html::HTMLElement *TreeQueries::FirstHTMLElementChild(const ContainerNode &node) noexcept
   {
     auto children = ConstChildNodeRange(node);
     auto it = FirstOfType<html::HTMLElement>(children);
@@ -699,7 +698,7 @@ namespace krys::boo::dom
     return it == std::ranges::end(children) ? nullptr : Downcast<html::HTMLElement>(&*it);
   }
 
-  const html::HTMLElement * TreeQueries::LastHTMLElementChild(const ContainerNode &node) noexcept
+  const html::HTMLElement *TreeQueries::LastHTMLElementChild(const ContainerNode &node) noexcept
   {
     auto children = ConstChildNodeRange(node);
     auto it = LastOfType<html::HTMLElement>(children);
@@ -799,8 +798,7 @@ namespace krys::boo::dom
     return PreviousAncestorSiblingPostOrder(current);
   }
 
-  Node *TreeQueries::PreviousSkippingChildrenPostOrder(const Node &current,
-                                                              const Node *stayWithin) noexcept
+  Node *TreeQueries::PreviousSkippingChildrenPostOrder(const Node &current, const Node *stayWithin) noexcept
   {
     if (&current == stayWithin)
     {
@@ -830,8 +828,7 @@ namespace krys::boo::dom
     return nullptr;
   }
 
-  Node *TreeQueries::PreviousAncestorSiblingPostOrder(const Node &current,
-                                                             const Node *stayWithin) noexcept
+  Node *TreeQueries::PreviousAncestorSiblingPostOrder(const Node &current, const Node *stayWithin) noexcept
   {
     assert(!current.PreviousSibling());
 

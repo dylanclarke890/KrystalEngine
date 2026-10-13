@@ -87,7 +87,7 @@ namespace krys::boo::dom
                                                  DOMStringView newValue) noexcept
   {
     (void)newValue;
-    
+
     MutationObserverAlgorithms::QueueMutationRecord(MutationRecordType::Attributes, ShareRef(element),
                                                     attribute.LocalName(), attribute.NamespaceURI(), oldValue,
                                                     {}, {}, nullptr, nullptr);

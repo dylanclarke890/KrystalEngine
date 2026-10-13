@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Selectors/Selector.hpp"
 #include "Krystal.Booey/CSS/Selectors/MutableSelector.hpp"
+#include "Krystal.Booey/CSS/Selectors/Selector.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/UniqueArray.hpp"

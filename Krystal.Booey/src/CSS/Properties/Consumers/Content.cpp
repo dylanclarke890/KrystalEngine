@@ -84,7 +84,7 @@ namespace krys::boo::css::PropertyParserHelpers
   }
 
   KRYS_NODISCARD static RefPtr<Value> ConsumeCountersContent(TokenRange args,
-                                                                PropertyParserState &state) noexcept
+                                                             PropertyParserState &state) noexcept
   {
     // counters() = counters( <counter-name>, <string>, <counter-style>? )
     // https://www.w3.org/TR/css-lists-3/#funcdef-counters
@@ -219,9 +219,8 @@ namespace krys::boo::css::PropertyParserHelpers
         return nullptr;
       }
 
-      return ValuePair::CreateSlashSeparated(
-        ValueList::CreateSpaceSeparated(krys::move(visibleContent)),
-        ValueList::CreateSpaceSeparated(krys::move(altText)));
+      return ValuePair::CreateSlashSeparated(ValueList::CreateSpaceSeparated(krys::move(visibleContent)),
+                                             ValueList::CreateSpaceSeparated(krys::move(altText)));
     }
 
     return ValueList::CreateSpaceSeparated(krys::move(visibleContent));

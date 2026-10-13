@@ -132,7 +132,8 @@ namespace krys::boo::tests
   TEST_CASE("FloatQuad: BoundingBoxSaturateInf", "[Graphics][FloatQuad]")
   {
     constexpr double inf = std::numeric_limits<double>::infinity();
-    FloatQuad quad(FloatPoint(static_cast<float>(-inf), 3), FloatPoint(5, static_cast<float>(inf)), FloatPoint(11, 13), FloatPoint(17, 19));
+    FloatQuad quad(FloatPoint(static_cast<float>(-inf), 3), FloatPoint(5, static_cast<float>(inf)),
+                   FloatPoint(11, 13), FloatPoint(17, 19));
     FloatRect rect = quad.BoundingBox();
     REQUIRE(rect.X() == std::numeric_limits<int>::min());
     REQUIRE(rect.Y() == 3.0f);
@@ -143,7 +144,8 @@ namespace krys::boo::tests
   TEST_CASE("FloatQuad: BoundingBoxSaturateLarge", "[Graphics][FloatQuad]")
   {
     constexpr double large = static_cast<double>(std::numeric_limits<float>::max()) * 4;
-    FloatQuad quad(FloatPoint(static_cast<float>(-large), 3), FloatPoint(5, static_cast<float>(large)), FloatPoint(11, 13), FloatPoint(17, 19));
+    FloatQuad quad(FloatPoint(static_cast<float>(-large), 3), FloatPoint(5, static_cast<float>(large)),
+                   FloatPoint(11, 13), FloatPoint(17, 19));
     FloatRect rect = quad.BoundingBox();
     REQUIRE(rect.X() == std::numeric_limits<int>::min());
     REQUIRE(rect.Y() == 3.0f);

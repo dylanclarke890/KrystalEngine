@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/FilterMode.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/WrapMode.hpp"
@@ -7,7 +8,6 @@
 #include "Krystal.Gfx/Registries/ISamplerRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
-#include "Krystal.Core/Attributes.hpp"
 
 namespace krys::Gfx::OpenGL
 {

@@ -37,7 +37,7 @@ namespace krys::boo::css
   }
 
   void MutableSelector::PrependComplexSelectorComponent(SelectorRelation relation,
-                                                           UniquePtr<MutableSelector> selector) noexcept
+                                                        UniquePtr<MutableSelector> selector) noexcept
   {
     auto *first = this;
     while (first->PrecedingComplexSelectorComponent())
@@ -50,7 +50,7 @@ namespace krys::boo::css
   }
 
   void MutableSelector::AppendTagInComplexSelector(const dom::QualifiedName &tagQualifiedName,
-                                                      bool tagIsForNamespaceRule) noexcept
+                                                   bool tagIsForNamespaceRule) noexcept
   {
     // Make the current last selector the second to last.
     auto currentLast = CreateUnique<MutableSelector>();

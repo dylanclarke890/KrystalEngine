@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Value.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
 {
@@ -24,11 +24,9 @@ namespace krys::boo::css
                                                             PropertyParserState &state) noexcept;
 
     // MARK: <ratio> consuming (value)
-    KRYS_NODISCARD RefPtr<Value> ConsumeRatio(TokenRange &tokens,
-                                                 PropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumeRatio(TokenRange &tokens, PropertyParserState &state) noexcept;
 
     KRYS_NODISCARD RefPtr<Value>
-      ConsumeRatioWithBothNumeratorAndDenominator(TokenRange &tokens,
-                                                  PropertyParserState &state) noexcept;
+      ConsumeRatioWithBothNumeratorAndDenominator(TokenRange &tokens, PropertyParserState &state) noexcept;
   }
 }

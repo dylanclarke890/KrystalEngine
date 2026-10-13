@@ -1,11 +1,11 @@
-﻿#include "Krystal.Core/IO/Streams/MemoryStream.hpp"
+﻿#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Core/IO/Streams/MemoryStream.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Serialisation/Access.hpp"
 #include "Krystal.Core/Serialisation/Archives/BinaryArchive.hpp"
 #include "Krystal.Core/Serialisation/Archives/JsonArchive.hpp"
 #include "Krystal.Core/Serialisation/Archives/XmlArchive.hpp"
 #include "Krystal.Core/Serialisation/Types/List.hpp"
-#include "catch2/catch_test_macros.hpp"
 
 namespace krys::tests
 {

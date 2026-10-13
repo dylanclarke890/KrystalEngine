@@ -7,8 +7,8 @@ namespace krys::boo::css
 {
   struct IntegerValidator
   {
-    KRYS_NODISCARD constexpr static Maybe<IntegerUnit>
-      Validate(UnitType unitType, PropertyParserState &, PropertyParserOptions) noexcept
+    KRYS_NODISCARD constexpr static Maybe<IntegerUnit> Validate(UnitType unitType, PropertyParserState &,
+                                                                PropertyParserOptions) noexcept
     {
       return UnitTraits<IntegerUnit>::Validate(unitType);
     }
@@ -25,8 +25,7 @@ namespace krys::boo::css
   {
     constexpr static TokenType TokenType = TokenType::Number;
 
-    KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(TokenRange &tokens,
-                                                                 PropertyParserState &,
+    KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(TokenRange &tokens, PropertyParserState &,
                                                                  CalcAllowedSymbols,
                                                                  PropertyParserOptions options) noexcept
     {

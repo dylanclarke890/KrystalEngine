@@ -1,9 +1,9 @@
-﻿#include "Krystal.Booey/CSS/Parser/InputStream.hpp"
-#include "Krystal.Booey/CSS/Parser/Token.hpp"
+﻿#include "Krystal.Booey/CSS/Parser/Token.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/String.hpp"
-#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::css::tests
 {
@@ -281,9 +281,8 @@ namespace krys::boo::css::tests
     CHECK(dimension.NumericValueType() == NumericValueType::Number);
 
     Token token {TokenType::Number};
-    token.NumericValue(css::NumericValue {.Value = 7.0,
-                                          .Type = NumericValueType::Number,
-                                          .SignCharacter = NumericSignChar::Plus});
+    token.NumericValue(css::NumericValue {
+      .Value = 7.0, .Type = NumericValueType::Number, .SignCharacter = NumericSignChar::Plus});
     CHECK(token.NumericValue() == 7.0);
     CHECK(token.NumericValueType() == NumericValueType::Number);
     CHECK(token.NumericSign() == NumericSignChar::Plus);
@@ -492,9 +491,10 @@ namespace krys::boo::css::tests
 
   TEST_CASE("Token::Serialise(round-trip)", "[CSS][Token]")
   {
-    for (auto css : {u8"color: red", u8"margin: 0 auto 10px -5%", u8"font-family: \"Helvetica Neue\", sans-serif",
-                     u8"background: url(a) no-repeat", u8"@media (min-width: 600px)",
-                     u8"a > b + c ~ d", u8"[data-x=\"y\"]", u8"calc(100% - 2em)"})
+    for (auto css :
+         {u8"color: red", u8"margin: 0 auto 10px -5%", u8"font-family: \"Helvetica Neue\", sans-serif",
+          u8"background: url(a) no-repeat", u8"@media (min-width: 600px)", u8"a > b + c ~ d",
+          u8"[data-x=\"y\"]", u8"calc(100% - 2em)"})
     {
       INFO(ToNarrow(css));
       CHECK(Serialise(css) == ToNarrow(css));
@@ -503,9 +503,9 @@ namespace krys::boo::css::tests
 
   TEST_CASE("Token::operator==(same input)", "[CSS][Token]")
   {
-    for (auto css : {u8"foo", u8"foo(", u8"@foo", u8"#foo", u8"#1a", u8"\"foo\"", u8"url(foo)", u8"/", u8"1", u8"1.5",
-                     u8"+1", u8"10%", u8"10px", u8",", u8":", u8";", u8"(", u8")", u8"[", u8"]", u8"{", u8"}",
-                     u8" ", u8"<!--", u8"-->"})
+    for (auto css : {u8"foo", u8"foo(", u8"@foo", u8"#foo", u8"#1a", u8"\"foo\"", u8"url(foo)", u8"/", u8"1",
+                     u8"1.5", u8"+1",   u8"10%",  u8"10px", u8",",   u8":",       u8";",        u8"(", u8")",
+                     u8"[",   u8"]",    u8"{",    u8"}",    u8" ",   u8"<!--",    u8"-->"})
     {
       INFO(ToNarrow(css));
       CHECK(TokenizeOne(css) == TokenizeOne(css));

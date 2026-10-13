@@ -29,8 +29,8 @@
 #include <wtf/AbstractRefCountedAndCanMakeWeakPtr.h>
 #include <wtf/HashMap.h>
 #include <wtf/Observer.h>
-#include <wtf/text/StringHash.h>
 #include <wtf/SmallList.h>
+#include <wtf/text/StringHash.h>
 #include <wtf/WeakHashSet.h>
 
 namespace krys::boo::css
@@ -166,7 +166,7 @@ namespace krys::boo::css
 
     // m_faces should hold all the same fonts as the ones inside inside m_facesLookupTable.
     SmallList<Ref<CSSFontFace>> m_faces; // We should investigate moving m_faces to FontFaceSet and making it
-                                      // reference FontFaces. This may clean up the font loading design.
+                                         // reference FontFaces. This may clean up the font loading design.
     HashMap<String, SmallList<Ref<CSSFontFace>>, ASCIICaseInsensitiveHash> m_facesLookupTable;
     HashMap<String, SmallList<Ref<CSSFontFace>>, ASCIICaseInsensitiveHash> m_locallyInstalledFacesLookupTable;
     HashMap<String, FontSelectionHashMap, ASCIICaseInsensitiveHash> m_cache;

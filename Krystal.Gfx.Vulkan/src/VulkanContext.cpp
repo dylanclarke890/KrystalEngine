@@ -418,7 +418,7 @@ namespace krys::Gfx::Vulkan
     {
       return queueIndices;
     }
-    
+
     return std::nullopt;
   }
 
@@ -1303,7 +1303,7 @@ namespace krys::Gfx::Vulkan
   void VulkanContext::Render(ICamera &camera) noexcept
   {
     (void)camera;
-    
+
     vkWaitForFences(_device, 1, &_inFlightFences[_currentFrame], VK_TRUE, UINT64_MAX);
 
     VkResult result =

@@ -71,7 +71,7 @@ namespace krys::boo::css
       case TokenType::Percentage:
         // The spec compares the original text, which isn't kept; fall back to the parsed values.
         return _numericSignChar == other._numericSignChar && _numericValue == other._numericValue
-            && _numericValueType == other._numericValueType;
+               && _numericValueType == other._numericValueType;
       case TokenType::UnicodeRange:
         return _unicodeRangeStart == other._unicodeRangeStart && _unicodeRangeEnd == other._unicodeRangeEnd;
       default: return true;
@@ -81,10 +81,10 @@ namespace krys::boo::css
   void Token::Serialise(CSSOMString &builder, const Token *nextToken,
                         KRYS_MAYBE_UNUSED TokenSerialisationMode mode) const noexcept
   {
-    // This is currently only used for @supports CSSOM. To keep our implementation simple we handle some of the
-    // edge cases incorrectly (see comments below).
-    auto appendCommentIfNeeded = [&](const NextTokenNeedsCommentBuilder &tokensNeedingComment,
-                                     auto... delimitersNeedingComment) noexcept
+    // This is currently only used for @supports CSSOM. To keep our implementation simple we handle some of
+    // the edge cases incorrectly (see comments below).
+    auto appendCommentIfNeeded =
+      [&](const NextTokenNeedsCommentBuilder &tokensNeedingComment, auto... delimitersNeedingComment) noexcept
     {
       if (!nextToken)
       {
@@ -123,14 +123,17 @@ namespace krys::boo::css
         builder.push_back(u8'@');
         SerialiseIdentifier(CSSOMString(IdentCodePoints()), builder);
         appendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl,
-                               TokenType::Number, TokenType::Percentage, TokenType::Dimension, TokenType::CDC},
+                               TokenType::Number, TokenType::Percentage, TokenType::Dimension,
+                               TokenType::CDC},
                               '-');
         break;
       case TokenType::Hash:
         builder.push_back(u8'#');
-        SerialiseIdentifier(CSSOMString(IdentCodePoints()), builder, _hashType == HashTokenType::Unrestricted);
+        SerialiseIdentifier(CSSOMString(IdentCodePoints()), builder,
+                            _hashType == HashTokenType::Unrestricted);
         appendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl,
-                               TokenType::Number, TokenType::Percentage, TokenType::Dimension, TokenType::CDC},
+                               TokenType::Number, TokenType::Percentage, TokenType::Dimension,
+                               TokenType::CDC},
                               '-');
         break;
       case TokenType::Url:
@@ -151,7 +154,8 @@ namespace krys::boo::css
             break;
           case U'@':
             builder.push_back(u8'@');
-            appendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl}, '-');
+            appendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl},
+                                  '-');
             break;
           case U'.':
           case U'+':
@@ -187,19 +191,20 @@ namespace krys::boo::css
         AppendNumber(_numericValue, builder);
         SerialiseIdentifier(CSSOMString(Unit()), builder);
         appendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl,
-                               TokenType::Number, TokenType::Percentage, TokenType::Dimension, TokenType::CDC},
+                               TokenType::Number, TokenType::Percentage, TokenType::Dimension,
+                               TokenType::CDC},
                               '-');
         break;
       case TokenType::UnicodeRange:
       {
         auto range = _unicodeRangeStart == _unicodeRangeEnd
-                     ? std::format("U+{:X}", static_cast<uint32>(_unicodeRangeStart))
-                     : std::format("U+{:X}-{:X}", static_cast<uint32>(_unicodeRangeStart),
-                                   static_cast<uint32>(_unicodeRangeEnd));
+                       ? std::format("U+{:X}", static_cast<uint32>(_unicodeRangeStart))
+                       : std::format("U+{:X}-{:X}", static_cast<uint32>(_unicodeRangeStart),
+                                     static_cast<uint32>(_unicodeRangeEnd));
         AppendASCII(range, builder);
         break;
       }
-      case TokenType::String: SerialiseString(CSSOMString(IdentCodePoints()), builder); break;
+      case TokenType::String:    SerialiseString(CSSOMString(IdentCodePoints()), builder); break;
 
       case TokenType::CDO:       AppendASCII("<!--", builder); break;
       case TokenType::CDC:       AppendASCII("-->", builder); break;
@@ -210,15 +215,15 @@ namespace krys::boo::css
         // newlines), which the tokenizer collapses into one token.
         builder.push_back(u8' ');
         break;
-      case TokenType::Colon:      builder.push_back(u8':'); break;
-      case TokenType::Semicolon:  builder.push_back(u8';'); break;
-      case TokenType::Comma:      builder.push_back(u8','); break;
-      case TokenType::OpenParen:  builder.push_back(u8'('); break;
-      case TokenType::CloseParen: builder.push_back(u8')'); break;
-      case TokenType::OpenSquare: builder.push_back(u8'['); break;
-      case TokenType::CloseSquare: builder.push_back(u8']'); break;
-      case TokenType::OpenCurly:  builder.push_back(u8'{'); break;
-      case TokenType::CloseCurly: builder.push_back(u8'}'); break;
+      case TokenType::Colon:         builder.push_back(u8':'); break;
+      case TokenType::Semicolon:     builder.push_back(u8';'); break;
+      case TokenType::Comma:         builder.push_back(u8','); break;
+      case TokenType::OpenParen:     builder.push_back(u8'('); break;
+      case TokenType::CloseParen:    builder.push_back(u8')'); break;
+      case TokenType::OpenSquare:    builder.push_back(u8'['); break;
+      case TokenType::CloseSquare:   builder.push_back(u8']'); break;
+      case TokenType::OpenCurly:     builder.push_back(u8'{'); break;
+      case TokenType::CloseCurly:    builder.push_back(u8'}'); break;
 
       case TokenType::Uninitialized:
       case TokenType::EndOfFile:     krys_unreachable();

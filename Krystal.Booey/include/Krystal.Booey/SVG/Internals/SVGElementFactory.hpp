@@ -36,7 +36,8 @@ namespace krys::boo::svg
   class SVGElementFactory
   {
   public:
-    KRYS_NODISCARD static RefPtr<SVGElement> TryCreate(dom::Document &document, html::TagName elementName) noexcept
+    KRYS_NODISCARD static RefPtr<SVGElement> TryCreate(dom::Document &document,
+                                                       html::TagName elementName) noexcept
     {
       switch (elementName)
       {

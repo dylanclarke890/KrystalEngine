@@ -7,11 +7,11 @@ namespace krys::boo::css
   class MediaList;
   class ImportRule;
 
-  //namespace MQ
+  // namespace MQ
   //{
-  //  struct MediaQuery;
-  //  using MediaQueryList = SmallList<MediaQuery>;
-  //}
+  //   struct MediaQuery;
+  //   using MediaQueryList = SmallList<MediaQuery>;
+  // }
 
   class CSSImportRule final : public CSSRule
   {
@@ -57,9 +57,9 @@ namespace krys::boo::css
 
     CSSOMString CssTextInternal(const CSSOMString &urlString) const noexcept;
 
-    //const MQ::MediaQueryList &mediaQueries() const noexcept;
+    // const MQ::MediaQueryList &mediaQueries() const noexcept;
 
-    //void setMediaQueries(MQ::MediaQueryList &&) noexcept;
+    // void setMediaQueries(MQ::MediaQueryList &&) noexcept;
   };
 }
 

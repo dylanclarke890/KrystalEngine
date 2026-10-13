@@ -26,10 +26,10 @@
 #pragma once
 
 #include "FontLoadRequest.h"
-#include "TrustedFonts.h"
-#include <JavaScriptCore/ArrayBufferView.h>
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+#include "TrustedFonts.h"
+#include <JavaScriptCore/ArrayBufferView.h>
 
 namespace krys::boo::css
 {
@@ -107,7 +107,7 @@ namespace krys::boo::css
 
     RefPtr<FontCustomPlatformData> loadCustomFont(SharedBuffer &, DownloadableBinaryFontTrustedTypes);
 
-    CSSOMStringAtom m_fontFaceName;                   // Font name for local fonts
+    CSSOMStringAtom m_fontFaceName;              // Font name for local fonts
     WeakRef<CSSFontFace> m_owningCSSFontFace;    // Our owning font face.
     WeakPtr<CSSFontSelector> m_fontSelector;     // For remote fonts, to orchestrate loading.
     const RefPtr<FontLoadRequest> m_fontRequest; // Also for remote fonts, a pointer to the resource request.

@@ -1,12 +1,12 @@
 ﻿#include "Krystal.Core/Serialisation/Builtins.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "catch2/matchers/catch_matchers_floating_point.hpp"
 #include "Krystal.Core/IO/Streams/MemoryStream.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Serialisation/Access.hpp"
 #include "Krystal.Core/Serialisation/Archives/BinaryArchive.hpp"
 #include "Krystal.Core/Serialisation/Archives/JsonArchive.hpp"
 #include "Krystal.Core/Serialisation/Archives/XmlArchive.hpp"
-#include "catch2/catch_test_macros.hpp"
-#include "catch2/matchers/catch_matchers_floating_point.hpp"
 
 namespace krys::tests
 {

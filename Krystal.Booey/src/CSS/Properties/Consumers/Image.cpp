@@ -440,7 +440,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
   template <ValueId Name>
   KRYS_NODISCARD static RefPtr<Value> consumePrefixedLinearGradient(TokenRange &tokens,
-                                                                       PropertyParserState &state)
+                                                                    PropertyParserState &state)
   {
     // https://compat.spec.whatwg.org/#css-gradients-webkit-linear-gradient/ states that
     // -webkit-linear-gradient() and -webkit-repeating-linear-gradient() must be "treated as an alias of
@@ -538,7 +538,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
   template <ValueId Name>
   KRYS_NODISCARD static RefPtr<Value> consumePrefixedRadialGradient(TokenRange &tokens,
-                                                                       PropertyParserState &state)
+                                                                    PropertyParserState &state)
   {
     // https://compat.spec.whatwg.org/#css-gradients-webkit-radial-gradient/ states that
     // -webkit-radial-gradient() and -webkit-repeating-radial-gradient() must be "treated as an alias of
@@ -1303,7 +1303,7 @@ namespace krys::boo::css::PropertyParserHelpers
   }
 
   KRYS_NODISCARD static RefPtr<Value> consumeImageSet(TokenRange &args, PropertyParserState &state,
-                                                         OptionSet<AllowedImageType> allowedImageTypes)
+                                                      OptionSet<AllowedImageType> allowedImageTypes)
   {
     CSSValueListBuilder imageSet;
     do
@@ -1321,7 +1321,7 @@ namespace krys::boo::css::PropertyParserHelpers
   // https://drafts.csswg.org/css-images-4/#image-values
 
   RefPtr<Value> consumeImage(TokenRange &tokens, PropertyParserState &state,
-                                OptionSet<AllowedImageType> allowedImageTypes)
+                             OptionSet<AllowedImageType> allowedImageTypes)
   {
     if (tokens.Peek().Type() == StringToken && allowedImageTypes.contains(AllowedImageType::RawStringAsURL))
     {
@@ -1440,7 +1440,7 @@ namespace krys::boo::css::PropertyParserHelpers
   // MARK: <image> | none
 
   RefPtr<Value> ConsumeImageOrNone(TokenRange &tokens, PropertyParserState &state,
-                                      AllowedImageType allowedImageTypes) noexcept
+                                   AllowedImageType allowedImageTypes) noexcept
   {
     if (tokens.Peek().ValueId() == ValueId::None)
     {

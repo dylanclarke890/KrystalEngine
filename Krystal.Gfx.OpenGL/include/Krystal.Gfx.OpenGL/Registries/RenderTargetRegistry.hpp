@@ -1,11 +1,11 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ImageRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ImageViewRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/RenderTarget.hpp"
 #include "Krystal.Gfx/Registries/IRenderTargetRegistry.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
-#include "Krystal.Core/Numeric.hpp"
 #include <cassert>
 
 namespace krys::Gfx::OpenGL

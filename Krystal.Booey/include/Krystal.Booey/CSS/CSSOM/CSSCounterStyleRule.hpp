@@ -1,10 +1,10 @@
 #pragma once
 
-#include <WebCore/CSSCounterStyle.h>
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
+#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include <WebCore/CSSCounterStyle.h>
 #include <WebCore/StyleProperties.h>
 #include <WebCore/StyleRule.h>
-#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 
 namespace krys::boo::css
 {
@@ -92,7 +92,8 @@ namespace krys::boo::css
   public:
     virtual ~CSSCounterStyleRule() noexcept;
 
-    KRYS_NODISCARD static Ref<CSSCounterStyleRule> Create(CounterStyleRule &rule, CSSStyleSheet *sheet) noexcept;
+    KRYS_NODISCARD static Ref<CSSCounterStyleRule> Create(CounterStyleRule &rule,
+                                                          CSSStyleSheet *sheet) noexcept;
 
     String cssText() const final;
     void reattach(StyleRuleBase &) final;

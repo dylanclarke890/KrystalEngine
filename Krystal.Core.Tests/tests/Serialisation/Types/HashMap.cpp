@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Core/Serialisation/Types/HashMap.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Core/IO/Streams/MemoryStream.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Serialisation/Archives/BinaryArchive.hpp"
@@ -6,7 +7,6 @@
 #include "Krystal.Core/Serialisation/Archives/XmlArchive.hpp"
 #include "Krystal.Core/Serialisation/Builtins.hpp"
 #include "Krystal.Core/Serialisation/Types/List.hpp"
-#include "catch2/catch_test_macros.hpp"
 
 namespace krys::tests
 {

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/HTML/HTMLMediaElement.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
+#include "Krystal.Booey/HTML/HTMLMediaElement.hpp"
 
 namespace krys::boo::html
 {

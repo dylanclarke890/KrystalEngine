@@ -171,7 +171,8 @@ namespace krys::boo::css
   // Variant<css::Percentage<>, css::Number<>, keywords::None, css::Symbol>
   template <typename Descriptor, size_t Index>
   using GetCSSColorParseTypeWithCalcAndSymbolsComponentResult =
-    brigand::wrap<GetCSSColorParseTypeWithCalcAndSymbolsComponentTypeList<Descriptor, Index>, VariantOrSingle>;
+    brigand::wrap<GetCSSColorParseTypeWithCalcAndSymbolsComponentTypeList<Descriptor, Index>,
+                  VariantOrSingle>;
 
   // e.g. for CSSColorParseTypeWithCalcAndSymbols<ColorRGBFunction<T>> ->
   // std::tuple<Variant<css::Percentage<>, css::Number<>, keywords::None, css::Symbol>, ...>

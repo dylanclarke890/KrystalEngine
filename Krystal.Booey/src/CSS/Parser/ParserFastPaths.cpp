@@ -133,7 +133,8 @@ namespace krys::boo::css
       if (characters.size() >= 4)
       {
         auto size = characters.size();
-        if (text::IsASCIICaselessEqual(characters[size - 3], 'd') && text::IsASCIICaselessEqual(characters[size - 2], 'e')
+        if (text::IsASCIICaselessEqual(characters[size - 3], 'd')
+            && text::IsASCIICaselessEqual(characters[size - 2], 'e')
             && text::IsASCIICaselessEqual(characters[size - 1], 'g'))
         {
           characters.remove_suffix(3);
@@ -427,7 +428,8 @@ namespace krys::boo::css
         return false;
       }
       return characters[4] == u8'(' && text::IsASCIICaselessEqual(characters[0], 'r')
-             && text::IsASCIICaselessEqual(characters[1], 'g') && text::IsASCIICaselessEqual(characters[2], 'b')
+             && text::IsASCIICaselessEqual(characters[1], 'g')
+             && text::IsASCIICaselessEqual(characters[2], 'b')
              && text::IsASCIICaselessEqual(characters[3], 'a');
     }
 
@@ -438,7 +440,8 @@ namespace krys::boo::css
         return false;
       }
       return characters[3] == u8'(' && text::IsASCIICaselessEqual(characters[0], 'r')
-             && text::IsASCIICaselessEqual(characters[1], 'g') && text::IsASCIICaselessEqual(characters[2], 'b');
+             && text::IsASCIICaselessEqual(characters[1], 'g')
+             && text::IsASCIICaselessEqual(characters[2], 'b');
     }
 
     KRYS_NODISCARD bool MightBeHSLA(CSSOMStringView characters) noexcept
@@ -448,7 +451,8 @@ namespace krys::boo::css
         return false;
       }
       return characters[4] == u8'(' && text::IsASCIICaselessEqual(characters[0], 'h')
-             && text::IsASCIICaselessEqual(characters[1], 's') && text::IsASCIICaselessEqual(characters[2], 'l')
+             && text::IsASCIICaselessEqual(characters[1], 's')
+             && text::IsASCIICaselessEqual(characters[2], 'l')
              && text::IsASCIICaselessEqual(characters[3], 'a');
     }
 
@@ -459,7 +463,8 @@ namespace krys::boo::css
         return false;
       }
       return characters[3] == u8'(' && text::IsASCIICaselessEqual(characters[0], 'h')
-             && text::IsASCIICaselessEqual(characters[1], 's') && text::IsASCIICaselessEqual(characters[2], 'l');
+             && text::IsASCIICaselessEqual(characters[1], 's')
+             && text::IsASCIICaselessEqual(characters[2], 'l');
     }
 
     KRYS_NODISCARD Maybe<SRGBA<uint8>> FinishParsingHexColor(uint32 value, size_t length) noexcept

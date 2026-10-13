@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
-#include "Krystal.Core/Hash.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Core/Hash.hpp"
 
 namespace krys::boo::css::tests
 {

@@ -26,11 +26,11 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
-#include "Krystal.Booey/Style/TreeResolutionState.hpp"
-#include "Krystal.Booey/Style/ForVisitedLink.hpp"
 #include "FontTaggedSettings.h"
+#include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Style/ForVisitedLink.hpp"
+#include "Krystal.Booey/Style/TreeResolutionState.hpp"
 #include "PropertyCascade.h"
 #include "RenderStyle.h"
 #include "RuleSet.h"

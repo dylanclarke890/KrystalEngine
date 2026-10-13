@@ -50,7 +50,7 @@ namespace krys::boo::html
       return lhs.Value != rhs.Value;
     }
 
-    friend bool operator<=(const MicroParserResult &lhs, const T& rhs) noexcept
+    friend bool operator<=(const MicroParserResult &lhs, const T &rhs) noexcept
     {
       return lhs.Value <= rhs;
     }

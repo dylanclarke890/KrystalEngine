@@ -34,7 +34,7 @@ namespace krys::boo::html
 
     // TODO(HTMLTableCellElement, HTML): Implement CellIndex().
     /// @see https://html.spec.whatwg.org/#dom-tdth-cellindex
-    //KRYS_NODISCARD int32 CellIndex() const noexcept;
+    // KRYS_NODISCARD int32 CellIndex() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tdth-scope
     KRYS_NODISCARD dom::DOMString Scope() const noexcept;

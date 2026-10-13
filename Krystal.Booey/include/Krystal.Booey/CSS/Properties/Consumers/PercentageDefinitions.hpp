@@ -6,8 +6,8 @@ namespace krys::boo::css
 {
   struct PercentageValidator
   {
-    KRYS_NODISCARD constexpr static Maybe<PercentageUnit>
-      Validate(UnitType unitType, PropertyParserState &, PropertyParserOptions) noexcept
+    KRYS_NODISCARD constexpr static Maybe<PercentageUnit> Validate(UnitType unitType, PropertyParserState &,
+                                                                   PropertyParserOptions) noexcept
     {
       return UnitTraits<PercentageUnit>::Validate(unitType);
     }
@@ -23,6 +23,7 @@ namespace krys::boo::css
   struct ConsumerDefinition<Percentage<R, V>>
   {
     using FunctionToken = FunctionConsumerForCalcValues<Percentage<R, V>>;
-    using PercentageToken = PercentageConsumer<Percentage<R, V>, PercentageValidator, PercentageUnit::Percentage>;
+    using PercentageToken =
+      PercentageConsumer<Percentage<R, V>, PercentageValidator, PercentageUnit::Percentage>;
   };
 }

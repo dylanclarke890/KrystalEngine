@@ -1,13 +1,13 @@
 ﻿#include "Krystal.Booey/DOM/Range.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
 #include "Krystal.Booey/DOM/Comment.hpp"
-#include "Krystal.Booey/DOM/DocumentType.hpp"
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/DocumentType.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/NodeList.hpp"
 #include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
-#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::dom::tests
 {

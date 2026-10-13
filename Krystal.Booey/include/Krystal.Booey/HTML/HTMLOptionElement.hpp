@@ -15,7 +15,7 @@ namespace krys::boo::html
 
   private:
     /// @see https://html.spec.whatwg.org/#cached-nearest-ancestor-select-element
-    HTMLSelectElement * _cachedNearestSelectElement {nullptr};
+    HTMLSelectElement *_cachedNearestSelectElement {nullptr};
 
     /// @see https://html.spec.whatwg.org/#concept-option-selectedness
     bool _selectedness {false};

@@ -692,7 +692,8 @@ namespace krys::boo::css
       return AdoptRef(*new ContainerRule(*this));
     }
 
-    KRYS_NODISCARD static Ref<ContainerRule> Create(cq::ContainerQuery &&query, SmallList<Ref<Rule>> &&rules) noexcept;
+    KRYS_NODISCARD static Ref<ContainerRule> Create(cq::ContainerQuery &&query,
+                                                    SmallList<Ref<Rule>> &&rules) noexcept;
 
     KRYS_NODISCARD const cq::ContainerQuery &containerQuery() const noexcept
     {

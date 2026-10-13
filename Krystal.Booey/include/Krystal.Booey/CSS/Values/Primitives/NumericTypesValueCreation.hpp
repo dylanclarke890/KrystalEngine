@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 
 namespace krys::boo::css
 {

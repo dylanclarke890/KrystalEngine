@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/SVG.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/LengthPercentageDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/NumberDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
@@ -60,7 +60,7 @@ namespace krys::boo::css::PropertyParserHelpers
       case ValueId::Stroke:
       {
         paintOrderList.push_back(firstPaintOrderType == ValueId::Fill ? krys::move(fill)
-                                                                         : krys::move(stroke));
+                                                                      : krys::move(stroke));
         if (paintTypeList.size() > 1uz && paintTypeList[1] == ValueId::Markers)
         {
           paintOrderList.push_back(krys::move(markers));

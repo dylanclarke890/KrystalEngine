@@ -17,8 +17,7 @@ namespace krys::boo::css
                       [&](auto &&value) -> ResultType { return Base::Resolve(krys::move(value), options); });
     }
 
-    KRYS_NODISCARD static ResultType Resolve(T &&consumeResult,
-                                             PropertyParserOptions options = {}) noexcept
+    KRYS_NODISCARD static ResultType Resolve(T &&consumeResult, PropertyParserOptions options = {}) noexcept
     requires(sizeof...(Ts) == 0)
     {
       return Base::Resolve(krys::move(consumeResult), options);

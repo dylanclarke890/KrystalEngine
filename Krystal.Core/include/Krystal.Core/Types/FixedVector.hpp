@@ -1,8 +1,8 @@
 #pragma once
 
 #include <algorithm>
-#include <cstddef>
 #include <concepts>
+#include <cstddef>
 #include <functional>
 #include <initializer_list>
 #include <iterator>

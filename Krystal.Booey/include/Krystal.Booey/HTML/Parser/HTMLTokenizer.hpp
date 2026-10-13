@@ -378,9 +378,9 @@ namespace krys::boo::html
 #define BEGIN_STATE(stateName)                                                                               \
   case TokenizerState::stateName:                                                                            \
   stateName:                                                                                                 \
-    {                                                                                                        \
-      constexpr auto currentState = TokenizerState::stateName;                                               \
-      (void)currentState;
+  {                                                                                                          \
+    constexpr auto currentState = TokenizerState::stateName;                                                 \
+    (void)currentState;
 
 #define END_STATE()                                                                                          \
   krys_unreachable();                                                                                        \
@@ -503,7 +503,7 @@ namespace krys::boo::html
 #pragma endregion
 
 #pragma warning(push)
-#pragma warning(disable : 4702) // Disable unreachable code warning
+#pragma warning(disable : 4'702) // Disable unreachable code warning
 
     /// @see https://html.spec.whatwg.org/#tokenization
     KRYS_NODISCARD bool StepTokenizationStateMachine() noexcept

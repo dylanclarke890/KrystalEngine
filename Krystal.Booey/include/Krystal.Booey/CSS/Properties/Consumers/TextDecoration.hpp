@@ -12,7 +12,6 @@ namespace krys::boo::css
   {
     // MARK: <'text-shadow'> consuming
     // https://drafts.csswg.org/css-text-decor-3/#propdef-text-shadow
-    KRYS_NODISCARD RefPtr<Value> ConsumeTextShadow(TokenRange &tokens,
-                                                      PropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumeTextShadow(TokenRange &tokens, PropertyParserState &state) noexcept;
   }
 }

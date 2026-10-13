@@ -27,8 +27,8 @@
 
 #include "CSSCustomPropertySyntax.h"
 #include "CSSVariableData.h"
-#include "StyleCustomProperty.h"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "StyleCustomProperty.h"
 
 namespace krys::boo::css
 {

@@ -1,11 +1,4 @@
 ﻿#include "Krystal.Booey/CSS/Parser/Parser.hpp"
-#include "Krystal.Booey/CSS/CSSStyleProperties.hpp"
-#include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
-#include "Krystal.Booey/CSS/MediaList.hpp"
-#include "Krystal.Booey/CSS/Parser/AtRuleType.hpp"
-#include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
-#include "Krystal.Booey/CSS/Properties/InternalStyleProperties.hpp"
-#include "Krystal.Booey/CSS/Properties/PropertyParser.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSFunctionDeclarations.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSGroupingRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSImportRule.hpp"
@@ -14,6 +7,13 @@
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSRuleList.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleRule.hpp"
+#include "Krystal.Booey/CSS/CSSStyleProperties.hpp"
+#include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/MediaList.hpp"
+#include "Krystal.Booey/CSS/Parser/AtRuleType.hpp"
+#include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
+#include "Krystal.Booey/CSS/Properties/InternalStyleProperties.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParser.hpp"
 #include "Krystal.Booey/CSS/Selectors/Selector.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
@@ -103,10 +103,10 @@ namespace krys::boo::css
 
     assert(current <= AllowedRules::Regular);
 
-    //if (Is<CSSCharsetRule>(ref))
+    // if (Is<CSSCharsetRule>(ref))
     //{
-    //  return AllowedRules::Import;
-    //}
+    //   return AllowedRules::Import;
+    // }
 
     if (Is<CSSImportRule>(ref))
     {

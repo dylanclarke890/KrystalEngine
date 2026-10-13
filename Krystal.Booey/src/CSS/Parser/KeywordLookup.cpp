@@ -31,7 +31,7 @@ namespace krys::boo::css
     KRYS_NODISCARD bool IsAppleLegacyValueKeyword(CSSOMStringView characters) noexcept
     {
       return characters.substr(1).starts_with(u8"apple-") && !characters.substr(7).starts_with(u8"system")
-          && !characters.substr(7).starts_with(u8"pay") && !characters.substr(7).starts_with(u8"wireless");
+             && !characters.substr(7).starts_with(u8"pay") && !characters.substr(7).starts_with(u8"wireless");
     }
   }
 

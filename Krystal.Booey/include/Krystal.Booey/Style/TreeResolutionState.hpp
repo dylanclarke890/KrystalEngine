@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
-#include "Krystal.Core/Types/CheckedPtr.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
+#include "Krystal.Core/Types/CheckedPtr.hpp"
 
 namespace krys::boo::style
 {
@@ -10,7 +10,7 @@ namespace krys::boo::style
   struct TreeResolutionState : public CanMakeCheckedPtr<TreeResolutionState>
   {
     KRYS_STRUCT_OVERRIDE_DELETE_FOR_CHECKED_PTR(TreeResolutionState);
-    
+
     AnchorPositionedStates anchorPositionedStates;
   };
 }

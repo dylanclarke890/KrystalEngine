@@ -13,7 +13,6 @@ namespace krys::boo::css
     /// @grammar <'margin-trim'>
     /// @see https://drafts.csswg.org/css-box/#margin-trim
     // https://drafts.csswg.org/css-box/#margin-trim
-    KRYS_NODISCARD RefPtr<Value> ConsumeMarginTrim(TokenRange &tokens,
-                                                      PropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumeMarginTrim(TokenRange &tokens, PropertyParserState &state) noexcept;
   }
 }

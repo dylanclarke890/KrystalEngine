@@ -396,7 +396,7 @@ namespace krys::tests
   TEST_CASE("MapEach(Matrix)", "[Matrix][MapEach]")
   {
 #define DO_TEST(MatType)                                                                                     \
-  SECTION(KRYS_STRINGIFY(MatType))                                                                                \
+  SECTION(KRYS_STRINGIFY(MatType))                                                                           \
   {                                                                                                          \
     constexpr MatType mat(1);                                                                                \
     MatType result = MapEach(mat, [](auto v) { return v + 1; });                                             \
@@ -418,7 +418,7 @@ namespace krys::tests
   TEST_CASE("ZipTwo(Matrix)", "[Matrix][Zip]")
   {
 #define DO_TEST(MatType)                                                                                     \
-  SECTION(KRYS_STRINGIFY(MatType))                                                                                \
+  SECTION(KRYS_STRINGIFY(MatType))                                                                           \
   {                                                                                                          \
     constexpr MatType a(1);                                                                                  \
     constexpr MatType b(1);                                                                                  \
@@ -441,7 +441,7 @@ namespace krys::tests
   TEST_CASE("ZipThree(Matrix)", "[Matrix][Zip]")
   {
 #define DO_TEST(MatType)                                                                                     \
-  SECTION(KRYS_STRINGIFY(MatType))                                                                                \
+  SECTION(KRYS_STRINGIFY(MatType))                                                                           \
   {                                                                                                          \
     constexpr MatType a(1);                                                                                  \
     constexpr MatType b(1);                                                                                  \

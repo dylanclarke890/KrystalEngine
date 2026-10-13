@@ -72,7 +72,8 @@ namespace krys::boo::css
     }
   }
 
-  void SerialiseIdentifier(const CSSOMString &identifier, CSSOMString &appendTo, bool skipStartChecks) noexcept
+  void SerialiseIdentifier(const CSSOMString &identifier, CSSOMString &appendTo,
+                           bool skipStartChecks) noexcept
   {
     bool isFirst = !skipStartChecks;
     bool isSecond = false;

@@ -53,7 +53,7 @@ namespace krys::boo::css
 
     template <typename ConsumeSelector>
     KRYS_NODISCARD MutableSelectorList ConsumeSelectorList(TokenRange &tokens,
-                                                              ConsumeSelector &&consumeSelector) noexcept;
+                                                           ConsumeSelector &&consumeSelector) noexcept;
 
     KRYS_NODISCARD MutableSelectorList ConsumeComplexSelectorList(TokenRange &tokens) noexcept;
 
@@ -67,8 +67,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD MutableSelectorList ConsumeComplexForgivingSelectorList(TokenRange &tokens) noexcept;
 
-    KRYS_NODISCARD MutableSelectorList
-      ConsumeNestedComplexForgivingSelectorList(TokenRange &tokens) noexcept;
+    KRYS_NODISCARD MutableSelectorList ConsumeNestedComplexForgivingSelectorList(TokenRange &tokens) noexcept;
 
 #pragma endregion
 

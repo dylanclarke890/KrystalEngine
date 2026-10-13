@@ -14,7 +14,7 @@ namespace krys
 
   template <typename T>
   KRYS_NODISCARD constexpr T Gauss(const Vector2<T> &coord, const Vector2<T> &expected,
-                               const Vector2<T> &stdDeviation) noexcept
+                                   const Vector2<T> &stdDeviation) noexcept
   {
     const Vector2<T> squared =
       ((coord - expected) * (coord - expected)) / (T(2) * stdDeviation * stdDeviation);

@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
-#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::dom::tests
 {

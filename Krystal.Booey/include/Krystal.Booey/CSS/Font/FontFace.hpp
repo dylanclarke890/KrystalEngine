@@ -34,10 +34,10 @@
 #include <memory>
 #include <wtf/AbstractRefCountedAndCanMakeWeakPtr.h>
 
+#include "Krystal.Core/Types/WeakPtr.hpp"
 #include <wtf/HashSet.h>
 #include <wtf/RefCountedAndCanMakeWeakPtr.h>
 #include <wtf/WeakHashSet.h>
-#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo::css
 {

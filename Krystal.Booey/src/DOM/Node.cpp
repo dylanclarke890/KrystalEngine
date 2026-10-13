@@ -369,7 +369,7 @@ namespace krys::boo::dom
   EventTarget *Node::GetParent(Event &event) const noexcept
   {
     (void)event;
-    
+
     if (SlotAlgorithms::IsAssigned(*this))
     {
       return SlotAlgorithms::GetAssignedSlot(*this);

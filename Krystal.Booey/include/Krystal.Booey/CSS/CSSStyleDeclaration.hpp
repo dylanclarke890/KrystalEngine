@@ -63,7 +63,6 @@ namespace krys::boo::css
     KRYS_NODISCARD virtual CSSOMString
       GetPropertyPriority(const CSSOMString &propertyName) const noexcept = 0;
 
-
     /// @see https://drafts.csswg.org/cssom/#dom-cssstyledeclaration-setproperty
     KRYS_NODISCARD virtual dom::ExceptionOr<void> SetProperty(const CSSOMString &propertyName,
                                                               const CSSOMString &value,

@@ -2,9 +2,9 @@
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
-#include "Krystal.Booey/CSS/Values/ValueId.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
@@ -35,8 +35,10 @@ namespace krys::boo::css::PropertyParserHelpers
     }
     else
     {
-      while (auto ident = ConsumeIdentRaw<ValueId::BlockStart, ValueId::BlockEnd,
-                                          ValueId::InlineStart, ValueId::InlineEnd>(tokens))
+      while (
+        auto ident =
+          ConsumeIdentRaw<ValueId::BlockStart, ValueId::BlockEnd, ValueId::InlineStart, ValueId::InlineEnd>(
+            tokens))
       {
         if (std::ranges::contains(idents, *ident))
         {

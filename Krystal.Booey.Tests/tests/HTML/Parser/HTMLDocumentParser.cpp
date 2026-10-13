@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/TestParserUtils.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
@@ -19,7 +20,6 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
-#include "catch2/catch_test_macros.hpp"
 #include <filesystem>
 
 namespace krys::boo::html::tests

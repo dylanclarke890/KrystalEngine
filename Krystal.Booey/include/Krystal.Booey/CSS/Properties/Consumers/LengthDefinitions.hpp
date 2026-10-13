@@ -6,8 +6,8 @@ namespace krys::boo::css
 {
   struct LengthValidator
   {
-    KRYS_NODISCARD constexpr static Maybe<LengthUnit>
-      Validate(UnitType unitType, PropertyParserState &state, PropertyParserOptions options) noexcept
+    KRYS_NODISCARD constexpr static Maybe<LengthUnit> Validate(UnitType unitType, PropertyParserState &state,
+                                                               PropertyParserOptions options) noexcept
     {
       (void)state;
       (void)options;

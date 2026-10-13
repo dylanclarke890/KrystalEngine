@@ -14,7 +14,7 @@ namespace krys::boo::css
   {
   public:
     MediaQueryParserContext() noexcept;
-    
+
     MediaQueryParserContext(const dom::Document &document) noexcept;
 
     MediaQueryParserContext(const ParserContext &o) noexcept;

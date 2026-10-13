@@ -29,8 +29,8 @@
 #include "CSSFontFace.h"
 #include "CSSPropertyNames.h"
 #include "IDLTypes.h"
-#include <wtf/UniqueRef.h>
 #include "Krystal.Core/Types/WeakPtr.hpp"
+#include <wtf/UniqueRef.h>
 
 namespace JSC
 {

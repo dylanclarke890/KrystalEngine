@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
 {
@@ -17,12 +17,11 @@ namespace krys::boo::css
     // https://drafts.fxtf.org/filter-effects/#FilterProperty
 
     // MARK: <'filter'> consuming (Value)
-    KRYS_NODISCARD RefPtr<Value> ConsumeFilter(TokenRange &tokens,
-                                                  PropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumeFilter(TokenRange &tokens, PropertyParserState &state) noexcept;
 
     // MARK: <'-apple-color-filter'> consuming (Value)
     KRYS_NODISCARD RefPtr<Value> ConsumeAppleColorFilter(TokenRange &tokens,
-                                                            PropertyParserState &state) noexcept;
+                                                         PropertyParserState &state) noexcept;
 
     // MARK: <'filter'> consuming (unresolved)
     KRYS_NODISCARD Maybe<Filter> ConsumeUnresolvedFilter(TokenRange &tokens,

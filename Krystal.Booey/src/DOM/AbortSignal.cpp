@@ -16,7 +16,7 @@ namespace krys::boo::dom
   {
     (void)milliseconds;
     krys_not_implemented();
-    
+
     // auto signal = CreateRef<AbortSignal>();
     // SPEC-VIOLATION(DOM): global objects not currently supported.
     // TODO(impl): ABORT - timeout abort signal. We don't have task queues or timers yet.

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
 {
@@ -18,11 +18,11 @@ namespace krys::boo::css
     // https://drafts.csswg.org/css-easing/#typedef-easing-function
 
     // MARK: <easing-function> consuming (unresolved)
-    KRYS_NODISCARD Maybe<EasingFunction>
-      ConsumeUnresolvedEasingFunction(TokenRange &tokens, PropertyParserState &state) noexcept;
+    KRYS_NODISCARD Maybe<EasingFunction> ConsumeUnresolvedEasingFunction(TokenRange &tokens,
+                                                                         PropertyParserState &state) noexcept;
 
     // MARK: <easing-function> consuming (Value)
     KRYS_NODISCARD RefPtr<Value> ConsumeEasingFunction(TokenRange &tokens,
-                                                          PropertyParserState &state) noexcept;
+                                                       PropertyParserState &state) noexcept;
   }
 }

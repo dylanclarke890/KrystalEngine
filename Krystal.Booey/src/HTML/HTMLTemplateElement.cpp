@@ -72,8 +72,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLTemplateElement::ShadowRootCustomElementRegistry() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"shadowrootcustomelementregistry")
-      .value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"shadowrootcustomelementregistry").value_or(u8"");
   }
 
   void HTMLTemplateElement::ShadowRootCustomElementRegistry(dom::DOMString &&value) noexcept

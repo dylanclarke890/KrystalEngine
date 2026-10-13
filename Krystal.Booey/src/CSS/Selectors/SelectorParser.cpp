@@ -5,17 +5,16 @@
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/MediaList.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
-#include "Krystal.Booey/CSS/Selectors/Selector.hpp"
 #include "Krystal.Booey/CSS/Selectors/MutableSelector.hpp"
+#include "Krystal.Booey/CSS/Selectors/Selector.hpp"
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
 namespace krys::boo::css
 {
-  Maybe<SelectorList>
-    SelectorParser::ParseSelector(CSSOMString &&input, const SelectorParserContext &context,
-                                     StyleSheetContents *stylesheet,
-                                     Maybe<NestedParserContextType> nestedContext) noexcept
+  Maybe<SelectorList> SelectorParser::ParseSelector(CSSOMString &&input, const SelectorParserContext &context,
+                                                    StyleSheetContents *stylesheet,
+                                                    Maybe<NestedParserContextType> nestedContext) noexcept
   {
     InputStream inputStream(krys::move(input));
     Tokenizer tokenizer(inputStream);
@@ -26,10 +25,9 @@ namespace krys::boo::css
     return ParseSelector(tokenizer.Tokens(), context, stylesheet, nestedContext);
   }
 
-  Maybe<SelectorList>
-    SelectorParser::ParseSelector(TokenRange tokens, const SelectorParserContext &context,
-                                     StyleSheetContents *stylesheet,
-                                     Maybe<NestedParserContextType> nestedContext) noexcept
+  Maybe<SelectorList> SelectorParser::ParseSelector(TokenRange tokens, const SelectorParserContext &context,
+                                                    StyleSheetContents *stylesheet,
+                                                    Maybe<NestedParserContextType> nestedContext) noexcept
   {
     auto result = ParseMutableSelectorList(tokens, context, stylesheet, nestedContext,
                                            IsForgivingSelectorList(false), DisallowPseudoElements(false));
@@ -82,7 +80,7 @@ namespace krys::boo::css
 
   template <typename ConsumeSelector>
   MutableSelectorList SelectorParser::ConsumeSelectorList(TokenRange &tokens,
-                                                                ConsumeSelector &&consumeSelector) noexcept
+                                                          ConsumeSelector &&consumeSelector) noexcept
   {
     MutableSelectorList selectors;
     auto selector = consumeSelector(tokens);
@@ -127,9 +125,8 @@ namespace krys::boo::css
   }
 
   template <typename ConsumeSelector>
-  MutableSelectorList
-    SelectorParser::ConsumeForgivingSelectorList(TokenRange &tokens,
-                                                    ConsumeSelector &&consumeSelector) noexcept
+  MutableSelectorList SelectorParser::ConsumeForgivingSelectorList(TokenRange &tokens,
+                                                                   ConsumeSelector &&consumeSelector) noexcept
   {
     MutableSelectorList selectors;
 
@@ -196,8 +193,7 @@ namespace krys::boo::css
                                         [&](TokenRange &tokens) { return ConsumeComplexSelector(tokens); });
   }
 
-  MutableSelectorList
-    SelectorParser::ConsumeNestedComplexForgivingSelectorList(TokenRange &tokens) noexcept
+  MutableSelectorList SelectorParser::ConsumeNestedComplexForgivingSelectorList(TokenRange &tokens) noexcept
   {
     return ConsumeForgivingSelectorList(tokens, [&](TokenRange &tokens)
                                         { return ConsumeNestedComplexSelector(tokens); });
@@ -244,7 +240,7 @@ namespace krys::boo::css
   }
 
   bool SelectorParser::ConsumeName(TokenRange &tokens, CSSOMStringAtom &name,
-                                      CSSOMStringAtom &namespacePrefix) noexcept
+                                   CSSOMStringAtom &namespacePrefix) noexcept
   {
     const Token &firstToken = tokens.Peek();
     if (firstToken.Type() == TokenType::Ident)
@@ -616,8 +612,8 @@ namespace krys::boo::css
   }
 
   Maybe<bool> SelectorParser::PrependTypeSelectorIfNeeded(const CSSOMStringAtom &namespacePrefix,
-                                                             const CSSOMStringAtom &elementName,
-                                                             MutableSelector &compoundSelector) noexcept
+                                                          const CSSOMStringAtom &elementName,
+                                                          MutableSelector &compoundSelector) noexcept
   {
     bool isShadowDOM = compoundSelector.NeedsImplicitShadowCombinatorForMatching();
 

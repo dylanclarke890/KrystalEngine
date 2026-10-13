@@ -28,7 +28,8 @@ namespace krys::boo::css
     TokenType _type : BitCount<TokenType>() {TokenType::Uninitialized};
     BlockTokenType _blockType : BitCount<BlockTokenType>() {BlockTokenType::None};
     HashTokenType _hashType : BitCount<HashTokenType>() {HashTokenType::Unrestricted};
-    css::NumericValueType _numericValueType : BitCount<css::NumericValueType>() {css::NumericValueType::Integer};
+    css::NumericValueType _numericValueType
+      : BitCount<css::NumericValueType>() {css::NumericValueType::Integer};
     NumericSignChar _numericSignChar : BitCount<NumericSignChar>() {NumericSignChar::Missing};
     double _numericValue {0.0};
     char32 _delimiter {0};
@@ -54,7 +55,8 @@ namespace krys::boo::css
       AppendDataInternal(utf32_stringview(&codePoint, 1uz));
     }
 
-    Token(TokenType type, utf32_stringview codePoints, BlockTokenType blockType = BlockTokenType::None) noexcept
+    Token(TokenType type, utf32_stringview codePoints,
+          BlockTokenType blockType = BlockTokenType::None) noexcept
         : _type(type), _blockType(blockType)
     {
       krys_debug_assert(_type == TokenType::Ident || _type == TokenType::Function || _type == TokenType::Url
@@ -99,8 +101,9 @@ namespace krys::boo::css
 
     KRYS_NODISCARD utf8_stringview IdentCodePoints() const noexcept
     {
-      krys_debug_assert(_type == TokenType::Ident || _type == TokenType::Function || _type == TokenType::AtKeyword
-                        || _type == TokenType::Hash || _type == TokenType::String || _type == TokenType::Url
+      krys_debug_assert(_type == TokenType::Ident || _type == TokenType::Function
+                        || _type == TokenType::AtKeyword || _type == TokenType::Hash
+                        || _type == TokenType::String || _type == TokenType::Url
                         || _type == TokenType::Delim);
 
       return utf8_stringview {_codePoints.data(), _codePoints.size()};
@@ -108,8 +111,9 @@ namespace krys::boo::css
 
     void IdentCodePoints(utf32_stringview codePoints) noexcept
     {
-      krys_debug_assert(_type == TokenType::Ident || _type == TokenType::Function || _type == TokenType::AtKeyword
-                        || _type == TokenType::Hash || _type == TokenType::String || _type == TokenType::Url
+      krys_debug_assert(_type == TokenType::Ident || _type == TokenType::Function
+                        || _type == TokenType::AtKeyword || _type == TokenType::Hash
+                        || _type == TokenType::String || _type == TokenType::Url
                         || _type == TokenType::Delim);
 
       AppendDataInternal(codePoints);

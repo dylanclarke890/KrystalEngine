@@ -109,11 +109,11 @@ namespace
   }
 }
 
+#include "Krystal.Core/Detection/OS.hpp"
 #include "Krystal.Gfx.OpenGL/Context.hpp"
 #include "Krystal.Gfx.OpenGL/ContextImpl/Win32.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/wgl.hpp"
-#include "Krystal.Core/Detection/OS.hpp"
 
 namespace krys::Gfx::OpenGL
 {

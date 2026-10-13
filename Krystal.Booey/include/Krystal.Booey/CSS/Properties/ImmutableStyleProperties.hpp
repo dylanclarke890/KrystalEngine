@@ -16,7 +16,7 @@ namespace krys::boo::css
 
   public:
     ~ImmutableStyleProperties() noexcept;
-    
+
     void SubRef() const noexcept
     {
       if (SubRefBase())

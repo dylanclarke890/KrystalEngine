@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Krystal.Booey/Core/WritingMode.hpp"
-#include "Krystal.Booey/Style/AnchorSizeDimension.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/DOM/EventTarget.hpp"
+#include "Krystal.Booey/Style/AnchorSizeDimension.hpp"
 #include "Krystal.Core/Types/CheckedPtr.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -204,7 +204,7 @@ namespace krys::boo::style
 
     static void updateAnchorPositioningStatesAfterInterleavedLayout(dom::Document &,
                                                                     AnchorPositionedStates &);
-    
+
     static void updateScrollAdjustments(RenderView &);
 
     static void updateAnchorPositionedStateForDefaultAnchorAndPositionVisibility(dom::Element &,
@@ -215,33 +215,33 @@ namespace krys::boo::style
       computeAnchorRectRelativeToContainingBlock(CheckedRef<const RenderBoxModelObject> anchorBox,
                                                  const RenderElement &containingBlock,
                                                  const RenderBox &anchoredBox);
-    
+
     static void captureScrollSnapshots(RenderBox &anchored,
                                        bool invalidateStyleForScrollPositionChanges = true);
 
     static AnchorToAnchorPositionedMap makeAnchorPositionedForAnchorMap(AnchorPositionedToAnchorMap &);
 
     static bool isAnchorPositioned(const RenderStyle &);
-    
+
     static bool isStyleTimeAnchorPositioned(const RenderStyle &);
-    
+
     static bool isLayoutTimeAnchorPositioned(const RenderStyle &);
 
     static css::PropertyId resolvePositionTryFallbackProperty(css::PropertyId, WritingMode,
-                                                         const BuilderPositionTryFallback &);
+                                                              const BuilderPositionTryFallback &);
 
     static css::ValueId resolvePositionTryFallbackValueForSelfPosition(css::PropertyId, css::ValueId,
-                                                                          WritingMode,
-                                                                     const BuilderPositionTryFallback &);
+                                                                       WritingMode,
+                                                                       const BuilderPositionTryFallback &);
 
     static bool overflowsInsetModifiedContainingBlock(const RenderBox &anchoredBox);
-    
+
     static bool isDefaultAnchorInvisibleOrClippedByInterveningBoxes(const RenderBox &anchoredBox);
 
     static ScopedName defaultAnchorName(const RenderStyle &);
-    
+
     static bool isAnchor(const RenderStyle &);
-    
+
     static bool isImplicitAnchor(const RenderStyle &);
 
     static CheckedPtr<RenderBoxModelObject> defaultAnchorForBox(const RenderBox &);
@@ -252,18 +252,17 @@ namespace krys::boo::style
   private:
     static CheckedPtr<RenderBoxModelObject>
       findAnchorForAnchorFunctionAndAttemptResolution(BuilderState &, std::optional<ScopedName> elementName);
-    
+
     static AnchorElements findAnchorsForAnchorPositionedElement(
-      const dom::Element &, const HashSet<ResolvedScopedName> &anchorNames,
-                                            const AnchorsForAnchorName &);
-    
+      const dom::Element &, const HashSet<ResolvedScopedName> &anchorNames, const AnchorsForAnchorName &);
+
     static RefPtr<const dom::Element> anchorPositionedElementOrPseudoElement(BuilderState &);
 
     static AnchorPositionedKey keyForElementOrPseudoElement(const dom::Element &);
-    
+
     static void addAnchorFunctionScrollCompensatedAxis(RenderStyle &, const RenderBox &anchored,
                                                        const RenderBoxModelObject &anchor, BoxAxis);
-    
+
     static LayoutSize scrollOffsetFromAnchor(const RenderBoxModelObject &anchor, const RenderBox &anchored);
   };
 }

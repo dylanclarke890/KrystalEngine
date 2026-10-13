@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Properties/ParsedPropertyList.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRangeGuard.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Align.hpp"
@@ -16,7 +15,6 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/ColorInterpolationMethod.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Content.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/CounterStyles.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Display.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Easing.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Filter.hpp"
@@ -43,6 +41,7 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Position.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/PositionTry.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ratio.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/ResolutionDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Scrollbars.hpp"
@@ -63,6 +62,7 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/WillChange.hpp"
 #include "Krystal.Booey/CSS/Properties/FontVariantLigaturesParser.hpp"
 #include "Krystal.Booey/CSS/Properties/FontVariantNumericParser.hpp"
+#include "Krystal.Booey/CSS/Properties/ParsedPropertyList.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParser.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserResult.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
@@ -70,18 +70,18 @@
 #include "Krystal.Booey/CSS/Properties/PropertyShorthandFunctions.hpp"
 #include "Krystal.Booey/CSS/Values/Borders/BorderImage.hpp"
 #include "Krystal.Booey/CSS/Values/Borders/BorderRadius.hpp"
-#include "Krystal.Booey/CSS/Values/OffsetRotateValue.hpp"
-#include "Krystal.Booey/CSS/Values/PositionValue.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/QuadValue.hpp"
-#include "Krystal.Booey/CSS/Values/TransformListValue.hpp"
-#include "Krystal.Booey/CSS/Values/ValueList.hpp"
-#include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Booey/CSS/Values/Grid/GridNamedAreaMap.hpp"
 #include "Krystal.Booey/CSS/Values/GridLineNamesValue.hpp"
 #include "Krystal.Booey/CSS/Values/GridTemplateAreasValue.hpp"
+#include "Krystal.Booey/CSS/Values/OffsetRotateValue.hpp"
+#include "Krystal.Booey/CSS/Values/PositionValue.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesValueCreation.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/QuadValue.hpp"
+#include "Krystal.Booey/CSS/Values/TransformListValue.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
+#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Utils/ZippedRange.hpp"
 
@@ -425,7 +425,6 @@ namespace krys::boo::css
                                                             PropertyParserResult &result) noexcept
     {
       (void)shorthand;
-
 
       auto borderRadius = ConsumeUnresolvedBorderRadius(tokens, state);
       if (!borderRadius.has_value())
@@ -1159,10 +1158,8 @@ namespace krys::boo::css
         return false;
       }
 
-      result.AddPropertyForCurrentShorthand(state, PropertyId::OverflowX,
-                                            PrimitiveValue::Create(xValueId));
-      result.AddPropertyForCurrentShorthand(state, PropertyId::OverflowY,
-                                            PrimitiveValue::Create(yValueId));
+      result.AddPropertyForCurrentShorthand(state, PropertyId::OverflowX, PrimitiveValue::Create(xValueId));
+      result.AddPropertyForCurrentShorthand(state, PropertyId::OverflowY, PrimitiveValue::Create(yValueId));
 
       return true;
     }
@@ -1420,7 +1417,7 @@ namespace krys::boo::css
         }
 
         return ValueList::CreateSpaceSeparated(PrimitiveValue::Create(flowDirection),
-                                                  PrimitiveValue::Create(ValueId::Dense));
+                                               PrimitiveValue::Create(ValueId::Dense));
       };
 
       TokenRange rangeCopy = tokens;

@@ -78,8 +78,8 @@ namespace krys::boo::infra
     /// @see https://infra.spec.whatwg.org/#collect-a-sequence-of-code-points
     template <typename TFunc>
     KRYS_NODISCARD static dom::DOMStringView CollectCodePointSequence(dom::DOMStringView input,
-                                                                 position_variable &position,
-                                                                 TFunc &&condition) noexcept
+                                                                      position_variable &position,
+                                                                      TFunc &&condition) noexcept
     {
       position_variable start = position;
       AdvancePositionWhile(input, position, condition);
@@ -112,7 +112,8 @@ namespace krys::boo::infra
     }
 
     /// @see https://infra.spec.whatwg.org/#strictly-split
-    KRYS_NODISCARD static List<dom::DOMString> StrictlySplit(dom::DOMStringView input, char32 delimiter) noexcept
+    KRYS_NODISCARD static List<dom::DOMString> StrictlySplit(dom::DOMStringView input,
+                                                             char32 delimiter) noexcept
     {
       List<dom::DOMString> tokens;
       auto position = input.begin();

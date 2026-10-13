@@ -21,7 +21,7 @@ namespace krys::boo::css
     // <basic-shape> = <circle()> | <ellipse() | <inset()> | <path()> | <polygon()> | <rect()> | <shape()> |
     // <xywh()> https://drafts.csswg.org/css-shapes/#typedef-basic-shape
     KRYS_NODISCARD RefPtr<Value> ConsumeBasicShape(TokenRange &tokens, PropertyParserState &state,
-                                                      PathParsingOption pathParsingOptions) noexcept;
+                                                   PathParsingOption pathParsingOptions) noexcept;
 
     // <path()> = path( <'fill-rule'>? , <string> )
     // https://drafts.csswg.org/css-shapes/#funcdef-basic-shape-path
@@ -29,8 +29,7 @@ namespace krys::boo::css
 
     // <'shape-outside'> = none | [ <basic-shape> || <shape-box> ] | <image>
     // https://drafts.csswg.org/css-shapes/#propdef-shape-outside
-    KRYS_NODISCARD RefPtr<Value> ConsumeShapeOutside(TokenRange &tokens,
-                                                        PropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumeShapeOutside(TokenRange &tokens, PropertyParserState &state) noexcept;
   }
 }
 

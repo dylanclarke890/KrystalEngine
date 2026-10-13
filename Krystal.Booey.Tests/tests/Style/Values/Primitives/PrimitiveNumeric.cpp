@@ -45,7 +45,6 @@ namespace krys::boo::style::tests
     STATIC_CHECK(DimensionPercentageNumeric<LengthPercentage<>>);
     STATIC_CHECK(IsPercentage<Percentage<>>);
     STATIC_CHECK_FALSE(IsPercentage<Number<>>);
-
   }
 
   TEST_CASE("Style PrimitiveNumeric: lengths and zoom", "[Style][PrimitiveNumeric]")
@@ -141,8 +140,8 @@ namespace krys::boo::style::tests
   {
     using LengthPercentageOrAuto = PrimitiveNumericOrKeyword<LengthPercentage<>, css::keywords::Auto>;
     STATIC_CHECK((SameType<LengthPercentageOrAuto::Representation::Representation,
-                          CompactVariant<Length<>, Percentage<css::All, float>,
-                                         UnevaluatedCalc<css::LengthPercentage<>>, css::keywords::Auto>>));
+                           CompactVariant<Length<>, Percentage<css::All, float>,
+                                          UnevaluatedCalc<css::LengthPercentage<>>, css::keywords::Auto>>));
 
     LengthPercentageOrAuto length {LengthPercentage<> {Length<> {0.0f}}};
     CHECK(length.HoldsAlternative<Length<>>());

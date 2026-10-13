@@ -211,8 +211,8 @@ namespace krys::boo::css
 #define TYPE OutlineStyle
 #define FOR_EACH(CASE)                                                                                       \
   CASE(Auto)                                                                                                 \
-  CASE(None) CASE(Inset) CASE(Groove) CASE(Ridge) CASE(Outset) CASE(Dotted) CASE(Dashed) CASE(Solid)         \
-    CASE(Double)
+  CASE(None)                                                                                                 \
+  CASE(Inset) CASE(Groove) CASE(Ridge) CASE(Outset) CASE(Dotted) CASE(Dashed) CASE(Solid) CASE(Double)
   DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
 #undef TYPE
 #undef FOR_EACH
@@ -1357,8 +1357,9 @@ namespace krys::boo::css
 #define TYPE PointerEvents
 #define FOR_EACH(CASE)                                                                                       \
   CASE(None)                                                                                                 \
-  CASE(Stroke) CASE(Fill) CASE(Painted) CASE(Visible) CASE(VisibleStroke) CASE(VisibleFill)                  \
-    CASE(VisiblePainted) CASE(BoundingBox) CASE(Auto) CASE(All)
+  CASE(Stroke)                                                                                               \
+  CASE(Fill) CASE(Painted) CASE(Visible) CASE(VisibleStroke) CASE(VisibleFill) CASE(VisiblePainted)          \
+    CASE(BoundingBox) CASE(Auto) CASE(All)
   DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
 #undef TYPE
 #undef FOR_EACH
@@ -1470,9 +1471,10 @@ namespace krys::boo::css
 #define TYPE BlendMode
 #define FOR_EACH(CASE)                                                                                       \
   CASE(Normal)                                                                                               \
-  CASE(Multiply) CASE(Screen) CASE(Overlay) CASE(Darken) CASE(Lighten) CASE(ColorDodge) CASE(ColorBurn)      \
-    CASE(HardLight) CASE(SoftLight) CASE(Difference) CASE(Exclusion) CASE(Hue) CASE(Saturation) CASE(Color)  \
-      CASE(Luminosity) CASE(PlusDarker) CASE(PlusLighter)
+  CASE(Multiply)                                                                                             \
+  CASE(Screen) CASE(Overlay) CASE(Darken) CASE(Lighten) CASE(ColorDodge) CASE(ColorBurn) CASE(HardLight)     \
+    CASE(SoftLight) CASE(Difference) CASE(Exclusion) CASE(Hue) CASE(Saturation) CASE(Color) CASE(Luminosity) \
+      CASE(PlusDarker) CASE(PlusLighter)
   DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
 #undef TYPE
 #undef FOR_EACH
@@ -1522,8 +1524,9 @@ namespace krys::boo::css
 #define TYPE AlignmentBaseline
 #define FOR_EACH(CASE)                                                                                       \
   CASE(AfterEdge)                                                                                            \
-  CASE(Alphabetic) CASE(Baseline) CASE(BeforeEdge) CASE(Central) CASE(Hanging) CASE(Ideographic)             \
-    CASE(Mathematical) CASE(Middle) CASE(TextAfterEdge) CASE(TextBeforeEdge)
+  CASE(Alphabetic)                                                                                           \
+  CASE(Baseline) CASE(BeforeEdge) CASE(Central) CASE(Hanging) CASE(Ideographic) CASE(Mathematical)           \
+    CASE(Middle) CASE(TextAfterEdge) CASE(TextBeforeEdge)
   DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
 #undef TYPE
 #undef FOR_EACH
@@ -1705,8 +1708,9 @@ namespace krys::boo::css
 #define TYPE DominantBaseline
 #define FOR_EACH(CASE)                                                                                       \
   CASE(Auto)                                                                                                 \
-  CASE(UseScript) CASE(NoChange) CASE(ResetSize) CASE(Central) CASE(Middle) CASE(TextBeforeEdge)             \
-    CASE(TextAfterEdge) CASE(Ideographic) CASE(Alphabetic) CASE(Hanging) CASE(Mathematical)
+  CASE(UseScript)                                                                                            \
+  CASE(NoChange) CASE(ResetSize) CASE(Central) CASE(Middle) CASE(TextBeforeEdge) CASE(TextAfterEdge)         \
+    CASE(Ideographic) CASE(Alphabetic) CASE(Hanging) CASE(Mathematical)
   DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
 #undef TYPE
 #undef FOR_EACH
@@ -1797,7 +1801,8 @@ namespace krys::boo::css
 #define TYPE ItemPosition
 #define FOR_EACH(CASE)                                                                                       \
   CASE(Legacy)                                                                                               \
-  CASE(Auto) CASE(Normal) CASE(Stretch) CASE(Baseline) CASE(LastBaseline) CASE(Center) CASE(Start) CASE(End) \
+  CASE(Auto)                                                                                                 \
+  CASE(Normal) CASE(Stretch) CASE(Baseline) CASE(LastBaseline) CASE(Center) CASE(Start) CASE(End)            \
     CASE(SelfStart) CASE(SelfEnd) CASE(FlexStart) CASE(FlexEnd) CASE(Left) CASE(Right) CASE(AnchorCenter)
   DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
 #undef TYPE
@@ -1812,8 +1817,8 @@ namespace krys::boo::css
 #define TYPE ContentPosition
 #define FOR_EACH(CASE)                                                                                       \
   CASE(Normal)                                                                                               \
-  CASE(Baseline) CASE(LastBaseline) CASE(Center) CASE(Start) CASE(End) CASE(FlexStart) CASE(FlexEnd)         \
-    CASE(Left) CASE(Right)
+  CASE(Baseline)                                                                                             \
+  CASE(LastBaseline) CASE(Center) CASE(Start) CASE(End) CASE(FlexStart) CASE(FlexEnd) CASE(Left) CASE(Right)
   DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
 #undef TYPE
 #undef FOR_EACH
@@ -1905,8 +1910,9 @@ namespace krys::boo::css
   #else
     #define FOR_EACH(CASE)                                                                                   \
       CASE(Plain)                                                                                            \
-      CASE(Buy) CASE(SetUp) CASE(Donate) CASE(CheckOut) CASE(Book) CASE(Subscribe) CASE(Reload)              \
-        CASE(AddMoney) CASE(TopUp) CASE(Order) CASE(Rent) CASE(Support) CASE(Contribute) CASE(Tip)
+      CASE(Buy)                                                                                              \
+      CASE(SetUp) CASE(Donate) CASE(CheckOut) CASE(Book) CASE(Subscribe) CASE(Reload) CASE(AddMoney)         \
+        CASE(TopUp) CASE(Order) CASE(Rent) CASE(Support) CASE(Contribute) CASE(Tip)
   #endif
   DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
   #undef TYPE

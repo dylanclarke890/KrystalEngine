@@ -13,11 +13,12 @@ namespace krys::boo::html
   }
 
   dom::SmallNodeList HTMLDocumentParser::ParseFragment(dom::Element &context, utf8_string &&input,
-                                                  bool allowDeclarativeShadowRoots,
-                                                  ParserScriptingMode scriptingMode) noexcept
+                                                       bool allowDeclarativeShadowRoots,
+                                                       ParserScriptingMode scriptingMode) noexcept
   {
     // FPA(1): Assert: scriptingMode is either Inert or Fragment.
-    krys_debug_assert(scriptingMode == ParserScriptingMode::Inert || scriptingMode == ParserScriptingMode::Fragment);
+    krys_debug_assert(scriptingMode == ParserScriptingMode::Inert
+                      || scriptingMode == ParserScriptingMode::Fragment);
 
     // FPA(2): Let document be a Document node whose type is "html".
     auto document = CreateRef<dom::HTMLDocument>();
@@ -123,9 +124,10 @@ namespace krys::boo::html
 
     // FPA(11): Let root be the result of creating an element given document, "html", the HTML namespace,
     // null, null, false, and context's custom element registry.
-    dom::QualifiedName name {infra::Namespaces::HTML, dom::DOMStringAtom::Null(), u8"html", TagName::html, Namespace::HTML};
+    dom::QualifiedName name {infra::Namespaces::HTML, dom::DOMStringAtom::Null(), u8"html", TagName::html,
+                             Namespace::HTML};
     auto root = dom::ElementFactory::Create(*document, name, dom::DOMStringAtom::Null(), false,
-                                       contextDocument.CustomElementRegistry());
+                                            contextDocument.CustomElementRegistry());
 
     // FPA(12): Append root to document.
     (void)dom::MutationAlgorithms::Append(*root, *document);

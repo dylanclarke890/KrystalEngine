@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
@@ -7,7 +8,6 @@
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
-#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::dom::tests
 {

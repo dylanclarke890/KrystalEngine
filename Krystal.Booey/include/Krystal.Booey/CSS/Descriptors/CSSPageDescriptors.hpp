@@ -29,19 +29,19 @@ namespace krys::boo::css
 
     KRYS_NODISCARD CSSOMString Margin() const noexcept;
     dom::ExceptionOr<void> Margin(const CSSOMString &value) noexcept;
-    
+
     KRYS_NODISCARD CSSOMString MarginTop() const noexcept;
     dom::ExceptionOr<void> MarginTop(const CSSOMString &value) noexcept;
-    
+
     KRYS_NODISCARD CSSOMString MarginRight() const noexcept;
     dom::ExceptionOr<void> MarginRight(const CSSOMString &value) noexcept;
-    
+
     KRYS_NODISCARD CSSOMString MarginBottom() const noexcept;
     dom::ExceptionOr<void> MarginBottom(const CSSOMString &value) noexcept;
-    
+
     KRYS_NODISCARD CSSOMString MarginLeft() const noexcept;
     dom::ExceptionOr<void> MarginLeft(const CSSOMString &value) noexcept;
-    
+
     KRYS_NODISCARD CSSOMString Size() const noexcept;
     dom::ExceptionOr<void> Size(const CSSOMString &value) noexcept;
 

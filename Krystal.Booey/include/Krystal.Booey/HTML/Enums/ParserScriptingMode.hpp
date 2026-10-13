@@ -15,4 +15,3 @@ namespace krys::boo::html
 }
 
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::ParserScriptingMode, 4u)
-

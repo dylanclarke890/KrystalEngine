@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Gfx.OpenGL/Context.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Gfx.OpenGL/Context.hpp"
 
 #pragma comment(lib, "opengl32.lib")
 

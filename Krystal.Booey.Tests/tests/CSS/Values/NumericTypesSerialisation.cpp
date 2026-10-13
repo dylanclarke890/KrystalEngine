@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
-#include "Krystal.Core/Types/String.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Core/Types/String.hpp"
 #include <limits>
 
 namespace krys::boo::css::tests

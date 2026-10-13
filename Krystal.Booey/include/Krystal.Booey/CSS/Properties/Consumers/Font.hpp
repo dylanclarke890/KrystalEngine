@@ -78,13 +78,11 @@ namespace krys::boo::css
 
     // MARK: 'font-family'
     // https://drafts.csswg.org/css-fonts-4/#font-family-prop
-    KRYS_NODISCARD RefPtr<Value> ConsumeFontFamily(TokenRange &tokens,
-                                                      PropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumeFontFamily(TokenRange &tokens, PropertyParserState &state) noexcept;
 
     // Sub-production of 'font-family': <family-name>
     // https://drafts.csswg.org/css-fonts-4/#family-name-syntax
-    KRYS_NODISCARD RefPtr<Value> ConsumeFamilyName(TokenRange &tokens,
-                                                      PropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumeFamilyName(TokenRange &tokens, PropertyParserState &state) noexcept;
 
     // Sub-production of 'font-family': <generic-family>
     // https://drafts.csswg.org/css-fonts-4/#generic-family-name-syntax
@@ -95,17 +93,16 @@ namespace krys::boo::css
     // MARK: 'font-size-adjust'
     // https://drafts.csswg.org/css-fonts-4/#font-size-adjust-prop
     KRYS_NODISCARD RefPtr<Value> ConsumeFontSizeAdjust(TokenRange &tokens,
-                                                          PropertyParserState &state) noexcept;
+                                                       PropertyParserState &state) noexcept;
 
     // MARK: - @font-face descriptor consumers
 
     // MARK: @font-face 'src'
     // https://drafts.csswg.org/css-fonts-4/#src-desc
-    KRYS_NODISCARD RefPtr<ValueList> ParseFontFaceSrc(const CSSOMString &,
-                                                         ScriptExecutionContext &) noexcept;
+    KRYS_NODISCARD RefPtr<ValueList> ParseFontFaceSrc(const CSSOMString &, ScriptExecutionContext &) noexcept;
 
     KRYS_NODISCARD RefPtr<ValueList> ConsumeFontFaceSrc(TokenRange &tokens,
-                                                           PropertyParserState &state) noexcept;
+                                                        PropertyParserState &state) noexcept;
 
     // Sub-production of 'src: <font-tech>
     // https://drafts.csswg.org/css-fonts-4/#font-tech-values
@@ -120,50 +117,49 @@ namespace krys::boo::css
     // MARK: @font-face 'size-adjust'
     // https://drafts.csswg.org/css-fonts-5/#descdef-font-face-size-adjust
     KRYS_NODISCARD RefPtr<Value> ParseFontFaceSizeAdjust(const CSSOMString &,
-                                                            ScriptExecutionContext &) noexcept;
+                                                         ScriptExecutionContext &) noexcept;
 
     // MARK: @font-face 'unicode-range'
     // https://drafts.csswg.org/css-fonts-4/#descdef-font-face-unicode-range
     KRYS_NODISCARD RefPtr<ValueList> ParseFontFaceUnicodeRange(const CSSOMString &,
-                                                                  ScriptExecutionContext &) noexcept;
+                                                               ScriptExecutionContext &) noexcept;
 
     // MARK: @font-face 'font-display'
     // https://drafts.csswg.org/css-fonts-4/#descdef-font-face-font-display
-    KRYS_NODISCARD RefPtr<Value> ParseFontFaceDisplay(const CSSOMString &,
-                                                         ScriptExecutionContext &) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ParseFontFaceDisplay(const CSSOMString &, ScriptExecutionContext &) noexcept;
 
     // MARK: @font-face 'font-style'
     // https://drafts.csswg.org/css-fonts-4/#descdef-font-face-font-style
     KRYS_NODISCARD RefPtr<Value> ParseFontFaceFontStyle(const CSSOMString &,
-                                                           ScriptExecutionContext &) noexcept;
+                                                        ScriptExecutionContext &) noexcept;
 
     KRYS_NODISCARD RefPtr<Value> ConsumeFontFaceFontStyle(TokenRange &tokens,
-                                                             PropertyParserState &state) noexcept;
+                                                          PropertyParserState &state) noexcept;
 
     // MARK: @font-face 'font-feature-settings'
     // https://drafts.csswg.org/css-fonts-4/#descdef-font-face-font-feature-settings
     KRYS_NODISCARD RefPtr<Value> ParseFontFaceFeatureSettings(const CSSOMString &,
-                                                                 ScriptExecutionContext &) noexcept;
+                                                              ScriptExecutionContext &) noexcept;
     // Sub-production of 'font-feature-settings': <feature-tag-value>
     // https://drafts.csswg.org/css-fonts-4/#feature-tag-value
     KRYS_NODISCARD RefPtr<Value> ConsumeFeatureTagValue(TokenRange &tokens,
-                                                           PropertyParserState &state) noexcept;
+                                                        PropertyParserState &state) noexcept;
 
     // MARK: @font-face 'font-variation-settings'
     // https://drafts.csswg.org/css-fonts-4/#descdef-font-face-font-variation-settings
     // Sub-production of 'font-variation-settings': <variation-tag-value>
     KRYS_NODISCARD RefPtr<Value> ConsumeVariationTagValue(TokenRange &tokens,
-                                                             PropertyParserState &state) noexcept;
+                                                          PropertyParserState &state) noexcept;
 
     // MARK: @font-face 'font-width'
     // https://drafts.csswg.org/css-fonts-4/#descdef-font-face-font-width
     KRYS_NODISCARD RefPtr<Value> ParseFontFaceFontWidth(const CSSOMString &,
-                                                           ScriptExecutionContext &) noexcept;
+                                                        ScriptExecutionContext &) noexcept;
 
     // MARK: @font-face 'font-weight'
     // https://drafts.csswg.org/css-fonts-4/#descdef-font-face-font-weight
     KRYS_NODISCARD RefPtr<Value> ParseFontFaceFontWeight(const CSSOMString &,
-                                                            ScriptExecutionContext &) noexcept;
+                                                         ScriptExecutionContext &) noexcept;
 
     // MARK: - @font-feature-values descriptor consumers
 

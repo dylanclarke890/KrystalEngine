@@ -141,7 +141,8 @@ namespace krys::boo::css
     void opportunisticallyStartFontDataURLLoading(const FontCascadeDescription &,
                                                   const CSSOMStringAtom &family) final;
 
-    std::optional<CSSOMStringAtom> resolveGenericFamily(const FontDescription &, const CSSOMStringAtom &family);
+    std::optional<CSSOMStringAtom> resolveGenericFamily(const FontDescription &,
+                                                        const CSSOMStringAtom &family);
 
     const FontPaletteValues &lookupFontPaletteValues(const CSSOMStringAtom &familyName,
                                                      const FontDescription &) const;

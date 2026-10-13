@@ -2,9 +2,9 @@
 
 #include "Krystal.Booey/CSS/Parser/AllowedBlockRules.hpp"
 #include "Krystal.Booey/CSS/Parser/AllowedRules.hpp"
+#include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/NestedParserContext.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
-#include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/Token.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
@@ -116,7 +116,7 @@ namespace krys::boo::css
 
 #pragma region At-Rule Consumers
 
-    //KRYS_NODISCARD RefPtr<CSSCharsetRule> ConsumeCharsetRule(TokenRange prelude) noexcept;
+    // KRYS_NODISCARD RefPtr<CSSCharsetRule> ConsumeCharsetRule(TokenRange prelude) noexcept;
 
     KRYS_NODISCARD RefPtr<CSSImportRule> ConsumeImportRule(TokenRange prelude) noexcept;
 

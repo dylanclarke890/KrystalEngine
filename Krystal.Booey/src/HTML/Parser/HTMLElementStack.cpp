@@ -12,7 +12,7 @@ namespace krys::boo::html
     return _items.front();
   }
 
-  HTMLStackItem * HTMLElementStack::OneBelowTop() noexcept
+  HTMLStackItem *HTMLElementStack::OneBelowTop() noexcept
   {
     if (_items.size() < 2uz)
     {

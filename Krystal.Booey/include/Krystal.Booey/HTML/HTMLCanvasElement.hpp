@@ -30,7 +30,8 @@ namespace krys::boo::html
     // RenderingContext? getContext(dom::DOMString contextId, optional any options = null);
     //
     // USVString toDataURL(optional dom::DOMString type = "image/png", optional any quality);
-    // undefined toBlob(BlobCallback _callback, optional dom::DOMString type = "image/png", optional any quality);
+    // undefined toBlob(BlobCallback _callback, optional dom::DOMString type = "image/png",
+    //                   optional any quality);
     // OffscreenCanvas transferControlToOffscreen();
 
 #pragma endregion

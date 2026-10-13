@@ -12,8 +12,9 @@ namespace krys::boo::css::PropertyParserHelpers
     // <'scroll-snap-type'> = none | [ x | y | block | inline | both ] [ mandatory | proximity
     // ]?@(default=proximity) https://drafts.csswg.org/css-scroll-snap-1/#scroll-snap-type
 
-    auto firstValue = ConsumeIdentRaw<ValueId::None, ValueId::X, ValueId::Y, ValueId::Block,
-                                      ValueId::Inline, ValueId::Both>(tokens);
+    auto firstValue =
+      ConsumeIdentRaw<ValueId::None, ValueId::X, ValueId::Y, ValueId::Block, ValueId::Inline, ValueId::Both>(
+        tokens);
     if (!firstValue)
     {
       return nullptr;
@@ -34,6 +35,6 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     return ValueList::CreateSpaceSeparated(PrimitiveValue::Create(*firstValue),
-                                              PrimitiveValue::Create(ValueId::Mandatory));
+                                           PrimitiveValue::Create(ValueId::Mandatory));
   }
 }

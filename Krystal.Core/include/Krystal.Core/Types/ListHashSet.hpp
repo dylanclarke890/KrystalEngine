@@ -182,7 +182,8 @@ namespace krys
   };
 
   template <typename T, typename Hash, typename KeyEqual>
-  void swap(ListHashSet<T, Hash, KeyEqual> &lhs, ListHashSet<T, Hash, KeyEqual> &rhs) noexcept(noexcept(lhs.swap(rhs)))
+  void swap(ListHashSet<T, Hash, KeyEqual> &lhs,
+            ListHashSet<T, Hash, KeyEqual> &rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     lhs.swap(rhs);
   }

@@ -12,12 +12,12 @@ namespace krys::boo::css
   {
     // MARK: <single-transition-property-or-none> consuming
     // https://drafts.csswg.org/css-transitions/#single-transition-property
-    KRYS_NODISCARD RefPtr<Value>
-      ConsumeSingleTransitionPropertyOrNone(TokenRange &tokens, PropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumeSingleTransitionPropertyOrNone(TokenRange &tokens,
+                                                                       PropertyParserState &state) noexcept;
 
     // MARK: <single-transition-property> consuming
     // https://drafts.csswg.org/css-transitions/#single-transition-property
     KRYS_NODISCARD RefPtr<Value> ConsumeSingleTransitionProperty(TokenRange &tokens,
-                                                                    PropertyParserState &state) noexcept;
+                                                                 PropertyParserState &state) noexcept;
   }
 }

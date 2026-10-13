@@ -28,9 +28,9 @@
 #include "ActiveDOMCallback.h"
 #include "CallbackResult.h"
 #include "CSSPaintSize.h"
+#include "Krystal.Core/Types/WeakPtr.hpp"
 #include "StylePropertyMapReadOnly.h"
 #include <wtf/RefCountedAndCanMakeWeakPtr.h>
-#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace JSC
 {

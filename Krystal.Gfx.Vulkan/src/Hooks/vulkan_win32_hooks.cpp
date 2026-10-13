@@ -10,7 +10,7 @@ namespace krys::Gfx::Vulkan
     bool HookCreateInstanceFunction() noexcept
     {
       VulkanLibrary = LoadLibraryA("vulkan-1.dll");
-      
+
       if (!VulkanLibrary)
       {
         return false;
@@ -25,8 +25,8 @@ namespace krys::Gfx::Vulkan
 
       vkCreateInstance =
         reinterpret_cast<PFN_vkCreateInstance>(vkGetInstanceProcAddr(VK_NULL_HANDLE, "vkCreateInstance"));
-      
-        return vkCreateInstance != nullptr;
+
+      return vkCreateInstance != nullptr;
     }
 
 #define LOAD_VK_FUNC_PTR(name)                                                                               \

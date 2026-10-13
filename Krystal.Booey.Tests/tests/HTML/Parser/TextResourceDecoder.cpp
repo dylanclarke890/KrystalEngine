@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/Parser/TextResourceDecoder.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Text/Codecs/CodecRegistry.hpp"
 #include "Krystal.Text/Encodings/ASCII.hpp"
-#include "catch2/catch_test_macros.hpp"
 
 namespace
 {

@@ -1,6 +1,4 @@
 ﻿#include "Krystal.Booey/CSS/Values/Value.hpp"
-#include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Hash.hpp"
 #include "Krystal.Booey/CSS/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
@@ -63,6 +61,8 @@
 #include "Krystal.Booey/CSS/Values/VariableReferenceValue.hpp"
 #include "Krystal.Booey/CSS/Values/ViewValue.hpp"
 #include "Krystal.Booey/DOM/EventTarget.hpp"
+#include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Hash.hpp"
 
 namespace krys::boo::css
 {

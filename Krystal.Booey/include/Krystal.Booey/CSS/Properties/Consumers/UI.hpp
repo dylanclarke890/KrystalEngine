@@ -12,7 +12,6 @@ namespace krys::boo::css
   {
     // MARK: <'cursor'> consuming
     // https://drafts.csswg.org/css-ui/#propdef-cursor
-    KRYS_NODISCARD RefPtr<Value> ConsumeCursor(TokenRange &tokens,
-                                                  PropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumeCursor(TokenRange &tokens, PropertyParserState &state) noexcept;
   }
 }

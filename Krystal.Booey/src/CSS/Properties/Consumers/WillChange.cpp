@@ -9,8 +9,7 @@
 
 namespace krys::boo::css::PropertyParserHelpers
 {
-  KRYS_NODISCARD RefPtr<Value> ConsumeWillChange(TokenRange &tokens,
-                                                    PropertyParserState &state) noexcept
+  KRYS_NODISCARD RefPtr<Value> ConsumeWillChange(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'will-change'> = auto | <animateable-feature>#
     // https://drafts.csswg.org/css-will-change/#propdef-will-change

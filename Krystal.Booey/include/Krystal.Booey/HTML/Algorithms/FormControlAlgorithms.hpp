@@ -63,7 +63,7 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/#collect-option-text
     KRYS_NODISCARD static dom::DOMString CollectOptionText(const HTMLOptionElement &option,
-                                                      bool includeAltText) noexcept;
+                                                           bool includeAltText) noexcept;
 
 #pragma endregion
   };

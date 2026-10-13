@@ -56,7 +56,7 @@ namespace
       case GL_DEBUG_SEVERITY_MEDIUM:       message += std::format("OPENGL ({0}): {1}", id, msg); break;
       case GL_DEBUG_SEVERITY_LOW:          message += std::format("OPENGL ({0}): {1}", id, msg); break;
       case GL_DEBUG_SEVERITY_NOTIFICATION: message += std::format("OPENGL ({0}): {1}", id, msg); break;
-      default: assert(false && "Unknown enum value: OpenGL severity level"); break;
+      default:                             assert(false && "Unknown enum value: OpenGL severity level"); break;
     }
     message += "\n";
 
@@ -72,7 +72,7 @@ namespace
       case GL_DEBUG_TYPE_PUSH_GROUP:          message += "Push Group"; break;
       case GL_DEBUG_TYPE_POP_GROUP:           message += "Pop Group"; break;
       case GL_DEBUG_TYPE_OTHER:               message += "Other"; break;
-      default: assert(false && "Unknown enum value: OpenGL message type"); break;
+      default:                                assert(false && "Unknown enum value: OpenGL message type"); break;
     }
     message += "\n";
 
@@ -94,7 +94,7 @@ namespace
       case GL_DEBUG_SEVERITY_MEDIUM:       logger->Error(message); break;
       case GL_DEBUG_SEVERITY_LOW:          logger->Warn(message); break;
       case GL_DEBUG_SEVERITY_NOTIFICATION: logger->Info(message); break;
-      default: assert(false && "Unknown enum value: OpenGL severity level"); break;
+      default:                             assert(false && "Unknown enum value: OpenGL severity level"); break;
     }
 
     if (severity != GL_DEBUG_SEVERITY_NOTIFICATION && severity != GL_DEBUG_SEVERITY_LOW)
@@ -844,14 +844,14 @@ namespace krys::Gfx::OpenGL
       };
       Vec3 lightColors[] = {Vec3(300.0f, 300.0f, 300.0f), Vec3(300.0f, 300.0f, 300.0f),
                             Vec3(300.0f, 300.0f, 300.0f), Vec3(300.0f, 300.0f, 300.0f)};
-  
+
       for (uint i = 0; i < sizeof(lightPositions) / sizeof(lightPositions[0]); ++i)
       {
         auto time = static_cast<float>(seconds(MonotonicTime::Now()).count());
         Vec3 newPos = lightPositions[i] + Vec3(std::sin(time * 5.0f), 0.0f, 0.0f);
         shader.SetUniform("lightPositions[" + std::to_string(i) + "]", newPos);
         shader.SetUniform("lightColors[" + std::to_string(i) + "]", lightColors[i]);
-  
+
         Mat4 model = Identity<Mat4>();
         model = Translate(model, newPos);
         model = Scale(model, Vec3(0.5f));

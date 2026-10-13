@@ -282,7 +282,7 @@ namespace krys::boo::css
       case UnitType::cqmin:
       case UnitType::cqmax: return true;
 
-      default: return false;
+      default:              return false;
     }
   }
 }

@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Timeline.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/LengthPercentageDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
@@ -16,8 +16,8 @@ namespace krys::boo::css::PropertyParserHelpers
 {
   bool IsAnimationRangeKeyword(ValueId id) noexcept
   {
-    return IdentMatches<ValueId::Normal, ValueId::Cover, ValueId::Contain, ValueId::Entry,
-                        ValueId::Exit, ValueId::EntryCrossing, ValueId::ExitCrossing>(id);
+    return IdentMatches<ValueId::Normal, ValueId::Cover, ValueId::Contain, ValueId::Entry, ValueId::Exit,
+                        ValueId::EntryCrossing, ValueId::ExitCrossing>(id);
   }
 
   RefPtr<Value> ConsumeAnimationTimelineScroll(TokenRange &tokens, PropertyParserState &state) noexcept
@@ -97,8 +97,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return ViewValue::Create(krys::move(axis), krys::move(startInset), krys::move(endInset));
   }
 
-  RefPtr<Value> ConsumeSingleViewTimelineInsetItem(TokenRange &tokens,
-                                                      PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeSingleViewTimelineInsetItem(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <single-view-timeline-inset-item-item> = <single-view-timeline-inset>{1,2}
     // https://drafts.csswg.org/scroll-animations-1/#propdef-view-timeline-inset
@@ -121,7 +120,7 @@ namespace krys::boo::css::PropertyParserHelpers
   }
 
   RefPtr<Value> ParseSingleViewTimelineInsetItem(const CSSOMString &string,
-                                                    const ParserContext &context) noexcept
+                                                 const ParserContext &context) noexcept
   {
     auto inputStream = InputStream(CSSOMString(string));
     auto tokenizer = Tokenizer(inputStream);
@@ -145,7 +144,7 @@ namespace krys::boo::css::PropertyParserHelpers
   }
 
   RefPtr<Value> ConsumeSingleAnimationRange(TokenRange &tokens, PropertyParserState &state,
-                                               SingleAnimationRangeType type) noexcept
+                                            SingleAnimationRangeType type) noexcept
   {
     // <'animation-tokens-{start|end}'> = normal | <length-percentage> | <timeline-tokens-name>
     // <length-percentage>? https://drafts.csswg.org/scroll-animations-1/#propdef-animation-tokens-start
@@ -194,8 +193,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return PrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(tokens, state);
   }
 
-  RefPtr<Value> ConsumeSingleAnimationRangeStart(TokenRange &tokens,
-                                                    PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeSingleAnimationRangeStart(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     return ConsumeSingleAnimationRange(tokens, state, SingleAnimationRangeType::Start);
   }
@@ -206,7 +204,7 @@ namespace krys::boo::css::PropertyParserHelpers
   }
 
   RefPtr<Value> ParseSingleAnimationRange(const CSSOMString &string, const ParserContext &context,
-                                             SingleAnimationRangeType type) noexcept
+                                          SingleAnimationRangeType type) noexcept
   {
     auto inputStream = InputStream(CSSOMString(string));
     auto tokenizer = Tokenizer(inputStream);

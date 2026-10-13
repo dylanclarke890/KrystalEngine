@@ -12,12 +12,10 @@ namespace krys::boo::css
   {
     // MARK: <'line-fit-edge'> consuming
     // https://drafts.csswg.org/css-inline-3/#propdef-line-fit-edge
-    KRYS_NODISCARD RefPtr<Value> ConsumeLineFitEdge(TokenRange &tokens,
-                                                       PropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumeLineFitEdge(TokenRange &tokens, PropertyParserState &state) noexcept;
 
     // MARK: <'text-box-edge'> consuming
     // https://drafts.csswg.org/css-inline-3/#propdef-text-box-edge
-    KRYS_NODISCARD RefPtr<Value> ConsumeTextBoxEdge(TokenRange &tokens,
-                                                       PropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumeTextBoxEdge(TokenRange &tokens, PropertyParserState &state) noexcept;
   }
 }

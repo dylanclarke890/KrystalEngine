@@ -6,6 +6,7 @@ namespace krys::boo
   {
   private:
     size_t *_nestingLevel;
+
   public:
     explicit NestingLevelIncrementer(size_t &nestingLevel) : _nestingLevel(&nestingLevel)
     {

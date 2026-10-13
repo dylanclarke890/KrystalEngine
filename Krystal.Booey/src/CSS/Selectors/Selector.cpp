@@ -379,8 +379,7 @@ namespace krys::boo::css
     _data.RareData->NthB = b;
   }
 
-  static bool ShouldSkipForEqualMode(const Selector &simpleSelector,
-                                     ComplexSelectorsEqualMode mode) noexcept
+  static bool ShouldSkipForEqualMode(const Selector &simpleSelector, ComplexSelectorsEqualMode mode) noexcept
   {
     if (mode == ComplexSelectorsEqualMode::IgnoreNonElementBackedPseudoElements)
     {
@@ -448,7 +447,7 @@ namespace krys::boo::css
   }
 
   bool Selector::VisitSimpleSelectors(VisitFunctionalPseudoClasses visitFunctionalPseudoClasses,
-                                         VisitOnlySubject visitOnlySubject, VisitFunc &&func) const noexcept
+                                      VisitOnlySubject visitOnlySubject, VisitFunc &&func) const noexcept
   {
     Queue<const Selector *> worklist;
     worklist.push(this);

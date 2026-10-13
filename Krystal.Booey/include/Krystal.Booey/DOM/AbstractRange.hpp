@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/BoundaryPoint.hpp"
-#include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/RefCounted.hpp"
 
 namespace krys::boo::dom
 {

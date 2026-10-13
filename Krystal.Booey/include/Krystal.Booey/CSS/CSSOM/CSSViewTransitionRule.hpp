@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
+#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "StyleProperties.h"
 #include "StyleRule.h"
-#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 
 namespace krys::boo::css
 {

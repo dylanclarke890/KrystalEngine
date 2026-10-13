@@ -4,8 +4,8 @@
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include <limits>
 
 namespace krys::boo::css

@@ -2,9 +2,9 @@
 
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumerDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaResolver.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/PrimitiveNumeric.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
@@ -15,27 +15,26 @@ namespace krys::boo::css
   struct PrimitiveValueResolverBase
   {
     KRYS_NODISCARD static RefPtr<PrimitiveValue> Resolve(NumericRaw auto value,
-                                                            PropertyParserOptions = {}) noexcept
+                                                         PropertyParserOptions = {}) noexcept
     {
       return PrimitiveValue::Create(value.Value, ToUnitType(value.Unit));
     }
 
     template <Range R, typename T>
     KRYS_NODISCARD static RefPtr<PrimitiveValue> Resolve(IntegerRaw<R, T> value,
-                                                            PropertyParserOptions) noexcept
+                                                         PropertyParserOptions) noexcept
     {
       return PrimitiveValue::Create(value.Value);
     }
 
-    KRYS_NODISCARD static RefPtr<PrimitiveValue> Resolve(Calc auto value,
-                                                            PropertyParserOptions = {}) noexcept
+    KRYS_NODISCARD static RefPtr<PrimitiveValue> Resolve(Calc auto value, PropertyParserOptions = {}) noexcept
     {
       (void)value;
       krys_not_implemented();
     }
 
     KRYS_NODISCARD static RefPtr<PrimitiveValue> Resolve(Numeric auto value,
-                                                            PropertyParserOptions options = {}) noexcept
+                                                         PropertyParserOptions options = {}) noexcept
     {
       return SwitchOn(krys::move(value), [&](auto &&value) { return Resolve(krys::move(value), options); });
     }
@@ -46,8 +45,7 @@ namespace krys::boo::css
               PropertyParserOptions options = {}) noexcept
     {
       return SwitchOn(
-        value,
-        [&](const Number<nR, T> &value) -> RefPtr<PrimitiveValue> { return Resolve(value, options); },
+        value, [&](const Number<nR, T> &value) -> RefPtr<PrimitiveValue> { return Resolve(value, options); },
         [&](const Percentage<pR, T> &value) -> RefPtr<PrimitiveValue>
         {
           return SwitchOn(
@@ -60,8 +58,7 @@ namespace krys::boo::css
   };
 
   template <typename... Ts>
-  struct PrimitiveValueResolver
-      : MetaResolver<RefPtr<PrimitiveValue>, PrimitiveValueResolverBase, Ts...>
+  struct PrimitiveValueResolver : MetaResolver<RefPtr<PrimitiveValue>, PrimitiveValueResolverBase, Ts...>
   {
     using MetaResolver<RefPtr<PrimitiveValue>, PrimitiveValueResolverBase, Ts...>::Resolve;
     using MetaResolver<RefPtr<PrimitiveValue>, PrimitiveValueResolverBase, Ts...>::ConsumeAndResolve;

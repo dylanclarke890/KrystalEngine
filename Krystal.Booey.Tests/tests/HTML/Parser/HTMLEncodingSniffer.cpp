@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Booey/HTML/Parser/HTMLEncodingSniffer.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Text/Codecs/CodecRegistry.hpp"
 #include "Krystal.Text/Codecs/ICodec.hpp"
 #include "Krystal.Text/Encodings/ASCII.hpp"
-#include "catch2/catch_test_macros.hpp"
 
 namespace
 {

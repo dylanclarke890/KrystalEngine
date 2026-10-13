@@ -35,8 +35,8 @@
 #include <WebCore/StyleRuleType.h>
 
 #include <wtf/RefCounted.h>
-#include <wtf/text/WTFString.h>
 #include <wtf/SmallList.h>
+#include <wtf/text/WTFString.h>
 
 namespace krys::boo::css
 {

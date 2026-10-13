@@ -56,7 +56,7 @@ namespace krys
     {
       return false;
     }
-    
+
     if constexpr (SameType<Target, Source>)
     {
       return true;

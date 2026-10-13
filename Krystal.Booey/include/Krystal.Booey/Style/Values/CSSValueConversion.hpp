@@ -169,7 +169,7 @@ namespace krys::boo::style
       if (auto list = dynamicDowncast<CSSValueList>(value))
       {
         return css::SpaceSeparatedListHashSet<T>::map(*list, [&](const css::Value &element)
-                                                 { return ConvertCSSValueToStyle<T>(state, element); });
+                                                      { return ConvertCSSValueToStyle<T>(state, element); });
       }
       return {ConvertCSSValueToStyle<T>(state, value)};
     }
@@ -184,7 +184,7 @@ namespace krys::boo::style
       if (auto list = dynamicDowncast<CSSValueList>(value))
       {
         return css::CommaSeparatedListHashSet<T>::map(*list, [&](const css::Value &element)
-                                                 { return ConvertCSSValueToStyle<T>(state, element); });
+                                                      { return ConvertCSSValueToStyle<T>(state, element); });
       }
       return {ConvertCSSValueToStyle<T>(state, value)};
     }

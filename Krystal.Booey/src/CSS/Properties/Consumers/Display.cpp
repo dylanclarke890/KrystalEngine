@@ -35,9 +35,9 @@ namespace krys::boo::css::PropertyParserHelpers
         // <display-box>
         ValueId::Contents, ValueId::None,
         // <display-internal>
-        ValueId::TableCaption, ValueId::TableCell, ValueId::TableColumnGroup,
-        ValueId::TableColumn, ValueId::TableHeaderGroup, ValueId::TableFooterGroup,
-        ValueId::TableRow, ValueId::TableRowGroup, ValueId::RubyBase, ValueId::RubyText,
+        ValueId::TableCaption, ValueId::TableCell, ValueId::TableColumnGroup, ValueId::TableColumn,
+        ValueId::TableHeaderGroup, ValueId::TableFooterGroup, ValueId::TableRow, ValueId::TableRowGroup,
+        ValueId::RubyBase, ValueId::RubyText,
         // <display-legacy>
         ValueId::InlineBlock, ValueId::InlineFlex, ValueId::InlineGrid, ValueId::InlineTable,
         // Prefixed values
@@ -48,8 +48,8 @@ namespace krys::boo::css::PropertyParserHelpers
 
     auto AllowsValue = [&](ValueId value)
     {
-      bool isRuby = value == ValueId::RubyBase || value == ValueId::RubyText
-                    || value == ValueId::BlockRuby || value == ValueId::Ruby;
+      bool isRuby = value == ValueId::RubyBase || value == ValueId::RubyText || value == ValueId::BlockRuby
+                    || value == ValueId::Ruby;
       return !isRuby || IsUASheetBehavior(state.Context.Mode);
     };
 
@@ -75,7 +75,7 @@ namespace krys::boo::css::PropertyParserHelpers
     {
       DiscardIdent(range);
       return PrimitiveValue::Create(nextValueId == ValueId::WebkitInlineFlex ? ValueId::InlineFlex
-                                                                                   : ValueId::Flex);
+                                                                             : ValueId::Flex);
     }
 
     // Parse [ <display-outside> || <display-inside> ]

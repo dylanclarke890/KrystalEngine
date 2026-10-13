@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/DOMTokenList.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
+#include "Krystal.Booey/HTML/HTMLElement.hpp"
 
 namespace krys::boo::html
 {

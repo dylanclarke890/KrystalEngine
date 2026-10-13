@@ -84,7 +84,7 @@ namespace krys::boo::dom
     // TODO: we need to iterate over codepoints instead of decoding the entire string at once
     auto decodeResult = krys::text::Decode<krys::text::UTF8>(name);
     krys_debug_assert(decodeResult.Error == krys::text::DecodeError::None);
-    
+
     auto &utf32 = decodeResult.Output;
     auto first = utf32[0];
     if (first != ':' && first != '_' && !(first >= 0x0080 && first <= 0x10FFF))

@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Booey/DOM/MutationObserver.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Node.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::dom::tests
 {
@@ -13,7 +13,11 @@ namespace krys::boo::dom::tests
     auto CreateEmptyObserver = []()
     {
       return CreateRef<MutationObserver>(
-        [](const List<MutationRecord> &records, MutationObserver &observer) {(void)records; (void)observer;});
+        [](const List<MutationRecord> &records, MutationObserver &observer)
+        {
+          (void)records;
+          (void)observer;
+        });
     };
   }
 
