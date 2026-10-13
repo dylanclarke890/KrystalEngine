@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/CSS/Parser/ParserMode.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
+#include "Krystal.Core/Attributes.hpp"
 
 namespace krys::boo::css
 {
@@ -45,4 +46,11 @@ namespace krys::boo::css
     bool webkitMediaTextTrackDisplayQuirkEnabled : 1 {false};
     bool cssMathDepthEnabled : 1 {false};
   };
+
+  /// @brief A standards-mode context with every setting at its default.
+  KRYS_NODISCARD inline const ParserContext &StrictParserContext() noexcept
+  {
+    static const ParserContext strictContext {.Mode = ParserMode::HTMLStandard};
+    return strictContext;
+  }
 }

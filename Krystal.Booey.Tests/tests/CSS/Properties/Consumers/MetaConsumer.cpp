@@ -3,7 +3,9 @@
 #include "Krystal.Booey/CSS/Calc/Value.hpp"
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/AngleDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/NumberDefinitions.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/SymbolDefinitions.hpp"
 #include "Krystal.Booey/CSS/Values/NoConversionDataRequiredTag.hpp"
 
 namespace krys::boo::css::tests
@@ -107,5 +109,44 @@ namespace krys::boo::css::tests
                                                       { return number.GetRaw()->Value * 2; });
     REQUIRE(doubled);
     CHECK(*doubled == 8.0);
+  }
+
+  TEST_CASE("MetaConsumer(unitless angles)", "[CSS][Properties][Consumers]")
+  {
+    auto consume = [](utf8_stringview css, ParserMode mode, PropertyId property)
+    {
+      ParserContext context {.Mode = mode};
+      PropertyParserState state {.Context = context, .CurrentProperty = property};
+      Tokens tokens {css};
+      auto range = tokens.Tokenizer.Tokens();
+      return MetaConsumer<Angle<All>>::Consume(range, state).has_value();
+    };
+
+    CHECK(consume(u8"90deg", ParserMode::HTMLStandard, PropertyId::Width));
+    CHECK_FALSE(consume(u8"0", ParserMode::HTMLStandard, PropertyId::Width));
+    CHECK_FALSE(consume(u8"90", ParserMode::HTMLStandard, PropertyId::GlyphOrientationVertical));
+    CHECK_FALSE(consume(u8"90", ParserMode::HTMLQuirks, PropertyId::Width));
+    CHECK(consume(u8"90", ParserMode::HTMLQuirks, PropertyId::GlyphOrientationVertical));
+    CHECK(consume(u8"90", ParserMode::HTMLQuirks, PropertyId::GlyphOrientationHorizontal));
+    CHECK(consume(u8"90", ParserMode::SVGAttribute, PropertyId::Width));
+  }
+
+  TEST_CASE("MetaConsumer(symbols)", "[CSS][Properties][Consumers]")
+  {
+    ParserContext context;
+    PropertyParserState state {.Context = context};
+    AllowedSymbols symbols {{{ValueId::R, UnitType::Number}}};
+
+    Tokens tokens {u8"r g"};
+    auto range = tokens.Tokenizer.Tokens();
+    auto symbol = MetaConsumer<Number<All>, Symbol>::Consume(range, state, symbols);
+    REQUIRE(symbol);
+    REQUIRE(std::holds_alternative<Symbol>(*symbol));
+    CHECK(std::get<Symbol>(*symbol).Value == ValueId::R);
+
+    // Not in the table.
+    CHECK_FALSE(MetaConsumer<Number<All>, Symbol>::Consume(range, state, symbols));
+    CHECK(range.Peek().ValueId() == ValueId::G);
+    CHECK(ValidatedRange(SymbolRaw {ValueId::G}, {}) == SymbolRaw {ValueId::G});
   }
 }

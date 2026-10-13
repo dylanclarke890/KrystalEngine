@@ -1,15 +1,17 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/Value.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+
+namespace krys::boo
+{
+  struct ColorInterpolationMethod;
+}
 
 namespace krys::boo::css
 {
   class TokenRange;
-  class CSSRatio;
   struct PropertyParserState;
-  struct ColorInterpolationMethod;
 
   namespace PropertyParserHelpers
   {

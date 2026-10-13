@@ -22,7 +22,7 @@ namespace krys::boo::css
   public:
     InputStream(CSSOMString &&input) noexcept : _data(FilterCodePoints(krys::move(input)))
     {
-      krys_debug_assert(!_data.empty() && _data.back() != EOFMarker);
+      krys_debug_assert(_data.empty() || _data.back() != EOFMarker);
     }
 
     /// @brief Gets the size of the input stream. This is the number of characters in the input stream, not
@@ -153,6 +153,12 @@ namespace krys::boo::css
         // finally, we can just append the text character to the output
         output.push_back(ch);
         continue;
+      }
+
+      // An empty input stream is valid; it only produces an EOF token.
+      if (output.empty())
+      {
+        return {};
       }
 
       auto decodeResult = krys::text::Decode<krys::text::UTF8>(utf8_stringview(output));

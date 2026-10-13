@@ -21,6 +21,13 @@ namespace krys::boo::css
     KRYS_NODISCARD bool operator==(const ColorScheme &) const noexcept = default;
   };
 
+  template <>
+  struct Serialiser<ColorScheme>
+  {
+    void operator()(CSSOMString &builder, const SerialisationContext &context,
+                    const ColorScheme &value) noexcept;
+  };
+
   template <size_t I>
   KRYS_NODISCARD const auto &get(const ColorScheme &colorScheme) noexcept
   {

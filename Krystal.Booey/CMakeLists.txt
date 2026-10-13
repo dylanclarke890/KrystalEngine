@@ -235,6 +235,18 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/ForVisitedLink.hpp
   include/Krystal.Booey/Style/Values/Color/ColorOptions.hpp
   include/Krystal.Booey/Style/Values/Color/SystemColor.hpp
+
+  # Slice 3: Colour, layer 5b (colour parser; the Value-returning consumers wait for layer 5c)
+  include/Krystal.Booey/CSS/Parser/ParserFastPaths.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/AngleDefinitions.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Color.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/ColorAdjust.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/ColorInlines.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/ColorInterpolationMethod.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/KeywordDefinitions.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/PercentageDefinitions.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/SymbolDefinitions.hpp
+  include/Krystal.Booey/CSS/Values/ColorAdjust/ColorScheme.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -309,6 +321,14 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/Color/PlatformColorResolutionState.cpp
   src/CSS/Values/Color/ResolvedColor.cpp
   src/Style/Values/Color/SystemColor.cpp
+
+  # Slice 3: Colour, layer 5b (colour parser; ColorValueConsumers.cpp/ColorAdjustValueConsumers.cpp wait for layer 5c)
+  src/CSS/Parser/ParserFastPaths.cpp
+  src/CSS/Properties/Consumers/Color.cpp
+  src/CSS/Properties/Consumers/ColorAdjust.cpp
+  src/CSS/Properties/Consumers/ColorInterpolationMethod.cpp
+  src/CSS/Properties/Consumers/Symbol.cpp
+  src/CSS/Values/ColorAdjust/ColorScheme.cpp
 )
 
 target_precompile_headers(Krystal.Booey

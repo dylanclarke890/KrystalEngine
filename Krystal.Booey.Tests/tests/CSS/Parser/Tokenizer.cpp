@@ -1,10 +1,11 @@
 ﻿#include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/TestParserUtils.hpp"
+#include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/ParseError.hpp"
 #include "Krystal.Booey/CSS/Parser/Token.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::css::tests
 {
@@ -330,4 +331,16 @@ namespace krys::boo::css::tests
   EXECUTE_CSS_TOKENIZER_TEST_CASE("string-01.dat");
 
   EXECUTE_CSS_TOKENIZER_TEST_CASE("url-01.dat");
+
+  TEST_CASE("Tokenizer(empty input)", "[CSS][Tokenizer]")
+  {
+    InputStream input {CSSOMString()};
+    CHECK(input.Size() == 0);
+    CHECK(input.NextInputCharacter() == EOFMarker);
+
+    Tokenizer tokenizer {input};
+    CHECK_FALSE(tokenizer.PumpTokenizer());
+    CHECK(tokenizer.Tokens().IsAtEnd());
+    CHECK(tokenizer.Tokens().Peek().Type() == TokenType::EndOfFile);
+  }
 }
