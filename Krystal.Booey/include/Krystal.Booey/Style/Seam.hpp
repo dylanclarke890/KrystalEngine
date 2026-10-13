@@ -6,10 +6,12 @@
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/FloatSize.hpp"
 #include "Krystal.Booey/Style/AnchorSizeDimension.hpp"
 #include "Krystal.Booey/Style/ScopedName.hpp"
 #include "Krystal.Booey/Style/ScopeOrdinal.hpp"
+#include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -18,14 +20,15 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
-// FIXME: Placeholders for the rendering, font and style-resolver types that length resolution and calc
-// evaluation need. Each declares only the members those callers use, under its upstream name. None of them
-// can be constructed, so no caller can reach these members and every definition is unreachable. Each type
-// moves to its own header, with its real implementation, when its slice is ported:
+// FIXME: Placeholders for the rendering, font and style-resolver types that length resolution, calc
+// evaluation and colour resolution need. Each declares only the members those callers use, under its upstream
+// name. Only `RenderStyle` can be constructed, and only its colour members are implemented; everything else
+// is unreachable. Each type moves to its own header, with its real implementation, when its slice is ported:
 //   - `FontMetrics`, `FontCascadeDescription`, `FontCascade`: platform/graphics fonts.
 //   - `RenderStyle`, `RenderView`, `RenderBox`: rendering.
 //   - `style::BuilderState`, `style::AnchorPositionEvaluator`, `style::ContainerQueryEvaluator`: the style
 //     resolver (`Style/BuilderState.hpp`, `Style/AnchorPositionEvaluator.hpp`, unreviewed).
+//   - the `Document*` colour functions: `dom::Document` (upstream members) once it has a page and settings.
 // A few members collapse an upstream call chain whose types aren't ported yet; they're marked below.
 
 namespace krys::boo::dom
@@ -46,6 +49,7 @@ namespace krys::boo::css::calc
 
 namespace krys::boo::style
 {
+  struct Color;
   struct ZoomFactor;
 }
 
@@ -94,8 +98,25 @@ namespace krys::boo
   {
     KRYS_NON_COPY_MOVABLE(RenderStyle);
 
+  private:
+    boo::Color _color {boo::Color::black};
+    boo::Color _visitedLinkColor {boo::Color::black};
+    bool _hasDarkOnlyColorScheme {false};
+
   public:
-    RenderStyle() = delete;
+    RenderStyle() noexcept = default;
+
+    KRYS_NODISCARD const boo::Color &GetColor() const noexcept;
+    void SetColor(const boo::Color &color) noexcept;
+    KRYS_NODISCARD const boo::Color &VisitedLinkColor() const noexcept;
+    void SetVisitedLinkColor(const boo::Color &color) noexcept;
+
+    KRYS_NODISCARD boo::Color ColorResolvingCurrentColor(const style::Color &color,
+                                                         bool visitedLink = false) const noexcept;
+
+    /// @brief Collapses `colorScheme()` resolving to `dark` without `light`.
+    KRYS_NODISCARD bool HasDarkOnlyColorScheme() const noexcept;
+    void SetHasDarkOnlyColorScheme(bool value) noexcept;
 
     KRYS_NODISCARD WritingMode GetWritingMode() const noexcept;
     KRYS_NODISCARD float Zoom() const noexcept;
@@ -158,6 +179,29 @@ namespace krys::boo
 
   /// @brief Collapses `dynamicDowncast<RenderBox>(element.renderer())`.
   KRYS_NODISCARD const RenderBox *RenderBoxOf(const dom::Element &) noexcept;
+
+  /// @brief Collapses `document.textColor()`. Nothing sets it (`<body text>`), so it's the initial black.
+  KRYS_NODISCARD boo::Color DocumentTextColor(const dom::Document &) noexcept;
+
+  /// @brief Collapses `document.linkColor(style)`. Nothing sets it (`<body link>`), so it's the
+  /// `-webkit-link` keyword colour.
+  KRYS_NODISCARD boo::Color DocumentLinkColor(const dom::Document &, const RenderStyle &) noexcept;
+
+  /// @brief Collapses `document.visitedLinkColor(style)`. Nothing sets it (`<body vlink>`), so it's the
+  /// visited `-webkit-link` keyword colour.
+  KRYS_NODISCARD boo::Color DocumentVisitedLinkColor(const dom::Document &, const RenderStyle &) noexcept;
+
+  /// @brief Collapses `document.activeLinkColor(style)`. Nothing sets it (`<body alink>`), so it's the
+  /// `-webkit-activelink` keyword colour.
+  KRYS_NODISCARD boo::Color DocumentActiveLinkColor(const dom::Document &, const RenderStyle &) noexcept;
+
+  /// @brief Collapses `document.useDarkAppearance(style)` for a document with no page and default settings:
+  /// dark only when the style's colour scheme is dark only.
+  KRYS_NODISCARD bool DocumentUseDarkAppearance(const dom::Document &, const RenderStyle *) noexcept;
+
+  /// @brief Collapses `document.styleColorOptions(style)` for a document with no page and default settings.
+  KRYS_NODISCARD style::ColorOptions DocumentStyleColorOptions(const dom::Document &,
+                                                               const RenderStyle *) noexcept;
 }
 
 namespace krys::boo::style
@@ -170,6 +214,7 @@ namespace krys::boo::style
   public:
     BuilderState() = delete;
 
+    KRYS_NODISCARD const RenderStyle &Style() const noexcept;
     KRYS_NODISCARD const RenderStyle &ParentStyle() const noexcept;
     KRYS_NODISCARD const RenderStyle *RootElementStyle() const noexcept;
 

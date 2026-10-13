@@ -227,4 +227,9 @@ namespace krys::boo::style
       default:                           return {};
     }
   }
+
+  boo::Color FocusRingColor(ColorOptions) noexcept
+  {
+    return boo::Color::black;
+  }
 }

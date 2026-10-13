@@ -1,13 +1,15 @@
 ﻿#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/CSS/Calc/RandomCachingKey.hpp"
 #include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
+#include "Krystal.Booey/CSS/Values/Color/KeywordColor.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp"
 #include "Krystal.Core/Assert.hpp"
 
-// FIXME: Placeholder definitions; see `Style/Seam.hpp`. None of these types can be constructed, so none of
-// these can be reached.
+// FIXME: Placeholder definitions; see `Style/Seam.hpp`. Only `RenderStyle` can be constructed, so only its
+// colour members and the document colour functions can be reached.
 
 namespace krys::boo
 {
@@ -69,6 +71,42 @@ namespace krys::boo
   float FontCascade::ZeroWidth() const noexcept
   {
     krys_unreachable();
+  }
+
+  const boo::Color &RenderStyle::GetColor() const noexcept
+  {
+    return _color;
+  }
+
+  void RenderStyle::SetColor(const boo::Color &color) noexcept
+  {
+    _color = color;
+  }
+
+  const boo::Color &RenderStyle::VisitedLinkColor() const noexcept
+  {
+    return _visitedLinkColor;
+  }
+
+  void RenderStyle::SetVisitedLinkColor(const boo::Color &color) noexcept
+  {
+    _visitedLinkColor = color;
+  }
+
+  boo::Color RenderStyle::ColorResolvingCurrentColor(const style::Color &color,
+                                                     bool visitedLink) const noexcept
+  {
+    return color.ResolveColor(visitedLink ? VisitedLinkColor() : GetColor());
+  }
+
+  bool RenderStyle::HasDarkOnlyColorScheme() const noexcept
+  {
+    return _hasDarkOnlyColorScheme;
+  }
+
+  void RenderStyle::SetHasDarkOnlyColorScheme(bool value) noexcept
+  {
+    _hasDarkOnlyColorScheme = value;
   }
 
   WritingMode RenderStyle::GetWritingMode() const noexcept
@@ -195,10 +233,52 @@ namespace krys::boo
   {
     krys_unreachable();
   }
+
+  boo::Color DocumentTextColor(const dom::Document &) noexcept
+  {
+    return boo::Color::black;
+  }
+
+  boo::Color DocumentLinkColor(const dom::Document &document, const RenderStyle &style) noexcept
+  {
+    return css::ColorFromKeyword(css::ValueId::WebkitLink, DocumentStyleColorOptions(document, &style));
+  }
+
+  boo::Color DocumentVisitedLinkColor(const dom::Document &document, const RenderStyle &style) noexcept
+  {
+    return css::ColorFromKeyword(css::ValueId::WebkitLink, DocumentStyleColorOptions(document, &style)
+                                                             | style::ColorOptions::ForVisitedLink);
+  }
+
+  boo::Color DocumentActiveLinkColor(const dom::Document &document, const RenderStyle &style) noexcept
+  {
+    return css::ColorFromKeyword(css::ValueId::WebkitActivelink, DocumentStyleColorOptions(document, &style));
+  }
+
+  bool DocumentUseDarkAppearance(const dom::Document &, const RenderStyle *style) noexcept
+  {
+    return style && style->HasDarkOnlyColorScheme();
+  }
+
+  style::ColorOptions DocumentStyleColorOptions(const dom::Document &document,
+                                                const RenderStyle *style) noexcept
+  {
+    auto options = style::ColorOptions::None;
+    if (DocumentUseDarkAppearance(document, style))
+    {
+      options |= style::ColorOptions::UseDarkAppearance;
+    }
+    return options;
+  }
 }
 
 namespace krys::boo::style
 {
+  const RenderStyle &BuilderState::Style() const noexcept
+  {
+    krys_unreachable();
+  }
+
   const RenderStyle &BuilderState::ParentStyle() const noexcept
   {
     krys_unreachable();

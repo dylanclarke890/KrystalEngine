@@ -10,4 +10,7 @@ namespace krys::boo::style
   /// the default theme's colour.
   /// @return The colour, or the invalid colour if `keyword` isn't a system colour.
   KRYS_NODISCARD boo::Color SystemColor(css::ValueId keyword, ColorOptions options) noexcept;
+
+  /// @brief The default theme's focus ring colour (`-webkit-focus-ring-color`).
+  KRYS_NODISCARD boo::Color FocusRingColor(ColorOptions options) noexcept;
 }

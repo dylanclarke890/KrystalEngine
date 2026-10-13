@@ -253,6 +253,24 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/ColorValue.hpp
   include/Krystal.Booey/CSS/Values/DynamicRangeLimitValue.hpp
   include/Krystal.Booey/CSS/Values/ValuePool.hpp
+
+  # Slice 3: Colour, layer 6 (Style colour)
+  include/Krystal.Booey/Graphics/PlatformDynamicRangeLimit.hpp
+  include/Krystal.Booey/Style/Values/Color/AbsoluteColor.hpp
+  include/Krystal.Booey/Style/Values/Color/Color.hpp
+  include/Krystal.Booey/Style/Values/Color/ColorLayers.hpp
+  include/Krystal.Booey/Style/Values/Color/ColorMix.hpp
+  include/Krystal.Booey/Style/Values/Color/ColorResolutionState.hpp
+  include/Krystal.Booey/Style/Values/Color/ContrastColor.hpp
+  include/Krystal.Booey/Style/Values/Color/CurrentColor.hpp
+  include/Krystal.Booey/Style/Values/Color/DynamicRangeLimit.hpp
+  include/Krystal.Booey/Style/Values/Color/DynamicRangeLimitMix.hpp
+  include/Krystal.Booey/Style/Values/Color/HexColor.hpp
+  include/Krystal.Booey/Style/Values/Color/KeywordColor.hpp
+  include/Krystal.Booey/Style/Values/Color/LightDarkColor.hpp
+  include/Krystal.Booey/Style/Values/Color/Opacity.hpp
+  include/Krystal.Booey/Style/Values/Color/RelativeColor.hpp
+  include/Krystal.Booey/Style/Values/Color/ResolvedColor.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -344,6 +362,20 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/ColorValue.cpp
   src/CSS/Values/DynamicRangeLimitValue.cpp
   src/CSS/Values/ValuePool.cpp
+
+  # Slice 3: Colour, layer 6 (Style colour)
+  src/Graphics/PlatformDynamicRangeLimit.cpp
+  src/Style/Values/Color/Color.cpp
+  src/Style/Values/Color/ColorLayers.cpp
+  src/Style/Values/Color/ColorMix.cpp
+  src/Style/Values/Color/ContrastColor.cpp
+  src/Style/Values/Color/CurrentColor.cpp
+  src/Style/Values/Color/DynamicRangeLimit.cpp
+  src/Style/Values/Color/DynamicRangeLimitMix.cpp
+  src/Style/Values/Color/HexColor.cpp
+  src/Style/Values/Color/KeywordColor.cpp
+  src/Style/Values/Color/LightDarkColor.cpp
+  src/Style/Values/Color/ResolvedColor.cpp
 )
 
 target_precompile_headers(Krystal.Booey

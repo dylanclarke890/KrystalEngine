@@ -126,6 +126,8 @@ target_sources(Krystal.Booey.Tests
 		# Style
 		tests/Style/Calc/Tree.cpp
 		tests/Style/ScopedName.cpp
+		tests/Style/Values/Color/Color.cpp
+		tests/Style/Values/Color/DynamicRangeLimit.cpp
 		tests/Style/Values/Color/SystemColor.cpp
 		tests/Style/Values/Primitives/LengthResolution.cpp
 		tests/Style/Values/Primitives/LengthWrapper.cpp
