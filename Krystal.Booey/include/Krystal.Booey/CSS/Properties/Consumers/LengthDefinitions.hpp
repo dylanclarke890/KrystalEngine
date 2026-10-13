@@ -1,6 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Parser/ParserMode.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumerDefinitions.hpp"
+#include "Krystal.Booey/CSS/Properties/Property.hpp"
 
 namespace krys::boo::css
 {
@@ -9,17 +11,18 @@ namespace krys::boo::css
     KRYS_NODISCARD constexpr static Maybe<LengthUnit> Validate(UnitType unitType, PropertyParserState &state,
                                                                PropertyParserOptions options) noexcept
     {
-      (void)state;
-      (void)options;
+      if (unitType == UnitType::QuirkyEm
+          && !IsUASheetBehavior(options.OverrideParserMode.value_or(state.Context.Mode)))
+      {
+        return null;
+      }
 
       return UnitTraits<LengthUnit>::Validate(unitType);
     }
 
     template <auto R, typename V>
-    KRYS_NODISCARD static bool IsValid(LengthRaw<R, V> raw, PropertyParserOptions options) noexcept
+    KRYS_NODISCARD static bool IsValid(LengthRaw<R, V> raw, PropertyParserOptions) noexcept
     {
-      (void)options;
-
       // Values other than 0 and +/-∞ are not supported for <length> numeric ranges currently.
       return IsValidNonCanonicalizableDimensionValue(raw);
     }
@@ -38,7 +41,7 @@ namespace krys::boo::css
         return true;
       }
 
-      return false;
+      return mode == ParserMode::HTMLQuirks && Property::AcceptsQuirkyLength(state.CurrentProperty);
     }
   };
 

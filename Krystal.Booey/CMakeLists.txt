@@ -395,6 +395,21 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Properties/PropertyShorthand.hpp
   include/Krystal.Booey/CSS/Properties/Types/IsImplicit.hpp
   include/Krystal.Booey/CSS/Properties/Types/IsSetFromShorthand.hpp
+
+  # Property parser, layer b1 (shared consumer foundations)
+  include/Krystal.Booey/CSS/Properties/Consumers/AnglePercentageDefinitions.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/FlexDefinitions.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/FrequencyDefinitions.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/IntegerDefinitions.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/LengthDefinitions.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/LengthPercentageDefinitions.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/List.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/MetaResolver.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Percentage.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/ResolutionDefinitions.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/String.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/TimeDefinitions.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -581,6 +596,10 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Properties/Property.cpp
   src/CSS/Properties/PropertyParserResult.cpp
   src/CSS/Properties/PropertyShorthand.cpp
+
+  # Property parser, layer b1 (shared consumer foundations)
+  src/CSS/Properties/Consumers/Percentage.cpp
+  src/CSS/Properties/Consumers/String.cpp
 )
 
 target_precompile_headers(Krystal.Booey

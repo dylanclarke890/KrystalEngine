@@ -1,9 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumerDefinitions.hpp"
+#include "Krystal.Booey/CSS/Calc/Value.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumer.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaResolver.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserOptions.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/PrimitiveNumeric.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/UnevaluatedCalc.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
@@ -24,13 +26,12 @@ namespace krys::boo::css
     KRYS_NODISCARD static RefPtr<PrimitiveValue> Resolve(IntegerRaw<R, T> value,
                                                          PropertyParserOptions) noexcept
     {
-      return PrimitiveValue::Create(value.Value);
+      return PrimitiveValue::CreateInteger(value.Value);
     }
 
     KRYS_NODISCARD static RefPtr<PrimitiveValue> Resolve(Calc auto value, PropertyParserOptions = {}) noexcept
     {
-      (void)value;
-      krys_not_implemented();
+      return PrimitiveValue::Create(value.ProtectedCalc());
     }
 
     KRYS_NODISCARD static RefPtr<PrimitiveValue> Resolve(Numeric auto value,

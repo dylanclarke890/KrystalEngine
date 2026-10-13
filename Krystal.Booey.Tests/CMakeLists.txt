@@ -102,9 +102,14 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Parser/VariableParser.cpp
 		tests/CSS/Properties/Consumers/Color.cpp
 		tests/CSS/Properties/Consumers/ColorAdjust.cpp
+		tests/CSS/Properties/Consumers/Definitions.cpp
 		tests/CSS/Properties/Consumers/Ident.cpp
+		tests/CSS/Properties/Consumers/List.cpp
 		tests/CSS/Properties/Consumers/MetaConsumer.cpp
+		tests/CSS/Properties/Consumers/Percentage.cpp
+		tests/CSS/Properties/Consumers/PrimitiveValue.cpp
 		tests/CSS/Properties/Consumers/Primitives.cpp
+		tests/CSS/Properties/Consumers/String.cpp
 		tests/CSS/Properties/Property.cpp
 		tests/CSS/Properties/PropertyParserResult.cpp
 		tests/CSS/Properties/PropertyShorthand.cpp

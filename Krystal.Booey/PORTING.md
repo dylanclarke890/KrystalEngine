@@ -40,9 +40,10 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Slice 3 is committed (up to `225dbc61`).
 - Values (slices 2 and 4, 2026-10-13): `Value`, `PrimitiveValue`, `ParserContext` and every `Value` subclass built and instance-tested, with the CSS types they hold (positions, URLs and WTF's `url::URL`, grid areas, easing, shadows, shapes, filters, `ray()`, variable data, gradients), the geometry types and the SVG path pipeline. Builder- and loader-dependent members are deferred (below). See the *Values* section.
 - Property parser, layer a (2026-10-13): parser plumbing (`Property`, `ParsedPropertyList`, `PropertyParserResult`, `PropertyShorthand` and the generated shorthand functions, `CustomPropertySyntax`, `VariableParser`) built and tested; see the *Property parser* section.
+- Property parser, layer b1 (2026-10-13): the shared consumer foundations (the remaining `*Definitions.hpp`, `MetaResolver`, the `PrimitiveValue` resolver, `List`, `Percentage`, `String`) built and tested.
 
 **Open / next candidates:**
-- Property parser, next: layer b, the consumers (`Consumers/*.cpp`), compile-only first, in groups; then layer c (`PropertyParserCustom.hpp`, generated `PropertyParsing.cpp`, `PropertyParser.cpp`). See the *Property parser* section for the plan.
+- Property parser, next: layer b2 (see the group plan in the *Property parser* section); then b3–b5, then layer c (`PropertyParserCustom.hpp`, generated `PropertyParsing.cpp`, `PropertyParser.cpp`). See the *Property parser* section for the plan.
 - Property parser, deferred definitions (need `style::CustomProperty`/`BuilderState`): `VariableParser::ParseInitialValueForUniversalSyntax`; layer c adds `PropertyParser::ParseTypedCustomPropertyValue`/`ParseTypedCustomPropertyInitialValue`.
 - Values, deferred definitions (declared, not defined, FIXME'd; define when `style::Builder`/`BuilderState` and the resource loader are ported): `VariableReferenceValue::ResolveVariableReferences`, `ResolveSingleValue`, `ResolveTokenRange`, `ResolveVariableReference`, `ResolveVariableFallback`, `TryResolveSimpleReference` (and so `ResolveAndCacheValue`); `PendingSubstitutionValue::ResolveValue` (also needs `PropertyParser::ParseValue` and `ParsedPropertyVector`); `FontFaceSrcResourceValue::GetFontLoadRequest` and its cached font (`CustomTraverseSubresources` returns `false` until then); `FontFaceSrcLocalValue::GetSVGFontFaceElement`/`SetSVGFontFaceElement` (need SVG fonts); `CreateStyleImage` on the ten image values (needs `style::BuilderState` and `StyleImage`, and the cached style image members of `NamedImageValue`/`CanvasValue`/`GradientValue`); `ImageValue::IsPending`, `LoadImage`, `GetCachedImage`, `KnownToBeOpaque` and its cached image (`CustomTraverseSubresources` returns `false`, and `CopyForComputedStyle` doesn't copy the cache, until then).
 - Not yet ported, needed later: the graphics `Path` (cached by `SVGPathByteStream` upstream), the rest of `SVGPathUtilities` (needs `Path` and `SVGPathSegList`), `parseKerningUnicodeString`/`parseGlyphName`.
@@ -50,7 +51,6 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Deferred from layer 6 (needs `Style/BuilderChecking.hpp` and the raw-WebKit `ValueList`/`ValuePair`/`FunctionValue`/`BuilderState` it includes): `CSSValueConversion<Color>`, `CSSValueCreation<Color>`, `CSSValueConversion<DynamicRangeLimit>`, `CSSValueCreation<DynamicRangeLimit>` and `CSSValueConversion<Opacity>`. They come with the other `+CSSValueConversion`/`+CSSValueCreation` headers.
 - Waiting on the property parser slice: `ValuePool::CreateFontFaceValue` (needs `ValueList`/`PropertyParser`) and `ParserFastPaths::MaybeParseValue` (its keyword fallback needs the generated `PropertyParsing.cpp`, which calls every consumer's `IsKeywordValidFor*`). The Style `+CSSValueConversion`/`+CSSValueCreation` headers (numerics, `LengthWrapper`, `PrimitiveKeyword`) are still raw WebKit.
 - Style `ToCSS`/serialisation can't be tested until there's a real `RenderStyle` (the seam's can't be constructed).
-- Only the `Number` consumer definitions are reviewed; the other `Consumers/*Definitions.hpp` (and `IntegerDefinitions.hpp`, which still uses `CalcAllowedSymbols`) come with the slices that need them.
 - The Style seam (`Style/Seam.hpp`, `src/Style/Seam.cpp`) stands in for `RenderStyle`, `RenderView`, `RenderBox`, the font types, `Style::BuilderState`, `AnchorPositionEvaluator`, `ContainerQueryEvaluator` and the `Document` colour API. Each placeholder is replaced when its slice is ported; see the layer 3b and layer 6 sections. Since layer 6, `RenderStyle` can be constructed (colour state only); its other members are still unreachable.
 - `ParserContext`: the `Document` and `Settings` constructors (FIXME in the header) wait for `Document::CssParserContext()` and a `Settings` port; so does the generated `PropertySettings(const Settings &)` constructor. `LocalFrame`'s `StaticValuePool::Init()` call comes with `LocalFrame`.
 - `CSS/Values/Concepts.hpp` (`CSSValueConcepts.h`) compiles but isn't reviewed.
@@ -383,7 +383,12 @@ Entry: `css/parser/CSSPropertyParser.cpp` (headers-only graph: 151 files, `tools
 
 **Plan (decided 2026-10-13):** `PropertyParser.cpp` can't link until the generated `PropertyParsing.cpp` does, and that includes `PropertyParserCustom.hpp` and calls every consumer (~43 `Consumers/*.cpp`, ~15k upstream lines; `Font.cpp` and `Shapes.cpp` are stubs, `Syntax.cpp` is missing). So, in layers, with the Style-dependent pieces declared and FIXME'd (the hybrid approach used for the Values):
 - **a.** Parser plumbing: `Property`, `ParsedPropertyList`, `PropertyParserResult`, `PropertyShorthand` (+ generated shorthand functions), `CustomPropertySyntax`, `VariableParser`. Done.
-- **b.** The consumers, in groups, compile-only first (as with the Value subclasses).
+- **b.** The consumers, in groups, compile-only first (as with the Value subclasses). Groups, by upstream include order (proposed 2026-10-13):
+  - **b1.** Shared foundations: the remaining `*Definitions.hpp`, `MetaResolver`, `PrimitiveValue` (`CSSPrimitiveValueResolver`), `List`, `Percentage`, `String`. Done.
+  - **b2.** Ident/keyword-level consumers: `Align`, `Anchor`, `Attr`, `Box`, `Display`, `Inline`, `PositionTry`, `Ratio`, `ScrollSnap`, `Scrollbars`, `Syntax` (missing), `Transitions`, `UnicodeRange`, `URL`, `ViewTransition`, `WillChange`.
+  - **b3.** Numeric/structured consumers: `Animations`, `CounterStyles`, `Easing`, `Grid`, `Lists`, `Position`, `SVG`, `TextDecoration`, `Timeline`, `Transform`.
+  - **b4.** Image-dependent consumers: `Image`, then `Background`, `Content`, `Filter`, `Masking`, `Motion`, `UI`.
+  - **b5.** The stubs: `Font`, `Shapes` (~2k upstream lines).
 - **c.** `PropertyParserCustom.hpp`, generated `PropertyParsing.cpp`, `PropertyParser.cpp`; then tests parsing properties from strings, and `ParserFastPaths::MaybeParseValue`/`ValuePool::CreateFontFaceValue`.
 
 ### Layer a: parser plumbing (2026-10-13)
@@ -415,6 +420,33 @@ Entry: `css/parser/CSSPropertyParser.cpp` (headers-only graph: 151 files, `tools
 - `VariableParser`: `ClassifyBlock`'s stack is a `List` (upstream `std::stack`); `ParseInitialValueForUniversalSyntax` is declared, not defined (FIXME; needs `style::CustomProperty`).
 
 Tests: `tests/CSS/Properties/{Property,PropertyShorthand,PropertyParserResult}.cpp`, `tests/CSS/Parser/{CustomPropertySyntax,VariableParser}.cpp`: 9 cases / 309 assertions pass; `IsCustomPropertyName` added to `tests/CSS/Parser/KeywordLookup.cpp`. Full Booey suite: 1358 cases / 671619 assertions; all pass except 2 expected failures. Whole solution builds with no warnings.
+
+### Layer b1: shared consumer foundations (2026-10-13)
+
+From the include graph of the consumer `.cpp`s: every other consumer includes some of these. Paths under `css/parser/CSSPropertyParserConsumer+` (WebKit) and `CSS/Properties/Consumers/` (Krystal).
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `IntegerDefinitions.h` | `have` | `IntegerDefinitions.hpp` | on | tested. See bugs. |
+| `LengthDefinitions.h` | `have` | `LengthDefinitions.hpp` | on | tested. See bugs. |
+| `LengthPercentageDefinitions.h` | `have` | `LengthPercentageDefinitions.hpp` | on | tested. |
+| `AnglePercentageDefinitions.h` | `have` | `AnglePercentageDefinitions.hpp` | on | tested. |
+| `TimeDefinitions.h`, `ResolutionDefinitions.h`, `FlexDefinitions.h`, `FrequencyDefinitions.h` | `have` | `TimeDefinitions.hpp`, `ResolutionDefinitions.hpp`, `FlexDefinitions.hpp`, `FrequencyDefinitions.hpp` | on | tested. |
+| `MetaResolver.h` | `have` | `MetaResolver.hpp` | on | tested through `PrimitiveValueResolver`. |
+| `CSSPrimitiveValueResolver.h` | `have` | `PrimitiveValue.hpp` (`PrimitiveValueResolver`, `PrimitiveValueResolverBase`) | on | tested. See bugs. |
+| `List.h` | `have` | `List.hpp` | on | tested. `ListBounds`' members are `Min`/`Max`, `size_t` (upstream `unsigned`). |
+| `Percentage.h`, `.cpp` | `have` | `Percentage.hpp`, `src/.../Percentage.cpp` | on | tested. Upstream's FIXME (calc() percentages aren't divided by 100) is kept, with a `[!shouldfail]` test. |
+| `String.h`, `.cpp` | `have` | `String.hpp`, `src/.../String.cpp` | on | tested. |
+
+**Bugs fixed:**
+- `IntegerDefinitions.hpp` used the old `CalcAllowedSymbols` (header no longer exists) and the raw `assert`, so it didn't compile.
+- `LengthValidator` didn't reject the quirky em unit (`__qem`) outside UA sheets, and didn't accept unitless lengths for the quirky-length properties in quirks mode (`Property::AcceptsQuirkyLength`).
+- `PrimitiveValueResolverBase`: resolving a calc value hit `krys_not_implemented()` (now `PrimitiveValue::Create(value.ProtectedCalc())`), and integers were created as plain numbers (now `CreateInteger`).
+
+**Differences:**
+- `PercentageConsumer` takes the percentage unit as a template argument (layer 3c); the definitions pass it explicitly.
+
+Tests: `tests/CSS/Properties/Consumers/{Definitions,PrimitiveValue,List,Percentage,String}.cpp`: 19 cases / 225 assertions pass (1 expected failure). Full Booey suite: 1377 cases / 671844 assertions; all pass except 3 expected failures.
 
 ## Slice 3: Colour
 

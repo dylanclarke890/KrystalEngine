@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Calc/CalcAllowedSymbols.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumerDefinitions.hpp"
 
 namespace krys::boo::css
@@ -26,10 +25,10 @@ namespace krys::boo::css
     constexpr static TokenType TokenType = TokenType::Number;
 
     KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(TokenRange &tokens, PropertyParserState &,
-                                                                 CalcAllowedSymbols,
+                                                                 AllowedSymbols,
                                                                  PropertyParserOptions options) noexcept
     {
-      assert(tokens.Peek().Type() == TokenType::Number);
+      krys_debug_assert(tokens.Peek().Type() == TokenType::Number);
 
       if (tokens.Peek().NumericValueType() != NumericValueType::Integer)
       {
