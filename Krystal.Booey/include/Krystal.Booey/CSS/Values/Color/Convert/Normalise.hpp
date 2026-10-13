@@ -1,9 +1,8 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Color/ColorDescriptors.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/Graphics/Color/ColorUtilities.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorNormalization.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include <limits>
 

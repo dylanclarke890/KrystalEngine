@@ -1,7 +1,9 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Color/ColorDescriptors.hpp"
 #include "Krystal.Booey/CSS/Values/Color/Convert/Normalise.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include <limits>
 
 namespace krys::boo::css
 {
@@ -9,30 +11,38 @@ namespace krys::boo::css
   // of `Variant<style::Number<>, style::Percentage<>, ...>`) into typed colors (e.g. `SRGBA<float>`).
 
   template <typename Descriptor, size_t Index>
-  float convertToTypeColorComponent(style::Number<> number)
+  KRYS_NODISCARD float ConvertToTypeColorComponent(style::Number<> number) noexcept
   {
     constexpr auto info = std::get<Index>(Descriptor::Components);
     constexpr auto multiplier = info.NumberMultiplier;
-    constexpr auto min = info.min * info.NumberMultiplier;
-    constexpr auto max = info.max * info.NumberMultiplier;
+    constexpr auto min = info.Min * info.NumberMultiplier;
+    constexpr auto max = info.Max * info.NumberMultiplier;
 
     if constexpr (info.Type == ColorComponentType::Angle)
     {
-      return normalizeHue(number.Value);
+      return static_cast<float>(NormalizeHue(number.Value));
     }
     else if constexpr (info.Min == -std::numeric_limits<double>::infinity()
                        && info.Max == std::numeric_limits<double>::infinity())
-      return number.Value * multiplier;
+    {
+      return static_cast<float>(number.Value * multiplier);
+    }
     else if constexpr (info.Min == -std::numeric_limits<double>::infinity())
-      return std::min(number.Value * multiplier, max);
+    {
+      return static_cast<float>(std::min(number.Value * multiplier, max));
+    }
     else if constexpr (info.Max == std::numeric_limits<double>::infinity())
-      return std::max(number.Value * multiplier, min);
+    {
+      return static_cast<float>(std::max(number.Value * multiplier, min));
+    }
     else
-      return std::clamp(number.Value * multiplier, min, max);
+    {
+      return static_cast<float>(std::clamp(number.Value * multiplier, min, max));
+    }
   }
 
   template <typename Descriptor, size_t Index>
-  float convertToTypeColorComponent(style::Percentage<> percent)
+  KRYS_NODISCARD float ConvertToTypeColorComponent(style::Percentage<> percent) noexcept
   {
     constexpr auto info = std::get<Index>(Descriptor::Components);
     constexpr auto multiplier = info.PercentMultiplier * info.NumberMultiplier;
@@ -41,50 +51,59 @@ namespace krys::boo::css
 
     if constexpr (info.Min == -std::numeric_limits<double>::infinity()
                   && info.Max == std::numeric_limits<double>::infinity())
-      return percent.Value * multiplier;
+    {
+      return static_cast<float>(percent.Value * multiplier);
+    }
     else if constexpr (info.Min == -std::numeric_limits<double>::infinity())
-      return std::min(percent.Value * multiplier, max);
+    {
+      return static_cast<float>(std::min(percent.Value * multiplier, max));
+    }
     else if constexpr (info.Max == std::numeric_limits<double>::infinity())
-      return std::max(percent.Value * multiplier, min);
+    {
+      return static_cast<float>(std::max(percent.Value * multiplier, min));
+    }
     else
-      return std::clamp(percent.Value * multiplier, min, max);
+    {
+      return static_cast<float>(std::clamp(percent.Value * multiplier, min, max));
+    }
   }
 
   template <typename Descriptor, size_t Index>
-  float convertToTypeColorComponent(style::Angle<> angle)
+  KRYS_NODISCARD float ConvertToTypeColorComponent(style::Angle<> angle) noexcept
   {
     constexpr auto info = std::get<Index>(Descriptor::Components);
     static_assert(info.Type == ColorComponentType::Angle);
 
-    return normalizeHue(angle.Value);
+    return static_cast<float>(NormalizeHue(angle.Value));
   }
 
   template <typename Descriptor, size_t Index>
-  float convertToTypeColorComponent(CSS::Keyword::None)
+  KRYS_NODISCARD float ConvertToTypeColorComponent(keywords::None) noexcept
   {
-    return std::numeric_limits<double>::quiet_NaN();
+    return std::numeric_limits<float>::quiet_NaN();
   }
 
   template <typename Descriptor, size_t Index, typename... Ts>
-  float convertToTypeColorComponent(const Variant<Ts...> &variant)
+  KRYS_NODISCARD float ConvertToTypeColorComponent(const Variant<Ts...> &variant) noexcept
   {
-    return WTF::switchOn(variant,
-                         [](auto value) { return convertToTypeColorComponent<Descriptor, Index>(value); });
+    return krys::SwitchOn(variant,
+                          [](auto value) { return ConvertToTypeColorComponent<Descriptor, Index>(value); });
   }
 
   template <typename Descriptor, size_t Index, typename T>
-  float convertToTypeColorComponent(const std::optional<T> &optional, float defaultValue)
+  KRYS_NODISCARD float ConvertToTypeColorComponent(const Maybe<T> &optional, float defaultValue) noexcept
   {
-    return optional ? convertToTypeColorComponent<Descriptor, Index>(*optional) : defaultValue;
+    return optional ? ConvertToTypeColorComponent<Descriptor, Index>(*optional) : defaultValue;
   }
 
   template <typename Descriptor>
-  GetColorType<Descriptor> convertToTypedColor(StyleColorParseType<Descriptor> parsed, double defaultAlpha)
+  KRYS_NODISCARD GetColorType<Descriptor> ConvertToTypedColor(StyleColorParseType<Descriptor> parsed,
+                                                              double defaultAlpha) noexcept
   {
-    return {ConvertToTypeColorComponent<Descriptor, 0>(std::get<0>(parsed)),
-            ConvertToTypeColorComponent<Descriptor, 1>(std::get<1>(parsed)),
-            ConvertToTypeColorComponent<Descriptor, 2>(std::get<2>(parsed)),
-            ConvertToTypeColorComponent<Descriptor, 3>(std::get<3>(parsed), defaultAlpha)};
+    return {
+      ConvertToTypeColorComponent<Descriptor, 0>(std::get<0>(parsed)),
+      ConvertToTypeColorComponent<Descriptor, 1>(std::get<1>(parsed)),
+      ConvertToTypeColorComponent<Descriptor, 2>(std::get<2>(parsed)),
+      ConvertToTypeColorComponent<Descriptor, 3>(std::get<3>(parsed), static_cast<float>(defaultAlpha))};
   }
-
-} // namespace WebCore
+}

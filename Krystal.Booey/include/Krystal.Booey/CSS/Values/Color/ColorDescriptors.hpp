@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesEvaluateCalc.hpp"
@@ -6,7 +6,12 @@
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorTypes.hpp"
-#include <optional>
+#include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/Variant.hpp"
+#include <brigand/algorithms/transform.hpp>
+#include <brigand/algorithms/wrap.hpp>
+#include <brigand/sequences/list.hpp>
 
 namespace krys::boo::css
 {
@@ -26,7 +31,7 @@ namespace krys::boo::css
   struct ColorComponent
   {
     using ResultTypeList = brigand::list<Ts...>;
-    using Result = VariantOrSingle<ResultTypeList>;
+    using Result = brigand::wrap<ResultTypeList, VariantOrSingle>;
 
     /// @brief Symbol used to represent component for relative color form.
     ValueId Symbol;
@@ -46,7 +51,7 @@ namespace krys::boo::css
     /// relative color form.
     double SymbolMultiplier = 1.0;
 
-    /// @brief Component Type for normalization. Angles get normalized using modular arithmetic, numbers get
+    /// @brief Component type for normalization. Angles get normalized using modular arithmetic, numbers get
     /// normalized using clamping.
     ColorComponentType Type = ColorComponentType::Number;
   };
@@ -74,7 +79,7 @@ namespace krys::boo::css
   template <typename Descriptor>
   using GetColorTypeComponentType = typename GetColorType<Descriptor>::ComponentType;
 
-  // MARK: Style resolved parse Type (Components are Variants with Style namespaced primitives)
+  // MARK: Style resolved parse type (components are Variants with Style namespaced primitives)
 
   // e.g. for GetStyleColorParseTypeComponentTypeList<ColorRGBFunction<SRGB<float>>, 2> ->
   // brigand::list<style::Percentage, style::Number, keywords::None>
@@ -87,7 +92,7 @@ namespace krys::boo::css
   /// -> Variant<style::Percentage, style::Number, keywords::None>
   template <typename Descriptor, size_t Index>
   using GetStyleColorParseTypeComponentResult =
-    VariantOrSingle<GetStyleColorParseTypeComponentTypeList<Descriptor, Index>>;
+    brigand::wrap<GetStyleColorParseTypeComponentTypeList<Descriptor, Index>, VariantOrSingle>;
 
   /// @brief e.g. for StyleColorParseType<ColorRGBFunction<T>> ->
   /// std::tuple<Variant<style::Percentage, style::Number, keywords::None>, ...>
@@ -111,7 +116,7 @@ namespace krys::boo::css
     return false;
   }
 
-  // MARK: CSS absolute color parse Type (Components are Variants with CSS namespaced primitive, but no symbol
+  // MARK: CSS absolute color parse type (components are Variants with CSS namespaced primitive, but no symbol
   // values)
 
   /// @brief e.g. for GetCSSColorParseTypeWithCalcComponentTypeList<ColorRGBFunction<SRGB<float>>, 2> ->
@@ -124,7 +129,7 @@ namespace krys::boo::css
   /// -> Variant<css::Percentage<>, css::Number<>, keywords::None>
   template <typename Descriptor, size_t Index>
   using GetCSSColorParseTypeWithCalcComponentResult =
-    VariantOrSingle<GetCSSColorParseTypeWithCalcComponentTypeList<Descriptor, Index>>;
+    brigand::wrap<GetCSSColorParseTypeWithCalcComponentTypeList<Descriptor, Index>, VariantOrSingle>;
 
   /// @brief e.g. for CSSColorParseTypeWithCalc<ColorRGBFunction<T>>
   /// -> std::tuple<Variant<css::Percentage<>, css::Number<>, keywords::None>, ...>
@@ -133,26 +138,26 @@ namespace krys::boo::css
     std::tuple<GetCSSColorParseTypeWithCalcComponentResult<Descriptor, 0>,
                GetCSSColorParseTypeWithCalcComponentResult<Descriptor, 1>,
                GetCSSColorParseTypeWithCalcComponentResult<Descriptor, 2>,
-               std::optional<GetCSSColorParseTypeWithCalcComponentResult<Descriptor, 3>>>;
+               Maybe<GetCSSColorParseTypeWithCalcComponentResult<Descriptor, 3>>>;
 
   template <typename Descriptor>
   KRYS_NODISCARD bool
-    ComponentsContainsUnevaluatedCalc(const CSSColorParseTypeWithCalc<Descriptor> &Components) noexcept
+    ComponentsContainsUnevaluatedCalc(const CSSColorParseTypeWithCalc<Descriptor> &components) noexcept
   {
-    return IsUnevaluatedCalc(std::get<0>(Components)) || IsUnevaluatedCalc(std::get<1>(Components))
-           || IsUnevaluatedCalc(std::get<2>(Components)) || IsUnevaluatedCalc(std::get<3>(Components));
+    return IsUnevaluatedCalc(std::get<0>(components)) || IsUnevaluatedCalc(std::get<1>(components))
+           || IsUnevaluatedCalc(std::get<2>(components)) || IsUnevaluatedCalc(std::get<3>(components));
   }
 
   template <typename Descriptor>
   KRYS_NODISCARD bool
-    ComponentsRequireConversionData(const CSSColorParseTypeWithCalc<Descriptor> &Components) noexcept
+    ComponentsRequireConversionData(const CSSColorParseTypeWithCalc<Descriptor> &components) noexcept
   {
-    return RequiresConversionData(std::get<0>(Components)) || RequiresConversionData(std::get<1>(Components))
-           || RequiresConversionData(std::get<2>(Components))
-           || RequiresConversionData(std::get<3>(Components));
+    return RequiresConversionData(std::get<0>(components)) || RequiresConversionData(std::get<1>(components))
+           || RequiresConversionData(std::get<2>(components))
+           || RequiresConversionData(std::get<3>(components));
   }
 
-  // MARK: CSS relative color parse Type (Components are Variants with CSS namespaced primitive, includes
+  // MARK: CSS relative color parse type (components are Variants with CSS namespaced primitive, includes
   // symbol values)
 
   /// @brief e.g. for GetCSSColorParseTypeWithCalcAndSymbolsComponentTypeList<ColorRGBFunction<SRGB<float>>,
@@ -166,7 +171,7 @@ namespace krys::boo::css
   // Variant<css::Percentage<>, css::Number<>, keywords::None, css::Symbol>
   template <typename Descriptor, size_t Index>
   using GetCSSColorParseTypeWithCalcAndSymbolsComponentResult =
-    VariantOrSingle<GetCSSColorParseTypeWithCalcAndSymbolsComponentTypeList<Descriptor, Index>>;
+    brigand::wrap<GetCSSColorParseTypeWithCalcAndSymbolsComponentTypeList<Descriptor, Index>, VariantOrSingle>;
 
   // e.g. for CSSColorParseTypeWithCalcAndSymbols<ColorRGBFunction<T>> ->
   // std::tuple<Variant<css::Percentage<>, css::Number<>, keywords::None, css::Symbol>, ...>
@@ -175,23 +180,23 @@ namespace krys::boo::css
     std::tuple<GetCSSColorParseTypeWithCalcAndSymbolsComponentResult<Descriptor, 0>,
                GetCSSColorParseTypeWithCalcAndSymbolsComponentResult<Descriptor, 1>,
                GetCSSColorParseTypeWithCalcAndSymbolsComponentResult<Descriptor, 2>,
-               std::optional<GetCSSColorParseTypeWithCalcAndSymbolsComponentResult<Descriptor, 3>>>;
+               Maybe<GetCSSColorParseTypeWithCalcAndSymbolsComponentResult<Descriptor, 3>>>;
 
   template <typename Descriptor>
   KRYS_NODISCARD bool ComponentsContainsUnevaluatedCalc(
-    const CSSColorParseTypeWithCalcAndSymbols<Descriptor> &Components) noexcept
+    const CSSColorParseTypeWithCalcAndSymbols<Descriptor> &components) noexcept
   {
-    return IsUnevaluatedCalc(std::get<0>(Components)) || IsUnevaluatedCalc(std::get<1>(Components))
-           || IsUnevaluatedCalc(std::get<2>(Components)) || IsUnevaluatedCalc(std::get<3>(Components));
+    return IsUnevaluatedCalc(std::get<0>(components)) || IsUnevaluatedCalc(std::get<1>(components))
+           || IsUnevaluatedCalc(std::get<2>(components)) || IsUnevaluatedCalc(std::get<3>(components));
   }
 
   template <typename Descriptor>
   KRYS_NODISCARD bool ComponentsRequireConversionData(
-    const CSSColorParseTypeWithCalcAndSymbols<Descriptor> &Components) noexcept
+    const CSSColorParseTypeWithCalcAndSymbols<Descriptor> &components) noexcept
   {
-    return RequiresConversionData(std::get<0>(Components)) || RequiresConversionData(std::get<1>(Components))
-           || RequiresConversionData(std::get<2>(Components))
-           || RequiresConversionData(std::get<3>(Components));
+    return RequiresConversionData(std::get<0>(components)) || RequiresConversionData(std::get<1>(components))
+           || RequiresConversionData(std::get<2>(components))
+           || RequiresConversionData(std::get<3>(components));
   }
 
   // MARK: - Shared Component Descriptors
@@ -204,8 +209,8 @@ namespace krys::boo::css
 
   // MARK: - Color Function Descriptors
 
-  // <modern-rgb-Syntax>  =  rgb( [<number> | <percentage> | none]{3} [ / [<alpha-value> | none] ]? )
-  // <modern-rgba-Syntax> = rgba( [<number> | <percentage> | none]{3} [ / [<alpha-value> | none] ]? )
+  // <modern-rgb-syntax>  =  rgb( [<number> | <percentage> | none]{3} [ / [<alpha-value> | none] ]? )
+  // <modern-rgba-syntax> = rgba( [<number> | <percentage> | none]{3} [ / [<alpha-value> | none] ]? )
   struct RGBFunctionModernAbsolute
   {
     using ColorType = SRGBA<float>;
@@ -245,8 +250,8 @@ namespace krys::boo::css
   template <typename T>
   concept RGBFunctionLegacyComponent = SameType<T, css::Percentage<>> || SameType<T, css::Number<>>;
 
-  // <legacy-rgb-Syntax>  =  rgb( <percentage>#{3} , <alpha-value>? ) |  rgb( <number>#{3} , <alpha-value>? )
-  // <legacy-rgba-Syntax> = rgba( <percentage>#{3} , <alpha-value>? ) | rgba( <number>#{3} , <alpha-value>? )
+  // <legacy-rgb-syntax>  =  rgb( <percentage>#{3} , <alpha-value>? ) |  rgb( <number>#{3} , <alpha-value>? )
+  // <legacy-rgba-syntax> = rgba( <percentage>#{3} , <alpha-value>? ) | rgba( <number>#{3} , <alpha-value>? )
   template <RGBFunctionLegacyComponent Component>
   struct RGBFunctionLegacy
   {
@@ -284,16 +289,17 @@ namespace krys::boo::css
                                                        AlphaLegacyComponent);
   };
 
-  // <modern-rgb-Syntax>  =  rgb( [from <color>] [<number> | <percentage> | none]{3} [ / [<alpha-value> |
-  // none] ]? ) <modern-rgba-Syntax> = rgba( [from <color>] [<number> | <percentage> | none]{3} [ /
-  // [<alpha-value> | none] ]? )
+  // <modern-rgb-syntax>  =  rgb( [from <color>] [<number> | <percentage> | none]{3}
+  //                             [ / [<alpha-value> | none] ]? )
+  // <modern-rgba-syntax> = rgba( [from <color>] [<number> | <percentage> | none]{3}
+  //                             [ / [<alpha-value> | none] ]? )
   struct RGBFunctionModernRelative
   {
     using ColorType = ExtendedSRGBA<float>;
     using Canonical = RGBFunctionModernRelative;
     constexpr static bool AllowEagerEvaluationOfResolvableCalc = true;
     constexpr static bool AllowConversionTo8BitSRGB = true;
-    constexpr static ColorFlags flagsForRelative = ColorFlags::UseColorFunctionSerialisation;
+    constexpr static ColorFlags FlagsForRelative = ColorFlags::UseColorFunctionSerialisation;
     constexpr static auto Syntax = ColorFunctionSyntax::Modern;
     constexpr static bool UsesColorFunctionForSerialisation = false;
     constexpr static CSSOMStringView SerialisationFunctionName = u8"rgb";
@@ -317,16 +323,17 @@ namespace krys::boo::css
                                                        AlphaComponent);
   };
 
-  // <modern-hsl-Syntax>  =  hsl( [from <color>]? [<hue> | none] [<percentage> | <number> | none]{2} [ /
-  // [<alpha-value> | none] ]? ) <modern-hsla-Syntax> = hsla( [from <color>]? [<hue> | none] [<percentage> |
-  // <number> | none]{2} [ / [<alpha-value> | none] ]? )
+  // <modern-hsl-syntax>  =  hsl( [from <color>]? [<hue> | none] [<percentage> | <number> | none]{2}
+  //                             [ / [<alpha-value> | none] ]? )
+  // <modern-hsla-syntax> = hsla( [from <color>]? [<hue> | none] [<percentage> | <number> | none]{2}
+  //                             [ / [<alpha-value> | none] ]? )
   struct HSLFunctionModern
   {
     using ColorType = HSLA<float>;
     using Canonical = HSLFunctionModern;
     constexpr static bool AllowEagerEvaluationOfResolvableCalc = true;
     constexpr static bool AllowConversionTo8BitSRGB = true;
-    constexpr static ColorFlags flagsForRelative = ColorFlags::UseColorFunctionSerialisation;
+    constexpr static ColorFlags FlagsForRelative = ColorFlags::UseColorFunctionSerialisation;
     constexpr static ColorFlags FlagsForAbsolute = {};
     constexpr static auto Syntax = ColorFunctionSyntax::Modern;
     constexpr static bool UsesColorFunctionForSerialisation = false;
@@ -342,8 +349,8 @@ namespace krys::boo::css
                       L {.Symbol = ValueId::L, .PercentMultiplier = 1.0}, AlphaComponent);
   };
 
-  // <legacy-hsl-Syntax>  =  hsl( <hue>, <percentage>, <percentage>, <alpha-value>? )
-  // <legacy-hsla-Syntax> = hsla( <hue>, <percentage>, <percentage>, <alpha-value>? )
+  // <legacy-hsl-syntax>  =  hsl( <hue>, <percentage>, <percentage>, <alpha-value>? )
+  // <legacy-hsla-syntax> = hsla( <hue>, <percentage>, <percentage>, <alpha-value>? )
   struct HSLFunctionLegacy
   {
     using ColorType = HSLA<float>;
@@ -373,7 +380,7 @@ namespace krys::boo::css
     using Canonical = HWBFunction;
     constexpr static bool AllowEagerEvaluationOfResolvableCalc = true;
     constexpr static bool AllowConversionTo8BitSRGB = true;
-    constexpr static ColorFlags flagsForRelative = ColorFlags::UseColorFunctionSerialisation;
+    constexpr static ColorFlags FlagsForRelative = ColorFlags::UseColorFunctionSerialisation;
     constexpr static ColorFlags FlagsForAbsolute = {};
     constexpr static auto Syntax = ColorFunctionSyntax::Modern;
     constexpr static bool UsesColorFunctionForSerialisation = false;
@@ -396,7 +403,7 @@ namespace krys::boo::css
     using Canonical = LabFunction;
     constexpr static bool AllowEagerEvaluationOfResolvableCalc = false;
     constexpr static bool AllowConversionTo8BitSRGB = false;
-    constexpr static ColorFlags flagsForRelative = {};
+    constexpr static ColorFlags FlagsForRelative = {};
     constexpr static ColorFlags FlagsForAbsolute = {};
     constexpr static auto Syntax = ColorFunctionSyntax::Modern;
     constexpr static bool UsesColorFunctionForSerialisation = false;
@@ -420,7 +427,7 @@ namespace krys::boo::css
     using Canonical = LCHFunction;
     constexpr static bool AllowEagerEvaluationOfResolvableCalc = false;
     constexpr static bool AllowConversionTo8BitSRGB = false;
-    constexpr static ColorFlags flagsForRelative = {};
+    constexpr static ColorFlags FlagsForRelative = {};
     constexpr static ColorFlags FlagsForAbsolute = {};
     constexpr static auto Syntax = ColorFunctionSyntax::Modern;
     constexpr static bool UsesColorFunctionForSerialisation = false;
@@ -443,7 +450,7 @@ namespace krys::boo::css
     using Canonical = OKLabFunction;
     constexpr static bool AllowEagerEvaluationOfResolvableCalc = false;
     constexpr static bool AllowConversionTo8BitSRGB = false;
-    constexpr static ColorFlags flagsForRelative = {};
+    constexpr static ColorFlags FlagsForRelative = {};
     constexpr static ColorFlags FlagsForAbsolute = {};
     constexpr static auto Syntax = ColorFunctionSyntax::Modern;
     constexpr static bool UsesColorFunctionForSerialisation = false;
@@ -467,7 +474,7 @@ namespace krys::boo::css
     using Canonical = OKLCHFunction;
     constexpr static bool AllowEagerEvaluationOfResolvableCalc = false;
     constexpr static bool AllowConversionTo8BitSRGB = false;
-    constexpr static ColorFlags flagsForRelative = {};
+    constexpr static ColorFlags FlagsForRelative = {};
     constexpr static ColorFlags FlagsForAbsolute = {};
     constexpr static auto Syntax = ColorFunctionSyntax::Modern;
     constexpr static bool UsesColorFunctionForSerialisation = false;
@@ -493,7 +500,7 @@ namespace krys::boo::css
     using Canonical = ColorRGBFunction<T>;
     constexpr static bool AllowEagerEvaluationOfResolvableCalc = false;
     constexpr static bool AllowConversionTo8BitSRGB = false;
-    constexpr static ColorFlags flagsForRelative = ColorFlags::UseColorFunctionSerialisation;
+    constexpr static ColorFlags FlagsForRelative = ColorFlags::UseColorFunctionSerialisation;
     constexpr static ColorFlags FlagsForAbsolute = ColorFlags::UseColorFunctionSerialisation;
     constexpr static auto Syntax = ColorFunctionSyntax::Modern;
     constexpr static bool UsesColorFunctionForSerialisation = true;
@@ -517,7 +524,7 @@ namespace krys::boo::css
     using Canonical = ColorXYZFunction<T>;
     constexpr static bool AllowEagerEvaluationOfResolvableCalc = false;
     constexpr static bool AllowConversionTo8BitSRGB = false;
-    constexpr static ColorFlags flagsForRelative = ColorFlags::UseColorFunctionSerialisation;
+    constexpr static ColorFlags FlagsForRelative = ColorFlags::UseColorFunctionSerialisation;
     constexpr static ColorFlags FlagsForAbsolute = ColorFlags::UseColorFunctionSerialisation;
     constexpr static auto Syntax = ColorFunctionSyntax::Modern;
     constexpr static bool UsesColorFunctionForSerialisation = true;

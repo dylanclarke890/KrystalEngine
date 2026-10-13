@@ -206,6 +206,35 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Values/Primitives/PrimitiveNumericOrKeywordConversions.hpp
   include/Krystal.Booey/Style/Values/Primitives/UnevaluatedCalc.hpp
   include/Krystal.Booey/Style/Values/Types.hpp
+
+  # Slice 3: Colour, layer 5a (CSS colour types)
+  include/Krystal.Booey/CSS/Values/Color/AbsoluteColor.hpp
+  include/Krystal.Booey/CSS/Values/Color/AbsoluteColorResolver.hpp
+  include/Krystal.Booey/CSS/Values/Color/Color.hpp
+  include/Krystal.Booey/CSS/Values/Color/ColorDescriptors.hpp
+  include/Krystal.Booey/CSS/Values/Color/ColorLayers.hpp
+  include/Krystal.Booey/CSS/Values/Color/ColorLayersResolver.hpp
+  include/Krystal.Booey/CSS/Values/Color/ColorMix.hpp
+  include/Krystal.Booey/CSS/Values/Color/ColorMixResolver.hpp
+  include/Krystal.Booey/CSS/Values/Color/ColorType.hpp
+  include/Krystal.Booey/CSS/Values/Color/ContrastColor.hpp
+  include/Krystal.Booey/CSS/Values/Color/ContrastColorResolver.hpp
+  include/Krystal.Booey/CSS/Values/Color/Convert/Normalise.hpp
+  include/Krystal.Booey/CSS/Values/Color/Convert/ToColor.hpp
+  include/Krystal.Booey/CSS/Values/Color/Convert/ToTypedColor.hpp
+  include/Krystal.Booey/CSS/Values/Color/DynamicRangeLimit.hpp
+  include/Krystal.Booey/CSS/Values/Color/DynamicRangeLimitMix.hpp
+  include/Krystal.Booey/CSS/Values/Color/HexColor.hpp
+  include/Krystal.Booey/CSS/Values/Color/KeywordColor.hpp
+  include/Krystal.Booey/CSS/Values/Color/LightDarkColor.hpp
+  include/Krystal.Booey/CSS/Values/Color/PlatformColorResolutionState.hpp
+  include/Krystal.Booey/CSS/Values/Color/RelativeColor.hpp
+  include/Krystal.Booey/CSS/Values/Color/RelativeColorResolver.hpp
+  include/Krystal.Booey/CSS/Values/Color/ResolvedColor.hpp
+  include/Krystal.Booey/Graphics/GraphicsTypes.hpp
+  include/Krystal.Booey/Style/ForVisitedLink.hpp
+  include/Krystal.Booey/Style/Values/Color/ColorOptions.hpp
+  include/Krystal.Booey/Style/Values/Color/SystemColor.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -264,6 +293,22 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Style/Values/Primitives/LengthWrapperData.cpp
   src/Style/Values/Primitives/NumericTypesConversions.cpp
   src/Style/Values/Primitives/UnevaluatedCalc.cpp
+
+  # Slice 3: Colour, layer 5a (CSS colour types)
+  src/CSS/Values/Color/Color.cpp
+  src/CSS/Values/Color/ColorLayers.cpp
+  src/CSS/Values/Color/ColorLayersResolver.cpp
+  src/CSS/Values/Color/ColorMix.cpp
+  src/CSS/Values/Color/ColorMixResolver.cpp
+  src/CSS/Values/Color/ContrastColor.cpp
+  src/CSS/Values/Color/ContrastColorResolver.cpp
+  src/CSS/Values/Color/DynamicRangeLimit.cpp
+  src/CSS/Values/Color/HexColor.cpp
+  src/CSS/Values/Color/KeywordColor.cpp
+  src/CSS/Values/Color/LightDarkColor.cpp
+  src/CSS/Values/Color/PlatformColorResolutionState.cpp
+  src/CSS/Values/Color/ResolvedColor.cpp
+  src/Style/Values/Color/SystemColor.cpp
 )
 
 target_precompile_headers(Krystal.Booey
@@ -463,6 +508,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/Graphics/Color/ColorTransferFunctions.hpp
       include/Krystal.Booey/Graphics/Color/ColorTypes.hpp
       include/Krystal.Booey/Graphics/Color/ColorUtilities.hpp
+      include/Krystal.Booey/Graphics/Color/NamedColors.hpp
       include/Krystal.Booey/Graphics/FloatPoint.hpp
       include/Krystal.Booey/Graphics/IntPoint.hpp
       include/Krystal.Booey/Graphics/IntSize.hpp
@@ -715,6 +761,7 @@ target_sources(Krystal.Booey
     src/Graphics/Color/ColorInterpolationMethod.cpp
     src/Graphics/Color/ColorLuminance.cpp
     src/Graphics/Color/ColorSerialisation.cpp
+    src/Graphics/Color/NamedColors.cpp
     src/Graphics/IntPoint.cpp
     src/Graphics/IntSize.cpp
 

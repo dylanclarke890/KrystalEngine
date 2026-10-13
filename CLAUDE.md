@@ -66,3 +66,11 @@ Use `struct` for policy/trait/plain-data types with all-public members.
 - Third-party sources (not managed by vcpkg) go under `third-party/` and are included with `<...>`.
 - Doxygen `///` with `@brief`, plus `@param`/`@return`/`@note`/`@attention` where they add something. Use `//` for implementation notes.
 - Brace every `if`/loop body, even if it's a single short statement.
+
+## Building and testing
+
+Use Visual Studio's bundled CMake (`C:/Program Files/Microsoft Visual Studio/18/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe`) with the `windows-x64` presets; never the system CMake or the bare `vcpkg` preset. Keep tool output out of context: only look at whether a step succeeded, or at the specific errors if it failed.
+
+- **Configure:** `cmake --preset windows-x64 --log-level=WARNING > build/configure.log 2>&1`. vcpkg still prints its installed-package list (no flag hides it), so don't read the log unless the exit code is non-zero.
+- **Build:** `cmake --build --preset windows-x64-debug --target <target> -- -v:quiet -nologo`. MSBuild then prints nothing on success and only errors/warnings on failure (warnings are errors). If a template error is long, read only its first lines.
+- **Tests:** Catch2's default reporter prints only failures and a summary; on a pass read only the last few lines.

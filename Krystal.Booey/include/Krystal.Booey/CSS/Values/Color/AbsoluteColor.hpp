@@ -2,13 +2,12 @@
 
 #include "Krystal.Booey/CSS/Values/Color/AbsoluteColorResolver.hpp"
 #include "Krystal.Booey/CSS/Values/Color/ColorDescriptors.hpp"
+#include "Krystal.Booey/CSS/Values/Color/PlatformColorResolutionState.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypesComputedStyleDependencies.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypesValueVisitation.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
-
-namespace krys::boo
-{
-  class Color;
-}
 
 namespace krys::boo::css
 {
@@ -22,95 +21,113 @@ namespace krys::boo::css
 
     CSSColorParseTypeWithCalc<Descriptor> Components;
 
-    bool operator==(const AbsoluteColor<Descriptor> &) const = default;
+    KRYS_NODISCARD bool operator==(const AbsoluteColor<Descriptor> &) const noexcept = default;
   };
 
   template <typename D>
-  KRYS_NODISCARD boo::Color createColor(const AbsoluteColor<D> &unresolved, PlatformColorResolutionState &state) noexcept
+  KRYS_NODISCARD boo::Color CreateColor(const AbsoluteColor<D> &unresolved,
+                                        PlatformColorResolutionState &state) noexcept
   {
     PlatformColorResolutionStateNester nester {state};
 
     auto resolver =
-      AbsoluteColorResolver<D> {.components = unresolved.components, .nestingLevel = state.nestingLevel};
+      AbsoluteColorResolver<D> {.Components = unresolved.Components, .NestingLevel = state.NestingLevel};
 
     if (state.ConversionData)
     {
       return Resolve(krys::move(resolver), *state.ConversionData);
     }
 
-    if (!componentsRequireConversionData<D>(resolver.components))
-      return resolveNoConversionDataRequired(WTF::move(resolver));
+    if (!ComponentsRequireConversionData<D>(resolver.Components))
+    {
+      return ResolveNoConversionDataRequired(krys::move(resolver));
+    }
 
     return {};
   }
 
   template <typename D>
-  constexpr bool containsColorSchemeDependentColor(const AbsoluteColor<D> &)
+  KRYS_NODISCARD constexpr bool ContainsColorSchemeDependentColor(const AbsoluteColor<D> &) noexcept
   {
     return false;
   }
 
   template <typename D>
-  constexpr bool containsCurrentColor(const AbsoluteColor<D> &)
+  KRYS_NODISCARD constexpr bool ContainsCurrentColor(const AbsoluteColor<D> &) noexcept
   {
     return false;
   }
 
   template <typename D>
-  struct Serialise<AbsoluteColor<D>>
+  struct Serialiser<AbsoluteColor<D>>
   {
-    void operator()(StringBuilder &builder, const SerialisationContext &context,
-                    const AbsoluteColor<D> &value)
+    void operator()(CSSOMString &builder, const SerialisationContext &context,
+                    const AbsoluteColor<D> &value) noexcept
     {
-      if constexpr (D::usesColorFunctionForSerialisation)
-        builder.append("color("_s, serialization(ColorSpaceFor<typename D::ColorType>), ' ');
+      if constexpr (D::UsesColorFunctionForSerialisation)
+      {
+        builder.append(u8"color(");
+        builder.append(boo::Serialisation(ColorSpaceFor<typename D::ColorType>));
+        builder.push_back(u8' ');
+      }
       else
-        builder.append(D::serializationFunctionName, '(');
+      {
+        builder.append(D::SerialisationFunctionName);
+        builder.push_back(u8'(');
+      }
 
-      auto [c1, c2, c3, alpha] = value.components;
+      const auto &[c1, c2, c3, alpha] = value.Components;
 
-      serializationForCSS(builder, context, c1);
-      builder.append(' ');
-      serializationForCSS(builder, context, c2);
-      builder.append(' ');
-      serializationForCSS(builder, context, c3);
+      Serialise(builder, context, c1);
+      builder.push_back(u8' ');
+      Serialise(builder, context, c2);
+      builder.push_back(u8' ');
+      Serialise(builder, context, c3);
 
       if (alpha)
       {
-        builder.append(" / "_s);
-        serializationForCSS(builder, context, *alpha);
+        builder.append(u8" / ");
+        Serialise(builder, context, *alpha);
       }
 
-      builder.append(')');
+      builder.push_back(u8')');
     }
   };
 
   template <typename D>
   struct ComputedStyleDependenciesCollector<AbsoluteColor<D>>
   {
-    void operator()(ComputedStyleDependencies &dependencies, const AbsoluteColor<D> &value)
+    void operator()(ComputedStyleDependencies &dependencies, const AbsoluteColor<D> &value) noexcept
     {
-      collectComputedStyleDependencies(dependencies, std::get<0>(value.components));
-      collectComputedStyleDependencies(dependencies, std::get<1>(value.components));
-      collectComputedStyleDependencies(dependencies, std::get<2>(value.components));
-      collectComputedStyleDependencies(dependencies, std::get<3>(value.components));
+      CollectComputedStyleDependencies(dependencies, std::get<0>(value.Components));
+      CollectComputedStyleDependencies(dependencies, std::get<1>(value.Components));
+      CollectComputedStyleDependencies(dependencies, std::get<2>(value.Components));
+      CollectComputedStyleDependencies(dependencies, std::get<3>(value.Components));
     }
   };
 
   template <typename D>
-  struct CSSValueChildrenVisitor<AbsoluteColor<D>>
+  struct ValueChildrenVisitor<AbsoluteColor<D>>
   {
-    IterationStatus operator()(NOESCAPE const Function<IterationStatus(CSSValue &)> &func,
-                               const AbsoluteColor<D> &value)
+    IterationStatus operator()(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func,
+                               const AbsoluteColor<D> &value) noexcept
     {
-      if (visitCSSValueChildren(func, std::get<0>(value.components)) == IterationStatus::Done)
+      if (VisitValueChildren(func, std::get<0>(value.Components)) == IterationStatus::Done)
+      {
         return IterationStatus::Done;
-      if (visitCSSValueChildren(func, std::get<1>(value.components)) == IterationStatus::Done)
+      }
+      if (VisitValueChildren(func, std::get<1>(value.Components)) == IterationStatus::Done)
+      {
         return IterationStatus::Done;
-      if (visitCSSValueChildren(func, std::get<2>(value.components)) == IterationStatus::Done)
+      }
+      if (VisitValueChildren(func, std::get<2>(value.Components)) == IterationStatus::Done)
+      {
         return IterationStatus::Done;
-      if (visitCSSValueChildren(func, std::get<3>(value.components)) == IterationStatus::Done)
+      }
+      if (VisitValueChildren(func, std::get<3>(value.Components)) == IterationStatus::Done)
+      {
         return IterationStatus::Done;
+      }
       return IterationStatus::Continue;
     }
   };

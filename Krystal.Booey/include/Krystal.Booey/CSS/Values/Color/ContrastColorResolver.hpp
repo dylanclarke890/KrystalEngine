@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 
@@ -6,8 +6,8 @@ namespace krys::boo::css
 {
   struct ContrastColorResolver
   {
-    boo::Color color {};
+    boo::Color Color {};
   };
 
-  boo::Color Resolve(const ContrastColorResolver &) noexcept;
+  KRYS_NODISCARD boo::Color Resolve(const ContrastColorResolver &resolver) noexcept;
 }

@@ -1,20 +1,18 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
-
-namespace krys::boo
-{
-  enum class BlendMode : uint8;
-}
+#include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
+#include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo::css
 {
   struct ColorLayersResolver
   {
-    BlendMode BlendMode;
-    SmallList<boo::Color> Colors;
+    boo::BlendMode BlendMode;
+    List<boo::Color> Colors;
   };
 
-  KRYS_NODISCARD boo::Color BlendSourceOver(const ColorLayersResolver &) noexcept;
+  /// @brief Composites the layers, the first on top.
+  /// @attention `colorLayers` must have at least one colour.
+  KRYS_NODISCARD boo::Color BlendSourceOver(const ColorLayersResolver &colorLayers) noexcept;
 }

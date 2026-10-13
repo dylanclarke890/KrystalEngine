@@ -95,6 +95,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Properties/Consumers/MetaConsumer.cpp
 		tests/CSS/Properties/Consumers/Primitives.cpp
 		tests/CSS/Values/Aggregates.cpp
+		tests/CSS/Values/Color/Color.cpp
 		tests/CSS/Values/NumericTypesSerialisation.cpp
 		tests/CSS/Values/Primitives/NumericRaw.cpp
 		tests/CSS/Values/Primitives/PrimitiveNumeric.cpp
@@ -117,10 +118,12 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Color/ColorInterpolation.cpp
 		tests/Graphics/Color/ColorSerialisation.cpp
 		tests/Graphics/Color/ColorUtilities.cpp
+		tests/Graphics/Color/NamedColors.cpp
 
 		# Style
 		tests/Style/Calc/Tree.cpp
 		tests/Style/ScopedName.cpp
+		tests/Style/Values/Color/SystemColor.cpp
 		tests/Style/Values/Primitives/LengthResolution.cpp
 		tests/Style/Values/Primitives/LengthWrapper.cpp
 		tests/Style/Values/Primitives/NumericTypesConversions.cpp

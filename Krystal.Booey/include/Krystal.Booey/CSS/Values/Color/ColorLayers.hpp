@@ -1,14 +1,7 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Color/Color.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
-
-namespace krys::boo
-{
-  class Color;
-
-  enum class BlendMode : uint8;
-}
+#include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 
 namespace krys::boo::css
 {
@@ -16,17 +9,16 @@ namespace krys::boo::css
 
   struct ColorLayers
   {
-    BlendMode BlendMode;
+    boo::BlendMode BlendMode;
     CommaSeparatedList<Color> Colors;
 
-    bool operator==(const ColorLayers &) const noexcept = default;
+    KRYS_NODISCARD bool operator==(const ColorLayers &) const noexcept = default;
   };
 
-  KRYS_NODISCARD boo::Color CreateColor(const ColorLayers &, PlatformColorResolutionState &) noexcept;
-
-  KRYS_NODISCARD bool ContainsCurrentColor(const ColorLayers &) noexcept;
-
-  KRYS_NODISCARD bool ContainsColorSchemeDependentColor(const ColorLayers &) noexcept;
+  KRYS_NODISCARD boo::Color CreateColor(const ColorLayers &value,
+                                        PlatformColorResolutionState &state) noexcept;
+  KRYS_NODISCARD bool ContainsCurrentColor(const ColorLayers &value) noexcept;
+  KRYS_NODISCARD bool ContainsColorSchemeDependentColor(const ColorLayers &value) noexcept;
 
   template <>
   struct Serialiser<ColorLayers>
@@ -38,12 +30,13 @@ namespace krys::boo::css
   template <>
   struct ComputedStyleDependenciesCollector<ColorLayers>
   {
-    void operator()(ComputedStyleDependencies &, const ColorLayers &) noexcept;
+    void operator()(ComputedStyleDependencies &dependencies, const ColorLayers &value) noexcept;
   };
 
   template <>
   struct ValueChildrenVisitor<ColorLayers>
   {
-    IterationStatus operator()(const Func<IterationStatus(css::Value &)> &, const ColorLayers &) noexcept;
+    IterationStatus operator()(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func,
+                               const ColorLayers &value) noexcept;
   };
 }

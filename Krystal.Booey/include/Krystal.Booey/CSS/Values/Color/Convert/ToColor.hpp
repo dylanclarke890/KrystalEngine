@@ -1,8 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Color/ColorDescriptors.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorConversion.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorTypes.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::css
 {
@@ -12,14 +14,14 @@ namespace krys::boo::css
   KRYS_NODISCARD constexpr bool OutsideSRGBGamut(HSLA<float> hsla) noexcept
   {
     auto unresolved = hsla.Unresolved();
-    return unresolved.saturation > 100.0 || unresolved.lightness < 0.0 || unresolved.lightness > 100.0;
+    return unresolved.Saturation > 100.0 || unresolved.Lightness < 0.0 || unresolved.Lightness > 100.0;
   }
 
   KRYS_NODISCARD constexpr bool OutsideSRGBGamut(HWBA<float> hwba) noexcept
   {
     auto unresolved = hwba.Unresolved();
-    return unresolved.whiteness < 0.0 || unresolved.whiteness > 100.0 || unresolved.blackness < 0.0
-           || unresolved.blackness > 100.0;
+    return unresolved.Whiteness < 0.0 || unresolved.Whiteness > 100.0 || unresolved.Blackness < 0.0
+           || unresolved.Blackness > 100.0;
   }
 
   KRYS_NODISCARD constexpr bool OutsideSRGBGamut(SRGBA<float>) noexcept
@@ -28,12 +30,12 @@ namespace krys::boo::css
   }
 
   template <typename Descriptor, ColorFunctionForm Form>
-  struct ConvertToColor;
+  struct ColorConverter;
 
   template <typename Descriptor>
-  struct ConvertToColor<Descriptor, ColorFunctionForm::Absolute>
+  struct ColorConverter<Descriptor, ColorFunctionForm::Absolute>
   {
-    KRYS_NODISCARD static Color ConvertToColor(GetColorType<Descriptor> color, size_t nestingLevel) noexcept
+    KRYS_NODISCARD static boo::Color Convert(GetColorType<Descriptor> color, uint32 nestingLevel) noexcept
     {
       if constexpr (Descriptor::AllowConversionTo8BitSRGB)
       {
@@ -61,11 +63,11 @@ namespace krys::boo::css
           return {color, Descriptor::FlagsForAbsolute};
         }
 
-        // The explicit conversion to SRGBA<uint8_t> is an intentional performance optimization that allows
+        // The explicit conversion to SRGBA<uint8> is an intentional performance optimization that allows
         // storing the color with no extra allocation for an extended color object. This is permissible in
         // some case due to the historical requirement that some syntaxes serialize using the legacy color
         // syntax (rgb()/rgba()) and historically have used the 8-bit rgba internal representation in engines.
-        return {convertColor<SRGBA<uint8_t>>(color), Descriptor::FlagsForAbsolute};
+        return {ConvertColor<SRGBA<uint8>>(color), Descriptor::FlagsForAbsolute};
       }
       else
       {
@@ -75,50 +77,50 @@ namespace krys::boo::css
   };
 
   template <typename Descriptor>
-  struct ConvertToColor<Descriptor, ColorFunctionForm::Relative>
+  struct ColorConverter<Descriptor, ColorFunctionForm::Relative>
   {
-    KRYS_NODISCARD static Color ConvertToColor(GetColorType<Descriptor> color) noexcept
+    KRYS_NODISCARD static boo::Color Convert(GetColorType<Descriptor> color) noexcept
     {
       return {color, Descriptor::FlagsForRelative};
     }
   };
 
   template <typename Descriptor, ColorFunctionForm Form>
-  KRYS_NODISCARD Color ConvertToColor(GetColorType<Descriptor> color, size_t nestingLevel) noexcept
+  KRYS_NODISCARD boo::Color ConvertToColor(GetColorType<Descriptor> color, uint32 nestingLevel) noexcept
   {
     static_assert(Form == ColorFunctionForm::Absolute);
-    return ConvertToColor<Descriptor, Form>::ConvertToColor(color, nestingLevel);
+    return ColorConverter<Descriptor, Form>::Convert(color, nestingLevel);
   }
 
   template <typename Descriptor, ColorFunctionForm Form>
-  KRYS_NODISCARD Color ConvertToColor(GetColorType<Descriptor> color) noexcept
+  KRYS_NODISCARD boo::Color ConvertToColor(GetColorType<Descriptor> color) noexcept
   {
     static_assert(Form == ColorFunctionForm::Relative);
-    return ConvertToColor<Descriptor, Form>::ConvertToColor(color);
+    return ColorConverter<Descriptor, Form>::Convert(color);
   }
 
   template <typename Descriptor, ColorFunctionForm Form>
-  KRYS_NODISCARD Color ConvertToColor(std::optional<GetColorType<Descriptor>> color,
-                                      size_t nestingLevel) noexcept
+  KRYS_NODISCARD boo::Color ConvertToColor(Maybe<GetColorType<Descriptor>> color,
+                                           uint32 nestingLevel) noexcept
   {
     static_assert(Form == ColorFunctionForm::Absolute);
+
     if (!color)
     {
       return {};
     }
-
     return ConvertToColor<Descriptor, Form>(*color, nestingLevel);
   }
 
   template <typename Descriptor, ColorFunctionForm Form>
-  KRYS_NODISCARD Color ConvertToColor(std::optional<GetColorType<Descriptor>> color) noexcept
+  KRYS_NODISCARD boo::Color ConvertToColor(Maybe<GetColorType<Descriptor>> color) noexcept
   {
     static_assert(Form == ColorFunctionForm::Relative);
+
     if (!color)
     {
       return {};
     }
-
     return ConvertToColor<Descriptor, Form>(*color);
   }
 }

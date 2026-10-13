@@ -1,7 +1,9 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Types.hpp"
-#include "Krystal.Core/Types/Variant.hpp"
+#include "Krystal.Core/Types/CompactVariant.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Visitor.hpp"
 
 namespace krys::boo::css
 {
@@ -12,10 +14,11 @@ namespace krys::boo::css
   struct DynamicRangeLimit
   {
   private:
-    using Kind = Variant<keywords::Standard, keywords::Constrained, keywords::NoLimit,
-                         UniquePtr<DynamicRangeLimitMixFunction>>;
+    // The mix function is never null, except after a move.
+    using Kind = CompactVariant<keywords::Standard, keywords::Constrained, keywords::NoLimit,
+                                UniquePtr<DynamicRangeLimitMixFunction>>;
 
-    Kind Value;
+    Kind _value;
 
   public:
     DynamicRangeLimit(keywords::Standard) noexcept;
@@ -33,19 +36,22 @@ namespace krys::boo::css
     ~DynamicRangeLimit() noexcept;
 
     template <typename... F>
-    decltype(auto) SwitchOn(F &&...) const noexcept
-    {
-      auto visitor = krys::CreateVisitor(std::forward<F>(f)...);
-      using ResultType = decltype(visitor(std::declval<keywords::Standard>()));
+    decltype(auto) SwitchOn(F &&...f) const;
 
-      return krys::SwitchOn(
-        Value,
-        [&]<ValueId Id>(const KeywordValueConstant<Id> &keyword) -> ResultType { return visitor(keyword); },
-        [&](const UniquePtr<DynamicRangeLimitMixFunction> &mix) -> ResultType { return visitor(mix.get()); });
-    }
-
-    bool operator==(const DynamicRangeLimit &) const noexcept;
+    KRYS_NODISCARD bool operator==(const DynamicRangeLimit &) const noexcept;
   };
+
+  template <typename... F>
+  decltype(auto) DynamicRangeLimit::SwitchOn(F &&...f) const
+  {
+    auto visitor = CreateVisitor(std::forward<F>(f)...);
+    using ResultType = decltype(visitor(std::declval<keywords::Standard>()));
+
+    return krys::SwitchOn(
+      _value,
+      [&]<ValueId Id>(const KeywordValueConstant<Id> &keyword) -> ResultType { return visitor(keyword); },
+      [&](const UniquePtr<DynamicRangeLimitMixFunction> &mix) -> ResultType { return visitor(*mix); });
+  }
 }
 
 DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::css::DynamicRangeLimit)

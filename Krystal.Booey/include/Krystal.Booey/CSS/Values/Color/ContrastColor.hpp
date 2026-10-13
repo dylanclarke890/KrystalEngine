@@ -1,27 +1,22 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Color/Color.hpp"
 
-namespace krys::boo
-{
-  class Color;
-  struct PlatformColorResolutionState;
-}
-
 namespace krys::boo::css
 {
+  struct PlatformColorResolutionState;
+
   struct ContrastColor
   {
-    Color Color;
+    css::Color Color;
 
-    bool operator==(const ContrastColor &) const noexcept;
+    KRYS_NODISCARD bool operator==(const ContrastColor &) const noexcept;
   };
 
-  KRYS_NODISCARD boo::Color CreateColor(const ContrastColor &, PlatformColorResolutionState &) noexcept;
-
-  KRYS_NODISCARD bool ContainsCurrentColor(const ContrastColor &) noexcept;
-
-  KRYS_NODISCARD bool ContainsColorSchemeDependentColor(const ContrastColor &) noexcept;
+  KRYS_NODISCARD boo::Color CreateColor(const ContrastColor &unresolved,
+                                        PlatformColorResolutionState &state) noexcept;
+  KRYS_NODISCARD bool ContainsCurrentColor(const ContrastColor &unresolved) noexcept;
+  KRYS_NODISCARD bool ContainsColorSchemeDependentColor(const ContrastColor &unresolved) noexcept;
 
   template <>
   struct Serialiser<ContrastColor>
@@ -33,12 +28,13 @@ namespace krys::boo::css
   template <>
   struct ComputedStyleDependenciesCollector<ContrastColor>
   {
-    void operator()(ComputedStyleDependencies &, const ContrastColor &);
+    void operator()(ComputedStyleDependencies &dependencies, const ContrastColor &value) noexcept;
   };
 
   template <>
   struct ValueChildrenVisitor<ContrastColor>
   {
-    IterationStatus operator()(const Func<IterationStatus(css::Value &)> &, const ContrastColor &) noexcept;
+    IterationStatus operator()(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func,
+                               const ContrastColor &value) noexcept;
   };
 }
