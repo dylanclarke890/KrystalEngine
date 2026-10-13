@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Core/FloatConversion.hpp"
 #include "Krystal.Booey/CSS/Calc/Value.hpp"
 #include "Krystal.Booey/CSS/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Markup.hpp"
@@ -7,6 +8,7 @@
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
 #include "Krystal.Core/Hash.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
@@ -27,16 +29,16 @@ namespace krys::boo::css
         case UnitType::PropertyId:
         case UnitType::String:
         case UnitType::Unknown:
-        case UnitType::ValueId:    return false;
-        case UnitType::Ident:      krys_debug_assert(false); return false;
-        default:                   return true;
+        case UnitType::ValueId:     return false;
+        case UnitType::Ident:       krys_debug_assert(false); return false;
+        default:                    return true;
       }
     }
 
     KRYS_NODISCARD bool IsStringType(UnitType type) noexcept
     {
       return type == UnitType::String || type == UnitType::CustomIdent || type == UnitType::Attr
-          || type == UnitType::FontFamily;
+             || type == UnitType::FontFamily;
     }
 
     KRYS_NODISCARD HashMap<const PrimitiveValue *, CSSOMString> &SerialisedPrimitiveValues() noexcept
@@ -45,7 +47,8 @@ namespace krys::boo::css
       return map.get();
     }
 
-    KRYS_NODISCARD PrimitiveValue *ValueFromPool(Span<AlignedStorage<PrimitiveValue>> pool, double value) noexcept
+    KRYS_NODISCARD PrimitiveValue *ValueFromPool(Span<AlignedStorage<PrimitiveValue>> pool,
+                                                 double value) noexcept
     {
       // Only values that round-trip exactly through an index are pooled. Checking the range first avoids the
       // undefined behaviour of casting an out-of-range double to an integer.
@@ -56,8 +59,9 @@ namespace krys::boo::css
 
       auto poolIndex = static_cast<size_t>(value);
       double roundTripValue = static_cast<double>(poolIndex);
-      if (std::ranges::equal(Span<const byte>(reinterpret_cast<const byte *>(&value), sizeof(double)),
-                             Span<const byte>(reinterpret_cast<const byte *>(&roundTripValue), sizeof(double))))
+      if (std::ranges::equal(
+            Span<const byte>(reinterpret_cast<const byte *>(&value), sizeof(double)),
+            Span<const byte>(reinterpret_cast<const byte *>(&roundTripValue), sizeof(double))))
       {
         return pool[poolIndex].get();
       }
@@ -88,7 +92,8 @@ namespace krys::boo::css
     _value.String = CSSOMStringAtom(string).Storage();
   }
 
-  PrimitiveValue::PrimitiveValue(StaticValueTag, css::ValueId valueId) noexcept : css::Value(ValueType::Primitive)
+  PrimitiveValue::PrimitiveValue(StaticValueTag, css::ValueId valueId) noexcept
+      : css::Value(ValueType::Primitive)
   {
     SetPrimitiveUnitType(UnitType::ValueId);
     _value.ValueId = valueId;
@@ -242,8 +247,8 @@ namespace krys::boo::css
       case UnitType::ValueId:
       case UnitType::CustomIdent: return UnitType::Ident;
       case UnitType::FontFamily:
-        // Web-exposed content expects font family values to have UnitType::String primitive type so we need to map
-        // our internal UnitType::FontFamily type here.
+        // Web-exposed content expects font family values to have UnitType::String primitive type so we need
+        // to map our internal UnitType::FontFamily type here.
         return UnitType::String;
       default:
         if (auto *calcValue = CSSCalcValue())
@@ -311,7 +316,7 @@ namespace krys::boo::css
   template <>
   float PrimitiveValue::ResolveAsLength(const ToLengthConversionData &conversionData) const noexcept
   {
-    return static_cast<float>(ResolveAsLengthDouble(conversionData));
+    return NarrowPrecisionToFloat(ResolveAsLengthDouble(conversionData));
   }
 
   template <>
@@ -320,7 +325,11 @@ namespace krys::boo::css
     return ResolveAsLengthDouble(conversionData);
   }
 
-  // FIXME: LayoutUnit specialisation once LayoutUnit is ported.
+  template <>
+  LayoutUnit PrimitiveValue::ResolveAsLength(const ToLengthConversionData &conversionData) const noexcept
+  {
+    return LayoutUnit(ResolveAsLengthDouble(conversionData));
+  }
 
   double PrimitiveValue::ResolveAsLengthDouble(const ToLengthConversionData &conversionData) const noexcept
   {
@@ -337,8 +346,7 @@ namespace krys::boo::css
       return -1.0;
     }
 
-    // FIXME: Needs Style::ComputeNonCalcLengthDouble (style/StyleLengthResolution), which isn't ported yet.
-    krys_not_implemented();
+    return style::ComputeNonCalcLengthDouble(_value.Number, *lengthUnit, conversionData);
   }
 
 #pragma endregion
@@ -356,7 +364,8 @@ namespace krys::boo::css
 
 #pragma region Arbitrarily converting
 
-  double PrimitiveValue::DoubleValue(UnitType targetUnit, const ToLengthConversionData &conversionData) const noexcept
+  double PrimitiveValue::DoubleValue(UnitType targetUnit,
+                                     const ToLengthConversionData &conversionData) const noexcept
   {
     return DoubleValueInternal(targetUnit, conversionData).value_or(0);
   }
@@ -403,8 +412,9 @@ namespace krys::boo::css
 
     if (auto *calcValue = CSSCalcValue())
     {
-      return calcValue->PrimitiveType() == UnitType::Percentage ? calcValue->DoubleValue(conversionData) / 100.0
-                                                                : calcValue->DoubleValue(conversionData);
+      return calcValue->PrimitiveType() == UnitType::Percentage
+               ? calcValue->DoubleValue(conversionData) / 100.0
+               : calcValue->DoubleValue(conversionData);
     }
 
     if (IsPercentage())
@@ -488,8 +498,9 @@ namespace krys::boo::css
     return _value.Number < 0;
   }
 
-  Maybe<double> PrimitiveValue::DoubleValueInternal(UnitType requestedUnitType,
-                                                    const ToLengthConversionData &conversionData) const noexcept
+  Maybe<double>
+    PrimitiveValue::DoubleValueInternal(UnitType requestedUnitType,
+                                        const ToLengthConversionData &conversionData) const noexcept
   {
     if (!IsValidUnitTypeForDoubleConversion(PrimitiveUnitType())
         || !IsValidUnitTypeForDoubleConversion(requestedUnitType))
@@ -525,7 +536,8 @@ namespace krys::boo::css
         return null;
       }
 
-      // We interpret conversion to UnitType::Number as conversion to a canonical unit in this value's category.
+      // We interpret conversion to UnitType::Number as conversion to a canonical unit in this value's
+      // category.
       targetUnitType = CanonicalUnitTypeForCategory(sourceCategory);
       if (targetUnitType == UnitType::Unknown)
       {
@@ -613,7 +625,8 @@ namespace krys::boo::css
         return null;
       }
 
-      // We interpret conversion to UnitType::Number as conversion to a canonical unit in this value's category.
+      // We interpret conversion to UnitType::Number as conversion to a canonical unit in this value's
+      // category.
       targetUnitType = CanonicalUnitTypeForCategory(sourceCategory);
       if (targetUnitType == UnitType::Unknown)
       {
@@ -768,14 +781,15 @@ namespace krys::boo::css
 
     switch (PrimitiveUnitType())
     {
-      case UnitType::Unknown:     return false;
-      case UnitType::PropertyId:  return _value.PropertyId == other._value.PropertyId;
-      case UnitType::ValueId:     return _value.ValueId == other._value.ValueId;
+      case UnitType::Unknown:    return false;
+      case UnitType::PropertyId: return _value.PropertyId == other._value.PropertyId;
+      case UnitType::ValueId:    return _value.ValueId == other._value.ValueId;
       case UnitType::String:
       case UnitType::CustomIdent:
-      case UnitType::FontFamily:  return _value.String == other._value.String; // Interned, so equal iff same atom.
-      case UnitType::Attr:        return ProtectedCSSAttrValue()->Equals(*other.ProtectedCSSAttrValue());
-      case UnitType::Calc:        return ProtectedCSSCalcValue()->Equals(*other.ProtectedCSSCalcValue());
+      case UnitType::FontFamily:
+        return _value.String == other._value.String; // Interned, so equal iff same atom.
+      case UnitType::Attr: return ProtectedCSSAttrValue()->Equals(*other.ProtectedCSSAttrValue());
+      case UnitType::Calc: return ProtectedCSSCalcValue()->Equals(*other.ProtectedCSSCalcValue());
       case UnitType::Ident:
       case UnitType::CalcPercentageWithAngle:
       case UnitType::CalcPercentageWithLength:
@@ -792,14 +806,14 @@ namespace krys::boo::css
 
     switch (PrimitiveUnitType())
     {
-      case UnitType::Unknown:     break;
-      case UnitType::PropertyId:  seed = Hash::Combine(seed, _value.PropertyId); break;
-      case UnitType::ValueId:     seed = Hash::Combine(seed, _value.ValueId); break;
+      case UnitType::Unknown:                  break;
+      case UnitType::PropertyId:               seed = Hash::Combine(seed, _value.PropertyId); break;
+      case UnitType::ValueId:                  seed = Hash::Combine(seed, _value.ValueId); break;
       case UnitType::String:
       case UnitType::CustomIdent:
-      case UnitType::FontFamily:  seed = Hash::Combine(seed, _value.String); break;
-      case UnitType::Attr:        seed = Hash::Combine(seed, _value.Attr); break;
-      case UnitType::Calc:        seed = Hash::Combine(seed, _value.Calc); break;
+      case UnitType::FontFamily:               seed = Hash::Combine(seed, _value.String); break;
+      case UnitType::Attr:                     seed = Hash::Combine(seed, _value.Attr); break;
+      case UnitType::Calc:                     seed = Hash::Combine(seed, _value.Calc); break;
       case UnitType::Ident:
       case UnitType::CalcPercentageWithAngle:
       case UnitType::CalcPercentageWithLength: krys_debug_assert(false); return false;
@@ -810,7 +824,8 @@ namespace krys::boo::css
   }
 
   /// @see https://drafts.css-houdini.org/css-properties-values-api/#dependency-cycles
-  void PrimitiveValue::CollectComputedStyleDependencies(css::ComputedStyleDependencies &dependencies) const noexcept
+  void PrimitiveValue::CollectComputedStyleDependencies(
+    css::ComputedStyleDependencies &dependencies) const noexcept
   {
     if (auto *calcValue = CSSCalcValue())
     {

@@ -470,8 +470,6 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/ColorAdjust/ColorScheme.cpp
 
   # Slice 3: Colour, layer 5c (colour values and the value pool; compile-only until Value.cpp/PrimitiveValue.cpp build)
-  src/CSS/Properties/Consumers/ColorAdjustValueConsumers.cpp
-  src/CSS/Properties/Consumers/ColorValueConsumers.cpp
   src/CSS/Properties/Consumers/Ident.cpp
   src/CSS/Values/ColorSchemeValue.cpp
   src/CSS/Values/ColorValue.cpp

@@ -664,7 +664,7 @@ namespace krys::boo::css
 
 #pragma region Length (requires IsLength())
 
-    /// @note Specialised for int64, uint64, int32, uint32, int16, uint16, float and double in
+    /// @note Specialised for int64, uint64, int32, uint32, int16, uint16, float, double and LayoutUnit in
     /// PrimitiveValue.cpp.
     template <typename T = double>
     KRYS_NODISCARD T ResolveAsLength(const ToLengthConversionData &conversionData) const noexcept;

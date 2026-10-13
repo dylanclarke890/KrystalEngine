@@ -4,18 +4,16 @@
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Properties/Types/IsImportant.hpp"
 #include "Krystal.Booey/CSS/Rules/RuleType.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Core/Numeric.hpp"
 
 namespace krys::boo::css
 {
-  class ValuePool;
-
   struct PropertyParserState
   {
     const ParserContext &Context;
 
-    // TODO: make this `ValuePool &` defaulting to `ValuePool::MainThreadPool()` once `ValuePool` builds.
-    ValuePool *Pool {nullptr};
+    ValuePool &Pool {ValuePool::MainThreadPool()};
 
     RuleType CurrentRule {RuleType::Style};
     PropertyId CurrentProperty {PropertyId::Invalid};

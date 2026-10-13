@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Color.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
@@ -475,5 +476,95 @@ namespace krys::boo::css::tests
     CHECK_FALSE(ParseDynamicRangeLimit(u8"dynamic-range-limit-mix(standard 50%)", enabled));
     CHECK_FALSE(ParseDynamicRangeLimit(u8"dynamic-range-limit-mix(standard, no-limit 50%)", enabled));
     CHECK_FALSE(ParseDynamicRangeLimit(u8"dynamic-range-limit-mix(standard 101%, no-limit 50%)", enabled));
+  }
+
+  namespace
+  {
+    /// @brief Tokenizes `css` and consumes it with `consume`; null unless every token was consumed.
+    template <typename TConsume>
+    RefPtr<Value> ConsumeValue(utf8_stringview css, const ParserContext &context, TConsume &&consume)
+    {
+      InputStream input {CSSOMString(css)};
+      Tokenizer tokenizer {input};
+      tokenizer.PumpTokenizer();
+      auto tokens = tokenizer.Tokens();
+
+      PropertyParserState state {.Context = context};
+      auto result = consume(tokens, state);
+      if (!tokens.IsAtEnd())
+      {
+        return nullptr;
+      }
+      return result;
+    }
+
+    RefPtr<Value> ConsumeColorValue(utf8_stringview css, const ParserContext &context)
+    {
+      return ConsumeValue(css, context, [](TokenRange &tokens, PropertyParserState &state)
+                          { return ConsumeColor(tokens, state); });
+    }
+  }
+
+  TEST_CASE("Colour parsing(Value entry point)", "[CSS][Properties][Consumers][Color]")
+  {
+    ParserContext context {ParserMode::HTMLStandard};
+
+    SECTION("Keywords are primitive values")
+    {
+      auto value = ConsumeColorValue(u8"red", context);
+      REQUIRE(value);
+      CHECK(value->IsPrimitiveValue());
+      CHECK(value->ValueId() == ValueId::Red);
+      CHECK(CssText(*value) == "red");
+    }
+
+    SECTION("Hex colours are pooled colour values")
+    {
+      auto value = ConsumeColorValue(u8"#ff8000", context);
+      REQUIRE(value);
+      CHECK(value->IsColorValue());
+      CHECK(CssText(*value) == "rgb(255, 128, 0)");
+      CHECK(ConsumeColorValue(u8"#ff8000", context).get() == value.get());
+    }
+
+    SECTION("Absolute colours are pooled colour values")
+    {
+      auto value = ConsumeColorValue(u8"rgb(0 128 255)", context);
+      REQUIRE(value);
+      CHECK(value->IsColorValue());
+      CHECK(CssText(*value) == "rgb(0, 128, 255)");
+      CHECK(ConsumeColorValue(u8"rgb(0 128 255)", context).get() == value.get());
+    }
+
+    SECTION("Unresolved colours are new colour values")
+    {
+      auto value = ConsumeColorValue(u8"light-dark(red, blue)", context);
+      REQUIRE(value);
+      CHECK(value->IsColorValue());
+      CHECK(CssText(*value) == "light-dark(red, blue)");
+      CHECK(ConsumeColorValue(u8"light-dark(red, blue)", context).get() != value.get());
+    }
+
+    SECTION("Invalid colours")
+    {
+      CHECK_FALSE(ConsumeColorValue(u8"not-a-colour", context));
+      CHECK_FALSE(ConsumeColorValue(u8"#ff", context));
+    }
+  }
+
+  TEST_CASE("Colour parsing(<'dynamic-range-limit'> Value)", "[CSS][Properties][Consumers][Color]")
+  {
+    ParserContext context {ParserMode::HTMLStandard};
+    auto consume = [](TokenRange &tokens, PropertyParserState &state)
+    {
+      return ConsumeDynamicRangeLimit(tokens, state);
+    };
+
+    auto value = ConsumeValue(u8"no-limit", context, consume);
+    REQUIRE(value);
+    CHECK(value->IsDynamicRangeLimitValue());
+    CHECK(CssText(*value) == "no-limit");
+
+    CHECK_FALSE(ConsumeValue(u8"high", context, consume));
   }
 }

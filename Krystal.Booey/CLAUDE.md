@@ -36,7 +36,7 @@ Tests: `<test files>`: N cases / N assertions pass.
 
 - Only files listed in the CMake lists are built; the rest of `CSS/`/`Style/` is unreviewed and may not compile.
 - A trial compile (temporarily adding a file to CMake) must be followed by re-running `cmake --preset windows-x64` after reverting, or the generated project keeps the trial file.
-- `Value.cpp`/`PrimitiveValue.cpp` can't build until every `Value` subclass compiles; `Value` instances can't be created in tests yet.
+- Tests that create `Value`s need the static value pool: use `ValueFixture` from `Krystal.Booey.Tests/CSS/ValueTestUtils.hpp` (it also has `CssText`, `ToNarrow` and `Children`).
 - Comments must not mention WebKit or the port unless they are TODO/FIXME; upstream differences belong in `PORTING.md`.
 - Format with Visual Studio's clang-format: `C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/Llvm/x64/bin/clang-format.exe -i <files>`. Working-tree files are CRLF (`core.autocrlf` + `text=auto`); that's expected.
 - Catch2 can't print `std::u8string` (shows `{?}`); to see a failing string, print it from a temporary test.

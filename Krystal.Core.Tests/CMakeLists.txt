@@ -62,6 +62,9 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Types/FixedVector.cpp
 	PRIVATE tests/Types/ListHashSet.cpp
 
+  # Utils
+	PRIVATE tests/Utils/NeverDestroyed.cpp
+
   # Commands
 	PRIVATE tests/Commands/Command.cpp
 	

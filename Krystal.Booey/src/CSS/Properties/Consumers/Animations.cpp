@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Animations.hpp"
+#include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
@@ -151,7 +152,7 @@ namespace krys::boo::css::PropertyParserHelpers
       auto &token = tokens.Consume();
       tokens.DiscardWhitespace();
 
-      auto valueId = FindValueKeyword(token.IdentCodePoints());
+      auto valueId = ValueIdFromName(token.IdentCodePoints());
       if (IsValidCustomIdentifier(valueId) && valueId != ValueId::None)
       {
         return PrimitiveValue::CreateCustomIdent(token.IdentCodePoints());

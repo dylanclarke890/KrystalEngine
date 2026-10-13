@@ -1,25 +1,18 @@
 ﻿#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
 #include <numbers>
 
-// These cover PrimitiveValue's static helpers. Instances can't be created in tests until Value.cpp is built.
 namespace krys::boo::css::tests
 {
-  namespace
-  {
-    KRYS_NODISCARD string ToNarrow(CSSOMStringView str) noexcept
-    {
-      return string(reinterpret_cast<const char *>(str.data()), str.size());
-    }
-  }
-
   TEST_CASE("PrimitiveValue::IsLength", "[CSS][PrimitiveValue]")
   {
-    for (auto unit : {UnitType::px, UnitType::cm, UnitType::mm, UnitType::in, UnitType::pt, UnitType::pc,
-                      UnitType::Q, UnitType::em, UnitType::ex, UnitType::rem, UnitType::lh, UnitType::cap,
-                      UnitType::ch, UnitType::ic, UnitType::QuirkyEm, UnitType::vw, UnitType::dvi, UnitType::cqw,
-                      UnitType::cqmax})
+    for (auto unit :
+         {UnitType::px, UnitType::cm, UnitType::mm, UnitType::in, UnitType::pt, UnitType::pc, UnitType::Q,
+          UnitType::em, UnitType::ex, UnitType::rem, UnitType::lh, UnitType::cap, UnitType::ch, UnitType::ic,
+          UnitType::QuirkyEm, UnitType::vw, UnitType::dvi, UnitType::cqw, UnitType::cqmax})
     {
       INFO(static_cast<int>(unit));
       CHECK(PrimitiveValue::IsLength(unit));
@@ -51,7 +44,8 @@ namespace krys::boo::css::tests
 
   TEST_CASE("PrimitiveValue::IsRootFontRelativeLength", "[CSS][PrimitiveValue]")
   {
-    for (auto unit : {UnitType::rem, UnitType::rex, UnitType::rlh, UnitType::rcap, UnitType::rch, UnitType::ric})
+    for (auto unit :
+         {UnitType::rem, UnitType::rex, UnitType::rlh, UnitType::rcap, UnitType::rch, UnitType::ric})
     {
       INFO(static_cast<int>(unit));
       CHECK(PrimitiveValue::IsRootFontRelativeLength(unit));
@@ -75,8 +69,9 @@ namespace krys::boo::css::tests
 
   TEST_CASE("PrimitiveValue::IsViewportPercentageLength", "[CSS][PrimitiveValue]")
   {
-    for (auto unit : {UnitType::vw, UnitType::vh, UnitType::vmin, UnitType::vmax, UnitType::vb, UnitType::vi,
-                      UnitType::svw, UnitType::svi, UnitType::lvw, UnitType::lvi, UnitType::dvw, UnitType::dvi})
+    for (auto unit :
+         {UnitType::vw, UnitType::vh, UnitType::vmin, UnitType::vmax, UnitType::vb, UnitType::vi,
+          UnitType::svw, UnitType::svi, UnitType::lvw, UnitType::lvi, UnitType::dvw, UnitType::dvi})
     {
       INFO(static_cast<int>(unit));
       CHECK(PrimitiveValue::IsViewportPercentageLength(unit));
@@ -88,7 +83,8 @@ namespace krys::boo::css::tests
 
   TEST_CASE("PrimitiveValue::IsContainerPercentageLength", "[CSS][PrimitiveValue]")
   {
-    for (auto unit : {UnitType::cqw, UnitType::cqh, UnitType::cqi, UnitType::cqb, UnitType::cqmin, UnitType::cqmax})
+    for (auto unit :
+         {UnitType::cqw, UnitType::cqh, UnitType::cqi, UnitType::cqb, UnitType::cqmin, UnitType::cqmax})
     {
       INFO(static_cast<int>(unit));
       CHECK(PrimitiveValue::IsContainerPercentageLength(unit));
@@ -107,8 +103,8 @@ namespace krys::boo::css::tests
     CHECK(ToNarrow(PrimitiveValue::UnitTypeString(UnitType::x)) == "x");
 
     // Units that don't serialise with a suffix.
-    for (auto unit : {UnitType::Number, UnitType::Integer, UnitType::Dimension, UnitType::QuirkyEm, UnitType::Calc,
-                      UnitType::String, UnitType::ValueId, UnitType::Unknown})
+    for (auto unit : {UnitType::Number, UnitType::Integer, UnitType::Dimension, UnitType::QuirkyEm,
+                      UnitType::Calc, UnitType::String, UnitType::ValueId, UnitType::Unknown})
     {
       INFO(static_cast<int>(unit));
       CHECK(PrimitiveValue::UnitTypeString(unit).empty());
@@ -171,7 +167,8 @@ namespace krys::boo::css::tests
   {
     CHECK(PrimitiveValue::ComputeResolution<ResolutionUnit::Dppx>(UnitType::dppx, 2.0) == 2.0);
     CHECK(PrimitiveValue::ComputeResolution<ResolutionUnit::Dppx>(UnitType::x, 2.0) == 2.0);
-    CHECK(PrimitiveValue::ComputeResolution<ResolutionUnit::Dppx>(UnitType::dpi, 192.0) == Catch::Approx(2.0));
+    CHECK(PrimitiveValue::ComputeResolution<ResolutionUnit::Dppx>(UnitType::dpi, 192.0)
+          == Catch::Approx(2.0));
     CHECK(PrimitiveValue::ComputeResolution<ResolutionUnit::Dppx>(UnitType::dpcm, 96.0 / 2.54)
           == Catch::Approx(1.0));
 
@@ -181,7 +178,8 @@ namespace krys::boo::css::tests
     CHECK(PrimitiveValue::ComputeResolution<ResolutionUnit::Dpi>(UnitType::dpcm, 1.0) == Catch::Approx(2.54));
 
     CHECK(PrimitiveValue::ComputeResolution<ResolutionUnit::Dpcm>(UnitType::dpi, 2.54) == Catch::Approx(1.0));
-    CHECK(PrimitiveValue::ComputeResolution<ResolutionUnit::Dpcm>(UnitType::x, 1.0) == Catch::Approx(96.0 / 2.54));
+    CHECK(PrimitiveValue::ComputeResolution<ResolutionUnit::Dpcm>(UnitType::x, 1.0)
+          == Catch::Approx(96.0 / 2.54));
   }
 
   TEST_CASE("RoundForImpreciseConversion", "[CSS][PrimitiveValue]")
@@ -195,5 +193,25 @@ namespace krys::boo::css::tests
     CHECK(RoundForImpreciseConversion<float>(44.995) == 45.0f);
     CHECK(RoundForImpreciseConversion<float>(44.5) == 44.5f);
     CHECK(RoundForImpreciseConversion<float>(-44.995) == -45.0f);
+  }
+
+  TEST_CASE_METHOD(ValueFixture, "PrimitiveValue::ResolveAsLength", "[CSS][PrimitiveValue]")
+  {
+    auto conversionData = ToLengthConversionData {};
+    auto pixels = PrimitiveValue::Create(12.5, UnitType::px);
+    auto inches = PrimitiveValue::Create(1.0, UnitType::in);
+
+    CHECK(pixels->ResolveAsLength(conversionData) == 12.5);
+    CHECK(inches->ResolveAsLength(conversionData) == 96.0);
+    CHECK(inches->ResolveAsLength<float>(conversionData) == 96.0f);
+    CHECK(inches->ResolveAsLength<LayoutUnit>(conversionData) == LayoutUnit(96.0));
+    CHECK(pixels->ResolveAsLength<LayoutUnit>(conversionData) == LayoutUnit(12.5));
+
+    // Integer results round imprecise conversions.
+    CHECK(pixels->ResolveAsLength<int32>(conversionData) == 12);
+    CHECK(PrimitiveValue::Create(44.99998, UnitType::px)->ResolveAsLength<int32>(conversionData) == 45);
+
+    // Absolute lengths are scaled by zoom.
+    CHECK(inches->ResolveAsLength(conversionData.CopyWithAdjustedZoom(2.0f)) == 192.0);
   }
 }

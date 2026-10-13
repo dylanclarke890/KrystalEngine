@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/MediaList.hpp"
 #include "Krystal.Booey/CSS/Parser/AtRuleType.hpp"
+#include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
 #include "Krystal.Booey/CSS/Properties/InternalStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParser.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSFunctionDeclarations.hpp"
@@ -474,7 +475,7 @@ namespace krys::boo::css
     auto &token = tokens.Consume();
     tokens.DiscardWhitespace();
 
-    auto propertyId = FindProperty(token.IdentCodePoints());
+    auto propertyId = PropertyIdFromName(token.IdentCodePoints());
     if (tokens.Consume().Type() != TokenType::Colon)
     {
       // TODO(Parser): parse error (expected colon after property name).

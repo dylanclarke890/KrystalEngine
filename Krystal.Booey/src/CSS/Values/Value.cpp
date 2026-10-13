@@ -15,7 +15,7 @@
 #include "Krystal.Booey/CSS/Values/ColorSchemeValue.hpp"
 #include "Krystal.Booey/CSS/Values/ColorValue.hpp"
 #include "Krystal.Booey/CSS/Values/CounterValue.hpp"
-#include "Krystal.Booey/CSS/Values/CrossfadeValue.hpp"
+#include "Krystal.Booey/CSS/Values/CrossFadeValue.hpp"
 #include "Krystal.Booey/CSS/Values/CursorImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/DynamicRangeLimitValue.hpp"
