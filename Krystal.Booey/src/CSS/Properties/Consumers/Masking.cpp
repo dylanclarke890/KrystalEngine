@@ -72,8 +72,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return RectValue::Create(Rect {krys::move(top), krys::move(right), krys::move(bottom), krys::move(left)});
   }
 
-  RefPtr<Value> krys::boo::css::PropertyParserHelpers::ConsumeClipPath(TokenRange &tokens,
-                                                                       PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeClipPath(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'clip-path'> = none | <clip-source> | [ <basic-shape> || <geometry-box> ]
     // <clip-source> = <url>

@@ -1,9 +1,9 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
-#include <cassert>
 
 namespace krys::boo::css
 {
@@ -30,6 +30,8 @@ namespace krys::boo::css
       Yes
     };
 
+    // MARK: - Border Radius
+
     // <'border-radius'> = <length-percentage [0,∞]>{1,4} [ / <length-percentage [0,∞]>{1,4} ]?
     // https://drafts.csswg.org/css-backgrounds/#propdef-border-radius
     KRYS_NODISCARD Maybe<BorderRadius> ConsumeUnresolvedBorderRadius(TokenRange &tokens,
@@ -38,6 +40,8 @@ namespace krys::boo::css
     // Non-standard -webkit-border-radius.
     KRYS_NODISCARD Maybe<BorderRadius>
       ConsumeUnresolvedWebKitBorderRadius(TokenRange &tokens, PropertyParserState &state) noexcept;
+
+    // MARK: - Border Image
 
     // <'border-image-slice'> = [<number [0,∞]> | <percentage [0,∞]>]{1,4} && fill?
     // https://drafts.csswg.org/css-backgrounds/#propdef-border-image-slice
@@ -59,6 +63,8 @@ namespace krys::boo::css
                                    BorderImageWidthOverridesWidthForLength overridesWidth =
                                      BorderImageWidthOverridesWidthForLength::No) noexcept;
 
+    // MARK: - Background Size
+
     // <bg-size> = [ <length-percentage [0,∞]> | auto ]{1,2} | cover | contain
     // https://drafts.csswg.org/css-backgrounds/#background-size
     KRYS_NODISCARD RefPtr<Value> ConsumeSingleBackgroundSize(TokenRange &tokens,
@@ -73,15 +79,27 @@ namespace krys::boo::css
     KRYS_NODISCARD RefPtr<Value> ConsumeSingleMaskSize(TokenRange &tokens,
                                                        PropertyParserState &state) noexcept;
 
+    // MARK: - Background Repeat
+
     // <repeat-style> = repeat-x | repeat-y | [repeat | space | round | no-repeat]{1,2}
     // https://drafts.csswg.org/css-backgrounds/#typedef-repeat-style
     KRYS_NODISCARD RefPtr<Value> ConsumeRepeatStyle(TokenRange &tokens, PropertyParserState &state) noexcept;
+
+    // MARK: - Shadows
 
     // <'box-shadow'> = none | <shadow>#
     // https://drafts.csswg.org/css-backgrounds/#propdef-box-shadow
     KRYS_NODISCARD RefPtr<Value> ConsumeBoxShadow(TokenRange &tokens, PropertyParserState &state) noexcept;
 
-    RefPtr<Value> ConsumeWebkitBoxReflect(TokenRange &tokens, PropertyParserState &state) noexcept;
+    // Non-standard.
+    KRYS_NODISCARD RefPtr<Value> ConsumeWebkitBoxShadow(TokenRange &tokens,
+                                                        PropertyParserState &state) noexcept;
+
+    // MARK: - Reflection (non-standard)
+
+    // Non-standard addition.
+    KRYS_NODISCARD RefPtr<Value> ConsumeWebkitBoxReflect(TokenRange &tokens,
+                                                         PropertyParserState &state) noexcept;
 
     // MARK: Utilities for filling in rects / quads in the "margin" form.
 
@@ -111,7 +129,7 @@ namespace krys::boo::css
     template <typename Container, typename T>
     KRYS_NODISCARD Container CompleteQuadFromArray(Array<Maybe<T>, 4uz> optionals) noexcept
     {
-      assert(optionals[0].has_value());
+      krys_debug_assert(optionals[0].has_value());
 
       if (!optionals[1])
       {

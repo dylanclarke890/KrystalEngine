@@ -442,8 +442,13 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Properties/Consumers/Transform.hpp
 
   # Property parser, layer b4 (Image-dependent consumers)
+  include/Krystal.Booey/CSS/Properties/Consumers/Background.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Content.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/Filter.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/Image.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Masking.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Motion.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/UI.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -666,8 +671,13 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Properties/Consumers/Transform.cpp
 
   # Property parser, layer b4 (Image-dependent consumers)
+  src/CSS/Properties/Consumers/Background.cpp
+  src/CSS/Properties/Consumers/Content.cpp
   src/CSS/Properties/Consumers/Filter.cpp
   src/CSS/Properties/Consumers/Image.cpp
+  src/CSS/Properties/Consumers/Masking.cpp
+  src/CSS/Properties/Consumers/Motion.cpp
+  src/CSS/Properties/Consumers/UI.cpp
 )
 
 target_precompile_headers(Krystal.Booey

@@ -132,6 +132,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Properties/Consumers/TextDecoration.cpp
 		tests/CSS/Properties/Consumers/Transform.cpp
 		tests/CSS/Properties/Consumers/Transitions.cpp
+		tests/CSS/Properties/Consumers/UI.cpp
 		tests/CSS/Properties/Consumers/URL.cpp
 		tests/CSS/Properties/Consumers/UnicodeRange.cpp
 		tests/CSS/Properties/Consumers/ViewTransition.cpp

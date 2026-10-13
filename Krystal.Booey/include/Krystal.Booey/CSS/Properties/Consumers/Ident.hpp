@@ -4,6 +4,7 @@
 #include "Krystal.Booey/CSS/Parser/Token.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include <ranges>
@@ -119,6 +120,28 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     return nullptr;
+  }
+
+  /// @brief Maps the next token's identifier with `mapping`, without consuming it.
+  /// @param mapping Takes a `ValueId` and returns a `Maybe` of the mapped value (`null` if unmapped).
+  template <Callable<ValueId> TMapping>
+  KRYS_NODISCARD auto PeekIdentUsingMapping(TokenRange &tokens, TMapping &&mapping) noexcept
+  {
+    return mapping(tokens.Peek().ValueId());
+  }
+
+  /// @brief Consumes the next token if `mapping` maps its identifier to a value.
+  /// @param mapping Takes a `ValueId` and returns a `Maybe` of the mapped value (`null` if unmapped).
+  template <Callable<ValueId> TMapping>
+  KRYS_NODISCARD auto ConsumeIdentUsingMapping(TokenRange &tokens, TMapping &&mapping) noexcept
+  {
+    auto value = mapping(tokens.Peek().ValueId());
+    if (value)
+    {
+      tokens.Discard();
+      tokens.DiscardWhitespace();
+    }
+    return value;
   }
 
 #pragma endregion

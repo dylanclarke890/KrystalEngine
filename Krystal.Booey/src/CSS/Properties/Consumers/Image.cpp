@@ -169,19 +169,6 @@ namespace krys::boo::css
       }
     }
 
-    // Consumes the next token if `mapping` maps its identifier to a value.
-    template <typename F>
-    KRYS_NODISCARD static auto ConsumeIdentUsingMapping(TokenRange &tokens, F &&mapping) noexcept
-    {
-      auto value = mapping(tokens.Peek().ValueId());
-      if (value)
-      {
-        tokens.Discard();
-        tokens.DiscardWhitespace();
-      }
-      return value;
-    }
-
     // MARK: Deprecated <gradient> values
 
     template <ValueId ZeroValue, ValueId OneHundredValue>

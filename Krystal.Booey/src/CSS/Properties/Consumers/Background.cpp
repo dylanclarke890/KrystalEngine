@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Background.hpp"
-#include "Krystal.Booey/CSS/Calc/CalcTreeParser.hpp"
+#include "Krystal.Booey/CSS/Calc/TreeParser.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Color.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
@@ -29,7 +29,7 @@
 namespace krys::boo::css::PropertyParserHelpers
 {
   template <typename ElementType>
-  static void Complete4Sides(Array<ElementType, 4> &sides) noexcept
+  static void Complete4Sides(Array<ElementType, 4uz> &sides) noexcept
   {
     if (!sides[1])
     {
@@ -285,7 +285,7 @@ namespace krys::boo::css::PropertyParserHelpers
         components.Slice = ConsumeBorderImageSlice(tokens, state, defaultFill);
         if (components.Slice)
         {
-          assert(!components.Width && !components.Outset);
+          krys_debug_assert(!components.Width && !components.Outset);
           if (ConsumeSlash(tokens))
           {
             components.Width = ConsumeBorderImageWidth(tokens, state, overridesWidth);
@@ -320,7 +320,8 @@ namespace krys::boo::css::PropertyParserHelpers
   // MARK: - Background Size
 
   template <PropertyId property>
-  static RefPtr<Value> ConsumeBackgroundSize(TokenRange &tokens, PropertyParserState &state) noexcept
+  KRYS_NODISCARD static RefPtr<Value> ConsumeBackgroundSize(TokenRange &tokens,
+                                                            PropertyParserState &state) noexcept
   {
     // <bg-size> = [ <length-percentage [0,∞]> | auto ]{1,2} | cover | contain
     // https://drafts.csswg.org/css-backgrounds/#propdef-background-size
@@ -457,7 +458,7 @@ namespace krys::boo::css::PropertyParserHelpers
       }
 
       const Token &nextToken = rangeCopy.Peek();
-      // If we have come to a comma (e.g. if this tokens represents a comma-separated list of <shadow>s), we
+      // If we have come to a comma (e.g. if this range represents a comma-separated list of <shadow>s), we
       // are done parsing this <shadow>.
       if (nextToken.Type() == TokenType::Comma)
       {
@@ -480,7 +481,7 @@ namespace krys::boo::css::PropertyParserHelpers
       auto maybeColor = ConsumeUnresolvedColor(rangeCopy, state);
       if (maybeColor)
       {
-        // If we just parsed a color but already had one, the given token tokens is
+        // If we just parsed a color but already had one, the given token range is
         // not a valid <shadow>.
         if (color)
         {
@@ -515,9 +516,9 @@ namespace krys::boo::css::PropertyParserHelpers
       const auto &token = rangeCopy.Peek();
 
       // The explicit check for calc() is unfortunate. This is ensuring that we only fail
-      // parsing if there is a length, but it fails the tokens check.
+      // parsing if there is a length, but it fails the range check.
       if (token.Type() == TokenType::Dimension || token.Type() == TokenType::Number
-          || (token.Type() == TokenType::Function && IsCalcFunction(token.FunctionId())))
+          || (token.Type() == TokenType::Function && calc::IsCalcFunction(token.FunctionId())))
       {
         blur = MetaConsumer<Length<NonNegativeUnzoomed>>::Consume(rangeCopy, state);
         if (!blur)
@@ -563,7 +564,7 @@ namespace krys::boo::css::PropertyParserHelpers
         return {};
       }
 
-      list.value.push_back(krys::move(*shadow));
+      list.Value.push_back(krys::move(*shadow));
     } while (ConsumeComma(rangeCopy));
 
     tokens = rangeCopy;
@@ -596,7 +597,10 @@ namespace krys::boo::css::PropertyParserHelpers
     // https://drafts.csswg.org/css-backgrounds/#propdef-box-shadow
 
     if (auto property = ConsumeUnresolvedBoxShadow(tokens, state, false))
+    {
       return BoxShadowPropertyValue::Create({krys::move(*property)});
+    }
+
     return nullptr;
   }
 

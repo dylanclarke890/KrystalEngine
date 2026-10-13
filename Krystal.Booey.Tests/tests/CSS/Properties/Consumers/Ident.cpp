@@ -44,6 +44,25 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(range.IsAtEnd());
   }
 
+  TEST_CASE("PropertyParserHelpers(ConsumeIdentUsingMapping)", "[CSS][Properties][Consumers]")
+  {
+    Tokens tokens {u8"top left"};
+    auto range = tokens.Tokenizer.Tokens();
+    auto mapping = [](ValueId id) -> Maybe<int32>
+    {
+      if (id == ValueId::Top)
+      {
+        return 1;
+      }
+      return null;
+    };
+    CHECK(PeekIdentUsingMapping(range, mapping) == 1);
+    CHECK(ConsumeIdentUsingMapping(range, mapping) == 1);
+    CHECK(PeekIdentUsingMapping(range, mapping) == null);
+    CHECK(ConsumeIdentUsingMapping(range, mapping) == null);
+    CHECK(range.Peek().ValueId() == ValueId::Left);
+  }
+
   TEST_CASE("PropertyParserHelpers(ConsumeCustomIdentRaw)", "[CSS][Properties][Consumers]")
   {
     Tokens tokens {u8"Foo inherit default Bar 5"};
