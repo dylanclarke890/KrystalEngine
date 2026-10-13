@@ -82,7 +82,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return BrightnessFunction {.Parameters = {}};
     }
 
-    auto parsedValue = ConsumeNumberOrPercentFilterParameter<BrightnessFunction::name>(args, state);
+    auto parsedValue = ConsumeNumberOrPercentFilterParameter<BrightnessFunction::Name>(args, state);
     if (!parsedValue || !args.IsAtEnd())
     {
       return {};
@@ -103,7 +103,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return ContrastFunction {.Parameters = {}};
     }
 
-    auto parsedValue = ConsumeNumberOrPercentFilterParameter<ContrastFunction::name>(args, state);
+    auto parsedValue = ConsumeNumberOrPercentFilterParameter<ContrastFunction::Name>(args, state);
     if (!parsedValue || !args.IsAtEnd())
     {
       return {};
@@ -197,7 +197,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return GrayscaleFunction {.Parameters = {}};
     }
 
-    auto parsedValue = ConsumeNumberOrPercentFilterParameter<GrayscaleFunction::name>(args, state);
+    auto parsedValue = ConsumeNumberOrPercentFilterParameter<GrayscaleFunction::Name>(args, state);
     if (!parsedValue || !args.IsAtEnd())
     {
       return {};
@@ -240,7 +240,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return InvertFunction {.Parameters = {}};
     }
 
-    auto parsedValue = ConsumeNumberOrPercentFilterParameter<InvertFunction::name>(args, state);
+    auto parsedValue = ConsumeNumberOrPercentFilterParameter<InvertFunction::Name>(args, state);
     if (!parsedValue || !args.IsAtEnd())
     {
       return {};
@@ -261,7 +261,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return OpacityFunction {.Parameters = {}};
     }
 
-    auto parsedValue = ConsumeNumberOrPercentFilterParameter<OpacityFunction::name>(args, state);
+    auto parsedValue = ConsumeNumberOrPercentFilterParameter<OpacityFunction::Name>(args, state);
     if (!parsedValue || !args.IsAtEnd())
     {
       return {};
@@ -282,7 +282,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return SaturateFunction {.Parameters = {}};
     }
 
-    auto parsedValue = ConsumeNumberOrPercentFilterParameter<SaturateFunction::name>(args, state);
+    auto parsedValue = ConsumeNumberOrPercentFilterParameter<SaturateFunction::Name>(args, state);
     if (!parsedValue || !args.IsAtEnd())
     {
       return {};
@@ -303,7 +303,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return SepiaFunction {.Parameters = {}};
     }
 
-    auto parsedValue = ConsumeNumberOrPercentFilterParameter<SepiaFunction::name>(args, state);
+    auto parsedValue = ConsumeNumberOrPercentFilterParameter<SepiaFunction::Name>(args, state);
     if (!parsedValue || !args.IsAtEnd())
     {
       return {};
@@ -312,8 +312,8 @@ namespace krys::boo::css::PropertyParserHelpers
     return SepiaFunction {.Parameters = {Sepia::Parameter {krys::move(*parsedValue)}}};
   }
 
-  KRYS_NODISCARD static Maybe<FilterValueList> ConsumeUnresolvedFilterValueList(TokenRange &range,
-                                                                                PropertyParserState &state)
+  KRYS_NODISCARD static Maybe<FilterValueList>
+    ConsumeUnresolvedFilterValueList(TokenRange &range, PropertyParserState &state) noexcept
   {
     // <filter-value-list> = [ <filter-function> | <url> ]+
     // <filter-function> = <blur()> | <brightness()> | <contrast()> | <drop-shadow()> | <grayscale()> |
@@ -617,29 +617,4 @@ namespace krys::boo::css::PropertyParserHelpers
 
     return nullptr;
   }
-
-  // Maybe<Style::Filter> parseFilterValueListOrNoneRaw(const String &string,
-  //                                                            const ParserContext &context,
-  //                                                            const Document &document, RenderStyle &style)
-  //{
-  //   auto tokenizer = Tokenizer(string);
-  //   auto range = tokenizer.tokenRange();
-
-  // // Handle leading whitespace.
-  // range.consumeWhitespace();
-
-  // auto state = PropertyParserState {.context = context};
-  // auto filter = consumeUnresolvedFilter(range, state);
-  // if (!filter)
-  //   return {};
-
-  // // Handle trailing whitespace.
-  // range.consumeWhitespace();
-
-  // if (!range.IsAtEnd())
-  //   return {};
-
-  // auto builderState = Style::BuilderState::create(style, Style::BuilderContext {document});
-  // return Style::toStyle(*filter, *CheckedPtr {builderState.ptr()});
-  // }
 }

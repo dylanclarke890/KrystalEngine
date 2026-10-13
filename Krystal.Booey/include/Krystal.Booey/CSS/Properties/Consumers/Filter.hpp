@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
@@ -31,9 +30,7 @@ namespace krys::boo::css
     KRYS_NODISCARD Maybe<AppleColorFilter>
       ConsumeUnresolvedAppleColorFilter(TokenRange &tokens, PropertyParserState &state) noexcept;
 
-    // MARK: <'filter'> parsing (raw)
-    // KRYS_NODISCARD Maybe<StyleFilter> ParseFilterValueListOrNoneRaw(const CSSOMString &, const
-    // ParserContext &,
-    //                                                                const Document &, RenderStyle &);
+    // FIXME: Add `ParseFilterValueListOrNoneRaw` (<'filter'> parsing to a `style::Filter`) once
+    // `style::Filter`, `style::BuilderState` and `Document` are available.
   }
 }

@@ -440,6 +440,10 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Properties/Consumers/TextDecoration.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/Timeline.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/Transform.hpp
+
+  # Property parser, layer b4 (Image-dependent consumers)
+  include/Krystal.Booey/CSS/Properties/Consumers/Filter.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Image.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -660,6 +664,10 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Properties/Consumers/TextDecoration.cpp
   src/CSS/Properties/Consumers/Timeline.cpp
   src/CSS/Properties/Consumers/Transform.cpp
+
+  # Property parser, layer b4 (Image-dependent consumers)
+  src/CSS/Properties/Consumers/Filter.cpp
+  src/CSS/Properties/Consumers/Image.cpp
 )
 
 target_precompile_headers(Krystal.Booey

@@ -42,11 +42,12 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Property parser, layer a (2026-10-13): parser plumbing (`Property`, `ParsedPropertyList`, `PropertyParserResult`, `PropertyShorthand` and the generated shorthand functions, `CustomPropertySyntax`, `VariableParser`) built and tested; see the *Property parser* section.
 - Property parser, layer b1 (2026-10-13): the shared consumer foundations (the remaining `*Definitions.hpp`, `MetaResolver`, the `PrimitiveValue` resolver, `List`, `Percentage`, `String`) built and tested.
 - Property parser, layer b2 (2026-10-13): the ident/keyword-level consumers (`Align`, `Anchor`, `Attr`, `Box`, `Display`, `Inline`, `PositionTry`, `Ratio`, `ScrollSnap`, `Scrollbars`, `Syntax`, `Transitions`, `UnicodeRange`, `URL`, `ViewTransition`, `WillChange`) built and tested.
+- Property parser, layer b3 (2026-10-13): the numeric/structured consumers built; all but `Timeline`, `Animations` and `CounterStyles` tested (those three wait for the generated `PropertyParsing.cpp`, layer c).
 
 **Open / next candidates:**
-- Property parser, layer b3 (2026-10-13): the numeric/structured consumers built; all but `Timeline`, `Animations` and `CounterStyles` tested (those three wait for the generated `PropertyParsing.cpp`, layer c).
-- Property parser, next: layer b4 (see the group plan in the *Property parser* section); then b5, then layer c (`PropertyParserCustom.hpp`, generated `PropertyParsing.cpp`, `PropertyParser.cpp`). See the *Property parser* section for the plan.
-- Property parser, not yet ported: `parseEasingFunctionDeprecated` (`CSSPropertyParserConsumer+Easing`; string → `TimingFunction`, used only by Web Animations; needs `TimingFunction` and `Style::createTimingFunctionDeprecated`) and `parseTransformRaw` (`CSSPropertyParserConsumer+Transform`; string → `Style::Transform`, used only by Web Animations; needs `Style::Transform`, `BuilderState` and the generated `consumeTransform`). Come with animations.
+- Property parser, layer b4 (2026-10-13, in progress): `Image` and `Filter` built and tested; next `Background`, `Content`, `Masking`, `Motion`, `UI`.
+- Property parser, next: the rest of layer b4 (see the group plan in the *Property parser* section); then b5, then layer c (`PropertyParserCustom.hpp`, generated `PropertyParsing.cpp`, `PropertyParser.cpp`). See the *Property parser* section for the plan.
+- Property parser, not yet ported: `parseEasingFunctionDeprecated` (`CSSPropertyParserConsumer+Easing`; string → `TimingFunction`, used only by Web Animations; needs `TimingFunction` and `Style::createTimingFunctionDeprecated`) and `parseTransformRaw` (`CSSPropertyParserConsumer+Transform`; string → `Style::Transform`, used only by Web Animations; needs `Style::Transform`, `BuilderState` and the generated `consumeTransform`). Come with animations. Also `parseFilterValueListOrNoneRaw` (`CSSPropertyParserConsumer+Filter`; string → `Style::Filter`, used only by the canvas 2D context's `filter`; needs `Style::Filter`, `BuilderState` and `Document`); comes with canvas.
 - Property parser, tests waiting for layer c: `Timeline`, `Animations` and `CounterStyles` compile but call the generated `PropertyParsing::ConsumeScroller`/`ConsumeAxis`/`ConsumeSingleViewTimelineInset`/`ConsumeSymbol` (`Animations` through `Timeline`'s `IsAnimationRangeKeyword`), so a test that links them needs `PropertyParsing.cpp` built. Test them in layer c.
 - Property parser, deferred definitions (need `style::CustomProperty`/`BuilderState`): `VariableParser::ParseInitialValueForUniversalSyntax`; layer c adds `PropertyParser::ParseTypedCustomPropertyValue`/`ParseTypedCustomPropertyInitialValue`.
 - Values, deferred definitions (declared, not defined, FIXME'd; define when `style::Builder`/`BuilderState` and the resource loader are ported): `VariableReferenceValue::ResolveVariableReferences`, `ResolveSingleValue`, `ResolveTokenRange`, `ResolveVariableReference`, `ResolveVariableFallback`, `TryResolveSimpleReference` (and so `ResolveAndCacheValue`); `PendingSubstitutionValue::ResolveValue` (also needs `PropertyParser::ParseValue` and `ParsedPropertyVector`); `FontFaceSrcResourceValue::GetFontLoadRequest` and its cached font (`CustomTraverseSubresources` returns `false` until then); `FontFaceSrcLocalValue::GetSVGFontFaceElement`/`SetSVGFontFaceElement` (need SVG fonts); `CreateStyleImage` on the ten image values (needs `style::BuilderState` and `StyleImage`, and the cached style image members of `NamedImageValue`/`CanvasValue`/`GradientValue`); `ImageValue::IsPending`, `LoadImage`, `GetCachedImage`, `KnownToBeOpaque` and its cached image (`CustomTraverseSubresources` returns `false`, and `CopyForComputedStyle` doesn't copy the cache, until then).
@@ -372,7 +373,7 @@ URL differences:
 
 - `StringAtom::View()` (Krystal.Core) dereferences null for `Null()`; `CounterValue` works around it, and `ImageValue`'s default initiator type would hit it in `LoadImage`.
 - Krystal.Core's text tests (`tests/Text/*`) aren't in `Krystal.Core.Tests/CMakeLists.txt`; only `CodePointIterator.cpp` is.
-- Unreviewed files still on the old or raw names: `Consumers/Image.cpp` (raw WebKit: `CSSGradientValue::create`, `CSSCrossfadeValue`, lowercase gradient members, `CSSVariableData::create` at `:1198`); `Consumers/Font.hpp` (`ConsumeFontTech` returns `SmallList<FontTechnology>`; `ConsumeFontFaceSrc` will need a `List`); `Consumers/Grid.hpp` (own `GridNamedAreaMapRow` alias); `Consumers/Shapes.cpp` (stub); `PrimitiveValueMappings.hpp` (raw `CSSFontFaceSrcValue.h`); `CSS/Font/FontFace.hpp` and `Style/BuilderState.hpp` (raw `FontTaggedSettings.h`); `Style/Values/Primitives/Position.hpp` (`x.offset`); `Style/Values/Primitives/CoordinatedValueList.hpp` (`PointerComparison`).
+- Unreviewed files still on the old or raw names: `Consumers/Font.hpp` (`ConsumeFontTech` returns `SmallList<FontTechnology>`; `ConsumeFontFaceSrc` will need a `List`); `Consumers/Grid.hpp` (own `GridNamedAreaMapRow` alias); `Consumers/Shapes.cpp` (stub); `PrimitiveValueMappings.hpp` (raw `CSSFontFaceSrcValue.h`); `CSS/Font/FontFace.hpp` and `Style/BuilderState.hpp` (raw `FontTaggedSettings.h`); `Style/Values/Primitives/Position.hpp` (`x.offset`); `Style/Values/Primitives/CoordinatedValueList.hpp` (`PointerComparison`).
 
 ### Tests
 
@@ -392,7 +393,7 @@ Entry: `css/parser/CSSPropertyParser.cpp` (headers-only graph: 151 files, `tools
   - **b1.** Shared foundations: the remaining `*Definitions.hpp`, `MetaResolver`, `PrimitiveValue` (`CSSPrimitiveValueResolver`), `List`, `Percentage`, `String`. Done.
   - **b2.** Ident/keyword-level consumers: `Align`, `Anchor`, `Attr`, `Box`, `Display`, `Inline`, `PositionTry`, `Ratio`, `ScrollSnap`, `Scrollbars`, `Syntax` (was missing), `Transitions`, `UnicodeRange`, `URL`, `ViewTransition`, `WillChange`. Done.
   - **b3.** Numeric/structured consumers: `Animations`, `CounterStyles`, `Easing`, `Grid`, `Lists`, `Position`, `SVG`, `TextDecoration`, `Timeline`, `Transform`. Done (`Timeline`, `Animations`, `CounterStyles` compile-only until layer c).
-  - **b4.** Image-dependent consumers: `Image`, then `Background`, `Content`, `Filter`, `Masking`, `Motion`, `UI`.
+  - **b4.** Image-dependent consumers: `Image`, then `Background`, `Content`, `Filter`, `Masking`, `Motion`, `UI`. `Image` and `Filter` done (`Image` calls `Filter`'s `ConsumeUnresolvedFilter`, so they went together).
   - **b5.** The stubs: `Font`, `Shapes` (~2k upstream lines).
 - **c.** `PropertyParserCustom.hpp`, generated `PropertyParsing.cpp`, `PropertyParser.cpp`; then tests parsing properties from strings, and `ParserFastPaths::MaybeParseValue`/`ValuePool::CreateFontFaceValue`.
 
@@ -510,6 +511,25 @@ Tests: one file per consumer under `tests/CSS/Properties/Consumers/`, using the 
 - `SingleAnimationRangeType` is declared in `Consumers/Timeline.hpp` in `css` (upstream: `Style::SingleAnimationRangeType`, forward-declared there and defined in `TimelineRangeValue.h`); move it when the Style side is ported.
 
 Tests: `tests/CSS/Properties/Consumers/{Easing,Lists,Position,Grid,SVG,TextDecoration,Transform}.cpp`: 34 cases / 606 assertions pass. Full Booey suite: 1441 cases / 672886 assertions; all pass except 4 expected failures.
+
+### Layer b4: Image-dependent consumers (2026-10-13, in progress)
+
+Graphs: `tools/port/out/consumer-image.md` (107 files; new beyond the b3 graphs: the image `Value` subclasses, the filter-effects types, `CSSGradient.h`, `CSSURL.h`, all already built), `tools/port/out/consumer-filter.md` (128 files, the extra ones through `StyleBuilderState.h`/`StyleFilter.h` for `parseFilterValueListOrNoneRaw`).
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/parser/CSSPropertyParserConsumer+Image.h`, `.cpp` | `have` | `CSS/Properties/Consumers/Image.hpp`, `src/.../Image.cpp` | on | tested. Rewritten: from the prefixed gradients on, the `.cpp` was still raw WebKit. See bugs and differences. |
+| `css/parser/CSSPropertyParserConsumer+Filter.h`, `.cpp` | `have` (no `parseFilterValueListOrNoneRaw`) | `CSS/Properties/Consumers/Filter.hpp`, `src/.../Filter.cpp` | on | tested. See bugs. |
+
+**Bugs fixed:**
+- `Image`: the `.cpp` didn't compile. Everything after `ComputeGradientColorInterpolationMethod` was raw WebKit (`CSSValue*` ids, `CSSGradientValue::create`, `SortedArrayMap`, lowercase gradient members, `CSSVariableData::create`, `OptionSet`), and the earlier half used the old lowercase member names (`.color`, `.parameters`, `legacyMethod`). The header had a duplicate `#pragma once`.
+- `Filter`: the number/percentage filter functions read `FunctionNotation::name` (Krystal: `Name`), so the file didn't compile. `ConsumeUnresolvedFilterValueList` wasn't `noexcept`. `parseFilterValueListOrNoneRaw` was commented out in both files; replaced with a FIXME (see *Where we are*).
+
+**Differences:**
+- `Image`: the `SortedArrayMap` keyword tables are `switch`-based `*FromValueId` functions, with a local `ConsumeIdentUsingMapping` taking one (upstream's `consumeIdentUsingMapping`/`peekIdentUsingMapping` aren't in `Ident.hpp`; see its entry). `image-set()`'s `type()` checks for a string token before `ConsumeStringRaw` (upstream checks for a null view, as in `URL`). No `shrinkToFit` on the stop lists (`SmallList` has none).
+- `-apple-invert-lightness()` doesn't parse, as upstream: the keyword is `apple-invert-lightness`, and the `-apple-` → `-webkit-` keyword rewrite gives `-webkit-invert-lightness`, which doesn't exist. Upstream's own tests use `apple-invert-lightness()`.
+
+Tests: `tests/CSS/Properties/Consumers/{Image,Filter}.cpp`: 17 cases / 321 assertions pass. Full Booey suite: 1452 cases / 673164 assertions; all pass except 4 expected failures.
 
 ## Slice 3: Colour
 

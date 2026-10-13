@@ -110,8 +110,10 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Properties/Consumers/Definitions.cpp
 		tests/CSS/Properties/Consumers/Display.cpp
 		tests/CSS/Properties/Consumers/Easing.cpp
+		tests/CSS/Properties/Consumers/Filter.cpp
 		tests/CSS/Properties/Consumers/Grid.cpp
 		tests/CSS/Properties/Consumers/Ident.cpp
+		tests/CSS/Properties/Consumers/Image.cpp
 		tests/CSS/Properties/Consumers/Inline.cpp
 		tests/CSS/Properties/Consumers/List.cpp
 		tests/CSS/Properties/Consumers/Lists.cpp
