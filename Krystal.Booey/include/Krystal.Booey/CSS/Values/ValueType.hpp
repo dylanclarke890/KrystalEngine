@@ -65,7 +65,7 @@ namespace krys::boo::css
     VariableReference,
     View,
 
-    // Classes that contain lists, which derive from ValueWithSmallList.
+    // Classes that contain lists, which derive from ValueContainingList.
     ValueList,
     Function,
     GridAutoRepeat,
@@ -73,7 +73,7 @@ namespace krys::boo::css
     ImageSet,
     Subgrid,
     TransformList,
-    // Do not append classes here unless they derive from ValueWithSmallList.
+    // Do not append classes here unless they derive from ValueContainingList.
   };
 }
 

@@ -1,18 +1,38 @@
-#pragma once
+﻿#pragma once
 
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
 {
-  class FontValue : public Value
+  /// @brief The `font` shorthand's components, each optional.
+  class FontValue final : public Value
   {
   public:
+    RefPtr<Value> Style;
+    RefPtr<PrimitiveValue> Variant;
+    RefPtr<PrimitiveValue> Weight;
+    RefPtr<PrimitiveValue> Width;
+    RefPtr<PrimitiveValue> Size;
+    RefPtr<PrimitiveValue> LineHeight;
+    RefPtr<Value> Family;
+
+  private:
+    FontValue() noexcept : Value(ValueType::Font)
+    {
+    }
+
+  public:
+    KRYS_NODISCARD static Ref<FontValue> Create() noexcept
+    {
+      return AdoptRef(*new FontValue);
+    }
+
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
-
     KRYS_NODISCARD bool Equals(const FontValue &other) const noexcept;
-
     KRYS_NODISCARD IterationStatus
-      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
+      CustomVisitChildren(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func) const noexcept;
   };
 }
 

@@ -353,7 +353,7 @@ namespace krys::boo::css
     // unless they don't allow the primitive values that can have dependencies. May want to base this on a
     // traverseValues or forEachValue function instead.
     // FIXME: Consider a non-recursive algorithm for walking this tree of dependencies.
-    if (auto *asList = DynamicDowncast<ValueWithSmallList>(*this))
+    if (auto *asList = DynamicDowncast<ValueContainingList>(*this))
     {
       for (auto &listValue : *asList)
       {

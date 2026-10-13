@@ -4,7 +4,7 @@
 
 namespace krys::boo::css
 {
-  class TransformListValue final : public ValueWithSmallList
+  class TransformListValue final : public ValueContainingList
   {
   public:
     KRYS_NODISCARD static Ref<TransformListValue> Create(ValueListBuilder values) noexcept;

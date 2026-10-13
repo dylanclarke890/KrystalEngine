@@ -1,11 +1,12 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/Primitives/Quad.hpp"
+#include "Krystal.Booey/CSS/Values/Quad.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
 {
+  /// @brief A `border-image-slice` value: four slice offsets, plus the `fill` keyword.
   class BorderImageSliceValue final : public Value
   {
   private:
@@ -14,17 +15,10 @@ namespace krys::boo::css
     Quad _slices;
     bool _fill {false};
 
-    BorderImageSliceValue(Quad slices, bool fill) noexcept
-        : Value(ValueType::BorderImageSlice), _slices(krys::move(slices)), _fill(fill)
-    {
-    }
+    BorderImageSliceValue(Quad slices, bool fill) noexcept;
 
   public:
     KRYS_NODISCARD static Ref<BorderImageSliceValue> Create(Quad slices, bool fill) noexcept;
-
-    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
-
-    KRYS_NODISCARD bool Equals(const BorderImageSliceValue &other) const noexcept;
 
     KRYS_NODISCARD const Quad &Slices() const noexcept
     {
@@ -35,6 +29,9 @@ namespace krys::boo::css
     {
       return _fill;
     }
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+    KRYS_NODISCARD bool Equals(const BorderImageSliceValue &other) const noexcept;
   };
 }
 

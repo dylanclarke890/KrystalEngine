@@ -1,7 +1,12 @@
-#include "Krystal.Booey/CSS/Values/BorderImageSliceValue.hpp"
+﻿#include "Krystal.Booey/CSS/Values/BorderImageSliceValue.hpp"
 
 namespace krys::boo::css
 {
+  BorderImageSliceValue::BorderImageSliceValue(Quad slices, bool fill) noexcept
+      : Value(ValueType::BorderImageSlice), _slices(krys::move(slices)), _fill(fill)
+  {
+  }
+
   Ref<BorderImageSliceValue> BorderImageSliceValue::Create(Quad slices, bool fill) noexcept
   {
     return AdoptRef(*new BorderImageSliceValue(krys::move(slices), fill));
@@ -13,7 +18,6 @@ namespace krys::boo::css
     {
       return _slices.CssText(context) + u8" fill";
     }
-
     return _slices.CssText(context);
   }
 

@@ -175,9 +175,20 @@ class GenerationContext:
 
             with writer.namespace(namespace="krys"):
                 writer.write_block("""\
-                    template<> 
-                    struct DefaultHash<::krys::boo::css::ValueId> : IntegerHash<uint16>
+                    template<>
+                    struct DefaultHash<::krys::boo::css::ValueId>
                     {
+                      constexpr static bool IsSafeToCompareToEmptyOrDeleted = true;
+
+                      KRYS_NODISCARD constexpr static size_t Hash(::krys::boo::css::ValueId id) noexcept
+                      {
+                        return IntegerHash<uint16>::Hash(static_cast<uint16>(id));
+                      }
+
+                      KRYS_NODISCARD constexpr static bool Equal(::krys::boo::css::ValueId a, ::krys::boo::css::ValueId b) noexcept
+                      {
+                        return a == b;
+                      }
                     };
 
                     template<>

@@ -825,7 +825,7 @@ namespace krys::boo::css
 
     if (Is<ValueList>(value.get()) || Is<TransformListValue>(value.get()))
     {
-      auto *valueList = Downcast<ValueWithSmallList>(value.get());
+      auto *valueList = Downcast<ValueContainingList>(value.get());
       auto syntaxValueList = style::CustomProperty::ValueList {{}, valueList->separator()};
       for (Ref listValue : valueList)
       {

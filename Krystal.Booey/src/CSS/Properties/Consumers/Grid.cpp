@@ -219,8 +219,8 @@ namespace krys::boo::css::PropertyParserHelpers
       return false;
     }
 
-    return IsGridTrackFixedSized(Downcast<PrimitiveValue>(function.Get(0uz)))
-           || IsGridTrackFixedSized(Downcast<PrimitiveValue>(function.Get(1uz)));
+    return IsGridTrackFixedSized(Downcast<PrimitiveValue>(function[0u]))
+           || IsGridTrackFixedSized(Downcast<PrimitiveValue>(function[1u]));
   }
 
   KRYS_NODISCARD static RefPtr<PrimitiveValue> ConsumeGridBreadth(TokenRange &tokens,

@@ -5,6 +5,7 @@
 
 namespace krys::boo::css
 {
+  /// @brief Four values for the top, right, bottom and left sides; shared by `Quad` and `Rect`.
   class RectBase
   {
   private:
@@ -32,14 +33,17 @@ namespace krys::boo::css
     {
       return *_top;
     }
+
     KRYS_NODISCARD const Value &Right() const noexcept
     {
       return *_right;
     }
+
     KRYS_NODISCARD const Value &Bottom() const noexcept
     {
       return *_bottom;
     }
+
     KRYS_NODISCARD const Value &Left() const noexcept
     {
       return *_left;
@@ -47,8 +51,8 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool Equals(const RectBase &other) const noexcept
     {
-      return *_top == *other._top && *_right == *other._right && *_left == *other._left
-             && *_bottom == *other._bottom;
+      return CompareValue(_top, other._top) && CompareValue(_right, other._right)
+             && CompareValue(_left, other._left) && CompareValue(_bottom, other._bottom);
     }
   };
 }

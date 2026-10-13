@@ -7458,8 +7458,19 @@ class GeneratePropertyId:
             with writer.namespace(namespace="krys"):
                 writer.write_block("""\
                   template<>
-                  struct DefaultHash<::krys::boo::css::PropertyId> : IntegerHash<uint16>
+                  struct DefaultHash<::krys::boo::css::PropertyId>
                   {
+                    constexpr static bool IsSafeToCompareToEmptyOrDeleted = true;
+
+                    KRYS_NODISCARD constexpr static size_t Hash(::krys::boo::css::PropertyId id) noexcept
+                    {
+                      return IntegerHash<uint16>::Hash(static_cast<uint16>(id));
+                    }
+
+                    KRYS_NODISCARD constexpr static bool Equal(::krys::boo::css::PropertyId a, ::krys::boo::css::PropertyId b) noexcept
+                    {
+                      return a == b;
+                    }
                   };""")
             writer.newline()
 

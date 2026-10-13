@@ -724,17 +724,17 @@ namespace krys
     KRYS_NODISCARD constexpr static size_t Combine(Args... args) noexcept
     {
       size_t seed = 0u;
-      Combine(seed, args...);
+      CombineInto(seed, args...);
       return seed;
     }
 
   private:
     template <typename Head, typename... Tail>
-    constexpr static void Combine(size_t &seed, const Head &head, Tail... tail) noexcept
+    constexpr static void CombineInto(size_t &seed, const Head &head, Tail... tail) noexcept
     {
       // this algorithm is based on boost::combine_hash and is designed to mix/smear around values
       seed ^= DefaultHash<Head>::Hash(head) + 0x9e'37'79'b9'7f'4a'7c'55 + (seed << 6) + (seed >> 2);
-      (Combine(seed, tail), ...);
+      (CombineInto(seed, tail), ...);
     }
   };
 }

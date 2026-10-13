@@ -102,8 +102,10 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Values/NumericTypesSerialisation.cpp
 		tests/CSS/Values/Primitives/NumericRaw.cpp
 		tests/CSS/Values/Primitives/PrimitiveNumeric.cpp
+		tests/CSS/Values/Primitives/Ratio.cpp
 		tests/CSS/Values/Primitives/Units.cpp
 		tests/CSS/Values/PrimitiveValue.cpp
+		tests/CSS/Values/Quad.cpp
 		tests/CSS/Values/Types.cpp
 		tests/CSS/Values/Units.cpp
 		# tests/CSS/Selectors/SelectorParser.cpp
@@ -111,6 +113,7 @@ target_sources(Krystal.Booey.Tests
 		# Graphics
 		tests/Graphics/FloatPoint.cpp
 		tests/Graphics/FloatSize.cpp
+		tests/Graphics/FontTaggedSettings.cpp
 		tests/Graphics/IntPoint.cpp
 		tests/Graphics/IntSize.cpp
 		tests/Graphics/LayoutPoint.cpp

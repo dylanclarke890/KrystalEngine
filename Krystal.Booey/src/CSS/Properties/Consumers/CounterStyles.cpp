@@ -203,7 +203,7 @@ namespace krys::boo::css::PropertyParserHelpers
         return ValuePair::CreateNonCoalescing(krys::move(lowerBound), krys::move(upperBound));
       });
 
-    if (!tokens.IsAtEnd() || !tokensList || !tokensList->Size())
+    if (!tokens.IsAtEnd() || !tokensList || !tokensList->size())
     {
       return nullptr;
     }
@@ -256,7 +256,7 @@ namespace krys::boo::css::PropertyParserHelpers
       },
       state);
 
-    if (!tokens.IsAtEnd() || !values || !values->Size())
+    if (!tokens.IsAtEnd() || !values || !values->size())
     {
       return nullptr;
     }

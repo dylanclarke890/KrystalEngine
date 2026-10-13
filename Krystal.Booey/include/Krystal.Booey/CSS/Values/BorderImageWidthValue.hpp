@@ -1,29 +1,22 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/Primitives/Quad.hpp"
+#include "Krystal.Booey/CSS/Values/Quad.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
 {
+  /// @brief A `border-image-width` value: four widths, plus whether they override the border widths.
   class BorderImageWidthValue final : public Value
   {
   private:
     Quad _widths;
     bool _overridesBorderWidths {false};
 
-    BorderImageWidthValue(Quad widths, bool overridesBorderWidths) noexcept
-        : Value(ValueType::BorderImageWidth), _widths(krys::move(widths)),
-          _overridesBorderWidths(overridesBorderWidths)
-    {
-    }
+    BorderImageWidthValue(Quad widths, bool overridesBorderWidths) noexcept;
 
   public:
     KRYS_NODISCARD static Ref<BorderImageWidthValue> Create(Quad widths, bool overridesBorderWidths) noexcept;
-
-    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
-
-    KRYS_NODISCARD bool Equals(const BorderImageWidthValue &other) const noexcept;
 
     KRYS_NODISCARD const Quad &Widths() const noexcept
     {
@@ -34,6 +27,9 @@ namespace krys::boo::css
     {
       return _overridesBorderWidths;
     }
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+    KRYS_NODISCARD bool Equals(const BorderImageWidthValue &other) const noexcept;
   };
 }
 

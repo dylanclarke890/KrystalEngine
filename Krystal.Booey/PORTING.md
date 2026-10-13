@@ -2,7 +2,7 @@
 
 - **Upstream:** `C:\Users\dylan\repos\WebKit` @ `300e80c70fd3` (2025-12-26). Never update the clone mid-port.
 - **Paths** are relative to `Source/WebCore` (WebKit) and `Krystal.Booey/include/Krystal.Booey` (Krystal) unless stated.
-- **Regenerate a slice:** `python tools/port/graph.py <entries...> --headers-only --out tools/port/out/<slice>.md` (add `--follow platform/graphics/` etc. to traverse outside `css/` and `style/`)
+- **Regenerate a slice:** `python tools/port/graph.py <entries...> --headers-only --out tools/port/out/<slice>.md` (to traverse outside `css/` and `style/`, pass all prefixes: `--follow css/ style/ platform/graphics/`; `--follow` replaces the defaults)
 
 ## Verdicts
 
@@ -38,9 +38,12 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Slice 3, layer 5b (2026-10-12): the colour parser (`+Color`, `+ColorAdjust`, `+ColorInterpolationMethod`), the colour half of `ParserFastPaths`, `ColorScheme` and the Angle/Percentage/Keyword/Symbol consumer definitions built and tested; colours parse end-to-end from strings. The Value-returning consumers are written but wait for 5c; see the layer 5b section.
 - Slice 3, layer 5c (2026-10-12): `ValuePool`/`StaticValuePool`, `ColorValue`, `DynamicRangeLimitValue`, `ColorSchemeValue` and the Value-returning colour/ident consumers compile into the library (compile-only: nothing calls them until `Value.cpp`/`PrimitiveValue.cpp` build); see the layer 5c section.
 - Slice 3, layer 6 (2026-10-12): Style colour (`style::Color` and its currentcolor-dependent kinds, conversion from `css::Color`, serialisation, blending), Style `DynamicRangeLimit` and `PlatformDynamicRangeLimit`, and the `Opacity` struct built and tested, against a testable seam (`RenderStyle` can be constructed); see the layer 6 section.
-- Layers 1–5c are committed (up to `c0e1ef11`); 6 isn't.
+- Slice 3 is committed (up to `225dbc61`).
+- Slice 4, Value subclasses (2026-10-12): `ValuePair`, `ValueList`/`ValueContainingList`, `FunctionValue`, `QuadValue`, `RectValue` and `RatioValue` reviewed and compile (compile-only; `Ratio` itself is tested); see the Slice 4 section.
+- Slice 4, tier 1 started (2026-10-12): `BackgroundRepeatValue`, `BorderImageSliceValue`, `BorderImageWidthValue`, `ReflectValue`, `UnicodeRangeValue` and the five font values (`FontVariationValue`, `FontFeatureValue`, `FontStyleWithAngleValue`, `FontStyleRangeValue`, `FontValue`) reviewed and compile (compile-only); `Graphics/FontTaggedSettings.hpp` ported and tested.
 
 **Open / next candidates:**
+- Slice 4 (Value subclasses): the generic types are done; next are the specific value types, one at a time, in the order under Slice 4's *Order* (tier 1 in progress: items 1–10 done; next `GridLineNamesValue`/`GridLineValue`).
 - Slice 3 (colour), bottom-up: (1) Graphics/Color, (2) calc-free numeric primitives, (3a) Style-free calc, (3b) calc evaluation and Style calc and (3c) calc parsing are done. (4a) `LayoutUnit` and the point/size types and (4b) Style numerics are done. (5a) the CSS colour types, (5b) the colour parser and (5c) `ColorValue`/`ValuePool` (compile-only) are done. (6) Style colour is done (its CSSValue half is deferred, see below). Slice 3 is complete apart from the Value-dependent pieces.
 - Deferred from layer 6 (needs `Style/BuilderChecking.hpp` and the raw-WebKit `ValueList`/`ValuePair`/`FunctionValue`/`BuilderState` it includes): `CSSValueConversion<Color>`, `CSSValueCreation<Color>`, `CSSValueConversion<DynamicRangeLimit>`, `CSSValueCreation<DynamicRangeLimit>` and `CSSValueConversion<Opacity>`. They come with the other `+CSSValueConversion`/`+CSSValueCreation` headers.
 - Waiting on `PrimitiveValue.cpp`/`Value.cpp` linking: `PropertyParserState::Pool` is a pointer (TODO: back to a reference defaulting to `MainThreadPool()`), `ColorValueConsumers.cpp` and `ColorAdjustValueConsumers.cpp` compile but should merge back into `Color.cpp`/`ColorAdjust.cpp`, `ValuePool::CreateFontFaceValue` (also needs `ValueList`/`PropertyParser`) and `ParserFastPaths::MaybeParseValue` aren't written, nothing in 5c is tested, and the Style `+CSSValueConversion`/`+CSSValueCreation` headers (numerics, `LengthWrapper`, `PrimitiveKeyword`) are still raw WebKit.
@@ -800,6 +803,287 @@ Graph from every `style/values/color` file except `StyleOpacity` (headers-only):
 - The parser doesn't take a `color-layers()` blend mode yet (upstream FIXME), so the multiply serialisation test builds the Style value directly.
 
 Tests: `tests/Style/Values/Color/{Color,DynamicRangeLimit}.cpp` (construction, `Markable`, conversion of every colour kind including keywords, document colours, system colours and `light-dark()` under the dark colour scheme, every currentcolor-dependent kind and its use-time resolution and serialisation, copies, computed serialisation, `ToCSS`, `RenderStyle`, blending; dynamic-range-limit keywords, mixes, normalisation, flattening, copies, blending, the platform value; `Opacity`): 13 cases / 303 assertions. Full Booey suite: 825 cases / 653189 assertions; all pass except 2 expected failures (`[!shouldfail]`). Whole solution builds with no warnings.
+
+## Slice 4: Value subclasses
+
+Every `Value` subclass, so `Value.cpp`/`PrimitiveValue.cpp` can build (`VisitDerived`). Decision (2026-10-12): the generic containers first (`ValuePair`, `ValueList`/`ValueContainingVector`, `FunctionValue`, `QuadValue`, `RectValue`), then the specific value types, one type per step (graph, port, build, test). Compile-only until `Value.cpp` builds: nothing can be created in a test, because `Ref` releases through `Value`'s `operator delete` and `CssText`/`Equals` dispatch through `Value.cpp`.
+
+### Order (decided 2026-10-12)
+
+Remaining subclasses, loosely by complexity. Measured from each upstream `.cpp`'s headers-only graph: "new" = graph files the ledger doesn't cover yet. `DeprecatedCSSOM*` is won't-port (no `createDeprecatedCSSOMWrapper`), so it's ignored. Every Krystal header exists except `CanvasValue.hpp`; only `AppleColorFilter`, `Attr`, `BackgroundRepeat`, `BasicShape`, `BorderImageSlice`/`Width` and `BoxShadowProperty` have a `.cpp`.
+
+**Tier 1: self-contained** (only the class's own files are new).
+1. `BackgroundRepeatValue`
+2. `BorderImageSliceValue`, 3. `BorderImageWidthValue` (on `Quad`)
+4. `ReflectValue`
+5. `UnicodeRangeValue`
+6. `FontVariationValue`, 7. `FontFeatureValue`, 8. `FontStyleWithAngleValue`, 9. `FontStyleRangeValue`, 10. `FontValue` (needs 8)
+11. `GridLineNamesValue`, 12. `GridLineValue`
+13. `SubgridValue`, 14. `TransformListValue`, 15. `GridAutoRepeatValue`, 16. `GridIntegerRepeatValue` (on `ValueContainingList`)
+17. `CounterValue`
+18. `OffsetRotateValue`
+19. `AttrValue`
+
+**Tier 2: one or two new CSS types.**
+20. `PositionValue`, `PositionXValue`, `PositionYValue` (`CSSPosition.h`)
+21. `UrlValue` (`CSSURL.h`, `CSSURLModifiers.h`; check `URL/Url.hpp` first)
+22. `GridTemplateAreasValue` (`CSSGridNamedAreaMap.h`, `CSSGridTemplateAreas.h`)
+23. `EasingFunctionValue` (the four easing functions; `Values/Easing/` exists)
+
+**Tier 3: CSS type families.**
+24. `BoxShadowPropertyValue`, 25. `TextShadowPropertyValue` (`CSSBoxShadow`/`CSSTextShadow`)
+26. `PathValue` (`CSSFillRule`, `CSSPathFunction`; needs `SVGPathByteStream`)
+27. `BasicShapeValue` (shape functions, `CSSBorderRadius`; needs 20, 26)
+28. `FilterValue`, 29. `AppleColorFilterValue` (filter functions; `FilterValue` needs 21)
+30. `RayValue`, 31. `ScrollValue`, 32. `ViewValue`: only new through `CSSPrimitiveValueMappings.h`, which reaches `StyleBuilderState`. Port just the enum mappings they use.
+
+**Tier 4: need the parser, Style builder or resource loading.**
+33. `CustomPropertyValue`, 34. `VariableReferenceValue`, 35. `PendingSubstitutionValue` (`CSSVariableData`, `CSSPropertyParser`, `StyleBuilder`, custom property registry)
+36. `FontFaceSrcLocalValue`/`FontFaceSrcResourceValue` (`CachedFont`, resource loader)
+37. Images, which create `StyleImage`s through `BuilderState`: `ImageValue`, `ImageSetOptionValue`, `ImageSetValue`, `NamedImageValue`, `CanvasValue` (new file), `PaintImageValue`, `CrossFadeValue`, `FilterImageValue` (needs 28), `CursorImageValue`, `GradientValue` (largest)
+
+Tier 4 may be stubbed (declarations plus minimal definitions) so `Value.cpp`/`PrimitiveValue.cpp` can build before its dependencies are ported; decide when tiers 1–3 are done.
+
+### `ValuePair` (2026-10-12)
+
+Graph from `css/CSSValuePair.cpp` (headers-only): 3 files (`CSSValuePair.cpp`, `CSSValuePair.h`, `CSSValue.h`), plus WTF boundaries (`tools/port/out/value-pair.md`). The `.cpp` only adds `Hasher.h`/`MakeString.h`/`WTFString.h`.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/CSSValuePair.h`, `.cpp` | `have` | `CSS/Values/ValuePair.hpp`, `src/CSS/Values/ValuePair.cpp` | on (compile-only) | `createNoncoalescing` → `CreateNonCoalescing` (existing callers). Defines `Value::First()`/`Second()`. |
+
+**Bugs fixed:**
+- `ValuePair` was declarations only: no data members, constructor or `.cpp`, so every `Create*`, `CustomCSSText`, `Equals`, `CustomVisitChildren`, `First`/`Second` (and `Value::First()`/`Second()`) was undefined.
+- No `const` `First()`/`Second()`.
+- `Create*` took `Ref<Value> &&`; now by value like upstream, so callers can pass a `Ref<Derived>` lvalue copy.
+
+**Krystal.Core bugs fixed (found here):**
+- `Hash::Combine(seed, x)` with an lvalue `size_t seed` (the `AddDerivedHash` pattern) didn't compile: it picked the private `Combine(size_t &, ...)` helper. Latent in `Value.cpp` and `PrimitiveValue.cpp`, which aren't built. The helper is renamed `CombineInto`. Tested in `Krystal.Core.Tests/tests/Hash.cpp`.
+
+**Added (upstream API):** `CanBeCoalesced`, `AddDerivedHash` (separator, coalesce flag, then both values; false if either value hashes by pointer), the `IdenticalValueSerialisation` constructor.
+
+**Differences:** none beyond the translation rules. `friend class Value` (for `AddDerivedHash` via `VisitDerived`) instead of upstream's `friend CSSValue::addHash`, like `PrimitiveValue`.
+
+Tests: none for `ValuePair` (compile-only). `Krystal.Core.Tests/tests/Hash.cpp`: 2 cases / 6 assertions. Full Booey suite: 825 cases / 653189 assertions; all pass except 2 expected failures. Core suite: 544 cases / 2214 assertions, all pass. Whole solution builds with no warnings.
+
+### `ValueList` (2026-10-12)
+
+Graph from `css/CSSValueList.cpp` (headers-only): 22 files (`tools/port/out/value-list.md`). Everything past `CSSValueList.h` comes in through `CSSPrimitiveValue.h` (the `.cpp` uses `isValueID`), all reviewed in slices 2–3.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/CSSValueList.h`, `.cpp` (`CSSValueContainingVector`) | `have` | `ValueContainingList` in `CSS/Values/ValueList.hpp`, `src/CSS/Values/ValueList.cpp` | on (compile-only) | Renamed from `ValueWithSmallList` (decided 2026-10-12; `FunctionValue`, `SubgridValue`, `TransformListValue`, `Value.cpp`, `PropertyParser.cpp` updated). Container protocol keeps upstream's names (`size`, `operator[]`, `begin`/`end`); the rest PascalCase (`Length`, `Item`, `ItemWithoutBoundsCheck`, `ProtectedItem`, `HasValue`, `SerialiseItems`, `ItemsEqual`, `ContainsSingleEqualItem`, `CopyValues`). |
+| `css/CSSValueList.h`, `.cpp` (`CSSValueList`) | `have` | `ValueList` in the same files | on (compile-only) | `create(char16_t, ...)` takes a `char32`. |
+| `CSSValueListBuilder` (in `CSSValueList.h`) | `have` | `CSS/Values/ValueListBuilder.hpp` | on | `SmallList<Ref<Value>, 4>`. |
+
+**Bugs fixed:**
+- No `.cpp`: every constructor, `Create*`, `HasValue`, `SerialiseItems`, `ItemsEqual`, `ContainsSingleEqualItem`, `CopyValues`, `operator[]`, `CustomVisitChildren`, `CustomTraverseSubresources`, `CustomCSSText` and `Equals` was undefined.
+- No `AddDerivedHash`, so lists hashed by pointer.
+- `Get` used raw `assert`; `CustomTraverseSubresources` wasn't `noexcept`; `ValueList(ValueSeparator)` wasn't `noexcept`.
+- `Create*` took `ValueListBuilder &&`; now by value like upstream.
+
+**Krystal callers updated:** `Consumers/CounterStyles.cpp` (`->Size()` → `->size()`), `Consumers/Grid.cpp` (`function.Get(i)` → `function[i]`). Both unreviewed and not built.
+
+**Added (upstream API):** `CreateCommaSeparated(Ref<Value>)`, `CreateSpaceSeparated()`, `CreateSlashSeparated(Ref<Value>)`, `Length`, `Item`, `ItemWithoutBoundsCheck`, `ProtectedItem`, `SeparatorCSSText` (public), `AddDerivedHash`.
+
+**Differences:**
+- Items are held in a `SmallList<const Value *, 4>` (leaked references, released in the destructor) instead of an inline `std::array` plus a `MallocSpan`. Same ownership and inline capacity.
+- Removed `Get`/`TryGet`/`Size` (use `operator[]`/`Item`/`size`).
+- No free `add(Hasher&, const CSSValueContainingVector&)` (declared upstream, never defined); see `Value`.
+
+Tests: none (compile-only). Full Booey suite: 825 cases / 653189 assertions; all pass except 2 expected failures. Whole solution builds with no warnings.
+
+### `FunctionValue` (2026-10-12)
+
+Graph from `css/CSSFunctionValue.cpp` (headers-only): 4 files (`CSSFunctionValue.cpp`, `.h`, `CSSValueList.h`, `CSSValue.h`; `tools/port/out/function-value.md`). The `.cpp` also includes `CSSValueKeywords.h` (generated `ValueId.hpp`).
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/CSSFunctionValue.h`, `.cpp` | `have` | `CSS/Values/FunctionValue.hpp`, `src/CSS/Values/FunctionValue.cpp` | on (compile-only) | `nameLiteral(m_name)` → `ToString(_name)` (keeps the keyword's case, e.g. `translateX`). |
+| `CSSValueKeywords.h`, `CSSPropertyNames.h` (`DefaultHash`) | `have` | `codegen/css_value_keywords.py`, `codegen/css_properties.py` | | See bugs. |
+
+**Bugs fixed:**
+- No `.cpp`, no constructors: every `Create`, `CustomCSSText`, `Equals` and the hash were undefined.
+- It declared its own `CustomVisitChildren` and `Length` (never defined), hiding `ValueContainingList`'s.
+- Generated code: `DefaultHash<ValueId>` and `DefaultHash<PropertyId>` derived from `IntegerHash<uint16>`, whose `Hash(uint16)` doesn't accept the enum, so hashing either (`Hash::Combine(seed, valueId)`, also in the unbuilt `PrimitiveValue::AddDerivedHash`) failed to compile. They now define `Hash`/`Equal` on the enum, forwarding to `IntegerHash<uint16>`. Tested in `tests/CSS/Parser/KeywordLookup.cpp`.
+
+**Added (upstream API):** `AddDerivedHash` (name, then the list's hash).
+
+**Differences:** none beyond the translation rules.
+
+Tests: none for `FunctionValue` (compile-only); `KeywordLookup.cpp` gained a hash case (6 assertions). Full Booey suite: 826 cases / 653195 assertions; all pass except 2 expected failures. Whole solution builds with no warnings.
+
+### `QuadValue` (2026-10-12)
+
+Graph from `css/CSSQuadValue.cpp` (headers-only): 5 files (`CSSQuadValue.cpp`, `.h`, `Quad.h`, `RectBase.h`, `CSSValue.h`; `tools/port/out/quad-value.md`). The `.cpp` adds nothing.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/CSSQuadValue.h`, `.cpp` | `have` | `CSS/Values/QuadValue.hpp`, `src/CSS/Values/QuadValue.cpp` | on (compile-only) | `quad()` → `GetQuad()`. Defines `Value::GetQuad()`. |
+| `css/Quad.h` | `have` | `CSS/Values/Quad.hpp` | on | Moved from `Primitives/` to match upstream's location (`Rect.hpp`/`RectBase.hpp` too). |
+| `css/RectBase.h` | `have` | `CSS/Values/RectBase.hpp` | on | Shared with `Rect` (reviewed with `RectValue`). |
+
+**Bugs fixed:**
+- `QuadValue` was declarations only: no data members, constructor or `.cpp`, so every `Create`, `CustomCSSText` and `Equals` was undefined.
+- It declared its own `CustomVisitChildren` (never defined; upstream has none), hiding `Value`'s default.
+
+**Added (upstream API):** `Create(Quad)`, `GetQuad` (and `Value::GetQuad()`), `CanBeCoalesced`.
+
+**Differences:**
+- `Quad(Ref<Value>)` is `explicit` (upstream's is implicit, but nothing upstream converts implicitly; `create({ ... })` uses the four-argument constructor).
+- `RectBase::Equals` uses `CompareValue`, like upstream's `compareCSSValue` (was `operator==`, same behaviour).
+- No `AddDerivedHash`, like upstream: quads hash by pointer.
+
+Tests: `tests/CSS/Values/Quad.cpp` covers `Quad::Serialise` (1 case / 6 assertions); `QuadValue` itself is compile-only. Full Booey suite: 827 cases / 653201 assertions; all pass except 2 expected failures. Whole solution builds with no warnings.
+
+### `RectValue` (2026-10-12)
+
+Graph from `css/CSSRectValue.cpp` (headers-only): 5 files (`CSSRectValue.cpp`, `.h`, `Rect.h`, `RectBase.h`, `CSSValue.h`; `tools/port/out/rect-value.md`). The `.cpp` adds nothing.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/CSSRectValue.h`, `.cpp` | `have` | `CSS/Values/RectValue.hpp`, `src/CSS/Values/RectValue.cpp` | on (compile-only) | `rect()` → `GetRect()`. Defines `Value::GetRect()`. |
+| `css/Rect.h` | `have` | `CSS/Values/Rect.hpp` | on | `generateCSSString` → `GenerateCSSString`. |
+
+**Bugs fixed:**
+- No `.cpp`: the constructor, `Create`, `CustomCSSText` and `Equals` were undefined.
+- It declared its own `CustomVisitChildren` (never defined; upstream has none), hiding `Value`'s default.
+- `RectValue` wasn't `final`.
+
+**Added (upstream API):** `GetRect` (and `Value::GetRect()`).
+
+**Differences:**
+- `Rect`'s serialiser was public (`Serialise`); now private `GenerateCSSString` like upstream (nothing else called it).
+- No `AddDerivedHash`, like upstream: rects hash by pointer.
+
+Tests: none (compile-only; `Rect`'s serialiser is private, and `CssText` dispatches through `Value.cpp`). Full Booey suite: 827 cases / 653201 assertions; all pass except 2 expected failures. Whole solution builds with no warnings.
+
+### `RatioValue` (2026-10-12)
+
+Graph from `css/CSSRatioValue.cpp` (headers-only): 23 files (`tools/port/out/ratio-value.md`). Only `CSSRatioValue.h`/`.cpp` and `CSSRatio.h` are new; the rest (numeric primitives and the `+CSSValueVisitation`/`+ComputedStyleDependencies`/`+Serialization` headers) was reviewed in slices 2–3. `CSSRatio.cpp` (not in the headers-only graph) defines `CSSValueCreation<Ratio>`.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/CSSRatioValue.h`, `.cpp` | `have` | `CSS/Values/RatioValue.hpp`, `src/CSS/Values/RatioValue.cpp` | on (compile-only) | `ratio()` → `GetRatio()`. |
+| `css/values/primitives/CSSRatio.h`, `.cpp` | `have` | `CSS/Values/Primitives/Ratio.hpp`, `src/CSS/Values/Primitives/Ratio.cpp` | on | tested. `numerator`/`denominator` → `Numerator`/`Denominator`. |
+
+**Bugs fixed:**
+- `RatioValue` was declarations only: no data member, constructor or `.cpp`, so `Create`, `CustomCSSText`, `Equals` and `CustomVisitChildren` were undefined.
+- `RatioValue` wasn't `final`.
+
+**Added (upstream API):** `GetRatio`.
+
+**Differences:**
+- One `Create(Ratio)` by value instead of upstream's `Ratio&&`/`const Ratio&` overloads (like `DynamicRangeLimitValue`).
+- No `AddDerivedHash`, like upstream: ratios hash by pointer.
+
+Tests: `tests/CSS/Values/Primitives/Ratio.cpp` (default denominator, `get`, equality, serialisation including `2 / 1` for an omitted denominator, visitation): 4 cases / 10 assertions. `RatioValue` and `ValueCreation<Ratio>` are compile-only. Full Booey suite: 831 cases / 653211 assertions; all pass except 2 expected failures. Whole solution builds with no warnings.
+
+### `BackgroundRepeatValue` (2026-10-12)
+
+Graph from `css/CSSBackgroundRepeatValue.cpp` (headers-only): 3 files (`CSSBackgroundRepeatValue.cpp`, `.h`, `CSSValue.h`; `tools/port/out/background-repeat-value.md`). The `.cpp` also includes `CSSValueKeywords.h` (generated `ValueId.hpp`). First of tier 1.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/CSSBackgroundRepeatValue.h`, `.cpp` | `have` | `CSS/Values/BackgroundRepeatValue.hpp`, `src/CSS/Values/BackgroundRepeatValue.cpp` | on (compile-only) | `xValue()`/`yValue()` → `XValue()`/`YValue()`. |
+
+**Bugs fixed:**
+- The accessors were `x()`/`y()` (lowercase, not upstream's names); now `XValue()`/`YValue()`. No Krystal callers.
+- The `.cpp` had no BOM; the header included `Quad.hpp` for nothing.
+
+**Added (upstream API):** none; the existing port was complete.
+
+**Differences:** none beyond the translation rules. No `AddDerivedHash`, like upstream: hashes by pointer.
+
+Tests: none (compile-only: `CssText` dispatches through `Value.cpp`). Full Booey suite: 831 cases / 653211 assertions; all pass except 2 expected failures.
+
+### `BorderImageSliceValue`, `BorderImageWidthValue` (2026-10-12)
+
+Graphs from `css/CSSBorderImageSliceValue.cpp` and `css/CSSBorderImageWidthValue.cpp` (headers-only): 5 files each (the class's `.h`/`.cpp`, `Quad.h`, `RectBase.h`, `CSSValue.h`; `tools/port/out/border-image-slice-value.md`, `border-image-width-value.md`). `Quad`/`RectBase` were reviewed with `QuadValue`; the `.cpp`s add only WTF string headers.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/CSSBorderImageSliceValue.h`, `.cpp` | `have` | `CSS/Values/BorderImageSliceValue.hpp`, `src/CSS/Values/BorderImageSliceValue.cpp` | on (compile-only) | `slices()`/`fill()` → `Slices()`/`Fill()`. |
+| `css/CSSBorderImageWidthValue.h`, `.cpp` | `have` | `CSS/Values/BorderImageWidthValue.hpp`, `src/CSS/Values/BorderImageWidthValue.cpp` | on (compile-only) | `widths()`/`overridesBorderWidths()` → `Widths()`/`OverridesBorderWidths()`. |
+
+**Bugs fixed:** none; the existing port was complete and matched upstream. Tidied: constructors moved to the `.cpp`s, the `.cpp`s gained a BOM, and `BorderImageWidthValue::Equals` compares in upstream's order.
+
+**Added (upstream API):** none.
+
+**Differences:** no out-of-line `= default` destructors (the implicit ones do the same). No `AddDerivedHash`, like upstream: both hash by pointer.
+
+Tests: none (compile-only: `CssText` dispatches through `Value.cpp`). Full Booey suite: 831 cases / 653211 assertions; all pass except 2 expected failures.
+
+### `ReflectValue` (2026-10-12)
+
+Graph from `css/CSSReflectValue.cpp` (headers-only): 22 files (`tools/port/out/reflect-value.md`). Only `CSSReflectValue.h`/`.cpp` are new; everything else comes in through `CSSPrimitiveValue.h`, reviewed in slices 2–3 (`CSSAttrValue.h` is tier 1 item 19, and already compiles through `PrimitiveValue.hpp`). The `.cpp` adds only `MakeString.h`.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/CSSReflectValue.h`, `.cpp` | `have` | `CSS/Values/ReflectValue.hpp`, `src/CSS/Values/ReflectValue.cpp` | on (compile-only) | `direction()`/`offset()`/`mask()` → `Direction()`/`Offset()`/`Mask()`. |
+
+**Bugs fixed:**
+- `ReflectValue` was declarations only: no data members, constructor or `.cpp`, so `Create`, `CustomCSSText`, `Equals` and `CustomVisitChildren` were undefined (`Consumers/Background.cpp` calls `Create`).
+- No accessors.
+- `CustomVisitChildren` was missing `KRYS_NOESCAPE`; it's now defined inline, like upstream.
+- The header included `Quad.hpp` for nothing.
+
+**Added (upstream API):** `Direction`, `Offset`, `Mask`.
+
+**Differences:** includes `Value.hpp` and forward-declares `ValueId` instead of including `PrimitiveValue.hpp` (only the keyword type is used). No `AddDerivedHash`, like upstream: hashes by pointer.
+
+Tests: none (compile-only: `CssText` dispatches through `Value.cpp`). Full Booey suite: 831 cases / 653211 assertions; all pass except 2 expected failures.
+
+### `UnicodeRangeValue` (2026-10-12)
+
+Graph from `css/CSSUnicodeRangeValue.cpp` (headers-only): 3 files (`CSSUnicodeRangeValue.cpp`, `.h`, `CSSValue.h`; `tools/port/out/unicode-range-value.md`). The `.cpp` adds only `HexNumber.h`/`MakeString.h`; the header's `<unicode/umachine.h>` (ICU, for `char32_t`) isn't needed.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/CSSUnicodeRangeValue.h`, `.cpp` | `have` | `CSS/Values/UnicodeRangeValue.hpp`, `src/CSS/Values/UnicodeRangeValue.cpp` | on (compile-only) | `from()`/`to()` → `From()`/`To()`. |
+
+**Bugs fixed:**
+- `UnicodeRangeValue` was declarations only: no data members, constructor or `.cpp`, so `Create`, `CustomCSSText` and `Equals` were undefined (`Consumers/UnicodeRange.cpp` calls `Create`).
+- It declared its own `CustomVisitChildren` (never defined; upstream has none), hiding `Value`'s default.
+- No accessors.
+
+**Added (upstream API):** `From`, `To`.
+
+**Differences:** `hex(x, Lowercase)` is a local `std::to_chars` helper in the `.cpp` (lowercase, no padding, same output); there's no general hex-number helper yet, so add one to `Text/` if another slice needs it. No `AddDerivedHash`, like upstream: hashes by pointer.
+
+Tests: none (compile-only: `CssText` dispatches through `Value.cpp`). Full Booey suite: 831 cases / 653211 assertions; all pass except 2 expected failures.
+
+### Font values (2026-10-12)
+
+`FontVariationValue`, `FontFeatureValue`, `FontStyleWithAngleValue`, `FontStyleRangeValue`, `FontValue` (tier 1 items 6–10), as one step. Graphs from each `css/CSS<name>.cpp` (headers-only, `--follow css/ style/ platform/graphics/`; `tools/port/out/font-*.md`). The only file not already reviewed is `platform/graphics/FontTaggedSettings.h` (from the variation and feature values); the rest comes in through `CSSPrimitiveValue.h`/`CSSValueList.h`/`CSSPrimitiveNumericTypes.h`, reviewed in slices 2–4.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `platform/graphics/FontTaggedSettings.h` | `port` | `Graphics/FontTaggedSettings.hpp` | on | tested. Header-only. `fontFeatureTag` → `FontFeatureTag`; `tag()`/`value()`/`enabled()` → `Tag()`/`Value()`/`Enabled()`; the list keeps container-protocol names (`insert`, `isEmpty`, `size`, `at`, `begin`/`end`). |
+| `platform/graphics/FontTaggedSettings.cpp` | `wont` | | | Only `TextStream` dumping. |
+| `css/CSSFontVariationValue.h`, `.cpp` | `have` | `CSS/Values/FontVariationValue.hpp`, `src/CSS/Values/FontVariationValue.cpp` | on (compile-only) | `tag()`/`value()` → `Tag()`/`GetValue()`. |
+| `css/CSSFontFeatureValue.h`, `.cpp` | `have` | `CSS/Values/FontFeatureValue.hpp`, `src/CSS/Values/FontFeatureValue.cpp` | on (compile-only) | Same accessors. |
+| `css/CSSFontStyleWithAngleValue.h`, `.cpp` | `have` | `CSS/Values/FontStyleWithAngleValue.hpp`, `src/CSS/Values/FontStyleWithAngleValue.cpp` | on (compile-only) | `obliqueAngle()` → `GetObliqueAngle()`; `nameLiteralForSerialization` → `ToLower(ValueId)`. |
+| `css/CSSFontStyleRangeValue.h`, `.cpp` | `have` | `CSS/Values/FontStyleRangeValue.hpp`, `src/CSS/Values/FontStyleRangeValue.cpp` | on (compile-only) | Public members `fontStyleValue`/`obliqueValues` → `FontStyleValue`/`ObliqueValues`. |
+| `css/CSSFontValue.h`, `.cpp` | `have` | `CSS/Values/FontValue.hpp`, `src/CSS/Values/FontValue.cpp` | on (compile-only) | Public members `style`, `variant`, ... → `Style`, `Variant`, `Weight`, `Width`, `Size`, `LineHeight`, `Family`. |
+
+**Bugs fixed:**
+- All five were declarations only: no data members, constructors, `Create` or `.cpp`, so `CustomCSSText`, `Equals` and `CustomVisitChildren` were undefined. They're now complete.
+- `FontStyleRangeValue` and `FontValue` declared a `CustomVisitChildren` without `KRYS_NOESCAPE`; none of the five were `final`. `FontValue.hpp` had no BOM.
+
+**Added (upstream API):** every member of the five classes (above); `FontTag`, `FontFeatureTag`, `FourCharacterTagHash`, `FourCharacterTagHashTraits`, `FontTaggedSetting`, `FontTaggedSettings`, `FontFeature`, `FontFeatureSettings`, `FontVariationSettings`.
+
+**Differences:**
+- `FontTaggedSetting::operator<` and `FontTaggedSettings::hash()` aren't ported: upstream declares them but never defines them.
+- `add(Hasher&, FontTag)` → `FourCharacterTagHash::Hash` (same big-endian integer); `add(Hasher&, const FontTaggedSetting<T>&)` → `DefaultHash<FontTaggedSetting<T>>`. No `DefaultHash<FontTag>` (it would cover every `Array<char, 4>`).
+- `FontVariationValue::Create`/`FontFeatureValue::Create` take `FontTag` and `Ref<Value>` by value (upstream: `Ref&&`, and `FontTag&&` for features); `FontStyleWithAngleValue::Create` takes the angle by value.
+- `FontFeatureValue` calls `ResolveAsIntegerIfNotCalculated<int>()` explicitly: Krystal's default is `int64`, upstream's `int`.
+- `FontStyleRangeValue::Equals` uses `CompareValue`/`CompareValuePtr` instead of `arePointingToEqualData` (same result; only the same-pointer shortcut is missing). `wtf/PointerComparison.h` isn't ported; `Style/Values/Primitives/CoordinatedValueList.hpp` (unreviewed) still calls it.
+- `FontValue.hpp` includes `PrimitiveValue.hpp` instead of forward-declaring it, so its `RefPtr<PrimitiveValue>` members are complete wherever the class is destroyed.
+- No `AddDerivedHash` on any of them, like upstream: all hash by pointer.
+- `CSS/Font/FontFace.hpp` and `Style/BuilderState.hpp` (unreviewed) still include the raw `FontTaggedSettings.h`; switch them when their slices come.
+
+Tests: `tests/Graphics/FontTaggedSettings.cpp` (tag creation, settings, sorted insert/replace, iteration, equality, tag and setting hashes, deleted-value traits): 5 cases / 31 assertions. The five value classes are compile-only. Full Booey suite: 836 cases / 653242 assertions; all pass except 2 expected failures.
 
 ## Deferred: Values (from the tokenizer graph)
 

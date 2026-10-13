@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
+#include "Krystal.Core/Hash.hpp"
 #include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::css::tests
@@ -86,5 +87,16 @@ namespace krys::boo::css::tests
 
     CHECK(ToString(PropertyId::BackgroundColor) == u8"background-color");
     CHECK(ToString(PropertyId::Invalid).empty());
+  }
+
+  TEST_CASE("PropertyId and ValueId hashes", "[CSS][KeywordLookup]")
+  {
+    CHECK(Hash::Combine(PropertyId::Color) == Hash::Combine(PropertyId::Color));
+    CHECK(Hash::Combine(PropertyId::Color) != Hash::Combine(PropertyId::MarginTop));
+    CHECK(DefaultHash<PropertyId>::Equal(PropertyId::Color, PropertyId::Color));
+
+    CHECK(Hash::Combine(ValueId::Auto) == Hash::Combine(ValueId::Auto));
+    CHECK(Hash::Combine(ValueId::Auto) != Hash::Combine(ValueId::None));
+    CHECK(!DefaultHash<ValueId>::Equal(ValueId::Auto, ValueId::None));
   }
 }

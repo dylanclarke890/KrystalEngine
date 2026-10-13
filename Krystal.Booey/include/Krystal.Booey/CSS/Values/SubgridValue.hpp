@@ -9,7 +9,7 @@
 
 namespace krys::boo::css
 {
-  class SubgridValue final : public ValueWithSmallList
+  class SubgridValue final : public ValueContainingList
   {
   public:
     KRYS_NODISCARD static Ref<SubgridValue> Create(ValueListBuilder builder) noexcept;

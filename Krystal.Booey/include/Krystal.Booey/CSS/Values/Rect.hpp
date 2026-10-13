@@ -1,9 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/Primitives/RectBase.hpp"
+#include "Krystal.Booey/CSS/Values/RectBase.hpp"
 
 namespace krys::boo::css
 {
+  /// @brief The four sides of a `rect()`, e.g. `clip: rect(1px, 2px, 3px, 4px)`.
   class Rect final : public RectBase
   {
   public:
@@ -14,12 +15,14 @@ namespace krys::boo::css
 
     KRYS_NODISCARD CSSOMString CssText(const SerialisationContext &context) const noexcept
     {
-      return Serialise(Top().CssText(context), Right().CssText(context), Bottom().CssText(context),
-                       Left().CssText(context));
+      return GenerateCSSString(Top().CssText(context), Right().CssText(context), Bottom().CssText(context),
+                               Left().CssText(context));
     }
 
-    KRYS_NODISCARD static CSSOMString Serialise(const CSSOMString &top, const CSSOMString &right,
-                                                const CSSOMString &bottom, const CSSOMString &left) noexcept
+  private:
+    KRYS_NODISCARD static CSSOMString GenerateCSSString(const CSSOMString &top, const CSSOMString &right,
+                                                        const CSSOMString &bottom,
+                                                        const CSSOMString &left) noexcept
     {
       return u8"rect(" + top + u8", " + right + u8", " + bottom + u8", " + left + u8')';
     }

@@ -6,12 +6,13 @@
 
 namespace krys::boo::css
 {
+  /// @brief A `<ratio>`, e.g. `16 / 9`.
   // <ratio> = <number [0,∞]> [ / <number [0,∞]> ]?
   // https://drafts.csswg.org/css-values-4/#ratio-value
   struct Ratio
   {
-    Number<NonNegative> numerator;
-    Number<NonNegative> denominator {1_css_number};
+    Number<NonNegative> Numerator;
+    Number<NonNegative> Denominator {1_css_number};
 
     KRYS_NODISCARD bool operator==(const Ratio &) const noexcept = default;
   };
@@ -21,11 +22,11 @@ namespace krys::boo::css
   {
     if constexpr (!I)
     {
-      return value.numerator;
+      return value.Numerator;
     }
     else if constexpr (I == 1)
     {
-      return value.denominator;
+      return value.Denominator;
     }
   }
 

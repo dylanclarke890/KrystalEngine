@@ -271,6 +271,30 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Values/Color/Opacity.hpp
   include/Krystal.Booey/Style/Values/Color/RelativeColor.hpp
   include/Krystal.Booey/Style/Values/Color/ResolvedColor.hpp
+
+  # Slice 4: Value subclasses (compile-only until Value.cpp/PrimitiveValue.cpp build)
+  include/Krystal.Booey/CSS/Values/BackgroundRepeatValue.hpp
+  include/Krystal.Booey/CSS/Values/BorderImageSliceValue.hpp
+  include/Krystal.Booey/CSS/Values/BorderImageWidthValue.hpp
+  include/Krystal.Booey/CSS/Values/FontFeatureValue.hpp
+  include/Krystal.Booey/CSS/Values/FontStyleRangeValue.hpp
+  include/Krystal.Booey/CSS/Values/FontStyleWithAngleValue.hpp
+  include/Krystal.Booey/CSS/Values/FontValue.hpp
+  include/Krystal.Booey/CSS/Values/FontVariationValue.hpp
+  include/Krystal.Booey/CSS/Values/FunctionValue.hpp
+  include/Krystal.Booey/CSS/Values/Quad.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/Ratio.hpp
+  include/Krystal.Booey/CSS/Values/QuadValue.hpp
+  include/Krystal.Booey/CSS/Values/RatioValue.hpp
+  include/Krystal.Booey/CSS/Values/Rect.hpp
+  include/Krystal.Booey/CSS/Values/RectBase.hpp
+  include/Krystal.Booey/CSS/Values/RectValue.hpp
+  include/Krystal.Booey/CSS/Values/ReflectValue.hpp
+  include/Krystal.Booey/CSS/Values/UnicodeRangeValue.hpp
+  include/Krystal.Booey/CSS/Values/ValueList.hpp
+  include/Krystal.Booey/CSS/Values/ValueListBuilder.hpp
+  include/Krystal.Booey/CSS/Values/ValuePair.hpp
+  include/Krystal.Booey/Graphics/FontTaggedSettings.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -376,6 +400,25 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Style/Values/Color/KeywordColor.cpp
   src/Style/Values/Color/LightDarkColor.cpp
   src/Style/Values/Color/ResolvedColor.cpp
+
+  # Slice 4: Value subclasses (compile-only until Value.cpp/PrimitiveValue.cpp build)
+  src/CSS/Values/BackgroundRepeatValue.cpp
+  src/CSS/Values/BorderImageSliceValue.cpp
+  src/CSS/Values/BorderImageWidthValue.cpp
+  src/CSS/Values/FontFeatureValue.cpp
+  src/CSS/Values/FontStyleRangeValue.cpp
+  src/CSS/Values/FontStyleWithAngleValue.cpp
+  src/CSS/Values/FontValue.cpp
+  src/CSS/Values/FontVariationValue.cpp
+  src/CSS/Values/FunctionValue.cpp
+  src/CSS/Values/Primitives/Ratio.cpp
+  src/CSS/Values/QuadValue.cpp
+  src/CSS/Values/RatioValue.cpp
+  src/CSS/Values/RectValue.cpp
+  src/CSS/Values/ReflectValue.cpp
+  src/CSS/Values/UnicodeRangeValue.cpp
+  src/CSS/Values/ValueList.cpp
+  src/CSS/Values/ValuePair.cpp
 )
 
 target_precompile_headers(Krystal.Booey
