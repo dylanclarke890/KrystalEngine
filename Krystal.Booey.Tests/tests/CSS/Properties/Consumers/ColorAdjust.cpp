@@ -13,7 +13,7 @@ namespace krys::boo::css::tests
   {
     std::string Serialised(utf8_stringview css)
     {
-      auto scheme = ParseUnresolvedColorScheme(css, ParserContext {});
+      auto scheme = ParseUnresolvedColorScheme(css, ParserContext {ParserMode::HTMLStandard});
       if (!scheme)
       {
         return "<invalid>";
@@ -26,12 +26,12 @@ namespace krys::boo::css::tests
 
   TEST_CASE("Colour scheme parsing", "[CSS][Properties][Consumers][ColorScheme]")
   {
-    auto normal = ParseUnresolvedColorScheme(u8"normal", ParserContext {});
+    auto normal = ParseUnresolvedColorScheme(u8"normal", ParserContext {ParserMode::HTMLStandard});
     REQUIRE(normal);
     CHECK(normal->IsNormal());
     CHECK_FALSE(normal->Only);
 
-    auto schemes = ParseUnresolvedColorScheme(u8"  light dark  ", ParserContext {});
+    auto schemes = ParseUnresolvedColorScheme(u8"  light dark  ", ParserContext {ParserMode::HTMLStandard});
     REQUIRE(schemes);
     REQUIRE(schemes->Schemes.size() == 2);
     CHECK(schemes->Schemes.Value[0] == CSSOMStringAtom(u8"light"));

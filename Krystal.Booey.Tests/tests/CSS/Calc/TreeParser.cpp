@@ -25,7 +25,7 @@ namespace krys::boo::css::calc::tests
     {
       css::Category Category {css::Category::Length};
       css::Range Range {All};
-      ParserContext Context {};
+      ParserContext Context {ParserMode::HTMLStandard};
       css::AllowedSymbols Symbols {};
       PropertyParserOptions PropertyOptions {};
       RuleType Rule {RuleType::Style};

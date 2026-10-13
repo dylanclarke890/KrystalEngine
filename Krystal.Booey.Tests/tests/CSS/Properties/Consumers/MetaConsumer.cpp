@@ -26,7 +26,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("MetaConsumer(Number token)", "[CSS][Properties][Consumers]")
   {
-    ParserContext context;
+    ParserContext context {ParserMode::HTMLStandard};
     PropertyParserState state {.Context = context};
 
     Tokens tokens {u8"5  0.5"};
@@ -46,7 +46,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("MetaConsumer(range validation)", "[CSS][Properties][Consumers]")
   {
-    ParserContext context;
+    ParserContext context {ParserMode::HTMLStandard};
     PropertyParserState state {.Context = context};
 
     Tokens tokens {u8"2"};
@@ -58,7 +58,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("MetaConsumer(unsupported tokens)", "[CSS][Properties][Consumers]")
   {
-    ParserContext context;
+    ParserContext context {ParserMode::HTMLStandard};
     PropertyParserState state {.Context = context};
 
     Tokens tokens {u8"auto 5px 5% \"5\""};
@@ -77,7 +77,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("MetaConsumer(calc)", "[CSS][Properties][Consumers]")
   {
-    ParserContext context;
+    ParserContext context {ParserMode::HTMLStandard};
     PropertyParserState state {.Context = context};
 
     Tokens tokens {u8"calc(2 * 3) calc(1px) 7"};
@@ -100,7 +100,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("MetaConsumer(functor)", "[CSS][Properties][Consumers]")
   {
-    ParserContext context;
+    ParserContext context {ParserMode::HTMLStandard};
     PropertyParserState state {.Context = context};
 
     Tokens tokens {u8"4"};
@@ -115,7 +115,7 @@ namespace krys::boo::css::tests
   {
     auto consume = [](utf8_stringview css, ParserMode mode, PropertyId property)
     {
-      ParserContext context {.Mode = mode};
+      ParserContext context {mode};
       PropertyParserState state {.Context = context, .CurrentProperty = property};
       Tokens tokens {css};
       auto range = tokens.Tokenizer.Tokens();
@@ -133,7 +133,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("MetaConsumer(symbols)", "[CSS][Properties][Consumers]")
   {
-    ParserContext context;
+    ParserContext context {ParserMode::HTMLStandard};
     PropertyParserState state {.Context = context};
     AllowedSymbols symbols {{{ValueId::R, UnitType::Number}}};
 

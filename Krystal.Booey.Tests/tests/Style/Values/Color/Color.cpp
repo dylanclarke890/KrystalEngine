@@ -25,8 +25,13 @@ namespace krys::boo::style::tests
 {
   namespace
   {
-    const auto ColorFunctionsEnabled =
-      css::ParserContext {.colorLayersEnabled = true, .contrastColorEnabled = true};
+    const auto ColorFunctionsEnabled = []
+    {
+      css::ParserContext context {css::ParserMode::HTMLStandard};
+      context.colorLayersEnabled = true;
+      context.contrastColorEnabled = true;
+      return context;
+    }();
 
     /// @brief Tokenizes `text` and consumes a colour from it; fails the test unless every token was consumed.
     css::Color ParseCSS(utf8_stringview text, const css::ParserContext &context = ColorFunctionsEnabled)

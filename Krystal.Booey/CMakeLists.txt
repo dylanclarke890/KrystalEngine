@@ -397,6 +397,8 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Parser/Tokenizer.cpp
 
   # Slice 2: Values
+  src/CSS/Values/Value.cpp
+  src/CSS/Values/PrimitiveValue.cpp
   src/CSS/Values/Primitives/NumericTypesSerialisation.cpp
 
   # Slice 3: Colour, layer 2 (ComputedStyleDependencies.cpp and TypesValueCreation.cpp aren't built yet)
@@ -433,6 +435,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   # Slice 3: Colour, layer 3c (calc parsing and the property-parser pieces it needs)
   src/CSS/Calc/TreeParser.cpp
   src/CSS/Calc/ValueParsing.cpp
+  src/CSS/Parser/ParserContext.cpp
   src/CSS/Properties/Consumers/Primitives.cpp
 
   # Slice 3: Colour, layer 4b (Style numerics)

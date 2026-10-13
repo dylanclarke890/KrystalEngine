@@ -31,8 +31,10 @@ namespace krys::boo::style::tests
       tokenizer.PumpTokenizer();
       auto tokens = tokenizer.Tokens();
 
-      css::PropertyParserState state {
-        .Context = {.cssDynamicRangeLimitMixEnabled = true, .cssConstrainedDynamicRangeLimitEnabled = true}};
+      css::ParserContext context {css::ParserMode::HTMLStandard};
+      context.cssDynamicRangeLimitMixEnabled = true;
+      context.cssConstrainedDynamicRangeLimitEnabled = true;
+      css::PropertyParserState state {.Context = context};
       auto result = css::PropertyParserHelpers::ConsumeUnresolvedDynamicRangeLimit(tokens, state);
       REQUIRE(result);
       REQUIRE(tokens.IsAtEnd());

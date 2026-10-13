@@ -7627,6 +7627,8 @@ class GeneratePropertyId:
             to.write_lines(settings_variable_declarations)
             to.newline()
             to.write(f"PropertySettings() noexcept = default;")
+            to.newline()
+            to.write(f"KRYS_NODISCARD size_t Hash() const noexcept;")
         to.newline()
 
         to.write(f"KRYS_NODISCARD bool operator==(const PropertySettings &, const PropertySettings &) noexcept;")
@@ -7904,6 +7906,7 @@ class GeneratePropertyId:
             # TODO: Re-enable this once we support global settings.
             # self._generate_css_property_settings_constructor(to=writer)
             self._generate_css_property_settings_operator_equal(to=writer)
+            self._generate_css_property_settings_hash(to=writer)
             self._generate_valid_keywords_for_property(to=writer)
 
             writer.write("}")  # closes namespace krys::boo
@@ -8229,6 +8232,20 @@ class GeneratePropertyId:
             with to.indent():
                 to.write_lines((f"&& {expression}" for expression in middle))
                 to.write(f"&& {last};")
+        to.newline()
+
+    def _generate_css_property_settings_hash(self, *, to: Writer):
+        first, *middle, last = (
+            f'{"static_cast<uint64>(" if i >= 32 else ""}{flag}{")" if i >= 32 else ""} << {i}'
+            for (i, flag) in enumerate(self.properties_and_descriptors.settings_flags)
+        )
+
+        with to.function_block(signature="size_t PropertySettings::Hash() const noexcept"):
+            to.write(f"uint64 bits = {first}")
+            with to.indent():
+                to.write_lines((f"| {expression}" for expression in middle))
+                to.write(f"| {last};")
+            to.write(f"return DefaultHash<uint64>::Hash(bits);")
         to.newline()
 
     def _generate_valid_keywords_for_property(self, *, to: Writer):

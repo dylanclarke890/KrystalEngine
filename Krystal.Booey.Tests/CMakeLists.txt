@@ -93,6 +93,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Calc/Value.cpp
 		# tests/CSS/Parser/Parser.cpp
 		tests/CSS/Parser/KeywordLookup.cpp
+		tests/CSS/Parser/ParserContext.cpp
 		tests/CSS/Parser/ParserFastPaths.cpp
 		tests/CSS/Parser/Token.cpp
 		tests/CSS/Parser/Tokenizer.cpp

@@ -21,7 +21,7 @@ namespace krys::boo::css::tests
 
     FilterReference Reference(utf8_stringview url)
     {
-      ParserContext context;
+      ParserContext context {ParserMode::HTMLStandard};
       context.BaseURL = url::URL {u8"https://example.com/"};
       return FilterReference {*CompleteURL(CSSOMString {url}, context)};
     }

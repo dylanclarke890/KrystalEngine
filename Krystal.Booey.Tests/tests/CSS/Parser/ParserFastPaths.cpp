@@ -31,7 +31,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("ParserFastPaths::ParseSimpleColor", "[CSS][Parser][FastPaths]")
   {
-    ParserContext standard;
+    ParserContext standard {ParserMode::HTMLStandard};
 
     SECTION("Hex and named colours")
     {
@@ -41,7 +41,7 @@ namespace krys::boo::css::tests
 
       // Hex without `#` is quirks mode only.
       CHECK_FALSE(ParserFastPaths::ParseSimpleColor(u8"f00", standard));
-      ParserContext quirks {.Mode = ParserMode::HTMLQuirks};
+      ParserContext quirks {ParserMode::HTMLQuirks};
       CHECK(ParserFastPaths::ParseSimpleColor(u8"f00", quirks) == SRGBA<uint8> {255, 0, 0});
       CHECK(ParserFastPaths::ParseSimpleColor(u8"00ff00", quirks) == SRGBA<uint8> {0, 255, 0});
       CHECK_FALSE(ParserFastPaths::ParseSimpleColor(u8"f00f", quirks));

@@ -26,7 +26,7 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 
 **Done:**
 - Slice 1, Tokenizer: `Token`, `Tokenizer`, `Markup`, `KeywordLookup`, generated `PropertyId`/`ValueId` build and are tested.
-- Slice 2, Values: `Value` and `PrimitiveValue` reviewed (headers build; `.cpp`s not built), `Units`/`UnitType`/`UnitCategory`, `NumericTypesSerialisation`, `Aggregates` reviewed and tested.
+- Slice 2, Values: `Value` and `PrimitiveValue` reviewed and built (2026-10-13; see *Trial compile* under Slice 2), `Units`/`UnitType`/`UnitCategory`, `NumericTypesSerialisation`, `Aggregates` reviewed and tested.
 - Slice 3, Colour, layer 1 (2026-10-12): Graphics/Color (`platform/graphics/Color*`) reviewed, completed and tested; see the Slice 3 section.
 - Slice 3, layer 2 (2026-10-12): calc-free CSS numeric primitives and value types reviewed, built and tested.
 - Slice 3, layer 3a (2026-10-12): calc tree, types, serialisation and the calc-dependent numeric primitives reviewed, built and tested; see the Slice 3 section.
@@ -56,16 +56,17 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Slice 4, tier 4 item 37 (2026-10-13): the ten image values (`NamedImageValue`, `CanvasValue`, `PaintImageValue`, `ImageSetOptionValue`, `ImageValue`, `ImageSetValue`, `CrossFadeValue`, `FilterImageValue`, `CursorImageValue`, `GradientValue`) built (compile-only), with `css::Gradient` (`CSSGradient.h`/`.cpp`, the seven gradient types) built and tested. Slice 4's subclass list is done. See their entry.
 
 **Open / next candidates:**
-- Slice 4 (Value subclasses): the generic types are done; next are the specific value types, one at a time, in the order under Slice 4's *Order* (tiers 1 and 2 done; tiers 1–3 done). Tier 4 is hybrid (see *Order*); items 33–37 are done (34's remaining half waits for `style::Builder`), so every item on the list is done. Every subclass header `Value.cpp` includes is now reviewed and built (only `Properties/Property.hpp` isn't reviewed, but it compiles), so the next step is a trial compile of `Value.cpp` (and then `PrimitiveValue.cpp`).
+- Slice 4 (Value subclasses): the generic types are done; next are the specific value types, one at a time, in the order under Slice 4's *Order* (tiers 1 and 2 done; tiers 1–3 done). Tier 4 is hybrid (see *Order*); items 33–37 are done (34's remaining half waits for `style::Builder`), so every item on the list is done. `Value.cpp` and `PrimitiveValue.cpp` now build and link (2026-10-13, see *Trial compile* under Slice 2). `ParserContext` now follows upstream and initialises the static value pool (see *`ParserContext`* under Slice 2). Next: the tests and cleanups listed under *Waiting on `PrimitiveValue.cpp`/`Value.cpp` linking*.
 - Tier 4 deferred definitions (declared, not defined, FIXME'd; define when `style::Builder`/`BuilderState` and the resource loader are ported): `VariableReferenceValue::ResolveVariableReferences`, `ResolveSingleValue`, `ResolveTokenRange`, `ResolveVariableReference`, `ResolveVariableFallback`, `TryResolveSimpleReference` (and so `ResolveAndCacheValue`); `PendingSubstitutionValue::ResolveValue` (also needs `PropertyParser::ParseValue` and `ParsedPropertyVector`); `FontFaceSrcResourceValue::GetFontLoadRequest` and its cached font (`CustomTraverseSubresources` returns `false` until then); `FontFaceSrcLocalValue::GetSVGFontFaceElement`/`SetSVGFontFaceElement` (need SVG fonts); `CreateStyleImage` on the ten image values (needs `style::BuilderState` and `StyleImage`, and the cached style image members of `NamedImageValue`/`CanvasValue`/`GradientValue`); `ImageValue::IsPending`, `LoadImage`, `GetCachedImage`, `KnownToBeOpaque` and its cached image (`CustomTraverseSubresources` returns `false`, and `CopyForComputedStyle` doesn't copy the cache, until then).
 - Not yet ported, needed later: the graphics `Path` (cached by `SVGPathByteStream` upstream), the rest of `SVGPathUtilities` (needs `Path` and `SVGPathSegList`), `parseKerningUnicodeString`/`parseGlyphName`.
 - Slice 3 (colour), bottom-up: (1) Graphics/Color, (2) calc-free numeric primitives, (3a) Style-free calc, (3b) calc evaluation and Style calc and (3c) calc parsing are done. (4a) `LayoutUnit` and the point/size types and (4b) Style numerics are done. (5a) the CSS colour types, (5b) the colour parser and (5c) `ColorValue`/`ValuePool` (compile-only) are done. (6) Style colour is done (its CSSValue half is deferred, see below). Slice 3 is complete apart from the Value-dependent pieces.
 - Deferred from layer 6 (needs `Style/BuilderChecking.hpp` and the raw-WebKit `ValueList`/`ValuePair`/`FunctionValue`/`BuilderState` it includes): `CSSValueConversion<Color>`, `CSSValueCreation<Color>`, `CSSValueConversion<DynamicRangeLimit>`, `CSSValueCreation<DynamicRangeLimit>` and `CSSValueConversion<Opacity>`. They come with the other `+CSSValueConversion`/`+CSSValueCreation` headers.
-- Waiting on `PrimitiveValue.cpp`/`Value.cpp` linking: `PropertyParserState::Pool` is a pointer (TODO: back to a reference defaulting to `MainThreadPool()`), `ColorValueConsumers.cpp` and `ColorAdjustValueConsumers.cpp` compile but should merge back into `Color.cpp`/`ColorAdjust.cpp`, `ValuePool::CreateFontFaceValue` (also needs `ValueList`/`PropertyParser`) and `ParserFastPaths::MaybeParseValue` aren't written, nothing in 5c is tested, and the Style `+CSSValueConversion`/`+CSSValueCreation` headers (numerics, `LengthWrapper`, `PrimitiveKeyword`) are still raw WebKit.
+- Waiting on `PrimitiveValue.cpp`/`Value.cpp` linking (now unblocked): `PropertyParserState::Pool` is a pointer (TODO: back to a reference defaulting to `MainThreadPool()`; the reason for the pointer is gone, since `ParserContext.cpp` now links the pool into every parser test anyway), `ColorValueConsumers.cpp` and `ColorAdjustValueConsumers.cpp` compile but should merge back into `Color.cpp`/`ColorAdjust.cpp`, `ValuePool::CreateFontFaceValue` (also needs `ValueList`/`PropertyParser`) and `ParserFastPaths::MaybeParseValue` aren't written, nothing in 5c is tested, and the Style `+CSSValueConversion`/`+CSSValueCreation` headers (numerics, `LengthWrapper`, `PrimitiveKeyword`) are still raw WebKit.
 - Style `ToCSS`/serialisation can't be tested until there's a real `RenderStyle` (the seam's can't be constructed).
 - Only the `Number` consumer definitions are reviewed; the other `Consumers/*Definitions.hpp` (and `IntegerDefinitions.hpp`, which still uses `CalcAllowedSymbols`) come with the slices that need them.
 - The Style seam (`Style/Seam.hpp`, `src/Style/Seam.cpp`) stands in for `RenderStyle`, `RenderView`, `RenderBox`, the font types, `Style::BuilderState`, `AnchorPositionEvaluator`, `ContainerQueryEvaluator` and the `Document` colour API. Each placeholder is replaced when its slice is ported; see the layer 3b and layer 6 sections. Since layer 6, `RenderStyle` can be constructed (colour state only); its other members are still unreachable.
-- `Value.cpp` and `PrimitiveValue.cpp` can't build until every `Value` subclass compiles (`VisitDerived`). The `AbsoluteColorResolver.hpp` blocker found by a trial compile of `PrimitiveValue.cpp` is fixed (5a), and `ValuePool.hpp`/`ColorValue.hpp` build (5c).
+- `ParserContext`: the `Document` and `Settings` constructors (FIXME in the header) wait for `Document::CssParserContext()` and a `Settings` port; so does the generated `PropertySettings(const Settings &)` constructor. `LocalFrame`'s `StaticValuePool::Init()` call comes with `LocalFrame`.
+- Krystal.Core: `LazyNeverDestroyed` doesn't assert it was constructed before access (upstream `ASSERT(m_isConstructed)`); that would have caught the missing `Init()` at the first access.
 - `CSS/Values/Concepts.hpp` (`CSSValueConcepts.h`) compiles but isn't reviewed.
 - URL, not yet done: the DOM `URL` interface and `URLSearchParams` (WebKit's `DOMURL`/`URLDecomposition`, tested by WPT `setters_tests.json`), `Document`'s URL/base URL (`Document::URL()` is a TODO), `CompleteURL(string, Document)`, and `applyModifiersToLoaderOptions` (needs the resource loader).
 - Krystal.Core: the `IntrusivePtr` `Downcast`/`DynamicDowncast` overloads can't be called with an explicit target and `Downcast` rejects null (see the `CounterValue`/`OffsetRotateValue` entry); `OffsetRotateValue.cpp` has a FIXME workaround.
@@ -192,13 +193,13 @@ Pulled into the build as headers, unreviewed: generated `PropertyId.cpp` defines
 
 ---
 
-## Slice 2: Values — `Value` reviewed, not built
+## Slice 2: Values — `Value` reviewed and built
 
 Entry: `css/CSSValue.cpp` (headers-only graph: 160 files, `tools/port/out/value.md`). `CSSValue.cpp`'s `visitDerived` downcasts to all ~58 subclasses, so `Value.cpp` can't compile, and no `Value` can be created or destroyed in a test, until every subclass compiles. Decision (2026-10-11): review `Value.hpp`/`Value.cpp` now; keep `Value.cpp` out of the build and add no tests until the subclasses are ported. `Value.hpp` is still compiled as a header (via `Properties/Property.hpp`).
 
 | WebKit | Verdict | Krystal | CMake | Notes |
 |---|---|---|---|---|
-| `css/CSSValue.h`, `.cpp` | `have*` | `CSS/Values/Value.hpp`, `src/CSS/Values/Value.cpp` | header only | Reviewed 2026-10-11. `.cpp` not built (needs every subclass; `CanvasValue.hpp` doesn't exist yet). |
+| `css/CSSValue.h`, `.cpp` | `have*` | `CSS/Values/Value.hpp`, `src/CSS/Values/Value.cpp` | on | Reviewed 2026-10-11. `.cpp` built 2026-10-13 (see *Trial compile*). |
 | `ClassType` (in `CSSValue.h`) | `have*` | `CSS/Values/ValueType.hpp` | | Reordered to upstream order (2026-10-11). |
 | `ValueSeparator` (in `CSSValue.h`) | `have` | `CSS/Values/ValueSeparator.hpp` | | |
 
@@ -211,6 +212,38 @@ Entry: `css/CSSValue.cpp` (headers-only graph: 160 files, `tools/port/out/value.
 - `CompareValueList` passed a `Ref<TValue>` to `Equals(const Value &)`; now dereferences it.
 
 **Added (2026-10-11):** `IsCanvasValue`, `HasVariableReferences`, `IsImageGeneratorValue`, `IsImage`, `AddHash`/`AddDerivedHash` (`Hasher&` → `size_t &seed` with `Hash::Combine`), `IsCSSLocalURL`, `SeparatorCSSText` (static and member, returns `CSSOMStringView`), and declarations for `First()`/`Second()`/`GetQuad()`/`GetRect()` (defined by `ValuePair`/`QuadValue`/`RectValue` when ported; `GetQuad`/`GetRect` because members named `Quad`/`Rect` would hide those types in subclasses).
+
+### Trial compile of `Value.cpp` and `PrimitiveValue.cpp` (2026-10-13)
+
+Both compile with no errors or warnings now that every subclass is built, and both are now in `KRYSTAL_BOOEY_CSS_SOURCES`. Since Booey is a static library and nothing in the tests references them yet, a temporary link probe (not kept) created values to force `Value.cpp`, `PrimitiveValue.cpp`, `ValuePool.cpp` and every subclass `.cpp` (through `VisitDerived`) into the test executable.
+
+**Bugs fixed:**
+- `CursorImageValue.cpp` called `Value::First()`/`Second()` (defined inline in `ValuePair.hpp`) without including `ValuePair.hpp`, so the link failed with two unresolved externals. Upstream gets `CSSValuePair.h` transitively through `StyleBuilderState.h`. Now included directly.
+
+**Found:** nothing called `StaticValuePool::Init()`, so every pooled value (`Create(ValueId)`, small integer px/%/number values, `ImplicitInitialValue()`) read zeroed storage: it serialised as an empty string, and releasing it deleted static storage (a debug heap dialog). Fixed by porting `ParserContext`'s constructor (next section). With `Init()` called first, the probe gave `12px`, `auto` and `12.5em` (heap path) from `CssText`, `Equals` was true for equal values, and destruction was clean.
+
+### `ParserContext` (2026-10-13)
+
+Graph from `css/parser/CSSParserContext.cpp` (headers-only): only `CSSParserContext.h`, `CSSParserMode.h`, `CSSValuePool.h` and the generated `CSSPropertyNames.h` are in `css/`/`style/`; the rest is `Document`, `Settings`, `DocumentLoader`, `DocumentQuirks`, `DocumentSecurityOrigin`, `OriginAccessPatterns` and `Page`, which only the `Document`/`Settings` constructors use. Previously a stand-in struct (layers 3c and 5b, `CSSURL`); now follows upstream apart from those two constructors.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/parser/CSSParserContext.h`, `.cpp` | `have` | `CSS/Parser/ParserContext.hpp`, `src/CSS/Parser/ParserContext.cpp` | on | tested. Upstream member order. `charset` (`ASCIILiteral`) → `utf8_stringview Charset`; `enclosingRuleType` → `Maybe<RuleType>`. Flag members keep upstream's camelCase. `add(Hasher&, ...)` → `Hash()` (so `DefaultHash` comes from `MemberBasedHash`); `HashTraits` ported. |
+| `CSSPropertySettings` hasher (generated by `process-css-properties.py`) | `have` | `PropertySettings::Hash()` (`codegen/css_properties.py`) | on | tested through `ParserContext`. |
+
+**Bugs fixed:**
+- No constructor, so `StaticValuePool::Init()` was never called (see *Trial compile* above). `ParserContext(ParserMode, const URL & = {})` now calls it, like upstream.
+- UA sheet contexts didn't enable the features UA sheets rely on (`applyUASheetBehaviorsToContext`).
+
+**Added (upstream API):** `Charset`, `EnclosingRuleType`, `HasDocumentSecurityOrigin`, the `(ParserMode, URL)` constructor, `SetUASheetMode`, `operator==`, `Hash()` (and `PropertySettings::Hash()`), `HashTraits<ParserContext>`. `StrictParserContext()` moved to the `.cpp` and uses `MainThreadNeverDestroyed` like upstream.
+
+**Differences:**
+- No `Document`/`Settings` constructors (FIXME; see *Where we are*), so no default-constructed or settings-derived contexts: callers (all tests so far) construct with a mode and set flags afterwards, since designated initialisers no longer work.
+- The constructor is `explicit` (upstream's is implicit).
+- No `HAVE(CORE_ANIMATION_SEPARATED_LAYERS)`/`ENABLE(SERVICE_CONTROLS)` guards; `propertySettings.useSystemAppearance` (`HAVE(CORE_MATERIAL)`) isn't set for UA sheets, since the generated `PropertySettings` has no such flag.
+- `Hash()` mirrors upstream, including its quirks: bit 31 repeats `cssTextTransformMathAutoEnabled`, and `counterStyleAtRuleImageSymbolsEnabled`, `shouldIgnoreImportRules`, `webkitMediaTextTrackDisplayQuirkEnabled` and `enclosingRuleType` aren't hashed (still compared by `==`). Upstream hashes the fields twice; Krystal combines them once.
+
+Tests: `tests/CSS/Parser/ParserContext.cpp` (defaults, base URL, UA sheet behaviours, the value pool is initialised, `SetUASheetMode`, equality and hashing, `HashTraits`, `StrictParserContext`): 5 cases / 71 assertions. Callers in 12 test files updated. Full Booey suite: 1127 cases / 670119 assertions; all pass except 2 expected failures. Whole solution builds with no warnings.
 
 ### `Aggregates` (2026-10-12)
 
@@ -240,7 +273,7 @@ Graph from `css/CSSPrimitiveValue.cpp` (headers-only): 125 files (`tools/port/ou
 
 | WebKit | Verdict | Krystal | CMake | Notes |
 |---|---|---|---|---|
-| `css/CSSPrimitiveValue.h`, `.cpp` | `have*` | `CSS/Values/PrimitiveValue.hpp`, `src/CSS/Values/PrimitiveValue.cpp` | header only | Rewritten against upstream. |
+| `css/CSSPrimitiveValue.h`, `.cpp` | `have*` | `CSS/Values/PrimitiveValue.hpp`, `src/CSS/Values/PrimitiveValue.cpp` | on | Rewritten against upstream. `.cpp` built 2026-10-13 (see *Trial compile*). |
 | `css/CSSUnits.h`, `.cpp` | `have*` | `CSS/Values/Units.hpp`, `UnitType.hpp`, `UnitCategory.hpp` | header | Split into three headers; `operator<<(TextStream&)` not ported (`wont`). |
 | `css/values/primitives/CSSPrimitiveNumericTypes+Serialization.h`, `.cpp` (number formatting only) | `port` | `CSS/Values/Primitives/NumericTypesSerialisation.hpp`, `src/.../NumericTypesSerialisation.cpp` | on | compiles, tested. `SerializableNumber`, `FormatCSSNumberValue`, `FormatNonfiniteCSSNumberValue`; WTF's `FormattedCSSNumber` (fixed, 6 decimals, trailing zeros trimmed, `-0` → `0`) done with `std::to_chars`. |
 
@@ -529,7 +562,7 @@ Graph from `css/calc/CSSCalcTree+Parser.cpp` (headers-only): 75 files (`tools/po
 | `css/parser/CSSPropertyParserOptions.h` | `have*` | `CSS/Properties/PropertyParserOptions.hpp` | on | `AnchorPolicy`/`AnchorSizePolicy`/`UnitlessZeroQuirk` enums are `StronglyTypedBool`s (`AllowAnchor`, `AllowAnchorSize`, `AllowUnitlessZero`); `OverrideParserMode` is the last member instead of the first. Same defaults. |
 | `css/parser/CSSParserTokenRangeGuard.h` | `have` | `CSS/Parser/TokenRangeGuard.hpp` | on | tested. |
 | `css/parser/CSSParserTokenRange.h` (`span()`) | `have*` | `CSS/Parser/TokenRange.hpp` | on | Added `Tokens()` (upstream `span()`; the plain name would hide `Span`). |
-| `css/parser/CSSParserContext.h` | `have*` | `CSS/Parser/ParserContext.hpp` | on | Only the fields the parser reads were checked. No `baseURL`, `charset`, `enclosingRuleType`, `hasDocumentSecurityOrigin`, `loadedFromOpaqueSource`, constructors, hashing or `strictCSSParserContext()`. Flag members keep upstream's camelCase (as does the generated `PropertySettings`). |
+| `css/parser/CSSParserContext.h` | `have*` | `CSS/Parser/ParserContext.hpp` | on | Only the fields the parser reads were checked. No `baseURL`, `charset`, `enclosingRuleType`, `hasDocumentSecurityOrigin`, `loadedFromOpaqueSource`, constructors, hashing or `strictCSSParserContext()`. Flag members keep upstream's camelCase (as does the generated `PropertySettings`). Superseded: see *`ParserContext` (2026-10-13)*. |
 | `css/parser/CSSPropertyParserConsumer+Primitives.h`, `.cpp` | `have` | `Consumers/Primitives.hpp`, `src/.../Primitives.cpp` | on | tested. `consumeCommaIncludingWhitespace`/`consumeSlashIncludingWhitespace` → `ConsumeComma`/`ConsumeSlash` (upstream FIXME's names). |
 | `css/parser/CSSPropertyParserConsumer+Ident.h`, `.cpp` | `have` | `Consumers/Ident.hpp`, `src/.../Ident.cpp` | header on, `.cpp` off | Raw consumers tested. The value-returning `ConsumeIdent`/`ConsumeIdentRange`/`ConsumeCustomIdent`/`ConsumeDashedIdent` moved to `Ident.cpp` (as upstream): `PrimitiveValue::Create(ValueId)` needs `ValuePool`, so it waits for layer 5. `consumeIdentUsingMapping`/`peekIdentUsingMapping` not ported (no `SortedArrayMap`). Extra: `DiscardIdent`. Raw custom/dashed idents return `Maybe<CSSOMString>` (`null` for upstream's null `String`). |
 | `css/parser/CSSPropertyParserConsumer+MetaConsumer.h` | `have` | `Consumers/MetaConsumer.hpp` | on | tested (`Number`, calc, functor overload). |
@@ -716,7 +749,7 @@ Graph from `css/parser/CSSPropertyParserConsumer+Color.cpp`, `+ColorAdjust.cpp` 
 | `css/parser/CSSPropertyParserConsumer+SymbolDefinitions.h`, `+Symbol.cpp` | `port` | `Consumers/SymbolDefinitions.hpp`, `src/.../Symbol.cpp` | on | tested. `validatedRange` → `ValidatedRange`. |
 | `css/parser/CSSPropertyParserConsumer+AngleDefinitions.h` | `have` | `Consumers/AngleDefinitions.hpp` | on | tested. See bugs. |
 | `css/parser/CSSPropertyParserConsumer+PercentageDefinitions.h`, `+KeywordDefinitions.h` | `have` | `Consumers/PercentageDefinitions.hpp`, `KeywordDefinitions.hpp` | on | tested through the colour parser. Match upstream. |
-| `css/parser/CSSParserContext.cpp` (`strictCSSParserContext`) | `port` | `StrictParserContext()` in `CSS/Parser/ParserContext.hpp` | on | A function-local static instead of `MainThreadNeverDestroyed`. |
+| `css/parser/CSSParserContext.cpp` (`strictCSSParserContext`) | `port` | `StrictParserContext()` in `CSS/Parser/ParserContext.hpp` | on | A function-local static instead of `MainThreadNeverDestroyed`. Superseded: see *`ParserContext` (2026-10-13)*. |
 | `css/CSSProperty.h` (`acceptsQuirkyColor`, `acceptsQuirkyAngle`) | `have?` | `CSS/Properties/Property.hpp` | header (via codegen) | Used, not reviewed; see "Where we are". |
 | `css/CSSValuePool.h`, `CSSColorValue.h`, `CSSPrimitiveValue.h`, `CSSDynamicRangeLimitValue.h`, `CSSColorSchemeValue.h` | | | off | Only the Value-returning consumers use them; layer 5c. |
 | `wtf/SortedArrayMap.h`, `wtf/text/MakeString.h` | `wont` | | | `switch`; `std::to_string` + `append`. |
@@ -1198,7 +1231,7 @@ Graphs: `css/CSSURLValue.cpp` (headers-only): 24 files, new ones `CSSURLValue.h`
 | `css/values/primitives/CSSURLModifiers.h`, `.cpp` | `have` | `CSS/Values/Primitives/URLModifiers.hpp` | on | tested. Members PascalCase. `applyModifiersToLoaderOptions` not ported (FIXME): no resource loader. |
 | `css/CSSURLValue.h`, `.cpp` | `have` | `CSS/Values/UrlValue.hpp`, `src/CSS/Values/UrlValue.cpp` | on (compile-only) | Krystal's existing name `UrlValue` kept. `url()` → `URL()`. |
 | `loader/LoadedFromOpaqueSource.h` | `port` | `Loader/LoadedFromOpaqueSource.hpp` | on | |
-| `css/parser/CSSParserContext.h` | `have*` | `CSS/Parser/ParserContext.hpp` | on | Added `BaseURL` and `LoadedFromOpaqueSource`. Still no `charset`, `enclosingRuleType`, `hasDocumentSecurityOrigin`, constructors or hashing. |
+| `css/parser/CSSParserContext.h` | `have*` | `CSS/Parser/ParserContext.hpp` | on | Added `BaseURL` and `LoadedFromOpaqueSource`. Still no `charset`, `enclosingRuleType`, `hasDocumentSecurityOrigin`, constructors or hashing. Superseded: see *`ParserContext` (2026-10-13)*. |
 | `loader/ResourceLoaderOptions.h`, `pal/text/TextEncoding.h`, `dom/Document.h` | | | off | See differences. |
 
 **Bugs fixed:**

@@ -18,9 +18,7 @@ namespace krys::boo::css::tests
 
     ParserContext ContextWithBase(utf8_stringview base)
     {
-      ParserContext context;
-      context.BaseURL = url::URL {base};
-      return context;
+      return ParserContext {ParserMode::HTMLStandard, url::URL {base}};
     }
   }
 
@@ -52,7 +50,7 @@ namespace krys::boo::css::tests
 
     SECTION("doesn't resolve against a null or about:blank base")
     {
-      auto withoutBase = CompleteURL(u8"a.png", ParserContext {});
+      auto withoutBase = CompleteURL(u8"a.png", ParserContext {ParserMode::HTMLStandard});
       REQUIRE(withoutBase);
       CHECK(withoutBase->Resolved.IsNull());
 
@@ -78,12 +76,12 @@ namespace krys::boo::css::tests
     auto empty = CompleteURL(u8"", ContextWithBase(u8"https://example.com/"));
     REQUIRE(empty);
     CHECK_FALSE(empty->IsNone());
-    CHECK_FALSE(CompleteURL(u8"a.png", ParserContext {})->IsNone());
+    CHECK_FALSE(CompleteURL(u8"a.png", ParserContext {ParserMode::HTMLStandard})->IsNone());
   }
 
   TEST_CASE("CSSURL(Resolve)", "[CSS][Primitives][URL]")
   {
-    auto unresolved = *CompleteURL(u8"https://example.com/a.png", ParserContext {});
+    auto unresolved = *CompleteURL(u8"https://example.com/a.png", ParserContext {ParserMode::HTMLStandard});
     CHECK(unresolved.Resolved.IsNull());
     auto resolved = Resolve(krys::move(unresolved));
     CHECK(S(resolved.Resolved.String()) == "https://example.com/a.png");
@@ -109,7 +107,8 @@ namespace krys::boo::css::tests
 
     // The specified URL is serialised, as a string.
     CHECK(S(Serialise(context, url)) == "url(\"images/a b.png\")");
-    CHECK(S(Serialise(context, *CompleteURL(u8"say \"hi\"", ParserContext {}))) == "url(\"say \\\"hi\\\"\")");
+    CHECK(S(Serialise(context, *CompleteURL(u8"say \"hi\"", ParserContext {ParserMode::HTMLStandard})))
+          == "url(\"say \\\"hi\\\"\")");
 
     url.Modifiers.CrossOrigin = URLCrossOriginFunction {.Parameters = {keywords::UseCredentials {}}};
     url.Modifiers.Integrity = URLIntegrityFunction {.Parameters = u8"sha384-abc"};

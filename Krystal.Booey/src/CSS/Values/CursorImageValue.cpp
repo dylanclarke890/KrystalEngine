@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/CursorImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/ImageValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 
 namespace krys::boo::css
 {

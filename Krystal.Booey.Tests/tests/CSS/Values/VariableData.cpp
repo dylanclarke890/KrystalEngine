@@ -69,7 +69,7 @@ namespace krys::boo::css::tests
   {
     CHECK(MakeData(u8"red")->Context().Mode == ParserMode::HTMLStandard);
 
-    ParserContext quirks {.Mode = ParserMode::HTMLQuirks};
+    ParserContext quirks {ParserMode::HTMLQuirks};
     CHECK(MakeData(u8"red", quirks)->Context().Mode == ParserMode::HTMLQuirks);
   }
 }

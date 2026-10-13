@@ -25,7 +25,7 @@ namespace krys::boo::css::tests
   {
     struct ParseOptions
     {
-      ParserContext Context {};
+      ParserContext Context {ParserMode::HTMLStandard};
       PropertyId Property {PropertyId::Invalid};
       ColorParsingOptions ColorOptions {};
     };
@@ -82,7 +82,7 @@ namespace krys::boo::css::tests
 
     ParseOptions Quirks(PropertyId property)
     {
-      return ParseOptions {.Context = ParserContext {.Mode = ParserMode::HTMLQuirks}, .Property = property};
+      return ParseOptions {.Context = ParserContext {ParserMode::HTMLQuirks}, .Property = property};
     }
 
     Maybe<DynamicRangeLimit> ParseDynamicRangeLimit(utf8_stringview css, const ParserContext &context)
@@ -124,15 +124,15 @@ namespace krys::boo::css::tests
     SECTION("Mode specific keywords")
     {
       CHECK_FALSE(Parse(u8"-webkit-focus-ring-color"));
-      CHECK(Parse(u8"-webkit-focus-ring-color", {.Context = {.Mode = ParserMode::HTMLQuirks}}));
-      CHECK(Parse(u8"-webkit-focus-ring-color", {.Context = {.Mode = ParserMode::UASheet}}));
+      CHECK(Parse(u8"-webkit-focus-ring-color", {.Context = ParserContext {ParserMode::HTMLQuirks}}));
+      CHECK(Parse(u8"-webkit-focus-ring-color", {.Context = ParserContext {ParserMode::UASheet}}));
 
-      CHECK_FALSE(IsColorKeywordAllowed(ValueId::InternalDocumentTextColor, ParserContext {}));
-      CHECK_FALSE(IsColorKeywordAllowed(ValueId::InternalDocumentTextColor,
-                                        ParserContext {.Mode = ParserMode::HTMLQuirks}));
-      CHECK(IsColorKeywordAllowed(ValueId::InternalDocumentTextColor,
-                                  ParserContext {.Mode = ParserMode::UASheet}));
-      CHECK(IsColorKeywordAllowed(ValueId::Red, ParserContext {}));
+      CHECK_FALSE(
+        IsColorKeywordAllowed(ValueId::InternalDocumentTextColor, ParserContext {ParserMode::HTMLStandard}));
+      CHECK_FALSE(
+        IsColorKeywordAllowed(ValueId::InternalDocumentTextColor, ParserContext {ParserMode::HTMLQuirks}));
+      CHECK(IsColorKeywordAllowed(ValueId::InternalDocumentTextColor, ParserContext {ParserMode::UASheet}));
+      CHECK(IsColorKeywordAllowed(ValueId::Red, ParserContext {ParserMode::HTMLStandard}));
     }
   }
 
@@ -342,7 +342,9 @@ namespace krys::boo::css::tests
       CHECK_FALSE(Parse(u8"contrast-color(red)"));
       CHECK_FALSE(Parse(u8"color-layers(red, blue)"));
 
-      auto enabled = ParseOptions {.Context = {.colorLayersEnabled = true, .contrastColorEnabled = true}};
+      auto enabled = ParseOptions {};
+      enabled.Context.colorLayersEnabled = true;
+      enabled.Context.contrastColorEnabled = true;
       CHECK(Serialised(u8"contrast-color(red)", enabled) == "contrast-color(red)");
       CHECK(Serialised(u8"color-layers(red, blue)", enabled) == "color-layers(red, blue)");
       CHECK_FALSE(Parse(u8"contrast-color(red, blue)", enabled));
@@ -355,7 +357,7 @@ namespace krys::boo::css::tests
       Tokenizer tokenizer {input};
       tokenizer.PumpTokenizer();
       auto tokens = tokenizer.Tokens();
-      ParserContext context;
+      ParserContext context {ParserMode::HTMLStandard};
       PropertyParserState state {.Context = context};
       CHECK_FALSE(ConsumeUnresolvedColor(tokens, state));
       CHECK(tokens.Peek().Type() == TokenType::Function);
@@ -364,7 +366,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("Colour parsing(raw entry points)", "[CSS][Properties][Consumers][Color]")
   {
-    ParserContext context;
+    ParserContext context {ParserMode::HTMLStandard};
 
     PlatformColorResolutionState state;
     CHECK(ParseColorRawGeneral(u8"  red ", context, {}, state) == boo::Color::red);
@@ -403,7 +405,7 @@ namespace krys::boo::css::tests
       Tokenizer tokenizer {input};
       tokenizer.PumpTokenizer();
       auto tokens = tokenizer.Tokens();
-      ParserContext context;
+      ParserContext context {ParserMode::HTMLStandard};
       PropertyParserState state {.Context = context};
       auto result = ConsumeColorInterpolationMethod(tokens, state);
       if (!tokens.IsAtEnd())
@@ -449,15 +451,16 @@ namespace krys::boo::css::tests
 
   TEST_CASE("Colour parsing(<'dynamic-range-limit'>)", "[CSS][Properties][Consumers][Color]")
   {
-    ParserContext context;
+    ParserContext context {ParserMode::HTMLStandard};
     CHECK(ParseDynamicRangeLimit(u8"standard", context) == DynamicRangeLimit {keywords::Standard {}});
     CHECK(ParseDynamicRangeLimit(u8"no-limit", context) == DynamicRangeLimit {keywords::NoLimit {}});
     CHECK_FALSE(ParseDynamicRangeLimit(u8"constrained", context));
     CHECK_FALSE(ParseDynamicRangeLimit(u8"dynamic-range-limit-mix(standard 50%, no-limit 50%)", context));
     CHECK_FALSE(ParseDynamicRangeLimit(u8"high", context));
 
-    ParserContext enabled {.cssDynamicRangeLimitMixEnabled = true,
-                           .cssConstrainedDynamicRangeLimitEnabled = true};
+    ParserContext enabled {ParserMode::HTMLStandard};
+    enabled.cssDynamicRangeLimitMixEnabled = true;
+    enabled.cssConstrainedDynamicRangeLimitEnabled = true;
     CHECK(ParseDynamicRangeLimit(u8"constrained", enabled) == DynamicRangeLimit {keywords::Constrained {}});
 
     auto mix = ParseDynamicRangeLimit(u8"dynamic-range-limit-mix(standard 25%, 75% no-limit)", enabled);

@@ -28,7 +28,7 @@ namespace krys::boo::style::tests
       css::Tokenizer tokenizer {input};
       REQUIRE(tokenizer.PumpTokenizer());
 
-      css::ParserContext context;
+      css::ParserContext context {css::ParserMode::HTMLStandard};
       css::PropertyParserState state {.Context = context};
       auto tokens = tokenizer.Tokens();
       auto value = css::calc::Value::Parse(tokens, state, category, css::All, css::AllowedSymbols {},
