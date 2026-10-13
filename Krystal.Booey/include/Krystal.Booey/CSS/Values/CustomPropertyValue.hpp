@@ -4,9 +4,13 @@
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/CSS/Values/VariableData.hpp"
 #include "Krystal.Booey/CSS/Values/VariableReferenceValue.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/Variant.hpp"
 
 namespace krys::boo::css
 {
+  /// @brief The value of a custom property (`--name`): unresolved references, tokens, or a CSS-wide keyword.
   class CustomPropertyValue final : public Value
   {
   public:
@@ -25,14 +29,14 @@ namespace krys::boo::css
   public:
     KRYS_NODISCARD static Ref<CustomPropertyValue> CreateEmpty(const CSSOMStringAtom &name) noexcept;
 
-    KRYS_NODISCARD static Ref<CustomPropertyValue> CreateUnresolved(const CSSOMStringAtom &name,
-                                                                    Ref<VariableReferenceValue> &&) noexcept;
+    KRYS_NODISCARD static Ref<CustomPropertyValue>
+      CreateUnresolved(const CSSOMStringAtom &name, Ref<VariableReferenceValue> &&value) noexcept;
 
     KRYS_NODISCARD static Ref<CustomPropertyValue> CreateSyntaxAll(const CSSOMStringAtom &name,
-                                                                   Ref<VariableData> &&) noexcept;
+                                                                   Ref<VariableData> &&value) noexcept;
 
-    KRYS_NODISCARD static Ref<CustomPropertyValue> CreateWithCSSWideKeyword(const CSSOMStringAtom &name,
-                                                                            GlobalKeyword) noexcept;
+    KRYS_NODISCARD static Ref<CustomPropertyValue> CreateWithGlobalKeyword(const CSSOMStringAtom &name,
+                                                                           GlobalKeyword keyword) noexcept;
 
     KRYS_NODISCARD const CSSOMStringAtom &Name() const noexcept
     {
@@ -59,10 +63,10 @@ namespace krys::boo::css
     KRYS_NODISCARD bool Equals(const CustomPropertyValue &other) const noexcept;
 
     KRYS_NODISCARD IterationStatus
-      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
+      CustomVisitChildren(KRYS_NOESCAPE const Func<IterationStatus(css::Value &)> &func) const noexcept;
 
   private:
-    KRYS_NODISCARD const SmallList<Token> &Tokens() const noexcept;
+    KRYS_NODISCARD const List<Token> &Tokens() const noexcept;
   };
 }
 

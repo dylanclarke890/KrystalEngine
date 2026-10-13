@@ -50,9 +50,11 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Slice 4, tier 3 item 28 (2026-10-13): `FilterValue`, with `Filter`, `FilterReference` and the ten filter functions (the folder renamed `CSS/Values/FilterEffects/`), built and tested (`FilterValue` compile-only). See its entry.
 - Slice 4, tier 3 item 29 (2026-10-13): `AppleColorFilterValue`, with `AppleColorFilter` and `AppleInvertLightness`, built and tested (`AppleColorFilterValue` compile-only). See its entry.
 - Slice 4, tier 3 items 30–32 (2026-10-13): `RayValue` (with `RayFunction` and `CSSBoxType`, the first enum in `Rendering/Style/RenderStyleConstants.hpp`), `ScrollValue` and `ViewValue` built (`RayFunction` tested; the value classes compile-only), so tier 3 is done. See their entry.
+- Slice 4, tier 4 decided (2026-10-13): hybrid (see *Order*). Item 33: `CustomPropertyValue`, with `VariableData` and the Builder-free half of `VariableReferenceValue`, built (`VariableData` tested; the value classes compile-only). See its entry.
 
 **Open / next candidates:**
-- Slice 4 (Value subclasses): the generic types are done; next are the specific value types, one at a time, in the order under Slice 4's *Order* (tiers 1 and 2 done; tiers 1–3 done). Next is tier 4 (items 33–37), which needs the parser, Style builder or resource loading: decide first whether to port or stub it (see *Order*).
+- Slice 4 (Value subclasses): the generic types are done; next are the specific value types, one at a time, in the order under Slice 4's *Order* (tiers 1 and 2 done; tiers 1–3 done). Tier 4 is hybrid (see *Order*); item 33 is done. Next is item 34, `VariableReferenceValue`'s remaining half: nothing more until `style::Builder`, so go on to item 35 (`PendingSubstitutionValue`).
+- Tier 4 deferred definitions (declared, not defined, FIXME'd; define when `style::Builder`/`BuilderState` and the resource loader are ported): `VariableReferenceValue::ResolveVariableReferences`, `ResolveSingleValue`, `ResolveTokenRange`, `ResolveVariableReference`, `ResolveVariableFallback`, `TryResolveSimpleReference` (and so `ResolveAndCacheValue`).
 - Not yet ported, needed later: the graphics `Path` (cached by `SVGPathByteStream` upstream), the rest of `SVGPathUtilities` (needs `Path` and `SVGPathSegList`), `parseKerningUnicodeString`/`parseGlyphName`.
 - Slice 3 (colour), bottom-up: (1) Graphics/Color, (2) calc-free numeric primitives, (3a) Style-free calc, (3b) calc evaluation and Style calc and (3c) calc parsing are done. (4a) `LayoutUnit` and the point/size types and (4b) Style numerics are done. (5a) the CSS colour types, (5b) the colour parser and (5c) `ColorValue`/`ValuePool` (compile-only) are done. (6) Style colour is done (its CSSValue half is deferred, see below). Slice 3 is complete apart from the Value-dependent pieces.
 - Deferred from layer 6 (needs `Style/BuilderChecking.hpp` and the raw-WebKit `ValueList`/`ValuePair`/`FunctionValue`/`BuilderState` it includes): `CSSValueConversion<Color>`, `CSSValueCreation<Color>`, `CSSValueConversion<DynamicRangeLimit>`, `CSSValueCreation<DynamicRangeLimit>` and `CSSValueConversion<Opacity>`. They come with the other `+CSSValueConversion`/`+CSSValueCreation` headers.
@@ -852,7 +854,7 @@ Remaining subclasses, loosely by complexity. Measured from each upstream `.cpp`'
 36. `FontFaceSrcLocalValue`/`FontFaceSrcResourceValue` (`CachedFont`, resource loader)
 37. Images, which create `StyleImage`s through `BuilderState`: `ImageValue`, `ImageSetOptionValue`, `ImageSetValue`, `NamedImageValue`, `CanvasValue` (new file), `PaintImageValue`, `CrossFadeValue`, `FilterImageValue` (needs 28), `CursorImageValue`, `GradientValue` (largest)
 
-Tier 4 may be stubbed (declarations plus minimal definitions) so `Value.cpp`/`PrimitiveValue.cpp` can build before its dependencies are ported; decide when tiers 1–3 are done.
+Decision (2026-10-13): **hybrid**. Each tier-4 class is ported fully except what needs `style::Builder`/`BuilderState` (`createStyleImage`, `resolveVariableReferences`, `resolveValue`, ...) or the resource loader (`CachedImage`/`CachedFont`): those are declared with a FIXME but not defined, and listed under *Where we are*. `Value.cpp`'s `VisitDerived` only dispatches `CustomCSSText`, `Equals`, `CustomVisitChildren`, `AddHash`, `CustomMayDependOnBaseUrl`, `CustomTraverseSubresources` and `CustomSetReplacementUrlForSubresources`, none of which need the builder, so this unblocks `Value.cpp` without porting `StyleBuilderState.h` (~31 new files: selectors, `RuleSet`, `PropertyCascade`, media queries, `StyleProperties`). Measured new files (headers-only graphs): 33: 4; 34: ~55 (Builder half); 35: 5; 36: 2 plus the loader; easy images (`NamedImage`, `Canvas`, `ImageSetOption`, `PaintImage`): 2–3; the rest of 37: 34–43, nearly all through `StyleBuilderState.h`.
 
 ### `ValuePair` (2026-10-12)
 
@@ -1479,6 +1481,33 @@ Tier 3 items 30–32, so tier 3 is done. Graphs from `css/CSSRayValue.cpp`, `CSS
 **Differences:** No `createDeprecatedCSSOMWrapper`/`AddDerivedHash`, like upstream. The headers of `ScrollValue`/`ViewValue` include `Value.hpp`, not `PrimitiveValue.hpp`; their `.cpp`s include `PrimitiveValue.hpp` for `Value::ValueId()`.
 
 Tests: `tests/CSS/Values/Motion/RayFunction.cpp` (serialisation of every size, `contain`, `at <position>` and all together; equality; dependencies; visitation): 3 cases / 17 assertions. The three value classes are compile-only. Full Booey suite: 1110 cases / 669948 assertions; all pass except 2 expected failures.
+
+### `CustomPropertyValue`, `VariableData`, `VariableReferenceValue` (Builder-free half) (2026-10-13)
+
+Tier 4 item 33, the first hybrid item. Graph from `css/CSSCustomPropertyValue.cpp` and `css/CSSVariableData.cpp` (headers-only): 56 files (`tools/port/out/custom-property-value.md`). New: the two value classes and `CSSVariableData`; `CSSVariableData.cpp` also includes `CSSValuePool.h` and `RenderStyle.h` (which bring `CSSResolvedColor.h`), but uses neither, so they aren't followed. `CSSWideKeyword` is `GlobalKeyword` (slice 1). `CSSVariableReferenceValue.cpp`'s own includes (`StyleBuilder`, `StyleResolver`, `CSSPropertyParser`, the custom property registry) are only for the Builder half.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/CSSVariableData.h`, `.cpp` | `have*` | `CSS/Values/VariableData.hpp`, `src/CSS/Values/VariableData.cpp` | on | tested. No backing string (see Differences). `Vector<CSSParserToken>` → `List<Token>`; `serialize()` → `Serialise()`. |
+| `css/CSSVariableReferenceValue.h`, `.cpp` | `have` (Builder-free half) | `CSS/Values/VariableReferenceValue.hpp`, `src/CSS/Values/VariableReferenceValue.cpp` | on (compile-only) | `create`×2, `equals`, `customCSSText`, `context`, `data`, `cacheSimpleReference`, `maxSubstitutionTokens` defined. The `Style::Builder` methods and the `resolveAndCacheValue` template are declared (`style::Builder` forward-declared) but not defined; FIXMEs. |
+| `css/CSSCustomPropertyValue.h`, `.cpp` | `have` | `CSS/Values/CustomPropertyValue.hpp`, `src/CSS/Values/CustomPropertyValue.cpp` | on (compile-only) | `createWithCSSWideKeyword` → `CreateWithGlobalKeyword`, `isCSSWideKeyword`/`tryCSSWideKeyword` → `IsGlobalKeyword`/`TryGlobalKeyword` (`GlobalKeyword`). `value()` → `Value()` (hides the base class name inside the class; the class only uses `css::Value`). |
+
+**Bugs fixed:**
+- None of the three had a `.cpp`: every method was declared but never defined. `VariableReferenceValue` was an empty shell (no data, no `Create`, no constructor).
+- `VariableData.hpp` had no BOM, and stored its tokens as `SmallList<Token>` (upstream: `Vector`, no inline capacity).
+- `CustomPropertyValue::CustomVisitChildren` lacked `KRYS_NOESCAPE`; `Tokens()` returned `SmallList`. `VariableData::Create`'s default context was `{}` instead of the strict context.
+
+**Krystal callers updated (unbuilt):** none needed (`PropertyParser.cpp`'s `VariableData::Create`/`VariableReferenceValue::Create` calls match; nothing called `CreateWithCSSWideKeyword`). `Consumers/Image.cpp:1198` is still raw WebKit (`CSSVariableData::create`).
+
+**Differences:**
+- Krystal `Token`s own their text (`SmallList<char8>`), so `VariableData` just copies them: no `m_backingString`, `updateBackingStringsInTokens`, `tryUseStringLiteralBacking` or `StringBuilder`.
+- `CustomPropertyValue::Tokens()` uses `get_if`, not `switchOn` (Krystal's `SwitchOn` returns by value, and this returns a reference).
+- `CacheSimpleReference` only caches when the name token is an ident (upstream takes `token.value()` of any token). The parser only creates these for valid `var()`/`env()`, so the name is always an ident; and without a simple reference, resolution takes the general path, which gives the same result.
+- `_stringValue`/`_cachedCSSText` caches use `empty()` for upstream's `isNull()`, so an empty serialisation isn't cached.
+- Equality inlines `arePointingToEqualData` (`a.get() == b.get() || *a == *b`); `wtf/PointerComparison.h` isn't ported.
+- No `createDeprecatedCSSOMWrapper`/`AddDerivedHash`, like upstream.
+
+Tests: `tests/CSS/Values/VariableData.cpp` (serialisation round-trip, including `var()` with a fallback, `env()`, strings, URLs (the value is serialised as an identifier, so `url(x.png)` → `url(x\.png)`, as upstream) and empty; tokens are copied and outlive the tokenizer, and `TokenRange()` views them; equality; context): 4 cases / 37 assertions. The value classes are compile-only. Full Booey suite: 1114 cases / 669985 assertions; all pass except 2 expected failures.
 
 ## Deferred: Values (from the tokenizer graph)
 

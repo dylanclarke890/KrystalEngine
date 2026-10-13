@@ -367,6 +367,9 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/RayValue.hpp
   include/Krystal.Booey/CSS/Values/ScrollValue.hpp
   include/Krystal.Booey/CSS/Values/ViewValue.hpp
+  include/Krystal.Booey/CSS/Values/VariableData.hpp
+  include/Krystal.Booey/CSS/Values/VariableReferenceValue.hpp
+  include/Krystal.Booey/CSS/Values/CustomPropertyValue.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -528,6 +531,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/RayValue.cpp
   src/CSS/Values/ScrollValue.cpp
   src/CSS/Values/ViewValue.cpp
+  src/CSS/Values/VariableData.cpp
+  src/CSS/Values/VariableReferenceValue.cpp
+  src/CSS/Values/CustomPropertyValue.cpp
 )
 
 target_precompile_headers(Krystal.Booey
