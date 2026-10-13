@@ -370,6 +370,19 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/VariableData.hpp
   include/Krystal.Booey/CSS/Values/VariableReferenceValue.hpp
   include/Krystal.Booey/CSS/Values/CustomPropertyValue.hpp
+  include/Krystal.Booey/CSS/Values/PendingSubstitutionValue.hpp
+  include/Krystal.Booey/CSS/Values/FontFaceSrcValue.hpp
+  include/Krystal.Booey/CSS/Values/NamedImageValue.hpp
+  include/Krystal.Booey/CSS/Values/CanvasValue.hpp
+  include/Krystal.Booey/CSS/Values/PaintImageValue.hpp
+  include/Krystal.Booey/CSS/Values/ImageSetOptionValue.hpp
+  include/Krystal.Booey/CSS/Values/ImageValue.hpp
+  include/Krystal.Booey/CSS/Values/ImageSetValue.hpp
+  include/Krystal.Booey/CSS/Values/CrossFadeValue.hpp
+  include/Krystal.Booey/CSS/Values/FilterImageValue.hpp
+  include/Krystal.Booey/CSS/Values/CursorImageValue.hpp
+  include/Krystal.Booey/CSS/Values/Images/Gradient.hpp
+  include/Krystal.Booey/CSS/Values/GradientValue.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -534,6 +547,19 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/VariableData.cpp
   src/CSS/Values/VariableReferenceValue.cpp
   src/CSS/Values/CustomPropertyValue.cpp
+  src/CSS/Values/PendingSubstitutionValue.cpp
+  src/CSS/Values/FontFaceSrcValue.cpp
+  src/CSS/Values/NamedImageValue.cpp
+  src/CSS/Values/CanvasValue.cpp
+  src/CSS/Values/PaintImageValue.cpp
+  src/CSS/Values/ImageSetOptionValue.cpp
+  src/CSS/Values/ImageValue.cpp
+  src/CSS/Values/ImageSetValue.cpp
+  src/CSS/Values/CrossFadeValue.cpp
+  src/CSS/Values/FilterImageValue.cpp
+  src/CSS/Values/CursorImageValue.cpp
+  src/CSS/Values/Images/Gradient.cpp
+  src/CSS/Values/GradientValue.cpp
 )
 
 target_precompile_headers(Krystal.Booey

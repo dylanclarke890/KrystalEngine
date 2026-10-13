@@ -51,10 +51,13 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Slice 4, tier 3 item 29 (2026-10-13): `AppleColorFilterValue`, with `AppleColorFilter` and `AppleInvertLightness`, built and tested (`AppleColorFilterValue` compile-only). See its entry.
 - Slice 4, tier 3 items 30–32 (2026-10-13): `RayValue` (with `RayFunction` and `CSSBoxType`, the first enum in `Rendering/Style/RenderStyleConstants.hpp`), `ScrollValue` and `ViewValue` built (`RayFunction` tested; the value classes compile-only), so tier 3 is done. See their entry.
 - Slice 4, tier 4 decided (2026-10-13): hybrid (see *Order*). Item 33: `CustomPropertyValue`, with `VariableData` and the Builder-free half of `VariableReferenceValue`, built (`VariableData` tested; the value classes compile-only). See its entry.
+- Slice 4, tier 4 items 34–35 (2026-10-13): item 34 has nothing left until `style::Builder`; item 35, `PendingSubstitutionValue` (Builder-free half), built (compile-only). See its entry.
+- Slice 4, tier 4 item 36 (2026-10-13): `FontFaceSrcLocalValue`/`FontFaceSrcResourceValue` (loader- and SVG-free half) and `FontTechnology` built (`CssTextFromFontTech` tested; the value classes compile-only). See their entry.
+- Slice 4, tier 4 item 37 (2026-10-13): the ten image values (`NamedImageValue`, `CanvasValue`, `PaintImageValue`, `ImageSetOptionValue`, `ImageValue`, `ImageSetValue`, `CrossFadeValue`, `FilterImageValue`, `CursorImageValue`, `GradientValue`) built (compile-only), with `css::Gradient` (`CSSGradient.h`/`.cpp`, the seven gradient types) built and tested. Slice 4's subclass list is done. See their entry.
 
 **Open / next candidates:**
-- Slice 4 (Value subclasses): the generic types are done; next are the specific value types, one at a time, in the order under Slice 4's *Order* (tiers 1 and 2 done; tiers 1–3 done). Tier 4 is hybrid (see *Order*); item 33 is done. Next is item 34, `VariableReferenceValue`'s remaining half: nothing more until `style::Builder`, so go on to item 35 (`PendingSubstitutionValue`).
-- Tier 4 deferred definitions (declared, not defined, FIXME'd; define when `style::Builder`/`BuilderState` and the resource loader are ported): `VariableReferenceValue::ResolveVariableReferences`, `ResolveSingleValue`, `ResolveTokenRange`, `ResolveVariableReference`, `ResolveVariableFallback`, `TryResolveSimpleReference` (and so `ResolveAndCacheValue`).
+- Slice 4 (Value subclasses): the generic types are done; next are the specific value types, one at a time, in the order under Slice 4's *Order* (tiers 1 and 2 done; tiers 1–3 done). Tier 4 is hybrid (see *Order*); items 33–37 are done (34's remaining half waits for `style::Builder`), so every item on the list is done. Every subclass header `Value.cpp` includes is now reviewed and built (only `Properties/Property.hpp` isn't reviewed, but it compiles), so the next step is a trial compile of `Value.cpp` (and then `PrimitiveValue.cpp`).
+- Tier 4 deferred definitions (declared, not defined, FIXME'd; define when `style::Builder`/`BuilderState` and the resource loader are ported): `VariableReferenceValue::ResolveVariableReferences`, `ResolveSingleValue`, `ResolveTokenRange`, `ResolveVariableReference`, `ResolveVariableFallback`, `TryResolveSimpleReference` (and so `ResolveAndCacheValue`); `PendingSubstitutionValue::ResolveValue` (also needs `PropertyParser::ParseValue` and `ParsedPropertyVector`); `FontFaceSrcResourceValue::GetFontLoadRequest` and its cached font (`CustomTraverseSubresources` returns `false` until then); `FontFaceSrcLocalValue::GetSVGFontFaceElement`/`SetSVGFontFaceElement` (need SVG fonts); `CreateStyleImage` on the ten image values (needs `style::BuilderState` and `StyleImage`, and the cached style image members of `NamedImageValue`/`CanvasValue`/`GradientValue`); `ImageValue::IsPending`, `LoadImage`, `GetCachedImage`, `KnownToBeOpaque` and its cached image (`CustomTraverseSubresources` returns `false`, and `CopyForComputedStyle` doesn't copy the cache, until then).
 - Not yet ported, needed later: the graphics `Path` (cached by `SVGPathByteStream` upstream), the rest of `SVGPathUtilities` (needs `Path` and `SVGPathSegList`), `parseKerningUnicodeString`/`parseGlyphName`.
 - Slice 3 (colour), bottom-up: (1) Graphics/Color, (2) calc-free numeric primitives, (3a) Style-free calc, (3b) calc evaluation and Style calc and (3c) calc parsing are done. (4a) `LayoutUnit` and the point/size types and (4b) Style numerics are done. (5a) the CSS colour types, (5b) the colour parser and (5c) `ColorValue`/`ValuePool` (compile-only) are done. (6) Style colour is done (its CSSValue half is deferred, see below). Slice 3 is complete apart from the Value-dependent pieces.
 - Deferred from layer 6 (needs `Style/BuilderChecking.hpp` and the raw-WebKit `ValueList`/`ValuePair`/`FunctionValue`/`BuilderState` it includes): `CSSValueConversion<Color>`, `CSSValueCreation<Color>`, `CSSValueConversion<DynamicRangeLimit>`, `CSSValueCreation<DynamicRangeLimit>` and `CSSValueConversion<Opacity>`. They come with the other `+CSSValueConversion`/`+CSSValueCreation` headers.
@@ -1508,6 +1511,82 @@ Tier 4 item 33, the first hybrid item. Graph from `css/CSSCustomPropertyValue.cp
 - No `createDeprecatedCSSOMWrapper`/`AddDerivedHash`, like upstream.
 
 Tests: `tests/CSS/Values/VariableData.cpp` (serialisation round-trip, including `var()` with a fallback, `env()`, strings, URLs (the value is serialised as an identifier, so `url(x.png)` → `url(x\.png)`, as upstream) and empty; tokens are copied and outlive the tokenizer, and `TokenRange()` views them; equality; context): 4 cases / 37 assertions. The value classes are compile-only. Full Booey suite: 1114 cases / 669985 assertions; all pass except 2 expected failures.
+
+### `PendingSubstitutionValue` (Builder-free half) (2026-10-13)
+
+Tier 4 item 35. Graph from `css/CSSPendingSubstitutionValue.cpp` (headers-only): 34 files (`tools/port/out/pending-substitution-value.md`). New: the value class, `css/CSSProperty.h` (`Property.hpp`, unreviewed but already compiles), `css/IsImportant.h` (`Properties/Types/IsImportant.hpp`, already built) and `css/parser/CSSPropertyParser.h`. The `.cpp` only defines `resolveValue`, which is the Builder half, so `CSSPropertyParser.h` isn't needed yet. Item 34 (`VariableReferenceValue`'s Builder half) has nothing to port before `style::Builder`.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/CSSProperty.h` | `have?` | `CSS/Properties/Property.hpp` | — (included) | Not reviewed; needed complete for the `List<Property>` cache. `property.value()` is a reference here (upstream: pointer), which matters when `ResolveValue` is defined. |
+| `css/CSSPendingSubstitutionValue.h`, `.cpp` | `have` (Builder-free half) | `CSS/Values/PendingSubstitutionValue.hpp`, `src/CSS/Values/PendingSubstitutionValue.cpp` | on (compile-only) | Header-only like upstream; the `.cpp` holds the FIXME for `ResolveValue` (declared, `style::Builder` forward-declared, not defined). |
+
+**Bugs fixed:**
+- The class was an empty shell: no data members, constructor, `Create`, `ShorthandValue()`/`ShorthandPropertyId()` or `ResolveValue`, and `CustomCSSText`/`Equals`/`CustomVisitChildren` were declared but never defined. `PropertyParser.cpp` and `StyleProperties.cpp` (unbuilt) already called `Create` and `ShorthandPropertyId()`.
+- It wasn't `final`; `CustomVisitChildren` lacked `KRYS_NOESCAPE`; `CustomCSSText` wasn't static.
+
+**Krystal callers updated (unbuilt):** none needed (`PropertyParser.cpp`'s `Create` and `StyleProperties.cpp`'s `ShorthandPropertyId()` match).
+
+**Differences:** `emptyString()` → `{}`. No `createDeprecatedCSSOMWrapper`/`AddDerivedHash`, like upstream.
+
+Tests: none (compile-only, nothing else to test). Full Booey suite: 1114 cases / 669985 assertions; all pass except 2 expected failures.
+
+### `FontFaceSrcLocalValue`, `FontFaceSrcResourceValue` (loader-free half) (2026-10-13)
+
+Tier 4 item 36. Graph from `css/CSSFontFaceSrcValue.cpp` (headers-only): 11 files (`tools/port/out/font-face-src-value.md`), all reviewed except the value pair itself. The rest is boundary: the loader (`CachedFont`, `CachedFontLoadRequest`, `CachedResourceHandle`, `CachedResourceLoader`, `CachedResourceRequest*`, `ResourceLoaderOptions`), `FontCustomPlatformData` (`supportsFormat`/`supportsTechnology`), `ScriptExecutionContext` and `SVGFontFaceElement`. All of them are only used by `fontLoadRequest`, the cached font and the SVG element accessors.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/CSSFontFaceSrcValue.h`, `.cpp` | `have` (loader-free half) | `CSS/Values/FontFaceSrcValue.hpp`, `src/CSS/Values/FontFaceSrcValue.cpp` | on (compile-only) | `cssTextFromFontTech` → `CssTextFromFontTech` (constexpr, tested). `isEmpty`/`fontFaceName` → `IsEmpty`/`FontFaceName`. `fontLoadRequest` → `GetFontLoadRequest`, `svgFontFaceElement` → `GetSVGFontFaceElement` (named after their types); those three and `SetSVGFontFaceElement` are declared (types forward-declared in `css`, as `Consumers/Font.hpp` does) but not defined; FIXMEs. `Vector<FontTechnology>` → `List`. |
+
+**Bugs fixed:**
+- Both classes were empty shells: no data, constructors or `Create`, and `CustomCSSText`/`Equals`/`CustomVisitChildren` were declared but never defined. `FontTechnology` and its serialisation were missing (only forward-declared in `Consumers/Font.hpp`). The resource value lacked `CustomTraverseSubresources`/`CustomMayDependOnBaseUrl`, and both declared a `CustomVisitChildren` upstream doesn't have (neither holds child values).
+- Neither was `final`; the header had no BOM.
+
+**Krystal callers updated (unbuilt):** none. `Consumers/Font.hpp`'s `ConsumeFontTech` returns `SmallList<FontTechnology>` (upstream: `Vector`), so `ConsumeFontFaceSrc` will need a `List` when it's reviewed. `PrimitiveValueMappings.hpp` still includes raw `CSSFontFaceSrcValue.h` for `fromCSSValueID(FontTechnology)`.
+
+**Differences:**
+- No cached font member: `CustomTraverseSubresources` returns `false` until the loader exists (upstream: `m_cachedFont && handler(*m_cachedFont)`), and no SVG element weak pointer (so no out-of-line destructor).
+- No `createDeprecatedCSSOMWrapper`/`AddDerivedHash`, like upstream.
+
+Tests: `tests/CSS/Values/FontFaceSrcValue.cpp` (`CssTextFromFontTech` for every technology and `Invalid`, at compile time): 1 case / 12 assertions. The value classes are compile-only. Full Booey suite: 1115 cases / 669997 assertions; all pass except 2 expected failures.
+
+### Image values and `css::Gradient` (2026-10-13)
+
+Tier 4 item 37, so Slice 4's list is done. Graphs from each upstream `.cpp` (headers-only; `tools/port/out/NamedImageValue.md`, `CanvasValue.md`, `PaintImageValue.md`, `ImageSetOptionValue.md`, `ImageValue.md`, `ImageSetValue.md`, `CrossfadeValue.md`, `FilterImageValue.md`, `CursorImageValue.md`, `GradientValue.md`): 3 to 105 files, but everything new beyond the class itself comes in through `StyleBuilderState.h` or the `Style*Image` headers (`createStyleImage`), the loader (`CachedImage`, `CachedResourceLoader`, `ResourceLoaderOptions`: `ImageValue`'s cache) or SVG (`SVGCursorElement`, only in `CSSCursorImageValue.cpp`'s includes). The exception is `GradientValue`, which needs `css/values/images/CSSGradient.h`/`.cpp`: its graph (`--follow css/ style/ platform/graphics/`, `tools/port/out/css-gradient.md`) is 169 files, but `CSSGradient` itself only uses reviewed types (`CSSColor`, `CSSPosition`, `ColorInterpolationMethod`, the numerics); the rest comes through its `.cpp`'s unused Style includes (`StyleGradientImage.h`, `StylePosition.h`, `StyleCalculationValue.h`, `CSSPrimitiveValueMappings.h`), which aren't followed.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/CSSNamedImageValue.h`, `.cpp` | `have` (Builder-free half) | `CSS/Values/NamedImageValue.hpp`, `src/…/NamedImageValue.cpp` | on (compile-only) | |
+| `css/CSSCanvasValue.h`, `.cpp` | `have` (Builder-free half) | `CSS/Values/CanvasValue.hpp`, `src/…/CanvasValue.cpp` | on (compile-only) | New header (the only image value without one). |
+| `css/CSSPaintImageValue.h`, `.cpp` | `have` (Builder-free half) | `CSS/Values/PaintImageValue.hpp`, `src/…/PaintImageValue.cpp` | on (compile-only) | Upstream's FIXME (arguments aren't serialised) kept. |
+| `css/CSSImageSetOptionValue.h`, `.cpp` | `have` | `CSS/Values/ImageSetOptionValue.hpp`, `src/…/ImageSetOptionValue.cpp` | on (compile-only) | `type()`/`setType()` → `Type()`/`SetType()`; the MIME type is `Maybe<CSSOMString>` (see Differences). The `create` asserts use `IsImageValue()` instead of including `ImageValue.hpp`. |
+| `css/CSSImageValue.h`, `.cpp` | `have` (loader- and Builder-free half) | `CSS/Values/ImageValue.hpp`, `src/…/ImageValue.cpp` | on (compile-only) | `url()` → `URL()`, `cachedImage()` → `GetCachedImage()` (named after a type). `create(WTF::URL)` takes `url::URL`. |
+| `css/CSSImageSetValue.h`, `.cpp` | `have` (Builder-free half) | `CSS/Values/ImageSetValue.hpp`, `src/…/ImageSetValue.cpp` | on (compile-only) | On `ValueContainingList`. |
+| `css/CSSCrossfadeValue.h`, `.cpp` | `have` (Builder-free half) | `CSS/Values/CrossFadeValue.hpp`, `src/…/CrossFadeValue.cpp` | on (compile-only) | Name kept as `CrossFadeValue` (matches `ValueType::CrossFade`/`IsCrossFadeValue`). |
+| `css/CSSFilterImageValue.h`, `.cpp` | `have` (Builder-free half) | `CSS/Values/FilterImageValue.hpp`, `src/…/FilterImageValue.cpp` | on (compile-only) | |
+| `css/CSSCursorImageValue.h`, `.cpp` | `have` (Builder-free half) | `CSS/Values/CursorImageValue.hpp`, `src/…/CursorImageValue.cpp` | on (compile-only) | `originalURL()` → `OriginalURL()`. |
+| `css/values/images/CSSGradient.h`, `.cpp` | `have` | `CSS/Values/Images/Gradient.hpp`, `src/CSS/Values/Images/Gradient.cpp` | on | tested. Members PascalCase; aliases that clash with a member get a `Type` suffix: `GradientLine` → `GradientLineType`, `GradientBox` → `GradientBoxType` (including the nested structs of `DeprecatedRadialGradient`/`ConicGradient`), `Ellipse::Size` → `SizeType`, `GradientColorStop::Color`/`Position` → `ColorType`/`PositionType`. `GradientColorInterpolationMethod::method`/`defaultMethod`/`legacyMethod` → `Method`/`DefaultMethod`/`LegacyMethod`. `CommaSeparatedVector<Stop, 2>` → `CommaSeparatedList<Stop, 2>`. |
+| `css/CSSGradientValue.h`, `.cpp` | `have` (Builder-free half) | `CSS/Values/GradientValue.hpp`, `src/…/GradientValue.cpp` | on (compile-only) | |
+
+`StyleImage`, `StyleCursorImage`, `CachedImage`, `CachedResourceLoader`, `RenderElement` and `ResourceLoaderOptions` are forward-declared in `krys::boo` (alongside `CachedResource`); `style::BuilderState` is the seam's.
+
+**Bugs fixed:**
+- All ten were empty shells (no data, constructors or `Create`; `CustomCSSText`/`Equals`/`CustomVisitChildren` declared but never defined), and none was `final` except `CursorImageValue`. `CanvasValue.hpp` didn't exist, though `Value.cpp` included it. `ImageSetOptionValue.hpp` and `ImageValue.hpp` had no BOM.
+- `CursorImageValue::Create` took the hot spot as `Ref<Value>` (upstream: `RefPtr`, since it's optional), so `Consumers/UI.cpp`'s `RefPtr<ValuePair>` didn't match. The three-argument `Create` (with the original URL) was missing.
+- `GradientValue.hpp` forward-declared `struct Gradient` (it's a variant alias) with a TODO. `Images/Gradient.hpp` was a stub: only the common types and `GradientColorInterpolationMethod` (lowercase members, no dependency/visitor traits), no stops, gradient structs, serialisers or `Gradient` variant.
+- `ImageSetValue` derived from `Value` (upstream: `CSSValueContainingVector`). `NamedImageValue`, `PaintImageValue` and `ImageSetValue` declared a `CustomVisitChildren` upstream doesn't have (removed); the others' lacked `KRYS_NOESCAPE`.
+
+**Krystal callers updated (unbuilt):** none. `Consumers/Image.cpp` is still largely raw WebKit (`CSSGradientValue::create`, `CSSCrossfadeValue`, lowercase gradient members such as `.colorInterpolationMethod`/`.stops`/`legacyMethod`, 34 uses), so it needs the new names when it's reviewed. `Value.cpp` includes `CrossfadeValue.hpp` (the file is `CrossFadeValue.hpp`; only works on case-insensitive file systems).
+
+**Differences:**
+- No cached `StyleImage` members (`Named`, `Canvas`, `Gradient`) or cached image (`ImageValue`), so no out-of-line destructors either; upstream's private `CSSGradientValue` copy constructor (only copies the cache) isn't ported.
+- `ImageSetOptionValue`'s MIME type is `Maybe<CSSOMString>` for upstream's nullable `String`: `type("")` is written when the type is empty but present, as upstream. The type is appended without escaping, as upstream.
+- `ImageValue`'s initiator type defaults to `CSSOMStringAtom::Null()` (`StringAtom` has no default constructor). Note that `StringAtom::View()` dereferences null on `Null()`; only `LoadImage` (not defined) would read it.
+- `CSSGradient.cpp`'s unused Style includes aren't carried over.
+- No `createDeprecatedCSSOMWrapper` (`ImageValue`'s is won't-port) or `AddDerivedHash`, like upstream.
+
+Tests: `tests/CSS/Values/Images/Gradient.cpp` (serialisation of every gradient kind: default direction/size/position/angle omitted, `to` sides and corners, interpolation methods only when not the default (including `longer hue`), colour hints, `from()`/`to()`/`color-stop()` with percentages written as numbers, prefixed forms with `center`/`circle cover`, repeating forms; equality; dependencies; visitation): 7 cases / 51 assertions. The value classes are compile-only. Full Booey suite: 1122 cases / 670048 assertions; all pass except 2 expected failures.
 
 ## Deferred: Values (from the tokenizer graph)
 
