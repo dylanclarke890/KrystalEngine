@@ -75,6 +75,7 @@ target_sources(Krystal.Booey.Tests
       include
     FILES
 		include/Krystal.Booey.Tests/DOM/TestElement.hpp
+		include/Krystal.Booey.Tests/CSS/ValueTestUtils.hpp
 		include/Krystal.Booey.Tests/TestParserUtils.hpp
 	PRIVATE
 		# Core
@@ -129,6 +130,59 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Values/TextDecoration/TextShadow.cpp
 		tests/CSS/Values/Types.cpp
 		tests/CSS/Values/Units.cpp
+		tests/CSS/Values/ValuePair.cpp
+		tests/CSS/Values/ValueList.cpp
+		tests/CSS/Values/FunctionValue.cpp
+		tests/CSS/Values/QuadValue.cpp
+		tests/CSS/Values/RectValue.cpp
+		tests/CSS/Values/RatioValue.cpp
+		tests/CSS/Values/BackgroundRepeatValue.cpp
+		tests/CSS/Values/BorderImageSliceValue.cpp
+		tests/CSS/Values/BorderImageWidthValue.cpp
+		tests/CSS/Values/ReflectValue.cpp
+		tests/CSS/Values/UnicodeRangeValue.cpp
+		tests/CSS/Values/FontVariationValue.cpp
+		tests/CSS/Values/FontFeatureValue.cpp
+		tests/CSS/Values/FontStyleWithAngleValue.cpp
+		tests/CSS/Values/FontStyleRangeValue.cpp
+		tests/CSS/Values/FontValue.cpp
+		tests/CSS/Values/GridLineNamesValue.cpp
+		tests/CSS/Values/GridLineValue.cpp
+		tests/CSS/Values/SubgridValue.cpp
+		tests/CSS/Values/TransformListValue.cpp
+		tests/CSS/Values/GridAutoRepeatValue.cpp
+		tests/CSS/Values/GridIntegerRepeatValue.cpp
+		tests/CSS/Values/CounterValue.cpp
+		tests/CSS/Values/OffsetRotateValue.cpp
+		tests/CSS/Values/AttrValue.cpp
+		tests/CSS/Values/PositionValue.cpp
+		tests/CSS/Values/UrlValue.cpp
+		tests/CSS/Values/GridTemplateAreasValue.cpp
+		tests/CSS/Values/EasingFunctionValue.cpp
+		tests/CSS/Values/BoxShadowPropertyValue.cpp
+		tests/CSS/Values/TextShadowPropertyValue.cpp
+		tests/CSS/Values/PathValue.cpp
+		tests/CSS/Values/BasicShapeValue.cpp
+		tests/CSS/Values/FilterValue.cpp
+		tests/CSS/Values/AppleColorFilterValue.cpp
+		tests/CSS/Values/RayValue.cpp
+		tests/CSS/Values/ScrollValue.cpp
+		tests/CSS/Values/ViewValue.cpp
+		tests/CSS/Values/CustomPropertyValue.cpp
+		tests/CSS/Values/VariableReferenceValue.cpp
+		tests/CSS/Values/ColorValue.cpp
+		tests/CSS/Values/ColorSchemeValue.cpp
+		tests/CSS/Values/DynamicRangeLimitValue.cpp
+		tests/CSS/Values/NamedImageValue.cpp
+		tests/CSS/Values/CanvasValue.cpp
+		tests/CSS/Values/PaintImageValue.cpp
+		tests/CSS/Values/ImageSetOptionValue.cpp
+		tests/CSS/Values/ImageValue.cpp
+		tests/CSS/Values/ImageSetValue.cpp
+		tests/CSS/Values/CrossFadeValue.cpp
+		tests/CSS/Values/FilterImageValue.cpp
+		tests/CSS/Values/CursorImageValue.cpp
+		tests/CSS/Values/GradientValue.cpp
 		# tests/CSS/Selectors/SelectorParser.cpp
 
 		# Graphics
