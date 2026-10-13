@@ -21,7 +21,7 @@ namespace krys::boo::css
       return false;
     }
 
-    if (ViewportDimensions && !conversionData.RenderView())
+    if (ViewportDimensions && !conversionData.GetRenderView())
     {
       return false;
     }

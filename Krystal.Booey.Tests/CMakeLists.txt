@@ -74,6 +74,7 @@ target_sources(Krystal.Booey.Tests
 		include/Krystal.Booey.Tests/TestParserUtils.hpp
 	PRIVATE
 		# Core
+		tests/Core/LayoutUnit.cpp
 		tests/Core/NumberFormatting.cpp
 
 		# CSS
@@ -104,7 +105,12 @@ target_sources(Krystal.Booey.Tests
 		# tests/CSS/Selectors/SelectorParser.cpp
 
 		# Graphics
+		tests/Graphics/FloatPoint.cpp
 		tests/Graphics/FloatSize.cpp
+		tests/Graphics/IntPoint.cpp
+		tests/Graphics/IntSize.cpp
+		tests/Graphics/LayoutPoint.cpp
+		tests/Graphics/LayoutSize.cpp
 		tests/Graphics/Color/Color.cpp
 		tests/Graphics/Color/ColorBlending.cpp
 		tests/Graphics/Color/ColorConversion.cpp
@@ -116,6 +122,11 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/Calc/Tree.cpp
 		tests/Style/ScopedName.cpp
 		tests/Style/Values/Primitives/LengthResolution.cpp
+		tests/Style/Values/Primitives/LengthWrapper.cpp
+		tests/Style/Values/Primitives/NumericTypesConversions.cpp
+		tests/Style/Values/Primitives/NumericTypesEvaluation.cpp
+		tests/Style/Values/Primitives/PrimitiveNumeric.cpp
+		tests/Style/Values/Types.cpp
 
 		# DOM
 		tests/DOM/Algorithms/EventDispatcher.cpp

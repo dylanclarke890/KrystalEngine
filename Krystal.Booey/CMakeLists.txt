@@ -187,6 +187,25 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Properties/PropertyParserState.hpp
   include/Krystal.Booey/CSS/Properties/Types/IsImportant.hpp
   include/Krystal.Booey/CSS/Rules/RuleType.hpp
+
+  # Slice 3: Colour, layer 4b (Style numerics; the CSSValueConversion/CSSValueCreation headers wait for layer 5)
+  include/Krystal.Booey/Style/Calc/ValueMap.hpp
+  include/Krystal.Booey/Style/Values/Primitives/Concepts.hpp
+  include/Krystal.Booey/Style/Values/Primitives/LengthWrapper.hpp
+  include/Krystal.Booey/Style/Values/Primitives/LengthWrapperBlending.hpp
+  include/Krystal.Booey/Style/Values/Primitives/LengthWrapperData.hpp
+  include/Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp
+  include/Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp
+  include/Krystal.Booey/Style/Values/Primitives/NumericTypesCalc.hpp
+  include/Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp
+  include/Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp
+  include/Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp
+  include/Krystal.Booey/Style/Values/Primitives/PrimitiveNumeric.hpp
+  include/Krystal.Booey/Style/Values/Primitives/PrimitiveNumericForward.hpp
+  include/Krystal.Booey/Style/Values/Primitives/PrimitiveNumericOrKeyword.hpp
+  include/Krystal.Booey/Style/Values/Primitives/PrimitiveNumericOrKeywordConversions.hpp
+  include/Krystal.Booey/Style/Values/Primitives/UnevaluatedCalc.hpp
+  include/Krystal.Booey/Style/Values/Types.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -238,6 +257,13 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Calc/TreeParser.cpp
   src/CSS/Calc/ValueParsing.cpp
   src/CSS/Properties/Consumers/Primitives.cpp
+
+  # Slice 3: Colour, layer 4b (Style numerics)
+  src/CSS/ComputedStyleDependencies.cpp
+  src/Style/Calc/ValueMap.cpp
+  src/Style/Values/Primitives/LengthWrapperData.cpp
+  src/Style/Values/Primitives/NumericTypesConversions.cpp
+  src/Style/Values/Primitives/UnevaluatedCalc.cpp
 )
 
 target_precompile_headers(Krystal.Booey
@@ -291,6 +317,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/Core/BoxSides.hpp
       include/Krystal.Booey/Core/EncodingRegistry.hpp
       include/Krystal.Booey/Core/IterationStatus.hpp
+      include/Krystal.Booey/Core/LayoutUnit.hpp
       include/Krystal.Booey/Core/MathExtras.hpp
       include/Krystal.Booey/Core/NumberFormatting.hpp
       include/Krystal.Booey/Core/WritingMode.hpp
@@ -436,6 +463,11 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/Graphics/Color/ColorTransferFunctions.hpp
       include/Krystal.Booey/Graphics/Color/ColorTypes.hpp
       include/Krystal.Booey/Graphics/Color/ColorUtilities.hpp
+      include/Krystal.Booey/Graphics/FloatPoint.hpp
+      include/Krystal.Booey/Graphics/IntPoint.hpp
+      include/Krystal.Booey/Graphics/IntSize.hpp
+      include/Krystal.Booey/Graphics/LayoutPoint.hpp
+      include/Krystal.Booey/Graphics/LayoutSize.hpp
 
       # HTML
       include/Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp
@@ -683,6 +715,8 @@ target_sources(Krystal.Booey
     src/Graphics/Color/ColorInterpolationMethod.cpp
     src/Graphics/Color/ColorLuminance.cpp
     src/Graphics/Color/ColorSerialisation.cpp
+    src/Graphics/IntPoint.cpp
+    src/Graphics/IntSize.cpp
 
     # HTML
     src/HTML/Algorithms/CustomElementAlgorithms.cpp

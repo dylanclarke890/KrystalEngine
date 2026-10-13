@@ -1,178 +1,183 @@
-/*
- * Copyright (C) 2024-2025 Samuel Weinig <sam@webkit.org>
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+﻿#pragma once
 
-#pragma once
+#include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
+#include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
+#include "Krystal.Booey/Style/Calc/Tree.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/NumericTypesCalc.hpp"
+#include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Attributes.hpp"
 
-#include "AnimationUtilities.h"
-#include "StylePrimitiveNumericTypes+Calculation.h"
-#include "StylePrimitiveNumericTypes.h"
-
-namespace WebCore
+namespace krys::boo::style
 {
-  namespace Style
+  using namespace css::Literals;
+
+  // MARK: Interpolation of base numeric types
+  // https://drafts.csswg.org/css-values/#combining-values
+  template <Numeric StyleType>
+  struct Blending<StyleType>
   {
-
-    using namespace CSS::Literals;
-
-    // MARK: Interpolation of base numeric types
-    // https://drafts.csswg.org/css-values/#combining-values
-    template <Numeric StyleType>
-    struct Blending<StyleType>
+    KRYS_NODISCARD StyleType Blend(const StyleType &from, const StyleType &to,
+                                   const BlendingContext &context) noexcept
     {
-      auto blend(const StyleType &from, const StyleType &to, const BlendingContext &context) -> StyleType
+      if (!context.Progress && context.IsReplace())
       {
-        if (!context.progress && context.isReplace())
-          return from;
-
-        if (context.progress == 1 && context.isReplace())
-          return to;
-
-        // FIXME: As interpolation may result in a value outside of the range allowed by the
-        // primitive, we clamp the value back down to the allowed range. The spec states that
-        // in some cases, an accumulated intermediate value should be allowed to be out of the
-        // allowed range until after interpolation has completed, but we currently don't have
-        // that concept.
-        // https://drafts.csswg.org/css-values/#combining-range
-
-        return StyleType {CSS::clampToRange<StyleType::range, typename StyleType::ResolvedValueType>(
-          WebCore::blend(from.value, to.value, context))};
-      }
-    };
-
-    template <auto R, typename V>
-    struct Blending<Length<R, V>>
-    {
-      using StyleType = Length<R, V>;
-
-      auto blend(const StyleType &from, const StyleType &to, const BlendingContext &context) -> StyleType
-      {
-        if (!context.progress && context.isReplace())
-          return from;
-
-        if (context.progress == 1 && context.isReplace())
-          return to;
-
-        // FIXME: As interpolation may result in a value outside of the range allowed by the
-        // primitive, we clamp the value back down to the allowed range. The spec states that
-        // in some cases, an accumulated intermediate value should be allowed to be out of the
-        // allowed range until after interpolation has completed, but we currently don't have
-        // that concept.
-        // https://drafts.csswg.org/css-values/#combining-range
-
-        return StyleType {CSS::clampToRange<StyleType::range, typename StyleType::ResolvedValueType>(
-          WebCore::blend(from.unresolvedValue(), to.unresolvedValue(), context))};
-      }
-    };
-
-    // MARK: Interpolation of mixed numeric types
-    // https://drafts.csswg.org/css-values/#combine-mixed
-    template <auto R, typename V>
-    struct Blending<LengthPercentage<R, V>>
-    {
-      using StyleType = LengthPercentage<R, V>;
-      using Length = typename StyleType::Dimension;
-      using Percentage = typename StyleType::Percentage;
-      using Calc = typename StyleType::Calc;
-
-      auto requiresInterpolationForAccumulativeIteration(const StyleType &from, const StyleType &to) -> bool
-      {
-        return WTF::holdsAlternative<Calc>(from) || WTF::holdsAlternative<Calc>(to)
-               || from.index() != to.index();
+        return from;
       }
 
-      auto blend(const StyleType &from, const StyleType &to, const BlendingContext &context) -> StyleType
+      if (context.Progress == 1 && context.IsReplace())
       {
-        // Interpolation of dimension-percentage value combinations (e.g. <length-percentage>,
-        // <frequency-percentage>, <angle-percentage>, <time-percentage> or equivalent notations) is defined
-        // as:
-        //
-        //  - equivalent to interpolation of <length> if both VA and VB are pure <length> values
-        //  - equivalent to interpolation of <percentage> if both VA and VB are pure <percentage> values
-        //  - equivalent to converting both values into a calc() expression representing the sum of the
-        //    dimension type and a percentage (each possibly zero) and interpolating each component
-        //    individually (as a <length>/<frequency>/<angle>/<time> and as a <percentage>, respectively)
+        return to;
+      }
 
-        if (WTF::holdsAlternative<Calc>(from) || WTF::holdsAlternative<Calc>(to)
-            || (from.index() != to.index()))
+      // FIXME: As interpolation may result in a value outside of the range allowed by the
+      // primitive, we clamp the value back down to the allowed range. The spec states that
+      // in some cases, an accumulated intermediate value should be allowed to be out of the
+      // allowed range until after interpolation has completed, but we currently don't have
+      // that concept.
+      // https://drafts.csswg.org/css-values/#combining-range
+
+      return StyleType {css::ClampToRange<StyleType::Range, typename StyleType::ResolvedValueType>(
+        krys::boo::Blend(from.Value, to.Value, context))};
+    }
+  };
+
+  template <auto R, typename V>
+  struct Blending<Length<R, V>>
+  {
+    using StyleType = Length<R, V>;
+
+    KRYS_NODISCARD StyleType Blend(const StyleType &from, const StyleType &to,
+                                   const BlendingContext &context) noexcept
+    {
+      if (!context.Progress && context.IsReplace())
+      {
+        return from;
+      }
+
+      if (context.Progress == 1 && context.IsReplace())
+      {
+        return to;
+      }
+
+      // FIXME: As interpolation may result in a value outside of the range allowed by the
+      // primitive, we clamp the value back down to the allowed range. The spec states that
+      // in some cases, an accumulated intermediate value should be allowed to be out of the
+      // allowed range until after interpolation has completed, but we currently don't have
+      // that concept.
+      // https://drafts.csswg.org/css-values/#combining-range
+
+      return StyleType {css::ClampToRange<StyleType::Range, typename StyleType::ResolvedValueType>(
+        krys::boo::Blend(from.UnresolvedValue(), to.UnresolvedValue(), context))};
+    }
+  };
+
+  // MARK: Interpolation of mixed numeric types
+  // https://drafts.csswg.org/css-values/#combine-mixed
+  template <auto R, typename V>
+  struct Blending<LengthPercentage<R, V>>
+  {
+    using StyleType = LengthPercentage<R, V>;
+    using Length = typename StyleType::Dimension;
+    using Percentage = typename StyleType::Percentage;
+    using Calc = typename StyleType::Calc;
+
+    KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const StyleType &from,
+                                                                      const StyleType &to) noexcept
+    {
+      return krys::HoldsAlternative<Calc>(from) || krys::HoldsAlternative<Calc>(to)
+             || from.index() != to.index();
+    }
+
+    KRYS_NODISCARD StyleType Blend(const StyleType &from, const StyleType &to,
+                                   const BlendingContext &context) noexcept
+    {
+      // Interpolation of dimension-percentage value combinations (e.g. <length-percentage>,
+      // <frequency-percentage>, <angle-percentage>, <time-percentage> or equivalent notations) is defined as:
+      //
+      //  - equivalent to interpolation of <length> if both VA and VB are pure <length> values
+      //  - equivalent to interpolation of <percentage> if both VA and VB are pure <percentage> values
+      //  - equivalent to converting both values into a calc() expression representing the sum of the
+      //    dimension type and a percentage (each possibly zero) and interpolating each component
+      //    individually (as a <length>/<frequency>/<angle>/<time> and as a <percentage>, respectively)
+
+      if (krys::HoldsAlternative<Calc>(from) || krys::HoldsAlternative<Calc>(to)
+          || (from.index() != to.index()))
+      {
+        if (context.CompositeOperation != CompositeOperation::Replace)
         {
-          if (context.compositeOperation != CompositeOperation::Replace)
-            return Calc {Calculation::add(copyCalculation(from), copyCalculation(to))};
-
-          bool fromIsZero = from.isKnownZero();
-          bool toIsZero = to.isKnownZero();
-
-          // 0% to 0px -> calc(0px + 0%) to calc(0px + 0%) -> 0px
-          // 0px to 0% -> calc(0px + 0%) to calc(0px + 0%) -> 0px
-          if (fromIsZero && toIsZero)
-            return 0_css_px;
-
-          if (!WTF::holdsAlternative<Calc>(to) && !WTF::holdsAlternative<Percentage>(from)
-              && (context.progress == 1 || fromIsZero))
-          {
-            if (WTF::holdsAlternative<Length>(to))
-              return WebCore::Style::blend(Length(0_css_px), get<Length>(to), context);
-            return WebCore::Style::blend(Percentage(0_css_percentage), get<Percentage>(to), context);
-          }
-
-          if (!WTF::holdsAlternative<Calc>(from) && !WTF::holdsAlternative<Percentage>(to)
-              && (!context.progress || toIsZero))
-          {
-            if (WTF::holdsAlternative<Length>(from))
-              return WebCore::Style::blend(get<Length>(from), Length(0_css_px), context);
-            return WebCore::Style::blend(get<Percentage>(from), Percentage(0_css_percentage), context);
-          }
-
-          return Calc {Calculation::blend(copyCalculation(from), copyCalculation(to), context.progress)};
+          return Calc {calc::Add(CopyCalculation(from), CopyCalculation(to))};
         }
 
-        if (!context.progress && context.isReplace())
-          return from;
+        bool fromIsZero = from.IsKnownZero();
+        bool toIsZero = to.IsKnownZero();
 
-        if (context.progress == 1 && context.isReplace())
-          return to;
+        // 0% to 0px -> calc(0px + 0%) to calc(0px + 0%) -> 0px
+        // 0px to 0% -> calc(0px + 0%) to calc(0px + 0%) -> 0px
+        if (fromIsZero && toIsZero)
+        {
+          return 0_css_px;
+        }
 
-        if (WTF::holdsAlternative<Length>(to))
-          return WebCore::Style::blend(get<Length>(from), get<Length>(to), context);
-        return WebCore::Style::blend(get<Percentage>(from), get<Percentage>(to), context);
+        if (!krys::HoldsAlternative<Calc>(to) && !krys::HoldsAlternative<Percentage>(from)
+            && (context.Progress == 1 || fromIsZero))
+        {
+          if (krys::HoldsAlternative<Length>(to))
+          {
+            return style::Blend(Length(0_css_px), get<Length>(to), context);
+          }
+
+          return style::Blend(Percentage(0_css_percentage), get<Percentage>(to), context);
+        }
+
+        if (!krys::HoldsAlternative<Calc>(from) && !krys::HoldsAlternative<Percentage>(to)
+            && (!context.Progress || toIsZero))
+        {
+          if (krys::HoldsAlternative<Length>(from))
+          {
+            return style::Blend(get<Length>(from), Length(0_css_px), context);
+          }
+
+          return style::Blend(get<Percentage>(from), Percentage(0_css_percentage), context);
+        }
+
+        return Calc {calc::BlendChildren(CopyCalculation(from), CopyCalculation(to), context.Progress)};
       }
-    };
 
-    // `NumberOrPercentageResolvedToNumber<nR, pR, V>` forwards to `Number<nR, V>`.
-    template <auto nR, auto pR, typename V>
-    struct Blending<NumberOrPercentageResolvedToNumber<nR, pR, V>>
+      if (!context.Progress && context.IsReplace())
+      {
+        return from;
+      }
+
+      if (context.Progress == 1 && context.IsReplace())
+      {
+        return to;
+      }
+
+      if (krys::HoldsAlternative<Length>(to))
+      {
+        return style::Blend(get<Length>(from), get<Length>(to), context);
+      }
+
+      return style::Blend(get<Percentage>(from), get<Percentage>(to), context);
+    }
+  };
+
+  // `NumberOrPercentageResolvedToNumber<nR, pR, V>` forwards to `Number<nR, V>`.
+  template <auto nR, auto pR, typename V>
+  struct Blending<NumberOrPercentageResolvedToNumber<nR, pR, V>>
+  {
+    using StyleType = NumberOrPercentageResolvedToNumber<nR, pR, V>;
+
+    KRYS_NODISCARD bool CanBlend(const StyleType &a, const StyleType &b) noexcept
     {
-      using StyleType = NumberOrPercentageResolvedToNumber<nR, pR, V>;
+      return style::CanBlend(a.Value, b.Value);
+    }
 
-      auto canBlend(const StyleType &a, const StyleType &b) -> bool
-      {
-        return Style::canBlend(a.value, b.value);
-      }
-      auto blend(const StyleType &a, const StyleType &b, const BlendingContext &context) -> StyleType
-      {
-        return Style::blend(a.value, b.value, context);
-      }
-    };
-
-  } // namespace Style
-} // namespace WebCore
+    KRYS_NODISCARD StyleType Blend(const StyleType &a, const StyleType &b,
+                                   const BlendingContext &context) noexcept
+    {
+      return style::Blend(a.Value, b.Value, context);
+    }
+  };
+}

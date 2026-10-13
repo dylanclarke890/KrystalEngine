@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 #include "Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp"
 #include <algorithm>
 

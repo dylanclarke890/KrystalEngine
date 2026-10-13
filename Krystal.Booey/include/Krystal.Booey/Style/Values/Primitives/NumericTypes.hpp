@@ -1,213 +1,213 @@
-/*
- * Copyright (C) 2024 Samuel Weinig <sam@webkit.org>
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+﻿#pragma once
 
-#pragma once
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/PrimitiveNumeric.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/PrimitiveNumericOrKeyword.hpp"
+#include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Types/Markable.hpp"
+#include "Krystal.Core/Types/Variant.hpp"
+#include "Krystal.Core/Visitor.hpp"
 
-#include <WebCore/CSSPrimitiveNumericTypes.h>
-#include <WebCore/StylePrimitiveNumeric.h>
-#include <WebCore/StylePrimitiveNumericOrKeyword.h>
-
-namespace WebCore
+namespace krys::boo::style
 {
-  namespace Style
-  {
+  template <css::Range nR, css::Range pR, typename V>
+  struct NumberOrPercentage;
+}
 
-    // NOTE: This is spelled with an explicit "Or" to distinguish it from types like
-    // AnglePercentage/LengthPercentage that have behavior distinctions beyond just being a union of the two
-    // types (specifically, calc() has specific behaviors for those types).
-    template <CSS::Range nR = CSS::All, CSS::Range pR = nR, typename V = double>
-    struct NumberOrPercentage
-    {
-      using Number = Style::Number<nR, V>;
-      using Percentage = Style::Percentage<pR, V>;
-
-      NumberOrPercentage(Variant<Number, Percentage> &&value)
-      {
-        WTF::switchOn(WTF::move(value), [this](auto &&alternative) { this->value = WTF::move(alternative); });
-      }
-
-      NumberOrPercentage(Number value) : value {WTF::move(value)}
-      {
-      }
-
-      NumberOrPercentage(Percentage value) : value {WTF::move(value)}
-      {
-      }
-
-      bool operator==(const NumberOrPercentage &) const = default;
-
-      template <typename... F>
-      decltype(auto) switchOn(F &&...f) const
-      {
-        auto visitor = WTF::makeVisitor(std::forward<F>(f)...);
-        using ResultType = decltype(visitor(std::declval<Number>()));
-
-        return WTF::switchOn(
-          value, [](CSS::PrimitiveDataEmptyToken) -> ResultType { RELEASE_ASSERT_NOT_REACHED(); },
-          [&](const Number &number) -> ResultType { return visitor(number); },
-          [&](const Percentage &percentage) -> ResultType { return visitor(percentage); });
-      }
-
-    private:
-      NumberOrPercentage(CSS::PrimitiveDataEmptyToken token) : value {WTF::move(token)}
-      {
-      }
-
-      bool isEmpty() const
-      {
-        return std::holds_alternative<CSS::PrimitiveDataEmptyToken>(value);
-      }
-
-      Variant<CSS::PrimitiveDataEmptyToken, Number, Percentage> value;
-    };
-
-    template <CSS::Range nR = CSS::All, CSS::Range pR = nR, typename V = double>
-    struct NumberOrPercentageResolvedToNumber
-    {
-      using Number = Style::Number<nR, V>;
-      using Percentage = Style::Percentage<pR, V>;
-
-      Number value {0};
-
-      constexpr NumberOrPercentageResolvedToNumber(Number number) : value {number}
-      {
-      }
-
-      constexpr NumberOrPercentageResolvedToNumber(Percentage percentage)
-          : value {percentage.value / static_cast<V>(100)}
-      {
-      }
-
-      constexpr NumberOrPercentageResolvedToNumber(typename Number::ResolvedValueType value)
-          : NumberOrPercentageResolvedToNumber {Number {value}}
-      {
-      }
-
-      constexpr NumberOrPercentageResolvedToNumber(CSS::ValueLiteral<CSS::NumberUnit::Number> literal)
-          : NumberOrPercentageResolvedToNumber {Number {literal}}
-      {
-      }
-
-      constexpr NumberOrPercentageResolvedToNumber(CSS::ValueLiteral<CSS::PercentageUnit::Percentage> literal)
-          : NumberOrPercentageResolvedToNumber {Percentage {literal}}
-      {
-      }
-
-      constexpr bool isZero() const
-      {
-        return value.isZero();
-      }
-
-      constexpr bool operator==(const NumberOrPercentageResolvedToNumber &) const = default;
-      constexpr bool operator==(typename Number::ResolvedValueType other) const
-      {
-        return value.value == other;
-      };
-    };
-
-    // Standard Numbers
-    using NumberAll = Number<CSS::All>;
-    using NumberNonnegative = Number<CSS::Nonnegative>;
-
-    // Standard Angles
-    using AngleAllFloat = Angle<CSS::All, float>;
-
-    // Standard Lengths
-    using LengthAll = Length<CSS::All>;
-    using LengthNonnegative = Length<CSS::Nonnegative>;
-
-    // Standard LengthPercentages
-    using LengthPercentageAll = LengthPercentage<CSS::All>;
-    using LengthPercentageNonnegative = LengthPercentage<CSS::Nonnegative>;
-
-    // Standard Percentages
-    using PercentageAll = Percentage<CSS::All>;
-    using PercentageNonnegative = Percentage<CSS::Nonnegative>;
-    using PercentageAllFloat = Percentage<CSS::All, float>;
-    using PercentageNonnegativeFloat = Percentage<CSS::Nonnegative, float>;
-    using Percentage0To100 = LengthPercentage<CSS::Range {0, 100}>;
-
-    // Standard Points
-    using LengthPercentageSpaceSeparatedPointAll = SpaceSeparatedPoint<LengthPercentageAll>;
-    using LengthPercentageSpaceSeparatedPointNonnegative = SpaceSeparatedPoint<LengthPercentageNonnegative>;
-
-    // Standard Sizes
-    using LengthPercentageSpaceSeparatedSizeAll = SpaceSeparatedSize<LengthPercentageAll>;
-    using LengthPercentageSpaceSeparatedSizeNonnegative = SpaceSeparatedSize<LengthPercentageNonnegative>;
-    using LengthPercentageMinimallySerialisingSpaceSeparatedSizeAll =
-      MinimallySerialisingSpaceSeparatedSize<LengthPercentageAll>;
-    using LengthPercentageMinimallySerialisingSpaceSeparatedSizeNonnegative =
-      MinimallySerialisingSpaceSeparatedSize<LengthPercentageNonnegative>;
-
-    // MARK: CSS -> Style
-
-    template <auto nR, auto pR, typename V>
-    struct ToStyleMapping<CSS::NumberOrPercentage<nR, pR, V>>
-    {
-      using type = NumberOrPercentage<nR, pR, V>;
-    };
-
-    template <auto nR, auto pR, typename V>
-    struct ToStyleMapping<CSS::NumberOrPercentageResolvedToNumber<nR, pR, V>>
-    {
-      using type = NumberOrPercentageResolvedToNumber<nR, pR, V>;
-    };
-
-    // MARK: Style -> CSS
-
-    template <auto nR, auto pR, typename V>
-    struct ToCSSMapping<NumberOrPercentage<nR, pR, V>>
-    {
-      using type = CSS::NumberOrPercentage<nR, pR, V>;
-    };
-
-    template <auto nR, auto pR, typename V>
-    struct ToCSSMapping<NumberOrPercentageResolvedToNumber<nR, pR, V>>
-    {
-      using type = CSS::NumberOrPercentageResolvedToNumber<nR, pR, V>;
-    };
-
-  } // namespace Style
-} // namespace WebCore
-
-namespace WTF
+namespace krys
 {
+  template <boo::css::Range nR, boo::css::Range pR, typename V>
+  struct MarkableTraits<boo::style::NumberOrPercentage<nR, pR, V>>;
+}
 
-  template <auto nR, auto pR, typename V>
-  struct MarkableTraits<WebCore::Style::NumberOrPercentage<nR, pR, V>>
+namespace krys::boo::style
+{
+  // NOTE: This is spelled with an explicit "Or" to distinguish it from types like
+  // AnglePercentage/LengthPercentage that have behavior distinctions beyond just being a union of the two
+  // types (specifically, calc() has specific behaviors for those types).
+  template <css::Range nR = css::All, css::Range pR = nR, typename V = double>
+  struct NumberOrPercentage
   {
-    static bool isEmptyValue(const WebCore::Style::NumberOrPercentage<nR, pR, V> &value)
+    friend struct krys::MarkableTraits<NumberOrPercentage>;
+
+    using Number = style::Number<nR, V>;
+    using Percentage = style::Percentage<pR, V>;
+
+  private:
+    Variant<css::PrimitiveDataEmptyToken, Number, Percentage> _value;
+
+  public:
+    NumberOrPercentage(Variant<Number, Percentage> &&value) noexcept
+        : _value {krys::SwitchOn(
+            krys::move(value), [](auto &&alternative)
+            { return Variant<css::PrimitiveDataEmptyToken, Number, Percentage> {krys::move(alternative)}; })}
     {
-      return value.isEmpty();
     }
-    static WebCore::Style::NumberOrPercentage<nR, pR, V> emptyValue()
+
+    NumberOrPercentage(Number value) noexcept : _value {krys::move(value)}
     {
-      return WebCore::Style::NumberOrPercentage<nR, pR, V>(WebCore::CSS::PrimitiveDataEmptyToken());
+    }
+
+    NumberOrPercentage(Percentage value) noexcept : _value {krys::move(value)}
+    {
+    }
+
+    KRYS_NODISCARD bool operator==(const NumberOrPercentage &) const noexcept = default;
+
+    template <typename... F>
+    decltype(auto) SwitchOn(F &&...f) const noexcept
+    {
+      auto visitor = krys::CreateVisitor(std::forward<F>(f)...);
+      using ResultType = decltype(visitor(std::declval<Number>()));
+
+      return krys::SwitchOn(
+        _value, [](css::PrimitiveDataEmptyToken) -> ResultType { krys_unreachable(); },
+        [&](const Number &number) -> ResultType { return visitor(number); },
+        [&](const Percentage &percentage) -> ResultType { return visitor(percentage); });
+    }
+
+  private:
+    explicit NumberOrPercentage(css::PrimitiveDataEmptyToken token) noexcept : _value {krys::move(token)}
+    {
+    }
+
+    KRYS_NODISCARD bool IsEmpty() const noexcept
+    {
+      return std::holds_alternative<css::PrimitiveDataEmptyToken>(_value);
     }
   };
 
+  template <css::Range nR = css::All, css::Range pR = nR, typename V = double>
+  struct NumberOrPercentageResolvedToNumber
+  {
+    using Number = style::Number<nR, V>;
+    using Percentage = style::Percentage<pR, V>;
+
+    Number Value {0};
+
+    constexpr NumberOrPercentageResolvedToNumber(Number number) noexcept : Value {number}
+    {
+    }
+
+    constexpr NumberOrPercentageResolvedToNumber(Percentage percentage) noexcept
+        : Value {percentage.Value / static_cast<V>(100)}
+    {
+    }
+
+    constexpr NumberOrPercentageResolvedToNumber(typename Number::ResolvedValueType value) noexcept
+        : NumberOrPercentageResolvedToNumber {Number {value}}
+    {
+    }
+
+    constexpr NumberOrPercentageResolvedToNumber(css::ValueLiteral<css::NumberUnit::Number> literal) noexcept
+        : NumberOrPercentageResolvedToNumber {Number {literal}}
+    {
+    }
+
+    constexpr NumberOrPercentageResolvedToNumber(
+      css::ValueLiteral<css::PercentageUnit::Percentage> literal) noexcept
+        : NumberOrPercentageResolvedToNumber {Percentage {literal}}
+    {
+    }
+
+    KRYS_NODISCARD constexpr bool IsZero() const noexcept
+    {
+      return Value.IsZero();
+    }
+
+    KRYS_NODISCARD constexpr bool
+      operator==(const NumberOrPercentageResolvedToNumber &) const noexcept = default;
+
+    KRYS_NODISCARD constexpr bool operator==(typename Number::ResolvedValueType other) const noexcept
+    {
+      return Value.Value == other;
+    }
+  };
+
+  // Standard Numbers
+  using NumberAll = Number<css::All>;
+  using NumberNonNegative = Number<css::NonNegative>;
+
+  // Standard Angles
+  using AngleAllFloat = Angle<css::All, float>;
+
+  // Standard Lengths
+  using LengthAll = Length<css::All>;
+  using LengthNonNegative = Length<css::NonNegative>;
+
+  // Standard LengthPercentages
+  using LengthPercentageAll = LengthPercentage<css::All>;
+  using LengthPercentageNonNegative = LengthPercentage<css::NonNegative>;
+
+  // Standard Percentages
+  using PercentageAll = Percentage<css::All>;
+  using PercentageNonNegative = Percentage<css::NonNegative>;
+  using PercentageAllFloat = Percentage<css::All, float>;
+  using PercentageNonNegativeFloat = Percentage<css::NonNegative, float>;
+  using Percentage0To100 = LengthPercentage<css::Range {0, 100}>;
+
+  // Standard Points
+  using LengthPercentageSpaceSeparatedPointAll = css::SpaceSeparatedPoint<LengthPercentageAll>;
+  using LengthPercentageSpaceSeparatedPointNonNegative =
+    css::SpaceSeparatedPoint<LengthPercentageNonNegative>;
+
+  // Standard Sizes
+  using LengthPercentageSpaceSeparatedSizeAll = css::SpaceSeparatedSize<LengthPercentageAll>;
+  using LengthPercentageSpaceSeparatedSizeNonNegative = css::SpaceSeparatedSize<LengthPercentageNonNegative>;
+  using LengthPercentageMinimallySerialisingSpaceSeparatedSizeAll =
+    css::MinimallySerialisingSpaceSeparatedSize<LengthPercentageAll>;
+  using LengthPercentageMinimallySerialisingSpaceSeparatedSizeNonNegative =
+    css::MinimallySerialisingSpaceSeparatedSize<LengthPercentageNonNegative>;
+
+  // MARK: CSS -> Style
+
+  template <auto nR, auto pR, typename V>
+  struct ToStyleMapping<css::NumberOrPercentage<nR, pR, V>>
+  {
+    using type = NumberOrPercentage<nR, pR, V>;
+  };
+
+  template <auto nR, auto pR, typename V>
+  struct ToStyleMapping<css::NumberOrPercentageResolvedToNumber<nR, pR, V>>
+  {
+    using type = NumberOrPercentageResolvedToNumber<nR, pR, V>;
+  };
+
+  // MARK: Style -> CSS
+
+  template <auto nR, auto pR, typename V>
+  struct ToCSSMapping<NumberOrPercentage<nR, pR, V>>
+  {
+    using type = css::NumberOrPercentage<nR, pR, V>;
+  };
+
+  template <auto nR, auto pR, typename V>
+  struct ToCSSMapping<NumberOrPercentageResolvedToNumber<nR, pR, V>>
+  {
+    using type = css::NumberOrPercentageResolvedToNumber<nR, pR, V>;
+  };
 }
 
-template <auto nR, auto pR, typename V>
-inline constexpr auto WebCore::TreatAsVariantLike<WebCore::Style::NumberOrPercentage<nR, pR, V>> = true;
+namespace krys
+{
+  template <boo::css::Range nR, boo::css::Range pR, typename V>
+  struct MarkableTraits<boo::style::NumberOrPercentage<nR, pR, V>>
+  {
+    KRYS_NODISCARD static bool IsEmptyValue(const boo::style::NumberOrPercentage<nR, pR, V> &value) noexcept
+    {
+      return value.IsEmpty();
+    }
+
+    KRYS_NODISCARD static boo::style::NumberOrPercentage<nR, pR, V> EmptyValue() noexcept
+    {
+      return boo::style::NumberOrPercentage<nR, pR, V>(boo::css::PrimitiveDataEmptyToken {});
+    }
+  };
+}
+
+namespace krys::boo::css
+{
+  template <auto nR, auto pR, typename V>
+  constexpr auto TreatAsVariantLike<style::NumberOrPercentage<nR, pR, V>> = true;
+}

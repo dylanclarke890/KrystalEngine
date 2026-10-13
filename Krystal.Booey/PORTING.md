@@ -32,18 +32,22 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Slice 3, layer 3a (2026-10-12): calc tree, types, serialisation and the calc-dependent numeric primitives reviewed, built and tested; see the Slice 3 section.
 - Slice 3, layer 3b (2026-10-12): calc evaluation and simplification, Style calc, `ToLengthConversionData` and length resolution, built against the Style seam (`Style/Seam.hpp`) and tested.
 - Slice 3, layer 3c (2026-10-12): calc parsing (`TreeParser.cpp`, `ValueParsing.cpp`) and the property-parser pieces it needs (`PropertyParserState`, `MetaConsumer`, Ident/Primitives/Number consumers, `TokenRangeGuard`, `ParseUnitType`) built and tested; calc is parsed end-to-end from strings.
-- Layers 1–3a are committed (`b2e8e04a`); part of 3b is in `58d6d9dc`/`60aad97a`; the rest of 3b and all of 3c aren't committed.
+- Slice 3, layer 4a (2026-10-12): `LayoutUnit`, `IntSize`/`IntPoint`, `FloatPoint`, `LayoutSize`/`LayoutPoint` ported and tested (upstream's API tests); see the layer 4a section.
+- Slice 3, layer 4b (2026-10-12): Style numerics (`Types`, `PrimitiveNumeric`, `NumericTypes` and its Calc/Conversions/Evaluation/Serialisation/Blending headers, `CalculationValueMap`, `LengthWrapper*`) built and tested, on top of a Core port of `CompactVariant`/`FlatteningVariant`; see the layer 4b section.
+- Layers 1–3c are committed (up to `d4693662`); 4a and 4b aren't.
 
 **Open / next candidates:**
-- Slice 3 (colour), bottom-up: (1) Graphics/Color, (2) calc-free numeric primitives, (3a) Style-free calc, (3b) calc evaluation and Style calc and (3c) calc parsing are done. Next is (4) Style numerics (`Style::Length`, `StyleCalculationValueMap`), then (5) CSS colour (`css/values/color`) and `ColorValue`, (6) Style colour (`style/values/color`).
-- Waiting on `ValuePool` (layer 5): `PropertyParserState::Pool` is a pointer (TODO: back to a reference defaulting to `MainThreadPool()`), and `src/CSS/Properties/Consumers/Ident.cpp` (the value-returning ident consumers) isn't built.
+- Slice 3 (colour), bottom-up: (1) Graphics/Color, (2) calc-free numeric primitives, (3a) Style-free calc, (3b) calc evaluation and Style calc and (3c) calc parsing are done. (4a) `LayoutUnit` and the point/size types and (4b) Style numerics are done. Next is (5) CSS colour (`css/values/color`) and `ColorValue`, (6) Style colour (`style/values/color`).
+- Waiting on `ValuePool` (layer 5): `PropertyParserState::Pool` is a pointer (TODO: back to a reference defaulting to `MainThreadPool()`), `src/CSS/Properties/Consumers/Ident.cpp` (the value-returning ident consumers) isn't built, and the Style `+CSSValueConversion`/`+CSSValueCreation` headers (numerics, `LengthWrapper`, `PrimitiveKeyword`) are still raw WebKit.
+- Style `ToCSS`/serialisation can't be tested until there's a real `RenderStyle` (the seam's can't be constructed).
 - Only the `Number` consumer definitions are reviewed; the other `Consumers/*Definitions.hpp` (and `IntegerDefinitions.hpp`, which still uses `CalcAllowedSymbols`) come with the slices that need them.
 - The Style seam (`Style/Seam.hpp`, `src/Style/Seam.cpp`) stands in for `RenderStyle`, `RenderView`, `RenderBox`, the font types, `Style::BuilderState`, `AnchorPositionEvaluator` and `ContainerQueryEvaluator`. Each placeholder is replaced when its slice is ported; see the layer 3b section.
 - `Value.cpp` and `PrimitiveValue.cpp` can't build until every `Value` subclass compiles (`VisitDerived`). Next blocker found by a trial compile of `PrimitiveValue.cpp`: `Values/Color/AbsoluteColorResolver.hpp` still includes raw WebKit `Color.h` (via `ValuePool.hpp` → `ColorValue.hpp`); that is layer 5 of slice 3.
 - `CSS/Values/Concepts.hpp` (`CSSValueConcepts.h`) compiles but isn't reviewed.
 - Callers still using the case-sensitive raw lookups: `src/CSS/Parser.cpp:477`, `Consumers/Animations.cpp:154`, `Consumers/WillChange.cpp:48` (switch to `PropertyIdFromName`/`ValueIdFromName`); delete the commented-out originals in `src/CSS/Properties/PropertyParser.cpp`.
 - Tokenizer doesn't keep numeric original text or whitespace counts, so `TokenSerialisationMode::CustomProperty` behaves like `Normal` (FIXMEs in `src/CSS/Parser/Token.cpp`).
-- Not yet ported, needed later: `LayoutUnit`, `StringBuilder`, `RefCountedFixedVector`, URL type (check `Krystal.Booey/URL/Url.hpp` first).
+- `LayoutUnit` now exists: `PrimitiveValue`'s `ResolveAsLength<LayoutUnit>` and `maxValueForCssLength`/`minValueForCssLength` (FIXME in `PrimitiveValue.hpp`) can be added when `PrimitiveValue.cpp` is built.
+- Not yet ported, needed later: `StringBuilder`, `RefCountedFixedVector`, URL type (check `Krystal.Booey/URL/Url.hpp` first).
 - Undecided style question: list wrappers use container-protocol lowercase names (`isEmpty`, `contains`), matching Core's `FixedVector`/`ListHashSet`; `EnumSet` and wrappers use PascalCase.
 
 ---
@@ -231,7 +235,7 @@ Graph from `css/CSSPrimitiveValue.cpp` (headers-only): 125 files (`tools/port/ou
 - Strings are interned `StringAtom`s that are never freed, not reference-counted `StringImpl`s; string equality is atom identity.
 - Static values still use the extra-`AddRef` workaround (no static flag; see `Value`).
 - Non-converting accessors keep the existing Krystal name `Value<T>(…)`, which hides the base class name inside `PrimitiveValue`; refer to the base as `css::Value` there.
-- `ResolveAsLength` is specialised for `int64/uint64/int32/uint32/int16/uint16/float/double`; no `LayoutUnit` specialisation and no `maxValueForCssLength`/`minValueForCssLength` until `LayoutUnit` is ported.
+- `ResolveAsLength` is specialised for `int64/uint64/int32/uint32/int16/uint16/float/double`; no `LayoutUnit` specialisation and no `maxValueForCssLength`/`minValueForCssLength` yet (`LayoutUnit` exists since layer 4a of slice 3).
 - `ResolveAsLengthDouble` for non-calc values is `krys_not_implemented()` until `Style::computeNonCalcLengthDouble` (`style/StyleLengthResolution`) is ported.
 - `CustomCSSText` serialises keywords with `ToLower(ValueId)` for upstream's `nameStringForSerialization`.
 - `FormatIntegerValue` uses shortest round-trip `std::to_chars` (same as `Token`); FIXME to share it.
@@ -259,7 +263,7 @@ Graph from every `platform/graphics/Color*`, `DestinationColorSpace` and `AlphaP
 | `platform/graphics/Color.h`, `.cpp` | `have` | `Graphics/Color/Color.hpp`, `ColorFlags.hpp`, `src/.../Color.cpp` | tested. `Flags`/`FlagsIncludingPrivate` are the namespace-level `ColorFlags`/`ColorFlagsIncludingPrivate` (flags enums, not `OptionSet`). `colorSpace()` is `Space()` (a member named `ColorSpace` would hide the type). |
 | `platform/graphics/ColorHash.h` | `port` | `Graphics/Color/ColorHash.hpp` | tested. `HashTraits<Color>`; the `add(Hasher&, Color)` equivalent is `DefaultHash<Color>` in `Color.hpp`. |
 | `platform/graphics/ColorBlending.h`, `.cpp` | `port` | `Graphics/Color/ColorBlending.hpp`, `src/.../ColorBlending.cpp` | tested. New. |
-| `platform/animation/AnimationUtilities.h` | `port` (partial) | `Graphics/Animation/AnimationUtilities.hpp` | tested. `BlendingContext` and the `int`/`unsigned`/`float`/`double` `Blend` overloads; the `IntPoint`/`FloatPoint`/`LayoutPoint`/`LayoutUnit` overloads wait for those types (TODO). Members are PascalCase (`Progress`, `CompositeOperation`, …). |
+| `platform/animation/AnimationUtilities.h` | `port` (partial) | `Graphics/Animation/AnimationUtilities.hpp` | tested. `BlendingContext` and the `int`/`unsigned`/`float`/`double` `Blend` overloads; the `IntPoint`/`FloatPoint`/`LayoutPoint`/`LayoutUnit` overloads were added in layer 4a. Members are PascalCase (`Progress`, `CompositeOperation`, …). |
 | `animation/CompositeOperation.h`, `IterationCompositeOperation.h` | `port` | `Graphics/Animation/CompositeOperation.hpp`, `IterationCompositeOperation.hpp` | `toCompositeOperation(const CSSValue&)` and `operator<<` not ported (CSS side; add with animations). |
 | `platform/graphics/ColorComponents.h` | `have` | `Graphics/Color/ColorComponents.hpp` | tested. |
 | `platform/graphics/ColorConversion.h`, `.cpp` | `have` | `Graphics/Color/ColorConversion.hpp`, `src/.../ColorConversion.cpp` | tested. |
@@ -434,9 +438,9 @@ Graph from `css/calc/CSSCalcTree+{Evaluation,Simplification,Parser}.cpp` and `CS
 | `RenderStyle::HasPseudoElementType()` | `!style.pseudoElementType()` |
 | `RenderStyle::EvaluateFixedLineHeight(ZoomFactor)` | `style.lineHeight().tryFixed()` + `Style::evaluate<LayoutUnit>(…).toFloat()` |
 | `RenderStyle::ComputeSpecifiedLineHeight()` | `style.computeLineHeight(style.specifiedLineHeight())` |
-| `RenderBox::ContentBoxWidth/Height()` → `float` | `LayoutUnit` |
 | `RenderViewOf(document)`, `RenderStyleOf(element)`, `RenderBoxOf(element)` | `document.renderView()`, `element.renderStyle()`, `dynamicDowncast<RenderBox>(element.renderer())` |
 | `AdjustFloatForAbsoluteZoom(value, style)` | `adjustFloatForAbsoluteZoom` (`RenderStyle+GettersInlines.h`) |
+| `BuilderState::EvaluationTimeZoomEnabled()` | `state.document().settings().evaluationTimeZoomEnabled()` (added in 4b) |
 
 The unreviewed `Style/BuilderState.hpp` and `Style/AnchorPositionEvaluator.hpp` (raw WebKit) still declare the full classes; nothing built includes them. When the style resolver is ported, the real classes replace the seam's and the collapsed members go back to upstream's call chains.
 
@@ -455,7 +459,7 @@ The unreviewed `Style/BuilderState.hpp` and `Style/AnchorPositionEvaluator.hpp` 
 | `style/calc/StyleCalculationTree+Evaluation.h`, `.cpp` | `port` | `Style/Calc/TreeEvaluation.hpp`, `src/.../TreeEvaluation.cpp` | on | tested. |
 | `style/calc/StyleCalculationTree+Conversion.h`, `.cpp` | `port` | `Style/Calc/TreeConversion.hpp`, `src/.../TreeConversion.cpp` | on | `ToStyle` tested through `CreateCalculationValue`; `ToCSS` needs a `RenderStyle`. |
 | `style/calc/StyleCalculationValue.h`, `.cpp` | `port` | `Style/Calc/Value.hpp`, `src/.../Value.cpp` | on | tested. `operator<<` not ported. |
-| `style/calc/StyleCalculationValueMap.h`, `.cpp` | | | | Deferred to layer 4 (only `Style::Length` uses it). |
+| `style/calc/StyleCalculationValueMap.h`, `.cpp` | | | | Done in layer 4b. |
 | `style/values/viewport/StyleZoomPrimitives.h` | `port` | `Style/Values/Viewport/ZoomPrimitives.hpp` | on | |
 | `style/StyleScopeOrdinal.h` | `port` | `Style/ScopeOrdinal.hpp` | on | tested. `operator<<` not ported. |
 | `style/ScopedName.h` | `have*` | `Style/ScopedName.hpp` | on | tested. The struct only: `switchOn` (needs `Style::CustomIdentifier`), `CSSValueConversion`, `MarkableTraits` and `operator<<` not ported. |
@@ -530,6 +534,97 @@ Graph from `css/calc/CSSCalcTree+Parser.cpp` (headers-only): 75 files (`tools/po
 
 Tests: `tests/CSS/Calc/TreeParser.cpp` (arithmetic, whitespace rules, type checking, depth limit, constants, symbols, every math function, the feature-flag/rule/property gates on `progress()`/`random()`/sibling functions, `anchor()`/`anchor-size()`), `tests/CSS/Properties/Consumers/{Ident,MetaConsumer,Primitives}.cpp` (also `TokenRangeGuard` and `TokenRange::Tokens`), `ParseUnitType` in `tests/CSS/Values/Units.cpp`. Full Booey suite: 724 cases / 11606 assertions; all pass except 2 expected failures (`[!shouldfail]`). Whole solution builds with no warnings.
 
+---
+
+### Layer 4a: LayoutUnit and geometry (2026-10-12)
+
+Graph from `platform/LayoutUnit.h`, `platform/graphics/LayoutPoint.h`, `LayoutSize.h` and `FloatPoint.h` with `--follow platform/` (headers-only): 20 files (`tools/port/out/layout-unit.md`); the rest comes in through `FloatPoint.h` (`FloatRect`, `AffineTransform`, `TransformationMatrix`) and `DoublePoint`/`DoubleSize`. Layer 4 needs these for `StylePrimitiveNumericTypes+Evaluation.h` and `StyleLengthWrapper.h` (graph from the Style numerics: 35 files, `tools/port/out/style-numerics.md`). Decisions (2026-10-12): port `LayoutUnit` and the point/size types first, as 4a; the Style numerics are 4b; the `+CSSValueConversion`/`+CSSValueCreation` headers (CSS-side `PrimitiveValue`/`ValuePool`) wait for layer 5.
+
+| WebKit | Verdict | Krystal | Notes |
+|---|---|---|---|
+| `platform/LayoutUnit.h`, `.cpp` | `port` | `Core/LayoutUnit.hpp` | tested (upstream's `LayoutUnitTests.cpp`, all of it, plus the rest of the API). The `.cpp` is only `operator<<`: not ported. `kFixedPointDenominator` etc. → `FixedPointDenominator`, `LayoutUnitFractionalBits`, `IntMaxForLayoutUnit`, `IntMinForLayoutUnit`. `DefaultHash`, `HashTraits`, `MarkableTraits` and the `_lu` literal ported. |
+| `platform/graphics/IntSize.h`, `.cpp` | `port` | `Graphics/IntSize.hpp`, `src/Graphics/IntSize.cpp` | tested. No `area()` (needs `Checked<unsigned>`), JSON, CG/Win conversions or `operator<<`. |
+| `platform/graphics/IntPoint.h`, `.cpp` | `port` | `Graphics/IntPoint.hpp`, `src/Graphics/IntPoint.cpp` | tested (upstream's `IntPointTests.cpp`). No `constrainedWithin(IntRect)`, CG/Win conversions or `operator<<`. |
+| `platform/graphics/FloatPoint.h`, `.cpp` | `port` | `Graphics/FloatPoint.hpp` | tested. No `constrainedWithin(FloatRect)`, `matrixTransform` (transforms), `DoublePoint` conversions, JSON, CG/Win or `operator<<`. `normalize()` → `Normalise()`. `add(Hasher&, FloatPoint)` → `DefaultHash<FloatPoint>`. |
+| `platform/graphics/LayoutSize.h`, `.cpp` | `port` | `Graphics/LayoutSize.hpp` | tested. `AspectRatioFitShrink`/`Grow` → `enum class AspectRatioFit { Shrink, Grow }`; `LayoutSizeLimits::m_min`/`m_max` → `Min`/`Max`. `constrainedBetween` is inline. |
+| `platform/graphics/LayoutPoint.h`, `.cpp` | `port` | `Graphics/LayoutPoint.hpp` | tested. No `DoublePoint` conversions or `operator<<`. `LayoutPointLimits` members as for `LayoutSizeLimits`. |
+| `platform/graphics/FloatSize.h` (IntSize half) | `have` | `Graphics/FloatSize.hpp` | tested. Added `FloatSize(const IntSize&)`, `IsExpressibleAsIntSize`, `RoundedIntSize`, `FlooredIntSize`, `ExpandedIntSize`, `FlooredIntPoint`. |
+| `platform/animation/AnimationUtilities.h` (rest) | `port` | `Graphics/Animation/AnimationUtilities.hpp` | tested. The `LayoutUnit`, `IntPoint`, `FloatPoint` and `LayoutPoint` `Blend` overloads (the TODO is gone). |
+| `platform/graphics/DoublePoint.h`, `DoubleSize.h`, `FloatRect.h`, `IntRect.h`, `transforms/*` | | | Not needed yet. |
+| `wtf/SaturatedArithmetic.h` | `port` | `SaturatedSum`/`SaturatedDifference` in `Krystal.Core/Maths/Base.hpp` | tested through `LayoutUnit`. Portable versions only (no builtins/asm). |
+| `wtf/MathExtras.h` (`clampToInteger`, `isWithinIntRange`) | `port` | `ClampToInteger`, `IsWithinIntRange` in `Krystal.Core/Maths/Base.hpp` | The `double`/`float` overloads only. |
+
+The Style seam's `RenderBox::ContentBoxWidth/Height()` now return `LayoutUnit`, like upstream (they returned `float`).
+
+**Bugs fixed (upstream):**
+- `LayoutUnit(unsigned long long)` multiplied by 64 before clamping, so values from 2^58 up wrapped instead of saturating. It now clamps first (same results otherwise).
+- `LayoutUnit::abs()` of `min()` was `::abs(INT_MIN)` (undefined behaviour); it now saturates to `Max()`, like unary minus.
+
+**Differences:**
+- `REPORT_OVERFLOW` (logging only) isn't ported: `ToUnsigned()` of a negative value and `SetRawValue(int64)` out of range don't log.
+- No `unsigned long` constructor or operator overloads (`uint16`/`uint32`/`uint64` only; `unsigned long` is a distinct 32-bit type on Windows that nothing uses). No private `isInBounds` helpers (unused upstream).
+- Added `LayoutUnit::operator=(int32)`: upstream has only `operator=(const float&)`, which overload resolution prefers over the implicit `int` constructor, so assigning an integer goes through `float` (and loses precision above 2^24).
+- Most of `LayoutUnit` is `constexpr` (not `FromFloatCeil`/`FromFloatFloor`/`CeilToFloat` or the device-pixel functions, which use `<cmath>`).
+
+Tests: `tests/Core/LayoutUnit.cpp`, `tests/Graphics/{IntSize,IntPoint,FloatPoint,LayoutSize,LayoutPoint}.cpp` (also the new `Blend` overloads): 34 cases / 640k assertions (upstream's pixel-snapping loops). Full Booey suite: 758 cases / 652100 assertions; all pass except 2 expected failures (`[!shouldfail]`).
+
+
+---
+
+### Layer 4b: Style numerics (2026-10-12)
+
+Graph from `style/values/primitives/StylePrimitiveNumericTypes.h`, `StyleLengthWrapper.h`, `StyleLengthWrapperData.cpp` and `style/calc/StyleCalculationValueMap.cpp` (headers-only): 35 files (`tools/port/out/style-numerics.md`); the `.cpp`s add `StyleLengthResolution`, the `RenderStyle` getters and `Settings`. Decisions (2026-10-12): `CompactVariant`/`FlatteningVariantAdaptor` are ported into Krystal.Core first, so `LengthPercentage` keeps upstream's 8-byte layout and `PrimitiveNumericOrKeyword` flattens like upstream; the `+CSSValueConversion`/`+CSSValueCreation` headers (and `StyleLengthWrapper+CSSValueConversion`/`+DeprecatedCSSValueConversion`) wait for layer 5.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `wtf/CompactVariant.h`, `CompactVariantOperations.h` | `port` | `Krystal.Core/Types/CompactVariant.hpp` | Core | tested (upstream's `TestWebKitAPI/Tests/WTF/CompactVariant.cpp`). One header. `valueless_by_move` → `IsValuelessByMove`; `holdsAlternative`/`switchOn` → `HoldsAlternative`/`SwitchOn`; the `CompactVariantTraits` functions are PascalCase. |
+| `wtf/FlatteningVariantAdaptor.h` | `port` | `Krystal.Core/Types/FlatteningVariant.hpp` | Core | tested. Its own type list (`FlatteningTypeList`) instead of `brigand`, which Core doesn't link. |
+| `wtf/VariantExtras.h`, `wtf/StdLibExtras.h` (`typeForIndex`, `VariantBestMatch`, `alternativeIndexV`, `IsStdInPlace*`) | `port` | `TypeForIndex`, `VariantBestMatch`, `AlternativeIndexV`, `IsInPlaceType`/`IsInPlaceIndex` in `Krystal.Core/Types/Variant.hpp` | Core | `TypeForIndex` is a recursive `if constexpr` chain instead of the unrolled switch. |
+| `style/values/StyleValueTypes.h` | `have` | `Style/Values/Types.hpp` | on | tested (`tests/Style/Values/Types.cpp`). See bugs. Invokers: `toCSS`/`toStyle`/`toStyleNoConversionDataRequired` → `ConvertToCSS`/`ConvertToStyle`/`ConvertToStyleNoConversionDataRequired`, `createCSSValue` → `CreateCSSValue`, `toStyleFromCSSValue` → `ConvertCSSValueToStyle`, `toPlatform` → `ConvertToPlatform`, `serializationForCSS` → `Serialise`, `evaluate` → `Evaluate`, `isZero`/`isKnownZero`/`isEmpty`/`isKnownEmpty` → `IsValueZero`/`IsValueKnownZero`/`IsValueEmpty`/`IsValueKnownEmpty` (the customisation structs keep the plain names), `Interpolation::Context` → `lerp::Context`. Logging not ported. |
+| `style/values/primitives/StylePrimitiveNumericConcepts.h` | `have` | `Style/Values/Primitives/Concepts.hpp` | on | `UnevaluatedCalculation` → `UnevaluatedCalc` (the namespace tells it apart from `css::UnevaluatedCalc`). |
+| `style/values/primitives/StylePrimitiveNumeric+Forward.h` | `port` | `Style/Values/Primitives/PrimitiveNumericForward.hpp` | on | |
+| `style/values/primitives/StyleUnevaluatedCalculation.h`, `.cpp` | `have` | `Style/Values/Primitives/UnevaluatedCalc.hpp`, `src/.../UnevaluatedCalc.cpp` | on | tested through `PrimitiveNumeric`. Was raw WebKit. `protectedCalculation` → `ProtectedCalculation`. |
+| `style/values/primitives/StylePrimitiveNumeric.h` | `have` | `Style/Values/Primitives/PrimitiveNumeric.hpp` | on | tested. Was raw WebKit. Public `value` → `Value`, `unit` → `Unit`, `range`/`category` → `Range`/`Category`; `Length` keeps its value private (`_value`) like upstream. The composite `get<T>()` keeps its lowercase name. No IPC (`IPCData`). |
+| `style/values/primitives/StylePrimitiveNumericOrKeyword.h` | `have` | `Style/Values/Primitives/PrimitiveNumericOrKeyword.hpp` | on | tested. |
+| `style/values/primitives/StylePrimitiveNumericTypes.h` | `have` | `Style/Values/Primitives/NumericTypes.hpp` | on | tested. `Nonnegative` aliases → `NonNegative`, `MinimallySerializing…` → `MinimallySerialising…`. |
+| `…+Calculation.h` | `have` | `NumericTypesCalc.hpp` | on | tested. `copyCalculation` → `CopyCalculation`. |
+| `…+Conversions.h`, `.cpp` | `have` | `NumericTypesConversions.hpp`, `src/.../NumericTypesConversions.cpp` | on | tested (raw canonicalization, CSS → Style including calc). `ToCSS` needs a `RenderStyle`, so it's untested. The two calc `ToStyle` specializations share one helper (`detail_conversions::DimensionPercentageCalcToStyle`). `canonicalize*` → `Canonicalize*` (the CSS side kept the American spelling). |
+| `…+Evaluation.h` | `have` | `NumericTypesEvaluation.hpp` | on | tested (lengths, percentages, calc, points and sizes in float and layout units, `Reflect`/`ReflectSum`). |
+| `…+Serialization.h` | `have` | `NumericTypesSerialisation.hpp` | on | Compiles; untested (every specialization goes through `ToCSS`, which needs a `RenderStyle`). |
+| `…+Blending.h` | `have` | `NumericTypesBlending.hpp` | on | tested. |
+| `StylePrimitiveNumericOrKeyword+Conversions.h` | `have` | `PrimitiveNumericOrKeywordConversions.hpp` | on | `ToStyle` tested; `ToCSS` needs a `RenderStyle`. |
+| `style/calc/StyleCalculationValueMap.h`, `.cpp` | `port` | `Style/Calc/ValueMap.hpp`, `src/Style/Calc/ValueMap.cpp` | on | tested. `HashMap` is `std::unordered_map`, so handles 0 and the maximum are skipped explicitly (WTF's empty/deleted keys). `ref`/`deref` → `AddRef`/`SubRef`. |
+| `style/values/primitives/StyleLengthWrapperData.h`, `.cpp` | `have` | `Style/Values/Primitives/LengthWrapperData.hpp`, `src/.../LengthWrapperData.cpp` | on | tested. No IPC. |
+| `style/values/primitives/StyleLengthWrapper.h` | `have` | `Style/Values/Primitives/LengthWrapper.hpp` | on | tested with a test-only wrapper (upstream's concrete wrappers live in the property files). `evaluateMinimum` → `EvaluateMinimum`. No IPC or logging. `LengthWrapperBaseDerived` uses an overload test instead of `IsBaseOfTemplate` (a `template <typename...>` parameter doesn't match the constrained keyword pack). |
+| `style/values/primitives/StyleLengthWrapper+Blending.h` | `have` | `Style/Values/Primitives/LengthWrapperBlending.hpp` | on | tested. |
+| `css/ComputedStyleDependencies.cpp` | `have` | `src/CSS/ComputedStyleDependencies.cpp` | on | Now built (`ToLengthConversionData` builds since 3b); `RenderView()` → `GetRenderView()`. |
+| `css/CSSPrimitiveValue.h` (`maxValueForCssLength`/`minValueForCssLength`) | `have` | `MaxValueForCssLength`/`MinValueForCssLength` in `CSS/Values/PrimitiveValue.hpp` | header | Replaces the FIXME. |
+| `…+CSSValueConversion.h`, `…+CSSValueCreation.h`, `StyleLengthWrapper+CSSValueConversion.h`, `+DeprecatedCSSValueConversion.h`, `StylePrimitiveKeyword+*` | | | off | Layer 5 (they need `PrimitiveValue`/`ValuePool`). Still raw WebKit. |
+
+**Seam changes:** `style::EvaluationTimeZoomEnabled(const RenderStyle&)` was a seam placeholder for this layer's `+Conversions` function; it's now defined in `NumericTypesConversions.cpp` (`LengthResolution.cpp` includes that header, as upstream does). Added `BuilderState::UseSVGZoomRulesForLength()` and `BuilderState::EvaluationTimeZoomEnabled()` (collapses `document().settings().evaluationTimeZoomEnabled()`).
+
+**Bugs fixed:**
+- `Types.hpp` didn't compile when instantiated:
+  - the `KeywordValueConstant` `Blending` specialization's first `Blend` had lost its last parameter (syntax error);
+  - separators were `utf8_string`s `push_back`'d into the builder (and `""` assigned to a `u8string`); now `CSSOMStringView` and `append`, as on the CSS side;
+  - `FunctionNotation` used `value.name`/`value.parameters` and `css::ToString`, from before the Aggregates renames; now `Name`/`Parameters` and `ToLower`, as on the CSS side;
+  - the list conversions called a non-existent `List::map` (and mixed `.value`/`.Value`); now the wrappers' static `map`;
+  - `IsKnownEmpty` called lowercase `isKnownEmpty()`/`isEmpty()`/`width()`, and the `HasIs*` concepts weren't qualified with `css::`;
+  - the string non-converting types were `StringAtom`/`utf8_string` instead of `CSSOMStringAtom`/`CSSOMString`, and `url::Url` was commented out.
+- Upstream bug fixed (behaviour differs): `IsKnownZero` fell back to `!value.isZero()` for types without `isKnownZero`, reporting non-zero values as known zero. It now returns `IsZero()`.
+- Upstream bug fixed: `FlatteningVariantAdaptor::holdsAlternative<T>()` called itself with an argument it doesn't take, so any instantiation failed; now `krys::HoldsAlternative<T>(_value)`.
+- Upstream bug fixed: the `MarkableTraits` of Style `NumberOrPercentage` called its private `isEmpty` without being a friend.
+- Upstream bug fixed: the `SpaceSeparatedSize` `ZoomFactor` evaluations were constrained on a `float` third parameter while passing a `ZoomFactor`; now constrained on `ZoomFactor`, like the other evaluations.
+- Upstream typo fixed: the calc lambdas of `ToCSS<AnglePercentage>`/`ToCSS<LengthPercentage>` returned `CSS::AnglePercentage<R>`/`CSS::LengthPercentage<R>`, dropping `V`.
+- All the Style primitives (`UnevaluatedCalc`, `PrimitiveNumeric`, `PrimitiveNumericOrKeyword`, `NumericTypes` and every `+` header, `LengthWrapper*`) were raw WebKit (`<WebCore/...>` includes); rewritten against upstream.
+
+**Differences:**
+- `CompactVariant` and `CompactVariantOperations` share one header; the payload helpers aren't `constexpr` (they use placement new).
+- `Canonicalize(LengthRaw, NoConversionDataRequiredTag)`'s debug check uses `ConversionToCanonicalUnitRequiresConversionData(raw.Unit)` directly: the CSS side has no raw overload of `RequiresConversionData`.
+- Known upstream behaviour (from 3b): converting a calc length-percentage with `NoConversionDataRequiredTag` asserts, because `CreateCalculationValue` dereferences the missing conversion data. The tests pass a default `ToLengthConversionData`.
+
+Tests: `tests/Style/Values/Types.cpp`, `tests/Style/Values/Primitives/{PrimitiveNumeric,NumericTypesConversions,NumericTypesEvaluation,LengthWrapper}.cpp`, Core `tests/Types/CompactVariant.cpp` (also `FlatteningVariant`). Full Booey suite: 784 cases / 652384 assertions; all pass except 2 expected failures (`[!shouldfail]`). Core suite: 542 cases, all pass. Whole solution builds with no warnings.
+
 ## Deferred: Values (from the tokenizer graph)
 
 WebKit's tokenizer pulls these in, but the Krystal tokenizer doesn't need them. Kept here for a future Values/Parser slice; re-run the graph from that slice's entries when it starts. Not yet confirmed (`have?` = name match only).
@@ -564,7 +659,7 @@ Boundary dependencies seen on this path (undecided):
 
 | WebKit | Verdict | Krystal | Notes |
 |---|---|---|---|
-| `platform/LayoutUnit.h` | `port` | `Core/LayoutUnit.hpp` | Keep fixed-point semantics. |
+| `platform/LayoutUnit.h` | `port` | `Core/LayoutUnit.hpp` | Done in slice 3, layer 4a. |
 | `platform/RectCorners.h` | `have` | `Core/RectCorners.hpp` | |
 | `platform/RectEdges.h` | `have` | `Core/RectEdges.hpp` | |
 | `loader/LoadedFromOpaqueSource.h` | `port` | | Single enum. |

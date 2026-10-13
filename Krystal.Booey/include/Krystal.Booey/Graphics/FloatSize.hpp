@@ -1,6 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Core/MathExtras.hpp"
+#include "Krystal.Booey/Graphics/IntPoint.hpp"
+#include "Krystal.Booey/Graphics/IntSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Maths/Base.hpp"
 #include <algorithm>
@@ -18,6 +20,11 @@ namespace krys::boo
   public:
     constexpr FloatSize() noexcept = default;
     constexpr FloatSize(float width, float height) noexcept : _width(width), _height(height)
+    {
+    }
+
+    constexpr FloatSize(const IntSize &size) noexcept
+        : _width(static_cast<float>(size.Width())), _height(static_cast<float>(size.Height()))
     {
     }
 
@@ -51,6 +58,11 @@ namespace krys::boo
     constexpr void SetHeight(float height) noexcept
     {
       _height = height;
+    }
+
+    KRYS_NODISCARD constexpr bool IsExpressibleAsIntSize() const noexcept
+    {
+      return IsWithinIntRange(_width) && IsWithinIntRange(_height);
     }
 
     KRYS_NODISCARD constexpr bool IsEmpty() const noexcept
@@ -232,5 +244,25 @@ namespace krys::boo
   KRYS_NODISCARD inline bool AreEssentiallyEqual(const FloatSize &a, const FloatSize &b) noexcept
   {
     return AreEssentiallyEqual(a.Width(), b.Width()) && AreEssentiallyEqual(a.Height(), b.Height());
+  }
+
+  KRYS_NODISCARD inline IntSize RoundedIntSize(const FloatSize &p) noexcept
+  {
+    return IntSize(ClampToInteger(std::round(p.Width())), ClampToInteger(std::round(p.Height())));
+  }
+
+  KRYS_NODISCARD inline IntSize FlooredIntSize(const FloatSize &p) noexcept
+  {
+    return IntSize(ClampToInteger(std::floor(p.Width())), ClampToInteger(std::floor(p.Height())));
+  }
+
+  KRYS_NODISCARD inline IntSize ExpandedIntSize(const FloatSize &p) noexcept
+  {
+    return IntSize(ClampToInteger(std::ceil(p.Width())), ClampToInteger(std::ceil(p.Height())));
+  }
+
+  KRYS_NODISCARD inline IntPoint FlooredIntPoint(const FloatSize &p) noexcept
+  {
+    return IntPoint(ClampToInteger(std::floor(p.Width())), ClampToInteger(std::floor(p.Height())));
   }
 }

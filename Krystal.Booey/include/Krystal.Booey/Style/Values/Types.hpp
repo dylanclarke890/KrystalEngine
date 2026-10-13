@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Calc/SymbolTable.hpp"
 #include "Krystal.Booey/CSS/Values/NoConversionDataRequiredTag.hpp"
@@ -20,6 +20,7 @@ namespace krys::boo
 
 namespace krys::boo::css
 {
+  class PrimitiveValue;
   class ToLengthConversionData;
 }
 
@@ -131,20 +132,20 @@ namespace krys::boo::style
   template <>
   constexpr bool TreatAsNonConverting<css::PropertyIdentifier> = true;
 
-  // Specialize `TreatAsNonConverting` for `StringAtom`, to indicate that its type does not change from the
-  // CSS representation.
+  // Specialize `TreatAsNonConverting` for `css::CSSOMStringAtom`, to indicate that its type does not change
+  // from the CSS representation.
   template <>
-  constexpr bool TreatAsNonConverting<StringAtom> = true;
+  constexpr bool TreatAsNonConverting<css::CSSOMStringAtom> = true;
 
-  // Specialize `TreatAsNonConverting` for `utf8_string`, to indicate that its type does not change from the
-  // CSS representation.
+  // Specialize `TreatAsNonConverting` for `css::CSSOMString`, to indicate that its type does not change from
+  // the CSS representation.
   template <>
-  constexpr bool TreatAsNonConverting<utf8_string> = true;
+  constexpr bool TreatAsNonConverting<css::CSSOMString> = true;
 
-  // Specialize `TreatAsNonConverting` for `css::Url`, to indicate that its type does not change from the
-  // CSS representation.
-  // template <>
-  // constexpr bool TreatAsNonConverting<css::url> = true;
+  // Specialize `TreatAsNonConverting` for `url::Url`, to indicate that its type does not change from the CSS
+  // representation.
+  template <>
+  constexpr bool TreatAsNonConverting<url::Url> = true;
 
 #pragma endregion
 
@@ -368,8 +369,7 @@ namespace krys::boo::style
     KRYS_NODISCARD Result operator()(const css::SpaceSeparatedList<StyleType, InlineCapacity> &value,
                                      const RenderStyle &style, Rest &&...rest) noexcept
     {
-      return Result {value.value.template map<typename Result::Container>(
-        [&](const auto &x) { return ConvertToCSS(x, style, rest...); })};
+      return Result::map(value, [&](const auto &x) { return ConvertToCSS(x, style, rest...); });
     }
   };
 
@@ -383,8 +383,7 @@ namespace krys::boo::style
     KRYS_NODISCARD Result operator()(const css::CommaSeparatedList<StyleType, InlineCapacity> &value,
                                      const RenderStyle &style, Rest &&...rest) noexcept
     {
-      return Result {value.value.template map<typename Result::Container>(
-        [&](const auto &x) { return ConvertToCSS(x, style, rest...); })};
+      return Result::map(value, [&](const auto &x) { return ConvertToCSS(x, style, rest...); });
     }
   };
 
@@ -643,8 +642,7 @@ namespace krys::boo::style
     KRYS_NODISCARD Result operator()(const css::SpaceSeparatedList<CSSType, InlineCapacity> &value,
                                      Rest &&...rest) noexcept
     {
-      return Result {value.Value.template map<typename Result::Container>(
-        [&](const auto &x) { return ConvertToStyle(x, rest...); })};
+      return Result::map(value, [&](const auto &x) { return ConvertToStyle(x, rest...); });
     }
   };
 
@@ -658,8 +656,7 @@ namespace krys::boo::style
     KRYS_NODISCARD Result operator()(const css::CommaSeparatedList<CSSType, InlineCapacity> &value,
                                      Rest &&...rest) noexcept
     {
-      return Result {value.value.template map<typename Result::Container>(
-        [&](const auto &x) { return ConvertToStyle(x, rest...); })};
+      return Result::map(value, [&](const auto &x) { return ConvertToStyle(x, rest...); });
     }
   };
 
@@ -798,7 +795,7 @@ namespace krys::boo::style
                                               Rest &&...rest) noexcept
     {
       return css::CreateFunctionValue(
-        value.name, CreateCSSValue(pool, style, value.parameters, std::forward<Rest>(rest)...));
+        value.Name, CreateCSSValue(pool, style, value.Parameters, std::forward<Rest>(rest)...));
     }
   };
 
@@ -996,10 +993,10 @@ namespace krys::boo::style
 
   template <typename StyleType, typename... Rest>
   void SerialisationForCSSOnTupleLike(css::CSSOMString &builder, const css::SerialisationContext &context,
-                                      const RenderStyle &style, const StyleType &value, utf8_string separator,
-                                      Rest &&...rest) noexcept
+                                      const RenderStyle &style, const StyleType &value,
+                                      css::CSSOMStringView separator, Rest &&...rest) noexcept
   {
-    utf8_string swappedSeparator = "";
+    css::CSSOMStringView swappedSeparator = u8"";
     auto caller = krys::CreateVisitor(
       [&]<css::OptionalLike T>(const T &element)
       {
@@ -1008,12 +1005,12 @@ namespace krys::boo::style
           return;
         }
 
-        builder.push_back(std::exchange(swappedSeparator, separator));
+        builder.append(std::exchange(swappedSeparator, separator));
         Serialise(builder, context, style, *element, rest...);
       },
       [&](const auto &element)
       {
-        builder.push_back(std::exchange(swappedSeparator, separator));
+        builder.append(std::exchange(swappedSeparator, separator));
         Serialise(builder, context, style, element, rest...);
       });
 
@@ -1024,7 +1021,7 @@ namespace krys::boo::style
   void SerialisationForCSSOnTupleLikeCoalescing(css::CSSOMString &builder,
                                                 const css::SerialisationContext &context,
                                                 const RenderStyle &style, const StyleType &value,
-                                                utf8_string separator, Rest &&...rest) noexcept
+                                                css::CSSOMStringView separator, Rest &&...rest) noexcept
   {
     if constexpr (std::tuple_size_v<StyleType> == 2)
     {
@@ -1068,13 +1065,13 @@ namespace krys::boo::style
 
   template <typename StyleType, typename... Rest>
   void SerialisationForCSSOnRangeLike(css::CSSOMString &builder, const css::SerialisationContext &context,
-                                      const RenderStyle &style, const StyleType &value, utf8_string separator,
-                                      Rest &&...rest) noexcept
+                                      const RenderStyle &style, const StyleType &value,
+                                      css::CSSOMStringView separator, Rest &&...rest) noexcept
   {
-    utf8_string swappedSeparator = "";
+    css::CSSOMStringView swappedSeparator = u8"";
     for (const auto &element : value)
     {
-      builder.push_back(std::exchange(swappedSeparator, separator));
+      builder.append(std::exchange(swappedSeparator, separator));
       Serialise(builder, context, style, element, rest...);
     }
   }
@@ -1181,9 +1178,9 @@ namespace krys::boo::style
                     const RenderStyle &style, const css::FunctionNotation<Name, StyleType> &value,
                     Rest &&...rest) noexcept
     {
-      builder.append(css::ToString(value.name));
+      builder.append(css::ToLower(value.Name));
       builder.push_back(u8'(');
-      Serialise(builder, context, style, value.parameters, std::forward<Rest>(rest)...);
+      Serialise(builder, context, style, value.Parameters, std::forward<Rest>(rest)...);
       builder.push_back(u8')');
     }
   };
@@ -1249,7 +1246,7 @@ namespace krys::boo::style
   };
 
   template <typename Result>
-  constexpr EvaluationInvoker<Result> Eval {};
+  constexpr EvaluationInvoker<Result> Evaluate {};
 
   // Constrained for `TreatAsVariantLike`.
   template <css::VariantLike StyleType, typename Result>
@@ -1259,7 +1256,7 @@ namespace krys::boo::style
     KRYS_NODISCARD Result operator()(const StyleType &value, Rest &&...rest) noexcept
     {
       return krys::SwitchOn(value, [&](const auto &alternative)
-                            { return Eval<Result>(alternative, std::forward<Rest>(rest)...); });
+                            { return Evaluate<Result>(alternative, std::forward<Rest>(rest)...); });
     }
   };
 
@@ -1271,7 +1268,7 @@ namespace krys::boo::style
     template <typename... Rest>
     KRYS_NODISCARD Result operator()(const StyleType &value, Rest &&...rest) noexcept
     {
-      return Eval<Result>(get<0>(value), std::forward<Rest>(rest)...);
+      return Evaluate<Result>(get<0>(value), std::forward<Rest>(rest)...);
     }
   };
 
@@ -1895,8 +1892,8 @@ namespace krys::boo::style
   template <css::ValueId C>
   struct Blending<css::KeywordValueConstant<C>>
   {
-    KRYS_NODISCARD css::KeywordValueConstant<C> Blend(const css::KeywordValueConstant<C> &,
-                                                      const css::KeywordValueConstant<C> &,
+    KRYS_NODISCARD css::KeywordValueConstant<C>
+      Blend(const css::KeywordValueConstant<C> &, const css::KeywordValueConstant<C> &, const auto &) noexcept
     {
       return {};
     }
@@ -2325,7 +2322,7 @@ namespace krys::boo::style
     template <typename T>
     KRYS_NODISCARD bool operator()(const T &value) const noexcept
     {
-      if constexpr (HasIsZero<T>)
+      if constexpr (css::HasIsZero<T>)
       {
         return value.IsZero();
       }
@@ -2336,7 +2333,7 @@ namespace krys::boo::style
     }
   };
 
-  constexpr IsZeroInvoker isZero {};
+  constexpr IsZeroInvoker IsValueZero {};
 
   // Constrained for `TreatAsTupleLike`.
   template <css::TupleLike T>
@@ -2344,7 +2341,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD bool operator()(const T &value) noexcept
     {
-      return krys::apply([&](const auto &...x) { return (isZero(x) && ...); }, value);
+      return krys::apply([&](const auto &...x) { return (IsValueZero(x) && ...); }, value);
     }
   };
 
@@ -2354,7 +2351,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD bool operator()(const T &value) noexcept
     {
-      return krys::SwitchOn(value, [&](const auto &alternative) { return isZero(alternative); });
+      return krys::SwitchOn(value, [&](const auto &alternative) { return IsValueZero(alternative); });
     }
   };
 
@@ -2380,13 +2377,13 @@ namespace krys::boo::style
     template <typename T>
     KRYS_NODISCARD bool operator()(const T &value) const noexcept
     {
-      if constexpr (HasIsKnownZero<T>)
+      if constexpr (css::HasIsKnownZero<T>)
       {
         return value.IsKnownZero();
       }
-      else if constexpr (HasIsZero<T>)
+      else if constexpr (css::HasIsZero<T>)
       {
-        return !value.IsZero();
+        return value.IsZero();
       }
       else
       {
@@ -2395,7 +2392,7 @@ namespace krys::boo::style
     }
   };
 
-  constexpr IsKnownZeroInvoker isKnownZero {};
+  constexpr IsKnownZeroInvoker IsValueKnownZero {};
 
   // Constrained for `TreatAsTupleLike`.
   template <css::TupleLike T>
@@ -2403,7 +2400,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD bool operator()(const T &value) noexcept
     {
-      return krys::apply([&](const auto &...x) { return (isKnownZero(x) && ...); }, value);
+      return krys::apply([&](const auto &...x) { return (IsValueKnownZero(x) && ...); }, value);
     }
   };
 
@@ -2413,7 +2410,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD bool operator()(const T &value) noexcept
     {
-      return krys::SwitchOn(value, [&](const auto &alternative) { return isKnownZero(alternative); });
+      return krys::SwitchOn(value, [&](const auto &alternative) { return IsValueKnownZero(alternative); });
     }
   };
 
@@ -2437,7 +2434,7 @@ namespace krys::boo::style
     template <typename T>
     KRYS_NODISCARD bool operator()(const T &value) const noexcept
     {
-      if constexpr (HasIsEmpty<T>)
+      if constexpr (css::HasIsEmpty<T>)
       {
         return value.IsEmpty();
       }
@@ -2448,7 +2445,7 @@ namespace krys::boo::style
     }
   };
 
-  constexpr IsEmptyInvoker isEmpty {};
+  constexpr IsEmptyInvoker IsValueEmpty {};
 
   // Specialization for `css::SpaceSeparatedSize`.
   template <typename T>
@@ -2456,7 +2453,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD bool operator()(const auto &value) noexcept
     {
-      return isZero(value.Width()) || isZero(value.Height());
+      return IsValueZero(value.Width()) || IsValueZero(value.Height());
     }
   };
 
@@ -2466,7 +2463,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD bool operator()(const auto &value) noexcept
     {
-      return isZero(value.x()) || isZero(value.y());
+      return IsValueZero(value.x()) || IsValueZero(value.y());
     }
   };
 
@@ -2476,7 +2473,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD bool operator()(const auto &value) noexcept
     {
-      return isZero(value.Width()) || isZero(value.Height());
+      return IsValueZero(value.Width()) || IsValueZero(value.Height());
     }
   };
 
@@ -2500,13 +2497,13 @@ namespace krys::boo::style
     template <typename T>
     KRYS_NODISCARD bool operator()(const T &value) const noexcept
     {
-      if constexpr (HasIsKnownEmpty<T>)
+      if constexpr (css::HasIsKnownEmpty<T>)
       {
-        return value.isKnownEmpty();
+        return value.IsKnownEmpty();
       }
-      else if constexpr (HasIsEmpty<T>)
+      else if constexpr (css::HasIsEmpty<T>)
       {
-        return value.isEmpty();
+        return value.IsEmpty();
       }
       else
       {
@@ -2515,7 +2512,7 @@ namespace krys::boo::style
     }
   };
 
-  constexpr IsKnownEmptyInvoker isKnownEmpty {};
+  constexpr IsKnownEmptyInvoker IsValueKnownEmpty {};
 
   // Specialization for `css::SpaceSeparatedSize`.
   template <typename T>
@@ -2523,7 +2520,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD bool operator()(const auto &value) noexcept
     {
-      return isKnownZero(value.Width()) || isKnownZero(value.Height());
+      return IsValueKnownZero(value.Width()) || IsValueKnownZero(value.Height());
     }
   };
 
@@ -2533,7 +2530,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD bool operator()(const auto &value) noexcept
     {
-      return isKnownZero(value.x()) || isKnownZero(value.y());
+      return IsValueKnownZero(value.x()) || IsValueKnownZero(value.y());
     }
   };
 
@@ -2543,7 +2540,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD bool operator()(const auto &value) noexcept
     {
-      return isKnownZero(value.width()) || isKnownZero(value.height());
+      return IsValueKnownZero(value.Width()) || IsValueKnownZero(value.Height());
     }
   };
 

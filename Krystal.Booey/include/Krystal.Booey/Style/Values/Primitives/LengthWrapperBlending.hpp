@@ -1,145 +1,148 @@
-/*
- * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+﻿#pragma once
 
-#pragma once
+#include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
+#include "Krystal.Booey/Style/Calc/Tree.hpp"
+#include "Krystal.Booey/Style/Calc/Value.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/LengthWrapper.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
+#include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Attributes.hpp"
 
-#include <WebCore/AnimationUtilities.h>
-#include <WebCore/StyleCalculationValue.h>
-#include <WebCore/StyleLengthWrapper.h>
-
-namespace WebCore
+namespace krys::boo::style
 {
-  namespace Style
+  // MARK: - Blending
+
+  constexpr size_t MaximumBlendTreeDepth = 128;
+
+  template <typename T>
+  struct LengthWrapperBlendingSupport
   {
-
-    // MARK: - Blending
-
-    static constexpr size_t maximumBlendTreeDepth = 128;
-
-    template <typename T>
-    struct LengthWrapperBlendingSupport
+    KRYS_NODISCARD static T BlendMixedSpecifiedTypes(const T &a, const T &b,
+                                                     const BlendingContext &context) noexcept
     {
-      static auto blendMixedSpecifiedTypes(const T &a, const T &b, const BlendingContext &context) -> T
+      krys_debug_assert(a.IsSpecified());
+      krys_debug_assert(b.IsSpecified());
+
+      auto copyCalculation = [](const T &value) -> calc::Child
       {
-        ASSERT(a.isSpecified());
-        ASSERT(b.isSpecified());
-
-        auto copyCalculation = [](const T &value) -> Calculation::Child
+        if (value.IsPercent())
         {
-          if (value.isPercent())
-            return Calculation::percentage(value.m_value.value());
-          if (value.isCalculated())
-            return value.m_value.protectedCalculationValue()->copyRoot();
-          ASSERT(value.isFixed());
-          return Calculation::dimension(value.m_value.value());
-        };
+          return calc::CreatePercentage(value._value.Value());
+        }
 
-        auto isTooDeepToBlendWithNode = [](const T &value)
+        if (value.IsCalculated())
         {
-          if (!value.isCalculated())
-            return false;
-          auto treeDepth = computeDepth(value.m_value.protectedCalculationValue()->tree());
-          return treeDepth > maximumBlendTreeDepth;
-        };
+          return value._value.ProtectedCalculationValue()->CopyRoot();
+        }
 
-        if (context.compositeOperation != CompositeOperation::Replace)
-          return typename T::Calc {Calculation::add(copyCalculation(a), copyCalculation(b))};
+        krys_debug_assert(value.IsFixed());
+        return calc::CreateDimension(value._value.Value());
+      };
 
-        auto isFixedZero = [](const T &value)
+      auto isTooDeepToBlendWithNode = [](const T &value)
+      {
+        if (!value.IsCalculated())
         {
-          ASSERT(value.isFixed() || value.isCalculated());
-          if (auto fixed = value.tryFixed())
-            return fixed->isZero();
           return false;
-        };
-
-        if (!b.isCalculated() && !a.isPercent() && (context.progress == 1 || isFixedZero(a)))
-        {
-          if (b.isPercent())
-            return Style::blend(typename T::Percentage {0}, typename T::Percentage {b.m_value.value()},
-                                context);
-          return Style::blend(typename T::Fixed {0}, typename T::Fixed {b.m_value.value()}, context);
         }
 
-        if (!a.isCalculated() && !b.isPercent() && (!context.progress || isFixedZero(b)))
-        {
-          if (a.isPercent())
-            return Style::blend(typename T::Percentage {a.m_value.value()}, typename T::Percentage {0},
-                                context);
-          return Style::blend(typename T::Fixed {a.m_value.value()}, typename T::Fixed {0}, context);
-        }
+        auto treeDepth = calc::ComputeDepth(value._value.ProtectedCalculationValue()->GetTree());
+        return treeDepth > MaximumBlendTreeDepth;
+      };
 
-        // Limit the tree depth generated by blending to avoid blowing up the stack in recursive functions.
-        if (isTooDeepToBlendWithNode(a) || isTooDeepToBlendWithNode(b))
-          return typename T::Calc {copyCalculation(b)};
-
-        return
-          typename T::Calc {Calculation::blend(copyCalculation(a), copyCalculation(b), context.progress)};
+      if (context.CompositeOperation != CompositeOperation::Replace)
+      {
+        return typename T::Calc {calc::Add(copyCalculation(a), copyCalculation(b))};
       }
-    };
 
-    template <LengthWrapperBaseDerived T>
-    struct Blending<T>
+      auto isFixedZero = [](const T &value)
+      {
+        krys_debug_assert(value.IsFixed() || value.IsCalculated());
+        if (auto fixed = value.TryFixed())
+        {
+          return fixed->IsZero();
+        }
+
+        return false;
+      };
+
+      if (!b.IsCalculated() && !a.IsPercent() && (context.Progress == 1 || isFixedZero(a)))
+      {
+        if (b.IsPercent())
+        {
+          return style::Blend(typename T::Percentage {0}, typename T::Percentage {b._value.Value()}, context);
+        }
+
+        return style::Blend(typename T::Fixed {0}, typename T::Fixed {b._value.Value()}, context);
+      }
+
+      if (!a.IsCalculated() && !b.IsPercent() && (!context.Progress || isFixedZero(b)))
+      {
+        if (a.IsPercent())
+        {
+          return style::Blend(typename T::Percentage {a._value.Value()}, typename T::Percentage {0}, context);
+        }
+
+        return style::Blend(typename T::Fixed {a._value.Value()}, typename T::Fixed {0}, context);
+      }
+
+      // Limit the tree depth generated by blending to avoid blowing up the stack in recursive functions.
+      if (isTooDeepToBlendWithNode(a) || isTooDeepToBlendWithNode(b))
+      {
+        return typename T::Calc {copyCalculation(b)};
+      }
+
+      return typename T::Calc {calc::BlendChildren(copyCalculation(a), copyCalculation(b), context.Progress)};
+    }
+  };
+
+  template <LengthWrapperBaseDerived T>
+  struct Blending<T>
+  {
+    KRYS_NODISCARD bool CanBlend(const T &a, const T &b) noexcept
     {
-      auto canBlend(const T &a, const T &b) -> bool
+      return a.HasSameType(b) || (a.IsSpecified() && b.IsSpecified());
+    }
+
+    KRYS_NODISCARD bool RequiresInterpolationForAccumulativeIteration(const T &a, const T &b) noexcept
+    {
+      return !a.HasSameType(b) || a.IsCalculated() || b.IsCalculated();
+    }
+
+    KRYS_NODISCARD T Blend(const T &a, const T &b, const BlendingContext &context) noexcept
+    {
+      if (!a.IsSpecified() || !b.IsSpecified())
       {
-        return a.hasSameType(b) || (a.isSpecified() && b.isSpecified());
+        return context.Progress < 0.5 ? a : b;
       }
-      auto requiresInterpolationForAccumulativeIteration(const T &a, const T &b) -> bool
+
+      if (a.IsCalculated() || b.IsCalculated() || !a.HasSameType(b))
       {
-        return !a.hasSameType(b) || a.isCalculated() || b.isCalculated();
+        return LengthWrapperBlendingSupport<T>::BlendMixedSpecifiedTypes(a, b, context);
       }
-      auto blend(const T &a, const T &b, const BlendingContext &context) -> T
+
+      if (!context.Progress && context.IsReplace())
       {
-        if (!a.isSpecified() || !b.isSpecified())
-          return context.progress < 0.5 ? a : b;
-
-        if (a.isCalculated() || b.isCalculated() || !a.hasSameType(b))
-          return LengthWrapperBlendingSupport<T>::blendMixedSpecifiedTypes(a, b, context);
-
-        if (!context.progress && context.isReplace())
-          return a;
-
-        if (context.progress == 1 && context.isReplace())
-          return b;
-
-        auto resultType = b.m_value.type();
-
-        ASSERT(resultType == T::indexForPercentage || resultType == T::indexForFixed);
-
-        if (resultType == T::indexForPercentage)
-        {
-          return Style::blend(typename T::Percentage {a.m_value.value()},
-                              typename T::Percentage {b.m_value.value()}, context);
-        }
-        else
-        {
-          return Style::blend(typename T::Fixed {a.m_value.value()}, typename T::Fixed {b.m_value.value()},
-                              context);
-        }
+        return a;
       }
-    };
 
-  } // namespace Style
-} // namespace WebCore
+      if (context.Progress == 1 && context.IsReplace())
+      {
+        return b;
+      }
+
+      auto resultType = b._value.Type();
+
+      krys_debug_assert(resultType == T::IndexForPercentage || resultType == T::IndexForFixed);
+
+      if (resultType == T::IndexForPercentage)
+      {
+        return style::Blend(typename T::Percentage {a._value.Value()},
+                            typename T::Percentage {b._value.Value()}, context);
+      }
+
+      return style::Blend(typename T::Fixed {a._value.Value()}, typename T::Fixed {b._value.Value()},
+                          context);
+    }
+  };
+}

@@ -1,447 +1,476 @@
-/*
- * Copyright (C) 2024-2025 Samuel Weinig <sam@webkit.org>
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+﻿#pragma once
 
-#pragma once
+#include "Krystal.Booey/Core/LayoutUnit.hpp"
+#include "Krystal.Booey/Graphics/FloatPoint.hpp"
+#include "Krystal.Booey/Graphics/FloatSize.hpp"
+#include "Krystal.Booey/Graphics/LayoutPoint.hpp"
+#include "Krystal.Booey/Graphics/LayoutSize.hpp"
+#include "Krystal.Booey/Style/Calc/Tree.hpp"
+#include "Krystal.Booey/Style/Calc/Value.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/NumericTypesCalc.hpp"
+#include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include <algorithm>
 
-#include <WebCore/FloatConversion.h>
-#include <WebCore/FloatPoint.h>
-#include <WebCore/FloatSize.h>
-#include <WebCore/LayoutPoint.h>
-#include <WebCore/LayoutSize.h>
-#include <WebCore/LayoutUnit.h>
-#include <WebCore/StylePrimitiveNumericTypes+Calculation.h>
-#include <WebCore/StylePrimitiveNumericTypes.h>
-#include <WebCore/StyleValueTypes.h>
-
-namespace WebCore
+namespace krys::boo::style
 {
-  namespace Style
+  using namespace css::Literals;
+
+#pragma region Length
+
+  template <auto R, typename V, typename Result>
+  struct Evaluation<Length<R, V>, Result>
   {
-
-    using namespace CSS::Literals;
-
-    // MARK: - Length
-
-    template <auto R, typename V, typename Result>
-    struct Evaluation<Length<R, V>, Result>
+    KRYS_NODISCARD constexpr Result operator()(const Length<R, V> &value, ZoomNeeded token) noexcept
+    requires(R.ZoomOptions == css::RangeZoomOptions::Default)
     {
-      constexpr auto operator()(const Length<R, V> &value, ZoomNeeded token) -> Result
-      requires(R.zoomOptions == CSS::RangeZoomOptions::Default)
-      {
-        return Result(value.resolveZoom(token));
-      }
-      constexpr auto operator()(const Length<R, V> &value, ZoomFactor zoom) -> Result
-      requires(R.zoomOptions == CSS::RangeZoomOptions::Unzoomed)
-      {
-        return Result(value.resolveZoom(zoom));
-      }
+      return Result(value.ResolveZoom(token));
+    }
 
-      constexpr auto operator()(const Length<R, V> &value, Result, ZoomNeeded token) -> Result
-      requires(R.zoomOptions == CSS::RangeZoomOptions::Default)
-      {
-        return Result(value.resolveZoom(token));
-      }
-      constexpr auto operator()(const Length<R, V> &value, Result, ZoomFactor zoom) -> Result
-      requires(R.zoomOptions == CSS::RangeZoomOptions::Unzoomed)
-      {
-        return Result(value.resolveZoom(zoom));
-      }
-    };
-
-    // MARK: - Percentage
-
-    template <auto R, typename V, typename Result>
-    struct Evaluation<Percentage<R, V>, Result>
+    KRYS_NODISCARD constexpr Result operator()(const Length<R, V> &value, ZoomFactor zoom) noexcept
+    requires(R.ZoomOptions == css::RangeZoomOptions::Unzoomed)
     {
-      constexpr auto operator()(const Percentage<R, V> &percentage) -> Result
-      {
-        return Result(percentage.value / 100.0);
-      }
-      constexpr auto operator()(const Percentage<R, V> &percentage, Result referenceLength) -> Result
-      {
-        return Result(percentage.value / 100.0 * referenceLength);
-      }
-    };
+      return Result(value.ResolveZoom(zoom));
+    }
 
-    // MARK: - Numeric
-
-    template <NonCompositeNumeric StyleType, typename Result>
-    struct Evaluation<StyleType, Result>
+    KRYS_NODISCARD constexpr Result operator()(const Length<R, V> &value, Result, ZoomNeeded token) noexcept
+    requires(R.ZoomOptions == css::RangeZoomOptions::Default)
     {
-      constexpr auto operator()(const StyleType &value) -> Result
-      {
-        return Result(value.value);
-      }
-      constexpr auto operator()(const StyleType &value, Result) -> Result
-      {
-        return Result(value.value);
-      }
-    };
+      return Result(value.ResolveZoom(token));
+    }
 
-    // MARK: - Calculation
-
-    template <typename Result>
-    struct Evaluation<Ref<Calculation::Value>, Result>
+    KRYS_NODISCARD constexpr Result operator()(const Length<R, V> &value, Result, ZoomFactor zoom) noexcept
+    requires(R.ZoomOptions == css::RangeZoomOptions::Unzoomed)
     {
-      auto operator()(Ref<Calculation::Value> calculation, Result referenceLength, ZoomFactor usedZoom)
-        -> Result
-      {
-        return Result(calculation->evaluate(referenceLength, usedZoom));
-      }
+      return Result(value.ResolveZoom(zoom));
+    }
+  };
 
-      auto operator()(Ref<Calculation::Value> calculation, Result referenceLength, ZoomNeeded token) -> Result
-      {
-        return Result(calculation->evaluate(referenceLength, token));
-      }
-    };
+#pragma endregion
 
-    template <Calc Calculation, typename Result>
-    struct Evaluation<Calculation, Result>
+#pragma region Percentage
+
+  template <auto R, typename V, typename Result>
+  struct Evaluation<Percentage<R, V>, Result>
+  {
+    KRYS_NODISCARD constexpr Result operator()(const Percentage<R, V> &percentage) noexcept
     {
-      template <typename... Rest>
-      auto operator()(const Calculation &calculation, Result referenceLength, ZoomNeeded token,
-                      Rest &&...rest) -> Result
-      requires(Calculation::range.zoomOptions == CSS::RangeZoomOptions::Default)
-      {
-        return evaluate<Result>(calculation.protectedCalculation(), referenceLength, token,
-                                std::forward<Rest>(rest)...);
-      }
+      return Result(percentage.Value / 100.0);
+    }
 
-      template <typename... Rest>
-      auto operator()(const Calculation &calculation, Result referenceLength, ZoomFactor usedZoom,
-                      Rest &&...rest) -> Result
-      requires(Calculation::range.zoomOptions == CSS::RangeZoomOptions::Unzoomed)
-      {
-        return evaluate<Result>(calculation.protectedCalculation(), referenceLength, usedZoom,
-                                std::forward<Rest>(rest)...);
-      }
-    };
-
-    // MARK: - LengthPercentage
-
-    template <auto R, typename V, typename Result>
-    struct Evaluation<LengthPercentage<R, V>, Result>
+    KRYS_NODISCARD constexpr Result operator()(const Percentage<R, V> &percentage,
+                                               Result referenceLength) noexcept
     {
-      constexpr auto operator()(const LengthPercentage<R, V> &lengthPercentage, Result referenceLength,
-                                ZoomNeeded token) -> Result
-      requires(R.zoomOptions == CSS::RangeZoomOptions::Default)
-      {
-        return WTF::switchOn(
-          lengthPercentage, [&](const typename LengthPercentage<R, V>::Dimension &length) -> Result
-          { return evaluate<Result>(length, token); },
-          [&](const typename LengthPercentage<R, V>::Percentage &percentage) -> Result
-          { return evaluate<Result>(percentage, referenceLength); },
-          [&](const typename LengthPercentage<R, V>::Calc &calculation) -> Result
-          { return evaluate<Result>(calculation, referenceLength, token); });
-      }
-      constexpr auto operator()(const LengthPercentage<R, V> &lengthPercentage, Result referenceLength,
-                                ZoomFactor zoom) -> Result
-      requires(R.zoomOptions == CSS::RangeZoomOptions::Unzoomed)
-      {
-        return WTF::switchOn(
-          lengthPercentage, [&](const typename LengthPercentage<R, V>::Dimension &length) -> Result
-          { return evaluate<Result>(length, zoom); },
-          [&](const typename LengthPercentage<R, V>::Percentage &percentage) -> Result
-          { return evaluate<Result>(percentage, referenceLength); },
-          [&](const typename LengthPercentage<R, V>::Calc &calculation) -> Result
-          { return evaluate<Result>(calculation, referenceLength, zoom); });
-      }
-    };
+      return Result(percentage.Value / 100.0 * referenceLength);
+    }
+  };
 
-    // MARK: - NumberOrPercentageResolvedToNumber
+#pragma endregion
 
-    template <CSS::Range nR, CSS::Range pR, typename V, typename Result>
-    struct Evaluation<NumberOrPercentageResolvedToNumber<nR, pR, V>, Result>
+#pragma region Numeric
+
+  template <NonCompositeNumeric StyleType, typename Result>
+  struct Evaluation<StyleType, Result>
+  {
+    KRYS_NODISCARD constexpr Result operator()(const StyleType &value) noexcept
     {
-      constexpr auto operator()(const NumberOrPercentageResolvedToNumber<nR, pR, V> &value) -> Result
-      {
-        return evaluate<Result>(value.value);
-      }
-      constexpr auto operator()(const NumberOrPercentageResolvedToNumber<nR, pR, V> &value, Result) -> Result
-      {
-        return evaluate<Result>(value.value);
-      }
-    };
+      return Result(value.Value);
+    }
 
-    // MARK: - SpaceSeparatedPoint
-
-    template <typename T>
-    struct Evaluation<SpaceSeparatedPoint<T>, FloatPoint>
+    KRYS_NODISCARD constexpr Result operator()(const StyleType &value, Result) noexcept
     {
-      auto operator()(const SpaceSeparatedPoint<T> &value, FloatSize referenceBox) -> FloatPoint
-      requires HasTwoParameterEvaluate<T, float, float>
-      {
-        return {evaluate<float>(value.x(), referenceBox.width()),
-                evaluate<float>(value.y(), referenceBox.height())};
-      }
-      auto operator()(const SpaceSeparatedPoint<T> &value, FloatSize referenceBox, ZoomNeeded token)
-        -> FloatPoint
-      requires HasThreeParameterEvaluate<T, float, float, ZoomNeeded>
-      {
-        return {evaluate<float>(value.x(), referenceBox.width(), token),
-                evaluate<float>(value.y(), referenceBox.height(), token)};
-      }
-      auto operator()(const SpaceSeparatedPoint<T> &value, FloatSize referenceBox, ZoomFactor zoom)
-        -> FloatPoint
-      requires HasThreeParameterEvaluate<T, float, float, ZoomFactor>
-      {
-        return {evaluate<float>(value.x(), referenceBox.width(), zoom),
-                evaluate<float>(value.y(), referenceBox.height(), zoom)};
-      }
-    };
-    template <typename T>
-    struct Evaluation<SpaceSeparatedPoint<T>, LayoutPoint>
+      return Result(value.Value);
+    }
+  };
+
+#pragma endregion
+
+#pragma region Calculation
+
+  template <typename Result>
+  struct Evaluation<Ref<calc::Value>, Result>
+  {
+    KRYS_NODISCARD Result operator()(Ref<calc::Value> calculation, Result referenceLength,
+                                     ZoomFactor usedZoom) noexcept
     {
-      auto operator()(const SpaceSeparatedPoint<T> &value, LayoutSize referenceBox) -> LayoutPoint
-      requires HasTwoParameterEvaluate<T, LayoutUnit, LayoutUnit>
-      {
-        return {evaluate<LayoutUnit>(value.x(), referenceBox.width()),
-                evaluate<LayoutUnit>(value.y(), referenceBox.height())};
-      }
-      auto operator()(const SpaceSeparatedPoint<T> &value, LayoutSize referenceBox, ZoomNeeded token)
-        -> LayoutPoint
-      requires HasThreeParameterEvaluate<T, LayoutUnit, LayoutUnit, ZoomNeeded>
-      {
-        return {evaluate<LayoutUnit>(value.x(), referenceBox.width(), token),
-                evaluate<LayoutUnit>(value.y(), referenceBox.height(), token)};
-      }
-      auto operator()(const SpaceSeparatedPoint<T> &value, LayoutSize referenceBox, ZoomFactor zoom)
-        -> LayoutPoint
-      requires HasThreeParameterEvaluate<T, LayoutUnit, LayoutUnit, ZoomFactor>
-      {
-        return {evaluate<LayoutUnit>(value.x(), referenceBox.width(), zoom),
-                evaluate<LayoutUnit>(value.y(), referenceBox.height(), zoom)};
-      }
-    };
+      return Result(calculation->Evaluate(referenceLength, usedZoom));
+    }
 
-    // MARK: - SpaceSeparatedSize
-
-    template <typename T>
-    struct Evaluation<SpaceSeparatedSize<T>, FloatSize>
+    KRYS_NODISCARD Result operator()(Ref<calc::Value> calculation, Result referenceLength,
+                                     ZoomNeeded token) noexcept
     {
-      auto operator()(const SpaceSeparatedSize<T> &value, FloatSize referenceBox) -> FloatSize
-      requires HasTwoParameterEvaluate<T, float, float>
-      {
-        return {evaluate<float>(value.width(), referenceBox.width()),
-                evaluate<float>(value.height(), referenceBox.height())};
-      }
-      auto operator()(const SpaceSeparatedSize<T> &value, FloatSize referenceBox, ZoomNeeded token)
-        -> FloatSize
-      requires HasThreeParameterEvaluate<T, float, float, ZoomNeeded>
-      {
-        return {evaluate<float>(value.width(), referenceBox.width(), token),
-                evaluate<float>(value.height(), referenceBox.height(), token)};
-      }
-      auto operator()(const SpaceSeparatedSize<T> &value, FloatSize referenceBox, ZoomFactor zoom)
-        -> FloatSize
-      requires HasThreeParameterEvaluate<T, float, float, float>
-      {
-        return {evaluate<float>(value.width(), referenceBox.width(), zoom),
-                evaluate<float>(value.height(), referenceBox.height(), zoom)};
-      }
-    };
-    template <typename T>
-    struct Evaluation<SpaceSeparatedSize<T>, LayoutSize>
+      return Result(calculation->Evaluate(referenceLength, token));
+    }
+  };
+
+  template <Calc Calculation, typename Result>
+  struct Evaluation<Calculation, Result>
+  {
+    template <typename... Rest>
+    KRYS_NODISCARD Result operator()(const Calculation &calculation, Result referenceLength, ZoomNeeded token,
+                                     Rest &&...rest) noexcept
+    requires(Calculation::Range.ZoomOptions == css::RangeZoomOptions::Default)
     {
-      auto operator()(const SpaceSeparatedSize<T> &value, LayoutSize referenceBox) -> LayoutSize
-      requires HasTwoParameterEvaluate<T, LayoutUnit, LayoutUnit>
-      {
-        return {evaluate<LayoutUnit>(value.width(), referenceBox.width()),
-                evaluate<LayoutUnit>(value.height(), referenceBox.height())};
-      }
-      auto operator()(const SpaceSeparatedSize<T> &value, LayoutSize referenceBox, ZoomNeeded token)
-        -> LayoutSize
-      requires HasThreeParameterEvaluate<T, LayoutUnit, LayoutUnit, ZoomNeeded>
-      {
-        return {evaluate<LayoutUnit>(value.width(), referenceBox.width(), token),
-                evaluate<LayoutUnit>(value.height(), referenceBox.height(), token)};
-      }
-      auto operator()(const SpaceSeparatedSize<T> &value, LayoutSize referenceBox, ZoomFactor zoom)
-        -> LayoutSize
-      requires HasThreeParameterEvaluate<T, LayoutUnit, LayoutUnit, float>
-      {
-        return {evaluate<LayoutUnit>(value.width(), referenceBox.width(), zoom),
-                evaluate<LayoutUnit>(value.height(), referenceBox.height(), zoom)};
-      }
-    };
+      return Evaluate<Result>(calculation.ProtectedCalculation(), referenceLength, token,
+                              std::forward<Rest>(rest)...);
+    }
 
-    // MARK: - MinimallySerialisingSpaceSeparatedSize
-
-    template <typename T>
-    struct Evaluation<MinimallySerialisingSpaceSeparatedSize<T>, FloatSize>
+    template <typename... Rest>
+    KRYS_NODISCARD Result operator()(const Calculation &calculation, Result referenceLength,
+                                     ZoomFactor usedZoom, Rest &&...rest) noexcept
+    requires(Calculation::Range.ZoomOptions == css::RangeZoomOptions::Unzoomed)
     {
-      auto operator()(const MinimallySerialisingSpaceSeparatedSize<T> &value, FloatSize referenceBox)
-        -> FloatSize
-      requires HasTwoParameterEvaluate<T, float, float>
-      {
-        return {evaluate<float>(value.width(), referenceBox.width()),
-                evaluate<float>(value.height(), referenceBox.height())};
-      }
-      auto operator()(const MinimallySerialisingSpaceSeparatedSize<T> &value, FloatSize referenceBox,
-                      ZoomNeeded token) -> FloatSize
-      requires HasThreeParameterEvaluate<T, float, float, ZoomNeeded>
-      {
-        return {evaluate<float>(value.width(), referenceBox.width(), token),
-                evaluate<float>(value.height(), referenceBox.height(), token)};
-      }
-      auto operator()(const MinimallySerialisingSpaceSeparatedSize<T> &value, FloatSize referenceBox,
-                      ZoomFactor zoom) -> FloatSize
-      requires HasThreeParameterEvaluate<T, float, float, ZoomFactor>
-      {
-        return {evaluate<float>(value.width(), referenceBox.width(), zoom),
-                evaluate<float>(value.height(), referenceBox.height(), zoom)};
-      }
-    };
-    template <typename T>
-    struct Evaluation<MinimallySerialisingSpaceSeparatedSize<T>, LayoutSize>
+      return Evaluate<Result>(calculation.ProtectedCalculation(), referenceLength, usedZoom,
+                              std::forward<Rest>(rest)...);
+    }
+  };
+
+#pragma endregion
+
+#pragma region LengthPercentage
+
+  template <auto R, typename V, typename Result>
+  struct Evaluation<LengthPercentage<R, V>, Result>
+  {
+    KRYS_NODISCARD constexpr Result operator()(const LengthPercentage<R, V> &lengthPercentage,
+                                               Result referenceLength, ZoomNeeded token) noexcept
+    requires(R.ZoomOptions == css::RangeZoomOptions::Default)
     {
-      auto operator()(const MinimallySerialisingSpaceSeparatedSize<T> &value, LayoutSize referenceBox)
-        -> LayoutSize
-      requires HasTwoParameterEvaluate<T, LayoutUnit, LayoutUnit>
-      {
-        return {evaluate<LayoutUnit>(value.width(), referenceBox.width()),
-                evaluate<LayoutUnit>(value.height(), referenceBox.height())};
-      }
-      auto operator()(const MinimallySerialisingSpaceSeparatedSize<T> &value, LayoutSize referenceBox,
-                      ZoomNeeded token) -> LayoutSize
-      requires HasThreeParameterEvaluate<T, LayoutUnit, LayoutUnit, ZoomNeeded>
-      {
-        return {evaluate<LayoutUnit>(value.width(), referenceBox.width(), token),
-                evaluate<LayoutUnit>(value.height(), referenceBox.height(), token)};
-      }
-      auto operator()(const MinimallySerialisingSpaceSeparatedSize<T> &value, LayoutSize referenceBox,
-                      ZoomFactor zoom) -> LayoutSize
-      requires HasThreeParameterEvaluate<T, LayoutUnit, LayoutUnit, ZoomFactor>
-      {
-        return {evaluate<LayoutUnit>(value.width(), referenceBox.width(), zoom),
-                evaluate<LayoutUnit>(value.height(), referenceBox.height(), zoom)};
-      }
-    };
+      return krys::SwitchOn(
+        lengthPercentage, [&](const typename LengthPercentage<R, V>::Dimension &length) -> Result
+        { return Evaluate<Result>(length, token); },
+        [&](const typename LengthPercentage<R, V>::Percentage &percentage) -> Result
+        { return Evaluate<Result>(percentage, referenceLength); },
+        [&](const typename LengthPercentage<R, V>::Calc &calculation) -> Result
+        { return Evaluate<Result>(calculation, referenceLength, token); });
+    }
 
-    // MARK: - Calculated Evaluations
-
-    // Convert to `calc(100% - value)`.
-    template <auto R, typename V>
-    auto reflect(const LengthPercentage<R, V> &value) -> LengthPercentage<R, V>
+    KRYS_NODISCARD constexpr Result operator()(const LengthPercentage<R, V> &lengthPercentage,
+                                               Result referenceLength, ZoomFactor zoom) noexcept
+    requires(R.ZoomOptions == css::RangeZoomOptions::Unzoomed)
     {
-      using Result = LengthPercentage<R, V>;
-      using Dimension = typename Result::Dimension;
-      using Percentage = typename Result::Percentage;
-      using Calc = typename Result::Calc;
+      return krys::SwitchOn(
+        lengthPercentage, [&](const typename LengthPercentage<R, V>::Dimension &length) -> Result
+        { return Evaluate<Result>(length, zoom); },
+        [&](const typename LengthPercentage<R, V>::Percentage &percentage) -> Result
+        { return Evaluate<Result>(percentage, referenceLength); },
+        [&](const typename LengthPercentage<R, V>::Calc &calculation) -> Result
+        { return Evaluate<Result>(calculation, referenceLength, zoom); });
+    }
+  };
 
-      return WTF::switchOn(
-        value,
-        [&](const Dimension &value) -> Result
+#pragma endregion
+
+#pragma region NumberOrPercentageResolvedToNumber
+
+  template <css::Range nR, css::Range pR, typename V, typename Result>
+  struct Evaluation<NumberOrPercentageResolvedToNumber<nR, pR, V>, Result>
+  {
+    KRYS_NODISCARD constexpr Result
+      operator()(const NumberOrPercentageResolvedToNumber<nR, pR, V> &value) noexcept
+    {
+      return Evaluate<Result>(value.Value);
+    }
+
+    KRYS_NODISCARD constexpr Result operator()(const NumberOrPercentageResolvedToNumber<nR, pR, V> &value,
+                                               Result) noexcept
+    {
+      return Evaluate<Result>(value.Value);
+    }
+  };
+
+#pragma endregion
+
+#pragma region SpaceSeparatedPoint
+
+  template <typename T>
+  struct Evaluation<css::SpaceSeparatedPoint<T>, FloatPoint>
+  {
+    KRYS_NODISCARD FloatPoint operator()(const css::SpaceSeparatedPoint<T> &value,
+                                         FloatSize referenceBox) noexcept
+    requires HasTwoParameterEvaluate<T, float, float>
+    {
+      return {Evaluate<float>(value.x(), referenceBox.Width()),
+              Evaluate<float>(value.y(), referenceBox.Height())};
+    }
+
+    KRYS_NODISCARD FloatPoint operator()(const css::SpaceSeparatedPoint<T> &value, FloatSize referenceBox,
+                                         ZoomNeeded token) noexcept
+    requires HasThreeParameterEvaluate<T, float, float, ZoomNeeded>
+    {
+      return {Evaluate<float>(value.x(), referenceBox.Width(), token),
+              Evaluate<float>(value.y(), referenceBox.Height(), token)};
+    }
+
+    KRYS_NODISCARD FloatPoint operator()(const css::SpaceSeparatedPoint<T> &value, FloatSize referenceBox,
+                                         ZoomFactor zoom) noexcept
+    requires HasThreeParameterEvaluate<T, float, float, ZoomFactor>
+    {
+      return {Evaluate<float>(value.x(), referenceBox.Width(), zoom),
+              Evaluate<float>(value.y(), referenceBox.Height(), zoom)};
+    }
+  };
+
+  template <typename T>
+  struct Evaluation<css::SpaceSeparatedPoint<T>, LayoutPoint>
+  {
+    KRYS_NODISCARD LayoutPoint operator()(const css::SpaceSeparatedPoint<T> &value,
+                                          LayoutSize referenceBox) noexcept
+    requires HasTwoParameterEvaluate<T, LayoutUnit, LayoutUnit>
+    {
+      return {Evaluate<LayoutUnit>(value.x(), referenceBox.Width()),
+              Evaluate<LayoutUnit>(value.y(), referenceBox.Height())};
+    }
+
+    KRYS_NODISCARD LayoutPoint operator()(const css::SpaceSeparatedPoint<T> &value, LayoutSize referenceBox,
+                                          ZoomNeeded token) noexcept
+    requires HasThreeParameterEvaluate<T, LayoutUnit, LayoutUnit, ZoomNeeded>
+    {
+      return {Evaluate<LayoutUnit>(value.x(), referenceBox.Width(), token),
+              Evaluate<LayoutUnit>(value.y(), referenceBox.Height(), token)};
+    }
+
+    KRYS_NODISCARD LayoutPoint operator()(const css::SpaceSeparatedPoint<T> &value, LayoutSize referenceBox,
+                                          ZoomFactor zoom) noexcept
+    requires HasThreeParameterEvaluate<T, LayoutUnit, LayoutUnit, ZoomFactor>
+    {
+      return {Evaluate<LayoutUnit>(value.x(), referenceBox.Width(), zoom),
+              Evaluate<LayoutUnit>(value.y(), referenceBox.Height(), zoom)};
+    }
+  };
+
+#pragma endregion
+
+#pragma region SpaceSeparatedSize
+
+  template <typename T>
+  struct Evaluation<css::SpaceSeparatedSize<T>, FloatSize>
+  {
+    KRYS_NODISCARD FloatSize operator()(const css::SpaceSeparatedSize<T> &value,
+                                        FloatSize referenceBox) noexcept
+    requires HasTwoParameterEvaluate<T, float, float>
+    {
+      return {Evaluate<float>(value.Width(), referenceBox.Width()),
+              Evaluate<float>(value.Height(), referenceBox.Height())};
+    }
+
+    KRYS_NODISCARD FloatSize operator()(const css::SpaceSeparatedSize<T> &value, FloatSize referenceBox,
+                                        ZoomNeeded token) noexcept
+    requires HasThreeParameterEvaluate<T, float, float, ZoomNeeded>
+    {
+      return {Evaluate<float>(value.Width(), referenceBox.Width(), token),
+              Evaluate<float>(value.Height(), referenceBox.Height(), token)};
+    }
+
+    KRYS_NODISCARD FloatSize operator()(const css::SpaceSeparatedSize<T> &value, FloatSize referenceBox,
+                                        ZoomFactor zoom) noexcept
+    requires HasThreeParameterEvaluate<T, float, float, ZoomFactor>
+    {
+      return {Evaluate<float>(value.Width(), referenceBox.Width(), zoom),
+              Evaluate<float>(value.Height(), referenceBox.Height(), zoom)};
+    }
+  };
+
+  template <typename T>
+  struct Evaluation<css::SpaceSeparatedSize<T>, LayoutSize>
+  {
+    KRYS_NODISCARD LayoutSize operator()(const css::SpaceSeparatedSize<T> &value,
+                                         LayoutSize referenceBox) noexcept
+    requires HasTwoParameterEvaluate<T, LayoutUnit, LayoutUnit>
+    {
+      return {Evaluate<LayoutUnit>(value.Width(), referenceBox.Width()),
+              Evaluate<LayoutUnit>(value.Height(), referenceBox.Height())};
+    }
+
+    KRYS_NODISCARD LayoutSize operator()(const css::SpaceSeparatedSize<T> &value, LayoutSize referenceBox,
+                                         ZoomNeeded token) noexcept
+    requires HasThreeParameterEvaluate<T, LayoutUnit, LayoutUnit, ZoomNeeded>
+    {
+      return {Evaluate<LayoutUnit>(value.Width(), referenceBox.Width(), token),
+              Evaluate<LayoutUnit>(value.Height(), referenceBox.Height(), token)};
+    }
+
+    KRYS_NODISCARD LayoutSize operator()(const css::SpaceSeparatedSize<T> &value, LayoutSize referenceBox,
+                                         ZoomFactor zoom) noexcept
+    requires HasThreeParameterEvaluate<T, LayoutUnit, LayoutUnit, ZoomFactor>
+    {
+      return {Evaluate<LayoutUnit>(value.Width(), referenceBox.Width(), zoom),
+              Evaluate<LayoutUnit>(value.Height(), referenceBox.Height(), zoom)};
+    }
+  };
+
+#pragma endregion
+
+#pragma region MinimallySerialisingSpaceSeparatedSize
+
+  template <typename T>
+  struct Evaluation<css::MinimallySerialisingSpaceSeparatedSize<T>, FloatSize>
+  {
+    KRYS_NODISCARD FloatSize operator()(const css::MinimallySerialisingSpaceSeparatedSize<T> &value,
+                                        FloatSize referenceBox) noexcept
+    requires HasTwoParameterEvaluate<T, float, float>
+    {
+      return {Evaluate<float>(value.Width(), referenceBox.Width()),
+              Evaluate<float>(value.Height(), referenceBox.Height())};
+    }
+
+    KRYS_NODISCARD FloatSize operator()(const css::MinimallySerialisingSpaceSeparatedSize<T> &value,
+                                        FloatSize referenceBox, ZoomNeeded token) noexcept
+    requires HasThreeParameterEvaluate<T, float, float, ZoomNeeded>
+    {
+      return {Evaluate<float>(value.Width(), referenceBox.Width(), token),
+              Evaluate<float>(value.Height(), referenceBox.Height(), token)};
+    }
+
+    KRYS_NODISCARD FloatSize operator()(const css::MinimallySerialisingSpaceSeparatedSize<T> &value,
+                                        FloatSize referenceBox, ZoomFactor zoom) noexcept
+    requires HasThreeParameterEvaluate<T, float, float, ZoomFactor>
+    {
+      return {Evaluate<float>(value.Width(), referenceBox.Width(), zoom),
+              Evaluate<float>(value.Height(), referenceBox.Height(), zoom)};
+    }
+  };
+
+  template <typename T>
+  struct Evaluation<css::MinimallySerialisingSpaceSeparatedSize<T>, LayoutSize>
+  {
+    KRYS_NODISCARD LayoutSize operator()(const css::MinimallySerialisingSpaceSeparatedSize<T> &value,
+                                         LayoutSize referenceBox) noexcept
+    requires HasTwoParameterEvaluate<T, LayoutUnit, LayoutUnit>
+    {
+      return {Evaluate<LayoutUnit>(value.Width(), referenceBox.Width()),
+              Evaluate<LayoutUnit>(value.Height(), referenceBox.Height())};
+    }
+
+    KRYS_NODISCARD LayoutSize operator()(const css::MinimallySerialisingSpaceSeparatedSize<T> &value,
+                                         LayoutSize referenceBox, ZoomNeeded token) noexcept
+    requires HasThreeParameterEvaluate<T, LayoutUnit, LayoutUnit, ZoomNeeded>
+    {
+      return {Evaluate<LayoutUnit>(value.Width(), referenceBox.Width(), token),
+              Evaluate<LayoutUnit>(value.Height(), referenceBox.Height(), token)};
+    }
+
+    KRYS_NODISCARD LayoutSize operator()(const css::MinimallySerialisingSpaceSeparatedSize<T> &value,
+                                         LayoutSize referenceBox, ZoomFactor zoom) noexcept
+    requires HasThreeParameterEvaluate<T, LayoutUnit, LayoutUnit, ZoomFactor>
+    {
+      return {Evaluate<LayoutUnit>(value.Width(), referenceBox.Width(), zoom),
+              Evaluate<LayoutUnit>(value.Height(), referenceBox.Height(), zoom)};
+    }
+  };
+
+#pragma endregion
+
+#pragma region Calculated Evaluations
+
+  /// @brief Convert to `calc(100% - value)`.
+  template <auto R, typename V>
+  KRYS_NODISCARD LengthPercentage<R, V> Reflect(const LengthPercentage<R, V> &value) noexcept
+  {
+    using Result = LengthPercentage<R, V>;
+    using Dimension = typename Result::Dimension;
+    using Percentage = typename Result::Percentage;
+    using Calc = typename Result::Calc;
+
+    return krys::SwitchOn(
+      value,
+      [&](const Dimension &dimension) -> Result
+      {
+        // If `value` is 0, we can avoid the `calc` altogether.
+        if (dimension == 0_css_px)
         {
-          // If `value` is 0, we can avoid the `calc` altogether.
-          if (value == 0_css_px)
-            return 100_css_percentage;
+          return 100_css_percentage;
+        }
 
-          // Turn this into a calc expression: `calc(100% - value)`.
-          return Calc {Calculation::subtract(Calculation::percentage(100), copyCalculation(value))};
+        // Turn this into a calc expression: `calc(100% - value)`.
+        return Calc {calc::Subtract(calc::CreatePercentage(100), CopyCalculation(dimension))};
+      },
+      [&](const Percentage &percentage) -> Result
+      {
+        // If `value` is a percentage, we can avoid the `calc` altogether.
+        return 100_css_percentage - percentage.Value;
+      },
+      [&](const Calc &calculation) -> Result
+      {
+        // Turn this into a calc expression: `calc(100% - value)`.
+        return Calc {calc::Subtract(calc::CreatePercentage(100), CopyCalculation(calculation))};
+      });
+  }
+
+  /// @brief Merges the two ranges, `aR` and `bR`, creating a union of their ranges.
+  KRYS_NODISCARD consteval css::Range MergeRanges(css::Range aR, css::Range bR) noexcept
+  {
+    return css::Range {std::min(aR.Min, bR.Min), std::max(aR.Max, bR.Max)};
+  }
+
+  /// @brief Convert to `calc(100% - (a + b))`.
+  ///
+  /// Returns a LengthPercentage with range, `resultR`, equal to union of the two input ranges `aR` and `bR`.
+  template <auto aR, auto bR, typename V>
+  KRYS_NODISCARD LengthPercentage<MergeRanges(aR, bR), V>
+    ReflectSum(const LengthPercentage<aR, V> &a, const LengthPercentage<bR, V> &b) noexcept
+  {
+    constexpr auto resultR = MergeRanges(aR, bR);
+
+    using Result = LengthPercentage<resultR, V>;
+    using CalcResult = typename Result::Calc;
+    using PercentageA = typename LengthPercentage<aR, V>::Percentage;
+    using PercentageB = typename LengthPercentage<bR, V>::Percentage;
+
+    bool aIsZero = a.IsKnownZero();
+    bool bIsZero = b.IsKnownZero();
+
+    // If both `a` and `b` are 0, turn this into a calc expression: `calc(100% - (0 + 0))` aka `100%`.
+    if (aIsZero && bIsZero)
+    {
+      return 100_css_percentage;
+    }
+
+    // If just `a` is 0, we can just consider the case of `calc(100% - b)`.
+    if (aIsZero)
+    {
+      return krys::SwitchOn(
+        b,
+        [&](const PercentageB &percentage) -> Result
+        {
+          // And if `b` is a percent, we can avoid the `calc` altogether.
+          return 100_css_percentage - percentage.Value;
         },
-        [&](const Percentage &value) -> Result
+        [&](const auto &alternative) -> Result
         {
-          // If `value` is a percentage, we can avoid the `calc` altogether.
-          return 100_css_percentage - value.value;
-        },
-        [&](const Calc &value) -> Result
-        {
-          // Turn this into a calc expression: `calc(100% - value)`.
-          return Calc {Calculation::subtract(Calculation::percentage(100), copyCalculation(value))};
+          // Otherwise, turn this into a calc expression: `calc(100% - b)`.
+          return CalcResult {calc::Subtract(calc::CreatePercentage(100), CopyCalculation(alternative))};
         });
     }
 
-    // Merges the two ranges, `aR` and `bR`, creating a union of their ranges.
-    consteval CSS::Range mergeRanges(CSS::Range aR, CSS::Range bR)
+    // If just `b` is 0, we can just consider the case of `calc(100% - a)`.
+    if (bIsZero)
     {
-      return CSS::Range {std::min(aR.min, bR.min), std::max(aR.max, bR.max)};
+      return krys::SwitchOn(
+        a,
+        [&](const PercentageA &percentage) -> Result
+        {
+          // And if `a` is a percent, we can avoid the `calc` altogether.
+          return 100_css_percentage - percentage.Value;
+        },
+        [&](const auto &alternative) -> Result
+        {
+          // Otherwise, turn this into a calc expression: `calc(100% - a)`.
+          return CalcResult {calc::Subtract(calc::CreatePercentage(100), CopyCalculation(alternative))};
+        });
     }
 
-    // Convert to `calc(100% - (a + b))`.
-    //
-    // Returns a LengthPercentage with range, `resultR`, equal to union of the two input ranges `aR` and `bR`.
-    template <auto aR, auto bR, typename V>
-    auto reflectSum(const LengthPercentage<aR, V> &a, const LengthPercentage<bR, V> &b)
-      -> LengthPercentage<mergeRanges(aR, bR), V>
+    // If both and `a` and `b` are percentages, we can avoid the `calc` altogether.
+    if (krys::HoldsAlternative<PercentageA>(a) && krys::HoldsAlternative<PercentageB>(b))
     {
-      constexpr auto resultR = mergeRanges(aR, bR);
-
-      using Result = LengthPercentage<resultR, V>;
-      using CalcResult = typename Result::Calc;
-      using PercentageA = typename LengthPercentage<aR, V>::Percentage;
-      using PercentageB = typename LengthPercentage<bR, V>::Percentage;
-
-      bool aIsZero = a.isKnownZero();
-      bool bIsZero = b.isKnownZero();
-
-      // If both `a` and `b` are 0, turn this into a calc expression: `calc(100% - (0 + 0))` aka `100%`.
-      if (aIsZero && bIsZero)
-        return 100_css_percentage;
-
-      // If just `a` is 0, we can just consider the case of `calc(100% - b)`.
-      if (aIsZero)
-      {
-        return WTF::switchOn(
-          b,
-          [&](const PercentageB &b) -> Result
-          {
-            // And if `b` is a percent, we can avoid the `calc` altogether.
-            return 100_css_percentage - b.value;
-          },
-          [&](const auto &b) -> Result
-          {
-            // Otherwise, turn this into a calc expression: `calc(100% - b)`.
-            return CalcResult {Calculation::subtract(Calculation::percentage(100), copyCalculation(b))};
-          });
-      }
-
-      // If just `b` is 0, we can just consider the case of `calc(100% - a)`.
-      if (bIsZero)
-      {
-        return WTF::switchOn(
-          a,
-          [&](const PercentageA &a) -> Result
-          {
-            // And if `a` is a percent, we can avoid the `calc` altogether.
-            return 100_css_percentage - a.value;
-          },
-          [&](const auto &a) -> Result
-          {
-            // Otherwise, turn this into a calc expression: `calc(100% - a)`.
-            return CalcResult {Calculation::subtract(Calculation::percentage(100), copyCalculation(a))};
-          });
-      }
-
-      // If both and `a` and `b` are percentages, we can avoid the `calc` altogether.
-      if (WTF::holdsAlternative<PercentageA>(a) && WTF::holdsAlternative<PercentageB>(b))
-        return 100_css_percentage - (get<PercentageA>(a).value + get<PercentageB>(b).value);
-
-      // Otherwise, turn this into a calc expression: `calc(100% - (a + b))`.
-      return CalcResult {Calculation::subtract(Calculation::percentage(100),
-                                               Calculation::add(copyCalculation(a), copyCalculation(b)))};
+      return 100_css_percentage - (get<PercentageA>(a).Value + get<PercentageB>(b).Value);
     }
 
-  } // namespace Style
-} // namespace WebCore
+    // Otherwise, turn this into a calc expression: `calc(100% - (a + b))`.
+    return CalcResult {
+      calc::Subtract(calc::CreatePercentage(100), calc::Add(CopyCalculation(a), CopyCalculation(b)))};
+  }
+
+#pragma endregion
+}

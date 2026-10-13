@@ -166,12 +166,12 @@ namespace krys::boo
     krys_unreachable();
   }
 
-  float RenderBox::ContentBoxWidth() const noexcept
+  LayoutUnit RenderBox::ContentBoxWidth() const noexcept
   {
     krys_unreachable();
   }
 
-  float RenderBox::ContentBoxHeight() const noexcept
+  LayoutUnit RenderBox::ContentBoxHeight() const noexcept
   {
     krys_unreachable();
   }
@@ -199,11 +199,6 @@ namespace krys::boo
 
 namespace krys::boo::style
 {
-  bool EvaluationTimeZoomEnabled(const RenderStyle &) noexcept
-  {
-    krys_unreachable();
-  }
-
   const RenderStyle &BuilderState::ParentStyle() const noexcept
   {
     krys_unreachable();
@@ -235,6 +230,16 @@ namespace krys::boo::style
   }
 
   const css::ToLengthConversionData &BuilderState::CssToLengthConversionData() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  bool BuilderState::UseSVGZoomRulesForLength() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  bool BuilderState::EvaluationTimeZoomEnabled() const noexcept
   {
     krys_unreachable();
   }

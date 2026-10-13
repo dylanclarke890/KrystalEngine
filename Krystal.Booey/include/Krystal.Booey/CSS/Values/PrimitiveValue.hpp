@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/AttrValue.hpp"
@@ -25,17 +26,21 @@ namespace krys::boo::css
 {
   class ToLengthConversionData;
 
-  // FIXME: maxValueForCssLength / minValueForCssLength need LayoutUnit, which isn't ported yet.
+  // Max/min values for CSS, needs to slightly smaller/larger than the true max/min values to allow for
+  // rounding without overflowing. Subtract two (rather than one) to allow for values to be converted to float
+  // and back without exceeding the LayoutUnit::max.
+  constexpr float MaxValueForCssLength = static_cast<float>(IntMaxForLayoutUnit - 2);
+  constexpr float MinValueForCssLength = static_cast<float>(IntMinForLayoutUnit + 2);
 
-  /// @brief Dimension calculations are imprecise, often resulting in values of e.g. 44.99998. We need to round if
-  /// we're really close to the next integer value.
+  /// @brief Dimension calculations are imprecise, often resulting in values of e.g. 44.99998. We need to
+  /// round if we're really close to the next integer value.
   template <typename T>
   KRYS_NODISCARD inline T RoundForImpreciseConversion(double value) noexcept
   {
     value += (value < 0) ? -0.01 : +0.01;
     return ((value > std::numeric_limits<T>::max()) || (value < std::numeric_limits<T>::min()))
-           ? 0
-           : static_cast<T>(value);
+             ? 0
+             : static_cast<T>(value);
   }
 
   template <>
@@ -135,8 +140,8 @@ namespace krys::boo::css
 
 #pragma region Unit Checks
 
-    // FIXME: Some of these use PrimitiveUnitType() and some use PrimitiveType(). Many that use PrimitiveUnitType()
-    // are likely broken with calc().
+    // FIXME: Some of these use PrimitiveUnitType() and some use PrimitiveType(). Many that use
+    // PrimitiveUnitType() are likely broken with calc().
 
     KRYS_NODISCARD bool IsAngle() const noexcept
     {
@@ -268,9 +273,9 @@ namespace krys::boo::css
     KRYS_NODISCARD constexpr static bool IsLength(UnitType type) noexcept
     {
       return type == UnitType::em || type == UnitType::ex || type == UnitType::px || type == UnitType::cm
-          || type == UnitType::mm || type == UnitType::in || type == UnitType::pt || type == UnitType::pc
-          || type == UnitType::Q || IsFontRelativeLength(type) || IsViewportPercentageLength(type)
-          || IsContainerPercentageLength(type) || type == UnitType::QuirkyEm;
+             || type == UnitType::mm || type == UnitType::in || type == UnitType::pt || type == UnitType::pc
+             || type == UnitType::Q || IsFontRelativeLength(type) || IsViewportPercentageLength(type)
+             || IsContainerPercentageLength(type) || type == UnitType::QuirkyEm;
     }
 
 #pragma endregion
@@ -659,7 +664,8 @@ namespace krys::boo::css
 
 #pragma region Length (requires IsLength())
 
-    /// @note Specialised for int64, uint64, int32, uint32, int16, uint16, float and double in PrimitiveValue.cpp.
+    /// @note Specialised for int64, uint64, int32, uint32, int16, uint16, float and double in
+    /// PrimitiveValue.cpp.
     template <typename T = double>
     KRYS_NODISCARD T ResolveAsLength(const ToLengthConversionData &conversionData) const noexcept;
 
@@ -709,7 +715,8 @@ namespace krys::boo::css
 #pragma region Divides value by 100 if percentage
 
     template <typename T = double>
-    KRYS_NODISCARD T ValueDividingBy100IfPercentage(const ToLengthConversionData &conversionData) const noexcept
+    KRYS_NODISCARD
+    T ValueDividingBy100IfPercentage(const ToLengthConversionData &conversionData) const noexcept
     {
       return ClampTo<T>(DoubleValueDividingBy100IfPercentage(conversionData));
     }
@@ -826,7 +833,8 @@ namespace krys::boo::css
 
 #pragma endregion
 
-    KRYS_NODISCARD constexpr static Maybe<double> ConversionToCanonicalUnitsScaleFactor(UnitType unitType) noexcept;
+    KRYS_NODISCARD constexpr static Maybe<double>
+      ConversionToCanonicalUnitsScaleFactor(UnitType unitType) noexcept;
 
     KRYS_NODISCARD Maybe<double> DoubleValueInternal(UnitType targetUnit,
                                                      const ToLengthConversionData &) const noexcept;
@@ -842,26 +850,26 @@ namespace krys::boo::css
     KRYS_NODISCARD constexpr static bool IsFontIndependentLength(UnitType type) noexcept
     {
       return type == UnitType::px || type == UnitType::cm || type == UnitType::mm || type == UnitType::in
-          || type == UnitType::pt || type == UnitType::pc;
+             || type == UnitType::pt || type == UnitType::pc;
     }
 
     KRYS_NODISCARD constexpr static bool IsRootFontRelativeLength(UnitType type) noexcept
     {
       return type == UnitType::rcap || type == UnitType::rch || type == UnitType::rem || type == UnitType::rex
-          || type == UnitType::ric || type == UnitType::rlh;
+             || type == UnitType::ric || type == UnitType::rlh;
     }
 
     KRYS_NODISCARD constexpr static bool IsFontRelativeLength(UnitType type) noexcept
     {
       return type == UnitType::em || type == UnitType::ex || type == UnitType::lh || type == UnitType::cap
-          || type == UnitType::ch || type == UnitType::ic || type == UnitType::QuirkyEm
-          || IsRootFontRelativeLength(type);
+             || type == UnitType::ch || type == UnitType::ic || type == UnitType::QuirkyEm
+             || IsRootFontRelativeLength(type);
     }
 
     KRYS_NODISCARD constexpr static bool IsContainerPercentageLength(UnitType type) noexcept
     {
       return type == UnitType::cqw || type == UnitType::cqh || type == UnitType::cqi || type == UnitType::cqb
-          || type == UnitType::cqmin || type == UnitType::cqmax;
+             || type == UnitType::cqmin || type == UnitType::cqmax;
     }
 
     KRYS_NODISCARD constexpr static bool IsViewportPercentageLength(UnitType type) noexcept
@@ -874,69 +882,69 @@ namespace krys::boo::css
   {
     switch (unitType)
     {
-      case UnitType::cap:     return u8"cap";
-      case UnitType::ch:      return u8"ch";
-      case UnitType::cm:      return u8"cm";
-      case UnitType::cqb:     return u8"cqb";
-      case UnitType::cqh:     return u8"cqh";
-      case UnitType::cqi:     return u8"cqi";
-      case UnitType::cqmax:   return u8"cqmax";
-      case UnitType::cqmin:   return u8"cqmin";
-      case UnitType::cqw:     return u8"cqw";
-      case UnitType::deg:     return u8"deg";
-      case UnitType::dpcm:    return u8"dpcm";
-      case UnitType::dpi:     return u8"dpi";
-      case UnitType::dppx:    return u8"dppx";
-      case UnitType::dvb:     return u8"dvb";
-      case UnitType::dvh:     return u8"dvh";
-      case UnitType::dvi:     return u8"dvi";
-      case UnitType::dvmax:   return u8"dvmax";
-      case UnitType::dvmin:   return u8"dvmin";
-      case UnitType::dvw:     return u8"dvw";
-      case UnitType::em:      return u8"em";
-      case UnitType::ex:      return u8"ex";
-      case UnitType::fr:      return u8"fr";
-      case UnitType::grad:    return u8"grad";
-      case UnitType::hz:      return u8"hz";
-      case UnitType::ic:      return u8"ic";
-      case UnitType::in:      return u8"in";
-      case UnitType::khz:     return u8"khz";
-      case UnitType::lh:      return u8"lh";
-      case UnitType::lvb:     return u8"lvb";
-      case UnitType::lvh:     return u8"lvh";
-      case UnitType::lvi:     return u8"lvi";
-      case UnitType::lvmax:   return u8"lvmax";
-      case UnitType::lvmin:   return u8"lvmin";
-      case UnitType::lvw:     return u8"lvw";
-      case UnitType::mm:      return u8"mm";
-      case UnitType::ms:      return u8"ms";
-      case UnitType::pc:      return u8"pc";
-      case UnitType::Percentage: return u8"%";
-      case UnitType::pt:      return u8"pt";
-      case UnitType::px:      return u8"px";
-      case UnitType::Q:       return u8"q";
-      case UnitType::rad:     return u8"rad";
-      case UnitType::rcap:    return u8"rcap";
-      case UnitType::rch:     return u8"rch";
-      case UnitType::rem:     return u8"rem";
-      case UnitType::rex:     return u8"rex";
-      case UnitType::ric:     return u8"ric";
-      case UnitType::rlh:     return u8"rlh";
-      case UnitType::s:       return u8"s";
-      case UnitType::svb:     return u8"svb";
-      case UnitType::svh:     return u8"svh";
-      case UnitType::svi:     return u8"svi";
-      case UnitType::svmax:   return u8"svmax";
-      case UnitType::svmin:   return u8"svmin";
-      case UnitType::svw:     return u8"svw";
-      case UnitType::turn:    return u8"turn";
-      case UnitType::vb:      return u8"vb";
-      case UnitType::vh:      return u8"vh";
-      case UnitType::vi:      return u8"vi";
-      case UnitType::vmax:    return u8"vmax";
-      case UnitType::vmin:    return u8"vmin";
-      case UnitType::vw:      return u8"vw";
-      case UnitType::x:       return u8"x";
+      case UnitType::cap:                      return u8"cap";
+      case UnitType::ch:                       return u8"ch";
+      case UnitType::cm:                       return u8"cm";
+      case UnitType::cqb:                      return u8"cqb";
+      case UnitType::cqh:                      return u8"cqh";
+      case UnitType::cqi:                      return u8"cqi";
+      case UnitType::cqmax:                    return u8"cqmax";
+      case UnitType::cqmin:                    return u8"cqmin";
+      case UnitType::cqw:                      return u8"cqw";
+      case UnitType::deg:                      return u8"deg";
+      case UnitType::dpcm:                     return u8"dpcm";
+      case UnitType::dpi:                      return u8"dpi";
+      case UnitType::dppx:                     return u8"dppx";
+      case UnitType::dvb:                      return u8"dvb";
+      case UnitType::dvh:                      return u8"dvh";
+      case UnitType::dvi:                      return u8"dvi";
+      case UnitType::dvmax:                    return u8"dvmax";
+      case UnitType::dvmin:                    return u8"dvmin";
+      case UnitType::dvw:                      return u8"dvw";
+      case UnitType::em:                       return u8"em";
+      case UnitType::ex:                       return u8"ex";
+      case UnitType::fr:                       return u8"fr";
+      case UnitType::grad:                     return u8"grad";
+      case UnitType::hz:                       return u8"hz";
+      case UnitType::ic:                       return u8"ic";
+      case UnitType::in:                       return u8"in";
+      case UnitType::khz:                      return u8"khz";
+      case UnitType::lh:                       return u8"lh";
+      case UnitType::lvb:                      return u8"lvb";
+      case UnitType::lvh:                      return u8"lvh";
+      case UnitType::lvi:                      return u8"lvi";
+      case UnitType::lvmax:                    return u8"lvmax";
+      case UnitType::lvmin:                    return u8"lvmin";
+      case UnitType::lvw:                      return u8"lvw";
+      case UnitType::mm:                       return u8"mm";
+      case UnitType::ms:                       return u8"ms";
+      case UnitType::pc:                       return u8"pc";
+      case UnitType::Percentage:               return u8"%";
+      case UnitType::pt:                       return u8"pt";
+      case UnitType::px:                       return u8"px";
+      case UnitType::Q:                        return u8"q";
+      case UnitType::rad:                      return u8"rad";
+      case UnitType::rcap:                     return u8"rcap";
+      case UnitType::rch:                      return u8"rch";
+      case UnitType::rem:                      return u8"rem";
+      case UnitType::rex:                      return u8"rex";
+      case UnitType::ric:                      return u8"ric";
+      case UnitType::rlh:                      return u8"rlh";
+      case UnitType::s:                        return u8"s";
+      case UnitType::svb:                      return u8"svb";
+      case UnitType::svh:                      return u8"svh";
+      case UnitType::svi:                      return u8"svi";
+      case UnitType::svmax:                    return u8"svmax";
+      case UnitType::svmin:                    return u8"svmin";
+      case UnitType::svw:                      return u8"svw";
+      case UnitType::turn:                     return u8"turn";
+      case UnitType::vb:                       return u8"vb";
+      case UnitType::vh:                       return u8"vh";
+      case UnitType::vi:                       return u8"vi";
+      case UnitType::vmax:                     return u8"vmax";
+      case UnitType::vmin:                     return u8"vmin";
+      case UnitType::vw:                       return u8"vw";
+      case UnitType::x:                        return u8"x";
 
       case UnitType::Attr:
       case UnitType::Calc:
@@ -952,7 +960,7 @@ namespace krys::boo::css
       case UnitType::String:
       case UnitType::Unknown:
       case UnitType::ValueId:
-      case UnitType::CustomIdent: return u8"";
+      case UnitType::CustomIdent:              return u8"";
     }
 
     krys_debug_assert(false);
@@ -986,7 +994,7 @@ namespace krys::boo::css
       case UnitType::ms:   return secsPerMs;
       case UnitType::khz:  return hertzPerKilohertz;
 
-      default: return null;
+      default:             return null;
     }
   }
 

@@ -1,422 +1,449 @@
-/*
- * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+﻿#pragma once
 
-#pragma once
+#include "Krystal.Booey/Core/LayoutUnit.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/PrimitiveKeywordList.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/LengthWrapperData.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
+#include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Utils/Tags.hpp"
+#include "Krystal.Core/Visitor.hpp"
 
-#include <WebCore/CSSPrimitiveKeywordList.h>
-#include <WebCore/LayoutUnit.h>
-#include <WebCore/StyleLengthWrapperData.h>
-#include <WebCore/StylePrimitiveNumericTypes.h>
-#include <wtf/StdLibExtras.h>
-#include <wtf/text/TextStream.h>
-
-namespace WebCore
+namespace krys::boo::style
 {
-  namespace Style
+  template <typename, css::PrimitiveKeyword...>
+  struct LengthWrapperBase;
+
+  template <typename, typename>
+  struct MinimumEvaluation;
+
+  template <typename>
+  struct LengthWrapperBlendingSupport;
+
+  // Transitionary type acting as a `style::PrimitiveNumericOrKeyword<...>` but implemented by wrapping a
+  // `LengthWrapperData`.
+  template <typename Numeric, css::PrimitiveKeyword... Ks>
+  struct LengthWrapperBase
   {
+    template <typename>
+    friend struct ToPlatform;
 
-    template <typename, CSS::PrimitiveKeyword...>
-    struct LengthWrapperBase;
     template <typename, typename>
-    struct MinimumEvaluation;
+    friend struct Evaluation;
 
-    // Transitionary type acting as a `Style::PrimitiveNumericOrKeyword<...>` but implemented by wrapping a
-    // `LengthWrapperData`.
-    template <typename Numeric, CSS::PrimitiveKeyword... Ks>
-    struct LengthWrapperBase
+    template <typename, typename>
+    friend struct MinimumEvaluation;
+
+    template <typename>
+    friend struct Blending;
+
+    template <typename>
+    friend struct LengthWrapperBlendingSupport;
+
+    using Base = LengthWrapperBase<Numeric, Ks...>;
+    using Keywords = css::PrimitiveKeywordList<Ks...>;
+
+    constexpr static bool HasKeywords = Keywords::Count > 0;
+
+    constexpr static uint8 IndexForFirstKeyword = 0;
+    constexpr static uint8 IndexForLastKeyword = HasKeywords ? Keywords::Count - 1 : 0;
+    constexpr static uint8 IndexForFixed = HasKeywords ? IndexForLastKeyword + 1 : 0;
+    constexpr static uint8 IndexForPercentage = IndexForFixed + 1;
+    constexpr static uint8 IndexForCalc = IndexForFixed + 2;
+    constexpr static uint8 MaxIndex = IndexForCalc;
+
+    using Specified = Numeric;
+    using Fixed = typename Specified::Dimension;
+    using Percentage = typename Specified::Percentage;
+    using Calc = typename Specified::Calc;
+
+    constexpr static bool SupportsAuto = Keywords::IsValidKeyword(css::keywords::Auto {});
+    constexpr static bool SupportsNormal = Keywords::IsValidKeyword(css::keywords::Normal {});
+    constexpr static bool SupportsIntrinsic = Keywords::IsValidKeyword(css::keywords::Intrinsic {});
+    constexpr static bool SupportsMinIntrinsic = Keywords::IsValidKeyword(css::keywords::MinIntrinsic {});
+    constexpr static bool SupportsMinContent = Keywords::IsValidKeyword(css::keywords::MinContent {});
+    constexpr static bool SupportsMaxContent = Keywords::IsValidKeyword(css::keywords::MaxContent {});
+    constexpr static bool SupportsWebkitFillAvailable =
+      Keywords::IsValidKeyword(css::keywords::WebkitFillAvailable {});
+    constexpr static bool SupportsFitContent = Keywords::IsValidKeyword(css::keywords::FitContent {});
+    constexpr static bool SupportsContent = Keywords::IsValidKeyword(css::keywords::Content {});
+    constexpr static bool SupportsNone = Keywords::IsValidKeyword(css::keywords::None {});
+
+  private:
+    LengthWrapperData _value;
+
+  public:
+    LengthWrapperBase(css::ValidKeywordForList<Keywords> auto keyword) noexcept
+        : _value(static_cast<uint8>(Keywords::OffsetForKeyword(keyword)))
     {
-      using Base = LengthWrapperBase<Numeric, Ks...>;
-      using Keywords = CSS::PrimitiveKeywordList<Ks...>;
-
-      static constexpr bool hasKeywords = Keywords::count > 0;
-
-      static constexpr uint8_t indexForFirstKeyword = 0;
-      static constexpr uint8_t indexForLastKeyword = hasKeywords ? Keywords::count - 1 : 0;
-      static constexpr uint8_t indexForFixed = hasKeywords ? indexForLastKeyword + 1 : 0;
-      static constexpr uint8_t indexForPercentage = indexForFixed + 1;
-      static constexpr uint8_t indexForCalc = indexForFixed + 2;
-      static constexpr uint8_t maxIndex = indexForCalc;
-
-      using Specified = Numeric;
-      using Fixed = typename Specified::Dimension;
-      using Percentage = typename Specified::Percentage;
-      using Calc = typename Specified::Calc;
-
-      static constexpr bool SupportsAuto = Keywords::isValidKeyword(CSS::Keyword::Auto {});
-      static constexpr bool SupportsNormal = Keywords::isValidKeyword(CSS::Keyword::Normal {});
-      static constexpr bool SupportsIntrinsic = Keywords::isValidKeyword(CSS::Keyword::Intrinsic {});
-      static constexpr bool SupportsMinIntrinsic = Keywords::isValidKeyword(CSS::Keyword::MinIntrinsic {});
-      static constexpr bool SupportsMinContent = Keywords::isValidKeyword(CSS::Keyword::MinContent {});
-      static constexpr bool SupportsMaxContent = Keywords::isValidKeyword(CSS::Keyword::MaxContent {});
-      static constexpr bool SupportsWebkitFillAvailable =
-        Keywords::isValidKeyword(CSS::Keyword::WebkitFillAvailable {});
-      static constexpr bool SupportsFitContent = Keywords::isValidKeyword(CSS::Keyword::FitContent {});
-      static constexpr bool SupportsContent = Keywords::isValidKeyword(CSS::Keyword::Content {});
-      static constexpr bool SupportsNone = Keywords::isValidKeyword(CSS::Keyword::None {});
-
-      LengthWrapperBase(CSS::ValidKeywordForList<Keywords> auto keyword)
-          : m_value(Keywords::offsetForKeyword(keyword))
-      {
-      }
-
-      LengthWrapperBase(Fixed fixed) : m_value(indexForFixed, fixed.unresolvedValue())
-      {
-      }
-      LengthWrapperBase(Fixed fixed, bool hasQuirk)
-          : m_value(indexForFixed, fixed.unresolvedValue(), hasQuirk)
-      {
-      }
-      LengthWrapperBase(Percentage percent) : m_value(indexForPercentage, percent.value)
-      {
-      }
-      LengthWrapperBase(Calc &&calc) : m_value(indexForCalc, calc.protectedCalculation())
-      {
-      }
-      LengthWrapperBase(Specified &&specified) : m_value(toData(specified))
-      {
-      }
-      LengthWrapperBase(const Specified &specified) : m_value(toData(specified))
-      {
-      }
-
-      LengthWrapperBase(CSS::ValueLiteral<CSS::LengthUnit::Px> literal) : LengthWrapperBase(Fixed {literal})
-      {
-      }
-      LengthWrapperBase(CSS::ValueLiteral<CSS::PercentageUnit::Percentage> literal)
-          : LengthWrapperBase(Percentage {literal})
-      {
-      }
-
-      explicit LengthWrapperBase(WTF::HashTableEmptyValueType token) : m_value(token)
-      {
-      }
-
-      // IPC Support
-      explicit LengthWrapperBase(LengthWrapperData::IPCData &&data) : m_value {toData(WTF::move(data))}
-      {
-      }
-      LengthWrapperData::IPCData ipcData() const
-      {
-        return m_value.ipcData();
-      }
-
-      ALWAYS_INLINE bool isFixed() const
-      {
-        return holdsAlternative<Fixed>();
-      }
-      ALWAYS_INLINE bool isPercent() const
-      {
-        return holdsAlternative<Percentage>();
-      }
-      ALWAYS_INLINE bool isCalculated() const
-      {
-        return holdsAlternative<Calc>();
-      }
-      ALWAYS_INLINE bool isPercentOrCalculated() const
-      {
-        return isPercent() || isCalculated();
-      }
-      ALWAYS_INLINE bool isSpecified() const
-      {
-        return isFixed() || isPercent() || isCalculated();
-      }
-
-      // `isKnownZero` returns whether the value can be guaranteed to be `0`. Keywords and calc() return
-      // `false`.
-      ALWAYS_INLINE bool isKnownZero() const
-      requires(Fixed::range.min <= 0 && Fixed::range.max >= 0)
-      {
-        return m_value.isKnownZero(evaluationKind());
-      }
-      // `isKnownPositive` returns whether the value can be guaranteed to be more than `0`. Keywords and
-      // calc() return `false`.
-      ALWAYS_INLINE bool isKnownPositive() const
-      requires(Fixed::range.max > 0)
-      {
-        return m_value.isKnownPositive(evaluationKind());
-      }
-      // `isKnownNegative` returns whether the value can be guaranteed to be less than `0`. Keywords and
-      // calc() return `false`.
-      ALWAYS_INLINE bool isKnownNegative() const
-      requires(Fixed::range.min < 0)
-      {
-        return m_value.isKnownNegative(evaluationKind());
-      }
-
-      // `isPossiblyZero` returns whether the value can possibly be `0`. Keywords and calc() return `true`.
-      ALWAYS_INLINE bool isPossiblyZero() const
-      requires(Fixed::range.min <= 0 && Fixed::range.max >= 0)
-      {
-        return m_value.isPossiblyZero(evaluationKind());
-      }
-      // `isPossiblyPositive` returns whether the value can possibly be more than `0`. Keywords and calc()
-      // return `true.
-      ALWAYS_INLINE bool isPossiblyPositive() const
-      requires(Fixed::range.max > 0)
-      {
-        return m_value.isPossiblyPositive(evaluationKind());
-      }
-      // `isPossiblyNegative` returns whether the value can possibly be less than `0`. Keywords and calc()
-      // return `true.
-      ALWAYS_INLINE bool isPossiblyNegative() const
-      requires(Fixed::range.min < 0)
-      {
-        return m_value.isPossiblyNegative(evaluationKind());
-      }
-
-      std::optional<Fixed> tryFixed() const
-      {
-        return isFixed() ? std::make_optional(Fixed {m_value.value()}) : std::nullopt;
-      }
-      std::optional<Percentage> tryPercentage() const
-      {
-        return isPercent() ? std::make_optional(Percentage {m_value.value()}) : std::nullopt;
-      }
-      std::optional<Calc> tryCalc() const
-      {
-        return isCalculated() ? std::make_optional(Calc {m_value.calculationValue()}) : std::nullopt;
-      }
-
-      std::optional<Specified> trySpecified() const
-      {
-        auto opaqueType = m_value.type();
-
-        if (opaqueType == indexForFixed)
-          return Specified(Fixed {m_value.value()});
-        else if (opaqueType == indexForPercentage)
-          return Specified(Percentage {m_value.value()});
-        else if (opaqueType == indexForCalc)
-          return Specified(Calc {m_value.calculationValue()});
-        else
-          return {};
-      }
-
-      template <typename T>
-      bool holdsAlternative() const
-      {
-        if constexpr (CSS::ValidKeywordForList<T, Keywords>)
-          return m_value.type() == Keywords::offsetForKeyword(T {});
-        else if constexpr (std::same_as<T, Fixed>)
-          return m_value.type() == indexForFixed;
-        else if constexpr (std::same_as<T, Percentage>)
-          return m_value.type() == indexForPercentage;
-        else if constexpr (std::same_as<T, Calc>)
-          return m_value.type() == indexForCalc;
-        else if constexpr (std::same_as<T, Specified>)
-          return m_value.type() == indexForFixed || m_value.type() == indexForPercentage
-                 || m_value.type() == indexForCalc;
-      }
-
-      template <typename... F>
-      decltype(auto) switchOn(F &&...f) const
-      {
-        auto visitor = WTF::makeVisitor(std::forward<F>(f)...);
-
-        auto opaqueType = m_value.type();
-
-        if constexpr (hasKeywords)
-        {
-          if (opaqueType <= indexForLastKeyword)
-            return Keywords::visitKeywordAtOffset(opaqueType, visitor);
-        }
-
-        if (opaqueType == indexForFixed)
-          return visitor(Fixed {m_value.value()});
-        else if (opaqueType == indexForPercentage)
-          return visitor(Percentage {m_value.value()});
-        else if (opaqueType == indexForCalc)
-          return visitor(Calc {m_value.calculationValue()});
-
-        RELEASE_ASSERT_NOT_REACHED();
-      }
-
-      bool hasQuirk() const
-      {
-        return m_value.hasQuirk();
-      }
-
-      bool hasSameType(const LengthWrapperBase &other) const
-      {
-        return m_value.type() == other.m_value.type();
-      }
-
-      bool operator==(const LengthWrapperBase &) const = default;
-
-    private:
-      template <typename>
-      friend struct ToPlatform;
-      template <typename, typename>
-      friend struct Evaluation;
-      template <typename, typename>
-      friend struct MinimumEvaluation;
-      template <typename>
-      friend struct Blending;
-      template <typename>
-      friend struct LengthWrapperBlendingSupport;
-
-      static LengthWrapperData toData(const Specified &specified)
-      {
-        return WTF::switchOn(
-          specified,
-          [](const Fixed &fixed) { return LengthWrapperData {indexForFixed, fixed.unresolvedValue()}; },
-          [](const Percentage &percentage)
-          { return LengthWrapperData {indexForPercentage, percentage.value}; },
-          [](const Calc &calc) { return LengthWrapperData {indexForCalc, calc.protectedCalculation()}; });
-      }
-
-      static LengthWrapperData toData(LengthWrapperData::IPCData &&ipcData)
-      {
-        RELEASE_ASSERT(ipcData.opaqueType <= maxIndex);
-        RELEASE_ASSERT(ipcData.opaqueType != indexForCalc);
-
-        if (ipcData.opaqueType == indexForFixed)
-        {
-          RELEASE_ASSERT(CSS::isWithinRange<Fixed::range>(ipcData.value));
-        }
-        if (ipcData.opaqueType == indexForPercentage)
-        {
-          RELEASE_ASSERT(CSS::isWithinRange<Percentage::range>(ipcData.value));
-        }
-
-        return LengthWrapperData {WTF::move(ipcData)};
-      }
-
-      LengthWrapperDataEvaluationKind evaluationKind() const
-      {
-        auto opaqueType = m_value.type();
-
-        if constexpr (hasKeywords)
-        {
-          if (opaqueType <= indexForLastKeyword)
-            return LengthWrapperDataEvaluationKind::Flag;
-        }
-
-        if (opaqueType == indexForFixed)
-          return LengthWrapperDataEvaluationKind::Fixed;
-        else if (opaqueType == indexForPercentage)
-          return LengthWrapperDataEvaluationKind::Percentage;
-        else if (opaqueType == indexForCalc)
-          return LengthWrapperDataEvaluationKind::Calculation;
-
-        RELEASE_ASSERT_NOT_REACHED();
-      }
-
-      LengthWrapperData m_value;
-    };
-
-    // MARK: - Concepts
-
-    template <typename T>
-    concept LengthWrapperBaseDerived = WTF::IsBaseOfTemplate<LengthWrapperBase, T>::value && VariantLike<T>;
-
-    // MARK: - Evaluation
-
-    template <LengthWrapperBaseDerived T, typename Result>
-    struct Evaluation<T, Result>
-    {
-      auto operator()(const T &value, NOESCAPE const Invocable<Result()> auto &lazyMaximumValueFunctor,
-                      ZoomNeeded token) -> Result
-      requires(T::Fixed::range.zoomOptions == CSS::RangeZoomOptions::Default)
-      {
-        return value.m_value.template valueForLengthWrapperDataWithLazyMaximum<Result, Result>(
-          value.evaluationKind(), lazyMaximumValueFunctor, token);
-      }
-      auto operator()(const T &value, Result maximumValue, ZoomNeeded token) -> Result
-      requires(T::Fixed::range.zoomOptions == CSS::RangeZoomOptions::Default)
-      {
-        return value.m_value.template valueForLengthWrapperDataWithLazyMaximum<Result, Result>(
-          value.evaluationKind(), [&] ALWAYS_INLINE_LAMBDA { return maximumValue; }, token);
-      }
-
-      auto operator()(const T &value, NOESCAPE const Invocable<Result()> auto &lazyMaximumValueFunctor,
-                      ZoomFactor zoom) -> Result
-      requires(T::Fixed::range.zoomOptions == CSS::RangeZoomOptions::Unzoomed)
-      {
-        return value.m_value.template valueForLengthWrapperDataWithLazyMaximum<Result, Result>(
-          value.evaluationKind(), lazyMaximumValueFunctor, zoom);
-      }
-      auto operator()(const T &value, Result maximumValue, ZoomFactor zoom) -> Result
-      requires(T::Fixed::range.zoomOptions == CSS::RangeZoomOptions::Unzoomed)
-      {
-        return value.m_value.template valueForLengthWrapperDataWithLazyMaximum<Result, Result>(
-          value.evaluationKind(), [&] ALWAYS_INLINE_LAMBDA { return maximumValue; }, zoom);
-      }
-    };
-
-    template <typename Result>
-    struct EvaluationMinimumInvoker
-    {
-      template <typename StyleType, typename Reference, typename Zoom>
-      decltype(auto) operator()(const StyleType &value, NOESCAPE Reference &&reference, Zoom &&zoom) const
-      {
-        return MinimumEvaluation<StyleType, Result> {}(value, std::forward<Reference>(reference),
-                                                       std::forward<Zoom>(zoom));
-      }
-    };
-    template <typename Result>
-    inline constexpr EvaluationMinimumInvoker<Result> evaluateMinimum {};
-
-    template <LengthWrapperBaseDerived T, typename Result>
-    struct MinimumEvaluation<T, Result>
-    {
-      auto operator()(const T &value, NOESCAPE const Invocable<Result()> auto &lazyMaximumValueFunctor,
-                      ZoomNeeded token) -> Result
-      requires(T::Fixed::range.zoomOptions == CSS::RangeZoomOptions::Default)
-      {
-        return value.m_value.template minimumValueForLengthWrapperDataWithLazyMaximum<LayoutUnit, LayoutUnit>(
-          value.evaluationKind(), lazyMaximumValueFunctor, token);
-      }
-      auto operator()(const T &value, Result maximumValue, ZoomNeeded token) -> Result
-      requires(T::Fixed::range.zoomOptions == CSS::RangeZoomOptions::Default)
-      {
-        return value.m_value.template minimumValueForLengthWrapperDataWithLazyMaximum<LayoutUnit, LayoutUnit>(
-          value.evaluationKind(), [&] ALWAYS_INLINE_LAMBDA { return LayoutUnit(maximumValue); }, token);
-      }
-
-      auto operator()(const T &value, NOESCAPE const Invocable<Result()> auto &lazyMaximumValueFunctor,
-                      ZoomFactor zoom) -> Result
-      requires(T::Fixed::range.zoomOptions == CSS::RangeZoomOptions::Unzoomed)
-      {
-        return value.m_value.template minimumValueForLengthWrapperDataWithLazyMaximum<LayoutUnit, LayoutUnit>(
-          value.evaluationKind(), lazyMaximumValueFunctor, zoom);
-      }
-      auto operator()(const T &value, Result maximumValue, ZoomFactor zoom) -> Result
-      requires(T::Fixed::range.zoomOptions == CSS::RangeZoomOptions::Unzoomed)
-      {
-        return value.m_value.template minimumValueForLengthWrapperDataWithLazyMaximum<LayoutUnit, LayoutUnit>(
-          value.evaluationKind(), [&] ALWAYS_INLINE_LAMBDA { return LayoutUnit(maximumValue); }, zoom);
-      }
-    };
-
-    // MARK: - Logging
-
-    template <LengthWrapperBaseDerived T>
-    WTF::TextStream &operator<<(WTF::TextStream &ts, const T &value)
-    {
-      WTF::switchOn(value, [&](const auto &alternative) { ts << alternative; });
-      return ts;
     }
 
-  } // namespace Style
-} // namespace WebCore
+    LengthWrapperBase(Fixed fixed) noexcept : _value(IndexForFixed, fixed.UnresolvedValue())
+    {
+    }
+
+    LengthWrapperBase(Fixed fixed, bool hasQuirk) noexcept
+        : _value(IndexForFixed, fixed.UnresolvedValue(), hasQuirk)
+    {
+    }
+
+    LengthWrapperBase(Percentage percent) noexcept : _value(IndexForPercentage, percent.Value)
+    {
+    }
+
+    LengthWrapperBase(Calc &&calc) noexcept : _value(IndexForCalc, calc.ProtectedCalculation())
+    {
+    }
+
+    LengthWrapperBase(Specified &&specified) noexcept : _value(ToData(specified))
+    {
+    }
+
+    LengthWrapperBase(const Specified &specified) noexcept : _value(ToData(specified))
+    {
+    }
+
+    LengthWrapperBase(css::ValueLiteral<css::LengthUnit::Px> literal) noexcept
+        : LengthWrapperBase(Fixed {literal})
+    {
+    }
+
+    LengthWrapperBase(css::ValueLiteral<css::PercentageUnit::Percentage> literal) noexcept
+        : LengthWrapperBase(Percentage {literal})
+    {
+    }
+
+    explicit LengthWrapperBase(HashTableEmptyValueTag token) noexcept : _value(token)
+    {
+    }
+
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsFixed() const noexcept
+    {
+      return HoldsAlternative<Fixed>();
+    }
+
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsPercent() const noexcept
+    {
+      return HoldsAlternative<Percentage>();
+    }
+
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsCalculated() const noexcept
+    {
+      return HoldsAlternative<Calc>();
+    }
+
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsPercentOrCalculated() const noexcept
+    {
+      return IsPercent() || IsCalculated();
+    }
+
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsSpecified() const noexcept
+    {
+      return IsFixed() || IsPercent() || IsCalculated();
+    }
+
+    // `IsKnownZero` returns whether the value can be guaranteed to be `0`. Keywords and calc() return
+    // `false`.
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsKnownZero() const noexcept
+    requires(Fixed::Range.Min <= 0 && Fixed::Range.Max >= 0)
+    {
+      return _value.IsKnownZero(EvaluationKind());
+    }
+
+    // `IsKnownPositive` returns whether the value can be guaranteed to be more than `0`. Keywords and calc()
+    // return `false`.
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsKnownPositive() const noexcept
+    requires(Fixed::Range.Max > 0)
+    {
+      return _value.IsKnownPositive(EvaluationKind());
+    }
+
+    // `IsKnownNegative` returns whether the value can be guaranteed to be less than `0`. Keywords and calc()
+    // return `false`.
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsKnownNegative() const noexcept
+    requires(Fixed::Range.Min < 0)
+    {
+      return _value.IsKnownNegative(EvaluationKind());
+    }
+
+    // `IsPossiblyZero` returns whether the value can possibly be `0`. Keywords and calc() return `true`.
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsPossiblyZero() const noexcept
+    requires(Fixed::Range.Min <= 0 && Fixed::Range.Max >= 0)
+    {
+      return _value.IsPossiblyZero(EvaluationKind());
+    }
+
+    // `IsPossiblyPositive` returns whether the value can possibly be more than `0`. Keywords and calc()
+    // return `true`.
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsPossiblyPositive() const noexcept
+    requires(Fixed::Range.Max > 0)
+    {
+      return _value.IsPossiblyPositive(EvaluationKind());
+    }
+
+    // `IsPossiblyNegative` returns whether the value can possibly be less than `0`. Keywords and calc()
+    // return `true`.
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsPossiblyNegative() const noexcept
+    requires(Fixed::Range.Min < 0)
+    {
+      return _value.IsPossiblyNegative(EvaluationKind());
+    }
+
+    KRYS_NODISCARD Maybe<Fixed> TryFixed() const noexcept
+    {
+      return IsFixed() ? Maybe<Fixed>(Fixed {_value.Value()}) : null;
+    }
+
+    KRYS_NODISCARD Maybe<Percentage> TryPercentage() const noexcept
+    {
+      return IsPercent() ? Maybe<Percentage>(Percentage {_value.Value()}) : null;
+    }
+
+    KRYS_NODISCARD Maybe<Calc> TryCalc() const noexcept
+    {
+      return IsCalculated() ? Maybe<Calc>(Calc {_value.CalculationValue()}) : null;
+    }
+
+    KRYS_NODISCARD Maybe<Specified> TrySpecified() const noexcept
+    {
+      auto opaqueType = _value.Type();
+
+      if (opaqueType == IndexForFixed)
+      {
+        return Specified(Fixed {_value.Value()});
+      }
+
+      if (opaqueType == IndexForPercentage)
+      {
+        return Specified(Percentage {_value.Value()});
+      }
+
+      if (opaqueType == IndexForCalc)
+      {
+        return Specified(Calc {_value.CalculationValue()});
+      }
+
+      return null;
+    }
+
+    template <typename T>
+    KRYS_NODISCARD bool HoldsAlternative() const noexcept
+    {
+      if constexpr (css::ValidKeywordForList<T, Keywords>)
+      {
+        return _value.Type() == Keywords::OffsetForKeyword(T {});
+      }
+      else if constexpr (SameType<T, Fixed>)
+      {
+        return _value.Type() == IndexForFixed;
+      }
+      else if constexpr (SameType<T, Percentage>)
+      {
+        return _value.Type() == IndexForPercentage;
+      }
+      else if constexpr (SameType<T, Calc>)
+      {
+        return _value.Type() == IndexForCalc;
+      }
+      else if constexpr (SameType<T, Specified>)
+      {
+        return _value.Type() == IndexForFixed || _value.Type() == IndexForPercentage
+               || _value.Type() == IndexForCalc;
+      }
+    }
+
+    template <typename... F>
+    decltype(auto) SwitchOn(F &&...f) const noexcept
+    {
+      auto visitor = krys::CreateVisitor(std::forward<F>(f)...);
+
+      auto opaqueType = _value.Type();
+
+      if constexpr (HasKeywords)
+      {
+        if (opaqueType <= IndexForLastKeyword)
+        {
+          return Keywords::VisitKeywordAtOffset(opaqueType, visitor);
+        }
+      }
+
+      if (opaqueType == IndexForFixed)
+      {
+        return visitor(Fixed {_value.Value()});
+      }
+
+      if (opaqueType == IndexForPercentage)
+      {
+        return visitor(Percentage {_value.Value()});
+      }
+
+      if (opaqueType == IndexForCalc)
+      {
+        return visitor(Calc {_value.CalculationValue()});
+      }
+
+      krys_unreachable();
+    }
+
+    KRYS_NODISCARD bool HasQuirk() const noexcept
+    {
+      return _value.HasQuirk();
+    }
+
+    KRYS_NODISCARD bool HasSameType(const LengthWrapperBase &other) const noexcept
+    {
+      return _value.Type() == other._value.Type();
+    }
+
+    KRYS_NODISCARD bool operator==(const LengthWrapperBase &) const noexcept = default;
+
+  private:
+    KRYS_NODISCARD static LengthWrapperData ToData(const Specified &specified) noexcept
+    {
+      return krys::SwitchOn(
+        specified,
+        [](const Fixed &fixed) { return LengthWrapperData {IndexForFixed, fixed.UnresolvedValue()}; },
+        [](const Percentage &percentage) { return LengthWrapperData {IndexForPercentage, percentage.Value}; },
+        [](const Calc &calc) { return LengthWrapperData {IndexForCalc, calc.ProtectedCalculation()}; });
+    }
+
+    KRYS_NODISCARD LengthWrapperDataEvaluationKind EvaluationKind() const noexcept
+    {
+      auto opaqueType = _value.Type();
+
+      if constexpr (HasKeywords)
+      {
+        if (opaqueType <= IndexForLastKeyword)
+        {
+          return LengthWrapperDataEvaluationKind::Flag;
+        }
+      }
+
+      if (opaqueType == IndexForFixed)
+      {
+        return LengthWrapperDataEvaluationKind::Fixed;
+      }
+
+      if (opaqueType == IndexForPercentage)
+      {
+        return LengthWrapperDataEvaluationKind::Percentage;
+      }
+
+      if (opaqueType == IndexForCalc)
+      {
+        return LengthWrapperDataEvaluationKind::Calculation;
+      }
+
+      krys_unreachable();
+    }
+  };
+
+  // MARK: - Concepts
+
+  namespace detail_length_wrapper
+  {
+    template <typename N, css::PrimitiveKeyword... Ks>
+    std::true_type IsLengthWrapperBase(const LengthWrapperBase<N, Ks...> *);
+    std::false_type IsLengthWrapperBase(const void *);
+  }
+
+  template <typename T>
+  concept LengthWrapperBaseDerived =
+    decltype(detail_length_wrapper::IsLengthWrapperBase(std::declval<const T *>()))::value
+    && css::VariantLike<T>;
+
+  // MARK: - Evaluation
+
+  template <LengthWrapperBaseDerived T, typename Result>
+  struct Evaluation<T, Result>
+  {
+    template <typename F>
+    requires InvocableReturns<Result, const F &>
+    KRYS_NODISCARD Result operator()(const T &value, const F &lazyMaximumValueFunctor,
+                                     ZoomNeeded token) noexcept
+    requires(T::Fixed::Range.ZoomOptions == css::RangeZoomOptions::Default)
+    {
+      return value._value.template ValueForLengthWrapperDataWithLazyMaximum<Result, Result>(
+        value.EvaluationKind(), lazyMaximumValueFunctor, token);
+    }
+
+    KRYS_NODISCARD Result operator()(const T &value, Result maximumValue, ZoomNeeded token) noexcept
+    requires(T::Fixed::Range.ZoomOptions == css::RangeZoomOptions::Default)
+    {
+      return value._value.template ValueForLengthWrapperDataWithLazyMaximum<Result, Result>(
+        value.EvaluationKind(), [&] { return maximumValue; }, token);
+    }
+
+    template <typename F>
+    requires InvocableReturns<Result, const F &>
+    KRYS_NODISCARD Result operator()(const T &value, const F &lazyMaximumValueFunctor,
+                                     ZoomFactor zoom) noexcept
+    requires(T::Fixed::Range.ZoomOptions == css::RangeZoomOptions::Unzoomed)
+    {
+      return value._value.template ValueForLengthWrapperDataWithLazyMaximum<Result, Result>(
+        value.EvaluationKind(), lazyMaximumValueFunctor, zoom);
+    }
+
+    KRYS_NODISCARD Result operator()(const T &value, Result maximumValue, ZoomFactor zoom) noexcept
+    requires(T::Fixed::Range.ZoomOptions == css::RangeZoomOptions::Unzoomed)
+    {
+      return value._value.template ValueForLengthWrapperDataWithLazyMaximum<Result, Result>(
+        value.EvaluationKind(), [&] { return maximumValue; }, zoom);
+    }
+  };
+
+  template <typename Result>
+  struct EvaluationMinimumInvoker
+  {
+    template <typename StyleType, typename Reference, typename Zoom>
+    KRYS_NODISCARD decltype(auto) operator()(const StyleType &value, Reference &&reference,
+                                             Zoom &&zoom) const noexcept
+    {
+      return MinimumEvaluation<StyleType, Result> {}(value, std::forward<Reference>(reference),
+                                                     std::forward<Zoom>(zoom));
+    }
+  };
+
+  template <typename Result>
+  constexpr EvaluationMinimumInvoker<Result> EvaluateMinimum {};
+
+  template <LengthWrapperBaseDerived T, typename Result>
+  struct MinimumEvaluation<T, Result>
+  {
+    template <typename F>
+    requires InvocableReturns<Result, const F &>
+    KRYS_NODISCARD Result operator()(const T &value, const F &lazyMaximumValueFunctor,
+                                     ZoomNeeded token) noexcept
+    requires(T::Fixed::Range.ZoomOptions == css::RangeZoomOptions::Default)
+    {
+      return value._value.template MinimumValueForLengthWrapperDataWithLazyMaximum<LayoutUnit, LayoutUnit>(
+        value.EvaluationKind(), lazyMaximumValueFunctor, token);
+    }
+
+    KRYS_NODISCARD Result operator()(const T &value, Result maximumValue, ZoomNeeded token) noexcept
+    requires(T::Fixed::Range.ZoomOptions == css::RangeZoomOptions::Default)
+    {
+      return value._value.template MinimumValueForLengthWrapperDataWithLazyMaximum<LayoutUnit, LayoutUnit>(
+        value.EvaluationKind(), [&] { return LayoutUnit(maximumValue); }, token);
+    }
+
+    template <typename F>
+    requires InvocableReturns<Result, const F &>
+    KRYS_NODISCARD Result operator()(const T &value, const F &lazyMaximumValueFunctor,
+                                     ZoomFactor zoom) noexcept
+    requires(T::Fixed::Range.ZoomOptions == css::RangeZoomOptions::Unzoomed)
+    {
+      return value._value.template MinimumValueForLengthWrapperDataWithLazyMaximum<LayoutUnit, LayoutUnit>(
+        value.EvaluationKind(), lazyMaximumValueFunctor, zoom);
+    }
+
+    KRYS_NODISCARD Result operator()(const T &value, Result maximumValue, ZoomFactor zoom) noexcept
+    requires(T::Fixed::Range.ZoomOptions == css::RangeZoomOptions::Unzoomed)
+    {
+      return value._value.template MinimumValueForLengthWrapperDataWithLazyMaximum<LayoutUnit, LayoutUnit>(
+        value.EvaluationKind(), [&] { return LayoutUnit(maximumValue); }, zoom);
+    }
+  };
+}

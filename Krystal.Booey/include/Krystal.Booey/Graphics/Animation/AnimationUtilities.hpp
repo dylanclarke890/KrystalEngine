@@ -1,16 +1,18 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
 #include "Krystal.Booey/Graphics/Animation/IterationCompositeOperation.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
+#include "Krystal.Booey/Graphics/FloatPoint.hpp"
+#include "Krystal.Booey/Graphics/IntPoint.hpp"
+#include "Krystal.Booey/Graphics/LayoutPoint.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Maths/Base.hpp"
 #include <cmath>
 
 namespace krys::boo
 {
-  // TODO: port the IntPoint, FloatPoint, LayoutPoint and LayoutUnit blend overloads once those types exist.
-
   /// @brief The progress and composite operations used to blend two values.
   struct BlendingContext
   {
@@ -127,5 +129,29 @@ namespace krys::boo
     }
 
     return static_cast<float>(from + from + (to - from) * context.Progress);
+  }
+
+  KRYS_NODISCARD inline LayoutUnit Blend(LayoutUnit from, LayoutUnit to,
+                                         const BlendingContext &context) noexcept
+  {
+    return LayoutUnit(Blend(from.ToFloat(), to.ToFloat(), context));
+  }
+
+  KRYS_NODISCARD inline IntPoint Blend(const IntPoint &from, const IntPoint &to,
+                                       const BlendingContext &context) noexcept
+  {
+    return IntPoint(Blend(from.X(), to.X(), context), Blend(from.Y(), to.Y(), context));
+  }
+
+  KRYS_NODISCARD inline FloatPoint Blend(const FloatPoint &from, const FloatPoint &to,
+                                         const BlendingContext &context) noexcept
+  {
+    return FloatPoint(Blend(from.X(), to.X(), context), Blend(from.Y(), to.Y(), context));
+  }
+
+  KRYS_NODISCARD inline LayoutPoint Blend(const LayoutPoint &from, const LayoutPoint &to,
+                                          const BlendingContext &context) noexcept
+  {
+    return LayoutPoint(Blend(from.X(), to.X(), context), Blend(from.Y(), to.Y(), context));
   }
 }

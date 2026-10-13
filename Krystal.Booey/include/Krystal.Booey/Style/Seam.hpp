@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/CSS/Queries/ContainerQueryAxis.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
@@ -143,9 +144,8 @@ namespace krys::boo
 
     KRYS_NODISCARD bool HasEligibleContainmentForSizeQuery() const noexcept;
 
-    // Upstream returns `LayoutUnit`.
-    KRYS_NODISCARD float ContentBoxWidth() const noexcept;
-    KRYS_NODISCARD float ContentBoxHeight() const noexcept;
+    KRYS_NODISCARD LayoutUnit ContentBoxWidth() const noexcept;
+    KRYS_NODISCARD LayoutUnit ContentBoxHeight() const noexcept;
   };
 
   KRYS_NODISCARD float AdjustFloatForAbsoluteZoom(float, const RenderStyle &) noexcept;
@@ -162,8 +162,6 @@ namespace krys::boo
 
 namespace krys::boo::style
 {
-  KRYS_NODISCARD bool EvaluationTimeZoomEnabled(const RenderStyle &) noexcept;
-
   class BuilderState : public CanMakeCheckedPtr<BuilderState>
   {
     KRYS_NON_COPY_MOVABLE(BuilderState);
@@ -183,6 +181,10 @@ namespace krys::boo::style
     KRYS_NODISCARD style::ScopeOrdinal StyleScopeOrdinal() const noexcept;
 
     KRYS_NODISCARD const css::ToLengthConversionData &CssToLengthConversionData() const noexcept;
+    KRYS_NODISCARD bool UseSVGZoomRulesForLength() const noexcept;
+
+    /// @brief Collapses `document().settings().evaluationTimeZoomEnabled()`.
+    KRYS_NODISCARD bool EvaluationTimeZoomEnabled() const noexcept;
 
     void SetCurrentPropertyInvalidAtComputedValueTime() noexcept;
 
