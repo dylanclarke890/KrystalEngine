@@ -17,7 +17,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "PositionValue", "[CSS][Values][PositionValue]")
   {
-    const auto position = TwoComponent({keywords::Left {}}, {LengthPercentage<> {10_css_px}});
+    auto position = TwoComponent({keywords::Left {}}, {LengthPercentage<> {10_css_px}});
     auto value = PositionValue::Create(position);
     CHECK(value->IsPositionValue());
     CHECK_FALSE(value->IsPositionXValue());
@@ -34,7 +34,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "PositionXValue", "[CSS][Values][PositionValue]")
   {
-    const PositionX position {
+    PositionX position {
       FourComponentPositionHorizontal {{keywords::Right {}, LengthPercentage<> {5_css_px}}}};
     auto value = PositionXValue::Create(position);
     CHECK(value->IsPositionXValue());
@@ -53,8 +53,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "PositionYValue", "[CSS][Values][PositionValue]")
   {
-    const PositionY position {
-      FourComponentPositionVertical {{keywords::Top {}, LengthPercentage<> {1_css_em}}}};
+    PositionY position {FourComponentPositionVertical {{keywords::Top {}, LengthPercentage<> {1_css_em}}}};
     auto value = PositionYValue::Create(position);
     CHECK(value->IsPositionYValue());
     CHECK_FALSE(value->IsPositionValue());

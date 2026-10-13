@@ -58,10 +58,8 @@ namespace krys::boo::css::tests
     }
   }
 
-  // FIXME: CounterValue::CustomCSSText calls Separator().View(), which dereferences null for
-  // CSSOMStringAtom::Null() (what counter() is created with). Hidden until fixed, since it crashes.
   TEST_CASE_METHOD(ValueFixture, "CounterValue serialisation with a null separator",
-                   "[.][!shouldfail][CSS][Values][CounterValue]")
+                   "[CSS][Values][CounterValue]")
   {
     auto counter = CounterValue::Create(CSSOMStringAtom {u8"item"}, CSSOMStringAtom::Null(),
                                         PrimitiveValue::Create(ValueId::Decimal));

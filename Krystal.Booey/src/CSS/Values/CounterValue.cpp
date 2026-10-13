@@ -34,7 +34,7 @@ namespace krys::boo::css
     CSSOMString styleLiteral = isDecimal ? CSSOMString() : CounterStyleCSSText();
 
     CSSOMString result;
-    if (_separator.View().empty())
+    if (_separator == CSSOMStringAtom::Null() || _separator.View().empty())
     {
       result.append(u8"counter(");
       result.append(_identifier.View());

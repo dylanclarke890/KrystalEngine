@@ -4,7 +4,9 @@
 #include "Krystal.Booey/CSS/Values/Concepts.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
+#include "Krystal.Core/TypeTraits.hpp"
 
 namespace krys::boo::css
 {
@@ -90,6 +92,7 @@ namespace krys::boo::css
               ThreeComponentPositionHorizontalVerticalLengthSecond, FourComponentPositionHorizontalVertical>;
 
     template <typename T>
+    requires(!SameType<remove_cvref_t<T>, Position> && Constructible<Kind, T>)
     Position(T &&value) noexcept : Value {std::forward<T>(value)}
     {
     }
@@ -112,6 +115,7 @@ namespace krys::boo::css
     using Kind = Variant<TwoComponentPositionHorizontal, FourComponentPositionHorizontal>;
 
     template <typename T>
+    requires(!SameType<remove_cvref_t<T>, PositionX> && Constructible<Kind, T>)
     PositionX(T &&value) noexcept : Value {std::forward<T>(value)}
     {
     }
@@ -134,6 +138,7 @@ namespace krys::boo::css
     using Kind = Variant<TwoComponentPositionVertical, FourComponentPositionVertical>;
 
     template <typename T>
+    requires(!SameType<remove_cvref_t<T>, PositionY> && Constructible<Kind, T>)
     PositionY(T &&value) noexcept : Value {std::forward<T>(value)}
     {
     }
