@@ -11,14 +11,14 @@ namespace krys::boo::css
   {
     using Parameter = NumberOrPercentage<ClosedUnitRangeClampUpper, ClosedPercentageRangeClampUpper>;
 
-    Markable<Parameter> value;
+    Markable<Parameter> Value;
 
-    bool operator==(const Invert &) const = default;
+    KRYS_NODISCARD bool operator==(const Invert &) const noexcept = default;
   };
 
   using InvertFunction = FunctionNotation<ValueId::Invert, Invert>;
 
-  DEFINE_TYPE_WRAPPER_GET(Invert, value);
+  DEFINE_TYPE_WRAPPER_GET(Invert, Value)
 }
 
 DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Invert, 1)

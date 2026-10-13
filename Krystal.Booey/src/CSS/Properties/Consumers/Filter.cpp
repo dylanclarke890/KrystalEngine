@@ -11,9 +11,9 @@
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/AppleColorFilterValue.hpp"
 #include "Krystal.Booey/CSS/Values/Color/Color.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/AppleColorFilter.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/Filter.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/FilterFunctionDescriptor.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/AppleColorFilter.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/Filter.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/FilterFunctionDescriptor.hpp"
 #include "Krystal.Booey/CSS/Values/FilterValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 
@@ -46,7 +46,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return {};
     }
 
-    return AppleInvertLightnessFunction {.parameters = {}};
+    return AppleInvertLightnessFunction {.Parameters = {}};
   }
 
   KRYS_NODISCARD static Maybe<BlurFunction> ConsumeFilterBlur(TokenRange &range,
@@ -58,7 +58,7 @@ namespace krys::boo::css::PropertyParserHelpers
     auto args = ConsumeFunction(range);
     if (args.IsAtEnd())
     {
-      return {BlurFunction {.parameters = {}}};
+      return {BlurFunction {.Parameters = {}}};
     }
 
     auto parsedValue = MetaConsumer<Length<NonNegative>>::Consume(args, state);
@@ -67,7 +67,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return {};
     }
 
-    return BlurFunction {.parameters = {Blur::Parameter {krys::move(*parsedValue)}}};
+    return BlurFunction {.Parameters = {Blur::Parameter {krys::move(*parsedValue)}}};
   }
 
   KRYS_NODISCARD static Maybe<BrightnessFunction> ConsumeFilterBrightness(TokenRange &range,
@@ -79,7 +79,7 @@ namespace krys::boo::css::PropertyParserHelpers
     auto args = ConsumeFunction(range);
     if (args.IsAtEnd())
     {
-      return BrightnessFunction {.parameters = {}};
+      return BrightnessFunction {.Parameters = {}};
     }
 
     auto parsedValue = ConsumeNumberOrPercentFilterParameter<BrightnessFunction::name>(args, state);
@@ -88,7 +88,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return {};
     }
 
-    return BrightnessFunction {.parameters = {Brightness::Parameter {krys::move(*parsedValue)}}};
+    return BrightnessFunction {.Parameters = {Brightness::Parameter {krys::move(*parsedValue)}}};
   }
 
   KRYS_NODISCARD static Maybe<ContrastFunction> ConsumeFilterContrast(TokenRange &range,
@@ -100,7 +100,7 @@ namespace krys::boo::css::PropertyParserHelpers
     auto args = ConsumeFunction(range);
     if (args.IsAtEnd())
     {
-      return ContrastFunction {.parameters = {}};
+      return ContrastFunction {.Parameters = {}};
     }
 
     auto parsedValue = ConsumeNumberOrPercentFilterParameter<ContrastFunction::name>(args, state);
@@ -109,7 +109,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return {};
     }
 
-    return ContrastFunction {.parameters = {Contrast::Parameter {krys::move(*parsedValue)}}};
+    return ContrastFunction {.Parameters = {Contrast::Parameter {krys::move(*parsedValue)}}};
   }
 
   KRYS_NODISCARD static Maybe<DropShadowFunction> ConsumeFilterDropShadow(TokenRange &range,
@@ -180,9 +180,9 @@ namespace krys::boo::css::PropertyParserHelpers
       return {};
     }
 
-    return DropShadowFunction {.parameters = {.color = krys::move(color),
-                                              .location = {krys::move(*x), krys::move(*y)},
-                                              .stdDeviation = krys::move(stdDeviation)}};
+    return DropShadowFunction {.Parameters = {.Color = krys::move(color),
+                                              .Location = {krys::move(*x), krys::move(*y)},
+                                              .StdDeviation = krys::move(stdDeviation)}};
   }
 
   KRYS_NODISCARD static Maybe<GrayscaleFunction> ConsumeFilterGrayscale(TokenRange &range,
@@ -194,7 +194,7 @@ namespace krys::boo::css::PropertyParserHelpers
     auto args = ConsumeFunction(range);
     if (args.IsAtEnd())
     {
-      return GrayscaleFunction {.parameters = {}};
+      return GrayscaleFunction {.Parameters = {}};
     }
 
     auto parsedValue = ConsumeNumberOrPercentFilterParameter<GrayscaleFunction::name>(args, state);
@@ -203,7 +203,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return {};
     }
 
-    return GrayscaleFunction {.parameters = {Grayscale::Parameter {krys::move(*parsedValue)}}};
+    return GrayscaleFunction {.Parameters = {Grayscale::Parameter {krys::move(*parsedValue)}}};
   }
 
   KRYS_NODISCARD static Maybe<HueRotateFunction> ConsumeFilterHueRotate(TokenRange &range,
@@ -215,7 +215,7 @@ namespace krys::boo::css::PropertyParserHelpers
     auto args = ConsumeFunction(range);
     if (args.IsAtEnd())
     {
-      return HueRotateFunction {.parameters = {}};
+      return HueRotateFunction {.Parameters = {}};
     }
 
     auto parsedValue =
@@ -225,7 +225,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return {};
     }
 
-    return HueRotateFunction {.parameters = {HueRotate::Parameter {krys::move(*parsedValue)}}};
+    return HueRotateFunction {.Parameters = {HueRotate::Parameter {krys::move(*parsedValue)}}};
   }
 
   KRYS_NODISCARD static Maybe<InvertFunction> ConsumeFilterInvert(TokenRange &range,
@@ -237,7 +237,7 @@ namespace krys::boo::css::PropertyParserHelpers
     auto args = ConsumeFunction(range);
     if (args.IsAtEnd())
     {
-      return InvertFunction {.parameters = {}};
+      return InvertFunction {.Parameters = {}};
     }
 
     auto parsedValue = ConsumeNumberOrPercentFilterParameter<InvertFunction::name>(args, state);
@@ -246,7 +246,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return {};
     }
 
-    return InvertFunction {.parameters = {Invert::Parameter {krys::move(*parsedValue)}}};
+    return InvertFunction {.Parameters = {Invert::Parameter {krys::move(*parsedValue)}}};
   }
 
   KRYS_NODISCARD static Maybe<OpacityFunction> ConsumeFilterOpacity(TokenRange &range,
@@ -258,7 +258,7 @@ namespace krys::boo::css::PropertyParserHelpers
     auto args = ConsumeFunction(range);
     if (args.IsAtEnd())
     {
-      return OpacityFunction {.parameters = {}};
+      return OpacityFunction {.Parameters = {}};
     }
 
     auto parsedValue = ConsumeNumberOrPercentFilterParameter<OpacityFunction::name>(args, state);
@@ -267,7 +267,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return {};
     }
 
-    return OpacityFunction {.parameters = {Opacity::Parameter {krys::move(*parsedValue)}}};
+    return OpacityFunction {.Parameters = {Opacity::Parameter {krys::move(*parsedValue)}}};
   }
 
   KRYS_NODISCARD static Maybe<SaturateFunction> ConsumeFilterSaturate(TokenRange &range,
@@ -279,7 +279,7 @@ namespace krys::boo::css::PropertyParserHelpers
     auto args = ConsumeFunction(range);
     if (args.IsAtEnd())
     {
-      return SaturateFunction {.parameters = {}};
+      return SaturateFunction {.Parameters = {}};
     }
 
     auto parsedValue = ConsumeNumberOrPercentFilterParameter<SaturateFunction::name>(args, state);
@@ -288,7 +288,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return {};
     }
 
-    return SaturateFunction {.parameters = {Saturate::Parameter {krys::move(*parsedValue)}}};
+    return SaturateFunction {.Parameters = {Saturate::Parameter {krys::move(*parsedValue)}}};
   }
 
   KRYS_NODISCARD static Maybe<SepiaFunction> ConsumeFilterSepia(TokenRange &range,
@@ -300,7 +300,7 @@ namespace krys::boo::css::PropertyParserHelpers
     auto args = ConsumeFunction(range);
     if (args.IsAtEnd())
     {
-      return SepiaFunction {.parameters = {}};
+      return SepiaFunction {.Parameters = {}};
     }
 
     auto parsedValue = ConsumeNumberOrPercentFilterParameter<SepiaFunction::name>(args, state);
@@ -309,7 +309,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return {};
     }
 
-    return SepiaFunction {.parameters = {Sepia::Parameter {krys::move(*parsedValue)}}};
+    return SepiaFunction {.Parameters = {Sepia::Parameter {krys::move(*parsedValue)}}};
   }
 
   KRYS_NODISCARD static Maybe<FilterValueList> ConsumeUnresolvedFilterValueList(TokenRange &range,
@@ -331,7 +331,7 @@ namespace krys::boo::css::PropertyParserHelpers
         return false;
       }
 
-      list.value.push_back(krys::move(*value));
+      list.Value.push_back(krys::move(*value));
       return true;
     };
 
@@ -339,7 +339,7 @@ namespace krys::boo::css::PropertyParserHelpers
     {
       if (auto url = ConsumeURLRaw(rangeCopy, state, {}))
       {
-        list.value.push_back(FilterReference {krys::move(*url)});
+        list.Value.push_back(FilterReference {krys::move(*url)});
         continue;
       }
 
@@ -494,7 +494,7 @@ namespace krys::boo::css::PropertyParserHelpers
         return false;
       }
 
-      list.value.push_back(krys::move(*value));
+      list.Value.push_back(krys::move(*value));
       return true;
     };
 

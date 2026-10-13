@@ -47,9 +47,11 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Slice 4, tier 3 started (2026-10-13): `BoxShadowPropertyValue` and `TextShadowPropertyValue` (with `BoxShadow`/`BoxShadowProperty` moved to `CSS/Values/Borders/`, and `TextShadow`/`TextShadowProperty`) built and tested (the value classes compile-only). `Markable` is now optional-like in `Aggregates.hpp`. See their entry.
 - Slice 4, tier 3 item 26 (2026-10-13): `PathValue` and `PathFunction`, with the geometry types (`IntRect`/`FloatRect`/`LayoutRect`, `FloatQuad`, `Region`, `GeometryUtilities`, `AffineTransform`, `TransformationMatrix` and their leaves) and the SVG path parse/serialise pipeline (`SVGPathByteStream` and friends, `FormatNumberFixedPrecision`), built and tested (`PathValue` compile-only). See its entry.
 - Slice 4, tier 3 item 27 (2026-10-13): `BasicShapeValue`, with `BasicShape`, the eight shape functions (`circle()`/`ellipse()`/`inset()`/`polygon()`/`rect()`/`shape()`/`xywh()` completed, `path()` from item 26) and `BorderRadius`, built and tested (`BasicShapeValue` compile-only). The `rect()` shape is `RectShape` (clashes with `css::Rect`). See its entry.
+- Slice 4, tier 3 item 28 (2026-10-13): `FilterValue`, with `Filter`, `FilterReference` and the ten filter functions (the folder renamed `CSS/Values/FilterEffects/`), built and tested (`FilterValue` compile-only). See its entry.
+- Slice 4, tier 3 item 29 (2026-10-13): `AppleColorFilterValue`, with `AppleColorFilter` and `AppleInvertLightness`, built and tested (`AppleColorFilterValue` compile-only). See its entry.
 
 **Open / next candidates:**
-- Slice 4 (Value subclasses): the generic types are done; next are the specific value types, one at a time, in the order under Slice 4's *Order* (tiers 1 and 2 done; tier 3 items 24–27 done; next `FilterValue`).
+- Slice 4 (Value subclasses): the generic types are done; next are the specific value types, one at a time, in the order under Slice 4's *Order* (tiers 1 and 2 done; tier 3 items 24–29 done; next `RayValue`).
 - Not yet ported, needed later: the graphics `Path` (cached by `SVGPathByteStream` upstream), the rest of `SVGPathUtilities` (needs `Path` and `SVGPathSegList`), `parseKerningUnicodeString`/`parseGlyphName`.
 - Slice 3 (colour), bottom-up: (1) Graphics/Color, (2) calc-free numeric primitives, (3a) Style-free calc, (3b) calc evaluation and Style calc and (3c) calc parsing are done. (4a) `LayoutUnit` and the point/size types and (4b) Style numerics are done. (5a) the CSS colour types, (5b) the colour parser and (5c) `ColorValue`/`ValuePool` (compile-only) are done. (6) Style colour is done (its CSSValue half is deferred, see below). Slice 3 is complete apart from the Value-dependent pieces.
 - Deferred from layer 6 (needs `Style/BuilderChecking.hpp` and the raw-WebKit `ValueList`/`ValuePair`/`FunctionValue`/`BuilderState` it includes): `CSSValueConversion<Color>`, `CSSValueCreation<Color>`, `CSSValueConversion<DynamicRangeLimit>`, `CSSValueCreation<DynamicRangeLimit>` and `CSSValueConversion<Opacity>`. They come with the other `+CSSValueConversion`/`+CSSValueCreation` headers.
@@ -1409,6 +1411,49 @@ Tier 3 item 27. Graph from `css/CSSBasicShapeValue.cpp` (headers-only): 34 files
 - `ShapeFunction.cpp` shares the identical `to`/`by`, control point, curve and smooth serialisation through local templates; upstream repeats them per type. Output is the same.
 
 Tests: `tests/CSS/Values/Borders/BorderRadius.cpp` (`HasDefaultValue`, minimal serialisation of each axis and the `/` form, corners, dependencies, visitation): 4 cases; `tests/CSS/Values/Shapes/BasicShape.cpp` (serialisation of `circle()`, `ellipse()`, `inset()`, `polygon()`, `rect()`, `xywh()` including their defaults and `round`, the `BasicShape` variant, equality, dependencies, visitation): 9 cases; `tests/CSS/Values/Shapes/ShapeFunction.cpp` (every command in both `to`/`by` forms, control point anchors, arc defaults, `shape()` with fill rules, equality, dependencies, visitation): 7 cases. 20 cases / 96 assertions. `BasicShapeValue` is compile-only. Full Booey suite: 1097 cases / 669871 assertions; all pass except 2 expected failures.
+
+### `FilterValue`, with the filter functions (2026-10-13)
+
+Tier 3 item 28. Graph from `css/CSSFilterValue.cpp` (headers-only): 76 files (`tools/port/out/filter-value.md`). New: the value class, `values/filter-effects/CSSFilter.h`, `CSSFilterReference.h` and the ten filter function headers (no `.cpp`s); the rest is reviewed (colour, numerics, `CSSURL`, `ValuePool`). `CSSFilterFunction.h` (with `CSSAppleInvertLightnessFunction.h`) is only reached through `DeprecatedCSSOMFilterFunctionValue.h` (won't-port), so it isn't ported; `AppleInvertLightness` comes with item 29. `CSSFilterFunctionDescriptor.h` is the parser's and isn't in the graph. Decision: the folder `CSS/Values/Filter/` is renamed `CSS/Values/FilterEffects/` to match upstream's `filter-effects/` (as `text-decoration/` → `TextDecoration/`); the unreviewed files in it (`AppleColorFilter`, `AppleInvertLightnessFunction`, `FilterFunctionDescriptor`, `FilterOperationType`) moved with it, includes only.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/values/filter-effects/CSSBlurFunction.h`, `CSSBrightnessFunction.h`, `CSSContrastFunction.h`, `CSSGrayscaleFunction.h`, `CSSHueRotateFunction.h`, `CSSInvertFunction.h`, `CSSOpacityFunction.h`, `CSSSaturateFunction.h`, `CSSSepiaFunction.h` | `have` | `CSS/Values/FilterEffects/<Name>Function.hpp` | on | tested. `value` → `Value`. |
+| `css/values/filter-effects/CSSDropShadowFunction.h` | `have` | `CSS/Values/FilterEffects/DropShadowFunction.hpp` | on | tested. `color`/`location`/`stdDeviation` → PascalCase; `Color`'s type is written `boo::css::Color`. |
+| `css/values/filter-effects/CSSFilterReference.h` | `have` | `CSS/Values/FilterEffects/FilterReference.hpp` | on | tested. `url` → `Url` (`CSSURL`). |
+| `css/values/filter-effects/CSSFilter.h` | `have` | `CSS/Values/FilterEffects/Filter.hpp` | on | tested. `CSS::FilterValue` → `FilterData` (clashes with the value class `css::FilterValue`); member `Value`. |
+| `css/CSSFilterValue.h`, `.cpp` | `have` | `CSS/Values/FilterValue.hpp`, `src/CSS/Values/FilterValue.cpp` | on (compile-only) | `filter()` → `GetFilter()` (would hide `Filter`). |
+
+**Bugs fixed:**
+- `FilterValue` had no `.cpp`, so its constructor and every method were declared but never defined. Its accessor `Filter()` hid the `Filter` struct (its own return type, ill-formed), its constructor wasn't `explicit`, and its `CustomVisitChildren` lacked `KRYS_NOESCAPE`.
+- Public members were lowercase; the `operator==`s weren't `KRYS_NODISCARD`/`noexcept`.
+
+**Krystal callers updated (unbuilt):** `Consumers/Filter.cpp` (includes, `.Parameters` for every filter function, the drop-shadow's `.Color`/`.Location`/`.StdDeviation`, and `list.Value`, which the list wrappers had already renamed).
+
+**Differences:** No `createDeprecatedCSSOMWrapper` (won't-port). No `AddDerivedHash`, like upstream: hashes by pointer.
+
+Tests: `tests/CSS/Values/FilterEffects/Filter.cpp` (serialisation of every function with and without its optional parameter, `drop-shadow()` with each optional part, references, `none` and lists; equality, including same parameter/different function and list order; `SwitchOn`; dependencies; visitation): 6 cases / 43 assertions. `FilterValue` is compile-only. Full Booey suite: 1103 cases / 669914 assertions; all pass except 2 expected failures.
+
+### `AppleColorFilterValue` (2026-10-13)
+
+Tier 3 item 29, so tier 3's filter items are done. Graph from `css/CSSAppleColorFilterValue.cpp` (headers-only): 91 files (`tools/port/out/apple-color-filter-value.md`). New: the value class, `values/filter-effects/CSSAppleColorFilter.h` and `CSSAppleInvertLightnessFunction.h` (no `.cpp`s); the filter functions came with item 28. `CSSFilterFunction.h` is again only reached through the won't-port `DeprecatedCSSOMFilterFunctionValue.h`.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/values/filter-effects/CSSAppleInvertLightnessFunction.h` | `have` | `CSS/Values/FilterEffects/AppleInvertLightnessFunction.hpp` | on | tested. Serialises as `apple-invert-lightness()` (the keyword has no leading dash, as upstream). |
+| `css/values/filter-effects/CSSAppleColorFilter.h` | `have` | `CSS/Values/FilterEffects/AppleColorFilter.hpp` | on | tested. `CSS::AppleColorFilterValue` → `AppleColorFilterData` (clashes with the value class), member `Value`. The upstream comment's `-apple-invert-lightness-filter()` is kept as is (the function is `apple-invert-lightness()`). |
+| `css/CSSAppleColorFilterValue.h`, `.cpp` | `have` | `CSS/Values/AppleColorFilterValue.hpp`, `src/CSS/Values/AppleColorFilterValue.cpp` | on (compile-only) | `filter()` → `GetFilter()`, as `FilterValue`. |
+
+**Bugs fixed:**
+- `AppleColorFilterValue.cpp` didn't include the serialisation/visitation headers its `Serialise`/`VisitValueChildren` calls need, used `std::move`, and had no BOM.
+- `AppleColorFilterValue::Filter()` was renamed `GetFilter()` for consistency with `FilterValue` (it didn't hide anything here, but upstream's names match). The constructor took its argument by value; `CustomVisitChildren` lacked `KRYS_NOESCAPE`.
+- Public members were lowercase; the `operator==`s weren't `KRYS_NODISCARD`/`noexcept`.
+
+**Krystal callers updated (unbuilt):** none needed (`Consumers/Filter.cpp` was updated in item 28).
+
+**Differences:** No `createDeprecatedCSSOMWrapper` (won't-port). No `AddDerivedHash`, like upstream.
+
+Tests: `tests/CSS/Values/FilterEffects/AppleColorFilter.cpp` (serialisation of `apple-invert-lightness()`, `none` and lists; equality; `SwitchOn`; dependencies; visitation): 4 cases / 17 assertions. `AppleColorFilterValue` is compile-only. Full Booey suite: 1107 cases / 669931 assertions; all pass except 2 expected failures.
 
 ## Deferred: Values (from the tokenizer graph)
 

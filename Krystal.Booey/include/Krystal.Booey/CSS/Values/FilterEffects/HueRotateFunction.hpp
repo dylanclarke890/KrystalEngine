@@ -11,14 +11,14 @@ namespace krys::boo::css
   {
     using Parameter = Angle<>;
 
-    Markable<Parameter> value;
+    Markable<Parameter> Value;
 
-    bool operator==(const HueRotate &) const = default;
+    KRYS_NODISCARD bool operator==(const HueRotate &) const noexcept = default;
   };
 
   using HueRotateFunction = FunctionNotation<ValueId::HueRotate, HueRotate>;
 
-  DEFINE_TYPE_WRAPPER_GET(HueRotate, value);
+  DEFINE_TYPE_WRAPPER_GET(HueRotate, Value)
 }
 
 DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::HueRotate, 1)

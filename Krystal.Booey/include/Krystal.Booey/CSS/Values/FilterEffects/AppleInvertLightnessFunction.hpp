@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
 
 namespace krys::boo::css
@@ -8,7 +7,7 @@ namespace krys::boo::css
   // Non-standard addition.
   struct AppleInvertLightness
   {
-    constexpr bool operator==(const AppleInvertLightness &) const = default;
+    KRYS_NODISCARD constexpr bool operator==(const AppleInvertLightness &) const noexcept = default;
   };
 
   using AppleInvertLightnessFunction = FunctionNotation<ValueId::AppleInvertLightness, AppleInvertLightness>;

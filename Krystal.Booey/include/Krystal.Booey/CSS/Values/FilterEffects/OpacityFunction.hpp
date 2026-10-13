@@ -11,14 +11,14 @@ namespace krys::boo::css
   {
     using Parameter = NumberOrPercentage<ClosedUnitRangeClampUpper, ClosedPercentageRangeClampUpper>;
 
-    Markable<Parameter> value;
+    Markable<Parameter> Value;
 
-    bool operator==(const Opacity &) const = default;
+    KRYS_NODISCARD bool operator==(const Opacity &) const noexcept = default;
   };
 
   using OpacityFunction = FunctionNotation<ValueId::Opacity, Opacity>;
 
-  DEFINE_TYPE_WRAPPER_GET(Opacity, value);
+  DEFINE_TYPE_WRAPPER_GET(Opacity, Value)
 }
 
 DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Opacity, 1)

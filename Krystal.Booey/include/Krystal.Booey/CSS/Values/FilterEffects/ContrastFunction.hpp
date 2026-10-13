@@ -11,14 +11,14 @@ namespace krys::boo::css
   {
     using Parameter = NumberOrPercentage<NonNegative>;
 
-    Markable<Parameter> value;
+    Markable<Parameter> Value;
 
-    bool operator==(const Contrast &) const = default;
+    KRYS_NODISCARD bool operator==(const Contrast &) const noexcept = default;
   };
 
   using ContrastFunction = FunctionNotation<ValueId::Contrast, Contrast>;
 
-  DEFINE_TYPE_WRAPPER_GET(Contrast, value);
+  DEFINE_TYPE_WRAPPER_GET(Contrast, Value)
 }
 
 DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Contrast, 1)

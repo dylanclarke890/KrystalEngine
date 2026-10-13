@@ -1,16 +1,14 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/Filter/AppleInvertLightnessFunction.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/BrightnessFunction.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/ContrastFunction.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/GrayscaleFunction.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/HueRotateFunction.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/InvertFunction.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/OpacityFunction.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/SaturateFunction.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/SepiaFunction.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
-#include "Krystal.Booey/CSS/Values/Types.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/AppleInvertLightnessFunction.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/BrightnessFunction.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/ContrastFunction.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/GrayscaleFunction.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/HueRotateFunction.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/InvertFunction.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/OpacityFunction.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/SaturateFunction.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/SepiaFunction.hpp"
 
 namespace krys::boo::css
 {
@@ -26,17 +24,17 @@ namespace krys::boo::css
 
   struct AppleColorFilterData
   {
-    AppleColorFilterValueKind value;
+    AppleColorFilterValueKind Value;
 
     template <typename T>
     requires std::constructible_from<AppleColorFilterValueKind, T>
-    AppleColorFilterData(T &&value) : value(std::forward<T>(value))
+    AppleColorFilterData(T &&value) noexcept : Value(std::forward<T>(value))
     {
     }
 
-    KRYS_FORWARD_VARIANT_FUNCTIONS(AppleColorFilterData, value)
+    KRYS_FORWARD_VARIANT_FUNCTIONS(AppleColorFilterData, Value)
 
-    bool operator==(const AppleColorFilterData &) const = default;
+    KRYS_NODISCARD bool operator==(const AppleColorFilterData &) const noexcept = default;
   };
 
   // <apple-color-filter-value-list> = [ <apple-color-filter-function> | <url> ]+
@@ -45,7 +43,7 @@ namespace krys::boo::css
 
   // <'-apple-color-filter'> = none | <-apple-color-filter-value-list>
   // (Equivalent of https://drafts.fxtf.org/filter-effects/#propdef-filter)
-  struct AppleColorFilter : public ListOrNone<AppleColorFilterValueList>
+  struct AppleColorFilter : ListOrNone<AppleColorFilterValueList>
   {
     using ListOrNone<AppleColorFilterValueList>::ListOrNone;
   };

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Color/CurrentColor.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/FilterOperationType.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/FilterOperationType.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 
 namespace krys::boo::css

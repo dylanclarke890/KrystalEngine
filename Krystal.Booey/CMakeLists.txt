@@ -346,6 +346,22 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/Shapes/XywhFunction.hpp
   include/Krystal.Booey/CSS/Values/Shapes/BasicShape.hpp
   include/Krystal.Booey/CSS/Values/BasicShapeValue.hpp
+  include/Krystal.Booey/CSS/Values/FilterEffects/BlurFunction.hpp
+  include/Krystal.Booey/CSS/Values/FilterEffects/BrightnessFunction.hpp
+  include/Krystal.Booey/CSS/Values/FilterEffects/ContrastFunction.hpp
+  include/Krystal.Booey/CSS/Values/FilterEffects/DropShadowFunction.hpp
+  include/Krystal.Booey/CSS/Values/FilterEffects/GrayscaleFunction.hpp
+  include/Krystal.Booey/CSS/Values/FilterEffects/HueRotateFunction.hpp
+  include/Krystal.Booey/CSS/Values/FilterEffects/InvertFunction.hpp
+  include/Krystal.Booey/CSS/Values/FilterEffects/OpacityFunction.hpp
+  include/Krystal.Booey/CSS/Values/FilterEffects/SaturateFunction.hpp
+  include/Krystal.Booey/CSS/Values/FilterEffects/SepiaFunction.hpp
+  include/Krystal.Booey/CSS/Values/FilterEffects/FilterReference.hpp
+  include/Krystal.Booey/CSS/Values/FilterEffects/Filter.hpp
+  include/Krystal.Booey/CSS/Values/FilterValue.hpp
+  include/Krystal.Booey/CSS/Values/FilterEffects/AppleInvertLightnessFunction.hpp
+  include/Krystal.Booey/CSS/Values/FilterEffects/AppleColorFilter.hpp
+  include/Krystal.Booey/CSS/Values/AppleColorFilterValue.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -501,6 +517,8 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/Shapes/ShapeFunction.cpp
   src/CSS/Values/Shapes/XywhFunction.cpp
   src/CSS/Values/BasicShapeValue.cpp
+  src/CSS/Values/FilterValue.cpp
+  src/CSS/Values/AppleColorFilterValue.cpp
 )
 
 target_precompile_headers(Krystal.Booey

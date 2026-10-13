@@ -1,16 +1,16 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/Filter/BlurFunction.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/BrightnessFunction.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/ContrastFunction.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/DropShadowFunction.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/FilterReference.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/GrayscaleFunction.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/HueRotateFunction.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/InvertFunction.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/OpacityFunction.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/SaturateFunction.hpp"
-#include "Krystal.Booey/CSS/Values/Filter/SepiaFunction.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/BlurFunction.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/BrightnessFunction.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/ContrastFunction.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/DropShadowFunction.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/FilterReference.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/GrayscaleFunction.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/HueRotateFunction.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/InvertFunction.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/OpacityFunction.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/SaturateFunction.hpp"
+#include "Krystal.Booey/CSS/Values/FilterEffects/SepiaFunction.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
 
@@ -24,17 +24,17 @@ namespace krys::boo::css
 
   struct FilterData
   {
-    FilterValueKind value;
+    FilterValueKind Value;
 
     template <typename T>
     requires std::constructible_from<FilterValueKind, T>
-    FilterData(T &&value) : value(std::forward<T>(value))
+    FilterData(T &&value) noexcept : Value(std::forward<T>(value))
     {
     }
 
-    KRYS_FORWARD_VARIANT_FUNCTIONS(FilterData, value)
+    KRYS_FORWARD_VARIANT_FUNCTIONS(FilterData, Value)
 
-    bool operator==(const FilterData &) const = default;
+    KRYS_NODISCARD bool operator==(const FilterData &) const noexcept = default;
   };
 
   // <filter-value-list> = [ <filter-function> | <url> ]+

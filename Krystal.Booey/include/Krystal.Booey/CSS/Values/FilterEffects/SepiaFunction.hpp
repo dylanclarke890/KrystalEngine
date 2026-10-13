@@ -11,14 +11,14 @@ namespace krys::boo::css
   {
     using Parameter = NumberOrPercentage<ClosedUnitRangeClampUpper, ClosedPercentageRangeClampUpper>;
 
-    Markable<Parameter> value;
+    Markable<Parameter> Value;
 
-    bool operator==(const Sepia &) const = default;
+    KRYS_NODISCARD bool operator==(const Sepia &) const noexcept = default;
   };
 
   using SepiaFunction = FunctionNotation<ValueId::Sepia, Sepia>;
 
-  DEFINE_TYPE_WRAPPER_GET(Sepia, value);
+  DEFINE_TYPE_WRAPPER_GET(Sepia, Value)
 }
 
 DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Sepia, 1)

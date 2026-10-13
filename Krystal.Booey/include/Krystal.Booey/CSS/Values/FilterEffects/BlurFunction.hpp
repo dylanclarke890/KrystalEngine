@@ -11,14 +11,14 @@ namespace krys::boo::css
   {
     using Parameter = Length<NonNegative>;
 
-    Markable<Parameter> value;
+    Markable<Parameter> Value;
 
-    bool operator==(const Blur &) const = default;
+    KRYS_NODISCARD bool operator==(const Blur &) const noexcept = default;
   };
 
   using BlurFunction = FunctionNotation<ValueId::Blur, Blur>;
 
-  DEFINE_TYPE_WRAPPER_GET(Blur, value);
+  DEFINE_TYPE_WRAPPER_GET(Blur, Value)
 }
 
 DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Blur, 1)

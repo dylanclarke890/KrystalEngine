@@ -10,11 +10,11 @@ namespace krys::boo::css
   // https://drafts.fxtf.org/filter-effects/#funcdef-filter-drop-shadow
   struct DropShadow
   {
-    Markable<Color> color;
-    SpaceSeparatedPoint<Length<AllUnzoomed>> location;
-    Markable<Length<NonNegativeUnzoomed>> stdDeviation;
+    Markable<boo::css::Color> Color;
+    SpaceSeparatedPoint<Length<AllUnzoomed>> Location;
+    Markable<Length<NonNegativeUnzoomed>> StdDeviation;
 
-    bool operator==(const DropShadow &) const = default;
+    KRYS_NODISCARD bool operator==(const DropShadow &) const noexcept = default;
   };
 
   using DropShadowFunction = FunctionNotation<ValueId::DropShadow, DropShadow>;
@@ -24,15 +24,15 @@ namespace krys::boo::css
   {
     if constexpr (!I)
     {
-      return value.color;
+      return value.Color;
     }
     else if constexpr (I == 1)
     {
-      return value.location;
+      return value.Location;
     }
     else if constexpr (I == 2)
     {
-      return value.stdDeviation;
+      return value.StdDeviation;
     }
   }
 }

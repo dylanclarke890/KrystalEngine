@@ -106,6 +106,8 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Values/Borders/BoxShadow.cpp
 		tests/CSS/Values/Color/Color.cpp
 		tests/CSS/Values/Easing/EasingFunction.cpp
+		tests/CSS/Values/FilterEffects/AppleColorFilter.cpp
+		tests/CSS/Values/FilterEffects/Filter.cpp
 		tests/CSS/Values/Grid/GridTemplateAreas.cpp
 		tests/CSS/Values/NumericTypesSerialisation.cpp
 		tests/CSS/Values/Primitives/NumericRaw.cpp

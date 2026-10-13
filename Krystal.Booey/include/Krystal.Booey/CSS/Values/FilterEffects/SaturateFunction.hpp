@@ -11,14 +11,14 @@ namespace krys::boo::css
   {
     using Parameter = NumberOrPercentage<NonNegative>;
 
-    Markable<Parameter> value;
+    Markable<Parameter> Value;
 
-    bool operator==(const Saturate &) const = default;
+    KRYS_NODISCARD bool operator==(const Saturate &) const noexcept = default;
   };
 
   using SaturateFunction = FunctionNotation<ValueId::Saturate, Saturate>;
 
-  DEFINE_TYPE_WRAPPER_GET(Saturate, value);
+  DEFINE_TYPE_WRAPPER_GET(Saturate, Value)
 }
 
 DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Saturate, 1)

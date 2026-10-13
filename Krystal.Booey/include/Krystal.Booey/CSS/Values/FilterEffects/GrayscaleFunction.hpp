@@ -11,14 +11,14 @@ namespace krys::boo::css
   {
     using Parameter = NumberOrPercentage<ClosedUnitRangeClampUpper, ClosedPercentageRangeClampUpper>;
 
-    Markable<Parameter> value;
+    Markable<Parameter> Value;
 
-    bool operator==(const Grayscale &) const = default;
+    KRYS_NODISCARD bool operator==(const Grayscale &) const noexcept = default;
   };
 
   using GrayscaleFunction = FunctionNotation<ValueId::Grayscale, Grayscale>;
 
-  DEFINE_TYPE_WRAPPER_GET(Grayscale, value);
+  DEFINE_TYPE_WRAPPER_GET(Grayscale, Value)
 }
 
 DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Grayscale, 1)
