@@ -109,19 +109,26 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Properties/Consumers/ColorAdjust.cpp
 		tests/CSS/Properties/Consumers/Definitions.cpp
 		tests/CSS/Properties/Consumers/Display.cpp
+		tests/CSS/Properties/Consumers/Easing.cpp
+		tests/CSS/Properties/Consumers/Grid.cpp
 		tests/CSS/Properties/Consumers/Ident.cpp
 		tests/CSS/Properties/Consumers/Inline.cpp
 		tests/CSS/Properties/Consumers/List.cpp
+		tests/CSS/Properties/Consumers/Lists.cpp
 		tests/CSS/Properties/Consumers/MetaConsumer.cpp
 		tests/CSS/Properties/Consumers/Percentage.cpp
+		tests/CSS/Properties/Consumers/Position.cpp
 		tests/CSS/Properties/Consumers/PositionTry.cpp
 		tests/CSS/Properties/Consumers/PrimitiveValue.cpp
 		tests/CSS/Properties/Consumers/Primitives.cpp
 		tests/CSS/Properties/Consumers/Ratio.cpp
+		tests/CSS/Properties/Consumers/SVG.cpp
 		tests/CSS/Properties/Consumers/ScrollSnap.cpp
 		tests/CSS/Properties/Consumers/Scrollbars.cpp
 		tests/CSS/Properties/Consumers/String.cpp
 		tests/CSS/Properties/Consumers/Syntax.cpp
+		tests/CSS/Properties/Consumers/TextDecoration.cpp
+		tests/CSS/Properties/Consumers/Transform.cpp
 		tests/CSS/Properties/Consumers/Transitions.cpp
 		tests/CSS/Properties/Consumers/URL.cpp
 		tests/CSS/Properties/Consumers/UnicodeRange.cpp

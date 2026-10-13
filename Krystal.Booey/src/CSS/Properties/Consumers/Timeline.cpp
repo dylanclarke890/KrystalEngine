@@ -20,7 +20,7 @@ namespace krys::boo::css::PropertyParserHelpers
                         ValueId::EntryCrossing, ValueId::ExitCrossing>(id);
   }
 
-  RefPtr<Value> ConsumeAnimationTimelineScroll(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeAnimationTimelineScroll(TokenRange &tokens, PropertyParserState &) noexcept
   {
     // <scroll()> = scroll( [ <scroller> || <axis> ]? )
     // <scroller> = root | nearest | self
@@ -72,7 +72,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     auto args = ConsumeFunction(tokens);
 
-    if (!args.IsAtEnd())
+    if (args.IsAtEnd())
     {
       return ViewValue::Create();
     }
@@ -124,6 +124,7 @@ namespace krys::boo::css::PropertyParserHelpers
   {
     auto inputStream = InputStream(CSSOMString(string));
     auto tokenizer = Tokenizer(inputStream);
+    std::ignore = tokenizer.PumpTokenizer();
     auto tokens = tokenizer.Tokens();
 
     // Handle leading whitespace.
@@ -146,8 +147,8 @@ namespace krys::boo::css::PropertyParserHelpers
   RefPtr<Value> ConsumeSingleAnimationRange(TokenRange &tokens, PropertyParserState &state,
                                             SingleAnimationRangeType type) noexcept
   {
-    // <'animation-tokens-{start|end}'> = normal | <length-percentage> | <timeline-tokens-name>
-    // <length-percentage>? https://drafts.csswg.org/scroll-animations-1/#propdef-animation-tokens-start
+    // <'animation-range-{start|end}'> = normal | <length-percentage> | <timeline-range-name>
+    // <length-percentage>? https://drafts.csswg.org/scroll-animations-1/#propdef-animation-range-start
 
     auto IsDefault = [&](auto &value)
     {
@@ -208,6 +209,7 @@ namespace krys::boo::css::PropertyParserHelpers
   {
     auto inputStream = InputStream(CSSOMString(string));
     auto tokenizer = Tokenizer(inputStream);
+    std::ignore = tokenizer.PumpTokenizer();
     auto tokens = tokenizer.Tokens();
 
     // Handle leading whitespace.

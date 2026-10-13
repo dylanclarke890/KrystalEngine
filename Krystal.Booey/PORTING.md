@@ -44,7 +44,10 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Property parser, layer b2 (2026-10-13): the ident/keyword-level consumers (`Align`, `Anchor`, `Attr`, `Box`, `Display`, `Inline`, `PositionTry`, `Ratio`, `ScrollSnap`, `Scrollbars`, `Syntax`, `Transitions`, `UnicodeRange`, `URL`, `ViewTransition`, `WillChange`) built and tested.
 
 **Open / next candidates:**
-- Property parser, next: layer b3 (see the group plan in the *Property parser* section); then b4–b5, then layer c (`PropertyParserCustom.hpp`, generated `PropertyParsing.cpp`, `PropertyParser.cpp`). See the *Property parser* section for the plan.
+- Property parser, layer b3 (2026-10-13): the numeric/structured consumers built; all but `Timeline`, `Animations` and `CounterStyles` tested (those three wait for the generated `PropertyParsing.cpp`, layer c).
+- Property parser, next: layer b4 (see the group plan in the *Property parser* section); then b5, then layer c (`PropertyParserCustom.hpp`, generated `PropertyParsing.cpp`, `PropertyParser.cpp`). See the *Property parser* section for the plan.
+- Property parser, not yet ported: `parseEasingFunctionDeprecated` (`CSSPropertyParserConsumer+Easing`; string → `TimingFunction`, used only by Web Animations; needs `TimingFunction` and `Style::createTimingFunctionDeprecated`) and `parseTransformRaw` (`CSSPropertyParserConsumer+Transform`; string → `Style::Transform`, used only by Web Animations; needs `Style::Transform`, `BuilderState` and the generated `consumeTransform`). Come with animations.
+- Property parser, tests waiting for layer c: `Timeline`, `Animations` and `CounterStyles` compile but call the generated `PropertyParsing::ConsumeScroller`/`ConsumeAxis`/`ConsumeSingleViewTimelineInset`/`ConsumeSymbol` (`Animations` through `Timeline`'s `IsAnimationRangeKeyword`), so a test that links them needs `PropertyParsing.cpp` built. Test them in layer c.
 - Property parser, deferred definitions (need `style::CustomProperty`/`BuilderState`): `VariableParser::ParseInitialValueForUniversalSyntax`; layer c adds `PropertyParser::ParseTypedCustomPropertyValue`/`ParseTypedCustomPropertyInitialValue`.
 - Values, deferred definitions (declared, not defined, FIXME'd; define when `style::Builder`/`BuilderState` and the resource loader are ported): `VariableReferenceValue::ResolveVariableReferences`, `ResolveSingleValue`, `ResolveTokenRange`, `ResolveVariableReference`, `ResolveVariableFallback`, `TryResolveSimpleReference` (and so `ResolveAndCacheValue`); `PendingSubstitutionValue::ResolveValue` (also needs `PropertyParser::ParseValue` and `ParsedPropertyVector`); `FontFaceSrcResourceValue::GetFontLoadRequest` and its cached font (`CustomTraverseSubresources` returns `false` until then); `FontFaceSrcLocalValue::GetSVGFontFaceElement`/`SetSVGFontFaceElement` (need SVG fonts); `CreateStyleImage` on the ten image values (needs `style::BuilderState` and `StyleImage`, and the cached style image members of `NamedImageValue`/`CanvasValue`/`GradientValue`); `ImageValue::IsPending`, `LoadImage`, `GetCachedImage`, `KnownToBeOpaque` and its cached image (`CustomTraverseSubresources` returns `false`, and `CopyForComputedStyle` doesn't copy the cache, until then).
 - Not yet ported, needed later: the graphics `Path` (cached by `SVGPathByteStream` upstream), the rest of `SVGPathUtilities` (needs `Path` and `SVGPathSegList`), `parseKerningUnicodeString`/`parseGlyphName`.
@@ -357,6 +360,7 @@ URL differences:
 ### Upstream bugs found
 
 - `genericParseNumber` returns `false` from a function returning `std::optional<float>` when the exponent is too large, so `1e39` parses as 0. Krystal fails.
+- `consumeUnresolvedLinearEasingFunction` accepts a trailing comma (`linear(0, 1,)`): a stop that fails after a comma just ends the loop. Krystal fails it (the grammar is `[ <number> && <percentage>{0,2} ]#`).
 - `FloatQuadTests`' `ExpectRotatedRect` computes its comparisons and drops them. Krystal checks them, with the trapezoid's size corrected to (26.833, 13.416).
 - Kept as upstream: `ParserContext::Hash()`'s quirks and `AffineTransform::Blend` (see above).
 
@@ -387,7 +391,7 @@ Entry: `css/parser/CSSPropertyParser.cpp` (headers-only graph: 151 files, `tools
 - **b.** The consumers, in groups, compile-only first (as with the Value subclasses). Groups, by upstream include order (proposed 2026-10-13):
   - **b1.** Shared foundations: the remaining `*Definitions.hpp`, `MetaResolver`, `PrimitiveValue` (`CSSPrimitiveValueResolver`), `List`, `Percentage`, `String`. Done.
   - **b2.** Ident/keyword-level consumers: `Align`, `Anchor`, `Attr`, `Box`, `Display`, `Inline`, `PositionTry`, `Ratio`, `ScrollSnap`, `Scrollbars`, `Syntax` (was missing), `Transitions`, `UnicodeRange`, `URL`, `ViewTransition`, `WillChange`. Done.
-  - **b3.** Numeric/structured consumers: `Animations`, `CounterStyles`, `Easing`, `Grid`, `Lists`, `Position`, `SVG`, `TextDecoration`, `Timeline`, `Transform`.
+  - **b3.** Numeric/structured consumers: `Animations`, `CounterStyles`, `Easing`, `Grid`, `Lists`, `Position`, `SVG`, `TextDecoration`, `Timeline`, `Transform`. Done (`Timeline`, `Animations`, `CounterStyles` compile-only until layer c).
   - **b4.** Image-dependent consumers: `Image`, then `Background`, `Content`, `Filter`, `Masking`, `Motion`, `UI`.
   - **b5.** The stubs: `Font`, `Shapes` (~2k upstream lines).
 - **c.** `PropertyParserCustom.hpp`, generated `PropertyParsing.cpp`, `PropertyParser.cpp`; then tests parsing properties from strings, and `ParserFastPaths::MaybeParseValue`/`ValuePool::CreateFontFaceValue`.
@@ -473,6 +477,39 @@ Paths under `css/parser/CSSPropertyParserConsumer+` (WebKit) and `CSS/Properties
 - `AllowedURLModifiers` is a flags enum with a `None` value (upstream: `OptionSet`).
 
 Tests: one file per consumer under `tests/CSS/Properties/Consumers/`, using the new `ConsumeToText` helper (`Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp`): 30 cases / 436 assertions pass (3 expected failures). Full Booey suite: 1407 cases / 672280 assertions; all pass except 4 expected failures.
+
+### Layer b3: numeric/structured consumers (2026-10-13)
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/parser/CSSPropertyParserConsumer+Easing.h`, `.cpp` | `have` | `CSS/Properties/Consumers/Easing.hpp`, `src/.../Easing.cpp` | on | tested (2026-10-13). Graph: 72 files (`tools/port/out/consumer-easing.md`), all already built. No `parseEasingFunctionDeprecated` (see *Where we are*). |
+| `css/parser/CSSPropertyParserConsumer+Lists.h`, `.cpp` | `have` | `CSS/Properties/Consumers/Lists.hpp`, `src/.../Lists.cpp` | on | tested (2026-10-13). Matched upstream. Graph: `tools/port/out/consumer-lists.md`. |
+| `css/parser/CSSPropertyParserConsumer+Position.h`, `.cpp` | `have` | `CSS/Properties/Consumers/Position.hpp`, `src/.../Position.cpp` | on | tested (2026-10-13). Graph: 67 files (`tools/port/out/consumer-position.md`), all already built. See bugs. |
+| `css/parser/CSSPropertyParserConsumer+Grid.h`, `.cpp` | `have` | `CSS/Properties/Consumers/Grid.hpp`, `src/.../Grid.cpp` | on | tested (2026-10-13). Graph: 79 files (`tools/port/out/consumer-grid.md`), all already built. See bugs. |
+| `css/parser/CSSPropertyParserConsumer+SVG.h`, `.cpp` | `have` | `CSS/Properties/Consumers/SVG.hpp`, `src/.../SVG.cpp` | on | tested. Matched upstream. Graph: `tools/port/out/consumer-svg.md`. |
+| `css/parser/CSSPropertyParserConsumer+TextDecoration.h`, `.cpp` | `have` | `CSS/Properties/Consumers/TextDecoration.hpp`, `src/.../TextDecoration.cpp` | on | tested. Matched upstream. Graph: `tools/port/out/consumer-textdecoration.md`. |
+| `css/parser/CSSPropertyParserConsumer+Transform.h`, `.cpp` | `have` (no `parseTransformRaw`) | `CSS/Properties/Consumers/Transform.hpp`, `src/.../Transform.cpp` | on | tested. Graph: 117 files (`tools/port/out/consumer-transform.md`), the extra ones through `StyleBuilderState.h`/`StyleTransform.h` for `parseTransformRaw`. See bugs. |
+| `css/parser/CSSPropertyParserConsumer+Timeline.h`, `.cpp` | `have` | `CSS/Properties/Consumers/Timeline.hpp`, `src/.../Timeline.cpp` | on | compiles; tests wait for layer c (see *Where we are*). See bugs. |
+| `css/parser/CSSPropertyParserConsumer+Animations.h`, `.cpp` | `have` | `CSS/Properties/Consumers/Animations.hpp`, `src/.../Animations.cpp` | on | compiles; tests wait for layer c. See bugs. |
+| `css/parser/CSSPropertyParserConsumer+CounterStyles.h`, `.cpp` | `have` | `CSS/Properties/Consumers/CounterStyles.hpp`, `src/.../CounterStyles.cpp` | on | compiles; tests wait for layer c. Matched upstream (comments fixed). |
+
+**Bugs fixed:**
+- `Easing`: `linear()` accepted a trailing comma (upstream bug; see *Upstream bugs found*). Raw `assert`s replaced with `krys_debug_assert`, one unbraced `if`, and a comment mangled by a rename ("tokens constraints").
+- `Position`: `ConsumeTwoComponentPositionHorizontalUnresolved`/`VerticalUnresolved` were defined as `consumeTwoComponent...` (lowercase, no `noexcept`), so the declared functions were never defined. Unbraced `if`s.
+- `Grid`: `ConsumeUnresolvedGridTemplateAreasRow`'s decode/encode `krys_debug_assert`s were inverted (`!= None`), so every valid `grid-template-areas` row asserted in debug; and an empty row string (`""`) was decoded before the whitespace check, which fails (`Decode` reports `EmptyInput`), so the check now runs on the UTF-8 text first. `fr` was matched by exact string, so `1FR` wasn't a flex breadth (now `ParseUnitType`, which ignores case).
+- `Transform`: `ConsumeTranslate` called `Discard()` after the y value (upstream: skip whitespace), dropping the z value (`translate: 1px 2px 3px` → `1px 2px`). `ParseTransformRaw` was declared with a nonexistent return type (`CSSTransform`) and never defined; replaced with a FIXME (see *Where we are*). Raw `assert`.
+- `Timeline`: `ConsumeAnimationTimelineView`'s empty-arguments check was inverted (`view()` with arguments returned an empty `view()`, and `view()` parsed nothing). `ParseSingleViewTimelineInsetItem`/`ParseSingleAnimationRange` never pumped the tokenizer, so they always saw an empty range.
+- `Animations`: `ParseKeyframeKeyList` never pumped the tokenizer. Used `ResolveAsPercentageNoConversionDataRequired` (a TODO) where upstream uses `ResolveAsPercentageDeprecated` (now available).
+- `TextDecoration`: `ConsumeTextShadow` was defined with a fully qualified name inside its own namespace (an IntelliSense workaround).
+- `SVG`: raw `assert`.
+- Comments and a spec URL mangled by an earlier `range` → `tokens` rename in `Timeline`, `Animations` and `CounterStyles` (`#counter-style-tokens`, `animation-tokens-start`), and a `tokensList` variable.
+
+**Differences:**
+- `Grid`: repeat counts are `Integer<[1,∞], uint32>` (upstream `unsigned`). Rows are decoded to UTF-32 to walk code points (upstream walks UTF-16 code units).
+
+- `SingleAnimationRangeType` is declared in `Consumers/Timeline.hpp` in `css` (upstream: `Style::SingleAnimationRangeType`, forward-declared there and defined in `TimelineRangeValue.h`); move it when the Style side is ported.
+
+Tests: `tests/CSS/Properties/Consumers/{Easing,Lists,Position,Grid,SVG,TextDecoration,Transform}.cpp`: 34 cases / 606 assertions pass. Full Booey suite: 1441 cases / 672886 assertions; all pass except 4 expected failures.
 
 ## Slice 3: Colour
 

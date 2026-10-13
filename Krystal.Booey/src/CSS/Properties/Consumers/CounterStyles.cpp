@@ -19,7 +19,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return valueId >= ValueId::Disc && valueId <= ValueId::EthiopicNumeric;
   }
 
-  RefPtr<Value> ConsumeCounterStyle(TokenRange &tokens, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeCounterStyle(TokenRange &tokens, PropertyParserState &) noexcept
   {
     // <counter-style> = <counter-style-name excluding=none> | <symbols()>
     // https://drafts.csswg.org/css-counter-styles-3/#typedef-counter-style
@@ -123,7 +123,7 @@ namespace krys::boo::css::PropertyParserHelpers
         return ident;
       }
 
-      // If we have the `fixed` keyword but the tokens is not at the end, the next token must be a integer.
+      // If we have the `fixed` keyword but the range is not at the end, the next token must be a integer.
       // If it's not, this value is invalid.
       auto firstSymbolValue = PrimitiveValueResolver<Integer<>>::ConsumeAndResolve(tokens, state);
       if (!firstSymbolValue)
@@ -151,8 +151,8 @@ namespace krys::boo::css::PropertyParserHelpers
 
   RefPtr<Value> ConsumeCounterStyleRange(TokenRange &tokens, PropertyParserState &state) noexcept
   {
-    // <'tokens'> = [ [ <integer> | infinite ]{2} ]# | auto
-    // https://drafts.csswg.org/css-counter-styles-3/#counter-style-tokens
+    // <'range'> = [ [ <integer> | infinite ]{2} ]# | auto
+    // https://drafts.csswg.org/css-counter-styles-3/#counter-style-range
 
     auto ConsumeCounterStyleRangeBound = [&](TokenRange &tokens) -> RefPtr<PrimitiveValue>
     {
@@ -174,7 +174,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return autoValue;
     }
 
-    auto tokensList = ConsumeListSeparatedBy<',', OneOrMore>(
+    auto rangeList = ConsumeListSeparatedBy<',', OneOrMore>(
       tokens,
       [&](auto &tokens) -> RefPtr<Value>
       {
@@ -190,7 +190,7 @@ namespace krys::boo::css::PropertyParserHelpers
           return nullptr;
         }
 
-        // If the lower bound of any tokens is higher than the upper bound, the entire descriptor is invalid
+        // If the lower bound of any range is higher than the upper bound, the entire descriptor is invalid
         // and must be ignored.
         if (lowerBound->IsInteger() && upperBound->IsInteger()
             && lowerBound->ResolveAsIntegerDeprecated() > upperBound->ResolveAsIntegerDeprecated())
@@ -201,12 +201,12 @@ namespace krys::boo::css::PropertyParserHelpers
         return ValuePair::CreateNonCoalescing(krys::move(lowerBound), krys::move(upperBound));
       });
 
-    if (!tokens.IsAtEnd() || !tokensList || !tokensList->size())
+    if (!tokens.IsAtEnd() || !rangeList || !rangeList->size())
     {
       return nullptr;
     }
 
-    return tokensList;
+    return rangeList;
   }
 
   RefPtr<Value> ConsumeCounterStyleAdditiveSymbols(TokenRange &tokens, PropertyParserState &state) noexcept

@@ -20,7 +20,7 @@ namespace krys::boo::css::PropertyParserHelpers
     // <steps-easing-function> = steps( <integer>, <steps-easing-function-position>? )
     // <steps-easing-function-position> = jump-start | jump-end | jump-none | jump-both | start | end
     //
-    // with tokens constraints, this is:
+    // with range constraints, this is:
     //
     // <steps-easing-function> = steps( <integer [1,∞]>, jump-start )
     //                         | steps( <integer [1,∞]>, jump-end )
@@ -30,7 +30,7 @@ namespace krys::boo::css::PropertyParserHelpers
     //                         | steps( <integer [2,∞]>, jump-none )
     // https://drafts.csswg.org/css-easing-2/#funcdef-steps
 
-    assert(tokens.Peek().FunctionId() == ValueId::Steps);
+    krys_debug_assert(tokens.Peek().FunctionId() == ValueId::Steps);
     auto rangeCopy = tokens;
     auto args = ConsumeFunction(rangeCopy);
 
@@ -121,7 +121,10 @@ namespace krys::boo::css::PropertyParserHelpers
 
     auto input = MetaConsumer<Percentage<>>::Consume(args, state);
     if (!input)
+    {
       return {};
+    }
+
     auto extra = MetaConsumer<Percentage<>>::Consume(args, state);
 
     return LinearEasingParameters::Stop::Length {.Input = krys::move(*input), .Extra = krys::move(extra)};
@@ -148,7 +151,7 @@ namespace krys::boo::css::PropertyParserHelpers
     // <linear()> = linear( [ <number> && <percentage>{0,2} ]# )
     // https://drafts.csswg.org/css-easing-2/#funcdef-linear
 
-    assert(tokens.Peek().FunctionId() == ValueId::Linear);
+    krys_debug_assert(tokens.Peek().FunctionId() == ValueId::Linear);
     auto rangeCopy = tokens;
     auto args = ConsumeFunction(rangeCopy);
 
@@ -159,6 +162,12 @@ namespace krys::boo::css::PropertyParserHelpers
       auto stop = ConsumeUnresolvedLinearEasingFunctionStop(args, state);
       if (!stop)
       {
+        // A comma must be followed by another stop.
+        if (!stops.empty())
+        {
+          return {};
+        }
+
         break;
       }
 
@@ -188,7 +197,7 @@ namespace krys::boo::css::PropertyParserHelpers
     // <cubic-bezier()> = cubic-bezier( [ <number [0,1]>, <number> ]#{2} )
     // https://drafts.csswg.org/css-easing-2/#funcdef-cubic-bezier
 
-    assert(tokens.Peek().FunctionId() == ValueId::CubicBezier);
+    krys_debug_assert(tokens.Peek().FunctionId() == ValueId::CubicBezier);
     auto rangeCopy = tokens;
     auto args = ConsumeFunction(rangeCopy);
 
@@ -253,7 +262,7 @@ namespace krys::boo::css::PropertyParserHelpers
     // <spring()> = spring( <number [>0,∞]> <number [>0,∞]> <number [0,∞]> <number> )
     // Non-standard
 
-    assert(tokens.Peek().FunctionId() == ValueId::Spring);
+    krys_debug_assert(tokens.Peek().FunctionId() == ValueId::Spring);
 
     if (!state.Context.springTimingFunctionEnabled)
     {

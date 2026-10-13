@@ -428,6 +428,18 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Properties/Consumers/UnicodeRange.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/ViewTransition.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/WillChange.hpp
+
+  # Property parser, layer b3 (numeric/structured consumers)
+  include/Krystal.Booey/CSS/Properties/Consumers/Animations.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/CounterStyles.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Easing.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Grid.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Lists.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Position.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/SVG.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/TextDecoration.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Timeline.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Transform.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -636,6 +648,18 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Properties/Consumers/UnicodeRange.cpp
   src/CSS/Properties/Consumers/ViewTransition.cpp
   src/CSS/Properties/Consumers/WillChange.cpp
+
+  # Property parser, layer b3 (numeric/structured consumers)
+  src/CSS/Properties/Consumers/Animations.cpp
+  src/CSS/Properties/Consumers/CounterStyles.cpp
+  src/CSS/Properties/Consumers/Easing.cpp
+  src/CSS/Properties/Consumers/Grid.cpp
+  src/CSS/Properties/Consumers/Lists.cpp
+  src/CSS/Properties/Consumers/Position.cpp
+  src/CSS/Properties/Consumers/SVG.cpp
+  src/CSS/Properties/Consumers/TextDecoration.cpp
+  src/CSS/Properties/Consumers/Timeline.cpp
+  src/CSS/Properties/Consumers/Transform.cpp
 )
 
 target_precompile_headers(Krystal.Booey

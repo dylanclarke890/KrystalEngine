@@ -80,7 +80,7 @@ namespace krys::boo::css::PropertyParserHelpers
       }
       default:
       {
-        assert(false);
+        krys_debug_assert(false);
         return nullptr;
       }
     }

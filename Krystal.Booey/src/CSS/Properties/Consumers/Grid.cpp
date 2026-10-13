@@ -50,14 +50,15 @@ namespace krys::boo::css::PropertyParserHelpers
       return row;
     }
 
-    auto decodeResult =
-      krys::text::Decode<krys::text::UTF8>(tokens.ConsumeIncludingWhitespace().IdentCodePoints());
-    krys_debug_assert(decodeResult.Error != krys::text::DecodeError::None);
-    auto &rowString = decodeResult.Output;
-    if (std::ranges::all_of(rowString, IsCSSSpace<char32>))
+    auto rowText = tokens.ConsumeIncludingWhitespace().IdentCodePoints();
+    if (std::ranges::all_of(rowText, IsCSSSpace<char8_t>))
     {
       return row;
     }
+
+    auto decodeResult = krys::text::Decode<krys::text::UTF8>(rowText);
+    krys_debug_assert(decodeResult.Error == krys::text::DecodeError::None);
+    auto &rowString = decodeResult.Output;
 
     // Once initial checks are completed, the value can be `emplaced` into the `Maybe` to initialize
     // it in-place.
@@ -105,7 +106,7 @@ namespace krys::boo::css::PropertyParserHelpers
       }
 
       auto encodeResult = krys::text::Encode<krys::text::UTF8>(Span<const char32>(&character, 1));
-      krys_debug_assert(encodeResult.Error != krys::text::EncodeError::None);
+      krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
       areaName.append_range(encodeResult.Output);
     }
 
@@ -235,8 +236,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return ConsumeIdent(tokens);
     }
 
-    // TODO: we should use the UnitType enum here instead of a string comparison
-    if (token.Type() == TokenType::Dimension && token.Unit() == u8"fr")
+    if (token.Type() == TokenType::Dimension && ParseUnitType(token.Unit()) == UnitType::fr)
     {
       auto numericValue = tokens.Peek().NumericValue();
       if (numericValue < 0)
@@ -356,7 +356,7 @@ namespace krys::boo::css::PropertyParserHelpers
     if (!isAutoRepeat)
     {
       repetitions =
-        PrimitiveValueResolver<Integer<Range {1, Range::Inf}, size_t>>::ConsumeAndResolve(args, state);
+        PrimitiveValueResolver<Integer<Range {1, Range::Inf}, uint32>>::ConsumeAndResolve(args, state);
       if (!repetitions)
       {
         return false;
@@ -430,7 +430,7 @@ namespace krys::boo::css::PropertyParserHelpers
     if (!isAutoRepeat)
     {
       repetitions =
-        PrimitiveValueResolver<Integer<Range {1, Range::Inf}, size_t>>::ConsumeAndResolve(args, state);
+        PrimitiveValueResolver<Integer<Range {1, Range::Inf}, uint32>>::ConsumeAndResolve(args, state);
       if (!repetitions)
       {
         return false;

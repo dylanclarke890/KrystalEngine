@@ -169,7 +169,9 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     if (auto lengthPercentage = MetaConsumer<LengthPercentage<>>::Consume(tokens, state))
+    {
       return PositionUnresolvedComponent {krys::move(*lengthPercentage)};
+    }
     return {};
   }
 
@@ -295,7 +297,9 @@ namespace krys::boo::css::PropertyParserHelpers
           {
             // `component3` must be <length-percentage>
             if (!std::holds_alternative<LengthPercentage<>>(component3))
+            {
               return {};
+            }
             return ThreeComponentPositionHorizontalVerticalLengthSecond {
               {{krys::move(component1)}},
               {{krys::move(component2), std::get<LengthPercentage<>>(component3)}},
@@ -333,7 +337,9 @@ namespace krys::boo::css::PropertyParserHelpers
           {
             // `component3` must be <length-percentage>
             if (!std::holds_alternative<LengthPercentage<>>(component3))
+            {
               return {};
+            }
             return ThreeComponentPositionHorizontalVerticalLengthFirst {
               {{krys::move(component2), std::get<LengthPercentage<>>(component3)}},
               {{krys::move(component1)}},
@@ -408,7 +414,9 @@ namespace krys::boo::css::PropertyParserHelpers
     // `component2` and `component4` must be <length-percentage>
     if (!std::holds_alternative<LengthPercentage<>>(component2)
         || !std::holds_alternative<LengthPercentage<>>(component4))
+    {
       return {};
+    }
 
     return krys::SwitchOn(
       krys::move(component1),
@@ -490,7 +498,9 @@ namespace krys::boo::css::PropertyParserHelpers
 
     auto component4 = ConsumePositionUnresolvedComponent(rangeCopy, state);
     if (!component4)
+    {
       return {};
+    }
 
     auto position = PositionUnresolvedFromFourComponents(krys::move(*component1), krys::move(*component2),
                                                          krys::move(*component3), krys::move(*component4));
@@ -768,7 +778,7 @@ namespace krys::boo::css::PropertyParserHelpers
   }
 
   Maybe<TwoComponentPositionHorizontal>
-    consumeTwoComponentPositionHorizontalUnresolved(TokenRange &tokens, PropertyParserState &state)
+    ConsumeTwoComponentPositionHorizontalUnresolved(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     if (tokens.Peek().Type() == TokenType::Ident)
     {
@@ -827,7 +837,7 @@ namespace krys::boo::css::PropertyParserHelpers
   }
 
   Maybe<TwoComponentPositionVertical>
-    consumeTwoComponentPositionVerticalUnresolved(TokenRange &tokens, PropertyParserState &state)
+    ConsumeTwoComponentPositionVerticalUnresolved(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     if (tokens.Peek().Type() == TokenType::Ident)
     {

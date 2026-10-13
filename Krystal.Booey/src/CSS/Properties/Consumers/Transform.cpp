@@ -256,7 +256,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return nullptr;
     }
 
-    tokens.Discard();
+    tokens.DiscardWhitespace();
 
     // If we have a calc() or non-zero y value, we can directly add it to the list. We only
     // want to add a zero y value if a non-zero z value is specified.
@@ -389,7 +389,7 @@ namespace krys::boo::css::PropertyParserHelpers
       // The first valid case is if we have 3 items in the list, meaning we parsed three consecutive number
       // values to specify the rotation axis. In that case, we must not also have encountered an axis
       // identifier.
-      assert(!axisIdentifier);
+      krys_debug_assert(!axisIdentifier);
 
       // Now we must check the values since if we have a vector in the x, y or z axis alone we must serialize
       // to the matching identifier.

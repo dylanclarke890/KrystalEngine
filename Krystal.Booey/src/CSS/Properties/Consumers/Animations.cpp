@@ -12,11 +12,10 @@
 
 namespace krys::boo::css::PropertyParserHelpers
 {
-
   SmallList<Pair<ValueId, double>> ConsumeKeyframeKeyList(TokenRange &tokens,
                                                           PropertyParserState &state) noexcept
   {
-    // <keyframe-selector> = from | to | <percentage [0,100]> | <timeline-tokens-name> <percentage>
+    // <keyframe-selector> = from | to | <percentage [0,100]> | <timeline-range-name> <percentage>
     // https://drafts.csswg.org/css-animations-1/#typedef-keyframe-selector
 
     enum class RestrictedToZeroToHundredRange : bool
@@ -34,9 +33,7 @@ namespace krys::boo::css::PropertyParserHelpers
       // when the keyframes are associated with a target element.
       if (auto percentageValue = PrimitiveValueResolver<Percentage<>>::ConsumeAndResolve(tokens, state))
       {
-        // TODO: I'm using ResolveAsPercentageNoConversionDataRequired() here instead of
-        // ResolveAsPercentageDeprecated()
-        auto resolvedPercentage = percentageValue->ResolveAsPercentageNoConversionDataRequired();
+        auto resolvedPercentage = percentageValue->ResolveAsPercentageDeprecated();
         if (restricted == RestrictedToZeroToHundredRange::No)
         {
           return resolvedPercentage / 100;
@@ -123,6 +120,7 @@ namespace krys::boo::css::PropertyParserHelpers
   {
     auto inputStream = InputStream(CSSOMString(string));
     auto tokenizer = Tokenizer(inputStream);
+    std::ignore = tokenizer.PumpTokenizer();
     auto tokens = tokenizer.Tokens();
 
     // Handle leading whitespace.
