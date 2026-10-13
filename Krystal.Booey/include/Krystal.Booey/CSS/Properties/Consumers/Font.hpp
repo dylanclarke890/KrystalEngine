@@ -3,9 +3,9 @@
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
 namespace krys::boo::css
@@ -14,15 +14,15 @@ namespace krys::boo::css
   class PrimitiveValue;
   class Value;
   class ValueList;
-  class ScriptExecutionContext;
 
-  enum class FontTechnology : uint8_t;
+  enum class FontTechnology : uint8;
 
   struct ParserContext;
+  struct PropertyParserState;
 
   namespace WebKitFontFamilyNames
   {
-    enum class FamilyNamesIndex;
+    enum class FamilyNamesIndex : uint8;
   }
 
   namespace PropertyParserHelpers
@@ -53,24 +53,26 @@ namespace krys::boo::css
 
     // [ <family-name> | <generic-family> ]#
     using UnresolvedFontFamilyName = Variant<ValueId, CSSOMStringAtom>;
-    using UnresolvedFontFamily = SmallList<UnresolvedFontFamilyName>;
+    using UnresolvedFontFamily = List<UnresolvedFontFamilyName>;
 
     struct UnresolvedFont
     {
-      UnresolvedFontStyle style;
-      UnresolvedFontVariantCaps variantCaps;
-      UnresolvedFontWeight weight;
-      UnresolvedFontWidth width;
-      UnresolvedFontSize size;
-      UnresolvedFontLineHeight lineHeight;
-      UnresolvedFontFamily family;
+      UnresolvedFontStyle Style;
+      UnresolvedFontVariantCaps VariantCaps;
+      UnresolvedFontWeight Weight;
+      UnresolvedFontWidth Width;
+      UnresolvedFontSize Size;
+      UnresolvedFontLineHeight LineHeight;
+      UnresolvedFontFamily Family;
     };
 
     // MARK: 'font' (shorthand)
     // https://drafts.csswg.org/css-fonts-4/#font-prop
-    KRYS_NODISCARD Maybe<UnresolvedFont>
-      ParseUnresolvedFont(const CSSOMString &font, ScriptExecutionContext &context,
-                          Maybe<ParserMode> parserModeOverride = null) noexcept;
+    KRYS_NODISCARD Maybe<UnresolvedFont> ConsumeUnresolvedFont(TokenRange &tokens,
+                                                               PropertyParserState &state) noexcept;
+
+    // FIXME: Add `ParseUnresolvedFont` (string → `UnresolvedFont`, for the canvas 2D context's `font`) once
+    // `ScriptExecutionContext` and `Document` are available.
 
     // MARK: 'font-style'
     // https://drafts.csswg.org/css-fonts-4/#font-style-prop
@@ -86,9 +88,9 @@ namespace krys::boo::css
 
     // Sub-production of 'font-family': <generic-family>
     // https://drafts.csswg.org/css-fonts-4/#generic-family-name-syntax
-    KRYS_NODISCARD const CSSOMStringAtom &GenericFontFamily(ValueId) noexcept;
+    KRYS_NODISCARD const CSSOMStringAtom &GenericFontFamily(ValueId ident) noexcept;
 
-    KRYS_NODISCARD WebKitFontFamilyNames::FamilyNamesIndex GenericFontFamilyIndex(ValueId) noexcept;
+    KRYS_NODISCARD WebKitFontFamilyNames::FamilyNamesIndex GenericFontFamilyIndex(ValueId ident) noexcept;
 
     // MARK: 'font-size-adjust'
     // https://drafts.csswg.org/css-fonts-4/#font-size-adjust-prop
@@ -97,49 +99,33 @@ namespace krys::boo::css
 
     // MARK: - @font-face descriptor consumers
 
+    // FIXME: Add the string parsers for the `FontFace` interface (`ParseFontFaceSrc`,
+    // `ParseFontFaceSizeAdjust`, `ParseFontFaceUnicodeRange`, `ParseFontFaceDisplay`,
+    // `ParseFontFaceFontStyle`, `ParseFontFaceFeatureSettings`, `ParseFontFaceFontWidth`,
+    // `ParseFontFaceFontWeight`) once `ScriptExecutionContext` and `Document` are available.
+
     // MARK: @font-face 'src'
     // https://drafts.csswg.org/css-fonts-4/#src-desc
-    KRYS_NODISCARD RefPtr<ValueList> ParseFontFaceSrc(const CSSOMString &, ScriptExecutionContext &) noexcept;
-
     KRYS_NODISCARD RefPtr<ValueList> ConsumeFontFaceSrc(TokenRange &tokens,
                                                         PropertyParserState &state) noexcept;
 
     // Sub-production of 'src: <font-tech>
     // https://drafts.csswg.org/css-fonts-4/#font-tech-values
-    KRYS_NODISCARD SmallList<FontTechnology> ConsumeFontTech(TokenRange &tokens, PropertyParserState &state,
-                                                             bool singleValue = false) noexcept;
+    KRYS_NODISCARD List<FontTechnology> ConsumeFontTech(TokenRange &tokens, PropertyParserState &state,
+                                                        bool singleValue = false) noexcept;
 
     // Sub-production of 'src': <font-format>
     // https://drafts.csswg.org/css-fonts-4/#font-format-values
-    KRYS_NODISCARD CSSOMString ConsumeFontFormat(TokenRange &tokens, PropertyParserState &state,
-                                                 bool rejectStringValues = false) noexcept;
-
-    // MARK: @font-face 'size-adjust'
-    // https://drafts.csswg.org/css-fonts-5/#descdef-font-face-size-adjust
-    KRYS_NODISCARD RefPtr<Value> ParseFontFaceSizeAdjust(const CSSOMString &,
-                                                         ScriptExecutionContext &) noexcept;
-
-    // MARK: @font-face 'unicode-range'
-    // https://drafts.csswg.org/css-fonts-4/#descdef-font-face-unicode-range
-    KRYS_NODISCARD RefPtr<ValueList> ParseFontFaceUnicodeRange(const CSSOMString &,
-                                                               ScriptExecutionContext &) noexcept;
-
-    // MARK: @font-face 'font-display'
-    // https://drafts.csswg.org/css-fonts-4/#descdef-font-face-font-display
-    KRYS_NODISCARD RefPtr<Value> ParseFontFaceDisplay(const CSSOMString &, ScriptExecutionContext &) noexcept;
+    KRYS_NODISCARD Maybe<CSSOMString> ConsumeFontFormat(TokenRange &tokens, PropertyParserState &state,
+                                                        bool rejectStringValues = false) noexcept;
 
     // MARK: @font-face 'font-style'
     // https://drafts.csswg.org/css-fonts-4/#descdef-font-face-font-style
-    KRYS_NODISCARD RefPtr<Value> ParseFontFaceFontStyle(const CSSOMString &,
-                                                        ScriptExecutionContext &) noexcept;
-
     KRYS_NODISCARD RefPtr<Value> ConsumeFontFaceFontStyle(TokenRange &tokens,
                                                           PropertyParserState &state) noexcept;
 
     // MARK: @font-face 'font-feature-settings'
     // https://drafts.csswg.org/css-fonts-4/#descdef-font-face-font-feature-settings
-    KRYS_NODISCARD RefPtr<Value> ParseFontFaceFeatureSettings(const CSSOMString &,
-                                                              ScriptExecutionContext &) noexcept;
     // Sub-production of 'font-feature-settings': <feature-tag-value>
     // https://drafts.csswg.org/css-fonts-4/#feature-tag-value
     KRYS_NODISCARD RefPtr<Value> ConsumeFeatureTagValue(TokenRange &tokens,
@@ -151,39 +137,20 @@ namespace krys::boo::css
     KRYS_NODISCARD RefPtr<Value> ConsumeVariationTagValue(TokenRange &tokens,
                                                           PropertyParserState &state) noexcept;
 
-    // MARK: @font-face 'font-width'
-    // https://drafts.csswg.org/css-fonts-4/#descdef-font-face-font-width
-    KRYS_NODISCARD RefPtr<Value> ParseFontFaceFontWidth(const CSSOMString &,
-                                                        ScriptExecutionContext &) noexcept;
-
-    // MARK: @font-face 'font-weight'
-    // https://drafts.csswg.org/css-fonts-4/#descdef-font-face-font-weight
-    KRYS_NODISCARD RefPtr<Value> ParseFontFaceFontWeight(const CSSOMString &,
-                                                         ScriptExecutionContext &) noexcept;
-
     // MARK: - @font-feature-values descriptor consumers
 
     // MARK: @font-feature-values 'prelude family name list'
     // https://drafts.csswg.org/css-fonts-4/#font-feature-values-syntax
-    KRYS_NODISCARD SmallList<CSSOMStringAtom>
+    KRYS_NODISCARD List<CSSOMStringAtom>
       ConsumeFontFeatureValuesPreludeFamilyNameList(TokenRange &tokens, const ParserContext &) noexcept;
 
     // Template and inline implementations are at the bottom of the file for readability.
 
     KRYS_NODISCARD constexpr bool IsSystemFontShorthand(ValueId valueId) noexcept
     {
-      // This needs to stay in sync with SystemFontDatabase::FontShorthand.
-      // static_assert(ValueId::StatusBar - ValueId::Caption
-      //              == static_cast<SystemFontDatabase::FontShorthandUnderlyingType>(
-      //                SystemFontDatabase::FontShorthand::StatusBar));
+      // FIXME: Assert that this stays in sync with `SystemFontDatabase::FontShorthand`, and add
+      // `LowerFontShorthand`, once `SystemFontDatabase` is available.
       return valueId >= ValueId::Caption && valueId <= ValueId::StatusBar;
     }
-
-    // inline SystemFontDatabase::FontShorthand lowerFontShorthand(ValueId valueId)
-    //{
-    //   // This needs to stay in sync with SystemFontDatabase::FontShorthand.
-    //   ASSERT(isSystemFontShorthand(valueId));
-    //   return static_cast<SystemFontDatabase::FontShorthand>(valueId - CSSValueCaption);
-    // }
   }
 }

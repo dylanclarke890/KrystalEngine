@@ -11,7 +11,7 @@ namespace krys::boo::css
 
   namespace PropertyParserHelpers
   {
-    enum class PathParsingOption : uint8_t
+    enum class PathParsingOption : uint8
     {
       None = 0,
       RejectPathFillRule = 1 << 0,
@@ -33,4 +33,4 @@ namespace krys::boo::css
   }
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::PropertyParserHelpers::PathParsingOption, 3uz);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::PropertyParserHelpers::PathParsingOption, 3uz)

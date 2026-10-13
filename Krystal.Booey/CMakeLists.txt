@@ -449,6 +449,11 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Properties/Consumers/Masking.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/Motion.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/UI.hpp
+
+  # Property parser, layer b5 (Font, Shapes)
+  include/Krystal.Booey/CSS/Properties/Consumers/Font.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Shapes.hpp
+  include/Krystal.Booey/CSS/WebKitFontFamilyNames.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -678,6 +683,11 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Properties/Consumers/Masking.cpp
   src/CSS/Properties/Consumers/Motion.cpp
   src/CSS/Properties/Consumers/UI.cpp
+
+  # Property parser, layer b5 (Font, Shapes)
+  src/CSS/Properties/Consumers/Font.cpp
+  src/CSS/Properties/Consumers/Shapes.cpp
+  src/CSS/WebKitFontFamilyNames.cpp
 )
 
 target_precompile_headers(Krystal.Booey

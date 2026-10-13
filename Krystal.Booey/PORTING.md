@@ -44,11 +44,13 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Property parser, layer b2 (2026-10-13): the ident/keyword-level consumers (`Align`, `Anchor`, `Attr`, `Box`, `Display`, `Inline`, `PositionTry`, `Ratio`, `ScrollSnap`, `Scrollbars`, `Syntax`, `Transitions`, `UnicodeRange`, `URL`, `ViewTransition`, `WillChange`) built and tested.
 - Property parser, layer b3 (2026-10-13): the numeric/structured consumers built; all but `Timeline`, `Animations` and `CounterStyles` tested (those three wait for the generated `PropertyParsing.cpp`, layer c).
 - Property parser, layer b4 (2026-10-13): the Image-dependent consumers built; `Image`, `Filter` and `UI` tested, `Background`, `Content`, `Masking` and `Motion` compile-only until layer c (and b5 for the shapes).
+- Property parser, layer b5 (2026-10-13): `Font` (and the generic family names) built and tested; `Shapes` built, compile-only until layer c. Layer b is done.
 
 **Open / next candidates:**
-- Property parser, next: b5 (`Font`, `Shapes`), then layer c (`PropertyParserCustom.hpp`, generated `PropertyParsing.cpp`, `PropertyParser.cpp`). See the *Property parser* section for the plan.
+- Property parser, next: layer c (`PropertyParserCustom.hpp`, generated `PropertyParsing.cpp`, `PropertyParser.cpp`). See the *Property parser* section for the plan.
+- Property parser, not yet ported (`Font`): the string parsers behind the `FontFace` interface and the canvas 2D context's `font` (`ParseUnresolvedFont`, `ParseFontFaceSrc`, `ParseFontFaceSizeAdjust`, `ParseFontFaceUnicodeRange`, `ParseFontFaceDisplay`, `ParseFontFaceFontStyle`, `ParseFontFaceFeatureSettings`, `ParseFontFaceFontWidth`, `ParseFontFaceFontWeight`; FIXME in `Consumers/Font.hpp`). They need `ScriptExecutionContext`/`Document` (quirks mode, value pool) and six of them the generated `PropertyParsing`. Also `LowerFontShorthand` and the `SystemFontDatabase::FontShorthand` sync check (need `SystemFontDatabase`).
 - Property parser, not yet ported: `parseEasingFunctionDeprecated` (`CSSPropertyParserConsumer+Easing`; string → `TimingFunction`, used only by Web Animations; needs `TimingFunction` and `Style::createTimingFunctionDeprecated`) and `parseTransformRaw` (`CSSPropertyParserConsumer+Transform`; string → `Style::Transform`, used only by Web Animations; needs `Style::Transform`, `BuilderState` and the generated `consumeTransform`). Come with animations. Also `parseFilterValueListOrNoneRaw` (`CSSPropertyParserConsumer+Filter`; string → `Style::Filter`, used only by the canvas 2D context's `filter`; needs `Style::Filter`, `BuilderState` and `Document`); comes with canvas.
-- Property parser, tests waiting for layer c: `Timeline`, `Animations` and `CounterStyles` compile but call the generated `PropertyParsing::ConsumeScroller`/`ConsumeAxis`/`ConsumeSingleViewTimelineInset`/`ConsumeSymbol` (`Animations` through `Timeline`'s `IsAnimationRangeKeyword`), so a test that links them needs `PropertyParsing.cpp` built. Likewise `Background` (`ConsumeBorderImageRepeat`/`ConsumeBorderImageOutset`), `Content` (through `CounterStyles`), and `Masking`/`Motion` (`ConsumeGeometryBox`, plus `ConsumeBasicShape` from the `Shapes` stub, b5). Test them in layer c; the `Content` `/` and `Motion` `ray()` size fixes (layer b4) are untested until then.
+- Property parser, tests waiting for layer c: `Timeline`, `Animations` and `CounterStyles` compile but call the generated `PropertyParsing::ConsumeScroller`/`ConsumeAxis`/`ConsumeSingleViewTimelineInset`/`ConsumeSymbol` (`Animations` through `Timeline`'s `IsAnimationRangeKeyword`), so a test that links them needs `PropertyParsing.cpp` built. Likewise `Background` (`ConsumeBorderImageRepeat`/`ConsumeBorderImageOutset`), `Content` (through `CounterStyles`), `Masking`/`Motion` (`ConsumeGeometryBox`), and `Shapes` (`ConsumeShapeBox`, and through `Background`). Test them in layer c; the `Content` `/` and `Motion` `ray()` size fixes (layer b4) and all of `<basic-shape>` parsing are untested until then.
 - Property parser, deferred definitions (need `style::CustomProperty`/`BuilderState`): `VariableParser::ParseInitialValueForUniversalSyntax`; layer c adds `PropertyParser::ParseTypedCustomPropertyValue`/`ParseTypedCustomPropertyInitialValue`.
 - Values, deferred definitions (declared, not defined, FIXME'd; define when `style::Builder`/`BuilderState` and the resource loader are ported): `VariableReferenceValue::ResolveVariableReferences`, `ResolveSingleValue`, `ResolveTokenRange`, `ResolveVariableReference`, `ResolveVariableFallback`, `TryResolveSimpleReference` (and so `ResolveAndCacheValue`); `PendingSubstitutionValue::ResolveValue` (also needs `PropertyParser::ParseValue` and `ParsedPropertyVector`); `FontFaceSrcResourceValue::GetFontLoadRequest` and its cached font (`CustomTraverseSubresources` returns `false` until then); `FontFaceSrcLocalValue::GetSVGFontFaceElement`/`SetSVGFontFaceElement` (need SVG fonts); `CreateStyleImage` on the ten image values (needs `style::BuilderState` and `StyleImage`, and the cached style image members of `NamedImageValue`/`CanvasValue`/`GradientValue`); `ImageValue::IsPending`, `LoadImage`, `GetCachedImage`, `KnownToBeOpaque` and its cached image (`CustomTraverseSubresources` returns `false`, and `CopyForComputedStyle` doesn't copy the cache, until then).
 - Not yet ported, needed later: the graphics `Path` (cached by `SVGPathByteStream` upstream), the rest of `SVGPathUtilities` (needs `Path` and `SVGPathSegList`), `parseKerningUnicodeString`/`parseGlyphName`.
@@ -394,7 +396,7 @@ Entry: `css/parser/CSSPropertyParser.cpp` (headers-only graph: 151 files, `tools
   - **b2.** Ident/keyword-level consumers: `Align`, `Anchor`, `Attr`, `Box`, `Display`, `Inline`, `PositionTry`, `Ratio`, `ScrollSnap`, `Scrollbars`, `Syntax` (was missing), `Transitions`, `UnicodeRange`, `URL`, `ViewTransition`, `WillChange`. Done.
   - **b3.** Numeric/structured consumers: `Animations`, `CounterStyles`, `Easing`, `Grid`, `Lists`, `Position`, `SVG`, `TextDecoration`, `Timeline`, `Transform`. Done (`Timeline`, `Animations`, `CounterStyles` compile-only until layer c).
   - **b4.** Image-dependent consumers: `Image`, then `Background`, `Content`, `Filter`, `Masking`, `Motion`, `UI`. Done; `Image` calls `Filter`'s `ConsumeUnresolvedFilter`, so they went together. `Background`, `Content`, `Masking`, `Motion` compile-only until layer c.
-  - **b5.** The stubs: `Font`, `Shapes` (~2k upstream lines).
+  - **b5.** The stubs: `Font`, `Shapes` (~2k upstream lines). Done (`Shapes` compile-only until layer c).
 - **c.** `PropertyParserCustom.hpp`, generated `PropertyParsing.cpp`, `PropertyParser.cpp`; then tests parsing properties from strings, and `ParserFastPaths::MaybeParseValue`/`ValuePool::CreateFontFaceValue`.
 
 ### Layer a: parser plumbing (2026-10-13)
@@ -541,6 +543,34 @@ Graphs: `tools/port/out/consumer-image.md` (107 files; new beyond the b3 graphs:
 - `-apple-invert-lightness()` doesn't parse, as upstream: the keyword is `apple-invert-lightness`, and the `-apple-` → `-webkit-` keyword rewrite gives `-webkit-invert-lightness`, which doesn't exist. Upstream's own tests use `apple-invert-lightness()`.
 
 Tests: `tests/CSS/Properties/Consumers/{Image,Filter}.cpp`: 17 cases / 321 assertions pass. `tests/CSS/Properties/Consumers/UI.cpp` and `ConsumeIdentUsingMapping` in `Ident.cpp`: 3 cases / 42 assertions pass. Full Booey suite: 1455 cases / 673206 assertions; all pass except 4 expected failures.
+
+### Layer b5: `Font` and `Shapes` (2026-10-13)
+
+Graphs: `tools/port/out/consumer-font.md` (152 files; new over the earlier graphs: the font `Value` subclasses, all already built; `FontFace.h`/`CSSFontFace.h` and `CSSParser.h`, which only the `FontFace` string parsers need; `CSSPrimitiveValueMappings.h`, which brings in ~20 Style keyword types and is only used for `FontTechnology`; and `CSSFontVariantLigaturesParser.h`/`CSSFontVariantNumericParser.h`, included but unused), `tools/port/out/consumer-shapes.md` (83 files, all already built: the shape types, `CSSBasicShapeValue`, `CSSPathValue`, the SVG path byte stream). Both `.cpp`s were empty stubs.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/parser/CSSPropertyParserConsumer+Font.h`, `.cpp` | `have` (no string parsers) | `CSS/Properties/Consumers/Font.hpp`, `src/.../Font.cpp` | on | tested. Ported; see bugs and differences. |
+| `css/parser/CSSPropertyParserConsumer+Shapes.h`, `.cpp` | `have` | `CSS/Properties/Consumers/Shapes.hpp`, `src/.../Shapes.cpp` | on | compiles; tests wait for layer c (`ConsumeShapeOutside` calls the generated `ConsumeShapeBox`, and the `<rect()>`/`<xywh()>`/`<inset()>` radii come from `Background`). Ported. |
+| `css/WebKitFontFamilyNames.in` (generated `WebKitFontFamilyNames.h`, `.cpp`) | `have*` | `CSS/WebKitFontFamilyNames.hpp`, `src/CSS/WebKitFontFamilyNames.cpp` | on | tested through `Font`. Hand-written; see differences. |
+
+**Bugs fixed:**
+- `Font.cpp`, `Shapes.cpp`: empty, and in `css::CSSPropertyParserHelpers` (the headers declare `css::PropertyParserHelpers`), so nothing was defined.
+- `Font.hpp`: used `PropertyParserState` without declaring it; `UnresolvedFont`'s members were lowercase. `Shapes.hpp`: `uint8_t`, and a stray `;` after the enum traits macro.
+
+**Added:** `ConsumeUnresolvedFont` is public (upstream: `static`, called only by `parseUnresolvedFont`), so it's built and tested while the string parser waits.
+
+**Differences:**
+- `Font` is the `ENABLE(VARIATION_FONTS)` build (as are `FontStyleRangeValue`/`FontVariationValue`): font-weight numbers aren't limited to multiples of 100, `@font-face` `font-style` takes an angle range, and `ConsumeVariationTagValue` exists.
+- The string parsers aren't ported (see *Where we are*). Nor are `forwardVariantTo` (unused upstream) and `parserMode` (needs `Document`).
+- Null strings: `ConsumeFontFormat` returns `Maybe<CSSOMString>` (so `format("")` stays distinct from failure), and the family-name helpers return `Maybe<CSSOMStringAtom>`. `GenericFontFamily` returns `CSSOMStringAtom::Null()` for non-generic keywords.
+- `Vector` → `List` for `UnresolvedFontFamily`, `ConsumeFontTech` and `ConsumeFontFeatureValuesPreludeFamilyNameList`.
+- `fromCSSValueID<FontTechnology>` (in the unreviewed `PrimitiveValueMappings.hpp`) is a local `FontTechnologyFromValueId` in `Font.cpp`.
+- `Shapes`: the `SortedArrayMap` keyword tables are `switch`-based `*FromValueId` functions passed to `ConsumeIdentUsingMapping`/`PeekIdentUsingMapping`; the circle and ellipse extent tables share one template. `ConsumeShapeCommandAffinity` and `ConsumeBasicShapePathFunctionParameters` drop their unused state parameter. `CSS::Rect` is `RectShape` (layer *Values*).
+- `WebKitFontFamilyNames`: upstream generates it from `WebKitFontFamilyNames.in` (`make_names.pl`) as lazily-constructed globals. Here, one function per name (`SerifFamily()`, ...) returning a function-local static atom, and `FamilyName(index)` in place of the `familyNames`/`familyNamesData` lists. No `FamilyNamesList` (used by `FontSelector`; comes with it).
+- A quoted generic family (`"serif"`) serialises unquoted, as upstream: `SerialiseFontFamily` only quotes non-identifiers.
+
+Tests: `tests/CSS/Properties/Consumers/Font.cpp`: 14 cases / 248 assertions pass. Full Booey suite: 1469 cases / 673454 assertions; all pass except 4 expected failures.
 
 ## Slice 3: Colour
 
