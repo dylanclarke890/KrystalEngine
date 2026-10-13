@@ -365,5 +365,74 @@ namespace krys
     return static_cast<TargetType>(value);
   }
 
+  KRYS_NODISCARD constexpr int32 ClampToInteger(double value) noexcept
+  {
+    return ClampTo<int32>(value);
+  }
+
+  KRYS_NODISCARD constexpr int32 ClampToInteger(float value) noexcept
+  {
+    return ClampTo<int32>(value);
+  }
+
+  /// @brief Whether `x` lies strictly inside the range of `int32`.
+  KRYS_NODISCARD constexpr bool IsWithinIntRange(float x) noexcept
+  {
+    return x > static_cast<float>(Limits<int32>::min()) && x < static_cast<float>(Limits<int32>::max());
+  }
+
+#pragma endregion
+
+#pragma region Saturated Arithmetic
+
+  /// @brief Adds `a` and `b`, clamping the result to the range of `T` instead of overflowing.
+  template <SignedIntegral T>
+  KRYS_NODISCARD constexpr T SaturatedSum(T a, T b) noexcept
+  {
+    if (b > 0 && a > Limits<T>::max() - b)
+    {
+      return Limits<T>::max();
+    }
+
+    if (b < 0 && a < Limits<T>::min() - b)
+    {
+      return Limits<T>::min();
+    }
+
+    return static_cast<T>(a + b);
+  }
+
+  /// @brief Adds `a` and `b`, clamping the result to the range of `T` instead of overflowing.
+  template <UnsignedIntegral T>
+  KRYS_NODISCARD constexpr T SaturatedSum(T a, T b) noexcept
+  {
+    const T result = static_cast<T>(a + b);
+    return result < a ? Limits<T>::max() : result;
+  }
+
+  /// @brief Subtracts `b` from `a`, clamping the result to the range of `T` instead of overflowing.
+  template <SignedIntegral T>
+  KRYS_NODISCARD constexpr T SaturatedDifference(T a, T b) noexcept
+  {
+    if (b < 0 && a > Limits<T>::max() + b)
+    {
+      return Limits<T>::max();
+    }
+
+    if (b > 0 && a < Limits<T>::min() + b)
+    {
+      return Limits<T>::min();
+    }
+
+    return static_cast<T>(a - b);
+  }
+
+  /// @brief Subtracts `b` from `a`, clamping the result to the range of `T` instead of overflowing.
+  template <UnsignedIntegral T>
+  KRYS_NODISCARD constexpr T SaturatedDifference(T a, T b) noexcept
+  {
+    return a > b ? static_cast<T>(a - b) : T {0};
+  }
+
 #pragma endregion
 }
