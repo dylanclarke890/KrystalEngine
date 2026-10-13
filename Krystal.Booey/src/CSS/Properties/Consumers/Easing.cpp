@@ -109,7 +109,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     tokens = rangeCopy;
 
-    return EasingFunction {StepsEasingFunction {.parameters = krys::move(*parameters)}};
+    return EasingFunction {StepsEasingFunction {.Parameters = krys::move(*parameters)}};
   }
 
   // MARK: - <linear()>
@@ -124,7 +124,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return {};
     auto extra = MetaConsumer<Percentage<>>::Consume(args, state);
 
-    return LinearEasingParameters::Stop::Length {.input = krys::move(*input), .extra = krys::move(extra)};
+    return LinearEasingParameters::Stop::Length {.Input = krys::move(*input), .Extra = krys::move(extra)};
   }
 
   KRYS_NODISCARD static Maybe<LinearEasingParameters::Stop>
@@ -139,7 +139,7 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     auto input = ConsumeUnresolvedLinearEasingFunctionStopLength(args, state);
-    return LinearEasingParameters::Stop {.output = krys::move(*output), .input = krys::move(input)};
+    return LinearEasingParameters::Stop {.Output = krys::move(*output), .Input = krys::move(input)};
   }
 
   KRYS_NODISCARD static Maybe<EasingFunction>
@@ -177,7 +177,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     tokens = rangeCopy;
 
-    return EasingFunction {LinearEasingFunction {.parameters = {.stops = {krys::move(stops)}}}};
+    return EasingFunction {LinearEasingFunction {.Parameters = {.Stops = {krys::move(stops)}}}};
   }
 
   // MARK: - <cubic-bezier()>
@@ -239,7 +239,7 @@ namespace krys::boo::css::PropertyParserHelpers
     tokens = rangeCopy;
 
     return EasingFunction {CubicBezierEasingFunction {
-      .parameters = {.value = {
+      .Parameters = {.Value = {
                        CubicBezierEasingParameters::Coordinate {krys::move(*x1), krys::move(*y1)},
                        CubicBezierEasingParameters::Coordinate {krys::move(*x2), krys::move(*y2)},
                      }}}};
@@ -294,11 +294,11 @@ namespace krys::boo::css::PropertyParserHelpers
 
     tokens = rangeCopy;
 
-    return EasingFunction {SpringEasingFunction {.parameters = {
-                                                   .mass = krys::move(*mass),
-                                                   .stiffness = krys::move(*stiffness),
-                                                   .damping = krys::move(*damping),
-                                                   .initialVelocity = krys::move(*initialVelocity),
+    return EasingFunction {SpringEasingFunction {.Parameters = {
+                                                   .Mass = krys::move(*mass),
+                                                   .Stiffness = krys::move(*stiffness),
+                                                   .Damping = krys::move(*damping),
+                                                   .InitialVelocity = krys::move(*initialVelocity),
                                                  }}};
   }
 
@@ -348,14 +348,14 @@ namespace krys::boo::css::PropertyParserHelpers
         tokens.Discard();
         tokens.DiscardWhitespace();
         return EasingFunction {StepsEasingFunction {
-          .parameters = {StepsEasingParameters::Start {Integer<Range {1, Range::Inf}> {1}}}}};
+          .Parameters = {StepsEasingParameters::Start {Integer<Range {1, Range::Inf}> {1}}}}};
       }
       case ValueId::StepEnd:
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
         return EasingFunction {StepsEasingFunction {
-          .parameters = {StepsEasingParameters::End {Integer<Range {1, Range::Inf}> {1}}}}};
+          .Parameters = {StepsEasingParameters::End {Integer<Range {1, Range::Inf}> {1}}}}};
       }
       default:
       {

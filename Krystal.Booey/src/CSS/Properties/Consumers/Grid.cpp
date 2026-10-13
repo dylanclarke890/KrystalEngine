@@ -9,7 +9,6 @@
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
 #include "Krystal.Booey/CSS/Values/Grid/GridNamedAreaMap.hpp"
-#include "Krystal.Booey/CSS/Values/Grid/GridPosition.hpp"
 #include "Krystal.Booey/CSS/Values/GridAutoRepeatValue.hpp"
 #include "Krystal.Booey/CSS/Values/GridIntegerRepeatValue.hpp"
 #include "Krystal.Booey/CSS/Values/GridLineNamesValue.hpp"
@@ -17,6 +16,7 @@
 #include "Krystal.Booey/CSS/Values/GridTemplateAreasValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/SubgridValue.hpp"
+#include "Krystal.Booey/Style/Values/Grid/GridPosition.hpp"
 #include "Krystal.Core/Text/Encodings/Decode.hpp"
 #include "Krystal.Core/Text/Encodings/Encode.hpp"
 #include "Krystal.Core/Text/Encodings/UTF.hpp"
@@ -406,7 +406,7 @@ namespace krys::boo::css::PropertyParserHelpers
     }
     else
     {
-      auto maxRepetitions = static_cast<int64>(GridPosition::max() / numberOfTracks);
+      auto maxRepetitions = static_cast<int64>(style::GridPosition::Max() / numberOfTracks);
       if (auto repetitionsInteger = repetitions->ResolveAsIntegerIfNotCalculated();
           repetitionsInteger && repetitionsInteger > maxRepetitions)
       {
@@ -436,9 +436,9 @@ namespace krys::boo::css::PropertyParserHelpers
         return false;
       }
       if (auto repetitionsInteger = repetitions->ResolveAsIntegerIfNotCalculated();
-          repetitionsInteger && repetitionsInteger > GridPosition::max())
+          repetitionsInteger && repetitionsInteger > style::GridPosition::Max())
       {
-        repetitions = PrimitiveValue::CreateInteger(GridPosition::max());
+        repetitions = PrimitiveValue::CreateInteger(style::GridPosition::Max());
       }
     }
 
@@ -606,7 +606,7 @@ namespace krys::boo::css::PropertyParserHelpers
       }
     } while (tokens.Peek().Type() == TokenType::String);
 
-    if (!map.rowCount)
+    if (!map.RowCount)
     {
       return nullptr;
     }

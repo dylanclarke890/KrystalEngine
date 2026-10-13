@@ -2,7 +2,7 @@
 
 #include "Krystal.Core/Attributes.hpp"
 
-namespace krys::boo::css
+namespace krys::boo::style
 {
   enum class GridTrackSizingDirection : bool
   {

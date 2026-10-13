@@ -7,7 +7,7 @@
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
-#include "Krystal.Booey/URL/Url.hpp"
+#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Utils/Apply.hpp"
@@ -460,11 +460,11 @@ namespace krys::boo::css
     }
   };
 
-  // Specialization for `url::Url`.
+  // Specialization for `url::URL`.
   template <>
-  struct ComputedStyleDependenciesCollector<url::Url>
+  struct ComputedStyleDependenciesCollector<url::URL>
   {
-    constexpr void operator()(ComputedStyleDependencies &, const url::Url &)
+    constexpr void operator()(ComputedStyleDependencies &, const url::URL &)
     {
       // Nothing to do.
     }
@@ -644,12 +644,12 @@ namespace krys::boo::css
     }
   };
 
-  // Specialization for `url::Url`.
+  // Specialization for `url::URL`.
   template <>
-  struct ValueChildrenVisitor<url::Url>
+  struct ValueChildrenVisitor<url::URL>
   {
     constexpr IterationStatus operator()(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &,
-                                         const url::Url &)
+                                         const url::URL &)
     {
       return IterationStatus::Continue;
     }

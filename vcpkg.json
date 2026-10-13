@@ -12,6 +12,7 @@
       "default-features": false,
       "features": [ "extensions" ]
     },
-    "brigand"
+    "brigand",
+    "icu"
   ]
 }

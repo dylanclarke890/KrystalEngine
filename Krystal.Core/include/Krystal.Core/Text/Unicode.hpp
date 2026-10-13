@@ -3,6 +3,7 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 
 namespace krys::text

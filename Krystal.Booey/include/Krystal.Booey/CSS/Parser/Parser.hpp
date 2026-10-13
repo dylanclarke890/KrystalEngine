@@ -11,7 +11,7 @@
 #include "Krystal.Booey/CSS/Properties/InternalStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/CSS/Rules/RuleType.hpp"
-#include "Krystal.Booey/URL/Url.hpp"
+#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css

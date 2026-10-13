@@ -18,7 +18,7 @@
 
 Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 
-## Where we are (2026-10-12)
+## Where we are (2026-10-13)
 
 **Process per file/slice:** run `tools/port/graph.py` from the WebKit entry (`--headers-only`; also check the `.cpp`'s own includes, which headers-only misses), compare the Krystal file with upstream, add missing methods, fix bugs, record differences here, add tests where something can be instantiated, build, run tests. The user reviews each step; don't port ahead without being asked.
 
@@ -41,9 +41,12 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Slice 3 is committed (up to `225dbc61`).
 - Slice 4, Value subclasses (2026-10-12): `ValuePair`, `ValueList`/`ValueContainingList`, `FunctionValue`, `QuadValue`, `RectValue` and `RatioValue` reviewed and compile (compile-only; `Ratio` itself is tested); see the Slice 4 section.
 - Slice 4, tier 1 done (2026-10-12): `BackgroundRepeatValue`, `BorderImageSliceValue`, `BorderImageWidthValue`, `ReflectValue`, `UnicodeRangeValue` and the five font values (`FontVariationValue`, `FontFeatureValue`, `FontStyleWithAngleValue`, `FontStyleRangeValue`, `FontValue`), `GridLineNamesValue`, `GridLineValue`, `SubgridValue`, `TransformListValue`, `GridAutoRepeatValue`, `GridIntegerRepeatValue`, `CounterValue`, `OffsetRotateValue` and `AttrValue` reviewed and compile (compile-only), so tier 1 is done; `Graphics/FontTaggedSettings.hpp` ported and tested.
+- Slice 4, tier 2 started (2026-10-12): `Position` (CSS primitive) built and tested; `PositionValue`/`PositionXValue`/`PositionYValue` compile (compile-only).
+- URL (2026-10-12): WTF's `URL`/`URLParser`/`URLHash` ported as `url::URL` (`Krystal.Booey/URL/`), with ICU for IDNA, and tested against the WPT URL data; `CSSURL`, `URLModifiers` and `UrlValue` built and tested (`UrlValue` compile-only). See the `UrlValue` entry.
+- Slice 4, tier 2 done (2026-10-13): `GridTemplateAreasValue` (with `GridTemplateAreas`, `GridNamedAreaMap`, `GridArea`/`GridSpan` moved to `Rendering/Style/`, and the Style `GridPosition`/`GridTrackSizingDirection` moved to `Style/Values/Grid/`) and `EasingFunctionValue` (with the five easing types) built and tested (the value classes compile-only). See their entries.
 
 **Open / next candidates:**
-- Slice 4 (Value subclasses): the generic types are done; next are the specific value types, one at a time, in the order under Slice 4's *Order* (tier 1 done; next tier 2, starting with `PositionValue`/`PositionXValue`/`PositionYValue`).
+- Slice 4 (Value subclasses): the generic types are done; next are the specific value types, one at a time, in the order under Slice 4's *Order* (tiers 1 and 2 done; next tier 3, starting with `BoxShadowPropertyValue`).
 - Slice 3 (colour), bottom-up: (1) Graphics/Color, (2) calc-free numeric primitives, (3a) Style-free calc, (3b) calc evaluation and Style calc and (3c) calc parsing are done. (4a) `LayoutUnit` and the point/size types and (4b) Style numerics are done. (5a) the CSS colour types, (5b) the colour parser and (5c) `ColorValue`/`ValuePool` (compile-only) are done. (6) Style colour is done (its CSSValue half is deferred, see below). Slice 3 is complete apart from the Value-dependent pieces.
 - Deferred from layer 6 (needs `Style/BuilderChecking.hpp` and the raw-WebKit `ValueList`/`ValuePair`/`FunctionValue`/`BuilderState` it includes): `CSSValueConversion<Color>`, `CSSValueCreation<Color>`, `CSSValueConversion<DynamicRangeLimit>`, `CSSValueCreation<DynamicRangeLimit>` and `CSSValueConversion<Opacity>`. They come with the other `+CSSValueConversion`/`+CSSValueCreation` headers.
 - Waiting on `PrimitiveValue.cpp`/`Value.cpp` linking: `PropertyParserState::Pool` is a pointer (TODO: back to a reference defaulting to `MainThreadPool()`), `ColorValueConsumers.cpp` and `ColorAdjustValueConsumers.cpp` compile but should merge back into `Color.cpp`/`ColorAdjust.cpp`, `ValuePool::CreateFontFaceValue` (also needs `ValueList`/`PropertyParser`) and `ParserFastPaths::MaybeParseValue` aren't written, nothing in 5c is tested, and the Style `+CSSValueConversion`/`+CSSValueCreation` headers (numerics, `LengthWrapper`, `PrimitiveKeyword`) are still raw WebKit.
@@ -52,12 +55,14 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - The Style seam (`Style/Seam.hpp`, `src/Style/Seam.cpp`) stands in for `RenderStyle`, `RenderView`, `RenderBox`, the font types, `Style::BuilderState`, `AnchorPositionEvaluator`, `ContainerQueryEvaluator` and the `Document` colour API. Each placeholder is replaced when its slice is ported; see the layer 3b and layer 6 sections. Since layer 6, `RenderStyle` can be constructed (colour state only); its other members are still unreachable.
 - `Value.cpp` and `PrimitiveValue.cpp` can't build until every `Value` subclass compiles (`VisitDerived`). The `AbsoluteColorResolver.hpp` blocker found by a trial compile of `PrimitiveValue.cpp` is fixed (5a), and `ValuePool.hpp`/`ColorValue.hpp` build (5c).
 - `CSS/Values/Concepts.hpp` (`CSSValueConcepts.h`) compiles but isn't reviewed.
+- URL, not yet done: the DOM `URL` interface and `URLSearchParams` (WebKit's `DOMURL`/`URLDecomposition`, tested by WPT `setters_tests.json`), `Document`'s URL/base URL (`Document::URL()` is a TODO), `CompleteURL(string, Document)`, and `applyModifiersToLoaderOptions` (needs the resource loader).
 - Krystal.Core: the `IntrusivePtr` `Downcast`/`DynamicDowncast` overloads can't be called with an explicit target and `Downcast` rejects null (see the `CounterValue`/`OffsetRotateValue` entry); `OffsetRotateValue.cpp` has a FIXME workaround.
 - `CSS/Properties/Property.hpp` (`CSSProperty.h`) isn't reviewed, but compiles (the generated `PropertyId.cpp` defines its static functions); the colour parser and `AngleValidator` use `AcceptsQuirkyColor`/`AcceptsQuirkyAngle` from it.
 - Callers still using the case-sensitive raw lookups: `src/CSS/Parser.cpp:477`, `Consumers/Animations.cpp:154`, `Consumers/WillChange.cpp:48` (switch to `PropertyIdFromName`/`ValueIdFromName`); delete the commented-out originals in `src/CSS/Properties/PropertyParser.cpp`.
 - Tokenizer doesn't keep numeric original text or whitespace counts, so `TokenSerialisationMode::CustomProperty` behaves like `Normal` (FIXMEs in `src/CSS/Parser/Token.cpp`).
 - `LayoutUnit` now exists: `PrimitiveValue`'s `ResolveAsLength<LayoutUnit>` and `maxValueForCssLength`/`minValueForCssLength` (FIXME in `PrimitiveValue.hpp`) can be added when `PrimitiveValue.cpp` is built.
-- Not yet ported, needed later: `StringBuilder`, `RefCountedFixedVector`, URL type (check `Krystal.Booey/URL/Url.hpp` first).
+- Not yet ported, needed later: `StringBuilder`, `RefCountedFixedVector`, `DefaultHash<StringAtom>` (Krystal.Core; for `add(Hasher&, const Style::GridPosition&)`).
+- Style `GridPosition`'s `CSSValueConversion` is deferred with the other `+CSSValueConversion` headers.
 - Undecided style question: list wrappers use container-protocol lowercase names (`isEmpty`, `contains`), matching Core's `FixedVector`/`ListHashSet`; `EnumSet` and wrappers use PascalCase.
 
 ---
@@ -115,7 +120,8 @@ Use the CSS aliases from `CSS/Types/CSSOMString.hpp`, never the Krystal.Core or 
 | `wtf/HashTraits.h` | `have` → `HashTraits` in `Hash.hpp` | `HashTableEmptyValue`/`HashTableDeletedValue` → `HashTableEmptyValueTag`/`HashTableDeletedValueTag` (`Utils/Tags.hpp`). |
 | `wtf/StdLibExtras.h` | `port` on demand | Map each helper as it comes up (e.g. `WTFMove` → `krys::move`) and record it here. |
 | `wtf/TypeCasts.h` | `have` → `TypeCast.hpp` | |
-| `wtf/URL.h` | `port` → URL type | WHATWG URL; port when a slice needs it. `Krystal.Booey/URL/Url.hpp` already exists, check it first. |
+| `wtf/URL.h`, `URLParser.h`, `URLHash.h` | `have` → `url::URL`, `url::URLParser` in `Krystal.Booey/URL/` | WHATWG URL, UTF-8 only; ICU (vcpkg `icu`) for IDNA. See the `UrlValue` entry. |
+| `wtf/text/CodePointIterator.h` | `have*` → `text::CodePointIterator` in `Text/CodePointIterator.hpp` | UTF-8 only (one iterator instead of the Latin-1/UTF-16 templates). |
 
 ### Naming
 
@@ -823,7 +829,7 @@ Remaining subclasses, loosely by complexity. Measured from each upstream `.cpp`'
 
 **Tier 2: one or two new CSS types.**
 20. `PositionValue`, `PositionXValue`, `PositionYValue` (`CSSPosition.h`)
-21. `UrlValue` (`CSSURL.h`, `CSSURLModifiers.h`; check `URL/Url.hpp` first)
+21. `UrlValue` (`CSSURL.h`, `CSSURLModifiers.h`, and WTF's URL)
 22. `GridTemplateAreasValue` (`CSSGridNamedAreaMap.h`, `CSSGridTemplateAreas.h`)
 23. `EasingFunctionValue` (the four easing functions; `Values/Easing/` exists)
 
@@ -1140,6 +1146,140 @@ Tier 1 items 17–19; tier 1 is done. Graphs from each `css/CSS<name>.cpp` (head
 - No `AddDerivedHash` on any of them, like upstream: all hash by pointer.
 
 Tests: none (compile-only: `CssText` dispatches through `Value.cpp`). Full Booey suite: 836 cases / 653242 assertions; all pass except 2 expected failures.
+
+### `PositionValue`, `PositionXValue`, `PositionYValue` (2026-10-12)
+
+Tier 2 item 20. Graphs from `css/CSSPositionValue.cpp` (headers-only): 23 files, and `css/values/primitives/CSSPosition.cpp`: 19 files (`tools/port/out/position-csspositionvalue.md`, `position-cssposition.md`). Only `CSSPositionValue.h`/`.cpp` and `CSSPosition.h`/`.cpp` are new; the rest is the numeric primitives (slices 2–3). `CSSPosition.h` lives in `css/values/primitives/` upstream, which matches Krystal's `CSS/Values/Primitives/Position.hpp`, so it isn't moved.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/values/primitives/CSSPosition.h`, `.cpp` | `have` | `CSS/Values/Primitives/Position.hpp`, `src/CSS/Values/Primitives/Position.cpp` | on | tested. `isCenterPosition`/`split` → `IsCenterPosition`/`Split`; `switchOn` → `SwitchOn`; struct members `offset`/`value` → `Offset`/`Value`; `CSS::Keyword::X` → generated `keywords::X`. |
+| `css/CSSPositionValue.h`, `.cpp` | `have` | `CSS/Values/PositionValue.hpp`, `src/CSS/Values/PositionValue.cpp` | on (compile-only) | All three classes in one file, like upstream. `position()` → `GetPosition()` (would hide `Position`). |
+
+**Bugs fixed:**
+- The value classes' accessor was named `Position()`, which changes the meaning of `Position` inside the class (ill-formed; MSVC accepted it).
+- Their constructors weren't `noexcept`, and `CustomVisitChildren` lacked `KRYS_NOESCAPE`.
+- `Position.hpp`'s public struct members were lowercase (`offset`, `value`).
+
+**Differences:**
+- `Create` takes the position by value (upstream: `&&`), like `RatioValue`.
+- The single-argument value constructors are `explicit`.
+- No `AddDerivedHash`, like upstream: all three hash by pointer.
+- `Style/Values/Primitives/Position.hpp` (unreviewed, raw WebKit) still reads `x.offset`/`y.offset`; it changes to `Offset` when the Style position is ported.
+
+Tests: `tests/CSS/Values/Primitives/Position.cpp` (`IsCenterPosition` including `50%` and the non-two-component forms, `Split` for all four forms, equality, serialisation, computed-style dependencies, visitation): 5 cases / 25 assertions. The value classes are compile-only. Full Booey suite: 841 cases / 653267 assertions; all pass except 2 expected failures.
+
+### `UrlValue` and WTF's URL (2026-10-12)
+
+Tier 2 item 21. Krystal had no URL implementation (`URL/Url.hpp` was an empty struct), so this ports WTF's URL as the base for CSS and the DOM. Decisions (2026-10-12): ICU through vcpkg for IDNA (like upstream), UTF-8-only query encoding (no `URLTextEncoding`), and the main type is `url::URL` in `URL/URL.hpp` with CSS's `CSSURL` holding one.
+
+Graphs: `css/CSSURLValue.cpp` (headers-only): 24 files, new ones `CSSURLValue.h`, `CSSURL.h`, `CSSURLModifiers.h`; `css/values/primitives/CSSURL.cpp`: also `CSSParserContext.h` (have*, layer 3c), `CSSMarkup.h`, `Document.h`; `CSSURLModifiers.cpp`: `loader/LoadedFromOpaqueSource.h`, `loader/ResourceLoaderOptions.h`. WTF's URL is outside the graph tool's prefixes; its files were read directly (`URL.h`/`.cpp`, `URLParser.h`/`.cpp`, `URLHash.h`, `text/CodePointIterator.h`). `tools/port/out/cssurl.md`, `cssurlmodifiers.md`, `cssurlvalue.md`.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `wtf/URL.h`, `.cpp` | `port` | `URL/URL.hpp`, `src/URL/URL.cpp` | on | tested. `url::URL`; methods PascalCase (`string()` → `String()`, `stringCenterEllipsizedToLength` → `StringCenterEllipsisedToLength`). Free functions too (`AboutBlankURL`, `ProtocolIs`, `PortAllowed`, …). |
+| `wtf/URLParser.h`, `.cpp` | `port` | `URL/URLParser.hpp`, `src/URL/URLParser.cpp` | on | tested. Every state and helper ported; one UTF-8 `CodePointIterator` instead of the Latin-1/UTF-16 templates. `serialize` → `Serialise`, `maybeCanonicalizeScheme` → `MaybeCanonicaliseScheme`. |
+| `wtf/URLHash.h` | `port` | `URL/URLHash.hpp` | on | tested. `DefaultHash<url::URL>`/`HashTraits<url::URL>`. |
+| `wtf/text/CodePointIterator.h` | `port` | Krystal.Core `Text/CodePointIterator.hpp` | on | tested. UTF-8 only; adds `DecodeUTF8`/`IsValidUTF8`. |
+| `wtf/URLHelpers.h`, `.cpp` | `wont` | | | Display-only (decoding punycode for UI). |
+| `css/values/primitives/CSSURL.h`, `.cpp` | `have` | `CSS/Values/Primitives/URL.hpp`, `src/CSS/Values/Primitives/URL.cpp` | on | tested. Upstream's `CSS::URL` is `CSSURL` (no clash with `url::URL`); members `specified`/`resolved`/`modifiers` → `Specified`/`Resolved`/`Modifiers`. |
+| `css/values/primitives/CSSURLModifiers.h`, `.cpp` | `have` | `CSS/Values/Primitives/URLModifiers.hpp` | on | tested. Members PascalCase. `applyModifiersToLoaderOptions` not ported (FIXME): no resource loader. |
+| `css/CSSURLValue.h`, `.cpp` | `have` | `CSS/Values/UrlValue.hpp`, `src/CSS/Values/UrlValue.cpp` | on (compile-only) | Krystal's existing name `UrlValue` kept. `url()` → `URL()`. |
+| `loader/LoadedFromOpaqueSource.h` | `port` | `Loader/LoadedFromOpaqueSource.hpp` | on | |
+| `css/parser/CSSParserContext.h` | `have*` | `CSS/Parser/ParserContext.hpp` | on | Added `BaseURL` and `LoadedFromOpaqueSource`. Still no `charset`, `enclosingRuleType`, `hasDocumentSecurityOrigin`, constructors or hashing. |
+| `loader/ResourceLoaderOptions.h`, `pal/text/TextEncoding.h`, `dom/Document.h` | | | off | See differences. |
+
+**Bugs fixed:**
+- `CSSURL::IsNone()` tested `specified.empty()`, so `url("")` counted as `none`; upstream tests for a null string. It now also requires a null resolved URL, which only `None()` has (`url("")` always resolves to a non-null, invalid URL).
+- `URLModifiers` was missing `loadedFromOpaqueSource` (commented out), so it was never compared or propagated from the context.
+- `Consumers/URL.cpp` (unbuilt) used `.parameters`, but `FunctionNotation`'s member is `Parameters`; renamed along with the modifier members.
+
+**Krystal.Core changes (found here):**
+- `Text/Unicode.hpp` used `MaxASCIIChar` without including `Text/ASCII.hpp`, so it didn't compile on its own.
+- Added `text::IsASCIIAlphaCaselessEqual` (single characters; WTF's `isASCIIAlphaCaselessEqual`); Core's `IsASCIICaselessEqual` compares whole strings.
+- Added `Text/CodePointIterator.hpp` (above). Core's text tests weren't built (`tests/Text/*` weren't in `Krystal.Core.Tests/CMakeLists.txt`); only the new `CodePointIterator.cpp` is added.
+
+**Differences:**
+- Strings are UTF-8 (`utf8_string`/`utf8_stringview`). WTF's null `String` is a separate `_isNull` bit on `URL`; null string views (`data() == nullptr`) stand in for WTF's null `StringView` in the getters (absent component) and in `SetQuery` (null removes the query) and `URL(base, relative)` (null relative gives the base without its fragment). Invalid UTF-8 in parser input reads as U+FFFD, one per invalid byte.
+- `URLTextEncoding` (non-UTF-8 query encoding) isn't supported: queries are always UTF-8 percent-encoded. `parseAllowingC0AtEnd`'s sentinel encoding pointer is a `bool`.
+- IDNA uses `uidna_nameToASCII_UTF8` (upstream converts to UTF-16 for `uidna_nameToASCII`). vcpkg's ICU is 78.3 (Unicode 17).
+- The scheme length field is 24 bits (upstream 26) to make room for the null and deleted-value bits.
+- Not ported: `isolatedCopy` (strings are values), `fakeURLWithRelativePart` (needs a UUID), `registerDefaultPortForProtocolForTesting`/`clearDefaultPortForProtocolMapForTesting`, `print`/`dump`/`TextStream`, the CF/NS/GLib conversions.
+- `User()`/`Password()` return an empty string for invalid UTF-8 after decoding (upstream a null string).
+- `RemoveQueryParameters` passes an empty remaining query as a null view, as upstream's empty `StringBuilder` does, so the `?` is removed.
+- `CSSURL` serialisation always uses the specified URL: Krystal's `SerialisationContext` has no replacement URLs or `shouldUseResolvedURLInCSSText` (upstream's default is the specified URL too).
+- `CompleteURL` has no WebVTT check (Krystal's `ParserMode` has no WebVTT mode), so it never returns null. The `Document` overload isn't ported: Krystal's `Document` has no base URL yet.
+
+Tests:
+- `tests/URL/WPT.cpp` runs the WPT URL data (`data/url/urltestdata.json`, `toascii.json`, `IdnaTestV2.json`, copied from WebKit's `LayoutTests/imported/w3c/web-platform-tests/url/resources`), mapping each field to the getter the DOM `URL` interface uses, plus `toascii.json`'s host/hostname setter cases: 3 cases / 13161 assertions, all pass. Three `IdnaTestV2.json` cases expect a V7 failure for U+32931/U+32B9A, which Unicode 17 (ICU 78) assigned (CJK Extension J); the test expects them to be valid. WebKit passes all of these upstream (no FAIL lines in its expectations).
+- `tests/URL/URL.cpp`: WebKit's `TestWebKitAPI/Tests/WTF/URL.cpp` (except `URLDataURIStringSharing`, `PrintStream`, `IsolatedCopy`), plus setters, hashing and the string helpers: 19 cases. WebKit's `URLParser.cpp` API tests aren't ported; `urltestdata.json` covers their parsing cases.
+- `tests/CSS/Values/Primitives/URL.cpp` (`CompleteURL`, `None`, `Resolve`, `MayDependOnBaseURL`, serialisation with modifiers, equality, dependencies, visitation): 6 cases / 36 assertions. `UrlValue` is compile-only.
+- Krystal.Core `tests/Text/CodePointIterator.cpp`: 4 cases / 20 assertions.
+- Full Booey suite: 869 cases / 666730 assertions; all pass except 2 expected failures. Core suite: 548 cases / 2234 assertions, all pass. Whole solution builds with no warnings.
+
+### `GridTemplateAreasValue` (2026-10-13)
+
+Tier 2 item 22. Graph from `css/CSSGridTemplateAreasValue.cpp` (headers-only): 9 files (`tools/port/out/grid-template-areas-value.md`). New: `CSSGridTemplateAreasValue.h`/`.cpp`, `values/grid/CSSGridTemplateAreas.h`, `values/grid/CSSGridNamedAreaMap.h`/`.cpp`, and the boundary `rendering/style/GridArea.h`, which needs `rendering/style/GridSpan.h`/`.cpp` and `style/values/grid/StyleGridTrackSizingDirection.h`. `GridSpan.cpp` clamps through `Style::GridPosition::max()`/`min()`, so `style/values/grid/StyleGridPosition.h`/`.cpp` (and `StyleGridPositionSide.h`, which it includes) came too, minus its CSSValue conversion. The rest is reviewed (`CSSValueTypes.h` and the aggregates).
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/CSSGridTemplateAreasValue.h`, `.cpp` | `have` | `CSS/Values/GridTemplateAreasValue.hpp`, `src/CSS/Values/GridTemplateAreasValue.cpp` | on (compile-only) | `areas()` → `Areas()`, `stringForRow` → `StringForRow`. |
+| `css/values/grid/CSSGridTemplateAreas.h` | `have` | `CSS/Values/Grid/GridTemplateAreas.hpp` | on | tested. `map` → `Map`. |
+| `css/values/grid/CSSGridNamedAreaMap.h`, `.cpp` | `have` | `CSS/Values/Grid/GridNamedAreaMap.hpp`, `src/CSS/Values/Grid/GridNamedAreaMap.cpp` | on | tested. `map`/`rowCount`/`columnCount` → `Map`/`RowCount`/`ColumnCount`; `addRow` → `AddRow`. |
+| `rendering/style/GridArea.h` | `have` | `Rendering/Style/GridArea.hpp` | on | tested. Moved from `CSS/Values/Grid/` to match upstream's location (like `Loader/`), namespace `boo`. `columns`/`rows` → `Columns`/`Rows`, `span()` → `Span()`. |
+| `rendering/style/GridArea.cpp` | `wont` | | | Only `TextStream` dumping. |
+| `rendering/style/GridSpan.h`, `.cpp` | `have` | `Rendering/Style/GridSpan.hpp`, `src/Rendering/Style/GridSpan.cpp` | on | tested. Moved likewise. Methods PascalCase (`translatedDefiniteGridSpan` → `TranslatedDefiniteGridSpan`, `startLine` → `StartLine`, `clamp` → `Clamp`, ...); `begin`/`end` keep their names. |
+| `style/values/grid/StyleGridTrackSizingDirection.h` | `have` | `Style/Values/Grid/GridTrackSizingDirection.hpp` | on | tested. Moved from `CSS/Values/Grid/` into `boo::style`. |
+| `style/values/grid/StyleGridPosition.h`, `.cpp` | `have` | `Style/Values/Grid/GridPosition.hpp`, `src/Style/Values/Grid/GridPosition.cpp` | on | tested. Was `CSS/Values/Grid/GridPosition.hpp` in `boo::css` (unreviewed, nothing defined); moved into `boo::style`. Methods PascalCase (`max` → `Max`, `setMaxPositionForTesting` → `SetMaxPositionForTesting`, ...). `CSSValueConversion<GridPosition>` and the logging aren't ported (see differences). |
+| `style/values/grid/StyleGridPositionSide.h` | `port` | `Style/Values/Grid/GridPositionSide.hpp` | on | |
+
+**Bugs fixed:**
+- `GridTemplateAreasValue` declared a `CustomVisitChildren` (never defined; upstream has none), hiding `Value`'s default, and neither it nor `GridSpan`, `GridNamedAreaMap`'s `AddRow` or `GridPosition` had any definitions (no `.cpp`s).
+- `GridTemplateAreas`/`GridNamedAreaMap`/`GridArea`/`GridPosition`'s public members were lowercase; `GridPosition`'s accessors and statics were camelCase.
+- `GridPosition` (a Style type) was in `boo::css`, so `Consumers/Grid.cpp`'s `GridPosition::max()` would have resolved to it.
+
+**Krystal callers updated (unbuilt):** `Consumers/Grid.cpp` (`style::GridPosition::Max()`, `map.RowCount`, the `GridPosition.hpp` include).
+
+**Added (upstream API):** everything in the table above; `GridArea::Span`, `GridSpan::MasonryAxisTranslatedDefiniteGridSpan`, `GridPosition::SetMaxPositionForTesting`, `Serialiser<GridNamedAreaMap>`.
+
+**Differences:**
+- One `GridTemplateAreasValue::Create(GridTemplateAreas)` by value instead of upstream's `&&`/`const &` overloads (like `RatioValue`).
+- `GridNamedAreaMap::Map` (upstream's `Map` alias) is `MapType`, because the member is now `Map`; likewise `GridPositionExplicit::Position`/`GridPositionSpan::Position` (aliases) are `PositionType`, with the members `Position`/`Name`.
+- `GridNamedAreaMap::Map` is a `std::unordered_map`, so iteration order differs from WTF's `HashMap`. Serialisation and `StringForRow` don't depend on it (areas don't overlap). `HashMap::ensure` → `try_emplace`.
+- `StringForRow` fills a `List<const CSSOMString *>` (null for an unnamed cell) instead of a `FixedVector<String>` of null strings.
+- `GridPosition`'s constructors take their argument by value (upstream `&&`).
+- Not ported: `add(Hasher&, const GridPosition&)` (Krystal.Core has no `DefaultHash<StringAtom>`; nothing hashes grid positions yet), `CSSValueConversion<GridPosition>` (needs `BuilderState`/`BuilderChecking`, deferred like the Style colour conversions), and the `TextStream` logging.
+- `GridPosition::SetMaxPositionForTesting` can't be reset, like upstream; tests set it back to 1000000.
+- `Consumers/Grid.hpp` (unreviewed) still declares its own `GridNamedAreaMapRow` alias (same type).
+
+Tests: `tests/Rendering/Style/GridSpan.cpp` (factories, iteration, `Translate`/`TranslateTo` both ways, both `Clamp`s, clamping to the grid position limits, `GridArea`, `OrthogonalDirection`): 5 cases; `tests/Style/Values/Grid/GridPosition.cpp` (the four kinds, limits and clamping, `SwitchOn` including the minimal `Explicit`/`Span` forms): 3 cases; `tests/CSS/Values/Grid/GridTemplateAreas.cpp` (`AddRow` including every rejection, serialisation, `none`, equality): 2 cases. 10 cases / 90 assertions. `GridTemplateAreasValue` is compile-only.
+
+### `EasingFunctionValue` (2026-10-13)
+
+Tier 2 item 23; tier 2 is done. Graph from `css/CSSEasingFunctionValue.cpp` (headers-only): 26 files (`tools/port/out/easing-function-value.md`). New: `CSSEasingFunctionValue.h`/`.cpp` and the five `css/values/easing/` headers (no `.cpp`s); the rest is the numeric primitives (slices 2–3).
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/CSSEasingFunctionValue.h`, `.cpp` | `have` | `CSS/Values/EasingFunctionValue.hpp`, `src/CSS/Values/EasingFunctionValue.cpp` | on (compile-only) | `easingFunction()` → `GetEasingFunction()` (would hide `EasingFunction`). |
+| `css/values/easing/CSSEasingFunction.h` | `have` | `CSS/Values/Easing/EasingFunction.hpp` | on | tested. `value` → `Value`, `switchOn` → `SwitchOn`. |
+| `css/values/easing/CSSCubicBezierEasingFunction.h` | `have` | `CSS/Values/Easing/CubicBezierEasingFunction.hpp` | on | tested. `value` → `Value`. |
+| `css/values/easing/CSSLinearEasingFunction.h` | `have` | `CSS/Values/Easing/LinearEasingFunction.hpp` | on | tested. `stops`/`output`/`input`/`extra` → PascalCase. |
+| `css/values/easing/CSSSpringEasingFunction.h` | `have` | `CSS/Values/Easing/SpringEasingFunction.hpp` | on | tested. `mass`/`stiffness`/`damping`/`initialVelocity` → PascalCase. |
+| `css/values/easing/CSSStepsEasingFunction.h` | `have` | `CSS/Values/Easing/StepsEasingFunction.hpp` | on | tested. `Kind`'s `steps`/`keyword` → `Steps`/`Keyword` (template parameter `Keyword` → `TKeyword`). |
+
+**Bugs fixed:**
+- No `Serialiser` for `StepsEasingParameters::Kind`: as a one-element tuple it serialised only the step count, so `steps(4, jump-start)` came out as `steps(4)`.
+- `EasingFunctionValue` had no constructor, member, accessor or `.cpp`, and its `CustomVisitChildren` lacked `KRYS_NOESCAPE`.
+- `LinearEasingParameters::Stop::Length::extra` was a `Markable<Percentage<>>` (upstream `std::optional`); now `Maybe`, like `Stop::input`.
+- Public members were lowercase; `EasingFunction::switchOn` was camelCase; `Stop::operator==` wasn't `noexcept`.
+
+**Krystal callers updated (unbuilt):** `Consumers/Easing.cpp` (designated initialisers: `.Parameters`, `.Stops`, `.Value`, `.Input`, `.Extra`, `.Output`, `.Mass`, ...).
+
+**Added (upstream API):** `EasingFunctionValue::Create`, `GetEasingFunction`, `CustomCSSText`, `Equals`, `CustomVisitChildren`; `Serialiser<StepsEasingParameters::Kind>`.
+
+**Differences:** `std::numeric_limits` → `Limits`. No `AddDerivedHash`, like upstream: hashes by pointer.
+
+Tests: `tests/CSS/Values/Easing/EasingFunction.cpp` (serialisation of every keyword and function, including each steps position and the omitted `end`/`jump-end` keyword; equality; `SwitchOn`; visitation and dependencies): 6 cases / 30 assertions. `EasingFunctionValue` is compile-only. Full Booey suite: 885 cases / 666850 assertions; all pass except 2 expected failures.
 
 ## Deferred: Values (from the tokenizer graph)
 

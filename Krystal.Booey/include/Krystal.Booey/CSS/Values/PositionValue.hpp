@@ -2,76 +2,74 @@
 
 #include "Krystal.Booey/CSS/Values/Primitives/Position.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
 {
+  /// @brief A `<position>` value, e.g. `background-position: left 10px top`.
   class PositionValue final : public Value
   {
   private:
     Position _position;
 
-    PositionValue(Position &&);
+    explicit PositionValue(Position &&position) noexcept;
 
   public:
-    KRYS_NODISCARD static Ref<PositionValue> Create(Position &&position) noexcept;
+    KRYS_NODISCARD static Ref<PositionValue> Create(Position position) noexcept;
 
-    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
-
-    KRYS_NODISCARD bool Equals(const PositionValue &other) const noexcept;
-
-    KRYS_NODISCARD IterationStatus
-      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
-
-    KRYS_NODISCARD const Position &Position() const noexcept
+    KRYS_NODISCARD const Position &GetPosition() const noexcept
     {
       return _position;
     }
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+    KRYS_NODISCARD bool Equals(const PositionValue &other) const noexcept;
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func) const noexcept;
   };
 
+  /// @brief The horizontal half of a `<position>`, e.g. `background-position-x: right 10px`.
   class PositionXValue final : public Value
   {
   private:
     PositionX _position;
 
-    PositionXValue(PositionX &&);
+    explicit PositionXValue(PositionX &&position) noexcept;
 
   public:
-    KRYS_NODISCARD static Ref<PositionXValue> Create(PositionX &&position) noexcept;
+    KRYS_NODISCARD static Ref<PositionXValue> Create(PositionX position) noexcept;
 
-    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
-
-    KRYS_NODISCARD bool Equals(const PositionXValue &other) const noexcept;
-
-    KRYS_NODISCARD IterationStatus
-      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
-
-    KRYS_NODISCARD const PositionX &Position() const noexcept
+    KRYS_NODISCARD const PositionX &GetPosition() const noexcept
     {
       return _position;
     }
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+    KRYS_NODISCARD bool Equals(const PositionXValue &other) const noexcept;
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func) const noexcept;
   };
 
+  /// @brief The vertical half of a `<position>`, e.g. `background-position-y: center`.
   class PositionYValue final : public Value
   {
   private:
     PositionY _position;
 
-    PositionYValue(PositionY &&);
+    explicit PositionYValue(PositionY &&position) noexcept;
 
   public:
-    KRYS_NODISCARD static Ref<PositionYValue> Create(PositionY &&position) noexcept;
+    KRYS_NODISCARD static Ref<PositionYValue> Create(PositionY position) noexcept;
 
-    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
-
-    KRYS_NODISCARD bool Equals(const PositionYValue &other) const noexcept;
-
-    KRYS_NODISCARD IterationStatus
-      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
-
-    KRYS_NODISCARD const PositionY &Position() const noexcept
+    KRYS_NODISCARD const PositionY &GetPosition() const noexcept
     {
       return _position;
     }
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+    KRYS_NODISCARD bool Equals(const PositionYValue &other) const noexcept;
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func) const noexcept;
   };
 }
 

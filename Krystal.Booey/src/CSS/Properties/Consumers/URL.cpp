@@ -85,7 +85,7 @@ namespace krys::boo::css::PropertyParserHelpers
                   return {};
                 }
 
-                if (result->modifiers.crossOrigin)
+                if (result->Modifiers.CrossOrigin)
                 {
                   return {};
                 }
@@ -99,7 +99,7 @@ namespace krys::boo::css::PropertyParserHelpers
                   return {};
                 }
 
-                result->modifiers.crossOrigin = URLCrossOriginFunction {.parameters = {*crossOriginValue}};
+                result->Modifiers.CrossOrigin = URLCrossOriginFunction {.Parameters = {*crossOriginValue}};
                 break;
               }
               case ValueId::Integrity:
@@ -114,7 +114,7 @@ namespace krys::boo::css::PropertyParserHelpers
                   return {};
                 }
 
-                if (result->modifiers.integrity)
+                if (result->Modifiers.Integrity)
                 {
                   return {};
                 }
@@ -127,8 +127,8 @@ namespace krys::boo::css::PropertyParserHelpers
                   return {};
                 }
 
-                result->modifiers.integrity =
-                  URLIntegrityFunction {.parameters = {CSSOMString(integrityValue)}};
+                result->Modifiers.Integrity =
+                  URLIntegrityFunction {.Parameters = {CSSOMString(integrityValue)}};
 
                 break;
               }
@@ -139,7 +139,7 @@ namespace krys::boo::css::PropertyParserHelpers
                   return {};
                 }
 
-                if (result->modifiers.referrerPolicy)
+                if (result->Modifiers.ReferrerPolicy)
                 {
                   return {};
                 }
@@ -156,8 +156,8 @@ namespace krys::boo::css::PropertyParserHelpers
                   return {};
                 }
 
-                result->modifiers.referrerPolicy =
-                  URLReferrerPolicyFunction {.parameters = {*referrerPolicyValue}};
+                result->Modifiers.ReferrerPolicy =
+                  URLReferrerPolicyFunction {.Parameters = {*referrerPolicyValue}};
 
                 break;
               }

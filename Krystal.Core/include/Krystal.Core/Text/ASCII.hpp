@@ -318,6 +318,14 @@ namespace krys::text
 
 #pragma region Comparison
 
+  /// @brief Whether the character `c` equals `expected`, ignoring ASCII case. Unlike `IsASCIICaselessEqual`,
+  /// compares single characters.
+  template <typename TChar, typename UChar>
+  KRYS_NODISCARD constexpr bool IsASCIIAlphaCaselessEqual(TChar c, UChar expected) noexcept
+  {
+    return ToASCIILower(static_cast<char32>(c)) == ToASCIILower(static_cast<char32>(expected));
+  }
+
   // TODO: this is a bit clunky to use with string literals as they don't have .length etc., rework slightly
   // to account for this
   template <typename A, typename B>

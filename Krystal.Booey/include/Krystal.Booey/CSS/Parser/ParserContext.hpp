@@ -2,15 +2,20 @@
 
 #include "Krystal.Booey/CSS/Parser/ParserMode.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
+#include "Krystal.Booey/Loader/LoadedFromOpaqueSource.hpp"
+#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
 
 namespace krys::boo::css
 {
   struct ParserContext
   {
+    url::URL BaseURL;
     ParserMode Mode {ParserMode::HTMLStandard};
     PropertySettings PropertySettings;
     bool IsHTMLDocument : 1 {false};
+
+    boo::LoadedFromOpaqueSource LoadedFromOpaqueSource : 1 {boo::LoadedFromOpaqueSource::No};
     bool useSystemAppearance : 1 {false};
     bool shouldIgnoreImportRules : 1 {false};
 

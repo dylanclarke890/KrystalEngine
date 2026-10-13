@@ -26,6 +26,10 @@ target_compile_options(Krystal.Booey
 find_path(BRIGAND_INCLUDE_DIRS "brigand/adapted.hpp")
 target_include_directories(Krystal.Booey PRIVATE ${BRIGAND_INCLUDE_DIRS})
 
+# Third-party - ICU (IDNA for URL host parsing)
+find_package(ICU REQUIRED COMPONENTS uc dt)
+target_link_libraries(Krystal.Booey PRIVATE ICU::uc ICU::dt)
+
 # Custom build step for python codegen scripts
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 find_program(GPERF_EXECUTABLE NAMES gperf REQUIRED)
@@ -289,6 +293,10 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/GridLineNamesValue.hpp
   include/Krystal.Booey/CSS/Values/GridLineValue.hpp
   include/Krystal.Booey/CSS/Values/OffsetRotateValue.hpp
+  include/Krystal.Booey/CSS/Values/PositionValue.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/URL.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/URLModifiers.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/Position.hpp
   include/Krystal.Booey/CSS/Values/Quad.hpp
   include/Krystal.Booey/CSS/Values/Primitives/Ratio.hpp
   include/Krystal.Booey/CSS/Values/QuadValue.hpp
@@ -299,11 +307,26 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/ReflectValue.hpp
   include/Krystal.Booey/CSS/Values/SubgridValue.hpp
   include/Krystal.Booey/CSS/Values/TransformListValue.hpp
+  include/Krystal.Booey/CSS/Values/UrlValue.hpp
   include/Krystal.Booey/CSS/Values/UnicodeRangeValue.hpp
   include/Krystal.Booey/CSS/Values/ValueList.hpp
   include/Krystal.Booey/CSS/Values/ValueListBuilder.hpp
   include/Krystal.Booey/CSS/Values/ValuePair.hpp
   include/Krystal.Booey/Graphics/FontTaggedSettings.hpp
+  include/Krystal.Booey/CSS/Values/Grid/GridNamedAreaMap.hpp
+  include/Krystal.Booey/CSS/Values/Grid/GridTemplateAreas.hpp
+  include/Krystal.Booey/CSS/Values/GridTemplateAreasValue.hpp
+  include/Krystal.Booey/Rendering/Style/GridArea.hpp
+  include/Krystal.Booey/Rendering/Style/GridSpan.hpp
+  include/Krystal.Booey/Style/Values/Grid/GridPosition.hpp
+  include/Krystal.Booey/Style/Values/Grid/GridPositionSide.hpp
+  include/Krystal.Booey/Style/Values/Grid/GridTrackSizingDirection.hpp
+  include/Krystal.Booey/CSS/Values/Easing/CubicBezierEasingFunction.hpp
+  include/Krystal.Booey/CSS/Values/Easing/EasingFunction.hpp
+  include/Krystal.Booey/CSS/Values/Easing/LinearEasingFunction.hpp
+  include/Krystal.Booey/CSS/Values/Easing/SpringEasingFunction.hpp
+  include/Krystal.Booey/CSS/Values/Easing/StepsEasingFunction.hpp
+  include/Krystal.Booey/CSS/Values/EasingFunctionValue.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -427,6 +450,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/GridLineNamesValue.cpp
   src/CSS/Values/GridLineValue.cpp
   src/CSS/Values/OffsetRotateValue.cpp
+  src/CSS/Values/PositionValue.cpp
+  src/CSS/Values/Primitives/URL.cpp
+  src/CSS/Values/Primitives/Position.cpp
   src/CSS/Values/Primitives/Ratio.cpp
   src/CSS/Values/QuadValue.cpp
   src/CSS/Values/RatioValue.cpp
@@ -434,9 +460,15 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/ReflectValue.cpp
   src/CSS/Values/SubgridValue.cpp
   src/CSS/Values/TransformListValue.cpp
+  src/CSS/Values/UrlValue.cpp
   src/CSS/Values/UnicodeRangeValue.cpp
   src/CSS/Values/ValueList.cpp
   src/CSS/Values/ValuePair.cpp
+  src/CSS/Values/Grid/GridNamedAreaMap.cpp
+  src/CSS/Values/GridTemplateAreasValue.cpp
+  src/Rendering/Style/GridSpan.cpp
+  src/Style/Values/Grid/GridPosition.cpp
+  src/CSS/Values/EasingFunctionValue.cpp
 )
 
 target_precompile_headers(Krystal.Booey
@@ -804,8 +836,13 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/Types/NestedLevelIncrementer.hpp
       include/Krystal.Booey/Types/SourceLocation.hpp
 
+      # Loader
+      include/Krystal.Booey/Loader/LoadedFromOpaqueSource.hpp
+
       # URL
-      include/Krystal.Booey/URL/Url.hpp
+      include/Krystal.Booey/URL/URL.hpp
+      include/Krystal.Booey/URL/URLHash.hpp
+      include/Krystal.Booey/URL/URLParser.hpp
 
   PRIVATE
     # ${KRYSTAL_BOOEY_GENERATED_SOURCES}
@@ -994,4 +1031,8 @@ target_sources(Krystal.Booey
     src/SVG/SVGTitleElement.cpp
     src/SVG/SVGUnknownElement.cpp
     src/SVG/SVGUseElement.cpp
+
+    # URL
+    src/URL/URL.cpp
+    src/URL/URLParser.cpp
 )

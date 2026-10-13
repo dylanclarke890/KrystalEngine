@@ -25,13 +25,14 @@ namespace krys::boo::css
       Yes
     };
 
-    template <typename T, typename Keyword, auto shouldSerialiseKeyword = ShouldSerialiseKeyword::Yes>
+    template <typename T, typename TKeyword, auto TShouldSerialiseKeyword = ShouldSerialiseKeyword::Yes>
     struct Kind
     {
-      constexpr static Keyword keyword = Keyword {};
-      T steps;
+      constexpr static TKeyword Keyword = TKeyword {};
 
-      constexpr bool operator==(const Kind &) const noexcept = default;
+      T Steps;
+
+      KRYS_NODISCARD constexpr bool operator==(const Kind &) const noexcept = default;
     };
 
     using JumpStart = Kind<Integer<Range {1, Range::Inf}>, keywords::JumpStart>;
@@ -41,42 +42,56 @@ namespace krys::boo::css
     using End = Kind<Integer<Range {1, Range::Inf}>, keywords::End, ShouldSerialiseKeyword::No>;
     using JumpNone = Kind<Integer<Range {2, Range::Inf}>, keywords::JumpNone>;
 
-    Variant<JumpStart, JumpEnd, JumpBoth, Start, End, JumpNone> value;
+    Variant<JumpStart, JumpEnd, JumpBoth, Start, End, JumpNone> Value;
 
-    constexpr bool operator==(const StepsEasingParameters &) const noexcept = default;
+    KRYS_NODISCARD constexpr bool operator==(const StepsEasingParameters &) const noexcept = default;
   };
 
   using StepsEasingFunction = FunctionNotation<ValueId::Steps, StepsEasingParameters>;
 
-  DEFINE_TYPE_WRAPPER_GET(StepsEasingParameters, value);
+  DEFINE_TYPE_WRAPPER_GET(StepsEasingParameters, Value)
 
-  template <size_t I, typename T, typename K, auto shouldSerialiseKeyword>
+  template <size_t I, typename T, typename TKeyword, auto TShouldSerialiseKeyword>
   KRYS_NODISCARD constexpr const auto &
-    get(const StepsEasingParameters::Kind<T, K, shouldSerialiseKeyword> &value) noexcept
+    get(const StepsEasingParameters::Kind<T, TKeyword, TShouldSerialiseKeyword> &value) noexcept
   {
-    return value.steps;
+    return value.Steps;
   }
+
+  template <typename T, typename TKeyword, auto TShouldSerialiseKeyword>
+  struct Serialiser<StepsEasingParameters::Kind<T, TKeyword, TShouldSerialiseKeyword>>
+  {
+    void operator()(CSSOMString &builder, const SerialisationContext &context,
+                    const StepsEasingParameters::Kind<T, TKeyword, TShouldSerialiseKeyword> &value) noexcept
+    {
+      Serialise(builder, context, value.Steps);
+      if constexpr (TShouldSerialiseKeyword == StepsEasingParameters::ShouldSerialiseKeyword::Yes)
+      {
+        builder.append(u8", ");
+        Serialise(builder, context, value.Keyword);
+      }
+    }
+  };
 }
 
 DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::StepsEasingParameters, 1)
 
 namespace std
 {
-  template <typename T, typename K, auto shouldSerialiseKeyword>
-  class tuple_size<krys::boo::css::StepsEasingParameters::Kind<T, K, shouldSerialiseKeyword>>
+  template <typename T, typename TKeyword, auto TShouldSerialiseKeyword>
+  class tuple_size<krys::boo::css::StepsEasingParameters::Kind<T, TKeyword, TShouldSerialiseKeyword>>
       : public std::integral_constant<size_t, 1>
   {
   };
 
-  template <size_t I, typename T, typename K, auto shouldSerialiseKeyword>
-  class tuple_element<I, krys::boo::css::StepsEasingParameters::Kind<T, K, shouldSerialiseKeyword>>
+  template <size_t I, typename T, typename TKeyword, auto TShouldSerialiseKeyword>
+  class tuple_element<I, krys::boo::css::StepsEasingParameters::Kind<T, TKeyword, TShouldSerialiseKeyword>>
   {
   public:
     using type = T;
   };
-
 }
 
-template <typename T, typename K, auto shouldSerialiseKeyword>
+template <typename T, typename TKeyword, auto TShouldSerialiseKeyword>
 constexpr bool krys::boo::css::TreatAsTupleLike<
-  krys::boo::css::StepsEasingParameters::Kind<T, K, shouldSerialiseKeyword>> = true;
+  krys::boo::css::StepsEasingParameters::Kind<T, TKeyword, TShouldSerialiseKeyword>> = true;

@@ -185,6 +185,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Text/Encodings/UTF.hpp
       include/Krystal.Core/Text/Encodings/Windows.hpp
       include/Krystal.Core/Text/ASCII.hpp
+      include/Krystal.Core/Text/CodePointIterator.hpp
       include/Krystal.Core/Text/EncodingRegistry.hpp
       include/Krystal.Core/Text/ICodec.hpp
       include/Krystal.Core/Text/Unicode.hpp

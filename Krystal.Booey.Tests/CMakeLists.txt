@@ -1,10 +1,14 @@
 ﻿add_executable(Krystal.Booey.Tests)
 
+# Third-party - RapidJSON (WPT URL test data)
+find_package(RapidJSON CONFIG REQUIRED)
+
 target_link_libraries(Krystal.Booey.Tests
   PRIVATE
 	 	Krystal.Core
 		Krystal.Booey
    	Catch2::Catch2WithMain
+		rapidjson
 )
 
 set_target_properties(Krystal.Booey.Tests
@@ -99,10 +103,14 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Properties/Consumers/Primitives.cpp
 		tests/CSS/Values/Aggregates.cpp
 		tests/CSS/Values/Color/Color.cpp
+		tests/CSS/Values/Easing/EasingFunction.cpp
+		tests/CSS/Values/Grid/GridTemplateAreas.cpp
 		tests/CSS/Values/NumericTypesSerialisation.cpp
 		tests/CSS/Values/Primitives/NumericRaw.cpp
 		tests/CSS/Values/Primitives/PrimitiveNumeric.cpp
+		tests/CSS/Values/Primitives/Position.cpp
 		tests/CSS/Values/Primitives/Ratio.cpp
+		tests/CSS/Values/Primitives/URL.cpp
 		tests/CSS/Values/Primitives/Units.cpp
 		tests/CSS/Values/PrimitiveValue.cpp
 		tests/CSS/Values/Quad.cpp
@@ -125,6 +133,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Color/ColorSerialisation.cpp
 		tests/Graphics/Color/ColorUtilities.cpp
 		tests/Graphics/Color/NamedColors.cpp
+		tests/Rendering/Style/GridSpan.cpp
 
 		# Style
 		tests/Style/Calc/Tree.cpp
@@ -132,6 +141,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/Values/Color/Color.cpp
 		tests/Style/Values/Color/DynamicRangeLimit.cpp
 		tests/Style/Values/Color/SystemColor.cpp
+		tests/Style/Values/Grid/GridPosition.cpp
 		tests/Style/Values/Primitives/LengthResolution.cpp
 		tests/Style/Values/Primitives/LengthWrapper.cpp
 		tests/Style/Values/Primitives/NumericTypesConversions.cpp
@@ -188,4 +198,8 @@ target_sources(Krystal.Booey.Tests
 
 		# Infra
 		tests/Infra/StringAlgorithms.cpp
+
+		# URL
+		tests/URL/URL.cpp
+		tests/URL/WPT.cpp
 )

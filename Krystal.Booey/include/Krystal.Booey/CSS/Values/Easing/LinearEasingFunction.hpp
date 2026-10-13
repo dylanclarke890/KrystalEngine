@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::css
 {
@@ -13,37 +14,37 @@ namespace krys::boo::css
     {
       struct Length
       {
-        Percentage<> input;
-        Markable<Percentage<>> extra;
+        Percentage<> Input;
+        Maybe<Percentage<>> Extra;
 
-        constexpr bool operator==(const Length &) const noexcept = default;
+        KRYS_NODISCARD constexpr bool operator==(const Length &) const noexcept = default;
       };
 
-      Number<> output;
-      Maybe<Length> input;
+      Number<> Output;
+      Maybe<Length> Input;
 
-      constexpr bool operator==(const Stop &) const = default;
+      KRYS_NODISCARD constexpr bool operator==(const Stop &) const noexcept = default;
     };
 
-    CommaSeparatedList<Stop> stops;
+    CommaSeparatedList<Stop> Stops;
 
-    bool operator==(const LinearEasingParameters &) const noexcept = default;
+    KRYS_NODISCARD constexpr bool operator==(const LinearEasingParameters &) const noexcept = default;
   };
 
   using LinearEasingFunction = FunctionNotation<ValueId::Linear, LinearEasingParameters>;
 
-  DEFINE_TYPE_WRAPPER_GET(LinearEasingParameters, stops);
+  DEFINE_TYPE_WRAPPER_GET(LinearEasingParameters, Stops)
 
   template <size_t I>
   KRYS_NODISCARD constexpr const auto &get(const LinearEasingParameters::Stop &value) noexcept
   {
     if constexpr (!I)
     {
-      return value.output;
+      return value.Output;
     }
     else if constexpr (I == 1)
     {
-      return value.input;
+      return value.Input;
     }
   }
 
@@ -52,11 +53,11 @@ namespace krys::boo::css
   {
     if constexpr (!I)
     {
-      return value.input;
+      return value.Input;
     }
     else if constexpr (I == 1)
     {
-      return value.extra;
+      return value.Extra;
     }
   }
 }
