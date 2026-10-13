@@ -12,6 +12,7 @@ namespace krys::boo
 
 namespace krys::boo::css
 {
+  /// @brief A `<color>` value.
   class ColorValue final : public css::Value
   {
     friend class ValuePool;
@@ -21,32 +22,27 @@ namespace krys::boo::css
   private:
     css::Color _color;
 
-    ColorValue(css::Color color) noexcept;
-
-    ColorValue(boo::Color color) noexcept;
-
+    explicit ColorValue(css::Color color) noexcept;
+    explicit ColorValue(boo::Color color) noexcept;
     ColorValue(StaticValueTag, boo::Color color) noexcept;
 
   public:
-    ~ColorValue() noexcept = default;
+    KRYS_NODISCARD static Ref<ColorValue> Create(css::Color color) noexcept;
+    KRYS_NODISCARD static Ref<ColorValue> Create(boo::Color color) noexcept;
 
-    KRYS_NODISCARD static Ref<ColorValue> Create(css::Color) noexcept;
-
-    KRYS_NODISCARD static Ref<ColorValue> Create(boo::Color) noexcept;
-
-    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
-
-    KRYS_NODISCARD bool Equals(const ColorValue &other) const noexcept;
-
-    KRYS_NODISCARD IterationStatus
-      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
-
-    KRYS_NODISCARD static boo::Color AbsoluteColor(const Value &value) noexcept;
-
-    KRYS_NODISCARD const css::Color &Color() const noexcept
+    KRYS_NODISCARD const css::Color &GetColor() const noexcept
     {
       return _color;
     }
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+    KRYS_NODISCARD bool Equals(const ColorValue &other) const noexcept;
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(KRYS_NOESCAPE const Func<IterationStatus(css::Value &)> &func) const noexcept;
+
+    /// @brief The absolute colour of a `ColorValue` or an absolute colour keyword; otherwise an invalid
+    /// colour.
+    KRYS_NODISCARD static boo::Color GetAbsoluteColor(const Value &value) noexcept;
   };
 }
 

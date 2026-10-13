@@ -1,12 +1,23 @@
 ﻿#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
-#include "Krystal.Booey/Graphics/Color/Color.hpp"
+#include "Krystal.Core/Maths/Random.hpp"
+#include <iterator>
+#include <mutex>
 
 namespace krys::boo::css
 {
-  ValuePool &ValuePool::MainThreadPool() noexcept
+  namespace
   {
-    static MainThreadNeverDestroyed<ValuePool> pool;
-    return pool;
+    // Remove one entry at random if the cache grows too large.
+    // FIXME: Use TinyLRUCache instead?
+    template <typename TMap>
+    void RemoveRandomEntryIfFull(TMap &map, size_t maximumSize) noexcept
+    {
+      if (map.size() >= maximumSize)
+      {
+        auto index = Random::UInt(static_cast<uint32>(map.size() - 1uz));
+        map.erase(std::next(map.begin(), static_cast<ptrdiff_t>(index)));
+      }
+    }
   }
 
   LazyNeverDestroyed<StaticValuePool> CommonValuePool;
@@ -23,18 +34,68 @@ namespace krys::boo::css
 
     for (size_t i = 0uz; i <= MaximumCacheableIntegerValue; ++i)
     {
-      double v = static_cast<double>(i);
-
-      new (_pixelValues[i].get()) PrimitiveValue(Value::StaticValue, v, UnitType::px);
-      new (_percentageValues[i].get()) PrimitiveValue(Value::StaticValue, v, UnitType::Percentage);
-      new (_numberValues[i].get()) PrimitiveValue(Value::StaticValue, v, UnitType::Number);
+      auto value = static_cast<double>(i);
+      new (_pixelValues[i].get()) PrimitiveValue(Value::StaticValue, value, UnitType::px);
+      new (_percentageValues[i].get()) PrimitiveValue(Value::StaticValue, value, UnitType::Percentage);
+      new (_numberValues[i].get()) PrimitiveValue(Value::StaticValue, value, UnitType::Number);
     }
   }
 
   void StaticValuePool::Init() noexcept
   {
     static std::once_flag onceKey;
-
     std::call_once(onceKey, []() { CommonValuePool.Construct(); });
+  }
+
+  ValuePool &ValuePool::MainThreadPool() noexcept
+  {
+    static MainThreadNeverDestroyed<ValuePool> pool;
+    return pool;
+  }
+
+  Ref<ColorValue> ValuePool::CreateColorValue(const boo::Color &color) noexcept
+  {
+    // These are the empty and deleted values of the hash table.
+    if (color == boo::Color::transparentBlack)
+    {
+      return ShareRef(CommonValuePool->_transparentColor);
+    }
+    if (color == boo::Color::white)
+    {
+      return ShareRef(CommonValuePool->_whiteColor);
+    }
+    // Just because it is common.
+    if (color == boo::Color::black)
+    {
+      return ShareRef(CommonValuePool->_blackColor);
+    }
+
+    constexpr size_t maximumColorCacheSize = 512uz;
+    RemoveRandomEntryIfFull(_colorValueCache, maximumColorCacheSize);
+
+    if (auto it = _colorValueCache.find(color); it != _colorValueCache.end())
+    {
+      return it->second;
+    }
+    return _colorValueCache.emplace(color, ColorValue::Create(color)).first->second;
+  }
+
+  Ref<PrimitiveValue> ValuePool::CreateFontFamilyValue(const CSSOMStringAtom &familyName) noexcept
+  {
+    constexpr size_t maximumFontFamilyCacheSize = 128uz;
+    RemoveRandomEntryIfFull(_fontFamilyValueCache, maximumFontFamilyCacheSize);
+
+    if (auto it = _fontFamilyValueCache.find(familyName); it != _fontFamilyValueCache.end())
+    {
+      return it->second;
+    }
+    auto value = PrimitiveValue::CreateFontFamily(CSSOMString {familyName.View()});
+    return _fontFamilyValueCache.emplace(familyName, krys::move(value)).first->second;
+  }
+
+  void ValuePool::Drain() noexcept
+  {
+    _colorValueCache.clear();
+    _fontFamilyValueCache.clear();
   }
 }

@@ -87,7 +87,7 @@ namespace krys::boo::css
 
     if (value->IsColorValue())
     {
-      return ColorValue::AbsoluteColor(*value);
+      return ColorValue::GetAbsoluteColor(*value);
     }
 
     auto serializationString =

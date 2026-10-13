@@ -236,7 +236,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Values/Color/ColorOptions.hpp
   include/Krystal.Booey/Style/Values/Color/SystemColor.hpp
 
-  # Slice 3: Colour, layer 5b (colour parser; the Value-returning consumers wait for layer 5c)
+  # Slice 3: Colour, layer 5b (colour parser)
   include/Krystal.Booey/CSS/Parser/ParserFastPaths.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/AngleDefinitions.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/Color.hpp
@@ -247,6 +247,12 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Properties/Consumers/PercentageDefinitions.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/SymbolDefinitions.hpp
   include/Krystal.Booey/CSS/Values/ColorAdjust/ColorScheme.hpp
+
+  # Slice 3: Colour, layer 5c (colour values and the value pool)
+  include/Krystal.Booey/CSS/Values/ColorSchemeValue.hpp
+  include/Krystal.Booey/CSS/Values/ColorValue.hpp
+  include/Krystal.Booey/CSS/Values/DynamicRangeLimitValue.hpp
+  include/Krystal.Booey/CSS/Values/ValuePool.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -322,13 +328,22 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/Color/ResolvedColor.cpp
   src/Style/Values/Color/SystemColor.cpp
 
-  # Slice 3: Colour, layer 5b (colour parser; ColorValueConsumers.cpp/ColorAdjustValueConsumers.cpp wait for layer 5c)
+  # Slice 3: Colour, layer 5b (colour parser)
   src/CSS/Parser/ParserFastPaths.cpp
   src/CSS/Properties/Consumers/Color.cpp
   src/CSS/Properties/Consumers/ColorAdjust.cpp
   src/CSS/Properties/Consumers/ColorInterpolationMethod.cpp
   src/CSS/Properties/Consumers/Symbol.cpp
   src/CSS/Values/ColorAdjust/ColorScheme.cpp
+
+  # Slice 3: Colour, layer 5c (colour values and the value pool; compile-only until Value.cpp/PrimitiveValue.cpp build)
+  src/CSS/Properties/Consumers/ColorAdjustValueConsumers.cpp
+  src/CSS/Properties/Consumers/ColorValueConsumers.cpp
+  src/CSS/Properties/Consumers/Ident.cpp
+  src/CSS/Values/ColorSchemeValue.cpp
+  src/CSS/Values/ColorValue.cpp
+  src/CSS/Values/DynamicRangeLimitValue.cpp
+  src/CSS/Values/ValuePool.cpp
 )
 
 target_precompile_headers(Krystal.Booey

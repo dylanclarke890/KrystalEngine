@@ -6,24 +6,26 @@
 
 namespace krys::boo::css
 {
-  class ColorSchemeValue : public Value
+  /// @brief A `<'color-scheme'>` value.
+  class ColorSchemeValue final : public Value
   {
   private:
-    ColorScheme _scheme;
+    css::ColorScheme _colorScheme;
 
-    ColorSchemeValue(ColorScheme scheme) noexcept : Value(ValueType::ColorScheme), _scheme(krys::move(scheme))
-    {
-    }
+    explicit ColorSchemeValue(css::ColorScheme colorScheme) noexcept;
 
   public:
-    KRYS_NODISCARD static Ref<ColorSchemeValue> Create(ColorScheme scheme) noexcept;
+    KRYS_NODISCARD static Ref<ColorSchemeValue> Create(css::ColorScheme colorScheme) noexcept;
+
+    KRYS_NODISCARD const css::ColorScheme &GetColorScheme() const noexcept
+    {
+      return _colorScheme;
+    }
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
-
     KRYS_NODISCARD bool Equals(const ColorSchemeValue &other) const noexcept;
-
     KRYS_NODISCARD IterationStatus
-      CustomVisitChildren(const Func<IterationStatus(css::Value &)> &func) const noexcept;
+      CustomVisitChildren(KRYS_NOESCAPE const Func<IterationStatus(css::Value &)> &func) const noexcept;
   };
 }
 
