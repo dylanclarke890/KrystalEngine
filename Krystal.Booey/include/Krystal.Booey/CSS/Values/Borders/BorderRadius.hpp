@@ -25,22 +25,22 @@ namespace krys::boo::css
 
     KRYS_NODISCARD Corner TopLeft() const noexcept
     {
-      return {Horizontal.value[0], Vertical.value[0]};
+      return {Horizontal.Value[0], Vertical.Value[0]};
     }
 
     KRYS_NODISCARD Corner TopRight() const noexcept
     {
-      return {Horizontal.value[1], Vertical.value[1]};
+      return {Horizontal.Value[1], Vertical.Value[1]};
     }
 
     KRYS_NODISCARD Corner BottomRight() const noexcept
     {
-      return {Horizontal.value[2], Vertical.value[2]};
+      return {Horizontal.Value[2], Vertical.Value[2]};
     }
 
     KRYS_NODISCARD Corner BottomLeft() const noexcept
     {
-      return {Horizontal.value[3], Vertical.value[3]};
+      return {Horizontal.Value[3], Vertical.Value[3]};
     }
 
     KRYS_NODISCARD bool operator==(const BorderRadius &) const noexcept = default;
@@ -49,11 +49,11 @@ namespace krys::boo::css
   template <size_t I>
   KRYS_NODISCARD const auto &get(const BorderRadius &value) noexcept
   {
-    if constexpr (I == 0uz)
+    if constexpr (!I)
     {
       return value.Horizontal;
     }
-    else if constexpr (I == 1uz)
+    else if constexpr (I == 1)
     {
       return value.Vertical;
     }
@@ -62,6 +62,13 @@ namespace krys::boo::css
   // Returns true if the provided `BorderRadius` contains the default value. This
   // is used to know ahead of time if serialization is needed.
   KRYS_NODISCARD bool HasDefaultValue(const BorderRadius &borderRadius) noexcept;
+
+  template <>
+  struct Serialiser<BorderRadius>
+  {
+    void operator()(CSSOMString &builder, const SerialisationContext &context,
+                    const BorderRadius &value) noexcept;
+  };
 }
 
 DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::BorderRadius, 2)

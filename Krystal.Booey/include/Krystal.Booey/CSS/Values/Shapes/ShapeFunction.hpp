@@ -1,8 +1,8 @@
-#pragma once
+﻿#pragma once
 
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Position.hpp"
 #include "Krystal.Booey/CSS/Values/Shapes/FillRule.hpp"
-#include "Krystal.Booey/CSS/Values/Types.hpp"
 
 namespace krys::boo::css
 {
@@ -20,7 +20,7 @@ namespace krys::boo::css
   // <arc-size> = large | small
   using ArcSize = Variant<keywords::Large, keywords::Small>;
 
-  // <control-point-Anchor> = start | end | origin
+  // <control-point-anchor> = start | end | origin
   using ControlPointAnchor = Variant<keywords::Start, keywords::End, keywords::Origin>;
 
   // <to-position> = to <position>
@@ -30,7 +30,7 @@ namespace krys::boo::css
 
     Position Offset;
 
-    bool operator==(const ToPosition &) const noexcept = default;
+    KRYS_NODISCARD bool operator==(const ToPosition &) const noexcept = default;
   };
 
   DEFINE_TYPE_WRAPPER_GET(ToPosition, Offset);
@@ -48,7 +48,7 @@ namespace krys::boo::css
 
     CoordinatePair Offset;
 
-    bool operator==(const ByCoordinatePair &) const noexcept = default;
+    KRYS_NODISCARD bool operator==(const ByCoordinatePair &) const noexcept = default;
   };
 
   DEFINE_TYPE_WRAPPER_GET(ByCoordinatePair, Offset);
@@ -64,16 +64,16 @@ namespace krys::boo::css
   // Specified https://github.com/w3c/csswg-drafts/issues/10649#issuecomment-2412816773
   struct RelativeControlPoint
   {
-    using Anchor = ControlPointAnchor;
+    using AnchorType = ControlPointAnchor;
 
     CoordinatePair Offset;
-    Maybe<Anchor> Anchor;
+    Maybe<AnchorType> Anchor;
 
-    bool operator==(const RelativeControlPoint &) const noexcept = default;
+    KRYS_NODISCARD bool operator==(const RelativeControlPoint &) const noexcept = default;
   };
 
   template <size_t I>
-  const auto &get(const RelativeControlPoint &value) noexcept
+  KRYS_NODISCARD const auto &get(const RelativeControlPoint &value) noexcept
   {
     if constexpr (!I)
     {
@@ -96,16 +96,16 @@ namespace krys::boo::css
   // Specified https://github.com/w3c/csswg-drafts/issues/10649#issuecomment-2412816773
   struct AbsoluteControlPoint
   {
-    using Anchor = ControlPointAnchor;
+    using AnchorType = ControlPointAnchor;
 
     Position Offset;
-    Maybe<Anchor> Anchor;
+    Maybe<AnchorType> Anchor;
 
-    bool operator==(const AbsoluteControlPoint &) const noexcept = default;
+    KRYS_NODISCARD bool operator==(const AbsoluteControlPoint &) const noexcept = default;
   };
 
   template <size_t I>
-  const auto &get(const AbsoluteControlPoint &value) noexcept
+  KRYS_NODISCARD const auto &get(const AbsoluteControlPoint &value) noexcept
   {
     if constexpr (!I)
     {
@@ -136,7 +136,7 @@ namespace krys::boo::css
 
     Variant<To, By> ToBy;
 
-    bool operator==(const MoveCommand &) const noexcept = default;
+    KRYS_NODISCARD bool operator==(const MoveCommand &) const noexcept = default;
   };
 
   DEFINE_TYPE_WRAPPER_GET(MoveCommand, ToBy);
@@ -159,7 +159,7 @@ namespace krys::boo::css
 
     Variant<To, By> ToBy;
 
-    bool operator==(const LineCommand &) const noexcept = default;
+    KRYS_NODISCARD bool operator==(const LineCommand &) const noexcept = default;
   };
 
   DEFINE_TYPE_WRAPPER_GET(LineCommand, ToBy);
@@ -170,8 +170,9 @@ namespace krys::boo::css
     void operator()(CSSOMString &builder, const SerialisationContext &context, const LineCommand &) noexcept;
   };
 
-  // <horizontal-line-command> = hline [ to [ <length-percentage> | left | center | right | x-start | x-end
-  // ] | by <length-percentage> ] https://drafts.csswg.org/css-shapes-2/#typedef-shape-hv-line-command
+  // <horizontal-line-command> = hline [ to [ <length-percentage> | left | center | right | x-start | x-end ]
+  //                                  | by <length-percentage> ]
+  // https://drafts.csswg.org/css-shapes-2/#typedef-shape-hv-line-command
   // Modified by https://github.com/w3c/csswg-drafts/issues/10649#issuecomment-2426552611
   struct HLineCommand
   {
@@ -183,7 +184,7 @@ namespace krys::boo::css
 
       TwoComponentPositionHorizontal Offset;
 
-      bool operator==(const To &) const noexcept = default;
+      KRYS_NODISCARD bool operator==(const To &) const noexcept = default;
     };
 
     struct By
@@ -192,12 +193,12 @@ namespace krys::boo::css
 
       LengthPercentage<> Offset;
 
-      bool operator==(const By &) const noexcept = default;
+      KRYS_NODISCARD bool operator==(const By &) const noexcept = default;
     };
 
     Variant<To, By> ToBy;
 
-    bool operator==(const HLineCommand &) const noexcept = default;
+    KRYS_NODISCARD bool operator==(const HLineCommand &) const noexcept = default;
   };
 
   DEFINE_TYPE_WRAPPER_GET(HLineCommand::By, Offset);
@@ -225,7 +226,8 @@ namespace krys::boo::css
   };
 
   // <vertical-line-command> = vline [ to [ <length-percentage> | top | center | bottom | y-start | y-end ]
-  // | by <length-percentage> ] https://drafts.csswg.org/css-shapes-2/#typedef-shape-hv-line-command
+  //                                | by <length-percentage> ]
+  // https://drafts.csswg.org/css-shapes-2/#typedef-shape-hv-line-command
   // Modified by https://github.com/w3c/csswg-drafts/issues/10649#issuecomment-2426552611
   struct VLineCommand
   {
@@ -237,7 +239,7 @@ namespace krys::boo::css
 
       TwoComponentPositionVertical Offset;
 
-      bool operator==(const To &) const noexcept = default;
+      KRYS_NODISCARD bool operator==(const To &) const noexcept = default;
     };
 
     struct By
@@ -246,12 +248,12 @@ namespace krys::boo::css
 
       LengthPercentage<> Offset;
 
-      bool operator==(const By &) const noexcept = default;
+      KRYS_NODISCARD bool operator==(const By &) const noexcept = default;
     };
 
     Variant<To, By> ToBy;
 
-    bool operator==(const VLineCommand &) const noexcept = default;
+    KRYS_NODISCARD bool operator==(const VLineCommand &) const noexcept = default;
   };
 
   DEFINE_TYPE_WRAPPER_GET(VLineCommand::By, Offset);
@@ -279,8 +281,8 @@ namespace krys::boo::css
   };
 
   // <curve-command> = curve [to <position> with <to-control-point> [/ <to-control-point>]?]
-  //                       | [by <coordinate-pair> with <relative-control-point> [/
-  //                       <relative-control-point>]?]
+  //                       | [by <coordinate-pair> with <relative-control-point>
+  //                          [/ <relative-control-point>]?]
   // https://drafts.csswg.org/css-shapes-2/#typedef-shape-curve-command
   // Modified by https://github.com/w3c/csswg-drafts/issues/10649#issuecomment-2412816773
   struct CurveCommand
@@ -295,7 +297,7 @@ namespace krys::boo::css
       AbsoluteControlPoint ControlPoint1;
       Maybe<AbsoluteControlPoint> ControlPoint2;
 
-      bool operator==(const To &) const noexcept = default;
+      KRYS_NODISCARD bool operator==(const To &) const noexcept = default;
     };
 
     struct By
@@ -306,12 +308,12 @@ namespace krys::boo::css
       RelativeControlPoint ControlPoint1;
       Maybe<RelativeControlPoint> ControlPoint2;
 
-      bool operator==(const By &) const noexcept = default;
+      KRYS_NODISCARD bool operator==(const By &) const noexcept = default;
     };
 
     Variant<To, By> ToBy;
 
-    bool operator==(const CurveCommand &) const noexcept = default;
+    KRYS_NODISCARD bool operator==(const CurveCommand &) const noexcept = default;
   };
 
   template <size_t I>
@@ -385,7 +387,7 @@ namespace krys::boo::css
       Position Offset;
       Maybe<AbsoluteControlPoint> ControlPoint;
 
-      bool operator==(const To &) const noexcept = default;
+      KRYS_NODISCARD bool operator==(const To &) const noexcept = default;
     };
 
     struct By
@@ -395,12 +397,12 @@ namespace krys::boo::css
       CoordinatePair Offset;
       Maybe<RelativeControlPoint> ControlPoint;
 
-      bool operator==(const By &) const noexcept = default;
+      KRYS_NODISCARD bool operator==(const By &) const noexcept = default;
     };
 
     Variant<To, By> ToBy;
 
-    bool operator==(const SmoothCommand &) const noexcept = default;
+    KRYS_NODISCARD bool operator==(const SmoothCommand &) const noexcept = default;
   };
 
   template <size_t I>
@@ -452,8 +454,9 @@ namespace krys::boo::css
                     const SmoothCommand &) noexcept;
   };
 
-  // <arc-command> = arc [to <position>] | [by <coordinate-pair>] of <length-percentage>{1,2} [<arc-sweep>?
-  // || <arc-size>? || [rotate <angle>]?] https://drafts.csswg.org/css-shapes-2/#typedef-shape-arc-command
+  // <arc-command> = arc [to <position>] | [by <coordinate-pair>] of <length-percentage>{1,2}
+  //                     [<arc-sweep>? || <arc-size>? || [rotate <angle>]?]
+  // https://drafts.csswg.org/css-shapes-2/#typedef-shape-arc-command
   // Modified by https://github.com/w3c/csswg-drafts/issues/10649#issuecomment-2412816773
   struct ArcCommand
   {
@@ -465,11 +468,11 @@ namespace krys::boo::css
 
     Variant<To, By> ToBy;
     SizeOfEllipse Size;
-    ArcSweep ArcSweep;
-    ArcSize ArcSize;
+    boo::css::ArcSweep ArcSweep;
+    boo::css::ArcSize ArcSize;
     Angle<> Rotation;
 
-    bool operator==(const ArcCommand &) const noexcept = default;
+    KRYS_NODISCARD bool operator==(const ArcCommand &) const noexcept = default;
   };
 
   template <size_t I>
@@ -507,8 +510,9 @@ namespace krys::boo::css
   // https://drafts.csswg.org/css-shapes-2/#valdef-shape-close
   using CloseCommand = keywords::Close;
 
-  // <shape-command> = <move-command> | <line-command> | <hv-line-command> | <curve-command> |
-  // <smooth-command> | <arc-command> | close https://drafts.csswg.org/css-shapes-2/#typedef-shape-command
+  // <shape-command> = <move-command> | <line-command> | <hv-line-command> | <curve-command>
+  //                 | <smooth-command> | <arc-command> | close
+  // https://drafts.csswg.org/css-shapes-2/#typedef-shape-command
   using ShapeCommand = Variant<MoveCommand, LineCommand, HLineCommand, VLineCommand, CurveCommand,
                                SmoothCommand, ArcCommand, CloseCommand>;
 
@@ -516,15 +520,15 @@ namespace krys::boo::css
   // https://drafts.csswg.org/css-shapes-2/#shape-function
   struct Shape
   {
-    using Commands = CommaSeparatedList<ShapeCommand>;
+    using CommandsType = CommaSeparatedList<ShapeCommand>;
 
-    Maybe<FillRule> FillRule;
+    Maybe<boo::css::FillRule> FillRule;
     // FIXME: The spec says this should be a <coordinate-pair>, but the tests and some comments indicate it
     // has changed to position.
     Position StartingPoint;
-    Commands Commands;
+    CommandsType Commands;
 
-    bool operator==(const Shape &) const noexcept = default;
+    KRYS_NODISCARD bool operator==(const Shape &) const noexcept = default;
   };
 
   using ShapeFunction = FunctionNotation<ValueId::Shape, Shape>;

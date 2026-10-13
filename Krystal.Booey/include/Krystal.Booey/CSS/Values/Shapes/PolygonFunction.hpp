@@ -1,22 +1,22 @@
-#pragma once
+﻿#pragma once
 
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Shapes/FillRule.hpp"
-#include "Krystal.Booey/CSS/Values/Types.hpp"
 
 namespace krys::boo::css
 {
-  // <polygon()> = polygon( <'fill-rule'>? [ round <length> ]? , [<length-percentage> <length-percentage>]#
-  // ) https://drafts.csswg.org/css-shapes-1/#funcdef-basic-shape-polygon
+  // <polygon()> = polygon( <'fill-rule'>? [ round <length> ]? , [<length-percentage> <length-percentage>]# )
+  // https://drafts.csswg.org/css-shapes-1/#funcdef-basic-shape-polygon
   // FIXME: Add support the "round" clause.
   struct Polygon
   {
     using Vertex = SpaceSeparatedPoint<LengthPercentage<>>;
-    using Vertices = CommaSeparatedList<Vertex>;
+    using VerticesType = CommaSeparatedList<Vertex>;
 
-    Maybe<FillRule> FillRule;
-    Vertices Vertices;
+    Maybe<boo::css::FillRule> FillRule;
+    VerticesType Vertices;
 
-    bool operator==(const Polygon &) const noexcept = default;
+    KRYS_NODISCARD bool operator==(const Polygon &) const noexcept = default;
   };
 
   using PolygonFunction = FunctionNotation<ValueId::Polygon, Polygon>;

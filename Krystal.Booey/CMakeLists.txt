@@ -336,6 +336,16 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/PathValue.hpp
   include/Krystal.Booey/CSS/Values/Shapes/FillRule.hpp
   include/Krystal.Booey/CSS/Values/Shapes/PathFunction.hpp
+  include/Krystal.Booey/CSS/Values/Borders/BorderRadius.hpp
+  include/Krystal.Booey/CSS/Values/Shapes/CircleFunction.hpp
+  include/Krystal.Booey/CSS/Values/Shapes/EllipseFunction.hpp
+  include/Krystal.Booey/CSS/Values/Shapes/InsetFunction.hpp
+  include/Krystal.Booey/CSS/Values/Shapes/PolygonFunction.hpp
+  include/Krystal.Booey/CSS/Values/Shapes/RectFunction.hpp
+  include/Krystal.Booey/CSS/Values/Shapes/ShapeFunction.hpp
+  include/Krystal.Booey/CSS/Values/Shapes/XywhFunction.hpp
+  include/Krystal.Booey/CSS/Values/Shapes/BasicShape.hpp
+  include/Krystal.Booey/CSS/Values/BasicShapeValue.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -482,6 +492,15 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/TextShadowPropertyValue.cpp
   src/CSS/Values/PathValue.cpp
   src/CSS/Values/Shapes/PathFunction.cpp
+  src/CSS/Values/Borders/BorderRadius.cpp
+  src/CSS/Values/Shapes/CircleFunction.cpp
+  src/CSS/Values/Shapes/EllipseFunction.cpp
+  src/CSS/Values/Shapes/InsetFunction.cpp
+  src/CSS/Values/Shapes/PolygonFunction.cpp
+  src/CSS/Values/Shapes/RectFunction.cpp
+  src/CSS/Values/Shapes/ShapeFunction.cpp
+  src/CSS/Values/Shapes/XywhFunction.cpp
+  src/CSS/Values/BasicShapeValue.cpp
 )
 
 target_precompile_headers(Krystal.Booey

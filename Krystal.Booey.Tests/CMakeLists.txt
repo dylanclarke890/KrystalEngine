@@ -102,6 +102,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Properties/Consumers/MetaConsumer.cpp
 		tests/CSS/Properties/Consumers/Primitives.cpp
 		tests/CSS/Values/Aggregates.cpp
+		tests/CSS/Values/Borders/BorderRadius.cpp
 		tests/CSS/Values/Borders/BoxShadow.cpp
 		tests/CSS/Values/Color/Color.cpp
 		tests/CSS/Values/Easing/EasingFunction.cpp
@@ -115,7 +116,9 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Values/Primitives/Units.cpp
 		tests/CSS/Values/PrimitiveValue.cpp
 		tests/CSS/Values/Quad.cpp
+		tests/CSS/Values/Shapes/BasicShape.cpp
 		tests/CSS/Values/Shapes/PathFunction.cpp
+		tests/CSS/Values/Shapes/ShapeFunction.cpp
 		tests/CSS/Values/TextDecoration/TextShadow.cpp
 		tests/CSS/Values/Types.cpp
 		tests/CSS/Values/Units.cpp

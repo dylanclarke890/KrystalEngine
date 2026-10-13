@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Shapes/CircleFunction.hpp"
 #include "Krystal.Booey/CSS/Values/Shapes/EllipseFunction.hpp"
@@ -11,8 +11,9 @@
 
 namespace krys::boo::css
 {
-  // <basic-shape> = <circle()> | <ellipse() | <inset()> | <path()> | <polygon()> | <rect()> | <shape()> |
-  // <xywh()> https://drafts.csswg.org/css-shapes/#typedef-basic-shape
+  // <basic-shape> = <circle()> | <ellipse() | <inset()> | <path()> | <polygon()> | <rect()> | <shape()>
+  //               | <xywh()>
+  // https://drafts.csswg.org/css-shapes/#typedef-basic-shape
   using BasicShape = Variant<CircleFunction, EllipseFunction, InsetFunction, PathFunction, PolygonFunction,
                              RectFunction, ShapeFunction, XywhFunction>;
 }

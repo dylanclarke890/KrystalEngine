@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Position.hpp"
-#include "Krystal.Booey/CSS/Values/Types.hpp"
 
 namespace krys::boo::css
 {
@@ -17,9 +17,9 @@ namespace krys::boo::css
     // FIXME: The spec says that this should take only a single RadialSize, not a pair, but this does not
     // match the tests.
     SpaceSeparatedPair<RadialSize> Radii;
-    Maybe<Position> Position;
+    Maybe<boo::css::Position> Position;
 
-    bool operator==(const Ellipse &) const noexcept = default;
+    KRYS_NODISCARD bool operator==(const Ellipse &) const noexcept = default;
   };
 
   using EllipseFunction = FunctionNotation<ValueId::Ellipse, Ellipse>;

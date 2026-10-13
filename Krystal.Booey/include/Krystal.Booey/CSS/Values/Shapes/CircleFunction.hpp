@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Position.hpp"
-#include "Krystal.Booey/CSS/Values/Types.hpp"
 
 namespace krys::boo::css
 {
@@ -11,17 +11,15 @@ namespace krys::boo::css
   {
     using Extent = Variant<keywords::ClosestCorner, keywords::ClosestSide, keywords::FarthestCorner,
                            keywords::FarthestSide>;
-
     // FIXME: The spec says that this should take Length, not a LengthPercentage, but this does not match
     // the tests.
     using Length = css::LengthPercentage<NonNegative>;
-
     using RadialSize = Variant<Length, Extent>;
 
     RadialSize Radius;
-    Maybe<Position> Position;
+    Maybe<boo::css::Position> Position;
 
-    bool operator==(const Circle &) const noexcept = default;
+    KRYS_NODISCARD bool operator==(const Circle &) const noexcept = default;
   };
 
   using CircleFunction = FunctionNotation<ValueId::Circle, Circle>;

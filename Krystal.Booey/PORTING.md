@@ -46,9 +46,10 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Slice 4, tier 2 done (2026-10-13): `GridTemplateAreasValue` (with `GridTemplateAreas`, `GridNamedAreaMap`, `GridArea`/`GridSpan` moved to `Rendering/Style/`, and the Style `GridPosition`/`GridTrackSizingDirection` moved to `Style/Values/Grid/`) and `EasingFunctionValue` (with the five easing types) built and tested (the value classes compile-only). See their entries.
 - Slice 4, tier 3 started (2026-10-13): `BoxShadowPropertyValue` and `TextShadowPropertyValue` (with `BoxShadow`/`BoxShadowProperty` moved to `CSS/Values/Borders/`, and `TextShadow`/`TextShadowProperty`) built and tested (the value classes compile-only). `Markable` is now optional-like in `Aggregates.hpp`. See their entry.
 - Slice 4, tier 3 item 26 (2026-10-13): `PathValue` and `PathFunction`, with the geometry types (`IntRect`/`FloatRect`/`LayoutRect`, `FloatQuad`, `Region`, `GeometryUtilities`, `AffineTransform`, `TransformationMatrix` and their leaves) and the SVG path parse/serialise pipeline (`SVGPathByteStream` and friends, `FormatNumberFixedPrecision`), built and tested (`PathValue` compile-only). See its entry.
+- Slice 4, tier 3 item 27 (2026-10-13): `BasicShapeValue`, with `BasicShape`, the eight shape functions (`circle()`/`ellipse()`/`inset()`/`polygon()`/`rect()`/`shape()`/`xywh()` completed, `path()` from item 26) and `BorderRadius`, built and tested (`BasicShapeValue` compile-only). The `rect()` shape is `RectShape` (clashes with `css::Rect`). See its entry.
 
 **Open / next candidates:**
-- Slice 4 (Value subclasses): the generic types are done; next are the specific value types, one at a time, in the order under Slice 4's *Order* (tiers 1 and 2 done; tier 3 items 24–26 done; next `BasicShapeValue`).
+- Slice 4 (Value subclasses): the generic types are done; next are the specific value types, one at a time, in the order under Slice 4's *Order* (tiers 1 and 2 done; tier 3 items 24–27 done; next `FilterValue`).
 - Not yet ported, needed later: the graphics `Path` (cached by `SVGPathByteStream` upstream), the rest of `SVGPathUtilities` (needs `Path` and `SVGPathSegList`), `parseKerningUnicodeString`/`parseGlyphName`.
 - Slice 3 (colour), bottom-up: (1) Graphics/Color, (2) calc-free numeric primitives, (3a) Style-free calc, (3b) calc evaluation and Style calc and (3c) calc parsing are done. (4a) `LayoutUnit` and the point/size types and (4b) Style numerics are done. (5a) the CSS colour types, (5b) the colour parser and (5c) `ColorValue`/`ValuePool` (compile-only) are done. (6) Style colour is done (its CSSValue half is deferred, see below). Slice 3 is complete apart from the Value-dependent pieces.
 - Deferred from layer 6 (needs `Style/BuilderChecking.hpp` and the raw-WebKit `ValueList`/`ValuePair`/`FunctionValue`/`BuilderState` it includes): `CSSValueConversion<Color>`, `CSSValueCreation<Color>`, `CSSValueConversion<DynamicRangeLimit>`, `CSSValueCreation<DynamicRangeLimit>` and `CSSValueConversion<Opacity>`. They come with the other `+CSSValueConversion`/`+CSSValueCreation` headers.
@@ -1375,6 +1376,39 @@ Tier 3 item 26. Graph from `css/CSSPathValue.cpp` with `--follow css/ style/ svg
 - Upstream's `AffineTransform::Blend` doubles the blended components for non-`Replace` composite operations; kept as is.
 
 Tests: geometry: `tests/Graphics/{DoublePoint,FloatPoint3D,IntRect,FloatRect,LayoutRect,FloatQuad,GeometryUtilities,Region}.cpp`, `tests/Graphics/Transforms/{Quaternion,AffineTransform,TransformationMatrix,TransformExtras}.cpp` (upstream's `IntRectTests`, `FloatRectTests`, `FloatQuadTests`, `RegionTests`, `AffineTransform` and `TransformationMatrix` tests, converted with a gtest→Catch2 script, minus the platform-only `Casting`/`EnclosingIntRect` cases and `area()`; `FloatPointTests`' `Transforms`; plus Krystal tests for everything upstream leaves untested, e.g. `LayoutRect` and `GeometryUtilities` have no upstream tests, and 3D rotation, projection, perspective and decomposition round trips). SVG: `tests/SVG/Internals/SVGPath.cpp` (number/flag/point/rect parsing, unaltered round trips of every command and syntax variant, parse errors, normalised parsing including arcs) and `tests/Core/NumberFormatting.cpp` (`FormatNumberFixedPrecision`). CSS: `tests/CSS/Values/Shapes/PathFunction.cpp` (serialisation with and without a fill rule, canonical path data, equality, dependencies, visitation). `PathValue` is compile-only. Full Booey suite: 1077 cases / 669775 assertions; all pass except 2 expected failures. Core suite: 548 cases, all pass. Whole solution builds with no warnings.
+
+### `BasicShapeValue`, with the shape functions and `BorderRadius` (2026-10-13)
+
+Tier 3 item 27. Graph from `css/CSSBasicShapeValue.cpp` (headers-only): 34 files (`tools/port/out/basic-shape-value.md`). New: the value class, `values/shapes/CSSBasicShape.h` and the seven shape functions other than `path()` (`CSSCircleFunction`, `CSSEllipseFunction`, `CSSInsetFunction`, `CSSPolygonFunction`, `CSSRectFunction`, `CSSShapeFunction`, `CSSXywhFunction`, each with a `.cpp`), and `values/borders/CSSBorderRadius.h`/`.cpp`; the rest is reviewed (numerics, `Position`, `PathFunction`, `FillRule`). Decision (2026-10-13): the `rect()` shape is `RectShape`, because upstream's `WebCore::Rect` (`css/Rect.h`, behind `RectValue`) and `WebCore::CSS::Rect` are both `css::Rect` here.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/values/borders/CSSBorderRadius.h`, `.cpp` | `have` | `CSS/Values/Borders/BorderRadius.hpp`, `src/CSS/Values/Borders/BorderRadius.cpp` | on | tested. `defaultValue()`/`topLeft()`.. → `DefaultValue()`/`TopLeft()`..; `hasDefaultValue` → `HasDefaultValue`. |
+| `css/values/shapes/CSSCircleFunction.h`, `.cpp` | `have` | `CSS/Values/Shapes/CircleFunction.hpp`, `src/…/CircleFunction.cpp` | on | tested. `Position`'s type is written `boo::css::Position`. |
+| `css/values/shapes/CSSEllipseFunction.h`, `.cpp` | `have` | `CSS/Values/Shapes/EllipseFunction.hpp`, `src/…/EllipseFunction.cpp` | on | tested. As `Circle`. |
+| `css/values/shapes/CSSInsetFunction.h`, `.cpp` | `have` | `CSS/Values/Shapes/InsetFunction.hpp`, `src/…/InsetFunction.cpp` | on | tested. `Inset::Insets` (alias) → `InsetsType`: the member is `Insets`. |
+| `css/values/shapes/CSSPolygonFunction.h`, `.cpp` | `have` | `CSS/Values/Shapes/PolygonFunction.hpp`, `src/…/PolygonFunction.cpp` | on | tested. `Polygon::Vertices` (alias) → `VerticesType`; `FillRule`'s type is written `boo::css::FillRule`. |
+| `css/values/shapes/CSSRectFunction.h`, `.cpp` | `have` | `CSS/Values/Shapes/RectFunction.hpp`, `src/…/RectFunction.cpp` | on | tested. `CSS::Rect` → `RectShape` (see above). |
+| `css/values/shapes/CSSXywhFunction.h`, `.cpp` | `have` | `CSS/Values/Shapes/XywhFunction.hpp`, `src/…/XywhFunction.cpp` | on | tested. `Xywh::Location`/`Size` (aliases) → `LocationType`/`SizeType`. |
+| `css/values/shapes/CSSShapeFunction.h`, `.cpp` | `have` | `CSS/Values/Shapes/ShapeFunction.hpp`, `src/…/ShapeFunction.cpp` | on | tested. `affinity`/`name` → `Affinity`/`Name`, members PascalCase. `RelativeControlPoint::Anchor`/`AbsoluteControlPoint::Anchor` (aliases) → `AnchorType`; `Shape::Commands` → `CommandsType`; `ArcSweep`/`ArcSize`/`FillRule`'s types are written `boo::css::X`. |
+| `css/values/shapes/CSSBasicShape.h` | `have` | `CSS/Values/Shapes/BasicShape.hpp` | on | tested. |
+| `css/CSSBasicShapeValue.h`, `.cpp` | `have` | `CSS/Values/BasicShapeValue.hpp`, `src/CSS/Values/BasicShapeValue.cpp` | on (compile-only) | `shape()` → `GetShape()` (would hide `Shape`). |
+
+**Bugs fixed:**
+- No shape function or `BorderRadius` had a `.cpp`, so every `Serialiser` (and `HasDefaultValue`) was declared but never defined.
+- Members named after their own types, which changes the name's meaning inside the struct (ill-formed; MSVC accepts it): `Maybe<Position> Position` (`Circle`, `Ellipse`), `Maybe<FillRule> FillRule` (`Polygon`, `Shape`), `Insets Insets`, `Vertices Vertices`, `Location Location`/`Size Size` (`Xywh`), `Maybe<Anchor> Anchor` (both control points), `ArcSweep ArcSweep`/`ArcSize ArcSize` (`ArcCommand`), `Commands Commands` (`Shape`).
+- `BorderRadius`'s corner accessors used `.value[i]`; the aggregates' member is `Value` (compile error once used).
+- `InsetFunction.hpp` didn't include `BorderRadius.hpp`, and the shape headers included `Types.hpp` instead of `NumericTypes.hpp` for `LengthPercentage`.
+- `BasicShapeValue` wasn't `final`, its constructor wasn't `explicit` and was inline, its `CustomVisitChildren` lacked `KRYS_NOESCAPE`, and `Shape()` hid the `Shape` struct.
+- clang-format had merged grammar comments with their spec links; `<control-point-anchor>` had been capitalised to `<control-point-Anchor>`. Restored.
+- Missing `KRYS_NODISCARD` on the `operator==`s and the control points' `get`; the eight shape headers and `BasicShapeValue.cpp` had no BOM.
+
+**Krystal callers updated (unbuilt):** none; `Consumers/Shapes.cpp` (shape parsing) is still a stub.
+
+**Differences:**
+- `ShapeFunction.cpp` shares the identical `to`/`by`, control point, curve and smooth serialisation through local templates; upstream repeats them per type. Output is the same.
+
+Tests: `tests/CSS/Values/Borders/BorderRadius.cpp` (`HasDefaultValue`, minimal serialisation of each axis and the `/` form, corners, dependencies, visitation): 4 cases; `tests/CSS/Values/Shapes/BasicShape.cpp` (serialisation of `circle()`, `ellipse()`, `inset()`, `polygon()`, `rect()`, `xywh()` including their defaults and `round`, the `BasicShape` variant, equality, dependencies, visitation): 9 cases; `tests/CSS/Values/Shapes/ShapeFunction.cpp` (every command in both `to`/`by` forms, control point anchors, arc defaults, `shape()` with fill rules, equality, dependencies, visitation): 7 cases. 20 cases / 96 assertions. `BasicShapeValue` is compile-only. Full Booey suite: 1097 cases / 669871 assertions; all pass except 2 expected failures.
 
 ## Deferred: Values (from the tokenizer graph)
 
