@@ -75,6 +75,7 @@ target_sources(Krystal.Booey.Tests
       include
     FILES
 		include/Krystal.Booey.Tests/DOM/TestElement.hpp
+		include/Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp
 		include/Krystal.Booey.Tests/CSS/ValueTestUtils.hpp
 		include/Krystal.Booey.Tests/TestParserUtils.hpp
 	PRIVATE
@@ -100,16 +101,32 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Parser/Token.cpp
 		tests/CSS/Parser/Tokenizer.cpp
 		tests/CSS/Parser/VariableParser.cpp
+		tests/CSS/Properties/Consumers/Align.cpp
+		tests/CSS/Properties/Consumers/Anchor.cpp
+		tests/CSS/Properties/Consumers/Attr.cpp
+		tests/CSS/Properties/Consumers/Box.cpp
 		tests/CSS/Properties/Consumers/Color.cpp
 		tests/CSS/Properties/Consumers/ColorAdjust.cpp
 		tests/CSS/Properties/Consumers/Definitions.cpp
+		tests/CSS/Properties/Consumers/Display.cpp
 		tests/CSS/Properties/Consumers/Ident.cpp
+		tests/CSS/Properties/Consumers/Inline.cpp
 		tests/CSS/Properties/Consumers/List.cpp
 		tests/CSS/Properties/Consumers/MetaConsumer.cpp
 		tests/CSS/Properties/Consumers/Percentage.cpp
+		tests/CSS/Properties/Consumers/PositionTry.cpp
 		tests/CSS/Properties/Consumers/PrimitiveValue.cpp
 		tests/CSS/Properties/Consumers/Primitives.cpp
+		tests/CSS/Properties/Consumers/Ratio.cpp
+		tests/CSS/Properties/Consumers/ScrollSnap.cpp
+		tests/CSS/Properties/Consumers/Scrollbars.cpp
 		tests/CSS/Properties/Consumers/String.cpp
+		tests/CSS/Properties/Consumers/Syntax.cpp
+		tests/CSS/Properties/Consumers/Transitions.cpp
+		tests/CSS/Properties/Consumers/URL.cpp
+		tests/CSS/Properties/Consumers/UnicodeRange.cpp
+		tests/CSS/Properties/Consumers/ViewTransition.cpp
+		tests/CSS/Properties/Consumers/WillChange.cpp
 		tests/CSS/Properties/Property.cpp
 		tests/CSS/Properties/PropertyParserResult.cpp
 		tests/CSS/Properties/PropertyShorthand.cpp

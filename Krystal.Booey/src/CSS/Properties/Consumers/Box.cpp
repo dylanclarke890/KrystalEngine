@@ -5,6 +5,7 @@
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {

@@ -4,6 +4,7 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {

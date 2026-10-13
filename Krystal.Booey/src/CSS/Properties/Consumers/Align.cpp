@@ -10,7 +10,7 @@ namespace krys::boo::css::PropertyParserHelpers
   {
     KRYS_NODISCARD RefPtr<Value> ConsumeAlignmentBaseline(TokenRange &tokens, PropertyParserState &) noexcept
     {
-      assert(tokens.Peek().ValueId() == ValueId::Baseline);
+      krys_debug_assert(tokens.Peek().ValueId() == ValueId::Baseline);
 
       // FIXME: The spec states that <baseline-position> is defined as `<baseline-position> = [ first | last
       // ]? && baseline`, allowing any ordering, but tests expect `[ first | last ]` to always be precede
@@ -25,7 +25,7 @@ namespace krys::boo::css::PropertyParserHelpers
     KRYS_NODISCARD RefPtr<Value> ConsumeAlignmentFirstBaseline(TokenRange &tokens,
                                                                PropertyParserState &) noexcept
     {
-      assert(tokens.Peek().ValueId() == ValueId::First);
+      krys_debug_assert(tokens.Peek().ValueId() == ValueId::First);
 
       auto copy = tokens;
       copy.Discard();
@@ -46,7 +46,7 @@ namespace krys::boo::css::PropertyParserHelpers
     KRYS_NODISCARD RefPtr<Value> ConsumeAlignmentLastBaseline(TokenRange &tokens,
                                                               PropertyParserState &) noexcept
     {
-      assert(tokens.Peek().ValueId() == ValueId::Last);
+      krys_debug_assert(tokens.Peek().ValueId() == ValueId::Last);
 
       auto copy = tokens;
       copy.Discard();
@@ -70,7 +70,8 @@ namespace krys::boo::css::PropertyParserHelpers
                                                                   ValueId overflowSafety,
                                                                   F &&predicate) noexcept
     {
-      assert(tokens.Peek().ValueId() == ValueId::Safe || tokens.Peek().ValueId() == ValueId::Unsafe);
+      krys_debug_assert(tokens.Peek().ValueId() == ValueId::Safe
+                        || tokens.Peek().ValueId() == ValueId::Unsafe);
 
       auto copy = tokens;
       copy.Discard();

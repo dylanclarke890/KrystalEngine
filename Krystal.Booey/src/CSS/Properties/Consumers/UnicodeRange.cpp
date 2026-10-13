@@ -4,19 +4,15 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/UnicodeRangeValue.hpp"
 #include "Krystal.Core/Text/Encodings/Decode.hpp"
-#include "Krystal.Core/Text/Encodings/Encode.hpp"
 #include "Krystal.Core/Text/Encodings/UTF.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
   namespace
   {
-    KRYS_NODISCARD bool ConsumeOptionalDelimiter(TokenRange &tokens, char32 delim) noexcept
+    KRYS_NODISCARD bool ConsumeOptionalDelimiter(TokenRange &tokens, char32 value) noexcept
     {
-      auto encodeResult = krys::text::Encode<krys::text::UTF8>(Span<const char32>(&delim, 1));
-      krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
-      if (!(tokens.Peek().Type() == TokenType::Delim
-            && tokens.Peek().IdentCodePoints() == encodeResult.Output))
+      if (!(tokens.Peek().Type() == TokenType::Delim && tokens.Peek().Delimiter() == value))
       {
         return false;
       }
@@ -43,31 +39,25 @@ namespace krys::boo::css::PropertyParserHelpers
         return false;
       }
 
-      auto originalText = tokens.Consume().IdentCodePoints();
-      if (originalText.empty())
-      {
-        return false;
-      }
-
-      str.append_range(originalText);
-      return true;
+      // FIXME: Tokens don't keep their original text, so numeric tokens can't be appended and every range
+      // that contains one (e.g. `U+0025-00FF`, `U+4??`) fails to parse.
+      (void)str;
+      return false;
     }
 
     KRYS_NODISCARD bool ConsumeAndAppendOptionalDelimiter(CSSOMString &str, TokenRange &tokens,
-                                                          char32 value) noexcept
+                                                          char8_t value) noexcept
     {
       if (!ConsumeOptionalDelimiter(tokens, value))
       {
         return false;
       }
 
-      auto encodeResult = krys::text::Encode<krys::text::UTF8>(Span<const char32>(&value, 1));
-      krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
-      str.append_range(encodeResult.Output);
+      str.push_back(value);
       return true;
     }
 
-    static void ConsumeAndAppendOptionalQuestionMarks(CSSOMString &str, TokenRange &tokens) noexcept
+    void ConsumeAndAppendOptionalQuestionMarks(CSSOMString &str, TokenRange &tokens) noexcept
     {
       while (ConsumeAndAppendOptionalDelimiter(str, tokens, '?'))
       {
@@ -169,6 +159,7 @@ namespace krys::boo::css::PropertyParserHelpers
       start <<= 4;
       end <<= 4;
       end |= 0xF;
+      buffer = buffer.substr(1uz);
     }
 
     if (!hexDigitCount)
@@ -217,7 +208,6 @@ namespace krys::boo::css::PropertyParserHelpers
     auto rangeCopy = tokens;
 
     auto unicodeRange = ConsumeUnicodeRangeTokenUnresolved(rangeCopy);
-    rangeCopy.Discard();
     rangeCopy.DiscardWhitespace();
 
     if (!unicodeRange || unicodeRange->end > krys::text::MaxUnicodeChar

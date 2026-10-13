@@ -53,11 +53,13 @@ namespace krys::boo::css::PropertyParserHelpers
 
         auto args = ConsumeFunction(tokens);
 
-        auto string = ConsumeStringRaw(args);
-        if (string.empty())
+        // An empty string is a valid URL, so check for the token rather than an empty result.
+        if (args.Peek().Type() != TokenType::String)
         {
           return {};
         }
+
+        auto string = ConsumeStringRaw(args);
 
         auto result = CompleteURL(CSSOMString(string), state.Context);
         if (!result)
@@ -120,9 +122,14 @@ namespace krys::boo::css::PropertyParserHelpers
                 }
 
                 auto integrityArgs = ConsumeFunction(args);
+                if (integrityArgs.Peek().Type() != TokenType::String)
+                {
+                  return {};
+                }
+
                 auto integrityValue = ConsumeStringRaw(integrityArgs);
 
-                if (integrityValue.empty() || !integrityArgs.IsAtEnd())
+                if (!integrityArgs.IsAtEnd())
                 {
                   return {};
                 }

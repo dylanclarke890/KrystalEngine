@@ -41,9 +41,10 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Values (slices 2 and 4, 2026-10-13): `Value`, `PrimitiveValue`, `ParserContext` and every `Value` subclass built and instance-tested, with the CSS types they hold (positions, URLs and WTF's `url::URL`, grid areas, easing, shadows, shapes, filters, `ray()`, variable data, gradients), the geometry types and the SVG path pipeline. Builder- and loader-dependent members are deferred (below). See the *Values* section.
 - Property parser, layer a (2026-10-13): parser plumbing (`Property`, `ParsedPropertyList`, `PropertyParserResult`, `PropertyShorthand` and the generated shorthand functions, `CustomPropertySyntax`, `VariableParser`) built and tested; see the *Property parser* section.
 - Property parser, layer b1 (2026-10-13): the shared consumer foundations (the remaining `*Definitions.hpp`, `MetaResolver`, the `PrimitiveValue` resolver, `List`, `Percentage`, `String`) built and tested.
+- Property parser, layer b2 (2026-10-13): the ident/keyword-level consumers (`Align`, `Anchor`, `Attr`, `Box`, `Display`, `Inline`, `PositionTry`, `Ratio`, `ScrollSnap`, `Scrollbars`, `Syntax`, `Transitions`, `UnicodeRange`, `URL`, `ViewTransition`, `WillChange`) built and tested.
 
 **Open / next candidates:**
-- Property parser, next: layer b2 (see the group plan in the *Property parser* section); then b3–b5, then layer c (`PropertyParserCustom.hpp`, generated `PropertyParsing.cpp`, `PropertyParser.cpp`). See the *Property parser* section for the plan.
+- Property parser, next: layer b3 (see the group plan in the *Property parser* section); then b4–b5, then layer c (`PropertyParserCustom.hpp`, generated `PropertyParsing.cpp`, `PropertyParser.cpp`). See the *Property parser* section for the plan.
 - Property parser, deferred definitions (need `style::CustomProperty`/`BuilderState`): `VariableParser::ParseInitialValueForUniversalSyntax`; layer c adds `PropertyParser::ParseTypedCustomPropertyValue`/`ParseTypedCustomPropertyInitialValue`.
 - Values, deferred definitions (declared, not defined, FIXME'd; define when `style::Builder`/`BuilderState` and the resource loader are ported): `VariableReferenceValue::ResolveVariableReferences`, `ResolveSingleValue`, `ResolveTokenRange`, `ResolveVariableReference`, `ResolveVariableFallback`, `TryResolveSimpleReference` (and so `ResolveAndCacheValue`); `PendingSubstitutionValue::ResolveValue` (also needs `PropertyParser::ParseValue` and `ParsedPropertyVector`); `FontFaceSrcResourceValue::GetFontLoadRequest` and its cached font (`CustomTraverseSubresources` returns `false` until then); `FontFaceSrcLocalValue::GetSVGFontFaceElement`/`SetSVGFontFaceElement` (need SVG fonts); `CreateStyleImage` on the ten image values (needs `style::BuilderState` and `StyleImage`, and the cached style image members of `NamedImageValue`/`CanvasValue`/`GradientValue`); `ImageValue::IsPending`, `LoadImage`, `GetCachedImage`, `KnownToBeOpaque` and its cached image (`CustomTraverseSubresources` returns `false`, and `CopyForComputedStyle` doesn't copy the cache, until then).
 - Not yet ported, needed later: the graphics `Path` (cached by `SVGPathByteStream` upstream), the rest of `SVGPathUtilities` (needs `Path` and `SVGPathSegList`), `parseKerningUnicodeString`/`parseGlyphName`.
@@ -57,7 +58,7 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - URL, not yet done: the DOM `URL` interface and `URLSearchParams` (WebKit's `DOMURL`/`URLDecomposition`, tested by WPT `setters_tests.json`), `Document`'s URL/base URL (`Document::URL()` is a TODO), `CompleteURL(string, Document)`, and `applyModifiersToLoaderOptions` (needs the resource loader).
 - Krystal.Core: the `IntrusivePtr` `Downcast`/`DynamicDowncast` overloads can't be called with an explicit target and `Downcast` rejects null (nothing calls them yet); `OffsetRotateValue.cpp` has a FIXME workaround.
 - `CSS/Properties/Property.hpp` (`CSSProperty.h`) isn't reviewed, but compiles (the generated `PropertyId.cpp` defines its static functions); the colour parser and `AngleValidator` use `AcceptsQuirkyColor`/`AcceptsQuirkyAngle` from it.
-- Tokenizer doesn't keep numeric original text or whitespace counts, so `TokenSerialisationMode::CustomProperty` behaves like `Normal` (FIXMEs in `src/CSS/Parser/Token.cpp`).
+- Tokenizer doesn't keep numeric original text or whitespace counts, so `TokenSerialisationMode::CustomProperty` behaves like `Normal` (FIXMEs in `src/CSS/Parser/Token.cpp`), and `ConsumeUnicodeRangeToken` rejects every range containing a number or dimension token (`U+0025-00FF`, `U+4??`; FIXME in `Consumers/UnicodeRange.cpp`, `[!shouldfail]` test). Decided 2026-10-13: fix both together once the tokenizer keeps original text.
 - Not yet ported, needed later: `StringBuilder`, `RefCountedFixedVector`, `DefaultHash<StringAtom>` (Krystal.Core; for `add(Hasher&, const Style::GridPosition&)`).
 - Style `GridPosition`'s `CSSValueConversion` is deferred with the other `+CSSValueConversion` headers.
 - Undecided style question: list wrappers use container-protocol lowercase names (`isEmpty`, `contains`), matching Core's `FixedVector`/`ListHashSet`; `EnumSet` and wrappers use PascalCase.
@@ -385,7 +386,7 @@ Entry: `css/parser/CSSPropertyParser.cpp` (headers-only graph: 151 files, `tools
 - **a.** Parser plumbing: `Property`, `ParsedPropertyList`, `PropertyParserResult`, `PropertyShorthand` (+ generated shorthand functions), `CustomPropertySyntax`, `VariableParser`. Done.
 - **b.** The consumers, in groups, compile-only first (as with the Value subclasses). Groups, by upstream include order (proposed 2026-10-13):
   - **b1.** Shared foundations: the remaining `*Definitions.hpp`, `MetaResolver`, `PrimitiveValue` (`CSSPrimitiveValueResolver`), `List`, `Percentage`, `String`. Done.
-  - **b2.** Ident/keyword-level consumers: `Align`, `Anchor`, `Attr`, `Box`, `Display`, `Inline`, `PositionTry`, `Ratio`, `ScrollSnap`, `Scrollbars`, `Syntax` (missing), `Transitions`, `UnicodeRange`, `URL`, `ViewTransition`, `WillChange`.
+  - **b2.** Ident/keyword-level consumers: `Align`, `Anchor`, `Attr`, `Box`, `Display`, `Inline`, `PositionTry`, `Ratio`, `ScrollSnap`, `Scrollbars`, `Syntax` (was missing), `Transitions`, `UnicodeRange`, `URL`, `ViewTransition`, `WillChange`. Done.
   - **b3.** Numeric/structured consumers: `Animations`, `CounterStyles`, `Easing`, `Grid`, `Lists`, `Position`, `SVG`, `TextDecoration`, `Timeline`, `Transform`.
   - **b4.** Image-dependent consumers: `Image`, then `Background`, `Content`, `Filter`, `Masking`, `Motion`, `UI`.
   - **b5.** The stubs: `Font`, `Shapes` (~2k upstream lines).
@@ -447,6 +448,31 @@ From the include graph of the consumer `.cpp`s: every other consumer includes so
 - `PercentageConsumer` takes the percentage unit as a template argument (layer 3c); the definitions pass it explicitly.
 
 Tests: `tests/CSS/Properties/Consumers/{Definitions,PrimitiveValue,List,Percentage,String}.cpp`: 19 cases / 225 assertions pass (1 expected failure). Full Booey suite: 1377 cases / 671844 assertions; all pass except 3 expected failures.
+
+### Layer b2: ident/keyword-level consumers (2026-10-13)
+
+Paths under `css/parser/CSSPropertyParserConsumer+` (WebKit) and `CSS/Properties/Consumers/`, `src/CSS/Properties/Consumers/` (Krystal). Each is a `.h`/`.cpp` pair.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `Align`, `Anchor`, `Box`, `Display`, `Inline`, `PositionTry`, `Ratio`, `ScrollSnap`, `Scrollbars`, `Transitions`, `ViewTransition`, `WillChange` | `have` | same names | on | tested. Matched upstream (apart from the bugs below). |
+| `Attr` | `have` | `Attr` | on | tested. See bugs. |
+| `Syntax` | `have` | `Syntax` | on | tested. The `.cpp` was missing. |
+| `UnicodeRange` | `have` | `UnicodeRange` | on | tested. See bugs and differences. |
+| `URL` | `have` | `URL` | on | tested. See bugs. |
+
+**Bugs fixed:**
+- `UnicodeRange`: the `?` loop never advanced the buffer, so any range with a `?` failed once it passed six digits; `ConsumeUnicodeRangeToken` discarded an extra token after the range (upstream only skips whitespace); and number/dimension tokens were read with `IdentCodePoints()`, which asserts on those token types.
+- `URL`: `url("")` and `integrity("")` were rejected, because an empty `ConsumeStringRaw` result was taken to mean "no string" (upstream checks for a null view). Now checks the token type first.
+- `Attr` didn't compile: it built a `CSSOMStringAtom` for `AttrValue::Create`, which takes a `CSSOMString` (upstream's atom converts implicitly).
+- `Box`/`ViewTransition` called the inline `PrimitiveValue::Create(ValueId)` without including `ValuePool.hpp`, which defines it.
+- Raw `assert` in `Align`, `Anchor`, `Display` (now `krys_debug_assert`).
+
+**Differences:**
+- `UnicodeRange`: numeric tokens have no original text, so ranges containing them fail (see *Where we are*); delimiters are matched with `Token::Delimiter()`.
+- `AllowedURLModifiers` is a flags enum with a `None` value (upstream: `OptionSet`).
+
+Tests: one file per consumer under `tests/CSS/Properties/Consumers/`, using the new `ConsumeToText` helper (`Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp`): 30 cases / 436 assertions pass (3 expected failures). Full Booey suite: 1407 cases / 672280 assertions; all pass except 4 expected failures.
 
 ## Slice 3: Colour
 

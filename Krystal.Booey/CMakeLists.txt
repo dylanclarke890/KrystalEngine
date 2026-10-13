@@ -410,6 +410,24 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Properties/Consumers/ResolutionDefinitions.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/String.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/TimeDefinitions.hpp
+
+  # Property parser, layer b2 (ident/keyword-level consumers)
+  include/Krystal.Booey/CSS/Properties/Consumers/Align.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Anchor.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Attr.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Box.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Display.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Inline.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/PositionTry.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Ratio.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/ScrollSnap.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Scrollbars.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Syntax.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Transitions.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/URL.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/UnicodeRange.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/ViewTransition.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/WillChange.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -600,6 +618,24 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   # Property parser, layer b1 (shared consumer foundations)
   src/CSS/Properties/Consumers/Percentage.cpp
   src/CSS/Properties/Consumers/String.cpp
+
+  # Property parser, layer b2 (ident/keyword-level consumers)
+  src/CSS/Properties/Consumers/Align.cpp
+  src/CSS/Properties/Consumers/Anchor.cpp
+  src/CSS/Properties/Consumers/Attr.cpp
+  src/CSS/Properties/Consumers/Box.cpp
+  src/CSS/Properties/Consumers/Display.cpp
+  src/CSS/Properties/Consumers/Inline.cpp
+  src/CSS/Properties/Consumers/PositionTry.cpp
+  src/CSS/Properties/Consumers/Ratio.cpp
+  src/CSS/Properties/Consumers/ScrollSnap.cpp
+  src/CSS/Properties/Consumers/Scrollbars.cpp
+  src/CSS/Properties/Consumers/Syntax.cpp
+  src/CSS/Properties/Consumers/Transitions.cpp
+  src/CSS/Properties/Consumers/URL.cpp
+  src/CSS/Properties/Consumers/UnicodeRange.cpp
+  src/CSS/Properties/Consumers/ViewTransition.cpp
+  src/CSS/Properties/Consumers/WillChange.cpp
 )
 
 target_precompile_headers(Krystal.Booey
