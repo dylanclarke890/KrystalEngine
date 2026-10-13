@@ -100,6 +100,7 @@ namespace krys
   constexpr float turnsPerDegreeFloat = 1.0f / 360.0f;
   constexpr float degreesPerTurnFloat = 360.0f;
   constexpr float radiansPerTurnFloat = 2.0f * std::numbers::pi_v<float>;
+  constexpr float piOverTwoFloat = static_cast<float>(std::numbers::pi / 2);
 
   KRYS_NODISCARD constexpr float deg2rad(float d) noexcept
   {

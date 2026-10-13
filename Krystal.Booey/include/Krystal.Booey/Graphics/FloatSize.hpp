@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Core/MathExtras.hpp"
+#include "Krystal.Booey/Graphics/DoubleSize.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/IntSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -172,6 +173,11 @@ namespace krys::boo
     {
       // NaN is the only value that isn't equal to itself.
       return _width != _width;
+    }
+
+    constexpr operator DoubleSize() const noexcept
+    {
+      return {_width, _height};
     }
 
     KRYS_NODISCARD friend constexpr bool operator==(const FloatSize &, const FloatSize &) noexcept = default;

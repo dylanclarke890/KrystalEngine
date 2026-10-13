@@ -327,6 +327,15 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/Easing/SpringEasingFunction.hpp
   include/Krystal.Booey/CSS/Values/Easing/StepsEasingFunction.hpp
   include/Krystal.Booey/CSS/Values/EasingFunctionValue.hpp
+  include/Krystal.Booey/CSS/Values/Borders/BoxShadow.hpp
+  include/Krystal.Booey/CSS/Values/Borders/BoxShadowProperty.hpp
+  include/Krystal.Booey/CSS/Values/BoxShadowPropertyValue.hpp
+  include/Krystal.Booey/CSS/Values/TextDecoration/TextShadow.hpp
+  include/Krystal.Booey/CSS/Values/TextDecoration/TextShadowProperty.hpp
+  include/Krystal.Booey/CSS/Values/TextShadowPropertyValue.hpp
+  include/Krystal.Booey/CSS/Values/PathValue.hpp
+  include/Krystal.Booey/CSS/Values/Shapes/FillRule.hpp
+  include/Krystal.Booey/CSS/Values/Shapes/PathFunction.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -469,6 +478,10 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/Style/GridSpan.cpp
   src/Style/Values/Grid/GridPosition.cpp
   src/CSS/Values/EasingFunctionValue.cpp
+  src/CSS/Values/BoxShadowPropertyValue.cpp
+  src/CSS/Values/TextShadowPropertyValue.cpp
+  src/CSS/Values/PathValue.cpp
+  src/CSS/Values/Shapes/PathFunction.cpp
 )
 
 target_precompile_headers(Krystal.Booey
@@ -520,7 +533,9 @@ target_sources(Krystal.Booey
 
       # Core
       include/Krystal.Booey/Core/BoxSides.hpp
+      include/Krystal.Booey/Core/BoxExtents.hpp
       include/Krystal.Booey/Core/EncodingRegistry.hpp
+      include/Krystal.Booey/Core/FloatConversion.hpp
       include/Krystal.Booey/Core/IterationStatus.hpp
       include/Krystal.Booey/Core/LayoutUnit.hpp
       include/Krystal.Booey/Core/MathExtras.hpp
@@ -669,11 +684,24 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/Graphics/Color/ColorTypes.hpp
       include/Krystal.Booey/Graphics/Color/ColorUtilities.hpp
       include/Krystal.Booey/Graphics/Color/NamedColors.hpp
+      include/Krystal.Booey/Graphics/DoublePoint.hpp
+      include/Krystal.Booey/Graphics/DoubleSize.hpp
       include/Krystal.Booey/Graphics/FloatPoint.hpp
+      include/Krystal.Booey/Graphics/FloatPoint3D.hpp
+      include/Krystal.Booey/Graphics/FloatQuad.hpp
+      include/Krystal.Booey/Graphics/FloatRect.hpp
+      include/Krystal.Booey/Graphics/GeometryUtilities.hpp
       include/Krystal.Booey/Graphics/IntPoint.hpp
+      include/Krystal.Booey/Graphics/IntRect.hpp
+      include/Krystal.Booey/Graphics/IntRectHash.hpp
       include/Krystal.Booey/Graphics/IntSize.hpp
       include/Krystal.Booey/Graphics/LayoutPoint.hpp
+      include/Krystal.Booey/Graphics/LayoutRect.hpp
       include/Krystal.Booey/Graphics/LayoutSize.hpp
+      include/Krystal.Booey/Graphics/Region.hpp
+      include/Krystal.Booey/Graphics/Transforms/AffineTransform.hpp
+      include/Krystal.Booey/Graphics/Transforms/Quaternion.hpp
+      include/Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp
 
       # HTML
       include/Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp
@@ -806,6 +834,17 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/SVG/Enums/SVGElementFlags.hpp
       include/Krystal.Booey/SVG/Enums/SVGElementInterface.hpp
       include/Krystal.Booey/SVG/Internals/SVGElementFactory.hpp
+      include/Krystal.Booey/SVG/Internals/SVGParserUtilities.hpp
+      include/Krystal.Booey/SVG/Internals/SVGPathByteStream.hpp
+      include/Krystal.Booey/SVG/Internals/SVGPathByteStreamBuilder.hpp
+      include/Krystal.Booey/SVG/Internals/SVGPathByteStreamSource.hpp
+      include/Krystal.Booey/SVG/Internals/SVGPathConsumer.hpp
+      include/Krystal.Booey/SVG/Internals/SVGPathParser.hpp
+      include/Krystal.Booey/SVG/Internals/SVGPathSegType.hpp
+      include/Krystal.Booey/SVG/Internals/SVGPathSource.hpp
+      include/Krystal.Booey/SVG/Internals/SVGPathStringBuilder.hpp
+      include/Krystal.Booey/SVG/Internals/SVGPathStringViewSource.hpp
+      include/Krystal.Booey/SVG/Internals/SVGPathUtilities.hpp
       include/Krystal.Booey/SVG/SVGCircleElement.hpp
       include/Krystal.Booey/SVG/SVGDefsElement.hpp
       include/Krystal.Booey/SVG/SVGDescElement.hpp
@@ -927,8 +966,20 @@ target_sources(Krystal.Booey
     src/Graphics/Color/ColorLuminance.cpp
     src/Graphics/Color/ColorSerialisation.cpp
     src/Graphics/Color/NamedColors.cpp
+    src/Graphics/DoubleSize.cpp
+    src/Graphics/FloatPoint.cpp
+    src/Graphics/FloatPoint3D.cpp
+    src/Graphics/FloatQuad.cpp
+    src/Graphics/FloatRect.cpp
+    src/Graphics/GeometryUtilities.cpp
     src/Graphics/IntPoint.cpp
+    src/Graphics/IntRect.cpp
     src/Graphics/IntSize.cpp
+    src/Graphics/LayoutRect.cpp
+    src/Graphics/Region.cpp
+    src/Graphics/Transforms/AffineTransform.cpp
+    src/Graphics/Transforms/Quaternion.cpp
+    src/Graphics/Transforms/TransformationMatrix.cpp
 
     # HTML
     src/HTML/Algorithms/CustomElementAlgorithms.cpp
@@ -1008,6 +1059,14 @@ target_sources(Krystal.Booey
     src/HTML/Parser/HTMLTreeBuilder.cpp
 
     # SVG
+    src/SVG/Internals/SVGParserUtilities.cpp
+    src/SVG/Internals/SVGPathByteStream.cpp
+    src/SVG/Internals/SVGPathByteStreamBuilder.cpp
+    src/SVG/Internals/SVGPathByteStreamSource.cpp
+    src/SVG/Internals/SVGPathParser.cpp
+    src/SVG/Internals/SVGPathStringBuilder.cpp
+    src/SVG/Internals/SVGPathStringViewSource.cpp
+    src/SVG/Internals/SVGPathUtilities.cpp
     src/SVG/SVGCircleElement.cpp
     src/SVG/SVGDefsElement.cpp
     src/SVG/SVGDescElement.cpp

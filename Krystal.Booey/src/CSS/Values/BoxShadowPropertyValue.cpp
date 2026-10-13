@@ -1,16 +1,22 @@
-#include "Krystal.Booey/CSS/Values/BoxShadowPropertyValue.hpp"
-#include "Krystal.Booey/CSS/Values/Types.hpp"
+﻿#include "Krystal.Booey/CSS/Values/BoxShadowPropertyValue.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypesValueVisitation.hpp"
 
 namespace krys::boo::css
 {
-  Ref<BoxShadowPropertyValue> BoxShadowPropertyValue::Create(BoxShadowProperty boxShadow) noexcept
+  Ref<BoxShadowPropertyValue> BoxShadowPropertyValue::Create(BoxShadowProperty shadow) noexcept
   {
-    return AdoptRef(*new BoxShadowPropertyValue(krys::move(boxShadow)));
+    return AdoptRef(*new BoxShadowPropertyValue(krys::move(shadow)));
+  }
+
+  BoxShadowPropertyValue::BoxShadowPropertyValue(BoxShadowProperty &&shadow) noexcept
+      : Value(ValueType::BoxShadowProperty), _shadow(krys::move(shadow))
+  {
   }
 
   CSSOMString BoxShadowPropertyValue::CustomCSSText(const SerialisationContext &context) const noexcept
   {
-    return css::Serialise(context, _shadow);
+    return Serialise(context, _shadow);
   }
 
   bool BoxShadowPropertyValue::Equals(const BoxShadowPropertyValue &other) const noexcept
@@ -19,8 +25,8 @@ namespace krys::boo::css
   }
 
   IterationStatus BoxShadowPropertyValue::CustomVisitChildren(
-    const Func<IterationStatus(css::Value &)> &func) const noexcept
+    KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func) const noexcept
   {
-    return css::VisitValueChildren(func, _shadow);
+    return VisitValueChildren(func, _shadow);
   }
 }

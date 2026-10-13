@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/Aggregates.hpp"
 #include "Krystal.Booey/CSS/Values/Color/Color.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
+#include "Krystal.Core/Types/Markable.hpp"
 
 namespace krys::boo::css
 {
@@ -10,12 +10,12 @@ namespace krys::boo::css
   // https://drafts.csswg.org/css-backgrounds-3/#typedef-shadow
   struct BoxShadow
   {
-    Maybe<Color> color;
-    SpaceSeparatedPoint<Length<AllUnzoomed>> location;
-    Maybe<Length<NonNegativeUnzoomed>> blur;
-    Maybe<Length<AllUnzoomed>> spread;
-    Maybe<keywords::Inset> inset;
-    bool isWebkitBoxShadow;
+    Markable<boo::css::Color> Color;
+    SpaceSeparatedPoint<Length<AllUnzoomed>> Location;
+    Markable<Length<NonNegativeUnzoomed>> Blur;
+    Markable<Length<AllUnzoomed>> Spread;
+    Maybe<keywords::Inset> Inset;
+    bool IsWebkitBoxShadow {false};
 
     KRYS_NODISCARD bool operator==(const BoxShadow &) const noexcept = default;
   };
@@ -25,23 +25,23 @@ namespace krys::boo::css
   {
     if constexpr (!I)
     {
-      return value.color;
+      return value.Color;
     }
     else if constexpr (I == 1)
     {
-      return value.location;
+      return value.Location;
     }
     else if constexpr (I == 2)
     {
-      return value.blur;
+      return value.Blur;
     }
     else if constexpr (I == 3)
     {
-      return value.spread;
+      return value.Spread;
     }
     else if constexpr (I == 4)
     {
-      return value.inset;
+      return value.Inset;
     }
   }
 }

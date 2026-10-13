@@ -7,7 +7,7 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumer.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/TextDecoration/TextShadow.hpp"
+#include "Krystal.Booey/CSS/Values/TextDecoration/TextShadowProperty.hpp"
 #include "Krystal.Booey/CSS/Values/TextShadowPropertyValue.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
@@ -88,7 +88,7 @@ namespace krys::boo::css::PropertyParserHelpers
     tokens = rangeCopy;
 
     return TextShadow {
-      .color = krys::move(color), .location = {krys::move(*x), krys::move(*y)}, .blur = krys::move(blur)};
+      .Color = krys::move(color), .Location = {krys::move(*x), krys::move(*y)}, .Blur = krys::move(blur)};
   }
 
   KRYS_NODISCARD static Maybe<TextShadowProperty::List>

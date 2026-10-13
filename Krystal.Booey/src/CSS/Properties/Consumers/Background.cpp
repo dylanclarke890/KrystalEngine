@@ -13,8 +13,8 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
-#include "Krystal.Booey/CSS/Values/Background/BoxShadow.hpp"
-#include "Krystal.Booey/CSS/Values/Background/BoxShadowProperty.hpp"
+#include "Krystal.Booey/CSS/Values/Borders/BoxShadow.hpp"
+#include "Krystal.Booey/CSS/Values/Borders/BoxShadowProperty.hpp"
 #include "Krystal.Booey/CSS/Values/BackgroundRepeatValue.hpp"
 #include "Krystal.Booey/CSS/Values/BorderImageSliceValue.hpp"
 #include "Krystal.Booey/CSS/Values/BorderImageWidthValue.hpp"
@@ -539,12 +539,12 @@ namespace krys::boo::css::PropertyParserHelpers
 
     tokens = rangeCopy;
 
-    return BoxShadow {.color = krys::move(color),
-                      .location = {krys::move(*x), krys::move(*y)},
-                      .blur = krys::move(blur),
-                      .spread = krys::move(spread),
-                      .inset = krys::move(inset),
-                      .isWebkitBoxShadow = isWebkitBoxShadow};
+    return BoxShadow {.Color = krys::move(color),
+                      .Location = {krys::move(*x), krys::move(*y)},
+                      .Blur = krys::move(blur),
+                      .Spread = krys::move(spread),
+                      .Inset = krys::move(inset),
+                      .IsWebkitBoxShadow = isWebkitBoxShadow};
   }
 
   KRYS_NODISCARD static Maybe<BoxShadowProperty::List>

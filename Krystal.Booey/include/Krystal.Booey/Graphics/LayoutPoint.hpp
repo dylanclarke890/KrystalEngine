@@ -36,6 +36,10 @@ namespace krys::boo
     {
     }
 
+    constexpr explicit LayoutPoint(const DoublePoint &point) noexcept : _x(point.X()), _y(point.Y())
+    {
+    }
+
     KRYS_NODISCARD constexpr static LayoutPoint Zero() noexcept
     {
       return LayoutPoint();
@@ -144,6 +148,11 @@ namespace krys::boo
     constexpr operator FloatPoint() const noexcept
     {
       return {_x, _y};
+    }
+
+    constexpr operator DoublePoint() const noexcept
+    {
+      return {_x.ToDouble(), _y.ToDouble()};
     }
   };
 

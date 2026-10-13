@@ -44,9 +44,12 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Slice 4, tier 2 started (2026-10-12): `Position` (CSS primitive) built and tested; `PositionValue`/`PositionXValue`/`PositionYValue` compile (compile-only).
 - URL (2026-10-12): WTF's `URL`/`URLParser`/`URLHash` ported as `url::URL` (`Krystal.Booey/URL/`), with ICU for IDNA, and tested against the WPT URL data; `CSSURL`, `URLModifiers` and `UrlValue` built and tested (`UrlValue` compile-only). See the `UrlValue` entry.
 - Slice 4, tier 2 done (2026-10-13): `GridTemplateAreasValue` (with `GridTemplateAreas`, `GridNamedAreaMap`, `GridArea`/`GridSpan` moved to `Rendering/Style/`, and the Style `GridPosition`/`GridTrackSizingDirection` moved to `Style/Values/Grid/`) and `EasingFunctionValue` (with the five easing types) built and tested (the value classes compile-only). See their entries.
+- Slice 4, tier 3 started (2026-10-13): `BoxShadowPropertyValue` and `TextShadowPropertyValue` (with `BoxShadow`/`BoxShadowProperty` moved to `CSS/Values/Borders/`, and `TextShadow`/`TextShadowProperty`) built and tested (the value classes compile-only). `Markable` is now optional-like in `Aggregates.hpp`. See their entry.
+- Slice 4, tier 3 item 26 (2026-10-13): `PathValue` and `PathFunction`, with the geometry types (`IntRect`/`FloatRect`/`LayoutRect`, `FloatQuad`, `Region`, `GeometryUtilities`, `AffineTransform`, `TransformationMatrix` and their leaves) and the SVG path parse/serialise pipeline (`SVGPathByteStream` and friends, `FormatNumberFixedPrecision`), built and tested (`PathValue` compile-only). See its entry.
 
 **Open / next candidates:**
-- Slice 4 (Value subclasses): the generic types are done; next are the specific value types, one at a time, in the order under Slice 4's *Order* (tiers 1 and 2 done; next tier 3, starting with `BoxShadowPropertyValue`).
+- Slice 4 (Value subclasses): the generic types are done; next are the specific value types, one at a time, in the order under Slice 4's *Order* (tiers 1 and 2 done; tier 3 items 24–26 done; next `BasicShapeValue`).
+- Not yet ported, needed later: the graphics `Path` (cached by `SVGPathByteStream` upstream), the rest of `SVGPathUtilities` (needs `Path` and `SVGPathSegList`), `parseKerningUnicodeString`/`parseGlyphName`.
 - Slice 3 (colour), bottom-up: (1) Graphics/Color, (2) calc-free numeric primitives, (3a) Style-free calc, (3b) calc evaluation and Style calc and (3c) calc parsing are done. (4a) `LayoutUnit` and the point/size types and (4b) Style numerics are done. (5a) the CSS colour types, (5b) the colour parser and (5c) `ColorValue`/`ValuePool` (compile-only) are done. (6) Style colour is done (its CSSValue half is deferred, see below). Slice 3 is complete apart from the Value-dependent pieces.
 - Deferred from layer 6 (needs `Style/BuilderChecking.hpp` and the raw-WebKit `ValueList`/`ValuePair`/`FunctionValue`/`BuilderState` it includes): `CSSValueConversion<Color>`, `CSSValueCreation<Color>`, `CSSValueConversion<DynamicRangeLimit>`, `CSSValueCreation<DynamicRangeLimit>` and `CSSValueConversion<Opacity>`. They come with the other `+CSSValueConversion`/`+CSSValueCreation` headers.
 - Waiting on `PrimitiveValue.cpp`/`Value.cpp` linking: `PropertyParserState::Pool` is a pointer (TODO: back to a reference defaulting to `MainThreadPool()`), `ColorValueConsumers.cpp` and `ColorAdjustValueConsumers.cpp` compile but should merge back into `Color.cpp`/`ColorAdjust.cpp`, `ValuePool::CreateFontFaceValue` (also needs `ValueList`/`PropertyParser`) and `ParserFastPaths::MaybeParseValue` aren't written, nothing in 5c is tested, and the Style `+CSSValueConversion`/`+CSSValueCreation` headers (numerics, `LengthWrapper`, `PrimitiveKeyword`) are still raw WebKit.
@@ -565,7 +568,7 @@ Graph from `platform/LayoutUnit.h`, `platform/graphics/LayoutPoint.h`, `LayoutSi
 | `platform/graphics/LayoutPoint.h`, `.cpp` | `port` | `Graphics/LayoutPoint.hpp` | tested. No `DoublePoint` conversions or `operator<<`. `LayoutPointLimits` members as for `LayoutSizeLimits`. |
 | `platform/graphics/FloatSize.h` (IntSize half) | `have` | `Graphics/FloatSize.hpp` | tested. Added `FloatSize(const IntSize&)`, `IsExpressibleAsIntSize`, `RoundedIntSize`, `FlooredIntSize`, `ExpandedIntSize`, `FlooredIntPoint`. |
 | `platform/animation/AnimationUtilities.h` (rest) | `port` | `Graphics/Animation/AnimationUtilities.hpp` | tested. The `LayoutUnit`, `IntPoint`, `FloatPoint` and `LayoutPoint` `Blend` overloads (the TODO is gone). |
-| `platform/graphics/DoublePoint.h`, `DoubleSize.h`, `FloatRect.h`, `IntRect.h`, `transforms/*` | | | Not needed yet. |
+| `platform/graphics/DoublePoint.h`, `DoubleSize.h`, `FloatRect.h`, `IntRect.h`, `transforms/*` | | | Ported with `PathValue` (Slice 4). |
 | `wtf/SaturatedArithmetic.h` | `port` | `SaturatedSum`/`SaturatedDifference` in `Krystal.Core/Maths/Base.hpp` | tested through `LayoutUnit`. Portable versions only (no builtins/asm). |
 | `wtf/MathExtras.h` (`clampToInteger`, `isWithinIntRange`) | `port` | `ClampToInteger`, `IsWithinIntRange` in `Krystal.Core/Maths/Base.hpp` | The `double`/`float` overloads only. |
 
@@ -1280,6 +1283,98 @@ Tier 2 item 23; tier 2 is done. Graph from `css/CSSEasingFunctionValue.cpp` (hea
 **Differences:** `std::numeric_limits` → `Limits`. No `AddDerivedHash`, like upstream: hashes by pointer.
 
 Tests: `tests/CSS/Values/Easing/EasingFunction.cpp` (serialisation of every keyword and function, including each steps position and the omitted `end`/`jump-end` keyword; equality; `SwitchOn`; visitation and dependencies): 6 cases / 30 assertions. `EasingFunctionValue` is compile-only. Full Booey suite: 885 cases / 666850 assertions; all pass except 2 expected failures.
+
+### `BoxShadowPropertyValue`, `TextShadowPropertyValue` (2026-10-13)
+
+Tier 3 items 24–25. Graphs from `css/CSSBoxShadowPropertyValue.cpp` and `css/CSSTextShadowPropertyValue.cpp` (headers-only): 62 files each (`tools/port/out/box-shadow-property-value.md`, `text-shadow-property-value.md`). New: the value classes, `values/borders/CSSBoxShadow.h`/`CSSBoxShadowProperty.h` and `values/text-decoration/CSSTextShadow.h`/`CSSTextShadowProperty.h` (no `.cpp`s); the rest is reviewed (colour, numerics, `ValuePool`). The `DeprecatedCSSOM*` includes are won't-port.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/values/borders/CSSBoxShadow.h` | `have` | `CSS/Values/Borders/BoxShadow.hpp` | on | tested. Moved from `CSS/Values/Background/` to match upstream (the folder is gone). Members `color`/`location`/`blur`/`spread`/`inset`/`isWebkitBoxShadow` → PascalCase; `Color`'s type is written `boo::css::Color`. |
+| `css/values/borders/CSSBoxShadowProperty.h` | `have` | `CSS/Values/Borders/BoxShadowProperty.hpp` | on | tested. Moved likewise. |
+| `css/CSSBoxShadowPropertyValue.h`, `.cpp` | `have` | `CSS/Values/BoxShadowPropertyValue.hpp`, `src/CSS/Values/BoxShadowPropertyValue.cpp` | on (compile-only) | `shadow()` → `Shadow()`. |
+| `css/values/text-decoration/CSSTextShadow.h` | `have` | `CSS/Values/TextDecoration/TextShadow.hpp` | on | tested. Members PascalCase, as for `BoxShadow`. |
+| `css/values/text-decoration/CSSTextShadowProperty.h` | `have` | `CSS/Values/TextDecoration/TextShadowProperty.hpp` | on | tested. New file: the alias was in `TextShadow.hpp`. |
+| `css/CSSTextShadowPropertyValue.h`, `.cpp` | `have` | `CSS/Values/TextShadowPropertyValue.hpp`, `src/CSS/Values/TextShadowPropertyValue.cpp` | on (compile-only) | `shadow()` → `Shadow()`. |
+
+**Bugs fixed:**
+- `Aggregates.hpp` didn't specialise `TreatAsOptionalLike` for `Markable` (upstream `CSSValueAggregates.h` does), so a `Markable` inside a tuple-like type couldn't be serialised, visited or have its dependencies collected (compile error).
+- `TextShadowPropertyValue`'s accessor was named `Value()`, which hides the base class `Value` inside the class (ill-formed). It had no `.cpp`, so the constructor and every method were declared but never defined.
+- `BoxShadow`/`TextShadow` used `Maybe` where upstream uses `Markable` (colour, blur, spread), doubling the flag storage per member.
+- Both value classes' `CustomVisitChildren` lacked `KRYS_NOESCAPE`; `BoxShadowPropertyValue`'s constructor wasn't `explicit`, and its `.cpp` had no BOM.
+- Public members were lowercase; `TextShadow`'s `operator==` and `get` weren't `noexcept`/`KRYS_NODISCARD`.
+
+**Krystal callers updated (unbuilt):** `Consumers/Background.cpp` (includes, `.Color`/`.Location`/`.Blur`/`.Spread`/`.Inset`/`.IsWebkitBoxShadow`), `Consumers/TextDecoration.cpp` (includes `TextShadowProperty.hpp`, designated initialisers). Their `Maybe` locals convert to `Markable`, as upstream's `std::optional` locals do.
+
+**Added (upstream API):** `TextShadowPropertyValue::Create`, `Shadow`, `CustomCSSText`, `Equals`, `CustomVisitChildren` (definitions); `TextShadowProperty.hpp`.
+
+**Differences:**
+- `BoxShadow::IsWebkitBoxShadow` defaults to `false` (upstream leaves it uninitialised).
+- No `createDeprecatedCSSOMWrapper` (won't-port). No `AddDerivedHash`, like upstream: both hash by pointer.
+
+Tests: `tests/CSS/Values/Borders/BoxShadow.cpp` (serialisation of each optional part and `inset`, `IsWebkitBoxShadow` not serialised but compared, the property's `none` and lists, equality, dependencies, visitation): 4 cases; `tests/CSS/Values/TextDecoration/TextShadow.cpp` (the same for `TextShadow`): 3 cases. 7 cases / 37 assertions. The value classes are compile-only. Full Booey suite: 892 cases / 666887 assertions; all pass except 2 expected failures.
+
+### `PathValue`, with the geometry types and the SVG path pipeline (2026-10-13)
+
+Tier 3 item 26. Graph from `css/CSSPathValue.cpp` with `--follow css/ style/ svg/ platform/graphics/` (headers-only; `tools/port/out/path-value.md`). `CSSPathValue` and `CSSPathFunction` are small; the work is `CSS::Path`'s `SVGPathByteStream` (an empty class in Krystal), whose serialisation and parsing need SVG's path parser, which needs `AffineTransform` for arcs. Decisions (2026-10-13): port the byte stream with the parse/serialise pipeline and `AffineTransform`, and all of `AffineTransform` including the geometry its `mapRect`/`mapQuad`/`mapRegion`/`toTransformationMatrix` need. Geometry graph: `tools/port/out/affine-transform.md` (from `AffineTransform.cpp`, `TransformationMatrix.cpp`, `Region.cpp`, `FloatQuad.cpp`, `FloatRect.cpp`, `IntRect.cpp`, `GeometryUtilities.cpp`, `--follow platform/graphics/ platform/`). Not ported: the graphics `Path` (and `PathImpl`/`PathSegment`/platform backends) that the byte stream caches.
+
+**Geometry** (`Graphics/`, `Core/`):
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `platform/FloatConversion.h` | `port` | `Core/FloatConversion.hpp` | on | `NarrowPrecisionToFloat(double)`; other types are a deleted template (upstream: a declared-only primary template). No CGFloat variants. |
+| `platform/BoxExtents.h` | `port` | `Core/BoxExtents.hpp` | on | `toLayoutBoxExtent` → `ToLayoutBoxExtent`. |
+| `platform/graphics/DoubleSize.h`, `.cpp` | `port` | `Graphics/DoubleSize.hpp`, `src/Graphics/DoubleSize.cpp` | on | tested. Constructor from `FloatSize` takes `const &` (upstream `const FloatSize&&`). |
+| `platform/graphics/DoublePoint.h`, `.cpp` | `port` | `Graphics/DoublePoint.hpp` | on | tested. No JSON, `LogArgument`, CG/Win. `FloatSize`/`FloatPoint`/`LayoutPoint` gain their `Double*` conversions (missing since layer 4a). |
+| `platform/graphics/FloatPoint3D.h`, `.cpp` | `port` | `Graphics/FloatPoint3D.hpp`, `src/Graphics/FloatPoint3D.cpp` | on | tested. `normalize` → `Normalise`. |
+| `platform/graphics/transforms/Quaternion.h`, `.cpp` | `port` | `Graphics/Transforms/Quaternion.hpp`, `src/Graphics/Transforms/Quaternion.cpp` | on | tested. Members `X`/`Y`/`Z`/`W`; `Slerp`/`Accumulate`/`Interpolate` are `const` (upstream non-const, but they don't modify). |
+| `platform/graphics/IntRect.h`, `.cpp`, `IntRectHash.h` | `port` | `Graphics/IntRect.hpp`, `IntRectHash.hpp`, `src/Graphics/IntRect.cpp` | on | tested (upstream's `IntRectTests`). No `area()` (no `Checked`). `IsValid`/`ToRectWithExtentsClippedToNumericLimits` use `int64` sums. The hash combines the four fields. `IntPoint::ConstrainedWithin` added. |
+| `platform/graphics/FloatRect.h`, `.cpp` | `port` | `Graphics/FloatRect.hpp`, `src/Graphics/FloatRect.cpp` | on | tested (upstream's `FloatRectTests`). `ContainsMode` is an enum class (`FloatRect::ContainsMode::InsideOrOnStroke`). `normalizeRect` → `NormaliseRect`. `MarkableTraits`. `FloatPoint::ConstrainedWithin` added (`src/Graphics/FloatPoint.cpp`). |
+| `platform/graphics/LayoutRect.h`, `.cpp` | `port` | `Graphics/LayoutRect.hpp`, `src/Graphics/LayoutRect.cpp` | on | tested. `unionRect(const Vector<LayoutRect>&)` → `UnionRect(Span<const LayoutRect>)`. |
+| `platform/graphics/FloatQuad.h`, `.cpp` | `port` | `Graphics/FloatQuad.hpp`, `src/Graphics/FloatQuad.cpp` | on | tested (upstream's `FloatQuadTests`). `p1()`..`p4()` → `P1()`..`P4()`; the list helpers take `Span`s. |
+| `platform/graphics/GeometryUtilities.h`, `.cpp` | `port` | `Graphics/GeometryUtilities.hpp`, `src/Graphics/GeometryUtilities.cpp` | on | tested. `normalizeAngleInRadians` → `NormaliseAngleInRadians`; `euclidianDistance` keeps its spelling; `min4` etc. → `Min4` (constexpr); `Vector` parameters → `Span`. |
+| `platform/graphics/Region.h`, `.cpp` | `port` | `Graphics/Region.hpp`, `src/Graphics/Region.cpp` | on | tested (upstream's `RegionTests`). `SmallList` for the segments/spans; `Span` members `Y`/`SegmentIndex`; inside `Region`, `krys::Span` is written qualified (the nested `Region::Span` hides it). `Bounds()` uses `int64` differences. |
+| `platform/graphics/transforms/AffineTransform.h`, `.cpp` | `port` | `Graphics/Transforms/AffineTransform.hpp`, `src/…/AffineTransform.cpp` | on | tested (upstream's `AffineTransform` tests). `span()` → `AsSpan()` (would hide `Span`); the namespace-level `identity` → `AffineTransform::Identity`. `FloatPoint::MatrixTransform` added. |
+| `platform/graphics/transforms/TransformationMatrix.h`, `.cpp` | `port` | `Graphics/Transforms/TransformationMatrix.hpp`, `src/…/TransformationMatrix.cpp` | on | tested (upstream's `TransformationMatrix` tests). Portable path only (no NEON/SSE2 multiply or inverse). `m11()` → `M11()`, `type()` → `GetType()`, `identity` → `Identity`; decomposition members PascalCase. |
+
+**SVG path pipeline** (`SVG/Internals/`, `boo::svg`, beside the existing byte stream stub):
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `svg/SVGPathSeg.h` (`SVGPathSegType`) | `port` (partial) | `SVGPathSegType.hpp` | on | The enum only; `SVGPathSeg` is SVG DOM. |
+| `svg/SVGPathConsumer.h`, `SVGPathSource.h` | `port` | `SVGPathConsumer.hpp`, `SVGPathSource.hpp` | on | `PathCoordinateMode`/`PathParsingMode` are enum classes (`NormalizedParsing` → `NormalisedParsing`). Segment members PascalCase. |
+| `svg/SVGParserUtilities.h`, `.cpp` | `port` (partial) | `SVGParserUtilities.hpp`, `src/…` | on | tested. Parsers consume a `dom::DOMStringView&` (UTF-8) instead of `StringParsingBuffer`. `parseNumber(StringView)` → `ParseNumberFromString`. Not ported: `parseKerningUnicodeString`, `parseGlyphName` (SVG fonts). |
+| `svg/SVGPathByteStream.h` | `port` | `SVGPathByteStream.hpp`, `src/…` | on | tested. Replaces the stub. |
+| `svg/SVGPathByteStreamSource.h`, `.cpp`, `SVGPathByteStreamBuilder.h`, `.cpp` | `port` | same names | on | tested. |
+| `svg/SVGPathStringViewSource.h`, `.cpp`, `SVGPathStringBuilder.h`, `.cpp` | `port` | same names | on | tested. |
+| `svg/SVGPathParser.h`, `.cpp` | `port` | `SVGPathParser.hpp`, `src/…` | on | tested, including arc decomposition (normalised parsing). |
+| `svg/SVGPathUtilities.h`, `.cpp` | `port` (partial) | `SVGPathUtilities.hpp`, `src/…` | on | `BuildSVGPathByteStreamFromString`, `BuildStringFromByteStream` only; the rest need `Path`/`SVGPathSegList` (FIXME). |
+| `wtf/text/StringConcatenateNumbers.h` (`FormattedNumber::fixedPrecision`), `wtf/dtoa.h` (`numberToFixedPrecisionString`) | `port` | `FormatNumberFixedPrecision` in `Krystal.Booey/Core/NumberFormatting.hpp` | on | tested with WTF's `StringNumberFixedPrecision`/`FormattedDoubleFixedPrecision` expectations. ECMAScript `toPrecision` rules on `std::to_chars` (upstream double-conversion). |
+| `wtf/MathExtras.h` (`piOverTwoFloat`) | `port` | Krystal.Core `Maths/Base.hpp` | on | |
+
+**CSS:**
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/values/shapes/CSSFillRule.h` | `have` | `CSS/Values/Shapes/FillRule.hpp` | on | Matches upstream. |
+| `css/values/shapes/CSSPathFunction.h`, `.cpp` | `have` | `CSS/Values/Shapes/PathFunction.hpp`, `src/CSS/Values/Shapes/PathFunction.cpp` | on | tested. `Path::Data` stays `PathData` (the member is `Data`); members `FillRule`/`Data`/`ByteStream`. |
+| `css/CSSPathValue.h`, `.cpp` | `have` | `CSS/Values/PathValue.hpp`, `src/CSS/Values/PathValue.cpp` | on (compile-only) | `path()` → `GetPath()` (would hide `Path`). |
+
+**Bugs fixed:**
+- `PathValue` was an empty shell: no `final`, constructor, `Create`, accessor, member or `.cpp`, and its `CustomVisitChildren` lacked `KRYS_NOESCAPE`. `PathFunction.hpp`'s serialiser, dependency collector and visitor were declared but never defined.
+- `SVGPathByteStream` was an empty class, so every `path()` compared equal and serialised as `""`.
+- `Path`'s member `Maybe<FillRule> FillRule` changed the meaning of `FillRule` inside the struct (ill-formed; MSVC accepted it); the type is now written `boo::css::FillRule`.
+- Upstream: `genericParseNumber` (SVG number parsing) did `return false;` in a function returning `std::optional<float>` when the exponent was too large, which returns an engaged 0, so `1e39` parsed as 0 instead of failing. Krystal fails.
+- Upstream test bug: `FloatQuadTests`' `ExpectRotatedRect` computed its comparisons and dropped them, so the rotated-rect tests checked nothing. Krystal checks them; the trapezoid's expected size (26.83, 13.42) is corrected to (26.833, 13.416) (12√5, 6√5) for the 0.001 tolerance.
+
+**Differences:**
+- `SVGPathByteStream` holds its bytes by value; upstream shares them between copies (copy-on-write) and caches the platform `Path` built from them (FIXME until `Path` is ported). `bytes()` → `GetBytes()` (would hide `Bytes`).
+- The SVG consumer/source/byte stream have no weak-pointer bases; the parser holds references. The byte stream reader asserts the remaining size (upstream's `consumeSpan` bounds-checks).
+- Region tests: upstream compares `TextStream` dumps (won't-port); Krystal compares the same data structurally (`Rects()` and the segment/span lists). The fuzz test uses a fixed seed.
+- No `operator<<`/`TextStream`, JSON, IPC coders, TZone allocation or platform (CG/Skia/Cairo/Win/simd) conversions anywhere in the geometry types.
+- Upstream's `AffineTransform::Blend` doubles the blended components for non-`Replace` composite operations; kept as is.
+
+Tests: geometry: `tests/Graphics/{DoublePoint,FloatPoint3D,IntRect,FloatRect,LayoutRect,FloatQuad,GeometryUtilities,Region}.cpp`, `tests/Graphics/Transforms/{Quaternion,AffineTransform,TransformationMatrix,TransformExtras}.cpp` (upstream's `IntRectTests`, `FloatRectTests`, `FloatQuadTests`, `RegionTests`, `AffineTransform` and `TransformationMatrix` tests, converted with a gtest→Catch2 script, minus the platform-only `Casting`/`EnclosingIntRect` cases and `area()`; `FloatPointTests`' `Transforms`; plus Krystal tests for everything upstream leaves untested, e.g. `LayoutRect` and `GeometryUtilities` have no upstream tests, and 3D rotation, projection, perspective and decomposition round trips). SVG: `tests/SVG/Internals/SVGPath.cpp` (number/flag/point/rect parsing, unaltered round trips of every command and syntax variant, parse errors, normalised parsing including arcs) and `tests/Core/NumberFormatting.cpp` (`FormatNumberFixedPrecision`). CSS: `tests/CSS/Values/Shapes/PathFunction.cpp` (serialisation with and without a fill rule, canonical path data, equality, dependencies, visitation). `PathValue` is compile-only. Full Booey suite: 1077 cases / 669775 assertions; all pass except 2 expected failures. Core suite: 548 cases, all pass. Whole solution builds with no warnings.
 
 ## Deferred: Values (from the tokenizer graph)
 

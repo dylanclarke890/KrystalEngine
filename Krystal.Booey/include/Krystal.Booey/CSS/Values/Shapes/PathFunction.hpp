@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Shapes/FillRule.hpp"
-#include "Krystal.Booey/CSS/Values/Types.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathByteStream.hpp"
 
 namespace krys::boo::css
@@ -14,13 +14,13 @@ namespace krys::boo::css
     {
       svg::SVGPathByteStream ByteStream;
 
-      bool operator==(const PathData &) const = default;
+      KRYS_NODISCARD bool operator==(const PathData &) const noexcept = default;
     };
 
-    Maybe<FillRule> FillRule;
+    Maybe<boo::css::FillRule> FillRule;
     PathData Data;
 
-    bool operator==(const Path &) const = default;
+    KRYS_NODISCARD bool operator==(const Path &) const noexcept = default;
   };
 
   using PathFunction = FunctionNotation<ValueId::Path, Path>;
@@ -47,13 +47,14 @@ namespace krys::boo::css
   template <>
   struct ComputedStyleDependenciesCollector<Path::PathData>
   {
-    void operator()(ComputedStyleDependencies &, const Path::PathData &) noexcept;
+    void operator()(ComputedStyleDependencies &dependencies, const Path::PathData &data) noexcept;
   };
 
   template <>
   struct ValueChildrenVisitor<Path::PathData>
   {
-    IterationStatus operator()(const Func<IterationStatus(css::Value &)> &, const Path::PathData &) noexcept;
+    KRYS_NODISCARD IterationStatus operator()(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func,
+                                              const Path::PathData &data) noexcept;
   };
 }
 

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/Background/BoxShadow.hpp"
+#include "Krystal.Booey/CSS/Values/Borders/BoxShadow.hpp"
 
 namespace krys::boo::css
 {

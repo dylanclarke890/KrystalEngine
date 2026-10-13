@@ -261,6 +261,9 @@ namespace krys::boo::css
   template <typename T>
   constexpr bool TreatAsOptionalLike<Maybe<T>> = true;
 
+  template <typename T, typename TTraits>
+  constexpr bool TreatAsOptionalLike<Markable<T, TTraits>> = true;
+
   template <typename... Ts>
   constexpr bool TreatAsTupleLike<std::tuple<Ts...>> = true;
 

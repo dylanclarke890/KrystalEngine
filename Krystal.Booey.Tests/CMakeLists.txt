@@ -102,6 +102,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Properties/Consumers/MetaConsumer.cpp
 		tests/CSS/Properties/Consumers/Primitives.cpp
 		tests/CSS/Values/Aggregates.cpp
+		tests/CSS/Values/Borders/BoxShadow.cpp
 		tests/CSS/Values/Color/Color.cpp
 		tests/CSS/Values/Easing/EasingFunction.cpp
 		tests/CSS/Values/Grid/GridTemplateAreas.cpp
@@ -114,18 +115,29 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Values/Primitives/Units.cpp
 		tests/CSS/Values/PrimitiveValue.cpp
 		tests/CSS/Values/Quad.cpp
+		tests/CSS/Values/Shapes/PathFunction.cpp
+		tests/CSS/Values/TextDecoration/TextShadow.cpp
 		tests/CSS/Values/Types.cpp
 		tests/CSS/Values/Units.cpp
 		# tests/CSS/Selectors/SelectorParser.cpp
 
 		# Graphics
+		tests/Graphics/DoublePoint.cpp
 		tests/Graphics/FloatPoint.cpp
+		tests/Graphics/FloatPoint3D.cpp
+		tests/Graphics/FloatQuad.cpp
+		tests/Graphics/FloatRect.cpp
 		tests/Graphics/FloatSize.cpp
 		tests/Graphics/FontTaggedSettings.cpp
+		tests/Graphics/GeometryUtilities.cpp
 		tests/Graphics/IntPoint.cpp
+		tests/Graphics/IntRect.cpp
 		tests/Graphics/IntSize.cpp
 		tests/Graphics/LayoutPoint.cpp
+		tests/Graphics/LayoutRect.cpp
 		tests/Graphics/LayoutSize.cpp
+		tests/Graphics/Region.cpp
+		tests/Graphics/Transforms/AffineTransform.cpp
 		tests/Graphics/Color/Color.cpp
 		tests/Graphics/Color/ColorBlending.cpp
 		tests/Graphics/Color/ColorConversion.cpp
@@ -133,6 +145,9 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Color/ColorSerialisation.cpp
 		tests/Graphics/Color/ColorUtilities.cpp
 		tests/Graphics/Color/NamedColors.cpp
+		tests/Graphics/Transforms/Quaternion.cpp
+		tests/Graphics/Transforms/TransformExtras.cpp
+		tests/Graphics/Transforms/TransformationMatrix.cpp
 		tests/Rendering/Style/GridSpan.cpp
 
 		# Style
@@ -200,6 +215,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Infra/StringAlgorithms.cpp
 
 		# URL
+		tests/SVG/Internals/SVGPath.cpp
 		tests/URL/URL.cpp
 		tests/URL/WPT.cpp
 )

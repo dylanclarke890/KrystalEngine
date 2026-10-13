@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Core/MathExtras.hpp"
+#include "Krystal.Booey/Graphics/DoublePoint.hpp"
 #include "Krystal.Booey/Graphics/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -12,6 +13,10 @@
 
 namespace krys::boo
 {
+  class AffineTransform;
+  class FloatRect;
+  class TransformationMatrix;
+
   /// @brief A point in floating point coordinates.
   class FloatPoint
   {
@@ -31,6 +36,11 @@ namespace krys::boo
     }
 
     constexpr explicit FloatPoint(const FloatSize &size) noexcept : _x(size.Width()), _y(size.Height())
+    {
+    }
+
+    constexpr explicit FloatPoint(const DoublePoint &point) noexcept
+        : _x(static_cast<float>(point.X())), _y(static_cast<float>(point.Y()))
     {
     }
 
@@ -166,6 +176,11 @@ namespace krys::boo
       return {std::max(min.X(), std::min(max.X(), _x)), std::max(min.Y(), std::min(max.Y(), _y))};
     }
 
+    KRYS_NODISCARD FloatPoint ConstrainedWithin(const FloatRect &rect) const noexcept;
+
+    KRYS_NODISCARD FloatPoint MatrixTransform(const TransformationMatrix &transform) const noexcept;
+    KRYS_NODISCARD FloatPoint MatrixTransform(const AffineTransform &transform) const noexcept;
+
     KRYS_NODISCARD constexpr FloatPoint ShrunkTo(const FloatPoint &other) const noexcept
     {
       return {std::min(_x, other._x), std::min(_y, other._y)};
@@ -194,6 +209,11 @@ namespace krys::boo
     KRYS_NODISCARD constexpr bool IsNaN() const noexcept
     {
       return krys::IsNaN(_x);
+    }
+
+    constexpr operator DoublePoint() const noexcept
+    {
+      return {_x, _y};
     }
 
     KRYS_NODISCARD friend constexpr bool operator==(const FloatPoint &,

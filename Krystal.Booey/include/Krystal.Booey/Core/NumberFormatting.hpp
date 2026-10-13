@@ -13,4 +13,12 @@ namespace krys::boo
   /// @brief Returns `number` formatted for CSS.
   /// @see FormatCSSNumber(utf8_string &, double)
   KRYS_NODISCARD utf8_string FormatCSSNumber(double number) noexcept;
+
+  /// @brief Appends `number` with `significantFigures` significant digits, like ECMAScript's
+  /// `Number.prototype.toPrecision`: exponential notation (`1.5e+21`) when the exponent is below -6 or at
+  /// least `significantFigures`, fixed notation otherwise. Non-finite values are written as "Infinity",
+  /// "-Infinity" or "NaN", and "-0" as "0".
+  /// @param truncateTrailingZeros Removes trailing zeros from the digits (and a then-trailing decimal point).
+  void FormatNumberFixedPrecision(utf8_string &builder, double number, uint32 significantFigures = 6,
+                                  bool truncateTrailingZeros = true) noexcept;
 }

@@ -9,6 +9,7 @@
 namespace krys::boo
 {
   class FloatPoint;
+  class IntRect;
 
   /// @brief A point in integer coordinates.
   class IntPoint
@@ -114,6 +115,8 @@ namespace krys::boo
     {
       return {std::max(min.X(), std::min(max.X(), _x)), std::max(min.Y(), std::min(max.Y(), _y))};
     }
+
+    KRYS_NODISCARD IntPoint ConstrainedWithin(const IntRect &rect) const noexcept;
 
     KRYS_NODISCARD constexpr int32 DistanceSquaredToPoint(const IntPoint &point) const noexcept;
 
