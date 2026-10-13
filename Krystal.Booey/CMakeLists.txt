@@ -383,6 +383,18 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/CursorImageValue.hpp
   include/Krystal.Booey/CSS/Values/Images/Gradient.hpp
   include/Krystal.Booey/CSS/Values/GradientValue.hpp
+
+  # Property parser, layer a (parser plumbing)
+  ${KRYSTAL_BOOEY_HEADER_OUTPUT_DIR}/Krystal.Booey/CSS/Properties/PropertyShorthandFunctions.hpp
+  include/Krystal.Booey/CSS/Parser/CustomPropertySyntax.hpp
+  include/Krystal.Booey/CSS/Parser/VariableParser.hpp
+  include/Krystal.Booey/CSS/Properties/ParsedPropertyList.hpp
+  include/Krystal.Booey/CSS/Properties/Property.hpp
+  include/Krystal.Booey/CSS/Properties/PropertyFlag.hpp
+  include/Krystal.Booey/CSS/Properties/PropertyParserResult.hpp
+  include/Krystal.Booey/CSS/Properties/PropertyShorthand.hpp
+  include/Krystal.Booey/CSS/Properties/Types/IsImplicit.hpp
+  include/Krystal.Booey/CSS/Properties/Types/IsSetFromShorthand.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -561,6 +573,14 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/CursorImageValue.cpp
   src/CSS/Values/Images/Gradient.cpp
   src/CSS/Values/GradientValue.cpp
+
+  # Property parser, layer a (parser plumbing)
+  ${KRYSTAL_BOOEY_SOURCES_OUTPUT_DIR}/CSS/Properties/PropertyShorthandFunctions.cpp
+  src/CSS/Parser/CustomPropertySyntax.cpp
+  src/CSS/Parser/VariableParser.cpp
+  src/CSS/Properties/Property.cpp
+  src/CSS/Properties/PropertyParserResult.cpp
+  src/CSS/Properties/PropertyShorthand.cpp
 )
 
 target_precompile_headers(Krystal.Booey

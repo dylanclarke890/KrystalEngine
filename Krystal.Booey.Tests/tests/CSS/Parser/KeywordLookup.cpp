@@ -73,6 +73,16 @@ namespace krys::boo::css::tests
     CHECK(ValueIdFromName(name) == ValueId::Invalid);
   }
 
+  TEST_CASE("IsCustomPropertyName", "[CSS][KeywordLookup]")
+  {
+    CHECK(IsCustomPropertyName(u8"--x"));
+    CHECK(IsCustomPropertyName(u8"---"));
+    CHECK_FALSE(IsCustomPropertyName(u8"--"));
+    CHECK_FALSE(IsCustomPropertyName(u8"-x-"));
+    CHECK_FALSE(IsCustomPropertyName(u8"x--"));
+    CHECK_FALSE(IsCustomPropertyName(u8""));
+  }
+
   TEST_CASE("ToString(PropertyId) round trips", "[CSS][KeywordLookup]")
   {
     // Regression: the generated name table had no commas between entries, so every name after the first was

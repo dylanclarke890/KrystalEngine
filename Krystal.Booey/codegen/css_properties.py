@@ -8059,9 +8059,8 @@ class GeneratePropertyId:
                 mapping=lambda p: f"return settings.{p.codegen_properties.settings_flag};",
                 default="return true;",
             )
-            to.newline()
 
-            to.write_block("""\
+        to.write_block("""\
                 KRYS_NODISCARD bool IsExposed(PropertyId id, const PropertySettings *settings) noexcept
                 {
                   if (id == PropertyId::Invalid || IsInternal(id))
@@ -8086,7 +8085,7 @@ class GeneratePropertyId:
 
                   return IsExposedNotInvalidAndNotInternal(id, settings);
                 }""")
-            to.newline()
+        to.newline()
 
     def _generate_is_inherited_property(self, *, to: Writer):
         all_inherited_and_ids = (

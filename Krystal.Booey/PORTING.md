@@ -39,8 +39,11 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Slice 3, layer 6 (2026-10-12): Style colour (`style::Color` and its currentcolor-dependent kinds, conversion from `css::Color`, serialisation, blending), Style `DynamicRangeLimit` and `PlatformDynamicRangeLimit`, and the `Opacity` struct built and tested, against a testable seam (`RenderStyle` can be constructed); see the layer 6 section.
 - Slice 3 is committed (up to `225dbc61`).
 - Values (slices 2 and 4, 2026-10-13): `Value`, `PrimitiveValue`, `ParserContext` and every `Value` subclass built and instance-tested, with the CSS types they hold (positions, URLs and WTF's `url::URL`, grid areas, easing, shadows, shapes, filters, `ray()`, variable data, gradients), the geometry types and the SVG path pipeline. Builder- and loader-dependent members are deferred (below). See the *Values* section.
+- Property parser, layer a (2026-10-13): parser plumbing (`Property`, `ParsedPropertyList`, `PropertyParserResult`, `PropertyShorthand` and the generated shorthand functions, `CustomPropertySyntax`, `VariableParser`) built and tested; see the *Property parser* section.
 
 **Open / next candidates:**
+- Property parser, next: layer b, the consumers (`Consumers/*.cpp`), compile-only first, in groups; then layer c (`PropertyParserCustom.hpp`, generated `PropertyParsing.cpp`, `PropertyParser.cpp`). See the *Property parser* section for the plan.
+- Property parser, deferred definitions (need `style::CustomProperty`/`BuilderState`): `VariableParser::ParseInitialValueForUniversalSyntax`; layer c adds `PropertyParser::ParseTypedCustomPropertyValue`/`ParseTypedCustomPropertyInitialValue`.
 - Values, deferred definitions (declared, not defined, FIXME'd; define when `style::Builder`/`BuilderState` and the resource loader are ported): `VariableReferenceValue::ResolveVariableReferences`, `ResolveSingleValue`, `ResolveTokenRange`, `ResolveVariableReference`, `ResolveVariableFallback`, `TryResolveSimpleReference` (and so `ResolveAndCacheValue`); `PendingSubstitutionValue::ResolveValue` (also needs `PropertyParser::ParseValue` and `ParsedPropertyVector`); `FontFaceSrcResourceValue::GetFontLoadRequest` and its cached font (`CustomTraverseSubresources` returns `false` until then); `FontFaceSrcLocalValue::GetSVGFontFaceElement`/`SetSVGFontFaceElement` (need SVG fonts); `CreateStyleImage` on the ten image values (needs `style::BuilderState` and `StyleImage`, and the cached style image members of `NamedImageValue`/`CanvasValue`/`GradientValue`); `ImageValue::IsPending`, `LoadImage`, `GetCachedImage`, `KnownToBeOpaque` and its cached image (`CustomTraverseSubresources` returns `false`, and `CopyForComputedStyle` doesn't copy the cache, until then).
 - Not yet ported, needed later: the graphics `Path` (cached by `SVGPathByteStream` upstream), the rest of `SVGPathUtilities` (needs `Path` and `SVGPathSegList`), `parseKerningUnicodeString`/`parseGlyphName`.
 - Slice 3 (colour), bottom-up: (1) Graphics/Color, (2) calc-free numeric primitives, (3a) Style-free calc, (3b) calc evaluation and Style calc and (3c) calc parsing are done. (4a) `LayoutUnit` and the point/size types and (4b) Style numerics are done. (5a) the CSS colour types, (5b) the colour parser and (5c) `ColorValue`/`ValuePool` (compile-only) are done. (6) Style colour is done (its CSSValue half is deferred, see below). Slice 3 is complete apart from the Value-dependent pieces.
@@ -373,6 +376,45 @@ URL differences:
 - Upstream tests converted: `TestWebKitAPI/Tests/WTF/URL.cpp` (except `URLDataURIStringSharing`, `PrintStream`, `IsolatedCopy`; `URLParser.cpp`'s cases are covered by the WPT data), and `IntRectTests`, `FloatRectTests`, `FloatQuadTests`, `RegionTests`, `AffineTransform`, `TransformationMatrix` (gtest → Catch2 script; minus `Casting`/`EnclosingIntRect` and `area()`). Region compares structurally (upstream compares `TextStream` dumps); the fuzz test uses a fixed seed.
 - `tests/URL/WPT.cpp` runs WPT's `urltestdata.json`, `toascii.json` and `IdnaTestV2.json` (copied to `data/url/` from WebKit's `LayoutTests/imported/w3c/web-platform-tests/url/resources`). Three `IdnaTestV2.json` cases expect a V7 failure for U+32931/U+32B9A, which Unicode 17 assigned; the test expects them to be valid.
 - Full Booey suite (2026-10-13): 1348 cases / 671304 assertions; all pass except 2 expected failures. Whole solution builds with no warnings.
+
+## Property parser — in progress
+
+Entry: `css/parser/CSSPropertyParser.cpp` (headers-only graph: 151 files, `tools/port/out/property-parser.md`). Most of that graph comes through `StyleBuilder.h`, `StyleCustomProperty.h` and `StylePrimitiveNumericTypes+CSSValueConversion.h`, which only the typed custom-property functions need.
+
+**Plan (decided 2026-10-13):** `PropertyParser.cpp` can't link until the generated `PropertyParsing.cpp` does, and that includes `PropertyParserCustom.hpp` and calls every consumer (~43 `Consumers/*.cpp`, ~15k upstream lines; `Font.cpp` and `Shapes.cpp` are stubs, `Syntax.cpp` is missing). So, in layers, with the Style-dependent pieces declared and FIXME'd (the hybrid approach used for the Values):
+- **a.** Parser plumbing: `Property`, `ParsedPropertyList`, `PropertyParserResult`, `PropertyShorthand` (+ generated shorthand functions), `CustomPropertySyntax`, `VariableParser`. Done.
+- **b.** The consumers, in groups, compile-only first (as with the Value subclasses).
+- **c.** `PropertyParserCustom.hpp`, generated `PropertyParsing.cpp`, `PropertyParser.cpp`; then tests parsing properties from strings, and `ParserFastPaths::MaybeParseValue`/`ValuePool::CreateFontFaceValue`.
+
+### Layer a: parser plumbing (2026-10-13)
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/CSSProperty.h`, `.cpp` | `have*` | `CSS/Properties/Property.hpp`, `src/.../Property.cpp` | on | tested. The statics are defined by the generated `PropertyId.cpp`. See differences. |
+| `ParsedPropertyVector` (in `CSSProperty.h`) | `have*` | `CSS/Properties/ParsedPropertyList.hpp` | on | `SmallList<Property, 63>` (upstream inline capacity 256). |
+| `css/parser/CSSPropertyParserResult.h`, `.cpp` | `have` | `CSS/Properties/PropertyParserResult.hpp`, `src/...` | on | tested. See bugs. |
+| `css/StylePropertyShorthand.h`, `.cpp` | `have` | `CSS/Properties/PropertyShorthand.hpp`, `src/.../PropertyShorthand.cpp` | on | tested. `length()` → `Size()`; `indexOfShorthandForLonghand` → `IndexOfShorthandForLonghand`. No `containerSize`. |
+| `StylePropertyShorthandFunctions.h`, `.cpp` (generated) | `have` | `codegen/css_properties.py` → `PropertyShorthandFunctions.hpp`/`.cpp` | on | tested through `PropertyShorthand`. |
+| `css/parser/CSSCustomPropertySyntax.h`, `.cpp` | `have` | `CSS/Parser/CustomPropertySyntax.hpp`, `src/...` | on | tested. The `.cpp` was missing. |
+| `css/parser/CSSVariableParser.h`, `.cpp` | `have` (Style-free half) | `CSS/Parser/VariableParser.hpp`, `src/...` | on | tested. The `.cpp` was missing. |
+| `isCustomPropertyName` (in `CSSPropertyParser.cpp`) | `have` | `IsCustomPropertyName` in `CSS/Parser/KeywordLookup.hpp` | on | tested. Moved from `PropertyParser.hpp` next to the other `CSSPropertyParser.cpp` lookups, so `VariableParser` can link before layer c. |
+
+**Bugs fixed:**
+- `PropertyParserResult::AddPropertyForAllLonghandsOfShorthand` copied the value with `ShareRef(*value)`, dereferencing null when a shorthand sets all its longhands to the implicit initial value (upstream: `value.copyRef()`).
+- The generated `IsExposed` overloads were inside the anonymous namespace in `PropertyId.cpp` (only `IsExposedNotInvalidAndNotInternal` is static upstream), so nothing outside could link to them (`PropertyParserResult`, the generated `PropertyParsing.cpp`). Fixed in `codegen/css_properties.py`.
+- `CustomPropertySyntax`: `Parse`/`ConsumeType` weren't static, `Universal()` returned the definition list instead of a `CustomPropertySyntax`, and nothing was defined.
+- `VariableParser`: nothing was defined; `ParseDeclarationValue` returned `RefPtr<Value>` (upstream `RefPtr<CSSCustomPropertyValue>`).
+- `TransitionShorthandForParsing` was declared but not defined; `LonghandsForShorthand` was declared, never defined or used (removed). `IndexOfShorthandProperty` used the raw `assert`.
+
+**Added (upstream API):** `Property::operator==` (and `PropertyMetadata`'s), `Property::IsDirectionAwareProperty`, `Property::IsListValuedProperty`, `TransitionShorthandForParsing`, `CustomPropertySyntax::{Parse, ConsumeType, ContainsUnknownType}`, `VariableParser::{ContainsValidVariableReferences, ParseDeclarationValue, IsValidVariableName}`.
+
+**Differences:**
+- `PropertyMetadata` is a `PropertyFlag` set (`Important`, `Implicit`, `SetFromShorthand`) plus a 3-bit shorthand index (upstream: bitfields, 2-bit index). `Property`'s constructor takes `(id, value, important, implicit, setFromShorthand, shorthandIndex)` (upstream: `(id, value, important, isSetFromShorthand, index, implicit)`); the strong booleans catch a mix-up. `Value()` returns a reference; no `protectedValue()`.
+- Not ported (not generated by `css_properties.py`): `colorProperties`/`physicalProperties` and `isColorProperty`, `animationUsesNonAdditiveOrCumulativeInterpolation`, `animationUsesNonNormalizedDiscreteInterpolation`, `animationIsAccelerated`, `allAcceleratedAnimationProperties` (the last two need `Settings`). They come with animations.
+- `CustomPropertySyntax`: `Definition` is a `List` (alias `DefinitionType`); `Component`'s members are `Type`/`Multiplier`/`Ident`, declared with qualified types. Parses UTF-8 directly (no `StringParsingBuffer`/`readCharactersForParsing`); the type-name table is a linear search (no `SortedArrayMap`). `type(` is matched by `FunctionId() == ValueId::Type` (case-insensitive, like upstream's `equalLettersIgnoringASCIICase`).
+- `VariableParser`: `ClassifyBlock`'s stack is a `List` (upstream `std::stack`); `ParseInitialValueForUniversalSyntax` is declared, not defined (FIXME; needs `style::CustomProperty`).
+
+Tests: `tests/CSS/Properties/{Property,PropertyShorthand,PropertyParserResult}.cpp`, `tests/CSS/Parser/{CustomPropertySyntax,VariableParser}.cpp`: 9 cases / 309 assertions pass; `IsCustomPropertyName` added to `tests/CSS/Parser/KeywordLookup.cpp`. Full Booey suite: 1358 cases / 671619 assertions; all pass except 2 expected failures. Whole solution builds with no warnings.
 
 ## Slice 3: Colour
 

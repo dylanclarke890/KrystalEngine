@@ -13,7 +13,7 @@ namespace krys::boo::css
                                          PropertyId currentShorthand, RefPtr<Value> &&value,
                                          IsImportant important, IsImplicit implicit) noexcept
   {
-    size_t shorthandIndex = 0uz;
+    uint8 shorthandIndex = 0u;
     IsSetFromShorthand setFromShorthand = IsSetFromShorthand(false);
 
     if (currentShorthand != PropertyId::Invalid)
@@ -22,7 +22,7 @@ namespace krys::boo::css
       setFromShorthand = IsSetFromShorthand(true);
       if (shorthands.size() > 1uz)
       {
-        shorthandIndex = IndexOfShorthandProperty(currentShorthand, shorthands);
+        shorthandIndex = static_cast<uint8>(IndexOfShorthandForLonghand(currentShorthand, shorthands));
       }
     }
 
@@ -34,13 +34,15 @@ namespace krys::boo::css
                       || IsInternal(property));
 
     if (value && !value->IsImplicitInitialValue())
-      AddProperty(Property(property, krys::move(value), important, implicit, setFromShorthand,
-                           static_cast<uint8>(shorthandIndex)));
+    {
+      AddProperty(
+        Property(property, krys::move(value), important, implicit, setFromShorthand, shorthandIndex));
+    }
     else
     {
       krys_debug_assert(setFromShorthand);
       AddProperty(Property(property, ShareRef(PrimitiveValue::ImplicitInitialValue()), important,
-                           IsImplicit(true), setFromShorthand, static_cast<uint8>(shorthandIndex)));
+                           IsImplicit(true), setFromShorthand, shorthandIndex));
     }
   }
 
@@ -61,7 +63,7 @@ namespace krys::boo::css
   {
     for (auto longhand : ShorthandForProperty(shorthand))
     {
-      AddProperty(state, longhand, shorthand, ShareRef(*value), important, implicit);
+      AddProperty(state, longhand, shorthand, RefPtr<Value>(value), important, implicit);
     }
   }
 

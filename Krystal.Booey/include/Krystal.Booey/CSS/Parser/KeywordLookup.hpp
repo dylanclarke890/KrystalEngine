@@ -17,4 +17,7 @@ namespace krys::boo::css
   /// @return The keyword, or ValueId::Invalid if the name is empty, too long, contains non-ASCII characters
   /// or isn't a known keyword.
   KRYS_NODISCARD css::ValueId ValueIdFromName(CSSOMStringView name) noexcept;
+
+  /// @brief Whether `propertyName` is a custom property name (`--` followed by at least one character).
+  KRYS_NODISCARD bool IsCustomPropertyName(CSSOMStringView propertyName) noexcept;
 }

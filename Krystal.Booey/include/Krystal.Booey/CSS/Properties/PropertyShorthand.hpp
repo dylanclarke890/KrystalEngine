@@ -50,33 +50,20 @@ namespace krys::boo::css
     }
   };
 
-  /// @brief Finds the index of the shorthand property in the given list of shorthands. If the shorthand
-  /// property is not found, an assertion will fail.
-  KRYS_NODISCARD constexpr size_t IndexOfShorthandProperty(PropertyId property,
-                                                           Span<const PropertyShorthand> shorthands) noexcept
-  {
-    for (size_t i = 0uz; i < shorthands.size(); ++i)
-    {
-      if (shorthands[i].Id() == property)
-      {
-        return i;
-      }
-    }
+  /// @brief Custom PropertyShorthand function.
+  KRYS_NODISCARD PropertyShorthand TransitionShorthandForParsing() noexcept;
 
-    assert(false);
-    return 0uz;
-  }
-
-  // The implementation is generated in PropertyShorthandFunctions.cpp.
-  KRYS_NODISCARD PropertyShorthand ShorthandForProperty(PropertyId) noexcept;
+  /// @brief Returns an empty value if the property is not a shorthand.
+  /// @note The implementation is generated in PropertyShorthandFunctions.cpp.
+  KRYS_NODISCARD PropertyShorthand ShorthandForProperty(PropertyId id) noexcept;
 
   using PropertyShorthandList = SmallList<PropertyShorthand, 4uz>;
 
-  /// @brief Gets the list of longhand properties that are set by the given shorthand property.
-  KRYS_NODISCARD PropertyShorthand LonghandsForShorthand(PropertyId property) noexcept;
+  /// @brief Returns the list of shorthands for a given longhand.
+  /// @note The implementation is generated in PropertyShorthandFunctions.cpp.
+  KRYS_NODISCARD PropertyShorthandList MatchingShorthandsForLonghand(PropertyId id) noexcept;
 
-  /// @brief Gets the list of shorthands that set the given longhand property.
-  KRYS_NODISCARD PropertyShorthandList MatchingShorthandsForLonghand(PropertyId property) noexcept;
-
-  KRYS_NODISCARD PropertyShorthand TransitionShorthandForParsing() noexcept;
+  /// @brief Finds the index of `shorthandId` in `shorthands`, which must contain it.
+  KRYS_NODISCARD uint32 IndexOfShorthandForLonghand(PropertyId shorthandId,
+                                                    const PropertyShorthandList &shorthands) noexcept;
 }

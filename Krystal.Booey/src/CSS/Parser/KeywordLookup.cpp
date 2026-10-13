@@ -77,4 +77,9 @@ namespace krys::boo::css
 
     return FindValueKeyword(CSSOMStringView(buffer.data(), length));
   }
+
+  bool IsCustomPropertyName(CSSOMStringView propertyName) noexcept
+  {
+    return propertyName.size() > 2uz && propertyName[0] == u8'-' && propertyName[1] == u8'-';
+  }
 }

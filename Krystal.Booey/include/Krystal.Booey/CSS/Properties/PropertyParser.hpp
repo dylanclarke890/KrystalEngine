@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
 #include "Krystal.Booey/CSS/Properties/ParsedPropertyList.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Properties/Types/IsImportant.hpp"
@@ -70,6 +71,4 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static Maybe<GlobalKeyword> ParseGlobalKeyword(TokenRange tokens) noexcept;
   };
-
-  KRYS_NODISCARD bool IsCustomPropertyName(CSSOMStringView id) noexcept;
 }

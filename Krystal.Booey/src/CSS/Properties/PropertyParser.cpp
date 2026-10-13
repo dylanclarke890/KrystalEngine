@@ -111,11 +111,6 @@ namespace krys::boo::css
 
 #pragma region Custom Property Name Validation
 
-  bool IsCustomPropertyName(CSSOMStringView propertyName) noexcept
-  {
-    return propertyName.length() > 2 && propertyName[0] == '-' && propertyName[1] == '-';
-  }
-
 #pragma endregion
 
 #pragma region GlobalKeyword Consumer

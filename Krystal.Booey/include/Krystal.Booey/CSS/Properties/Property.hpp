@@ -36,6 +36,9 @@ namespace krys::boo::css
     uint8 ShorthandIndex : std::bit_width(MaxShorthandsPerProperty) {0u};
 
     KRYS_NODISCARD PropertyId ShorthandId() const noexcept;
+
+    KRYS_NODISCARD friend bool operator==(const PropertyMetadata &,
+                                          const PropertyMetadata &) noexcept = default;
   };
 
   class Property
@@ -115,6 +118,25 @@ namespace krys::boo::css
     KRYS_NODISCARD PropertyMetadata Metadata() const noexcept
     {
       return _metadata;
+    }
+
+    KRYS_NODISCARD bool operator==(const Property &other) const noexcept
+    {
+      if (!(_metadata == other._metadata))
+      {
+        return false;
+      }
+      return _value->Equals(*other._value);
+    }
+
+    KRYS_NODISCARD static bool IsDirectionAwareProperty(PropertyId id) noexcept
+    {
+      return IsLogicalPropertyGroupLogicalProperty(id);
+    }
+
+    KRYS_NODISCARD static bool IsListValuedProperty(PropertyId id) noexcept
+    {
+      return ListValuedPropertySeparator(id) != 0 || id == PropertyId::Custom;
     }
 
     KRYS_NODISCARD static PropertyId ResolveDirectionAwareProperty(PropertyId id,
