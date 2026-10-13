@@ -49,9 +49,10 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Slice 4, tier 3 item 27 (2026-10-13): `BasicShapeValue`, with `BasicShape`, the eight shape functions (`circle()`/`ellipse()`/`inset()`/`polygon()`/`rect()`/`shape()`/`xywh()` completed, `path()` from item 26) and `BorderRadius`, built and tested (`BasicShapeValue` compile-only). The `rect()` shape is `RectShape` (clashes with `css::Rect`). See its entry.
 - Slice 4, tier 3 item 28 (2026-10-13): `FilterValue`, with `Filter`, `FilterReference` and the ten filter functions (the folder renamed `CSS/Values/FilterEffects/`), built and tested (`FilterValue` compile-only). See its entry.
 - Slice 4, tier 3 item 29 (2026-10-13): `AppleColorFilterValue`, with `AppleColorFilter` and `AppleInvertLightness`, built and tested (`AppleColorFilterValue` compile-only). See its entry.
+- Slice 4, tier 3 items 30–32 (2026-10-13): `RayValue` (with `RayFunction` and `CSSBoxType`, the first enum in `Rendering/Style/RenderStyleConstants.hpp`), `ScrollValue` and `ViewValue` built (`RayFunction` tested; the value classes compile-only), so tier 3 is done. See their entry.
 
 **Open / next candidates:**
-- Slice 4 (Value subclasses): the generic types are done; next are the specific value types, one at a time, in the order under Slice 4's *Order* (tiers 1 and 2 done; tier 3 items 24–29 done; next `RayValue`).
+- Slice 4 (Value subclasses): the generic types are done; next are the specific value types, one at a time, in the order under Slice 4's *Order* (tiers 1 and 2 done; tiers 1–3 done). Next is tier 4 (items 33–37), which needs the parser, Style builder or resource loading: decide first whether to port or stub it (see *Order*).
 - Not yet ported, needed later: the graphics `Path` (cached by `SVGPathByteStream` upstream), the rest of `SVGPathUtilities` (needs `Path` and `SVGPathSegList`), `parseKerningUnicodeString`/`parseGlyphName`.
 - Slice 3 (colour), bottom-up: (1) Graphics/Color, (2) calc-free numeric primitives, (3a) Style-free calc, (3b) calc evaluation and Style calc and (3c) calc parsing are done. (4a) `LayoutUnit` and the point/size types and (4b) Style numerics are done. (5a) the CSS colour types, (5b) the colour parser and (5c) `ColorValue`/`ValuePool` (compile-only) are done. (6) Style colour is done (its CSSValue half is deferred, see below). Slice 3 is complete apart from the Value-dependent pieces.
 - Deferred from layer 6 (needs `Style/BuilderChecking.hpp` and the raw-WebKit `ValueList`/`ValuePair`/`FunctionValue`/`BuilderState` it includes): `CSSValueConversion<Color>`, `CSSValueCreation<Color>`, `CSSValueConversion<DynamicRangeLimit>`, `CSSValueCreation<DynamicRangeLimit>` and `CSSValueConversion<Opacity>`. They come with the other `+CSSValueConversion`/`+CSSValueCreation` headers.
@@ -1454,6 +1455,30 @@ Tier 3 item 29, so tier 3's filter items are done. Graph from `css/CSSAppleColor
 **Differences:** No `createDeprecatedCSSOMWrapper` (won't-port). No `AddDerivedHash`, like upstream.
 
 Tests: `tests/CSS/Values/FilterEffects/AppleColorFilter.cpp` (serialisation of `apple-invert-lightness()`, `none` and lists; equality; `SwitchOn`; dependencies; visitation): 4 cases / 17 assertions. `AppleColorFilterValue` is compile-only. Full Booey suite: 1107 cases / 669931 assertions; all pass except 2 expected failures.
+
+### `RayValue`, `ScrollValue`, `ViewValue` (2026-10-13)
+
+Tier 3 items 30–32, so tier 3 is done. Graphs from `css/CSSRayValue.cpp`, `CSSScrollValue.cpp` and `CSSViewValue.cpp` (headers-only): 103 files each (`tools/port/out/ray-value.md`, `scroll-value.md`, `view-value.md`), all through `CSSPrimitiveValueMappings.h` (→ `StyleBuilderState.h`) except `css/values/motion/CSSRayFunction.h`/`.cpp`, whose own graph is only reviewed files (`CSSPosition`, numerics). What the code actually uses from the mappings: `toCSSValueID(CSSBoxType)` (`RayValue`) and nothing in `ScrollValue`/`ViewValue` (they only need `CSSPrimitiveValue::valueID()`). `CSSBoxType` comes from `rendering/style/RenderStyleConstants.h`; only that enum is ported, into a new `Rendering/Style/RenderStyleConstants.hpp`.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `rendering/style/RenderStyleConstants.h` (`CSSBoxType`) | `port` on demand | `Rendering/Style/RenderStyleConstants.hpp` | on | `CSSBoxType` only, in `krys::boo` (name kept: the unreviewed `PrimitiveValueMappings.hpp`/`KeywordValueRepresentationNeeded.hpp` already use it). Add the other enums as they're needed. |
+| `css/CSSPrimitiveValueMappings.h` (`toCSSValueID(CSSBoxType)`) | `have*` | local `ToValueId(CSSBoxType)` in `src/CSS/Values/RayValue.cpp` | on | FIXME to use `PrimitiveValueMappings.hpp` once reviewed, as `ToValueId(BlendMode)`. `BoxMissing` debug-asserts and returns `None`, as upstream. |
+| `css/values/motion/CSSRayFunction.h`, `.cpp` | `have` | `CSS/Values/Motion/RayFunction.hpp`, `src/CSS/Values/Motion/RayFunction.cpp` | on | tested. Members PascalCase; `Angle`'s and `Position`'s types are written `boo::css::X`. |
+| `css/CSSRayValue.h`, `.cpp` | `have` | `CSS/Values/RayValue.hpp`, `src/CSS/Values/RayValue.cpp` | on (compile-only) | `ray()` → `GetRay()` (consistent with `GetFilter()`/`GetShape()`); `coordinateBox()` → `CoordinateBox()`. `nameLiteralForSerialization` → `ToLower(ValueId)`. |
+| `css/CSSScrollValue.h`, `.cpp` | `have` | `CSS/Values/ScrollValue.hpp`, `src/CSS/Values/ScrollValue.cpp` | on (compile-only) | |
+| `css/CSSViewValue.h`, `.cpp` | `have` | `CSS/Values/ViewValue.hpp`, `src/CSS/Values/ViewValue.cpp` | on (compile-only) | |
+
+**Bugs fixed:**
+- None of the three value classes had a `.cpp` or any data members: every method was declared but never defined, and the classes stored nothing.
+- `RayFunction` had no `Serialiser<Ray>` (upstream declares one in the header, defined in `CSSRayFunction.cpp`), so it didn't get upstream's serialisation (omit the default `closest-side`, write `at` before the position). It included `Types.hpp` instead of `NumericTypes.hpp` for `Angle`. Members were lowercase.
+- `RayValue::Create` had no `coordinateBox` parameter. `ScrollValue` lacked the no-argument `Create()`. `ViewValue::Create` took `Ref<Value>`s, so `view()` with an omitted axis or inset couldn't be created (upstream: `RefPtr`). No accessors on any of them; `CustomVisitChildren` lacked `KRYS_NOESCAPE`.
+
+**Krystal callers updated (unbuilt):** `Consumers/Motion.cpp` (`RayFunction {.parameters` → `.Parameters`). `Consumers/Timeline.cpp` needed no change (`ScrollValue::Create(nullptr, nullptr)` and the `ViewValue` calls now match).
+
+**Differences:** No `createDeprecatedCSSOMWrapper`/`AddDerivedHash`, like upstream. The headers of `ScrollValue`/`ViewValue` include `Value.hpp`, not `PrimitiveValue.hpp`; their `.cpp`s include `PrimitiveValue.hpp` for `Value::ValueId()`.
+
+Tests: `tests/CSS/Values/Motion/RayFunction.cpp` (serialisation of every size, `contain`, `at <position>` and all together; equality; dependencies; visitation): 3 cases / 17 assertions. The three value classes are compile-only. Full Booey suite: 1110 cases / 669948 assertions; all pass except 2 expected failures.
 
 ## Deferred: Values (from the tokenizer graph)
 

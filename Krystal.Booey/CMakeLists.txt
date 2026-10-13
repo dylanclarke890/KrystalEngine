@@ -362,6 +362,11 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/FilterEffects/AppleInvertLightnessFunction.hpp
   include/Krystal.Booey/CSS/Values/FilterEffects/AppleColorFilter.hpp
   include/Krystal.Booey/CSS/Values/AppleColorFilterValue.hpp
+  include/Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp
+  include/Krystal.Booey/CSS/Values/Motion/RayFunction.hpp
+  include/Krystal.Booey/CSS/Values/RayValue.hpp
+  include/Krystal.Booey/CSS/Values/ScrollValue.hpp
+  include/Krystal.Booey/CSS/Values/ViewValue.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -519,6 +524,10 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/BasicShapeValue.cpp
   src/CSS/Values/FilterValue.cpp
   src/CSS/Values/AppleColorFilterValue.cpp
+  src/CSS/Values/Motion/RayFunction.cpp
+  src/CSS/Values/RayValue.cpp
+  src/CSS/Values/ScrollValue.cpp
+  src/CSS/Values/ViewValue.cpp
 )
 
 target_precompile_headers(Krystal.Booey

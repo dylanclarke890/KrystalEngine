@@ -112,7 +112,7 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     return RayValue::Create(
-      RayFunction {.parameters = Ray {krys::move(*angle), size.value_or(RaySize {keywords::ClosestSide {}}),
+      RayFunction {.Parameters = Ray {krys::move(*angle), size.value_or(RaySize {keywords::ClosestSide {}}),
                                       krys::move(contain), krys::move(position)}});
   }
 
