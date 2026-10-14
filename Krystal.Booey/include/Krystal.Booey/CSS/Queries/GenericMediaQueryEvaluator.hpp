@@ -1,14 +1,10 @@
-#pragma once
+﻿#pragma once
 
-// #include "Krystal.Booey/CSS/LayoutUnit.hpp"
+#include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryTypes.hpp"
 #include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
-
-namespace krys::boo
-{
-  class RenderElement;
-}
+#include "Krystal.Booey/Graphics/FloatSize.hpp"
 
 namespace krys::boo::css
 {
@@ -24,7 +20,7 @@ namespace krys::boo::css
       const Feature &feature, bool, const ToLengthConversionData &conversionData) noexcept;
 
     KRYS_NODISCARD EvaluationResult EvaluateIntegerFeature(
-      const Feature &feature, int, const ToLengthConversionData &conversionData) noexcept;
+      const Feature &feature, int32, const ToLengthConversionData &conversionData) noexcept;
 
     KRYS_NODISCARD EvaluationResult EvaluateNumberFeature(
       const Feature &feature, double, const ToLengthConversionData &conversionData) noexcept;

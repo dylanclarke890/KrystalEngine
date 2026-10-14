@@ -18,7 +18,7 @@
 
 Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 
-## Where we are (2026-10-13)
+## Where we are (2026-10-14)
 
 **Process per file/slice:** run `tools/port/graph.py` from the WebKit entry (`--headers-only`; also check the `.cpp`'s own includes, which headers-only misses), compare the Krystal file with upstream, add missing methods, fix bugs, record differences here, add tests where something can be instantiated, build, run tests. The user reviews each step; don't port ahead without being asked.
 
@@ -56,13 +56,16 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Sheet parser, layer d4 (2026-10-13): the rule model (`Rule` and every rule type, including the internal keyframe, counter style, view transition and position try rules upstream keeps in CSSOM headers), `AtRuleId`, the counter style descriptors, `FontFeatureValues`/`FontPaletteValues` and the parse side of `StyleSheetContents` built and tested. `@import` doesn't load; `@-internal-base-appearance` is dropped and `StyleSheet` moved to the CSSOM slice.
 - Tokenizer, original text (2026-10-13): numeric tokens keep their original text and whitespace tokens their whitespace, so `TokenSerialisationMode::CustomProperty` serialises them as written, tokens compare by original text, and `<unicode-range>` accepts ranges with numbers (`U+0025-00FF`, `U+4??`). See *Slice 1*.
 - Sheet parser, layer d5 (2026-10-13): `CSSParser` (`Parser`) and `CSSSupportsParser` (`SupportsParser`) built and tested; whole style sheets, single rules, keyframes, declaration lists and `@supports` conditions parse end to end. `MutableStyleProperties`' string setters, `ParseDeclaration` and `StyleSheetContents::ParseString` are defined, and the old parser is deleted. The sheet parser slice is done.
+- CSSOM (2026-10-14): `CSSStyleSheet`, `StyleSheet`, `MediaList`, `CSSRule`/`CSSRuleList` and every rule wrapper, `CSSStyleDeclaration`/`CSSStyleProperties`, the descriptor classes, `Rule::CreateCSSOMWrapper` and `StyleSheetContentsCache` built and tested, connected to the DOM through the Style seam. Sheets are read and changed through the CSSOM (`insertRule`, `replaceSync`, `style.setProperty`, ...) with copy-on-write of shared contents. See the *CSSOM* section.
+- Media query evaluation (2026-10-14): `GenericMediaQueryEvaluator`, `MediaQueryEvaluator` and every media feature's evaluation built and tested, against a host-filled `MediaEnvironment` (view size, media type, screen, pointing devices, user preferences); `style::Ratio` ported. Container query evaluation and `MediaQueryMatcher`/`matchMedia` are deferred. See the *Media query evaluation* section.
 
 **Open / next candidates:**
-- **Next:** undecided. Candidates: the CSSOM slice (`CSSStyleSheet`, `StyleSheet`, `MediaList`, the `CSS*Rule` wrappers and `Rule::CreateCSSOMWrapper`; `src/CSS/CSSStyleSheet.cpp` still calls the deleted parser), media and container query evaluation, the rule set and style resolution.
+- **Next:** undecided. Candidates: the rule set and style resolution (brings container query evaluation), the DOM integration of the CSSOM (brings `MediaQueryMatcher`/`matchMedia`; below).
+- CSSOM, not yet ported (DOM integration): `<style>`/`<link>` owner nodes and `CSSStyleSheet::CreateInline`, inline styles (`InlineCSSStyleProperties`, `EnsureInlineCSSStyleProperties`, `StyleAttributeMutationScope`, `Element::style`, `Parser::ParseInlineStyleDeclaration`), `adoptedStyleSheets` (adopting tree scopes, `CSSStyleSheetObservableArray`), `StyleSheetList` (`document.styleSheets`), the async `replace()` (promises), and a real `style::Scope` (the seam's never exists). Also not yet ported: the Typed OM (`styleMap`) and the computed style declaration.
 - Sheet parser, not yet ported (d5): `CSSParser::parseInlineStyleDeclaration` (needs `Element`, its `Document`'s parser context and quirks mode; FIXME in `Parser/Parser.hpp`). The inspector entry points (`parseDeclarationListForInspector`, `parseStyleSheetForInspector`) are `wont`.
-- Rule model, not yet ported (d4): `@import` loading (`ImportRule::RequestStyleSheet`, the cached sheet and its client) and the loader half of `StyleSheetContents` (`ParseAuthorStyleSheet`, `NotifyLoadedSheet`, `SubresourcesAllowReuse`, `IsLoadingSubresources`) come with the resource loader; its owner-node half (`SingleOwnerNode`, `SingleOwnerDocument`, `StartLoadingDynamicSheet`, the owner notification in `CheckLoaded`) and `Rule::CreateCSSOMWrapper` with the CSSOM slice (with `StyleSheet`); `RuleData::MaximumSelectorComponentCount` with the rule set.
-- Media and container query evaluation (not yet ported): `GenericMediaQueryEvaluator`, `MediaQueryEvaluator`, `MediaQueryMatcher`, `style/ContainerQueryEvaluator`, and each feature schema's `evaluate` (FIXMEs in `src/CSS/Queries/*Features.cpp`); the headers on disk are unreviewed. `MediaList` and `MediaQueryList`/`MediaQueryListEvent` come with the CSSOM slice; `MediaQueryParserContext(const Document &)` with `Document::CssParserContext()`.
-- Not yet ported, needed later: the CSSOM wrapper half of `MutableStyleProperties` (with `CSSStyleProperties`), the `Style::Extractor` overload of `SerialiseShorthandValue`, `FontSelectionValue` (`platform/graphics/FontSelectionAlgorithm.h`) and `FontSelectionValueInlines.hpp` (still raw WebKit).
+- Rule model, not yet ported (d4): `@import` loading (`ImportRule::RequestStyleSheet`, the cached sheet and its client) and the loader half of `StyleSheetContents` (`ParseAuthorStyleSheet`, `NotifyLoadedSheet`, `SubresourcesAllowReuse`, `IsLoadingSubresources`) come with the resource loader; its owner-node half (`SingleOwnerNode`, `SingleOwnerDocument`, `StartLoadingDynamicSheet`, the owner notification in `CheckLoaded`) with the DOM integration; `RuleData::MaximumSelectorComponentCount` with the rule set.
+- Query evaluation, not yet ported: container queries (`style/ContainerQueryEvaluator`, the container feature schemas' `evaluate`, FIXME in `src/CSS/Queries/ContainerQueryFeatures.cpp`) come with style resolution; `MediaQueryMatcher`, `MediaQueryList`, `MediaQueryListEvent` and `matchMedia` with the DOM integration (the headers on disk are unreviewed); font-relative units in media queries with the matcher and fonts. `MediaEnvironment` is process-wide until documents have frames (FIXME). `MediaQueryParserContext(const Document &)` comes with `Document::CssParserContext()`.
+- Not yet ported, needed later: the `Style::Extractor` overload of `SerialiseShorthandValue`, `FontSelectionValue` (`platform/graphics/FontSelectionAlgorithm.h`) and `FontSelectionValueInlines.hpp` (still raw WebKit).
 - Property parser, not yet ported (`Font`): the string parsers behind the `FontFace` interface and the canvas 2D context's `font` (`ParseUnresolvedFont`, `ParseFontFaceSrc`, `ParseFontFaceSizeAdjust`, `ParseFontFaceUnicodeRange`, `ParseFontFaceDisplay`, `ParseFontFaceFontStyle`, `ParseFontFaceFeatureSettings`, `ParseFontFaceFontWidth`, `ParseFontFaceFontWeight`; FIXME in `Consumers/Font.hpp`). They need `ScriptExecutionContext`/`Document` (quirks mode, value pool) and six of them the generated `PropertyParsing`. Also `LowerFontShorthand` and the `SystemFontDatabase::FontShorthand` sync check (need `SystemFontDatabase`).
 - Property parser, not yet ported: `parseEasingFunctionDeprecated` (`CSSPropertyParserConsumer+Easing`; string → `TimingFunction`, used only by Web Animations; needs `TimingFunction` and `Style::createTimingFunctionDeprecated`) and `parseTransformRaw` (`CSSPropertyParserConsumer+Transform`; string → `Style::Transform`, used only by Web Animations; needs `Style::Transform`, `BuilderState` and the generated `consumeTransform`). Come with animations. Also `parseFilterValueListOrNoneRaw` (`CSSPropertyParserConsumer+Filter`; string → `Style::Filter`, used only by the canvas 2D context's `filter`; needs `Style::Filter`, `BuilderState` and `Document`); comes with canvas.
 - Property parser, deferred definitions (need `style::CustomProperty`/`BuilderState`): `VariableParser::ParseInitialValueForUniversalSyntax`, `PropertyParser::ParseTypedCustomPropertyValue`/`ParseTypedCustomPropertyInitialValue`.
@@ -71,7 +74,7 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Deferred from layer 6 (needs `Style/BuilderChecking.hpp` and the raw-WebKit `ValueList`/`ValuePair`/`FunctionValue`/`BuilderState` it includes): `CSSValueConversion<Color>`, `CSSValueCreation<Color>`, `CSSValueConversion<DynamicRangeLimit>`, `CSSValueCreation<DynamicRangeLimit>` and `CSSValueConversion<Opacity>`. They come with the other `+CSSValueConversion`/`+CSSValueCreation` headers.
 - The Style `+CSSValueConversion`/`+CSSValueCreation` headers (numerics, `LengthWrapper`, `PrimitiveKeyword`) are still raw WebKit.
 - Style `ToCSS`/serialisation can't be tested until there's a real `RenderStyle` (the seam's can't be constructed).
-- The Style seam (`Style/Seam.hpp`, `src/Style/Seam.cpp`) stands in for `RenderStyle`, `RenderView`, `RenderBox`, the font types, `Style::BuilderState`, `AnchorPositionEvaluator`, `ContainerQueryEvaluator` and the `Document` colour API. Each placeholder is replaced when its slice is ported; see the layer 3b and layer 6 sections. Since layer 6, `RenderStyle` can be constructed (colour state only); its other members are still unreachable.
+- The Style seam (`Style/Seam.hpp`, `src/Style/Seam.cpp`) stands in for `RenderStyle`, `RenderView`, `RenderBox`, the font types, `Style::BuilderState`, `AnchorPositionEvaluator`, `ContainerQueryEvaluator`, `Style::Scope`/`StyleResolver` and the `Document` colour, URL, parser context and security API. Each placeholder is replaced when its slice is ported; see the layer 3b and layer 6 sections. Since layer 6, `RenderStyle` can be constructed (colour state only); its other members are still unreachable.
 - `ParserContext`: the `Document` and `Settings` constructors (FIXME in the header) wait for `Document::CssParserContext()` and a `Settings` port; so does the generated `PropertySettings(const Settings &)` constructor. `LocalFrame`'s `StaticValuePool::Init()` call comes with `LocalFrame`.
 - `CSS/Values/Concepts.hpp` (`CSSValueConcepts.h`) compiles but isn't reviewed.
 - URL, not yet done: the DOM `URL` interface and `URLSearchParams` (WebKit's `DOMURL`/`URLDecomposition`, tested by WPT `setters_tests.json`), `Document`'s URL/base URL (`Document::URL()` is a TODO), `CompleteURL(string, Document)`, and `applyModifiersToLoaderOptions` (needs the resource loader).
@@ -876,7 +879,7 @@ Graph from the nine d3 entries (`MediaQueryParser.cpp`, `ContainerQueryParser.cp
 | `css/query/ContainerQueryParser.h`, `.cpp` | `have` | `CSS/Queries/ContainerQueryParser.hpp`, `src/...` | on | tested. |
 | `css/query/ContainerQueryFeatures.h`, `.cpp` | `have*` (schemas only) | `CSS/Queries/ContainerQueryFeatures.hpp`, `src/...` | on | tested. |
 | `css/MediaQueryParserContext.h`, `.cpp` | `have` (no `Document` constructor) | `CSS/Queries/MediaQueryParserContext.hpp`, `src/...` | on | tested through the parsers. |
-| `css/query/GenericMediaQueryEvaluator.*`, `MediaQueryEvaluator.*`, `css/MediaQueryMatcher.*`, `style/ContainerQueryEvaluator.*` | `?` | `CSS/Queries/*Evaluator.hpp`, `MediaQueryMatcher.hpp` | off | Evaluation; deferred, unreviewed. |
+| `css/query/GenericMediaQueryEvaluator.*`, `MediaQueryEvaluator.*`, `css/MediaQueryMatcher.*`, `style/ContainerQueryEvaluator.*` | | | | Evaluation; see *Media query evaluation*. |
 | `css/MediaList.h`, `.cpp` | `?` | `CSS/Media/MediaList.hpp` | off | CSSOM slice. |
 | `css/parser/CSSSupportsParser.h`, `.cpp` | `port` | — | — | d5. |
 | `css/parser/MediaQueryBlockWatcher.h`, `.cpp` | `wont` | deleted | — | Dead upstream: nothing includes it. |
@@ -994,6 +997,105 @@ Graph from `css/parser/CSSParser.cpp` and `css/parser/CSSSupportsParser.cpp` (he
 **Unbuilt files touched:** none. Left as they are: `src/CSS/CSSStyleSheet.cpp` still includes the deleted `Parser/Parser.hpp` and calls the old `Parser::ParseRule` (CSSOM slice).
 
 Tests: `tests/CSS/Parser/{Parser,SupportsParser}.cpp`, `tests/Graphics/FontCustomPlatformData.cpp`: 42 cases / 725 assertions pass (the whitespace `[!shouldfail]` passes since the tokenizer fix). Full Booey suite: 1671 cases / 678937 assertions; all pass except 9 expected failures. Whole solution builds with no warnings.
+
+## CSSOM — done (DOM integration deferred)
+
+Graph from the 35 CSSOM `.cpp`s (`css/CSS*Rule*.cpp`, `CSSStyleSheet.cpp`, `StyleSheet.cpp`, `StyleSheetList.cpp`, `MediaList.cpp`, `CSSStyleDeclaration.cpp`, `CSSStyleProperties.cpp`, `PropertySetCSSDescriptors.cpp`, `CSSFunctionDeclarations.cpp`, `CSSNestedDeclarations.cpp`; headers-only): 183 files (`tools/port/out/cssom.md`). Apart from the CSSOM files themselves, almost everything in it was already ported. The new dependencies are integration points: `Document`, `Element`/`StyledElement`, `Node`, mutation observers, `Style::Scope`, `StyleResolver`, `StyleSheetContentsCache`, `RuleSet`, `CachedCSSStyleSheet`, the bindings and the Typed OM (`css/typedom`). The Krystal CSSOM files on disk (`CSS/CSSOM/*`, `CSSStyleSheet`, `StyleSheet`, `MediaList`, `CSSStyleDeclaration`, `CSSStyleProperties`, `Descriptors/*`) were unbuilt, partly raw WebKit or spec-driven sketches; each is rewritten from upstream.
+
+**Decisions (2026-10-13/14):**
+- The CSSOM connects to the DOM through the Style seam (`Style/Seam.hpp`): `style::Scope` and `style::Resolver` placeholders (nothing creates a scope; `Scope::ForNode` returns null) and `Document*` functions for the base URL, URL completion, the parser context, security checks and keyframes notifications. Constructed sheets and sheets built from `StyleSheetContents` work fully; `<style>`/`<link>` ownership, inline styles, `adoptedStyleSheets` and `document.styleSheets` come with the DOM integration.
+- One layer (sheet, declarations and every rule wrapper together), because `Rule::CreateCSSOMWrapper` needs every wrapper and several wrappers need the declarations.
+- Dropped as non-standard: `DeprecatedCSSOMValue` (`getPropertyCSSValue`), the epub-cased IDL attributes and the `epub` prefix in script property names. `CSSInternalBaseAppearanceRule` is dropped with its rule (d4). Deferred: the Typed OM (`styleMap`), the computed style declaration and the async `replace()`.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/StyleSheet.h`, `.cpp` | `have` | `CSS/StyleSheet.hpp` | on | tested. No `debugDescription`/`TextStream`. |
+| `css/CSSStyleSheet.h`, `.cpp` | `have*` | `CSS/CSSStyleSheet.hpp`, `src/CSS/CSSStyleSheet.cpp` | on | tested. No `createInline`, adopting tree scopes or `replace` (FIXMEs). |
+| `css/MediaList.h`, `.cpp` | `have` | `CSS/Media/MediaList.hpp`, `src/...` | on | tested. |
+| `css/CSSRule.h`, `.cpp` | `have` | `CSS/CSSOM/CSSRule.hpp`, `src/CSS/CSSOM/CSSRule.cpp` | on | tested. Was `src/CSS/CSSRule.cpp`. |
+| `css/CSSRuleList.h`, `.cpp` | `have` | `CSS/CSSOM/CSSRuleList.hpp`, `src/...` | on | tested. |
+| `css/CSSGroupingRule`, `CSSConditionRule`, `CSSMediaRule`, `CSSSupportsRule`, `CSSContainerRule`, `CSSScopeRule`, `CSSStartingStyleRule`, `CSSLayerBlockRule`, `CSSLayerStatementRule` (`.h`, `.cpp`) | `have` | `CSS/CSSOM/<same>.hpp`, `src/...` | on | tested. |
+| `css/CSSStyleRule`, `CSSNestedDeclarations`, `CSSPageRule`, `CSSFontFaceRule`, `CSSKeyframeRule`, `CSSKeyframesRule` (`.h`, `.cpp`) | `have` | `CSS/CSSOM/<same>.hpp`, `src/...` | on | tested. No `styleMap` (Typed OM, FIXME). |
+| `css/CSSImportRule`, `CSSNamespaceRule`, `CSSCounterStyleRule`, `CSSFontFeatureValuesRule`, `CSSFontPaletteValuesRule`, `CSSPropertyRule`, `CSSViewTransitionRule`, `CSSPositionTryRule`, `CSSFunctionRule`, `CSSFunctionDeclarations` (`.h`, `.cpp`) | `have` | `CSS/CSSOM/<same>.hpp`, `src/...` | on | tested. See bugs. |
+| `css/CSSInternalBaseAppearanceRule.h`, `.cpp` | `wont` | | | Its rule was dropped in d4; the old header is deleted. |
+| `css/CSSStyleDeclaration.h`, `.cpp` | `have` | `CSS/CSSStyleDeclaration.hpp`, `src/...` | on | tested. No `getPropertyCSSValue` or `settings()`. |
+| `css/CSSStyleProperties.h`, `.cpp` | `have*` | `CSS/CSSStyleProperties.hpp`, `src/...` | on | tested. No `InlineCSSStyleProperties` (FIXME), epub names or deprecated value wrappers. |
+| `css/PropertySetCSSDescriptors.h`, `.cpp` | `have` | `CSS/Descriptors/PropertySetCSSDescriptors.hpp`, `src/...` | on | tested. |
+| `css/CSSFontFaceDescriptors`, `CSSPageDescriptors`, `CSSPositionTryDescriptors`, `CSSFunctionDescriptors` (`.h`, `.cpp`) | `have` | `CSS/Descriptors/<same>.hpp`, `src/...` | on | tested. |
+| `css/StyleRule.cpp` (`createCSSOMWrapper`) | `have` | `Rule::CreateCSSOMWrapper` (`src/CSS/Rules/Rule.cpp`) | on | tested. |
+| `css/MutableStyleProperties.h`, `.cpp`, `StyleProperties.cpp` (CSSOM wrapper half) | `have` | `MutableStyleProperties::CssStyleProperties`/`EnsureCSSStyleProperties`, `StyleProperties::HasCSSOMWrapper` | on | tested. No `ensureInlineCSSStyleProperties` (FIXME). |
+| `style/StyleSheetContentsCache.h`, `.cpp` | `have` | `Style/StyleSheetContentsCache.hpp`, `src/...` | on | tested. |
+| `style/StyleScope.h`, `StyleResolver.h` | `stub` | `style::Scope`, `style::Resolver` in `Style/Seam.hpp` | on | Placeholders; no scope is ever created. |
+| `css/StyleSheetList.h`, `.cpp` | `?` | `CSS/StyleSheetList.hpp` | off | DOM integration (`document.styleSheets` needs the style scope's sheet list). Old header left as it is. |
+| `css/CSSStyleSheetObservableArray.h`, `.cpp` | `?` | | | DOM integration (`adoptedStyleSheets`). |
+| `css/CSSComputedStyleDeclaration.h`, `.cpp` | `?` | | | Needs the Style builder and `RenderStyle`. |
+| `css/DeprecatedCSSOM*` | `wont` | | | Non-standard (`getPropertyCSSValue`). |
+| `css/typedom/*` | `?` | | | The Typed OM, a slice of its own. |
+| `css/StyleAttributeMutationScope.h` | `?` | | | Inline styles (mutation records for the `style` attribute). |
+
+**Names:** the CSSOM classes keep their IDL names (`CSSStyleSheet`, `CSSRule`, `CSSMediaRule`, `MediaList`, ...); methods are PascalCase, setters `Set*` (`setMediaText` → `SetMediaText`, `setDisabled` → `SetDisabled`). Getters that would hide a type: `styleSheet()` (`CSSRuleList`, `CSSImportRule`) → `GetStyleSheet()`, `styleDeclarationType()` → `GetStyleDeclarationType()`, `ruleType()` (descriptors) → `GetRuleType()`, `parserContext()` → `GetParserContext()`, `nestedContext()` → `GetNestedContext()`, `groupRule()` → `GetGroupRule()`, `styleRule()` → `GetStyleRule()`, `styleRuleContainer()`/`styleRuleScope()`/`styleRuleFunction()` → `GetContainerRule()`/`GetScopeRule()`/`GetFunctionRule()`. `styleRuleType()` → `StyleRuleType()`; `typeForCSSOM()` → `TypeForCSSOM()`; `styleScope()` → `StyleScope()`; `propertyValueFor*IDLAttribute` → `GetPropertyValueFor*IDLAttribute`; `getCSSPropertyIDFromJavaScriptPropertyName` → `GetPropertyIdFromJavaScriptPropertyName`; `cssValueFromText` → `CSSValueFromText`. `CSSStyleSheet::RuleMutationType` and `ContentsClonedForMutation` are `enum class`.
+
+**Bugs fixed (old Krystal files):**
+- The old `CSSStyleSheet`, `StyleSheet` and `MediaList` were spec-driven sketches: `Media()` was `krys_not_implemented()`, the constructor ignored its options, `CssRules()` returned an empty list, and nothing connected the sheet to `StyleSheetContents`. `src/CSS/CSSStyleSheet.cpp` still called the parser deleted in d5.
+- `src/CSS/CSSRule.cpp` mapped rule types to the wrong CSSOM numbers (no `@charset`, a `Viewport` type that doesn't exist) and used members the header didn't declare.
+- Most `CSSOM/*.hpp` were raw WebKit (`String`, `adoptRef`, `SPECIALIZE_TYPE_TRAITS_CSS_RULE`, licence headers) or half-translated, with no `.cpp`; the descriptor classes had no `.cpp`.
+
+**Upstream bugs found:**
+- `CSSViewTransitionRule::cssText` closes the `types` descriptor with `}` instead of `; `, giving `@view-transition { types: a b}}`. Fixed (tested).
+- `CSSCounterStyleRule::setName` changes the descriptors' name but not the rule's, so `name` and `cssText` keep the old name. Fixed: both are set (tested).
+- `CSSCounterStyleRule::setSystem` doesn't do the step its comment quotes ("if the new value would change the algorithm used, do nothing"). Fixed: a value with a different system is ignored (tested).
+- `StyleSheetContentsCache::add` calls `addedToMemoryCache` even when the key is already present (the contents aren't stored, so the count is never undone). Krystal only counts a new entry (tested); `replaceSync` never adds an existing key.
+- Kept as upstream: `PropertySetCSSStyleProperties::setPropertyInternal` (and the descriptors') calls `willMutate` before the exposure check, so an unexposed property leaves it unpaired (harmless: it only makes the contents mutable); `CSSKeyframeRule::setKeyText` changes the keyframe outside a mutation scope (no copy-on-write); `CSSPageRule::setSelectorText` parses a selector list, not a page selector; `CSSNamespaceRule::reattach` keeps the old rule; removing a shorthand returns an empty string (d2's `RemoveShorthandProperty` FIXME, tested); the `negative` descriptor always writes its suffix (`"-" ""`, d4, tested).
+
+**Differences:**
+- Through the seam, no sheet has a style scope, so `DidMutate`, `DidMutateRules`, `SetDisabled` and `WasMutated` never notify anything. Constructed sheets use `DocumentBaseURL` (`about:blank`), `DocumentCompleteURL` and `DocumentCssParserContext` (a no-quirks document with default settings); `CanAccessRules` asks `DocumentCanRequest`, which allows everything.
+- Not ported until the DOM integration (FIXMEs): `CSSStyleSheet::CreateInline`, the adopting tree scopes, the async `Replace`, `StyleSheetList`, `InlineCSSStyleProperties`, `MutableStyleProperties::EnsureInlineCSSStyleProperties`, `StyleAttributeMutationScope` and `CSSStyleDeclaration::settings()`.
+- `CSSOMString` can't be null: `Href()` and `Title()` are empty for none; nullable attributes are `Maybe` (`CSSImportRule::LayerName`, `CSSPropertyRule::InitialValue`, `CSSFunctionRule::FunctionParameter::DefaultValue`). The rule model can't tell an empty `supports()` from none, so `@import "a" supports()` serialises without it, and `CSSPropertyRule` omits an empty `syntax`.
+- `CSSImportRule::GetStyleSheet()` is always null (imports don't load); whether the imported sheet is origin-clean waits for the loader (FIXME). No `cssText(context)` override (its only job is URL replacement, which `SerialisationContext` doesn't support); the other `CssText(context)` overloads are kept.
+- `StyleSheetContentsCache` evicts the first entry of its `std::unordered_map`, not a random one, and hashes the context with `ParserContext::Hash()`.
+- `CSSStyleRule::NestedRules()` returns a reference (upstream copies the list on every call).
+- Names and wrappers return `CSSOMString` or `CSSOMStringAtom` where upstream returns `String`/`AtomString`; `CSSNamespaceRule::Prefix()` is the null atom for the default namespace.
+- `CSSRule`, `CSSStyleSheet` and `MediaList` use `WeakPtr` where upstream uses `SingleThreadWeakPtr`.
+- Indices and counts are `uint32`.
+
+**Unbuilt files touched:** none. `CSS/StyleSheetList.hpp` (old sketch) is left as it is for the DOM integration.
+
+Tests: `tests/CSS/{CSSStyleSheet,CSSStyleProperties}.cpp`, `tests/CSS/Media/MediaList.cpp`, `tests/CSS/CSSOM/*.cpp` (one per wrapper), `tests/CSS/Descriptors/PropertySetCSSDescriptors.cpp`, `tests/Style/StyleSheetContentsCache.cpp` (helpers in `include/Krystal.Booey.Tests/CSS/CSSOMTestUtils.hpp`): 58 cases / 1294 assertions pass. Full Booey suite: 1732 cases / 680288 assertions; all pass except 7 expected failures. Whole solution builds with no warnings.
+
+## Media query evaluation (2026-10-14)
+
+Graph from the seven evaluation entries (`GenericMediaQueryEvaluator.cpp`, `MediaQueryEvaluator.cpp`, `MediaQueryFeatures.cpp`, `ContainerQueryFeatures.cpp`, `MediaQueryMatcher.cpp`, `MediaQueryList.cpp`, `style/ContainerQueryEvaluator.cpp`; headers-only): 145 files (`tools/port/out/evaluation.md`), nearly all already ported. The new dependencies are the frame, page, settings, theme and screen (media features), the render tree and style resolver (container queries), and `EventTarget`/`ActiveDOMObject` (`MediaQueryList`).
+
+**Decisions (2026-10-14):**
+- Media only. Container query evaluation (`ContainerQueryEvaluator`, the size schemas and `style()`) waits for style resolution: it needs composed-tree traversal, `containerType()`/`containerNames()`, `RenderBox` content sizes, `Style::Update` and `Style::Builder::resolveCustomPropertyForContainerQueries`. `MediaQueryMatcher`, `MediaQueryList`, `MediaQueryListEvent` and `matchMedia` wait for the DOM integration.
+- Media features read a Krystal-side `MediaEnvironment` (`CSS/Queries/MediaEnvironment.hpp`) that the host fills in, instead of the frame, page, settings, theme and screen. It's process-wide (FIXME) and set with `SetMediaEnvironment`; `MediaEnvironmentFor(document)` is null until one is set, which stands for "the document has no view".
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/query/GenericMediaQueryEvaluator.h`, `.cpp` | `have` | `CSS/Queries/GenericMediaQueryEvaluator.hpp`, `src/...` | on | tested. |
+| `css/query/MediaQueryEvaluator.h`, `.cpp` | `have` | `CSS/Queries/MediaQueryEvaluator.hpp`, `src/...` | on | tested. |
+| `css/query/MediaQueryFeatures.cpp` (evaluation) | `have*` | `src/CSS/Queries/MediaQueryFeatures.cpp` | on | tested. Reads `MediaEnvironment`; see differences. |
+| `style/values/primitives/StyleRatio.h` | `have` (no `.cpp`) | `Style/Values/Primitives/Ratio.hpp` | on | tested through `aspect-ratio`. `CSSValueCreation<Ratio>` is deferred with the other `CSSValueCreation`s (FIXME). |
+| — | Krystal | `CSS/Queries/MediaEnvironment.hpp`, `src/...` | on | tested. Stands in for `LocalFrame`/`LocalFrameView`/`Page`/`Chrome`/`Settings`/`Theme` and the screen functions. |
+| `css/query/ContainerQueryFeatures.cpp` (evaluation), `style/ContainerQueryEvaluator.h`, `.cpp` | `?` | `src/CSS/Queries/ContainerQueryFeatures.cpp` (schemas only); seam `style::ContainerQueryEvaluator` | — | Style resolution. |
+| `css/MediaQueryMatcher.h`, `.cpp`, `css/MediaQueryList.*`, `css/MediaQueryListEvent.*` | `?` | `CSS/Queries/MediaQueryMatcher.hpp`, `CSS/Media/MediaQueryList.hpp` | off | DOM integration; old headers left as they are (`MediaQueryMatcher.hpp` has `KRYS_NODISCARD void` and `SmallList`). |
+
+**Names:** `evaluate*` → `Evaluate*`; `toEvaluationResult` → `ToEvaluationResult`; `concreteEvaluator()` → `AsConcreteEvaluator()`; the schema base classes (`BooleanSchema`, `IntegerSchema`, `LengthSchema`, `RatioSchema`, `ResolutionSchema`, `IdentifierSchema`) keep their names and live in the `.cpp`. `NumberSchema` isn't ported: only the dropped `-webkit-device-pixel-ratio` used it.
+
+**Bugs fixed (old Krystal headers):** `GenericMediaQueryEvaluator.hpp` included a commented-out `LayoutUnit` header and nothing for `FloatSize`, and had no `.cpp` (the `Evaluate*Feature` functions were never defined); `MediaQueryEvaluator.hpp` had no `.cpp`.
+
+**Seam changes:** `RenderStyle::Zoom`, `UsedZoom`, `DeviceScaleFactor` (1) and `EvaluationTimeZoomEnabled` (off, the non-Cocoa default) are implemented, so lengths resolve against a constructed `RenderStyle`. `RenderViewOf` returns null (was unreachable). Added `RenderElement` (a `CheckedPtr` target for `FeatureEvaluationContext::Renderer`; `RenderBox` derives from it) and `AdjustForAbsoluteZoom(int32, const RenderView &)` (unreachable; only called with a render view).
+
+**Differences:**
+- `MediaEnvironment` holds the effective values. Upstream's forced accessibility settings (`forcedColorsAreInvertedAccessibilityValue`, `forcedPrefersContrastAccessibilityValue`, ...) and the theme's `userPrefers*` collapse into one field each; the host applies its own overrides.
+- Site-specific quirks are dropped (`shouldSupportHoverMediaQueries`, `shouldPreventOrientationMediaQueryFromEvaluatingToLandscape`, `shouldHideCoarsePointerCharacteristics`).
+- Upstream's `hover`/`pointer` features match `none` when there's no page; the environment defaults to a mouse (hover, fine pointer).
+- `color-gamut`, `color`, `dynamic-range` and `monochrome` read the screen fields; upstream asks the main frame's view. `monochrome` doesn't need a local main frame.
+- The evaluator checks `MediaEnvironmentFor(document)` where upstream checks `document->view()`.
+- Font-relative units in media queries (`em`, `ex`, `ch`, ...) can't be evaluated yet: the seam's `RenderStyle` has no font (`GetFontCascade` is unreachable). Upstream resolves them against the root element's user-agent style, which `MediaQueryMatcher` builds; comes with the matcher and fonts.
+- Dropped with their features in d3: the `-webkit-animation`, `-webkit-device-pixel-ratio`, `-webkit-transform-2d`/`3d`, `-webkit-transition`, `-webkit-video-playable-inline` and `prefers-dark-interface` schemas.
+
+Tests: `tests/CSS/Queries/MediaQueryEvaluator.cpp` (media types, static results, dynamic dependencies, three-valued logic and every media feature against changed environments): 11 cases / 221 assertions pass. Full Booey suite: 1743 cases / 680509 assertions; all pass except 7 expected failures. Whole solution builds with no warnings.
 
 ## Slice 3: Colour
 

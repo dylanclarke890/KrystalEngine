@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
+#include "Krystal.Booey/CSS/CSSStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Parser/Parser.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserMode.hpp"
@@ -40,6 +41,23 @@ namespace krys::boo::css
         _propertyVector.push_back(property.ToProperty());
       }
     }
+  }
+
+  CSSStyleProperties *MutableStyleProperties::CssStyleProperties() noexcept
+  {
+    return _cssomWrapper.get();
+  }
+
+  CSSStyleProperties &MutableStyleProperties::EnsureCSSStyleProperties() noexcept
+  {
+    if (_cssomWrapper)
+    {
+      krys_debug_assert(!_cssomWrapper->ParentRule());
+      krys_debug_assert(!_cssomWrapper->ParentElement());
+      return *_cssomWrapper;
+    }
+    _cssomWrapper = CreateUnique<PropertySetCSSStyleProperties>(*this);
+    return *_cssomWrapper;
   }
 
   Ref<MutableStyleProperties> MutableStyleProperties::Create() noexcept

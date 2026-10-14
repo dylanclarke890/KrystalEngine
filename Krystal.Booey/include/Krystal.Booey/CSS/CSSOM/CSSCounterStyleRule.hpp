@@ -1,109 +1,76 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Booey/CSS/Rules/CounterStyleRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
-#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include <WebCore/CSSCounterStyle.h>
-#include <WebCore/StyleProperties.h>
+#include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
 {
+  class CounterStyleRule;
+  class Value;
+  struct CounterStyleDescriptors;
+
+  /// @brief An `@counter-style` rule, exposed to scripts.
+  /// @see https://drafts.csswg.org/css-counter-styles/#the-csscounterstylerule-interface
   class CSSCounterStyleRule final : public CSSRule
   {
+  private:
+    Ref<CounterStyleRule> _counterStyleRule;
+
+    CSSCounterStyleRule(CounterStyleRule &counterStyleRule, CSSStyleSheet *parent) noexcept;
+
   public:
-    virtual ~CSSCounterStyleRule() noexcept;
+    ~CSSCounterStyleRule() noexcept;
 
     KRYS_NODISCARD static Ref<CSSCounterStyleRule> Create(CounterStyleRule &rule,
                                                           CSSStyleSheet *sheet) noexcept;
 
-    String cssText() const final;
-    void reattach(StyleRuleBase &) final;
-    RuleType RuleType() const final
+    KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+    void Reattach(Rule &rule) noexcept final;
+
+    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
     {
       return RuleType::CounterStyle;
     }
 
-    String name() const
-    {
-      return m_counterStyleRule->name();
-    }
-    String system() const
-    {
-      return m_counterStyleRule->system();
-    }
-    String negative() const
-    {
-      return m_counterStyleRule->negative();
-    }
-    String prefix() const
-    {
-      return m_counterStyleRule->prefix();
-    }
-    String suffix() const
-    {
-      return m_counterStyleRule->suffix();
-    }
-    String range() const
-    {
-      return m_counterStyleRule->range();
-    }
-    String pad() const
-    {
-      return m_counterStyleRule->pad();
-    }
-    String fallback() const
-    {
-      return m_counterStyleRule->fallback();
-    }
-    String symbols() const
-    {
-      return m_counterStyleRule->symbols();
-    }
-    String additiveSymbols() const
-    {
-      return m_counterStyleRule->additiveSymbols();
-    }
-    String speakAs() const
-    {
-      return m_counterStyleRule->speakAs();
-    }
+    KRYS_NODISCARD CSSOMString Name() const noexcept;
+    KRYS_NODISCARD CSSOMString System() const noexcept;
+    KRYS_NODISCARD CSSOMString Negative() const noexcept;
+    KRYS_NODISCARD CSSOMString Prefix() const noexcept;
+    KRYS_NODISCARD CSSOMString Suffix() const noexcept;
+    KRYS_NODISCARD CSSOMString Range() const noexcept;
+    KRYS_NODISCARD CSSOMString Pad() const noexcept;
+    KRYS_NODISCARD CSSOMString Fallback() const noexcept;
+    KRYS_NODISCARD CSSOMString Symbols() const noexcept;
+    KRYS_NODISCARD CSSOMString AdditiveSymbols() const noexcept;
+    KRYS_NODISCARD CSSOMString SpeakAs() const noexcept;
 
-    void setName(const String &);
-    void setSystem(const String &);
-    void setNegative(const String &);
-    void setPrefix(const String &);
-    void setSuffix(const String &);
-    void setRange(const String &);
-    void setPad(const String &);
-    void setFallback(const String &);
-    void setSymbols(const String &);
-    void setAdditiveSymbols(const String &);
-    void setSpeakAs(const String &);
+    void SetName(const CSSOMString &text) noexcept;
+    void SetSystem(const CSSOMString &text) noexcept;
+    void SetNegative(const CSSOMString &text) noexcept;
+    void SetPrefix(const CSSOMString &text) noexcept;
+    void SetSuffix(const CSSOMString &text) noexcept;
+    void SetRange(const CSSOMString &text) noexcept;
+    void SetPad(const CSSOMString &text) noexcept;
+    void SetFallback(const CSSOMString &text) noexcept;
+    void SetSymbols(const CSSOMString &text) noexcept;
+    void SetAdditiveSymbols(const CSSOMString &text) noexcept;
+    void SetSpeakAs(const CSSOMString &text) noexcept;
 
   private:
-    CSSCounterStyleRule(StyleRuleCounterStyle &, CSSStyleSheet *parent);
+    KRYS_NODISCARD RefPtr<Value> CSSValueFromText(PropertyId property,
+                                                  const CSSOMString &text) const noexcept;
 
-    bool setterInternal(CSSPropertyID, const String &);
-    RefPtr<Value> cssValueFromText(CSSPropertyID, const String &);
-    const CSSCounterStyleDescriptors &descriptors() const
-    {
-      return m_counterStyleRule->descriptors();
-    }
-    CSSCounterStyleDescriptors &mutableDescriptors()
-    {
-      return m_counterStyleRule->mutableDescriptors();
-    }
-
-    Ref<StyleRuleCounterStyle> m_counterStyleRule;
+    KRYS_NODISCARD const CounterStyleDescriptors &Descriptors() const noexcept;
+    KRYS_NODISCARD CounterStyleDescriptors &MutableDescriptors() noexcept;
   };
-
-  CSSCounterStyleDescriptors::System toCounterStyleSystemEnum(const Value *);
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSCounterStyleRule)
-  KRYS_NODISCARD static bool isType(const krys::boo::css::CSSRule &rule) noexcept
+  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
   {
-    return rule.Type() == krys::boo::css::RuleType::CounterStyle;
+    return rule.StyleRuleType() == krys::boo::css::RuleType::CounterStyle;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
-

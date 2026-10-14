@@ -1,32 +1,40 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/CSSOM/CSSGroupingRule.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::css
 {
-  class RuleScope;
+  class ScopeRule;
 
+  /// @brief An `@scope` rule, exposed to scripts.
+  /// @see https://drafts.csswg.org/css-cascade-6/#the-cssscoperule-interface
   class CSSScopeRule final : public CSSGroupingRule
   {
-    CSSScopeRule(RuleScope &scope, CSSStyleSheet *parent) noexcept;
+  private:
+    CSSScopeRule(css::ScopeRule &rule, CSSStyleSheet *parent) noexcept;
 
   public:
-    KRYS_NODISCARD static Ref<CSSScopeRule> Create(RuleScope &scope, CSSStyleSheet *parent) noexcept;
+    KRYS_NODISCARD static Ref<CSSScopeRule> Create(css::ScopeRule &rule, CSSStyleSheet *parent) noexcept;
 
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
-
     KRYS_NODISCARD CSSOMString Start() const noexcept;
-
     KRYS_NODISCARD CSSOMString End() const noexcept;
 
   private:
-    KRYS_NODISCARD const RuleScope &Scope() const noexcept;
+    KRYS_NODISCARD const css::ScopeRule &GetScopeRule() const noexcept;
 
-    KRYS_NODISCARD RuleType Type() const noexcept final
+    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
     {
       return RuleType::Scope;
     }
   };
 }
 
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSScopeRule, RuleType::Scope)
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSScopeRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+  {
+    return rule.StyleRuleType() == krys::boo::css::RuleType::Scope;
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

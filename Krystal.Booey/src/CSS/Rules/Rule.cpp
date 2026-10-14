@@ -1,4 +1,26 @@
 ﻿#include "Krystal.Booey/CSS/Rules/Rule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSContainerRule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSCounterStyleRule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSFontFaceRule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSFontFeatureValuesRule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSFontPaletteValuesRule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSFunctionDeclarations.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSFunctionRule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSImportRule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSKeyframesRule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSLayerBlockRule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSLayerStatementRule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSMediaRule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSNamespaceRule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSNestedDeclarations.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSPageRule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSPositionTryRule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSPropertyRule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSScopeRule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStartingStyleRule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleRule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSSupportsRule.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSViewTransitionRule.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/CounterStyleRule.hpp"
@@ -171,6 +193,141 @@ namespace krys::boo::css
         static_assert(!SameType<decltype(&TRule::Copy), decltype(&Rule::Copy)>);
         return rule.Copy();
       });
+  }
+
+  Ref<CSSRule> Rule::CreateCSSOMWrapper(CSSStyleSheet &parentSheet) const noexcept
+  {
+    return CreateCSSOMWrapper(&parentSheet, nullptr);
+  }
+
+  Ref<CSSRule> Rule::CreateCSSOMWrapper(CSSGroupingRule &parentRule) const noexcept
+  {
+    return CreateCSSOMWrapper(nullptr, &parentRule);
+  }
+
+  Ref<CSSRule> Rule::CreateCSSOMWrapper(CSSStyleRule &parentRule) const noexcept
+  {
+    return CreateCSSOMWrapper(nullptr, &parentRule);
+  }
+
+  Ref<CSSRule> Rule::CreateCSSOMWrapper() const noexcept
+  {
+    return CreateCSSOMWrapper(nullptr, nullptr);
+  }
+
+  Ref<CSSRule> Rule::CreateCSSOMWrapper(CSSStyleSheet *parentSheet, CSSRule *parentRule) const noexcept
+  {
+    // FIXME: const_cast is required here because a wrapper for a style rule can be used to *modify* the style
+    // rule's selector; use of const in the style system is thus inaccurate.
+    auto wrapper = const_cast<Rule &>(*this).VisitDerived(
+      [&]<typename TRule>(TRule &rule) -> Ref<CSSRule>
+      {
+        if constexpr (SameType<TRule, StyleRule> || SameType<TRule, StyleRuleWithNesting>)
+        {
+          return CSSStyleRule::Create(rule, parentSheet);
+        }
+        else if constexpr (SameType<TRule, NestedDeclarationsRule>)
+        {
+          return CSSNestedDeclarations::Create(rule, parentSheet);
+        }
+        else if constexpr (SameType<TRule, PageRule>)
+        {
+          return CSSPageRule::Create(rule, parentSheet);
+        }
+        else if constexpr (SameType<TRule, FontFaceRule>)
+        {
+          return CSSFontFaceRule::Create(rule, parentSheet);
+        }
+        else if constexpr (SameType<TRule, FontFeatureValuesRule>)
+        {
+          return CSSFontFeatureValuesRule::Create(rule, parentSheet);
+        }
+        else if constexpr (SameType<TRule, FontFeatureValuesBlockRule>)
+        {
+          return CSSFontFeatureValuesBlockRule::Create(rule, parentSheet);
+        }
+        else if constexpr (SameType<TRule, FontPaletteValuesRule>)
+        {
+          return CSSFontPaletteValuesRule::Create(rule, parentSheet);
+        }
+        else if constexpr (SameType<TRule, MediaRule>)
+        {
+          return CSSMediaRule::Create(rule, parentSheet);
+        }
+        else if constexpr (SameType<TRule, SupportsRule>)
+        {
+          return CSSSupportsRule::Create(rule, parentSheet);
+        }
+        else if constexpr (SameType<TRule, ImportRule>)
+        {
+          return CSSImportRule::Create(rule, parentSheet);
+        }
+        else if constexpr (SameType<TRule, KeyframesRule>)
+        {
+          return CSSKeyframesRule::Create(rule, parentSheet);
+        }
+        else if constexpr (SameType<TRule, NamespaceRule>)
+        {
+          return CSSNamespaceRule::Create(rule, parentSheet);
+        }
+        else if constexpr (SameType<TRule, CounterStyleRule>)
+        {
+          return CSSCounterStyleRule::Create(rule, parentSheet);
+        }
+        else if constexpr (SameType<TRule, LayerRule>)
+        {
+          if (rule.IsStatement())
+          {
+            return CSSLayerStatementRule::Create(rule, parentSheet);
+          }
+          return CSSLayerBlockRule::Create(rule, parentSheet);
+        }
+        else if constexpr (SameType<TRule, ContainerRule>)
+        {
+          return CSSContainerRule::Create(rule, parentSheet);
+        }
+        else if constexpr (SameType<TRule, PropertyRule>)
+        {
+          return CSSPropertyRule::Create(rule, parentSheet);
+        }
+        else if constexpr (SameType<TRule, ScopeRule>)
+        {
+          return CSSScopeRule::Create(rule, parentSheet);
+        }
+        else if constexpr (SameType<TRule, StartingStyleRule>)
+        {
+          return CSSStartingStyleRule::Create(rule, parentSheet);
+        }
+        else if constexpr (SameType<TRule, ViewTransitionRule>)
+        {
+          return CSSViewTransitionRule::Create(rule, parentSheet);
+        }
+        else if constexpr (SameType<TRule, PositionTryRule>)
+        {
+          return CSSPositionTryRule::Create(rule, parentSheet);
+        }
+        else if constexpr (SameType<TRule, FunctionRule>)
+        {
+          return CSSFunctionRule::Create(rule, parentSheet);
+        }
+        else if constexpr (SameType<TRule, FunctionDeclarationsRule>)
+        {
+          return CSSFunctionDeclarations::Create(rule, parentSheet);
+        }
+        else
+        {
+          // `@charset` rules and keyframes (which `CSSKeyframesRule` wraps) have no wrapper of their own.
+          static_assert(SameType<TRule, CharsetRule> || SameType<TRule, KeyframeRule>);
+          krys_unreachable();
+        }
+      });
+
+    if (parentRule)
+    {
+      wrapper->SetParentRule(parentRule);
+    }
+
+    return wrapper;
   }
 
   void Rule::InvalidateResolvedSelectorListRecursively() noexcept

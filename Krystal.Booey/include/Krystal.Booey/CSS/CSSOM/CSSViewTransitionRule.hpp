@@ -1,40 +1,46 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Booey/CSS/Rules/ViewTransitionRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
-#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "StyleProperties.h"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
 {
+  class ViewTransitionRule;
+
+  /// @brief An `@view-transition` rule, exposed to scripts.
+  /// @see https://drafts.csswg.org/css-view-transitions-2/#the-cssviewtransitionrule-interface
   class CSSViewTransitionRule final : public CSSRule
   {
+  private:
+    Ref<css::ViewTransitionRule> _viewTransitionRule;
+
+    CSSViewTransitionRule(css::ViewTransitionRule &rule, CSSStyleSheet *parent) noexcept;
+
   public:
-    using ViewTransitionNavigation = WebCore::ViewTransitionNavigation;
+    ~CSSViewTransitionRule() noexcept;
 
-    static Ref<CSSViewTransitionRule> create(StyleRuleViewTransition &, CSSStyleSheet *);
-    virtual ~CSSViewTransitionRule();
+    KRYS_NODISCARD static Ref<CSSViewTransitionRule> Create(css::ViewTransitionRule &rule,
+                                                            CSSStyleSheet *sheet) noexcept;
 
-    String cssText() const final;
-    void reattach(StyleRuleBase &) final;
-    RuleType RuleType() const final
+    KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+    void Reattach(Rule &rule) noexcept final;
+
+    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
     {
       return RuleType::ViewTransition;
     }
 
-    CSSOMStringAtom navigation() const;
-    SmallList<CSSOMStringAtom> types() const
-    {
-      return Ref {m_viewTransitionRule}->types();
-    }
-
-  private:
-    CSSViewTransitionRule(StyleRuleViewTransition &, CSSStyleSheet *parent);
-
-    Ref<StyleRuleViewTransition> m_viewTransitionRule;
+    KRYS_NODISCARD CSSOMStringAtom Navigation() const noexcept;
+    KRYS_NODISCARD List<CSSOMStringAtom> Types() const noexcept;
   };
+}
 
-} // namespace krys::boo::css
-
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSViewTransitionRule, RuleType::ViewTransition)
-
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSViewTransitionRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+  {
+    return rule.StyleRuleType() == krys::boo::css::RuleType::ViewTransition;
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

@@ -12,8 +12,10 @@
 #include "Krystal.Booey/Style/ScopedName.hpp"
 #include "Krystal.Booey/Style/ScopeOrdinal.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
+#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
+#include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -22,24 +24,33 @@
 
 // FIXME: Placeholders for the rendering, font and style-resolver types that length resolution, calc
 // evaluation and colour resolution need. Each declares only the members those callers use, under its upstream
-// name. Only `RenderStyle` can be constructed, and only its colour members are implemented; everything else
-// is unreachable. Each type moves to its own header, with its real implementation, when its slice is ported:
+// name. Only `RenderStyle` can be constructed, and only its colour and zoom members are implemented (zoom is
+// always the initial value); everything else is unreachable. Each type moves to its own header, with its real
+// implementation, when its slice is ported:
 //   - `FontMetrics`, `FontCascadeDescription`, `FontCascade`: platform/graphics fonts.
-//   - `RenderStyle`, `RenderView`, `RenderBox`: rendering.
+//   - `RenderStyle`, `RenderView`, `RenderElement`, `RenderBox`: rendering.
 //   - `style::BuilderState`, `style::AnchorPositionEvaluator`, `style::ContainerQueryEvaluator`: the style
 //     resolver (`Style/BuilderState.hpp`, `Style/AnchorPositionEvaluator.hpp`, unreviewed).
+//   - `style::Scope`, `style::Resolver`: style sheet invalidation and the style resolver. Nothing creates a
+//     scope yet (`ScopeForNode` returns null), so style sheets have no scope to notify.
 //   - the `Document*` colour functions: `dom::Document` (upstream members) once it has a page and settings.
+//   - the `Document*` URL, parser context, security and keyframes functions: `dom::Document` (upstream
+//     members) once it has a URL, settings and a security origin.
 // A few members collapse an upstream call chain whose types aren't ported yet; they're marked below.
 
 namespace krys::boo::dom
 {
   class Document;
   class Element;
+  class Node;
 }
 
 namespace krys::boo::css
 {
+  class CSSStyleSheet;
+  class KeyframesRule;
   class ToLengthConversionData;
+  struct ParserContext;
 }
 
 namespace krys::boo::css::calc
@@ -119,9 +130,17 @@ namespace krys::boo
     void SetHasDarkOnlyColorScheme(bool value) noexcept;
 
     KRYS_NODISCARD WritingMode GetWritingMode() const noexcept;
+
+    /// @brief The initial `zoom` (1); nothing sets it yet.
     KRYS_NODISCARD float Zoom() const noexcept;
+
+    /// @brief The initial used zoom (1); nothing sets it yet.
     KRYS_NODISCARD float UsedZoom() const noexcept;
+
+    /// @brief Collapses the page's device scale factor for a document with no page: 1.
     KRYS_NODISCARD float DeviceScaleFactor() const noexcept;
+
+    /// @brief Collapses `document().settings().evaluationTimeZoomEnabled()` for default settings: off.
     KRYS_NODISCARD bool EvaluationTimeZoomEnabled() const noexcept;
 
     KRYS_NODISCARD const FontCascade &GetFontCascade() const noexcept;
@@ -156,7 +175,16 @@ namespace krys::boo
     KRYS_NODISCARD FloatSize SizeForCSSDefaultViewportUnits() const noexcept;
   };
 
-  class RenderBox
+  class RenderElement : public CanMakeCheckedPtr<RenderElement>
+  {
+    KRYS_NON_COPY_MOVABLE(RenderElement);
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderElement);
+
+  public:
+    RenderElement() = delete;
+  };
+
+  class RenderBox : public RenderElement
   {
     KRYS_NON_COPY_MOVABLE(RenderBox);
 
@@ -171,7 +199,10 @@ namespace krys::boo
 
   KRYS_NODISCARD float AdjustFloatForAbsoluteZoom(float, const RenderStyle &) noexcept;
 
-  /// @brief Collapses `document.renderView()`.
+  /// @brief Collapses `adjustForAbsoluteZoom(value, renderView)` (`RenderView` is a `RenderElement`).
+  KRYS_NODISCARD int32 AdjustForAbsoluteZoom(int32, const RenderView &) noexcept;
+
+  /// @brief Collapses `document.renderView()`. Nothing creates a render tree yet, so it's always null.
   KRYS_NODISCARD const RenderView *RenderViewOf(const dom::Document &) noexcept;
 
   /// @brief Collapses `element.renderStyle()`.
@@ -202,6 +233,24 @@ namespace krys::boo
   /// @brief Collapses `document.styleColorOptions(style)` for a document with no page and default settings.
   KRYS_NODISCARD style::ColorOptions DocumentStyleColorOptions(const dom::Document &,
                                                                const RenderStyle *) noexcept;
+
+  /// @brief Collapses `document.baseURL()`. `Document` has no URL yet, so it's `about:blank`.
+  KRYS_NODISCARD url::URL DocumentBaseURL(const dom::Document &) noexcept;
+
+  /// @brief Collapses `document.completeURL(url)`: @p url resolved against `DocumentBaseURL`.
+  KRYS_NODISCARD url::URL DocumentCompleteURL(const dom::Document &, utf8_stringview url) noexcept;
+
+  /// @brief Collapses `CSSParserContext(document, baseURL)` for a no-quirks document with default settings.
+  KRYS_NODISCARD css::ParserContext DocumentCssParserContext(const dom::Document &,
+                                                             const url::URL &baseURL) noexcept;
+
+  /// @brief Collapses `document.protectedSecurityOrigin()->canRequest(url, ...)`. There's no security origin
+  /// or loader yet, so every URL can be requested.
+  KRYS_NODISCARD bool DocumentCanRequest(const dom::Document &, const url::URL &) noexcept;
+
+  /// @brief Collapses `document.keyframesRuleDidChange(name)`. Nothing runs animations yet, so it does
+  /// nothing.
+  void DocumentKeyframesRuleDidChange(dom::Document &, const css::CSSOMString &name) noexcept;
 }
 
 namespace krys::boo::style
@@ -272,5 +321,36 @@ namespace krys::boo::style
     KRYS_NODISCARD static RefPtr<const dom::Element>
       SelectContainer(css::cq::Axis, const css::CSSOMString &name, const dom::Element &,
                       SelectionMode = SelectionMode::Element) noexcept;
+  };
+
+  class Resolver
+  {
+    KRYS_NON_COPY_MOVABLE(Resolver);
+
+  public:
+    Resolver() = delete;
+
+    void AddKeyframeStyle(css::KeyframesRule &) noexcept;
+  };
+
+  class Scope : public CanMakeCheckedPtr<Scope>, public CanMakeWeakPtr<Scope>
+  {
+    KRYS_NON_COPY_MOVABLE(Scope);
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Scope);
+
+  public:
+    Scope() = delete;
+
+    /// @brief Collapses `Style::Scope::forNode(node)`. No document or shadow root has a scope yet, so it's
+    /// always null.
+    KRYS_NODISCARD static Scope *ForNode(dom::Node &) noexcept;
+
+    void DidChangeActiveStyleSheetCandidates() noexcept;
+    void DidChangeStyleSheetContents() noexcept;
+    KRYS_NODISCARD bool ActiveStyleSheetsContains(const css::CSSStyleSheet &) const noexcept;
+    KRYS_NODISCARD Resolver *ResolverIfExists() noexcept;
+
+    /// @brief Collapses `setLastSuccessfulPositionOptionIndexMap({ })`.
+    void ClearLastSuccessfulPositionOptionIndexMap() noexcept;
   };
 }

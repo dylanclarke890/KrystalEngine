@@ -85,6 +85,33 @@ target_sources(Krystal.Booey.Tests
 		tests/Core/NumberFormatting.cpp
 
 		# CSS
+		tests/CSS/CSSOM/CSSContainerRule.cpp
+		tests/CSS/CSSOM/CSSCounterStyleRule.cpp
+		tests/CSS/CSSOM/CSSFontFaceRule.cpp
+		tests/CSS/CSSOM/CSSFontFeatureValuesRule.cpp
+		tests/CSS/CSSOM/CSSFontPaletteValuesRule.cpp
+		tests/CSS/CSSOM/CSSFunctionRule.cpp
+		tests/CSS/CSSOM/CSSGroupingRule.cpp
+		tests/CSS/CSSOM/CSSImportRule.cpp
+		tests/CSS/CSSOM/CSSKeyframesRule.cpp
+		tests/CSS/CSSOM/CSSLayerBlockRule.cpp
+		tests/CSS/CSSOM/CSSLayerStatementRule.cpp
+		tests/CSS/CSSOM/CSSMediaRule.cpp
+		tests/CSS/CSSOM/CSSNamespaceRule.cpp
+		tests/CSS/CSSOM/CSSPageRule.cpp
+		tests/CSS/CSSOM/CSSPositionTryRule.cpp
+		tests/CSS/CSSOM/CSSPropertyRule.cpp
+		tests/CSS/CSSOM/CSSRule.cpp
+		tests/CSS/CSSOM/CSSRuleList.cpp
+		tests/CSS/CSSOM/CSSScopeRule.cpp
+		tests/CSS/CSSOM/CSSStartingStyleRule.cpp
+		tests/CSS/CSSOM/CSSStyleRule.cpp
+		tests/CSS/CSSOM/CSSSupportsRule.cpp
+		tests/CSS/CSSOM/CSSViewTransitionRule.cpp
+		tests/CSS/CSSStyleProperties.cpp
+		tests/CSS/CSSStyleSheet.cpp
+		tests/CSS/Descriptors/PropertySetCSSDescriptors.cpp
+		tests/CSS/Media/MediaList.cpp
 		tests/CSS/Calc/CalcType.cpp
 		tests/CSS/Calc/Executor.cpp
 		tests/CSS/Calc/SymbolTable.cpp
@@ -158,6 +185,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Properties/ShorthandSerialiser.cpp
 		tests/CSS/Properties/StyleProperties.cpp
 		tests/CSS/Queries/ContainerQueryParser.cpp
+		tests/CSS/Queries/MediaQueryEvaluator.cpp
 		tests/CSS/Queries/MediaQueryParser.cpp
 		tests/CSS/Rules/CounterStyleRule.cpp
 		tests/CSS/Rules/DescriptorRules.cpp
@@ -286,6 +314,7 @@ target_sources(Krystal.Booey.Tests
 		# Style
 		tests/Style/Calc/Tree.cpp
 		tests/Style/ScopedName.cpp
+		tests/Style/StyleSheetContentsCache.cpp
 		tests/Style/Values/Color/Color.cpp
 		tests/Style/Values/Color/DynamicRangeLimit.cpp
 		tests/Style/Values/Color/SystemColor.cpp

@@ -1,79 +1,80 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/CSSOM/CSSConditionRule.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo::css
 {
   class CSSRuleList;
   class CSSStyleProperties;
-  class DeclaredStylePropertyMap;
-  class StylePropertyMap;
-  class StyleRuleCSSStyleProperties;
-  class StyleRule;
-  class StyleRuleWithNesting;
   class StyleRuleCSSStyleProperties;
 
+  /// @brief A style rule, exposed to scripts.
+  /// @see https://drafts.csswg.org/cssom/#the-cssstylerule-interface
+  // FIXME: styleMap (DeclaredStylePropertyMap) comes with the Typed OM.
   class CSSStyleRule final : public CSSRule
   {
+  private:
+    Ref<StyleRule> _styleRule;
+    RefPtr<StyleRuleCSSStyleProperties> _propertiesCSSOMWrapper;
+
+    mutable List<RefPtr<CSSRule>> _childRuleCSSOMWrappers;
+    mutable UniquePtr<CSSRuleList> _ruleListCSSOMWrapper;
+
+    CSSStyleRule(StyleRule &rule, CSSStyleSheet *parent) noexcept;
+    CSSStyleRule(StyleRuleWithNesting &rule, CSSStyleSheet *parent) noexcept;
+
   public:
-    static Ref<CSSStyleRule> create(StyleRule &rule, CSSStyleSheet *sheet)
-    {
-      return adoptRef(*new CSSStyleRule(rule, sheet));
-    }
-    static Ref<CSSStyleRule> create(StyleRuleWithNesting &rule, CSSStyleSheet *sheet)
-    {
-      return adoptRef(*new CSSStyleRule(rule, sheet));
-    };
+    ~CSSStyleRule() noexcept;
 
-    virtual ~CSSStyleRule();
+    KRYS_NODISCARD static Ref<CSSStyleRule> Create(StyleRule &rule, CSSStyleSheet *sheet) noexcept;
+    KRYS_NODISCARD static Ref<CSSStyleRule> Create(StyleRuleWithNesting &rule, CSSStyleSheet *sheet) noexcept;
 
-    String selectorText() const;
-    void setSelectorText(const String &);
+    KRYS_NODISCARD CSSOMString SelectorText() const noexcept;
+    void SetSelectorText(const CSSOMString &selectorText) noexcept;
 
-    CSSStyleProperties &style();
+    KRYS_NODISCARD CSSStyleProperties &Style() noexcept;
 
     // FIXME: Not CSSOM. Remove.
-    StyleRule &styleRule() const
+    KRYS_NODISCARD StyleRule &GetStyleRule() const noexcept
     {
-      return m_styleRule.get();
+      return *_styleRule;
     }
 
-    CSSRuleList &cssRules() const;
-    ExceptionOr<unsigned> insertRule(const String &rule, unsigned index);
-    ExceptionOr<void> deleteRule(unsigned index);
-    unsigned length() const;
-    CSSRule *item(unsigned index) const;
-
-    StylePropertyMap &styleMap();
+    KRYS_NODISCARD CSSRuleList &CssRules() const noexcept;
+    dom::ExceptionOr<uint32> InsertRule(const CSSOMString &rule, uint32 index) noexcept;
+    dom::ExceptionOr<void> DeleteRule(uint32 index) noexcept;
+    KRYS_NODISCARD uint32 Length() const noexcept;
+    KRYS_NODISCARD CSSRule *Item(uint32 index) const noexcept;
 
   private:
-    CSSStyleRule(StyleRule &, CSSStyleSheet *);
-    CSSStyleRule(StyleRuleWithNesting &, CSSStyleSheet *);
-
-    RuleType RuleType() const final
+    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
     {
       return RuleType::Style;
     }
-    String cssText() const final;
-    String cssText(const SerialisationContext &) const final;
-    String cssTextInternal(StringBuilder &declarations, StringBuilder &rules) const;
-    void reattach(StyleRuleBase &) final;
-    void getChildStyleSheets(HashSet<RefPtr<CSSStyleSheet>> &) final;
 
-    String generateSelectorText() const;
-    SmallList<Ref<StyleRuleBase>> nestedRules() const;
-    void cssTextForRules(StringBuilder &rules) const;
-    void cssTextForRulesWithReplacementURLs(StringBuilder &rules, const SerialisationContext &) const;
+    KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+    KRYS_NODISCARD CSSOMString CssText(const SerialisationContext &context) const noexcept final;
+    KRYS_NODISCARD CSSOMString CssTextInternal(const CSSOMString &declarations,
+                                               const CSSOMString &rules) const noexcept;
+    void Reattach(Rule &rule) noexcept final;
+    void GetChildStyleSheets(HashSet<RefPtr<CSSStyleSheet>> &childStyleSheets) noexcept final;
 
-    Ref<StyleRule> m_styleRule;
-    const Ref<DeclaredStylePropertyMap> m_styleMap;
-    RefPtr<StyleRuleCSSStyleProperties> m_propertiesCSSOMWrapper;
-
-    mutable SmallList<RefPtr<CSSRule>> m_childRuleCSSOMWrappers;
-    const std::unique_ptr<CSSRuleList> m_ruleListCSSOMWrapper;
+    KRYS_NODISCARD CSSOMString GenerateSelectorText() const noexcept;
+    KRYS_NODISCARD const List<Ref<Rule>> &NestedRules() const noexcept;
+    void CssTextForRules(CSSOMString &rules) const noexcept;
+    void CssTextForRulesWithReplacementURLs(CSSOMString &rules,
+                                            const SerialisationContext &context) const noexcept;
   };
+}
 
-} // namespace krys::boo::css
-
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSStyleRule, RuleType::Style)
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSStyleRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+  {
+    return rule.StyleRuleType() == krys::boo::css::RuleType::Style;
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

@@ -21,6 +21,10 @@
 
 namespace krys::boo::css
 {
+  class CSSGroupingRule;
+  class CSSRule;
+  class CSSStyleRule;
+  class CSSStyleSheet;
   class MutableStyleProperties;
   class StyleProperties;
   class StyleSheetContents;
@@ -28,7 +32,6 @@ namespace krys::boo::css
   using CascadeLayerName = List<CSSOMStringAtom>;
 
   /// @brief The base of the internal rule model: a parsed rule, shared by the CSSOM wrappers created for it.
-  // FIXME: The CreateCSSOMWrapper overloads come with the CSSOM rule wrappers.
   class Rule : public RefCounted<Rule>
   {
     // Needs access to the protected operator delete.
@@ -186,6 +189,14 @@ namespace krys::boo::css
     /// @brief Deep-copies the rule (its declarations and child rules), whatever its type.
     KRYS_NODISCARD Ref<Rule> Copy() const noexcept;
 
+    /// @brief Creates the CSSOM wrapper exposing this rule to scripts.
+    KRYS_NODISCARD Ref<CSSRule> CreateCSSOMWrapper(CSSStyleSheet &parentSheet) const noexcept;
+    KRYS_NODISCARD Ref<CSSRule> CreateCSSOMWrapper(CSSGroupingRule &parentRule) const noexcept;
+    KRYS_NODISCARD Ref<CSSRule> CreateCSSOMWrapper(CSSStyleRule &parentRule) const noexcept;
+
+    // This is only needed to support getMatchedCSSRules.
+    KRYS_NODISCARD Ref<CSSRule> CreateCSSOMWrapper() const noexcept;
+
   protected:
     void operator delete(Rule *rule, std::destroying_delete_t) noexcept;
 
@@ -202,6 +213,9 @@ namespace krys::boo::css
     void InvalidateResolvedSelectorListRecursively() noexcept;
 
   private:
+    KRYS_NODISCARD Ref<CSSRule> CreateCSSOMWrapper(CSSStyleSheet *parentSheet,
+                                                   CSSRule *parentRule) const noexcept;
+
     template <typename Visitor>
     constexpr decltype(auto) VisitDerived(Visitor &&) noexcept;
 

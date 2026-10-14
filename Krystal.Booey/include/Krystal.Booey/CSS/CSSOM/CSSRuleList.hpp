@@ -1,14 +1,18 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
 
 namespace krys::boo::css
 {
   class CSSRule;
   class CSSStyleSheet;
 
+  /// @brief An ordered list of rules exposed to scripts.
+  /// @see https://drafts.csswg.org/cssom/#the-cssrulelist-interface
   class CSSRuleList : public AbstractRefCounted
   {
     KRYS_NON_COPYABLE(CSSRuleList);
@@ -19,22 +23,22 @@ namespace krys::boo::css
   public:
     virtual ~CSSRuleList() noexcept;
 
-    KRYS_NODISCARD virtual size_t Length() const noexcept = 0;
+    KRYS_NODISCARD virtual uint32 Length() const noexcept = 0;
+    KRYS_NODISCARD virtual CSSRule *Item(uint32 index) const noexcept = 0;
 
-    KRYS_NODISCARD virtual CSSRule *Item(size_t index) const noexcept = 0;
-
-    KRYS_NODISCARD bool IsSupportedPropertyIndex(size_t index) const noexcept
+    KRYS_NODISCARD bool IsSupportedPropertyIndex(uint32 index) const noexcept
     {
       return Item(index);
     }
 
-    KRYS_NODISCARD virtual CSSStyleSheet *StyleSheet() const noexcept = 0;
+    KRYS_NODISCARD virtual CSSStyleSheet *GetStyleSheet() const noexcept = 0;
   };
 
+  /// @brief A rule list that owns its rules.
   class StaticCSSRuleList final : public CSSRuleList, public RefCounted<StaticCSSRuleList>
   {
   private:
-    SmallList<RefPtr<CSSRule>> _rules;
+    List<RefPtr<CSSRule>> _rules;
 
     StaticCSSRuleList() noexcept;
 
@@ -51,47 +55,44 @@ namespace krys::boo::css
       RefCounted::SubRef();
     }
 
-    uint32 GetRefCount() const noexcept final
+    KRYS_NODISCARD uint32 GetRefCount() const noexcept final
     {
       return RefCounted::GetRefCount();
     }
 
-    KRYS_NODISCARD static Ref<StaticCSSRuleList> Create() noexcept
-    {
-      return AdoptRef<StaticCSSRuleList>(*new StaticCSSRuleList());
-    }
+    KRYS_NODISCARD static Ref<StaticCSSRuleList> Create() noexcept;
 
-    KRYS_NODISCARD SmallList<RefPtr<CSSRule>> &Rules() noexcept
+    KRYS_NODISCARD List<RefPtr<CSSRule>> &Rules() noexcept
     {
       return _rules;
     }
 
-    KRYS_NODISCARD CSSStyleSheet *StyleSheet() const noexcept final
+    KRYS_NODISCARD CSSStyleSheet *GetStyleSheet() const noexcept final
     {
       return nullptr;
     }
 
   private:
-    KRYS_NODISCARD size_t Length() const noexcept final
+    KRYS_NODISCARD uint32 Length() const noexcept final
     {
-      return _rules.size();
+      return static_cast<uint32>(_rules.size());
     }
 
-    KRYS_NODISCARD CSSRule *Item(size_t index) const noexcept final
+    KRYS_NODISCARD CSSRule *Item(uint32 index) const noexcept final
     {
       return index < _rules.size() ? _rules[index].get() : nullptr;
     }
   };
 
-  template <typename Rule>
+  /// @brief A rule list that reads a rule's child rules as they are now. The rule owns the live list.
+  template <typename TRule>
   class LiveCSSRuleList final : public CSSRuleList
   {
   private:
-    /// @brief The rule owns the live list.
-    Rule &_rule;
+    TRule &_rule;
 
   public:
-    LiveCSSRuleList(Rule &rule) noexcept : _rule(rule)
+    explicit LiveCSSRuleList(TRule &rule) noexcept : _rule(rule)
     {
     }
 
@@ -105,20 +106,25 @@ namespace krys::boo::css
       _rule.SubRef();
     }
 
+    KRYS_NODISCARD uint32 GetRefCount() const noexcept final
+    {
+      return _rule.GetRefCount();
+    }
+
   private:
-    KRYS_NODISCARD size_t Length() const noexcept final
+    KRYS_NODISCARD uint32 Length() const noexcept final
     {
       return _rule.Length();
     }
 
-    KRYS_NODISCARD CSSRule *Item(size_t index) const noexcept final
+    KRYS_NODISCARD CSSRule *Item(uint32 index) const noexcept final
     {
       return _rule.Item(index);
     }
 
-    KRYS_NODISCARD CSSStyleSheet *StyleSheet() const noexcept final
+    KRYS_NODISCARD CSSStyleSheet *GetStyleSheet() const noexcept final
     {
-      return _rule.StyleSheet();
+      return _rule.ParentStyleSheet();
     }
   };
 }

@@ -188,7 +188,6 @@ namespace krys::boo::css
 
     KRYS_NODISCARD CSSOMStringAtom AsTextAtom(const SerialisationContext &context) const noexcept;
 
-    // FIXME: Returns false until the CSSOM wrappers (CSSStyleProperties) are ported.
     KRYS_NODISCARD bool HasCSSOMWrapper() const noexcept;
 
     KRYS_NODISCARD bool IsMutable() const noexcept

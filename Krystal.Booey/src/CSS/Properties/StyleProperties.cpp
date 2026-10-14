@@ -355,7 +355,8 @@ namespace krys::boo::css
 
   bool StyleProperties::HasCSSOMWrapper() const noexcept
   {
-    return false;
+    const auto *mutableProperties = DynamicDowncast<MutableStyleProperties>(*this);
+    return mutableProperties && mutableProperties->_cssomWrapper;
   }
 
   bool StyleProperties::TraverseSubresources(

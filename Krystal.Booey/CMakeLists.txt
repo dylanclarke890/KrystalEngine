@@ -219,6 +219,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Values/Primitives/PrimitiveNumericForward.hpp
   include/Krystal.Booey/Style/Values/Primitives/PrimitiveNumericOrKeyword.hpp
   include/Krystal.Booey/Style/Values/Primitives/PrimitiveNumericOrKeywordConversions.hpp
+  include/Krystal.Booey/Style/Values/Primitives/Ratio.hpp
   include/Krystal.Booey/Style/Values/Primitives/UnevaluatedCalc.hpp
   include/Krystal.Booey/Style/Values/Types.hpp
 
@@ -512,10 +513,13 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Queries/ContainerQuery.hpp
   include/Krystal.Booey/CSS/Queries/ContainerQueryFeatures.hpp
   include/Krystal.Booey/CSS/Queries/ContainerQueryParser.hpp
+  include/Krystal.Booey/CSS/Queries/GenericMediaQueryEvaluator.hpp
   include/Krystal.Booey/CSS/Queries/GenericMediaQueryParser.hpp
   include/Krystal.Booey/CSS/Queries/GenericMediaQuerySerialisation.hpp
   include/Krystal.Booey/CSS/Queries/GenericMediaQueryTypes.hpp
+  include/Krystal.Booey/CSS/Queries/MediaEnvironment.hpp
   include/Krystal.Booey/CSS/Queries/MediaQuery.hpp
+  include/Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp
   include/Krystal.Booey/CSS/Queries/MediaQueryFeatures.hpp
   include/Krystal.Booey/CSS/Queries/MediaQueryParser.hpp
   include/Krystal.Booey/CSS/Queries/MediaQueryParserContext.hpp
@@ -539,6 +543,47 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Parser/SupportsParser.hpp
   include/Krystal.Booey/Graphics/FontCustomPlatformData.hpp
   include/Krystal.Booey/Types/NestingLevelIncrementer.hpp
+
+  # CSSOM
+  include/Krystal.Booey/CSS/CSSOM/CSSConditionRule.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSContainerRule.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSCounterStyleRule.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSFontFaceRule.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSFontFeatureValuesRule.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSFontPaletteValuesRule.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSFunctionDeclarations.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSFunctionRule.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSGroupingRule.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSImportRule.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSKeyframeRule.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSKeyframesRule.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSLayerBlockRule.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSLayerStatementRule.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSMediaRule.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSNamespaceRule.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSNestedDeclarations.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSPageRule.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSPositionTryRule.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSPropertyRule.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSRule.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSRuleList.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSScopeRule.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSStartingStyleRule.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSStyleRule.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSSupportsRule.hpp
+  include/Krystal.Booey/CSS/CSSOM/CSSViewTransitionRule.hpp
+  include/Krystal.Booey/CSS/CSSStyleDeclaration.hpp
+  include/Krystal.Booey/CSS/CSSStyleProperties.hpp
+  include/Krystal.Booey/CSS/CSSStyleSheet.hpp
+  include/Krystal.Booey/CSS/Descriptors/CSSFontFaceDescriptors.hpp
+  include/Krystal.Booey/CSS/Descriptors/CSSFunctionDescriptors.hpp
+  include/Krystal.Booey/CSS/Descriptors/CSSPageDescriptors.hpp
+  include/Krystal.Booey/CSS/Descriptors/CSSPositionTryDescriptors.hpp
+  include/Krystal.Booey/CSS/Descriptors/PropertySetCSSDescriptors.hpp
+  include/Krystal.Booey/CSS/Media/MediaList.hpp
+  include/Krystal.Booey/CSS/StyleSheet.hpp
+  include/Krystal.Booey/CSS/Types/MediaListOrDOMString.hpp
+  include/Krystal.Booey/Style/StyleSheetContentsCache.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -805,8 +850,11 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Queries/ContainerQuery.cpp
   src/CSS/Queries/ContainerQueryFeatures.cpp
   src/CSS/Queries/ContainerQueryParser.cpp
+  src/CSS/Queries/GenericMediaQueryEvaluator.cpp
   src/CSS/Queries/GenericMediaQueryParser.cpp
   src/CSS/Queries/GenericMediaQuerySerialisation.cpp
+  src/CSS/Queries/MediaEnvironment.cpp
+  src/CSS/Queries/MediaQueryEvaluator.cpp
   src/CSS/Queries/MediaQueryFeatures.cpp
   src/CSS/Queries/MediaQueryParser.cpp
   src/CSS/Queries/MediaQueryParserContext.cpp
@@ -828,6 +876,45 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Parser/Parser.cpp
   src/CSS/Parser/SupportsParser.cpp
   src/Graphics/FontCustomPlatformData.cpp
+
+  # CSSOM
+  src/CSS/CSSOM/CSSConditionRule.cpp
+  src/CSS/CSSOM/CSSContainerRule.cpp
+  src/CSS/CSSOM/CSSCounterStyleRule.cpp
+  src/CSS/CSSOM/CSSFontFaceRule.cpp
+  src/CSS/CSSOM/CSSFontFeatureValuesRule.cpp
+  src/CSS/CSSOM/CSSFontPaletteValuesRule.cpp
+  src/CSS/CSSOM/CSSFunctionDeclarations.cpp
+  src/CSS/CSSOM/CSSFunctionRule.cpp
+  src/CSS/CSSOM/CSSGroupingRule.cpp
+  src/CSS/CSSOM/CSSImportRule.cpp
+  src/CSS/CSSOM/CSSKeyframeRule.cpp
+  src/CSS/CSSOM/CSSKeyframesRule.cpp
+  src/CSS/CSSOM/CSSLayerBlockRule.cpp
+  src/CSS/CSSOM/CSSLayerStatementRule.cpp
+  src/CSS/CSSOM/CSSMediaRule.cpp
+  src/CSS/CSSOM/CSSNamespaceRule.cpp
+  src/CSS/CSSOM/CSSNestedDeclarations.cpp
+  src/CSS/CSSOM/CSSPageRule.cpp
+  src/CSS/CSSOM/CSSPositionTryRule.cpp
+  src/CSS/CSSOM/CSSPropertyRule.cpp
+  src/CSS/CSSOM/CSSRule.cpp
+  src/CSS/CSSOM/CSSRuleList.cpp
+  src/CSS/CSSOM/CSSScopeRule.cpp
+  src/CSS/CSSOM/CSSStartingStyleRule.cpp
+  src/CSS/CSSOM/CSSStyleRule.cpp
+  src/CSS/CSSOM/CSSSupportsRule.cpp
+  src/CSS/CSSOM/CSSViewTransitionRule.cpp
+  src/CSS/CSSStyleDeclaration.cpp
+  src/CSS/CSSStyleProperties.cpp
+  src/CSS/CSSStyleSheet.cpp
+  src/CSS/Descriptors/CSSFontFaceDescriptors.cpp
+  src/CSS/Descriptors/CSSFunctionDescriptors.cpp
+  src/CSS/Descriptors/CSSPageDescriptors.cpp
+  src/CSS/Descriptors/CSSPositionTryDescriptors.cpp
+  src/CSS/Descriptors/PropertySetCSSDescriptors.cpp
+  src/CSS/Media/MediaList.cpp
+  src/Style/StyleSheetContentsCache.cpp
 )
 
 target_precompile_headers(Krystal.Booey

@@ -4,9 +4,11 @@
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo::css
 {
+  class CSSStyleProperties;
   struct ParserContext;
 
   /// @brief A declaration block that can be changed in place.
@@ -15,9 +17,8 @@ namespace krys::boo::css
     friend class StyleProperties;
 
   private:
-    // FIXME: Add the CSSOM wrapper (CSSStyleProperties) and CssStyleProperties(), EnsureCSSStyleProperties()
-    // and EnsureInlineCSSStyleProperties() once the CSSOM wrappers are ported.
     SmallList<Property, 4uz> _propertyVector;
+    UniquePtr<CSSStyleProperties> _cssomWrapper;
 
     explicit MutableStyleProperties(css::ParserMode mode) noexcept;
     explicit MutableStyleProperties(const StyleProperties &other) noexcept;
@@ -45,6 +46,12 @@ namespace krys::boo::css
     KRYS_NODISCARD Ref<ImmutableStyleProperties> ImmutableCopy() const noexcept;
 
     KRYS_NODISCARD Ref<ImmutableStyleProperties> ImmutableDeduplicatedCopy() const noexcept;
+
+    /// @brief The CSSOM view of this declaration block, if one has been created.
+    KRYS_NODISCARD CSSStyleProperties *CssStyleProperties() noexcept;
+
+    KRYS_NODISCARD CSSStyleProperties &EnsureCSSStyleProperties() noexcept;
+    // FIXME: EnsureInlineCSSStyleProperties(StyledElement &) comes with inline styles.
 
     KRYS_NODISCARD uint32 PropertyCount() const noexcept
     {

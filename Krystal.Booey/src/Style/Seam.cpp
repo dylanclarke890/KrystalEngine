@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/CSS/Calc/RandomCachingKey.hpp"
+#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/Color/KeywordColor.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
@@ -9,7 +10,7 @@
 #include "Krystal.Core/Assert.hpp"
 
 // FIXME: Placeholder definitions; see `Style/Seam.hpp`. Only `RenderStyle` can be constructed, so only its
-// colour members and the document colour functions can be reached.
+// colour members, the document functions and `Scope::ForNode` can be reached.
 
 namespace krys::boo
 {
@@ -116,22 +117,22 @@ namespace krys::boo
 
   float RenderStyle::Zoom() const noexcept
   {
-    krys_unreachable();
+    return 1.f;
   }
 
   float RenderStyle::UsedZoom() const noexcept
   {
-    krys_unreachable();
+    return 1.f;
   }
 
   float RenderStyle::DeviceScaleFactor() const noexcept
   {
-    krys_unreachable();
+    return 1.f;
   }
 
   bool RenderStyle::EvaluationTimeZoomEnabled() const noexcept
   {
-    krys_unreachable();
+    return false;
   }
 
   const FontCascade &RenderStyle::GetFontCascade() const noexcept
@@ -219,9 +220,14 @@ namespace krys::boo
     krys_unreachable();
   }
 
-  const RenderView *RenderViewOf(const dom::Document &) noexcept
+  int32 AdjustForAbsoluteZoom(int32, const RenderView &) noexcept
   {
     krys_unreachable();
+  }
+
+  const RenderView *RenderViewOf(const dom::Document &) noexcept
+  {
+    return nullptr;
   }
 
   const RenderStyle *RenderStyleOf(const dom::Element &) noexcept
@@ -269,6 +275,30 @@ namespace krys::boo
       options |= style::ColorOptions::UseDarkAppearance;
     }
     return options;
+  }
+
+  url::URL DocumentBaseURL(const dom::Document &) noexcept
+  {
+    return url::AboutBlankURL();
+  }
+
+  url::URL DocumentCompleteURL(const dom::Document &document, utf8_stringview url) noexcept
+  {
+    return url::URL(DocumentBaseURL(document), url);
+  }
+
+  css::ParserContext DocumentCssParserContext(const dom::Document &, const url::URL &baseURL) noexcept
+  {
+    return css::ParserContext(css::ParserMode::HTMLStandard, baseURL);
+  }
+
+  bool DocumentCanRequest(const dom::Document &, const url::URL &) noexcept
+  {
+    return true;
+  }
+
+  void DocumentKeyframesRuleDidChange(dom::Document &, const css::CSSOMString &) noexcept
+  {
   }
 }
 
@@ -370,6 +400,41 @@ namespace krys::boo::style
   RefPtr<const dom::Element>
     ContainerQueryEvaluator::SelectContainer(css::cq::Axis, const css::CSSOMString &, const dom::Element &,
                                              ContainerQueryEvaluator::SelectionMode) noexcept
+  {
+    krys_unreachable();
+  }
+
+  void Resolver::AddKeyframeStyle(css::KeyframesRule &) noexcept
+  {
+    krys_unreachable();
+  }
+
+  Scope *Scope::ForNode(dom::Node &) noexcept
+  {
+    return nullptr;
+  }
+
+  void Scope::DidChangeActiveStyleSheetCandidates() noexcept
+  {
+    krys_unreachable();
+  }
+
+  void Scope::DidChangeStyleSheetContents() noexcept
+  {
+    krys_unreachable();
+  }
+
+  bool Scope::ActiveStyleSheetsContains(const css::CSSStyleSheet &) const noexcept
+  {
+    krys_unreachable();
+  }
+
+  Resolver *Scope::ResolverIfExists() noexcept
+  {
+    krys_unreachable();
+  }
+
+  void Scope::ClearLastSuccessfulPositionOptionIndexMap() noexcept
   {
     krys_unreachable();
   }
