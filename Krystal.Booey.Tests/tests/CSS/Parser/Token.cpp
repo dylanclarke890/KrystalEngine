@@ -44,6 +44,14 @@ namespace krys::boo::css::tests
       return ToNarrow(tokenizer.Tokens().Serialise(TokenSerialisationMode::Normal));
     }
 
+    KRYS_NODISCARD string SerialiseForCustomProperty(utf8_stringview css) noexcept
+    {
+      InputStream inputStream {utf8_string(css)};
+      Tokenizer tokenizer(inputStream);
+      tokenizer.PumpTokenizer();
+      return ToNarrow(tokenizer.Tokens().Serialise(TokenSerialisationMode::CustomProperty));
+    }
+
     KRYS_NODISCARD string Serialise(const Token &token) noexcept
     {
       CSSOMString builder;
@@ -304,6 +312,33 @@ namespace krys::boo::css::tests
     CHECK(ToNarrow(token.Unit()) == "vh");
   }
 
+  TEST_CASE("Token::OriginalText", "[CSS][Token]")
+  {
+    CHECK(ToNarrow(TokenizeOne(u8"42").OriginalText()) == "42");
+    CHECK(ToNarrow(TokenizeOne(u8"+3").OriginalText()) == "+3");
+    CHECK(ToNarrow(TokenizeOne(u8"-1.50E+2").OriginalText()) == "-1.50E+2");
+    CHECK(ToNarrow(TokenizeOne(u8".5").OriginalText()) == ".5");
+    // Percentages don't include the %.
+    CHECK(ToNarrow(TokenizeOne(u8"050%").OriginalText()) == "050");
+    // Dimensions include the unit as written.
+    auto dimension = TokenizeOne(u8"2.50PX");
+    CHECK(ToNarrow(dimension.OriginalText()) == "2.50PX");
+    CHECK(ToNarrow(dimension.Unit()) == "PX");
+    auto escaped = TokenizeOne(u8"10\\70 x");
+    CHECK(ToNarrow(escaped.OriginalText()) == "10\\70 x");
+    CHECK(ToNarrow(escaped.Unit()) == "px");
+    // Whitespace keeps every character (after input preprocessing).
+    CHECK(ToNarrow(TokenizeOne(u8" \t\r\n ").OriginalText()) == " \t\n ");
+
+    // The original text and the unit can be set in either order.
+    Token token {TokenType::Dimension};
+    token.Unit(U"vh");
+    token.OriginalText(U"1vh");
+    token.Unit(U"vw");
+    CHECK(ToNarrow(token.OriginalText()) == "1vh");
+    CHECK(ToNarrow(token.Unit()) == "vw");
+  }
+
   TEST_CASE("Token::UnicodeRange", "[CSS][Token]")
   {
     auto range = UnicodeRangeToken(0x25, 0xFF);
@@ -398,9 +433,28 @@ namespace krys::boo::css::tests
 
   TEST_CASE("Token::Serialise(whitespace)", "[CSS][Token]")
   {
-    // Whitespace runs collapse to a single space.
+    // A run of spaces and tabs is a single space, and each newline is another.
     CHECK(Serialise(u8"a   b") == "a b");
-    CHECK(Serialise(u8"a\n\tb") == "a b");
+    CHECK(Serialise(u8"a\n\tb") == "a  b");
+    CHECK(Serialise(u8"a \n\n b") == "a    b");
+
+    // A whitespace token without its text is a single space.
+    CHECK(Serialise(Token {TokenType::Whitespace}) == " ");
+  }
+
+  TEST_CASE("Token::Serialise(custom property)", "[CSS][Token]")
+  {
+    // Numbers keep their original text.
+    CHECK(SerialiseForCustomProperty(u8"1.50") == "1.50");
+    CHECK(SerialiseForCustomProperty(u8"+1") == "+1");
+    CHECK(SerialiseForCustomProperty(u8"1e3") == "1e3");
+    CHECK(SerialiseForCustomProperty(u8"050%") == "050%");
+    CHECK(SerialiseForCustomProperty(u8"1.0PX") == "1.0PX");
+    CHECK(SerialiseForCustomProperty(u8"10\\70 x") == "10\\70 x");
+    // Whitespace keeps its length and newlines; tabs are spaces.
+    CHECK(SerialiseForCustomProperty(u8"a  \t\n b") == "a   \n b");
+    // Everything else is as in normal mode.
+    CHECK(SerialiseForCustomProperty(u8"foo(\"a\")") == "foo(\"a\")");
   }
 
   TEST_CASE("Token::Serialise(comments between tokens)", "[CSS][Token]")
@@ -537,6 +591,14 @@ namespace krys::boo::css::tests
     CHECK_FALSE(TokenizeOne(u8"1") == TokenizeOne(u8"+1"));
     CHECK_FALSE(TokenizeOne(u8"1") == TokenizeOne(u8"1.0"));
     CHECK_FALSE(TokenizeOne(u8"10%") == TokenizeOne(u8"20%"));
+    // Numbers compare their original text, not their value.
+    CHECK_FALSE(TokenizeOne(u8"1e2") == TokenizeOne(u8"100"));
+    CHECK_FALSE(TokenizeOne(u8"1.0px") == TokenizeOne(u8"1px"));
+
+    // Whitespace length and newlines; a tab counts as a space.
+    CHECK(TokenizeOne(u8" ") == TokenizeOne(u8"\t"));
+    CHECK_FALSE(TokenizeOne(u8" ") == TokenizeOne(u8"  "));
+    CHECK_FALSE(TokenizeOne(u8" ") == TokenizeOne(u8"\n"));
 
     // Dimension unit.
     CHECK_FALSE(TokenizeOne(u8"10px") == TokenizeOne(u8"10em"));

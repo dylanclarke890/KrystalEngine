@@ -320,13 +320,19 @@ namespace krys::boo::css::tests
     CHECK(ConditionText(u8"foo(bar)") == "foo(bar)");
   }
 
-  // FIXME: The tokenizer doesn't keep the original text of numbers or runs of whitespace, so custom property
-  // values don't round-trip (see Token.cpp). The `or` case fails upstream too.
   TEST_CASE_METHOD(ValueFixture, "ContainerQueryParser: style() serialisation of original text",
-                   "[CSS][Queries][ContainerQueryParser][!shouldfail]")
+                   "[CSS][Queries][ContainerQueryParser]")
   {
+    // Custom property values keep their original text.
     CHECK(ConditionText(u8"style(--foo: bar   baz)") == "style(--foo: bar   baz)");
     CHECK(ConditionText(u8"style(--foo:2.100  )") == "style(--foo: 2.100)");
+  }
+
+  // FIXME: Fails upstream too: the unknown `prop: val` condition is serialised from its tokens in normal
+  // mode, so its whitespace collapses.
+  TEST_CASE_METHOD(ValueFixture, "ContainerQueryParser: style() serialisation of unknown conditions",
+                   "[CSS][Queries][ContainerQueryParser][!shouldfail]")
+  {
     CHECK(ConditionText(u8" style(  ( --FOO: BAR) OR ( prop: val  ) )")
           == "style((--FOO: BAR) or ( prop: val  ))");
   }

@@ -39,10 +39,8 @@ namespace krys::boo::css::PropertyParserHelpers
         return false;
       }
 
-      // FIXME: Tokens don't keep their original text, so numeric tokens can't be appended and every range
-      // that contains one (e.g. `U+0025-00FF`, `U+4??`) fails to parse.
-      (void)str;
-      return false;
+      str.append(tokens.Consume().OriginalText());
+      return true;
     }
 
     KRYS_NODISCARD bool ConsumeAndAppendOptionalDelimiter(CSSOMString &str, TokenRange &tokens,

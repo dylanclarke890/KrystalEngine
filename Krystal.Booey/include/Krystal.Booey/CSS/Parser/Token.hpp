@@ -36,6 +36,8 @@ namespace krys::boo::css
     char32 _unicodeRangeStart {0};
     char32 _unicodeRangeEnd {0};
     mutable ValueIdStorage _valueId {UncachedValueId};
+    // For numeric and whitespace tokens, the original text is stored first and a dimension's unit after it.
+    uint32 _originalTextLength {0};
     SmallList<char8, 32uz> _codePoints;
 
   public:
@@ -189,16 +191,43 @@ namespace krys::boo::css
       return _numericSignChar;
     }
 
+    /// @brief Sets the text the token was tokenized from: the number (without `%`) for number and percentage
+    /// tokens, the number and the unit as written (escapes included) for dimension tokens, and the whitespace
+    /// for whitespace tokens.
+    void OriginalText(utf32_stringview text) noexcept
+    {
+      krys_debug_assert(_type == TokenType::Number || _type == TokenType::Percentage
+                        || _type == TokenType::Dimension || _type == TokenType::Whitespace);
+
+      // Keep the unit, which is stored after the original text.
+      SmallList<char8, 32uz> unit(_codePoints.begin() + _originalTextLength, _codePoints.end());
+      AppendDataInternal(text);
+      _originalTextLength = static_cast<uint32>(_codePoints.size());
+      _codePoints.append(unit.begin(), unit.end());
+    }
+
+    /// @brief The text the token was tokenized from (see the setter).
+    KRYS_NODISCARD utf8_stringview OriginalText() const noexcept
+    {
+      krys_debug_assert(_type == TokenType::Number || _type == TokenType::Percentage
+                        || _type == TokenType::Dimension || _type == TokenType::Whitespace);
+
+      return utf8_stringview {_codePoints.data(), _originalTextLength};
+    }
+
     void Unit(utf32_stringview unit) noexcept
     {
       krys_debug_assert(_type == TokenType::Dimension);
-      AppendDataInternal(unit);
+
+      _codePoints.resize(_originalTextLength);
+      AppendEncoded(unit);
     }
 
     KRYS_NODISCARD utf8_stringview Unit() const noexcept
     {
       krys_debug_assert(_type == TokenType::Dimension);
-      return utf8_stringview {_codePoints.data(), _codePoints.size()};
+      return utf8_stringview {_codePoints.data() + _originalTextLength,
+                              _codePoints.size() - _originalTextLength};
     }
 
     void UnicodeRange(char32 start, char32 end) noexcept
@@ -240,17 +269,21 @@ namespace krys::boo::css
     void AppendDataInternal(utf32_stringview codePoints) noexcept
     {
       _valueId = UncachedValueId;
+      _codePoints.clear();
+      AppendEncoded(codePoints);
+    }
 
+    void AppendEncoded(utf32_stringview codePoints) noexcept
+    {
       // Empty strings and URLs are valid, but Encode reports empty input as an error.
       if (codePoints.empty())
       {
-        _codePoints.clear();
         return;
       }
 
       auto encodeResult = krys::text::Encode<krys::text::UTF8>(codePoints);
       krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
-      _codePoints.assign(encodeResult.Output.begin(), encodeResult.Output.end());
+      _codePoints.append(encodeResult.Output.begin(), encodeResult.Output.end());
     }
   };
 }

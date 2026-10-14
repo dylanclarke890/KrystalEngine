@@ -629,9 +629,8 @@ namespace krys::boo::css::tests
     CHECK(consume(u8"red important") == Pair<bool, std::string> {false, "red important"});
   }
 
-  // FIXME: The tokenizer doesn't keep whitespace counts, so custom property values lose repeated whitespace.
   TEST_CASE_METHOD(ValueFixture, "MutableStyleProperties::SetCustomProperty keeps whitespace",
-                   "[CSS][Parser][!shouldfail]")
+                   "[CSS][Parser]")
   {
     auto context = SheetContext();
     auto properties = MutableStyleProperties::Create(ParserMode::HTMLStandard);

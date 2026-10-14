@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Parser/Token.hpp"
 #include "Krystal.Booey/CSS/Markup.hpp"
 #include "Krystal.Core/Types/Array.hpp"
+#include <algorithm>
 #include <charconv>
 #include <cmath>
 #include <format>
@@ -22,6 +23,13 @@ namespace krys::boo::css
 
       Array<bool, EnumTraits<TokenType>::DistinctValues> Buffer {};
     };
+
+    // Spaces and tabs are counted as spaces, and newlines kept, as the original whitespace is serialised for
+    // custom properties.
+    constexpr char8 WhitespaceForCustomProperty(char8 c) noexcept
+    {
+      return c == u8'\n' ? u8'\n' : u8' ';
+    }
 
     void AppendASCII(std::string_view ascii, CSSOMString &builder) noexcept
     {
@@ -68,10 +76,11 @@ namespace krys::boo::css
         }
         KRYS_FALLTHROUGH;
       case TokenType::Number:
-      case TokenType::Percentage:
-        // The spec compares the original text, which isn't kept; fall back to the parsed values.
-        return _numericSignChar == other._numericSignChar && _numericValue == other._numericValue
-               && _numericValueType == other._numericValueType;
+      case TokenType::Percentage: return OriginalText() == other.OriginalText();
+      case TokenType::Whitespace:
+        return std::ranges::equal(
+          OriginalText(), other.OriginalText(),
+          [](char8 a, char8 b) { return WhitespaceForCustomProperty(a) == WhitespaceForCustomProperty(b); });
       case TokenType::UnicodeRange:
         return _unicodeRangeStart == other._unicodeRangeStart && _unicodeRangeEnd == other._unicodeRangeEnd;
       default: return true;
@@ -79,7 +88,7 @@ namespace krys::boo::css
   }
 
   void Token::Serialise(CSSOMString &builder, const Token *nextToken,
-                        KRYS_MAYBE_UNUSED TokenSerialisationMode mode) const noexcept
+                        TokenSerialisationMode mode) const noexcept
   {
     // This is currently only used for @supports CSSOM. To keep our implementation simple we handle some of
     // the edge cases incorrectly (see comments below).
@@ -170,26 +179,43 @@ namespace krys::boo::css
         }
         break;
       case TokenType::Number:
-        // FIXME: TokenSerialisationMode::CustomProperty should append the original text, which the tokenizer
-        // doesn't keep. Serialised from the parsed value instead.
-        if (_numericSignChar == NumericSignChar::Plus)
+        if (mode == TokenSerialisationMode::CustomProperty)
         {
-          builder.push_back(u8'+');
+          builder.append(OriginalText());
         }
-        AppendNumber(_numericValue, builder);
+        else
+        {
+          if (_numericSignChar == NumericSignChar::Plus)
+          {
+            builder.push_back(u8'+');
+          }
+          AppendNumber(_numericValue, builder);
+        }
         appendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl,
                                TokenType::Number, TokenType::Percentage, TokenType::Dimension},
                               '%');
         break;
       case TokenType::Percentage:
-        // FIXME: Same as Number for TokenSerialisationMode::CustomProperty.
-        AppendNumber(_numericValue, builder);
+        if (mode == TokenSerialisationMode::CustomProperty)
+        {
+          builder.append(OriginalText());
+        }
+        else
+        {
+          AppendNumber(_numericValue, builder);
+        }
         builder.push_back(u8'%');
         break;
       case TokenType::Dimension:
-        // FIXME: Same as Number for TokenSerialisationMode::CustomProperty.
-        AppendNumber(_numericValue, builder);
-        SerialiseIdentifier(CSSOMString(Unit()), builder);
+        if (mode == TokenSerialisationMode::CustomProperty)
+        {
+          builder.append(OriginalText());
+        }
+        else
+        {
+          AppendNumber(_numericValue, builder);
+          SerialiseIdentifier(CSSOMString(Unit()), builder);
+        }
         appendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl,
                                TokenType::Number, TokenType::Percentage, TokenType::Dimension,
                                TokenType::CDC},
@@ -211,9 +237,37 @@ namespace krys::boo::css
       case TokenType::BadString: AppendASCII("'\n", builder); break;
       case TokenType::BadUrl:    AppendASCII("url(()", builder); break;
       case TokenType::Whitespace:
-        // FIXME: TokenSerialisationMode::CustomProperty should preserve the original whitespace (count and
-        // newlines), which the tokenizer collapses into one token.
-        builder.push_back(u8' ');
+        if (OriginalText().empty())
+        {
+          // Created without its text; serialise as a single space.
+          builder.push_back(u8' ');
+        }
+        else if (mode == TokenSerialisationMode::CustomProperty)
+        {
+          for (auto c : OriginalText())
+          {
+            builder.push_back(WhitespaceForCustomProperty(c));
+          }
+        }
+        else
+        {
+          // One whitespace token covers what upstream tokenizes as a token per run of spaces and tabs and a
+          // token per newline; each of those serialises as a space.
+          bool inRun = false;
+          for (auto c : OriginalText())
+          {
+            if (c == u8'\n')
+            {
+              builder.push_back(u8' ');
+              inRun = false;
+            }
+            else if (!inRun)
+            {
+              builder.push_back(u8' ');
+              inRun = true;
+            }
+          }
+        }
         break;
       case TokenType::Colon:         builder.push_back(u8':'); break;
       case TokenType::Semicolon:     builder.push_back(u8';'); break;

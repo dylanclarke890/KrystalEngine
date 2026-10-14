@@ -37,8 +37,12 @@ namespace krys::boo::css
 
     if (IsWhitespace(current))
     {
+      auto start = _inputStream.ReadPosition() - 1uz;
       ConsumeWhitespace();
-      return Token {TokenType::Whitespace};
+
+      auto token = Token {TokenType::Whitespace};
+      token.OriginalText(_inputStream.Slice(start, _inputStream.ReadPosition()));
+      return token;
     }
 
     if (current == U'"')
@@ -262,13 +266,16 @@ namespace krys::boo::css
 
   Token Tokenizer::ConsumeNumericToken() noexcept
   {
+    auto start = _inputStream.ReadPosition();
     auto number = ConsumeNumber();
+    auto numberText = _inputStream.Slice(start, _inputStream.ReadPosition());
 
     if (StartsWithIdentifier(_inputStream.NextInputCharacter(), _inputStream.Peek(1uz),
                              _inputStream.Peek(2uz)))
     {
       auto token = Token {TokenType::Dimension};
       token.Unit(ConsumeIdentSequence());
+      token.OriginalText(_inputStream.Slice(start, _inputStream.ReadPosition()));
       token.NumericValue(number);
 
       return token;
@@ -279,12 +286,14 @@ namespace krys::boo::css
       _inputStream.Consume();
 
       auto token = Token {TokenType::Percentage};
+      token.OriginalText(numberText);
       token.NumericValue(number);
 
       return token;
     }
 
     auto token = Token {TokenType::Number};
+    token.OriginalText(numberText);
     token.NumericValue(number);
 
     return token;

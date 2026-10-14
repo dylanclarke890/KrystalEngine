@@ -96,6 +96,13 @@ namespace krys::boo::css
       krys_debug_assert(NextInputCharacter() == ch);
     }
 
+    /// @brief The (filtered) input between the read positions @p start and @p end.
+    KRYS_NODISCARD utf32_stringview Slice(size_t start, size_t end) const noexcept
+    {
+      krys_debug_assert(start <= end && end <= _data.size());
+      return utf32_stringview(_data).substr(start, end - start);
+    }
+
     KRYS_NODISCARD size_t ReadPosition() const noexcept
     {
       return _readPosition;

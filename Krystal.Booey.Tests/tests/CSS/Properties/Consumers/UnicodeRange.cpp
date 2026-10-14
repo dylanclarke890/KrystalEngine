@@ -41,12 +41,18 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(range.Peek().Type() == TokenType::Ident);
   }
 
-  // FIXME: Tokens don't keep their original text, so ranges containing number or dimension tokens fail.
-  TEST_CASE("PropertyParserHelpers(ConsumeUnicodeRangeToken numeric)",
-            "[CSS][Properties][Consumers][!shouldfail]")
+  TEST_CASE("PropertyParserHelpers(ConsumeUnicodeRangeToken numeric)", "[CSS][Properties][Consumers]")
   {
+    // Ranges containing number and dimension tokens, which are read from their original text.
     CHECK(ConsumeToText(u8"U+0025-00FF", Consume) == "U+25-ff");
     CHECK(ConsumeToText(u8"U+4??", Consume) == "U+400-4ff");
     CHECK(ConsumeToText(u8"U+1e3", Consume) == "U+1e3");
+    CHECK(ConsumeToText(u8"U+1F600", Consume) == "U+1f600");
+    CHECK(ConsumeToText(u8"U+0-7F", Consume) == "U+0-7f");
+    CHECK(ConsumeToText(u8"U+10-20", Consume) == "U+10-20");
+    CHECK(ConsumeToText(u8"U+1e-3", Consume) == "<null>");
+    CHECK(ConsumeToText(u8"U+0.5", Consume) == "<null>");
+    // An escaped unit isn't a hex digit.
+    CHECK(ConsumeToText(u8"U+0\\66", Consume) == "<null>");
   }
 }
