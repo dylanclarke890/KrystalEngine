@@ -1,15 +1,21 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/Span.hpp"
+#include <iterator>
+
+namespace krys::boo
+{
+  class CachedResource;
+}
 
 namespace krys::boo::css
 {
-  class CachedResource;
-  class Color;
   class ImmutableStyleProperties;
   class MutableStyleProperties;
 
@@ -18,16 +24,17 @@ namespace krys::boo::css
   enum class ValueId : uint16;
   enum class ParserMode : uint8;
 
+  /// @brief A declaration block: an ordered list of longhand and custom property declarations, either mutable
+  /// or immutable (a compact copy shared between rules).
   class StyleProperties : public RefCounted<StyleProperties>
   {
   protected:
-    size_t _parserMode : 3;
-    mutable size_t _isMutable : 1 {true};
-    size_t _arraySize : 28 {0};
+    uint32 _parserMode : 3;
+    mutable uint32 _isMutable : 1 {true};
+    uint32 _arraySize : 28 {0u};
 
-    explicit StyleProperties(css::ParserMode parserMode) noexcept;
-
-    StyleProperties(css::ParserMode parserMode, size_t immutableArraySize) noexcept;
+    inline explicit StyleProperties(css::ParserMode mode) noexcept;
+    inline StyleProperties(css::ParserMode mode, uint32 immutableArraySize) noexcept;
 
   public:
     // Override RefCounted's SubRef() to ensure operator delete is called on the appropriate subclass type.
@@ -37,17 +44,17 @@ namespace krys::boo::css
     {
     private:
       const PropertyMetadata &_metadata;
-      const Value *_value;
+      const css::Value *_value;
 
     public:
-      PropertyReference(const PropertyMetadata &metadata, const Value *value) noexcept
+      PropertyReference(const PropertyMetadata &metadata, const css::Value *value) noexcept
           : _metadata(metadata), _value(value)
       {
       }
 
       KRYS_NODISCARD PropertyId Id() const noexcept
       {
-        return static_cast<PropertyId>(_metadata.Id);
+        return _metadata.Id;
       }
 
       KRYS_NODISCARD PropertyId ShorthandId() const noexcept
@@ -69,9 +76,26 @@ namespace krys::boo::css
 
       KRYS_NODISCARD CSSOMString CssText(const SerialisationContext &context) const noexcept;
 
-      const css::Value *Value() const noexcept
+      KRYS_NODISCARD const css::Value *Value() const noexcept
       {
         return _value;
+      }
+
+      // FIXME: We should try to remove this mutable overload.
+      KRYS_NODISCARD css::Value *Value() noexcept
+      {
+        return const_cast<css::Value *>(_value);
+      }
+
+      KRYS_NODISCARD Ref<css::Value> ProtectedValue() const noexcept
+      {
+        return ShareRef(const_cast<css::Value &>(*_value));
+      }
+
+      // FIXME: Remove this.
+      KRYS_NODISCARD Property ToProperty() const noexcept
+      {
+        return Property(_metadata, ProtectedValue());
       }
     };
 
@@ -80,7 +104,7 @@ namespace krys::boo::css
     {
     private:
       const T &_properties;
-      size_t _index {0uz};
+      uint32 _index {0u};
 
     public:
       using iterator_category = std::forward_iterator_tag;
@@ -93,7 +117,7 @@ namespace krys::boo::css
       {
       }
 
-      PropertyReference operator*() const noexcept
+      KRYS_NODISCARD PropertyReference operator*() const noexcept
       {
         return _properties.PropertyAt(_index);
       }
@@ -104,17 +128,19 @@ namespace krys::boo::css
         return *this;
       }
 
-      bool operator==(std::nullptr_t) const noexcept
+      KRYS_NODISCARD bool operator==(std::nullptr_t) const noexcept
       {
         return _index >= _properties.PropertyCount();
       }
     };
 
-    KRYS_NODISCARD size_t PropertyCount() const noexcept;
+    KRYS_NODISCARD inline uint32 PropertyCount() const noexcept;
 
-    KRYS_NODISCARD PropertyReference PropertyAt(size_t index) const noexcept;
+    KRYS_NODISCARD inline bool empty() const noexcept;
 
-    KRYS_NODISCARD Iterator<StyleProperties> begin() const noexcept
+    KRYS_NODISCARD inline PropertyReference PropertyAt(uint32 index) const noexcept KRYS_LIFETIME_BOUND;
+
+    KRYS_NODISCARD Iterator<StyleProperties> begin() const noexcept KRYS_LIFETIME_BOUND
     {
       return {*this};
     }
@@ -124,11 +150,9 @@ namespace krys::boo::css
       return nullptr;
     }
 
-    KRYS_NODISCARD bool empty() const noexcept;
+    KRYS_NODISCARD inline uint32 size() const noexcept;
 
-    KRYS_NODISCARD size_t size() const noexcept;
-
-    KRYS_NODISCARD RefPtr<Value> GetPropertyCSSValue(PropertyId property) const noexcept;
+    KRYS_NODISCARD RefPtr<css::Value> GetPropertyCSSValue(PropertyId property) const noexcept;
 
     KRYS_NODISCARD CSSOMString GetPropertyValue(PropertyId property) const noexcept;
 
@@ -142,13 +166,11 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsPropertyImplicit(PropertyId property) const noexcept;
 
-    KRYS_NODISCARD RefPtr<Value> GetCustomPropertyCSSValue(const CSSOMString &propertyName) const noexcept;
+    KRYS_NODISCARD RefPtr<css::Value> GetCustomPropertyCSSValue(CSSOMStringView propertyName) const noexcept;
 
-    KRYS_NODISCARD CSSOMString GetCustomPropertyValue(const CSSOMString &propertyName) const noexcept;
+    KRYS_NODISCARD CSSOMString GetCustomPropertyValue(CSSOMStringView propertyName) const noexcept;
 
-    KRYS_NODISCARD bool CustomPropertyIsImportant(const CSSOMString &propertyName) const noexcept;
-
-    KRYS_NODISCARD Ref<MutableStyleProperties> CopyBlockProperties() const noexcept;
+    KRYS_NODISCARD bool CustomPropertyIsImportant(CSSOMStringView propertyName) const noexcept;
 
     KRYS_NODISCARD css::ParserMode ParserMode() const noexcept
     {
@@ -166,6 +188,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD CSSOMStringAtom AsTextAtom(const SerialisationContext &context) const noexcept;
 
+    // FIXME: Returns false until the CSSOM wrappers (CSSStyleProperties) are ported.
     KRYS_NODISCARD bool HasCSSOMWrapper() const noexcept;
 
     KRYS_NODISCARD bool IsMutable() const noexcept
@@ -174,21 +197,21 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD bool
-      TraverseSubresources(const Func<bool(const CachedResource &)> &handler) const noexcept;
+      TraverseSubresources(KRYS_NOESCAPE const Func<bool(const CachedResource &)> &handler) const noexcept;
 
     KRYS_NODISCARD bool MayDependOnBaseURL() const noexcept;
 
     KRYS_NODISCARD static size_t AverageSizeInBytes() noexcept;
 
-#ifdef KRYS_DEBUG
+#if KRYS_DEBUG
     void ShowStyle() const noexcept;
 #endif
 
-    KRYS_NODISCARD bool PropertyMatches(PropertyId property, const Value *value) const noexcept;
+    KRYS_NODISCARD bool PropertyMatches(PropertyId property, const css::Value *value) const noexcept;
 
-    KRYS_NODISCARD Maybe<size_t> FindPropertyIndex(PropertyId property) const noexcept;
+    KRYS_NODISCARD inline Maybe<uint32> FindPropertyIndex(PropertyId property) const noexcept;
 
-    KRYS_NODISCARD Maybe<size_t> FindCustomPropertyIndex(CSSOMStringView propertyName) const noexcept;
+    KRYS_NODISCARD inline Maybe<uint32> FindCustomPropertyIndex(CSSOMStringView propertyName) const noexcept;
 
   private:
     KRYS_NODISCARD CSSOMString AsTextInternal(const SerialisationContext &context) const noexcept;
@@ -196,12 +219,14 @@ namespace krys::boo::css
     KRYS_NODISCARD CSSOMString SerialiseLonghandValue(const SerialisationContext &context,
                                                       PropertyId property) const noexcept;
 
-    KRYS_NODISCARD CSSOMString SerialiseShorthandValue(const SerialisationContext &context,
-                                                       PropertyId property) const noexcept;
+    KRYS_NODISCARD Maybe<CSSOMString> SerialiseShorthandValue(const SerialisationContext &context,
+                                                              PropertyId property) const noexcept;
   };
 
-  KRYS_NODISCARD inline CSSOMString SerialiseLonghandValue(const SerialisationContext &context,
-                                                           PropertyId property, const Value &value) noexcept;
+  /// @brief Serialises `value` as the value of `property`, writing implicit initial values (including those
+  /// in comma-separated lists) as the property's initial value.
+  KRYS_NODISCARD CSSOMString SerialiseLonghandValue(const SerialisationContext &context, PropertyId property,
+                                                    const Value &value) noexcept;
 
   KRYS_NODISCARD inline CSSOMString SerialiseLonghandValue(const SerialisationContext &context,
                                                            PropertyId property, const Value *value) noexcept;

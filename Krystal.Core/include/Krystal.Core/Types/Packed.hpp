@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Concepts.hpp"
@@ -9,10 +9,10 @@
 #include "Krystal.Core/Maths/Base.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Span.hpp"
-#include "Krystal.Core/Utils/AllowCompactPointers.hpp"
 #include "Krystal.Core/Utils/Tags.hpp"
 #include "Krystal.Core/Utils/UnalignedAccess.hpp"
 #include <bit>
+#include <cstring>
 
 namespace krys
 {
@@ -87,7 +87,6 @@ namespace krys
   template <typename T, size_t AlignTo>
   class PackedAlignedPtr
   {
-    static_assert(krys::AllowsCompactPointers<T *>());
     static_assert(std::has_single_bit(AlignTo), "Alignment needs to be power-of-two");
 
     constexpr static size_t EffectiveAddressWidth = KRYS_EFFECTIVE_ADDRESS_WIDTH;
@@ -96,11 +95,6 @@ namespace krys
     {
       size_t roundedToMultipleOf8 = (value + 8 - 1) & ~(8 - 1);
       return roundedToMultipleOf8 / 8uz;
-    };
-
-    constexpr static auto AsByteSpan = [](uintptr_t value) noexcept -> Span<const uint8_t>
-    {
-      return Span {reinterpret_cast<const uint8_t *>(&value), sizeof(value)};
     };
 
     constexpr static size_t AlignmentShiftSizeIfProfitable = std::countr_zero(AlignTo);
@@ -135,19 +129,21 @@ namespace krys
     {
     }
 
-    constexpr PackedAlignedPtr(T *value) noexcept
+    PackedAlignedPtr(T *value) noexcept
     {
       set(value);
     }
 
-    KRYS_NODISCARD constexpr T *get() const noexcept
+    KRYS_NODISCARD T *get() const noexcept
     {
+      // FIXME: PackedPtr<> can load memory with one mov by checking page boundary.
       uintptr_t value = 0;
 
 #if KRYS_CPU(LITTLE_ENDIAN)
-      std::ranges::copy(AsByteSpan(value), _storage.begin());
+      std::memcpy(&value, _storage.data(), StorageSize);
 #else
-      std::ranges::copy(AsByteSpan(value).last(StorageSize), _storage.begin());
+      std::memcpy(reinterpret_cast<byte *>(&value) + sizeof(value) - StorageSize, _storage.data(),
+                  StorageSize);
 #endif
 
       if constexpr (IsAlignmentShiftProfitable)
@@ -171,7 +167,7 @@ namespace krys
       return std::bit_cast<T *>(value);
     }
 
-    constexpr void set(T *passedValue) noexcept
+    void set(T *passedValue) noexcept
     {
       uintptr_t value = std::bit_cast<uintptr_t>(passedValue);
       if constexpr (IsAlignmentShiftProfitable)
@@ -180,82 +176,69 @@ namespace krys
       }
 
 #if KRYS_CPU(LITTLE_ENDIAN)
-      std::ranges::copy(_storage, AsByteSpan(value).first(StorageSize));
+      std::memcpy(_storage.data(), &value, StorageSize);
 #else
-      std::ranges::copy(_storage, AsByteSpan(value).last(StorageSize));
+      std::memcpy(_storage.data(), reinterpret_cast<const byte *>(&value) + sizeof(value) - StorageSize,
+                  StorageSize);
 #endif
 
-      if (std::is_constant_evaluated())
-      {
-        static_assert(std::bit_cast<uintptr_t>(get()) == value);
-      }
-      else
-      {
-        krys_assert(std::bit_cast<uintptr_t>(get()) == value);
-      }
+      krys_debug_assert(std::bit_cast<uintptr_t>(get()) == std::bit_cast<uintptr_t>(passedValue));
     }
 
-    constexpr void reset() noexcept
+    void clear() noexcept
     {
       set(nullptr);
     }
 
-    constexpr T *operator->() const noexcept
+    T *operator->() const noexcept
     {
       return get();
     }
 
     template <typename U = T>
     requires(!Void<U>)
-    constexpr U &operator*() const noexcept
+    U &operator*() const noexcept
     {
       return *get();
     }
 
-    KRYS_NODISCARD constexpr bool operator!() const noexcept
+    KRYS_NODISCARD bool operator!() const noexcept
     {
       return !get();
     }
 
-    // This conversion operator allows implicit conversion to bool but not to other integer types.
-    typedef T *(PackedAlignedPtr::*UnspecifiedBoolType);
-    constexpr operator UnspecifiedBoolType() const noexcept
-    {
-      return get() ? &PackedAlignedPtr::_storage : nullptr;
-    }
-
-    explicit constexpr operator bool() const noexcept
+    explicit operator bool() const noexcept
     {
       return get();
     }
 
-    constexpr PackedAlignedPtr &operator=(T *value) noexcept
+    PackedAlignedPtr &operator=(T *value) noexcept
     {
       set(value);
       return *this;
     }
 
     template <class U>
-    KRYS_NODISCARD constexpr T *exchange(U &&newValue) noexcept
+    T *exchange(U &&newValue) noexcept
     {
       T *oldValue = get();
       set(std::forward<U>(newValue));
       return oldValue;
     }
 
-    constexpr void swap(std::nullptr_t) noexcept
+    void swap(std::nullptr_t) noexcept
     {
       clear();
     }
 
-    constexpr void swap(PackedAlignedPtr &other) noexcept
+    void swap(PackedAlignedPtr &other) noexcept
     {
       _storage.swap(other._storage);
     }
 
     template <typename Other>
     requires Other::IsPackedType
-    constexpr void swap(Other &other) noexcept
+    void swap(Other &other) noexcept
     {
       T *t1 = get();
       T *t2 = other.get();
@@ -264,7 +247,7 @@ namespace krys
       other.set(t1);
     }
 
-    constexpr void swap(T *t2) noexcept
+    void swap(T *t2) noexcept
     {
       T *t1 = get();
       std::swap(t1, t2);
@@ -276,18 +259,16 @@ namespace krys
   class Packed<T *> : public PackedAlignedPtr<T, 1>
   {
   public:
-    static_assert(krys::AllowsCompactPointers<T *>());
-
     using Base = PackedAlignedPtr<T, 1>;
     using Base::Base;
 
     // Hash table deleted values, which are only constructed and never copied or destroyed.
-    constexpr Packed(HashTableDeletedValueTag)
-        : Base(std::bit_cast<T *>(static_cast<uintptr_t>(Base::Alignment))) noexcept
+    Packed(HashTableDeletedValueTag) noexcept
+        : Base(std::bit_cast<T *>(static_cast<uintptr_t>(Base::Alignment)))
     {
     }
 
-    KRYS_NODISCARD constexpr bool IsHashTableDeletedValue() const noexcept
+    KRYS_NODISCARD bool IsHashTableDeletedValue() const noexcept
     {
       return Base::get() == std::bit_cast<T *>(static_cast<uintptr_t>(Base::Alignment));
     }
@@ -303,13 +284,13 @@ namespace krys
   constexpr bool IsNullableSmartPtr<PackedPtr<T>> = true;
 
   template <typename T, typename U>
-  KRYS_NODISCARD constexpr bool operator==(const PackedPtr<T> &a, const PackedPtr<U> &b) noexcept
+  KRYS_NODISCARD bool operator==(const PackedPtr<T> &a, const PackedPtr<U> &b) noexcept
   {
     return a.get() == b.get();
   }
 
   template <typename T, typename U>
-  KRYS_NODISCARD constexpr bool operator==(const PackedPtr<T> &a, U *b) noexcept
+  KRYS_NODISCARD bool operator==(const PackedPtr<T> &a, U *b) noexcept
   {
     return a.get() == b;
   }
@@ -323,7 +304,7 @@ namespace krys
     using StorageType = PackedPtr<T>;
 
     template <class U>
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD constexpr static T *exchange(StorageType &ptr, U &&newValue) noexcept
+    KRYS_ALWAYS_INLINE constexpr static T *exchange(StorageType &ptr, U &&newValue) noexcept
     {
       return ptr.exchange(newValue);
     }

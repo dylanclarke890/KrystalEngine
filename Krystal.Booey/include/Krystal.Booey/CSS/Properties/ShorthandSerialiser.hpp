@@ -1,13 +1,9 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
-
-namespace krys::boo::style
-{
-  class Extractor;
-}
+#include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::css
 {
@@ -17,11 +13,11 @@ namespace krys::boo::css
 
   struct SerialisationContext;
 
-  KRYS_NODISCARD CSSOMString SerialiseShorthandValue(const SerialisationContext &context,
-                                                     const Style::Extractor &extractor,
-                                                     PropertyId shorthandId) noexcept;
+  // FIXME: Add the style::Extractor overload (computed style serialisation) once style::Extractor is ported.
 
-  KRYS_NODISCARD CSSOMString SerialiseShorthandValue(const SerialisationContext &context,
-                                                     const StyleProperties &properties,
-                                                     PropertyId shorthandId) noexcept;
+  /// @brief Serialises the shorthand `shorthandId` from its longhands in `properties`.
+  /// @return The serialisation, or `null` if the longhands can't be represented by the shorthand.
+  KRYS_NODISCARD Maybe<CSSOMString> SerialiseShorthandValue(const SerialisationContext &context,
+                                                            const StyleProperties &properties,
+                                                            PropertyId shorthandId) noexcept;
 }

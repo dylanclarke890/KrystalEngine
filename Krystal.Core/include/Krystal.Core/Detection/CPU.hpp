@@ -198,7 +198,10 @@
   #define KRYS_CPU_UNKNOWN 1
 #endif
 
-#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#if defined(_MSC_VER) && !defined(__BYTE_ORDER__)
+  // MSVC doesn't define __BYTE_ORDER__, and every target it supports is little endian.
+  #define KRYS_CPU_LITTLE_ENDIAN 1
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
   #define KRYS_CPU_BIG_ENDIAN 1
 #elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
   #define KRYS_CPU_LITTLE_ENDIAN 1

@@ -297,7 +297,7 @@ namespace krys::boo::css
   RefPtr<Value> PropertyParser::ParseStylePropertyLonghand(PropertyId property, const CSSOMString &string,
                                                            const ParserContext &context) noexcept
   {
-    krys_debug_assert(!Property::IsShorthand(property));
+    krys_debug_assert(!IsShorthand(property));
 
     if (string.empty())
     {
@@ -340,7 +340,7 @@ namespace krys::boo::css
   RefPtr<Value> PropertyParser::ParseStylePropertyLonghand(PropertyId property, TokenRange range,
                                                            const ParserContext &context) noexcept
   {
-    krys_debug_assert(!Property::IsShorthand(property));
+    krys_debug_assert(!IsShorthand(property));
 
     range.DiscardWhitespace();
 
@@ -608,7 +608,7 @@ namespace krys::boo::css
       return true;
     }
 
-    if (Property::IsShorthand(property))
+    if (IsShorthand(property))
     {
       auto rangeCopy = range;
       if (RefPtr keywordValue = ConsumeGlobalKeywordValue(rangeCopy))

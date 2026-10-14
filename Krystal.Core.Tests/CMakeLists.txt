@@ -61,6 +61,7 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Types/CompactVariant.cpp
 	PRIVATE tests/Types/FixedVector.cpp
 	PRIVATE tests/Types/ListHashSet.cpp
+	PRIVATE tests/Types/Packed.cpp
 
   # Utils
 	PRIVATE tests/Utils/NeverDestroyed.cpp

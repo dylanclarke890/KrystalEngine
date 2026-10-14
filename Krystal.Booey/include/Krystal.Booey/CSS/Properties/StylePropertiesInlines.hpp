@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Properties/ImmutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
@@ -8,17 +8,16 @@
 namespace krys::boo::css
 {
   inline StyleProperties::StyleProperties(css::ParserMode mode) noexcept
-      : _parserMode(static_cast<underlying_t<css::ParserMode>>(mode)), _isMutable(true)
+      : _parserMode(static_cast<uint32>(mode)), _isMutable(true)
   {
   }
 
-  inline StyleProperties::StyleProperties(css::ParserMode mode, size_t immutableArraySize) noexcept
-      : _parserMode(static_cast<underlying_t<css::ParserMode>>(mode)), _isMutable(false),
-        _arraySize(immutableArraySize)
+  inline StyleProperties::StyleProperties(css::ParserMode mode, uint32 immutableArraySize) noexcept
+      : _parserMode(static_cast<uint32>(mode)), _isMutable(false), _arraySize(immutableArraySize)
   {
   }
 
-  inline StyleProperties::PropertyReference StyleProperties::PropertyAt(size_t index) const noexcept
+  inline StyleProperties::PropertyReference StyleProperties::PropertyAt(uint32 index) const noexcept
   {
     if (_isMutable)
     {
@@ -28,7 +27,7 @@ namespace krys::boo::css
     return Downcast<ImmutableStyleProperties>(*this).PropertyAt(index);
   }
 
-  inline size_t StyleProperties::PropertyCount() const noexcept
+  inline uint32 StyleProperties::PropertyCount() const noexcept
   {
     if (_isMutable)
     {
@@ -59,7 +58,7 @@ namespace krys::boo::css
     }
   }
 
-  inline Maybe<size_t> StyleProperties::FindPropertyIndex(PropertyId property) const noexcept
+  inline Maybe<uint32> StyleProperties::FindPropertyIndex(PropertyId property) const noexcept
   {
     if (_isMutable)
     {
@@ -69,7 +68,7 @@ namespace krys::boo::css
     return Downcast<ImmutableStyleProperties>(*this).FindPropertyIndex(property);
   }
 
-  inline Maybe<size_t> StyleProperties::FindCustomPropertyIndex(CSSOMStringView propertyName) const noexcept
+  inline Maybe<uint32> StyleProperties::FindCustomPropertyIndex(CSSOMStringView propertyName) const noexcept
   {
     if (_isMutable)
     {
@@ -84,7 +83,7 @@ namespace krys::boo::css
     return !PropertyCount();
   }
 
-  inline size_t StyleProperties::size() const noexcept
+  inline uint32 StyleProperties::size() const noexcept
   {
     return PropertyCount();
   }
@@ -100,7 +99,7 @@ namespace krys::boo::css
     return value.IsImplicitInitialValue() ? InitialValueIdForLonghand(property) : GetValueId(value);
   }
 
-  inline Maybe<ValueId> LonghandValueId(PropertyId property, const Value *value)
+  inline Maybe<ValueId> LonghandValueId(PropertyId property, const Value *value) noexcept
   {
     if (!value)
     {

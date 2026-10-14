@@ -500,6 +500,13 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Selectors/Types/IsForgivingSelectorList.hpp
   include/Krystal.Booey/CSS/StyleSheetContents.hpp
   include/Krystal.Booey/Style/PseudoElementIdentifier.hpp
+  # Sheet parser, layer d2 (declaration blocks)
+  include/Krystal.Booey/CSS/Properties/ImmutableStyleProperties.hpp
+  include/Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp
+  include/Krystal.Booey/CSS/Properties/PropertyInitialValues.hpp
+  include/Krystal.Booey/CSS/Properties/ShorthandSerialiser.hpp
+  include/Krystal.Booey/CSS/Properties/StyleProperties.hpp
+  include/Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -755,6 +762,12 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   # Sheet parser, layer d1c (selector parser)
   src/CSS/Selectors/SelectorParser.cpp
   src/CSS/StyleSheetContents.cpp
+  # Sheet parser, layer d2 (declaration blocks)
+  src/CSS/Properties/ImmutableStyleProperties.cpp
+  src/CSS/Properties/MutableStyleProperties.cpp
+  src/CSS/Properties/PropertyInitialValues.cpp
+  src/CSS/Properties/ShorthandSerialiser.cpp
+  src/CSS/Properties/StyleProperties.cpp
 )
 
 target_precompile_headers(Krystal.Booey

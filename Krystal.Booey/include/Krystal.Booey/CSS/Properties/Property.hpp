@@ -51,6 +51,8 @@ namespace krys::boo::css
     Property(const PropertyMetadata &metadata, Ref<css::Value> &&value) noexcept
         : _metadata(metadata), _value(krys::move(value))
     {
+      krys_debug_assert(_metadata.Id != PropertyId::Invalid);
+      krys_debug_assert_msg(!IsShorthand(_metadata.Id), "unexpected shorthand property");
     }
 
     Property(PropertyId id, Ref<css::Value> &&value, IsImportant important = IsImportant(false),
@@ -59,6 +61,9 @@ namespace krys::boo::css
              uint8 shorthandIndex = 0u) noexcept
         : _metadata({.Id = id, .ShorthandIndex = shorthandIndex}), _value(krys::move(value))
     {
+      krys_debug_assert(id != PropertyId::Invalid);
+      krys_debug_assert_msg(!IsShorthand(id), "unexpected shorthand property");
+
       if (important)
       {
         _metadata.Flags = _metadata.Flags | PropertyFlag::Important;
@@ -115,7 +120,7 @@ namespace krys::boo::css
       return *_value;
     }
 
-    KRYS_NODISCARD PropertyMetadata Metadata() const noexcept
+    KRYS_NODISCARD const PropertyMetadata &Metadata() const noexcept
     {
       return _metadata;
     }
@@ -144,18 +149,6 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static PropertyId UnresolvePhysicalProperty(PropertyId id,
                                                                WritingMode writingMode) noexcept;
-
-    KRYS_NODISCARD static bool IsShorthand(PropertyId id) noexcept
-    {
-      return static_cast<size_t>(id) >= static_cast<uint16>(FirstShorthandProperty)
-             && static_cast<size_t>(id) <= static_cast<uint16>(LastShorthandProperty);
-    }
-
-    KRYS_NODISCARD static bool IsLonghand(PropertyId id) noexcept
-    {
-      return static_cast<size_t>(id) >= static_cast<uint16>(FirstProperty)
-             && static_cast<size_t>(id) < static_cast<uint16>(FirstShorthandProperty);
-    }
 
     /// @brief Checks if a property is a sizing property
     /// @see https://drafts.csswg.org/css-sizing-3/#sizing-property

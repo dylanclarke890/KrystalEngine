@@ -51,13 +51,16 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Sheet parser, layer d1a (2026-10-13): pseudo-class/pseudo-element codegen (`codegen/css_pseudo_selectors.py`) generates the enums, the name maps, `UserAgentParts` and the `Selector` inlines; standard pseudos only. Maps and parts built and tested.
 - Sheet parser, layer d1b (2026-10-13): `Selector`, `SelectorList`, `MutableSelector` (and `SelectorParserContext`, pulled forward from d1c) completed against upstream, built and tested, with specificity, hashing and full selector serialisation; selectors are built through `MutableSelector` until the parser lands.
 - Sheet parser, layer d1c (2026-10-13): the selector parser (`SelectorParser`), with the namespace half of `StyleSheetContents`, `ParserEnum` and `style::PseudoElementIdentifier`, built and tested; selectors parse and serialise end to end from strings, including nesting resolution. The selector layer (d1) is done.
+- Sheet parser, layer d2 (2026-10-13): declaration blocks (`StyleProperties`, `MutableStyleProperties`, `ImmutableStyleProperties`, `ShorthandSerialiser`, `PropertyInitialValues`) built and tested; declaration blocks serialise with shorthand collapsing. `Property.hpp` reviewed; Krystal.Core `Packed.hpp` fixed and tested. The `CSSParser`-dependent setters wait for d5 and the CSSOM wrapper half for the CSSOM slice.
 
 **Open / next candidates:**
 - Property parser, layer c1 generator review done (2026-10-13): the generated parser matches upstream; the build now passes `ENABLE_DARK_MODE_CSS`/`ENABLE_VARIATION_FONTS`; 41 legacy `-webkit-` properties are dropped on purpose.
 - Property parser, layer c1 done (2026-10-13): `PropertyParserCustom.hpp` reviewed (8 behaviour bugs fixed), the generated `PropertyParsing.cpp` builds and links, tested through shorthands.
 - Property parser, layer c2 done (2026-10-13): the compile-only consumers are tested; three `Background` consumers that only served dropped `-webkit-` properties are removed.
 - Property parser, layer c3 done (2026-10-13): `PropertyParser` reviewed, built and tested, with the value half of `ParserFastPaths` and `ValuePool::CreateFontFaceValue`. The property parser slice is complete apart from the Style-dependent pieces below.
-- Next: the sheet parser, planned 2026-10-13 (see the *Sheet parser* section). Layer d1 (selectors: d1a codegen, d1b selectors, d1c parser) is done; next is d2 (declaration blocks: `StyleProperties`, `MutableStyleProperties`, `ImmutableStyleProperties`, `ShorthandSerializer`). `Rules/Rule.hpp` still uses the old `Selector` API and is fixed in d4. `NestedParserContext.hpp` (unreviewed) now takes `NestedParserContextType` from `ParserEnum.hpp`.
+- Next: the sheet parser, planned 2026-10-13 (see the *Sheet parser* section). Layers d1 (selectors) and d2 (declaration blocks) are done; next is d3 (conditions: media/container queries, `MediaList`, `@supports`). `Rules/Rule.hpp` still uses the old `Selector` API and is fixed in d4. `NestedParserContext.hpp` (unreviewed) now takes `NestedParserContextType` from `ParserEnum.hpp`.
+- Sheet parser, d5: define `MutableStyleProperties::SetProperty(id, string, ...)`, `SetCustomProperty` and `ParseDeclaration` (FIXMEs) once `CSSParser` lands.
+- Not yet ported, needed later: the CSSOM wrapper half of `MutableStyleProperties` (with `CSSStyleProperties`), the `Style::Extractor` overload of `SerialiseShorthandValue`, `FontSelectionValue` (`platform/graphics/FontSelectionAlgorithm.h`) and `FontSelectionValueInlines.hpp` (still raw WebKit).
 - Property parser, not yet ported (`Font`): the string parsers behind the `FontFace` interface and the canvas 2D context's `font` (`ParseUnresolvedFont`, `ParseFontFaceSrc`, `ParseFontFaceSizeAdjust`, `ParseFontFaceUnicodeRange`, `ParseFontFaceDisplay`, `ParseFontFaceFontStyle`, `ParseFontFaceFeatureSettings`, `ParseFontFaceFontWidth`, `ParseFontFaceFontWeight`; FIXME in `Consumers/Font.hpp`). They need `ScriptExecutionContext`/`Document` (quirks mode, value pool) and six of them the generated `PropertyParsing`. Also `LowerFontShorthand` and the `SystemFontDatabase::FontShorthand` sync check (need `SystemFontDatabase`).
 - Property parser, not yet ported: `parseEasingFunctionDeprecated` (`CSSPropertyParserConsumer+Easing`; string → `TimingFunction`, used only by Web Animations; needs `TimingFunction` and `Style::createTimingFunctionDeprecated`) and `parseTransformRaw` (`CSSPropertyParserConsumer+Transform`; string → `Style::Transform`, used only by Web Animations; needs `Style::Transform`, `BuilderState` and the generated `consumeTransform`). Come with animations. Also `parseFilterValueListOrNoneRaw` (`CSSPropertyParserConsumer+Filter`; string → `Style::Filter`, used only by the canvas 2D context's `filter`; needs `Style::Filter`, `BuilderState` and `Document`); comes with canvas.
 - Property parser, deferred definitions (need `style::CustomProperty`/`BuilderState`): `VariableParser::ParseInitialValueForUniversalSyntax`, `PropertyParser::ParseTypedCustomPropertyValue`/`ParseTypedCustomPropertyInitialValue`.
@@ -72,7 +75,6 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - `CSS/Values/Concepts.hpp` (`CSSValueConcepts.h`) compiles but isn't reviewed.
 - URL, not yet done: the DOM `URL` interface and `URLSearchParams` (WebKit's `DOMURL`/`URLDecomposition`, tested by WPT `setters_tests.json`), `Document`'s URL/base URL (`Document::URL()` is a TODO), `CompleteURL(string, Document)`, and `applyModifiersToLoaderOptions` (needs the resource loader).
 - Krystal.Core: the `IntrusivePtr` `Downcast`/`DynamicDowncast` overloads can't be called with an explicit target and `Downcast` rejects null (nothing calls them yet); `OffsetRotateValue.cpp` has a FIXME workaround. `StringAtom::View()` crashes on a null atom (layer c2).
-- `CSS/Properties/Property.hpp` (`CSSProperty.h`) isn't reviewed, but compiles (the generated `PropertyId.cpp` defines its static functions); the colour parser and `AngleValidator` use `AcceptsQuirkyColor`/`AcceptsQuirkyAngle` from it.
 - Tokenizer doesn't keep numeric original text or whitespace counts, so `TokenSerialisationMode::CustomProperty` behaves like `Normal` (FIXMEs in `src/CSS/Parser/Token.cpp`), and `ConsumeUnicodeRangeToken` rejects every range containing a number or dimension token (`U+0025-00FF`, `U+4??`; FIXME in `Consumers/UnicodeRange.cpp`, `[!shouldfail]` test). Decided 2026-10-13: fix both together once the tokenizer keeps original text.
 - Not yet ported, needed later: `StringBuilder`, `RefCountedFixedVector`, `DefaultHash<StringAtom>` (Krystal.Core; for `add(Hasher&, const Style::GridPosition&)`).
 - Style `GridPosition`'s `CSSValueConversion` is deferred with the other `+CSSValueConversion` headers.
@@ -689,7 +691,7 @@ Entry: `css/parser/CSSParser.cpp` (headers-only graph: 123 files, `tools/port/ou
 
 **Layers (bottom-up, each built and tested):**
 - **d1. Selectors:** `CSSSelector`, `CSSSelectorList`, `MutableCSSSelector`, `CSSSelectorParserContext`, `CSSSelectorParser` (~4,100 upstream lines; Krystal `Selectors/*`). Upstream's `CSSSelectorEnums.h` and pseudo-class/element tables are generated by `css/scripts/process-css-pseudo-selectors.py`; Krystal's `Selectors/Enums/*` are hand-written, so likely a codegen step. Tests parse and serialise selectors.
-- **d2. Declaration blocks:** `StyleProperties`, `MutableStyleProperties`, `ImmutableStyleProperties`, `StylePropertiesInlines` and `ShorthandSerializer` (~2,900 lines; Krystal `Properties/StyleProperties.hpp` etc., `ShorthandSerialiser.hpp`).
+- **d2. Declaration blocks:** `StyleProperties`, `MutableStyleProperties`, `ImmutableStyleProperties`, `StylePropertiesInlines` and `ShorthandSerializer` (~2,900 lines; Krystal `Properties/StyleProperties.hpp` etc., `ShorthandSerialiser.hpp`). Done.
 - **d3. Conditions:** media/container query parsing and serialisation (`query/MediaQuery`, `GenericMediaQueryParser`/`Types`/`Serialization`, `MediaQueryParser`, `ContainerQuery`, `ContainerQueryParser`, the `MediaQueryFeatures`/`ContainerQueryFeatures` schemas the parser validates against), `MediaQueryParserContext`, `MediaList`, `CSSSupportsParser`. Evaluation deferred.
 - **d4. Rule model:** `StyleRule` (all rule types), `StyleRuleImport` (no loading), `StyleRuleFunction`, `CSSAtRuleID`, `CSSParserEnum`, `CSSCounterStyleDescriptors`, `StyleSheet`, the parse side of `StyleSheetContents`.
 - **d5. `CSSParser`:** whole stylesheets parse end to end.
@@ -809,6 +811,53 @@ Graph: the d1a graph (`tools/port/out/selectors.md`) covers `CSSSelectorParser`.
 **Test data fixed:** `an-plus-b-01.dat` had WPT's JavaScript `\n` escapes copied literally (now real newlines) and a corrupted expected output (`:nth-childsource(n+3)`).
 
 Tests: `tests/CSS/Selectors/SelectorParser.cpp` (the `data/css-selector-parser/*.dat` suite, re-enabled, and API tests for namespaces, nesting, `ResolveNestingParent`, `SupportsComplexSelector`, `ParsePseudoElement`, forgiving lists, quirks mode, functional pseudo-classes and pseudo-elements): 35 cases. Full Booey suite: 1583 cases / 675018 assertions; all pass except 6 expected failures. Whole solution builds with no warnings.
+
+### Layer d2: declaration blocks (2026-10-13)
+
+Graph from `css/StyleProperties.cpp`, `MutableStyleProperties.cpp`, `ImmutableStyleProperties.cpp` and `ShorthandSerializer.cpp` (headers-only): 106 files (`tools/port/out/declarations.md`), nearly all done. New for d2: the four entries, `CSSPropertyInitialValues.cpp` and the review of `CSSProperty.h`. Boundaries: `CSSParser.h` (d5), `CSSStyleProperties.h` (CSSOM wrappers), `StyleExtractor.h` (Style), `FontSelectionValueInlines.h` (not needed: see differences). The Krystal files were an own partial port (headers mostly upstream's, no `Mutable`/`Immutable`/serialiser `.cpp`, never built). Decided with the user: the `CSSParser`-dependent methods are declared and FIXME'd until d5, the CSSOM wrapper half is removed until the CSSOM slice, `Property.hpp` is reviewed and `PropertyInitialValues.cpp` ported here, and `Packed.hpp` (Krystal.Core) is fixed and tested.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/StyleProperties.h`, `.cpp`, `StylePropertiesInlines.h` | `have` | `CSS/Properties/StyleProperties.hpp`, `StylePropertiesInlines.hpp`, `src/.../StyleProperties.cpp` | on | tested. |
+| `css/MutableStyleProperties.h`, `.cpp` | `have` (no CSSOM wrapper; string setters undefined) | `CSS/Properties/MutableStyleProperties.hpp`, `src/.../MutableStyleProperties.cpp` | on | tested. |
+| `css/ImmutableStyleProperties.h`, `.cpp` | `have` | `CSS/Properties/ImmutableStyleProperties.hpp`, `src/.../ImmutableStyleProperties.cpp` | on | tested, including deduplication. |
+| `css/ShorthandSerializer.h`, `.cpp` | `have` (no `Style::Extractor` overload) | `CSS/Properties/ShorthandSerialiser.hpp`, `src/.../ShorthandSerialiser.cpp` | on | tested, every shorthand family. |
+| `css/CSSPropertyInitialValues.h`, `.cpp` | `have` | `CSS/Properties/PropertyInitialValues.hpp`, `src/.../PropertyInitialValues.cpp` | on | tested. Uses the generated `InitialValues.hpp`. |
+| `css/CSSProperty.h`, `.cpp` | `have` (reviewed) | `CSS/Properties/Property.hpp`, `src/.../Property.cpp` | on (already) | See bugs and differences. |
+| `wtf/Packed.h` | `have` | Krystal.Core `Types/Packed.hpp` | header | tested (`Krystal.Core.Tests/tests/Types/Packed.cpp`). See bugs. |
+
+**Names:** `serializeShorthandValue`/`serializeLonghandValue` → `SerialiseShorthandValue`/`SerialiseLonghandValue`; `PropertyReference::toCSSProperty` → `ToProperty`, `protectedValue` → `ProtectedValue`; `cssParserMode()` → `ParserMode()`; `isEmpty` → `empty` (container protocol, as before); `ImmutableStyleProperties::objectSize` → `ObjectSize`. `PropertyMetadata` field names are Krystal's (`Id`, `Flags`, `ShorthandIndex`; upstream bitfields `m_propertyID`, `m_important`, ...).
+
+**Bugs fixed (old Krystal files):**
+- `Property::Metadata()` returned by value, so every `PropertyReference` from a `MutableStyleProperties` held a dangling reference to a temporary.
+- `StyleProperties.hpp` forward-declared `css::CachedResource` (it's `boo::CachedResource`) and a stray `css::Color`; the free `SerialiseLonghandValue(..., const Value &)` was declared `inline` but defined in the `.cpp`; `LonghandValueId(PropertyId, const Value *)` lacked the declared `noexcept`; `PropertyReference::CssText` didn't return.
+- The shorthand serialiser returned a plain string and `AsTextInternal` tested `value.empty()` where upstream tests `isNull()`, so a shorthand that couldn't be serialised looked like one that serialised to the empty string. Now `Maybe<CSSOMString>` (see differences).
+- `ImmutableStyleProperties` was allocated with the object's variable size but deleted with a sized `delete`; it now has an unsized class `operator delete`. Metadata and values are placement-constructed.
+- `MutableStyleProperties`, `ImmutableStyleProperties`, `ShorthandSerialiser` and `PropertyInitialValues` had no `.cpp` (and the last one's header forward-declared `CSSOMString` as a class).
+- Krystal.Core `Packed.hpp` had never compiled: `PackedAlignedPtr::get()`/`set()` copied in the wrong direction through a span of a by-value lambda parameter, `set()` `static_assert`ed a runtime value, the implicit "unspecified bool" conversion pointed at a member of the wrong type, `swap(nullptr)` called a missing `clear()`, and the `HashTableDeletedValueTag` constructor misplaced `noexcept`.
+- Krystal.Core `Detection/CPU.hpp` defined `KRYS_CPU_BIG_ENDIAN` under MSVC (`__BYTE_ORDER__` and `__ORDER_BIG_ENDIAN__` are both undefined there, so `0 == 0`). Only `Packed.hpp` uses it.
+
+**Upstream bugs found:**
+- `serializeAnimationRange` returns an empty (non-null) string when `animation-range-start` and `animation-range-end` have different list lengths (including one list and one single value), so `cssText` emits `animation-range: ;` instead of the longhands. Fixed: any length mismatch can't be serialised (tested).
+
+**Added (upstream API):** everything in the four `.cpp`s and `CSSPropertyInitialValues.cpp`. `PropertyReference::ProtectedValue`/`ToProperty` and the mutable `Value()` overload; `KRYS_LIFETIME_BOUND` on the property accessors. `PackedAlignedPtr::clear()`.
+
+**Differences:**
+- Null strings: `SerialiseShorthandValue` returns `Maybe<CSSOMString>` (`null` = can't be represented by the shorthand); `GetPropertyValue` returns `""` for it. Inside the serialiser, `SerialiseCommonValue`, `SerialiseBorder` and the other null-returning helpers also use `Maybe`.
+- Indices are `Maybe<uint32>` (upstream `int`, -1 for not found); counts are `uint32`.
+- Removed with the CSSOM wrappers (FIXME): the `_cssomWrapper` member, `cssStyleProperties()`, `ensureCSSStyleProperties()`, `ensureInlineCSSStyleProperties()`; `HasCSSOMWrapper()` returns `false`.
+- Declared, not defined, until d5 (FIXME): `SetProperty(id, string, ...)` (both overloads), `SetCustomProperty`, `ParseDeclaration`. Tests build blocks with `PropertyParser`/`VariableParser` and `AddParsedProperties` (`StylePropertiesTestUtils.hpp`).
+- No `Style::Extractor` overload of `SerialiseShorthandValue` (FIXME; comes with computed style).
+- Dropped with the legacy `-webkit-` shorthands: the `WebkitMask`, `WebkitBorderImage`, `WebkitMaskBoxImage`, `WebkitBorderRadius`, `WebkitColumnBreak*`, `WebkitPerspective`, `WebkitTextOrientation` and `WebkitTextStroke` cases and `serializeColumnBreak`; the `-webkit-mask-clip` layer case. So `border-image` only checks that a `BorderImageWidthValue` doesn't override the border widths (only the legacy shorthand could set that).
+- The font shorthand's width percentage → keyword conversion matches the nine keyword percentages exactly (`FontWidthKeyword(double)`) instead of round-tripping through `FontSelectionValue`; the results are the same (the keyword values are exactly representable, and anything that isn't failed the round trip upstream). `FontSelectionValue` isn't ported.
+- `InitialValueTextForLonghand` also handles `0deg` (`glyph-orientation-horizontal`; upstream hits `ASSERT_NOT_REACHED`, though only an implicit initial value would reach it).
+- Deduplication hashes with `Hash::Combine` into a `HashMap<size_t, ...>` and evicts the first entry when full (upstream: a random one).
+- `RemoveProperties` searches the span (upstream builds a `HashSet`).
+- `Property`'s constructor takes `(id, value, important, implicit, setFromShorthand, shorthandIndex)` (upstream `(id, value, important, isSetFromShorthand, index, implicit)`); `Property::IsShorthand`/`IsLonghand` (not upstream; duplicated the generated free functions) are removed.
+- `PackedPtr` doesn't assert `AllowsCompactPointers` (Krystal has no compact heap; WTF only allows it for fast-malloc'd types). The implicit bool conversion is gone; `explicit operator bool` remains. `get`/`set` aren't `constexpr` (`bit_cast` of a pointer isn't).
+- Shorthand serialisations follow upstream where browsers differ, e.g. `background-size: 10px` is the pair `10px auto`, `animation: none` serialises as `auto`, `outline: none` as `currentcolor`, `offset: none` as `normal` (all accepted by WPT).
+
+Tests: `tests/CSS/Properties/{StyleProperties,ShorthandSerialiser,PropertyInitialValues}.cpp` (helpers in `include/Krystal.Booey.Tests/CSS/StylePropertiesTestUtils.hpp`): 20 cases / 1978 assertions. `Krystal.Core.Tests/tests/Types/Packed.cpp`: 4 cases / 35 assertions. Full Booey suite: 1603 cases / 676996 assertions; all pass except 6 expected failures. Core suite: 554 cases pass. Whole solution builds with no warnings.
 
 ## Slice 3: Colour
 

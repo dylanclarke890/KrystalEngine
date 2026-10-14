@@ -148,10 +148,13 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Properties/Consumers/ViewTransition.cpp
 		tests/CSS/Properties/Consumers/WillChange.cpp
 		tests/CSS/Properties/Property.cpp
+		tests/CSS/Properties/PropertyInitialValues.cpp
 		tests/CSS/Properties/PropertyParser.cpp
 		tests/CSS/Properties/PropertyParserCustom.cpp
 		tests/CSS/Properties/PropertyParserResult.cpp
 		tests/CSS/Properties/PropertyShorthand.cpp
+		tests/CSS/Properties/ShorthandSerialiser.cpp
+		tests/CSS/Properties/StyleProperties.cpp
 		tests/CSS/Values/Aggregates.cpp
 		tests/CSS/Values/Borders/BorderRadius.cpp
 		tests/CSS/Values/Borders/BoxShadow.cpp
