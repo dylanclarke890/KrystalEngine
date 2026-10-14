@@ -52,14 +52,16 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Sheet parser, layer d1b (2026-10-13): `Selector`, `SelectorList`, `MutableSelector` (and `SelectorParserContext`, pulled forward from d1c) completed against upstream, built and tested, with specificity, hashing and full selector serialisation; selectors are built through `MutableSelector` until the parser lands.
 - Sheet parser, layer d1c (2026-10-13): the selector parser (`SelectorParser`), with the namespace half of `StyleSheetContents`, `ParserEnum` and `style::PseudoElementIdentifier`, built and tested; selectors parse and serialise end to end from strings, including nesting resolution. The selector layer (d1) is done.
 - Sheet parser, layer d2 (2026-10-13): declaration blocks (`StyleProperties`, `MutableStyleProperties`, `ImmutableStyleProperties`, `ShorthandSerialiser`, `PropertyInitialValues`) built and tested; declaration blocks serialise with shorthand collapsing. `Property.hpp` reviewed; Krystal.Core `Packed.hpp` fixed and tested. The `CSSParser`-dependent setters wait for d5 and the CSSOM wrapper half for the CSSOM slice.
+- Sheet parser, layer d3 (2026-10-13): media and container query parsing and serialisation (`MediaQueryParser`, `ContainerQueryParser`, the shared condition grammar and feature parser, the feature schemas, `MediaQueryParserContext`) built and tested against the WPT parsing and serialisation cases. Evaluation is deferred; `CSSSupportsParser` moved to d5 and `MediaList` to the CSSOM slice.
 
 **Open / next candidates:**
 - Property parser, layer c1 generator review done (2026-10-13): the generated parser matches upstream; the build now passes `ENABLE_DARK_MODE_CSS`/`ENABLE_VARIATION_FONTS`; 41 legacy `-webkit-` properties are dropped on purpose.
 - Property parser, layer c1 done (2026-10-13): `PropertyParserCustom.hpp` reviewed (8 behaviour bugs fixed), the generated `PropertyParsing.cpp` builds and links, tested through shorthands.
 - Property parser, layer c2 done (2026-10-13): the compile-only consumers are tested; three `Background` consumers that only served dropped `-webkit-` properties are removed.
 - Property parser, layer c3 done (2026-10-13): `PropertyParser` reviewed, built and tested, with the value half of `ParserFastPaths` and `ValuePool::CreateFontFaceValue`. The property parser slice is complete apart from the Style-dependent pieces below.
-- Next: the sheet parser, planned 2026-10-13 (see the *Sheet parser* section). Layers d1 (selectors) and d2 (declaration blocks) are done; next is d3 (conditions: media/container queries, `MediaList`, `@supports`). `Rules/Rule.hpp` still uses the old `Selector` API and is fixed in d4. `NestedParserContext.hpp` (unreviewed) now takes `NestedParserContextType` from `ParserEnum.hpp`.
-- Sheet parser, d5: define `MutableStyleProperties::SetProperty(id, string, ...)`, `SetCustomProperty` and `ParseDeclaration` (FIXMEs) once `CSSParser` lands.
+- Next: the sheet parser, planned 2026-10-13 (see the *Sheet parser* section). Layers d1 (selectors), d2 (declaration blocks) and d3 (media and container queries) are done; next is d4 (the rule model). `Rules/Rule.hpp` still uses the old `Selector` API and is fixed in d4. `NestedParserContext.hpp` (unreviewed) now takes `NestedParserContextType` from `ParserEnum.hpp`.
+- Sheet parser, d5: define `MutableStyleProperties::SetProperty(id, string, ...)`, `SetCustomProperty` and `ParseDeclaration` (FIXMEs) once `CSSParser` lands. Port `CSSSupportsParser` with it (needs `CSSParser::supportsDeclaration` and `FontCustomPlatformData::supportsFormat`/`supportsTechnology`), and replace the local `ConsumeTrailingImportantAndWhitespace` in `src/CSS/Queries/GenericMediaQueryParser.cpp` with the parser's.
+- Media and container query evaluation (not yet ported): `GenericMediaQueryEvaluator`, `MediaQueryEvaluator`, `MediaQueryMatcher`, `style/ContainerQueryEvaluator`, and each feature schema's `evaluate` (FIXMEs in `src/CSS/Queries/*Features.cpp`); the headers on disk are unreviewed. `MediaList` and `MediaQueryList`/`MediaQueryListEvent` come with the CSSOM slice; `MediaQueryParserContext(const Document &)` with `Document::CssParserContext()`.
 - Not yet ported, needed later: the CSSOM wrapper half of `MutableStyleProperties` (with `CSSStyleProperties`), the `Style::Extractor` overload of `SerialiseShorthandValue`, `FontSelectionValue` (`platform/graphics/FontSelectionAlgorithm.h`) and `FontSelectionValueInlines.hpp` (still raw WebKit).
 - Property parser, not yet ported (`Font`): the string parsers behind the `FontFace` interface and the canvas 2D context's `font` (`ParseUnresolvedFont`, `ParseFontFaceSrc`, `ParseFontFaceSizeAdjust`, `ParseFontFaceUnicodeRange`, `ParseFontFaceDisplay`, `ParseFontFaceFontStyle`, `ParseFontFaceFeatureSettings`, `ParseFontFaceFontWidth`, `ParseFontFaceFontWeight`; FIXME in `Consumers/Font.hpp`). They need `ScriptExecutionContext`/`Document` (quirks mode, value pool) and six of them the generated `PropertyParsing`. Also `LowerFontShorthand` and the `SystemFontDatabase::FontShorthand` sync check (need `SystemFontDatabase`).
 - Property parser, not yet ported: `parseEasingFunctionDeprecated` (`CSSPropertyParserConsumer+Easing`; string → `TimingFunction`, used only by Web Animations; needs `TimingFunction` and `Style::createTimingFunctionDeprecated`) and `parseTransformRaw` (`CSSPropertyParserConsumer+Transform`; string → `Style::Transform`, used only by Web Animations; needs `Style::Transform`, `BuilderState` and the generated `consumeTransform`). Come with animations. Also `parseFilterValueListOrNoneRaw` (`CSSPropertyParserConsumer+Filter`; string → `Style::Filter`, used only by the canvas 2D context's `filter`; needs `Style::Filter`, `BuilderState` and `Document`); comes with canvas.
@@ -692,10 +694,10 @@ Entry: `css/parser/CSSParser.cpp` (headers-only graph: 123 files, `tools/port/ou
 **Layers (bottom-up, each built and tested):**
 - **d1. Selectors:** `CSSSelector`, `CSSSelectorList`, `MutableCSSSelector`, `CSSSelectorParserContext`, `CSSSelectorParser` (~4,100 upstream lines; Krystal `Selectors/*`). Upstream's `CSSSelectorEnums.h` and pseudo-class/element tables are generated by `css/scripts/process-css-pseudo-selectors.py`; Krystal's `Selectors/Enums/*` are hand-written, so likely a codegen step. Tests parse and serialise selectors.
 - **d2. Declaration blocks:** `StyleProperties`, `MutableStyleProperties`, `ImmutableStyleProperties`, `StylePropertiesInlines` and `ShorthandSerializer` (~2,900 lines; Krystal `Properties/StyleProperties.hpp` etc., `ShorthandSerialiser.hpp`). Done.
-- **d3. Conditions:** media/container query parsing and serialisation (`query/MediaQuery`, `GenericMediaQueryParser`/`Types`/`Serialization`, `MediaQueryParser`, `ContainerQuery`, `ContainerQueryParser`, the `MediaQueryFeatures`/`ContainerQueryFeatures` schemas the parser validates against), `MediaQueryParserContext`, `MediaList`, `CSSSupportsParser`. Evaluation deferred.
+- **d3. Conditions:** media/container query parsing and serialisation (`query/MediaQuery`, `GenericMediaQueryParser`/`Types`/`Serialization`, `MediaQueryParser`, `ContainerQuery`, `ContainerQueryParser`, the `MediaQueryFeatures`/`ContainerQueryFeatures` schemas the parser validates against), `MediaQueryParserContext`. Evaluation deferred. Done; `CSSSupportsParser` moved to d5 and `MediaList` to the CSSOM slice (decided 2026-10-13).
 - **d4. Rule model:** `StyleRule` (all rule types), `StyleRuleImport` (no loading), `StyleRuleFunction`, `CSSAtRuleID`, `CSSParserEnum`, `CSSCounterStyleDescriptors`, `StyleSheet`, the parse side of `StyleSheetContents`.
-- **d5. `CSSParser`:** whole stylesheets parse end to end.
-- **Later:** CSSOM wrappers, `@import` loading (`CachedCSSStyleSheet`), `parseInlineStyleDeclaration` (needs `Element`/`Document`), query evaluation, `RuleSet`/style resolution.
+- **d5. `CSSParser`:** whole stylesheets parse end to end, with `CSSSupportsParser`.
+- **Later:** CSSOM wrappers (with `MediaList`), `@import` loading (`CachedCSSStyleSheet`), `parseInlineStyleDeclaration` (needs `Element`/`Document`), query evaluation, `RuleSet`/style resolution.
 
 **Boundaries:** `CSSParserObserver`/`CSSParserObserverWrapper` and `cssjit/CompiledSelector.h` are `wont`; `html/parser/NestingLevelIncrementer.h` is trivial (`SetForScope`-like); `platform/graphics/FontFeatureValues.h`/`FontPaletteValues.h` are small and come with d4.
 
@@ -858,6 +860,53 @@ Graph from `css/StyleProperties.cpp`, `MutableStyleProperties.cpp`, `ImmutableSt
 - Shorthand serialisations follow upstream where browsers differ, e.g. `background-size: 10px` is the pair `10px auto`, `animation: none` serialises as `auto`, `outline: none` as `currentcolor`, `offset: none` as `normal` (all accepted by WPT).
 
 Tests: `tests/CSS/Properties/{StyleProperties,ShorthandSerialiser,PropertyInitialValues}.cpp` (helpers in `include/Krystal.Booey.Tests/CSS/StylePropertiesTestUtils.hpp`): 20 cases / 1978 assertions. `Krystal.Core.Tests/tests/Types/Packed.cpp`: 4 cases / 35 assertions. Full Booey suite: 1603 cases / 676996 assertions; all pass except 6 expected failures. Core suite: 554 cases pass. Whole solution builds with no warnings.
+
+### Layer d3: media and container queries (2026-10-13)
+
+Graph from the nine d3 entries (`MediaQueryParser.cpp`, `ContainerQueryParser.cpp`, `GenericMediaQuerySerialization.cpp`, `MediaQueryFeatures.cpp`, `ContainerQueryFeatures.cpp`, `ContainerQuery.cpp`, `MediaQueryParserContext.cpp`, `MediaList.cpp`, `CSSSupportsParser.cpp`; headers-only): 146 files (`tools/port/out/conditions.md`). Nearly all of it is the evaluators' reach (`ContainerQueryFeatures.cpp` pulls in `StyleBuilder`, `RuleSet` and `SelectorChecker`); the parse side needs only done files. The Krystal headers were an own port close to upstream (no sources, never built). Decided with the user: `CSSSupportsParser` moves to d5 (it needs `CSSParser::supportsDeclaration`), `MediaList` to the CSSOM slice (it only wraps a parent sheet or rule), and the feature schemas are plain `FeatureSchema`s until evaluation lands.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/query/GenericMediaQueryTypes.h` | `have` | `CSS/Queries/GenericMediaQueryTypes.hpp` | on | tested. |
+| `css/query/MediaQuery.h` | `have` | `CSS/Queries/MediaQuery.hpp` | on | tested. |
+| `css/query/GenericMediaQueryParser.h`, `.cpp` | `have` | `CSS/Queries/GenericMediaQueryParser.hpp`, `src/.../GenericMediaQueryParser.cpp` | on | tested. |
+| `css/query/GenericMediaQuerySerialization.h`, `.cpp` | `have` | `CSS/Queries/GenericMediaQuerySerialisation.hpp`, `src/...` | on | tested. |
+| `css/query/MediaQueryParser.h`, `.cpp` | `have` | `CSS/Queries/MediaQueryParser.hpp`, `src/...` | on | tested. |
+| `css/query/MediaQueryFeatures.h`, `.cpp` | `have*` (schemas only) | `CSS/Queries/MediaQueryFeatures.hpp`, `src/...` | on | tested. See differences. |
+| `css/query/ContainerQuery.h`, `.cpp` | `have` | `CSS/Queries/ContainerQuery.hpp`, `ContainerQueryAxis.hpp`, `src/...` | on | tested. `Axis` is in its own header (the Style seam uses it). |
+| `css/query/ContainerQueryParser.h`, `.cpp` | `have` | `CSS/Queries/ContainerQueryParser.hpp`, `src/...` | on | tested. |
+| `css/query/ContainerQueryFeatures.h`, `.cpp` | `have*` (schemas only) | `CSS/Queries/ContainerQueryFeatures.hpp`, `src/...` | on | tested. |
+| `css/MediaQueryParserContext.h`, `.cpp` | `have` (no `Document` constructor) | `CSS/Queries/MediaQueryParserContext.hpp`, `src/...` | on | tested through the parsers. |
+| `css/query/GenericMediaQueryEvaluator.*`, `MediaQueryEvaluator.*`, `css/MediaQueryMatcher.*`, `style/ContainerQueryEvaluator.*` | `?` | `CSS/Queries/*Evaluator.hpp`, `MediaQueryMatcher.hpp` | off | Evaluation; deferred, unreviewed. |
+| `css/MediaList.h`, `.cpp` | `?` | `CSS/Media/MediaList.hpp` | off | CSSOM slice. |
+| `css/parser/CSSSupportsParser.h`, `.cpp` | `port` | — | — | d5. |
+| `css/parser/MediaQueryBlockWatcher.h`, `.cpp` | `wont` | deleted | — | Dead upstream: nothing includes it. |
+
+**Names:** `MQ`/`CQ` → `css::mq`/`css::cq`; `serialize` → `Serialise`; `FeatureSchema::type`/`valueType` → `FeatureType`/`FeatureValueType` (the nested enums are `Type`/`ValueType`); members that share their type's name are written `mq::Syntax Syntax`, `mq::Condition Condition`, ...; `MediaQueryResult::mediaQueryList` → `MediaQueryList`.
+
+**Bugs fixed (old Krystal headers):**
+- `GenericMediaQueryParser` forward-declared `MediaQueryParserContext` in `css::mq` (it's in `css`), and built a `GeneralEnclosed` from a `CSSOMStringAtom` (it holds strings).
+- `Feature`, `MediaQuery` and `ContainerQuery` couldn't be default-constructed (`StringAtom` has no default constructor), so `TraverseFeatures`' dummy feature and `Condition {}` didn't compile; they now default to the null atom.
+- `EnumTraits<MediaQueryDynamicDependency>` said 4 values (there are 3).
+- `Comparison::Value`, `Condition::LogicalOperator` and similar members hid their own types.
+- `ContainerQuery.hpp` declared `cq::FeatureSchemas::Width()` etc., which are never defined (upstream declares them too; the real ones are `cq::Features`). Removed.
+- Lists were `SmallList` (upstream `Vector`); now `List`. `FeatureSchema::ValueIdentifiers` is a `FixedVector`, as upstream.
+
+**Differences:**
+- Non-standard features are dropped: `-webkit-animation`, `-webkit-device-pixel-ratio` (and its `min-`/`max-` forms), `-webkit-transform-2d`, `-webkit-transform-3d`, `-webkit-transition`, `-webkit-video-playable-inline` and `prefers-dark-interface`. So `MediaQueryParser` has no `schemaForFeatureName` override (it only gated `prefers-dark-interface`), and the plain-feature parser doesn't rewrite `-webkit-min-`/`-webkit-max-`. Each of these now parses as `<general-enclosed>` (valid, evaluates to unknown).
+- `display-mode` and `prefers-color-scheme` are always on (upstream `ENABLE(APPLICATION_MANIFEST)`/`ENABLE(DARK_MODE_CSS)`); the codegen now also passes `ENABLE_APPLICATION_MANIFEST`, which only adds the `fullscreen`, `standalone`, `minimal-ui` and `browser` keywords.
+- Schemas are plain `FeatureSchema`s whose `Evaluate` returns `Unknown` (FIXME); upstream's `BooleanSchema`/`IntegerSchema`/.../`SizeFeatureSchema`/`StyleFeatureSchema` subclasses and their value functions come with evaluation.
+- `OptionSet<MediaQueryDynamicDependency>` and `OptionSet<Axis>` are flags enums with a `None` value.
+- `GenericMediaQueryParser::ValidateFeature` passes the `MediaQueryParserContext` to `SchemaForFeatureName` (upstream passes the inner `CSSParserContext`, which converts back through the implicit constructor, copying it).
+- `ConsumeTrailingImportantAndWhitespace` is a local copy of `CSSParser`'s until d5 (FIXME).
+- `MediaQueryParser::Parse(string)` takes a `CSSOMStringView` and always tokenizes (Krystal's tokenizer can't fail, unlike `CSSTokenizer::tryCreate`).
+- Serialising a name-only container query gives `--foo ` (trailing space), as upstream.
+
+**Known failures (tests tagged `[!shouldfail]`):**
+- Range syntax in `style()` and lists of container queries (css-conditional-5) aren't supported; they fail upstream too (`at-container-style-parsing-expected.txt`, `at-container-parsing-expected.txt`).
+- `style()` values don't keep runs of whitespace or a number's original text (`style(--foo: 2.100)` → `2.1`): the tokenizer gap (see *Where we are*). The `( prop: val  )` case fails upstream too.
+
+Tests: `tests/CSS/Queries/{MediaQueryParser,ContainerQueryParser}.cpp` (WPT `match-media-parsing.html`, `aspect-ratio-serialization.html`, `mq-invalid-media-type-*`, `at-container-parsing.html`, `at-container-style-parsing.html`, `at-container-serialization.html`, `at-container-style-serialization.html`, plus schema, feature and API tests): 19 cases / 416 assertions. Full Booey suite: 1622 cases / 677412 assertions; all pass except 8 expected failures. Whole solution builds with no warnings.
 
 ## Slice 3: Colour
 

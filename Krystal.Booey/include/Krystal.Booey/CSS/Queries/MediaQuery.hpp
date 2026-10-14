@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryTypes.hpp"
 
@@ -10,18 +10,19 @@ namespace krys::boo::css::mq
     Only
   };
 
+  /// @brief A media query: an optional `not`/`only` prefix, a media type and an optional condition.
   struct MediaQuery
   {
-    Maybe<Prefix> Prefix;
-    CSSOMStringAtom MediaType;
-    Maybe<Condition> Condition {};
+    Maybe<mq::Prefix> Prefix;
+    CSSOMStringAtom MediaType {CSSOMStringAtom::Null()};
+    Maybe<mq::Condition> Condition {};
   };
 
-  using MediaQueryList = SmallList<MediaQuery>;
+  using MediaQueryList = List<MediaQuery>;
 
   struct MediaQueryResult
   {
-    MediaQueryList MediaQueries;
+    mq::MediaQueryList MediaQueryList;
     bool Result;
   };
 

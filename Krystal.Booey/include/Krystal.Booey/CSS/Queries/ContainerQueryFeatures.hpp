@@ -1,22 +1,17 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryTypes.hpp"
 
-namespace krys::boo::css
+namespace krys::boo::css::cq::Features
 {
-  class ToLengthConversionData;
-  enum class Category : uint8;
+  KRYS_NODISCARD const mq::FeatureSchema &Width() noexcept;
+  KRYS_NODISCARD const mq::FeatureSchema &Height() noexcept;
+  KRYS_NODISCARD const mq::FeatureSchema &InlineSize() noexcept;
+  KRYS_NODISCARD const mq::FeatureSchema &BlockSize() noexcept;
+  KRYS_NODISCARD const mq::FeatureSchema &AspectRatio() noexcept;
+  KRYS_NODISCARD const mq::FeatureSchema &Orientation() noexcept;
+  KRYS_NODISCARD const mq::FeatureSchema &Style() noexcept;
 
-  namespace cq::Features
-  {
-    const mq::FeatureSchema &Width() noexcept;
-    const mq::FeatureSchema &Height() noexcept;
-    const mq::FeatureSchema &InlineSize() noexcept;
-    const mq::FeatureSchema &BlockSize() noexcept;
-    const mq::FeatureSchema &AspectRatio() noexcept;
-    const mq::FeatureSchema &Orientation() noexcept;
-    const mq::FeatureSchema &Style() noexcept;
-
-    SmallList<const mq::FeatureSchema *> AllSchemas() noexcept;
-  }
+  /// @brief The size features. `style()` isn't looked up by name, so it isn't included.
+  KRYS_NODISCARD List<const mq::FeatureSchema *> AllSchemas() noexcept;
 }

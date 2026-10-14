@@ -1,31 +1,12 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Queries/ContainerQueryAxis.hpp"
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryTypes.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 
-namespace krys::boo::dom
-{
-  class Element;
-}
-
-namespace krys::boo::css
-{
-  class Value;
-}
-
 namespace krys::boo::css::cq
 {
-  namespace FeatureSchemas
-  {
-    const mq::FeatureSchema &Width();
-    const mq::FeatureSchema &Height();
-    const mq::FeatureSchema &InlineSize();
-    const mq::FeatureSchema &BlockSize();
-    const mq::FeatureSchema &AspectRatio();
-    const mq::FeatureSchema &Orientation();
-  };
-
+  /// @brief The axes a container must support size queries on for the feature to be evaluated.
   KRYS_NODISCARD Axis RequiredAxesForFeature(const mq::Feature &feature) noexcept;
 
   enum class ContainsUnknownFeature : bool
@@ -34,12 +15,13 @@ namespace krys::boo::css::cq
     Yes
   };
 
+  /// @brief The prelude of an `@container` rule: an optional container name and a condition.
   struct ContainerQuery
   {
-    CSSOMStringAtom Name;
+    CSSOMStringAtom Name {CSSOMStringAtom::Null()};
     mq::Condition Condition;
-    cq::Axis RequiredAxes;
-    ContainsUnknownFeature ContainsUnknownFeature;
+    Axis RequiredAxes {Axis::None};
+    cq::ContainsUnknownFeature ContainsUnknownFeature {cq::ContainsUnknownFeature::No};
   };
 
   void Serialise(CSSOMString &builder, const ContainerQuery &query) noexcept;

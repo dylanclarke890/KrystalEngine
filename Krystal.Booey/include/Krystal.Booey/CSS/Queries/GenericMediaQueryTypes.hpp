@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
@@ -6,8 +6,10 @@
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/CheckedPtr.hpp"
+#include "Krystal.Core/Types/FixedVector.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 #include "Krystal.Core/Visitor.hpp"
@@ -48,19 +50,25 @@ namespace krys::boo::css::mq
   };
 
   struct Condition;
-
   struct FeatureSchema;
 
+  /// @brief One side of a feature comparison: an operator and the value it compares against.
   struct Comparison
   {
     ComparisonOperator Op;
-    RefPtr<Value> Value;
+    RefPtr<css::Value> Value;
+
+    KRYS_NODISCARD RefPtr<css::Value> ProtectedValue() const noexcept
+    {
+      return Value;
+    }
   };
 
+  /// @brief A media or container feature, in boolean, plain (`name: value`) or range syntax.
   struct Feature
   {
-    CSSOMStringAtom Name;
-    Syntax Syntax;
+    CSSOMStringAtom Name {CSSOMStringAtom::Null()};
+    mq::Syntax Syntax {mq::Syntax::Boolean};
     Maybe<Comparison> LeftComparison;
     Maybe<Comparison> RightComparison;
 
@@ -69,6 +77,7 @@ namespace krys::boo::css::mq
     const FeatureSchema *Schema {nullptr};
   };
 
+  /// @brief An unrecognised `<general-enclosed>` production, kept for serialisation.
   struct GeneralEnclosed
   {
     CSSOMString Name;
@@ -77,10 +86,11 @@ namespace krys::boo::css::mq
 
   using QueryInParens = Variant<Condition, Feature, GeneralEnclosed>;
 
+  /// @brief A condition: queries joined by one logical operator, or a single negated query.
   struct Condition
   {
-    LogicalOperator LogicalOperator {LogicalOperator::And};
-    SmallList<QueryInParens> Queries;
+    mq::LogicalOperator LogicalOperator {mq::LogicalOperator::And};
+    List<QueryInParens> Queries;
 
     Maybe<ValueId> FunctionId {};
   };
@@ -94,11 +104,13 @@ namespace krys::boo::css::mq
 
   enum class MediaQueryDynamicDependency : uint8
   {
+    None = 0,
     Viewport = 1 << 0,
     Appearance = 1 << 1,
     Accessibility = 1 << 2,
   };
 
+  /// @brief What a feature is evaluated against.
   struct FeatureEvaluationContext
   {
     WeakRef<const dom::Document> Document;
@@ -106,6 +118,8 @@ namespace krys::boo::css::mq
     CheckedPtr<const RenderElement> Renderer {};
   };
 
+  /// @brief Describes a feature the parser accepts: its name, whether it's discrete or a range, and the type
+  /// of value it takes.
   struct FeatureSchema
   {
     enum class Type : uint8
@@ -129,19 +143,19 @@ namespace krys::boo::css::mq
     Type FeatureType;
     ValueType FeatureValueType;
     MediaQueryDynamicDependency Dependencies;
-    SmallList<ValueId> ValueIdentifiers;
+    FixedVector<ValueId> ValueIdentifiers;
 
-    KRYS_NODISCARD virtual EvaluationResult Evaluate(const Feature &feature,
-                                                     const FeatureEvaluationContext &context) const noexcept
+    KRYS_NODISCARD virtual EvaluationResult Evaluate(const Feature &,
+                                                     const FeatureEvaluationContext &) const noexcept
     {
       return EvaluationResult::Unknown;
     }
 
     FeatureSchema(const CSSOMStringAtom &name, Type type, ValueType valueType,
                   MediaQueryDynamicDependency dependencies,
-                  SmallList<ValueId> &&valueIdentifiers = {}) noexcept
+                  FixedVector<ValueId> valueIdentifiers = {}) noexcept
         : Name(name), FeatureType(type), FeatureValueType(valueType), Dependencies(dependencies),
-          ValueIdentifiers(::krys::move(valueIdentifiers))
+          ValueIdentifiers(krys::move(valueIdentifiers))
     {
     }
 
@@ -154,12 +168,12 @@ namespace krys::boo::css::mq
   template <typename TraverseFunction>
   void TraverseFeatures(const QueryInParens &queryInParens, TraverseFunction &&function) noexcept
   {
-    return krys::SwitchOn(
+    krys::SwitchOn(
       queryInParens, [&](const Condition &condition) { TraverseFeatures(condition, function); },
-      [&](const mq::Feature &feature) { function(feature); },
-      [&](const mq::GeneralEnclosed &)
+      [&](const Feature &feature) { function(feature); },
+      [&](const GeneralEnclosed &)
       {
-        mq::Feature dummy {};
+        Feature dummy {};
         function(dummy);
       });
   }
@@ -174,4 +188,4 @@ namespace krys::boo::css::mq
   }
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::mq::MediaQueryDynamicDependency, 4uz);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::mq::MediaQueryDynamicDependency, 3uz);

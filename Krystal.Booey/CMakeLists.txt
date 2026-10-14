@@ -79,7 +79,7 @@ set(KRYSTAL_BOOEY_GENERATED_SOURCES
 
 set(KRYSTAL_BOOEY_CODEGEN_SCRIPT_ARGS
   --gperf-executable=${GPERF_EXECUTABLE}
-  --defines=ENABLE_DARK_MODE_CSS,ENABLE_VARIATION_FONTS
+  --defines=ENABLE_APPLICATION_MANIFEST,ENABLE_DARK_MODE_CSS,ENABLE_VARIATION_FONTS
   --output-headers-dir=${KRYSTAL_BOOEY_HEADER_OUTPUT_DIR}
   --output-sources-dir=${KRYSTAL_BOOEY_SOURCES_OUTPUT_DIR}
 )
@@ -507,6 +507,18 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Properties/ShorthandSerialiser.hpp
   include/Krystal.Booey/CSS/Properties/StyleProperties.hpp
   include/Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp
+
+  # Sheet parser, layer d3 (media and container queries)
+  include/Krystal.Booey/CSS/Queries/ContainerQuery.hpp
+  include/Krystal.Booey/CSS/Queries/ContainerQueryFeatures.hpp
+  include/Krystal.Booey/CSS/Queries/ContainerQueryParser.hpp
+  include/Krystal.Booey/CSS/Queries/GenericMediaQueryParser.hpp
+  include/Krystal.Booey/CSS/Queries/GenericMediaQuerySerialisation.hpp
+  include/Krystal.Booey/CSS/Queries/GenericMediaQueryTypes.hpp
+  include/Krystal.Booey/CSS/Queries/MediaQuery.hpp
+  include/Krystal.Booey/CSS/Queries/MediaQueryFeatures.hpp
+  include/Krystal.Booey/CSS/Queries/MediaQueryParser.hpp
+  include/Krystal.Booey/CSS/Queries/MediaQueryParserContext.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -768,6 +780,16 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Properties/PropertyInitialValues.cpp
   src/CSS/Properties/ShorthandSerialiser.cpp
   src/CSS/Properties/StyleProperties.cpp
+
+  # Sheet parser, layer d3 (media and container queries)
+  src/CSS/Queries/ContainerQuery.cpp
+  src/CSS/Queries/ContainerQueryFeatures.cpp
+  src/CSS/Queries/ContainerQueryParser.cpp
+  src/CSS/Queries/GenericMediaQueryParser.cpp
+  src/CSS/Queries/GenericMediaQuerySerialisation.cpp
+  src/CSS/Queries/MediaQueryFeatures.cpp
+  src/CSS/Queries/MediaQueryParser.cpp
+  src/CSS/Queries/MediaQueryParserContext.cpp
 )
 
 target_precompile_headers(Krystal.Booey

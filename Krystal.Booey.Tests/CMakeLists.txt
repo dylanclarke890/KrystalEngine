@@ -155,6 +155,8 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Properties/PropertyShorthand.cpp
 		tests/CSS/Properties/ShorthandSerialiser.cpp
 		tests/CSS/Properties/StyleProperties.cpp
+		tests/CSS/Queries/ContainerQueryParser.cpp
+		tests/CSS/Queries/MediaQueryParser.cpp
 		tests/CSS/Values/Aggregates.cpp
 		tests/CSS/Values/Borders/BorderRadius.cpp
 		tests/CSS/Values/Borders/BoxShadow.cpp
