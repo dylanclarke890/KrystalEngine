@@ -250,6 +250,8 @@ namespace krys::boo
     _usesTreeCountingFunctions = true;
   }
 
+  // Properties (see the declarations).
+
   Maybe<float> RenderStyle::EvaluateFixedLineHeight(const style::ZoomFactor &) const noexcept
   {
     // The initial `line-height` is `normal`, which isn't fixed.
@@ -259,6 +261,48 @@ namespace krys::boo
   float RenderStyle::ComputeSpecifiedLineHeight() const noexcept
   {
     return static_cast<float>(InitialFontLineSpacing);
+  }
+
+  const style::AspectRatio &RenderStyle::AspectRatio() const noexcept
+  {
+    return _aspectRatio;
+  }
+
+  void RenderStyle::SetAspectRatio(style::AspectRatio value) noexcept
+  {
+    _aspectRatio = krys::move(value);
+  }
+
+  double RenderStyle::LogicalAspectRatio() const noexcept
+  {
+    auto ratio = AspectRatio().TryRatio();
+    krys_debug_assert(ratio);
+
+    if (GetWritingMode().IsHorizontal())
+    {
+      return ratio->Numerator.Value / ratio->Denominator.Value;
+    }
+    return ratio->Denominator.Value / ratio->Numerator.Value;
+  }
+
+  const style::MathDepth &RenderStyle::MathDepth() const noexcept
+  {
+    return _mathDepth;
+  }
+
+  void RenderStyle::SetMathDepth(style::MathDepth value) noexcept
+  {
+    _mathDepth = krys::move(value);
+  }
+
+  MathStyle RenderStyle::GetMathStyle() const noexcept
+  {
+    return _mathStyle;
+  }
+
+  void RenderStyle::SetMathStyle(MathStyle value) noexcept
+  {
+    _mathStyle = krys::move(value);
   }
 
   const dom::Document &RenderView::GetDocument() const noexcept

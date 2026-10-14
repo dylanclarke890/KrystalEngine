@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
@@ -15,6 +16,23 @@
 
 namespace krys::boo::style
 {
+  namespace detail_builder_checking
+  {
+    /// @brief Downcasts a value known to be a `ValueType` (a no-op for `css::Value` itself).
+    template <typename ValueType>
+    KRYS_NODISCARD const ValueType &DowncastValue(const css::Value &value) noexcept
+    {
+      if constexpr (SameType<ValueType, css::Value>)
+      {
+        return value;
+      }
+      else
+      {
+        return Downcast<ValueType>(value);
+      }
+    }
+  }
+
   template <typename ValueType>
   KRYS_NODISCARD const ValueType *RequiredDowncast(BuilderState &, const css::Value &) noexcept;
 
@@ -45,7 +63,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD const ValueType &operator*() const noexcept
     {
-      return Downcast<ValueType>(*Iterator);
+      return detail_builder_checking::DowncastValue<ValueType>(*Iterator);
     }
 
     KRYS_NODISCARD bool operator!=(const TypedRequiredListIterator &other) const noexcept
@@ -70,7 +88,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD const ValueType &item(uint32 index) const noexcept KRYS_LIFETIME_BOUND
     {
-      return Downcast<ValueType>(*List->Item(index));
+      return detail_builder_checking::DowncastValue<ValueType>(*List->Item(index));
     }
 
     KRYS_NODISCARD TypedRequiredListIterator<ValueType> begin() const noexcept KRYS_LIFETIME_BOUND
@@ -95,13 +113,20 @@ namespace krys::boo::style
   template <typename ValueType>
   inline const ValueType *RequiredDowncast(BuilderState &builderState, const css::Value &value) noexcept
   {
-    auto *typedValue = DynamicDowncast<ValueType>(value);
-    if (!typedValue) KRYS_UNLIKELY
+    if constexpr (SameType<ValueType, css::Value>)
     {
-      builderState.SetCurrentPropertyInvalidAtComputedValueTime();
-      return nullptr;
+      return &value;
     }
-    return typedValue;
+    else
+    {
+      auto *typedValue = DynamicDowncast<ValueType>(value);
+      if (!typedValue) KRYS_UNLIKELY
+      {
+        builderState.SetCurrentPropertyInvalidAtComputedValueTime();
+        return nullptr;
+      }
+      return typedValue;
+    }
   }
 
   template <typename ValueType>

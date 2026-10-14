@@ -9,12 +9,15 @@
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/FloatSize.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/AnchorSizeDimension.hpp"
 #include "Krystal.Booey/Style/PropertyCascade.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Style/ScopedName.hpp"
 #include "Krystal.Booey/Style/ScopeOrdinal.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
+#include "Krystal.Booey/Style/Values/Math/MathDepth.hpp"
+#include "Krystal.Booey/Style/Values/Sizing/AspectRatio.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
@@ -121,6 +124,11 @@ namespace krys::boo
     bool _usesTreeCountingFunctions {false};
     boo::WritingMode _writingMode {};
 
+    // Property storage, grown as the computed value types need it; replaced by the generated storage.
+    style::AspectRatio _aspectRatio {css::keywords::Auto {}};
+    style::MathDepth _mathDepth {0};
+    MathStyle _mathStyle {MathStyle::Normal};
+
   public:
     RenderStyle() noexcept = default;
 
@@ -171,6 +179,16 @@ namespace krys::boo
     void SetUsesContainerUnits() noexcept;
     KRYS_NODISCARD bool UsesTreeCountingFunctions() const noexcept;
     void SetUsesTreeCountingFunctions() noexcept;
+
+    // Properties, grown as the computed value types need them; replaced by the generated getters and
+    // setters.
+    KRYS_NODISCARD const style::AspectRatio &AspectRatio() const noexcept;
+    void SetAspectRatio(style::AspectRatio value) noexcept;
+    KRYS_NODISCARD double LogicalAspectRatio() const noexcept;
+    KRYS_NODISCARD const style::MathDepth &MathDepth() const noexcept;
+    void SetMathDepth(style::MathDepth value) noexcept;
+    KRYS_NODISCARD MathStyle GetMathStyle() const noexcept;
+    void SetMathStyle(MathStyle value) noexcept;
 
     /// @brief Collapses `lineHeight().tryFixed()` evaluated to a `LayoutUnit` with `zoom`, as a float, for
     /// the initial `line-height`.

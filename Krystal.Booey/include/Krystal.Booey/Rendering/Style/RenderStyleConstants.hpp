@@ -803,8 +803,8 @@ namespace krys::boo
 
   enum class ColorScheme : uint8
   {
-    Light = 1 << 0,
-    Dark = 1 << 1
+    Light,
+    Dark
   };
 
   constexpr size_t ColorSchemeBits = 2;

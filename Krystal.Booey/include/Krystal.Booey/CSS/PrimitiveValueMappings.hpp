@@ -15,17 +15,23 @@
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Graphics/WindRule.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
+#include "Krystal.Booey/Style/Values/Box/MarginTrim.hpp"
+#include "Krystal.Booey/Style/Values/Contain/Contain.hpp"
+#include "Krystal.Booey/Style/Values/Overflow/ScrollBehavior.hpp"
+#include "Krystal.Booey/Style/Values/PointerEvents/TouchAction.hpp"
+#include "Krystal.Booey/Style/Values/Scrollbars/ScrollbarWidth.hpp"
+#include "Krystal.Booey/Style/Values/Speech/SpeakAs.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Visitor.hpp"
 
-// FIXME: The mappings of the Style value types (and `FontSizeAdjust::Metric`) are added with their types:
-// `style::ContainValue`, `HangingPunctuationValue`, `ImageOrientation`, `MarginTrimSide`, `MaskMode` (and
-// `ToValueIdForWebkitMaskSourceType`), `PositionTryFallbackTactic`, `PositionTryOrder`,
-// `PositionVisibilityValue`, `Resize`, `ScrollBehavior`, `ScrollbarWidth`, `SpeakAsValue`, `TextAlign`,
-// `TextAlignLast`, `TextDecorationLine::Flag`, `TextEmphasisPositionValue`, `TextTransformValue`,
-// `TextUnderlinePositionValue`, `TouchActionValue` and `WebkitLineBoxContainValue`.
+// FIXME: The mappings of the remaining Style value types (and `FontSizeAdjust::Metric`) are added with their
+// types: `style::HangingPunctuationValue`, `style::ImageOrientation`, `style::MaskMode` (and
+// `ToValueIdForWebkitMaskSourceType`), `style::PositionTryFallbackTactic`, `style::PositionTryOrder`,
+// `style::PositionVisibilityValue`, `style::Resize`, `style::TextAlign`, `style::TextAlignLast`,
+// `style::TextDecorationLine::Flag`, `style::TextEmphasisPositionValue`, `style::TextTransformValue`,
+// `style::TextUnderlinePositionValue` and `style::WebkitLineBoxContainValue`.
 
 namespace krys::boo
 {
@@ -1174,9 +1180,9 @@ namespace krys::boo
   CASE(Screen)                                                                                               \
   CASE(Overlay)                                                                                              \
   CASE(Darken)                                                                                               \
-  CASE(Lighten) CASE(ColorDodge) CASE(ColorBurn) CASE(HardLight) CASE(SoftLight) CASE(Difference)            \
-    CASE(Exclusion) CASE(Hue) CASE(Saturation) CASE(Color) CASE(Luminosity) CASE(PlusDarker)                 \
-      CASE(PlusLighter)
+  CASE(Lighten)                                                                                              \
+  CASE(ColorDodge) CASE(ColorBurn) CASE(HardLight) CASE(SoftLight) CASE(Difference) CASE(Exclusion)          \
+    CASE(Hue) CASE(Saturation) CASE(Color) CASE(Luminosity) CASE(PlusDarker) CASE(PlusLighter)
   KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
 #undef KRYS_MAPPING_TYPE
 #undef KRYS_MAPPING_FOR_EACH
@@ -1335,7 +1341,8 @@ namespace krys::boo
   CASE(NoChange)                                                                                             \
   CASE(ResetSize)                                                                                            \
   CASE(Central)                                                                                              \
-  CASE(Middle) CASE(TextBeforeEdge) CASE(TextAfterEdge) CASE(Ideographic) CASE(Alphabetic) CASE(Hanging)     \
+  CASE(Middle)                                                                                               \
+  CASE(TextBeforeEdge) CASE(TextAfterEdge) CASE(Ideographic) CASE(Alphabetic) CASE(Hanging)                  \
     CASE(Mathematical)
   KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
 #undef KRYS_MAPPING_TYPE
@@ -1433,8 +1440,9 @@ namespace krys::boo
   CASE(Normal)                                                                                               \
   CASE(Stretch)                                                                                              \
   CASE(Baseline)                                                                                             \
-  CASE(LastBaseline) CASE(Center) CASE(Start) CASE(End) CASE(SelfStart) CASE(SelfEnd) CASE(FlexStart)        \
-    CASE(FlexEnd) CASE(Left) CASE(Right) CASE(AnchorCenter)
+  CASE(LastBaseline)                                                                                         \
+  CASE(Center) CASE(Start) CASE(End) CASE(SelfStart) CASE(SelfEnd) CASE(FlexStart) CASE(FlexEnd) CASE(Left)  \
+    CASE(Right) CASE(AnchorCenter)
   KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
 #undef KRYS_MAPPING_TYPE
 #undef KRYS_MAPPING_FOR_EACH
@@ -1710,6 +1718,42 @@ namespace krys::boo
 
 #define KRYS_MAPPING_TYPE TextSpacingTrim::TrimType
 #define KRYS_MAPPING_FOR_EACH(CASE) CASE(SpaceAll) CASE(TrimAll) CASE(Auto)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
+
+#define KRYS_MAPPING_TYPE style::SpeakAsValue
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(SpellOut) CASE(Digits) CASE(LiteralPunctuation) CASE(NoPunctuation)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
+
+#define KRYS_MAPPING_TYPE style::TouchActionValue
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(PanX) CASE(PanY) CASE(PinchZoom)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
+
+#define KRYS_MAPPING_TYPE style::ScrollbarWidth
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Auto) CASE(Thin) CASE(None)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
+
+#define KRYS_MAPPING_TYPE style::ScrollBehavior
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Auto) CASE(Smooth)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
+
+#define KRYS_MAPPING_TYPE style::MarginTrimSide
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(BlockStart) CASE(InlineStart) CASE(BlockEnd) CASE(InlineEnd)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
+
+#define KRYS_MAPPING_TYPE style::ContainValue
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Size) CASE(InlineSize) CASE(Layout) CASE(Style) CASE(Paint)
   KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
 #undef KRYS_MAPPING_TYPE
 #undef KRYS_MAPPING_FOR_EACH

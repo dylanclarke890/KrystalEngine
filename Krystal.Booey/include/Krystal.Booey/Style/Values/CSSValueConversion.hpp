@@ -131,7 +131,7 @@ namespace krys::boo::style
       if (auto *list = DynamicDowncast<css::ValueList>(value);
           list && list->Separator() == css::ValueSeparator::SpaceSeparator)
       {
-        return css::SpaceSeparatedEnumSet<T>::map(*list, [&](const css::Value &element)
+        return css::SpaceSeparatedEnumSet<T>::Map(*list, [&](const css::Value &element)
                                                   { return ConvertCSSValueToStyle<T>(state, element); });
       }
       return {ConvertCSSValueToStyle<T>(state, value)};
@@ -148,7 +148,7 @@ namespace krys::boo::style
       if (auto *list = DynamicDowncast<css::ValueList>(value);
           list && list->Separator() == css::ValueSeparator::CommaSeparator)
       {
-        return css::CommaSeparatedEnumSet<T>::map(*list, [&](const css::Value &element)
+        return css::CommaSeparatedEnumSet<T>::Map(*list, [&](const css::Value &element)
                                                   { return ConvertCSSValueToStyle<T>(state, element); });
       }
       return {ConvertCSSValueToStyle<T>(state, value)};

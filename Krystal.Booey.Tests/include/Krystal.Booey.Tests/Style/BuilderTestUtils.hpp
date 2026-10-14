@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey.Tests/CSS/RuleTestUtils.hpp"
+#include "Krystal.Booey.Tests/CSS/StylePropertiesTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
@@ -40,13 +41,28 @@ namespace krys::boo::style::tests
       State->SetCurrentProperty(&CurrentProperty);
     }
 
+    /// @brief A parser context with every settings-gated property the value tests use enabled.
+    KRYS_NODISCARD static css::ParserContext ParseContext() noexcept
+    {
+      auto context = css::tests::DeclarationTestContext();
+      context.PropertySettings.cssMathDepthEnabled = true;
+      context.PropertySettings.cssRhythmicSizingEnabled = true;
+      context.PropertySettings.cssScrollbarColorEnabled = true;
+      context.PropertySettings.cssScrollbarGutterEnabled = true;
+      context.PropertySettings.cssScrollbarWidthEnabled = true;
+      context.PropertySettings.viewTransitionsEnabled = true;
+      return context;
+    }
+
     /// @brief Parses `value` as the value of `property`.
     KRYS_NODISCARD Ref<css::Value> Parse(css::PropertyId property, utf8_stringview value) noexcept
     {
       utf8_string declaration {css::ToString(property)};
       declaration += u8": ";
       declaration += value;
-      auto parsed = css::tests::ImmutableDeclarations(declaration)->GetPropertyCSSValue(property);
+      auto properties = css::MutableStyleProperties::Create(css::ParserMode::HTMLStandard);
+      css::tests::AddDeclaration(*properties, declaration, ParseContext());
+      auto parsed = properties->GetPropertyCSSValue(property);
       krys_assert_msg(parsed, "The value doesn't parse");
       Ref<css::Value> result = krys::move(parsed);
       return result;

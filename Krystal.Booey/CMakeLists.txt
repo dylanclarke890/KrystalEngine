@@ -665,6 +665,48 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueCreation.hpp
   include/Krystal.Booey/Style/Values/Primitives/Position.hpp
   include/Krystal.Booey/Style/Values/Primitives/Url.hpp
+
+  # Style resolution, layer f3b (keyword and length groups)
+  include/Krystal.Booey/Style/Values/Box/Margin.hpp
+  include/Krystal.Booey/Style/Values/Box/MarginTrim.hpp
+  include/Krystal.Booey/Style/Values/Box/Padding.hpp
+  include/Krystal.Booey/Style/Values/Break/Orphans.hpp
+  include/Krystal.Booey/Style/Values/Break/Widows.hpp
+  include/Krystal.Booey/Style/Values/CSS2/ZIndex.hpp
+  include/Krystal.Booey/Style/Values/ColorAdjust/ColorScheme.hpp
+  include/Krystal.Booey/Style/Values/Contain/Contain.hpp
+  include/Krystal.Booey/Style/Values/Contain/ContainerName.hpp
+  include/Krystal.Booey/Style/Values/CounterStyles/CounterStyle.hpp
+  include/Krystal.Booey/Style/Values/Display/Order.hpp
+  include/Krystal.Booey/Style/Values/FillStroke/StrokeMiterlimit.hpp
+  include/Krystal.Booey/Style/Values/FillStroke/StrokeWidth.hpp
+  include/Krystal.Booey/Style/Values/Flexbox/FlexBasis.hpp
+  include/Krystal.Booey/Style/Values/Flexbox/FlexGrow.hpp
+  include/Krystal.Booey/Style/Values/Flexbox/FlexShrink.hpp
+  include/Krystal.Booey/Style/Values/Lists/ListStyleType.hpp
+  include/Krystal.Booey/Style/Values/Math/MathDepth.hpp
+  include/Krystal.Booey/Style/Values/Multicol/ColumnCount.hpp
+  include/Krystal.Booey/Style/Values/Multicol/ColumnWidth.hpp
+  include/Krystal.Booey/Style/Values/Overflow/BlockEllipsis.hpp
+  include/Krystal.Booey/Style/Values/Overflow/MaximumLines.hpp
+  include/Krystal.Booey/Style/Values/Overflow/ScrollBehavior.hpp
+  include/Krystal.Booey/Style/Values/Overflow/ScrollbarGutter.hpp
+  include/Krystal.Booey/Style/Values/Page/PageSize.hpp
+  include/Krystal.Booey/Style/Values/PointerEvents/TouchAction.hpp
+  include/Krystal.Booey/Style/Values/Position/Inset.hpp
+  include/Krystal.Booey/Style/Values/Rhythm/BlockStepSize.hpp
+  include/Krystal.Booey/Style/Values/Scrollbars/ScrollbarColor.hpp
+  include/Krystal.Booey/Style/Values/Scrollbars/ScrollbarWidth.hpp
+  include/Krystal.Booey/Style/Values/Sizing/AspectRatio.hpp
+  include/Krystal.Booey/Style/Values/Sizing/ContainIntrinsicSize.hpp
+  include/Krystal.Booey/Style/Values/Sizing/MaximumSize.hpp
+  include/Krystal.Booey/Style/Values/Sizing/MinimumSize.hpp
+  include/Krystal.Booey/Style/Values/Sizing/PreferredSize.hpp
+  include/Krystal.Booey/Style/Values/Speech/SpeakAs.hpp
+  include/Krystal.Booey/Style/Values/ViewTransitions/ViewTransitionClass.hpp
+  include/Krystal.Booey/Style/Values/ViewTransitions/ViewTransitionName.hpp
+  include/Krystal.Booey/Style/Values/Viewport/Zoom.hpp
+  include/Krystal.Booey/Style/Values/WillChange/WillChange.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -1047,6 +1089,35 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Style/Values/Primitives/Position.cpp
   src/Style/Values/Primitives/Ratio.cpp
   src/Style/Values/Primitives/Url.cpp
+
+  # Style resolution, layer f3b (keyword and length groups)
+  src/Style/Values/Box/Margin.cpp
+  src/Style/Values/Box/MarginTrim.cpp
+  src/Style/Values/Break/Orphans.cpp
+  src/Style/Values/Break/Widows.cpp
+  src/Style/Values/CSS2/ZIndex.cpp
+  src/Style/Values/ColorAdjust/ColorScheme.cpp
+  src/Style/Values/Contain/Contain.cpp
+  src/Style/Values/CounterStyles/CounterStyle.cpp
+  src/Style/Values/FillStroke/StrokeWidth.cpp
+  src/Style/Values/Flexbox/FlexBasis.cpp
+  src/Style/Values/Lists/ListStyleType.cpp
+  src/Style/Values/Math/MathDepth.cpp
+  src/Style/Values/Multicol/ColumnCount.cpp
+  src/Style/Values/Multicol/ColumnWidth.cpp
+  src/Style/Values/Overflow/BlockEllipsis.cpp
+  src/Style/Values/Overflow/ScrollbarGutter.cpp
+  src/Style/Values/Page/PageSize.cpp
+  src/Style/Values/PointerEvents/TouchAction.cpp
+  src/Style/Values/Rhythm/BlockStepSize.cpp
+  src/Style/Values/Scrollbars/ScrollbarColor.cpp
+  src/Style/Values/Scrollbars/ScrollbarWidth.cpp
+  src/Style/Values/Sizing/AspectRatio.cpp
+  src/Style/Values/Sizing/ContainIntrinsicSize.cpp
+  src/Style/Values/Sizing/PreferredSize.cpp
+  src/Style/Values/Speech/SpeakAs.cpp
+  src/Style/Values/ViewTransitions/ViewTransitionName.cpp
+  src/Style/Values/WillChange/WillChange.cpp
 )
 
 target_precompile_headers(Krystal.Booey

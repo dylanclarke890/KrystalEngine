@@ -330,7 +330,10 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/UserAgentStyle.cpp
 		tests/Style/ScopedName.cpp
 		tests/Style/StyleSheetContentsCache.cpp
+		tests/Style/Values/Box/Box.cpp
 		tests/Style/Values/CSSValueConversion.cpp
+		tests/Style/Values/KeywordAndLengthGroups.cpp
+		tests/Style/Values/Sizing/Sizing.cpp
 		tests/Style/Values/Color/Color.cpp
 		tests/Style/Values/Color/ColorConversion.cpp
 		tests/Style/Values/Color/DynamicRangeLimit.cpp
