@@ -19,75 +19,15 @@ namespace krys::boo
   {
     // The initial `font-size` (`medium`).
     constexpr float InitialFontSize = 16.f;
-
-    // FIXME: There's no font data, so the metrics use the fallbacks of css-values-4 where it gives one (an
-    // `ex` or `ch` is 0.5em, an `ic` is 1em), the em box for the ascent and 1.2em for a `normal` line height.
-    constexpr int32 InitialFontAscent = 16;
-    constexpr int32 InitialFontLineSpacing = 19;
-
-    const FontMetrics InitialFontMetrics {};
-    const FontCascadeDescription InitialFontDescription {};
-    const FontCascade InitialFontCascade {};
   }
 
-  int FontMetrics::IntAscent() const noexcept
+  FontCascade RenderStyle::InitialFontCascade() noexcept
   {
-    return InitialFontAscent;
-  }
-
-  int FontMetrics::IntLineSpacing() const noexcept
-  {
-    return InitialFontLineSpacing;
-  }
-
-  Maybe<float> FontMetrics::XHeight() const noexcept
-  {
-    return null;
-  }
-
-  Maybe<float> FontMetrics::CapHeight() const noexcept
-  {
-    return null;
-  }
-
-  Maybe<float> FontMetrics::ZeroWidth() const noexcept
-  {
-    return null;
-  }
-
-  Maybe<float> FontMetrics::IdeogramWidth() const noexcept
-  {
-    return InitialFontSize;
-  }
-
-  float FontCascadeDescription::ComputedSize() const noexcept
-  {
-    return InitialFontSize;
-  }
-
-  float FontCascadeDescription::ComputedSizeForRangeZoomOption(css::RangeZoomOptions) const noexcept
-  {
-    return InitialFontSize;
-  }
-
-  float FontCascadeDescription::SpecifiedSize() const noexcept
-  {
-    return InitialFontSize;
-  }
-
-  const FontCascadeDescription &FontCascade::GetFontDescription() const noexcept
-  {
-    return InitialFontDescription;
-  }
-
-  const FontMetrics &FontCascade::MetricsOfPrimaryFont() const noexcept
-  {
-    return InitialFontMetrics;
-  }
-
-  float FontCascade::ZeroWidth() const noexcept
-  {
-    return InitialFontSize / 2;
+    FontCascadeDescription description;
+    description.SetSpecifiedSize(InitialFontSize);
+    description.SetComputedSize(InitialFontSize);
+    description.SetKeywordSizeFromIdentifier(css::ValueId::Medium);
+    return FontCascade {krys::move(description)};
   }
 
   const boo::Color &RenderStyle::GetColor() const noexcept
@@ -183,22 +123,42 @@ namespace krys::boo
 
   const FontCascade &RenderStyle::GetFontCascade() const noexcept
   {
-    return InitialFontCascade;
+    return _fontCascade;
+  }
+
+  FontCascade &RenderStyle::MutableFontCascade() noexcept
+  {
+    return _fontCascade;
   }
 
   const FontCascadeDescription &RenderStyle::GetFontDescription() const noexcept
   {
-    return InitialFontDescription;
+    return _fontCascade.GetFontDescription();
+  }
+
+  bool RenderStyle::SetFontDescription(FontCascadeDescription &&description) noexcept
+  {
+    if (_fontCascade.GetFontDescription() == description)
+    {
+      return false;
+    }
+    _fontCascade = FontCascade {krys::move(description), _fontCascade};
+    return true;
+  }
+
+  float RenderStyle::ComputedFontSize() const noexcept
+  {
+    return GetFontDescription().ComputedSize();
   }
 
   const FontMetrics &RenderStyle::MetricsOfPrimaryFont() const noexcept
   {
-    return InitialFontMetrics;
+    return _fontCascade.MetricsOfPrimaryFont();
   }
 
   float RenderStyle::ComputedLineHeight() const noexcept
   {
-    return static_cast<float>(InitialFontLineSpacing);
+    return static_cast<float>(MetricsOfPrimaryFont().IntLineSpacing());
   }
 
   Maybe<PseudoElementType> RenderStyle::GetPseudoElementType() const noexcept
@@ -260,7 +220,7 @@ namespace krys::boo
 
   float RenderStyle::ComputeSpecifiedLineHeight() const noexcept
   {
-    return static_cast<float>(InitialFontLineSpacing);
+    return static_cast<float>(MetricsOfPrimaryFont().IntLineSpacing());
   }
 
   const style::AspectRatio &RenderStyle::AspectRatio() const noexcept

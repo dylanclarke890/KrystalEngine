@@ -9,6 +9,7 @@
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/FloatSize.hpp"
+#include "Krystal.Booey/Graphics/FontCascade.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/AnchorSizeDimension.hpp"
 #include "Krystal.Booey/Style/PropertyCascade.hpp"
@@ -35,11 +36,10 @@
 // FIXME: Placeholders for the rendering, font and style-resolver types that length resolution, calc
 // evaluation, colour resolution and the computed value conversions need. Each declares only the members those
 // callers use, under its upstream name. `RenderStyle` and `style::BuilderState` can be constructed:
-// `RenderStyle` has its colour state, pseudo-element and unit-usage flags (zoom and the font are always the
-// initial values; the font has no font data), and `BuilderState` has upstream's state for converting values
-// (no font updates, custom properties or style images). Everything else is unreachable. Each type moves to
-// its own header, with its real implementation, when its slice is ported:
-//   - `FontMetrics`, `FontCascadeDescription`, `FontCascade`: platform/graphics fonts.
+// `RenderStyle` has its colour state, font, pseudo-element and unit-usage flags (zoom is always the initial
+// value; the font starts as the initial `medium` and has no font data), and `BuilderState` has upstream's
+// state for converting values (no font updates, custom properties or style images). Everything else is
+// unreachable. Each type moves to its own header, with its real implementation, when its slice is ported:
 //   - `RenderStyle`, `RenderView`, `RenderElement`, `RenderBox`: rendering.
 //   - `style::BuilderState`, `style::AnchorPositionEvaluator`, `style::ContainerQueryEvaluator`: the style
 //     resolver (`Style/BuilderState.hpp`, `Style/AnchorPositionEvaluator.hpp`, unreviewed).
@@ -73,45 +73,6 @@ namespace krys::boo::style
 
 namespace krys::boo
 {
-  class FontMetrics
-  {
-    KRYS_NON_COPY_MOVABLE(FontMetrics);
-
-  public:
-    FontMetrics() noexcept = default;
-
-    KRYS_NODISCARD int IntAscent() const noexcept;
-    KRYS_NODISCARD int IntLineSpacing() const noexcept;
-    KRYS_NODISCARD Maybe<float> XHeight() const noexcept;
-    KRYS_NODISCARD Maybe<float> CapHeight() const noexcept;
-    KRYS_NODISCARD Maybe<float> ZeroWidth() const noexcept;
-    KRYS_NODISCARD Maybe<float> IdeogramWidth() const noexcept;
-  };
-
-  class FontCascadeDescription
-  {
-    KRYS_NON_COPY_MOVABLE(FontCascadeDescription);
-
-  public:
-    FontCascadeDescription() noexcept = default;
-
-    KRYS_NODISCARD float ComputedSize() const noexcept;
-    KRYS_NODISCARD float ComputedSizeForRangeZoomOption(css::RangeZoomOptions) const noexcept;
-    KRYS_NODISCARD float SpecifiedSize() const noexcept;
-  };
-
-  class FontCascade
-  {
-    KRYS_NON_COPY_MOVABLE(FontCascade);
-
-  public:
-    FontCascade() noexcept = default;
-
-    KRYS_NODISCARD const FontCascadeDescription &GetFontDescription() const noexcept;
-    KRYS_NODISCARD const FontMetrics &MetricsOfPrimaryFont() const noexcept;
-    KRYS_NODISCARD float ZeroWidth() const noexcept;
-  };
-
   class RenderStyle
   {
     KRYS_NON_COPY_MOVABLE(RenderStyle);
@@ -125,6 +86,7 @@ namespace krys::boo
     bool _usesContainerUnits {false};
     bool _usesTreeCountingFunctions {false};
     boo::WritingMode _writingMode {};
+    FontCascade _fontCascade {InitialFontCascade()};
 
     // Property storage, grown as the computed value types need it; replaced by the generated storage.
     style::AspectRatio _aspectRatio {css::keywords::Auto {}};
@@ -165,12 +127,15 @@ namespace krys::boo
     /// @brief Collapses `document().settings().evaluationTimeZoomEnabled()` for default settings: off.
     KRYS_NODISCARD bool EvaluationTimeZoomEnabled() const noexcept;
 
-    /// @brief The initial font: `medium` (16px), with no font data.
+    /// @brief The font, initially `medium` (16px). There's no font data; see `FontCascade`.
     KRYS_NODISCARD const FontCascade &GetFontCascade() const noexcept;
+    KRYS_NODISCARD FontCascade &MutableFontCascade() noexcept;
     KRYS_NODISCARD const FontCascadeDescription &GetFontDescription() const noexcept;
+    bool SetFontDescription(FontCascadeDescription &&) noexcept;
+    KRYS_NODISCARD float ComputedFontSize() const noexcept;
     KRYS_NODISCARD const FontMetrics &MetricsOfPrimaryFont() const noexcept;
 
-    /// @brief The initial `line-height` (`normal`) of the initial font.
+    /// @brief The initial `line-height` (`normal`) of the font.
     KRYS_NODISCARD float ComputedLineHeight() const noexcept;
 
     KRYS_NODISCARD Maybe<PseudoElementType> GetPseudoElementType() const noexcept;
@@ -204,6 +169,10 @@ namespace krys::boo
 
     /// @brief Collapses `computeLineHeight(specifiedLineHeight())` for the initial `line-height`.
     KRYS_NODISCARD float ComputeSpecifiedLineHeight() const noexcept;
+
+  private:
+    /// @brief Collapses the initial font the style resolver gives the document: `medium`, no families.
+    KRYS_NODISCARD static FontCascade InitialFontCascade() noexcept;
   };
 
   class RenderView

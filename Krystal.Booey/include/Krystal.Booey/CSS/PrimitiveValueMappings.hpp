@@ -12,6 +12,7 @@
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
+#include "Krystal.Booey/Graphics/FontSizeAdjust.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Graphics/WindRule.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
@@ -31,7 +32,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Visitor.hpp"
 
-// FIXME: The mappings of the remaining Style value types (and `FontSizeAdjust::Metric`) are added with their
+// FIXME: The mappings of the remaining Style value types are added with their
 // types: `style::ImageOrientation`, `style::MaskMode` (and `ToValueIdForWebkitMaskSourceType`),
 // `style::PositionTryFallbackTactic`, `style::PositionTryOrder`, `style::PositionVisibilityValue`,
 // `style::TextDecorationLine::Flag`, `style::TextEmphasisPositionValue`, `style::TextUnderlinePositionValue`
@@ -1188,8 +1189,9 @@ namespace krys::boo
   CASE(ColorDodge)                                                                                           \
   CASE(ColorBurn)                                                                                            \
   CASE(HardLight)                                                                                            \
-  CASE(SoftLight) CASE(Difference) CASE(Exclusion) CASE(Hue) CASE(Saturation) CASE(Color) CASE(Luminosity)   \
-    CASE(PlusDarker) CASE(PlusLighter)
+  CASE(SoftLight)                                                                                            \
+  CASE(Difference)                                                                                           \
+  CASE(Exclusion) CASE(Hue) CASE(Saturation) CASE(Color) CASE(Luminosity) CASE(PlusDarker) CASE(PlusLighter)
   KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
 #undef KRYS_MAPPING_TYPE
 #undef KRYS_MAPPING_FOR_EACH
@@ -1854,6 +1856,36 @@ namespace krys::boo
   KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
 #undef KRYS_MAPPING_TYPE
 #undef KRYS_MAPPING_FOR_EACH
+
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(FontSizeAdjust::Metric metric) noexcept
+  {
+    switch (metric)
+    {
+      case FontSizeAdjust::Metric::ExHeight:  return css::ValueId::ExHeight;
+      case FontSizeAdjust::Metric::CapHeight: return css::ValueId::CapHeight;
+      case FontSizeAdjust::Metric::ChWidth:   return css::ValueId::ChWidth;
+      case FontSizeAdjust::Metric::IcWidth:   return css::ValueId::IcWidth;
+      case FontSizeAdjust::Metric::IcHeight:  return css::ValueId::IcHeight;
+    }
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Auto;
+  }
+
+  template <>
+  KRYS_NODISCARD constexpr FontSizeAdjust::Metric FromValueId(css::ValueId valueID) noexcept
+  {
+    switch (valueID)
+    {
+      case css::ValueId::ExHeight:  return FontSizeAdjust::Metric::ExHeight;
+      case css::ValueId::CapHeight: return FontSizeAdjust::Metric::CapHeight;
+      case css::ValueId::ChWidth:   return FontSizeAdjust::Metric::ChWidth;
+      case css::ValueId::IcWidth:   return FontSizeAdjust::Metric::IcWidth;
+      case css::ValueId::IcHeight:  return FontSizeAdjust::Metric::IcHeight;
+      default:                      break;
+    }
+    krys_debug_assert_msg(false, "Unexpected value");
+    return FontSizeAdjust::Metric::ExHeight;
+  }
 
 #undef KRYS_EMIT_TO_VALUE_ID_SWITCH_CASE
 #undef KRYS_EMIT_FROM_VALUE_ID_SWITCH_CASE

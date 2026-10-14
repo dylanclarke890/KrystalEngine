@@ -9,12 +9,12 @@
 #include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/CSS/Values/Concepts.hpp"
 #include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
+#include "Krystal.Booey/Graphics/FontSizeAdjust.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Graphics/WindRule.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 
 // FIXME: Add specializations of ValueRepresentation for all enums listed in this file.
-// FIXME: `FontSizeAdjust::Metric` is added with the font types.
 
 // Helper to define an enum that still needs a value representation conformance.
 #define KRYS_DEFINE_ENUM_NEEDS_VALUE_REPRESENTATION_CONFORMANCE(T)                                           \
@@ -33,6 +33,7 @@ namespace krys::boo::css
   KRYS_DEFINE_ENUM_NEEDS_VALUE_REPRESENTATION_CONFORMANCE(FillBox)
   KRYS_DEFINE_ENUM_NEEDS_VALUE_REPRESENTATION_CONFORMANCE(FillRepeat)
   KRYS_DEFINE_ENUM_NEEDS_VALUE_REPRESENTATION_CONFORMANCE(FlexWrap)
+  KRYS_DEFINE_ENUM_NEEDS_VALUE_REPRESENTATION_CONFORMANCE(FontSizeAdjust::Metric)
   KRYS_DEFINE_ENUM_NEEDS_VALUE_REPRESENTATION_CONFORMANCE(FontVariantCaps)
   KRYS_DEFINE_ENUM_NEEDS_VALUE_REPRESENTATION_CONFORMANCE(FontVariantPosition)
   KRYS_DEFINE_ENUM_NEEDS_VALUE_REPRESENTATION_CONFORMANCE(ImageRendering)

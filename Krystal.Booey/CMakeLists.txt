@@ -26,9 +26,9 @@ target_compile_options(Krystal.Booey
 find_path(BRIGAND_INCLUDE_DIRS "brigand/adapted.hpp")
 target_include_directories(Krystal.Booey PRIVATE ${BRIGAND_INCLUDE_DIRS})
 
-# Third-party - ICU (IDNA for URL host parsing)
+# Third-party - ICU (IDNA for URL host parsing; script codes in the public font description)
 find_package(ICU REQUIRED COMPONENTS uc dt)
-target_link_libraries(Krystal.Booey PRIVATE ICU::uc ICU::dt)
+target_link_libraries(Krystal.Booey PUBLIC ICU::uc PRIVATE ICU::dt)
 
 # Custom build step for python codegen scripts
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
@@ -759,6 +759,32 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Values/Grid/GridTrackSize.hpp
   include/Krystal.Booey/Style/Values/Grid/GridTrackSizes.hpp
   include/Krystal.Booey/Style/Values/Grid/ItemTolerance.hpp
+
+  # Style resolution, layer f3c (fonts)
+  include/Krystal.Booey/Core/LocaleToScriptMapping.hpp
+  include/Krystal.Booey/Graphics/FontBaseline.hpp
+  include/Krystal.Booey/Graphics/FontCascade.hpp
+  include/Krystal.Booey/Graphics/FontCascadeDescription.hpp
+  include/Krystal.Booey/Graphics/FontDescription.hpp
+  include/Krystal.Booey/Graphics/FontMetrics.hpp
+  include/Krystal.Booey/Graphics/FontPalette.hpp
+  include/Krystal.Booey/Graphics/FontSelectionAlgorithm.hpp
+  include/Krystal.Booey/Graphics/FontSizeAdjust.hpp
+  include/Krystal.Booey/Graphics/SystemFontDatabase.hpp
+  include/Krystal.Booey/Style/Values/Fonts/FontFamily.hpp
+  include/Krystal.Booey/Style/Values/Fonts/FontFamilyName.hpp
+  include/Krystal.Booey/Style/Values/Fonts/FontFeatureSettings.hpp
+  include/Krystal.Booey/Style/Values/Fonts/FontOpentypeTag.hpp
+  include/Krystal.Booey/Style/Values/Fonts/FontPalette.hpp
+  include/Krystal.Booey/Style/Values/Fonts/FontSizeAdjust.hpp
+  include/Krystal.Booey/Style/Values/Fonts/FontStyle.hpp
+  include/Krystal.Booey/Style/Values/Fonts/FontVariantAlternates.hpp
+  include/Krystal.Booey/Style/Values/Fonts/FontVariantEastAsian.hpp
+  include/Krystal.Booey/Style/Values/Fonts/FontVariantLigatures.hpp
+  include/Krystal.Booey/Style/Values/Fonts/FontVariantNumeric.hpp
+  include/Krystal.Booey/Style/Values/Fonts/FontVariationSettings.hpp
+  include/Krystal.Booey/Style/Values/Fonts/FontWeight.hpp
+  include/Krystal.Booey/Style/Values/Fonts/FontWidth.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -1207,6 +1233,27 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Style/Values/Grid/GridTrackSize.cpp
   src/Style/Values/Grid/GridTrackSizes.cpp
   src/Style/Values/Grid/ItemTolerance.cpp
+
+  # Style resolution, layer f3c (fonts)
+  src/Core/LocaleToScriptMapping.cpp
+  src/Graphics/FontCascade.cpp
+  src/Graphics/FontCascadeDescription.cpp
+  src/Graphics/FontDescription.cpp
+  src/Graphics/FontSelectionAlgorithm.cpp
+  src/Graphics/SystemFontDatabase.cpp
+  src/Style/Values/Fonts/FontFamily.cpp
+  src/Style/Values/Fonts/FontFamilyName.cpp
+  src/Style/Values/Fonts/FontFeatureSettings.cpp
+  src/Style/Values/Fonts/FontPalette.cpp
+  src/Style/Values/Fonts/FontSizeAdjust.cpp
+  src/Style/Values/Fonts/FontStyle.cpp
+  src/Style/Values/Fonts/FontVariantAlternates.cpp
+  src/Style/Values/Fonts/FontVariantEastAsian.cpp
+  src/Style/Values/Fonts/FontVariantLigatures.cpp
+  src/Style/Values/Fonts/FontVariantNumeric.cpp
+  src/Style/Values/Fonts/FontVariationSettings.cpp
+  src/Style/Values/Fonts/FontWeight.cpp
+  src/Style/Values/Fonts/FontWidth.cpp
 )
 
 target_precompile_headers(Krystal.Booey
