@@ -57,7 +57,7 @@ namespace krys::boo::html
   {
     if (!_relList)
     {
-      _relList = dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"rellist");
+      _relList = dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"rel");
     }
 
     return *_relList;

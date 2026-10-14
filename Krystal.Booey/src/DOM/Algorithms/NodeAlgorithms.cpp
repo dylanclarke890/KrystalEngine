@@ -171,17 +171,17 @@ namespace krys::boo::dom
       auto &docCopy = Downcast<Document>(*copy);
       docCopy._flags = doc._flags;
       docCopy._contentType = doc._contentType;
-      docCopy._quirksMode = doc._quirksMode;
+      docCopy.SetQuirksMode(doc._quirksMode);
+      docCopy.SetURL(url::URL(doc._url));
       docCopy._allowDeclarativeShadowRoots = doc._allowDeclarativeShadowRoots;
 
-      if (doc._customElementRegistry->IsScoped())
+      if (doc._customElementRegistry != nullptr && doc._customElementRegistry->IsScoped())
       {
         docCopy._customElementRegistry = doc._customElementRegistry;
       }
 
       // TODO(feat): DOM - Set copy's encoding
       // SPEC-VIOLATION(URL): Set the origin on the cloned document to the origin of the original document.
-      // SPEC-VIOLATION(URL): Set the url on the cloned document to the url of the original document.
     }
     else if (Is<DocumentType>(node))
     {

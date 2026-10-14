@@ -8,17 +8,19 @@ namespace krys::boo::dom
   enum class NodeFlags : uint16
   {
     None = 0,
-    IsConnected = 1 << 1,
-    IsInShadowTree = 1 << 2,
-    IsCharacterData = 1 << 3,
-    IsContainerNode = 1 << 4,
-    IsShadowRoot = 1 << 5,
-    IsUnknownElement = 1 << 6,
-    IsHTMLElement = 1 << 7,
-    IsSVGElement = 1 << 8,
-    IsMathMLElement = 1 << 9,
-    IsHTMLSlotElement = 1 << 10,
+    IsConnected = 1 << 0,
+    IsInShadowTree = 1 << 1,
+    IsCharacterData = 1 << 2,
+    IsContainerNode = 1 << 3,
+    IsShadowRoot = 1 << 4,
+    IsUnknownElement = 1 << 5,
+    IsHTMLElement = 1 << 6,
+    IsSVGElement = 1 << 7,
+    IsMathMLElement = 1 << 8,
+    IsHTMLSlotElement = 1 << 9,
+    /// @brief Set while the parser is inserting the element's children; see `Element::FinishParsingChildren`.
+    IsParsingChildren = 1 << 10,
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeFlags, 10u);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeFlags, 11u);

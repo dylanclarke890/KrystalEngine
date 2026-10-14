@@ -1022,6 +1022,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/Dicts/StaticRangeInit.hpp
       include/Krystal.Booey/DOM/Document.hpp
       include/Krystal.Booey/DOM/DocumentFragment.hpp
+      include/Krystal.Booey/DOM/DocumentOrShadowRoot.hpp
       include/Krystal.Booey/DOM/DocumentType.hpp
       include/Krystal.Booey/DOM/DOMImplementation.hpp
       include/Krystal.Booey/DOM/DOMTokenList.hpp
@@ -1152,6 +1153,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/Dicts/ShowPopoverOptions.hpp
       include/Krystal.Booey/HTML/Dicts/TogglePopoverOptions.hpp
       include/Krystal.Booey/HTML/ElementInternals.hpp
+      include/Krystal.Booey/HTML/EventLoop.hpp
       include/Krystal.Booey/HTML/Enums/AttributeState.hpp
       include/Krystal.Booey/HTML/Enums/CanPlayTypeResult.hpp
       include/Krystal.Booey/HTML/Enums/ContentType.hpp
@@ -1167,6 +1169,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/Enums/ParsedAttributeFlags.hpp
       include/Krystal.Booey/HTML/Enums/ParserScriptingMode.hpp
       include/Krystal.Booey/HTML/Enums/TagName.hpp
+      include/Krystal.Booey/HTML/Enums/TaskSource.hpp
       include/Krystal.Booey/HTML/Enums/TokenizerState.hpp
       include/Krystal.Booey/HTML/Enums/TrackReadyState.hpp
       include/Krystal.Booey/HTML/HTMLAnchorElement.hpp
@@ -1353,6 +1356,7 @@ target_sources(Krystal.Booey
     src/DOM/Dicts/StaticRangeInit.cpp
     src/DOM/Document.cpp
     src/DOM/DocumentFragment.cpp
+    src/DOM/DocumentOrShadowRoot.cpp
     src/DOM/DocumentType.cpp
     src/DOM/DOMImplementation.cpp
     src/DOM/DOMTokenList.cpp
@@ -1417,6 +1421,7 @@ target_sources(Krystal.Booey
     src/HTML/Algorithms/CustomElementAlgorithms.cpp
     src/HTML/Algorithms/FormControlAlgorithms.cpp
     src/HTML/Algorithms/RenderBlocking.cpp
+    src/HTML/EventLoop.cpp
     src/HTML/HTMLAnchorElement.cpp
     src/HTML/HTMLAreaElement.cpp
     src/HTML/HTMLAudioElement.cpp

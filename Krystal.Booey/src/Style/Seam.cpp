@@ -1,6 +1,5 @@
 ﻿#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/CSS/Calc/RandomCachingKey.hpp"
-#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/Color/KeywordColor.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
@@ -275,21 +274,6 @@ namespace krys::boo
       options |= style::ColorOptions::UseDarkAppearance;
     }
     return options;
-  }
-
-  url::URL DocumentBaseURL(const dom::Document &) noexcept
-  {
-    return url::AboutBlankURL();
-  }
-
-  url::URL DocumentCompleteURL(const dom::Document &document, utf8_stringview url) noexcept
-  {
-    return url::URL(DocumentBaseURL(document), url);
-  }
-
-  css::ParserContext DocumentCssParserContext(const dom::Document &, const url::URL &baseURL) noexcept
-  {
-    return css::ParserContext(css::ParserMode::HTMLStandard, baseURL);
   }
 
   bool DocumentCanRequest(const dom::Document &, const url::URL &) noexcept

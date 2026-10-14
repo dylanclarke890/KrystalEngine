@@ -615,11 +615,11 @@ namespace krys::boo::html
         {
           if (IsQuirksModeDOCTYPE(token))
           {
-            _document._quirksMode = dom::QuirksMode::Quirks;
+            _document.SetQuirksMode(dom::QuirksMode::Quirks);
           }
           else if (IsLimitedQuirksModeDOCTYPE(token))
           {
-            _document._quirksMode = dom::QuirksMode::LimitedQuirks;
+            _document.SetQuirksMode(dom::QuirksMode::LimitedQuirks);
           }
         }
 
@@ -635,7 +635,7 @@ namespace krys::boo::html
 
     if (!_document._parserCannotChangeTheMode)
     {
-      _document._quirksMode = dom::QuirksMode::Quirks;
+      _document.SetQuirksMode(dom::QuirksMode::Quirks);
     }
 
     _insertionMode = InsertionMode::BeforeHTML;

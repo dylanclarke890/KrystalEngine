@@ -39,6 +39,7 @@ namespace krys::boo::html
     /// @brief Add an element to the top of the stack.
     void Push(HTMLStackItem &&item) noexcept
     {
+      item.Element().BeginParsingChildren();
       _items.push_back(krys::move(item));
     }
 
@@ -153,7 +154,12 @@ namespace krys::boo::html
       auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item.Element() == &node; });
       if (it != _items.end())
       {
+        Ref<dom::Element> element = ShareRef(it->Element());
         _items.erase(it);
+
+        // NOTE: an element removed from the middle of the stack is finished too, even though its children
+        // may not all have been parsed.
+        element->FinishParsingChildren();
       }
     }
 
@@ -172,6 +178,7 @@ namespace krys::boo::html
     {
       auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item.Element() == &reference; });
       assert(it != _items.end());
+      newItem.Element().BeginParsingChildren();
       _items.insert(std::next(it), krys::move(newItem));
     }
 

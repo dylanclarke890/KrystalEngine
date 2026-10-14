@@ -347,6 +347,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/CharacterData.cpp
 		tests/DOM/Comment.cpp
 		tests/DOM/ContainerNode.cpp
+		tests/DOM/Document.cpp
 		tests/DOM/DocumentFragment.cpp
 		tests/DOM/DocumentType.cpp
 		tests/DOM/DOMImplementation.cpp
@@ -365,9 +366,12 @@ target_sources(Krystal.Booey.Tests
 
 		# HTML
 		tests/HTML/Attributes/Reflection.cpp
+		tests/HTML/EventLoop.cpp
+		tests/HTML/HTMLLinkElement.cpp
 		tests/HTML/MicroParsers/Numbers.cpp
 		tests/HTML/Parser/HTMLCharacterReference.cpp
 		tests/HTML/Parser/HTMLDocumentParser.cpp
+		tests/HTML/Parser/HTMLElementStack.cpp
 		# tests/HTML/Parser/HTMLEncodingSniffer.cpp
 		tests/HTML/Parser/InputStream.cpp
 		# tests/HTML/Parser/TextResourceDecoder.cpp

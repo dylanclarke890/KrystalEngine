@@ -30,8 +30,8 @@ namespace krys::boo::dom
                                                              Node &node) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#handle-attribute-changes
-    static void HandleAttributeChanges(Attr &attribute, Element &element, DOMStringView oldValue,
-                                       DOMStringView newValue) noexcept;
+    static void HandleAttributeChanges(Attr &attribute, Element &element, Maybe<DOMStringView> oldValue,
+                                       Maybe<DOMStringView> newValue) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-change
     static void ChangeAttribute(Attr &attribute, DOMString &&value) noexcept;

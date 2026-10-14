@@ -9,6 +9,7 @@
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include <utility>
 
 namespace krys::boo::dom
 {
@@ -83,28 +84,25 @@ namespace krys::boo::dom
     }
   }
 
-  void ElementAlgorithms::HandleAttributeChanges(Attr &attribute, Element &element, DOMStringView oldValue,
-                                                 DOMStringView newValue) noexcept
+  void ElementAlgorithms::HandleAttributeChanges(Attr &attribute, Element &element,
+                                                 Maybe<DOMStringView> oldValue,
+                                                 Maybe<DOMStringView> newValue) noexcept
   {
-    (void)newValue;
-
-    MutationObserverAlgorithms::QueueMutationRecord(MutationRecordType::Attributes, ShareRef(element),
-                                                    attribute.LocalName(), attribute.NamespaceURI(), oldValue,
-                                                    {}, {}, nullptr, nullptr);
+    MutationObserverAlgorithms::QueueMutationRecord(
+      MutationRecordType::Attributes, ShareRef(element), attribute.LocalName(), attribute.NamespaceURI(),
+      oldValue.has_value() ? DOMStringAtom(*oldValue) : DOMStringAtom::Null(), {}, {}, nullptr, nullptr);
 
     // TODO(impl): CUSTOM-ELEMENT
     // If element is custom, then enqueue a custom element callback reaction with element, callback name
     // "attributeChangedCallback", and « attribute’s local name, oldValue, newValue, attribute’s namespace ».
 
-    ExtensibilityHooks::ElementAttributeChanged(element, attribute.LocalName(), oldValue, attribute.Value(),
+    ExtensibilityHooks::ElementAttributeChanged(element, attribute.LocalName(), oldValue, newValue,
                                                 attribute.NamespaceURI());
   }
 
   void ElementAlgorithms::ChangeAttribute(Attr &attribute, DOMString &&value) noexcept
   {
-    DOMString &&oldValue = krys::move(attribute._value);
-
-    attribute._value = krys::move(value);
+    DOMString oldValue = std::exchange(attribute._value, krys::move(value));
 
     HandleAttributeChanges(attribute, *attribute._ownerElement, oldValue, attribute._value);
   }
@@ -116,7 +114,7 @@ namespace krys::boo::dom
     attribute._ownerElement = CreateWeakPtr(&element);
     attribute._nodeDocument = ShareRefPtr(&element.NodeDocument());
 
-    HandleAttributeChanges(attribute, element, {}, attribute._value);
+    HandleAttributeChanges(attribute, element, null, attribute._value);
   }
 
   void ElementAlgorithms::RemoveAttribute(Attr &attribute) noexcept
@@ -132,7 +130,7 @@ namespace krys::boo::dom
 
     attribute._ownerElement.reset();
 
-    HandleAttributeChanges(attribute, *element, attribute._value, {});
+    HandleAttributeChanges(attribute, *element, attribute._value, null);
   }
 
   void ElementAlgorithms::ReplaceAttribute(Attr &oldAttribute, Attr &newAttribute) noexcept

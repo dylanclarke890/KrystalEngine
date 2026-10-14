@@ -12,7 +12,7 @@ namespace krys::boo::dom
   ShadowRoot::ShadowRoot(Document &document, RefPtr<html::CustomElementRegistry> &&registry,
                          NodeFlags flags) noexcept
       : DocumentFragment(document, flags | NodeFlags::IsShadowRoot),
-        _customElementRegistry(krys::move(registry))
+        DocumentOrShadowRoot(krys::move(registry))
   {
     SetNodeFlag(NodeFlags::IsInShadowTree);
   }
@@ -26,15 +26,6 @@ namespace krys::boo::dom
 
     return nullptr;
   }
-
-#pragma region DocumentOrShadowRoot Mixin - https://dom.spec.whatwg.org/#mixin-documentorshadowroot
-
-  RefPtr<html::CustomElementRegistry> ShadowRoot::CustomElementRegistry() const noexcept
-  {
-    return _customElementRegistry;
-  }
-
-#pragma endregion
 
   EventTarget *ShadowRoot::GetParent(Event &event) const noexcept
   {

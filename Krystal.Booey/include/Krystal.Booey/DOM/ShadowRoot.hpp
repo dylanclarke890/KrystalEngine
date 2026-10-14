@@ -1,13 +1,14 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Enums/ShadowRootMode.hpp"
 #include "Krystal.Booey/DOM/Enums/SlotAssignmentMode.hpp"
 
 namespace krys::boo::dom
 {
   /// @see https://dom.spec.whatwg.org/#interface-shadowroot
-  class ShadowRoot : public DocumentFragment
+  class ShadowRoot : public DocumentFragment, public DocumentOrShadowRoot
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ShadowRoot);
 
@@ -24,7 +25,6 @@ namespace krys::boo::dom
     bool _clonable : 1 {false};
     bool _serializable : 1 {false};
     bool _keepCustomElementRegistryNull : 1 {false};
-    RefPtr<html::CustomElementRegistry> _customElementRegistry;
 
   public:
     ShadowRoot(Document &document, RefPtr<html::CustomElementRegistry> &&registry = nullptr,
@@ -67,14 +67,6 @@ namespace krys::boo::dom
 
     // TODO(impl): SHADOW-ROOT - The onslotchange attribute is an event handler IDL attribute for the
     // onslotchange event handler, whose event handler event type is slotchange.
-
-#pragma endregion
-
-#pragma region DocumentOrShadowRoot Mixin - https://dom.spec.whatwg.org/#mixin-documentorshadowroot
-
-    /// @brief Returns node's CustomElementRegistry object, if any; otherwise null.
-    /// @see https://dom.spec.whatwg.org/#dom-documentorshadowroot-customelementregistry
-    RefPtr<html::CustomElementRegistry> CustomElementRegistry() const noexcept;
 
 #pragma endregion
 

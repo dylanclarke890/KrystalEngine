@@ -1,11 +1,8 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/ExtensibilityHooks.hpp"
-#include "Krystal.Booey/Constants/Attributes.hpp"
-#include "Krystal.Booey/DOM/Algorithms/OrderedSet.hpp"
-#include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
+#include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
-#include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 
 namespace krys::boo::dom
 {
@@ -92,106 +89,6 @@ namespace krys::boo::dom
                                                    Maybe<DOMStringView> oldValue, Maybe<DOMStringView> value,
                                                    DOMStringAtom namespaceURI) noexcept
   {
-    // NOTE: we currently don't need this as we just use the value stored in the attribute. Later, when
-    // we optimize we can use this hook to update Element's member variable to skip needing to lookup the
-    // attribute. This will be particularly important for a faster implementation of GetElementById.
-    // if (localName == u8"id")
-    //{
-    //   if (namespaceURI == DOMStringAtom::Null())
-    //   {
-    //     if (value.has_value() && !value->empty())
-    //     {
-    //       element.Id(DOMString(*value));
-    //     }
-    //     else
-    //     {
-    //       element.Id(u8"");
-    //     }
-    //   }
-    // }
-
-    // TODO(fix): the below logic needs reviewing and a better way of doing this needs to be found.
-
-    if (localName == Attributes::Class)
-    {
-      if (namespaceURI == DOMStringAtom::Null())
-      {
-        auto &domTokenList = element.ClassList();
-        domTokenList._tokens.clear();
-        if (value.has_value())
-        {
-          auto tokens = OrderedSet::Parser(*value);
-          domTokenList._tokens.append(tokens.begin(), tokens.end());
-        }
-      }
-    }
-    else if (localName == Attributes::Name)
-    {
-      if (Is<html::HTMLSlotElement>(element) && namespaceURI == DOMStringAtom::Null())
-      {
-        if (value == oldValue)
-        {
-          return;
-        }
-
-        if (!value.has_value() && oldValue.has_value() && oldValue->empty())
-        {
-          return;
-        }
-
-        if (value.has_value() && value->empty() && !oldValue.has_value())
-        {
-          return;
-        }
-
-        auto &slotElement = Downcast<html::HTMLSlotElement>(element);
-        if (!value.has_value() || value->empty())
-        {
-          slotElement.Name(u8"");
-        }
-        else
-        {
-          slotElement.Name(DOMString(*value));
-        }
-
-        SlotAlgorithms::AssignSlottablesForTree(TreeQueries::Root(slotElement));
-      }
-    }
-    else if (localName == Attributes::Slot)
-    {
-      if (namespaceURI == DOMStringAtom::Null())
-      {
-        if (value == oldValue)
-        {
-          return;
-        }
-
-        if (!value.has_value() && oldValue.has_value() && oldValue->empty())
-        {
-          return;
-        }
-
-        if (value.has_value() && value->empty() && !oldValue.has_value())
-        {
-          return;
-        }
-
-        if (!value.has_value() || value->empty())
-        {
-          element._slottableName = u8"";
-        }
-        else
-        {
-          element._slottableName = DOMString(*value);
-        }
-
-        if (auto *assignedSlot = SlotAlgorithms::GetAssignedSlot(element))
-        {
-          SlotAlgorithms::AssignSlottables(*assignedSlot);
-        }
-
-        SlotAlgorithms::AssignSlot(element);
-      }
-    }
+    element.OnAttributeChanged(localName, oldValue, value, namespaceURI);
   }
 }

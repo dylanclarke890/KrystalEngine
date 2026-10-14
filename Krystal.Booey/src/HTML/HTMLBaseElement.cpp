@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLBaseElement.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 
 namespace krys::boo::html
@@ -40,4 +41,46 @@ namespace krys::boo::html
   }
 
 #pragma endregion
+
+  void HTMLBaseElement::OnInsert() noexcept
+  {
+    HTMLElement::OnInsert();
+
+    if (IsConnected())
+    {
+      NodeDocument().ProcessBaseElement();
+    }
+  }
+
+  void HTMLBaseElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  {
+    HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
+
+    if (oldAncestor.IsConnected())
+    {
+      NodeDocument().ProcessBaseElement();
+    }
+  }
+
+  void HTMLBaseElement::OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  {
+    HTMLElement::OnMove(isSubtreeRoot, oldAncestor);
+
+    if (IsConnected())
+    {
+      NodeDocument().ProcessBaseElement();
+    }
+  }
+
+  void HTMLBaseElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                                           Maybe<dom::DOMStringView> value,
+                                           dom::DOMStringAtom namespaceURI) noexcept
+  {
+    HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
+
+    if (localName == u8"href" && namespaceURI == dom::DOMStringAtom::Null() && IsConnected())
+    {
+      NodeDocument().ProcessBaseElement();
+    }
+  }
 }

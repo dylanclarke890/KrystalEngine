@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
 
 namespace krys::boo::css
 {
@@ -11,6 +12,11 @@ namespace krys::boo::css
         viewTransitionsEnabled(context.PropertySettings.viewTransitionsEnabled),
         cssAppearanceBaseEnabled(context.cssAppearanceBaseEnabled),
         webkitMediaTextTrackDisplayQuirkEnabled(context.webkitMediaTextTrackDisplayQuirkEnabled)
+  {
+  }
+
+  SelectorParserContext::SelectorParserContext(const dom::Document &document) noexcept
+      : Mode(document.InQuirksMode() ? ParserMode::HTMLQuirks : ParserMode::HTMLStandard)
   {
   }
 }

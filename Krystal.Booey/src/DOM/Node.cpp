@@ -31,10 +31,7 @@ namespace krys::boo::dom
 
   DOMString Node::BaseURI() const noexcept
   {
-    // TODO(impl): URL - The baseURI getter steps are to return this’s node document’s document base URL,
-    // serialized.
-    // @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#document-base-url
-    return {};
+    return NodeDocument().BaseURL().String();
   }
 
   Document *Node::OwnerDocument() const noexcept

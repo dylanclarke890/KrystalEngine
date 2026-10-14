@@ -266,6 +266,17 @@ namespace krys::boo::css::tests
       REQUIRE(ToNarrow(other->Media()->MediaText()) == "screen");
     }
 
+    SECTION("a relative base URL is resolved against the document base URL")
+    {
+      document->SetURL(url::URL(u8"https://example.com/dir/page.html"));
+
+      auto sheet = ConstructedSheet(*document, {.BaseURL = u8"sheets/"});
+      REQUIRE(ToNarrow(sheet->BaseURL().String()) == "https://example.com/dir/sheets/");
+
+      auto defaultSheet = ConstructedSheet(*document);
+      REQUIRE(ToNarrow(defaultSheet->BaseURL().String()) == "https://example.com/dir/page.html");
+    }
+
     SECTION("an invalid base URL")
     {
       auto sheet = CSSStyleSheet::Create(*document, {.BaseURL = u8"relative"});

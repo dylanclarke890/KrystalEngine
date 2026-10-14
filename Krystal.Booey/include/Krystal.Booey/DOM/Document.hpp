@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Dicts/ElementCreationOptions.hpp"
 #include "Krystal.Booey/DOM/Dicts/ImportNodeOptions.hpp"
+#include "Krystal.Booey/DOM/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/DOM/DOMImplementation.hpp"
 #include "Krystal.Booey/DOM/Enums/DocumentFlags.hpp"
 #include "Krystal.Booey/DOM/Enums/QuirksMode.hpp"
@@ -14,12 +15,20 @@
 #include "Krystal.Booey/HTML/Enums/DocumentReadyState.hpp"
 #include "Krystal.Booey/HTML/Enums/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/HTML/Types/HTMLOrSVGScriptElement.hpp"
+#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
+
+namespace krys::boo::css
+{
+  struct ParserContext;
+}
 
 namespace krys::boo::html
 {
   class CustomElementAlgorithms;
   class CustomElementRegistry;
+  class HTMLBaseElement;
   class HTMLBodyElement;
   class HTMLDocumentParser;
   class HTMLHeadElement;
@@ -42,7 +51,7 @@ namespace krys::boo::dom
   class TreeWalker;
 
   /// @see https://dom.spec.whatwg.org/#interface-document
-  class Document : public ContainerNode
+  class Document : public ContainerNode, public DocumentOrShadowRoot
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Document);
     KRYS_TYPE_CAST_TRAITS_ACCESS();
@@ -56,6 +65,7 @@ namespace krys::boo::dom
     friend class NodeAlgorithms;
 
     friend class html::CustomElementAlgorithms;
+    friend class html::HTMLBaseElement;
     friend class html::HTMLDocumentParser;
     friend class html::HTMLTreeBuilder;
     friend class html::RenderBlocking;
@@ -66,7 +76,6 @@ namespace krys::boo::dom
     DOMString _contentType {u8"application/xml"};
     List<Range *> _liveRanges;
     List<NodeIterator *> _nodeIterators;
-    RefPtr<html::CustomElementRegistry> _customElementRegistry;
     bool _allowDeclarativeShadowRoots : 1 {false};
     QuirksMode _quirksMode : BitCount<QuirksMode>() {QuirksMode::NoQuirks};
     DocumentFlags _flags : BitCount<DocumentFlags>() {DocumentFlags::None};
@@ -80,10 +89,22 @@ namespace krys::boo::dom
 
     List<WeakRef<Element>> _renderBlockingElements;
 
+    /// @see https://dom.spec.whatwg.org/#concept-document-url
+    url::URL _url;
+    /// @see https://html.spec.whatwg.org/#document-base-url
+    url::URL _baseURL;
+    /// @brief The frozen base URL of the first `base` element with an `href` in the document tree, or null.
+    /// @see https://html.spec.whatwg.org/#frozen-base-url
+    url::URL _baseElementURL;
+
+    mutable UniquePtr<css::ParserContext> _cachedCSSParserContext;
+
   protected:
     Document(DocumentFlags flags) noexcept;
 
   public:
+    ~Document() noexcept override;
+
 #pragma region Document (DOM) - https://dom.spec.whatwg.org/#interface-document
 
     /// @see https://dom.spec.whatwg.org/#dom-document-document
@@ -330,6 +351,69 @@ namespace krys::boo::dom
 
 #pragma endregion
 
+#pragma region URLs - https://html.spec.whatwg.org/#document-base-url
+
+    /// @brief The document's URL; `about:blank` until the host sets one.
+    /// @see https://dom.spec.whatwg.org/#concept-document-url
+    KRYS_NODISCARD const url::URL &GetURL() const noexcept
+    {
+      return _url;
+    }
+
+    /// @brief Sets the document's URL. An empty URL becomes `about:blank`.
+    void SetURL(url::URL &&url) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#fallback-base-url
+    KRYS_NODISCARD const url::URL &FallbackBaseURL() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#document-base-url
+    KRYS_NODISCARD const url::URL &BaseURL() const noexcept
+    {
+      return _baseURL;
+    }
+
+    /// @brief Parses @p url relative to the document base URL.
+    /// @see https://html.spec.whatwg.org/#encoding-parsing-a-url
+    KRYS_NODISCARD url::URL CompleteURL(utf8_stringview url) const noexcept;
+
+    /// @brief Parses @p url relative to @p baseURL.
+    /// @see https://html.spec.whatwg.org/#encoding-parsing-a-url
+    KRYS_NODISCARD url::URL CompleteURL(utf8_stringview url, const url::URL &baseURL) const noexcept;
+
+#pragma endregion
+
+#pragma region CSS
+
+    /// @brief The context the document's style sheets are parsed with: its base URL, mode and settings.
+    /// Cached until one of them changes.
+    KRYS_NODISCARD const css::ParserContext &CssParserContext() const noexcept;
+
+    void InvalidateCachedCSSParserContext() noexcept;
+
+#pragma endregion
+
+#pragma region Mode - https://dom.spec.whatwg.org/#concept-document-mode
+
+    /// @see https://dom.spec.whatwg.org/#concept-document-quirks
+    KRYS_NODISCARD bool InQuirksMode() const noexcept
+    {
+      return _quirksMode == QuirksMode::Quirks;
+    }
+
+    /// @see https://dom.spec.whatwg.org/#concept-document-limited-quirks
+    KRYS_NODISCARD bool InLimitedQuirksMode() const noexcept
+    {
+      return _quirksMode == QuirksMode::LimitedQuirks;
+    }
+
+    /// @see https://dom.spec.whatwg.org/#concept-document-no-quirks
+    KRYS_NODISCARD bool InNoQuirksMode() const noexcept
+    {
+      return _quirksMode == QuirksMode::NoQuirks;
+    }
+
+#pragma endregion
+
 #pragma region ParentNode Mixin - https://dom.spec.whatwg.org/#parentnode
 
     /// @brief Returns the child elements.
@@ -403,23 +487,16 @@ namespace krys::boo::dom
 
 #pragma endregion
 
-#pragma region DocumentOrShadowRoot Mixin (DOM) - https://dom.spec.whatwg.org/#mixin-documentorshadowroot
-
-    /// @brief Returns node's CustomElementRegistry object, if any; otherwise null.
-    /// @see https://dom.spec.whatwg.org/#dom-documentorshadowroot-customelementregistry
-    RefPtr<html::CustomElementRegistry> CustomElementRegistry() const noexcept;
-
-#pragma endregion
-
-#pragma region DocumentOrShadowRoot Mixin (HTML) - https://html.spec.whatwg.org/#documentorshadowroot
-
-    /// @brief Returns node's active element, if any; otherwise null.
-    /// @see https://html.spec.whatwg.org/#dom-documentorshadowroot-activeelement
-    RefPtr<Element> ActiveElement() const noexcept;
-
-#pragma endregion
-
   protected:
+    void SetQuirksMode(QuirksMode mode) noexcept;
+
+    /// @brief Finds the first `base` element with an `href` in the document tree and updates the document
+    /// base URL from it. Called whenever a `base` element is inserted, removed or moved, or its `href`
+    /// changes.
+    void ProcessBaseElement() noexcept;
+
+    void UpdateBaseURL() noexcept;
+
     /// @see https://dom.spec.whatwg.org/#get-the-parent
     KRYS_NODISCARD EventTarget *GetParent(Event &event) const noexcept override
     {

@@ -83,18 +83,18 @@ namespace krys::boo::css
     url::URL baseURL;
     if (!init.BaseURL)
     {
-      baseURL = DocumentBaseURL(document);
+      baseURL = document.BaseURL();
     }
     else
     {
-      baseURL = DocumentCompleteURL(document, *init.BaseURL);
+      baseURL = document.CompleteURL(*init.BaseURL);
       if (!baseURL.IsValid())
       {
         return dom::Exception(dom::ExceptionCode::NotAllowedError, u8"Base URL is invalid");
       }
     }
 
-    auto parserContext = DocumentCssParserContext(document, baseURL);
+    auto parserContext = ParserContext(document, baseURL, {});
     parserContext.shouldIgnoreImportRules = true;
     return AdoptRef(
       *new CSSStyleSheet(StyleSheetContents::Create(parserContext), document, krys::move(init)));

@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
@@ -27,6 +28,7 @@
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Booey/HTML/HTMLBaseElement.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHeadElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHtmlElement.hpp"
@@ -47,10 +49,13 @@ namespace krys::boo::dom
 #pragma region Document (DOM)
 
   Document::Document() noexcept
-      : ContainerNode(*this, NodeType::DOCUMENT_NODE, NodeFlags::IsContainerNode), _flags(DocumentFlags::None)
+      : ContainerNode(*this, NodeType::DOCUMENT_NODE, NodeFlags::IsContainerNode),
+        _flags(DocumentFlags::None), _url(url::AboutBlankURL()), _baseURL(_url)
   {
     SetNodeFlag(NodeFlags::IsConnected);
   }
+
+  Document::~Document() noexcept = default;
 
   DOMImplementation &Document::Implementation() noexcept
   {
@@ -64,8 +69,7 @@ namespace krys::boo::dom
 
   DOMString Document::URL() const noexcept
   {
-    // TODO(DOCUMENT, URL): return the url, serialized.
-    return {};
+    return _url.String();
   }
 
   DOMString Document::DocumentURI() const noexcept
@@ -617,23 +621,126 @@ namespace krys::boo::dom
 
 #pragma endregion
 
-#pragma region DocumentOrShadowRoot Mixin (DOM)
+#pragma region URLs
 
-  RefPtr<html::CustomElementRegistry> Document::CustomElementRegistry() const noexcept
+  void Document::SetURL(url::URL &&url) noexcept
   {
-    return _customElementRegistry;
+    url::URL newURL = url.IsEmpty() ? url::AboutBlankURL() : krys::move(url);
+    if (newURL == _url)
+    {
+      return;
+    }
+
+    _url = krys::move(newURL);
+    UpdateBaseURL();
+  }
+
+  const url::URL &Document::FallbackBaseURL() const noexcept
+  {
+    // SPEC-VIOLATION(HTML): there are no iframes or browsing contexts, so a document is never an iframe
+    // srcdoc document and never has an about base URL; the fallback base URL is always the document's URL.
+    return _url;
+  }
+
+  url::URL Document::CompleteURL(utf8_stringview url) const noexcept
+  {
+    return CompleteURL(url, _baseURL);
+  }
+
+  url::URL Document::CompleteURL(utf8_stringview url, const url::URL &baseURL) const noexcept
+  {
+    // NOTE: the document's encoding is always UTF-8, so the URL is parsed without one.
+    return url::URL(baseURL, url);
+  }
+
+  void Document::ProcessBaseElement() noexcept
+  {
+    Maybe<DOMString> href;
+    for (auto &node : DescendantRange(*this))
+    {
+      auto *element = DynamicDowncast<html::HTMLElement>(&node);
+      if (element == nullptr || !Is<html::HTMLBaseElement>(*element))
+      {
+        continue;
+      }
+
+      href = element->GetAttribute(u8"href");
+      if (href.has_value())
+      {
+        break;
+      }
+    }
+
+    url::URL baseElementURL;
+    if (href.has_value())
+    {
+      // https://html.spec.whatwg.org/#set-the-frozen-base-url
+      // 3. If urlRecord is failure, its scheme is "data" or "javascript", or "Is base allowed for Document?"
+      // returns "Blocked", then set element's frozen base URL to document's fallback base URL; otherwise to
+      // urlRecord.
+      // SPEC-VIOLATION(CSP): there's no content security policy, so every base is allowed.
+      baseElementURL = CompleteURL(*href, FallbackBaseURL());
+      if (!baseElementURL.IsValid() || baseElementURL.ProtocolIsData()
+          || baseElementURL.ProtocolIsJavaScript())
+      {
+        baseElementURL = FallbackBaseURL();
+      }
+    }
+
+    if (baseElementURL == _baseElementURL && baseElementURL.IsNull() == _baseElementURL.IsNull())
+    {
+      return;
+    }
+
+    _baseElementURL = krys::move(baseElementURL);
+    UpdateBaseURL();
+  }
+
+  void Document::UpdateBaseURL() noexcept
+  {
+    // https://html.spec.whatwg.org/#document-base-url
+    // 1. If there is no base element that has an href attribute in the Document, then return the Document's
+    // fallback base URL.
+    // 2. Otherwise, return the frozen base URL of the first base element in the Document that has an href
+    // attribute, in tree order.
+    _baseURL = _baseElementURL.IsNull() ? FallbackBaseURL() : _baseElementURL;
+
+    InvalidateCachedCSSParserContext();
   }
 
 #pragma endregion
 
-#pragma region DocumentOrShadowRoot Mixin (HTML)
+#pragma region CSS
 
-  RefPtr<Element> Document::ActiveElement() const noexcept
+  const css::ParserContext &Document::CssParserContext() const noexcept
   {
-    // TODO(DOCUMENTORSHADOWROOT, HTML): return the active element.
-    return nullptr;
+    if (_cachedCSSParserContext == nullptr)
+    {
+      _cachedCSSParserContext = CreateUnique<css::ParserContext>(*this, url::URL {}, utf8_stringview {});
+    }
+
+    return *_cachedCSSParserContext;
+  }
+
+  void Document::InvalidateCachedCSSParserContext() noexcept
+  {
+    _cachedCSSParserContext = nullptr;
   }
 
 #pragma endregion
 
+#pragma region Mode
+
+  void Document::SetQuirksMode(QuirksMode mode) noexcept
+  {
+    if (_quirksMode == mode)
+    {
+      return;
+    }
+
+    _quirksMode = mode;
+    InvalidateCachedCSSParserContext();
+  }
+
+#pragma endregion
 }

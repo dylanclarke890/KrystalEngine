@@ -34,8 +34,8 @@
 //   - `style::Scope`, `style::Resolver`: style sheet invalidation and the style resolver. Nothing creates a
 //     scope yet (`ScopeForNode` returns null), so style sheets have no scope to notify.
 //   - the `Document*` colour functions: `dom::Document` (upstream members) once it has a page and settings.
-//   - the `Document*` URL, parser context, security and keyframes functions: `dom::Document` (upstream
-//     members) once it has a URL, settings and a security origin.
+//   - the `Document*` security and keyframes functions: `dom::Document` (upstream members) once it has a
+//     security origin and runs animations.
 // A few members collapse an upstream call chain whose types aren't ported yet; they're marked below.
 
 namespace krys::boo::dom
@@ -50,7 +50,6 @@ namespace krys::boo::css
   class CSSStyleSheet;
   class KeyframesRule;
   class ToLengthConversionData;
-  struct ParserContext;
 }
 
 namespace krys::boo::css::calc
@@ -233,16 +232,6 @@ namespace krys::boo
   /// @brief Collapses `document.styleColorOptions(style)` for a document with no page and default settings.
   KRYS_NODISCARD style::ColorOptions DocumentStyleColorOptions(const dom::Document &,
                                                                const RenderStyle *) noexcept;
-
-  /// @brief Collapses `document.baseURL()`. `Document` has no URL yet, so it's `about:blank`.
-  KRYS_NODISCARD url::URL DocumentBaseURL(const dom::Document &) noexcept;
-
-  /// @brief Collapses `document.completeURL(url)`: @p url resolved against `DocumentBaseURL`.
-  KRYS_NODISCARD url::URL DocumentCompleteURL(const dom::Document &, utf8_stringview url) noexcept;
-
-  /// @brief Collapses `CSSParserContext(document, baseURL)` for a no-quirks document with default settings.
-  KRYS_NODISCARD css::ParserContext DocumentCssParserContext(const dom::Document &,
-                                                             const url::URL &baseURL) noexcept;
 
   /// @brief Collapses `document.protectedSecurityOrigin()->canRequest(url, ...)`. There's no security origin
   /// or loader yet, so every URL can be requested.

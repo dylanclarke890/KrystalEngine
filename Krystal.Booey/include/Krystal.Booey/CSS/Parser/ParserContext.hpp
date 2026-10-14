@@ -12,6 +12,11 @@
 #include "Krystal.Core/Utils/Tags.hpp"
 #include <memory>
 
+namespace krys::boo::dom
+{
+  class Document;
+}
+
 namespace krys::boo::css
 {
   /// @brief The document state and settings that affect how CSS is parsed.
@@ -69,7 +74,14 @@ namespace krys::boo::css
     /// @note Initialises the static value pool.
     explicit ParserContext(ParserMode mode, const url::URL &baseURL = {}) noexcept;
 
-    // FIXME: Add the Document and Settings constructors once Document::CssParserContext() and Settings exist.
+    /// @brief The document's context (`Document::CssParserContext()`).
+    explicit ParserContext(const dom::Document &document) noexcept;
+
+    /// @brief A context for a sheet in @p document: @p sheetBaseURL (or the document base URL if it's null),
+    /// the document's mode and settings.
+    /// FIXME: the settings are the defaults until there's a `Settings`; add the `Settings` constructor then.
+    ParserContext(const dom::Document &document, const url::URL &sheetBaseURL,
+                  utf8_stringview charset) noexcept;
 
     /// @brief Switches to the UA sheet mode and enables the features UA sheets rely on.
     void SetUASheetMode() noexcept;

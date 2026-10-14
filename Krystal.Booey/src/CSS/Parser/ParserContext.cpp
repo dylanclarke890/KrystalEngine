@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
+#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
 namespace krys::boo::css
@@ -38,6 +40,21 @@ namespace krys::boo::css
     }
 
     StaticValuePool::Init();
+  }
+  ParserContext::ParserContext(const dom::Document &document) noexcept
+      : ParserContext(document.CssParserContext())
+  {
+  }
+
+  ParserContext::ParserContext(const dom::Document &document, const url::URL &sheetBaseURL,
+                               utf8_stringview charset) noexcept
+      : ParserContext(ParserMode::HTMLStandard)
+  {
+    BaseURL = sheetBaseURL.IsNull() ? document.BaseURL() : sheetBaseURL;
+    Charset = charset;
+    Mode = document.InQuirksMode() ? ParserMode::HTMLQuirks : ParserMode::HTMLStandard;
+    IsHTMLDocument = Is<dom::HTMLDocument>(document);
+    HasDocumentSecurityOrigin = sheetBaseURL.IsNull() || DocumentCanRequest(document, BaseURL);
   }
 
   void ParserContext::SetUASheetMode() noexcept

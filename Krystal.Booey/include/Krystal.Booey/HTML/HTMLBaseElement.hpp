@@ -28,6 +28,17 @@ namespace krys::boo::html
     void Target(dom::DOMString &&value) noexcept;
 
 #pragma endregion
+
+  protected:
+    void OnInsert() noexcept override;
+
+    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+
+    void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+
+    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                            Maybe<dom::DOMStringView> value,
+                            dom::DOMStringAtom namespaceURI) noexcept override;
   };
 }
 

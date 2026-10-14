@@ -15,6 +15,7 @@
 namespace krys::boo::html
 {
   class CustomElementRegistry;
+  class HTMLElementStack;
   class HTMLSlotElement;
 }
 
@@ -41,6 +42,8 @@ namespace krys::boo::dom
     friend class NodeAlgorithms;
     friend class NamedNodeMap;
     friend class TreeQueries;
+
+    friend class html::HTMLElementStack;
 
   private:
     QualifiedName _qualifiedName;
@@ -327,6 +330,44 @@ namespace krys::boo::dom
 
     /// @see https://dom.spec.whatwg.org/#dom-slotable-assignedslot
     KRYS_NODISCARD RefPtr<html::HTMLSlotElement> AssignedSlot() noexcept;
+
+#pragma endregion
+
+    /// @brief Whether the parser has finished inserting this element's children. Elements not created by the
+    /// parser have always finished.
+    KRYS_NODISCARD bool IsFinishedParsingChildren() const noexcept
+    {
+      return !HasNodeFlag(NodeFlags::IsParsingChildren);
+    }
+
+  protected:
+#pragma region Parser Hooks
+
+    /// @brief Called by the parser when it pushes this element onto the stack of open elements.
+    void BeginParsingChildren() noexcept
+    {
+      SetNodeFlag(NodeFlags::IsParsingChildren);
+    }
+
+    /// @brief Called by the parser when it pops this element off the stack of open elements. Overrides must
+    /// call the base implementation.
+    /// @see https://html.spec.whatwg.org/#stack-of-open-elements
+    virtual void FinishParsingChildren() noexcept
+    {
+      ClearNodeFlag(NodeFlags::IsParsingChildren);
+    }
+
+#pragma endregion
+
+#pragma region Extension Hooks
+
+    /// @brief The attribute change steps, run whenever one of the element's attributes is set, changed or
+    /// removed. Overrides must call the base implementation.
+    /// @param oldValue The previous value, or null if the attribute was added.
+    /// @param value The new value, or null if the attribute was removed.
+    /// @see https://dom.spec.whatwg.org/#concept-element-attributes-change-ext
+    virtual void OnAttributeChanged(DOMStringAtom localName, Maybe<DOMStringView> oldValue,
+                                    Maybe<DOMStringView> value, DOMStringAtom namespaceURI) noexcept;
 
 #pragma endregion
   };

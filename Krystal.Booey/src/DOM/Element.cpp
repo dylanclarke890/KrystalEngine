@@ -1,8 +1,11 @@
 ﻿#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/Constants/Attributes.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Algorithms/OrderedSet.hpp"
+#include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/HTMLCollection.hpp"
@@ -497,6 +500,67 @@ namespace krys::boo::dom
   RefPtr<html::HTMLSlotElement> Element::AssignedSlot() noexcept
   {
     return mixins::Slottable::AssignedSlot(*this);
+  }
+
+#pragma endregion
+
+#pragma region Extension Hooks
+
+  void Element::OnAttributeChanged(DOMStringAtom localName, Maybe<DOMStringView> oldValue,
+                                   Maybe<DOMStringView> value, DOMStringAtom namespaceURI) noexcept
+  {
+    if (namespaceURI != DOMStringAtom::Null())
+    {
+      return;
+    }
+
+    // NOTE: we currently don't need to handle `id` as we just use the value stored in the attribute. Later,
+    // when we optimise we can use this hook to update a member variable to skip needing to look up the
+    // attribute. This will be particularly important for a faster implementation of GetElementById.
+
+    if (localName == Attributes::Class)
+    {
+      auto &domTokenList = ClassList();
+      domTokenList._tokens.clear();
+      if (value.has_value())
+      {
+        auto tokens = OrderedSet::Parser(*value);
+        domTokenList._tokens.append(tokens.begin(), tokens.end());
+      }
+    }
+    else if (localName == Attributes::Slot)
+    {
+      if (value == oldValue)
+      {
+        return;
+      }
+
+      if (!value.has_value() && oldValue.has_value() && oldValue->empty())
+      {
+        return;
+      }
+
+      if (value.has_value() && value->empty() && !oldValue.has_value())
+      {
+        return;
+      }
+
+      if (!value.has_value() || value->empty())
+      {
+        _slottableName = u8"";
+      }
+      else
+      {
+        _slottableName = DOMString(*value);
+      }
+
+      if (auto *assignedSlot = SlotAlgorithms::GetAssignedSlot(*this))
+      {
+        SlotAlgorithms::AssignSlottables(*assignedSlot);
+      }
+
+      SlotAlgorithms::AssignSlot(*this);
+    }
   }
 
 #pragma endregion

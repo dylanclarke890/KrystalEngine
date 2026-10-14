@@ -36,6 +36,11 @@ namespace krys::boo::html
     void Name(dom::DOMString &&name) noexcept;
 
 #pragma endregion
+
+  protected:
+    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                            Maybe<dom::DOMStringView> value,
+                            dom::DOMStringAtom namespaceURI) noexcept override;
   };
 }
 

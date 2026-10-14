@@ -29,14 +29,14 @@ namespace krys::boo::html
     // FPA(4): If contextDocument is in quirks mode, then set document's mode to "quirks".
     if (contextDocument._quirksMode == dom::QuirksMode::Quirks)
     {
-      document->_quirksMode = dom::QuirksMode::Quirks;
+      document->SetQuirksMode(dom::QuirksMode::Quirks);
     }
 
     // FPA(5): Otherwise, if context's node document is in limited-quirks mode, then set document's mode to
     // "limited-quirks".
     else if (contextDocument._quirksMode == dom::QuirksMode::LimitedQuirks)
     {
-      document->_quirksMode = dom::QuirksMode::LimitedQuirks;
+      document->SetQuirksMode(dom::QuirksMode::LimitedQuirks);
     }
 
     // FPA(6): If allowDeclarativeShadowRoots is true, then set document's allow declarative shadow roots to

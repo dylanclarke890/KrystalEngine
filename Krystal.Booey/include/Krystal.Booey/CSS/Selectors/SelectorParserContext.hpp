@@ -2,6 +2,11 @@
 
 #include "Krystal.Booey/CSS/Parser/ParserMode.hpp"
 
+namespace krys::boo::dom
+{
+  class Document;
+}
+
 namespace krys::boo::css
 {
   struct ParserContext;
@@ -22,7 +27,9 @@ namespace krys::boo::css
 
     explicit SelectorParserContext(const ParserContext &context) noexcept;
 
-    // FIXME: SelectorParserContext(const dom::Document &), once Document has settings and quirks.
+    /// @brief The document's mode and settings.
+    /// FIXME: the settings are the defaults until there's a `Settings`.
+    explicit SelectorParserContext(const dom::Document &document) noexcept;
 
     KRYS_NODISCARD friend bool operator==(const SelectorParserContext &,
                                           const SelectorParserContext &) noexcept = default;
