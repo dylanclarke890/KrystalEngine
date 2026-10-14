@@ -17,11 +17,13 @@
 #include "Krystal.Booey/DOM/Mixins/Slottable.hpp"
 #include "Krystal.Booey/DOM/NamedNodeMap.hpp"
 #include "Krystal.Booey/DOM/NodeList.hpp"
+#include "Krystal.Booey/DOM/SelectorQuery.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/StyledElement.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
 #include <ranges>
 
 namespace krys::boo::dom
@@ -53,6 +55,43 @@ namespace krys::boo::dom
   DOMString Element::Id() const noexcept
   {
     return ElementAlgorithms::GetAttributeValue(*this, u8"id");
+  }
+
+  bool Element::HasClassName(DOMStringView className) const noexcept
+  {
+    auto classes = GetAttribute(u8"class");
+    if (!classes || className.empty())
+    {
+      return false;
+    }
+    bool foldCase = NodeDocument().InQuirksMode();
+    DOMStringView remaining = *classes;
+    while (!remaining.empty())
+    {
+      auto start = std::ranges::find_if_not(remaining, [](char8 c) { return text::IsASCIIWhitespace(c); });
+      auto end =
+        std::ranges::find_if(start, remaining.end(), [](char8 c) { return text::IsASCIIWhitespace(c); });
+      DOMStringView token(start, end);
+      if (token.size() == className.size()
+          && (foldCase
+                ? std::ranges::equal(token, className, {}, [](char8 c) { return text::ToASCIILower(c); })
+                : token == className))
+      {
+        return true;
+      }
+      remaining = DOMStringView(end, remaining.end());
+    }
+    return false;
+  }
+
+  DOMString Element::IdForStyleResolution() const noexcept
+  {
+    auto id = GetAttribute(u8"id").value_or(DOMString());
+    if (NodeDocument().InQuirksMode())
+    {
+      return text::ToASCIILower(DOMStringView(id));
+    }
+    return id;
   }
 
   void Element::ClassName(DOMString &&className) noexcept
@@ -318,18 +357,24 @@ namespace krys::boo::dom
     return _shadowRoot;
   }
 
-  RefPtr<Element> Element::Closest(DOMStringView selectors) noexcept
+  ExceptionOr<RefPtr<Element>> Element::Closest(DOMStringView selectors) noexcept
   {
-    // TODO(impl): CSS-SELECTORS
-    (void)selectors;
-    krys_not_implemented();
+    auto query = NodeDocument().SelectorQueryForString(selectors);
+    if (query.HasException())
+    {
+      return query.ReleaseException();
+    }
+    return ShareRefPtr(query.Value().Closest(*this));
   }
 
-  bool Element::Matches(DOMStringView selectors) const noexcept
+  ExceptionOr<bool> Element::Matches(DOMStringView selectors) const noexcept
   {
-    // TODO(impl): CSS-SELECTORS
-    (void)selectors;
-    krys_not_implemented();
+    auto query = NodeDocument().SelectorQueryForString(selectors);
+    if (query.HasException())
+    {
+      return query.ReleaseException();
+    }
+    return query.Value().Matches(*this);
   }
 
   Ref<HTMLCollection> Element::GetElementsByTagName(DOMStringAtom qualifiedName) noexcept

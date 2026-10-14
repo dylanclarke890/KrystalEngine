@@ -9,6 +9,7 @@
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHeadElement.hpp"
 #include "Krystal.Booey/HTML/HTMLLinkElement.hpp"
+#include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/HTMLStyleElement.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include <algorithm>
@@ -508,5 +509,28 @@ namespace krys::boo::style
       return nullptr;
     }
     return &ForNode(*_shadowRoot->Host());
+  }
+
+  html::HTMLSlotElement *AssignedSlotForScopeOrdinal(const dom::Element &element,
+                                                     ScopeOrdinal scopeOrdinal) noexcept
+  {
+    krys_debug_assert(scopeOrdinal >= ScopeOrdinal::FirstSlot);
+    auto *slot = const_cast<dom::Element &>(element).AssignedSlot().get();
+    for (auto scopeDepth = ScopeOrdinal::FirstSlot; slot && scopeDepth != scopeOrdinal; ++scopeDepth)
+    {
+      slot = slot->AssignedSlot().get();
+    }
+    return slot;
+  }
+
+  dom::Element *HostForScopeOrdinal(const dom::Element &element, ScopeOrdinal scopeOrdinal) noexcept
+  {
+    krys_debug_assert(scopeOrdinal <= ScopeOrdinal::ContainingHost);
+    auto *host = dom::TreeQueries::ShadowHost(element);
+    for (auto scopeDepth = ScopeOrdinal::ContainingHost; host && scopeDepth != scopeOrdinal; --scopeDepth)
+    {
+      host = dom::TreeQueries::ShadowHost(*host);
+    }
+    return host;
   }
 }

@@ -164,4 +164,11 @@ namespace krys::boo::dom::tests
     CHECK(any.LocalName() == StarAtom());
     CHECK(any == AnyQualifiedName());
   }
+
+  TEST_CASE("QualifiedName: an empty namespace is no namespace", "[HTML][QualifiedNameCache]")
+  {
+    auto empty = QualifiedName(DOMStringAtom::Empty(), DOMStringAtom::Null(), u8"p");
+    CHECK(empty.NamespaceURI() == DOMStringAtom::Null());
+    CHECK(empty == QualifiedName(DOMStringAtom::Null(), DOMStringAtom::Null(), u8"p"));
+  }
 }

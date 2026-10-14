@@ -274,6 +274,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Values/GradientValue.cpp
 		tests/CSS/Selectors/MutableSelector.cpp
 		tests/CSS/Selectors/Selector.cpp
+		tests/CSS/Selectors/SelectorChecker.cpp
 		tests/CSS/Selectors/SelectorList.cpp
 		tests/CSS/Selectors/SelectorParser.cpp
 		tests/CSS/Selectors/SelectorPseudoTypeMap.cpp
@@ -362,6 +363,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/NodeIterator.cpp
 		tests/DOM/ProcessingInstruction.cpp
 		tests/DOM/Range.cpp
+		tests/DOM/SelectorQuery.cpp
 		tests/DOM/StaticRange.cpp
 		tests/DOM/StyledElement.cpp
 		tests/DOM/Text.cpp

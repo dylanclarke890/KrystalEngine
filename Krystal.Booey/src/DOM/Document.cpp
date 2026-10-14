@@ -22,6 +22,7 @@
 #include "Krystal.Booey/DOM/NodeList.hpp"
 #include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/Range.hpp"
+#include "Krystal.Booey/DOM/SelectorQuery.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/DOM/TreeWalker.hpp"
 #include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
@@ -749,6 +750,27 @@ namespace krys::boo::dom
   {
     std::erase_if(_inDocumentShadowRoots,
                   [&](const WeakPtr<ShadowRoot> &root) { return !root || root.get() == &shadowRoot; });
+  }
+
+  ExceptionOr<SelectorQuery &> Document::SelectorQueryForString(DOMStringView selectorString) const noexcept
+  {
+    auto invalid = [&]
+    {
+      return Exception(ExceptionCode::SyntaxError,
+                       u8"'" + DOMString(selectorString) + u8"' is not a valid selector.");
+    };
+    if (selectorString.empty())
+    {
+      return invalid();
+    }
+
+    auto *query = SelectorQueryCache::Singleton().Add(selectorString, *this);
+    if (!query)
+    {
+      return invalid();
+    }
+
+    return *query;
   }
 
 #pragma region DocumentOrShadowRoot Mixin (CSSOM)

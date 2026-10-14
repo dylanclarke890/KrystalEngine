@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Style/ScopeOrdinal.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
@@ -23,6 +24,11 @@ namespace krys::boo::dom
   class Element;
   class Node;
   class ShadowRoot;
+}
+
+namespace krys::boo::html
+{
+  class HTMLSlotElement;
 }
 
 namespace krys::boo::style
@@ -171,4 +177,12 @@ namespace krys::boo::style
 
     KRYS_NODISCARD ActiveStyleSheetCollection CollectActiveStyleSheets() noexcept;
   };
+
+  /// @return The slot @p scopeOrdinal slots up the assignment chain from @p element, if any.
+  KRYS_NODISCARD html::HTMLSlotElement *AssignedSlotForScopeOrdinal(const dom::Element &element,
+                                                                    ScopeOrdinal scopeOrdinal) noexcept;
+
+  /// @return The shadow host @p scopeOrdinal scopes up from @p element, if any.
+  KRYS_NODISCARD dom::Element *HostForScopeOrdinal(const dom::Element &element,
+                                                   ScopeOrdinal scopeOrdinal) noexcept;
 }

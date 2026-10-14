@@ -55,7 +55,7 @@ namespace krys::boo::dom
     UniquePtr<DOMTokenList> _domTokenList;
     List<Ref<Attr>> _attributes;
     DOMStringAtom _is {DOMStringAtom::Null()};
-    CustomElementState _customElementState {CustomElementState::Undefined};
+    CustomElementState _customElementState {CustomElementState::Uncustomized};
 
     /// @see https://dom.spec.whatwg.org/#slotable-name
     DOMString _slottableName;
@@ -179,13 +179,13 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-element-closest
-    KRYS_NODISCARD RefPtr<Element> Closest(DOMStringView selectors) noexcept;
+    KRYS_NODISCARD ExceptionOr<RefPtr<Element>> Closest(DOMStringView selectors) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-matches
-    KRYS_NODISCARD bool Matches(DOMStringView selectors) const noexcept;
+    KRYS_NODISCARD ExceptionOr<bool> Matches(DOMStringView selectors) const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-webkitmatchesselector
-    KRYS_NODISCARD bool WebkitMatchesSelector(DOMStringView selectors) const noexcept
+    KRYS_NODISCARD ExceptionOr<bool> WebkitMatchesSelector(DOMStringView selectors) const noexcept
     {
       return Matches(selectors);
     }
@@ -339,6 +339,31 @@ namespace krys::boo::dom
     KRYS_NODISCARD bool IsFinishedParsingChildren() const noexcept
     {
       return !HasNodeFlag(NodeFlags::IsParsingChildren);
+    }
+
+    KRYS_NODISCARD const QualifiedName &TagQualifiedName() const noexcept
+    {
+      return _qualifiedName;
+    }
+
+    /// @brief The attribute list, synchronised first.
+    KRYS_NODISCARD const List<Ref<Attr>> &AttributeList() const noexcept
+    {
+      SynchronizeAllAttributes();
+      return _attributes;
+    }
+
+    /// @brief Whether @p className is one of the element's classes (ASCII case-insensitively in quirks mode,
+    /// where @p className must be lowercase).
+    KRYS_NODISCARD bool HasClassName(DOMStringView className) const noexcept;
+
+    /// @brief The element's ID, ASCII-lowercased in quirks mode; empty if it has none.
+    KRYS_NODISCARD DOMString IdForStyleResolution() const noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-element-custom-element-state
+    KRYS_NODISCARD CustomElementState GetCustomElementState() const noexcept
+    {
+      return _customElementState;
     }
 
     /// @brief Writes attributes that are updated lazily (the `style` attribute after a change to the inline

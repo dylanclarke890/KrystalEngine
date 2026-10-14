@@ -47,6 +47,7 @@ namespace krys::boo::dom
   class DocumentType;
   class Element;
   class HTMLCollection;
+  class SelectorQuery;
   class ProcessingInstruction;
   class ShadowRoot;
   class Text;
@@ -409,6 +410,12 @@ namespace krys::boo::dom
     /// @brief The style sheets of the document, in order.
     /// @see https://drafts.csswg.org/cssom/#dom-documentorshadowroot-stylesheets
     KRYS_NODISCARD css::StyleSheetList &StyleSheets() noexcept;
+
+    /// @brief The (cached) query for @p selectorString, as used by `querySelector()`, `matches()` and
+    /// `closest()`.
+    /// @return A `SyntaxError` if @p selectorString isn't a valid selector list.
+    KRYS_NODISCARD ExceptionOr<SelectorQuery &>
+      SelectorQueryForString(DOMStringView selectorString) const noexcept;
 
 #pragma endregion
 

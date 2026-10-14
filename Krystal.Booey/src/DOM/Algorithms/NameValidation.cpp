@@ -212,7 +212,12 @@ namespace krys::boo::dom
       return false;
     }
 
-    if (std::ranges::any_of(name, [](char8 ch) { return krys::text::IsASCIIUpper(ch) || ch == '-'; }))
+    if (std::ranges::any_of(name, [](char8 ch) { return krys::text::IsASCIIUpper(ch); }))
+    {
+      return false;
+    }
+
+    if (!std::ranges::contains(name, u8'-'))
     {
       return false;
     }

@@ -278,6 +278,17 @@ namespace krys::boo::dom
     return node._shadowRoot != nullptr;
   }
 
+  ShadowRoot *TreeQueries::ContainingShadowRoot(const Node &node) noexcept
+  {
+    return DynamicDowncast<ShadowRoot>(const_cast<Node &>(Root(node)));
+  }
+
+  Element *TreeQueries::ShadowHost(const Node &node) noexcept
+  {
+    auto *shadowRoot = ContainingShadowRoot(node);
+    return shadowRoot ? shadowRoot->Host() : nullptr;
+  }
+
 #pragma endregion
 
 #pragma region Tree Order Traversal

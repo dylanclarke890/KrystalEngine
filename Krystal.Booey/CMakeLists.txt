@@ -596,6 +596,11 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
 
   # DOM integration, layer e5 (adoptedStyleSheets)
   include/Krystal.Booey/CSS/CSSStyleSheetObservableArray.hpp
+
+  # DOM integration, layer e6 (selector matching)
+  include/Krystal.Booey/CSS/Selectors/SelectorChecker.hpp
+  include/Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp
+  include/Krystal.Booey/Style/RuleFeature.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -939,6 +944,11 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
 
   # DOM integration, layer e5 (adoptedStyleSheets)
   src/CSS/CSSStyleSheetObservableArray.cpp
+
+  # DOM integration, layer e6 (selector matching)
+  src/CSS/Selectors/SelectorChecker.cpp
+  src/CSS/Selectors/SelectorCheckerTestFunctions.cpp
+  src/Style/RuleFeature.cpp
 )
 
 target_precompile_headers(Krystal.Booey
@@ -1105,6 +1115,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/NodeList.hpp
       include/Krystal.Booey/DOM/ProcessingInstruction.hpp
       include/Krystal.Booey/DOM/Range.hpp
+      include/Krystal.Booey/DOM/SelectorQuery.hpp
       include/Krystal.Booey/DOM/ShadowRoot.hpp
       include/Krystal.Booey/DOM/StaticRange.hpp
       include/Krystal.Booey/DOM/StyledElement.hpp
@@ -1384,6 +1395,7 @@ target_sources(Krystal.Booey
     src/DOM/DocumentFragment.cpp
     src/DOM/DocumentOrShadowRoot.cpp
     src/DOM/DocumentType.cpp
+    src/DOM/HTMLDocument.cpp
     src/DOM/DOMImplementation.cpp
     src/DOM/DOMTokenList.cpp
     src/DOM/Element.cpp
@@ -1414,6 +1426,7 @@ target_sources(Krystal.Booey
     src/DOM/NodeIterator.cpp
     src/DOM/ProcessingInstruction.cpp
     src/DOM/Range.cpp
+    src/DOM/SelectorQuery.cpp
     src/DOM/ShadowRoot.cpp
     src/DOM/StaticRange.cpp
     src/DOM/StyledElement.cpp

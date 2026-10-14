@@ -44,6 +44,11 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-attr-localname
+    KRYS_NODISCARD const QualifiedName &GetQualifiedName() const noexcept
+    {
+      return _name;
+    }
+
     KRYS_NODISCARD DOMStringAtom LocalName() const noexcept
     {
       return _name.LocalName();

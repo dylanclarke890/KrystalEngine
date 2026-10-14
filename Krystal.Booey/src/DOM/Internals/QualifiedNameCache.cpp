@@ -11,6 +11,11 @@ namespace krys::boo::dom
   Ref<QualifiedNameStorage> QualifiedNameCache::GetOrAdd(DOMStringAtom namespaceURI, DOMStringAtom prefix,
                                                          DOMStringAtom localName) noexcept
   {
+    // An empty namespace is no namespace.
+    if (namespaceURI.View().empty())
+    {
+      namespaceURI = DOMStringAtom::Null();
+    }
     auto it = _cache.find(QualifiedNameCacheKey {namespaceURI, prefix, localName});
     if (it != _cache.end())
     {
@@ -31,6 +36,11 @@ namespace krys::boo::dom
                                                          DOMStringAtom localName, html::TagName tagName,
                                                          html::Namespace tagNamespace) noexcept
   {
+    // An empty namespace is no namespace.
+    if (namespaceURI.View().empty())
+    {
+      namespaceURI = DOMStringAtom::Null();
+    }
     auto it = _cache.find(QualifiedNameCacheKey {namespaceURI, prefix, localName});
     if (it != _cache.end())
     {

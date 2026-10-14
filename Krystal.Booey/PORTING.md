@@ -64,9 +64,10 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - DOM integration, layer e3 (2026-10-14): `style::Scope` (owned by `DocumentOrShadowRoot`): candidate nodes in tree order, pending sheets, preferred/alternate style sheet sets, active style sheets, updates batched on the event loop; LinkStyle `Sheet()` on `<style>`/`<link>`; the document's connected shadow roots. Three DOM bugs fixed (shadow trees never connected, shadow roots over-released, descendants over-retained). See *DOM integration*.
 - DOM integration, layer e4 (2026-10-14): `<style>` elements own their sheets (`InlineStyleSheetOwner`, `CSSStyleSheet::CreateInline`, the owner-node half of `StyleSheetContents`), with `type`, `media`, `title`, `disabled` and `load` events; `document.styleSheets`/`shadowRoot.styleSheets` (`StyleSheetList`). Krystal.Core `StringAtom::View()` no longer crashes on the null atom. See *DOM integration*.
 - DOM integration, layer e5 (2026-10-14): `adoptedStyleSheets` on documents and shadow roots (`CSSStyleSheetObservableArray` as a C++ list API with the constructed-sheet checks), adopting tree scopes on `CSSStyleSheet` (mutations reach every adopting scope), adopted sheets activated after owned sheets and listed in `styleSheets`. Two upstream bugs fixed (replaced and truncated sheets stayed adopted). See *DOM integration*.
+- DOM integration, layer e6 (2026-10-14): selector matching (`SelectorChecker` and its state test functions, the `:has()` match element from `RuleFeature`) and `SelectorQuery`/`SelectorQueryCache`; `querySelector()`, `querySelectorAll()`, `matches()` and `closest()` work. State pseudo-classes follow the HTML spec where the DOM has the state and match nothing otherwise (FIXMEs). Three DOM bugs fixed (custom element names, the initial custom element state, empty namespaces) and one upstream bug (`|*` fast path). See *DOM integration*.
 
 **Open / next candidates:**
-- **Next:** DOM integration layer e6 (selector matching); see *DOM integration*. After that: the rest of the DOM integration, then the rule set and style resolution (brings container query evaluation).
+- **Next:** DOM integration layer e7 (`matchMedia`); see *DOM integration*. After that: the rest of the DOM integration, then the rule set and style resolution (brings container query evaluation).
 - DOM, not yet done (noted 2026-10-14, deferred by choice): `NodeAlgorithms::Equals` compares attributes by position and ignores extra attributes on the other element (the spec compares the counts and matches attributes regardless of order). `Document::Head()` returns null for parsed documents (`DOMTreeAccessors::GetHeadElement`); URL reflection (`dom::USVString` is a placeholder). only `classList` follows its attribute; `relList`, `sandbox`, `sizes`, `blocking` and `htmlFor` are parsed once when created and should update from `Element::OnAttributeChanged`. Mutation observers never deliver records: `QueueMutationObserverMicrotask`/`NotifyMutationObservers` are TODOs and can now be built on `html::EventLoop`.
 - CSSOM, not yet ported (DOM integration): `<link>` sheets (resource loader) and the async `replace()` (promises). Also not yet ported: the Typed OM (`styleMap`) and the computed style declaration.
 - Sheet parser, not yet ported (d5): the inspector entry points (`parseDeclarationListForInspector`, `parseStyleSheetForInspector`) are `wont`.
@@ -1116,7 +1117,7 @@ Connects the CSS port to the DOM (`DOM/`, `HTML/`), which is written from the WH
 - **e3, `style::Scope` bookkeeping:** owned by `DocumentOrShadowRoot`; candidate nodes, pending sheets, preferred/alternate sets, `CollectActiveStyleSheets`, `UpdateActiveStyleSheets` without the render-tree gate, resolver update or invalidation. Updates are scheduled on the event loop. Done.
 - **e4, sheet owners:** `InlineStyleSheetOwner`, `CSSStyleSheet::CreateInline`, the owner-node half of `StyleSheetContents`, `HTMLStyleElement`, `StyleSheetList` (`document.styleSheets`, `shadowRoot.styleSheets`). Done.
 - **e5, `adoptedStyleSheets`:** on `DocumentOrShadowRoot`; `CSSStyleSheetObservableArray` becomes a plain C++ list API with the same checks; adopting tree scopes in `CSSStyleSheet`. Done.
-- **e6, selector matching:** `SelectorChecker` (`QueryingRules` mode, no JIT, `SelectorFilter` or relations), then `SelectorQuery`/`SelectorQueryCache`; probably split in two.
+- **e6, selector matching:** `SelectorChecker` (`QueryingRules` mode, no JIT, `SelectorFilter` or relations), then `SelectorQuery`/`SelectorQueryCache`. Done (one layer).
 - **e7, `matchMedia`:** `MediaQueryMatcher`, `MediaQueryList`, `MediaQueryListEvent`, on `Document` (there's no window).
 - **Deferred:** `<link>` loading, `xml-stylesheet`, `@import`, render blocking (resource loader); `SVGStyleElement`; presentational hints and `<body>` colours (cascade); the `*ChangeInvalidation` classes; `getComputedStyle`.
 
@@ -1291,6 +1292,48 @@ Graph from `css/CSSStyleSheetObservableArray.cpp` (headers-only): 15 files (`too
 - Adopting tree scopes are a `List<WeakPtr<ContainerNode>>` (upstream: a weak hash set); entries freed with their tree scope are ignored and pruned on the next add.
 
 Tests: `tests/CSS/CSSStyleSheetObservableArray.cpp` (the constructed-sheet checks, set/remove/shrink, duplicates, several tree scopes, activation order, `styleSheets`, mutations, disabled and titled sheets, shadow roots, adoption into another document, a freed tree scope): 2 cases / 107 assertions pass. A freed document can't be tested: no document is freed (FIXME in the test). Full Booey suite: 1770 cases / 681003 assertions; all pass except 7 expected failures. Whole solution builds with no warnings.
+
+### Layer e6: selector matching (2026-10-14)
+
+Graph from `css/SelectorChecker.cpp` (headers-only): 59 files (`tools/port/out/selector-checker.md`), and from `dom/SelectorQuery.cpp` (`tools/port/out/selector-query.md`). Apart from the two entries, everything to port was already ported or belongs to style resolution (`StyleRelations`, `SelectorMatchingState`, `HasSelectorFilter`, `SelectorFilter`, `StyleScrollbarState`, `ContainerQueryEvaluator`); the rest of the reach is element state (`SelectorCheckerTestFunctions.h`: forms, focus, fullscreen, media, popovers, view transitions).
+
+**Decisions (2026-10-14):** one layer (checker and queries together). State pseudo-classes are implemented where the state is already in the DOM or follows from attributes by the HTML spec; the others match nothing, with FIXMEs.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/SelectorChecker.h`, `.cpp` | `port` | `CSS/Selectors/SelectorChecker.hpp`, `src/...` | on | tested. No JIT, relations or `:has()` cache; see differences. |
+| `css/SelectorCheckerTestFunctions.h` | `have*` | `CSS/Selectors/SelectorCheckerTestFunctions.hpp`, `src/...` | on | tested. Written from the HTML spec where upstream asks element state Krystal doesn't have; see differences. |
+| `dom/SelectorQuery.h`, `.cpp` | `port` | `DOM/SelectorQuery.hpp`, `src/...` | on (DOM) | tested. No ID fast paths; see differences. |
+| `style/RuleFeature.h`, `.cpp` (`MatchElement`, `isHasPseudoClassMatchElement`, `computeHasPseudoClassMatchElement`) | `port` (partial) | `Style/RuleFeature.hpp`, `src/...` | on | tested through `:has()`. The rest of the file comes with the rule set. |
+| `style/StyleScope.cpp` (`hostForScopeOrdinal`, `assignedSlotForScopeOrdinal`) | `port` | `style::HostForScopeOrdinal`, `AssignedSlotForScopeOrdinal` (`Style/Scope.hpp`) | on | Only reached with non-element scope ordinals (style resolution). |
+| `html/HTMLDocument.cpp` (`isCaseSensitiveAttribute`) | `port` | `dom::HTMLDocument::IsCaseSensitiveAttribute` (`src/DOM/HTMLDocument.cpp`, new) | on (DOM) | tested. |
+| `dom/Document.cpp` (`selectorQueryForString`), `ContainerNode.cpp` (`querySelector`, `querySelectorAll`), `Element.cpp` (`matches`, `closest`) | `port` | `Document::SelectorQueryForString`, `ParentNode::QuerySelector`/`QuerySelectorAll`, `Element::Matches`/`Closest`/`WebkitMatchesSelector` | on | tested. Were `krys_not_implemented()`. |
+| `style/StyleRelations.h`, `SelectorMatchingState.h`, `HasSelectorFilter.*`, `css/SelectorFilter.*`, `style/StyleScrollbarState.h` | `?` | | | Style resolution. |
+| `cssjit/*` | `wont` | | | No selector JIT. |
+
+**Names:** `SelectorChecker::Match` (the enum) is `MatchOutcome`, since it would clash with `Match()`; `MatchResult::match`/`matchType` are `Outcome`/`Type`. `LocalContext::selector`/`element`/`visitedMatchType` are `CurrentSelector`/`Element`/`VisitedType`. The checking context keeps the requested pseudo-element as a `Maybe` (upstream splits it into fields for the JIT). New DOM accessors for upstream's: `Element::TagQualifiedName` (`tagQName`), `AttributeList` (`attributes()`, synchronised), `HasClassName`, `IdForStyleResolution`, `GetCustomElementState`; `Attr::GetQualifiedName`; `TreeQueries::ContainingShadowRoot`/`ShadowHost` (`Node::containingShadowRoot`/`shadowHost`). `Element::isLink()` (a node flag upstream) is the free function `css::IsLink`.
+
+**Bugs fixed (DOM):**
+- `NameValidation::IsValidCustomElementName` rejected names *with* a hyphen instead of names without one, so `a`, `div` and `span` were valid custom element names (created in the `undefined` state) and `x-widget` wasn't. Fixed (tested).
+- Elements started in the `undefined` custom element state; "create an element" leaves every non-custom element `uncustomized`. The default is now `Uncustomized` (`:defined` is tested).
+- `QualifiedName` kept an empty namespace as the empty atom, so `|p` (no namespace, which the selector parser resolves to the empty atom) never matched an element in no namespace. As upstream, the qualified name cache turns an empty namespace into null (tested).
+- `querySelector()`, `querySelectorAll()`, `matches()` and `closest()` were `krys_not_implemented()`. `Matches`, `Closest` and `WebkitMatchesSelector` now return `ExceptionOr` (they throw a `SyntaxError`, per spec).
+
+**Upstream bugs found:**
+- The single type selector fast path never matches `ns|*` or `|*` (a namespace with a universal local name): `localNameMatches` compares the element's local name with `*`. Krystal skips the local name check for `*` (tested with `|*`).
+
+**Differences:**
+- No selector JIT, `SelectorFilter`, style relations (the `addStyleRelation` calls are dropped, FIXME) or `:has()` match cache and filters (`SelectorMatchingState`, FIXME); `:has()` always traverses. No child index cache, so `:nth-child` counts siblings.
+- Not in the standard-only enums (d1a), so not handled: the scrollbar pseudo-classes and pseudo-elements, `-webkit-any`, `-webkit-drag`, the internal pseudo-classes, `-apple-has-attachment`, `:window-inactive`, the strong-password autofill pseudo-classes and the legacy user agent part alias.
+- State pseudo-classes implemented from the HTML spec: `:link`/`:any-link` (`a`/`area` with `href`, SVG `a` with `href` or `xlink:href`), `:checked` (checkbox/radio `Checked()`, option `Selected()`), `:default` (checked checkboxes/radios, selected options, the default button of the nearest ancestor form), `:disabled`/`:enabled` (actually disabled, with fieldsets and their first legend, options in disabled optgroups), `:required`/`:optional`, `:read-write`/`:read-only` (text-like inputs, textareas, `contenteditable`), `:placeholder-shown`, `:indeterminate` (checkboxes, progress without a value), `:defined`, `:lang()` (upstream's matching; `xml:lang`/`lang` across shadow boundaries), `:dir()`. `:visited` never matches (no history).
+- Match nothing, with FIXMEs: `:hover`, `:active`, `:focus`, `:focus-visible`, `:focus-within`, `:target`, `:valid`, `:invalid`, `:in-range`, `:out-of-range`, `:user-valid`, `:user-invalid`, `:autofill`, `:state()`, `:modal`, `:popover-open`, `:fullscreen`, `:picture-in-picture`, the media playback pseudo-classes, `:future`/`:past`, `:active-view-transition(-type)` and the view-transition pseudo-elements that need an active transition. Radio buttons are never indeterminate (no radio groups); `:dir(auto)` and `<bdi>` are LTR (no bidi data); `:lang()` has no document default language; the default button ignores the `form` attribute; a textarea's value is its child text.
+- `::part()` doesn't follow `exportparts` (FIXME): part names match only in the element's own scope. User agent parts never match (no user agent shadow roots).
+- `SelectorQuery` has no ID fast paths (`RightMostWithIdMatch`, root filtering; FIXME until tree scopes map IDs), no cached first element with an attribute, no document-level `querySelectorAll` result cache (`resultForSelectorAll`, `shouldStoreInDocument`, `classNameToMatch`), no `<base>` shortcut and no SVG animated attribute bailout (no SMIL). The cache key has no security origin and evicts its first entry when full.
+- The test functions live in a `.cpp` (upstream: an inline header). `Element::Matches` is `const`.
+
+**Open (DOM):** `HTMLTreeBuilder::CreateElement` passes the `is` attribute's *name* as the `is` value instead of its value. `HTMLInputElement::Checked`, `Indeterminate` and `Value`, and `HTMLOptionElement::Selected`, reflect content attributes rather than checkedness, indeterminacy, value and selectedness, so `:checked` follows the attributes until form control state exists.
+
+Tests: `tests/CSS/Selectors/SelectorChecker.cpp` (simple selectors, quirks mode, combinators, `:not`/`:is`/`:where`/`:has`, tree-structural pseudo-classes, `:scope`/`:host`, element state, `:lang`/`:dir`, link match type), `tests/DOM/SelectorQuery.cpp` (every fast path, element/fragment/shadow root queries, no-namespace elements, `matches`/`closest`, syntax errors, the cache): 13 cases / 522 assertions pass; `NameValidation` and `QualifiedNameCache` tests for the DOM fixes. Full Booey suite: 1785 cases / 681534 assertions; all pass except 7 expected failures. Whole solution builds with no warnings.
 
 ## Slice 3: Colour
 

@@ -13,6 +13,7 @@ namespace krys::boo::dom
   class Document;
   class Element;
   class Node;
+  class ShadowRoot;
   class Text;
 
   /// @brief Implementations of the various tree concepts/algorithms defined in the DOM spec, grouped together
@@ -130,6 +131,12 @@ namespace krys::boo::dom
 
     /// @see https://dom.spec.whatwg.org/#element-shadow-host
     KRYS_NODISCARD static bool IsShadowHost(const Element &node) noexcept;
+
+    /// @return The shadow root whose shadow tree contains @p node, or null if @p node isn't in a shadow tree.
+    KRYS_NODISCARD static ShadowRoot *ContainingShadowRoot(const Node &node) noexcept;
+
+    /// @return The host of the shadow tree that contains @p node, or null if @p node isn't in a shadow tree.
+    KRYS_NODISCARD static Element *ShadowHost(const Node &node) noexcept;
 
 #pragma endregion
 
