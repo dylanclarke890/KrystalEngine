@@ -78,7 +78,7 @@ def extract_values_from_file(parsing_context, parsed_values, values_file):
 class ParsingContext:
     def __init__(self, *, defines_string: str, parsing_for_codegen: bool, verbose: bool):
         if defines_string:
-            self.conditionals = frozenset(defines_string.split(" "))
+            self.conditionals = frozenset(define for define in re.split(r"[,\s]+", defines_string) if define)
         else:
             self.conditionals = frozenset()
         self.parsing_for_codegen = parsing_for_codegen

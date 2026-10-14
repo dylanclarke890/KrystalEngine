@@ -63,9 +63,9 @@
 #include "Krystal.Booey/CSS/Properties/FontVariantLigaturesParser.hpp"
 #include "Krystal.Booey/CSS/Properties/FontVariantNumericParser.hpp"
 #include "Krystal.Booey/CSS/Properties/ParsedPropertyList.hpp"
-#include "Krystal.Booey/CSS/Properties/PropertyParser.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserResult.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyShorthandFunctions.hpp"
 #include "Krystal.Booey/CSS/Values/Borders/BorderImage.hpp"
@@ -163,26 +163,6 @@ namespace krys::boo::css
         || value == ValueId::Right)
     {
       return value;
-    }
-
-    return ValueId::Invalid;
-  }
-
-  KRYS_NODISCARD constexpr ValueId MapFromColumnBreakBetween(ValueId value) noexcept
-  {
-    if (value == ValueId::Always)
-    {
-      return ValueId::Column;
-    }
-
-    if (value == ValueId::Auto)
-    {
-      return value;
-    }
-
-    if (value == ValueId::Avoid)
-    {
-      return ValueId::AvoidColumn;
     }
 
     return ValueId::Invalid;
@@ -325,11 +305,9 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeBorderShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                      const PropertyShorthand &shorthand,
+                                                      const PropertyShorthand &,
                                                       PropertyParserResult &result) noexcept
     {
-      (void)shorthand;
-
       auto components = ConsumeBorderShorthandComponents(tokens, state);
       if (!components)
       {
@@ -352,11 +330,9 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeBorderInlineShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                            const PropertyShorthand &shorthand,
+                                                            const PropertyShorthand &,
                                                             PropertyParserResult &result) noexcept
     {
-      (void)shorthand;
-
       auto components = ConsumeBorderShorthandComponents(tokens, state);
       if (!components)
       {
@@ -374,11 +350,9 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeBorderImageShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                           const PropertyShorthand &shorthand,
+                                                           const PropertyShorthand &,
                                                            PropertyParserResult &result) noexcept
     {
-      (void)shorthand;
-
       auto components = ConsumeBorderImageComponents(tokens, state);
       if (!components)
       {
@@ -400,11 +374,9 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeBorderBlockShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                           const PropertyShorthand &shorthand,
+                                                           const PropertyShorthand &,
                                                            PropertyParserResult &result) noexcept
     {
-      (void)shorthand;
-
       auto components = ConsumeBorderShorthandComponents(tokens, state);
       if (!components)
       {
@@ -421,11 +393,9 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeBorderRadiusShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                            const PropertyShorthand &shorthand,
+                                                            const PropertyShorthand &,
                                                             PropertyParserResult &result) noexcept
     {
-      (void)shorthand;
-
       auto borderRadius = ConsumeUnresolvedBorderRadius(tokens, state);
       if (!borderRadius.has_value())
       {
@@ -433,23 +403,21 @@ namespace krys::boo::css
       }
 
       result.AddPropertyForCurrentShorthand(state, PropertyId::BorderTopLeftRadius,
-                                            CreateValue(state.ValuePool, borderRadius->TopLeft()));
+                                            CreateValue(state.Pool, borderRadius->TopLeft()));
       result.AddPropertyForCurrentShorthand(state, PropertyId::BorderTopRightRadius,
-                                            CreateValue(state.ValuePool, borderRadius->TopRight()));
+                                            CreateValue(state.Pool, borderRadius->TopRight()));
       result.AddPropertyForCurrentShorthand(state, PropertyId::BorderBottomRightRadius,
-                                            CreateValue(state.ValuePool, borderRadius->BottomRight()));
+                                            CreateValue(state.Pool, borderRadius->BottomRight()));
       result.AddPropertyForCurrentShorthand(state, PropertyId::BorderBottomLeftRadius,
-                                            CreateValue(state.ValuePool, borderRadius->BottomLeft()));
+                                            CreateValue(state.Pool, borderRadius->BottomLeft()));
 
       return true;
     }
 
     KRYS_NODISCARD static bool ConsumeBorderSpacingShorthand(TokenRange &tokens, PropertyParserState &state,
                                                              const PropertyShorthand &,
-                                                             PropertyParserResult &result)
+                                                             PropertyParserResult &result) noexcept
     {
-      (void)shorthand;
-
       RefPtr horizontalSpacing =
         PrimitiveValueResolver<Length<NonNegative>>::ConsumeAndResolve(tokens, state);
       if (!horizontalSpacing)
@@ -524,9 +492,7 @@ namespace krys::boo::css
           }
           case PropertyId::AnimationTimingFunction:
           {
-            // TODO: Implement ConsumeEasingFunction
-            return nullptr;
-            // return ConsumeEasingFunction(tokens, state);
+            return ConsumeEasingFunction(tokens, state);
           }
           case PropertyId::TransitionBehavior:
           {
@@ -658,13 +624,11 @@ namespace krys::boo::css
           }
           case PropertyId::TransitionProperty:
           {
-            return nullptr;
-            // return ConsumeSingleTransitionPropertyOrNone(tokens, state);
+            return ConsumeSingleTransitionPropertyOrNone(tokens, state);
           }
           case PropertyId::TransitionTimingFunction:
           {
-            return nullptr;
-            // return ConsumeEasingFunction(tokens, state);
+            return ConsumeEasingFunction(tokens, state);
           }
           case PropertyId::TransitionBehavior:
           {
@@ -821,6 +785,17 @@ namespace krys::boo::css
           {
             return ConsumeSingleMaskSize(tokens, state);
           }
+
+          // -webkit-mask-*
+          case PropertyId::WebkitMaskPositionX:
+          {
+            return PropertyParsing::ConsumeSingleWebkitMaskPositionX(tokens, state);
+          }
+          case PropertyId::WebkitMaskPositionY:
+          {
+            return PropertyParsing::ConsumeSingleWebkitMaskPositionY(tokens, state);
+          }
+
           default:
           {
             return nullptr;
@@ -853,13 +828,15 @@ namespace krys::boo::css
           for (size_t i = 0uz; i < longhandCount; ++i)
           {
             if (parsedLonghand[i])
+            {
               continue;
+            }
 
             RefPtr<Value> value;
             RefPtr<Value> valueY;
             PropertyId property = shorthandProperties[i];
 
-            if (property == PropertyId::BackgroundPositionX)
+            if (property == PropertyId::BackgroundPositionX || property == PropertyId::WebkitMaskPositionX)
             {
               // Note: This assumes y properties (for example background-position-y) follow the x properties
               // in the shorthand array.
@@ -909,7 +886,8 @@ namespace krys::boo::css
                 return false;
               }
             }
-            else if (property == PropertyId::BackgroundPositionY)
+            else if (property == PropertyId::BackgroundPositionY
+                     || property == PropertyId::WebkitMaskPositionY)
             {
               continue;
             }
@@ -1050,7 +1028,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static bool ConsumeWebkitBackgroundSizeShorthand(TokenRange &tokens,
                                                                     PropertyParserState &state,
-                                                                    const PropertyShorthand &shorthand,
+                                                                    const PropertyShorthand &,
                                                                     PropertyParserResult &result) noexcept
     {
       auto backgroundSize = ConsumeListSeparatedBy<',', OneOrMore, ListOptimization::SingleValue>(
@@ -1094,7 +1072,10 @@ namespace krys::boo::css
       {
         auto position = ConsumePositionUnresolved(tokens, state);
         if (!position)
+        {
           return false;
+        }
+
         auto [positionX, positionY] = Split(krys::move(*position));
         x.push_back(PositionXValue::Create(krys::move(positionX)));
         y.push_back(PositionYValue::Create(krys::move(positionY)));
@@ -1126,7 +1107,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeOverflowShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                        const PropertyShorthand &shorthand,
+                                                        const PropertyShorthand &,
                                                         PropertyParserResult &result) noexcept
     {
       ValueId xValueId = tokens.Consume().ValueId();
@@ -1141,6 +1122,15 @@ namespace krys::boo::css
       if (tokens.IsAtEnd())
       {
         yValueId = xValueId;
+
+        // FIXME: -webkit-paged-x or -webkit-paged-y only apply to overflow-y. If this value has been
+        // set using the shorthand, then for now overflow-x will default to auto, but once we implement
+        // pagination controls, it should default to hidden. If the overflow-y value is anything but
+        // paged-x or paged-y, then overflow-x and overflow-y should have the same value.
+        if (xValueId == ValueId::WebkitPagedX || xValueId == ValueId::WebkitPagedY)
+        {
+          xValueId = ValueId::Auto;
+        }
       }
       else
       {
@@ -1165,7 +1155,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeColumnsShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                       const PropertyShorthand &shorthand,
+                                                       const PropertyShorthand &,
                                                        PropertyParserResult &result) noexcept
     {
       RefPtr<Value> columnWidth;
@@ -1259,11 +1249,11 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeGridTemplateShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                            const PropertyShorthand &shorthand,
+                                                            const PropertyShorthand &,
                                                             PropertyParserResult &result) noexcept
     {
       TokenRange rangeCopy = tokens;
-      RefPtr<Value> rowsValue = ConsumeIdent<ValueId::None>(rangeCopy);
+      RefPtr<Value> rowsValue = ConsumeIdent<ValueId::None>(tokens);
 
       // 1- 'none' case.
       if (rowsValue && tokens.IsAtEnd())
@@ -1306,9 +1296,9 @@ namespace krys::boo::css
         return true;
       }
 
-      // // 3- [ <line-names>? <string> <track-size>? <line-names>? ]+ [ / <track-list> ]?
+      // 3- [ <line-names>? <string> <track-size>? <line-names>? ]+ [ / <track-list> ]?
 
-      // tokens = rangeCopy;
+      tokens = rangeCopy;
 
       GridNamedAreaMap gridAreaMap;
       ValueListBuilder templateRows;
@@ -1357,10 +1347,10 @@ namespace krys::boo::css
         lineNames = ConsumeGridLineNames(tokens, state);
         if (lineNames)
         {
-          templateRows.push_back(krys::move(lineNames));
+          templateRows.push_back(lineNames);
         }
       } while (!tokens.IsAtEnd()
-               && !(tokens.Peek().Type() == TokenType::Delim && tokens.Peek().IdentCodePoints() == u8"/"));
+               && !(tokens.Peek().Type() == TokenType::Delim && tokens.Peek().Delimiter() == U'/'));
 
       RefPtr<Value> columnsValue;
       if (!tokens.IsAtEnd())
@@ -1391,7 +1381,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeGridShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                    const PropertyShorthand &shorthand,
+                                                    KRYS_MAYBE_UNUSED const PropertyShorthand &shorthand,
                                                     PropertyParserResult &result) noexcept
     {
       krys_debug_assert(shorthand.Size() == 6);
@@ -1451,9 +1441,14 @@ namespace krys::boo::css
         // 2- [ auto-flow && dense? ] <grid-auto-rows>? / <grid-template-columns>
         gridAutoFlow = ConsumeImplicitGridAutoFlow(tokens, ValueId::Row);
         if (!gridAutoFlow || tokens.IsAtEnd())
+        {
           return false;
+        }
+
         if (ConsumeSlash(tokens))
+        {
           autoRowsValue = PrimitiveValue::Create(ValueId::Auto);
+        }
         else
         {
           autoRowsValue = ConsumeGridTrackList(tokens, state, GridAuto);
@@ -1539,7 +1534,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeGridAreaShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                        const PropertyShorthand &shorthand,
+                                                        const PropertyShorthand &,
                                                         PropertyParserResult &result) noexcept
     {
       RefPtr rowStartValue = ConsumeGridLine(tokens, state);
@@ -1613,7 +1608,7 @@ namespace krys::boo::css
       {
         if (IsCustomIdentValue(*columnStartValue))
         {
-          columnEndValue = rowStartValue;
+          columnEndValue = columnStartValue;
         }
         else
         {
@@ -1671,7 +1666,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeBlockStepShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                         const PropertyShorthand &shorthand,
+                                                         const PropertyShorthand &,
                                                          PropertyParserResult &result) noexcept
     {
       // https://drafts.csswg.org/css-rhythm/#block-step
@@ -1744,26 +1739,26 @@ namespace krys::boo::css
                                                     const PropertyShorthand &shorthand,
                                                     PropertyParserResult &result) noexcept
     {
-      // if (IsSystemFontShorthand(tokens.Peek().ValueId()))
-      //{
-      //   auto systemFont = tokens.Consume().ValueId();
-      //   tokens.DiscardWhitespace();
+      if (IsSystemFontShorthand(tokens.Peek().ValueId()))
+      {
+        auto systemFont = tokens.Consume().ValueId();
+        tokens.DiscardWhitespace();
 
-      // if (!tokens.IsAtEnd())
-      // {
-      //   return false;
-      // }
+        if (!tokens.IsAtEnd())
+        {
+          return false;
+        }
 
-      // // We can't store properties (weight, size, etc.) of the system font here,
-      // // since those values can change (e.g. accessibility font sizes, or accessibility bold).
-      // // Parsing (correctly) doesn't re-run in response to updateStyleAfterChangeInEnvironment().
-      // // Instead, we store sentinel values, later replaced by environment-sensitive values
-      // // inside Style::BuilderCustom and Style::BuilderConverter.
-      // result.AddPropertyForAllLonghandsOfCurrentShorthand(state, PrimitiveValue::Create(systemFont),
-      //                                                     IsImplicit(true));
+        // We can't store properties (weight, size, etc.) of the system font here,
+        // since those values can change (e.g. accessibility font sizes, or accessibility bold).
+        // Parsing (correctly) doesn't re-run in response to updateStyleAfterChangeInEnvironment().
+        // Instead, we store sentinel values, later replaced by environment-sensitive values
+        // inside Style::BuilderCustom and Style::BuilderConverter.
+        result.AddPropertyForAllLonghandsOfCurrentShorthand(state, PrimitiveValue::Create(systemFont),
+                                                            IsImplicit(true));
 
-      // return true;
-      // }
+        return true;
+      }
 
       TokenRangeGuard guard {tokens};
 
@@ -1862,7 +1857,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeFontVariantShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                           const PropertyShorthand &shorthand,
+                                                           const PropertyShorthand &,
                                                            PropertyParserResult &result) noexcept
     {
       if (IdentMatches<ValueId::Normal, ValueId::None>(tokens.Peek().ValueId()))
@@ -1956,12 +1951,12 @@ namespace krys::boo::css
       } while (!tokens.IsAtEnd());
 
       result.AddPropertyForCurrentShorthand(state, PropertyId::FontVariantLigatures,
-                                            ligaturesParser.Finalize(), implicitLigatures);
+                                            ligaturesParser.FinalizeValue(), implicitLigatures);
       result.AddPropertyForCurrentShorthand(state, PropertyId::FontVariantCaps, krys::move(capsValue));
       result.AddPropertyForCurrentShorthand(state, PropertyId::FontVariantAlternates,
                                             krys::move(alternatesValue));
-      result.AddPropertyForCurrentShorthand(state, PropertyId::FontVariantNumeric, numericParser.Finalize(),
-                                            implicitNumeric);
+      result.AddPropertyForCurrentShorthand(state, PropertyId::FontVariantNumeric,
+                                            numericParser.FinalizeValue(), implicitNumeric);
       result.AddPropertyForCurrentShorthand(state, PropertyId::FontVariantEastAsian,
                                             krys::move(eastAsianValue));
       result.AddPropertyForCurrentShorthand(state, PropertyId::FontVariantPosition,
@@ -1972,7 +1967,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeFontSynthesisShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                             const PropertyShorthand &shorthand,
+                                                             const PropertyShorthand &,
                                                              PropertyParserResult &result) noexcept
     {
       // none | [ weight || style || small-caps ]
@@ -2061,7 +2056,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static bool ConsumeTextDecorationSkipShorthand(TokenRange &tokens,
                                                                   PropertyParserState &state,
-                                                                  const PropertyShorthand &shorthand,
+                                                                  const PropertyShorthand &,
                                                                   PropertyParserResult &result) noexcept
     {
       if (auto skip = ConsumeIdentRaw<ValueId::None, ValueId::Auto, ValueId::Ink>(tokens))
@@ -2093,7 +2088,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeMaskBorderShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                          const PropertyShorthand &shorthand,
+                                                          const PropertyShorthand &,
                                                           PropertyParserResult &result) noexcept
     {
       auto components = ConsumeBorderImageComponents(tokens, state);
@@ -2117,7 +2112,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeFlexShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                    const PropertyShorthand &shorthand,
+                                                    const PropertyShorthand &,
                                                     PropertyParserResult &result) noexcept
     {
       // <'flex'>        = none | [ <'flex-grow'> <'flex-shrink'>? || <'flex-basis'> ]
@@ -2138,8 +2133,12 @@ namespace krys::boo::css
           case ValueId::Intrinsic:
           case ValueId::MinIntrinsic:
           case ValueId::MinContent:
+          case ValueId::WebkitMinContent:
           case ValueId::MaxContent:
+          case ValueId::WebkitMaxContent:
+          case ValueId::WebkitFillAvailable:
           case ValueId::FitContent:
+          case ValueId::WebkitFitContent:
           {
             return true;
           }
@@ -2245,7 +2244,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumePageBreakAfterShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                              const PropertyShorthand &shorthand,
+                                                              const PropertyShorthand &,
                                                               PropertyParserResult &result) noexcept
     {
       auto keyword = ConsumeIdentRaw(tokens);
@@ -2266,7 +2265,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumePageBreakBeforeShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                               const PropertyShorthand &shorthand,
+                                                               const PropertyShorthand &,
                                                                PropertyParserResult &result) noexcept
     {
       auto keyword = ConsumeIdentRaw(tokens);
@@ -2287,7 +2286,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumePageBreakInsideShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                               const PropertyShorthand &shorthand,
+                                                               const PropertyShorthand &,
                                                                PropertyParserResult &result) noexcept
     {
       auto keyword = ConsumeIdentRaw(tokens);
@@ -2308,7 +2307,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeTransformOriginShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                               const PropertyShorthand &shorthand,
+                                                               const PropertyShorthand &,
                                                                PropertyParserResult &result) noexcept
     {
       if (auto position = ConsumeOneOrTwoComponentPositionUnresolved(tokens, state))
@@ -2337,7 +2336,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static bool ConsumePerspectiveOriginShorthand(TokenRange &tokens,
                                                                  PropertyParserState &state,
-                                                                 const PropertyShorthand &shorthand,
+                                                                 const PropertyShorthand &,
                                                                  PropertyParserResult &result) noexcept
     {
       if (auto position = ConsumePositionUnresolved(tokens, state))
@@ -2354,7 +2353,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeOffsetShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                      const PropertyShorthand &shorthand,
+                                                      const PropertyShorthand &,
                                                       PropertyParserResult &result) noexcept
     {
       // The offset shorthand is defined as:
@@ -2374,7 +2373,9 @@ namespace krys::boo::css
 
       // Either one of offset-position and offset-path must be present.
       if (!offsetPosition && !offsetPath)
+      {
         return false;
+      }
 
       // Only parse offset-distance and offset-rotate if offset-path is specified.
       RefPtr<Value> offsetDistance;
@@ -2385,7 +2386,9 @@ namespace krys::boo::css
         // Otherwise, parse in the reverse order.
         if ((offsetDistance =
                PropertyParsing::ParseStylePropertyLonghand(tokens, PropertyId::OffsetDistance, state)))
+        {
           offsetRotate = PropertyParsing::ParseStylePropertyLonghand(tokens, PropertyId::OffsetRotate, state);
+        }
         else
         {
           offsetRotate = PropertyParsing::ParseStylePropertyLonghand(tokens, PropertyId::OffsetRotate, state);
@@ -2416,7 +2419,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeListStyleShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                         const PropertyShorthand &shorthand,
+                                                         const PropertyShorthand &,
                                                          PropertyParserResult &result) noexcept
     {
       RefPtr<Value> position;
@@ -2483,10 +2486,10 @@ namespace krys::boo::css
       return tokens.IsAtEnd();
     }
 
-    KRYS_NODISCARD static bool ConsumeOverscrollBehaviorShorthand(TokenRange &tokens,
-                                                                  PropertyParserState &state,
-                                                                  const PropertyShorthand &shorthand,
-                                                                  PropertyParserResult &result) noexcept
+    KRYS_NODISCARD static bool
+      ConsumeOverscrollBehaviorShorthand(TokenRange &tokens, PropertyParserState &state,
+                                         KRYS_MAYBE_UNUSED const PropertyShorthand &shorthand,
+                                         PropertyParserResult &result) noexcept
     {
       krys_debug_assert(shorthand.Size() == 2);
 
@@ -2526,7 +2529,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeContainerShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                         const PropertyShorthand &shorthand,
+                                                         const PropertyShorthand &,
                                                          PropertyParserResult &result) noexcept
     {
       RefPtr name = PropertyParsing::ParseStylePropertyLonghand(tokens, PropertyId::ContainerName, state);
@@ -2564,10 +2567,10 @@ namespace krys::boo::css
       return true;
     }
 
-    KRYS_NODISCARD static bool ConsumeContainIntrinsicSizeShorthand(TokenRange &tokens,
-                                                                    PropertyParserState &state,
-                                                                    const PropertyShorthand &shorthand,
-                                                                    PropertyParserResult &result) noexcept
+    KRYS_NODISCARD static bool
+      ConsumeContainIntrinsicSizeShorthand(TokenRange &tokens, PropertyParserState &state,
+                                           KRYS_MAYBE_UNUSED const PropertyShorthand &shorthand,
+                                           PropertyParserResult &result) noexcept
     {
       krys_debug_assert(shorthand.Size() == 2);
       krys_debug_assert(IsExposed(PropertyId::ContainIntrinsicSize, &state.Context.PropertySettings));
@@ -2608,7 +2611,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeAnimationRangeShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                              const PropertyShorthand &shorthand,
+                                                              const PropertyShorthand &,
                                                               PropertyParserResult &result) noexcept
     {
       ValueListBuilder startList;
@@ -2683,7 +2686,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeScrollTimelineShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                              const PropertyShorthand &shorthand,
+                                                              const PropertyShorthand &,
                                                               PropertyParserResult &result) noexcept
     {
       ValueListBuilder namesList;
@@ -2733,7 +2736,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeViewTimelineShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                            const PropertyShorthand &shorthand,
+                                                            const PropertyShorthand &,
                                                             PropertyParserResult &result) noexcept
     {
       ValueListBuilder namesList;
@@ -2791,11 +2794,11 @@ namespace krys::boo::css
 
           if (insets)
           {
-            axesList.push_back(krys::move(insets));
+            insetsList.push_back(krys::move(insets));
           }
           else
           {
-            axesList.push_back(DefaultInsets());
+            insetsList.push_back(DefaultInsets());
           }
         }
         else
@@ -2821,7 +2824,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeLineClampShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                         const PropertyShorthand &shorthand,
+                                                         const PropertyShorthand &,
                                                          PropertyParserResult &result) noexcept
     {
       krys_debug_assert(state.Context.PropertySettings.cssLineClampEnabled);
@@ -2878,7 +2881,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeTextBoxShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                       const PropertyShorthand &shorthand,
+                                                       const PropertyShorthand &,
                                                        PropertyParserResult &result) noexcept
     {
       if (tokens.Peek().ValueId() == ValueId::Normal)
@@ -2936,7 +2939,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeTextWrapShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                        const PropertyShorthand &shorthand,
+                                                        const PropertyShorthand &,
                                                         PropertyParserResult &result) noexcept
     {
       RefPtr<Value> mode;
@@ -2981,7 +2984,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeWhiteSpaceShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                          const PropertyShorthand &shorthand,
+                                                          const PropertyShorthand &,
                                                           PropertyParserResult &result) noexcept
     {
       RefPtr<Value> whiteSpaceCollapse;
@@ -3071,14 +3074,16 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumePositionTryShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                           const PropertyShorthand &shorthand,
+                                                           const PropertyShorthand &,
                                                            PropertyParserResult &result) noexcept
     {
       auto order = PropertyParsing::ParseStylePropertyLonghand(tokens, PropertyId::PositionTryOrder, state);
       auto fallbacks =
         PropertyParsing::ParseStylePropertyLonghand(tokens, PropertyId::PositionTryFallbacks, state);
       if (!fallbacks)
+      {
         return false;
+      }
 
       result.AddPropertyForCurrentShorthand(state, PropertyId::PositionTryOrder, krys::move(order));
       result.AddPropertyForCurrentShorthand(state, PropertyId::PositionTryFallbacks, krys::move(fallbacks));
@@ -3086,7 +3091,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static bool ConsumeMarkerShorthand(TokenRange &tokens, PropertyParserState &state,
-                                                      const PropertyShorthand &shorthand,
+                                                      const PropertyShorthand &,
                                                       PropertyParserResult &result) noexcept
     {
       auto marker = PropertyParsing::ParseStylePropertyLonghand(tokens, PropertyId::MarkerStart, state);

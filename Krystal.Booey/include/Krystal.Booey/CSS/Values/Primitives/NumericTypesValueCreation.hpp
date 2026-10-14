@@ -10,7 +10,7 @@ namespace krys::boo::css
   template <NumericRaw CSSType>
   struct ValueCreation<CSSType>
   {
-    Ref<Value> operator()(ValuePool &, const CSSType &raw)
+    KRYS_NODISCARD Ref<Value> operator()(ValuePool &, const CSSType &raw) noexcept
     {
       return PrimitiveValue::Create(raw.Value, ToUnitType(raw.Unit));
     }
@@ -19,9 +19,9 @@ namespace krys::boo::css
   template <Calc CSSType>
   struct ValueCreation<CSSType>
   {
-    Ref<Value> operator()(ValuePool &, const CSSType &calc)
+    KRYS_NODISCARD Ref<Value> operator()(ValuePool &, const CSSType &calc) noexcept
     {
-      return PrimitiveValue::Create(ShareRef(*calc.get()));
+      return PrimitiveValue::Create(calc.ProtectedCalc());
     }
   };
 }

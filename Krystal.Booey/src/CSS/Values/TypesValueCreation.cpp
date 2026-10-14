@@ -4,6 +4,7 @@
 #include "Krystal.Booey/CSS/Values/Types.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 
 namespace krys::boo::css
 {

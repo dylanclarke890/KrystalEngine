@@ -166,6 +166,8 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static bool IsInheritedProperty(PropertyId id) noexcept;
 
+    KRYS_NODISCARD static bool IsColorProperty(PropertyId id) noexcept;
+
     KRYS_NODISCARD static bool IsBorderColorProperty(PropertyId id) noexcept;
 
     KRYS_NODISCARD static bool IsBorderRadiusProperty(PropertyId id) noexcept;

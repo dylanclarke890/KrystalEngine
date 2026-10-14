@@ -22,7 +22,6 @@
 #include "Krystal.Booey/CSS/Values/Borders/BoxShadowProperty.hpp"
 #include "Krystal.Booey/CSS/Values/BoxShadowPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/ReflectValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 
@@ -49,15 +48,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
   // MARK: - Border Radius
 
-  enum class SupportWebKitBorderRadiusQuirk : bool
-  {
-    No,
-    Yes
-  };
-
-  template <SupportWebKitBorderRadiusQuirk supportQuirk>
-  KRYS_NODISCARD static Maybe<BorderRadius> ConsumeBorderRadius(TokenRange &tokens,
-                                                                PropertyParserState &state) noexcept
+  Maybe<BorderRadius> ConsumeUnresolvedBorderRadius(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'border-radius'> = <length-percentage [0,∞]>{1,4} [ / <length-percentage [0,∞]>{1,4} ]?
     // https://drafts.csswg.org/css-backgrounds/#propdef-border-radius
@@ -82,21 +73,6 @@ namespace krys::boo::css::PropertyParserHelpers
 
     if (tokens.IsAtEnd())
     {
-      if constexpr (supportQuirk == SupportWebKitBorderRadiusQuirk::Yes)
-      {
-        // Legacy syntax: `-webkit-border-radius: l1 l2` is equivalent to border-radius: `l1 / l2`.
-        if (i == 2uz)
-        {
-          OptionalRadiiForAxis verticalRadii;
-          verticalRadii[0] = horizontalRadii[1];
-          horizontalRadii[1] = null;
-
-          return BorderRadius {
-            .Horizontal = CompleteQuadFromArray<BorderRadius::Axis>(krys::move(horizontalRadii)),
-            .Vertical = CompleteQuadFromArray<BorderRadius::Axis>(krys::move(verticalRadii))};
-        }
-      }
-
       auto horizontal = CompleteQuadFromArray<BorderRadius::Axis>(krys::move(horizontalRadii));
       auto vertical = horizontal; // Copy `horizontal` radii to `vertical`.
 
@@ -125,25 +101,6 @@ namespace krys::boo::css::PropertyParserHelpers
 
     return BorderRadius {.Horizontal = CompleteQuadFromArray<BorderRadius::Axis>(krys::move(horizontalRadii)),
                          .Vertical = CompleteQuadFromArray<BorderRadius::Axis>(krys::move(verticalRadii))};
-  }
-
-  Maybe<BorderRadius> ConsumeUnresolvedBorderRadius(TokenRange &tokens, PropertyParserState &state) noexcept
-  {
-    // <'border-radius'> = <length-percentage [0,∞]>{1,4} [ / <length-percentage [0,∞]>{1,4} ]?
-    // https://drafts.csswg.org/css-backgrounds/#propdef-border-radius
-
-    return ConsumeBorderRadius<SupportWebKitBorderRadiusQuirk::No>(tokens, state);
-  }
-
-  Maybe<BorderRadius> ConsumeUnresolvedWebKitBorderRadius(TokenRange &tokens,
-                                                          PropertyParserState &state) noexcept
-  {
-    // <'border-radius'> = <length-percentage [0,∞]>{1,4} [ / <length-percentage [0,∞]>{1,4} ]?
-    // https://drafts.csswg.org/css-backgrounds/#propdef-border-radius
-
-    // Includes the legacy syntax quirk where `-webkit-border-radius: l1 l2` is equivalent to border-radius:
-    // `l1 / l2`.
-    return ConsumeBorderRadius<SupportWebKitBorderRadiusQuirk::Yes>(tokens, state);
   }
 
   // MARK: - Border Image
@@ -435,8 +392,7 @@ namespace krys::boo::css::PropertyParserHelpers
   // MARK: - Box Shadows
 
   KRYS_NODISCARD static Maybe<BoxShadow> ConsumeSingleUnresolvedBoxShadow(TokenRange &tokens,
-                                                                          PropertyParserState &state,
-                                                                          bool isWebkitBoxShadow) noexcept
+                                                                          PropertyParserState &state) noexcept
   {
     // <box-shadow> = <color>? && [<length>{2} <length [0,∞]>? <length>?] && inset?
     // https://drafts.csswg.org/css-backgrounds/#propdef-box-shadow
@@ -544,13 +500,11 @@ namespace krys::boo::css::PropertyParserHelpers
                       .Location = {krys::move(*x), krys::move(*y)},
                       .Blur = krys::move(blur),
                       .Spread = krys::move(spread),
-                      .Inset = krys::move(inset),
-                      .IsWebkitBoxShadow = isWebkitBoxShadow};
+                      .Inset = krys::move(inset)};
   }
 
   KRYS_NODISCARD static Maybe<BoxShadowProperty::List>
-    ConsumeUnresolvedBoxShadowList(TokenRange &tokens, PropertyParserState &state,
-                                   bool isWebkitBoxShadow) noexcept
+    ConsumeUnresolvedBoxShadowList(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     auto rangeCopy = tokens;
 
@@ -558,7 +512,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     do
     {
-      auto shadow = ConsumeSingleUnresolvedBoxShadow(rangeCopy, state, isWebkitBoxShadow);
+      auto shadow = ConsumeSingleUnresolvedBoxShadow(rangeCopy, state);
       if (!shadow)
       {
         return {};
@@ -572,9 +526,8 @@ namespace krys::boo::css::PropertyParserHelpers
     return list;
   }
 
-  KRYS_NODISCARD static Maybe<BoxShadowProperty> ConsumeUnresolvedBoxShadow(TokenRange &tokens,
-                                                                            PropertyParserState &state,
-                                                                            bool isWebkitBoxShadow) noexcept
+  KRYS_NODISCARD static Maybe<BoxShadowProperty>
+    ConsumeUnresolvedBoxShadow(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     if (tokens.Peek().ValueId() == ValueId::None)
     {
@@ -583,7 +536,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return BoxShadowProperty {keywords::None {}};
     }
 
-    if (auto boxShadowList = ConsumeUnresolvedBoxShadowList(tokens, state, isWebkitBoxShadow))
+    if (auto boxShadowList = ConsumeUnresolvedBoxShadowList(tokens, state))
     {
       return BoxShadowProperty {krys::move(*boxShadowList)};
     }
@@ -596,66 +549,11 @@ namespace krys::boo::css::PropertyParserHelpers
     // <'box-shadow'> = none | <shadow>#
     // https://drafts.csswg.org/css-backgrounds/#propdef-box-shadow
 
-    if (auto property = ConsumeUnresolvedBoxShadow(tokens, state, false))
+    if (auto property = ConsumeUnresolvedBoxShadow(tokens, state))
     {
       return BoxShadowPropertyValue::Create({krys::move(*property)});
     }
 
     return nullptr;
-  }
-
-  RefPtr<Value> ConsumeWebkitBoxShadow(TokenRange &tokens, PropertyParserState &state) noexcept
-  {
-    if (auto property = ConsumeUnresolvedBoxShadow(tokens, state, true))
-    {
-      return BoxShadowPropertyValue::Create({krys::move(*property)});
-    }
-
-    return nullptr;
-  }
-
-  // MARK: - Reflect (non-standard)
-
-  RefPtr<Value> ConsumeWebkitBoxReflect(TokenRange &tokens, PropertyParserState &state) noexcept
-  {
-    if (tokens.Peek().ValueId() == ValueId::None)
-    {
-      return ConsumeIdent(tokens);
-    }
-
-    auto direction = ConsumeIdentRaw<ValueId::Above, ValueId::Below, ValueId::Left, ValueId::Right>(tokens);
-    if (!direction)
-    {
-      return nullptr;
-    }
-
-    // FIXME: Does not seem right to create "0px" here. We'd like to omit "0px" when serializing if there is
-    // also no image.
-    RefPtr<PrimitiveValue> offset;
-    if (tokens.IsAtEnd())
-    {
-      offset = PrimitiveValue::Create(0, UnitType::px);
-    }
-    else
-    {
-      offset = PrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(tokens, state);
-      if (!offset)
-      {
-        return nullptr;
-      }
-    }
-
-    RefPtr<Value> mask;
-    if (!tokens.IsAtEnd())
-    {
-      auto components = ConsumeBorderImageComponents(tokens, state, BorderImageSliceFillDefault::Yes);
-      if (!components)
-      {
-        return nullptr;
-      }
-      mask = CreateBorderImageValue(krys::move(*components));
-    }
-
-    return ReflectValue::Create(*direction, krys::move(offset), krys::move(mask));
   }
 }

@@ -1,4 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
+#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParser.hpp"
+#include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Core/Maths/Random.hpp"
 #include <iterator>
 #include <mutex>
@@ -53,6 +56,10 @@ namespace krys::boo::css
     return pool;
   }
 
+  // Defined here, where `ValueList` is complete.
+  ValuePool::ValuePool() noexcept = default;
+  ValuePool::~ValuePool() noexcept = default;
+
   Ref<ColorValue> ValuePool::CreateColorValue(const boo::Color &color) noexcept
   {
     // These are the empty and deleted values of the hash table.
@@ -80,6 +87,22 @@ namespace krys::boo::css
     return _colorValueCache.emplace(color, ColorValue::Create(color)).first->second;
   }
 
+  RefPtr<ValueList> ValuePool::CreateFontFaceValue(const CSSOMStringAtom &string) noexcept
+  {
+    constexpr size_t maximumFontFaceCacheSize = 128uz;
+    RemoveRandomEntryIfFull(_fontFaceValueCache, maximumFontFaceCacheSize);
+
+    if (auto it = _fontFaceValueCache.find(string); it != _fontFaceValueCache.end())
+    {
+      return it->second;
+    }
+
+    auto value = PropertyParser::ParseStylePropertyLonghand(PropertyId::FontFamily, CSSOMString {string.View()},
+                                                            StrictParserContext());
+    auto *list = DynamicDowncast<ValueList>(value.get());
+    return _fontFaceValueCache.emplace(string, ShareRefPtr(list)).first->second;
+  }
+
   Ref<PrimitiveValue> ValuePool::CreateFontFamilyValue(const CSSOMStringAtom &familyName) noexcept
   {
     constexpr size_t maximumFontFamilyCacheSize = 128uz;
@@ -96,6 +119,7 @@ namespace krys::boo::css
   void ValuePool::Drain() noexcept
   {
     _colorValueCache.clear();
+    _fontFaceValueCache.clear();
     _fontFamilyValueCache.clear();
   }
 }

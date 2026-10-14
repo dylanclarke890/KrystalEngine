@@ -5293,7 +5293,7 @@ class GeneratedSharedGrammarRuleConsumer(SharedGrammarRuleConsumer):
         return True
 
     def generate_export_declaration(self, *, to: Writer):
-        to.write(f"static {self.signature.declaration_string};")
+        to.write(f"KRYS_NODISCARD static {self.signature.declaration_string};")
 
     def generate_definition(self, *, to: Writer):
         with to.function_block(signature=self.signature.definition_string):
@@ -7218,7 +7218,7 @@ class ParsingContext:
         ParsingContext.TopLevelObject.schema.validate_dictionary(self, "$", json_value, label="top level object")
 
         self.json_value = json_value
-        self.conditionals = frozenset((defines_string or "").split(" "))
+        self.conditionals = frozenset(define for define in re.split(r"[,\s]+", defines_string or "") if define)
         self.check_unused_grammars_values = check_unused_grammars_values
         self.verbose = verbose
         self.parsed_shared_grammar_rules = None
@@ -7753,6 +7753,12 @@ class GeneratePropertyId:
             self._generate_is_exposed_functions(to=writer)
             self._generate_is_inherited_property(to=writer)
 
+            self.generation_context.generate_property_id_switch_function_bool(
+                to=writer,
+                signature="bool Property::IsColorProperty(PropertyId id) noexcept",
+                iterable=(p for p in self.properties_and_descriptors.style_properties.all if p.codegen_properties.color_property),
+            )
+
             self.generation_context.generate_property_id_switch_function(
                 to=writer,
                 signature="PropertyId CascadeAliasProperty(PropertyId id) noexcept",
@@ -8104,8 +8110,8 @@ class GeneratePropertyId:
         to.write_block("""\
             bool Property::IsInheritedProperty(PropertyId id) noexcept
             {
-              assert(static_cast<size_t>(id) < TotalPropertyIdValues);
-              assert(id != PropertyId::Invalid);
+              krys_debug_assert(static_cast<size_t>(id) < TotalPropertyIdValues);
+              krys_debug_assert(id != PropertyId::Invalid);
               return IsInheritedPropertyTable[static_cast<size_t>(id)];
             }""")
         to.newline()
@@ -8624,7 +8630,7 @@ class GeneratePropertyParsing:
     ):
         if not keyword_fast_path_eligible_property_consumers:
             with to.function_block(
-                signature=f"bool PropertyParsing::IsKeywordValidFor{parsing_collection.id}(PropertyId id, ValueId keyword, PropertyParserState &state) noexcept"
+                signature=f"bool PropertyParsing::IsKeywordValidFor{parsing_collection.id}(PropertyId, ValueId, PropertyParserState &) noexcept"
             ):
                 to.write(f"return false;")
             to.newline()
@@ -8654,7 +8660,7 @@ class GeneratePropertyParsing:
     ):
         if not keyword_fast_path_eligible_property_consumers:
             with to.function_block(
-                signature=f"bool PropertyParsing::IsKeywordFastPathEligible{parsing_collection.id}(PropertyId id) noexcept"
+                signature=f"bool PropertyParsing::IsKeywordFastPathEligible{parsing_collection.id}(PropertyId) noexcept"
             ):
                 to.write(f"return false;")
             to.newline()
@@ -8700,7 +8706,7 @@ class GeneratePropertyParsing:
                 to.write(
                     f"// and to handle certain DOM-exposed values (e.g. -webkit-font-size-delta from execCommand('FontSizeDelta'))."
                 )
-                to.write(f"krys_unreachable();")
+                to.write(f"krys_debug_assert(false);")
                 to.write("return {};")
 
             # Build up a list of pairs of (property, return-expression-to-use-for-property).

@@ -4,6 +4,7 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 
 namespace krys::boo::css
 {
@@ -18,7 +19,7 @@ namespace krys::boo::css
     ValueListBuilder _result;
 
   public:
-    enum class ParseResult : uint8_t
+    enum class ParseResult : uint8
     {
       ConsumedValue,
       DisallowedValue,
@@ -95,7 +96,7 @@ namespace krys::boo::css
       return ParseResult::ConsumedValue;
     }
 
-    KRYS_NODISCARD RefPtr<Value> Finalize() noexcept
+    KRYS_NODISCARD RefPtr<Value> FinalizeValue() noexcept
     {
       if (_result.empty())
       {

@@ -69,6 +69,7 @@ set(KRYSTAL_BOOEY_GENERATED_SOURCES
 
 set(KRYSTAL_BOOEY_CODEGEN_SCRIPT_ARGS
   --gperf-executable=${GPERF_EXECUTABLE}
+  --defines=ENABLE_DARK_MODE_CSS,ENABLE_VARIATION_FONTS
   --output-headers-dir=${KRYSTAL_BOOEY_HEADER_OUTPUT_DIR}
   --output-sources-dir=${KRYSTAL_BOOEY_SOURCES_OUTPUT_DIR}
 )
@@ -454,6 +455,17 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Properties/Consumers/Font.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/Shapes.hpp
   include/Krystal.Booey/CSS/WebKitFontFamilyNames.hpp
+
+  # Property parser, layer c1 (custom shorthand parsers, generated parsing)
+  ${KRYSTAL_BOOEY_HEADER_OUTPUT_DIR}/Krystal.Booey/CSS/Properties/PropertyParsing.hpp
+  include/Krystal.Booey/CSS/Properties/FontVariantLigaturesParser.hpp
+  include/Krystal.Booey/CSS/Properties/FontVariantNumericParser.hpp
+  include/Krystal.Booey/CSS/Properties/PropertyParserCustom.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/NumericTypesValueCreation.hpp
+  include/Krystal.Booey/CSS/Values/Borders/BorderImage.hpp
+
+  # Property parser, layer c3 (property parser)
+  include/Krystal.Booey/CSS/Properties/PropertyParser.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -472,11 +484,12 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/PrimitiveValue.cpp
   src/CSS/Values/Primitives/NumericTypesSerialisation.cpp
 
-  # Slice 3: Colour, layer 2 (ComputedStyleDependencies.cpp and TypesValueCreation.cpp aren't built yet)
+  # Slice 3: Colour, layer 2 (ComputedStyleDependencies.cpp isn't built yet)
   src/CSS/Values/Primitives/Symbol.cpp
   src/CSS/Values/Primitives/Units.cpp
   src/CSS/Values/SerialisationContext.cpp
   src/CSS/Values/Types.cpp
+  src/CSS/Values/TypesValueCreation.cpp
 
   # Slice 3: Colour, layer 3a (calc, Style-free half)
   src/CSS/Calc/CalcType.cpp
@@ -688,6 +701,13 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Properties/Consumers/Font.cpp
   src/CSS/Properties/Consumers/Shapes.cpp
   src/CSS/WebKitFontFamilyNames.cpp
+
+  # Property parser, layer c1 (custom shorthand parsers, generated parsing)
+  ${KRYSTAL_BOOEY_SOURCES_OUTPUT_DIR}/CSS/Properties/PropertyParsing.cpp
+  src/CSS/Values/Borders/BorderImage.cpp
+
+  # Property parser, layer c3 (property parser)
+  src/CSS/Properties/PropertyParser.cpp
 )
 
 target_precompile_headers(Krystal.Booey

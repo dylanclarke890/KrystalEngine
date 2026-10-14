@@ -1,11 +1,24 @@
 ﻿#include "Krystal.Booey/CSS/Parser/ParserFastPaths.hpp"
+#include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserIdioms.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/Color.hpp"
+#include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
+#include "Krystal.Booey/CSS/Rules/RuleType.hpp"
 #include "Krystal.Booey/CSS/Values/Color/ColorDescriptors.hpp"
 #include "Krystal.Booey/CSS/Values/Color/Convert/ToColor.hpp"
 #include "Krystal.Booey/CSS/Values/Color/Convert/ToTypedColor.hpp"
+#include "Krystal.Booey/CSS/Values/Color/KeywordColor.hpp"
+#include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
+#include "Krystal.Booey/CSS/Values/GlobalKeyword.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Units.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/TransformListValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorUtilities.hpp"
 #include "Krystal.Booey/Graphics/Color/NamedColors.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
@@ -165,6 +178,55 @@ namespace krys::boo::css
       auto parsedNumber = ParseCSSNumber(characters);
       number = parsedNumber.value_or(0);
       return parsedNumber.has_value();
+    }
+
+    KRYS_NODISCARD bool ParseSimpleLength(CSSOMStringView characters, UnitType &unit, double &number) noexcept
+    {
+      if (characters.size() > 2 && text::IsASCIICaselessEqual(characters[characters.size() - 2], 'p')
+          && text::IsASCIICaselessEqual(characters[characters.size() - 1], 'x'))
+      {
+        characters.remove_suffix(2);
+        unit = UnitType::px;
+      }
+      else if (!characters.empty() && characters.back() == u8'%')
+      {
+        characters.remove_suffix(1);
+        unit = UnitType::Percentage;
+      }
+
+      auto parsedNumber = ParseCSSNumber(characters);
+      number = parsedNumber.value_or(0);
+      return parsedNumber.has_value();
+    }
+
+    KRYS_NODISCARD bool ParseSimpleNumberOrPercentageDividedBy100(CSSOMStringView characters,
+                                                                  double &number) noexcept
+    {
+      bool isPercentage = false;
+      if (!characters.empty() && characters.back() == u8'%')
+      {
+        characters.remove_suffix(1);
+        isPercentage = true;
+      }
+
+      auto parsedNumber = ParseCSSNumber(characters);
+      if (!parsedNumber)
+      {
+        return false;
+      }
+
+      number = *parsedNumber;
+      if (std::isinf(number))
+      {
+        return false;
+      }
+
+      if (isPercentage)
+      {
+        number /= 100.0;
+      }
+
+      return true;
     }
 
     /// @brief Returns the number of characters which form a valid double and are terminated by the given
@@ -786,5 +848,492 @@ namespace krys::boo::css
   Maybe<SRGBA<uint8>> ParserFastPaths::ParseNamedColor(CSSOMStringView string) noexcept
   {
     return ParseNamedColorInternal(string);
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD RefPtr<Value> ParseSimpleLengthValue(CSSOMStringView string, ParserMode parserMode,
+                                                        Range valueRange) noexcept
+    {
+      krys_debug_assert(!string.empty());
+
+      double number;
+      auto unit = UnitType::Number;
+      if (!ParseSimpleLength(string, unit, number))
+      {
+        return nullptr;
+      }
+
+      if (unit == UnitType::Number)
+      {
+        if (number && parserMode != ParserMode::SVGAttribute)
+        {
+          return nullptr;
+        }
+
+        unit = UnitType::px;
+      }
+
+      if (number < valueRange.Min || number > valueRange.Max)
+      {
+        return nullptr;
+      }
+
+      if (std::isinf(number))
+      {
+        return nullptr;
+      }
+
+      return PrimitiveValue::Create(number, unit);
+    }
+
+    KRYS_NODISCARD RefPtr<Value> ParseColor(CSSOMStringView string, const ParserContext &context) noexcept
+    {
+      krys_debug_assert(!string.empty());
+
+      auto valueId = ValueIdFromName(string);
+      if (IsColorKeyword(valueId))
+      {
+        if (!PropertyParserHelpers::IsColorKeywordAllowed(valueId, context))
+        {
+          return nullptr;
+        }
+
+        return PrimitiveValue::Create(valueId);
+      }
+
+      if (auto color = ParseNumericColor(string, context))
+      {
+        return ValuePool::MainThreadPool().CreateColorValue(*color);
+      }
+
+      return nullptr;
+    }
+
+    KRYS_NODISCARD bool IsUniversalKeyword(CSSOMStringView string) noexcept
+    {
+      // These keywords can be used for all properties.
+      return text::IsASCIICaselessEqual(string, CSSOMStringView {u8"initial"})
+             || text::IsASCIICaselessEqual(string, CSSOMStringView {u8"inherit"})
+             || text::IsASCIICaselessEqual(string, CSSOMStringView {u8"unset"})
+             || text::IsASCIICaselessEqual(string, CSSOMStringView {u8"revert"})
+             || text::IsASCIICaselessEqual(string, CSSOMStringView {u8"revert-layer"});
+    }
+
+    KRYS_NODISCARD RefPtr<Value> ParseKeywordValue(PropertyId property, CSSOMStringView string,
+                                                   PropertyParserState &state) noexcept
+    {
+      krys_debug_assert(!string.empty());
+
+      if (!PropertyParsing::IsKeywordFastPathEligibleStyleProperty(property))
+      {
+        // All properties, including non-keyword properties, accept the CSS-wide keywords.
+        if (!IsUniversalKeyword(string))
+        {
+          return nullptr;
+        }
+
+        // Leave shorthands to parse CSS-wide keywords using PropertyParser.
+        if (ShorthandForProperty(property).Size())
+        {
+          return nullptr;
+        }
+      }
+
+      auto valueId = ValueIdFromName(string);
+      if (valueId == ValueId::Invalid)
+      {
+        return nullptr;
+      }
+
+      if (IsGlobalKeyword(valueId))
+      {
+        return PrimitiveValue::Create(valueId);
+      }
+
+      if (PropertyParsing::IsKeywordValidForStyleProperty(property, valueId, state))
+      {
+        return PrimitiveValue::Create(valueId);
+      }
+
+      return nullptr;
+    }
+
+    KRYS_NODISCARD bool ParseTransformTranslateArguments(CSSOMStringView &buffer, size_t expectedCount,
+                                                         ValueId transformType,
+                                                         ValueListBuilder &arguments) noexcept
+    {
+      while (expectedCount)
+      {
+        auto delimiter = buffer.find(expectedCount == 1uz ? u8')' : u8',');
+        if (delimiter == CSSOMStringView::npos)
+        {
+          return false;
+        }
+
+        auto unit = UnitType::Number;
+        double number;
+        if (!ParseSimpleLength(buffer.substr(0, delimiter), unit, number))
+        {
+          return false;
+        }
+
+        if (!number && unit == UnitType::Number)
+        {
+          unit = UnitType::px;
+        }
+
+        if (unit == UnitType::Number
+            || (unit == UnitType::Percentage
+                && (transformType == ValueId::TranslateZ
+                    || (transformType == ValueId::Translate3d && expectedCount == 1uz))))
+        {
+          return false;
+        }
+
+        arguments.push_back(PrimitiveValue::Create(number, unit));
+        buffer.remove_prefix(delimiter + 1);
+        --expectedCount;
+      }
+
+      return true;
+    }
+
+    KRYS_NODISCARD RefPtr<Value> ParseTransformAngleArgument(CSSOMStringView &buffer) noexcept
+    {
+      auto delimiter = buffer.find(u8')');
+      if (delimiter == CSSOMStringView::npos)
+      {
+        return nullptr;
+      }
+
+      auto angleUnit = AngleUnit::Deg;
+      double number;
+      if (!ParseSimpleAngle(buffer.substr(0, delimiter), RequireUnits::Yes, angleUnit, number))
+      {
+        return nullptr;
+      }
+
+      buffer.remove_prefix(delimiter + 1);
+
+      return PrimitiveValue::Create(number, ToUnitType(angleUnit));
+    }
+
+    KRYS_NODISCARD bool ParseTransformNumberArguments(CSSOMStringView &buffer, size_t expectedCount,
+                                                      ValueListBuilder &arguments) noexcept
+    {
+      while (expectedCount)
+      {
+        auto delimiter = buffer.find(expectedCount == 1uz ? u8')' : u8',');
+        if (delimiter == CSSOMStringView::npos)
+        {
+          return false;
+        }
+
+        auto number = ParseCSSNumber(buffer.substr(0, delimiter));
+        if (!number)
+        {
+          return false;
+        }
+
+        arguments.push_back(PrimitiveValue::Create(*number, UnitType::Number));
+        buffer.remove_prefix(delimiter + 1);
+        --expectedCount;
+      }
+
+      return true;
+    }
+
+    /// @brief Whether `buffer` starts with `prefix`, ignoring ASCII case. `prefix` must be lowercase.
+    KRYS_NODISCARD bool StartsWithLettersIgnoringASCIICase(CSSOMStringView buffer,
+                                                           CSSOMStringView prefix) noexcept
+    {
+      return buffer.size() >= prefix.size()
+             && text::IsASCIICaselessEqual(buffer.substr(0, prefix.size()), prefix);
+    }
+
+    KRYS_NODISCARD RefPtr<FunctionValue> ParseSimpleTransformValue(CSSOMStringView &buffer) noexcept
+    {
+      // Also guarantees indexes up to buffer[8] are safe to access below.
+      constexpr auto shortestValidTransformStringLength = 9uz; // "rotate(0)"
+      if (buffer.size() < shortestValidTransformStringLength)
+      {
+        return nullptr;
+      }
+
+      if (StartsWithLettersIgnoringASCIICase(buffer, u8"translate"))
+      {
+        // Also guarantees indexes up to buffer[11] are safe to access below.
+        constexpr auto shortestValidTranslateStringLength = 12uz; // "translate(0)"
+        if (buffer.size() < shortestValidTranslateStringLength)
+        {
+          return nullptr;
+        }
+
+        ValueId transformType;
+        size_t expectedArgumentCount = 1uz;
+        size_t argumentStart = 11uz;
+        auto c9 = text::ToASCIILower(buffer[9]);
+        if (c9 == u8'x' && buffer[10] == u8'(')
+        {
+          transformType = ValueId::TranslateX;
+        }
+        else if (c9 == u8'y' && buffer[10] == u8'(')
+        {
+          transformType = ValueId::TranslateY;
+        }
+        else if (c9 == u8'z' && buffer[10] == u8'(')
+        {
+          transformType = ValueId::TranslateZ;
+        }
+        else if (c9 == u8'(')
+        {
+          transformType = ValueId::Translate;
+          expectedArgumentCount = 2uz;
+          argumentStart = 10uz;
+        }
+        else if (c9 == u8'3' && text::ToASCIILower(buffer[10]) == u8'd' && buffer[11] == u8'(')
+        {
+          transformType = ValueId::Translate3d;
+          expectedArgumentCount = 3uz;
+          argumentStart = 12uz;
+        }
+        else
+        {
+          return nullptr;
+        }
+
+        ValueListBuilder arguments;
+        buffer.remove_prefix(argumentStart);
+        if (!ParseTransformTranslateArguments(buffer, expectedArgumentCount, transformType, arguments))
+        {
+          return nullptr;
+        }
+
+        return FunctionValue::Create(transformType, krys::move(arguments));
+      }
+
+      if (StartsWithLettersIgnoringASCIICase(buffer, u8"matrix3d("))
+      {
+        buffer.remove_prefix(9);
+        ValueListBuilder arguments;
+        if (!ParseTransformNumberArguments(buffer, 16uz, arguments))
+        {
+          return nullptr;
+        }
+
+        return FunctionValue::Create(ValueId::Matrix3d, krys::move(arguments));
+      }
+
+      if (StartsWithLettersIgnoringASCIICase(buffer, u8"scale3d("))
+      {
+        buffer.remove_prefix(8);
+        ValueListBuilder arguments;
+        if (!ParseTransformNumberArguments(buffer, 3uz, arguments))
+        {
+          return nullptr;
+        }
+
+        return FunctionValue::Create(ValueId::Scale3d, krys::move(arguments));
+      }
+
+      if (StartsWithLettersIgnoringASCIICase(buffer, u8"rotate"))
+      {
+        ValueId transformType;
+        size_t argumentStart = 7uz;
+        auto c6 = text::ToASCIILower(buffer[6]);
+        if (c6 == u8'(')
+        {
+          transformType = ValueId::Rotate;
+        }
+        else if (c6 == u8'z' && buffer[7] == u8'(')
+        {
+          transformType = ValueId::RotateZ;
+          argumentStart = 8uz;
+        }
+        else
+        {
+          return nullptr;
+        }
+
+        buffer.remove_prefix(argumentStart);
+        auto angle = ParseTransformAngleArgument(buffer);
+        if (!angle)
+        {
+          return nullptr;
+        }
+
+        return FunctionValue::Create(transformType, krys::move(angle));
+      }
+
+      return nullptr;
+    }
+
+    KRYS_NODISCARD RefPtr<Value> ParseSimpleTransform(CSSOMStringView buffer) noexcept
+    {
+      krys_debug_assert(!buffer.empty());
+
+      ValueListBuilder builder;
+      while (!buffer.empty())
+      {
+        SkipWhile(buffer, [](char8_t c) { return IsCSSSpace(c); });
+        if (buffer.empty())
+        {
+          break;
+        }
+
+        auto transformValue = ParseSimpleTransformValue(buffer);
+        if (!transformValue)
+        {
+          return nullptr;
+        }
+
+        builder.push_back(krys::move(transformValue));
+      }
+
+      if (builder.empty())
+      {
+        return nullptr;
+      }
+
+      return TransformListValue::Create(krys::move(builder));
+    }
+
+    KRYS_NODISCARD RefPtr<Value> ParseDisplay(CSSOMStringView string) noexcept
+    {
+      krys_debug_assert(!string.empty());
+
+      auto valueId = ValueIdFromName(string);
+      switch (valueId)
+      {
+        case ValueId::None:
+        // <display-outside>
+        case ValueId::Block:
+        case ValueId::Inline:
+        // <display-inside> (except for ValueId::Flow since it becomes "block")
+        case ValueId::Flex:
+        case ValueId::FlowRoot:
+        case ValueId::Grid:
+        case ValueId::Table:
+        // <display-internal>
+        case ValueId::TableCaption:
+        case ValueId::TableCell:
+        case ValueId::TableColumnGroup:
+        case ValueId::TableColumn:
+        case ValueId::TableHeaderGroup:
+        case ValueId::TableFooterGroup:
+        case ValueId::TableRow:
+        case ValueId::TableRowGroup:
+        // <display-legacy>
+        case ValueId::InlineBlock:
+        case ValueId::InlineFlex:
+        case ValueId::InlineGrid:
+        case ValueId::InlineTable:
+        // Prefixed values
+        case ValueId::WebkitInlineBox:
+        case ValueId::WebkitBox:
+        // No layout support for the full <display-listitem> syntax, so treat it as <display-legacy>
+        case ValueId::ListItem:
+        {
+          return PrimitiveValue::Create(valueId);
+        }
+        default:
+        {
+          if (IsGlobalKeyword(valueId))
+          {
+            return PrimitiveValue::Create(valueId);
+          }
+
+          return nullptr;
+        }
+      }
+    }
+
+    KRYS_NODISCARD RefPtr<Value> ParseOpacity(CSSOMStringView string) noexcept
+    {
+      double number;
+      if (!ParseSimpleNumberOrPercentageDividedBy100(string, number))
+      {
+        return nullptr;
+      }
+
+      return PrimitiveValue::Create(number, UnitType::Number);
+    }
+
+    KRYS_NODISCARD RefPtr<Value> ParseColorWithAuto(CSSOMStringView string,
+                                                    const ParserContext &context) noexcept
+    {
+      krys_debug_assert(!string.empty());
+
+      if (ValueIdFromName(string) == ValueId::Auto)
+      {
+        return PrimitiveValue::Create(ValueId::Auto);
+      }
+
+      return ParseColor(string, context);
+    }
+  }
+
+  RefPtr<Value> ParserFastPaths::MaybeParseValue(PropertyId property, CSSOMStringView string,
+                                                 PropertyParserState &state) noexcept
+  {
+    // Some at-rules like @keyframes, @position-try restrict which properties
+    // are allowed inside the rule. Fallback to slow path for at-rules since
+    // the restriction logic is in the slow-path parser (PropertyParser).
+    if (state.CurrentRule != RuleType::Style)
+    {
+      return nullptr;
+    }
+
+    switch (property)
+    {
+      case PropertyId::Display:
+      {
+        return ParseDisplay(string);
+      }
+      case PropertyId::Opacity:
+      {
+        return ParseOpacity(string);
+      }
+      case PropertyId::Transform:
+      {
+        return ParseSimpleTransform(string);
+      }
+      case PropertyId::CaretColor:
+      case PropertyId::AccentColor:
+      {
+        if (IsExposed(property, &state.Context.PropertySettings))
+        {
+          return ParseColorWithAuto(string, state.Context);
+        }
+
+        break;
+      }
+      default:
+      {
+        break;
+      }
+    }
+
+    if (Property::IsColorProperty(property))
+    {
+      auto context = state.Context;
+      if (!Property::AcceptsQuirkyColor(property))
+      {
+        context.Mode = ParserMode::HTMLStandard;
+      }
+
+      return ParseColor(string, context);
+    }
+
+    if (auto valueRange = LengthValueRangeForPropertiesSupportingSimpleLengths(property))
+    {
+      if (auto result = ParseSimpleLengthValue(string, state.Context.Mode, *valueRange))
+      {
+        return result;
+      }
+    }
+
+    return ParseKeywordValue(property, string, state);
   }
 }

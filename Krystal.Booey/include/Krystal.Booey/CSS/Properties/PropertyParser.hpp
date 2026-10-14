@@ -52,6 +52,8 @@ namespace krys::boo::css
     KRYS_NODISCARD static RefPtr<Value> ParseCounterStyleDescriptor(PropertyId id, const CSSOMString &str,
                                                                     const ParserContext &context) noexcept;
 
+    // FIXME: Not defined yet; ParseTypedCustomPropertyInitialValue and ParseTypedCustomPropertyValue need
+    // `style::CustomProperty` and `style::BuilderState`.
     KRYS_NODISCARD static RefPtr<const style::CustomProperty> ParseTypedCustomPropertyInitialValue(
       const CSSOMStringAtom &str, const CustomPropertySyntax &customPropertySyntax, TokenRange tokens,
       style::BuilderState &state, const ParserContext &context) noexcept;

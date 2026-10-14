@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Properties/PropertyParser.hpp"
 #include "Krystal.Booey/CSS/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Parser/CustomPropertySyntax.hpp"
+#include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserFastPaths.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserIdioms.hpp"
@@ -24,9 +25,11 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/TimeDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/URL.hpp"
 #include "Krystal.Booey/CSS/Properties/ParsedPropertyList.hpp"
+#include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserResult.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
 #include "Krystal.Booey/CSS/Rules/RuleType.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
@@ -35,15 +38,9 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/TransformListValue.hpp"
 #include "Krystal.Booey/CSS/Values/UrlValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/VariableReferenceValue.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
-#include <memory>
-
-#include "StyleBuilder.h"
-#include "StyleCustomProperty.h"
-#include "StylePrimitiveNumericTypes+CSSValueConversion.h"
-#include "StylePropertyShorthand.h"
-#include "StylePropertyShorthandFunctions.h"
 
 namespace krys::boo::css
 {
@@ -52,11 +49,6 @@ namespace krys::boo::css
   KRYS_NODISCARD static Pair<RefPtr<Value>, CustomPropertySyntax::Type>
     ConsumeCustomPropertyValueWithSyntax(TokenRange &tokens, PropertyParserState &state,
                                          const CustomPropertySyntax &syntax) noexcept;
-
-  KRYS_NODISCARD static Maybe<Variant<Ref<const style::CustomProperty>, GlobalKeyword>>
-    ConsumeTypedCustomPropertyValue(TokenRange &tokens, PropertyParserState &state,
-                                    const CSSOMStringAtom &name, const CustomPropertySyntax &syntax,
-                                    style::BuilderState &builderState) noexcept;
 
 #pragma endregion
 
@@ -109,10 +101,6 @@ namespace krys::boo::css
 
 #pragma endregion
 
-#pragma region Custom Property Name Validation
-
-#pragma endregion
-
 #pragma region GlobalKeyword Consumer
 
   KRYS_NODISCARD static RefPtr<PrimitiveValue> ConsumeGlobalKeywordValue(TokenRange &range) noexcept
@@ -157,8 +145,9 @@ namespace krys::boo::css
 
 #pragma region FunctionValue Consumer
 
-  static bool ConsumeFunctionArgument(TokenRange &range, size_t index, PropertyId property,
-                                      PropertyParserState &state, PropertyParserResult &result) noexcept
+  KRYS_NODISCARD static bool ConsumeFunctionArgument(TokenRange &range, size_t index, PropertyId property,
+                                                     PropertyParserState &state,
+                                                     PropertyParserResult &result) noexcept
   {
     auto argument = PropertyParserHelpers::ConsumeArgument(range, index);
     if (!argument)
@@ -172,9 +161,9 @@ namespace krys::boo::css
     return ConsumeStyleProperty(*argument, context, property, important, ruleType, result);
   }
 
-  static bool ConsumeInternalAutoBaseFunction(TokenRange &range, PropertyId property,
-                                              PropertyParserState &state,
-                                              PropertyParserResult &result) noexcept
+  KRYS_NODISCARD static bool ConsumeInternalAutoBaseFunction(TokenRange &range, PropertyId property,
+                                                             PropertyParserState &state,
+                                                             PropertyParserResult &result) noexcept
   {
     // -internal-auto-base() = -internal-auto-base( <auto value>, <base value> )
 
@@ -213,8 +202,8 @@ namespace krys::boo::css
 
     for (size_t index = 0uz; index < autoProperties.size(); ++index)
     {
-      const Property &autoProperty = autoProperties[index];
-      const Property &baseProperty = baseProperties[index];
+      Property &autoProperty = autoProperties[index];
+      Property &baseProperty = baseProperties[index];
 
       auto value = FunctionValue::Create(ValueId::InternalAutoBase, ShareRef(autoProperty.Value()),
                                          ShareRef(baseProperty.Value()));
@@ -231,7 +220,7 @@ namespace krys::boo::css
                                   const ParserContext &context, ParsedPropertyList &parsedProperties,
                                   RuleType ruleType) noexcept
   {
-    int initialParsedPropertiesSize = parsedProperties.size();
+    auto initialParsedPropertiesSize = parsedProperties.size();
 
     range.DiscardWhitespace();
 
@@ -299,8 +288,7 @@ namespace krys::boo::css
 
     if (!parseSuccess)
     {
-      // TODO: webkit used shrink here, check this is correct.
-      parsedProperties.resize(initialParsedPropertiesSize);
+      parsedProperties.truncate(initialParsedPropertiesSize);
     }
 
     return parseSuccess;
@@ -309,7 +297,7 @@ namespace krys::boo::css
   RefPtr<Value> PropertyParser::ParseStylePropertyLonghand(PropertyId property, const CSSOMString &string,
                                                            const ParserContext &context) noexcept
   {
-    krys_assert(!Property::IsShorthand(property));
+    krys_debug_assert(!Property::IsShorthand(property));
 
     if (string.empty())
     {
@@ -318,18 +306,19 @@ namespace krys::boo::css
 
     auto state = PropertyParserState {
       .Context = context,
-      .CurrentProperty = property,
       .CurrentRule = RuleType::Style,
+      .CurrentProperty = property,
       .Important = IsImportant(false),
     };
 
     if (auto value = ParserFastPaths::MaybeParseValue(property, string, state))
     {
-      return ShareRefPtr(&*value);
+      return value;
     }
 
     InputStream inputStream {CSSOMString(string)};
     Tokenizer tokenizer(inputStream);
+    std::ignore = tokenizer.PumpTokenizer();
 
     auto range = tokenizer.Tokens();
     range.DiscardWhitespace();
@@ -351,7 +340,7 @@ namespace krys::boo::css
   RefPtr<Value> PropertyParser::ParseStylePropertyLonghand(PropertyId property, TokenRange range,
                                                            const ParserContext &context) noexcept
   {
-    krys_assert(!Property::IsShorthand(property));
+    krys_debug_assert(!Property::IsShorthand(property));
 
     range.DiscardWhitespace();
 
@@ -362,8 +351,8 @@ namespace krys::boo::css
 
     auto state = PropertyParserState {
       .Context = context,
-      .CurrentProperty = property,
       .CurrentRule = RuleType::Style,
+      .CurrentProperty = property,
       .Important = IsImportant(false),
     };
 
@@ -381,6 +370,7 @@ namespace krys::boo::css
   {
     InputStream inputStream {CSSOMString(string)};
     Tokenizer tokenizer(inputStream);
+    std::ignore = tokenizer.PumpTokenizer();
     auto range = tokenizer.Tokens();
 
     // Handle leading whitespace.
@@ -388,8 +378,8 @@ namespace krys::boo::css
 
     auto state = PropertyParserState {
       .Context = context,
-      .CurrentProperty = property,
       .CurrentRule = RuleType::CounterStyle,
+      .CurrentProperty = property,
       .Important = IsImportant(false),
     };
 
@@ -409,56 +399,6 @@ namespace krys::boo::css
 
 #pragma region Custom Properties
 
-  Maybe<Variant<Ref<const style::CustomProperty>, GlobalKeyword>>
-    PropertyParser::ParseTypedCustomPropertyValue(const CSSOMStringAtom &name,
-                                                  const CustomPropertySyntax &syntax, TokenRange range,
-                                                  style::BuilderState &builderState,
-                                                  const ParserContext &context) noexcept
-  {
-    auto state = PropertyParserState {
-      .Context = context,
-      .CurrentProperty = PropertyId::Custom,
-      .CurrentRule = RuleType::Style,
-      .Important = IsImportant(false),
-    };
-
-    auto value = ConsumeTypedCustomPropertyValue(range, state, name, syntax, builderState);
-    if (!value || !range.IsAtEnd())
-    {
-      return {};
-    }
-
-    return value;
-  }
-
-  RefPtr<const style::CustomProperty> PropertyParser::ParseTypedCustomPropertyInitialValue(
-    const CSSOMStringAtom &name, const CustomPropertySyntax &syntax, TokenRange range,
-    style::BuilderState &builderState, const ParserContext &context) noexcept
-  {
-    if (syntax.IsUniversal())
-    {
-      return VariableParser::ParseInitialValueForUniversalSyntax(name, range);
-    }
-
-    auto state = PropertyParserState {
-      .Context = context,
-      .CurrentProperty = PropertyId::Custom,
-      .CurrentRule = RuleType::Style,
-      .Important = IsImportant(false),
-    };
-
-    auto value = ConsumeTypedCustomPropertyValue(range, state, name, syntax, builderState);
-    if (!value || !range.IsAtEnd())
-    {
-      return {};
-    }
-
-    return krys::SwitchOn(
-      *value, [](const Ref<const style::CustomProperty> &resolved) -> RefPtr<const style::CustomProperty>
-      { return resolved; },
-      [](const GlobalKeyword &) -> RefPtr<const style::CustomProperty> { return nullptr; });
-  }
-
   ComputedStyleDependencies PropertyParser::CollectParsedCustomPropertyValueDependencies(
     const CustomPropertySyntax &syntax, TokenRange range, const ParserContext &context) noexcept
   {
@@ -471,8 +411,8 @@ namespace krys::boo::css
 
     auto state = PropertyParserState {
       .Context = context,
-      .CurrentProperty = PropertyId::Custom,
       .CurrentRule = RuleType::Style,
+      .CurrentProperty = PropertyId::Custom,
       .Important = IsImportant(false),
     };
 
@@ -498,8 +438,8 @@ namespace krys::boo::css
 
     auto state = PropertyParserState {
       .Context = context,
-      .CurrentProperty = PropertyId::Custom,
       .CurrentRule = RuleType::Style,
+      .CurrentProperty = PropertyId::Custom,
       .Important = IsImportant(false),
     };
 
@@ -515,13 +455,13 @@ namespace krys::boo::css
     ConsumeCustomPropertyValueWithSyntax(TokenRange &range, PropertyParserState &state,
                                          const CustomPropertySyntax &syntax) noexcept
   {
-    krys_assert(!syntax.IsUniversal());
+    krys_debug_assert(!syntax.IsUniversal());
 
     auto rangeCopy = range;
 
     auto ConsumeSingleValue = [&](auto &range, auto &component) -> RefPtr<Value>
     {
-      switch (component.type)
+      switch (component.Type)
       {
         case CustomPropertySyntax::Type::Length:
         {
@@ -535,7 +475,7 @@ namespace krys::boo::css
         {
           if (RefPtr value = PropertyParserHelpers::ConsumeCustomIdent(range))
           {
-            if (component.ident == CSSOMStringAtom::Null() || value->StringValue() == component.ident)
+            if (component.Ident == CSSOMStringAtom::Null() || value->StringValue() == component.Ident.View())
             {
               return value;
             }
@@ -600,12 +540,13 @@ namespace krys::boo::css
         }
       }
 
-      krys_unreachable();
+      krys_debug_assert(false);
+      return nullptr;
     };
 
     auto ConsumeComponent = [&](auto &range, const auto &component) -> RefPtr<Value>
     {
-      switch (component.multiplier)
+      switch (component.Multiplier)
       {
         case CustomPropertySyntax::Multiplier::Single:
         {
@@ -623,7 +564,8 @@ namespace krys::boo::css
         }
       }
 
-      krys_unreachable();
+      krys_debug_assert(false);
+      return nullptr;
     };
 
     for (auto &component : syntax.Definition)
@@ -632,7 +574,7 @@ namespace krys::boo::css
       {
         if (range.IsAtEnd())
         {
-          return {value, component.type};
+          return {value, component.Type};
         }
       }
 
@@ -642,135 +584,12 @@ namespace krys::boo::css
     return {nullptr, CustomPropertySyntax::Type::Unknown};
   }
 
-  Maybe<Variant<Ref<const style::CustomProperty>, GlobalKeyword>>
-    ConsumeTypedCustomPropertyValue(TokenRange &range, PropertyParserState &state,
-                                    const CSSOMStringAtom &name, const CustomPropertySyntax &syntax,
-                                    style::BuilderState &builderState) noexcept
-  {
-    if (syntax.IsUniversal())
-    {
-      return {{style::CustomProperty::CreateForVariableData(name, VariableData::Create(range.ConsumeAll()))}};
-    }
-
-    range.DiscardWhitespace();
-
-    if (auto keyword = ConsumeGlobalKeyword(range))
-    {
-      return {{*keyword}};
-    }
-
-    auto [value, syntaxType] = ConsumeCustomPropertyValueWithSyntax(range, state, syntax);
-    if (!value)
-    {
-      return {};
-    }
-
-    auto ResolveSyntaxValue = [&, syntaxType =
-                                    syntaxType](const Value &value) -> Maybe<style::CustomProperty::Value>
-    {
-      switch (syntaxType)
-      {
-        case CustomPropertySyntax::Type::LengthPercentage:
-        {
-          return style::toStyleFromCSSValue<style::LengthPercentage<>>(builderState,
-                                                                       Downcast<PrimitiveValue>(value));
-        }
-        case CustomPropertySyntax::Type::Length:
-        {
-          return style::toStyleFromCSSValue<style::Length<>>(builderState, Downcast<PrimitiveValue>(value));
-        }
-        case CustomPropertySyntax::Type::Integer:
-        case CustomPropertySyntax::Type::Number:
-        {
-          return style::toStyleFromCSSValue<style::Number<>>(builderState, Downcast<PrimitiveValue>(value));
-        }
-        case CustomPropertySyntax::Type::Percentage:
-        {
-          return style::toStyleFromCSSValue<style::Percentage<>>(builderState,
-                                                                 Downcast<PrimitiveValue>(value));
-        }
-        case CustomPropertySyntax::Type::Angle:
-        {
-          return style::toStyleFromCSSValue<style::Angle<>>(builderState, Downcast<PrimitiveValue>(value));
-        }
-        case CustomPropertySyntax::Type::Time:
-        {
-          return style::toStyleFromCSSValue<style::Time<>>(builderState, Downcast<PrimitiveValue>(value));
-        }
-        case CustomPropertySyntax::Type::Resolution:
-        {
-          return style::toStyleFromCSSValue<style::Resolution<>>(builderState,
-                                                                 Downcast<PrimitiveValue>(value));
-        }
-        case CustomPropertySyntax::Type::Color:
-        {
-          return style::toStyleFromCSSValue<style::Color>(builderState, value, style::ForVisitedLink::No);
-        }
-        case CustomPropertySyntax::Type::Image:
-        {
-          auto styleImage = builderState.createStyleImage(value);
-          if (!styleImage)
-          {
-            return {};
-          }
-
-          return Style::ImageWrapper {styleImage.releaseNonNull()};
-        }
-        case CustomPropertySyntax::Type::URL:
-        {
-          return Style::toStyle(downcast<CSSURLValue>(value).url(), builderState);
-        }
-        case CustomPropertySyntax::Type::CustomIdent:
-        {
-          return CustomIdentifier {CSSOMStringAtom {downcast<PrimitiveValue>(value).stringValue()}};
-        }
-        case CustomPropertySyntax::Type::String:
-        {
-          return Downcast<PrimitiveValue>(value).StringValue();
-        }
-        case CustomPropertySyntax::Type::TransformFunction:
-        case CustomPropertySyntax::Type::TransformList:
-        {
-          return Style::toStyleFromCSSValue<Style::TransformFunction>(builderState, value);
-        }
-        case CustomPropertySyntax::Type::Unknown: return {};
-      }
-
-      krys_unreachable();
-    };
-
-    if (Is<ValueList>(value.get()) || Is<TransformListValue>(value.get()))
-    {
-      auto *valueList = Downcast<ValueContainingList>(value.get());
-      auto syntaxValueList = style::CustomProperty::ValueList {{}, valueList->separator()};
-      for (Ref listValue : valueList)
-      {
-        auto syntaxValue = ResolveSyntaxValue(listValue);
-        if (!syntaxValue)
-        {
-          return {};
-        }
-        syntaxValueList.values.append(krys::move(*syntaxValue));
-      }
-
-      return {{style::CustomProperty::CreateForValueList(name, krys::move(syntaxValueList))}};
-    };
-
-    auto syntaxValue = ResolveSyntaxValue(*value);
-    if (!syntaxValue)
-    {
-      return {};
-    }
-
-    return {{style::CustomProperty::CreateForValue(name, krys::move(*syntaxValue))}};
-  }
-
 #pragma endregion
 
 #pragma region Root Consumers
 
   bool ConsumeStyleProperty(TokenRange &range, const ParserContext &context, PropertyId property,
-                            IsImportant important, RuleType ruleType, PropertyParserResult &result)
+                            IsImportant important, RuleType ruleType, PropertyParserResult &result) noexcept
   {
     if (Property::IsDescriptorOnly(property))
     {
@@ -779,13 +598,15 @@ namespace krys::boo::css
 
     auto state = PropertyParserState {
       .Context = context,
-      .CurrentProperty = property,
       .CurrentRule = ruleType,
+      .CurrentProperty = property,
       .Important = important,
     };
 
     if (ConsumeInternalAutoBaseFunction(range, property, state, result))
+    {
       return true;
+    }
 
     if (Property::IsShorthand(property))
     {
@@ -843,12 +664,12 @@ namespace krys::boo::css
   }
 
   bool ConsumeFontFaceDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
-                                 PropertyParserResult &result)
+                                 PropertyParserResult &result) noexcept
   {
     auto state = PropertyParserState {
       .Context = context,
-      .CurrentProperty = property,
       .CurrentRule = RuleType::FontFace,
+      .CurrentProperty = property,
       .Important = IsImportant(false),
     };
 
@@ -863,12 +684,12 @@ namespace krys::boo::css
   }
 
   bool ConsumeFontPaletteValuesDescriptor(TokenRange &range, const ParserContext &context,
-                                          PropertyId property, PropertyParserResult &result)
+                                          PropertyId property, PropertyParserResult &result) noexcept
   {
     auto state = PropertyParserState {
       .Context = context,
-      .CurrentProperty = property,
       .CurrentRule = RuleType::FontPaletteValues,
+      .CurrentProperty = property,
       .Important = IsImportant(false),
     };
 
@@ -883,12 +704,12 @@ namespace krys::boo::css
   }
 
   bool ConsumeCounterStyleDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
-                                     PropertyParserResult &result)
+                                     PropertyParserResult &result) noexcept
   {
     auto state = PropertyParserState {
       .Context = context,
-      .CurrentProperty = property,
       .CurrentRule = RuleType::CounterStyle,
+      .CurrentProperty = property,
       .Important = IsImportant(false),
     };
 
@@ -903,7 +724,7 @@ namespace krys::boo::css
   }
 
   bool ConsumeKeyframeDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
-                                 IsImportant important, PropertyParserResult &result)
+                                 IsImportant important, PropertyParserResult &result) noexcept
   {
     // https://www.w3.org/TR/css-animations-1/#keyframes
     // The <declaration-list> inside of <keyframe-block> accepts any CSS property except those
@@ -924,7 +745,7 @@ namespace krys::boo::css
   }
 
   bool ConsumePageDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
-                             IsImportant important, PropertyParserResult &result)
+                             IsImportant important, PropertyParserResult &result) noexcept
   {
     // Does not apply in @page per-spec.
     if (property == PropertyId::Page)
@@ -934,8 +755,8 @@ namespace krys::boo::css
 
     auto state = PropertyParserState {
       .Context = context,
-      .CurrentProperty = property,
       .CurrentRule = RuleType::Page,
+      .CurrentProperty = property,
       .Important = IsImportant(false),
     };
 
@@ -954,12 +775,12 @@ namespace krys::boo::css
   }
 
   bool ConsumePropertyDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
-                                 PropertyParserResult &result)
+                                 PropertyParserResult &result) noexcept
   {
     auto state = PropertyParserState {
       .Context = context,
-      .CurrentProperty = property,
       .CurrentRule = RuleType::Property,
+      .CurrentProperty = property,
       .Important = IsImportant(false),
     };
 
@@ -974,14 +795,14 @@ namespace krys::boo::css
   }
 
   bool ConsumeViewTransitionDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
-                                       PropertyParserResult &result)
+                                       PropertyParserResult &result) noexcept
   {
     krys_debug_assert(context.PropertySettings.crossDocumentViewTransitionsEnabled);
 
     auto state = PropertyParserState {
       .Context = context,
-      .CurrentProperty = property,
       .CurrentRule = RuleType::ViewTransition,
+      .CurrentProperty = property,
       .Important = IsImportant(false),
     };
 
@@ -1030,8 +851,8 @@ namespace krys::boo::css
 
     auto state = PropertyParserState {
       .Context = context,
-      .CurrentProperty = property,
       .CurrentRule = RuleType::Function,
+      .CurrentProperty = property,
       .Important = IsImportant(false),
     };
 

@@ -20,7 +20,6 @@ namespace krys::boo::css
   public:
     /// @brief Parses simple values like '10px' or 'green', but makes no guarantees about handling any
     /// property completely.
-    /// TODO: Not defined yet; it needs `PrimitiveValue`/`ValuePool` to link.
     KRYS_NODISCARD static RefPtr<Value> MaybeParseValue(PropertyId property, CSSOMStringView string,
                                                         PropertyParserState &state) noexcept;
 

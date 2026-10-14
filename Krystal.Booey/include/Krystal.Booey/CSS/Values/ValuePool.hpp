@@ -63,10 +63,12 @@ namespace krys::boo::css
 
   private:
     HashMap<boo::Color, Ref<ColorValue>, ColorHash> _colorValueCache;
+    HashMap<CSSOMStringAtom, RefPtr<ValueList>> _fontFaceValueCache;
     HashMap<CSSOMStringAtom, Ref<PrimitiveValue>> _fontFamilyValueCache;
 
   public:
-    ValuePool() noexcept = default;
+    ValuePool() noexcept;
+    ~ValuePool() noexcept;
 
     // FIXME: This function needs a name that make it clear that this is not the one and only CSSValuePool,
     // rather the one that can be used only on the main thread.
@@ -77,8 +79,7 @@ namespace krys::boo::css
     void Drain() noexcept;
 
     KRYS_NODISCARD Ref<ColorValue> CreateColorValue(const boo::Color &color) noexcept;
-    // TODO: CreateFontFaceValue(const CSSOMStringAtom &) -> RefPtr<ValueList>, once ValueList and
-    // PropertyParser::ParseStylePropertyLonghand are ported.
+    KRYS_NODISCARD RefPtr<ValueList> CreateFontFaceValue(const CSSOMStringAtom &string) noexcept;
     KRYS_NODISCARD Ref<PrimitiveValue> CreateFontFamilyValue(const CSSOMStringAtom &familyName) noexcept;
   };
 

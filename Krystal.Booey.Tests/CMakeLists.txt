@@ -103,10 +103,14 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Parser/VariableParser.cpp
 		tests/CSS/Properties/Consumers/Align.cpp
 		tests/CSS/Properties/Consumers/Anchor.cpp
+		tests/CSS/Properties/Consumers/Animations.cpp
 		tests/CSS/Properties/Consumers/Attr.cpp
+		tests/CSS/Properties/Consumers/Background.cpp
 		tests/CSS/Properties/Consumers/Box.cpp
 		tests/CSS/Properties/Consumers/Color.cpp
 		tests/CSS/Properties/Consumers/ColorAdjust.cpp
+		tests/CSS/Properties/Consumers/Content.cpp
+		tests/CSS/Properties/Consumers/CounterStyles.cpp
 		tests/CSS/Properties/Consumers/Definitions.cpp
 		tests/CSS/Properties/Consumers/Display.cpp
 		tests/CSS/Properties/Consumers/Easing.cpp
@@ -118,7 +122,9 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Properties/Consumers/Inline.cpp
 		tests/CSS/Properties/Consumers/List.cpp
 		tests/CSS/Properties/Consumers/Lists.cpp
+		tests/CSS/Properties/Consumers/Masking.cpp
 		tests/CSS/Properties/Consumers/MetaConsumer.cpp
+		tests/CSS/Properties/Consumers/Motion.cpp
 		tests/CSS/Properties/Consumers/Percentage.cpp
 		tests/CSS/Properties/Consumers/Position.cpp
 		tests/CSS/Properties/Consumers/PositionTry.cpp
@@ -128,9 +134,11 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Properties/Consumers/SVG.cpp
 		tests/CSS/Properties/Consumers/ScrollSnap.cpp
 		tests/CSS/Properties/Consumers/Scrollbars.cpp
+		tests/CSS/Properties/Consumers/Shapes.cpp
 		tests/CSS/Properties/Consumers/String.cpp
 		tests/CSS/Properties/Consumers/Syntax.cpp
 		tests/CSS/Properties/Consumers/TextDecoration.cpp
+		tests/CSS/Properties/Consumers/Timeline.cpp
 		tests/CSS/Properties/Consumers/Transform.cpp
 		tests/CSS/Properties/Consumers/Transitions.cpp
 		tests/CSS/Properties/Consumers/UI.cpp
@@ -139,6 +147,8 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Properties/Consumers/ViewTransition.cpp
 		tests/CSS/Properties/Consumers/WillChange.cpp
 		tests/CSS/Properties/Property.cpp
+		tests/CSS/Properties/PropertyParser.cpp
+		tests/CSS/Properties/PropertyParserCustom.cpp
 		tests/CSS/Properties/PropertyParserResult.cpp
 		tests/CSS/Properties/PropertyShorthand.cpp
 		tests/CSS/Values/Aggregates.cpp

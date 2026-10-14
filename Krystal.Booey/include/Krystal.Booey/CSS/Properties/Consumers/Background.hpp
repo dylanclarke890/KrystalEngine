@@ -37,10 +37,6 @@ namespace krys::boo::css
     KRYS_NODISCARD Maybe<BorderRadius> ConsumeUnresolvedBorderRadius(TokenRange &tokens,
                                                                      PropertyParserState &state) noexcept;
 
-    // Non-standard -webkit-border-radius.
-    KRYS_NODISCARD Maybe<BorderRadius>
-      ConsumeUnresolvedWebKitBorderRadius(TokenRange &tokens, PropertyParserState &state) noexcept;
-
     // MARK: - Border Image
 
     // <'border-image-slice'> = [<number [0,∞]> | <percentage [0,∞]>]{1,4} && fill?
@@ -90,16 +86,6 @@ namespace krys::boo::css
     // <'box-shadow'> = none | <shadow>#
     // https://drafts.csswg.org/css-backgrounds/#propdef-box-shadow
     KRYS_NODISCARD RefPtr<Value> ConsumeBoxShadow(TokenRange &tokens, PropertyParserState &state) noexcept;
-
-    // Non-standard.
-    KRYS_NODISCARD RefPtr<Value> ConsumeWebkitBoxShadow(TokenRange &tokens,
-                                                        PropertyParserState &state) noexcept;
-
-    // MARK: - Reflection (non-standard)
-
-    // Non-standard addition.
-    KRYS_NODISCARD RefPtr<Value> ConsumeWebkitBoxReflect(TokenRange &tokens,
-                                                         PropertyParserState &state) noexcept;
 
     // MARK: Utilities for filling in rects / quads in the "margin" form.
 

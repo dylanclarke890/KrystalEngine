@@ -45,24 +45,30 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Property parser, layer b3 (2026-10-13): the numeric/structured consumers built; all but `Timeline`, `Animations` and `CounterStyles` tested (those three wait for the generated `PropertyParsing.cpp`, layer c).
 - Property parser, layer b4 (2026-10-13): the Image-dependent consumers built; `Image`, `Filter` and `UI` tested, `Background`, `Content`, `Masking` and `Motion` compile-only until layer c (and b5 for the shapes).
 - Property parser, layer b5 (2026-10-13): `Font` (and the generic family names) built and tested; `Shapes` built, compile-only until layer c. Layer b is done.
+- Property parser, layer c1 (2026-10-13): the generator reviewed against upstream's output, `PropertyParserCustom.hpp` reviewed and fixed, and the generated `PropertyParsing.cpp` built, linked and tested through the shorthands.
+- Property parser, layer c2 (2026-10-13): `Timeline`, `Animations`, `CounterStyles`, `Background`, `Content`, `Masking`, `Motion` and `Shapes` tested.
+- Property parser, layer c3 (2026-10-13): `PropertyParser`, the value half of `ParserFastPaths` and `ValuePool::CreateFontFaceValue` built and tested; properties parse end-to-end from strings.
 
 **Open / next candidates:**
-- Property parser, next: layer c1 (generator review, then `PropertyParserCustom.hpp` and the generated `PropertyParsing.cpp` compiling and linking). See the *Property parser* section for the c1/c2/c3 plan and the 2026-10-13 trial compile.
+- Property parser, layer c1 generator review done (2026-10-13): the generated parser matches upstream; the build now passes `ENABLE_DARK_MODE_CSS`/`ENABLE_VARIATION_FONTS`; 41 legacy `-webkit-` properties are dropped on purpose.
+- Property parser, layer c1 done (2026-10-13): `PropertyParserCustom.hpp` reviewed (8 behaviour bugs fixed), the generated `PropertyParsing.cpp` builds and links, tested through shorthands.
+- Property parser, layer c2 done (2026-10-13): the compile-only consumers are tested; three `Background` consumers that only served dropped `-webkit-` properties are removed.
+- Property parser, layer c3 done (2026-10-13): `PropertyParser` reviewed, built and tested, with the value half of `ParserFastPaths` and `ValuePool::CreateFontFaceValue`. The property parser slice is complete apart from the Style-dependent pieces below.
+- Next candidates: the rule/sheet parser (`CSSParser`, `CSSParserImpl`: what turns a stylesheet into rules and calls `PropertyParser::ParseValue`), or the Style side (`style::CustomProperty`/`BuilderState`) that the deferred pieces wait on.
 - Property parser, not yet ported (`Font`): the string parsers behind the `FontFace` interface and the canvas 2D context's `font` (`ParseUnresolvedFont`, `ParseFontFaceSrc`, `ParseFontFaceSizeAdjust`, `ParseFontFaceUnicodeRange`, `ParseFontFaceDisplay`, `ParseFontFaceFontStyle`, `ParseFontFaceFeatureSettings`, `ParseFontFaceFontWidth`, `ParseFontFaceFontWeight`; FIXME in `Consumers/Font.hpp`). They need `ScriptExecutionContext`/`Document` (quirks mode, value pool) and six of them the generated `PropertyParsing`. Also `LowerFontShorthand` and the `SystemFontDatabase::FontShorthand` sync check (need `SystemFontDatabase`).
 - Property parser, not yet ported: `parseEasingFunctionDeprecated` (`CSSPropertyParserConsumer+Easing`; string → `TimingFunction`, used only by Web Animations; needs `TimingFunction` and `Style::createTimingFunctionDeprecated`) and `parseTransformRaw` (`CSSPropertyParserConsumer+Transform`; string → `Style::Transform`, used only by Web Animations; needs `Style::Transform`, `BuilderState` and the generated `consumeTransform`). Come with animations. Also `parseFilterValueListOrNoneRaw` (`CSSPropertyParserConsumer+Filter`; string → `Style::Filter`, used only by the canvas 2D context's `filter`; needs `Style::Filter`, `BuilderState` and `Document`); comes with canvas.
-- Property parser, tests waiting for layer c: `Timeline`, `Animations` and `CounterStyles` compile but call the generated `PropertyParsing::ConsumeScroller`/`ConsumeAxis`/`ConsumeSingleViewTimelineInset`/`ConsumeSymbol` (`Animations` through `Timeline`'s `IsAnimationRangeKeyword`), so a test that links them needs `PropertyParsing.cpp` built. Likewise `Background` (`ConsumeBorderImageRepeat`/`ConsumeBorderImageOutset`), `Content` (through `CounterStyles`), `Masking`/`Motion` (`ConsumeGeometryBox`), and `Shapes` (`ConsumeShapeBox`, and through `Background`). Test them in layer c; the `Content` `/` and `Motion` `ray()` size fixes (layer b4) and all of `<basic-shape>` parsing are untested until then.
-- Property parser, deferred definitions (need `style::CustomProperty`/`BuilderState`): `VariableParser::ParseInitialValueForUniversalSyntax`; layer c adds `PropertyParser::ParseTypedCustomPropertyValue`/`ParseTypedCustomPropertyInitialValue`.
+- Property parser, deferred definitions (need `style::CustomProperty`/`BuilderState`): `VariableParser::ParseInitialValueForUniversalSyntax`, `PropertyParser::ParseTypedCustomPropertyValue`/`ParseTypedCustomPropertyInitialValue`.
 - Values, deferred definitions (declared, not defined, FIXME'd; define when `style::Builder`/`BuilderState` and the resource loader are ported): `VariableReferenceValue::ResolveVariableReferences`, `ResolveSingleValue`, `ResolveTokenRange`, `ResolveVariableReference`, `ResolveVariableFallback`, `TryResolveSimpleReference` (and so `ResolveAndCacheValue`); `PendingSubstitutionValue::ResolveValue` (also needs `PropertyParser::ParseValue` and `ParsedPropertyVector`); `FontFaceSrcResourceValue::GetFontLoadRequest` and its cached font (`CustomTraverseSubresources` returns `false` until then); `FontFaceSrcLocalValue::GetSVGFontFaceElement`/`SetSVGFontFaceElement` (need SVG fonts); `CreateStyleImage` on the ten image values (needs `style::BuilderState` and `StyleImage`, and the cached style image members of `NamedImageValue`/`CanvasValue`/`GradientValue`); `ImageValue::IsPending`, `LoadImage`, `GetCachedImage`, `KnownToBeOpaque` and its cached image (`CustomTraverseSubresources` returns `false`, and `CopyForComputedStyle` doesn't copy the cache, until then).
 - Not yet ported, needed later: the graphics `Path` (cached by `SVGPathByteStream` upstream), the rest of `SVGPathUtilities` (needs `Path` and `SVGPathSegList`), `parseKerningUnicodeString`/`parseGlyphName`.
 - Slice 3 (colour), bottom-up: (1) Graphics/Color, (2) calc-free numeric primitives, (3a) Style-free calc, (3b) calc evaluation and Style calc and (3c) calc parsing are done. (4a) `LayoutUnit` and the point/size types and (4b) Style numerics are done. (5a) the CSS colour types, (5b) the colour parser and (5c) `ColorValue`/`ValuePool` (compile-only) are done. (6) Style colour is done (its CSSValue half is deferred, see below). Slice 3 is complete apart from the Value-dependent pieces.
 - Deferred from layer 6 (needs `Style/BuilderChecking.hpp` and the raw-WebKit `ValueList`/`ValuePair`/`FunctionValue`/`BuilderState` it includes): `CSSValueConversion<Color>`, `CSSValueCreation<Color>`, `CSSValueConversion<DynamicRangeLimit>`, `CSSValueCreation<DynamicRangeLimit>` and `CSSValueConversion<Opacity>`. They come with the other `+CSSValueConversion`/`+CSSValueCreation` headers.
-- Waiting on the property parser slice: `ValuePool::CreateFontFaceValue` (needs `ValueList`/`PropertyParser`) and `ParserFastPaths::MaybeParseValue` (its keyword fallback needs the generated `PropertyParsing.cpp`, which calls every consumer's `IsKeywordValidFor*`). The Style `+CSSValueConversion`/`+CSSValueCreation` headers (numerics, `LengthWrapper`, `PrimitiveKeyword`) are still raw WebKit.
+- The Style `+CSSValueConversion`/`+CSSValueCreation` headers (numerics, `LengthWrapper`, `PrimitiveKeyword`) are still raw WebKit.
 - Style `ToCSS`/serialisation can't be tested until there's a real `RenderStyle` (the seam's can't be constructed).
 - The Style seam (`Style/Seam.hpp`, `src/Style/Seam.cpp`) stands in for `RenderStyle`, `RenderView`, `RenderBox`, the font types, `Style::BuilderState`, `AnchorPositionEvaluator`, `ContainerQueryEvaluator` and the `Document` colour API. Each placeholder is replaced when its slice is ported; see the layer 3b and layer 6 sections. Since layer 6, `RenderStyle` can be constructed (colour state only); its other members are still unreachable.
 - `ParserContext`: the `Document` and `Settings` constructors (FIXME in the header) wait for `Document::CssParserContext()` and a `Settings` port; so does the generated `PropertySettings(const Settings &)` constructor. `LocalFrame`'s `StaticValuePool::Init()` call comes with `LocalFrame`.
 - `CSS/Values/Concepts.hpp` (`CSSValueConcepts.h`) compiles but isn't reviewed.
 - URL, not yet done: the DOM `URL` interface and `URLSearchParams` (WebKit's `DOMURL`/`URLDecomposition`, tested by WPT `setters_tests.json`), `Document`'s URL/base URL (`Document::URL()` is a TODO), `CompleteURL(string, Document)`, and `applyModifiersToLoaderOptions` (needs the resource loader).
-- Krystal.Core: the `IntrusivePtr` `Downcast`/`DynamicDowncast` overloads can't be called with an explicit target and `Downcast` rejects null (nothing calls them yet); `OffsetRotateValue.cpp` has a FIXME workaround.
+- Krystal.Core: the `IntrusivePtr` `Downcast`/`DynamicDowncast` overloads can't be called with an explicit target and `Downcast` rejects null (nothing calls them yet); `OffsetRotateValue.cpp` has a FIXME workaround. `StringAtom::View()` crashes on a null atom (layer c2).
 - `CSS/Properties/Property.hpp` (`CSSProperty.h`) isn't reviewed, but compiles (the generated `PropertyId.cpp` defines its static functions); the colour parser and `AngleValidator` use `AcceptsQuirkyColor`/`AcceptsQuirkyAngle` from it.
 - Tokenizer doesn't keep numeric original text or whitespace counts, so `TokenSerialisationMode::CustomProperty` behaves like `Normal` (FIXMEs in `src/CSS/Parser/Token.cpp`), and `ConsumeUnicodeRangeToken` rejects every range containing a number or dimension token (`U+0025-00FF`, `U+4??`; FIXME in `Consumers/UnicodeRange.cpp`, `[!shouldfail]` test). Decided 2026-10-13: fix both together once the tokenizer keeps original text.
 - Not yet ported, needed later: `StringBuilder`, `RefCountedFixedVector`, `DefaultHash<StringAtom>` (Krystal.Core; for `add(Hasher&, const Style::GridPosition&)`).
@@ -385,7 +391,7 @@ URL differences:
 - `tests/URL/WPT.cpp` runs WPT's `urltestdata.json`, `toascii.json` and `IdnaTestV2.json` (copied to `data/url/` from WebKit's `LayoutTests/imported/w3c/web-platform-tests/url/resources`). Three `IdnaTestV2.json` cases expect a V7 failure for U+32931/U+32B9A, which Unicode 17 assigned; the test expects them to be valid.
 - Full Booey suite (2026-10-13): 1348 cases / 671304 assertions; all pass except 2 expected failures. Whole solution builds with no warnings.
 
-## Property parser — in progress
+## Property parser — done (Style-dependent pieces deferred)
 
 Entry: `css/parser/CSSPropertyParser.cpp` (headers-only graph: 151 files, `tools/port/out/property-parser.md`). Most of that graph comes through `StyleBuilder.h`, `StyleCustomProperty.h` and `StylePrimitiveNumericTypes+CSSValueConversion.h`, which only the typed custom-property functions need.
 
@@ -398,9 +404,9 @@ Entry: `css/parser/CSSPropertyParser.cpp` (headers-only graph: 151 files, `tools
   - **b4.** Image-dependent consumers: `Image`, then `Background`, `Content`, `Filter`, `Masking`, `Motion`, `UI`. Done; `Image` calls `Filter`'s `ConsumeUnresolvedFilter`, so they went together. `Background`, `Content`, `Masking`, `Motion` compile-only until layer c.
   - **b5.** The stubs: `Font`, `Shapes` (~2k upstream lines). Done (`Shapes` compile-only until layer c).
 - **c.** `PropertyParserCustom.hpp`, generated `PropertyParsing.cpp`, `PropertyParser.cpp`; then tests parsing properties from strings, and `ParserFastPaths::MaybeParseValue`/`ValuePool::CreateFontFaceValue`. Split (proposed 2026-10-13):
-  - **c1.** Review `codegen/css_properties.py`'s `PropertyParsing.hpp`/`.cpp` output against upstream's generator (`Source/WebCore/css/scripts/process-css-properties.py`); only the shorthand functions and `IsExposed` have been checked (layer a). Then get `PropertyParserCustom.hpp` (hand-written shorthand parsers, 3,106 lines vs upstream 2,216; no raw WebKit names left, 114 commented lines, 2 FIXMEs; unreviewed) and the generated `PropertyParsing.cpp` (20,064 lines; generated each build, listed in `KRYSTAL_BOOEY_GENERATED_SOURCES` but not in `KRYSTAL_BOOEY_CSS_SOURCES`) compiling and linking. Generator review first: it's the riskiest, unreviewed part.
-  - **c2.** Tests for the compile-only consumers, which link against the generated functions: `Timeline`, `Animations`, `CounterStyles`, `Background`, `Content`, `Masking`, `Motion`, `Shapes` (including all of `<basic-shape>` and the layer b4 `Content` `/` and `Motion` `ray()` fixes).
-  - **c3.** `PropertyParser.cpp`/`.hpp` (1,064 lines vs upstream 904; translated, unreviewed), then property-from-string tests, `ParserFastPaths::MaybeParseValue` and `ValuePool::CreateFontFaceValue`. Still deferred after c3 (need Style/`Document`): typed custom-property parsing and the raw string parsers (`Font`/`FontFace`, `Filter`, `Transform`, `Easing`).
+  - **c1.** Done (2026-10-13; see the two *Layer c1* sections below). Original plan: review `codegen/css_properties.py`'s `PropertyParsing.hpp`/`.cpp` output against upstream's generator (`Source/WebCore/css/scripts/process-css-properties.py`); only the shorthand functions and `IsExposed` have been checked (layer a). Then get `PropertyParserCustom.hpp` (hand-written shorthand parsers, 3,106 lines vs upstream 2,216; no raw WebKit names left, 114 commented lines, 2 FIXMEs; unreviewed) and the generated `PropertyParsing.cpp` (20,064 lines; generated each build, listed in `KRYSTAL_BOOEY_GENERATED_SOURCES` but not in `KRYSTAL_BOOEY_CSS_SOURCES`) compiling and linking. Generator review first: it's the riskiest, unreviewed part.
+  - **c2.** Done (2026-10-13). Tests for the compile-only consumers, which link against the generated functions: `Timeline`, `Animations`, `CounterStyles`, `Background`, `Content`, `Masking`, `Motion`, `Shapes` (including all of `<basic-shape>` and the layer b4 `Content` `/` and `Motion` `ray()` fixes).
+  - **c3.** Done (2026-10-13). `PropertyParser.cpp`/`.hpp` (1,064 lines vs upstream 904; translated, unreviewed), then property-from-string tests, `ParserFastPaths::MaybeParseValue` and `ValuePool::CreateFontFaceValue`. Still deferred after c3 (need Style/`Document`): typed custom-property parsing and the raw string parsers (`Font`/`FontFace`, `Filter`, `Transform`, `Easing`).
   - **Trial compile (2026-10-13, reverted):** with `PropertyParsing.cpp` added to `KRYSTAL_BOOEY_CSS_SOURCES` and compiled alone (MSBuild `-t:ClCompile -p:SelectedFiles=...`), it stopped at 13 errors, all in `PropertyParserCustom.hpp`'s border-radius and border-spacing shorthands (~lines 425-455): `state.ValuePool` (the member is `Pool`), `AddPropertyForCurrentShorthand` called with the wrong arguments, and `(void)shorthand` on an unnamed parameter. Expect more once those are fixed. Whether `PropertyParser.cpp` compiles is unknown (the trial didn't compile it).
 
 ### Layer a: parser plumbing (2026-10-13)
@@ -427,7 +433,7 @@ Entry: `css/parser/CSSPropertyParser.cpp` (headers-only graph: 151 files, `tools
 
 **Differences:**
 - `PropertyMetadata` is a `PropertyFlag` set (`Important`, `Implicit`, `SetFromShorthand`) plus a 3-bit shorthand index (upstream: bitfields, 2-bit index). `Property`'s constructor takes `(id, value, important, implicit, setFromShorthand, shorthandIndex)` (upstream: `(id, value, important, isSetFromShorthand, index, implicit)`); the strong booleans catch a mix-up. `Value()` returns a reference; no `protectedValue()`.
-- Not ported (not generated by `css_properties.py`): `colorProperties`/`physicalProperties` and `isColorProperty`, `animationUsesNonAdditiveOrCumulativeInterpolation`, `animationUsesNonNormalizedDiscreteInterpolation`, `animationIsAccelerated`, `allAcceleratedAnimationProperties` (the last two need `Settings`). They come with animations.
+- Not ported (not generated by `css_properties.py`): `colorProperties`/`physicalProperties` (`IsColorProperty` added in layer c3), `animationUsesNonAdditiveOrCumulativeInterpolation`, `animationUsesNonNormalizedDiscreteInterpolation`, `animationIsAccelerated`, `allAcceleratedAnimationProperties` (the last two need `Settings`). They come with animations.
 - `CustomPropertySyntax`: `Definition` is a `List` (alias `DefinitionType`); `Component`'s members are `Type`/`Multiplier`/`Ident`, declared with qualified types. Parses UTF-8 directly (no `StringParsingBuffer`/`readCharactersForParsing`); the type-name table is a linear search (no `SortedArrayMap`). `type(` is matched by `FunctionId() == ValueId::Type` (case-insensitive, like upstream's `equalLettersIgnoringASCIICase`).
 - `VariableParser`: `ClassifyBlock`'s stack is a `List` (upstream `std::stack`); `ParseInitialValueForUniversalSyntax` is declared, not defined (FIXME; needs `style::CustomProperty`).
 
@@ -576,6 +582,99 @@ Graphs: `tools/port/out/consumer-font.md` (152 files; new over the earlier graph
 
 Tests: `tests/CSS/Properties/Consumers/Font.cpp`: 14 cases / 248 assertions pass. Full Booey suite: 1469 cases / 673454 assertions; all pass except 4 expected failures.
 
+### Layer c1: generator review (2026-10-13)
+
+Reviewed by comparing output rather than scripts: upstream's `css/scripts/process-css-properties.py` was run on its `CSSProperties.json`, filtered to the properties in `codegen/css-properties.json`, with the same defines, and its `CSSPropertyParsing.h`/`.cpp` diffed against ours after normalising names (`CSSValueFoo` → `ValueId::Foo`, `consumeIncludingWhitespace` → `Discard` + `DiscardWhitespace`, `AnchorPolicy::Forbid` → `AllowAnchor(false)`, `OptionSet` lists → `|`, `move`, ...). After normalising, the 462 generated functions match line for line; the remaining differences are the assertion macros and named parameters on the `@function` descriptor stubs.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/scripts/process-css-properties.py` (`GenerateCSSPropertyParsing`, the term generators, `PropertyConsumer`s) | `have` | `codegen/css_properties.py` (`GeneratePropertyParsing`) | (codegen) | Reviewed via output. `PropertyParsing.cpp` isn't compiled yet (c1, next). |
+| `css/CSSProperties.json` | `have*` | `codegen/css-properties.json` | (codegen) | Restructured schema (`module` for `category`; `parser-grammar` + `parser-grammar-unused: true` for `parser-grammar-unused: "<grammar>"`), PascalCase parser functions. See differences. |
+
+**Bugs fixed:**
+- The build passed no `--defines`, so `font-variation-settings`, `font-optical-sizing`, `color-scheme` and the variation-font forms of `font-width` and the `@font-face` `font-weight`/`font-style`/`font-width` descriptors weren't generated, though `Font` (layer b5) and `ColorScheme` (layer 5b) are ported for them. CMake now passes `--defines=ENABLE_DARK_MODE_CSS,ENABLE_VARIATION_FONTS`. Both scripts split `--defines` on spaces while `main.py`'s help says comma-separated; they now accept either.
+- The longhand/descriptor parse functions guarded unexposed properties with `krys_unreachable()` (`std::unreachable()`: undefined behaviour in release); upstream's `ASSERT_NOT_REACHED()` is debug-only and returns null. Now `krys_debug_assert(false)`, as the shorthand guard already was.
+- The exported shared-rule consumers in `PropertyParsing.hpp` weren't `KRYS_NODISCARD` (the property consumers were).
+
+**Differences:**
+- 41 legacy `-webkit-`-only properties are dropped from `css-properties.json` on purpose (decided by the user: Booey doesn't support legacy or WebKit-specific properties): `-webkit-backdrop-filter`, `-webkit-background-clip`/`-origin`, `-webkit-border-image`, `-webkit-border-radius`, `-webkit-box-*` (`align`, `direction`, `flex`, `flex-group`, `lines`, `ordinal-group`, `orient`, `pack`, `reflect`, `shadow`), `-webkit-column-axis`, `-webkit-column-break-*`, `-webkit-font-size-delta`, `-webkit-line-clamp`/`-grid`/`-snap`, `-webkit-marquee-*`, `-webkit-mask`, `-webkit-mask-box-image`, `-webkit-mask-clip`/`-composite`/`-source-type`, `-webkit-nbsp-mode`, `-webkit-perspective`, `-webkit-text-orientation`, `-webkit-text-size-adjust`, `-webkit-text-stroke*`, `-webkit-text-zoom`. Code that only serves them (e.g. their shorthand parsers in `PropertyParserCustom.hpp`) can be removed rather than ported.
+- Defines left off: the Apple Pay, attachment element, touch, cursor visibility, text autosizing, overflow scrolling, touch callout and Core Animation/material features.
+
+### Layer c1: custom shorthand parsers and generated parsing (2026-10-13)
+
+`PropertyParserCustom.hpp` compared function by function with `css/parser/CSSPropertyParserCustom.h`. The generated `PropertyParsing.cpp` now compiles and links (a test calls into it, so the linker pulls in all its references).
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/parser/CSSPropertyParserCustom.h` | `have` | `CSS/Properties/PropertyParserCustom.hpp` | on | tested. See bugs and differences. |
+| `CSSPropertyParsing.h`, `.cpp` (generated) | `have` | `codegen/css_properties.py` → `PropertyParsing.hpp`/`.cpp` | on | tested (longhands and shorthands through `PropertyParserCustom`). |
+| `css/parser/CSSFontVariantLigaturesParser.h`, `CSSFontVariantNumericParser.h` | `have` | `CSS/Properties/FontVariantLigaturesParser.hpp`, `FontVariantNumericParser.hpp` | on | tested through `font-variant`. Matched upstream. |
+| `css/CSSBorderImage.h`, `.cpp` | `have` | `CSS/Values/Borders/BorderImage.hpp`, `src/.../BorderImage.cpp` | on | compiles; the `.cpp` was missing (unresolved `CreateBorderImageValue` from `Background`). Ported. |
+| `css/values/primitives/CSSPrimitiveNumericTypes+CSSValueCreation.h` | `have` | `CSS/Values/Primitives/NumericTypesValueCreation.hpp` | on | tested. See bugs. |
+| `css/values/CSSValueTypes.cpp` (value creation) | `have` | `src/CSS/Values/TypesValueCreation.cpp` | on | compiles; was never built (unresolved `CreateCoalescingPairValue<Space>`). |
+
+**Bugs fixed:**
+- `grid-template: none` never matched: `none` was consumed from a copy of the range. The range wasn't restored before the `<string>` form (commented out), the `/` before the columns was looked for with `IdentCodePoints()` (empty for delimiters; as `Content`, layer b4), so `"a" / 1fr` failed, and trailing line names were moved into the list, so consecutive `[y] [z]` weren't merged into `[y z]`.
+- `grid-area: a / b` defaulted `grid-column-end` to the row start (`a`) instead of the column start (`b`).
+- `mask` with a position failed: the background/mask shorthand only handled `background-position-x/y`, not `-webkit-mask-position-x/y` (`mask`'s position longhands).
+- `animation`/`transition`: `animation-timing-function`, `transition-property` and `transition-timing-function` were stubbed to null, so any timing function or transition property failed.
+- `view-timeline`: the insets went into the axis list, leaving the inset list empty.
+- `font`: the system font keywords (`font: caption`) were commented out.
+- `overflow`: a single `-webkit-paged-x`/`-y` didn't set `overflow-x` to `auto`.
+- `flex`: the `-webkit-min-content`, `-webkit-max-content`, `-webkit-fill-available`, `-webkit-fit-content` basis keywords were missing.
+- Didn't compile: `state.ValuePool` (`state.Pool`), `(void)shorthand` on unnamed parameters, named unused parameters; `ConsumeBorderSpacingShorthand` wasn't `noexcept`; unbraced `if`s. Includes the unreviewed `PropertyParser.hpp` instead of `PropertyParsing.hpp`.
+- `NumericTypesValueCreation.hpp`: the calc case called a nonexistent `get()` (upstream `protectedCalc()`); not `KRYS_NODISCARD`/`noexcept`.
+- `FontVariant*Parser.hpp`: used the inline `PrimitiveValue::Create(ValueId)` without including `ValuePool.hpp`. `Finalize` → `FinalizeValue`.
+- `TypesValueCreation.cpp`: same missing `ValuePool.hpp` include.
+- Generator: the empty `@function` descriptor keyword stubs named parameters they don't use (C4100).
+
+**Differences:**
+- The shorthand parsers are defined in the class body (upstream: declared in the class, defined `inline` below).
+- No parsers for the dropped `-webkit-` shorthands (`-webkit-border-radius`, `-webkit-border-image`, `-webkit-mask-box-image`, `-webkit-column-break-*`, `-webkit-text-orientation`, `-webkit-perspective`) or their keyword mapping (`mapFromColumnBreakBetween`); the background/mask shorthand has no `-webkit-background-clip/origin` or `-webkit-mask-clip/composite/source-type` cases. `-webkit-background-size` and `-webkit-mask-position` are still in `css-properties.json`, so they're kept.
+
+Tests: `tests/CSS/Properties/PropertyParserCustom.cpp`: 2 cases / 36 assertions pass. Full Booey suite: 1471 cases / 673496 assertions; all pass except 4 expected failures. Whole solution builds with no warnings.
+
+### Layer c2: tests for the compile-only consumers (2026-10-13)
+
+Each consumer was first probed (its output printed for a set of inputs), the outputs checked against upstream and the specs, then frozen as tests. No consumer bugs were found; the layer b4 `Content` `/` and `Motion` `ray()` size fixes are now tested.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `CSSPropertyParserConsumer+Timeline`, `+Animations`, `+CounterStyles`, `+Content`, `+Masking`, `+Motion`, `+Shapes` | `have` | same names | on | tested. |
+| `CSSPropertyParserConsumer+Background` | `have` | `Background` | on | tested. See differences. |
+
+**Differences:**
+- `Background`: `consumeUnresolvedWebKitBorderRadius` (and the two-value `-webkit-border-radius` quirk), `consumeWebkitBoxShadow` (and the `isWebkitBoxShadow` flag it set) and `consumeWebkitBoxReflect` are removed: they only served the dropped `-webkit-border-radius`, `-webkit-box-shadow` and `-webkit-box-reflect`. `BoxShadow::IsWebkitBoxShadow` and `ReflectValue` (Values layer) are kept. `BorderImageSliceFillDefault`/`BorderImageWidthOverridesWidthForLength` are kept, though only the dropped `-webkit-border-image`/`-webkit-mask-box-image` passed `Yes`.
+- `ConsumeKeyframesName("")` gives an empty `<custom-ident>` that serialises as nothing, as upstream (the empty string isn't a keyword).
+
+**Krystal.Core, flagged:** `StringAtom::View()` dereferences unconditionally, so calling it on `StringAtom::Null()` crashes (WTF's null `AtomString` gives an empty view). Callers must compare with `Null()` first.
+
+Tests: `tests/CSS/Properties/Consumers/{Timeline,Animations,CounterStyles,Background,Content,Masking,Motion,Shapes}.cpp`: 26 cases. Full Booey suite: 1497 cases / 673896 assertions; all pass except 4 expected failures. Whole solution builds with no warnings.
+
+### Layer c3: the property parser (2026-10-13)
+
+`CSSPropertyParser.h`/`.cpp` compared with `PropertyParser.hpp`/`.cpp`; the value half of `CSSParserFastPaths.cpp` ported; `CSSValuePool::createFontFaceValue` added.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/parser/CSSPropertyParser.h`, `.cpp` | `have` (no typed custom-property parsing) | `CSS/Properties/PropertyParser.hpp`, `src/.../PropertyParser.cpp` | on | tested. See bugs and differences. The keyword/property-name lookups live in `KeywordLookup` (slice 1, layer a). |
+| `css/parser/CSSParserFastPaths.cpp` (value half: `maybeParseValue` and the length, keyword, transform, `display`, `opacity` and colour fast paths) | `have` | `src/CSS/Parser/ParserFastPaths.cpp` | on | tested. Ported. |
+| `CSSValuePool::createFontFaceValue` | `have` | `ValuePool::CreateFontFaceValue` | on | tested. |
+| `CSSProperty::isColorProperty` (generated `colorProperties`) | `have*` | `Property::IsColorProperty`, generated into `PropertyId.cpp` | on | tested through the fast path. A `switch` (upstream: a bitset). |
+
+**Bugs fixed:**
+- `PropertyParser::ParseStylePropertyLonghand(string)` and `ParseCounterStyleDescriptor` never pumped the tokenizer, so they always saw an empty range (as `Timeline`/`Animations`, layer b3).
+- Didn't compile: raw WebKit includes (`StyleBuilder.h`, ...) and the typed custom-property code (`style::toStyleFromCSSValue`, `downcast<CSSURLValue>`, ...); old `CustomPropertySyntax` member names (`type`, `multiplier`, `ident`); designated initialisers out of `PropertyParserState`'s member order; the root consumers' definitions weren't `noexcept`; `ShareRef` of a `const Value` in `-internal-auto-base()`; `SmallList::resize` to drop the properties of a failed parse (needs a default constructor; now `truncate`, upstream `shrink`). The `.cpp` had no BOM.
+- `krys_assert`/`krys_unreachable` where upstream's `ASSERT`/`ASSERT_NOT_REACHED` are debug-only (`krys_unreachable` is undefined behaviour in release).
+- `ValuePool`: the new cache holds `RefPtr<ValueList>`, so the constructor and destructor are out of line (the header only forward-declares `ValueList`).
+- Generator: the generated `Property::IsInheritedProperty` used the raw `assert`.
+
+**Differences:**
+- `ParseTypedCustomPropertyValue`/`ParseTypedCustomPropertyInitialValue` (and the file-local `consumeTypedCustomPropertyValue`) aren't defined (FIXME in the header): they need `style::CustomProperty` and `style::BuilderState`.
+- Fast path: UTF-8 only; `StringParsingBuffer` is a `CSSOMStringView` advanced with `remove_prefix`, and the transform-name checks compare prefixes case-insensitively rather than character by character.
+
+Tests: `tests/CSS/Properties/PropertyParser.cpp` (longhands, shorthands, CSS-wide keywords, `var()`, failure rollback, `-internal-auto-base()`, `@keyframes`/`@position-try`/`@page` and descriptors, the string entry points, custom-property syntax and its dependencies, `ParseGlobalKeyword`, `CreateFontFaceValue`) and `ParserFastPaths::MaybeParseValue` in `tests/CSS/Parser/ParserFastPaths.cpp`: 11 cases / 255 assertions with the existing fast-path cases. Full Booey suite: 1504 cases / 674094 assertions; all pass except 4 expected failures. Whole solution builds with no warnings.
+
 ## Slice 3: Colour
 
 Entry: `css/CSSColorValue.cpp` (headers-only graph: 42 files, `tools/port/out/color-value.md`; with every `css/values/color` file as an entry: 158 files, `tools/port/out/color.md`, which reaches the style builder through `CSSLightDarkColor.cpp`/`CSSKeywordColor.cpp`). `ColorValue` itself is a thin wrapper; the work is in `css::Color` (Krystal has 4 of upstream's 43 alternatives). Decision (2026-10-12): full colour slice, bottom-up, building and testing each layer; layer 1 (Graphics/Color) first, then re-plan.
@@ -651,7 +750,7 @@ Graph: `tools/port/out/primitives.md`. Upstream's `CSSValueTypes.h` reaches `CSS
 | `css/values/primitives/CSSSymbol.h`, `.cpp` | `have` | `CSS/Values/Primitives/Symbol.hpp`, `src/.../Symbol.cpp` | on | tested. |
 | `css/values/CSSNoConversionDataRequiredToken.h` | `have` | `CSS/Values/NoConversionDataRequiredTag.hpp` | on | Renamed `…Tag`. |
 | `css/ComputedStyleDependencies.h`, `.cpp` | `have` | `CSS/ComputedStyleDependencies.hpp`, `src/CSS/ComputedStyleDependencies.cpp` | header | tested. The `.cpp` needs `ToLengthConversionData` (unreviewed): layer 3. |
-| `css/values/CSSValueTypes.h`, `.cpp` | `have` | `CSS/Values/Types.hpp`, `src/.../Types.cpp`, `src/.../TypesValueCreation.cpp` | on (not `TypesValueCreation.cpp`) | tested. The value-creation half needs `ValueList`/`ValuePair`/`QuadValue`/`FunctionValue`: build it with the Values slice. |
+| `css/values/CSSValueTypes.h`, `.cpp` | `have` | `CSS/Values/Types.hpp`, `src/.../Types.cpp`, `src/.../TypesValueCreation.cpp` | on | tested. `TypesValueCreation.cpp` built from layer c1 (2026-10-13; it was left off after the Values slice); see *Layer c1*. |
 | `css/values/CSSSerializationContext.h`, `.cpp` | `have*` | `CSS/Values/SerialisationContext.hpp`, `src/.../SerialisationContext.cpp` | on | Decision (2026-10-12): URL replacement is not supported (upstream fills it only when saving web archives), so the context is an empty struct kept for future options; `DefaultSerialisationContext()` stays. Unbuilt users of the old fields (`CSSURL`, `CSSImportRule`, …) drop that code when reviewed. |
 
 **Bugs fixed:**
@@ -703,7 +802,7 @@ Graph from `css/calc/CSSCalcValue.h`, `CSSCalcTree.h`, the calc-dependent primit
 | `css/values/primitives/CSSPrimitiveNumericTypes+SymbolReplacement.h`, `.cpp` | `have` | `NumericTypesSymbolReplacement.hpp`, `.cpp` | on | tested. The `.cpp` was missing; now ported. |
 | `css/values/primitives/CSSPrimitiveNumericTypes+EvaluateCalc.h` | `have` | `NumericTypesEvaluateCalc.hpp` | on | `RequiresConversionData`/`IsUnevaluatedCalc` tested; evaluation tested in 3b. |
 | `css/values/primitives/CSSPrimitiveNumericTypes+CSSValueVisitation.h` | `port` | `NumericTypesValueVisitation.hpp` | on | tested. Was missing. |
-| `css/values/primitives/CSSPrimitiveNumericTypes+CSSValueCreation.h` | `have` | `NumericTypesValueCreation.hpp` | off | Needs `ValuePool`: waits for the Values slice. |
+| `css/values/primitives/CSSPrimitiveNumericTypes+CSSValueCreation.h` | `have` | `NumericTypesValueCreation.hpp` | on | tested (through `border-radius`, layer c1). See *Layer c1*. |
 | `css/values/primitives/CSSPrimitiveNumericTypes+Logging.h` | `wont` | | | `TextStream`. |
 | `style/AnchorPositionEvaluator.h` (`AnchorSizeDimension` only) | `have` | `Style/AnchorSizeDimension.hpp` | on | The enum moved out of the unreviewed `AnchorPositionEvaluator.hpp` (which now includes it) so calc serialisation can use it. |
 
@@ -1011,7 +1110,7 @@ Graph from `css/parser/CSSPropertyParserConsumer+Color.cpp`, `+ColorAdjust.cpp` 
 | `css/parser/CSSPropertyParserConsumer+ColorInterpolationMethod.h`, `.cpp` | `have` | `Consumers/ColorInterpolationMethod.hpp`, `src/.../ColorInterpolationMethod.cpp` | on | tested. The `.cpp` was missing. The hue method table is a `switch` (no `SortedArrayMap`, as in 3c). |
 | `css/parser/CSSPropertyParserConsumer+ColorAdjust.h`, `.cpp` | `have` | `Consumers/ColorAdjust.hpp`, `src/.../ColorAdjust.cpp` | on | tested. `consumeColorScheme` (Value) was in `ColorAdjustValueConsumers.cpp` until 2026-10-13. No `DARK_MODE_CSS` guard. |
 | `css/values/color-adjust/CSSColorScheme.h`, `.cpp` | `have` | `CSS/Values/ColorAdjust/ColorScheme.hpp`, `src/.../ColorScheme.cpp` | on | tested. The `.cpp` (serialiser) was missing. |
-| `css/parser/CSSParserFastPaths.h`, `.cpp` (colour half, `lengthValueRangeForPropertiesSupportingSimpleLengths`) | `have` | `CSS/Parser/ParserFastPaths.hpp`, `src/CSS/Parser/ParserFastPaths.cpp` | on | tested. The `.cpp` was missing. UTF-8 only, so no 8-/16-bit split; the WTF span helpers (`skipWhile`, `skipExactly`, …) are local helpers on `CSSOMStringView`. `charactersToDouble` → `std::from_chars` after skipping leading whitespace (same grammar as WTF's fast_float: no leading `+`, accepts `inf`/`nan`). `maybeParseValue` and the length/transform/display/opacity fast paths wait for the Values slice (`MaybeParseValue` is declared, not defined; TODO). |
+| `css/parser/CSSParserFastPaths.h`, `.cpp` (colour half, `lengthValueRangeForPropertiesSupportingSimpleLengths`) | `have` | `CSS/Parser/ParserFastPaths.hpp`, `src/CSS/Parser/ParserFastPaths.cpp` | on | tested. The `.cpp` was missing. UTF-8 only, so no 8-/16-bit split; the WTF span helpers (`skipWhile`, `skipExactly`, …) are local helpers on `CSSOMStringView`. `charactersToDouble` → `std::from_chars` after skipping leading whitespace (same grammar as WTF's fast_float: no leading `+`, accepts `inf`/`nan`). The value half (`maybeParseValue` and the length/transform/display/opacity fast paths) was ported in property parser layer c3. |
 | `css/parser/CSSPropertyParserConsumer+SymbolDefinitions.h`, `+Symbol.cpp` | `port` | `Consumers/SymbolDefinitions.hpp`, `src/.../Symbol.cpp` | on | tested. `validatedRange` → `ValidatedRange`. |
 | `css/parser/CSSPropertyParserConsumer+AngleDefinitions.h` | `have` | `Consumers/AngleDefinitions.hpp` | on | tested. See bugs. |
 | `css/parser/CSSPropertyParserConsumer+PercentageDefinitions.h`, `+KeywordDefinitions.h` | `have` | `Consumers/PercentageDefinitions.hpp`, `KeywordDefinitions.hpp` | on | tested through the colour parser. Match upstream. |
