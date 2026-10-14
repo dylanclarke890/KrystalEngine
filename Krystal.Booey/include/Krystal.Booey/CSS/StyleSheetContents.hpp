@@ -1,54 +1,39 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
 
 namespace krys::boo::css
 {
-  class CSSImportRule;
-  class CSSNamespaceRule;
-  class CSSRule;
-
+  /// @brief The parsed contents of a style sheet, shared between the CSSStyleSheet objects that use it.
+  // FIXME: Only the namespaces so far; the rules, import handling and parsing come with the rule model.
   class StyleSheetContents : public RefCounted<StyleSheetContents>
   {
     using PrefixNamespaceURIMap = HashMap<CSSOMStringAtom, CSSOMStringAtom>;
 
   private:
-    SmallList<Ref<CSSImportRule>> _importRules;
-    SmallList<Ref<CSSNamespaceRule>> _namespaceRules;
-    SmallList<Ref<CSSRule>> _childRules;
     PrefixNamespaceURIMap _namespaces;
-    CSSOMStringAtom _defaultNamespace;
+    CSSOMStringAtom _defaultNamespace {dom::StarAtom()};
 
   public:
-    KRYS_NODISCARD bool IsEmpty() const noexcept
+    StyleSheetContents() noexcept = default;
+
+    KRYS_NODISCARD static Ref<StyleSheetContents> Create() noexcept
     {
-      return TotalRules() == 0uz;
+      return CreateRef<StyleSheetContents>();
     }
-
-    KRYS_NODISCARD size_t TotalRules() const noexcept;
-
-    KRYS_NODISCARD CSSRule *RuleAt(size_t index) const noexcept;
-
-    bool InsertRule(Ref<CSSRule> &&rule, size_t index) noexcept;
-
-    bool DeleteRule(size_t index) noexcept;
-
-#pragma region Namespaces
-
-    void AddNamespace(const CSSOMStringAtom &prefix, const CSSOMStringAtom &namespaceURI) noexcept;
 
     KRYS_NODISCARD const CSSOMStringAtom &DefaultNamespace() const noexcept
     {
       return _defaultNamespace;
     }
 
-    KRYS_NODISCARD const CSSOMStringAtom &NamespaceForPrefix(const CSSOMStringAtom &prefix) const noexcept;
+    KRYS_NODISCARD const CSSOMStringAtom &
+      NamespaceURIFromPrefix(const CSSOMStringAtom &prefix) const noexcept;
 
-#pragma endregion
+    void ParserAddNamespace(const CSSOMStringAtom &prefix, const CSSOMStringAtom &uri) noexcept;
   };
 }

@@ -492,6 +492,14 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp
   include/Krystal.Booey/CSS/Selectors/Types/IsCaseSensitive.hpp
   include/Krystal.Booey/CSS/Selectors/Types/MatchLowercase.hpp
+
+  # Sheet parser, layer d1c (selector parser)
+  include/Krystal.Booey/CSS/Parser/ParserEnum.hpp
+  include/Krystal.Booey/CSS/Selectors/SelectorParser.hpp
+  include/Krystal.Booey/CSS/Selectors/Types/DisallowPseudoElements.hpp
+  include/Krystal.Booey/CSS/Selectors/Types/IsForgivingSelectorList.hpp
+  include/Krystal.Booey/CSS/StyleSheetContents.hpp
+  include/Krystal.Booey/Style/PseudoElementIdentifier.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -743,6 +751,10 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Selectors/Selector.cpp
   src/CSS/Selectors/SelectorList.cpp
   src/CSS/Selectors/SelectorParserContext.cpp
+
+  # Sheet parser, layer d1c (selector parser)
+  src/CSS/Selectors/SelectorParser.cpp
+  src/CSS/StyleSheetContents.cpp
 )
 
 target_precompile_headers(Krystal.Booey

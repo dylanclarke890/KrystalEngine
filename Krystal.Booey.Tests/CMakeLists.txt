@@ -232,10 +232,10 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Values/FilterImageValue.cpp
 		tests/CSS/Values/CursorImageValue.cpp
 		tests/CSS/Values/GradientValue.cpp
-		# tests/CSS/Selectors/SelectorParser.cpp
 		tests/CSS/Selectors/MutableSelector.cpp
 		tests/CSS/Selectors/Selector.cpp
 		tests/CSS/Selectors/SelectorList.cpp
+		tests/CSS/Selectors/SelectorParser.cpp
 		tests/CSS/Selectors/SelectorPseudoTypeMap.cpp
 		tests/CSS/Selectors/UserAgentParts.cpp
 
