@@ -3,6 +3,7 @@ import os
 import pathlib
 
 import css_properties
+import css_pseudo_selectors
 import css_value_keywords
 
 
@@ -19,6 +20,11 @@ def parse_args() -> argparse.Namespace:
         "--values",
         default=[current_dir / "css-value-keywords.in", current_dir / "svg-css-value-keywords.in"],
         help="Path to the CSS value keywords input file.",
+    )
+    parser.add_argument(
+        "--pseudo-selectors",
+        default=current_dir / "css-pseudo-selectors.json",
+        help="Path to the CSS pseudo-class and pseudo-element definitions JSON file.",
     )
     parser.add_argument(
         "--output-headers-dir",
@@ -48,6 +54,7 @@ def main():
 
     css_value_keywords.generate(args)
     css_properties.generate(args)
+    css_pseudo_selectors.generate(args)
 
 
 if __name__ == "__main__":

@@ -48,13 +48,14 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Property parser, layer c1 (2026-10-13): the generator reviewed against upstream's output, `PropertyParserCustom.hpp` reviewed and fixed, and the generated `PropertyParsing.cpp` built, linked and tested through the shorthands.
 - Property parser, layer c2 (2026-10-13): `Timeline`, `Animations`, `CounterStyles`, `Background`, `Content`, `Masking`, `Motion` and `Shapes` tested.
 - Property parser, layer c3 (2026-10-13): `PropertyParser`, the value half of `ParserFastPaths` and `ValuePool::CreateFontFaceValue` built and tested; properties parse end-to-end from strings.
+- Sheet parser, layer d1a (2026-10-13): pseudo-class/pseudo-element codegen (`codegen/css_pseudo_selectors.py`) generates the enums, the name maps, `UserAgentParts` and the `Selector` inlines; standard pseudos only. Maps and parts built and tested.
 
 **Open / next candidates:**
 - Property parser, layer c1 generator review done (2026-10-13): the generated parser matches upstream; the build now passes `ENABLE_DARK_MODE_CSS`/`ENABLE_VARIATION_FONTS`; 41 legacy `-webkit-` properties are dropped on purpose.
 - Property parser, layer c1 done (2026-10-13): `PropertyParserCustom.hpp` reviewed (8 behaviour bugs fixed), the generated `PropertyParsing.cpp` builds and links, tested through shorthands.
 - Property parser, layer c2 done (2026-10-13): the compile-only consumers are tested; three `Background` consumers that only served dropped `-webkit-` properties are removed.
 - Property parser, layer c3 done (2026-10-13): `PropertyParser` reviewed, built and tested, with the value half of `ParserFastPaths` and `ValuePool::CreateFontFaceValue`. The property parser slice is complete apart from the Style-dependent pieces below.
-- Next candidates: the rule/sheet parser (`CSSParser`, `CSSParserImpl`: what turns a stylesheet into rules and calls `PropertyParser::ParseValue`), or the Style side (`style::CustomProperty`/`BuilderState`) that the deferred pieces wait on.
+- Next: the sheet parser, planned 2026-10-13 (see the *Sheet parser* section). Layer d1a (pseudo-selector codegen) is done; next is d1b (`Selector`, `SelectorList`, `MutableSelector`, selector serialisation), then d1c (`SelectorParserContext`, `SelectorParser`). The Style side (`style::CustomProperty`/`BuilderState`) that the deferred pieces wait on comes later.
 - Property parser, not yet ported (`Font`): the string parsers behind the `FontFace` interface and the canvas 2D context's `font` (`ParseUnresolvedFont`, `ParseFontFaceSrc`, `ParseFontFaceSizeAdjust`, `ParseFontFaceUnicodeRange`, `ParseFontFaceDisplay`, `ParseFontFaceFontStyle`, `ParseFontFaceFeatureSettings`, `ParseFontFaceFontWidth`, `ParseFontFaceFontWeight`; FIXME in `Consumers/Font.hpp`). They need `ScriptExecutionContext`/`Document` (quirks mode, value pool) and six of them the generated `PropertyParsing`. Also `LowerFontShorthand` and the `SystemFontDatabase::FontShorthand` sync check (need `SystemFontDatabase`).
 - Property parser, not yet ported: `parseEasingFunctionDeprecated` (`CSSPropertyParserConsumer+Easing`; string → `TimingFunction`, used only by Web Animations; needs `TimingFunction` and `Style::createTimingFunctionDeprecated`) and `parseTransformRaw` (`CSSPropertyParserConsumer+Transform`; string → `Style::Transform`, used only by Web Animations; needs `Style::Transform`, `BuilderState` and the generated `consumeTransform`). Come with animations. Also `parseFilterValueListOrNoneRaw` (`CSSPropertyParserConsumer+Filter`; string → `Style::Filter`, used only by the canvas 2D context's `filter`; needs `Style::Filter`, `BuilderState` and `Document`); comes with canvas.
 - Property parser, deferred definitions (need `style::CustomProperty`/`BuilderState`): `VariableParser::ParseInitialValueForUniversalSyntax`, `PropertyParser::ParseTypedCustomPropertyValue`/`ParseTypedCustomPropertyInitialValue`.
@@ -674,6 +675,54 @@ Tests: `tests/CSS/Properties/Consumers/{Timeline,Animations,CounterStyles,Backgr
 - Fast path: UTF-8 only; `StringParsingBuffer` is a `CSSOMStringView` advanced with `remove_prefix`, and the transform-name checks compare prefixes case-insensitively rather than character by character.
 
 Tests: `tests/CSS/Properties/PropertyParser.cpp` (longhands, shorthands, CSS-wide keywords, `var()`, failure rollback, `-internal-auto-base()`, `@keyframes`/`@position-try`/`@page` and descriptors, the string entry points, custom-property syntax and its dependencies, `ParseGlobalKeyword`, `CreateFontFaceValue`) and `ParserFastPaths::MaybeParseValue` in `tests/CSS/Parser/ParserFastPaths.cpp`: 11 cases / 255 assertions with the existing fast-path cases. Full Booey suite: 1504 cases / 674094 assertions; all pass except 4 expected failures. Whole solution builds with no warnings.
+
+## Sheet parser — planned
+
+Entry: `css/parser/CSSParser.cpp` (headers-only graph: 123 files, `tools/port/out/sheet-parser.md`). Upstream has merged `CSSParserImpl` into `CSSParser` (~2,050 lines). It turns text into the internal rule model (`StyleRule*` in `StyleSheetContents`) and calls `PropertyParser::ParseValue` per declaration. About 80 of the graph's files (values, calc, colour, tokenizer, property parser) are done; everything above them is on disk but unreviewed and unbuilt.
+
+**Decisions (2026-10-13):**
+- `src/CSS/Parser.cpp`/`Parser/Parser.hpp` (own spec-driven implementation that built CSSOM objects directly, mostly TODOs) is replaced by a port of upstream's `CSSParser`.
+- `Rules/Rule.hpp` is Krystal's `StyleRuleBase`/`StyleRule*`: the internal representation, as `Value` is for `CSSValue`. The CSSOM wrappers (`CSSOM/CSS*Rule`, `CSSStyleSheet`) are created from it and are a later slice.
+- Serialisation is not deferred: serialisers (selector text, `ShorthandSerializer`/`cssText`, media query and rule serialisation) are completed in the layer that owns them, tested alongside parsing.
+
+**Layers (bottom-up, each built and tested):**
+- **d1. Selectors:** `CSSSelector`, `CSSSelectorList`, `MutableCSSSelector`, `CSSSelectorParserContext`, `CSSSelectorParser` (~4,100 upstream lines; Krystal `Selectors/*`). Upstream's `CSSSelectorEnums.h` and pseudo-class/element tables are generated by `css/scripts/process-css-pseudo-selectors.py`; Krystal's `Selectors/Enums/*` are hand-written, so likely a codegen step. Tests parse and serialise selectors.
+- **d2. Declaration blocks:** `StyleProperties`, `MutableStyleProperties`, `ImmutableStyleProperties`, `StylePropertiesInlines` and `ShorthandSerializer` (~2,900 lines; Krystal `Properties/StyleProperties.hpp` etc., `ShorthandSerialiser.hpp`).
+- **d3. Conditions:** media/container query parsing and serialisation (`query/MediaQuery`, `GenericMediaQueryParser`/`Types`/`Serialization`, `MediaQueryParser`, `ContainerQuery`, `ContainerQueryParser`, the `MediaQueryFeatures`/`ContainerQueryFeatures` schemas the parser validates against), `MediaQueryParserContext`, `MediaList`, `CSSSupportsParser`. Evaluation deferred.
+- **d4. Rule model:** `StyleRule` (all rule types), `StyleRuleImport` (no loading), `StyleRuleFunction`, `CSSAtRuleID`, `CSSParserEnum`, `CSSCounterStyleDescriptors`, `StyleSheet`, the parse side of `StyleSheetContents`.
+- **d5. `CSSParser`:** whole stylesheets parse end to end.
+- **Later:** CSSOM wrappers, `@import` loading (`CachedCSSStyleSheet`), `parseInlineStyleDeclaration` (needs `Element`/`Document`), query evaluation, `RuleSet`/style resolution.
+
+**Boundaries:** `CSSParserObserver`/`CSSParserObserverWrapper` and `cssjit/CompiledSelector.h` are `wont`; `html/parser/NestingLevelIncrementer.h` is trivial (`SetForScope`-like); `platform/graphics/FontFeatureValues.h`/`FontPaletteValues.h` are small and come with d4.
+
+### Layer d1a: pseudo-selector codegen (2026-10-13)
+
+Graph from the five selector `.cpp`s (`CSSSelector`, `CSSSelectorList`, `MutableCSSSelector`, `CSSSelectorParserContext`, `CSSSelectorParser`; headers-only): 68 files (`tools/port/out/selectors.md`), nearly all done. New for d1: the five selector files, `SelectorPseudoTypeMap.h`, `CSSParserEnum.h` (pulled forward from d4), `style/PseudoElementIdentifier.h` and `PseudoElementType` (`rendering/style/RenderStyleConstants.h`). `dom::QualifiedName` and `StyleSheetContents`'s namespace lookup exist (the parser accepts a null sheet). Unresolved generated headers: `CSSSelectorEnums.h`, `CSSSelectorInlines.h`, `UserAgentParts.h` (this layer), plus `HTMLNames.h` and `Settings.h`.
+
+Decision (2026-10-13): only standard pseudo-classes and pseudo-elements are supported, including ones nothing else supports yet (media playback, `:autofill`, `:fullscreen`, `:visited`, `::highlight`, view transitions, ...), so they're easy to wire up later. Prefixed (`-webkit-`, `-apple-`, `-internal-`), non-standard and legacy alias names are dropped.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/CSSPseudoSelectors.json` | `have*` | `codegen/css-pseudo-selectors.json` | — | Filtered copy: 63 of 86 pseudo-classes and 25 of 89 pseudo-elements; no `aliases`, `conditional` or `status` fields. |
+| `css/scripts/process-css-pseudo-selectors.py` | `have*` | `codegen/css_pseudo_selectors.py` (run by `codegen/main.py`) | — | See differences. |
+| generated `CSSSelectorEnums.h` | `have` | generated `CSS/Selectors/SelectorEnums.hpp` | on | tested. `SelectorPseudoClass`/`SelectorPseudoElement` (upstream `CSSSelectorPseudoClass`/`CSSSelectorPseudoElement`) with contiguous enum traits. Replaces the hand-written `Selectors/Enums/PseudoClassId.hpp`/`PseudoElementId.hpp` stubs (deleted). |
+| generated `SelectorPseudoClassAndCompatibilityElementMap.cpp`, `SelectorPseudoElementMap.cpp` | `have` | same names, generated under `CSS/Selectors/` | on | tested. gperf, upstream's options. |
+| `css/SelectorPseudoTypeMap.h` | `have` | `CSS/Selectors/SelectorPseudoTypeMap.hpp` | on | tested. Includes `SelectorEnums.hpp` rather than `Selector.hpp`. |
+| generated `UserAgentParts.h`, `.cpp` | `have` | generated `CSS/Selectors/UserAgentParts.hpp`, `.cpp` | on | tested. `css::UserAgentParts::DetailsContent()` etc. (PascalCase). |
+| generated `CSSSelectorInlines.h` | `have` | generated `CSS/Selectors/SelectorInlines.hpp` | — | Generated, not yet included: defines `Selector` statics (`IsPseudoClassEnabled`, `IsPseudoElementEnabled`, `SelectorTextForPseudoClass`, `PseudoClass`/`PseudoElement` `RequiresArgument`/`MayHaveArgument`); built and tested with d1b. |
+
+**Differences:**
+- Dropped pseudos: all prefixed ones (5 `-webkit-`, 5 `-internal-` and 1 `-apple-` pseudo-classes; 59 `-webkit-`, 4 `-internal-` and 1 `-apple-` pseudo-elements, including every `::-webkit-scrollbar*` part and the form-control/media-control parts), WebKit's non-standard scrollbar pseudo-classes (`:horizontal`, `:vertical`, `:decrement`, `:increment`, `:start`, `:end`, `:double-button`, `:single-button`, `:no-button`, `:corner-present`), `:window-inactive`, `:immersive` (`<model>` element, not standard) and the legacy aliases (`:matches`, `:-webkit-any-link`, `:-webkit-autofill`, `:-webkit-full-screen`, `::-webkit-file-upload-button`, `::-webkit-input-placeholder`).
+- So `SelectorPseudoElement` has no `UserAgentPartLegacyAlias` or `WebKitUnknown`, and there is no `nameForUserAgentPartLegacyAlias`. Upstream accepts any unknown `::-webkit-*` pseudo-element (as `WebKitUnknown`, matching nothing); here it is a parse error, as the standard says. The `isUASheetBehavior` gating of `-internal-` pseudos is gone with them.
+- No `conditional`/`ENABLE()` support: every standard pseudo is always generated (upstream compiles out the media ones without `ENABLE(VIDEO)`, `:fullscreen` without `ENABLE(FULLSCREEN_API)`, ...). Settings flags remain (`viewTransitionsEnabled`, `popoverAttributeEnabled`, `cssAppearanceBaseEnabled`, `targetTextPseudoElementEnabled`, `thumbAndTrackPseudoElementsEnabled`), read from `SelectorParserContext` under upstream's names.
+- The validator rejects any prefixed name instead of counting `-webkit-` names.
+- UTF-8 only: the maps take a `CSSOMStringView` and hand it straight to gperf (no 16-bit path); non-ASCII names don't match.
+- The gperf maps disable MSVC's C4267 (gperf's hash narrows `size_t` to `unsigned int`); upstream disables its own set of warnings around them.
+- `codegen/utils.py`'s `run_gperf` takes the gperf options (default unchanged, for `ValueId`).
+
+**Unbuilt d1b/d1c files touched:** `Selector.hpp`, `MutableSelector.hpp` and `SelectorParser.cpp` were renamed from `PseudoClassId`/`PseudoElementId` to the generated enums (mechanical; not reviewed). `Selector.cpp` still calls the stubs' `IsElementBackedPseudoElement` (d1b).
+
+Tests: `tests/CSS/Selectors/{SelectorPseudoTypeMap,UserAgentParts}.cpp`: 10 cases / 63 assertions. Full Booey suite: 1514 cases / 674157 assertions; all pass except 4 expected failures. Builds with no warnings.
 
 ## Slice 3: Colour
 

@@ -232,6 +232,8 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Values/CursorImageValue.cpp
 		tests/CSS/Values/GradientValue.cpp
 		# tests/CSS/Selectors/SelectorParser.cpp
+		tests/CSS/Selectors/SelectorPseudoTypeMap.cpp
+		tests/CSS/Selectors/UserAgentParts.cpp
 
 		# Graphics
 		tests/Graphics/DoublePoint.cpp

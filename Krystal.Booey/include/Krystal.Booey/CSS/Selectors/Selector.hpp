@@ -1,9 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Selectors/Enums/PseudoClassId.hpp"
-#include "Krystal.Booey/CSS/Selectors/Enums/PseudoElementId.hpp"
 #include "Krystal.Booey/CSS/Selectors/Enums/SelectorMatch.hpp"
 #include "Krystal.Booey/CSS/Selectors/Enums/SelectorRelation.hpp"
+#include "Krystal.Booey/CSS/Selectors/SelectorEnums.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorFlag.hpp"
 #include "Krystal.Booey/CSS/Selectors/Types/IsCaseSensitive.hpp"
 #include "Krystal.Booey/CSS/Selectors/Types/MatchLowercase.hpp"
@@ -87,8 +86,8 @@ namespace krys::boo::css
     SelectorRelation _relation : BitCount<SelectorRelation>();
     SelectorFlag _flags : BitCount<SelectorFlag>() {SelectorFlag::IsFirstInComplexSelector
                                                     | SelectorFlag::IsLastInComplexSelector};
-    PseudoClassId _pseudoClass : BitCount<PseudoClassId>();
-    PseudoElementId _pseudoElement : BitCount<PseudoElementId>();
+    SelectorPseudoClass _pseudoClass : BitCount<SelectorPseudoClass>();
+    SelectorPseudoElement _pseudoElement : BitCount<SelectorPseudoElement>();
 
     union DataUnion
     {
@@ -116,13 +115,13 @@ namespace krys::boo::css
       return _relation;
     }
 
-    KRYS_NODISCARD PseudoClassId PseudoClass() const noexcept
+    KRYS_NODISCARD SelectorPseudoClass PseudoClass() const noexcept
     {
       assert(_match == SelectorMatch::PseudoClass);
       return _pseudoClass;
     }
 
-    KRYS_NODISCARD PseudoElementId PseudoElement() const noexcept
+    KRYS_NODISCARD SelectorPseudoElement PseudoElement() const noexcept
     {
       assert(_match == SelectorMatch::PseudoElement);
       return _pseudoElement;
@@ -290,12 +289,12 @@ namespace krys::boo::css
       _relation = relation;
     }
 
-    void SetPseudoElement(PseudoElementId type) noexcept
+    void SetPseudoElement(SelectorPseudoElement type) noexcept
     {
       _pseudoElement = type;
     }
 
-    void SetPseudoClass(PseudoClassId type) noexcept
+    void SetPseudoClass(SelectorPseudoClass type) noexcept
     {
       _pseudoClass = type;
     }
@@ -405,4 +404,4 @@ namespace krys::boo::css
   KRYS_NODISCARD bool
     ComplexSelectorsEqual(const Selector &a, const Selector &b,
                           ComplexSelectorsEqualMode mode = ComplexSelectorsEqualMode::Full) noexcept;
-}
+}

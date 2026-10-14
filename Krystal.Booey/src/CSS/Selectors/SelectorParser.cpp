@@ -648,7 +648,7 @@ namespace krys::boo::css
     // (relation) on in the cases where there are no simple selectors preceding
     // the pseudo element.
     bool isHostPseudo = compoundSelector.Match() == SelectorMatch::PseudoClass
-                        && compoundSelector.PseudoClass() == PseudoClassId::Host;
+                        && compoundSelector.PseudoClass() == SelectorPseudoClass::Host;
     if (isHostPseudo && elementName == CSSOMStringAtom::Null() && namespacePrefix == CSSOMStringAtom::Null())
     {
       return false;
@@ -875,4 +875,4 @@ namespace krys::boo::css
   }
 
 #pragma endregion
-}
+}

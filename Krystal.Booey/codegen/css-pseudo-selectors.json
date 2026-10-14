@@ -1,0 +1,201 @@
+﻿{
+    "documentation": {
+        "description": "This file is used to generate code for pseudo-classes and pseudo-elements.",
+        "fields": {
+            "argument": [
+                "Specifies if the pseudo takes an argument, and whether that argument is required or optional.",
+                "The 'optional' value is for pseudos like `:host` which support both `:host` and `:host(argument)`.",
+                "The 'required' value is for pseudos which don't support the argument-free syntax like: `::highlight(name)`.",
+                "Omit this field if the pseudo never takes an argument."
+            ],
+            "comment": "Add a description of how the pseudo is used. Especially useful for non-standard or internal ones.",
+            "settings-flag": "Settings flag queried from SelectorParserContext. Note that the flag needs to be manually added there.",
+            "supports-single-colon-for-compatibility": [
+                "For pseudo-elements only. Whether the pseudo-element supports the single colon form (e.g. `:after` instead of `::after`).",
+                "You should not have to add more of these. They exist only for compatibility with CSS 2.1."
+            ],
+            "user-agent-part": [
+                "For pseudo-elements only. Whether the pseudo-element represents an element in an user agent shadow tree.",
+                "They internally map to `SelectorPseudoElement::UserAgentPart`.",
+                "Also creates an entry in UserAgentParts."
+            ],
+            "user-agent-part-string": [
+                "For pseudo-elements only. When the pseudo-element needs to be in UserAgentParts despite not being a `PseudoElement::UserAgentPart`.",
+                "Mutually exclusive with the user-agent-part field."
+            ]
+        },
+        "notes": [
+            "Only standard pseudo-classes and pseudo-elements are listed; prefixed, non-standard and legacy alias names are not supported."
+        ]
+    },
+    "pseudo-classes": {
+        "active": {},
+        "active-view-transition": {
+            "settings-flag": "viewTransitionsEnabled"
+        },
+        "active-view-transition-type": {
+            "argument": "required",
+            "settings-flag": "viewTransitionsEnabled"
+        },
+        "any-link": {},
+        "autofill": {},
+        "buffering": {},
+        "checked": {},
+        "default": {},
+        "defined": {},
+        "dir": {
+            "argument": "required"
+        },
+        "disabled": {},
+        "empty": {},
+        "enabled": {},
+        "first-child": {},
+        "first-of-type": {},
+        "focus": {},
+        "focus-visible": {},
+        "focus-within": {},
+        "fullscreen": {},
+        "future": {},
+        "has": {
+            "argument": "required"
+        },
+        "host": {
+            "argument": "optional"
+        },
+        "hover": {},
+        "in-range": {},
+        "indeterminate": {},
+        "invalid": {},
+        "is": {
+            "argument": "required"
+        },
+        "lang": {
+            "argument": "required"
+        },
+        "last-child": {},
+        "last-of-type": {},
+        "link": {},
+        "modal": {},
+        "muted": {},
+        "not": {
+            "argument": "required"
+        },
+        "nth-child": {
+            "argument": "required"
+        },
+        "nth-last-child": {
+            "argument": "required"
+        },
+        "nth-last-of-type": {
+            "argument": "required"
+        },
+        "nth-of-type": {
+            "argument": "required"
+        },
+        "only-child": {},
+        "only-of-type": {},
+        "optional": {},
+        "out-of-range": {},
+        "past": {},
+        "paused": {},
+        "picture-in-picture": {},
+        "placeholder-shown": {},
+        "playing": {},
+        "popover-open": {
+            "settings-flag": "popoverAttributeEnabled"
+        },
+        "read-only": {},
+        "read-write": {},
+        "required": {},
+        "root": {},
+        "scope": {},
+        "seeking": {},
+        "stalled": {},
+        "state": {
+            "argument": "required"
+        },
+        "target": {},
+        "user-invalid": {},
+        "user-valid": {},
+        "valid": {},
+        "visited": {},
+        "volume-locked": {},
+        "where": {
+            "argument": "required"
+        }
+    },
+    "pseudo-elements": {
+        "after": {
+            "supports-single-colon-for-compatibility": true
+        },
+        "backdrop": {},
+        "before": {
+            "supports-single-colon-for-compatibility": true
+        },
+        "checkmark": {
+            "settings-flag": "cssAppearanceBaseEnabled"
+        },
+        "cue": {
+            "argument": "optional",
+            "user-agent-part-string": true
+        },
+        "details-content": {
+            "user-agent-part": true
+        },
+        "file-selector-button": {
+            "user-agent-part": true
+        },
+        "first-letter": {
+            "supports-single-colon-for-compatibility": true
+        },
+        "first-line": {
+            "supports-single-colon-for-compatibility": true
+        },
+        "grammar-error": {},
+        "highlight": {
+            "argument": "required"
+        },
+        "marker": {},
+        "part": {
+            "argument": "required"
+        },
+        "placeholder": {
+            "user-agent-part": true
+        },
+        "selection": {},
+        "slotted": {
+            "argument": "required"
+        },
+        "spelling-error": {},
+        "target-text": {
+            "settings-flag": "targetTextPseudoElementEnabled"
+        },
+        "thumb": {
+            "settings-flag": "thumbAndTrackPseudoElementsEnabled",
+            "user-agent-part": true
+        },
+        "track": {
+            "settings-flag": "thumbAndTrackPseudoElementsEnabled",
+            "user-agent-part": true
+        },
+        "view-transition": {
+            "settings-flag": "viewTransitionsEnabled"
+        },
+        "view-transition-group": {
+            "argument": "required",
+            "settings-flag": "viewTransitionsEnabled"
+        },
+        "view-transition-image-pair": {
+            "argument": "required",
+            "settings-flag": "viewTransitionsEnabled"
+        },
+        "view-transition-new": {
+            "argument": "required",
+            "settings-flag": "viewTransitionsEnabled"
+        },
+        "view-transition-old": {
+            "argument": "required",
+            "settings-flag": "viewTransitionsEnabled"
+        }
+    }
+}

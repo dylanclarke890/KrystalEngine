@@ -74,22 +74,22 @@ namespace krys::boo::css
       _selector->SetMatch(match);
     }
 
-    KRYS_NODISCARD PseudoElementId PseudoElement() const noexcept
+    KRYS_NODISCARD SelectorPseudoElement PseudoElement() const noexcept
     {
       return _selector->PseudoElement();
     }
 
-    void SetPseudoElement(PseudoElementId type) noexcept
+    void SetPseudoElement(SelectorPseudoElement type) noexcept
     {
       _selector->SetPseudoElement(type);
     }
 
-    KRYS_NODISCARD PseudoClassId PseudoClass() const noexcept
+    KRYS_NODISCARD SelectorPseudoClass PseudoClass() const noexcept
     {
       return _selector->PseudoClass();
     }
 
-    void SetPseudoClass(PseudoClassId type) noexcept
+    void SetPseudoClass(SelectorPseudoClass type) noexcept
     {
       _selector->SetPseudoClass(type);
     }
@@ -125,4 +125,4 @@ namespace krys::boo::css
   };
 
   using MutableSelectorList = SmallList<UniquePtr<MutableSelector>>;
-}
+}
