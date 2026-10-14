@@ -212,7 +212,7 @@ namespace krys::boo::css::tests
       auto sheet = CSSStyleSheet::Create(Ref<StyleSheetContents>(contents), *text);
       REQUIRE(sheet->OwnerNode() == text.get());
       REQUIRE(sheet->OwnerDocument() == document.get());
-      REQUIRE(sheet->StyleScope() == nullptr);
+      REQUIRE(sheet->StyleScope() == &document->StyleScope());
       REQUIRE_FALSE(sheet->IsDetached());
       REQUIRE(sheet->CanAccessRules());
 

@@ -257,7 +257,7 @@ namespace krys::boo::dom
 
       for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(*target))
       {
-        ExtensibilityHooks::NodeInserted(inclusiveDescendant);
+        ExtensibilityHooks::NodeInserted(inclusiveDescendant, &inclusiveDescendant == target.get());
 
         if (!inclusiveDescendant.IsConnected())
         {

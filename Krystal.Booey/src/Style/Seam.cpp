@@ -9,7 +9,7 @@
 #include "Krystal.Core/Assert.hpp"
 
 // FIXME: Placeholder definitions; see `Style/Seam.hpp`. Only `RenderStyle` can be constructed, so only its
-// colour members, the document functions and `Scope::ForNode` can be reached.
+// colour members and the document functions can be reached.
 
 namespace krys::boo
 {
@@ -389,36 +389,6 @@ namespace krys::boo::style
   }
 
   void Resolver::AddKeyframeStyle(css::KeyframesRule &) noexcept
-  {
-    krys_unreachable();
-  }
-
-  Scope *Scope::ForNode(dom::Node &) noexcept
-  {
-    return nullptr;
-  }
-
-  void Scope::DidChangeActiveStyleSheetCandidates() noexcept
-  {
-    krys_unreachable();
-  }
-
-  void Scope::DidChangeStyleSheetContents() noexcept
-  {
-    krys_unreachable();
-  }
-
-  bool Scope::ActiveStyleSheetsContains(const css::CSSStyleSheet &) const noexcept
-  {
-    krys_unreachable();
-  }
-
-  Resolver *Scope::ResolverIfExists() noexcept
-  {
-    krys_unreachable();
-  }
-
-  void Scope::ClearLastSuccessfulPositionOptionIndexMap() noexcept
   {
     krys_unreachable();
   }

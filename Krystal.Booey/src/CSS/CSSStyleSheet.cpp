@@ -13,6 +13,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Node.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+#include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/StyleSheetContentsCache.hpp"
 #include "Krystal.Core/Assert.hpp"

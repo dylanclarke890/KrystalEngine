@@ -47,6 +47,7 @@ namespace krys::boo::dom
   class Element;
   class HTMLCollection;
   class ProcessingInstruction;
+  class ShadowRoot;
   class Text;
   class TreeWalker;
 
@@ -98,6 +99,8 @@ namespace krys::boo::dom
     url::URL _baseElementURL;
 
     mutable UniquePtr<css::ParserContext> _cachedCSSParserContext;
+
+    List<WeakPtr<ShadowRoot>> _inDocumentShadowRoots;
 
   protected:
     Document(DocumentFlags flags) noexcept;
@@ -389,6 +392,15 @@ namespace krys::boo::dom
     KRYS_NODISCARD const css::ParserContext &CssParserContext() const noexcept;
 
     void InvalidateCachedCSSParserContext() noexcept;
+
+    /// @brief The connected shadow roots among the document's shadow-including descendants.
+    KRYS_NODISCARD const List<WeakPtr<ShadowRoot>> &InDocumentShadowRoots() const noexcept
+    {
+      return _inDocumentShadowRoots;
+    }
+
+    void DidInsertInDocumentShadowRoot(ShadowRoot &shadowRoot) noexcept;
+    void DidRemoveInDocumentShadowRoot(ShadowRoot &shadowRoot) noexcept;
 
 #pragma endregion
 

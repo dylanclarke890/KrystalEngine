@@ -14,8 +14,10 @@ namespace krys::boo::dom
   class ExtensibilityHooks
   {
   public:
+    /// @param isSubtreeRoot Whether `insertedNode` is the node that was inserted, rather than one of its
+    /// shadow-including descendants.
     /// @see https://dom.spec.whatwg.org/#concept-node-insert-ext
-    static void NodeInserted(Node &insertedNode) noexcept;
+    static void NodeInserted(Node &insertedNode, bool isSubtreeRoot) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-node-post-connection-ext
     static void NodePostConnection(Node &connectedNode) noexcept;

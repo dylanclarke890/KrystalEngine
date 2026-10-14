@@ -31,8 +31,8 @@
 //   - `RenderStyle`, `RenderView`, `RenderElement`, `RenderBox`: rendering.
 //   - `style::BuilderState`, `style::AnchorPositionEvaluator`, `style::ContainerQueryEvaluator`: the style
 //     resolver (`Style/BuilderState.hpp`, `Style/AnchorPositionEvaluator.hpp`, unreviewed).
-//   - `style::Scope`, `style::Resolver`: style sheet invalidation and the style resolver. Nothing creates a
-//     scope yet (`ScopeForNode` returns null), so style sheets have no scope to notify.
+//   - `style::Resolver`: the style resolver. Scopes never create one (`style::Scope::ResolverIfExists` is
+//     null), so its members are unreachable.
 //   - the `Document*` colour functions: `dom::Document` (upstream members) once it has a page and settings.
 //   - the `Document*` security and keyframes functions: `dom::Document` (upstream members) once it has a
 //     security origin and runs animations.
@@ -320,26 +320,5 @@ namespace krys::boo::style
     Resolver() = delete;
 
     void AddKeyframeStyle(css::KeyframesRule &) noexcept;
-  };
-
-  class Scope : public CanMakeCheckedPtr<Scope>, public CanMakeWeakPtr<Scope>
-  {
-    KRYS_NON_COPY_MOVABLE(Scope);
-    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Scope);
-
-  public:
-    Scope() = delete;
-
-    /// @brief Collapses `Style::Scope::forNode(node)`. No document or shadow root has a scope yet, so it's
-    /// always null.
-    KRYS_NODISCARD static Scope *ForNode(dom::Node &) noexcept;
-
-    void DidChangeActiveStyleSheetCandidates() noexcept;
-    void DidChangeStyleSheetContents() noexcept;
-    KRYS_NODISCARD bool ActiveStyleSheetsContains(const css::CSSStyleSheet &) const noexcept;
-    KRYS_NODISCARD Resolver *ResolverIfExists() noexcept;
-
-    /// @brief Collapses `setLastSuccessfulPositionOptionIndexMap({ })`.
-    void ClearLastSuccessfulPositionOptionIndexMap() noexcept;
   };
 }

@@ -2,6 +2,11 @@
 
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 
+namespace krys::boo::css
+{
+  class CSSStyleSheet;
+}
+
 namespace krys::boo::html
 {
   /// @see https://html.spec.whatwg.org/#htmlstyleelement
@@ -11,9 +16,11 @@ namespace krys::boo::html
 
   private:
     UniquePtr<dom::DOMTokenList> _blocking;
+    RefPtr<css::CSSStyleSheet> _sheet;
 
   public:
     HTMLStyleElement(dom::Document &document) noexcept;
+    ~HTMLStyleElement() noexcept override;
 
 #pragma region HTMLStyleElement - https://html.spec.whatwg.org/#htmlstyleelement
 
@@ -41,6 +48,14 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/#dom-style-type
     void Type(dom::DOMString &&value) noexcept;
+
+#pragma endregion
+
+#pragma region LinkStyle - https://drafts.csswg.org/cssom/#the-linkstyle-interface
+
+    /// @brief The associated CSS style sheet, if any.
+    /// @see https://drafts.csswg.org/cssom/#dom-linkstyle-sheet
+    KRYS_NODISCARD css::CSSStyleSheet *Sheet() const noexcept;
 
 #pragma endregion
   };

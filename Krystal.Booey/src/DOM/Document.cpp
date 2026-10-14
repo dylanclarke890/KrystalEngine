@@ -36,6 +36,7 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTitleElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGScriptElement.hpp"
 
@@ -53,6 +54,7 @@ namespace krys::boo::dom
         _flags(DocumentFlags::None), _url(url::AboutBlankURL()), _baseURL(_url)
   {
     SetNodeFlag(NodeFlags::IsConnected);
+    _styleScope = CreateUnique<style::Scope>(*this);
   }
 
   Document::~Document() noexcept = default;
@@ -725,6 +727,20 @@ namespace krys::boo::dom
   void Document::InvalidateCachedCSSParserContext() noexcept
   {
     _cachedCSSParserContext = nullptr;
+  }
+
+  void Document::DidInsertInDocumentShadowRoot(ShadowRoot &shadowRoot) noexcept
+  {
+    krys_debug_assert(shadowRoot.IsConnected());
+    krys_debug_assert(std::ranges::none_of(_inDocumentShadowRoots, [&](const WeakPtr<ShadowRoot> &root)
+                                           { return root.get() == &shadowRoot; }));
+    _inDocumentShadowRoots.push_back(CreateWeakPtr(&shadowRoot));
+  }
+
+  void Document::DidRemoveInDocumentShadowRoot(ShadowRoot &shadowRoot) noexcept
+  {
+    std::erase_if(_inDocumentShadowRoots,
+                  [&](const WeakPtr<ShadowRoot> &root) { return !root || root.get() == &shadowRoot; });
   }
 
 #pragma endregion

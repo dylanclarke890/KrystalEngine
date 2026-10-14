@@ -2,11 +2,17 @@
 
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo::html
 {
   class CustomElementAlgorithms;
   class CustomElementRegistry;
+}
+
+namespace krys::boo::style
+{
+  class Scope;
 }
 
 namespace krys::boo::dom
@@ -31,6 +37,9 @@ namespace krys::boo::dom
     RefPtr<html::CustomElementRegistry> _customElementRegistry;
 
   protected:
+    /// @brief Created by the document or shadow root's constructor.
+    UniquePtr<style::Scope> _styleScope;
+
     explicit DocumentOrShadowRoot(RefPtr<html::CustomElementRegistry> &&registry = nullptr) noexcept;
     ~DocumentOrShadowRoot() noexcept;
 
@@ -50,5 +59,11 @@ namespace krys::boo::dom
     KRYS_NODISCARD RefPtr<Element> ActiveElement() const noexcept;
 
 #pragma endregion
+
+    /// @brief The style sheet bookkeeping of this document or shadow root.
+    KRYS_NODISCARD style::Scope &StyleScope() const noexcept
+    {
+      return *_styleScope;
+    }
   };
 }

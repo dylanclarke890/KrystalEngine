@@ -54,7 +54,7 @@ namespace krys::boo::css
     }
 
     dom::MutationObserverAlgorithms::QueueMutationRecord(
-      dom::MutationRecordType::Attributes, ShareRef(*_element), Attributes::Style, dom::DOMStringAtom::Null(),
+      dom::MutationRecordType::Attributes, _element, Attributes::Style, dom::DOMStringAtom::Null(),
       _oldValue ? dom::DOMStringAtom(*_oldValue) : dom::DOMStringAtom::Null(), {}, {}, nullptr, nullptr);
   }
 

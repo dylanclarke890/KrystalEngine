@@ -5,6 +5,7 @@
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::dom
@@ -15,7 +16,10 @@ namespace krys::boo::dom
         DocumentOrShadowRoot(krys::move(registry))
   {
     SetNodeFlag(NodeFlags::IsInShadowTree);
+    _styleScope = CreateUnique<style::Scope>(*this);
   }
+
+  ShadowRoot::~ShadowRoot() noexcept = default;
 
   Element *ShadowRoot::Host() const noexcept
   {
@@ -26,6 +30,33 @@ namespace krys::boo::dom
 
     return nullptr;
   }
+
+#pragma region Extension Hooks
+
+  void ShadowRoot::OnInsert() noexcept
+  {
+    DocumentFragment::OnInsert();
+    if (IsConnected())
+    {
+      NodeDocument().DidInsertInDocumentShadowRoot(*this);
+    }
+  }
+
+  void ShadowRoot::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
+  {
+    DocumentFragment::OnRemove(isSubtreeRoot, oldAncestor);
+    NodeDocument().DidRemoveInDocumentShadowRoot(*this);
+  }
+
+  void ShadowRoot::OnAdopt(Document &oldDocument) noexcept
+  {
+    DocumentFragment::OnAdopt(oldDocument);
+
+    // Style scopes are document specific.
+    _styleScope = CreateUnique<style::Scope>(*this);
+  }
+
+#pragma endregion
 
   EventTarget *ShadowRoot::GetParent(Event &event) const noexcept
   {

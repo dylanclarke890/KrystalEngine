@@ -29,6 +29,7 @@ namespace krys::boo::dom
   public:
     ShadowRoot(Document &document, RefPtr<html::CustomElementRegistry> &&registry = nullptr,
                NodeFlags flags = NodeFlags::None) noexcept;
+    ~ShadowRoot() noexcept override;
 
 #pragma region ShadowRoot - https://dom.spec.whatwg.org/#shadowroot
 
@@ -73,6 +74,14 @@ namespace krys::boo::dom
   protected:
     /// @see https://dom.spec.whatwg.org/#get-the-parent
     KRYS_NODISCARD EventTarget *GetParent(Event &event) const noexcept override;
+
+#pragma region Extension Hooks
+
+    void OnInsert() noexcept override;
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
+    void OnAdopt(Document &oldDocument) noexcept override;
+
+#pragma endregion
   };
 }
 

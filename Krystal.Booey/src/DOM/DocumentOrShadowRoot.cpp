@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/DOM/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Booey/Style/Scope.hpp"
 
 namespace krys::boo::dom
 {

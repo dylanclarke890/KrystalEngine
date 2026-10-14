@@ -6,15 +6,30 @@
 
 namespace krys::boo::dom
 {
-  void ExtensibilityHooks::NodeInserted(Node &insertedNode) noexcept
+  void ExtensibilityHooks::NodeInserted(Node &insertedNode, bool isSubtreeRoot) noexcept
   {
-    auto *parent = insertedNode.ParentNode();
-    if (parent == nullptr)
+    // NOTE: a shadow root has no parent: it's connected when its host is, and it's always in a shadow tree
+    // (its own). Its host owns it, so it holds no tree reference.
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(insertedNode))
     {
+      if (shadowRoot->Host()->IsConnected())
+      {
+        shadowRoot->SetNodeFlag(NodeFlags::IsConnected);
+      }
+
+      insertedNode.OnInsert();
       return;
     }
 
-    insertedNode.AddRef();
+    auto *parent = insertedNode.ParentNode();
+    krys_debug_assert(parent);
+
+    // The parent owns its children: the inserted node gains one tree reference. Its descendants keep the ones
+    // they already hold.
+    if (isSubtreeRoot)
+    {
+      insertedNode.AddRef();
+    }
 
     if (parent->IsConnected())
     {
@@ -41,8 +56,14 @@ namespace krys::boo::dom
 
   void ExtensibilityHooks::NodeMoved(Node &movedNode, bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
+    if (Is<ShadowRoot>(movedNode))
+    {
+      movedNode.OnMove(isSubtreeRoot, oldAncestor);
+      return;
+    }
+
     auto *parent = movedNode.ParentNode();
-    assert(parent != nullptr);
+    krys_debug_assert(parent);
 
     // NOTE: a node can be moved from a shadow tree to a light tree and vice versa but only as long as
     // they share the same shadow-including root (i.e. they're in the same document). This means that
@@ -65,11 +86,18 @@ namespace krys::boo::dom
                                        ContainerNode &oldAncestor) noexcept
   {
     removedNode.ClearNodeFlag(NodeFlags::IsConnected);
-    removedNode.ClearNodeFlag(NodeFlags::IsInShadowTree);
+
+    // Shadow roots and the nodes in their trees stay in their shadow trees; the removed node and the rest of
+    // its light tree leave the shadow tree they were in, if any.
+    if (!Is<ShadowRoot>(TreeQueries::Root(removedNode)))
+    {
+      removedNode.ClearNodeFlag(NodeFlags::IsInShadowTree);
+    }
 
     removedNode.OnRemove(isSubtreeRoot, oldAncestor);
 
-    if (removedNode.ParentNode() == nullptr)
+    // The removed node loses its parent's tree reference (which may delete it).
+    if (isSubtreeRoot)
     {
       removedNode.SubRef();
     }

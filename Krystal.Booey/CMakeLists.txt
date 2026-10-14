@@ -587,6 +587,9 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
 
   # DOM integration, layer e2 (inline styles)
   include/Krystal.Booey/CSS/StyleAttributeMutationScope.hpp
+
+  # DOM integration, layer e3 (style scopes)
+  include/Krystal.Booey/Style/Scope.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -921,6 +924,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
 
   # DOM integration, layer e2 (inline styles)
   src/CSS/StyleAttributeMutationScope.cpp
+
+  # DOM integration, layer e3 (style scopes)
+  src/Style/Scope.cpp
 )
 
 target_precompile_headers(Krystal.Booey

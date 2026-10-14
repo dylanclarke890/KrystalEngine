@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLLinkElement.hpp"
+#include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 
@@ -8,6 +9,17 @@ namespace krys::boo::html
       : HTMLElement(document, HTMLElementInterface::Link)
   {
   }
+
+  HTMLLinkElement::~HTMLLinkElement() noexcept = default;
+
+#pragma region LinkStyle
+
+  css::CSSStyleSheet *HTMLLinkElement::Sheet() const noexcept
+  {
+    return _sheet.get();
+  }
+
+#pragma endregion
 
 #pragma region HTMLLinkElement
 

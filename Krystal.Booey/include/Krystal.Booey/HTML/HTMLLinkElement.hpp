@@ -4,6 +4,11 @@
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 
+namespace krys::boo::css
+{
+  class CSSStyleSheet;
+}
+
 namespace krys::boo::html
 {
   /// @see https://html.spec.whatwg.org/#htmllinkelement
@@ -19,8 +24,11 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#explicitly-enabled
     bool _explicitlyEnabled {false};
 
+    RefPtr<css::CSSStyleSheet> _sheet;
+
   public:
     HTMLLinkElement(dom::Document &document) noexcept;
+    ~HTMLLinkElement() noexcept override;
 
 #pragma region HTMLLinkElement - https://html.spec.whatwg.org/#htmllinkelement
 
@@ -132,6 +140,14 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/#dom-link-target
     void Target(dom::DOMString &&value) noexcept;
+
+#pragma endregion
+
+#pragma region LinkStyle - https://drafts.csswg.org/cssom/#the-linkstyle-interface
+
+    /// @brief The associated CSS style sheet, if any.
+    /// @see https://drafts.csswg.org/cssom/#dom-linkstyle-sheet
+    KRYS_NODISCARD css::CSSStyleSheet *Sheet() const noexcept;
 
 #pragma endregion
   };

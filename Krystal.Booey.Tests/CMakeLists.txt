@@ -313,6 +313,7 @@ target_sources(Krystal.Booey.Tests
 
 		# Style
 		tests/Style/Calc/Tree.cpp
+		tests/Style/Scope.cpp
 		tests/Style/ScopedName.cpp
 		tests/Style/StyleSheetContentsCache.cpp
 		tests/Style/Values/Color/Color.cpp

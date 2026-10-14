@@ -326,6 +326,11 @@ namespace krys::boo::dom
 
     element._shadowRoot = shadow;
 
+    if (element.IsConnected())
+    {
+      ExtensibilityHooks::NodeInserted(*shadow, false);
+    }
+
     return {};
   }
 
