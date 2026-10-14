@@ -49,13 +49,14 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Property parser, layer c2 (2026-10-13): `Timeline`, `Animations`, `CounterStyles`, `Background`, `Content`, `Masking`, `Motion` and `Shapes` tested.
 - Property parser, layer c3 (2026-10-13): `PropertyParser`, the value half of `ParserFastPaths` and `ValuePool::CreateFontFaceValue` built and tested; properties parse end-to-end from strings.
 - Sheet parser, layer d1a (2026-10-13): pseudo-class/pseudo-element codegen (`codegen/css_pseudo_selectors.py`) generates the enums, the name maps, `UserAgentParts` and the `Selector` inlines; standard pseudos only. Maps and parts built and tested.
+- Sheet parser, layer d1b (2026-10-13): `Selector`, `SelectorList`, `MutableSelector` (and `SelectorParserContext`, pulled forward from d1c) completed against upstream, built and tested, with specificity, hashing and full selector serialisation; selectors are built through `MutableSelector` until the parser lands.
 
 **Open / next candidates:**
 - Property parser, layer c1 generator review done (2026-10-13): the generated parser matches upstream; the build now passes `ENABLE_DARK_MODE_CSS`/`ENABLE_VARIATION_FONTS`; 41 legacy `-webkit-` properties are dropped on purpose.
 - Property parser, layer c1 done (2026-10-13): `PropertyParserCustom.hpp` reviewed (8 behaviour bugs fixed), the generated `PropertyParsing.cpp` builds and links, tested through shorthands.
 - Property parser, layer c2 done (2026-10-13): the compile-only consumers are tested; three `Background` consumers that only served dropped `-webkit-` properties are removed.
 - Property parser, layer c3 done (2026-10-13): `PropertyParser` reviewed, built and tested, with the value half of `ParserFastPaths` and `ValuePool::CreateFontFaceValue`. The property parser slice is complete apart from the Style-dependent pieces below.
-- Next: the sheet parser, planned 2026-10-13 (see the *Sheet parser* section). Layer d1a (pseudo-selector codegen) is done; next is d1b (`Selector`, `SelectorList`, `MutableSelector`, selector serialisation), then d1c (`SelectorParserContext`, `SelectorParser`). The Style side (`style::CustomProperty`/`BuilderState`) that the deferred pieces wait on comes later.
+- Next: the sheet parser, planned 2026-10-13 (see the *Sheet parser* section). Layers d1a (pseudo-selector codegen) and d1b (selectors) are done; next is d1c (`SelectorParser`; `SelectorParserContext` is already done). `SelectorParser.cpp` and `Rules/Rule.hpp` still use the old `Selector`/`MutableSelector` API (`get()`, `SetIsLastInSelectorList`, ...) and are fixed in d1c/d4.
 - Property parser, not yet ported (`Font`): the string parsers behind the `FontFace` interface and the canvas 2D context's `font` (`ParseUnresolvedFont`, `ParseFontFaceSrc`, `ParseFontFaceSizeAdjust`, `ParseFontFaceUnicodeRange`, `ParseFontFaceDisplay`, `ParseFontFaceFontStyle`, `ParseFontFaceFeatureSettings`, `ParseFontFaceFontWidth`, `ParseFontFaceFontWeight`; FIXME in `Consumers/Font.hpp`). They need `ScriptExecutionContext`/`Document` (quirks mode, value pool) and six of them the generated `PropertyParsing`. Also `LowerFontShorthand` and the `SystemFontDatabase::FontShorthand` sync check (need `SystemFontDatabase`).
 - Property parser, not yet ported: `parseEasingFunctionDeprecated` (`CSSPropertyParserConsumer+Easing`; string → `TimingFunction`, used only by Web Animations; needs `TimingFunction` and `Style::createTimingFunctionDeprecated`) and `parseTransformRaw` (`CSSPropertyParserConsumer+Transform`; string → `Style::Transform`, used only by Web Animations; needs `Style::Transform`, `BuilderState` and the generated `consumeTransform`). Come with animations. Also `parseFilterValueListOrNoneRaw` (`CSSPropertyParserConsumer+Filter`; string → `Style::Filter`, used only by the canvas 2D context's `filter`; needs `Style::Filter`, `BuilderState` and `Document`); comes with canvas.
 - Property parser, deferred definitions (need `style::CustomProperty`/`BuilderState`): `VariableParser::ParseInitialValueForUniversalSyntax`, `PropertyParser::ParseTypedCustomPropertyValue`/`ParseTypedCustomPropertyInitialValue`.
@@ -723,6 +724,52 @@ Decision (2026-10-13): only standard pseudo-classes and pseudo-elements are supp
 **Unbuilt d1b/d1c files touched:** `Selector.hpp`, `MutableSelector.hpp` and `SelectorParser.cpp` were renamed from `PseudoClassId`/`PseudoElementId` to the generated enums (mechanical; not reviewed). `Selector.cpp` still calls the stubs' `IsElementBackedPseudoElement` (d1b).
 
 Tests: `tests/CSS/Selectors/{SelectorPseudoTypeMap,UserAgentParts}.cpp`: 10 cases / 63 assertions. Full Booey suite: 1514 cases / 674157 assertions; all pass except 4 expected failures. Builds with no warnings.
+
+### Layer d1b: selectors (2026-10-13)
+
+Graph: the d1a graph (`tools/port/out/selectors.md`) covers these files. The Krystal files were an own partial rewrite (about half of upstream's API, never built); they're now completed against upstream, keeping their names where the d1c parser and `Rules/Rule.hpp` already use them.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/CSSSelector.h`, `.cpp` | `have*` | `CSS/Selectors/Selector.hpp`, `src/.../Selector.cpp`, `Enums/SelectorMatch.hpp`, `Enums/SelectorRelation.hpp`, `Enums/SelectorPagePseudoClass.hpp`, `SelectorFlag.hpp` | on | tested. See names, bugs and differences. |
+| `css/CSSSelectorList.h`, `.cpp` | `have` | `CSS/Selectors/SelectorList.hpp`, `src/.../SelectorList.cpp` | on | tested. |
+| `css/parser/MutableCSSSelector.h`, `.cpp` | `have` | `CSS/Selectors/MutableSelector.hpp`, `src/.../MutableSelector.cpp` | on | tested. |
+| `css/parser/CSSSelectorParserContext.h`, `.cpp` | `have` (no `Document` constructor, no hash) | `CSS/Selectors/SelectorParserContext.hpp`, `src/.../SelectorParserContext.cpp` | on | tested through the pseudo-name parsing. Pulled forward from d1c: the generated `SelectorInlines.hpp` needs it. |
+| `rendering/style/RenderStyleConstants.h` (`PseudoElementType`) | `have*` | `Rendering/Style/RenderStyleConstants.hpp` | on | tested. Standard pseudo-elements only (see differences). |
+| generated `CSSSelectorInlines.h` | `have` | generated `CSS/Selectors/SelectorInlines.hpp` | on | tested (generated in d1a). |
+
+**Names:** enums are free (`SelectorMatch`, `SelectorRelation`, `SelectorPagePseudoClass`) rather than nested. `Match::Unknown`/`Tag`/`Exact`/`Set`/`List`/`Hyphen`/`Contain`/`Begin`/`End` → `None`/`Type`/`AttributeEquals`/`AttributeExists`/`AttributeIncludes`/`AttributeDash`/`AttributeSubstring`/`AttributePrefix`/`AttributeSuffix`; `Relation::Subselector`/`DescendantSpace`/`DirectAdjacent`/`IndirectAdjacent` → `Compounding`/`Descendant`/`NextSibling`/`SubsequentSibling`. `precedingInComplexSelector`/`firstInCompound`/`lastInCompound`/`precedingInCompound` → `PrecedingComplexSelectorComponent`/`FirstInCompoundSelector`/`LastInCompoundSelector`/`PrecedingCompoundSelectorComponent`; `selectorList()` → `SubSelectors()` (would hide the type); `tagQName`/`tagLowercaseLocalName` → `TagQualifiedName`/`TagLocalNameLower`; `MutableCSSSelector::selector()` → `GetSelector()`; `prependInComplexSelector*` → `PrependComplexSelectorComponent*`; `CSSSelectorList::makeCopying{Simple,Complex}Selector`/`makeJoining`/`first`/`selectorAt`/`listSize`/`selectorsText` → `CopySimple`/`CopyComplex`/`Join`/`FirstSelectorComponent`/`SelectorComponentAt`/`SelectorCount`/`SelectorsText`. `AttributeMatchType` → `IsCaseSensitive`; `setValue(value, bool)` → `MatchLowercase`.
+
+**Bugs fixed:**
+- `Selector` had no copy constructor: the implicit one copied the union's raw pointers without a ref, so copying a `SelectorList` (or the sub-selectors in `RareData`) double-freed the rare data and the tag's `QualifiedName` storage. Now upstream's (deep-copies rare data), plus the `MutableSelectorCopy` constructor.
+- A default-constructed `Selector` left its match, relation and pseudo type uninitialised (upstream: `Unknown`, `DescendantSpace`, 0).
+- `EnumTraits<SelectorMatch>` said 14 values (there were 17; 18 with `PagePseudoClass`).
+- `SetAttribute` only ever set the case-insensitive flag, never cleared it.
+- `SelectorList::SelectorText()` popped two characters off an empty string for an empty list.
+- `SelectorText` didn't serialise pseudo-classes, pseudo-elements or page pseudo-classes at all, and missed the implicit relative-nesting separator (`> .a`).
+- `RareData::NthA`/`NthB` were `int64` (upstream `int`).
+- `MutableSelector::NeedsImplicitShadowCombinatorForMatching()` was a stub returning `false`.
+- DOM: `dom::AnyQualifiedName()` passed `(Null, *, *)` as (namespace, prefix, local name), giving prefix `*` and no namespace; upstream's `anyQName` has no prefix and namespace `*`. Fixed (tested in `tests/DOM/Internals/QualifiedNameCache.cpp`); it would have broken the parser's `*|` handling.
+- Used the unreviewed `SerialiserIdioms` (UTF-32) and raw `assert`; now `Markup.hpp` and `krys_debug_assert`.
+
+**Upstream bugs found:**
+- `visitSimpleSelectors` with `VisitOnlySubject::Yes` has its condition inverted: it stops inside the subject compound and crosses combinators, the opposite of its comment. Nothing upstream passes `Yes`. Fixed per the comment (tested).
+- `specificityForPage` reads `tagQName()` of `this` instead of the component being visited. Harmless upstream (a type selector is always first in its compound); fixed.
+
+**Added (upstream API):** `Selector`: copy constructors, `ComputeSpecificity`/`ComputeSpecificityTuple`/`SpecificityForPage` (with the saturating `SelectorSpecificity`), `StylePseudoElementTypeFor`, `ParsePseudoElementName`, the generated pseudo statics, `PagePseudoClass`, `IsForPage`/`SetForPage`, `SetImplicit`, `SetLastInSelectorList`, `HasExplicitPseudoClassScope`, `HasScope`, `IsHostPseudoClass`, `IsScopePseudoClass`, `IsSiblingSelector`, `MatchesPseudoElement`, `HasDescendant(OrChild)Relation`, non-const `SubSelectors`; `VisitSimpleSelectors`/`HasExplicitNestingParent` are public. Free: `ComplexSelectorCanMatchPseudoElement`, `ComplexSelectorMatchesElementBackedPseudoElement`, `IsElementBackedPseudoElement` (replaces the deleted d1a stub), `PseudoClassIsRelativeToSiblings`, `IsTreeStructuralPseudoClass`, `IsLogicalCombinationPseudoClass`, `SelectorSpecificityIncrement`, `operator==(PossiblyQuotedIdentifier, atom)`. `SelectorRelation::ShadowDescendant`/`ShadowPartDescendant`/`ShadowSlotted`, `SelectorMatch::PagePseudoClass`, `SelectorFlag::IsForPage`. `SelectorList`: `IndexOfNextSelectorAfter`, `BuildSelectorsText`, move assignment. `MutableSelector`: `ParsePseudoClassSelector`/`ParsePseudoElementSelector`/`ParsePagePseudoSelector`, the copy-from-`Selector` constructors, `AdoptSelectorVector`, `SetArgument`/`SetNth`/`SetArgumentList`/`SetLangList`/`SetSubSelectors`/`SetForPage`/`SetImplicit`, `MatchesPseudoElement`, `IsHostPseudoClass`, `HasExplicitNestingParent`/`HasExplicitPseudoClassScope`, `StartsWithExplicitCombinator`, `PrependComplexSelectorComponentAsRelative`, `ReleaseFromComplexSelector`, const `LeftmostSimpleSelector`.
+
+**Differences:**
+- One `uint8` pseudo type, enums stored whole and a `SelectorFlag` set instead of upstream's bitfields; still 16 bytes (`static_assert`ed). Atoms are interned for the program's lifetime, so a plain value isn't ref-counted (upstream refs its `AtomStringImpl`).
+- `add(Hasher&, ...)` → `HashComplexSelector(selector, mode)` and `DefaultHash<SelectorList>`; atoms and qualified names hash by their interned pointer.
+- `IndexOfNextSelectorAfter` returns `Maybe<size_t>` (upstream `notFound`).
+- `MutableSelectorList` is a `List` (upstream `Vector`; was `SmallList`); `Join` takes a `List`; argument and lang lists are `FixedVector` (were `SmallList`).
+- No `UserAgentPartLegacyAlias`/`WebKitUnknown`/`WebKitAny` cases (dropped in d1a): `ParsePseudoElementName` returns nothing for unknown `-webkit-` names, and `nameForUserAgentPartLegacyAlias` isn't needed. `::cue` is always element-backed (upstream: `ENABLE(VIDEO)`).
+- `PseudoElementType` has only the standard pseudo-elements: no `WebKitScrollbar*`, `WebKitResizer` or `InternalWritingSuggestions`; `allPublicPseudoElementTypes` waits for Style.
+- No `destructorHasBeenCalled` debug bit; no `TextStream` printing.
+- `SelectorParserContext`: the `Document` constructor is a FIXME (needs `Settings` and quirks); no hash/`HashTraits` yet (comes with whatever caches on it). The unused `DefaultCaseSensitivity` member is removed. Settings flags keep upstream's names, as in `ParserContext`.
+- Specificity of a bare `&` hits a debug assertion, as upstream (nesting is resolved before specificity is computed).
+
+Tests: `tests/CSS/Selectors/{Selector,SelectorList,MutableSelector}.cpp` (builder in `include/Krystal.Booey.Tests/CSS/SelectorTestUtils.hpp`): 33 cases. Full Booey suite: 1548 cases / 674451 assertions; all pass except 4 expected failures. Whole solution builds with no warnings.
 
 ## Slice 3: Colour
 

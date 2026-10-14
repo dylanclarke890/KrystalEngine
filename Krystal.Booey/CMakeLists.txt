@@ -479,6 +479,19 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
 
   # Sheet parser, layer d1a (pseudo-selector codegen)
   include/Krystal.Booey/CSS/Selectors/SelectorPseudoTypeMap.hpp
+
+  # Sheet parser, layer d1b (selectors)
+  ${KRYSTAL_BOOEY_HEADER_OUTPUT_DIR}/Krystal.Booey/CSS/Selectors/SelectorInlines.hpp
+  include/Krystal.Booey/CSS/Selectors/Enums/SelectorMatch.hpp
+  include/Krystal.Booey/CSS/Selectors/Enums/SelectorPagePseudoClass.hpp
+  include/Krystal.Booey/CSS/Selectors/Enums/SelectorRelation.hpp
+  include/Krystal.Booey/CSS/Selectors/MutableSelector.hpp
+  include/Krystal.Booey/CSS/Selectors/Selector.hpp
+  include/Krystal.Booey/CSS/Selectors/SelectorFlag.hpp
+  include/Krystal.Booey/CSS/Selectors/SelectorList.hpp
+  include/Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp
+  include/Krystal.Booey/CSS/Selectors/Types/IsCaseSensitive.hpp
+  include/Krystal.Booey/CSS/Selectors/Types/MatchLowercase.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -724,6 +737,12 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
 
   # Property parser, layer c3 (property parser)
   src/CSS/Properties/PropertyParser.cpp
+
+  # Sheet parser, layer d1b (selectors)
+  src/CSS/Selectors/MutableSelector.cpp
+  src/CSS/Selectors/Selector.cpp
+  src/CSS/Selectors/SelectorList.cpp
+  src/CSS/Selectors/SelectorParserContext.cpp
 )
 
 target_precompile_headers(Krystal.Booey

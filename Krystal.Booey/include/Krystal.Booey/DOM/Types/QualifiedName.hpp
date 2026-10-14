@@ -121,7 +121,7 @@ namespace krys::boo::dom
 
   KRYS_NODISCARD inline QualifiedName AnyQualifiedName() noexcept
   {
-    return QualifiedName(DOMStringAtom::Null(), StarAtom(), StarAtom(), html::TagName::Unknown,
+    return QualifiedName(StarAtom(), DOMStringAtom::Null(), StarAtom(), html::TagName::Unknown,
                          html::Namespace::Unknown);
   }
 }

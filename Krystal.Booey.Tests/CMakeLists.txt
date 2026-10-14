@@ -76,6 +76,7 @@ target_sources(Krystal.Booey.Tests
     FILES
 		include/Krystal.Booey.Tests/DOM/TestElement.hpp
 		include/Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp
+		include/Krystal.Booey.Tests/CSS/SelectorTestUtils.hpp
 		include/Krystal.Booey.Tests/CSS/ValueTestUtils.hpp
 		include/Krystal.Booey.Tests/TestParserUtils.hpp
 	PRIVATE
@@ -232,6 +233,9 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Values/CursorImageValue.cpp
 		tests/CSS/Values/GradientValue.cpp
 		# tests/CSS/Selectors/SelectorParser.cpp
+		tests/CSS/Selectors/MutableSelector.cpp
+		tests/CSS/Selectors/Selector.cpp
+		tests/CSS/Selectors/SelectorList.cpp
 		tests/CSS/Selectors/SelectorPseudoTypeMap.cpp
 		tests/CSS/Selectors/UserAgentParts.cpp
 

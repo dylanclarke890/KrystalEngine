@@ -155,4 +155,13 @@ namespace krys::boo::dom::tests
 
     REQUIRE(qn.Name() == u8"element");
   }
+
+  TEST_CASE("AnyQualifiedName: no prefix, any namespace and any local name", "[HTML][QualifiedNameCache]")
+  {
+    auto any = AnyQualifiedName();
+    CHECK(any.NamespacePrefix() == DOMStringAtom::Null());
+    CHECK(any.NamespaceURI() == StarAtom());
+    CHECK(any.LocalName() == StarAtom());
+    CHECK(any == AnyQualifiedName());
+  }
 }

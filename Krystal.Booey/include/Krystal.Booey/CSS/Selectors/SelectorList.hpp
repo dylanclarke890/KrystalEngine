@@ -2,21 +2,21 @@
 
 #include "Krystal.Booey/CSS/Selectors/MutableSelector.hpp"
 #include "Krystal.Booey/CSS/Selectors/Selector.hpp"
-#include "Krystal.Core/Types/Func.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/UniqueArray.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo::css
 {
-  using MutableSelectorList = SmallList<UniquePtr<MutableSelector>>;
-
+  /// @brief A flattened, comma-separated list of complex selectors.
   class SelectorList
   {
   private:
     /// @brief The selectors in this list. They are stored contiguously, with complex selectors being stored
     /// right-to-left (i.e. the rightmost selector is first in memory, followed by its preceding selector
-    /// component, and so on).
+    /// component, and so on). The end of a complex selector is indicated by IsLastInComplexSelector on its
+    /// last item, and the end of the array by IsLastInSelectorList on the last item.
     UniqueArray<Selector> _selectors;
 
   public:
@@ -28,7 +28,16 @@ namespace krys::boo::css
 
     explicit SelectorList(MutableSelectorList &&selectors) noexcept;
 
-    explicit SelectorList(UniqueArray<Selector> &&array) noexcept;
+    explicit SelectorList(UniqueArray<Selector> &&array) noexcept : _selectors(krys::move(array))
+    {
+    }
+
+    SelectorList &operator=(SelectorList &&) noexcept = default;
+
+    KRYS_NODISCARD static SelectorList CopySimple(const Selector &simpleSelector) noexcept;
+    KRYS_NODISCARD static SelectorList CopyComplex(const Selector &complexSelector) noexcept;
+    KRYS_NODISCARD static SelectorList Join(const SelectorList &a, const SelectorList &b) noexcept;
+    KRYS_NODISCARD static SelectorList Join(const List<const SelectorList *> &lists) noexcept;
 
     KRYS_NODISCARD bool operator==(const SelectorList &other) const noexcept;
 
@@ -47,6 +56,19 @@ namespace krys::boo::css
       return &_selectors[index];
     }
 
+    /// @return The index of the first component of the complex selector after the one at @p index, or
+    /// nothing if it is the last.
+    KRYS_NODISCARD Maybe<size_t> IndexOfNextSelectorAfter(size_t index) const noexcept
+    {
+      const_iterator current = SelectorComponentAt(index);
+      ++current;
+      if (current == end())
+      {
+        return {};
+      }
+      return static_cast<size_t>(&*current - _selectors.get());
+    }
+
     KRYS_NODISCARD size_t ComponentCount() const noexcept;
 
     KRYS_NODISCARD size_t SelectorCount() const noexcept;
@@ -55,7 +77,9 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool HasOnlyNestingSelector() const noexcept;
 
-    KRYS_NODISCARD CSSOMString SelectorText() const noexcept;
+    KRYS_NODISCARD CSSOMString SelectorsText() const noexcept;
+
+    void BuildSelectorsText(CSSOMString &builder) const noexcept;
 
 #pragma region Iterator
 
@@ -122,60 +146,30 @@ namespace krys::boo::css
     }
 
 #pragma endregion
+  };
+}
 
-#pragma region Static utility functions
+namespace krys
+{
+  template <>
+  struct DefaultHash<boo::css::SelectorList>
+  {
+    constexpr static bool IsSafeToCompareToEmptyOrDeleted = false;
 
-    KRYS_NODISCARD static SelectorList Join(const SelectorList &a, const SelectorList &b) noexcept;
-
-    KRYS_NODISCARD static SelectorList Join(const SmallList<const SelectorList *> &lists) noexcept;
-
-    KRYS_NODISCARD static SelectorList CopySimple(const Selector &selector) noexcept;
-
-    KRYS_NODISCARD static SelectorList CopyComplex(const Selector &selector) noexcept;
-
-#pragma endregion
-
-  private:
-    template <typename Functor>
-    KRYS_NODISCARD bool ForEachTagSelector(Functor &&functor, const Selector *selector) const noexcept
+    KRYS_NODISCARD static size_t Hash(const boo::css::SelectorList &list) noexcept
     {
-      assert(selector);
-
-      do
+      size_t seed = 0;
+      for (const auto &selector : list)
       {
-        if (functor(selector))
-        {
-          return true;
-        }
-
-        if (auto subSelectors = selector->SubSelectors())
-        {
-          for (const auto &subSelector : *subSelectors)
-          {
-            if (ForEachTagSelector(functor, &subSelector))
-            {
-              return true;
-            }
-          }
-        }
-
-      } while ((selector = selector->PrecedingComplexSelectorComponent()));
-
-      return false;
+        seed = krys::Hash::Combine(seed, boo::css::HashComplexSelector(selector));
+      }
+      return seed;
     }
 
-    template <typename Functor>
-    KRYS_NODISCARD bool ForEachSelector(Functor &&functor) const noexcept
+    KRYS_NODISCARD static bool Equal(const boo::css::SelectorList &a,
+                                     const boo::css::SelectorList &b) noexcept
     {
-      for (const auto &selector : *this)
-      {
-        if (ForEachTagSelector(functor, &selector))
-        {
-          return true;
-        }
-      }
-
-      return false;
+      return a == b;
     }
   };
 }
