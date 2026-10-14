@@ -9,68 +9,83 @@
 #include "Krystal.Core/Assert.hpp"
 
 // FIXME: Placeholder definitions; see `Style/Seam.hpp`. Only `RenderStyle` can be constructed, so only its
-// colour members and the document functions can be reached.
+// colour, zoom and font members and the document functions can be reached.
 
 namespace krys::boo
 {
+  namespace
+  {
+    // The initial `font-size` (`medium`).
+    constexpr float InitialFontSize = 16.f;
+
+    // FIXME: There's no font data, so the metrics use the fallbacks of css-values-4 where it gives one (an
+    // `ex` or `ch` is 0.5em, an `ic` is 1em), the em box for the ascent and 1.2em for a `normal` line height.
+    constexpr int32 InitialFontAscent = 16;
+    constexpr int32 InitialFontLineSpacing = 19;
+
+    const FontMetrics InitialFontMetrics {};
+    const FontCascadeDescription InitialFontDescription {};
+    const FontCascade InitialFontCascade {};
+  }
+
   int FontMetrics::IntAscent() const noexcept
   {
-    krys_unreachable();
+    return InitialFontAscent;
   }
 
   int FontMetrics::IntLineSpacing() const noexcept
   {
-    krys_unreachable();
+    return InitialFontLineSpacing;
   }
 
   Maybe<float> FontMetrics::XHeight() const noexcept
   {
-    krys_unreachable();
+    return null;
   }
 
   Maybe<float> FontMetrics::CapHeight() const noexcept
   {
-    krys_unreachable();
+    return null;
   }
 
   Maybe<float> FontMetrics::ZeroWidth() const noexcept
   {
-    krys_unreachable();
+    return null;
   }
 
   Maybe<float> FontMetrics::IdeogramWidth() const noexcept
   {
-    krys_unreachable();
+    return InitialFontSize;
   }
 
   float FontCascadeDescription::ComputedSize() const noexcept
   {
-    krys_unreachable();
+    return InitialFontSize;
   }
 
   float FontCascadeDescription::ComputedSizeForRangeZoomOption(css::RangeZoomOptions) const noexcept
   {
-    krys_unreachable();
+    return InitialFontSize;
   }
 
   float FontCascadeDescription::SpecifiedSize() const noexcept
   {
-    krys_unreachable();
+    return InitialFontSize;
   }
 
   const FontCascadeDescription &FontCascade::GetFontDescription() const noexcept
   {
-    krys_unreachable();
+    return InitialFontDescription;
   }
 
   const FontMetrics &FontCascade::MetricsOfPrimaryFont() const noexcept
   {
-    krys_unreachable();
+    return InitialFontMetrics;
   }
 
   float FontCascade::ZeroWidth() const noexcept
   {
-    krys_unreachable();
+    return InitialFontSize / 2;
   }
 
   const boo::Color &RenderStyle::GetColor() const noexcept
@@ -136,22 +151,22 @@ namespace krys::boo
 
   const FontCascade &RenderStyle::GetFontCascade() const noexcept
   {
-    krys_unreachable();
+    return InitialFontCascade;
   }
 
   const FontCascadeDescription &RenderStyle::GetFontDescription() const noexcept
   {
-    krys_unreachable();
+    return InitialFontDescription;
   }
 
   const FontMetrics &RenderStyle::MetricsOfPrimaryFont() const noexcept
   {
-    krys_unreachable();
+    return InitialFontMetrics;
   }
 
   float RenderStyle::ComputedLineHeight() const noexcept
   {
-    krys_unreachable();
+    return static_cast<float>(InitialFontLineSpacing);
   }
 
   bool RenderStyle::HasPseudoElementType() const noexcept
@@ -161,12 +176,13 @@ namespace krys::boo
 
   Maybe<float> RenderStyle::EvaluateFixedLineHeight(const style::ZoomFactor &) const noexcept
   {
-    krys_unreachable();
+    // The initial `line-height` is `normal`, which isn't fixed.
+    return null;
   }
 
   float RenderStyle::ComputeSpecifiedLineHeight() const noexcept
   {
-    krys_unreachable();
+    return static_cast<float>(InitialFontLineSpacing);
   }
 
   const dom::Document &RenderView::GetDocument() const noexcept

@@ -113,6 +113,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/CSSStyleSheetObservableArray.cpp
 		tests/CSS/Descriptors/PropertySetCSSDescriptors.cpp
 		tests/CSS/Media/MediaList.cpp
+		tests/CSS/Media/MediaQueryList.cpp
 		tests/CSS/Calc/CalcType.cpp
 		tests/CSS/Calc/Executor.cpp
 		tests/CSS/Calc/SymbolTable.cpp

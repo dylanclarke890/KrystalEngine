@@ -21,6 +21,8 @@
 
 namespace krys::boo::css
 {
+  class MediaQueryList;
+  class MediaQueryMatcher;
   class StyleSheetList;
   struct ParserContext;
 }
@@ -104,6 +106,7 @@ namespace krys::boo::dom
 
     List<WeakPtr<ShadowRoot>> _inDocumentShadowRoots;
     RefPtr<css::StyleSheetList> _styleSheetList;
+    RefPtr<css::MediaQueryMatcher> _mediaQueryMatcher;
 
   protected:
     Document(DocumentFlags flags) noexcept;
@@ -416,6 +419,23 @@ namespace krys::boo::dom
     /// @return A `SyntaxError` if @p selectorString isn't a valid selector list.
     KRYS_NODISCARD ExceptionOr<SelectorQuery &>
       SelectorQueryForString(DOMStringView selectorString) const noexcept;
+
+#pragma endregion
+
+#pragma region Media queries - https://drafts.csswg.org/cssom-view/#the-mediaquerylist-interface
+
+    /// @brief Evaluates the document's `MediaQueryList`s and dispatches their `change` events.
+    KRYS_NODISCARD css::MediaQueryMatcher &GetMediaQueryMatcher() noexcept;
+
+    /// @brief A new `MediaQueryList` for @p query, evaluated against the document.
+    /// @note `matchMedia()` is a `Window` member; there's no window, so it's on the document.
+    /// @see https://drafts.csswg.org/cssom-view/#dom-window-matchmedia
+    KRYS_NODISCARD Ref<css::MediaQueryList> MatchMedia(DOMStringView query) noexcept;
+
+    /// @brief Re-evaluates the document's `MediaQueryList`s and fires `change` at each one whose result
+    /// changed. The host calls this after changing the media environment.
+    /// @see https://drafts.csswg.org/cssom-view/#evaluate-media-queries-and-report-changes
+    void EvaluateMediaQueriesAndReportChanges() noexcept;
 
 #pragma endregion
 

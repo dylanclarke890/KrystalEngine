@@ -1,8 +1,13 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryMatcher.hpp"
+#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
 #include "Krystal.Booey/DOM/EventTarget.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
 {
@@ -11,55 +16,48 @@ namespace krys::boo::css
     class MediaQueryEvaluator;
   }
 
-  // MediaQueryList interface is specified at
-  // https://drafts.csswg.org/cssom-view/#the-mediaquerylist-interface The objects of this class are returned
-  // by window.matchMedia. They may be used to retrieve the current value of the given media query and to
-  // add/remove listeners that will be called whenever the value of the query changes.
-
-  class MediaQueryList final : public RefCounted<MediaQueryList>, public dom::EventTarget
+  /// @brief The object `matchMedia()` returns: the current result of a media query list, and `change` events
+  /// whenever it changes.
+  /// @see https://drafts.csswg.org/cssom-view/#the-mediaquerylist-interface
+  class MediaQueryList final : public dom::EventTarget
   {
   private:
     RefPtr<MediaQueryMatcher> _matcher;
     const mq::MediaQueryList _mediaQueries;
-    const mq::MediaQueryDynamicDependency _dynamicDependencies;
     // Indicates if the query has been evaluated after the last style selector change.
-    size_t _evaluationRound;
+    uint32 _evaluationRound;
     // Used to know if the query has changed in the last style selector change.
-    size_t _changeRound;
+    uint32 _changeRound;
     bool _matches;
-    bool _hasChangeEventListener {false};
     bool _needsNotification {false};
 
-    MediaQueryList(dom::Document &, MediaQueryMatcher &matcher, mq::MediaQueryList &&queries,
-                   bool matches) noexcept;
+    MediaQueryList(MediaQueryMatcher &matcher, mq::MediaQueryList &&mediaQueries, bool matches) noexcept;
 
   public:
-    ~MediaQueryList() noexcept;
+    ~MediaQueryList() noexcept override;
 
-    KRYS_NODISCARD static Ref<MediaQueryList> Create(dom::Document &document, MediaQueryMatcher &matcher,
-                                                     mq::MediaQueryList &&queries, bool matches) noexcept;
+    KRYS_NODISCARD static Ref<MediaQueryList>
+      Create(MediaQueryMatcher &matcher, mq::MediaQueryList &&mediaQueries, bool matches) noexcept;
 
+    /// @see https://drafts.csswg.org/cssom-view/#dom-mediaquerylist-media
     KRYS_NODISCARD CSSOMString Media() const noexcept;
 
+    /// @see https://drafts.csswg.org/cssom-view/#dom-mediaquerylist-matches
     KRYS_NODISCARD bool Matches() noexcept;
 
-    void AddListener(RefPtr<dom::EventListener> &&listener) noexcept;
+    /// @note Legacy.
+    /// @see https://drafts.csswg.org/cssom-view/#dom-mediaquerylist-addlistener
+    void AddListener(RefPtr<dom::EventListenerCallback> &&listener) noexcept;
 
-    void RemoveListener(RefPtr<dom::EventListener> &&listener) noexcept;
+    /// @note Legacy.
+    /// @see https://drafts.csswg.org/cssom-view/#dom-mediaquerylist-removelistener
+    void RemoveListener(RefPtr<dom::EventListenerCallback> &&listener) noexcept;
 
     void Evaluate(mq::MediaQueryEvaluator &evaluator, MediaQueryMatcher::EventMode eventMode) noexcept;
 
     void DetachFromMatcher() noexcept;
 
   private:
-    void SetMatches(bool matches) noexcept;
+    void SetMatches(bool newValue) noexcept;
   };
 }
-
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::MediaQueryList)
-  KRYS_NODISCARD static bool IsType(const krys::boo::dom::EventTarget &target) noexcept
-  {
-    // TODO(implement): type checking for MediaQueryList against EventTarget.
-    return false;
-  }
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

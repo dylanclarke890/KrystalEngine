@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
+#include "Krystal.Booey/CSS/Queries/MediaQueryMatcher.hpp"
 #include "Krystal.Booey/CSS/StyleSheetList.hpp"
 #include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
@@ -65,6 +67,10 @@ namespace krys::boo::dom
     if (_styleSheetList)
     {
       _styleSheetList->Detach();
+    }
+    if (_mediaQueryMatcher)
+    {
+      _mediaQueryMatcher->DocumentDestroyed();
     }
   }
 
@@ -750,6 +756,33 @@ namespace krys::boo::dom
   {
     std::erase_if(_inDocumentShadowRoots,
                   [&](const WeakPtr<ShadowRoot> &root) { return !root || root.get() == &shadowRoot; });
+  }
+
+  css::MediaQueryMatcher &Document::GetMediaQueryMatcher() noexcept
+  {
+    if (!_mediaQueryMatcher)
+    {
+      _mediaQueryMatcher = css::MediaQueryMatcher::Create(*this);
+    }
+    return *_mediaQueryMatcher;
+  }
+
+  Ref<css::MediaQueryList> Document::MatchMedia(DOMStringView query) noexcept
+  {
+    // The matcher only returns null once the document is gone.
+    Ref<css::MediaQueryList> list = GetMediaQueryMatcher().MatchMedia(query);
+    return list;
+  }
+
+  void Document::EvaluateMediaQueriesAndReportChanges() noexcept
+  {
+    // FIXME: Run this from the "update the rendering" steps once there's a rendering loop.
+    if (!_mediaQueryMatcher)
+    {
+      return;
+    }
+
+    _mediaQueryMatcher->EvaluateAll(css::MediaQueryMatcher::EventMode::DispatchNow);
   }
 
   ExceptionOr<SelectorQuery &> Document::SelectorQueryForString(DOMStringView selectorString) const noexcept

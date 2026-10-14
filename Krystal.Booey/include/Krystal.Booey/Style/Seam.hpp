@@ -24,8 +24,9 @@
 
 // FIXME: Placeholders for the rendering, font and style-resolver types that length resolution, calc
 // evaluation and colour resolution need. Each declares only the members those callers use, under its upstream
-// name. Only `RenderStyle` can be constructed, and only its colour and zoom members are implemented (zoom is
-// always the initial value); everything else is unreachable. Each type moves to its own header, with its real
+// name. Only `RenderStyle` can be constructed, and only its colour, zoom and font members are implemented
+// (zoom and the font are always the initial values; the font has no font data); everything else is
+// unreachable. Each type moves to its own header, with its real
 // implementation, when its slice is ported:
 //   - `FontMetrics`, `FontCascadeDescription`, `FontCascade`: platform/graphics fonts.
 //   - `RenderStyle`, `RenderView`, `RenderElement`, `RenderBox`: rendering.
@@ -70,7 +71,7 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(FontMetrics);
 
   public:
-    FontMetrics() = delete;
+    FontMetrics() noexcept = default;
 
     KRYS_NODISCARD int IntAscent() const noexcept;
     KRYS_NODISCARD int IntLineSpacing() const noexcept;
@@ -85,7 +86,7 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(FontCascadeDescription);
 
   public:
-    FontCascadeDescription() = delete;
+    FontCascadeDescription() noexcept = default;
 
     KRYS_NODISCARD float ComputedSize() const noexcept;
     KRYS_NODISCARD float ComputedSizeForRangeZoomOption(css::RangeZoomOptions) const noexcept;
@@ -97,7 +98,7 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(FontCascade);
 
   public:
-    FontCascade() = delete;
+    FontCascade() noexcept = default;
 
     KRYS_NODISCARD const FontCascadeDescription &GetFontDescription() const noexcept;
     KRYS_NODISCARD const FontMetrics &MetricsOfPrimaryFont() const noexcept;
@@ -142,19 +143,22 @@ namespace krys::boo
     /// @brief Collapses `document().settings().evaluationTimeZoomEnabled()` for default settings: off.
     KRYS_NODISCARD bool EvaluationTimeZoomEnabled() const noexcept;
 
+    /// @brief The initial font: `medium` (16px), with no font data.
     KRYS_NODISCARD const FontCascade &GetFontCascade() const noexcept;
     KRYS_NODISCARD const FontCascadeDescription &GetFontDescription() const noexcept;
     KRYS_NODISCARD const FontMetrics &MetricsOfPrimaryFont() const noexcept;
 
+    /// @brief The initial `line-height` (`normal`) of the initial font.
     KRYS_NODISCARD float ComputedLineHeight() const noexcept;
 
     /// @brief Collapses `!pseudoElementType()`.
     KRYS_NODISCARD bool HasPseudoElementType() const noexcept;
 
-    /// @brief Collapses `lineHeight().tryFixed()` evaluated to a `LayoutUnit` with `zoom`, as a float.
+    /// @brief Collapses `lineHeight().tryFixed()` evaluated to a `LayoutUnit` with `zoom`, as a float, for the
+    /// initial `line-height`.
     KRYS_NODISCARD Maybe<float> EvaluateFixedLineHeight(const style::ZoomFactor &zoom) const noexcept;
 
-    /// @brief Collapses `computeLineHeight(specifiedLineHeight())`.
+    /// @brief Collapses `computeLineHeight(specifiedLineHeight())` for the initial `line-height`.
     KRYS_NODISCARD float ComputeSpecifiedLineHeight() const noexcept;
   };
 

@@ -6,6 +6,7 @@ namespace krys::boo::EventNames
 {
   constexpr utf8_stringview ReadyStateChange = u8"readystatechange";
   constexpr utf8_stringview Abort = u8"abort";
+  constexpr utf8_stringview Change = u8"change";
   constexpr utf8_stringview Load = u8"load";
   constexpr utf8_stringview Error = u8"error";
   constexpr utf8_stringview Click = u8"click";

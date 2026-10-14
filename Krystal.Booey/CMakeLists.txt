@@ -521,6 +521,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Queries/MediaQuery.hpp
   include/Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp
   include/Krystal.Booey/CSS/Queries/MediaQueryFeatures.hpp
+  include/Krystal.Booey/CSS/Queries/MediaQueryMatcher.hpp
   include/Krystal.Booey/CSS/Queries/MediaQueryParser.hpp
   include/Krystal.Booey/CSS/Queries/MediaQueryParserContext.hpp
 
@@ -581,6 +582,8 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Descriptors/CSSPositionTryDescriptors.hpp
   include/Krystal.Booey/CSS/Descriptors/PropertySetCSSDescriptors.hpp
   include/Krystal.Booey/CSS/Media/MediaList.hpp
+  include/Krystal.Booey/CSS/Media/MediaQueryList.hpp
+  include/Krystal.Booey/CSS/Media/MediaQueryListEvent.hpp
   include/Krystal.Booey/CSS/StyleSheet.hpp
   include/Krystal.Booey/CSS/Types/MediaListOrDOMString.hpp
   include/Krystal.Booey/Style/StyleSheetContentsCache.hpp
@@ -873,6 +876,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Queries/MediaEnvironment.cpp
   src/CSS/Queries/MediaQueryEvaluator.cpp
   src/CSS/Queries/MediaQueryFeatures.cpp
+  src/CSS/Queries/MediaQueryMatcher.cpp
   src/CSS/Queries/MediaQueryParser.cpp
   src/CSS/Queries/MediaQueryParserContext.cpp
 
@@ -931,6 +935,8 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Descriptors/CSSPositionTryDescriptors.cpp
   src/CSS/Descriptors/PropertySetCSSDescriptors.cpp
   src/CSS/Media/MediaList.cpp
+  src/CSS/Media/MediaQueryList.cpp
+  src/CSS/Media/MediaQueryListEvent.cpp
   src/Style/StyleSheetContentsCache.cpp
 
   # DOM integration, layer e2 (inline styles)
