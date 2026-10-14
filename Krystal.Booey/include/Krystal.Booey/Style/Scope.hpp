@@ -19,6 +19,7 @@ namespace krys::boo::css
 namespace krys::boo::dom
 {
   class Document;
+  class DocumentOrShadowRoot;
   class Element;
   class Node;
   class ShadowRoot;
@@ -157,6 +158,7 @@ namespace krys::boo::style
 
   private:
     KRYS_NODISCARD Scope &DocumentScope() noexcept;
+    KRYS_NODISCARD dom::DocumentOrShadowRoot &TreeScope() noexcept;
 
     void DidRemovePendingStylesheet() noexcept;
 

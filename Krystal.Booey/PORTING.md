@@ -63,11 +63,12 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - DOM integration, layer e2 (2026-10-14): `StyledElement` (now the base of `HTMLElement`, `SVGElement` and a real `MathMLElement`), the `style` attribute's change steps, `InlineCSSStyleProperties` (`Style()`), `StyleAttributeMutationScope`, `Parser::ParseInlineStyleDeclaration` and lazy `style` attribute synchronisation; a cloning bug fixed. See *DOM integration*.
 - DOM integration, layer e3 (2026-10-14): `style::Scope` (owned by `DocumentOrShadowRoot`): candidate nodes in tree order, pending sheets, preferred/alternate style sheet sets, active style sheets, updates batched on the event loop; LinkStyle `Sheet()` on `<style>`/`<link>`; the document's connected shadow roots. Three DOM bugs fixed (shadow trees never connected, shadow roots over-released, descendants over-retained). See *DOM integration*.
 - DOM integration, layer e4 (2026-10-14): `<style>` elements own their sheets (`InlineStyleSheetOwner`, `CSSStyleSheet::CreateInline`, the owner-node half of `StyleSheetContents`), with `type`, `media`, `title`, `disabled` and `load` events; `document.styleSheets`/`shadowRoot.styleSheets` (`StyleSheetList`). Krystal.Core `StringAtom::View()` no longer crashes on the null atom. See *DOM integration*.
+- DOM integration, layer e5 (2026-10-14): `adoptedStyleSheets` on documents and shadow roots (`CSSStyleSheetObservableArray` as a C++ list API with the constructed-sheet checks), adopting tree scopes on `CSSStyleSheet` (mutations reach every adopting scope), adopted sheets activated after owned sheets and listed in `styleSheets`. Two upstream bugs fixed (replaced and truncated sheets stayed adopted). See *DOM integration*.
 
 **Open / next candidates:**
-- **Next:** DOM integration layer e5 (`adoptedStyleSheets`); see *DOM integration*. After that: the rest of the DOM integration, then the rule set and style resolution (brings container query evaluation).
+- **Next:** DOM integration layer e6 (selector matching); see *DOM integration*. After that: the rest of the DOM integration, then the rule set and style resolution (brings container query evaluation).
 - DOM, not yet done (noted 2026-10-14, deferred by choice): `NodeAlgorithms::Equals` compares attributes by position and ignores extra attributes on the other element (the spec compares the counts and matches attributes regardless of order). `Document::Head()` returns null for parsed documents (`DOMTreeAccessors::GetHeadElement`); URL reflection (`dom::USVString` is a placeholder). only `classList` follows its attribute; `relList`, `sandbox`, `sizes`, `blocking` and `htmlFor` are parsed once when created and should update from `Element::OnAttributeChanged`. Mutation observers never deliver records: `QueueMutationObserverMicrotask`/`NotifyMutationObservers` are TODOs and can now be built on `html::EventLoop`.
-- CSSOM, not yet ported (DOM integration): `<link>` sheets (resource loader), `adoptedStyleSheets` (adopting tree scopes, `CSSStyleSheetObservableArray`) and the async `replace()` (promises). Also not yet ported: the Typed OM (`styleMap`) and the computed style declaration.
+- CSSOM, not yet ported (DOM integration): `<link>` sheets (resource loader) and the async `replace()` (promises). Also not yet ported: the Typed OM (`styleMap`) and the computed style declaration.
 - Sheet parser, not yet ported (d5): the inspector entry points (`parseDeclarationListForInspector`, `parseStyleSheetForInspector`) are `wont`.
 - Rule model, not yet ported (d4): `@import` loading (`ImportRule::RequestStyleSheet`, the cached sheet and its client) and the loader half of `StyleSheetContents` (`ParseAuthorStyleSheet`, `NotifyLoadedSheet`, `SubresourcesAllowReuse`, `IsLoadingSubresources`) come with the resource loader (its owner-node half came with e4 of the DOM integration); `RuleData::MaximumSelectorComponentCount` with the rule set.
 - Query evaluation, not yet ported: container queries (`style/ContainerQueryEvaluator`, the container feature schemas' `evaluate`, FIXME in `src/CSS/Queries/ContainerQueryFeatures.cpp`) come with style resolution; `MediaQueryMatcher`, `MediaQueryList`, `MediaQueryListEvent` and `matchMedia` with the DOM integration (the headers on disk are unreviewed); font-relative units in media queries with the matcher and fonts. `MediaEnvironment` is process-wide until documents have frames (FIXME). 
@@ -1016,7 +1017,7 @@ Graph from the 35 CSSOM `.cpp`s (`css/CSS*Rule*.cpp`, `CSSStyleSheet.cpp`, `Styl
 | WebKit | Verdict | Krystal | CMake | Notes |
 |---|---|---|---|---|
 | `css/StyleSheet.h`, `.cpp` | `have` | `CSS/StyleSheet.hpp` | on | tested. No `debugDescription`/`TextStream`. |
-| `css/CSSStyleSheet.h`, `.cpp` | `have*` | `CSS/CSSStyleSheet.hpp`, `src/CSS/CSSStyleSheet.cpp` | on | tested. No `createInline`, adopting tree scopes or `replace` (FIXMEs). |
+| `css/CSSStyleSheet.h`, `.cpp` | `have*` | `CSS/CSSStyleSheet.hpp`, `src/CSS/CSSStyleSheet.cpp` | on | tested. No `replace` (FIXME). `createInline` came with e4, adopting tree scopes with e5. |
 | `css/MediaList.h`, `.cpp` | `have` | `CSS/Media/MediaList.hpp`, `src/...` | on | tested. |
 | `css/CSSRule.h`, `.cpp` | `have` | `CSS/CSSOM/CSSRule.hpp`, `src/CSS/CSSOM/CSSRule.cpp` | on | tested. Was `src/CSS/CSSRule.cpp`. |
 | `css/CSSRuleList.h`, `.cpp` | `have` | `CSS/CSSOM/CSSRuleList.hpp`, `src/...` | on | tested. |
@@ -1034,7 +1035,7 @@ Graph from the 35 CSSOM `.cpp`s (`css/CSS*Rule*.cpp`, `CSSStyleSheet.cpp`, `Styl
 | `style/StyleScope.h` | `port` | `Style/Scope.hpp` | on | Since e3 of the DOM integration. |
 | `style/StyleResolver.h` | `stub` | `style::Resolver` in `Style/Seam.hpp` | on | Placeholder; scopes never create one. |
 | `css/StyleSheetList.h`, `.cpp` | `port` | `CSS/StyleSheetList.hpp`, `src/...` | on | Since e4 of the DOM integration. |
-| `css/CSSStyleSheetObservableArray.h`, `.cpp` | `?` | | | DOM integration (`adoptedStyleSheets`). |
+| `css/CSSStyleSheetObservableArray.h`, `.cpp` | `port` | `CSS/CSSStyleSheetObservableArray.hpp`, `src/...` | on | Since e5 of the DOM integration. |
 | `css/CSSComputedStyleDeclaration.h`, `.cpp` | `?` | | | Needs the Style builder and `RenderStyle`. |
 | `css/DeprecatedCSSOM*` | `wont` | | | Non-standard (`getPropertyCSSValue`). |
 | `css/typedom/*` | `?` | | | The Typed OM, a slice of its own. |
@@ -1056,7 +1057,7 @@ Graph from the 35 CSSOM `.cpp`s (`css/CSS*Rule*.cpp`, `CSSStyleSheet.cpp`, `Styl
 
 **Differences:**
 - Through the seam, no sheet has a style scope, so `DidMutate`, `DidMutateRules`, `SetDisabled` and `WasMutated` never notify anything. Constructed sheets use the document's base URL and parser context (default settings; since e1 of the DOM integration); `CanAccessRules` asks `DocumentCanRequest`, which allows everything.
-- Not ported until the DOM integration (FIXMEs): the adopting tree scopes, the async `Replace` and `CSSStyleDeclaration::settings()`. Inline styles came with e2, `CreateInline` and `StyleSheetList` with e4.
+- Not ported until the DOM integration (FIXMEs): the async `Replace` and `CSSStyleDeclaration::settings()`. Inline styles came with e2, `CreateInline` and `StyleSheetList` with e4, the adopting tree scopes with e5.
 - `CSSOMString` can't be null: `Href()` and `Title()` are empty for none; nullable attributes are `Maybe` (`CSSImportRule::LayerName`, `CSSPropertyRule::InitialValue`, `CSSFunctionRule::FunctionParameter::DefaultValue`). The rule model can't tell an empty `supports()` from none, so `@import "a" supports()` serialises without it, and `CSSPropertyRule` omits an empty `syntax`.
 - `CSSImportRule::GetStyleSheet()` is always null (imports don't load); whether the imported sheet is origin-clean waits for the loader (FIXME). No `cssText(context)` override (its only job is URL replacement, which `SerialisationContext` doesn't support); the other `CssText(context)` overloads are kept.
 - `StyleSheetContentsCache` evicts the first entry of its `std::unordered_map`, not a random one, and hashes the context with `ParserContext::Hash()`.
@@ -1114,7 +1115,7 @@ Connects the CSS port to the DOM (`DOM/`, `HTML/`), which is written from the WH
 - **e2, inline styles:** `StyledElement` between `Element` and `HTMLElement`/`SVGElement`/`MathMLElement`, the inline style, `InlineCSSStyleProperties`, `StyleAttributeMutationScope`, `Parser::ParseInlineStyleDeclaration`, lazy `style` attribute synchronisation. Presentational hints wait for the cascade. Done.
 - **e3, `style::Scope` bookkeeping:** owned by `DocumentOrShadowRoot`; candidate nodes, pending sheets, preferred/alternate sets, `CollectActiveStyleSheets`, `UpdateActiveStyleSheets` without the render-tree gate, resolver update or invalidation. Updates are scheduled on the event loop. Done.
 - **e4, sheet owners:** `InlineStyleSheetOwner`, `CSSStyleSheet::CreateInline`, the owner-node half of `StyleSheetContents`, `HTMLStyleElement`, `StyleSheetList` (`document.styleSheets`, `shadowRoot.styleSheets`). Done.
-- **e5, `adoptedStyleSheets`:** on `DocumentOrShadowRoot`; `CSSStyleSheetObservableArray` becomes a plain C++ list API with the same checks; adopting tree scopes in `CSSStyleSheet`.
+- **e5, `adoptedStyleSheets`:** on `DocumentOrShadowRoot`; `CSSStyleSheetObservableArray` becomes a plain C++ list API with the same checks; adopting tree scopes in `CSSStyleSheet`. Done.
 - **e6, selector matching:** `SelectorChecker` (`QueryingRules` mode, no JIT, `SelectorFilter` or relations), then `SelectorQuery`/`SelectorQueryCache`; probably split in two.
 - **e7, `matchMedia`:** `MediaQueryMatcher`, `MediaQueryList`, `MediaQueryListEvent`, on `Document` (there's no window).
 - **Deferred:** `<link>` loading, `xml-stylesheet`, `@import`, render blocking (resource loader); `SVGStyleElement`; presentational hints and `<body>` colours (cascade); the `*ChangeInvalidation` classes; `getComputedStyle`.
@@ -1228,12 +1229,12 @@ Graph from `style/StyleScope.cpp` (headers-only): 131 files (`tools/port/out/sty
 - No render tree or style resolution: `UpdateActiveStyleSheets` always runs (no living-render-tree gate, no deferral during style recalc) and never analyses the change, updates a resolver or invalidates style (FIXMEs). `ScheduleUpdate` doesn't invalidate `:host`/`::slotted` or clear the resolver. `usesStyleBasedEditability`, `usesHasPseudoClass`, the match result cache, the custom property and counter style registries, shared shadow tree resolvers, media query re-evaluation, viewport changes, layout dependencies and anchor positioning are not ported.
 - Updates are a task on `html::EventLoop` (DOM manipulation task source) instead of a zero-delay timer. A queued task isn't cancelled when the update is flushed early; it finds nothing to do.
 - No extension style sheets or `authorAndUserStylesEnabled` setting; no user agent shadow roots; no inspector.
-- `CollectActiveStyleSheets`: xml-stylesheet processing instructions and `SVGStyleElement` are skipped (FIXMEs; no sheets yet), and adopted sheets come with e5 (FIXME). A `<link>`'s "enabled via script" state and its loading branch come with the resource loader. As upstream, `rel` is checked for the substring `alternate`, case-sensitively.
+- `CollectActiveStyleSheets`: xml-stylesheet processing instructions and `SVGStyleElement` are skipped (FIXMEs; no sheets yet). Adopted sheets came with e5. A `<link>`'s "enabled via script" state and its loading branch come with the resource loader. As upstream, `rel` is checked for the substring `alternate`, case-sensitively.
 - Pending processing-instruction sheets aren't tracked, and removing the last pending sheet doesn't notify the document (`didRemoveAllPendingStylesheet`, FIXME: scripts and rendering don't wait for sheets).
 - Candidates, pending sheets and in-document shadow roots are `List<WeakPtr<...>>` (upstream: weak hash sets); `ActiveStyleSheetsContains` is a linear search (upstream caches a hash set).
 - `Document::Body()` only returns `<body>`, so a `<frameset>` doesn't count as the body when ordering candidates.
 
-**Open (DOM):** a container node doesn't release its children when it's destroyed, and every node keeps its document alive (`_nodeDocument` is a `RefPtr`), so a document with children is never freed. Upstream breaks the cycle with the document's referencing-node count and `removeDetachedChildren`.
+**Open (DOM):** a container node doesn't release its children when it's destroyed, and every node keeps its document alive (`_nodeDocument` is a `RefPtr`), so a document with children is never freed. In fact no document is freed: `Document` is a `Node` whose `_nodeDocument` is itself (noted in e5). Upstream breaks the cycle with the document's referencing-node count and `removeDetachedChildren`.
 
 Tests: `tests/Style/Scope.cpp` (shadow tree connection and references, scope lookup and adoption, update scheduling and flushing, shadow scopes, links without sheets, pending sheets): 4 cases / 67 assertions pass; `tests/CSS/CSSStyleSheet.cpp` now expects an owner node's sheet to have its document's scope. Full Booey suite: 1766 cases / 680822 assertions; all pass except 7 expected failures. Whole solution builds with no warnings.
 
@@ -1264,6 +1265,32 @@ Graph from `dom/InlineStyleSheetOwner.cpp`, `html/HTMLStyleElement.cpp` and `css
 - `<link>` has `Sheet()` but nothing sets it until the resource loader; `SVGStyleElement` doesn't own a sheet yet.
 
 Tests: `tests/HTML/HTMLStyleElement.cpp` (parsed sheets, tree order, text changes, removal, `type`, `media`, `title`, `disabled`, shadow roots, shared contents, `load`): 1 case / 60 assertions; `tests/Style/Scope.cpp` gains the collection tests deferred from e3 (empty and disabled sheets, style sheet sets): 5 cases / 81 assertions; Core `StringAtom` test. Full Booey suite: 1768 cases / 680896 assertions; all pass except 7 expected failures. Krystal.Core suite: 554 cases pass. Whole solution builds with no warnings.
+
+### Layer e5: `adoptedStyleSheets` (2026-10-14)
+
+Graph from `css/CSSStyleSheetObservableArray.cpp` (headers-only): 15 files (`tools/port/out/adopted-sheets.md`), all already ported; the boundaries are the bindings (`JSObservableArray`, `JSDOMConvert`) and the DOM (`TreeScope`, `Document`, `ShadowRoot`).
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `css/CSSStyleSheetObservableArray.h`, `.cpp` | `port` | `CSS/CSSStyleSheetObservableArray.hpp`, `src/...` | on | tested. A C++ list API instead of a `JSC::ObservableArray`; see differences. |
+| `dom/TreeScope.h`, `.cpp` (`adoptedStyleSheets`, `setAdoptedStyleSheets`, `ensureAdoptedStyleSheets`) | `have*` | `DocumentOrShadowRoot::AdoptedStyleSheets`, `SetAdoptedStyleSheets`, `GetAdoptedStyleSheets` | on | tested. |
+| `css/CSSStyleSheet.h`, `.cpp` (`addAdoptingTreeScope`, `removeAdoptingTreeScope`, `adoptingTreeScopes`, `forEachStyleScope`, `isDetached`) | `port` | `CSSStyleSheet` | on | tested. |
+| `style/StyleScope.cpp` (`collectActiveStyleSheets`'s adopted half, `treeScope`) | `port` | `style::Scope` | on | tested. |
+| `dom/ShadowRoot.cpp` (`insertedIntoAncestor`, `moveShadowRootToNewDocument`) | `have*` | `ShadowRoot::OnInsert`, `OnAdopt` | on | tested. |
+
+**Names:** the IDL getter `adoptedStyleSheets` is `AdoptedStyleSheets()` (creates and returns the array, upstream's `ensureAdoptedStyleSheets`/`adoptedStyleSheetWrapper`); upstream's span accessor `adoptedStyleSheets()` is `GetAdoptedStyleSheets()` (doesn't create the array). The array keeps upstream's method names: `SetSheets`, `Sheets`, `SetValueAt`, `ValueAt`, `RemoveLast`, `ShrinkTo`, `Length`. `DocumentOrShadowRoot` now takes its root node (upstream's `TreeScope::m_rootNode`), which the array needs.
+
+**Upstream bugs found:**
+- `setValueAt` overwrites a sheet without `willRemoveSheet`, and `shrinkTo` (setting `length`) drops sheets without it, so a sheet no longer in `adoptedStyleSheets` keeps the tree scope in its adopting set: it isn't detached (`replaceSync` skips the contents cache) and its mutations keep updating the scope. Krystal releases the replaced sheet and each truncated one (tested).
+- A sheet can be adopted twice (`[sheet, sheet]`), but the adopting set holds the tree scope once, so removing either copy releases it. Krystal only releases a tree scope when no copy of the sheet remains (tested).
+
+**Differences:**
+- No bindings: the array's methods take sheets directly (no conversion), `SetValueAt` asserts `index <= Length()` (the bindings return `false` past the end) and `ValueAt` returns null instead of `undefined`. The array is owned by its document or shadow root (upstream: ref-counted, shared with the JS wrapper).
+- A shadow root's adopted sheets are always cleared when it moves to another document: there are no template contents owner documents (upstream keeps them when moving between a document and its template document).
+- `ShadowRoot::OnInsert` reacts to adopted sheets without upstream's `document().frame()` check (no frames; the scope always updates, as in e3).
+- Adopting tree scopes are a `List<WeakPtr<ContainerNode>>` (upstream: a weak hash set); entries freed with their tree scope are ignored and pruned on the next add.
+
+Tests: `tests/CSS/CSSStyleSheetObservableArray.cpp` (the constructed-sheet checks, set/remove/shrink, duplicates, several tree scopes, activation order, `styleSheets`, mutations, disabled and titled sheets, shadow roots, adoption into another document, a freed tree scope): 2 cases / 107 assertions pass. A freed document can't be tested: no document is freed (FIXME in the test). Full Booey suite: 1770 cases / 681003 assertions; all pass except 7 expected failures. Whole solution builds with no warnings.
 
 ## Slice 3: Colour
 

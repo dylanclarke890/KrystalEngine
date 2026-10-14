@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/StyleSheetList.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
@@ -14,7 +15,7 @@ namespace krys::boo::dom
   ShadowRoot::ShadowRoot(Document &document, RefPtr<html::CustomElementRegistry> &&registry,
                          NodeFlags flags) noexcept
       : DocumentFragment(document, flags | NodeFlags::IsShadowRoot),
-        DocumentOrShadowRoot(krys::move(registry))
+        DocumentOrShadowRoot(*this, krys::move(registry))
   {
     SetNodeFlag(NodeFlags::IsInShadowTree);
     _styleScope = CreateUnique<style::Scope>(*this);
@@ -60,6 +61,10 @@ namespace krys::boo::dom
     {
       NodeDocument().DidInsertInDocumentShadowRoot(*this);
     }
+    if (!GetAdoptedStyleSheets().empty())
+    {
+      StyleScope().DidChangeActiveStyleSheetCandidates();
+    }
   }
 
   void ShadowRoot::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
@@ -71,6 +76,9 @@ namespace krys::boo::dom
   void ShadowRoot::OnAdopt(Document &oldDocument) noexcept
   {
     DocumentFragment::OnAdopt(oldDocument);
+
+    // Adopted sheets were constructed for the old document.
+    (void)SetAdoptedStyleSheets({});
 
     // Style scopes are document specific.
     _styleScope = CreateUnique<style::Scope>(*this);

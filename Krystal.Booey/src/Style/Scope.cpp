@@ -332,8 +332,24 @@ namespace krys::boo::style
       }
     }
 
-    // FIXME: Adopted style sheets (those that aren't disabled and have no title or the preferred set's
-    // title), once documents and shadow roots have adoptedStyleSheets.
+    auto canActivateAdoptedStyleSheet = [&](const css::CSSStyleSheet &sheet)
+    {
+      if (sheet.Disabled())
+      {
+        return false;
+      }
+      return sheet.Title().empty() || sheet.Title() == _preferredStylesheetSetName;
+    };
+
+    for (auto &adoptedStyleSheet : TreeScope().GetAdoptedStyleSheets())
+    {
+      if (!canActivateAdoptedStyleSheet(*adoptedStyleSheet))
+      {
+        continue;
+      }
+      styleSheetsForStyleSheetsList.push_back(adoptedStyleSheet);
+      sheets.push_back(adoptedStyleSheet);
+    }
 
     return {krys::move(sheets), krys::move(styleSheetsForStyleSheetsList)};
   }
@@ -474,6 +490,15 @@ namespace krys::boo::style
   Scope &Scope::DocumentScope() noexcept
   {
     return _document->StyleScope();
+  }
+
+  dom::DocumentOrShadowRoot &Scope::TreeScope() noexcept
+  {
+    if (_shadowRoot)
+    {
+      return *_shadowRoot;
+    }
+    return *_document;
   }
 
   const Scope *Scope::HostScope() const noexcept

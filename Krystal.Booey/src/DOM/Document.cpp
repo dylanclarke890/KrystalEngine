@@ -52,7 +52,8 @@ namespace krys::boo::dom
 
   Document::Document() noexcept
       : ContainerNode(*this, NodeType::DOCUMENT_NODE, NodeFlags::IsContainerNode),
-        _flags(DocumentFlags::None), _url(url::AboutBlankURL()), _baseURL(_url)
+        DocumentOrShadowRoot(static_cast<ContainerNode &>(*this)), _flags(DocumentFlags::None),
+        _url(url::AboutBlankURL()), _baseURL(_url)
   {
     SetNodeFlag(NodeFlags::IsConnected);
     _styleScope = CreateUnique<style::Scope>(*this);

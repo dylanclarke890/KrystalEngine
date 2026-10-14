@@ -18,6 +18,7 @@
 
 namespace krys::boo::dom
 {
+  class ContainerNode;
   class Document;
   class Element;
   class Node;
@@ -44,8 +45,7 @@ namespace krys::boo::css
 
   /// @brief A CSS style sheet exposed to scripts, wrapping its (possibly shared) parsed contents.
   /// @see https://drafts.csswg.org/cssom/#the-cssstylesheet-interface
-  // FIXME: The adopting tree scopes (with adoptedStyleSheets) and the async Replace (needs promises) come
-  // with the DOM integration.
+  // FIXME: The async Replace (needs promises).
   class CSSStyleSheet final : public StyleSheet, public CanMakeWeakPtr<CSSStyleSheet>
   {
   public:
@@ -104,6 +104,8 @@ namespace krys::boo::css
     WeakPtr<dom::Document> _constructorDocument;
     WeakPtr<dom::Node> _ownerNode;
     WeakPtr<CSSImportRule> _ownerRule;
+    // The documents and shadow roots whose adoptedStyleSheets hold this sheet.
+    List<WeakPtr<dom::ContainerNode>> _adoptingTreeScopes;
 
     mutable RefPtr<MediaList> _mediaCSSOMWrapper;
     mutable List<RefPtr<CSSRule>> _childRuleCSSOMWrappers;
@@ -174,6 +176,14 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD dom::Document *ConstructorDocument() const noexcept;
+
+    void RemoveAdoptingTreeScope(dom::ContainerNode &treeScope) noexcept;
+    void AddAdoptingTreeScope(dom::ContainerNode &treeScope) noexcept;
+
+    KRYS_NODISCARD const List<WeakPtr<dom::ContainerNode>> &AdoptingTreeScopes() const noexcept
+    {
+      return _adoptingTreeScopes;
+    }
 
     // For CSSRuleList.
     KRYS_NODISCARD uint32 Length() const noexcept;

@@ -13,6 +13,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Node.hpp"
+#include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
@@ -24,6 +25,16 @@ namespace krys::boo::css
 {
   namespace
   {
+    KRYS_NODISCARD style::Scope &StyleScopeFor(dom::ContainerNode &treeScope) noexcept
+    {
+      krys_debug_assert(Is<dom::Document>(treeScope) || Is<dom::ShadowRoot>(treeScope));
+      if (auto *shadowRoot = DynamicDowncast<dom::ShadowRoot>(treeScope))
+      {
+        return shadowRoot->StyleScope();
+      }
+      return Downcast<dom::Document>(treeScope).StyleScope();
+    }
+
     class StyleSheetCSSRuleList final : public CSSRuleList
     {
     private:
@@ -286,7 +297,13 @@ namespace krys::boo::css
       apply(*scope);
       return;
     }
-    // FIXME: Also apply to the style scope of each adopting tree scope, once adoptedStyleSheets exists.
+    for (auto &treeScope : _adoptingTreeScopes)
+    {
+      if (treeScope)
+      {
+        apply(StyleScopeFor(*treeScope));
+      }
+    }
   }
 
   void CSSStyleSheet::ClearOwnerNode() noexcept
@@ -663,13 +680,34 @@ namespace krys::boo::css
 
   bool CSSStyleSheet::IsDetached() const noexcept
   {
-    // FIXME: And no adopting tree scopes, once adoptedStyleSheets exists.
-    return !_ownerNode && !_ownerRule;
+    return !_ownerNode && !_ownerRule
+           && std::ranges::none_of(_adoptingTreeScopes,
+                                   [](const WeakPtr<dom::ContainerNode> &treeScope) { return !!treeScope; });
   }
 
   dom::Document *CSSStyleSheet::ConstructorDocument() const noexcept
   {
     return _constructorDocument.get();
+  }
+
+  void CSSStyleSheet::AddAdoptingTreeScope(dom::ContainerNode &treeScope) noexcept
+  {
+    krys_debug_assert(Is<dom::Document>(treeScope) || Is<dom::ShadowRoot>(treeScope));
+    std::erase_if(_adoptingTreeScopes, [](const WeakPtr<dom::ContainerNode> &scope) { return !scope; });
+    if (std::ranges::none_of(_adoptingTreeScopes, [&](const WeakPtr<dom::ContainerNode> &scope)
+                             { return scope.get() == &treeScope; }))
+    {
+      _adoptingTreeScopes.push_back(WeakPtr<dom::ContainerNode>::WithRef(treeScope));
+    }
+    StyleScopeFor(treeScope).DidChangeActiveStyleSheetCandidates();
+  }
+
+  void CSSStyleSheet::RemoveAdoptingTreeScope(dom::ContainerNode &treeScope) noexcept
+  {
+    krys_debug_assert(Is<dom::Document>(treeScope) || Is<dom::ShadowRoot>(treeScope));
+    std::erase_if(_adoptingTreeScopes, [&](const WeakPtr<dom::ContainerNode> &scope)
+                  { return !scope || scope.get() == &treeScope; });
+    StyleScopeFor(treeScope).DidChangeStyleSheetContents();
   }
 
   Ref<StyleSheetContents> CSSStyleSheet::ProtectedContents() noexcept

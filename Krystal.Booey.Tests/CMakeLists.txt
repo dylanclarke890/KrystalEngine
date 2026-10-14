@@ -110,6 +110,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/CSSOM/CSSViewTransitionRule.cpp
 		tests/CSS/CSSStyleProperties.cpp
 		tests/CSS/CSSStyleSheet.cpp
+		tests/CSS/CSSStyleSheetObservableArray.cpp
 		tests/CSS/Descriptors/PropertySetCSSDescriptors.cpp
 		tests/CSS/Media/MediaList.cpp
 		tests/CSS/Calc/CalcType.cpp

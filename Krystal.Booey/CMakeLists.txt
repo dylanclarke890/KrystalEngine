@@ -593,6 +593,9 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
 
   # DOM integration, layer e4 (sheet owners)
   include/Krystal.Booey/CSS/StyleSheetList.hpp
+
+  # DOM integration, layer e5 (adoptedStyleSheets)
+  include/Krystal.Booey/CSS/CSSStyleSheetObservableArray.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -933,6 +936,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
 
   # DOM integration, layer e4 (sheet owners)
   src/CSS/StyleSheetList.cpp
+
+  # DOM integration, layer e5 (adoptedStyleSheets)
+  src/CSS/CSSStyleSheetObservableArray.cpp
 )
 
 target_precompile_headers(Krystal.Booey
