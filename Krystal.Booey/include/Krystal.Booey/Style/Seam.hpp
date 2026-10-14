@@ -18,6 +18,8 @@
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
 #include "Krystal.Booey/Style/Values/Math/MathDepth.hpp"
 #include "Krystal.Booey/Style/Values/Sizing/AspectRatio.hpp"
+#include "Krystal.Booey/Style/Values/Text/TextAlign.hpp"
+#include "Krystal.Booey/Style/Values/Text/TextAlignLast.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
@@ -128,6 +130,8 @@ namespace krys::boo
     style::AspectRatio _aspectRatio {css::keywords::Auto {}};
     style::MathDepth _mathDepth {0};
     MathStyle _mathStyle {MathStyle::Normal};
+    style::TextAlign _textAlign {style::TextAlign::Start};
+    style::TextAlignLast _textAlignLast {style::TextAlignLast::Auto};
 
   public:
     RenderStyle() noexcept = default;
@@ -189,6 +193,10 @@ namespace krys::boo
     void SetMathDepth(style::MathDepth value) noexcept;
     KRYS_NODISCARD MathStyle GetMathStyle() const noexcept;
     void SetMathStyle(MathStyle value) noexcept;
+    KRYS_NODISCARD style::TextAlign TextAlign() const noexcept;
+    void SetTextAlign(style::TextAlign value) noexcept;
+    KRYS_NODISCARD style::TextAlignLast TextAlignLast() const noexcept;
+    void SetTextAlignLast(style::TextAlignLast value) noexcept;
 
     /// @brief Collapses `lineHeight().tryFixed()` evaluated to a `LayoutUnit` with `zoom`, as a float, for
     /// the initial `line-height`.

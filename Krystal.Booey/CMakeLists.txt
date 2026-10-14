@@ -707,6 +707,58 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Values/ViewTransitions/ViewTransitionName.hpp
   include/Krystal.Booey/Style/Values/Viewport/Zoom.hpp
   include/Krystal.Booey/Style/Values/WillChange/WillChange.hpp
+
+  # Style resolution, layer f3b2 (align, inline, text, scroll-snap, ui, grid)
+  include/Krystal.Booey/Rendering/Style/StyleContentAlignmentData.hpp
+  include/Krystal.Booey/Rendering/Style/StyleSelfAlignmentData.hpp
+  include/Krystal.Booey/Style/Values/Align/AlignContent.hpp
+  include/Krystal.Booey/Style/Values/Align/AlignItems.hpp
+  include/Krystal.Booey/Style/Values/Align/AlignSelf.hpp
+  include/Krystal.Booey/Style/Values/Align/BaselineAlignmentPreference.hpp
+  include/Krystal.Booey/Style/Values/Align/GapGutter.hpp
+  include/Krystal.Booey/Style/Values/Align/JustifyContent.hpp
+  include/Krystal.Booey/Style/Values/Align/JustifyItems.hpp
+  include/Krystal.Booey/Style/Values/Align/JustifySelf.hpp
+  include/Krystal.Booey/Style/Values/Align/LegacyPosition.hpp
+  include/Krystal.Booey/Style/Values/Align/OverflowPosition.hpp
+  include/Krystal.Booey/Style/Values/Inline/LineFitEdge.hpp
+  include/Krystal.Booey/Style/Values/Inline/LineHeight.hpp
+  include/Krystal.Booey/Style/Values/Inline/TextBoxEdge.hpp
+  include/Krystal.Booey/Style/Values/Inline/TextEdge.hpp
+  include/Krystal.Booey/Style/Values/Inline/TextEdgeCSSValueConversion.hpp
+  include/Krystal.Booey/Style/Values/Inline/VerticalAlign.hpp
+  include/Krystal.Booey/Style/Values/Inline/WebKitInitialLetter.hpp
+  include/Krystal.Booey/Style/Values/ScrollSnap/ScrollMargin.hpp
+  include/Krystal.Booey/Style/Values/ScrollSnap/ScrollPadding.hpp
+  include/Krystal.Booey/Style/Values/ScrollSnap/ScrollSnapAlign.hpp
+  include/Krystal.Booey/Style/Values/ScrollSnap/ScrollSnapType.hpp
+  include/Krystal.Booey/Style/Values/Text/HangingPunctuation.hpp
+  include/Krystal.Booey/Style/Values/Text/HyphenateCharacter.hpp
+  include/Krystal.Booey/Style/Values/Text/HyphenateLimitEdge.hpp
+  include/Krystal.Booey/Style/Values/Text/HyphenateLimitLines.hpp
+  include/Krystal.Booey/Style/Values/Text/LetterSpacing.hpp
+  include/Krystal.Booey/Style/Values/Text/TabSize.hpp
+  include/Krystal.Booey/Style/Values/Text/TextAlign.hpp
+  include/Krystal.Booey/Style/Values/Text/TextAlignLast.hpp
+  include/Krystal.Booey/Style/Values/Text/TextAutospace.hpp
+  include/Krystal.Booey/Style/Values/Text/TextIndent.hpp
+  include/Krystal.Booey/Style/Values/Text/TextSpacingTrim.hpp
+  include/Krystal.Booey/Style/Values/Text/TextTransform.hpp
+  include/Krystal.Booey/Style/Values/Text/WordSpacing.hpp
+  include/Krystal.Booey/Style/Values/UI/AccentColor.hpp
+  include/Krystal.Booey/Style/Values/UI/Resize.hpp
+
+  # # Style resolution, layer f3b2 (align, inline, text, scroll-snap, ui, grid)
+  include/Krystal.Booey/Style/Values/Grid/GridAutoFlow.hpp
+  include/Krystal.Booey/Style/Values/Grid/GridNamedAreaMap.hpp
+  include/Krystal.Booey/Style/Values/Grid/GridNamedLinesMap.hpp
+  include/Krystal.Booey/Style/Values/Grid/GridOrderedNamedLinesMap.hpp
+  include/Krystal.Booey/Style/Values/Grid/GridTemplateAreas.hpp
+  include/Krystal.Booey/Style/Values/Grid/GridTemplateList.hpp
+  include/Krystal.Booey/Style/Values/Grid/GridTrackBreadth.hpp
+  include/Krystal.Booey/Style/Values/Grid/GridTrackSize.hpp
+  include/Krystal.Booey/Style/Values/Grid/GridTrackSizes.hpp
+  include/Krystal.Booey/Style/Values/Grid/ItemTolerance.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -1118,6 +1170,43 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Style/Values/Speech/SpeakAs.cpp
   src/Style/Values/ViewTransitions/ViewTransitionName.cpp
   src/Style/Values/WillChange/WillChange.cpp
+
+  # Style resolution, layer f3b2 (align, inline, text, scroll-snap, ui, grid)
+  src/Rendering/Style/StyleContentAlignmentData.cpp
+  src/Rendering/Style/StyleSelfAlignmentData.cpp
+  src/Style/Values/Align/AlignContent.cpp
+  src/Style/Values/Align/AlignItems.cpp
+  src/Style/Values/Align/AlignSelf.cpp
+  src/Style/Values/Align/JustifyContent.cpp
+  src/Style/Values/Align/JustifyItems.cpp
+  src/Style/Values/Align/JustifySelf.cpp
+  src/Style/Values/Inline/LineHeight.cpp
+  src/Style/Values/Inline/VerticalAlign.cpp
+  src/Style/Values/Inline/WebKitInitialLetter.cpp
+  src/Style/Values/ScrollSnap/ScrollMargin.cpp
+  src/Style/Values/ScrollSnap/ScrollPadding.cpp
+  src/Style/Values/ScrollSnap/ScrollSnapAlign.cpp
+  src/Style/Values/ScrollSnap/ScrollSnapType.cpp
+  src/Style/Values/Text/HangingPunctuation.cpp
+  src/Style/Values/Text/LetterSpacing.cpp
+  src/Style/Values/Text/TabSize.cpp
+  src/Style/Values/Text/TextAlign.cpp
+  src/Style/Values/Text/TextAlignLast.cpp
+  src/Style/Values/Text/TextAutospace.cpp
+  src/Style/Values/Text/TextIndent.cpp
+  src/Style/Values/Text/TextTransform.cpp
+  src/Style/Values/Text/WordSpacing.cpp
+  src/Style/Values/UI/AccentColor.cpp
+  src/Style/Values/UI/Resize.cpp
+
+  # # Style resolution, layer f3b2 (align, inline, text, scroll-snap, ui, grid)
+  src/Style/Values/Grid/GridAutoFlow.cpp
+  src/Style/Values/Grid/GridTemplateAreas.cpp
+  src/Style/Values/Grid/GridTemplateList.cpp
+  src/Style/Values/Grid/GridTrackBreadth.cpp
+  src/Style/Values/Grid/GridTrackSize.cpp
+  src/Style/Values/Grid/GridTrackSizes.cpp
+  src/Style/Values/Grid/ItemTolerance.cpp
 )
 
 target_precompile_headers(Krystal.Booey

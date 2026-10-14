@@ -21,17 +21,21 @@
 #include "Krystal.Booey/Style/Values/PointerEvents/TouchAction.hpp"
 #include "Krystal.Booey/Style/Values/Scrollbars/ScrollbarWidth.hpp"
 #include "Krystal.Booey/Style/Values/Speech/SpeakAs.hpp"
+#include "Krystal.Booey/Style/Values/Text/HangingPunctuation.hpp"
+#include "Krystal.Booey/Style/Values/Text/TextAlign.hpp"
+#include "Krystal.Booey/Style/Values/Text/TextAlignLast.hpp"
+#include "Krystal.Booey/Style/Values/Text/TextTransform.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Booey/Style/Values/UI/Resize.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Visitor.hpp"
 
 // FIXME: The mappings of the remaining Style value types (and `FontSizeAdjust::Metric`) are added with their
-// types: `style::HangingPunctuationValue`, `style::ImageOrientation`, `style::MaskMode` (and
-// `ToValueIdForWebkitMaskSourceType`), `style::PositionTryFallbackTactic`, `style::PositionTryOrder`,
-// `style::PositionVisibilityValue`, `style::Resize`, `style::TextAlign`, `style::TextAlignLast`,
-// `style::TextDecorationLine::Flag`, `style::TextEmphasisPositionValue`, `style::TextTransformValue`,
-// `style::TextUnderlinePositionValue` and `style::WebkitLineBoxContainValue`.
+// types: `style::ImageOrientation`, `style::MaskMode` (and `ToValueIdForWebkitMaskSourceType`),
+// `style::PositionTryFallbackTactic`, `style::PositionTryOrder`, `style::PositionVisibilityValue`,
+// `style::TextDecorationLine::Flag`, `style::TextEmphasisPositionValue`, `style::TextUnderlinePositionValue`
+// and `style::WebkitLineBoxContainValue`.
 
 namespace krys::boo
 {
@@ -1181,8 +1185,11 @@ namespace krys::boo
   CASE(Overlay)                                                                                              \
   CASE(Darken)                                                                                               \
   CASE(Lighten)                                                                                              \
-  CASE(ColorDodge) CASE(ColorBurn) CASE(HardLight) CASE(SoftLight) CASE(Difference) CASE(Exclusion)          \
-    CASE(Hue) CASE(Saturation) CASE(Color) CASE(Luminosity) CASE(PlusDarker) CASE(PlusLighter)
+  CASE(ColorDodge)                                                                                           \
+  CASE(ColorBurn)                                                                                            \
+  CASE(HardLight)                                                                                            \
+  CASE(SoftLight) CASE(Difference) CASE(Exclusion) CASE(Hue) CASE(Saturation) CASE(Color) CASE(Luminosity)   \
+    CASE(PlusDarker) CASE(PlusLighter)
   KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
 #undef KRYS_MAPPING_TYPE
 #undef KRYS_MAPPING_FOR_EACH
@@ -1342,8 +1349,7 @@ namespace krys::boo
   CASE(ResetSize)                                                                                            \
   CASE(Central)                                                                                              \
   CASE(Middle)                                                                                               \
-  CASE(TextBeforeEdge) CASE(TextAfterEdge) CASE(Ideographic) CASE(Alphabetic) CASE(Hanging)                  \
-    CASE(Mathematical)
+  CASE(TextBeforeEdge) CASE(TextAfterEdge) CASE(Ideographic) CASE(Alphabetic) CASE(Hanging) CASE(Mathematical)
   KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
 #undef KRYS_MAPPING_TYPE
 #undef KRYS_MAPPING_FOR_EACH
@@ -1441,8 +1447,10 @@ namespace krys::boo
   CASE(Stretch)                                                                                              \
   CASE(Baseline)                                                                                             \
   CASE(LastBaseline)                                                                                         \
-  CASE(Center) CASE(Start) CASE(End) CASE(SelfStart) CASE(SelfEnd) CASE(FlexStart) CASE(FlexEnd) CASE(Left)  \
-    CASE(Right) CASE(AnchorCenter)
+  CASE(Center)                                                                                               \
+  CASE(Start)                                                                                                \
+  CASE(End)                                                                                                  \
+  CASE(SelfStart) CASE(SelfEnd) CASE(FlexStart) CASE(FlexEnd) CASE(Left) CASE(Right) CASE(AnchorCenter)
   KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
 #undef KRYS_MAPPING_TYPE
 #undef KRYS_MAPPING_FOR_EACH
@@ -1754,6 +1762,95 @@ namespace krys::boo
 
 #define KRYS_MAPPING_TYPE style::ContainValue
 #define KRYS_MAPPING_FOR_EACH(CASE) CASE(Size) CASE(InlineSize) CASE(Layout) CASE(Style) CASE(Paint)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
+
+#define KRYS_MAPPING_TYPE style::Resize
+#define KRYS_MAPPING_FOR_EACH(CASE)                                                                          \
+  CASE(Both) CASE(Horizontal) CASE(Vertical) CASE(Block) CASE(Inline) CASE(None)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
+
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(style::TextAlign e) noexcept
+  {
+    switch (e)
+    {
+      case style::TextAlign::Start:        return css::ValueId::Start;
+      case style::TextAlign::End:          return css::ValueId::End;
+      case style::TextAlign::Left:         return css::ValueId::Left;
+      case style::TextAlign::Right:        return css::ValueId::Right;
+      case style::TextAlign::Center:       return css::ValueId::Center;
+      case style::TextAlign::Justify:      return css::ValueId::Justify;
+      case style::TextAlign::WebKitLeft:   return css::ValueId::WebkitLeft;
+      case style::TextAlign::WebKitRight:  return css::ValueId::WebkitRight;
+      case style::TextAlign::WebKitCenter: return css::ValueId::WebkitCenter;
+    }
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
+  }
+
+  template <>
+  KRYS_NODISCARD constexpr style::TextAlign FromValueId(css::ValueId valueID) noexcept
+  {
+    switch (valueID)
+    {
+      case css::ValueId::WebkitAuto: // Legacy -webkit-auto. Equivalent to start.
+      case css::ValueId::Start:        return style::TextAlign::Start;
+      case css::ValueId::End:          return style::TextAlign::End;
+      case css::ValueId::Left:         return style::TextAlign::Left;
+      case css::ValueId::Right:        return style::TextAlign::Right;
+      case css::ValueId::Center:       return style::TextAlign::Center;
+      case css::ValueId::Justify:      return style::TextAlign::Justify;
+      case css::ValueId::WebkitLeft:   return style::TextAlign::WebKitLeft;
+      case css::ValueId::WebkitRight:  return style::TextAlign::WebKitRight;
+      case css::ValueId::WebkitCenter: return style::TextAlign::WebKitCenter;
+      default:                         break;
+    }
+    krys_debug_assert_msg(false, "Unexpected value");
+    return style::TextAlign::Start;
+  }
+
+  template <>
+  struct style::ValueRepresentation<style::TextAlign>
+  {
+    template <typename... F>
+    constexpr decltype(auto) operator()(style::TextAlign value, F &&...f)
+    {
+      auto visitor = krys::CreateVisitor(std::forward<F>(f)...);
+      switch (value)
+      {
+        case style::TextAlign::Start:        return visitor(css::keywords::Start {});
+        case style::TextAlign::End:          return visitor(css::keywords::End {});
+        case style::TextAlign::Left:         return visitor(css::keywords::Left {});
+        case style::TextAlign::Right:        return visitor(css::keywords::Right {});
+        case style::TextAlign::Center:       return visitor(css::keywords::Center {});
+        case style::TextAlign::Justify:      return visitor(css::keywords::Justify {});
+        case style::TextAlign::WebKitLeft:   return visitor(css::keywords::WebkitLeft {});
+        case style::TextAlign::WebKitRight:  return visitor(css::keywords::WebkitRight {});
+        case style::TextAlign::WebKitCenter: return visitor(css::keywords::WebkitCenter {});
+      }
+      krys_unreachable();
+    }
+  };
+
+#define KRYS_MAPPING_TYPE style::TextAlignLast
+#define KRYS_MAPPING_FOR_EACH(CASE)                                                                          \
+  CASE(Start) CASE(End) CASE(Left) CASE(Right) CASE(Center) CASE(Justify) CASE(Auto)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
+
+#define KRYS_MAPPING_TYPE style::HangingPunctuationValue
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(First) CASE(ForceEnd) CASE(AllowEnd) CASE(Last)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
+
+#define KRYS_MAPPING_TYPE style::TextTransformValue
+#define KRYS_MAPPING_FOR_EACH(CASE)                                                                          \
+  CASE(Capitalize) CASE(Uppercase) CASE(Lowercase) CASE(FullWidth) CASE(FullSizeKana) CASE(MathAuto)
   KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
 #undef KRYS_MAPPING_TYPE
 #undef KRYS_MAPPING_FOR_EACH

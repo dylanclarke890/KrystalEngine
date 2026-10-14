@@ -305,6 +305,26 @@ namespace krys::boo
     _mathStyle = krys::move(value);
   }
 
+  style::TextAlign RenderStyle::TextAlign() const noexcept
+  {
+    return _textAlign;
+  }
+
+  void RenderStyle::SetTextAlign(style::TextAlign value) noexcept
+  {
+    _textAlign = krys::move(value);
+  }
+
+  style::TextAlignLast RenderStyle::TextAlignLast() const noexcept
+  {
+    return _textAlignLast;
+  }
+
+  void RenderStyle::SetTextAlignLast(style::TextAlignLast value) noexcept
+  {
+    _textAlignLast = krys::move(value);
+  }
+
   const dom::Document &RenderView::GetDocument() const noexcept
   {
     krys_unreachable();

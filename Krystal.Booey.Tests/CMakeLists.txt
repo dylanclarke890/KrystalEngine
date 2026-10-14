@@ -332,6 +332,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/StyleSheetContentsCache.cpp
 		tests/Style/Values/Box/Box.cpp
 		tests/Style/Values/CSSValueConversion.cpp
+		tests/Style/Values/AlignInlineTextGroups.cpp
 		tests/Style/Values/KeywordAndLengthGroups.cpp
 		tests/Style/Values/Sizing/Sizing.cpp
 		tests/Style/Values/Color/Color.cpp
@@ -339,6 +340,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/Values/Color/DynamicRangeLimit.cpp
 		tests/Style/Values/Color/SystemColor.cpp
 		tests/Style/Values/Grid/GridPosition.cpp
+		tests/Style/Values/Grid/GridTemplate.cpp
 		tests/Style/Values/Primitives/CoordinatedValueList.cpp
 		tests/Style/Values/Primitives/LengthResolution.cpp
 		tests/Style/Values/Primitives/LengthWrapper.cpp
