@@ -634,6 +634,10 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/MatchResult.hpp
   include/Krystal.Booey/Style/ElementRuleCollector.hpp
   include/Krystal.Booey/Style/PageRuleCollector.hpp
+
+  # Style resolution, layer f2 (the cascade)
+  include/Krystal.Booey/Animation/WebAnimationTypes.hpp
+  include/Krystal.Booey/Style/PropertyCascade.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -1003,6 +1007,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   # Style resolution, layer f1 (matching)
   src/Style/ElementRuleCollector.cpp
   src/Style/PageRuleCollector.cpp
+
+  # Style resolution, layer f2 (the cascade)
+  src/Style/PropertyCascade.cpp
 )
 
 target_precompile_headers(Krystal.Booey
