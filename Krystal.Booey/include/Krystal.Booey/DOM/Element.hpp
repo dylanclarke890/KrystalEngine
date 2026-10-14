@@ -17,6 +17,7 @@ namespace krys::boo::html
   class CustomElementRegistry;
   class HTMLElementStack;
   class HTMLSlotElement;
+  class HTMLTreeBuilder;
 }
 
 namespace krys::boo::dom
@@ -37,13 +38,13 @@ namespace krys::boo::dom
     friend class SlotAlgorithms;
     friend class HTMLCollectionAlgorithms;
     friend class HTMLStackItem;
-    friend class HTMLTreeBuilder;
     friend class Node;
     friend class NodeAlgorithms;
     friend class NamedNodeMap;
     friend class TreeQueries;
 
     friend class html::HTMLElementStack;
+    friend class html::HTMLTreeBuilder;
 
   private:
     QualifiedName _qualifiedName;

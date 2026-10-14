@@ -3859,6 +3859,11 @@ namespace krys::boo::html
     auto [parent, beforeSibling] = AppropriatePlaceToInsertNode();
     auto element = CreateElement(token.Name(), namespaceURI, token.Attributes(), *parent);
 
+    // NOTE: the element is about to be pushed onto the stack of open elements, which begins parsing its
+    // children; begin before inserting it, so that its insertion steps see that its children are still to
+    // come.
+    element->BeginParsingChildren();
+
     if (!onlyAddToElementStack)
     {
       InsertElementAtAdjustedInsertionLocation(*element);

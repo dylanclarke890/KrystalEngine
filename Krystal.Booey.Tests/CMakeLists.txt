@@ -370,6 +370,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/Attributes/Reflection.cpp
 		tests/HTML/EventLoop.cpp
 		tests/HTML/HTMLLinkElement.cpp
+		tests/HTML/HTMLStyleElement.cpp
 		tests/HTML/MicroParsers/Numbers.cpp
 		tests/HTML/Parser/HTMLCharacterReference.cpp
 		tests/HTML/Parser/HTMLDocumentParser.cpp

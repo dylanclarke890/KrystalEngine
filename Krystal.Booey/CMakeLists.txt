@@ -590,6 +590,9 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
 
   # DOM integration, layer e3 (style scopes)
   include/Krystal.Booey/Style/Scope.hpp
+
+  # DOM integration, layer e4 (sheet owners)
+  include/Krystal.Booey/CSS/StyleSheetList.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -927,6 +930,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
 
   # DOM integration, layer e3 (style scopes)
   src/Style/Scope.cpp
+
+  # DOM integration, layer e4 (sheet owners)
+  src/CSS/StyleSheetList.cpp
 )
 
 target_precompile_headers(Krystal.Booey
@@ -1058,6 +1064,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/EventTarget.hpp
       include/Krystal.Booey/DOM/HTMLCollection.hpp
       include/Krystal.Booey/DOM/HTMLDocument.hpp
+      include/Krystal.Booey/DOM/InlineStyleSheetOwner.hpp
       include/Krystal.Booey/DOM/Internals/ElementFactory.hpp
       include/Krystal.Booey/DOM/Internals/Event/EventListener.hpp
       include/Krystal.Booey/DOM/Internals/Event/EventPathItem.hpp
@@ -1376,6 +1383,7 @@ target_sources(Krystal.Booey
     src/DOM/Element.cpp
     src/DOM/Event.cpp
     src/DOM/EventTarget.cpp
+    src/DOM/InlineStyleSheetOwner.cpp
     src/DOM/Internals/ElementFactory.cpp
     src/DOM/Internals/Event/EventPathItem.cpp
     src/DOM/Internals/HTMLCollection/LiveHTMLCollection.cpp

@@ -19,6 +19,7 @@
 namespace krys::boo::dom
 {
   class Document;
+  class Element;
   class Node;
 
   template <typename>
@@ -43,8 +44,8 @@ namespace krys::boo::css
 
   /// @brief A CSS style sheet exposed to scripts, wrapping its (possibly shared) parsed contents.
   /// @see https://drafts.csswg.org/cssom/#the-cssstylesheet-interface
-  // FIXME: CreateInline (needs the HTML parser's text positions), the adopting tree scopes (with
-  // adoptedStyleSheets) and the async Replace (needs promises) come with the DOM integration.
+  // FIXME: The adopting tree scopes (with adoptedStyleSheets) and the async Replace (needs promises) come
+  // with the DOM integration.
   class CSSStyleSheet final : public StyleSheet, public CanMakeWeakPtr<CSSStyleSheet>
   {
   public:
@@ -122,6 +123,10 @@ namespace krys::boo::css
                                                     Maybe<bool> isOriginClean = null) noexcept;
     KRYS_NODISCARD static Ref<CSSStyleSheet> Create(Ref<StyleSheetContents> &&contents, dom::Node &ownerNode,
                                                     Maybe<bool> isOriginClean = null) noexcept;
+
+    /// @brief The sheet of a `style` element (or another element whose sheet is written inline).
+    KRYS_NODISCARD static Ref<CSSStyleSheet> CreateInline(Ref<StyleSheetContents> &&contents,
+                                                          dom::Element &owner) noexcept;
 
     /// @brief The `CSSStyleSheet` constructor: an empty sheet, constructed by script, for @p document.
     /// @see https://drafts.csswg.org/cssom/#dom-cssstylesheet-cssstylesheet

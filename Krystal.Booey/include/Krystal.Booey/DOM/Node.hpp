@@ -8,6 +8,7 @@
 #include "Krystal.Booey/DOM/Internals/RareData/NodeRareData.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
@@ -210,6 +211,29 @@ namespace krys::boo::dom
     {
       return *_nodeDocument;
     }
+
+#pragma region Style Sheet Owner
+
+    /// @brief Called when the style sheet this node owns has finished loading.
+    /// @return Whether the node is done loading its sheet.
+    virtual bool SheetLoaded() noexcept
+    {
+      return true;
+    }
+
+    /// @brief Called once the sheet this node owns and its critical subresources have loaded.
+    virtual void NotifyLoadedSheetAndAllCriticalSubresources(bool errorOccurred) noexcept
+    {
+      (void)errorOccurred;
+    }
+
+    /// @brief Called when the style sheet this node owns starts loading a subresource after it was created.
+    virtual void StartLoadingDynamicSheet() noexcept
+    {
+      krys_unreachable();
+    }
+
+#pragma endregion
 
   protected:
     /// @see https://dom.spec.whatwg.org/#get-the-parent

@@ -5,6 +5,11 @@
 #include "Krystal.Booey/DOM/Enums/ShadowRootMode.hpp"
 #include "Krystal.Booey/DOM/Enums/SlotAssignmentMode.hpp"
 
+namespace krys::boo::css
+{
+  class StyleSheetList;
+}
+
 namespace krys::boo::dom
 {
   /// @see https://dom.spec.whatwg.org/#interface-shadowroot
@@ -25,6 +30,7 @@ namespace krys::boo::dom
     bool _clonable : 1 {false};
     bool _serializable : 1 {false};
     bool _keepCustomElementRegistryNull : 1 {false};
+    RefPtr<css::StyleSheetList> _styleSheetList;
 
   public:
     ShadowRoot(Document &document, RefPtr<html::CustomElementRegistry> &&registry = nullptr,
@@ -68,6 +74,14 @@ namespace krys::boo::dom
 
     // TODO(impl): SHADOW-ROOT - The onslotchange attribute is an event handler IDL attribute for the
     // onslotchange event handler, whose event handler event type is slotchange.
+
+#pragma endregion
+
+#pragma region DocumentOrShadowRoot Mixin (CSSOM) - https://drafts.csswg.org/cssom/#extensions-to-the-document-or-shadow-root-interface
+
+    /// @brief The style sheets of the shadow root, in order.
+    /// @see https://drafts.csswg.org/cssom/#dom-documentorshadowroot-stylesheets
+    KRYS_NODISCARD css::StyleSheetList &StyleSheets() noexcept;
 
 #pragma endregion
 

@@ -32,11 +32,6 @@ namespace krys::boo::css::mq
     return CSSOMStringAtom(text::ToASCIILower(name));
   }
 
-  KRYS_NODISCARD static bool IsNullOrEmpty(const CSSOMStringAtom &atom) noexcept
-  {
-    return atom == CSSOMStringAtom::Null() || atom == CSSOMStringAtom::Empty();
-  }
-
   Maybe<Feature> FeatureParser::ConsumeFeature(TokenRange &tokens,
                                                const MediaQueryParserContext &context) noexcept
   {
@@ -74,7 +69,7 @@ namespace krys::boo::css::mq
     auto consumePlainFeatureName = [&]() -> Pair<CSSOMStringAtom, ComparisonOperator>
     {
       auto name = ConsumeFeatureName(tokens);
-      if (IsNullOrEmpty(name))
+      if (name.View().empty())
       {
         return {CSSOMStringAtom::Null(), ComparisonOperator::Equal};
       }
@@ -95,7 +90,7 @@ namespace krys::boo::css::mq
     };
 
     auto [featureName, op] = consumePlainFeatureName();
-    if (IsNullOrEmpty(featureName))
+    if (featureName.View().empty())
     {
       return {};
     }
@@ -225,7 +220,7 @@ namespace krys::boo::css::mq
     auto leftComparison = consumeLeftComparison();
 
     auto featureName = ConsumeFeatureName(tokens);
-    if (IsNullOrEmpty(featureName))
+    if (featureName.View().empty())
     {
       return {};
     }

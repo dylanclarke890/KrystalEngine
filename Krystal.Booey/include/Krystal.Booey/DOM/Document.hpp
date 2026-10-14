@@ -21,6 +21,7 @@
 
 namespace krys::boo::css
 {
+  class StyleSheetList;
   struct ParserContext;
 }
 
@@ -101,6 +102,7 @@ namespace krys::boo::dom
     mutable UniquePtr<css::ParserContext> _cachedCSSParserContext;
 
     List<WeakPtr<ShadowRoot>> _inDocumentShadowRoots;
+    RefPtr<css::StyleSheetList> _styleSheetList;
 
   protected:
     Document(DocumentFlags flags) noexcept;
@@ -401,6 +403,14 @@ namespace krys::boo::dom
 
     void DidInsertInDocumentShadowRoot(ShadowRoot &shadowRoot) noexcept;
     void DidRemoveInDocumentShadowRoot(ShadowRoot &shadowRoot) noexcept;
+
+#pragma region DocumentOrShadowRoot Mixin (CSSOM) - https://drafts.csswg.org/cssom/#extensions-to-the-document-or-shadow-root-interface
+
+    /// @brief The style sheets of the document, in order.
+    /// @see https://drafts.csswg.org/cssom/#dom-documentorshadowroot-stylesheets
+    KRYS_NODISCARD css::StyleSheetList &StyleSheets() noexcept;
+
+#pragma endregion
 
 #pragma endregion
 

@@ -17,10 +17,8 @@ namespace krys::boo::dom
       return ShareRef(**it);
     }
 
-    auto tagName =
-      localName == DOMStringAtom::Null() ? html::TagName::Unknown : html::ParseTagName(localName.View());
-    auto tagNamespace = namespaceURI == DOMStringAtom::Null() ? html::Namespace::None
-                                                              : html::ParseNamespace(namespaceURI.View());
+    auto tagName = localName.View().empty() ? html::TagName::Unknown : html::ParseTagName(localName.View());
+    auto tagNamespace = html::ParseNamespace(namespaceURI.View());
 
     auto storage = CreateRef<QualifiedNameStorage>(namespaceURI, prefix, localName, tagName, tagNamespace);
 

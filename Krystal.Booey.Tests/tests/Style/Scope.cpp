@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/Style/Scope.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
@@ -129,8 +131,52 @@ namespace krys::boo::style::tests
     }
   }
 
-  // FIXME: The active style sheets, their tree order, filtering and style sheet sets are tested with e4 of
-  // the DOM integration, when `<style>` elements own sheets.
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Scope: active style sheets", "[Style][Scope]")
+  {
+    RunTasks();
+
+    SECTION("Empty and disabled sheets are listed but not active")
+    {
+      auto document = Parse(u8"<!DOCTYPE html><style>a {}</style><style></style><style>b {}</style>");
+      auto &scope = document->StyleScope();
+      auto &sheets = scope.StyleSheetsForStyleSheetList();
+      REQUIRE(sheets.size() == 3uz);
+      REQUIRE(scope.ActiveStyleSheets().size() == 2uz);
+
+      auto &third = Downcast<css::CSSStyleSheet>(*sheets[2]);
+      third.SetDisabled(true);
+      REQUIRE(scope.HasPendingUpdate());
+      RunTasks();
+      REQUIRE(scope.ActiveStyleSheets().size() == 1uz);
+      REQUIRE_FALSE(scope.ActiveStyleSheetsContains(third));
+    }
+
+    SECTION("The first titled sheet sets the preferred set")
+    {
+      auto document = Parse(u8"<!DOCTYPE html><style>a {}</style><style title=Default>b {}</style>"
+                            u8"<style title=Other>c {}</style><style title=Default>d {}</style>");
+      auto &scope = document->StyleScope();
+      auto &sheets = scope.StyleSheetsForStyleSheetList();
+      REQUIRE(sheets.size() == 4uz);
+
+      auto active = [&](uint32 index)
+      {
+        return scope.ActiveStyleSheetsContains(Downcast<css::CSSStyleSheet>(*sheets[index]));
+      };
+      REQUIRE(active(0));
+      REQUIRE(active(1));
+      REQUIRE_FALSE(active(2));
+      REQUIRE(active(3));
+
+      scope.SetPreferredStylesheetSetName(u8"Other");
+      scope.FlushPendingUpdate();
+      REQUIRE(active(0));
+      REQUIRE_FALSE(active(1));
+      REQUIRE(active(2));
+      REQUIRE_FALSE(active(3));
+    }
+  }
+
   TEST_CASE("Scope: updates", "[Style][Scope]")
   {
     RunTasks();

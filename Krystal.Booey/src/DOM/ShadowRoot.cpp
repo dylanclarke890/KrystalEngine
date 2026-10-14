@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/CSS/StyleSheetList.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
@@ -19,7 +20,26 @@ namespace krys::boo::dom
     _styleScope = CreateUnique<style::Scope>(*this);
   }
 
-  ShadowRoot::~ShadowRoot() noexcept = default;
+  ShadowRoot::~ShadowRoot() noexcept
+  {
+    if (_styleSheetList)
+    {
+      _styleSheetList->Detach();
+    }
+  }
+
+#pragma region DocumentOrShadowRoot Mixin (CSSOM)
+
+  css::StyleSheetList &ShadowRoot::StyleSheets() noexcept
+  {
+    if (!_styleSheetList)
+    {
+      _styleSheetList = css::StyleSheetList::Create(*this);
+    }
+    return *_styleSheetList;
+  }
+
+#pragma endregion
 
   Element *ShadowRoot::Host() const noexcept
   {

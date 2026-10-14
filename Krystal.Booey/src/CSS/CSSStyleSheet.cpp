@@ -11,6 +11,7 @@
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Node.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
@@ -77,6 +78,12 @@ namespace krys::boo::css
                                            Maybe<bool> isOriginClean) noexcept
   {
     return AdoptRef(*new CSSStyleSheet(krys::move(contents), ownerNode, isOriginClean));
+  }
+
+  Ref<CSSStyleSheet> CSSStyleSheet::CreateInline(Ref<StyleSheetContents> &&contents,
+                                                 dom::Element &owner) noexcept
+  {
+    return AdoptRef(*new CSSStyleSheet(krys::move(contents), owner, true));
   }
 
   dom::ExceptionOr<Ref<CSSStyleSheet>> CSSStyleSheet::Create(dom::Document &document, Init &&init) noexcept

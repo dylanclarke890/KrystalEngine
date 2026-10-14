@@ -1,8 +1,10 @@
 ﻿#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Parser/Parser.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/ImportRule.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include <algorithm>
 #include <utility>
@@ -529,9 +531,25 @@ namespace krys::boo::css
       _loadCompleted = true;
       return;
     }
-    // FIXME: Ask the single owner node (sheetLoaded, notifyLoadedSheetAndAllCriticalSubresources) once
-    // CSSStyleSheet and the DOM's style sheet owners exist; until then there never is one.
-    _loadCompleted = true;
+    auto ownerNode = ShareRefPtr(SingleOwnerNode());
+    if (!ownerNode)
+    {
+      _loadCompleted = true;
+      return;
+    }
+    _loadCompleted = ownerNode->SheetLoaded();
+    if (_loadCompleted)
+    {
+      ownerNode->NotifyLoadedSheetAndAllCriticalSubresources(_didLoadErrorOccur);
+    }
+  }
+
+  void StyleSheetContents::StartLoadingDynamicSheet() noexcept
+  {
+    if (auto *owner = SingleOwnerNode())
+    {
+      owner->StartLoadingDynamicSheet();
+    }
   }
 
   StyleSheetContents *StyleSheetContents::RootStyleSheet() const noexcept
@@ -542,6 +560,23 @@ namespace krys::boo::css
       root = root->ParentStyleSheet();
     }
     return const_cast<StyleSheetContents *>(root);
+  }
+
+  dom::Node *StyleSheetContents::SingleOwnerNode() const noexcept
+  {
+    auto *root = RootStyleSheet();
+    if (root->_clients.empty())
+    {
+      return nullptr;
+    }
+    krys_debug_assert(root->_clients.size() == 1);
+    return root->_clients[0]->OwnerNode();
+  }
+
+  dom::Document *StyleSheetContents::SingleOwnerDocument() const noexcept
+  {
+    auto *ownerNode = SingleOwnerNode();
+    return ownerNode ? &ownerNode->NodeDocument() : nullptr;
   }
 
   bool StyleSheetContents::TraverseRules(KRYS_NOESCAPE const Func<bool(const Rule &)> &handler) const noexcept

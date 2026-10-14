@@ -154,9 +154,10 @@ namespace krys
       return a._ptr == b._ptr;
     }
 
+    /// @brief The interned string; empty for the null atom.
     KRYS_NODISCARD utf8_stringview View() const noexcept
     {
-      return *_ptr;
+      return _ptr ? utf8_stringview {*_ptr} : utf8_stringview {};
     }
 
     /// @brief The interned string. Stays valid for the lifetime of the program.

@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/InlineStyleSheetOwner.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 
 namespace krys::boo::css
@@ -16,7 +17,8 @@ namespace krys::boo::html
 
   private:
     UniquePtr<dom::DOMTokenList> _blocking;
-    RefPtr<css::CSSStyleSheet> _sheet;
+    dom::InlineStyleSheetOwner _styleSheetOwner;
+    bool _loadedSheet {false};
 
   public:
     HTMLStyleElement(dom::Document &document) noexcept;
@@ -58,6 +60,20 @@ namespace krys::boo::html
     KRYS_NODISCARD css::CSSStyleSheet *Sheet() const noexcept;
 
 #pragma endregion
+
+  protected:
+    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                            Maybe<dom::DOMStringView> value,
+                            dom::DOMStringAtom namespaceURI) noexcept override;
+    void OnInsert() noexcept override;
+    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnChildrenChanged() noexcept override;
+    void FinishParsingChildren() noexcept override;
+
+  public:
+    bool SheetLoaded() noexcept override;
+    void NotifyLoadedSheetAndAllCriticalSubresources(bool errorOccurred) noexcept override;
+    void StartLoadingDynamicSheet() noexcept override;
   };
 }
 

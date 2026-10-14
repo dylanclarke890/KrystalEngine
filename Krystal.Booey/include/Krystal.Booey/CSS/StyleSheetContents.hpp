@@ -19,6 +19,12 @@ namespace krys::boo
   class CachedResource;
 }
 
+namespace krys::boo::dom
+{
+  class Document;
+  class Node;
+}
+
 namespace krys::boo::css
 {
   class CSSStyleSheet;
@@ -30,8 +36,7 @@ namespace krys::boo::css
   /// @brief The parsed contents of a style sheet: its rules and namespaces, shared between the CSSStyleSheet
   /// objects that use it.
   // FIXME: Loading (ParseAuthorStyleSheet, NotifyLoadedSheet, SubresourcesAllowReuse, IsLoadingSubresources)
-  // comes with the resource loader, and the owner node (SingleOwnerNode, SingleOwnerDocument,
-  // StartLoadingDynamicSheet) with CSSStyleSheet.
+  // comes with the resource loader.
   class StyleSheetContents final : public RefCounted<StyleSheetContents>,
                                    public CanMakeWeakPtr<StyleSheetContents>
   {
@@ -101,8 +106,11 @@ namespace krys::boo::css
     KRYS_NODISCARD bool IsLoading() const noexcept;
 
     void CheckLoaded() noexcept;
+    void StartLoadingDynamicSheet() noexcept;
 
     KRYS_NODISCARD StyleSheetContents *RootStyleSheet() const noexcept;
+    KRYS_NODISCARD dom::Node *SingleOwnerNode() const noexcept;
+    KRYS_NODISCARD dom::Document *SingleOwnerDocument() const noexcept;
 
     KRYS_NODISCARD utf8_stringview Charset() const noexcept
     {

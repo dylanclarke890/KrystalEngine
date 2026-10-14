@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
+#include "Krystal.Booey/CSS/StyleSheetList.hpp"
 #include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
@@ -57,7 +58,13 @@ namespace krys::boo::dom
     _styleScope = CreateUnique<style::Scope>(*this);
   }
 
-  Document::~Document() noexcept = default;
+  Document::~Document() noexcept
+  {
+    if (_styleSheetList)
+    {
+      _styleSheetList->Detach();
+    }
+  }
 
   DOMImplementation &Document::Implementation() noexcept
   {
@@ -742,6 +749,19 @@ namespace krys::boo::dom
     std::erase_if(_inDocumentShadowRoots,
                   [&](const WeakPtr<ShadowRoot> &root) { return !root || root.get() == &shadowRoot; });
   }
+
+#pragma region DocumentOrShadowRoot Mixin (CSSOM)
+
+  css::StyleSheetList &Document::StyleSheets() noexcept
+  {
+    if (!_styleSheetList)
+    {
+      _styleSheetList = css::StyleSheetList::Create(*this);
+    }
+    return *_styleSheetList;
+  }
+
+#pragma endregion
 
 #pragma endregion
 
