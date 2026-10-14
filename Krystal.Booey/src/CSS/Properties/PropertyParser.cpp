@@ -94,11 +94,6 @@ namespace krys::boo::css
   KRYS_NODISCARD static bool ConsumeFunctionDescriptor(TokenRange &, const ParserContext &, PropertyId,
                                                        PropertyParserResult &) noexcept;
 
-  // @-internal-base-appearance descriptors.
-  KRYS_NODISCARD static bool ConsumeInternalBaseAppearanceDescriptor(TokenRange &, const ParserContext &,
-                                                                     PropertyId, IsImportant,
-                                                                     PropertyParserResult &) noexcept;
-
 #pragma endregion
 
 #pragma region GlobalKeyword Consumer
@@ -272,11 +267,6 @@ namespace krys::boo::css
       case RuleType::Function:
       {
         parseSuccess = ConsumeFunctionDescriptor(range, context, property, result);
-        break;
-      }
-      case RuleType::InternalBaseAppearance:
-      {
-        parseSuccess = ConsumeInternalBaseAppearanceDescriptor(range, context, property, important, result);
         break;
       }
       default:
@@ -864,21 +854,6 @@ namespace krys::boo::css
 
     result.AddProperty(state, property, PropertyId::Invalid, krys::move(parsedValue), IsImportant(false));
     return true;
-  }
-
-  bool ConsumeInternalBaseAppearanceDescriptor(TokenRange &range, const ParserContext &context,
-                                               PropertyId property, IsImportant important,
-                                               PropertyParserResult &result) noexcept
-  {
-    krys_debug_assert(context.Mode == ParserMode::UASheet);
-
-    if (property == PropertyId::Appearance)
-    {
-      return false;
-    }
-
-    return ConsumeStyleProperty(range, context, property, important, RuleType::InternalBaseAppearance,
-                                result);
   }
 
 #pragma endregion

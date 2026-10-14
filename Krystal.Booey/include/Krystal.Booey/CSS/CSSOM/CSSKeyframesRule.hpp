@@ -25,8 +25,8 @@
 
 #pragma once
 
+#include "Krystal.Booey/CSS/Rules/KeyframesRule.hpp"
 #include "CSSRule.h"
-#include "StyleRule.h"
 #include <memory>
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
@@ -37,44 +37,6 @@ namespace krys::boo::css
   class CSSKeyframeRule;
   class CSSRuleList;
   class StyleRuleKeyframe;
-
-  class StyleRuleKeyframes final : public StyleRuleBase
-  {
-  public:
-    static Ref<StyleRuleKeyframes> create(const CSSOMStringAtom &name);
-    ~StyleRuleKeyframes();
-
-    const SmallList<Ref<StyleRuleKeyframe>> &keyframes() const;
-
-    void parserAppendKeyframe(RefPtr<StyleRuleKeyframe> &&);
-    void wrapperAppendKeyframe(Ref<StyleRuleKeyframe> &&);
-    void wrapperRemoveKeyframe(unsigned);
-
-    const CSSOMStringAtom &name() const
-    {
-      return m_name;
-    }
-    void setName(const CSSOMStringAtom &name)
-    {
-      m_name = name;
-    }
-
-    std::optional<size_t> findKeyframeIndex(const String &key) const;
-
-    Ref<StyleRuleKeyframes> copy() const
-    {
-      return adoptRef(*new StyleRuleKeyframes(*this));
-    }
-
-    void shrinkToFit();
-
-  private:
-    explicit StyleRuleKeyframes(const CSSOMStringAtom &);
-    StyleRuleKeyframes(const StyleRuleKeyframes &);
-
-    mutable SmallList<Ref<StyleRuleKeyframe>> m_keyframes;
-    CSSOMStringAtom m_name;
-  };
 
   class CSSKeyframesRule final : public CSSRule
   {
@@ -125,9 +87,3 @@ namespace krys::boo::css
 
 SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSKeyframesRule, RuleType::Keyframes)
 
-SPECIALIZE_TYPE_TRAITS_BEGIN(WebCore::StyleRuleKeyframes)
-static bool isType(const WebCore::StyleRuleBase &rule)
-{
-  return rule.isKeyframesRule();
-}
-SPECIALIZE_TYPE_TRAITS_END()

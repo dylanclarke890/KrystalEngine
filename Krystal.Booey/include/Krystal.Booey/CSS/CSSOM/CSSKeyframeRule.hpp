@@ -25,8 +25,8 @@
 
 #pragma once
 
+#include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
 #include "CSSRule.h"
-#include "StyleRule.h"
 
 namespace krys::boo::css
 {
@@ -35,58 +35,6 @@ namespace krys::boo::css
   class CSSKeyframesRule;
   class StyleProperties;
   class StyleRuleCSSStyleProperties;
-
-  class StyleRuleKeyframe final : public StyleRuleBase
-  {
-  public:
-    static Ref<StyleRuleKeyframe> create(Ref<StyleProperties> &&);
-    static Ref<StyleRuleKeyframe> create(SmallList<std::pair<CSSValueID, double>> &&keys,
-                                         Ref<StyleProperties> &&);
-    ~StyleRuleKeyframe();
-
-    Ref<StyleRuleKeyframe> copy() const
-    {
-      RELEASE_ASSERT_NOT_REACHED();
-    }
-
-    struct Key
-    {
-      CSSValueID rangeName;
-      double offset;
-
-      void writeToString(StringBuilder &) const;
-      bool operator==(const Key &) const = default;
-    };
-
-    String keyText() const;
-    bool setKeyText(const String &);
-    void setKey(Key key)
-    {
-      ASSERT(m_keys.isEmpty());
-      m_keys.clear();
-      m_keys.append(key);
-    }
-
-    const SmallList<Key> &keys() const
-    {
-      return m_keys;
-    };
-
-    const StyleProperties &properties() const
-    {
-      return m_properties;
-    }
-    MutableStyleProperties &mutableProperties();
-
-    String cssText() const;
-
-  private:
-    explicit StyleRuleKeyframe(Ref<StyleProperties> &&);
-    StyleRuleKeyframe(SmallList<Key> &&, Ref<StyleProperties> &&);
-
-    Ref<StyleProperties> m_properties;
-    SmallList<Key> m_keys;
-  };
 
   class CSSKeyframeRule final : public CSSRule
   {

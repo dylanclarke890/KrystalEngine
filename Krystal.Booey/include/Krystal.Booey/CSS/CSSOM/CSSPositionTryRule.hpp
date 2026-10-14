@@ -25,53 +25,16 @@
 
 #pragma once
 
+#include "Krystal.Booey/CSS/Rules/PositionTryRule.hpp"
 #include "CSSRule.h"
 #include "StyleProperties.h"
 #include "StylePropertiesInlines.h"
-#include "StyleRule.h"
 #include <wtf/TypeCasts.h>
 
 namespace krys::boo::css
 {
 
   class CSSPositionTryDescriptors;
-
-  class StyleRulePositionTry final : public StyleRuleBase
-  {
-  public:
-    static Ref<StyleRulePositionTry> create(CSSOMStringAtom &&name, Ref<StyleProperties> &&);
-
-    Ref<StyleRulePositionTry> copy() const
-    {
-      return adoptRef(*new StyleRulePositionTry(*this));
-    }
-
-    CSSOMStringAtom name() const
-    {
-      return m_name;
-    }
-
-    StyleProperties &properties() const
-    {
-      return m_properties;
-    }
-    Ref<StyleProperties> protectedProperties() const
-    {
-      return m_properties;
-    }
-    MutableStyleProperties &mutableProperties();
-    Ref<MutableStyleProperties> protectedMutableProperties()
-    {
-      return mutableProperties();
-    }
-
-  private:
-    explicit StyleRulePositionTry(CSSOMStringAtom &&name, Ref<StyleProperties> &&);
-    StyleRulePositionTry(const StyleRulePositionTry &);
-
-    CSSOMStringAtom m_name;
-    Ref<StyleProperties> m_properties;
-  };
 
   class CSSPositionTryRule final : public CSSRule
   {
@@ -104,12 +67,6 @@ namespace krys::boo::css
 
 } // namespace krys::boo::css
 
-SPECIALIZE_TYPE_TRAITS_BEGIN(WebCore::StyleRulePositionTry)
-static bool isType(const WebCore::StyleRuleBase &rule)
-{
-  return rule.isPositionTryRule();
-}
-SPECIALIZE_TYPE_TRAITS_END()
 
 SPECIALIZE_TYPE_TRAITS_BEGIN(WebCore::CSSPositionTryRule)
 static bool isType(const WebCore::CSSRule &rule)

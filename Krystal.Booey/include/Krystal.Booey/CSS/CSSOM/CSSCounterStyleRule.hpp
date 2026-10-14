@@ -1,92 +1,13 @@
 #pragma once
 
+#include "Krystal.Booey/CSS/Rules/CounterStyleRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include <WebCore/CSSCounterStyle.h>
 #include <WebCore/StyleProperties.h>
-#include <WebCore/StyleRule.h>
 
 namespace krys::boo::css
 {
-  class CounterStyleRule final : public RuleBase
-  {
-  public:
-    static Ref<CounterStyleRule> create(const CSSOMStringAtom &, CSSCounterStyleDescriptors &&);
-    ~CounterStyleRule();
-
-    Ref<CounterStyleRule> copy() const
-    {
-      return adoptRef(*new CounterStyleRule(*this));
-    }
-
-    const CSSCounterStyleDescriptors &descriptors() const
-    {
-      return m_descriptors;
-    };
-    CSSCounterStyleDescriptors &mutableDescriptors()
-    {
-      return m_descriptors;
-    };
-
-    const CSSOMStringAtom &name() const
-    {
-      return m_name;
-    }
-    String system() const
-    {
-      return m_descriptors.systemCSSText();
-    }
-    String negative() const
-    {
-      return m_descriptors.negativeCSSText();
-    }
-    String prefix() const
-    {
-      return m_descriptors.prefixCSSText();
-    }
-    String suffix() const
-    {
-      return m_descriptors.suffixCSSText();
-    }
-    String range() const
-    {
-      return {m_descriptors.rangesCSSText()};
-    }
-    String pad() const
-    {
-      return m_descriptors.padCSSText();
-    }
-    String fallback() const
-    {
-      return m_descriptors.fallbackCSSText();
-    }
-    String symbols() const
-    {
-      return m_descriptors.symbolsCSSText();
-    }
-    String additiveSymbols() const
-    {
-      return m_descriptors.additiveSymbolsCSSText();
-    }
-    String speakAs() const
-    {
-      return {};
-    }
-    bool newValueInvalidOrEqual(CSSPropertyID, const RefPtr<Value> newValue) const;
-
-    void setName(const CSSOMStringAtom &name)
-    {
-      m_name = name;
-    }
-
-  private:
-    explicit StyleRuleCounterStyle(const CSSOMStringAtom &, CSSCounterStyleDescriptors &&);
-    StyleRuleCounterStyle(const StyleRuleCounterStyle &) = default;
-
-    CSSOMStringAtom m_name;
-    CSSCounterStyleDescriptors m_descriptors;
-  };
-
   class CSSCounterStyleRule final : public CSSRule
   {
   public:
@@ -186,9 +107,3 @@ KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSCounterStyleRule)
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::RuleBase)
-  KRYS_NODISCARD static bool isType(const krys::boo::css::CounterStyleRule &rule) noexcept
-  {
-    return rule.IsCounterStyleRule();
-  }
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

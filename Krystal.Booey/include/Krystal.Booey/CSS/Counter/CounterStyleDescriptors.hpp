@@ -1,147 +1,176 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/Pair.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
 {
-  class Value;
   class StyleProperties;
+  class Value;
 
-  struct CSSCounterStyleDescriptors
+  using CounterStyleName = CSSOMStringAtom;
+  using CounterStyleRanges = List<Pair<int32, int32>>;
+  using CounterStyleSystemData = Pair<CounterStyleName, int32>;
+
+  /// @brief A counter symbol: a string or an identifier.
+  struct CounterStyleSymbol
   {
-    using Name = CSSOMStringAtom;
-    using Ranges = SmallList<std::pair<int, int>>;
-    using SystemData = std::pair<CSSCounterStyleDescriptors::Name, int>;
-    // The keywords that can be used as values for the counter-style `system` descriptor.
-    // https://www.w3.org/TR/css-counter-styles-3/#counter-style-system
-    struct Symbol
-    {
-      bool isCustomIdent {false};
-      CSSOMString text;
-      friend bool operator==(const Symbol &, const Symbol &) = default;
-      CSSOMString cssText() const;
-    };
-    using AdditiveSymbols = SmallList<std::pair<Symbol, unsigned>>;
-    enum class System : uint8_t
-    {
-      Cyclic,
-      Numeric,
-      Alphabetic,
-      Symbolic,
-      Additive,
-      Fixed,
-      DisclosureClosed,
-      DisclosureOpen,
-      SimplifiedChineseInformal,
-      SimplifiedChineseFormal,
-      TraditionalChineseInformal,
-      TraditionalChineseFormal,
-      EthiopicNumeric,
-      Extends
-    };
-    enum class SpeakAs : uint8_t
-    {
-      Auto,
-      Bullets,
-      Numbers,
-      Words,
-      SpellOut,
-      CounterStyleNameReference,
-    };
-    struct Pad
-    {
-      unsigned m_padMinimumLength = 0;
-      Symbol m_padSymbol;
-      friend bool operator==(const Pad &, const Pad &) = default;
-      CSSOMString cssText() const;
-    };
-    struct NegativeSymbols
-    {
-      Symbol m_prefix = {false, "-"};
-      Symbol m_suffix;
-      friend bool operator==(const NegativeSymbols &, const NegativeSymbols &) = default;
-    };
-    enum class ExplicitlySetDescriptors : uint16_t
-    {
-      System = 1 << 0,
-      Negative = 1 << 1,
-      Prefix = 1 << 2,
-      Suffix = 1 << 3,
-      Range = 1 << 4,
-      Pad = 1 << 5,
-      Fallback = 1 << 6,
-      Symbols = 1 << 7,
-      AdditiveSymbols = 1 << 8,
-      SpeakAs = 1 << 9
-    };
+    bool IsCustomIdent {false};
+    CSSOMString Text;
 
-    // create() is prefered here rather than a custom constructor, so that the Struct still classifies as an
-    // aggregate.
-    static CSSCounterStyleDescriptors create(CSSOMStringAtom name, const StyleProperties &);
-    bool operator==(const CSSCounterStyleDescriptors &other) const
-    {
-      // Intentionally doesn't check m_isExtendedResolved.
-      return m_name == other.m_name && m_system == other.m_system
-             && m_negativeSymbols == other.m_negativeSymbols && m_prefix == other.m_prefix
-             && m_suffix == other.m_suffix && m_ranges == other.m_ranges && m_pad == other.m_pad
-             && m_fallbackName == other.m_fallbackName && m_symbols == other.m_symbols
-             && m_additiveSymbols == other.m_additiveSymbols && m_speakAs == other.m_speakAs
-             && m_extendsName == other.m_extendsName
-             && m_fixedSystemFirstSymbolValue == other.m_fixedSystemFirstSymbolValue
-             && m_explicitlySetDescriptors == other.m_explicitlySetDescriptors;
-    }
-    void setExplicitlySetDescriptors(const StyleProperties &);
-    bool isValid() const;
-    static bool areSymbolsValidForSystem(System, const SmallList<Symbol> &, const AdditiveSymbols &);
-
-    void setName(Name);
-    void setSystem(System);
-    void setSystemData(SystemData);
-    void setNegative(NegativeSymbols);
-    void setPrefix(Symbol);
-    void setSuffix(Symbol);
-    void setRanges(Ranges);
-    void setPad(Pad);
-    void setFallbackName(Name);
-    void setSymbols(SmallList<Symbol>);
-    void setAdditiveSymbols(AdditiveSymbols);
-
-    CSSOMString nameCSSText() const;
-    CSSOMString systemCSSText() const;
-    CSSOMString negativeCSSText() const;
-    CSSOMString prefixCSSText() const;
-    CSSOMString suffixCSSText() const;
-    CSSOMString rangesCSSText() const;
-    CSSOMString padCSSText() const;
-    CSSOMString fallbackCSSText() const;
-    CSSOMString symbolsCSSText() const;
-    CSSOMString additiveSymbolsCSSText() const;
-
-    Name m_name;
-    System m_system;
-    NegativeSymbols m_negativeSymbols;
-    Symbol m_prefix;
-    Symbol m_suffix;
-    Ranges m_ranges;
-    Pad m_pad;
-    Name m_fallbackName;
-    SmallList<Symbol> m_symbols;
-    AdditiveSymbols m_additiveSymbols;
-    SpeakAs m_speakAs;
-    Name m_extendsName;
-    int m_fixedSystemFirstSymbolValue;
-    OptionSet<ExplicitlySetDescriptors> m_explicitlySetDescriptors;
-    bool m_isExtendedResolved {false};
+    KRYS_NODISCARD bool operator==(const CounterStyleSymbol &) const noexcept = default;
+    KRYS_NODISCARD CSSOMString CssText() const noexcept;
   };
 
-  CSSCounterStyleDescriptors::Ranges rangeFromCSSValue(Ref<Value>);
-  CSSCounterStyleDescriptors::AdditiveSymbols additiveSymbolsFromCSSValue(Ref<Value>);
-  CSSCounterStyleDescriptors::Pad padFromCSSValue(Ref<Value>);
-  CSSCounterStyleDescriptors::NegativeSymbols negativeSymbolsFromCSSValue(Ref<Value>);
-  CSSCounterStyleDescriptors::Symbol symbolFromCSSValue(RefPtr<Value>);
-  SmallList<CSSCounterStyleDescriptors::Symbol> symbolsFromCSSValue(Ref<Value>);
-  CSSCounterStyleDescriptors::Name fallbackNameFromCSSValue(Ref<Value>);
-  CSSCounterStyleDescriptors::SystemData extractSystemDataFromCSSValue(RefPtr<Value>,
-                                                                       CSSCounterStyleDescriptors::System);
-} // namespace krys::boo::css
+  using CounterStyleAdditiveSymbols = List<Pair<CounterStyleSymbol, uint32>>;
+
+  /// @brief The keywords that can be used as values for the counter-style `system` descriptor.
+  /// @see https://www.w3.org/TR/css-counter-styles-3/#counter-style-system
+  enum class CounterStyleSystem : uint8
+  {
+    Cyclic,
+    Numeric,
+    Alphabetic,
+    Symbolic,
+    Additive,
+    Fixed,
+    DisclosureClosed,
+    DisclosureOpen,
+    SimplifiedChineseInformal,
+    SimplifiedChineseFormal,
+    TraditionalChineseInformal,
+    TraditionalChineseFormal,
+    EthiopicNumeric,
+    Extends
+  };
+
+  enum class CounterStyleSpeakAs : uint8
+  {
+    Auto,
+    Bullets,
+    Numbers,
+    Words,
+    SpellOut,
+    CounterStyleNameReference,
+  };
+
+  struct CounterStylePad
+  {
+    uint32 PadMinimumLength {0};
+    CounterStyleSymbol PadSymbol;
+
+    KRYS_NODISCARD bool operator==(const CounterStylePad &) const noexcept = default;
+    KRYS_NODISCARD CSSOMString CssText() const noexcept;
+  };
+
+  struct CounterStyleNegativeSymbols
+  {
+    CounterStyleSymbol Prefix {false, u8"-"};
+    CounterStyleSymbol Suffix;
+
+    KRYS_NODISCARD bool operator==(const CounterStyleNegativeSymbols &) const noexcept = default;
+  };
+
+  /// @brief The descriptors explicitly set in a `@counter-style` rule.
+  enum class CounterStyleDescriptor : uint16
+  {
+    None = 0,
+    System = 1 << 0,
+    Negative = 1 << 1,
+    Prefix = 1 << 2,
+    Suffix = 1 << 3,
+    Range = 1 << 4,
+    Pad = 1 << 5,
+    Fallback = 1 << 6,
+    Symbols = 1 << 7,
+    AdditiveSymbols = 1 << 8,
+    SpeakAs = 1 << 9
+  };
+}
+
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::CounterStyleDescriptor, 10uz);
+
+namespace krys::boo::css
+{
+  /// @brief The descriptors of a `@counter-style` rule.
+  struct CounterStyleDescriptors
+  {
+    CounterStyleName Name;
+    CounterStyleSystem System;
+    CounterStyleNegativeSymbols NegativeSymbols;
+    CounterStyleSymbol Prefix;
+    CounterStyleSymbol Suffix;
+    CounterStyleRanges Ranges;
+    CounterStylePad Pad;
+    CounterStyleName FallbackName;
+    List<CounterStyleSymbol> Symbols;
+    CounterStyleAdditiveSymbols AdditiveSymbols;
+    CounterStyleSpeakAs SpeakAs;
+    CounterStyleName ExtendsName;
+    int32 FixedSystemFirstSymbolValue;
+    CounterStyleDescriptor ExplicitlySetDescriptors;
+    bool IsExtendedResolved {false};
+
+    // Create() is preferred here rather than a custom constructor, so that the struct still classifies as an
+    // aggregate.
+    KRYS_NODISCARD static CounterStyleDescriptors Create(CounterStyleName name,
+                                                         const StyleProperties &properties) noexcept;
+
+    KRYS_NODISCARD bool operator==(const CounterStyleDescriptors &other) const noexcept
+    {
+      // Intentionally doesn't check IsExtendedResolved.
+      return Name == other.Name && System == other.System && NegativeSymbols == other.NegativeSymbols
+             && Prefix == other.Prefix && Suffix == other.Suffix && Ranges == other.Ranges && Pad == other.Pad
+             && FallbackName == other.FallbackName && Symbols == other.Symbols
+             && AdditiveSymbols == other.AdditiveSymbols && SpeakAs == other.SpeakAs
+             && ExtendsName == other.ExtendsName
+             && FixedSystemFirstSymbolValue == other.FixedSystemFirstSymbolValue
+             && ExplicitlySetDescriptors == other.ExplicitlySetDescriptors;
+    }
+
+    void SetExplicitlySetDescriptors(const StyleProperties &properties) noexcept;
+    KRYS_NODISCARD bool IsValid() const noexcept;
+    KRYS_NODISCARD static bool
+      AreSymbolsValidForSystem(CounterStyleSystem system, const List<CounterStyleSymbol> &symbols,
+                               const CounterStyleAdditiveSymbols &additiveSymbols) noexcept;
+
+    void SetName(CounterStyleName name) noexcept;
+    void SetSystemData(CounterStyleSystemData systemData) noexcept;
+    void SetNegative(CounterStyleNegativeSymbols negative) noexcept;
+    void SetPrefix(CounterStyleSymbol prefix) noexcept;
+    void SetSuffix(CounterStyleSymbol suffix) noexcept;
+    void SetRanges(CounterStyleRanges ranges) noexcept;
+    void SetPad(CounterStylePad pad) noexcept;
+    void SetFallbackName(CounterStyleName name) noexcept;
+    void SetSymbols(List<CounterStyleSymbol> symbols) noexcept;
+    void SetAdditiveSymbols(CounterStyleAdditiveSymbols additiveSymbols) noexcept;
+
+    KRYS_NODISCARD CSSOMString NameCSSText() const noexcept;
+    KRYS_NODISCARD CSSOMString SystemCSSText() const noexcept;
+    KRYS_NODISCARD CSSOMString NegativeCSSText() const noexcept;
+    KRYS_NODISCARD CSSOMString PrefixCSSText() const noexcept;
+    KRYS_NODISCARD CSSOMString SuffixCSSText() const noexcept;
+    KRYS_NODISCARD CSSOMString RangesCSSText() const noexcept;
+    KRYS_NODISCARD CSSOMString PadCSSText() const noexcept;
+    KRYS_NODISCARD CSSOMString FallbackCSSText() const noexcept;
+    KRYS_NODISCARD CSSOMString SymbolsCSSText() const noexcept;
+    KRYS_NODISCARD CSSOMString AdditiveSymbolsCSSText() const noexcept;
+  };
+
+  /// @brief The system named by a `system` descriptor value (`symbolic` if there is none).
+  KRYS_NODISCARD CounterStyleSystem ToCounterStyleSystemEnum(const Value *system) noexcept;
+
+  KRYS_NODISCARD CounterStyleRanges RangeFromValue(Ref<Value> value) noexcept;
+  KRYS_NODISCARD CounterStyleAdditiveSymbols AdditiveSymbolsFromValue(Ref<Value> value) noexcept;
+  KRYS_NODISCARD CounterStylePad PadFromValue(Ref<Value> value) noexcept;
+  KRYS_NODISCARD CounterStyleNegativeSymbols NegativeSymbolsFromValue(Ref<Value> value) noexcept;
+  KRYS_NODISCARD CounterStyleSymbol SymbolFromValue(RefPtr<Value> value) noexcept;
+  KRYS_NODISCARD List<CounterStyleSymbol> SymbolsFromValue(Ref<Value> value) noexcept;
+  KRYS_NODISCARD CounterStyleName FallbackNameFromValue(Ref<Value> value) noexcept;
+  KRYS_NODISCARD CounterStyleSystemData ExtractSystemDataFromValue(RefPtr<Value> systemValue,
+                                                                   CounterStyleSystem system) noexcept;
+}

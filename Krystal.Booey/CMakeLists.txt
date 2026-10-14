@@ -519,6 +519,20 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Queries/MediaQueryFeatures.hpp
   include/Krystal.Booey/CSS/Queries/MediaQueryParser.hpp
   include/Krystal.Booey/CSS/Queries/MediaQueryParserContext.hpp
+
+  # Sheet parser, layer d4 (rule model)
+  include/Krystal.Booey/CSS/Counter/CounterStyleDescriptors.hpp
+  include/Krystal.Booey/CSS/Parser/AtRuleId.hpp
+  include/Krystal.Booey/CSS/Rules/CounterStyleRule.hpp
+  include/Krystal.Booey/CSS/Rules/FunctionRule.hpp
+  include/Krystal.Booey/CSS/Rules/ImportRule.hpp
+  include/Krystal.Booey/CSS/Rules/KeyframeRule.hpp
+  include/Krystal.Booey/CSS/Rules/KeyframesRule.hpp
+  include/Krystal.Booey/CSS/Rules/PositionTryRule.hpp
+  include/Krystal.Booey/CSS/Rules/Rule.hpp
+  include/Krystal.Booey/CSS/Rules/ViewTransitionRule.hpp
+  include/Krystal.Booey/Graphics/FontFeatureValues.hpp
+  include/Krystal.Booey/Graphics/FontPaletteValues.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -790,6 +804,19 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Queries/MediaQueryFeatures.cpp
   src/CSS/Queries/MediaQueryParser.cpp
   src/CSS/Queries/MediaQueryParserContext.cpp
+
+  # Sheet parser, layer d4 (rule model)
+  src/CSS/Counter/CounterStyleDescriptors.cpp
+  src/CSS/Parser/AtRuleId.cpp
+  src/CSS/Rules/CounterStyleRule.cpp
+  src/CSS/Rules/FunctionRule.cpp
+  src/CSS/Rules/ImportRule.cpp
+  src/CSS/Rules/KeyframeRule.cpp
+  src/CSS/Rules/KeyframesRule.cpp
+  src/CSS/Rules/PositionTryRule.cpp
+  src/CSS/Rules/Rule.cpp
+  src/CSS/Rules/ViewTransitionRule.cpp
+  src/Graphics/FontFeatureValues.cpp
 )
 
 target_precompile_headers(Krystal.Booey
