@@ -84,6 +84,35 @@ namespace krys::boo::dom
     return false;
   }
 
+  List<DOMStringAtom> Element::ClassNames() const noexcept
+  {
+    List<DOMStringAtom> classNames;
+    auto classes = GetAttribute(u8"class");
+    if (!classes)
+    {
+      return classNames;
+    }
+    bool foldCase = NodeDocument().InQuirksMode();
+    DOMStringView remaining = *classes;
+    while (!remaining.empty())
+    {
+      auto start = std::ranges::find_if_not(remaining, [](char8 c) { return text::IsASCIIWhitespace(c); });
+      auto end =
+        std::ranges::find_if(start, remaining.end(), [](char8 c) { return text::IsASCIIWhitespace(c); });
+      if (start != end)
+      {
+        DOMStringAtom className = foldCase ? DOMStringAtom(text::ToASCIILower(DOMStringView(start, end)))
+                                           : DOMStringAtom(DOMStringView(start, end));
+        if (std::ranges::find(classNames, className) == classNames.end())
+        {
+          classNames.push_back(className);
+        }
+      }
+      remaining = DOMStringView(end, remaining.end());
+    }
+    return classNames;
+  }
+
   DOMString Element::IdForStyleResolution() const noexcept
   {
     auto id = GetAttribute(u8"id").value_or(DOMString());

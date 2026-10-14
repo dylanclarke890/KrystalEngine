@@ -32,8 +32,6 @@
 //   - `RenderStyle`, `RenderView`, `RenderElement`, `RenderBox`: rendering.
 //   - `style::BuilderState`, `style::AnchorPositionEvaluator`, `style::ContainerQueryEvaluator`: the style
 //     resolver (`Style/BuilderState.hpp`, `Style/AnchorPositionEvaluator.hpp`, unreviewed).
-//   - `style::Resolver`: the style resolver. Scopes never create one (`style::Scope::ResolverIfExists` is
-//     null), so its members are unreachable.
 //   - the `Document*` colour functions: `dom::Document` (upstream members) once it has a page and settings.
 //   - the `Document*` security and keyframes functions: `dom::Document` (upstream members) once it has a
 //     security origin and runs animations.
@@ -49,7 +47,6 @@ namespace krys::boo::dom
 namespace krys::boo::css
 {
   class CSSStyleSheet;
-  class KeyframesRule;
   class ToLengthConversionData;
 }
 
@@ -154,8 +151,8 @@ namespace krys::boo
     /// @brief Collapses `!pseudoElementType()`.
     KRYS_NODISCARD bool HasPseudoElementType() const noexcept;
 
-    /// @brief Collapses `lineHeight().tryFixed()` evaluated to a `LayoutUnit` with `zoom`, as a float, for the
-    /// initial `line-height`.
+    /// @brief Collapses `lineHeight().tryFixed()` evaluated to a `LayoutUnit` with `zoom`, as a float, for
+    /// the initial `line-height`.
     KRYS_NODISCARD Maybe<float> EvaluateFixedLineHeight(const style::ZoomFactor &zoom) const noexcept;
 
     /// @brief Collapses `computeLineHeight(specifiedLineHeight())` for the initial `line-height`.
@@ -314,15 +311,5 @@ namespace krys::boo::style
     KRYS_NODISCARD static RefPtr<const dom::Element>
       SelectContainer(css::cq::Axis, const css::CSSOMString &name, const dom::Element &,
                       SelectionMode = SelectionMode::Element) noexcept;
-  };
-
-  class Resolver
-  {
-    KRYS_NON_COPY_MOVABLE(Resolver);
-
-  public:
-    Resolver() = delete;
-
-    void AddKeyframeStyle(css::KeyframesRule &) noexcept;
   };
 }

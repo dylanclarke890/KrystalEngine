@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Selectors/Selector.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
+#include "Krystal.Booey/Style/Relations.hpp"
 #include "Krystal.Booey/Style/ScopeOrdinal.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -17,6 +18,11 @@ namespace krys::boo::dom
   class Document;
   class Element;
   class QualifiedName;
+}
+
+namespace krys::boo::style
+{
+  struct SelectorMatchingState;
 }
 
 namespace krys::boo::css
@@ -92,8 +98,10 @@ namespace krys::boo::css
       bool MatchesAllHasScopes {false};
       bool IsEvaluatingScopingRoot {false};
       style::ScopeOrdinal StyleScopeOrdinal {style::ScopeOrdinal::Element};
+      style::SelectorMatchingState *SelectorMatchingState {nullptr};
 
       // FIXME: It would be nicer to have a separate object for return values.
+      style::Relations StyleRelations;
       EnumSet<PseudoElementType> PublicPseudoElements;
       bool MatchedInsideScope {false};
       bool DisallowHasPseudoClass {false};

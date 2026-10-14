@@ -11,6 +11,7 @@
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+#include "Krystal.Booey/Style/RuleData.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
@@ -19,9 +20,8 @@ namespace krys::boo::css
 {
   namespace
   {
-    // FIXME: Use Style::RuleData::MaximumSelectorComponentCount once the rule set is ported.
     // NOTE: The selector list has to fit into RuleData. <http://webkit.org/b/118369>
-    constexpr uint32 MaximumSelectorComponentCount = 8'192;
+    constexpr uint32 MaximumSelectorComponentCount = style::RuleData::MaximumSelectorComponentCount;
 
     using SelectorTextCache = HashMap<const CSSStyleRule *, CSSOMString>;
 

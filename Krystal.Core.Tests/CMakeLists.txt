@@ -58,6 +58,7 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Text/CodePointIterator.cpp
 
   # Types
+	PRIVATE tests/Types/BloomFilter.cpp
 	PRIVATE tests/Types/CompactVariant.cpp
 	PRIVATE tests/Types/FixedVector.cpp
 	PRIVATE tests/Types/ListHashSet.cpp

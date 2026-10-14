@@ -15,6 +15,7 @@
 #include "Krystal.Booey/DOM/Node.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+#include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/StyleSheetContentsCache.hpp"
@@ -258,7 +259,7 @@ namespace krys::boo::css
           {
             if (auto *resolver = scope.ResolverIfExists())
             {
-              resolver->AddKeyframeStyle(*insertedKeyframesRule);
+              resolver->AddKeyframeStyle(ShareRef(*insertedKeyframesRule));
             }
             return;
           }

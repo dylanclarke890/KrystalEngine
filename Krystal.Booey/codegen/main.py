@@ -1,10 +1,11 @@
-import argparse
+﻿import argparse
 import os
 import pathlib
 
 import css_properties
 import css_pseudo_selectors
 import css_value_keywords
+import user_agent_style_sheets
 
 
 def parse_args() -> argparse.Namespace:
@@ -55,6 +56,7 @@ def main():
     css_value_keywords.generate(args)
     css_properties.generate(args)
     css_pseudo_selectors.generate(args)
+    user_agent_style_sheets.generate(args)
 
 
 if __name__ == "__main__":

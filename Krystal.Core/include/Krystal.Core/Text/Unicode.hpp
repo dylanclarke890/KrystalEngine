@@ -11,6 +11,12 @@ namespace krys::text
   constexpr char32 UnicodeReplacementChar = 0xFFFD;
   constexpr char32 MaxUnicodeChar = 0x10FFFF;
 
+  // Named code points.
+  constexpr char32 BlackDownPointingSmallTriangle = 0x25BE;
+  constexpr char32 BlackLeftPointingSmallTriangle = 0x25C2;
+  constexpr char32 BlackRightPointingSmallTriangle = 0x25B8;
+  constexpr char32 BlackUpPointingSmallTriangle = 0x25B4;
+
   KRYS_NODISCARD constexpr bool IsNonUnicodeCharacter(char32 value) noexcept
   {
     return (value >= 0xFDD0 && value <= 0xFDEF)

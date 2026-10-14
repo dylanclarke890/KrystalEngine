@@ -357,6 +357,9 @@ namespace krys::boo::dom
     /// where @p className must be lowercase).
     KRYS_NODISCARD bool HasClassName(DOMStringView className) const noexcept;
 
+    /// @brief The element's classes in order, without duplicates, ASCII-lowercased in quirks mode.
+    KRYS_NODISCARD List<DOMStringAtom> ClassNames() const noexcept;
+
     /// @brief The element's ID, ASCII-lowercased in quirks mode; empty if it has none.
     KRYS_NODISCARD DOMString IdForStyleResolution() const noexcept;
 

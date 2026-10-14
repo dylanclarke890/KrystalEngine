@@ -17,6 +17,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Utils/AllowCompactPointers.hpp"
 #include <new>
 
 namespace krys::boo::css
@@ -36,6 +37,7 @@ namespace krys::boo::css
   {
     // Needs access to the protected operator delete.
     friend class RefCounted<Rule>;
+    KRYS_ENABLE_COMPACT_POINTERS;
 
   private:
     RuleType _type : 5;

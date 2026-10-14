@@ -403,9 +403,4 @@ namespace krys::boo::style
   {
     krys_unreachable();
   }
-
-  void Resolver::AddKeyframeStyle(css::KeyframesRule &) noexcept
-  {
-    krys_unreachable();
-  }
 }

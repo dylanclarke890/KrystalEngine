@@ -13,13 +13,11 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Style/RuleFeature.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/SelectorMatchingState.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include <algorithm>
-
-// FIXME: Style relations (Style::Relations), the :has() match cache and its selector filters
-// (Style::SelectorMatchingState) come with style resolution.
 
 namespace krys::boo::css
 {
@@ -485,23 +483,30 @@ namespace krys::boo::css
       }
       return names;
     }
+  }
 
-    template <typename TFunc>
-    bool ForEachDescendantElement(const dom::Element &root, TFunc &&func) noexcept
+  static inline void AddStyleRelation(SelectorChecker::CheckingContext &checkingContext,
+                                      const dom::Element &element, style::Relation::Type type,
+                                      uint32 value = 1) noexcept
+  {
+    krys_debug_assert(value == 1 || type == style::Relation::NthChildIndex
+                      || type == style::Relation::AffectedByEmpty);
+    if (checkingContext.ResolvingMode != SelectorChecker::Mode::ResolvingStyle)
     {
-      for (auto *node = dom::TreeQueries::Next(root, &root); node;
-           node = dom::TreeQueries::Next(*node, &root))
-      {
-        if (auto *element = DynamicDowncast<dom::Element>(*node))
-        {
-          if (func(*element))
-          {
-            return true;
-          }
-        }
-      }
-      return false;
+      return;
     }
+    if (type == style::Relation::AffectsNextSibling && !checkingContext.StyleRelations.empty())
+    {
+      auto &last = checkingContext.StyleRelations.back();
+      if (last.RelationType == style::Relation::AffectsNextSibling
+          && last.Element == dom::TreeQueries::NextElementSibling(element))
+      {
+        ++last.Value;
+        last.Element = &element;
+        return;
+      }
+    }
+    checkingContext.StyleRelations.emplace_back(element, type, value);
   }
 
   SelectorChecker::SelectorChecker(const dom::Document &document) noexcept
@@ -713,11 +718,17 @@ namespace krys::boo::css
 
       case SelectorRelation::NextSibling:
       {
+        auto siblingRelation = context.IsMatchElement ? style::Relation::AffectedByPreviousSibling
+                                                      : style::Relation::DescendantsAffectedByPreviousSibling;
+        AddStyleRelation(checkingContext, *context.Element, siblingRelation);
+
         auto *previousElement = dom::TreeQueries::PreviousElementSibling(*context.Element);
         if (!previousElement)
         {
           return MatchResult::Fails(MatchOutcome::SelectorFailsAllSiblings);
         }
+
+        AddStyleRelation(checkingContext, *previousElement, style::Relation::AffectsNextSibling);
 
         nextContext.Element = previousElement;
         nextContext.FirstSelectorOfTheFragment = nextContext.CurrentSelector;
@@ -729,11 +740,17 @@ namespace krys::boo::css
       }
       case SelectorRelation::SubsequentSibling:
       {
+        auto siblingRelation = context.IsMatchElement ? style::Relation::AffectedByPreviousSibling
+                                                      : style::Relation::DescendantsAffectedByPreviousSibling;
+        AddStyleRelation(checkingContext, *context.Element, siblingRelation);
+
         nextContext.Element = dom::TreeQueries::PreviousElementSibling(*context.Element);
         nextContext.FirstSelectorOfTheFragment = nextContext.CurrentSelector;
         for (; nextContext.Element;
              nextContext.Element = dom::TreeQueries::PreviousElementSibling(*nextContext.Element))
         {
+          AddStyleRelation(checkingContext, *nextContext.Element, style::Relation::AffectsNextSibling);
+
           EnumSet<PseudoElementType> ignoredPseudoElements;
           MatchResult result = MatchRecursively(checkingContext, nextContext, ignoredPseudoElements);
           krys_debug_assert(!nextContext.PseudoElementEffective && !ignoredPseudoElements);
@@ -991,15 +1008,38 @@ namespace krys::boo::css
               }
             }
           }
+          AddStyleRelation(checkingContext, *context.Element, style::Relation::AffectedByEmpty, result);
 
           return result;
         }
         case SelectorPseudoClass::FirstChild:
+        {
           // first-child matches the first child that is an element
-          return IsFirstChildElement(element);
+          bool isFirstChild = IsFirstChildElement(element);
+          if (auto *parentElement = DynamicDowncast<dom::Element>(element.ParentNode()))
+          {
+            AddStyleRelation(checkingContext, *parentElement,
+                             style::Relation::ChildrenAffectedByFirstChildRules);
+          }
+          if (!isFirstChild)
+          {
+            break;
+          }
+          AddStyleRelation(checkingContext, element, style::Relation::FirstChild);
+          return true;
+        }
         case SelectorPseudoClass::FirstOfType:
+        {
           // first-of-type matches the first element of its type
+          if (auto *parentElement = DynamicDowncast<dom::Element>(element.ParentNode()))
+          {
+            auto relation = context.IsSubjectOrAdjacentElement
+                              ? style::Relation::ChildrenAffectedByForwardPositionalRules
+                              : style::Relation::DescendantsAffectedByForwardPositionalRules;
+            AddStyleRelation(checkingContext, *parentElement, relation);
+          }
           return IsFirstOfType(element, element.TagQualifiedName());
+        }
         case SelectorPseudoClass::LastChild:
         {
           // last-child matches the last child that is an element
@@ -1010,14 +1050,25 @@ namespace krys::boo::css
             {
               isLastChild = false;
             }
+            AddStyleRelation(checkingContext, *parentElement,
+                             style::Relation::ChildrenAffectedByLastChildRules);
           }
-          return isLastChild;
+          if (!isLastChild)
+          {
+            break;
+          }
+          AddStyleRelation(checkingContext, element, style::Relation::LastChild);
+          return true;
         }
         case SelectorPseudoClass::LastOfType:
         {
           // last-of-type matches the last element of its type
           if (auto *parentElement = DynamicDowncast<dom::Element>(element.ParentNode()))
           {
+            auto relation = context.IsSubjectOrAdjacentElement
+                              ? style::Relation::ChildrenAffectedByBackwardPositionalRules
+                              : style::Relation::DescendantsAffectedByBackwardPositionalRules;
+            AddStyleRelation(checkingContext, *parentElement, relation);
             if (!parentElement->IsFinishedParsingChildren())
             {
               return false;
@@ -1031,10 +1082,22 @@ namespace krys::boo::css
           bool onlyChild = firstChild && IsLastChildElement(element);
           if (auto *parentElement = DynamicDowncast<dom::Element>(element.ParentNode()))
           {
+            AddStyleRelation(checkingContext, *parentElement,
+                             style::Relation::ChildrenAffectedByFirstChildRules);
+            AddStyleRelation(checkingContext, *parentElement,
+                             style::Relation::ChildrenAffectedByLastChildRules);
             if (!parentElement->IsFinishedParsingChildren())
             {
               onlyChild = false;
             }
+          }
+          if (firstChild)
+          {
+            AddStyleRelation(checkingContext, element, style::Relation::FirstChild);
+          }
+          if (onlyChild)
+          {
+            AddStyleRelation(checkingContext, element, style::Relation::LastChild);
           }
           return onlyChild;
         }
@@ -1043,6 +1106,15 @@ namespace krys::boo::css
           // FIXME: This selector is very slow.
           if (auto *parentElement = DynamicDowncast<dom::Element>(element.ParentNode()))
           {
+            auto forwardRelation = context.IsSubjectOrAdjacentElement
+                                     ? style::Relation::ChildrenAffectedByForwardPositionalRules
+                                     : style::Relation::DescendantsAffectedByForwardPositionalRules;
+            AddStyleRelation(checkingContext, *parentElement, forwardRelation);
+            auto backwardRelation = context.IsSubjectOrAdjacentElement
+                                      ? style::Relation::ChildrenAffectedByBackwardPositionalRules
+                                      : style::Relation::DescendantsAffectedByBackwardPositionalRules;
+            AddStyleRelation(checkingContext, *parentElement, backwardRelation);
+
             if (!parentElement->IsFinishedParsingChildren())
             {
               return false;
@@ -1107,6 +1179,14 @@ namespace krys::boo::css
         case SelectorPseudoClass::PlaceholderShown: return IsPlaceholderShown(element);
         case SelectorPseudoClass::NthChild:
         {
+          if (auto *parentElement = DynamicDowncast<dom::Element>(element.ParentNode()))
+          {
+            auto relation = context.IsSubjectOrAdjacentElement
+                              ? style::Relation::ChildrenAffectedByForwardPositionalRules
+                              : style::Relation::DescendantsAffectedByForwardPositionalRules;
+            AddStyleRelation(checkingContext, *parentElement, relation);
+          }
+
           if (const SelectorList *selectorList = selector.SubSelectors())
           {
             if (!MatchSelectorList(checkingContext, context, element, *selectorList))
@@ -1130,6 +1210,8 @@ namespace krys::boo::css
           else
           {
             count += CountElementsBefore(element);
+            AddStyleRelation(checkingContext, element, style::Relation::NthChildIndex,
+                             static_cast<uint32>(count));
           }
 
           if (selector.MatchNth(count))
@@ -1140,6 +1222,14 @@ namespace krys::boo::css
         }
         case SelectorPseudoClass::NthOfType:
         {
+          if (auto *parentElement = DynamicDowncast<dom::Element>(element.ParentNode()))
+          {
+            auto relation = context.IsSubjectOrAdjacentElement
+                              ? style::Relation::ChildrenAffectedByForwardPositionalRules
+                              : style::Relation::DescendantsAffectedByForwardPositionalRules;
+            AddStyleRelation(checkingContext, *parentElement, relation);
+          }
+
           int32 count = 1 + CountElementsOfTypeBefore(element, element.TagQualifiedName());
           if (selector.MatchNth(count))
           {
@@ -1157,6 +1247,16 @@ namespace krys::boo::css
               {
                 return false;
               }
+
+              AddStyleRelation(checkingContext, *parentElement,
+                               style::Relation::ChildrenAffectedByBackwardPositionalRules);
+            }
+            else
+            {
+              auto relation = context.IsSubjectOrAdjacentElement
+                                ? style::Relation::ChildrenAffectedByBackwardPositionalRules
+                                : style::Relation::DescendantsAffectedByBackwardPositionalRules;
+              AddStyleRelation(checkingContext, *parentElement, relation);
             }
             if (!parentElement->IsFinishedParsingChildren())
             {
@@ -1187,6 +1287,11 @@ namespace krys::boo::css
         {
           if (auto *parentElement = DynamicDowncast<dom::Element>(element.ParentNode()))
           {
+            auto relation = context.IsSubjectOrAdjacentElement
+                              ? style::Relation::ChildrenAffectedByBackwardPositionalRules
+                              : style::Relation::DescendantsAffectedByBackwardPositionalRules;
+            AddStyleRelation(checkingContext, *parentElement, relation);
+
             if (!parentElement->IsFinishedParsingChildren())
             {
               return false;
@@ -1564,10 +1669,80 @@ namespace krys::boo::css
       return false;
     }
 
+    auto *cache = checkingContext.SelectorMatchingState
+                    ? &checkingContext.SelectorMatchingState->HasPseudoClassMatchCache
+                    : nullptr;
+
+    auto cachedMatch = [&](const dom::Element &cachedElement)
+    {
+      auto it = cache->find(style::MakeHasPseudoClassCacheKey(cachedElement, hasSelector));
+      return it == cache->end() ? style::HasPseudoClassMatch::None : it->second;
+    };
+
+    auto checkForCachedMatch = [&]() -> Maybe<bool>
+    {
+      if (!cache)
+      {
+        return {};
+      }
+      switch (cachedMatch(element))
+      {
+        case style::HasPseudoClassMatch::Matches:      return true;
+        case style::HasPseudoClassMatch::Fails:
+        case style::HasPseudoClassMatch::FailsSubtree: return false;
+        case style::HasPseudoClassMatch::None:         break;
+      }
+      return {};
+    };
+
+    // See if we know the result already.
+    if (auto match = checkForCachedMatch())
+    {
+      return *match;
+    }
+
+    auto filterForElement = [&]() -> style::HasSelectorFilter *
+    {
+      if (!checkingContext.SelectorMatchingState)
+      {
+        return nullptr;
+      }
+      auto type = style::HasSelectorFilter::TypeForMatchElement(matchElement);
+      if (!type)
+      {
+        return nullptr;
+      }
+      auto &filtersMap = checkingContext.SelectorMatchingState->HasPseudoClassSelectorFilters;
+      auto [it, isNewEntry] = filtersMap.try_emplace(style::MakeHasPseudoClassFilterKey(element, *type));
+      // Only build a filter if the same element gets checked second time with a different selector (misses
+      // the match cache).
+      if (isNewEntry)
+      {
+        return nullptr;
+      }
+
+      if (!it->second)
+      {
+        it->second = CreateUnique<style::HasSelectorFilter>(element, *type);
+      }
+      return it->second.get();
+    };
+
+    // Check if the bloom filter rejects this selector
+    if (auto *filter = filterForElement())
+    {
+      if (filter->Reject(hasSelector))
+      {
+        return false;
+      }
+    }
+
     CheckingContext hasCheckingContext(Mode::ResolvingStyle);
     hasCheckingContext.Scope = checkingContext.Scope;
     hasCheckingContext.HasScope = &element;
     hasCheckingContext.DisallowHasPseudoClass = true;
+
+    bool matchedInsideScope = false;
 
     auto checkRelative = [&](const dom::Element &elementToCheck)
     {
@@ -1576,65 +1751,168 @@ namespace krys::boo::css
       hasContext.PseudoElementEffective = false;
 
       EnumSet<PseudoElementType> ignoredPseudoElements;
-      return MatchRecursively(hasCheckingContext, hasContext, ignoredPseudoElements).Outcome
-             == MatchOutcome::SelectorMatches;
+      auto result = MatchRecursively(hasCheckingContext, hasContext, ignoredPseudoElements).Outcome
+                    == MatchOutcome::SelectorMatches;
+
+      if (hasCheckingContext.MatchedInsideScope)
+      {
+        matchedInsideScope = true;
+      }
+
+      return result;
     };
 
     auto checkDescendants = [&](const dom::Element &descendantRoot)
     {
-      return ForEachDescendantElement(descendantRoot, checkRelative);
-    };
-
-    switch (matchElement)
-    {
-      // :has(> .child)
-      case style::MatchElement::HasChild:
-        for (auto *child = dom::TreeQueries::FirstElementChild(element); child;
-             child = dom::TreeQueries::NextElementSibling(*child))
+      for (auto *node = dom::TreeQueries::Next(descendantRoot, &descendantRoot); node;)
+      {
+        auto *descendant = DynamicDowncast<dom::Element>(*node);
+        if (!descendant)
         {
-          if (checkRelative(*child))
-          {
-            return true;
-          }
+          node = dom::TreeQueries::Next(*node, &descendantRoot);
+          continue;
         }
-        break;
-      // :has(.descendant)
-      case style::MatchElement::HasDescendant:
-        if (checkDescendants(element))
+
+        if (checkRelative(*descendant))
         {
           return true;
         }
-        break;
-      // FIXME: Add a separate case for adjacent combinator.
-      // :has(+ .sibling)
-      // :has(~ .sibling)
-      case style::MatchElement::HasSibling:
-        for (auto *sibling = dom::TreeQueries::NextElementSibling(element); sibling;
-             sibling = dom::TreeQueries::NextElementSibling(*sibling))
-        {
-          if (checkRelative(*sibling))
-          {
-            return true;
-          }
-        }
-        break;
-      // FIXME: Add a separate case for adjacent combinator.
-      // :has(+ .sibling .descendant)
-      // :has(~ .sibling .descendant)
-      case style::MatchElement::HasSiblingDescendant:
-        for (auto *sibling = dom::TreeQueries::NextElementSibling(element); sibling;
-             sibling = dom::TreeQueries::NextElementSibling(*sibling))
-        {
-          if (checkDescendants(*sibling))
-          {
-            return true;
-          }
-        }
-        break;
 
-      default: krys_debug_assert(false); break;
+        if (cache && dom::TreeQueries::FirstElementChild(*descendant))
+        {
+          if (cachedMatch(*descendant) == style::HasPseudoClassMatch::FailsSubtree)
+          {
+            node = dom::TreeQueries::NextSkippingChildren(*descendant, &descendantRoot);
+            continue;
+          }
+        }
+
+        node = dom::TreeQueries::Next(*descendant, &descendantRoot);
+      }
+
+      return false;
+    };
+
+    auto match = [&]
+    {
+      switch (matchElement)
+      {
+        // :has(> .child)
+        case style::MatchElement::HasChild:
+          for (auto *child = dom::TreeQueries::FirstElementChild(element); child;
+               child = dom::TreeQueries::NextElementSibling(*child))
+          {
+            if (checkRelative(*child))
+            {
+              return true;
+            }
+          }
+          break;
+        // :has(.descendant)
+        case style::MatchElement::HasDescendant:
+        {
+          if (cache)
+          {
+            // See if we already know this descendant selector doesn't match in this subtree.
+            for (auto *ancestor = element.ParentElement(); ancestor; ancestor = ancestor->ParentElement())
+            {
+              if (cachedMatch(*ancestor) == style::HasPseudoClassMatch::FailsSubtree)
+              {
+                return false;
+              }
+            }
+          }
+          if (checkDescendants(element))
+          {
+            return true;
+          }
+
+          break;
+        }
+        // FIXME: Add a separate case for adjacent combinator.
+        // :has(+ .sibling)
+        // :has(~ .sibling)
+        case style::MatchElement::HasSibling:
+          for (auto *sibling = dom::TreeQueries::NextElementSibling(element); sibling;
+               sibling = dom::TreeQueries::NextElementSibling(*sibling))
+          {
+            if (checkRelative(*sibling))
+            {
+              return true;
+            }
+          }
+          break;
+        // FIXME: Add a separate case for adjacent combinator.
+        // :has(+ .sibling .descendant)
+        // :has(~ .sibling .descendant)
+        case style::MatchElement::HasSiblingDescendant:
+          for (auto *sibling = dom::TreeQueries::NextElementSibling(element); sibling;
+               sibling = dom::TreeQueries::NextElementSibling(*sibling))
+          {
+            if (checkDescendants(*sibling))
+            {
+              return true;
+            }
+          }
+          break;
+
+        default: krys_debug_assert(false); break;
+      }
+      return false;
+    };
+
+    auto result = match();
+
+    auto matchTypeForCache = [&]
+    {
+      if (result)
+      {
+        return style::HasPseudoClassMatch::Matches;
+      }
+      if (matchedInsideScope)
+      {
+        return style::HasPseudoClassMatch::Fails;
+      }
+      return style::HasPseudoClassMatch::FailsSubtree;
+    };
+
+    if (cache)
+    {
+      cache->try_emplace(style::MakeHasPseudoClassCacheKey(element, hasSelector), matchTypeForCache());
     }
-    return false;
+
+    auto forwardStyleRelation = [&](const style::Relation &relation)
+    {
+      switch (relation.RelationType)
+      {
+        case style::Relation::ChildrenAffectedByForwardPositionalRules:
+        case style::Relation::ChildrenAffectedByBackwardPositionalRules:
+          checkingContext.StyleRelations.emplace_back(
+            *relation.Element, style::Relation::AffectedByHasWithPositionalPseudoClass);
+          return;
+        case style::Relation::ChildrenAffectedByFirstChildRules:
+        case style::Relation::ChildrenAffectedByLastChildRules:
+          checkingContext.StyleRelations.push_back(relation);
+          return;
+        case style::Relation::AffectedByEmpty:
+        case style::Relation::AffectedByPreviousSibling:
+        case style::Relation::DescendantsAffectedByPreviousSibling:
+        case style::Relation::AffectsNextSibling:
+        case style::Relation::DescendantsAffectedByForwardPositionalRules:
+        case style::Relation::DescendantsAffectedByBackwardPositionalRules:
+        case style::Relation::FirstChild:
+        case style::Relation::LastChild:
+        case style::Relation::NthChildIndex:                                return;
+        case style::Relation::AffectedByHasWithPositionalPseudoClass:       krys_debug_assert(false); return;
+      }
+    };
+
+    for (auto &relation : hasCheckingContext.StyleRelations)
+    {
+      forwardStyleRelation(relation);
+    }
+
+    return result;
   }
 
   bool SelectorChecker::CheckViewTransitionPseudoClass(const CheckingContext &checkingContext,

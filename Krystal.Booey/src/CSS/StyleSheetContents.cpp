@@ -5,6 +5,7 @@
 #include "Krystal.Booey/CSS/Rules/ImportRule.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Style/RuleData.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include <algorithm>
 #include <utility>
@@ -13,9 +14,8 @@ namespace krys::boo::css
 {
   namespace
   {
-    // FIXME: Use Style::RuleData::MaximumSelectorComponentCount once the rule set is ported.
     // The selector list has to fit into RuleData.
-    constexpr uint32 MaximumSelectorComponentCount = 8'192;
+    constexpr uint32 MaximumSelectorComponentCount = style::RuleData::MaximumSelectorComponentCount;
 
     bool TraverseRulesInList(const List<Ref<Rule>> &rules,
                              KRYS_NOESCAPE const Func<bool(const Rule &)> &handler) noexcept

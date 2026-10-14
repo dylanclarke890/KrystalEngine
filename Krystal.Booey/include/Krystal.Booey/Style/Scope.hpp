@@ -6,15 +6,21 @@
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+#include <tuple>
 
 namespace krys::boo::css
 {
+  class CounterStyleRegistry;
   class CSSStyleSheet;
   class StyleSheet;
+  class StyleSheetContents;
 }
 
 namespace krys::boo::dom
@@ -34,6 +40,7 @@ namespace krys::boo::html
 namespace krys::boo::style
 {
   class Resolver;
+  class RuleSet;
 
   /// @brief The style sheets of a document or shadow root: the nodes that can provide a style sheet (in tree
   /// order), the sheets that are still loading, the preferred style sheet set, and the active style sheets
@@ -56,9 +63,32 @@ namespace krys::boo::style
       List<RefPtr<css::StyleSheet>> StyleSheetsForStyleSheetList;
     };
 
+    enum class ResolverUpdateType : uint8
+    {
+      Reconstruct,
+      Reset,
+      Additive
+    };
+
+    struct StyleSheetChange
+    {
+      ResolverUpdateType UpdateType;
+      List<Ref<css::StyleSheetContents>> AddedSheets {};
+    };
+
+    using ResolverSharingKey = std::tuple<List<RefPtr<css::StyleSheetContents>>, bool, bool>;
+
+    struct ResolverSharingKeyHash
+    {
+      KRYS_NODISCARD size_t operator()(const ResolverSharingKey &key) const noexcept;
+    };
+
   private:
     dom::Document *_document;
     dom::ShadowRoot *_shadowRoot {nullptr};
+
+    RefPtr<Resolver> _resolver;
+    mutable RefPtr<RuleSet> _dynamicViewTransitionsStyle;
 
     List<RefPtr<css::StyleSheet>> _styleSheetsForStyleSheetList;
     List<RefPtr<css::CSSStyleSheet>> _activeStyleSheets;
@@ -78,6 +108,12 @@ namespace krys::boo::style
 
     bool _hasDescendantWithPendingUpdate {false};
     bool _isPendingUpdateTaskQueued {false};
+    bool _usesHasPseudoClass {false};
+    bool _isUpdatingStyleResolver {false};
+
+    const UniquePtr<css::CounterStyleRegistry> _counterStyleRegistry;
+
+    HashMap<ResolverSharingKey, Ref<Resolver>, ResolverSharingKeyHash> _sharedShadowTreeResolvers;
 
   public:
     explicit Scope(dom::Document &document) noexcept;
@@ -122,11 +158,32 @@ namespace krys::boo::style
 
     void FlushPendingUpdate() noexcept;
 
-    /// @brief The style resolver, if one has been created.
-    // FIXME: Always null until there is a style resolver.
-    KRYS_NODISCARD Resolver *ResolverIfExists() noexcept
+    KRYS_NODISCARD bool UsesHasPseudoClass() const noexcept
     {
-      return nullptr;
+      return _usesHasPseudoClass;
+    }
+
+    /// @brief The style resolver, created if needed (shared with shadow trees that have the same style
+    /// sheets).
+    KRYS_NODISCARD Resolver &GetResolver() noexcept;
+
+    /// @brief The style resolver, if one has been created.
+    KRYS_NODISCARD Resolver *ResolverIfExists() noexcept;
+    KRYS_NODISCARD const Resolver *ResolverIfExists() const noexcept;
+
+    void ClearResolver() noexcept;
+    void ClearViewTransitionStyles() noexcept;
+
+    void ReleaseMemory() noexcept;
+
+    KRYS_NODISCARD const css::CounterStyleRegistry &GetCounterStyleRegistry() const noexcept
+    {
+      return *_counterStyleRegistry;
+    }
+
+    KRYS_NODISCARD css::CounterStyleRegistry &GetCounterStyleRegistry() noexcept
+    {
+      return *_counterStyleRegistry;
     }
 
     KRYS_NODISCARD const dom::Document &Document() const noexcept
@@ -169,6 +226,15 @@ namespace krys::boo::style
     void DidRemovePendingStylesheet() noexcept;
 
     void UpdateActiveStyleSheets(UpdateType updateType) noexcept;
+    KRYS_NODISCARD StyleSheetChange
+      AnalyzeStyleSheetChange(const List<RefPtr<css::CSSStyleSheet>> &newStylesheets) noexcept;
+    void UpdateResolver(Span<const RefPtr<css::CSSStyleSheet>> activeStyleSheets,
+                        ResolverUpdateType updateType) noexcept;
+    void CreateDocumentResolver() noexcept;
+    void CreateOrFindSharedShadowTreeResolver() noexcept;
+    void UnshareShadowTreeResolverBeforeMutation() noexcept;
+    KRYS_NODISCARD ResolverSharingKey MakeResolverSharingKey() noexcept;
+    KRYS_NODISCARD bool IsForUserAgentShadowTree() const noexcept;
     void ScheduleUpdate(UpdateType update) noexcept;
 
     void FlushPendingSelfUpdate() noexcept;

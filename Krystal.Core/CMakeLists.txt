@@ -202,6 +202,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Types/CompactPtrTuple.hpp
       include/Krystal.Core/Types/CompactRefPtrTuple.hpp
       include/Krystal.Core/Types/CompactUniquePtrTuple.hpp
+      include/Krystal.Core/Types/BloomFilter.hpp
       include/Krystal.Core/Types/CompactVariant.hpp
       include/Krystal.Core/Types/Expected.hpp
       include/Krystal.Core/Types/FixedVector.hpp

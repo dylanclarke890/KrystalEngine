@@ -108,6 +108,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/CSSOM/CSSStyleRule.cpp
 		tests/CSS/CSSOM/CSSSupportsRule.cpp
 		tests/CSS/CSSOM/CSSViewTransitionRule.cpp
+		tests/CSS/Counter/CounterStyle.cpp
 		tests/CSS/CSSStyleProperties.cpp
 		tests/CSS/CSSStyleSheet.cpp
 		tests/CSS/CSSStyleSheetObservableArray.cpp
@@ -276,6 +277,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Selectors/MutableSelector.cpp
 		tests/CSS/Selectors/Selector.cpp
 		tests/CSS/Selectors/SelectorChecker.cpp
+		tests/CSS/Selectors/SelectorFilter.cpp
 		tests/CSS/Selectors/SelectorList.cpp
 		tests/CSS/Selectors/SelectorParser.cpp
 		tests/CSS/Selectors/SelectorPseudoTypeMap.cpp
@@ -316,7 +318,10 @@ target_sources(Krystal.Booey.Tests
 
 		# Style
 		tests/Style/Calc/Tree.cpp
+		tests/Style/Resolver.cpp
+		tests/Style/RuleSet.cpp
 		tests/Style/Scope.cpp
+		tests/Style/UserAgentStyle.cpp
 		tests/Style/ScopedName.cpp
 		tests/Style/StyleSheetContentsCache.cpp
 		tests/Style/Values/Color/Color.cpp

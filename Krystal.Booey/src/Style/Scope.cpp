@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp"
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/StyleSheet.hpp"
+#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
@@ -11,8 +13,12 @@
 #include "Krystal.Booey/HTML/HTMLLinkElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/HTMLStyleElement.hpp"
+#include "Krystal.Booey/Style/Resolver.hpp"
+#include "Krystal.Booey/Style/RuleSet.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Hash.hpp"
 #include <algorithm>
+#include <utility>
 
 namespace krys::boo::style
 {
@@ -74,18 +80,185 @@ namespace krys::boo::style
     }
   }
 
-  Scope::Scope(dom::Document &document) noexcept : _document(&document)
+  Scope::Scope(dom::Document &document) noexcept
+      : _document(&document), _counterStyleRegistry(CreateUnique<css::CounterStyleRegistry>())
   {
   }
 
   Scope::Scope(dom::ShadowRoot &shadowRoot) noexcept
-      : _document(&shadowRoot.NodeDocument()), _shadowRoot(&shadowRoot)
+      : _document(&shadowRoot.NodeDocument()), _shadowRoot(&shadowRoot),
+        _counterStyleRegistry(CreateUnique<css::CounterStyleRegistry>())
   {
   }
 
   Scope::~Scope() noexcept
   {
     krys_debug_assert(!HasPendingSheets());
+  }
+
+  size_t Scope::ResolverSharingKeyHash::operator()(const ResolverSharingKey &key) const noexcept
+  {
+    size_t seed = Hash::Combine(std::get<1>(key), std::get<2>(key));
+    for (auto &contents : std::get<0>(key))
+    {
+      seed = Hash::Combine(seed, contents.get());
+    }
+    return seed;
+  }
+
+  Resolver &Scope::GetResolver() noexcept
+  {
+    if (!_resolver)
+    {
+      if (_shadowRoot)
+      {
+        CreateOrFindSharedShadowTreeResolver();
+      }
+      else
+      {
+        CreateDocumentResolver();
+      }
+
+      if (_resolver->RuleSets().Features().UsesHasPseudoClass())
+      {
+        _usesHasPseudoClass = true;
+      }
+    }
+    return *_resolver;
+  }
+
+  Resolver *Scope::ResolverIfExists() noexcept
+  {
+    return _resolver.get();
+  }
+
+  const Resolver *Scope::ResolverIfExists() const noexcept
+  {
+    return _resolver.get();
+  }
+
+  void Scope::CreateDocumentResolver() noexcept
+  {
+    krys_debug_assert(!_resolver);
+    krys_debug_assert(!_shadowRoot);
+
+    auto isUpdatingStyleResolver = std::exchange(_isUpdatingStyleResolver, true);
+
+    _resolver = Resolver::Create(*_document, Resolver::ScopeType::Document);
+
+    if (!_dynamicViewTransitionsStyle)
+    {
+      _dynamicViewTransitionsStyle = RuleSet::Create();
+    }
+
+    _resolver->RuleSets().SetDynamicViewTransitionsStyle(_dynamicViewTransitionsStyle.get());
+
+    // FIXME: Tell the document's font selector that a build started and completed, and add the SVG font face
+    // rules, once there are fonts.
+
+    _resolver->RuleSets().InitializeUserStyle();
+    _resolver->AppendAuthorStyleSheets(_activeStyleSheets);
+
+    _isUpdatingStyleResolver = isUpdatingStyleResolver;
+  }
+
+  void Scope::CreateOrFindSharedShadowTreeResolver() noexcept
+  {
+    krys_debug_assert(!_resolver);
+    krys_debug_assert(_shadowRoot);
+
+    krys_assert(!_isUpdatingStyleResolver);
+
+    auto key = MakeResolverSharingKey();
+
+    auto &sharedShadowTreeResolvers = DocumentScope()._sharedShadowTreeResolvers;
+    if (auto it = sharedShadowTreeResolvers.find(key); it != sharedShadowTreeResolvers.end())
+    {
+      _resolver = it->second;
+      _resolver->SetSharedBetweenShadowTrees();
+      return;
+    }
+
+    {
+      auto isUpdatingStyleResolver = std::exchange(_isUpdatingStyleResolver, true);
+
+      _resolver = Resolver::Create(*_document, Resolver::ScopeType::ShadowTree);
+
+      _resolver->RuleSets().SetUsesSharedUserStyle(!IsForUserAgentShadowTree());
+      _resolver->AppendAuthorStyleSheets(_activeStyleSheets);
+
+      _isUpdatingStyleResolver = isUpdatingStyleResolver;
+    }
+
+    Ref<Resolver> sharedResolver = _resolver;
+    sharedShadowTreeResolvers.emplace(krys::move(key), krys::move(sharedResolver));
+
+    static constexpr auto maximimumSharedResolverCount = 256;
+    if (sharedShadowTreeResolvers.size() > maximimumSharedResolverCount)
+    {
+      sharedShadowTreeResolvers.erase(sharedShadowTreeResolvers.begin());
+    }
+  }
+
+  void Scope::UnshareShadowTreeResolverBeforeMutation() noexcept
+  {
+    krys_debug_assert(_shadowRoot);
+
+    DocumentScope()._sharedShadowTreeResolvers.erase(MakeResolverSharingKey());
+  }
+
+  Scope::ResolverSharingKey Scope::MakeResolverSharingKey() noexcept
+  {
+    constexpr bool isNonEmptyHashTableValue = true;
+    List<RefPtr<css::StyleSheetContents>> contents;
+    contents.reserve(_activeStyleSheets.size());
+    for (auto &sheet : _activeStyleSheets)
+    {
+      contents.push_back(ShareRefPtr(&sheet->Contents()));
+    }
+    return {krys::move(contents), IsForUserAgentShadowTree(), isNonEmptyHashTableValue};
+  }
+
+  bool Scope::IsForUserAgentShadowTree() const noexcept
+  {
+    // FIXME: User agent shadow roots, once there are any.
+    return false;
+  }
+
+  void Scope::ClearResolver() noexcept
+  {
+    krys_assert(!_isUpdatingStyleResolver);
+    // FIXME: Also assert that the document isn't resolving its tree style, once there is a tree resolver.
+
+    _resolver = nullptr;
+    // FIXME: Clear the custom properties registered from style sheets, once the custom property registry is
+    // ported.
+    GetCounterStyleRegistry().ClearAuthorCounterStyles();
+  }
+
+  void Scope::ClearViewTransitionStyles() noexcept
+  {
+    ClearResolver();
+    _dynamicViewTransitionsStyle = nullptr;
+  }
+
+  void Scope::ReleaseMemory() noexcept
+  {
+    if (!_shadowRoot)
+    {
+      for (auto &descendantShadowRoot : _document->InDocumentShadowRoots())
+      {
+        if (descendantShadowRoot)
+        {
+          descendantShadowRoot->StyleScope().ReleaseMemory();
+        }
+      }
+    }
+
+    ClearResolver();
+
+    _sharedShadowTreeResolvers.clear();
+    // FIXME: Also clear the match result cache, once it is ported.
   }
 
   Scope &Scope::ForNode(dom::Node &node) noexcept
@@ -365,14 +538,121 @@ namespace krys::boo::style
     auto collection = CollectActiveStyleSheets();
 
     List<RefPtr<css::CSSStyleSheet>> activeCSSStyleSheets;
+
+    // FIXME: The injected author style sheets, once there are extension style sheets.
+
     FilterEnabledNonemptyCSSStyleSheets(activeCSSStyleSheets, collection.ActiveStyleSheets);
 
-    // FIXME: Analyse the change (reconstruct, reset or append to the resolver), update the resolver and
-    // invalidate style, once there is a style resolver.
-    (void)updateType;
+    auto styleSheetChange = StyleSheetChange {ResolverUpdateType::Reconstruct};
+    if (updateType == UpdateType::ActiveSet)
+    {
+      styleSheetChange = AnalyzeStyleSheetChange(activeCSSStyleSheets);
+    }
+
+    UpdateResolver(activeCSSStyleSheets, styleSheetChange.UpdateType);
 
     _activeStyleSheets.swap(activeCSSStyleSheets);
     _styleSheetsForStyleSheetList.swap(collection.StyleSheetsForStyleSheetList);
+
+    if (_resolver && _resolver->RuleSets().Features().UsesHasPseudoClass())
+    {
+      _usesHasPseudoClass = true;
+    }
+
+    // FIXME: Invalidate style after the style sheet change (all style when the resolver is reconstructed, or
+    // with the added sheets), once there is style invalidation.
+  }
+
+  Scope::StyleSheetChange
+    Scope::AnalyzeStyleSheetChange(const List<RefPtr<css::CSSStyleSheet>> &newStylesheets) noexcept
+  {
+    size_t newStylesheetCount = newStylesheets.size();
+
+    auto *resolver = ResolverIfExists();
+    if (!resolver)
+    {
+      return {ResolverUpdateType::Reconstruct};
+    }
+
+    if (resolver->IsSharedBetweenShadowTrees())
+    {
+      return {ResolverUpdateType::Reconstruct};
+    }
+
+    // Find out which stylesheets are new.
+    size_t oldStylesheetCount = _activeStyleSheets.size();
+    if (newStylesheetCount < oldStylesheetCount)
+    {
+      return {ResolverUpdateType::Reconstruct};
+    }
+
+    List<Ref<css::StyleSheetContents>> addedSheets;
+    size_t newIndex = 0;
+    for (size_t oldIndex = 0; oldIndex < oldStylesheetCount; ++oldIndex)
+    {
+      if (newIndex >= newStylesheetCount)
+      {
+        return {ResolverUpdateType::Reconstruct};
+      }
+
+      while (_activeStyleSheets[oldIndex] != newStylesheets[newIndex])
+      {
+        addedSheets.push_back(ShareRef(newStylesheets[newIndex]->Contents()));
+        ++newIndex;
+        if (newIndex == newStylesheetCount)
+        {
+          return {ResolverUpdateType::Reconstruct};
+        }
+      }
+      ++newIndex;
+    }
+    bool hasInsertions = !addedSheets.empty();
+    while (newIndex < newStylesheetCount)
+    {
+      addedSheets.push_back(ShareRef(newStylesheets[newIndex]->Contents()));
+      ++newIndex;
+    }
+
+    // If all new sheets were added at the end of the list we can just add them to existing Resolver.
+    // If there were insertions we need to re-add all the stylesheets so rules are ordered correctly.
+    return {hasInsertions ? ResolverUpdateType::Reset : ResolverUpdateType::Additive,
+            krys::move(addedSheets)};
+  }
+
+  void Scope::UpdateResolver(Span<const RefPtr<css::CSSStyleSheet>> activeStyleSheets,
+                             ResolverUpdateType updateType) noexcept
+  {
+    if (updateType == ResolverUpdateType::Reconstruct)
+    {
+      ClearResolver();
+      return;
+    }
+
+    if (_shadowRoot)
+    {
+      UnshareShadowTreeResolverBeforeMutation();
+    }
+
+    auto isUpdatingStyleResolver = std::exchange(_isUpdatingStyleResolver, true);
+
+    if (updateType == ResolverUpdateType::Reset)
+    {
+      // FIXME: Clear the custom properties registered from style sheets, once the custom property registry is
+      // ported.
+      GetCounterStyleRegistry().ClearAuthorCounterStyles();
+      _resolver->RuleSets().ResetAuthorStyle();
+      _resolver->AppendAuthorStyleSheets(activeStyleSheets);
+    }
+    else
+    {
+      krys_debug_assert(updateType == ResolverUpdateType::Additive);
+      krys_debug_assert(activeStyleSheets.size() >= _activeStyleSheets.size());
+
+      auto firstNewIndex = _activeStyleSheets.size();
+      _resolver->AppendAuthorStyleSheets(activeStyleSheets.subspan(firstNewIndex));
+    }
+
+    _isUpdatingStyleResolver = isUpdatingStyleResolver;
   }
 
   bool Scope::ActiveStyleSheetsContains(const css::CSSStyleSheet &sheet) const noexcept
@@ -425,8 +705,19 @@ namespace krys::boo::style
 
   void Scope::ScheduleUpdate(UpdateType update) noexcept
   {
-    // FIXME: For a contents or interpretation change, invalidate :host and ::slotted style and clear the
-    // resolver, once there is a style resolver.
+    if (update == UpdateType::ContentsOrInterpretation)
+    {
+      // :host and ::slotted rules might go away.
+      if (_shadowRoot)
+      {
+        // FIXME: Invalidate :host and ::slotted style, once there is style invalidation.
+        UnshareShadowTreeResolverBeforeMutation();
+      }
+
+      ClearResolver();
+
+      // FIXME: Also clear the match result cache, once it is ported.
+    }
 
     if (!_pendingUpdate || *_pendingUpdate < update)
     {
