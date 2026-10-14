@@ -67,19 +67,6 @@ namespace krys::boo::css
       return false;
     }
 
-    KRYS_NODISCARD const dom::Element *ParentOrShadowHostElement(const dom::Element &element) noexcept
-    {
-      if (auto *parent = element.ParentElement())
-      {
-        return parent;
-      }
-      if (auto *shadowRoot = DynamicDowncast<dom::ShadowRoot>(element.ParentNode()))
-      {
-        return shadowRoot->Host();
-      }
-      return nullptr;
-    }
-
     /// @brief Whether @p element is a descendant of a `fieldset` with a `disabled` attribute, outside that
     /// fieldset's first `legend` child.
     KRYS_NODISCARD bool IsInDisabledFieldset(const dom::Element &element) noexcept
@@ -502,7 +489,8 @@ namespace krys::boo::css
   {
     // FIXME: The document's default language (a Content-Language pragma or header).
     dom::DOMStringAtom xmlNamespace(infra::Namespaces::XML);
-    for (auto *ancestor = &element; ancestor; ancestor = ParentOrShadowHostElement(*ancestor))
+    for (auto *ancestor = &element; ancestor;
+         ancestor = dom::TreeQueries::ParentOrShadowHostElement(*ancestor))
     {
       if (auto lang = ancestor->GetAttributeNS(xmlNamespace, u8"lang"))
       {
@@ -518,7 +506,8 @@ namespace krys::boo::css
 
   TextDirection EffectiveTextDirection(const dom::Element &element) noexcept
   {
-    for (auto *ancestor = &element; ancestor; ancestor = ParentOrShadowHostElement(*ancestor))
+    for (auto *ancestor = &element; ancestor;
+         ancestor = dom::TreeQueries::ParentOrShadowHostElement(*ancestor))
     {
       if (!Is<html::HTMLElement>(*ancestor))
       {

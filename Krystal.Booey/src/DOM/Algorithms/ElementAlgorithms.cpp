@@ -311,6 +311,7 @@ namespace krys::boo::dom
 
     auto shadow = CreateRef<ShadowRoot>(element.NodeDocument(), ShareRefPtr(registry));
     shadow->_host = CreateWeakPtr(&element);
+    shadow->_mode = mode;
     shadow->_delegatesFocus = delegatesFocus;
 
     if (element._customElementState == CustomElementState::Precustomized

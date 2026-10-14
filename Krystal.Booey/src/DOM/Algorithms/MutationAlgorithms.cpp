@@ -197,7 +197,7 @@ namespace krys::boo::dom
 
     bool isParentNamedShadowHost =
       TreeQueries::IsShadowHost(parent)
-      && Downcast<Element>(parent).ShadowRoot()->SlotAssignment() == SlotAssignmentMode::Named;
+      && TreeQueries::GetShadowRoot(Downcast<Element>(parent))->SlotAssignment() == SlotAssignmentMode::Named;
     bool isParentRootShadowRoot = Is<ShadowRoot>(TreeQueries::Root(parent));
 
     auto *slotParent = DynamicDowncast<html::HTMLSlotElement>(parent);

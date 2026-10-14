@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/StyleSheet.hpp"
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
@@ -806,10 +807,10 @@ namespace krys::boo::style
                                                      ScopeOrdinal scopeOrdinal) noexcept
   {
     krys_debug_assert(scopeOrdinal >= ScopeOrdinal::FirstSlot);
-    auto *slot = const_cast<dom::Element &>(element).AssignedSlot().get();
+    auto *slot = dom::SlotAlgorithms::GetAssignedSlot(element);
     for (auto scopeDepth = ScopeOrdinal::FirstSlot; slot && scopeDepth != scopeOrdinal; ++scopeDepth)
     {
-      slot = slot->AssignedSlot().get();
+      slot = dom::SlotAlgorithms::GetAssignedSlot(*slot);
     }
     return slot;
   }

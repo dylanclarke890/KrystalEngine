@@ -628,6 +628,12 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Resolver.hpp
   include/Krystal.Booey/Style/UserAgentStyle.hpp
   ${KRYSTAL_BOOEY_HEADER_OUTPUT_DIR}/Krystal.Booey/CSS/UserAgentStyleSheets.hpp
+
+  # Style resolution, layer f1 (matching)
+  include/Krystal.Booey/Style/PseudoElementRequest.hpp
+  include/Krystal.Booey/Style/MatchResult.hpp
+  include/Krystal.Booey/Style/ElementRuleCollector.hpp
+  include/Krystal.Booey/Style/PageRuleCollector.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -993,6 +999,10 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Style/Resolver.cpp
   src/Style/UserAgentStyle.cpp
   ${KRYSTAL_BOOEY_SOURCES_OUTPUT_DIR}/CSS/UserAgentStyleSheets.cpp
+
+  # Style resolution, layer f1 (matching)
+  src/Style/ElementRuleCollector.cpp
+  src/Style/PageRuleCollector.cpp
 )
 
 target_precompile_headers(Krystal.Booey

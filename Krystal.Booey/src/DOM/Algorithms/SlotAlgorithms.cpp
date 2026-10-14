@@ -128,7 +128,7 @@ namespace krys::boo::dom
       return nullptr;
     }
 
-    RefPtr<ShadowRoot> shadow = parent->ShadowRoot();
+    RefPtr<ShadowRoot> shadow = ShareRefPtr(TreeQueries::GetShadowRoot(*parent));
 
     if (shadow == nullptr)
     {

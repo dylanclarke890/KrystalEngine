@@ -278,6 +278,11 @@ namespace krys::boo::dom
     return node._shadowRoot != nullptr;
   }
 
+  ShadowRoot *TreeQueries::GetShadowRoot(const Element &element) noexcept
+  {
+    return element._shadowRoot.get();
+  }
+
   ShadowRoot *TreeQueries::ContainingShadowRoot(const Node &node) noexcept
   {
     return DynamicDowncast<ShadowRoot>(const_cast<Node &>(Root(node)));
@@ -287,6 +292,19 @@ namespace krys::boo::dom
   {
     auto *shadowRoot = ContainingShadowRoot(node);
     return shadowRoot ? shadowRoot->Host() : nullptr;
+  }
+
+  Element *TreeQueries::ParentOrShadowHostElement(const Node &node) noexcept
+  {
+    if (auto *parent = node.ParentElement())
+    {
+      return parent;
+    }
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(node.ParentNode()))
+    {
+      return shadowRoot->Host();
+    }
+    return nullptr;
   }
 
 #pragma endregion
@@ -378,7 +396,7 @@ namespace krys::boo::dom
 
     if (auto *host = DynamicDowncast<Element>(current))
     {
-      if (auto *shadowRoot = host->ShadowRoot().get())
+      if (auto *shadowRoot = GetShadowRoot(*host))
       {
         return shadowRoot;
       }
@@ -414,7 +432,7 @@ namespace krys::boo::dom
 
     if (auto *host = DynamicDowncast<Element>(current))
     {
-      if (auto *shadowRoot = host->ShadowRoot().get())
+      if (auto *shadowRoot = GetShadowRoot(*host))
       {
         return shadowRoot;
       }

@@ -1,7 +1,9 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "catch2/generators/catch_generators.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 
@@ -611,6 +613,37 @@ namespace krys::boo::dom::tests
 
     REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
     REQUIRE_FALSE(doc->RemoveChild(*parent).HasException());
+  }
+
+  TEST_CASE("TreeQueries::GetShadowRoot", "[HTML][TreeQueries]")
+  {
+    auto doc = CreateRef<HTMLDocument>();
+    auto host = doc->CreateElement(u8"div").ReleaseValue();
+    REQUIRE(TreeQueries::GetShadowRoot(*host) == nullptr);
+
+    auto mode = GENERATE(ShadowRootMode::Open, ShadowRootMode::Closed);
+    auto shadow = host->AttachShadow({.Mode = mode}).ReleaseValue();
+    REQUIRE(shadow->Mode() == mode);
+    REQUIRE(TreeQueries::GetShadowRoot(*host) == shadow.get());
+    // The web-exposed getter hides closed shadow roots.
+    REQUIRE((host->ShadowRoot().get() == shadow.get()) == (mode == ShadowRootMode::Open));
+  }
+
+  TEST_CASE("TreeQueries::ParentOrShadowHostElement", "[HTML][TreeQueries]")
+  {
+    auto doc = CreateRef<HTMLDocument>();
+    auto host = doc->CreateElement(u8"div").ReleaseValue();
+    auto child = doc->CreateElement(u8"span").ReleaseValue();
+    auto inner = doc->CreateElement(u8"span").ReleaseValue();
+    REQUIRE_FALSE(doc->AppendChild(*host).HasException());
+    REQUIRE_FALSE(host->AppendChild(*child).HasException());
+    auto shadow = host->AttachShadow({.Mode = ShadowRootMode::Closed}).ReleaseValue();
+    REQUIRE_FALSE(shadow->AppendChild(*inner).HasException());
+
+    REQUIRE(TreeQueries::ParentOrShadowHostElement(*child) == host.get());
+    REQUIRE(TreeQueries::ParentOrShadowHostElement(*inner) == host.get());
+    REQUIRE(TreeQueries::ParentOrShadowHostElement(*host) == nullptr);
+    REQUIRE(TreeQueries::ParentOrShadowHostElement(*shadow) == nullptr);
   }
 
 #pragma endregion

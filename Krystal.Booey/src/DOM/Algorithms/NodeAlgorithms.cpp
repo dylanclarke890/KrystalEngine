@@ -80,10 +80,11 @@ namespace krys::boo::dom
 
     if (auto *element = DynamicDowncast<Element>(node))
     {
-      if (auto shadowRoot = element->ShadowRoot(); shadowRoot != nullptr && shadowRoot->Clonable())
+      if (auto shadowRoot = ShareRefPtr(TreeQueries::GetShadowRoot(*element));
+          shadowRoot != nullptr && shadowRoot->Clonable())
       {
         auto *elementCopy = Downcast<Element>(copy.get());
-        assert(elementCopy->ShadowRoot() == nullptr);
+        assert(TreeQueries::GetShadowRoot(*elementCopy) == nullptr);
 
         auto shadowRootRegistry = shadowRoot->CustomElementRegistry();
         if (html::CustomElementAlgorithms::IsGlobalCustomElementRegistry(shadowRootRegistry.get()))
@@ -101,13 +102,13 @@ namespace krys::boo::dom
           return attach.ReleaseException();
         }
 
-        auto shadowRootCopy = elementCopy->ShadowRoot();
+        auto *shadowRootCopy = TreeQueries::GetShadowRoot(*elementCopy);
         shadowRootCopy->_declarative = shadowRoot->_declarative;
         shadowRootCopy->_keepCustomElementRegistryNull = shadowRoot->_keepCustomElementRegistryNull;
 
         for (auto &child : ChildNodeRange(*shadowRoot))
         {
-          if (auto clone = CloneNode(child, document, subtree, shadowRootCopy.get()); clone.HasException())
+          if (auto clone = CloneNode(child, document, subtree, shadowRootCopy); clone.HasException())
           {
             return clone.ReleaseException();
           }

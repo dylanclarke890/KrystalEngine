@@ -132,11 +132,17 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#element-shadow-host
     KRYS_NODISCARD static bool IsShadowHost(const Element &node) noexcept;
 
+    /// @return @p element's shadow root, open or closed, or null if @p element isn't a shadow host.
+    KRYS_NODISCARD static ShadowRoot *GetShadowRoot(const Element &element) noexcept;
+
     /// @return The shadow root whose shadow tree contains @p node, or null if @p node isn't in a shadow tree.
     KRYS_NODISCARD static ShadowRoot *ContainingShadowRoot(const Node &node) noexcept;
 
     /// @return The host of the shadow tree that contains @p node, or null if @p node isn't in a shadow tree.
     KRYS_NODISCARD static Element *ShadowHost(const Node &node) noexcept;
+
+    /// @return @p node's parent element or, if @p node is the child of a shadow root, its host.
+    KRYS_NODISCARD static Element *ParentOrShadowHostElement(const Node &node) noexcept;
 
 #pragma endregion
 

@@ -318,6 +318,7 @@ target_sources(Krystal.Booey.Tests
 
 		# Style
 		tests/Style/Calc/Tree.cpp
+		tests/Style/ElementRuleCollector.cpp
 		tests/Style/Resolver.cpp
 		tests/Style/RuleSet.cpp
 		tests/Style/Scope.cpp

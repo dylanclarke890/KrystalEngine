@@ -2,6 +2,7 @@
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
+#include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
@@ -525,7 +526,7 @@ namespace krys::boo::css
 
     if (checkingContext.StyleScopeOrdinal == style::ScopeOrdinal::Shadow)
     {
-      krys_debug_assert(element.ShadowRoot());
+      krys_debug_assert(dom::TreeQueries::GetShadowRoot(element));
       // Rules coming from the element's shadow tree must match :host pseudo class.
       context.MustMatchHostPseudoClass = true;
     }
@@ -557,7 +558,7 @@ namespace krys::boo::css
   bool SelectorChecker::MatchHostPseudoClass(const Selector &selector, const dom::Element &element,
                                              CheckingContext &checkingContext) const noexcept
   {
-    if (!element.ShadowRoot())
+    if (!dom::TreeQueries::GetShadowRoot(element))
     {
       return false;
     }
@@ -1404,7 +1405,7 @@ namespace krys::boo::css
             return false;
           }
 
-          if (element.ShadowRoot())
+          if (dom::TreeQueries::GetShadowRoot(element))
           {
             context.MatchedHostPseudoClass = true;
           }
@@ -1480,8 +1481,7 @@ namespace krys::boo::css
         }
         case SelectorPseudoElement::Slotted:
         {
-          auto &mutableElement = const_cast<dom::Element &>(*context.Element);
-          if (!mutableElement.AssignedSlot())
+          if (!dom::SlotAlgorithms::GetAssignedSlot(*context.Element))
           {
             return false;
           }
