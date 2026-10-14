@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Queries/GenericMediaQueryParser.hpp"
 #include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
+#include "Krystal.Booey/CSS/Parser/Parser.hpp"
 #include "Krystal.Booey/CSS/Parser/VariableParser.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/IntegerDefinitions.hpp"
@@ -36,35 +37,6 @@ namespace krys::boo::css::mq
     return atom == CSSOMStringAtom::Null() || atom == CSSOMStringAtom::Empty();
   }
 
-  // FIXME: Use the sheet parser's ConsumeTrailingImportantAndWhitespace once it's ported.
-  static IsImportant ConsumeTrailingImportantAndWhitespace(TokenRange &tokens) noexcept
-  {
-    tokens.DiscardTrailingWhitespace();
-    if (tokens.Size() < 2)
-    {
-      return IsImportant(false);
-    }
-
-    auto removeImportantRange = tokens;
-    if (auto &last = removeImportantRange.ConsumeLast();
-        last.Type() != TokenType::Ident
-        || !text::IsASCIICaselessEqual(last.IdentCodePoints(), utf8_stringview(u8"important")))
-    {
-      return IsImportant(false);
-    }
-
-    removeImportantRange.DiscardTrailingWhitespace();
-    if (auto &last = removeImportantRange.ConsumeLast();
-        last.Type() != TokenType::Delim || last.Delimiter() != U'!')
-    {
-      return IsImportant(false);
-    }
-
-    removeImportantRange.DiscardTrailingWhitespace();
-    tokens = removeImportantRange;
-    return IsImportant(true);
-  }
-
   Maybe<Feature> FeatureParser::ConsumeFeature(TokenRange &tokens,
                                                const MediaQueryParserContext &context) noexcept
   {
@@ -86,7 +58,7 @@ namespace krys::boo::css::mq
     std::ignore = tokens.ConsumeAll();
 
     // Syntax is that of a valid declaration so !important is allowed. It just gets ignored.
-    std::ignore = ConsumeTrailingImportantAndWhitespace(valueRange);
+    std::ignore = Parser::ConsumeTrailingImportantAndWhitespace(valueRange);
 
     if (valueRange.IsAtEnd())
     {

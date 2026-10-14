@@ -82,7 +82,6 @@ namespace krys::boo::css
     bool AddParsedProperty(const Property &property) noexcept;
 
     // These expand shorthand properties into multiple properties.
-    // FIXME: Define the string overloads once the sheet parser (CSSParser::ParseValue) is ported.
     bool SetProperty(PropertyId property, const CSSOMString &value, ParserContext context,
                      IsImportant important = IsImportant(false), bool *didFailParsing = nullptr) noexcept;
 
@@ -106,7 +105,6 @@ namespace krys::boo::css
 
     void Clear() noexcept;
 
-    // FIXME: Define once the sheet parser (CSSParser::ParseDeclarationList) is ported.
     bool ParseDeclaration(const CSSOMString &styleDeclaration, ParserContext context) noexcept;
 
     KRYS_NODISCARD Maybe<uint32> FindPropertyIndex(PropertyId property) const noexcept;
@@ -114,7 +112,6 @@ namespace krys::boo::css
     KRYS_NODISCARD Maybe<uint32> FindCustomPropertyIndex(CSSOMStringView propertyName) const noexcept;
 
     // Methods for querying and altering CSS custom properties.
-    // FIXME: Define SetCustomProperty once the sheet parser (CSSParser::ParseCustomPropertyValue) is ported.
     bool SetCustomProperty(const CSSOMString &propertyName, const CSSOMString &value, ParserContext context,
                            IsImportant important = IsImportant(false)) noexcept;
 

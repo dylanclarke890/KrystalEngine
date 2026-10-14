@@ -93,7 +93,6 @@ namespace krys::boo::css
       NamespaceURIFromPrefix(const CSSOMStringAtom &prefix) const noexcept;
 
     /// @brief Parses @p sheetText into this sheet.
-    // FIXME: Declared, not defined, until the CSS parser lands.
     bool ParseString(const CSSOMString &sheetText) noexcept;
 
     KRYS_NODISCARD bool IsCacheable() const noexcept;

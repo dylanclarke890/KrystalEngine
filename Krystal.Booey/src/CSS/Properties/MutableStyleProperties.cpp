@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
+#include "Krystal.Booey/CSS/Parser/Parser.hpp"
+#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserMode.hpp"
 #include "Krystal.Booey/CSS/Properties/ImmutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
@@ -126,6 +128,59 @@ namespace krys::boo::css
     return RemovePropertyAtIndex(FindCustomPropertyIndex(propertyName), returnText);
   }
 
+  bool MutableStyleProperties::SetProperty(PropertyId property, const CSSOMString &value,
+                                           ParserContext context, IsImportant important,
+                                           bool *didFailParsing) noexcept
+  {
+    if (!IsExposed(property, &context.PropertySettings) && !IsInternal(property))
+    {
+      // Allow internal properties as we use them to handle certain DOM-exposed values
+      // (e.g. -webkit-font-size-delta from execCommand('FontSizeDelta')).
+      return false;
+    }
+
+    // Setting the value to an empty string just removes the property in both IE and Gecko.
+    // Setting it to null seems to produce less consistent results, but we treat it just the same.
+    if (value.empty())
+    {
+      return RemoveProperty(property);
+    }
+
+    // When replacing an existing property value, this moves the property to the end of the list.
+    // Firefox preserves the position, and MSIE moves the property to the beginning.
+    context.Mode = ParserMode();
+    auto parseResult = Parser::ParseValue(*this, property, value, important, context);
+    if (didFailParsing)
+    {
+      *didFailParsing = parseResult == Parser::ParseResult::Error;
+    }
+    return parseResult == Parser::ParseResult::Changed;
+  }
+
+  bool MutableStyleProperties::SetProperty(PropertyId property, const CSSOMString &value,
+                                           IsImportant important, bool *didFailParsing) noexcept
+  {
+    ParserContext context {ParserMode()};
+    return SetProperty(property, value, context, important, didFailParsing);
+  }
+
+  bool MutableStyleProperties::SetCustomProperty(const CSSOMString &propertyName, const CSSOMString &value,
+                                                 ParserContext context, IsImportant important) noexcept
+  {
+    // Setting the value to an empty string just removes the property in both IE and Gecko.
+    // Setting it to null seems to produce less consistent results, but we treat it just the same.
+    if (value.empty())
+    {
+      return RemoveCustomProperty(propertyName);
+    }
+
+    // When replacing an existing property value, this moves the property to the end of the list.
+    // Firefox preserves the position, and MSIE moves the property to the beginning.
+    context.Mode = ParserMode();
+    return Parser::ParseCustomPropertyValue(*this, CSSOMStringAtom(propertyName), value, important, context)
+           == Parser::ParseResult::Changed;
+  }
+
   void MutableStyleProperties::SetProperty(PropertyId property, Ref<css::Value> &&value,
                                            IsImportant important) noexcept
   {
@@ -208,6 +263,19 @@ namespace krys::boo::css
   {
     krys_debug_assert(IsLonghand(property));
     return SetProperty(Property(property, PrimitiveValue::Create(identifier), important));
+  }
+
+  bool MutableStyleProperties::ParseDeclaration(const CSSOMString &styleDeclaration,
+                                                ParserContext context) noexcept
+  {
+    auto oldProperties = krys::move(_propertyVector);
+    _propertyVector.clear();
+
+    context.Mode = ParserMode();
+    Parser::ParseDeclarationList(*this, styleDeclaration, context);
+
+    // We could do better. Just changing property order does not require style invalidation.
+    return oldProperties != _propertyVector;
   }
 
   bool MutableStyleProperties::AddParsedProperties(const ParsedPropertyList &properties) noexcept

@@ -533,6 +533,12 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Rules/ViewTransitionRule.hpp
   include/Krystal.Booey/Graphics/FontFeatureValues.hpp
   include/Krystal.Booey/Graphics/FontPaletteValues.hpp
+
+  # Sheet parser, layer d5 (CSSParser)
+  include/Krystal.Booey/CSS/Parser/Parser.hpp
+  include/Krystal.Booey/CSS/Parser/SupportsParser.hpp
+  include/Krystal.Booey/Graphics/FontCustomPlatformData.hpp
+  include/Krystal.Booey/Types/NestingLevelIncrementer.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -817,6 +823,11 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Rules/Rule.cpp
   src/CSS/Rules/ViewTransitionRule.cpp
   src/Graphics/FontFeatureValues.cpp
+
+  # Sheet parser, layer d5 (CSSParser)
+  src/CSS/Parser/Parser.cpp
+  src/CSS/Parser/SupportsParser.cpp
+  src/Graphics/FontCustomPlatformData.cpp
 )
 
 target_precompile_headers(Krystal.Booey
@@ -1207,7 +1218,6 @@ target_sources(Krystal.Booey
 
       # Types
       include/Krystal.Booey/Types/IsEOF.hpp
-      include/Krystal.Booey/Types/NestedLevelIncrementer.hpp
       include/Krystal.Booey/Types/SourceLocation.hpp
 
       # Loader

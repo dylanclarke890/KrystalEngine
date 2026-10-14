@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/CSS/Parser/Parser.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/ImportRule.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
@@ -501,6 +502,12 @@ namespace krys::boo::css
       return CSSOMStringAtom::Null();
     }
     return it->second;
+  }
+
+  bool StyleSheetContents::ParseString(const CSSOMString &sheetText) noexcept
+  {
+    Parser::ParseStyleSheet(sheetText, GetParserContext(), *this);
+    return true;
   }
 
   bool StyleSheetContents::IsLoading() const noexcept

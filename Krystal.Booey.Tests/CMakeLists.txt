@@ -94,12 +94,13 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Calc/TreeSerialisation.cpp
 		tests/CSS/Calc/TreeSimplification.cpp
 		tests/CSS/Calc/Value.cpp
-		# tests/CSS/Parser/Parser.cpp
 		tests/CSS/Parser/AtRuleId.cpp
 		tests/CSS/Parser/CustomPropertySyntax.cpp
 		tests/CSS/Parser/KeywordLookup.cpp
+		tests/CSS/Parser/Parser.cpp
 		tests/CSS/Parser/ParserContext.cpp
 		tests/CSS/Parser/ParserFastPaths.cpp
+		tests/CSS/Parser/SupportsParser.cpp
 		tests/CSS/Parser/Token.cpp
 		tests/CSS/Parser/Tokenizer.cpp
 		tests/CSS/Parser/VariableParser.cpp
@@ -257,6 +258,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/FloatQuad.cpp
 		tests/Graphics/FloatRect.cpp
 		tests/Graphics/FloatSize.cpp
+		tests/Graphics/FontCustomPlatformData.cpp
 		tests/Graphics/FontFeatureValues.cpp
 		tests/Graphics/FontPaletteValues.cpp
 		tests/Graphics/FontTaggedSettings.cpp
