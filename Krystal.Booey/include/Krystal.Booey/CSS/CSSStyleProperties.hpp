@@ -10,6 +10,11 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
+namespace krys::boo::dom
+{
+  class StyledElement;
+}
+
 namespace krys::boo::css
 {
   class MutableStyleProperties;
@@ -70,8 +75,6 @@ namespace krys::boo::css
   };
 
   /// @brief The CSSOM view of a declaration block. The declaration block owns it.
-  // FIXME: InlineCSSStyleProperties (an element's `style`) and the style attribute mutation records
-  // (StyleAttributeMutationScope) come with inline styles.
   class PropertySetCSSStyleProperties : public CSSStyleProperties
   {
   protected:
@@ -182,6 +185,33 @@ namespace krys::boo::css
     KRYS_NODISCARD CSSRule *ParentRule() const noexcept final;
 
     KRYS_NODISCARD bool WillMutate() noexcept final;
+    void DidMutate(MutationType type) noexcept final;
+    KRYS_NODISCARD ParserContext CssParserContext() const noexcept final;
+  };
+
+  /// @brief The `style` of an element: the CSSOM view of its inline style. Changes are written back to the
+  /// element's `style` attribute.
+  class InlineCSSStyleProperties final : public PropertySetCSSStyleProperties
+  {
+  private:
+    WeakPtr<dom::StyledElement> _parentElement;
+
+  public:
+    InlineCSSStyleProperties(MutableStyleProperties &propertySet, dom::StyledElement &parentElement) noexcept;
+
+    KRYS_NODISCARD dom::Element *ParentElement() const noexcept final;
+
+  private:
+    KRYS_NODISCARD CSSStyleSheet *ParentStyleSheet() const noexcept final
+    {
+      return nullptr;
+    }
+
+    KRYS_NODISCARD bool WillMutate() noexcept final
+    {
+      return true;
+    }
+
     void DidMutate(MutationType type) noexcept final;
     KRYS_NODISCARD ParserContext CssParserContext() const noexcept final;
   };

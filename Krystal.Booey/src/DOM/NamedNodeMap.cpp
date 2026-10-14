@@ -10,11 +10,13 @@ namespace krys::boo::dom
 {
   size_t NamedNodeMap::Length() const noexcept
   {
+    _associatedElement->SynchronizeAllAttributes();
     return _associatedElement->_attributes.size();
   }
 
   RefPtr<Attr> NamedNodeMap::Item(size_t index) noexcept
   {
+    _associatedElement->SynchronizeAllAttributes();
     if (index < _associatedElement->_attributes.size())
     {
       return _associatedElement->_attributes[index];
@@ -105,6 +107,7 @@ namespace krys::boo::dom
 
   List<DOMString> NamedNodeMap::SupportedPropertyNames() const noexcept
   {
+    _associatedElement->SynchronizeAllAttributes();
     auto names = std::ranges::views::transform(_associatedElement->_attributes,
                                                [](const Ref<Attr> &attr) { return attr->Name(); })
                  | std::ranges::to<List<DOMString>>();

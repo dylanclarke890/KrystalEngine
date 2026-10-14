@@ -102,6 +102,7 @@ namespace krys::boo::dom
 
   void ElementAlgorithms::ChangeAttribute(Attr &attribute, DOMString &&value) noexcept
   {
+    attribute._ownerElement->SynchronizeAllAttributes();
     DOMString oldValue = std::exchange(attribute._value, krys::move(value));
 
     HandleAttributeChanges(attribute, *attribute._ownerElement, oldValue, attribute._value);
@@ -122,6 +123,7 @@ namespace krys::boo::dom
     assert(attribute._ownerElement);
     RefPtr<Element> element = attribute._ownerElement.lock();
     assert(element);
+    element->SynchronizeAllAttributes();
 
     Ref<Attr> attributeRef = ShareRef(attribute);
     element->_attributes.erase(std::remove_if(element->_attributes.begin(), element->_attributes.end(),
@@ -138,6 +140,7 @@ namespace krys::boo::dom
     assert(oldAttribute._ownerElement);
     RefPtr<Element> element = oldAttribute._ownerElement.lock();
     assert(element);
+    element->SynchronizeAllAttributes();
 
     std::replace_if(
       element->_attributes.begin(), element->_attributes.end(),
@@ -157,6 +160,7 @@ namespace krys::boo::dom
       qualifiedName = krys::text::ToASCIILower(qualifiedName.View());
     }
 
+    element.SynchronizeAllAttributes();
     auto it = std::find_if(element._attributes.begin(), element._attributes.end(),
                            [&](const Ref<Attr> &attr) { return attr->Name() == qualifiedName; });
     return it != element._attributes.end() ? it->get() : nullptr;
@@ -170,6 +174,7 @@ namespace krys::boo::dom
       namespaceURI = DOMStringAtom::Null();
     }
 
+    element.SynchronizeAllAttributes();
     auto it =
       std::find_if(element._attributes.begin(), element._attributes.end(), [&](const Ref<Attr> &attr)
                    { return attr->LocalName() == localName && attr->NamespaceURI() == namespaceURI; });

@@ -138,10 +138,11 @@ namespace krys::boo::dom
 
       copy = ElementFactory::Create(document, element->_qualifiedName, element->_is, false, registry);
 
+      element->SynchronizeAllAttributes();
       for (auto &attr : element->_attributes)
       {
         auto attrCopy = AdoptRef<Attr>(*new Attr(document, attr->_name, DOMString(attr->Value())));
-        ElementAlgorithms::AppendAttribute(*attr, Downcast<Element>(*copy));
+        ElementAlgorithms::AppendAttribute(*attrCopy, Downcast<Element>(*copy));
       }
     }
     else if (Is<Document>(node))
@@ -263,6 +264,8 @@ namespace krys::boo::dom
           return false;
         }
 
+        thisElement.SynchronizeAllAttributes();
+        otherElement.SynchronizeAllAttributes();
         for (size_t i = 0uz; i < thisElement._attributes.size(); i++)
         {
           if (i >= otherElement._attributes.size())

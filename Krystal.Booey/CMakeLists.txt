@@ -584,6 +584,9 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/StyleSheet.hpp
   include/Krystal.Booey/CSS/Types/MediaListOrDOMString.hpp
   include/Krystal.Booey/Style/StyleSheetContentsCache.hpp
+
+  # DOM integration, layer e2 (inline styles)
+  include/Krystal.Booey/CSS/StyleAttributeMutationScope.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -915,6 +918,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Descriptors/PropertySetCSSDescriptors.cpp
   src/CSS/Media/MediaList.cpp
   src/Style/StyleSheetContentsCache.cpp
+
+  # DOM integration, layer e2 (inline styles)
+  src/CSS/StyleAttributeMutationScope.cpp
 )
 
 target_precompile_headers(Krystal.Booey
@@ -1082,6 +1088,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/Range.hpp
       include/Krystal.Booey/DOM/ShadowRoot.hpp
       include/Krystal.Booey/DOM/StaticRange.hpp
+      include/Krystal.Booey/DOM/StyledElement.hpp
       include/Krystal.Booey/DOM/Text.hpp
       include/Krystal.Booey/DOM/TreeWalker.hpp
       include/Krystal.Booey/DOM/Types/DOMHighResTimeStamp.hpp
@@ -1389,6 +1396,7 @@ target_sources(Krystal.Booey
     src/DOM/Range.cpp
     src/DOM/ShadowRoot.cpp
     src/DOM/StaticRange.cpp
+    src/DOM/StyledElement.cpp
     src/DOM/Text.cpp
     src/DOM/TreeWalker.cpp
     src/DOM/Types/QualifiedName.cpp
@@ -1494,6 +1502,10 @@ target_sources(Krystal.Booey
     src/HTML/Parser/HTMLElementStack.cpp
     src/HTML/Parser/HTMLFormattingElementList.cpp
     src/HTML/Parser/HTMLTreeBuilder.cpp
+
+    # MathML
+    src/MathML/Internals/MathMLElementFactory.cpp
+    src/MathML/MathMLElement.cpp
 
     # SVG
     src/SVG/Internals/SVGParserUtilities.cpp

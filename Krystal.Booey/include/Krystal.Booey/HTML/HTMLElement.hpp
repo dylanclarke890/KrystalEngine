@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/StyledElement.hpp"
 #include "Krystal.Booey/HTML/Dicts/ShowPopoverOptions.hpp"
 #include "Krystal.Booey/HTML/Dicts/TogglePopoverOptions.hpp"
 #include "Krystal.Booey/HTML/Enums/HTMLElementFlags.hpp"
@@ -17,7 +17,7 @@ namespace krys::boo::html
   class ElementInternals;
 
   /// @see https://html.spec.whatwg.org/#htmlelement
-  class HTMLElement : public dom::Element
+  class HTMLElement : public dom::StyledElement
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLElement);

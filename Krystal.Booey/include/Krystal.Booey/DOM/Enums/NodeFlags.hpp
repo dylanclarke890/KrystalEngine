@@ -20,7 +20,10 @@ namespace krys::boo::dom
     IsHTMLSlotElement = 1 << 9,
     /// @brief Set while the parser is inserting the element's children; see `Element::FinishParsingChildren`.
     IsParsingChildren = 1 << 10,
+    /// @brief Set when the inline style has changed since the `style` attribute was last written; see
+    /// `Element::SynchronizeAllAttributes`.
+    StyleAttributeIsDirty = 1 << 11,
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeFlags, 11u);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeFlags, 12u);

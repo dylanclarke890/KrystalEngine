@@ -56,10 +56,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-attr-value
-    KRYS_NODISCARD const DOMString &Value() const noexcept
-    {
-      return _value;
-    }
+    KRYS_NODISCARD const DOMString &Value() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-attr-value
     void Value(DOMString &&value) noexcept

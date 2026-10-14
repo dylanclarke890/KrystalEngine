@@ -14,8 +14,8 @@ namespace krys::boo::html
 {
   HTMLElement::HTMLElement(dom::Document &document, HTMLElementInterface interface, HTMLElementFlags flags,
                            dom::NodeFlags nodeFlags) noexcept
-      : Element(document, dom::NullQualifiedName(), nodeFlags | dom::NodeFlags::IsHTMLElement), _flags(flags),
-        _interface(interface)
+      : StyledElement(document, dom::NullQualifiedName(), nodeFlags | dom::NodeFlags::IsHTMLElement),
+        _flags(flags), _interface(interface)
   {
   }
 

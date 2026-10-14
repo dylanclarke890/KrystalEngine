@@ -19,6 +19,11 @@
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
+namespace krys::boo::dom
+{
+  class Element;
+}
+
 namespace krys::boo::css
 {
   class CounterStyleRule;
@@ -112,8 +117,9 @@ namespace krys::boo::css
                                                                const CSSOMStringAtom &propertyName,
                                                                CSSOMStringView string, IsImportant important,
                                                                const ParserContext &context) noexcept;
-    // FIXME: ParseInlineStyleDeclaration(const CSSOMString &, const dom::Element &), once Element has a
-    // document with a parser context and quirks mode.
+    /// @brief Parses the value of an element's `style` attribute.
+    KRYS_NODISCARD static Ref<ImmutableStyleProperties>
+      ParseInlineStyleDeclaration(CSSOMStringView string, const dom::Element &element) noexcept;
     static bool ParseDeclarationList(MutableStyleProperties &declaration, CSSOMStringView string,
                                      const ParserContext &context) noexcept;
     KRYS_NODISCARD static RefPtr<Rule> ParseRule(CSSOMStringView string, const ParserContext &context,

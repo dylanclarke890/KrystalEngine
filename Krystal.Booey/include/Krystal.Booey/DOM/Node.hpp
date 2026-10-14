@@ -363,6 +363,12 @@ namespace krys::boo::dom
       return HasNodeFlag(NodeFlags::IsMathMLElement);
     }
 
+    /// @brief Whether this is an element with an inline style (`StyledElement`).
+    KRYS_NODISCARD bool IsStyledElement() const noexcept
+    {
+      return !!(_flags & (NodeFlags::IsHTMLElement | NodeFlags::IsSVGElement | NodeFlags::IsMathMLElement));
+    }
+
     KRYS_NODISCARD bool IsHTMLUnknownElement() const noexcept
     {
       return HasNodeFlag(NodeFlags::IsHTMLElement) && HasNodeFlag(NodeFlags::IsUnknownElement);

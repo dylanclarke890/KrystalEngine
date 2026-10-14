@@ -27,6 +27,11 @@ namespace krys::boo::dom
                                     SmallNodeList &&addedNodes, SmallNodeList &&removedNodes,
                                     RefPtr<Node> &&previousSibling, RefPtr<Node> &&nextSibling) noexcept;
 
+    /// @brief Whether a mutation record for a change to `target`'s attribute `name` (in the null namespace)
+    /// would carry the old value, i.e. an interested observer set `attributeOldValue`. Lets callers skip
+    /// computing an old value nobody reads.
+    KRYS_NODISCARD static bool IsAttributeOldValueRequested(Node &target, DOMStringAtom name) noexcept;
+
     /// @see https://dom.spec.whatwg.org/#queue-a-tree-mutation-record
     static void QueueTreeMutationRecord(Ref<Node> &&target, SmallNodeList &&addedNodes,
                                         SmallNodeList &&removedNodes, RefPtr<Node> &&previousSibling,

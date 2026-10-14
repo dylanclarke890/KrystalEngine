@@ -45,6 +45,40 @@ namespace krys::boo::dom
     // slot.
   }
 
+  bool MutationObserverAlgorithms::IsAttributeOldValueRequested(Node &target, DOMStringAtom name) noexcept
+  {
+    // The interested observers of "queue a mutation record" (steps 2 and 3) for an attribute in the null
+    // namespace.
+    for (auto &node : InclusiveAncestorRange(target))
+    {
+      for (auto &registered : node.RegisteredObservers())
+      {
+        auto options = registered->Options();
+        if (&node != &target && !options.Subtree)
+        {
+          continue;
+        }
+
+        if (!options.Attributes.value_or(false))
+        {
+          continue;
+        }
+
+        if (options.AttributeFilter.has_value() && !std::ranges::contains(*options.AttributeFilter, name))
+        {
+          continue;
+        }
+
+        if (options.AttributeOldValue == true)
+        {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   void MutationObserverAlgorithms::QueueMutationRecord(MutationRecordType type, Ref<Node> &&target,
                                                        DOMStringAtom name, DOMStringAtom namespaceURI,
                                                        DOMStringAtom oldValue, SmallNodeList &&addedNodes,

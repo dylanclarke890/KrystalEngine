@@ -1,12 +1,12 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/StyledElement.hpp"
 #include "Krystal.Booey/SVG/Enums/SVGElementFlags.hpp"
 #include "Krystal.Booey/SVG/Enums/SVGElementInterface.hpp"
 
 namespace krys::boo::svg
 {
-  class SVGElement : public dom::Element
+  class SVGElement : public dom::StyledElement
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGElement);

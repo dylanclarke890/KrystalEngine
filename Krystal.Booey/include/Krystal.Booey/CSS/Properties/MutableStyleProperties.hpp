@@ -6,6 +6,11 @@
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
+namespace krys::boo::dom
+{
+  class StyledElement;
+}
+
 namespace krys::boo::css
 {
   class CSSStyleProperties;
@@ -51,7 +56,9 @@ namespace krys::boo::css
     KRYS_NODISCARD CSSStyleProperties *CssStyleProperties() noexcept;
 
     KRYS_NODISCARD CSSStyleProperties &EnsureCSSStyleProperties() noexcept;
-    // FIXME: EnsureInlineCSSStyleProperties(StyledElement &) comes with inline styles.
+
+    KRYS_NODISCARD CSSStyleProperties &
+      EnsureInlineCSSStyleProperties(dom::StyledElement &parentElement) noexcept;
 
     KRYS_NODISCARD uint32 PropertyCount() const noexcept
     {

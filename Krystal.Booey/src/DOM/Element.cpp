@@ -18,6 +18,7 @@
 #include "Krystal.Booey/DOM/NamedNodeMap.hpp"
 #include "Krystal.Booey/DOM/NodeList.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/StyledElement.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
@@ -86,6 +87,7 @@ namespace krys::boo::dom
 
   bool Element::HasAttributes() const noexcept
   {
+    SynchronizeAllAttributes();
     return !_attributes.empty();
   }
 
@@ -101,6 +103,7 @@ namespace krys::boo::dom
 
   List<DOMString> Element::GetAttributeNames() const noexcept
   {
+    SynchronizeAllAttributes();
     return std::ranges::views::transform(_attributes, [](const Ref<Attr> &attr) { return attr->Name(); })
            | std::ranges::to<List<DOMString>>();
   }
@@ -142,6 +145,7 @@ namespace krys::boo::dom
     // SPEC-VIOLATION(TRUSTED-TYPES): Let verifiedValue be the result of calling get trusted type compliant
     // attribute value with qualifiedName, null, this, and value.
 
+    SynchronizeAllAttributes();
     auto it = std::find_if(_attributes.begin(), _attributes.end(),
                            [&](const Ref<Attr> &attr) { return attr->Name() == qualifiedName; });
     if (it != _attributes.end())
@@ -202,6 +206,7 @@ namespace krys::boo::dom
       qualifiedName = krys::text::ToASCIILower(qualifiedName.View());
     }
 
+    SynchronizeAllAttributes();
     auto it = std::find_if(_attributes.begin(), _attributes.end(),
                            [&](const Ref<Attr> &attr) { return attr->Name() == qualifiedName; });
 
@@ -234,6 +239,7 @@ namespace krys::boo::dom
       qualifiedName = krys::text::ToASCIILower(qualifiedName.View());
     }
 
+    SynchronizeAllAttributes();
     return std::ranges::any_of(_attributes, [&](const Ref<Attr> &a) { return a->Name() == qualifiedName; });
   }
 
@@ -244,6 +250,7 @@ namespace krys::boo::dom
       namespaceURI = DOMStringAtom::Null();
     }
 
+    SynchronizeAllAttributes();
     return std::ranges::any_of(_attributes, [&](const Ref<Attr> &a)
                                { return a->NamespaceURI() == namespaceURI && a->LocalName() == localName; });
   }
@@ -500,6 +507,33 @@ namespace krys::boo::dom
   RefPtr<html::HTMLSlotElement> Element::AssignedSlot() noexcept
   {
     return mixins::Slottable::AssignedSlot(*this);
+  }
+
+#pragma endregion
+
+#pragma region Lazy Attributes
+
+  void Element::SetSynchronizedLazyAttribute(DOMStringAtom localName, DOMString &&value) noexcept
+  {
+    auto it = std::ranges::find_if(
+      _attributes, [&](const Ref<Attr> &attr)
+      { return attr->LocalName() == localName && attr->NamespaceURI() == DOMStringAtom::Null(); });
+    if (it != _attributes.end())
+    {
+      (*it)->_value = krys::move(value);
+      return;
+    }
+
+    auto attr = AdoptRef<Attr>(
+      *new Attr(NodeDocument(), QualifiedName {DOMStringAtom::Null(), DOMStringAtom::Null(), localName},
+                krys::move(value)));
+    attr->_ownerElement = CreateWeakPtr(this);
+    _attributes.push_back(krys::move(attr));
+  }
+
+  void Element::SynchronizeStyleAttribute() const noexcept
+  {
+    const_cast<StyledElement &>(Downcast<StyledElement>(*this)).SynchronizeStyleAttributeInternal();
   }
 
 #pragma endregion

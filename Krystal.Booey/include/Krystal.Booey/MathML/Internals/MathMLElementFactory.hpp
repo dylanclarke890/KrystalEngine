@@ -16,13 +16,8 @@ namespace krys::boo::mathml
   class MathMLElementFactory
   {
   public:
+    /// @brief Every element in the MathML namespace is a `MathMLElement`.
     KRYS_NODISCARD static RefPtr<MathMLElement> TryCreate(dom::Document &document,
-                                                          const dom::QualifiedName &name) noexcept
-    {
-      // TODO(impl): MATHML-ELEMENTS
-      (void)document;
-      (void)name;
-      return nullptr;
-    }
+                                                          const dom::QualifiedName &name) noexcept;
   };
 }

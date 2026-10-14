@@ -361,6 +361,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/ProcessingInstruction.cpp
 		tests/DOM/Range.cpp
 		tests/DOM/StaticRange.cpp
+		tests/DOM/StyledElement.cpp
 		tests/DOM/Text.cpp
 		tests/DOM/TreeWalker.cpp
 

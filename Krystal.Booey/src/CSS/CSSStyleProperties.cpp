@@ -5,8 +5,11 @@
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/StyleAttributeMutationScope.hpp"
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/StyledElement.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
@@ -58,7 +61,8 @@ namespace krys::boo::css
       krys_debug_assert(!propertyName.empty());
 
       // First character of the prefix within the property name may be upper or lowercase.
-      if (text::ToASCIILower(propertyName[0]) == u8'w' && MatchesCSSPropertyNamePrefix(propertyName, u8"webkit"))
+      if (text::ToASCIILower(propertyName[0]) == u8'w'
+          && MatchesCSSPropertyNamePrefix(propertyName, u8"webkit"))
       {
         return PropertyNamePrefix::WebKit;
       }
@@ -341,6 +345,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> PropertySetCSSStyleProperties::SetCssText(const CSSOMString &text) noexcept
   {
+    StyleAttributeMutationScope mutationScope {ParentElement()};
     if (!WillMutate())
     {
       return {};
@@ -348,6 +353,8 @@ namespace krys::boo::css
 
     bool changed = _propertySet->ParseDeclaration(text, CssParserContext());
     DidMutate(changed ? MutationType::PropertyChanged : MutationType::StyleAttributeChanged);
+
+    mutationScope.EnqueueMutationRecord();
     return {};
   }
 
@@ -400,6 +407,8 @@ namespace krys::boo::css
                                                                     const CSSOMString &value,
                                                                     const CSSOMString &priority) noexcept
   {
+    StyleAttributeMutationScope mutationScope {ParentElement()};
+
     auto property = PropertyIdFromName(propertyName);
     if (IsCustomPropertyName(propertyName))
     {
@@ -433,15 +442,21 @@ namespace krys::boo::css
       changed = _propertySet->SetProperty(property, value, CssParserContext(), IsImportant(important));
     }
 
-    // CSS DOM requires raising SyntaxError of parsing failed, but this is too dangerous for compatibility,
-    // see <http://bugs.webkit.org/show_bug.cgi?id=7296>.
     DidMutate(changed ? MutationType::PropertyChanged : MutationType::NoChanges);
+
+    if (changed)
+    {
+      // CSS DOM requires raising SyntaxError of parsing failed, but this is too dangerous for compatibility,
+      // see <http://bugs.webkit.org/show_bug.cgi?id=7296>.
+      mutationScope.EnqueueMutationRecord();
+    }
     return {};
   }
 
   dom::ExceptionOr<CSSOMString>
     PropertySetCSSStyleProperties::RemoveProperty(const CSSOMString &propertyName) noexcept
   {
+    StyleAttributeMutationScope mutationScope {ParentElement()};
     auto property = PropertyIdFromName(propertyName);
     if (IsCustomPropertyName(propertyName))
     {
@@ -463,6 +478,11 @@ namespace krys::boo::css
                                                   : _propertySet->RemoveCustomProperty(propertyName, &result);
 
     DidMutate(changed ? MutationType::PropertyChanged : MutationType::NoChanges);
+
+    if (changed)
+    {
+      mutationScope.EnqueueMutationRecord();
+    }
     return result;
   }
 
@@ -479,6 +499,7 @@ namespace krys::boo::css
                                                                             const CSSOMString &value,
                                                                             IsImportant important) noexcept
   {
+    StyleAttributeMutationScope mutationScope {ParentElement()};
     if (!WillMutate())
     {
       return {};
@@ -492,6 +513,7 @@ namespace krys::boo::css
     if (_propertySet->SetProperty(property, value, CssParserContext(), important))
     {
       DidMutate(MutationType::PropertyChanged);
+      mutationScope.EnqueueMutationRecord();
     }
     else
     {
@@ -601,6 +623,54 @@ namespace krys::boo::css
     _propertySet->SubRef();
     _propertySet = &propertySet;
     _propertySet->AddRef();
+  }
+
+#pragma endregion
+
+#pragma region InlineCSSStyleProperties
+
+  InlineCSSStyleProperties::InlineCSSStyleProperties(MutableStyleProperties &propertySet,
+                                                     dom::StyledElement &parentElement) noexcept
+      : PropertySetCSSStyleProperties(propertySet), _parentElement(CreateWeakPtr(&parentElement))
+  {
+  }
+
+  dom::Element *InlineCSSStyleProperties::ParentElement() const noexcept
+  {
+    return _parentElement.get();
+  }
+
+  void InlineCSSStyleProperties::DidMutate(MutationType type) noexcept
+  {
+    if (type == MutationType::NoChanges)
+    {
+      return;
+    }
+
+    if (type == MutationType::StyleAttributeChanged && _parentElement)
+    {
+      _parentElement->DirtyStyleAttribute();
+      return;
+    }
+
+    if (!_parentElement)
+    {
+      return;
+    }
+
+    _parentElement->InvalidateStyleAttribute();
+  }
+
+  ParserContext InlineCSSStyleProperties::CssParserContext() const noexcept
+  {
+    if (!_parentElement)
+    {
+      return PropertySetCSSStyleProperties::CssParserContext();
+    }
+
+    auto context = _parentElement->NodeDocument().CssParserContext();
+    context.Mode = _propertySet->ParserMode();
+    return context;
   }
 
 #pragma endregion

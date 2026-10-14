@@ -9,6 +9,7 @@
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
+#include "Krystal.Booey/DOM/StyledElement.hpp"
 #include <algorithm>
 #include <iterator>
 
@@ -57,6 +58,17 @@ namespace krys::boo::css
       return *_cssomWrapper;
     }
     _cssomWrapper = CreateUnique<PropertySetCSSStyleProperties>(*this);
+    return *_cssomWrapper;
+  }
+
+  CSSStyleProperties &
+    MutableStyleProperties::EnsureInlineCSSStyleProperties(dom::StyledElement &parentElement) noexcept
+  {
+    if (!_cssomWrapper)
+    {
+      _cssomWrapper = CreateUnique<InlineCSSStyleProperties>(*this, parentElement);
+    }
+    krys_debug_assert(_cssomWrapper->ParentElement() == &parentElement);
     return *_cssomWrapper;
   }
 

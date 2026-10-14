@@ -38,6 +38,8 @@
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Booey/CSS/Values/VariableData.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Types/NestingLevelIncrementer.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
@@ -195,6 +197,18 @@ namespace krys::boo::css
       }
       return CSSOMString(string);
     }
+  }
+
+  Ref<ImmutableStyleProperties> Parser::ParseInlineStyleDeclaration(CSSOMStringView string,
+                                                                    const dom::Element &element) noexcept
+  {
+    ParserContext context(element.NodeDocument());
+    context.Mode =
+      StrictToParserMode(Is<html::HTMLElement>(element) && !element.NodeDocument().InQuirksMode());
+
+    Parser parser(context, string);
+    parser.ConsumeDeclarationList(parser.GetTokenizer()->Tokens(), RuleType::Style);
+    return CreateStyleProperties(parser.TopContext().ParsedProperties, context.Mode);
   }
 
   bool Parser::ParseDeclarationList(MutableStyleProperties &declaration, CSSOMStringView string,
