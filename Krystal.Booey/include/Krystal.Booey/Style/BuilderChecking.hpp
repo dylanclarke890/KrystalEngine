@@ -1,171 +1,169 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Seam.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
+#include <iterator>
+
+// FIXME: Include `Style/BuilderState.hpp` instead of the seam once the builder is ported.
 
 namespace krys::boo::style
 {
   template <typename ValueType>
-  RefPtr<const ValueType> RequiredDowncast(BuilderState &, const css::Value &) noexcept;
+  KRYS_NODISCARD const ValueType *RequiredDowncast(BuilderState &, const css::Value &) noexcept;
 
   template <typename ValueType>
-  Maybe<Pair<Ref<const ValueType>, Ref<const ValueType>>> RequiredPairDowncast(BuilderState &,
-                                                                               const css::Value &) noexcept;
+  KRYS_NODISCARD Maybe<Pair<Ref<const ValueType>, Ref<const ValueType>>>
+    RequiredPairDowncast(BuilderState &, const css::Value &) noexcept;
 
   template <typename ValueType>
   struct TypedRequiredListIterator
   {
-    css::ValueList::iterator iterator;
-
     using iterator_category = std::forward_iterator_tag;
     using value_type = const ValueType &;
     using difference_type = ptrdiff_t;
     using pointer = const ValueType *;
     using reference = const ValueType &;
 
-    TypedRequiredListIterator(css::ValueList::iterator iterator) : iterator(iterator)
+    css::ValueList::iterator Iterator;
+
+    TypedRequiredListIterator(css::ValueList::iterator iterator) noexcept : Iterator(iterator)
     {
     }
 
-    TypedRequiredListIterator &operator++()
+    TypedRequiredListIterator &operator++() noexcept
     {
-      ++iterator;
+      ++Iterator;
       return *this;
     }
 
-    const ValueType &operator*() const
+    KRYS_NODISCARD const ValueType &operator*() const noexcept
     {
-      return downcast<ValueType>(*iterator);
+      return Downcast<ValueType>(*Iterator);
     }
 
-    bool operator!=(const TypedRequiredListIterator &other) const
+    KRYS_NODISCARD bool operator!=(const TypedRequiredListIterator &other) const noexcept
     {
-      return iterator != other.iterator;
+      return Iterator != other.Iterator;
     }
   };
 
   template <typename ListType, typename ValueType>
   struct TypedRequiredList
   {
-    Ref<const ListType> list;
+    Ref<const ListType> List;
 
-    TypedRequiredList(const ListType &list) : list(list)
+    TypedRequiredList(const ListType &list) noexcept : List(ShareRef(list))
     {
     }
 
-    size_t size() const
+    KRYS_NODISCARD uint32 size() const noexcept
     {
-      return list->size();
+      return List->size();
     }
 
-    const ValueType &item(size_t index) const noexcept
+    KRYS_NODISCARD const ValueType &item(uint32 index) const noexcept KRYS_LIFETIME_BOUND
     {
-      return Downcast<ValueType>(*list->item(index));
+      return Downcast<ValueType>(*List->Item(index));
     }
 
-    TypedRequiredListIterator<ValueType> begin() const noexcept
+    KRYS_NODISCARD TypedRequiredListIterator<ValueType> begin() const noexcept KRYS_LIFETIME_BOUND
     {
-      return list->begin();
+      return List->begin();
     }
 
-    TypedRequiredListIterator<ValueType> end() const noexcept
+    KRYS_NODISCARD TypedRequiredListIterator<ValueType> end() const noexcept KRYS_LIFETIME_BOUND
     {
-      return list->end();
+      return List->end();
     }
   };
 
-  template <typename ListType, typename ValueType, size_t minimumLength = 1uz>
-  Maybe<TypedRequiredList<ListType, ValueType>> RequiredListDowncast(BuilderState &state,
-                                                                     const css::Value &) noexcept;
+  template <typename ListType, typename ValueType, uint32 MinimumLength = 1>
+  KRYS_NODISCARD Maybe<TypedRequiredList<ListType, ValueType>>
+    RequiredListDowncast(BuilderState &, const css::Value &) noexcept;
 
-  template <css::ValueId, typename ValueType, size_t minimumLength = 1>
-  Maybe<TypedRequiredList<css::FunctionValue, ValueType>>
+  template <css::ValueId, typename ValueType, uint32 MinimumLength = 1>
+  KRYS_NODISCARD Maybe<TypedRequiredList<css::FunctionValue, ValueType>>
     RequiredFunctionDowncast(BuilderState &, const css::Value &) noexcept;
 
   template <typename ValueType>
-  RefPtr<const ValueType> RequiredDowncast(BuilderState &builderState, const css::Value &value) noexcept
+  inline const ValueType *RequiredDowncast(BuilderState &builderState, const css::Value &value) noexcept
   {
     auto *typedValue = DynamicDowncast<ValueType>(value);
-    if (!typedValue) [[unlikely]]
+    if (!typedValue) KRYS_UNLIKELY
     {
       builderState.SetCurrentPropertyInvalidAtComputedValueTime();
       return nullptr;
     }
-
-    return ShareRefPtr(typedValue);
+    return typedValue;
   }
 
   template <typename ValueType>
-  Maybe<Pair<Ref<const ValueType>, Ref<const ValueType>>>
+  inline Maybe<Pair<Ref<const ValueType>, Ref<const ValueType>>>
     RequiredPairDowncast(BuilderState &builderState, const css::Value &value) noexcept
   {
-    auto pairValue = RequiredDowncast<css::ValuePair>(builderState, value);
-    if (!pairValue) [[unlikely]]
+    auto *pairValue = RequiredDowncast<css::ValuePair>(builderState, value);
+    if (!pairValue) KRYS_UNLIKELY
     {
-      return {};
+      return null;
     }
-
-    auto firstValue = RequiredDowncast<ValueType>(builderState, pairValue->First());
-    if (!firstValue) [[unlikely]]
+    auto *firstValue = RequiredDowncast<ValueType>(builderState, pairValue->First());
+    if (!firstValue) KRYS_UNLIKELY
     {
-      return {};
+      return null;
     }
-
-    auto secondValue = RequiredDowncast<ValueType>(builderState, pairValue->Second());
-    if (!secondValue) [[unlikely]]
+    auto *secondValue = RequiredDowncast<ValueType>(builderState, pairValue->Second());
+    if (!secondValue) KRYS_UNLIKELY
     {
-      return {};
+      return null;
     }
-
-    return {{krys::move(firstValue), krys::move(secondValue)}};
+    return Pair<Ref<const ValueType>, Ref<const ValueType>> {ShareRef(*firstValue), ShareRef(*secondValue)};
   }
 
-  template <typename ListType, typename ValueType, size_t minimumSize>
-  Maybe<TypedRequiredList<ListType, ValueType>> RequiredListDowncast(BuilderState &builderState,
-                                                                     const css::Value &value) noexcept
+  template <typename ListType, typename ValueType, uint32 MinimumSize>
+  inline Maybe<TypedRequiredList<ListType, ValueType>> RequiredListDowncast(BuilderState &builderState,
+                                                                            const css::Value &value) noexcept
   {
-    RefPtr listValue = RequiredDowncast<ListType>(builderState, value);
-    if (!listValue) [[unlikely]]
+    auto *listValue = RequiredDowncast<ListType>(builderState, value);
+    if (!listValue) KRYS_UNLIKELY
     {
-      return {};
+      return null;
     }
-
-    if (listValue->size() < minimumSize) [[unlikely]]
+    if (listValue->size() < MinimumSize) KRYS_UNLIKELY
     {
       builderState.SetCurrentPropertyInvalidAtComputedValueTime();
-      return {};
+      return null;
     }
-
-    for (Ref value : *listValue)
+    for (const auto &item : *listValue)
     {
-      if (!RequiredDowncast<ValueType>(builderState, value)) [[unlikely]]
+      if (!RequiredDowncast<ValueType>(builderState, item)) KRYS_UNLIKELY
       {
-        return {};
+        return null;
       }
     }
-
     return TypedRequiredList<ListType, ValueType> {*listValue};
   }
 
-  template <css::ValueId functionName, typename ValueType, size_t minimumSize>
-  Maybe<TypedRequiredList<css::FunctionValue, ValueType>>
+  template <css::ValueId FunctionName, typename ValueType, uint32 MinimumSize>
+  inline Maybe<TypedRequiredList<css::FunctionValue, ValueType>>
     RequiredFunctionDowncast(BuilderState &builderState, const css::Value &value) noexcept
   {
-    auto function = RequiredListDowncast<css::FunctionValue, ValueType, minimumSize>(builderState, value);
-    if (!function) [[unlikely]]
+    auto function = RequiredListDowncast<css::FunctionValue, ValueType, MinimumSize>(builderState, value);
+    if (!function) KRYS_UNLIKELY
     {
-      return {};
+      return null;
     }
-
-    if (function->List->Name() != functionName)
+    if (function->List->Name() != FunctionName)
     {
       builderState.SetCurrentPropertyInvalidAtComputedValueTime();
-      return {};
+      return null;
     }
-
     return function;
   }
 }

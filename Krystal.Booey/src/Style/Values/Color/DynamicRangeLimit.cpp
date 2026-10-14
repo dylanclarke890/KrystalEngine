@@ -1,9 +1,12 @@
 ﻿#include "Krystal.Booey/Style/Values/Color/DynamicRangeLimit.hpp"
 #include "Krystal.Booey/CSS/Values/Color/DynamicRangeLimit.hpp"
 #include "Krystal.Booey/CSS/Values/Color/DynamicRangeLimitMix.hpp"
+#include "Krystal.Booey/CSS/Values/DynamicRangeLimitValue.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Graphics/PlatformDynamicRangeLimit.hpp"
+#include "Krystal.Booey/Style/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Values/Color/DynamicRangeLimitMix.hpp"
 
@@ -60,6 +63,37 @@ namespace krys::boo::style
       { return DynamicRangeLimit(keyword); },
       [&](const css::DynamicRangeLimitMixFunction &mix) -> DynamicRangeLimit
       { return Resolve(ConvertToStyle(mix, conversionData)); });
+  }
+
+  Ref<css::Value> CSSValueCreation<DynamicRangeLimit>::operator()(css::ValuePool &, const RenderStyle &style,
+                                                                  const DynamicRangeLimit &value) noexcept
+  {
+    return css::DynamicRangeLimitValue::Create(ConvertToCSS(value, style));
+  }
+
+  DynamicRangeLimit CSSValueConversion<DynamicRangeLimit>::operator()(BuilderState &state,
+                                                                      const css::Value &value) noexcept
+  {
+    if (auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(value))
+    {
+      switch (primitiveValue->ValueId())
+      {
+        case css::ValueId::Standard:    return css::keywords::Standard {};
+        case css::ValueId::Constrained: return css::keywords::Constrained {};
+        case css::ValueId::NoLimit:     return css::keywords::NoLimit {};
+        default:                        break;
+      }
+
+      state.SetCurrentPropertyInvalidAtComputedValueTime();
+      return css::keywords::NoLimit {};
+    }
+
+    auto *dynamicRangeLimit = RequiredDowncast<css::DynamicRangeLimitValue>(state, value);
+    if (!dynamicRangeLimit)
+    {
+      return css::keywords::NoLimit {};
+    }
+    return ConvertToStyle(dynamicRangeLimit->GetDynamicRangeLimit(), state);
   }
 
   // MARK: - Serialisation

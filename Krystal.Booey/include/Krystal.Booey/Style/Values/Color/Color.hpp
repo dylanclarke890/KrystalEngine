@@ -182,6 +182,21 @@ namespace krys::boo::style
     KRYS_NODISCARD Color operator()(const css::Color &value, const BuilderState &builderState) noexcept;
   };
 
+  template <>
+  struct CSSValueConversion<Color>
+  {
+    KRYS_NODISCARD Color operator()(BuilderState &builderState, const css::Value &value,
+                                    style::ForVisitedLink forVisitedLink) noexcept;
+    KRYS_NODISCARD Color operator()(BuilderState &builderState, const css::Value &value) noexcept;
+  };
+
+  template <>
+  struct CSSValueCreation<Color>
+  {
+    KRYS_NODISCARD Ref<css::Value> operator()(css::ValuePool &pool, const RenderStyle &style,
+                                              const Color &value) noexcept;
+  };
+
   // MARK: - Blending
 
   template <>

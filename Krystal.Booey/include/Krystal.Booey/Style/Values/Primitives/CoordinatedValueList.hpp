@@ -1,264 +1,255 @@
-/*
- * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+﻿#pragma once
 
-#pragma once
+#include "Krystal.Booey/Style/Values/Primitives/CoordinatedValueListValue.hpp"
+#include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/Span.hpp"
+#include <algorithm>
 
-#include <WebCore/StyleCoordinatedValueListValue.h>
-#include <WebCore/StyleValueTypes.h>
-#include <wtf/IndexedRange.h>
-
-namespace WebCore
+namespace krys::boo::style
 {
-  namespace Style
+  /// @brief The values of a group of coordinating list properties (e.g. the background layers).
+  // https://drafts.csswg.org/css-values-4/#coordinating-list-property
+  template <typename T>
+  struct CoordinatedValueList
   {
+    using Container = List<T>;
+    using value_type = T;
 
-    // https://drafts.csswg.org/css-values-4/#coordinating-list-property
-    template <typename T>
-    struct CoordinatedValueList
+  private:
+    class Data : public RefCounted<Data>
     {
-      using Container = Vector<T, 0, CrashOnOverflow, 0>;
-      using value_type = T;
+    public:
+      Container Values;
+      uint32 UsedLength {1};
 
-      template <CSSValueID valueID>
-      CoordinatedValueList(Constant<valueID> keyword)
-          : CoordinatedValueList {Container {value_type {keyword}}}
+      explicit Data(Container &&container) noexcept : Values {krys::move(container)}
       {
+        krys_assert(!Values.empty());
       }
 
-      CoordinatedValueList(T &&value) : CoordinatedValueList {Container {WTF::move(value)}}
+      KRYS_NODISCARD static Ref<Data> Create(Container &&container) noexcept
       {
+        return AdoptRef(*new Data(krys::move(container)));
       }
 
-      CoordinatedValueList(std::initializer_list<T> &&values)
-          : CoordinatedValueList {Container {WTF::move(values)}}
+      KRYS_NODISCARD Ref<Data> Clone() const noexcept
       {
-      }
-
-      CoordinatedValueList &access() LIFETIME_BOUND
-      {
-        if (!m_data->hasOneRef())
+        Container clone;
+        clone.reserve(Values.size());
+        for (const auto &item : Values)
         {
-          Ref oldData = m_data;
-          m_data = oldData->clone();
+          clone.push_back(value_type::Clone(item));
         }
-        return *this;
+        return AdoptRef(*new Data(krys::move(clone)));
       }
 
-      // Must be called after modifying the list or its values, before any of the used*() functions are
-      // called.
-      void prepareForUse();
-
-      void append(T &&value)
+      KRYS_NODISCARD bool operator==(const Data &other) const noexcept
       {
-        m_data->container.append(WTF::move(value));
+        return Values == other.Values;
       }
-
-      value_type &usedFirst() LIFETIME_BOUND
-      {
-        return m_data->container.first();
-      }
-      const value_type &usedFirst() const LIFETIME_BOUND
-      {
-        return m_data->container.first();
-      }
-      value_type &computedFirst() LIFETIME_BOUND
-      {
-        return m_data->container.first();
-      }
-      const value_type &computedFirst() const LIFETIME_BOUND
-      {
-        return m_data->container.first();
-      }
-
-      value_type &usedLast() LIFETIME_BOUND
-      {
-        return m_data->container[m_data->usedLength - 1];
-      }
-      const value_type &usedLast() const LIFETIME_BOUND
-      {
-        return m_data->container[m_data->usedLength - 1];
-      }
-      value_type &computedLast() LIFETIME_BOUND
-      {
-        return m_data->container.last();
-      }
-      const value_type &computedLast() const LIFETIME_BOUND
-      {
-        return m_data->container.last();
-      }
-
-      T &operator[](size_t i) LIFETIME_BOUND
-      {
-        return m_data->container[i];
-      }
-      const T &operator[](size_t i) const LIFETIME_BOUND
-      {
-        return m_data->container[i];
-      }
-
-      unsigned usedLength() const
-      {
-        return m_data->usedLength;
-      }
-      unsigned computedLength() const
-      {
-        return m_data->container.size();
-      }
-
-      std::span<const T> usedValues() const LIFETIME_BOUND
-      {
-        return m_data->container.span().first(m_data->usedLength);
-      }
-      std::span<const T> computedValues() const LIFETIME_BOUND
-      {
-        return m_data->container.span();
-      }
-
-      bool isInitial() const
-      {
-        return m_data->container.size() == 1 && m_data->container[0].isInitial()
-               && allNonBasePropertiesAreUnsetOrFilled(m_data->container[0]);
-      }
-
-      bool operator==(const CoordinatedValueList &other) const
-      {
-        return arePointingToEqualData(m_data, other.m_data);
-      }
-
-    private:
-      CoordinatedValueList(Container &&container) : m_data {Data::create(WTF::move(container))}
-      {
-      }
-
-      void removeEmptyValues();
-      void fillUnsetProperties();
-      void computeUsedLength();
-
-      class Data : public RefCounted<Data>
-      {
-      public:
-        static Ref<Data> create(Container &&container)
-        {
-          return adoptRef(*new Data(WTF::move(container)));
-        }
-
-        Ref<Data> clone() const
-        {
-          return adoptRef(
-            *new Data(container.template map<Container>([](auto &item) { return value_type::clone(item); })));
-        }
-
-        bool operator==(const Data &other) const
-        {
-          return container == other.container;
-        }
-
-        Data(Container &&container) : container {WTF::move(container)}
-        {
-          RELEASE_ASSERT(this->container.size() > 0);
-        }
-
-        Container container;
-        unsigned usedLength {1};
-      };
-
-      Ref<Data> m_data;
     };
 
-    template <typename T>
-    void CoordinatedValueList<T>::prepareForUse()
+    Ref<Data> _data;
+
+    explicit CoordinatedValueList(Container &&container) noexcept
+        : _data {Data::Create(krys::move(container))}
     {
-      removeEmptyValues();
-      fillUnsetProperties();
-      computeUsedLength();
     }
 
-    template <typename T>
-    void CoordinatedValueList<T>::removeEmptyValues()
+  public:
+    template <css::ValueId ValueId>
+    CoordinatedValueList(css::KeywordValueConstant<ValueId> keyword) noexcept
+        : CoordinatedValueList {Container {value_type {keyword}}}
     {
-      for (auto [i, value] : indexedRange(m_data->container))
+    }
+
+    CoordinatedValueList(T &&value) noexcept : CoordinatedValueList {MakeContainer(krys::move(value))}
+    {
+    }
+
+    CoordinatedValueList(std::initializer_list<T> values) noexcept : CoordinatedValueList {Container {values}}
+    {
+    }
+
+    CoordinatedValueList &Access() noexcept KRYS_LIFETIME_BOUND
+    {
+      if (!_data->HasOneRef())
       {
-        if (i > 0)
-        {
-          if (allPropertiesAreUnsetOrFilled(value))
-          {
-            m_data->container.resize(i);
-            break;
-          }
-        }
+        Ref oldData = _data;
+        _data = oldData->Clone();
+      }
+      return *this;
+    }
+
+    // Must be called after modifying the list or its values, before any of the Used*() functions are called.
+    void PrepareForUse() noexcept;
+
+    void Append(T &&value) noexcept
+    {
+      _data->Values.push_back(krys::move(value));
+    }
+
+    KRYS_NODISCARD value_type &UsedFirst() noexcept KRYS_LIFETIME_BOUND
+    {
+      return _data->Values.front();
+    }
+
+    KRYS_NODISCARD const value_type &UsedFirst() const noexcept KRYS_LIFETIME_BOUND
+    {
+      return _data->Values.front();
+    }
+
+    KRYS_NODISCARD value_type &ComputedFirst() noexcept KRYS_LIFETIME_BOUND
+    {
+      return _data->Values.front();
+    }
+
+    KRYS_NODISCARD const value_type &ComputedFirst() const noexcept KRYS_LIFETIME_BOUND
+    {
+      return _data->Values.front();
+    }
+
+    KRYS_NODISCARD value_type &UsedLast() noexcept KRYS_LIFETIME_BOUND
+    {
+      return _data->Values[_data->UsedLength - 1];
+    }
+
+    KRYS_NODISCARD const value_type &UsedLast() const noexcept KRYS_LIFETIME_BOUND
+    {
+      return _data->Values[_data->UsedLength - 1];
+    }
+
+    KRYS_NODISCARD value_type &ComputedLast() noexcept KRYS_LIFETIME_BOUND
+    {
+      return _data->Values.back();
+    }
+
+    KRYS_NODISCARD const value_type &ComputedLast() const noexcept KRYS_LIFETIME_BOUND
+    {
+      return _data->Values.back();
+    }
+
+    KRYS_NODISCARD T &operator[](size_t i) noexcept KRYS_LIFETIME_BOUND
+    {
+      return _data->Values[i];
+    }
+
+    KRYS_NODISCARD const T &operator[](size_t i) const noexcept KRYS_LIFETIME_BOUND
+    {
+      return _data->Values[i];
+    }
+
+    KRYS_NODISCARD uint32 UsedLength() const noexcept
+    {
+      return _data->UsedLength;
+    }
+
+    KRYS_NODISCARD uint32 ComputedLength() const noexcept
+    {
+      return static_cast<uint32>(_data->Values.size());
+    }
+
+    KRYS_NODISCARD Span<const T> UsedValues() const noexcept KRYS_LIFETIME_BOUND
+    {
+      return Span<const T> {_data->Values}.first(_data->UsedLength);
+    }
+
+    KRYS_NODISCARD Span<const T> ComputedValues() const noexcept KRYS_LIFETIME_BOUND
+    {
+      return Span<const T> {_data->Values};
+    }
+
+    KRYS_NODISCARD bool IsInitial() const noexcept
+    {
+      return _data->Values.size() == 1 && _data->Values[0].IsInitial()
+             && AllNonBasePropertiesAreUnsetOrFilled(_data->Values[0]);
+    }
+
+    KRYS_NODISCARD bool operator==(const CoordinatedValueList &other) const noexcept
+    {
+      return _data.get() == other._data.get() || *_data == *other._data;
+    }
+
+  private:
+    KRYS_NODISCARD static Container MakeContainer(T &&value) noexcept
+    {
+      Container container;
+      container.push_back(krys::move(value));
+      return container;
+    }
+
+    void RemoveEmptyValues() noexcept;
+    void FillUnsetProperties() noexcept;
+    void ComputeUsedLength() noexcept;
+  };
+
+  template <typename T>
+  void CoordinatedValueList<T>::PrepareForUse() noexcept
+  {
+    RemoveEmptyValues();
+    FillUnsetProperties();
+    ComputeUsedLength();
+  }
+
+  template <typename T>
+  void CoordinatedValueList<T>::RemoveEmptyValues() noexcept
+  {
+    for (size_t i = 1; i < _data->Values.size(); ++i)
+    {
+      if (AllPropertiesAreUnsetOrFilled(_data->Values[i]))
+      {
+        _data->Values.erase(_data->Values.begin() + static_cast<ptrdiff_t>(i), _data->Values.end());
+        break;
       }
     }
+  }
 
-    template <typename T>
-    void CoordinatedValueList<T>::fillUnsetProperties()
+  template <typename T>
+  void CoordinatedValueList<T>::FillUnsetProperties() noexcept
+  {
+    auto fillUnsetProperty = [this]<css::PropertyId propertyId>()
     {
-      auto fillUnsetProperty = [this]<auto propertyID>()
+      using PropertyAccessor = CoordinatedValueListPropertyAccessor<propertyId>;
+
+      size_t i = 0;
+      for (; i < _data->Values.size() && PropertyAccessor {_data->Values[i]}.IsSet(); ++i)
       {
-        using PropertyAccessor = CoordinatedValueListPropertyAccessor<propertyID>;
-
-        size_t i = 0;
-        for (; i < m_data->container.size() && PropertyAccessor {m_data->container[i]}.isSet(); ++i)
-        {
-        }
-        if (i)
-        {
-          for (size_t j = 0; i < m_data->container.size(); ++i, ++j)
-            PropertyAccessor {m_data->container[i]}.fill(
-              typename PropertyAccessor::Type {PropertyAccessor {m_data->container[j]}.get()});
-        }
-      };
-
-      eachCoordinatedValueListProperties<T>(fillUnsetProperty);
-    }
-
-    template <typename T>
-    void CoordinatedValueList<T>::computeUsedLength()
-    {
-      // The length of the coordinated value list is determined by the number of items
-      // specified in one particular coordinating list property, the coordinating list
-      // base property. (In the case of backgrounds, this is the background-image property.).
-
-      using BasePropertyAccessor = CoordinatedValueListPropertyConstAccessor<T::baseProperty.value>;
-
-      unsigned result = 0;
-      for (auto &value : m_data->container)
-      {
-        if (!BasePropertyAccessor {value}.isSet())
-          break;
-        ++result;
       }
-      m_data->usedLength = std::max(1u, result);
-    }
+      if (i)
+      {
+        for (size_t j = 0; i < _data->Values.size(); ++i, ++j)
+        {
+          PropertyAccessor {_data->Values[i]}.Fill(
+            typename PropertyAccessor::Type {PropertyAccessor {_data->Values[j]}.Get()});
+        }
+      }
+    };
 
-    // MARK: - Logging
+    EachCoordinatedValueListProperties<T>(fillUnsetProperty);
+  }
 
-    template <typename T>
-    TextStream &operator<<(TextStream &ts, const CoordinatedValueList<T> &value)
+  template <typename T>
+  void CoordinatedValueList<T>::ComputeUsedLength() noexcept
+  {
+    // The length of the coordinated value list is determined by the number of items
+    // specified in one particular coordinating list property, the coordinating list
+    // base property. (In the case of backgrounds, this is the background-image property.).
+
+    using BasePropertyAccessor = CoordinatedValueListPropertyConstAccessor<T::BaseProperty.value>;
+
+    uint32 result = 0;
+    for (auto &value : _data->Values)
     {
-      logForCSSOnRangeLike(ts, value.computedValues(), ", "_s);
-      return ts;
+      if (!BasePropertyAccessor {value}.IsSet())
+      {
+        break;
+      }
+      ++result;
     }
-
-  } // namespace Style
-} // namespace WebCore
+    _data->UsedLength = std::max(1u, result);
+  }
+}

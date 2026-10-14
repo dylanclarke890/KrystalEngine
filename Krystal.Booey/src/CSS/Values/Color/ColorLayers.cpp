@@ -1,36 +1,11 @@
 ﻿#include "Krystal.Booey/CSS/Values/Color/ColorLayers.hpp"
+#include "Krystal.Booey/CSS/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/CSS/Values/Color/ColorLayersResolver.hpp"
 #include "Krystal.Booey/CSS/Values/Color/PlatformColorResolutionState.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 
 namespace krys::boo::css
 {
-  ValueId ToValueId(BlendMode value) noexcept
-  {
-    switch (value)
-    {
-      case BlendMode::Normal:      return ValueId::Normal;
-      case BlendMode::Multiply:    return ValueId::Multiply;
-      case BlendMode::Screen:      return ValueId::Screen;
-      case BlendMode::Darken:      return ValueId::Darken;
-      case BlendMode::Lighten:     return ValueId::Lighten;
-      case BlendMode::Overlay:     return ValueId::Overlay;
-      case BlendMode::ColorDodge:  return ValueId::ColorDodge;
-      case BlendMode::ColorBurn:   return ValueId::ColorBurn;
-      case BlendMode::HardLight:   return ValueId::HardLight;
-      case BlendMode::SoftLight:   return ValueId::SoftLight;
-      case BlendMode::Difference:  return ValueId::Difference;
-      case BlendMode::Exclusion:   return ValueId::Exclusion;
-      case BlendMode::Hue:         return ValueId::Hue;
-      case BlendMode::Saturation:  return ValueId::Saturation;
-      case BlendMode::Color:       return ValueId::Color;
-      case BlendMode::Luminosity:  return ValueId::Luminosity;
-      case BlendMode::PlusDarker:  return ValueId::PlusDarker;
-      case BlendMode::PlusLighter: return ValueId::PlusLighter;
-    }
-    krys_unreachable();
-  }
-
   boo::Color CreateColor(const ColorLayers &value, PlatformColorResolutionState &state) noexcept
   {
     PlatformColorResolutionStateNester nester {state};

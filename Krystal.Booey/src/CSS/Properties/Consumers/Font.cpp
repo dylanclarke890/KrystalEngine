@@ -2,6 +2,7 @@
 #include "Krystal.Booey/CSS/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/CSS/Parser/Token.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
+#include "Krystal.Booey/CSS/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/AngleDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/IntegerDefinitions.hpp"
@@ -527,61 +528,6 @@ namespace krys::boo::css::PropertyParserHelpers
 
   // MARK: @font-face 'src'
 
-  KRYS_NODISCARD static FontTechnology FontTechnologyFromValueId(ValueId id) noexcept
-  {
-    switch (id)
-    {
-      case ValueId::ColorColrv0:
-      {
-        return FontTechnology::ColorColrv0;
-      }
-      case ValueId::ColorColrv1:
-      {
-        return FontTechnology::ColorColrv1;
-      }
-      case ValueId::ColorCbdt:
-      {
-        return FontTechnology::ColorCbdt;
-      }
-      case ValueId::ColorSbix:
-      {
-        return FontTechnology::ColorSbix;
-      }
-      case ValueId::ColorSvg:
-      {
-        return FontTechnology::ColorSvg;
-      }
-      case ValueId::FeaturesAat:
-      {
-        return FontTechnology::FeaturesAat;
-      }
-      case ValueId::FeaturesGraphite:
-      {
-        return FontTechnology::FeaturesGraphite;
-      }
-      case ValueId::FeaturesOpentype:
-      {
-        return FontTechnology::FeaturesOpentype;
-      }
-      case ValueId::Incremental:
-      {
-        return FontTechnology::Incremental;
-      }
-      case ValueId::Palettes:
-      {
-        return FontTechnology::Palettes;
-      }
-      case ValueId::Variations:
-      {
-        return FontTechnology::Variations;
-      }
-      default:
-      {
-        return FontTechnology::Invalid;
-      }
-    }
-  }
-
   List<FontTechnology> ConsumeFontTech(TokenRange &tokens, PropertyParserState &, bool singleValue) noexcept
   {
     List<FontTechnology> technologies;
@@ -593,7 +539,7 @@ namespace krys::boo::css::PropertyParserHelpers
       {
         return {};
       }
-      auto technology = FontTechnologyFromValueId(arg.ValueId());
+      auto technology = FromValueId<FontTechnology>(arg.ValueId());
       if (technology == FontTechnology::Invalid)
       {
         return {};

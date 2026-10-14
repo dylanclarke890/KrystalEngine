@@ -121,6 +121,19 @@ namespace krys::boo::style
                                                 const css::ToLengthConversionData &conversionData) noexcept;
   };
 
+  template <>
+  struct CSSValueCreation<DynamicRangeLimit>
+  {
+    KRYS_NODISCARD Ref<css::Value> operator()(css::ValuePool &, const RenderStyle &,
+                                              const DynamicRangeLimit &) noexcept;
+  };
+
+  template <>
+  struct CSSValueConversion<DynamicRangeLimit>
+  {
+    KRYS_NODISCARD DynamicRangeLimit operator()(BuilderState &, const css::Value &) noexcept;
+  };
+
   // MARK: Serialisation
 
   template <>

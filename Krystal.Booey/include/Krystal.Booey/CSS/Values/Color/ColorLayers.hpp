@@ -15,9 +15,6 @@ namespace krys::boo::css
     KRYS_NODISCARD bool operator==(const ColorLayers &) const noexcept = default;
   };
 
-  // FIXME: Use the `BlendMode` mapping in `PrimitiveValueMappings.hpp` once it's reviewed.
-  KRYS_NODISCARD ValueId ToValueId(BlendMode value) noexcept;
-
   KRYS_NODISCARD boo::Color CreateColor(const ColorLayers &value,
                                         PlatformColorResolutionState &state) noexcept;
   KRYS_NODISCARD bool ContainsCurrentColor(const ColorLayers &value) noexcept;

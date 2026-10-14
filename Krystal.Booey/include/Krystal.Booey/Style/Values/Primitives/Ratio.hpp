@@ -4,9 +4,6 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
 
-// FIXME: `CSSValueCreation<Ratio>` (special-cased to return a `RatioValue`) comes with the other
-// `CSSValueCreation` specialisations.
-
 namespace krys::boo::style
 {
   /// @brief A computed `<ratio>`.
@@ -34,6 +31,15 @@ namespace krys::boo::style
   }
 
   DEFINE_TYPE_MAPPING(css::Ratio, Ratio)
+
+  // MARK: Conversion
+
+  // `Ratio` is special-cased to return a `css::RatioValue`.
+  template <>
+  struct CSSValueCreation<Ratio>
+  {
+    KRYS_NODISCARD Ref<css::Value> operator()(css::ValuePool &, const RenderStyle &, const Ratio &) noexcept;
+  };
 }
 
 DEFINE_SLASH_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::Ratio, 2)

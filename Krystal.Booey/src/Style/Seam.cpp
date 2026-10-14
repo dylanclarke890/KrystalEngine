@@ -6,6 +6,8 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp"
+#include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 #include "Krystal.Core/Assert.hpp"
 
 // FIXME: Placeholder definitions; see `Style/Seam.hpp`. Only `RenderStyle` can be constructed, so only its
@@ -126,7 +128,37 @@ namespace krys::boo
 
   WritingMode RenderStyle::GetWritingMode() const noexcept
   {
-    krys_unreachable();
+    return _writingMode;
+  }
+
+  bool RenderStyle::SetDirection(TextDirection bidiDirection) noexcept
+  {
+    if (_writingMode.ComputedTextDirection() == bidiDirection)
+    {
+      return false;
+    }
+    _writingMode.SetTextDirection(bidiDirection);
+    return true;
+  }
+
+  bool RenderStyle::SetTextOrientation(TextOrientation textOrientation) noexcept
+  {
+    if (_writingMode.ComputedTextOrientation() == textOrientation)
+    {
+      return false;
+    }
+    _writingMode.SetTextOrientation(textOrientation);
+    return true;
+  }
+
+  bool RenderStyle::SetWritingMode(StyleWritingMode mode) noexcept
+  {
+    if (_writingMode.ComputedWritingMode() == mode)
+    {
+      return false;
+    }
+    _writingMode.SetWritingMode(mode);
+    return true;
   }
 
   float RenderStyle::Zoom() const noexcept
@@ -169,9 +201,53 @@ namespace krys::boo
     return static_cast<float>(InitialFontLineSpacing);
   }
 
-  bool RenderStyle::HasPseudoElementType() const noexcept
+  Maybe<PseudoElementType> RenderStyle::GetPseudoElementType() const noexcept
   {
-    krys_unreachable();
+    if (!_pseudoElementIdentifier)
+    {
+      return null;
+    }
+    return _pseudoElementIdentifier->Type;
+  }
+
+  Maybe<style::PseudoElementIdentifier> RenderStyle::GetPseudoElementIdentifier() const noexcept
+  {
+    return _pseudoElementIdentifier;
+  }
+
+  void RenderStyle::SetPseudoElementIdentifier(Maybe<style::PseudoElementIdentifier> &&identifier) noexcept
+  {
+    _pseudoElementIdentifier = krys::move(identifier);
+  }
+
+  bool RenderStyle::UsesViewportUnits() const noexcept
+  {
+    return _usesViewportUnits;
+  }
+
+  void RenderStyle::SetUsesViewportUnits() noexcept
+  {
+    _usesViewportUnits = true;
+  }
+
+  bool RenderStyle::UsesContainerUnits() const noexcept
+  {
+    return _usesContainerUnits;
+  }
+
+  void RenderStyle::SetUsesContainerUnits() noexcept
+  {
+    _usesContainerUnits = true;
+  }
+
+  bool RenderStyle::UsesTreeCountingFunctions() const noexcept
+  {
+    return _usesTreeCountingFunctions;
+  }
+
+  void RenderStyle::SetUsesTreeCountingFunctions() noexcept
+  {
+    _usesTreeCountingFunctions = true;
   }
 
   Maybe<float> RenderStyle::EvaluateFixedLineHeight(const style::ZoomFactor &) const noexcept
@@ -230,9 +306,9 @@ namespace krys::boo
     krys_unreachable();
   }
 
-  float AdjustFloatForAbsoluteZoom(float, const RenderStyle &) noexcept
+  float AdjustFloatForAbsoluteZoom(float value, const RenderStyle &style) noexcept
   {
-    krys_unreachable();
+    return value / style.UsedZoom();
   }
 
   int32 AdjustForAbsoluteZoom(int32, const RenderView &) noexcept
@@ -304,85 +380,193 @@ namespace krys::boo
 
 namespace krys::boo::style
 {
+  BuilderState::BuilderState(RenderStyle &style, BuilderContext &&context) noexcept
+      : _style(style), _context(krys::move(context)), _cssToLengthConversionData(style, *this)
+  {
+  }
+
+  BuilderState::~BuilderState() noexcept = default;
+
+  RenderStyle &BuilderState::Style() noexcept
+  {
+    return _style;
+  }
+
   const RenderStyle &BuilderState::Style() const noexcept
   {
-    krys_unreachable();
+    return _style;
   }
 
   const RenderStyle &BuilderState::ParentStyle() const noexcept
   {
-    krys_unreachable();
+    return *_context.ParentStyle;
   }
 
   const RenderStyle *BuilderState::RootElementStyle() const noexcept
   {
-    krys_unreachable();
+    return _context.RootElementStyle;
   }
 
   const dom::Document &BuilderState::GetDocument() const noexcept
   {
-    krys_unreachable();
+    return *_context.Document;
   }
 
   const dom::Element *BuilderState::GetElement() const noexcept
   {
-    krys_unreachable();
+    return _context.Element.get();
   }
 
   float BuilderState::ZoomWithTextZoomFactor() noexcept
   {
-    krys_unreachable();
+    // FIXME: Documents have no frame, so there's no text zoom factor (`-webkit-text-zoom` isn't supported).
+    return CssToLengthConversionData().Zoom();
   }
 
-  style::ScopeOrdinal BuilderState::StyleScopeOrdinal() const noexcept
+  // SVG handles zooming in a different way compared to CSS. The whole document is scaled instead
+  // of each individual length value in the render style / tree. CSSPrimitiveValue::resolveAsLength*()
+  // multiplies each resolved length with the zoom multiplier - so for SVG we need to disable that.
+  // Though all CSS values that can be applied to outermost <svg> elements (width/height/border/padding...)
+  // need to respect the scaling. RenderBox (the parent class of LegacyRenderSVGRoot) grabs values like
+  // width/height/border/padding/... from the RenderStyle -> for SVG these values would never scale,
+  // if we'd pass a 1.0 zoom factor everywhere. So we only pass a zoom factor of 1.0 for specific
+  // properties that are NOT allowed to scale within a zoomed SVG document (letter/word-spacing/font-size).
+  bool BuilderState::UseSVGZoomRules() const noexcept
   {
-    krys_unreachable();
-  }
-
-  const css::ToLengthConversionData &BuilderState::CssToLengthConversionData() const noexcept
-  {
-    krys_unreachable();
+    return Is<svg::SVGElement>(GetElement());
   }
 
   bool BuilderState::UseSVGZoomRulesForLength() const noexcept
   {
-    krys_unreachable();
+    auto *svgElement = DynamicDowncast<svg::SVGElement>(GetElement());
+    return svgElement && !(Is<svg::SVGSvgElement>(*svgElement) && svgElement->ParentNode());
   }
 
-  bool BuilderState::EvaluationTimeZoomEnabled() const noexcept
+  style::ScopeOrdinal BuilderState::StyleScopeOrdinal() const noexcept
   {
-    krys_unreachable();
+    return _currentProperty->StyleScopeOrdinal;
+  }
+
+  const List<css::CSSOMStringAtom> &BuilderState::RegisteredContentAttributes() const noexcept
+  {
+    return _registeredContentAttributes;
+  }
+
+  void BuilderState::RegisterContentAttribute(const css::CSSOMStringAtom &attributeLocalName) noexcept
+  {
+    if (Style().GetPseudoElementType() == PseudoElementType::Before
+        || Style().GetPseudoElementType() == PseudoElementType::After)
+    {
+      _registeredContentAttributes.push_back(attributeLocalName);
+    }
+  }
+
+  const css::ToLengthConversionData &BuilderState::CssToLengthConversionData() const noexcept
+  {
+    return _cssToLengthConversionData;
+  }
+
+  bool BuilderState::IsAuthorOrigin() const noexcept
+  {
+    return _currentProperty && _currentProperty->Origin == PropertyCascade::Origin::Author;
+  }
+
+  css::PropertyId BuilderState::CssPropertyId() const noexcept
+  {
+    return _currentProperty ? _currentProperty->Id : css::PropertyId::Invalid;
+  }
+
+  bool BuilderState::IsCurrentPropertyInvalidAtComputedValueTime() const noexcept
+  {
+    return _invalidAtComputedValueTimeProperties.test(static_cast<size_t>(CssPropertyId()));
   }
 
   void BuilderState::SetCurrentPropertyInvalidAtComputedValueTime() noexcept
   {
-    krys_unreachable();
+    _invalidAtComputedValueTimeProperties.set(static_cast<size_t>(CssPropertyId()));
+  }
+
+  bool BuilderState::EvaluationTimeZoomEnabled() const noexcept
+  {
+    return false;
   }
 
   void BuilderState::SetUsesViewportUnits() noexcept
   {
-    krys_unreachable();
+    _style.SetUsesViewportUnits();
   }
 
   void BuilderState::SetUsesContainerUnits() noexcept
   {
-    krys_unreachable();
+    _style.SetUsesContainerUnits();
   }
 
   double BuilderState::LookupCSSRandomBaseValue(const css::calc::RandomCachingKey &,
                                                 Maybe<css::keywords::ElementShared>) const noexcept
   {
+    // FIXME: The element and document `random()` caches come with the resolver.
     krys_unreachable();
   }
 
+  // MARK: - Tree Counting Functions
+
   uint32 BuilderState::SiblingCount() noexcept
   {
-    krys_unreachable();
+    // https://drafts.csswg.org/css-values-5/#funcdef-sibling-count
+
+    krys_debug_assert(GetElement());
+
+    RefPtr parent = ShareRefPtr(GetElement()->ParentElement());
+    if (!parent)
+    {
+      return 1;
+    }
+
+    _style.SetUsesTreeCountingFunctions();
+    // FIXME: Mark the parent's children as affected by forward and backward positional rules once elements
+    // keep their style relations (invalidation).
+
+    uint32 count = 1;
+    for (auto sibling = GetElement()->PreviousElementSibling(); sibling;
+         sibling = sibling->PreviousElementSibling())
+    {
+      ++count;
+    }
+    for (auto sibling = GetElement()->NextElementSibling(); sibling; sibling = sibling->NextElementSibling())
+    {
+      ++count;
+    }
+    return count;
   }
 
   uint32 BuilderState::SiblingIndex() noexcept
   {
-    krys_unreachable();
+    // https://drafts.csswg.org/css-values-5/#funcdef-sibling-index
+
+    krys_debug_assert(GetElement());
+
+    RefPtr parent = ShareRefPtr(GetElement()->ParentElement());
+    if (!parent)
+    {
+      return 1;
+    }
+
+    _style.SetUsesTreeCountingFunctions();
+    // FIXME: Mark the parent's children as affected by forward and backward positional rules once elements
+    // keep their style relations (invalidation).
+
+    uint32 count = 1;
+    for (auto sibling = GetElement()->PreviousElementSibling(); sibling;
+         sibling = sibling->PreviousElementSibling())
+    {
+      ++count;
+    }
+    return count;
+  }
+
+  void BuilderState::SetCurrentProperty(const PropertyCascade::Property *property) noexcept
+  {
+    _currentProperty = property;
   }
 
   Maybe<double> AnchorPositionEvaluator::Evaluate(BuilderState &, Maybe<ScopedName>,

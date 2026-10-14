@@ -109,7 +109,7 @@ namespace krys::boo
     }
     constexpr void SetTextOrientation(TextOrientation verticalOrientation) noexcept
     {
-      _bits &= ~WritingModeFlags::OrientationShift;
+      _bits &= ~WritingModeFlags::OrientationMask;
       _bits |= static_cast<Data>(verticalOrientation)
                << static_cast<Data>(WritingModeFlags::OrientationShift);
     }

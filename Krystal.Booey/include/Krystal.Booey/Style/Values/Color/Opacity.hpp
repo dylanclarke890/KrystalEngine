@@ -45,6 +45,14 @@ namespace krys::boo::style
   };
 
   DEFINE_TYPE_WRAPPER_GET(Opacity, Value);
+
+  // MARK: - Conversion
+
+  template <>
+  struct CSSValueConversion<Opacity>
+  {
+    KRYS_NODISCARD Opacity operator()(BuilderState &, const css::Value &) noexcept;
+  };
 }
 
 DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::Opacity)

@@ -1,5 +1,10 @@
 ﻿#include "Krystal.Booey/Style/Values/Color/Color.hpp"
+#include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
+#include "Krystal.Booey/CSS/Values/Color/KeywordColor.hpp"
+#include "Krystal.Booey/CSS/Values/ColorValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
@@ -317,6 +322,39 @@ namespace krys::boo::style
   Color ToStyle<css::Color>::operator()(const css::Color &value, const BuilderState &builderState) noexcept
   {
     return ConvertToStyle(value, builderState, style::ForVisitedLink::No);
+  }
+
+  Color CSSValueConversion<Color>::operator()(BuilderState &builderState, const css::Value &value,
+                                              style::ForVisitedLink forVisitedLink) noexcept
+  {
+    if (!builderState.GetElement() || !css::IsLink(*builderState.GetElement()))
+    {
+      forVisitedLink = style::ForVisitedLink::No;
+    }
+
+    if (auto *color = DynamicDowncast<css::ColorValue>(value))
+    {
+      return ConvertToStyle(color->GetColor(), builderState, forVisitedLink);
+    }
+
+    if (css::IsColorKeyword(value.ValueId()))
+    {
+      return ConvertToStyle(css::Color {css::KeywordColor {value.ValueId()}}, builderState, forVisitedLink);
+    }
+
+    builderState.SetCurrentPropertyInvalidAtComputedValueTime();
+    return Color {boo::Color {}};
+  }
+
+  Color CSSValueConversion<Color>::operator()(BuilderState &builderState, const css::Value &value) noexcept
+  {
+    return (*this)(builderState, value, style::ForVisitedLink::No);
+  }
+
+  Ref<css::Value> CSSValueCreation<Color>::operator()(css::ValuePool &pool, const RenderStyle &style,
+                                                      const Color &value) noexcept
+  {
+    return pool.CreateColorValue(style.ColorResolvingCurrentColor(value));
   }
 
   // MARK: - Blending

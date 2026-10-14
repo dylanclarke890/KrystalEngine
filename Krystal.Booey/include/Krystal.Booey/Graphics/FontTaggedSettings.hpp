@@ -41,6 +41,12 @@ namespace krys::boo
     {
       return a == b;
     }
+
+    // Lets `HashMap` hash `FontTag` keys.
+    KRYS_NODISCARD size_t operator()(const FontTag &tag) const noexcept
+    {
+      return Hash(tag);
+    }
   };
 
   /// @brief Hash table traits for `FontTag` keys: all zeros is empty, all `0xFF` is deleted.

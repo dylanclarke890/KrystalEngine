@@ -3,12 +3,15 @@
 #include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/CSS/Queries/ContainerQueryAxis.hpp"
+#include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/FloatSize.hpp"
 #include "Krystal.Booey/Style/AnchorSizeDimension.hpp"
+#include "Krystal.Booey/Style/PropertyCascade.hpp"
+#include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Style/ScopedName.hpp"
 #include "Krystal.Booey/Style/ScopeOrdinal.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
@@ -18,16 +21,19 @@
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
+#include <bitset>
 
 // FIXME: Placeholders for the rendering, font and style-resolver types that length resolution, calc
-// evaluation and colour resolution need. Each declares only the members those callers use, under its upstream
-// name. Only `RenderStyle` can be constructed, and only its colour, zoom and font members are implemented
-// (zoom and the font are always the initial values; the font has no font data); everything else is
-// unreachable. Each type moves to its own header, with its real
-// implementation, when its slice is ported:
+// evaluation, colour resolution and the computed value conversions need. Each declares only the members those
+// callers use, under its upstream name. `RenderStyle` and `style::BuilderState` can be constructed:
+// `RenderStyle` has its colour state, pseudo-element and unit-usage flags (zoom and the font are always the
+// initial values; the font has no font data), and `BuilderState` has upstream's state for converting values
+// (no font updates, custom properties or style images). Everything else is unreachable. Each type moves to
+// its own header, with its real implementation, when its slice is ported:
 //   - `FontMetrics`, `FontCascadeDescription`, `FontCascade`: platform/graphics fonts.
 //   - `RenderStyle`, `RenderView`, `RenderElement`, `RenderBox`: rendering.
 //   - `style::BuilderState`, `style::AnchorPositionEvaluator`, `style::ContainerQueryEvaluator`: the style
@@ -47,7 +53,6 @@ namespace krys::boo::dom
 namespace krys::boo::css
 {
   class CSSStyleSheet;
-  class ToLengthConversionData;
 }
 
 namespace krys::boo::css::calc
@@ -110,6 +115,11 @@ namespace krys::boo
     boo::Color _color {boo::Color::black};
     boo::Color _visitedLinkColor {boo::Color::black};
     bool _hasDarkOnlyColorScheme {false};
+    Maybe<style::PseudoElementIdentifier> _pseudoElementIdentifier;
+    bool _usesViewportUnits {false};
+    bool _usesContainerUnits {false};
+    bool _usesTreeCountingFunctions {false};
+    boo::WritingMode _writingMode {};
 
   public:
     RenderStyle() noexcept = default;
@@ -127,6 +137,9 @@ namespace krys::boo
     void SetHasDarkOnlyColorScheme(bool value) noexcept;
 
     KRYS_NODISCARD WritingMode GetWritingMode() const noexcept;
+    bool SetDirection(TextDirection bidiDirection) noexcept;
+    bool SetTextOrientation(TextOrientation textOrientation) noexcept;
+    bool SetWritingMode(StyleWritingMode mode) noexcept;
 
     /// @brief The initial `zoom` (1); nothing sets it yet.
     KRYS_NODISCARD float Zoom() const noexcept;
@@ -148,8 +161,16 @@ namespace krys::boo
     /// @brief The initial `line-height` (`normal`) of the initial font.
     KRYS_NODISCARD float ComputedLineHeight() const noexcept;
 
-    /// @brief Collapses `!pseudoElementType()`.
-    KRYS_NODISCARD bool HasPseudoElementType() const noexcept;
+    KRYS_NODISCARD Maybe<PseudoElementType> GetPseudoElementType() const noexcept;
+    KRYS_NODISCARD Maybe<style::PseudoElementIdentifier> GetPseudoElementIdentifier() const noexcept;
+    void SetPseudoElementIdentifier(Maybe<style::PseudoElementIdentifier> &&identifier) noexcept;
+
+    KRYS_NODISCARD bool UsesViewportUnits() const noexcept;
+    void SetUsesViewportUnits() noexcept;
+    KRYS_NODISCARD bool UsesContainerUnits() const noexcept;
+    void SetUsesContainerUnits() noexcept;
+    KRYS_NODISCARD bool UsesTreeCountingFunctions() const noexcept;
+    void SetUsesTreeCountingFunctions() noexcept;
 
     /// @brief Collapses `lineHeight().tryFixed()` evaluated to a `LayoutUnit` with `zoom`, as a float, for
     /// the initial `line-height`.
@@ -245,14 +266,39 @@ namespace krys::boo
 
 namespace krys::boo::style
 {
+  /// @brief What a builder state is built from, besides the style it writes into.
+  struct BuilderContext
+  {
+    RefPtr<const dom::Document> Document {};
+    const RenderStyle *ParentStyle {};
+    const RenderStyle *RootElementStyle {};
+    RefPtr<const dom::Element> Element {};
+    // FIXME: `treeResolutionState` and `positionTryFallback` come with the tree resolver and anchor
+    // positioning.
+  };
+
   class BuilderState : public CanMakeCheckedPtr<BuilderState>
   {
     KRYS_NON_COPY_MOVABLE(BuilderState);
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(BuilderState);
 
-  public:
-    BuilderState() = delete;
+  private:
+    RenderStyle &_style;
+    BuilderContext _context;
 
+    const css::ToLengthConversionData _cssToLengthConversionData;
+
+    std::bitset<css::TotalPropertyIdValues> _invalidAtComputedValueTimeProperties;
+
+    const PropertyCascade::Property *_currentProperty {nullptr};
+
+    List<css::CSSOMStringAtom> _registeredContentAttributes;
+
+  public:
+    BuilderState(RenderStyle &, BuilderContext &&) noexcept;
+    ~BuilderState() noexcept;
+
+    KRYS_NODISCARD RenderStyle &Style() noexcept;
     KRYS_NODISCARD const RenderStyle &Style() const noexcept;
     KRYS_NODISCARD const RenderStyle &ParentStyle() const noexcept;
     KRYS_NODISCARD const RenderStyle *RootElementStyle() const noexcept;
@@ -262,15 +308,25 @@ namespace krys::boo::style
 
     KRYS_NODISCARD float ZoomWithTextZoomFactor() noexcept;
 
+    KRYS_NODISCARD bool UseSVGZoomRules() const noexcept;
+    KRYS_NODISCARD bool UseSVGZoomRulesForLength() const noexcept;
+
     KRYS_NODISCARD style::ScopeOrdinal StyleScopeOrdinal() const noexcept;
 
+    KRYS_NODISCARD const List<css::CSSOMStringAtom> &RegisteredContentAttributes() const noexcept;
+    void RegisterContentAttribute(const css::CSSOMStringAtom &attributeLocalName) noexcept;
+
     KRYS_NODISCARD const css::ToLengthConversionData &CssToLengthConversionData() const noexcept;
-    KRYS_NODISCARD bool UseSVGZoomRulesForLength() const noexcept;
+
+    KRYS_NODISCARD bool IsAuthorOrigin() const noexcept;
+
+    KRYS_NODISCARD css::PropertyId CssPropertyId() const noexcept;
+
+    KRYS_NODISCARD bool IsCurrentPropertyInvalidAtComputedValueTime() const noexcept;
+    void SetCurrentPropertyInvalidAtComputedValueTime() noexcept;
 
     /// @brief Collapses `document().settings().evaluationTimeZoomEnabled()`.
     KRYS_NODISCARD bool EvaluationTimeZoomEnabled() const noexcept;
-
-    void SetCurrentPropertyInvalidAtComputedValueTime() noexcept;
 
     void SetUsesViewportUnits() noexcept;
     void SetUsesContainerUnits() noexcept;
@@ -281,6 +337,9 @@ namespace krys::boo::style
     // Accessors for sibling information used by the sibling-count() and sibling-index() CSS functions.
     KRYS_NODISCARD uint32 SiblingCount() noexcept;
     KRYS_NODISCARD uint32 SiblingIndex() noexcept;
+
+    /// @brief Collapses `Builder` setting the property it applies.
+    void SetCurrentProperty(const PropertyCascade::Property *property) noexcept;
   };
 
   class AnchorPositionEvaluator

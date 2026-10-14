@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Style/Values/Color/ColorLayers.hpp"
+#include "Krystal.Booey/CSS/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/CSS/Values/Color/ColorLayersResolver.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorResolutionState.hpp"
@@ -76,7 +77,7 @@ namespace krys::boo::style
 
     if (value.BlendMode != BlendMode::Normal)
     {
-      builder.append(css::ToLower(css::ToValueId(value.BlendMode)));
+      builder.append(css::ToLower(ToValueId(value.BlendMode)));
       builder.append(u8", ");
     }
 

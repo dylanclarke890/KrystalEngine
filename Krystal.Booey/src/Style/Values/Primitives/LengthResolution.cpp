@@ -278,7 +278,7 @@ namespace krys::boo::style
         return null;
       }
 
-      auto mode = !conversionData.Style()->HasPseudoElementType()
+      auto mode = !conversionData.Style()->GetPseudoElementType()
                     ? ContainerQueryEvaluator::SelectionMode::Element
                     : ContainerQueryEvaluator::SelectionMode::PseudoElement;
 

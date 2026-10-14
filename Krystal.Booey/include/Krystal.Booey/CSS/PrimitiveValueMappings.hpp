@@ -1,324 +1,257 @@
-/*
- * Copyright (C) 2007 Alexey Proskuryakov <ap@nypop.com>.
- * Copyright (C) 2008-2023 Apple Inc. All rights reserved.
- * Copyright (C) 2009 Torch Mobile Inc. All rights reserved. (http://www.torchmobile.com/)
- * Copyright (C) 2009 Jeff Schiller <codedread@gmail.com>
- * Copyright (C) Research In Motion Limited 2010. All rights reserved.
- * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+﻿#pragma once
 
-#pragma once
+#include "Krystal.Booey/Animation/ScrollAxis.hpp"
+#include "Krystal.Booey/Core/ScrollTypes.hpp"
+#include "Krystal.Booey/Core/StyleAppearance.hpp"
+#include "Krystal.Booey/Core/TextFlags.hpp"
+#include "Krystal.Booey/Core/TextSpacing.hpp"
+#include "Krystal.Booey/Core/ThemeTypes.hpp"
+#include "Krystal.Booey/Core/UnicodeBidi.hpp"
+#include "Krystal.Booey/Core/WritingMode.hpp"
+#include "Krystal.Booey/CSS/Values/FontFaceSrcValue.hpp"
+#include "Krystal.Booey/CSS/Values/Value.hpp"
+#include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
+#include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
+#include "Krystal.Booey/Graphics/WindRule.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
+#include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Visitor.hpp"
 
-#include "AnchorPositionEvaluator.h"
-#include "CompositeOperation.h"
-#include "CSSCalcSymbolTable.h"
-#include "CSSFontFaceSrcValue.h"
-#include "CSSPrimitiveValue.h"
-#include "CSSToLengthConversionData.h"
-#include "CSSValueKeywords.h"
-#include "FontSizeAdjust.h"
-#include "GraphicsTypes.h"
-#include "RenderStyleConstants.h"
-#include "ScrollAxis.h"
-#include "ScrollTypes.h"
-#include "StyleBuilderState.h"
-#include "StyleContain.h"
-#include "StyleHangingPunctuation.h"
-#include "StyleImageOrientation.h"
-#include "StyleMarginTrim.h"
-#include "StyleMaskMode.h"
-#include "StylePositionTryFallbackTactic.h"
-#include "StylePositionVisibility.h"
-#include "StyleResize.h"
-#include "StyleScrollbarWidth.h"
-#include "StyleScrollBehavior.h"
-#include "StyleSpeakAs.h"
-#include "StyleTextAlign.h"
-#include "StyleTextAlignLast.h"
-#include "StyleTextDecorationLine.h"
-#include "StyleTextEmphasisPosition.h"
-#include "StyleTextTransform.h"
-#include "StyleTextUnderlinePosition.h"
-#include "StyleTouchAction.h"
-#include "StyleWebKitLineBoxContain.h"
-#include "StyleWebKitOverflowScrolling.h"
-#include "StyleWebKitTouchCallout.h"
-#include "SVGRenderStyleDefs.h"
-#include "TextFlags.h"
-#include "TextSpacing.h"
-#include "ThemeTypes.h"
-#include "UnicodeBidi.h"
-#include "WritingMode.h"
-#include <wtf/MathExtras.h>
+// FIXME: The mappings of the Style value types (and `FontSizeAdjust::Metric`) are added with their types:
+// `style::ContainValue`, `HangingPunctuationValue`, `ImageOrientation`, `MarginTrimSide`, `MaskMode` (and
+// `ToValueIdForWebkitMaskSourceType`), `PositionTryFallbackTactic`, `PositionTryOrder`,
+// `PositionVisibilityValue`, `Resize`, `ScrollBehavior`, `ScrollbarWidth`, `SpeakAsValue`, `TextAlign`,
+// `TextAlignLast`, `TextDecorationLine::Flag`, `TextEmphasisPositionValue`, `TextTransformValue`,
+// `TextUnderlinePositionValue`, `TouchActionValue` and `WebkitLineBoxContainValue`.
 
-#if ENABLE(APPLE_PAY)
-  #include "ApplePayButtonPart.h"
-#endif
-
-#if HAVE(CORE_MATERIAL)
-  #include "AppleVisualEffect.h"
-#endif
-
-namespace krys::boo::css
+namespace krys::boo
 {
+  template <typename TargetType>
+  KRYS_NODISCARD constexpr TargetType FromValueId(css::ValueId) noexcept;
 
   template <typename TargetType>
-  TargetType fromCSSValue(const Value &value)
+  KRYS_NODISCARD TargetType FromCSSValue(const css::Value &value) noexcept
   {
-    return fromCSSValueID<TargetType>(value.valueID());
+    return FromValueId<TargetType>(value.ValueId());
   }
 
-#define EMIT_TO_CSS_SWITCH_CASE(VALUE)                                                                       \
-  case TYPE::VALUE: return Value##VALUE;
-#define EMIT_FROM_CSS_SWITCH_CASE(VALUE)                                                                     \
-  case Value##VALUE: return TYPE::VALUE;
-#define EMIT_VALUE_REPRESENTATION_CSS_SWITCH_CASE(VALUE)                                                     \
-  case WebCore::TYPE::VALUE: return visitor(CSS::Keyword::VALUE {});
+#define KRYS_EMIT_TO_VALUE_ID_SWITCH_CASE(VALUE)                                                             \
+  case KRYS_MAPPING_TYPE::VALUE: return css::ValueId::VALUE;
+#define KRYS_EMIT_FROM_VALUE_ID_SWITCH_CASE(VALUE)                                                           \
+  case css::ValueId::VALUE: return KRYS_MAPPING_TYPE::VALUE;
+#define KRYS_EMIT_VALUE_REPRESENTATION_SWITCH_CASE(VALUE)                                                    \
+  case boo::KRYS_MAPPING_TYPE::VALUE: return visitor(css::keywords::VALUE {});
 
-#define DEFINE_TO_CSS_VALUE_ID_FUNCTION                                                                      \
-  constexpr CSSValueID toCSSValueID(TYPE value)                                                              \
+#define KRYS_DEFINE_TO_VALUE_ID_FUNCTION                                                                     \
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(KRYS_MAPPING_TYPE value) noexcept                          \
   {                                                                                                          \
     switch (value)                                                                                           \
     {                                                                                                        \
-      FOR_EACH(EMIT_TO_CSS_SWITCH_CASE)                                                                      \
+      KRYS_MAPPING_FOR_EACH(KRYS_EMIT_TO_VALUE_ID_SWITCH_CASE)                                               \
     }                                                                                                        \
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();                                                            \
-    return CSSValueInvalid;                                                                                  \
+    krys_debug_assert_msg(false, "Unexpected value");                                                        \
+    return css::ValueId::Invalid;                                                                            \
   }
 
-#define DEFINE_FROM_CSS_VALUE_ID_FUNCTION                                                                    \
+#define KRYS_DEFINE_FROM_VALUE_ID_FUNCTION                                                                   \
   template <>                                                                                                \
-  constexpr TYPE fromCSSValueID(CSSValueID value)                                                            \
+  KRYS_NODISCARD constexpr KRYS_MAPPING_TYPE FromValueId(css::ValueId value) noexcept                        \
   {                                                                                                          \
     switch (value)                                                                                           \
     {                                                                                                        \
-      FOR_EACH(EMIT_FROM_CSS_SWITCH_CASE)                                                                    \
+      KRYS_MAPPING_FOR_EACH(KRYS_EMIT_FROM_VALUE_ID_SWITCH_CASE)                                             \
       default: break;                                                                                        \
     }                                                                                                        \
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();                                                            \
+    krys_debug_assert_msg(false, "Unexpected value");                                                        \
     return {};                                                                                               \
   }
 
-#define DEFINE_VALUE_REPRESENTATION_CSS_VALUE_ID_FUNCTION                                                    \
+#define KRYS_DEFINE_VALUE_REPRESENTATION_FUNCTION                                                            \
   template <>                                                                                                \
-  struct Style::ValueRepresentation<WebCore::TYPE>                                                           \
+  struct style::ValueRepresentation<boo::KRYS_MAPPING_TYPE>                                                  \
   {                                                                                                          \
     template <typename... F>                                                                                 \
-    constexpr decltype(auto) operator()(WebCore::TYPE value, F &&...f)                                       \
+    constexpr decltype(auto) operator()(boo::KRYS_MAPPING_TYPE value, F &&...f) noexcept                     \
     {                                                                                                        \
-      auto visitor = WTF::makeVisitor(std::forward<F>(f)...);                                                \
+      auto visitor = krys::CreateVisitor(std::forward<F>(f)...);                                             \
       switch (value)                                                                                         \
       {                                                                                                      \
-        FOR_EACH(EMIT_VALUE_REPRESENTATION_CSS_SWITCH_CASE)                                                  \
+        KRYS_MAPPING_FOR_EACH(KRYS_EMIT_VALUE_REPRESENTATION_SWITCH_CASE)                                    \
       }                                                                                                      \
-      RELEASE_ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();                                                  \
+      krys_unreachable();                                                                                    \
     }                                                                                                        \
   };
 
-#define DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS                                                                \
-  DEFINE_TO_CSS_VALUE_ID_FUNCTION                                                                            \
-  DEFINE_FROM_CSS_VALUE_ID_FUNCTION                                                                          \
-  DEFINE_VALUE_REPRESENTATION_CSS_VALUE_ID_FUNCTION
+#define KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS                                                               \
+  KRYS_DEFINE_TO_VALUE_ID_FUNCTION                                                                           \
+  KRYS_DEFINE_FROM_VALUE_ID_FUNCTION                                                                         \
+  KRYS_DEFINE_VALUE_REPRESENTATION_FUNCTION
 
-#define TYPE ReflectionDirection
-#define FOR_EACH(CASE) CASE(Above) CASE(Below) CASE(Left) CASE(Right)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE ColumnFill
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Auto) CASE(Balance)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE ColumnFill
-#define FOR_EACH(CASE) CASE(Auto) CASE(Balance)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE ColumnSpan
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(All) CASE(None)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE ColumnSpan
-#define FOR_EACH(CASE) CASE(All) CASE(None)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE PrintColorAdjust
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Exact) CASE(Economy)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE PrintColorAdjust
-#define FOR_EACH(CASE) CASE(Exact) CASE(Economy)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE BlockStepAlign
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Auto) CASE(Center) CASE(Start) CASE(End)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE BlockStepAlign
-#define FOR_EACH(CASE) CASE(Auto) CASE(Center) CASE(Start) CASE(End)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE BlockStepInsert
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(MarginBox) CASE(PaddingBox) CASE(ContentBox)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE BlockStepInsert
-#define FOR_EACH(CASE) CASE(MarginBox) CASE(PaddingBox) CASE(ContentBox)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE BlockStepRound
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Up) CASE(Down) CASE(Nearest)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE BlockStepRound
-#define FOR_EACH(CASE) CASE(Up) CASE(Down) CASE(Nearest)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-  constexpr CSSValueID toCSSValueID(BorderStyle e)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(BorderStyle e) noexcept
   {
     switch (e)
     {
-      case BorderStyle::None:   return CSSValueNone;
-      case BorderStyle::Hidden: return CSSValueHidden;
-      case BorderStyle::Inset:  return CSSValueInset;
-      case BorderStyle::Groove: return CSSValueGroove;
-      case BorderStyle::Ridge:  return CSSValueRidge;
-      case BorderStyle::Outset: return CSSValueOutset;
-      case BorderStyle::Dotted: return CSSValueDotted;
-      case BorderStyle::Dashed: return CSSValueDashed;
-      case BorderStyle::Solid:  return CSSValueSolid;
-      case BorderStyle::Double: return CSSValueDouble;
+      case BorderStyle::None:   return css::ValueId::None;
+      case BorderStyle::Hidden: return css::ValueId::Hidden;
+      case BorderStyle::Inset:  return css::ValueId::Inset;
+      case BorderStyle::Groove: return css::ValueId::Groove;
+      case BorderStyle::Ridge:  return css::ValueId::Ridge;
+      case BorderStyle::Outset: return css::ValueId::Outset;
+      case BorderStyle::Dotted: return css::ValueId::Dotted;
+      case BorderStyle::Dashed: return css::ValueId::Dashed;
+      case BorderStyle::Solid:  return css::ValueId::Solid;
+      case BorderStyle::Double: return css::ValueId::Double;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr BorderStyle fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr BorderStyle FromValueId(css::ValueId valueID) noexcept
   {
-    return static_cast<BorderStyle>(valueID - CSSValueNone);
+    return static_cast<BorderStyle>(static_cast<uint16>(valueID) - static_cast<uint16>(css::ValueId::None));
   }
 
-#define TYPE OutlineStyle
-#define FOR_EACH(CASE)                                                                                       \
+#define KRYS_MAPPING_TYPE OutlineStyle
+#define KRYS_MAPPING_FOR_EACH(CASE)                                                                          \
   CASE(Auto)                                                                                                 \
   CASE(None)                                                                                                 \
   CASE(Inset) CASE(Groove) CASE(Ridge) CASE(Outset) CASE(Dotted) CASE(Dashed) CASE(Solid) CASE(Double)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-  constexpr CSSValueID toCSSValueID(CompositeOperator e)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(CompositeOperator e) noexcept
   {
     switch (e)
     {
-      case CompositeOperator::SourceOver: return CSSValueAdd;
-      case CompositeOperator::SourceIn:   return CSSValueIntersect;
-      case CompositeOperator::SourceOut:  return CSSValueSubtract;
-      case CompositeOperator::XOR:        return CSSValueExclude;
+      case CompositeOperator::SourceOver: return css::ValueId::Add;
+      case CompositeOperator::SourceIn:   return css::ValueId::Intersect;
+      case CompositeOperator::SourceOut:  return css::ValueId::Subtract;
+      case CompositeOperator::XOR:        return css::ValueId::Exclude;
       default:                            break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
-  constexpr CSSValueID toCSSValueIDForWebkitMaskComposite(CompositeOperator e)
+  KRYS_NODISCARD constexpr css::ValueId ToValueIdForWebkitMaskComposite(CompositeOperator e) noexcept
   {
     switch (e)
     {
-      case CompositeOperator::Clear:           return CSSValueClear;
-      case CompositeOperator::Copy:            return CSSValueCopy;
-      case CompositeOperator::SourceOver:      return CSSValueSourceOver;
-      case CompositeOperator::SourceIn:        return CSSValueSourceIn;
-      case CompositeOperator::SourceOut:       return CSSValueSourceOut;
-      case CompositeOperator::SourceAtop:      return CSSValueSourceAtop;
-      case CompositeOperator::DestinationOver: return CSSValueDestinationOver;
-      case CompositeOperator::DestinationIn:   return CSSValueDestinationIn;
-      case CompositeOperator::DestinationOut:  return CSSValueDestinationOut;
-      case CompositeOperator::DestinationAtop: return CSSValueDestinationAtop;
-      case CompositeOperator::XOR:             return CSSValueXor;
-      case CompositeOperator::PlusDarker:      return CSSValuePlusDarker;
-      case CompositeOperator::PlusLighter:     return CSSValuePlusLighter;
+      case CompositeOperator::Clear:           return css::ValueId::Clear;
+      case CompositeOperator::Copy:            return css::ValueId::Copy;
+      case CompositeOperator::SourceOver:      return css::ValueId::SourceOver;
+      case CompositeOperator::SourceIn:        return css::ValueId::SourceIn;
+      case CompositeOperator::SourceOut:       return css::ValueId::SourceOut;
+      case CompositeOperator::SourceAtop:      return css::ValueId::SourceAtop;
+      case CompositeOperator::DestinationOver: return css::ValueId::DestinationOver;
+      case CompositeOperator::DestinationIn:   return css::ValueId::DestinationIn;
+      case CompositeOperator::DestinationOut:  return css::ValueId::DestinationOut;
+      case CompositeOperator::DestinationAtop: return css::ValueId::DestinationAtop;
+      case CompositeOperator::XOR:             return css::ValueId::Xor;
+      case CompositeOperator::PlusDarker:      return css::ValueId::PlusDarker;
+      case CompositeOperator::PlusLighter:     return css::ValueId::PlusLighter;
       case CompositeOperator::Difference:      break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr CompositeOperator fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr CompositeOperator FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueClear:           return CompositeOperator::Clear;
-      case CSSValueCopy:            return CompositeOperator::Copy;
-      case CSSValueSourceOver:
-      case CSSValueAdd:             return CompositeOperator::SourceOver;
-      case CSSValueSourceIn:
-      case CSSValueIntersect:       return CompositeOperator::SourceIn;
-      case CSSValueSourceOut:
-      case CSSValueSubtract:        return CompositeOperator::SourceOut;
-      case CSSValueSourceAtop:      return CompositeOperator::SourceAtop;
-      case CSSValueDestinationOver: return CompositeOperator::DestinationOver;
-      case CSSValueDestinationIn:   return CompositeOperator::DestinationIn;
-      case CSSValueDestinationOut:  return CompositeOperator::DestinationOut;
-      case CSSValueDestinationAtop: return CompositeOperator::DestinationAtop;
-      case CSSValueXor:
-      case CSSValueExclude:         return CompositeOperator::XOR;
-      case CSSValuePlusDarker:      return CompositeOperator::PlusDarker;
-      case CSSValuePlusLighter:     return CompositeOperator::PlusLighter;
-      default:                      break;
+      case css::ValueId::Clear:           return CompositeOperator::Clear;
+      case css::ValueId::Copy:            return CompositeOperator::Copy;
+      case css::ValueId::SourceOver:
+      case css::ValueId::Add:             return CompositeOperator::SourceOver;
+      case css::ValueId::SourceIn:
+      case css::ValueId::Intersect:       return CompositeOperator::SourceIn;
+      case css::ValueId::SourceOut:
+      case css::ValueId::Subtract:        return CompositeOperator::SourceOut;
+      case css::ValueId::SourceAtop:      return CompositeOperator::SourceAtop;
+      case css::ValueId::DestinationOver: return CompositeOperator::DestinationOver;
+      case css::ValueId::DestinationIn:   return CompositeOperator::DestinationIn;
+      case css::ValueId::DestinationOut:  return CompositeOperator::DestinationOut;
+      case css::ValueId::DestinationAtop: return CompositeOperator::DestinationAtop;
+      case css::ValueId::Xor:
+      case css::ValueId::Exclude:         return CompositeOperator::XOR;
+      case css::ValueId::PlusDarker:      return CompositeOperator::PlusDarker;
+      case css::ValueId::PlusLighter:     return CompositeOperator::PlusLighter;
+      default:                            break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return CompositeOperator::Clear;
   }
 
-  constexpr CSSValueID toCSSValueID(StyleAppearance e)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(StyleAppearance e) noexcept
   {
     switch (e)
     {
-      case StyleAppearance::None:             return CSSValueNone;
-      case StyleAppearance::Auto:             return CSSValueAuto;
-      case StyleAppearance::Base:             return CSSValueBase;
-      case StyleAppearance::Checkbox:         return CSSValueCheckbox;
-      case StyleAppearance::Radio:            return CSSValueRadio;
-      case StyleAppearance::PushButton:       return CSSValuePushButton;
-      case StyleAppearance::SquareButton:     return CSSValueSquareButton;
-      case StyleAppearance::Button:           return CSSValueButton;
-      case StyleAppearance::DefaultButton:    return CSSValueDefaultButton;
-      case StyleAppearance::Listbox:          return CSSValueListbox;
-      case StyleAppearance::Menulist:         return CSSValueMenulist;
-      case StyleAppearance::MenulistButton:   return CSSValueMenulistButton;
-      case StyleAppearance::Meter:            return CSSValueMeter;
-      case StyleAppearance::ProgressBar:      return CSSValueProgressBar;
-      case StyleAppearance::SliderHorizontal: return CSSValueSliderHorizontal;
-      case StyleAppearance::SliderVertical:   return CSSValueSliderVertical;
-      case StyleAppearance::SearchField:      return CSSValueSearchfield;
-      case StyleAppearance::TextField:        return CSSValueTextfield;
-      case StyleAppearance::TextArea:         return CSSValueTextarea;
-#if ENABLE(ATTACHMENT_ELEMENT)
-      case StyleAppearance::Attachment:           return CSSValueAttachment;
-      case StyleAppearance::BorderlessAttachment: return CSSValueBorderlessAttachment;
-#endif
-#if ENABLE(APPLE_PAY)
-      case StyleAppearance::ApplePayButton: return CSSValueApplePayButton;
-#endif
+      case StyleAppearance::None:             return css::ValueId::None;
+      case StyleAppearance::Auto:             return css::ValueId::Auto;
+      case StyleAppearance::Base:             return css::ValueId::Base;
+      case StyleAppearance::Checkbox:         return css::ValueId::Checkbox;
+      case StyleAppearance::Radio:            return css::ValueId::Radio;
+      case StyleAppearance::PushButton:       return css::ValueId::PushButton;
+      case StyleAppearance::SquareButton:     return css::ValueId::SquareButton;
+      case StyleAppearance::Button:           return css::ValueId::Button;
+      case StyleAppearance::DefaultButton:    return css::ValueId::DefaultButton;
+      case StyleAppearance::Listbox:          return css::ValueId::Listbox;
+      case StyleAppearance::Menulist:         return css::ValueId::Menulist;
+      case StyleAppearance::MenulistButton:   return css::ValueId::MenulistButton;
+      case StyleAppearance::Meter:            return css::ValueId::Meter;
+      case StyleAppearance::ProgressBar:      return css::ValueId::ProgressBar;
+      case StyleAppearance::SliderHorizontal: return css::ValueId::SliderHorizontal;
+      case StyleAppearance::SliderVertical:   return css::ValueId::SliderVertical;
+      case StyleAppearance::SearchField:      return css::ValueId::Searchfield;
+      case StyleAppearance::TextField:        return css::ValueId::Textfield;
+      case StyleAppearance::TextArea:         return css::ValueId::Textarea;
       case StyleAppearance::ColorWell:
       case StyleAppearance::ColorWellSwatch:
       case StyleAppearance::ColorWellSwatchOverlay:
       case StyleAppearance::ColorWellSwatchWrapper:
-#if ENABLE(SERVICE_CONTROLS)
-      case StyleAppearance::ImageControlsButton:
-#endif
       case StyleAppearance::InnerSpinButton:
       case StyleAppearance::ListButton:
       case StyleAppearance::SearchFieldDecoration:
@@ -329,1895 +262,1463 @@ namespace krys::boo::css
       case StyleAppearance::SliderThumbVertical:
       case StyleAppearance::Switch:
       case StyleAppearance::SwitchThumb:
-      case StyleAppearance::SwitchTrack:                  ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT(); return CSSValueNone;
+      case StyleAppearance::SwitchTrack:
+        krys_debug_assert_msg(false, "Unexpected value");
+        return css::ValueId::None;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr StyleAppearance fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr StyleAppearance FromValueId(css::ValueId valueID) noexcept
   {
-    if (valueID == CSSValueNone)
+    if (valueID == css::ValueId::None)
+    {
       return StyleAppearance::None;
+    }
 
-    if (valueID == CSSValueAuto)
+    if (valueID == css::ValueId::Auto)
+    {
       return StyleAppearance::Auto;
+    }
 
-    return StyleAppearance(valueID - CSSValueBase + static_cast<unsigned>(StyleAppearance::Base));
+    return static_cast<StyleAppearance>(static_cast<uint16>(valueID) - static_cast<uint16>(css::ValueId::Base)
+                                        + static_cast<uint16>(StyleAppearance::Base));
   }
 
-#define TYPE BackfaceVisibility
-#define FOR_EACH(CASE) CASE(Visible) CASE(Hidden)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE BackfaceVisibility
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Visible) CASE(Hidden)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE FieldSizing
-#define FOR_EACH(CASE) CASE(Fixed) CASE(Content)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE FieldSizing
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Fixed) CASE(Content)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-  constexpr CSSValueID toCSSValueID(FillAttachment e)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(FillAttachment e) noexcept
   {
     switch (e)
     {
-      case FillAttachment::ScrollBackground: return CSSValueScroll;
-      case FillAttachment::LocalBackground:  return CSSValueLocal;
-      case FillAttachment::FixedBackground:  return CSSValueFixed;
+      case FillAttachment::ScrollBackground: return css::ValueId::Scroll;
+      case FillAttachment::LocalBackground:  return css::ValueId::Local;
+      case FillAttachment::FixedBackground:  return css::ValueId::Fixed;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr FillAttachment fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr FillAttachment FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueScroll: return FillAttachment::ScrollBackground;
-      case CSSValueLocal:  return FillAttachment::LocalBackground;
-      case CSSValueFixed:  return FillAttachment::FixedBackground;
-      default:             break;
+      case css::ValueId::Scroll: return FillAttachment::ScrollBackground;
+      case css::ValueId::Local:  return FillAttachment::LocalBackground;
+      case css::ValueId::Fixed:  return FillAttachment::FixedBackground;
+      default:                   break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return FillAttachment::ScrollBackground;
   }
 
-  constexpr CSSValueID toCSSValueID(FillBox e)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(FillBox e) noexcept
   {
     switch (e)
     {
-      case FillBox::BorderBox:  return CSSValueBorderBox;
-      case FillBox::PaddingBox: return CSSValuePaddingBox;
-      case FillBox::ContentBox: return CSSValueContentBox;
-      case FillBox::BorderArea: return CSSValueBorderArea;
-      case FillBox::Text:       return CSSValueText;
-      case FillBox::NoClip:     return CSSValueNoClip;
+      case FillBox::BorderBox:  return css::ValueId::BorderBox;
+      case FillBox::PaddingBox: return css::ValueId::PaddingBox;
+      case FillBox::ContentBox: return css::ValueId::ContentBox;
+      case FillBox::BorderArea: return css::ValueId::BorderArea;
+      case FillBox::Text:       return css::ValueId::Text;
+      case FillBox::NoClip:     return css::ValueId::NoClip;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr FillBox fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr FillBox FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueBorder:
-      case CSSValueBorderBox:  return FillBox::BorderBox;
-      case CSSValuePadding:
-      case CSSValuePaddingBox: return FillBox::PaddingBox;
-      case CSSValueContent:
-      case CSSValueContentBox: return FillBox::ContentBox;
-      case CSSValueBorderArea: return FillBox::BorderArea;
-      case CSSValueText:
-      case CSSValueWebkitText: return FillBox::Text;
-      case CSSValueNoClip:     return FillBox::NoClip;
-      default:                 break;
+      case css::ValueId::Border:
+      case css::ValueId::BorderBox:  return FillBox::BorderBox;
+      case css::ValueId::Padding:
+      case css::ValueId::PaddingBox: return FillBox::PaddingBox;
+      case css::ValueId::Content:
+      case css::ValueId::ContentBox: return FillBox::ContentBox;
+      case css::ValueId::BorderArea: return FillBox::BorderArea;
+      case css::ValueId::Text:
+      case css::ValueId::WebkitText: return FillBox::Text;
+      case css::ValueId::NoClip:     return FillBox::NoClip;
+      default:                       break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return FillBox::BorderBox;
   }
 
-#define TYPE FillRepeat
-#define FOR_EACH(CASE) CASE(Repeat) CASE(NoRepeat) CASE(Round) CASE(Space)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE FillRepeat
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Repeat) CASE(NoRepeat) CASE(Round) CASE(Space)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE BoxPack
-#define FOR_EACH(CASE) CASE(Start) CASE(Center) CASE(End) CASE(Justify)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE BoxDecorationBreak
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Slice) CASE(Clone)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE BoxAlignment
-#define FOR_EACH(CASE) CASE(Stretch) CASE(Start) CASE(Center) CASE(End) CASE(Baseline)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE Edge
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Top) CASE(Right) CASE(Bottom) CASE(Left)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE BoxDecorationBreak
-#define FOR_EACH(CASE) CASE(Slice) CASE(Clone)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE BoxSizing
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(BorderBox) CASE(ContentBox)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE Edge
-#define FOR_EACH(CASE) CASE(Top) CASE(Right) CASE(Bottom) CASE(Left)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE CaptionSide
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Top) CASE(Bottom)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE BoxSizing
-#define FOR_EACH(CASE) CASE(BorderBox) CASE(ContentBox)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE Clear
+#define KRYS_MAPPING_FOR_EACH(CASE)                                                                          \
+  CASE(None) CASE(Left) CASE(Right) CASE(InlineStart) CASE(InlineEnd) CASE(Both)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE BoxDirection
-#define FOR_EACH(CASE) CASE(Normal) CASE(Reverse)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE TextBoxTrim
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(None) CASE(TrimStart) CASE(TrimEnd) CASE(TrimBoth)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE BoxLines
-#define FOR_EACH(CASE) CASE(Single) CASE(Multiple)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-  constexpr CSSValueID toCSSValueID(BoxOrient e)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(CursorType e) noexcept
   {
     switch (e)
     {
-      case BoxOrient::Horizontal: return CSSValueHorizontal;
-      case BoxOrient::Vertical:   return CSSValueVertical;
+      case CursorType::Auto:         return css::ValueId::Auto;
+      case CursorType::Default:      return css::ValueId::Default;
+      case CursorType::None:         return css::ValueId::None;
+      case CursorType::ContextMenu:  return css::ValueId::ContextMenu;
+      case CursorType::Help:         return css::ValueId::Help;
+      case CursorType::Pointer:      return css::ValueId::Pointer;
+      case CursorType::Progress:     return css::ValueId::Progress;
+      case CursorType::Wait:         return css::ValueId::Wait;
+      case CursorType::Cell:         return css::ValueId::Cell;
+      case CursorType::Crosshair:    return css::ValueId::Crosshair;
+      case CursorType::Text:         return css::ValueId::Text;
+      case CursorType::VerticalText: return css::ValueId::VerticalText;
+      case CursorType::Alias:        return css::ValueId::Alias;
+      case CursorType::Copy:         return css::ValueId::Copy;
+      case CursorType::Move:         return css::ValueId::Move;
+      case CursorType::NoDrop:       return css::ValueId::NoDrop;
+      case CursorType::NotAllowed:   return css::ValueId::NotAllowed;
+      case CursorType::Grab:         return css::ValueId::Grab;
+      case CursorType::Grabbing:     return css::ValueId::Grabbing;
+      case CursorType::EResize:      return css::ValueId::EResize;
+      case CursorType::NResize:      return css::ValueId::NResize;
+      case CursorType::NEResize:     return css::ValueId::NeResize;
+      case CursorType::NWResize:     return css::ValueId::NwResize;
+      case CursorType::SResize:      return css::ValueId::SResize;
+      case CursorType::SEResize:     return css::ValueId::SeResize;
+      case CursorType::SWResize:     return css::ValueId::SwResize;
+      case CursorType::WResize:      return css::ValueId::WResize;
+      case CursorType::EWResize:     return css::ValueId::EwResize;
+      case CursorType::NSResize:     return css::ValueId::NsResize;
+      case CursorType::NESWResize:   return css::ValueId::NeswResize;
+      case CursorType::NWSEResize:   return css::ValueId::NwseResize;
+      case CursorType::ColumnResize: return css::ValueId::ColResize;
+      case CursorType::RowResize:    return css::ValueId::RowResize;
+      case CursorType::AllScroll:    return css::ValueId::AllScroll;
+      case CursorType::ZoomIn:       return css::ValueId::ZoomIn;
+      case CursorType::ZoomOut:      return css::ValueId::ZoomOut;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr BoxOrient fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr CursorType FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueHorizontal:
-      case CSSValueInlineAxis: return BoxOrient::Horizontal;
-      case CSSValueVertical:
-      case CSSValueBlockAxis:  return BoxOrient::Vertical;
-      default:                 break;
+      case css::ValueId::Copy:           return CursorType::Copy;
+      case css::ValueId::WebkitGrab:     return CursorType::Grab;
+      case css::ValueId::WebkitGrabbing: return CursorType::Grabbing;
+      case css::ValueId::WebkitZoomIn:   return CursorType::ZoomIn;
+      case css::ValueId::WebkitZoomOut:  return CursorType::ZoomOut;
+      case css::ValueId::None:           return CursorType::None;
+      default:
+        return static_cast<CursorType>(static_cast<uint16>(valueID)
+                                       - static_cast<uint16>(css::ValueId::Auto));
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return BoxOrient::Horizontal;
   }
 
-#define TYPE CaptionSide
-#define FOR_EACH(CASE) CASE(Top) CASE(Bottom)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-#define TYPE Clear
-#define FOR_EACH(CASE) CASE(None) CASE(Left) CASE(Right) CASE(InlineStart) CASE(InlineEnd) CASE(Both)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-#define TYPE TextBoxTrim
-#define FOR_EACH(CASE) CASE(None) CASE(TrimStart) CASE(TrimEnd) CASE(TrimBoth)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-  constexpr CSSValueID toCSSValueID(CursorType e)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(DisplayType e) noexcept
   {
     switch (e)
     {
-      case CursorType::Auto:         return CSSValueAuto;
-      case CursorType::Default:      return CSSValueDefault;
-      case CursorType::None:         return CSSValueNone;
-      case CursorType::ContextMenu:  return CSSValueContextMenu;
-      case CursorType::Help:         return CSSValueHelp;
-      case CursorType::Pointer:      return CSSValuePointer;
-      case CursorType::Progress:     return CSSValueProgress;
-      case CursorType::Wait:         return CSSValueWait;
-      case CursorType::Cell:         return CSSValueCell;
-      case CursorType::Crosshair:    return CSSValueCrosshair;
-      case CursorType::Text:         return CSSValueText;
-      case CursorType::VerticalText: return CSSValueVerticalText;
-      case CursorType::Alias:        return CSSValueAlias;
-      case CursorType::Copy:         return CSSValueCopy;
-      case CursorType::Move:         return CSSValueMove;
-      case CursorType::NoDrop:       return CSSValueNoDrop;
-      case CursorType::NotAllowed:   return CSSValueNotAllowed;
-      case CursorType::Grab:         return CSSValueGrab;
-      case CursorType::Grabbing:     return CSSValueGrabbing;
-      case CursorType::EResize:      return CSSValueEResize;
-      case CursorType::NResize:      return CSSValueNResize;
-      case CursorType::NEResize:     return CSSValueNeResize;
-      case CursorType::NWResize:     return CSSValueNwResize;
-      case CursorType::SResize:      return CSSValueSResize;
-      case CursorType::SEResize:     return CSSValueSeResize;
-      case CursorType::SWResize:     return CSSValueSwResize;
-      case CursorType::WResize:      return CSSValueWResize;
-      case CursorType::EWResize:     return CSSValueEwResize;
-      case CursorType::NSResize:     return CSSValueNsResize;
-      case CursorType::NESWResize:   return CSSValueNeswResize;
-      case CursorType::NWSEResize:   return CSSValueNwseResize;
-      case CursorType::ColumnResize: return CSSValueColResize;
-      case CursorType::RowResize:    return CSSValueRowResize;
-      case CursorType::AllScroll:    return CSSValueAllScroll;
-      case CursorType::ZoomIn:       return CSSValueZoomIn;
-      case CursorType::ZoomOut:      return CSSValueZoomOut;
+      case DisplayType::Inline:           return css::ValueId::Inline;
+      case DisplayType::Block:            return css::ValueId::Block;
+      case DisplayType::ListItem:         return css::ValueId::ListItem;
+      case DisplayType::InlineBlock:      return css::ValueId::InlineBlock;
+      case DisplayType::Table:            return css::ValueId::Table;
+      case DisplayType::InlineTable:      return css::ValueId::InlineTable;
+      case DisplayType::TableRowGroup:    return css::ValueId::TableRowGroup;
+      case DisplayType::TableHeaderGroup: return css::ValueId::TableHeaderGroup;
+      case DisplayType::TableFooterGroup: return css::ValueId::TableFooterGroup;
+      case DisplayType::TableRow:         return css::ValueId::TableRow;
+      case DisplayType::TableColumnGroup: return css::ValueId::TableColumnGroup;
+      case DisplayType::TableColumn:      return css::ValueId::TableColumn;
+      case DisplayType::TableCell:        return css::ValueId::TableCell;
+      case DisplayType::TableCaption:     return css::ValueId::TableCaption;
+      case DisplayType::Box:              return css::ValueId::WebkitBox;
+      case DisplayType::InlineBox:        return css::ValueId::WebkitInlineBox;
+      case DisplayType::Flex:             return css::ValueId::Flex;
+      case DisplayType::InlineFlex:       return css::ValueId::InlineFlex;
+      case DisplayType::Grid:             return css::ValueId::Grid;
+      case DisplayType::InlineGrid:       return css::ValueId::InlineGrid;
+      case DisplayType::GridLanes:        return css::ValueId::GridLanes;
+      case DisplayType::InlineGridLanes:  return css::ValueId::InlineGridLanes;
+      case DisplayType::None:             return css::ValueId::None;
+      case DisplayType::Contents:         return css::ValueId::Contents;
+      case DisplayType::FlowRoot:         return css::ValueId::FlowRoot;
+      case DisplayType::Ruby:             return css::ValueId::Ruby;
+      case DisplayType::RubyBlock:        return css::ValueId::BlockRuby;
+      case DisplayType::RubyBase:         return css::ValueId::RubyBase;
+      case DisplayType::RubyAnnotation:   return css::ValueId::RubyText;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr CursorType fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr DisplayType FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueCopy:           return CursorType::Copy;
-      case CSSValueWebkitGrab:     return CursorType::Grab;
-      case CSSValueWebkitGrabbing: return CursorType::Grabbing;
-      case CSSValueWebkitZoomIn:   return CursorType::ZoomIn;
-      case CSSValueWebkitZoomOut:  return CursorType::ZoomOut;
-      case CSSValueNone:           return CursorType::None;
-      default:                     return static_cast<CursorType>(valueID - CSSValueAuto);
+      case css::ValueId::Inline:           return DisplayType::Inline;
+      case css::ValueId::Block:            return DisplayType::Block;
+      case css::ValueId::ListItem:         return DisplayType::ListItem;
+      case css::ValueId::InlineBlock:      return DisplayType::InlineBlock;
+      case css::ValueId::Table:            return DisplayType::Table;
+      case css::ValueId::InlineTable:      return DisplayType::InlineTable;
+      case css::ValueId::TableRowGroup:    return DisplayType::TableRowGroup;
+      case css::ValueId::TableHeaderGroup: return DisplayType::TableHeaderGroup;
+      case css::ValueId::TableFooterGroup: return DisplayType::TableFooterGroup;
+      case css::ValueId::TableRow:         return DisplayType::TableRow;
+      case css::ValueId::TableColumnGroup: return DisplayType::TableColumnGroup;
+      case css::ValueId::TableColumn:      return DisplayType::TableColumn;
+      case css::ValueId::TableCell:        return DisplayType::TableCell;
+      case css::ValueId::TableCaption:     return DisplayType::TableCaption;
+      case css::ValueId::WebkitBox:        return DisplayType::Box;
+      case css::ValueId::WebkitInlineBox:  return DisplayType::InlineBox;
+      case css::ValueId::Flex:             return DisplayType::Flex;
+      case css::ValueId::InlineFlex:       return DisplayType::InlineFlex;
+      case css::ValueId::Grid:             return DisplayType::Grid;
+      case css::ValueId::InlineGrid:       return DisplayType::InlineGrid;
+      case css::ValueId::GridLanes:        return DisplayType::GridLanes;
+      case css::ValueId::InlineGridLanes:  return DisplayType::InlineGridLanes;
+      case css::ValueId::None:             return DisplayType::None;
+      case css::ValueId::Contents:         return DisplayType::Contents;
+      case css::ValueId::FlowRoot:         return DisplayType::FlowRoot;
+      case css::ValueId::Ruby:             return DisplayType::Ruby;
+      case css::ValueId::BlockRuby:        return DisplayType::RubyBlock;
+      case css::ValueId::RubyBase:         return DisplayType::RubyBase;
+      case css::ValueId::RubyText:         return DisplayType::RubyAnnotation;
+      default:                             break;
     }
-  }
-
-#if ENABLE(CURSOR_VISIBILITY)
-
-  #define TYPE CursorVisibility
-  #define FOR_EACH(CASE) CASE(Auto) CASE(AutoHide)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-  #undef TYPE
-  #undef FOR_EACH
-
-#endif
-
-  constexpr CSSValueID toCSSValueID(DisplayType e)
-  {
-    switch (e)
-    {
-      case DisplayType::Inline:           return CSSValueInline;
-      case DisplayType::Block:            return CSSValueBlock;
-      case DisplayType::ListItem:         return CSSValueListItem;
-      case DisplayType::InlineBlock:      return CSSValueInlineBlock;
-      case DisplayType::Table:            return CSSValueTable;
-      case DisplayType::InlineTable:      return CSSValueInlineTable;
-      case DisplayType::TableRowGroup:    return CSSValueTableRowGroup;
-      case DisplayType::TableHeaderGroup: return CSSValueTableHeaderGroup;
-      case DisplayType::TableFooterGroup: return CSSValueTableFooterGroup;
-      case DisplayType::TableRow:         return CSSValueTableRow;
-      case DisplayType::TableColumnGroup: return CSSValueTableColumnGroup;
-      case DisplayType::TableColumn:      return CSSValueTableColumn;
-      case DisplayType::TableCell:        return CSSValueTableCell;
-      case DisplayType::TableCaption:     return CSSValueTableCaption;
-      case DisplayType::Box:              return CSSValueWebkitBox;
-      case DisplayType::InlineBox:        return CSSValueWebkitInlineBox;
-      case DisplayType::Flex:             return CSSValueFlex;
-      case DisplayType::InlineFlex:       return CSSValueInlineFlex;
-      case DisplayType::Grid:             return CSSValueGrid;
-      case DisplayType::InlineGrid:       return CSSValueInlineGrid;
-      case DisplayType::GridLanes:        return CSSValueGridLanes;
-      case DisplayType::InlineGridLanes:  return CSSValueInlineGridLanes;
-      case DisplayType::None:             return CSSValueNone;
-      case DisplayType::Contents:         return CSSValueContents;
-      case DisplayType::FlowRoot:         return CSSValueFlowRoot;
-      case DisplayType::Ruby:             return CSSValueRuby;
-      case DisplayType::RubyBlock:        return CSSValueBlockRuby;
-      case DisplayType::RubyBase:         return CSSValueRubyBase;
-      case DisplayType::RubyAnnotation:   return CSSValueRubyText;
-    }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
-  }
-
-  template <>
-  constexpr DisplayType fromCSSValueID(CSSValueID valueID)
-  {
-    switch (valueID)
-    {
-      case CSSValueInline:           return DisplayType::Inline;
-      case CSSValueBlock:            return DisplayType::Block;
-      case CSSValueListItem:         return DisplayType::ListItem;
-      case CSSValueInlineBlock:      return DisplayType::InlineBlock;
-      case CSSValueTable:            return DisplayType::Table;
-      case CSSValueInlineTable:      return DisplayType::InlineTable;
-      case CSSValueTableRowGroup:    return DisplayType::TableRowGroup;
-      case CSSValueTableHeaderGroup: return DisplayType::TableHeaderGroup;
-      case CSSValueTableFooterGroup: return DisplayType::TableFooterGroup;
-      case CSSValueTableRow:         return DisplayType::TableRow;
-      case CSSValueTableColumnGroup: return DisplayType::TableColumnGroup;
-      case CSSValueTableColumn:      return DisplayType::TableColumn;
-      case CSSValueTableCell:        return DisplayType::TableCell;
-      case CSSValueTableCaption:     return DisplayType::TableCaption;
-      case CSSValueWebkitBox:        return DisplayType::Box;
-      case CSSValueWebkitInlineBox:  return DisplayType::InlineBox;
-      case CSSValueFlex:             return DisplayType::Flex;
-      case CSSValueInlineFlex:       return DisplayType::InlineFlex;
-      case CSSValueGrid:             return DisplayType::Grid;
-      case CSSValueInlineGrid:       return DisplayType::InlineGrid;
-      case CSSValueGridLanes:        return DisplayType::GridLanes;
-      case CSSValueInlineGridLanes:  return DisplayType::InlineGridLanes;
-      case CSSValueNone:             return DisplayType::None;
-      case CSSValueContents:         return DisplayType::Contents;
-      case CSSValueFlowRoot:         return DisplayType::FlowRoot;
-      case CSSValueRuby:             return DisplayType::Ruby;
-      case CSSValueBlockRuby:        return DisplayType::RubyBlock;
-      case CSSValueRubyBase:         return DisplayType::RubyBase;
-      case CSSValueRubyText:         return DisplayType::RubyAnnotation;
-      default:                       break;
-    }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return DisplayType::Inline;
   }
 
-#define TYPE EmptyCell
-#define FOR_EACH(CASE) CASE(Show) CASE(Hide)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE EmptyCell
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Show) CASE(Hide)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE FlexDirection
-#define FOR_EACH(CASE) CASE(Row) CASE(RowReverse) CASE(Column) CASE(ColumnReverse)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE FlexDirection
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Row) CASE(RowReverse) CASE(Column) CASE(ColumnReverse)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-  constexpr CSSValueID toCSSValueID(FlexWrap e)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(FlexWrap e) noexcept
   {
     switch (e)
     {
-      case FlexWrap::NoWrap:  return CSSValueNowrap;
-      case FlexWrap::Wrap:    return CSSValueWrap;
-      case FlexWrap::Reverse: return CSSValueWrapReverse;
+      case FlexWrap::NoWrap:  return css::ValueId::Nowrap;
+      case FlexWrap::Wrap:    return css::ValueId::Wrap;
+      case FlexWrap::Reverse: return css::ValueId::WrapReverse;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr FlexWrap fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr FlexWrap FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueNowrap:      return FlexWrap::NoWrap;
-      case CSSValueWrap:        return FlexWrap::Wrap;
-      case CSSValueWrapReverse: return FlexWrap::Reverse;
-      default:                  break;
+      case css::ValueId::Nowrap:      return FlexWrap::NoWrap;
+      case css::ValueId::Wrap:        return FlexWrap::Wrap;
+      case css::ValueId::WrapReverse: return FlexWrap::Reverse;
+      default:                        break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return FlexWrap::NoWrap;
   }
 
-#define TYPE Float
-#define FOR_EACH(CASE) CASE(None) CASE(Left) CASE(Right) CASE(InlineStart) CASE(InlineEnd)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE Float
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(None) CASE(Left) CASE(Right) CASE(InlineStart) CASE(InlineEnd)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE LineBreak
-#define FOR_EACH(CASE) CASE(Auto) CASE(Loose) CASE(Normal) CASE(Strict) CASE(AfterWhiteSpace) CASE(Anywhere)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE LineBreak
+#define KRYS_MAPPING_FOR_EACH(CASE)                                                                          \
+  CASE(Auto) CASE(Loose) CASE(Normal) CASE(Strict) CASE(AfterWhiteSpace) CASE(Anywhere)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE Style::HangingPunctuationValue
-#define FOR_EACH(CASE) CASE(First) CASE(ForceEnd) CASE(AllowEnd) CASE(Last)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE ListStylePosition
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Outside) CASE(Inside)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE ListStylePosition
-#define FOR_EACH(CASE) CASE(Outside) CASE(Inside)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-#define TYPE MarqueeBehavior
-#define FOR_EACH(CASE) CASE(None) CASE(Scroll) CASE(Slide) CASE(Alternate)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-  constexpr CSSValueID toCSSValueID(MarqueeDirection direction)
-  {
-    switch (direction)
-    {
-      case MarqueeDirection::Forward:  return CSSValueForwards;
-      case MarqueeDirection::Backward: return CSSValueBackwards;
-      case MarqueeDirection::Auto:     return CSSValueAuto;
-      case MarqueeDirection::Up:       return CSSValueUp;
-      case MarqueeDirection::Down:     return CSSValueDown;
-      case MarqueeDirection::Left:     return CSSValueLeft;
-      case MarqueeDirection::Right:    return CSSValueRight;
-    }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
-  }
-
-  template <>
-  constexpr MarqueeDirection fromCSSValueID(CSSValueID valueID)
-  {
-    switch (valueID)
-    {
-      case CSSValueForwards:  return MarqueeDirection::Forward;
-      case CSSValueBackwards: return MarqueeDirection::Backward;
-      case CSSValueAuto:      return MarqueeDirection::Auto;
-      case CSSValueAhead:
-      case CSSValueUp: // We don't support vertical languages, so AHEAD just maps to UP.
-        return MarqueeDirection::Up;
-      case CSSValueReverse:
-      case CSSValueDown: // REVERSE just maps to DOWN, since we don't do vertical text.
-        return MarqueeDirection::Down;
-      case CSSValueLeft:  return MarqueeDirection::Left;
-      case CSSValueRight: return MarqueeDirection::Right;
-      default:            break;
-    }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return MarqueeDirection::Auto;
-  }
-
-#define TYPE NBSPMode
-#define FOR_EACH(CASE) CASE(Normal) CASE(Space)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-  constexpr CSSValueID toCSSValueID(Overflow e)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(Overflow e) noexcept
   {
     switch (e)
     {
-      case Overflow::Visible: return CSSValueVisible;
-      case Overflow::Hidden:  return CSSValueHidden;
-      case Overflow::Scroll:  return CSSValueScroll;
-      case Overflow::Auto:    return CSSValueAuto;
-      case Overflow::PagedX:  return CSSValueWebkitPagedX;
-      case Overflow::PagedY:  return CSSValueWebkitPagedY;
-      case Overflow::Clip:    return CSSValueClip;
+      case Overflow::Visible: return css::ValueId::Visible;
+      case Overflow::Hidden:  return css::ValueId::Hidden;
+      case Overflow::Scroll:  return css::ValueId::Scroll;
+      case Overflow::Auto:    return css::ValueId::Auto;
+      case Overflow::PagedX:  return css::ValueId::WebkitPagedX;
+      case Overflow::PagedY:  return css::ValueId::WebkitPagedY;
+      case Overflow::Clip:    return css::ValueId::Clip;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr Overflow fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr Overflow FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueVisible:      return Overflow::Visible;
-      case CSSValueHidden:       return Overflow::Hidden;
-      case CSSValueScroll:       return Overflow::Scroll;
-      case CSSValueOverlay:
-      case CSSValueAuto:         return Overflow::Auto;
-      case CSSValueWebkitPagedX: return Overflow::PagedX;
-      case CSSValueWebkitPagedY: return Overflow::PagedY;
-      case CSSValueClip:         return Overflow::Clip;
-      default:                   break;
+      case css::ValueId::Visible:      return Overflow::Visible;
+      case css::ValueId::Hidden:       return Overflow::Hidden;
+      case css::ValueId::Scroll:       return Overflow::Scroll;
+      case css::ValueId::Overlay:
+      case css::ValueId::Auto:         return Overflow::Auto;
+      case css::ValueId::WebkitPagedX: return Overflow::PagedX;
+      case css::ValueId::WebkitPagedY: return Overflow::PagedY;
+      case css::ValueId::Clip:         return Overflow::Clip;
+      default:                         break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return Overflow::Visible;
   }
 
-#define TYPE OverscrollBehavior
-#define FOR_EACH(CASE) CASE(Contain) CASE(None) CASE(Auto)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE OverscrollBehavior
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Contain) CASE(None) CASE(Auto)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE OverflowAnchor
-#define FOR_EACH(CASE) CASE(None) CASE(Auto)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE OverflowAnchor
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(None) CASE(Auto)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-  constexpr CSSValueID toCSSValueID(BreakBetween e)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(BreakBetween e) noexcept
   {
     switch (e)
     {
-      case BreakBetween::Auto:        return CSSValueAuto;
-      case BreakBetween::Avoid:       return CSSValueAvoid;
-      case BreakBetween::AvoidColumn: return CSSValueAvoidColumn;
-      case BreakBetween::AvoidPage:   return CSSValueAvoidPage;
-      case BreakBetween::Column:      return CSSValueColumn;
-      case BreakBetween::Page:        return CSSValuePage;
-      case BreakBetween::LeftPage:    return CSSValueLeft;
-      case BreakBetween::RightPage:   return CSSValueRight;
-      case BreakBetween::RectoPage:   return CSSValueRecto;
-      case BreakBetween::VersoPage:   return CSSValueVerso;
+      case BreakBetween::Auto:        return css::ValueId::Auto;
+      case BreakBetween::Avoid:       return css::ValueId::Avoid;
+      case BreakBetween::AvoidColumn: return css::ValueId::AvoidColumn;
+      case BreakBetween::AvoidPage:   return css::ValueId::AvoidPage;
+      case BreakBetween::Column:      return css::ValueId::Column;
+      case BreakBetween::Page:        return css::ValueId::Page;
+      case BreakBetween::LeftPage:    return css::ValueId::Left;
+      case BreakBetween::RightPage:   return css::ValueId::Right;
+      case BreakBetween::RectoPage:   return css::ValueId::Recto;
+      case BreakBetween::VersoPage:   return css::ValueId::Verso;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr BreakBetween fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr BreakBetween FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueAuto:        return BreakBetween::Auto;
-      case CSSValueAvoid:       return BreakBetween::Avoid;
-      case CSSValueAvoidColumn: return BreakBetween::AvoidColumn;
-      case CSSValueAvoidPage:   return BreakBetween::AvoidPage;
-      case CSSValueColumn:      return BreakBetween::Column;
-      case CSSValuePage:        return BreakBetween::Page;
-      case CSSValueLeft:        return BreakBetween::LeftPage;
-      case CSSValueRight:       return BreakBetween::RightPage;
-      case CSSValueRecto:       return BreakBetween::RectoPage;
-      case CSSValueVerso:       return BreakBetween::VersoPage;
-      default:                  break;
+      case css::ValueId::Auto:        return BreakBetween::Auto;
+      case css::ValueId::Avoid:       return BreakBetween::Avoid;
+      case css::ValueId::AvoidColumn: return BreakBetween::AvoidColumn;
+      case css::ValueId::AvoidPage:   return BreakBetween::AvoidPage;
+      case css::ValueId::Column:      return BreakBetween::Column;
+      case css::ValueId::Page:        return BreakBetween::Page;
+      case css::ValueId::Left:        return BreakBetween::LeftPage;
+      case css::ValueId::Right:       return BreakBetween::RightPage;
+      case css::ValueId::Recto:       return BreakBetween::RectoPage;
+      case css::ValueId::Verso:       return BreakBetween::VersoPage;
+      default:                        break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return BreakBetween::Auto;
   }
 
-#define TYPE BreakInside
-#define FOR_EACH(CASE) CASE(Auto) CASE(Avoid) CASE(AvoidColumn) CASE(AvoidPage)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE BreakInside
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Auto) CASE(Avoid) CASE(AvoidColumn) CASE(AvoidPage)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-  constexpr CSSValueID toCSSValueID(PositionType e)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(PositionType e) noexcept
   {
     switch (e)
     {
-      case PositionType::Static:   return CSSValueStatic;
-      case PositionType::Relative: return CSSValueRelative;
-      case PositionType::Absolute: return CSSValueAbsolute;
-      case PositionType::Fixed:    return CSSValueFixed;
-      case PositionType::Sticky:   return CSSValueSticky;
+      case PositionType::Static:   return css::ValueId::Static;
+      case PositionType::Relative: return css::ValueId::Relative;
+      case PositionType::Absolute: return css::ValueId::Absolute;
+      case PositionType::Fixed:    return css::ValueId::Fixed;
+      case PositionType::Sticky:   return css::ValueId::Sticky;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr PositionType fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr PositionType FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueStatic:       return PositionType::Static;
-      case CSSValueRelative:     return PositionType::Relative;
-      case CSSValueAbsolute:     return PositionType::Absolute;
-      case CSSValueFixed:        return PositionType::Fixed;
-      case CSSValueSticky:
-      case CSSValueWebkitSticky: return PositionType::Sticky;
-      default:                   break;
+      case css::ValueId::Static:       return PositionType::Static;
+      case css::ValueId::Relative:     return PositionType::Relative;
+      case css::ValueId::Absolute:     return PositionType::Absolute;
+      case css::ValueId::Fixed:        return PositionType::Fixed;
+      case css::ValueId::Sticky:
+      case css::ValueId::WebkitSticky: return PositionType::Sticky;
+      default:                         break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return PositionType::Static;
   }
 
-#define TYPE Style::Resize
-#define FOR_EACH(CASE) CASE(Both) CASE(Horizontal) CASE(Vertical) CASE(Block) CASE(Inline) CASE(None)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE TableLayoutType
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Auto) CASE(Fixed)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE TableLayoutType
-#define FOR_EACH(CASE) CASE(Auto) CASE(Fixed)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE TextGroupAlign
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(None) CASE(Start) CASE(End) CASE(Left) CASE(Right) CASE(Center)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-  constexpr CSSValueID toCSSValueID(Style::TextAlign e)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(TextJustify e) noexcept
   {
     switch (e)
     {
-      case Style::TextAlign::Start:        return CSSValueStart;
-      case Style::TextAlign::End:          return CSSValueEnd;
-      case Style::TextAlign::Left:         return CSSValueLeft;
-      case Style::TextAlign::Right:        return CSSValueRight;
-      case Style::TextAlign::Center:       return CSSValueCenter;
-      case Style::TextAlign::Justify:      return CSSValueJustify;
-      case Style::TextAlign::WebKitLeft:   return CSSValueWebkitLeft;
-      case Style::TextAlign::WebKitRight:  return CSSValueWebkitRight;
-      case Style::TextAlign::WebKitCenter: return CSSValueWebkitCenter;
+      case TextJustify::Auto:           return css::ValueId::Auto;
+      case TextJustify::None:           return css::ValueId::None;
+      case TextJustify::InterWord:      return css::ValueId::InterWord;
+      case TextJustify::InterCharacter: return css::ValueId::InterCharacter;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr Style::TextAlign fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr TextJustify FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueWebkitAuto: // Legacy -webkit-auto. Equivalent to start.
-      case CSSValueStart:      return Style::TextAlign::Start;
-      case CSSValueEnd:        return Style::TextAlign::End;
-      default:                 return static_cast<Style::TextAlign>(valueID - CSSValueLeft);
+      case css::ValueId::Auto:           return TextJustify::Auto;
+      case css::ValueId::None:           return TextJustify::None;
+      case css::ValueId::InterWord:      return TextJustify::InterWord;
+      case css::ValueId::InterCharacter:
+      case css::ValueId::Distribute:     return TextJustify::InterCharacter;
+      default:                           break;
     }
-  }
-
-  template <>
-  struct Style::ValueRepresentation<Style::TextAlign>
-  {
-    template <typename... F>
-    constexpr decltype(auto) operator()(Style::TextAlign value, F &&...f)
-    {
-      auto visitor = WTF::makeVisitor(std::forward<F>(f)...);
-      switch (value)
-      {
-        case Style::TextAlign::Start:        return visitor(CSS::Keyword::Start {});
-        case Style::TextAlign::End:          return visitor(CSS::Keyword::End {});
-        case Style::TextAlign::Left:         return visitor(CSS::Keyword::Left {});
-        case Style::TextAlign::Right:        return visitor(CSS::Keyword::Right {});
-        case Style::TextAlign::Center:       return visitor(CSS::Keyword::Center {});
-        case Style::TextAlign::Justify:      return visitor(CSS::Keyword::Justify {});
-        case Style::TextAlign::WebKitLeft:   return visitor(CSS::Keyword::WebkitLeft {});
-        case Style::TextAlign::WebKitRight:  return visitor(CSS::Keyword::WebkitRight {});
-        case Style::TextAlign::WebKitCenter: return visitor(CSS::Keyword::WebkitCenter {});
-      }
-      RELEASE_ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    }
-  };
-
-#define TYPE Style::TextAlignLast
-#define FOR_EACH(CASE) CASE(Start) CASE(End) CASE(Left) CASE(Right) CASE(Center) CASE(Justify) CASE(Auto)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-#define TYPE TextGroupAlign
-#define FOR_EACH(CASE) CASE(None) CASE(Start) CASE(End) CASE(Left) CASE(Right) CASE(Center)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-  constexpr CSSValueID toCSSValueID(TextJustify e)
-  {
-    switch (e)
-    {
-      case TextJustify::Auto:           return CSSValueAuto;
-      case TextJustify::None:           return CSSValueNone;
-      case TextJustify::InterWord:      return CSSValueInterWord;
-      case TextJustify::InterCharacter: return CSSValueInterCharacter;
-    }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
-  }
-
-  template <>
-  constexpr TextJustify fromCSSValueID(CSSValueID valueID)
-  {
-    switch (valueID)
-    {
-      case CSSValueAuto:           return TextJustify::Auto;
-      case CSSValueNone:           return TextJustify::None;
-      case CSSValueInterWord:      return TextJustify::InterWord;
-      case CSSValueInterCharacter:
-      case CSSValueDistribute:     return TextJustify::InterCharacter;
-      default:                     break;
-    }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return TextJustify::Auto;
   }
 
-#define TYPE Style::TextDecorationLine::Flag
-#define FOR_EACH(CASE) CASE(Underline) CASE(Overline) CASE(LineThrough) CASE(Blink)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE TextDecorationStyle
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Solid) CASE(Double) CASE(Dotted) CASE(Dashed) CASE(Wavy)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE TextDecorationStyle
-#define FOR_EACH(CASE) CASE(Solid) CASE(Double) CASE(Dotted) CASE(Dashed) CASE(Wavy)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE TextSecurity
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(None) CASE(Disc) CASE(Circle) CASE(Square)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE Style::TextEmphasisPositionValue
-#define FOR_EACH(CASE) CASE(Over) CASE(Under) CASE(Left) CASE(Right)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE TextDecorationSkipInk
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(None) CASE(Auto) CASE(All)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE Style::TextUnderlinePositionValue
-#define FOR_EACH(CASE) CASE(FromFont) CASE(Under) CASE(Left) CASE(Right)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-#define TYPE TextSecurity
-#define FOR_EACH(CASE) CASE(None) CASE(Disc) CASE(Circle) CASE(Square)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-#define TYPE TextDecorationSkipInk
-#define FOR_EACH(CASE) CASE(None) CASE(Auto) CASE(All)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-#define TYPE Style::TextTransformValue
-#define FOR_EACH(CASE)                                                                                       \
-  CASE(Capitalize) CASE(Uppercase) CASE(Lowercase) CASE(FullWidth) CASE(FullSizeKana) CASE(MathAuto)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-  constexpr CSSValueID toCSSValueID(UnicodeBidi e)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(UnicodeBidi e) noexcept
   {
     switch (e)
     {
-      case UnicodeBidi::Normal:          return CSSValueNormal;
-      case UnicodeBidi::Embed:           return CSSValueEmbed;
-      case UnicodeBidi::Override:        return CSSValueBidiOverride;
-      case UnicodeBidi::Isolate:         return CSSValueIsolate;
-      case UnicodeBidi::IsolateOverride: return CSSValueIsolateOverride;
-      case UnicodeBidi::Plaintext:       return CSSValuePlaintext;
+      case UnicodeBidi::Normal:          return css::ValueId::Normal;
+      case UnicodeBidi::Embed:           return css::ValueId::Embed;
+      case UnicodeBidi::Override:        return css::ValueId::BidiOverride;
+      case UnicodeBidi::Isolate:         return css::ValueId::Isolate;
+      case UnicodeBidi::IsolateOverride: return css::ValueId::IsolateOverride;
+      case UnicodeBidi::Plaintext:       return css::ValueId::Plaintext;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr UnicodeBidi fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr UnicodeBidi FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueNormal:                return UnicodeBidi::Normal;
-      case CSSValueEmbed:                 return UnicodeBidi::Embed;
-      case CSSValueBidiOverride:          return UnicodeBidi::Override;
-      case CSSValueIsolate:
-      case CSSValueWebkitIsolate:         return UnicodeBidi::Isolate;
-      case CSSValueIsolateOverride:
-      case CSSValueWebkitIsolateOverride: return UnicodeBidi::IsolateOverride;
-      case CSSValuePlaintext:
-      case CSSValueWebkitPlaintext:       return UnicodeBidi::Plaintext;
-      default:                            break;
+      case css::ValueId::Normal:                return UnicodeBidi::Normal;
+      case css::ValueId::Embed:                 return UnicodeBidi::Embed;
+      case css::ValueId::BidiOverride:          return UnicodeBidi::Override;
+      case css::ValueId::Isolate:
+      case css::ValueId::WebkitIsolate:         return UnicodeBidi::Isolate;
+      case css::ValueId::IsolateOverride:
+      case css::ValueId::WebkitIsolateOverride: return UnicodeBidi::IsolateOverride;
+      case css::ValueId::Plaintext:
+      case css::ValueId::WebkitPlaintext:       return UnicodeBidi::Plaintext;
+      default:                                  break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return UnicodeBidi::Normal;
   }
 
-#define TYPE UserDrag
-#define FOR_EACH(CASE) CASE(Auto) CASE(None) CASE(Element)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE UserDrag
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Auto) CASE(None) CASE(Element)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE UserModify
-#define FOR_EACH(CASE) CASE(ReadOnly) CASE(ReadWrite) CASE(ReadWritePlaintextOnly)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE UserModify
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(ReadOnly) CASE(ReadWrite) CASE(ReadWritePlaintextOnly)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-  constexpr CSSValueID toCSSValueID(UserSelect e)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(UserSelect e) noexcept
   {
     switch (e)
     {
-      case UserSelect::None: return CSSValueNone;
-      case UserSelect::Text: return CSSValueText;
-      case UserSelect::All:  return CSSValueAll;
+      case UserSelect::None: return css::ValueId::None;
+      case UserSelect::Text: return css::ValueId::Text;
+      case UserSelect::All:  return css::ValueId::All;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr UserSelect fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr UserSelect FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueAuto: return UserSelect::Text;
-      case CSSValueNone: return UserSelect::None;
-      case CSSValueText: return UserSelect::Text;
-      case CSSValueAll:  return UserSelect::All;
-      default:           break;
+      case css::ValueId::Auto: return UserSelect::Text;
+      case css::ValueId::None: return UserSelect::None;
+      case css::ValueId::Text: return UserSelect::Text;
+      case css::ValueId::All:  return UserSelect::All;
+      default:                 break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return UserSelect::Text;
   }
 
-#define TYPE Visibility
-#define FOR_EACH(CASE) CASE(Visible) CASE(Hidden) CASE(Collapse)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE Visibility
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Visible) CASE(Hidden) CASE(Collapse)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE WhiteSpaceCollapse
-#define FOR_EACH(CASE) CASE(Collapse) CASE(Preserve) CASE(PreserveBreaks) CASE(BreakSpaces)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE WhiteSpaceCollapse
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Collapse) CASE(Preserve) CASE(PreserveBreaks) CASE(BreakSpaces)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE WordBreak
-#define FOR_EACH(CASE) CASE(Normal) CASE(BreakAll) CASE(KeepAll) CASE(BreakWord) CASE(AutoPhrase)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE WordBreak
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Normal) CASE(BreakAll) CASE(KeepAll) CASE(BreakWord) CASE(AutoPhrase)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE OverflowWrap
-#define FOR_EACH(CASE) CASE(Normal) CASE(Anywhere) CASE(BreakWord)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE OverflowWrap
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Normal) CASE(Anywhere) CASE(BreakWord)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-  constexpr CSSValueID toCSSValueID(TextDirection e)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(TextDirection e) noexcept
   {
     switch (e)
     {
-      case TextDirection::LTR: return CSSValueLtr;
-      case TextDirection::RTL: return CSSValueRtl;
+      case TextDirection::LTR: return css::ValueId::Ltr;
+      case TextDirection::RTL: return css::ValueId::Rtl;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr TextDirection fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr TextDirection FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueLtr: return TextDirection::LTR;
-      case CSSValueRtl: return TextDirection::RTL;
-      default:          break;
+      case css::ValueId::Ltr: return TextDirection::LTR;
+      case css::ValueId::Rtl: return TextDirection::RTL;
+      default:                break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return TextDirection::LTR;
   }
 
-  constexpr CSSValueID toCSSValueID(StyleWritingMode e)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(StyleWritingMode e) noexcept
   {
     switch (e)
     {
-      case StyleWritingMode::HorizontalTb: return CSSValueHorizontalTb;
-      case StyleWritingMode::VerticalRl:   return CSSValueVerticalRl;
-      case StyleWritingMode::VerticalLr:   return CSSValueVerticalLr;
-      case StyleWritingMode::SidewaysRl:   return CSSValueSidewaysRl;
-      case StyleWritingMode::SidewaysLr:   return CSSValueSidewaysLr;
-      case StyleWritingMode::HorizontalBt: return CSSValueHorizontalBt;
+      case StyleWritingMode::HorizontalTb: return css::ValueId::HorizontalTb;
+      case StyleWritingMode::VerticalRl:   return css::ValueId::VerticalRl;
+      case StyleWritingMode::VerticalLr:   return css::ValueId::VerticalLr;
+      case StyleWritingMode::SidewaysRl:   return css::ValueId::SidewaysRl;
+      case StyleWritingMode::SidewaysLr:   return css::ValueId::SidewaysLr;
+      case StyleWritingMode::HorizontalBt: return css::ValueId::HorizontalBt;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr StyleWritingMode fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr StyleWritingMode FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueHorizontalTb:
-      case CSSValueLr:
-      case CSSValueLrTb:
-      case CSSValueRl:
-      case CSSValueRlTb:         return StyleWritingMode::HorizontalTb;
-      case CSSValueVerticalRl:
-      case CSSValueTb:
-      case CSSValueTbRl:         return StyleWritingMode::VerticalRl;
-      case CSSValueVerticalLr:   return StyleWritingMode::VerticalLr;
-      case CSSValueSidewaysLr:   return StyleWritingMode::SidewaysLr;
-      case CSSValueSidewaysRl:   return StyleWritingMode::SidewaysRl;
-      case CSSValueHorizontalBt: return StyleWritingMode::HorizontalBt;
-      default:                   break;
+      case css::ValueId::HorizontalTb:
+      case css::ValueId::Lr:
+      case css::ValueId::LrTb:
+      case css::ValueId::Rl:
+      case css::ValueId::RlTb:         return StyleWritingMode::HorizontalTb;
+      case css::ValueId::VerticalRl:
+      case css::ValueId::Tb:
+      case css::ValueId::TbRl:         return StyleWritingMode::VerticalRl;
+      case css::ValueId::VerticalLr:   return StyleWritingMode::VerticalLr;
+      case css::ValueId::SidewaysLr:   return StyleWritingMode::SidewaysLr;
+      case css::ValueId::SidewaysRl:   return StyleWritingMode::SidewaysRl;
+      case css::ValueId::HorizontalBt: return StyleWritingMode::HorizontalBt;
+      default:                         break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return StyleWritingMode::HorizontalTb;
   }
 
-  constexpr CSSValueID toCSSValueID(TextCombine e)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(TextCombine e) noexcept
   {
     switch (e)
     {
-      case TextCombine::None: return CSSValueNone;
-      case TextCombine::All:  return CSSValueAll;
+      case TextCombine::None: return css::ValueId::None;
+      case TextCombine::All:  return css::ValueId::All;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr TextCombine fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr TextCombine FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueNone: return TextCombine::None;
-      case CSSValueAll:
-      case CSSValueHorizontal: // -webkit-text-combine only
+      case css::ValueId::None: return TextCombine::None;
+      case css::ValueId::All:
+      case css::ValueId::Horizontal: // -webkit-text-combine only
         return TextCombine::All;
       default: break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return TextCombine::None;
   }
 
-  constexpr CSSValueID toCSSValueID(RubyPosition e)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(RubyPosition e) noexcept
   {
     switch (e)
     {
-      case RubyPosition::Over:                 return CSSValueOver;
-      case RubyPosition::Under:                return CSSValueUnder;
-      case RubyPosition::InterCharacter:       return CSSValueInterCharacter;
-      case RubyPosition::LegacyInterCharacter: return CSSValueLegacyInterCharacter;
+      case RubyPosition::Over:                 return css::ValueId::Over;
+      case RubyPosition::Under:                return css::ValueId::Under;
+      case RubyPosition::InterCharacter:       return css::ValueId::InterCharacter;
+      case RubyPosition::LegacyInterCharacter: return css::ValueId::LegacyInterCharacter;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr RubyPosition fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr RubyPosition FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueOver:
-      case CSSValueBefore: // -webkit-ruby-position only
+      case css::ValueId::Over:
+      case css::ValueId::Before: // -webkit-ruby-position only
         return RubyPosition::Over;
-      case CSSValueUnder:
-      case CSSValueAfter: // -webkit-ruby-position only
+      case css::ValueId::Under:
+      case css::ValueId::After: // -webkit-ruby-position only
         return RubyPosition::Under;
-      case CSSValueInterCharacter:       return RubyPosition::InterCharacter;
-      case CSSValueLegacyInterCharacter: return RubyPosition::LegacyInterCharacter;
-      default:                           break;
+      case css::ValueId::InterCharacter:       return RubyPosition::InterCharacter;
+      case css::ValueId::LegacyInterCharacter: return RubyPosition::LegacyInterCharacter;
+      default:                                 break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return RubyPosition::Over;
   }
 
-#define TYPE RubyAlign
-#define FOR_EACH(CASE) CASE(Start) CASE(Center) CASE(SpaceBetween) CASE(SpaceAround)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE RubyAlign
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Start) CASE(Center) CASE(SpaceBetween) CASE(SpaceAround)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE RubyOverhang
-#define FOR_EACH(CASE) CASE(Auto) CASE(None)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE RubyOverhang
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Auto) CASE(None)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE TextOverflow
-#define FOR_EACH(CASE) CASE(Clip) CASE(Ellipsis)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE TextOverflow
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Clip) CASE(Ellipsis)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-  constexpr CSSValueID toCSSValueID(TextWrapMode wrap)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(TextWrapMode wrap) noexcept
   {
     switch (wrap)
     {
-      case TextWrapMode::Wrap:   return CSSValueWrap;
-      case TextWrapMode::NoWrap: return CSSValueNowrap;
+      case TextWrapMode::Wrap:   return css::ValueId::Wrap;
+      case TextWrapMode::NoWrap: return css::ValueId::Nowrap;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr TextWrapMode fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr TextWrapMode FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueWrap:   return TextWrapMode::Wrap;
-      case CSSValueNowrap: return TextWrapMode::NoWrap;
-      default:             break;
+      case css::ValueId::Wrap:   return TextWrapMode::Wrap;
+      case css::ValueId::Nowrap: return TextWrapMode::NoWrap;
+      default:                   break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return TextWrapMode::Wrap;
   }
 
-#define TYPE TextWrapStyle
-#define FOR_EACH(CASE) CASE(Auto) CASE(Balance) CASE(Pretty) CASE(Stable)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE TextWrapStyle
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Auto) CASE(Balance) CASE(Pretty) CASE(Stable)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE TextEmphasisFill
-#define FOR_EACH(CASE) CASE(Filled) CASE(Open)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE TextEmphasisFill
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Filled) CASE(Open)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-  constexpr CSSValueID toCSSValueID(TextEmphasisMark mark)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(TextEmphasisMark mark) noexcept
   {
     switch (mark)
     {
-      case TextEmphasisMark::Dot:          return CSSValueDot;
-      case TextEmphasisMark::Circle:       return CSSValueCircle;
-      case TextEmphasisMark::DoubleCircle: return CSSValueDoubleCircle;
-      case TextEmphasisMark::Triangle:     return CSSValueTriangle;
-      case TextEmphasisMark::Sesame:       return CSSValueSesame;
+      case TextEmphasisMark::Dot:          return css::ValueId::Dot;
+      case TextEmphasisMark::Circle:       return css::ValueId::Circle;
+      case TextEmphasisMark::DoubleCircle: return css::ValueId::DoubleCircle;
+      case TextEmphasisMark::Triangle:     return css::ValueId::Triangle;
+      case TextEmphasisMark::Sesame:       return css::ValueId::Sesame;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr TextEmphasisMark fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr TextEmphasisMark FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueDot:          return TextEmphasisMark::Dot;
-      case CSSValueCircle:       return TextEmphasisMark::Circle;
-      case CSSValueDoubleCircle: return TextEmphasisMark::DoubleCircle;
-      case CSSValueTriangle:     return TextEmphasisMark::Triangle;
-      case CSSValueSesame:       return TextEmphasisMark::Sesame;
-      default:                   break;
+      case css::ValueId::Dot:          return TextEmphasisMark::Dot;
+      case css::ValueId::Circle:       return TextEmphasisMark::Circle;
+      case css::ValueId::DoubleCircle: return TextEmphasisMark::DoubleCircle;
+      case css::ValueId::Triangle:     return TextEmphasisMark::Triangle;
+      case css::ValueId::Sesame:       return TextEmphasisMark::Sesame;
+      default:                         break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return TextEmphasisMark::Dot;
   }
 
-#define TYPE TextOrientation
-#define FOR_EACH(CASE) CASE(Sideways) CASE(Mixed) CASE(Upright)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE TextOrientation
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Sideways) CASE(Mixed) CASE(Upright)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE PointerEvents
-#define FOR_EACH(CASE)                                                                                       \
+#define KRYS_MAPPING_TYPE PointerEvents
+#define KRYS_MAPPING_FOR_EACH(CASE)                                                                          \
   CASE(None)                                                                                                 \
   CASE(Stroke)                                                                                               \
-  CASE(Fill) CASE(Painted) CASE(Visible) CASE(VisibleStroke) CASE(VisibleFill) CASE(VisiblePainted)          \
-    CASE(BoundingBox) CASE(Auto) CASE(All)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+  CASE(Fill)                                                                                                 \
+  CASE(Painted)                                                                                              \
+  CASE(Visible)                                                                                              \
+  CASE(VisibleStroke) CASE(VisibleFill) CASE(VisiblePainted) CASE(BoundingBox) CASE(Auto) CASE(All)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-  constexpr CSSValueID toCSSValueID(Kerning kerning)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(Kerning kerning) noexcept
   {
     switch (kerning)
     {
-      case Kerning::Auto:    return CSSValueAuto;
-      case Kerning::Normal:  return CSSValueNormal;
-      case Kerning::NoShift: return CSSValueNone;
+      case Kerning::Auto:    return css::ValueId::Auto;
+      case Kerning::Normal:  return css::ValueId::Normal;
+      case Kerning::NoShift: return css::ValueId::None;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr Kerning fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr Kerning FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueAuto:   return Kerning::Auto;
-      case CSSValueNormal: return Kerning::Normal;
-      case CSSValueNone:   return Kerning::NoShift;
-      default:             break;
+      case css::ValueId::Auto:   return Kerning::Auto;
+      case css::ValueId::Normal: return Kerning::Normal;
+      case css::ValueId::None:   return Kerning::NoShift;
+      default:                   break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return Kerning::Auto;
   }
 
-#define TYPE ObjectFit
-#define FOR_EACH(CASE) CASE(Fill) CASE(Contain) CASE(Cover) CASE(None) CASE(ScaleDown)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE ObjectFit
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Fill) CASE(Contain) CASE(Cover) CASE(None) CASE(ScaleDown)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-  constexpr CSSValueID toCSSValueID(FontSizeAdjust::Metric metric)
-  {
-    switch (metric)
-    {
-      case FontSizeAdjust::Metric::ExHeight:  return CSSValueExHeight;
-      case FontSizeAdjust::Metric::CapHeight: return CSSValueCapHeight;
-      case FontSizeAdjust::Metric::ChWidth:   return CSSValueChWidth;
-      case FontSizeAdjust::Metric::IcWidth:   return CSSValueIcWidth;
-      case FontSizeAdjust::Metric::IcHeight:  return CSSValueIcHeight;
-    }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueAuto;
-  }
+#define KRYS_MAPPING_TYPE FontSmoothingMode
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Auto) CASE(None) CASE(Antialiased) CASE(SubpixelAntialiased)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-  template <>
-  constexpr FontSizeAdjust::Metric fromCSSValueID(CSSValueID valueID)
-  {
-    switch (valueID)
-    {
-      case CSSValueExHeight:  return FontSizeAdjust::Metric::ExHeight;
-      case CSSValueCapHeight: return FontSizeAdjust::Metric::CapHeight;
-      case CSSValueChWidth:   return FontSizeAdjust::Metric::ChWidth;
-      case CSSValueIcWidth:   return FontSizeAdjust::Metric::IcWidth;
-      case CSSValueIcHeight:  return FontSizeAdjust::Metric::IcHeight;
-      default:                break;
-    }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return FontSizeAdjust::Metric::ExHeight;
-  }
+#define KRYS_MAPPING_TYPE TextRenderingMode
+#define KRYS_MAPPING_FOR_EACH(CASE)                                                                          \
+  CASE(Auto) CASE(OptimizeSpeed) CASE(OptimizeLegibility) CASE(GeometricPrecision)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE FontSmoothingMode
-#define FOR_EACH(CASE) CASE(Auto) CASE(None) CASE(Antialiased) CASE(SubpixelAntialiased)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE Hyphens
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(None) CASE(Manual) CASE(Auto)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE TextRenderingMode
-#define FOR_EACH(CASE) CASE(Auto) CASE(OptimizeSpeed) CASE(OptimizeLegibility) CASE(GeometricPrecision)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE LineAlign
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(None) CASE(Edges)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE Hyphens
-#define FOR_EACH(CASE) CASE(None) CASE(Manual) CASE(Auto)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE Order
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Logical) CASE(Visual)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE LineSnap
-#define FOR_EACH(CASE) CASE(None) CASE(Baseline) CASE(Contain)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-#define TYPE LineAlign
-#define FOR_EACH(CASE) CASE(None) CASE(Edges)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-#define TYPE Style::SpeakAsValue
-#define FOR_EACH(CASE) CASE(SpellOut) CASE(Digits) CASE(LiteralPunctuation) CASE(NoPunctuation)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-#define TYPE Order
-#define FOR_EACH(CASE) CASE(Logical) CASE(Visual)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-#define TYPE BlendMode
-#define FOR_EACH(CASE)                                                                                       \
+#define KRYS_MAPPING_TYPE BlendMode
+#define KRYS_MAPPING_FOR_EACH(CASE)                                                                          \
   CASE(Normal)                                                                                               \
   CASE(Multiply)                                                                                             \
-  CASE(Screen) CASE(Overlay) CASE(Darken) CASE(Lighten) CASE(ColorDodge) CASE(ColorBurn) CASE(HardLight)     \
-    CASE(SoftLight) CASE(Difference) CASE(Exclusion) CASE(Hue) CASE(Saturation) CASE(Color) CASE(Luminosity) \
-      CASE(PlusDarker) CASE(PlusLighter)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+  CASE(Screen)                                                                                               \
+  CASE(Overlay)                                                                                              \
+  CASE(Darken)                                                                                               \
+  CASE(Lighten) CASE(ColorDodge) CASE(ColorBurn) CASE(HardLight) CASE(SoftLight) CASE(Difference)            \
+    CASE(Exclusion) CASE(Hue) CASE(Saturation) CASE(Color) CASE(Luminosity) CASE(PlusDarker)                 \
+      CASE(PlusLighter)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE Isolation
-#define FOR_EACH(CASE) CASE(Auto) CASE(Isolate)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE Isolation
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Auto) CASE(Isolate)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE LineCap
-#define FOR_EACH(CASE) CASE(Butt) CASE(Round) CASE(Square)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE LineCap
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Butt) CASE(Round) CASE(Square)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE LineJoin
-#define FOR_EACH(CASE) CASE(Miter) CASE(Round) CASE(Bevel)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE LineJoin
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Miter) CASE(Round) CASE(Bevel)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-  constexpr CSSValueID toCSSValueID(WindRule e)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(WindRule e) noexcept
   {
     switch (e)
     {
-      case WindRule::NonZero: return CSSValueNonzero;
-      case WindRule::EvenOdd: return CSSValueEvenodd;
+      case WindRule::NonZero: return css::ValueId::Nonzero;
+      case WindRule::EvenOdd: return css::ValueId::Evenodd;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr WindRule fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr WindRule FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueNonzero: return WindRule::NonZero;
-      case CSSValueEvenodd: return WindRule::EvenOdd;
-      default:              break;
+      case css::ValueId::Nonzero: return WindRule::NonZero;
+      case css::ValueId::Evenodd: return WindRule::EvenOdd;
+      default:                    break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return WindRule::NonZero;
   }
 
-#define TYPE AlignmentBaseline
-#define FOR_EACH(CASE)                                                                                       \
+#define KRYS_MAPPING_TYPE AlignmentBaseline
+#define KRYS_MAPPING_FOR_EACH(CASE)                                                                          \
   CASE(AfterEdge)                                                                                            \
   CASE(Alphabetic)                                                                                           \
-  CASE(Baseline) CASE(BeforeEdge) CASE(Central) CASE(Hanging) CASE(Ideographic) CASE(Mathematical)           \
-    CASE(Middle) CASE(TextAfterEdge) CASE(TextBeforeEdge)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+  CASE(Baseline)                                                                                             \
+  CASE(BeforeEdge)                                                                                           \
+  CASE(Central)                                                                                              \
+  CASE(Hanging) CASE(Ideographic) CASE(Mathematical) CASE(Middle) CASE(TextAfterEdge) CASE(TextBeforeEdge)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE BorderCollapse
-#define FOR_EACH(CASE) CASE(Separate) CASE(Collapse)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE BorderCollapse
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Separate) CASE(Collapse)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-  constexpr CSSValueID toCSSValueID(ImageRendering imageRendering)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(ImageRendering imageRendering) noexcept
   {
     switch (imageRendering)
     {
-      case ImageRendering::Auto:            return CSSValueAuto;
-      case ImageRendering::CrispEdges:      return CSSValueCrispEdges;
-      case ImageRendering::Pixelated:       return CSSValuePixelated;
-      case ImageRendering::OptimizeSpeed:   return CSSValueOptimizeSpeed;
-      case ImageRendering::OptimizeQuality: return CSSValueOptimizeQuality;
+      case ImageRendering::Auto:            return css::ValueId::Auto;
+      case ImageRendering::CrispEdges:      return css::ValueId::CrispEdges;
+      case ImageRendering::Pixelated:       return css::ValueId::Pixelated;
+      case ImageRendering::OptimizeSpeed:   return css::ValueId::OptimizeSpeed;
+      case ImageRendering::OptimizeQuality: return css::ValueId::OptimizeQuality;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr ImageRendering fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr ImageRendering FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueAuto:                   return ImageRendering::Auto;
-      case CSSValueWebkitOptimizeContrast:
-      case CSSValueCrispEdges:
-      case CSSValueWebkitCrispEdges:       return ImageRendering::CrispEdges;
-      case CSSValuePixelated:              return ImageRendering::Pixelated;
-      case CSSValueOptimizeSpeed:          return ImageRendering::OptimizeSpeed;
-      case CSSValueOptimizeQuality:        return ImageRendering::OptimizeQuality;
-      default:                             break;
+      case css::ValueId::Auto:                   return ImageRendering::Auto;
+      case css::ValueId::WebkitOptimizeContrast:
+      case css::ValueId::CrispEdges:
+      case css::ValueId::WebkitCrispEdges:       return ImageRendering::CrispEdges;
+      case css::ValueId::Pixelated:              return ImageRendering::Pixelated;
+      case css::ValueId::OptimizeSpeed:          return ImageRendering::OptimizeSpeed;
+      case css::ValueId::OptimizeQuality:        return ImageRendering::OptimizeQuality;
+      default:                                   break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return ImageRendering::Auto;
   }
 
-#if HAVE(CORE_MATERIAL)
+#define KRYS_MAPPING_TYPE InputSecurity
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Auto) CASE(None)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-  constexpr CSSValueID toCSSValueID(AppleVisualEffect effect)
-  {
-    switch (effect)
-    {
-      case AppleVisualEffect::None:                  return CSSValueNone;
-      case AppleVisualEffect::BlurUltraThinMaterial: return CSSValueAppleSystemBlurMaterialUltraThin;
-      case AppleVisualEffect::BlurThinMaterial:      return CSSValueAppleSystemBlurMaterialThin;
-      case AppleVisualEffect::BlurMaterial:          return CSSValueAppleSystemBlurMaterial;
-      case AppleVisualEffect::BlurThickMaterial:     return CSSValueAppleSystemBlurMaterialThick;
-      case AppleVisualEffect::BlurChromeMaterial:    return CSSValueAppleSystemBlurMaterialChrome;
-  #if HAVE(MATERIAL_HOSTING)
-      case AppleVisualEffect::GlassMaterial:        return CSSValueAppleSystemGlassMaterial;
-      case AppleVisualEffect::GlassClearMaterial:   return CSSValueAppleSystemGlassMaterialClear;
-      case AppleVisualEffect::GlassSubduedMaterial: return CSSValueAppleSystemGlassMaterialSubdued;
-      case AppleVisualEffect::GlassMediaControlsMaterial:
-        return CSSValueAppleSystemGlassMaterialMediaControls;
-      case AppleVisualEffect::GlassSubduedMediaControlsMaterial:
-        return CSSValueAppleSystemGlassMaterialMediaControlsSubdued;
-  #endif
-      case AppleVisualEffect::VibrancyLabel:           return CSSValueAppleSystemVibrancyLabel;
-      case AppleVisualEffect::VibrancySecondaryLabel:  return CSSValueAppleSystemVibrancySecondaryLabel;
-      case AppleVisualEffect::VibrancyTertiaryLabel:   return CSSValueAppleSystemVibrancyTertiaryLabel;
-      case AppleVisualEffect::VibrancyQuaternaryLabel: return CSSValueAppleSystemVibrancyQuaternaryLabel;
-      case AppleVisualEffect::VibrancyFill:            return CSSValueAppleSystemVibrancyFill;
-      case AppleVisualEffect::VibrancySecondaryFill:   return CSSValueAppleSystemVibrancySecondaryFill;
-      case AppleVisualEffect::VibrancyTertiaryFill:    return CSSValueAppleSystemVibrancyTertiaryFill;
-      case AppleVisualEffect::VibrancySeparator:       return CSSValueAppleSystemVibrancySeparator;
-    }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
-  }
-
-  template <>
-  constexpr AppleVisualEffect fromCSSValueID(CSSValueID valueID)
-  {
-    switch (valueID)
-    {
-      case CSSValueNone:                             return AppleVisualEffect::None;
-      case CSSValueAppleSystemBlurMaterialUltraThin: return AppleVisualEffect::BlurUltraThinMaterial;
-      case CSSValueAppleSystemBlurMaterialThin:      return AppleVisualEffect::BlurThinMaterial;
-      case CSSValueAppleSystemBlurMaterial:          return AppleVisualEffect::BlurMaterial;
-      case CSSValueAppleSystemBlurMaterialThick:     return AppleVisualEffect::BlurThickMaterial;
-      case CSSValueAppleSystemBlurMaterialChrome:    return AppleVisualEffect::BlurChromeMaterial;
-  #if HAVE(MATERIAL_HOSTING)
-      case CSSValueAppleSystemGlassMaterial:        return AppleVisualEffect::GlassMaterial;
-      case CSSValueAppleSystemGlassMaterialClear:   return AppleVisualEffect::GlassClearMaterial;
-      case CSSValueAppleSystemGlassMaterialSubdued: return AppleVisualEffect::GlassSubduedMaterial;
-      case CSSValueAppleSystemGlassMaterialMediaControls:
-        return AppleVisualEffect::GlassMediaControlsMaterial;
-      case CSSValueAppleSystemGlassMaterialMediaControlsSubdued:
-        return AppleVisualEffect::GlassSubduedMediaControlsMaterial;
-  #endif
-      case CSSValueAppleSystemVibrancyLabel:           return AppleVisualEffect::VibrancyLabel;
-      case CSSValueAppleSystemVibrancySecondaryLabel:  return AppleVisualEffect::VibrancySecondaryLabel;
-      case CSSValueAppleSystemVibrancyTertiaryLabel:   return AppleVisualEffect::VibrancyTertiaryLabel;
-      case CSSValueAppleSystemVibrancyQuaternaryLabel: return AppleVisualEffect::VibrancyQuaternaryLabel;
-      case CSSValueAppleSystemVibrancyFill:            return AppleVisualEffect::VibrancyFill;
-      case CSSValueAppleSystemVibrancySecondaryFill:   return AppleVisualEffect::VibrancySecondaryFill;
-      case CSSValueAppleSystemVibrancyTertiaryFill:    return AppleVisualEffect::VibrancyTertiaryFill;
-      case CSSValueAppleSystemVibrancySeparator:       return AppleVisualEffect::VibrancySeparator;
-      default:                                         break;
-    }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return AppleVisualEffect::None;
-  }
-
-#endif // HAVE(CORE_MATERIAL)
-
-#define TYPE InputSecurity
-#define FOR_EACH(CASE) CASE(Auto) CASE(None)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-  constexpr CSSValueID toCSSValueID(TransformStyle3D e)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(TransformStyle3D e) noexcept
   {
     switch (e)
     {
-      case TransformStyle3D::Flat:       return CSSValueFlat;
-      case TransformStyle3D::Preserve3D: return CSSValuePreserve3d;
-#if HAVE(CORE_ANIMATION_SEPARATED_LAYERS)
-      case TransformStyle3D::Separated: return CSSValueSeparated;
-#endif
+      case TransformStyle3D::Flat:       return css::ValueId::Flat;
+      case TransformStyle3D::Preserve3D: return css::ValueId::Preserve3d;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr TransformStyle3D fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr TransformStyle3D FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueFlat:       return TransformStyle3D::Flat;
-      case CSSValuePreserve3d: return TransformStyle3D::Preserve3D;
-#if HAVE(CORE_ANIMATION_SEPARATED_LAYERS)
-      case CSSValueSeparated: return TransformStyle3D::Separated;
-#endif
-      default: break;
+      case css::ValueId::Flat:       return TransformStyle3D::Flat;
+      case css::ValueId::Preserve3d: return TransformStyle3D::Preserve3D;
+      default:                       break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return TransformStyle3D::Flat;
   }
 
-#define TYPE TransformBox
-#define FOR_EACH(CASE) CASE(StrokeBox) CASE(ContentBox) CASE(BorderBox) CASE(FillBox) CASE(ViewBox)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE TransformBox
+#define KRYS_MAPPING_FOR_EACH(CASE)                                                                          \
+  CASE(StrokeBox) CASE(ContentBox) CASE(BorderBox) CASE(FillBox) CASE(ViewBox)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE ColumnAxis
-#define FOR_EACH(CASE) CASE(Horizontal) CASE(Vertical) CASE(Auto)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE ColumnProgression
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Normal) CASE(Reverse)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE ColumnProgression
-#define FOR_EACH(CASE) CASE(Normal) CASE(Reverse)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE BufferedRendering
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Auto) CASE(Dynamic) CASE(Static)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE BufferedRendering
-#define FOR_EACH(CASE) CASE(Auto) CASE(Dynamic) CASE(Static)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE ColorInterpolation
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Auto) CASE(SRGB) CASE(LinearRGB)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE ColorInterpolation
-#define FOR_EACH(CASE) CASE(Auto) CASE(SRGB) CASE(LinearRGB)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-#define TYPE DominantBaseline
-#define FOR_EACH(CASE)                                                                                       \
+#define KRYS_MAPPING_TYPE DominantBaseline
+#define KRYS_MAPPING_FOR_EACH(CASE)                                                                          \
   CASE(Auto)                                                                                                 \
   CASE(UseScript)                                                                                            \
-  CASE(NoChange) CASE(ResetSize) CASE(Central) CASE(Middle) CASE(TextBeforeEdge) CASE(TextAfterEdge)         \
-    CASE(Ideographic) CASE(Alphabetic) CASE(Hanging) CASE(Mathematical)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+  CASE(NoChange)                                                                                             \
+  CASE(ResetSize)                                                                                            \
+  CASE(Central)                                                                                              \
+  CASE(Middle) CASE(TextBeforeEdge) CASE(TextAfterEdge) CASE(Ideographic) CASE(Alphabetic) CASE(Hanging)     \
+    CASE(Mathematical)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-  constexpr CSSValueID toCSSValueID(ShapeRendering e)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(ShapeRendering e) noexcept
   {
     switch (e)
     {
-      case ShapeRendering::Auto:               return CSSValueAuto;
-      case ShapeRendering::OptimizeSpeed:      return CSSValueOptimizeSpeed;
-      case ShapeRendering::CrispEdges:         return CSSValueCrispedges; // "crispedges", not "crisp-edges"
-      case ShapeRendering::GeometricPrecision: return CSSValueGeometricPrecision;
+      case ShapeRendering::Auto:               return css::ValueId::Auto;
+      case ShapeRendering::OptimizeSpeed:      return css::ValueId::OptimizeSpeed;
+      case ShapeRendering::CrispEdges:         return css::ValueId::Crispedges; // "crispedges", not "crisp-edges"
+      case ShapeRendering::GeometricPrecision: return css::ValueId::GeometricPrecision;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr ShapeRendering fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr ShapeRendering FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueAuto:          return ShapeRendering::Auto;
-      case CSSValueOptimizeSpeed: return ShapeRendering::OptimizeSpeed;
-      case CSSValueCrispedges: // "crispedges", not "crisp-edges"
+      case css::ValueId::Auto:          return ShapeRendering::Auto;
+      case css::ValueId::OptimizeSpeed: return ShapeRendering::OptimizeSpeed;
+      case css::ValueId::Crispedges: // "crispedges", not "crisp-edges"
         return ShapeRendering::CrispEdges;
-      case CSSValueGeometricPrecision: return ShapeRendering::GeometricPrecision;
-      default:                         break;
+      case css::ValueId::GeometricPrecision: return ShapeRendering::GeometricPrecision;
+      default:                               break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return ShapeRendering::Auto;
   }
 
-#define TYPE TextAnchor
-#define FOR_EACH(CASE) CASE(Start) CASE(Middle) CASE(End)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE TextAnchor
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Start) CASE(Middle) CASE(End)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE VectorEffect
-#define FOR_EACH(CASE) CASE(None) CASE(NonScalingStroke)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE VectorEffect
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(None) CASE(NonScalingStroke)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE MaskType
-#define FOR_EACH(CASE) CASE(Luminance) CASE(Alpha)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE MaskType
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Luminance) CASE(Alpha)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-  constexpr CSSValueID toCSSValueID(CSSBoxType cssBox)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(CSSBoxType cssBox) noexcept
   {
     switch (cssBox)
     {
-      case CSSBoxType::MarginBox:  return CSSValueMarginBox;
-      case CSSBoxType::BorderBox:  return CSSValueBorderBox;
-      case CSSBoxType::PaddingBox: return CSSValuePaddingBox;
-      case CSSBoxType::ContentBox: return CSSValueContentBox;
-      case CSSBoxType::FillBox:    return CSSValueFillBox;
-      case CSSBoxType::StrokeBox:  return CSSValueStrokeBox;
-      case CSSBoxType::ViewBox:    return CSSValueViewBox;
-      case CSSBoxType::BoxMissing: ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT(); return CSSValueNone;
+      case CSSBoxType::MarginBox:  return css::ValueId::MarginBox;
+      case CSSBoxType::BorderBox:  return css::ValueId::BorderBox;
+      case CSSBoxType::PaddingBox: return css::ValueId::PaddingBox;
+      case CSSBoxType::ContentBox: return css::ValueId::ContentBox;
+      case CSSBoxType::FillBox:    return css::ValueId::FillBox;
+      case CSSBoxType::StrokeBox:  return css::ValueId::StrokeBox;
+      case CSSBoxType::ViewBox:    return css::ValueId::ViewBox;
+      case CSSBoxType::BoxMissing:
+        krys_debug_assert_msg(false, "Unexpected value");
+        return css::ValueId::None;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr CSSBoxType fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr CSSBoxType FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueMarginBox:  return CSSBoxType::MarginBox;
-      case CSSValueBorderBox:  return CSSBoxType::BorderBox;
-      case CSSValuePaddingBox: return CSSBoxType::PaddingBox;
-      case CSSValueContentBox: return CSSBoxType::ContentBox;
+      case css::ValueId::MarginBox:  return CSSBoxType::MarginBox;
+      case css::ValueId::BorderBox:  return CSSBoxType::BorderBox;
+      case css::ValueId::PaddingBox: return CSSBoxType::PaddingBox;
+      case css::ValueId::ContentBox: return CSSBoxType::ContentBox;
       // The following are used in an SVG context.
-      case CSSValueFillBox:    return CSSBoxType::FillBox;
-      case CSSValueStrokeBox:  return CSSBoxType::StrokeBox;
-      case CSSValueViewBox:    return CSSBoxType::ViewBox;
-      default:                 break;
+      case css::ValueId::FillBox:    return CSSBoxType::FillBox;
+      case css::ValueId::StrokeBox:  return CSSBoxType::StrokeBox;
+      case css::ValueId::ViewBox:    return CSSBoxType::ViewBox;
+      default:                       break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return CSSBoxType::BoxMissing;
   }
 
-#define TYPE ItemPosition
-#define FOR_EACH(CASE)                                                                                       \
+#define KRYS_MAPPING_TYPE ItemPosition
+#define KRYS_MAPPING_FOR_EACH(CASE)                                                                          \
   CASE(Legacy)                                                                                               \
   CASE(Auto)                                                                                                 \
-  CASE(Normal) CASE(Stretch) CASE(Baseline) CASE(LastBaseline) CASE(Center) CASE(Start) CASE(End)            \
-    CASE(SelfStart) CASE(SelfEnd) CASE(FlexStart) CASE(FlexEnd) CASE(Left) CASE(Right) CASE(AnchorCenter)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+  CASE(Normal)                                                                                               \
+  CASE(Stretch)                                                                                              \
+  CASE(Baseline)                                                                                             \
+  CASE(LastBaseline) CASE(Center) CASE(Start) CASE(End) CASE(SelfStart) CASE(SelfEnd) CASE(FlexStart)        \
+    CASE(FlexEnd) CASE(Left) CASE(Right) CASE(AnchorCenter)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE OverflowAlignment
-#define FOR_EACH(CASE) CASE(Default) CASE(Unsafe) CASE(Safe)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE OverflowAlignment
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Default) CASE(Unsafe) CASE(Safe)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE ContentPosition
-#define FOR_EACH(CASE)                                                                                       \
+#define KRYS_MAPPING_TYPE ContentPosition
+#define KRYS_MAPPING_FOR_EACH(CASE)                                                                          \
   CASE(Normal)                                                                                               \
   CASE(Baseline)                                                                                             \
   CASE(LastBaseline) CASE(Center) CASE(Start) CASE(End) CASE(FlexStart) CASE(FlexEnd) CASE(Left) CASE(Right)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE ContentDistribution
-#define FOR_EACH(CASE) CASE(Default) CASE(SpaceBetween) CASE(SpaceAround) CASE(SpaceEvenly) CASE(Stretch)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE ContentDistribution
+#define KRYS_MAPPING_FOR_EACH(CASE)                                                                          \
+  CASE(Default) CASE(SpaceBetween) CASE(SpaceAround) CASE(SpaceEvenly) CASE(Stretch)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE TextZoom
-#define FOR_EACH(CASE) CASE(Normal) CASE(Reset)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE ScrollSnapStrictness
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Proximity) CASE(Mandatory)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE Style::TouchActionValue
-#define FOR_EACH(CASE) CASE(PanX) CASE(PanY) CASE(PinchZoom)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-#define TYPE ScrollSnapStrictness
-#define FOR_EACH(CASE) CASE(Proximity) CASE(Mandatory)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-  constexpr CSSValueID toCSSValueID(ScrollSnapAxis axis)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(ScrollSnapAxis axis) noexcept
   {
     switch (axis)
     {
-      case ScrollSnapAxis::XAxis:  return CSSValueX;
-      case ScrollSnapAxis::YAxis:  return CSSValueY;
-      case ScrollSnapAxis::Block:  return CSSValueBlock;
-      case ScrollSnapAxis::Inline: return CSSValueInline;
-      case ScrollSnapAxis::Both:   return CSSValueBoth;
+      case ScrollSnapAxis::XAxis:  return css::ValueId::X;
+      case ScrollSnapAxis::YAxis:  return css::ValueId::Y;
+      case ScrollSnapAxis::Block:  return css::ValueId::Block;
+      case ScrollSnapAxis::Inline: return css::ValueId::Inline;
+      case ScrollSnapAxis::Both:   return css::ValueId::Both;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr ScrollSnapAxis fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr ScrollSnapAxis FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueX:      return ScrollSnapAxis::XAxis;
-      case CSSValueY:      return ScrollSnapAxis::YAxis;
-      case CSSValueBlock:  return ScrollSnapAxis::Block;
-      case CSSValueInline: return ScrollSnapAxis::Inline;
-      case CSSValueBoth:   return ScrollSnapAxis::Both;
-      default:             break;
+      case css::ValueId::X:      return ScrollSnapAxis::XAxis;
+      case css::ValueId::Y:      return ScrollSnapAxis::YAxis;
+      case css::ValueId::Block:  return ScrollSnapAxis::Block;
+      case css::ValueId::Inline: return ScrollSnapAxis::Inline;
+      case css::ValueId::Both:   return ScrollSnapAxis::Both;
+      default:                   break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return ScrollSnapAxis::Both;
   }
 
-#define TYPE ScrollSnapAxisAlignType
-#define FOR_EACH(CASE) CASE(None) CASE(Start) CASE(Center) CASE(End)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE ScrollSnapAxisAlignType
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(None) CASE(Start) CASE(Center) CASE(End)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE ScrollSnapStop
-#define FOR_EACH(CASE) CASE(Normal) CASE(Always)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE ScrollSnapStop
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Normal) CASE(Always)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE Style::ScrollbarWidth
-#define FOR_EACH(CASE) CASE(Auto) CASE(Thin) CASE(None)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-#if ENABLE(APPLE_PAY)
-
-  #define TYPE ApplePayButtonStyle
-  #define FOR_EACH(CASE) CASE(White) CASE(WhiteOutline) CASE(Black)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-  #undef TYPE
-  #undef FOR_EACH
-
-  #define TYPE ApplePayButtonType
-  #if !ENABLE(APPLE_PAY_NEW_BUTTON_TYPES)
-    #define FOR_EACH(CASE)                                                                                   \
-      CASE(Plain) CASE(Buy) CASE(SetUp) CASE(Donate) CASE(CheckOut) CASE(Book) CASE(Subscribe)
-  #else
-    #define FOR_EACH(CASE)                                                                                   \
-      CASE(Plain)                                                                                            \
-      CASE(Buy)                                                                                              \
-      CASE(SetUp) CASE(Donate) CASE(CheckOut) CASE(Book) CASE(Subscribe) CASE(Reload) CASE(AddMoney)         \
-        CASE(TopUp) CASE(Order) CASE(Rent) CASE(Support) CASE(Contribute) CASE(Tip)
-  #endif
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-  #undef TYPE
-  #undef FOR_EACH
-
-#endif
-
-  constexpr CSSValueID toCSSValueID(FontVariantPosition position)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(FontVariantPosition position) noexcept
   {
     switch (position)
     {
-      case FontVariantPosition::Normal:      return CSSValueNormal;
-      case FontVariantPosition::Subscript:   return CSSValueSub;
-      case FontVariantPosition::Superscript: return CSSValueSuper;
+      case FontVariantPosition::Normal:      return css::ValueId::Normal;
+      case FontVariantPosition::Subscript:   return css::ValueId::Sub;
+      case FontVariantPosition::Superscript: return css::ValueId::Super;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr FontVariantPosition fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr FontVariantPosition FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueNormal: return FontVariantPosition::Normal;
-      case CSSValueSub:    return FontVariantPosition::Subscript;
-      case CSSValueSuper:  return FontVariantPosition::Superscript;
-      default:             ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT(); return FontVariantPosition::Normal;
+      case css::ValueId::Normal: return FontVariantPosition::Normal;
+      case css::ValueId::Sub:    return FontVariantPosition::Subscript;
+      case css::ValueId::Super:  return FontVariantPosition::Superscript;
+      default:                   krys_debug_assert_msg(false, "Unexpected value"); return FontVariantPosition::Normal;
     }
   }
 
-  constexpr CSSValueID toCSSValueID(FontVariantCaps caps)
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(FontVariantCaps caps) noexcept
   {
     switch (caps)
     {
-      case FontVariantCaps::Normal:    return CSSValueNormal;
-      case FontVariantCaps::Small:     return CSSValueSmallCaps;
-      case FontVariantCaps::AllSmall:  return CSSValueAllSmallCaps;
-      case FontVariantCaps::Petite:    return CSSValuePetiteCaps;
-      case FontVariantCaps::AllPetite: return CSSValueAllPetiteCaps;
-      case FontVariantCaps::Unicase:   return CSSValueUnicase;
-      case FontVariantCaps::Titling:   return CSSValueTitlingCaps;
+      case FontVariantCaps::Normal:    return css::ValueId::Normal;
+      case FontVariantCaps::Small:     return css::ValueId::SmallCaps;
+      case FontVariantCaps::AllSmall:  return css::ValueId::AllSmallCaps;
+      case FontVariantCaps::Petite:    return css::ValueId::PetiteCaps;
+      case FontVariantCaps::AllPetite: return css::ValueId::AllPetiteCaps;
+      case FontVariantCaps::Unicase:   return css::ValueId::Unicase;
+      case FontVariantCaps::Titling:   return css::ValueId::TitlingCaps;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
+    krys_debug_assert_msg(false, "Unexpected value");
+    return css::ValueId::Invalid;
   }
 
   template <>
-  constexpr FontVariantCaps fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr FontVariantCaps FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueNormal:        return FontVariantCaps::Normal;
-      case CSSValueSmallCaps:     return FontVariantCaps::Small;
-      case CSSValueAllSmallCaps:  return FontVariantCaps::AllSmall;
-      case CSSValuePetiteCaps:    return FontVariantCaps::Petite;
-      case CSSValueAllPetiteCaps: return FontVariantCaps::AllPetite;
-      case CSSValueUnicase:       return FontVariantCaps::Unicase;
-      case CSSValueTitlingCaps:   return FontVariantCaps::Titling;
-      default:                    break;
+      case css::ValueId::Normal:        return FontVariantCaps::Normal;
+      case css::ValueId::SmallCaps:     return FontVariantCaps::Small;
+      case css::ValueId::AllSmallCaps:  return FontVariantCaps::AllSmall;
+      case css::ValueId::PetiteCaps:    return FontVariantCaps::Petite;
+      case css::ValueId::AllPetiteCaps: return FontVariantCaps::AllPetite;
+      case css::ValueId::Unicase:       return FontVariantCaps::Unicase;
+      case css::ValueId::TitlingCaps:   return FontVariantCaps::Titling;
+      default:                          break;
     }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
+    krys_debug_assert_msg(false, "Unexpected value");
     return FontVariantCaps::Normal;
   }
 
-#define TYPE FontVariantEmoji
-#define FOR_EACH(CASE) CASE(Normal) CASE(Text) CASE(Emoji) CASE(Unicode)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE FontVariantEmoji
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Normal) CASE(Text) CASE(Emoji) CASE(Unicode)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE FontOpticalSizing
-#define FOR_EACH(CASE) CASE(Auto) CASE(None)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE FontOpticalSizing
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Auto) CASE(None)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
   template <>
-  constexpr FontTechnology fromCSSValueID(CSSValueID valueID)
+  KRYS_NODISCARD constexpr css::FontTechnology FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case CSSValueColorColrv0:      return FontTechnology::ColorColrv0;
-      case CSSValueColorColrv1:      return FontTechnology::ColorColrv1;
-      case CSSValueColorCbdt:        return FontTechnology::ColorCbdt;
-      case CSSValueColorSbix:        return FontTechnology::ColorSbix;
-      case CSSValueColorSvg:         return FontTechnology::ColorSvg;
-      case CSSValueFeaturesAat:      return FontTechnology::FeaturesAat;
-      case CSSValueFeaturesGraphite: return FontTechnology::FeaturesGraphite;
-      case CSSValueFeaturesOpentype: return FontTechnology::FeaturesOpentype;
-      case CSSValueIncremental:      return FontTechnology::Incremental;
-      case CSSValuePalettes:         return FontTechnology::Palettes;
-      case CSSValueVariations:       return FontTechnology::Variations;
-      default:                       break;
+      case css::ValueId::ColorColrv0:      return css::FontTechnology::ColorColrv0;
+      case css::ValueId::ColorColrv1:      return css::FontTechnology::ColorColrv1;
+      case css::ValueId::ColorCbdt:        return css::FontTechnology::ColorCbdt;
+      case css::ValueId::ColorSbix:        return css::FontTechnology::ColorSbix;
+      case css::ValueId::ColorSvg:         return css::FontTechnology::ColorSvg;
+      case css::ValueId::FeaturesAat:      return css::FontTechnology::FeaturesAat;
+      case css::ValueId::FeaturesGraphite: return css::FontTechnology::FeaturesGraphite;
+      case css::ValueId::FeaturesOpentype: return css::FontTechnology::FeaturesOpentype;
+      case css::ValueId::Incremental:      return css::FontTechnology::Incremental;
+      case css::ValueId::Palettes:         return css::FontTechnology::Palettes;
+      case css::ValueId::Variations:       return css::FontTechnology::Variations;
+      default:                             break;
     }
-    return FontTechnology::Invalid;
+    return css::FontTechnology::Invalid;
   }
 
-#define TYPE FontSynthesisLonghandValue
-#define FOR_EACH(CASE) CASE(Auto) CASE(None)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE FontSynthesisLonghandValue
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Auto) CASE(None)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE FontLoadingBehavior
-#define FOR_EACH(CASE) CASE(Auto) CASE(Block) CASE(Swap) CASE(Fallback) CASE(Optional)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE FontLoadingBehavior
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Auto) CASE(Block) CASE(Swap) CASE(Fallback) CASE(Optional)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE MathShift
-#define FOR_EACH(CASE) CASE(Normal) CASE(Compact)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE MathShift
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Normal) CASE(Compact)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE MathStyle
-#define FOR_EACH(CASE) CASE(Normal) CASE(Compact)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE MathStyle
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Normal) CASE(Compact)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE ContainerType
-#define FOR_EACH(CASE) CASE(Normal) CASE(Size) CASE(InlineSize)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE ContainerType
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Normal) CASE(Size) CASE(InlineSize)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE ContentVisibility
-#define FOR_EACH(CASE) CASE(Visible) CASE(Hidden) CASE(Auto)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE ContentVisibility
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Visible) CASE(Hidden) CASE(Auto)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE ScrollAxis
-#define FOR_EACH(CASE) CASE(Block) CASE(Inline) CASE(X) CASE(Y)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE ScrollAxis
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Block) CASE(Inline) CASE(X) CASE(Y)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE QuoteType
-#define FOR_EACH(CASE) CASE(OpenQuote) CASE(CloseQuote) CASE(NoOpenQuote) CASE(NoCloseQuote)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE QuoteType
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(OpenQuote) CASE(CloseQuote) CASE(NoOpenQuote) CASE(NoCloseQuote)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE OverflowContinue
-#define FOR_EACH(CASE) CASE(Auto) CASE(Discard)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE OverflowContinue
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Auto) CASE(Discard)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE Style::PositionTryOrder
-#define FOR_EACH(CASE) CASE(Normal) CASE(MostWidth) CASE(MostHeight) CASE(MostBlockSize) CASE(MostInlineSize)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE Scroller
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Nearest) CASE(Root) CASE(Self)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE Style::PositionVisibilityValue
-#define FOR_EACH(CASE) CASE(AnchorsValid) CASE(AnchorsVisible) CASE(NoOverflow)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE NinePieceImageRule
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Stretch) CASE(Round) CASE(Space) CASE(Repeat)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE Style::PositionTryFallbackTactic
-#define FOR_EACH(CASE) CASE(FlipBlock) CASE(FlipInline) CASE(FlipStart) CASE(FlipX) CASE(FlipY)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE AnimationDirection
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Normal) CASE(Alternate) CASE(Reverse) CASE(AlternateReverse)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE Style::ScrollBehavior
-#define FOR_EACH(CASE) CASE(Auto) CASE(Smooth)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE AnimationFillMode
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(None) CASE(Forwards) CASE(Backwards) CASE(Both)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE Scroller
-#define FOR_EACH(CASE) CASE(Nearest) CASE(Root) CASE(Self)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE AnimationPlayState
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Running) CASE(Paused)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE NinePieceImageRule
-#define FOR_EACH(CASE) CASE(Stretch) CASE(Round) CASE(Space) CASE(Repeat)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE CompositeOperation
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Replace) CASE(Add) CASE(Accumulate)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE AnimationDirection
-#define FOR_EACH(CASE) CASE(Normal) CASE(Alternate) CASE(Reverse) CASE(AlternateReverse)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE TransitionBehavior
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Normal) CASE(AllowDiscrete)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE AnimationFillMode
-#define FOR_EACH(CASE) CASE(None) CASE(Forwards) CASE(Backwards) CASE(Both)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE TextEdgeOver
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Text) CASE(Ideographic) CASE(IdeographicInk) CASE(Cap) CASE(Ex)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE AnimationPlayState
-#define FOR_EACH(CASE) CASE(Running) CASE(Paused)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE TextEdgeUnder
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Text) CASE(Ideographic) CASE(IdeographicInk) CASE(Alphabetic)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE CompositeOperation
-#define FOR_EACH(CASE) CASE(Replace) CASE(Add) CASE(Accumulate)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
+#define KRYS_MAPPING_TYPE TextSpacingTrim::TrimType
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(SpaceAll) CASE(TrimAll) CASE(Auto)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
-#define TYPE TransitionBehavior
-#define FOR_EACH(CASE) CASE(Normal) CASE(AllowDiscrete)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-#define TYPE TextEdgeOver
-#define FOR_EACH(CASE) CASE(Text) CASE(Ideographic) CASE(IdeographicInk) CASE(Cap) CASE(Ex)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-#define TYPE TextEdgeUnder
-#define FOR_EACH(CASE) CASE(Text) CASE(Ideographic) CASE(IdeographicInk) CASE(Alphabetic)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-#define TYPE TextSpacingTrim::TrimType
-#define FOR_EACH(CASE) CASE(SpaceAll) CASE(TrimAll) CASE(Auto)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-#define TYPE Style::ImageOrientation
-#define FOR_EACH(CASE) CASE(FromImage) CASE(None)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-#define TYPE Style::MarginTrimSide
-#define FOR_EACH(CASE) CASE(BlockStart) CASE(InlineStart) CASE(BlockEnd) CASE(InlineEnd)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-#define TYPE Style::WebkitLineBoxContainValue
-#define FOR_EACH(CASE)                                                                                       \
-  CASE(Block) CASE(Inline) CASE(Font) CASE(Glyphs) CASE(Replaced) CASE(InlineBox) CASE(InitialLetter)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-#define TYPE Style::ContainValue
-#define FOR_EACH(CASE) CASE(Size) CASE(InlineSize) CASE(Layout) CASE(Style) CASE(Paint)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-#define TYPE Style::MaskMode
-#define FOR_EACH(CASE) CASE(Alpha) CASE(Luminance) CASE(MatchSource)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-#undef TYPE
-#undef FOR_EACH
-
-  constexpr CSSValueID toCSSValueIDForWebkitMaskSourceType(Style::MaskMode e)
-  {
-    switch (e)
-    {
-      case Style::MaskMode::Alpha:       return CSSValueAlpha;
-      case Style::MaskMode::Luminance:   return CSSValueLuminance;
-      case Style::MaskMode::MatchSource: return CSSValueAlpha;
-    }
-    ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
-    return CSSValueInvalid;
-  }
-
-#if ENABLE(WEBKIT_OVERFLOW_SCROLLING_CSS_PROPERTY)
-
-  #define TYPE Style::WebkitOverflowScrolling
-  #define FOR_EACH(CASE) CASE(Auto) CASE(Touch)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-  #undef TYPE
-  #undef FOR_EACH
-
-#endif
-
-#if ENABLE(WEBKIT_TOUCH_CALLOUT_CSS_PROPERTY)
-
-  #define TYPE Style::WebkitTouchCallout
-  #define FOR_EACH(CASE) CASE(Default) CASE(None)
-  DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-  #undef TYPE
-  #undef FOR_EACH
-
-#endif
-
-#undef EMIT_TO_CSS_SWITCH_CASE
-#undef EMIT_FROM_CSS_SWITCH_CASE
-#undef EMIT_VALUE_REPRESENTATION_CSS_SWITCH_CASE
-#undef DEFINE_TO_CSS_VALUE_ID_FUNCTION
-#undef DEFINE_FROM_CSS_VALUE_ID_FUNCTION
-#undef DEFINE_VALUE_REPRESENTATION_CSS_VALUE_ID_FUNCTION
-#undef DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
-
+#undef KRYS_EMIT_TO_VALUE_ID_SWITCH_CASE
+#undef KRYS_EMIT_FROM_VALUE_ID_SWITCH_CASE
+#undef KRYS_EMIT_VALUE_REPRESENTATION_SWITCH_CASE
+#undef KRYS_DEFINE_TO_VALUE_ID_FUNCTION
+#undef KRYS_DEFINE_FROM_VALUE_ID_FUNCTION
+#undef KRYS_DEFINE_VALUE_REPRESENTATION_FUNCTION
+#undef KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
 }

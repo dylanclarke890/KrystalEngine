@@ -1,17 +1,24 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Booey\Style\Values\Types.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
+#include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include <tuple>
 
-/// @summary Utilities and macros for implementing coordinating list property groups.
-/// @see https://drafts.csswg.org/css-values-4/#coordinating-list-property
+// Utilities and macros for implementing coordinating list property groups.
+// https://drafts.csswg.org/css-values-4/#coordinating-list-property
+//
+// The property macros take `(ownerType, property, type, lowercaseName, uppercaseName)`. The owner stores each
+// property as `_lowercaseName` with its state in `_lowercaseNameState`, and declares the getter
+// `GetUppercaseName()`; the macros declare the rest.
+
 namespace krys::boo::style
 {
-
   template <typename T>
   concept CoordinatedValueListValue = requires(T value) {
     { T::ComputedValueUsesUsedValues } -> SameType<const bool &>;
-    { T::BaseProperty.Value } -> SameType<const css::PropertyId &>;
-    { value.Clone(std::declval<const T &>()) } -> SameType<T>;
+    { T::BaseProperty.value } -> SameType<const css::PropertyId &>;
+    { T::Clone(std::declval<const T &>()) } -> SameType<T>;
     { value.IsInitial() } -> SameType<bool>;
   };
 
@@ -27,368 +34,369 @@ namespace krys::boo::style
 
   template <css::PropertyId>
   struct CoordinatedValueListPropertyConstAccessor;
+}
 
 #define KRYS_DECLARE_COORDINATED_VALUE_LIST_PROPERTY(ownerType, property, type, lowercaseName,               \
                                                      uppercaseName)                                          \
-  css::PropertyNameConstant<css::PropertyId::##property> {},
+  css::PropertyNameConstant<css::PropertyId::property> {},
 
 #define KRYS_INTERNAL_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_COMMON(ownerType, property, type,     \
-                                                                              name)                          \
-  static type Initial()                                                                                      \
+                                                                              lowercaseName, uppercaseName)  \
+  KRYS_NODISCARD static type Initial() noexcept                                                              \
   {                                                                                                          \
-    return ownerType::Initial##name();                                                                       \
+    return ownerType::Initial##uppercaseName();                                                              \
   }                                                                                                          \
-  bool IsUnset() const noexcept                                                                              \
+  KRYS_NODISCARD bool IsUnset() const noexcept                                                               \
   {                                                                                                          \
-    return value.Is##name##Unset();                                                                          \
+    return Value.Is##uppercaseName##Unset();                                                                 \
   }                                                                                                          \
-  bool IsSet() const noexcept                                                                                \
+  KRYS_NODISCARD bool IsSet() const noexcept                                                                 \
   {                                                                                                          \
-    return value.Is##name##Set();                                                                            \
+    return Value.Is##uppercaseName##Set();                                                                   \
   }                                                                                                          \
-  bool IsFilled() const noexcept                                                                             \
+  KRYS_NODISCARD bool IsFilled() const noexcept                                                              \
   {                                                                                                          \
-    return value.Is##name##Filled();                                                                         \
+    return Value.Is##uppercaseName##Filled();                                                                \
   }                                                                                                          \
-  CoordinatedValueListPropertyState State() const noexcept                                                   \
+  KRYS_NODISCARD CoordinatedValueListPropertyState State() const noexcept                                    \
   {                                                                                                          \
-    return value.name##State();                                                                              \
+    return Value.uppercaseName##State();                                                                     \
   }
 
 #define KRYS_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_REFERENCE(ownerType, property, type,           \
                                                                         lowercaseName, uppercaseName)        \
   template <>                                                                                                \
-  struct CoordinatedValueListPropertyAccessor<css::PropertyId::##property>                                   \
+  struct CoordinatedValueListPropertyAccessor<css::PropertyId::property>                                     \
   {                                                                                                          \
     using Type = type;                                                                                       \
                                                                                                              \
-    ownerType &value;                                                                                        \
+    ownerType &Value;                                                                                        \
                                                                                                              \
-    const type &Get() const noexcept                                                                         \
+    KRYS_NODISCARD const type &Get() const noexcept                                                          \
     {                                                                                                        \
-      return value.lowercaseName();                                                                          \
+      return Value.Get##uppercaseName();                                                                     \
     }                                                                                                        \
     void Set(type &&lowercaseName) noexcept                                                                  \
     {                                                                                                        \
-      value.Set##uppercaseName(WTF::move(lowercaseName));                                                    \
+      Value.Set##uppercaseName(krys::move(lowercaseName));                                                   \
     }                                                                                                        \
     void Fill(type &&lowercaseName) noexcept                                                                 \
     {                                                                                                        \
-      value.Fill##uppercaseName(WTF::move(lowercaseName));                                                   \
+      Value.Fill##uppercaseName(krys::move(lowercaseName));                                                  \
     }                                                                                                        \
     void Clear() noexcept                                                                                    \
     {                                                                                                        \
-      value.Clear##uppercaseName();                                                                          \
+      Value.Clear##uppercaseName();                                                                          \
     }                                                                                                        \
                                                                                                              \
     KRYS_INTERNAL_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_COMMON(ownerType, property, type,         \
-                                                                          uppercaseName)                     \
-                                                                                                             \
-    bool operator==(                                                                                         \
-      const CoordinatedValueListPropertyAccessor<css::PropertyId::##property> &other) const noexcept         \
-    {                                                                                                        \
-      return Get() == other.Get() && State() == other.State();                                               \
-    }                                                                                                        \
-  };                                                                                                         \
-                                                                                                             \
-  template <>                                                                                                \
-  struct CoordinatedValueListPropertyConstAccessor<css::PropertyId::##property>                              \
-  {                                                                                                          \
-    using Type = type;                                                                                       \
-                                                                                                             \
-    const ownerType &value;                                                                                  \
-                                                                                                             \
-    const type &Get() const noexcept                                                                         \
-    {                                                                                                        \
-      return value.lowercaseName();                                                                          \
-    }                                                                                                        \
-                                                                                                             \
-    KRYS_INTERNAL_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_COMMON(ownerType, property, type,         \
-                                                                          uppercaseName)                     \
-                                                                                                             \
-    bool operator==(                                                                                         \
-      const CoordinatedValueListPropertyConstAccessor<css::PropertyId::##property> &other) const noexcept    \
-    {                                                                                                        \
-      return Get() == other.Get() && State() == other.State();                                               \
-    }                                                                                                        \
-  };
-
-#define DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_VALUE(ownerType, property, type, lowercaseName,     \
-                                                               uppercaseName)                                \
-  template <>                                                                                                \
-  struct CoordinatedValueListPropertyAccessor<css::PropertyId::##property>                                   \
-  {                                                                                                          \
-    using Type = type;                                                                                       \
-                                                                                                             \
-    ownerType &value;                                                                                        \
-                                                                                                             \
-    type get() const                                                                                         \
-    {                                                                                                        \
-      return value.lowercaseName();                                                                          \
-    }                                                                                                        \
-    void set(type lowercaseName)                                                                             \
-    {                                                                                                        \
-      value.set##uppercaseName(lowercaseName);                                                               \
-    }                                                                                                        \
-    void fill(type lowercaseName)                                                                            \
-    {                                                                                                        \
-      value.fill##uppercaseName(lowercaseName);                                                              \
-    }                                                                                                        \
-    void clear()                                                                                             \
-    {                                                                                                        \
-      value.clear##uppercaseName();                                                                          \
-    }                                                                                                        \
-                                                                                                             \
-    INTERNAL_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_COMMON(ownerType, property, type,              \
-                                                                     lowercaseName, uppercaseName)           \
-                                                                                                             \
-    bool operator==(const CoordinatedValueListPropertyAccessor<css::PropertyId::##property> &other) const    \
-    {                                                                                                        \
-      return get() == other.get() && state() == other.state();                                               \
-    }                                                                                                        \
-  };                                                                                                         \
-                                                                                                             \
-  template <>                                                                                                \
-  struct CoordinatedValueListPropertyConstAccessor<css::PropertyId::##property>                              \
-  {                                                                                                          \
-    using Type = type;                                                                                       \
-                                                                                                             \
-    const ownerType &value;                                                                                  \
-                                                                                                             \
-    type get() const                                                                                         \
-    {                                                                                                        \
-      return value.lowercaseName();                                                                          \
-    }                                                                                                        \
-                                                                                                             \
-    INTERNAL_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_COMMON(ownerType, property, type,              \
-                                                                     lowercaseName, uppercaseName)           \
-                                                                                                             \
-    bool                                                                                                     \
-      operator==(const CoordinatedValueListPropertyConstAccessor<css::PropertyId::##property> &other) const  \
-    {                                                                                                        \
-      return get() == other.get() && state() == other.state();                                               \
-    }                                                                                                        \
-  };
-
-#define DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_ENUM(ownerType, property, type, lowercaseName,      \
-                                                              uppercaseName)                                 \
-  DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_VALUE(ownerType, property, type, lowercaseName,           \
-                                                         uppercaseName)
-
-#define DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_SHORTHAND(ownerType, property, type, lowercaseName, \
-                                                                   uppercaseName)                            \
-  template <>                                                                                                \
-  struct CoordinatedValueListPropertyAccessor<css::PropertyId::##property>                                   \
-  {                                                                                                          \
-    using Type = type;                                                                                       \
-                                                                                                             \
-    ownerType &value;                                                                                        \
-                                                                                                             \
-    type get() const                                                                                         \
-    {                                                                                                        \
-      return value.lowercaseName();                                                                          \
-    }                                                                                                        \
-    void set(type &&lowercaseName)                                                                           \
-    {                                                                                                        \
-      value.set##uppercaseName(WTF::move(lowercaseName));                                                    \
-    }                                                                                                        \
-    void fill(type &&lowercaseName)                                                                          \
-    {                                                                                                        \
-      value.fill##uppercaseName(WTF::move(lowercaseName));                                                   \
-    }                                                                                                        \
-    void clear()                                                                                             \
-    {                                                                                                        \
-      value.clear##uppercaseName();                                                                          \
-    }                                                                                                        \
-                                                                                                             \
-    static type initial()                                                                                    \
-    {                                                                                                        \
-      return ownerType::initial##uppercaseName();                                                            \
-    }                                                                                                        \
-    bool isUnset() const                                                                                     \
-    {                                                                                                        \
-      return value.is##uppercaseName##Unset();                                                               \
-    }                                                                                                        \
-    bool isSet() const                                                                                       \
-    {                                                                                                        \
-      return value.is##uppercaseName##Set();                                                                 \
-    }                                                                                                        \
-    bool isFilled() const                                                                                    \
-    {                                                                                                        \
-      return value.is##uppercaseName##Filled();                                                              \
-    }                                                                                                        \
-  };                                                                                                         \
-                                                                                                             \
-  template <>                                                                                                \
-  struct CoordinatedValueListPropertyConstAccessor<css::PropertyId::##property>                              \
-  {                                                                                                          \
-    using Type = type;                                                                                       \
-                                                                                                             \
-    const ownerType &value;                                                                                  \
-                                                                                                             \
-    type get() const                                                                                         \
-    {                                                                                                        \
-      return value.lowercaseName();                                                                          \
-    }                                                                                                        \
-                                                                                                             \
-    static type initial()                                                                                    \
-    {                                                                                                        \
-      return ownerType::initial##uppercaseName();                                                            \
-    }                                                                                                        \
-    bool isUnset() const                                                                                     \
-    {                                                                                                        \
-      return value.is##uppercaseName##Unset();                                                               \
-    }                                                                                                        \
-    bool isSet() const                                                                                       \
-    {                                                                                                        \
-      return value.is##uppercaseName##Set();                                                                 \
-    }                                                                                                        \
-    bool isFilled() const                                                                                    \
-    {                                                                                                        \
-      return value.is##uppercaseName##Filled();                                                              \
-    }                                                                                                        \
-  };
-
-#define DECLARE_COORDINATED_VALUE_LIST_IS_SET_AND_IS_FILLED_MEMBERS(ownerType, property, type,               \
-                                                                    lowercaseName, uppercaseName)            \
-  PREFERRED_TYPE(CoordinatedValueListPropertyState)                                                          \
-  unsigned m_##lowercaseName##State : 2 {static_cast<unsigned>(CoordinatedValueListPropertyState::Unset)};
-
-#define INTERNAL_DECLARE_COORDINATED_VALUE_LIST_GETTER_AND_SETTERS_COMMON(ownerType, property, type,         \
                                                                           lowercaseName, uppercaseName)      \
-  CoordinatedValueListPropertyState lowercaseName##State() const                                             \
+                                                                                                             \
+    KRYS_NODISCARD bool operator==(                                                                          \
+      const CoordinatedValueListPropertyAccessor<css::PropertyId::property> &other) const noexcept           \
+    {                                                                                                        \
+      return Get() == other.Get() && State() == other.State();                                               \
+    }                                                                                                        \
+  };                                                                                                         \
+                                                                                                             \
+  template <>                                                                                                \
+  struct CoordinatedValueListPropertyConstAccessor<css::PropertyId::property>                                \
   {                                                                                                          \
-    return static_cast<CoordinatedValueListPropertyState>(data().m_##lowercaseName##State);                  \
-  }                                                                                                          \
-  bool is##uppercaseName##Unset() const                                                                      \
-  {                                                                                                          \
-    return lowercaseName##State() == CoordinatedValueListPropertyState::Unset;                               \
-  }                                                                                                          \
-  bool is##uppercaseName##Set() const                                                                        \
-  {                                                                                                          \
-    return lowercaseName##State() == CoordinatedValueListPropertyState::Set;                                 \
-  }                                                                                                          \
-  bool is##uppercaseName##Filled() const                                                                     \
-  {                                                                                                          \
-    return lowercaseName##State() == CoordinatedValueListPropertyState::Filled;                              \
-  }
+    using Type = type;                                                                                       \
+                                                                                                             \
+    const ownerType &Value;                                                                                  \
+                                                                                                             \
+    KRYS_NODISCARD const type &Get() const noexcept                                                          \
+    {                                                                                                        \
+      return Value.Get##uppercaseName();                                                                     \
+    }                                                                                                        \
+                                                                                                             \
+    KRYS_INTERNAL_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_COMMON(ownerType, property, type,         \
+                                                                          lowercaseName, uppercaseName)      \
+                                                                                                             \
+    KRYS_NODISCARD bool operator==(                                                                          \
+      const CoordinatedValueListPropertyConstAccessor<css::PropertyId::property> &other) const noexcept      \
+    {                                                                                                        \
+      return Get() == other.Get() && State() == other.State();                                               \
+    }                                                                                                        \
+  };
 
-#define DECLARE_COORDINATED_VALUE_LIST_GETTER_AND_SETTERS_REFERENCE(ownerType, property, type,               \
+#define KRYS_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_VALUE(ownerType, property, type,               \
                                                                     lowercaseName, uppercaseName)            \
-  void clear##uppercaseName()                                                                                \
+  template <>                                                                                                \
+  struct CoordinatedValueListPropertyAccessor<css::PropertyId::property>                                     \
   {                                                                                                          \
-    data().m_##lowercaseName = ownerType::initial##uppercaseName();                                          \
-    data().m_##lowercaseName##State = static_cast<unsigned>(CoordinatedValueListPropertyState::Unset);       \
-  }                                                                                                          \
-  void set##uppercaseName(type &&lowercaseName)                                                              \
-  {                                                                                                          \
-    data().m_##lowercaseName = WTF::move(lowercaseName);                                                     \
-    data().m_##lowercaseName##State = static_cast<unsigned>(CoordinatedValueListPropertyState::Set);         \
-  }                                                                                                          \
-  void fill##uppercaseName(type &&lowercaseName)                                                             \
-  {                                                                                                          \
-    data().m_##lowercaseName = WTF::move(lowercaseName);                                                     \
-    data().m_##lowercaseName##State = static_cast<unsigned>(CoordinatedValueListPropertyState::Filled);      \
-  }                                                                                                          \
-  INTERNAL_DECLARE_COORDINATED_VALUE_LIST_GETTER_AND_SETTERS_COMMON(ownerType, property, type,               \
-                                                                    lowercaseName, uppercaseName)
-
-#define DECLARE_COORDINATED_VALUE_LIST_GETTER_AND_SETTERS_VALUE(ownerType, property, type, lowercaseName,    \
-                                                                uppercaseName)                               \
-  void clear##uppercaseName()                                                                                \
-  {                                                                                                          \
-    data().m_##lowercaseName = ownerType::initial##uppercaseName();                                          \
-    data().m_##lowercaseName##State = static_cast<unsigned>(CoordinatedValueListPropertyState::Unset);       \
-  }                                                                                                          \
+    using Type = type;                                                                                       \
                                                                                                              \
-  void set##uppercaseName(type lowercaseName)                                                                \
-  {                                                                                                          \
-    data().m_##lowercaseName = lowercaseName;                                                                \
-    data().m_##lowercaseName##State = static_cast<unsigned>(CoordinatedValueListPropertyState::Set);         \
-  }                                                                                                          \
-  void fill##uppercaseName(type lowercaseName)                                                               \
-  {                                                                                                          \
-    data().m_##lowercaseName = lowercaseName;                                                                \
-    data().m_##lowercaseName##State = static_cast<unsigned>(CoordinatedValueListPropertyState::Filled);      \
-  }                                                                                                          \
-  INTERNAL_DECLARE_COORDINATED_VALUE_LIST_GETTER_AND_SETTERS_COMMON(ownerType, property, type,               \
-                                                                    lowercaseName, uppercaseName)
-
-#define DECLARE_COORDINATED_VALUE_LIST_GETTER_AND_SETTERS_ENUM(ownerType, property, type, lowercaseName,     \
-                                                               uppercaseName)                                \
-  void clear##uppercaseName()                                                                                \
-  {                                                                                                          \
-    data().m_##lowercaseName = static_cast<unsigned>(ownerType::initial##uppercaseName());                   \
-    data().m_##lowercaseName##State = static_cast<unsigned>(CoordinatedValueListPropertyState::Unset);       \
-  }                                                                                                          \
+    ownerType &Value;                                                                                        \
                                                                                                              \
-  void set##uppercaseName(type lowercaseName)                                                                \
+    KRYS_NODISCARD type Get() const noexcept                                                                 \
+    {                                                                                                        \
+      return Value.Get##uppercaseName();                                                                     \
+    }                                                                                                        \
+    void Set(type lowercaseName) noexcept                                                                    \
+    {                                                                                                        \
+      Value.Set##uppercaseName(lowercaseName);                                                               \
+    }                                                                                                        \
+    void Fill(type lowercaseName) noexcept                                                                   \
+    {                                                                                                        \
+      Value.Fill##uppercaseName(lowercaseName);                                                              \
+    }                                                                                                        \
+    void Clear() noexcept                                                                                    \
+    {                                                                                                        \
+      Value.Clear##uppercaseName();                                                                          \
+    }                                                                                                        \
+                                                                                                             \
+    KRYS_INTERNAL_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_COMMON(ownerType, property, type,         \
+                                                                          lowercaseName, uppercaseName)      \
+                                                                                                             \
+    KRYS_NODISCARD bool operator==(                                                                          \
+      const CoordinatedValueListPropertyAccessor<css::PropertyId::property> &other) const noexcept           \
+    {                                                                                                        \
+      return Get() == other.Get() && State() == other.State();                                               \
+    }                                                                                                        \
+  };                                                                                                         \
+                                                                                                             \
+  template <>                                                                                                \
+  struct CoordinatedValueListPropertyConstAccessor<css::PropertyId::property>                                \
   {                                                                                                          \
-    data().m_##lowercaseName = static_cast<unsigned>(lowercaseName);                                         \
-    data().m_##lowercaseName##State = static_cast<unsigned>(CoordinatedValueListPropertyState::Set);         \
-  }                                                                                                          \
-  void fill##uppercaseName(type lowercaseName)                                                               \
-  {                                                                                                          \
-    data().m_##lowercaseName = static_cast<unsigned>(lowercaseName);                                         \
-    data().m_##lowercaseName##State = static_cast<unsigned>(CoordinatedValueListPropertyState::Filled);      \
-  }                                                                                                          \
-  INTERNAL_DECLARE_COORDINATED_VALUE_LIST_GETTER_AND_SETTERS_COMMON(ownerType, property, type,               \
-                                                                    lowercaseName, uppercaseName)
+    using Type = type;                                                                                       \
+                                                                                                             \
+    const ownerType &Value;                                                                                  \
+                                                                                                             \
+    KRYS_NODISCARD type Get() const noexcept                                                                 \
+    {                                                                                                        \
+      return Value.Get##uppercaseName();                                                                     \
+    }                                                                                                        \
+                                                                                                             \
+    KRYS_INTERNAL_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_COMMON(ownerType, property, type,         \
+                                                                          lowercaseName, uppercaseName)      \
+                                                                                                             \
+    KRYS_NODISCARD bool operator==(                                                                          \
+      const CoordinatedValueListPropertyConstAccessor<css::PropertyId::property> &other) const noexcept      \
+    {                                                                                                        \
+      return Get() == other.Get() && State() == other.State();                                               \
+    }                                                                                                        \
+  };
 
+#define KRYS_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_ENUM(ownerType, property, type, lowercaseName, \
+                                                                   uppercaseName)                            \
+  KRYS_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_VALUE(ownerType, property, type, lowercaseName,      \
+                                                              uppercaseName)
+
+#define KRYS_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_SHORTHAND(ownerType, property, type,           \
+                                                                        lowercaseName, uppercaseName)        \
+  template <>                                                                                                \
+  struct CoordinatedValueListPropertyAccessor<css::PropertyId::property>                                     \
+  {                                                                                                          \
+    using Type = type;                                                                                       \
+                                                                                                             \
+    ownerType &Value;                                                                                        \
+                                                                                                             \
+    KRYS_NODISCARD type Get() const noexcept                                                                 \
+    {                                                                                                        \
+      return Value.Get##uppercaseName();                                                                     \
+    }                                                                                                        \
+    void Set(type &&lowercaseName) noexcept                                                                  \
+    {                                                                                                        \
+      Value.Set##uppercaseName(krys::move(lowercaseName));                                                   \
+    }                                                                                                        \
+    void Fill(type &&lowercaseName) noexcept                                                                 \
+    {                                                                                                        \
+      Value.Fill##uppercaseName(krys::move(lowercaseName));                                                  \
+    }                                                                                                        \
+    void Clear() noexcept                                                                                    \
+    {                                                                                                        \
+      Value.Clear##uppercaseName();                                                                          \
+    }                                                                                                        \
+                                                                                                             \
+    KRYS_NODISCARD static type Initial() noexcept                                                            \
+    {                                                                                                        \
+      return ownerType::Initial##uppercaseName();                                                            \
+    }                                                                                                        \
+    KRYS_NODISCARD bool IsUnset() const noexcept                                                             \
+    {                                                                                                        \
+      return Value.Is##uppercaseName##Unset();                                                               \
+    }                                                                                                        \
+    KRYS_NODISCARD bool IsSet() const noexcept                                                               \
+    {                                                                                                        \
+      return Value.Is##uppercaseName##Set();                                                                 \
+    }                                                                                                        \
+    KRYS_NODISCARD bool IsFilled() const noexcept                                                            \
+    {                                                                                                        \
+      return Value.Is##uppercaseName##Filled();                                                              \
+    }                                                                                                        \
+  };                                                                                                         \
+                                                                                                             \
+  template <>                                                                                                \
+  struct CoordinatedValueListPropertyConstAccessor<css::PropertyId::property>                                \
+  {                                                                                                          \
+    using Type = type;                                                                                       \
+                                                                                                             \
+    const ownerType &Value;                                                                                  \
+                                                                                                             \
+    KRYS_NODISCARD type Get() const noexcept                                                                 \
+    {                                                                                                        \
+      return Value.Get##uppercaseName();                                                                     \
+    }                                                                                                        \
+                                                                                                             \
+    KRYS_NODISCARD static type Initial() noexcept                                                            \
+    {                                                                                                        \
+      return ownerType::Initial##uppercaseName();                                                            \
+    }                                                                                                        \
+    KRYS_NODISCARD bool IsUnset() const noexcept                                                             \
+    {                                                                                                        \
+      return Value.Is##uppercaseName##Unset();                                                               \
+    }                                                                                                        \
+    KRYS_NODISCARD bool IsSet() const noexcept                                                               \
+    {                                                                                                        \
+      return Value.Is##uppercaseName##Set();                                                                 \
+    }                                                                                                        \
+    KRYS_NODISCARD bool IsFilled() const noexcept                                                            \
+    {                                                                                                        \
+      return Value.Is##uppercaseName##Filled();                                                              \
+    }                                                                                                        \
+  };
+
+#define KRYS_DECLARE_COORDINATED_VALUE_LIST_IS_SET_AND_IS_FILLED_MEMBERS(ownerType, property, type,          \
+                                                                         lowercaseName, uppercaseName)       \
+  uint8 _##lowercaseName##State : 2 {static_cast<uint8>(CoordinatedValueListPropertyState::Unset)};
+
+#define KRYS_INTERNAL_DECLARE_COORDINATED_VALUE_LIST_GETTER_AND_SETTERS_COMMON(ownerType, property, type,    \
+                                                                               lowercaseName, uppercaseName) \
+  KRYS_NODISCARD CoordinatedValueListPropertyState uppercaseName##State() const noexcept                     \
+  {                                                                                                          \
+    return static_cast<CoordinatedValueListPropertyState>(Data()._##lowercaseName##State);                   \
+  }                                                                                                          \
+  KRYS_NODISCARD bool Is##uppercaseName##Unset() const noexcept                                              \
+  {                                                                                                          \
+    return uppercaseName##State() == CoordinatedValueListPropertyState::Unset;                               \
+  }                                                                                                          \
+  KRYS_NODISCARD bool Is##uppercaseName##Set() const noexcept                                                \
+  {                                                                                                          \
+    return uppercaseName##State() == CoordinatedValueListPropertyState::Set;                                 \
+  }                                                                                                          \
+  KRYS_NODISCARD bool Is##uppercaseName##Filled() const noexcept                                             \
+  {                                                                                                          \
+    return uppercaseName##State() == CoordinatedValueListPropertyState::Filled;                              \
+  }
+
+#define KRYS_DECLARE_COORDINATED_VALUE_LIST_GETTER_AND_SETTERS_REFERENCE(ownerType, property, type,          \
+                                                                         lowercaseName, uppercaseName)       \
+  void Clear##uppercaseName() noexcept                                                                       \
+  {                                                                                                          \
+    Data()._##lowercaseName = ownerType::Initial##uppercaseName();                                           \
+    Data()._##lowercaseName##State = static_cast<uint8>(CoordinatedValueListPropertyState::Unset);           \
+  }                                                                                                          \
+  void Set##uppercaseName(type &&lowercaseName) noexcept                                                     \
+  {                                                                                                          \
+    Data()._##lowercaseName = krys::move(lowercaseName);                                                     \
+    Data()._##lowercaseName##State = static_cast<uint8>(CoordinatedValueListPropertyState::Set);             \
+  }                                                                                                          \
+  void Fill##uppercaseName(type &&lowercaseName) noexcept                                                    \
+  {                                                                                                          \
+    Data()._##lowercaseName = krys::move(lowercaseName);                                                     \
+    Data()._##lowercaseName##State = static_cast<uint8>(CoordinatedValueListPropertyState::Filled);          \
+  }                                                                                                          \
+  KRYS_INTERNAL_DECLARE_COORDINATED_VALUE_LIST_GETTER_AND_SETTERS_COMMON(ownerType, property, type,          \
+                                                                         lowercaseName, uppercaseName)
+
+#define KRYS_DECLARE_COORDINATED_VALUE_LIST_GETTER_AND_SETTERS_VALUE(ownerType, property, type,              \
+                                                                     lowercaseName, uppercaseName)           \
+  void Clear##uppercaseName() noexcept                                                                       \
+  {                                                                                                          \
+    Data()._##lowercaseName = ownerType::Initial##uppercaseName();                                           \
+    Data()._##lowercaseName##State = static_cast<uint8>(CoordinatedValueListPropertyState::Unset);           \
+  }                                                                                                          \
+  void Set##uppercaseName(type lowercaseName) noexcept                                                       \
+  {                                                                                                          \
+    Data()._##lowercaseName = lowercaseName;                                                                 \
+    Data()._##lowercaseName##State = static_cast<uint8>(CoordinatedValueListPropertyState::Set);             \
+  }                                                                                                          \
+  void Fill##uppercaseName(type lowercaseName) noexcept                                                      \
+  {                                                                                                          \
+    Data()._##lowercaseName = lowercaseName;                                                                 \
+    Data()._##lowercaseName##State = static_cast<uint8>(CoordinatedValueListPropertyState::Filled);          \
+  }                                                                                                          \
+  KRYS_INTERNAL_DECLARE_COORDINATED_VALUE_LIST_GETTER_AND_SETTERS_COMMON(ownerType, property, type,          \
+                                                                         lowercaseName, uppercaseName)
+
+#define KRYS_DECLARE_COORDINATED_VALUE_LIST_GETTER_AND_SETTERS_ENUM(ownerType, property, type,               \
+                                                                    lowercaseName, uppercaseName)            \
+  void Clear##uppercaseName() noexcept                                                                       \
+  {                                                                                                          \
+    Data()._##lowercaseName = static_cast<uint8>(ownerType::Initial##uppercaseName());                       \
+    Data()._##lowercaseName##State = static_cast<uint8>(CoordinatedValueListPropertyState::Unset);           \
+  }                                                                                                          \
+  void Set##uppercaseName(type lowercaseName) noexcept                                                       \
+  {                                                                                                          \
+    Data()._##lowercaseName = static_cast<uint8>(lowercaseName);                                             \
+    Data()._##lowercaseName##State = static_cast<uint8>(CoordinatedValueListPropertyState::Set);             \
+  }                                                                                                          \
+  void Fill##uppercaseName(type lowercaseName) noexcept                                                      \
+  {                                                                                                          \
+    Data()._##lowercaseName = static_cast<uint8>(lowercaseName);                                             \
+    Data()._##lowercaseName##State = static_cast<uint8>(CoordinatedValueListPropertyState::Filled);          \
+  }                                                                                                          \
+  KRYS_INTERNAL_DECLARE_COORDINATED_VALUE_LIST_GETTER_AND_SETTERS_COMMON(ownerType, property, type,          \
+                                                                         lowercaseName, uppercaseName)
+
+namespace krys::boo::style
+{
   // Applies the provided functor to each property of the CoordinatedValueList value, invoking the functor
-  // with each properties css::PropertyId as the first template argument, and then and'ing the results.
+  // with each properties `css::PropertyId` as the first template argument, and then and'ing the results.
   template <CoordinatedValueListValue T, typename F>
-  constexpr bool allOfCoordinatedValueListProperties(NOESCAPE F &&f)
+  constexpr bool AllOfCoordinatedValueListProperties(KRYS_NOESCAPE F &&f) noexcept
   {
-    return WTF::apply([&]<typename... Ts>(const Ts &...)
-                      { return (f.template operator()<Ts::value>() && ...); }, T::properties);
+    return std::apply([&]<typename... Ts>(const Ts &...)
+                      { return (f.template operator()<Ts::value>() && ...); }, T::Properties);
   }
 
   // Applies the provided functor to each property of the CoordinatedValueList value, invoking the functor
-  // with each properties css::PropertyId as the first template argument, and then or'ing the results.
+  // with each properties `css::PropertyId` as the first template argument, and then or'ing the results.
   template <CoordinatedValueListValue T, typename F>
-  constexpr bool anyOfCoordinatedValueListProperties(NOESCAPE F &&f)
+  constexpr bool AnyOfCoordinatedValueListProperties(KRYS_NOESCAPE F &&f) noexcept
   {
-    return WTF::apply([&]<typename... Ts>(const Ts &...)
-                      { return (f.template operator()<Ts::value>() || ...); }, T::properties);
+    return std::apply([&]<typename... Ts>(const Ts &...)
+                      { return (f.template operator()<Ts::value>() || ...); }, T::Properties);
   }
 
   // Applies the provided functor to each property of the CoordinatedValueList value, invoking the functor
-  // with each properties css::PropertyId as the first template argument.
+  // with each properties `css::PropertyId` as the first template argument.
   template <CoordinatedValueListValue T, typename F>
-  constexpr void eachCoordinatedValueListProperties(NOESCAPE F &&f)
+  constexpr void EachCoordinatedValueListProperties(KRYS_NOESCAPE F &&f) noexcept
   {
-    WTF::apply([&]<typename... Ts>(const Ts &...) { (f.template operator()<Ts::value>(), ...); },
-               T::properties);
+    std::apply([&]<typename... Ts>(const Ts &...) { (f.template operator()<Ts::value>(), ...); },
+               T::Properties);
   }
 
   template <CoordinatedValueListValue T>
-  bool allNonBasePropertiesAreUnsetOrFilled(const T &value)
+  KRYS_NODISCARD bool AllNonBasePropertiesAreUnsetOrFilled(const T &value) noexcept
   {
-    return allOfCoordinatedValueListProperties<T>(
-      [&value]<css::PropertyId propertyID>()
+    return AllOfCoordinatedValueListProperties<T>(
+      [&value]<css::PropertyId propertyId>()
       {
-        using PropertyAccessor = CoordinatedValueListPropertyConstAccessor<propertyID>;
+        using PropertyAccessor = CoordinatedValueListPropertyConstAccessor<propertyId>;
 
-        if constexpr (propertyID == T::baseProperty)
+        if constexpr (propertyId == T::BaseProperty)
         {
           return true;
         }
         else
         {
-          return !PropertyAccessor {value}.isSet();
+          return !PropertyAccessor {value}.IsSet();
         }
       });
   }
 
   template <CoordinatedValueListValue T>
-  bool allPropertiesAreUnsetOrFilled(const T &value)
+  KRYS_NODISCARD bool AllPropertiesAreUnsetOrFilled(const T &value) noexcept
   {
-    return allOfCoordinatedValueListProperties<T>(
-      [&value]<css::PropertyId propertyID>()
+    return AllOfCoordinatedValueListProperties<T>(
+      [&value]<css::PropertyId propertyId>()
       {
-        using PropertyAccessor = CoordinatedValueListPropertyConstAccessor<propertyID>;
-        return !PropertyAccessor {value}.isSet();
+        using PropertyAccessor = CoordinatedValueListPropertyConstAccessor<propertyId>;
+        return !PropertyAccessor {value}.IsSet();
       });
   }
 }

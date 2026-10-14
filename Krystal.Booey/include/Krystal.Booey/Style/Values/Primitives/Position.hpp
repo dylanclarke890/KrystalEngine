@@ -1,205 +1,191 @@
-/*
- * Copyright (C) 2024-2025 Samuel Weinig <sam@webkit.org>
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+﻿#pragma once
 
-#pragma once
+#include "Krystal.Booey/CSS/Values/Primitives/Position.hpp"
+#include "Krystal.Booey/Graphics/FloatPoint.hpp"
+#include "Krystal.Booey/Graphics/FloatSize.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/LengthWrapper.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
+#include "Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp"
 
-#include <WebCore/CSSPosition.h>
-#include <WebCore/FloatPoint.h>
-#include <WebCore/StyleLengthWrapper.h>
-#include <WebCore/StylePrimitiveNumericTypes.h>
-
-namespace WebCore
+namespace krys::boo::style
 {
-  namespace Style
+  struct PositionX : LengthWrapperBase<LengthPercentage<>>
   {
+    using Base::Base;
+  };
 
-    struct PositionX : LengthWrapperBase<LengthPercentage<>>
+  struct PositionY : LengthWrapperBase<LengthPercentage<>>
+  {
+    using Base::Base;
+  };
+
+  struct TwoComponentPositionHorizontal
+  {
+    PositionX Offset;
+
+    KRYS_NODISCARD bool operator==(const TwoComponentPositionHorizontal &) const noexcept = default;
+  };
+  DEFINE_TYPE_WRAPPER_GET(TwoComponentPositionHorizontal, Offset)
+
+  struct TwoComponentPositionVertical
+  {
+    PositionY Offset;
+
+    KRYS_NODISCARD bool operator==(const TwoComponentPositionVertical &) const noexcept = default;
+  };
+  DEFINE_TYPE_WRAPPER_GET(TwoComponentPositionVertical, Offset)
+
+  /// @brief A computed `<position>`: a horizontal and a vertical length-percentage.
+  struct Position
+  {
+    PositionX X;
+    PositionY Y;
+
+    Position(PositionX &&x, PositionY &&y) noexcept : X {krys::move(x)}, Y {krys::move(y)}
     {
-      using Base::Base;
-    };
-    struct PositionY : LengthWrapperBase<LengthPercentage<>>
-    {
-      using Base::Base;
-    };
-
-    struct TwoComponentPositionHorizontal
-    {
-      PositionX offset;
-      bool operator==(const TwoComponentPositionHorizontal &) const = default;
-    };
-    DEFINE_TYPE_WRAPPER_GET(TwoComponentPositionHorizontal, offset);
-
-    struct TwoComponentPositionVertical
-    {
-      PositionY offset;
-      bool operator==(const TwoComponentPositionVertical &) const = default;
-    };
-    DEFINE_TYPE_WRAPPER_GET(TwoComponentPositionVertical, offset);
-
-    struct Position
-    {
-      using X = PositionX;
-      using Y = PositionY;
-
-      X x;
-      Y y;
-
-      Position(X &&x, Y &&y) : x {WTF::move(x)}, y {WTF::move(y)}
-      {
-      }
-
-      Position(const X &x, const Y &y) : x {x}, y {y}
-      {
-      }
-
-      Position(TwoComponentPositionHorizontal &&x, TwoComponentPositionVertical &&y)
-          : x {WTF::move(x.offset)}, y {WTF::move(y.offset)}
-      {
-      }
-
-      Position(const TwoComponentPositionHorizontal &x, const TwoComponentPositionVertical &y)
-          : x {x.offset}, y {y.offset}
-      {
-      }
-
-      Position(FloatPoint point) : x {PositionX::Fixed {point.x()}}, y {PositionY::Fixed {point.y()}}
-      {
-      }
-
-      Position(CSS::ValueLiteral<CSS::LengthUnit::Px> literalX,
-               CSS::ValueLiteral<CSS::LengthUnit::Px> literalY)
-          : x {literalX}, y {literalY}
-      {
-      }
-
-      Position(CSS::ValueLiteral<CSS::PercentageUnit::Percentage> literalX,
-               CSS::ValueLiteral<CSS::PercentageUnit::Percentage> literalY)
-          : x {literalX}, y {literalY}
-      {
-      }
-
-      bool operator==(const Position &) const = default;
-    };
-    template <size_t I>
-    const auto &get(const Position &position)
-    {
-      if constexpr (!I)
-        return position.x;
-      else if constexpr (I == 1)
-        return position.y;
     }
 
-    // MARK: - Conversion
+    Position(const PositionX &x, const PositionY &y) noexcept : X {x}, Y {y}
+    {
+    }
 
-    template <>
-    struct ToCSS<TwoComponentPositionHorizontal>
+    Position(TwoComponentPositionHorizontal &&x, TwoComponentPositionVertical &&y) noexcept
+        : X {krys::move(x.Offset)}, Y {krys::move(y.Offset)}
     {
-      auto operator()(const TwoComponentPositionHorizontal &, const RenderStyle &)
-        -> CSS::TwoComponentPositionHorizontal;
-    };
-    template <>
-    struct ToStyle<CSS::TwoComponentPositionHorizontal>
-    {
-      auto operator()(const CSS::TwoComponentPositionHorizontal &, const BuilderState &)
-        -> TwoComponentPositionHorizontal;
-    };
+    }
 
-    template <>
-    struct ToCSS<TwoComponentPositionVertical>
+    Position(const TwoComponentPositionHorizontal &x, const TwoComponentPositionVertical &y) noexcept
+        : X {x.Offset}, Y {y.Offset}
     {
-      auto operator()(const TwoComponentPositionVertical &, const RenderStyle &)
-        -> CSS::TwoComponentPositionVertical;
-    };
-    template <>
-    struct ToStyle<CSS::TwoComponentPositionVertical>
-    {
-      auto operator()(const CSS::TwoComponentPositionVertical &, const BuilderState &)
-        -> TwoComponentPositionVertical;
-    };
+    }
 
-    template <>
-    struct ToCSS<Position>
+    Position(FloatPoint point) noexcept : X {PositionX::Fixed {point.X()}}, Y {PositionY::Fixed {point.Y()}}
     {
-      auto operator()(const Position &, const RenderStyle &) -> CSS::Position;
-    };
-    template <>
-    struct ToStyle<CSS::Position>
-    {
-      auto operator()(const CSS::Position &, const BuilderState &) -> Position;
-    };
+    }
 
-    template <>
-    struct ToCSS<PositionX>
+    Position(css::ValueLiteral<css::LengthUnit::Px> literalX,
+             css::ValueLiteral<css::LengthUnit::Px> literalY) noexcept
+        : X {literalX}, Y {literalY}
     {
-      auto operator()(const PositionX &, const RenderStyle &) -> CSS::PositionX;
-    };
-    template <>
-    struct ToStyle<CSS::PositionX>
-    {
-      auto operator()(const CSS::PositionX &, const BuilderState &) -> PositionX;
-    };
+    }
 
-    template <>
-    struct ToCSS<PositionY>
+    Position(css::ValueLiteral<css::PercentageUnit::Percentage> literalX,
+             css::ValueLiteral<css::PercentageUnit::Percentage> literalY) noexcept
+        : X {literalX}, Y {literalY}
     {
-      auto operator()(const PositionY &, const RenderStyle &) -> CSS::PositionY;
-    };
-    template <>
-    struct ToStyle<CSS::PositionY>
-    {
-      auto operator()(const CSS::PositionY &, const BuilderState &) -> PositionY;
-    };
+    }
 
-    template <>
-    struct CSSValueConversion<Position>
-    {
-      auto operator()(BuilderState &, const CSSValue &) -> Position;
-    };
-    template <>
-    struct CSSValueConversion<PositionX>
-    {
-      auto operator()(BuilderState &, const CSSValue &) -> PositionX;
-    };
-    template <>
-    struct CSSValueConversion<PositionY>
-    {
-      auto operator()(BuilderState &, const CSSValue &) -> PositionY;
-    };
+    KRYS_NODISCARD bool operator==(const Position &) const noexcept = default;
+  };
 
-    // MARK: - Evaluation
-
-    template <>
-    struct Evaluation<Position, FloatPoint>
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Position &position) noexcept
+  {
+    if constexpr (!I)
     {
-      auto operator()(const Position &, FloatSize, ZoomNeeded) -> FloatPoint;
-    };
+      return position.X;
+    }
+    else if constexpr (I == 1)
+    {
+      return position.Y;
+    }
+  }
 
-  } // namespace Style
-} // namespace WebCore
+  // MARK: - Conversion
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(WebCore::Style::PositionX)
-DEFINE_VARIANT_LIKE_CONFORMANCE(WebCore::Style::PositionY)
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(WebCore::Style::TwoComponentPositionHorizontal)
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(WebCore::Style::TwoComponentPositionVertical)
-DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(WebCore::Style::Position, 2)
+  template <>
+  struct ToCSS<TwoComponentPositionHorizontal>
+  {
+    KRYS_NODISCARD css::TwoComponentPositionHorizontal operator()(const TwoComponentPositionHorizontal &,
+                                                                  const RenderStyle &) noexcept;
+  };
+
+  template <>
+  struct ToStyle<css::TwoComponentPositionHorizontal>
+  {
+    KRYS_NODISCARD TwoComponentPositionHorizontal operator()(const css::TwoComponentPositionHorizontal &,
+                                                             const BuilderState &) noexcept;
+  };
+
+  template <>
+  struct ToCSS<TwoComponentPositionVertical>
+  {
+    KRYS_NODISCARD css::TwoComponentPositionVertical operator()(const TwoComponentPositionVertical &,
+                                                                const RenderStyle &) noexcept;
+  };
+
+  template <>
+  struct ToStyle<css::TwoComponentPositionVertical>
+  {
+    KRYS_NODISCARD TwoComponentPositionVertical operator()(const css::TwoComponentPositionVertical &,
+                                                           const BuilderState &) noexcept;
+  };
+
+  template <>
+  struct ToCSS<Position>
+  {
+    KRYS_NODISCARD css::Position operator()(const Position &, const RenderStyle &) noexcept;
+  };
+
+  template <>
+  struct ToStyle<css::Position>
+  {
+    KRYS_NODISCARD Position operator()(const css::Position &, const BuilderState &) noexcept;
+  };
+
+  template <>
+  struct ToCSS<PositionX>
+  {
+    KRYS_NODISCARD css::PositionX operator()(const PositionX &, const RenderStyle &) noexcept;
+  };
+
+  template <>
+  struct ToStyle<css::PositionX>
+  {
+    KRYS_NODISCARD PositionX operator()(const css::PositionX &, const BuilderState &) noexcept;
+  };
+
+  template <>
+  struct ToCSS<PositionY>
+  {
+    KRYS_NODISCARD css::PositionY operator()(const PositionY &, const RenderStyle &) noexcept;
+  };
+
+  template <>
+  struct ToStyle<css::PositionY>
+  {
+    KRYS_NODISCARD PositionY operator()(const css::PositionY &, const BuilderState &) noexcept;
+  };
+
+  template <>
+  struct CSSValueConversion<Position>
+  {
+    KRYS_NODISCARD Position operator()(BuilderState &, const css::Value &) noexcept;
+  };
+
+  template <>
+  struct CSSValueConversion<PositionX>
+  {
+    KRYS_NODISCARD PositionX operator()(BuilderState &, const css::Value &) noexcept;
+  };
+
+  template <>
+  struct CSSValueConversion<PositionY>
+  {
+    KRYS_NODISCARD PositionY operator()(BuilderState &, const css::Value &) noexcept;
+  };
+
+  // MARK: - Evaluation
+
+  template <>
+  struct Evaluation<Position, FloatPoint>
+  {
+    KRYS_NODISCARD FloatPoint operator()(const Position &, FloatSize, ZoomNeeded) noexcept;
+  };
+}
+
+DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::PositionX)
+DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::PositionY)
+DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::TwoComponentPositionHorizontal)
+DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::TwoComponentPositionVertical)
+DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::Position, 2)

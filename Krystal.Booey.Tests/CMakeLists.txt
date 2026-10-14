@@ -282,6 +282,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Selectors/SelectorParser.cpp
 		tests/CSS/Selectors/SelectorPseudoTypeMap.cpp
 		tests/CSS/Selectors/UserAgentParts.cpp
+		tests/CSS/PrimitiveValueMappings.cpp
 		tests/CSS/StyleSheetContents.cpp
 
 		# Graphics
@@ -314,9 +315,12 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Transforms/Quaternion.cpp
 		tests/Graphics/Transforms/TransformExtras.cpp
 		tests/Graphics/Transforms/TransformationMatrix.cpp
+		tests/Core/TextFlags.cpp
 		tests/Rendering/Style/GridSpan.cpp
+		tests/Rendering/Style/RenderStyleConstants.cpp
 
 		# Style
+		tests/Style/BuilderState.cpp
 		tests/Style/Calc/Tree.cpp
 		tests/Style/ElementRuleCollector.cpp
 		tests/Style/PropertyCascade.cpp
@@ -326,15 +330,20 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/UserAgentStyle.cpp
 		tests/Style/ScopedName.cpp
 		tests/Style/StyleSheetContentsCache.cpp
+		tests/Style/Values/CSSValueConversion.cpp
 		tests/Style/Values/Color/Color.cpp
+		tests/Style/Values/Color/ColorConversion.cpp
 		tests/Style/Values/Color/DynamicRangeLimit.cpp
 		tests/Style/Values/Color/SystemColor.cpp
 		tests/Style/Values/Grid/GridPosition.cpp
+		tests/Style/Values/Primitives/CoordinatedValueList.cpp
 		tests/Style/Values/Primitives/LengthResolution.cpp
 		tests/Style/Values/Primitives/LengthWrapper.cpp
 		tests/Style/Values/Primitives/NumericTypesConversions.cpp
 		tests/Style/Values/Primitives/NumericTypesEvaluation.cpp
+		tests/Style/Values/Primitives/Position.cpp
 		tests/Style/Values/Primitives/PrimitiveNumeric.cpp
+		tests/Style/Values/Primitives/Url.cpp
 		tests/Style/Values/Types.cpp
 
 		# DOM

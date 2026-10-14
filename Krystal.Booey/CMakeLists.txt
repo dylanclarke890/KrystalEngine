@@ -638,6 +638,33 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   # Style resolution, layer f2 (the cascade)
   include/Krystal.Booey/Animation/WebAnimationTypes.hpp
   include/Krystal.Booey/Style/PropertyCascade.hpp
+
+  # Style resolution, layer f3a (computed style foundations)
+  include/Krystal.Booey/Animation/ScrollAxis.hpp
+  include/Krystal.Booey/CSS/PrimitiveValueMappings.hpp
+  include/Krystal.Booey/Core/ScrollTypes.hpp
+  include/Krystal.Booey/Core/StyleAppearance.hpp
+  include/Krystal.Booey/Core/TextFlags.hpp
+  include/Krystal.Booey/Core/TextSpacing.hpp
+  include/Krystal.Booey/Core/ThemeTypes.hpp
+  include/Krystal.Booey/Core/TouchAction.hpp
+  include/Krystal.Booey/Core/UnicodeBidi.hpp
+  include/Krystal.Booey/Graphics/TabSize.hpp
+  include/Krystal.Booey/Graphics/WindRule.hpp
+  include/Krystal.Booey/Style/BuilderChecking.hpp
+  include/Krystal.Booey/Style/Values/CSSValueConversion.hpp
+  include/Krystal.Booey/Style/Values/Primitives/CoordinatedValueList.hpp
+  include/Krystal.Booey/Style/Values/Primitives/CoordinatedValueListValue.hpp
+  include/Krystal.Booey/Style/Values/Primitives/KeywordCSSValueConversion.hpp
+  include/Krystal.Booey/Style/Values/Primitives/KeywordCSSValueCreation.hpp
+  include/Krystal.Booey/Style/Values/Primitives/KeywordSerialisation.hpp
+  include/Krystal.Booey/Style/Values/Primitives/KeywordValueRepresentationNeeded.hpp
+  include/Krystal.Booey/Style/Values/Primitives/LengthWrapperCSSValueConversion.hpp
+  include/Krystal.Booey/Style/Values/Primitives/LengthWrapperDeprecatedCSSValueConversion.hpp
+  include/Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueConversion.hpp
+  include/Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueCreation.hpp
+  include/Krystal.Booey/Style/Values/Primitives/Position.hpp
+  include/Krystal.Booey/Style/Values/Primitives/Url.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -1010,6 +1037,16 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
 
   # Style resolution, layer f2 (the cascade)
   src/Style/PropertyCascade.cpp
+
+  # Style resolution, layer f3a (computed style foundations)
+  src/Core/TextFlags.cpp
+  src/Core/TextSpacing.cpp
+  src/Rendering/Style/RenderStyleConstants.cpp
+  src/Style/Values/Color/Opacity.cpp
+  src/Style/Values/Primitives/LengthWrapperDeprecatedCSSValueConversion.cpp
+  src/Style/Values/Primitives/Position.cpp
+  src/Style/Values/Primitives/Ratio.cpp
+  src/Style/Values/Primitives/Url.cpp
 )
 
 target_precompile_headers(Krystal.Booey
