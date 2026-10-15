@@ -12,6 +12,12 @@ namespace krys::boo::html
   public:
     HTMLCanvasElement(dom::Document &document) noexcept;
 
+    KRYS_NODISCARD bool IsReplaced(const RenderStyle * = nullptr) const noexcept override
+    {
+      // FIXME: A canvas is replaced when scripting is enabled for it; there is no scripting yet.
+      return false;
+    }
+
 #pragma region HTMLCanvasElement - https://html.spec.whatwg.org/#htmlcanvaselement
 
     /// @see https://html.spec.whatwg.org/#dom-canvas-width

@@ -13,6 +13,12 @@ namespace krys::boo::html
   public:
     HTMLObjectElement(dom::Document &document) noexcept;
 
+    KRYS_NODISCARD bool IsReplaced(const RenderStyle * = nullptr) const noexcept override
+    {
+      // FIXME: A plug-in replacement that creates a renderer makes the element not replaced.
+      return true;
+    }
+
 #pragma region HTMLObjectElement - https://html.spec.whatwg.org/#htmlobjectelement
 
     /// @see https://html.spec.whatwg.org/#dom-object-data

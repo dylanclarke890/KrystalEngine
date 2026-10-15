@@ -83,6 +83,12 @@ namespace krys::boo::html
     return state == AttributeState::Hidden;
   }
 
+  bool HTMLElement::IsHiddenUntilFound() const noexcept
+  {
+    auto value = GetAttribute(u8"hidden");
+    return value && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*value, u8"until-found");
+  }
+
   void HTMLElement::Hidden(dom::DOMString &&value) noexcept
   {
     if (value == u8"until-found")

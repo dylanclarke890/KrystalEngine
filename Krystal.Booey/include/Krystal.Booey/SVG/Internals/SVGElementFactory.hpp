@@ -49,6 +49,10 @@ namespace krys::boo::svg
         {
           return CreateRef<SVGDescElement>(document);
         }
+        case html::TagName::foreignObject:
+        {
+          return CreateRef<SVGForeignObjectElement>(document);
+        }
         case html::TagName::svg:
         {
           return CreateRef<SVGSvgElement>(document);

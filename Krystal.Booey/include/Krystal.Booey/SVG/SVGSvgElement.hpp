@@ -10,6 +10,11 @@ namespace krys::boo::svg
 
   public:
     SVGSvgElement(dom::Document &document) noexcept;
+
+    KRYS_NODISCARD bool IsReplaced(const RenderStyle * = nullptr) const noexcept override
+    {
+      return IsOutermostSVGSVGElement();
+    }
   };
 }
 

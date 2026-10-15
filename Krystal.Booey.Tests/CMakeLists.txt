@@ -339,6 +339,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/Style/RenderStyleConstants.cpp
 
 		# Style
+		tests/Style/Adjuster.cpp
 		tests/Style/Builder.cpp
 		tests/Style/BuilderState.cpp
 		tests/Style/FontSizeFunctions.cpp

@@ -204,6 +204,14 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-input-type
     void Type(dom::DOMString &&value) noexcept;
 
+    /// @brief Whether the `type` attribute is in the Password state.
+    KRYS_NODISCARD bool IsPasswordField() const noexcept;
+
+    /// @brief Whether the `type` attribute is in the Image Button state.
+    KRYS_NODISCARD bool IsImageButton() const noexcept;
+
+    KRYS_NODISCARD bool IsReplaced(const RenderStyle * = nullptr) const noexcept override;
+
     /// @see https://html.spec.whatwg.org/#dom-input-defaultvalue
     KRYS_NODISCARD dom::DOMString DefaultValue() const noexcept;
 

@@ -666,7 +666,10 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Core/UnicodeBidi.hpp
   include/Krystal.Booey/Graphics/TabSize.hpp
   include/Krystal.Booey/Graphics/WindRule.hpp
+  include/Krystal.Booey/Style/Adjuster.hpp
   include/Krystal.Booey/Style/Builder.hpp
+  include/Krystal.Booey/Style/Change.hpp
+  include/Krystal.Booey/Style/ResolvedStyle.hpp
   include/Krystal.Booey/Style/BuilderChecking.hpp
   include/Krystal.Booey/Style/BuilderCustom.hpp
   include/Krystal.Booey/Style/BuilderGenerated.hpp
@@ -1776,7 +1779,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Style/CustomPropertyRegistry.cpp
 
   # The builder (f4d)
+  src/Style/Adjuster.cpp
   src/Style/Builder.cpp
+  src/Style/Change.cpp
 )
 
 target_precompile_headers(Krystal.Booey

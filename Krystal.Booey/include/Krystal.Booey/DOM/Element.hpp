@@ -12,6 +12,11 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
+namespace krys::boo
+{
+  class RenderStyle;
+}
+
 namespace krys::boo::html
 {
   class CustomElementRegistry;
@@ -377,6 +382,23 @@ namespace krys::boo::dom
       {
         SynchronizeStyleAttribute();
       }
+    }
+
+    /// @brief Whether the element is a replaced element (its content is outside the scope of CSS), given its
+    /// style if there is one.
+    /// @see https://html.spec.whatwg.org/#replaced-elements
+    KRYS_NODISCARD virtual bool IsReplaced(const RenderStyle * = nullptr) const noexcept
+    {
+      return false;
+    }
+
+    /// @brief Whether the element is relevant to the user, for `content-visibility: auto`.
+    /// @see https://drafts.csswg.org/css-contain/#relevant-to-the-user
+    KRYS_NODISCARD bool IsRelevantToUser() const noexcept
+    {
+      // FIXME: Content relevancy (on screen, focused, selected, in the top layer) is never computed, so no
+      // element is relevant to the user.
+      return false;
     }
 
   protected:

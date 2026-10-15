@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 
 namespace krys::boo::html
 {
@@ -308,6 +309,23 @@ namespace krys::boo::html
   void HTMLInputElement::Type(dom::DOMString &&value) noexcept
   {
     Reflection::Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
+  }
+
+  bool HTMLInputElement::IsPasswordField() const noexcept
+  {
+    auto type = GetAttribute(u8"type");
+    return type && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*type, u8"password");
+  }
+
+  bool HTMLInputElement::IsImageButton() const noexcept
+  {
+    auto type = GetAttribute(u8"type");
+    return type && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*type, u8"image");
+  }
+
+  bool HTMLInputElement::IsReplaced(const RenderStyle *) const noexcept
+  {
+    return IsImageButton();
   }
 
   dom::DOMString HTMLInputElement::DefaultValue() const noexcept

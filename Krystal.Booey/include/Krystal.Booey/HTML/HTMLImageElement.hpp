@@ -160,6 +160,8 @@ namespace krys::boo::html
     void Border(dom::DOMString &&value) noexcept;
 
 #pragma endregion
+
+    KRYS_NODISCARD bool IsReplaced(const RenderStyle *style = nullptr) const noexcept override;
   };
 }
 

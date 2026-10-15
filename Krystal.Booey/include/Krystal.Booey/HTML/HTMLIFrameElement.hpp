@@ -17,6 +17,11 @@ namespace krys::boo::html
   public:
     HTMLIFrameElement(dom::Document &document) noexcept;
 
+    KRYS_NODISCARD bool IsReplaced(const RenderStyle * = nullptr) const noexcept override
+    {
+      return true;
+    }
+
 #pragma region HTMLIFrameElement - https://html.spec.whatwg.org/#htmliframeelement
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-src

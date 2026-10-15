@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 namespace krys::boo::html
 {
@@ -254,4 +255,9 @@ namespace krys::boo::html
   }
 
 #pragma endregion
+
+  bool HTMLImageElement::IsReplaced(const RenderStyle *style) const noexcept
+  {
+    return !style || !style->HasContent();
+  }
 }

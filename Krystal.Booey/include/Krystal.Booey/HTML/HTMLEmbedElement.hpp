@@ -13,6 +13,12 @@ namespace krys::boo::html
   public:
     HTMLEmbedElement(dom::Document &document) noexcept;
 
+    KRYS_NODISCARD bool IsReplaced(const RenderStyle * = nullptr) const noexcept override
+    {
+      // FIXME: A plug-in replacement that creates a renderer makes the element not replaced.
+      return true;
+    }
+
 #pragma region HTMLEmbedElement - https://html.spec.whatwg.org/#htmlembedelement
 
     /// @see https://html.spec.whatwg.org/#dom-embed-src

@@ -15,6 +15,11 @@ namespace krys::boo::html
   public:
     HTMLMediaElement(dom::Document &document) noexcept;
 
+    KRYS_NODISCARD bool IsReplaced(const RenderStyle * = nullptr) const noexcept override
+    {
+      return true;
+    }
+
     // TODO(HTMLMediaElement, HTML): Implement the media element API.
   };
 }

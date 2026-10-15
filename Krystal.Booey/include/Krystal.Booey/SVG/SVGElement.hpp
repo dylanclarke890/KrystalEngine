@@ -22,6 +22,13 @@ namespace krys::boo::svg
   public:
     SVGElement(dom::Document &document) noexcept;
 
+    /// @brief Whether this is an `<svg>` element inside another SVG element.
+    KRYS_NODISCARD bool IsInnerSVGSVGElement() const noexcept;
+
+    /// @brief Whether this is an `<svg>` element that establishes an SVG document fragment: it has no parent
+    /// node, its parent isn't an SVG element, or its parent is a `<foreignObject>`.
+    KRYS_NODISCARD bool IsOutermostSVGSVGElement() const noexcept;
+
   protected:
 #pragma region Type Checks
 

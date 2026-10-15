@@ -72,6 +72,9 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-hidden
     void Hidden(double value) noexcept;
 
+    /// @brief Whether the `hidden` attribute is in the hidden until found state.
+    KRYS_NODISCARD bool IsHiddenUntilFound() const noexcept;
+
     /// @see https://html.spec.whatwg.org/#dom-inert
     KRYS_NODISCARD bool Inert() const noexcept;
 

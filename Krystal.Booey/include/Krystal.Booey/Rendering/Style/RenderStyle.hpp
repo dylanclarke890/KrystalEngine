@@ -5,6 +5,11 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyleProperties.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
 
+namespace krys::boo::dom
+{
+  class Element;
+}
+
 namespace krys::boo::style
 {
   class CustomPropertyRegistry;
@@ -329,6 +334,11 @@ namespace krys::boo
   KRYS_NODISCARD inline bool GeneratesBox(const RenderStyle &) noexcept;
   KRYS_NODISCARD inline bool IsNonVisibleOverflow(Overflow) noexcept;
 
-  // FIXME: `ShouldApply{Layout,Size,InlineSize,Style,Paint}Containment` and `IsSkippedContentRoot` come with
-  // `dom::Element::IsReplaced` and `IsRelevantToUser`.
+  KRYS_NODISCARD inline bool ShouldApplyLayoutContainment(const RenderStyle &, const dom::Element &) noexcept;
+  KRYS_NODISCARD inline bool ShouldApplySizeContainment(const RenderStyle &, const dom::Element &) noexcept;
+  KRYS_NODISCARD inline bool ShouldApplyInlineSizeContainment(const RenderStyle &,
+                                                              const dom::Element &) noexcept;
+  KRYS_NODISCARD inline bool ShouldApplyStyleContainment(const RenderStyle &, const dom::Element &) noexcept;
+  KRYS_NODISCARD inline bool ShouldApplyPaintContainment(const RenderStyle &, const dom::Element &) noexcept;
+  KRYS_NODISCARD inline bool IsSkippedContentRoot(const RenderStyle &, const dom::Element &) noexcept;
 }

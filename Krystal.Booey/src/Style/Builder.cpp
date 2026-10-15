@@ -14,6 +14,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCustomPropertyData.hpp"
+#include "Krystal.Booey/Style/Adjuster.hpp"
 #include "Krystal.Booey/Style/BuilderGenerated.hpp"
 #include "Krystal.Booey/Style/BuilderStateInlines.hpp"
 #include "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp"
@@ -137,7 +138,7 @@ namespace krys::boo::style
 
   void Builder::AdjustAfterApplying() noexcept
   {
-    // FIXME: `Adjuster::adjustFromBuilder()` comes with the style adjuster.
+    Adjuster::AdjustFromBuilder(_state->Style());
   }
 
   void Builder::ApplyLogicalGroupProperties() noexcept
