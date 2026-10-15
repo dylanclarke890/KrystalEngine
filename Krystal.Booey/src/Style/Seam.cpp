@@ -14,6 +14,8 @@
 #include "Krystal.Booey/CSS/Values/PaintImageValue.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCursorImage.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp"
@@ -21,343 +23,11 @@
 #include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 #include "Krystal.Core/Assert.hpp"
 
-// FIXME: Placeholder definitions; see `Style/Seam.hpp`. Only `RenderStyle` can be constructed, so only its
-// colour, zoom and font members and the document functions can be reached.
+// FIXME: Placeholder definitions; see `Style/Seam.hpp`. Only `BuilderState` can be constructed, so only its
+// members and the document functions can be reached.
 
 namespace krys::boo
 {
-  namespace
-  {
-    // The initial `font-size` (`medium`).
-    constexpr float InitialFontSize = 16.f;
-  }
-
-  FontCascade RenderStyle::InitialFontCascade() noexcept
-  {
-    FontCascadeDescription description;
-    description.SetSpecifiedSize(InitialFontSize);
-    description.SetComputedSize(InitialFontSize);
-    description.SetKeywordSizeFromIdentifier(css::ValueId::Medium);
-    return FontCascade {krys::move(description)};
-  }
-
-  const boo::Color &RenderStyle::GetColor() const noexcept
-  {
-    return _color;
-  }
-
-  void RenderStyle::SetColor(const boo::Color &color) noexcept
-  {
-    _color = color;
-  }
-
-  const boo::Color &RenderStyle::VisitedLinkColor() const noexcept
-  {
-    return _visitedLinkColor;
-  }
-
-  void RenderStyle::SetVisitedLinkColor(const boo::Color &color) noexcept
-  {
-    _visitedLinkColor = color;
-  }
-
-  boo::Color RenderStyle::ColorResolvingCurrentColor(const style::Color &color,
-                                                     bool visitedLink) const noexcept
-  {
-    return color.ResolveColor(visitedLink ? VisitedLinkColor() : GetColor());
-  }
-
-  bool RenderStyle::HasDarkOnlyColorScheme() const noexcept
-  {
-    return _hasDarkOnlyColorScheme;
-  }
-
-  void RenderStyle::SetHasDarkOnlyColorScheme(bool value) noexcept
-  {
-    _hasDarkOnlyColorScheme = value;
-  }
-
-  WritingMode RenderStyle::GetWritingMode() const noexcept
-  {
-    return _writingMode;
-  }
-
-  bool RenderStyle::SetDirection(TextDirection bidiDirection) noexcept
-  {
-    if (_writingMode.ComputedTextDirection() == bidiDirection)
-    {
-      return false;
-    }
-    _writingMode.SetTextDirection(bidiDirection);
-    return true;
-  }
-
-  bool RenderStyle::SetTextOrientation(TextOrientation textOrientation) noexcept
-  {
-    if (_writingMode.ComputedTextOrientation() == textOrientation)
-    {
-      return false;
-    }
-    _writingMode.SetTextOrientation(textOrientation);
-    return true;
-  }
-
-  bool RenderStyle::SetWritingMode(StyleWritingMode mode) noexcept
-  {
-    if (_writingMode.ComputedWritingMode() == mode)
-    {
-      return false;
-    }
-    _writingMode.SetWritingMode(mode);
-    return true;
-  }
-
-  float RenderStyle::Zoom() const noexcept
-  {
-    return 1.f;
-  }
-
-  float RenderStyle::UsedZoom() const noexcept
-  {
-    return 1.f;
-  }
-
-  style::ZoomFactor RenderStyle::UsedZoomForLength() const noexcept
-  {
-    if (EvaluationTimeZoomEnabled())
-    {
-      return style::ZoomFactor {UsedZoom(), DeviceScaleFactor()};
-    }
-    return style::ZoomFactor {1.0f, DeviceScaleFactor()};
-  }
-
-  float RenderStyle::DeviceScaleFactor() const noexcept
-  {
-    return 1.f;
-  }
-
-  bool RenderStyle::EvaluationTimeZoomEnabled() const noexcept
-  {
-    return false;
-  }
-
-  const FontCascade &RenderStyle::GetFontCascade() const noexcept
-  {
-    return _fontCascade;
-  }
-
-  FontCascade &RenderStyle::MutableFontCascade() noexcept
-  {
-    return _fontCascade;
-  }
-
-  const FontCascadeDescription &RenderStyle::GetFontDescription() const noexcept
-  {
-    return _fontCascade.GetFontDescription();
-  }
-
-  bool RenderStyle::SetFontDescription(FontCascadeDescription &&description) noexcept
-  {
-    if (_fontCascade.GetFontDescription() == description)
-    {
-      return false;
-    }
-    _fontCascade = FontCascade {krys::move(description), _fontCascade};
-    return true;
-  }
-
-  float RenderStyle::ComputedFontSize() const noexcept
-  {
-    return GetFontDescription().ComputedSize();
-  }
-
-  const FontMetrics &RenderStyle::MetricsOfPrimaryFont() const noexcept
-  {
-    return _fontCascade.MetricsOfPrimaryFont();
-  }
-
-  float RenderStyle::ComputedLineHeight() const noexcept
-  {
-    return static_cast<float>(MetricsOfPrimaryFont().IntLineSpacing());
-  }
-
-  Maybe<PseudoElementType> RenderStyle::GetPseudoElementType() const noexcept
-  {
-    if (!_pseudoElementIdentifier)
-    {
-      return null;
-    }
-    return _pseudoElementIdentifier->Type;
-  }
-
-  Maybe<style::PseudoElementIdentifier> RenderStyle::GetPseudoElementIdentifier() const noexcept
-  {
-    return _pseudoElementIdentifier;
-  }
-
-  void RenderStyle::SetPseudoElementIdentifier(Maybe<style::PseudoElementIdentifier> &&identifier) noexcept
-  {
-    _pseudoElementIdentifier = krys::move(identifier);
-  }
-
-  bool RenderStyle::UsesViewportUnits() const noexcept
-  {
-    return _usesViewportUnits;
-  }
-
-  void RenderStyle::SetUsesViewportUnits() noexcept
-  {
-    _usesViewportUnits = true;
-  }
-
-  bool RenderStyle::UsesContainerUnits() const noexcept
-  {
-    return _usesContainerUnits;
-  }
-
-  void RenderStyle::SetUsesContainerUnits() noexcept
-  {
-    _usesContainerUnits = true;
-  }
-
-  bool RenderStyle::UsesTreeCountingFunctions() const noexcept
-  {
-    return _usesTreeCountingFunctions;
-  }
-
-  void RenderStyle::SetUsesTreeCountingFunctions() noexcept
-  {
-    _usesTreeCountingFunctions = true;
-  }
-
-  // Properties (see the declarations).
-
-  Maybe<float> RenderStyle::EvaluateFixedLineHeight(const style::ZoomFactor &) const noexcept
-  {
-    // The initial `line-height` is `normal`, which isn't fixed.
-    return null;
-  }
-
-  float RenderStyle::ComputeSpecifiedLineHeight() const noexcept
-  {
-    return static_cast<float>(MetricsOfPrimaryFont().IntLineSpacing());
-  }
-
-  const style::AspectRatio &RenderStyle::AspectRatio() const noexcept
-  {
-    return _aspectRatio;
-  }
-
-  void RenderStyle::SetAspectRatio(style::AspectRatio value) noexcept
-  {
-    _aspectRatio = krys::move(value);
-  }
-
-  double RenderStyle::LogicalAspectRatio() const noexcept
-  {
-    auto ratio = AspectRatio().TryRatio();
-    krys_debug_assert(ratio);
-
-    if (GetWritingMode().IsHorizontal())
-    {
-      return ratio->Numerator.Value / ratio->Denominator.Value;
-    }
-    return ratio->Denominator.Value / ratio->Numerator.Value;
-  }
-
-  const style::MathDepth &RenderStyle::MathDepth() const noexcept
-  {
-    return _mathDepth;
-  }
-
-  void RenderStyle::SetMathDepth(style::MathDepth value) noexcept
-  {
-    _mathDepth = krys::move(value);
-  }
-
-  MathStyle RenderStyle::GetMathStyle() const noexcept
-  {
-    return _mathStyle;
-  }
-
-  void RenderStyle::SetMathStyle(MathStyle value) noexcept
-  {
-    _mathStyle = krys::move(value);
-  }
-
-  style::TextAlign RenderStyle::TextAlign() const noexcept
-  {
-    return _textAlign;
-  }
-
-  void RenderStyle::SetTextAlign(style::TextAlign value) noexcept
-  {
-    _textAlign = krys::move(value);
-  }
-
-  style::TextAlignLast RenderStyle::TextAlignLast() const noexcept
-  {
-    return _textAlignLast;
-  }
-
-  void RenderStyle::SetTextAlignLast(style::TextAlignLast value) noexcept
-  {
-    _textAlignLast = krys::move(value);
-  }
-
-  const style::AppleColorFilter &RenderStyle::AppleColorFilter() const noexcept
-  {
-    return _appleColorFilter;
-  }
-
-  void RenderStyle::SetAppleColorFilter(style::AppleColorFilter value) noexcept
-  {
-    _appleColorFilter = krys::move(value);
-  }
-
-  bool RenderStyle::HasAppleColorFilter() const noexcept
-  {
-    return !_appleColorFilter.IsNone();
-  }
-
-  boo::Color RenderStyle::ColorByApplyingColorFilter(const boo::Color &color) const noexcept
-  {
-    auto transformedColor = color;
-    (void)AppleColorFilter().TransformColor(transformedColor);
-    return transformedColor;
-  }
-
-  boo::Color RenderStyle::ColorWithColorFilter(const style::Color &color) const noexcept
-  {
-    return ColorByApplyingColorFilter(ColorResolvingCurrentColor(color));
-  }
-
-  const RenderStyle &RenderStyle::DefaultStyleSingleton() noexcept
-  {
-    static const RenderStyle style;
-    return style;
-  }
-
-  bool RenderStyle::HasAttrContent() const noexcept
-  {
-    return _hasAttrContent;
-  }
-
-  void RenderStyle::SetHasAttrContent() noexcept
-  {
-    _hasAttrContent = true;
-  }
-
-  bool RenderStyle::DisallowsFastPathInheritance() const noexcept
-  {
-    return _disallowsFastPathInheritance;
-  }
-
-  void RenderStyle::SetDisallowsFastPathInheritance() noexcept
-  {
-    _disallowsFastPathInheritance = true;
-  }
-
   const dom::Document &RenderView::GetDocument() const noexcept
   {
     krys_unreachable();
@@ -403,11 +73,6 @@ namespace krys::boo
     krys_unreachable();
   }
 
-  float AdjustFloatForAbsoluteZoom(float value, const RenderStyle &style) noexcept
-  {
-    return value / style.UsedZoom();
-  }
-
   int32 AdjustForAbsoluteZoom(int32, const RenderView &) noexcept
   {
     krys_unreachable();
@@ -451,7 +116,14 @@ namespace krys::boo
 
   bool DocumentUseDarkAppearance(const dom::Document &, const RenderStyle *style) noexcept
   {
-    return style && style->HasDarkOnlyColorScheme();
+    // Collapses `Document::useDarkAppearance`: there's no document colour scheme and the page is light, so
+    // only a style that supports dark and not light uses the dark appearance.
+    if (!style)
+    {
+      return false;
+    }
+    auto colorScheme = style->GetColorScheme().GetColorScheme();
+    return colorScheme.Contains(ColorScheme::Dark) && !colorScheme.Contains(ColorScheme::Light);
   }
 
   style::ColorOptions DocumentStyleColorOptions(const dom::Document &document,

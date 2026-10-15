@@ -2,6 +2,8 @@
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 
 namespace krys::boo::style::tests
@@ -108,7 +110,7 @@ namespace krys::boo::style::tests
       Reset(&ById(*document, u8"b"));
       CHECK(State->SiblingCount() == 4);
       CHECK(State->SiblingIndex() == 2);
-      CHECK(Style.UsesTreeCountingFunctions());
+      CHECK(Style.UseTreeCountingFunctions());
 
       Reset(&ById(*document, u8"a"));
       CHECK(State->SiblingIndex() == 1);
@@ -119,7 +121,7 @@ namespace krys::boo::style::tests
       Reset(document->DocumentElement().get());
       CHECK(State->SiblingCount() == 1);
       CHECK(State->SiblingIndex() == 1);
-      CHECK_FALSE(Style.UsesTreeCountingFunctions());
+      CHECK_FALSE(Style.UseTreeCountingFunctions());
     }
 
     SECTION("SVG zoom rules")
@@ -141,7 +143,7 @@ namespace krys::boo::style::tests
 
   TEST_CASE("RenderStyle (seam): writing mode", "[Style][Seam]")
   {
-    RenderStyle style;
+    RenderStyle style {RenderStyle::Create()};
     CHECK(style.GetWritingMode().IsHorizontal());
     CHECK(style.GetWritingMode().IsBidiLTR());
 

@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Values/TextDecoration/TextDecorationThickness.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"

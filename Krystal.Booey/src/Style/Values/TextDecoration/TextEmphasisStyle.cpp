@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Values/TextDecoration/TextEmphasisStyle.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 
 #include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/CSS/PrimitiveValueMappings.hpp"

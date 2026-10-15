@@ -208,7 +208,7 @@ namespace krys::boo::style::tests
     CHECK(Convert<FontWeight>(PropertyId::FontWeight, u8"lighter").Platform() == FontSelectionValue {100});
     auto description = ParentStyle.GetFontDescription();
     description.SetWeight(BoldWeightValue());
-    CHECK(ParentStyle.SetFontDescription(krys::move(description)));
+    ParentStyle.SetFontDescription(krys::move(description));
     CHECK(Convert<FontWeight>(PropertyId::FontWeight, u8"bolder").Platform() == FontSelectionValue {900});
     CHECK(Convert<FontWeight>(PropertyId::FontWeight, u8"lighter").Platform() == FontSelectionValue {400});
 

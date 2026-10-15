@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/Style/DropShadowFilterOperationWithStyleColor.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"

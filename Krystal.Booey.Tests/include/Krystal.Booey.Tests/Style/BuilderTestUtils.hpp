@@ -7,7 +7,10 @@
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/PropertyCascade.hpp"
+#include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
@@ -20,8 +23,9 @@ namespace krys::boo::style::tests
   struct BuilderFixture : css::tests::ValueFixture
   {
     Ref<dom::HTMLDocument> Document {CreateRef<dom::HTMLDocument>()};
-    RenderStyle ParentStyle;
-    RenderStyle Style;
+    // Both start with the document's default font (16px), as resolved styles do.
+    RenderStyle ParentStyle {RenderStyle::Clone(*Resolver::DefaultStyleForElement(*Document, nullptr))};
+    RenderStyle Style {RenderStyle::Clone(*Resolver::DefaultStyleForElement(*Document, nullptr))};
     PropertyCascade::Property CurrentProperty {};
     UniquePtr<BuilderState> State;
 

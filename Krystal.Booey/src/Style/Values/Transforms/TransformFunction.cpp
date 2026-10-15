@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Values/Transforms/TransformFunction.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 
 #include "Krystal.Booey/CSS/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"

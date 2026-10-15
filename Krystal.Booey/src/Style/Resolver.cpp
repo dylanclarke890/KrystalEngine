@@ -1,10 +1,13 @@
 ﻿#include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaEnvironment.hpp"
+#include "Krystal.Booey/CSS/WebKitFontFamilyNames.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/UserAgentStyle.hpp"
 #include "Krystal.Core/Assert.hpp"
@@ -48,8 +51,8 @@ namespace krys::boo::style
     {
       // FIXME: Resolve the document element's style from the user agent rules (styleForElement with
       // MatchOnlyUserAgentRules) once there is a style builder. Media queries only read its font, which until
-      // then is the initial font.
-      _rootDefaultStyle = CreateUnique<RenderStyle>();
+      // then is the default font.
+      _rootDefaultStyle = DefaultStyleForElement(Document(), Document().DocumentElement().get());
     }
 
     if (_rootDefaultStyle && environment)
@@ -131,6 +134,26 @@ namespace krys::boo::style
   Maybe<DynamicMediaQueryEvaluationChanges> Resolver::EvaluateDynamicMediaQueries() noexcept
   {
     return _ruleSets.EvaluateDynamicMediaQueryRules(_mediaQueryEvaluator);
+  }
+
+  UniquePtr<RenderStyle> Resolver::DefaultStyleForElement(const dom::Document &,
+                                                          const dom::Element *) noexcept
+  {
+    // FIXME: Start from the custom property registry's initial values once it's ported.
+    auto style = RenderStyle::CreatePtr();
+
+    FontCascadeDescription fontDescription;
+    fontDescription.SetOneFamily(css::WebKitFontFamilyNames::StandardFamily());
+    fontDescription.SetKeywordSizeFromIdentifier(css::ValueId::Medium);
+
+    // FIXME: The settings' default font size (`fontSizeForKeyword`) and the zoomed computed size
+    // (`computedFontSizeFromSpecifiedSize`) come with the font size functions.
+    constexpr float size = 16;
+    fontDescription.SetSpecifiedSize(size);
+    fontDescription.SetComputedSize(size);
+
+    style->SetFontDescription(krys::move(fontDescription));
+    return style;
   }
 
   RefPtr<css::ViewTransitionRule> Resolver::GetViewTransitionRule() const noexcept

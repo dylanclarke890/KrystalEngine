@@ -6,6 +6,8 @@
 #include "Krystal.Booey/CSS/Values/Units.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 #include "Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp"
@@ -341,13 +343,15 @@ namespace krys::boo::style
                      : static_cast<float>(
                          conversionData.FontCascadeForFontUnits().MetricsOfPrimaryFont().IntLineSpacing());
         }
-        else if (auto fixedLineHeight = conversionData.Style()->EvaluateFixedLineHeight(
-                   ZoomFactor {conversionData.Zoom(), conversionData.Style()->DeviceScaleFactor()}))
+        else if (auto fixedLineHeight = conversionData.Style()->GetLineHeight().TryFixed())
         {
           // We can't use computedLineHeightForFontUnits if the line height is fixed since
           // that will apply the usedZoomFactor. We probably should refactor it so that
           // does not happen and we don't have to special case this scenario.
-          value *= *fixedLineHeight;
+          value *=
+            Evaluate<LayoutUnit>(*fixedLineHeight, ZoomFactor {conversionData.Zoom(),
+                                                               conversionData.Style()->DeviceScaleFactor()})
+              .ToFloat();
         }
         else
         {
@@ -379,7 +383,8 @@ namespace krys::boo::style
         {
           if (conversionData.ComputingLineHeight() || conversionData.ComputingFontSize())
           {
-            value *= conversionData.RootStyle()->ComputeSpecifiedLineHeight();
+            value *= conversionData.RootStyle()->ComputeLineHeight(
+              conversionData.RootStyle()->SpecifiedLineHeight());
           }
           else
           {
@@ -607,7 +612,7 @@ namespace krys::boo::style
       return false;
     }
 
-    if (styleA.Zoom() != styleB.Zoom())
+    if (styleA.GetZoom() != styleB.GetZoom())
     {
       return false;
     }

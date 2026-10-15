@@ -71,7 +71,7 @@ namespace krys::boo::style
     friend class boo::RenderStyleBase;
 
     ComputedStyle(ComputedStyle &&) noexcept;
-    ComputedStyle &operator=(ComputedStyle &&);
+    ComputedStyle &operator=(ComputedStyle &&) noexcept;
     ComputedStyle(CreateDefaultStyleTag) noexcept;
     ComputedStyle(const ComputedStyle &, CloneTag) noexcept;
     ComputedStyle(ComputedStyle &, ComputedStyle &&) noexcept;

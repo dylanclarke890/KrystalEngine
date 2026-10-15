@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Values/Text/TextAlignLast.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
@@ -25,15 +27,15 @@ namespace krys::boo::style
     {
       auto &parentStyle = state.ParentStyle();
 
-      if (parentStyle.TextAlignLast() == TextAlignLast::Start)
+      if (parentStyle.GetTextAlignLast() == TextAlignLast::Start)
       {
         return parentStyle.GetWritingMode().IsBidiLTR() ? TextAlignLast::Left : TextAlignLast::Right;
       }
-      if (parentStyle.TextAlignLast() == TextAlignLast::End)
+      if (parentStyle.GetTextAlignLast() == TextAlignLast::End)
       {
         return parentStyle.GetWritingMode().IsBidiLTR() ? TextAlignLast::Right : TextAlignLast::Left;
       }
-      return parentStyle.TextAlignLast();
+      return parentStyle.GetTextAlignLast();
     }
 
     return FromCSSValue<TextAlignLast>(value);

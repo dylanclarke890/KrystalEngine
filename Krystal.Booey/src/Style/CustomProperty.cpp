@@ -7,6 +7,7 @@
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/CSS/Values/VariableReferenceValue.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueCreation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordSerialisation.hpp"
@@ -39,7 +40,8 @@ namespace krys::boo::style
     };
 
     return krys::SwitchOn(
-      _value, [&](const GuaranteedInvalid &) -> Ref<css::Value> { return css::PrimitiveValue::Create(css::CSSOMString {}); },
+      _value, [&](const GuaranteedInvalid &) -> Ref<css::Value>
+      { return css::PrimitiveValue::Create(css::CSSOMString {}); },
       [&](const Ref<css::VariableData> &variableData) -> Ref<css::Value>
       { return css::VariableReferenceValue::Create(Ref<css::VariableData> {variableData}); },
       [&](const Value &value) -> Ref<css::Value> { return convertValue(value); },

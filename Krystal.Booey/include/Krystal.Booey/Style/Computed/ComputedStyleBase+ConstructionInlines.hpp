@@ -6,7 +6,7 @@
 namespace krys::boo::style
 {
   inline ComputedStyleBase::ComputedStyleBase(ComputedStyleBase &&) noexcept = default;
-  inline ComputedStyleBase &ComputedStyleBase::operator=(ComputedStyleBase &&) = default;
+  inline ComputedStyleBase &ComputedStyleBase::operator=(ComputedStyleBase &&) noexcept = default;
 
   inline ComputedStyleBase::ComputedStyleBase(CreateDefaultStyleTag) noexcept
       : _nonInheritedData(StyleNonInheritedData::Create()),

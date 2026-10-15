@@ -71,7 +71,7 @@ def generate(args: argparse.Namespace):
             GenerateStyleComputedStyleProperties,
             # GenerateStyleExtractorGenerated,
             # GenerateStyleInterpolationWrapperMap,
-            # GenerateRenderStyleProperties,
+            GenerateRenderStyleProperties,
         ]
     ]
 
@@ -11052,41 +11052,29 @@ class GenerateRenderStyleProperties:
 
     # Computes the annotations, if any, of the getter's declaration.
     def _compute_getter_declaration_annotations(self, property):
-        annotations = ["inline"]
-        if property.codegen_properties.render_style_getter_constexpr:
-            annotations += ["constexpr"]
-        return " ".join(annotations) + " " if annotations else ""
+        return "inline "
 
     # Computes the annotations, if any, of the getter's definition.
     def _compute_getter_definition_annotations(self, property):
-        annotations = ["inline"]
-        if property.codegen_properties.render_style_getter_constexpr:
-            annotations += ["constexpr"]
-        return " ".join(annotations) + " " if annotations else ""
+        return "inline "
 
     # Computes the annotations, if any, of the setter's declaration.
     def _compute_setter_declaration_annotations(self, property):
-        annotations = ["inline"]
-        if property.codegen_properties.render_style_setter_constexpr:
-            annotations += ["constexpr"]
-        return " ".join(annotations) + " " if annotations else ""
+        return "inline "
 
     # Computes the annotations, if any, of the setter's definition.
     def _compute_setter_definition_annotations(self, property):
-        annotations = ["inline"]
-        if property.codegen_properties.render_style_setter_constexpr:
-            annotations += ["constexpr"]
-        return " ".join(annotations) + " " if annotations else ""
+        return "inline "
 
     # Generate RenderStyleProperties.h
 
     def _generate_getter_function_declaration(self, *, to: Writer, function_name, annotations, return_type):
-        to.write(f"{annotations}{return_type} {function_name}() const;")
+        to.write(f"KRYS_NODISCARD {annotations}{return_type} {function_name}() const noexcept;")
 
     def _generate_setter_function_declaration(
         self, *, to: Writer, function_name, annotations, return_type, argument_type
     ):
-        to.write(f"{annotations}{return_type} {function_name}({argument_type});")
+        to.write(f"{annotations}{return_type} {function_name}({argument_type}) noexcept;")
 
     def _generate_property_function_declarations(self, *, to: Writer):
         for property in self.style_properties.all:
@@ -11130,8 +11118,8 @@ class GenerateRenderStyleProperties:
                 )
 
             if property.codegen_properties.render_style_visited_link_storage_path:
-                getter_name = f"visitedLink{property.codegen_properties.render_style_name_for_methods}"
-                setter_name = f"setVisitedLink{property.codegen_properties.render_style_name_for_methods}"
+                getter_name = f"VisitedLink{property.codegen_properties.render_style_name_for_methods}"
+                setter_name = f"SetVisitedLink{property.codegen_properties.render_style_name_for_methods}"
                 getter_annotations = "inline "
                 getter_return_type = property.getter_return_type
                 setter_annotations = f"inline "
@@ -11153,8 +11141,8 @@ class GenerateRenderStyleProperties:
                 )
 
             if property.codegen_properties.render_style_has_explicitly_set_storage_path:
-                getter_name = f"hasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
-                setter_name = f"setHasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
+                getter_name = f"HasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
+                setter_name = f"SetHasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
                 getter_annotations = "inline "
                 getter_return_type = "bool"
                 setter_annotations = f"inline "
@@ -11193,11 +11181,11 @@ class GenerateRenderStyleProperties:
                 setter_argument_type = horizontal_property.setter_argument_type
 
                 for property in [horizontal_property, vertical_property]:
-                    to.write(f"inline {getter_return_type} logical{property.id_without_prefix}(WritingMode) const;")
+                    to.write(f"KRYS_NODISCARD inline {getter_return_type} Logical{property.id_without_prefix}(WritingMode) const noexcept;")
                 for property in [horizontal_property, vertical_property]:
-                    to.write(f"inline {getter_return_type} logical{property.id_without_prefix}() const;")
+                    to.write(f"KRYS_NODISCARD inline {getter_return_type} Logical{property.id_without_prefix}() const noexcept;")
                 for property in [horizontal_property, vertical_property]:
-                    to.write(f"inline void setLogical{property.id_without_prefix}({setter_argument_type});")
+                    to.write(f"inline void SetLogical{property.id_without_prefix}({setter_argument_type}) noexcept;")
             elif property_group["kind"] == "side":
                 property = property_group["physical"]["bottom"]
                 # NOTE: Choice of which property we use here is arbitrary, they must always have the same types.
@@ -11214,7 +11202,7 @@ class GenerateRenderStyleProperties:
                     "LogicalLeft",
                     "LogicalRight",
                 ]:
-                    to.write(f"inline {getter_return_type} {prefix.id_without_prefix}{edge}(WritingMode) const;")
+                    to.write(f"KRYS_NODISCARD inline {getter_return_type} {prefix.id_without_prefix}{edge}(WritingMode) const noexcept;")
                 for edge in [
                     "Start",
                     "End",
@@ -11223,7 +11211,7 @@ class GenerateRenderStyleProperties:
                     "LogicalLeft",
                     "LogicalRight",
                 ]:
-                    to.write(f"inline {getter_return_type} {prefix.id_without_prefix}{edge}() const;")
+                    to.write(f"KRYS_NODISCARD inline {getter_return_type} {prefix.id_without_prefix}{edge}() const noexcept;")
                 for edge in [
                     "Start",
                     "End",
@@ -11232,14 +11220,16 @@ class GenerateRenderStyleProperties:
                     "LogicalLeft",
                     "LogicalRight",
                 ]:
-                    to.write(f"inline void set{prefix.id_without_prefix}{edge}({setter_argument_type});")
+                    to.write(f"inline void Set{prefix.id_without_prefix}{edge}({setter_argument_type}) noexcept;")
             else:
                 # FIXME: Add logical getters / setters for other group kinds (like 'corner') if it would be useful.
                 to.write(f"// FIXME: Add support for logical getter/setters of kind '{property_group['kind']}'.")
             to.newline()
 
     def generate_render_style_properties_h(self):
-        with open(self.generation_context.output_hpp_path("Krystal.Booey/Rendering/Style/RenderStyleProperties.hpp"), "w") as output_file:
+        with open(
+            self.generation_context.output_hpp_path("Krystal.Booey/Rendering/Style/RenderStyleProperties.hpp"), "w"
+        ) as output_file:
             writer = Writer(output_file)
 
             writer.hpp_prelude(
@@ -11248,7 +11238,8 @@ class GenerateRenderStyleProperties:
             )
 
             with writer.namespace(namespace="krys::boo"):
-                writer.write(f"class RenderStyleProperties : public RenderStyleBase {{")
+                writer.write(f"class RenderStyleProperties : public RenderStyleBase")
+                writer.write(f"{{")
                 writer.write(f"public:")
 
                 with writer.indent():
@@ -11262,7 +11253,7 @@ class GenerateRenderStyleProperties:
                     writer.write(f"RenderStyleProperties& operator=(RenderStyleProperties&&) noexcept = default;")
                     writer.newline()
 
-                    writer.write(f"RenderStyleProperties(CreateDefaultStyleTag tag) noexcept : RenderStyleBase {{ tag }} {{ }}")
+                    writer.write(f"explicit RenderStyleProperties(CreateDefaultStyleTag tag) noexcept : RenderStyleBase {{ tag }} {{ }}")
                     writer.write(
                         f"RenderStyleProperties(const RenderStyleProperties& other, CloneTag tag) noexcept : RenderStyleBase {{ other, tag }} {{ }}"
                     )
@@ -11278,10 +11269,10 @@ class GenerateRenderStyleProperties:
     # Generate RenderStyleProperties+GettersInlines.h
 
     def _generate_getters_inlines_function_definition(self, *, to: Writer, function_name, annotations, return_type):
-        to.write(f"{annotations}{return_type} RenderStyleProperties::{function_name}() const")
+        to.write(f"{annotations}{return_type} RenderStyleProperties::{function_name}() const noexcept")
         to.write(f"{{")
         with to.indent():
-            to.write(f"return m_computedStyle.{function_name}();")
+            to.write(f"return _computedStyle.{function_name}();")
         to.write(f"}}")
         to.newline()
 
@@ -11315,7 +11306,7 @@ class GenerateRenderStyleProperties:
             )
 
             if property.codegen_properties.render_style_visited_link_storage_path:
-                function_name = f"visitedLink{property.codegen_properties.render_style_name_for_methods}"
+                function_name = f"VisitedLink{property.codegen_properties.render_style_name_for_methods}"
                 annotations = "inline "
                 return_type = property.getter_return_type
 
@@ -11327,7 +11318,7 @@ class GenerateRenderStyleProperties:
                 )
 
             if property.codegen_properties.render_style_has_explicitly_set_storage_path:
-                function_name = f"hasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
+                function_name = f"HasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
                 annotations = "inline "
                 return_type = "bool"
 
@@ -11341,10 +11332,10 @@ class GenerateRenderStyleProperties:
     def _generate_getters_inlines_function_definition_taking_writing_mode(
         self, *, to: Writer, function_name, annotations, return_type
     ):
-        to.write(f"{annotations}{return_type} RenderStyleProperties::{function_name}(WritingMode writingMode) const")
+        to.write(f"{annotations}{return_type} RenderStyleProperties::{function_name}(WritingMode writingMode) const noexcept")
         to.write(f"{{")
         with to.indent():
-            to.write(f"return m_computedStyle.{function_name}(writingMode);")
+            to.write(f"return _computedStyle.{function_name}(writingMode);")
         to.write(f"}}")
         to.newline()
 
@@ -11364,14 +11355,14 @@ class GenerateRenderStyleProperties:
                 for property in [horizontal_property, vertical_property]:
                     self._generate_getters_inlines_function_definition_taking_writing_mode(
                         to=to,
-                        function_name=f"logical{property.id_without_prefix}",
+                        function_name=f"Logical{property.id_without_prefix}",
                         annotations=annotations,
                         return_type=return_type,
                     )
                 for property in [horizontal_property, vertical_property]:
                     self._generate_getters_inlines_function_definition(
                         to=to,
-                        function_name=f"logical{property.id_without_prefix}",
+                        function_name=f"Logical{property.id_without_prefix}",
                         annotations=annotations,
                         return_type=return_type,
                     )
@@ -11431,8 +11422,8 @@ class GenerateRenderStyleProperties:
 
             writer.includes(
                 headers=[
-                    "Krystal/HTML/CSS/Style/RenderStyleBase+GettersInlines.hpp",
-                    "Krystal/HTML/CSS/Style/StyleComputedStyle+GettersInlines.hpp",
+                    "Krystal.Booey/Rendering/Style/RenderStyleBase+GettersInlines.hpp",
+                    "Krystal.Booey/Style/Computed/ComputedStyle+GettersInlines.hpp",
                 ],
             )
 
@@ -11453,13 +11444,13 @@ class GenerateRenderStyleProperties:
         argument_name,
         forwarding_expression,
     ):
-        to.write(f"{annotations}{return_type} RenderStyleProperties::{function_name}({argument_type} {argument_name})")
+        to.write(f"{annotations}{return_type} RenderStyleProperties::{function_name}({argument_type} {argument_name}) noexcept")
         to.write(f"{{")
         with to.indent():
             if return_type == "void":
-                to.write(f"m_computedStyle.{function_name}({forwarding_expression});")
+                to.write(f"_computedStyle.{function_name}({forwarding_expression});")
             else:
-                to.write(f"return m_computedStyle.{function_name}({forwarding_expression});")
+                to.write(f"return _computedStyle.{function_name}({forwarding_expression});")
         to.write(f"}}")
         to.newline()
 
@@ -11499,7 +11490,7 @@ class GenerateRenderStyleProperties:
             )
 
             if property.codegen_properties.render_style_visited_link_storage_path:
-                function_name = f"setVisitedLink{property.codegen_properties.render_style_name_for_methods}"
+                function_name = f"SetVisitedLink{property.codegen_properties.render_style_name_for_methods}"
                 annotations = "inline "
                 return_type = "void"
                 argument_type = property.setter_argument_type
@@ -11519,7 +11510,7 @@ class GenerateRenderStyleProperties:
                 )
 
             if property.codegen_properties.render_style_has_explicitly_set_storage_path:
-                function_name = f"setHasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
+                function_name = f"SetHasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
                 annotations = "inline "
                 return_type = "void"
                 argument_type = "bool"
@@ -11554,7 +11545,7 @@ class GenerateRenderStyleProperties:
                 for property in [horizontal_property, vertical_property]:
                     self._generate_setters_inlines_function_definition(
                         to=to,
-                        function_name=f"setLogical{property.id_without_prefix}",
+                        function_name=f"SetLogical{property.id_without_prefix}",
                         annotations=annotations,
                         return_type="void",
                         argument_type=argument_type,
@@ -11582,7 +11573,7 @@ class GenerateRenderStyleProperties:
                 ]:
                     self._generate_setters_inlines_function_definition(
                         to=to,
-                        function_name=f"set{prefix.id_without_prefix}{edge}",
+                        function_name=f"Set{prefix.id_without_prefix}{edge}",
                         annotations=annotations,
                         return_type="void",
                         argument_type=argument_type,

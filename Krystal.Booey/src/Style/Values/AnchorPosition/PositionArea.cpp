@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Values/AnchorPosition/PositionArea.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 
 #include "Krystal.Booey/Core/BoxSides.hpp"
 #include "Krystal.Booey/Core/WritingMode.hpp"

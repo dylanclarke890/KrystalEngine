@@ -112,6 +112,10 @@ namespace krys::boo::style
 
     KRYS_NODISCARD RefPtr<css::ViewTransitionRule> GetViewTransitionRule() const noexcept;
 
+    /// @brief A style with the initial values and the document's default font (`medium`).
+    KRYS_NODISCARD static UniquePtr<RenderStyle> DefaultStyleForElement(const dom::Document &document,
+                                                                        const dom::Element *element) noexcept;
+
     KRYS_NODISCARD bool UsesFirstLineRules() const noexcept
     {
       return _ruleSets.Features().UsesFirstLineRules;

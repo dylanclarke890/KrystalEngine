@@ -2,6 +2,8 @@
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/RatioValue.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Values/Flexbox/FlexBasis.hpp"
 #include "Krystal.Booey/Style/Values/Flexbox/FlexGrow.hpp"
 #include "Krystal.Booey/Style/Values/Flexbox/FlexShrink.hpp"
@@ -68,9 +70,9 @@ namespace krys::boo::style::tests
 
     SECTION("Blending interpolates the logical ratio")
     {
-      RenderStyle aStyle;
+      RenderStyle aStyle {RenderStyle::Create()};
       aStyle.SetAspectRatio(Ratio {1, 1});
-      RenderStyle bStyle;
+      RenderStyle bStyle {RenderStyle::Create()};
       bStyle.SetAspectRatio(Ratio {4, 1});
       CHECK(aStyle.LogicalAspectRatio() == 1);
       CHECK(bStyle.LogicalAspectRatio() == 4);

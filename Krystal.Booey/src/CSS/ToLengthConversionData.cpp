@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/Graphics/FloatSize.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 
 namespace krys::boo::css

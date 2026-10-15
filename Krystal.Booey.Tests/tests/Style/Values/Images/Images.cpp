@@ -225,7 +225,7 @@ namespace krys::boo::style::tests
            Stop(styleBlue)}}};
       Gradient gradient {css::FunctionNotation<css::ValueId::LinearGradient, LinearGradient> {linear}};
       CHECK_FALSE(StopsAreCacheable(gradient));
-      Style.SetColor(styleRed);
+      Style.SetColor(boo::Color {styleRed});
       auto platform = CreatePlatformGradient(gradient, {10, 10}, Style);
       CHECK(platform->Stops().Stops()[0].Color == styleRed);
     }

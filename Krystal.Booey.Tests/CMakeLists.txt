@@ -308,6 +308,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/Style/BorderValues.cpp
 		tests/Style/CustomProperty.cpp
 		tests/Rendering/Style/StyleDataGroups.cpp
+		tests/Rendering/Style/RenderStyle.cpp
 		tests/Style/Computed/ComputedStyleInitial.cpp
 		tests/Style/NameScope.cpp
 		tests/Graphics/Animation/TimingFunction.cpp

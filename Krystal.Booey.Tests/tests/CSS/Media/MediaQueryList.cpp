@@ -94,12 +94,12 @@ namespace krys::boo::css::tests
       REQUIRE(Document->MatchMedia(u8"(width: 50em)")->Matches());
       REQUIRE(Document->MatchMedia(u8"(width: 50rem)")->Matches());
       REQUIRE(Document->MatchMedia(u8"(width: 100rex)")->Matches());
-      REQUIRE(Document->MatchMedia(u8"(min-width: 42rlh) and (max-width: 42.2rlh)")->Matches());
+      REQUIRE(Document->MatchMedia(u8"(min-width: 41.6rlh) and (max-width: 41.7rlh)")->Matches());
       REQUIRE(Document->MatchMedia(u8"(width: 100ex)")->Matches());
       REQUIRE(Document->MatchMedia(u8"(width: 100ch)")->Matches());
       REQUIRE(Document->MatchMedia(u8"(width: 50ic)")->Matches());
       REQUIRE(Document->MatchMedia(u8"(width: 50cap)")->Matches());
-      REQUIRE(Document->MatchMedia(u8"(min-width: 42lh) and (max-width: 42.2lh)")->Matches());
+      REQUIRE(Document->MatchMedia(u8"(min-width: 41.6lh) and (max-width: 41.7lh)")->Matches());
       REQUIRE_FALSE(Document->MatchMedia(u8"(min-width: 51em)")->Matches());
     }
 

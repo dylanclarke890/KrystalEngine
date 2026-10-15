@@ -38,13 +38,10 @@
 
 // FIXME: Placeholders for the rendering, font and style-resolver types that length resolution, calc
 // evaluation, colour resolution and the computed value conversions need. Each declares only the members those
-// callers use, under its upstream name. `RenderStyle` and `style::BuilderState` can be constructed:
-// `RenderStyle` has its colour state, font, pseudo-element and unit-usage flags (zoom is always the initial
-// value; the font starts as the initial `medium` and has no font data), and `BuilderState` has upstream's
+// callers use, under its upstream name. Only `style::BuilderState` can be constructed: it has upstream's
 // state for converting values (no font updates, custom properties or style images). Everything else is
 // unreachable. Each type moves to its own header, with its real implementation, when its slice is ported:
-//   - `RenderStyle`, `RenderView`, `RenderElement`, `RenderBox`, `RenderTheme` (focus ring metrics):
-//   rendering.
+//   - `RenderView`, `RenderElement`, `RenderBox`, `RenderTheme` (focus ring metrics): rendering.
 //   - `style::BuilderState`, `style::AnchorPositionEvaluator`, `style::ContainerQueryEvaluator`: the style
 //     resolver (`Style/BuilderState.hpp`, `Style/AnchorPositionEvaluator.hpp`, unreviewed).
 //   - the `Document*` colour functions: `dom::Document` (upstream members) once it has a page and settings.
@@ -79,126 +76,7 @@ namespace krys::boo
 {
   class StyleImage;
 
-  class RenderStyle
-  {
-    KRYS_NON_COPY_MOVABLE(RenderStyle);
-
-  private:
-    boo::Color _color {boo::Color::black};
-    boo::Color _visitedLinkColor {boo::Color::black};
-    bool _hasDarkOnlyColorScheme {false};
-    Maybe<style::PseudoElementIdentifier> _pseudoElementIdentifier;
-    bool _usesViewportUnits {false};
-    bool _usesContainerUnits {false};
-    bool _usesTreeCountingFunctions {false};
-    bool _hasAttrContent {false};
-    bool _disallowsFastPathInheritance {false};
-    boo::WritingMode _writingMode {};
-    FontCascade _fontCascade {InitialFontCascade()};
-
-    // Property storage, grown as the computed value types need it; replaced by the generated storage.
-    style::AspectRatio _aspectRatio {css::keywords::Auto {}};
-    style::MathDepth _mathDepth {0};
-    MathStyle _mathStyle {MathStyle::Normal};
-    style::TextAlign _textAlign {style::TextAlign::Start};
-    style::TextAlignLast _textAlignLast {style::TextAlignLast::Auto};
-    style::AppleColorFilter _appleColorFilter {css::keywords::None {}};
-
-  public:
-    RenderStyle() noexcept = default;
-
-    /// @brief The style with every property at its initial value, shared.
-    KRYS_NODISCARD static const RenderStyle &DefaultStyleSingleton() noexcept;
-
-    KRYS_NODISCARD const boo::Color &GetColor() const noexcept;
-    void SetColor(const boo::Color &color) noexcept;
-    KRYS_NODISCARD const boo::Color &VisitedLinkColor() const noexcept;
-    void SetVisitedLinkColor(const boo::Color &color) noexcept;
-
-    KRYS_NODISCARD boo::Color ColorResolvingCurrentColor(const style::Color &color,
-                                                         bool visitedLink = false) const noexcept;
-    KRYS_NODISCARD boo::Color ColorByApplyingColorFilter(const boo::Color &color) const noexcept;
-    KRYS_NODISCARD boo::Color ColorWithColorFilter(const style::Color &color) const noexcept;
-
-    /// @brief Collapses `colorScheme()` resolving to `dark` without `light`.
-    KRYS_NODISCARD bool HasDarkOnlyColorScheme() const noexcept;
-    void SetHasDarkOnlyColorScheme(bool value) noexcept;
-
-    KRYS_NODISCARD WritingMode GetWritingMode() const noexcept;
-    bool SetDirection(TextDirection bidiDirection) noexcept;
-    bool SetTextOrientation(TextOrientation textOrientation) noexcept;
-    bool SetWritingMode(StyleWritingMode mode) noexcept;
-
-    /// @brief The initial `zoom` (1); nothing sets it yet.
-    KRYS_NODISCARD float Zoom() const noexcept;
-
-    /// @brief The initial used zoom (1); nothing sets it yet.
-    KRYS_NODISCARD float UsedZoom() const noexcept;
-
-    /// @brief The zoom lengths are evaluated with: the used zoom when zoom is applied at evaluation time, 1
-    /// otherwise. Collapses `useSVGZoomRulesForLength()`, which is false until there's an SVG zoom flag.
-    KRYS_NODISCARD style::ZoomFactor UsedZoomForLength() const noexcept;
-
-    /// @brief Collapses the page's device scale factor for a document with no page: 1.
-    KRYS_NODISCARD float DeviceScaleFactor() const noexcept;
-
-    /// @brief Collapses `document().settings().evaluationTimeZoomEnabled()` for default settings: off.
-    KRYS_NODISCARD bool EvaluationTimeZoomEnabled() const noexcept;
-
-    /// @brief The font, initially `medium` (16px). There's no font data; see `FontCascade`.
-    KRYS_NODISCARD const FontCascade &GetFontCascade() const noexcept;
-    KRYS_NODISCARD FontCascade &MutableFontCascade() noexcept;
-    KRYS_NODISCARD const FontCascadeDescription &GetFontDescription() const noexcept;
-    bool SetFontDescription(FontCascadeDescription &&) noexcept;
-    KRYS_NODISCARD float ComputedFontSize() const noexcept;
-    KRYS_NODISCARD const FontMetrics &MetricsOfPrimaryFont() const noexcept;
-
-    /// @brief The initial `line-height` (`normal`) of the font.
-    KRYS_NODISCARD float ComputedLineHeight() const noexcept;
-
-    KRYS_NODISCARD Maybe<PseudoElementType> GetPseudoElementType() const noexcept;
-    KRYS_NODISCARD Maybe<style::PseudoElementIdentifier> GetPseudoElementIdentifier() const noexcept;
-    void SetPseudoElementIdentifier(Maybe<style::PseudoElementIdentifier> &&identifier) noexcept;
-
-    KRYS_NODISCARD bool UsesViewportUnits() const noexcept;
-    void SetUsesViewportUnits() noexcept;
-    KRYS_NODISCARD bool UsesContainerUnits() const noexcept;
-    void SetUsesContainerUnits() noexcept;
-    KRYS_NODISCARD bool UsesTreeCountingFunctions() const noexcept;
-    void SetUsesTreeCountingFunctions() noexcept;
-    KRYS_NODISCARD bool HasAttrContent() const noexcept;
-    void SetHasAttrContent() noexcept;
-    KRYS_NODISCARD bool DisallowsFastPathInheritance() const noexcept;
-    void SetDisallowsFastPathInheritance() noexcept;
-
-    // Properties, grown as the computed value types need them; replaced by the generated getters and
-    // setters.
-    KRYS_NODISCARD const style::AspectRatio &AspectRatio() const noexcept;
-    void SetAspectRatio(style::AspectRatio value) noexcept;
-    KRYS_NODISCARD double LogicalAspectRatio() const noexcept;
-    KRYS_NODISCARD const style::MathDepth &MathDepth() const noexcept;
-    void SetMathDepth(style::MathDepth value) noexcept;
-    KRYS_NODISCARD MathStyle GetMathStyle() const noexcept;
-    void SetMathStyle(MathStyle value) noexcept;
-    KRYS_NODISCARD style::TextAlign TextAlign() const noexcept;
-    void SetTextAlign(style::TextAlign value) noexcept;
-    KRYS_NODISCARD style::TextAlignLast TextAlignLast() const noexcept;
-    void SetTextAlignLast(style::TextAlignLast value) noexcept;
-    KRYS_NODISCARD const style::AppleColorFilter &AppleColorFilter() const noexcept;
-    void SetAppleColorFilter(style::AppleColorFilter value) noexcept;
-    KRYS_NODISCARD bool HasAppleColorFilter() const noexcept;
-
-    /// @brief Collapses `lineHeight().tryFixed()` evaluated to a `LayoutUnit` with `zoom`, as a float, for
-    /// the initial `line-height`.
-    KRYS_NODISCARD Maybe<float> EvaluateFixedLineHeight(const style::ZoomFactor &zoom) const noexcept;
-
-    /// @brief Collapses `computeLineHeight(specifiedLineHeight())` for the initial `line-height`.
-    KRYS_NODISCARD float ComputeSpecifiedLineHeight() const noexcept;
-
-  private:
-    /// @brief Collapses the initial font the style resolver gives the document: `medium`, no families.
-    KRYS_NODISCARD static FontCascade InitialFontCascade() noexcept;
-  };
+  class RenderStyle;
 
   class RenderTheme
   {
@@ -251,8 +129,6 @@ namespace krys::boo
     KRYS_NODISCARD LayoutUnit ContentBoxWidth() const noexcept;
     KRYS_NODISCARD LayoutUnit ContentBoxHeight() const noexcept;
   };
-
-  KRYS_NODISCARD float AdjustFloatForAbsoluteZoom(float, const RenderStyle &) noexcept;
 
   /// @brief Collapses `adjustForAbsoluteZoom(value, renderView)` (`RenderView` is a `RenderElement`).
   KRYS_NODISCARD int32 AdjustForAbsoluteZoom(int32, const RenderView &) noexcept;

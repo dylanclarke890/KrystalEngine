@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
 #include "Krystal.Core/Maths/Base.hpp"
 

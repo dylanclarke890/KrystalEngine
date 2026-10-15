@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Values/Text/TextAlign.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
@@ -30,11 +32,11 @@ namespace krys::boo::style
     // value 'center'. https://html.spec.whatwg.org/multipage/rendering.html#rendering
     if (primitiveValue->ValueId() == css::ValueId::InternalThCenter)
     {
-      if (parentStyle.TextAlign() == TextAlign::Start)
+      if (parentStyle.GetTextAlign() == TextAlign::Start)
       {
         return TextAlign::Center;
       }
-      return parentStyle.TextAlign();
+      return parentStyle.GetTextAlign();
     }
 
     if (primitiveValue->ValueId() == css::ValueId::WebkitMatchParent
@@ -46,16 +48,16 @@ namespace krys::boo::style
       {
         return TextAlign::Start;
       }
-      if (parentStyle.TextAlign() == TextAlign::Start)
+      if (parentStyle.GetTextAlign() == TextAlign::Start)
       {
         return parentStyle.GetWritingMode().IsBidiLTR() ? TextAlign::Left : TextAlign::Right;
       }
-      if (parentStyle.TextAlign() == TextAlign::End)
+      if (parentStyle.GetTextAlign() == TextAlign::End)
       {
         return parentStyle.GetWritingMode().IsBidiLTR() ? TextAlign::Right : TextAlign::Left;
       }
 
-      return parentStyle.TextAlign();
+      return parentStyle.GetTextAlign();
     }
 
     return FromCSSValue<TextAlign>(value);

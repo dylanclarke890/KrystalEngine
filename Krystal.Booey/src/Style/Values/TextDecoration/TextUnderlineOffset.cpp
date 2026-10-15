@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Style/Values/TextDecoration/TextUnderlineOffset.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"

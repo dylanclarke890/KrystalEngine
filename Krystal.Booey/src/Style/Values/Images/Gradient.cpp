@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Style/Values/Images/Gradient.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 #include "Krystal.Booey/Graphics/Color/ColorInterpolation.hpp"
 #include "Krystal.Booey/Graphics/GeometryUtilities.hpp"

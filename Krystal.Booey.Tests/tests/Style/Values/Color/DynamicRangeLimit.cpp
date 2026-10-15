@@ -12,6 +12,8 @@
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Graphics/PlatformDynamicRangeLimit.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Values/Color/Opacity.hpp"
 #include <string>
@@ -44,7 +46,7 @@ namespace krys::boo::style::tests
     /// @brief The computed value, serialised as a std::string, which Catch2 can print.
     std::string Serialised(const DynamicRangeLimit &limit)
     {
-      RenderStyle style;
+      RenderStyle style {RenderStyle::Create()};
       auto serialised = Serialise(css::DefaultSerialisationContext(), style, limit);
       return std::string(serialised.begin(), serialised.end());
     }

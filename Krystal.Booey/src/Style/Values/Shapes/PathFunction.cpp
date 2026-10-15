@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Style/Values/Shapes/PathFunction.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 #include "Krystal.Booey/CSS/Values/PathValue.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
@@ -54,8 +55,9 @@ namespace krys::boo::style
     }
   };
 
-  KRYS_NODISCARD static const boo::Path &CachedTransformedByteStreamPath(const svg::SVGPathByteStream &stream, float zoom,
-                                                          const FloatPoint &offset) noexcept
+  KRYS_NODISCARD static const boo::Path &CachedTransformedByteStreamPath(const svg::SVGPathByteStream &stream,
+                                                                         float zoom,
+                                                                         const FloatPoint &offset) noexcept
   {
     static NeverDestroyed<
       TinyLRUCache<SVGPathTransformedByteStream, boo::Path, 4, TransformedByteStreamPathPolicy>>
@@ -66,7 +68,7 @@ namespace krys::boo::style
   // MARK: - Conversion
 
   KRYS_NODISCARD static svg::SVGPathByteStream CopySVGPathByteStream(const svg::SVGPathByteStream &source,
-                                                                PathConversion conversion) noexcept
+                                                                     PathConversion conversion) noexcept
   {
     if (conversion == PathConversion::ForceAbsolute)
     {
@@ -80,12 +82,13 @@ namespace krys::boo::style
   }
 
   css::Path::PathData ToCSS<Path::PathData>::operator()(const Path::PathData &value, const RenderStyle &,
-                                                PathConversion conversion) noexcept
+                                                        PathConversion conversion) noexcept
   {
     return {CopySVGPathByteStream(value.ByteStream, conversion)};
   }
 
-  Path::PathData ToStyle<css::Path::PathData>::operator()(const css::Path::PathData &value, const BuilderState &) noexcept
+  Path::PathData ToStyle<css::Path::PathData>::operator()(const css::Path::PathData &value,
+                                                          const BuilderState &) noexcept
   {
     return {CopySVGPathByteStream(value.ByteStream, PathConversion::None)};
   }
@@ -141,7 +144,8 @@ namespace krys::boo::style
 
   bool Blending<Path>::CanBlend(const Path &a, const Path &b) noexcept
   {
-    return ComputeWindRule(a) == ComputeWindRule(b) && svg::CanBlendSVGPathByteStreams(a.Data.ByteStream, b.Data.ByteStream);
+    return ComputeWindRule(a) == ComputeWindRule(b)
+           && svg::CanBlendSVGPathByteStreams(a.Data.ByteStream, b.Data.ByteStream);
   }
 
   Path Blending<Path>::Blend(const Path &a, const Path &b, const BlendingContext &context) noexcept

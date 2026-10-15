@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Style/Computed/ComputedStyleBase.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Computed/ComputedStyleBase+SettersInlines.hpp"
 
 #include "Krystal.Booey/Animation/ScrollAxis.hpp"

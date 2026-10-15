@@ -7,6 +7,7 @@
 #include "Krystal.Booey/CSS/Calc/TreeSimplification.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericCategory.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/UnevaluatedCalc.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Calc/Tree.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"

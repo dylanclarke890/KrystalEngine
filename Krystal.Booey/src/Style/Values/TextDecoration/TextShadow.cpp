@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Style/Values/TextDecoration/TextShadow.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 #include "Krystal.Booey/CSS/Values/TextShadowPropertyValue.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"

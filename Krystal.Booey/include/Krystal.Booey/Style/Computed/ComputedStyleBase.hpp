@@ -14,7 +14,6 @@
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Style/Values/Grid/GridAutoFlow.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/PrimitiveNumericForward.hpp"
-#include "Krystal.Core/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/Types/DataRef.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
@@ -295,10 +294,8 @@ namespace krys::boo
 
       HashMap<PseudoElementIdentifier, UniquePtr<RenderStyle>, IdentifierHash> Styles;
     };
-    class ComputedStyleBase : public CanMakeCheckedPtr<ComputedStyleBase>
+    class ComputedStyleBase
     {
-      KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ComputedStyleBase);
-
     public:
       enum CloneTag
       {
@@ -704,7 +701,7 @@ namespace krys::boo
       friend class boo::RenderStyleProperties;
 
       ComputedStyleBase(ComputedStyleBase &&) noexcept;
-      ComputedStyleBase &operator=(ComputedStyleBase &&);
+      ComputedStyleBase &operator=(ComputedStyleBase &&) noexcept;
 
       ComputedStyleBase(CreateDefaultStyleTag) noexcept;
       ComputedStyleBase(const ComputedStyleBase &, CloneTag) noexcept;

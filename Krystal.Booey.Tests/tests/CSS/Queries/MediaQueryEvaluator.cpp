@@ -6,6 +6,8 @@
 #include "Krystal.Booey/CSS/Queries/MediaQueryFeatures.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 
 namespace krys::boo::css::tests
@@ -36,7 +38,7 @@ namespace krys::boo::css::tests
     struct EvaluationFixture : ValueFixture
     {
       Ref<dom::Document> Document {CreateRef<dom::Document>()};
-      RenderStyle RootStyle {};
+      RenderStyle RootStyle {RenderStyle::Create()};
       mq::MediaEnvironment Environment {};
 
       EvaluationFixture()

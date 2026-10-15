@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Values/Inline/LineHeight.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 

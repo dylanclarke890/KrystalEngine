@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Values/Content/Content.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 
 #include "Krystal.Booey/CSS/Values/AttrValue.hpp"
 #include "Krystal.Booey/CSS/Values/CounterValue.hpp"

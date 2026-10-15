@@ -11,6 +11,8 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorLayers.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorMix.hpp"
@@ -52,7 +54,7 @@ namespace krys::boo::style::tests
     struct Resolution
     {
       Ref<dom::Document> Document {CreateRef<dom::Document>()};
-      RenderStyle Style;
+      RenderStyle Style {RenderStyle::Create()};
 
       Color Convert(const css::Color &value, ForVisitedLink forVisitedLink = ForVisitedLink::No)
       {
@@ -234,7 +236,9 @@ namespace krys::boo::style::tests
 
       CHECK(keyword(css::ValueId::Linktext).GetResolvedColor() == light);
 
-      resolution.Style.SetHasDarkOnlyColorScheme(true);
+      resolution.Style.SetColorScheme(ColorScheme {css::SpaceSeparatedList<css::CustomIdentifier> {
+                                                     css::CustomIdentifier {css::CSSOMStringAtom {u8"dark"}}},
+                                                   null});
       CHECK(keyword(css::ValueId::Linktext).GetResolvedColor() == dark);
       CHECK(keyword(css::ValueId::WebkitLink).GetResolvedColor()
             == css::ColorFromKeyword(css::ValueId::WebkitLink, ColorOptions::UseDarkAppearance));
@@ -244,11 +248,13 @@ namespace krys::boo::style::tests
     {
       CHECK(Bytes(resolution.Convert(u8"light-dark(red, blue)").GetResolvedColor()) == Red);
 
-      resolution.Style.SetHasDarkOnlyColorScheme(true);
+      resolution.Style.SetColorScheme(ColorScheme {css::SpaceSeparatedList<css::CustomIdentifier> {
+                                                     css::CustomIdentifier {css::CSSOMStringAtom {u8"dark"}}},
+                                                   null});
       CHECK(Bytes(resolution.Convert(u8"light-dark(red, blue)").GetResolvedColor()) == Blue);
 
       CHECK(resolution.Convert(u8"light-dark(currentcolor, blue)").IsResolvedColor());
-      resolution.Style.SetHasDarkOnlyColorScheme(false);
+      resolution.Style.SetColorScheme(ColorScheme {css::keywords::Normal {}});
       CHECK(resolution.Convert(u8"light-dark(currentcolor, blue)").IsCurrentColor());
     }
   }
@@ -375,7 +381,7 @@ namespace krys::boo::style::tests
           == "rgb(0, 0, 255)");
 
     // Computed values serialise the used colour.
-    RenderStyle style;
+    RenderStyle style {RenderStyle::Create()};
     style.SetColor(boo::Color {Green});
     CHECK(ToString(Serialise(css::DefaultSerialisationContext(), style, Color {})) == "rgb(0, 128, 0)");
     CHECK(ToString(Serialise(css::DefaultSerialisationContext(), style, Color {Red})) == "rgb(255, 0, 0)");
@@ -387,7 +393,7 @@ namespace krys::boo::style::tests
 
   TEST_CASE("Style colour(RenderStyle)", "[Style][Values][Color]")
   {
-    RenderStyle style;
+    RenderStyle style {RenderStyle::Create()};
     CHECK(style.GetColor() == boo::Color::black);
     CHECK(style.VisitedLinkColor() == boo::Color::black);
 
@@ -400,9 +406,9 @@ namespace krys::boo::style::tests
 
   TEST_CASE("Style colour(blending)", "[Style][Values][Color]")
   {
-    RenderStyle aStyle;
+    RenderStyle aStyle {RenderStyle::Create()};
     aStyle.SetColor(boo::Color {Red});
-    RenderStyle bStyle;
+    RenderStyle bStyle {RenderStyle::Create()};
     bStyle.SetColor(boo::Color {Blue});
 
     SECTION("equality")
