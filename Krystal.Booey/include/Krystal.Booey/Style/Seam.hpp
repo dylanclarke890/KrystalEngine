@@ -43,7 +43,8 @@
 // value; the font starts as the initial `medium` and has no font data), and `BuilderState` has upstream's
 // state for converting values (no font updates, custom properties or style images). Everything else is
 // unreachable. Each type moves to its own header, with its real implementation, when its slice is ported:
-//   - `RenderStyle`, `RenderView`, `RenderElement`, `RenderBox`: rendering.
+//   - `RenderStyle`, `RenderView`, `RenderElement`, `RenderBox`, `RenderTheme` (focus ring metrics):
+//   rendering.
 //   - `style::BuilderState`, `style::AnchorPositionEvaluator`, `style::ContainerQueryEvaluator`: the style
 //     resolver (`Style/BuilderState.hpp`, `Style/AnchorPositionEvaluator.hpp`, unreviewed).
 //   - the `Document*` colour functions: `dom::Document` (upstream members) once it has a page and settings.
@@ -197,6 +198,20 @@ namespace krys::boo
   private:
     /// @brief Collapses the initial font the style resolver gives the document: `medium`, no families.
     KRYS_NODISCARD static FontCascade InitialFontCascade() noexcept;
+  };
+
+  class RenderTheme
+  {
+  public:
+    KRYS_NODISCARD static float PlatformFocusRingWidth() noexcept
+    {
+      return 3;
+    }
+
+    KRYS_NODISCARD static float PlatformFocusRingOffset(float outlineWidth) noexcept
+    {
+      return std::max<float>(outlineWidth - PlatformFocusRingWidth(), 0);
+    }
   };
 
   class RenderView

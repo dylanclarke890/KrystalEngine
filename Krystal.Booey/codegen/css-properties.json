@@ -3080,6 +3080,7 @@
       "initial": "0",
       "codegen-properties": {
         "disables-native-appearance": true,
+        "render-style-storage-name": "outset",
         "render-style-storage-path": [
           "_nonInheritedData",
           "surroundData",
@@ -3103,6 +3104,7 @@
       "values": ["stretch", "repeat", "round", "space"],
       "codegen-properties": {
         "disables-native-appearance": true,
+        "render-style-storage-name": "repeat",
         "render-style-storage-path": [
           "_nonInheritedData",
           "surroundData",
@@ -3126,6 +3128,7 @@
       "values": ["fill"],
       "codegen-properties": {
         "disables-native-appearance": true,
+        "render-style-storage-name": "slice",
         "render-style-storage-path": [
           "_nonInheritedData",
           "surroundData",
@@ -3153,6 +3156,7 @@
       "values": ["none"],
       "codegen-properties": {
         "disables-native-appearance": true,
+        "render-style-storage-name": "source",
         "render-style-storage-path": [
           "_nonInheritedData",
           "surroundData",
@@ -3176,6 +3180,7 @@
       "codegen-properties": {
         "style-extractor-custom": true,
         "disables-native-appearance": true,
+        "render-style-storage-name": "width",
         "render-style-storage-path": [
           "_nonInheritedData",
           "surroundData",
@@ -5959,6 +5964,7 @@
       "initial": "0",
       "codegen-properties": {
         "aliases": ["-webkit-mask-box-image-outset"],
+        "render-style-storage-name": "outset",
         "render-style-storage-path": [
           "_nonInheritedData",
           "rareData",
@@ -5981,6 +5987,7 @@
       "values": ["stretch", "repeat", "space", "round"],
       "codegen-properties": {
         "aliases": ["-webkit-mask-box-image-repeat"],
+        "render-style-storage-name": "repeat",
         "render-style-storage-path": [
           "_nonInheritedData",
           "rareData",
@@ -6003,6 +6010,7 @@
       "values": ["fill"],
       "codegen-properties": {
         "aliases": ["-webkit-mask-box-image-slice"],
+        "render-style-storage-name": "slice",
         "render-style-storage-path": [
           "_nonInheritedData",
           "rareData",
@@ -6029,6 +6037,7 @@
       "values": ["none"],
       "codegen-properties": {
         "aliases": ["-webkit-mask-box-image-source"],
+        "render-style-storage-name": "source",
         "render-style-storage-path": [
           "_nonInheritedData",
           "rareData",
@@ -6051,6 +6060,7 @@
       "values": ["auto"],
       "codegen-properties": {
         "aliases": ["-webkit-mask-box-image-width"],
+        "render-style-storage-name": "width",
         "render-style-storage-path": [
           "_nonInheritedData",
           "rareData",

@@ -2634,6 +2634,15 @@ namespace krys
 
 namespace std
 {
+  template <>
+  struct hash<krys::boo::css::CustomIdentifier>
+  {
+    size_t operator()(const krys::boo::css::CustomIdentifier &identifier) const noexcept
+    {
+      return hash<krys::boo::css::CSSOMStringAtom> {}(identifier.Value);
+    }
+  };
+
   template <krys::boo::css::ValueId C, typename T>
   class tuple_size<krys::boo::css::FunctionNotation<C, T>> : public std::integral_constant<size_t, 1>
   {
