@@ -46,7 +46,6 @@ namespace krys::boo::css
       return func(*_imageValue);
     }
 
-    // FIXME: not defined until style::BuilderState and StyleCursorImage are ported.
     KRYS_NODISCARD RefPtr<StyleCursorImage> CreateStyleImage(const style::BuilderState &state) const noexcept;
   };
 }

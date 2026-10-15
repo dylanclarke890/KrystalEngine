@@ -1,6 +1,9 @@
 ﻿#include "Krystal.Booey/CSS/Values/CursorImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/ImageValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
+#include "Krystal.Booey/Rendering/Style/StyleCursorImage.hpp"
+#include "Krystal.Booey/Style/Seam.hpp"
 
 namespace krys::boo::css
 {
@@ -42,5 +45,27 @@ namespace krys::boo::css
   bool CursorImageValue::Equals(const CursorImageValue &other) const noexcept
   {
     return CompareValue(_imageValue, other._imageValue) && CompareValuePtr(_hotSpot, other._hotSpot);
+  }
+
+  RefPtr<StyleCursorImage> CursorImageValue::CreateStyleImage(const style::BuilderState &state) const noexcept
+  {
+    auto styleImage = state.CreateStyleImage(*_imageValue);
+    if (!styleImage)
+    {
+      return nullptr;
+    }
+
+    Maybe<IntPoint> hotSpot;
+    if (_hotSpot)
+    {
+      // FIXME: Should we clamp or round instead of just casting from double to int?
+      hotSpot = IntPoint {
+        static_cast<int>(
+          Downcast<PrimitiveValue>(_hotSpot->First()).ResolveAsNumber(state.CssToLengthConversionData())),
+        static_cast<int>(
+          Downcast<PrimitiveValue>(_hotSpot->Second()).ResolveAsNumber(state.CssToLengthConversionData()))};
+    }
+    return StyleCursorImage::Create(Ref<StyleImage> {krys::move(styleImage)}, hotSpot,
+                                    style::ConvertToStyle(_originalURL, state));
   }
 }

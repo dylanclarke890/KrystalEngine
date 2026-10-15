@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/CrossFadeValue.hpp"
+#include "Krystal.Booey/Rendering/Style/StyleCrossfadeImage.hpp"
+#include "Krystal.Booey/Style/Seam.hpp"
 
 namespace krys::boo::css
 {
@@ -38,5 +40,14 @@ namespace krys::boo::css
     result.append(_percentageValue->CssText(context));
     result.push_back(u8')');
     return result;
+  }
+
+  RefPtr<StyleImage> CrossFadeValue::CreateStyleImage(const style::BuilderState &state) const noexcept
+  {
+    return StyleCrossfadeImage::Create(
+      state.CreateStyleImage(*_fromValueOrNone), state.CreateStyleImage(*_toValueOrNone),
+      std::clamp(_percentageValue->ValueDividingBy100IfPercentage<double>(state.CssToLengthConversionData()),
+                 0.0, 1.0),
+      _isPrefixed);
   }
 }

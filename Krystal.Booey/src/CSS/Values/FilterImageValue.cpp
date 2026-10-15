@@ -2,6 +2,8 @@
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesValueVisitation.hpp"
+#include "Krystal.Booey/Rendering/Style/StyleFilterImage.hpp"
+#include "Krystal.Booey/Style/Seam.hpp"
 
 namespace krys::boo::css
 {
@@ -49,5 +51,11 @@ namespace krys::boo::css
       return IterationStatus::Done;
     }
     return IterationStatus::Continue;
+  }
+
+  RefPtr<StyleImage> FilterImageValue::CreateStyleImage(const style::BuilderState &state) const noexcept
+  {
+    return StyleFilterImage::Create(state.CreateStyleImage(*_imageValueOrNone),
+                                    style::ConvertToStyle(_filter, state));
   }
 }

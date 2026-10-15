@@ -21,17 +21,18 @@ namespace krys::boo::css
   {
   private:
     CSSOMString _name;
-    // FIXME: add the cached style image (mutable RefPtr<StyleImage>) once StyleImage is ported.
+    mutable RefPtr<StyleImage> _cachedStyleImage;
 
     explicit CanvasValue(CSSOMString &&name) noexcept;
 
   public:
+    ~CanvasValue() noexcept;
+
     KRYS_NODISCARD static Ref<CanvasValue> Create(CSSOMString name) noexcept;
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
     KRYS_NODISCARD bool Equals(const CanvasValue &other) const noexcept;
 
-    // FIXME: not defined until style::BuilderState and StyleImage are ported.
     KRYS_NODISCARD RefPtr<StyleImage> CreateStyleImage(const style::BuilderState &state) const noexcept;
   };
 }

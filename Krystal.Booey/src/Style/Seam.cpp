@@ -2,9 +2,19 @@
 #include "Krystal.Booey/CSS/Calc/RandomCachingKey.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
+#include "Krystal.Booey/CSS/Values/CanvasValue.hpp"
 #include "Krystal.Booey/CSS/Values/Color/KeywordColor.hpp"
+#include "Krystal.Booey/CSS/Values/CrossFadeValue.hpp"
+#include "Krystal.Booey/CSS/Values/CursorImageValue.hpp"
+#include "Krystal.Booey/CSS/Values/FilterImageValue.hpp"
+#include "Krystal.Booey/CSS/Values/GradientValue.hpp"
+#include "Krystal.Booey/CSS/Values/ImageSetValue.hpp"
+#include "Krystal.Booey/CSS/Values/ImageValue.hpp"
+#include "Krystal.Booey/CSS/Values/NamedImageValue.hpp"
+#include "Krystal.Booey/CSS/Values/PaintImageValue.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/Rendering/Style/StyleCursorImage.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
@@ -295,6 +305,43 @@ namespace krys::boo
     _textAlignLast = krys::move(value);
   }
 
+  const style::AppleColorFilter &RenderStyle::AppleColorFilter() const noexcept
+  {
+    return _appleColorFilter;
+  }
+
+  void RenderStyle::SetAppleColorFilter(style::AppleColorFilter value) noexcept
+  {
+    _appleColorFilter = krys::move(value);
+  }
+
+  bool RenderStyle::HasAppleColorFilter() const noexcept
+  {
+    return !_appleColorFilter.IsNone();
+  }
+
+  boo::Color RenderStyle::ColorByApplyingColorFilter(const boo::Color &color) const noexcept
+  {
+    auto transformedColor = color;
+    (void)AppleColorFilter().TransformColor(transformedColor);
+    return transformedColor;
+  }
+
+  boo::Color RenderStyle::ColorWithColorFilter(const style::Color &color) const noexcept
+  {
+    return ColorByApplyingColorFilter(ColorResolvingCurrentColor(color));
+  }
+
+  bool RenderStyle::HasAttrContent() const noexcept
+  {
+    return _hasAttrContent;
+  }
+
+  void RenderStyle::SetHasAttrContent() noexcept
+  {
+    _hasAttrContent = true;
+  }
+
   const dom::Document &RenderView::GetDocument() const noexcept
   {
     krys_unreachable();
@@ -498,6 +545,47 @@ namespace krys::boo::style
     {
       _registeredContentAttributes.push_back(attributeLocalName);
     }
+  }
+
+  RefPtr<StyleImage> BuilderState::CreateStyleImage(const css::Value &value) const noexcept
+  {
+    if (const auto *imageValue = DynamicDowncast<css::ImageValue>(value))
+    {
+      return imageValue->CreateStyleImage(*this);
+    }
+    if (const auto *imageSetValue = DynamicDowncast<css::ImageSetValue>(value))
+    {
+      return imageSetValue->CreateStyleImage(*this);
+    }
+    if (const auto *imageValue = DynamicDowncast<css::CursorImageValue>(value))
+    {
+      return imageValue->CreateStyleImage(*this);
+    }
+    if (const auto *imageValue = DynamicDowncast<css::NamedImageValue>(value))
+    {
+      return imageValue->CreateStyleImage(*this);
+    }
+    if (const auto *cssCanvasValue = DynamicDowncast<css::CanvasValue>(value))
+    {
+      return cssCanvasValue->CreateStyleImage(*this);
+    }
+    if (const auto *crossfadeValue = DynamicDowncast<css::CrossFadeValue>(value))
+    {
+      return crossfadeValue->CreateStyleImage(*this);
+    }
+    if (const auto *filterImageValue = DynamicDowncast<css::FilterImageValue>(value))
+    {
+      return filterImageValue->CreateStyleImage(*this);
+    }
+    if (const auto *gradientValue = DynamicDowncast<css::GradientValue>(value))
+    {
+      return gradientValue->CreateStyleImage(*this);
+    }
+    if (const auto *paintImageValue = DynamicDowncast<css::PaintImageValue>(value))
+    {
+      return paintImageValue->CreateStyleImage(*this);
+    }
+    return nullptr;
   }
 
   const css::ToLengthConversionData &BuilderState::CssToLengthConversionData() const noexcept

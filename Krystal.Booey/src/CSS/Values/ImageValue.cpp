@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Values/ImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
+#include "Krystal.Booey/Rendering/Style/StyleCachedImage.hpp"
+#include "Krystal.Booey/Style/Seam.hpp"
 
 namespace krys::boo::css
 {
@@ -74,5 +76,26 @@ namespace krys::boo::css
       return {};
     }
     return Serialise(context, _location);
+  }
+
+  RefPtr<StyleImage> ImageValue::CreateStyleImage(const style::BuilderState &state) const noexcept
+  {
+    auto styleLocation = style::ConvertToStyle(_location, state);
+    if (styleLocation.Resolved == _location.Resolved)
+    {
+      return StyleCachedImage::Create(krys::move(styleLocation), ShareRef(const_cast<ImageValue &>(*this)));
+    }
+
+    // FIXME: This case can only happen when a element from a document with no baseURL has an inline style
+    // with a relative image URL in it and has been moved to a document with a non-null baseURL. Instead of
+    // re-resolving in this case, moved elements with this kind of inline style should have their inline style
+    // re-parsed.
+    auto newLocation = _location;
+    newLocation.Resolved = styleLocation.Resolved;
+    auto result = Create(krys::move(newLocation));
+    // FIXME: Share the cached image, once the resource loader is ported.
+    result->_initiatorType = _initiatorType;
+    result->_unresolvedValue = ShareRefPtr(const_cast<ImageValue *>(this));
+    return StyleCachedImage::Create(krys::move(styleLocation), krys::move(result));
   }
 }

@@ -22,14 +22,13 @@ namespace krys::boo::css
   {
   private:
     boo::css::Gradient _gradient;
-    // FIXME: add the cached style image (mutable RefPtr<StyleImage>) once StyleImage is ported.
+    mutable RefPtr<StyleImage> _cachedStyleImage;
 
-    explicit GradientValue(boo::css::Gradient &&gradient) noexcept
-        : Value(ValueType::Gradient), _gradient(krys::move(gradient))
-    {
-    }
+    explicit GradientValue(boo::css::Gradient &&gradient) noexcept;
 
   public:
+    ~GradientValue() noexcept;
+
     KRYS_NODISCARD static Ref<GradientValue> Create(boo::css::Gradient &&gradient) noexcept
     {
       return AdoptRef(*new GradientValue(krys::move(gradient)));
@@ -38,7 +37,6 @@ namespace krys::boo::css
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
     KRYS_NODISCARD bool Equals(const GradientValue &other) const noexcept;
 
-    // FIXME: not defined until style::BuilderState and StyleImage are ported.
     KRYS_NODISCARD RefPtr<StyleImage> CreateStyleImage(const style::BuilderState &state) const noexcept;
 
     KRYS_NODISCARD IterationStatus

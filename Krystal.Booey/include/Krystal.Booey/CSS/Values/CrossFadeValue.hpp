@@ -43,7 +43,6 @@ namespace krys::boo::css
       return _isPrefixed;
     }
 
-    // FIXME: not defined until style::BuilderState and StyleImage are ported.
     KRYS_NODISCARD RefPtr<StyleImage> CreateStyleImage(const style::BuilderState &state) const noexcept;
 
     KRYS_NODISCARD IterationStatus

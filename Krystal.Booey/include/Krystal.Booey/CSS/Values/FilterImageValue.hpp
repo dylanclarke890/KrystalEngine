@@ -36,7 +36,6 @@ namespace krys::boo::css
     KRYS_NODISCARD IterationStatus
       CustomVisitChildren(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func) const noexcept;
 
-    // FIXME: not defined until style::BuilderState and StyleImage are ported.
     KRYS_NODISCARD RefPtr<StyleImage> CreateStyleImage(const style::BuilderState &state) const noexcept;
   };
 }

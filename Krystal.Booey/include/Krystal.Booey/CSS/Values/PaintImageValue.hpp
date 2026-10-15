@@ -42,7 +42,6 @@ namespace krys::boo::css
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
 
-    // FIXME: not defined until style::BuilderState and StyleImage are ported.
     KRYS_NODISCARD RefPtr<StyleImage> CreateStyleImage(const style::BuilderState &state) const noexcept;
   };
 }

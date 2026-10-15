@@ -18,6 +18,7 @@
 #include "Krystal.Booey/Style/ScopeOrdinal.hpp"
 #include "Krystal.Booey/Style/Values/AnchorPosition/PositionTryFallbackTactic.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
+#include "Krystal.Booey/Style/Values/FilterEffects/AppleColorFilter.hpp"
 #include "Krystal.Booey/Style/Values/Math/MathDepth.hpp"
 #include "Krystal.Booey/Style/Values/Sizing/AspectRatio.hpp"
 #include "Krystal.Booey/Style/Values/Text/TextAlign.hpp"
@@ -75,6 +76,8 @@ namespace krys::boo::style
 
 namespace krys::boo
 {
+  class StyleImage;
+
   class RenderStyle
   {
     KRYS_NON_COPY_MOVABLE(RenderStyle);
@@ -87,6 +90,7 @@ namespace krys::boo
     bool _usesViewportUnits {false};
     bool _usesContainerUnits {false};
     bool _usesTreeCountingFunctions {false};
+    bool _hasAttrContent {false};
     boo::WritingMode _writingMode {};
     FontCascade _fontCascade {InitialFontCascade()};
 
@@ -96,6 +100,7 @@ namespace krys::boo
     MathStyle _mathStyle {MathStyle::Normal};
     style::TextAlign _textAlign {style::TextAlign::Start};
     style::TextAlignLast _textAlignLast {style::TextAlignLast::Auto};
+    style::AppleColorFilter _appleColorFilter {css::keywords::None {}};
 
   public:
     RenderStyle() noexcept = default;
@@ -107,6 +112,8 @@ namespace krys::boo
 
     KRYS_NODISCARD boo::Color ColorResolvingCurrentColor(const style::Color &color,
                                                          bool visitedLink = false) const noexcept;
+    KRYS_NODISCARD boo::Color ColorByApplyingColorFilter(const boo::Color &color) const noexcept;
+    KRYS_NODISCARD boo::Color ColorWithColorFilter(const style::Color &color) const noexcept;
 
     /// @brief Collapses `colorScheme()` resolving to `dark` without `light`.
     KRYS_NODISCARD bool HasDarkOnlyColorScheme() const noexcept;
@@ -154,6 +161,8 @@ namespace krys::boo
     void SetUsesContainerUnits() noexcept;
     KRYS_NODISCARD bool UsesTreeCountingFunctions() const noexcept;
     void SetUsesTreeCountingFunctions() noexcept;
+    KRYS_NODISCARD bool HasAttrContent() const noexcept;
+    void SetHasAttrContent() noexcept;
 
     // Properties, grown as the computed value types need them; replaced by the generated getters and
     // setters.
@@ -168,6 +177,9 @@ namespace krys::boo
     void SetTextAlign(style::TextAlign value) noexcept;
     KRYS_NODISCARD style::TextAlignLast TextAlignLast() const noexcept;
     void SetTextAlignLast(style::TextAlignLast value) noexcept;
+    KRYS_NODISCARD const style::AppleColorFilter &AppleColorFilter() const noexcept;
+    void SetAppleColorFilter(style::AppleColorFilter value) noexcept;
+    KRYS_NODISCARD bool HasAppleColorFilter() const noexcept;
 
     /// @brief Collapses `lineHeight().tryFixed()` evaluated to a `LayoutUnit` with `zoom`, as a float, for
     /// the initial `line-height`.
@@ -326,6 +338,8 @@ namespace krys::boo::style
 
     KRYS_NODISCARD const List<css::CSSOMStringAtom> &RegisteredContentAttributes() const noexcept;
     void RegisterContentAttribute(const css::CSSOMStringAtom &attributeLocalName) noexcept;
+
+    KRYS_NODISCARD RefPtr<StyleImage> CreateStyleImage(const css::Value &) const noexcept;
 
     KRYS_NODISCARD const css::ToLengthConversionData &CssToLengthConversionData() const noexcept;
 

@@ -67,7 +67,6 @@ namespace krys::boo::css
     // FIXME: not defined until the resource loader and RenderElement are ported.
     KRYS_NODISCARD bool KnownToBeOpaque(const RenderElement &renderer) const noexcept;
 
-    // FIXME: not defined until style::BuilderState and StyleImage are ported.
     KRYS_NODISCARD RefPtr<StyleImage> CreateStyleImage(const style::BuilderState &state) const noexcept;
 
     KRYS_NODISCARD bool IsLoadedFromOpaqueSource() const noexcept;

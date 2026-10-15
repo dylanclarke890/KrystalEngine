@@ -221,6 +221,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Types/Packed.hpp
       include/Krystal.Core/Types/Pair.hpp
       include/Krystal.Core/Types/Queue.hpp
+      include/Krystal.Core/Types/RefCountedFixedVector.hpp
       include/Krystal.Core/Types/RefPtr.hpp
       include/Krystal.Core/Types/SmallList.hpp
       include/Krystal.Core/Types/Span.hpp
@@ -249,6 +250,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Utils/Move.hpp
       include/Krystal.Core/Utils/NativeHandle.hpp
       include/Krystal.Core/Utils/NeverDestroyed.hpp
+      include/Krystal.Core/Utils/PointerComparison.hpp
       include/Krystal.Core/Utils/ScopedProfiler.hpp
       include/Krystal.Core/Utils/SetForScope.hpp
       include/Krystal.Core/Utils/StringId.hpp

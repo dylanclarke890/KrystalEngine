@@ -880,6 +880,33 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Values/FilterEffects/OpacityFunction.hpp
   include/Krystal.Booey/Style/Values/FilterEffects/SaturateFunction.hpp
   include/Krystal.Booey/Style/Values/FilterEffects/SepiaFunction.hpp
+
+  # Style resolution, layer f3e1 (style images, images and content)
+  include/Krystal.Booey/Graphics/Gradient.hpp
+  include/Krystal.Booey/Graphics/GradientColorStop.hpp
+  include/Krystal.Booey/Graphics/GradientColorStops.hpp
+  include/Krystal.Booey/Graphics/ImageOrientation.hpp
+  include/Krystal.Booey/Rendering/Style/StyleCachedImage.hpp
+  include/Krystal.Booey/Rendering/Style/StyleCanvasImage.hpp
+  include/Krystal.Booey/Rendering/Style/StyleCrossfadeImage.hpp
+  include/Krystal.Booey/Rendering/Style/StyleCursorImage.hpp
+  include/Krystal.Booey/Rendering/Style/StyleFilterImage.hpp
+  include/Krystal.Booey/Rendering/Style/StyleGeneratedImage.hpp
+  include/Krystal.Booey/Rendering/Style/StyleGradientImage.hpp
+  include/Krystal.Booey/Rendering/Style/StyleImage.hpp
+  include/Krystal.Booey/Rendering/Style/StyleImageSet.hpp
+  include/Krystal.Booey/Rendering/Style/StyleInvalidImage.hpp
+  include/Krystal.Booey/Rendering/Style/StyleMultiImage.hpp
+  include/Krystal.Booey/Rendering/Style/StyleNamedImage.hpp
+  include/Krystal.Booey/Rendering/Style/StylePaintImage.hpp
+  include/Krystal.Booey/Style/Values/Content/Content.hpp
+  include/Krystal.Booey/Style/Values/Content/Quotes.hpp
+  include/Krystal.Booey/Style/Values/Images/Gradient.hpp
+  include/Krystal.Booey/Style/Values/Images/ImageOrNone.hpp
+  include/Krystal.Booey/Style/Values/Images/ImageOrientation.hpp
+  include/Krystal.Booey/Style/Values/Images/ImageWrapper.hpp
+  include/Krystal.Booey/Style/Values/Images/ObjectPosition.hpp
+  include/Krystal.Booey/Style/Values/UI/Cursor.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -1424,6 +1451,28 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Style/Values/FilterEffects/OpacityFunction.cpp
   src/Style/Values/FilterEffects/SaturateFunction.cpp
   src/Style/Values/FilterEffects/SepiaFunction.cpp
+
+  # Style resolution, layer f3e1 (style images, images and content)
+  src/Graphics/Gradient.cpp
+  src/Rendering/Style/StyleCachedImage.cpp
+  src/Rendering/Style/StyleCanvasImage.cpp
+  src/Rendering/Style/StyleCrossfadeImage.cpp
+  src/Rendering/Style/StyleCursorImage.cpp
+  src/Rendering/Style/StyleFilterImage.cpp
+  src/Rendering/Style/StyleGeneratedImage.cpp
+  src/Rendering/Style/StyleGradientImage.cpp
+  src/Rendering/Style/StyleImageSet.cpp
+  src/Rendering/Style/StyleInvalidImage.cpp
+  src/Rendering/Style/StyleMultiImage.cpp
+  src/Rendering/Style/StyleNamedImage.cpp
+  src/Rendering/Style/StylePaintImage.cpp
+  src/Style/Values/Content/Content.cpp
+  src/Style/Values/Content/Quotes.cpp
+  src/Style/Values/Images/Gradient.cpp
+  src/Style/Values/Images/ImageOrNone.cpp
+  src/Style/Values/Images/ImageOrientation.cpp
+  src/Style/Values/Images/ImageWrapper.cpp
+  src/Style/Values/UI/Cursor.cpp
 )
 
 target_precompile_headers(Krystal.Booey

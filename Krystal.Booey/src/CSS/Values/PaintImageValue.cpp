@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Values/PaintImageValue.hpp"
+#include "Krystal.Booey/Rendering/Style/StylePaintImage.hpp"
 
 namespace krys::boo::css
 {
@@ -19,5 +20,10 @@ namespace krys::boo::css
     result.append(_name);
     result.push_back(u8')');
     return result;
+  }
+
+  RefPtr<StyleImage> PaintImageValue::CreateStyleImage(const style::BuilderState &) const noexcept
+  {
+    return StylePaintImage::Create(_name, _arguments);
   }
 }

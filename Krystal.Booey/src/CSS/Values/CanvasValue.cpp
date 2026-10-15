@@ -1,7 +1,10 @@
 ﻿#include "Krystal.Booey/CSS/Values/CanvasValue.hpp"
+#include "Krystal.Booey/Rendering/Style/StyleCanvasImage.hpp"
 
 namespace krys::boo::css
 {
+  CanvasValue::~CanvasValue() noexcept = default;
+
   CanvasValue::CanvasValue(CSSOMString &&name) noexcept : Value(ValueType::Canvas), _name(krys::move(name))
   {
   }
@@ -22,5 +25,16 @@ namespace krys::boo::css
   bool CanvasValue::Equals(const CanvasValue &other) const noexcept
   {
     return _name == other._name;
+  }
+
+  RefPtr<StyleImage> CanvasValue::CreateStyleImage(const style::BuilderState &) const noexcept
+  {
+    if (_cachedStyleImage)
+    {
+      return _cachedStyleImage;
+    }
+
+    _cachedStyleImage = StyleCanvasImage::Create(_name);
+    return _cachedStyleImage;
   }
 }

@@ -32,7 +32,6 @@ namespace krys::boo::css
       return ItemsEqual(other);
     }
 
-    // FIXME: not defined until style::BuilderState and StyleImage are ported.
     KRYS_NODISCARD RefPtr<StyleImage> CreateStyleImage(const style::BuilderState &state) const noexcept;
   };
 }

@@ -13,9 +13,11 @@
 #include "Krystal.Core/Types/ListHashSet.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/RefCountedFixedVector.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Utils/Apply.hpp"
+#include "Krystal.Core/Utils/PointerComparison.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include <concepts>
 #include <functional>
@@ -1092,6 +1094,184 @@ namespace krys::boo::css
 
   template <typename T>
   constexpr auto SerialisationSeparator<CommaSeparatedFixedList<T>> = SerialisationSeparatorType::Comma;
+
+  // Wraps a variable (though known at construction) number of elements of a single type in a reference
+  // counted container, semantically marking them as serializing as "space separated".
+  template <typename T>
+  struct SpaceSeparatedRefCountedFixedVector
+  {
+    using Container = krys::RefCountedFixedVector<T>;
+    using const_iterator = typename Container::const_iterator;
+    using const_reverse_iterator = typename Container::const_reverse_iterator;
+    using value_type = typename Container::value_type;
+
+    SpaceSeparatedRefCountedFixedVector(T &&value) : Value {Container::create(krys::move(value))}
+    {
+    }
+
+    SpaceSeparatedRefCountedFixedVector(std::initializer_list<T> initializerList)
+        : Value {Container::create(initializerList)}
+    {
+    }
+
+    SpaceSeparatedRefCountedFixedVector(Ref<Container> &&value) : Value {krys::move(value)}
+    {
+    }
+
+    template <typename SizedRange, typename Mapper>
+    static SpaceSeparatedRefCountedFixedVector map(SizedRange &&range, KRYS_NOESCAPE Mapper &&mapper)
+    {
+      return Container::map(std::forward<SizedRange>(range), std::forward<Mapper>(mapper));
+    }
+
+    template <std::invocable<size_t> Generator>
+    static SpaceSeparatedRefCountedFixedVector
+      createWithSizeFromGenerator(size_t size, KRYS_NOESCAPE Generator &&generator)
+    {
+      return Container::createWithSizeFromGenerator(size, std::forward<Generator>(generator));
+    }
+
+    const_iterator begin() const KRYS_LIFETIME_BOUND
+    {
+      return Value->begin();
+    }
+    const_iterator end() const KRYS_LIFETIME_BOUND
+    {
+      return Value->end();
+    }
+    const_reverse_iterator rbegin() const KRYS_LIFETIME_BOUND
+    {
+      return Value->rbegin();
+    }
+    const_reverse_iterator rend() const KRYS_LIFETIME_BOUND
+    {
+      return Value->rend();
+    }
+
+    bool isEmpty() const
+    {
+      return Value->isEmpty();
+    }
+    size_t size() const
+    {
+      return Value->size();
+    }
+    const T &operator[](size_t i) const KRYS_LIFETIME_BOUND
+    {
+      return (*Value)[i];
+    }
+
+    const T &first() const KRYS_LIFETIME_BOUND
+    {
+      return Value->first();
+    }
+    const T &last() const KRYS_LIFETIME_BOUND
+    {
+      return Value->last();
+    }
+
+    bool operator==(const SpaceSeparatedRefCountedFixedVector &other) const
+    {
+      return ArePointingToEqualData(Value, other.Value);
+    }
+
+    Ref<Container> Value;
+  };
+
+  template <typename T>
+  constexpr auto TreatAsRangeLike<SpaceSeparatedRefCountedFixedVector<T>> = true;
+  template <typename T>
+  constexpr auto SerialisationSeparator<SpaceSeparatedRefCountedFixedVector<T>> =
+    SerialisationSeparatorType::Space;
+
+  // Wraps a variable (though known at construction) number of elements of a single type in a reference
+  // counted container, semantically marking them as serializing as "comma separated".
+  template <typename T>
+  struct CommaSeparatedRefCountedFixedVector
+  {
+    using Container = krys::RefCountedFixedVector<T>;
+    using const_iterator = typename Container::const_iterator;
+    using const_reverse_iterator = typename Container::const_reverse_iterator;
+    using value_type = typename Container::value_type;
+
+    CommaSeparatedRefCountedFixedVector(T &&value) : Value {Container::create(krys::move(value))}
+    {
+    }
+
+    CommaSeparatedRefCountedFixedVector(std::initializer_list<T> initializerList)
+        : Value {Container::create(initializerList)}
+    {
+    }
+
+    CommaSeparatedRefCountedFixedVector(Ref<Container> &&value) : Value {krys::move(value)}
+    {
+    }
+
+    template <typename SizedRange, typename Mapper>
+    static CommaSeparatedRefCountedFixedVector map(SizedRange &&range, KRYS_NOESCAPE Mapper &&mapper)
+    {
+      return Container::map(std::forward<SizedRange>(range), std::forward<Mapper>(mapper));
+    }
+
+    template <std::invocable<size_t> Generator>
+    static CommaSeparatedRefCountedFixedVector
+      createWithSizeFromGenerator(size_t size, KRYS_NOESCAPE Generator &&generator)
+    {
+      return Container::createWithSizeFromGenerator(size, std::forward<Generator>(generator));
+    }
+
+    const_iterator begin() const KRYS_LIFETIME_BOUND
+    {
+      return Value->begin();
+    }
+    const_iterator end() const KRYS_LIFETIME_BOUND
+    {
+      return Value->end();
+    }
+    const_reverse_iterator rbegin() const KRYS_LIFETIME_BOUND
+    {
+      return Value->rbegin();
+    }
+    const_reverse_iterator rend() const KRYS_LIFETIME_BOUND
+    {
+      return Value->rend();
+    }
+
+    bool isEmpty() const
+    {
+      return Value->isEmpty();
+    }
+    size_t size() const
+    {
+      return Value->size();
+    }
+    const T &operator[](size_t i) const KRYS_LIFETIME_BOUND
+    {
+      return (*Value)[i];
+    }
+
+    const T &first() const KRYS_LIFETIME_BOUND
+    {
+      return Value->first();
+    }
+    const T &last() const KRYS_LIFETIME_BOUND
+    {
+      return Value->last();
+    }
+
+    bool operator==(const CommaSeparatedRefCountedFixedVector &other) const
+    {
+      return ArePointingToEqualData(Value, other.Value);
+    }
+
+    Ref<Container> Value;
+  };
+
+  template <typename T>
+  constexpr auto TreatAsRangeLike<CommaSeparatedRefCountedFixedVector<T>> = true;
+  template <typename T>
+  constexpr auto SerialisationSeparator<CommaSeparatedRefCountedFixedVector<T>> =
+    SerialisationSeparatorType::Comma;
 
 #pragma region SpaceSeparatedTuple
 
