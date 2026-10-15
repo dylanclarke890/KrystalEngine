@@ -40,6 +40,7 @@ namespace krys::boo::html
 namespace krys::boo::style
 {
   class CustomPropertyRegistry;
+  class MatchResultCache;
   class Resolver;
   class RuleSet;
 
@@ -117,6 +118,8 @@ namespace krys::boo::style
 
     HashMap<ResolverSharingKey, Ref<Resolver>, ResolverSharingKeyHash> _sharedShadowTreeResolvers;
 
+    UniquePtr<MatchResultCache> _matchResultCache;
+
   public:
     explicit Scope(dom::Document &document) noexcept;
     explicit Scope(dom::ShadowRoot &shadowRoot) noexcept;
@@ -175,6 +178,12 @@ namespace krys::boo::style
 
     void ClearResolver() noexcept;
     void ClearViewTransitionStyles() noexcept;
+
+    /// @brief Drops the cached styles of the resolvers of this scope (and, for the document, of its shadow
+    /// trees), after a change that can change the styles built from the same declarations.
+    void InvalidateMatchedDeclarationsCache() noexcept;
+
+    KRYS_NODISCARD MatchResultCache &GetMatchResultCache() noexcept;
 
     void ReleaseMemory() noexcept;
 

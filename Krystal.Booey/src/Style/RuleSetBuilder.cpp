@@ -626,8 +626,8 @@ namespace krys::boo::style
       if (Is<css::FontFaceRule>(rule) || Is<css::FontPaletteValuesRule>(rule)
           || Is<css::FontFeatureValuesRule>(rule))
       {
-        // FIXME: Add the rule to the document's font selector and invalidate the matched declarations cache,
-        // once there are fonts.
+        // FIXME: Add the rule to the document's font selector, once there are fonts.
+        _resolver->InvalidateMatchedDeclarationsCache();
         continue;
       }
 

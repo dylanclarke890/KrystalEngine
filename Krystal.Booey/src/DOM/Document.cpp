@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/CSS/Calc/RandomCachingKeyMap.hpp"
 #include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryMatcher.hpp"
@@ -27,6 +28,7 @@
 #include "Krystal.Booey/DOM/SelectorQuery.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/DOM/TreeWalker.hpp"
+#include "Krystal.Booey/DOM/VisitedLinkState.hpp"
 #include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Algorithms/DOMTreeAccessors.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
@@ -40,6 +42,8 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTitleElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
+#include "Krystal.Booey/Style/ResolveForDocument.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGScriptElement.hpp"
@@ -564,6 +568,10 @@ namespace krys::boo::dom
 
   Ref<HTMLCollection> Document::Children() noexcept
   {
+    if (!_documentRareData)
+    {
+      _documentRareData = CreateUnique<DocumentRareData>();
+    }
     return _documentRareData->Children(*this);
   }
 
@@ -756,6 +764,33 @@ namespace krys::boo::dom
   {
     std::erase_if(_inDocumentShadowRoots,
                   [&](const WeakPtr<ShadowRoot> &root) { return !root || root.get() == &shadowRoot; });
+  }
+
+  const RenderStyle *Document::InitialContainingBlockStyle() const noexcept
+  {
+    if (!_initialContainingBlockStyle)
+    {
+      _initialContainingBlockStyle = RenderStyle::ClonePtr(style::ResolveForDocument(*this));
+    }
+    return _initialContainingBlockStyle.get();
+  }
+
+  VisitedLinkState &Document::GetVisitedLinkState() const noexcept
+  {
+    if (!_visitedLinkState)
+    {
+      _visitedLinkState = CreateUnique<VisitedLinkState>(const_cast<Document &>(*this));
+    }
+    return *_visitedLinkState;
+  }
+
+  double Document::LookupCSSRandomBaseValue(const css::calc::RandomCachingKey &key) const noexcept
+  {
+    if (!_randomCachingKeyMap)
+    {
+      _randomCachingKeyMap = css::calc::RandomCachingKeyMap::Create();
+    }
+    return _randomCachingKeyMap->LookupCSSRandomBaseValue(key);
   }
 
   css::MediaQueryMatcher &Document::GetMediaQueryMatcher() noexcept

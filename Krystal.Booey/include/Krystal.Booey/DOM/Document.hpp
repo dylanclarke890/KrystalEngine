@@ -19,12 +19,23 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
+namespace krys::boo
+{
+  class RenderStyle;
+}
+
 namespace krys::boo::css
 {
   class MediaQueryList;
   class MediaQueryMatcher;
   class StyleSheetList;
   struct ParserContext;
+}
+
+namespace krys::boo::css::calc
+{
+  class RandomCachingKeyMap;
+  struct RandomCachingKey;
 }
 
 namespace krys::boo::html
@@ -54,6 +65,7 @@ namespace krys::boo::dom
   class ShadowRoot;
   class Text;
   class TreeWalker;
+  class VisitedLinkState;
 
   /// @see https://dom.spec.whatwg.org/#interface-document
   class Document : public ContainerNode, public DocumentOrShadowRoot
@@ -107,6 +119,11 @@ namespace krys::boo::dom
     List<WeakPtr<ShadowRoot>> _inDocumentShadowRoots;
     RefPtr<css::StyleSheetList> _styleSheetList;
     RefPtr<css::MediaQueryMatcher> _mediaQueryMatcher;
+
+    mutable UniquePtr<VisitedLinkState> _visitedLinkState;
+    mutable UniquePtr<RenderStyle> _initialContainingBlockStyle;
+    mutable RefPtr<css::calc::RandomCachingKeyMap> _randomCachingKeyMap;
+    bool _hasStyleWithViewportUnits {false};
 
   protected:
     Document(DocumentFlags flags) noexcept;
@@ -407,6 +424,28 @@ namespace krys::boo::dom
 
     void DidInsertInDocumentShadowRoot(ShadowRoot &shadowRoot) noexcept;
     void DidRemoveInDocumentShadowRoot(ShadowRoot &shadowRoot) noexcept;
+
+    /// @brief The style of the initial containing block, which the document element inherits from.
+    /// @note This may end up differing from the used style of the initial containing block due to
+    /// adjustments.
+    // FIXME: Created on first use until the document resolves its style, which keeps it up to date.
+    KRYS_NODISCARD const RenderStyle *InitialContainingBlockStyle() const noexcept;
+
+    /// @brief Determines whether links are visited, for `:visited` and the link styles.
+    KRYS_NODISCARD VisitedLinkState &GetVisitedLinkState() const noexcept;
+
+    void SetHasStyleWithViewportUnits() noexcept
+    {
+      _hasStyleWithViewportUnits = true;
+    }
+
+    KRYS_NODISCARD bool HasStyleWithViewportUnits() const noexcept
+    {
+      return _hasStyleWithViewportUnits;
+    }
+
+    /// @brief The base value of a `random()` shared between the elements of the document (`element-shared`).
+    KRYS_NODISCARD double LookupCSSRandomBaseValue(const css::calc::RandomCachingKey &key) const noexcept;
 
 #pragma region DocumentOrShadowRoot Mixin (CSSOM) - https://drafts.csswg.org/cssom/#extensions-to-the-document-or-shadow-root-interface
 

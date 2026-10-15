@@ -84,6 +84,7 @@ target_sources(Krystal.Booey.Tests
 		include/Krystal.Booey.Tests/CSS/SelectorTestUtils.hpp
 		include/Krystal.Booey.Tests/CSS/ValueTestUtils.hpp
 		include/Krystal.Booey.Tests/Style/BuilderTestUtils.hpp
+		include/Krystal.Booey.Tests/Style/ResolverTestUtils.hpp
 		include/Krystal.Booey.Tests/TestParserUtils.hpp
 	PRIVATE
 		# Core
@@ -354,7 +355,10 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/CustomPropertyRegistry.cpp
 		tests/Style/Calc/Tree.cpp
 		tests/Style/ElementRuleCollector.cpp
+		tests/Style/MatchedDeclarationsCache.cpp
+		tests/Style/MatchResultCache.cpp
 		tests/Style/PropertyCascade.cpp
+		tests/Style/ResolveForDocument.cpp
 		tests/Style/Resolver.cpp
 		tests/Style/RuleSet.cpp
 		tests/Style/Scope.cpp

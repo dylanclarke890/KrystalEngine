@@ -37,6 +37,10 @@ namespace krys::boo::dom
 
   Ref<HTMLCollection> DocumentFragment::Children() noexcept
   {
+    if (!_documentFragmentRareData)
+    {
+      _documentFragmentRareData = CreateUnique<DocumentFragmentRareData>();
+    }
     return _documentFragmentRareData->Children(*this);
   }
 

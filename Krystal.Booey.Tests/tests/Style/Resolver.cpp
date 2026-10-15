@@ -1,9 +1,12 @@
 ﻿#include "Krystal.Booey/Style/Resolver.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey/CSS/Calc/RandomCachingKey.hpp"
 #include "Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp"
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
+#include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaEnvironment.hpp"
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
@@ -271,5 +274,226 @@ namespace krys::boo::style::tests
     REQUIRE_FALSE(wide.IsEnabled());
 
     css::mq::SetMediaEnvironment(null);
+  }
+
+  namespace
+  {
+    struct ElementStyleFixture : ResolverFixture
+    {
+      ElementStyleFixture() noexcept
+          : ResolverFixture(u8R"(<!DOCTYPE html><style>
+              html { font-size: 20px }
+              .a { width: 2rem; opacity: 0.5 }
+              #b { margin-top: 1em }
+              div:first-child { height: 3px }
+              p::before { content: "x"; width: 3px }
+              #anchor::before { content: attr(data-x) }
+              @page { margin-top: 7px }
+              @page :first { margin-left: 9px }
+            </style><body><div id=a class=a></div><div id=b class=a style="height: 4px"></div>
+            <a id=link href="x"></a><a id=self href=""></a><a id=anchor></a><p id=p></p>
+            <svg><a id=svglink xlink:href="x"></a><svg id=inner></svg></svg>)")
+      {
+      }
+    };
+  }
+
+  TEST_CASE_METHOD(ElementStyleFixture, "Resolver: element styles", "[Style][Resolver]")
+  {
+    SECTION("The document element inherits from the initial containing block")
+    {
+      auto resolved = Resolve(*Document->DocumentElement());
+      REQUIRE(resolved.Style);
+      CHECK(resolved.Style->ComputedFontSize() == 20);
+      CHECK(resolved.Style->Display() == DisplayType::Block);
+      CHECK(resolved.MatchResult);
+    }
+
+    SECTION("Rules from every origin, inline style, root-relative units and inheritance")
+    {
+      auto a = Resolve(ById(u8"a"));
+      CHECK(Serialised(*a.Style, a.Style->Width()) == "40px");
+      CHECK(a.Style->GetOpacity() == Opacity {0.5f});
+      CHECK(a.Style->Display() == DisplayType::Block);
+      CHECK(a.Style->ComputedFontSize() == 20);
+      CHECK(Serialised(*a.Style, a.Style->Height()) == "3px");
+
+      auto b = Resolve(ById(u8"b"));
+      CHECK(Serialised(*b.Style, b.Style->MarginTop()) == "20px");
+      // The inline style wins over the author rule.
+      CHECK(Serialised(*b.Style, b.Style->Height()) == "4px");
+      REQUIRE(b.MatchResult);
+      CHECK(b.MatchResult->AuthorDeclarations.size() >= 3u);
+
+      auto body = Resolve(*Document->Body());
+      CHECK(Serialised(*body.Style, body.Style->MarginTop()) == "8px");
+    }
+
+    SECTION("Only user agent rules")
+    {
+      auto a = Resolve(ById(u8"a"), RuleMatchingBehavior::MatchOnlyUserAgentRules);
+      CHECK(Serialised(*a.Style, a.Style->Width()) == "auto");
+      CHECK(a.Style->Display() == DisplayType::Block);
+    }
+
+    SECTION("Relations")
+    {
+      // `:first-child` matched: the element's own style records it.
+      auto a = Resolve(ById(u8"a"));
+      CHECK(a.Style->FirstChildState());
+      REQUIRE(a.Relations);
+      CHECK(std::ranges::none_of(*a.Relations, [](const Relation &relation)
+                                 { return relation.RelationType == Relation::FirstChild; }));
+
+      // Failing `:first-child` still makes the parent's children depend on it.
+      auto b = Resolve(ById(u8"b"));
+      CHECK_FALSE(b.Style->FirstChildState());
+      REQUIRE(b.Relations);
+      CHECK(std::ranges::any_of(*b.Relations,
+                                [&](const Relation &relation)
+                                {
+                                  return relation.RelationType == Relation::ChildrenAffectedByFirstChildRules
+                                         && relation.Element == Document->Body().get();
+                                }));
+    }
+
+    SECTION("Links")
+    {
+      auto link = Resolve(ById(u8"link"));
+      CHECK(link.Style->IsLink());
+      CHECK(link.Style->GetInsideLink() == InsideLink::InsideUnvisited);
+
+      // A link to the document itself is visited.
+      auto self = Resolve(ById(u8"self"));
+      CHECK(self.Style->GetInsideLink() == InsideLink::InsideVisited);
+
+      auto anchor = Resolve(ById(u8"anchor"));
+      CHECK_FALSE(anchor.Style->IsLink());
+      CHECK(anchor.Style->GetInsideLink() == InsideLink::NotInside);
+
+      auto svgLink = Resolve(ById(u8"svglink"));
+      CHECK(svgLink.Style->GetInsideLink() == InsideLink::InsideUnvisited);
+    }
+
+    SECTION("SVG zoom rules")
+    {
+      CHECK(Resolve(ById(u8"svglink")).Style->UseSVGZoomRulesForLength());
+      // Only an `<svg>` without a parent uses them.
+      CHECK_FALSE(Resolve(ById(u8"inner")).Style->UseSVGZoomRulesForLength());
+      CHECK_FALSE(Resolve(ById(u8"a")).Style->UseSVGZoomRulesForLength());
+    }
+
+    SECTION("Pseudo-elements")
+    {
+      auto p = Resolve(ById(u8"p"));
+      CHECK(p.Style->HasPseudoStyle(PseudoElementType::Before));
+      CHECK_FALSE(p.Style->HasPseudoStyle(PseudoElementType::After));
+
+      auto before = GetResolver().StyleForPseudoElement(
+        ById(u8"p"), PseudoElementRequest {PseudoElementType::Before}, {.ParentStyle = p.Style.get()});
+      REQUIRE(before);
+      CHECK(Serialised(*before->Style, before->Style->Width()) == "3px");
+      REQUIRE(before->Style->GetPseudoElementIdentifier());
+      CHECK(before->Style->GetPseudoElementIdentifier()->Type == PseudoElementType::Before);
+
+      // No rules match ::after (the user agent's ::after rules need `content`).
+      auto after = GetResolver().StyleForPseudoElement(
+        ById(u8"p"), PseudoElementRequest {PseudoElementType::After}, {.ParentStyle = p.Style.get()});
+      CHECK_FALSE(after);
+    }
+
+    SECTION("Pages")
+    {
+      auto first = GetResolver().StyleForPage(0);
+      CHECK(Serialised(*first, first->MarginTop()) == "7px");
+      CHECK(Serialised(*first, first->MarginLeft()) == "9px");
+      // Inherited from the initial containing block.
+      CHECK(first->ComputedFontSize() == 16);
+
+      auto second = GetResolver().StyleForPage(1);
+      CHECK(Serialised(*second, second->MarginTop()) == "7px");
+      // From the user agent's @page rule.
+      CHECK(Serialised(*second, second->MarginLeft()) == "auto");
+    }
+
+    SECTION("Matched rules")
+    {
+      auto &a = ById(u8"a");
+      auto author = GetResolver().StyleRulesForElement(&a, Resolver::AuthorCSSRules);
+      CHECK(author.size() == 2u);
+      auto all = GetResolver().StyleRulesForElement(&a);
+      CHECK(all.size() > author.size());
+      CHECK(GetResolver().StyleRulesForElement(nullptr).empty());
+
+      auto before = GetResolver().PseudoStyleRulesForElement(
+        &ById(u8"p"), PseudoElementRequest {PseudoElementType::Before}, Resolver::AuthorCSSRules);
+      CHECK(before.size() == 1u);
+    }
+
+    SECTION("The root default style only has user agent rules")
+    {
+      // The resolver was created after the document was parsed.
+      Document->StyleScope().ClearResolver();
+      auto *root = GetResolver().RootDefaultStyle();
+      REQUIRE(root);
+      CHECK(root->ComputedFontSize() == 16);
+      CHECK(root->Display() == DisplayType::Block);
+    }
+
+    SECTION("Viewport units are recorded on the document")
+    {
+      CHECK_FALSE(Document->HasStyleWithViewportUnits());
+      REQUIRE_FALSE(ById(u8"a").SetAttribute(u8"style", u8"width: 10vw").HasException());
+      (void)Resolve(ById(u8"a"));
+      CHECK(Document->HasStyleWithViewportUnits());
+    }
+
+    SECTION("Content attributes of ::before and ::after are registered as rule features")
+    {
+      auto &anchor = ById(u8"anchor");
+      auto anchorStyle = Resolve(anchor);
+      CHECK_FALSE(GetResolver().RuleSets().Features().ContentAttributeNamesInRules.contains(
+        css::CSSOMStringAtom(u8"data-x")));
+      auto before = GetResolver().StyleForPseudoElement(
+        anchor, PseudoElementRequest {PseudoElementType::Before}, {.ParentStyle = anchorStyle.Style.get()});
+      REQUIRE(before);
+      CHECK(GetResolver().RuleSets().Features().ContentAttributeNamesInRules.contains(
+        css::CSSOMStringAtom(u8"data-x")));
+    }
+  }
+
+  TEST_CASE_METHOD(ElementStyleFixture, "Resolver: view transition styles", "[Style][Resolver]")
+  {
+    auto &resolver = GetResolver();
+    auto *dynamicStyle = resolver.RuleSets().DynamicViewTransitionsStyle();
+    REQUIRE(dynamicStyle);
+    auto before = dynamicStyle->RuleCount();
+
+    auto properties = css::MutableStyleProperties::Create(css::ParserMode::HTMLStandard);
+    REQUIRE(properties->SetProperty(css::PropertyId::Width, u8"5px"));
+    resolver.SetViewTransitionStyles(css::SelectorPseudoElement::ViewTransitionGroup,
+                                     css::CSSOMStringAtom(u8"x"), properties);
+    CHECK(dynamicStyle->RuleCount() == before + 1);
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Resolver: random() base values", "[Style][Resolver]")
+  {
+    auto document = ResolverFixture::Parse(u8"<!DOCTYPE html><div id=a></div><div id=b></div>");
+    auto a = document->GetElementById(u8"a");
+    auto b = document->GetElementById(u8"b");
+    css::calc::RandomCachingKey key {
+      Variant<css::calc::Random::SharingOptions::Auto, css::CSSOMStringAtom> {css::CSSOMStringAtom(u8"x")}};
+
+    CHECK_FALSE(a->HasRandomCachingKeyMap());
+    auto value = a->LookupCSSRandomBaseValue({}, key);
+    CHECK(a->HasRandomCachingKeyMap());
+    CHECK(value >= 0.0);
+    CHECK(value < 1.0);
+    // Values are cached per element and pseudo-element.
+    CHECK(a->LookupCSSRandomBaseValue({}, key) == value);
+    CHECK_FALSE(b->HasRandomCachingKeyMap());
+
+    auto shared = document->LookupCSSRandomBaseValue(key);
+    CHECK(document->LookupCSSRandomBaseValue(key) == shared);
   }
 }

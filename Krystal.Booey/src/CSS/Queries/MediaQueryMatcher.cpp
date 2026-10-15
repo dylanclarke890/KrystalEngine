@@ -5,7 +5,9 @@
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
+#include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include <algorithm>
@@ -64,10 +66,11 @@ namespace krys::boo::css
       return nullptr;
     }
 
-    // FIXME: Resolve the document element's style from the user agent rules, through the document's style
-    // resolver, once there's a style builder. Media queries only read its font, which until then is the
-    // default font.
-    return style::Resolver::DefaultStyleForElement(*_document, _document->DocumentElement().get());
+    return _document->StyleScope()
+      .GetResolver()
+      .StyleForElement(*_document->DocumentElement(), {_document->InitialContainingBlockStyle()},
+                       RuleMatchingBehavior::MatchOnlyUserAgentRules)
+      .Style;
   }
 
   bool MediaQueryMatcher::Evaluate(const mq::MediaQueryList &queries) const noexcept

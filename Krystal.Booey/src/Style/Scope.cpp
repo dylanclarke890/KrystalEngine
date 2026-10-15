@@ -15,6 +15,7 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/HTMLStyleElement.hpp"
 #include "Krystal.Booey/Style/CustomPropertyRegistry.hpp"
+#include "Krystal.Booey/Style/MatchResultCache.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/RuleSet.hpp"
 #include "Krystal.Core/Assert.hpp"
@@ -245,6 +246,34 @@ namespace krys::boo::style
     _dynamicViewTransitionsStyle = nullptr;
   }
 
+  void Scope::InvalidateMatchedDeclarationsCache() noexcept
+  {
+    if (!_shadowRoot)
+    {
+      for (auto &descendantShadowRoot : _document->InDocumentShadowRoots())
+      {
+        if (descendantShadowRoot)
+        {
+          descendantShadowRoot->StyleScope().InvalidateMatchedDeclarationsCache();
+        }
+      }
+    }
+
+    if (auto *resolver = ResolverIfExists())
+    {
+      resolver->InvalidateMatchedDeclarationsCache();
+    }
+  }
+
+  MatchResultCache &Scope::GetMatchResultCache() noexcept
+  {
+    if (!_matchResultCache)
+    {
+      _matchResultCache = CreateUnique<MatchResultCache>();
+    }
+    return *_matchResultCache;
+  }
+
   void Scope::ReleaseMemory() noexcept
   {
     if (!_shadowRoot)
@@ -261,7 +290,7 @@ namespace krys::boo::style
     ClearResolver();
 
     _sharedShadowTreeResolvers.clear();
-    // FIXME: Also clear the match result cache, once it is ported.
+    _matchResultCache = nullptr;
   }
 
   Scope &Scope::ForNode(dom::Node &node) noexcept
@@ -718,7 +747,7 @@ namespace krys::boo::style
 
       ClearResolver();
 
-      // FIXME: Also clear the match result cache, once it is ported.
+      _matchResultCache = nullptr;
     }
 
     if (!_pendingUpdate || *_pendingUpdate < update)

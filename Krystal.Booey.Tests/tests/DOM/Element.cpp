@@ -688,4 +688,18 @@ namespace krys::boo::dom::tests
 
     REQUIRE(Is<html::HTMLSlotElement>(static_cast<Node &>(*slot)));
   }
+
+  TEST_CASE("Element::Children", "[DOM][Element]")
+  {
+    // Rare data is created on first use.
+    auto document = CreateRef<HTMLDocument>();
+    auto div = document->CreateElement(u8"div").Value();
+    auto span = document->CreateElement(u8"span").Value();
+    REQUIRE_FALSE(document->AppendChild(*div).HasException());
+    REQUIRE_FALSE(div->AppendChild(*span).HasException());
+    CHECK(document->Children()->Length() == 1u);
+    CHECK(div->Children()->Length() == 1u);
+    CHECK(span->Children()->Length() == 0u);
+    CHECK(document->CreateDocumentFragment()->Children()->Length() == 0u);
+  }
 }

@@ -670,6 +670,9 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Builder.hpp
   include/Krystal.Booey/Style/Change.hpp
   include/Krystal.Booey/Style/ResolvedStyle.hpp
+  include/Krystal.Booey/Style/MatchedDeclarationsCache.hpp
+  include/Krystal.Booey/Style/MatchResultCache.hpp
+  include/Krystal.Booey/Style/ResolveForDocument.hpp
   include/Krystal.Booey/Style/BuilderChecking.hpp
   include/Krystal.Booey/Style/BuilderCustom.hpp
   include/Krystal.Booey/Style/BuilderGenerated.hpp
@@ -1783,6 +1786,12 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Style/Adjuster.cpp
   src/Style/Builder.cpp
   src/Style/Change.cpp
+
+  # Element resolution (f5b)
+  src/Style/MatchedDeclarationsCache.cpp
+  src/Style/MatchResultCache.cpp
+  src/Style/Relations.cpp
+  src/Style/ResolveForDocument.cpp
 )
 
 target_precompile_headers(Krystal.Booey
@@ -1827,8 +1836,12 @@ target_precompile_headers(Krystal.Booey
     include/Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp
     include/Krystal.Booey/HTML/HTMLSlotElement.hpp
 
+    include/Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp
+    include/Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp
+
     include/Krystal.Booey/Style/BuilderState.hpp
     include/Krystal.Booey/Style/BuilderChecking.hpp
+    include/Krystal.Booey/Style/Resolver.hpp
     include/Krystal.Booey/Style/Computed/ComputedStyle+GettersInlines.hpp
     include/Krystal.Booey/Style/Computed/ComputedStyleBase+GettersInlines.hpp
     include/Krystal.Booey/Style/Computed/ComputedStyleProperties+GettersCustomInlines.hpp
@@ -1973,6 +1986,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/StyledElement.hpp
       include/Krystal.Booey/DOM/Text.hpp
       include/Krystal.Booey/DOM/TreeWalker.hpp
+      include/Krystal.Booey/DOM/VisitedLinkState.hpp
       include/Krystal.Booey/DOM/Types/DOMHighResTimeStamp.hpp
       include/Krystal.Booey/DOM/Types/DOMString.hpp
       include/Krystal.Booey/DOM/Types/Exception.hpp
@@ -2285,6 +2299,7 @@ target_sources(Krystal.Booey
     src/DOM/StyledElement.cpp
     src/DOM/Text.cpp
     src/DOM/TreeWalker.cpp
+    src/DOM/VisitedLinkState.cpp
     src/DOM/Types/QualifiedName.cpp
 
     # Graphics

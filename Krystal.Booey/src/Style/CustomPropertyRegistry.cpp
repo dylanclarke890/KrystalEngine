@@ -168,7 +168,7 @@ namespace krys::boo::style
   {
     _hasInvalidPrototypeStyle = true;
     // Changing property registration may affect computed property values in the cache.
-    // FIXME: `Scope::invalidateMatchedDeclarationsCache()` comes with the matched declarations cache.
+    _scope.InvalidateMatchedDeclarationsCache();
 
     // FIXME: Invalidate all?
     if (customProperty != css::CSSOMStringAtom::Null())

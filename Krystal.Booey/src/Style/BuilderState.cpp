@@ -12,6 +12,7 @@
 #include "Krystal.Booey/CSS/Values/ImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/NamedImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/PaintImageValue.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -250,11 +251,16 @@ namespace krys::boo::style
     _style.SetUsesContainerUnits();
   }
 
-  double BuilderState::LookupCSSRandomBaseValue(const css::calc::RandomCachingKey &,
-                                                Maybe<css::keywords::ElementShared>) const noexcept
+  double
+    BuilderState::LookupCSSRandomBaseValue(const css::calc::RandomCachingKey &key,
+                                           Maybe<css::keywords::ElementShared> elementShared) const noexcept
   {
-    // FIXME: The element and document `random()` caches come with the resolver.
-    krys_unreachable();
+    if (!elementShared)
+    {
+      return GetElement()->LookupCSSRandomBaseValue(_style.GetPseudoElementIdentifier(), key);
+    }
+
+    return GetDocument().LookupCSSRandomBaseValue(key);
   }
 
   // MARK: - Tree Counting Functions

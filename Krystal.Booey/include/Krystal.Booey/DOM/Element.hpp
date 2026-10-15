@@ -5,7 +5,6 @@
 #include "Krystal.Booey/DOM/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Enums/CustomElementState.hpp"
 #include "Krystal.Booey/DOM/Enums/InsertAdjacentWhere.hpp"
-#include "Krystal.Booey/DOM/Internals/RareData/ElementRareData.hpp"
 #include "Krystal.Booey/DOM/NamedNodeMap.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
@@ -15,6 +14,16 @@
 namespace krys::boo
 {
   class RenderStyle;
+}
+
+namespace krys::boo::css::calc
+{
+  struct RandomCachingKey;
+}
+
+namespace krys::boo::style
+{
+  struct PseudoElementIdentifier;
 }
 
 namespace krys::boo::html
@@ -27,6 +36,7 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
+  class ElementRareData;
   class HTMLCollection;
   class NodeList;
   class ShadowRoot;
@@ -73,6 +83,8 @@ namespace krys::boo::dom
     Element(Document &document, const QualifiedName &name, NodeFlags nodeFlags) noexcept;
 
   public:
+    ~Element() noexcept override;
+
 #pragma region Element - https://dom.spec.whatwg.org/#element
 
     /// @see https://dom.spec.whatwg.org/#dom-element-namespaceuri
@@ -400,6 +412,17 @@ namespace krys::boo::dom
       // element is relevant to the user.
       return false;
     }
+
+    /// @brief The base value of a `random()` of the element (or of one of its pseudo-elements) that isn't
+    /// shared between elements.
+    KRYS_NODISCARD double
+      LookupCSSRandomBaseValue(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
+                               const css::calc::RandomCachingKey &key) const noexcept;
+
+    KRYS_NODISCARD bool HasRandomCachingKeyMap() const noexcept;
+
+  private:
+    KRYS_NODISCARD ElementRareData &EnsureElementRareData() noexcept;
 
   protected:
     /// @brief Sets an attribute in the null namespace to `value` without running the attribute change steps

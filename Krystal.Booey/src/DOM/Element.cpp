@@ -33,6 +33,36 @@ namespace krys::boo::dom
   {
   }
 
+  Element::~Element() noexcept = default;
+
+  ElementRareData &Element::EnsureElementRareData() noexcept
+  {
+    if (!_elementRareData)
+    {
+      _elementRareData = CreateUnique<ElementRareData>();
+    }
+    return *_elementRareData;
+  }
+
+  double
+    Element::LookupCSSRandomBaseValue(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
+                                      const css::calc::RandomCachingKey &key) const noexcept
+  {
+    return const_cast<Element *>(this)
+      ->EnsureElementRareData()
+      .EnsureRandomCachingKeyMap(pseudoElementIdentifier)
+      ->LookupCSSRandomBaseValue(key);
+  }
+
+  bool Element::HasRandomCachingKeyMap() const noexcept
+  {
+    if (!_elementRareData)
+    {
+      return false;
+    }
+    return _elementRareData->HasRandomCachingKeyMap();
+  }
+
 #pragma region Element
 
   DOMString Element::TagName() const noexcept
@@ -516,7 +546,7 @@ namespace krys::boo::dom
 
   Ref<HTMLCollection> Element::Children() noexcept
   {
-    return _elementRareData->Children(*this);
+    return EnsureElementRareData().Children(*this);
   }
 
   RefPtr<const Element> Element::FirstElementChild() const noexcept
