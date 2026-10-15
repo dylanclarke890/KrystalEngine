@@ -785,6 +785,36 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Values/Fonts/FontVariationSettings.hpp
   include/Krystal.Booey/Style/Values/Fonts/FontWeight.hpp
   include/Krystal.Booey/Style/Values/Fonts/FontWidth.hpp
+
+  # Style resolution, layer f3d1 (timing and animations)
+  include/Krystal.Booey/Animation/WebAnimationUtilities.hpp
+  include/Krystal.Booey/Graphics/Animation/TimingFunction.hpp
+  include/Krystal.Booey/Graphics/SpringSolver.hpp
+  include/Krystal.Booey/Graphics/UnitBezier.hpp
+  include/Krystal.Booey/Style/Values/Animations/Animation.hpp
+  include/Krystal.Booey/Style/Values/Animations/Animations.hpp
+  include/Krystal.Booey/Style/Values/Animations/SingleAnimationDelay.hpp
+  include/Krystal.Booey/Style/Values/Animations/SingleAnimationDuration.hpp
+  include/Krystal.Booey/Style/Values/Animations/SingleAnimationIterationCount.hpp
+  include/Krystal.Booey/Style/Values/Animations/SingleAnimationName.hpp
+  include/Krystal.Booey/Style/Values/Animations/SingleAnimationRange.hpp
+  include/Krystal.Booey/Style/Values/Animations/SingleAnimationRangeName.hpp
+  include/Krystal.Booey/Style/Values/Animations/SingleAnimationTimeline.hpp
+  include/Krystal.Booey/Style/Values/Easing/CubicBezierEasingFunction.hpp
+  include/Krystal.Booey/Style/Values/Easing/EasingFunction.hpp
+  include/Krystal.Booey/Style/Values/Easing/LinearEasingFunction.hpp
+  include/Krystal.Booey/Style/Values/Easing/SpringEasingFunction.hpp
+  include/Krystal.Booey/Style/Values/Easing/StepsEasingFunction.hpp
+  include/Krystal.Booey/Style/Values/ScrollAnimations/ProgressTimelineAxes.hpp
+  include/Krystal.Booey/Style/Values/ScrollAnimations/ProgressTimelineName.hpp
+  include/Krystal.Booey/Style/Values/ScrollAnimations/ScrollFunction.hpp
+  include/Krystal.Booey/Style/Values/ScrollAnimations/ViewFunction.hpp
+  include/Krystal.Booey/Style/Values/ScrollAnimations/ViewTimelineInsets.hpp
+  include/Krystal.Booey/Style/Values/Transitions/SingleTransitionDelay.hpp
+  include/Krystal.Booey/Style/Values/Transitions/SingleTransitionDuration.hpp
+  include/Krystal.Booey/Style/Values/Transitions/SingleTransitionProperty.hpp
+  include/Krystal.Booey/Style/Values/Transitions/Transition.hpp
+  include/Krystal.Booey/Style/Values/Transitions/Transitions.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -1254,6 +1284,26 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Style/Values/Fonts/FontVariationSettings.cpp
   src/Style/Values/Fonts/FontWeight.cpp
   src/Style/Values/Fonts/FontWidth.cpp
+
+  # Style resolution, layer f3d1 (timing and animations)
+  src/Graphics/Animation/TimingFunction.cpp
+  src/Style/Values/Animations/Animation.cpp
+  src/Style/Values/Animations/SingleAnimationName.cpp
+  src/Style/Values/Animations/SingleAnimationRange.cpp
+  src/Style/Values/Animations/SingleAnimationRangeName.cpp
+  src/Style/Values/Animations/SingleAnimationTimeline.cpp
+  src/Style/Values/Easing/CubicBezierEasingFunction.cpp
+  src/Style/Values/Easing/EasingFunction.cpp
+  src/Style/Values/Easing/LinearEasingFunction.cpp
+  src/Style/Values/Easing/SpringEasingFunction.cpp
+  src/Style/Values/Easing/StepsEasingFunction.cpp
+  src/Style/Values/ScrollAnimations/ProgressTimelineName.cpp
+  src/Style/Values/ScrollAnimations/ScrollFunction.cpp
+  src/Style/Values/ScrollAnimations/ViewFunction.cpp
+  src/Style/Values/ScrollAnimations/ViewTimelineInsets.cpp
+  src/Style/Values/Transitions/SingleTransitionProperty.cpp
+  src/Style/Values/Transitions/Transition.cpp
+  src/Style/ScopedName.cpp
 )
 
 target_precompile_headers(Krystal.Booey

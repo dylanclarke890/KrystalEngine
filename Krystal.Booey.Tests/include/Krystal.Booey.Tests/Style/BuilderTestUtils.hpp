@@ -56,7 +56,9 @@ namespace krys::boo::style::tests
       context.PropertySettings.cssTextAutospaceEnabled = true;
       context.PropertySettings.cssTextBoxTrimEnabled = true;
       context.PropertySettings.cssTextSpacingTrimEnabled = true;
+      context.PropertySettings.scrollDrivenAnimationsEnabled = true;
       context.PropertySettings.viewTransitionsEnabled = true;
+      context.springTimingFunctionEnabled = true;
       return context;
     }
 
