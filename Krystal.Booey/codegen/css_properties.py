@@ -65,8 +65,8 @@ def generate(args: argparse.Namespace):
             GeneratePropertyId,
             GeneratePropertyParsing,
             GeneratePropertyShorthandFunctions,
+            GenerateStyleBuilderGenerated,
             # TODO: Uncomment these generators when they are supported.
-            # GenerateStyleBuilderGenerated,
             # GenerateStyleChangedAnimatablePropertiesGenerated,
             GenerateStyleComputedStyleProperties,
             # GenerateStyleExtractorGenerated,
@@ -765,7 +765,7 @@ class StylePropertyCodeGenProperties:
     def _complete_name_family(json_value: dict, family_name: str, property_name: PropertyName):
         if f"{family_name}-name-for-methods" not in json_value:
             json_value[f"{family_name}-name-for-methods"] = property_name.name_for_methods
-            if family_name == "render-style":
+            if family_name in ("render-style", "font-description"):
                 # Non-standard properties keep their `-webkit-` prefix but not in their accessor names.
                 json_value[f"{family_name}-name-for-methods"] = property_name.name_for_methods.replace("Webkit", "")
 
@@ -1292,13 +1292,13 @@ class StyleProperty:
     @property
     def method_name_for_get_coordinated_value_list(self):
         if "animation-" in self.name:
-            return "Animations"
+            return "GetAnimations"
         if "transition-" in self.name:
-            return "Transitions"
+            return "GetTransitions"
         if "background-" in self.name:
-            return "BackgroundLayers"
+            return "GetBackgroundLayers"
         if "mask-" in self.name:
-            return "MaskLayers"
+            return "GetMaskLayers"
         raise Exception(f"Unrecognized coordinated list value property name: '{self.name}")
 
     @property
@@ -9064,7 +9064,7 @@ class GeneratePropertyShorthandFunctions:
                     to.write("return {};")
 
 
-# Generates `StyleBuilderGenerated.cpp`.
+# Generates `Style/BuilderGenerated.cpp`.
 class GenerateStyleBuilderGenerated:
     def __init__(self, generation_context: GenerationContext):
         self.generation_context = generation_context
@@ -9080,138 +9080,116 @@ class GenerateStyleBuilderGenerated:
     def generate(self):
         self.generate_style_builder_generated_cpp()
 
-    # MARK: - Helper generator functions for StyleBuilderGenerated.cpp
+    # MARK: - Helper generator functions for BuilderGenerated.cpp
 
     def _converted_value(self, property, additional_parameters=[]):
         parameters = ["builderState", "value"] + additional_parameters
-        return f"toStyleFromCSSValue<{property.codegen_properties.render_style_type}>({', '.join(parameters)})"
+        return f"ConvertCSSValueToStyle<{property.codegen_properties.render_style_type}>({', '.join(parameters)})"
+
+    def _inherited_value(self, property):
+        return f"ForwardInheritedValue(builderState.ParentStyle().{property.codegen_properties.render_style_getter}())"
+
+    def _initial_value(self, property):
+        return f"style::ComputedStyle::{property.codegen_properties.render_style_initial}()"
+
+    def _font_description_setter(self, property):
+        return property.codegen_properties.font_description_setter.replace("set", "SetFontDescription", 1)
+
+    def _write_if(self, to: Writer, condition: str, statement: str):
+        to.write(f"if ({condition})")
+        to.write("{")
+        with to.indent():
+            to.write(statement)
+        to.write("}")
 
     # Color property setters.
 
-    def _generate_visited_link_color_supporting_property_initial_value_setter(self, to: Writer, property):
-        initial_function = "Style::ComputedStyle::" + property.codegen_properties.render_style_initial
-        to.write(f"if (builderState.applyPropertyToRegularStyle())")
-        to.write(f"    builderState.style().{property.codegen_properties.render_style_setter}({initial_function}());")
-        to.write(f"if (builderState.applyPropertyToVisitedLinkStyle())")
-        to.write(
-            f"    builderState.style().setVisitedLink{property.codegen_properties.render_style_name_for_methods}({initial_function}());"
+    def _generate_visited_link_color_supporting_property_setter(self, to: Writer, property, value, visited_value):
+        name = property.codegen_properties.render_style_name_for_methods
+        self._write_if(
+            to,
+            "builderState.ApplyPropertyToRegularStyle()",
+            f"builderState.Style().{property.codegen_properties.render_style_setter}({value});",
         )
-
-    def _generate_visited_link_color_supporting_property_inherit_value_setter(self, to: Writer, property):
-        to.write(f"if (builderState.applyPropertyToRegularStyle())")
-        to.write(
-            f"    builderState.style().{property.codegen_properties.render_style_setter}(forwardInheritedValue(builderState.parentStyle().{property.codegen_properties.render_style_getter}()));"
-        )
-        to.write(f"if (builderState.applyPropertyToVisitedLinkStyle())")
-        to.write(
-            f"    builderState.style().setVisitedLink{property.codegen_properties.render_style_name_for_methods}(forwardInheritedValue(builderState.parentStyle().{property.codegen_properties.render_style_getter}()));"
-        )
-
-    def _generate_visited_link_color_supporting_property_value_setter(self, to: Writer, property):
-        to.write(f"if (builderState.applyPropertyToRegularStyle())")
-        to.write(
-            f"    builderState.style().{property.codegen_properties.render_style_setter}({self._converted_value(property, ['ForVisitedLink::No'])});"
-        )
-        to.write(f"if (builderState.applyPropertyToVisitedLinkStyle())")
-        to.write(
-            f"    builderState.style().setVisitedLink{property.codegen_properties.render_style_name_for_methods}({self._converted_value(property, ['ForVisitedLink::Yes'])});"
+        self._write_if(
+            to,
+            "builderState.ApplyPropertyToVisitedLinkStyle()",
+            f"builderState.Style().SetVisitedLink{name}({visited_value});",
         )
 
     # CoordinatedValueList property setters.
 
     def _generate_coordinated_value_list_property_initial_value_setter(self, to: Writer, property):
         to.write(
-            f"applyInitialCoordinatedValueListProperty<{property.id_or_cascade_alias_id}, &RenderStyle::{property.method_name_for_ensure_coordinated_value_list}, {property.type_name_for_coordinated_value_list}>(builderState);"
+            f"ApplyInitialCoordinatedValueListProperty<css::{property.id_or_cascade_alias_id}, &RenderStyle::{property.method_name_for_ensure_coordinated_value_list}, {property.type_name_for_coordinated_value_list}>(builderState);"
         )
 
     def _generate_coordinated_value_list_property_inherit_value_setter(self, to: Writer, property):
         to.write(
-            f"applyInheritCoordinatedValueListProperty<{property.id_or_cascade_alias_id}, &RenderStyle::{property.method_name_for_ensure_coordinated_value_list}, &RenderStyle::{property.method_name_for_get_coordinated_value_list}, {property.type_name_for_coordinated_value_list}>(builderState);"
+            f"ApplyInheritCoordinatedValueListProperty<css::{property.id_or_cascade_alias_id}, &RenderStyle::{property.method_name_for_ensure_coordinated_value_list}, &RenderStyle::{property.method_name_for_get_coordinated_value_list}, {property.type_name_for_coordinated_value_list}>(builderState);"
         )
 
     def _generate_coordinated_value_list_property_value_setter(self, to: Writer, property):
         to.write(
-            f"applyValueCoordinatedValueListProperty<{property.id_or_cascade_alias_id}, &RenderStyle::{property.method_name_for_ensure_coordinated_value_list}, WebCore::{property.codegen_properties.coordinated_value_list_property_item_type}, {property.type_name_for_coordinated_value_list}>(builderState, value);"
+            f"ApplyValueCoordinatedValueListProperty<css::{property.id_or_cascade_alias_id}, &RenderStyle::{property.method_name_for_ensure_coordinated_value_list}, {krystal_type(property.codegen_properties.coordinated_value_list_property_item_type)}, {property.type_name_for_coordinated_value_list}>(builderState, value);"
         )
-
-    # Font property setters.
-
-    def _generate_font_property_initial_value_setter(self, to: Writer, property):
-        to.write(
-            f"builderState.{property.codegen_properties.font_description_setter.replace('set', 'setFontDescription', 1)}(Style::ComputedStyle::{property.codegen_properties.render_style_initial}());"
-        )
-
-    def _generate_font_property_inherit_value_setter(self, to: Writer, property):
-        to.write(
-            f"auto inheritedValue = builderState.parentStyle().{property.codegen_properties.render_style_getter}();"
-        )
-        to.write(
-            f"builderState.{property.codegen_properties.font_description_setter.replace('set', 'setFontDescription', 1)}(krys::move(inheritedValue));"
-        )
-
-    def _generate_font_property_value_setter(self, to: Writer, property, value):
-        to.write(
-            f"builderState.{property.codegen_properties.font_description_setter.replace('set', 'setFontDescription', 1)}({value});"
-        )
-
-    # All other property setters.
-
-    def _generate_property_initial_value_setter(self, to: Writer, property):
-        to.write(
-            f"builderState.style().{property.codegen_properties.render_style_setter}(Style::ComputedStyle::{property.codegen_properties.render_style_initial}());"
-        )
-
-    def _generate_property_inherit_value_setter(self, to: Writer, property):
-        to.write(
-            f"builderState.style().{property.codegen_properties.render_style_setter}(forwardInheritedValue(builderState.parentStyle().{property.codegen_properties.render_style_getter}()));"
-        )
-
-    def _generate_property_value_setter(self, to: Writer, property, value):
-        to.write(f"builderState.style().{property.codegen_properties.render_style_setter}({value});")
 
     # Property setter dispatch.
 
     def _generate_style_builder_generated_cpp_initial_value_setter(self, to: Writer, property):
-        to.write(f"static void applyInitial{property.id_without_prefix}(BuilderState& builderState)")
-        to.write(f"{{")
+        to.write(f"static void ApplyInitial{property.id_without_prefix}(BuilderState &builderState) noexcept")
+        to.write("{")
 
         with to.indent():
             if property.codegen_properties.visited_link_color_support:
-                self._generate_visited_link_color_supporting_property_initial_value_setter(to, property)
+                self._generate_visited_link_color_supporting_property_setter(
+                    to, property, self._initial_value(property), self._initial_value(property)
+                )
             elif property.codegen_properties.coordinated_value_list_property:
                 self._generate_coordinated_value_list_property_initial_value_setter(to, property)
             elif property.codegen_properties.font_property:
-                self._generate_font_property_initial_value_setter(to, property)
+                to.write(f"builderState.{self._font_description_setter(property)}({self._initial_value(property)});")
             else:
-                self._generate_property_initial_value_setter(to, property)
+                to.write(
+                    f"builderState.Style().{property.codegen_properties.render_style_setter}({self._initial_value(property)});"
+                )
 
             if property.codegen_properties.fast_path_inherited:
-                to.write(f"builderState.style().setDisallowsFastPathInheritance();")
+                to.write("builderState.Style().SetDisallowsFastPathInheritance();")
 
-        to.write(f"}}")
+        to.write("}")
 
     def _generate_style_builder_generated_cpp_inherit_value_setter(self, to: Writer, property):
-        to.write(f"static void applyInherit{property.id_without_prefix}(BuilderState& builderState)")
-        to.write(f"{{")
+        to.write(f"static void ApplyInherit{property.id_without_prefix}(BuilderState &builderState) noexcept")
+        to.write("{")
 
         with to.indent():
             if property.codegen_properties.visited_link_color_support:
-                self._generate_visited_link_color_supporting_property_inherit_value_setter(to, property)
+                self._generate_visited_link_color_supporting_property_setter(
+                    to, property, self._inherited_value(property), self._inherited_value(property)
+                )
             elif property.codegen_properties.coordinated_value_list_property:
                 self._generate_coordinated_value_list_property_inherit_value_setter(to, property)
             elif property.codegen_properties.font_property:
-                self._generate_font_property_inherit_value_setter(to, property)
+                to.write(
+                    f"auto inheritedValue = builderState.ParentStyle().{property.codegen_properties.render_style_getter}();"
+                )
+                to.write(f"builderState.{self._font_description_setter(property)}(krys::move(inheritedValue));")
             else:
-                self._generate_property_inherit_value_setter(to, property)
+                to.write(
+                    f"builderState.Style().{property.codegen_properties.render_style_setter}({self._inherited_value(property)});"
+                )
 
             if property.codegen_properties.fast_path_inherited:
-                to.write(f"builderState.style().setDisallowsFastPathInheritance();")
+                to.write("builderState.Style().SetDisallowsFastPathInheritance();")
 
-        to.write(f"}}")
+        to.write("}")
 
     def _generate_style_builder_generated_cpp_value_setter(self, to: Writer, property):
-        to.write(f"static void applyValue{property.id_without_prefix}(BuilderState& builderState, Value& value)")
-        to.write(f"{{")
+        to.write(
+            f"static void ApplyValue{property.id_without_prefix}(BuilderState &builderState, css::Value &value) noexcept"
+        )
+        to.write("{")
 
         with to.indent():
             if (
@@ -9219,29 +9197,37 @@ class GenerateStyleBuilderGenerated:
                 and "Initial" not in property.codegen_properties.style_builder_custom
                 and property.codegen_properties.style_builder_needs_system_font_shorthand_check
             ):
-                to.write(f"if (PropertyParserHelpers::isSystemFontShorthand(value.valueID())) {{")
+                to.write("if (css::PropertyParserHelpers::IsSystemFontShorthand(value.ValueId()))")
+                to.write("{")
                 with to.indent():
-                    to.write(f"applyInitial{property.id_without_prefix}(builderState);")
-                    to.write(f"return;")
-                to.write(f"}}")
+                    to.write(f"ApplyInitial{property.id_without_prefix}(builderState);")
+                    to.write("return;")
+                to.write("}")
 
             if property.codegen_properties.visited_link_color_support:
-                self._generate_visited_link_color_supporting_property_value_setter(to, property)
+                self._generate_visited_link_color_supporting_property_setter(
+                    to,
+                    property,
+                    self._converted_value(property, ["ForVisitedLink::No"]),
+                    self._converted_value(property, ["ForVisitedLink::Yes"]),
+                )
             elif property.codegen_properties.coordinated_value_list_property:
                 self._generate_coordinated_value_list_property_value_setter(to, property)
             elif property.codegen_properties.font_property:
-                self._generate_font_property_value_setter(to, property, self._converted_value(property))
+                to.write(f"builderState.{self._font_description_setter(property)}({self._converted_value(property)});")
             else:
-                self._generate_property_value_setter(to, property, self._converted_value(property))
+                to.write(
+                    f"builderState.Style().{property.codegen_properties.render_style_setter}({self._converted_value(property)});"
+                )
 
             if property.codegen_properties.fast_path_inherited:
-                to.write(f"builderState.style().setDisallowsFastPathInheritance();")
+                to.write("builderState.Style().SetDisallowsFastPathInheritance();")
 
-        to.write(f"}}")
+        to.write("}")
 
     def _generate_style_builder_generated_cpp_builder_functions_class(self, *, to: Writer):
         with to.class_block(name="BuilderFunctions"):
-            to.write(f"public:")
+            to.write("public:")
 
             with to.indent():
                 for property in self.style_properties.all:
@@ -9268,69 +9254,69 @@ class GenerateStyleBuilderGenerated:
                         and "Value" not in property.codegen_properties.style_builder_custom
                     ):
                         self._generate_style_builder_generated_cpp_value_setter(to, property)
+        to.newline()
 
     def _generate_style_builder_generated_cpp_builder_generated_apply(self, *, to: Writer):
-        to.write_block("""
-            void BuilderGenerated::applyProperty(PropertyId id, BuilderState& builderState, Value& value, ApplyValueType valueType)
-            {
-                switch (id) {
-                case PropertyId::CSSPropertyInvalid:
-                    break;
-                case PropertyId::CSSPropertyCustom:
-                    ASSERT_NOT_REACHED();
-                    break;""")
+        to.write(
+            "void BuilderGenerated::ApplyProperty(css::PropertyId id, BuilderState &builderState, css::Value &value, ApplyValueType valueType) noexcept"
+        )
+        to.write("{")
 
         with to.indent():
-
-            def scope_for_function(property, function):
-                if function in property.codegen_properties.style_builder_custom:
-                    return "BuilderCustom"
-                return "BuilderFunctions"
-
-            for property in self.properties_and_descriptors.all_unique:
-                if not isinstance(property, StyleProperty):
-                    to.write(f"case {property.id}:")
-                    with to.indent():
-                        to.write(f"break;")
-                    continue
-
-                to.write(f"case {property.id}:")
-
+            to.write("switch (id)")
+            to.write("{")
+            with to.indent():
+                to.write("case css::PropertyId::Invalid:")
                 with to.indent():
-                    if property.codegen_properties.longhands:
-                        to.write(f"ASSERT(isShorthand(id));")
-                        to.write(f"ASSERT_NOT_REACHED();")
-                    elif not property.codegen_properties.skip_style_builder:
-                        apply_initial_arguments = ["builderState"]
-                        apply_inherit_arguments = ["builderState"]
-                        apply_value_arguments = ["builderState", "value"]
+                    to.write("break;")
+                to.write("case css::PropertyId::Custom:")
+                with to.indent():
+                    to.write('krys_debug_assert_msg(false, "custom properties are applied by the builder");')
+                    to.write("break;")
 
-                        to.write(f"switch (valueType) {{")
-                        to.write(f"case ApplyValueType::Initial:")
-                        with to.indent():
-                            to.write(
-                                f"{scope_for_function(property, 'Initial')}::applyInitial{property.id_without_prefix}({', '.join(apply_initial_arguments)});"
-                            )
-                            to.write(f"break;")
-                        to.write(f"case ApplyValueType::Inherit:")
-                        with to.indent():
-                            to.write(
-                                f"{scope_for_function(property, 'Inherit')}::applyInherit{property.id_without_prefix}({', '.join(apply_inherit_arguments)});"
-                            )
-                            to.write(f"break;")
-                        to.write("case ApplyValueType::Value:")
-                        with to.indent():
-                            to.write(
-                                f"{scope_for_function(property, 'Value')}::applyValue{property.id_without_prefix}({', '.join(apply_value_arguments)});"
-                            )
-                            to.write(f"break;")
-                        to.write(f"}}")
+                def scope_for_function(property, function):
+                    if function in property.codegen_properties.style_builder_custom:
+                        return "BuilderCustom"
+                    return "BuilderFunctions"
 
-                    to.write(f"break;")
+                for property in self.properties_and_descriptors.all_unique:
+                    to.write(f"case css::{property.id}:")
 
-            to.write(f"}}")
-        to.write(f"}}")
-        to.newline()
+                    with to.indent():
+                        if not isinstance(property, StyleProperty):
+                            to.write("break;")
+                            continue
+
+                        if property.codegen_properties.longhands:
+                            to.write("krys_debug_assert(css::IsShorthand(id));")
+                            to.write('krys_debug_assert_msg(false, "shorthands are expanded before they are applied");')
+                        elif not property.codegen_properties.skip_style_builder:
+                            to.write("switch (valueType)")
+                            to.write("{")
+                            with to.indent():
+                                to.write("case ApplyValueType::Initial:")
+                                with to.indent():
+                                    to.write(
+                                        f"{scope_for_function(property, 'Initial')}::ApplyInitial{property.id_without_prefix}(builderState);"
+                                    )
+                                    to.write("break;")
+                                to.write("case ApplyValueType::Inherit:")
+                                with to.indent():
+                                    to.write(
+                                        f"{scope_for_function(property, 'Inherit')}::ApplyInherit{property.id_without_prefix}(builderState);"
+                                    )
+                                    to.write("break;")
+                                to.write("case ApplyValueType::Value:")
+                                with to.indent():
+                                    to.write(
+                                        f"{scope_for_function(property, 'Value')}::ApplyValue{property.id_without_prefix}(builderState, value);"
+                                    )
+                                    to.write("break;")
+                            to.write("}")
+
+                        to.write("break;")
+            to.write("}")
+        to.write("}")
 
     def generate_style_builder_generated_cpp(self):
         with open(self.generation_context.output_cpp_path("Style/BuilderGenerated.cpp"), "w") as output_file:
@@ -9338,23 +9324,20 @@ class GenerateStyleBuilderGenerated:
             writer.cpp_prelude(
                 generator_name=GENERATOR_NAME,
                 for_header="Krystal.Booey/Style/BuilderGenerated.hpp",
-            )
-            writer.includes(
                 headers=[
-                    "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp",
-                    "Krystal.Booey/CSS/Properties/Property.hpp",
+                    "Krystal.Booey/CSS/Properties/Consumers/Font.hpp",
+                    "Krystal.Booey/CSS/Properties/PropertyId.hpp",
                     "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp",
                     "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp",
                     "Krystal.Booey/Style/BuilderCustom.hpp",
                     "Krystal.Booey/Style/BuilderState.hpp",
+                    "Krystal.Booey/Style/BuilderStateInlines.hpp",
                     "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp",
-                    "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp",
-                ]
+                ],
             )
 
-            with writer.namespace(namespace="krys::boo"):
+            with writer.namespace(namespace="krys::boo::style"):
                 self._generate_style_builder_generated_cpp_builder_functions_class(to=writer)
-
                 self._generate_style_builder_generated_cpp_builder_generated_apply(to=writer)
 
 

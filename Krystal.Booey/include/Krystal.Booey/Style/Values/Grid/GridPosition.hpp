@@ -148,6 +148,14 @@ namespace krys::boo::style
 
     static void SetMaxPositionForTesting(unsigned maxPosition) noexcept;
   };
+
+  // MARK: - Conversion
+
+  template <>
+  struct CSSValueConversion<GridPosition>
+  {
+    KRYS_NODISCARD GridPosition operator()(BuilderState &, const css::Value &) noexcept;
+  };
 }
 
 DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::GridPosition)

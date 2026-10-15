@@ -84,9 +84,10 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Style resolution, layers f3f2 and f3f3 (2026-10-14): the computed style property generator, the `rendering/style` data groups, `style/computed` and `NameScope`. See *Layer f3f2 and f3f3*.
 - Style resolution, layer f3f4 (2026-10-15): the render style property generator and `RenderStyle`, which replaces the seam's. See *Layer f3f4*.
 - Style resolution, layer f4a (2026-10-15): f4 planned in four sublayers; the builder state (`BuilderState`, replacing the seam's) and the font size functions. See *Layer f4: the builder (planned)* and *Layer f4a*.
+- Style resolution, layer f4b (2026-10-15): the generated builder (`BuilderGenerated`, its generator, `BuilderCustom`). See *Layer f4b*.
 
 **Open / next candidates:**
-- **Next:** style resolution, layer f4b (the generated builder); see *Layer f4: the builder (planned)*.
+- **Next:** style resolution, layer f4c (registered custom properties); see *Layer f4: the builder (planned)*.
 - Settings, noted with f0 (2026-10-14): parser contexts have no `Settings`, so features behind a settings flag that's on by default upstream are off in author sheets (`@view-transition` via crossDocumentViewTransitionsEnabled, `@position-try` via cssAnchorPositioningEnabled, `text-decoration-line: spelling-error | grammar-error`, ...). User agent sheets turn on upstream's list, which doesn't include the `text-decoration-line` flag (as upstream).
 - DOM, not yet done (noted 2026-10-14, deferred by choice): `NodeAlgorithms::Equals` compares attributes by position and ignores extra attributes on the other element (the spec compares the counts and matches attributes regardless of order). `Document::Head()` returns null for parsed documents (`DOMTreeAccessors::GetHeadElement`); URL reflection (`dom::USVString` is a placeholder). only `classList` follows its attribute; `relList`, `sandbox`, `sizes`, `blocking` and `htmlFor` are parsed once when created and should update from `Element::OnAttributeChanged`. Mutation observers never deliver records: `QueueMutationObserverMicrotask`/`NotifyMutationObservers` are TODOs and can now be built on `html::EventLoop`.
 - DOM, not yet done (noted with f1, 2026-10-14): `TreeQueries::NextShadowIncluding` visits a host's children before its shadow root and, when the host has children, never visits the shadow root (shadow-including tree order visits the shadow root right after its host). Shadow roots have no part mappings (`exportparts`), so `::part()` never reaches beyond the host's scope (FIXMEs in `SelectorChecker` and `ElementRuleCollector`). Documents have no focused area, so `:focus`/`:focus-visible` never match (FIXMEs).
@@ -106,7 +107,6 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - URL, not yet done: the DOM `URL` interface and `URLSearchParams` (WebKit's `DOMURL`/`URLDecomposition`, tested by WPT `setters_tests.json`), and `applyModifiersToLoaderOptions` (needs the resource loader).
 - Krystal.Core: the `IntrusivePtr` `Downcast`/`DynamicDowncast` overloads can't be called with an explicit target and `Downcast` rejects null (nothing calls them yet); `OffsetRotateValue.cpp` has a FIXME workaround.
 - Not yet ported, needed later: `StringBuilder`, `RefCountedFixedVector`, `DefaultHash<StringAtom>` (Krystal.Core; for `add(Hasher&, const Style::GridPosition&)`).
-- Style `GridPosition`'s `CSSValueConversion` comes with the `grid` group (f3b).
 - Undecided style question: list wrappers use container-protocol lowercase names (`isEmpty`, `contains`), matching Core's `FixedVector`/`ListHashSet`; `EnumSet` and wrappers use PascalCase.
 
 ---
@@ -332,7 +332,7 @@ Ported with the values that hold them. On and tested unless noted.
 | `css/values/grid/CSSGridNamedAreaMap.h`, `.cpp` | `have` | `CSS/Values/Grid/GridNamedAreaMap.hpp`, `src/...` | `Map`/`RowCount`/`ColumnCount`, `AddRow`; the `Map` alias is `MapType`. `std::unordered_map` (iteration order differs from WTF's `HashMap`; nothing depends on it); `ensure` → `try_emplace`. |
 | `rendering/style/GridArea.h`, `GridSpan.h`, `.cpp` | `have` | `Rendering/Style/GridArea.hpp`, `GridSpan.hpp`, `src/Rendering/Style/GridSpan.cpp` | Namespace `boo`. `columns`/`rows` → `Columns`/`Rows`, `span()` → `Span()`; `GridSpan` methods PascalCase except `begin`/`end`. |
 | `style/values/grid/StyleGridTrackSizingDirection.h`, `StyleGridPositionSide.h` | `have`/`port` | `Style/Values/Grid/GridTrackSizingDirection.hpp`, `GridPositionSide.hpp` | `boo::style`. |
-| `style/values/grid/StyleGridPosition.h`, `.cpp` | `have` | `Style/Values/Grid/GridPosition.hpp`, `src/...` | `boo::style`. Methods PascalCase (`Max`, `SetMaxPositionForTesting`, which can't be reset, as upstream). `Position` alias → `PositionType`. Not ported: `add(Hasher&, GridPosition)` (needs `DefaultHash<StringAtom>`), `CSSValueConversion<GridPosition>` (deferred with the other conversions), logging. |
+| `style/values/grid/StyleGridPosition.h`, `.cpp` | `have` | `Style/Values/Grid/GridPosition.hpp`, `src/...` | `boo::style`. Methods PascalCase (`Max`, `SetMaxPositionForTesting`, which can't be reset, as upstream). `Position` alias → `PositionType`. Not ported: `add(Hasher&, GridPosition)` (needs `DefaultHash<StringAtom>`), logging. `CSSValueConversion<GridPosition>` came with f4b. |
 | `css/values/easing/CSS{,CubicBezier,Linear,Spring,Steps}EasingFunction.h` | `have` | `CSS/Values/Easing/*.hpp` | Members PascalCase (`Value`, `Stops`, `Mass`, ...); `switchOn` → `SwitchOn`; steps `Kind`'s template parameter `Keyword` → `TKeyword`. `Stop::Length::Extra` is `Maybe` (upstream `std::optional`). `std::numeric_limits` → `Limits`. |
 | `css/values/borders/CSSBoxShadow.h`, `CSSBoxShadowProperty.h` | `have` | `CSS/Values/Borders/BoxShadow.hpp`, `BoxShadowProperty.hpp` | Members PascalCase; `IsWebkitBoxShadow` defaults to `false` (upstream uninitialised). |
 | `css/values/text-decoration/CSSTextShadow.h`, `CSSTextShadowProperty.h` | `have` | `CSS/Values/TextDecoration/TextShadow.hpp`, `TextShadowProperty.hpp` | Members PascalCase. |
@@ -1435,12 +1435,36 @@ Graph (headers-only, `--follow css/ style/ rendering/style/`) from `style/StyleB
 
 **Sublayers:**
 - **f4a, the builder state, done (2026-10-15):** `BuilderState` (and its inlines), replacing the seam's, and `StyleFontSizeFunctions`.
-- **f4b, the generated builder:** `GenerateStyleBuilderGenerated`, `StyleBuilderGenerated.h` and `StyleBuilderCustom.h` (the per-property apply functions: value, initial, inherit), with `maybeUpdateFontForLetterSpacingOrWordSpacing`.
+- **f4b, the generated builder, done (2026-10-15):** `GenerateStyleBuilderGenerated`, `StyleBuilderGenerated.h` and `StyleBuilderCustom.h` (the per-property apply functions: value, initial, inherit), with `maybeUpdateFontForLetterSpacingOrWordSpacing`.
 - **f4c, registered custom properties:** `CustomPropertyRegistry`, `CSSRegisteredCustomProperty`, `@property` registration in the resolver, the typed custom property parsing (`ParseTypedCustomPropertyValue`, `ParseTypedCustomPropertyInitialValue`, `ParseInitialValueForUniversalSyntax`) and `RenderStyle::createPtrWithRegisteredInitialValues`.
 - **f4d, the builder:** `Builder` (applying the cascade by priority, custom properties with cycle detection, logical groups, the rollback cascades for `revert`/`revert-layer`), `var()` resolution (the deferred `VariableReferenceValue` definitions) and `PendingSubstitutionValue::ResolveValue`. The builder test fixture's `SetCurrentProperty` hook goes (the builder sets the current property).
 
 **Decisions (2026-10-15):**
 - `StyleResolveForFont` is deferred to the `FontFace` interface and the canvas 2D context: its only callers are `CSSFontFace`, `EditingStyle` and the canvas contexts, and `resolveForUnresolvedFont` needs the unported `ParseUnresolvedFont` (see *Where we are*).
+
+### Layer f4b: the generated builder (2026-10-15)
+
+Graph: the f4 plan's. `style/StyleBuilderGenerated.h`, `StyleBuilderCustom.h` and the `GenerateStyleBuilderGenerated` generator (`process-css-properties.py`), which writes `Style/BuilderGenerated.cpp` into the build's codegen directory (not committed). `StyleBuilderCustom.h` was translated by `conv.py`, then by hand; the generator was rewritten to emit Krystal code.
+
+**Decisions (2026-10-15):**
+- The generator emits `BuilderFunctions` (the generated apply functions) and `BuilderGenerated::ApplyProperty` into `krys::boo::style`, with property ids as `css::PropertyId::X`. `ASSERT_NOT_REACHED` for `Custom` and shorthands is `krys_debug_assert_msg(false, ...)`, as elsewhere. The file is compiled with `/bigobj` (MSVC's section limit).
+- Dropped custom handlers: `applyValueWebkitLocale` (dead upstream: `-webkit-locale` is a generated font property), `applyValueFontSizeAdjust` (declared but never defined upstream), `applyValueWebkitTextZoom` (`-webkit-text-zoom` isn't in the JSON), and the `forwardInheritedValue` overloads for `-webkit-box-reflect`, `-webkit-line-clamp`, `-webkit-line-grid` and `-webkit-marquee-increment` (dropped properties). `color-scheme`'s handler stays (`ENABLE_DARK_MODE_CSS` is on); `line-height`'s isn't custom (`ENABLE_TEXT_AUTOSIZING` is off, as on most upstream ports).
+- The font description accessor names drop `Webkit` as the render style ones do (`-webkit-font-smoothing` → `SetFontDescriptionFontSmoothing`, upstream's name). The coordinated value list getters the generator names are `GetAnimations()` and so on (they'd hide the types).
+- The legacy inter-character ruby check walks `ParentElement()` for an HTML `rt` (no ancestor iterators yet).
+- `CSSValueConversion<GridPosition>` (deferred in f3b2) is ported here: the builder needs it.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `style/StyleBuilderGenerated.h` | `port` | `Style/BuilderGenerated.hpp` | on | tested. |
+| `css/process-css-properties.py` (`GenerateStyleBuilderGenerated`) | `port` | `codegen/css_properties.py` → `Style/BuilderGenerated.cpp` (generated) | on | tested. |
+| `style/StyleBuilderCustom.h` | `port` | `Style/BuilderCustom.hpp` | on | tested. |
+| `style/values/grid/StyleGridPosition.cpp` (conversion) | `port` | `src/Style/Values/Grid/GridPosition.cpp` | on | |
+
+**Added (upstream API):** `BuilderGenerated::ApplyProperty`, `BuilderCustom`, `ForwardInheritedValue`, the coordinated value list apply functions, `MaybeUpdateFontForLetterSpacingOrWordSpacing`, `CSSValueConversion<GridPosition>`.
+
+**Differences:** as in the decisions.
+
+Tests: `tests/Style/BuilderGenerated.cpp` (values, initial values, inheritance, keywords, fast path inheritance, visited link colours, font properties and the system font check, coordinated value lists) and `tests/Style/BuilderCustom.cpp` (colours and `currentcolor`, caret colour, explicitly set flags, line widths under zoom, counters, font sizes and families, zoom, spacing): 11 new cases. Full Booey suite: 1993 cases; all pass except 7 expected failures. Whole solution builds with no warnings.
 
 ### Layer f4a: the builder state (2026-10-15)
 

@@ -1,4 +1,8 @@
 ﻿#include "Krystal.Booey/Style/Values/Grid/GridPosition.hpp"
+#include "Krystal.Booey/CSS/Values/GridLineValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Style/BuilderChecking.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Core/Maths/Base.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
@@ -66,5 +70,52 @@ namespace krys::boo::style
   void GridPosition::SetMaxPositionForTesting(unsigned maxPosition) noexcept
   {
     maxPositionForTesting = static_cast<int>(maxPosition);
+  }
+
+  // MARK: - Conversion
+
+  GridPosition CSSValueConversion<GridPosition>::operator()(BuilderState &state,
+                                                            const css::Value &value) noexcept
+  {
+    if (const auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(value))
+    {
+      if (primitiveValue->ValueId() == css::ValueId::Auto)
+      {
+        return css::keywords::Auto {};
+      }
+
+      if (primitiveValue->IsCustomIdent())
+      {
+        return css::CustomIdentifier {css::CSSOMStringAtom {primitiveValue->StringValue()}};
+      }
+
+      state.SetCurrentPropertyInvalidAtComputedValueTime();
+      return css::keywords::Auto {};
+    }
+
+    const auto *gridLineValue = RequiredDowncast<css::GridLineValue>(state, value);
+    if (!gridLineValue)
+    {
+      return css::keywords::Auto {};
+    }
+
+    const auto *uncheckedSpanValue = gridLineValue->SpanValue();
+    const auto *uncheckedNumericValue = gridLineValue->NumericValue();
+    const auto *uncheckedGridLineName = gridLineValue->GridLineName();
+
+    auto gridLineNumber = uncheckedNumericValue && uncheckedNumericValue->IsInteger()
+                            ? uncheckedNumericValue->ResolveAsInteger<int>(state.CssToLengthConversionData())
+                            : 0;
+    auto gridLineName = uncheckedGridLineName && uncheckedGridLineName->IsCustomIdent()
+                          ? css::CSSOMStringAtom {uncheckedGridLineName->StringValue()}
+                          : css::CSSOMStringAtom::Null();
+
+    if (uncheckedSpanValue && uncheckedSpanValue->ValueId() == css::ValueId::Span)
+    {
+      return GridPosition::Span {{gridLineNumber > 0 ? gridLineNumber : 1},
+                                 css::CustomIdentifier {krys::move(gridLineName)}};
+    }
+
+    return GridPosition::Explicit {{gridLineNumber}, css::CustomIdentifier {krys::move(gridLineName)}};
   }
 }
