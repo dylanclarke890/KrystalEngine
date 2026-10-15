@@ -39,6 +39,7 @@ namespace krys::boo::html
 
 namespace krys::boo::style
 {
+  class CustomPropertyRegistry;
   class Resolver;
   class RuleSet;
 
@@ -111,6 +112,7 @@ namespace krys::boo::style
     bool _usesHasPseudoClass {false};
     bool _isUpdatingStyleResolver {false};
 
+    const UniquePtr<CustomPropertyRegistry> _customPropertyRegistry;
     const UniquePtr<css::CounterStyleRegistry> _counterStyleRegistry;
 
     HashMap<ResolverSharingKey, Ref<Resolver>, ResolverSharingKeyHash> _sharedShadowTreeResolvers;
@@ -175,6 +177,16 @@ namespace krys::boo::style
     void ClearViewTransitionStyles() noexcept;
 
     void ReleaseMemory() noexcept;
+
+    KRYS_NODISCARD const CustomPropertyRegistry &GetCustomPropertyRegistry() const noexcept
+    {
+      return *_customPropertyRegistry;
+    }
+
+    KRYS_NODISCARD CustomPropertyRegistry &GetCustomPropertyRegistry() noexcept
+    {
+      return *_customPropertyRegistry;
+    }
 
     KRYS_NODISCARD const css::CounterStyleRegistry &GetCounterStyleRegistry() const noexcept
     {

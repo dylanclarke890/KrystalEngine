@@ -1,12 +1,14 @@
 ﻿#include "Krystal.Booey/CSS/Properties/PropertyParser.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
+#include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
 #include "Krystal.Booey/CSS/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Parser/CustomPropertySyntax.hpp"
 #include "Krystal.Booey/CSS/Rules/RuleType.hpp"
 #include "Krystal.Booey/CSS/Values/GlobalKeyword.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
+#include "Krystal.Booey/Style/CustomProperty.hpp"
 #include <string>
 
 namespace krys::boo::css::tests
@@ -260,5 +262,111 @@ namespace krys::boo::css::tests
     CHECK(pool.CreateFontFaceValue(CSSOMStringAtom(u8"Arial, serif")) == value);
 
     CHECK_FALSE(pool.CreateFontFaceValue(CSSOMStringAtom(u8"10px")));
+  }
+
+  TEST_CASE_METHOD(style::tests::BuilderFixture, "PropertyParser: typed custom properties",
+                   "[CSS][Properties][PropertyParser]")
+  {
+    const auto context = ParseContext();
+    const CSSOMStringAtom name {u8"--x"};
+
+    auto serialised = [&](const style::CustomProperty &property)
+    {
+      auto text = property.PropertyValueSerialisation(DefaultSerialisationContext(), Style);
+      return ToNarrow(text);
+    };
+
+    auto parseValue = [&](utf8_stringview syntax, utf8_stringview css)
+    {
+      auto parsed = CustomPropertySyntax::Parse(syntax);
+      REQUIRE(parsed);
+      Tokens tokens {css};
+      return PropertyParser::ParseTypedCustomPropertyValue(name, *parsed, tokens.Tokenizer.Tokens(), *State,
+                                                           context);
+    };
+
+    auto parseInitialValue = [&](utf8_stringview syntax, utf8_stringview css)
+    {
+      auto parsed = CustomPropertySyntax::Parse(syntax);
+      REQUIRE(parsed);
+      Tokens tokens {css};
+      return PropertyParser::ParseTypedCustomPropertyInitialValue(name, *parsed, tokens.Tokenizer.Tokens(),
+                                                                  *State, context);
+    };
+
+    SECTION("Values are computed")
+    {
+      auto value = parseValue(u8"<length>", u8" 1em");
+      REQUIRE(value);
+      const auto &property = *std::get<Ref<const style::CustomProperty>>(*value);
+      CHECK(property.GetName() == name);
+      CHECK(property.IsValue());
+      CHECK(serialised(property) == "16px");
+
+      value = parseValue(u8"<length> | <color>", u8"red");
+      REQUIRE(value);
+      CHECK(serialised(*std::get<Ref<const style::CustomProperty>>(*value)) == "rgb(255, 0, 0)");
+
+      value = parseValue(u8"<custom-ident>", u8"foo");
+      REQUIRE(value);
+      CHECK(serialised(*std::get<Ref<const style::CustomProperty>>(*value)) == "foo");
+    }
+
+    SECTION("Lists")
+    {
+      auto value = parseValue(u8"<integer>+", u8"1 2 3");
+      REQUIRE(value);
+      const auto &property = *std::get<Ref<const style::CustomProperty>>(*value);
+      CHECK(property.IsValueList());
+      CHECK(serialised(property) == "1 2 3");
+
+      value = parseValue(u8"<percentage>#", u8"10%, 20%");
+      REQUIRE(value);
+      CHECK(serialised(*std::get<Ref<const style::CustomProperty>>(*value)) == "10%, 20%");
+    }
+
+    SECTION("The universal syntax keeps the tokens")
+    {
+      auto value = parseValue(u8"*", u8"anything { at all }");
+      REQUIRE(value);
+      const auto &property = *std::get<Ref<const style::CustomProperty>>(*value);
+      CHECK(property.IsVariableData());
+      CHECK(serialised(property) == "anything { at all }");
+    }
+
+    SECTION("Global keywords")
+    {
+      auto value = parseValue(u8"<length>", u8"inherit");
+      REQUIRE(value);
+      CHECK(std::get<GlobalKeyword>(*value) == GlobalKeyword::Inherit);
+    }
+
+    SECTION("Values that don't match the syntax")
+    {
+      CHECK_FALSE(parseValue(u8"<length>", u8"red"));
+      CHECK_FALSE(parseValue(u8"<length>", u8"10px 10px"));
+    }
+
+    SECTION("Initial values")
+    {
+      auto initial = parseInitialValue(u8"<length>", u8"10px");
+      REQUIRE(initial);
+      CHECK(serialised(*initial) == "10px");
+
+      // Keywords aren't initial values.
+      CHECK_FALSE(parseInitialValue(u8"<length>", u8"initial"));
+      CHECK_FALSE(parseInitialValue(u8"<length>", u8"red"));
+    }
+
+    SECTION("Universal initial values")
+    {
+      auto initial = parseInitialValue(u8"*", u8"foo bar");
+      REQUIRE(initial);
+      CHECK(initial->IsVariableData());
+      CHECK(serialised(*initial) == "foo bar");
+
+      CHECK_FALSE(parseInitialValue(u8"*", u8"var(--y)"));
+      CHECK_FALSE(parseInitialValue(u8"*", u8"inherit"));
+    }
   }
 }

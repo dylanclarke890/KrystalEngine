@@ -20,6 +20,7 @@
 #include "Krystal.Booey/Rendering/Style/StyleSelfAlignmentData.hpp"
 #include "Krystal.Booey/Rendering/Style/SVGRenderStyle.hpp"
 #include "Krystal.Booey/Rendering/TransformOperationData.hpp"
+#include "Krystal.Booey/Style/CustomPropertyRegistry.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Booey/Style/Values/Text/TextTransform.hpp"
@@ -62,6 +63,12 @@ namespace krys::boo
   UniquePtr<RenderStyle> RenderStyle::CreatePtr() noexcept
   {
     return ClonePtr(DefaultStyleSingleton());
+  }
+
+  UniquePtr<RenderStyle>
+    RenderStyle::CreatePtrWithRegisteredInitialValues(const style::CustomPropertyRegistry &registry) noexcept
+  {
+    return ClonePtr(registry.InitialValuePrototypeStyle());
   }
 
   RenderStyle RenderStyle::Clone(const RenderStyle &style) noexcept

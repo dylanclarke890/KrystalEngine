@@ -343,6 +343,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/FontSizeFunctions.cpp
 		tests/Style/BuilderGenerated.cpp
 		tests/Style/BuilderCustom.cpp
+		tests/Style/CustomPropertyRegistry.cpp
 		tests/Style/Calc/Tree.cpp
 		tests/Style/ElementRuleCollector.cpp
 		tests/Style/PropertyCascade.cpp

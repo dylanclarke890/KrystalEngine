@@ -85,9 +85,10 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Style resolution, layer f3f4 (2026-10-15): the render style property generator and `RenderStyle`, which replaces the seam's. See *Layer f3f4*.
 - Style resolution, layer f4a (2026-10-15): f4 planned in four sublayers; the builder state (`BuilderState`, replacing the seam's) and the font size functions. See *Layer f4: the builder (planned)* and *Layer f4a*.
 - Style resolution, layer f4b (2026-10-15): the generated builder (`BuilderGenerated`, its generator, `BuilderCustom`). See *Layer f4b*.
+- Style resolution, layer f4c (2026-10-15): registered custom properties (`CustomPropertyRegistry`, `@property`, the typed custom property parsing). See *Layer f4c*.
 
 **Open / next candidates:**
-- **Next:** style resolution, layer f4c (registered custom properties); see *Layer f4: the builder (planned)*.
+- **Next:** style resolution, layer f4d (the builder); see *Layer f4: the builder (planned)*.
 - Settings, noted with f0 (2026-10-14): parser contexts have no `Settings`, so features behind a settings flag that's on by default upstream are off in author sheets (`@view-transition` via crossDocumentViewTransitionsEnabled, `@position-try` via cssAnchorPositioningEnabled, `text-decoration-line: spelling-error | grammar-error`, ...). User agent sheets turn on upstream's list, which doesn't include the `text-decoration-line` flag (as upstream).
 - DOM, not yet done (noted 2026-10-14, deferred by choice): `NodeAlgorithms::Equals` compares attributes by position and ignores extra attributes on the other element (the spec compares the counts and matches attributes regardless of order). `Document::Head()` returns null for parsed documents (`DOMTreeAccessors::GetHeadElement`); URL reflection (`dom::USVString` is a placeholder). only `classList` follows its attribute; `relList`, `sandbox`, `sizes`, `blocking` and `htmlFor` are parsed once when created and should update from `Element::OnAttributeChanged`. Mutation observers never deliver records: `QueueMutationObserverMicrotask`/`NotifyMutationObservers` are TODOs and can now be built on `html::EventLoop`.
 - DOM, not yet done (noted with f1, 2026-10-14): `TreeQueries::NextShadowIncluding` visits a host's children before its shadow root and, when the host has children, never visits the shadow root (shadow-including tree order visits the shadow root right after its host). Shadow roots have no part mappings (`exportparts`), so `::part()` never reaches beyond the host's scope (FIXMEs in `SelectorChecker` and `ElementRuleCollector`). Documents have no focused area, so `:focus`/`:focus-visible` never match (FIXMEs).
@@ -1436,11 +1437,31 @@ Graph (headers-only, `--follow css/ style/ rendering/style/`) from `style/StyleB
 **Sublayers:**
 - **f4a, the builder state, done (2026-10-15):** `BuilderState` (and its inlines), replacing the seam's, and `StyleFontSizeFunctions`.
 - **f4b, the generated builder, done (2026-10-15):** `GenerateStyleBuilderGenerated`, `StyleBuilderGenerated.h` and `StyleBuilderCustom.h` (the per-property apply functions: value, initial, inherit), with `maybeUpdateFontForLetterSpacingOrWordSpacing`.
-- **f4c, registered custom properties:** `CustomPropertyRegistry`, `CSSRegisteredCustomProperty`, `@property` registration in the resolver, the typed custom property parsing (`ParseTypedCustomPropertyValue`, `ParseTypedCustomPropertyInitialValue`, `ParseInitialValueForUniversalSyntax`) and `RenderStyle::createPtrWithRegisteredInitialValues`.
+- **f4c, registered custom properties, done (2026-10-15):** `CustomPropertyRegistry`, `CSSRegisteredCustomProperty`, `@property` registration in the resolver, the typed custom property parsing (`ParseTypedCustomPropertyValue`, `ParseTypedCustomPropertyInitialValue`, `ParseInitialValueForUniversalSyntax`) and `RenderStyle::createPtrWithRegisteredInitialValues`.
 - **f4d, the builder:** `Builder` (applying the cascade by priority, custom properties with cycle detection, logical groups, the rollback cascades for `revert`/`revert-layer`), `var()` resolution (the deferred `VariableReferenceValue` definitions) and `PendingSubstitutionValue::ResolveValue`. The builder test fixture's `SetCurrentProperty` hook goes (the builder sets the current property).
 
 **Decisions (2026-10-15):**
 - `StyleResolveForFont` is deferred to the `FontFace` interface and the canvas 2D context: its only callers are `CSSFontFace`, `EditingStyle` and the canvas contexts, and `resolveForUnresolvedFont` needs the unported `ParseUnresolvedFont` (see *Where we are*).
+
+### Layer f4c: registered custom properties (2026-10-15)
+
+Graph: the f4 plan's. `style/StyleCustomPropertyRegistry.h`, `.cpp`, `css/CSSRegisteredCustomProperty.h`, `.cpp`, the typed custom property parsing in `CSSPropertyParser.cpp` (`parseTypedCustomPropertyValue`, `parseTypedCustomPropertyInitialValue`, `consumeTypedCustomPropertyValue`), `CSSVariableParser::parseInitialValueForUniversalSyntax`, `RenderStyle::createPtrWithRegisteredInitialValues`, and the registry's users in `StyleScope` and `RuleSetBuilder`.
+
+**Decisions (2026-10-15):**
+- `css::RegisteredCustomProperty` is a plain struct (PascalCase members); its out-of-line destructor (upstream's, for incomplete types) isn't needed, so there's no `.cpp`. The registry keeps both maps as `HashMap<CSSOMStringAtom, UniquePtr<RegisteredCustomProperty>>`.
+- FIXMEs: invalidating the matched declarations cache (f5), `Document::setHasStyleWithViewportUnits()` and the scope's viewport unit invalidation that calls `InvalidatePropertiesWithViewportUnits` (no viewport changes yet), and telling keyframe effects about registrations (animations).
+- `Resolver::DefaultStyleForElement` starts from the registry's initial values (upstream also does for `initializeStateAndStyle` and `styleForPseudoElement`, which come with element resolution in f5).
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `style/StyleCustomPropertyRegistry.h`, `.cpp` | `port` | `Style/CustomPropertyRegistry.hpp`, `src/...` | on | tested. |
+| `css/CSSRegisteredCustomProperty.h`, `.cpp` | `port` | `CSS/Properties/RegisteredCustomProperty.hpp` | on | Replaces the unreviewed raw file. |
+
+**Added (upstream API):** `CustomPropertyRegistry` (with `Scope::GetCustomPropertyRegistry()`), `@property` registration in `RuleSetBuilder` (ignored in shadow trees), clearing the style sheets' registrations with the resolver, `RenderStyle::CreatePtrWithRegisteredInitialValues`, `PropertyParser::ParseTypedCustomPropertyValue` and `ParseTypedCustomPropertyInitialValue`, `VariableParser::ParseInitialValueForUniversalSyntax`.
+
+**Differences:** as in the decisions.
+
+Tests: `tests/Style/CustomPropertyRegistry.cpp` (registration order and precedence, invalid initial values, the universal syntax, viewport units, parsing initial values, the prototype style and default styles, `@property` rules and shadow trees) and `tests/CSS/Properties/PropertyParser.cpp` (typed values, lists, the universal syntax, global keywords, mismatches, initial values): 4 new cases. Full Booey suite: 1997 cases; all pass except 7 expected failures. Whole solution builds with no warnings.
 
 ### Layer f4b: the generated builder (2026-10-15)
 
@@ -1994,7 +2015,7 @@ Graphs from the nine f0 entries (headers-only): `style/RuleSet.cpp` (89 files), 
 
 **Decisions (2026-10-14):**
 - The rule set half of `Style::Resolver` comes now: creation and initialisation (no root default style; FIXME, as in e7), the rule sets, the media query evaluator, author style sheets, keyframes, shared shadow tree resolvers, and `Style::Scope`'s resolver hooks (create, reconstruct, reset or append on style sheet changes). Style resolution (`styleForElement` and the rest) waits for f5.
-- Of the at-rules a rule set hands to the resolver, `@keyframes` (the resolver's keyframes map), `@counter-style` (the scope's counter style registry; `CSSCounterStyle` and `CSSCounterStyleRegistry` are reviewed here so `counterStyles.css` registers), `@view-transition` and `@position-try` (the rule set) are handled. `@property` waits for f4 (`CustomPropertyRegistry`, moved from f2); `@font-face`, `@font-palette-values` and `@font-feature-values` wait for the font selector (FIXMEs).
+- Of the at-rules a rule set hands to the resolver, `@keyframes` (the resolver's keyframes map), `@counter-style` (the scope's counter style registry; `CSSCounterStyle` and `CSSCounterStyleRegistry` are reviewed here so `counterStyles.css` registers), `@view-transition` and `@position-try` (the rule set) are handled. `@property` registers with the scope's custom property registry (since f4c); `@font-face`, `@font-palette-values` and `@font-feature-values` wait for the font selector (FIXMEs).
 - The user agent sheets are checked in as cleaned copies (`codegen/user-agent-style-sheets/`), embedded by a codegen step. See *User agent sheets* below.
 - Style relations are collected now (`SelectorChecker`'s `addStyleRelation` calls); committing them to element flags and styles (`commitRelations`, `commitRelationsToRenderStyle`, `copyRelations`) waits for the resolver (f5).
 
@@ -2098,8 +2119,8 @@ Graphs from the six planned entries (headers-only): `style/PropertyCascade.cpp` 
 | `style/PropertyCascade.h`, `.cpp` | `port` | `Style/PropertyCascade.hpp`, `src/...` | on | tested. See differences. |
 | `animation/WebAnimationTypes.h` (`AnimatableCSSProperty`) | `port` (partial) | `Animation/WebAnimationTypes.hpp` | on | tested (through the cascade). The type only. |
 | `style/StyleCustomProperty.h`, `.cpp` | `port` (f3) | | | Moved to f3. |
-| `style/StyleCustomPropertyRegistry.h`, `.cpp` | `port` (f4) | | | Moved to f4. |
-| `css/CSSRegisteredCustomProperty.h`, `.cpp` | `port` (f4) | | | Moved to f4 (with the registry). The unreviewed `CSS/Properties/RegisteredCustomProperty.hpp` stays off. |
+| `style/StyleCustomPropertyRegistry.h`, `.cpp` | `port` (f4) | | | Moved to f4; ported in f4c. |
+| `css/CSSRegisteredCustomProperty.h`, `.cpp` | `port` (f4) | | | Moved to f4 (with the registry); ported in f4c. |
 | `css/CSSVariableReferenceValue.cpp` (resolution) | `port` (f4) | | | The deferred definitions move to f4 with `Style::Builder`. |
 | `css/CSSCustomPropertyValue.h`, `.cpp` | `have` | `CSS/Values/CustomPropertyValue.hpp`, `src/...` | on | Unchanged (reviewed with the values). |
 

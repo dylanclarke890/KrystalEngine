@@ -28,7 +28,6 @@ namespace krys::boo::css
       ParseDeclarationValue(const CSSOMStringAtom &variableName, TokenRange tokens,
                             const ParserContext &context) noexcept;
 
-    // FIXME: Not defined until style::CustomProperty is ported.
     KRYS_NODISCARD static RefPtr<const style::CustomProperty>
       ParseInitialValueForUniversalSyntax(const CSSOMStringAtom &variableName, TokenRange tokens) noexcept;
 

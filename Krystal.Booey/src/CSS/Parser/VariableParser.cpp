@@ -7,6 +7,7 @@
 #include "Krystal.Booey/CSS/Values/GlobalKeyword.hpp"
 #include "Krystal.Booey/CSS/Values/VariableData.hpp"
 #include "Krystal.Booey/CSS/Values/VariableReferenceValue.hpp"
+#include "Krystal.Booey/Style/CustomProperty.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo::css
@@ -323,9 +324,17 @@ namespace krys::boo::css
     return CustomPropertyValue::CreateSyntaxAll(variableName, VariableData::Create(range, parserContext));
   }
 
-  // FIXME: ParseInitialValueForUniversalSyntax needs style::CustomProperty::CreateForVariableData:
-  //   auto type = ClassifyVariableRange(range, StrictParserContext());
-  //   if (!type || type->Keyword || type->ClassifyBlockResult.HasReferences)
-  //     return nullptr;
-  //   return style::CustomProperty::CreateForVariableData(variableName, VariableData::Create(range));
+  RefPtr<const style::CustomProperty>
+    VariableParser::ParseInitialValueForUniversalSyntax(const CSSOMStringAtom &variableName,
+                                                        TokenRange range) noexcept
+  {
+    auto type = ClassifyVariableRange(range, StrictParserContext());
+
+    if (!type || type->Keyword || type->ClassifyBlockResult.HasReferences)
+    {
+      return nullptr;
+    }
+
+    return style::CustomProperty::CreateForVariableData(variableName, VariableData::Create(range));
+  }
 }

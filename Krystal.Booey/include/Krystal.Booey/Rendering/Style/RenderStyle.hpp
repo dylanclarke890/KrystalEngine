@@ -5,6 +5,11 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyleProperties.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
 
+namespace krys::boo::style
+{
+  class CustomPropertyRegistry;
+}
+
 namespace krys::boo
 {
   class IntSize;
@@ -27,6 +32,8 @@ namespace krys::boo
 
     KRYS_NODISCARD static RenderStyle Create() noexcept;
     KRYS_NODISCARD static UniquePtr<RenderStyle> CreatePtr() noexcept;
+    KRYS_NODISCARD static UniquePtr<RenderStyle>
+      CreatePtrWithRegisteredInitialValues(const style::CustomPropertyRegistry &) noexcept;
 
     KRYS_NODISCARD static RenderStyle Clone(const RenderStyle &) noexcept;
     KRYS_NODISCARD static RenderStyle CloneIncludingPseudoElements(const RenderStyle &) noexcept;

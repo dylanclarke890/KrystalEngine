@@ -8,6 +8,8 @@
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
+#include "Krystal.Booey/Style/CustomPropertyRegistry.hpp"
+#include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/UserAgentStyle.hpp"
 #include "Krystal.Core/Assert.hpp"
@@ -136,11 +138,11 @@ namespace krys::boo::style
     return _ruleSets.EvaluateDynamicMediaQueryRules(_mediaQueryEvaluator);
   }
 
-  UniquePtr<RenderStyle> Resolver::DefaultStyleForElement(const dom::Document &,
+  UniquePtr<RenderStyle> Resolver::DefaultStyleForElement(const dom::Document &document,
                                                           const dom::Element *) noexcept
   {
-    // FIXME: Start from the custom property registry's initial values once it's ported.
-    auto style = RenderStyle::CreatePtr();
+    auto style =
+      RenderStyle::CreatePtrWithRegisteredInitialValues(document.StyleScope().GetCustomPropertyRegistry());
 
     FontCascadeDescription fontDescription;
     fontDescription.SetOneFamily(css::WebKitFontFamilyNames::StandardFamily());

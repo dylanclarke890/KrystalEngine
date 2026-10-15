@@ -10,6 +10,7 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Style/CustomPropertyRegistry.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Core/Assert.hpp"
@@ -647,11 +648,16 @@ namespace krys::boo::style
         continue;
       }
 
-      if (Is<css::PropertyRule>(rule))
+      if (auto *styleRuleProperty = DynamicDowncast<css::PropertyRule>(rule))
       {
         // "A @property is invalid if it occurs in a stylesheet inside of a shadow tree, and must be ignored."
         // https://drafts.css-houdini.org/css-properties-values-api/#at-property-rule
-        // FIXME: Register the property with the scope's custom property registry, once it is ported.
+        if (_resolver->GetScopeType() == Resolver::ScopeType::ShadowTree)
+        {
+          continue;
+        }
+        auto &registry = _resolver->Document().StyleScope().GetCustomPropertyRegistry();
+        registry.RegisterFromStylesheet(styleRuleProperty->GetDescriptor());
         continue;
       }
 

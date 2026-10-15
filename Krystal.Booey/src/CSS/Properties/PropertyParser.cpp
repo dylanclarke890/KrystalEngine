@@ -40,6 +40,14 @@
 #include "Krystal.Booey/CSS/Values/UrlValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/VariableReferenceValue.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/CustomProperty.hpp"
+#include "Krystal.Booey/Style/ForVisitedLink.hpp"
+#include "Krystal.Booey/Style/Values/Color/Color.hpp"
+#include "Krystal.Booey/Style/Values/Images/ImageWrapper.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueConversion.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/Url.hpp"
+#include "Krystal.Booey/Style/Values/Transforms/TransformFunction.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 
 namespace krys::boo::css
@@ -49,6 +57,10 @@ namespace krys::boo::css
   KRYS_NODISCARD static Pair<RefPtr<Value>, CustomPropertySyntax::Type>
     ConsumeCustomPropertyValueWithSyntax(TokenRange &tokens, PropertyParserState &state,
                                          const CustomPropertySyntax &syntax) noexcept;
+  KRYS_NODISCARD static Maybe<Variant<Ref<const style::CustomProperty>, GlobalKeyword>>
+    ConsumeTypedCustomPropertyValue(TokenRange &tokens, PropertyParserState &state,
+                                    const CSSOMStringAtom &name, const CustomPropertySyntax &syntax,
+                                    style::BuilderState &builderState) noexcept;
 
 #pragma endregion
 
@@ -389,6 +401,55 @@ namespace krys::boo::css
 
 #pragma region Custom Properties
 
+  Maybe<Variant<Ref<const style::CustomProperty>, GlobalKeyword>>
+    PropertyParser::ParseTypedCustomPropertyValue(const CSSOMStringAtom &name,
+                                                  const CustomPropertySyntax &syntax, TokenRange range,
+                                                  style::BuilderState &builderState,
+                                                  const ParserContext &context) noexcept
+  {
+    auto state = PropertyParserState {
+      .Context = context,
+      .CurrentRule = RuleType::Style,
+      .CurrentProperty = PropertyId::Custom,
+      .Important = IsImportant(false),
+    };
+
+    auto value = ConsumeTypedCustomPropertyValue(range, state, name, syntax, builderState);
+    if (!value || !range.IsAtEnd())
+    {
+      return std::nullopt;
+    }
+    return value;
+  }
+
+  RefPtr<const style::CustomProperty> PropertyParser::ParseTypedCustomPropertyInitialValue(
+    const CSSOMStringAtom &name, const CustomPropertySyntax &syntax, TokenRange range,
+    style::BuilderState &builderState, const ParserContext &context) noexcept
+  {
+    if (syntax.IsUniversal())
+    {
+      return VariableParser::ParseInitialValueForUniversalSyntax(name, range);
+    }
+
+    auto state = PropertyParserState {
+      .Context = context,
+      .CurrentRule = RuleType::Style,
+      .CurrentProperty = PropertyId::Custom,
+      .Important = IsImportant(false),
+    };
+
+    auto value = ConsumeTypedCustomPropertyValue(range, state, name, syntax, builderState);
+    if (!value || !range.IsAtEnd())
+    {
+      return nullptr;
+    }
+
+    return krys::SwitchOn(
+      *value, [](const Ref<const style::CustomProperty> &resolved) -> RefPtr<const style::CustomProperty>
+      { return resolved; },
+      [](const GlobalKeyword &) -> RefPtr<const style::CustomProperty> { return nullptr; });
+  }
+
   ComputedStyleDependencies PropertyParser::CollectParsedCustomPropertyValueDependencies(
     const CustomPropertySyntax &syntax, TokenRange range, const ParserContext &context) noexcept
   {
@@ -572,6 +633,105 @@ namespace krys::boo::css
     }
 
     return {nullptr, CustomPropertySyntax::Type::Unknown};
+  }
+
+  Maybe<Variant<Ref<const style::CustomProperty>, GlobalKeyword>>
+    ConsumeTypedCustomPropertyValue(TokenRange &range, PropertyParserState &state,
+                                    const CSSOMStringAtom &name, const CustomPropertySyntax &syntax,
+                                    style::BuilderState &builderState) noexcept
+  {
+    if (syntax.IsUniversal())
+    {
+      return style::CustomProperty::CreateForVariableData(name, VariableData::Create(range.ConsumeAll()));
+    }
+
+    range.DiscardWhitespace();
+
+    if (auto keyword = ConsumeGlobalKeyword(range))
+    {
+      return *keyword;
+    }
+
+    auto [value, syntaxType] = ConsumeCustomPropertyValueWithSyntax(range, state, syntax);
+    if (!value)
+    {
+      return std::nullopt;
+    }
+
+    auto resolveSyntaxValue = [&, syntaxType =
+                                    syntaxType](const Value &value) -> Maybe<style::CustomProperty::Value>
+    {
+      switch (syntaxType)
+      {
+        case CustomPropertySyntax::Type::LengthPercentage:
+          return style::ConvertCSSValueToStyle<style::LengthPercentage<>>(builderState,
+                                                                          Downcast<PrimitiveValue>(value));
+        case CustomPropertySyntax::Type::Length:
+          return style::ConvertCSSValueToStyle<style::Length<>>(builderState,
+                                                                Downcast<PrimitiveValue>(value));
+        case CustomPropertySyntax::Type::Integer:
+        case CustomPropertySyntax::Type::Number:
+          return style::ConvertCSSValueToStyle<style::Number<>>(builderState,
+                                                                Downcast<PrimitiveValue>(value));
+        case CustomPropertySyntax::Type::Percentage:
+          return style::ConvertCSSValueToStyle<style::Percentage<>>(builderState,
+                                                                    Downcast<PrimitiveValue>(value));
+        case CustomPropertySyntax::Type::Angle:
+          return style::ConvertCSSValueToStyle<style::Angle<>>(builderState, Downcast<PrimitiveValue>(value));
+        case CustomPropertySyntax::Type::Time:
+          return style::ConvertCSSValueToStyle<style::Time<>>(builderState, Downcast<PrimitiveValue>(value));
+        case CustomPropertySyntax::Type::Resolution:
+          return style::ConvertCSSValueToStyle<style::Resolution<>>(builderState,
+                                                                    Downcast<PrimitiveValue>(value));
+        case CustomPropertySyntax::Type::Color:
+          return style::ConvertCSSValueToStyle<style::Color>(builderState, value, style::ForVisitedLink::No);
+        case CustomPropertySyntax::Type::Image:
+        {
+          auto styleImage = builderState.CreateStyleImage(value);
+          if (!styleImage)
+          {
+            return std::nullopt;
+          }
+          Ref<StyleImage> image = krys::move(styleImage);
+          return style::ImageWrapper {krys::move(image)};
+        }
+        case CustomPropertySyntax::Type::URL:
+          return style::ConvertToStyle(Downcast<UrlValue>(value).URL(), builderState);
+        case CustomPropertySyntax::Type::CustomIdent:
+          return CustomIdentifier {CSSOMStringAtom {Downcast<PrimitiveValue>(value).StringValue()}};
+        case CustomPropertySyntax::Type::String: return Downcast<PrimitiveValue>(value).StringValue();
+        case CustomPropertySyntax::Type::TransformFunction:
+        case CustomPropertySyntax::Type::TransformList:
+          return style::ConvertCSSValueToStyle<style::TransformFunction>(builderState, value);
+        case CustomPropertySyntax::Type::Unknown: return std::nullopt;
+      }
+      krys_debug_assert(false);
+      return std::nullopt;
+    };
+
+    if (Is<ValueList>(*value) || Is<TransformListValue>(*value))
+    {
+      const auto &valueList = Downcast<ValueContainingList>(*value);
+      auto syntaxValueList = style::CustomProperty::ValueList {{}, valueList.Separator()};
+      for (const auto &listValue : valueList)
+      {
+        auto syntaxValue = resolveSyntaxValue(listValue);
+        if (!syntaxValue)
+        {
+          return std::nullopt;
+        }
+        syntaxValueList.Values.push_back(krys::move(*syntaxValue));
+      }
+      return style::CustomProperty::CreateForValueList(name, krys::move(syntaxValueList));
+    }
+
+    auto syntaxValue = resolveSyntaxValue(*value);
+    if (!syntaxValue)
+    {
+      return std::nullopt;
+    }
+
+    return style::CustomProperty::CreateForValue(name, krys::move(*syntaxValue));
   }
 
 #pragma endregion

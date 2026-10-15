@@ -14,6 +14,7 @@
 #include "Krystal.Booey/HTML/HTMLLinkElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/HTMLStyleElement.hpp"
+#include "Krystal.Booey/Style/CustomPropertyRegistry.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/RuleSet.hpp"
 #include "Krystal.Core/Assert.hpp"
@@ -82,12 +83,14 @@ namespace krys::boo::style
   }
 
   Scope::Scope(dom::Document &document) noexcept
-      : _document(&document), _counterStyleRegistry(CreateUnique<css::CounterStyleRegistry>())
+      : _document(&document), _customPropertyRegistry(CreateUnique<CustomPropertyRegistry>(*this)),
+        _counterStyleRegistry(CreateUnique<css::CounterStyleRegistry>())
   {
   }
 
   Scope::Scope(dom::ShadowRoot &shadowRoot) noexcept
       : _document(&shadowRoot.NodeDocument()), _shadowRoot(&shadowRoot),
+        _customPropertyRegistry(CreateUnique<CustomPropertyRegistry>(*this)),
         _counterStyleRegistry(CreateUnique<css::CounterStyleRegistry>())
   {
   }
@@ -232,8 +235,7 @@ namespace krys::boo::style
     // FIXME: Also assert that the document isn't resolving its tree style, once there is a tree resolver.
 
     _resolver = nullptr;
-    // FIXME: Clear the custom properties registered from style sheets, once the custom property registry is
-    // ported.
+    GetCustomPropertyRegistry().ClearRegisteredFromStylesheets();
     GetCounterStyleRegistry().ClearAuthorCounterStyles();
   }
 
@@ -638,8 +640,7 @@ namespace krys::boo::style
 
     if (updateType == ResolverUpdateType::Reset)
     {
-      // FIXME: Clear the custom properties registered from style sheets, once the custom property registry is
-      // ported.
+      GetCustomPropertyRegistry().ClearRegisteredFromStylesheets();
       GetCounterStyleRegistry().ClearAuthorCounterStyles();
       _resolver->RuleSets().ResetAuthorStyle();
       _resolver->AppendAuthorStyleSheets(activeStyleSheets);

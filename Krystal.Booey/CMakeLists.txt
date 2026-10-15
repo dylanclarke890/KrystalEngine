@@ -670,6 +670,8 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/BuilderCustom.hpp
   include/Krystal.Booey/Style/BuilderGenerated.hpp
   include/Krystal.Booey/Style/BuilderState.hpp
+  include/Krystal.Booey/Style/CustomPropertyRegistry.hpp
+  include/Krystal.Booey/CSS/Properties/RegisteredCustomProperty.hpp
   include/Krystal.Booey/Style/BuilderStateInlines.hpp
   include/Krystal.Booey/Style/FontSizeFunctions.hpp
   include/Krystal.Booey/Style/Values/CSSValueConversion.hpp
@@ -1768,6 +1770,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
 
   # Generated builder (f4b)
   ${KRYSTAL_BOOEY_SOURCES_OUTPUT_DIR}/Style/BuilderGenerated.cpp
+
+  # Registered custom properties (f4c)
+  src/Style/CustomPropertyRegistry.cpp
 )
 
 target_precompile_headers(Krystal.Booey
