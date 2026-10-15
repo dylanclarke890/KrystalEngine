@@ -4,6 +4,7 @@
 #include "Krystal.Booey/CSS/Values/TextShadowPropertyValue.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Values/Borders/ShadowInterpolation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"

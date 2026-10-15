@@ -2,6 +2,7 @@
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
 #include <algorithm>
 
 namespace krys::boo::style

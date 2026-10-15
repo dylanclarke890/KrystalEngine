@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Style/Values/Shapes/BasicShape.hpp"
 
 #include "Krystal.Booey/CSS/Values/BasicShapeValue.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 

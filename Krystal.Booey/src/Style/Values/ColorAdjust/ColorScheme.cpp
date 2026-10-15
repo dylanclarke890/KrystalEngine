@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Values/ColorSchemeValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
 namespace krys::boo::style

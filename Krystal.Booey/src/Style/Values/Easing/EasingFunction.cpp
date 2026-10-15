@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Values/Easing/EasingFunction.hpp"
 #include "Krystal.Booey/CSS/Values/EasingFunctionValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Easing/CubicBezierEasingFunction.hpp"
 #include "Krystal.Booey/Style/Values/Easing/LinearEasingFunction.hpp"
 #include "Krystal.Booey/Style/Values/Easing/SpringEasingFunction.hpp"

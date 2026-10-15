@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Values/FilterEffects/FilterReference.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Rendering/Style/ReferenceFilterOperation.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 
 namespace krys::boo::style

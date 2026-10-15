@@ -14,9 +14,11 @@
 #include "Krystal.Booey/CSS/Values/PaintImageValue.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCursorImage.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
@@ -71,6 +73,30 @@ namespace krys::boo
   LayoutUnit RenderBox::ContentBoxHeight() const noexcept
   {
     krys_unreachable();
+  }
+
+  bool RenderTheme::HasAppearanceForElementTypeFromUAStyle(const dom::Element &element) noexcept
+  {
+    if (!Is<html::HTMLElement>(element))
+    {
+      return false;
+    }
+    switch (element.TagQualifiedName().TagName())
+    {
+      case html::TagName::input:
+      case html::TagName::textarea:
+      case html::TagName::button:
+      case html::TagName::progress:
+      case html::TagName::select:
+      case html::TagName::meter:    return true;
+      default:                      return false;
+    }
+  }
+
+  const SettingsValues &DocumentSettingsValues(const dom::Document &) noexcept
+  {
+    static constexpr SettingsValues settings {};
+    return settings;
   }
 
   int32 AdjustForAbsoluteZoom(int32, const RenderView &) noexcept
@@ -149,241 +175,6 @@ namespace krys::boo
 
 namespace krys::boo::style
 {
-  BuilderState::BuilderState(RenderStyle &style, BuilderContext &&context) noexcept
-      : _style(style), _context(krys::move(context)), _cssToLengthConversionData(style, *this)
-  {
-  }
-
-  BuilderState::~BuilderState() noexcept = default;
-
-  RenderStyle &BuilderState::Style() noexcept
-  {
-    return _style;
-  }
-
-  const RenderStyle &BuilderState::Style() const noexcept
-  {
-    return _style;
-  }
-
-  const RenderStyle &BuilderState::ParentStyle() const noexcept
-  {
-    return *_context.ParentStyle;
-  }
-
-  const RenderStyle *BuilderState::RootElementStyle() const noexcept
-  {
-    return _context.RootElementStyle;
-  }
-
-  const dom::Document &BuilderState::GetDocument() const noexcept
-  {
-    return *_context.Document;
-  }
-
-  const dom::Element *BuilderState::GetElement() const noexcept
-  {
-    return _context.Element.get();
-  }
-
-  const Maybe<BuilderPositionTryFallback> &BuilderState::GetPositionTryFallback() const noexcept
-  {
-    return _context.PositionTryFallback;
-  }
-
-  float BuilderState::ZoomWithTextZoomFactor() noexcept
-  {
-    // FIXME: Documents have no frame, so there's no text zoom factor (`-webkit-text-zoom` isn't supported).
-    return CssToLengthConversionData().Zoom();
-  }
-
-  // SVG handles zooming in a different way compared to CSS. The whole document is scaled instead
-  // of each individual length value in the render style / tree. CSSPrimitiveValue::resolveAsLength*()
-  // multiplies each resolved length with the zoom multiplier - so for SVG we need to disable that.
-  // Though all CSS values that can be applied to outermost <svg> elements (width/height/border/padding...)
-  // need to respect the scaling. RenderBox (the parent class of LegacyRenderSVGRoot) grabs values like
-  // width/height/border/padding/... from the RenderStyle -> for SVG these values would never scale,
-  // if we'd pass a 1.0 zoom factor everywhere. So we only pass a zoom factor of 1.0 for specific
-  // properties that are NOT allowed to scale within a zoomed SVG document (letter/word-spacing/font-size).
-  bool BuilderState::UseSVGZoomRules() const noexcept
-  {
-    return Is<svg::SVGElement>(GetElement());
-  }
-
-  bool BuilderState::UseSVGZoomRulesForLength() const noexcept
-  {
-    auto *svgElement = DynamicDowncast<svg::SVGElement>(GetElement());
-    return svgElement && !(Is<svg::SVGSvgElement>(*svgElement) && svgElement->ParentNode());
-  }
-
-  style::ScopeOrdinal BuilderState::StyleScopeOrdinal() const noexcept
-  {
-    return _currentProperty->StyleScopeOrdinal;
-  }
-
-  const List<css::CSSOMStringAtom> &BuilderState::RegisteredContentAttributes() const noexcept
-  {
-    return _registeredContentAttributes;
-  }
-
-  void BuilderState::RegisterContentAttribute(const css::CSSOMStringAtom &attributeLocalName) noexcept
-  {
-    if (Style().GetPseudoElementType() == PseudoElementType::Before
-        || Style().GetPseudoElementType() == PseudoElementType::After)
-    {
-      _registeredContentAttributes.push_back(attributeLocalName);
-    }
-  }
-
-  RefPtr<StyleImage> BuilderState::CreateStyleImage(const css::Value &value) const noexcept
-  {
-    if (const auto *imageValue = DynamicDowncast<css::ImageValue>(value))
-    {
-      return imageValue->CreateStyleImage(*this);
-    }
-    if (const auto *imageSetValue = DynamicDowncast<css::ImageSetValue>(value))
-    {
-      return imageSetValue->CreateStyleImage(*this);
-    }
-    if (const auto *imageValue = DynamicDowncast<css::CursorImageValue>(value))
-    {
-      return imageValue->CreateStyleImage(*this);
-    }
-    if (const auto *imageValue = DynamicDowncast<css::NamedImageValue>(value))
-    {
-      return imageValue->CreateStyleImage(*this);
-    }
-    if (const auto *cssCanvasValue = DynamicDowncast<css::CanvasValue>(value))
-    {
-      return cssCanvasValue->CreateStyleImage(*this);
-    }
-    if (const auto *crossfadeValue = DynamicDowncast<css::CrossFadeValue>(value))
-    {
-      return crossfadeValue->CreateStyleImage(*this);
-    }
-    if (const auto *filterImageValue = DynamicDowncast<css::FilterImageValue>(value))
-    {
-      return filterImageValue->CreateStyleImage(*this);
-    }
-    if (const auto *gradientValue = DynamicDowncast<css::GradientValue>(value))
-    {
-      return gradientValue->CreateStyleImage(*this);
-    }
-    if (const auto *paintImageValue = DynamicDowncast<css::PaintImageValue>(value))
-    {
-      return paintImageValue->CreateStyleImage(*this);
-    }
-    return nullptr;
-  }
-
-  const css::ToLengthConversionData &BuilderState::CssToLengthConversionData() const noexcept
-  {
-    return _cssToLengthConversionData;
-  }
-
-  bool BuilderState::IsAuthorOrigin() const noexcept
-  {
-    return _currentProperty && _currentProperty->Origin == PropertyCascade::Origin::Author;
-  }
-
-  css::PropertyId BuilderState::CssPropertyId() const noexcept
-  {
-    return _currentProperty ? _currentProperty->Id : css::PropertyId::Invalid;
-  }
-
-  bool BuilderState::IsCurrentPropertyInvalidAtComputedValueTime() const noexcept
-  {
-    return _invalidAtComputedValueTimeProperties.test(static_cast<size_t>(CssPropertyId()));
-  }
-
-  void BuilderState::SetCurrentPropertyInvalidAtComputedValueTime() noexcept
-  {
-    _invalidAtComputedValueTimeProperties.set(static_cast<size_t>(CssPropertyId()));
-  }
-
-  bool BuilderState::EvaluationTimeZoomEnabled() const noexcept
-  {
-    return false;
-  }
-
-  void BuilderState::SetUsesViewportUnits() noexcept
-  {
-    _style.SetUsesViewportUnits();
-  }
-
-  void BuilderState::SetUsesContainerUnits() noexcept
-  {
-    _style.SetUsesContainerUnits();
-  }
-
-  double BuilderState::LookupCSSRandomBaseValue(const css::calc::RandomCachingKey &,
-                                                Maybe<css::keywords::ElementShared>) const noexcept
-  {
-    // FIXME: The element and document `random()` caches come with the resolver.
-    krys_unreachable();
-  }
-
-  // MARK: - Tree Counting Functions
-
-  uint32 BuilderState::SiblingCount() noexcept
-  {
-    // https://drafts.csswg.org/css-values-5/#funcdef-sibling-count
-
-    krys_debug_assert(GetElement());
-
-    RefPtr parent = ShareRefPtr(GetElement()->ParentElement());
-    if (!parent)
-    {
-      return 1;
-    }
-
-    _style.SetUsesTreeCountingFunctions();
-    // FIXME: Mark the parent's children as affected by forward and backward positional rules once elements
-    // keep their style relations (invalidation).
-
-    uint32 count = 1;
-    for (auto sibling = GetElement()->PreviousElementSibling(); sibling;
-         sibling = sibling->PreviousElementSibling())
-    {
-      ++count;
-    }
-    for (auto sibling = GetElement()->NextElementSibling(); sibling; sibling = sibling->NextElementSibling())
-    {
-      ++count;
-    }
-    return count;
-  }
-
-  uint32 BuilderState::SiblingIndex() noexcept
-  {
-    // https://drafts.csswg.org/css-values-5/#funcdef-sibling-index
-
-    krys_debug_assert(GetElement());
-
-    RefPtr parent = ShareRefPtr(GetElement()->ParentElement());
-    if (!parent)
-    {
-      return 1;
-    }
-
-    _style.SetUsesTreeCountingFunctions();
-    // FIXME: Mark the parent's children as affected by forward and backward positional rules once elements
-    // keep their style relations (invalidation).
-
-    uint32 count = 1;
-    for (auto sibling = GetElement()->PreviousElementSibling(); sibling;
-         sibling = sibling->PreviousElementSibling())
-    {
-      ++count;
-    }
-    return count;
-  }
-
-  void BuilderState::SetCurrentProperty(const PropertyCascade::Property *property) noexcept
-  {
-    _currentProperty = property;
-  }
-
   Maybe<double> AnchorPositionEvaluator::Evaluate(BuilderState &, Maybe<ScopedName>,
                                                   AnchorPositionEvaluator::Side) noexcept
   {

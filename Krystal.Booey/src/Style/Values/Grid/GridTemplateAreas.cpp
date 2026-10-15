@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/CSS/Values/GridTemplateAreasValue.hpp"
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
 #include <algorithm>
 
 namespace krys::boo::style

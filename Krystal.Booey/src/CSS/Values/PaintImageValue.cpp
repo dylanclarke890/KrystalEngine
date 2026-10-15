@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/PaintImageValue.hpp"
 #include "Krystal.Booey/Rendering/Style/StylePaintImage.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
 
 namespace krys::boo::css
 {

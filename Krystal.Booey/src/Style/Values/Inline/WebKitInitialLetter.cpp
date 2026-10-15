@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Style/Values/Inline/WebKitInitialLetter.hpp"
 
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueConversion.hpp"
 
 namespace krys::boo::style

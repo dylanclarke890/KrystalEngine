@@ -340,6 +340,7 @@ target_sources(Krystal.Booey.Tests
 
 		# Style
 		tests/Style/BuilderState.cpp
+		tests/Style/FontSizeFunctions.cpp
 		tests/Style/Calc/Tree.cpp
 		tests/Style/ElementRuleCollector.cpp
 		tests/Style/PropertyCascade.cpp

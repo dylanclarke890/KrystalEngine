@@ -5,6 +5,7 @@
 #include "Krystal.Booey/CSS/Values/UrlValue.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/ForVisitedLink.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 

@@ -1,5 +1,6 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Align/AlignSelf.hpp"
 #include "Krystal.Booey/Style/Values/Align/JustifySelf.hpp"
 #include "Krystal.Booey/Style/Values/AnchorPosition/AnchorName.hpp"

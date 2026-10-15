@@ -83,9 +83,10 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Style resolution, layer f3f1 (2026-10-14): the border, outline and counter value classes, `PositionTryOrder`, and the custom property storage (`CustomProperty`, `CustomPropertyData`). See *Layer f3f1*.
 - Style resolution, layers f3f2 and f3f3 (2026-10-14): the computed style property generator, the `rendering/style` data groups, `style/computed` and `NameScope`. See *Layer f3f2 and f3f3*.
 - Style resolution, layer f3f4 (2026-10-15): the render style property generator and `RenderStyle`, which replaces the seam's. See *Layer f3f4*.
+- Style resolution, layer f4a (2026-10-15): f4 planned in four sublayers; the builder state (`BuilderState`, replacing the seam's) and the font size functions. See *Layer f4: the builder (planned)* and *Layer f4a*.
 
 **Open / next candidates:**
-- **Next:** style resolution, layer f4 (the builder); see the f3/f4 plan. f3 is complete.
+- **Next:** style resolution, layer f4b (the generated builder); see *Layer f4: the builder (planned)*.
 - Settings, noted with f0 (2026-10-14): parser contexts have no `Settings`, so features behind a settings flag that's on by default upstream are off in author sheets (`@view-transition` via crossDocumentViewTransitionsEnabled, `@position-try` via cssAnchorPositioningEnabled, `text-decoration-line: spelling-error | grammar-error`, ...). User agent sheets turn on upstream's list, which doesn't include the `text-decoration-line` flag (as upstream).
 - DOM, not yet done (noted 2026-10-14, deferred by choice): `NodeAlgorithms::Equals` compares attributes by position and ignores extra attributes on the other element (the spec compares the counts and matches attributes regardless of order). `Document::Head()` returns null for parsed documents (`DOMTreeAccessors::GetHeadElement`); URL reflection (`dom::USVString` is a placeholder). only `classList` follows its attribute; `relList`, `sandbox`, `sizes`, `blocking` and `htmlFor` are parsed once when created and should update from `Element::OnAttributeChanged`. Mutation observers never deliver records: `QueueMutationObserverMicrotask`/`NotifyMutationObservers` are TODOs and can now be built on `html::EventLoop`.
 - DOM, not yet done (noted with f1, 2026-10-14): `TreeQueries::NextShadowIncluding` visits a host's children before its shadow root and, when the host has children, never visits the shadow root (shadow-including tree order visits the shadow root right after its host). Shadow roots have no part mappings (`exportparts`), so `::part()` never reaches beyond the host's scope (FIXMEs in `SelectorChecker` and `ElementRuleCollector`). Documents have no focused area, so `:focus`/`:focus-visible` never match (FIXMEs).
@@ -415,7 +416,7 @@ URL differences:
 
 - `StringAtom::View()` (Krystal.Core) dereferences null for `Null()`; `CounterValue` works around it, and `ImageValue`'s default initiator type would hit it in `LoadImage`.
 - Krystal.Core's text tests (`tests/Text/*`) aren't in `Krystal.Core.Tests/CMakeLists.txt`; only `CodePointIterator.cpp` is.
-- Unreviewed files still on the old or raw names: `Consumers/Font.hpp` (`ConsumeFontTech` returns `SmallList<FontTechnology>`; `ConsumeFontFaceSrc` will need a `List`); `Consumers/Grid.hpp` (own `GridNamedAreaMapRow` alias); `Consumers/Shapes.cpp` (stub); `PrimitiveValueMappings.hpp` (raw `CSSFontFaceSrcValue.h`); `CSS/Font/FontFace.hpp` and `Style/BuilderState.hpp` (raw `FontTaggedSettings.h`); `Style/Values/Primitives/Position.hpp` (`x.offset`); `Style/Values/Primitives/CoordinatedValueList.hpp` (`PointerComparison`).
+- Unreviewed files still on the old or raw names: `Consumers/Font.hpp` (`ConsumeFontTech` returns `SmallList<FontTechnology>`; `ConsumeFontFaceSrc` will need a `List`); `Consumers/Grid.hpp` (own `GridNamedAreaMapRow` alias); `Consumers/Shapes.cpp` (stub); `PrimitiveValueMappings.hpp` (raw `CSSFontFaceSrcValue.h`); `CSS/Font/FontFace.hpp` (raw `FontTaggedSettings.h`); `Style/Values/Primitives/Position.hpp` (`x.offset`); `Style/Values/Primitives/CoordinatedValueList.hpp` (`PointerComparison`).
 
 ### Tests
 
@@ -1399,7 +1400,7 @@ From matched rules to computed styles. Upstream: the resolver (`style/` top leve
 - **f1, matching:** `ElementRuleCollector`, `MatchResult`, `PageRuleCollector`, `PseudoElementRequest`. Tested as the matched declarations of an element in cascade order. Done (`MatchResultCache` moved to f5).
 - **f2, the cascade:** `PropertyCascade` (origins, `!important`, layers, logical and physical properties, the rollback cascades for `revert`/`revert-layer`). Tested as the winning declared value of each property. Done (`StyleCustomProperty` moved to f3; `CustomPropertyRegistry` and `var()` resolution moved to f4).
 - **f3, computed style storage:** `style/computed`, the `rendering/style` data groups, codegen for the computed style and render style properties, every remaining `style/values` type with its conversions, `StyleCustomProperty` (moved from f2). Replaces the seam's `RenderStyle`. Planned in sublayers f3a to f3f (2026-10-14); see *Layer f3: computed style storage (planned)*.
-- **f4, the builder:** `BuilderState`, `Builder`, `BuilderCustom`, `BuilderChecking`, codegen for the generated builder; font resolution (`StyleResolveForFont`, `StyleFontSizeFunctions`) against a font description without platform font data; the remaining deferred value definitions (`PendingSubstitutionValue`, `CreateStyleImage` without loading); moved from f2: `CustomPropertyRegistry`, `CSSRegisteredCustomProperty` and `@property` registration (they need the render style's custom property storage and the typed custom property parsing), `var()` resolution (the deferred `VariableReferenceValue` definitions and the typed custom property parser functions: the builder applies custom properties on demand) and applying `revert`/`revert-layer` (the builder builds the rollback cascades).
+- **f4, the builder (planned in sublayers f4a to f4d on 2026-10-15; see *Layer f4: the builder (planned)*):** `BuilderState`, `Builder`, `BuilderCustom`, `BuilderChecking`, codegen for the generated builder; font resolution (`StyleResolveForFont`, `StyleFontSizeFunctions`) against a font description without platform font data; the remaining deferred value definitions (`PendingSubstitutionValue`, `CreateStyleImage` without loading); moved from f2: `CustomPropertyRegistry`, `CSSRegisteredCustomProperty` and `@property` registration (they need the render style's custom property storage and the typed custom property parsing), `var()` resolution (the deferred `VariableReferenceValue` definitions and the typed custom property parser functions: the builder applies custom properties on demand) and applying `revert`/`revert-layer` (the builder builds the rollback cascades).
 - **f5, the resolver:** `Style::Resolver`, `TreeResolver`, `Update`, `StyleAdjuster`, `MatchedDeclarationsCache`, `MatchResultCache` (moved from f1: it caches the resolved style), `StyleResolveForDocument`; `ContainerQueryEvaluator` (`style()` queries; size queries are unknown without layout); the user agent root style in `MediaQueryMatcher`; presentational hints and `<body>` colours.
 - **f6, output and invalidation:** `Style::Extractor` (and its generated half), `getComputedStyle` (`CSSComputedStyleDeclaration`), `StyleDifference`, `StyleInvalidator` and the `*ChangeInvalidation` classes, hooked to the DOM's change steps.
 - **Deferred:** animations and transitions (`StyleInterpolation*`, `Styleable`, the changed animatable properties), `AnchorPositionEvaluator` (layout), `InlineTextBoxStyle`, resource loading.
@@ -1427,6 +1428,42 @@ Boundaries outside `css/`, `style/` and `rendering/style/`: platform data (text 
 - **f3f, storage (~22k, plus generated code; split in four on 2026-10-14: f3f1, the storage leaves and custom properties, done; f3f2, the generators; f3f3, the data groups with `style/computed`; f3f4, `RenderStyle`):** the `rendering/style` data groups and value classes (`BorderData`, `BorderValue`, `OutlineValue`, `CounterDirectives`, `SVGRenderStyle`, ...), `StyleCustomProperty` and `StyleCustomPropertyData`, `style/computed`, the `GenerateStyleComputedStyleProperties` and `GenerateRenderStyleProperties` generators (reviewed against upstream's output, as in c1), and `RenderStyle`, which replaces the seam's. Tested as initial values, getters and setters, copy-on-write of the data groups, inheritance (`inheritFrom`), equality and the custom property storage. Done (2026-10-15).
 
 **Tests:** each value type: conversion from parsed CSS through the seam's `BuilderState` (including invalid-at-computed-value-time cases), creation back to a CSS value, serialisation and equality; platform data types against upstream's API tests where they exist.
+
+### Layer f4: the builder (planned 2026-10-15)
+
+Graph (headers-only, `--follow css/ style/ rendering/style/`) from `style/StyleBuilder.cpp`, `StyleBuilderState.cpp`, `StyleResolveForFont.cpp`, `StyleFontSizeFunctions.cpp`, `StyleCustomPropertyRegistry.cpp`, `css/CSSRegisteredCustomProperty.cpp`, `CSSVariableReferenceValue.cpp` and `CSSPendingSubstitutionValue.cpp`: 252 files (`tools/port/out/f4-all.md`), nearly all ported in f0 to f3. New: the entries, `StyleBuilderStateInlines.h`, `StyleBuilderCustom.h`, `StyleBuilderGenerated.h` (and the `GenerateStyleBuilderGenerated` generator), `CSSWideKeyword.h`. The resolver's files in the graph (`StyleUpdate`, `StyleChange`, `ContainerQueryEvaluator`, `MatchedDeclarationsCache`, `StyleAdjuster`) are f5's; `Styleable` is animations'.
+
+**Sublayers:**
+- **f4a, the builder state, done (2026-10-15):** `BuilderState` (and its inlines), replacing the seam's, and `StyleFontSizeFunctions`.
+- **f4b, the generated builder:** `GenerateStyleBuilderGenerated`, `StyleBuilderGenerated.h` and `StyleBuilderCustom.h` (the per-property apply functions: value, initial, inherit), with `maybeUpdateFontForLetterSpacingOrWordSpacing`.
+- **f4c, registered custom properties:** `CustomPropertyRegistry`, `CSSRegisteredCustomProperty`, `@property` registration in the resolver, the typed custom property parsing (`ParseTypedCustomPropertyValue`, `ParseTypedCustomPropertyInitialValue`, `ParseInitialValueForUniversalSyntax`) and `RenderStyle::createPtrWithRegisteredInitialValues`.
+- **f4d, the builder:** `Builder` (applying the cascade by priority, custom properties with cycle detection, logical groups, the rollback cascades for `revert`/`revert-layer`), `var()` resolution (the deferred `VariableReferenceValue` definitions) and `PendingSubstitutionValue::ResolveValue`. The builder test fixture's `SetCurrentProperty` hook goes (the builder sets the current property).
+
+**Decisions (2026-10-15):**
+- `StyleResolveForFont` is deferred to the `FontFace` interface and the canvas 2D context: its only callers are `CSSFontFace`, `EditingStyle` and the canvas contexts, and `resolveForUnresolvedFont` needs the unported `ParseUnresolvedFont` (see *Where we are*).
+
+### Layer f4a: the builder state (2026-10-15)
+
+Graph: the f4 plan's. `style/StyleBuilderState.h`, `.cpp`, `StyleBuilderStateInlines.h`, `StyleFontSizeFunctions.h`, `.cpp`. Translated by `conv.py`, then by hand; the seam's `BuilderState` (and `BuilderContext`, `BuilderPositionTryFallback`) moved here, and its users include `Style/BuilderState.hpp`.
+
+**Decisions (2026-10-15):**
+- Settings: the seam has a `SettingsValues` with the font size settings (`defaultFontSize` 16, `defaultFixedFontSize` 13, `minimumFontSize` 0, `minimumLogicalFontSize` 0: the WebCore defaults) and `evaluationTimeZoomEnabled` (false; upstream turns it on for Cocoa), returned by `DocumentSettingsValues(document)` until there's a `Settings` port. `evaluationTimeZoomEnabled(BuilderState)` reads it (it was a seam member of `BuilderState`).
+- `updateFont()` always updates: upstream updates when the font is dirty or the cascade has no fonts, and cascades have no fonts without a font backend. The font selector update (`fontCascade().update(&fontSelector)`) and `updateUseBackslashAsYenSymbol` are FIXMEs (the font cache).
+- No frames: the text zoom factor is 1 (`zoomWithTextZoomFactor`, `computedFontSizeFromSpecifiedSize`, `updateFontForZoomChange`); `-webkit-text-zoom` and text autosizing aren't supported.
+- `disableNativeAppearanceIfNeeded` uses the seam's `RenderTheme::HasAppearanceForElementTypeFromUAStyle` (upstream's list, without the user agent shadow tree part) for `Element::isDevolvableWidget()` too (the same elements; FIXME until the form controls).
+- `treeResolutionState` and `anchorPositionedStates()` come with the tree resolver (FIXME); `SetCurrentProperty` stays for the tests until `Builder` (f4d). `fontDescription()` is `GetFontDescription()`.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `style/StyleBuilderState.h`, `.cpp`, `StyleBuilderStateInlines.h` | `port` | `Style/BuilderState.hpp`, `BuilderStateInlines.hpp`, `src/Style/BuilderState.cpp` | on | tested. Replaces the seam's (and the unreviewed raw `Style/BuilderState.hpp`). |
+| `style/StyleFontSizeFunctions.h`, `.cpp` | `port` | `Style/FontSizeFunctions.hpp`, `src/...` | on | tested. |
+| `style/StyleResolveForFont.h`, `.cpp` | `defer` | | | With `FontFace` and the canvas 2D context. |
+
+**Added (upstream API):** the font description setters, `setZoom`, `setUsedZoom`, `setWritingMode`, `setTextOrientation`, `fontDirty`, `applyPropertyToRegularStyle`/`applyPropertyToVisitedLinkStyle`, `setFontSize`, `disableNativeAppearanceIfNeeded`, the font updates and `adjustStyleForInterCharacterRuby` (private, for `Builder`), and the builder's custom property and link match state. Seam: `SettingsValues`, `DocumentSettingsValues`, `RenderTheme::HasAppearanceForElementTypeFromUAStyle`.
+
+**Differences:** as in the decisions.
+
+Tests: `tests/Style/FontSizeFunctions.cpp` (keyword sizes in both tables and outside them, computed sizes with the minimum rules, zoom and SVG, legacy sizes, size adjustment) and `tests/Style/BuilderState.cpp` (font description setters and dirtiness, sizes under zoom, keyword sizes, variant groups, native appearance; the seam's cases renamed): 6 new cases. Full Booey suite: 1982 cases; all pass except 7 expected failures. Whole solution builds with no warnings.
 
 ### Layer f3f4: RenderStyle (2026-10-15)
 
@@ -2244,7 +2281,7 @@ Graph from `css/calc/CSSCalcTree+{Evaluation,Simplification,Parser}.cpp` and `CS
 | `AdjustFloatForAbsoluteZoom(value, style)` | `adjustFloatForAbsoluteZoom` (`RenderStyle+GettersInlines.h`) |
 | `BuilderState::EvaluationTimeZoomEnabled()` | `state.document().settings().evaluationTimeZoomEnabled()` (added in 4b) |
 
-The unreviewed `Style/BuilderState.hpp` and `Style/AnchorPositionEvaluator.hpp` (raw WebKit) still declare the full classes; nothing built includes them. When the style resolver is ported, the real classes replace the seam's and the collapsed members go back to upstream's call chains.
+The unreviewed `Style/AnchorPositionEvaluator.hpp` (raw WebKit) still declares the full class; nothing built includes it (`BuilderState` was ported in f4a). When the style resolver is ported, the real classes replace the seam's and the collapsed members go back to upstream's call chains.
 
 | WebKit | Verdict | Krystal | CMake | Notes |
 |---|---|---|---|---|

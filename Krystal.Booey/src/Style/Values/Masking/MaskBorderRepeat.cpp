@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Style/Values/Masking/MaskBorderRepeat.hpp"
 
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueConversion.hpp"
 
 namespace krys::boo::style

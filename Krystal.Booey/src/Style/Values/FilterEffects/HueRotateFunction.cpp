@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Values/FilterEffects/FilterFunctionDescriptor.hpp"
 #include "Krystal.Booey/CSS/Values/FilterEffects/HueRotateFunction.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperation.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 
 namespace krys::boo::style

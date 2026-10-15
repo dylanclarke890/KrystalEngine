@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Values/ImageSetValue.hpp"
 #include "Krystal.Booey/CSS/Values/ImageSetOptionValue.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImageSet.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include <numeric>
 

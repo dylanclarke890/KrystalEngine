@@ -4,15 +4,13 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include <iterator>
-
-// FIXME: Include `Style/BuilderState.hpp` instead of the seam once the builder is ported.
 
 namespace krys::boo::style
 {

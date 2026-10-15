@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Style/Values/CSS2/ZIndex.hpp"
 
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueConversion.hpp"
 

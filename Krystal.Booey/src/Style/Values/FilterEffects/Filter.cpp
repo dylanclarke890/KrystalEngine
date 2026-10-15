@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Rendering/Style/DropShadowFilterOperationWithStyleColor.hpp"
 #include "Krystal.Booey/Rendering/Style/ReferenceFilterOperation.hpp"
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/BlurFunction.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/BrightnessFunction.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/ContrastFunction.hpp"

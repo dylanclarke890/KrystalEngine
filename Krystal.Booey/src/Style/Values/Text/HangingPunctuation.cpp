@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Style/Values/Text/HangingPunctuation.hpp"
 
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
 
 namespace krys::boo::style
 {

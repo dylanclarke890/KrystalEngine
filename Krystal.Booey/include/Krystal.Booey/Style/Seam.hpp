@@ -38,12 +38,12 @@
 
 // FIXME: Placeholders for the rendering, font and style-resolver types that length resolution, calc
 // evaluation, colour resolution and the computed value conversions need. Each declares only the members those
-// callers use, under its upstream name. Only `style::BuilderState` can be constructed: it has upstream's
-// state for converting values (no font updates, custom properties or style images). Everything else is
-// unreachable. Each type moves to its own header, with its real implementation, when its slice is ported:
+// callers use, under its upstream name. None can be constructed but `SettingsValues`. Each type moves to its
+// own header, with its real implementation, when its slice is ported:
 //   - `RenderView`, `RenderElement`, `RenderBox`, `RenderTheme` (focus ring metrics): rendering.
-//   - `style::BuilderState`, `style::AnchorPositionEvaluator`, `style::ContainerQueryEvaluator`: the style
-//     resolver (`Style/BuilderState.hpp`, `Style/AnchorPositionEvaluator.hpp`, unreviewed).
+//   - `style::AnchorPositionEvaluator`, `style::ContainerQueryEvaluator`: the style resolver
+//     (`Style/AnchorPositionEvaluator.hpp`, unreviewed).
+//   - `SettingsValues`: `Settings`.
 //   - the `Document*` colour functions: `dom::Document` (upstream members) once it has a page and settings.
 //   - the `Document*` security and keyframes functions: `dom::Document` (upstream members) once it has a
 //     security origin and runs animations.
@@ -90,7 +90,25 @@ namespace krys::boo
     {
       return std::max<float>(outlineWidth - PlatformFocusRingWidth(), 0);
     }
+
+    // NOTE: This is just a legacy hard-coded list of elements that have some appearance value in html.css
+    // FIXME: Remove when devolvable widgets are universally enabled.
+    // FIXME: Also the `::-webkit-list-button` part of user agent shadow trees, once there are any.
+    KRYS_NODISCARD static bool HasAppearanceForElementTypeFromUAStyle(const dom::Element &) noexcept;
   };
+
+  /// @brief The settings style building reads (part of upstream's `SettingsValues`, with their defaults).
+  struct SettingsValues
+  {
+    int32 DefaultFontSize {16};
+    int32 DefaultFixedFontSize {13};
+    int32 MinimumFontSize {0};
+    int32 MinimumLogicalFontSize {0};
+    bool EvaluationTimeZoomEnabled {false};
+  };
+
+  /// @brief Collapses `document.settingsValues()`. Documents have no settings yet, so they're the defaults.
+  KRYS_NODISCARD const SettingsValues &DocumentSettingsValues(const dom::Document &) noexcept;
 
   class RenderView
   {
@@ -176,93 +194,8 @@ namespace krys::boo
 
 namespace krys::boo::style
 {
-  /// @brief The position-try fallback a style is being built for: the `@position-try` rule's declarations (or
-  /// the inline `position-area`) and the tactics to apply.
-  struct BuilderPositionTryFallback
-  {
-    RefPtr<const css::StyleProperties> Properties;
-    List<PositionTryFallbackTactic> Tactics;
-  };
-
-  /// @brief What a builder state is built from, besides the style it writes into.
-  struct BuilderContext
-  {
-    RefPtr<const dom::Document> Document {};
-    const RenderStyle *ParentStyle {};
-    const RenderStyle *RootElementStyle {};
-    RefPtr<const dom::Element> Element {};
-    // FIXME: `treeResolutionState` comes with the tree resolver.
-    Maybe<BuilderPositionTryFallback> PositionTryFallback {};
-  };
-
-  class BuilderState : public CanMakeCheckedPtr<BuilderState>
-  {
-    KRYS_NON_COPY_MOVABLE(BuilderState);
-    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(BuilderState);
-
-  private:
-    RenderStyle &_style;
-    BuilderContext _context;
-
-    const css::ToLengthConversionData _cssToLengthConversionData;
-
-    std::bitset<css::TotalPropertyIdValues> _invalidAtComputedValueTimeProperties;
-
-    const PropertyCascade::Property *_currentProperty {nullptr};
-
-    List<css::CSSOMStringAtom> _registeredContentAttributes;
-
-  public:
-    BuilderState(RenderStyle &, BuilderContext &&) noexcept;
-    ~BuilderState() noexcept;
-
-    KRYS_NODISCARD RenderStyle &Style() noexcept;
-    KRYS_NODISCARD const RenderStyle &Style() const noexcept;
-    KRYS_NODISCARD const RenderStyle &ParentStyle() const noexcept;
-    KRYS_NODISCARD const RenderStyle *RootElementStyle() const noexcept;
-
-    KRYS_NODISCARD const dom::Document &GetDocument() const noexcept;
-    KRYS_NODISCARD const dom::Element *GetElement() const noexcept;
-
-    KRYS_NODISCARD const Maybe<BuilderPositionTryFallback> &GetPositionTryFallback() const noexcept;
-
-    KRYS_NODISCARD float ZoomWithTextZoomFactor() noexcept;
-
-    KRYS_NODISCARD bool UseSVGZoomRules() const noexcept;
-    KRYS_NODISCARD bool UseSVGZoomRulesForLength() const noexcept;
-
-    KRYS_NODISCARD style::ScopeOrdinal StyleScopeOrdinal() const noexcept;
-
-    KRYS_NODISCARD const List<css::CSSOMStringAtom> &RegisteredContentAttributes() const noexcept;
-    void RegisterContentAttribute(const css::CSSOMStringAtom &attributeLocalName) noexcept;
-
-    KRYS_NODISCARD RefPtr<StyleImage> CreateStyleImage(const css::Value &) const noexcept;
-
-    KRYS_NODISCARD const css::ToLengthConversionData &CssToLengthConversionData() const noexcept;
-
-    KRYS_NODISCARD bool IsAuthorOrigin() const noexcept;
-
-    KRYS_NODISCARD css::PropertyId CssPropertyId() const noexcept;
-
-    KRYS_NODISCARD bool IsCurrentPropertyInvalidAtComputedValueTime() const noexcept;
-    void SetCurrentPropertyInvalidAtComputedValueTime() noexcept;
-
-    /// @brief Collapses `document().settings().evaluationTimeZoomEnabled()`.
-    KRYS_NODISCARD bool EvaluationTimeZoomEnabled() const noexcept;
-
-    void SetUsesViewportUnits() noexcept;
-    void SetUsesContainerUnits() noexcept;
-
-    KRYS_NODISCARD double LookupCSSRandomBaseValue(const css::calc::RandomCachingKey &,
-                                                   Maybe<css::keywords::ElementShared>) const noexcept;
-
-    // Accessors for sibling information used by the sibling-count() and sibling-index() CSS functions.
-    KRYS_NODISCARD uint32 SiblingCount() noexcept;
-    KRYS_NODISCARD uint32 SiblingIndex() noexcept;
-
-    /// @brief Collapses `Builder` setting the property it applies.
-    void SetCurrentProperty(const PropertyCascade::Property *property) noexcept;
-  };
+  class BuilderState;
+  struct BuilderPositionTryFallback;
 
   class AnchorPositionEvaluator
   {

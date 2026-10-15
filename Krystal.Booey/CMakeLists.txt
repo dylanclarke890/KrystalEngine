@@ -659,6 +659,9 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Graphics/TabSize.hpp
   include/Krystal.Booey/Graphics/WindRule.hpp
   include/Krystal.Booey/Style/BuilderChecking.hpp
+  include/Krystal.Booey/Style/BuilderState.hpp
+  include/Krystal.Booey/Style/BuilderStateInlines.hpp
+  include/Krystal.Booey/Style/FontSizeFunctions.hpp
   include/Krystal.Booey/Style/Values/CSSValueConversion.hpp
   include/Krystal.Booey/Style/Values/Primitives/CoordinatedValueList.hpp
   include/Krystal.Booey/Style/Values/Primitives/CoordinatedValueListValue.hpp
@@ -1748,6 +1751,10 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   # RenderStyle (f3f4)
   src/Rendering/Style/RenderStyle.cpp
   src/Rendering/Style/RenderStyleBase.cpp
+
+  # BuilderState (f4a)
+  src/Style/BuilderState.cpp
+  src/Style/FontSizeFunctions.cpp
 )
 
 target_precompile_headers(Krystal.Booey

@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Values/Masking/ClipPath.hpp"
 
+#include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
 
 namespace krys::boo::style

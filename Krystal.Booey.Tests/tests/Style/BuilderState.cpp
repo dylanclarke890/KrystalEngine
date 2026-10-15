@@ -1,9 +1,11 @@
-﻿#include "catch2/catch_test_macros.hpp"
+﻿#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
+#include "Krystal.Booey/Style/BuilderStateInlines.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 
 namespace krys::boo::style::tests
@@ -29,7 +31,7 @@ namespace krys::boo::style::tests
     }
   }
 
-  TEST_CASE_METHOD(BuilderFixture, "BuilderState (seam)", "[Style][BuilderState]")
+  TEST_CASE_METHOD(BuilderFixture, "BuilderState", "[Style][BuilderState]")
   {
     SECTION("Styles, document and element")
     {
@@ -100,7 +102,7 @@ namespace krys::boo::style::tests
     }
   }
 
-  TEST_CASE_METHOD(BuilderFixture, "BuilderState (seam): elements", "[Style][BuilderState]")
+  TEST_CASE_METHOD(BuilderFixture, "BuilderState: elements", "[Style][BuilderState]")
   {
     auto document = ParseDocument(u8"<!DOCTYPE html><body><p id=a></p><p id=b></p>text<p id=c></p>"
                                   u8"<svg id=outer><svg id=inner></svg><circle id=circle /></svg></body>");
@@ -141,7 +143,89 @@ namespace krys::boo::style::tests
     }
   }
 
-  TEST_CASE("RenderStyle (seam): writing mode", "[Style][Seam]")
+  TEST_CASE_METHOD(BuilderFixture, "BuilderState: font description", "[Style][BuilderState]")
+  {
+    CHECK_FALSE(State->FontDirty());
+    CHECK(State->GetFontDescription().ComputedSize() == 16);
+    CHECK(State->ParentFontDescription().ComputedSize() == 16);
+
+    SECTION("Setting a value that's already set leaves the font clean")
+    {
+      State->SetFontDescriptionKeywordSizeFromIdentifier(css::ValueId::Medium);
+      State->SetFontDescriptionIsAbsoluteSize(false);
+      State->SetFontDescriptionFontSize(16);
+      CHECK_FALSE(State->FontDirty());
+    }
+
+    SECTION("The font size sets the specified and computed sizes")
+    {
+      State->SetFontDescriptionFontSize(20);
+      CHECK(State->FontDirty());
+      CHECK(Style.GetFontDescription().SpecifiedSize() == 20);
+      CHECK(Style.GetFontDescription().ComputedSize() == 20);
+    }
+
+    SECTION("The computed size follows the zoom")
+    {
+      State->SetUsedZoom(2);
+      CHECK(State->FontDirty());
+      State->SetFontDescriptionFontSize(10);
+      CHECK(Style.GetFontDescription().SpecifiedSize() == 10);
+      CHECK(Style.GetFontDescription().ComputedSize() == 20);
+      CHECK(Style.GetFontDescription().UsedZoomFactor() == 2);
+
+      FontCascadeDescription description;
+      State->SetFontSize(description, 5);
+      CHECK(description.SpecifiedSize() == 5);
+      CHECK(description.ComputedSize() == 10);
+    }
+
+    SECTION("Keyword sizes")
+    {
+      State->SetFontDescriptionKeywordSizeFromIdentifier(css::ValueId::Large);
+      CHECK(State->FontDirty());
+      CHECK(Style.GetFontDescription().KeywordSizeAsIdentifier() == css::ValueId::Large);
+    }
+
+    SECTION("Variant groups set each of their parts")
+    {
+      State->SetFontDescriptionVariantLigatures(FontVariantLigatures {FontVariantLigaturesValues {
+        .Common = boo::FontVariantLigatures::No, .Contextual = boo::FontVariantLigatures::Yes}});
+      CHECK(State->FontDirty());
+      CHECK(Style.GetFontDescription().VariantCommonLigatures() == boo::FontVariantLigatures::No);
+      CHECK(Style.GetFontDescription().VariantDiscretionaryLigatures() == boo::FontVariantLigatures::Normal);
+      CHECK(Style.GetFontDescription().VariantContextualAlternates() == boo::FontVariantLigatures::Yes);
+    }
+
+    SECTION("The writing mode dirties the font")
+    {
+      State->SetWritingMode(StyleWritingMode::VerticalRl);
+      CHECK(State->FontDirty());
+    }
+  }
+
+  TEST_CASE_METHOD(BuilderFixture, "BuilderState: native appearance", "[Style][BuilderState]")
+  {
+    auto document = ParseDocument(u8"<!DOCTYPE html><body><button id=button></button><p id=p></p></body>");
+
+    // Link matching is off, so properties apply to both the regular and the visited link style.
+    CHECK(State->ApplyPropertyToRegularStyle());
+    CHECK(State->ApplyPropertyToVisitedLinkStyle());
+
+    Reset(&ById(*document, u8"p"));
+    State->DisableNativeAppearanceIfNeeded(PropertyId::BackgroundColor, PropertyCascade::Origin::Author);
+    CHECK_FALSE(Style.NativeAppearanceDisabled());
+
+    Reset(&ById(*document, u8"button"));
+    State->DisableNativeAppearanceIfNeeded(PropertyId::BackgroundColor, PropertyCascade::Origin::UserAgent);
+    CHECK_FALSE(Style.NativeAppearanceDisabled());
+    State->DisableNativeAppearanceIfNeeded(PropertyId::Color, PropertyCascade::Origin::Author);
+    CHECK_FALSE(Style.NativeAppearanceDisabled());
+    State->DisableNativeAppearanceIfNeeded(PropertyId::BackgroundColor, PropertyCascade::Origin::Author);
+    CHECK(Style.NativeAppearanceDisabled());
+  }
+
+  TEST_CASE("RenderStyle: writing mode", "[Style][RenderStyle]")
   {
     RenderStyle style {RenderStyle::Create()};
     CHECK(style.GetWritingMode().IsHorizontal());

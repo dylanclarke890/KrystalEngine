@@ -2,6 +2,7 @@
 #include "Krystal.Booey/CSS/Values/UrlValue.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
 
 namespace krys::boo::style
 {
