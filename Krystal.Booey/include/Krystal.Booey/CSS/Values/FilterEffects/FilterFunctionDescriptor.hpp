@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Color/CurrentColor.hpp"
-#include "Krystal.Booey/CSS/Values/FilterEffects/FilterOperationType.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
+#include "Krystal.Booey/Graphics/Filters/FilterOperation.hpp"
 
 namespace krys::boo::css
 {
@@ -20,7 +20,7 @@ namespace krys::boo::css
     constexpr static auto DefaultValue = LengthRaw<> {LengthUnit::Px, 0};
     constexpr static auto InitialLengthValueForInterpolation = LengthRaw<> {LengthUnit::Px, 0};
 
-    constexpr static auto OperationType = FilterOperationType::Blur;
+    constexpr static auto OperationType = boo::FilterOperation::Type::Blur;
   };
 
   // https://drafts.fxtf.org/filter-effects/#funcdef-filter-brightness
@@ -34,7 +34,7 @@ namespace krys::boo::css
     constexpr static auto DefaultValue = NumberRaw<> {1};
     constexpr static auto InitialValueForInterpolation = NumberRaw<> {1};
 
-    constexpr static auto OperationType = FilterOperationType::Brightness;
+    constexpr static auto OperationType = boo::FilterOperation::Type::Brightness;
   };
 
   // https://drafts.fxtf.org/filter-effects/#funcdef-filter-contrast
@@ -48,7 +48,7 @@ namespace krys::boo::css
     constexpr static auto DefaultValue = NumberRaw<> {1};
     constexpr static auto InitialValueForInterpolation = NumberRaw<> {1};
 
-    constexpr static auto OperationType = FilterOperationType::Contrast;
+    constexpr static auto OperationType = boo::FilterOperation::Type::Contrast;
   };
 
   // https://drafts.fxtf.org/filter-effects/#funcdef-filter-drop-shadow
@@ -65,7 +65,7 @@ namespace krys::boo::css
     // constexpr static auto InitialColorValueForInterpolation = Color::TransparentBlack;
     constexpr static auto InitialLengthValueForInterpolation = LengthRaw<> {LengthUnit::Px, 0};
 
-    constexpr static auto OperationType = FilterOperationType::DropShadowWithStyleColor;
+    constexpr static auto OperationType = boo::FilterOperation::Type::DropShadowWithStyleColor;
   };
 
   // https://drafts.fxtf.org/filter-effects/#funcdef-filter-grayscale
@@ -79,7 +79,7 @@ namespace krys::boo::css
     constexpr static auto DefaultValue = NumberRaw<> {1};
     constexpr static auto InitialValueForInterpolation = NumberRaw<> {0};
 
-    constexpr static auto OperationType = FilterOperationType::Grayscale;
+    constexpr static auto OperationType = boo::FilterOperation::Type::Grayscale;
   };
 
   // https://drafts.fxtf.org/filter-effects/#funcdef-filter-hue-rotate
@@ -92,7 +92,7 @@ namespace krys::boo::css
     constexpr static auto DefaultValue = AngleRaw<> {AngleUnit::Deg, 0};
     constexpr static auto InitialValueForInterpolation = AngleRaw<> {AngleUnit::Deg, 0};
 
-    constexpr static auto OperationType = FilterOperationType::HueRotate;
+    constexpr static auto OperationType = boo::FilterOperation::Type::HueRotate;
   };
 
   // https://drafts.fxtf.org/filter-effects/#funcdef-filter-invert
@@ -106,7 +106,7 @@ namespace krys::boo::css
     constexpr static auto DefaultValue = NumberRaw<> {1};
     constexpr static auto InitialValueForInterpolation = NumberRaw<> {0};
 
-    constexpr static auto OperationType = FilterOperationType::Invert;
+    constexpr static auto OperationType = boo::FilterOperation::Type::Invert;
   };
 
   // https://drafts.fxtf.org/filter-effects/#funcdef-filter-opacity
@@ -120,7 +120,7 @@ namespace krys::boo::css
     constexpr static auto DefaultValue = NumberRaw<> {1};
     constexpr static auto InitialValueForInterpolation = NumberRaw<> {1};
 
-    constexpr static auto OperationType = FilterOperationType::Opacity;
+    constexpr static auto OperationType = boo::FilterOperation::Type::Opacity;
   };
 
   // https://drafts.fxtf.org/filter-effects/#funcdef-filter-saturate
@@ -134,7 +134,7 @@ namespace krys::boo::css
     constexpr static auto DefaultValue = NumberRaw<> {1};
     constexpr static auto InitialValueForInterpolation = NumberRaw<> {1};
 
-    constexpr static auto OperationType = FilterOperationType::Saturate;
+    constexpr static auto OperationType = boo::FilterOperation::Type::Saturate;
   };
 
   // https://drafts.fxtf.org/filter-effects/#funcdef-filter-sepia
@@ -148,7 +148,7 @@ namespace krys::boo::css
     constexpr static auto DefaultValue = NumberRaw<> {1};
     constexpr static auto InitialValueForInterpolation = NumberRaw<> {0};
 
-    constexpr static auto OperationType = FilterOperationType::Sepia;
+    constexpr static auto OperationType = boo::FilterOperation::Type::Sepia;
   };
 
   // Non-standard addition.
@@ -158,7 +158,7 @@ namespace krys::boo::css
     constexpr static bool IsPixelFilterFunction = false;
     constexpr static bool IsColorFilterFunction = true;
 
-    constexpr static auto OperationType = FilterOperationType::AppleInvertLightness;
+    constexpr static auto OperationType = boo::FilterOperation::Type::AppleInvertLightness;
   };
 
   template <auto FilterFunction>

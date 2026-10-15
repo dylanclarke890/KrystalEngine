@@ -846,6 +846,40 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Values/Transforms/TransformList.hpp
   include/Krystal.Booey/Style/Values/Transforms/TransformOrigin.hpp
   include/Krystal.Booey/Style/Values/Transforms/Translate.hpp
+
+  # Style resolution, layer f3d3 (filters and anchor positioning)
+  include/Krystal.Booey/Graphics/Filters/FEDropShadow.hpp
+  include/Krystal.Booey/Graphics/Filters/FEGaussianBlur.hpp
+  include/Krystal.Booey/Graphics/Filters/FilterOperation.hpp
+  include/Krystal.Booey/Graphics/Filters/FilterOperations.hpp
+  include/Krystal.Booey/Rendering/Style/DropShadowFilterOperationWithStyleColor.hpp
+  include/Krystal.Booey/Rendering/Style/ReferenceFilterOperation.hpp
+  include/Krystal.Booey/Style/Values/AnchorPosition/AnchorName.hpp
+  include/Krystal.Booey/Style/Values/AnchorPosition/PositionAnchor.hpp
+  include/Krystal.Booey/Style/Values/AnchorPosition/PositionArea.hpp
+  include/Krystal.Booey/Style/Values/AnchorPosition/PositionAreaAxis.hpp
+  include/Krystal.Booey/Style/Values/AnchorPosition/PositionAreaSelf.hpp
+  include/Krystal.Booey/Style/Values/AnchorPosition/PositionAreaSpan.hpp
+  include/Krystal.Booey/Style/Values/AnchorPosition/PositionAreaTrack.hpp
+  include/Krystal.Booey/Style/Values/AnchorPosition/PositionTryFallback.hpp
+  include/Krystal.Booey/Style/Values/AnchorPosition/PositionTryFallbackTactic.hpp
+  include/Krystal.Booey/Style/Values/AnchorPosition/PositionTryFallbacks.hpp
+  include/Krystal.Booey/Style/Values/AnchorPosition/PositionVisibility.hpp
+  include/Krystal.Booey/Style/Values/FilterEffects/AppleColorFilter.hpp
+  include/Krystal.Booey/Style/Values/FilterEffects/AppleInvertLightnessFunction.hpp
+  include/Krystal.Booey/Style/Values/FilterEffects/BlurFunction.hpp
+  include/Krystal.Booey/Style/Values/FilterEffects/BrightnessFunction.hpp
+  include/Krystal.Booey/Style/Values/FilterEffects/ContrastFunction.hpp
+  include/Krystal.Booey/Style/Values/FilterEffects/DropShadowFunction.hpp
+  include/Krystal.Booey/Style/Values/FilterEffects/Filter.hpp
+  include/Krystal.Booey/Style/Values/FilterEffects/FilterInterpolation.hpp
+  include/Krystal.Booey/Style/Values/FilterEffects/FilterReference.hpp
+  include/Krystal.Booey/Style/Values/FilterEffects/GrayscaleFunction.hpp
+  include/Krystal.Booey/Style/Values/FilterEffects/HueRotateFunction.hpp
+  include/Krystal.Booey/Style/Values/FilterEffects/InvertFunction.hpp
+  include/Krystal.Booey/Style/Values/FilterEffects/OpacityFunction.hpp
+  include/Krystal.Booey/Style/Values/FilterEffects/SaturateFunction.hpp
+  include/Krystal.Booey/Style/Values/FilterEffects/SepiaFunction.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -1362,6 +1396,34 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Style/Values/Transforms/TransformFunction.cpp
   src/Style/Values/Transforms/TransformList.cpp
   src/Style/Values/Transforms/Translate.cpp
+
+  # Style resolution, layer f3d3 (filters and anchor positioning)
+  src/Graphics/Filters/FEDropShadow.cpp
+  src/Graphics/Filters/FEGaussianBlur.cpp
+  src/Graphics/Filters/FilterOperation.cpp
+  src/Graphics/Filters/FilterOperations.cpp
+  src/Rendering/Style/DropShadowFilterOperationWithStyleColor.cpp
+  src/Rendering/Style/ReferenceFilterOperation.cpp
+  src/Style/Values/AnchorPosition/PositionArea.cpp
+  src/Style/Values/AnchorPosition/PositionAreaAxis.cpp
+  src/Style/Values/AnchorPosition/PositionAreaSelf.cpp
+  src/Style/Values/AnchorPosition/PositionAreaSpan.cpp
+  src/Style/Values/AnchorPosition/PositionAreaTrack.cpp
+  src/Style/Values/AnchorPosition/PositionTryFallback.cpp
+  src/Style/Values/FilterEffects/AppleColorFilter.cpp
+  src/Style/Values/FilterEffects/AppleInvertLightnessFunction.cpp
+  src/Style/Values/FilterEffects/BlurFunction.cpp
+  src/Style/Values/FilterEffects/BrightnessFunction.cpp
+  src/Style/Values/FilterEffects/ContrastFunction.cpp
+  src/Style/Values/FilterEffects/DropShadowFunction.cpp
+  src/Style/Values/FilterEffects/Filter.cpp
+  src/Style/Values/FilterEffects/FilterReference.cpp
+  src/Style/Values/FilterEffects/GrayscaleFunction.cpp
+  src/Style/Values/FilterEffects/HueRotateFunction.cpp
+  src/Style/Values/FilterEffects/InvertFunction.cpp
+  src/Style/Values/FilterEffects/OpacityFunction.cpp
+  src/Style/Values/FilterEffects/SaturateFunction.cpp
+  src/Style/Values/FilterEffects/SepiaFunction.cpp
 )
 
 target_precompile_headers(Krystal.Booey

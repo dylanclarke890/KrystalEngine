@@ -16,6 +16,8 @@
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Graphics/WindRule.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
+#include "Krystal.Booey/Style/Values/AnchorPosition/PositionTryFallbackTactic.hpp"
+#include "Krystal.Booey/Style/Values/AnchorPosition/PositionVisibility.hpp"
 #include "Krystal.Booey/Style/Values/Box/MarginTrim.hpp"
 #include "Krystal.Booey/Style/Values/Contain/Contain.hpp"
 #include "Krystal.Booey/Style/Values/Overflow/ScrollBehavior.hpp"
@@ -34,9 +36,8 @@
 
 // FIXME: The mappings of the remaining Style value types are added with their
 // types: `style::ImageOrientation`, `style::MaskMode` (and `ToValueIdForWebkitMaskSourceType`),
-// `style::PositionTryFallbackTactic`, `style::PositionTryOrder`, `style::PositionVisibilityValue`,
-// `style::TextDecorationLine::Flag`, `style::TextEmphasisPositionValue`, `style::TextUnderlinePositionValue`
-// and `style::WebkitLineBoxContainValue`.
+// `style::PositionTryOrder`, `style::TextDecorationLine::Flag`, `style::TextEmphasisPositionValue`,
+// `style::TextUnderlinePositionValue` and `style::WebkitLineBoxContainValue`.
 
 namespace krys::boo
 {
@@ -1886,6 +1887,18 @@ namespace krys::boo
     krys_debug_assert_msg(false, "Unexpected value");
     return FontSizeAdjust::Metric::ExHeight;
   }
+
+#define KRYS_MAPPING_TYPE style::PositionVisibilityValue
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(AnchorsValid) CASE(AnchorsVisible) CASE(NoOverflow)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
+
+#define KRYS_MAPPING_TYPE style::PositionTryFallbackTactic
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(FlipBlock) CASE(FlipInline) CASE(FlipStart) CASE(FlipX) CASE(FlipY)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
 
 #undef KRYS_EMIT_TO_VALUE_ID_SWITCH_CASE
 #undef KRYS_EMIT_FROM_VALUE_ID_SWITCH_CASE

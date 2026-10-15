@@ -16,11 +16,13 @@
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Style/ScopedName.hpp"
 #include "Krystal.Booey/Style/ScopeOrdinal.hpp"
+#include "Krystal.Booey/Style/Values/AnchorPosition/PositionTryFallbackTactic.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
 #include "Krystal.Booey/Style/Values/Math/MathDepth.hpp"
 #include "Krystal.Booey/Style/Values/Sizing/AspectRatio.hpp"
 #include "Krystal.Booey/Style/Values/Text/TextAlign.hpp"
 #include "Krystal.Booey/Style/Values/Text/TextAlignLast.hpp"
+#include "Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
@@ -58,6 +60,7 @@ namespace krys::boo::dom
 namespace krys::boo::css
 {
   class CSSStyleSheet;
+  class StyleProperties;
 }
 
 namespace krys::boo::css::calc
@@ -68,7 +71,6 @@ namespace krys::boo::css::calc
 namespace krys::boo::style
 {
   struct Color;
-  struct ZoomFactor;
 }
 
 namespace krys::boo
@@ -120,6 +122,10 @@ namespace krys::boo
 
     /// @brief The initial used zoom (1); nothing sets it yet.
     KRYS_NODISCARD float UsedZoom() const noexcept;
+
+    /// @brief The zoom lengths are evaluated with: the used zoom when zoom is applied at evaluation time, 1
+    /// otherwise. Collapses `useSVGZoomRulesForLength()`, which is false until there's an SVG zoom flag.
+    KRYS_NODISCARD style::ZoomFactor UsedZoomForLength() const noexcept;
 
     /// @brief Collapses the page's device scale factor for a document with no page: 1.
     KRYS_NODISCARD float DeviceScaleFactor() const noexcept;
@@ -261,6 +267,14 @@ namespace krys::boo
 
 namespace krys::boo::style
 {
+  /// @brief The position-try fallback a style is being built for: the `@position-try` rule's declarations (or
+  /// the inline `position-area`) and the tactics to apply.
+  struct BuilderPositionTryFallback
+  {
+    RefPtr<const css::StyleProperties> Properties;
+    List<PositionTryFallbackTactic> Tactics;
+  };
+
   /// @brief What a builder state is built from, besides the style it writes into.
   struct BuilderContext
   {
@@ -268,8 +282,8 @@ namespace krys::boo::style
     const RenderStyle *ParentStyle {};
     const RenderStyle *RootElementStyle {};
     RefPtr<const dom::Element> Element {};
-    // FIXME: `treeResolutionState` and `positionTryFallback` come with the tree resolver and anchor
-    // positioning.
+    // FIXME: `treeResolutionState` comes with the tree resolver.
+    Maybe<BuilderPositionTryFallback> PositionTryFallback {};
   };
 
   class BuilderState : public CanMakeCheckedPtr<BuilderState>
@@ -300,6 +314,8 @@ namespace krys::boo::style
 
     KRYS_NODISCARD const dom::Document &GetDocument() const noexcept;
     KRYS_NODISCARD const dom::Element *GetElement() const noexcept;
+
+    KRYS_NODISCARD const Maybe<BuilderPositionTryFallback> &GetPositionTryFallback() const noexcept;
 
     KRYS_NODISCARD float ZoomWithTextZoomFactor() noexcept;
 
@@ -348,6 +364,12 @@ namespace krys::boo::style
                                                  Side) noexcept;
     KRYS_NODISCARD static Maybe<double> EvaluateSize(BuilderState &, Maybe<ScopedName> elementName,
                                                      Maybe<AnchorSizeDimension>) noexcept;
+
+    /// @brief Swaps a self-alignment position (`align-self`/`justify-self`) according to a position-try
+    /// fallback's tactics.
+    KRYS_NODISCARD static css::ValueId
+      ResolvePositionTryFallbackValueForSelfPosition(css::PropertyId, css::ValueId position, WritingMode,
+                                                     const BuilderPositionTryFallback &) noexcept;
   };
 
   class ContainerQueryEvaluator

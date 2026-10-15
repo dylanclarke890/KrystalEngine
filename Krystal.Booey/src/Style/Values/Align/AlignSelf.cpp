@@ -50,11 +50,14 @@ namespace krys::boo::style
 
   AlignSelf CSSValueConversion<AlignSelf>::operator()(BuilderState &state, const css::Value &value) noexcept
   {
-    auto applyPositionTryFallbackTactics = [](auto &, auto position) -> css::ValueId
+    auto applyPositionTryFallbackTactics = [](auto &state, auto position) -> css::ValueId
     {
-      // FIXME: Flip the position according to the position-try fallback, if specified, once anchor
-      // positioning
-      // (`BuilderState::PositionTryFallback`, `AnchorPositionEvaluator`) is ported.
+      // Flip the position according to position-try fallback, if specified.
+      if (const auto &positionTryFallback = state.GetPositionTryFallback())
+      {
+        position = AnchorPositionEvaluator::ResolvePositionTryFallbackValueForSelfPosition(
+          state.CssPropertyId(), position, state.Style().GetWritingMode(), *positionTryFallback);
+      }
       return position;
     };
 
