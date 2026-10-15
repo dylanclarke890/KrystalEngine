@@ -21,6 +21,8 @@
 #include "Krystal.Booey/Style/Values/Box/MarginTrim.hpp"
 #include "Krystal.Booey/Style/Values/Contain/Contain.hpp"
 #include "Krystal.Booey/Style/Values/Images/ImageOrientation.hpp"
+#include "Krystal.Booey/Style/Values/Masking/MaskMode.hpp"
+#include "Krystal.Booey/Style/Values/NonStandard/WebKitLineBoxContain.hpp"
 #include "Krystal.Booey/Style/Values/Overflow/ScrollBehavior.hpp"
 #include "Krystal.Booey/Style/Values/PointerEvents/TouchAction.hpp"
 #include "Krystal.Booey/Style/Values/Scrollbars/ScrollbarWidth.hpp"
@@ -29,16 +31,16 @@
 #include "Krystal.Booey/Style/Values/Text/TextAlign.hpp"
 #include "Krystal.Booey/Style/Values/Text/TextAlignLast.hpp"
 #include "Krystal.Booey/Style/Values/Text/TextTransform.hpp"
+#include "Krystal.Booey/Style/Values/TextDecoration/TextDecorationLine.hpp"
+#include "Krystal.Booey/Style/Values/TextDecoration/TextEmphasisPosition.hpp"
+#include "Krystal.Booey/Style/Values/TextDecoration/TextUnderlinePosition.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
 #include "Krystal.Booey/Style/Values/UI/Resize.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Visitor.hpp"
 
-// FIXME: The mappings of the remaining Style value types are added with their
-// types: `style::MaskMode` (and `ToValueIdForWebkitMaskSourceType`),
-// `style::PositionTryOrder`, `style::TextDecorationLine::Flag`, `style::TextEmphasisPositionValue`,
-// `style::TextUnderlinePositionValue` and `style::WebkitLineBoxContainValue`.
+// FIXME: The mapping of `style::PositionTryOrder` is added with its type.
 
 namespace krys::boo
 {
@@ -1903,6 +1905,37 @@ namespace krys::boo
 
 #define KRYS_MAPPING_TYPE style::ImageOrientation
 #define KRYS_MAPPING_FOR_EACH(CASE) CASE(FromImage) CASE(None)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
+
+#define KRYS_MAPPING_TYPE style::MaskMode
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Alpha) CASE(Luminance) CASE(MatchSource)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
+
+#define KRYS_MAPPING_TYPE style::TextDecorationLine::Flag
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Underline) CASE(Overline) CASE(LineThrough) CASE(Blink)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
+
+#define KRYS_MAPPING_TYPE style::TextEmphasisPositionValue
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(Over) CASE(Under) CASE(Left) CASE(Right)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
+
+#define KRYS_MAPPING_TYPE style::TextUnderlinePositionValue
+#define KRYS_MAPPING_FOR_EACH(CASE) CASE(FromFont) CASE(Under) CASE(Left) CASE(Right)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
+
+#define KRYS_MAPPING_TYPE style::WebkitLineBoxContainValue
+#define KRYS_MAPPING_FOR_EACH(CASE)                                                                          \
+  CASE(Block) CASE(Inline) CASE(Font) CASE(Glyphs) CASE(Replaced) CASE(InlineBox) CASE(InitialLetter)
   KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
 #undef KRYS_MAPPING_TYPE
 #undef KRYS_MAPPING_FOR_EACH

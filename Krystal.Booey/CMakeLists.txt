@@ -907,6 +907,38 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Values/Images/ImageWrapper.hpp
   include/Krystal.Booey/Style/Values/Images/ObjectPosition.hpp
   include/Krystal.Booey/Style/Values/UI/Cursor.hpp
+
+  # Style resolution, layer f3e2 (backgrounds, borders, text decoration, non-standard)
+  include/Krystal.Booey/Graphics/FloatRoundedRect.hpp
+  include/Krystal.Booey/Graphics/LayoutRoundedRect.hpp
+  include/Krystal.Booey/Style/Values/Backgrounds/BackgroundLayer.hpp
+  include/Krystal.Booey/Style/Values/Backgrounds/BackgroundLayers.hpp
+  include/Krystal.Booey/Style/Values/Backgrounds/BackgroundSize.hpp
+  include/Krystal.Booey/Style/Values/Backgrounds/BorderImage.hpp
+  include/Krystal.Booey/Style/Values/Backgrounds/BorderImageOutset.hpp
+  include/Krystal.Booey/Style/Values/Backgrounds/BorderImageRepeat.hpp
+  include/Krystal.Booey/Style/Values/Backgrounds/BorderImageSlice.hpp
+  include/Krystal.Booey/Style/Values/Backgrounds/BorderImageSource.hpp
+  include/Krystal.Booey/Style/Values/Backgrounds/BorderImageWidth.hpp
+  include/Krystal.Booey/Style/Values/Backgrounds/FillLayers.hpp
+  include/Krystal.Booey/Style/Values/Backgrounds/LineWidth.hpp
+  include/Krystal.Booey/Style/Values/Backgrounds/RepeatStyle.hpp
+  include/Krystal.Booey/Style/Values/Borders/BorderRadius.hpp
+  include/Krystal.Booey/Style/Values/Borders/BoxShadow.hpp
+  include/Krystal.Booey/Style/Values/Borders/CornerShapeValue.hpp
+  include/Krystal.Booey/Style/Values/Borders/Shadow.hpp
+  include/Krystal.Booey/Style/Values/Borders/ShadowInterpolation.hpp
+  include/Krystal.Booey/Style/Values/NonStandard/WebKitBorderSpacing.hpp
+  include/Krystal.Booey/Style/Values/NonStandard/WebKitLineBoxContain.hpp
+  include/Krystal.Booey/Style/Values/NonStandard/WebKitLocale.hpp
+  include/Krystal.Booey/Style/Values/TextDecoration/TextDecorationLine.hpp
+  include/Krystal.Booey/Style/Values/TextDecoration/TextDecorationThickness.hpp
+  include/Krystal.Booey/Style/Values/TextDecoration/TextEmphasisPosition.hpp
+  include/Krystal.Booey/Style/Values/TextDecoration/TextEmphasisStyle.hpp
+  include/Krystal.Booey/Style/Values/TextDecoration/TextShadow.hpp
+  include/Krystal.Booey/Style/Values/TextDecoration/TextUnderlineOffset.hpp
+  include/Krystal.Booey/Style/Values/TextDecoration/TextUnderlinePosition.hpp
+  include/Krystal.Booey/Style/Values/Masking/MaskMode.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -1473,6 +1505,32 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Style/Values/Images/ImageOrientation.cpp
   src/Style/Values/Images/ImageWrapper.cpp
   src/Style/Values/UI/Cursor.cpp
+
+  # Style resolution, layer f3e2 (backgrounds, borders, text decoration, non-standard)
+  src/Graphics/FloatRoundedRect.cpp
+  src/Graphics/LayoutRoundedRect.cpp
+  src/Style/Values/Backgrounds/BackgroundLayer.cpp
+  src/Style/Values/Backgrounds/BackgroundSize.cpp
+  src/Style/Values/Backgrounds/BorderImage.cpp
+  src/Style/Values/Backgrounds/BorderImageOutset.cpp
+  src/Style/Values/Backgrounds/BorderImageRepeat.cpp
+  src/Style/Values/Backgrounds/BorderImageSlice.cpp
+  src/Style/Values/Backgrounds/BorderImageSource.cpp
+  src/Style/Values/Backgrounds/BorderImageWidth.cpp
+  src/Style/Values/Backgrounds/LineWidth.cpp
+  src/Style/Values/Backgrounds/RepeatStyle.cpp
+  src/Style/Values/Borders/BorderRadius.cpp
+  src/Style/Values/Borders/BoxShadow.cpp
+  src/Style/Values/Borders/CornerShapeValue.cpp
+  src/Style/Values/NonStandard/WebKitLocale.cpp
+  src/Style/Values/TextDecoration/TextDecorationLine.cpp
+  src/Style/Values/TextDecoration/TextDecorationThickness.cpp
+  src/Style/Values/TextDecoration/TextEmphasisPosition.cpp
+  src/Style/Values/TextDecoration/TextEmphasisStyle.cpp
+  src/Style/Values/TextDecoration/TextShadow.cpp
+  src/Style/Values/TextDecoration/TextUnderlineOffset.cpp
+  src/Style/Values/TextDecoration/TextUnderlinePosition.cpp
+  src/Style/Values/Masking/MaskMode.cpp
 )
 
 target_precompile_headers(Krystal.Booey

@@ -48,6 +48,8 @@ namespace krys::boo::style::tests
       context.PropertySettings.accentColorEnabled = true;
       context.PropertySettings.colorFilterEnabled = true;
       context.PropertySettings.cssUnprefixedBackdropFilterEnabled = true;
+      context.PropertySettings.cssCornerShapeEnabled = true;
+      context.cssTextDecorationLineErrorValues = true;
       context.PropertySettings.cssAnchorPositioningEnabled = true;
       context.PropertySettings.cssLineFitEdgeEnabled = true;
       context.PropertySettings.cssMathDepthEnabled = true;

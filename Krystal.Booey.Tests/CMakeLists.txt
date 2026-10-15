@@ -299,6 +299,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Transforms/TransformOperations.cpp
 		tests/Graphics/Filters/FilterOperations.cpp
 		tests/Graphics/Gradient.cpp
+		tests/Graphics/RoundedRect.cpp
 		tests/Graphics/Animation/TimingFunction.cpp
 		tests/Graphics/FontDescription.cpp
 		tests/Graphics/FontSelectionAlgorithm.cpp
@@ -352,6 +353,9 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/Values/AnchorPosition/AnchorPosition.cpp
 		tests/Style/Values/Images/Images.cpp
 		tests/Style/Values/Content/Content.cpp
+		tests/Style/Values/Backgrounds/Backgrounds.cpp
+		tests/Style/Values/Borders/Borders.cpp
+		tests/Style/Values/TextDecoration/TextDecoration.cpp
 		tests/Style/Values/Animations/AnimationGroups.cpp
 		tests/Style/Values/Grid/GridPosition.cpp
 		tests/Style/Values/Grid/GridTemplate.cpp
