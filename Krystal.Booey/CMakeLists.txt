@@ -939,6 +939,35 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Values/TextDecoration/TextUnderlineOffset.hpp
   include/Krystal.Booey/Style/Values/TextDecoration/TextUnderlinePosition.hpp
   include/Krystal.Booey/Style/Values/Masking/MaskMode.hpp
+
+  # Style resolution, layer f3e3 (paths and shapes)
+  include/Krystal.Booey/Graphics/Path.hpp
+  include/Krystal.Booey/Graphics/PathElement.hpp
+  include/Krystal.Booey/Graphics/PathImpl.hpp
+  include/Krystal.Booey/Graphics/PathSegment.hpp
+  include/Krystal.Booey/Graphics/PathSegmentData.hpp
+  include/Krystal.Booey/Graphics/PathStream.hpp
+  include/Krystal.Booey/Graphics/PathTraversalState.hpp
+  include/Krystal.Booey/Graphics/RotationDirection.hpp
+  include/Krystal.Booey/SVG/Internals/SVGPathBuilder.hpp
+  include/Krystal.Booey/Style/Values/Shapes/BasicShape.hpp
+  include/Krystal.Booey/Style/Values/Shapes/CircleFunction.hpp
+  include/Krystal.Booey/Style/Values/Shapes/EllipseFunction.hpp
+  include/Krystal.Booey/Style/Values/Shapes/FillRule.hpp
+  include/Krystal.Booey/Style/Values/Shapes/InsetFunction.hpp
+  include/Krystal.Booey/Style/Values/Shapes/PathComputation.hpp
+  include/Krystal.Booey/Style/Values/Shapes/PathFunction.hpp
+  include/Krystal.Booey/Style/Values/Shapes/PolygonFunction.hpp
+  include/Krystal.Booey/Style/Values/Shapes/RectFunction.hpp
+  include/Krystal.Booey/Style/Values/Shapes/ShapeForward.hpp
+  include/Krystal.Booey/Style/Values/Shapes/ShapeFunction.hpp
+  include/Krystal.Booey/Style/Values/Shapes/ShapeImageThreshold.hpp
+  include/Krystal.Booey/Style/Values/Shapes/ShapeMargin.hpp
+  include/Krystal.Booey/Style/Values/Shapes/ShapeOutside.hpp
+  include/Krystal.Booey/Style/Values/Shapes/WindRuleComputation.hpp
+  include/Krystal.Booey/Style/Values/Shapes/XywhFunction.hpp
+  include/Krystal.Booey/SVG/Internals/SVGPathAbsoluteConverter.hpp
+  include/Krystal.Booey/SVG/Internals/SVGPathBlender.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -1531,6 +1560,27 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Style/Values/TextDecoration/TextUnderlineOffset.cpp
   src/Style/Values/TextDecoration/TextUnderlinePosition.cpp
   src/Style/Values/Masking/MaskMode.cpp
+
+  # Style resolution, layer f3e3 (paths and shapes)
+  src/Graphics/Path.cpp
+  src/Graphics/PathImpl.cpp
+  src/Graphics/PathSegment.cpp
+  src/Graphics/PathSegmentData.cpp
+  src/Graphics/PathStream.cpp
+  src/Graphics/PathTraversalState.cpp
+  src/SVG/Internals/SVGPathBuilder.cpp
+  src/Style/Values/Shapes/BasicShape.cpp
+  src/Style/Values/Shapes/CircleFunction.cpp
+  src/Style/Values/Shapes/EllipseFunction.cpp
+  src/Style/Values/Shapes/InsetFunction.cpp
+  src/Style/Values/Shapes/PathFunction.cpp
+  src/Style/Values/Shapes/PolygonFunction.cpp
+  src/Style/Values/Shapes/RectFunction.cpp
+  src/Style/Values/Shapes/ShapeFunction.cpp
+  src/Style/Values/Shapes/ShapeOutside.cpp
+  src/Style/Values/Shapes/XywhFunction.cpp
+  src/SVG/Internals/SVGPathAbsoluteConverter.cpp
+  src/SVG/Internals/SVGPathBlender.cpp
 )
 
 target_precompile_headers(Krystal.Booey

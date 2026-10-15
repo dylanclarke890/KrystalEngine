@@ -3,13 +3,23 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathConsumer.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+
+namespace krys::boo
+{
+  class Path;
+}
 
 namespace krys::boo::svg
 {
   class SVGPathByteStream;
 
-  // FIXME: The Path, SVGPathSegList, blending, accumulation, traversal and absolute-coordinate helpers aren't
-  // ported yet; they need the platform Path and the SVG DOM.
+  // FIXME: The SVGPathSegList, accumulation (`addToSVGPathByteStream`) and traversal helpers aren't ported
+  // yet; they need the SVG DOM and SVG animation.
+
+  // String/SVGPathByteStream -> Path
+  KRYS_NODISCARD Path BuildPathFromString(dom::DOMStringView d) noexcept;
+  KRYS_NODISCARD Path BuildPathFromByteStream(const SVGPathByteStream &stream) noexcept;
 
   // SVGPathByteStream <-> String
   KRYS_NODISCARD bool BuildSVGPathByteStreamFromString(dom::DOMStringView d, SVGPathByteStream &result,
@@ -17,4 +27,14 @@ namespace krys::boo::svg
   KRYS_NODISCARD bool BuildStringFromByteStream(const SVGPathByteStream &stream, dom::DOMString &result,
                                                 PathParsingMode parsingMode,
                                                 bool checkForInitialMoveTo = true) noexcept;
+
+  // SVGPathByteStream blending
+  KRYS_NODISCARD bool CanBlendSVGPathByteStreams(const SVGPathByteStream &fromStream,
+                                                 const SVGPathByteStream &toStream) noexcept;
+  KRYS_NODISCARD bool BuildAnimatedSVGPathByteStream(const SVGPathByteStream &fromStream,
+                                                     const SVGPathByteStream &toStream,
+                                                     SVGPathByteStream &result, float progress) noexcept;
+
+  KRYS_NODISCARD Maybe<SVGPathByteStream>
+    ConvertSVGPathByteStreamToAbsoluteCoordinates(const SVGPathByteStream &stream) noexcept;
 }

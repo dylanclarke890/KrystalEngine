@@ -8,6 +8,13 @@
 namespace krys::boo
 {
   /// @brief Divides `u` by `v`, protecting against overflow and underflow.
+  /// @brief Whether `a` is in `[min, max]`.
+  template <typename T>
+  KRYS_NODISCARD constexpr bool IsInRange(const T &a, const T &min, const T &max) noexcept
+  {
+    return a >= min && a <= max;
+  }
+
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T SafeFPDivision(T u, T v) noexcept
   {

@@ -60,6 +60,7 @@ target_sources(Krystal.Core.Tests
   # Types
 	PRIVATE tests/Types/BloomFilter.cpp
 	PRIVATE tests/Types/CompactVariant.cpp
+	PRIVATE tests/Types/DataRef.cpp
 	PRIVATE tests/Types/FixedVector.cpp
 	PRIVATE tests/Types/ListHashSet.cpp
 	PRIVATE tests/Types/Packed.cpp

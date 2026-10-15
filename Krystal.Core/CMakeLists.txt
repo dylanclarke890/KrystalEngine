@@ -204,6 +204,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Types/CompactUniquePtrTuple.hpp
       include/Krystal.Core/Types/BloomFilter.hpp
       include/Krystal.Core/Types/CompactVariant.hpp
+      include/Krystal.Core/Types/DataRef.hpp
       include/Krystal.Core/Types/Expected.hpp
       include/Krystal.Core/Types/FixedVector.hpp
       include/Krystal.Core/Types/FlatteningVariant.hpp
@@ -230,6 +231,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Types/StringAtom.hpp
       include/Krystal.Core/Types/StronglyTypedValue.hpp
       include/Krystal.Core/Types/TaggedPtr.hpp
+      include/Krystal.Core/Types/TinyLRUCache.hpp
       include/Krystal.Core/Types/ThreadSafeWeakPtr.hpp
       include/Krystal.Core/Types/UniqueArray.hpp
       include/Krystal.Core/Types/UniquePtr.hpp

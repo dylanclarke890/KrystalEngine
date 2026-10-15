@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Core/MathExtras.hpp"
+#include "Krystal.Booey/Graphics/Path.hpp"
 #include "Krystal.Core/Maths/Base.hpp"
 #include <algorithm>
 #include <cmath>
@@ -227,6 +228,13 @@ namespace krys::boo
   {
     return !(rect.Intersects(TopLeftCorner()) || rect.Intersects(TopRightCorner())
              || rect.Intersects(BottomLeftCorner()) || rect.Intersects(BottomRightCorner()));
+  }
+
+  Path FloatRoundedRect::GetPath() const noexcept
+  {
+    Path path;
+    path.AddRoundedRect(*this);
+    return path;
   }
 
   Region ApproximateAsRegion(const FloatRoundedRect &roundedRect, unsigned stepLength) noexcept

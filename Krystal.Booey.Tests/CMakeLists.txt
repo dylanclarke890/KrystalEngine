@@ -300,6 +300,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Filters/FilterOperations.cpp
 		tests/Graphics/Gradient.cpp
 		tests/Graphics/RoundedRect.cpp
+		tests/Graphics/Path.cpp
+		tests/Style/Values/Shapes/Shapes.cpp
 		tests/Graphics/Animation/TimingFunction.cpp
 		tests/Graphics/FontDescription.cpp
 		tests/Graphics/FontSelectionAlgorithm.cpp

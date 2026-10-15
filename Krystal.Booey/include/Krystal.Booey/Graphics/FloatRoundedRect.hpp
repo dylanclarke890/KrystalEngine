@@ -9,6 +9,8 @@
 
 namespace krys::boo
 {
+  class Path;
+
   /// @brief A rectangle with rounded corners.
   class FloatRoundedRect
   {
@@ -193,7 +195,8 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IntersectionIsRectangular(const FloatRect &) const noexcept;
 
-    // FIXME: `path()` comes with the `Path` stand-in.
+    /// @brief The rounded rect as a path.
+    KRYS_NODISCARD Path GetPath() const noexcept;
 
     KRYS_NODISCARD bool operator==(const FloatRoundedRect &) const noexcept = default;
   };

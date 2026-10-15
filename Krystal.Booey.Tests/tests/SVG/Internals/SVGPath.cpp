@@ -1,4 +1,6 @@
-﻿#include "catch2/catch_test_macros.hpp"
+﻿#include "catch2/catch_approx.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey/Graphics/Path.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGParserUtilities.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathByteStream.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathUtilities.hpp"
@@ -265,5 +267,43 @@ namespace krys::boo::svg::tests
     dom::DOMString empty;
     CHECK(BuildStringFromByteStream(SVGPathByteStream(), empty, PathParsingMode::UnalteredParsing));
     CHECK(empty.empty());
+  }
+
+  TEST_CASE("SVG path utilities", "[SVG][SVGPath]")
+  {
+    using Catch::Approx;
+
+    SECTION("building a path")
+    {
+      auto path = BuildPathFromString(u8"M 0 0 L 10 0 L 10 10 Z");
+      CHECK(path.IsClosed());
+      CHECK(path.BoundingRect() == FloatRect {0, 0, 10, 10});
+      CHECK(BuildPathFromByteStream(SVGPathByteStream(u8"M 0 0 h 30 v 40")).BoundingRect()
+            == FloatRect {0, 0, 30, 40});
+      CHECK(BuildPathFromString(u8"").IsEmpty());
+    }
+
+    SECTION("blending")
+    {
+      SVGPathByteStream from(u8"M 0 0 L 10 10");
+      SVGPathByteStream to(u8"M 10 20 L 30 50");
+      CHECK(CanBlendSVGPathByteStreams(from, to));
+      CHECK_FALSE(CanBlendSVGPathByteStreams(from, SVGPathByteStream(u8"M 0 0 C 1 1 2 2 3 3")));
+
+      SVGPathByteStream result;
+      REQUIRE(BuildAnimatedSVGPathByteStream(from, to, result, 0.5f));
+      dom::DOMString string;
+      REQUIRE(BuildStringFromByteStream(result, string, PathParsingMode::UnalteredParsing));
+      CHECK(string == u8"M 5 10 L 20 30");
+    }
+
+    SECTION("converting to absolute coordinates")
+    {
+      auto absolute = ConvertSVGPathByteStreamToAbsoluteCoordinates(SVGPathByteStream(u8"m 1 2 l 3 4 h 5"));
+      REQUIRE(absolute);
+      dom::DOMString string;
+      REQUIRE(BuildStringFromByteStream(*absolute, string, PathParsingMode::UnalteredParsing));
+      CHECK(string == u8"M 1 2 L 4 6 H 9");
+    }
   }
 }
