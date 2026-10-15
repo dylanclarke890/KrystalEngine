@@ -305,6 +305,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/Values/Masking/Masking.cpp
 		tests/Style/Values/Motion/Motion.cpp
 		tests/Style/Values/SVG/SVG.cpp
+		tests/Rendering/Style/BorderValues.cpp
+		tests/Style/CustomProperty.cpp
 		tests/Graphics/Animation/TimingFunction.cpp
 		tests/Graphics/FontDescription.cpp
 		tests/Graphics/FontSelectionAlgorithm.cpp

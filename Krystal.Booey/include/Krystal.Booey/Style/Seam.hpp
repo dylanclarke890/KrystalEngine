@@ -106,6 +106,9 @@ namespace krys::boo
   public:
     RenderStyle() noexcept = default;
 
+    /// @brief The style with every property at its initial value, shared.
+    KRYS_NODISCARD static const RenderStyle &DefaultStyleSingleton() noexcept;
+
     KRYS_NODISCARD const boo::Color &GetColor() const noexcept;
     void SetColor(const boo::Color &color) noexcept;
     KRYS_NODISCARD const boo::Color &VisitedLinkColor() const noexcept;

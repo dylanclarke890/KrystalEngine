@@ -15,6 +15,7 @@
 #include "Krystal.Booey/Graphics/FontSizeAdjust.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Graphics/WindRule.hpp"
+#include "Krystal.Booey/Rendering/Style/PositionTryOrder.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/Values/AnchorPosition/PositionTryFallbackTactic.hpp"
 #include "Krystal.Booey/Style/Values/AnchorPosition/PositionVisibility.hpp"
@@ -1936,6 +1937,13 @@ namespace krys::boo
 #define KRYS_MAPPING_TYPE style::WebkitLineBoxContainValue
 #define KRYS_MAPPING_FOR_EACH(CASE)                                                                          \
   CASE(Block) CASE(Inline) CASE(Font) CASE(Glyphs) CASE(Replaced) CASE(InlineBox) CASE(InitialLetter)
+  KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
+#undef KRYS_MAPPING_TYPE
+#undef KRYS_MAPPING_FOR_EACH
+
+#define KRYS_MAPPING_TYPE style::PositionTryOrder
+#define KRYS_MAPPING_FOR_EACH(CASE)                                                                          \
+  CASE(Normal) CASE(MostWidth) CASE(MostHeight) CASE(MostBlockSize) CASE(MostInlineSize)
   KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
 #undef KRYS_MAPPING_TYPE
 #undef KRYS_MAPPING_FOR_EACH

@@ -332,6 +332,12 @@ namespace krys::boo
     return ColorByApplyingColorFilter(ColorResolvingCurrentColor(color));
   }
 
+  const RenderStyle &RenderStyle::DefaultStyleSingleton() noexcept
+  {
+    static const RenderStyle style;
+    return style;
+  }
+
   bool RenderStyle::HasAttrContent() const noexcept
   {
     return _hasAttrContent;

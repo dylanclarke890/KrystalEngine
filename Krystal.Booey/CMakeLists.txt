@@ -1003,6 +1003,15 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Values/SVG/SVGStrokeDasharray.hpp
   include/Krystal.Booey/Style/Values/SVG/SVGStrokeDashoffset.hpp
   include/Krystal.Booey/Style/Values/Shapes/PathOperationWrappers.hpp
+
+  # Style resolution, layer f3f1 (storage leaves and custom properties)
+  include/Krystal.Booey/Rendering/Style/BorderValue.hpp
+  include/Krystal.Booey/Rendering/Style/CollapsedBorderValue.hpp
+  include/Krystal.Booey/Rendering/Style/CounterDirectives.hpp
+  include/Krystal.Booey/Rendering/Style/OutlineValue.hpp
+  include/Krystal.Booey/Rendering/Style/PositionTryOrder.hpp
+  include/Krystal.Booey/Rendering/Style/StyleCustomPropertyData.hpp
+  include/Krystal.Booey/Style/CustomProperty.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -1643,6 +1652,13 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Style/Values/SVG/SVGStrokeDasharray.cpp
   src/Style/Values/SVG/SVGStrokeDashoffset.cpp
   src/Style/Values/Shapes/PathOperationWrappers.cpp
+
+  # Style resolution, layer f3f1 (storage leaves and custom properties)
+  src/Rendering/Style/BorderValue.cpp
+  src/Rendering/Style/OutlineValue.cpp
+  src/Rendering/Style/PositionTryOrder.cpp
+  src/Rendering/Style/StyleCustomPropertyData.cpp
+  src/Style/CustomProperty.cpp
 )
 
 target_precompile_headers(Krystal.Booey

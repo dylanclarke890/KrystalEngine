@@ -80,9 +80,10 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - Style resolution, layer f3e2 (2026-10-14): the rounded rects, `backgrounds`, `borders`, `text-decoration`, the non-standard values still in `css-properties.json`, and `MaskMode`. See *Layer f3e2*.
 - Style resolution, layer f3e3 (2026-10-14): the path data model, the SVG path builder, blender and absolute converter, `DataRef` and `TinyLRUCache`, and `shapes`. See *Layer f3e3*.
 - Style resolution, layer f3e4 (2026-10-14): path operations and motion paths, `masking`, `motion` and `svg` values. See *Layer f3e4*.
+- Style resolution, layer f3f1 (2026-10-14): the border, outline and counter value classes, `PositionTryOrder`, and the custom property storage (`CustomProperty`, `CustomPropertyData`). See *Layer f3f1*.
 
 **Open / next candidates:**
-- **Next:** style resolution, layer f3f (storage); see *Layer f3: computed style storage (planned)*. The rest of the DOM integration's deferred list comes with the resource loader and the builder.
+- **Next:** style resolution, layer f3f2 (the computed style and render style property generators); see *Layer f3: computed style storage (planned)*. The rest of the DOM integration's deferred list comes with the resource loader and the builder.
 - Settings, noted with f0 (2026-10-14): parser contexts have no `Settings`, so features behind a settings flag that's on by default upstream are off in author sheets (`@view-transition` via crossDocumentViewTransitionsEnabled, `@position-try` via cssAnchorPositioningEnabled, `text-decoration-line: spelling-error | grammar-error`, ...). User agent sheets turn on upstream's list, which doesn't include the `text-decoration-line` flag (as upstream).
 - DOM, not yet done (noted 2026-10-14, deferred by choice): `NodeAlgorithms::Equals` compares attributes by position and ignores extra attributes on the other element (the spec compares the counts and matches attributes regardless of order). `Document::Head()` returns null for parsed documents (`DOMTreeAccessors::GetHeadElement`); URL reflection (`dom::USVString` is a placeholder). only `classList` follows its attribute; `relList`, `sandbox`, `sizes`, `blocking` and `htmlFor` are parsed once when created and should update from `Element::OnAttributeChanged`. Mutation observers never deliver records: `QueueMutationObserverMicrotask`/`NotifyMutationObservers` are TODOs and can now be built on `html::EventLoop`.
 - DOM, not yet done (noted with f1, 2026-10-14): `TreeQueries::NextShadowIncluding` visits a host's children before its shadow root and, when the host has children, never visits the shadow root (shadow-including tree order visits the shadow root right after its host). Shadow roots have no part mappings (`exportparts`), so `::part()` never reaches beyond the host's scope (FIXMEs in `SelectorChecker` and `ElementRuleCollector`). Documents have no focused area, so `:focus`/`:focus-visible` never match (FIXMEs).
@@ -1421,9 +1422,38 @@ Boundaries outside `css/`, `style/` and `rendering/style/`: platform data (text 
 - **f3c, fonts (~2.7k, plus ~1.1k platform), done (2026-10-14):** the font description types, the `FontCascade` shell, `fonts`.
 - **f3d, timing, transforms and filters (~11.7k, plus ~3.6k platform; split in three on 2026-10-14: f3d1, timing and animations, done; f3d2, transforms, done; f3d3, filters and anchor positioning, done, with `Path` moved to f3e):** `TimingFunction`, transform operations, filter operations, the `Path` stand-in; `easing`, `transforms` (and `transforms/functions`), `filter-effects`, `animations`, `transitions`, `scroll-animations`, `anchor-position`.
 - **f3e, images and painted values (~17.7k, plus the image classes; split in three on 2026-10-14: f3e1, style images, `images`, `content` and the cursor, done; f3e2, `backgrounds`, `borders`, `text-decoration`, `non-standard`, done (with `MaskMode` from `masking`); f3e3, paths and `shapes`, done; f3e4, `masking`, `motion`, `svg`, with `PathOperation`, done):** the `StyleImage` hierarchy and the drawing stand-ins (with the `Path` stand-in, moved from f3d3); `images`, `backgrounds`, `borders`, `shapes`, `masking`, `motion`, `content`, `text-decoration`, `svg`, `non-standard` (only the types behind properties still in `css-properties.json`).
-- **f3f, storage (~22k, plus generated code):** the `rendering/style` data groups and value classes (`BorderData`, `BorderValue`, `OutlineValue`, `CounterDirectives`, `SVGRenderStyle`, ...), `StyleCustomProperty` and `StyleCustomPropertyData`, `style/computed`, the `GenerateStyleComputedStyleProperties` and `GenerateRenderStyleProperties` generators (reviewed against upstream's output, as in c1), and `RenderStyle`, which replaces the seam's. Tested as initial values, getters and setters, copy-on-write of the data groups, inheritance (`inheritFrom`), equality and the custom property storage.
+- **f3f, storage (~22k, plus generated code; split in four on 2026-10-14: f3f1, the storage leaves and custom properties, done; f3f2, the generators; f3f3, the data groups with `style/computed`; f3f4, `RenderStyle`):** the `rendering/style` data groups and value classes (`BorderData`, `BorderValue`, `OutlineValue`, `CounterDirectives`, `SVGRenderStyle`, ...), `StyleCustomProperty` and `StyleCustomPropertyData`, `style/computed`, the `GenerateStyleComputedStyleProperties` and `GenerateRenderStyleProperties` generators (reviewed against upstream's output, as in c1), and `RenderStyle`, which replaces the seam's. Tested as initial values, getters and setters, copy-on-write of the data groups, inheritance (`inheritFrom`), equality and the custom property storage.
 
 **Tests:** each value type: conversion from parsed CSS through the seam's `BuilderState` (including invalid-at-computed-value-time cases), creation back to a CSS value, serialisation and equality; platform data types against upstream's API tests where they exist.
+
+### Layer f3f1: storage leaves and custom properties (2026-10-14)
+
+Graphs: the planning graphs (`tools/port/out/f3-all.md`, `f3-computed.md`). The `rendering/style` value classes that don't need `ComputedStyle`'s initial values (`BorderValue.h`, `.cpp`, `OutlineValue.h`, `.cpp`, `CollapsedBorderValue.h`, `CounterDirectives.h`, `PositionTryOrder.h`, `.cpp`) and the custom property storage (`style/StyleCustomProperty.h`, `.cpp`, `rendering/style/StyleCustomPropertyData.h`, `.cpp`). Translated by `conv.py` and rewritten by hand.
+
+**Decisions (2026-10-14):**
+- f3f split in four: f3f1 (this layer); f3f2, the `GenerateStyleComputedStyleProperties` and `GenerateRenderStyleProperties` generators; f3f3, the data groups (`Style*Data`, `BorderData`, `SVGRenderStyle` and `SVGRenderStyleDefs`) with `style/computed`, since the data groups' constructors call the generated `ComputedStyle::initial*()` functions and `ComputedStyle` holds the data groups; f3f4, `RenderStyle`, replacing the seam's.
+- `rendering/style/StyleTextEdge.h`, `.cpp` are dropped: dead upstream (`TextEdgeType` exists nowhere, and every `StyleTextEdge.h` include resolves to `style/values/inline`'s, ported in f3b2). `AutosizeStatus` is dropped too (`ENABLE_TEXT_AUTOSIZING`, which the generator leaves off).
+- Names: `BorderValue`'s members are `Color`/`Width`/`Style`, `OutlineValue`'s `OutlineColor`/`OutlineWidth`/`OutlineOffset`/`OutlineStyle` (the last qualified as `boo::OutlineStyle` inside the struct), `CounterDirectives`' `ResetValue`/`IncrementValue`/`SetValue`, `CounterDirectiveMap::Map`, `CustomProperty::ValueList`'s `Values`/`Separator`; `CustomProperty::value()` → `GetValue()`, `name()` → `GetName()`, `propertyValueSerialization` → `PropertyValueSerialisation`; `CustomPropertyData::get`/`size` → `Get`/`Size`, and its entries are the map's `value_type` (`Entry`, `first`/`second`). The bitfields are `uint8`.
+- `CustomProperty`'s `String` alternative is `css::CSSOMString`, and its variable data is `css::VariableData`; its tokens are `css::Token`s. Tokenizing a typed value serialises it against the seam's new `RenderStyle::DefaultStyleSingleton()`.
+- `CustomPropertyData` keeps upstream's parent-linked copy-on-write (`ShareRefPtr` to the source); the debug-only `_hasChildren` check is under `KRYS_DEBUG`. `dumpDifferences` (logging) isn't ported.
+- Mappings: `Style::PositionTryOrder` now has its `CSSPrimitiveValueMappings` entry; none remain deferred.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `rendering/style/BorderValue.h`, `.cpp`, `OutlineValue.h`, `.cpp`, `CollapsedBorderValue.h`, `CounterDirectives.h`, `PositionTryOrder.h`, `.cpp` | `port` | `Rendering/Style/...`, `src/...` | on | tested. |
+| `style/StyleCustomProperty.h`, `.cpp` | `port` | `Style/CustomProperty.hpp`, `src/...` | on | tested. |
+| `rendering/style/StyleCustomPropertyData.h`, `.cpp` | `port` | `Rendering/Style/StyleCustomPropertyData.hpp`, `src/...` | on | tested. |
+| `rendering/style/StyleTextEdge.h`, `.cpp` | `drop` | | | Dead upstream. |
+| `rendering/style/AutosizeStatus.h`, `.cpp` | `drop` | | | `ENABLE_TEXT_AUTOSIZING`. |
+
+**Bugs fixed:**
+- `CSS/Values/ValueSeparator.hpp` had no `#pragma once`, so including it twice in one translation unit redefined `css::ValueSeparator` (first hit by `CustomProperty.cpp`).
+
+**Added (upstream API):** `RenderStyle::DefaultStyleSingleton()` on the seam; the `Style::PositionTryOrder` mapping.
+
+**Differences:** none beyond the decisions.
+
+Tests: `tests/Rendering/Style/BorderValues.cpp` (border visibility, transparency and hidden styles, collapsed borders and their adjusted widths, outlines and `ToBorderStyle`, counter directive maps, position-try order axes), `tests/Style/CustomProperty.cpp` (guaranteed-invalid, token and typed custom properties with their serialisation, tokens, CSS values and equality; custom property data: copy-on-write, overriding, iteration, key lookup by index, equality across parents): 6 new cases. Full Booey suite: 1959 cases; all pass except 7 expected failures. Whole solution builds with no warnings.
 
 ### Layer f3e4: masking, motion and SVG values, with path operations (2026-10-14)
 
