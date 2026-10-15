@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Builder.hpp"

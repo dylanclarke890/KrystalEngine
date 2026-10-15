@@ -1078,6 +1078,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/NameScope.hpp
 
   # RenderStyle (f3f4)
+  include/Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp
   include/Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp
   include/Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp
   include/Krystal.Booey/Rendering/Style/RenderStyle.hpp

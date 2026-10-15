@@ -1477,7 +1477,7 @@ Graphs: `tools/port/out/f5-StyleAdjuster.md`, `f5-StyleChange.md` (the f5 plan's
 | `dom/Element.h` (`isReplaced`, `isRelevantToUser`) and the `isReplaced` overrides | `port` | `dom::Element`, the HTML and SVG elements | on | tested. See decisions. |
 | `html/HTMLElement.cpp` (`isHiddenUntilFound`), `HTMLInputElement.cpp` (`isPasswordField`, `isImageButton`) | `port` | `html::HTMLElement`, `html::HTMLInputElement` | on | tested. From the `hidden` and `type` attributes. |
 | `svg/SVGElement.cpp` (`isOutermostSVGSVGElement`, `isInnerSVGSVGElement`) | `port` | `svg::SVGElement` | on | tested. |
-| `rendering/style/RenderStyle+GettersInlines.h` (`shouldApply*Containment`, `isSkippedContentRoot`) | `port` | `Rendering/Style/RenderStyle+GettersInlines.hpp` | on | tested. Was a FIXME. |
+| `rendering/style/RenderStyle+GettersInlines.h` (`shouldApply*Containment`, `isSkippedContentRoot`) | `port` | `Rendering/Style/RenderStyle+ContainmentInlines.hpp` | on | tested. Was a FIXME. Its own header (upstream: the getters), so the style headers don't include `DOM/Element.hpp`. |
 
 **Names:** `adjust()` → `Adjust()` and so on. `Change` is an `EnumSet` of sequential values (upstream: an `OptionSet` of bit flags); `inheritedChanges()` → `InheritedChanges()`, `determineChanges` → `DetermineChanges`. `ResolvedStyle`/`UnadjustedStyle` members are PascalCase, writing their types as `style::X`.
 

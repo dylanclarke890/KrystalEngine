@@ -6,6 +6,7 @@
 #include "Krystal.Booey/HTML/HTMLTableElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/MathML/MathMLElement.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp"
