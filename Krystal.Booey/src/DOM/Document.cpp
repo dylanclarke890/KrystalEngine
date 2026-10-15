@@ -4,6 +4,7 @@
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryMatcher.hpp"
 #include "Krystal.Booey/CSS/StyleSheetList.hpp"
+#include "Krystal.Booey/CSS/Values/Color/KeywordColor.hpp"
 #include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
@@ -45,6 +46,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/ResolveForDocument.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGScriptElement.hpp"
 
@@ -782,6 +784,50 @@ namespace krys::boo::dom
       _visitedLinkState = CreateUnique<VisitedLinkState>(const_cast<Document &>(*this));
     }
     return *_visitedLinkState;
+  }
+
+  boo::Color Document::LinkColor(const RenderStyle &style) const noexcept
+  {
+    if (_linkColor.IsValid())
+    {
+      return _linkColor;
+    }
+    return css::ColorFromKeyword(css::ValueId::WebkitLink, DocumentStyleColorOptions(*this, &style));
+  }
+
+  boo::Color Document::VisitedLinkColor(const RenderStyle &style) const noexcept
+  {
+    if (_visitedLinkColor.IsValid())
+    {
+      return _visitedLinkColor;
+    }
+    return css::ColorFromKeyword(css::ValueId::WebkitLink, DocumentStyleColorOptions(*this, &style)
+                                                             | style::ColorOptions::ForVisitedLink);
+  }
+
+  boo::Color Document::ActiveLinkColor(const RenderStyle &style) const noexcept
+  {
+    if (_activeLinkColor.IsValid())
+    {
+      return _activeLinkColor;
+    }
+    return css::ColorFromKeyword(css::ValueId::WebkitActivelink,
+                                 DocumentStyleColorOptions(*this, &style));
+  }
+
+  void Document::ResetLinkColor() noexcept
+  {
+    _linkColor = {};
+  }
+
+  void Document::ResetVisitedLinkColor() noexcept
+  {
+    _visitedLinkColor = {};
+  }
+
+  void Document::ResetActiveLinkColor() noexcept
+  {
+    _activeLinkColor = {};
   }
 
   double Document::LookupCSSRandomBaseValue(const css::calc::RandomCachingKey &key) const noexcept

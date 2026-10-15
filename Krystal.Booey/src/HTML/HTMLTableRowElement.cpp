@@ -4,7 +4,7 @@
 namespace krys::boo::html
 {
   HTMLTableRowElement::HTMLTableRowElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::TableRow)
+      : HTMLTablePartElement(document, HTMLElementInterface::TableRow)
   {
   }
 

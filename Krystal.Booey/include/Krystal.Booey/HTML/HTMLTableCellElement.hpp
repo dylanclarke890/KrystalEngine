@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/HTMLTablePartElement.hpp"
 
 namespace krys::boo::html
 {
   /// @see https://html.spec.whatwg.org/#htmltablecellelement
-  class HTMLTableCellElement : public HTMLElement
+  class HTMLTableCellElement : public HTMLTablePartElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTableCellElement);
 
@@ -107,6 +107,18 @@ namespace krys::boo::html
     void BgColor(dom::DOMString &&value) noexcept;
 
 #pragma endregion
+
+  public:
+    KRYS_NODISCARD const css::MutableStyleProperties *
+      AdditionalPresentationalHintStyle() const noexcept override;
+
+  protected:
+    KRYS_NODISCARD bool
+      HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                         dom::DOMStringAtom namespaceURI) const noexcept override;
+    void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
+                                                dom::DOMStringView value,
+                                                css::MutableStyleProperties &style) noexcept override;
   };
 }
 

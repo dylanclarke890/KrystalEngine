@@ -441,7 +441,10 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/EventLoop.cpp
 		tests/HTML/HTMLLinkElement.cpp
 		tests/HTML/HTMLStyleElement.cpp
+		tests/HTML/MicroParsers/Dimensions.cpp
 		tests/HTML/MicroParsers/Numbers.cpp
+		tests/HTML/PresentationalHints.cpp
+		tests/MathML/MathMLElement.cpp
 		tests/HTML/Parser/HTMLCharacterReference.cpp
 		tests/HTML/Parser/HTMLDocumentParser.cpp
 		tests/HTML/Parser/HTMLElementStack.cpp
@@ -455,6 +458,7 @@ target_sources(Krystal.Booey.Tests
 
 		# URL
 		tests/SVG/Internals/SVGPath.cpp
+		tests/SVG/SVGElement.cpp
 		tests/URL/URL.cpp
 		tests/URL/WPT.cpp
 )

@@ -1,12 +1,12 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/HTMLPlugInElement.hpp"
 
 namespace krys::boo::html
 {
   /// @see https://html.spec.whatwg.org/#htmlobjectelement
-  class HTMLObjectElement : public HTMLElement
+  class HTMLObjectElement : public HTMLPlugInElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLObjectElement);
 
@@ -138,6 +138,14 @@ namespace krys::boo::html
     void Border(dom::DOMString &&value) noexcept;
 
 #pragma endregion
+
+  protected:
+    KRYS_NODISCARD bool
+      HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                         dom::DOMStringAtom namespaceURI) const noexcept override;
+    void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
+                                                dom::DOMStringView value,
+                                                css::MutableStyleProperties &style) noexcept override;
   };
 }
 

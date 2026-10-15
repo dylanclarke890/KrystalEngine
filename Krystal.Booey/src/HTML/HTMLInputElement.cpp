@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 
 namespace krys::boo::html
@@ -380,6 +381,96 @@ namespace krys::boo::html
   void HTMLInputElement::UseMap(dom::DOMString &&value) noexcept
   {
     Reflection::Reflect<dom::DOMString>(*this, u8"usemap", krys::move(value));
+  }
+
+#pragma endregion
+
+#pragma region Presentational hints
+
+  bool HTMLInputElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                                            dom::DOMStringAtom namespaceURI) const noexcept
+  {
+    if (namespaceURI == dom::DOMStringAtom::Null())
+    {
+      // The type decides which of the other attributes map to style.
+      if (localName == u8"vspace" || localName == u8"hspace" || localName == u8"width"
+          || localName == u8"height" || localName == u8"type")
+      {
+        return true;
+      }
+      if (localName == u8"border")
+      {
+        return IsImageButton();
+      }
+    }
+    return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
+  }
+
+  void HTMLInputElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                                                dom::DOMStringAtom namespaceURI,
+                                                                dom::DOMStringView value,
+                                                                css::MutableStyleProperties &style) noexcept
+  {
+    using namespace presentational_hints;
+    if (namespaceURI != dom::DOMStringAtom::Null())
+    {
+      HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
+      return;
+    }
+    // Only image buttons respect the align, width and height attributes.
+    if (localName == u8"vspace")
+    {
+      if (IsImageButton())
+      {
+        AddHTMLLengthToStyle(style, css::PropertyId::MarginTop, value);
+        AddHTMLLengthToStyle(style, css::PropertyId::MarginBottom, value);
+      }
+      return;
+    }
+    if (localName == u8"hspace")
+    {
+      if (IsImageButton())
+      {
+        AddHTMLLengthToStyle(style, css::PropertyId::MarginLeft, value);
+        AddHTMLLengthToStyle(style, css::PropertyId::MarginRight, value);
+      }
+      return;
+    }
+    if (localName == u8"align")
+    {
+      if (IsImageButton())
+      {
+        ApplyAlignmentAttributeToStyle(value, style);
+      }
+      return;
+    }
+    if (localName == u8"width")
+    {
+      if (IsImageButton())
+      {
+        AddHTMLLengthToStyle(style, css::PropertyId::Width, value);
+        ApplyAspectRatioFromWidthAndHeightAttributesToStyle(value, AttributeOrEmpty(u8"height"), style);
+      }
+      return;
+    }
+    if (localName == u8"height")
+    {
+      if (IsImageButton())
+      {
+        AddHTMLLengthToStyle(style, css::PropertyId::Height, value);
+        ApplyAspectRatioFromWidthAndHeightAttributesToStyle(AttributeOrEmpty(u8"width"), value, style);
+      }
+      return;
+    }
+    if (localName == u8"border")
+    {
+      if (IsImageButton())
+      {
+        ApplyBorderAttributeToStyle(value, style);
+      }
+      return;
+    }
+    HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
   }
 
 #pragma endregion

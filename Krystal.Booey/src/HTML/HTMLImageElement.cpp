@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 namespace krys::boo::html
@@ -260,4 +261,80 @@ namespace krys::boo::html
   {
     return !style || !style->HasContent();
   }
+
+#pragma region Presentational hints
+
+  bool HTMLImageElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                                            dom::DOMStringAtom namespaceURI) const noexcept
+  {
+    if (namespaceURI == dom::DOMStringAtom::Null()
+        && (localName == u8"width" || localName == u8"height" || localName == u8"border"
+            || localName == u8"vspace" || localName == u8"hspace" || localName == u8"valign"))
+    {
+      return true;
+    }
+    return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
+  }
+
+  void HTMLImageElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                                                dom::DOMStringAtom namespaceURI,
+                                                                dom::DOMStringView value,
+                                                                css::MutableStyleProperties &style) noexcept
+  {
+    using namespace presentational_hints;
+    if (namespaceURI != dom::DOMStringAtom::Null())
+    {
+      HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
+      return;
+    }
+    if (localName == u8"width")
+    {
+      AddHTMLMultiLengthToStyle(style, css::PropertyId::Width, value);
+      ApplyAspectRatioFromWidthAndHeightAttributesToStyle(value, AttributeOrEmpty(u8"height"), style);
+      return;
+    }
+    if (localName == u8"height")
+    {
+      AddHTMLMultiLengthToStyle(style, css::PropertyId::Height, value);
+      ApplyAspectRatioFromWidthAndHeightAttributesToStyle(AttributeOrEmpty(u8"width"), value, style);
+      return;
+    }
+    if (localName == u8"border")
+    {
+      ApplyBorderAttributeToStyle(value, style);
+      return;
+    }
+    if (localName == u8"vspace")
+    {
+      AddHTMLLengthToStyle(style, css::PropertyId::MarginTop, value);
+      AddHTMLLengthToStyle(style, css::PropertyId::MarginBottom, value);
+      return;
+    }
+    if (localName == u8"hspace")
+    {
+      AddHTMLLengthToStyle(style, css::PropertyId::MarginLeft, value);
+      AddHTMLLengthToStyle(style, css::PropertyId::MarginRight, value);
+      return;
+    }
+    if (localName == u8"align")
+    {
+      ApplyAlignmentAttributeToStyle(value, style);
+      return;
+    }
+    if (localName == u8"valign")
+    {
+      AddPropertyToPresentationalHintStyle(style, css::PropertyId::VerticalAlign, ToCSSOMString(value));
+      return;
+    }
+    HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
+  }
+
+  void HTMLImageElement::CollectExtraStyleForPresentationalHints(css::MutableStyleProperties &style) noexcept
+  {
+    // FIXME: The width and height of the <source> selected in a <picture> override the image's own once image
+    // source selection is ported.
+    (void)style;
+  }
+
+#pragma endregion
 }

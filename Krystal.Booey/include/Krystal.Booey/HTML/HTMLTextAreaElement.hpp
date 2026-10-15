@@ -114,6 +114,14 @@ namespace krys::boo::html
     // undefined setSelectionRange(unsigned long start, unsigned long end, optional dom::DOMString direction);
 
 #pragma endregion
+
+  protected:
+    KRYS_NODISCARD bool
+      HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                         dom::DOMStringAtom namespaceURI) const noexcept override;
+    void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
+                                                dom::DOMStringView value,
+                                                css::MutableStyleProperties &style) noexcept override;
   };
 }
 

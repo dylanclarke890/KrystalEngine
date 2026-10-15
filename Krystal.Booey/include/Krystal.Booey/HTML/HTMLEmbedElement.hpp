@@ -1,12 +1,12 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/HTMLPlugInElement.hpp"
 
 namespace krys::boo::html
 {
   /// @see https://html.spec.whatwg.org/#htmlembedelement
-  class HTMLEmbedElement : public HTMLElement
+  class HTMLEmbedElement : public HTMLPlugInElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLEmbedElement);
 
@@ -64,6 +64,11 @@ namespace krys::boo::html
     void Name(dom::DOMString &&value) noexcept;
 
 #pragma endregion
+
+  protected:
+    void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
+                                                dom::DOMStringView value,
+                                                css::MutableStyleProperties &style) noexcept override;
   };
 }
 

@@ -162,6 +162,15 @@ namespace krys::boo::html
 #pragma endregion
 
     KRYS_NODISCARD bool IsReplaced(const RenderStyle *style = nullptr) const noexcept override;
+
+  protected:
+    KRYS_NODISCARD bool
+      HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                         dom::DOMStringAtom namespaceURI) const noexcept override;
+    void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
+                                                dom::DOMStringView value,
+                                                css::MutableStyleProperties &style) noexcept override;
+    void CollectExtraStyleForPresentationalHints(css::MutableStyleProperties &style) noexcept override;
   };
 }
 

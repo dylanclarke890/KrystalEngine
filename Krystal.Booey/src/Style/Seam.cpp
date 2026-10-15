@@ -119,27 +119,6 @@ namespace krys::boo
     krys_unreachable();
   }
 
-  boo::Color DocumentTextColor(const dom::Document &) noexcept
-  {
-    return boo::Color::black;
-  }
-
-  boo::Color DocumentLinkColor(const dom::Document &document, const RenderStyle &style) noexcept
-  {
-    return css::ColorFromKeyword(css::ValueId::WebkitLink, DocumentStyleColorOptions(document, &style));
-  }
-
-  boo::Color DocumentVisitedLinkColor(const dom::Document &document, const RenderStyle &style) noexcept
-  {
-    return css::ColorFromKeyword(css::ValueId::WebkitLink, DocumentStyleColorOptions(document, &style)
-                                                             | style::ColorOptions::ForVisitedLink);
-  }
-
-  boo::Color DocumentActiveLinkColor(const dom::Document &document, const RenderStyle &style) noexcept
-  {
-    return css::ColorFromKeyword(css::ValueId::WebkitActivelink, DocumentStyleColorOptions(document, &style));
-  }
-
   bool DocumentUseDarkAppearance(const dom::Document &, const RenderStyle *style) noexcept
   {
     // Collapses `Document::useDarkAppearance`: there's no document colour scheme and the page is light, so

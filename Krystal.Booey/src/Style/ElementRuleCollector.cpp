@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Style/ElementRuleCollector.hpp"
 #include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/Properties/ImmutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
@@ -25,6 +26,7 @@
 #include "Krystal.Booey/Style/ScopeRuleSets.hpp"
 #include "Krystal.Booey/Style/SelectorMatchingState.hpp"
 #include "Krystal.Booey/Style/UserAgentStyle.hpp"
+#include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/TypeCast.hpp"
@@ -957,8 +959,27 @@ namespace krys::boo::style
 
     if (auto *styledElement = DynamicDowncast<dom::StyledElement>(Element()))
     {
-      // FIXME: Presentational hints (https://html.spec.whatwg.org/#presentational-hints), and the additional
-      // presentational hint style tables and table cells share, once elements map their attributes to style.
+      if (auto *presentationalHintStyle = styledElement->PresentationalHintStyle())
+      {
+        // https://html.spec.whatwg.org/#presentational-hints
+
+        // Presentation attributes in SVG elements tend to be unique and not restyled often. Avoid bloating
+        // the cache.
+        // FIXME: Refcount is an imperfect proxy for sharing within a single document.
+        static constexpr auto matchedDeclarationsCacheSharingThreshold = 4;
+        bool allowFullCaching =
+          !Is<svg::SVGElement>(*styledElement)
+          || presentationalHintStyle->GetRefCount() > matchedDeclarationsCacheSharingThreshold;
+
+        auto isCacheable = allowFullCaching ? IsCacheable::Yes : IsCacheable::Partially;
+        AddElementStyleProperties(presentationalHintStyle,
+                                  RuleSet::CascadeLayerPriorityForPresentationalHints, isCacheable);
+      }
+
+      // Tables and table cells share an additional presentation style that must be applied
+      // after all attributes, since their style depends on the values of multiple attributes.
+      AddElementStyleProperties(styledElement->AdditionalPresentationalHintStyle(),
+                                RuleSet::CascadeLayerPriorityForPresentationalHints);
 
       if (auto *htmlElement = DynamicDowncast<html::HTMLElement>(*styledElement))
       {

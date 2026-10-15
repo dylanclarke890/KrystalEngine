@@ -1835,6 +1835,7 @@ target_precompile_headers(Krystal.Booey
     include/Krystal.Booey/DOM/Types/USVString.hpp
     include/Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp
     include/Krystal.Booey/HTML/HTMLSlotElement.hpp
+    include/Krystal.Booey/HTML/Internals/PresentationalHints.hpp
 
     include/Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp
     include/Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp
@@ -2091,6 +2092,8 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/HTMLDListElement.hpp
       include/Krystal.Booey/HTML/HTMLElement.hpp
       include/Krystal.Booey/HTML/HTMLEmbedElement.hpp
+      include/Krystal.Booey/HTML/HTMLFontElement.hpp
+      include/Krystal.Booey/HTML/HTMLFrameSetElement.hpp
       include/Krystal.Booey/HTML/HTMLFieldSetElement.hpp
       include/Krystal.Booey/HTML/HTMLFormElement.hpp
       include/Krystal.Booey/HTML/HTMLHeadElement.hpp
@@ -2105,6 +2108,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/HTMLLIElement.hpp
       include/Krystal.Booey/HTML/HTMLLinkElement.hpp
       include/Krystal.Booey/HTML/HTMLMapElement.hpp
+      include/Krystal.Booey/HTML/HTMLMarqueeElement.hpp
       include/Krystal.Booey/HTML/HTMLMediaElement.hpp
       include/Krystal.Booey/HTML/HTMLMenuElement.hpp
       include/Krystal.Booey/HTML/HTMLMetaElement.hpp
@@ -2117,6 +2121,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/HTMLOutputElement.hpp
       include/Krystal.Booey/HTML/HTMLParagraphElement.hpp
       include/Krystal.Booey/HTML/HTMLPictureElement.hpp
+      include/Krystal.Booey/HTML/HTMLPlugInElement.hpp
       include/Krystal.Booey/HTML/HTMLPreElement.hpp
       include/Krystal.Booey/HTML/HTMLProgressElement.hpp
       include/Krystal.Booey/HTML/HTMLQuoteElement.hpp
@@ -2131,6 +2136,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/HTMLTableCellElement.hpp
       include/Krystal.Booey/HTML/HTMLTableColElement.hpp
       include/Krystal.Booey/HTML/HTMLTableElement.hpp
+      include/Krystal.Booey/HTML/HTMLTablePartElement.hpp
       include/Krystal.Booey/HTML/HTMLTableRowElement.hpp
       include/Krystal.Booey/HTML/HTMLTableSectionElement.hpp
       include/Krystal.Booey/HTML/HTMLTemplateElement.hpp
@@ -2144,7 +2150,9 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/Internals/AttributeDefinition.hpp
       include/Krystal.Booey/HTML/Internals/CustomElementFactory.hpp
       include/Krystal.Booey/HTML/Internals/HTMLElementFactory.hpp
+      include/Krystal.Booey/HTML/Internals/PresentationalHints.hpp
       include/Krystal.Booey/HTML/MicroParsers/MicroParserError.hpp
+      include/Krystal.Booey/HTML/MicroParsers/Dimensions.hpp
       include/Krystal.Booey/HTML/MicroParsers/MicroParserResult.hpp
       include/Krystal.Booey/HTML/MicroParsers/Numbers.hpp
       include/Krystal.Booey/HTML/Parser/HTMLCharacterReference.hpp
@@ -2347,6 +2355,8 @@ target_sources(Krystal.Booey
     src/HTML/HTMLDListElement.cpp
     src/HTML/HTMLElement.cpp
     src/HTML/HTMLEmbedElement.cpp
+    src/HTML/HTMLFontElement.cpp
+    src/HTML/HTMLFrameSetElement.cpp
     src/HTML/HTMLFieldSetElement.cpp
     src/HTML/HTMLFormElement.cpp
     src/HTML/HTMLHeadElement.cpp
@@ -2361,6 +2371,7 @@ target_sources(Krystal.Booey
     src/HTML/HTMLLIElement.cpp
     src/HTML/HTMLLinkElement.cpp
     src/HTML/HTMLMapElement.cpp
+    src/HTML/HTMLMarqueeElement.cpp
     src/HTML/HTMLMediaElement.cpp
     src/HTML/HTMLMenuElement.cpp
     src/HTML/HTMLMetaElement.cpp
@@ -2373,6 +2384,7 @@ target_sources(Krystal.Booey
     src/HTML/HTMLOutputElement.cpp
     src/HTML/HTMLParagraphElement.cpp
     src/HTML/HTMLPictureElement.cpp
+    src/HTML/HTMLPlugInElement.cpp
     src/HTML/HTMLPreElement.cpp
     src/HTML/HTMLProgressElement.cpp
     src/HTML/HTMLQuoteElement.cpp
@@ -2387,6 +2399,7 @@ target_sources(Krystal.Booey
     src/HTML/HTMLTableCellElement.cpp
     src/HTML/HTMLTableColElement.cpp
     src/HTML/HTMLTableElement.cpp
+    src/HTML/HTMLTablePartElement.cpp
     src/HTML/HTMLTableRowElement.cpp
     src/HTML/HTMLTableSectionElement.cpp
     src/HTML/HTMLTemplateElement.cpp

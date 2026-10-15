@@ -282,14 +282,18 @@ namespace krys::boo::style::tests
       auto document =
         Parse(u8"<!DOCTYPE html><style>p { --n: p; }</style><p id=auto dir=auto></p><p id=ltr dir=ltr></p>");
       auto autoResult = MatchAll(ById(*document, u8"auto"));
-      REQUIRE(autoResult->AuthorDeclarations.size() == 2u);
-      // Before every author rule, as presentational hints.
-      auto &direction = autoResult->AuthorDeclarations.front();
+      // The presentational hint (unicode-bidi), then the direction, then the author rule.
+      REQUIRE(autoResult->AuthorDeclarations.size() == 3u);
+      auto &hints = autoResult->AuthorDeclarations[0];
+      REQUIRE(hints.Properties->PropertyAsValueId(css::PropertyId::UnicodeBidi) == css::ValueId::Isolate);
+      REQUIRE(hints.CascadeLayerPriority == RuleSet::CascadeLayerPriorityForPresentationalHints);
+      auto &direction = autoResult->AuthorDeclarations[1];
       REQUIRE(direction.Properties->PropertyAsValueId(css::PropertyId::Direction) == css::ValueId::Ltr);
       REQUIRE(Names(autoResult->AuthorDeclarations) == Strings {"p"});
 
+      // dir=ltr is only a presentational hint.
       auto ltrResult = MatchAll(ById(*document, u8"ltr"));
-      REQUIRE(ltrResult->AuthorDeclarations.size() == 1u);
+      REQUIRE(ltrResult->AuthorDeclarations.size() == 2u);
     }
   }
 

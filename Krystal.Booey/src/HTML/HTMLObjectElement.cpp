@@ -1,10 +1,11 @@
 ﻿#include "Krystal.Booey/HTML/HTMLObjectElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 
 namespace krys::boo::html
 {
   HTMLObjectElement::HTMLObjectElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Object)
+      : HTMLPlugInElement(document, HTMLElementInterface::Object)
   {
   }
 #pragma region HTMLObjectElement
@@ -171,6 +172,39 @@ namespace krys::boo::html
   void HTMLObjectElement::Border(dom::DOMString &&value) noexcept
   {
     Reflection::Reflect<dom::DOMString>(*this, u8"border", krys::move(value));
+  }
+
+#pragma endregion
+
+#pragma region Presentational hints
+
+  bool HTMLObjectElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                                             dom::DOMStringAtom namespaceURI) const noexcept
+  {
+    if (namespaceURI == dom::DOMStringAtom::Null() && (localName == u8"border"))
+    {
+      return true;
+    }
+    return HTMLPlugInElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
+  }
+
+  void HTMLObjectElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                                                 dom::DOMStringAtom namespaceURI,
+                                                                 dom::DOMStringView value,
+                                                                 css::MutableStyleProperties &style) noexcept
+  {
+    using namespace presentational_hints;
+    if (namespaceURI != dom::DOMStringAtom::Null())
+    {
+      HTMLPlugInElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
+      return;
+    }
+    if (localName == u8"border")
+    {
+      ApplyBorderAttributeToStyle(value, style);
+      return;
+    }
+    HTMLPlugInElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
   }
 
 #pragma endregion

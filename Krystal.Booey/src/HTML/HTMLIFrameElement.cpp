@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/HTML/HTMLIFrameElement.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
+#include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 
 namespace krys::boo::html
 {
@@ -183,6 +185,62 @@ namespace krys::boo::html
   void HTMLIFrameElement::MarginHeight(dom::DOMString &&value) noexcept
   {
     Reflection::Reflect<dom::DOMString>(*this, u8"marginheight", krys::move(value));
+  }
+
+#pragma endregion
+
+#pragma region Presentational hints
+
+  bool HTMLIFrameElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                                             dom::DOMStringAtom namespaceURI) const noexcept
+  {
+    if (namespaceURI == dom::DOMStringAtom::Null()
+        && (localName == u8"width" || localName == u8"height" || localName == u8"frameborder"))
+    {
+      return true;
+    }
+    return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
+  }
+
+  void HTMLIFrameElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                                                 dom::DOMStringAtom namespaceURI,
+                                                                 dom::DOMStringView value,
+                                                                 css::MutableStyleProperties &style) noexcept
+  {
+    using namespace presentational_hints;
+    if (namespaceURI != dom::DOMStringAtom::Null())
+    {
+      HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
+      return;
+    }
+    if (localName == u8"width")
+    {
+      AddHTMLLengthToStyle(style, css::PropertyId::Width, value);
+      return;
+    }
+    if (localName == u8"height")
+    {
+      AddHTMLLengthToStyle(style, css::PropertyId::Height, value);
+      return;
+    }
+    if (localName == u8"align")
+    {
+      ApplyAlignmentAttributeToStyle(value, style);
+      return;
+    }
+    if (localName == u8"frameborder")
+    {
+      // Frame border doesn't really match the HTML4 spec definition for iframes. It simply adds
+      // a presentational hint that the border should be off if set to zero.
+      auto frameBorder = Numbers::ParseInteger(value);
+      if (!frameBorder.Success() || !frameBorder.Value)
+      {
+        // Add a rule that nulls out our border width.
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::BorderWidth, 0, css::UnitType::px);
+      }
+      return;
+    }
+    HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
   }
 
 #pragma endregion

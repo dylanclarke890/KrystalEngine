@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/HTMLOListElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 
 namespace krys::boo::html
 {
@@ -53,6 +54,58 @@ namespace krys::boo::html
   void HTMLOListElement::Compact(bool value) noexcept
   {
     Reflection::Reflect<bool>(*this, u8"compact", krys::move(value));
+  }
+
+#pragma endregion
+
+#pragma region Presentational hints
+
+  bool HTMLOListElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                                            dom::DOMStringAtom namespaceURI) const noexcept
+  {
+    if (namespaceURI == dom::DOMStringAtom::Null() && (localName == u8"type"))
+    {
+      return true;
+    }
+    return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
+  }
+
+  void HTMLOListElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                                                dom::DOMStringAtom namespaceURI,
+                                                                dom::DOMStringView value,
+                                                                css::MutableStyleProperties &style) noexcept
+  {
+    using namespace presentational_hints;
+    if (namespaceURI != dom::DOMStringAtom::Null())
+    {
+      HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
+      return;
+    }
+    if (localName == u8"type")
+    {
+      if (value == u8"a")
+      {
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::ListStyleType, css::ValueId::LowerAlpha);
+      }
+      else if (value == u8"A")
+      {
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::ListStyleType, css::ValueId::UpperAlpha);
+      }
+      else if (value == u8"i")
+      {
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::ListStyleType, css::ValueId::LowerRoman);
+      }
+      else if (value == u8"I")
+      {
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::ListStyleType, css::ValueId::UpperRoman);
+      }
+      else if (value == u8"1")
+      {
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::ListStyleType, css::ValueId::Decimal);
+      }
+      return;
+    }
+    HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
   }
 
 #pragma endregion

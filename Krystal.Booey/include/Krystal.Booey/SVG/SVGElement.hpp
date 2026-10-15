@@ -29,7 +29,21 @@ namespace krys::boo::svg
     /// node, its parent isn't an SVG element, or its parent is a `<foreignObject>`.
     KRYS_NODISCARD bool IsOutermostSVGSVGElement() const noexcept;
 
+    /// @brief The property a presentation attribute maps to, or `PropertyId::Invalid` if the attribute isn't
+    /// one.
+    /// @see https://svgwg.org/svg2-draft/styling.html#PresentationAttributes
+    KRYS_NODISCARD static css::PropertyId
+      CssPropertyIdForSVGAttributeName(dom::DOMStringAtom localName,
+                                       dom::DOMStringAtom namespaceURI) noexcept;
+
   protected:
+    KRYS_NODISCARD bool
+      HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                         dom::DOMStringAtom namespaceURI) const noexcept override;
+    void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
+                                                dom::DOMStringView value,
+                                                css::MutableStyleProperties &style) noexcept override;
+
 #pragma region Type Checks
 
     KRYS_NODISCARD bool IsSVGCircleElement() const noexcept

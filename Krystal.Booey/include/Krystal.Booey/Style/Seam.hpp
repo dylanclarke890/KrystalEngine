@@ -160,21 +160,6 @@ namespace krys::boo
   /// @brief Collapses `dynamicDowncast<RenderBox>(element.renderer())`.
   KRYS_NODISCARD const RenderBox *RenderBoxOf(const dom::Element &) noexcept;
 
-  /// @brief Collapses `document.textColor()`. Nothing sets it (`<body text>`), so it's the initial black.
-  KRYS_NODISCARD boo::Color DocumentTextColor(const dom::Document &) noexcept;
-
-  /// @brief Collapses `document.linkColor(style)`. Nothing sets it (`<body link>`), so it's the
-  /// `-webkit-link` keyword colour.
-  KRYS_NODISCARD boo::Color DocumentLinkColor(const dom::Document &, const RenderStyle &) noexcept;
-
-  /// @brief Collapses `document.visitedLinkColor(style)`. Nothing sets it (`<body vlink>`), so it's the
-  /// visited `-webkit-link` keyword colour.
-  KRYS_NODISCARD boo::Color DocumentVisitedLinkColor(const dom::Document &, const RenderStyle &) noexcept;
-
-  /// @brief Collapses `document.activeLinkColor(style)`. Nothing sets it (`<body alink>`), so it's the
-  /// `-webkit-activelink` keyword colour.
-  KRYS_NODISCARD boo::Color DocumentActiveLinkColor(const dom::Document &, const RenderStyle &) noexcept;
-
   /// @brief Collapses `document.useDarkAppearance(style)` for a document with no page and default settings:
   /// dark only when the style's colour scheme is dark only.
   KRYS_NODISCARD bool DocumentUseDarkAppearance(const dom::Document &, const RenderStyle *) noexcept;

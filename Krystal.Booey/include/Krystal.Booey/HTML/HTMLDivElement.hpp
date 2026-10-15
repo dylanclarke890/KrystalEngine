@@ -21,6 +21,11 @@ namespace krys::boo::html
     void Align(dom::DOMString &&value) noexcept;
 
 #pragma endregion
+
+  protected:
+    void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
+                                                dom::DOMStringView value,
+                                                css::MutableStyleProperties &style) noexcept override;
   };
 }
 

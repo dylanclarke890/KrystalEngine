@@ -67,10 +67,114 @@ namespace krys::boo::dom
                                          Maybe<DOMStringView> value, DOMStringAtom namespaceURI) noexcept
   {
     Element::OnAttributeChanged(localName, oldValue, value, namespaceURI);
-    if (oldValue != value && localName == Attributes::Style && namespaceURI == DOMStringAtom::Null())
+    if (oldValue != value)
     {
-      StyleAttributeChanged(value);
+      if (localName == Attributes::Style && namespaceURI == DOMStringAtom::Null())
+      {
+        StyleAttributeChanged(value);
+      }
+      else if (HasPresentationalHintsForAttribute(localName, namespaceURI))
+      {
+        _presentationalHintStyleIsDirty = true;
+        // FIXME: Invalidate the element's style once there is style invalidation.
+      }
     }
+  }
+
+  const css::ImmutableStyleProperties *StyledElement::PresentationalHintStyle() const noexcept
+  {
+    if (_presentationalHintStyleIsDirty)
+    {
+      const_cast<StyledElement &>(*this).RebuildPresentationalHintStyle();
+    }
+    return _presentationalHintStyle.get();
+  }
+
+  void StyledElement::InvalidatePresentationalHintStyle() noexcept
+  {
+    _presentationalHintStyleIsDirty = true;
+  }
+
+  void StyledElement::RebuildPresentationalHintStyle() noexcept
+  {
+    bool isSVG = IsSVGElement();
+    auto style = css::MutableStyleProperties::Create(isSVG ? css::ParserMode::SVGAttribute
+                                                           : css::ParserMode::HTMLQuirks);
+    for (auto &attribute : AttributeList())
+    {
+      CollectPresentationalHintsForAttribute(attribute->LocalName(), attribute->NamespaceURI(),
+                                             attribute->Value(), *style);
+    }
+    CollectExtraStyleForPresentationalHints(*style);
+
+    _presentationalHintStyleIsDirty = false;
+    if (style->empty())
+    {
+      _presentationalHintStyle = nullptr;
+      return;
+    }
+
+    auto shouldDeduplicate = [&]
+    {
+      auto hasNonZeroProperty = [&](css::PropertyId property)
+      {
+        auto value = style->GetPropertyCSSValue(property);
+        auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(value.get());
+        return primitiveValue && !primitiveValue->IsZero().value_or(false);
+      };
+      if (isSVG)
+      {
+        // SVG style tends to have unique x/y properties. Don't spend effort trying to deduplicate them.
+        if (hasNonZeroProperty(css::PropertyId::X))
+        {
+          return false;
+        }
+        if (hasNonZeroProperty(css::PropertyId::Y))
+        {
+          return false;
+        }
+        if (hasNonZeroProperty(css::PropertyId::Cx))
+        {
+          return false;
+        }
+        if (hasNonZeroProperty(css::PropertyId::Cy))
+        {
+          return false;
+        }
+      }
+      return true;
+    }();
+
+    _presentationalHintStyle =
+      shouldDeduplicate ? style->ImmutableDeduplicatedCopy() : style->ImmutableCopy();
+  }
+
+  void StyledElement::AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style,
+                                                           css::PropertyId property,
+                                                           css::ValueId identifier) noexcept
+  {
+    style.SetProperty(property, css::PrimitiveValue::Create(identifier));
+  }
+
+  void StyledElement::AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style,
+                                                           css::PropertyId property, double value,
+                                                           css::UnitType unit) noexcept
+  {
+    style.SetProperty(property, css::PrimitiveValue::Create(value, unit));
+  }
+
+  void StyledElement::AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style,
+                                                           css::PropertyId property,
+                                                           const css::CSSOMString &value) noexcept
+  {
+    style.SetProperty(property, value, NodeDocument().CssParserContext());
+  }
+
+  void StyledElement::AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style,
+                                                           css::PropertyId property,
+                                                           Ref<css::Value> &&value) noexcept
+  {
+    style.SetProperty(property, krys::move(value));
   }
 
   void StyledElement::SetInlineStyleFromString(DOMStringView newStyleString) noexcept

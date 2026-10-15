@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 
 namespace krys::boo::html
 {
@@ -128,6 +129,59 @@ namespace krys::boo::html
   void HTMLTextAreaElement::Wrap(dom::DOMString &&value) noexcept
   {
     Reflection::Reflect<dom::DOMString>(*this, u8"wrap", krys::move(value));
+  }
+
+#pragma endregion
+
+#pragma region Presentational hints
+
+  bool HTMLTextAreaElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                                               dom::DOMStringAtom namespaceURI) const noexcept
+  {
+    if (namespaceURI == dom::DOMStringAtom::Null())
+    {
+      if (localName == u8"align")
+      {
+        // Don't map 'align' attribute.  This matches what Firefox, Opera and IE do.
+        return false;
+      }
+      if (localName == u8"wrap")
+      {
+        return true;
+      }
+    }
+    return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
+  }
+
+  void HTMLTextAreaElement::CollectPresentationalHintsForAttribute(
+    dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI, dom::DOMStringView value,
+    css::MutableStyleProperties &style) noexcept
+  {
+    using namespace presentational_hints;
+    if (namespaceURI != dom::DOMStringAtom::Null())
+    {
+      HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
+      return;
+    }
+    if (localName == u8"wrap")
+    {
+      if (!EqualLettersIgnoringASCIICase(value, u8"off"))
+      {
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::WhiteSpaceCollapse,
+                                             css::ValueId::Preserve);
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextWrapMode, css::ValueId::Wrap);
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::OverflowWrap, css::ValueId::BreakWord);
+      }
+      else
+      {
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::WhiteSpaceCollapse,
+                                             css::ValueId::Preserve);
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextWrapMode, css::ValueId::Nowrap);
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::OverflowWrap, css::ValueId::Normal);
+      }
+      return;
+    }
+    HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
   }
 
 #pragma endregion

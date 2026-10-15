@@ -8,6 +8,7 @@
 namespace krys::boo::css
 {
   class CSSStyleProperties;
+  class ImmutableStyleProperties;
   class MutableStyleProperties;
   class StyleProperties;
   class Value;
@@ -31,6 +32,8 @@ namespace krys::boo::dom
 
   private:
     RefPtr<css::StyleProperties> _inlineStyle;
+    RefPtr<const css::ImmutableStyleProperties> _presentationalHintStyle;
+    bool _presentationalHintStyleIsDirty {false};
 
   protected:
     StyledElement(Document &document, const QualifiedName &name, NodeFlags nodeFlags) noexcept;
@@ -75,7 +78,57 @@ namespace krys::boo::dom
     bool RemoveInlineStyleCustomProperty(const css::CSSOMStringAtom &property) noexcept;
     void RemoveAllInlineStyleProperties() noexcept;
 
+    /// @brief The declarations the element's presentational attributes map to, rebuilt when one changes.
+    /// @see https://html.spec.whatwg.org/#presentational-hints
+    KRYS_NODISCARD const css::ImmutableStyleProperties *PresentationalHintStyle() const noexcept;
+
+    /// @brief Presentational hints that depend on several attributes or on other elements (tables and their
+    /// parts share them), applied after the element's own.
+    KRYS_NODISCARD virtual const css::MutableStyleProperties *
+      AdditionalPresentationalHintStyle() const noexcept
+    {
+      return nullptr;
+    }
+
   protected:
+    /// @brief Adds the declarations the attribute maps to, if it's a presentational attribute of the element.
+    virtual void CollectPresentationalHintsForAttribute(DOMStringAtom localName, DOMStringAtom namespaceURI,
+                                                        DOMStringView value,
+                                                        css::MutableStyleProperties &style) noexcept
+    {
+      (void)localName;
+      (void)namespaceURI;
+      (void)value;
+      (void)style;
+    }
+
+    /// @brief Adds the declarations that don't come from a single attribute, after the attributes' own.
+    virtual void CollectExtraStyleForPresentationalHints(css::MutableStyleProperties &style) noexcept
+    {
+      (void)style;
+    }
+
+    /// @brief Whether a change to the attribute changes the element's presentational hints.
+    KRYS_NODISCARD virtual bool HasPresentationalHintsForAttribute(DOMStringAtom localName,
+                                                                   DOMStringAtom namespaceURI) const noexcept
+    {
+      (void)localName;
+      (void)namespaceURI;
+      return false;
+    }
+
+    void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style, css::PropertyId property,
+                                              css::ValueId identifier) noexcept;
+    void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style, css::PropertyId property,
+                                              double value, css::UnitType unit) noexcept;
+    void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style, css::PropertyId property,
+                                              const css::CSSOMString &value) noexcept;
+    void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style, css::PropertyId property,
+                                              Ref<css::Value> &&value) noexcept;
+
+    /// @brief Marks the presentational hints out of date, for a change that isn't an attribute change.
+    void InvalidatePresentationalHintStyle() noexcept;
+
     void OnAttributeChanged(DOMStringAtom localName, Maybe<DOMStringView> oldValue,
                             Maybe<DOMStringView> value, DOMStringAtom namespaceURI) noexcept override;
 
@@ -87,6 +140,7 @@ namespace krys::boo::dom
     void InlineStyleChanged() noexcept;
     void SetInlineStyleFromString(DOMStringView newStyleString) noexcept;
     KRYS_NODISCARD Ref<css::MutableStyleProperties> EnsureMutableInlineStyle() noexcept;
+    void RebuildPresentationalHintStyle() noexcept;
   };
 }
 

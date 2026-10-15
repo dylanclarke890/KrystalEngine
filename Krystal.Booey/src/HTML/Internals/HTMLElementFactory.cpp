@@ -19,12 +19,15 @@
 #include "Krystal.Booey/HTML/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDetailsElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
+#include "Krystal.Booey/HTML/HTMLBRElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDivElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDListElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/HTMLEmbedElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFieldSetElement.hpp"
+#include "Krystal.Booey/HTML/HTMLFontElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
+#include "Krystal.Booey/HTML/HTMLFrameSetElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHeadElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHeadingElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHRElement.hpp"
@@ -37,6 +40,7 @@
 #include "Krystal.Booey/HTML/HTMLLIElement.hpp"
 #include "Krystal.Booey/HTML/HTMLLinkElement.hpp"
 #include "Krystal.Booey/HTML/HTMLMapElement.hpp"
+#include "Krystal.Booey/HTML/HTMLMarqueeElement.hpp"
 #include "Krystal.Booey/HTML/HTMLMediaElement.hpp"
 #include "Krystal.Booey/HTML/HTMLMenuElement.hpp"
 #include "Krystal.Booey/HTML/HTMLMetaElement.hpp"
@@ -184,6 +188,22 @@ namespace krys::boo::html
       case TagName::dialog:
       {
         return CreateRefPtr<HTMLDialogElement>(document);
+      }
+      case TagName::br:
+      {
+        return CreateRefPtr<HTMLBRElement>(document);
+      }
+      case TagName::font:
+      {
+        return CreateRefPtr<HTMLFontElement>(document);
+      }
+      case TagName::frameset:
+      {
+        return CreateRefPtr<HTMLFrameSetElement>(document);
+      }
+      case TagName::marquee:
+      {
+        return CreateRefPtr<HTMLMarqueeElement>(document);
       }
       case TagName::div:
       {

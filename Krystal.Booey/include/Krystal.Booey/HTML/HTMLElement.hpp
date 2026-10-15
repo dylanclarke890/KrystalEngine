@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/StyledElement.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorTypes.hpp"
 #include "Krystal.Booey/HTML/Dicts/ShowPopoverOptions.hpp"
 #include "Krystal.Booey/HTML/Dicts/TogglePopoverOptions.hpp"
 #include "Krystal.Booey/HTML/Enums/HTMLElementFlags.hpp"
@@ -159,12 +160,62 @@ namespace krys::boo::html
 
 #pragma endregion
 
+    /// @brief The colour a presentational attribute (`bgcolor`, `color`, `text`, ...) specifies, if any.
+    /// @see https://html.spec.whatwg.org/#rules-for-parsing-a-legacy-colour-value
+    KRYS_NODISCARD static Maybe<SRGBA<uint8>> ParseLegacyColorValue(dom::DOMStringView string) noexcept;
+
     // TODO(HTMLELEMENT, HTML): HTMLElement mixins:
     // HTMLElement includes GlobalEventHandlers;
     // HTMLElement includes ElementContentEditable;
     // HTMLElement includes HTMLOrSVGOrMathMLElement;
 
   protected:
+#pragma region Presentational hints - https://html.spec.whatwg.org/#presentational-hints
+
+    enum class AllowZeroValue : bool
+    {
+      No,
+      Yes
+    };
+
+    KRYS_NODISCARD bool
+      HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                         dom::DOMStringAtom namespaceURI) const noexcept override;
+    void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
+                                                dom::DOMStringView value,
+                                                css::MutableStyleProperties &style) noexcept override;
+
+    /// @param value The `border` attribute's value, or null if there isn't one.
+    KRYS_NODISCARD uint32 ParseBorderWidthAttribute(Maybe<dom::DOMStringView> value) const noexcept;
+    void ApplyBorderAttributeToStyle(dom::DOMStringView value, css::MutableStyleProperties &style) noexcept;
+    void ApplyAlignmentAttributeToStyle(dom::DOMStringView alignment,
+                                        css::MutableStyleProperties &style) noexcept;
+    void ApplyAspectRatioFromWidthAndHeightAttributesToStyle(dom::DOMStringView widthAttribute,
+                                                             dom::DOMStringView heightAttribute,
+                                                             css::MutableStyleProperties &style) noexcept;
+    void ApplyAspectRatioWithoutDimensionalRulesFromWidthAndHeightAttributesToStyle(
+      dom::DOMStringView widthAttribute, dom::DOMStringView heightAttribute,
+      css::MutableStyleProperties &style) noexcept;
+
+    // https://www.w3.org/TR/html4/sgml/dtd.html#Length, including pixel and percentage values.
+    void AddHTMLLengthToStyle(css::MutableStyleProperties &style, css::PropertyId property,
+                              dom::DOMStringView value,
+                              AllowZeroValue allowZeroValue = AllowZeroValue::Yes) noexcept;
+    // https://www.w3.org/TR/html4/sgml/dtd.html#MultiLength, including pixel, percentage, and relative
+    // values.
+    void AddHTMLMultiLengthToStyle(css::MutableStyleProperties &style, css::PropertyId property,
+                                   dom::DOMStringView value) noexcept;
+    // https://www.w3.org/TR/html4/sgml/dtd.html#Pixels, including pixel value.
+    void AddHTMLPixelsToStyle(css::MutableStyleProperties &style, css::PropertyId property,
+                              dom::DOMStringView value) noexcept;
+    void AddHTMLColorToStyle(css::MutableStyleProperties &style, css::PropertyId property,
+                             dom::DOMStringView attributeValue) noexcept;
+
+    /// @brief The value of the attribute in the null namespace, or an empty view if there isn't one.
+    KRYS_NODISCARD dom::DOMString AttributeOrEmpty(dom::DOMStringView localName) const noexcept;
+
+#pragma endregion
+
 #pragma region HTMLElement Flags
 
     void SetHTMLElementFlag(HTMLElementFlags flag) noexcept
@@ -240,6 +291,33 @@ namespace krys::boo::html
 #pragma endregion
 
 #pragma region Type Checks
+
+    KRYS_NODISCARD bool IsHTMLFontElement() const noexcept
+    {
+      return _interface == HTMLElementInterface::Font;
+    }
+
+    KRYS_NODISCARD bool IsHTMLFrameSetElement() const noexcept
+    {
+      return _interface == HTMLElementInterface::FrameSet;
+    }
+
+    KRYS_NODISCARD bool IsHTMLMarqueeElement() const noexcept
+    {
+      return _interface == HTMLElementInterface::Marquee;
+    }
+
+    KRYS_NODISCARD bool IsHTMLTablePartElement() const noexcept
+    {
+      return _interface == HTMLElementInterface::TableCell || _interface == HTMLElementInterface::TableCol
+             || _interface == HTMLElementInterface::TableRow
+             || _interface == HTMLElementInterface::TableSection;
+    }
+
+    KRYS_NODISCARD bool IsHTMLPlugInElement() const noexcept
+    {
+      return _interface == HTMLElementInterface::Embed || _interface == HTMLElementInterface::Object;
+    }
 
     KRYS_NODISCARD bool IsHTMLAreaElement() const noexcept
     {
@@ -561,6 +639,32 @@ namespace krys::boo::html
     }
 
 #pragma endregion
+  private:
+    enum class AllowPercentage : bool
+    {
+      No,
+      Yes
+    };
+
+    enum class UseCSSPXAsUnitType : bool
+    {
+      No,
+      Yes
+    };
+
+    enum class IsMultiLength : bool
+    {
+      No,
+      Yes
+    };
+
+    void AddHTMLLengthToStyle(css::MutableStyleProperties &style, css::PropertyId property,
+                              dom::DOMStringView value, AllowPercentage allowPercentage,
+                              UseCSSPXAsUnitType useCSSPX, IsMultiLength isMultiLength,
+                              AllowZeroValue allowZeroValue = AllowZeroValue::Yes) noexcept;
+    void AddParsedWidthAndHeightToAspectRatioList(double width, double height,
+                                                  css::MutableStyleProperties &style) noexcept;
+    void MapLanguageAttributeToLocale(dom::DOMStringView value, css::MutableStyleProperties &style) noexcept;
   };
 }
 

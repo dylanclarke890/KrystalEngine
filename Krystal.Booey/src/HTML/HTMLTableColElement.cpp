@@ -1,10 +1,12 @@
 ﻿#include "Krystal.Booey/HTML/HTMLTableColElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/HTMLTableElement.hpp"
+#include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 
 namespace krys::boo::html
 {
   HTMLTableColElement::HTMLTableColElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::TableCol)
+      : HTMLTablePartElement(document, HTMLElementInterface::TableCol)
   {
   }
 
@@ -73,6 +75,56 @@ namespace krys::boo::html
   void HTMLTableColElement::Width(dom::DOMString &&value) noexcept
   {
     Reflection::Reflect<dom::DOMString>(*this, u8"width", krys::move(value));
+  }
+
+#pragma endregion
+
+#pragma region Presentational hints
+
+  bool HTMLTableColElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                                               dom::DOMStringAtom namespaceURI) const noexcept
+  {
+    if (namespaceURI == dom::DOMStringAtom::Null() && (localName == u8"width"))
+    {
+      return true;
+    }
+    return HTMLTablePartElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
+  }
+
+  void HTMLTableColElement::CollectPresentationalHintsForAttribute(
+    dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI, dom::DOMStringView value,
+    css::MutableStyleProperties &style) noexcept
+  {
+    using namespace presentational_hints;
+    if (namespaceURI != dom::DOMStringAtom::Null())
+    {
+      HTMLTablePartElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
+      return;
+    }
+    if (localName == u8"width")
+    {
+      AddHTMLMultiLengthToStyle(style, css::PropertyId::Width, value);
+      return;
+    }
+    if (localName == u8"height")
+    {
+      AddHTMLMultiLengthToStyle(style, css::PropertyId::Height, value);
+      return;
+    }
+    HTMLTablePartElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
+  }
+
+  const css::MutableStyleProperties *HTMLTableColElement::AdditionalPresentationalHintStyle() const noexcept
+  {
+    if (TagQualifiedName().TagName() != TagName::colgroup)
+    {
+      return nullptr;
+    }
+    if (const auto *table = FindParentTable())
+    {
+      return table->AdditionalGroupStyle(false);
+    }
+    return nullptr;
   }
 
 #pragma endregion

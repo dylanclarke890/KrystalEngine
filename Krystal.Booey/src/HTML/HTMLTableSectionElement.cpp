@@ -1,10 +1,12 @@
 ﻿#include "Krystal.Booey/HTML/HTMLTableSectionElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/HTMLTableElement.hpp"
+#include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 
 namespace krys::boo::html
 {
   HTMLTableSectionElement::HTMLTableSectionElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::TableSection)
+      : HTMLTablePartElement(document, HTMLElementInterface::TableSection)
   {
   }
 
@@ -48,6 +50,21 @@ namespace krys::boo::html
   void HTMLTableSectionElement::VAlign(dom::DOMString &&value) noexcept
   {
     Reflection::Reflect<dom::DOMString>(*this, u8"valign", krys::move(value));
+  }
+
+#pragma endregion
+
+#pragma region Presentational hints
+
+  const css::MutableStyleProperties *
+    HTMLTableSectionElement::AdditionalPresentationalHintStyle() const noexcept
+  {
+    const auto *table = FindParentTable();
+    if (!table)
+    {
+      return nullptr;
+    }
+    return table->AdditionalGroupStyle(true);
   }
 
 #pragma endregion

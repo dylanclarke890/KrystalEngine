@@ -12,6 +12,7 @@
 #include "Krystal.Booey/DOM/Range.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
+#include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/HTML/Enums/DocumentReadyState.hpp"
 #include "Krystal.Booey/HTML/Enums/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/HTML/Types/HTMLOrSVGScriptElement.hpp"
@@ -124,6 +125,11 @@ namespace krys::boo::dom
     mutable UniquePtr<RenderStyle> _initialContainingBlockStyle;
     mutable RefPtr<css::calc::RandomCachingKeyMap> _randomCachingKeyMap;
     bool _hasStyleWithViewportUnits {false};
+
+    boo::Color _textColor {boo::Color::black};
+    boo::Color _linkColor;
+    boo::Color _visitedLinkColor;
+    boo::Color _activeLinkColor;
 
   protected:
     Document(DocumentFlags flags) noexcept;
@@ -443,6 +449,44 @@ namespace krys::boo::dom
     {
       return _hasStyleWithViewportUnits;
     }
+
+    /// @brief The colour of `-internal-document-text-color`.
+    // FIXME: The tree resolver sets it from the <body> element's colour; until then it's black.
+    KRYS_NODISCARD const boo::Color &TextColor() const noexcept
+    {
+      return _textColor;
+    }
+
+    void SetTextColor(const boo::Color &color) noexcept
+    {
+      _textColor = color;
+    }
+
+    /// @brief The colour of `-webkit-link`: the `<body link>` colour, or the keyword's.
+    KRYS_NODISCARD boo::Color LinkColor(const RenderStyle &style) const noexcept;
+    /// @brief The colour of visited `-webkit-link`: the `<body vlink>` colour, or the keyword's.
+    KRYS_NODISCARD boo::Color VisitedLinkColor(const RenderStyle &style) const noexcept;
+    /// @brief The colour of `-webkit-activelink`: the `<body alink>` colour, or the keyword's.
+    KRYS_NODISCARD boo::Color ActiveLinkColor(const RenderStyle &style) const noexcept;
+
+    void SetLinkColor(const boo::Color &color) noexcept
+    {
+      _linkColor = color;
+    }
+
+    void SetVisitedLinkColor(const boo::Color &color) noexcept
+    {
+      _visitedLinkColor = color;
+    }
+
+    void SetActiveLinkColor(const boo::Color &color) noexcept
+    {
+      _activeLinkColor = color;
+    }
+
+    void ResetLinkColor() noexcept;
+    void ResetVisitedLinkColor() noexcept;
+    void ResetActiveLinkColor() noexcept;
 
     /// @brief The base value of a `random()` shared between the elements of the document (`element-shared`).
     KRYS_NODISCARD double LookupCSSRandomBaseValue(const css::calc::RandomCachingKey &key) const noexcept;
