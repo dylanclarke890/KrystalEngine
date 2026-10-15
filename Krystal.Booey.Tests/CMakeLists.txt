@@ -64,8 +64,13 @@ target_precompile_headers(Krystal.Booey.Tests
     <Krystal.Booey/DOM/Types/DOMString.hpp>
     <Krystal.Booey/DOM/Types/ExceptionOr.hpp>
     <Krystal.Booey/DOM/Types/USVString.hpp>
+
     <Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp>
     <Krystal.Booey/HTML/HTMLSlotElement.hpp>
+    <Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp>
+    <Krystal.Booey/HTML/Parser/HTMLCharacterReference.hpp>
+    <Krystal.Booey/HTML/Parser/HTMLTokenizer.hpp>
+    <Krystal.Booey/CSS/Values/ValuePool.hpp>
 )
 
 target_sources(Krystal.Booey.Tests
@@ -78,6 +83,7 @@ target_sources(Krystal.Booey.Tests
 		include/Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp
 		include/Krystal.Booey.Tests/CSS/SelectorTestUtils.hpp
 		include/Krystal.Booey.Tests/CSS/ValueTestUtils.hpp
+		include/Krystal.Booey.Tests/Style/BuilderTestUtils.hpp
 		include/Krystal.Booey.Tests/TestParserUtils.hpp
 	PRIVATE
 		# Core

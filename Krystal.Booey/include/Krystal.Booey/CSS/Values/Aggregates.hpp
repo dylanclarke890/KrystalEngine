@@ -14,6 +14,7 @@
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefCountedFixedVector.hpp"
+#include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Utils/Apply.hpp"

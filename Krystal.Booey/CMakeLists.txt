@@ -1802,7 +1802,18 @@ target_precompile_headers(Krystal.Booey
     <type_traits>
     <variant>
     <vector>
-    
+
+    <Krystal.Core/Text/Encodings/UTF.hpp>
+
+    include/Krystal.Booey/CSS/Calc/Tree.hpp
+    include/Krystal.Booey/CSS/Calc/Value.hpp
+    include/Krystal.Booey/CSS/Parser/ParserContext.hpp
+    include/Krystal.Booey/CSS/Parser/TokenRange.hpp
+    include/Krystal.Booey/CSS/Values/Color/Color.hpp
+    include/Krystal.Booey/CSS/Values/PrimitiveValue.hpp
+    include/Krystal.Booey/CSS/Values/Primitives/PrimitiveNumeric.hpp
+    include/Krystal.Booey/CSS/Values/Value.hpp
+
     include/Krystal.Booey/DOM/AbortSignal.hpp
     include/Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp
     include/Krystal.Booey/DOM/Attr.hpp
@@ -1815,6 +1826,12 @@ target_precompile_headers(Krystal.Booey
     include/Krystal.Booey/DOM/Types/USVString.hpp
     include/Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp
     include/Krystal.Booey/HTML/HTMLSlotElement.hpp
+
+    include/Krystal.Booey/Style/BuilderState.hpp
+    include/Krystal.Booey/Style/BuilderChecking.hpp
+    include/Krystal.Booey/Style/Computed/ComputedStyle+GettersInlines.hpp
+    include/Krystal.Booey/Style/Computed/ComputedStyleBase+GettersInlines.hpp
+    include/Krystal.Booey/Style/Computed/ComputedStyleProperties+GettersCustomInlines.hpp
 )
 
 target_sources(Krystal.Booey

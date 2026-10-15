@@ -6,6 +6,14 @@ set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 set(CMAKE_VS_JUST_MY_CODE_DEBUGGING ON CACHE BOOL "Enable Just My Code Debugging")
 set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "ProgramDatabase" CACHE STRING "MSVC debug information format")
 
+# MSBuild's CL task only parallelises (/MP) within a batch of files with identical settings, and files that share a
+# basename get their own object path, so each one ends up in a batch of its own and compiles serially. The multi tool
+# task schedules every file independently instead.
+set(CMAKE_VS_GLOBALS
+  "UseMultiToolTask=true"
+  "EnforceProcessCountAcrossBuilds=true"
+)
+
 # Third-party - stb
 add_subdirectory(third-party/stb)
 
