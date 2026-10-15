@@ -58,7 +58,6 @@ namespace krys::boo::css
       return {};
     }
 
-    // FIXME: not defined until style::Builder is ported.
     KRYS_NODISCARD RefPtr<Value> ResolveValue(style::Builder &builder, PropertyId propertyId) const noexcept;
 
     KRYS_NODISCARD IterationStatus

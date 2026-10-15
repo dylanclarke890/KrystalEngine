@@ -262,10 +262,6 @@ namespace krys::boo::style
 
     void DisableNativeAppearanceIfNeeded(css::PropertyId, PropertyCascade::Origin) noexcept;
 
-    /// @brief Collapses `Builder` setting the property it applies.
-    // FIXME: Remove once `Builder` applies properties.
-    void SetCurrentProperty(const PropertyCascade::Property *property) noexcept;
-
   private:
     void AdjustStyleForInterCharacterRuby() noexcept;
 

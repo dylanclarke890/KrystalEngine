@@ -45,34 +45,15 @@ namespace krys::boo::style::tests
       CHECK(State->ZoomWithTextZoomFactor() == 1.f);
     }
 
-    SECTION("The current property")
+    SECTION("Without a current property")
     {
-      CHECK(State->CssPropertyId() == PropertyId::Invalid);
-
-      CurrentProperty.Id = PropertyId::Color;
-      CurrentProperty.StyleScopeOrdinal = ScopeOrdinal::Shadow;
-      CHECK(State->CssPropertyId() == PropertyId::Color);
-      CHECK(State->StyleScopeOrdinal() == ScopeOrdinal::Shadow);
-      CHECK_FALSE(State->IsAuthorOrigin());
-
-      CurrentProperty.Origin = PropertyCascade::Origin::Author;
-      CHECK(State->IsAuthorOrigin());
-
-      State->SetCurrentProperty(nullptr);
+      // Only `Builder` sets the current property (see the builder tests for the current property's origin and
+      // scope, and invalidity per property).
       CHECK(State->CssPropertyId() == PropertyId::Invalid);
       CHECK_FALSE(State->IsAuthorOrigin());
-    }
 
-    SECTION("Invalid at computed-value time is per property")
-    {
-      CurrentProperty.Id = PropertyId::Color;
-      State->SetCurrentPropertyInvalidAtComputedValueTime();
-      CHECK(State->IsCurrentPropertyInvalidAtComputedValueTime());
-
-      CurrentProperty.Id = PropertyId::Width;
       CHECK_FALSE(State->IsCurrentPropertyInvalidAtComputedValueTime());
-
-      CurrentProperty.Id = PropertyId::Color;
+      State->SetCurrentPropertyInvalidAtComputedValueTime();
       CHECK(State->IsCurrentPropertyInvalidAtComputedValueTime());
     }
 

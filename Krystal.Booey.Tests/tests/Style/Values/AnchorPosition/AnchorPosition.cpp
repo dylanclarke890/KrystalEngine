@@ -22,23 +22,22 @@ namespace krys::boo::style::tests
     /// @brief Recreates the fixture's builder state as if building the style for a fallback with `tactics`.
     void UseFallback(BuilderFixture &fixture, List<PositionTryFallbackTactic> tactics) noexcept
     {
-      fixture.State.reset();
-      fixture.State = CreateUnique<BuilderState>(
-        fixture.Style,
-        BuilderContext {.Document = fixture.Document,
-                        .ParentStyle = &fixture.ParentStyle,
-                        .PositionTryFallback = BuilderPositionTryFallback {nullptr, krys::move(tactics)}});
-      fixture.State->SetCurrentProperty(&fixture.CurrentProperty);
+      fixture.PositionTryFallback = BuilderPositionTryFallback {nullptr, krys::move(tactics)};
+      fixture.ResetState();
     }
   }
 
   TEST_CASE_METHOD(BuilderFixture, "Style anchor names", "[Style][Values][AnchorPosition]")
   {
-    CHECK(Convert<AnchorNames>(PropertyId::AnchorName, u8"none").IsNone());
-    CHECK(Serialised(Convert<AnchorNames>(PropertyId::AnchorName, u8"--a, --b")) == "--a, --b");
+    Build(PropertyId::AnchorName, u8"none");
+    CHECK(Style.GetAnchorNames().IsNone());
+    Build(PropertyId::AnchorName, u8"--a, --b");
+    CHECK(Serialised(Style.GetAnchorNames()) == "--a, --b");
 
-    CHECK(Convert<PositionAnchor>(PropertyId::PositionAnchor, u8"auto").IsAuto());
-    auto anchor = Convert<PositionAnchor>(PropertyId::PositionAnchor, u8"--a");
+    Build(PropertyId::PositionAnchor, u8"auto");
+    CHECK(Style.GetPositionAnchor().IsAuto());
+    Build(PropertyId::PositionAnchor, u8"--a");
+    auto anchor = Style.GetPositionAnchor();
     CHECK(anchor.IsName());
     CHECK(Serialised(anchor) == "--a");
     CHECK(Created(anchor) == "--a");
@@ -67,10 +66,11 @@ namespace krys::boo::style::tests
 
   TEST_CASE_METHOD(BuilderFixture, "Style PositionTryFallbacks", "[Style][Values][AnchorPosition]")
   {
-    CHECK(Convert<PositionTryFallbacks>(PropertyId::PositionTryFallbacks, u8"none").IsNone());
+    Build(PropertyId::PositionTryFallbacks, u8"none");
+    CHECK(Style.GetPositionTryFallbacks().IsNone());
 
-    auto fallbacks = Convert<PositionTryFallbacks>(PropertyId::PositionTryFallbacks,
-                                                   u8"--foo flip-block, flip-x flip-y, left");
+    Build(PropertyId::PositionTryFallbacks, u8"--foo flip-block, flip-x flip-y, left");
+    auto fallbacks = Style.GetPositionTryFallbacks();
     CHECK(Serialised(fallbacks) == "--foo flip-block, flip-x flip-y, left");
     CHECK(Created(fallbacks) == "--foo flip-block, flip-x flip-y, left");
 
@@ -90,22 +90,33 @@ namespace krys::boo::style::tests
   TEST_CASE_METHOD(BuilderFixture, "Style self-alignment under position-try fallbacks",
                    "[Style][Values][AnchorPosition]")
   {
-    CHECK(Serialised(Convert<AlignSelf>(PropertyId::AlignSelf, u8"start")) == "start");
+    auto alignSelf = [&](utf8_stringview value)
+    {
+      Build(PropertyId::AlignSelf, value);
+      return Serialised(Style.GetAlignSelf());
+    };
+    auto justifySelf = [&](utf8_stringview value)
+    {
+      Build(PropertyId::JustifySelf, value);
+      return Serialised(Style.GetJustifySelf());
+    };
+
+    CHECK(alignSelf(u8"start") == "start");
 
     UseFallback(*this, {PositionTryFallbackTactic::FlipBlock});
-    CHECK(Serialised(Convert<AlignSelf>(PropertyId::AlignSelf, u8"start")) == "end");
-    CHECK(Serialised(Convert<AlignSelf>(PropertyId::AlignSelf, u8"safe self-end")) == "safe self-start");
-    CHECK(Serialised(Convert<AlignSelf>(PropertyId::AlignSelf, u8"center")) == "center");
+    CHECK(alignSelf(u8"start") == "end");
+    CHECK(alignSelf(u8"safe self-end") == "safe self-start");
+    CHECK(alignSelf(u8"center") == "center");
     // `flip-block` leaves the inline axis alone.
-    CHECK(Serialised(Convert<JustifySelf>(PropertyId::JustifySelf, u8"left")) == "left");
+    CHECK(justifySelf(u8"left") == "left");
 
     // In a horizontal writing mode, `flip-x` flips the inline axis.
     UseFallback(*this, {PositionTryFallbackTactic::FlipX});
-    CHECK(Serialised(Convert<JustifySelf>(PropertyId::JustifySelf, u8"left")) == "right");
-    CHECK(Serialised(Convert<AlignSelf>(PropertyId::AlignSelf, u8"start")) == "start");
+    CHECK(justifySelf(u8"left") == "right");
+    CHECK(alignSelf(u8"start") == "start");
 
     // `flip-start` resolves physical positions to logical ones, ready to be swapped across axes.
     UseFallback(*this, {PositionTryFallbackTactic::FlipStart});
-    CHECK(Serialised(Convert<JustifySelf>(PropertyId::JustifySelf, u8"left")) == "self-start");
+    CHECK(justifySelf(u8"left") == "self-start");
   }
 }

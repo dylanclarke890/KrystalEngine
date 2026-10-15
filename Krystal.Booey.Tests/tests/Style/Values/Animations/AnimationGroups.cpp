@@ -70,16 +70,22 @@ namespace krys::boo::style::tests
 
   TEST_CASE_METHOD(BuilderFixture, "Style animation values", "[Style][Values][Animations]")
   {
-    auto name = Convert<SingleAnimationName>(PropertyId::AnimationName, u8"slide");
+    auto animationName = [&](utf8_stringview value)
+    {
+      Build(PropertyId::AnimationName, value);
+      return Style.GetAnimations()[0].GetName();
+    };
+
+    auto name = animationName(u8"slide");
     REQUIRE(name.TryKeyframesName());
     CHECK(name.TryKeyframesName()->Name == css::CSSOMStringAtom {u8"slide"});
     CHECK(name.TryKeyframesName()->IsIdentifier);
     CHECK(Serialised(name) == "slide");
-    CHECK(Convert<SingleAnimationName>(PropertyId::AnimationName, u8"none").IsNone());
+    CHECK(animationName(u8"none").IsNone());
     // A quoted name is an identifier unless it would read as a keyword.
-    auto quoted = Convert<SingleAnimationName>(PropertyId::AnimationName, u8"\"two words\"");
+    auto quoted = animationName(u8"\"two words\"");
     CHECK(quoted.TryKeyframesName()->IsIdentifier);
-    auto keywordString = Convert<SingleAnimationName>(PropertyId::AnimationName, u8"\"none\"");
+    auto keywordString = animationName(u8"\"none\"");
     REQUIRE(keywordString.TryKeyframesName());
     CHECK_FALSE(keywordString.TryKeyframesName()->IsIdentifier);
     CHECK(Serialised(keywordString) == "\"none\"");

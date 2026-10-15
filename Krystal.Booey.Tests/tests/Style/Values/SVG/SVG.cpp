@@ -26,7 +26,7 @@ namespace krys::boo::style::tests
     KRYS_NODISCARD SVGPaint ConvertPaint(BuilderFixture &fixture, utf8_stringview value) noexcept
     {
       auto parsed = fixture.Parse(PropertyId::Fill, value);
-      fixture.CurrentProperty.Id = PropertyId::Fill;
+      fixture.ResetState();
       return ConvertCSSValueToStyle<SVGPaint>(*fixture.State, *parsed, ForVisitedLink::No);
     }
   }

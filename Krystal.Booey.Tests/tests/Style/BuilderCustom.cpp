@@ -1,9 +1,12 @@
 ﻿#include "Krystal.Booey/Style/BuilderCustom.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/RuleTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Style/Builder.hpp"
 #include "Krystal.Booey/Style/BuilderGenerated.hpp"
+#include "Krystal.Booey/Style/MatchResult.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordSerialisation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp"
 
@@ -24,7 +27,6 @@ namespace krys::boo::style::tests
 
       void Apply(PropertyId property, css::Value &value, ApplyValueType valueType) noexcept
       {
-        CurrentProperty.Id = property;
         BuilderGenerated::ApplyProperty(property, *State, value, valueType);
       }
 
@@ -38,6 +40,16 @@ namespace krys::boo::style::tests
       {
         auto value = css::PrimitiveValue::Create(css::ValueId::Inherit);
         Apply(property, *value, ApplyValueType::Inherit);
+      }
+
+      /// @brief Builds the style from author declarations, so their origin is the author's.
+      void BuildAuthor(utf8_stringview css) noexcept
+      {
+        auto matched = MatchResult::Create();
+        matched->AuthorDeclarations.push_back(
+          MatchedProperties {.Properties = css::tests::ImmutableDeclarations(css)});
+        Builder builder {Style, BuilderContext {.Document = Document, .ParentStyle = &ParentStyle}, *matched};
+        builder.ApplyAllProperties();
       }
 
       KRYS_NODISCARD const CounterDirectives &Counter(utf8_stringview name) const noexcept
@@ -66,10 +78,10 @@ namespace krys::boo::style::tests
     {
       Apply(PropertyId::Color, u8"red");
       CHECK(Style.GetColor() == boo::Color {boo::Color::red});
+      // Without a current property, the origin isn't the author's.
       CHECK_FALSE(Style.HasExplicitlySetColor());
 
-      CurrentProperty.Origin = PropertyCascade::Origin::Author;
-      ApplyInitial(PropertyId::Color);
+      BuildAuthor(u8"color: initial");
       CHECK(Style.GetColor() == ComputedStyle::InitialColor());
       CHECK(Style.HasExplicitlySetColor());
     }
@@ -119,8 +131,7 @@ namespace krys::boo::style::tests
       CHECK(Serialised(Style.PaddingTop()) == "5px");
       CHECK_FALSE(Style.HasExplicitlySetPaddingTop());
 
-      CurrentProperty.Origin = PropertyCascade::Origin::Author;
-      Apply(PropertyId::PaddingTop, u8"6px");
+      BuildAuthor(u8"padding-top: 6px");
       CHECK(Style.HasExplicitlySetPaddingTop());
     }
 

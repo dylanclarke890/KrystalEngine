@@ -66,7 +66,8 @@ namespace krys::boo::style::tests
       CHECK(Convert<Widows>(PropertyId::Widows, u8"4").IsInteger());
       CHECK(Convert<ColumnCount>(PropertyId::ColumnCount, u8"auto").IsAuto());
       CHECK(Convert<ColumnCount>(PropertyId::ColumnCount, u8"3") == ColumnCount {ColumnCount::Value {3}});
-      CHECK(Blending<ColumnCount> {}.Blend(ColumnCount {ColumnCount::Value {2}}, ColumnCount {ColumnCount::Value {4}}, BlendingContext {0.5})
+      CHECK(Blending<ColumnCount> {}.Blend(ColumnCount {ColumnCount::Value {2}},
+                                           ColumnCount {ColumnCount::Value {4}}, BlendingContext {0.5})
             == ColumnCount {ColumnCount::Value {3}});
     }
 
@@ -229,14 +230,20 @@ namespace krys::boo::style::tests
 
     SECTION("view transitions")
     {
-      CurrentProperty.StyleScopeOrdinal = ScopeOrdinal::Shadow;
-      CHECK(Convert<ViewTransitionName>(PropertyId::ViewTransitionName, u8"none").IsNone());
-      auto named = Convert<ViewTransitionName>(PropertyId::ViewTransitionName, u8"hero");
+      auto viewTransitionName = [&](utf8_stringview value)
+      {
+        Build(PropertyId::ViewTransitionName, value, ScopeOrdinal::Shadow);
+        return Style.GetViewTransitionName();
+      };
+
+      CHECK(viewTransitionName(u8"none").IsNone());
+      // Names are scoped to the declaration's style scope.
+      auto named = viewTransitionName(u8"hero");
       CHECK(named.IsCustomIdentifier());
       CHECK(named.GetScopeOrdinal() == ScopeOrdinal::Shadow);
       CHECK(Serialised(named) == "hero");
-      CHECK(Convert<ViewTransitionName>(PropertyId::ViewTransitionName, u8"auto").IsAuto());
-      CHECK(Convert<ViewTransitionName>(PropertyId::ViewTransitionName, u8"match-element").IsMatchElement());
+      CHECK(viewTransitionName(u8"auto").IsAuto());
+      CHECK(viewTransitionName(u8"match-element").IsMatchElement());
     }
 
     SECTION("color-scheme")

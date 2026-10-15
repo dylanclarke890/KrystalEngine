@@ -26,7 +26,7 @@ namespace krys::boo::style::tests
                                        utf8_stringview value) noexcept
     {
       auto parsed = fixture.Parse(property, value);
-      fixture.CurrentProperty.Id = property;
+      fixture.ResetState();
       const auto *list = DynamicDowncast<css::ValueList>(*parsed);
       const auto &layer = list ? *list->Item(0) : *parsed;
       return ConvertCSSValueToStyle<T>(*fixture.State, layer);

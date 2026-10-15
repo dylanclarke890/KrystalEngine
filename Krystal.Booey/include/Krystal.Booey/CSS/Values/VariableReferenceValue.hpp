@@ -63,12 +63,10 @@ namespace krys::boo::css
     KRYS_NODISCARD bool Equals(const VariableReferenceValue &other) const noexcept;
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
 
-    // FIXME: not defined until style::Builder is ported.
     KRYS_NODISCARD RefPtr<VariableData> ResolveVariableReferences(style::Builder &builder) const noexcept;
 
     KRYS_NODISCARD const ParserContext &Context() const noexcept;
 
-    // FIXME: not defined until style::Builder is ported.
     KRYS_NODISCARD RefPtr<Value> ResolveSingleValue(style::Builder &builder,
                                                     css::PropertyId propertyId) const noexcept;
 
@@ -83,7 +81,6 @@ namespace krys::boo::css
                            KRYS_NOESCAPE const TCacheFunction &cacheFunction) const noexcept;
 
   private:
-    // FIXME: the resolution helpers aren't defined until style::Builder is ported.
     KRYS_NODISCARD Maybe<List<Token>> ResolveTokenRange(css::TokenRange range,
                                                         style::Builder &builder) const noexcept;
     KRYS_NODISCARD bool ResolveVariableReference(css::TokenRange range, css::ValueId functionId,

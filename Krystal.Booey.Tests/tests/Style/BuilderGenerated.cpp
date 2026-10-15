@@ -28,7 +28,6 @@ namespace krys::boo::style::tests
 
       void Apply(PropertyId property, css::Value &value, ApplyValueType valueType) noexcept
       {
-        CurrentProperty.Id = property;
         BuilderGenerated::ApplyProperty(property, *State, value, valueType);
       }
 
@@ -178,7 +177,6 @@ namespace krys::boo::style::tests
       // Build the parent's list with a state over the parent style.
       auto parentState =
         CreateUnique<BuilderState>(ParentStyle, BuilderContext {.Document = Document, .ParentStyle = &Style});
-      parentState->SetCurrentProperty(&CurrentProperty);
       auto parsed = Parse(PropertyId::AnimationDuration, u8"4s, 5s");
       BuilderGenerated::ApplyProperty(PropertyId::AnimationDuration, *parentState, *parsed,
                                       ApplyValueType::Value);

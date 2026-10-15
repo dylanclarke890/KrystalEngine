@@ -340,9 +340,4 @@ namespace krys::boo::style
       _style.SetNativeAppearanceDisabled(true);
     }
   }
-
-  void BuilderState::SetCurrentProperty(const PropertyCascade::Property *property) noexcept
-  {
-    _currentProperty = property;
-  }
 }

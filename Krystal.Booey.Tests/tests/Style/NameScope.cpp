@@ -55,15 +55,15 @@ namespace krys::boo::style::tests
     };
 
     CHECK(convert(*PrimitiveValue::Create(ValueId::None)).Type == NameScope::Type::None);
-    CHECK(convert(*PrimitiveValue::Create(ValueId::All))
-          == NameScope {css::keywords::All {}, ScopeOrdinal::Element});
-    CHECK(convert(*PrimitiveValue::CreateCustomIdent(css::CSSOMString {u8"--a"}))
-          == NameScope {Names({u8"--a"}), ScopeOrdinal::Element});
-    CHECK(convert(*css::ValueList::CreateCommaSeparated(
-            css::ValueListBuilder {PrimitiveValue::CreateCustomIdent(css::CSSOMString {u8"--a"}),
-                                   PrimitiveValue::CreateCustomIdent(css::CSSOMString {u8"--b"})}))
-          == NameScope {Names({u8"--a", u8"--b"}), ScopeOrdinal::Element});
     CHECK_FALSE(IsInvalid());
+
+    // Names are scoped to the declaration's style scope.
+    Build(css::PropertyId::AnchorScope, u8"all");
+    CHECK(Style.AnchorScope() == NameScope {css::keywords::All {}, ScopeOrdinal::Element});
+    Build(css::PropertyId::AnchorScope, u8"--a", ScopeOrdinal::Shadow);
+    CHECK(Style.AnchorScope() == NameScope {Names({u8"--a"}), ScopeOrdinal::Shadow});
+    Build(css::PropertyId::TimelineScope, u8"--a, --b");
+    CHECK(Style.TimelineScope() == NameScope {Names({u8"--a", u8"--b"}), ScopeOrdinal::Element});
 
     CHECK(convert(*PrimitiveValue::Create(ValueId::Auto)).Type == NameScope::Type::None);
     CHECK(IsInvalid());
