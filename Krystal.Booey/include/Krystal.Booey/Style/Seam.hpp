@@ -91,6 +91,7 @@ namespace krys::boo
     bool _usesContainerUnits {false};
     bool _usesTreeCountingFunctions {false};
     bool _hasAttrContent {false};
+    bool _disallowsFastPathInheritance {false};
     boo::WritingMode _writingMode {};
     FontCascade _fontCascade {InitialFontCascade()};
 
@@ -163,6 +164,8 @@ namespace krys::boo
     void SetUsesTreeCountingFunctions() noexcept;
     KRYS_NODISCARD bool HasAttrContent() const noexcept;
     void SetHasAttrContent() noexcept;
+    KRYS_NODISCARD bool DisallowsFastPathInheritance() const noexcept;
+    void SetDisallowsFastPathInheritance() noexcept;
 
     // Properties, grown as the computed value types need them; replaced by the generated getters and
     // setters.

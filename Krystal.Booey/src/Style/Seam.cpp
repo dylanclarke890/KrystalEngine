@@ -342,6 +342,16 @@ namespace krys::boo
     _hasAttrContent = true;
   }
 
+  bool RenderStyle::DisallowsFastPathInheritance() const noexcept
+  {
+    return _disallowsFastPathInheritance;
+  }
+
+  void RenderStyle::SetDisallowsFastPathInheritance() noexcept
+  {
+    _disallowsFastPathInheritance = true;
+  }
+
   const dom::Document &RenderView::GetDocument() const noexcept
   {
     krys_unreachable();

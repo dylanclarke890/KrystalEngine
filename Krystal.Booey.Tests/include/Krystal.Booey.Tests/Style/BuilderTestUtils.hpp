@@ -51,6 +51,7 @@ namespace krys::boo::style::tests
       context.PropertySettings.cssCornerShapeEnabled = true;
       context.cssTextDecorationLineErrorValues = true;
       context.cssShapeFunctionEnabled = true;
+      context.PropertySettings.cssDPropertyEnabled = true;
       context.PropertySettings.cssAnchorPositioningEnabled = true;
       context.PropertySettings.cssLineFitEdgeEnabled = true;
       context.PropertySettings.cssMathDepthEnabled = true;

@@ -968,6 +968,41 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Values/Shapes/XywhFunction.hpp
   include/Krystal.Booey/SVG/Internals/SVGPathAbsoluteConverter.hpp
   include/Krystal.Booey/SVG/Internals/SVGPathBlender.hpp
+
+  # Style resolution, layer f3e4 (masking, motion and svg)
+  include/Krystal.Booey/Rendering/MotionPath.hpp
+  include/Krystal.Booey/Rendering/PathOperation.hpp
+  include/Krystal.Booey/Rendering/TransformOperationData.hpp
+  include/Krystal.Booey/Style/Values/Masking/Clip.hpp
+  include/Krystal.Booey/Style/Values/Masking/ClipPath.hpp
+  include/Krystal.Booey/Style/Values/Masking/MaskBorder.hpp
+  include/Krystal.Booey/Style/Values/Masking/MaskBorderOutset.hpp
+  include/Krystal.Booey/Style/Values/Masking/MaskBorderRepeat.hpp
+  include/Krystal.Booey/Style/Values/Masking/MaskBorderSlice.hpp
+  include/Krystal.Booey/Style/Values/Masking/MaskBorderSource.hpp
+  include/Krystal.Booey/Style/Values/Masking/MaskBorderWidth.hpp
+  include/Krystal.Booey/Style/Values/Masking/MaskLayer.hpp
+  include/Krystal.Booey/Style/Values/Masking/MaskLayers.hpp
+  include/Krystal.Booey/Style/Values/Motion/OffsetAnchor.hpp
+  include/Krystal.Booey/Style/Values/Motion/OffsetDistance.hpp
+  include/Krystal.Booey/Style/Values/Motion/OffsetPath.hpp
+  include/Krystal.Booey/Style/Values/Motion/OffsetPosition.hpp
+  include/Krystal.Booey/Style/Values/Motion/OffsetRotate.hpp
+  include/Krystal.Booey/Style/Values/Motion/RayFunction.hpp
+  include/Krystal.Booey/Style/Values/SVG/SVGBaselineShift.hpp
+  include/Krystal.Booey/Style/Values/SVG/SVGCenterCoordinateComponent.hpp
+  include/Krystal.Booey/Style/Values/SVG/SVGCoordinateComponent.hpp
+  include/Krystal.Booey/Style/Values/SVG/SVGGlyphOrientationHorizontal.hpp
+  include/Krystal.Booey/Style/Values/SVG/SVGGlyphOrientationVertical.hpp
+  include/Krystal.Booey/Style/Values/SVG/SVGMarkerResource.hpp
+  include/Krystal.Booey/Style/Values/SVG/SVGPaint.hpp
+  include/Krystal.Booey/Style/Values/SVG/SVGPaintOrder.hpp
+  include/Krystal.Booey/Style/Values/SVG/SVGPathData.hpp
+  include/Krystal.Booey/Style/Values/SVG/SVGRadius.hpp
+  include/Krystal.Booey/Style/Values/SVG/SVGRadiusComponent.hpp
+  include/Krystal.Booey/Style/Values/SVG/SVGStrokeDasharray.hpp
+  include/Krystal.Booey/Style/Values/SVG/SVGStrokeDashoffset.hpp
+  include/Krystal.Booey/Style/Values/Shapes/PathOperationWrappers.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -1581,6 +1616,33 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Style/Values/Shapes/XywhFunction.cpp
   src/SVG/Internals/SVGPathAbsoluteConverter.cpp
   src/SVG/Internals/SVGPathBlender.cpp
+
+  # Style resolution, layer f3e4 (masking, motion and svg)
+  src/Rendering/MotionPath.cpp
+  src/Rendering/PathOperation.cpp
+  src/Style/Values/Masking/Clip.cpp
+  src/Style/Values/Masking/ClipPath.cpp
+  src/Style/Values/Masking/MaskBorder.cpp
+  src/Style/Values/Masking/MaskBorderOutset.cpp
+  src/Style/Values/Masking/MaskBorderRepeat.cpp
+  src/Style/Values/Masking/MaskBorderSlice.cpp
+  src/Style/Values/Masking/MaskBorderSource.cpp
+  src/Style/Values/Masking/MaskBorderWidth.cpp
+  src/Style/Values/Masking/MaskLayer.cpp
+  src/Style/Values/Motion/OffsetAnchor.cpp
+  src/Style/Values/Motion/OffsetPath.cpp
+  src/Style/Values/Motion/OffsetPosition.cpp
+  src/Style/Values/Motion/OffsetRotate.cpp
+  src/Style/Values/Motion/RayFunction.cpp
+  src/Style/Values/SVG/SVGBaselineShift.cpp
+  src/Style/Values/SVG/SVGGlyphOrientationHorizontal.cpp
+  src/Style/Values/SVG/SVGGlyphOrientationVertical.cpp
+  src/Style/Values/SVG/SVGPaint.cpp
+  src/Style/Values/SVG/SVGPaintOrder.cpp
+  src/Style/Values/SVG/SVGPathData.cpp
+  src/Style/Values/SVG/SVGStrokeDasharray.cpp
+  src/Style/Values/SVG/SVGStrokeDashoffset.cpp
+  src/Style/Values/Shapes/PathOperationWrappers.cpp
 )
 
 target_precompile_headers(Krystal.Booey
