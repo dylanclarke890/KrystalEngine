@@ -815,6 +815,37 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Values/Transitions/SingleTransitionProperty.hpp
   include/Krystal.Booey/Style/Values/Transitions/Transition.hpp
   include/Krystal.Booey/Style/Values/Transitions/Transitions.hpp
+
+  # Style resolution, layer f3d2 (transforms)
+  include/Krystal.Booey/Graphics/Transforms/IdentityTransformOperation.hpp
+  include/Krystal.Booey/Graphics/Transforms/Matrix3DTransformOperation.hpp
+  include/Krystal.Booey/Graphics/Transforms/MatrixTransformOperation.hpp
+  include/Krystal.Booey/Graphics/Transforms/PerspectiveTransformOperation.hpp
+  include/Krystal.Booey/Graphics/Transforms/RotateTransformOperation.hpp
+  include/Krystal.Booey/Graphics/Transforms/ScaleTransformOperation.hpp
+  include/Krystal.Booey/Graphics/Transforms/SkewTransformOperation.hpp
+  include/Krystal.Booey/Graphics/Transforms/TransformOperation.hpp
+  include/Krystal.Booey/Graphics/Transforms/TransformOperations.hpp
+  include/Krystal.Booey/Graphics/Transforms/TransformOperationsSharedPrimitivesPrefix.hpp
+  include/Krystal.Booey/Graphics/Transforms/TranslateTransformOperation.hpp
+  include/Krystal.Booey/Style/Values/Transforms/Functions/Matrix3DTransformFunction.hpp
+  include/Krystal.Booey/Style/Values/Transforms/Functions/MatrixTransformFunction.hpp
+  include/Krystal.Booey/Style/Values/Transforms/Functions/PerspectiveTransformFunction.hpp
+  include/Krystal.Booey/Style/Values/Transforms/Functions/RotateTransformFunction.hpp
+  include/Krystal.Booey/Style/Values/Transforms/Functions/ScaleTransformFunction.hpp
+  include/Krystal.Booey/Style/Values/Transforms/Functions/SkewTransformFunction.hpp
+  include/Krystal.Booey/Style/Values/Transforms/Functions/TransformFunctionBase.hpp
+  include/Krystal.Booey/Style/Values/Transforms/Functions/TransformFunctionWrapper.hpp
+  include/Krystal.Booey/Style/Values/Transforms/Functions/TranslateTransformFunction.hpp
+  include/Krystal.Booey/Style/Values/Transforms/Perspective.hpp
+  include/Krystal.Booey/Style/Values/Transforms/PerspectiveOrigin.hpp
+  include/Krystal.Booey/Style/Values/Transforms/Rotate.hpp
+  include/Krystal.Booey/Style/Values/Transforms/Scale.hpp
+  include/Krystal.Booey/Style/Values/Transforms/Transform.hpp
+  include/Krystal.Booey/Style/Values/Transforms/TransformFunction.hpp
+  include/Krystal.Booey/Style/Values/Transforms/TransformList.hpp
+  include/Krystal.Booey/Style/Values/Transforms/TransformOrigin.hpp
+  include/Krystal.Booey/Style/Values/Transforms/Translate.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -1304,6 +1335,33 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Style/Values/Transitions/SingleTransitionProperty.cpp
   src/Style/Values/Transitions/Transition.cpp
   src/Style/ScopedName.cpp
+
+  # Style resolution, layer f3d2 (transforms)
+  src/Graphics/Transforms/IdentityTransformOperation.cpp
+  src/Graphics/Transforms/Matrix3DTransformOperation.cpp
+  src/Graphics/Transforms/MatrixTransformOperation.cpp
+  src/Graphics/Transforms/PerspectiveTransformOperation.cpp
+  src/Graphics/Transforms/RotateTransformOperation.cpp
+  src/Graphics/Transforms/ScaleTransformOperation.cpp
+  src/Graphics/Transforms/SkewTransformOperation.cpp
+  src/Graphics/Transforms/TransformOperation.cpp
+  src/Graphics/Transforms/TransformOperations.cpp
+  src/Graphics/Transforms/TranslateTransformOperation.cpp
+  src/Style/Values/Transforms/Functions/Matrix3DTransformFunction.cpp
+  src/Style/Values/Transforms/Functions/MatrixTransformFunction.cpp
+  src/Style/Values/Transforms/Functions/PerspectiveTransformFunction.cpp
+  src/Style/Values/Transforms/Functions/RotateTransformFunction.cpp
+  src/Style/Values/Transforms/Functions/ScaleTransformFunction.cpp
+  src/Style/Values/Transforms/Functions/SkewTransformFunction.cpp
+  src/Style/Values/Transforms/Functions/TransformFunctionBase.cpp
+  src/Style/Values/Transforms/Functions/TranslateTransformFunction.cpp
+  src/Style/Values/Transforms/Perspective.cpp
+  src/Style/Values/Transforms/Rotate.cpp
+  src/Style/Values/Transforms/Scale.cpp
+  src/Style/Values/Transforms/Transform.cpp
+  src/Style/Values/Transforms/TransformFunction.cpp
+  src/Style/Values/Transforms/TransformList.cpp
+  src/Style/Values/Transforms/Translate.cpp
 )
 
 target_precompile_headers(Krystal.Booey
