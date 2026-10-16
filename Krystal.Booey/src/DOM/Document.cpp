@@ -46,6 +46,8 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTitleElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -1098,6 +1100,149 @@ namespace krys::boo::dom
     return *InitialContainingBlockStyle();
   }
 
+  LocalFrame *Document::Frame() const noexcept
+  {
+    return _frame.get();
+  }
+
+  LocalFrameView *Document::View() const noexcept
+  {
+    return _frame ? _frame->View() : nullptr;
+  }
+
+  void Document::CreateRenderTree() noexcept
+  {
+    krys_debug_assert(!GetRenderView());
+    krys_debug_assert(View());
+
+    _renderView = CreateUnique<boo::RenderView>(*this);
+
+    ResolveStyle(ResolveStyleType::Rebuild);
+  }
+
+  void Document::DestroyRenderTree() noexcept
+  {
+    krys_debug_assert(HasLivingRenderTree());
+
+    // FIXME: Tear down the renderers and tell the view, once there's a render tree.
+    _renderView = nullptr;
+
+    // Styles resolved against the view (viewport units, the page zoom) are stale.
+    ScheduleFullStyleRebuild();
+  }
+
+  void Document::DidBecomeCurrentDocumentInFrame(LocalFrame &frame) noexcept
+  {
+    _frame = WeakPtr<LocalFrame>::WithRef(frame);
+
+    if (!HasLivingRenderTree() && View())
+    {
+      CreateRenderTree();
+    }
+
+    // FIXME: Viewport arguments, scheduled task and animation suspension, and quirks, once there are any.
+  }
+
+  void Document::WillBeRemovedFromFrame() noexcept
+  {
+    // FIXME: Unload, page hide and the other steps of unloading the document, once there's navigation.
+    if (HasLivingRenderTree())
+    {
+      DestroyRenderTree();
+    }
+
+    _frame = nullptr;
+  }
+
+  float Document::DeviceScaleFactor() const noexcept
+  {
+    float deviceScaleFactor = 1.0;
+    if (auto *frame = Frame())
+    {
+      deviceScaleFactor = frame->GetMediaEnvironment().DeviceScaleFactor;
+    }
+    return deviceScaleFactor;
+  }
+
+  bool Document::ShouldScheduleLayout() const noexcept
+  {
+    if (!DocumentElement())
+    {
+      return false;
+    }
+    if (!Is<html::HTMLHtmlElement>(*DocumentElement()))
+    {
+      return true;
+    }
+    if (!Body())
+    {
+      return false;
+    }
+    if (StyleScope().HasPendingSheetsBeforeBody())
+    {
+      return false;
+    }
+    // FIXME: Wait until the view is visually non-empty, once there's painting.
+    return true;
+  }
+
+  bool Document::IsLayoutPending() const noexcept
+  {
+    return View() && View()->LayoutContext().IsLayoutPending();
+  }
+
+  void Document::UpdateViewportUnitsOnResize() noexcept
+  {
+    StyleScope().DidChangeViewportSize();
+  }
+
+  Document::UpdateLayoutResult Document::UpdateLayoutIgnorePendingStylesheets() noexcept
+  {
+    SetForScope ignorePendingStylesheets(_ignorePendingStylesheets, true);
+    // FIXME: This should just invalidate elements with missing styles.
+    if (_hasNodesWithMissingStyle)
+    {
+      ScheduleFullStyleRebuild();
+    }
+
+    // FIXME: Update the relevancy of content-visibility elements, once there's content relevancy.
+
+    return UpdateLayout();
+  }
+
+  Document::UpdateLayoutResult Document::UpdateLayout() noexcept
+  {
+    RefPtr<LocalFrameView> frameView = ShareRefPtr(View());
+    if (frameView && frameView->LayoutContext().IsInRenderTreeLayout())
+    {
+      // View layout should not be re-entrant.
+      krys_debug_assert_msg(false, "layout isn't re-entrant");
+      return UpdateLayoutResult::NoChange;
+    }
+
+    UpdateLayoutResult result = UpdateLayoutResult::NoChange;
+
+    // FIXME: Update the owner document's layout first, once documents can be nested in frames.
+
+    if (UpdateStyleIfNeeded())
+    {
+      result = UpdateLayoutResult::ChangesDone;
+    }
+
+    if (frameView && GetRenderView())
+    {
+      auto &layoutContext = frameView->LayoutContext();
+      // FIXME: Force the layout of skipped content (content-visibility) when asked, once there's layout.
+      if (layoutContext.NeedsLayout())
+      {
+        layoutContext.Layout();
+        result = UpdateLayoutResult::ChangesDone;
+      }
+    }
+
+    return result;
+  }
+
   void Document::ScheduleFullStyleRebuild() noexcept
   {
     _needsFullStyleRebuild = true;
@@ -1242,6 +1387,11 @@ namespace krys::boo::dom
         {
           UpdateRenderTree(krys::move(styleUpdate));
         }
+      }
+
+      if (auto *frameView = View(); frameView && _renderView && _renderView->NeedsLayout())
+      {
+        frameView->LayoutContext().ScheduleLayout();
       }
     }
   }

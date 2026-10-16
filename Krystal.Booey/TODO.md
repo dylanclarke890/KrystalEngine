@@ -4,11 +4,11 @@ Open work outside the WebKit port's current slice. Port-specific detail (verdict
 
 ## Infrastructure
 
-- **Event loop and rendering loop** — nothing schedules style updates; the host must call `Document::UpdateStyleIfNeeded()` (FIXME in `src/DOM/Document.cpp`). Needed for timers, microtasks and the "update the rendering" steps. https://html.spec.whatwg.org/#event-loops
+- **Event loop and rendering loop** — nothing schedules style updates or layout; the host must call `Document::UpdateStyleIfNeeded()` or `Document::UpdateLayout()`, and `Document::EvaluateMediaQueriesAndReportChanges()` after viewport or media environment changes (FIXMEs in `src/DOM/Document.cpp`, `src/Page/LocalFrameViewLayoutContext.cpp`). Needed for timers, microtasks and the "update the rendering" steps. https://html.spec.whatwg.org/#event-loops
 - **Settings** — `Page/Settings.hpp` holds the experimental and embedder flags and the font size values; the other values upstream reads from `Settings` (`textAreasAreResizable`, `hiddenUntilFoundEnabled`, `coreMathMLEnabled`, ...) are upstream's defaults in code. The media text track display quirk is never set (no document quirks).
 - **Resource loading** — `<link rel=stylesheet>`, `@import`, `@font-face` sources and images aren't fetched (`CSS/Rules/ImportRule.hpp`, `CSS/Values/ImageValue.hpp`, `src/HTML/HTMLLinkElement.cpp`). https://html.spec.whatwg.org/#link-type-stylesheet
 - **Fonts** — `FontCascade` has no font data or font selector, so font metrics (and units that depend on them) aren't real; `FontFace`/`FontFaceSet` and the `CSSFontFace*` headers are unbuilt (`CSS/Font/`). https://drafts.csswg.org/css-font-loading/
-- **Viewport changes** — media queries aren't re-evaluated and viewport-unit styles aren't invalidated when the `MediaEnvironment` changes; it's process-wide until documents have frames (`src/Style/Scope.cpp`, `src/Style/CustomPropertyRegistry.cpp`).
+- **Frames** — `LocalFrame` has no page, loader, navigation, frame tree (no iframes), window, scripting or printing; `LocalFrameView` has no scrolling, scrollbars or visual viewport (`Page/LocalFrame.hpp`, `Page/LocalFrameView.hpp`).
 - **Logging** — no channel for exceptions thrown by event listeners or for parse errors (`src/DOM/Algorithms/EventDispatcher.cpp`, `src/HTML/Parser/HTMLTreeBuilder.cpp`).
 
 ## Style
@@ -23,7 +23,7 @@ Open work outside the WebKit port's current slice. Port-specific detail (verdict
 - **Document language** — no default language from a `Content-Language` pragma or header (`EffectiveLang`). https://html.spec.whatwg.org/#pragma-set-default-language
 - **Typed OM** — `styleMap`, `attributeStyleMap`, `computedStyleMap()` and `css/typedom` aren't ported; needs `DOMMatrix` and `ParseTransformRaw` first (`CSS/Properties/Consumers/Transform.hpp`). https://drafts.css-houdini.org/css-typed-om/
 - **CSSOM** — async `CSSStyleSheet.replace()` (promises); `getComputedStyle` is a free function until there's a window (`CSS/CSSComputedStyleDeclaration.hpp`).
-- **Render tree** — `RenderTreeUpdater` is a stand-in; no layout, so no used values, size container queries, container units, `Style::Difference` or anchor positioning (`Style/Seam.hpp`, `PORTING.md` *Open*).
+- **Render tree** — `RenderTreeUpdater` and the seam's `RenderView` are stand-ins; no layout, so no used values, size container queries, container units, `Style::Difference` or anchor positioning (`Style/Seam.hpp`, `PORTING.md` *Open*).
 
 ## DOM
 

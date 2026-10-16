@@ -701,6 +701,12 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   # Settings
   include/Krystal.Booey/Page/Settings.hpp
 
+  # Frame view and viewport
+  include/Krystal.Booey/Page/LocalFrame.hpp
+  include/Krystal.Booey/Page/LocalFrameView.hpp
+  include/Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp
+  include/Krystal.Booey/Rendering/Pagination.hpp
+
   # Interaction state
   include/Krystal.Booey/DOM/FocusOptions.hpp
   include/Krystal.Booey/DOM/UserActionElementSet.hpp
@@ -1401,7 +1407,6 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Queries/GenericMediaQueryEvaluator.cpp
   src/CSS/Queries/GenericMediaQueryParser.cpp
   src/CSS/Queries/GenericMediaQuerySerialisation.cpp
-  src/CSS/Queries/MediaEnvironment.cpp
   src/CSS/Queries/MediaQueryEvaluator.cpp
   src/CSS/Queries/MediaQueryFeatures.cpp
   src/CSS/Queries/MediaQueryMatcher.cpp
@@ -1863,6 +1868,11 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/DOM/UserActionElementSet.cpp
   src/HTML/Algorithms/FocusAlgorithms.cpp
   src/HTML/Mixins/HTMLOrSVGOrMathMLElement.cpp
+
+  # Frame view and viewport
+  src/Page/LocalFrame.cpp
+  src/Page/LocalFrameView.cpp
+  src/Page/LocalFrameViewLayoutContext.cpp
 )
 
 target_precompile_headers(Krystal.Booey

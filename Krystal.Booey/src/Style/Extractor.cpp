@@ -263,8 +263,7 @@ namespace krys::boo::style
       return nullptr;
     }
 
-    // FIXME: Layout. Upstream updates layout ignoring pending style sheets.
-    element->NodeDocument().UpdateStyleIfNeededIgnoringPendingStylesheets();
+    element->NodeDocument().UpdateLayoutIgnorePendingStylesheets();
 
     const auto *style = element->ComputedStyle(_pseudoElementIdentifier);
     if (!style)
@@ -463,9 +462,8 @@ namespace krys::boo::style
 
       if (forcedLayout == ForcedLayout::Yes)
       {
-        // FIXME: Layout. Upstream updates layout ignoring pending style sheets (treating content-visibility
-        // hidden and auto as visible).
-        document->UpdateStyleIfNeededIgnoringPendingStylesheets();
+        // FIXME: Treat content-visibility hidden and auto as visible, once there's layout.
+        document->UpdateLayoutIgnorePendingStylesheets();
       }
     }
 
@@ -581,8 +579,7 @@ namespace krys::boo::style
     {
       if (const auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(value))
       {
-        // FIXME: Layout. Upstream updates layout ignoring pending style sheets.
-        _element->NodeDocument().UpdateStyleIfNeededIgnoringPendingStylesheets();
+        _element->NodeDocument().UpdateLayoutIgnorePendingStylesheets();
         if (const auto *style = _element->ComputedStyle(_pseudoElementIdentifier))
         {
           if (css::ValueId sizeIdentifier = style->GetFontDescription().KeywordSizeAsIdentifier();

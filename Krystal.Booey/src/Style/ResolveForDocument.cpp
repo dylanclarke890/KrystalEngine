@@ -2,6 +2,7 @@
 #include "Krystal.Booey/CSS/WebKitFontFamilyNames.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
@@ -20,7 +21,11 @@ namespace krys::boo::style
     documentStyle.SetDisplay(DisplayType::Block);
     // FIXME: Visually ordered documents (legacy encodings) set `Order::Visual`; there are no encodings.
     documentStyle.SetRTLOrdering(boo::Order::Logical);
-    // FIXME: The frame's page zoom and scale factors (`setZoom`, `setPageScaleTransform`) come with frames.
+    if (auto *frame = document.Frame())
+    {
+      documentStyle.SetZoom(!document.Printing() ? frame->PageZoomFactor() : 1);
+    }
+    // FIXME: The frame's scale factor (`setPageScaleTransform`), once frames have a page.
 
     // This overrides any -webkit-user-modify inherited from the parent iframe.
     // FIXME: Documents in design mode are `read-write`; there's no design mode.
@@ -28,7 +33,8 @@ namespace krys::boo::style
 
     Adjuster::AdjustEventListenerRegionTypesForRootStyle(documentStyle, document);
 
-    // FIXME: Paged frame views set the column styles from their pagination mode; there are no frame views.
+    // FIXME: Paginated views set the column styles from their pagination mode
+    // (setColumnStylesFromPaginationMode), which needs the dropped `-webkit-column-axis`.
 
     auto fontDescription = [&]()
     {
@@ -67,8 +73,7 @@ namespace krys::boo::style
 
     documentStyle.SetEvaluationTimeZoomEnabled(document.GetSettings().Values.EvaluationTimeZoomEnabled);
 
-    // FIXME: The device scale factor comes with pages; it's 1.
-    documentStyle.SetDeviceScaleFactor(1);
+    documentStyle.SetDeviceScaleFactor(document.DeviceScaleFactor());
 
     return documentStyle;
   }

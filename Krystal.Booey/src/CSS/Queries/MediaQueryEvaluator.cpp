@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
-#include "Krystal.Booey/CSS/Queries/MediaEnvironment.hpp"
 #include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
@@ -71,7 +70,7 @@ namespace krys::boo::css::mq
         return _staticMediaConditionResult;
       }
 
-      if (!MediaEnvironmentFor(*document) || !document->DocumentElement())
+      if (!document->View() || !document->DocumentElement())
       {
         return EvaluationResult::Unknown;
       }

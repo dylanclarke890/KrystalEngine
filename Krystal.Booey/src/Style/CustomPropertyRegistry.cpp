@@ -90,7 +90,7 @@ namespace krys::boo::style
       if (parsedInitialValue->second == ViewportUnitDependency::Yes)
       {
         initialValueTokensForViewportUnits = css::VariableData::Create(tokenRange);
-        // FIXME: `Document::setHasStyleWithViewportUnits()` comes with viewport unit invalidation.
+        document.SetHasStyleWithViewportUnits();
       }
     }
     else if (syntax->IsUniversal())

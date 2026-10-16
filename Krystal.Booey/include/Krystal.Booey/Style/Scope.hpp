@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Graphics/IntSize.hpp"
 #include "Krystal.Booey/Style/ScopeOrdinal.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
@@ -9,6 +10,7 @@
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
@@ -80,6 +82,11 @@ namespace krys::boo::style
 
     using ResolverSharingKey = std::tuple<List<RefPtr<css::StyleSheetContents>>, bool, bool>;
 
+    // These things affect evaluation of viewport dependent media queries.
+    using MediaQueryViewportState = std::tuple<IntSize, float, bool>;
+
+    using ResolverScopes = List<Pair<Ref<Resolver>, List<WeakPtr<Scope>>>>;
+
     struct ResolverSharingKeyHash
     {
       KRYS_NODISCARD size_t operator()(const ResolverSharingKey &key) const noexcept;
@@ -118,6 +125,8 @@ namespace krys::boo::style
 
     HashMap<ResolverSharingKey, Ref<Resolver>, ResolverSharingKeyHash> _sharedShadowTreeResolvers;
 
+    Maybe<MediaQueryViewportState> _viewportStateOnPreviousMediaQueryEvaluation;
+
     UniquePtr<MatchResultCache> _matchResultCache;
 
   public:
@@ -155,6 +164,15 @@ namespace krys::boo::style
     /// to printing). The change is assumed to potentially affect all author and user stylesheets including
     /// shadow roots.
     void DidChangeStyleSheetEnvironment() noexcept;
+
+    /// @brief Re-evaluates the media queries of the style sheets after the viewport changed, and invalidates
+    /// the styles whose rules started or stopped applying.
+    void EvaluateMediaQueriesForViewportChange() noexcept;
+    void EvaluateMediaQueriesForAccessibilitySettingsChange() noexcept;
+    void EvaluateMediaQueriesForAppearanceChange() noexcept;
+
+    /// @brief Invalidates the styles that use viewport units, after the viewport changed size.
+    void DidChangeViewportSize() noexcept;
 
     KRYS_NODISCARD bool HasPendingUpdate() const noexcept
     {
@@ -264,6 +282,14 @@ namespace krys::boo::style
     void ClearPendingUpdate() noexcept;
 
     KRYS_NODISCARD ActiveStyleSheetCollection CollectActiveStyleSheets() noexcept;
+
+    KRYS_NODISCARD ResolverScopes CollectResolverScopes() noexcept;
+
+    template <typename TFunction>
+    void EvaluateMediaQueries(TFunction &&testFunction) noexcept;
+
+    KRYS_NODISCARD static MediaQueryViewportState
+      MediaQueryViewportStateForDocument(const dom::Document &document) noexcept;
   };
 
   /// @return The slot @p scopeOrdinal slots up the assignment chain from @p element, if any.

@@ -7,6 +7,8 @@
 #include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
 
 namespace krys::boo::css::tests
 {
@@ -47,29 +49,32 @@ namespace krys::boo::css::tests
       }
     };
 
+    /// @brief Shows @p document in a new frame with an 800x600 view.
+    KRYS_NODISCARD Ref<LocalFrame> ShowInFrame(dom::Document &document) noexcept
+    {
+      auto frame = LocalFrame::Create();
+      frame->CreateView({800, 600});
+      frame->SetDocument(ShareRefPtr(&document));
+      return frame;
+    }
+
     /// @brief A parsed document, evaluated against an 800x600 screen view.
     struct MatchMediaFixture : ValueFixture
     {
       Ref<dom::HTMLDocument> Document {Parse(u8"<!DOCTYPE html><p>")};
-      mq::MediaEnvironment Environment {};
+      Ref<LocalFrame> Frame {ShowInFrame(*Document)};
 
       MatchMediaFixture()
       {
-        Environment.LayoutSize = IntSize {800, 600};
-        Environment.ScreenSize = FloatSize {1'920, 1'080};
-        mq::SetMediaEnvironment(Environment);
+        mq::MediaEnvironment environment;
+        environment.ScreenSize = FloatSize {1'920, 1'080};
+        Frame->SetMediaEnvironment(environment);
       }
 
-      ~MatchMediaFixture() noexcept
-      {
-        mq::SetMediaEnvironment(null);
-      }
-
-      /// @brief Changes the environment to have a view @p width wide.
+      /// @brief Resizes the view to be @p width wide.
       void Resize(int32 width)
       {
-        Environment.LayoutSize = IntSize {width, 600};
-        mq::SetMediaEnvironment(Environment);
+        Frame->View()->Resize({width, 600});
       }
     };
   }
@@ -103,14 +108,23 @@ namespace krys::boo::css::tests
       REQUIRE_FALSE(Document->MatchMedia(u8"(min-width: 51em)")->Matches());
     }
 
-    SECTION("Nothing matches without a view or a document element")
+    SECTION("Nothing matches without a frame or a document element")
     {
-      mq::SetMediaEnvironment(null);
+      Frame->SetDocument(nullptr);
       REQUIRE_FALSE(Document->MatchMedia(u8"all")->Matches());
 
-      mq::SetMediaEnvironment(Environment);
       auto empty = CreateRef<dom::HTMLDocument>();
+      auto emptyFrame = ShowInFrame(*empty);
       REQUIRE_FALSE(empty->MatchMedia(u8"all")->Matches());
+    }
+
+    SECTION("Without a view there's no media type, and conditions are unknown")
+    {
+      Frame->SetView(nullptr);
+      REQUIRE(Document->MatchMedia(u8"all")->Matches());
+      REQUIRE_FALSE(Document->MatchMedia(u8"screen")->Matches());
+      REQUIRE_FALSE(Document->MatchMedia(u8"(min-width: 0)")->Matches());
+      REQUIRE_FALSE(Document->MatchMedia(u8"not all and (min-width: 0)")->Matches());
     }
 
     SECTION("The result is kept until the queries are evaluated again")

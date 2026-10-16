@@ -6,6 +6,8 @@
 #include "Krystal.Booey/CSS/Queries/MediaQueryFeatures.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
@@ -34,30 +36,42 @@ namespace krys::boo::css::tests
       return print;
     }
 
+    /// @brief Shows @p document in a new frame with a view of @p viewSize.
+    KRYS_NODISCARD Ref<LocalFrame> ShowInFrame(dom::Document &document, IntSize viewSize = {800, 600})
+    {
+      auto frame = LocalFrame::Create();
+      frame->CreateView(viewSize);
+      frame->SetDocument(ShareRefPtr(&document));
+      return frame;
+    }
+
     /// @brief Evaluates queries against a document with a root element and an 800x600 screen view.
     struct EvaluationFixture : ValueFixture
     {
       Ref<dom::Document> Document {CreateRef<dom::Document>()};
+      Ref<LocalFrame> Frame {ShowInFrame(*Document)};
       RenderStyle RootStyle {RenderStyle::Create()};
       mq::MediaEnvironment Environment {};
+      IntSize ViewSize {800, 600};
+      CSSOMStringAtom ViewMediaType {Screen()};
+      bool Paginated {false};
 
       EvaluationFixture()
       {
         auto root = CreateRef<dom::tests::TestElement>(*Document);
         REQUIRE_FALSE(Document->AppendChild(*root).HasException());
-        Environment.LayoutSize = IntSize {800, 600};
         Environment.ScreenSize = FloatSize {1'920, 1'080};
+        Frame->SetMediaEnvironment(Environment);
       }
 
-      ~EvaluationFixture() noexcept
-      {
-        mq::SetMediaEnvironment(null);
-      }
-
-      /// @brief Whether @p text matches with the current `Environment`, for @p mediaType.
+      /// @brief Whether @p text matches with the current `Environment` and view, for @p mediaType.
       KRYS_NODISCARD bool Matches(utf8_stringview text, const CSSOMStringAtom &mediaType = Screen())
       {
-        mq::SetMediaEnvironment(Environment);
+        Frame->SetMediaEnvironment(Environment);
+        auto &view = *Frame->View();
+        view.Resize(ViewSize);
+        view.SetMediaType(ViewMediaType);
+        view.SetPagination({Paginated ? PaginationMode::LeftToRightPaginated : PaginationMode::Unpaginated});
         return mq::MediaQueryEvaluator {mediaType, *Document, &RootStyle}.Evaluate(Parse(text));
       }
     };
@@ -150,7 +164,7 @@ namespace krys::boo::css::tests
 
     SECTION("No view: the condition is unknown")
     {
-      mq::SetMediaEnvironment(null);
+      fixture.Frame->SetView(nullptr);
       mq::MediaQueryEvaluator evaluator {Screen(), *fixture.Document, &fixture.RootStyle};
       CHECK_FALSE(evaluator.Evaluate(Parse(u8"(width)")));
       CHECK_FALSE(evaluator.Evaluate(Parse(u8"not all and (width)")));
@@ -160,7 +174,7 @@ namespace krys::boo::css::tests
     SECTION("No root element: the condition is unknown")
     {
       auto document = CreateRef<dom::Document>();
-      mq::SetMediaEnvironment(fixture.Environment);
+      auto frame = ShowInFrame(*document);
       mq::MediaQueryEvaluator evaluator {Screen(), *document, &fixture.RootStyle};
       CHECK_FALSE(evaluator.Evaluate(Parse(u8"(width)")));
       CHECK_FALSE(evaluator.Evaluate(Parse(u8"not all and (width)")));
@@ -218,7 +232,7 @@ namespace krys::boo::css::tests
       CHECK_FALSE(fixture.Matches(u8"(min-width: 1)"));
       CHECK_FALSE(fixture.Matches(u8"not all and (min-width: 1)"));
 
-      fixture.Environment.LayoutSize = IntSize {0, 0};
+      fixture.ViewSize = IntSize {0, 0};
       CHECK_FALSE(fixture.Matches(u8"(width)"));
       CHECK(fixture.Matches(u8"(width: 0)"));
     }
@@ -244,11 +258,11 @@ namespace krys::boo::css::tests
       CHECK_FALSE(fixture.Matches(u8"(orientation: portrait)"));
       CHECK(fixture.Matches(u8"(orientation)"));
 
-      fixture.Environment.LayoutSize = IntSize {600, 800};
+      fixture.ViewSize = IntSize {600, 800};
       CHECK(fixture.Matches(u8"(orientation: portrait)"));
 
       // A square viewport is portrait.
-      fixture.Environment.LayoutSize = IntSize {500, 500};
+      fixture.ViewSize = IntSize {500, 500};
       CHECK(fixture.Matches(u8"(orientation: portrait)"));
     }
   }
@@ -277,9 +291,9 @@ namespace krys::boo::css::tests
       CHECK_FALSE(fixture.Matches(u8"(min-resolution: 3dppx)"));
 
       // Printing uses 300dpi; other media types have no resolution.
-      fixture.Environment.MediaType = Print();
+      fixture.ViewMediaType = Print();
       CHECK(fixture.Matches(u8"(resolution: 300dpi)", Print()));
-      fixture.Environment.MediaType = CSSOMStringAtom {u8"tv"};
+      fixture.ViewMediaType = CSSOMStringAtom {u8"tv"};
       CHECK_FALSE(fixture.Matches(u8"(resolution)"));
     }
 
@@ -335,11 +349,11 @@ namespace krys::boo::css::tests
       CHECK(fixture.Matches(u8"(overflow-inline: scroll)"));
       CHECK_FALSE(fixture.Matches(u8"(overflow-inline: none)"));
 
-      fixture.Environment.IsPaginated = true;
+      fixture.Paginated = true;
       CHECK(fixture.Matches(u8"(overflow-block: paged)"));
 
-      fixture.Environment.IsPaginated = false;
-      fixture.Environment.MediaType = Print();
+      fixture.Paginated = false;
+      fixture.ViewMediaType = Print();
       CHECK(fixture.Matches(u8"(update: none)", Print()));
       CHECK_FALSE(fixture.Matches(u8"(update)", Print()));
       CHECK(fixture.Matches(u8"(overflow-block: paged)", Print()));
@@ -446,7 +460,6 @@ namespace krys::boo::css::tests
   TEST_CASE("MediaQueryEvaluator: every schema evaluates", "[CSS][Queries][MediaQueryEvaluator]")
   {
     EvaluationFixture fixture;
-    mq::SetMediaEnvironment(fixture.Environment);
 
     mq::FeatureEvaluationContext context {CreateWeakRef<const dom::Document>(*fixture.Document),
                                           {fixture.RootStyle, &fixture.RootStyle, nullptr, nullptr},

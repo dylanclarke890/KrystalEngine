@@ -1,7 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
-#include "Krystal.Booey/CSS/Queries/MediaEnvironment.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Booey/CSS/Selectors/MutableSelector.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
@@ -11,6 +10,7 @@
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/VisitedLinkState.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Adjuster.hpp"
@@ -136,10 +136,10 @@ namespace krys::boo::style
     // document doesn't have documentElement
     // NOTE: this assumes that element that gets passed to styleForElement -call
     // is always from the document that owns the style selector
-    auto *environment = css::mq::MediaEnvironmentFor(Document());
-    if (environment)
+    auto *view = Document().View();
+    if (view)
     {
-      _mediaQueryEvaluator = css::mq::MediaQueryEvaluator {environment->MediaType};
+      _mediaQueryEvaluator = css::mq::MediaQueryEvaluator {view->MediaType()};
     }
     else
     {
@@ -155,10 +155,10 @@ namespace krys::boo::style
       // loads its primary font here; there are no fonts.
     }
 
-    if (_rootDefaultStyle && environment)
+    if (_rootDefaultStyle && view)
     {
       _mediaQueryEvaluator =
-        css::mq::MediaQueryEvaluator {environment->MediaType, Document(), _rootDefaultStyle.get()};
+        css::mq::MediaQueryEvaluator {view->MediaType(), Document(), _rootDefaultStyle.get()};
     }
 
     _ruleSets.ResetAuthorStyle();

@@ -21,12 +21,16 @@
 #include "Krystal.Core/Types/FixedVector.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {
   class HitTestRequest;
+  class LocalFrame;
+  class LocalFrameView;
   class RenderStyle;
   class RenderTreeUpdater;
+  class RenderView;
   struct Settings;
 }
 
@@ -148,6 +152,11 @@ namespace krys::boo::dom
     List<WeakPtr<ShadowRoot>> _inDocumentShadowRoots;
     RefPtr<css::StyleSheetList> _styleSheetList;
     RefPtr<css::MediaQueryMatcher> _mediaQueryMatcher;
+
+    WeakPtr<LocalFrame> _frame;
+    // FIXME: Stands in for the render tree, which there isn't yet: a document has a render view while it's
+    // shown in a frame with a view.
+    UniquePtr<boo::RenderView> _renderView;
 
     mutable UniquePtr<VisitedLinkState> _visitedLinkState;
     mutable UniquePtr<RenderStyle> _initialContainingBlockStyle;
@@ -618,6 +627,67 @@ namespace krys::boo::dom
     KRYS_NODISCARD UniquePtr<RenderStyle> StyleForElementIgnoringPendingStylesheets(
       Element &element, const RenderStyle *parentStyle,
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier = null) noexcept;
+
+#pragma region Frame and layout
+
+    /// @brief The frame the document is shown in, if any.
+    KRYS_NODISCARD LocalFrame *Frame() const noexcept;
+
+    /// @brief The view the document is laid out in: its frame's, if any.
+    KRYS_NODISCARD LocalFrameView *View() const noexcept;
+
+    /// @brief The root of the document's render tree, if it has one.
+    KRYS_NODISCARD const boo::RenderView *GetRenderView() const noexcept
+    {
+      return _renderView.get();
+    }
+
+    KRYS_NODISCARD boo::RenderView *GetRenderView() noexcept
+    {
+      return _renderView.get();
+    }
+
+    KRYS_NODISCARD bool HasLivingRenderTree() const noexcept
+    {
+      return _renderView != nullptr;
+    }
+
+    /// @brief Creates the document's render tree, for the view of its frame.
+    void CreateRenderTree() noexcept;
+    void DestroyRenderTree() noexcept;
+
+    /// @brief Called when @p frame starts showing the document.
+    void DidBecomeCurrentDocumentInFrame(LocalFrame &frame) noexcept;
+    /// @brief Called when the document's frame stops showing it.
+    void WillBeRemovedFromFrame() noexcept;
+
+    /// @brief Whether the document is being printed.
+    // FIXME: Always false: frames don't print.
+    KRYS_NODISCARD bool Printing() const noexcept
+    {
+      return false;
+    }
+
+    /// @brief Device pixels per CSS pixel: the frame's media environment's, or 1.
+    KRYS_NODISCARD float DeviceScaleFactor() const noexcept;
+
+    KRYS_NODISCARD bool ShouldScheduleLayout() const noexcept;
+    KRYS_NODISCARD bool IsLayoutPending() const noexcept;
+
+    /// @brief Updates the styles that use viewport units after the view's size changed.
+    void UpdateViewportUnitsOnResize() noexcept;
+
+    enum class UpdateLayoutResult : bool
+    {
+      NoChange,
+      ChangesDone
+    };
+
+    /// @brief Updates style, then lays the document out if it needs it.
+    UpdateLayoutResult UpdateLayout() noexcept;
+    UpdateLayoutResult UpdateLayoutIgnorePendingStylesheets() noexcept;
+
+#pragma endregion
 
     /// @brief Determines whether links are visited, for `:visited` and the link styles.
     KRYS_NODISCARD VisitedLinkState &GetVisitedLinkState() const noexcept;

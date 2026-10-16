@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/CSS/Queries/MediaQueryFeatures.hpp"
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaEnvironment.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
@@ -158,12 +160,20 @@ namespace krys::boo::css::mq::Features
     ValueFunction _valueFunction;
   };
 
+  /// @brief The frame's media environment, which stands in for its page, chrome client and screen.
   KRYS_NODISCARD static const MediaEnvironment &
     EnvironmentOf(const FeatureEvaluationContext &context) noexcept
   {
-    auto *environment = MediaEnvironmentFor(*context.Document);
-    krys_assert_msg(environment, "media features are only evaluated for a document with a view");
-    return *environment;
+    auto *frame = context.Document->Frame();
+    krys_assert_msg(frame, "media features are only evaluated for a document with a view");
+    return frame->GetMediaEnvironment();
+  }
+
+  KRYS_NODISCARD static const LocalFrameView &ViewOf(const FeatureEvaluationContext &context) noexcept
+  {
+    auto *view = context.Document->View();
+    krys_assert_msg(view, "media features are only evaluated for a document with a view");
+    return *view;
   }
 
   KRYS_NODISCARD static const CSSOMStringAtom &ScreenAtom() noexcept
@@ -180,12 +190,11 @@ namespace krys::boo::css::mq::Features
 
   KRYS_NODISCARD static float DeviceScaleFactor(const FeatureEvaluationContext &context) noexcept
   {
-    auto &environment = EnvironmentOf(context);
-    auto &mediaType = environment.MediaType;
+    auto &mediaType = ViewOf(context).MediaType();
 
     if (mediaType == ScreenAtom())
     {
-      return environment.DeviceScaleFactor;
+      return EnvironmentOf(context).DeviceScaleFactor;
     }
     if (mediaType == PrintAtom())
     {
@@ -243,8 +252,8 @@ namespace krys::boo::css::mq::Features
     static MainThreadNeverDestroyed<RatioSchema> schema {
       u8"aspect-ratio", Dependency::Viewport, [](auto &context)
       {
-        auto layoutSize = EnvironmentOf(context).LayoutSize;
-        return FloatSize(static_cast<float>(layoutSize.Width()), static_cast<float>(layoutSize.Height()));
+        auto &view = ViewOf(context);
+        return FloatSize(static_cast<float>(view.LayoutWidth()), static_cast<float>(view.LayoutHeight()));
       }};
     return schema;
   }
@@ -340,7 +349,7 @@ namespace krys::boo::css::mq::Features
     static MainThreadNeverDestroyed<LengthSchema> schema {
       u8"height", Dependency::Viewport, [](auto &context)
       {
-        auto height = EnvironmentOf(context).LayoutSize.Height();
+        auto height = ViewOf(context).LayoutHeight();
         if (auto *renderView = RenderViewOf(*context.Document))
         {
           height = AdjustForAbsoluteZoom(height, *renderView);
@@ -390,7 +399,7 @@ namespace krys::boo::css::mq::Features
       u8"orientation", FixedVector {ValueId::Landscape, ValueId::Portrait}, Dependency::Viewport,
       [](auto &context)
       {
-        auto layoutSize = EnvironmentOf(context).LayoutSize;
+        auto layoutSize = ViewOf(context).GetLayoutSize();
         // Square viewport is portrait.
         bool isPortrait = layoutSize.Height() >= layoutSize.Width();
         return MatchingIdentifiers {isPortrait ? ValueId::Portrait : ValueId::Landscape};
@@ -468,7 +477,7 @@ namespace krys::boo::css::mq::Features
       u8"update", FixedVector {ValueId::None, ValueId::Slow, ValueId::Fast}, Dependency::None,
       [](auto &context)
       {
-        if (EnvironmentOf(context).MediaType == PrintAtom())
+        if (ViewOf(context).MediaType() == PrintAtom())
         {
           return MatchingIdentifiers {ValueId::None};
         }
@@ -484,7 +493,7 @@ namespace krys::boo::css::mq::Features
     static MainThreadNeverDestroyed<LengthSchema> schema {
       u8"width", Dependency::Viewport, [](auto &context)
       {
-        auto width = EnvironmentOf(context).LayoutSize.Width();
+        auto width = ViewOf(context).LayoutWidth();
         if (auto *renderView = RenderViewOf(*context.Document))
         {
           width = AdjustForAbsoluteZoom(width, *renderView);
@@ -525,8 +534,9 @@ namespace krys::boo::css::mq::Features
       [](auto &context)
       {
         // FIXME: Match none when scrollEnabled is set to false by UIKit.
-        auto &environment = EnvironmentOf(context);
-        bool matchesPaged = environment.MediaType == PrintAtom() || environment.IsPaginated;
+        auto &view = ViewOf(context);
+        bool matchesPaged =
+          view.MediaType() == PrintAtom() || view.GetPagination().Mode != PaginationMode::Unpaginated;
         return MatchingIdentifiers {matchesPaged ? ValueId::Paged : ValueId::Scroll};
       }};
     return schema;

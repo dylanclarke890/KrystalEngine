@@ -1,9 +1,10 @@
 ﻿#include "Krystal.Booey/CSS/Queries/MediaQueryMatcher.hpp"
 #include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
-#include "Krystal.Booey/CSS/Queries/MediaEnvironment.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
@@ -42,21 +43,17 @@ namespace krys::boo::css
 
   CSSOMStringAtom MediaQueryMatcher::MediaType() const noexcept
   {
-    if (!_document)
+    if (!_document || !_document->Frame() || !_document->Frame()->View())
     {
       return CSSOMStringAtom::Null();
     }
-    auto *environment = mq::MediaEnvironmentFor(*_document);
-    if (!environment)
-    {
-      return CSSOMStringAtom::Null();
-    }
-    return environment->MediaType;
+
+    return _document->Frame()->View()->MediaType();
   }
 
   UniquePtr<RenderStyle> MediaQueryMatcher::DocumentElementUserAgentStyle() const noexcept
   {
-    if (!_document || !mq::MediaEnvironmentFor(*_document))
+    if (!_document || !_document->Frame())
     {
       return nullptr;
     }

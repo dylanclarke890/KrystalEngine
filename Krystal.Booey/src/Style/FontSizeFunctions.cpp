@@ -5,6 +5,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/FontMetrics.hpp"
 #include "Krystal.Booey/Graphics/FontSizeAdjust.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
@@ -73,7 +74,11 @@ namespace krys::boo::style
     if (!useSVGZoomRules)
     {
       zoomFactor = style->UsedZoom();
-      // FIXME: Documents have no frame, so there's no text zoom factor (`-webkit-text-zoom` isn't supported).
+      // `-webkit-text-zoom: reset` isn't supported, so the text zoom always applies.
+      if (auto *frame = document.Frame())
+      {
+        zoomFactor *= frame->TextZoomFactor();
+      }
     }
     return {ComputedFontSizeFromSpecifiedSize(specifiedSize, isAbsoluteSize, zoomFactor,
                                               useSVGZoomRules ? MinimumFontSizeRule::None

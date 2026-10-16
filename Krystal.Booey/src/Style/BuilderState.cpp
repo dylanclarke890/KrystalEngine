@@ -16,11 +16,13 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCursorImage.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Booey/Style/FontSizeFunctions.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 #include "Krystal.Core/Assert.hpp"
@@ -40,7 +42,13 @@ namespace krys::boo::style
 
   float BuilderState::ZoomWithTextZoomFactor() noexcept
   {
-    // FIXME: Documents have no frame, so there's no text zoom factor (`-webkit-text-zoom` isn't supported).
+    if (auto *frame = GetDocument().Frame())
+    {
+      // `-webkit-text-zoom: reset` isn't supported, so the text zoom always applies.
+      float textZoomFactor = frame->TextZoomFactor();
+      float usedZoom = EvaluationTimeZoomEnabled(*this) ? 1.0f : Style().UsedZoom();
+      return usedZoom * textZoomFactor;
+    }
     return CssToLengthConversionData().Zoom();
   }
 
@@ -145,7 +153,6 @@ namespace krys::boo::style
 
   void BuilderState::UpdateFontForZoomChange() noexcept
   {
-    // FIXME: Compare the text zoom too once there's a frame (`-webkit-text-zoom` isn't supported).
     if (_style.UsedZoom() == ParentStyle().UsedZoom())
     {
       return;

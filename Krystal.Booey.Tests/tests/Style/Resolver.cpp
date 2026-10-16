@@ -7,7 +7,6 @@
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
-#include "Krystal.Booey/CSS/Queries/MediaEnvironment.hpp"
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
@@ -15,6 +14,8 @@
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLStyleElement.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Style/DeclarationOrigin.hpp"
 #include "Krystal.Booey/Style/RuleSet.hpp"
 #include "Krystal.Booey/Style/RuleSetBuilder.hpp"
@@ -235,12 +236,12 @@ namespace krys::boo::style::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "Resolver: dynamic media queries", "[Style][Resolver]")
   {
     RunTasks();
-    css::mq::MediaEnvironment environment;
-    environment.LayoutSize = IntSize {800, 600};
-    css::mq::SetMediaEnvironment(environment);
 
     auto document = Parse(u8"<!DOCTYPE html><style>@media (min-width: 1000px) { .wide {} } .always {}</style>"
                           u8"<style>@media screen { .screen {} }</style>");
+    auto frame = LocalFrame::Create();
+    frame->CreateView({800, 600});
+    frame->SetDocument(ShareRefPtr<dom::Document>(document.get()));
     auto &scope = document->StyleScope();
     scope.FlushPendingUpdate();
     auto &resolver = scope.GetResolver();
@@ -252,8 +253,7 @@ namespace krys::boo::style::tests
     REQUIRE_FALSE(wide.IsEnabled());
     REQUIRE_FALSE(resolver.EvaluateDynamicMediaQueries());
 
-    environment.LayoutSize = IntSize {1'200, 600};
-    css::mq::SetMediaEnvironment(environment);
+    frame->View()->Resize({1'200, 600});
     auto changes = resolver.EvaluateDynamicMediaQueries();
     REQUIRE(changes);
     REQUIRE(changes->ChangeType == DynamicMediaQueryEvaluationChanges::Type::InvalidateStyle);
@@ -262,14 +262,11 @@ namespace krys::boo::style::tests
     REQUIRE(wide.IsEnabled());
 
     // The invalidation rule set is reused for the same change.
-    environment.LayoutSize = IntSize {800, 600};
-    css::mq::SetMediaEnvironment(environment);
+    frame->View()->Resize({800, 600});
     auto back = resolver.EvaluateDynamicMediaQueries();
     REQUIRE(back);
     REQUIRE(back->InvalidationRuleSets[0].RuleSet == changes->InvalidationRuleSets[0].RuleSet);
     REQUIRE_FALSE(wide.IsEnabled());
-
-    css::mq::SetMediaEnvironment(null);
   }
 
   namespace

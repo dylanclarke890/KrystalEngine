@@ -1,20 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Graphics/FloatSize.hpp"
-#include "Krystal.Booey/Graphics/IntSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/Maybe.hpp"
-
-// FIXME: The environment is process-wide. Give each document its own once documents have a frame (the frame's
-// view, page and settings are what it stands in for).
-
-namespace krys::boo::dom
-{
-  class Document;
-}
 
 namespace krys::boo::css::mq
 {
@@ -35,19 +24,13 @@ namespace krys::boo::css::mq
     Browser
   };
 
-  /// @brief The device and user state that media features are evaluated against: the view's size and media
-  /// type, the screen, the pointing devices and the user's preferences. The host fills it in.
+  /// @brief The device and user state that media features are evaluated against: the screen, the pointing
+  /// devices, the user's preferences and how the document is presented. The host fills it in, on the frame
+  /// (`LocalFrame::SetMediaEnvironment`); the view's size and media type are the view's.
+  // FIXME: Stands in for the page (device scale factor, appearance, application manifest), its chrome client
+  // (pointing devices), the platform's screen and accessibility settings, and the frame's script controller.
   struct MediaEnvironment
   {
-    /// @brief The view's media type (`screen`, `print`, ...).
-    CSSOMStringAtom MediaType {u8"screen"};
-
-    /// @brief The view's layout size, in CSS pixels.
-    IntSize LayoutSize {};
-
-    /// @brief Whether the view lays content out in pages.
-    bool IsPaginated {false};
-
     /// @brief Device pixels per CSS pixel.
     float DeviceScaleFactor {1.f};
 
@@ -94,14 +77,9 @@ namespace krys::boo::css::mq
     bool CanExecuteScripts {true};
 
     boo::css::mq::DisplayMode DisplayMode {DisplayMode::Browser};
+
+    friend bool operator==(const MediaEnvironment &, const MediaEnvironment &) = default;
   };
-
-  /// @brief The environment @p document is evaluated against, or null if it has no view (no environment has
-  /// been set).
-  KRYS_NODISCARD const MediaEnvironment *MediaEnvironmentFor(const dom::Document &document) noexcept;
-
-  /// @brief Sets the environment every document is evaluated against; `NullOpt` means documents have no view.
-  void SetMediaEnvironment(Maybe<MediaEnvironment> environment) noexcept;
 }
 
 KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::mq::PointerCharacteristics, 2uz);

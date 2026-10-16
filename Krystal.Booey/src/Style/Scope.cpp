@@ -14,6 +14,9 @@
 #include "Krystal.Booey/HTML/HTMLLinkElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/HTMLStyleElement.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/CustomPropertyRegistry.hpp"
 #include "Krystal.Booey/Style/Invalidator.hpp"
 #include "Krystal.Booey/Style/MatchResultCache.hpp"
@@ -845,6 +848,174 @@ namespace krys::boo::style
     }
 
     ScheduleUpdate(UpdateType::ContentsOrInterpretation);
+  }
+
+  auto Scope::MediaQueryViewportStateForDocument(const dom::Document &document) noexcept
+    -> MediaQueryViewportState
+  {
+    // These things affect evaluation of viewport dependent media queries.
+    return {document.View()->GetLayoutSize(), document.Frame()->PageZoomFactor(), document.Printing()};
+  }
+
+  void Scope::EvaluateMediaQueriesForViewportChange() noexcept
+  {
+    auto viewportState = MediaQueryViewportStateForDocument(*_document);
+
+    if (_viewportStateOnPreviousMediaQueryEvaluation
+        && *_viewportStateOnPreviousMediaQueryEvaluation == viewportState)
+    {
+      return;
+    }
+    // This doesn't need to be invalidated as any changes to the rules will compute their media queries to
+    // correct values.
+    _viewportStateOnPreviousMediaQueryEvaluation = viewportState;
+
+    EvaluateMediaQueries([](Resolver &resolver) { return resolver.EvaluateDynamicMediaQueries(); });
+  }
+
+  void Scope::EvaluateMediaQueriesForAccessibilitySettingsChange() noexcept
+  {
+    EvaluateMediaQueries([](Resolver &resolver) { return resolver.EvaluateDynamicMediaQueries(); });
+  }
+
+  void Scope::EvaluateMediaQueriesForAppearanceChange() noexcept
+  {
+    EvaluateMediaQueries([](Resolver &resolver) { return resolver.EvaluateDynamicMediaQueries(); });
+  }
+
+  auto Scope::CollectResolverScopes() noexcept -> ResolverScopes
+  {
+    krys_debug_assert(!_shadowRoot);
+
+    ResolverScopes resolverScopes;
+
+    auto add = [&](Resolver &resolver, Scope &scope)
+    {
+      auto it =
+        std::ranges::find_if(resolverScopes, [&](auto &entry) { return entry.first.get() == &resolver; });
+      if (it == resolverScopes.end())
+      {
+        resolverScopes.emplace_back(ShareRef(resolver), List<WeakPtr<Scope>> {});
+        it = std::prev(resolverScopes.end());
+      }
+      it->second.push_back(WeakPtr<Scope>::WithRef(scope));
+    };
+
+    if (auto *resolver = ResolverIfExists())
+    {
+      add(*resolver, *this);
+    }
+
+    for (auto &shadowRoot : _document->InDocumentShadowRoots())
+    {
+      if (!shadowRoot)
+      {
+        continue;
+      }
+      auto &scope = shadowRoot->StyleScope();
+
+      if (auto *resolver = scope.ResolverIfExists())
+      {
+        add(*resolver, scope);
+      }
+    }
+    return resolverScopes;
+  }
+
+  template <typename TFunction>
+  void Scope::EvaluateMediaQueries(TFunction &&testFunction) noexcept
+  {
+    auto resolverScopes = CollectResolverScopes();
+    for (auto &[resolver, scopes] : resolverScopes)
+    {
+      auto evaluationChanges = testFunction(*resolver);
+      if (!evaluationChanges)
+      {
+        continue;
+      }
+
+      for (auto &scope : scopes)
+      {
+        if (!scope)
+        {
+          continue;
+        }
+        switch (evaluationChanges->ChangeType)
+        {
+          case DynamicMediaQueryEvaluationChanges::Type::InvalidateStyle:
+          {
+            Invalidator invalidator(evaluationChanges->InvalidationRuleSets);
+            invalidator.InvalidateStyle(*scope);
+            break;
+          }
+          case DynamicMediaQueryEvaluationChanges::Type::ResetStyle:
+            scope->ScheduleUpdate(UpdateType::ContentsOrInterpretation);
+            break;
+        }
+      }
+    }
+  }
+
+  void Scope::DidChangeViewportSize() noexcept
+  {
+    dom::ContainerNode *rootNode = _document;
+    if (_shadowRoot)
+    {
+      rootNode = _shadowRoot;
+    }
+    else
+    {
+      if (!_document->HasStyleWithViewportUnits())
+      {
+        return;
+      }
+
+      for (auto &descendantShadowRoot : _document->InDocumentShadowRoots())
+      {
+        // FIXME: Skip user agent shadow roots, once there are any.
+        if (descendantShadowRoot)
+        {
+          descendantShadowRoot->StyleScope().DidChangeViewportSize();
+        }
+      }
+    }
+
+    auto *resolver = ResolverIfExists();
+    if (!resolver)
+    {
+      return;
+    }
+    resolver->ClearCachedDeclarationsAffectedByViewportUnits();
+
+    if (GetCustomPropertyRegistry().InvalidatePropertiesWithViewportUnits(*_document))
+    {
+      if (!_shadowRoot)
+      {
+        if (auto element = _document->DocumentElement())
+        {
+          element->InvalidateStyleForSubtree();
+        }
+      }
+      return;
+    }
+
+    // FIXME: Ideally, we should save the list of elements that have viewport units and only iterate over
+    // those.
+    // FIXME: Pseudo-elements (nextIncludingPseudo), once they're nodes; their styles are in their element's
+    // pseudo-style cache.
+    for (auto *node = rootNode->FirstChild(); node; node = dom::TreeQueries::Next(*node, rootNode))
+    {
+      auto *element = DynamicDowncast<dom::Element>(node);
+      if (!element)
+      {
+        continue;
+      }
+      auto *style = element->GetRenderStyle();
+      if (style && style->UsesViewportUnits())
+      {
+        element->InvalidateStyle();
+      }
+    }
   }
 
   const List<RefPtr<css::StyleSheet>> &Scope::StyleSheetsForStyleSheetList() noexcept
