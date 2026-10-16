@@ -37,7 +37,7 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - **Interaction state**, layers i1 and i2 (2026-10-16): hover, active and focus state (`UserActionElementSet`, the `Element` setters, `Document::UpdateHoverActiveState`) with `:hover`, `:active`, `:focus`, `:focus-visible` and `:focus-within`; the HTML focus model (focusable areas, the focusing, unfocusing and focus update steps, `focus()`, `blur()`, `tabIndex`, `activeElement`, `hasFocus()`, focus events). See *Interaction state*.
 - **Frame view and viewport** (2026-10-16, step 1 of *Plan: render tree and layout*): a thin `LocalFrame` (document, view, page and text zoom, the media environment), `LocalFrameView` (frame rect, layout size, fixed layout, media type, pagination, the viewport unit sizes and overrides) and `LocalFrameViewLayoutContext` (scheduling, and layout up to where the render tree would be laid out); the seam's `RenderView` is a stand-in a framed document owns, so viewport units resolve; viewport changes invalidate viewport unit styles and re-evaluate media queries at layout; `Document::UpdateLayout`. See *Frame view and viewport*.
 
-**Next:** step 2 of *Plan: render tree and layout*: platform text and fonts (FreeType and HarfBuzz, `FontCascade`, bidi, line breaking). Other candidates are in *Open* and `TODO.md` (the event loop, resource loading, animations).
+**In progress:** step 2 of *Plan: render tree and layout*, platform text and fonts, in three layers (see *Platform text and fonts*): t1, text (break iterators, character properties, text spacing classes, base direction, a hyphenation stub), is done (2026-10-16); t2, fonts, is next, then t3, text measurement. Other candidates are in *Open* and `TODO.md` (the event loop, resource loading, animations).
 
 **Open:**
 - **Rendering:** there's no render tree. A document shown in a frame with a view owns the seam's `RenderView`, a stand-in for the render tree's root (its document, a needs-layout bit, the page zoom and the viewport unit sizes); layout updates style and stops where the render tree would be laid out. `RenderTreeUpdater` is a stand-in that keeps the style each element's renderer would hold on the element (`Node::GetRenderStyle`) and the render view's style on the document (`Document::RenderViewStyle`); text renderers, generated content, rebuild roots and the top layer wait for it. Without principal boxes, size container queries and container units are unknown and the seam's `RenderBoxOf` is null. Layout interleaving is a loop without layout. Anchor positioning (position options, position visibility, the tree resolution state) and elements with custom style resolve callbacks are FIXMEs in the tree resolver.
@@ -113,6 +113,8 @@ Use the CSS aliases from `CSS/Types/CSSOMString.hpp`, never the Krystal.Core or 
 | `wtf/TypeCasts.h` | `have` → `TypeCast.hpp` | |
 | `wtf/URL.h`, `URLParser.h`, `URLHash.h` | `have` → `url::URL`, `url::URLParser` in `Krystal.Booey/URL/` | WHATWG URL, UTF-8 only; ICU (vcpkg `icu`) for IDNA. See *URL* under *Values*. |
 | `wtf/text/CodePointIterator.h` | `have*` → `text::CodePointIterator` in `Text/CodePointIterator.hpp` | UTF-8 only (one iterator instead of the Latin-1/UTF-16 templates). |
+| `wtf/text/TextBreakIterator.h`, `.cpp`, `icu/TextBreakIteratorICU.h` | `have*` → `Krystal.Booey/Core/TextBreakIterator.hpp` | UTF-8; offsets are bytes. See *Platform text and fonts*. |
+| `wtf/text/CharacterProperties.h` | `have` → `Krystal.Booey/Core/CharacterProperties.hpp` | In Booey (it needs ICU, which Core doesn't link). |
 
 ### Naming
 
@@ -2961,7 +2963,7 @@ Graph from `rendering/RenderObject.h`, `RenderElement.h`, `RenderBox.h`, `Render
 ### Order
 
 1. **Frame view and viewport.** Done 2026-10-16; see *Frame view and viewport*.
-2. **Platform text and fonts** (FreeType and HarfBuzz, `FontCascade`, bidi, line breaking). Independent of 1.
+2. **Platform text and fonts** (FreeType and HarfBuzz, `FontCascade`, bidi, line breaking). Independent of 1. In progress: t1 done 2026-10-16; see *Platform text and fonts*.
 3. **DOM groundwork:** the renderer pointer, `PseudoElement`, `CreateElementRenderer`, `StringBuilder`.
 4. **`Style::Difference`.**
 5. **The render tree:** `RenderObject`, `RenderElement`, `RenderBoxModelObject`, `RenderBox`, `RenderBlock`, `RenderBlockFlow`, `RenderInline`, `RenderText`, `RenderView`; `RenderTreeBuilder` (block, inline, continuation, list, first-letter); the real `RenderTreeUpdater`; generated content (quotes, counters, list markers). The seam's render stubs go.
@@ -3006,3 +3008,45 @@ Step 1 of *Plan: render tree and layout*. Graphs: none (no `css/` or `style/` en
 - `ShouldScheduleLayout` doesn't wait for the view to be visually non-empty (no painting; FIXME).
 
 Tests: `tests/Page/LocalFrameView.cpp` (documents and views, sizes and overrides, viewport units with resizing, overrides, page and text zoom, registered properties with viewport units, media query re-evaluation at layout and layout scheduling, media type and pagination, the media environment): 7 new cases; `tests/CSS/Media/MediaQueryList.cpp`, `tests/CSS/Queries/MediaQueryEvaluator.cpp` and `tests/Style/Resolver.cpp` use frames (a frame without a view has no media type, so media type queries other than `all` don't match).
+
+## Platform text and fonts (layers t1 to t3, 2026-10-16)
+
+Step 2 of *Plan: render tree and layout*. Graph from `platform/graphics/FontCascade.cpp`, `WidthIterator.cpp` and `ComplexTextController.cpp` (headers-only, `--follow platform/graphics/ platform/text/`): 169 files (`tools/port/out/fonts-scope.md`), most of them drawing (`GraphicsContext`, display lists, images, filters) and the Cocoa, Skia and Cairo branches.
+
+**Decisions (2026-10-16, by the user):**
+- Fonts come from the host: it registers font files or directories, and Krystal indexes them with FreeType (family, weight, width, slope, coverage) for family matching and fallback; generic families map to families the host configures. No fontconfig, CoreText or DirectWrite. Upstream's FreeType code is Cairo and fontconfig throughout, so the platform half (`FontPlatformData`, the font cache's lookup, the shaping backend) is written for FreeType and HarfBuzz; the platform-independent half ports as usual.
+- Text offsets in rendering are UTF-8 byte offsets, as in the DOM (`CharacterData::Length()` is a byte count): HarfBuzz clusters and ICU break iterators (over a UTF-8 `UText`) are bytes natively; bidi (`ubidi` takes UTF-16) maps its indices. Upstream's UTF-16 index arithmetic is rewritten at each site.
+- Three layers: t1, text; t2, fonts (`FontPlatformData`, the font index and cache, `Font`, glyph pages, `FontRanges`, `FontCascadeFonts`, the primary font's metrics); t3, measurement (`TextRun`, `GlyphBuffer`, `WidthIterator`, `ComplexTextController` on HarfBuzz, `FontCascade::width` and friends). No drawing. `FontFace`, `CSSFontSelector` and `@font-face` wait for resource loading.
+- HarfBuzz from the start (decided with the plan).
+
+### Layer t1: text (2026-10-16)
+
+Graph: none (`wtf/` and `platform/text/` aren't traversed by default); read in full: `wtf/text/TextBreakIterator.h`, `.cpp`, `icu/TextBreakIteratorICU.h`, `TextBreakIteratorInternalICU.h`, `unix/TextBreakIteratorInternalICUUnix.cpp`, `wtf/text/CharacterProperties.h`, `platform/text/TextSpacing.h`, `.cpp`, `UnicodeHelpers.h`, `.cpp`, `Hyphenation.h`, `.cpp`. `BidiResolver.h`, `BidiContext.h`, `.cpp` and `BidiRunList.h` are used only by the legacy line layout (SVG text) and `GraphicsContext::drawBidiText`; modern inline layout calls `ubidi` directly (`InlineItemsBuilder`), so they wait for SVG text.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `wtf/text/TextBreakIterator.h`, `.cpp`, `icu/TextBreakIteratorICU.h` | `have*` | `Core/TextBreakIterator.hpp`, `src/...` | on | tested. UTF-8; ICU only (no Cocoa or null backing). Replaces the `NumGraphemeClusters`-only file. |
+| `wtf/text/TextBreakIteratorInternalICU.h` (`currentTextBreakLocaleID`) | `have*` | `CurrentTextBreakLocaleID` | on | tested (through the static iterators). ICU's default locale. |
+| `wtf/text/CharacterProperties.h` | `port` | `Core/CharacterProperties.hpp` | on | tested. |
+| `wtf/unicode/CharacterNames.h` (the quotation marks) | `port` | `text::LeftSingleQuotationMark` and friends in Krystal.Core `Text/Unicode.hpp` | on | |
+| `platform/text/TextSpacing.h`, `.cpp` (`characterClass`, `isIdeograph`, `shouldApplySpacing(char32_t, char32_t)`) | `port` | `Core/TextSpacing.hpp`, `src/...` | on | tested. `getHalfWidthFontIfNeeded` and `textAutospaceSize` come with fonts (FIXME). |
+| `platform/text/UnicodeHelpers.h`, `.cpp` | `port` | `Core/UnicodeHelpers.hpp`, `src/...` | on | tested. |
+| `platform/text/Hyphenation.h`, `.cpp` (no libhyphen) | `port` | `Core/Hyphenation.hpp`, `src/...` | on | tested. No dictionaries (FIXME). |
+| `platform/text/BidiResolver.h`, `BidiContext.h`, `.cpp`, `BidiRunList.h` | `?` | | | Wait for SVG text (the legacy line layout). |
+
+**Bugs fixed:**
+- Upstream bug: `TextBreakIteratorICU`'s move assignment didn't take the other iterator's prior context length, so an iterator moved into one that had a different prior context reported offsets shifted by the difference.
+
+**Added (upstream API):** `TextBreakIteratorICU`, `TextBreakIterator` (`LineMode`, `CaretMode`, `DeleteMode`, `CharacterMode`, `ContentAnalysis`, `Preceding`, `Following`, `IsBoundary`), `TextBreakIteratorCache`, `CachedTextBreakIterator`, `CachedLineBreakIteratorFactory` and its `PriorContext`, `NonSharedCharacterBreakIterator`, `NonSharedSentenceBreakIterator`, `WordBreakIterator`, `SentenceBreakIterator`, `IsWordTextBreak`, `NumCodeUnitsInGraphemeClusters`, `CurrentTextBreakLocaleID`; the `CharacterProperties` functions (`IsEmojiGroupCandidate` and the other emoji tests, `IsVariationSelector`, `IsDefaultIgnorableCodePoint`, `IsControlCharacter`, `IsPrivateUseAreaCharacter`, `IsPunctuation`, `IsOpeningPunctuation`, `IsClosingPunctuation`, `IsOfScriptType`, `EastAsianWidth`, `IsEastAsianFullWidth`, `IsCJKSymbolOrPunctuation`, `IsFullwidthMiddleDotPunctuation`, `IsCombiningMark`, `IsCurrencySymbol`); `text_spacing::GetCharacterClass`, `IsIdeograph`, `TextAutospace::ShouldApplySpacing(char32_t, char32_t)`; `BaseTextDirection`; `CanHyphenate`, `LastHyphenLocation`, `EnoughWidthForHyphenation`.
+
+**Names:** `TextBreakIterator::LineMode::Behavior` is the namespace-level `TextBreakLineBehavior` (the member `Behavior` would hide a nested type of that name); `mode()`/`contentAnalysis()`/`locale()` → `GetMode()`/`GetContentAnalysis()`/`Locale()`; `CachedLineBreakIteratorFactory::priorContext()` → `GetPriorContext()`, `PriorContext::length()` → `GetLength()`; `TextSpacing::characterClass` → `text_spacing::GetCharacterClass` (`CharacterClass` is a type).
+
+**Differences:**
+- Every offset is a byte offset into UTF-8 text. The prior context holds code points (`char32`), not UTF-16 code units, and its `Characters()` are UTF-8; it's encoded at the end of its buffer so that, as upstream's span, it starts at a different address when its length changes (which is how the factory notices a new prior context).
+- ICU reads UTF-8 text in place, so a text with a prior context is copied after the context into a buffer the iterator owns (upstream: a UText provider that reads both).
+- No main thread checks: the iterator cache and the non-shared iterators assume one thread (upstream: atomics, and no cache off the main thread).
+- `CurrentTextBreakLocaleID` is ICU's default locale (`uloc_getDefault`; upstream on Unix: `setlocale(LC_MESSAGES)` or `en_us`).
+- `NumGraphemeClusters`' and `NumCodeUnitsInGraphemeClusters`' fast path is ASCII (upstream: Latin-1); only CR LF is a multi-character cluster there.
+- `BaseTextDirection` finds the first strong character itself (`ubidi_getBaseDirection` takes UTF-16), with the same rules; text that's all Latin-1 is left to right, as upstream's 8-bit strings.
+
+Tests: `tests/Core/TextBreakIterator.cpp` (line breaks in bytes, prior contexts, strictness, moves, reuse, grapheme clusters, the non-shared, word and sentence iterators, the factory and its prior context), `tests/Core/TextSpacing.cpp` (character classes, ideographs, autospace, the character properties, base direction, hyphenation): 9 new cases.

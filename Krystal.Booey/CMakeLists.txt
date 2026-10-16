@@ -707,6 +707,11 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp
   include/Krystal.Booey/Rendering/Pagination.hpp
 
+  # Platform text (t1)
+  include/Krystal.Booey/Core/CharacterProperties.hpp
+  include/Krystal.Booey/Core/Hyphenation.hpp
+  include/Krystal.Booey/Core/UnicodeHelpers.hpp
+
   # Interaction state
   include/Krystal.Booey/DOM/FocusOptions.hpp
   include/Krystal.Booey/DOM/UserActionElementSet.hpp
@@ -1873,6 +1878,10 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Page/LocalFrame.cpp
   src/Page/LocalFrameView.cpp
   src/Page/LocalFrameViewLayoutContext.cpp
+
+  # Platform text (t1)
+  src/Core/Hyphenation.cpp
+  src/Core/UnicodeHelpers.cpp
 )
 
 target_precompile_headers(Krystal.Booey

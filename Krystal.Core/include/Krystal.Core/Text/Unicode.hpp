@@ -16,6 +16,10 @@ namespace krys::text
   constexpr char32 BlackLeftPointingSmallTriangle = 0x25C2;
   constexpr char32 BlackRightPointingSmallTriangle = 0x25B8;
   constexpr char32 BlackUpPointingSmallTriangle = 0x25B4;
+  constexpr char32 LeftDoubleQuotationMark = 0x201C;
+  constexpr char32 LeftSingleQuotationMark = 0x2018;
+  constexpr char32 RightDoubleQuotationMark = 0x201D;
+  constexpr char32 RightSingleQuotationMark = 0x2019;
 
   KRYS_NODISCARD constexpr bool IsNonUnicodeCharacter(char32 value) noexcept
   {

@@ -33,8 +33,13 @@ namespace krys::boo
       CharacterClass NextCharacterClass {};
     };
 
-    // FIXME: `characterClass`, `isIdeograph` and `getHalfWidthFontIfNeeded` come with text layout (they need
-    // the Unicode character properties and `Font`).
+    /// @brief The text spacing class of @p character.
+    /// @see https://www.w3.org/TR/css-text-4/#text-spacing-classes
+    KRYS_NODISCARD CharacterClass GetCharacterClass(char32_t character) noexcept;
+
+    KRYS_NODISCARD bool IsIdeograph(char32_t character) noexcept;
+
+    // FIXME: `getHalfWidthFontIfNeeded` comes with fonts.
 
     struct SpacingState
     {
@@ -147,8 +152,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ShouldApplySpacing(text_spacing::CharacterClass firstCharacterClass,
                                            text_spacing::CharacterClass secondCharacterClass) const noexcept;
-
-    // FIXME: `shouldApplySpacing(char32_t, char32_t)` and `textAutospaceSize(const Font &)` come with text
-    // layout.
+    KRYS_NODISCARD bool ShouldApplySpacing(char32_t firstCharacter, char32_t secondCharacter) const noexcept;
+    // FIXME: `textAutospaceSize(const Font &)` comes with fonts.
   };
 }

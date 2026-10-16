@@ -342,7 +342,9 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Transforms/TransformExtras.cpp
 		tests/Graphics/Transforms/TransformationMatrix.cpp
 		tests/Core/LocaleToScriptMapping.cpp
+		tests/Core/TextBreakIterator.cpp
 		tests/Core/TextFlags.cpp
+		tests/Core/TextSpacing.cpp
 		tests/Rendering/Style/GridSpan.cpp
 		tests/Rendering/Style/RenderStyleConstants.cpp
 
