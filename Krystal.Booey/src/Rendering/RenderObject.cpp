@@ -1,8 +1,15 @@
 ﻿#include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/PseudoElement.hpp"
+#include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/HTMLFieldSetElement.hpp"
+#include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 namespace krys::boo
 {
@@ -168,6 +175,197 @@ namespace krys::boo
   bool RenderObject::CanHaveGeneratedChildren() const noexcept
   {
     return CanHaveChildren();
+  }
+
+  bool RenderObject::IsDocumentElementRenderer() const noexcept
+  {
+    return GetDocument().DocumentElement().get() == &_node;
+  }
+
+  bool RenderObject::IsFieldset() const noexcept
+  {
+    auto *element = DynamicDowncast<html::HTMLElement>(GetNode());
+    return element && Is<html::HTMLFieldSetElement>(*element);
+  }
+
+  bool RenderObject::IsBody() const noexcept
+  {
+    auto *node = GetNode();
+    if (!node)
+    {
+      return false;
+    }
+    auto *element = DynamicDowncast<html::HTMLElement>(node);
+    return element && Is<html::HTMLBodyElement>(*element);
+  }
+
+  bool RenderObject::IsPseudoElement() const noexcept
+  {
+    return GetNode() && Is<dom::PseudoElement>(*GetNode());
+  }
+
+  void RenderObject::SetPositionState(PositionType position) noexcept
+  {
+    krys_debug_assert((position != PositionType::Absolute && position != PositionType::Fixed)
+                      || IsRenderBox());
+    // This mask maps PositionType::Fixed and PositionType::Absolute to IsOutOfFlowPositioned, saving one bit.
+    _positionedState = static_cast<PositionedState>(static_cast<uint8>(position) & 0x3);
+  }
+
+  void RenderObject::SetHasVisibleBoxDecorations(bool b) noexcept
+  {
+    if (!b)
+    {
+      _boxDecorationState = BoxDecorationState::None;
+      return;
+    }
+    if (HasVisibleBoxDecorations())
+    {
+      return;
+    }
+    _boxDecorationState = BoxDecorationState::InvalidObscurationStatus;
+  }
+
+  KRYS_NODISCARD static RenderBlock *
+    NearestNonAnonymousContainingBlockIncludingSelf(RenderElement *renderer) noexcept
+  {
+    while (renderer && (!Is<RenderBlock>(*renderer) || renderer->IsAnonymousBlock()))
+    {
+      renderer = renderer->ContainingBlock();
+    }
+    return static_cast<RenderBlock *>(renderer);
+  }
+
+  RenderBlock *RenderObject::ContainingBlockForPositionType(PositionType positionType,
+                                                            const RenderObject &renderer) noexcept
+  {
+    if (positionType == PositionType::Static || positionType == PositionType::Relative
+        || positionType == PositionType::Sticky)
+    {
+      auto containingBlockForObjectInFlow = [&]
+      {
+        auto *ancestor = renderer.Parent();
+        while (ancestor
+               && ((ancestor->IsInline() && !ancestor->IsBlockLevelReplacedOrAtomicInline())
+                   || !ancestor->IsRenderBlock()))
+        {
+          ancestor = ancestor->Parent();
+        }
+        return static_cast<RenderBlock *>(ancestor);
+      };
+      return containingBlockForObjectInFlow();
+    }
+
+    if (positionType == PositionType::Absolute)
+    {
+      auto containingBlockForAbsolutePosition = [&]
+      {
+        if (auto *renderInline = DynamicDowncast<RenderInline>(renderer);
+            renderInline && renderInline->Style().GetPosition() == PositionType::Relative)
+        {
+          // A relatively positioned RenderInline forwards its absolute positioned descendants to
+          // its nearest non-anonymous containing block (to avoid having positioned objects list in
+          // RenderInlines).
+          return NearestNonAnonymousContainingBlockIncludingSelf(renderer.Parent());
+        }
+        auto *ancestor = renderer.Parent();
+        while (ancestor && !ancestor->CanContainAbsolutelyPositionedObjects())
+        {
+          ancestor = ancestor->Parent();
+        }
+        // Make sure we only return non-anonymous RenderBlock as containing block.
+        return NearestNonAnonymousContainingBlockIncludingSelf(ancestor);
+      };
+      return containingBlockForAbsolutePosition();
+    }
+
+    if (positionType == PositionType::Fixed)
+    {
+      auto containingBlockForFixedPosition = [&]() -> RenderBlock *
+      {
+        auto *ancestor = renderer.Parent();
+        while (ancestor && !ancestor->CanContainFixedPositionObjects())
+        {
+          if (dom::IsInTopLayerOrBackdrop(ancestor->Style(), ancestor->GetElement()))
+          {
+            return &renderer.View();
+          }
+          ancestor = ancestor->Parent();
+        }
+        return NearestNonAnonymousContainingBlockIncludingSelf(ancestor);
+      };
+      return containingBlockForFixedPosition();
+    }
+
+    krys_debug_assert(false);
+    return nullptr;
+  }
+
+  RenderBlock *RenderObject::ContainingBlock() const noexcept
+  {
+    // FIXME: See https://bugs.webkit.org/show_bug.cgi?id=270977 for RenderLineBreak special treatment.
+    if (IsRenderText() || IsRenderLineBreak())
+    {
+      return ContainingBlockForPositionType(PositionType::Static, *this);
+    }
+
+    auto containingBlockForRenderer = [](const RenderElement &renderer) -> RenderBlock *
+    {
+      if (dom::IsInTopLayerOrBackdrop(renderer.Style(), renderer.GetElement()))
+      {
+        return &renderer.View();
+      }
+      return ContainingBlockForPositionType(renderer.Style().GetPosition(), renderer);
+    };
+
+    // FIXME: Scrollbar parts, which have no parent, once there are any.
+    return containingBlockForRenderer(static_cast<const RenderElement &>(*this));
+  }
+
+  // This method is extremely similar to containingBlock(), but with a few notable
+  // exceptions.
+  // (1) For normal flow elements, it just returns the parent.
+  // (2) For absolute positioned elements, it will return a relative positioned inline, while
+  // containingBlock() skips to the non-anonymous containing block.
+  // This does mean that computeOutOfFlowPositionedLogicalWidth and computeOutOfFlowPositionedLogicalHeight
+  // have to use container().
+  // FIXME: The repaint container variant (container(repaintContainer, repaintContainerSkipped)), once there's
+  // painting.
+  RenderElement *RenderObject::Container() const noexcept
+  {
+    // FIXME: See https://bugs.webkit.org/show_bug.cgi?id=270977 for RenderLineBreak special treatment.
+    if (!IsRenderElement() || IsRenderText() || IsRenderLineBreak())
+    {
+      return Parent();
+    }
+
+    auto &renderElement = static_cast<const RenderElement &>(*this);
+    if (dom::IsInTopLayerOrBackdrop(renderElement.Style(), renderElement.GetElement()))
+    {
+      return &renderElement.View();
+    }
+    auto position = renderElement.Style().GetPosition();
+    if (position == PositionType::Static || position == PositionType::Relative
+        || position == PositionType::Sticky)
+    {
+      return renderElement.Parent();
+    }
+    auto *parent = renderElement.Parent();
+    if (position == PositionType::Absolute)
+    {
+      for (; parent && !parent->CanContainAbsolutelyPositionedObjects(); parent = parent->Parent())
+      {
+      }
+      return parent;
+    }
+    for (; parent && !parent->CanContainFixedPositionObjects(); parent = parent->Parent())
+    {
+      if (dom::IsInTopLayerOrBackdrop(parent->Style(), parent->GetElement()))
+      {
+        return &renderElement.View();
+      }
+    }
+    return parent;
   }
 
   RenderView &RenderObject::View() const noexcept

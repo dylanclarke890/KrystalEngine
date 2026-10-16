@@ -43,7 +43,7 @@ namespace krys::boo::tests
       CHECK(p.GetRenderStyle() == &renderer->Style());
       CHECK(renderer->Style().Display() == DisplayType::Block);
       CHECK(renderer->GetType() == RenderObject::Type::BlockFlow);
-      CHECK(renderer->RenderName() == u8"RenderBlockFlow");
+      CHECK(renderer->RenderName() == u8"RenderBlock");
       CHECK(Is<RenderElement>(static_cast<RenderObject &>(*renderer)));
 
       auto *span = fixture.ById(u8"span").Renderer();

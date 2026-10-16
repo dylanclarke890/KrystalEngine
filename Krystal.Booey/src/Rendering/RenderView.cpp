@@ -6,16 +6,17 @@
 namespace krys::boo
 {
   RenderView::RenderView(dom::Document &document, RenderStyle &&style) noexcept
-      : RenderElement(Type::View, document, krys::move(style),
-                      {TypeFlag::IsLayerModelObject, TypeFlag::IsBoxModelObject, TypeFlag::IsBox,
-                       TypeFlag::IsRenderBlock},
-                      {}),
-        _frameView(*document.View())
+      : RenderBlockFlow(Type::View, document, krys::move(style)), _frameView(*document.View())
   {
     // FIXME: We should find a way to enforce this at compile time.
     krys_debug_assert(document.View());
 
-    // FIXME: Not inline, no preferred widths, and positioned at 0,0, once there's layout.
+    // init RenderObject attributes
+    SetInline(false);
+
+    // FIXME: The preferred widths, once there's layout.
+
+    SetPositionState(PositionType::Absolute); // to 0,0 :)
 
     krys_debug_assert(IsRenderView());
   }

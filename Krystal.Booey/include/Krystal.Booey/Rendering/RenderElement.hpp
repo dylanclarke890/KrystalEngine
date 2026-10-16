@@ -54,8 +54,6 @@ namespace krys::boo
     /// @brief The renderer @p element gets with @p style, or null if @p style's display doesn't generate a
     /// box.
     /// @param rendererTypeOverride The displays that get a block flow instead.
-    /// @note FIXME: Until the renderer classes are ported, the renderer is a plain `RenderElement` of the
-    /// type and with the type flags its class would have.
     KRYS_NODISCARD static RenderPtr<RenderElement>
       CreateFor(dom::Element &element, RenderStyle &&style,
                 EnumSet<ConstructBlockLevelRendererFor> rendererTypeOverride = {}) noexcept;
@@ -116,16 +114,56 @@ namespace krys::boo
     void InsertedIntoTree() noexcept override;
     void WillBeRemovedFromTree() noexcept override;
 
-    // FIXME: Layout queries. They're only reachable through `RendererOf` and `RenderBoxOf`, which return null
-    // until there's layout.
-    KRYS_NODISCARD const RenderElement *Container() const noexcept;
-    KRYS_NODISCARD const RenderBlock *ContainingBlock() const noexcept;
-    KRYS_NODISCARD bool IsInline() const noexcept;
-    KRYS_NODISCARD bool IsBlockLevelReplacedOrAtomicInline() const noexcept;
+    KRYS_NODISCARD bool IsFixedPositioned() const noexcept;
+    KRYS_NODISCARD bool IsAbsolutelyPositioned() const noexcept;
+
+    KRYS_NODISCARD bool IsFlexItemIncludingDeprecated() const noexcept
+    {
+      return !IsInline() && !IsFloatingOrOutOfFlowPositioned() && Parent()
+             && Parent()->IsFlexibleBoxIncludingDeprecated();
+    }
+
+    // block-level boxes are boxes that participate in a block formatting context.
     KRYS_NODISCARD bool IsBlockLevelBox() const noexcept;
-    KRYS_NODISCARD bool IsFlexItem() const noexcept;
-    KRYS_NODISCARD bool IsGridItem() const noexcept;
-    KRYS_NODISCARD bool IsHorizontalWritingMode() const noexcept;
+    KRYS_NODISCARD bool IsAnonymousBlock() const noexcept;
+    KRYS_NODISCARD bool IsBlockContainer() const noexcept;
+    // A block-level box that is also a block container.
+    KRYS_NODISCARD bool IsBlockBox() const noexcept;
+    KRYS_NODISCARD bool IsBeforeContent() const noexcept;
+    KRYS_NODISCARD bool IsAfterContent() const noexcept;
+    KRYS_NODISCARD bool IsBeforeOrAfterContent() const noexcept;
+
+    /// @brief The element whose content this renderer renders: the host of a pseudo-element.
+    KRYS_NODISCARD dom::Element *GeneratingElement() const noexcept;
+
+    KRYS_NODISCARD Overflow EffectiveOverflowX() const noexcept;
+    KRYS_NODISCARD Overflow EffectiveOverflowY() const noexcept;
+    KRYS_NODISCARD Overflow EffectiveOverflowBlockDirection() const noexcept;
+    KRYS_NODISCARD Overflow EffectiveOverflowInlineDirection() const noexcept;
+    KRYS_NODISCARD bool HasPotentiallyScrollableOverflow() const noexcept;
+
+    KRYS_NODISCARD bool HasClip() const noexcept;
+    KRYS_NODISCARD bool HasClipOrNonVisibleOverflow() const noexcept;
+
+    KRYS_NODISCARD bool CanEstablishContainingBlockWithTransform() const noexcept;
+    KRYS_NODISCARD bool
+      MayContainOutOfFlowPositionedObjects(const RenderStyle *styleToUse = nullptr) const noexcept;
+    KRYS_NODISCARD bool
+      CanContainFixedPositionObjects(const RenderStyle *styleToUse = nullptr) const noexcept;
+    KRYS_NODISCARD bool
+      CanContainAbsolutelyPositionedObjects(const RenderStyle *styleToUse = nullptr) const noexcept;
+
+    KRYS_NODISCARD bool ShouldApplyAnyContainment() const noexcept;
+    KRYS_NODISCARD bool ShouldApplySizeOrInlineSizeContainment() const noexcept;
+    KRYS_NODISCARD bool ShouldApplyLayoutContainment(const RenderStyle *styleToUse = nullptr) const noexcept;
+    KRYS_NODISCARD bool ShouldApplySizeContainment() const noexcept;
+    KRYS_NODISCARD bool ShouldApplyInlineSizeContainment() const noexcept;
+    KRYS_NODISCARD bool ShouldApplyStyleContainment() const noexcept;
+    KRYS_NODISCARD bool ShouldApplyPaintContainment(const RenderStyle *styleToUse = nullptr) const noexcept;
+    KRYS_NODISCARD bool HasEligibleContainmentForSizeQuery() const noexcept;
+
+    // FIXME: Layout queries, reachable only through `RendererOf` and `RenderBoxOf`, which return null until
+    // there's layout.
     KRYS_NODISCARD FloatRect TransformReferenceBoxRect(const RenderStyle &) const noexcept;
 
   protected:
@@ -135,6 +173,11 @@ namespace krys::boo
                   TypeSpecificFlags typeSpecificFlags) noexcept;
 
     void WillBeDestroyed() noexcept override;
+
+    // FIXME: Most of the work upstream does here (repaint, layout invalidation, layers, images, counters,
+    // outlines, scroll anchoring, line layout) comes with layout and painting.
+    virtual void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept;
+    virtual void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept;
 
   private:
     RenderElement(Type type, dom::ContainerNode &elementOrDocument, RenderStyle &&style,

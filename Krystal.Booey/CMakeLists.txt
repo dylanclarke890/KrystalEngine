@@ -241,7 +241,6 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/ScopedName.hpp
   include/Krystal.Booey/Style/ScopeOrdinal.hpp
   include/Krystal.Booey/Style/Seam.hpp
-  include/Krystal.Booey/Style/SeamRenderers.hpp
   include/Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp
   include/Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp
 
@@ -718,6 +717,23 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/RenderObject.hpp
   include/Krystal.Booey/Rendering/RenderPtr.hpp
   include/Krystal.Booey/Rendering/RenderView.hpp
+  include/Krystal.Booey/Rendering/RenderLayerModelObject.hpp
+  include/Krystal.Booey/Rendering/RenderBoxModelObject.hpp
+  include/Krystal.Booey/Rendering/RenderBox.hpp
+  include/Krystal.Booey/Rendering/RenderBlock.hpp
+  include/Krystal.Booey/Rendering/RenderBlockFlow.hpp
+  include/Krystal.Booey/Rendering/RenderInline.hpp
+  include/Krystal.Booey/Rendering/RenderReplaced.hpp
+  include/Krystal.Booey/Rendering/RenderFlexibleBox.hpp
+  include/Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp
+  include/Krystal.Booey/Rendering/RenderGrid.hpp
+  include/Krystal.Booey/Rendering/RenderListItem.hpp
+  include/Krystal.Booey/Rendering/RenderTable.hpp
+  include/Krystal.Booey/Rendering/RenderTableCell.hpp
+  include/Krystal.Booey/Rendering/RenderTableCaption.hpp
+  include/Krystal.Booey/Rendering/RenderTableSection.hpp
+  include/Krystal.Booey/Rendering/RenderTableRow.hpp
+  include/Krystal.Booey/Rendering/RenderTableCol.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreePosition.hpp
@@ -1926,6 +1942,23 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/RenderElement.cpp
   src/Rendering/RenderObject.cpp
   src/Rendering/RenderView.cpp
+  src/Rendering/RenderLayerModelObject.cpp
+  src/Rendering/RenderBoxModelObject.cpp
+  src/Rendering/RenderBox.cpp
+  src/Rendering/RenderBlock.cpp
+  src/Rendering/RenderBlockFlow.cpp
+  src/Rendering/RenderInline.cpp
+  src/Rendering/RenderReplaced.cpp
+  src/Rendering/RenderFlexibleBox.cpp
+  src/Rendering/RenderDeprecatedFlexibleBox.cpp
+  src/Rendering/RenderGrid.cpp
+  src/Rendering/RenderListItem.cpp
+  src/Rendering/RenderTable.cpp
+  src/Rendering/RenderTableCell.cpp
+  src/Rendering/RenderTableCaption.cpp
+  src/Rendering/RenderTableSection.cpp
+  src/Rendering/RenderTableRow.cpp
+  src/Rendering/RenderTableCol.cpp
   src/Rendering/Updating/RenderTreeUpdater.cpp
   src/Rendering/Updating/RenderTreeBuilder.cpp
   src/Rendering/Updating/RenderTreePosition.cpp

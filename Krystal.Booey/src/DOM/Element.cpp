@@ -1511,4 +1511,11 @@ namespace krys::boo::dom
   }
 
 #pragma endregion
+
+  bool IsInTopLayerOrBackdrop(const RenderStyle &style, const Element *) noexcept
+  {
+    // FIXME: Whether the element is in the top layer (modal dialogs, popovers, fullscreen), once there's a
+    // top layer.
+    return style.GetPseudoElementType() == PseudoElementType::Backdrop;
+  }
 }

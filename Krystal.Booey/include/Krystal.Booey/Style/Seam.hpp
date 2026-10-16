@@ -46,9 +46,7 @@
 // evaluation, colour resolution, the computed value conversions and the extractor need. Each declares only
 // the members those callers use, under its upstream name. None can be constructed. Each type moves to its own
 // header, with its real implementation, when its slice is ported:
-//   - `RenderBoxModelObject`, `RenderBox`, `RenderBlock`, `RenderGrid`, `RenderInline`
-//   (`Style/SeamRenderers.hpp`),
-//     `RenderElement`'s layout queries, `RenderTheme` (focus ring metrics): rendering.
+//   - `RenderTheme` (focus ring metrics): rendering.
 //   - `style::AnchorPositionEvaluator`: anchor positioning (`Style/AnchorPositionEvaluator.hpp`, unreviewed).
 //   - the `Document*` colour functions: `dom::Document` (upstream members) once it has a page and settings.
 //   - the `Document*` security and keyframes functions: `dom::Document` (upstream members) once it has a

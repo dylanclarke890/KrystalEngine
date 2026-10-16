@@ -9,6 +9,8 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeAncestorIterator.hpp"
+#include "Krystal.Booey/Rendering/RenderGrid.hpp"
+#include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/CustomProperty.hpp"
 #include "Krystal.Booey/Style/ExtractorGenerated.hpp"
@@ -16,7 +18,6 @@
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/ScopeRuleSets.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
-#include "Krystal.Booey/Style/SeamRenderers.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style

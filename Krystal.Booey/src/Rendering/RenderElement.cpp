@@ -1,76 +1,27 @@
 ﻿#include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/HTML/HTMLMarqueeElement.hpp"
+#include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
+#include "Krystal.Booey/Rendering/RenderBox.hpp"
+#include "Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp"
+#include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
+#include "Krystal.Booey/Rendering/RenderGrid.hpp"
+#include "Krystal.Booey/Rendering/RenderInline.hpp"
+#include "Krystal.Booey/Rendering/RenderListItem.hpp"
+#include "Krystal.Booey/Rendering/RenderTable.hpp"
+#include "Krystal.Booey/Rendering/RenderTableCaption.hpp"
+#include "Krystal.Booey/Rendering/RenderTableCell.hpp"
+#include "Krystal.Booey/Rendering/RenderTableCol.hpp"
+#include "Krystal.Booey/Rendering/RenderTableRow.hpp"
+#include "Krystal.Booey/Rendering/RenderTableSection.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 namespace krys::boo
 {
-  namespace
-  {
-    // FIXME: Stands in for the renderer classes (`RenderBlockFlow`, `RenderInline`, `RenderFlexibleBox`, ...)
-    // until they're ported.
-    class GenericRenderElement final : public RenderElement
-    {
-      KRYS_NON_COPY_MOVABLE(GenericRenderElement);
-      KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(GenericRenderElement);
-
-    public:
-      GenericRenderElement(Type type, dom::Element &element, RenderStyle &&style) noexcept
-          : RenderElement(type, element, krys::move(style), TypeFlagsFor(type), {})
-      {
-      }
-
-      KRYS_NODISCARD bool CanHaveChildren() const noexcept override
-      {
-        return true;
-      }
-
-      KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
-      {
-        switch (GetType())
-        {
-          case Type::BlockFlow:             return u8"RenderBlockFlow";
-          case Type::Inline:                return u8"RenderInline";
-          case Type::ListItem:              return u8"RenderListItem";
-          case Type::FlexibleBox:           return u8"RenderFlexibleBox";
-          case Type::Grid:                  return u8"RenderGrid";
-          case Type::DeprecatedFlexibleBox: return u8"RenderDeprecatedFlexibleBox";
-          case Type::Table:                 return u8"RenderTable";
-          case Type::TableCell:             return u8"RenderTableCell";
-          case Type::TableCaption:          return u8"RenderTableCaption";
-          case Type::TableSection:          return u8"RenderTableSection";
-          case Type::TableRow:              return u8"RenderTableRow";
-          case Type::TableCol:              return u8"RenderTableCol";
-          default:                          return u8"RenderElement";
-        }
-      }
-
-    private:
-      // The flags the constructors of the renderer classes between `RenderElement` and this type's class add.
-      KRYS_NODISCARD static EnumSet<TypeFlag> TypeFlagsFor(Type type) noexcept
-      {
-        const EnumSet<TypeFlag> box {TypeFlag::IsLayerModelObject, TypeFlag::IsBoxModelObject,
-                                     TypeFlag::IsBox};
-        switch (type)
-        {
-          case Type::Inline:
-            return {TypeFlag::IsLayerModelObject, TypeFlag::IsBoxModelObject, TypeFlag::IsRenderInline};
-          case Type::FlexibleBox:  return box | TypeFlag::IsRenderBlock | TypeFlag::IsFlexibleBox;
-          case Type::TableSection:
-          case Type::TableRow:
-          case Type::TableCol:     return box;
-          default:                 return box | TypeFlag::IsRenderBlock;
-        }
-      }
-    };
-
-    KRYS_NODISCARD RenderPtr<RenderElement>
-      CreateGenericRenderer(RenderObject::Type type, dom::Element &element, RenderStyle &&style) noexcept
-    {
-      return CreateRenderer<GenericRenderElement>(type, element, krys::move(style));
-    }
-  }
-
   RenderElement::RenderElement(Type type, dom::ContainerNode &elementOrDocument, RenderStyle &&style,
                                EnumSet<TypeFlag> flags, TypeSpecificFlags typeSpecificFlags) noexcept
       : RenderObject(type, elementOrDocument, flags, typeSpecificFlags), _style(krys::move(style))
@@ -109,57 +60,59 @@ namespace krys::boo
       case DisplayType::Inline:
         if (rendererTypeOverride.Contains(ConstructBlockLevelRendererFor::Inline))
         {
-          return CreateGenericRenderer(Type::BlockFlow, element, krys::move(style));
+          return CreateRenderer<RenderBlockFlow>(Type::BlockFlow, element, krys::move(style));
         }
-        return CreateGenericRenderer(Type::Inline, element, krys::move(style));
+        return CreateRenderer<RenderInline>(Type::Inline, element, krys::move(style));
       case DisplayType::Block:
       case DisplayType::FlowRoot:
       case DisplayType::InlineBlock:
-        return CreateGenericRenderer(Type::BlockFlow, element, krys::move(style));
+        return CreateRenderer<RenderBlockFlow>(Type::BlockFlow, element, krys::move(style));
       case DisplayType::ListItem:
         if (rendererTypeOverride.Contains(ConstructBlockLevelRendererFor::ListItem))
         {
-          return CreateGenericRenderer(Type::BlockFlow, element, krys::move(style));
+          return CreateRenderer<RenderBlockFlow>(Type::BlockFlow, element, krys::move(style));
         }
-        return CreateGenericRenderer(Type::ListItem, element, krys::move(style));
+        return CreateRenderer<RenderListItem>(element, krys::move(style));
       case DisplayType::Flex:
       case DisplayType::InlineFlex:
-        return CreateGenericRenderer(Type::FlexibleBox, element, krys::move(style));
+        return CreateRenderer<RenderFlexibleBox>(Type::FlexibleBox, element, krys::move(style));
       case DisplayType::Grid:
       case DisplayType::InlineGrid:
       case DisplayType::GridLanes:
-      case DisplayType::InlineGridLanes: return CreateGenericRenderer(Type::Grid, element, krys::move(style));
+      case DisplayType::InlineGridLanes: return CreateRenderer<RenderGrid>(element, krys::move(style));
       case DisplayType::Box:
       case DisplayType::InlineBox:
-        return CreateGenericRenderer(Type::DeprecatedFlexibleBox, element, krys::move(style));
-      case DisplayType::RubyBase: return CreateGenericRenderer(Type::Inline, element, krys::move(style));
+        return CreateRenderer<RenderDeprecatedFlexibleBox>(element, krys::move(style));
+      case DisplayType::RubyBase:
+        return CreateRenderer<RenderInline>(Type::Inline, element, krys::move(style));
       case DisplayType::RubyAnnotation:
-        return CreateGenericRenderer(Type::BlockFlow, element, krys::move(style));
-      case DisplayType::Ruby:      return CreateGenericRenderer(Type::Inline, element, krys::move(style));
-      case DisplayType::RubyBlock: return CreateGenericRenderer(Type::BlockFlow, element, krys::move(style));
-      default:                     break;
+        return CreateRenderer<RenderBlockFlow>(Type::BlockFlow, element, krys::move(style));
+      case DisplayType::Ruby: return CreateRenderer<RenderInline>(Type::Inline, element, krys::move(style));
+      case DisplayType::RubyBlock:
+        return CreateRenderer<RenderBlockFlow>(Type::BlockFlow, element, krys::move(style));
+      default: break;
     }
 
     if (style.IsDisplayTableOrTablePart()
         && rendererTypeOverride.Contains(ConstructBlockLevelRendererFor::TableOrTablePart))
     {
-      return CreateGenericRenderer(Type::BlockFlow, element, krys::move(style));
+      return CreateRenderer<RenderBlockFlow>(Type::BlockFlow, element, krys::move(style));
     }
 
     switch (style.Display())
     {
       case DisplayType::Table:
-      case DisplayType::InlineTable: return CreateGenericRenderer(Type::Table, element, krys::move(style));
-      case DisplayType::TableCell:   return CreateGenericRenderer(Type::TableCell, element, krys::move(style));
-      case DisplayType::TableCaption:
-        return CreateGenericRenderer(Type::TableCaption, element, krys::move(style));
+      case DisplayType::InlineTable:
+        return CreateRenderer<RenderTable>(Type::Table, element, krys::move(style));
+      case DisplayType::TableCell:    return CreateRenderer<RenderTableCell>(element, krys::move(style));
+      case DisplayType::TableCaption: return CreateRenderer<RenderTableCaption>(element, krys::move(style));
       case DisplayType::TableRowGroup:
       case DisplayType::TableHeaderGroup:
       case DisplayType::TableFooterGroup:
-        return CreateGenericRenderer(Type::TableSection, element, krys::move(style));
-      case DisplayType::TableRow:         return CreateGenericRenderer(Type::TableRow, element, krys::move(style));
+        return CreateRenderer<RenderTableSection>(element, krys::move(style));
+      case DisplayType::TableRow:         return CreateRenderer<RenderTableRow>(element, krys::move(style));
       case DisplayType::TableColumnGroup:
-      case DisplayType::TableColumn:      return CreateGenericRenderer(Type::TableCol, element, krys::move(style));
+      case DisplayType::TableColumn:      return CreateRenderer<RenderTableCol>(element, krys::move(style));
       default:                            break;
     }
     krys_debug_assert(false);
@@ -223,9 +176,14 @@ namespace krys::boo
 
   void RenderElement::InitializeStyle() noexcept
   {
-    // FIXME: Pending resources (Style::loadPendingResources), styleWillChange and styleDidChange with
-    // DifferenceResult::NewStyle, and view transitions, once there are any.
+    // FIXME: Pending resources (Style::loadPendingResources), once there's resource loading.
+
+    StyleWillChange(style::DifferenceResult::NewStyle, Style());
     _hasInitializedStyle = true;
+    StyleDidChange(style::DifferenceResult::NewStyle, nullptr);
+
+    // FIXME: We shouldn't have any text children that would need styleDidChange at this point, once there
+    // are text renderers; the view transition capture state, once there are view transitions.
   }
 
   void RenderElement::SetStyle(RenderStyle &&style, style::DifferenceResult minimalStyleDifference) noexcept
@@ -244,10 +202,272 @@ namespace krys::boo
     diff.Result = std::max(diff.Result, minimalStyleDifference);
     diff = AdjustStyleDifference(diff);
 
-    // FIXME: Pending resources, the repaint before the change, styleWillChange, styleDidChange (also of the
-    // text children), and the layout and repaint the difference asks for, once there's layout and painting.
-    (void)diff;
+    // FIXME: Pending resources and the repaint before the change, once there are resource loading and
+    // painting.
+    StyleWillChange(diff, style);
+    auto oldStyle = krys::move(_style);
     _style = krys::move(style);
+
+    // FIXME: The fragmented flow state when the containing block changes, once there are fragmented flows.
+
+    StyleDidChange(diff, &oldStyle);
+
+    // FIXME: Tell the text children their style changed, then adjust the difference again and do the layout
+    // and repaint it asks for, once there are text renderers, layout and painting.
+  }
+
+  void RenderElement::StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept
+  {
+    auto *oldStyle = HasInitializedStyle() ? &Style() : nullptr;
+    if (oldStyle)
+    {
+      // FIXME: Line layout, the stacking context's z-order lists, rendering-dependent regions, the
+      // accessibility cache, the enclosing layer's visible content status and event region, the floating and
+      // positioned object lists and the fragmented flow, once there are any.
+
+      // reset style flags
+      if (diff == style::DifferenceResult::Layout
+          || diff == style::DifferenceResult::LayoutOutOfFlowMovementOnly)
+      {
+        SetFloating(false);
+        ClearPositionedState();
+      }
+      SetHorizontalWritingMode(true);
+      SetHasVisibleBoxDecorations(false);
+      SetHasNonVisibleOverflow(false);
+      SetHasTransformRelatedProperty(false);
+    }
+
+    // FIXME: Content visibility observation, outline counting, slow repaint objects and the extended
+    // background, once there are any.
+    (void)newStyle;
+  }
+
+  void RenderElement::StyleDidChange(style::Difference, const RenderStyle *) noexcept
+  {
+    // FIXME: Images, SVG resources, counters, the layout the difference asks for, out-of-flow static
+    // positions, cursors, outline-auto ancestors, scroll anchoring and line layout, once there are any.
+  }
+
+  bool RenderElement::IsFixedPositioned() const noexcept
+  {
+    return IsOutOfFlowPositioned() && Style().GetPosition() == PositionType::Fixed;
+  }
+
+  bool RenderElement::IsAbsolutelyPositioned() const noexcept
+  {
+    return IsOutOfFlowPositioned() && Style().GetPosition() == PositionType::Absolute;
+  }
+
+  bool RenderElement::IsBlockLevelBox() const noexcept
+  {
+    // block-level boxes are boxes that participate in a block formatting context.
+    auto *renderBox = DynamicDowncast<RenderBox>(*this);
+    if (!renderBox)
+    {
+      return false;
+    }
+    if (renderBox->IsFlexItem() || renderBox->IsGridItem() || renderBox->IsRenderTableCell())
+    {
+      return false;
+    }
+    return Style().IsDisplayBlockLevel();
+  }
+
+  bool RenderElement::IsAnonymousBlock() const noexcept
+  {
+    // FIXME: MathML blocks, multi-column sets, once there are any.
+    return IsAnonymous() && (Style().Display() == DisplayType::Block || Style().Display() == DisplayType::Box)
+           && !Style().GetPseudoElementType() && IsRenderBlock() && !IsRenderListMarker()
+           && !IsRenderFragmentedFlow() && !IsRenderView() && !IsViewTransitionContainingBlock();
+  }
+
+  bool RenderElement::IsBlockContainer() const noexcept
+  {
+    auto display = Style().Display();
+    return (display == DisplayType::Block || display == DisplayType::InlineBlock
+            || display == DisplayType::FlowRoot || display == DisplayType::ListItem
+            || display == DisplayType::TableCell || display == DisplayType::TableCaption)
+           && !IsRenderReplaced();
+  }
+
+  bool RenderElement::IsBlockBox() const noexcept
+  {
+    // A block-level box that is also a block container.
+    return IsBlockLevelBox() && IsBlockContainer();
+  }
+
+  bool RenderElement::IsBeforeContent() const noexcept
+  {
+    // Text nodes don't have their own styles, so ignore the style on a text node.
+    // if (isRenderText())
+    //     return false;
+    if (Style().GetPseudoElementType() != PseudoElementType::Before)
+    {
+      return false;
+    }
+    return true;
+  }
+
+  bool RenderElement::IsAfterContent() const noexcept
+  {
+    // Text nodes don't have their own styles, so ignore the style on a text node.
+    // if (isRenderText())
+    //     return false;
+    if (Style().GetPseudoElementType() != PseudoElementType::After)
+    {
+      return false;
+    }
+    return true;
+  }
+
+  bool RenderElement::IsBeforeOrAfterContent() const noexcept
+  {
+    return IsBeforeContent() || IsAfterContent();
+  }
+
+  dom::Element *RenderElement::GeneratingElement() const noexcept
+  {
+    return IsPseudoElement() ? static_cast<dom::PseudoElement &>(*GetElement()).HostElement() : GetElement();
+  }
+
+  Overflow RenderElement::EffectiveOverflowX() const noexcept
+  {
+    auto overflowX = Style().OverflowX();
+    if (PaintContainmentApplies() && overflowX == Overflow::Visible)
+    {
+      return Overflow::Clip;
+    }
+    return overflowX;
+  }
+
+  Overflow RenderElement::EffectiveOverflowY() const noexcept
+  {
+    auto overflowY = Style().OverflowY();
+    if (PaintContainmentApplies() && overflowY == Overflow::Visible)
+    {
+      return Overflow::Clip;
+    }
+    return overflowY;
+  }
+
+  Overflow RenderElement::EffectiveOverflowBlockDirection() const noexcept
+  {
+    return Style().GetWritingMode().IsHorizontal() ? EffectiveOverflowY() : EffectiveOverflowX();
+  }
+
+  Overflow RenderElement::EffectiveOverflowInlineDirection() const noexcept
+  {
+    return Style().GetWritingMode().IsHorizontal() ? EffectiveOverflowX() : EffectiveOverflowY();
+  }
+
+  bool RenderElement::HasPotentiallyScrollableOverflow() const noexcept
+  {
+    // We only need to test one overflow dimension since 'visible' and 'clip' always get accompanied
+    // with 'clip' or 'visible' in the other dimension (see Style::Adjuster::adjust).
+    return HasNonVisibleOverflow() && Style().OverflowX() != Overflow::Clip
+           && Style().OverflowX() != Overflow::Visible;
+  }
+
+  bool RenderElement::HasClip() const noexcept
+  {
+    return IsOutOfFlowPositioned() && Style().HasClip();
+  }
+
+  bool RenderElement::HasClipOrNonVisibleOverflow() const noexcept
+  {
+    return HasClip() || HasNonVisibleOverflow();
+  }
+
+  bool RenderElement::CanEstablishContainingBlockWithTransform() const noexcept
+  {
+    return IsRenderBlock() || (IsTablePart() && !IsRenderTableCol());
+  }
+
+  bool RenderElement::MayContainOutOfFlowPositionedObjects(const RenderStyle *styleToUse) const noexcept
+  {
+    auto &style = styleToUse ? *styleToUse : Style();
+    // FIXME: SVG foreign objects, once there are SVG renderers.
+    return IsRenderView()
+           || (CanEstablishContainingBlockWithTransform()
+               && (styleToUse ? styleToUse->HasTransformRelatedProperty() : HasTransformRelatedProperty()))
+           || (style.HasBackdropFilter() && !IsDocumentElementRenderer())
+           || (style.HasFilter() && !IsDocumentElementRenderer()) || ShouldApplyLayoutContainment(styleToUse)
+           || ShouldApplyPaintContainment(styleToUse) || IsViewTransitionContainingBlock();
+  }
+
+  bool RenderElement::CanContainAbsolutelyPositionedObjects(const RenderStyle *styleToUse) const noexcept
+  {
+    auto &style = styleToUse ? *styleToUse : Style();
+    return MayContainOutOfFlowPositionedObjects(styleToUse) || style.GetPosition() != PositionType::Static
+           || (IsRenderBlock()
+               && style.GetWillChange().CreatesContainingBlockForAbsolutelyPositioned(
+                 IsDocumentElementRenderer()));
+  }
+
+  bool RenderElement::CanContainFixedPositionObjects(const RenderStyle *styleToUse) const noexcept
+  {
+    auto &style = styleToUse ? *styleToUse : Style();
+    return MayContainOutOfFlowPositionedObjects(styleToUse)
+           || (IsRenderBlock()
+               && style.GetWillChange().CreatesContainingBlockForOutOfFlowPositioned(
+                 IsDocumentElementRenderer()));
+  }
+
+  bool RenderElement::ShouldApplyAnyContainment() const noexcept
+  {
+    return ShouldApplyLayoutContainment() || ShouldApplySizeContainment()
+           || ShouldApplyInlineSizeContainment() || ShouldApplyStyleContainment()
+           || ShouldApplyPaintContainment();
+  }
+
+  bool RenderElement::ShouldApplySizeOrInlineSizeContainment() const noexcept
+  {
+    return ShouldApplySizeContainment() || ShouldApplyInlineSizeContainment();
+  }
+
+  bool RenderElement::ShouldApplyLayoutContainment(const RenderStyle *styleToUse) const noexcept
+  {
+    return GetElement()
+           && boo::ShouldApplyLayoutContainment(styleToUse ? *styleToUse : Style(), *GetElement());
+  }
+
+  bool RenderElement::ShouldApplySizeContainment() const noexcept
+  {
+    return GetElement() && boo::ShouldApplySizeContainment(Style(), *GetElement());
+  }
+
+  bool RenderElement::ShouldApplyInlineSizeContainment() const noexcept
+  {
+    return GetElement() && boo::ShouldApplyInlineSizeContainment(Style(), *GetElement());
+  }
+
+  bool RenderElement::ShouldApplyStyleContainment() const noexcept
+  {
+    return GetElement() && boo::ShouldApplyStyleContainment(Style(), *GetElement());
+  }
+
+  bool RenderElement::ShouldApplyPaintContainment(const RenderStyle *styleToUse) const noexcept
+  {
+    return GetElement()
+           && boo::ShouldApplyPaintContainment(styleToUse ? *styleToUse : Style(), *GetElement());
+  }
+
+  bool RenderElement::HasEligibleContainmentForSizeQuery() const noexcept
+  {
+    switch (Style().GetContainerType())
+    {
+      case ContainerType::InlineSize: return ShouldApplyInlineSizeContainment();
+      case ContainerType::Size:       return ShouldApplySizeContainment();
+      case ContainerType::Normal:     return true;
+    }
+    krys_debug_assert(false);
+    return false;
+  }
+
+  FloatRect RenderElement::TransformReferenceBoxRect(const RenderStyle &) const noexcept
+  {
+    krys_unreachable();
   }
 
   dom::Element *RenderElement::GetElement() const noexcept

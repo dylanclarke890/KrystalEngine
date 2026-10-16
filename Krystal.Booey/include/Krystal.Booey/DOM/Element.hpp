@@ -779,6 +779,12 @@ namespace krys::boo::dom
   void InvalidateForSiblingCombinators(Element *sibling) noexcept;
 }
 
+namespace krys::boo::dom
+{
+  /// @brief Whether an element with @p style is in the top layer, or is a `::backdrop`.
+  KRYS_NODISCARD bool IsInTopLayerOrBackdrop(const RenderStyle &style, const Element *element) noexcept;
+}
+
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::Element)
   KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &node) noexcept
   {

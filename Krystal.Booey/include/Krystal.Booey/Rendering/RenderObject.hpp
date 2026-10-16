@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
@@ -17,9 +18,26 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class RenderBlock;
   class RenderElement;
   class RenderTreeBuilder;
   class RenderView;
+
+  // FIXME: The layout bits (NeedsLayout, NormalChildNeedsLayout, ...), EverHadLayout, rare data, SVG
+  // transforms, skipped content and view transition captures come with layout and their features.
+  enum class RenderObjectStateFlag : uint8
+  {
+    IsBlock,
+    IsBlockLevelReplacedOrAtomicInline,
+    IsExcludedFromNormalLayout,
+    Floating,
+    VerticalWritingMode,
+    HasLayer,
+    HasNonVisibleOverflow,
+    HasTransformRelatedProperty,
+    ChildrenInline,
+    PaintContainmentApplies
+  };
 
   enum class RenderObjectTypeFlag : uint8
   {
@@ -67,6 +85,7 @@ namespace krys::boo
   };
 }
 
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectStateFlag, 10uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectTypeFlag, 8uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectBlockFlowFlag, 5uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectLineBreakFlag, 1uz);
@@ -196,6 +215,7 @@ namespace krys::boo
     };
 
     using TypeFlag = RenderObjectTypeFlag;
+    using StateFlag = RenderObjectStateFlag;
     using BlockFlowFlag = RenderObjectBlockFlowFlag;
     using LineBreakFlag = RenderObjectLineBreakFlag;
     using ReplacedFlag = RenderObjectReplacedFlag;
@@ -270,9 +290,25 @@ namespace krys::boo
       }
     };
 
+    enum class BoxDecorationState : uint8
+    {
+      None,
+      InvalidObscurationStatus,
+      IsKnownToBeObscured,
+      MayBeVisible,
+    };
+
   private:
     friend class RenderElement;
     friend class RenderTreeBuilder;
+
+    enum class PositionedState : uint8
+    {
+      IsStaticallyPositioned = 0,
+      IsRelativelyPositioned = 1,
+      IsOutOfFlowPositioned = 2,
+      IsStickilyPositioned = 3
+    };
 
     dom::Node &_node;
     RenderElement *_parent {nullptr};
@@ -281,6 +317,9 @@ namespace krys::boo
     EnumSet<TypeFlag> _typeFlags;
     Type _type;
     TypeSpecificFlags _typeSpecificFlags;
+    EnumSet<StateFlag> _stateFlags;
+    PositionedState _positionedState {PositionedState::IsStaticallyPositioned};
+    BoxDecorationState _boxDecorationState {BoxDecorationState::None};
     bool _isBeingDestroyed {false};
 
   public:
@@ -384,6 +423,81 @@ namespace krys::boo
     {
       return _type == Type::Grid;
     }
+    KRYS_NODISCARD bool IsRenderLayerModelObject() const noexcept
+    {
+      return _typeFlags.Contains(TypeFlag::IsLayerModelObject);
+    }
+    KRYS_NODISCARD bool IsRenderReplaced() const noexcept
+    {
+      return _typeSpecificFlags.GetKind() == TypeSpecificFlags::Kind::Replaced;
+    }
+    KRYS_NODISCARD bool IsRenderBlockFlow() const noexcept
+    {
+      return _typeSpecificFlags.GetKind() == TypeSpecificFlags::Kind::BlockFlow;
+    }
+    KRYS_NODISCARD bool IsRenderFlexibleBox() const noexcept
+    {
+      return _typeFlags.Contains(TypeFlag::IsFlexibleBox);
+    }
+    KRYS_NODISCARD bool IsRenderDeprecatedFlexibleBox() const noexcept
+    {
+      return _type == Type::DeprecatedFlexibleBox;
+    }
+    KRYS_NODISCARD bool IsFlexibleBoxIncludingDeprecated() const noexcept
+    {
+      return IsRenderFlexibleBox() || IsRenderDeprecatedFlexibleBox();
+    }
+    KRYS_NODISCARD bool IsRenderListItem() const noexcept
+    {
+      return _type == Type::ListItem;
+    }
+    KRYS_NODISCARD bool IsRenderListMarker() const noexcept
+    {
+      return _type == Type::ListMarker;
+    }
+    KRYS_NODISCARD bool IsRenderLineBreak() const noexcept
+    {
+      return _type == Type::LineBreak;
+    }
+    KRYS_NODISCARD bool IsRenderTable() const noexcept
+    {
+      return _type == Type::Table;
+    }
+    KRYS_NODISCARD bool IsRenderTableCell() const noexcept
+    {
+      return _type == Type::TableCell;
+    }
+    KRYS_NODISCARD bool IsRenderTableCol() const noexcept
+    {
+      return _type == Type::TableCol;
+    }
+    KRYS_NODISCARD bool IsRenderTableCaption() const noexcept
+    {
+      return _type == Type::TableCaption;
+    }
+    KRYS_NODISCARD bool IsRenderTableSection() const noexcept
+    {
+      return _type == Type::TableSection;
+    }
+    KRYS_NODISCARD bool IsRenderTableRow() const noexcept
+    {
+      return _type == Type::TableRow;
+    }
+    KRYS_NODISCARD bool IsTablePart() const noexcept
+    {
+      return IsRenderTableCell() || IsRenderTableCol() || IsRenderTableCaption() || IsRenderTableRow()
+             || IsRenderTableSection();
+    }
+    KRYS_NODISCARD bool IsRenderFragmentedFlow() const noexcept
+    {
+      return IsRenderBlockFlow()
+             && _typeSpecificFlags.BlockFlowFlags().Contains(BlockFlowFlag::IsFragmentedFlow);
+    }
+    KRYS_NODISCARD bool IsViewTransitionContainingBlock() const noexcept
+    {
+      return IsRenderBlockFlow()
+             && _typeSpecificFlags.BlockFlowFlags().Contains(BlockFlowFlag::IsViewTransitionContainingBlock);
+    }
     KRYS_NODISCARD bool IsRenderView() const noexcept
     {
       return _type == Type::View;
@@ -407,6 +521,116 @@ namespace krys::boo
     {
       return _typeFlags.Contains(TypeFlag::IsAnonymous);
     }
+
+    KRYS_NODISCARD bool IsFloating() const noexcept
+    {
+      return _stateFlags.Contains(StateFlag::Floating);
+    }
+
+    KRYS_NODISCARD bool IsPositioned() const noexcept
+    {
+      return _positionedState != PositionedState::IsStaticallyPositioned;
+    }
+    KRYS_NODISCARD bool IsInFlowPositioned() const noexcept
+    {
+      return IsRelativelyPositioned() || IsStickilyPositioned();
+    }
+    // absolute or fixed positioning
+    KRYS_NODISCARD bool IsOutOfFlowPositioned() const noexcept
+    {
+      return _positionedState == PositionedState::IsOutOfFlowPositioned;
+    }
+    KRYS_NODISCARD bool IsRelativelyPositioned() const noexcept
+    {
+      return _positionedState == PositionedState::IsRelativelyPositioned;
+    }
+    KRYS_NODISCARD bool IsStickilyPositioned() const noexcept
+    {
+      return _positionedState == PositionedState::IsStickilyPositioned;
+    }
+
+    KRYS_NODISCARD bool IsFloatingOrOutOfFlowPositioned() const noexcept
+    {
+      return IsFloating() || IsOutOfFlowPositioned();
+    }
+    KRYS_NODISCARD bool IsInFlow() const noexcept
+    {
+      return !IsFloatingOrOutOfFlowPositioned();
+    }
+
+    // inline object
+    KRYS_NODISCARD bool IsInline() const noexcept
+    {
+      return !_stateFlags.Contains(StateFlag::IsBlock);
+    }
+    KRYS_NODISCARD bool IsBlockLevelReplacedOrAtomicInline() const noexcept
+    {
+      return _stateFlags.Contains(StateFlag::IsBlockLevelReplacedOrAtomicInline);
+    }
+    KRYS_NODISCARD bool IsHorizontalWritingMode() const noexcept
+    {
+      return !_stateFlags.Contains(StateFlag::VerticalWritingMode);
+    }
+
+    KRYS_NODISCARD bool IsExcludedFromNormalLayout() const noexcept
+    {
+      return _stateFlags.Contains(StateFlag::IsExcludedFromNormalLayout);
+    }
+    void SetIsExcludedFromNormalLayout(bool excluded) noexcept
+    {
+      _stateFlags.Set(StateFlag::IsExcludedFromNormalLayout, excluded);
+    }
+
+    KRYS_NODISCARD bool ChildrenInline() const noexcept
+    {
+      return _stateFlags.Contains(StateFlag::ChildrenInline);
+    }
+    virtual void SetChildrenInline(bool b) noexcept
+    {
+      _stateFlags.Set(StateFlag::ChildrenInline, b);
+    }
+
+    KRYS_NODISCARD bool HasLayer() const noexcept
+    {
+      return _stateFlags.Contains(StateFlag::HasLayer);
+    }
+
+    KRYS_NODISCARD BoxDecorationState GetBoxDecorationState() const noexcept
+    {
+      return _boxDecorationState;
+    }
+    KRYS_NODISCARD bool HasVisibleBoxDecorations() const noexcept
+    {
+      return _boxDecorationState != BoxDecorationState::None;
+    }
+
+    KRYS_NODISCARD bool HasNonVisibleOverflow() const noexcept
+    {
+      return _stateFlags.Contains(StateFlag::HasNonVisibleOverflow);
+    }
+
+    // Transform, perspective or transform-style: preserve-3d.
+    KRYS_NODISCARD bool HasTransformRelatedProperty() const noexcept
+    {
+      return _stateFlags.Contains(StateFlag::HasTransformRelatedProperty);
+    }
+
+    KRYS_NODISCARD bool PaintContainmentApplies() const noexcept
+    {
+      return _stateFlags.Contains(StateFlag::PaintContainmentApplies);
+    }
+
+    KRYS_NODISCARD bool IsDocumentElementRenderer() const noexcept;
+    KRYS_NODISCARD bool IsFieldset() const noexcept;
+    KRYS_NODISCARD bool IsBody() const noexcept;
+    KRYS_NODISCARD bool IsPseudoElement() const noexcept;
+
+    // Returns the object containing this one. Can be different from parent for positioned elements.
+    KRYS_NODISCARD RenderElement *Container() const noexcept;
+
+    KRYS_NODISCARD RenderBlock *ContainingBlock() const noexcept;
+    KRYS_NODISCARD static RenderBlock *ContainingBlockForPositionType(PositionType positionType,
+                                                                      const RenderObject &renderer) noexcept;
 
     /// @brief The node rendered, or null for an anonymous object.
     KRYS_NODISCARD dom::Node *GetNode() const noexcept
@@ -441,6 +665,48 @@ namespace krys::boo
     void SetParent(RenderElement *parent) noexcept;
 
     virtual void WillBeDestroyed() noexcept;
+
+    void SetPositionState(PositionType position) noexcept;
+    void ClearPositionedState() noexcept
+    {
+      _positionedState = PositionedState::IsStaticallyPositioned;
+    }
+
+    void SetFloating(bool b = true) noexcept
+    {
+      _stateFlags.Set(StateFlag::Floating, b);
+    }
+    void SetInline(bool b) noexcept
+    {
+      _stateFlags.Set(StateFlag::IsBlock, !b);
+    }
+
+    void SetHasVisibleBoxDecorations(bool b = true) noexcept;
+
+    void SetBlockLevelReplacedOrAtomicInline(bool b = true) noexcept
+    {
+      _stateFlags.Set(StateFlag::IsBlockLevelReplacedOrAtomicInline, b);
+    }
+    void SetHorizontalWritingMode(bool b = true) noexcept
+    {
+      _stateFlags.Set(StateFlag::VerticalWritingMode, !b);
+    }
+    void SetHasNonVisibleOverflow(bool b = true) noexcept
+    {
+      _stateFlags.Set(StateFlag::HasNonVisibleOverflow, b);
+    }
+    void SetHasLayer(bool b = true) noexcept
+    {
+      _stateFlags.Set(StateFlag::HasLayer, b);
+    }
+    void SetHasTransformRelatedProperty(bool b = true) noexcept
+    {
+      _stateFlags.Set(StateFlag::HasTransformRelatedProperty, b);
+    }
+    void SetPaintContainmentApplies(bool value = true) noexcept
+    {
+      _stateFlags.Set(StateFlag::PaintContainmentApplies, value);
+    }
 
     KRYS_NODISCARD EnumSet<TypeFlag> TypeFlags() const noexcept
     {

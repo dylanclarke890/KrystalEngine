@@ -29,12 +29,6 @@ namespace krys::boo::style
       return element && element->TagQualifiedName().TagName() == tagName;
     }
 
-    KRYS_NODISCARD bool IsInTopLayerOrBackdrop(const RenderStyle &style, const dom::Element *) noexcept
-    {
-      // FIXME: There is no top layer (modal dialogs, popovers, fullscreen), so only `::backdrop` is in it.
-      return style.GetPseudoElementType() == PseudoElementType::Backdrop;
-    }
-
     // https://www.w3.org/TR/css-display-3/#transformations
     KRYS_NODISCARD DisplayType EquivalentBlockDisplay(const RenderStyle &style) noexcept
     {
@@ -436,7 +430,7 @@ namespace krys::boo::style
       // Top layer elements are always position: absolute; unless the position is set to fixed.
       // https://fullscreen.spec.whatwg.org/#new-stacking-layer
       if (_element.get() != documentElement.get() && style.GetPosition() != PositionType::Absolute
-          && style.GetPosition() != PositionType::Fixed && IsInTopLayerOrBackdrop(style, _element.get()))
+          && style.GetPosition() != PositionType::Fixed && dom::IsInTopLayerOrBackdrop(style, _element.get()))
       {
         style.SetPosition(PositionType::Absolute);
       }
@@ -569,7 +563,7 @@ namespace krys::boo::style
     if (hasAutoSpecifiedZIndex)
     {
       if ((_element && documentElement.get() == _element.get()) || hasTransformRelatedProperty(style)
-          || ShouldTreatAutoZIndexAsZero(style) || IsInTopLayerOrBackdrop(style, _element.get()))
+          || ShouldTreatAutoZIndexAsZero(style) || dom::IsInTopLayerOrBackdrop(style, _element.get()))
       {
         style.SetUsedZIndex(0);
       }
@@ -774,7 +768,7 @@ namespace krys::boo::style
 
   void Adjuster::AdjustDisplayContentsStyle(RenderStyle &style) const noexcept
   {
-    bool isInTopLayer = IsInTopLayerOrBackdrop(style, _element.get());
+    bool isInTopLayer = dom::IsInTopLayerOrBackdrop(style, _element.get());
     if (isInTopLayer || (_element && _document->DocumentElement().get() == _element.get()))
     {
       style.SetEffectiveDisplay(DisplayType::Block);

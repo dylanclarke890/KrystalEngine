@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/FloatSize.hpp"
-#include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
@@ -12,9 +12,9 @@ namespace krys::boo
   class LocalFrameView;
 
   /// @brief The root of a document's render tree, shown in the document's view.
-  // FIXME: A `RenderBlockFlow`, once there is one. Layout, painting, layers, selection, printing and the
-  // repaint, compositing and quote/counter bookkeeping come with layout and painting.
-  class RenderView final : public RenderElement
+  // FIXME: Layout, painting, layers, selection, printing and the repaint, compositing and quote/counter
+  // bookkeeping come with layout and painting.
+  class RenderView final : public RenderBlockFlow
   {
     KRYS_NON_COPY_MOVABLE(RenderView);
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderView);
@@ -33,11 +33,6 @@ namespace krys::boo
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {
       return u8"RenderView";
-    }
-
-    KRYS_NODISCARD bool CanHaveChildren() const noexcept override
-    {
-      return true;
     }
 
     KRYS_NODISCARD bool IsChildAllowed(const RenderObject &child,
