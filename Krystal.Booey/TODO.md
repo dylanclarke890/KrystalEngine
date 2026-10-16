@@ -5,7 +5,7 @@ Open work outside the WebKit port's current slice. Port-specific detail (verdict
 ## Infrastructure
 
 - **Event loop and rendering loop** — nothing schedules style updates; the host must call `Document::UpdateStyleIfNeeded()` (FIXME in `src/DOM/Document.cpp`). Needed for timers, microtasks and the "update the rendering" steps. https://html.spec.whatwg.org/#event-loops
-- **Settings** — no `Settings` object: settings-gated features are off in author sheets and exposed in computed style (`CSS/Parser/ParserContext.hpp`, `src/DOM/Document.cpp`).
+- **Settings** — `Page/Settings.hpp` holds the experimental and embedder flags and the font size values; the other values upstream reads from `Settings` (`textAreasAreResizable`, `hiddenUntilFoundEnabled`, `coreMathMLEnabled`, ...) are upstream's defaults in code. The media text track display quirk is never set (no document quirks).
 - **Resource loading** — `<link rel=stylesheet>`, `@import`, `@font-face` sources and images aren't fetched (`CSS/Rules/ImportRule.hpp`, `CSS/Values/ImageValue.hpp`, `src/HTML/HTMLLinkElement.cpp`). https://html.spec.whatwg.org/#link-type-stylesheet
 - **Fonts** — `FontCascade` has no font data or font selector, so font metrics (and units that depend on them) aren't real; `FontFace`/`FontFaceSet` and the `CSSFontFace*` headers are unbuilt (`CSS/Font/`). https://drafts.csswg.org/css-font-loading/
 - **Viewport changes** — media queries aren't re-evaluated and viewport-unit styles aren't invalidated when the `MediaEnvironment` changes; it's process-wide until documents have frames (`src/Style/Scope.cpp`, `src/Style/CustomPropertyRegistry.cpp`).

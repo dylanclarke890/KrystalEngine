@@ -67,13 +67,6 @@ namespace krys::boo::css::PropertyParserHelpers
           return {};
         }
 
-        if (!state.Context.cssURLModifiersEnabled)
-        {
-          if (!args.IsAtEnd())
-          {
-            return {};
-          }
-        }
         else
         {
           while (!args.IsAtEnd())
@@ -106,11 +99,6 @@ namespace krys::boo::css::PropertyParserHelpers
               }
               case ValueId::Integrity:
               {
-                if (!state.Context.cssURLIntegrityModifierEnabled)
-                {
-                  return {};
-                }
-
                 if (!HasFlag(allowedURLModifiers, AllowedURLModifiers::Integrity))
                 {
                   return {};

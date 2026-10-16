@@ -35,37 +35,15 @@ namespace krys::boo::css
     bool useSystemAppearance : 1 {false};
     bool shouldIgnoreImportRules : 1 {false};
 
-    // Settings, excluding those affecting properties.
-    bool counterStyleAtRuleImageSymbolsEnabled : 1 {false};
+    // Settings (`boo::Settings`), excluding those affecting properties. Standard features are always on.
     bool springTimingFunctionEnabled : 1 {false};
     bool cssTransformStyleSeparatedEnabled : 1 {false};
-    bool gridLanesEnabled : 1 {false};
-    bool cssAppearanceBaseEnabled : 1 {false};
-    bool cssPaintingAPIEnabled : 1 {false};
-    bool cssShapeFunctionEnabled : 1 {false};
-    bool cssTextDecorationLineErrorValues : 1 {false};
-    bool cssBackgroundClipBorderAreaEnabled : 1 {false};
-    bool cssWordBreakAutoPhraseEnabled : 1 {false};
-    bool popoverAttributeEnabled : 1 {false};
-    bool sidewaysWritingModesEnabled : 1 {false};
-    bool cssTextWrapPrettyEnabled : 1 {true};
     bool thumbAndTrackPseudoElementsEnabled : 1 {false};
-    bool imageControlsEnabled : 1 {false};
     bool colorLayersEnabled : 1 {false};
-    bool contrastColorEnabled : 1 {false};
-    bool targetTextPseudoElementEnabled : 1 {false};
-    bool cssProgressFunctionEnabled : 1 {false};
-    bool cssRandomFunctionEnabled : 1 {false};
-    bool cssTreeCountingFunctionsEnabled : 1 {false};
-    bool cssURLModifiersEnabled : 1 {false};
-    bool cssURLIntegrityModifierEnabled : 1 {false};
-    bool cssAxisRelativePositionKeywordsEnabled : 1 {false};
-    bool cssDynamicRangeLimitMixEnabled : 1 {false};
-    bool cssConstrainedDynamicRangeLimitEnabled : 1 {false};
-    bool cssTextTransformMathAutoEnabled : 1 {false};
+    // User agent sheets only.
     bool cssInternalAutoBaseParsingEnabled : 1 {false};
+    // A document quirk.
     bool webkitMediaTextTrackDisplayQuirkEnabled : 1 {false};
-    bool cssMathDepthEnabled : 1 {false};
 
     // Settings, those affecting properties.
     css::PropertySettings PropertySettings;
@@ -79,7 +57,6 @@ namespace krys::boo::css
 
     /// @brief A context for a sheet in @p document: @p sheetBaseURL (or the document base URL if it's null),
     /// the document's mode and settings.
-    /// FIXME: the settings are the defaults until there's a `Settings`; add the `Settings` constructor then.
     ParserContext(const dom::Document &document, const url::URL &sheetBaseURL,
                   utf8_stringview charset) noexcept;
 

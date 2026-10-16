@@ -2,6 +2,7 @@
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 
 namespace krys::boo::html
 {
@@ -25,6 +26,7 @@ namespace krys::boo::html
 
     // FPA(3): Let contextDocument be context's node document.
     auto &contextDocument = context.NodeDocument();
+    document->SetSettings(ShareRef(contextDocument.GetSettings()));
 
     // FPA(4): If contextDocument is in quirks mode, then set document's mode to "quirks".
     if (contextDocument._quirksMode == dom::QuirksMode::Quirks)

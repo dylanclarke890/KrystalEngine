@@ -359,12 +359,6 @@ namespace krys::boo
     }
   }
 
-  const SettingsValues &DocumentSettingsValues(const dom::Document &) noexcept
-  {
-    static constexpr SettingsValues settings {};
-    return settings;
-  }
-
   int32 AdjustForAbsoluteZoom(int32, const RenderView &) noexcept
   {
     krys_unreachable();

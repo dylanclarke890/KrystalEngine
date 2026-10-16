@@ -31,11 +31,9 @@
     "pseudo-classes": {
         "active": {},
         "active-view-transition": {
-            "settings-flag": "viewTransitionsEnabled"
         },
         "active-view-transition-type": {
-            "argument": "required",
-            "settings-flag": "viewTransitionsEnabled"
+            "argument": "required"
         },
         "any-link": {},
         "autofill": {},
@@ -102,7 +100,6 @@
         "placeholder-shown": {},
         "playing": {},
         "popover-open": {
-            "settings-flag": "popoverAttributeEnabled"
         },
         "read-only": {},
         "read-write": {},
@@ -133,7 +130,6 @@
             "supports-single-colon-for-compatibility": true
         },
         "checkmark": {
-            "settings-flag": "cssAppearanceBaseEnabled"
         },
         "cue": {
             "argument": "optional",
@@ -168,7 +164,6 @@
         },
         "spelling-error": {},
         "target-text": {
-            "settings-flag": "targetTextPseudoElementEnabled"
         },
         "thumb": {
             "settings-flag": "thumbAndTrackPseudoElementsEnabled",
@@ -179,23 +174,18 @@
             "user-agent-part": true
         },
         "view-transition": {
-            "settings-flag": "viewTransitionsEnabled"
         },
         "view-transition-group": {
-            "argument": "required",
-            "settings-flag": "viewTransitionsEnabled"
+            "argument": "required"
         },
         "view-transition-image-pair": {
-            "argument": "required",
-            "settings-flag": "viewTransitionsEnabled"
+            "argument": "required"
         },
         "view-transition-new": {
-            "argument": "required",
-            "settings-flag": "viewTransitionsEnabled"
+            "argument": "required"
         },
         "view-transition-old": {
-            "argument": "required",
-            "settings-flag": "viewTransitionsEnabled"
+            "argument": "required"
         }
     }
 }

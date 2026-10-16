@@ -1438,14 +1438,8 @@ namespace krys::boo::css
     // MARK: <paint()>
     // https://drafts.css-houdini.org/css-paint-api/#funcdef-paint
 
-    KRYS_NODISCARD static RefPtr<Value> ConsumeCustomPaint(TokenRange &args,
-                                                           PropertyParserState &state) noexcept
+    KRYS_NODISCARD static RefPtr<Value> ConsumeCustomPaint(TokenRange &args, PropertyParserState &) noexcept
     {
-      if (!state.Context.cssPaintingAPIEnabled)
-      {
-        return nullptr;
-      }
-
       if (args.Peek().Type() != TokenType::Ident)
       {
         return nullptr;

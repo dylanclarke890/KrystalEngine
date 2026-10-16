@@ -101,22 +101,12 @@ namespace krys::boo::css::PropertyParserHelpers
         }
         case ValueId::XStart:
         {
-          if (!state.Context.cssAxisRelativePositionKeywordsEnabled)
-          {
-            return {};
-          }
-
           tokens.Discard();
           tokens.DiscardWhitespace();
           return PositionUnresolvedComponent {keywords::XStart {}};
         }
         case ValueId::XEnd:
         {
-          if (!state.Context.cssAxisRelativePositionKeywordsEnabled)
-          {
-            return {};
-          }
-
           tokens.Discard();
           tokens.DiscardWhitespace();
           return PositionUnresolvedComponent {keywords::XEnd {}};
@@ -135,22 +125,12 @@ namespace krys::boo::css::PropertyParserHelpers
         }
         case ValueId::YStart:
         {
-          if (!state.Context.cssAxisRelativePositionKeywordsEnabled)
-          {
-            return {};
-          }
-
           tokens.Discard();
           tokens.DiscardWhitespace();
           return PositionUnresolvedComponent {keywords::YStart {}};
         }
         case ValueId::YEnd:
         {
-          if (!state.Context.cssAxisRelativePositionKeywordsEnabled)
-          {
-            return {};
-          }
-
           tokens.Discard();
           tokens.DiscardWhitespace();
           return PositionUnresolvedComponent {keywords::YEnd {}};
@@ -606,11 +586,6 @@ namespace krys::boo::css::PropertyParserHelpers
         }
         case ValueId::XStart:
         {
-          if (!state.Context.cssAxisRelativePositionKeywordsEnabled)
-          {
-            return {};
-          }
-
           tokens.Discard();
           tokens.DiscardWhitespace();
           if (auto lengthPercentage = MetaConsumer<LengthPercentage<>>::Consume(tokens, state))
@@ -623,10 +598,6 @@ namespace krys::boo::css::PropertyParserHelpers
         }
         case ValueId::XEnd:
         {
-          if (!state.Context.cssAxisRelativePositionKeywordsEnabled)
-          {
-            return {};
-          }
           tokens.Discard();
           tokens.DiscardWhitespace();
           if (auto lengthPercentage = MetaConsumer<LengthPercentage<>>::Consume(tokens, state))
@@ -690,11 +661,6 @@ namespace krys::boo::css::PropertyParserHelpers
         }
         case ValueId::YStart:
         {
-          if (!state.Context.cssAxisRelativePositionKeywordsEnabled)
-          {
-            return {};
-          }
-
           tokens.Discard();
           tokens.DiscardWhitespace();
           if (auto lengthPercentage = MetaConsumer<LengthPercentage<>>::Consume(tokens, state))
@@ -707,11 +673,6 @@ namespace krys::boo::css::PropertyParserHelpers
         }
         case ValueId::YEnd:
         {
-          if (!state.Context.cssAxisRelativePositionKeywordsEnabled)
-          {
-            return {};
-          }
-
           tokens.Discard();
           tokens.DiscardWhitespace();
           if (auto lengthPercentage = MetaConsumer<LengthPercentage<>>::Consume(tokens, state))
@@ -798,22 +759,12 @@ namespace krys::boo::css::PropertyParserHelpers
         }
         case ValueId::XStart:
         {
-          if (!state.Context.cssAxisRelativePositionKeywordsEnabled)
-          {
-            return {};
-          }
-
           tokens.Discard();
           tokens.DiscardWhitespace();
           return TwoComponentPositionHorizontal {keywords::XStart {}};
         }
         case ValueId::XEnd:
         {
-          if (!state.Context.cssAxisRelativePositionKeywordsEnabled)
-          {
-            return {};
-          }
-
           tokens.Discard();
           tokens.DiscardWhitespace();
           return TwoComponentPositionHorizontal {keywords::XEnd {}};
@@ -857,21 +808,12 @@ namespace krys::boo::css::PropertyParserHelpers
         }
         case ValueId::YStart:
         {
-          if (!state.Context.cssAxisRelativePositionKeywordsEnabled)
-          {
-            return {};
-          }
           tokens.Discard();
           tokens.DiscardWhitespace();
           return TwoComponentPositionVertical {keywords::YStart {}};
         }
         case ValueId::YEnd:
         {
-          if (!state.Context.cssAxisRelativePositionKeywordsEnabled)
-          {
-            return {};
-          }
-
           tokens.Discard();
           tokens.DiscardWhitespace();
           return TwoComponentPositionVertical {keywords::YEnd {}};

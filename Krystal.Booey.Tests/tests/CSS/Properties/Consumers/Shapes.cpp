@@ -68,9 +68,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     SECTION("shape()")
     {
       ParserContext context {ParserMode::HTMLStandard};
-      CHECK(ConsumeToText(u8"shape(from 0 0, line to 10px 10px)", BasicShape, context) == "<null>");
 
-      context.cssShapeFunctionEnabled = true;
       CHECK(ConsumeToText(u8"shape(from 0 0, line to 10px 10px)", BasicShape, context)
             == "shape(from 0px 0px, line to 10px 10px)");
       CHECK(ConsumeToText(u8"shape(nonzero from 0 0, hline by 5px, close)", BasicShape, context)

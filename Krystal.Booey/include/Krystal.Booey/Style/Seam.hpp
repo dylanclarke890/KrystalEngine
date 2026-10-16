@@ -43,13 +43,12 @@
 #include <bitset>
 
 // FIXME: Placeholders for the rendering, font and style-resolver types that length resolution, calc
-// evaluation, colour resolution, the computed value conversions and the extractor need. Each declares only the
-// members those callers use, under its upstream name. None can be constructed but `SettingsValues`. Each type
-// moves to its own header, with its real implementation, when its slice is ported:
+// evaluation, colour resolution, the computed value conversions and the extractor need. Each declares only
+// the members those callers use, under its upstream name. None can be constructed. Each type moves to its own
+// header, with its real implementation, when its slice is ported:
 //   - `RenderView`, `RenderElement` (with the `RenderObject` members), `RenderBoxModelObject`, `RenderBox`,
 //     `RenderBlock`, `RenderGrid`, `RenderInline`, `RenderTheme` (focus ring metrics): rendering.
 //   - `style::AnchorPositionEvaluator`: anchor positioning (`Style/AnchorPositionEvaluator.hpp`, unreviewed).
-//   - `SettingsValues`: `Settings`.
 //   - the `Document*` colour functions: `dom::Document` (upstream members) once it has a page and settings.
 //   - the `Document*` security and keyframes functions: `dom::Document` (upstream members) once it has a
 //     security origin and runs animations.
@@ -102,19 +101,6 @@ namespace krys::boo
     // FIXME: Also the `::-webkit-list-button` part of user agent shadow trees, once there are any.
     KRYS_NODISCARD static bool HasAppearanceForElementTypeFromUAStyle(const dom::Element &) noexcept;
   };
-
-  /// @brief The settings style building reads (part of upstream's `SettingsValues`, with their defaults).
-  struct SettingsValues
-  {
-    int32 DefaultFontSize {16};
-    int32 DefaultFixedFontSize {13};
-    int32 MinimumFontSize {0};
-    int32 MinimumLogicalFontSize {0};
-    bool EvaluationTimeZoomEnabled {false};
-  };
-
-  /// @brief Collapses `document.settingsValues()`. Documents have no settings yet, so they're the defaults.
-  KRYS_NODISCARD const SettingsValues &DocumentSettingsValues(const dom::Document &) noexcept;
 
   class RenderView
   {

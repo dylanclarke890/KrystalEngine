@@ -9,6 +9,7 @@
 #include "Krystal.Booey/DOM/XMLDocument.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/SVG/SVGDocument.hpp"
 
 namespace krys::boo::dom
@@ -55,6 +56,7 @@ namespace krys::boo::dom
 
       return AdoptRef<XMLDocument>(*doc.release());
     }();
+    document->SetSettings(ShareRef(_document->GetSettings()));
 
     RefPtr<Element> element = nullptr;
     if (qualifiedName != DOMStringAtom::Empty())
@@ -94,6 +96,7 @@ namespace krys::boo::dom
   {
     Ref<HTMLDocument> document = CreateRef<HTMLDocument>();
     document->_contentType = u8"text/html";
+    document->SetSettings(ShareRef(_document->GetSettings()));
 
     auto documentType = AdoptRef(*new DocumentType(*document, u8"html", u8"", u8""));
     if (auto appendResult = document->AppendChild(*documentType); appendResult.HasException())
@@ -110,7 +113,7 @@ namespace krys::boo::dom
 
     auto headElement =
       ElementFactory::Create(*document, {infra::Namespaces::HTML, DOMStringAtom::Null(), u8"head"});
-    if (auto appendResult = document->AppendChild(*headElement); appendResult.HasException())
+    if (auto appendResult = htmlElement->AppendChild(*headElement); appendResult.HasException())
     {
       return appendResult.ReleaseException();
     }
@@ -134,7 +137,7 @@ namespace krys::boo::dom
 
     auto bodyElement =
       ElementFactory::Create(*document, {infra::Namespaces::HTML, DOMStringAtom::Null(), u8"body"});
-    if (auto appendResult = document->AppendChild(*bodyElement); appendResult.HasException())
+    if (auto appendResult = htmlElement->AppendChild(*bodyElement); appendResult.HasException())
     {
       return appendResult.ReleaseException();
     }

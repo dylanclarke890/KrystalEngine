@@ -45,10 +45,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
   TEST_CASE("PropertyParserHelpers(ConsumeDisplay grid-lanes)", "[CSS][Properties][Consumers]")
   {
     ParserContext context {ParserMode::HTMLStandard};
-    CHECK(ConsumeToText(u8"grid-lanes", ConsumeDisplay, context) == "<null>");
-    CHECK(ConsumeToText(u8"inline-grid-lanes", ConsumeDisplay, context) == "<null>");
 
-    context.gridLanesEnabled = true;
     CHECK(ConsumeToText(u8"grid-lanes", ConsumeDisplay, context) == "grid-lanes");
     CHECK(ConsumeToText(u8"inline grid-lanes", ConsumeDisplay, context) == "inline-grid-lanes");
     CHECK(ConsumeToText(u8"inline-grid-lanes", ConsumeDisplay, context) == "inline-grid-lanes");

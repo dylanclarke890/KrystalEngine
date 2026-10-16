@@ -44,6 +44,7 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTitleElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
@@ -72,7 +73,7 @@ namespace krys::boo::dom
   Document::Document() noexcept
       : ContainerNode(*this, NodeType::DOCUMENT_NODE, NodeFlags::IsContainerNode),
         DocumentOrShadowRoot(static_cast<ContainerNode &>(*this)), _flags(DocumentFlags::None),
-        _url(url::AboutBlankURL()), _baseURL(_url)
+        _url(url::AboutBlankURL()), _baseURL(_url), _settings(ShareRef(Settings::Default()))
   {
     SetNodeFlag(NodeFlags::IsConnected);
     _styleScope = CreateUnique<style::Scope>(*this);
@@ -764,6 +765,14 @@ namespace krys::boo::dom
     _cachedCSSParserContext = nullptr;
   }
 
+  void Document::SetSettings(Ref<Settings> &&settings) noexcept
+  {
+    _settings = krys::move(settings);
+    InvalidateCachedCSSParserContext();
+    _exposedComputedCSSPropertyIds = null;
+    ScheduleFullStyleRebuild();
+  }
+
   void Document::DidInsertInDocumentShadowRoot(ShadowRoot &shadowRoot) noexcept
   {
     krys_debug_assert(shadowRoot.IsConnected());
@@ -831,17 +840,17 @@ namespace krys::boo::dom
   {
     if (!_exposedComputedCSSPropertyIds.has_value())
     {
-      // FIXME: Settings. Properties disabled by settings are exposed.
+      auto &settings = CssParserContext().PropertySettings;
       List<css::PropertyId> exposed;
       for (auto property : css::ComputedPropertyIds)
       {
-        if (!css::IsExposed(property, nullptr))
+        if (!css::IsExposed(property, settings))
         {
           continue;
         }
         // If the standard property is exposed no need to expose the alias.
         if (auto standard = css::CascadeAliasProperty(property);
-            standard != property && css::IsExposed(standard, nullptr))
+            standard != property && css::IsExposed(standard, settings))
         {
           continue;
         }

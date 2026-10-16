@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Style/BuilderStateInlines.hpp"
 
 #include "Krystal.Booey/CSS/Calc/RandomCachingKey.hpp"
@@ -181,7 +182,7 @@ namespace krys::boo::style
                                          GetDocument());
       }
 
-      const auto &settings = DocumentSettingsValues(GetDocument());
+      const auto &settings = GetDocument().GetSettings().Values;
       auto fixedSize = settings.DefaultFixedFontSize;
       auto defaultSize = settings.DefaultFontSize;
       float fixedScaleFactor =

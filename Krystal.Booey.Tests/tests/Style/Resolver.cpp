@@ -161,11 +161,7 @@ namespace krys::boo::style::tests
 
     SECTION("@view-transition and @position-try")
     {
-      // FIXME: Author sheets can't have @view-transition and @position-try rules until parser contexts have
-      // settings (crossDocumentViewTransitionsEnabled and cssAnchorPositioningEnabled are on by default).
       css::ParserContext context(css::ParserMode::HTMLStandard);
-      context.PropertySettings.crossDocumentViewTransitionsEnabled = true;
-      context.PropertySettings.cssAnchorPositioningEnabled = true;
       auto sheet = css::StyleSheetContents::Create(context);
       sheet->ParseString(u8"@view-transition { navigation: auto; } @position-try --p { top: 0; }"
                          u8"@layer a { @position-try --q { top: 0; } } @position-try --p { top: 1px; }");

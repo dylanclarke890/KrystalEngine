@@ -17,8 +17,6 @@ namespace krys::boo::css::tests
   KRYS_NODISCARD inline ParserContext CSSOMTestContext()
   {
     auto context = DeclarationTestContext();
-    context.PropertySettings.crossDocumentViewTransitionsEnabled = true;
-    context.PropertySettings.cssFunctionAtRuleEnabled = true;
     return context;
   }
 

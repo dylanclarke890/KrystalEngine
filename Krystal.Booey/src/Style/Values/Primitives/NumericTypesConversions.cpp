@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
@@ -50,6 +51,6 @@ namespace krys::boo::style
 
   bool EvaluationTimeZoomEnabled(const BuilderState &state) noexcept
   {
-    return DocumentSettingsValues(state.GetDocument()).EvaluationTimeZoomEnabled;
+    return state.GetDocument().GetSettings().Values.EvaluationTimeZoomEnabled;
   }
 }

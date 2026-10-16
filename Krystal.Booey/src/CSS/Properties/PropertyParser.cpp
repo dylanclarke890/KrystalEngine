@@ -947,8 +947,6 @@ namespace krys::boo::css
   bool ConsumeViewTransitionDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
                                        PropertyParserResult &result) noexcept
   {
-    krys_debug_assert(context.PropertySettings.crossDocumentViewTransitionsEnabled);
-
     auto state = PropertyParserState {
       .Context = context,
       .CurrentRule = RuleType::ViewTransition,
@@ -978,8 +976,6 @@ namespace krys::boo::css
   bool ConsumePositionTryDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
                                     IsImportant important, PropertyParserResult &result) noexcept
   {
-    krys_debug_assert(context.PropertySettings.cssAnchorPositioningEnabled);
-
     // Per spec, !important is not allowed and makes the whole declaration invalid.
     if (important)
     {
@@ -997,8 +993,6 @@ namespace krys::boo::css
   bool ConsumeFunctionDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,
                                  PropertyParserResult &result) noexcept
   {
-    krys_debug_assert(context.PropertySettings.cssFunctionAtRuleEnabled);
-
     auto state = PropertyParserState {
       .Context = context,
       .CurrentRule = RuleType::Function,

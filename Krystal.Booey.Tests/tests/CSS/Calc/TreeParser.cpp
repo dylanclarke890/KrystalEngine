@@ -326,9 +326,7 @@ namespace krys::boo::css::calc::tests
   TEST_CASE("TreeParser(Progress)", "[CSS][Calc][TreeParser]")
   {
     auto options = WithCategory(css::Category::Number);
-    CHECK_FALSE(ParseValue(u8"progress(5px, 0px, 10px)", options));
 
-    options.Context.cssProgressFunctionEnabled = true;
     CHECK(Evaluate(u8"progress(5px, 0px, 10px)", options) == 0.5);
     CHECK_FALSE(ParseValue(u8"progress(5px, 0px)", options));
     CHECK_FALSE(ParseValue(u8"progress(5px, 0s, 10px)", options));
@@ -337,9 +335,7 @@ namespace krys::boo::css::calc::tests
   TEST_CASE("TreeParser(TreeCountingFunctions)", "[CSS][Calc][TreeParser]")
   {
     auto options = WithCategory(css::Category::Integer);
-    CHECK_FALSE(ParseValue(u8"calc(sibling-index())", options));
 
-    options.Context.cssTreeCountingFunctionsEnabled = true;
     CHECK(ParseValue(u8"calc(sibling-index())", options));
     CHECK(ParseValue(u8"calc(sibling-count() + 1)", options));
     CHECK_FALSE(ParseValue(u8"calc(sibling-index(1))", options));
@@ -360,9 +356,7 @@ namespace krys::boo::css::calc::tests
   TEST_CASE("TreeParser(Random)", "[CSS][Calc][TreeParser]")
   {
     auto options = ParseOptions {};
-    CHECK_FALSE(ParseValue(u8"random(1px, 10px)", options));
 
-    options.Context.cssRandomFunctionEnabled = true;
     auto parsed = Parse(u8"random(1px, 10px)", options);
     REQUIRE(parsed.Result);
     CHECK(parsed.Result->RequiresConversionData());
@@ -430,9 +424,7 @@ namespace krys::boo::css::calc::tests
     CHECK_FALSE(ParseValue(u8"anchor(--a top)", options));
 
     options.PropertyOptions.AnchorPolicy = AllowAnchor {true};
-    CHECK_FALSE(ParseValue(u8"anchor(--a top)", options));
 
-    options.Context.PropertySettings.cssAnchorPositioningEnabled = true;
     auto value = ParseValue(u8"anchor(--a top)", options);
     REQUIRE(value);
     CHECK(value->RequiresConversionData());
@@ -470,7 +462,6 @@ namespace krys::boo::css::calc::tests
   TEST_CASE("TreeParser(AnchorSize)", "[CSS][Calc][TreeParser]")
   {
     auto options = WithCategory(css::Category::LengthPercentage);
-    options.Context.PropertySettings.cssAnchorPositioningEnabled = true;
     CHECK_FALSE(ParseValue(u8"anchor-size(width)", options));
 
     options.PropertyOptions.AnchorSizePolicy = AllowAnchorSize {true};

@@ -697,6 +697,9 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Invalidator.hpp
   include/Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp
   include/Krystal.Booey/Style/PseudoClassStateInvalidation.hpp
+
+  # Settings
+  include/Krystal.Booey/Page/Settings.hpp
   include/Krystal.Booey/Style/MatchedDeclarationsCache.hpp
   include/Krystal.Booey/Style/MatchResultCache.hpp
   include/Krystal.Booey/Style/ResolveForDocument.hpp
@@ -1840,6 +1843,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Style/Invalidator.cpp
   src/Style/PseudoClassChangeInvalidation.cpp
   src/Style/PseudoClassStateInvalidation.cpp
+
+  # Settings
+  src/Page/Settings.cpp
 )
 
 target_precompile_headers(Krystal.Booey

@@ -133,7 +133,6 @@ namespace krys::boo::css::tests
     SECTION("view-timeline")
     {
       ParserContext context {ParserMode::HTMLStandard};
-      context.PropertySettings.scrollDrivenAnimationsEnabled = true;
       CHECK(ShorthandToText(u8"--a x 10px", PropertyId::ViewTimeline, context)
             == "view-timeline-name: --a; view-timeline-axis: x; view-timeline-inset: 10px");
     }

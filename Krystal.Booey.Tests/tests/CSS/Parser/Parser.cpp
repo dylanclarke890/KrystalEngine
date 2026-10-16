@@ -21,8 +21,6 @@ namespace krys::boo::css::tests
     KRYS_NODISCARD ParserContext SheetContext()
     {
       auto context = DeclarationTestContext();
-      context.PropertySettings.crossDocumentViewTransitionsEnabled = true;
-      context.PropertySettings.cssFunctionAtRuleEnabled = true;
       return context;
     }
 
@@ -394,10 +392,6 @@ namespace krys::boo::css::tests
       auto sheet = ParseSheet(u8"@view-transition { navigation: auto } @view-transition x { }");
       REQUIRE(sheet->RuleCount() == 1);
       CHECK(Downcast<ViewTransitionRule>(*sheet->RuleAt(0)).Navigation() == ViewTransitionNavigation::Auto);
-
-      auto context = SheetContext();
-      context.PropertySettings.crossDocumentViewTransitionsEnabled = false;
-      CHECK(ParseSheet(u8"@view-transition { navigation: auto }", context)->IsEmpty());
     }
 
     SECTION("@position-try")

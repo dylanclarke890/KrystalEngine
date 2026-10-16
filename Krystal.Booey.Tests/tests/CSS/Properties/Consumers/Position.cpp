@@ -95,10 +95,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
   TEST_CASE("PropertyParserHelpers(ConsumePosition axis-relative keywords)", "[CSS][Properties][Consumers]")
   {
     ParserContext context {ParserMode::HTMLStandard};
-    CHECK(ConsumeToText(u8"x-start", ConsumePosition, context) == "<null>");
-    CHECK(ConsumeToText(u8"y-end", ConsumePositionY, context) == "<null>");
 
-    context.cssAxisRelativePositionKeywordsEnabled = true;
     CHECK(ConsumeToText(u8"x-start", ConsumePosition, context) == "x-start center");
     CHECK(ConsumeToText(u8"y-end x-end", ConsumePosition, context) == "x-end y-end");
     CHECK(ConsumeToText(u8"x-start 5px y-start 5px", ConsumePosition, context) == "x-start 5px y-start 5px");

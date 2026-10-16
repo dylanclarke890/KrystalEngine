@@ -492,10 +492,8 @@ namespace krys::boo::css::tests
     CHECK(!Selector::ParsePseudoElementName(u8"", context));
     CHECK(!Selector::ParsePseudoElementName(u8"nope", context));
     CHECK(!Selector::ParsePseudoElementName(u8"-webkit-nope", context));
-    CHECK(!Selector::ParsePseudoElementName(u8"view-transition", context));
     CHECK(!Selector::ParsePseudoElementName(u8"thumb", context));
 
-    context.viewTransitionsEnabled = true;
     context.thumbAndTrackPseudoElementsEnabled = true;
     CHECK(Selector::ParsePseudoElementName(u8"view-transition", context)
           == SelectorPseudoElement::ViewTransition);

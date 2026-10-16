@@ -41,11 +41,7 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"normal", ConsumeAlignItems) == "normal");
     CHECK(ConsumeToText(u8"last baseline", ConsumeAlignItems) == "last baseline");
 
-    // anchor-center is behind a setting.
     ParserContext context {ParserMode::HTMLStandard};
-    CHECK(ConsumeToText(u8"anchor-center", ConsumeAlignSelf, context) == "<null>");
-    CHECK(ConsumeToText(u8"safe anchor-center", ConsumeAlignItems, context) == "<null>");
-    context.PropertySettings.cssAnchorPositioningEnabled = true;
     CHECK(ConsumeToText(u8"anchor-center", ConsumeAlignSelf, context) == "anchor-center");
     CHECK(ConsumeToText(u8"safe anchor-center", ConsumeAlignItems, context) == "safe anchor-center");
   }

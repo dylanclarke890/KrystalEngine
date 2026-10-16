@@ -179,9 +179,6 @@ namespace krys::boo::css::tests
       CHECK(parse(PropertyId::BackgroundColor, u8"currentcolor") == "currentcolor");
       CHECK(parse(PropertyId::CaretColor, u8"auto") == "auto");
 
-      // `accent-color` only takes `auto` here while it's exposed.
-      CHECK(parse(PropertyId::AccentColor, u8"auto") == "<null>");
-      context.PropertySettings.accentColorEnabled = true;
       CHECK(parse(PropertyId::AccentColor, u8"auto") == "auto");
       CHECK(parse(PropertyId::Color, u8"10px") == "<null>");
 

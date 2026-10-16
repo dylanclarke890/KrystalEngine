@@ -25,6 +25,7 @@ namespace krys::boo
 {
   class RenderStyle;
   class RenderTreeUpdater;
+  struct Settings;
 }
 
 namespace krys::boo::css
@@ -128,6 +129,7 @@ namespace krys::boo::dom
     url::URL _baseElementURL;
 
     mutable UniquePtr<css::ParserContext> _cachedCSSParserContext;
+    Ref<Settings> _settings;
 
     List<WeakPtr<ShadowRoot>> _inDocumentShadowRoots;
     RefPtr<css::StyleSheetList> _styleSheetList;
@@ -442,6 +444,17 @@ namespace krys::boo::dom
     /// @brief The context the document's style sheets are parsed with: its base URL, mode and settings.
     /// Cached until one of them changes.
     KRYS_NODISCARD const css::ParserContext &CssParserContext() const noexcept;
+
+    /// @brief The document's settings: the defaults (`Settings::Default()`) unless the host gave it its own,
+    /// or those of the document that created it.
+    KRYS_NODISCARD Settings &GetSettings() const noexcept
+    {
+      return *_settings;
+    }
+
+    /// @brief Gives the document @p settings, and resolves its style again with them. Style sheets that were
+    /// already parsed aren't parsed again.
+    void SetSettings(Ref<Settings> &&settings) noexcept;
 
     void InvalidateCachedCSSParserContext() noexcept;
 

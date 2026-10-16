@@ -2,6 +2,7 @@
 #include "Krystal.Booey/CSS/WebKitFontFamilyNames.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Adjuster.hpp"
@@ -31,7 +32,7 @@ namespace krys::boo::style
 
     auto fontDescription = [&]()
     {
-      auto &settings = DocumentSettingsValues(document);
+      auto &settings = document.GetSettings().Values;
 
       FontCascadeDescription fontDescription;
       // FIXME: The document's content language (`Content-Language`, `<meta http-equiv>`) isn't tracked.
@@ -64,7 +65,7 @@ namespace krys::boo::style
     // FIXME: Upstream gives the font cascade the document's font selector here; there's no font selector.
     documentStyle.SetFontCascade(krys::move(fontCascade));
 
-    documentStyle.SetEvaluationTimeZoomEnabled(DocumentSettingsValues(document).EvaluationTimeZoomEnabled);
+    documentStyle.SetEvaluationTimeZoomEnabled(document.GetSettings().Values.EvaluationTimeZoomEnabled);
 
     // FIXME: The device scale factor comes with pages; it's 1.
     documentStyle.SetDeviceScaleFactor(1);

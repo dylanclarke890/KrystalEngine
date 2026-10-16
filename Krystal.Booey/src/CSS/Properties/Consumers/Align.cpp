@@ -245,11 +245,6 @@ namespace krys::boo::css::PropertyParserHelpers
       // <self-position>
       case ValueId::AnchorCenter:
       {
-        if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
-        {
-          return nullptr;
-        }
-
         KRYS_FALLTHROUGH;
       }
       case ValueId::Start:
@@ -282,37 +277,31 @@ namespace krys::boo::css::PropertyParserHelpers
       case ValueId::Unsafe:
       case ValueId::Safe:
       {
-        return ConsumeAlignmentOverflowPosition(
-          tokens, state, initial,
-          [&](auto second)
-          {
-            switch (second)
-            {
-              case ValueId::AnchorCenter:
-              {
-                if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
-                {
-                  return false;
-                }
-
-                KRYS_FALLTHROUGH;
-              }
-              case ValueId::Start:
-              case ValueId::End:
-              case ValueId::Center:
-              case ValueId::SelfStart:
-              case ValueId::SelfEnd:
-              case ValueId::FlexStart:
-              case ValueId::FlexEnd:
-              {
-                return true;
-              }
-              default:
-              {
-                return false;
-              }
-            }
-          });
+        return ConsumeAlignmentOverflowPosition(tokens, state, initial,
+                                                [&](auto second)
+                                                {
+                                                  switch (second)
+                                                  {
+                                                    case ValueId::AnchorCenter:
+                                                    {
+                                                      KRYS_FALLTHROUGH;
+                                                    }
+                                                    case ValueId::Start:
+                                                    case ValueId::End:
+                                                    case ValueId::Center:
+                                                    case ValueId::SelfStart:
+                                                    case ValueId::SelfEnd:
+                                                    case ValueId::FlexStart:
+                                                    case ValueId::FlexEnd:
+                                                    {
+                                                      return true;
+                                                    }
+                                                    default:
+                                                    {
+                                                      return false;
+                                                    }
+                                                  }
+                                                });
       }
       default:
       {
@@ -343,11 +332,6 @@ namespace krys::boo::css::PropertyParserHelpers
       // [ <self-position> | left | right ]
       case ValueId::AnchorCenter:
       {
-        if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
-        {
-          return nullptr;
-        }
-
         KRYS_FALLTHROUGH;
       }
       case ValueId::Start:
@@ -382,38 +366,33 @@ namespace krys::boo::css::PropertyParserHelpers
       case ValueId::Unsafe:
       case ValueId::Safe:
       {
-        return ConsumeAlignmentOverflowPosition(
-          tokens, state, initial,
-          [&](auto second)
-          {
-            switch (second)
-            {
-              case ValueId::AnchorCenter:
-              {
-                if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
-                {
-                  return false;
-                }
-                KRYS_FALLTHROUGH;
-              }
-              case ValueId::Start:
-              case ValueId::End:
-              case ValueId::Center:
-              case ValueId::SelfStart:
-              case ValueId::SelfEnd:
-              case ValueId::FlexStart:
-              case ValueId::FlexEnd:
-              case ValueId::Left:
-              case ValueId::Right:
-              {
-                return true;
-              }
-              default:
-              {
-                return false;
-              }
-            }
-          });
+        return ConsumeAlignmentOverflowPosition(tokens, state, initial,
+                                                [&](auto second)
+                                                {
+                                                  switch (second)
+                                                  {
+                                                    case ValueId::AnchorCenter:
+                                                    {
+                                                      KRYS_FALLTHROUGH;
+                                                    }
+                                                    case ValueId::Start:
+                                                    case ValueId::End:
+                                                    case ValueId::Center:
+                                                    case ValueId::SelfStart:
+                                                    case ValueId::SelfEnd:
+                                                    case ValueId::FlexStart:
+                                                    case ValueId::FlexEnd:
+                                                    case ValueId::Left:
+                                                    case ValueId::Right:
+                                                    {
+                                                      return true;
+                                                    }
+                                                    default:
+                                                    {
+                                                      return false;
+                                                    }
+                                                  }
+                                                });
       }
       default:
       {
@@ -442,11 +421,6 @@ namespace krys::boo::css::PropertyParserHelpers
       // <self-position>
       case ValueId::AnchorCenter:
       {
-        if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
-        {
-          return nullptr;
-        }
-
         KRYS_FALLTHROUGH;
       }
       case ValueId::Start:
@@ -479,37 +453,31 @@ namespace krys::boo::css::PropertyParserHelpers
       case ValueId::Unsafe:
       case ValueId::Safe:
       {
-        return ConsumeAlignmentOverflowPosition(
-          tokens, state, initial,
-          [&](auto second)
-          {
-            switch (second)
-            {
-              case ValueId::AnchorCenter:
-              {
-                if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
-                {
-                  return false;
-                }
-
-                KRYS_FALLTHROUGH;
-              }
-              case ValueId::Start:
-              case ValueId::End:
-              case ValueId::Center:
-              case ValueId::SelfStart:
-              case ValueId::SelfEnd:
-              case ValueId::FlexStart:
-              case ValueId::FlexEnd:
-              {
-                return true;
-              }
-              default:
-              {
-                return false;
-              }
-            }
-          });
+        return ConsumeAlignmentOverflowPosition(tokens, state, initial,
+                                                [&](auto second)
+                                                {
+                                                  switch (second)
+                                                  {
+                                                    case ValueId::AnchorCenter:
+                                                    {
+                                                      KRYS_FALLTHROUGH;
+                                                    }
+                                                    case ValueId::Start:
+                                                    case ValueId::End:
+                                                    case ValueId::Center:
+                                                    case ValueId::SelfStart:
+                                                    case ValueId::SelfEnd:
+                                                    case ValueId::FlexStart:
+                                                    case ValueId::FlexEnd:
+                                                    {
+                                                      return true;
+                                                    }
+                                                    default:
+                                                    {
+                                                      return false;
+                                                    }
+                                                  }
+                                                });
       }
 
       default: return nullptr;
@@ -538,11 +506,6 @@ namespace krys::boo::css::PropertyParserHelpers
       // account for additional `legacy` keyword.
       case ValueId::AnchorCenter:
       {
-        if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
-        {
-          return nullptr;
-        }
-
         KRYS_FALLTHROUGH;
       }
       case ValueId::Start:
@@ -573,39 +536,33 @@ namespace krys::boo::css::PropertyParserHelpers
       case ValueId::Unsafe:
       case ValueId::Safe:
       {
-        return ConsumeAlignmentOverflowPosition(
-          tokens, state, initial,
-          [&](auto second)
-          {
-            switch (second)
-            {
-              case ValueId::AnchorCenter:
-              {
-                if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
-                {
-                  return false;
-                }
-
-                KRYS_FALLTHROUGH;
-              }
-              case ValueId::Start:
-              case ValueId::End:
-              case ValueId::Center:
-              case ValueId::SelfStart:
-              case ValueId::SelfEnd:
-              case ValueId::FlexStart:
-              case ValueId::FlexEnd:
-              case ValueId::Left:
-              case ValueId::Right:
-              {
-                return true;
-              }
-              default:
-              {
-                return false;
-              }
-            }
-          });
+        return ConsumeAlignmentOverflowPosition(tokens, state, initial,
+                                                [&](auto second)
+                                                {
+                                                  switch (second)
+                                                  {
+                                                    case ValueId::AnchorCenter:
+                                                    {
+                                                      KRYS_FALLTHROUGH;
+                                                    }
+                                                    case ValueId::Start:
+                                                    case ValueId::End:
+                                                    case ValueId::Center:
+                                                    case ValueId::SelfStart:
+                                                    case ValueId::SelfEnd:
+                                                    case ValueId::FlexStart:
+                                                    case ValueId::FlexEnd:
+                                                    case ValueId::Left:
+                                                    case ValueId::Right:
+                                                    {
+                                                      return true;
+                                                    }
+                                                    default:
+                                                    {
+                                                      return false;
+                                                    }
+                                                  }
+                                                });
       }
 
       // legacy | legacy && [ left | right | center ]

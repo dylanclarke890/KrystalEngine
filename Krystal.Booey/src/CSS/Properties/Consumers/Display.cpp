@@ -26,7 +26,7 @@ namespace krys::boo::css::PropertyParserHelpers
     // Parse single keyword values
     auto singleKeyword = [&]()
     {
-      if (state.Context.gridLanesEnabled && range.Peek().ValueId() == ValueId::InlineGridLanes)
+      if (range.Peek().ValueId() == ValueId::InlineGridLanes)
       {
         return ConsumeIdent(range);
       }
@@ -101,11 +101,6 @@ namespace krys::boo::css::PropertyParserHelpers
         // <display-inside>
         case ValueId::GridLanes:
         {
-          if (!state.Context.gridLanesEnabled)
-          {
-            return nullptr;
-          }
-
           KRYS_FALLTHROUGH;
         }
         case ValueId::Flex:

@@ -7562,6 +7562,10 @@ class GeneratePropertyId:
                 ],
             )
 
+            with writer.namespace(namespace="krys::boo"):
+                writer.write("struct Settings;")
+            writer.newline()
+
             with writer.namespace(namespace="krys::boo::css"):
                 self._generate_property_id_hpp_property_constants(to=writer)
                 self._generate_property_id_hpp_property_settings(to=writer)
@@ -7740,6 +7744,7 @@ class GeneratePropertyId:
             to.write_lines(settings_variable_declarations)
             to.newline()
             to.write(f"PropertySettings() noexcept = default;")
+            to.write(f"explicit PropertySettings(const Settings &settings) noexcept;")
             to.newline()
             to.write(f"KRYS_NODISCARD size_t Hash() const noexcept;")
         to.newline()
@@ -8022,8 +8027,7 @@ class GeneratePropertyId:
 
             # TODO: Re-enable this once we support animation properties.
             # self._generate_animation_property_functions(to=writer)
-            # TODO: Re-enable this once we support global settings.
-            # self._generate_css_property_settings_constructor(to=writer)
+            self._generate_css_property_settings_constructor(to=writer)
             self._generate_css_property_settings_operator_equal(to=writer)
             self._generate_css_property_settings_hash(to=writer)
             self._generate_valid_keywords_for_property(to=writer)
@@ -8039,6 +8043,7 @@ class GeneratePropertyId:
                     "Krystal.Booey/CSS/Parser/ParserContext.hpp",
                     "Krystal.Booey/CSS/Properties/Property.hpp",
                     "Krystal.Booey/CSS/Values/ValueId.hpp",
+                    "Krystal.Booey/Page/Settings.hpp",
                     "Krystal.Core/Types/SmallList.hpp",
                     "Krystal.Core/Types/String.hpp",
                 ],
@@ -8329,41 +8334,52 @@ class GeneratePropertyId:
             to.write("return Span<const PropertyId> {PropertiesExcludingThreadedOnly};")
 
     def _generate_css_property_settings_constructor(self, *, to: Writer):
-        first_settings_initializer, *remaining_settings_initializers = [
-            f"{flag} {{ settings.{flag}() }}" for flag in self.properties_and_descriptors.settings_flags
+        # `Settings` names its members in PascalCase: `colorFilterEnabled` is `Settings::ColorFilterEnabled`.
+        settings_initializers = [
+            f"{flag}(settings.{flag[0].upper()}{flag[1:]})" for flag in self.properties_and_descriptors.settings_flags
         ]
 
         to.write(f"PropertySettings::PropertySettings(const Settings &settings) noexcept")
         with to.indent():
-            to.write(f": {first_settings_initializer}")
-            to.write_lines((f", {initializer}" for initializer in remaining_settings_initializers))
+            if settings_initializers:
+                first_settings_initializer, *remaining_settings_initializers = settings_initializers
+                to.write(f": {first_settings_initializer}")
+                to.write_lines((f", {initializer}" for initializer in remaining_settings_initializers))
 
         to.write("{")
         to.write("}")
         to.newline()
 
     def _generate_css_property_settings_operator_equal(self, *, to: Writer):
-        first, *middle, last = (f"a.{flag} == b.{flag}" for flag in self.properties_and_descriptors.settings_flags)
+        expressions = [f"a.{flag} == b.{flag}" for flag in self.properties_and_descriptors.settings_flags]
 
         with to.function_block(signature="bool operator==(const PropertySettings &a, const PropertySettings &b) noexcept"):
-            to.write(f"return {first}")
-            with to.indent():
-                to.write_lines((f"&& {expression}" for expression in middle))
-                to.write(f"&& {last};")
+            if not expressions:
+                to.write("return true;")
+            else:
+                first, *rest = expressions
+                to.write(f"return {first}" + ("" if rest else ";"))
+                with to.indent():
+                    for i, expression in enumerate(rest):
+                        to.write(f"&& {expression}" + (";" if i == len(rest) - 1 else ""))
         to.newline()
 
     def _generate_css_property_settings_hash(self, *, to: Writer):
-        first, *middle, last = (
-            f'{"static_cast<uint64>(" if i >= 32 else ""}{flag}{")" if i >= 32 else ""} << {i}'
+        expressions = [
+            f"static_cast<uint64>({flag}) << {i}"
             for (i, flag) in enumerate(self.properties_and_descriptors.settings_flags)
-        )
+        ]
 
         with to.function_block(signature="size_t PropertySettings::Hash() const noexcept"):
-            to.write(f"uint64 bits = {first}")
-            with to.indent():
-                to.write_lines((f"| {expression}" for expression in middle))
-                to.write(f"| {last};")
-            to.write(f"return DefaultHash<uint64>::Hash(bits);")
+            if not expressions:
+                to.write("return 0;")
+            else:
+                first, *rest = expressions
+                to.write(f"uint64 bits = {first}" + ("" if rest else ";"))
+                with to.indent():
+                    for i, expression in enumerate(rest):
+                        to.write(f"| {expression}" + (";" if i == len(rest) - 1 else ""))
+                to.write(f"return DefaultHash<uint64>::Hash(bits);")
         to.newline()
 
     def _generate_valid_keywords_for_property(self, *, to: Writer):

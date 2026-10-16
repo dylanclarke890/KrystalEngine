@@ -31,7 +31,6 @@ namespace krys::boo::style::tests
     {
       css::ParserContext context {css::ParserMode::HTMLStandard};
       context.colorLayersEnabled = true;
-      context.contrastColorEnabled = true;
       return context;
     }();
 

@@ -15,7 +15,6 @@ namespace krys::boo::css::tests
   KRYS_NODISCARD inline Ref<MutableStyleProperties> ParseDescriptors(utf8_stringview css, RuleType ruleType)
   {
     auto context = DeclarationTestContext();
-    context.PropertySettings.crossDocumentViewTransitionsEnabled = true;
     auto properties = MutableStyleProperties::Create(ParserMode::HTMLStandard);
     while (!css.empty())
     {

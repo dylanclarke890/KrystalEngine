@@ -34,16 +34,11 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"url(a b)", consume, context) == "<null>");
     CHECK(ConsumeToText(u8"\"a.png\"", consume, context) == "<null>");
     CHECK(ConsumeToText(u8"src(\"a.png\")", consume, context) == "<null>");
-
-    // Modifiers are rejected unless the setting is on.
-    CHECK(ConsumeToText(u8"url(\"a.png\" cross-origin(anonymous))", Consume<AllModifiers>, context)
-          == "<null>");
   }
 
   TEST_CASE("PropertyParserHelpers(ConsumeURL modifiers)", "[CSS][Properties][Consumers]")
   {
     ParserContext context {ParserMode::HTMLStandard, url::URL(u8"https://example.com/")};
-    context.cssURLModifiersEnabled = true;
 
     CHECK(ConsumeToText(u8"url(\"a\" cross-origin(anonymous))", Consume<AllModifiers>, context)
           == "url(\"a\" cross-origin(anonymous))");
@@ -61,9 +56,6 @@ namespace krys::boo::css::PropertyParserHelpers::tests
           == "<null>");
     CHECK(ConsumeToText(u8"url(\"a\" foo(bar))", Consume<AllModifiers>, context) == "<null>");
 
-    // integrity() has its own setting.
-    CHECK(ConsumeToText(u8"url(\"a\" integrity(\"sha384-x\"))", Consume<AllModifiers>, context) == "<null>");
-    context.cssURLIntegrityModifierEnabled = true;
     CHECK(ConsumeToText(u8"url(\"a\" integrity(\"sha384-x\"))", Consume<AllModifiers>, context)
           == "url(\"a\" integrity(\"sha384-x\"))");
     CHECK(ConsumeToText(u8"url(\"a\" integrity(\"\"))", Consume<AllModifiers>, context)

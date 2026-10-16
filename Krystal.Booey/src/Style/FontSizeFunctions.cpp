@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Style/FontSizeFunctions.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
@@ -77,7 +78,7 @@ namespace krys::boo::style
     return {ComputedFontSizeFromSpecifiedSize(specifiedSize, isAbsoluteSize, zoomFactor,
                                               useSVGZoomRules ? MinimumFontSizeRule::None
                                                               : MinimumFontSizeRule::AbsoluteAndRelative,
-                                              DocumentSettingsValues(document)),
+                                              document.GetSettings().Values),
             zoomFactor};
   }
 
@@ -86,7 +87,7 @@ namespace krys::boo::style
                                                           const dom::Document &document) noexcept
   {
     return ComputedFontSizeFromSpecifiedSize(specifiedSize, isAbsoluteSize, zoomFactor,
-                                             MinimumFontSizeRule::Absolute, DocumentSettingsValues(document));
+                                             MinimumFontSizeRule::Absolute, document.GetSettings().Values);
   }
 
   constexpr int32 fontSizeTableMax = 16;
@@ -144,7 +145,7 @@ namespace krys::boo::style
   float FontSizeForKeyword(uint32 keywordID, bool shouldUseFixedDefaultSize,
                            const dom::Document &document) noexcept
   {
-    return FontSizeForKeyword(keywordID, shouldUseFixedDefaultSize, DocumentSettingsValues(document),
+    return FontSizeForKeyword(keywordID, shouldUseFixedDefaultSize, document.GetSettings().Values,
                               document.InQuirksMode());
   }
 
@@ -167,7 +168,7 @@ namespace krys::boo::style
                                    const dom::Document &document) noexcept
   {
     bool quirksMode = document.InQuirksMode();
-    const auto &settings = DocumentSettingsValues(document);
+    const auto &settings = document.GetSettings().Values;
     int32 mediumSize = shouldUseFixedDefaultSize ? settings.DefaultFixedFontSize : settings.DefaultFontSize;
     if (mediumSize >= fontSizeTableMin && mediumSize <= fontSizeTableMax)
     {

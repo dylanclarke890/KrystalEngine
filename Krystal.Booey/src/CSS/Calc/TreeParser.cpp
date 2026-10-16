@@ -698,11 +698,6 @@ namespace krys::boo::css::calc
   {
     // <random()> = random( <random-value-sharing>? , <calc-sum>, <calc-sum>, <calc-sum>? )
 
-    if (!state.PropertyParserState.Context.cssRandomFunctionEnabled)
-    {
-      return null;
-    }
-
     if (state.PropertyParserState.CurrentRule != RuleType::Style
         && state.PropertyParserState.CurrentRule != RuleType::Keyframe)
     {
@@ -851,11 +846,6 @@ namespace krys::boo::css::calc
   {
     // <progress()> = progress( <calc-sum>, <calc-sum>, <calc-sum> )
 
-    if (!state.PropertyParserState.Context.cssProgressFunctionEnabled)
-    {
-      return null;
-    }
-
     using Op = Progress;
 
     auto value = ParseCalcSum(tokens, depth, state);
@@ -984,11 +974,6 @@ namespace krys::boo::css::calc
       return null;
     }
 
-    if (!state.PropertyParserState.Context.PropertySettings.cssAnchorPositioningEnabled)
-    {
-      return null;
-    }
-
     auto anchorElement = PropertyParserHelpers::ConsumeDashedIdentRaw(tokens);
 
     // <anchor-side> = inside | outside | top | left | right | bottom | start | end | self-start | self-end |
@@ -1100,11 +1085,6 @@ namespace krys::boo::css::calc
     // <anchor-size> = width | height | block | inline | self-block | self-inline
 
     if (!state.ParserOptions.PropertyOptions.AnchorSizePolicy)
-    {
-      return null;
-    }
-
-    if (!state.PropertyParserState.Context.PropertySettings.cssAnchorPositioningEnabled)
     {
       return null;
     }
@@ -1386,11 +1366,6 @@ namespace krys::boo::css::calc
         // <sibling-count()> = sibling-count()
         //     - INPUT: none
         //     - OUTPUT: <integer>
-        if (!state.PropertyParserState.Context.cssTreeCountingFunctionsEnabled)
-        {
-          return null;
-        }
-
         if (state.PropertyParserState.CurrentRule != RuleType::Style
             && state.PropertyParserState.CurrentRule != RuleType::Keyframe)
         {
@@ -1410,11 +1385,6 @@ namespace krys::boo::css::calc
         // <sibling-index()> = sibling-index()
         //     - INPUT: none
         //     - OUTPUT: <integer>
-        if (!state.PropertyParserState.Context.cssTreeCountingFunctionsEnabled)
-        {
-          return null;
-        }
-
         if (state.PropertyParserState.CurrentRule != RuleType::Style
             && state.PropertyParserState.CurrentRule != RuleType::Keyframe)
         {

@@ -125,8 +125,7 @@ namespace krys::boo::css
             result.HasReferences = true;
             continue;
           }
-          if (token.Type() == TokenType::Function && IsCustomPropertyName(token.IdentCodePoints())
-              && parserContext.PropertySettings.cssFunctionAtRuleEnabled)
+          if (token.Type() == TokenType::Function && IsCustomPropertyName(token.IdentCodePoints()))
           {
             // https://drafts.csswg.org/css-mixins/#typedef-dashed-function
             if (!IsValidDashedFunction(block, parserContext))

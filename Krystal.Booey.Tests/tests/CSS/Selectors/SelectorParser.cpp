@@ -203,9 +203,6 @@ namespace krys::boo::css::tests
     KRYS_NODISCARD SelectorParserContext AllEnabled() noexcept
     {
       SelectorParserContext context;
-      context.viewTransitionsEnabled = true;
-      context.popoverAttributeEnabled = true;
-      context.targetTextPseudoElementEnabled = true;
       return context;
     }
   }
@@ -340,7 +337,6 @@ namespace krys::boo::css::tests
     CHECK(!SelectorParser::ParsePseudoElement(u8"::part(x)", context).first);
     CHECK(!SelectorParser::ParsePseudoElement(u8"before", context).first);
     CHECK(!SelectorParser::ParsePseudoElement(u8"", context).first);
-    CHECK(!SelectorParser::ParsePseudoElement(u8"::view-transition-group(x)", context).first);
 
     auto enabled = AllEnabled();
     CHECK(SelectorParser::ParsePseudoElement(u8"::view-transition-group(x)", enabled)
@@ -416,7 +412,6 @@ namespace krys::boo::css::tests
     CHECK(Parse(u8":is(::before)") == u8":is(::before)");
     CHECK(Parse(u8":not(::before)") == u8"<invalid>");
 
-    CHECK(Parse(u8":active-view-transition-type(a, b)") == u8"<invalid>");
     CHECK(Parse(u8":active-view-transition-type(a, b)", AllEnabled())
           == u8":active-view-transition-type(a, b)");
     CHECK(Parse(u8":active-view-transition-type(a,)", AllEnabled()) == u8"<invalid>");
@@ -448,7 +443,6 @@ namespace krys::boo::css::tests
     CHECK(Parse(u8"::cue") == u8"::cue");
     CHECK(Parse(u8"video::cue(b, i)") == u8"video::cue(b, i)");
     CHECK(Parse(u8"::cue(b c)") == u8"<invalid>");
-    CHECK(Parse(u8"::target-text") == u8"<invalid>");
     CHECK(Parse(u8"::target-text", AllEnabled()) == u8"::target-text");
 
     auto enabled = AllEnabled();

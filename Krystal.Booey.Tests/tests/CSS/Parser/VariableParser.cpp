@@ -115,9 +115,7 @@ namespace krys::boo::css::tests
     SECTION("Dashed functions")
     {
       ParserContext context(ParserMode::HTMLStandard);
-      CHECK_FALSE(ContainsValidVariableReferences(u8"--f(1px)", context));
 
-      context.PropertySettings.cssFunctionAtRuleEnabled = true;
       for (auto css : {u8"--f()", u8"--f(1px)", u8"--f(1px, red)", u8"--f({a, b}, c)"})
       {
         CAPTURE(ToNarrow(css));

@@ -423,8 +423,7 @@ namespace krys::boo::style
       return nullptr;
     }
 
-    // FIXME: Settings. Properties disabled by settings are exposed.
-    if (!css::IsExposed(propertyID, nullptr))
+    if (!css::IsExposed(propertyID, element->NodeDocument().CssParserContext().PropertySettings))
     {
       // Exit quickly, and avoid us ever having to update layout in this case.
       return nullptr;
@@ -532,7 +531,8 @@ namespace krys::boo::style
                                     css::ValuePool &pool, const RenderElement *renderer,
                                     ExtractorState::PropertyValueType valueType) const noexcept
   {
-    krys_debug_assert(css::IsExposed(propertyID, nullptr));
+    krys_debug_assert(
+      css::IsExposed(propertyID, _element->NodeDocument().CssParserContext().PropertySettings));
 
     ExtractorState state {
       .ValueType = valueType,
@@ -552,7 +552,8 @@ namespace krys::boo::style
                                                  css::ValuePool &pool, const RenderElement *renderer,
                                                  ExtractorState::PropertyValueType valueType) const noexcept
   {
-    krys_debug_assert(css::IsExposed(propertyID, nullptr));
+    krys_debug_assert(
+      css::IsExposed(propertyID, _element->NodeDocument().CssParserContext().PropertySettings));
 
     css::CSSOMString builder;
 

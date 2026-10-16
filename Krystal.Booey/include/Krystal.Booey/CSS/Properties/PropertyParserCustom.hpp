@@ -717,7 +717,7 @@ namespace krys::boo::css
           // background-*
           case PropertyId::BackgroundClip:
           {
-            return PropertyParsing::ConsumeSingleBackgroundClip(tokens, state);
+            return PropertyParsing::ConsumeSingleBackgroundClip(tokens);
           }
           case PropertyId::BackgroundBlendMode:
           {
@@ -1939,7 +1939,7 @@ namespace krys::boo::css
           continue;
         }
 
-        if (state.Context.PropertySettings.cssFontVariantEmojiEnabled && !emojiValue
+        if (!emojiValue
             && (emojiValue =
                   PropertyParsing::ParseStylePropertyLonghand(tokens, PropertyId::FontVariantEmoji, state)))
         {
@@ -2827,8 +2827,6 @@ namespace krys::boo::css
                                                          const PropertyShorthand &,
                                                          PropertyParserResult &result) noexcept
     {
-      krys_debug_assert(state.Context.PropertySettings.cssLineClampEnabled);
-
       if (tokens.Peek().ValueId() == ValueId::None)
       {
         // Sets max-lines to none, continue to auto, and block-ellipsis to none.
@@ -2952,7 +2950,7 @@ namespace krys::boo::css
           continue;
         }
 
-        if (!style && (style = PropertyParsing::ConsumeTextWrapStyle(tokens, state)))
+        if (!style && (style = PropertyParsing::ConsumeTextWrapStyle(tokens)))
         {
           continue;
         }

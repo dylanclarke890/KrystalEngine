@@ -239,11 +239,16 @@ def write_default_case(writer: Writer, *, body: list[str]):
 
 
 def write_is_pseudo_class_enabled(writer: Writer, pseudo_classes):
+    flagged = {name: data for name, data in pseudo_classes.items() if "settings-flag" in data}
+    if not flagged:
+        signature = f"inline bool Selector::IsPseudoClassEnabled({PSEUDO_CLASS_TYPE}, const SelectorParserContext &) noexcept"
+        with writer.function_block(signature=signature):
+            writer.write("return true;")
+        return
+
     signature = f"inline bool Selector::IsPseudoClassEnabled({PSEUDO_CLASS_TYPE} type, const SelectorParserContext &context) noexcept"
     with writer.function_block(signature=signature), writer.switch_block(expr="type"):
-        for pseudo_name, pseudo_data in pseudo_classes.items():
-            if "settings-flag" not in pseudo_data:
-                continue
+        for pseudo_name, pseudo_data in flagged.items():
 
             write_case(
                 writer,

@@ -253,9 +253,6 @@ namespace krys::boo::css::PropertyParserHelpers::tests
     CHECK(ConsumeToText(u8"-webkit-filter(none, sepia())", Image, context) == "filter(none, sepia())");
     CHECK(ConsumeToText(u8"filter(url(a.png))", Image, context) == "<null>");
 
-    // paint() is behind a setting.
-    CHECK(ConsumeToText(u8"paint(foo, 1px)", Image, context) == "<null>");
-    context.cssPaintingAPIEnabled = true;
     CHECK(ConsumeToText(u8"paint(foo, 1px)", Image, context) == "paint(foo)");
     CHECK(ConsumeToText(u8"paint(foo)", Image, context) == "paint(foo)");
     CHECK(ConsumeToText(u8"paint(foo 1px)", Image, context) == "<null>");

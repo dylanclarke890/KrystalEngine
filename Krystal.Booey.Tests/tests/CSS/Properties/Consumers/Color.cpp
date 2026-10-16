@@ -338,14 +338,12 @@ namespace krys::boo::css::tests
       CHECK_FALSE(Parse(u8"light-dark(red blue)"));
     }
 
-    SECTION("contrast-color() and color-layers() are behind settings")
+    SECTION("contrast-color(), and color-layers() behind its setting")
     {
-      CHECK_FALSE(Parse(u8"contrast-color(red)"));
       CHECK_FALSE(Parse(u8"color-layers(red, blue)"));
 
       auto enabled = ParseOptions {};
       enabled.Context.colorLayersEnabled = true;
-      enabled.Context.contrastColorEnabled = true;
       CHECK(Serialised(u8"contrast-color(red)", enabled) == "contrast-color(red)");
       CHECK(Serialised(u8"color-layers(red, blue)", enabled) == "color-layers(red, blue)");
       CHECK_FALSE(Parse(u8"contrast-color(red, blue)", enabled));
@@ -455,13 +453,9 @@ namespace krys::boo::css::tests
     ParserContext context {ParserMode::HTMLStandard};
     CHECK(ParseDynamicRangeLimit(u8"standard", context) == DynamicRangeLimit {keywords::Standard {}});
     CHECK(ParseDynamicRangeLimit(u8"no-limit", context) == DynamicRangeLimit {keywords::NoLimit {}});
-    CHECK_FALSE(ParseDynamicRangeLimit(u8"constrained", context));
-    CHECK_FALSE(ParseDynamicRangeLimit(u8"dynamic-range-limit-mix(standard 50%, no-limit 50%)", context));
     CHECK_FALSE(ParseDynamicRangeLimit(u8"high", context));
 
     ParserContext enabled {ParserMode::HTMLStandard};
-    enabled.cssDynamicRangeLimitMixEnabled = true;
-    enabled.cssConstrainedDynamicRangeLimitEnabled = true;
     CHECK(ParseDynamicRangeLimit(u8"constrained", enabled) == DynamicRangeLimit {keywords::Constrained {}});
 
     auto mix = ParseDynamicRangeLimit(u8"dynamic-range-limit-mix(standard 25%, 75% no-limit)", enabled);

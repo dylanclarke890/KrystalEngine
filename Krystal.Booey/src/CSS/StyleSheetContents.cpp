@@ -645,7 +645,7 @@ namespace krys::boo::css
           }
           case RuleType::CounterStyle:
           {
-            return static_cast<bool>(_parserContext.counterStyleAtRuleImageSymbolsEnabled);
+            return true;
           }
           case RuleType::Media:
           case RuleType::Page:

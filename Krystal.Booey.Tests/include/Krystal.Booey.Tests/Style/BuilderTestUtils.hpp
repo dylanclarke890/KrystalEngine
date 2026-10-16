@@ -63,25 +63,7 @@ namespace krys::boo::style::tests
     KRYS_NODISCARD static css::ParserContext ParseContext() noexcept
     {
       auto context = css::tests::DeclarationTestContext();
-      context.PropertySettings.accentColorEnabled = true;
       context.PropertySettings.colorFilterEnabled = true;
-      context.PropertySettings.cssUnprefixedBackdropFilterEnabled = true;
-      context.PropertySettings.cssCornerShapeEnabled = true;
-      context.cssTextDecorationLineErrorValues = true;
-      context.cssShapeFunctionEnabled = true;
-      context.PropertySettings.cssDPropertyEnabled = true;
-      context.PropertySettings.cssAnchorPositioningEnabled = true;
-      context.PropertySettings.cssLineFitEdgeEnabled = true;
-      context.PropertySettings.cssMathDepthEnabled = true;
-      context.PropertySettings.cssRhythmicSizingEnabled = true;
-      context.PropertySettings.cssScrollbarColorEnabled = true;
-      context.PropertySettings.cssScrollbarGutterEnabled = true;
-      context.PropertySettings.cssScrollbarWidthEnabled = true;
-      context.PropertySettings.cssTextAutospaceEnabled = true;
-      context.PropertySettings.cssTextBoxTrimEnabled = true;
-      context.PropertySettings.cssTextSpacingTrimEnabled = true;
-      context.PropertySettings.scrollDrivenAnimationsEnabled = true;
-      context.PropertySettings.viewTransitionsEnabled = true;
       context.springTimingFunctionEnabled = true;
       return context;
     }

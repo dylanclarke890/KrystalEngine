@@ -970,11 +970,6 @@ namespace krys::boo::css::PropertyParserHelpers
     // shape() = shape( <'fill-rule'>? from <coordinate-pair>, <shape-command># )
     // https://drafts.csswg.org/css-shapes-2/#shape-function
 
-    if (!state.Context.cssShapeFunctionEnabled)
-    {
-      return null;
-    }
-
     auto fillRule = ConsumeFillRule(args);
 
     if (!ConsumeIdentRaw<ValueId::From>(args))

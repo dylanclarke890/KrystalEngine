@@ -93,10 +93,7 @@ namespace krys::boo::style::tests
 
     SECTION("Every rule of the sheets parses")
     {
-      // FIXME: `spelling-error` and `grammar-error` are behind the cssTextDecorationLineErrorValues setting,
-      // which is on by default; parser contexts have no settings yet.
-      RequireFullyParsed(css::HTMLUserAgentStyleSheet, UserAgentStyle::DefaultStyleSheet,
-                         {":root::spelling-error", ":root::grammar-error"});
+      RequireFullyParsed(css::HTMLUserAgentStyleSheet, UserAgentStyle::DefaultStyleSheet);
       RequireFullyParsed(css::QuirksUserAgentStyleSheet, UserAgentStyle::QuirksStyleSheet);
       RequireFullyParsed(css::CounterStylesUserAgentStyleSheet, UserAgentStyle::CounterStylesStyleSheet);
     }

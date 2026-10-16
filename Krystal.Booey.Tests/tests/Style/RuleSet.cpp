@@ -18,7 +18,6 @@ namespace krys::boo::style::tests
     KRYS_NODISCARD Ref<css::StyleSheetContents> ParseSheet(utf8_stringview text)
     {
       css::ParserContext context(css::ParserMode::HTMLStandard);
-      context.PropertySettings.viewTransitionsEnabled = true;
       auto sheet = css::StyleSheetContents::Create(context);
       sheet->ParseString(css::CSSOMString(text));
       return sheet;

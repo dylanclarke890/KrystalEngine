@@ -1198,11 +1198,6 @@ namespace krys::boo::css
 
   RefPtr<ViewTransitionRule> Parser::ConsumeViewTransitionRule(TokenRange prelude, TokenRange block) noexcept
   {
-    if (!_context.PropertySettings.crossDocumentViewTransitionsEnabled)
-    {
-      return nullptr;
-    }
-
     if (!prelude.IsAtEnd())
     {
       return nullptr; // Parse error; @view-transition prelude should be empty
@@ -1214,11 +1209,6 @@ namespace krys::boo::css
 
   RefPtr<PositionTryRule> Parser::ConsumePositionTryRule(TokenRange prelude, TokenRange block) noexcept
   {
-    if (!_context.PropertySettings.cssAnchorPositioningEnabled)
-    {
-      return nullptr;
-    }
-
     // Prelude should ONLY be a <dashed-ident>.
     auto ruleName = PropertyParserHelpers::ConsumeDashedIdentRaw(prelude);
     if (!ruleName)
@@ -1237,11 +1227,6 @@ namespace krys::boo::css
 
   RefPtr<FunctionRule> Parser::ConsumeFunctionRule(TokenRange prelude, TokenRange block) noexcept
   {
-    if (!_context.PropertySettings.cssFunctionAtRuleEnabled)
-    {
-      return nullptr;
-    }
-
     // https://drafts.csswg.org/css-mixins/#function-rule
     // <@function> = @function <function-token> <function-parameter>#? ) [ returns <css-type> ]?
 

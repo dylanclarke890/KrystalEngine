@@ -76,12 +76,6 @@ namespace krys::boo::css::tests
   KRYS_NODISCARD inline ParserContext DeclarationTestContext(ParserMode mode = ParserMode::HTMLStandard)
   {
     ParserContext context {mode};
-    context.PropertySettings.cssAnchorPositioningEnabled = true;
-    context.PropertySettings.cssCornerShapeEnabled = true;
-    context.PropertySettings.cssLineClampEnabled = true;
-    context.PropertySettings.cssTextBoxTrimEnabled = true;
-    context.PropertySettings.overscrollBehaviorEnabled = true;
-    context.PropertySettings.scrollDrivenAnimationsEnabled = true;
     return context;
   }
 

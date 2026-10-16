@@ -27,8 +27,8 @@ namespace krys::boo::css::tests
       CHECK_FALSE(context.IsHTMLDocument);
       CHECK_FALSE(context.HasDocumentSecurityOrigin);
       CHECK(context.LoadedFromOpaqueSource == LoadedFromOpaqueSource::No);
-      CHECK(context.cssTextWrapPrettyEnabled);
-      CHECK_FALSE(context.cssAppearanceBaseEnabled);
+      CHECK_FALSE(context.springTimingFunctionEnabled);
+      CHECK_FALSE(context.thumbAndTrackPseudoElementsEnabled);
       CHECK(context.PropertySettings == PropertySettings {});
     }
 
@@ -42,18 +42,9 @@ namespace krys::boo::css::tests
     SECTION("UA sheets enable the features they rely on")
     {
       ParserContext context {ParserMode::UASheet};
-      CHECK(context.cssAppearanceBaseEnabled);
-      CHECK(context.cssTextTransformMathAutoEnabled);
-      CHECK(context.popoverAttributeEnabled);
-      CHECK(context.cssMathDepthEnabled);
       CHECK(context.thumbAndTrackPseudoElementsEnabled);
       CHECK(context.cssInternalAutoBaseParsingEnabled);
-      CHECK(context.PropertySettings.cssInputSecurityEnabled);
-      CHECK(context.PropertySettings.supportHDRDisplayEnabled);
-      CHECK(context.PropertySettings.viewTransitionsEnabled);
-      CHECK(context.PropertySettings.cssFieldSizingEnabled);
-      CHECK(context.PropertySettings.cssMathDepthEnabled);
-      CHECK_FALSE(context.cssPaintingAPIEnabled);
+      CHECK_FALSE(context.springTimingFunctionEnabled);
     }
 
     SECTION("Initialises the static value pool")
@@ -108,14 +99,14 @@ namespace krys::boo::css::tests
 
     SECTION("Settings")
     {
-      b.cssRandomFunctionEnabled = true;
+      b.springTimingFunctionEnabled = true;
       CHECK(a != b);
       CHECK(a.Hash() != b.Hash());
     }
 
     SECTION("Property settings")
     {
-      b.PropertySettings.cssFieldSizingEnabled = true;
+      b.PropertySettings.colorFilterEnabled = true;
       CHECK(a != b);
       CHECK(a.Hash() != b.Hash());
       CHECK(a.PropertySettings.Hash() != b.PropertySettings.Hash());

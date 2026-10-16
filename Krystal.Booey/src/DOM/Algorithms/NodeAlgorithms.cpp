@@ -22,6 +22,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/SVG/SVGDocument.hpp"
 #include <ranges>
 
@@ -176,6 +177,7 @@ namespace krys::boo::dom
       docCopy.SetQuirksMode(doc._quirksMode);
       docCopy.SetURL(url::URL(doc._url));
       docCopy._allowDeclarativeShadowRoots = doc._allowDeclarativeShadowRoots;
+      docCopy.SetSettings(ShareRef(doc.GetSettings()));
 
       if (doc._customElementRegistry != nullptr && doc._customElementRegistry->IsScoped())
       {

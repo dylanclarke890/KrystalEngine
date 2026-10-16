@@ -146,7 +146,6 @@ namespace krys::boo::css::tests
     SECTION("@position-try")
     {
       ParserContext context {ParserMode::HTMLStandard};
-      context.PropertySettings.cssAnchorPositioningEnabled = true;
 
       CHECK(ParseToText(u8"1px", PropertyId::Top, context, RuleType::PositionTry) == "top: 1px");
       CHECK(ParseToText(u8"1px", PropertyId::MarginLeft, context, RuleType::PositionTry)

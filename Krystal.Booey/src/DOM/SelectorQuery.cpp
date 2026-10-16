@@ -410,10 +410,9 @@ namespace krys::boo::dom
   size_t SelectorQueryCache::KeyHash::operator()(const Key &key) const noexcept
   {
     auto &context = key.second;
-    return Hash::Combine(std::hash<DOMString> {}(key.first), context.Mode, context.imageControlsEnabled,
-                         context.popoverAttributeEnabled, context.targetTextPseudoElementEnabled,
-                         context.thumbAndTrackPseudoElementsEnabled, context.viewTransitionsEnabled,
-                         context.cssAppearanceBaseEnabled, context.webkitMediaTextTrackDisplayQuirkEnabled);
+    return Hash::Combine(std::hash<DOMString> {}(key.first), context.Mode,
+                         context.thumbAndTrackPseudoElementsEnabled,
+                         context.webkitMediaTextTrackDisplayQuirkEnabled);
   }
 
   SelectorQueryCache &SelectorQueryCache::Singleton() noexcept

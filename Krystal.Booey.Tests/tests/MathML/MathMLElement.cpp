@@ -31,9 +31,8 @@ namespace krys::boo::mathml::tests
     CHECK(Hints(u8"<math><mstyle id=e displaystyle=TRUE></mstyle></math>") == "math-style: normal;");
     CHECK(Hints(u8"<math><mstyle id=e displaystyle=false></mstyle></math>") == "math-style: compact;");
     CHECK(Hints(u8"<math><mstyle id=e displaystyle=maybe></mstyle></math>").empty());
-    // math-depth is behind the cssMathDepthEnabled setting, off by default, so scriptlevel maps to nothing.
-    CHECK(Hints(u8"<math><mstyle id=e scriptlevel=2></mstyle></math>").empty());
-    CHECK(Hints(u8"<math><mstyle id=e scriptlevel=+1></mstyle></math>").empty());
+    CHECK(Hints(u8"<math><mstyle id=e scriptlevel=2></mstyle></math>") == "math-depth: 2;");
+    CHECK(Hints(u8"<math><mstyle id=e scriptlevel=+1></mstyle></math>") == "math-depth: add(1);");
     CHECK(Hints(u8"<math><mstyle id=e scriptlevel=x></mstyle></math>").empty());
     // Deprecated attributes.
     CHECK(

@@ -739,11 +739,6 @@ namespace krys::boo::css::PropertyParserHelpers
 
       krys_debug_assert(tokens.Peek().FunctionId() == ValueId::ContrastColor);
 
-      if (!state.PropertyParserState.Context.contrastColorEnabled)
-      {
-        return null;
-      }
-
       auto args = ConsumeFunction(tokens);
 
       auto color = ConsumeColor(args, state);
@@ -1225,10 +1220,6 @@ namespace krys::boo::css::PropertyParserHelpers
       }
       case ValueId::Constrained:
       {
-        if (!state.Context.cssConstrainedDynamicRangeLimitEnabled)
-        {
-          return null;
-        }
         DiscardIdent(tokens);
         return DynamicRangeLimit {keywords::Constrained {}};
       }
@@ -1241,11 +1232,6 @@ namespace krys::boo::css::PropertyParserHelpers
       {
         break;
       }
-    }
-
-    if (!state.Context.cssDynamicRangeLimitMixEnabled)
-    {
-      return null;
     }
 
     if (tokens.Peek().FunctionId() == ValueId::DynamicRangeLimitMix)

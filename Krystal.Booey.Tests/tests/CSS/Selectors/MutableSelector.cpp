@@ -28,8 +28,6 @@ namespace krys::boo::css::tests
     CHECK(B::List(krys::move(before)).SelectorsText() == u8"::before");
 
     CHECK(!MutableSelector::ParsePseudoClassSelector(u8"nope", context));
-    CHECK(!MutableSelector::ParsePseudoClassSelector(u8"popover-open", context));
-    context.popoverAttributeEnabled = true;
     CHECK(MutableSelector::ParsePseudoClassSelector(u8"popover-open", context));
   }
 
@@ -49,8 +47,6 @@ namespace krys::boo::css::tests
     CHECK(B::List(krys::move(part)).SelectorsText() == u8"::details-content");
 
     CHECK(!MutableSelector::ParsePseudoElementSelector(u8"hover", context));
-    CHECK(!MutableSelector::ParsePseudoElementSelector(u8"target-text", context));
-    context.targetTextPseudoElementEnabled = true;
     CHECK(MutableSelector::ParsePseudoElementSelector(u8"target-text", context));
   }
 
