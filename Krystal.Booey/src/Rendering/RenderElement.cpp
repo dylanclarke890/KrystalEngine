@@ -5,6 +5,7 @@
 #include "Krystal.Booey/HTML/HTMLMarqueeElement.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
+#include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
@@ -16,6 +17,7 @@
 #include "Krystal.Booey/Rendering/RenderTableCol.hpp"
 #include "Krystal.Booey/Rendering/RenderTableRow.hpp"
 #include "Krystal.Booey/Rendering/RenderTableSection.hpp"
+#include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -212,8 +214,14 @@ namespace krys::boo
 
     StyleDidChange(diff, &oldStyle);
 
-    // FIXME: Tell the text children their style changed, then adjust the difference again and do the layout
-    // and repaint it asks for, once there are text renderers, layout and painting.
+    // Text renderers use their parent style. Notify them about the change.
+    for (auto &child : ChildrenOfType<RenderText>(*this))
+    {
+      child.StyleDidChange(diff, &oldStyle);
+    }
+
+    // FIXME: Adjust the difference again and do the layout and repaint it asks for, once there are layout and
+    // painting.
   }
 
   void RenderElement::StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept
@@ -513,10 +521,14 @@ namespace krys::boo
     return static_cast<dom::Element *>(GetNode());
   }
 
-  void RenderElement::DidAttachChild(RenderObject &, RenderObject *) noexcept
+  void RenderElement::DidAttachChild(RenderObject &child, RenderObject *) noexcept
   {
-    // FIXME: Tell text children their style changed, and remove the layers created in hidden SVG subtrees,
-    // once there are text renderers and layers.
+    if (auto *textRenderer = DynamicDowncast<RenderText>(child))
+    {
+      textRenderer->StyleDidChange(style::DifferenceResult::Equal, nullptr);
+    }
+
+    // FIXME: Remove the layers created in hidden SVG subtrees, once there are layers.
   }
 
   RenderObject *RenderElement::AttachRendererInternal(RenderPtr<RenderObject> child,

@@ -3,9 +3,16 @@
 #include "Krystal.Booey/DOM/CharacterData.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+#include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+
+namespace krys::boo
+{
+  class RenderStyle;
+  class RenderText;
+}
 
 namespace krys::boo::html
 {
@@ -68,6 +75,15 @@ namespace krys::boo::dom
     KRYS_NODISCARD RefPtr<html::HTMLSlotElement> AssignedSlot() noexcept;
 
 #pragma endregion
+
+    KRYS_NODISCARD RenderText *Renderer() const noexcept;
+
+    /// @brief Creates the renderer of this text, whose parent renderer has @p style.
+    KRYS_NODISCARD RenderPtr<RenderText> CreateTextRenderer(const RenderStyle &style) noexcept;
+
+    /// @brief Schedules an update of the renderer after @p lengthOfReplacedData bytes from
+    /// @p offsetOfReplacedData were replaced.
+    void UpdateRendererAfterContentChange(size_t offsetOfReplacedData, size_t lengthOfReplacedData) noexcept;
   };
 }
 

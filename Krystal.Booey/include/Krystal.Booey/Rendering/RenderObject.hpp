@@ -430,6 +430,14 @@ namespace krys::boo
     {
       return _type == Type::Grid;
     }
+    KRYS_NODISCARD bool IsRenderButton() const noexcept
+    {
+      return _type == Type::Button;
+    }
+    KRYS_NODISCARD bool IsRenderFrameSet() const noexcept
+    {
+      return _type == Type::FrameSet;
+    }
     KRYS_NODISCARD bool IsRenderLayerModelObject() const noexcept
     {
       return _typeFlags.Contains(TypeFlag::IsLayerModelObject);
@@ -465,6 +473,16 @@ namespace krys::boo
     KRYS_NODISCARD bool IsRenderLineBreak() const noexcept
     {
       return _type == Type::LineBreak;
+    }
+    /// @brief Whether this is the line break of a `<br>`.
+    KRYS_NODISCARD bool IsBR() const noexcept
+    {
+      return IsRenderLineBreak() && !HasWBRLineBreakFlag();
+    }
+    /// @brief Whether this is the line break opportunity of a `<wbr>`.
+    KRYS_NODISCARD bool IsWBR() const noexcept
+    {
+      return IsRenderLineBreak() && HasWBRLineBreakFlag();
     }
     KRYS_NODISCARD bool IsRenderTable() const noexcept
     {
@@ -673,6 +691,11 @@ namespace krys::boo
       _next = next;
     }
     void SetParent(RenderElement *parent) noexcept;
+
+    KRYS_NODISCARD bool HasWBRLineBreakFlag() const noexcept
+    {
+      return _typeSpecificFlags.LineBreakFlags().Contains(LineBreakFlag::IsWBR);
+    }
 
     virtual void WillBeDestroyed() noexcept;
 

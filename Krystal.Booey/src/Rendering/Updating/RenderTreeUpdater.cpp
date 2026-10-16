@@ -10,6 +10,7 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
+#include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
@@ -269,10 +270,19 @@ namespace krys::boo
         GetRenderTreePosition().InvalidateNextSibling();
       }
 
-      if (Is<dom::Text>(node))
+      if (auto *text = DynamicDowncast<dom::Text>(node))
       {
-        // FIXME: Text renderers (updateTextRenderer) and the previous renderer (storePreviousRenderer), once
-        // there are text renderers.
+        auto *textUpdate = _styleUpdate->GetTextUpdate(*text);
+        bool didCreateParent =
+          GetParent().Update && GetParent().Update->Changes.Contains(style::Change::Renderer);
+        bool mayNeedUpdateWhitespaceOnlyRenderer =
+          RenderingParent().DidCreateOrDestroyChildRenderer && text->ContainsOnlyASCIIWhitespace();
+        if (didCreateParent || textUpdate || mayNeedUpdateWhitespaceOnlyRenderer)
+        {
+          UpdateTextRenderer(*text, textUpdate, nullptr);
+        }
+
+        StorePreviousRenderer(*text);
         it.TraverseNextSkippingChildren();
         continue;
       }
@@ -287,6 +297,7 @@ namespace krys::boo
       // there may be other updates down the tree.
       if (!elementUpdate && !element.HasDisplayContents())
       {
+        StorePreviousRenderer(element);
         it.TraverseNextSkippingChildren();
         continue;
       }
@@ -295,6 +306,8 @@ namespace krys::boo
       {
         UpdateElementRenderer(element, *elementUpdate);
       }
+
+      StorePreviousRenderer(element);
 
       // FIXME: Skipped content in the top layer, once there's a top layer.
       auto mayHaveRenderedDescendants = [&]
@@ -380,7 +393,10 @@ namespace krys::boo
       GetGeneratedContent().UpdateBeforeOrAfterPseudoElement(element, *update, PseudoElementType::Before);
     }
 
-    // FIXME: The previous renderer (storePreviousRenderer), once there are text renderers.
+    if (auto *before = element.BeforePseudoElement())
+    {
+      StorePreviousRenderer(*before);
+    }
   }
 
   void RenderTreeUpdater::UpdateAfterDescendants(dom::Element &element,
@@ -535,6 +551,186 @@ namespace krys::boo
     // FIXME: The text manipulation controller and the accessibility cache, once there are any.
   }
 
+  bool RenderTreeUpdater::TextRendererIsNeeded(const dom::Text &textNode) noexcept
+  {
+    auto &renderingParent = RenderingParent();
+    auto &parentRenderer = renderingParent.Position->Parent();
+    if (!parentRenderer.CanHaveChildren())
+    {
+      return false;
+    }
+    if (parentRenderer.GetElement() && !parentRenderer.GetElement()->ChildShouldCreateRenderer(textNode))
+    {
+      return false;
+    }
+    // FIXME: Editing text always gets a renderer, once there's editing.
+    if (!textNode.Length())
+    {
+      return false;
+    }
+    if (!textNode.ContainsOnlyASCIIWhitespace())
+    {
+      return true;
+    }
+    if (Is<RenderText>(renderingParent.PreviousChildRenderer))
+    {
+      return true;
+    }
+    // This text node has nothing but white space. We may still need a renderer in some cases.
+    if (parentRenderer.IsRenderTable() || parentRenderer.IsRenderTableRow()
+        || parentRenderer.IsRenderTableSection() || parentRenderer.IsRenderTableCol()
+        || parentRenderer.IsRenderFrameSet() || parentRenderer.IsRenderGrid()
+        || (parentRenderer.IsRenderFlexibleBox() && !parentRenderer.IsRenderButton()))
+    {
+      return false;
+    }
+    if (parentRenderer.Style().PreserveNewline()) // pre/pre-wrap/pre-line always make renderers.
+    {
+      return true;
+    }
+
+    auto *previousRenderer = renderingParent.PreviousChildRenderer;
+    if (previousRenderer && previousRenderer->IsBR()) // <span><br/> <br/></span>
+    {
+      return false;
+    }
+
+    if (parentRenderer.IsRenderInline())
+    {
+      // <span><div/> <div/></span>
+      if (previousRenderer && !previousRenderer->IsInline() && !previousRenderer->IsOutOfFlowPositioned())
+      {
+        return false;
+      }
+
+      return true;
+    }
+
+    auto wouldBeFirstInlineContentInsideBlock = [&]
+    {
+      if (!parentRenderer.IsRenderBlock())
+      {
+        return false;
+      }
+
+      if (!previousRenderer)
+      {
+        return !parentRenderer.ChildrenInline();
+      }
+
+      if (previousRenderer->Parent() == &parentRenderer)
+      {
+        return !parentRenderer.ChildrenInline() && !previousRenderer->IsInline();
+      }
+
+      if (auto *parent = previousRenderer->Parent(); parent->IsAnonymous())
+      {
+        return !parent->ChildrenInline() && !previousRenderer->IsInline();
+      }
+
+      // Can't tell yet.
+      return false;
+    };
+    if (wouldBeFirstInlineContentInsideBlock())
+    {
+      return false;
+    }
+
+    return renderingParent.HasPrecedingInFlowChild;
+  }
+
+  void RenderTreeUpdater::CreateTextRenderer(dom::Text &textNode,
+                                             const style::TextUpdate *textUpdate) noexcept
+  {
+    krys_debug_assert(!textNode.Renderer());
+
+    auto &renderTreePosition = GetRenderTreePosition();
+    auto textRenderer = textNode.CreateTextRenderer(renderTreePosition.Parent().Style());
+
+    renderTreePosition.ComputeNextSibling(textNode);
+
+    if (!renderTreePosition.Parent().IsChildAllowed(*textRenderer, renderTreePosition.Parent().Style()))
+    {
+      return;
+    }
+
+    textNode.SetRenderer(textRenderer.get());
+
+    if (textUpdate && textUpdate->InheritedDisplayContentsStyle && *textUpdate->InheritedDisplayContentsStyle)
+    {
+      // Wrap text renderer into anonymous inline so we can give it a style.
+      // This is to support "<div style='display:contents;color:green'>text</div>" type cases
+      auto newDisplayContentsAnonymousWrapper =
+        boo::CreateRenderer<RenderInline>(RenderObject::Type::Inline, textNode.NodeDocument(),
+                                          RenderStyle::Clone(**textUpdate->InheritedDisplayContentsStyle));
+      newDisplayContentsAnonymousWrapper->InitializeStyle();
+      auto &displayContentsAnonymousWrapper = *newDisplayContentsAnonymousWrapper;
+      _builder->Attach(renderTreePosition.Parent(), krys::move(newDisplayContentsAnonymousWrapper),
+                       renderTreePosition.NextSibling());
+
+      textRenderer->SetInlineWrapperForDisplayContents(&displayContentsAnonymousWrapper);
+      _builder->Attach(displayContentsAnonymousWrapper, krys::move(textRenderer));
+      return;
+    }
+
+    _builder->Attach(renderTreePosition.Parent(), krys::move(textRenderer), renderTreePosition.NextSibling());
+
+    // FIXME: The text manipulation controller and the accessibility cache, once there are any.
+  }
+
+  void RenderTreeUpdater::UpdateTextRenderer(dom::Text &text, const style::TextUpdate *textUpdate,
+                                             const dom::ContainerNode *root) noexcept
+  {
+    auto *existingRenderer = text.Renderer();
+    bool needsRenderer = TextRendererIsNeeded(text);
+
+    if (existingRenderer && textUpdate && textUpdate->InheritedDisplayContentsStyle)
+    {
+      if (existingRenderer->InlineWrapperForDisplayContents() || *textUpdate->InheritedDisplayContentsStyle)
+      {
+        // FIXME: We could update without teardown.
+        TearDownTextRenderer(text, root, *_builder);
+        existingRenderer = nullptr;
+      }
+    }
+
+    if (existingRenderer)
+    {
+      if (needsRenderer)
+      {
+        if (textUpdate)
+        {
+          existingRenderer->SetTextWithOffset(text.Data(), textUpdate->Offset);
+        }
+        return;
+      }
+      TearDownTextRenderer(text, root, *_builder);
+      RenderingParent().DidCreateOrDestroyChildRenderer = true;
+      return;
+    }
+    if (!needsRenderer)
+    {
+      return;
+    }
+    CreateTextRenderer(text, textUpdate);
+    RenderingParent().DidCreateOrDestroyChildRenderer = true;
+  }
+
+  void RenderTreeUpdater::StorePreviousRenderer(dom::Node &node) noexcept
+  {
+    auto *renderer = node.Renderer();
+    if (!renderer)
+    {
+      return;
+    }
+    krys_debug_assert(RenderingParent().PreviousChildRenderer != renderer);
+    RenderingParent().PreviousChildRenderer = renderer;
+    if (renderer->IsInFlow())
+    {
+      RenderingParent().HasPrecedingInFlowChild = true;
+    }
+  }
+
   void RenderTreeUpdater::UpdateRenderViewStyle() noexcept
   {
     if (_styleUpdate->InitialContainingBlockUpdate())
@@ -594,6 +790,19 @@ namespace krys::boo
   {
     krys_debug_assert(dom::TreeQueries::GetShadowRoot(host));
     TearDownRenderers(host, TeardownType::FullAfterSlotOrShadowRootChange);
+  }
+
+  void RenderTreeUpdater::TearDownRenderer(dom::Text &text) noexcept
+  {
+    auto *view = text.NodeDocument().GetRenderView();
+    if (!view)
+    {
+      return;
+    }
+
+    RenderTreeBuilder builder(*view);
+    TearDownTextRenderer(text, nullptr, builder);
+    InvalidateRebuildRootIfNeeded(text);
   }
 
   void RenderTreeUpdater::TearDownRenderers(dom::Element &root, TeardownType teardownType,
@@ -659,9 +868,9 @@ namespace krys::boo
     {
       pop(it.Depth());
 
-      if (Is<dom::Text>(*it))
+      if (auto *text = DynamicDowncast<dom::Text>(*it))
       {
-        // FIXME: Text renderers (tearDownTextRenderer), once there are any.
+        TearDownTextRenderer(*text, &root, builder);
         continue;
       }
 
@@ -682,11 +891,29 @@ namespace krys::boo
       {
         continue;
       }
-      // FIXME: Text renderers (tearDownTextRenderer), once there are any.
+      if (auto *text = DynamicDowncast<dom::Text>(*child))
+      {
+        TearDownTextRenderer(*text, &element, builder);
+        continue;
+      }
       if (auto *childElement = DynamicDowncast<dom::Element>(*child))
       {
         TearDownRenderers(*childElement, TeardownType::Full, builder);
       }
     }
+  }
+
+  void RenderTreeUpdater::TearDownTextRenderer(dom::Text &text, const dom::ContainerNode *root,
+                                               RenderTreeBuilder &builder) noexcept
+  {
+    auto *renderer = text.Renderer();
+    if (!renderer)
+    {
+      return;
+    }
+    // FIXME: Repaint and layout invalidation, once there's layout.
+    builder.DestroyAndCleanUpAnonymousWrappers(
+      *renderer, root ? DynamicDowncast<RenderElement>(root->Renderer()) : nullptr);
+    text.SetRenderer(nullptr);
   }
 }

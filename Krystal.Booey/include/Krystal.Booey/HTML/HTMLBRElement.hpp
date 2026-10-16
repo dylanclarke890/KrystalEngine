@@ -22,6 +22,8 @@ namespace krys::boo::html
 
 #pragma endregion
 
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept final;
+
   protected:
     KRYS_NODISCARD bool
       HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,

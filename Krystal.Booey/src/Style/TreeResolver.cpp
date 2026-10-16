@@ -1093,8 +1093,7 @@ namespace krys::boo::style
           {
             return true;
           }
-          // FIXME: Text nodes have no renderers yet, so check for one (`!text->renderer()`) once they do.
-          if (containsOnlyASCIIWhitespace && parent.Style.PreserveNewline())
+          if (!text->Renderer() && containsOnlyASCIIWhitespace && parent.Style.PreserveNewline())
           {
             // FIXME: This really needs to be done only when parent.style.preserveNewline() changes value.
             return true;

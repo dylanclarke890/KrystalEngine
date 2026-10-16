@@ -75,6 +75,7 @@ namespace krys::boo::html
     UList,
     Unknown,
     Video,
+    WBR,
   };
 }
 

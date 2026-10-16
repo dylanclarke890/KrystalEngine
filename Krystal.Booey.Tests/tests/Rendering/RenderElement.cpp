@@ -74,12 +74,14 @@ namespace krys::boo::tests
       CHECK(contents.ExistingComputedStyle()->Display() == DisplayType::Contents);
     }
 
-    SECTION("Text isn't rendered yet")
+    SECTION("Text is rendered with its parent's style")
     {
-      auto *text = fixture.ById(u8"p").FirstChild();
+      auto &p = fixture.ById(u8"p");
+      auto *text = p.FirstChild();
       REQUIRE(Is<dom::Text>(text));
-      CHECK_FALSE(text->Renderer());
-      CHECK_FALSE(text->GetRenderStyle());
+      REQUIRE(text->Renderer());
+      CHECK(text->Renderer()->Parent() == p.Renderer());
+      CHECK(text->GetRenderStyle() == &p.Renderer()->Style());
     }
 
     SECTION("A style change updates the renderer's style")

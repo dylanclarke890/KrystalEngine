@@ -3,11 +3,24 @@
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/DOM/UserActionElementSet.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
 
 namespace krys::boo::dom
 {
+  static void TearDownRenderers(Node &node) noexcept
+  {
+    if (auto *element = DynamicDowncast<Element>(node))
+    {
+      RenderTreeUpdater::TearDownRenderers(*element);
+    }
+    else if (auto *text = DynamicDowncast<Text>(node))
+    {
+      RenderTreeUpdater::TearDownRenderer(*text);
+    }
+  }
+
   void ExtensibilityHooks::NodeInserted(Node &insertedNode, bool isSubtreeRoot) noexcept
   {
     // NOTE: a shadow root has no parent: it's connected when its host is, and it's always in a shadow tree
@@ -63,9 +76,9 @@ namespace krys::boo::dom
   void ExtensibilityHooks::NodeMoved(Node &movedNode, bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     // A moved subtree is styled again in its new place.
-    if (auto *element = DynamicDowncast<Element>(movedNode); element && isSubtreeRoot)
+    if (isSubtreeRoot)
     {
-      RenderTreeUpdater::TearDownRenderers(*element);
+      TearDownRenderers(movedNode);
     }
 
     if (Is<ShadowRoot>(movedNode))
@@ -99,9 +112,9 @@ namespace krys::boo::dom
                                        ContainerNode &oldAncestor) noexcept
   {
     // The removed subtree's renderers go with it.
-    if (auto *element = DynamicDowncast<Element>(removedNode); element && isSubtreeRoot)
+    if (isSubtreeRoot)
     {
-      RenderTreeUpdater::TearDownRenderers(*element);
+      TearDownRenderers(removedNode);
     }
 
     removedNode.ClearNodeFlag(NodeFlags::IsConnected);

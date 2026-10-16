@@ -22,7 +22,9 @@ namespace krys::text
   constexpr char32 BlackDownPointingSmallTriangle = 0x25BE;
   constexpr char32 BlackLeftPointingSmallTriangle = 0x25C2;
   constexpr char32 BlackRightPointingSmallTriangle = 0x25B8;
+  constexpr char32 BlackSquare = 0x25A0;
   constexpr char32 BlackUpPointingSmallTriangle = 0x25B4;
+  constexpr char32 Bullet = 0x2022;
   constexpr char32 CarriageReturn = 0x000D;
   constexpr char32 CjkWater = 0x6C34;
   constexpr char32 DeleteCharacter = 0x007F;
@@ -80,7 +82,9 @@ namespace krys::text
   constexpr char32 TibetanMarkIntersyllabicTsheg = 0x0F0B;
   constexpr char32 TironianSignEt = 0x204A;
   constexpr char32 UgariticWordDivider = 0x1039F;
+  constexpr char32 WhiteBullet = 0x25E6;
   constexpr char32 WordJoiner = 0x2060;
+  constexpr char32 YenSign = 0x00A5;
   constexpr char32 ZeroWidthJoiner = 0x200D;
   constexpr char32 ZeroWidthNoBreakSpace = 0xFEFF;
   constexpr char32 ZeroWidthNonJoiner = 0x200C;

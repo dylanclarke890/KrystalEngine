@@ -734,6 +734,8 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/RenderTableSection.hpp
   include/Krystal.Booey/Rendering/RenderTableRow.hpp
   include/Krystal.Booey/Rendering/RenderTableCol.hpp
+  include/Krystal.Booey/Rendering/RenderText.hpp
+  include/Krystal.Booey/Rendering/RenderLineBreak.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlock.hpp
@@ -1963,6 +1965,8 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/RenderTableSection.cpp
   src/Rendering/RenderTableRow.cpp
   src/Rendering/RenderTableCol.cpp
+  src/Rendering/RenderText.cpp
+  src/Rendering/RenderLineBreak.cpp
   src/Rendering/Updating/RenderTreeUpdater.cpp
   src/Rendering/Updating/RenderTreeBuilder.cpp
   src/Rendering/Updating/RenderTreeBuilderBlock.cpp
@@ -2325,6 +2329,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/HTMLBaseElement.hpp
       include/Krystal.Booey/HTML/HTMLBodyElement.hpp
       include/Krystal.Booey/HTML/HTMLBRElement.hpp
+      include/Krystal.Booey/HTML/HTMLWBRElement.hpp
       include/Krystal.Booey/HTML/HTMLButtonElement.hpp
       include/Krystal.Booey/HTML/HTMLCanvasElement.hpp
       include/Krystal.Booey/HTML/HTMLDataElement.hpp
@@ -2591,6 +2596,7 @@ target_sources(Krystal.Booey
     src/HTML/HTMLBaseElement.cpp
     src/HTML/HTMLBodyElement.cpp
     src/HTML/HTMLBRElement.cpp
+    src/HTML/HTMLWBRElement.cpp
     src/HTML/HTMLButtonElement.cpp
     src/HTML/HTMLCanvasElement.cpp
     src/HTML/HTMLDataElement.cpp

@@ -678,6 +678,11 @@ namespace krys::boo::html
       return _interface == HTMLElementInterface::Video;
     }
 
+    KRYS_NODISCARD bool IsHTMLWBRElement() const noexcept
+    {
+      return _interface == HTMLElementInterface::WBR;
+    }
+
 #pragma endregion
   private:
     enum class AllowPercentage : bool

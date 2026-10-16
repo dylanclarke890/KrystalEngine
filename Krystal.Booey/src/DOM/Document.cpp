@@ -1150,6 +1150,7 @@ namespace krys::boo::dom
     // FIXME: The accessibility cache, the document becoming inactive and telling the view, once there are
     // any.
 
+    _pendingRenderTreeUpdate = nullptr;
     _initialContainingBlockStyle = nullptr;
 
     if (auto documentElement = DocumentElement())
@@ -1438,8 +1439,7 @@ namespace krys::boo::dom
       }
 
       {
-        // FIXME: The pending render tree update (text and SVG renderer updates), once there are renderers.
-        style::TreeResolver resolver(*this);
+        style::TreeResolver resolver(*this, krys::move(_pendingRenderTreeUpdate));
         auto styleUpdate = resolver.Resolve();
 
         while (resolver.NeedsInterleavedLayout())
@@ -1473,6 +1473,28 @@ namespace krys::boo::dom
     }
   }
 
+  void Document::UpdateTextRenderer(Text &text, uint32 offsetOfReplacedText,
+                                    uint32 lengthOfReplacedText) noexcept
+  {
+    if (!HasLivingRenderTree())
+    {
+      return;
+    }
+
+    EnsurePendingRenderTreeUpdate().AddText(text, {offsetOfReplacedText, lengthOfReplacedText, null});
+  }
+
+  style::Update &Document::EnsurePendingRenderTreeUpdate() noexcept
+  {
+    krys_debug_assert(HasLivingRenderTree());
+
+    if (!_pendingRenderTreeUpdate)
+    {
+      _pendingRenderTreeUpdate = CreateUnique<style::Update>(*this);
+    }
+    return *_pendingRenderTreeUpdate;
+  }
+
   bool Document::NeedsStyleRecalc() const noexcept
   {
     if (_needsFullStyleRebuild)
@@ -1481,6 +1503,11 @@ namespace krys::boo::dom
     }
 
     if (ChildNeedsStyleRecalc())
+    {
+      return true;
+    }
+
+    if (_pendingRenderTreeUpdate)
     {
       return true;
     }

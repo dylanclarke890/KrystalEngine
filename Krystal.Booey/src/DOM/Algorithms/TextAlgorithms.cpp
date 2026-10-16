@@ -53,6 +53,11 @@ namespace krys::boo::dom
 
     LiveRangeUpdater::CharacterDataReplaced(node, offset, count, data.size());
 
+    if (auto *text = DynamicDowncast<Text>(node))
+    {
+      text->UpdateRendererAfterContentChange(offset, count);
+    }
+
     if (auto parent = node.ParentNode())
     {
       ExtensibilityHooks::NodeChildrenChanged(*parent);

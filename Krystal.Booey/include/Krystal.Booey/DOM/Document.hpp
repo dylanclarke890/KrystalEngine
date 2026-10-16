@@ -158,14 +158,15 @@ namespace krys::boo::dom
     mutable RefPtr<FontSelector> _fontSelector;
 
     WeakPtr<LocalFrame> _frame;
-    // FIXME: Stands in for the render tree, which there isn't yet: a document has a render view while it's
-    // shown in a frame with a view.
+    // The root of the render tree: a document has one while it's shown in a frame with a view.
     RenderPtr<boo::RenderView> _renderView;
     bool _renderTreeBeingDestroyed {false};
+    // Renderer updates (of text) that the next style resolution applies.
+    UniquePtr<style::Update> _pendingRenderTreeUpdate;
 
     mutable UniquePtr<VisitedLinkState> _visitedLinkState;
     mutable UniquePtr<RenderStyle> _initialContainingBlockStyle;
-    // FIXME: The style of the render view, which there isn't yet; `RenderTreeUpdater` keeps it here.
+    // The style the render view would have, for a document without one; `RenderTreeUpdater` keeps it here.
     UniquePtr<RenderStyle> _renderViewStyle;
     mutable RefPtr<css::calc::RandomCachingKeyMap> _randomCachingKeyMap;
     bool _hasStyleWithViewportUnits {false};
@@ -666,6 +667,10 @@ namespace krys::boo::dom
     void CreateRenderTree() noexcept;
     void DestroyRenderTree() noexcept;
 
+    /// @brief Schedules an update of @p text's renderer after @p lengthOfReplacedText bytes from
+    /// @p offsetOfReplacedText were replaced.
+    void UpdateTextRenderer(Text &text, uint32 offsetOfReplacedText, uint32 lengthOfReplacedText) noexcept;
+
     /// @brief Called when @p frame starts showing the document.
     void DidBecomeCurrentDocumentInFrame(LocalFrame &frame) noexcept;
     /// @brief Called when the document's frame stops showing it.
@@ -896,6 +901,7 @@ namespace krys::boo::dom
     void SetQuirksMode(QuirksMode mode) noexcept;
 
     void UpdateRenderTree(UniquePtr<style::Update> styleUpdate) noexcept;
+    KRYS_NODISCARD style::Update &EnsurePendingRenderTreeUpdate() noexcept;
 
     /// @brief Finds the first `base` element with an `href` in the document tree and updates the document
     /// base URL from it. Called whenever a `base` element is inserted, removed or moved, or its `href`

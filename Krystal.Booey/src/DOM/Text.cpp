@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Mixins/Slottable.hpp"
+#include "Krystal.Booey/Rendering/RenderText.hpp"
 
 namespace krys::boo::dom
 {
@@ -52,4 +54,33 @@ namespace krys::boo::dom
   }
 
 #pragma endregion
+
+  RenderText *Text::Renderer() const noexcept
+  {
+    return Downcast<RenderText>(Node::Renderer());
+  }
+
+  RenderPtr<RenderText> Text::CreateTextRenderer(const RenderStyle &) noexcept
+  {
+    // FIXME: SVG text (RenderSVGInlineText) and text-combine-upright (RenderCombineText), once there are
+    // those renderers.
+    return CreateRenderer<RenderText>(RenderObject::Type::Text, *this, Data());
+  }
+
+  void Text::UpdateRendererAfterContentChange(size_t offsetOfReplacedData,
+                                              size_t lengthOfReplacedData) noexcept
+  {
+    if (!IsConnected())
+    {
+      return;
+    }
+
+    if (HasInvalidRenderer())
+    {
+      return;
+    }
+
+    NodeDocument().UpdateTextRenderer(*this, static_cast<uint32>(offsetOfReplacedData),
+                                      static_cast<uint32>(lengthOfReplacedData));
+  }
 }

@@ -77,6 +77,7 @@
 #include "Krystal.Booey/HTML/HTMLUListElement.hpp"
 #include "Krystal.Booey/HTML/HTMLUnknownElement.hpp"
 #include "Krystal.Booey/HTML/HTMLVideoElement.hpp"
+#include "Krystal.Booey/HTML/HTMLWBRElement.hpp"
 
 namespace krys::boo::html
 {
@@ -122,9 +123,12 @@ namespace krys::boo::html
       case TagName::sup:
       case TagName::u:
       case TagName::var:
-      case TagName::wbr:
       {
         return CreateRefPtr<HTMLElement>(document);
+      }
+      case TagName::wbr:
+      {
+        return CreateRefPtr<HTMLWBRElement>(document);
       }
       case TagName::a:
       {

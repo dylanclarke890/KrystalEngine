@@ -15,6 +15,8 @@ namespace krys::boo::dom
   class ContainerNode;
   class Document;
   class Element;
+  class Node;
+  class Text;
 }
 
 namespace krys::boo::style
@@ -22,18 +24,20 @@ namespace krys::boo::style
   class PostResolutionCallbackDisabler;
   class Update;
   struct ElementUpdate;
+  struct TextUpdate;
 }
 
 namespace krys::boo
 {
   class RenderElement;
+  class RenderObject;
   class RenderStyle;
   class RenderTreeBuilder;
   class RenderView;
 
   /// @brief Applies a style update to the render tree.
-  // FIXME: Text renderers, the renderers of generated content, ::marker, ::backdrop, the top layer and layout
-  // come with the rest of the render tree.
+  // FIXME: The renderers of generated content, ::marker, ::backdrop, the top layer and layout come with the
+  // rest of the render tree.
   class RenderTreeUpdater
   {
     KRYS_NON_COPY_MOVABLE(RenderTreeUpdater);
@@ -47,6 +51,8 @@ namespace krys::boo
       Maybe<RenderTreePosition> Position;
 
       bool DidCreateOrDestroyChildRenderer {false};
+      RenderObject *PreviousChildRenderer {nullptr};
+      bool HasPrecedingInFlowChild {false};
 
       explicit Parent(dom::ContainerNode &root) noexcept;
       Parent(dom::Element &element, const style::ElementUpdate *update) noexcept;
@@ -77,6 +83,7 @@ namespace krys::boo
     static void TearDownRenderers(dom::Element &root) noexcept;
     static void TearDownRenderersForShadowRootInsertion(dom::Element &host) noexcept;
     static void TearDownRenderersAfterSlotChange(dom::Element &host) noexcept;
+    static void TearDownRenderer(dom::Text &text) noexcept;
 
   private:
     void UpdateRebuildRoots() noexcept;
@@ -85,6 +92,11 @@ namespace krys::boo
     void UpdateRendererStyle(RenderElement &renderer, RenderStyle &&newStyle,
                              style::DifferenceResult minimalStyleDifference) noexcept;
     void CreateRenderer(dom::Element &element, RenderStyle &&style) noexcept;
+    void UpdateTextRenderer(dom::Text &text, const style::TextUpdate *textUpdate,
+                            const dom::ContainerNode *root) noexcept;
+    void CreateTextRenderer(dom::Text &textNode, const style::TextUpdate *textUpdate) noexcept;
+    KRYS_NODISCARD bool TextRendererIsNeeded(const dom::Text &textNode) noexcept;
+    void StorePreviousRenderer(dom::Node &node) noexcept;
     void UpdateRenderViewStyle() noexcept;
 
     KRYS_NODISCARD Parent &GetParent() noexcept
@@ -113,5 +125,7 @@ namespace krys::boo
                                   RenderTreeBuilder &builder) noexcept;
     static void TearDownLeftoverChildrenOfComposedTree(dom::Element &element,
                                                        RenderTreeBuilder &builder) noexcept;
+    static void TearDownTextRenderer(dom::Text &text, const dom::ContainerNode *root,
+                                     RenderTreeBuilder &builder) noexcept;
   };
 }

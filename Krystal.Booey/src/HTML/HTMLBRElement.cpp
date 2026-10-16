@@ -1,12 +1,20 @@
 ﻿#include "Krystal.Booey/HTML/HTMLBRElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
+#include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
 
 namespace krys::boo::html
 {
   HTMLBRElement::HTMLBRElement(dom::Document &document) noexcept
       : HTMLElement(document, HTMLElementInterface::BR)
   {
+  }
+
+  RenderPtr<RenderElement> HTMLBRElement::CreateElementRenderer(RenderStyle &&style) noexcept
+  {
+    // FIXME: Content data (a renderer from RenderElement::CreateFor when the style's content is supported),
+    // once there's generated content for elements.
+    return CreateRenderer<RenderLineBreak>(*this, krys::move(style));
   }
 
 #pragma region HTMLBRElement Obsolete members

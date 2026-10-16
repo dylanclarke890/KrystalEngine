@@ -9,6 +9,7 @@
 #include "Krystal.Booey/Rendering/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/RenderTableRow.hpp"
 #include "Krystal.Booey/Rendering/RenderTableSection.hpp"
+#include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlock.hpp"
@@ -180,8 +181,14 @@ namespace krys::boo
 
     krys_debug_assert(&parent.View() == &_view);
 
-    // FIXME: The display: contents inline wrapper of a text beforeChild and column spanners, once there are
-    // text renderers and multi-column flows.
+    if (auto *beforeChildText = DynamicDowncast<RenderText>(beforeChild))
+    {
+      if (auto *wrapperInline = beforeChildText->InlineWrapperForDisplayContents())
+      {
+        beforeChild = wrapperInline;
+      }
+    }
+    // FIXME: A beforeChild that's a column spanner, once there are multi-column flows.
 
     // FIXME: SVG text, style-based ruby (ruby displays are rebuild roots until then), buttons, menu lists,
     // SVG containers and roots and MathML, once there are their renderers and builders.
@@ -345,6 +352,8 @@ namespace krys::boo
     }
 
     krys_debug_assert(!beforeChild || beforeChild->Parent() == &parent);
+    krys_debug_assert(!Is<RenderText>(beforeChild)
+                      || !Downcast<RenderText>(*beforeChild).InlineWrapperForDisplayContents());
 
     // Take the ownership.
     auto *newChild = parent.AttachRendererInternal(krys::move(child), beforeChild);
