@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/Constants/Attributes.hpp"
+#include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
@@ -22,13 +23,16 @@
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/StyledElement.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/UserActionElementSet.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Change.hpp"
 #include "Krystal.Booey/Style/ChildChangeInvalidation.hpp"
 #include "Krystal.Booey/Style/Invalidator.hpp"
+#include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/TreeResolver.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
@@ -459,6 +463,207 @@ namespace krys::boo::dom
     ClearNodeFlag(NodeFlags::IsParsingChildren);
     style::ChildChangeInvalidation::InvalidateAfterFinishedParsingChildren(*this);
   }
+
+#pragma region User Action State
+
+  bool Element::IsUserActionElementInActiveChain() const noexcept
+  {
+    krys_debug_assert(IsUserActionElement());
+    return NodeDocument().UserActionElements().IsInActiveChain(*this);
+  }
+
+  bool Element::IsUserActionElementActive() const noexcept
+  {
+    krys_debug_assert(IsUserActionElement());
+    return NodeDocument().UserActionElements().IsActive(*this);
+  }
+
+  bool Element::IsUserActionElementFocused() const noexcept
+  {
+    krys_debug_assert(IsUserActionElement());
+    return NodeDocument().UserActionElements().IsFocused(*this);
+  }
+
+  bool Element::IsUserActionElementHovered() const noexcept
+  {
+    krys_debug_assert(IsUserActionElement());
+    return NodeDocument().UserActionElements().IsHovered(*this);
+  }
+
+  bool Element::IsUserActionElementHasFocusVisible() const noexcept
+  {
+    krys_debug_assert(IsUserActionElement());
+    return NodeDocument().UserActionElements().HasFocusVisible(*this);
+  }
+
+  bool Element::IsUserActionElementHasFocusWithin() const noexcept
+  {
+    krys_debug_assert(IsUserActionElement());
+    return NodeDocument().UserActionElements().HasFocusWithin(*this);
+  }
+
+  void Element::SetActive(bool value, style::InvalidationScope invalidationScope) noexcept
+  {
+    if (value == Active())
+    {
+      return;
+    }
+    {
+      style::PseudoClassChangeInvalidation styleInvalidation(*this, css::SelectorPseudoClass::Active, value,
+                                                             invalidationScope);
+      NodeDocument().UserActionElements().SetActive(*this, value);
+    }
+
+    // FIXME: Repaint elements with a used appearance, once there are renderers.
+  }
+
+  namespace
+  {
+    /// @brief Whether @p element is a text field: a text area, or an input of a text-like type.
+    KRYS_NODISCARD bool IsTextField(const Element &element) noexcept
+    {
+      if (!Is<html::HTMLElement>(element))
+      {
+        return false;
+      }
+      auto tagName = element.TagQualifiedName().TagName();
+      if (tagName == html::TagName::textarea)
+      {
+        return true;
+      }
+      if (tagName != html::TagName::input)
+      {
+        return false;
+      }
+      // Missing and unknown types are text.
+      auto type = text::ToASCIILower(DOMStringView(element.GetAttribute(u8"type").value_or(DOMString())));
+      static constexpr DOMStringView nonTextFieldTypes[] = {
+        u8"hidden",   u8"date",  u8"month", u8"week",   u8"time",  u8"datetime-local", u8"range", u8"color",
+        u8"checkbox", u8"radio", u8"file",  u8"submit", u8"image", u8"reset",          u8"button"};
+      return std::ranges::find(nonTextFieldTypes, DOMStringView(type)) == std::end(nonTextFieldTypes);
+    }
+
+    KRYS_NODISCARD bool ShouldAlwaysHaveFocusVisibleWhenFocused(const Element &element) noexcept
+    {
+      if (IsTextField(element))
+      {
+        return true;
+      }
+      if (!Is<html::HTMLElement>(element))
+      {
+        return false;
+      }
+      switch (element.TagQualifiedName().TagName())
+      {
+        case html::TagName::select:   return true;
+        case html::TagName::input:
+        case html::TagName::textarea: return false;
+        // Whether the element is editable (`contenteditable`).
+        default:                      return css::MatchesReadWritePseudoClass(element);
+      }
+    }
+  }
+
+  void Element::SetFocus(bool value, FocusVisibility visibility) noexcept
+  {
+    if (value == Focused())
+    {
+      return;
+    }
+
+    style::PseudoClassChangeInvalidation focusStyleInvalidation(
+      *this, {{css::SelectorPseudoClass::Focus, value}, {css::SelectorPseudoClass::FocusVisible, value}});
+    NodeDocument().UserActionElements().SetFocused(*this, value);
+
+    // Shadow host with a slot that contain focused element is not considered focused.
+    for (auto *root = TreeQueries::ContainingShadowRoot(*this); root;
+         root = TreeQueries::ContainingShadowRoot(*root->Host()))
+    {
+      root->SetContainsFocusedElement(value);
+      root->Host()->InvalidateStyle();
+    }
+
+    for (auto *element = this; element; element = element->ParentElementInComposedTree())
+    {
+      element->SetHasFocusWithin(value);
+    }
+
+    SetHasFocusVisible(
+      value
+      && (visibility == FocusVisibility::Visible
+          || (visibility == FocusVisibility::Invisible && ShouldAlwaysHaveFocusVisibleWhenFocused(*this))));
+  }
+
+  void Element::SetHasFocusVisible(bool value) noexcept
+  {
+    krys_debug_assert(!value || Focused());
+
+    if (HasFocusVisible() == value)
+    {
+      return;
+    }
+
+    NodeDocument().UserActionElements().SetHasFocusVisible(*this, value);
+  }
+
+  void Element::SetHasFocusWithin(bool value) noexcept
+  {
+    if (HasFocusWithin() == value)
+    {
+      return;
+    }
+    {
+      style::PseudoClassChangeInvalidation styleInvalidation(*this, css::SelectorPseudoClass::FocusWithin,
+                                                             value);
+      NodeDocument().UserActionElements().SetHasFocusWithin(*this, value);
+    }
+  }
+
+  void Element::SetHasTentativeFocus(bool value) noexcept
+  {
+    // Tentative focus is used when trying to set the focus on a new element.
+    for (auto *ancestor = ParentElementInComposedTree(); ancestor;
+         ancestor = ancestor->ParentElementInComposedTree())
+    {
+      krys_debug_assert(ancestor->HasFocusWithin() != value);
+      NodeDocument().UserActionElements().SetHasFocusWithin(*ancestor, value);
+    }
+  }
+
+  void Element::SetHovered(bool value, style::InvalidationScope invalidationScope, HitTestRequest) noexcept
+  {
+    if (value == Hovered())
+    {
+      return;
+    }
+    {
+      style::PseudoClassChangeInvalidation styleInvalidation(*this, css::SelectorPseudoClass::Hover, value,
+                                                             invalidationScope);
+      NodeDocument().UserActionElements().SetHovered(*this, value);
+    }
+
+    // FIXME: Repaint elements with a used appearance whose theme supports hover, once there are renderers.
+  }
+
+  void Element::ClearHoverAndActiveStatusBeforeDetachingRenderer() noexcept
+  {
+    if (!IsUserActionElement())
+    {
+      return;
+    }
+    auto &document = NodeDocument();
+    if (Hovered())
+    {
+      document.HoveredElementDidDetach(*this);
+    }
+    if (IsInActiveChain())
+    {
+      document.ElementInActiveChainDidDetach(*this);
+    }
+    document.UserActionElements().ClearActiveAndHovered(*this);
+  }
+
+#pragma endregion
 
   bool Element::NeedsStyleInvalidation() const noexcept
   {

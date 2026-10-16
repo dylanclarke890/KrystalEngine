@@ -30,6 +30,7 @@ namespace krys::boo::dom
     bool _clonable : 1 {false};
     bool _serializable : 1 {false};
     bool _keepCustomElementRegistryNull : 1 {false};
+    bool _containsFocusedElement : 1 {false};
     RefPtr<css::StyleSheetList> _styleSheetList;
 
   public:
@@ -84,6 +85,17 @@ namespace krys::boo::dom
     KRYS_NODISCARD css::StyleSheetList &StyleSheets() noexcept;
 
 #pragma endregion
+
+    /// @brief Whether the focused element is in this shadow tree (the host matches `:focus`).
+    KRYS_NODISCARD bool ContainsFocusedElement() const noexcept
+    {
+      return _containsFocusedElement;
+    }
+
+    void SetContainsFocusedElement(bool flag) noexcept
+    {
+      _containsFocusedElement = flag;
+    }
 
   protected:
     /// @see https://dom.spec.whatwg.org/#get-the-parent

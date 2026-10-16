@@ -5,7 +5,7 @@
 namespace krys::boo::dom
 {
   /// @brief Various flags for optimizing certain node checks.
-  enum class NodeFlags : uint16
+  enum class NodeFlags : uint32
   {
     None = 0,
     IsConnected = 1 << 0,
@@ -28,7 +28,10 @@ namespace krys::boo::dom
     HasInvalidRenderer = 1 << 13,
     StyleResolutionShouldRecompositeLayer = 1 << 14,
     NeedsUpdateQueryContainerDependentStyle = 1 << 15,
+    /// @brief Set while the element has user action state (hover, active or focus) in its document's
+    /// `UserActionElementSet`.
+    IsUserActionElement = 1 << 16,
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeFlags, 16u);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeFlags, 17u);

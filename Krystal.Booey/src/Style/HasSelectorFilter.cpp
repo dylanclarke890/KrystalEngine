@@ -106,6 +106,12 @@ namespace krys::boo::style
       _filter.Add(hash);
     }
 
-    // FIXME: Also add the hashes salted with HoverSalt for a hovered element, once there is input handling.
+    if (element.Hovered())
+    {
+      for (auto hash : elementHashes)
+      {
+        _filter.Add(hash * HoverSalt);
+      }
+    }
   }
 }

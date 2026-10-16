@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/generators/catch_generators.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
+#include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
@@ -644,6 +645,33 @@ namespace krys::boo::dom::tests
     REQUIRE(TreeQueries::ParentOrShadowHostElement(*inner) == host.get());
     REQUIRE(TreeQueries::ParentOrShadowHostElement(*host) == nullptr);
     REQUIRE(TreeQueries::ParentOrShadowHostElement(*shadow) == nullptr);
+  }
+
+  TEST_CASE("TreeQueries shadow-including ancestry and retargeting", "[HTML][TreeQueries]")
+  {
+    auto doc = CreateRef<HTMLDocument>();
+    auto host = doc->CreateElement(u8"div").ReleaseValue();
+    auto inner = doc->CreateElement(u8"span").ReleaseValue();
+    auto deep = doc->CreateElement(u8"b").ReleaseValue();
+    REQUIRE_FALSE(doc->AppendChild(*host).HasException());
+    auto shadow = host->AttachShadow({}).ReleaseValue();
+    REQUIRE_FALSE(shadow->AppendChild(*inner).HasException());
+    REQUIRE_FALSE(inner->AppendChild(*deep).HasException());
+
+    // Elements in a host's shadow tree are its shadow-including descendants.
+    CHECK(TreeQueries::IsShadowIncludingDescendant(*inner, *host));
+    CHECK(TreeQueries::IsShadowIncludingDescendant(*deep, *host));
+    CHECK(TreeQueries::IsShadowIncludingInclusiveAncestor(*host, *deep));
+    CHECK(TreeQueries::IsShadowIncludingAncestor(*doc, *deep));
+    CHECK_FALSE(TreeQueries::IsShadowIncludingDescendant(*host, *inner));
+
+    // Retargeting a node in a shadow tree against a node outside it gives the host.
+    CHECK(EventTargetAlgorithms::Retarget(deep.get(), *doc) == host.get());
+    CHECK(EventTargetAlgorithms::Retarget(deep.get(), *host) == host.get());
+    // Against a node in the same shadow tree, the node itself.
+    CHECK(EventTargetAlgorithms::Retarget(deep.get(), *inner) == deep.get());
+    // Nodes outside shadow trees are returned as they are.
+    CHECK(EventTargetAlgorithms::Retarget(host.get(), *inner) == host.get());
   }
 
 #pragma endregion

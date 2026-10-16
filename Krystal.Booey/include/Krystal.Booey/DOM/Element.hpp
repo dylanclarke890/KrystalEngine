@@ -5,9 +5,11 @@
 #include "Krystal.Booey/DOM/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Enums/CustomElementState.hpp"
 #include "Krystal.Booey/DOM/Enums/InsertAdjacentWhere.hpp"
+#include "Krystal.Booey/DOM/FocusOptions.hpp"
 #include "Krystal.Booey/DOM/NamedNodeMap.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
+#include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
@@ -627,8 +629,77 @@ namespace krys::boo::dom
 
 #pragma endregion
 
+#pragma region User Action State
+
+    /// @brief Whether the element has user action state in its document (`Document::UserActionElements`).
+    KRYS_NODISCARD bool IsUserActionElement() const noexcept
+    {
+      return HasNodeFlag(NodeFlags::IsUserActionElement);
+    }
+
+    void SetUserActionElement(bool flag) noexcept
+    {
+      flag ? SetNodeFlag(NodeFlags::IsUserActionElement) : ClearNodeFlag(NodeFlags::IsUserActionElement);
+    }
+
+    /// @brief Whether the element is in the chain of elements that became `:active` when the pointer was
+    /// pressed.
+    KRYS_NODISCARD bool IsInActiveChain() const noexcept
+    {
+      return IsUserActionElement() && IsUserActionElementInActiveChain();
+    }
+
+    KRYS_NODISCARD bool Active() const noexcept
+    {
+      return IsUserActionElement() && IsUserActionElementActive();
+    }
+
+    KRYS_NODISCARD bool Hovered() const noexcept
+    {
+      return IsUserActionElement() && IsUserActionElementHovered();
+    }
+
+    KRYS_NODISCARD bool Focused() const noexcept
+    {
+      return IsUserActionElement() && IsUserActionElementFocused();
+    }
+
+    KRYS_NODISCARD bool HasFocusVisible() const noexcept
+    {
+      return IsUserActionElement() && IsUserActionElementHasFocusVisible();
+    }
+
+    KRYS_NODISCARD bool HasFocusWithin() const noexcept
+    {
+      return IsUserActionElement() && IsUserActionElementHasFocusWithin();
+    }
+
+    void SetActive(bool value,
+                   style::InvalidationScope invalidationScope = style::InvalidationScope::All) noexcept;
+    void SetHovered(bool value, style::InvalidationScope invalidationScope = style::InvalidationScope::All,
+                    HitTestRequest request = {}) noexcept;
+    /// @brief Sets the element's focus, and the focus within of its ancestors in the composed tree.
+    void SetFocus(bool value, FocusVisibility visibility = FocusVisibility::Invisible) noexcept;
+    void SetHasFocusVisible(bool value) noexcept;
+    void SetHasFocusWithin(bool value) noexcept;
+    /// @brief Gives the element's composed tree ancestors focus within while its focusability is checked.
+    void SetHasTentativeFocus(bool value) noexcept;
+
+    /// @brief Clears the element's hover and active state, moving the document's hovered element and active
+    /// chain to its ancestors, before its renderer goes.
+    void ClearHoverAndActiveStatusBeforeDetachingRenderer() noexcept;
+
+#pragma endregion
+
   private:
     KRYS_NODISCARD ElementRareData &EnsureElementRareData() noexcept;
+
+    KRYS_NODISCARD bool IsUserActionElementInActiveChain() const noexcept;
+    KRYS_NODISCARD bool IsUserActionElementActive() const noexcept;
+    KRYS_NODISCARD bool IsUserActionElementFocused() const noexcept;
+    KRYS_NODISCARD bool IsUserActionElementHovered() const noexcept;
+    KRYS_NODISCARD bool IsUserActionElementHasFocusVisible() const noexcept;
+    KRYS_NODISCARD bool IsUserActionElementHasFocusWithin() const noexcept;
 
     KRYS_NODISCARD const RenderStyle &
       ResolvePseudoElementStyle(const style::PseudoElementIdentifier &pseudoElementIdentifier) noexcept;

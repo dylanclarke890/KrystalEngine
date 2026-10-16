@@ -13,7 +13,9 @@ Open work outside the WebKit port's current slice. Port-specific detail (verdict
 
 ## Style
 
-- **Interaction states** — `:hover`, `:active`, `:focus`, `:focus-visible`, `:focus-within` never match: the DOM tracks no hover, active or focused element (`src/CSS/Selectors/SelectorChecker.cpp`). Needs `activeElement` and focus. https://html.spec.whatwg.org/#focus
+- **Hit testing and pointer events** — the host says which element is under the pointer (`Document::UpdateHoverActiveState`, `html::FocusAlgorithms::FocusForClick`); no hit testing, and no mouse, pointer or keyboard events are fired (`UIEvent` and `FocusEvent` only). https://w3c.github.io/uievents/
+- **Sequential focus navigation** — no Tab order (tabindex-ordered focus navigation scopes), no focus navigation starting point. https://html.spec.whatwg.org/#sequential-focus-navigation
+- **Autofocus and focus fixup** — autofocus candidates aren't flushed and the focused element isn't refocused when it stops being focusable (both run in the rendering update) (`src/HTML/Algorithms/FocusAlgorithms.cpp`). https://html.spec.whatwg.org/#flush-autofocus-candidates
 - **Animations and transitions** — keyframe styles, interpolation and the tree resolver's animated updates aren't ported; `animation`/`transition` compute but nothing animates (`PORTING.md`, *Open*).
 - **Other pseudo-classes** — `:target`, `:autofill`, validity (`:valid`, `:invalid`, `:in-range`, `:user-*`), `:state()`, `:popover-open`, `:modal`, `:fullscreen`, media playback states and view transitions return false (`src/CSS/Selectors/SelectorChecker.cpp`).
 - **Form owners** — the form owner is the nearest ancestor form (no `form` attribute), which `:default` and the default button rely on (`src/CSS/Selectors/SelectorCheckerTestFunctions.cpp`). https://html.spec.whatwg.org/#form-owner
@@ -45,7 +47,6 @@ Open work outside the WebKit port's current slice. Port-specific detail (verdict
 
 ## HTML
 
-- **Focus and `activeElement`** — not implemented (`src/DOM/DocumentOrShadowRoot.cpp`). https://html.spec.whatwg.org/#dom-documentorshadowroot-activeelement
 - **`innerText`/`outerText`** — getters and setters are TODOs (`src/HTML/HTMLElement.cpp`). https://html.spec.whatwg.org/#the-innertext-idl-attribute
 - **`HTMLElement` API** — `click()`, `accessKeyLabel`, `draggable`/`spellcheck` defaults, `writingSuggestions`, `autocapitalize`, `autocorrect`, `attachInternals()`, removal and move steps (`src/HTML/HTMLElement.cpp`, `HTML/HTMLElement.hpp`).
 - **`dataset`** — no `DOMStringMap` for `data-*` attributes. https://html.spec.whatwg.org/#dom-dataset

@@ -281,8 +281,14 @@ namespace krys::boo::style
     {
       CollectMatchingRulesForList(matchRequest.RuleSet.LinkPseudoClassRules(), matchRequest);
     }
-    // FIXME: Focus and focus-visible rules, once documents track their focused area (until then they can't
-    // match).
+    if (css::MatchesFocusPseudoClass(element))
+    {
+      CollectMatchingRulesForList(matchRequest.RuleSet.FocusPseudoClassRules(), matchRequest);
+    }
+    if (css::MatchesFocusVisiblePseudoClass(element))
+    {
+      CollectMatchingRulesForList(matchRequest.RuleSet.FocusVisiblePseudoClassRules(), matchRequest);
+    }
     if (&element == element.NodeDocument().DocumentElement().get())
     {
       CollectMatchingRulesForList(matchRequest.RuleSet.RootElementRules(), matchRequest);

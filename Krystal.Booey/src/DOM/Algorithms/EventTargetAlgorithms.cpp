@@ -176,14 +176,15 @@ namespace krys::boo::dom
         return current;
       }
 
+      // Return A if its root is not a shadow root, or is a shadow-including inclusive ancestor of B.
       auto *currentNode = Downcast<Node>(current);
       auto &currentRoot = TreeQueries::Root(*currentNode);
-      if (!Is<ShadowRoot>(currentNode))
+      if (!Is<ShadowRoot>(currentRoot))
       {
         return current;
       }
 
-      if (bNode != nullptr && !TreeQueries::IsShadowIncludingInclusiveAncestor(currentRoot, *bNode))
+      if (bNode != nullptr && TreeQueries::IsShadowIncludingInclusiveAncestor(currentRoot, *bNode))
       {
         return current;
       }

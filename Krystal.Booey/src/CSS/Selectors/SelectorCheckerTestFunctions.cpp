@@ -179,6 +179,35 @@ namespace krys::boo::css
     }
   }
 
+  bool IsFrameFocused(const dom::Element &element) noexcept
+  {
+    return element.NodeDocument().IsFocusedAndActive();
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD bool DoesShadowTreeContainFocusedElement(const dom::Element &element) noexcept
+    {
+      auto *shadowRoot = dom::TreeQueries::GetShadowRoot(element);
+      return shadowRoot && shadowRoot->ContainsFocusedElement();
+    }
+  }
+
+  bool MatchesFocusPseudoClass(const dom::Element &element) noexcept
+  {
+    return (element.Focused() || DoesShadowTreeContainFocusedElement(element)) && IsFrameFocused(element);
+  }
+
+  bool MatchesFocusVisiblePseudoClass(const dom::Element &element) noexcept
+  {
+    return element.HasFocusVisible() && IsFrameFocused(element);
+  }
+
+  bool MatchesFocusWithinPseudoClass(const dom::Element &element) noexcept
+  {
+    return element.HasFocusWithin() && IsFrameFocused(element);
+  }
+
   bool IsSubmitButton(const dom::Element &element) noexcept
   {
     if (IsHTMLElement(element, html::TagName::button))

@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/UserActionElementSet.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
 
 namespace krys::boo::dom
@@ -104,6 +105,11 @@ namespace krys::boo::dom
     }
 
     removedNode.ClearNodeFlag(NodeFlags::IsConnected);
+
+    if (auto *element = DynamicDowncast<Element>(removedNode))
+    {
+      element->NodeDocument().UserActionElements().ClearAllForElement(*element);
+    }
 
     // Shadow roots and the nodes in their trees stay in their shadow trees; the removed node and the rest of
     // its light tree leave the shadow tree they were in, if any.

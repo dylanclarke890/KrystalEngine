@@ -1,8 +1,12 @@
 ﻿#include "Krystal.Booey/DOM/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/CSS/CSSStyleSheetObservableArray.hpp"
+#include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 
 namespace krys::boo::dom
@@ -28,8 +32,41 @@ namespace krys::boo::dom
 
   RefPtr<Element> DocumentOrShadowRoot::ActiveElement() const noexcept
   {
-    // TODO(DOCUMENTORSHADOWROOT, HTML): return the active element.
-    return nullptr;
+    // Let candidate be this's node document's focused area's DOM anchor.
+    auto &document = _rootNode.NodeDocument();
+    Node *candidate = document.FocusedElement();
+    if (!candidate)
+    {
+      candidate = &document;
+    }
+
+    // Set candidate to the result of retargeting candidate against this.
+    auto *retargeted = DynamicDowncast<Node>(EventTargetAlgorithms::Retarget(candidate, _rootNode));
+    if (!retargeted)
+    {
+      return nullptr;
+    }
+
+    // If candidate's root is not this, then return null.
+    if (&TreeQueries::Root(*retargeted) != &_rootNode)
+    {
+      return nullptr;
+    }
+
+    // If candidate is not a Document object, then return candidate.
+    if (!Is<Document>(*retargeted))
+    {
+      return ShareRefPtr(Downcast<Element>(retargeted));
+    }
+
+    // If candidate has a body element, then return that body element.
+    if (auto body = document.Body())
+    {
+      return body;
+    }
+
+    // If candidate's document element is non-null, then return that document element.
+    return document.DocumentElement();
   }
 
 #pragma endregion

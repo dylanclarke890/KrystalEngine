@@ -207,9 +207,10 @@ namespace krys::boo::dom
 
     if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(TreeQueries::Root(a)))
     {
+      // A's root is a shadow root and A's root's host is a shadow-including inclusive descendant of B.
       if (auto *host = shadowRoot->Host())
       {
-        return IsShadowIncludingDescendant(*host, b);
+        return IsShadowIncludingInclusiveDescendant(*host, b);
       }
     }
 

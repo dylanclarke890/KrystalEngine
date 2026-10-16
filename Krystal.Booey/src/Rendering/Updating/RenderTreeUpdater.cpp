@@ -281,11 +281,11 @@ namespace krys::boo
     TearDownRenderers(host, TeardownType::FullAfterSlotOrShadowRootChange);
   }
 
-  void RenderTreeUpdater::TearDownRenderers(dom::Element &root, TeardownType) noexcept
+  void RenderTreeUpdater::TearDownRenderers(dom::Element &root, TeardownType teardownType) noexcept
   {
-    // FIXME: Animations (cancelling style-originated animations), hover and active state, generated content,
-    // repaint and layout invalidation, once there are any.
-    auto tearDown = [](dom::Element &element)
+    // FIXME: Animations (cancelling style-originated animations), generated content, repaint and layout
+    // invalidation, once there are any.
+    auto tearDown = [&](dom::Element &element)
     {
       // Make sure we don't leave any renderers behind in nodes outside the composed tree.
       // See ComposedTreeIterator::ComposedTreeIterator().
@@ -293,6 +293,20 @@ namespace krys::boo
       {
         TearDownLeftoverChildrenOfComposedTree(element);
       }
+
+      switch (teardownType)
+      {
+        case TeardownType::FullAfterSlotOrShadowRootChange:
+          if (&element != &root)
+          {
+            element.ClearHoverAndActiveStatusBeforeDetachingRenderer();
+          }
+          break;
+        case TeardownType::Full:                              element.ClearHoverAndActiveStatusBeforeDetachingRenderer(); break;
+        case TeardownType::RendererUpdate:
+        case TeardownType::RendererUpdateCancelingAnimations: break;
+      }
+
       element._rendererStyle = nullptr;
     };
 

@@ -464,6 +464,8 @@ namespace krys::boo::dom
     auto *oldPreviousSibling = node.PreviousSibling();
     auto *oldNextSibling = node.NextSibling();
 
+    node.NodeDocument().NodeWillBeRemoved(node);
+
     {
       ChildChangeStyleInvalidation removalStyleInvalidation(oldParent,
                                                             MakeChildChangeForRemoval(oldParent, node), node);
@@ -785,6 +787,8 @@ namespace krys::boo::dom
 
     auto oldPreviousSibling = node.PreviousSibling();
     auto oldNextSibling = node.NextSibling();
+
+    node.NodeDocument().NodeWillBeRemoved(node);
 
     {
       ChildChangeStyleInvalidation styleInvalidation(parent, MakeChildChangeForRemoval(parent, node), node);

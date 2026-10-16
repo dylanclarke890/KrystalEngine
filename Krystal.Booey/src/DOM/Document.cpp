@@ -30,9 +30,11 @@
 #include "Krystal.Booey/DOM/SelectorQuery.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/DOM/TreeWalker.hpp"
+#include "Krystal.Booey/DOM/UserActionElementSet.hpp"
 #include "Krystal.Booey/DOM/VisitedLinkState.hpp"
 #include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Algorithms/DOMTreeAccessors.hpp"
+#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
@@ -45,10 +47,12 @@
 #include "Krystal.Booey/HTML/HTMLTitleElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
+#include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
 #include "Krystal.Booey/Style/Change.hpp"
+#include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Booey/Style/Relations.hpp"
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/Style/ResolveForDocument.hpp"
@@ -59,6 +63,7 @@
 #include "Krystal.Booey/Style/Update.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGScriptElement.hpp"
+#include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
 namespace krys::boo::dom
@@ -73,7 +78,8 @@ namespace krys::boo::dom
   Document::Document() noexcept
       : ContainerNode(*this, NodeType::DOCUMENT_NODE, NodeFlags::IsContainerNode),
         DocumentOrShadowRoot(static_cast<ContainerNode &>(*this)), _flags(DocumentFlags::None),
-        _url(url::AboutBlankURL()), _baseURL(_url), _settings(ShareRef(Settings::Default()))
+        _url(url::AboutBlankURL()), _baseURL(_url), _settings(ShareRef(Settings::Default())),
+        _userActionElements(CreateUnique<UserActionElementSet>())
   {
     SetNodeFlag(NodeFlags::IsConnected);
     _styleScope = CreateUnique<style::Scope>(*this);
@@ -764,6 +770,293 @@ namespace krys::boo::dom
   {
     _cachedCSSParserContext = nullptr;
   }
+
+#pragma region User Action State
+
+  namespace
+  {
+    KRYS_NODISCARD Element *FindNearestCommonComposedAncestor(Element *elementA, Element *elementB) noexcept
+    {
+      if (!elementA || !elementB)
+      {
+        return nullptr;
+      }
+
+      if (elementA == elementB)
+      {
+        return elementA;
+      }
+
+      HashSet<Element *> ancestorChain;
+      for (auto *element = elementA; element; element = element->ParentElementInComposedTree())
+      {
+        ancestorChain.insert(element);
+      }
+
+      for (auto *element = elementB; element; element = element->ParentElementInComposedTree())
+      {
+        if (ancestorChain.contains(element))
+        {
+          return element;
+        }
+      }
+      return nullptr;
+    }
+
+    KRYS_NODISCARD bool HasShadowRootParent(const Element &element) noexcept
+    {
+      return Is<ShadowRoot>(element.ParentNode());
+    }
+
+    // FIXME: The renderer, once there's a render tree; until then an element has one when it has a render
+    // style.
+    KRYS_NODISCARD bool HasRenderer(const Element &element) noexcept
+    {
+      return element.GetRenderStyle();
+    }
+  }
+
+  void Document::UpdateHoverActiveState(const HitTestRequest &request, Element *innerElement,
+                                        CaptureChange captureElementChanged) noexcept
+  {
+    krys_debug_assert(!request.ReadOnly());
+
+    List<RefPtr<Element>> elementsToClearActive;
+    List<RefPtr<Element>> elementsToSetActive;
+    List<RefPtr<Element>> elementsToClearHover;
+    List<RefPtr<Element>> elementsToSetHover;
+
+    // FIXME: Update the hover and active state of the subframe documents the element is in, once there are
+    // frames.
+    RefPtr<Element> innerElementInDocument = ShareRefPtr(innerElement);
+    if (innerElementInDocument && &innerElementInDocument->NodeDocument() != this)
+    {
+      innerElementInDocument = nullptr;
+    }
+
+    RefPtr<Element> oldActiveElement = _activeElement;
+    if (oldActiveElement && !request.Active())
+    {
+      // We are clearing the :active chain because the mouse has been released.
+      for (RefPtr<Element> currentElement = oldActiveElement; currentElement;
+           currentElement = ShareRefPtr(currentElement->ParentElementInComposedTree()))
+      {
+        elementsToClearActive.push_back(currentElement);
+        _userActionElements->SetInActiveChain(*currentElement, false);
+      }
+      _activeElement = nullptr;
+    }
+    else
+    {
+      RefPtr<Element> newActiveElement = innerElementInDocument;
+      if (!oldActiveElement && newActiveElement && request.Active() && !request.TouchMove())
+      {
+        // We are setting the :active chain and freezing it. If future moves happen, they
+        // will need to reference this chain.
+        // FIXME: The chain of renderers, once there's a render tree; until then the composed tree ancestors
+        // with a renderer.
+        for (auto *element = newActiveElement.get(); element;
+             element = element->ParentElementInComposedTree())
+        {
+          if (!HasRenderer(*element))
+          {
+            continue;
+          }
+          _userActionElements->SetInActiveChain(*element, true);
+        }
+
+        _activeElement = newActiveElement;
+      }
+    }
+    // If the mouse has just been pressed, set :active on the chain. Those (and only those)
+    // nodes should remain :active until the mouse is released.
+    bool allowActiveChanges = !oldActiveElement && _activeElement;
+
+    // If the mouse is down and if this is a mouse move event, we want to restrict changes in
+    // :hover/:active to only apply to elements that are in the :active chain that we froze
+    // at the time the mouse went down, unless the capture element changed.
+    bool mustBeInActiveChain =
+      request.Active() && request.Move() && captureElementChanged == CaptureChange::No;
+
+    RefPtr<Element> oldHoveredElement = krys::move(_hoveredElement);
+
+    // A touch release does not set a new hover target; clearing the element we're working with
+    // will clear the chain of hovered elements all the way to the top of the tree.
+    if (request.TouchRelease())
+    {
+      innerElementInDocument = nullptr;
+    }
+
+    // Check to see if the hovered Element has changed.
+    // If it hasn't, we do not need to do anything.
+    RefPtr<Element> newHoveredElement = innerElementInDocument;
+    while (newHoveredElement && !HasRenderer(*newHoveredElement))
+    {
+      newHoveredElement = ShareRefPtr(newHoveredElement->ParentElementInComposedTree());
+    }
+
+    _hoveredElement = newHoveredElement;
+
+    auto *commonAncestor =
+      FindNearestCommonComposedAncestor(oldHoveredElement.get(), newHoveredElement.get());
+
+    if (oldHoveredElement != newHoveredElement)
+    {
+      for (auto *element = oldHoveredElement.get(); element; element = element->ParentElementInComposedTree())
+      {
+        if (element == commonAncestor)
+        {
+          break;
+        }
+        if (mustBeInActiveChain && !element->IsInActiveChain())
+        {
+          continue;
+        }
+        elementsToClearHover.push_back(ShareRefPtr(element));
+      }
+      // FIXME: Unset the hovered nodes in the subframe document of a frame owner, once there are frames.
+    }
+
+    bool sawCommonAncestor = false;
+    for (auto *element = newHoveredElement.get(); element; element = element->ParentElementInComposedTree())
+    {
+      if (mustBeInActiveChain && !element->IsInActiveChain())
+      {
+        continue;
+      }
+      if (allowActiveChanges)
+      {
+        elementsToSetActive.push_back(ShareRefPtr(element));
+      }
+      if (element == commonAncestor)
+      {
+        sawCommonAncestor = true;
+      }
+      if (!sawCommonAncestor)
+      {
+        elementsToSetHover.push_back(ShareRefPtr(element));
+      }
+    }
+
+    auto changeState =
+      [](List<RefPtr<Element>> &elements, css::SelectorPseudoClass pseudoClass, bool value, auto &&setter)
+    {
+      if (elements.empty())
+      {
+        return;
+      }
+
+      style::PseudoClassChangeInvalidation styleInvalidation {*elements.back(), pseudoClass, value,
+                                                              style::InvalidationScope::Descendants};
+
+      // We need to do descendant invalidation for each shadow tree separately as the style is per-scope.
+      List<UniquePtr<style::PseudoClassChangeInvalidation>> shadowDescendantStyleInvalidations;
+      for (auto &element : elements)
+      {
+        if (HasShadowRootParent(*element))
+        {
+          shadowDescendantStyleInvalidations.push_back(CreateUnique<style::PseudoClassChangeInvalidation>(
+            *element, pseudoClass, value, style::InvalidationScope::Descendants));
+        }
+      }
+
+      for (auto &element : elements)
+      {
+        setter(*element);
+      }
+    };
+
+    changeState(elementsToClearActive, css::SelectorPseudoClass::Active, false, [](Element &element)
+                { element.SetActive(false, style::InvalidationScope::SelfChildrenAndSiblings); });
+    changeState(elementsToSetActive, css::SelectorPseudoClass::Active, true, [](Element &element)
+                { element.SetActive(true, style::InvalidationScope::SelfChildrenAndSiblings); });
+    changeState(elementsToClearHover, css::SelectorPseudoClass::Hover, false, [&request](Element &element)
+                { element.SetHovered(false, style::InvalidationScope::SelfChildrenAndSiblings, request); });
+    changeState(elementsToSetHover, css::SelectorPseudoClass::Hover, true, [&request](Element &element)
+                { element.SetHovered(true, style::InvalidationScope::SelfChildrenAndSiblings, request); });
+  }
+
+  void Document::HoveredElementDidDetach(Element &element) noexcept
+  {
+    if (!_hoveredElement || &element != _hoveredElement.get())
+    {
+      return;
+    }
+
+    _hoveredElement = ShareRefPtr(element.ParentElement());
+    while (_hoveredElement && !HasRenderer(*_hoveredElement))
+    {
+      _hoveredElement = ShareRefPtr(_hoveredElement->ParentElement());
+    }
+    // FIXME: Schedule a hover state update (the event handler's scheduleHoverStateUpdate), once there's input
+    // handling.
+  }
+
+  bool Document::HasFocus() const noexcept
+  {
+    return html::FocusAlgorithms::HasFocusSteps(*this);
+  }
+
+  void Document::NodeWillBeRemoved(Node &node) noexcept
+  {
+    // If the focused area of the document is removed, the viewport becomes the focused area. This doesn't run
+    // the focusing or focus update steps, so no events are fired.
+    // https://html.spec.whatwg.org/#html-element-removing-steps
+    if (_focusedElement && TreeQueries::IsShadowIncludingInclusiveAncestor(node, *_focusedElement))
+    {
+      // Clearing the focus while the element is still in the tree also clears its ancestors' focus within.
+      RefPtr<Element> focusedElement = std::exchange(_focusedElement, nullptr);
+      focusedElement->SetFocus(false);
+    }
+
+    // The removed subtree's renderers go after it's removed, so the hovered element and the active chain move
+    // to the nearest ancestor outside it with a renderer now (upstream: as its renderers are torn down,
+    // before the removal).
+    auto moveOutOfRemovedSubtree = [&](RefPtr<Element> &element)
+    {
+      if (!element || !TreeQueries::IsShadowIncludingInclusiveAncestor(node, *element))
+      {
+        return;
+      }
+      element = ShareRefPtr(node.ParentElement());
+      while (element && !HasRenderer(*element))
+      {
+        element = ShareRefPtr(element->ParentElement());
+      }
+    };
+    moveOutOfRemovedSubtree(_hoveredElement);
+    moveOutOfRemovedSubtree(_activeElement);
+  }
+
+  void Document::ElementInActiveChainDidDetach(Element &element) noexcept
+  {
+    if (!_activeElement || &element != _activeElement.get())
+    {
+      return;
+    }
+
+    _activeElement = ShareRefPtr(element.ParentElement());
+    while (_activeElement && !HasRenderer(*_activeElement))
+    {
+      _activeElement = ShareRefPtr(_activeElement->ParentElement());
+    }
+  }
+
+  void Document::SetFocusedAndActive(bool flag) noexcept
+  {
+    if (_isFocusedAndActive == flag)
+    {
+      return;
+    }
+    _isFocusedAndActive = flag;
+
+    // `:focus`, `:focus-visible` and `:focus-within` check whether the document is focused and active, so the
+    // elements they may match restyle.
+    _userActionElements->ForEachFocusedOrFocusWithinElement([](Element &element)
+                                                            { element.InvalidateStyleForSubtree(); });
+  }
+
+#pragma endregion
 
   void Document::SetSettings(Ref<Settings> &&settings) noexcept
   {

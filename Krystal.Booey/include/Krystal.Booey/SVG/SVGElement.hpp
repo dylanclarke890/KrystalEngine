@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/StyledElement.hpp"
+#include "Krystal.Booey/HTML/Mixins/HTMLOrSVGOrMathMLElement.hpp"
 #include "Krystal.Booey/SVG/Enums/SVGElementFlags.hpp"
 #include "Krystal.Booey/SVG/Enums/SVGElementInterface.hpp"
 
@@ -21,6 +22,46 @@ namespace krys::boo::svg
 
   public:
     SVGElement(dom::Document &document) noexcept;
+
+#pragma region HTMLOrSVGOrMathMLElement Mixin - https://html.spec.whatwg.org/#htmlorsvgormathmlelement
+
+    /// @see https://html.spec.whatwg.org/#dom-tabindex
+    KRYS_NODISCARD int32 TabIndex() const noexcept
+    {
+      return html::mixins::HTMLOrSVGOrMathMLElement::TabIndex(*this);
+    }
+
+    /// @see https://html.spec.whatwg.org/#dom-tabindex
+    void TabIndex(int32 value) noexcept
+    {
+      html::mixins::HTMLOrSVGOrMathMLElement::TabIndex(*this, value);
+    }
+
+    /// @see https://html.spec.whatwg.org/#dom-fe-autofocus
+    KRYS_NODISCARD bool Autofocus() const noexcept
+    {
+      return html::mixins::HTMLOrSVGOrMathMLElement::Autofocus(*this);
+    }
+
+    /// @see https://html.spec.whatwg.org/#dom-fe-autofocus
+    void Autofocus(bool value) noexcept
+    {
+      html::mixins::HTMLOrSVGOrMathMLElement::Autofocus(*this, value);
+    }
+
+    /// @see https://html.spec.whatwg.org/#dom-focus
+    void Focus(const dom::FocusOptions &options = {}) noexcept
+    {
+      html::mixins::HTMLOrSVGOrMathMLElement::Focus(*this, options);
+    }
+
+    /// @see https://html.spec.whatwg.org/#dom-blur
+    void Blur() noexcept
+    {
+      html::mixins::HTMLOrSVGOrMathMLElement::Blur(*this);
+    }
+
+#pragma endregion
 
     /// @brief Whether this is an `<svg>` element inside another SVG element.
     KRYS_NODISCARD bool IsInnerSVGSVGElement() const noexcept;

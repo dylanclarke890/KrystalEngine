@@ -444,8 +444,10 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/StyledElement.cpp
 		tests/DOM/Text.cpp
 		tests/DOM/TreeWalker.cpp
+		tests/DOM/UserActionElementSet.cpp
 
 		# HTML
+		tests/HTML/Algorithms/FocusAlgorithms.cpp
 		tests/HTML/Attributes/Reflection.cpp
 		tests/HTML/EventLoop.cpp
 		tests/HTML/HTMLLinkElement.cpp

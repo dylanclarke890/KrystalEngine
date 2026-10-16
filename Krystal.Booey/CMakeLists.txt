@@ -700,6 +700,18 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
 
   # Settings
   include/Krystal.Booey/Page/Settings.hpp
+
+  # Interaction state
+  include/Krystal.Booey/DOM/FocusOptions.hpp
+  include/Krystal.Booey/DOM/UserActionElementSet.hpp
+  include/Krystal.Booey/Rendering/HitTestRequest.hpp
+  include/Krystal.Booey/Rendering/HitTestSource.hpp
+  include/Krystal.Booey/DOM/Dicts/FocusEventInit.hpp
+  include/Krystal.Booey/DOM/Dicts/UIEventInit.hpp
+  include/Krystal.Booey/DOM/FocusEvent.hpp
+  include/Krystal.Booey/DOM/UIEvent.hpp
+  include/Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp
+  include/Krystal.Booey/HTML/Mixins/HTMLOrSVGOrMathMLElement.hpp
   include/Krystal.Booey/Style/MatchedDeclarationsCache.hpp
   include/Krystal.Booey/Style/MatchResultCache.hpp
   include/Krystal.Booey/Style/ResolveForDocument.hpp
@@ -1846,6 +1858,11 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
 
   # Settings
   src/Page/Settings.cpp
+
+  # Interaction state
+  src/DOM/UserActionElementSet.cpp
+  src/HTML/Algorithms/FocusAlgorithms.cpp
+  src/HTML/Mixins/HTMLOrSVGOrMathMLElement.cpp
 )
 
 target_precompile_headers(Krystal.Booey

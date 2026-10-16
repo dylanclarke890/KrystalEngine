@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/DOMImplementation.hpp"
 #include "Krystal.Booey/DOM/Enums/DocumentFlags.hpp"
 #include "Krystal.Booey/DOM/Enums/QuirksMode.hpp"
+#include "Krystal.Booey/DOM/FocusOptions.hpp"
 #include "Krystal.Booey/DOM/Internals/RareData/DocumentRareData.hpp"
 #include "Krystal.Booey/DOM/NodeIterator.hpp"
 #include "Krystal.Booey/DOM/Range.hpp"
@@ -23,6 +24,7 @@
 
 namespace krys::boo
 {
+  class HitTestRequest;
   class RenderStyle;
   class RenderTreeUpdater;
   struct Settings;
@@ -54,6 +56,7 @@ namespace krys::boo::html
 {
   class CustomElementAlgorithms;
   class CustomElementRegistry;
+  class FocusAlgorithms;
   class HTMLBaseElement;
   class HTMLBodyElement;
   class HTMLDocumentParser;
@@ -77,6 +80,7 @@ namespace krys::boo::dom
   class ShadowRoot;
   class Text;
   class TreeWalker;
+  class UserActionElementSet;
   class VisitedLinkState;
 
   /// @see https://dom.spec.whatwg.org/#interface-document
@@ -94,6 +98,7 @@ namespace krys::boo::dom
     friend class NodeAlgorithms;
 
     friend class html::CustomElementAlgorithms;
+    friend class html::FocusAlgorithms;
     friend class html::HTMLBaseElement;
     friend class html::HTMLDocumentParser;
     friend class html::HTMLTreeBuilder;
@@ -130,6 +135,15 @@ namespace krys::boo::dom
 
     mutable UniquePtr<css::ParserContext> _cachedCSSParserContext;
     Ref<Settings> _settings;
+
+    UniquePtr<UserActionElementSet> _userActionElements;
+    RefPtr<Element> _hoveredElement;
+    // The element the pointer was pressed on: the chain of its ancestors stays `:active` until it's released.
+    RefPtr<Element> _activeElement;
+    bool _isFocusedAndActive {true};
+    // The focused area of the document: an element, or the viewport if null.
+    RefPtr<Element> _focusedElement;
+    FocusTrigger _latestFocusTrigger {FocusTrigger::Other};
 
     List<WeakPtr<ShadowRoot>> _inDocumentShadowRoots;
     RefPtr<css::StyleSheetList> _styleSheetList;
@@ -466,6 +480,68 @@ namespace krys::boo::dom
 
     void DidInsertInDocumentShadowRoot(ShadowRoot &shadowRoot) noexcept;
     void DidRemoveInDocumentShadowRoot(ShadowRoot &shadowRoot) noexcept;
+
+#pragma endregion
+
+#pragma region User Action State
+
+    KRYS_NODISCARD UserActionElementSet &UserActionElements() const noexcept
+    {
+      return *_userActionElements;
+    }
+
+    /// @brief The innermost element under the pointer that has a renderer, if any.
+    KRYS_NODISCARD Element *HoveredElement() const noexcept
+    {
+      return _hoveredElement.get();
+    }
+
+    enum class CaptureChange : bool
+    {
+      No,
+      Yes
+    };
+
+    /// @brief Updates the hover and active state for a pointer over @p innerElement (or outside the document,
+    /// if it's null), as hit testing finds it: hover follows the pointer, and a press makes the element and
+    /// its ancestors `:active` until the release.
+    /// @note There's no hit testing yet: the host says which element is under the pointer.
+    void UpdateHoverActiveState(const HitTestRequest &request, Element *innerElement,
+                                CaptureChange captureElementChanged = CaptureChange::No) noexcept;
+
+    void HoveredElementDidDetach(Element &element) noexcept;
+    /// @brief Moves the hovered element and the active chain out of @p node's subtree before it's removed.
+    void NodeWillBeRemoved(Node &node) noexcept;
+    void ElementInActiveChainDidDetach(Element &element) noexcept;
+
+    /// @brief Whether the document's window has system focus: `:focus` and its relatives only match then.
+    /// Hosts set it as their window gains and loses focus; it's true by default.
+    KRYS_NODISCARD bool IsFocusedAndActive() const noexcept
+    {
+      return _isFocusedAndActive;
+    }
+
+    void SetFocusedAndActive(bool flag) noexcept;
+
+#pragma endregion
+
+#pragma region Focus - https://html.spec.whatwg.org/#focus
+
+    /// @brief The focused area of the document if it's an element; null if it's the viewport.
+    /// @see https://html.spec.whatwg.org/#focused-area-of-the-document
+    KRYS_NODISCARD Element *FocusedElement() const noexcept
+    {
+      return _focusedElement.get();
+    }
+
+    /// @see https://html.spec.whatwg.org/#dom-document-hasfocus
+    KRYS_NODISCARD bool HasFocus() const noexcept;
+
+    /// @brief Whether the latest focus change the user made was by clicking.
+    KRYS_NODISCARD bool WasLastFocusByClick() const noexcept
+    {
+      return _latestFocusTrigger == FocusTrigger::Click;
+    }
 
     /// @brief The style of the initial containing block, which the document element inherits from.
     /// @note This may end up differing from the used style of the initial containing block due to

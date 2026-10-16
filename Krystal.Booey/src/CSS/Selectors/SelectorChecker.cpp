@@ -1338,16 +1338,25 @@ namespace krys::boo::css
           }
           return true;
         }
-        case SelectorPseudoClass::Focus:
-        case SelectorPseudoClass::FocusVisible:
-        case SelectorPseudoClass::FocusWithin:
-          // FIXME: Focus, once documents track their focused area.
-          return false;
+        case SelectorPseudoClass::Focus:        return MatchesFocusPseudoClass(element);
+        case SelectorPseudoClass::FocusVisible: return MatchesFocusVisiblePseudoClass(element);
+        case SelectorPseudoClass::FocusWithin:  return MatchesFocusWithinPseudoClass(element);
         case SelectorPseudoClass::Hover:
+          if (_strictParsing || IsLink(element) || CanMatchHoverOrActiveInQuirksMode(context))
+          {
+            if (element.Hovered())
+            {
+              return true;
+            }
+          }
+          break;
         case SelectorPseudoClass::Active:
           if (_strictParsing || IsLink(element) || CanMatchHoverOrActiveInQuirksMode(context))
           {
-            // FIXME: The hover and active states, once there is input handling.
+            if (element.Active())
+            {
+              return true;
+            }
           }
           break;
         case SelectorPseudoClass::Enabled:   return MatchesEnabledPseudoClass(element);
