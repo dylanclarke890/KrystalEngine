@@ -27,6 +27,8 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Change.hpp"
+#include "Krystal.Booey/Style/ChildChangeInvalidation.hpp"
+#include "Krystal.Booey/Style/Invalidator.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/TreeResolver.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
@@ -382,19 +384,40 @@ namespace krys::boo::dom
     return style.Display() != DisplayType::None && style.Display() != DisplayType::Contents;
   }
 
+  namespace
+  {
+    void InvalidateSiblingsIfNeeded(Element &element) noexcept
+    {
+      if (!element.AffectsNextSiblingElementStyle())
+      {
+        return;
+      }
+      auto *parent = element.ParentElement();
+      if (parent && parent->StyleValidity() >= style::Validity::SubtreeInvalid)
+      {
+        return;
+      }
+
+      InvalidateForSiblingCombinators(TreeQueries::NextElementSibling(element));
+    }
+  }
+
   void Element::InvalidateStyle() noexcept
   {
     Node::InvalidateStyle(style::Validity::ElementInvalid);
+    InvalidateSiblingsIfNeeded(*this);
   }
 
   void Element::InvalidateStyleAndLayerComposition() noexcept
   {
     Node::InvalidateStyle(style::Validity::ElementInvalid, style::InvalidationMode::RecompositeLayer);
+    InvalidateSiblingsIfNeeded(*this);
   }
 
   void Element::InvalidateStyleForSubtree() noexcept
   {
     Node::InvalidateStyle(style::Validity::SubtreeInvalid);
+    InvalidateSiblingsIfNeeded(*this);
   }
 
   void Element::InvalidateStyleAndRenderersForSubtree() noexcept
@@ -429,6 +452,70 @@ namespace krys::boo::dom
   {
     SetChildNeedsStyleRecalc();
     MarkAncestorsForInvalidatedStyle();
+  }
+
+  void Element::FinishParsingChildren() noexcept
+  {
+    ClearNodeFlag(NodeFlags::IsParsingChildren);
+    style::ChildChangeInvalidation::InvalidateAfterFinishedParsingChildren(*this);
+  }
+
+  bool Element::NeedsStyleInvalidation() const noexcept
+  {
+    if (!IsConnected())
+    {
+      return false;
+    }
+    // If :has() is present a change in an element may affect elements outside its subtree.
+    if (StyleValidity() >= style::Validity::SubtreeInvalid
+        && !style::Scope::ForNode(*this).UsesHasPseudoClass())
+    {
+      return false;
+    }
+    auto *documentElement = TreeQueries::DocumentElement(NodeDocument());
+    if (documentElement && documentElement->StyleValidity() >= style::Validity::SubtreeInvalid)
+    {
+      return false;
+    }
+    if (NodeDocument().HasPendingFullStyleRebuild())
+    {
+      return false;
+    }
+
+    return true;
+  }
+
+  style::Resolver &Element::StyleResolver() noexcept
+  {
+    if (auto *shadowRoot = TreeQueries::ContainingShadowRoot(*this))
+    {
+      return shadowRoot->StyleScope().GetResolver();
+    }
+
+    return NodeDocument().StyleScope().GetResolver();
+  }
+
+  void InvalidateForSiblingCombinators(Element *sibling) noexcept
+  {
+    for (auto *element = sibling; element; element = TreeQueries::NextElementSibling(*element))
+    {
+      if (element->StyleIsAffectedByPreviousSibling())
+      {
+        element->InvalidateStyleInternal();
+      }
+      if (element->DescendantsAffectedByPreviousSibling())
+      {
+        for (auto *siblingChild = TreeQueries::FirstElementChild(*element); siblingChild;
+             siblingChild = TreeQueries::NextElementSibling(*siblingChild))
+        {
+          siblingChild->InvalidateStyleForSubtreeInternal();
+        }
+      }
+      if (!element->AffectsNextSiblingElementStyle())
+      {
+        return;
+      }
+    }
   }
 
   bool Element::HasFlagsSetDuringStylingOfChildren() const noexcept
@@ -512,8 +599,13 @@ namespace krys::boo::dom
 
   List<DOMStringAtom> Element::ClassNames() const noexcept
   {
-    List<DOMStringAtom> classNames;
     auto classes = GetAttribute(u8"class");
+    return ClassNamesForValue(classes ? Maybe<DOMStringView>(*classes) : null);
+  }
+
+  List<DOMStringAtom> Element::ClassNamesForValue(Maybe<DOMStringView> classes) const noexcept
+  {
+    List<DOMStringAtom> classNames;
     if (!classes)
     {
       return classNames;
@@ -1094,6 +1186,20 @@ namespace krys::boo::dom
       }
 
       SlotAlgorithms::AssignSlot(*this);
+    }
+    else if (localName.View() == u8"part")
+    {
+      if (NeedsStyleInvalidation() && IsInShadowTree())
+      {
+        InvalidateStyleInternal();
+      }
+    }
+    else if (localName.View() == u8"exportparts")
+    {
+      if (auto *shadowRoot = TreeQueries::GetShadowRoot(*this))
+      {
+        style::Invalidator::InvalidateShadowParts(*shadowRoot);
+      }
     }
   }
 

@@ -97,6 +97,10 @@ namespace krys::boo::dom
 
 #pragma endregion
   };
+
+  /// @brief The shadow roots of the slots that @p node is assigned to: its assigned slot's, then that slot's
+  /// assigned slot's, and so on.
+  KRYS_NODISCARD List<Ref<ShadowRoot>> AssignedShadowRootsIfSlotted(const Node &node) noexcept;
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::ShadowRoot)

@@ -50,23 +50,6 @@ namespace krys::boo::css
       return u8"text";
     }
 
-    /// @see https://html.spec.whatwg.org/#attr-button-type
-    KRYS_NODISCARD bool IsSubmitButton(const dom::Element &element) noexcept
-    {
-      if (IsHTMLElement(element, html::TagName::button))
-      {
-        auto type =
-          text::ToASCIILower(dom::DOMStringView(element.GetAttribute(u8"type").value_or(dom::DOMString())));
-        return type != u8"reset" && type != u8"button";
-      }
-      if (IsHTMLElement(element, html::TagName::input))
-      {
-        auto type = InputType(element);
-        return type == u8"submit" || type == u8"image";
-      }
-      return false;
-    }
-
     /// @brief Whether @p element is a descendant of a `fieldset` with a `disabled` attribute, outside that
     /// fieldset's first `legend` child.
     KRYS_NODISCARD bool IsInDisabledFieldset(const dom::Element &element) noexcept
@@ -194,6 +177,22 @@ namespace krys::boo::css
       }
       return false;
     }
+  }
+
+  bool IsSubmitButton(const dom::Element &element) noexcept
+  {
+    if (IsHTMLElement(element, html::TagName::button))
+    {
+      auto type =
+        text::ToASCIILower(dom::DOMStringView(element.GetAttribute(u8"type").value_or(dom::DOMString())));
+      return type != u8"reset" && type != u8"button";
+    }
+    if (IsHTMLElement(element, html::TagName::input))
+    {
+      auto type = InputType(element);
+      return type == u8"submit" || type == u8"image";
+    }
+    return false;
   }
 
   bool IsLink(const dom::Element &element) noexcept

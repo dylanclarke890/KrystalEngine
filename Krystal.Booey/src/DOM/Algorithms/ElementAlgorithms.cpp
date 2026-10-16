@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.Booey/Constants/Attributes.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationObserverAlgorithms.hpp"
@@ -10,10 +11,69 @@
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
+#include "Krystal.Booey/Style/AttributeChangeInvalidation.hpp"
+#include "Krystal.Booey/Style/ClassChangeInvalidation.hpp"
+#include "Krystal.Booey/Style/IdChangeInvalidation.hpp"
+#include "Krystal.Booey/Style/PseudoClassStateInvalidation.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
 #include <utility>
 
 namespace krys::boo::dom
 {
+  namespace
+  {
+    /// @brief Invalidates the style that a change to one of an element's attributes affects, before the
+    /// change (when constructed) and after it (when destroyed): rules with attribute selectors, the element's
+    /// classes and ID, and the pseudo-class states derived from the attribute.
+    class AttributeChangeStyleInvalidation
+    {
+      KRYS_NON_COPY_MOVABLE(AttributeChangeStyleInvalidation);
+
+    private:
+      Maybe<style::AttributeChangeInvalidation> _attributeInvalidation;
+      Maybe<style::ClassChangeInvalidation> _classInvalidation;
+      Maybe<style::IdChangeInvalidation> _idInvalidation;
+      style::PseudoClassChangeInvalidations _pseudoClassInvalidations;
+
+    public:
+      AttributeChangeStyleInvalidation(Element &element, const Attr &attribute, Maybe<DOMStringView> oldValue,
+                                       Maybe<DOMStringView> newValue) noexcept
+      {
+        if (oldValue == newValue || !element.NeedsStyleInvalidation())
+        {
+          return;
+        }
+
+        auto &name = attribute.GetQualifiedName();
+        _attributeInvalidation.emplace(element, name, oldValue, newValue);
+
+        if (name.NamespaceURI() == DOMStringAtom::Null())
+        {
+          if (name.LocalName().View() == Attributes::Class)
+          {
+            auto oldClasses = element.ClassNames();
+            auto newClasses = element.ClassNamesForValue(newValue);
+            _classInvalidation.emplace(element, oldClasses, newClasses);
+          }
+          else if (name.LocalName().View() == Attributes::Id)
+          {
+            DOMStringAtom oldId(element.IdForStyleResolution());
+            auto newIdValue = newValue.value_or(DOMStringView());
+            DOMStringAtom newId(element.NodeDocument().InQuirksMode() ? text::ToASCIILower(newIdValue)
+                                                                      : DOMString(newIdValue));
+            if (oldId != newId)
+            {
+              _idInvalidation.emplace(element, oldId, newId);
+            }
+          }
+        }
+
+        style::InvalidatePseudoClassesForAttributeChange(_pseudoClassInvalidations, element, name, oldValue,
+                                                         newValue);
+      }
+    };
+  }
+
   bool ElementAlgorithms::IsDefined(const Element &element) noexcept
   {
     return element._customElementState == CustomElementState::Uncustomized
@@ -104,14 +164,22 @@ namespace krys::boo::dom
   void ElementAlgorithms::ChangeAttribute(Attr &attribute, DOMString &&value) noexcept
   {
     attribute._ownerElement->SynchronizeAllAttributes();
-    DOMString oldValue = std::exchange(attribute._value, krys::move(value));
+    DOMString oldValue;
+    {
+      AttributeChangeStyleInvalidation styleInvalidation(*attribute._ownerElement, attribute,
+                                                         attribute._value, value);
+      oldValue = std::exchange(attribute._value, krys::move(value));
+    }
 
     HandleAttributeChanges(attribute, *attribute._ownerElement, oldValue, attribute._value);
   }
 
   void ElementAlgorithms::AppendAttribute(Attr &attribute, Element &element) noexcept
   {
-    element._attributes.push_back(ShareRef(attribute));
+    {
+      AttributeChangeStyleInvalidation styleInvalidation(element, attribute, null, attribute._value);
+      element._attributes.push_back(ShareRef(attribute));
+    }
 
     attribute._ownerElement = CreateWeakPtr(&element);
     attribute._nodeDocument = ShareRefPtr(&element.NodeDocument());
@@ -127,9 +195,12 @@ namespace krys::boo::dom
     element->SynchronizeAllAttributes();
 
     Ref<Attr> attributeRef = ShareRef(attribute);
-    element->_attributes.erase(std::remove_if(element->_attributes.begin(), element->_attributes.end(),
-                                              [&](const Ref<Attr> &attr)
-                                              { return attr.get() == &attribute; }));
+    {
+      AttributeChangeStyleInvalidation styleInvalidation(*element, attribute, attribute._value, null);
+      element->_attributes.erase(std::remove_if(element->_attributes.begin(), element->_attributes.end(),
+                                                [&](const Ref<Attr> &attr)
+                                                { return attr.get() == &attribute; }));
+    }
 
     attribute._ownerElement.reset();
 
@@ -143,9 +214,13 @@ namespace krys::boo::dom
     assert(element);
     element->SynchronizeAllAttributes();
 
-    std::replace_if(
-      element->_attributes.begin(), element->_attributes.end(),
-      [&](const Ref<Attr> &attr) { return attr.get() == &oldAttribute; }, ShareRef(newAttribute));
+    {
+      AttributeChangeStyleInvalidation styleInvalidation(*element, oldAttribute, oldAttribute._value,
+                                                         newAttribute._value);
+      std::replace_if(
+        element->_attributes.begin(), element->_attributes.end(),
+        [&](const Ref<Attr> &attr) { return attr.get() == &oldAttribute; }, ShareRef(newAttribute));
+    }
 
     newAttribute._ownerElement = CreateWeakPtr(element.get());
     newAttribute._nodeDocument = ShareRefPtr(&element->NodeDocument());

@@ -2,6 +2,7 @@
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/StyleSheetList.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
+#include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
@@ -109,5 +110,18 @@ namespace krys::boo::dom
     }
 
     return nullptr;
+  }
+
+  List<Ref<ShadowRoot>> AssignedShadowRootsIfSlotted(const Node &node) noexcept
+  {
+    List<Ref<ShadowRoot>> result;
+    for (auto *slot = SlotAlgorithms::GetAssignedSlot(node); slot;
+         slot = SlotAlgorithms::GetAssignedSlot(*slot))
+    {
+      auto *shadowRoot = TreeQueries::ContainingShadowRoot(*slot);
+      krys_debug_assert(shadowRoot);
+      result.push_back(ShareRef(*shadowRoot));
+    }
+    return result;
   }
 }

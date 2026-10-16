@@ -249,6 +249,7 @@ namespace krys::boo::style
     void UpdateActiveStyleSheets(UpdateType updateType) noexcept;
     KRYS_NODISCARD StyleSheetChange
       AnalyzeStyleSheetChange(const List<RefPtr<css::CSSStyleSheet>> &newStylesheets) noexcept;
+    void InvalidateStyleAfterStyleSheetChange(const StyleSheetChange &styleSheetChange) noexcept;
     void UpdateResolver(Span<const RefPtr<css::CSSStyleSheet>> activeStyleSheets,
                         ResolverUpdateType updateType) noexcept;
     void CreateDocumentResolver() noexcept;

@@ -15,6 +15,7 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/HTMLStyleElement.hpp"
 #include "Krystal.Booey/Style/CustomPropertyRegistry.hpp"
+#include "Krystal.Booey/Style/Invalidator.hpp"
 #include "Krystal.Booey/Style/MatchResultCache.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/RuleSet.hpp"
@@ -591,8 +592,51 @@ namespace krys::boo::style
       _usesHasPseudoClass = true;
     }
 
-    // FIXME: Invalidate style after the style sheet change (all style when the resolver is reconstructed, or
-    // with the added sheets), once there is style invalidation.
+    InvalidateStyleAfterStyleSheetChange(styleSheetChange);
+  }
+
+  void Scope::InvalidateStyleAfterStyleSheetChange(const StyleSheetChange &styleSheetChange) noexcept
+  {
+    if (_shadowRoot && !_shadowRoot->IsConnected())
+    {
+      return;
+    }
+
+    // The first body or frameset child of the html element.
+    auto hasBodyOrFrameset = [&]
+    {
+      auto isHTMLElement = [](const dom::Element &element, html::TagName tagName)
+      {
+        return Is<html::HTMLElement>(element) && element.TagQualifiedName().TagName() == tagName;
+      };
+      auto *documentElement = dom::TreeQueries::DocumentElement(*_document);
+      if (!documentElement || !isHTMLElement(*documentElement, html::TagName::html))
+      {
+        return false;
+      }
+      for (auto *child = dom::TreeQueries::FirstElementChild(*documentElement); child;
+           child = dom::TreeQueries::NextElementSibling(*child))
+      {
+        if (isHTMLElement(*child, html::TagName::body) || isHTMLElement(*child, html::TagName::frameset))
+        {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    // If we are already parsing the body and so may have significant amount of elements, put some effort into
+    // trying to avoid style recalcs.
+    bool invalidateAll = !hasBodyOrFrameset() || _document->HasNodesWithMissingStyle();
+
+    if (styleSheetChange.UpdateType == ResolverUpdateType::Reconstruct || invalidateAll)
+    {
+      Invalidator::InvalidateAllStyle(*this);
+      return;
+    }
+
+    Invalidator invalidator(styleSheetChange.AddedSheets, _resolver->MediaQueryEvaluator());
+    invalidator.InvalidateStyle(*this);
   }
 
   Scope::StyleSheetChange
@@ -741,7 +785,7 @@ namespace krys::boo::style
       // :host and ::slotted rules might go away.
       if (_shadowRoot)
       {
-        // FIXME: Invalidate :host and ::slotted style, once there is style invalidation.
+        Invalidator::InvalidateHostAndSlottedStyleIfNeeded(*_shadowRoot);
         UnshareShadowTreeResolverBeforeMutation();
       }
 

@@ -136,6 +136,10 @@ namespace krys::boo::dom
     /// @brief Writes the serialised inline style to the `style` attribute and clears the dirty flag.
     void SynchronizeStyleAttributeInternal() noexcept;
 
+    /// @brief Writes the inline style back to the `style` attribute now, invalidating the style of the rules
+    /// that select on it.
+    void SynchronizeStyleAttributeWithInvalidation() noexcept;
+
     void StyleAttributeChanged(Maybe<DOMStringView> newStyleString) noexcept;
     void InlineStyleChanged() noexcept;
     void SetInlineStyleFromString(DOMStringView newStyleString) noexcept;

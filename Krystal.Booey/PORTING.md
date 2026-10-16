@@ -33,13 +33,13 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - **CSSOM** (2026-10-14): `CSSStyleSheet`, `StyleSheet`, `MediaList`, the rule wrappers, `CSSStyleDeclaration` and the descriptor classes, with copy-on-write of shared contents. See *CSSOM*.
 - **Media query evaluation** (2026-10-14): every media feature, against a host-filled `MediaEnvironment`. See *Media query evaluation*.
 - **DOM integration**, layers e0 to e7 (2026-10-14): `DocumentOrShadowRoot`, the document URL, base URL and parser context, inline styles (`StyledElement`), style scopes, `<style>` sheet owners and `styleSheets`, `adoptedStyleSheets`, selector matching (`querySelector()`, `matches()`, `closest()`), `matchMedia()`. See *DOM integration*.
-- **Style resolution**, layers f0 to f6a (2026-10-14 to 15): rule sets, the user agent sheets, matching and the cascade (f0 to f2); every computed value type, the data groups, `ComputedStyle` and `RenderStyle` (f3a to f3f4); the builder state, the generated builder, registered custom properties and `Builder` with `var()` and `revert` (f4a to f4d); the adjuster (f5a); element resolution with the matched declarations and match result caches (f5b); presentational hints on HTML, SVG and MathML elements and the `<body>` link colours (f5c); the tree resolver, the DOM's style state (style validity, the styles elements keep, the direct invalidations), the composed tree iterators and container queries (f5d); computed style output: `Style::Extractor`, `getComputedStyle` and the transform resolver (f6a). See *Style resolution*.
+- **Style resolution**, layers f0 to f6b (2026-10-14 to 15): rule sets, the user agent sheets, matching and the cascade (f0 to f2); every computed value type, the data groups, `ComputedStyle` and `RenderStyle` (f3a to f3f4); the builder state, the generated builder, registered custom properties and `Builder` with `var()` and `revert` (f4a to f4d); the adjuster (f5a); element resolution with the matched declarations and match result caches (f5b); presentational hints on HTML, SVG and MathML elements and the `<body>` link colours (f5c); the tree resolver, the DOM's style state (style validity, the styles elements keep, the direct invalidations), the composed tree iterators and container queries (f5d); computed style output: `Style::Extractor`, `getComputedStyle` and the transform resolver (f6a); style invalidation: `Style::Invalidator` and the class, ID, attribute, pseudo-class and child change invalidations, hooked to the DOM's change steps, and style sheet changes (f6b). See *Style resolution*.
 
-**Next:** style resolution, layer f6b (the selector-based style invalidation). See *Style resolution*.
+**Next:** not planned yet. Style resolution is complete; the candidates are in *Open* (the render tree, animations, `Settings`, resource loading).
 
 **Open:**
 - **Rendering:** there's no render tree. `RenderTreeUpdater` is a stand-in that keeps the style each element's renderer would hold on the element (`Node::GetRenderStyle`) and the render view's style on the document (`Document::RenderViewStyle`); text renderers, generated content, rebuild roots and the top layer wait for it. Without principal boxes, size container queries and container units are unknown and the seam's `RenderBoxOf` is null. Layout interleaving is a loop without layout. Anchor positioning (position options, position visibility, the tree resolution state) and elements with custom style resolve callbacks are FIXMEs in the tree resolver.
-- **Style resolution, f6b:** the style invalidators (class, id, attribute, pseudo-class, child and sheet changes; with child changes, `CountElementsBefore` can use the cached child index, FIXME in `SelectorChecker.cpp`). Viewport unit invalidation: registered custom properties with viewport units in their initial value don't call `Document::SetHasStyleWithViewportUnits()` yet (FIXME in `src/Style/CustomPropertyRegistry.cpp`).
+- **Style invalidation:** viewport changes (media query re-evaluation for viewport changes, `InvalidatePropertiesWithViewportUnits`; registered custom properties with viewport units in their initial value don't call `Document::SetHasStyleWithViewportUnits()` yet, FIXME in `src/Style/CustomPropertyRegistry.cpp`). User agent shadow roots (user agent part and `::cue` invalidation) and form owners (`:default` follows the nearest form ancestor) are FIXMEs. Hover, focus, active, fullscreen, popovers, validity and custom states aren't tracked, so they have nothing to invalidate.
 - **The Style seam** (`Style/Seam.hpp`) still stands in for `RenderView`, `RenderElement`, `RenderBoxModelObject`, `RenderBox`, `RenderBlock`, `RenderGrid`, `RenderInline` (unreachable stubs for the extractor's layout branches since f6a), `RenderTheme`'s focus ring metrics, `AnchorPositionEvaluator`, the settings values (`SettingsValues`, the upstream defaults), the document's colour options (`DocumentUseDarkAppearance`, `DocumentStyleColorOptions`) and its security and keyframes functions. `RenderStyle` and `BuilderState` are the real classes (f3f4, f4a).
 - **Settings:** there is no `Settings`. Parser contexts use default settings, so features behind a settings flag that's on by default upstream are off in author sheets (`@view-transition` via crossDocumentViewTransitionsEnabled, `@position-try` via cssAnchorPositioningEnabled, `text-decoration-line: spelling-error | grammar-error`, ...); user agent sheets turn on upstream's list. The `ParserContext(const Settings &)` and generated `PropertySettings(const Settings &)` constructors wait for it.
 - **Resource loading:** `<link>` sheets, `@import` loading and the loader half of `StyleSheetContents` (`ParseAuthorStyleSheet`, `NotifyLoadedSheet`, `SubresourcesAllowReuse`, `IsLoadingSubresources`); `ImageValue::IsPending`, `LoadImage`, `GetCachedImage`, `KnownToBeOpaque` and its cached image; `FontFaceSrcResourceValue::GetFontLoadRequest` (`CustomTraverseSubresources` returns `false` until then); `applyModifiersToLoaderOptions`.
@@ -1588,7 +1588,7 @@ Connects the CSS port to the DOM (`DOM/`, `HTML/`), which is written from the WH
 - **e5, `adoptedStyleSheets`:** on `DocumentOrShadowRoot`; `CSSStyleSheetObservableArray` becomes a plain C++ list API with the same checks; adopting tree scopes in `CSSStyleSheet`. Done.
 - **e6, selector matching:** `SelectorChecker` (`QueryingRules` mode, no JIT, `SelectorFilter` or relations), then `SelectorQuery`/`SelectorQueryCache`. Done (one layer).
 - **e7, `matchMedia`:** `MediaQueryMatcher`, `MediaQueryList`, `MediaQueryListEvent`, on `Document` (there's no window). Done.
-- **Deferred:** `<link>` loading, `xml-stylesheet`, `@import`, render blocking (resource loader); `SVGStyleElement`; the `*ChangeInvalidation` classes (f6b). `getComputedStyle` came with f6a.
+- **Deferred:** `<link>` loading, `xml-stylesheet`, `@import`, render blocking (resource loader); `SVGStyleElement`. The `*ChangeInvalidation` classes came with f6b, `getComputedStyle` with f6a.
 
 **Decisions (2026-10-14):**
 - No `TreeScope`. Its state lives on `DocumentOrShadowRoot` (the spec mixin, now a base of `Document` and `ShadowRoot`), and the tree scope of a node is found by walking to its root (`TreeQueries::Root`) instead of upstream's cached `Node::treeScope()`.
@@ -1675,7 +1675,7 @@ Tests: `tests/DOM/StyledElement.cpp` (element types, the `style` attribute, CSSO
 
 ### Layer e3: style scopes (2026-10-14)
 
-Graph from `style/StyleScope.cpp` (headers-only): 131 files (`tools/port/out/style-scope.md`); the new pieces are `Style::Scope` itself, `Document::inDocumentShadowRoots` and the `sheet()` of the sheet owners. The resolver and media query re-evaluation parts came with f0; invalidation (f6b), layout dependencies and anchor positioning are still open.
+Graph from `style/StyleScope.cpp` (headers-only): 131 files (`tools/port/out/style-scope.md`); the new pieces are `Style::Scope` itself, `Document::inDocumentShadowRoots` and the `sheet()` of the sheet owners. The resolver and media query re-evaluation parts came with f0 and invalidation with f6b; layout dependencies and anchor positioning are still open.
 
 **Decisions (2026-10-14):** fix the three shadow-tree/ref-counting DOM bugs below in this layer; give `<style>` and `<link>` LinkStyle's `Sheet()` now (null until e4 or the resource loader) so `CollectActiveStyleSheets` is complete. Until something creates those sheets, collection, tree order, filtering and style sheet sets can't be tested; they're tested with e4 (FIXME in `tests/Style/Scope.cpp`).
 
@@ -1696,7 +1696,7 @@ Graph from `style/StyleScope.cpp` (headers-only): 131 files (`tools/port/out/sty
 - Moving a host (`moveBefore`) tripped `NodeMoved`'s assertion on its shadow root, which has no parent.
 
 **Differences:**
-- No render tree: `UpdateActiveStyleSheets` always runs (no living-render-tree gate, no deferral during style recalc) and doesn't analyse the change or invalidate style (FIXMEs, f6b); `ScheduleUpdate` doesn't invalidate `:host`/`::slotted`. The resolver, `usesHasPseudoClass`, shared shadow tree resolvers and media query re-evaluation came with f0, the registries with f0 and f4c, the match result cache with f5b. Not ported: `usesStyleBasedEditability`, viewport changes, layout dependencies, anchor positioning.
+- No render tree: `UpdateActiveStyleSheets` always runs (no living-render-tree gate, no deferral during style recalc) (FIXMEs); invalidating style after the change, and `:host`/`::slotted` style in `ScheduleUpdate`, came with f6b. The resolver, `usesHasPseudoClass`, shared shadow tree resolvers and media query re-evaluation came with f0, the registries with f0 and f4c, the match result cache with f5b. Not ported: `usesStyleBasedEditability`, viewport changes, layout dependencies, anchor positioning.
 - Updates are a task on `html::EventLoop` (DOM manipulation task source) instead of a zero-delay timer. A queued task isn't cancelled when the update is flushed early; it finds nothing to do.
 - No extension style sheets or `authorAndUserStylesEnabled` setting; no user agent shadow roots; no inspector.
 - `CollectActiveStyleSheets`: xml-stylesheet processing instructions and `SVGStyleElement` are skipped (FIXMEs; no sheets yet). Adopted sheets came with e5. A `<link>`'s "enabled via script" state and its loading branch come with the resource loader. As upstream, `rel` is checked for the substring `alternate`, case-sensitively.
@@ -1838,7 +1838,7 @@ Tests: `tests/CSS/Media/MediaQueryList.cpp` (evaluation against the environment,
 
 ---
 
-## Style resolution (layers f0 to f6, 2026-10-14 to 15) — f0 to f6a done
+## Style resolution (layers f0 to f6, 2026-10-14 to 15) — done
 
 From matched rules to computed styles. Upstream: the resolver (`style/` top level, ~115 files and ~31k lines: rule sets, matching, the cascade, the builder, the tree resolver, invalidation), the computed style it writes into (`style/computed`, 16 files, plus storage generated from `CSSProperties.json`), its data groups (`rendering/style`, 113 files, ~17.6k lines) and the computed value types (`style/values`, ~400 files, ported in f3).
 
@@ -1855,7 +1855,7 @@ From matched rules to computed styles. Upstream: the resolver (`style/` top leve
 - **f3, computed style storage:** `style/computed`, the `rendering/style` data groups, codegen for the computed style and render style properties, every remaining `style/values` type with its conversions, `StyleCustomProperty` (moved from f2). Replaced the seam's `RenderStyle`. Done in sublayers f3a to f3f4 (2026-10-14 to 15); see *Plan for layer f3*.
 - **f4, the builder (done in sublayers f4a to f4d on 2026-10-15; see *Plan for layer f4*):** `BuilderState`, `Builder`, `BuilderCustom`, `BuilderChecking`, codegen for the generated builder; font resolution (`StyleResolveForFont`, `StyleFontSizeFunctions`) against a font description without platform font data; the remaining deferred value definitions (`PendingSubstitutionValue`, `CreateStyleImage` without loading); moved from f2: `CustomPropertyRegistry`, `CSSRegisteredCustomProperty` and `@property` registration (they need the render style's custom property storage and the typed custom property parsing), `var()` resolution (the deferred `VariableReferenceValue` definitions and the typed custom property parser functions: the builder applies custom properties on demand) and applying `revert`/`revert-layer` (the builder builds the rollback cascades).
 - **f5, the resolver (planned in sublayers f5a to f5d on 2026-10-15, done; see *Plan for layer f5*):** `Style::Resolver`, `TreeResolver`, `Update`, `StyleAdjuster`, `MatchedDeclarationsCache`, `MatchResultCache` (moved from f1: it caches the resolved style), `StyleResolveForDocument`; `ContainerQueryEvaluator` (`style()` queries; size queries are unknown without layout); the user agent root style in `MediaQueryMatcher` (done in f5b); presentational hints and `<body>` colours.
-- **f6, output and invalidation (planned in sublayers on 2026-10-15, f6a done):** f6a, output: `Style::Extractor` (and its generated half), `getComputedStyle` (`CSSComputedStyleDeclaration`); f6b, invalidation: `StyleInvalidator` and the `*ChangeInvalidation` classes, hooked to the DOM's change steps. `StyleDifference` waits for the render tree (decided by the user: only renderers consume it).
+- **f6, output and invalidation (planned in sublayers on 2026-10-15, done):** f6a, output: `Style::Extractor` (and its generated half), `getComputedStyle` (`CSSComputedStyleDeclaration`); f6b, invalidation: `StyleInvalidator` and the `*ChangeInvalidation` classes, hooked to the DOM's change steps. `StyleDifference` waits for the render tree (decided by the user: only renderers consume it).
 - **Deferred:** animations and transitions (`StyleInterpolation*`, `Styleable`, the changed animatable properties), `AnchorPositionEvaluator` (layout), `InlineTextBoxStyle`, resource loading.
 
 ### Layer f0: rule sets (2026-10-14)
@@ -1904,7 +1904,7 @@ Graphs from the nine f0 entries (headers-only): `style/RuleSet.cpp` (89 files), 
 
 **Differences:**
 - The resolver's media type comes from the `MediaEnvironment` (upstream: the frame's view). Element resolution came with f5b; keyframe styles come with animations.
-- `Style::Scope` updates the resolver but doesn't invalidate style after a sheet change (FIXME, f6b), and doesn't invalidate `:host`/`::slotted` style on a contents change. No font selector, SVG font face rules or render view font update (FIXMEs); the custom property registry and match result cache came with f4c and f5b. Shared shadow tree resolvers evict the first entry when there are more than 256 (upstream: a random one). No user agent shadow roots, so `isForUserAgentShadowTree` is false.
+- `Style::Scope` invalidates style after a sheet change and `:host`/`::slotted` style on a contents change since f6b. No font selector, SVG font face rules or render view font update (FIXMEs); the custom property registry and match result cache came with f4c and f5b. Shared shadow tree resolvers evict the first entry when there are more than 256 (upstream: a random one). No user agent shadow roots, so `isForUserAgentShadowTree` is false.
 - `ScopeRuleSets` has no user style sheets (`initializeUserStyle` adds nothing; FIXME: extension style sheets) and no inspector wrappers. Its invalidation rule set builders are kept in first-seen order (upstream: a hash map's order).
 - `RuleSetBuilder` keeps a dynamic media query's affected rules in first-seen order (upstream: a hash set copied to a vector). Anonymous cascade layers get a random `anon_` name from `std::mt19937_64` (upstream: a cryptographically random number).
 - `RuleSet` doesn't clone `::cue` rules for the cue background box (`::-internal-cue-background` was dropped with the internal pseudos) and doesn't skip SVG animatable attributes when bucketing attribute selectors (no SMIL; FIXMEs).
@@ -2737,7 +2737,7 @@ Graphs: the f5 plan's (`f5-StyleTreeResolver.md`, `f5-StyleUpdate.md`, `f5-Conta
 
 **Decisions (2026-10-15):**
 - One layer, as decided by the user, with container queries.
-- The direct invalidations come now (decided by the user): insertion (and moves) invalidate the inserted subtree, removal tears down its renderers, inline style and presentational hint changes invalidate the element, the `<body>` link colours and the table's cell borders invalidate the subtree, and attaching a shadow root or changing slot assignments rebuilds the host's subtree. The selector-based invalidators (class, id, attribute, pseudo-class, child and sheet changes, `ChildChangeInvalidation`) stay in f6 (f6b).
+- The direct invalidations come now (decided by the user): insertion (and moves) invalidate the inserted subtree, removal tears down its renderers, inline style and presentational hint changes invalidate the element, the `<body>` link colours and the table's cell borders invalidate the subtree, and attaching a shadow root or changing slot assignments rebuilds the host's subtree. The selector-based invalidators (class, id, attribute, pseudo-class, child and sheet changes, `ChildChangeInvalidation`) came with f6b.
 - No render tree: `RenderTreeUpdater` is a stand-in. It stores each element's renderer style on the element (`Element::_rendererStyle`, which `Node::GetRenderStyle` returns), the `display: contents`/`none` styles as upstream, and the render view's style on the document (`Document::RenderViewStyle`). Teardown drops the renderer styles of a subtree. Text renderers, generated content, rebuild roots, pseudo-style cache checks, the top layer and layout come with the render tree.
 - Without layout, the interleaving loop resolves the deferred descendants of query containers on the next pass with no layout in between; size queries and container units are unknown (no principal boxes).
 - Documents need a full style rebuild at first (`_needsFullStyleRebuild` starts true): upstream's initial rebuild comes from creating the render tree. There's no style recalc timer: the host calls `UpdateStyleIfNeeded` (FIXME, the event loop).
@@ -2767,7 +2767,7 @@ Graphs: the f5 plan's (`f5-StyleTreeResolver.md`, `f5-StyleUpdate.md`, `f5-Conta
 - `Update` and the other checked-pointer targets must be heap-allocated in Krystal (no stack exception), so the empty update in `StyleForElementIgnoringPendingStylesheets` is.
 - `CharacterData::ContainsOnlyASCIIWhitespace` is computed each time (upstream caches it in node flags).
 - No `PseudoElement` nodes: `::before`/`::after` styles live in the element's pseudo-style cache only, and their validity isn't combined with the element's.
-- `CountElementsBefore` doesn't read the cached child index until child changes invalidate siblings (f6b).
+- `CountElementsBefore` reads the cached child index since f6b (child changes invalidate the siblings).
 - `ResolveStyle` sets the render view's style on its first rebuild even when the initial containing block style was already created on demand.
 - Removal tears down the removed subtree's renderers in the removing steps (upstream: before removal). Moves tear down and invalidate the moved subtree.
 
@@ -2813,3 +2813,45 @@ Graph from `style/StyleExtractor.cpp` and `css/CSSComputedStyleDeclaration.cpp` 
 - `SerialiseShorthandValue` returns `Maybe` for declaration blocks; the extractor overload returns the empty string where upstream does.
 
 Tests: `tests/Style/Extractor.cpp` (longhands and their adjustments, shorthands, custom properties, copies and matching, text nodes, and every computed property's direct serialisation against its value's), `tests/CSS/CSSComputedStyleDeclaration.cpp` (`getComputedStyle`, read-only, items and length, liveness, pseudo-elements): 5 new cases; `tests/Style/Builder.cpp`: the medium priority properties.
+
+### Layer f6b: style invalidation (2026-10-15)
+
+Graphs from the six entries (headers-only): `style/StyleInvalidator.cpp` (84 files) and the five `*ChangeInvalidation.cpp` (82 each) (`tools/port/out/f6b-*.md`), all done but the entries and `StyleInvalidationFunctions.h`. The call sites are in `dom/` and `html/` (`Element`, `StyledElement`, `ContainerNode`, `CharacterData`, `Style::Scope` and the form controls).
+
+**Decisions (2026-10-15):**
+- Every pseudo-class state Krystal has is hooked up (decided by the user). Hover, focus, active, fullscreen, popovers, validity, autofill and custom states aren't tracked, so there's nothing to hook.
+- Krystal's DOM follows the spec algorithms, whose change steps run after a change, and keeps no copies of the classes, the ID or the form controls' states: the selector checker reads them from the attributes. So the invalidations wrap the changes themselves: `ElementAlgorithms` wraps each attribute store in one scope (attribute, class, ID and pseudo-class invalidations), and `MutationAlgorithms` and `TextAlgorithms` wrap each inserted, removed or moved node and each text change in a child change scope.
+- The pseudo-class states the checker derives (`:link`, `:checked`, `:default`, `:indeterminate`, `:disabled`/`:enabled`, `:read-only`/`:read-write`, `:required`/`:optional`, `:placeholder-shown`, `:lang()`, `:dir()`) are invalidated by `Style/PseudoClassStateInvalidation` (not upstream), which maps an attribute or child change to the elements and states it may flip. Upstream does this where each element stores its state; every form state is an attribute in Krystal (`checked`, `indeterminate`, `selected`, `value`). A state that may flip is invalidated as if it flips, which costs a little extra invalidation when it doesn't; `:lang()` and `:dir()` use `AnyValue`.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `style/StyleInvalidator.h`, `.cpp` | `port` | `Style/Invalidator.hpp`, `src/...` | on | tested. User agent parts and `::cue` are FIXMEs. |
+| `style/StyleInvalidationFunctions.h` | `port` | `Style/InvalidationFunctions.hpp` | on | User agent shadow trees are a FIXME. |
+| `style/ClassChangeInvalidation.h`, `.cpp` | `port` | `Style/ClassChangeInvalidation.hpp`, `src/...` | on | tested. |
+| `style/IdChangeInvalidation.h`, `.cpp` | `port` | `Style/IdChangeInvalidation.hpp`, `src/...` | on | tested. |
+| `style/AttributeChangeInvalidation.h`, `.cpp` | `port` | `Style/AttributeChangeInvalidation.hpp`, `src/...` | on | tested. |
+| `style/PseudoClassChangeInvalidation.h`, `.cpp` | `port` | `Style/PseudoClassChangeInvalidation.hpp`, `src/...` | on | tested. |
+| `style/ChildChangeInvalidation.h`, `.cpp` | `port` | `Style/ChildChangeInvalidation.hpp`, `src/...` | on | tested. |
+| (none) | `have*` | `Style/PseudoClassStateInvalidation.hpp`, `src/...` | on | tested. See decisions. |
+| `dom/ContainerNode.h` (`ChildChange`) | `port` | `dom::ContainerNode::ChildChange` | on | tested. |
+| `dom/Element.cpp` (`needsStyleInvalidation`, `styleResolver`, `invalidateForSiblingCombinators`, the attribute change sites, `finishParsingChildren`, `partAttributeChanged`, `exportparts`) | `port` | `dom::Element`, `ElementAlgorithms` | on | tested. |
+| `dom/StyledElement.cpp` (`dirtyStyleAttribute`, `invalidateStyleAttribute`) | `port` | `dom::StyledElement` | on | tested. |
+| `dom/ContainerNode.cpp`, `CharacterData.cpp` (the child change sites) | `port` | `MutationAlgorithms`, `TextAlgorithms` | on | tested. |
+| `dom/ShadowRoot.cpp` (`assignedShadowRootsIfSlotted`) | `port` | `dom::AssignedShadowRootsIfSlotted` | on | |
+| `style/StyleScope.cpp` (`invalidateStyleAfterStyleSheetChange`, `scheduleUpdate`) | `port` | `src/Style/Scope.cpp` | on | tested. |
+| `css/SelectorChecker.cpp` (`countElementsBefore`) | `port` | `src/CSS/Selectors/SelectorChecker.cpp` | on | tested. |
+
+**Bugs fixed:**
+- `Element::InvalidateStyle`, `InvalidateStyleAndLayerComposition` and `InvalidateStyleForSubtree` didn't invalidate the following siblings that sibling combinators make depend on the element (upstream's `invalidateSiblingsIfNeeded`, missed in f5d).
+
+**Added (upstream API):** `Invalidator`, `ClassChangeInvalidation`, `IdChangeInvalidation`, `AttributeChangeInvalidation`, `PseudoClassChangeInvalidation`, `MakePseudoClassInvalidationKeys`, `ChildChangeInvalidation`, `TraverseRuleFeatures` and its helpers; `ContainerNode::ChildChange`; `Element::NeedsStyleInvalidation`, `StyleResolver`, `dom::InvalidateForSiblingCombinators`; `dom::AssignedShadowRootsIfSlotted`; `Document::HasNodesWithMissingStyle`; `Scope::InvalidateStyleAfterStyleSheetChange`. Not upstream: `Element::ClassNamesForValue`, `css::IsSubmitButton` (public; was internal to the selector checker's test functions), `InvalidatePseudoClassesForAttributeChange`, `InvalidatePseudoClassesForChildChange`, `PseudoClassChangeInvalidations`.
+
+**Names:** `ChildChange`'s `type`, `source` and `affectsElements` → `ChangeType`, `ChangeSource`, `ChangeAffectsElements` (they'd clash with its enums); `invalidateStyle*` → `InvalidateStyle*`; `Element::styleResolver()` → `StyleResolver()`.
+
+**Differences:**
+- The class and ID invalidations wrap the attribute store (upstream: the store of the parsed classes and ID after it), and the classes are parsed from the old and new values each time (no `SpaceSplitString`). The pseudo-class invalidations for attribute-derived states run in the same scope.
+- Children are inserted one at a time (upstream: `AllChildrenRemoved`/`AllChildrenReplaced` for `replaceChildren` and `textContent`), so those change types are never made. A node's insertion is the parser's when its parent's children are still being parsed. Moves are a removal and an insertion.
+- No user agent shadow roots: `TraverseRuleFeatures` never reports rules that may affect a user agent shadow tree, and user agent part invalidation is a FIXME; `InvalidateShadowParts` reads the `part` and `exportparts` attributes (no part mappings).
+- `:default` for submit buttons follows the nearest form ancestor, as the selector checker does (FIXME, form owners).
+
+Tests: `tests/Style/Invalidator.cpp` (added, removed and non-style-rule sheets, media and nested rules, direct invalidation, shadow trees, `:host`/`::slotted()`, `::part()`), `tests/Style/AttributeChangeInvalidation.cpp` (class, ID and attribute changes, negation, `[style]` synchronisation), `tests/Style/PseudoClassChangeInvalidation.cpp` (invalidation keys; `:checked`, `:indeterminate`, `:link`, `:required`, `:read-only`, `:placeholder-shown`, `:default` and type changes; `:lang()`, `:dir()`, `contenteditable`, disabled fieldsets and legends, default buttons, text areas), `tests/Style/ChildChangeInvalidation.cpp` (`:empty`, `:first-child`, `:last-child`, positional pseudo-classes, sibling combinators, `:has()`): 11 new cases.

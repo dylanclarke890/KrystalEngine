@@ -348,6 +348,7 @@ target_sources(Krystal.Booey.Tests
 
 		# Style
 		tests/Style/Adjuster.cpp
+		tests/Style/AttributeChangeInvalidation.cpp
 		tests/Style/Builder.cpp
 		tests/Style/BuilderState.cpp
 		tests/Style/FontSizeFunctions.cpp
@@ -355,11 +356,14 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/BuilderCustom.cpp
 		tests/Style/CustomPropertyRegistry.cpp
 		tests/Style/Calc/Tree.cpp
+		tests/Style/ChildChangeInvalidation.cpp
 		tests/Style/ElementRuleCollector.cpp
 		tests/Style/Extractor.cpp
+		tests/Style/Invalidator.cpp
 		tests/Style/MatchedDeclarationsCache.cpp
 		tests/Style/MatchResultCache.cpp
 		tests/Style/PropertyCascade.cpp
+		tests/Style/PseudoClassChangeInvalidation.cpp
 		tests/Style/ResolveForDocument.cpp
 		tests/Style/Resolver.cpp
 		tests/Style/RuleSet.cpp

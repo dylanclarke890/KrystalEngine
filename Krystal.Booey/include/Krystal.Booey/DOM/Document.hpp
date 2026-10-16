@@ -519,6 +519,11 @@ namespace krys::boo::dom
       _hasNodesWithMissingStyle = true;
     }
 
+    KRYS_NODISCARD bool HasNodesWithMissingStyle() const noexcept
+    {
+      return _hasNodesWithMissingStyle;
+    }
+
     /// @brief The style of @p element (or of one of its pseudo-elements) inheriting from @p parentStyle,
     /// resolved outside style resolution.
     KRYS_NODISCARD UniquePtr<RenderStyle> StyleForElementIgnoringPendingStylesheets(

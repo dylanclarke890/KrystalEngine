@@ -19,6 +19,10 @@ namespace krys::boo::css
   /// `href` or `xlink:href`.
   KRYS_NODISCARD bool IsLink(const dom::Element &element) noexcept;
 
+  /// @brief Whether @p element is a submit button: a `button` that isn't a reset or plain button, or an
+  /// `input` of type `submit` or `image`.
+  /// @see https://html.spec.whatwg.org/#concept-submit-button
+  KRYS_NODISCARD bool IsSubmitButton(const dom::Element &element) noexcept;
   /// @see https://html.spec.whatwg.org/#selector-default
   KRYS_NODISCARD bool MatchesDefaultPseudoClass(const dom::Element &element) noexcept;
 

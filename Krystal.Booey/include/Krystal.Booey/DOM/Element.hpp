@@ -25,6 +25,7 @@ namespace krys::boo::css::calc
 namespace krys::boo::style
 {
   struct PseudoElementIdentifier;
+  class Resolver;
 }
 
 namespace krys::boo::html
@@ -384,6 +385,10 @@ namespace krys::boo::dom
     /// @brief The element's classes in order, without duplicates, ASCII-lowercased in quirks mode.
     KRYS_NODISCARD List<DOMStringAtom> ClassNames() const noexcept;
 
+    /// @brief The classes a `class` attribute with @p value would give the element (none for null), as
+    /// `ClassNames` gives them.
+    KRYS_NODISCARD List<DOMStringAtom> ClassNamesForValue(Maybe<DOMStringView> value) const noexcept;
+
     /// @brief The element's ID, ASCII-lowercased in quirks mode; empty if it has none.
     KRYS_NODISCARD DOMString IdForStyleResolution() const noexcept;
 
@@ -483,6 +488,13 @@ namespace krys::boo::dom
     void InvalidateStyleForSubtreeInternal() noexcept;
     void InvalidateForQueryContainerSizeChange() noexcept;
     void InvalidateForResumingQueryContainerResolution() noexcept;
+
+    /// @brief Whether a change to the element needs to invalidate style: false when the element isn't
+    /// connected or its style (or the whole document's) will be resolved again anyway.
+    KRYS_NODISCARD bool NeedsStyleInvalidation() const noexcept;
+
+    /// @brief The style resolver of the element's tree: its shadow root's, or its document's.
+    KRYS_NODISCARD style::Resolver &StyleResolver() noexcept;
 
     KRYS_NODISCARD bool NeedsUpdateQueryContainerDependentStyle() const noexcept
     {
@@ -637,10 +649,7 @@ namespace krys::boo::dom
     /// @brief Called by the parser when it pops this element off the stack of open elements. Overrides must
     /// call the base implementation.
     /// @see https://html.spec.whatwg.org/#stack-of-open-elements
-    virtual void FinishParsingChildren() noexcept
-    {
-      ClearNodeFlag(NodeFlags::IsParsingChildren);
-    }
+    virtual void FinishParsingChildren() noexcept;
 
 #pragma endregion
 
@@ -659,6 +668,10 @@ namespace krys::boo::dom
   private:
     void SynchronizeStyleAttribute() const noexcept;
   };
+
+  /// @brief Invalidates the style of @p sibling and its following siblings that sibling combinators make
+  /// depend on their previous siblings, up to the first one that doesn't affect the next.
+  void InvalidateForSiblingCombinators(Element *sibling) noexcept;
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::Element)

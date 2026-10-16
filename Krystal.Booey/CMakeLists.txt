@@ -687,6 +687,16 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/ExtractorState.hpp
   include/Krystal.Booey/Style/OrderedNamedLinesCollector.hpp
   include/Krystal.Booey/Style/TransformResolver.hpp
+
+  # Style invalidation (f6b)
+  include/Krystal.Booey/Style/AttributeChangeInvalidation.hpp
+  include/Krystal.Booey/Style/ChildChangeInvalidation.hpp
+  include/Krystal.Booey/Style/ClassChangeInvalidation.hpp
+  include/Krystal.Booey/Style/IdChangeInvalidation.hpp
+  include/Krystal.Booey/Style/InvalidationFunctions.hpp
+  include/Krystal.Booey/Style/Invalidator.hpp
+  include/Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp
+  include/Krystal.Booey/Style/PseudoClassStateInvalidation.hpp
   include/Krystal.Booey/Style/MatchedDeclarationsCache.hpp
   include/Krystal.Booey/Style/MatchResultCache.hpp
   include/Krystal.Booey/Style/ResolveForDocument.hpp
@@ -1821,6 +1831,15 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Style/Extractor.cpp
   ${KRYSTAL_BOOEY_SOURCES_OUTPUT_DIR}/Style/ExtractorGenerated.cpp
   src/Style/TransformResolver.cpp
+
+  # Style invalidation (f6b)
+  src/Style/AttributeChangeInvalidation.cpp
+  src/Style/ChildChangeInvalidation.cpp
+  src/Style/ClassChangeInvalidation.cpp
+  src/Style/IdChangeInvalidation.cpp
+  src/Style/Invalidator.cpp
+  src/Style/PseudoClassChangeInvalidation.cpp
+  src/Style/PseudoClassStateInvalidation.cpp
 )
 
 target_precompile_headers(Krystal.Booey
