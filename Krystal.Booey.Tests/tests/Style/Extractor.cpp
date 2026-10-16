@@ -32,7 +32,8 @@ namespace krys::boo::style::tests
            width: 50%; min-width: auto; max-height: none; transform: rotate(45deg); counter-reset: x 2 y;
            position: absolute; float: left; widows: 3; white-space: pre; z-index: 4 }
       #b { line-height: 150%; letter-spacing: 2px; margin-inline-start: 7px; direction: rtl }
-    </style><div id=a></div><div id=b></div>)"};
+    </style><div id=a></div><div id=b></div>)",
+                             WithView::No};
     auto &a = fixture.ById(u8"a");
     auto &b = fixture.ById(u8"b");
     Extractor ea {&a};

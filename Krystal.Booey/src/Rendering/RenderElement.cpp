@@ -16,8 +16,13 @@ namespace krys::boo
 
     public:
       GenericRenderElement(Type type, dom::Element &element, RenderStyle &&style) noexcept
-          : RenderElement(type, element, krys::move(style), {}, {})
+          : RenderElement(type, element, krys::move(style), TypeFlagsFor(type), {})
       {
+      }
+
+      KRYS_NODISCARD bool CanHaveChildren() const noexcept override
+      {
+        return true;
       }
 
       KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
@@ -39,12 +44,30 @@ namespace krys::boo
           default:                          return u8"RenderElement";
         }
       }
+
+    private:
+      // The flags the constructors of the renderer classes between `RenderElement` and this type's class add.
+      KRYS_NODISCARD static EnumSet<TypeFlag> TypeFlagsFor(Type type) noexcept
+      {
+        const EnumSet<TypeFlag> box {TypeFlag::IsLayerModelObject, TypeFlag::IsBoxModelObject,
+                                     TypeFlag::IsBox};
+        switch (type)
+        {
+          case Type::Inline:
+            return {TypeFlag::IsLayerModelObject, TypeFlag::IsBoxModelObject, TypeFlag::IsRenderInline};
+          case Type::FlexibleBox:  return box | TypeFlag::IsRenderBlock | TypeFlag::IsFlexibleBox;
+          case Type::TableSection:
+          case Type::TableRow:
+          case Type::TableCol:     return box;
+          default:                 return box | TypeFlag::IsRenderBlock;
+        }
+      }
     };
 
-    KRYS_NODISCARD UniquePtr<RenderElement> CreateRenderer(RenderObject::Type type, dom::Element &element,
-                                                           RenderStyle &&style) noexcept
+    KRYS_NODISCARD RenderPtr<RenderElement>
+      CreateGenericRenderer(RenderObject::Type type, dom::Element &element, RenderStyle &&style) noexcept
     {
-      return CreateUnique<GenericRenderElement>(type, element, krys::move(style));
+      return CreateRenderer<GenericRenderElement>(type, element, krys::move(style));
     }
   }
 
@@ -68,9 +91,13 @@ namespace krys::boo
   {
   }
 
-  RenderElement::~RenderElement() noexcept = default;
+  RenderElement::~RenderElement() noexcept
+  {
+    // Do not add any code here. Add it to willBeDestroyed() instead.
+    krys_debug_assert(!_firstChild);
+  }
 
-  UniquePtr<RenderElement>
+  RenderPtr<RenderElement>
     RenderElement::CreateFor(dom::Element &element, RenderStyle &&style,
                              EnumSet<ConstructBlockLevelRendererFor> rendererTypeOverride) noexcept
   {
@@ -82,53 +109,57 @@ namespace krys::boo
       case DisplayType::Inline:
         if (rendererTypeOverride.Contains(ConstructBlockLevelRendererFor::Inline))
         {
-          return CreateRenderer(Type::BlockFlow, element, krys::move(style));
+          return CreateGenericRenderer(Type::BlockFlow, element, krys::move(style));
         }
-        return CreateRenderer(Type::Inline, element, krys::move(style));
+        return CreateGenericRenderer(Type::Inline, element, krys::move(style));
       case DisplayType::Block:
       case DisplayType::FlowRoot:
-      case DisplayType::InlineBlock: return CreateRenderer(Type::BlockFlow, element, krys::move(style));
+      case DisplayType::InlineBlock:
+        return CreateGenericRenderer(Type::BlockFlow, element, krys::move(style));
       case DisplayType::ListItem:
         if (rendererTypeOverride.Contains(ConstructBlockLevelRendererFor::ListItem))
         {
-          return CreateRenderer(Type::BlockFlow, element, krys::move(style));
+          return CreateGenericRenderer(Type::BlockFlow, element, krys::move(style));
         }
-        return CreateRenderer(Type::ListItem, element, krys::move(style));
+        return CreateGenericRenderer(Type::ListItem, element, krys::move(style));
       case DisplayType::Flex:
-      case DisplayType::InlineFlex:      return CreateRenderer(Type::FlexibleBox, element, krys::move(style));
+      case DisplayType::InlineFlex:
+        return CreateGenericRenderer(Type::FlexibleBox, element, krys::move(style));
       case DisplayType::Grid:
       case DisplayType::InlineGrid:
       case DisplayType::GridLanes:
-      case DisplayType::InlineGridLanes: return CreateRenderer(Type::Grid, element, krys::move(style));
+      case DisplayType::InlineGridLanes: return CreateGenericRenderer(Type::Grid, element, krys::move(style));
       case DisplayType::Box:
       case DisplayType::InlineBox:
-        return CreateRenderer(Type::DeprecatedFlexibleBox, element, krys::move(style));
-      case DisplayType::RubyBase:       return CreateRenderer(Type::Inline, element, krys::move(style));
-      case DisplayType::RubyAnnotation: return CreateRenderer(Type::BlockFlow, element, krys::move(style));
-      case DisplayType::Ruby:           return CreateRenderer(Type::Inline, element, krys::move(style));
-      case DisplayType::RubyBlock:      return CreateRenderer(Type::BlockFlow, element, krys::move(style));
-      default:                          break;
+        return CreateGenericRenderer(Type::DeprecatedFlexibleBox, element, krys::move(style));
+      case DisplayType::RubyBase: return CreateGenericRenderer(Type::Inline, element, krys::move(style));
+      case DisplayType::RubyAnnotation:
+        return CreateGenericRenderer(Type::BlockFlow, element, krys::move(style));
+      case DisplayType::Ruby:      return CreateGenericRenderer(Type::Inline, element, krys::move(style));
+      case DisplayType::RubyBlock: return CreateGenericRenderer(Type::BlockFlow, element, krys::move(style));
+      default:                     break;
     }
 
     if (style.IsDisplayTableOrTablePart()
         && rendererTypeOverride.Contains(ConstructBlockLevelRendererFor::TableOrTablePart))
     {
-      return CreateRenderer(Type::BlockFlow, element, krys::move(style));
+      return CreateGenericRenderer(Type::BlockFlow, element, krys::move(style));
     }
 
     switch (style.Display())
     {
       case DisplayType::Table:
-      case DisplayType::InlineTable:  return CreateRenderer(Type::Table, element, krys::move(style));
-      case DisplayType::TableCell:    return CreateRenderer(Type::TableCell, element, krys::move(style));
-      case DisplayType::TableCaption: return CreateRenderer(Type::TableCaption, element, krys::move(style));
+      case DisplayType::InlineTable: return CreateGenericRenderer(Type::Table, element, krys::move(style));
+      case DisplayType::TableCell:   return CreateGenericRenderer(Type::TableCell, element, krys::move(style));
+      case DisplayType::TableCaption:
+        return CreateGenericRenderer(Type::TableCaption, element, krys::move(style));
       case DisplayType::TableRowGroup:
       case DisplayType::TableHeaderGroup:
       case DisplayType::TableFooterGroup:
-        return CreateRenderer(Type::TableSection, element, krys::move(style));
-      case DisplayType::TableRow:         return CreateRenderer(Type::TableRow, element, krys::move(style));
+        return CreateGenericRenderer(Type::TableSection, element, krys::move(style));
+      case DisplayType::TableRow:         return CreateGenericRenderer(Type::TableRow, element, krys::move(style));
       case DisplayType::TableColumnGroup:
-      case DisplayType::TableColumn:      return CreateRenderer(Type::TableCol, element, krys::move(style));
+      case DisplayType::TableColumn:      return CreateGenericRenderer(Type::TableCol, element, krys::move(style));
       default:                            break;
     }
     krys_debug_assert(false);
@@ -202,7 +233,7 @@ namespace krys::boo
     // FIXME: Should change RenderView so it can use initializeStyle too.
     // If we do that, we can assert m_hasInitializedStyle unconditionally,
     // and remove the check of m_hasInitializedStyle below too.
-    krys_debug_assert(_hasInitializedStyle);
+    krys_debug_assert(_hasInitializedStyle || IsRenderView());
 
     auto diff = style::Difference {};
     if (_hasInitializedStyle)
@@ -222,5 +253,95 @@ namespace krys::boo
   dom::Element *RenderElement::GetElement() const noexcept
   {
     return static_cast<dom::Element *>(GetNode());
+  }
+
+  void RenderElement::DidAttachChild(RenderObject &, RenderObject *) noexcept
+  {
+    // FIXME: Tell text children their style changed, and remove the layers created in hidden SVG subtrees,
+    // once there are text renderers and layers.
+  }
+
+  RenderObject *RenderElement::AttachRendererInternal(RenderPtr<RenderObject> child,
+                                                      RenderObject *beforeChild) noexcept
+  {
+    child->SetParent(this);
+
+    if (_firstChild == beforeChild)
+    {
+      _firstChild = child.get();
+    }
+
+    if (beforeChild)
+    {
+      auto *previousSibling = beforeChild->PreviousSibling();
+      if (previousSibling)
+      {
+        previousSibling->SetNextSibling(child.get());
+      }
+      child->SetPreviousSibling(previousSibling);
+      child->SetNextSibling(beforeChild);
+      beforeChild->SetPreviousSibling(child.get());
+      return child.release();
+    }
+    {
+      auto *lastChild = _lastChild;
+      if (lastChild)
+      {
+        lastChild->SetNextSibling(child.get());
+      }
+      child->SetPreviousSibling(lastChild);
+    }
+    _lastChild = child.get();
+    return child.release();
+  }
+
+  RenderPtr<RenderObject> RenderElement::DetachRendererInternal(RenderObject &renderer) noexcept
+  {
+    auto *parent = renderer.Parent();
+    krys_debug_assert(parent);
+    auto *nextSibling = renderer.NextSibling();
+
+    if (auto *previousSibling = renderer.PreviousSibling())
+    {
+      previousSibling->SetNextSibling(nextSibling);
+    }
+    if (nextSibling)
+    {
+      nextSibling->SetPreviousSibling(renderer.PreviousSibling());
+    }
+
+    if (parent->FirstChild() == &renderer)
+    {
+      parent->_firstChild = nextSibling;
+    }
+    if (parent->LastChild() == &renderer)
+    {
+      parent->_lastChild = renderer.PreviousSibling();
+    }
+
+    renderer.SetPreviousSibling(nullptr);
+    renderer.SetNextSibling(nullptr);
+    renderer.SetParent(nullptr);
+    return RenderPtr<RenderObject>(&renderer);
+  }
+
+  void RenderElement::InsertedIntoTree() noexcept
+  {
+    // FIXME: Keep the layer hierarchy updated and the parent layer's visible content status, once there are
+    // layers.
+    RenderObject::InsertedIntoTree();
+  }
+
+  void RenderElement::WillBeRemovedFromTree() noexcept
+  {
+    // FIXME: The enclosing layer's visible content status and the layer hierarchy, once there are layers.
+    RenderObject::WillBeRemovedFromTree();
+  }
+
+  void RenderElement::WillBeDestroyed() noexcept
+  {
+    // FIXME: Slow repaint objects, visibility callbacks, counter nodes, the subtree layout root, image
+    // clients, outlines, paused image animations and the other upstream clean-up, once there are any.
+    RenderObject::WillBeDestroyed();
   }
 }

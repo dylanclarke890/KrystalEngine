@@ -7,6 +7,7 @@
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
@@ -19,14 +20,30 @@
 
 namespace krys::boo::style::tests
 {
-  /// @brief Fixture for tests that resolve the styles of a parsed document's elements.
+  /// @brief Whether a fixture's document is shown in a frame with a view, so it has a render tree.
+  enum class WithView : bool
+  {
+    No,
+    Yes
+  };
+
+  /// @brief Fixture for tests that resolve the styles of a parsed document's elements. The document is shown
+  /// in an 800x600 view unless the test asks for none.
   struct ResolverFixture : css::tests::ValueFixture
   {
     Ref<dom::HTMLDocument> Document;
+    RefPtr<LocalFrame> Frame;
 
-    explicit ResolverFixture(utf8_string &&markup) noexcept : Document(Parse(krys::move(markup)))
+    explicit ResolverFixture(utf8_string &&markup, WithView withView = WithView::Yes) noexcept
+        : Document(Parse(krys::move(markup)))
     {
       Document->StyleScope().FlushPendingUpdate();
+      if (withView == WithView::Yes)
+      {
+        Frame = LocalFrame::Create();
+        Frame->CreateView({800, 600});
+        Frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));
+      }
     }
 
     KRYS_NODISCARD static Ref<dom::HTMLDocument> Parse(utf8_string &&markup) noexcept

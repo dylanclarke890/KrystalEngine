@@ -711,8 +711,16 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Update.hpp
   include/Krystal.Booey/Style/Validity.hpp
   include/Krystal.Booey/Rendering/RenderElement.hpp
+  include/Krystal.Booey/Rendering/RenderAncestorIterator.hpp
+  include/Krystal.Booey/Rendering/RenderChildIterator.hpp
+  include/Krystal.Booey/Rendering/RenderDescendantIterator.hpp
+  include/Krystal.Booey/Rendering/RenderIterator.hpp
   include/Krystal.Booey/Rendering/RenderObject.hpp
+  include/Krystal.Booey/Rendering/RenderPtr.hpp
+  include/Krystal.Booey/Rendering/RenderView.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp
+  include/Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp
+  include/Krystal.Booey/Rendering/Updating/RenderTreePosition.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeUpdaterGeneratedContent.hpp
 
   # Computed style output (f6a)
@@ -1917,7 +1925,10 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   # The tree resolver and container queries (f5d)
   src/Rendering/RenderElement.cpp
   src/Rendering/RenderObject.cpp
+  src/Rendering/RenderView.cpp
   src/Rendering/Updating/RenderTreeUpdater.cpp
+  src/Rendering/Updating/RenderTreeBuilder.cpp
+  src/Rendering/Updating/RenderTreePosition.cpp
   src/Rendering/Updating/RenderTreeUpdaterGeneratedContent.cpp
   src/Style/ContainerQueryEvaluator.cpp
   src/Style/TreeResolver.cpp

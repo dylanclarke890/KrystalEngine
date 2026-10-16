@@ -9,7 +9,7 @@ namespace krys::boo::html
   {
   }
 
-  UniquePtr<RenderElement> HTMLFieldSetElement::CreateElementRenderer(RenderStyle &&style) noexcept
+  RenderPtr<RenderElement> HTMLFieldSetElement::CreateElementRenderer(RenderStyle &&style) noexcept
   {
     // Fieldsets should make a block flow if display: inline or table types are set.
     return RenderElement::CreateFor(*this, krys::move(style),

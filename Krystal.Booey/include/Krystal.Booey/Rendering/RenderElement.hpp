@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
+#include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/Difference.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -34,11 +35,14 @@ namespace krys::boo
   /// @brief A renderer with its own style: an element's, or an anonymous box's.
   class RenderElement : public RenderObject
   {
+    friend class RenderTreeBuilder;
     KRYS_NON_COPY_MOVABLE(RenderElement);
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderElement);
 
   private:
     RenderStyle _style;
+    RenderObject *_firstChild {nullptr};
+    RenderObject *_lastChild {nullptr};
     bool _hasInitializedStyle {false};
 
   public:
@@ -51,8 +55,8 @@ namespace krys::boo
     /// box.
     /// @param rendererTypeOverride The displays that get a block flow instead.
     /// @note FIXME: Until the renderer classes are ported, the renderer is a plain `RenderElement` of the
-    /// type its class would have, without that class's type flags.
-    KRYS_NODISCARD static UniquePtr<RenderElement>
+    /// type and with the type flags its class would have.
+    KRYS_NODISCARD static RenderPtr<RenderElement>
       CreateFor(dom::Element &element, RenderStyle &&style,
                 EnumSet<ConstructBlockLevelRendererFor> rendererTypeOverride = {}) noexcept;
 
@@ -83,6 +87,35 @@ namespace krys::boo
     /// @brief The element rendered, or null for an anonymous box.
     KRYS_NODISCARD dom::Element *GetElement() const noexcept;
 
+    KRYS_NODISCARD RenderObject *FirstChild() const noexcept
+    {
+      return _firstChild;
+    }
+    KRYS_NODISCARD RenderObject *LastChild() const noexcept
+    {
+      return _lastChild;
+    }
+
+    KRYS_NODISCARD RenderObject *FirstChildSlow() const noexcept final
+    {
+      return FirstChild();
+    }
+    KRYS_NODISCARD RenderObject *LastChildSlow() const noexcept final
+    {
+      return LastChild();
+    }
+
+    /// @brief Whether @p child, with @p style, may be a child of this renderer.
+    KRYS_NODISCARD virtual bool IsChildAllowed(const RenderObject &, const RenderStyle &) const noexcept
+    {
+      return true;
+    }
+
+    void DidAttachChild(RenderObject &child, RenderObject *beforeChild) noexcept;
+
+    void InsertedIntoTree() noexcept override;
+    void WillBeRemovedFromTree() noexcept override;
+
     // FIXME: Layout queries. They're only reachable through `RendererOf` and `RenderBoxOf`, which return null
     // until there's layout.
     KRYS_NODISCARD const RenderElement *Container() const noexcept;
@@ -101,9 +134,15 @@ namespace krys::boo
     RenderElement(Type type, dom::Document &document, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags,
                   TypeSpecificFlags typeSpecificFlags) noexcept;
 
+    void WillBeDestroyed() noexcept override;
+
   private:
     RenderElement(Type type, dom::ContainerNode &elementOrDocument, RenderStyle &&style,
                   EnumSet<TypeFlag> flags, TypeSpecificFlags typeSpecificFlags) noexcept;
+
+    // Called by RenderTreeBuilder: they take and give up ownership of the child.
+    RenderObject *AttachRendererInternal(RenderPtr<RenderObject> child, RenderObject *beforeChild) noexcept;
+    KRYS_NODISCARD RenderPtr<RenderObject> DetachRendererInternal(RenderObject &renderer) noexcept;
 
     KRYS_NODISCARD style::Difference AdjustStyleDifference(style::Difference diff) const noexcept;
     KRYS_NODISCARD bool IsHTMLMarquee() const noexcept;

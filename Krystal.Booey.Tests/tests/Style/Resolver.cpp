@@ -285,7 +285,8 @@ namespace krys::boo::style::tests
               @page :first { margin-left: 9px }
             </style><body><div id=a class=a></div><div id=b class=a style="height: 4px"></div>
             <a id=link href="x"></a><a id=self href=""></a><a id=anchor></a><p id=p></p>
-            <svg><a id=svglink xlink:href="x"></a><svg id=inner></svg></svg>)")
+            <svg><a id=svglink xlink:href="x"></a><svg id=inner></svg></svg>)",
+                            WithView::No)
       {
       }
     };
@@ -401,7 +402,10 @@ namespace krys::boo::style::tests
       auto unresolved = GetResolver().StyleForPage(0);
       CHECK(Serialised(*unresolved, unresolved->MarginTop()) == "0px");
 
-      Document->UpdateStyleIfNeeded();
+      // The document element's style is the one it's rendered with.
+      auto frame = LocalFrame::Create();
+      frame->CreateView({800, 600});
+      frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));
       auto first = GetResolver().StyleForPage(0);
       CHECK(Serialised(*first, first->MarginTop()) == "7px");
       CHECK(Serialised(*first, first->MarginLeft()) == "9px");

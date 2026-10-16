@@ -17,6 +17,7 @@
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCursorImage.hpp"
@@ -28,43 +29,11 @@
 #include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 #include "Krystal.Core/Assert.hpp"
 
-// FIXME: Placeholder definitions; see `Style/Seam.hpp`. Only `BuilderState` and `RenderView` can be
-// constructed, so only their members and the document functions can be reached.
+// FIXME: Placeholder definitions; see `Style/Seam.hpp`. Only `BuilderState` can be constructed, so only its
+// members and the document functions can be reached.
 
 namespace krys::boo
 {
-  KRYS_NODISCARD static const LocalFrameView &FrameViewOf(const RenderView &renderView) noexcept
-  {
-    auto *view = renderView.GetDocument().View();
-    krys_assert_msg(view, "a document has a render view only while it's shown in a frame with a view");
-    return *view;
-  }
-
-  float RenderView::ZoomFactor() const noexcept
-  {
-    return FrameViewOf(*this).Frame().PageZoomFactor();
-  }
-
-  FloatSize RenderView::SizeForCSSSmallViewportUnits() const noexcept
-  {
-    return FrameViewOf(*this).SizeForCSSSmallViewportUnits();
-  }
-
-  FloatSize RenderView::SizeForCSSLargeViewportUnits() const noexcept
-  {
-    return FrameViewOf(*this).SizeForCSSLargeViewportUnits();
-  }
-
-  FloatSize RenderView::SizeForCSSDynamicViewportUnits() const noexcept
-  {
-    return FrameViewOf(*this).SizeForCSSDynamicViewportUnits();
-  }
-
-  FloatSize RenderView::SizeForCSSDefaultViewportUnits() const noexcept
-  {
-    return FrameViewOf(*this).SizeForCSSDefaultViewportUnits();
-  }
-
   const RenderElement *RenderElement::Container() const noexcept
   {
     krys_unreachable();
@@ -326,7 +295,7 @@ namespace krys::boo
 
   int32 AdjustForAbsoluteZoom(int32 value, const RenderView &renderView) noexcept
   {
-    return AdjustForAbsoluteZoom(value, renderView.GetDocument().RenderViewStyle());
+    return AdjustForAbsoluteZoom(value, renderView.Style());
   }
 
   const RenderView *RenderViewOf(const dom::Document &document) noexcept

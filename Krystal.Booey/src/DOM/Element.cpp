@@ -49,18 +49,8 @@ namespace krys::boo::dom
 
   Element::~Element() noexcept
   {
-    // FIXME: The pseudo-elements of a destroyed document's elements still have renderers, until the document
-    // tears its render tree down when it's destroyed.
-    for (auto *pseudoElement : {BeforePseudoElement(), AfterPseudoElement()})
-    {
-      if (pseudoElement && pseudoElement->Renderer())
-      {
-        pseudoElement->SetRenderer(nullptr);
-        pseudoElement->_ownedRenderer = nullptr;
-      }
-    }
-    ClearBeforePseudoElement();
-    ClearAfterPseudoElement();
+    krys_debug_assert(!BeforePseudoElement());
+    krys_debug_assert(!AfterPseudoElement());
   }
 
   ElementRareData &Element::EnsureElementRareData() noexcept
@@ -405,7 +395,7 @@ namespace krys::boo::dom
     _elementRareData->SetDisplayContentsOrNoneStyle(nullptr);
   }
 
-  UniquePtr<RenderElement> Element::CreateElementRenderer(RenderStyle &&style) noexcept
+  RenderPtr<RenderElement> Element::CreateElementRenderer(RenderStyle &&style) noexcept
   {
     return RenderElement::CreateFor(*this, krys::move(style));
   }

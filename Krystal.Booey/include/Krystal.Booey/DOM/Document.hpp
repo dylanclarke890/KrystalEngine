@@ -18,6 +18,7 @@
 #include "Krystal.Booey/HTML/Enums/DocumentReadyState.hpp"
 #include "Krystal.Booey/HTML/Enums/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/HTML/Types/HTMLOrSVGScriptElement.hpp"
+#include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -159,7 +160,8 @@ namespace krys::boo::dom
     WeakPtr<LocalFrame> _frame;
     // FIXME: Stands in for the render tree, which there isn't yet: a document has a render view while it's
     // shown in a frame with a view.
-    UniquePtr<boo::RenderView> _renderView;
+    RenderPtr<boo::RenderView> _renderView;
+    bool _renderTreeBeingDestroyed {false};
 
     mutable UniquePtr<VisitedLinkState> _visitedLinkState;
     mutable UniquePtr<RenderStyle> _initialContainingBlockStyle;
@@ -650,9 +652,14 @@ namespace krys::boo::dom
       return _renderView.get();
     }
 
+    KRYS_NODISCARD bool RenderTreeBeingDestroyed() const noexcept
+    {
+      return _renderTreeBeingDestroyed;
+    }
+
     KRYS_NODISCARD bool HasLivingRenderTree() const noexcept
     {
-      return _renderView != nullptr;
+      return _renderView && !_renderTreeBeingDestroyed;
     }
 
     /// @brief Creates the document's render tree, for the view of its frame.

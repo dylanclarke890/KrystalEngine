@@ -4,48 +4,51 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeAncestorIterator.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
+#include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdaterGeneratedContent.hpp"
 #include "Krystal.Booey/Style/TreeResolver.hpp"
 #include "Krystal.Booey/Style/Update.hpp"
 
 namespace krys::boo
 {
-  RenderTreeUpdater::Parent::Parent(dom::ContainerNode &) noexcept
+  RenderTreeUpdater::Parent::Parent(dom::ContainerNode &root) noexcept
+      : Element(DynamicDowncast<dom::Element>(root)),
+        Position(RenderTreePosition(Downcast<RenderElement>(*root.Renderer())))
   {
   }
 
   RenderTreeUpdater::Parent::Parent(dom::Element &element, const style::ElementUpdate *update) noexcept
       : Element(&element), Update(update)
   {
+    if (auto *renderer = element.Renderer())
+    {
+      Position = RenderTreePosition(*renderer);
+    }
   }
 
   RenderTreeUpdater::RenderTreeUpdater(dom::Document &document,
                                        style::PostResolutionCallbackDisabler &) noexcept
       : _document(ShareRef(document)), _generatedContent(CreateUnique<GeneratedContent>(*this))
   {
+    if (auto *renderView = document.GetRenderView())
+    {
+      _builder = CreateUnique<RenderTreeBuilder>(*renderView);
+    }
   }
 
   RenderTreeUpdater::~RenderTreeUpdater() noexcept = default;
-
-  // FIXME: The document always has a renderer (its render view, which isn't a `RenderObject` yet).
-  static bool HasRenderer(const dom::Node &node) noexcept
-  {
-    if (Is<dom::Document>(node))
-    {
-      return true;
-    }
-    return node.Renderer();
-  }
 
   static dom::Element *FindRenderingAncestor(dom::Node &node) noexcept
   {
     for (auto &ancestor : dom::ComposedTreeAncestors(node))
     {
-      if (HasRenderer(ancestor))
+      if (ancestor.Renderer())
       {
         return &ancestor;
       }
@@ -59,7 +62,7 @@ namespace krys::boo
 
   static dom::ContainerNode *FindRenderingRoot(dom::ContainerNode &node) noexcept
   {
-    if (HasRenderer(node))
+    if (node.Renderer())
     {
       return &node;
     }
@@ -70,10 +73,20 @@ namespace krys::boo
   {
     krys_debug_assert(_document.get() == &styleUpdate->Document());
 
+    if (!_document->GetRenderView())
+    {
+      // Documents without a render view are still styled; they keep the style the render view would have.
+      if (styleUpdate->InitialContainingBlockUpdate())
+      {
+        _document->_renderViewStyle = RenderStyle::ClonePtr(*styleUpdate->InitialContainingBlockUpdate());
+      }
+      return;
+    }
+
     _styleUpdate = krys::move(styleUpdate);
 
     // FIXME: Rebuild roots (updateRebuildRoots: continuations, anonymous flex items, blocks in inlines), once
-    // there's a render tree.
+    // there are anonymous boxes.
     (void)_styleUpdate->TakeRebuildRoots();
 
     UpdateRenderViewStyle();
@@ -92,15 +105,29 @@ namespace krys::boo
       UpdateRenderTree(*renderingRoot);
     }
 
-    // FIXME: Quotes and counters (generatedContent().updateRemainingQuotes/updateCounters), once there's
-    // generated content.
+    // FIXME: Quotes and counters (generatedContent().updateRemainingQuotes/updateCounters) and
+    // RenderTreeBuilder's updateAfterDescendants of the render view, once there's generated content.
 
     _styleUpdate = nullptr;
   }
 
+  static bool ShouldCreateRenderer(const dom::Element &element, const RenderElement &parentRenderer) noexcept
+  {
+    if (!parentRenderer.CanHaveChildren()
+        && !(Is<dom::PseudoElement>(element) && parentRenderer.CanHaveGeneratedChildren()))
+    {
+      return false;
+    }
+    if (parentRenderer.GetElement() && !parentRenderer.GetElement()->ChildShouldCreateRenderer(element))
+    {
+      return false;
+    }
+    return true;
+  }
+
   void RenderTreeUpdater::UpdateRenderTree(dom::ContainerNode &root) noexcept
   {
-    krys_debug_assert(HasRenderer(root));
+    krys_debug_assert(root.Renderer());
     krys_debug_assert(_parentStack.empty());
 
     _parentStack.push_back(Parent(root));
@@ -115,14 +142,26 @@ namespace krys::boo
 
       auto &node = *it;
 
+      if (auto *renderer = node.Renderer())
+      {
+        GetRenderTreePosition().InvalidateNextSibling(*renderer);
+      }
+      else if (auto *element = DynamicDowncast<dom::Element>(node); element && element->HasDisplayContents())
+      {
+        GetRenderTreePosition().InvalidateNextSibling();
+      }
+
       if (Is<dom::Text>(node))
       {
-        // FIXME: Text renderers (updateTextRenderer), once there's a render tree.
+        // FIXME: Text renderers (updateTextRenderer) and the previous renderer (storePreviousRenderer), once
+        // there are text renderers.
         it.TraverseNextSkippingChildren();
         continue;
       }
 
       auto &element = Downcast<dom::Element>(node);
+
+      // FIXME: SVG renderer updates, once there are SVG renderers.
 
       auto *elementUpdate = _styleUpdate->GetElementUpdate(element);
 
@@ -139,9 +178,16 @@ namespace krys::boo
         UpdateElementRenderer(element, *elementUpdate);
       }
 
-      // FIXME: Skipped content in the top layer, and whether the parent renderer can have children
-      // (shouldCreateRenderer), once there's a render tree.
-      auto mayHaveRenderedDescendants = HasRenderer(element) || element.HasDisplayContents();
+      // FIXME: Skipped content in the top layer, once there's a top layer.
+      auto mayHaveRenderedDescendants = [&]
+      {
+        if (element.Renderer())
+        {
+          return true;
+        }
+        return element.HasDisplayContents()
+               && ShouldCreateRenderer(element, GetRenderTreePosition().Parent());
+      }();
 
       if (!mayHaveRenderedDescendants)
       {
@@ -157,6 +203,24 @@ namespace krys::boo
     PopParentsToDepth(0);
   }
 
+  auto RenderTreeUpdater::RenderingParent() noexcept -> Parent &
+  {
+    for (auto i = _parentStack.size(); i--;)
+    {
+      if (_parentStack[i].Position)
+      {
+        return _parentStack[i];
+      }
+    }
+    krys_debug_assert(false);
+    return _parentStack.back();
+  }
+
+  RenderTreePosition &RenderTreeUpdater::GetRenderTreePosition() noexcept
+  {
+    return *RenderingParent().Position;
+  }
+
   void RenderTreeUpdater::PushParent(dom::Element &element, const style::ElementUpdate *update) noexcept
   {
     _parentStack.push_back(Parent(element, update));
@@ -170,6 +234,11 @@ namespace krys::boo
     if (parent.Element)
     {
       UpdateAfterDescendants(*parent.Element, parent.Update);
+    }
+
+    if (&parent != &RenderingParent())
+    {
+      GetRenderTreePosition().InvalidateNextSibling();
     }
 
     _parentStack.pop_back();
@@ -193,8 +262,7 @@ namespace krys::boo
       GetGeneratedContent().UpdateBeforeOrAfterPseudoElement(element, *update, PseudoElementType::Before);
     }
 
-    // FIXME: The previous renderer of the insertion position (storePreviousRenderer), once there's a render
-    // tree.
+    // FIXME: The previous renderer (storePreviousRenderer), once there are text renderers.
   }
 
   void RenderTreeUpdater::UpdateAfterDescendants(dom::Element &element,
@@ -206,7 +274,15 @@ namespace krys::boo
     }
 
     // FIXME: The ::backdrop renderer, writing suggestions, view transitions, RenderTreeBuilder's
-    // updateAfterDescendants and didAttachRenderers, once there's a render tree.
+    // updateAfterDescendants and didAttachRenderers, once there are any.
+  }
+
+  void RenderTreeUpdater::UpdateRendererStyle(RenderElement &renderer, RenderStyle &&newStyle,
+                                              style::DifferenceResult minimalStyleDifference) noexcept
+  {
+    // FIXME: Normalize the tree after the style change (RenderTreeBuilder::normalizeTreeAfterStyleChange),
+    // once there are anonymous boxes.
+    renderer.SetStyle(krys::move(newStyle), minimalStyleDifference);
   }
 
   void RenderTreeUpdater::UpdateElementRenderer(dom::Element &element,
@@ -221,16 +297,25 @@ namespace krys::boo
 
     // FIXME: Elements in the top layer whose skipped content changed, once there's a top layer.
     bool shouldTearDownRenderers = elementUpdate.Changes.Contains(style::Change::Renderer)
-                                   && (HasRenderer(element) || element.HasDisplayContents());
+                                   && (element.Renderer() || element.HasDisplayContents());
 
     if (shouldTearDownRenderers)
     {
+      if (!element.Renderer())
+      {
+        // We may be tearing down a descendant renderer cached in renderTreePosition.
+        GetRenderTreePosition().InvalidateNextSibling();
+      }
+
       // display:none cancels animations.
+      // FIXME: Unless display is affected by animations, once there are animations.
       auto teardownType = elementUpdate.Style->Display() == DisplayType::None
                             ? TeardownType::RendererUpdateCancelingAnimations
                             : TeardownType::RendererUpdate;
 
-      TearDownRenderers(element, teardownType);
+      TearDownRenderers(element, teardownType, *_builder);
+
+      RenderingParent().DidCreateOrDestroyChildRenderer = true;
     }
 
     bool hasDisplayContents = elementUpdate.Style->Display() == DisplayType::Contents;
@@ -252,7 +337,10 @@ namespace krys::boo
     bool shouldCreateNewRenderer = !element.Renderer() && !hasDisplayContentsOrNone;
     if (shouldCreateNewRenderer)
     {
+      // FIXME: Custom style resolve callbacks (willAttachRenderers), once there are any.
       CreateRenderer(element, krys::move(elementUpdateStyle));
+
+      RenderingParent().DidCreateOrDestroyChildRenderer = true;
       return;
     }
 
@@ -264,7 +352,8 @@ namespace krys::boo
 
     if (elementUpdate.RecompositeLayer)
     {
-      renderer->SetStyle(krys::move(elementUpdateStyle), style::DifferenceResult::RecompositeLayer);
+      UpdateRendererStyle(*renderer, krys::move(elementUpdateStyle),
+                          style::DifferenceResult::RecompositeLayer);
       return;
     }
 
@@ -275,19 +364,36 @@ namespace krys::boo
       return;
     }
 
-    renderer->SetStyle(krys::move(elementUpdateStyle), style::DifferenceResult::Equal);
+    UpdateRendererStyle(*renderer, krys::move(elementUpdateStyle), style::DifferenceResult::Equal);
   }
 
   void RenderTreeUpdater::CreateRenderer(dom::Element &element, RenderStyle &&style) noexcept
   {
+    auto computeInsertionPosition = [this, &element]() -> RenderTreePosition &
+    {
+      GetRenderTreePosition().ComputeNextSibling(element);
+      return GetRenderTreePosition();
+    };
+
+    if (!ShouldCreateRenderer(element, GetRenderTreePosition().Parent()))
+    {
+      return;
+    }
+
     if (!element.RendererIsNeeded(style))
     {
       return;
     }
 
-    // FIXME: The insertion position in the render tree.
+    auto &insertionPosition = computeInsertionPosition();
+    // FIXME: Pass the insertion position, once an override uses it.
     auto newRenderer = element.CreateElementRenderer(krys::move(style));
     if (!newRenderer)
+    {
+      return;
+    }
+
+    if (!insertionPosition.Parent().IsChildAllowed(*newRenderer, newRenderer->Style()))
     {
       return;
     }
@@ -295,109 +401,163 @@ namespace krys::boo
     element.SetRenderer(newRenderer.get());
 
     newRenderer->InitializeStyle();
-    // FIXME: The render tree owns renderers; until there is one, the element does.
-    element._ownedRenderer = krys::move(newRenderer);
+
+    _builder->Attach(insertionPosition.Parent(), krys::move(newRenderer), insertionPosition.NextSibling());
+
+    // FIXME: The text manipulation controller and the accessibility cache, once there are any.
   }
 
   void RenderTreeUpdater::UpdateRenderViewStyle() noexcept
   {
     if (_styleUpdate->InitialContainingBlockUpdate())
     {
-      _document->_renderViewStyle = RenderStyle::ClonePtr(*_styleUpdate->InitialContainingBlockUpdate());
+      GetRenderView().SetStyle(RenderStyle::Clone(*_styleUpdate->InitialContainingBlockUpdate()));
     }
   }
 
-  void RenderTreeUpdater::TearDownRenderers(dom::Element &root) noexcept
+  RenderView &RenderTreeUpdater::GetRenderView() noexcept
   {
-    if (!HasRenderer(root) && !root.HasDisplayContents())
+    return *_document->GetRenderView();
+  }
+
+  static void InvalidateRebuildRootIfNeeded(dom::Node &node) noexcept
+  {
+    auto *ancestor = FindRenderingAncestor(node);
+    if (!ancestor)
+    {
+      return;
+    }
+    if (!RenderTreeBuilder::IsRebuildRootForChildren(*ancestor->Renderer()))
+    {
+      return;
+    }
+    ancestor->InvalidateRenderer();
+  }
+
+  void RenderTreeUpdater::TearDownRenderers(dom::Element &root, TeardownType teardownType) noexcept
+  {
+    if (!root.Renderer() && !root.HasDisplayContents())
+    {
+      return;
+    }
+    auto *view = root.NodeDocument().GetRenderView();
+    if (!view)
     {
       return;
     }
 
+    RenderTreeBuilder builder(*view);
+    TearDownRenderers(root, teardownType, builder);
+    InvalidateRebuildRootIfNeeded(root);
+  }
+
+  void RenderTreeUpdater::TearDownRenderers(dom::Element &root) noexcept
+  {
     TearDownRenderers(root, TeardownType::Full);
-    // FIXME: Invalidate the rendering ancestor if it's a rebuild root for its children, once there's a render
-    // tree.
   }
 
   void RenderTreeUpdater::TearDownRenderersForShadowRootInsertion(dom::Element &host) noexcept
   {
     krys_debug_assert(!dom::TreeQueries::GetShadowRoot(host));
-    if (!HasRenderer(host) && !host.HasDisplayContents())
-    {
-      return;
-    }
     TearDownRenderers(host, TeardownType::FullAfterSlotOrShadowRootChange);
   }
 
   void RenderTreeUpdater::TearDownRenderersAfterSlotChange(dom::Element &host) noexcept
   {
     krys_debug_assert(dom::TreeQueries::GetShadowRoot(host));
-    if (!HasRenderer(host) && !host.HasDisplayContents())
-    {
-      return;
-    }
     TearDownRenderers(host, TeardownType::FullAfterSlotOrShadowRootChange);
   }
 
-  void RenderTreeUpdater::TearDownRenderers(dom::Element &root, TeardownType teardownType) noexcept
+  void RenderTreeUpdater::TearDownRenderers(dom::Element &root, TeardownType teardownType,
+                                            RenderTreeBuilder &builder) noexcept
   {
-    // FIXME: Animations (cancelling style-originated animations), ::marker, repaint and layout invalidation,
-    // once there are any.
-    auto tearDown = [&](dom::Element &element)
+    List<dom::Element *> teardownStack;
+
+    auto push = [&](dom::Element &element)
     {
-      // Make sure we don't leave any renderers behind in nodes outside the composed tree.
-      // See ComposedTreeIterator::ComposedTreeIterator().
-      if (Is<html::HTMLSlotElement>(element) || dom::TreeQueries::GetShadowRoot(element))
-      {
-        TearDownLeftoverChildrenOfComposedTree(element);
-      }
+      // FIXME: Custom style resolve callbacks (willDetachRenderers), once there are any.
+      teardownStack.push_back(&element);
+    };
 
-      switch (teardownType)
+    auto pop = [&](uint32 depth)
+    {
+      while (teardownStack.size() > depth)
       {
-        case TeardownType::FullAfterSlotOrShadowRootChange:
-          if (&element != &root)
-          {
-            element.ClearHoverAndActiveStatusBeforeDetachingRenderer();
-          }
-          break;
-        case TeardownType::Full:                              element.ClearHoverAndActiveStatusBeforeDetachingRenderer(); break;
-        case TeardownType::RendererUpdate:
-        case TeardownType::RendererUpdateCancelingAnimations: break;
-      }
+        auto &element = *teardownStack.back();
+        teardownStack.pop_back();
 
-      GeneratedContent::RemoveBeforePseudoElement(element);
-      GeneratedContent::RemoveAfterPseudoElement(element);
+        // Make sure we don't leave any renderers behind in nodes outside the composed tree.
+        // See ComposedTreeIterator::ComposedTreeIterator().
+        if (Is<html::HTMLSlotElement>(element) || dom::TreeQueries::GetShadowRoot(element))
+        {
+          TearDownLeftoverChildrenOfComposedTree(element, builder);
+        }
 
-      // FIXME: Repaint, layout invalidation and anonymous wrapper clean-up, once there's a render tree.
-      if (element.Renderer())
-      {
-        element.SetRenderer(nullptr);
-        element._ownedRenderer = nullptr;
+        // FIXME: Animations (willChangeRenderer, cancelStyleOriginatedAnimations), once there are animations.
+        switch (teardownType)
+        {
+          case TeardownType::FullAfterSlotOrShadowRootChange:
+            if (&element != &root)
+            {
+              element.ClearHoverAndActiveStatusBeforeDetachingRenderer();
+            }
+            break;
+          case TeardownType::Full:                              element.ClearHoverAndActiveStatusBeforeDetachingRenderer(); break;
+          case TeardownType::RendererUpdateCancelingAnimations:
+          case TeardownType::RendererUpdate:                    break;
+        }
+
+        GeneratedContent::RemoveBeforePseudoElement(element, builder);
+        GeneratedContent::RemoveAfterPseudoElement(element, builder);
+
+        // FIXME: The ::marker's animations, once there are list markers.
+
+        if (auto *renderer = element.Renderer())
+        {
+          // FIXME: Repaint and layout invalidation, and the ::backdrop renderer, once there are any.
+          builder.DestroyAndCleanUpAnonymousWrappers(*renderer, root.Renderer());
+          element.SetRenderer(nullptr);
+        }
+
+        // FIXME: Custom style resolve callbacks (didDetachRenderers), once there are any.
       }
     };
 
-    tearDown(root);
+    push(root);
 
-    for (auto &descendant : dom::ComposedTreeDescendants(root))
+    // FIXME: Repaint and mark containing blocks dirty before the teardown, once there's layout.
+    auto descendants = dom::ComposedTreeDescendants(root);
+    for (auto it = descendants.begin(), end = descendants.end(); it != end; it.TraverseNext())
     {
-      if (auto *element = DynamicDowncast<dom::Element>(descendant))
+      pop(it.Depth());
+
+      if (Is<dom::Text>(*it))
       {
-        tearDown(*element);
+        // FIXME: Text renderers (tearDownTextRenderer), once there are any.
+        continue;
       }
+
+      push(Downcast<dom::Element>(*it));
     }
+
+    pop(0);
+
+    // FIXME: Leftover pagination renderers, once there's multi-column layout.
   }
 
-  void RenderTreeUpdater::TearDownLeftoverChildrenOfComposedTree(dom::Element &element) noexcept
+  void RenderTreeUpdater::TearDownLeftoverChildrenOfComposedTree(dom::Element &element,
+                                                                 RenderTreeBuilder &builder) noexcept
   {
     for (auto *child = element.FirstChild(); child; child = child->NextSibling())
     {
-      if (!HasRenderer(*child))
+      if (!child->Renderer())
       {
         continue;
       }
+      // FIXME: Text renderers (tearDownTextRenderer), once there are any.
       if (auto *childElement = DynamicDowncast<dom::Element>(*child))
       {
-        TearDownRenderers(*childElement, TeardownType::Full);
+        TearDownRenderers(*childElement, TeardownType::Full, builder);
       }
     }
   }

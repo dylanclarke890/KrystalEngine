@@ -17,6 +17,10 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class RenderElement;
+  class RenderTreeBuilder;
+  class RenderView;
+
   enum class RenderObjectTypeFlag : uint8
   {
     IsAnonymous,
@@ -267,12 +271,17 @@ namespace krys::boo
     };
 
   private:
+    friend class RenderElement;
+    friend class RenderTreeBuilder;
+
     dom::Node &_node;
-    // FIXME: The parent, siblings and children come with the render tree.
     RenderElement *_parent {nullptr};
+    RenderObject *_previous {nullptr};
+    RenderObject *_next {nullptr};
     EnumSet<TypeFlag> _typeFlags;
     Type _type;
     TypeSpecificFlags _typeSpecificFlags;
+    bool _isBeingDestroyed {false};
 
   public:
     /// @brief Anonymous objects should pass the document as their node, and they will then automatically be
@@ -292,6 +301,60 @@ namespace krys::boo
     {
       return _parent;
     }
+
+    KRYS_NODISCARD bool IsDescendantOf(const RenderObject *ancestor) const noexcept;
+
+    KRYS_NODISCARD RenderObject *PreviousSibling() const noexcept
+    {
+      return _previous;
+    }
+    KRYS_NODISCARD RenderObject *NextSibling() const noexcept
+    {
+      return _next;
+    }
+
+    // Use RenderElement versions instead.
+    KRYS_NODISCARD virtual RenderObject *FirstChildSlow() const noexcept
+    {
+      return nullptr;
+    }
+    KRYS_NODISCARD virtual RenderObject *LastChildSlow() const noexcept
+    {
+      return nullptr;
+    }
+
+    KRYS_NODISCARD RenderObject *NextInPreOrder() const noexcept;
+    KRYS_NODISCARD RenderObject *NextInPreOrder(const RenderObject *stayWithin) const noexcept;
+    KRYS_NODISCARD RenderObject *NextInPreOrderAfterChildren() const noexcept;
+    KRYS_NODISCARD RenderObject *NextInPreOrderAfterChildren(const RenderObject *stayWithin) const noexcept;
+    KRYS_NODISCARD RenderObject *PreviousInPreOrder() const noexcept;
+    KRYS_NODISCARD RenderObject *PreviousInPreOrder(const RenderObject *stayWithin) const noexcept;
+    KRYS_NODISCARD RenderObject *ChildAt(uint32 index) const noexcept;
+
+    KRYS_NODISCARD RenderObject *FirstLeafChild() const noexcept;
+    KRYS_NODISCARD RenderObject *LastLeafChild() const noexcept;
+
+    KRYS_NODISCARD virtual bool CanHaveChildren() const noexcept = 0;
+    KRYS_NODISCARD virtual bool CanHaveGeneratedChildren() const noexcept;
+
+    /// @brief The render tree's root.
+    KRYS_NODISCARD RenderView &View() const noexcept;
+
+    /// @brief Whether the object is in its document's render tree.
+    KRYS_NODISCARD bool IsRooted() const noexcept;
+
+    KRYS_NODISCARD bool BeingDestroyed() const noexcept
+    {
+      return _isBeingDestroyed;
+    }
+
+    KRYS_NODISCARD bool RenderTreeBeingDestroyed() const noexcept;
+
+    /// @brief Destroys the object, which must have been detached from the render tree.
+    void Destroy() noexcept;
+
+    virtual void InsertedIntoTree() noexcept;
+    virtual void WillBeRemovedFromTree() noexcept;
 
     KRYS_NODISCARD bool IsRenderElement() const noexcept
     {
@@ -367,6 +430,18 @@ namespace krys::boo
     KRYS_NODISCARD const RenderStyle &Style() const noexcept;
 
   protected:
+    void SetPreviousSibling(RenderObject *previous) noexcept
+    {
+      _previous = previous;
+    }
+    void SetNextSibling(RenderObject *next) noexcept
+    {
+      _next = next;
+    }
+    void SetParent(RenderElement *parent) noexcept;
+
+    virtual void WillBeDestroyed() noexcept;
+
     KRYS_NODISCARD EnumSet<TypeFlag> TypeFlags() const noexcept
     {
       return _typeFlags;

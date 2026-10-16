@@ -44,11 +44,11 @@
 
 // FIXME: Placeholders for the rendering, font and style-resolver types that length resolution, calc
 // evaluation, colour resolution, the computed value conversions and the extractor need. Each declares only
-// the members those callers use, under its upstream name. None can be constructed but `RenderView`, which a
-// document shown in a frame with a view owns. Each type moves to its own header, with its real
-// implementation, when its slice is ported:
-//   - `RenderView`, `RenderElement` (with the `RenderObject` members), `RenderBoxModelObject`, `RenderBox`,
-//     `RenderBlock`, `RenderGrid`, `RenderInline`, `RenderTheme` (focus ring metrics): rendering.
+// the members those callers use, under its upstream name. None can be constructed. Each type moves to its own
+// header, with its real implementation, when its slice is ported:
+//   - `RenderBoxModelObject`, `RenderBox`, `RenderBlock`, `RenderGrid`, `RenderInline`
+//   (`Style/SeamRenderers.hpp`),
+//     `RenderElement`'s layout queries, `RenderTheme` (focus ring metrics): rendering.
 //   - `style::AnchorPositionEvaluator`: anchor positioning (`Style/AnchorPositionEvaluator.hpp`, unreviewed).
 //   - the `Document*` colour functions: `dom::Document` (upstream members) once it has a page and settings.
 //   - the `Document*` security and keyframes functions: `dom::Document` (upstream members) once it has a
@@ -103,50 +103,7 @@ namespace krys::boo
     KRYS_NODISCARD static bool HasAppearanceForElementTypeFromUAStyle(const dom::Element &) noexcept;
   };
 
-  /// @brief Stands in for the root of a document's render tree: its document, whether it needs layout, the
-  /// page zoom and the sizes viewport units resolve against, from the document's view.
-  class RenderView
-  {
-    KRYS_NON_COPY_MOVABLE(RenderView);
-
-  private:
-    dom::Document &_document;
-    // A new renderer needs layout. Style changes don't mark it: there are no other renderers.
-    bool _needsLayout {true};
-
-  public:
-    explicit RenderView(dom::Document &document) noexcept : _document(document)
-    {
-    }
-
-    KRYS_NODISCARD const dom::Document &GetDocument() const noexcept
-    {
-      return _document;
-    }
-
-    KRYS_NODISCARD bool NeedsLayout() const noexcept
-    {
-      return _needsLayout;
-    }
-
-    void SetNeedsLayout() noexcept
-    {
-      _needsLayout = true;
-    }
-
-    void ClearNeedsLayout() noexcept
-    {
-      _needsLayout = false;
-    }
-
-    KRYS_NODISCARD float ZoomFactor() const noexcept;
-
-    KRYS_NODISCARD FloatSize SizeForCSSSmallViewportUnits() const noexcept;
-    KRYS_NODISCARD FloatSize SizeForCSSLargeViewportUnits() const noexcept;
-    KRYS_NODISCARD FloatSize SizeForCSSDynamicViewportUnits() const noexcept;
-    KRYS_NODISCARD FloatSize SizeForCSSDefaultViewportUnits() const noexcept;
-  };
-
+  class RenderView;
   class RenderBlock;
   class RenderBox;
   class RenderBoxModelObject;
@@ -154,8 +111,7 @@ namespace krys::boo
   class RenderGrid;
   class RenderInline;
 
-  /// @brief Collapses `adjustForAbsoluteZoom(value, renderView)` (`RenderView` is a `RenderElement`): the
-  /// render view's style is the document's `RenderViewStyle()`.
+  /// @brief Collapses `adjustForAbsoluteZoom(value, renderView)`.
   KRYS_NODISCARD int32 AdjustForAbsoluteZoom(int32, const RenderView &) noexcept;
 
   /// @brief Collapses `document.renderView()`: the document's render view, if it's shown in a frame with a

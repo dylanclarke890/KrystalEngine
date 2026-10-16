@@ -51,8 +51,10 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
 #include "Krystal.Booey/Style/Change.hpp"
 #include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
@@ -1103,6 +1105,10 @@ namespace krys::boo::dom
 
   const RenderStyle &Document::RenderViewStyle() const noexcept
   {
+    if (_renderView)
+    {
+      return _renderView->Style();
+    }
     if (_renderViewStyle)
     {
       return *_renderViewStyle;
@@ -1125,7 +1131,12 @@ namespace krys::boo::dom
     krys_debug_assert(!GetRenderView());
     krys_debug_assert(View());
 
-    _renderView = CreateUnique<boo::RenderView>(*this);
+    // The document may have been styled without a render view; the rebuild gives the new one its style.
+    _initialContainingBlockStyle = nullptr;
+
+    // FIXME: It would be better if we could pass the resolved document style directly here.
+    _renderView = CreateRenderer<boo::RenderView>(*this, RenderStyle::Create());
+    Node::SetRenderer(_renderView.get());
 
     ResolveStyle(ResolveStyleType::Rebuild);
   }
@@ -1134,8 +1145,34 @@ namespace krys::boo::dom
   {
     krys_debug_assert(HasLivingRenderTree());
 
-    // FIXME: Tear down the renderers and tell the view, once there's a render tree.
-    _renderView = nullptr;
+    SetForScope change(_renderTreeBeingDestroyed, true);
+
+    // FIXME: The accessibility cache, the document becoming inactive and telling the view, once there are
+    // any.
+
+    _initialContainingBlockStyle = nullptr;
+
+    if (auto documentElement = DocumentElement())
+    {
+      RenderTreeUpdater::TearDownRenderers(*documentElement);
+    }
+
+    // FIXME: RenderObject::view() uses m_renderView and we can't null it before destruction is completed
+    {
+      RenderTreeBuilder builder(*_renderView);
+      // FIXME: This is a workaround for leftover content (see webkit.org/b/182547).
+      while (_renderView->FirstChild())
+      {
+        builder.Destroy(*_renderView->FirstChild());
+      }
+
+      // FIXME: Delete the layout context's detached renderers, once there's layout.
+
+      _renderView->Destroy();
+    }
+    (void)_renderView.release();
+
+    Node::SetRenderer(nullptr);
 
     // Styles resolved against the view (viewport units, the page zoom) are stale.
     ScheduleFullStyleRebuild();
@@ -1379,12 +1416,19 @@ namespace krys::boo::dom
         auto documentChanges = _initialContainingBlockStyle
                                  ? style::DetermineChanges(newStyle, *_initialContainingBlockStyle)
                                  : EnumSet<style::Change> {style::Change::Renderer};
-        if (!documentChanges.IsEmpty() || !_renderViewStyle)
+        if (!documentChanges.IsEmpty())
         {
           _initialContainingBlockStyle = RenderStyle::ClonePtr(newStyle);
           // The used style may end up differing from the computed style due to propagation of properties from
           // elements.
-          _renderViewStyle = RenderStyle::ClonePtr(newStyle);
+          if (_renderView)
+          {
+            _renderView->SetStyle(krys::move(newStyle));
+          }
+          else
+          {
+            _renderViewStyle = RenderStyle::ClonePtr(newStyle);
+          }
         }
 
         if (auto documentElement = DocumentElement())

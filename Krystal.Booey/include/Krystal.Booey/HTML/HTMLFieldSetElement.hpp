@@ -46,7 +46,7 @@ namespace krys::boo::html
 
 #pragma endregion
 
-    KRYS_NODISCARD UniquePtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept final;
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept final;
   };
 }
 

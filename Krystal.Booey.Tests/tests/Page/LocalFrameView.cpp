@@ -3,12 +3,14 @@
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 
 namespace krys::boo::tests
 {
   using style::tests::ResolverFixture;
+  using style::tests::WithView;
 
   namespace
   {
@@ -20,7 +22,7 @@ namespace krys::boo::tests
     {
       Ref<LocalFrame> Frame {LocalFrame::Create()};
 
-      explicit FrameFixture(utf8_string &&markup) noexcept : ResolverFixture(krys::move(markup))
+      explicit FrameFixture(utf8_string &&markup) noexcept : ResolverFixture(krys::move(markup), WithView::No)
       {
         Frame->CreateView({800, 600});
         Frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));
@@ -108,9 +110,10 @@ namespace krys::boo::tests
       frame = LocalFrame::Create();
       CHECK_FALSE(document->Frame());
       CHECK_FALSE(document->HasLivingRenderTree());
-      // Its style is still resolved, without a view.
+      // Its style is still resolved, without a view, but it has no renderers.
       document->UpdateStyleIfNeeded();
-      CHECK(document->GetElementById(u8"p")->GetRenderStyle());
+      CHECK_FALSE(document->GetElementById(u8"p")->GetRenderStyle());
+      CHECK(document->GetElementById(u8"p")->ComputedStyle());
     }
   }
 
@@ -169,9 +172,9 @@ namespace krys::boo::tests
   {
     SECTION("Viewport units are zero without a view")
     {
-      ResolverFixture fixture {u8"<!DOCTYPE html><div id=d style='width: 50vw'></div>"};
-      fixture.Document->UpdateStyleIfNeeded();
-      auto *style = fixture.ById(u8"d").GetRenderStyle();
+      ResolverFixture fixture {u8"<!DOCTYPE html><div id=d style='width: 50vw'></div>", WithView::No};
+      // Without a view there are no renderers: the style is resolved on demand.
+      auto *style = fixture.ById(u8"d").ComputedStyle();
       REQUIRE(style);
       CHECK(ResolverFixture::Serialised(*style, style->Width()) == "0px");
     }

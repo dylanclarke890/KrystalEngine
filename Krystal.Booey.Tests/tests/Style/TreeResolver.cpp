@@ -40,10 +40,11 @@ namespace krys::boo::style::tests
     </style><p id=p><b id=b>x</b></p><div class=none id=none><i id=i></i></div><span id=c><em id=em></em></span>)"};
     auto &document = *fixture.Document;
 
-    CHECK(document.NeedsStyleRecalc());
-    CHECK_FALSE(fixture.ById(u8"p").GetRenderStyle());
+    // Showing the document in a view resolves its style and builds its render tree.
+    CHECK_FALSE(document.NeedsStyleRecalc());
+    CHECK(fixture.ById(u8"p").GetRenderStyle());
 
-    CHECK(document.UpdateStyleIfNeeded());
+    CHECK_FALSE(document.UpdateStyleIfNeeded());
     CHECK_FALSE(document.NeedsStyleRecalc());
     CHECK_FALSE(document.ChildNeedsStyleRecalc());
     CHECK_FALSE(document.UpdateStyleIfNeeded());

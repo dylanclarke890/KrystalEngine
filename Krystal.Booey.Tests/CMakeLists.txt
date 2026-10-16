@@ -358,6 +358,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/WidthIterator.cpp
 		tests/Page/LocalFrameView.cpp
 		tests/Rendering/RenderElement.cpp
+		tests/Rendering/RenderIterator.cpp
+		tests/Rendering/Updating/RenderTreeBuilder.cpp
 		tests/Page/Settings.cpp
 		tests/Style/Adjuster.cpp
 		tests/Style/AttributeChangeInvalidation.cpp

@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
 #include "Krystal.Booey/Style/Change.hpp"
 #include "Krystal.Booey/Style/Update.hpp"
 
@@ -23,8 +24,10 @@ namespace krys::boo
     auto *pseudoElement = pseudoElementType == PseudoElementType::Before ? current.BeforePseudoElement()
                                                                          : current.AfterPseudoElement();
 
-    // FIXME: Invalidate the next sibling of the insertion position (invalidateNextSibling), once there's a
-    // render tree.
+    if (auto *renderer = pseudoElement ? pseudoElement->Renderer() : nullptr)
+    {
+      _updater.GetRenderTreePosition().InvalidateNextSibling(*renderer);
+    }
 
     auto *updateStyle =
       elementUpdate.Style ? elementUpdate.Style->GetCachedPseudoStyle({pseudoElementType}) : nullptr;
@@ -40,11 +43,11 @@ namespace krys::boo
       {
         if (pseudoElementType == PseudoElementType::Before)
         {
-          RemoveBeforePseudoElement(current);
+          RemoveBeforePseudoElement(current, *_updater._builder);
         }
         else
         {
-          RemoveAfterPseudoElement(current);
+          RemoveAfterPseudoElement(current, *_updater._builder);
         }
       }
       return;
@@ -119,8 +122,10 @@ namespace krys::boo
     {
       return false;
     }
-    // FIXME: Whether the parent renderer can have generated children (canHaveGeneratedChildren), once there's
-    // a render tree.
+    if (!_updater.GetRenderTreePosition().Parent().CanHaveGeneratedChildren())
+    {
+      return false;
+    }
     if (!PseudoElementRendererIsNeeded(style))
     {
       return false;
@@ -128,25 +133,27 @@ namespace krys::boo
     return true;
   }
 
-  void RenderTreeUpdater::GeneratedContent::RemoveBeforePseudoElement(dom::Element &element) noexcept
+  void RenderTreeUpdater::GeneratedContent::RemoveBeforePseudoElement(dom::Element &element,
+                                                                      RenderTreeBuilder &builder) noexcept
   {
     auto *pseudoElement = element.BeforePseudoElement();
     if (!pseudoElement)
     {
       return;
     }
-    TearDownRenderers(*pseudoElement, TeardownType::Full);
+    TearDownRenderers(*pseudoElement, TeardownType::Full, builder);
     element.ClearBeforePseudoElement();
   }
 
-  void RenderTreeUpdater::GeneratedContent::RemoveAfterPseudoElement(dom::Element &element) noexcept
+  void RenderTreeUpdater::GeneratedContent::RemoveAfterPseudoElement(dom::Element &element,
+                                                                     RenderTreeBuilder &builder) noexcept
   {
     auto *pseudoElement = element.AfterPseudoElement();
     if (!pseudoElement)
     {
       return;
     }
-    TearDownRenderers(*pseudoElement, TeardownType::Full);
+    TearDownRenderers(*pseudoElement, TeardownType::Full, builder);
     element.ClearAfterPseudoElement();
   }
 }

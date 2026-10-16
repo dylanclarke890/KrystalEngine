@@ -24,8 +24,8 @@ namespace krys::boo
     void UpdateBeforeOrAfterPseudoElement(dom::Element &current, const style::ElementUpdate &elementUpdate,
                                           PseudoElementType pseudoElementType) noexcept;
 
-    static void RemoveBeforePseudoElement(dom::Element &element) noexcept;
-    static void RemoveAfterPseudoElement(dom::Element &element) noexcept;
+    static void RemoveBeforePseudoElement(dom::Element &element, RenderTreeBuilder &builder) noexcept;
+    static void RemoveAfterPseudoElement(dom::Element &element, RenderTreeBuilder &builder) noexcept;
 
   private:
     KRYS_NODISCARD bool NeedsPseudoElement(const RenderStyle *style) noexcept;
