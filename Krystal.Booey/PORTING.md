@@ -37,7 +37,7 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - **Interaction state**, layers i1 and i2 (2026-10-16): hover, active and focus state (`UserActionElementSet`, the `Element` setters, `Document::UpdateHoverActiveState`) with `:hover`, `:active`, `:focus`, `:focus-visible` and `:focus-within`; the HTML focus model (focusable areas, the focusing, unfocusing and focus update steps, `focus()`, `blur()`, `tabIndex`, `activeElement`, `hasFocus()`, focus events). See *Interaction state*.
 - **Frame view and viewport** (2026-10-16, step 1 of *Plan: render tree and layout*): a thin `LocalFrame` (document, view, page and text zoom, the media environment), `LocalFrameView` (frame rect, layout size, fixed layout, media type, pagination, the viewport unit sizes and overrides) and `LocalFrameViewLayoutContext` (scheduling, and layout up to where the render tree would be laid out); the seam's `RenderView` is a stand-in a framed document owns, so viewport units resolve; viewport changes invalidate viewport unit styles and re-evaluate media queries at layout; `Document::UpdateLayout`. See *Frame view and viewport*.
 
-**In progress:** step 2 of *Plan: render tree and layout*, platform text and fonts, in three layers (see *Platform text and fonts*): t1, text (break iterators, character properties, text spacing classes, base direction, a hyphenation stub), is done (2026-10-16); t2, fonts, is next, then t3, text measurement. Other candidates are in *Open* and `TODO.md` (the event loop, resource loading, animations).
+**In progress:** step 2 of *Plan: render tree and layout*, platform text and fonts, in three layers (see *Platform text and fonts*): t1, text (break iterators, character properties, text spacing classes, base direction, a hyphenation stub), and t2a, the font platform (FreeType faces, the font database, the bundled Liberation Sans, `FontPlatformData`, `Font`, glyph pages), are done (2026-10-16); t2b, font selection, is next, then t3, text measurement. Other candidates are in *Open* and `TODO.md` (the event loop, resource loading, animations).
 
 **Open:**
 - **Rendering:** there's no render tree. A document shown in a frame with a view owns the seam's `RenderView`, a stand-in for the render tree's root (its document, a needs-layout bit, the page zoom and the viewport unit sizes); layout updates style and stops where the render tree would be laid out. `RenderTreeUpdater` is a stand-in that keeps the style each element's renderer would hold on the element (`Node::GetRenderStyle`) and the render view's style on the document (`Document::RenderViewStyle`); text renderers, generated content, rebuild roots and the top layer wait for it. Without principal boxes, size container queries and container units are unknown and the seam's `RenderBoxOf` is null. Layout interleaving is a loop without layout. Anchor positioning (position options, position visibility, the tree resolution state) and elements with custom style resolve callbacks are FIXMEs in the tree resolver.
@@ -2963,7 +2963,7 @@ Graph from `rendering/RenderObject.h`, `RenderElement.h`, `RenderBox.h`, `Render
 ### Order
 
 1. **Frame view and viewport.** Done 2026-10-16; see *Frame view and viewport*.
-2. **Platform text and fonts** (FreeType and HarfBuzz, `FontCascade`, bidi, line breaking). Independent of 1. In progress: t1 done 2026-10-16; see *Platform text and fonts*.
+2. **Platform text and fonts** (FreeType and HarfBuzz, `FontCascade`, bidi, line breaking). Independent of 1. In progress: t1 and t2a done 2026-10-16; see *Platform text and fonts*.
 3. **DOM groundwork:** the renderer pointer, `PseudoElement`, `CreateElementRenderer`, `StringBuilder`.
 4. **`Style::Difference`.**
 5. **The render tree:** `RenderObject`, `RenderElement`, `RenderBoxModelObject`, `RenderBox`, `RenderBlock`, `RenderBlockFlow`, `RenderInline`, `RenderText`, `RenderView`; `RenderTreeBuilder` (block, inline, continuation, list, first-letter); the real `RenderTreeUpdater`; generated content (quotes, counters, list markers). The seam's render stubs go.
@@ -3016,7 +3016,7 @@ Step 2 of *Plan: render tree and layout*. Graph from `platform/graphics/FontCasc
 **Decisions (2026-10-16, by the user):**
 - Fonts come from the host: it registers font files or directories, and Krystal indexes them with FreeType (family, weight, width, slope, coverage) for family matching and fallback; generic families map to families the host configures. No fontconfig, CoreText or DirectWrite. Upstream's FreeType code is Cairo and fontconfig throughout, so the platform half (`FontPlatformData`, the font cache's lookup, the shaping backend) is written for FreeType and HarfBuzz; the platform-independent half ports as usual.
 - Text offsets in rendering are UTF-8 byte offsets, as in the DOM (`CharacterData::Length()` is a byte count): HarfBuzz clusters and ICU break iterators (over a UTF-8 `UText`) are bytes natively; bidi (`ubidi` takes UTF-16) maps its indices. Upstream's UTF-16 index arithmetic is rewritten at each site.
-- Three layers: t1, text; t2, fonts (`FontPlatformData`, the font index and cache, `Font`, glyph pages, `FontRanges`, `FontCascadeFonts`, the primary font's metrics); t3, measurement (`TextRun`, `GlyphBuffer`, `WidthIterator`, `ComplexTextController` on HarfBuzz, `FontCascade::width` and friends). No drawing. `FontFace`, `CSSFontSelector` and `@font-face` wait for resource loading.
+- Three layers: t1, text; t2, fonts, split into t2a, the font platform (FreeType faces, the font database, `FontPlatformData`, `Font`, glyph pages), and t2b, font selection (`FontCache`, fallback, `FontRanges`, `FontCascadeFonts`, the generic families, the primary font's metrics); t3, measurement (`TextRun`, `GlyphBuffer`, `WidthIterator`, `ComplexTextController` on HarfBuzz, `FontCascade::width` and friends). No drawing. `FontFace`, `CSSFontSelector` and `@font-face` wait for resource loading.
 - HarfBuzz from the start (decided with the plan).
 
 ### Layer t1: text (2026-10-16)
@@ -3050,3 +3050,40 @@ Graph: none (`wtf/` and `platform/text/` aren't traversed by default); read in f
 - `BaseTextDirection` finds the first strong character itself (`ubidi_getBaseDirection` takes UTF-16), with the same rules; text that's all Latin-1 is left to right, as upstream's 8-bit strings.
 
 Tests: `tests/Core/TextBreakIterator.cpp` (line breaks in bytes, prior contexts, strictness, moves, reuse, grapheme clusters, the non-shared, word and sentence iterators, the factory and its prior context), `tests/Core/TextSpacing.cpp` (character classes, ideographs, autospace, the character properties, base direction, hyphenation): 9 new cases.
+
+### Layer t2a: the font platform (2026-10-16)
+
+Graph: covered by the slice graph (`fonts-scope.md`). Read in full: `platform/graphics/Font.h`, `.cpp`, `FontPlatformData.h`, `.cpp`, `GlyphPage.h`, `GlyphMetricsMap.h`, `Glyph.h`, `freetype/SimpleFontDataFreeType.cpp`, `GlyphPageTreeNodeFreeType.cpp`, `FontPlatformDataFreeType.cpp`, `cairo/FontCairo.cpp` (glyph widths and bounds), and `FontCascade.h`'s character helpers.
+
+**Decisions (2026-10-16, by the user):**
+- The host registers fonts with a process-wide database (`FontDatabase`: `AddFontFile`, `AddFontDirectory`, `AddFontData`); the generic families will be `Settings` values (t2b).
+- Krystal bundles Liberation Sans (Regular, 2.1.5, SIL OFL 1.1; `third-party/liberation-fonts/`), compiled into the library by `codegen/bundled_fonts.py` (`BundledLiberationSansRegular()`), as the default and last-resort font. It's always in the database as the family "Liberation Sans".
+- Tests measure against Ahem (version 1.50, public domain / CC0, from web-platform-tests; `Krystal.Booey.Tests/data/fonts/`).
+- t2 is split in two (t2a, the font platform; t2b, font selection).
+
+**Platform half (written for FreeType, upstream's is Cairo and fontconfig):** `FreeTypeFace` opens one face of a font file in memory (`FontFileData`) and reads its names, its font selection capabilities (OS/2 weight and width classes, italic and oblique bits) and its fixed pitch; `FontDatabase` indexes the faces by ASCII-lowercased family and picks a face with `FontSelectionAlgorithm`. Fonts are measured in font units and scaled to the font's size, so a face needs no FreeType size: metrics follow cairo's unhinted path (hhea ascender, descender and height, or the OS/2 typographic metrics when `USE_TYPO_METRICS` is set; OS/2 x-height and cap height, else the height of `x` and `T`), widths are `FT_Get_Advance` in font units, bounds are the unscaled glyph metrics (skewed for synthetic oblique), and glyph pages map code points with `FT_Get_Char_Index`, as upstream's FreeType fill.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `platform/graphics/Font.h`, `.cpp`, `freetype/SimpleFontDataFreeType.cpp`, `cairo/FontCairo.cpp` (widths and bounds) | `have*` | `Graphics/Font.hpp`, `src/...` | on | tested. No paths, rendering identifiers, OpenType math or vertical data, colour glyphs, `applyTransforms` or system fallback (t2b, t3; FIXMEs). |
+| `platform/graphics/FontPlatformData.h`, `.cpp`, `freetype/FontPlatformDataFreeType.cpp` | `have*` | `Graphics/FontPlatformData.hpp`, `src/...` | on | tested. A face, a size and the synthesis flags; `updateSizeWithFontSizeAdjust` comes with the font cache (t2b). |
+| `platform/graphics/GlyphPage.h`, `freetype/GlyphPageTreeNodeFreeType.cpp` | `port` | `Graphics/GlyphPage.hpp`, `GlyphPage::Fill` in `src/Graphics/Font.cpp` | on | tested. |
+| `platform/graphics/GlyphMetricsMap.h`, `Glyph.h` | `port` | `Graphics/GlyphMetricsMap.hpp`, `Graphics/Glyph.hpp` | on | tested. No path maps (no glyph paths). |
+| (fontconfig, `freetype/FontCacheFreeType.cpp`'s lookup) | `have*` | `Graphics/FreeTypeFace.hpp`, `Graphics/FontDatabase.hpp`, `src/...` | on | tested. See decisions. |
+| `platform/graphics/FontCascade.h` (`treatAsSpace`, `treatAsZeroWidthSpace`, `treatAsZeroWidthSpaceInComplexScript`, `isCharacterWhoseGlyphsShouldBeDeletedForTextRendering`, `isInvisibleReplacementObjectCharacter`) | `port` | `FontCascade` | on | tested (through glyph pages). |
+| `wtf/unicode/CharacterNames.h` (the spaces, controls and bidi formatting characters, `cjkWater`) | `port` | Krystal.Core `Text/Unicode.hpp` | on | |
+
+**Added (upstream API):** `Font` (`Create`, `CreateSystemFallbackFontPlaceholder`, the derived fonts, `GetFontMetrics`, `SizePerUnit`, `MaxCharWidth`, `AvgCharWidth`, `BoundsForGlyph`, `BoundsForGlyphs`, `WidthForGlyph`, `SpaceWidth`, `SyntheticBoldOffset`, `SpaceGlyph`, `ZeroWidthSpaceGlyph`, `IsZeroWidthSpaceGlyph`, `GlyphDataForCharacter`, `GlyphForCharacter`, `SupportsCodePoint`, `PlatformSupportsCodePoint`, `GetGlyphPage`, `GetPitch`, `CanRenderCombiningCharacterSequence`, `VariantCapsSupportedForSynthesis`, `ColorGlyphType`, ...), `FontVariant`, `Pitch`, `FontOrigin`, `FontIsInterstitial`, `FontVisibility`, `FontIsOrientationFallback`, `FontInternalAttributes`; `FontPlatformData` (`CloneWithOrientation`, `CloneWithSyntheticOblique`, `CloneWithSize`, `IsFixedPitch`, `FamilyName`, `Hash`, `OpenTypeTable`, `Description`, ...); `GlyphData`, `GlyphPage`, `GlyphMetricsMap`, `Glyph`; `FontCascade::TreatAsSpace` and the other character helpers. Not upstream: `FreeTypeFace`, `FontFileData`, `FontDatabase`, `BundledLiberationSansRegular`.
+
+**Names:** `fontMetrics()` → `GetFontMetrics()`, `pitch()` → `GetPitch()`, `origin()`/`visibility()`/`attributes()` → `GetOrigin()`/`GetVisibility()`/`GetAttributes()`, `glyphPage()` → `GetGlyphPage()` (each is a type); `Font::IsInterstitial` (the alias) is dropped, as `IsInterstitial()` is the method: the type is `FontIsInterstitial`; `textRenderingMode()` → `GetTextRenderingMode()`; `GlyphPage::font()` → `GetFont()`; `GlyphData`'s members are PascalCase (`Glyph`, `ColorGlyphType`, `Font`).
+
+**Differences:**
+- Glyph pages are filled from code points (upstream: a UTF-16 buffer). Every page is filled the FreeType way: a character that maps to no glyph gets the font's ZERO WIDTH SPACE glyph if it's default ignorable or a control character.
+- Widths and bounds come from unhinted font units scaled by the size (upstream on FreeType: cairo's unhinted extents, which are the same), so a font needs no FreeType size object.
+- A synthetic oblique slants the ink bounds by `SyntheticObliqueAngle()`; synthetic bold only adds `SyntheticBoldOffset()` to advances (cairo also emboldens the outline's ink).
+- `_codePointSupport` is a list of booleans (upstream: a bit vector); glyph pages are kept in a `HashMap` keyed by page number.
+- No colour glyph detection (FreeType's FIXME upstream), no half-width fonts (likewise), no vertical metrics tables, no math data.
+- `BoundsForGlyphs` measures each glyph (upstream batches the unknown ones for the platform).
+- The bundled font and every registered face stay alive for the process.
+
+Tests: `tests/Graphics/FontDatabase.cpp` (the bundled font, registration, rejection of what isn't a font, faces and tables), `tests/Graphics/Font.cpp` (Ahem's and Liberation Sans' metrics, glyphs, glyph pages and bounds, code point support, synthetic bold and oblique, derived fonts, platform data): 7 new cases. The t1 tests' non-ASCII literals are now escapes (the editor had written some as raw characters, one of them invisible).

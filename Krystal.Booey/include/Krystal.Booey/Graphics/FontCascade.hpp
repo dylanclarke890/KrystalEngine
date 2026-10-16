@@ -1,9 +1,11 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Core/CharacterProperties.hpp"
 #include "Krystal.Booey/Graphics/FontCascadeDescription.hpp"
 #include "Krystal.Booey/Graphics/FontMetrics.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Text/Unicode.hpp"
 
 namespace krys::boo
 {
@@ -134,6 +136,63 @@ namespace krys::boo
     KRYS_NODISCARD constexpr static float SyntheticObliqueAngle() noexcept
     {
       return 14;
+    }
+
+    KRYS_NODISCARD static bool IsInvisibleReplacementObjectCharacter(char32 character) noexcept
+    {
+      if (character != text::ObjectReplacementCharacter)
+      {
+        return false;
+      }
+      return false;
+    }
+
+    KRYS_NODISCARD static bool TreatAsSpace(char32 c) noexcept
+    {
+      return c == text::Space || c == text::TabCharacter || c == text::NewlineCharacter
+             || c == text::NoBreakSpace;
+    }
+
+    KRYS_NODISCARD static bool
+      IsCharacterWhoseGlyphsShouldBeDeletedForTextRendering(char32 character) noexcept
+    {
+      // https://www.w3.org/TR/css-text-3/#white-space-processing
+      // "Control characters (Unicode category Cc)—other than tabs (U+0009), line feeds (U+000A), carriage
+      // returns (U+000D) and sequences that form a segment break—must be rendered as a visible glyph"
+      if (character == text::TabCharacter || character == text::NewlineCharacter
+          || character == text::CarriageReturn)
+      {
+        return true;
+      }
+      // Also, we're omitting Null (U+0000) from this set because Chrome and Firefox do so and it's needed for
+      // compat. See https://github.com/w3c/csswg-drafts/pull/6983.
+      if (character == text::NullCharacter)
+      {
+        return true;
+      }
+      if (IsControlCharacter(character))
+      {
+        return false;
+      }
+      // "Unsupported Default_ignorable characters must be ignored for text rendering."
+      return IsDefaultIgnorableCodePoint(character) || IsInvisibleReplacementObjectCharacter(character);
+    }
+
+    // FIXME: Callers of treatAsZeroWidthSpace() and treatAsZeroWidthSpaceInComplexScript() should probably be
+    // calling isCharacterWhoseGlyphsShouldBeDeletedForTextRendering() instead.
+    KRYS_NODISCARD static bool TreatAsZeroWidthSpace(char32 c) noexcept
+    {
+      return TreatAsZeroWidthSpaceInComplexScript(c) || c == text::ZeroWidthNonJoiner
+             || c == text::ZeroWidthJoiner;
+    }
+
+    KRYS_NODISCARD static bool TreatAsZeroWidthSpaceInComplexScript(char32 c) noexcept
+    {
+      return c < text::Space || (c >= text::DeleteCharacter && c < text::NoBreakSpace)
+             || c == text::SoftHyphen || c == text::ZeroWidthSpace
+             || (c >= text::LeftToRightMark && c <= text::RightToLeftMark)
+             || (c >= text::LeftToRightEmbed && c <= text::RightToLeftOverride)
+             || c == text::ZeroWidthNoBreakSpace || IsInvisibleReplacementObjectCharacter(c);
     }
 
     KRYS_NODISCARD uint32 Generation() const noexcept

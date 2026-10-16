@@ -16,10 +16,36 @@ namespace krys::text
   constexpr char32 BlackLeftPointingSmallTriangle = 0x25C2;
   constexpr char32 BlackRightPointingSmallTriangle = 0x25B8;
   constexpr char32 BlackUpPointingSmallTriangle = 0x25B4;
+  constexpr char32 CarriageReturn = 0x000D;
+  constexpr char32 CjkWater = 0x6C34;
+  constexpr char32 DeleteCharacter = 0x007F;
+  constexpr char32 FirstStrongIsolate = 0x2068;
   constexpr char32 LeftDoubleQuotationMark = 0x201C;
   constexpr char32 LeftSingleQuotationMark = 0x2018;
+  constexpr char32 LeftToRightEmbed = 0x202A;
+  constexpr char32 LeftToRightIsolate = 0x2066;
+  constexpr char32 LeftToRightMark = 0x200E;
+  constexpr char32 LeftToRightOverride = 0x202D;
+  constexpr char32 NarrowNoBreakSpace = 0x202F;
+  constexpr char32 NewlineCharacter = 0x000A;
+  constexpr char32 NoBreakSpace = 0x00A0;
+  constexpr char32 NullCharacter = 0x0000;
+  constexpr char32 ObjectReplacementCharacter = 0xFFFC;
+  constexpr char32 PopDirectionalFormatting = 0x202C;
+  constexpr char32 PopDirectionalIsolate = 0x2069;
   constexpr char32 RightDoubleQuotationMark = 0x201D;
   constexpr char32 RightSingleQuotationMark = 0x2019;
+  constexpr char32 RightToLeftEmbed = 0x202B;
+  constexpr char32 RightToLeftIsolate = 0x2067;
+  constexpr char32 RightToLeftMark = 0x200F;
+  constexpr char32 RightToLeftOverride = 0x202E;
+  constexpr char32 SoftHyphen = 0x00AD;
+  constexpr char32 Space = 0x0020;
+  constexpr char32 TabCharacter = 0x0009;
+  constexpr char32 ZeroWidthJoiner = 0x200D;
+  constexpr char32 ZeroWidthNoBreakSpace = 0xFEFF;
+  constexpr char32 ZeroWidthNonJoiner = 0x200C;
+  constexpr char32 ZeroWidthSpace = 0x200B;
 
   KRYS_NODISCARD constexpr bool IsNonUnicodeCharacter(char32 value) noexcept
   {

@@ -30,6 +30,10 @@ target_include_directories(Krystal.Booey PRIVATE ${BRIGAND_INCLUDE_DIRS})
 find_package(ICU REQUIRED COMPONENTS uc dt)
 target_link_libraries(Krystal.Booey PUBLIC ICU::uc PRIVATE ICU::dt)
 
+# Third-party - FreeType (font files, metrics and glyphs)
+find_package(Freetype REQUIRED)
+target_link_libraries(Krystal.Booey PRIVATE Freetype::Freetype)
+
 # Custom build step for python codegen scripts
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 find_program(GPERF_EXECUTABLE NAMES gperf REQUIRED)
@@ -120,6 +124,28 @@ add_custom_command(
     ${KRYSTAL_BOOEY_CODEGEN_DIR}
   COMMENT
     "Running Krystal.Booey code generation..."
+  VERBATIM
+)
+
+# The bundled fonts, embedded as byte arrays (codegen/bundled_fonts.py)
+set(KRYSTAL_BOOEY_BUNDLED_FONTS_DIR "${CMAKE_SOURCE_DIR}/third-party/liberation-fonts")
+set(KRYSTAL_BOOEY_BUNDLED_FONTS_OUTPUTS
+  ${KRYSTAL_BOOEY_HEADER_OUTPUT_DIR}/Krystal.Booey/Graphics/BundledFonts.hpp
+  ${KRYSTAL_BOOEY_SOURCES_OUTPUT_DIR}/Graphics/BundledFonts.cpp
+)
+add_custom_command(
+  OUTPUT
+    ${KRYSTAL_BOOEY_BUNDLED_FONTS_OUTPUTS}
+  COMMAND
+    ${Python3_EXECUTABLE} "${KRYSTAL_BOOEY_CODEGEN_DIR}/bundled_fonts.py"
+      --fonts-dir=${KRYSTAL_BOOEY_BUNDLED_FONTS_DIR}
+      --output-headers-dir=${KRYSTAL_BOOEY_HEADER_OUTPUT_DIR}
+      --output-sources-dir=${KRYSTAL_BOOEY_SOURCES_OUTPUT_DIR}
+  DEPENDS
+    "${KRYSTAL_BOOEY_CODEGEN_DIR}/bundled_fonts.py"
+    "${KRYSTAL_BOOEY_BUNDLED_FONTS_DIR}/LiberationSans-Regular.ttf"
+  COMMENT
+    "Embedding Krystal.Booey's bundled fonts..."
   VERBATIM
 )
 
@@ -711,6 +737,16 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Core/CharacterProperties.hpp
   include/Krystal.Booey/Core/Hyphenation.hpp
   include/Krystal.Booey/Core/UnicodeHelpers.hpp
+
+  # Font platform (t2a)
+  ${KRYSTAL_BOOEY_HEADER_OUTPUT_DIR}/Krystal.Booey/Graphics/BundledFonts.hpp
+  include/Krystal.Booey/Graphics/Font.hpp
+  include/Krystal.Booey/Graphics/FontDatabase.hpp
+  include/Krystal.Booey/Graphics/FontPlatformData.hpp
+  include/Krystal.Booey/Graphics/FreeTypeFace.hpp
+  include/Krystal.Booey/Graphics/Glyph.hpp
+  include/Krystal.Booey/Graphics/GlyphMetricsMap.hpp
+  include/Krystal.Booey/Graphics/GlyphPage.hpp
 
   # Interaction state
   include/Krystal.Booey/DOM/FocusOptions.hpp
@@ -1882,6 +1918,13 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   # Platform text (t1)
   src/Core/Hyphenation.cpp
   src/Core/UnicodeHelpers.cpp
+
+  # Font platform (t2a)
+  ${KRYSTAL_BOOEY_SOURCES_OUTPUT_DIR}/Graphics/BundledFonts.cpp
+  src/Graphics/Font.cpp
+  src/Graphics/FontDatabase.cpp
+  src/Graphics/FontPlatformData.cpp
+  src/Graphics/FreeTypeFace.cpp
 )
 
 target_precompile_headers(Krystal.Booey

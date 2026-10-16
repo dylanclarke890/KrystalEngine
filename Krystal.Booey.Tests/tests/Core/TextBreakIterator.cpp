@@ -31,7 +31,7 @@ namespace krys::boo::tests
       CHECK_FALSE(iterator.IsBoundary(3));
 
       // "héllo " is seven bytes.
-      auto accented = LineBreaks(u8"héllo wörld");
+      auto accented = LineBreaks(u8"h\u00E9llo w\u00F6rld");
       CHECK(accented.Following(0) == 7u);
       CHECK(accented.Preceding(12) == 7u);
     }
@@ -41,7 +41,7 @@ namespace krys::boo::tests
       CHECK_FALSE(LineBreaks(u8"abc", u8"x").IsBoundary(0));
       CHECK(LineBreaks(u8"abc", u8"x ").IsBoundary(0));
       // A prior context isn't part of the text.
-      auto iterator = LineBreaks(u8"ab cd", u8"é ");
+      auto iterator = LineBreaks(u8"ab cd", u8"\u00E9 ");
       CHECK(iterator.Following(0) == 3u);
       CHECK(iterator.Preceding(4) == 3u);
       CHECK(iterator.Preceding(1).value_or(0) == 0u);
@@ -50,7 +50,7 @@ namespace krys::boo::tests
     SECTION("Strictness")
     {
       // A small kana can only start a line under loose or normal line breaking.
-      auto text = u8"あぁ";
+      auto text = u8"\u3042\u3041";
       const StringAtom japanese {u8"ja"};
       CHECK_FALSE(LineBreaks(text, {}, TextBreakLineBehavior::Strict, japanese).IsBoundary(3));
       CHECK(LineBreaks(text, {}, TextBreakLineBehavior::Loose, japanese).IsBoundary(3));
@@ -84,7 +84,7 @@ namespace krys::boo::tests
     SECTION("Caret and character modes")
     {
       // e + COMBINING ACUTE ACCENT (two bytes) is one cluster.
-      utf8_stringview text = u8"éx";
+      utf8_stringview text = u8"e\u0301x";
       CachedTextBreakIterator character {text, {}, TextBreakIterator::CharacterMode {}, NoLocale};
       CHECK(character.Following(0) == 3u);
       CHECK_FALSE(character.IsBoundary(1));
@@ -97,19 +97,19 @@ namespace krys::boo::tests
       CHECK(NumGraphemeClusters(u8"") == 0u);
       CHECK(NumGraphemeClusters(u8"abc") == 3u);
       CHECK(NumGraphemeClusters(u8"a\r\nb") == 3u);
-      CHECK(NumGraphemeClusters(u8"é") == 1u);
+      CHECK(NumGraphemeClusters(u8"e\u0301") == 1u);
       // A flag is a pair of regional indicators.
       CHECK(NumGraphemeClusters(u8"\U0001F1EB\U0001F1F7!") == 2u);
 
       CHECK(NumCodeUnitsInGraphemeClusters(u8"a\r\nbc", 2) == 3u);
       CHECK(NumCodeUnitsInGraphemeClusters(u8"abc", 5) == 3u);
-      CHECK(NumCodeUnitsInGraphemeClusters(u8"aéb", 2) == 4u);
-      CHECK(NumCodeUnitsInGraphemeClusters(u8"aéb", 9) == 5u);
+      CHECK(NumCodeUnitsInGraphemeClusters(u8"ae\u0301b", 2) == 4u);
+      CHECK(NumCodeUnitsInGraphemeClusters(u8"ae\u0301b", 9) == 5u);
     }
 
     SECTION("Non-shared iterators")
     {
-      NonSharedCharacterBreakIterator iterator {u8"éa"};
+      NonSharedCharacterBreakIterator iterator {u8"\u00E9a"};
       REQUIRE(iterator);
       CHECK(ubrk_next(iterator) == 2);
       CHECK(ubrk_next(iterator) == 3);
@@ -149,10 +149,10 @@ namespace krys::boo::tests
       CHECK(context.LastCharacter() == U'a');
       CHECK(context.Characters() == u8"a");
 
-      context.Update(U'é');
+      context.Update(U'\u00E9');
       CHECK(context.GetLength() == 2u);
       CHECK(context.SecondToLastCharacter() == U'a');
-      CHECK(context.Characters() == u8"aé");
+      CHECK(context.Characters() == u8"a\u00E9");
 
       context.Set({U'\U0001F600', U' '});
       CHECK(context.Characters() == u8"\U0001F600 ");
