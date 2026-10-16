@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 
@@ -18,7 +19,7 @@ namespace krys::boo::css
       ValueId RangeName;
       double Offset;
 
-      void WriteToString(CSSOMString &builder) const noexcept;
+      void WriteToString(StringBuilder &builder) const noexcept;
       KRYS_NODISCARD bool operator==(const Key &) const noexcept = default;
     };
 

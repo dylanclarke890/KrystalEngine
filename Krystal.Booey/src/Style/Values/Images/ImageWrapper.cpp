@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Rendering/Style/StyleCachedImage.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCrossfadeImage.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleFilterImage.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -17,11 +18,10 @@ namespace krys::boo::style
 
   // MARK: - Serialization
 
-  void Serialiser<ImageWrapper>::operator()(css::CSSOMString &builder,
-                                            const css::SerialisationContext &context,
+  void Serialiser<ImageWrapper>::operator()(StringBuilder &builder, const css::SerialisationContext &context,
                                             const RenderStyle &style, const ImageWrapper &value) noexcept
   {
-    builder.append(value.Value->ComputedStyleValue(style)->CssText(context));
+    builder.Append(value.Value->ComputedStyleValue(style)->CssText(context));
   }
 
   // MARK: - Blending

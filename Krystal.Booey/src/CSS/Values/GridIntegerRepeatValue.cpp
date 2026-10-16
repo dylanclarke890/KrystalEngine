@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Values/GridIntegerRepeatValue.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -18,12 +19,13 @@ namespace krys::boo::css
 
   CSSOMString GridIntegerRepeatValue::CustomCSSText(const SerialisationContext &context) const noexcept
   {
-    CSSOMString result {u8"repeat("};
-    result.append(_repetitions->CssText(context));
-    result.append(u8", ");
+    StringBuilder result;
+    result.Append(u8"repeat(");
+    result.Append(_repetitions->CssText(context));
+    result.Append(u8", ");
     SerialiseItems(result, context);
-    result.push_back(u8')');
-    return result;
+    result.Append(u8')');
+    return krys::move(result).ToString();
   }
 
   bool GridIntegerRepeatValue::Equals(const GridIntegerRepeatValue &other) const noexcept

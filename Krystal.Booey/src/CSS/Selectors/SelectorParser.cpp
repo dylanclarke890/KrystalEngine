@@ -6,6 +6,7 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorInlines.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorPseudoTypeMap.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include <charconv>
@@ -1367,44 +1368,35 @@ namespace krys::boo::css
 
   namespace
   {
-    void AppendInteger(int32 value, CSSOMString &builder) noexcept
-    {
-      Array<char, 16uz> buffer;
-      auto result = std::to_chars(buffer.data(), buffer.data() + buffer.size(), value);
-      krys_debug_assert(result.ec == std::errc {});
-      builder.append(reinterpret_cast<const char8 *>(buffer.data()),
-                     reinterpret_cast<const char8 *>(result.ptr));
-    }
-
     // <an+b> token sequences have special serialisation rules:
     // https://www.w3.org/TR/css-syntax-3/#serializing-anb
     CSSOMStringAtom SerialiseANPlusB(const Pair<int32, int32> &ab) noexcept
     {
-      CSSOMString builder;
+      StringBuilder builder;
 
       if (!ab.first)
       {
-        AppendInteger(ab.second, builder);
+        builder.Append(ab.second);
         return CSSOMStringAtom(builder);
       }
 
       if (ab.first == -1)
       {
-        builder += u8'-';
+        builder.Append(u8'-');
       }
       else if (ab.first != 1)
       {
-        AppendInteger(ab.first, builder);
+        builder.Append(ab.first);
       }
-      builder += u8'n';
+      builder.Append(u8'n');
 
       if (ab.second)
       {
         if (ab.second > 0)
         {
-          builder += u8'+';
+          builder.Append(u8'+');
         }
-        AppendInteger(ab.second, builder);
+        builder.Append(ab.second);
       }
 
       return CSSOMStringAtom(builder);

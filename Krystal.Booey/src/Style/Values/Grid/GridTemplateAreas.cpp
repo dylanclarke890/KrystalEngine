@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Values/GridTemplateAreasValue.hpp"
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include <algorithm>
 
 namespace krys::boo::style
@@ -79,7 +80,7 @@ namespace krys::boo::style
 
   // MARK: - Serialization
 
-  void Serialiser<GridTemplateAreas>::operator()(css::CSSOMString &builder,
+  void Serialiser<GridTemplateAreas>::operator()(StringBuilder &builder,
                                                  const css::SerialisationContext &context,
                                                  const RenderStyle &style,
                                                  const GridTemplateAreas &value) noexcept

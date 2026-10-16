@@ -23,6 +23,7 @@
 #include "Krystal.Booey/Style/Values/Transforms/Functions/ScaleTransformFunction.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Functions/SkewTransformFunction.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Functions/TranslateTransformFunction.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -743,7 +744,7 @@ namespace krys::boo::style
 
   // MARK: - Serialization
 
-  void Serialiser<TransformFunction>::operator()(css::CSSOMString &builder,
+  void Serialiser<TransformFunction>::operator()(StringBuilder &builder,
                                                  const css::SerialisationContext &context,
                                                  const RenderStyle &style,
                                                  const TransformFunction &value) noexcept
@@ -769,22 +770,22 @@ namespace krys::boo::style
     switch (function.GetType())
     {
       case TransformFunctionType::TranslateX:
-        builder.append(css::ToString(css::ValueId::TranslateX));
-        builder.push_back(u8'(');
+        builder.Append(css::ToString(css::ValueId::TranslateX));
+        builder.Append(u8'(');
         translateLength(Downcast<TranslateTransformFunction>(function).X());
-        builder.push_back(u8')');
+        builder.Append(u8')');
         return;
       case TransformFunctionType::TranslateY:
-        builder.append(css::ToString(css::ValueId::TranslateY));
-        builder.push_back(u8'(');
+        builder.Append(css::ToString(css::ValueId::TranslateY));
+        builder.Append(u8'(');
         translateLength(Downcast<TranslateTransformFunction>(function).Y());
-        builder.push_back(u8')');
+        builder.Append(u8')');
         return;
       case TransformFunctionType::TranslateZ:
-        builder.append(css::ToString(css::ValueId::TranslateZ));
-        builder.push_back(u8'(');
+        builder.Append(css::ToString(css::ValueId::TranslateZ));
+        builder.Append(u8'(');
         translateLength(Downcast<TranslateTransformFunction>(function).Z());
-        builder.push_back(u8')');
+        builder.Append(u8')');
         return;
       case TransformFunctionType::Translate:
       case TransformFunctionType::Translate3D:
@@ -794,47 +795,47 @@ namespace krys::boo::style
         {
           if (!includeLength(translate.Y()))
           {
-            builder.append(css::ToString(css::ValueId::Translate));
-            builder.push_back(u8'(');
+            builder.Append(css::ToString(css::ValueId::Translate));
+            builder.Append(u8'(');
             translateLength(translate.X());
-            builder.push_back(u8')');
+            builder.Append(u8')');
             return;
           }
-          builder.append(css::ToString(css::ValueId::Translate));
-          builder.push_back(u8'(');
+          builder.Append(css::ToString(css::ValueId::Translate));
+          builder.Append(u8'(');
           translateLength(translate.X());
-          builder.append(u8", ");
+          builder.Append(u8", ");
           translateLength(translate.Y());
-          builder.push_back(u8')');
+          builder.Append(u8')');
           return;
         }
-        builder.append(css::ToString(css::ValueId::Translate3d));
-        builder.push_back(u8'(');
+        builder.Append(css::ToString(css::ValueId::Translate3d));
+        builder.Append(u8'(');
         translateLength(translate.X());
-        builder.append(u8", ");
+        builder.Append(u8", ");
         translateLength(translate.Y());
-        builder.append(u8", ");
+        builder.Append(u8", ");
         translateLength(translate.Z());
-        builder.push_back(u8')');
+        builder.Append(u8')');
         return;
       }
       case TransformFunctionType::ScaleX:
-        builder.append(css::ToString(css::ValueId::ScaleX));
-        builder.push_back(u8'(');
+        builder.Append(css::ToString(css::ValueId::ScaleX));
+        builder.Append(u8'(');
         Serialise(builder, context, style, Downcast<ScaleTransformFunction>(function).X());
-        builder.push_back(u8')');
+        builder.Append(u8')');
         return;
       case TransformFunctionType::ScaleY:
-        builder.append(css::ToString(css::ValueId::ScaleY));
-        builder.push_back(u8'(');
+        builder.Append(css::ToString(css::ValueId::ScaleY));
+        builder.Append(u8'(');
         Serialise(builder, context, style, Downcast<ScaleTransformFunction>(function).Y());
-        builder.push_back(u8')');
+        builder.Append(u8')');
         return;
       case TransformFunctionType::ScaleZ:
-        builder.append(css::ToString(css::ValueId::ScaleZ));
-        builder.push_back(u8'(');
+        builder.Append(css::ToString(css::ValueId::ScaleZ));
+        builder.Append(u8'(');
         Serialise(builder, context, style, Downcast<ScaleTransformFunction>(function).Z());
-        builder.push_back(u8')');
+        builder.Append(u8')');
         return;
       case TransformFunctionType::Scale:
       case TransformFunctionType::Scale3D:
@@ -844,105 +845,105 @@ namespace krys::boo::style
         {
           if (scale.X() == scale.Y())
           {
-            builder.append(css::ToString(css::ValueId::Scale));
-            builder.push_back(u8'(');
+            builder.Append(css::ToString(css::ValueId::Scale));
+            builder.Append(u8'(');
             Serialise(builder, context, style, scale.X());
-            builder.push_back(u8')');
+            builder.Append(u8')');
             return;
           }
-          builder.append(css::ToString(css::ValueId::Scale));
-          builder.push_back(u8'(');
+          builder.Append(css::ToString(css::ValueId::Scale));
+          builder.Append(u8'(');
           Serialise(builder, context, style, scale.X());
-          builder.append(u8", ");
+          builder.Append(u8", ");
           Serialise(builder, context, style, scale.Y());
-          builder.push_back(u8')');
+          builder.Append(u8')');
           return;
         }
-        builder.append(css::ToString(css::ValueId::Scale3d));
-        builder.push_back(u8'(');
+        builder.Append(css::ToString(css::ValueId::Scale3d));
+        builder.Append(u8'(');
         Serialise(builder, context, style, scale.X());
-        builder.append(u8", ");
+        builder.Append(u8", ");
         Serialise(builder, context, style, scale.Y());
-        builder.append(u8", ");
+        builder.Append(u8", ");
         Serialise(builder, context, style, scale.Z());
-        builder.push_back(u8')');
+        builder.Append(u8')');
         return;
       }
       case TransformFunctionType::RotateX:
-        builder.append(css::ToString(css::ValueId::RotateX));
-        builder.push_back(u8'(');
+        builder.Append(css::ToString(css::ValueId::RotateX));
+        builder.Append(u8'(');
         Serialise(builder, context, style, Downcast<RotateTransformFunction>(function).GetAngle());
-        builder.push_back(u8')');
+        builder.Append(u8')');
         return;
       case TransformFunctionType::RotateY:
-        builder.append(css::ToString(css::ValueId::RotateY));
-        builder.push_back(u8'(');
+        builder.Append(css::ToString(css::ValueId::RotateY));
+        builder.Append(u8'(');
         Serialise(builder, context, style, Downcast<RotateTransformFunction>(function).GetAngle());
-        builder.push_back(u8')');
+        builder.Append(u8')');
         return;
       case TransformFunctionType::RotateZ:
-        builder.append(css::ToString(css::ValueId::RotateZ));
-        builder.push_back(u8'(');
+        builder.Append(css::ToString(css::ValueId::RotateZ));
+        builder.Append(u8'(');
         Serialise(builder, context, style, Downcast<RotateTransformFunction>(function).GetAngle());
-        builder.push_back(u8')');
+        builder.Append(u8')');
         return;
       case TransformFunctionType::Rotate:
-        builder.append(css::ToString(css::ValueId::Rotate));
-        builder.push_back(u8'(');
+        builder.Append(css::ToString(css::ValueId::Rotate));
+        builder.Append(u8'(');
         Serialise(builder, context, style, Downcast<RotateTransformFunction>(function).GetAngle());
-        builder.push_back(u8')');
+        builder.Append(u8')');
         return;
       case TransformFunctionType::Rotate3D:
       {
         auto &rotate = Downcast<RotateTransformFunction>(function);
-        builder.append(css::ToString(css::ValueId::Rotate3d));
-        builder.push_back(u8'(');
+        builder.Append(css::ToString(css::ValueId::Rotate3d));
+        builder.Append(u8'(');
         Serialise(builder, context, style, rotate.X());
-        builder.append(u8", ");
+        builder.Append(u8", ");
         Serialise(builder, context, style, rotate.Y());
-        builder.append(u8", ");
+        builder.Append(u8", ");
         Serialise(builder, context, style, rotate.Z());
-        builder.append(u8", ");
+        builder.Append(u8", ");
         Serialise(builder, context, style, rotate.GetAngle());
-        builder.push_back(u8')');
+        builder.Append(u8')');
         return;
       }
       case TransformFunctionType::SkewX:
-        builder.append(css::ToString(css::ValueId::SkewX));
-        builder.push_back(u8'(');
+        builder.Append(css::ToString(css::ValueId::SkewX));
+        builder.Append(u8'(');
         Serialise(builder, context, style, Downcast<SkewTransformFunction>(function).AngleX());
-        builder.push_back(u8')');
+        builder.Append(u8')');
         return;
       case TransformFunctionType::SkewY:
-        builder.append(css::ToString(css::ValueId::SkewY));
-        builder.push_back(u8'(');
+        builder.Append(css::ToString(css::ValueId::SkewY));
+        builder.Append(u8'(');
         Serialise(builder, context, style, Downcast<SkewTransformFunction>(function).AngleY());
-        builder.push_back(u8')');
+        builder.Append(u8')');
         return;
       case TransformFunctionType::Skew:
       {
         auto &skew = Downcast<SkewTransformFunction>(function);
         if (skew.AngleY().IsZero())
         {
-          builder.append(css::ToString(css::ValueId::Skew));
-          builder.push_back(u8'(');
+          builder.Append(css::ToString(css::ValueId::Skew));
+          builder.Append(u8'(');
           Serialise(builder, context, style, skew.AngleX());
-          builder.push_back(u8')');
+          builder.Append(u8')');
           return;
         }
-        builder.append(css::ToString(css::ValueId::Skew));
-        builder.push_back(u8'(');
+        builder.Append(css::ToString(css::ValueId::Skew));
+        builder.Append(u8'(');
         Serialise(builder, context, style, skew.AngleX());
-        builder.append(u8", ");
+        builder.Append(u8", ");
         Serialise(builder, context, style, skew.AngleY());
-        builder.push_back(u8')');
+        builder.Append(u8')');
         return;
       }
       case TransformFunctionType::Perspective:
-        builder.append(css::ToString(css::ValueId::Perspective));
-        builder.push_back(u8'(');
+        builder.Append(css::ToString(css::ValueId::Perspective));
+        builder.Append(u8'(');
         Serialise(builder, context, style, Downcast<PerspectiveTransformFunction>(function).GetPerspective());
-        builder.push_back(u8')');
+        builder.Append(u8')');
         return;
       case TransformFunctionType::Matrix:
       case TransformFunctionType::Matrix3D:
@@ -960,24 +961,24 @@ namespace krys::boo::style
   namespace
   {
     template <size_t N>
-    void SerialiseMatrix(css::CSSOMString &builder, const css::SerialisationContext &context,
-                         css::ValueId name, const std::array<double, N> &values) noexcept
+    void SerialiseMatrix(StringBuilder &builder, const css::SerialisationContext &context, css::ValueId name,
+                         const std::array<double, N> &values) noexcept
     {
-      builder.append(css::ToString(name));
-      builder.push_back(u8'(');
+      builder.Append(css::ToString(name));
+      builder.Append(u8'(');
       for (size_t i = 0; i < N; ++i)
       {
         if (i)
         {
-          builder.append(u8", ");
+          builder.Append(u8", ");
         }
         css::Serialise(builder, context, css::NumberRaw<> {values[i]});
       }
-      builder.push_back(u8')');
+      builder.Append(u8')');
     }
   }
 
-  void Serialiser<TransformationMatrix>::operator()(css::CSSOMString &builder,
+  void Serialiser<TransformationMatrix>::operator()(StringBuilder &builder,
                                                     const css::SerialisationContext &context,
                                                     const RenderStyle &style,
                                                     const TransformationMatrix &transform) noexcept

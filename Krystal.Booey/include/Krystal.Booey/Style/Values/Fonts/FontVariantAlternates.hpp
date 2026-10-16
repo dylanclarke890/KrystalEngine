@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/Core/TextFlags.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -65,7 +66,7 @@ namespace krys::boo::style
   template <>
   struct Serialiser<FontVariantAlternates>
   {
-    void operator()(css::CSSOMString &, const css::SerialisationContext &, const RenderStyle &,
+    void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &,
                     const FontVariantAlternates &) noexcept;
   };
 }

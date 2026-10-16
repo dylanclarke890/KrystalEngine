@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/CSSOM/CSSLayerBlockRule.hpp"
 #include "Krystal.Booey/CSS/Markup.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -17,14 +18,14 @@ namespace krys::boo::css
 
   CSSOMString CSSLayerBlockRule::CssText() const noexcept
   {
-    CSSOMString builder;
-    builder.append(u8"@layer");
+    StringBuilder builder;
+    builder.Append(u8"@layer");
     if (auto name = Name(); !name.empty())
     {
-      builder.append(u8" ").append(name);
+      builder.Append(u8" ", name);
     }
     AppendCSSTextForItems(builder);
-    return builder;
+    return krys::move(builder).ToString();
   }
 
   CSSOMString CSSLayerBlockRule::Name() const noexcept
@@ -41,15 +42,15 @@ namespace krys::boo::css
 
   CSSOMString StringFromCascadeLayerName(const CascadeLayerName &name) noexcept
   {
-    CSSOMString result;
+    StringBuilder result;
     for (const auto &segment : name)
     {
       SerialiseIdentifier(CSSOMString(segment.View()), result);
       if (&segment != &name.back())
       {
-        result.push_back(u8'.');
+        result.Append(u8'.');
       }
     }
-    return result;
+    return krys::move(result).ToString();
   }
 }

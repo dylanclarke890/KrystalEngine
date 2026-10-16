@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorResolutionState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -78,14 +79,13 @@ namespace krys::boo::style
       return ColorMix::Component::PercentageType {100.0 - percentage.Value};
     }
 
-    void SerialiseColorMixPercentage(css::CSSOMString &builder, const css::SerialisationContext &context,
+    void SerialiseColorMixPercentage(StringBuilder &builder, const css::SerialisationContext &context,
                                      const ColorMix::Component::PercentageType &percentage) noexcept
     {
       css::Serialise(builder, context, css::PercentageRaw<> {percentage.Value});
     }
 
-    void SerialisationForColorMixPercentage1(css::CSSOMString &builder,
-                                             const css::SerialisationContext &context,
+    void SerialisationForColorMixPercentage1(StringBuilder &builder, const css::SerialisationContext &context,
                                              const ColorMix &value) noexcept
     {
       if (value.MixComponents1.Percentage && value.MixComponents2.Percentage)
@@ -95,7 +95,7 @@ namespace krys::boo::style
         {
           return;
         }
-        builder.push_back(u8' ');
+        builder.Append(u8' ');
         SerialiseColorMixPercentage(builder, context, *value.MixComponents1.Percentage);
       }
       else if (value.MixComponents1.Percentage)
@@ -104,7 +104,7 @@ namespace krys::boo::style
         {
           return;
         }
-        builder.push_back(u8' ');
+        builder.Append(u8' ');
         SerialiseColorMixPercentage(builder, context, *value.MixComponents1.Percentage);
       }
       else if (value.MixComponents2.Percentage)
@@ -120,13 +120,12 @@ namespace krys::boo::style
           return;
         }
 
-        builder.push_back(u8' ');
+        builder.Append(u8' ');
         SerialiseColorMixPercentage(builder, context, *subtractedPercent);
       }
     }
 
-    void SerialisationForColorMixPercentage2(css::CSSOMString &builder,
-                                             const css::SerialisationContext &context,
+    void SerialisationForColorMixPercentage2(StringBuilder &builder, const css::SerialisationContext &context,
                                              const ColorMix &value) noexcept
     {
       if (value.MixComponents1.Percentage && value.MixComponents2.Percentage)
@@ -136,37 +135,37 @@ namespace krys::boo::style
           return;
         }
 
-        builder.push_back(u8' ');
+        builder.Append(u8' ');
         SerialiseColorMixPercentage(builder, context, *value.MixComponents2.Percentage);
       }
     }
   }
 
-  void SerialisationForCSSTokenization(css::CSSOMString &builder, const css::SerialisationContext &context,
+  void SerialisationForCSSTokenization(StringBuilder &builder, const css::SerialisationContext &context,
                                        const ColorMix &colorMix) noexcept
   {
-    builder.append(u8"color-mix(");
+    builder.Append(u8"color-mix(");
 
     if (colorMix.ColorInterpolationMethod != css::DefaultInterpolationMethodForColorMix)
     {
-      builder.append(u8"in ");
+      builder.Append(u8"in ");
       boo::SerialisationForCSS(builder, colorMix.ColorInterpolationMethod);
-      builder.append(u8", ");
+      builder.Append(u8", ");
     }
 
     SerialisationForCSSTokenization(builder, context, colorMix.MixComponents1.Color);
     SerialisationForColorMixPercentage1(builder, context, colorMix);
-    builder.append(u8", ");
+    builder.Append(u8", ");
     SerialisationForCSSTokenization(builder, context, colorMix.MixComponents2.Color);
     SerialisationForColorMixPercentage2(builder, context, colorMix);
-    builder.push_back(u8')');
+    builder.Append(u8')');
   }
 
   css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
                                                    const ColorMix &colorMix) noexcept
   {
-    css::CSSOMString builder;
+    StringBuilder builder;
     SerialisationForCSSTokenization(builder, context, colorMix);
-    return builder;
+    return krys::move(builder).ToString();
   }
 }

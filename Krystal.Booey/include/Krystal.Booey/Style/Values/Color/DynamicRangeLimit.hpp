@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/Style/Values/Color/DynamicRangeLimitMix.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/CompactVariant.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Visitor.hpp"
@@ -139,7 +140,7 @@ namespace krys::boo::style
   template <>
   struct Serialiser<DynamicRangeLimit>
   {
-    void operator()(css::CSSOMString &builder, const css::SerialisationContext &context,
+    void operator()(StringBuilder &builder, const css::SerialisationContext &context,
                     const RenderStyle &style, const DynamicRangeLimit &value) noexcept;
   };
 

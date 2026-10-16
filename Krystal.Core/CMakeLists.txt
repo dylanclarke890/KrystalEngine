@@ -187,7 +187,9 @@ target_sources(Krystal.Core
       include/Krystal.Core/Text/ASCII.hpp
       include/Krystal.Core/Text/CodePointIterator.hpp
       include/Krystal.Core/Text/EncodingRegistry.hpp
+      include/Krystal.Core/Text/HexNumber.hpp
       include/Krystal.Core/Text/ICodec.hpp
+      include/Krystal.Core/Text/StringBuilder.hpp
       include/Krystal.Core/Text/Unicode.hpp
 
       # Time
@@ -281,4 +283,7 @@ target_sources(Krystal.Core
     
     # Utils
     src/Utils/ScopedProfiler.cpp
+
+    # Text
+    src/Text/StringBuilder.cpp
 )

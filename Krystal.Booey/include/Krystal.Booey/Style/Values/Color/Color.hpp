@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Style/Values/Color/CurrentColor.hpp"
 #include "Krystal.Booey/Style/Values/Color/ResolvedColor.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
@@ -144,7 +145,7 @@ namespace krys::boo::style
   KRYS_NODISCARD boo::Color ResolveColor(const Color &value, const boo::Color &currentColor) noexcept;
   KRYS_NODISCARD bool ContainsCurrentColor(const Color &value) noexcept;
 
-  void SerialisationForCSSTokenization(css::CSSOMString &builder, const css::SerialisationContext &context,
+  void SerialisationForCSSTokenization(StringBuilder &builder, const css::SerialisationContext &context,
                                        const Color &value) noexcept;
   KRYS_NODISCARD css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
                                                                   const Color &value) noexcept;
@@ -152,7 +153,7 @@ namespace krys::boo::style
   template <>
   struct Serialiser<Color>
   {
-    void operator()(css::CSSOMString &builder, const css::SerialisationContext &context,
+    void operator()(StringBuilder &builder, const css::SerialisationContext &context,
                     const RenderStyle &style, const Color &value) noexcept;
   };
 

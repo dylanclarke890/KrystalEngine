@@ -83,7 +83,7 @@ Open work outside the WebKit port's current slice. Port-specific detail (verdict
 
 ## Krystal.Core
 
-- `IntrusivePtr` `Downcast`/`DynamicDowncast` can't take an explicit target and `Downcast` rejects null; `StringBuilder` and `DefaultHash<StringAtom>` aren't ported (`PORTING.md`, *Open*).
+- `IntrusivePtr` `Downcast`/`DynamicDowncast` can't take an explicit target and `Downcast` rejects null; `DefaultHash<StringAtom>` isn't ported (`PORTING.md`, *Open*).
 
 ## Not supported (by choice)
 

@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Graphics/Color/ColorInterpolationMethod.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::style
@@ -35,7 +36,7 @@ namespace krys::boo::style
   KRYS_NODISCARD boo::Color ResolveColor(const ColorMix &colorMix, const boo::Color &currentColor) noexcept;
   KRYS_NODISCARD bool ContainsCurrentColor(const ColorMix &colorMix) noexcept;
 
-  void SerialisationForCSSTokenization(css::CSSOMString &builder, const css::SerialisationContext &context,
+  void SerialisationForCSSTokenization(StringBuilder &builder, const css::SerialisationContext &context,
                                        const ColorMix &value) noexcept;
   KRYS_NODISCARD css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
                                                                   const ColorMix &value) noexcept;

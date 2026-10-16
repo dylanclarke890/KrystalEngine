@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/CSSOM/CSSScopeRule.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -20,23 +21,23 @@ namespace krys::boo::css
 
   CSSOMString CSSScopeRule::CssText() const noexcept
   {
-    CSSOMString builder;
-    builder.append(u8"@scope");
+    StringBuilder builder;
+    builder.Append(u8"@scope");
 
     auto start = Start();
     if (!start.empty())
     {
-      builder.append(u8" (").append(start).push_back(u8')');
+      builder.Append(u8" (", start, u8')');
     }
 
     auto end = End();
     if (!end.empty())
     {
-      builder.append(u8" to ").append(u8"(").append(end).push_back(u8')');
+      builder.Append(u8" to ", u8"(", end, u8')');
     }
 
     AppendCSSTextForItems(builder);
-    return builder;
+    return krys::move(builder).ToString();
   }
 
   CSSOMString CSSScopeRule::Start() const noexcept

@@ -5,6 +5,7 @@
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -190,7 +191,7 @@ namespace krys::boo::style
     return css::ValueList::CreateSpaceSeparated(krys::move(valueList));
   }
 
-  void Serialiser<FontVariantAlternates>::operator()(css::CSSOMString &builder,
+  void Serialiser<FontVariantAlternates>::operator()(StringBuilder &builder,
                                                      const css::SerialisationContext &context,
                                                      const RenderStyle &style,
                                                      const FontVariantAlternates &alternates) noexcept
@@ -209,7 +210,7 @@ namespace krys::boo::style
       {
         if (needsSpace)
         {
-          builder.push_back(u8' ');
+          builder.Append(u8' ');
         }
         Serialise(builder, context, style, name);
         needsSpace = true;
@@ -221,13 +222,13 @@ namespace krys::boo::style
       {
         if (needsSpace)
         {
-          builder.push_back(u8' ');
+          builder.Append(u8' ');
         }
 
         Serialise(builder, context, style, name);
-        builder.push_back(u8'(');
+        builder.Append(u8'(');
         Serialise(builder, context, style, css::CustomIdentifier {css::CSSOMStringAtom {*value}});
-        builder.push_back(u8')');
+        builder.Append(u8')');
 
         needsSpace = true;
       }
@@ -238,22 +239,22 @@ namespace krys::boo::style
       {
         if (needsSpace)
         {
-          builder.push_back(u8' ');
+          builder.Append(u8' ');
         }
 
         Serialise(builder, context, style, name);
-        builder.push_back(u8'(');
+        builder.Append(u8'(');
         bool first = true;
         for (const auto &argument : value)
         {
           if (!first)
           {
-            builder.append(u8", ");
+            builder.Append(u8", ");
           }
           first = false;
           Serialise(builder, context, style, css::CustomIdentifier {css::CSSOMStringAtom {argument}});
         }
-        builder.push_back(u8')');
+        builder.Append(u8')');
 
         needsSpace = true;
       }

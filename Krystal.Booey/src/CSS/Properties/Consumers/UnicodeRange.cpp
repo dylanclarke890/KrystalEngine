@@ -5,6 +5,7 @@
 #include "Krystal.Booey/CSS/Values/UnicodeRangeValue.hpp"
 #include "Krystal.Core/Text/Encodings/Decode.hpp"
 #include "Krystal.Core/Text/Encodings/UTF.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
@@ -31,7 +32,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return tokens.Consume().IdentCodePoints();
     }
 
-    KRYS_NODISCARD bool ConsumeAndAppendOptionalNumber(CSSOMString &str, TokenRange &tokens,
+    KRYS_NODISCARD bool ConsumeAndAppendOptionalNumber(StringBuilder &str, TokenRange &tokens,
                                                        TokenType type = TokenType::Number) noexcept
     {
       if (tokens.Peek().Type() != type)
@@ -39,11 +40,11 @@ namespace krys::boo::css::PropertyParserHelpers
         return false;
       }
 
-      str.append(tokens.Consume().OriginalText());
+      str.Append(tokens.Consume().OriginalText());
       return true;
     }
 
-    KRYS_NODISCARD bool ConsumeAndAppendOptionalDelimiter(CSSOMString &str, TokenRange &tokens,
+    KRYS_NODISCARD bool ConsumeAndAppendOptionalDelimiter(StringBuilder &str, TokenRange &tokens,
                                                           char8_t value) noexcept
     {
       if (!ConsumeOptionalDelimiter(tokens, value))
@@ -51,11 +52,11 @@ namespace krys::boo::css::PropertyParserHelpers
         return false;
       }
 
-      str.push_back(value);
+      str.Append(value);
       return true;
     }
 
-    void ConsumeAndAppendOptionalQuestionMarks(CSSOMString &str, TokenRange &tokens) noexcept
+    void ConsumeAndAppendOptionalQuestionMarks(StringBuilder &str, TokenRange &tokens) noexcept
     {
       while (ConsumeAndAppendOptionalDelimiter(str, tokens, '?'))
       {
@@ -69,7 +70,7 @@ namespace krys::boo::css::PropertyParserHelpers
         return {};
       }
 
-      CSSOMString builder;
+      StringBuilder builder;
       if (ConsumeAndAppendOptionalNumber(builder, tokens, TokenType::Dimension))
       {
         ConsumeAndAppendOptionalQuestionMarks(builder, tokens);
@@ -84,10 +85,10 @@ namespace krys::boo::css::PropertyParserHelpers
       }
       else if (ConsumeOptionalDelimiter(tokens, '+'))
       {
-        builder.push_back(u8'+');
+        builder.Append(u8'+');
         if (auto identifier = ConsumeIdentifier(tokens); !identifier.empty())
         {
-          builder.append(identifier);
+          builder.Append(identifier);
         }
         else if (!ConsumeAndAppendOptionalDelimiter(builder, tokens, '?'))
         {
@@ -101,7 +102,7 @@ namespace krys::boo::css::PropertyParserHelpers
         return {};
       }
 
-      return builder;
+      return krys::move(builder).ToString();
     }
 
     struct UnicodeRange

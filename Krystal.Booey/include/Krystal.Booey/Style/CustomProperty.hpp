@@ -11,6 +11,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/Url.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/TransformFunction.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
@@ -88,7 +89,7 @@ namespace krys::boo
       KRYS_NODISCARD Ref<css::Value> PropertyValue(css::ValuePool &, const RenderStyle &) const noexcept;
       KRYS_NODISCARD css::CSSOMString PropertyValueSerialisation(const css::SerialisationContext &,
                                                                  const RenderStyle &) const noexcept;
-      void PropertyValueSerialisation(css::CSSOMString &, const css::SerialisationContext &,
+      void PropertyValueSerialisation(StringBuilder &, const css::SerialisationContext &,
                                       const RenderStyle &) const noexcept;
 
     private:
@@ -100,7 +101,7 @@ namespace krys::boo
       KRYS_NODISCARD css::CSSOMString
         PropertyValueSerialisationForTokenization(const css::SerialisationContext &,
                                                   const RenderStyle &) const noexcept;
-      void PropertyValueSerialisationForTokenization(css::CSSOMString &, const css::SerialisationContext &,
+      void PropertyValueSerialisationForTokenization(StringBuilder &, const css::SerialisationContext &,
                                                      const RenderStyle &) const noexcept;
     };
 

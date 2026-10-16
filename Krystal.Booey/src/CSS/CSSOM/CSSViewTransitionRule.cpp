@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/CSSOM/CSSViewTransitionRule.hpp"
 #include "Krystal.Booey/CSS/Rules/ViewTransitionRule.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -19,30 +20,30 @@ namespace krys::boo::css
 
   CSSOMString CSSViewTransitionRule::CssText() const noexcept
   {
-    CSSOMString builder;
-    builder.append(u8"@view-transition { ");
+    StringBuilder builder;
+    builder.Append(u8"@view-transition { ");
 
     if (auto navigation = _viewTransitionRule->Navigation())
     {
-      builder.append(u8"navigation: ");
-      builder.append(*navigation == ViewTransitionNavigation::Auto ? u8"auto" : u8"none");
-      builder.append(u8"; ");
+      builder.Append(u8"navigation: ");
+      builder.Append(*navigation == ViewTransitionNavigation::Auto ? u8"auto" : u8"none");
+      builder.Append(u8"; ");
     }
 
     auto types = Types();
     if (!types.empty())
     {
-      builder.append(u8"types:");
+      builder.Append(u8"types:");
       for (const auto &type : types)
       {
-        builder.push_back(u8' ');
-        builder.append(type.View());
+        builder.Append(u8' ');
+        builder.Append(type.View());
       }
-      builder.append(u8"; ");
+      builder.Append(u8"; ");
     }
 
-    builder.push_back(u8'}');
-    return builder;
+    builder.Append(u8'}');
+    return krys::move(builder).ToString();
   }
 
   CSSOMStringAtom CSSViewTransitionRule::Navigation() const noexcept

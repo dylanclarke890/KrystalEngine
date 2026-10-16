@@ -1,8 +1,9 @@
 ﻿#include "Krystal.Booey/CSS/Values/ColorAdjust/ColorScheme.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
-  void Serialiser<ColorScheme>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<ColorScheme>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                            const ColorScheme &value) noexcept
   {
     if (value.IsNormal())
@@ -14,7 +15,7 @@ namespace krys::boo::css
     Serialise(builder, context, value.Schemes);
     if (value.Only)
     {
-      builder.push_back(u8' ');
+      builder.Append(u8' ');
       Serialise(builder, context, *value.Only);
     }
   }

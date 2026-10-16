@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/String.hpp"
 #include <limits>
 
@@ -64,8 +65,9 @@ namespace krys::boo::css::tests
 
   TEST_CASE("FormatCSSNumberValue(appends)", "[CSS][NumericTypesSerialisation]")
   {
-    CSSOMString builder = u8"width: ";
+    StringBuilder builder;
+    builder.Append(u8"width: ");
     FormatCSSNumberValue(builder, SerialisableNumber {.Value = 2.5, .Suffix = u8"px"});
-    CHECK(string(reinterpret_cast<const char *>(builder.data()), builder.size()) == "width: 2.5px");
+    CHECK(string(reinterpret_cast<const char *>(builder.View().data()), builder.Length()) == "width: 2.5px");
   }
 }

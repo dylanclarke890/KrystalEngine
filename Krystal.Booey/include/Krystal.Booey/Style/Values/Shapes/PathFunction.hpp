@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Style/Values/Shapes/FillRule.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/PathComputation.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/WindRuleComputation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -71,7 +72,7 @@ namespace krys::boo::style
   struct ToCSS<Path::PathData>
   {
     KRYS_NODISCARD css::Path::PathData operator()(const Path::PathData &, const RenderStyle &,
-                                              PathConversion = PathConversion::None) noexcept;
+                                                  PathConversion = PathConversion::None) noexcept;
   };
   template <>
   struct ToStyle<css::Path::PathData>
@@ -91,7 +92,7 @@ namespace krys::boo::style
   template <>
   struct Serialiser<Path>
   {
-    void operator()(css::CSSOMString &, const css::SerialisationContext &, const RenderStyle &, const Path &,
+    void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &, const Path &,
                     PathConversion = PathConversion::None) noexcept;
   };
 

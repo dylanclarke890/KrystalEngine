@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Values/Types.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorTypes.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -34,7 +35,7 @@ namespace krys::boo::css
   template <>
   struct Serialiser<HexColor>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const HexColor &value) noexcept;
   };
 

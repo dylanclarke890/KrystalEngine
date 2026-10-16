@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathConsumer.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::svg
 {
@@ -9,7 +10,7 @@ namespace krys::boo::svg
   class SVGPathStringBuilder final : public SVGPathConsumer
   {
   private:
-    dom::DOMString _stringBuilder;
+    StringBuilder _stringBuilder;
 
   public:
     SVGPathStringBuilder() noexcept;

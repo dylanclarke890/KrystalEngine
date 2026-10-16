@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Types.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -36,14 +37,15 @@ namespace krys::boo::css
   template <>
   struct Serialiser<SymbolRaw>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const SymbolRaw &value) noexcept;
   };
 
   template <>
   struct Serialiser<Symbol>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context, const Symbol &value) noexcept;
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
+                    const Symbol &value) noexcept;
   };
 
   template <>

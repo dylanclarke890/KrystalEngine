@@ -4,10 +4,11 @@
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesValueVisitation.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathUtilities.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
-  void Serialiser<Path>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<Path>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                     const Path &value) noexcept
   {
     // <path()> = path( <'fill-rule'>? , <string> )
@@ -15,7 +16,7 @@ namespace krys::boo::css
     if (value.FillRule && !std::holds_alternative<keywords::Nonzero>(*value.FillRule))
     {
       Serialise(builder, context, *value.FillRule);
-      builder.append(u8", ");
+      builder.Append(u8", ");
     }
 
     // FIXME: Add version of `buildStringFromByteStream` that takes a `StringBuilder`.

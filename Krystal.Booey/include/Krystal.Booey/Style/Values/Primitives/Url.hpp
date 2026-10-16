@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/CSS/Values/Primitives/URL.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 
 namespace krys::boo::dom
@@ -68,7 +69,7 @@ namespace krys::boo::style
   template <>
   struct Serialiser<URL>
   {
-    void operator()(css::CSSOMString &, const css::SerialisationContext &, const RenderStyle &,
+    void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &,
                     const URL &) noexcept;
   };
 }

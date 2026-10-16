@@ -1,9 +1,10 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryTypes.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css::mq
 {
-  void Serialise(CSSOMString &builder, const Feature &feature) noexcept;
-  void Serialise(CSSOMString &builder, const Condition &condition) noexcept;
+  void Serialise(StringBuilder &builder, const Feature &feature) noexcept;
+  void Serialise(StringBuilder &builder, const Condition &condition) noexcept;
 }

@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Style/Values/Transforms/Functions/TransformFunctionBase.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Functions/TransformFunctionWrapper.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -39,13 +40,13 @@ namespace krys::boo::style
   template <>
   struct Serialiser<TransformFunction>
   {
-    void operator()(css::CSSOMString &, const css::SerialisationContext &, const RenderStyle &,
+    void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &,
                     const TransformFunction &) noexcept;
   };
   template <>
   struct Serialiser<TransformationMatrix>
   {
-    void operator()(css::CSSOMString &, const css::SerialisationContext &, const RenderStyle &,
+    void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &,
                     const TransformationMatrix &) noexcept;
   };
 

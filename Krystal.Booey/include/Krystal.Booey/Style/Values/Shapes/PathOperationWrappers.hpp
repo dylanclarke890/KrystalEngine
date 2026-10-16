@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Rendering/PathOperation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Utils/PointerComparison.hpp"
 
 namespace krys::boo::style
@@ -242,7 +243,7 @@ namespace krys::boo::style
   template <>
   struct Serialiser<BasicShapePath>
   {
-    void operator()(css::CSSOMString &, const css::SerialisationContext &, const RenderStyle &,
+    void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &,
                     const BasicShapePath &, PathConversion = PathConversion::None) noexcept;
   };
 }

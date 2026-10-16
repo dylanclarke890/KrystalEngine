@@ -11,6 +11,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include <ranges>
 
@@ -80,8 +81,7 @@ namespace krys::boo::style
 
   // MARK: - Serialization
 
-  void Serialiser<BoxShadowList>::operator()(css::CSSOMString &builder,
-                                             const css::SerialisationContext &context,
+  void Serialiser<BoxShadowList>::operator()(StringBuilder &builder, const css::SerialisationContext &context,
                                              const RenderStyle &style, const BoxShadowList &value) noexcept
   {
     SerialisationForCSSOnRangeLike(builder, context, style, value | std::views::reverse,

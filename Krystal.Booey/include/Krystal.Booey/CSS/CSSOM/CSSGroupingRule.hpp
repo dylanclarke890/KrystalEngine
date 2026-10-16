@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -53,8 +54,8 @@ namespace krys::boo::css
 
     void Reattach(Rule &rule) noexcept override;
 
-    void AppendCSSTextForItems(CSSOMString &builder) const noexcept;
-    void AppendCSSTextWithReplacementURLsForItems(CSSOMString &builder,
+    void AppendCSSTextForItems(StringBuilder &builder) const noexcept;
+    void AppendCSSTextWithReplacementURLsForItems(StringBuilder &builder,
                                                   const SerialisationContext &context) const noexcept;
 
     KRYS_NODISCARD RefPtr<StyleRuleWithNesting>
@@ -66,9 +67,9 @@ namespace krys::boo::css
       return true;
     }
 
-    static void AppendCSSTextForItemsInternal(CSSOMString &builder, const CSSOMString &rules) noexcept;
-    void CssTextForRules(CSSOMString &rules) const noexcept;
-    void CssTextForRulesWithReplacementURLs(CSSOMString &rules,
+    static void AppendCSSTextForItemsInternal(StringBuilder &builder, const StringBuilder &rules) noexcept;
+    void CssTextForRules(StringBuilder &rules) const noexcept;
+    void CssTextForRulesWithReplacementURLs(StringBuilder &rules,
                                             const SerialisationContext &context) const noexcept;
   };
 }

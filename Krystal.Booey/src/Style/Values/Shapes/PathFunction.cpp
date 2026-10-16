@@ -12,6 +12,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathUtilities.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/TinyLRUCache.hpp"
 
 namespace krys::boo::style
@@ -118,7 +119,7 @@ namespace krys::boo::style
 
   // MARK: - Serialization
 
-  void Serialiser<Path>::operator()(css::CSSOMString &builder, const css::SerialisationContext &context,
+  void Serialiser<Path>::operator()(StringBuilder &builder, const css::SerialisationContext &context,
                                     const RenderStyle &style, const Path &value,
                                     PathConversion conversion) noexcept
   {

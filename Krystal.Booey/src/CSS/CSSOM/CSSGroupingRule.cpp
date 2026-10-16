@@ -6,6 +6,7 @@
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -125,26 +126,27 @@ namespace krys::boo::css
     return {};
   }
 
-  void CSSGroupingRule::AppendCSSTextForItemsInternal(CSSOMString &builder, const CSSOMString &rules) noexcept
+  void CSSGroupingRule::AppendCSSTextForItemsInternal(StringBuilder &builder,
+                                                      const StringBuilder &rules) noexcept
   {
-    builder.append(u8" {");
-    if (rules.empty())
+    builder.Append(u8" {");
+    if (rules.IsEmpty())
     {
-      builder.append(u8"\n}");
+      builder.Append(u8"\n}");
       return;
     }
 
-    builder.append(rules).append(u8"\n}");
+    builder.Append(rules, u8"\n}");
   }
 
-  void CSSGroupingRule::AppendCSSTextForItems(CSSOMString &builder) const noexcept
+  void CSSGroupingRule::AppendCSSTextForItems(StringBuilder &builder) const noexcept
   {
-    CSSOMString rules;
+    StringBuilder rules;
     CssTextForRules(rules);
     AppendCSSTextForItemsInternal(builder, rules);
   }
 
-  void CSSGroupingRule::CssTextForRules(CSSOMString &rules) const noexcept
+  void CSSGroupingRule::CssTextForRules(StringBuilder &rules) const noexcept
   {
     const auto &childRules = _groupRule->ChildRules();
     for (uint32 index = 0; index < childRules.size(); ++index)
@@ -152,27 +154,27 @@ namespace krys::boo::css
       auto ruleText = Item(index)->CssText();
       if (!ruleText.empty())
       {
-        rules.append(u8"\n  ").append(ruleText);
+        rules.Append(u8"\n  ", ruleText);
       }
     }
   }
 
   void CSSGroupingRule::AppendCSSTextWithReplacementURLsForItems(
-    CSSOMString &builder, const SerialisationContext &context) const noexcept
+    StringBuilder &builder, const SerialisationContext &context) const noexcept
   {
-    CSSOMString rules;
+    StringBuilder rules;
     CssTextForRulesWithReplacementURLs(rules, context);
     AppendCSSTextForItemsInternal(builder, rules);
   }
 
-  void CSSGroupingRule::CssTextForRulesWithReplacementURLs(CSSOMString &rules,
+  void CSSGroupingRule::CssTextForRulesWithReplacementURLs(StringBuilder &rules,
                                                            const SerialisationContext &context) const noexcept
   {
     const auto &childRules = _groupRule->ChildRules();
     for (uint32 index = 0; index < childRules.size(); index++)
     {
       auto *wrappedRule = Item(index);
-      rules.append(u8"\n  ").append(wrappedRule->CssText(context));
+      rules.Append(u8"\n  ", wrappedRule->CssText(context));
     }
   }
 

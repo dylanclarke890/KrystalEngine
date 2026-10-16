@@ -12,6 +12,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueCreation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -74,7 +75,7 @@ namespace krys::boo::style
 
   // MARK: - Serialization
 
-  void Serialiser<BackgroundSize>::operator()(css::CSSOMString &builder,
+  void Serialiser<BackgroundSize>::operator()(StringBuilder &builder,
                                               const css::SerialisationContext &context,
                                               const RenderStyle &style, const BackgroundSize &value) noexcept
   {

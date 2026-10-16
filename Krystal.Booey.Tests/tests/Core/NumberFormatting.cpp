@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Core/NumberFormatting.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/Core/MathExtras.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include <limits>
 #include <numbers>
 
@@ -11,9 +12,9 @@ namespace krys::boo::tests
     utf8_string FixedPrecision(double number, uint32 significantFigures = 6,
                                bool truncateTrailingZeros = true)
     {
-      utf8_string builder;
+      StringBuilder builder;
       FormatNumberFixedPrecision(builder, number, significantFigures, truncateTrailingZeros);
-      return builder;
+      return krys::move(builder).ToString();
     }
   }
 
@@ -39,7 +40,8 @@ namespace krys::boo::tests
     CHECK(FormatCSSNumber(-std::numeric_limits<double>::infinity()) == u8"-infinity");
     CHECK(FormatCSSNumber(std::numeric_limits<double>::quiet_NaN()) == u8"NaN");
 
-    utf8_string builder = u8"x: ";
+    StringBuilder builder;
+    builder.Append(u8"x: ");
     FormatCSSNumber(builder, 0.25);
     CHECK(builder == u8"x: 0.25");
   }

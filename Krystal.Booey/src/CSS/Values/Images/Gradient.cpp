@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/Images/Gradient.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -8,13 +9,13 @@ namespace krys::boo::css
   namespace
   {
     template <typename C, typename P>
-    void ColorStopSerialisationForCSS(CSSOMString &builder, const SerialisationContext &context,
+    void ColorStopSerialisationForCSS(StringBuilder &builder, const SerialisationContext &context,
                                       const GradientColorStop<C, P> &stop) noexcept
     {
       if (stop.Color && stop.Position)
       {
         Serialise(builder, context, *stop.Color);
-        builder.push_back(u8' ');
+        builder.Append(u8' ');
         Serialise(builder, context, *stop.Position);
       }
       else if (stop.Color)
@@ -28,21 +29,21 @@ namespace krys::boo::css
     }
   }
 
-  void Serialiser<GradientAngularColorStop>::operator()(CSSOMString &builder,
+  void Serialiser<GradientAngularColorStop>::operator()(StringBuilder &builder,
                                                         const SerialisationContext &context,
                                                         const GradientAngularColorStop &stop) noexcept
   {
     ColorStopSerialisationForCSS(builder, context, stop);
   }
 
-  void Serialiser<GradientLinearColorStop>::operator()(CSSOMString &builder,
+  void Serialiser<GradientLinearColorStop>::operator()(StringBuilder &builder,
                                                        const SerialisationContext &context,
                                                        const GradientLinearColorStop &stop) noexcept
   {
     ColorStopSerialisationForCSS(builder, context, stop);
   }
 
-  void Serialiser<GradientDeprecatedColorStop>::operator()(CSSOMString &builder,
+  void Serialiser<GradientDeprecatedColorStop>::operator()(StringBuilder &builder,
                                                            const SerialisationContext &context,
                                                            const GradientDeprecatedColorStop &stop) noexcept
   {
@@ -50,33 +51,33 @@ namespace krys::boo::css
     {
       if (!raw.Value)
       {
-        builder.append(u8"from(");
+        builder.Append(u8"from(");
         Serialise(builder, context, color);
-        builder.push_back(u8')');
+        builder.Append(u8')');
       }
       else if (raw.Value == 1)
       {
-        builder.append(u8"to(");
+        builder.Append(u8"to(");
         Serialise(builder, context, color);
-        builder.push_back(u8')');
+        builder.Append(u8')');
       }
       else
       {
-        builder.append(u8"color-stop(");
+        builder.Append(u8"color-stop(");
         Serialise(builder, context, raw);
-        builder.append(u8", ");
+        builder.Append(u8", ");
         Serialise(builder, context, color);
-        builder.push_back(u8')');
+        builder.Append(u8')');
       }
     };
 
     auto appendCalc = [&](const auto &color, const auto &calc)
     {
-      builder.append(u8"color-stop(");
+      builder.Append(u8"color-stop(");
       Serialise(builder, context, calc);
-      builder.append(u8", ");
+      builder.Append(u8", ");
       Serialise(builder, context, color);
-      builder.push_back(u8')');
+      builder.Append(u8')');
     };
 
     stop.Position.SwitchOn(
@@ -98,7 +99,7 @@ namespace krys::boo::css
 
   namespace
   {
-    bool AppendColorInterpolationMethod(CSSOMString &builder,
+    bool AppendColorInterpolationMethod(StringBuilder &builder,
                                         GradientColorInterpolationMethod colorInterpolationMethod,
                                         bool needsLeadingSpace) noexcept
     {
@@ -108,7 +109,7 @@ namespace krys::boo::css
         {
           if (colorInterpolationMethod.DefaultMethod != GradientColorInterpolationMethod::Default::OKLab)
           {
-            builder.append(needsLeadingSpace ? u8" in oklab" : u8"in oklab");
+            builder.Append(needsLeadingSpace ? u8" in oklab" : u8"in oklab");
             return true;
           }
           return false;
@@ -117,15 +118,15 @@ namespace krys::boo::css
         {
           if (colorInterpolationMethod.DefaultMethod != GradientColorInterpolationMethod::Default::SRGB)
           {
-            builder.append(needsLeadingSpace ? u8" in srgb" : u8"in srgb");
+            builder.Append(needsLeadingSpace ? u8" in srgb" : u8"in srgb");
             return true;
           }
           return false;
         },
         [&]<typename MethodColorSpace>(const MethodColorSpace &methodColorSpace)
         {
-          builder.append(needsLeadingSpace ? u8" in " : u8"in ");
-          builder.append(SerialisationForCSS(methodColorSpace.InterpolationColorSpace));
+          builder.Append(needsLeadingSpace ? u8" in " : u8"in ");
+          builder.Append(SerialisationForCSS(methodColorSpace.InterpolationColorSpace));
           if constexpr (hasHueInterpolationMethod<MethodColorSpace>)
           {
             SerialisationForCSS(builder, methodColorSpace.HueInterpolationMethod);
@@ -137,7 +138,7 @@ namespace krys::boo::css
 
   // MARK: - LinearGradient
 
-  void Serialiser<LinearGradient>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<LinearGradient>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                               const LinearGradient &gradient) noexcept
   {
     bool wroteSomething = false;
@@ -166,7 +167,7 @@ namespace krys::boo::css
       },
       [&](const Horizontal &horizontal)
       {
-        builder.append(u8"to ");
+        builder.Append(u8"to ");
         Serialise(builder, context, horizontal);
         wroteSomething = true;
       },
@@ -177,13 +178,13 @@ namespace krys::boo::css
           return;
         }
 
-        builder.append(u8"to ");
+        builder.Append(u8"to ");
         Serialise(builder, context, vertical);
         wroteSomething = true;
       },
       [&](const SpaceSeparatedTuple<Horizontal, Vertical> &pair)
       {
-        builder.append(u8"to ");
+        builder.Append(u8"to ");
         Serialise(builder, context, pair);
         wroteSomething = true;
       });
@@ -195,7 +196,7 @@ namespace krys::boo::css
 
     if (wroteSomething)
     {
-      builder.append(u8", ");
+      builder.Append(u8", ");
     }
 
     Serialise(builder, context, gradient.Stops);
@@ -203,39 +204,39 @@ namespace krys::boo::css
 
   // MARK: - PrefixedLinearGradient
 
-  void Serialiser<PrefixedLinearGradient>::operator()(CSSOMString &builder,
+  void Serialiser<PrefixedLinearGradient>::operator()(StringBuilder &builder,
                                                       const SerialisationContext &context,
                                                       const PrefixedLinearGradient &gradient) noexcept
   {
     Serialise(builder, context, gradient.GradientLine);
-    builder.append(u8", ");
+    builder.Append(u8", ");
     Serialise(builder, context, gradient.Stops);
   }
 
   // MARK: - DeprecatedLinearGradient
 
-  void Serialiser<DeprecatedLinearGradient>::operator()(CSSOMString &builder,
+  void Serialiser<DeprecatedLinearGradient>::operator()(StringBuilder &builder,
                                                         const SerialisationContext &context,
                                                         const DeprecatedLinearGradient &gradient) noexcept
   {
-    builder.append(u8"linear, ");
+    builder.Append(u8"linear, ");
 
     Serialise(builder, context, gradient.GradientLine);
 
     if (!gradient.Stops.isEmpty())
     {
-      builder.append(u8", ");
+      builder.Append(u8", ");
       Serialise(builder, context, gradient.Stops);
     }
   }
 
   // MARK: - RadialGradient
 
-  void Serialiser<RadialGradient::Ellipse>::operator()(CSSOMString &builder,
+  void Serialiser<RadialGradient::Ellipse>::operator()(StringBuilder &builder,
                                                        const SerialisationContext &context,
                                                        const RadialGradient::Ellipse &ellipse) noexcept
   {
-    auto lengthBefore = builder.size();
+    auto lengthBefore = builder.Length();
 
     krys::SwitchOn(
       ellipse.Size, [&](const RadialGradient::Ellipse::SizeType &size) { Serialise(builder, context, size); },
@@ -251,19 +252,19 @@ namespace krys::boo::css
     {
       if (!IsCenterPosition(*ellipse.Position))
       {
-        bool wroteSomething = builder.size() != lengthBefore;
+        bool wroteSomething = builder.Length() != lengthBefore;
         if (wroteSomething)
         {
-          builder.push_back(u8' ');
+          builder.Append(u8' ');
         }
 
-        builder.append(u8"at ");
+        builder.Append(u8"at ");
         Serialise(builder, context, *ellipse.Position);
       }
     }
   }
 
-  void Serialiser<RadialGradient::Circle>::operator()(CSSOMString &builder,
+  void Serialiser<RadialGradient::Circle>::operator()(StringBuilder &builder,
                                                       const SerialisationContext &context,
                                                       const RadialGradient::Circle &circle) noexcept
   {
@@ -273,12 +274,12 @@ namespace krys::boo::css
       {
         if (!std::holds_alternative<keywords::FarthestCorner>(extent))
         {
-          builder.append(u8"circle ");
+          builder.Append(u8"circle ");
           Serialise(builder, context, extent);
         }
         else
         {
-          builder.append(u8"circle");
+          builder.Append(u8"circle");
         }
       });
 
@@ -286,18 +287,18 @@ namespace krys::boo::css
     {
       if (!IsCenterPosition(*circle.Position))
       {
-        builder.append(u8" at ");
+        builder.Append(u8" at ");
         Serialise(builder, context, *circle.Position);
       }
     }
   }
 
-  void Serialiser<RadialGradient>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<RadialGradient>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                               const RadialGradient &gradient) noexcept
   {
-    auto lengthBefore = builder.size();
+    auto lengthBefore = builder.Length();
     Serialise(builder, context, gradient.GradientBox);
-    bool wroteSomething = builder.size() != lengthBefore;
+    bool wroteSomething = builder.Length() != lengthBefore;
 
     if (AppendColorInterpolationMethod(builder, gradient.ColorInterpolationMethod, wroteSomething))
     {
@@ -306,7 +307,7 @@ namespace krys::boo::css
 
     if (wroteSomething)
     {
-      builder.append(u8", ");
+      builder.Append(u8", ");
     }
 
     Serialise(builder, context, gradient.Stops);
@@ -315,7 +316,7 @@ namespace krys::boo::css
   // MARK: - PrefixedRadialGradient
 
   void Serialiser<PrefixedRadialGradient::Ellipse>::operator()(
-    CSSOMString &builder, const SerialisationContext &context,
+    StringBuilder &builder, const SerialisationContext &context,
     const PrefixedRadialGradient::Ellipse &ellipse) noexcept
   {
     if (ellipse.Position)
@@ -324,7 +325,7 @@ namespace krys::boo::css
     }
     else
     {
-      builder.append(u8"center");
+      builder.Append(u8"center");
     }
 
     if (ellipse.Size)
@@ -333,19 +334,19 @@ namespace krys::boo::css
         *ellipse.Size,
         [&](const PrefixedRadialGradient::Ellipse::SizeType &size)
         {
-          builder.append(u8", ");
+          builder.Append(u8", ");
           Serialise(builder, context, size);
         },
         [&](const PrefixedRadialGradient::Extent &extent)
         {
-          builder.append(u8", ellipse ");
+          builder.Append(u8", ellipse ");
           Serialise(builder, context, extent);
         });
     }
   }
 
   void Serialiser<PrefixedRadialGradient::Circle>::operator()(
-    CSSOMString &builder, const SerialisationContext &context,
+    StringBuilder &builder, const SerialisationContext &context,
     const PrefixedRadialGradient::Circle &circle) noexcept
   {
     if (circle.Position)
@@ -354,25 +355,25 @@ namespace krys::boo::css
     }
     else
     {
-      builder.append(u8"center");
+      builder.Append(u8"center");
     }
 
-    builder.append(u8", circle ");
+    builder.Append(u8", circle ");
     Serialise(builder, context,
               circle.Size ? *circle.Size : PrefixedRadialGradient::Extent {keywords::Cover {}});
   }
 
-  void Serialiser<PrefixedRadialGradient>::operator()(CSSOMString &builder,
+  void Serialiser<PrefixedRadialGradient>::operator()(StringBuilder &builder,
                                                       const SerialisationContext &context,
                                                       const PrefixedRadialGradient &gradient) noexcept
   {
-    auto lengthBefore = builder.size();
+    auto lengthBefore = builder.Length();
     Serialise(builder, context, gradient.GradientBox);
-    bool wroteSomething = builder.size() != lengthBefore;
+    bool wroteSomething = builder.Length() != lengthBefore;
 
     if (wroteSomething)
     {
-      builder.append(u8", ");
+      builder.Append(u8", ");
     }
 
     Serialise(builder, context, gradient.Stops);
@@ -381,29 +382,29 @@ namespace krys::boo::css
   // MARK: - DeprecatedRadialGradient
 
   void Serialiser<DeprecatedRadialGradient::GradientBoxType>::operator()(
-    CSSOMString &builder, const SerialisationContext &context,
+    StringBuilder &builder, const SerialisationContext &context,
     const DeprecatedRadialGradient::GradientBoxType &gradientBox) noexcept
   {
     Serialise(builder, context, gradientBox.First);
-    builder.append(u8", ");
+    builder.Append(u8", ");
     Serialise(builder, context, gradientBox.FirstRadius);
-    builder.append(u8", ");
+    builder.Append(u8", ");
     Serialise(builder, context, gradientBox.Second);
-    builder.append(u8", ");
+    builder.Append(u8", ");
     Serialise(builder, context, gradientBox.SecondRadius);
   }
 
-  void Serialiser<DeprecatedRadialGradient>::operator()(CSSOMString &builder,
+  void Serialiser<DeprecatedRadialGradient>::operator()(StringBuilder &builder,
                                                         const SerialisationContext &context,
                                                         const DeprecatedRadialGradient &gradient) noexcept
   {
-    builder.append(u8"radial, ");
+    builder.Append(u8"radial, ");
 
     Serialise(builder, context, gradient.GradientBox);
 
     if (!gradient.Stops.isEmpty())
     {
-      builder.append(u8", ");
+      builder.Append(u8", ");
       Serialise(builder, context, gradient.Stops);
     }
   }
@@ -411,7 +412,7 @@ namespace krys::boo::css
   // MARK: - ConicGradient
 
   void Serialiser<ConicGradient::GradientBoxType>::operator()(
-    CSSOMString &builder, const SerialisationContext &context,
+    StringBuilder &builder, const SerialisationContext &context,
     const ConicGradient::GradientBoxType &gradientBox) noexcept
   {
     bool wroteSomething = false;
@@ -424,14 +425,14 @@ namespace krys::boo::css
         {
           if (angleRaw.Value)
           {
-            builder.append(u8"from ");
+            builder.Append(u8"from ");
             Serialise(builder, context, angleRaw);
             wroteSomething = true;
           }
         },
         [&](const Angle<>::Calc &angleCalc)
         {
-          builder.append(u8"from ");
+          builder.Append(u8"from ");
           Serialise(builder, context, angleCalc);
           wroteSomething = true;
         });
@@ -441,19 +442,19 @@ namespace krys::boo::css
     {
       if (wroteSomething)
       {
-        builder.push_back(u8' ');
+        builder.Append(u8' ');
       }
-      builder.append(u8"at ");
+      builder.Append(u8"at ");
       Serialise(builder, context, *gradientBox.Position);
     }
   }
 
-  void Serialiser<ConicGradient>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<ConicGradient>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                              const ConicGradient &gradient) noexcept
   {
-    auto lengthBefore = builder.size();
+    auto lengthBefore = builder.Length();
     Serialise(builder, context, gradient.GradientBox);
-    bool wroteSomething = builder.size() != lengthBefore;
+    bool wroteSomething = builder.Length() != lengthBefore;
 
     if (AppendColorInterpolationMethod(builder, gradient.ColorInterpolationMethod, wroteSomething))
     {
@@ -462,7 +463,7 @@ namespace krys::boo::css
 
     if (wroteSomething)
     {
-      builder.append(u8", ");
+      builder.Append(u8", ");
     }
 
     Serialise(builder, context, gradient.Stops);

@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/CSSOM/CSSNamespaceRule.hpp"
 #include "Krystal.Booey/CSS/Markup.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -31,15 +32,15 @@ namespace krys::boo::css
     auto prefix = Prefix();
     auto prefixIsEmpty = prefix == CSSOMStringAtom::Null() || prefix.View().empty();
 
-    CSSOMString result;
-    result.append(u8"@namespace ");
+    StringBuilder result;
+    result.Append(u8"@namespace ");
     if (!prefixIsEmpty)
     {
       SerialiseIdentifier(CSSOMString(prefix.View()), result);
     }
-    result.append(prefixIsEmpty ? u8"" : u8" ").append(u8"url(");
-    result.append(SerialiseString(CSSOMString(NamespaceURI().View()))).append(u8");");
-    return result;
+    result.Append(prefixIsEmpty ? u8"" : u8" ", u8"url(");
+    result.Append(SerialiseString(CSSOMString(NamespaceURI().View())), u8");");
+    return krys::move(result).ToString();
   }
 
   void CSSNamespaceRule::Reattach(Rule &) noexcept

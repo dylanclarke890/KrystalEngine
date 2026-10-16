@@ -6,6 +6,7 @@
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -81,9 +82,9 @@ namespace krys::boo::css
 
   CSSOMString MediaList::MediaText() const noexcept
   {
-    CSSOMString builder;
+    StringBuilder builder;
     mq::Serialise(builder, MediaQueries());
-    return builder;
+    return krys::move(builder).ToString();
   }
 
   void MediaList::SetMediaText(const CSSOMString &value) noexcept
@@ -106,9 +107,9 @@ namespace krys::boo::css
     const auto &queries = MediaQueries();
     if (index < queries.size())
     {
-      CSSOMString builder;
+      StringBuilder builder;
       mq::Serialise(builder, queries[index]);
-      return builder;
+      return krys::move(builder).ToString();
     }
     return {};
   }

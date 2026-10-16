@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Booey/Graphics/FontFeatureValues.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include <charconv>
 
 namespace krys::boo::css
@@ -28,7 +29,7 @@ namespace krys::boo::css
 
   CSSOMStringAtom CSSFontFeatureValuesRule::FontFamily() const noexcept
   {
-    CSSOMString builder;
+    StringBuilder builder;
     bool first = true;
     for (const auto &family : _fontFeatureValuesRule->FontFamilies())
     {
@@ -38,18 +39,18 @@ namespace krys::boo::css
       }
       else
       {
-        builder.append(u8", ");
+        builder.Append(u8", ");
       }
 
-      builder.append(family.View());
+      builder.Append(family.View());
     }
     return CSSOMStringAtom(krys::move(builder));
   }
 
   CSSOMString CSSFontFeatureValuesRule::CssText() const noexcept
   {
-    CSSOMString builder;
-    builder.append(u8"@font-feature-values ");
+    StringBuilder builder;
+    builder.Append(u8"@font-feature-values ");
 
     auto joinFontFamiliesWithSeparator = [&builder](const auto &elements, CSSOMStringView separator)
     {
@@ -58,36 +59,32 @@ namespace krys::boo::css
       {
         if (!first)
         {
-          builder.append(separator);
+          builder.Append(separator);
         }
-        builder.append(SerialiseFontFamily(CSSOMString(element.View())));
+        builder.Append(SerialiseFontFamily(CSSOMString(element.View())));
         first = false;
       }
     };
     joinFontFamiliesWithSeparator(_fontFeatureValuesRule->FontFamilies(), u8", ");
-    builder.append(u8" { ");
+    builder.Append(u8" { ");
     auto value = _fontFeatureValuesRule->Value();
 
     auto addVariant = [&builder](CSSOMStringView variantName, const auto &tags)
     {
       if (!tags.empty())
       {
-        builder.append(u8"@").append(variantName).append(u8" { ");
+        builder.Append(u8"@", variantName, u8" { ");
         for (const auto &[key, integers] : tags)
         {
           SerialiseIdentifier(key, builder);
-          builder.push_back(u8':');
+          builder.Append(u8':');
           for (auto integer : integers)
           {
-            char buffer[16];
-            auto result = std::to_chars(buffer, buffer + sizeof(buffer), integer);
-            builder.push_back(u8' ');
-            builder.append(reinterpret_cast<const char8 *>(buffer),
-                           reinterpret_cast<const char8 *>(result.ptr));
+            builder.Append(u8' ', integer);
           }
-          builder.append(u8"; ");
+          builder.Append(u8"; ");
         }
-        builder.append(u8"} ");
+        builder.Append(u8"} ");
       }
     };
 
@@ -100,8 +97,8 @@ namespace krys::boo::css
     addVariant(u8"character-variant", value->CharacterVariant());
     addVariant(u8"styleset", value->Styleset());
 
-    builder.push_back(u8'}');
-    return builder;
+    builder.Append(u8'}');
+    return krys::move(builder).ToString();
   }
 
   void CSSFontFeatureValuesRule::Reattach(Rule &rule) noexcept

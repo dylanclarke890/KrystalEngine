@@ -2,18 +2,19 @@
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
   // MARK: - Serialisation
 
-  void Serialiser<CSSURL>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<CSSURL>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                       const CSSURL &value) noexcept
   {
     // https://drafts.csswg.org/cssom/#serialize-a-url
 
-    builder.append(ToLower(ValueId::Url));
-    builder.push_back(u8'(');
+    builder.Append(ToLower(ValueId::Url));
+    builder.Append(u8'(');
 
     // FIXME: Upstream can serialise the resolved URL instead (SerialisationContext's replacement URLs and
     // shouldUseResolvedURLInCSSText, used for web archives); the specified URL is upstream's default.
@@ -21,21 +22,21 @@ namespace krys::boo::css
 
     if (value.Modifiers.CrossOrigin)
     {
-      builder.push_back(u8' ');
+      builder.Append(u8' ');
       Serialise(builder, context, *value.Modifiers.CrossOrigin);
     }
     if (value.Modifiers.Integrity)
     {
-      builder.push_back(u8' ');
+      builder.Append(u8' ');
       Serialise(builder, context, *value.Modifiers.Integrity);
     }
     if (value.Modifiers.ReferrerPolicy)
     {
-      builder.push_back(u8' ');
+      builder.Append(u8' ');
       Serialise(builder, context, *value.Modifiers.ReferrerPolicy);
     }
 
-    builder.push_back(u8')');
+    builder.Append(u8')');
   }
 
   // MARK: Operations

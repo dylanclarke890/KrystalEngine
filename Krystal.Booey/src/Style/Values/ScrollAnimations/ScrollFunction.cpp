@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueCreation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordSerialisation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -39,7 +40,7 @@ namespace krys::boo::style
 
   // MARK: - Serialization
 
-  void Serialiser<ScrollFunctionParameters>::operator()(css::CSSOMString &builder,
+  void Serialiser<ScrollFunctionParameters>::operator()(StringBuilder &builder,
                                                         const css::SerialisationContext &context,
                                                         const RenderStyle &style,
                                                         const ScrollFunctionParameters &value) noexcept
@@ -58,7 +59,7 @@ namespace krys::boo::style
     {
       if (needsSpace)
       {
-        builder.push_back(u8' ');
+        builder.Append(u8' ');
       }
       Serialise(builder, context, style, value.Axis);
     }

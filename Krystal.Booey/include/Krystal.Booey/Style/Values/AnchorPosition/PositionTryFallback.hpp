@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Style/ScopedName.hpp"
 #include "Krystal.Booey/Style/Values/AnchorPosition/PositionTryFallbackTactic.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Visitor.hpp"
@@ -95,7 +96,7 @@ namespace krys::boo::style
   template <>
   struct Serialiser<PositionTryFallback::PositionArea>
   {
-    void operator()(css::CSSOMString &, const css::SerialisationContext &, const RenderStyle &,
+    void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &,
                     const PositionTryFallback::PositionArea &) noexcept;
   };
 }

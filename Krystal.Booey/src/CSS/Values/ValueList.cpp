@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include <limits>
 
 namespace krys::boo::css
@@ -210,7 +211,7 @@ namespace krys::boo::css
     return result;
   }
 
-  void ValueContainingList::SerialiseItems(CSSOMString &builder,
+  void ValueContainingList::SerialiseItems(StringBuilder &builder,
                                            const SerialisationContext &context) const noexcept
   {
     bool first = true;
@@ -218,18 +219,18 @@ namespace krys::boo::css
     {
       if (!first)
       {
-        builder.append(SeparatorCSSText());
+        builder.Append(SeparatorCSSText());
       }
       first = false;
-      builder.append(value.CssText(context));
+      builder.Append(value.CssText(context));
     }
   }
 
   CSSOMString ValueContainingList::SerialiseItems(const SerialisationContext &context) const noexcept
   {
-    CSSOMString result;
+    StringBuilder result;
     SerialiseItems(result, context);
-    return result;
+    return krys::move(result).ToString();
   }
 
   CSSOMString ValueList::CustomCSSText(const SerialisationContext &context) const noexcept

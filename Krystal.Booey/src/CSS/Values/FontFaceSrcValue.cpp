@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Values/FontFaceSrcValue.hpp"
 #include "Krystal.Booey/CSS/Markup.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -16,10 +17,11 @@ namespace krys::boo::css
 
   CSSOMString FontFaceSrcLocalValue::CustomCSSText(const SerialisationContext &) const noexcept
   {
-    CSSOMString result {u8"local("};
+    StringBuilder result;
+    result.Append(u8"local(");
     SerialiseString(CSSOMString(_fontFaceName.View()), result);
-    result.push_back(u8')');
-    return result;
+    result.Append(u8')');
+    return krys::move(result).ToString();
   }
 
   bool FontFaceSrcLocalValue::Equals(const FontFaceSrcLocalValue &other) const noexcept
@@ -55,31 +57,31 @@ namespace krys::boo::css
 
   CSSOMString FontFaceSrcResourceValue::CustomCSSText(const SerialisationContext &context) const noexcept
   {
-    CSSOMString builder;
+    StringBuilder builder;
 
     Serialise(builder, context, _location);
 
     if (!_format.empty())
     {
-      builder.append(u8" format(");
+      builder.Append(u8" format(");
       SerialiseString(_format, builder);
-      builder.push_back(u8')');
+      builder.Append(u8')');
     }
     if (!_technologies.empty())
     {
-      builder.append(u8" tech(");
+      builder.Append(u8" tech(");
       for (size_t i = 0uz; i < _technologies.size(); ++i)
       {
         if (i)
         {
-          builder.append(u8", ");
+          builder.Append(u8", ");
         }
-        builder.append(CssTextFromFontTech(_technologies[i]));
+        builder.Append(CssTextFromFontTech(_technologies[i]));
       }
-      builder.push_back(u8')');
+      builder.Append(u8')');
     }
 
-    return builder;
+    return krys::move(builder).ToString();
   }
 
   bool FontFaceSrcResourceValue::Equals(const FontFaceSrcResourceValue &other) const noexcept

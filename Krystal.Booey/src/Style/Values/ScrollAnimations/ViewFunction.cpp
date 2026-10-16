@@ -11,6 +11,7 @@
 
 #include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -77,7 +78,7 @@ namespace krys::boo::style
 
   // MARK: - Serialization
 
-  void Serialiser<ViewFunctionParameters>::operator()(css::CSSOMString &builder,
+  void Serialiser<ViewFunctionParameters>::operator()(StringBuilder &builder,
                                                       const css::SerialisationContext &context,
                                                       const RenderStyle &style,
                                                       const ViewFunctionParameters &value) noexcept
@@ -98,7 +99,7 @@ namespace krys::boo::style
 
       if (needsSpace)
       {
-        builder.push_back(u8' ');
+        builder.Append(u8' ');
       }
       Serialise(builder, context, style, value.Insets.Start());
     }
@@ -106,11 +107,11 @@ namespace krys::boo::style
     {
       if (needsSpace)
       {
-        builder.push_back(u8' ');
+        builder.Append(u8' ');
       }
 
       Serialise(builder, context, style, value.Insets.Start());
-      builder.push_back(u8' ');
+      builder.Append(u8' ');
       Serialise(builder, context, style, value.Insets.End());
     }
   }

@@ -1,10 +1,11 @@
 ﻿#include "Krystal.Booey/CSS/Parser/Token.hpp"
 #include "Krystal.Booey/CSS/Markup.hpp"
+#include "Krystal.Core/Text/HexNumber.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include <algorithm>
 #include <charconv>
 #include <cmath>
-#include <format>
 #include <initializer_list>
 
 namespace krys::boo::css
@@ -29,22 +30,6 @@ namespace krys::boo::css
     constexpr char8 WhitespaceForCustomProperty(char8 c) noexcept
     {
       return c == u8'\n' ? u8'\n' : u8' ';
-    }
-
-    void AppendASCII(std::string_view ascii, CSSOMString &builder) noexcept
-    {
-      builder.append(ascii.begin(), ascii.end());
-    }
-
-    /// @brief Appends the shortest round-trip representation, in ECMAScript style: fixed notation below 1e21,
-    /// scientific above.
-    void AppendNumber(double value, CSSOMString &builder) noexcept
-    {
-      Array<char, 64uz> buffer {};
-      auto format = std::abs(value) < 1e21 ? std::chars_format::fixed : std::chars_format::scientific;
-      auto result = std::to_chars(buffer.data(), buffer.data() + buffer.size(), value, format);
-      krys_debug_assert(result.ec == std::errc {});
-      AppendASCII(std::string_view(buffer.data(), result.ptr), builder);
     }
   }
 
@@ -87,7 +72,7 @@ namespace krys::boo::css
     }
   }
 
-  void Token::Serialise(CSSOMString &builder, const Token *nextToken,
+  void Token::Serialise(StringBuilder &builder, const Token *nextToken,
                         TokenSerialisationMode mode) const noexcept
   {
     // This is currently only used for @supports CSSOM. To keep our implementation simple we handle some of
@@ -103,14 +88,14 @@ namespace krys::boo::css
       TokenType nextType = nextToken->Type();
       if (tokensNeedingComment.Buffer[static_cast<size_t>(nextType)])
       {
-        AppendASCII("/**/", builder);
+        builder.Append("/**/");
         return;
       }
 
       if (nextType == TokenType::Delim
           && ((static_cast<char32>(delimitersNeedingComment) == nextToken->Delimiter()) || ... || false))
       {
-        AppendASCII("/**/", builder);
+        builder.Append("/**/");
         return;
       }
     };
@@ -126,10 +111,10 @@ namespace krys::boo::css
         break;
       case TokenType::Function:
         SerialiseIdentifier(CSSOMString(IdentCodePoints()), builder);
-        builder.push_back(u8'(');
+        builder.Append(u8'(');
         break;
       case TokenType::AtKeyword:
-        builder.push_back(u8'@');
+        builder.Append(u8'@');
         SerialiseIdentifier(CSSOMString(IdentCodePoints()), builder);
         appendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl,
                                TokenType::Number, TokenType::Percentage, TokenType::Dimension,
@@ -137,7 +122,7 @@ namespace krys::boo::css
                               '-');
         break;
       case TokenType::Hash:
-        builder.push_back(u8'#');
+        builder.Append(u8'#');
         SerialiseIdentifier(CSSOMString(IdentCodePoints()), builder,
                             _hashType == HashTokenType::Unrestricted);
         appendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl,
@@ -146,50 +131,50 @@ namespace krys::boo::css
                               '-');
         break;
       case TokenType::Url:
-        AppendASCII("url(", builder);
+        builder.Append("url(");
         SerialiseIdentifier(CSSOMString(IdentCodePoints()), builder);
-        builder.push_back(u8')');
+        builder.Append(u8')');
         break;
       case TokenType::Delim:
         switch (_delimiter)
         {
-          case U'\\': AppendASCII("\\\n", builder); break;
+          case U'\\': builder.Append("\\\n"); break;
           case U'#':
           case U'-':
-            builder.append(IdentCodePoints());
+            builder.Append(IdentCodePoints());
             appendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl,
                                    TokenType::Number, TokenType::Percentage, TokenType::Dimension},
                                   '-');
             break;
           case U'@':
-            builder.push_back(u8'@');
+            builder.Append(u8'@');
             appendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl},
                                   '-');
             break;
           case U'.':
           case U'+':
-            builder.append(IdentCodePoints());
+            builder.Append(IdentCodePoints());
             appendCommentIfNeeded({TokenType::Number, TokenType::Percentage, TokenType::Dimension});
             break;
           case U'/':
-            builder.push_back(u8'/');
+            builder.Append(u8'/');
             appendCommentIfNeeded({}, '*');
             break;
-          default: builder.append(IdentCodePoints()); break;
+          default: builder.Append(IdentCodePoints()); break;
         }
         break;
       case TokenType::Number:
         if (mode == TokenSerialisationMode::CustomProperty)
         {
-          builder.append(OriginalText());
+          builder.Append(OriginalText());
         }
         else
         {
           if (_numericSignChar == NumericSignChar::Plus)
           {
-            builder.push_back(u8'+');
+            builder.Append(u8'+');
           }
-          AppendNumber(_numericValue, builder);
+          builder.Append(_numericValue);
         }
         appendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl,
                                TokenType::Number, TokenType::Percentage, TokenType::Dimension},
@@ -198,22 +183,22 @@ namespace krys::boo::css
       case TokenType::Percentage:
         if (mode == TokenSerialisationMode::CustomProperty)
         {
-          builder.append(OriginalText());
+          builder.Append(OriginalText());
         }
         else
         {
-          AppendNumber(_numericValue, builder);
+          builder.Append(_numericValue);
         }
-        builder.push_back(u8'%');
+        builder.Append(u8'%');
         break;
       case TokenType::Dimension:
         if (mode == TokenSerialisationMode::CustomProperty)
         {
-          builder.append(OriginalText());
+          builder.Append(OriginalText());
         }
         else
         {
-          AppendNumber(_numericValue, builder);
+          builder.Append(_numericValue);
           SerialiseIdentifier(CSSOMString(Unit()), builder);
         }
         appendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl,
@@ -223,30 +208,30 @@ namespace krys::boo::css
         break;
       case TokenType::UnicodeRange:
       {
-        auto range = _unicodeRangeStart == _unicodeRangeEnd
-                       ? std::format("U+{:X}", static_cast<uint32>(_unicodeRangeStart))
-                       : std::format("U+{:X}-{:X}", static_cast<uint32>(_unicodeRangeStart),
-                                     static_cast<uint32>(_unicodeRangeEnd));
-        AppendASCII(range, builder);
+        builder.Append(u8"U+", Hex(static_cast<uint32>(_unicodeRangeStart)));
+        if (_unicodeRangeStart != _unicodeRangeEnd)
+        {
+          builder.Append(u8'-', Hex(static_cast<uint32>(_unicodeRangeEnd)));
+        }
         break;
       }
       case TokenType::String:    SerialiseString(CSSOMString(IdentCodePoints()), builder); break;
 
-      case TokenType::CDO:       AppendASCII("<!--", builder); break;
-      case TokenType::CDC:       AppendASCII("-->", builder); break;
-      case TokenType::BadString: AppendASCII("'\n", builder); break;
-      case TokenType::BadUrl:    AppendASCII("url(()", builder); break;
+      case TokenType::CDO:       builder.Append("<!--"); break;
+      case TokenType::CDC:       builder.Append("-->"); break;
+      case TokenType::BadString: builder.Append("'\n"); break;
+      case TokenType::BadUrl:    builder.Append("url(()"); break;
       case TokenType::Whitespace:
         if (OriginalText().empty())
         {
           // Created without its text; serialise as a single space.
-          builder.push_back(u8' ');
+          builder.Append(u8' ');
         }
         else if (mode == TokenSerialisationMode::CustomProperty)
         {
           for (auto c : OriginalText())
           {
-            builder.push_back(WhitespaceForCustomProperty(c));
+            builder.Append(WhitespaceForCustomProperty(c));
           }
         }
         else
@@ -258,26 +243,26 @@ namespace krys::boo::css
           {
             if (c == u8'\n')
             {
-              builder.push_back(u8' ');
+              builder.Append(u8' ');
               inRun = false;
             }
             else if (!inRun)
             {
-              builder.push_back(u8' ');
+              builder.Append(u8' ');
               inRun = true;
             }
           }
         }
         break;
-      case TokenType::Colon:         builder.push_back(u8':'); break;
-      case TokenType::Semicolon:     builder.push_back(u8';'); break;
-      case TokenType::Comma:         builder.push_back(u8','); break;
-      case TokenType::OpenParen:     builder.push_back(u8'('); break;
-      case TokenType::CloseParen:    builder.push_back(u8')'); break;
-      case TokenType::OpenSquare:    builder.push_back(u8'['); break;
-      case TokenType::CloseSquare:   builder.push_back(u8']'); break;
-      case TokenType::OpenCurly:     builder.push_back(u8'{'); break;
-      case TokenType::CloseCurly:    builder.push_back(u8'}'); break;
+      case TokenType::Colon:         builder.Append(u8':'); break;
+      case TokenType::Semicolon:     builder.Append(u8';'); break;
+      case TokenType::Comma:         builder.Append(u8','); break;
+      case TokenType::OpenParen:     builder.Append(u8'('); break;
+      case TokenType::CloseParen:    builder.Append(u8')'); break;
+      case TokenType::OpenSquare:    builder.Append(u8'['); break;
+      case TokenType::CloseSquare:   builder.Append(u8']'); break;
+      case TokenType::OpenCurly:     builder.Append(u8'{'); break;
+      case TokenType::CloseCurly:    builder.Append(u8'}'); break;
 
       case TokenType::Uninitialized:
       case TokenType::EndOfFile:     krys_unreachable();

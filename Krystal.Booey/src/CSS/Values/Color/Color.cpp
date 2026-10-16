@@ -8,6 +8,7 @@
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesValueVisitation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -329,7 +330,7 @@ namespace krys::boo::css
                           [&](const auto &color) { return css::ContainsColorSchemeDependentColor(color); });
   }
 
-  void Serialiser<Color>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<Color>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                      const Color &value) noexcept
   {
     krys::SwitchOn(value, [&](const auto &color) { Serialise(builder, context, color); });

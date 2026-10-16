@@ -1,45 +1,46 @@
 ﻿#include "Krystal.Booey/CSS/Values/Shapes/ShapeFunction.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
   namespace
   {
-    void AppendKeyword(CSSOMString &builder, ValueId keyword) noexcept
+    void AppendKeyword(StringBuilder &builder, ValueId keyword) noexcept
     {
-      builder.append(ToLower(keyword));
+      builder.Append(ToLower(keyword));
     }
 
     // Writes ` <keyword> `.
-    void AppendSpacedKeyword(CSSOMString &builder, ValueId keyword) noexcept
+    void AppendSpacedKeyword(StringBuilder &builder, ValueId keyword) noexcept
     {
-      builder.append(u8" ");
+      builder.Append(u8" ");
       AppendKeyword(builder, keyword);
-      builder.append(u8" ");
+      builder.Append(u8" ");
     }
 
     // Writes `<affinity> <offset>`, shared by the `to`/`by` halves of every command.
     template <typename T>
-    void SerialiseAffinityAndOffset(CSSOMString &builder, const SerialisationContext &context,
+    void SerialiseAffinityAndOffset(StringBuilder &builder, const SerialisationContext &context,
                                     const T &value) noexcept
     {
       AppendKeyword(builder, value.Affinity.Value);
-      builder.append(u8" ");
+      builder.Append(u8" ");
       Serialise(builder, context, value.Offset);
     }
 
     // Writes `<name> <to-by>`, shared by every command.
     template <typename T>
-    void SerialiseNameAndToBy(CSSOMString &builder, const SerialisationContext &context,
+    void SerialiseNameAndToBy(StringBuilder &builder, const SerialisationContext &context,
                               const T &value) noexcept
     {
       AppendKeyword(builder, value.Name);
-      builder.append(u8" ");
+      builder.Append(u8" ");
       Serialise(builder, context, value.ToBy);
     }
 
     template <typename T>
-    void SerialiseControlPoint(CSSOMString &builder, const SerialisationContext &context,
+    void SerialiseControlPoint(StringBuilder &builder, const SerialisationContext &context,
                                const T &value) noexcept
     {
       Serialise(builder, context, value.Offset);
@@ -52,7 +53,7 @@ namespace krys::boo::css
     }
 
     template <typename T>
-    void SerialiseCurveToBy(CSSOMString &builder, const SerialisationContext &context,
+    void SerialiseCurveToBy(StringBuilder &builder, const SerialisationContext &context,
                             const T &value) noexcept
     {
       SerialiseAffinityAndOffset(builder, context, value);
@@ -61,13 +62,13 @@ namespace krys::boo::css
       Serialise(builder, context, value.ControlPoint1);
       if (value.ControlPoint2)
       {
-        builder.append(u8" / ");
+        builder.Append(u8" / ");
         Serialise(builder, context, *value.ControlPoint2);
       }
     }
 
     template <typename T>
-    void SerialiseSmoothToBy(CSSOMString &builder, const SerialisationContext &context,
+    void SerialiseSmoothToBy(StringBuilder &builder, const SerialisationContext &context,
                              const T &value) noexcept
     {
       SerialiseAffinityAndOffset(builder, context, value);
@@ -80,7 +81,7 @@ namespace krys::boo::css
     }
   }
 
-  void Serialiser<ToPosition>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<ToPosition>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                           const ToPosition &value) noexcept
   {
     // <to-position> = to <position>
@@ -88,7 +89,7 @@ namespace krys::boo::css
     SerialiseAffinityAndOffset(builder, context, value);
   }
 
-  void Serialiser<ByCoordinatePair>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<ByCoordinatePair>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                                 const ByCoordinatePair &value) noexcept
   {
     // <by-coordinate-pair> = by <coordinate-pair>
@@ -96,7 +97,8 @@ namespace krys::boo::css
     SerialiseAffinityAndOffset(builder, context, value);
   }
 
-  void Serialiser<RelativeControlPoint>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<RelativeControlPoint>::operator()(StringBuilder &builder,
+                                                    const SerialisationContext &context,
                                                     const RelativeControlPoint &value) noexcept
   {
     // <relative-control-point> = [<coordinate-pair> [from [start | end | origin]]?]
@@ -105,7 +107,8 @@ namespace krys::boo::css
     SerialiseControlPoint(builder, context, value);
   }
 
-  void Serialiser<AbsoluteControlPoint>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<AbsoluteControlPoint>::operator()(StringBuilder &builder,
+                                                    const SerialisationContext &context,
                                                     const AbsoluteControlPoint &value) noexcept
   {
     // <to-control-point> = [<position> | <relative-control-point>]
@@ -116,7 +119,7 @@ namespace krys::boo::css
     SerialiseControlPoint(builder, context, value);
   }
 
-  void Serialiser<MoveCommand>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<MoveCommand>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                            const MoveCommand &value) noexcept
   {
     // <move-command> = move [to <position>] | [by <coordinate-pair>]
@@ -126,7 +129,7 @@ namespace krys::boo::css
     SerialiseNameAndToBy(builder, context, value);
   }
 
-  void Serialiser<LineCommand>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<LineCommand>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                            const LineCommand &value) noexcept
   {
     // <line-command> = line [to <position>] | [by <coordinate-pair>]
@@ -136,19 +139,19 @@ namespace krys::boo::css
     SerialiseNameAndToBy(builder, context, value);
   }
 
-  void Serialiser<HLineCommand::To>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<HLineCommand::To>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                                 const HLineCommand::To &value) noexcept
   {
     SerialiseAffinityAndOffset(builder, context, value);
   }
 
-  void Serialiser<HLineCommand::By>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<HLineCommand::By>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                                 const HLineCommand::By &value) noexcept
   {
     SerialiseAffinityAndOffset(builder, context, value);
   }
 
-  void Serialiser<HLineCommand>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<HLineCommand>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                             const HLineCommand &value) noexcept
   {
     // <horizontal-line-command> = hline [ to [ <length-percentage> | left | center | right
@@ -160,19 +163,19 @@ namespace krys::boo::css
     SerialiseNameAndToBy(builder, context, value);
   }
 
-  void Serialiser<VLineCommand::To>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<VLineCommand::To>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                                 const VLineCommand::To &value) noexcept
   {
     SerialiseAffinityAndOffset(builder, context, value);
   }
 
-  void Serialiser<VLineCommand::By>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<VLineCommand::By>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                                 const VLineCommand::By &value) noexcept
   {
     SerialiseAffinityAndOffset(builder, context, value);
   }
 
-  void Serialiser<VLineCommand>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<VLineCommand>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                             const VLineCommand &value) noexcept
   {
     // <vertical-line-command> = vline [ to [ <length-percentage> | top | center | bottom | y-start | y-end ]
@@ -183,19 +186,19 @@ namespace krys::boo::css
     SerialiseNameAndToBy(builder, context, value);
   }
 
-  void Serialiser<CurveCommand::To>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<CurveCommand::To>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                                 const CurveCommand::To &value) noexcept
   {
     SerialiseCurveToBy(builder, context, value);
   }
 
-  void Serialiser<CurveCommand::By>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<CurveCommand::By>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                                 const CurveCommand::By &value) noexcept
   {
     SerialiseCurveToBy(builder, context, value);
   }
 
-  void Serialiser<CurveCommand>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<CurveCommand>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                             const CurveCommand &value) noexcept
   {
     // <curve-command> = curve [to <position> with <to-control-point> [/ <to-control-point>]?]
@@ -207,19 +210,19 @@ namespace krys::boo::css
     SerialiseNameAndToBy(builder, context, value);
   }
 
-  void Serialiser<SmoothCommand::To>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<SmoothCommand::To>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                                  const SmoothCommand::To &value) noexcept
   {
     SerialiseSmoothToBy(builder, context, value);
   }
 
-  void Serialiser<SmoothCommand::By>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<SmoothCommand::By>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                                  const SmoothCommand::By &value) noexcept
   {
     SerialiseSmoothToBy(builder, context, value);
   }
 
-  void Serialiser<SmoothCommand>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<SmoothCommand>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                              const SmoothCommand &value) noexcept
   {
     // <smooth-command> = smooth [to <position> [with <to-control-point>]?]
@@ -230,7 +233,7 @@ namespace krys::boo::css
     SerialiseNameAndToBy(builder, context, value);
   }
 
-  void Serialiser<ArcCommand>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<ArcCommand>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                           const ArcCommand &value) noexcept
   {
     // <arc-command> = arc [to <position>] | [by <coordinate-pair>] of <length-percentage>{1,2}
@@ -252,13 +255,13 @@ namespace krys::boo::css
 
     if (!std::holds_alternative<keywords::Ccw>(value.ArcSweep))
     {
-      builder.append(u8" ");
+      builder.Append(u8" ");
       Serialise(builder, context, value.ArcSweep);
     }
 
     if (!std::holds_alternative<keywords::Small>(value.ArcSize))
     {
-      builder.append(u8" ");
+      builder.Append(u8" ");
       Serialise(builder, context, value.ArcSize);
     }
 
@@ -269,7 +272,7 @@ namespace krys::boo::css
     }
   }
 
-  void Serialiser<Shape>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<Shape>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                      const Shape &value) noexcept
   {
     // shape() = shape( <'fill-rule'>? from <coordinate-pair>, <shape-command>#)
@@ -277,13 +280,13 @@ namespace krys::boo::css
     if (value.FillRule && !std::holds_alternative<keywords::Nonzero>(*value.FillRule))
     {
       Serialise(builder, context, *value.FillRule);
-      builder.append(u8" ");
+      builder.Append(u8" ");
     }
 
     AppendKeyword(builder, ValueId::From);
-    builder.append(u8" ");
+    builder.Append(u8" ");
     Serialise(builder, context, value.StartingPoint);
-    builder.append(u8", ");
+    builder.Append(u8", ");
     Serialise(builder, context, value.Commands);
   }
 }

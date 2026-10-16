@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/Borders/BorderRadius.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 
 namespace krys::boo::css
@@ -50,7 +51,7 @@ namespace krys::boo::css
     return HasDefaultValueForAxis(borderRadius.Horizontal) && HasDefaultValueForAxis(borderRadius.Vertical);
   }
 
-  void Serialiser<BorderRadius>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<BorderRadius>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                             const BorderRadius &value) noexcept
   {
     // <'border-radius'> = <length-percentage [0,∞]>{1,4} [ / <length-percentage [0,∞]>{1,4} ]?
@@ -64,7 +65,7 @@ namespace krys::boo::css
 
       if (horizontal != vertical)
       {
-        builder.append(u8" / ");
+        builder.Append(u8" / ");
         Serialise(builder, context, vertical);
       }
     }

@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/Graphics/Animation/TimingFunction.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo
 {
@@ -48,7 +49,7 @@ namespace krys::boo
     template <>
     struct Serialiser<EasingFunction>
     {
-      void operator()(css::CSSOMString &, const css::SerialisationContext &, const RenderStyle &,
+      void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &,
                       const EasingFunction &) noexcept;
     };
   }

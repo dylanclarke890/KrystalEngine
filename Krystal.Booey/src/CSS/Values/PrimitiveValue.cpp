@@ -10,6 +10,7 @@
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
 #include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include <algorithm>
@@ -704,15 +705,9 @@ namespace krys::boo::css
       return FormatNonfiniteCSSNumberValue(SerialisableNumber {.Value = _value.Number, .Suffix = suffix});
     }
 
-    // FIXME: Shortest round-trip formatting like WTF's numberToString; share with Token's number formatting.
-    Array<char, 64uz> buffer;
-    auto format = std::abs(_value.Number) < 1e21 ? std::chars_format::fixed : std::chars_format::scientific;
-    auto result = std::to_chars(buffer.data(), buffer.data() + buffer.size(), _value.Number, format);
-    krys_debug_assert(result.ec == std::errc {});
-
-    CSSOMString builder(reinterpret_cast<const char8 *>(buffer.data()), result.ptr - buffer.data());
-    builder.append(suffix);
-    return builder;
+    StringBuilder builder;
+    builder.Append(_value.Number, suffix);
+    return krys::move(builder).ToString();
   }
 
   CSSOMString PrimitiveValue::SerialiseInternal(const SerialisationContext &context) const noexcept
@@ -730,9 +725,9 @@ namespace krys::boo::css
       case UnitType::String:     return SerialiseString(*_value.String);
       case UnitType::CustomIdent:
       {
-        CSSOMString builder;
+        StringBuilder builder;
         SerialiseIdentifier(*_value.String, builder);
-        return builder;
+        return krys::move(builder).ToString();
       }
 
       case UnitType::CalcPercentageWithAngle:

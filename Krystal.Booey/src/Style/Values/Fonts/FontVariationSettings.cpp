@@ -12,6 +12,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueConversion.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueCreation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -73,7 +74,7 @@ namespace krys::boo::style
 
   // MARK: - Serialization
 
-  void Serialiser<FontVariationSettings>::operator()(css::CSSOMString &builder,
+  void Serialiser<FontVariationSettings>::operator()(StringBuilder &builder,
                                                      const css::SerialisationContext &context,
                                                      const RenderStyle &style,
                                                      const FontVariationSettings &value) noexcept
@@ -89,11 +90,11 @@ namespace krys::boo::style
     {
       if (!first)
       {
-        builder.append(u8", ");
+        builder.Append(u8", ");
       }
       first = false;
       Serialise(builder, context, style, FontOpentypeTag {setting.Tag()});
-      builder.push_back(u8' ');
+      builder.Append(u8' ');
       Serialise(builder, context, style, FontVariationSettings::Value {setting.Value()});
     }
   }

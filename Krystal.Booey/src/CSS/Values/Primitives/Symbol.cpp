@@ -1,16 +1,17 @@
 ﻿#include "Krystal.Booey/CSS/Values/Primitives/Symbol.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
-  void Serialiser<SymbolRaw>::operator()(CSSOMString &builder, const SerialisationContext &,
+  void Serialiser<SymbolRaw>::operator()(StringBuilder &builder, const SerialisationContext &,
                                          const SymbolRaw &value) noexcept
   {
-    builder.append(ToLower(value.Value));
+    builder.Append(ToLower(value.Value));
   }
 
-  void Serialiser<Symbol>::operator()(CSSOMString &builder, const SerialisationContext &,
+  void Serialiser<Symbol>::operator()(StringBuilder &builder, const SerialisationContext &,
                                       const Symbol &value) noexcept
   {
-    builder.append(ToLower(value.Value));
+    builder.Append(ToLower(value.Value));
   }
 }

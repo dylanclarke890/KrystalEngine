@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -45,9 +46,8 @@ namespace krys::boo::style
 
   // MARK: - Serialization
 
-  void Serialiser<SVGPathData>::operator()(css::CSSOMString &builder,
-                                           const css::SerialisationContext &context, const RenderStyle &style,
-                                           const SVGPathData &value) noexcept
+  void Serialiser<SVGPathData>::operator()(StringBuilder &builder, const css::SerialisationContext &context,
+                                           const RenderStyle &style, const SVGPathData &value) noexcept
   {
     if (value.IsNone())
     {

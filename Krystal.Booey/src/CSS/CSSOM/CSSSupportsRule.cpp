@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/CSSOM/CSSSupportsRule.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -15,18 +16,18 @@ namespace krys::boo::css
 
   CSSOMString CSSSupportsRule::CssText() const noexcept
   {
-    CSSOMString builder;
-    builder.append(u8"@supports ").append(ConditionText());
+    StringBuilder builder;
+    builder.Append(u8"@supports ", ConditionText());
     AppendCSSTextForItems(builder);
-    return builder;
+    return krys::move(builder).ToString();
   }
 
   CSSOMString CSSSupportsRule::CssText(const SerialisationContext &context) const noexcept
   {
-    CSSOMString builder;
-    builder.append(u8"@supports ").append(ConditionText());
+    StringBuilder builder;
+    builder.Append(u8"@supports ", ConditionText());
     AppendCSSTextWithReplacementURLsForItems(builder, context);
-    return builder;
+    return krys::move(builder).ToString();
   }
 
   CSSOMString CSSSupportsRule::ConditionText() const noexcept

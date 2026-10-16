@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/KeywordSerialisation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueCreation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -40,9 +41,8 @@ namespace krys::boo::style
 
   // MARK: - Serialization
 
-  void Serialiser<BorderImage>::operator()(css::CSSOMString &builder,
-                                           const css::SerialisationContext &context, const RenderStyle &style,
-                                           const BorderImage &value) noexcept
+  void Serialiser<BorderImage>::operator()(StringBuilder &builder, const css::SerialisationContext &context,
+                                           const RenderStyle &style, const BorderImage &value) noexcept
   {
     if (value.Source.IsNone())
     {
@@ -52,13 +52,13 @@ namespace krys::boo::style
 
     // FIXME: Omit values that have their initial value.
     Serialise(builder, context, style, value.Source);
-    builder.push_back(u8' ');
+    builder.Append(u8' ');
     Serialise(builder, context, style, value.Slice);
-    builder.append(u8" / ");
+    builder.Append(u8" / ");
     Serialise(builder, context, style, value.Width);
-    builder.append(u8" / ");
+    builder.Append(u8" / ");
     Serialise(builder, context, style, value.Outset);
-    builder.push_back(u8' ');
+    builder.Append(u8' ');
     Serialise(builder, context, style, value.Repeat);
   }
 }

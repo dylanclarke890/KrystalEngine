@@ -5,6 +5,7 @@
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include <charconv>
 
 namespace krys::boo::css
@@ -25,38 +26,38 @@ namespace krys::boo::css
     }
   }
 
-  void KeyframeRule::Key::WriteToString(CSSOMString &builder) const noexcept
+  void KeyframeRule::Key::WriteToString(StringBuilder &builder) const noexcept
   {
     switch (RangeName)
     {
       case ValueId::Contain:
       {
-        builder += u8"contain "sv;
+        builder.Append(u8"contain "sv);
         break;
       }
       case ValueId::Cover:
       {
-        builder += u8"cover "sv;
+        builder.Append(u8"cover "sv);
         break;
       }
       case ValueId::Entry:
       {
-        builder += u8"entry "sv;
+        builder.Append(u8"entry "sv);
         break;
       }
       case ValueId::EntryCrossing:
       {
-        builder += u8"entry-crossing "sv;
+        builder.Append(u8"entry-crossing "sv);
         break;
       }
       case ValueId::Exit:
       {
-        builder += u8"exit "sv;
+        builder.Append(u8"exit "sv);
         break;
       }
       case ValueId::ExitCrossing:
       {
-        builder += u8"exit-crossing "sv;
+        builder.Append(u8"exit-crossing "sv);
         break;
       }
       default:
@@ -65,13 +66,7 @@ namespace krys::boo::css
       }
     }
 
-    // The shortest representation that round-trips.
-    char buffer[64];
-    auto [end, error] =
-      std::to_chars(buffer, buffer + sizeof(buffer), Offset * 100, std::chars_format::fixed);
-    krys_debug_assert(error == std::errc {});
-    builder.append(reinterpret_cast<const char8_t *>(buffer), reinterpret_cast<const char8_t *>(end));
-    builder += u8'%';
+    builder.Append(Offset * 100, u8'%');
   }
 
   KeyframeRule::KeyframeRule(Ref<StyleProperties> &&properties) noexcept
@@ -113,16 +108,16 @@ namespace krys::boo::css
 
   CSSOMString KeyframeRule::KeyText() const noexcept
   {
-    CSSOMString keyText;
+    StringBuilder keyText;
     for (size_t i = 0uz; i < _keys.size(); ++i)
     {
       if (i)
       {
-        keyText += u8',';
+        keyText.Append(u8',');
       }
       _keys[i].WriteToString(keyText);
     }
-    return keyText;
+    return krys::move(keyText).ToString();
   }
 
   bool KeyframeRule::SetKeyText(const CSSOMString &keyText) noexcept

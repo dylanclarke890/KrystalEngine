@@ -1,8 +1,9 @@
 ﻿#include "Krystal.Booey/CSS/Markup.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserIdioms.hpp"
 #include "Krystal.Core/Text/Encodings/UTF.hpp"
+#include "Krystal.Core/Text/HexNumber.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Text/Unicode.hpp"
-#include <format>
 
 namespace krys::boo::css
 {
@@ -21,10 +22,9 @@ namespace krys::boo::css
       }
     }
 
-    void AppendCodePoint(char32 c, CSSOMString &appendTo) noexcept
+    void AppendCodePoint(char32 c, StringBuilder &appendTo) noexcept
     {
-      auto result = krys::text::UTF8::EncodeOne(c);
-      appendTo.append(result.Output.data(), result.CodeUnitsProduced);
+      appendTo.Append(c);
     }
 
     /// @brief "ident" from the CSS tokenizer, minus backslash-escape sequences.
@@ -59,20 +59,19 @@ namespace krys::boo::css
       return string.empty();
     }
 
-    void SerialiseCharacter(char32 c, CSSOMString &appendTo) noexcept
+    void SerialiseCharacter(char32 c, StringBuilder &appendTo) noexcept
     {
-      appendTo.push_back(u8'\\');
+      appendTo.Append(u8'\\');
       AppendCodePoint(c, appendTo);
     }
 
-    void SerialiseCharacterAsCodePoint(char32 c, CSSOMString &appendTo) noexcept
+    void SerialiseCharacterAsCodePoint(char32 c, StringBuilder &appendTo) noexcept
     {
-      auto hex = std::format("\\{:x} ", static_cast<uint32>(c));
-      appendTo.append(hex.begin(), hex.end());
+      appendTo.Append(u8'\\', Hex(static_cast<uint32>(c), HexConversionMode::Lowercase), u8' ');
     }
   }
 
-  void SerialiseIdentifier(const CSSOMString &identifier, CSSOMString &appendTo,
+  void SerialiseIdentifier(const CSSOMString &identifier, StringBuilder &appendTo,
                            bool skipStartChecks) noexcept
   {
     bool isFirst = !skipStartChecks;
@@ -117,9 +116,9 @@ namespace krys::boo::css
                      });
   }
 
-  void SerialiseString(const CSSOMString &string, CSSOMString &appendTo) noexcept
+  void SerialiseString(const CSSOMString &string, StringBuilder &appendTo) noexcept
   {
-    appendTo.push_back(u8'"');
+    appendTo.Append(u8'"');
 
     ForEachCodePoint(string,
                      [&](char32 c, bool)
@@ -138,22 +137,23 @@ namespace krys::boo::css
                        }
                      });
 
-    appendTo.push_back(u8'"');
+    appendTo.Append(u8'"');
   }
 
   CSSOMString SerialiseString(const CSSOMString &value) noexcept
   {
-    CSSOMString builder;
+    StringBuilder builder;
     SerialiseString(value, builder);
-    return builder;
+    return krys::move(builder).ToString();
   }
 
   CSSOMString SerialiseURL(const CSSOMString &value) noexcept
   {
-    CSSOMString builder = u8"url(";
+    StringBuilder builder;
+    builder.Append(u8"url(");
     SerialiseString(value, builder);
-    builder.push_back(u8')');
-    return builder;
+    builder.Append(u8')');
+    return krys::move(builder).ToString();
   }
 
   CSSOMString SerialiseFontFamily(const CSSOMString &value) noexcept

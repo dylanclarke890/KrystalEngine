@@ -2,6 +2,7 @@
 #include "Krystal.Booey/CSS/Values/Color/ContrastColorResolver.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorResolutionState.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -36,19 +37,19 @@ namespace krys::boo::style
 
   // MARK: - Serialisation
 
-  void SerialisationForCSSTokenization(css::CSSOMString &builder, const css::SerialisationContext &context,
+  void SerialisationForCSSTokenization(StringBuilder &builder, const css::SerialisationContext &context,
                                        const ContrastColor &contrastColor) noexcept
   {
-    builder.append(u8"contrast-color(");
+    builder.Append(u8"contrast-color(");
     SerialisationForCSSTokenization(builder, context, contrastColor.Color);
-    builder.push_back(u8')');
+    builder.Append(u8')');
   }
 
   css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
                                                    const ContrastColor &contrastColor) noexcept
   {
-    css::CSSOMString builder;
+    StringBuilder builder;
     SerialisationForCSSTokenization(builder, context, contrastColor);
-    return builder;
+    return krys::move(builder).ToString();
   }
 }

@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/Graphics/Filters/FilterOperations.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo
 {
@@ -115,7 +116,7 @@ namespace krys::boo
     template <>
     struct Serialiser<Filter>
     {
-      void operator()(css::CSSOMString &, const css::SerialisationContext &, const RenderStyle &,
+      void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &,
                       const Filter &) noexcept;
     };
 

@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueCreation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -28,7 +29,7 @@ namespace krys::boo::style
 
   // MARK: - Serialization
 
-  void Serialiser<OffsetPath>::operator()(css::CSSOMString &builder, const css::SerialisationContext &context,
+  void Serialiser<OffsetPath>::operator()(StringBuilder &builder, const css::SerialisationContext &context,
                                           const RenderStyle &style, const OffsetPath &value) noexcept
   {
     return krys::SwitchOn(

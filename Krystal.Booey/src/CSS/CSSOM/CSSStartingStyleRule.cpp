@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/CSSOM/CSSStartingStyleRule.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -16,9 +17,9 @@ namespace krys::boo::css
 
   CSSOMString CSSStartingStyleRule::CssText() const noexcept
   {
-    CSSOMString builder;
-    builder.append(u8"@starting-style");
+    StringBuilder builder;
+    builder.Append(u8"@starting-style");
     AppendCSSTextForItems(builder);
-    return builder;
+    return krys::move(builder).ToString();
   }
 }

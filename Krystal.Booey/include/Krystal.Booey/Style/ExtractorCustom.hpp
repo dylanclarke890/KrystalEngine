@@ -33,6 +33,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueCreation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include <algorithm>
 
 namespace krys::boo::style
@@ -43,12 +44,12 @@ namespace krys::boo::style
   public:
 #define KRYS_DECLARE_EXTRACTOR_CUSTOM(name)                                                                  \
   KRYS_NODISCARD static Ref<css::Value> Extract##name(ExtractorState &) noexcept;                            \
-  static void Extract##name##Serialisation(ExtractorState &, css::CSSOMString &,                             \
+  static void Extract##name##Serialisation(ExtractorState &, StringBuilder &,                                \
                                            const css::SerialisationContext &) noexcept
 
 #define KRYS_DECLARE_EXTRACTOR_CUSTOM_OPTIONAL(name)                                                         \
   KRYS_NODISCARD static RefPtr<css::Value> Extract##name(ExtractorState &) noexcept;                         \
-  static void Extract##name##Serialisation(ExtractorState &, css::CSSOMString &,                             \
+  static void Extract##name##Serialisation(ExtractorState &, StringBuilder &,                                \
                                            const css::SerialisationContext &) noexcept
 
     KRYS_DECLARE_EXTRACTOR_CUSTOM(Direction);
@@ -1284,7 +1285,7 @@ namespace krys::boo::style
   }
 
   template <css::PropertyId propertyID>
-  void ExtractSerialisation(ExtractorState &state, css::CSSOMString &builder,
+  void ExtractSerialisation(ExtractorState &state, StringBuilder &builder,
                             const css::SerialisationContext &context) noexcept
   {
     PropertyExtractorAdaptor<propertyID> {}.ComputedValue(
@@ -1330,7 +1331,7 @@ namespace krys::boo::style
   }
 
   template <css::PropertyId propertyID, typename TList, typename TMapper>
-  void ExtractCoordinatedValueListSerialisation(ExtractorState &state, css::CSSOMString &builder,
+  void ExtractCoordinatedValueListSerialisation(ExtractorState &state, StringBuilder &builder,
                                                 const css::SerialisationContext &context, const TList &list,
                                                 TMapper &&mapper) noexcept
   {
@@ -1344,7 +1345,7 @@ namespace krys::boo::style
       {
         if (includeComma)
         {
-          builder.append(u8", ");
+          builder.Append(u8", ");
         }
         mapper(state, builder, context, PropertyAccessor {value}.Get(), value, list);
         includeComma = true;
@@ -1360,7 +1361,7 @@ namespace krys::boo::style
           {
             if (includeComma)
             {
-              builder.append(u8", ");
+              builder.Append(u8", ");
             }
             mapper(state, builder, context, PropertyAccessor {value}.Get(), value, list);
             includeComma = true;
@@ -1417,7 +1418,7 @@ namespace krys::boo::style
   }
 
   template <css::PropertyId propertyID>
-  void ExtractCounterSerialisation(ExtractorState &state, css::CSSOMString &builder,
+  void ExtractCounterSerialisation(ExtractorState &state, StringBuilder &builder,
                                    const css::SerialisationContext &context) noexcept
   {
     auto &map = state.Style.GetCounterDirectives().Map;
@@ -1435,11 +1436,11 @@ namespace krys::boo::style
       {
         if (!listEmpty)
         {
-          builder.push_back(u8' ');
+          builder.Append(u8' ');
         }
 
         Serialise(builder, context, state.Style, css::CustomIdentifier {key});
-        builder.push_back(u8' ');
+        builder.Append(u8' ');
         Serialise(builder, context, state.Style, Integer<> {*number});
 
         listEmpty = false;
@@ -1604,18 +1605,18 @@ namespace krys::boo::style
   }
 
   template <GridTrackSizingDirection direction>
-  void ExtractGridTemplateSerialisation(ExtractorState &state, css::CSSOMString &builder,
+  void ExtractGridTemplateSerialisation(ExtractorState &state, StringBuilder &builder,
                                         const css::SerialisationContext &context) noexcept
   {
     // FIXME: Do this more efficiently without creating and destroying a css::Value object.
-    builder.append(ExtractGridTemplateValue<direction>(state)->CssText(context));
+    builder.Append(ExtractGridTemplateValue<direction>(state)->CssText(context));
   }
 
   // MARK: Shorthand Utilities
 
   /// @brief Appends each item to `builder`, separated by `separator`.
   template <typename TRange, typename TFunc>
-  void AppendInterleaved(css::CSSOMString &builder, const TRange &range, TFunc &&func,
+  void AppendInterleaved(StringBuilder &builder, const TRange &range, TFunc &&func,
                          css::CSSOMStringView separator) noexcept
   {
     bool first = true;
@@ -1623,7 +1624,7 @@ namespace krys::boo::style
     {
       if (!first)
       {
-        builder.append(separator);
+        builder.Append(separator);
       }
       first = false;
       func(builder, item);
@@ -1647,7 +1648,7 @@ namespace krys::boo::style
     return Ref<css::Value>(ExtractorGenerated::ExtractValue(state, *shorthand.begin()));
   }
 
-  inline void ExtractSingleShorthandSerialisation(ExtractorState &state, css::CSSOMString &builder,
+  inline void ExtractSingleShorthandSerialisation(ExtractorState &state, StringBuilder &builder,
                                                   const css::SerialisationContext &context,
                                                   const css::PropertyShorthand &shorthand) noexcept
   {
@@ -1668,7 +1669,7 @@ namespace krys::boo::style
   }
 
   inline void
-    ExtractStandardSpaceSeparatedShorthandSerialisation(ExtractorState &state, css::CSSOMString &builder,
+    ExtractStandardSpaceSeparatedShorthandSerialisation(ExtractorState &state, StringBuilder &builder,
                                                         const css::SerialisationContext &context,
                                                         const css::PropertyShorthand &shorthand) noexcept
   {
@@ -1690,7 +1691,7 @@ namespace krys::boo::style
   }
 
   inline void
-    ExtractStandardSlashSeparatedShorthandSerialisation(ExtractorState &state, css::CSSOMString &builder,
+    ExtractStandardSlashSeparatedShorthandSerialisation(ExtractorState &state, StringBuilder &builder,
                                                         const css::SerialisationContext &context,
                                                         const css::PropertyShorthand &shorthand) noexcept
   {
@@ -1717,30 +1718,30 @@ namespace krys::boo::style
                                   Ref<css::Value>(krys::move(endValue)));
   }
 
-  inline void ExtractCoalescingPairShorthandSerialisation(ExtractorState &state, css::CSSOMString &builder,
+  inline void ExtractCoalescingPairShorthandSerialisation(ExtractorState &state, StringBuilder &builder,
                                                           const css::SerialisationContext &context,
                                                           const css::PropertyShorthand &shorthand) noexcept
   {
     auto longhands = shorthand.Properties();
 
-    auto offsetBeforeFirst = builder.size();
+    auto offsetBeforeFirst = builder.Length();
     ExtractorGenerated::ExtractValueSerialisation(state, builder, context, longhands[0]);
-    auto offsetAfterFirst = builder.size();
+    auto offsetAfterFirst = builder.Length();
 
     if (offsetBeforeFirst == offsetAfterFirst)
     {
       return;
     }
 
-    builder.push_back(u8' ');
+    builder.Append(u8' ');
 
-    auto offsetBeforeSecond = builder.size();
+    auto offsetBeforeSecond = builder.Length();
     ExtractorGenerated::ExtractValueSerialisation(state, builder, context, longhands[1]);
-    auto offsetAfterSecond = builder.size();
+    auto offsetAfterSecond = builder.Length();
 
     if (offsetBeforeSecond == offsetAfterSecond)
     {
-      builder.resize(offsetBeforeFirst);
+      builder.Shrink(offsetBeforeFirst);
       return;
     }
 
@@ -1752,7 +1753,7 @@ namespace krys::boo::style
     // longhand.
     if (stringViewFirst == stringViewSecond)
     {
-      builder.resize(offsetAfterFirst);
+      builder.Shrink(offsetAfterFirst);
     }
   }
 
@@ -1793,7 +1794,7 @@ namespace krys::boo::style
     return css::ValueList::CreateSpaceSeparated(krys::move(list));
   }
 
-  inline void ExtractCoalescingQuadShorthandSerialisation(ExtractorState &state, css::CSSOMString &builder,
+  inline void ExtractCoalescingQuadShorthandSerialisation(ExtractorState &state, StringBuilder &builder,
                                                           const css::SerialisationContext &context,
                                                           const css::PropertyShorthand &shorthand) noexcept
   {
@@ -1801,44 +1802,44 @@ namespace krys::boo::style
 
     // All 4 properties must be specified.
 
-    auto offsetBeforeTop = builder.size();
+    auto offsetBeforeTop = builder.Length();
     ExtractorGenerated::ExtractValueSerialisation(state, builder, context, longhands[0]);
-    auto offsetAfterTop = builder.size();
+    auto offsetAfterTop = builder.Length();
     if (offsetBeforeTop == offsetAfterTop)
     {
       return;
     }
 
-    builder.push_back(u8' ');
+    builder.Append(u8' ');
 
-    auto offsetBeforeRight = builder.size();
+    auto offsetBeforeRight = builder.Length();
     ExtractorGenerated::ExtractValueSerialisation(state, builder, context, longhands[1]);
-    auto offsetAfterRight = builder.size();
+    auto offsetAfterRight = builder.Length();
     if (offsetBeforeRight == offsetAfterRight)
     {
-      builder.resize(offsetBeforeTop);
+      builder.Shrink(offsetBeforeTop);
       return;
     }
 
-    builder.push_back(u8' ');
+    builder.Append(u8' ');
 
-    auto offsetBeforeBottom = builder.size();
+    auto offsetBeforeBottom = builder.Length();
     ExtractorGenerated::ExtractValueSerialisation(state, builder, context, longhands[2]);
-    auto offsetAfterBottom = builder.size();
+    auto offsetAfterBottom = builder.Length();
     if (offsetBeforeBottom == offsetAfterBottom)
     {
-      builder.resize(offsetBeforeTop);
+      builder.Shrink(offsetBeforeTop);
       return;
     }
 
-    builder.push_back(u8' ');
+    builder.Append(u8' ');
 
-    auto offsetBeforeLeft = builder.size();
+    auto offsetBeforeLeft = builder.Length();
     ExtractorGenerated::ExtractValueSerialisation(state, builder, context, longhands[3]);
-    auto offsetAfterLeft = builder.size();
+    auto offsetAfterLeft = builder.Length();
     if (offsetBeforeLeft == offsetAfterLeft)
     {
-      builder.resize(offsetBeforeTop);
+      builder.Shrink(offsetBeforeTop);
       return;
     }
 
@@ -1857,19 +1858,19 @@ namespace krys::boo::style
     // Shrink to include top, right and bottom.
     if (stringViewBottom != stringViewTop)
     {
-      builder.resize(offsetAfterBottom);
+      builder.Shrink(offsetAfterBottom);
       return;
     }
 
     // Shrink to include top and right.
     if (stringViewRight != stringViewTop)
     {
-      builder.resize(offsetAfterRight);
+      builder.Shrink(offsetAfterRight);
       return;
     }
 
     // Shrink to just include top.
-    builder.resize(offsetAfterTop);
+    builder.Shrink(offsetAfterTop);
   }
 
   KRYS_NODISCARD inline RefPtr<css::Value>
@@ -1886,14 +1887,14 @@ namespace krys::boo::style
     return value;
   }
 
-  inline void ExtractBorderShorthandSerialisation(ExtractorState &state, css::CSSOMString &builder,
+  inline void ExtractBorderShorthandSerialisation(ExtractorState &state, StringBuilder &builder,
                                                   const css::SerialisationContext &context,
                                                   Span<const css::PropertyId> sections) noexcept
   {
     // FIXME: Do this more efficiently without creating and destroying a css::Value object.
     if (auto value = ExtractBorderShorthand(state, sections))
     {
-      builder.append(value->CssText(context));
+      builder.Append(value->CssText(context));
     }
   }
 
@@ -2090,12 +2091,12 @@ namespace krys::boo::style
 
   template <css::PropertyId property>
   void ExtractFillLayerPropertyShorthandSerialisation(
-    ExtractorState &state, css::CSSOMString &builder, const css::SerialisationContext &context,
+    ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context,
     const css::PropertyShorthand &propertiesBeforeSlashSeparator,
     const css::PropertyShorthand &propertiesAfterSlashSeparator, css::PropertyId lastLayerProperty) noexcept
   {
     // FIXME: Do this more efficiently without creating and destroying a css::Value object.
-    builder.append(ExtractFillLayerPropertyShorthand<property>(
+    builder.Append(ExtractFillLayerPropertyShorthand<property>(
                      state, propertiesBeforeSlashSeparator, propertiesAfterSlashSeparator, lastLayerProperty)
                      ->CssText(context));
   }
@@ -2109,7 +2110,7 @@ namespace krys::boo::style
   }                                                                                                          \
                                                                                                              \
   inline void ExtractorCustom::Extract##name##Serialisation(                                                 \
-    ExtractorState &state, css::CSSOMString &builder, const css::SerialisationContext &context) noexcept     \
+    ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept        \
   {                                                                                                          \
     ExtractSerialisation<css::PropertyId::name>(state, builder, context);                                    \
   }
@@ -2158,7 +2159,7 @@ namespace krys::boo::style
   }
 
   inline void
-    ExtractorCustom::ExtractCounterIncrementSerialisation(ExtractorState &state, css::CSSOMString &builder,
+    ExtractorCustom::ExtractCounterIncrementSerialisation(ExtractorState &state, StringBuilder &builder,
                                                           const css::SerialisationContext &context) noexcept
   {
     ExtractCounterSerialisation<css::PropertyId::CounterIncrement>(state, builder, context);
@@ -2170,7 +2171,7 @@ namespace krys::boo::style
   }
 
   inline void
-    ExtractorCustom::ExtractCounterResetSerialisation(ExtractorState &state, css::CSSOMString &builder,
+    ExtractorCustom::ExtractCounterResetSerialisation(ExtractorState &state, StringBuilder &builder,
                                                       const css::SerialisationContext &context) noexcept
   {
     ExtractCounterSerialisation<css::PropertyId::CounterReset>(state, builder, context);
@@ -2182,7 +2183,7 @@ namespace krys::boo::style
   }
 
   inline void
-    ExtractorCustom::ExtractCounterSetSerialisation(ExtractorState &state, css::CSSOMString &builder,
+    ExtractorCustom::ExtractCounterSetSerialisation(ExtractorState &state, StringBuilder &builder,
                                                     const css::SerialisationContext &context) noexcept
   {
     ExtractCounterSerialisation<css::PropertyId::CounterSet>(state, builder, context);
@@ -2199,7 +2200,7 @@ namespace krys::boo::style
   }
 
   inline void
-    ExtractorCustom::ExtractBorderImageWidthSerialisation(ExtractorState &state, css::CSSOMString &builder,
+    ExtractorCustom::ExtractBorderImageWidthSerialisation(ExtractorState &state, StringBuilder &builder,
                                                           const css::SerialisationContext &context) noexcept
   {
     auto &borderImageWidth = state.Style.GetBorderImageWidth();
@@ -2239,7 +2240,7 @@ namespace krys::boo::style
   }
 
   inline void
-    ExtractorCustom::ExtractTransformSerialisation(ExtractorState &state, css::CSSOMString &builder,
+    ExtractorCustom::ExtractTransformSerialisation(ExtractorState &state, StringBuilder &builder,
                                                    const css::SerialisationContext &context) noexcept
   {
     if (!state.Style.HasTransform())
@@ -2276,7 +2277,7 @@ namespace krys::boo::style
   }
 
   inline void ExtractorCustom::ExtractGridTemplateColumnsSerialisation(
-    ExtractorState &state, css::CSSOMString &builder, const css::SerialisationContext &context) noexcept
+    ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept
   {
     ExtractGridTemplateSerialisation<GridTrackSizingDirection::Columns>(state, builder, context);
   }
@@ -2287,7 +2288,7 @@ namespace krys::boo::style
   }
 
   inline void
-    ExtractorCustom::ExtractGridTemplateRowsSerialisation(ExtractorState &state, css::CSSOMString &builder,
+    ExtractorCustom::ExtractGridTemplateRowsSerialisation(ExtractorState &state, StringBuilder &builder,
                                                           const css::SerialisationContext &context) noexcept
   {
     ExtractGridTemplateSerialisation<GridTrackSizingDirection::Rows>(state, builder, context);
@@ -2353,14 +2354,14 @@ namespace krys::boo::style
   }
 
   inline void
-    ExtractorCustom::ExtractAnimationDurationSerialisation(ExtractorState &state, css::CSSOMString &builder,
+    ExtractorCustom::ExtractAnimationDurationSerialisation(ExtractorState &state, StringBuilder &builder,
                                                            const css::SerialisationContext &context) noexcept
   {
     auto mapper = [&](auto &state, auto &builder, const auto &context, const auto &value,
                       const Maybe<Animation> &animation, const auto &animations)
     {
       // FIXME: Do this more efficiently without creating and destroying a css::Value object.
-      builder.append(ConvertSingleAnimationDuration(state, value, animation, animations)->CssText(context));
+      builder.Append(ConvertSingleAnimationDuration(state, value, animation, animations)->CssText(context));
     };
     ExtractCoordinatedValueListSerialisation<css::PropertyId::AnimationDuration>(
       state, builder, context, state.Style.GetAnimations(), mapper);
@@ -2375,12 +2376,12 @@ namespace krys::boo::style
     return ExtractCSSValue<css::PropertyId::Color>(state);
   }
 
-  inline void ExtractorCustom::ExtractColorSerialisation(ExtractorState &state, css::CSSOMString &builder,
+  inline void ExtractorCustom::ExtractColorSerialisation(ExtractorState &state, StringBuilder &builder,
                                                          const css::SerialisationContext &context) noexcept
   {
     if (state.AllowVisitedStyle)
     {
-      builder.append(SerialisationForCSS(state.Style.VisitedDependentColor(css::PropertyId::Color)));
+      builder.Append(SerialisationForCSS(state.Style.VisitedDependentColor(css::PropertyId::Color)));
       return;
     }
     ExtractSerialisation<css::PropertyId::Color>(state, builder, context);
@@ -2527,7 +2528,7 @@ namespace krys::boo::style
   }
 
   inline void
-    ExtractorCustom::ExtractAnimationShorthandSerialisation(ExtractorState &state, css::CSSOMString &builder,
+    ExtractorCustom::ExtractAnimationShorthandSerialisation(ExtractorState &state, StringBuilder &builder,
                                                             const css::SerialisationContext &context) noexcept
   {
     auto &animations = state.Style.GetAnimations();
@@ -2551,7 +2552,7 @@ namespace krys::boo::style
       [&](auto &builder, const auto &animation)
       {
         // FIXME: Do this more efficiently without creating and destroying a css::Value object.
-        builder.append(ConvertSingleAnimation(state, animation, animations)->CssText(context));
+        builder.Append(ConvertSingleAnimation(state, animation, animations)->CssText(context));
       },
       u8", ");
   }
@@ -2603,13 +2604,13 @@ namespace krys::boo::style
   }
 
   inline void ExtractorCustom::ExtractAnimationRangeShorthandSerialisation(
-    ExtractorState &state, css::CSSOMString &builder, const css::SerialisationContext &context) noexcept
+    ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept
   {
     auto mapper = [&](auto &state, auto &builder, const auto &context, const auto &value,
                       const Maybe<Animation> &, const auto &)
     {
       // FIXME: Do this more efficiently without creating and destroying a css::Value object.
-      builder.append(ConvertAnimationRange(state, value)->CssText(context));
+      builder.Append(ConvertAnimationRange(state, value)->CssText(context));
     };
     ExtractCoordinatedValueListSerialisation<css::PropertyId::AnimationRange>(
       state, builder, context, state.Style.GetAnimations(), mapper);
@@ -2633,7 +2634,7 @@ namespace krys::boo::style
   }
 
   inline void ExtractorCustom::ExtractBackgroundShorthandSerialisation(
-    ExtractorState &state, css::CSSOMString &builder, const css::SerialisationContext &context) noexcept
+    ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept
   {
     ExtractFillLayerPropertyShorthandSerialisation<css::PropertyId::Background>(
       state, builder, context,
@@ -2657,7 +2658,7 @@ namespace krys::boo::style
   }
 
   inline void ExtractorCustom::ExtractBackgroundPositionShorthandSerialisation(
-    ExtractorState &state, css::CSSOMString &builder, const css::SerialisationContext &context) noexcept
+    ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept
   {
     auto mapper = [](auto &state, auto &builder, const auto &context, const auto &value,
                      const Maybe<BackgroundLayer> &, const auto &)
@@ -2675,7 +2676,7 @@ namespace krys::boo::style
   }                                                                                                          \
                                                                                                              \
   inline void ExtractorCustom::Extract##name##ShorthandSerialisation(                                        \
-    ExtractorState &state, css::CSSOMString &builder, const css::SerialisationContext &context) noexcept     \
+    ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept        \
   {                                                                                                          \
     ExtractSerialisation<css::PropertyId::name>(state, builder, context);                                    \
   }
@@ -2711,7 +2712,7 @@ namespace krys::boo::style
   }
 
   inline void
-    ExtractorCustom::ExtractBorderShorthandSerialisation(ExtractorState &state, css::CSSOMString &builder,
+    ExtractorCustom::ExtractBorderShorthandSerialisation(ExtractorState &state, StringBuilder &builder,
                                                          const css::SerialisationContext &context) noexcept
   {
     style::ExtractBorderShorthandSerialisation(state, builder, context,
@@ -2724,7 +2725,7 @@ namespace krys::boo::style
   }
 
   inline void ExtractorCustom::ExtractBorderBlockShorthandSerialisation(
-    ExtractorState &state, css::CSSOMString &builder, const css::SerialisationContext &context) noexcept
+    ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept
   {
     style::ExtractBorderShorthandSerialisation(state, builder, context,
                                                Span<const css::PropertyId> {BorderBlockSections});
@@ -2745,7 +2746,7 @@ namespace krys::boo::style
   }
 
   inline void ExtractorCustom::ExtractBorderImageShorthandSerialisation(
-    ExtractorState &state, css::CSSOMString &builder, const css::SerialisationContext &context) noexcept
+    ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept
   {
     auto &borderImage = state.Style.GetBorderImage();
     if (borderImage.Source.IsNone())
@@ -2766,7 +2767,7 @@ namespace krys::boo::style
   }
 
   inline void ExtractorCustom::ExtractBorderInlineShorthandSerialisation(
-    ExtractorState &state, css::CSSOMString &builder, const css::SerialisationContext &context) noexcept
+    ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept
   {
     style::ExtractBorderShorthandSerialisation(state, builder, context,
                                                Span<const css::PropertyId> {BorderInlineSections});
@@ -2778,10 +2779,10 @@ namespace krys::boo::style
   }
 
   inline void ExtractorCustom::ExtractBorderRadiusShorthandSerialisation(
-    ExtractorState &state, css::CSSOMString &builder, const css::SerialisationContext &context) noexcept
+    ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept
   {
     // FIXME: Do this more efficiently without creating and destroying a css::Value object.
-    builder.append(ExtractBorderRadiusShorthand(state)->CssText(context));
+    builder.Append(ExtractBorderRadiusShorthand(state)->CssText(context));
   }
 
   inline RefPtr<css::Value> ExtractorCustom::ExtractColumnsShorthand(ExtractorState &state) noexcept
@@ -2798,7 +2799,7 @@ namespace krys::boo::style
   }
 
   inline void
-    ExtractorCustom::ExtractColumnsShorthandSerialisation(ExtractorState &state, css::CSSOMString &builder,
+    ExtractorCustom::ExtractColumnsShorthandSerialisation(ExtractorState &state, StringBuilder &builder,
                                                           const css::SerialisationContext &context) noexcept
   {
     if (state.Style.GetColumnCount() == ComputedStyle::InitialColumnCount())
@@ -2836,7 +2837,7 @@ namespace krys::boo::style
   }
 
   inline void
-    ExtractorCustom::ExtractContainerShorthandSerialisation(ExtractorState &state, css::CSSOMString &builder,
+    ExtractorCustom::ExtractContainerShorthandSerialisation(ExtractorState &state, StringBuilder &builder,
                                                             const css::SerialisationContext &context) noexcept
   {
     if (state.Style.GetContainerNames().IsNone())
@@ -2853,7 +2854,7 @@ namespace krys::boo::style
       return;
     }
 
-    builder.append(u8" / ");
+    builder.Append(u8" / ");
     ExtractorGenerated::ExtractValueSerialisation(state, builder, context, css::PropertyId::ContainerType);
   }
 
@@ -2871,7 +2872,7 @@ namespace krys::boo::style
   }
 
   inline void
-    ExtractorCustom::ExtractFlexFlowShorthandSerialisation(ExtractorState &state, css::CSSOMString &builder,
+    ExtractorCustom::ExtractFlexFlowShorthandSerialisation(ExtractorState &state, StringBuilder &builder,
                                                            const css::SerialisationContext &context) noexcept
   {
     if (state.Style.GetFlexWrap() == ComputedStyle::InitialFlexWrap())
@@ -2951,11 +2952,11 @@ namespace krys::boo::style
   }
 
   inline void
-    ExtractorCustom::ExtractFontShorthandSerialisation(ExtractorState &state, css::CSSOMString &builder,
+    ExtractorCustom::ExtractFontShorthandSerialisation(ExtractorState &state, StringBuilder &builder,
                                                        const css::SerialisationContext &context) noexcept
   {
     // FIXME: Do this more efficiently without creating and destroying a css::Value object.
-    builder.append(ExtractFontShorthand(state)->CssText(context));
+    builder.Append(ExtractFontShorthand(state)->CssText(context));
   }
 
   inline RefPtr<css::Value> ExtractorCustom::ExtractFontVariantShorthand(ExtractorState &state) noexcept
@@ -2979,10 +2980,10 @@ namespace krys::boo::style
   }
 
   inline void ExtractorCustom::ExtractFontVariantShorthandSerialisation(
-    ExtractorState &state, css::CSSOMString &builder, const css::SerialisationContext &context) noexcept
+    ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept
   {
     // FIXME: Do this more efficiently without creating and destroying a css::Value object.
-    builder.append(ExtractFontVariantShorthand(state)->CssText(context));
+    builder.Append(ExtractFontVariantShorthand(state)->CssText(context));
   }
 
   inline constexpr Array<css::PropertyId, 2> MaskPropertiesBeforeSlashSeparator {
@@ -3003,7 +3004,7 @@ namespace krys::boo::style
   }
 
   inline void
-    ExtractorCustom::ExtractMaskShorthandSerialisation(ExtractorState &state, css::CSSOMString &builder,
+    ExtractorCustom::ExtractMaskShorthandSerialisation(ExtractorState &state, StringBuilder &builder,
                                                        const css::SerialisationContext &context) noexcept
   {
     ExtractFillLayerPropertyShorthandSerialisation<css::PropertyId::Mask>(
@@ -3027,7 +3028,7 @@ namespace krys::boo::style
   }
 
   inline void ExtractorCustom::ExtractMaskPositionShorthandSerialisation(
-    ExtractorState &state, css::CSSOMString &builder, const css::SerialisationContext &context) noexcept
+    ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept
   {
     auto mapper = [](auto &state, auto &builder, const auto &context, const auto &value,
                      const Maybe<MaskLayer> &, const auto &)
@@ -3084,11 +3085,11 @@ namespace krys::boo::style
   }
 
   inline void
-    ExtractorCustom::ExtractOffsetShorthandSerialisation(ExtractorState &state, css::CSSOMString &builder,
+    ExtractorCustom::ExtractOffsetShorthandSerialisation(ExtractorState &state, StringBuilder &builder,
                                                          const css::SerialisationContext &context) noexcept
   {
     // FIXME: Do this more efficiently without creating and destroying a css::Value object.
-    builder.append(ExtractOffsetShorthand(state)->CssText(context));
+    builder.Append(ExtractOffsetShorthand(state)->CssText(context));
   }
 
   inline RefPtr<css::Value> ExtractorCustom::ExtractPositionTryShorthand(ExtractorState &state) noexcept
@@ -3101,7 +3102,7 @@ namespace krys::boo::style
   }
 
   inline void ExtractorCustom::ExtractPositionTryShorthandSerialisation(
-    ExtractorState &state, css::CSSOMString &builder, const css::SerialisationContext &context) noexcept
+    ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept
   {
     if (state.Style.GetPositionTryOrder() == ComputedStyle::InitialPositionTryOrder())
     {
@@ -3143,7 +3144,7 @@ namespace krys::boo::style
   }
 
   inline void ExtractorCustom::ExtractScrollTimelineShorthandSerialisation(
-    ExtractorState &state, css::CSSOMString &builder, const css::SerialisationContext &context) noexcept
+    ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept
   {
     auto &timelines = state.Style.GetScrollTimelines();
     if (timelines.isEmpty())
@@ -3161,7 +3162,7 @@ namespace krys::boo::style
         Serialise(builder, context, state.Style, css::CustomIdentifier {timeline->GetName()});
         if (auto axis = timeline->Axis(); axis != ScrollAxis::Block)
         {
-          builder.push_back(u8' ');
+          builder.Append(u8' ');
           Serialise(builder, context, state.Style, axis);
         }
       },
@@ -3183,7 +3184,7 @@ namespace krys::boo::style
   }
 
   inline void ExtractorCustom::ExtractTextDecorationSkipShorthandSerialisation(
-    ExtractorState &state, css::CSSOMString &builder, const css::SerialisationContext &context) noexcept
+    ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept
   {
     switch (state.Style.GetTextDecorationSkipInk())
     {
@@ -3255,7 +3256,7 @@ namespace krys::boo::style
   }
 
   inline void ExtractorCustom::ExtractTransitionShorthandSerialisation(
-    ExtractorState &state, css::CSSOMString &builder, const css::SerialisationContext &context) noexcept
+    ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept
   {
     auto &transitions = state.Style.GetTransitions();
     if (transitions.IsInitial())
@@ -3269,7 +3270,7 @@ namespace krys::boo::style
       [&](auto &builder, auto &transition)
       {
         // FIXME: Do this more efficiently without creating and destroying a css::Value object.
-        builder.append(ConvertSingleTransition(state, transition)->CssText(context));
+        builder.Append(ConvertSingleTransition(state, transition)->CssText(context));
       },
       u8", ");
   }
@@ -3320,10 +3321,10 @@ namespace krys::boo::style
   }
 
   inline void ExtractorCustom::ExtractViewTimelineShorthandSerialisation(
-    ExtractorState &state, css::CSSOMString &builder, const css::SerialisationContext &context) noexcept
+    ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept
   {
     // FIXME: Do this more efficiently without creating and destroying a css::Value object.
-    builder.append(ExtractViewTimelineShorthand(state)->CssText(context));
+    builder.Append(ExtractViewTimelineShorthand(state)->CssText(context));
   }
 
   inline RefPtr<css::Value>
@@ -3333,13 +3334,13 @@ namespace krys::boo::style
   }
 
   inline void ExtractorCustom::ExtractWebkitMaskPositionShorthandSerialisation(
-    ExtractorState &state, css::CSSOMString &builder, const css::SerialisationContext &context) noexcept
+    ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept
   {
     ExtractMaskPositionShorthandSerialisation(state, builder, context);
   }
 
   inline void
-    ExtractorCustom::ExtractMarkerShorthandSerialisation(ExtractorState &state, css::CSSOMString &builder,
+    ExtractorCustom::ExtractMarkerShorthandSerialisation(ExtractorState &state, StringBuilder &builder,
                                                          const css::SerialisationContext &context) noexcept
   {
     auto markerStart = state.Style.MarkerStart();

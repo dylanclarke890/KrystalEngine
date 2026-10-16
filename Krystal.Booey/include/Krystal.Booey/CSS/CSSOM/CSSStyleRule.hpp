@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -60,14 +61,14 @@ namespace krys::boo::css
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
     KRYS_NODISCARD CSSOMString CssText(const SerialisationContext &context) const noexcept final;
     KRYS_NODISCARD CSSOMString CssTextInternal(const CSSOMString &declarations,
-                                               const CSSOMString &rules) const noexcept;
+                                               const StringBuilder &rules) const noexcept;
     void Reattach(Rule &rule) noexcept final;
     void GetChildStyleSheets(HashSet<RefPtr<CSSStyleSheet>> &childStyleSheets) noexcept final;
 
     KRYS_NODISCARD CSSOMString GenerateSelectorText() const noexcept;
     KRYS_NODISCARD const List<Ref<Rule>> &NestedRules() const noexcept;
-    void CssTextForRules(CSSOMString &rules) const noexcept;
-    void CssTextForRulesWithReplacementURLs(CSSOMString &rules,
+    void CssTextForRules(StringBuilder &rules) const noexcept;
+    void CssTextForRulesWithReplacementURLs(StringBuilder &rules,
                                             const SerialisationContext &context) const noexcept;
   };
 }

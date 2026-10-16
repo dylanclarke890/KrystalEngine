@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Style/Values/Masking/MaskBorderSlice.hpp"
 #include "Krystal.Booey/Style/Values/Masking/MaskBorderSource.hpp"
 #include "Krystal.Booey/Style/Values/Masking/MaskBorderWidth.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -54,7 +55,7 @@ namespace krys::boo::style
   template <>
   struct Serialiser<MaskBorder>
   {
-    void operator()(css::CSSOMString &, const css::SerialisationContext &, const RenderStyle &,
+    void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &,
                     const MaskBorder &) noexcept;
   };
 }

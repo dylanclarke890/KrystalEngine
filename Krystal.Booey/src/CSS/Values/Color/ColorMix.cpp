@@ -6,6 +6,7 @@
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesValueVisitation.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -78,7 +79,7 @@ namespace krys::boo::css
                                 : null;
     }
 
-    void SerialiseColorMixPercentage1(CSSOMString &builder, const SerialisationContext &context,
+    void SerialiseColorMixPercentage1(StringBuilder &builder, const SerialisationContext &context,
                                       const ColorMix &value) noexcept
     {
       if (value.MixComponents1.Percentage && value.MixComponents2.Percentage)
@@ -88,7 +89,7 @@ namespace krys::boo::css
         {
           return;
         }
-        builder.push_back(u8' ');
+        builder.Append(u8' ');
         Serialise(builder, context, *value.MixComponents1.Percentage);
       }
       else if (value.MixComponents1.Percentage)
@@ -97,7 +98,7 @@ namespace krys::boo::css
         {
           return;
         }
-        builder.push_back(u8' ');
+        builder.Append(u8' ');
         Serialise(builder, context, *value.MixComponents1.Percentage);
       }
       else if (value.MixComponents2.Percentage)
@@ -113,12 +114,12 @@ namespace krys::boo::css
           return;
         }
 
-        builder.push_back(u8' ');
+        builder.Append(u8' ');
         Serialise(builder, context, *subtractedPercent);
       }
     }
 
-    void SerialiseColorMixPercentage2(CSSOMString &builder, const SerialisationContext &context,
+    void SerialiseColorMixPercentage2(StringBuilder &builder, const SerialisationContext &context,
                                       const ColorMix &value) noexcept
     {
       if (value.MixComponents1.Percentage && value.MixComponents2.Percentage)
@@ -128,7 +129,7 @@ namespace krys::boo::css
           return;
         }
 
-        builder.push_back(u8' ');
+        builder.Append(u8' ');
         Serialise(builder, context, *value.MixComponents2.Percentage);
       }
       else if (value.MixComponents2.Percentage)
@@ -142,29 +143,29 @@ namespace krys::boo::css
           return;
         }
 
-        builder.push_back(u8' ');
+        builder.Append(u8' ');
         Serialise(builder, context, *value.MixComponents2.Percentage);
       }
     }
   }
 
-  void Serialiser<ColorMix>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<ColorMix>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                         const ColorMix &value) noexcept
   {
-    builder.append(u8"color-mix(");
+    builder.Append(u8"color-mix(");
     if (value.ColorInterpolationMethod != DefaultInterpolationMethodForColorMix)
     {
-      builder.append(u8"in ");
+      builder.Append(u8"in ");
       boo::SerialisationForCSS(builder, value.ColorInterpolationMethod);
-      builder.append(u8", ");
+      builder.Append(u8", ");
     }
 
     Serialise(builder, context, value.MixComponents1.Color);
     SerialiseColorMixPercentage1(builder, context, value);
-    builder.append(u8", ");
+    builder.Append(u8", ");
     Serialise(builder, context, value.MixComponents2.Color);
     SerialiseColorMixPercentage2(builder, context, value);
-    builder.push_back(u8')');
+    builder.Append(u8')');
   }
 
   void ComputedStyleDependenciesCollector<ColorMix>::operator()(ComputedStyleDependencies &dependencies,

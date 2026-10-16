@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Shapes/FillRule.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathByteStream.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -41,7 +42,7 @@ namespace krys::boo::css
   template <>
   struct Serialiser<Path>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context, const Path &value) noexcept;
+    void operator()(StringBuilder &builder, const SerialisationContext &context, const Path &value) noexcept;
   };
 
   template <>

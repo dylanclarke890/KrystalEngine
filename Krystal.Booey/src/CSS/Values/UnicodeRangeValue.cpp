@@ -1,36 +1,18 @@
 ﻿#include "Krystal.Booey/CSS/Values/UnicodeRangeValue.hpp"
-#include "Krystal.Core/Assert.hpp"
-#include <charconv>
+#include "Krystal.Core/Text/HexNumber.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
-  namespace
-  {
-    // Lowercase hex digits, no leading zeros.
-    void AppendLowercaseHex(CSSOMString &result, char32 value) noexcept
-    {
-      char buffer[8];
-      auto [end, error] = std::to_chars(buffer, buffer + sizeof(buffer), static_cast<uint32>(value), 16);
-      krys_debug_assert(error == std::errc {});
-      for (const char *it = buffer; it != end; ++it)
-      {
-        result.push_back(static_cast<char8_t>(*it));
-      }
-    }
-  }
-
   CSSOMString UnicodeRangeValue::CustomCSSText(const SerialisationContext &) const noexcept
   {
-    CSSOMString result {u8"U+"};
-    AppendLowercaseHex(result, _from);
-    if (_from == _to)
+    StringBuilder result;
+    result.Append(u8"U+", Hex(_from, HexConversionMode::Lowercase));
+    if (_from != _to)
     {
-      return result;
+      result.Append(u8'-', Hex(_to, HexConversionMode::Lowercase));
     }
-
-    result.push_back(u8'-');
-    AppendLowercaseHex(result, _to);
-    return result;
+    return krys::move(result).ToString();
   }
 
   bool UnicodeRangeValue::Equals(const UnicodeRangeValue &other) const noexcept

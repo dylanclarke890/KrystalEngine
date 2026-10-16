@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/Color/LightDarkColor.hpp"
 #include "Krystal.Booey/CSS/Values/Color/PlatformColorResolutionState.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -29,14 +30,14 @@ namespace krys::boo::css
     return ContainsCurrentColor(unresolved.LightColor) || ContainsCurrentColor(unresolved.DarkColor);
   }
 
-  void Serialiser<LightDarkColor>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<LightDarkColor>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                               const LightDarkColor &value) noexcept
   {
-    builder.append(u8"light-dark(");
+    builder.Append(u8"light-dark(");
     Serialise(builder, context, value.LightColor);
-    builder.append(u8", ");
+    builder.Append(u8", ");
     Serialise(builder, context, value.DarkColor);
-    builder.push_back(u8')');
+    builder.Append(u8')');
   }
 
   void ComputedStyleDependenciesCollector<LightDarkColor>::operator()(ComputedStyleDependencies &dependencies,

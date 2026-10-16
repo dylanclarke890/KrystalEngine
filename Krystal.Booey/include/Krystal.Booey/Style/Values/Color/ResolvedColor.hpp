@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -37,7 +38,7 @@ namespace krys::boo::style
     return false;
   }
 
-  void SerialisationForCSSTokenization(css::CSSOMString &builder, const css::SerialisationContext &context,
+  void SerialisationForCSSTokenization(StringBuilder &builder, const css::SerialisationContext &context,
                                        const ResolvedColor &value) noexcept;
   KRYS_NODISCARD css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
                                                                   const ResolvedColor &value) noexcept;

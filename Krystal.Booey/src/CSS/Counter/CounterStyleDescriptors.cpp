@@ -4,6 +4,7 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include <algorithm>
 #include <limits>
 #include <string>
@@ -17,12 +18,6 @@ namespace krys::boo::css
     KRYS_NODISCARD CSSOMString NameText(const CounterStyleName &name) noexcept
     {
       return name == CounterStyleName::Null() ? CSSOMString() : CSSOMString(name.View());
-    }
-
-    void AppendInteger(CSSOMString &builder, int64 value) noexcept
-    {
-      auto text = std::to_string(value);
-      builder.append(reinterpret_cast<const char8_t *>(text.data()), text.size());
     }
 
     KRYS_NODISCARD CounterStyleRanges RangeFromStyleProperties(const StyleProperties &properties) noexcept
@@ -546,7 +541,7 @@ namespace krys::boo::css
 
   CSSOMString CounterStyleSymbol::CssText() const noexcept
   {
-    CSSOMString builder;
+    StringBuilder builder;
     if (IsCustomIdent)
     {
       SerialiseIdentifier(Text, builder);
@@ -555,7 +550,7 @@ namespace krys::boo::css
     {
       SerialiseString(Text, builder);
     }
-    return builder;
+    return krys::move(builder).ToString();
   }
 
   CSSOMString CounterStyleDescriptors::NameCSSText() const noexcept
@@ -598,9 +593,10 @@ namespace krys::boo::css
       }
       case CounterStyleSystem::Fixed:
       {
-        CSSOMString result = u8"fixed ";
-        AppendInteger(result, FixedSystemFirstSymbolValue);
-        return result;
+        StringBuilder result;
+        result.Append(u8"fixed ");
+        result.Append(FixedSystemFirstSymbolValue);
+        return krys::move(result).ToString();
       }
       case CounterStyleSystem::Extends:
       {
@@ -659,42 +655,42 @@ namespace krys::boo::css
       return u8"auto";
     }
 
-    CSSOMString builder;
+    StringBuilder builder;
     for (size_t i = 0uz; i < Ranges.size(); ++i)
     {
       if (i)
       {
-        builder += u8", "sv;
+        builder.Append(u8", "sv);
       }
       const auto &range = Ranges[i];
       if (range.first == std::numeric_limits<int32>::min())
       {
-        builder += u8"infinite"sv;
+        builder.Append(u8"infinite"sv);
       }
       else
       {
-        AppendInteger(builder, range.first);
+        builder.Append(range.first);
       }
-      builder += u8' ';
+      builder.Append(u8' ');
       if (range.second == std::numeric_limits<int32>::max())
       {
-        builder += u8"infinite"sv;
+        builder.Append(u8"infinite"sv);
       }
       else
       {
-        AppendInteger(builder, range.second);
+        builder.Append(range.second);
       }
     }
-    return builder;
+    return krys::move(builder).ToString();
   }
 
   CSSOMString CounterStylePad::CssText() const noexcept
   {
-    CSSOMString result;
-    AppendInteger(result, PadMinimumLength);
-    result += u8' ';
-    result += PadSymbol.CssText();
-    return result;
+    StringBuilder result;
+    result.Append(PadMinimumLength);
+    result.Append(u8' ');
+    result.Append(PadSymbol.CssText());
+    return krys::move(result).ToString();
   }
 
   CSSOMString CounterStyleDescriptors::PadCSSText() const noexcept
@@ -721,16 +717,16 @@ namespace krys::boo::css
     {
       return {};
     }
-    CSSOMString builder;
+    StringBuilder builder;
     for (size_t i = 0uz; i < Symbols.size(); ++i)
     {
       if (i)
       {
-        builder += u8' ';
+        builder.Append(u8' ');
       }
-      builder += Symbols[i].CssText();
+      builder.Append(Symbols[i].CssText());
     }
-    return builder;
+    return krys::move(builder).ToString();
   }
 
   CSSOMString CounterStyleDescriptors::AdditiveSymbolsCSSText() const noexcept
@@ -739,17 +735,17 @@ namespace krys::boo::css
     {
       return {};
     }
-    CSSOMString builder;
+    StringBuilder builder;
     for (size_t i = 0uz; i < AdditiveSymbols.size(); ++i)
     {
       if (i)
       {
-        builder += u8", "sv;
+        builder.Append(u8", "sv);
       }
-      AppendInteger(builder, AdditiveSymbols[i].second);
-      builder += u8' ';
-      builder += AdditiveSymbols[i].first.CssText();
+      builder.Append(AdditiveSymbols[i].second);
+      builder.Append(u8' ');
+      builder.Append(AdditiveSymbols[i].first.CssText());
     }
-    return builder;
+    return krys::move(builder).ToString();
   }
 }

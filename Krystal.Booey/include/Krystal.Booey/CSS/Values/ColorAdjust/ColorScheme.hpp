@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Types.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -24,7 +25,7 @@ namespace krys::boo::css
   template <>
   struct Serialiser<ColorScheme>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const ColorScheme &value) noexcept;
   };
 

@@ -2,6 +2,7 @@
 #include "Krystal.Booey/CSS/Markup.hpp"
 #include "Krystal.Booey/CSS/Queries/GenericMediaQuerySerialisation.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -22,35 +23,35 @@ namespace krys::boo::css
 
   CSSOMString CSSContainerRule::CssText() const noexcept
   {
-    CSSOMString builder;
-    builder.append(u8"@container ");
+    StringBuilder builder;
+    builder.Append(u8"@container ");
     cq::Serialise(builder, GetContainerRule().ContainerQuery());
     AppendCSSTextForItems(builder);
-    return builder;
+    return krys::move(builder).ToString();
   }
 
   CSSOMString CSSContainerRule::ConditionText() const noexcept
   {
-    CSSOMString builder;
+    StringBuilder builder;
     cq::Serialise(builder, GetContainerRule().ContainerQuery());
-    return builder;
+    return krys::move(builder).ToString();
   }
 
   CSSOMString CSSContainerRule::ContainerName() const noexcept
   {
-    CSSOMString builder;
+    StringBuilder builder;
     auto name = GetContainerRule().ContainerQuery().Name;
     if (name != CSSOMStringAtom::Null() && !name.View().empty())
     {
       SerialiseIdentifier(CSSOMString(name.View()), builder);
     }
-    return builder;
+    return krys::move(builder).ToString();
   }
 
   CSSOMString CSSContainerRule::ContainerQuery() const noexcept
   {
-    CSSOMString builder;
+    StringBuilder builder;
     mq::Serialise(builder, GetContainerRule().ContainerQuery().Condition);
-    return builder;
+    return krys::move(builder).ToString();
   }
 }

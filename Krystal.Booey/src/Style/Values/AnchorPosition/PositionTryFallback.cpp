@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueConversion.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueCreation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordSerialisation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -118,9 +119,9 @@ namespace krys::boo::style
   // MARK: - Serialization
 
   void Serialiser<PositionTryFallback::PositionArea>::operator()(
-    css::CSSOMString &builder, const css::SerialisationContext &context, const RenderStyle &,
+    StringBuilder &builder, const css::SerialisationContext &context, const RenderStyle &,
     const PositionTryFallback::PositionArea &value) noexcept
   {
-    builder.append(value.Properties->GetPropertyCSSValue(css::PropertyId::PositionArea)->CssText(context));
+    builder.Append(value.Properties->GetPropertyCSSValue(css::PropertyId::PositionArea)->CssText(context));
   }
 }

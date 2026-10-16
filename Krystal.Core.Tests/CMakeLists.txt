@@ -56,6 +56,7 @@ target_sources(Krystal.Core.Tests
 
   # Text
 	PRIVATE tests/Text/CodePointIterator.cpp
+	PRIVATE tests/Text/StringBuilder.cpp
 
   # Types
 	PRIVATE tests/Types/BloomFilter.cpp

@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Markup.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -16,9 +17,9 @@ namespace krys::boo::style
 
   // MARK: - Serialization
 
-  void Serialiser<FontFamilyName>::operator()(css::CSSOMString &builder, const css::SerialisationContext &,
+  void Serialiser<FontFamilyName>::operator()(StringBuilder &builder, const css::SerialisationContext &,
                                               const RenderStyle &, const FontFamilyName &value) noexcept
   {
-    builder.append(css::SerialiseFontFamily(css::CSSOMString {value.Value.View()}));
+    builder.Append(css::SerialiseFontFamily(css::CSSOMString {value.Value.View()}));
   }
 }

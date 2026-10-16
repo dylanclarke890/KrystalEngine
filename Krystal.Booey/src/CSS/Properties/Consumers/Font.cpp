@@ -28,6 +28,7 @@
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/CSS/WebKitFontFamilyNames.hpp"
 #include "Krystal.Booey/Graphics/FontTaggedSettings.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
@@ -239,17 +240,17 @@ namespace krys::boo::css::PropertyParserHelpers
 
   KRYS_NODISCARD static Maybe<CSSOMStringAtom> ConcatenateFamilyName(TokenRange &tokens) noexcept
   {
-    CSSOMString builder;
+    StringBuilder builder;
     bool addedSpace = false;
     const Token &firstToken = tokens.Peek();
     while (tokens.Peek().Type() == TokenType::Ident)
     {
-      if (!builder.empty())
+      if (!builder.IsEmpty())
       {
-        builder += u8' ';
+        builder.Append(u8' ');
         addedSpace = true;
       }
-      builder += tokens.ConsumeIncludingWhitespace().IdentCodePoints();
+      builder.Append(tokens.ConsumeIncludingWhitespace().IdentCodePoints());
     }
     // <family-name> can't contain unquoted generic families
     if (!addedSpace

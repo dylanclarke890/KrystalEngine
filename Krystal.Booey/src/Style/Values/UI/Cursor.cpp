@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -63,10 +64,9 @@ namespace krys::boo::style
 
   // MARK: - Serialization
 
-  void Serialiser<CursorImage>::operator()(css::CSSOMString &builder,
-                                           const css::SerialisationContext &context, const RenderStyle &style,
-                                           const CursorImage &value) noexcept
+  void Serialiser<CursorImage>::operator()(StringBuilder &builder, const css::SerialisationContext &context,
+                                           const RenderStyle &style, const CursorImage &value) noexcept
   {
-    builder.append(value.Image->ComputedStyleValue(style)->CssText(context));
+    builder.Append(value.Image->ComputedStyleValue(style)->CssText(context));
   }
 }

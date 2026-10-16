@@ -2,6 +2,7 @@
 #include "Krystal.Booey/CSS/Media/MediaList.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -35,25 +36,25 @@ namespace krys::boo::css
 
   CSSOMString CSSMediaRule::CssText() const noexcept
   {
-    CSSOMString builder;
-    builder.append(u8"@media ").append(ConditionText());
+    StringBuilder builder;
+    builder.Append(u8"@media ", ConditionText());
     AppendCSSTextForItems(builder);
-    return builder;
+    return krys::move(builder).ToString();
   }
 
   CSSOMString CSSMediaRule::CssText(const SerialisationContext &context) const noexcept
   {
-    CSSOMString builder;
-    builder.append(u8"@media ").append(ConditionText());
+    StringBuilder builder;
+    builder.Append(u8"@media ", ConditionText());
     AppendCSSTextWithReplacementURLsForItems(builder, context);
-    return builder;
+    return krys::move(builder).ToString();
   }
 
   CSSOMString CSSMediaRule::ConditionText() const noexcept
   {
-    CSSOMString builder;
+    StringBuilder builder;
     mq::Serialise(builder, MediaQueries());
-    return builder;
+    return krys::move(builder).ToString();
   }
 
   MediaList *CSSMediaRule::Media() const noexcept

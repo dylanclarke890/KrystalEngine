@@ -2,6 +2,7 @@
 #include "Krystal.Booey/CSS/Markup.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Booey/CSS/Values/VariableData.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -43,32 +44,32 @@ namespace krys::boo::css
 
   CSSOMString CSSPropertyRule::CssText() const noexcept
   {
-    CSSOMString builder;
+    StringBuilder builder;
     const auto &descriptor = _propertyRule->GetDescriptor();
 
-    builder.append(u8"@property ");
+    builder.Append(u8"@property ");
     SerialiseIdentifier(CSSOMString(descriptor.Name.View()), builder);
-    builder.append(u8" { ");
+    builder.Append(u8" { ");
 
     if (!descriptor.Syntax.empty())
     {
-      builder.append(u8"syntax: ");
+      builder.Append(u8"syntax: ");
       SerialiseString(Syntax(), builder);
-      builder.append(u8"; ");
+      builder.Append(u8"; ");
     }
 
     if (descriptor.Inherits)
     {
-      builder.append(u8"inherits: ").append(*descriptor.Inherits ? u8"true" : u8"false").append(u8"; ");
+      builder.Append(u8"inherits: ", *descriptor.Inherits ? u8"true" : u8"false", u8"; ");
     }
 
     if (descriptor.InitialValue)
     {
-      builder.append(u8"initial-value: ").append(*InitialValue()).append(u8"; ");
+      builder.Append(u8"initial-value: ", *InitialValue(), u8"; ");
     }
 
-    builder.push_back(u8'}');
-    return builder;
+    builder.Append(u8'}');
+    return krys::move(builder).ToString();
   }
 
   void CSSPropertyRule::Reattach(Rule &rule) noexcept

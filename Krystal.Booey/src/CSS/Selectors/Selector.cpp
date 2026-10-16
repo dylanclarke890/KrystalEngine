@@ -4,6 +4,7 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorPseudoTypeMap.hpp"
 #include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Queue.hpp"
 #include <charconv>
 
@@ -457,16 +458,16 @@ namespace krys::boo::css
 
   namespace
   {
-    void AppendIdentifier(const CSSOMStringAtom &identifier, CSSOMString &builder) noexcept
+    void AppendIdentifier(const CSSOMStringAtom &identifier, StringBuilder &builder) noexcept
     {
       SerialiseIdentifier(CSSOMString(identifier.View()), builder);
     }
 
-    void AppendIdentifierOrStar(const CSSOMStringAtom &identifier, CSSOMString &builder) noexcept
+    void AppendIdentifierOrStar(const CSSOMStringAtom &identifier, StringBuilder &builder) noexcept
     {
       if (identifier == dom::StarAtom())
       {
-        builder += u8'*';
+        builder.Append(u8'*');
       }
       else
       {
@@ -474,16 +475,7 @@ namespace krys::boo::css
       }
     }
 
-    void AppendInteger(int32 value, CSSOMString &builder) noexcept
-    {
-      Array<char, 16uz> buffer;
-      auto result = std::to_chars(buffer.data(), buffer.data() + buffer.size(), value);
-      krys_debug_assert(result.ec == std::errc {});
-      builder.append(reinterpret_cast<const char8 *>(buffer.data()),
-                     reinterpret_cast<const char8 *>(result.ptr));
-    }
-
-    void AppendPseudoClassFunctionTail(CSSOMString &builder, const Selector *selector) noexcept
+    void AppendPseudoClassFunctionTail(StringBuilder &builder, const Selector *selector) noexcept
     {
       switch (selector->PseudoClass())
       {
@@ -491,8 +483,8 @@ namespace krys::boo::css
         case SelectorPseudoClass::NthOfType:
         case SelectorPseudoClass::NthLastOfType:
         {
-          builder += selector->Argument().View();
-          builder += u8')';
+          builder.Append(selector->Argument().View());
+          builder.Append(u8')');
           break;
         }
         default:
@@ -503,7 +495,7 @@ namespace krys::boo::css
       }
     }
 
-    void AppendPossiblyQuotedIdentifier(CSSOMString &builder,
+    void AppendPossiblyQuotedIdentifier(StringBuilder &builder,
                                         const PossiblyQuotedIdentifier &identifier) noexcept
     {
       if (!identifier.WasQuoted)
@@ -517,14 +509,14 @@ namespace krys::boo::css
     }
 
     void AppendCommaSeparatedPossiblyQuotedIdentifierList(
-      CSSOMString &builder, const FixedVector<PossiblyQuotedIdentifier> &list) noexcept
+      StringBuilder &builder, const FixedVector<PossiblyQuotedIdentifier> &list) noexcept
     {
       bool first = true;
       for (const auto &identifier : list)
       {
         if (!first)
         {
-          builder += u8", ";
+          builder.Append(u8", ");
         }
         first = false;
         AppendPossiblyQuotedIdentifier(builder, identifier);
@@ -532,7 +524,7 @@ namespace krys::boo::css
     }
 
     template <typename TAppend>
-    void AppendInterleaved(CSSOMString &builder, const FixedVector<CSSOMStringAtom> &list,
+    void AppendInterleaved(StringBuilder &builder, const FixedVector<CSSOMStringAtom> &list,
                            CSSOMStringView separator, TAppend &&append) noexcept
     {
       bool first = true;
@@ -540,7 +532,7 @@ namespace krys::boo::css
       {
         if (!first)
         {
-          builder += separator;
+          builder.Append(separator);
         }
         first = false;
         append(item, builder);
@@ -548,7 +540,7 @@ namespace krys::boo::css
     }
 
     // https://drafts.csswg.org/css-syntax/#serializing-anb
-    void OutputNthChildAnPlusB(const Selector &selector, CSSOMString &builder) noexcept
+    void OutputNthChildAnPlusB(const Selector &selector, StringBuilder &builder) noexcept
     {
       auto outputFirstTerm = [&builder](int32 a)
       {
@@ -560,12 +552,12 @@ namespace krys::boo::css
           }
           case -1:
           {
-            builder += u8'-';
+            builder.Append(u8'-');
             break;
           }
           default:
           {
-            AppendInteger(a, builder);
+            builder.Append(a);
             break;
           }
         }
@@ -580,42 +572,42 @@ namespace krys::boo::css
       int32 b = selector.NthB();
       if (a == 0 && b == 0)
       {
-        builder += u8'0';
+        builder.Append(u8'0');
       }
       else if (a == 0)
       {
-        AppendInteger(b, builder);
+        builder.Append(b);
       }
       else if (b == 0)
       {
         outputFirstTerm(a);
-        builder += u8'n';
+        builder.Append(u8'n');
       }
       else if (b < 0)
       {
         outputFirstTerm(a);
-        builder += u8'n';
-        AppendInteger(b, builder);
+        builder.Append(u8'n');
+        builder.Append(b);
       }
       else
       {
         outputFirstTerm(a);
-        builder += u8"n+";
-        AppendInteger(b, builder);
+        builder.Append(u8"n+");
+        builder.Append(b);
       }
     }
   }
 
   CSSOMString Selector::SelectorText(CSSOMStringView separator, CSSOMStringView rightSide) const noexcept
   {
-    CSSOMString builder;
+    StringBuilder builder;
 
     if (Match() == SelectorMatch::Type && !HasFlag(_flags, SelectorFlag::TagIsForNamespaceRule))
     {
       if (const auto &prefix = TagQualifiedName().NamespacePrefix(); prefix != CSSOMStringAtom::Null())
       {
         AppendIdentifierOrStar(prefix, builder);
-        builder += u8'|';
+        builder.Append(u8'|');
       }
       AppendIdentifierOrStar(TagQualifiedName().LocalName(), builder);
     }
@@ -631,22 +623,22 @@ namespace krys::boo::css
       }
       if (selector->Match() == SelectorMatch::Id)
       {
-        builder += u8'#';
+        builder.Append(u8'#');
         AppendIdentifier(selector->SerialisingValue(), builder);
       }
       else if (selector->Match() == SelectorMatch::NestingParent)
       {
-        builder += u8'&';
+        builder.Append(u8'&');
       }
       else if (selector->Match() == SelectorMatch::Class)
       {
-        builder += u8'.';
+        builder.Append(u8'.');
         AppendIdentifier(selector->SerialisingValue(), builder);
       }
       else if (selector->Match() == SelectorMatch::ForgivingUnknown
                || selector->Match() == SelectorMatch::ForgivingUnknownNestContaining)
       {
-        builder += selector->Value().View();
+        builder.Append(selector->Value().View());
       }
       else if (selector->Match() == SelectorMatch::HasScope)
       {
@@ -655,7 +647,7 @@ namespace krys::boo::css
       }
       else if (selector->Match() == SelectorMatch::PseudoClass)
       {
-        builder += SelectorTextForPseudoClass(selector->PseudoClass());
+        builder.Append(SelectorTextForPseudoClass(selector->PseudoClass()));
 
         // Handle serialisation of functional variants.
         switch (selector->PseudoClass())
@@ -664,39 +656,39 @@ namespace krys::boo::css
           {
             if (const auto *selectorList = selector->SubSelectors())
             {
-              builder += u8'(';
+              builder.Append(u8'(');
               selectorList->BuildSelectorsText(builder);
-              builder += u8')';
+              builder.Append(u8')');
             }
             break;
           }
           case SelectorPseudoClass::Lang:
           {
-            builder += u8'(';
+            builder.Append(u8'(');
             krys_debug_assert_msg(selector->LangList() && !selector->LangList()->isEmpty(),
                                   "An empty :lang() is invalid and should never be generated by the parser.");
             AppendCommaSeparatedPossiblyQuotedIdentifierList(builder, *selector->LangList());
-            builder += u8')';
+            builder.Append(u8')');
             break;
           }
           case SelectorPseudoClass::NthChild:
           case SelectorPseudoClass::NthLastChild:
           {
-            builder += u8'(';
+            builder.Append(u8'(');
             OutputNthChildAnPlusB(*selector, builder);
             if (const auto *selectorList = selector->SubSelectors())
             {
-              builder += u8" of ";
+              builder.Append(u8" of ");
               selectorList->BuildSelectorsText(builder);
             }
-            builder += u8')';
+            builder.Append(u8')');
             break;
           }
           case SelectorPseudoClass::Dir:
           case SelectorPseudoClass::NthOfType:
           case SelectorPseudoClass::NthLastOfType:
           {
-            builder += u8'(';
+            builder.Append(u8'(');
             AppendPseudoClassFunctionTail(builder, selector);
             break;
           }
@@ -705,16 +697,16 @@ namespace krys::boo::css
           case SelectorPseudoClass::Not:
           case SelectorPseudoClass::Where:
           {
-            builder += u8'(';
+            builder.Append(u8'(');
             selector->SubSelectors()->BuildSelectorsText(builder);
-            builder += u8')';
+            builder.Append(u8')');
             break;
           }
           case SelectorPseudoClass::State:
           {
-            builder += u8'(';
+            builder.Append(u8'(');
             AppendIdentifier(selector->Argument(), builder);
-            builder += u8')';
+            builder.Append(u8')');
             break;
           }
           case SelectorPseudoClass::ActiveViewTransitionType:
@@ -722,9 +714,9 @@ namespace krys::boo::css
             krys_debug_assert_msg(selector->ArgumentList() && !selector->ArgumentList()->isEmpty(),
                                   "An empty :active-view-transition-type() is invalid and should never be "
                                   "generated by the parser.");
-            builder += u8'(';
+            builder.Append(u8'(');
             AppendInterleaved(builder, *selector->ArgumentList(), u8", ", AppendIdentifier);
-            builder += u8')';
+            builder.Append(u8')');
             break;
           }
           default:
@@ -741,9 +733,9 @@ namespace krys::boo::css
         {
           case SelectorPseudoElement::Slotted:
           {
-            builder += u8"::slotted(";
+            builder.Append(u8"::slotted(");
             selector->SubSelectors()->BuildSelectorsText(builder);
-            builder += u8')';
+            builder.Append(u8')');
             break;
           }
           case SelectorPseudoElement::Highlight:
@@ -755,30 +747,30 @@ namespace krys::boo::css
             // Name or universal selector always comes first, followed by classes.
             krys_debug_assert(selector->ArgumentList() && !selector->ArgumentList()->isEmpty());
 
-            builder += u8"::";
-            builder += selector->SerialisingValue().View();
-            builder += u8'(';
+            builder.Append(u8"::");
+            builder.Append(selector->SerialisingValue().View());
+            builder.Append(u8'(');
             AppendInterleaved(builder, *selector->ArgumentList(), u8".", AppendIdentifierOrStar);
-            builder += u8')';
+            builder.Append(u8')');
             break;
           }
           case SelectorPseudoElement::Part:
           {
             krys_debug_assert(selector->ArgumentList() && !selector->ArgumentList()->isEmpty());
 
-            builder += u8"::part(";
+            builder.Append(u8"::part(");
             AppendInterleaved(builder, *selector->ArgumentList(), u8" ", AppendIdentifier);
-            builder += u8')';
+            builder.Append(u8')');
             break;
           }
           case SelectorPseudoElement::Cue:
           {
-            builder += u8"::cue";
+            builder.Append(u8"::cue");
             if (const auto *selectorList = selector->SubSelectors())
             {
-              builder += u8'(';
+              builder.Append(u8'(');
               selectorList->BuildSelectorsText(builder);
-              builder += u8')';
+              builder.Append(u8')');
             }
             break;
           }
@@ -786,7 +778,7 @@ namespace krys::boo::css
           {
             krys_debug_assert_msg(!PseudoElementMayHaveArgument(selector->PseudoElement()),
                                   "Missing serialisation for pseudo-element argument");
-            builder += u8"::";
+            builder.Append(u8"::");
             AppendIdentifier(selector->SerialisingValue(), builder);
             break;
           }
@@ -794,50 +786,50 @@ namespace krys::boo::css
       }
       else if (selector->IsAttributeSelector())
       {
-        builder += u8'[';
+        builder.Append(u8'[');
         if (const auto &prefix = selector->Attribute().NamespacePrefix();
             prefix != CSSOMStringAtom::Null() && prefix != CSSOMStringAtom::Empty())
         {
           AppendIdentifierOrStar(prefix, builder);
-          builder += u8'|';
+          builder.Append(u8'|');
         }
         AppendIdentifierOrStar(selector->Attribute().LocalName(), builder);
         switch (selector->Match())
         {
           case SelectorMatch::AttributeEquals:
           {
-            builder += u8'=';
+            builder.Append(u8'=');
             break;
           }
           case SelectorMatch::AttributeExists:
           {
             // AttributeExists has no operator or value, just the attribute name.
-            builder += u8']';
+            builder.Append(u8']');
             break;
           }
           case SelectorMatch::AttributeIncludes:
           {
-            builder += u8"~=";
+            builder.Append(u8"~=");
             break;
           }
           case SelectorMatch::AttributeDash:
           {
-            builder += u8"|=";
+            builder.Append(u8"|=");
             break;
           }
           case SelectorMatch::AttributePrefix:
           {
-            builder += u8"^=";
+            builder.Append(u8"^=");
             break;
           }
           case SelectorMatch::AttributeSuffix:
           {
-            builder += u8"$=";
+            builder.Append(u8"$=");
             break;
           }
           case SelectorMatch::AttributeSubstring:
           {
-            builder += u8"*=";
+            builder.Append(u8"*=");
             break;
           }
           default:
@@ -850,11 +842,11 @@ namespace krys::boo::css
           SerialiseString(CSSOMString(selector->SerialisingValue().View()), builder);
           if (selector->IsAttributeValueMatchingCaseInsensitive())
           {
-            builder += u8" i]";
+            builder.Append(u8" i]");
           }
           else
           {
-            builder += u8']';
+            builder.Append(u8']');
           }
         }
       }
@@ -864,17 +856,17 @@ namespace krys::boo::css
         {
           case SelectorPagePseudoClass::First:
           {
-            builder += u8":first";
+            builder.Append(u8":first");
             break;
           }
           case SelectorPagePseudoClass::Left:
           {
-            builder += u8":left";
+            builder.Append(u8":left");
             break;
           }
           case SelectorPagePseudoClass::Right:
           {
-            builder += u8":right";
+            builder.Append(u8":right");
             break;
           }
         }
@@ -888,8 +880,8 @@ namespace krys::boo::css
       selector = selector->PrecedingComplexSelectorComponent();
     }
 
-    builder += separator;
-    builder += rightSide;
+    builder.Append(separator);
+    builder.Append(rightSide);
 
     auto separatorTextForNestingRelative = [&]() -> Maybe<CSSOMStringView>
     {
@@ -957,10 +949,10 @@ namespace krys::boo::css
     {
       // We have a separator but no preceding selector which can happen with implicit relative nesting
       // selector.
-      return CSSOMString(*separatorText) + builder;
+      return CSSOMString(*separatorText) + CSSOMString(builder.View());
     }
 
-    return builder;
+    return krys::move(builder).ToString();
   }
 
 #pragma endregion

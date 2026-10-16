@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -33,23 +34,16 @@ namespace krys::boo::css
     CSSOMStringView styleSeparator = isDecimal ? u8"" : u8", ";
     CSSOMString styleLiteral = isDecimal ? CSSOMString() : CounterStyleCSSText();
 
-    CSSOMString result;
+    StringBuilder result;
     if (_separator == CSSOMStringAtom::Null() || _separator.View().empty())
     {
-      result.append(u8"counter(");
-      result.append(_identifier.View());
+      result.Append(u8"counter(", _identifier, styleSeparator, styleLiteral, u8')');
+      return krys::move(result).ToString();
     }
-    else
-    {
-      result.append(u8"counters(");
-      result.append(_identifier.View());
-      result.append(u8", ");
-      SerialiseString(CSSOMString(_separator.View()), result);
-    }
-    result.append(styleSeparator);
-    result.append(styleLiteral);
-    result.push_back(u8')');
-    return result;
+    result.Append(u8"counters(", _identifier, u8", ");
+    SerialiseString(CSSOMString(_separator.View()), result);
+    result.Append(styleSeparator, styleLiteral, u8')');
+    return krys::move(result).ToString();
   }
 
   CSSOMString CounterValue::CounterStyleCSSText() const noexcept

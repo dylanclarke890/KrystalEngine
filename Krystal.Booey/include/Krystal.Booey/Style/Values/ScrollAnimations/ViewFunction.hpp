@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Animation/ScrollAxis.hpp"
 #include "Krystal.Booey/Style/Values/ScrollAnimations/ViewTimelineInsets.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo
 {
@@ -45,7 +46,7 @@ namespace krys::boo
     template <>
     struct Serialiser<ViewFunctionParameters>
     {
-      void operator()(css::CSSOMString &, const css::SerialisationContext &, const RenderStyle &,
+      void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &,
                       const ViewFunctionParameters &) noexcept;
     };
 

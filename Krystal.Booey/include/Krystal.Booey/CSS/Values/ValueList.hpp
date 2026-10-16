@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include <iterator>
@@ -91,7 +92,7 @@ namespace krys::boo::css
     KRYS_NODISCARD bool HasValue(const Value &value) const noexcept;
     KRYS_NODISCARD bool HasValue(css::ValueId value) const noexcept;
 
-    void SerialiseItems(CSSOMString &builder, const SerialisationContext &context) const noexcept;
+    void SerialiseItems(StringBuilder &builder, const SerialisationContext &context) const noexcept;
     KRYS_NODISCARD CSSOMString SerialiseItems(const SerialisationContext &context) const noexcept;
 
     KRYS_NODISCARD bool ItemsEqual(const ValueContainingList &other) const noexcept;

@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -61,13 +62,13 @@ namespace krys::boo::css
   template <typename T, typename TKeyword, auto TShouldSerialiseKeyword>
   struct Serialiser<StepsEasingParameters::Kind<T, TKeyword, TShouldSerialiseKeyword>>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const StepsEasingParameters::Kind<T, TKeyword, TShouldSerialiseKeyword> &value) noexcept
     {
       Serialise(builder, context, value.Steps);
       if constexpr (TShouldSerialiseKeyword == StepsEasingParameters::ShouldSerialiseKeyword::Yes)
       {
-        builder.append(u8", ");
+        builder.Append(u8", ");
         Serialise(builder, context, value.Keyword);
       }
     }

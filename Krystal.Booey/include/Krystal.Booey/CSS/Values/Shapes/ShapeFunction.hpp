@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Position.hpp"
 #include "Krystal.Booey/CSS/Values/Shapes/FillRule.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -38,7 +39,7 @@ namespace krys::boo::css
   template <>
   struct Serialiser<ToPosition>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context, const ToPosition &) noexcept;
+    void operator()(StringBuilder &builder, const SerialisationContext &context, const ToPosition &) noexcept;
   };
 
   // <by-coordinate-pair> = by <coordinate-pair>
@@ -56,7 +57,7 @@ namespace krys::boo::css
   template <>
   struct Serialiser<ByCoordinatePair>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const ByCoordinatePair &) noexcept;
   };
 
@@ -88,7 +89,7 @@ namespace krys::boo::css
   template <>
   struct Serialiser<RelativeControlPoint>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const RelativeControlPoint &) noexcept;
   };
 
@@ -120,7 +121,7 @@ namespace krys::boo::css
   template <>
   struct Serialiser<AbsoluteControlPoint>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const AbsoluteControlPoint &) noexcept;
   };
 
@@ -144,7 +145,8 @@ namespace krys::boo::css
   template <>
   struct Serialiser<MoveCommand>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context, const MoveCommand &) noexcept;
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
+                    const MoveCommand &) noexcept;
   };
 
   // <line-command> = line [to <position>] | [by <coordinate-pair>]
@@ -167,7 +169,8 @@ namespace krys::boo::css
   template <>
   struct Serialiser<LineCommand>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context, const LineCommand &) noexcept;
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
+                    const LineCommand &) noexcept;
   };
 
   // <horizontal-line-command> = hline [ to [ <length-percentage> | left | center | right | x-start | x-end ]
@@ -208,21 +211,22 @@ namespace krys::boo::css
   template <>
   struct Serialiser<HLineCommand::To>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const HLineCommand::To &) noexcept;
   };
 
   template <>
   struct Serialiser<HLineCommand::By>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const HLineCommand::By &) noexcept;
   };
 
   template <>
   struct Serialiser<HLineCommand>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context, const HLineCommand &) noexcept;
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
+                    const HLineCommand &) noexcept;
   };
 
   // <vertical-line-command> = vline [ to [ <length-percentage> | top | center | bottom | y-start | y-end ]
@@ -263,21 +267,22 @@ namespace krys::boo::css
   template <>
   struct Serialiser<VLineCommand::To>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const VLineCommand::To &) noexcept;
   };
 
   template <>
   struct Serialiser<VLineCommand::By>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const VLineCommand::By &) noexcept;
   };
 
   template <>
   struct Serialiser<VLineCommand>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context, const VLineCommand &) noexcept;
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
+                    const VLineCommand &) noexcept;
   };
 
   // <curve-command> = curve [to <position> with <to-control-point> [/ <to-control-point>]?]
@@ -355,21 +360,22 @@ namespace krys::boo::css
   template <>
   struct Serialiser<CurveCommand::To>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const CurveCommand::To &) noexcept;
   };
 
   template <>
   struct Serialiser<CurveCommand::By>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const CurveCommand::By &) noexcept;
   };
 
   template <>
   struct Serialiser<CurveCommand>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context, const CurveCommand &) noexcept;
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
+                    const CurveCommand &) noexcept;
   };
 
   // <smooth-command> = smooth [to <position> [with <to-control-point>]?]
@@ -436,21 +442,21 @@ namespace krys::boo::css
   template <>
   struct Serialiser<SmoothCommand::To>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const SmoothCommand::To &) noexcept;
   };
 
   template <>
   struct Serialiser<SmoothCommand::By>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const SmoothCommand::By &) noexcept;
   };
 
   template <>
   struct Serialiser<SmoothCommand>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const SmoothCommand &) noexcept;
   };
 
@@ -503,7 +509,7 @@ namespace krys::boo::css
   template <>
   struct Serialiser<ArcCommand>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context, const ArcCommand &) noexcept;
+    void operator()(StringBuilder &builder, const SerialisationContext &context, const ArcCommand &) noexcept;
   };
 
   // <close> = close
@@ -553,7 +559,7 @@ namespace krys::boo::css
   template <>
   struct Serialiser<Shape>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context, const Shape &) noexcept;
+    void operator()(StringBuilder &builder, const SerialisationContext &context, const Shape &) noexcept;
   };
 }
 

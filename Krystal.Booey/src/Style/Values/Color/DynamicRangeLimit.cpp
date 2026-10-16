@@ -10,6 +10,7 @@
 #include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Values/Color/DynamicRangeLimitMix.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -99,7 +100,7 @@ namespace krys::boo::style
 
   // MARK: - Serialisation
 
-  void Serialiser<DynamicRangeLimit>::operator()(css::CSSOMString &builder,
+  void Serialiser<DynamicRangeLimit>::operator()(StringBuilder &builder,
                                                  const css::SerialisationContext &context,
                                                  const RenderStyle &style,
                                                  const DynamicRangeLimit &value) noexcept

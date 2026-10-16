@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Symbol.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css::tests
 {
@@ -30,7 +31,8 @@ namespace krys::boo::css::tests
     CHECK(SerialiseForTest(Symbol {SymbolRaw {ValueId::Pi}}) == u8"pi");
     CHECK(SerialiseForTest(SymbolRaw {ValueId::E}) == u8"e");
 
-    CSSOMString builder = u8"x: ";
+    StringBuilder builder;
+    builder.Append(u8"x: ");
     Serialise(builder, DefaultSerialisationContext(), keywords::None {});
     CHECK(builder == u8"x: none");
   }

@@ -5,6 +5,7 @@
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -39,9 +40,9 @@ namespace krys::boo::css
 
   CSSOMString MediaQueryList::Media() const noexcept
   {
-    CSSOMString builder;
+    StringBuilder builder;
     mq::Serialise(builder, _mediaQueries);
-    return builder;
+    return krys::move(builder).ToString();
   }
 
   void MediaQueryList::AddListener(RefPtr<dom::EventListenerCallback> &&listener) noexcept

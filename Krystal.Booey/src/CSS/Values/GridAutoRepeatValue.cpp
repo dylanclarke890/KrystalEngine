@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Values/GridAutoRepeatValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -23,12 +24,13 @@ namespace krys::boo::css
 
   CSSOMString GridAutoRepeatValue::CustomCSSText(const SerialisationContext &context) const noexcept
   {
-    CSSOMString result {u8"repeat("};
-    result.append(ToString(AutoRepeatID()));
-    result.append(u8", ");
+    StringBuilder result;
+    result.Append(u8"repeat(");
+    result.Append(ToString(AutoRepeatID()));
+    result.Append(u8", ");
     SerialiseItems(result, context);
-    result.push_back(u8')');
-    return result;
+    result.Append(u8')');
+    return krys::move(result).ToString();
   }
 
   bool GridAutoRepeatValue::Equals(const GridAutoRepeatValue &other) const noexcept

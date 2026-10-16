@@ -6,6 +6,7 @@
 #include "Krystal.Booey/CSS/Values/Types.hpp"
 #include "Krystal.Booey/Graphics/Color/AlphaPremultiplication.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorInterpolationMethod.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
@@ -117,21 +118,21 @@ namespace krys::boo::css
   template <>
   struct Serialiser<GradientAngularColorStop>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const GradientAngularColorStop &stop) noexcept;
   };
 
   template <>
   struct Serialiser<GradientLinearColorStop>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const GradientLinearColorStop &stop) noexcept;
   };
 
   template <>
   struct Serialiser<GradientDeprecatedColorStop>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const GradientDeprecatedColorStop &stop) noexcept;
   };
 
@@ -152,7 +153,7 @@ namespace krys::boo::css
   template <>
   struct Serialiser<LinearGradient>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const LinearGradient &gradient) noexcept;
   };
 
@@ -190,7 +191,7 @@ namespace krys::boo::css
   template <>
   struct Serialiser<PrefixedLinearGradient>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const PrefixedLinearGradient &gradient) noexcept;
   };
 
@@ -227,7 +228,7 @@ namespace krys::boo::css
   template <>
   struct Serialiser<DeprecatedLinearGradient>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const DeprecatedLinearGradient &gradient) noexcept;
   };
 
@@ -286,21 +287,21 @@ namespace krys::boo::css
   template <>
   struct Serialiser<RadialGradient::Ellipse>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const RadialGradient::Ellipse &ellipse) noexcept;
   };
 
   template <>
   struct Serialiser<RadialGradient::Circle>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const RadialGradient::Circle &circle) noexcept;
   };
 
   template <>
   struct Serialiser<RadialGradient>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const RadialGradient &gradient) noexcept;
   };
 
@@ -383,21 +384,21 @@ namespace krys::boo::css
   template <>
   struct Serialiser<PrefixedRadialGradient::Ellipse>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const PrefixedRadialGradient::Ellipse &ellipse) noexcept;
   };
 
   template <>
   struct Serialiser<PrefixedRadialGradient::Circle>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const PrefixedRadialGradient::Circle &circle) noexcept;
   };
 
   template <>
   struct Serialiser<PrefixedRadialGradient>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const PrefixedRadialGradient &gradient) noexcept;
   };
 
@@ -468,14 +469,14 @@ namespace krys::boo::css
   template <>
   struct Serialiser<DeprecatedRadialGradient::GradientBoxType>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const DeprecatedRadialGradient::GradientBoxType &gradientBox) noexcept;
   };
 
   template <>
   struct Serialiser<DeprecatedRadialGradient>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const DeprecatedRadialGradient &gradient) noexcept;
   };
 
@@ -539,14 +540,14 @@ namespace krys::boo::css
   template <>
   struct Serialiser<ConicGradient::GradientBoxType>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const ConicGradient::GradientBoxType &gradientBox) noexcept;
   };
 
   template <>
   struct Serialiser<ConicGradient>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const ConicGradient &gradient) noexcept;
   };
 

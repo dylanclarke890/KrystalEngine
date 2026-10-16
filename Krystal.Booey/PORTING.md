@@ -37,7 +37,7 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - **Interaction state**, layers i1 and i2 (2026-10-16): hover, active and focus state (`UserActionElementSet`, the `Element` setters, `Document::UpdateHoverActiveState`) with `:hover`, `:active`, `:focus`, `:focus-visible` and `:focus-within`; the HTML focus model (focusable areas, the focusing, unfocusing and focus update steps, `focus()`, `blur()`, `tabIndex`, `activeElement`, `hasFocus()`, focus events). See *Interaction state*.
 - **Frame view and viewport** (2026-10-16, step 1 of *Plan: render tree and layout*): a thin `LocalFrame` (document, view, page and text zoom, the media environment), `LocalFrameView` (frame rect, layout size, fixed layout, media type, pagination, the viewport unit sizes and overrides) and `LocalFrameViewLayoutContext` (scheduling, and layout up to where the render tree would be laid out); the seam's `RenderView` is a stand-in a framed document owns, so viewport units resolve; viewport changes invalidate viewport unit styles and re-evaluate media queries at layout; `Document::UpdateLayout`. See *Frame view and viewport*.
 
-**Just done:** step 2 of *Plan: render tree and layout*, platform text and fonts, in three layers (see *Platform text and fonts*): t1, text (break iterators, character properties, text spacing classes, base direction, a hyphenation stub), t2a, the font platform (FreeType faces, the font database, the bundled Liberation Sans, `FontPlatformData`, `Font`, glyph pages), and t2b, font selection (the font cache, fallback, `FontCascadeFonts`, `CSSFontSelector` without `@font-face`, generic families in `Settings`; font-relative units are real), are done (2026-10-16); t3, text measurement, is split in two: t3a, the simple path (`TextRun`, `GlyphBuffer`, `WidthCache`, `WidthIterator`, the `FontCascade` width, position and selection APIs), and t3b, shaping with HarfBuzz (`ComplexTextController`), are done (2026-10-16), which completes step 2. Step 3 of the plan, DOM groundwork, is next. Other candidates are in *Open* and `TODO.md` (the event loop, resource loading, animations).
+**Just done:** step 2 of *Plan: render tree and layout*, platform text and fonts, in three layers (see *Platform text and fonts*): t1, text (break iterators, character properties, text spacing classes, base direction, a hyphenation stub), t2a, the font platform (FreeType faces, the font database, the bundled Liberation Sans, `FontPlatformData`, `Font`, glyph pages), and t2b, font selection (the font cache, fallback, `FontCascadeFonts`, `CSSFontSelector` without `@font-face`, generic families in `Settings`; font-relative units are real), are done (2026-10-16); t3, text measurement, is split in two: t3a, the simple path (`TextRun`, `GlyphBuffer`, `WidthCache`, `WidthIterator`, the `FontCascade` width, position and selection APIs), and t3b, shaping with HarfBuzz (`ComplexTextController`), are done (2026-10-16), which completes step 2. Step 3 of the plan, DOM groundwork, has started: Krystal.Core's `StringBuilder` is done (2026-10-16), and the renderer pointer, `PseudoElement` and `CreateElementRenderer` are next. Other candidates are in *Open* and `TODO.md` (the event loop, resource loading, animations).
 
 **Open:**
 - **Rendering:** there's no render tree. A document shown in a frame with a view owns the seam's `RenderView`, a stand-in for the render tree's root (its document, a needs-layout bit, the page zoom and the viewport unit sizes); layout updates style and stops where the render tree would be laid out. `RenderTreeUpdater` is a stand-in that keeps the style each element's renderer would hold on the element (`Node::GetRenderStyle`) and the render view's style on the document (`Document::RenderViewStyle`); text renderers, generated content, rebuild roots and the top layer wait for it. Without principal boxes, size container queries and container units are unknown and the seam's `RenderBoxOf` is null. Layout interleaving is a loop without layout. Anchor positioning (position options, position visibility, the tree resolution state) and elements with custom style resolve callbacks are FIXMEs in the tree resolver.
@@ -51,7 +51,7 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - **Style differences:** `Style::Difference` (`style/StyleDifference.h`, `.cpp`: repaint and layout decisions) waits for the render tree, its only consumer (decided 2026-10-15).
 - **DOM** (deferred by choice): no document is freed (a container doesn't release its children and every node, including the document itself, holds its document; upstream breaks the cycle with the referencing-node count). Mutation observers never deliver records (TODOs in `MutationObserverAlgorithms.cpp`; can be built on `html::EventLoop`). `NodeAlgorithms::Equals` compares attributes by position. `Document::Head()` returns null for parsed documents. Only `classList` follows its attribute (`relList`, `sandbox`, `sizes`, `blocking`, `htmlFor` should update from `Element::OnAttributeChanged`). `TreeQueries::NextShadowIncluding` visits a host's children before its shadow root. Shadow roots have no part mappings (`exportparts`), so `::part()` stays in the host's scope.
 - **URL:** the DOM `URL` interface and `URLSearchParams` (WPT `setters_tests.json`).
-- **Krystal.Core:** the `IntrusivePtr` `Downcast`/`DynamicDowncast` overloads can't take an explicit target and `Downcast` rejects null (FIXME workaround in `OffsetRotateValue.cpp`); `StringBuilder` and `DefaultHash<StringAtom>` aren't ported (the latter for hashing `Style::GridPosition`).
+- **Krystal.Core:** the `IntrusivePtr` `Downcast`/`DynamicDowncast` overloads can't take an explicit target and `Downcast` rejects null (FIXME workaround in `OffsetRotateValue.cpp`); `DefaultHash<StringAtom>` isn't ported (for hashing `Style::GridPosition`).
 - **Code FIXMEs now unblocked:** `BorderImage.cpp` and `MaskBorder.cpp` still use literal initial values ("use `ComputedStyle`'s once the generated storage is ported"; the storage came with f3f3).
 - **Unreviewed:** `CSS/Values/Concepts.hpp` is built but not reviewed. `CSS/Values/FilterEffects/FilterFunctionDescriptor.hpp` and `CSS/Values/Color/CurrentColor.hpp` (not upstream) are on disk but not built.
 - **Undecided style question:** list wrappers use container-protocol lowercase names (`isEmpty`, `contains`), matching Core's `FixedVector`/`ListHashSet`; `EnumSet` and other wrappers use PascalCase.
@@ -71,7 +71,8 @@ Use the CSS aliases from `CSS/Types/CSSOMString.hpp`, never the Krystal.Core or 
 | `wtf/text/WTFString.h` (`String`) | `CSSOMString` | Alias of `dom::DOMString` (`std::u8string`). |
 | `wtf/text/StringView.h` (`StringView`) | `CSSOMStringView` | Alias of `dom::DOMStringView` (`std::u8string_view`). |
 | `wtf/text/AtomString.h` (`AtomString`) | `CSSOMStringAtom` | Alias of `dom::DOMStringAtom`; own port of WTF's atom string. |
-| `wtf/text/StringBuilder.h` | `port` → `StringBuilder` | Krystal naming; UTF-8 only (drop WebKit's Latin-1/UTF-16 handling). |
+| `wtf/text/StringBuilder.h`, `StringConcatenate.h`, `StringConcatenateNumbers.h` | `Krystal.Core/Text/StringBuilder.hpp` | UTF-8 only. Serialisers take `StringBuilder &` as upstream does; `Append` takes the values upstream's variadic `append` does (see *Krystal.Core `StringBuilder`*). |
+| `wtf/HexNumber.h` (`hex`) | `Krystal.Core/Text/HexNumber.hpp` (`Hex`) | A `StringBuilder` writer. |
 | `wtf/text/ASCIILiteral.h` (`"foo"_s`) | `u8"foo"sv` / `CSSOMStringView` | No new type. |
 | `wtf/text/ParsingUtilities.h` | `port` on demand → `Text/` | Port only the helpers a slice uses. |
 | `wtf/text/StringToIntegerConversion.h` | `port` → `Text/` | `parseInteger` and friends. |
@@ -591,7 +592,7 @@ Graph from `css/parser/CSSPropertyParserConsumer+Color.cpp`, `+ColorAdjust.cpp` 
 | `css/parser/CSSParserContext.cpp` (`strictCSSParserContext`) | `port` | `StrictParserContext()` in `CSS/Parser/ParserContext.hpp` | on | A function-local static instead of `MainThreadNeverDestroyed`. Superseded: see *Values*. |
 | `css/CSSProperty.h` (`acceptsQuirkyColor`, `acceptsQuirkyAngle`) | `have` | `CSS/Properties/Property.hpp` | on | Reviewed in d2. |
 | `css/CSSValuePool.h`, `CSSColorValue.h`, `CSSPrimitiveValue.h`, `CSSDynamicRangeLimitValue.h`, `CSSColorSchemeValue.h` | `have` | | on | Only the Value-returning consumers use them; ported in 5c and the Values slice. |
-| `wtf/SortedArrayMap.h`, `wtf/text/MakeString.h` | `wont` | | | `switch`; `std::to_string` + `append`. |
+| `wtf/SortedArrayMap.h`, `wtf/text/MakeString.h` | `wont` | | | `switch`; a `StringBuilder`. |
 
 **Bugs fixed:**
 - `Color.hpp`: `ConsumeColorRaw` returned `Color`, which inside `css` is `css::Color`, not the platform colour; `DynamicRangeLimit` was forward-declared as a `class` (it's a `struct`; C4099 is an error under `/WX`); `ParseColorRaw`/`ParseColorRawSimple`/`ParseColorRawGeneral` were missing.
@@ -1434,7 +1435,7 @@ Graph from the seven d4 entries (`StyleRule.cpp`, `StyleRuleImport.cpp`, `StyleR
 - `StyleSheetContents`: `ParseString` came with d5 and the owner-node half (`SingleOwnerNode`, `SingleOwnerDocument`, `StartLoadingDynamicSheet`, `CheckLoaded`) with e4. Not ported until the loader (FIXME): `ParseAuthorStyleSheet`, `NotifyLoadedSheet`, `SubresourcesAllowReuse`, `IsLoadingSubresources`, so `TraverseSubresources` doesn't visit an import's cached sheet. Client registration is kept (pointers only).
 - `FontFeatureValues::Tags` is a `HashMap` (`std::unordered_map`), so the hash sums the entries (order-independent); upstream hashes in iteration order. No `TextStream` operator.
 - `FontPaletteIndex` and `FontPaletteValues` have `explicit operator bool`.
-- Keyframe offsets are written with `std::to_chars` (shortest fixed notation), as upstream's `StringBuilder::append(double)` for offsets in range.
+- Keyframe offsets are written as upstream's `StringBuilder::append(double)` writes them (`StringBuilder::Append`, since 2026-10-16).
 - `KeyframeRule::Create` takes a `Span` of key pairs (the key list parser returns a `SmallList`).
 - Indices and counts are `uint32`; out-of-range `RuleAt`/`WrapperInsertRule`/`WrapperDeleteRule` assert.
 - As upstream, `KeyframesRule` copies share their keyframes, and `FunctionDeclarationsRule`/`FontFeatureValuesRule` copies share their declarations/values; every other rule copies deeply.
@@ -2943,7 +2944,7 @@ Graph from `rendering/RenderObject.h`, `RenderElement.h`, `RenderBox.h`, `Render
    - `PseudoElement` nodes: generated content hangs its renderers off them. Today `::before`/`::after` live only in the element's pseudo-style cache, so the tree resolver and `RenderTreeUpdater` change with them.
 5. **Style.** `Style::Difference` (deferred until now, 2026-10-15). The seam's render object stubs (`RenderView`, `RenderElement`, `RenderBoxModelObject`, `RenderBox`, `RenderBlock`, `RenderGrid`, `RenderInline`, `RenderTheme`) and its always-null `RendererOf`/`RenderBoxOf` go as the real classes arrive; size container queries and container units follow. `StylePendingResources` can be a stub until resource loading.
 6. **Settings.** About 55 distinct settings are read in `rendering/` and `layout/`; per *Settings*, standard features are always on and the rest use upstream's defaults in code.
-7. **Smaller gaps.** Krystal.Core's `StringBuilder` (`RenderText`, counters, list markers); `TransformState`, `PODIntervalTree` (floats), `LayoutRange`, `RenderGeometryMap`; check `RectEdges`/`BoxSides`. The `Layout*`/`Float*`/`Int*` geometry and the transforms are done.
+7. **Smaller gaps.** Krystal.Core's `StringBuilder` (`RenderText`, counters, list markers; done 2026-10-16); `TransformState`, `PODIntervalTree` (floats), `LayoutRange`, `RenderGeometryMap`; check `RectEdges`/`BoxSides`. The `Layout*`/`Float*`/`Int*` geometry and the transforms are done.
 
 ### Out of scope at first
 
@@ -2964,7 +2965,7 @@ Graph from `rendering/RenderObject.h`, `RenderElement.h`, `RenderBox.h`, `Render
 
 1. **Frame view and viewport.** Done 2026-10-16; see *Frame view and viewport*.
 2. **Platform text and fonts** (FreeType and HarfBuzz, `FontCascade`, bidi, line breaking). Independent of 1. Done 2026-10-16 (t1, t2a, t2b, t3a, t3b); see *Platform text and fonts*.
-3. **DOM groundwork:** the renderer pointer, `PseudoElement`, `CreateElementRenderer`, `StringBuilder`.
+3. **DOM groundwork:** the renderer pointer, `PseudoElement`, `CreateElementRenderer`, `StringBuilder` (done 2026-10-16; see *Krystal.Core `StringBuilder`*).
 4. **`Style::Difference`.**
 5. **The render tree:** `RenderObject`, `RenderElement`, `RenderBoxModelObject`, `RenderBox`, `RenderBlock`, `RenderBlockFlow`, `RenderInline`, `RenderText`, `RenderView`; `RenderTreeBuilder` (block, inline, continuation, list, first-letter); the real `RenderTreeUpdater`; generated content (quotes, counters, list markers). The seam's render stubs go.
 6. **Layout:** block layout with the minimal `RenderLayer`; the layout tree and inline layout (`layout/layouttree/`, `formattingContexts/inline/`, `integration/inline/`); then flex, grid and table.
@@ -3204,3 +3205,34 @@ Graph from `platform/graphics/ComplexTextController.h` (headers-only, following 
 - A face HarfBuzz can't read is shaped as missing glyphs (upstream asserts).
 
 Tests: `tests/Graphics/ComplexTextController.cpp` (HarfBuzz fonts, kerning and turning it off, the simple path for `optimizeSpeed`, composed combining characters and positions in them, RTL Hebrew with its selection rects and per-byte advances, marks, whole-cluster fallback, glyph bounds and overflow; given runs: a ligature's advance divided between two-byte characters, positions inside it): 2 cases / 57 assertions. The t3a tests now run on the shaped path and pass unchanged. The whole suite passes (2104 cases).
+
+## Krystal.Core `StringBuilder` (2026-10-16)
+
+Part of step 3 of *Plan: render tree and layout*. Read in full: `wtf/text/StringBuilder.h`, `.cpp`, `StringConcatenate.h`, `StringConcatenateNumbers.h`, `wtf/HexNumber.h`, `wtf/dtoa.cpp` (`numberToStringAndSize`), `wtf/dragonbox/dragonbox_to_chars.h`, `.cpp` (`to_shortest`), `wtf/dtoa/utils.h` (the shortest representation's exponent range).
+
+**Decision (2026-10-16, by the user):** convert everything that was built without it in this change: the serialisers that took a `CSSOMString &`/`utf8_string &` builder (where upstream takes `StringBuilder &`), the number formatting and colour serialisation helpers, and the `std::format`/`to_chars` string building that stood in for upstream's `append` of numbers and `hex`.
+
+| WebKit | Verdict | Krystal | Notes |
+|---|---|---|---|
+| `wtf/text/StringBuilder.h`, `.cpp`, `StringConcatenate.h`, `StringConcatenateNumbers.h` (the adapters) | `port` | `Krystal.Core/Text/StringBuilder.hpp`, `src/Text/StringBuilder.cpp` | tested (`Krystal.Core.Tests/tests/Text/StringBuilder.cpp`). |
+| `wtf/HexNumber.h` | `port` | `Krystal.Core/Text/HexNumber.hpp` | tested. |
+| `wtf/text/StringBuilderJSON.h`, `.cpp` (`appendQuotedJSONString`) | `skip` | | Nothing uses it. |
+
+**API:** `Append(values...)` appends UTF-8 strings (`utf8_stringview`, `utf8_string`, `u8` literals, `StringAtom`, another builder), ASCII strings (`std::string_view`, `"..."` literals; asserted ASCII), `char8` (a code unit), `char32` (a code point, encoded), an ASCII `char`, integers and enums in decimal, floating-point numbers in their shortest round-trip form written as upstream writes them (ECMAScript `Number.prototype.toString`: `1.5`, `100`, `0.000001`, `1e-7`, `1e+21`, `-0` as `0`; floats with float precision), and `StringBuilderWriter`s (types with `WriteTo(StringBuilder &)`, as upstream's `writeUsing` adapters; `Hex` is one). `bool` and UTF-16 characters don't compile. Also `AppendSubstring`, `AppendRepeated`, `ToString` (a reference, or the string moved out of an rvalue builder), `ToAtomString`, `IsEmpty`, `Length` (bytes), `View` and an implicit `utf8_stringview` conversion, `operator[]`, `Capacity`, `ReserveCapacity`, `Shrink`, `ShrinkToFit`, `ContainsOnlyASCII`, `Clear`, `Swap`, `operator==`.
+
+**Names:** `append` → `Append`, `toString` → `ToString`, `length` → `Length`, `shrink` → `Shrink`, `hex` → `Hex`, `Lowercase`/`Uppercase` → `HexConversionMode::Lowercase`/`Uppercase`.
+
+**Differences:**
+- UTF-8 only: no Latin-1/UTF-16 buffers, no `span8`/`span16`/`is8Bit`, no overflow policy (`std::u8string` terminates on overflow, as upstream's default crash policy), no `createNSString`.
+- `ToString` doesn't shrink the buffer; `ToString() &&` moves the string out instead of copying it.
+- The variadic `append` writes values one at a time (upstream sums their lengths and writes once).
+
+**Converted (the sweep):** about 370 serialiser parameters in 160 files (`CSS/`, `Style/`, `Graphics/Color/`, `SVG/`), their callers' local builders, the generated extractor (`codegen/css_properties.py`), `SVGPathStringBuilder`'s member, and the CSSOM rule texts. Chains of `append` became one `Append`. Helpers made redundant were removed: `Token.cpp`'s `AppendASCII`/`AppendNumber`, and the `AppendInteger`s of `CSSFontPaletteValuesRule`, `CounterStyleDescriptors`, `Selector`, `SelectorParser` and `ColorSerialisation`.
+
+**Behaviour changes** (now as upstream):
+- Numbers in serialised tokens, keyframe offsets and `PrimitiveValue::FormatIntegerValue` use upstream's shortest form: values below 1e-6 are written in exponent form (`1e-7`; previously fixed notation, `0.0000001`). Resolves the FIXME in `PrimitiveValue.cpp`.
+- Unicode ranges (tokens and `UnicodeRangeValue`) and CSS code point escapes use `Hex`, with the same output as before.
+
+**Not converted:** `std::to_string` calls that stand in for upstream's `String::number` (`HTMLLIElement`, `HTMLOrSVGOrMathMLElement`, attribute reflection, `Color` hex parsing), `std::format` for a debug pointer (`ComposedTreeIterator`) and for `FormattedNumber::fixedWidth` (`MathMLElement`), the UTF-32 escaping in `SerialiserIdioms.hpp`, and the URL parser's buffers (upstream uses vectors there). `PathFunction.cpp`'s FIXME is upstream's.
+
+Tests: `Krystal.Core.Tests/tests/Text/StringBuilder.cpp` (strings, characters and code points, substrings and shrinking, builders, moving out, integers and enums, ECMAScript number formatting, floats, writers, `Hex`): 4 cases / 74 assertions. Booey tests updated for the new parameter types; the whole Booey suite passes (2104 cases), with no expectation changes.

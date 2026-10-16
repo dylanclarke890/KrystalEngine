@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Values/SubgridValue.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -8,9 +9,10 @@ namespace krys::boo::css
     {
       return CSSOMString(u8"subgrid");
     }
-    CSSOMString result {u8"subgrid "};
+    StringBuilder result;
+    result.Append(u8"subgrid ");
     SerialiseItems(result, context);
-    return result;
+    return krys::move(result).ToString();
   }
 
   SubgridValue::SubgridValue(ValueListBuilder builder) noexcept

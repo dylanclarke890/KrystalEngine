@@ -14,6 +14,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueConversion.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueCreation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -105,7 +106,7 @@ namespace krys::boo::style
 
   // MARK: - Serialization
 
-  void Serialiser<FontSizeAdjust>::operator()(css::CSSOMString &builder,
+  void Serialiser<FontSizeAdjust>::operator()(StringBuilder &builder,
                                               const css::SerialisationContext &context,
                                               const RenderStyle &style, const FontSizeAdjust &value) noexcept
   {

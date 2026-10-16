@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Graphics/FontTaggedSettings.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -57,7 +58,7 @@ namespace krys::boo::style
   template <>
   struct Serialiser<FontFeatureSettings>
   {
-    void operator()(css::CSSOMString &, const css::SerialisationContext &, const RenderStyle &,
+    void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &,
                     const FontFeatureSettings &) noexcept;
   };
 }

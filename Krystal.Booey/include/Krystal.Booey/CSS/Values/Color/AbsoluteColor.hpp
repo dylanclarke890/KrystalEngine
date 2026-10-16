@@ -8,6 +8,7 @@
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesValueVisitation.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -61,36 +62,36 @@ namespace krys::boo::css
   template <typename D>
   struct Serialiser<AbsoluteColor<D>>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const AbsoluteColor<D> &value) noexcept
     {
       if constexpr (D::UsesColorFunctionForSerialisation)
       {
-        builder.append(u8"color(");
-        builder.append(boo::Serialisation(ColorSpaceFor<typename D::ColorType>));
-        builder.push_back(u8' ');
+        builder.Append(u8"color(");
+        builder.Append(boo::Serialisation(ColorSpaceFor<typename D::ColorType>));
+        builder.Append(u8' ');
       }
       else
       {
-        builder.append(D::SerialisationFunctionName);
-        builder.push_back(u8'(');
+        builder.Append(D::SerialisationFunctionName);
+        builder.Append(u8'(');
       }
 
       const auto &[c1, c2, c3, alpha] = value.Components;
 
       Serialise(builder, context, c1);
-      builder.push_back(u8' ');
+      builder.Append(u8' ');
       Serialise(builder, context, c2);
-      builder.push_back(u8' ');
+      builder.Append(u8' ');
       Serialise(builder, context, c3);
 
       if (alpha)
       {
-        builder.append(u8" / ");
+        builder.Append(u8" / ");
         Serialise(builder, context, *alpha);
       }
 
-      builder.push_back(u8')');
+      builder.Append(u8')');
     }
   };
 

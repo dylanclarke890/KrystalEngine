@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/GridTemplateAreasValue.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo::css
@@ -30,27 +31,27 @@ namespace krys::boo::css
       }
     }
 
-    CSSOMString builder;
+    StringBuilder builder;
     bool first = true;
     for (const auto *name : columns)
     {
       if (!first)
       {
-        builder.push_back(u8' ');
+        builder.Append(u8' ');
       }
       first = false;
 
       if (!name)
       {
-        builder.push_back(u8'.');
+        builder.Append(u8'.');
       }
       else
       {
-        builder.append(*name);
+        builder.Append(*name);
       }
     }
 
-    return builder;
+    return krys::move(builder).ToString();
   }
 
   CSSOMString GridTemplateAreasValue::CustomCSSText(const SerialisationContext &context) const noexcept

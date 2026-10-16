@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Graphics/Color/ColorNormalization.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include <charconv>
 #include <cmath>
@@ -13,11 +14,11 @@ namespace krys::boo
 {
   namespace
   {
-    void AppendNumericComponent(utf8_string &builder, float value) noexcept
+    void AppendNumericComponent(StringBuilder &builder, float value) noexcept
     {
       if (std::isnan(value))
       {
-        builder.append(u8"none");
+        builder.Append(u8"none");
         return;
       }
 
@@ -27,17 +28,9 @@ namespace krys::boo
         return;
       }
 
-      builder.append(u8"calc(");
+      builder.Append(u8"calc(");
       FormatCSSNumber(builder, value);
-      builder.push_back(u8')');
-    }
-
-    void AppendInteger(utf8_string &builder, uint32 value) noexcept
-    {
-      Array<char, 16uz> buffer;
-      auto result = std::to_chars(buffer.data(), buffer.data() + buffer.size(), value);
-      krys_debug_assert(result.ec == std::errc {});
-      builder.append(buffer.data(), result.ptr);
+      builder.Append(u8')');
     }
 
     enum class HexCase : uint8
@@ -46,30 +39,30 @@ namespace krys::boo
       Lowercase
     };
 
-    void AppendHexByte(utf8_string &builder, uint8 value, HexCase hexCase = HexCase::Uppercase) noexcept
+    void AppendHexByte(StringBuilder &builder, uint8 value, HexCase hexCase = HexCase::Uppercase) noexcept
     {
       if (hexCase == HexCase::Lowercase)
       {
-        builder.push_back(static_cast<char8>(text::UpperNibbleToLowercaseASCIIHexDigit(value)));
-        builder.push_back(static_cast<char8>(text::LowerNibbleToLowercaseASCIIHexDigit(value)));
+        builder.Append(static_cast<char8>(text::UpperNibbleToLowercaseASCIIHexDigit(value)));
+        builder.Append(static_cast<char8>(text::LowerNibbleToLowercaseASCIIHexDigit(value)));
       }
       else
       {
-        builder.push_back(static_cast<char8>(text::UpperNibbleToASCIIHexDigit(value)));
-        builder.push_back(static_cast<char8>(text::LowerNibbleToASCIIHexDigit(value)));
+        builder.Append(static_cast<char8>(text::UpperNibbleToASCIIHexDigit(value)));
+        builder.Append(static_cast<char8>(text::LowerNibbleToASCIIHexDigit(value)));
       }
     }
 
     /// @brief Appends " / <alpha>" unless the alpha is (essentially) opaque, then the closing parenthesis.
-    void AppendAlphaAndClose(utf8_string &builder, float alpha) noexcept
+    void AppendAlphaAndClose(StringBuilder &builder, float alpha) noexcept
     {
       if (!AreEssentiallyEqual(alpha, 1.0f))
       {
-        builder.append(u8" / ");
+        builder.Append(u8" / ");
         AppendNumericComponent(builder, alpha);
       }
 
-      builder.push_back(u8')');
+      builder.Append(u8')');
     }
 
     template <typename ColorType>
@@ -79,16 +72,17 @@ namespace krys::boo
 
       auto [c1, c2, c3, alpha] = color.Unresolved();
 
-      utf8_string builder = u8"color(";
-      builder.append(Serialisation(ColorSpaceFor<ColorType>));
-      builder.push_back(u8' ');
+      StringBuilder builder;
+      builder.Append(u8"color(");
+      builder.Append(Serialisation(ColorSpaceFor<ColorType>));
+      builder.Append(u8' ');
       AppendNumericComponent(builder, c1);
-      builder.push_back(u8' ');
+      builder.Append(u8' ');
       AppendNumericComponent(builder, c2);
-      builder.push_back(u8' ');
+      builder.Append(u8' ');
       AppendNumericComponent(builder, c3);
       AppendAlphaAndClose(builder, alpha);
-      return builder;
+      return krys::move(builder).ToString();
     }
 
     KRYS_NODISCARD utf8_string SerialisationUsingColorFunction(const SRGBA<uint8> &color) noexcept
@@ -104,15 +98,16 @@ namespace krys::boo
       // https://www.w3.org/TR/css-color-4/#serializing-lab-lch
       auto [c1, c2, c3, alpha] = color.Unresolved();
 
-      utf8_string builder {Serialisation(ColorSpaceFor<ColorType>)};
-      builder.push_back(u8'(');
+      StringBuilder builder;
+      builder.Append(Serialisation(ColorSpaceFor<ColorType>));
+      builder.Append(u8'(');
       AppendNumericComponent(builder, c1);
-      builder.push_back(u8' ');
+      builder.Append(u8' ');
       AppendNumericComponent(builder, c2);
-      builder.push_back(u8' ');
+      builder.Append(u8' ');
       AppendNumericComponent(builder, c3);
       AppendAlphaAndClose(builder, alpha);
-      return builder;
+      return krys::move(builder).ToString();
     }
 
     template <typename ColorType>
@@ -127,15 +122,16 @@ namespace krys::boo
 
       auto [c1, c2, c3, alpha] = color.Unresolved();
 
-      utf8_string builder {Serialisation(ColorSpaceFor<ColorType>)};
-      builder.push_back(u8'(');
+      StringBuilder builder;
+      builder.Append(Serialisation(ColorSpaceFor<ColorType>));
+      builder.Append(u8'(');
       AppendNumericComponent(builder, c1);
-      builder.push_back(u8' ');
+      builder.Append(u8' ');
       AppendNumericComponent(builder, c2);
-      builder.push_back(u8' ');
+      builder.Append(u8' ');
       AppendNumericComponent(builder, NormalizeHue(c3));
       AppendAlphaAndClose(builder, alpha);
-      return builder;
+      return krys::move(builder).ToString();
     }
 
     // MARK: SRGBA<uint8> overloads
@@ -175,35 +171,36 @@ namespace krys::boo
 
       auto [red, green, blue, alpha] = color.Resolved();
 
-      utf8_string builder = alpha == 0xFF ? u8"rgb(" : u8"rgba(";
-      AppendInteger(builder, red);
-      builder.append(u8", ");
-      AppendInteger(builder, green);
-      builder.append(u8", ");
-      AppendInteger(builder, blue);
+      StringBuilder builder;
+      builder.Append(alpha == 0xFF ? u8"rgb(" : u8"rgba(");
+      builder.Append(red);
+      builder.Append(u8", ");
+      builder.Append(green);
+      builder.Append(u8", ");
+      builder.Append(blue);
 
       switch (alpha)
       {
         case 0:
         {
-          builder.append(u8", 0)");
+          builder.Append(u8", 0)");
           break;
         }
         case 0xFF:
         {
-          builder.push_back(u8')');
+          builder.Append(u8')');
           break;
         }
         default:
         {
-          builder.append(u8", 0.");
-          builder.append(FractionDigitsForFractionalAlphaValue(alpha).data());
-          builder.push_back(u8')');
+          builder.Append(u8", 0.");
+          builder.Append(FractionDigitsForFractionalAlphaValue(alpha).data());
+          builder.Append(u8')');
           break;
         }
       }
 
-      return builder;
+      return krys::move(builder).ToString();
     }
 
     KRYS_NODISCARD utf8_string SerialisationForHTML(SRGBA<uint8> color,
@@ -217,11 +214,12 @@ namespace krys::boo
       auto [red, green, blue, alpha] = color.Resolved();
       if (alpha == 0xFF)
       {
-        utf8_string builder = u8"#";
+        StringBuilder builder;
+        builder.Append(u8"#");
         AppendHexByte(builder, red, HexCase::Lowercase);
         AppendHexByte(builder, green, HexCase::Lowercase);
         AppendHexByte(builder, blue, HexCase::Lowercase);
-        return builder;
+        return krys::move(builder).ToString();
       }
 
       return boo::SerialisationForCSS(Color {color});
@@ -237,7 +235,8 @@ namespace krys::boo
 
       auto [red, green, blue, alpha] = color.Resolved();
 
-      utf8_string builder = u8"#";
+      StringBuilder builder;
+      builder.Append(u8"#");
       AppendHexByte(builder, red);
       AppendHexByte(builder, green);
       AppendHexByte(builder, blue);
@@ -246,7 +245,7 @@ namespace krys::boo
         AppendHexByte(builder, alpha);
       }
 
-      return builder;
+      return krys::move(builder).ToString();
     }
 
     // MARK: SRGBA<float> overloads

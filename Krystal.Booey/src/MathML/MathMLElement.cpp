@@ -155,14 +155,15 @@ namespace krys::boo::mathml
         case ScriptLevelSyntax::AddUnsigned:
         case ScriptLevelSyntax::AddMinusUnsigned:
         {
-          auto builder = css::CSSOMString(u8"add(");
+          StringBuilder builder;
+          builder.Append(u8"add(");
           if (syntax == ScriptLevelSyntax::AddMinusUnsigned)
           {
-            builder += u8'-';
+            builder.Append(u8'-');
           }
-          builder += view;
-          builder += u8')';
-          AddPropertyToPresentationalHintStyle(style, css::PropertyId::MathDepth, builder);
+          builder.Append(view);
+          builder.Append(u8')');
+          AddPropertyToPresentationalHintStyle(style, css::PropertyId::MathDepth, builder.ToString());
           break;
         }
         case ScriptLevelSyntax::Unsigned:

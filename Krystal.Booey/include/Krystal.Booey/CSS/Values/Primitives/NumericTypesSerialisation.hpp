@@ -4,6 +4,7 @@
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -17,18 +18,18 @@ namespace krys::boo::css
 
   /// @brief Appends a non-finite number as `infinity`, `-infinity` or `NaN`, multiplied by 1 of the suffix's
   /// unit if there is one (e.g. `infinity * 1px`).
-  void FormatNonfiniteCSSNumberValue(CSSOMString &builder, const SerialisableNumber &number) noexcept;
+  void FormatNonfiniteCSSNumberValue(StringBuilder &builder, const SerialisableNumber &number) noexcept;
   KRYS_NODISCARD CSSOMString FormatNonfiniteCSSNumberValue(const SerialisableNumber &number) noexcept;
 
   /// @brief Appends a number rounded to at most 6 decimal places, without trailing zeros, followed by its
   /// suffix.
-  void FormatCSSNumberValue(CSSOMString &builder, const SerialisableNumber &number) noexcept;
+  void FormatCSSNumberValue(StringBuilder &builder, const SerialisableNumber &number) noexcept;
   KRYS_NODISCARD CSSOMString FormatCSSNumberValue(const SerialisableNumber &number) noexcept;
 
   template <>
   struct Serialiser<SerialisableNumber>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &,
+    void operator()(StringBuilder &builder, const SerialisationContext &,
                     const SerialisableNumber &number) noexcept
     {
       FormatCSSNumberValue(builder, number);
@@ -38,7 +39,8 @@ namespace krys::boo::css
   template <NumericRaw RawType>
   struct Serialiser<RawType>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context, const RawType &value) noexcept
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
+                    const RawType &value) noexcept
     {
       Serialise(builder, context, SerialisableNumber {value.Value, UnitString(value.Unit)});
     }
@@ -47,7 +49,7 @@ namespace krys::boo::css
   template <Range nR, Range pR, typename V>
   struct Serialiser<NumberOrPercentageResolvedToNumber<nR, pR, V>>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const NumberOrPercentageResolvedToNumber<nR, pR, V> &value) noexcept
     {
       value.SwitchOn([&](const typename NumberOrPercentageResolvedToNumber<nR, pR, V>::Number &number)

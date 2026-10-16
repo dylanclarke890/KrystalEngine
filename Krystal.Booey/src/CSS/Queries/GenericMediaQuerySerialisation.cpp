@@ -1,10 +1,11 @@
 ﻿#include "Krystal.Booey/CSS/Queries/GenericMediaQuerySerialisation.hpp"
 #include "Krystal.Booey/CSS/Markup.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css::mq
 {
-  static void Serialise(CSSOMString &builder, const QueryInParens &queryInParens) noexcept
+  static void Serialise(StringBuilder &builder, const QueryInParens &queryInParens) noexcept
   {
     krys::SwitchOn(
       queryInParens,
@@ -12,26 +13,26 @@ namespace krys::boo::css::mq
       {
         if (node.FunctionId)
         {
-          builder += ToString(*node.FunctionId);
+          builder.Append(ToString(*node.FunctionId));
         }
-        builder += u8'(';
+        builder.Append(u8'(');
         Serialise(builder, node);
-        builder += u8')';
+        builder.Append(u8')');
       },
       [&](const GeneralEnclosed &generalEnclosed)
       {
-        builder += generalEnclosed.Name;
-        builder += u8'(';
-        builder += generalEnclosed.Text;
-        builder += u8')';
+        builder.Append(generalEnclosed.Name);
+        builder.Append(u8'(');
+        builder.Append(generalEnclosed.Text);
+        builder.Append(u8')');
       });
   }
 
-  void Serialise(CSSOMString &builder, const Condition &condition) noexcept
+  void Serialise(StringBuilder &builder, const Condition &condition) noexcept
   {
     if (condition.Queries.size() == 1 && condition.LogicalOperator == LogicalOperator::Not)
     {
-      builder += u8"not ";
+      builder.Append(u8"not ");
       Serialise(builder, condition.Queries.front());
       return;
     }
@@ -40,26 +41,26 @@ namespace krys::boo::css::mq
     {
       if (&query != &condition.Queries.front())
       {
-        builder += condition.LogicalOperator == LogicalOperator::And ? u8" and " : u8" or ";
+        builder.Append(condition.LogicalOperator == LogicalOperator::And ? u8" and " : u8" or ");
       }
       Serialise(builder, query);
     }
   }
 
-  void Serialise(CSSOMString &builder, const Feature &feature) noexcept
+  void Serialise(StringBuilder &builder, const Feature &feature) noexcept
   {
     auto serialiseRangeComparisonOperator = [&](ComparisonOperator op)
     {
-      builder += u8' ';
+      builder.Append(u8' ');
       switch (op)
       {
-        case ComparisonOperator::LessThan:           builder += u8'<'; break;
-        case ComparisonOperator::LessThanOrEqual:    builder += u8"<="; break;
-        case ComparisonOperator::Equal:              builder += u8'='; break;
-        case ComparisonOperator::GreaterThan:        builder += u8'>'; break;
-        case ComparisonOperator::GreaterThanOrEqual: builder += u8">="; break;
+        case ComparisonOperator::LessThan:           builder.Append(u8'<'); break;
+        case ComparisonOperator::LessThanOrEqual:    builder.Append(u8"<="); break;
+        case ComparisonOperator::Equal:              builder.Append(u8'='); break;
+        case ComparisonOperator::GreaterThan:        builder.Append(u8'>'); break;
+        case ComparisonOperator::GreaterThanOrEqual: builder.Append(u8">="); break;
       }
-      builder += u8' ';
+      builder.Append(u8' ');
     };
 
     CSSOMString name {feature.Name.View()};
@@ -71,9 +72,9 @@ namespace krys::boo::css::mq
       case Syntax::Plain:
         switch (feature.RightComparison->Op)
         {
-          case ComparisonOperator::LessThanOrEqual:    builder += u8"max-"; break;
+          case ComparisonOperator::LessThanOrEqual:    builder.Append(u8"max-"); break;
           case ComparisonOperator::Equal:              break;
-          case ComparisonOperator::GreaterThanOrEqual: builder += u8"min-"; break;
+          case ComparisonOperator::GreaterThanOrEqual: builder.Append(u8"min-"); break;
           case ComparisonOperator::LessThan:
           case ComparisonOperator::GreaterThan:
             krys_debug_assert_msg(false, "Plain features only use <=, = and >=");
@@ -81,14 +82,14 @@ namespace krys::boo::css::mq
         }
         SerialiseIdentifier(name, builder);
 
-        builder += u8": ";
-        builder += feature.RightComparison->ProtectedValue()->CssText(DefaultSerialisationContext());
+        builder.Append(u8": ");
+        builder.Append(feature.RightComparison->ProtectedValue()->CssText(DefaultSerialisationContext()));
         break;
 
       case Syntax::Range:
         if (feature.LeftComparison)
         {
-          builder += feature.LeftComparison->ProtectedValue()->CssText(DefaultSerialisationContext());
+          builder.Append(feature.LeftComparison->ProtectedValue()->CssText(DefaultSerialisationContext()));
           serialiseRangeComparisonOperator(feature.LeftComparison->Op);
         }
 
@@ -97,7 +98,7 @@ namespace krys::boo::css::mq
         if (feature.RightComparison)
         {
           serialiseRangeComparisonOperator(feature.RightComparison->Op);
-          builder += feature.RightComparison->ProtectedValue()->CssText(DefaultSerialisationContext());
+          builder.Append(feature.RightComparison->ProtectedValue()->CssText(DefaultSerialisationContext()));
         }
         break;
     }

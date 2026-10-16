@@ -1,34 +1,35 @@
 ﻿#include "Krystal.Booey/SVG/Internals/SVGPathStringBuilder.hpp"
 #include "Krystal.Booey/Core/NumberFormatting.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::svg
 {
   namespace
   {
-    void AppendFlag(dom::DOMString &stringBuilder, bool flag) noexcept
+    void AppendFlag(StringBuilder &stringBuilder, bool flag) noexcept
     {
-      stringBuilder.append(flag ? u8"1 " : u8"0 ");
+      stringBuilder.Append(flag ? u8"1 " : u8"0 ");
     }
 
-    void AppendNumber(dom::DOMString &stringBuilder, float number) noexcept
+    void AppendNumber(StringBuilder &stringBuilder, float number) noexcept
     {
       // FIXME: Shortest form would be better, but fixed precision is required for now to smooth over
       // precision errors caused by converting float to double and back in CGPath on Cocoa platforms.
       FormatNumberFixedPrecision(stringBuilder, number);
-      stringBuilder.push_back(u8' ');
+      stringBuilder.Append(u8' ');
     }
 
-    void AppendPoint(dom::DOMString &stringBuilder, const FloatPoint &point) noexcept
+    void AppendPoint(StringBuilder &stringBuilder, const FloatPoint &point) noexcept
     {
       AppendNumber(stringBuilder, point.X());
       AppendNumber(stringBuilder, point.Y());
     }
 
-    void AppendCommand(dom::DOMString &stringBuilder, PathCoordinateMode mode, char8_t absolute,
+    void AppendCommand(StringBuilder &stringBuilder, PathCoordinateMode mode, char8_t absolute,
                        char8_t relative) noexcept
     {
-      stringBuilder.push_back(mode == PathCoordinateMode::AbsoluteCoordinates ? absolute : relative);
-      stringBuilder.push_back(u8' ');
+      stringBuilder.Append(mode == PathCoordinateMode::AbsoluteCoordinates ? absolute : relative);
+      stringBuilder.Append(u8' ');
     }
   }
 
@@ -38,14 +39,15 @@ namespace krys::boo::svg
 
   dom::DOMString SVGPathStringBuilder::Result() noexcept
   {
-    if (_stringBuilder.empty())
+    auto size = _stringBuilder.Length();
+    if (!size)
     {
       return {};
     }
 
     // Remove trailing space.
-    _stringBuilder.pop_back();
-    return _stringBuilder;
+    _stringBuilder.Shrink(size - 1);
+    return _stringBuilder.ToString();
   }
 
   void SVGPathStringBuilder::IncrementPathSegmentCount() noexcept
@@ -127,6 +129,6 @@ namespace krys::boo::svg
 
   void SVGPathStringBuilder::ClosePath() noexcept
   {
-    _stringBuilder.append(u8"Z ");
+    _stringBuilder.Append(u8"Z ");
   }
 }

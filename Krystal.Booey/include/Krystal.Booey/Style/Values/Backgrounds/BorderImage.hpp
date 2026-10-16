@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Style/Values/Backgrounds/BorderImageSlice.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/BorderImageSource.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/BorderImageWidth.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -40,7 +41,7 @@ namespace krys::boo::style
   template <>
   struct Serialiser<BorderImage>
   {
-    void operator()(css::CSSOMString &, const css::SerialisationContext &, const RenderStyle &,
+    void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &,
                     const BorderImage &) noexcept;
   };
 }

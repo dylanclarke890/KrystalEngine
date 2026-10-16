@@ -1,24 +1,25 @@
 ﻿#include "Krystal.Booey/CSS/Values/GridLineNamesValue.hpp"
 #include "Krystal.Booey/CSS/Markup.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include <utility>
 
 namespace krys::boo::css
 {
   CSSOMString GridLineNamesValue::CustomCSSText(const SerialisationContext &) const noexcept
   {
-    CSSOMString result;
-    result.push_back(u8'[');
+    StringBuilder result;
+    result.Append(u8'[');
     bool first = true;
     for (const auto &name : _names)
     {
       if (!std::exchange(first, false))
       {
-        result.push_back(u8' ');
+        result.Append(u8' ');
       }
       SerialiseIdentifier(name, result);
     }
-    result.push_back(u8']');
-    return result;
+    result.Append(u8']');
+    return krys::move(result).ToString();
   }
 
   GridLineNamesValue::GridLineNamesValue(Span<const CSSOMString> names) noexcept

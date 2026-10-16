@@ -7,6 +7,7 @@
 #include "Krystal.Booey/CSS/Values/Types.hpp"
 #include "Krystal.Booey/CSS/Values/Units.hpp"
 #include "Krystal.Booey/Style/AnchorSizeDimension.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include <algorithm>
 #include <cmath>
@@ -63,77 +64,78 @@ namespace krys::boo::css::calc
       return atom == CSSOMStringAtom::Null();
     }
 
-    void AppendIdentifier(CSSOMString &builder, const CSSOMStringAtom &atom) noexcept
+    void AppendIdentifier(StringBuilder &builder, const CSSOMStringAtom &atom) noexcept
     {
       SerialiseIdentifier(CSSOMString {atom.View()}, builder);
     }
   }
 
   // https://drafts.csswg.org/css-values-4/#serialize-a-math-function
-  static void SerialiseMathFunction(CSSOMString &, const Child &, SerialisationState &) noexcept;
-  static void SerialiseMathFunction(CSSOMString &, const Symbol &, SerialisationState &) noexcept;
-  static void SerialiseMathFunction(CSSOMString &, const SiblingCount &, SerialisationState &) noexcept;
-  static void SerialiseMathFunction(CSSOMString &, const SiblingIndex &, SerialisationState &) noexcept;
+  static void SerialiseMathFunction(StringBuilder &, const Child &, SerialisationState &) noexcept;
+  static void SerialiseMathFunction(StringBuilder &, const Symbol &, SerialisationState &) noexcept;
+  static void SerialiseMathFunction(StringBuilder &, const SiblingCount &, SerialisationState &) noexcept;
+  static void SerialiseMathFunction(StringBuilder &, const SiblingIndex &, SerialisationState &) noexcept;
   template <Numeric Op>
-  static void SerialiseMathFunction(CSSOMString &, const Op &, SerialisationState &) noexcept;
+  static void SerialiseMathFunction(StringBuilder &, const Op &, SerialisationState &) noexcept;
   template <typename Op>
-  static void SerialiseMathFunction(CSSOMString &, const IndirectNode<Op> &, SerialisationState &) noexcept;
+  static void SerialiseMathFunction(StringBuilder &, const IndirectNode<Op> &, SerialisationState &) noexcept;
 
-  static void SerialiseMathFunctionPrefix(CSSOMString &, const IndirectNode<Sum> &,
+  static void SerialiseMathFunctionPrefix(StringBuilder &, const IndirectNode<Sum> &,
                                           SerialisationState &) noexcept;
-  static void SerialiseMathFunctionPrefix(CSSOMString &, const IndirectNode<Product> &,
+  static void SerialiseMathFunctionPrefix(StringBuilder &, const IndirectNode<Product> &,
                                           SerialisationState &) noexcept;
-  static void SerialiseMathFunctionPrefix(CSSOMString &, const IndirectNode<Negate> &,
+  static void SerialiseMathFunctionPrefix(StringBuilder &, const IndirectNode<Negate> &,
                                           SerialisationState &) noexcept;
-  static void SerialiseMathFunctionPrefix(CSSOMString &, const IndirectNode<Invert> &,
+  static void SerialiseMathFunctionPrefix(StringBuilder &, const IndirectNode<Invert> &,
                                           SerialisationState &) noexcept;
-  static void SerialiseMathFunctionPrefix(CSSOMString &, const IndirectNode<RoundNearest> &,
+  static void SerialiseMathFunctionPrefix(StringBuilder &, const IndirectNode<RoundNearest> &,
                                           SerialisationState &) noexcept;
-  static void SerialiseMathFunctionPrefix(CSSOMString &, const IndirectNode<RoundUp> &,
+  static void SerialiseMathFunctionPrefix(StringBuilder &, const IndirectNode<RoundUp> &,
                                           SerialisationState &) noexcept;
-  static void SerialiseMathFunctionPrefix(CSSOMString &, const IndirectNode<RoundDown> &,
+  static void SerialiseMathFunctionPrefix(StringBuilder &, const IndirectNode<RoundDown> &,
                                           SerialisationState &) noexcept;
-  static void SerialiseMathFunctionPrefix(CSSOMString &, const IndirectNode<RoundToZero> &,
+  static void SerialiseMathFunctionPrefix(StringBuilder &, const IndirectNode<RoundToZero> &,
                                           SerialisationState &) noexcept;
   template <typename Op>
-  static void SerialiseMathFunctionPrefix(CSSOMString &, const IndirectNode<Op> &,
+  static void SerialiseMathFunctionPrefix(StringBuilder &, const IndirectNode<Op> &,
                                           SerialisationState &) noexcept;
 
-  static void SerialiseMathFunctionArguments(CSSOMString &, const IndirectNode<Sum> &,
+  static void SerialiseMathFunctionArguments(StringBuilder &, const IndirectNode<Sum> &,
                                              SerialisationState &) noexcept;
-  static void SerialiseMathFunctionArguments(CSSOMString &, const IndirectNode<Product> &,
+  static void SerialiseMathFunctionArguments(StringBuilder &, const IndirectNode<Product> &,
                                              SerialisationState &) noexcept;
-  static void SerialiseMathFunctionArguments(CSSOMString &, const IndirectNode<Random> &,
+  static void SerialiseMathFunctionArguments(StringBuilder &, const IndirectNode<Random> &,
                                              SerialisationState &) noexcept;
-  static void SerialiseMathFunctionArguments(CSSOMString &, const IndirectNode<Anchor> &,
+  static void SerialiseMathFunctionArguments(StringBuilder &, const IndirectNode<Anchor> &,
                                              SerialisationState &) noexcept;
-  static void SerialiseMathFunctionArguments(CSSOMString &, const IndirectNode<AnchorSize> &,
+  static void SerialiseMathFunctionArguments(StringBuilder &, const IndirectNode<AnchorSize> &,
                                              SerialisationState &) noexcept;
   template <typename Op>
-  static void SerialiseMathFunctionArguments(CSSOMString &, const IndirectNode<Op> &,
+  static void SerialiseMathFunctionArguments(StringBuilder &, const IndirectNode<Op> &,
                                              SerialisationState &) noexcept;
 
-  static void SerialiseWithoutOmittingPrefix(CSSOMString &, const Child &, SerialisationState &) noexcept;
+  static void SerialiseWithoutOmittingPrefix(StringBuilder &, const Child &, SerialisationState &) noexcept;
 
   // https://drafts.csswg.org/css-values-4/#serialize-a-calculation-tree
-  static void SerialiseCalculationTree(CSSOMString &, const Child &, SerialisationState &) noexcept;
-  static void SerialiseCalculationTree(CSSOMString &, const ChildOrNone &, SerialisationState &) noexcept;
-  static void SerialiseCalculationTree(CSSOMString &, const keywords::None &, SerialisationState &) noexcept;
-  static void SerialiseCalculationTree(CSSOMString &, const Symbol &, SerialisationState &) noexcept;
-  static void SerialiseCalculationTree(CSSOMString &, const SiblingCount &, SerialisationState &) noexcept;
-  static void SerialiseCalculationTree(CSSOMString &, const SiblingIndex &, SerialisationState &) noexcept;
-  static void SerialiseCalculationTree(CSSOMString &, const IndirectNode<Sum> &,
+  static void SerialiseCalculationTree(StringBuilder &, const Child &, SerialisationState &) noexcept;
+  static void SerialiseCalculationTree(StringBuilder &, const ChildOrNone &, SerialisationState &) noexcept;
+  static void SerialiseCalculationTree(StringBuilder &, const keywords::None &,
                                        SerialisationState &) noexcept;
-  static void SerialiseCalculationTree(CSSOMString &, const IndirectNode<Product> &,
+  static void SerialiseCalculationTree(StringBuilder &, const Symbol &, SerialisationState &) noexcept;
+  static void SerialiseCalculationTree(StringBuilder &, const SiblingCount &, SerialisationState &) noexcept;
+  static void SerialiseCalculationTree(StringBuilder &, const SiblingIndex &, SerialisationState &) noexcept;
+  static void SerialiseCalculationTree(StringBuilder &, const IndirectNode<Sum> &,
                                        SerialisationState &) noexcept;
-  static void SerialiseCalculationTree(CSSOMString &, const IndirectNode<Negate> &,
+  static void SerialiseCalculationTree(StringBuilder &, const IndirectNode<Product> &,
                                        SerialisationState &) noexcept;
-  static void SerialiseCalculationTree(CSSOMString &, const IndirectNode<Invert> &,
+  static void SerialiseCalculationTree(StringBuilder &, const IndirectNode<Negate> &,
+                                       SerialisationState &) noexcept;
+  static void SerialiseCalculationTree(StringBuilder &, const IndirectNode<Invert> &,
                                        SerialisationState &) noexcept;
   template <Numeric Op>
-  static void SerialiseCalculationTree(CSSOMString &, const Op &, SerialisationState &) noexcept;
+  static void SerialiseCalculationTree(StringBuilder &, const Op &, SerialisationState &) noexcept;
   template <typename Op>
-  static void SerialiseCalculationTree(CSSOMString &, const IndirectNode<Op> &,
+  static void SerialiseCalculationTree(StringBuilder &, const IndirectNode<Op> &,
                                        SerialisationState &) noexcept;
 
   // MARK: Sorting
@@ -286,13 +288,13 @@ namespace krys::boo::css::calc
     return std::clamp(value, range.Min, range.Max);
   }
 
-  void SerialiseMathFunction(CSSOMString &builder, const Child &fn, SerialisationState &state) noexcept
+  void SerialiseMathFunction(StringBuilder &builder, const Child &fn, SerialisationState &state) noexcept
   {
     krys::SwitchOn(fn, [&builder, &state](const auto &root) { SerialiseMathFunction(builder, root, state); });
   }
 
   template <Numeric Op>
-  void SerialiseMathFunction(CSSOMString &builder, const Op &fn, SerialisationState &state) noexcept
+  void SerialiseMathFunction(StringBuilder &builder, const Op &fn, SerialisationState &state) noexcept
   {
     // 1. If the root of the calculation tree fn represents is a numeric value (number, percentage, or
     // dimension), and the serialization being produced is of a computed value or later, then clamp the value
@@ -324,30 +326,32 @@ namespace krys::boo::css::calc
     // 4. For each child of the root node, serialize the calculation tree. [...]
     // 5. Append ")" (close parenthesis) to s.
 
-    builder.append(u8"calc(");
+    builder.Append(u8"calc(");
     SerialiseCalculationTree(builder, fn, state);
-    builder.push_back(u8')');
+    builder.Append(u8')');
   }
 
-  void SerialiseMathFunction(CSSOMString &builder, const Symbol &fn, SerialisationState &state) noexcept
+  void SerialiseMathFunction(StringBuilder &builder, const Symbol &fn, SerialisationState &state) noexcept
   {
-    builder.append(u8"calc(");
+    builder.Append(u8"calc(");
     SerialiseCalculationTree(builder, fn, state);
-    builder.push_back(u8')');
+    builder.Append(u8')');
   }
 
-  void SerialiseMathFunction(CSSOMString &builder, const SiblingCount &fn, SerialisationState &state) noexcept
+  void SerialiseMathFunction(StringBuilder &builder, const SiblingCount &fn,
+                             SerialisationState &state) noexcept
   {
     SerialiseCalculationTree(builder, fn, state);
   }
 
-  void SerialiseMathFunction(CSSOMString &builder, const SiblingIndex &fn, SerialisationState &state) noexcept
+  void SerialiseMathFunction(StringBuilder &builder, const SiblingIndex &fn,
+                             SerialisationState &state) noexcept
   {
     SerialiseCalculationTree(builder, fn, state);
   }
 
   template <typename Op>
-  void SerialiseMathFunction(CSSOMString &builder, const IndirectNode<Op> &fn,
+  void SerialiseMathFunction(StringBuilder &builder, const IndirectNode<Op> &fn,
                              SerialisationState &state) noexcept
   {
     // 3. If the calculation tree’s root node is a numeric value, or a calc-operator node, let s be a string
@@ -372,86 +376,86 @@ namespace krys::boo::css::calc
     }
 
     // 5. Append ")" (close parenthesis) to s.
-    builder.push_back(u8')');
+    builder.Append(u8')');
   }
 
-  void SerialiseMathFunctionPrefix(CSSOMString &builder, const IndirectNode<Sum> &,
+  void SerialiseMathFunctionPrefix(StringBuilder &builder, const IndirectNode<Sum> &,
                                    SerialisationState &) noexcept
   {
-    builder.append(u8"calc(");
+    builder.Append(u8"calc(");
   }
 
-  void SerialiseMathFunctionPrefix(CSSOMString &builder, const IndirectNode<Product> &,
+  void SerialiseMathFunctionPrefix(StringBuilder &builder, const IndirectNode<Product> &,
                                    SerialisationState &) noexcept
   {
-    builder.append(u8"calc(");
+    builder.Append(u8"calc(");
   }
 
-  void SerialiseMathFunctionPrefix(CSSOMString &builder, const IndirectNode<Negate> &,
+  void SerialiseMathFunctionPrefix(StringBuilder &builder, const IndirectNode<Negate> &,
                                    SerialisationState &) noexcept
   {
-    builder.append(u8"calc(");
+    builder.Append(u8"calc(");
   }
 
-  void SerialiseMathFunctionPrefix(CSSOMString &builder, const IndirectNode<Invert> &,
+  void SerialiseMathFunctionPrefix(StringBuilder &builder, const IndirectNode<Invert> &,
                                    SerialisationState &) noexcept
   {
-    builder.append(u8"calc(");
+    builder.Append(u8"calc(");
   }
 
-  static void SerialiseRoundPrefix(CSSOMString &builder, ValueId strategy) noexcept
+  static void SerialiseRoundPrefix(StringBuilder &builder, ValueId strategy) noexcept
   {
-    builder.append(ToString(ValueId::Round));
-    builder.push_back(u8'(');
-    builder.append(ToString(strategy));
-    builder.append(u8", ");
+    builder.Append(ToString(ValueId::Round));
+    builder.Append(u8'(');
+    builder.Append(ToString(strategy));
+    builder.Append(u8", ");
   }
 
-  void SerialiseMathFunctionPrefix(CSSOMString &builder, const IndirectNode<RoundNearest> &,
+  void SerialiseMathFunctionPrefix(StringBuilder &builder, const IndirectNode<RoundNearest> &,
                                    SerialisationState &) noexcept
   {
     SerialiseRoundPrefix(builder, RoundNearest::Id);
   }
 
-  void SerialiseMathFunctionPrefix(CSSOMString &builder, const IndirectNode<RoundUp> &,
+  void SerialiseMathFunctionPrefix(StringBuilder &builder, const IndirectNode<RoundUp> &,
                                    SerialisationState &) noexcept
   {
     SerialiseRoundPrefix(builder, RoundUp::Id);
   }
 
-  void SerialiseMathFunctionPrefix(CSSOMString &builder, const IndirectNode<RoundDown> &,
+  void SerialiseMathFunctionPrefix(StringBuilder &builder, const IndirectNode<RoundDown> &,
                                    SerialisationState &) noexcept
   {
     SerialiseRoundPrefix(builder, RoundDown::Id);
   }
 
-  void SerialiseMathFunctionPrefix(CSSOMString &builder, const IndirectNode<RoundToZero> &,
+  void SerialiseMathFunctionPrefix(StringBuilder &builder, const IndirectNode<RoundToZero> &,
                                    SerialisationState &) noexcept
   {
     SerialiseRoundPrefix(builder, RoundToZero::Id);
   }
 
   template <typename Op>
-  void SerialiseMathFunctionPrefix(CSSOMString &builder, const IndirectNode<Op> &,
+  void SerialiseMathFunctionPrefix(StringBuilder &builder, const IndirectNode<Op> &,
                                    SerialisationState &) noexcept
   {
-    builder.append(ToString(Op::Id));
-    builder.push_back(u8'(');
+    builder.Append(ToString(Op::Id));
+    builder.Append(u8'(');
   }
 
-  void SerialiseMathFunctionArguments(CSSOMString &builder, const IndirectNode<Sum> &fn,
+  void SerialiseMathFunctionArguments(StringBuilder &builder, const IndirectNode<Sum> &fn,
                                       SerialisationState &state) noexcept
   {
     SerialiseCalculationTree(builder, fn, state);
   }
 
-  void SerialiseMathFunctionArguments(CSSOMString &builder, const IndirectNode<Product> &fn,
+  void SerialiseMathFunctionArguments(StringBuilder &builder, const IndirectNode<Product> &fn,
                                       SerialisationState &state) noexcept
   {
     SerialiseCalculationTree(builder, fn, state);
   }
 
-  void SerialiseMathFunctionArguments(CSSOMString &builder, const IndirectNode<Random> &fn,
+  void SerialiseMathFunctionArguments(StringBuilder &builder, const IndirectNode<Random> &fn,
                                       SerialisationState &state) noexcept
   {
     krys::SwitchOn(
@@ -461,52 +465,52 @@ namespace krys::boo::css::calc
         const bool hasIdentifier = std::holds_alternative<CSSOMStringAtom>(options.Identifier);
         if (hasIdentifier && options.ElementShared)
         {
-          builder.append(std::get<CSSOMStringAtom>(options.Identifier).View());
-          builder.push_back(u8' ');
-          builder.append(ToString(ValueId::ElementShared));
-          builder.append(u8", ");
+          builder.Append(std::get<CSSOMStringAtom>(options.Identifier).View());
+          builder.Append(u8' ');
+          builder.Append(ToString(ValueId::ElementShared));
+          builder.Append(u8", ");
         }
         else if (hasIdentifier)
         {
-          builder.append(std::get<CSSOMStringAtom>(options.Identifier).View());
-          builder.append(u8", ");
+          builder.Append(std::get<CSSOMStringAtom>(options.Identifier).View());
+          builder.Append(u8", ");
         }
         else if (options.ElementShared)
         {
-          builder.append(ToString(ValueId::ElementShared));
-          builder.append(u8", ");
+          builder.Append(ToString(ValueId::ElementShared));
+          builder.Append(u8", ");
         }
       },
       [&](const Random::SharingFixed &fixed)
       {
-        builder.append(ToString(ValueId::Fixed));
-        builder.push_back(u8' ');
+        builder.Append(ToString(ValueId::Fixed));
+        builder.Append(u8' ');
         Serialise(builder, state.SerialisationContext, fixed.Value);
-        builder.append(u8", ");
+        builder.Append(u8", ");
       });
 
     SerialiseCalculationTree(builder, fn->Min, state);
-    builder.append(u8", ");
+    builder.Append(u8", ");
     SerialiseCalculationTree(builder, fn->Max, state);
 
     if (fn->Step)
     {
-      builder.append(u8", ");
+      builder.Append(u8", ");
       SerialiseCalculationTree(builder, *fn->Step, state);
     }
   }
 
-  void SerialiseMathFunctionArguments(CSSOMString &builder, const IndirectNode<Anchor> &anchor,
+  void SerialiseMathFunctionArguments(StringBuilder &builder, const IndirectNode<Anchor> &anchor,
                                       SerialisationState &state) noexcept
   {
     if (!IsNull(anchor->ElementName))
     {
       AppendIdentifier(builder, anchor->ElementName);
-      builder.push_back(u8' ');
+      builder.Append(u8' ');
     }
 
     krys::SwitchOn(
-      anchor->Side, [&](ValueId valueId) { builder.append(ToString(valueId)); },
+      anchor->Side, [&](ValueId valueId) { builder.Append(ToString(valueId)); },
       [&](const Child &percentage)
       {
         // As anchor() is not actually a "math function", calc() can't be omitted in arguments.
@@ -515,50 +519,50 @@ namespace krys::boo::css::calc
 
     if (anchor->Fallback)
     {
-      builder.append(u8", ");
+      builder.Append(u8", ");
       SerialiseWithoutOmittingPrefix(builder, *anchor->Fallback, state);
     }
   }
 
-  static void SerialiseAnchorSizeDimension(CSSOMString &builder,
+  static void SerialiseAnchorSizeDimension(StringBuilder &builder,
                                            style::AnchorSizeDimension dimension) noexcept
   {
     switch (dimension)
     {
       case style::AnchorSizeDimension::Width:
       {
-        builder.append(u8"width");
+        builder.Append(u8"width");
         break;
       }
       case style::AnchorSizeDimension::Height:
       {
-        builder.append(u8"height");
+        builder.Append(u8"height");
         break;
       }
       case style::AnchorSizeDimension::Block:
       {
-        builder.append(u8"block");
+        builder.Append(u8"block");
         break;
       }
       case style::AnchorSizeDimension::Inline:
       {
-        builder.append(u8"inline");
+        builder.Append(u8"inline");
         break;
       }
       case style::AnchorSizeDimension::SelfBlock:
       {
-        builder.append(u8"self-block");
+        builder.Append(u8"self-block");
         break;
       }
       case style::AnchorSizeDimension::SelfInline:
       {
-        builder.append(u8"self-inline");
+        builder.Append(u8"self-inline");
         break;
       }
     }
   }
 
-  void SerialiseMathFunctionArguments(CSSOMString &builder, const IndirectNode<AnchorSize> &anchorSize,
+  void SerialiseMathFunctionArguments(StringBuilder &builder, const IndirectNode<AnchorSize> &anchorSize,
                                       SerialisationState &state) noexcept
   {
     const bool hasElementName = !IsNull(anchorSize->ElementName);
@@ -572,7 +576,7 @@ namespace krys::boo::css::calc
     {
       if (hasElementName)
       {
-        builder.push_back(u8' ');
+        builder.Append(u8' ');
       }
 
       SerialiseAnchorSizeDimension(builder, *anchorSize->Dimension);
@@ -582,7 +586,7 @@ namespace krys::boo::css::calc
     {
       if (hasElementName || anchorSize->Dimension)
       {
-        builder.append(u8", ");
+        builder.Append(u8", ");
       }
 
       SerialiseWithoutOmittingPrefix(builder, *anchorSize->Fallback, state);
@@ -590,7 +594,7 @@ namespace krys::boo::css::calc
   }
 
   template <typename Op>
-  void SerialiseMathFunctionArguments(CSSOMString &builder, const IndirectNode<Op> &fn,
+  void SerialiseMathFunctionArguments(StringBuilder &builder, const IndirectNode<Op> &fn,
                                       SerialisationState &state) noexcept
   {
     CSSOMStringView separator = u8"";
@@ -599,7 +603,7 @@ namespace krys::boo::css::calc
                           {
                             if (root)
                             {
-                              builder.append(std::exchange(separator, u8", "));
+                              builder.Append(std::exchange(separator, u8", "));
                               SerialiseCalculationTree(builder, *root, state);
                             }
                           },
@@ -607,18 +611,18 @@ namespace krys::boo::css::calc
                           {
                             if (!IsNull(root))
                             {
-                              builder.append(std::exchange(separator, u8", "));
+                              builder.Append(std::exchange(separator, u8", "));
                               AppendIdentifier(builder, root);
                             }
                           },
                           [&](const auto &root)
                           {
-                            builder.append(std::exchange(separator, u8", "));
+                            builder.Append(std::exchange(separator, u8", "));
                             SerialiseCalculationTree(builder, root, state);
                           }));
   }
 
-  void SerialiseWithoutOmittingPrefix(CSSOMString &builder, const Child &child,
+  void SerialiseWithoutOmittingPrefix(StringBuilder &builder, const Child &child,
                                       SerialisationState &state) noexcept
   {
     krys::SwitchOn(
@@ -629,27 +633,27 @@ namespace krys::boo::css::calc
   // MARK: Calculation Tree
   // https://drafts.csswg.org/css-values-4/#serialize-a-calculation-tree
 
-  void SerialiseCalculationTree(CSSOMString &builder, const Child &root, SerialisationState &state) noexcept
+  void SerialiseCalculationTree(StringBuilder &builder, const Child &root, SerialisationState &state) noexcept
   {
     krys::SwitchOn(root,
                    [&builder, &state](const auto &root) { SerialiseCalculationTree(builder, root, state); });
   }
 
-  void SerialiseCalculationTree(CSSOMString &builder, const ChildOrNone &root,
+  void SerialiseCalculationTree(StringBuilder &builder, const ChildOrNone &root,
                                 SerialisationState &state) noexcept
   {
     krys::SwitchOn(root,
                    [&builder, &state](const auto &root) { SerialiseCalculationTree(builder, root, state); });
   }
 
-  void SerialiseCalculationTree(CSSOMString &builder, const keywords::None &root,
+  void SerialiseCalculationTree(StringBuilder &builder, const keywords::None &root,
                                 SerialisationState &state) noexcept
   {
     Serialise(builder, state.SerialisationContext, root);
   }
 
   template <Numeric Op>
-  void SerialiseCalculationTree(CSSOMString &builder, const Op &root, SerialisationState &) noexcept
+  void SerialiseCalculationTree(StringBuilder &builder, const Op &root, SerialisationState &) noexcept
   {
     // 2. If root is a numeric value, or a non-math function, serialize root per the normal rules for it and
     // return the result.
@@ -658,33 +662,35 @@ namespace krys::boo::css::calc
                          SerialisableNumber {root.Value, PrimitiveValue::UnitTypeString(ToUnit(root))});
   }
 
-  void SerialiseCalculationTree(CSSOMString &builder, const Symbol &root, SerialisationState &) noexcept
+  void SerialiseCalculationTree(StringBuilder &builder, const Symbol &root, SerialisationState &) noexcept
   {
     // 2. If root is a numeric value, or a non-math function, serialize root per the normal rules for it and
     // return the result.
 
-    builder.append(ToString(root.Id));
+    builder.Append(ToString(root.Id));
   }
 
-  void SerialiseCalculationTree(CSSOMString &builder, const SiblingCount &root, SerialisationState &) noexcept
+  void SerialiseCalculationTree(StringBuilder &builder, const SiblingCount &root,
+                                SerialisationState &) noexcept
   {
     // 2. If root is a numeric value, or a non-math function, serialize root per the normal rules for it and
     // return the result.
 
-    builder.append(ToString(root.Id));
-    builder.append(u8"()");
+    builder.Append(ToString(root.Id));
+    builder.Append(u8"()");
   }
 
-  void SerialiseCalculationTree(CSSOMString &builder, const SiblingIndex &root, SerialisationState &) noexcept
+  void SerialiseCalculationTree(StringBuilder &builder, const SiblingIndex &root,
+                                SerialisationState &) noexcept
   {
     // 2. If root is a numeric value, or a non-math function, serialize root per the normal rules for it and
     // return the result.
 
-    builder.append(ToString(root.Id));
-    builder.append(u8"()");
+    builder.Append(ToString(root.Id));
+    builder.Append(u8"()");
   }
 
-  void SerialiseCalculationTree(CSSOMString &builder, const IndirectNode<Sum> &root,
+  void SerialiseCalculationTree(StringBuilder &builder, const IndirectNode<Sum> &root,
                                 SerialisationState &state) noexcept
   {
     krys_debug_assert(!root->Children.empty());
@@ -692,7 +698,7 @@ namespace krys::boo::css::calc
     // 6. If root is a Sum node,
 
     // - let s be a string initially containing "(".
-    builder.append(state.OpenGroup());
+    builder.Append(state.OpenGroup());
 
     // - Sort root’s children.
 
@@ -716,7 +722,7 @@ namespace krys::boo::css::calc
           {
             // 1. If child is a Negate node, append " - " to s, then serialize the Negate’s child and append
             // the result to s.
-            builder.append(u8" - ");
+            builder.Append(u8" - ");
             SerialiseCalculationTree(builder, child->A, state);
           },
           [&builder, &state]<Numeric T>(const T &child)
@@ -725,29 +731,29 @@ namespace krys::boo::css::calc
             // child as normal and append the result to s.
             if (child.Value < 0)
             {
-              builder.append(u8" - ");
+              builder.Append(u8" - ");
               SerialiseCalculationTree(builder, CreateChildWithValueBasedOn(-child.Value, child), state);
               return;
             }
 
             // 3. Otherwise, append " + " to s, then serialize child and append the result to s.
-            builder.append(u8" + ");
+            builder.Append(u8" + ");
             SerialiseCalculationTree(builder, child, state);
           },
           [&builder, &state](const auto &child)
           {
             // 3. Otherwise, append " + " to s, then serialize child and append the result to s.
-            builder.append(u8" + ");
+            builder.Append(u8" + ");
             SerialiseCalculationTree(builder, child, state);
           });
       }
     }
 
     // - Finally, append ")" to s and return it.
-    builder.append(state.CloseGroup());
+    builder.Append(state.CloseGroup());
   }
 
-  void SerialiseCalculationTree(CSSOMString &builder, const IndirectNode<Product> &root,
+  void SerialiseCalculationTree(StringBuilder &builder, const IndirectNode<Product> &root,
                                 SerialisationState &state) noexcept
   {
     krys_debug_assert(!root->Children.empty());
@@ -755,7 +761,7 @@ namespace krys::boo::css::calc
     // 7. If root is a Product node,
 
     // - let s be a string initially containing "(".
-    builder.append(state.OpenGroup());
+    builder.Append(state.OpenGroup());
 
     // - Sort root’s children.
 
@@ -779,30 +785,30 @@ namespace krys::boo::css::calc
           {
             // 1. If child is an Invert node, append " / " to s, then serialize the Invert’s child and append
             // the result to s.
-            builder.append(u8" / ");
+            builder.Append(u8" / ");
             SerialiseCalculationTree(builder, child->A, state);
           },
           [&builder, &state](const auto &child)
           {
             // 2. Otherwise, append " * " to s, then serialize child and append the result to s.
-            builder.append(u8" * ");
+            builder.Append(u8" * ");
             SerialiseCalculationTree(builder, child, state);
           });
       }
     }
 
     // - Finally, append ")" to s and return it.
-    builder.append(state.CloseGroup());
+    builder.Append(state.CloseGroup());
   }
 
-  void SerialiseCalculationTree(CSSOMString &builder, const IndirectNode<Negate> &root,
+  void SerialiseCalculationTree(StringBuilder &builder, const IndirectNode<Negate> &root,
                                 SerialisationState &state) noexcept
   {
     // 4. If root is a Negate node,
 
     // - let s be a string initially containing "(-1 * ".
-    builder.append(state.OpenGroup());
-    builder.append(u8"-1 * ");
+    builder.Append(state.OpenGroup());
+    builder.Append(u8"-1 * ");
 
     {
       ParenthesisSaver saver {state};
@@ -813,17 +819,17 @@ namespace krys::boo::css::calc
     }
 
     // - Append ")" to s, then return it.
-    builder.append(state.CloseGroup());
+    builder.Append(state.CloseGroup());
   }
 
-  void SerialiseCalculationTree(CSSOMString &builder, const IndirectNode<Invert> &root,
+  void SerialiseCalculationTree(StringBuilder &builder, const IndirectNode<Invert> &root,
                                 SerialisationState &state) noexcept
   {
     // 5. If root is an Invert node,
 
     // - let s be a string initially containing "(1 / ".
-    builder.append(state.OpenGroup());
-    builder.append(u8"1 / ");
+    builder.Append(state.OpenGroup());
+    builder.Append(u8"1 / ");
 
     {
       ParenthesisSaver saver {state};
@@ -834,11 +840,11 @@ namespace krys::boo::css::calc
     }
 
     // - Append ")" to s, then return it.
-    builder.append(state.CloseGroup());
+    builder.Append(state.CloseGroup());
   }
 
   template <typename Op>
-  void SerialiseCalculationTree(CSSOMString &builder, const IndirectNode<Op> &root,
+  void SerialiseCalculationTree(StringBuilder &builder, const IndirectNode<Op> &root,
                                 SerialisationState &state) noexcept
   {
     // 3. If root is anything but a Sum, Negate, Product, or Invert node, serialize a math function for the
@@ -849,7 +855,7 @@ namespace krys::boo::css::calc
 
   // MARK: Exposed interface
 
-  void SerialisationForCSS(CSSOMString &builder, const Tree &tree,
+  void SerialisationForCSS(StringBuilder &builder, const Tree &tree,
                            const SerialisationOptions &options) noexcept
   {
     SerialisationState state {
@@ -862,12 +868,12 @@ namespace krys::boo::css::calc
 
   CSSOMString SerialisationForCSS(const Tree &tree, const SerialisationOptions &options) noexcept
   {
-    CSSOMString builder;
+    StringBuilder builder;
     SerialisationForCSS(builder, tree, options);
-    return builder;
+    return krys::move(builder).ToString();
   }
 
-  void SerialisationForCSS(CSSOMString &builder, const Child &child,
+  void SerialisationForCSS(StringBuilder &builder, const Child &child,
                            const SerialisationOptions &options) noexcept
   {
     SerialisationState state {
@@ -879,8 +885,8 @@ namespace krys::boo::css::calc
 
   CSSOMString SerialisationForCSS(const Child &child, const SerialisationOptions &options) noexcept
   {
-    CSSOMString builder;
+    StringBuilder builder;
     SerialisationForCSS(builder, child, options);
-    return builder;
+    return krys::move(builder).ToString();
   }
 }

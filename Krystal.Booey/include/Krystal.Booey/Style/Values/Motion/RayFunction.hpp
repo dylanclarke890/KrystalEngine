@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Values/Motion/RayFunction.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/Position.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -50,7 +51,7 @@ namespace krys::boo::style
   template <>
   struct Serialiser<Ray>
   {
-    void operator()(css::CSSOMString &, const css::SerialisationContext &, const RenderStyle &,
+    void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &,
                     const Ray &) noexcept;
   };
 }

@@ -5,13 +5,14 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
   template <Numeric StyleType>
   struct Serialiser<StyleType>
   {
-    void operator()(css::CSSOMString &builder, const css::SerialisationContext &context,
+    void operator()(StringBuilder &builder, const css::SerialisationContext &context,
                     const RenderStyle &style, const StyleType &value) noexcept
     {
       // FIXME: Do this more efficiently without creating and destroying a css::Numeric object.
@@ -22,7 +23,7 @@ namespace krys::boo::style
   template <DimensionPercentageNumeric StyleType>
   struct Serialiser<StyleType>
   {
-    void operator()(css::CSSOMString &builder, const css::SerialisationContext &context,
+    void operator()(StringBuilder &builder, const css::SerialisationContext &context,
                     const RenderStyle &style, const StyleType &value) noexcept
     {
       // FIXME: Do this more efficiently without creating and destroying a css::Numeric object.
@@ -33,7 +34,7 @@ namespace krys::boo::style
   template <Calc StyleType>
   struct Serialiser<StyleType>
   {
-    void operator()(css::CSSOMString &builder, const css::SerialisationContext &context,
+    void operator()(StringBuilder &builder, const css::SerialisationContext &context,
                     const RenderStyle &style, const StyleType &value) noexcept
     {
       // FIXME: Do this more efficiently without creating and destroying a css::UnevaluatedCalc object.
@@ -46,7 +47,7 @@ namespace krys::boo::style
   {
     using StyleType = NumberOrPercentage<nR, pR, V>;
 
-    void operator()(css::CSSOMString &builder, const css::SerialisationContext &context,
+    void operator()(StringBuilder &builder, const css::SerialisationContext &context,
                     const RenderStyle &style, const StyleType &value) noexcept
     {
       // FIXME: Do this more efficiently without creating and destroying a css::UnevaluatedCalc object.
@@ -59,7 +60,7 @@ namespace krys::boo::style
   {
     using StyleType = NumberOrPercentageResolvedToNumber<nR, pR, V>;
 
-    void operator()(css::CSSOMString &builder, const css::SerialisationContext &context,
+    void operator()(StringBuilder &builder, const css::SerialisationContext &context,
                     const RenderStyle &style, const StyleType &value) noexcept
     {
       // FIXME: Do this more efficiently without creating and destroying a css::UnevaluatedCalc object.

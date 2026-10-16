@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Queries/ContainerQueryAxis.hpp"
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryTypes.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css::cq
 {
@@ -24,5 +25,5 @@ namespace krys::boo::css::cq
     cq::ContainsUnknownFeature ContainsUnknownFeature {cq::ContainsUnknownFeature::No};
   };
 
-  void Serialise(CSSOMString &builder, const ContainerQuery &query) noexcept;
+  void Serialise(StringBuilder &builder, const ContainerQuery &query) noexcept;
 }

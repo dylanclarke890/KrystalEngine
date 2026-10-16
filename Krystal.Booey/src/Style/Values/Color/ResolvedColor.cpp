@@ -2,6 +2,7 @@
 #include "Krystal.Booey/CSS/Values/Color/ResolvedColor.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -14,10 +15,10 @@ namespace krys::boo::style
 
   // MARK: - Serialisation
 
-  void SerialisationForCSSTokenization(css::CSSOMString &builder, const css::SerialisationContext &,
+  void SerialisationForCSSTokenization(StringBuilder &builder, const css::SerialisationContext &,
                                        const ResolvedColor &absoluteColor) noexcept
   {
-    builder.append(boo::SerialisationForCSS(absoluteColor.Value));
+    builder.Append(boo::SerialisationForCSS(absoluteColor.Value));
   }
 
   css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &,

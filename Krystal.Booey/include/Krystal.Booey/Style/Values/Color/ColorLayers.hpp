@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Values/Color/ColorLayers.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -23,7 +24,7 @@ namespace krys::boo::style
                                          const boo::Color &currentColor) noexcept;
   KRYS_NODISCARD bool ContainsCurrentColor(const ColorLayers &colorLayers) noexcept;
 
-  void SerialisationForCSSTokenization(css::CSSOMString &builder, const css::SerialisationContext &context,
+  void SerialisationForCSSTokenization(StringBuilder &builder, const css::SerialisationContext &context,
                                        const ColorLayers &value) noexcept;
   KRYS_NODISCARD css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
                                                                   const ColorLayers &value) noexcept;

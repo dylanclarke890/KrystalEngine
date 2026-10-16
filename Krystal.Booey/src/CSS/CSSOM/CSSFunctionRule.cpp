@@ -2,6 +2,7 @@
 #include "Krystal.Booey/CSS/Markup.hpp"
 #include "Krystal.Booey/CSS/Rules/FunctionRule.hpp"
 #include "Krystal.Booey/CSS/Values/VariableData.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -44,33 +45,33 @@ namespace krys::boo::css
 
   CSSOMString CSSFunctionRule::CssText() const noexcept
   {
-    CSSOMString builder;
-    builder.append(u8"@function ");
+    StringBuilder builder;
+    builder.Append(u8"@function ");
     SerialiseIdentifier(Name(), builder);
-    builder.push_back(u8'(');
+    builder.Append(u8'(');
 
     CSSOMStringView separator = u8"";
     for (const auto &parameter : GetFunctionRule().Parameters())
     {
-      builder.append(separator);
+      builder.Append(separator);
       SerialiseIdentifier(CSSOMString(parameter.Name.View()), builder);
       // FIMXE: Serialize the type.
       if (const auto &defaultValue = parameter.DefaultValue)
       {
-        builder.append(u8": ").append(defaultValue->Serialise());
+        builder.Append(u8": ", defaultValue->Serialise());
       }
       separator = u8", ";
     }
 
-    builder.append(u8") { ");
+    builder.Append(u8") { ");
     for (uint32 index = 0; index < Length(); ++index)
     {
       auto ruleText = Item(index)->CssText();
-      builder.append(ruleText).push_back(u8' ');
+      builder.Append(ruleText, u8' ');
     }
 
-    builder.push_back(u8'}');
-    return builder;
+    builder.Append(u8'}');
+    return krys::move(builder).ToString();
   }
 
   const css::FunctionRule &CSSFunctionRule::GetFunctionRule() const noexcept

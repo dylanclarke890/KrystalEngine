@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Rendering/Style/StyleFilterImage.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -32,12 +33,13 @@ namespace krys::boo::css
 
   CSSOMString FilterImageValue::CustomCSSText(const SerialisationContext &context) const noexcept
   {
-    CSSOMString result {u8"filter("};
-    result.append(_imageValueOrNone->CssText(context));
-    result.append(u8", ");
+    StringBuilder result;
+    result.Append(u8"filter(");
+    result.Append(_imageValueOrNone->CssText(context));
+    result.Append(u8", ");
     Serialise(result, context, _filter);
-    result.push_back(u8')');
-    return result;
+    result.Append(u8')');
+    return krys::move(result).ToString();
   }
 
   IterationStatus FilterImageValue::CustomVisitChildren(

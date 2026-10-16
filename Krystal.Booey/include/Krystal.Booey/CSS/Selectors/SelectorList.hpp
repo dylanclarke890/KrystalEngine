@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Selectors/MutableSelector.hpp"
 #include "Krystal.Booey/CSS/Selectors/Selector.hpp"
 #include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/UniqueArray.hpp"
@@ -79,7 +80,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD CSSOMString SelectorsText() const noexcept;
 
-    void BuildSelectorsText(CSSOMString &builder) const noexcept;
+    void BuildSelectorsText(StringBuilder &builder) const noexcept;
 
 #pragma region Iterator
 

@@ -3,18 +3,13 @@
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include <charconv>
 
 namespace krys::boo::css
 {
   namespace
   {
-    void AppendInteger(CSSOMString &builder, uint32 integer) noexcept
-    {
-      char buffer[16];
-      auto result = std::to_chars(buffer, buffer + sizeof(buffer), integer);
-      builder.append(reinterpret_cast<const char8 *>(buffer), reinterpret_cast<const char8 *>(result.ptr));
-    }
   }
 
   CSSFontPaletteValuesRule::CSSFontPaletteValuesRule(css::FontPaletteValuesRule &fontPaletteValuesRule,
@@ -38,16 +33,16 @@ namespace krys::boo::css
 
   CSSOMString CSSFontPaletteValuesRule::FontFamily() const noexcept
   {
-    CSSOMString result;
+    StringBuilder result;
     for (const auto &family : _fontPaletteValuesRule->FontFamilies())
     {
-      if (!result.empty())
+      if (!result.IsEmpty())
       {
-        result.append(u8", ");
+        result.Append(u8", ");
       }
-      result.append(SerialiseFontFamily(CSSOMString(family.View())));
+      result.Append(SerialiseFontFamily(CSSOMString(family.View())));
     }
-    return result;
+    return krys::move(result).ToString();
   }
 
   CSSOMString CSSFontPaletteValuesRule::BasePalette() const noexcept
@@ -70,9 +65,9 @@ namespace krys::boo::css
       }
       case FontPaletteIndex::Type::Integer:
       {
-        CSSOMString result;
-        AppendInteger(result, basePalette->Integer);
-        return result;
+        StringBuilder result;
+        result.Append(basePalette->Integer);
+        return krys::move(result).ToString();
       }
     }
     krys_unreachable();
@@ -80,30 +75,30 @@ namespace krys::boo::css
 
   CSSOMString CSSFontPaletteValuesRule::OverrideColors() const noexcept
   {
-    CSSOMString result;
+    StringBuilder result;
     const auto &overrideColors = _fontPaletteValuesRule->OverrideColors();
     for (size_t i = 0; i < overrideColors.size(); ++i)
     {
       if (i)
       {
-        result.append(u8", ");
+        result.Append(u8", ");
       }
       const auto &item = overrideColors[i];
-      AppendInteger(result, item.first);
-      result.push_back(u8' ');
-      result.append(SerialisationForCSS(item.second));
+      result.Append(item.first);
+      result.Append(u8' ');
+      result.Append(SerialisationForCSS(item.second));
     }
-    return result;
+    return krys::move(result).ToString();
   }
 
   CSSOMString CSSFontPaletteValuesRule::CssText() const noexcept
   {
-    CSSOMString builder;
-    builder.append(u8"@font-palette-values ").append(Name()).append(u8" { ");
+    StringBuilder builder;
+    builder.Append(u8"@font-palette-values ", Name(), u8" { ");
 
     if (!_fontPaletteValuesRule->FontFamilies().empty())
     {
-      builder.append(u8"font-family: ").append(FontFamily()).append(u8"; ");
+      builder.Append(u8"font-family: ", FontFamily(), u8"; ");
     }
 
     if (auto basePalette = _fontPaletteValuesRule->BasePalette())
@@ -112,19 +107,19 @@ namespace krys::boo::css
       {
         case FontPaletteIndex::Type::Light:
         {
-          builder.append(u8"base-palette: light; ");
+          builder.Append(u8"base-palette: light; ");
           break;
         }
         case FontPaletteIndex::Type::Dark:
         {
-          builder.append(u8"base-palette: dark; ");
+          builder.Append(u8"base-palette: dark; ");
           break;
         }
         case FontPaletteIndex::Type::Integer:
         {
-          builder.append(u8"base-palette: ");
-          AppendInteger(builder, basePalette->Integer);
-          builder.append(u8"; ");
+          builder.Append(u8"base-palette: ");
+          builder.Append(basePalette->Integer);
+          builder.Append(u8"; ");
           break;
         }
       }
@@ -133,23 +128,23 @@ namespace krys::boo::css
     const auto &overrideColors = _fontPaletteValuesRule->OverrideColors();
     if (!overrideColors.empty())
     {
-      builder.append(u8"override-colors:");
+      builder.Append(u8"override-colors:");
       for (size_t i = 0; i < overrideColors.size(); ++i)
       {
         if (i)
         {
-          builder.push_back(u8',');
+          builder.Append(u8',');
         }
-        builder.push_back(u8' ');
-        AppendInteger(builder, overrideColors[i].first);
-        builder.push_back(u8' ');
-        builder.append(SerialisationForCSS(overrideColors[i].second));
+        builder.Append(u8' ');
+        builder.Append(overrideColors[i].first);
+        builder.Append(u8' ');
+        builder.Append(SerialisationForCSS(overrideColors[i].second));
       }
-      builder.append(u8"; ");
+      builder.Append(u8"; ");
     }
 
-    builder.push_back(u8'}');
-    return builder;
+    builder.Append(u8'}');
+    return krys::move(builder).ToString();
   }
 
   void CSSFontPaletteValuesRule::Reattach(Rule &rule) noexcept

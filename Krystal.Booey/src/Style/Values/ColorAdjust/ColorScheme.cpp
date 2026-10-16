@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -46,9 +47,8 @@ namespace krys::boo::style
 
   // MARK: - Serialisation
 
-  void Serialiser<ColorScheme>::operator()(css::CSSOMString &builder,
-                                           const css::SerialisationContext &context, const RenderStyle &style,
-                                           const ColorScheme &value) noexcept
+  void Serialiser<ColorScheme>::operator()(StringBuilder &builder, const css::SerialisationContext &context,
+                                           const RenderStyle &style, const ColorScheme &value) noexcept
   {
     if (value.IsNormal())
     {
@@ -59,7 +59,7 @@ namespace krys::boo::style
     Serialise(builder, context, style, value.Schemes);
     if (value.Only)
     {
-      builder.append(u8" ");
+      builder.Append(u8" ");
       Serialise(builder, context, style, *value.Only);
     }
   }

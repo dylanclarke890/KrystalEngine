@@ -21,6 +21,7 @@
 #include "Krystal.Booey/Style/Values/Color/KeywordColor.hpp"
 #include "Krystal.Booey/Style/Values/Color/LightDarkColor.hpp"
 #include "Krystal.Booey/Style/Values/Color/RelativeColor.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
 namespace krys::boo::style
@@ -269,19 +270,19 @@ namespace krys::boo::style
                           { return style::SerialisationForCSSTokenization(context, kind); });
   }
 
-  void SerialisationForCSSTokenization(css::CSSOMString &builder, const css::SerialisationContext &context,
+  void SerialisationForCSSTokenization(StringBuilder &builder, const css::SerialisationContext &context,
                                        const Color &value) noexcept
   {
     krys::SwitchOn(value,
                    [&](const auto &kind) { style::SerialisationForCSSTokenization(builder, context, kind); });
   }
 
-  void Serialiser<Color>::operator()(css::CSSOMString &builder, const css::SerialisationContext &,
+  void Serialiser<Color>::operator()(StringBuilder &builder, const css::SerialisationContext &,
                                      const RenderStyle &style, const Color &value) noexcept
   {
     // NOTE: The specialization of style::Serialiser is used for computed value serialization, so the resolved
     // "used" value is used.
-    builder.append(boo::SerialisationForCSS(style.ColorResolvingCurrentColor(value)));
+    builder.Append(boo::SerialisationForCSS(style.ColorResolvingCurrentColor(value)));
   }
 
   // MARK: - Conversion

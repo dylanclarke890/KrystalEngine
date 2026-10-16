@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
 #include "Krystal.Booey/Core/NumberFormatting.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include <cmath>
 #include <limits>
 
@@ -23,24 +24,24 @@ namespace krys::boo::css
     }
   }
 
-  void FormatNonfiniteCSSNumberValue(CSSOMString &builder, const SerialisableNumber &number) noexcept
+  void FormatNonfiniteCSSNumberValue(StringBuilder &builder, const SerialisableNumber &number) noexcept
   {
-    builder.append(FormatNonfiniteCSSNumberValuePrefix(number.Value));
+    builder.Append(FormatNonfiniteCSSNumberValuePrefix(number.Value));
     if (!number.Suffix.empty())
     {
-      builder.append(u8" * 1");
+      builder.Append(u8" * 1");
     }
-    builder.append(number.Suffix);
+    builder.Append(number.Suffix);
   }
 
   CSSOMString FormatNonfiniteCSSNumberValue(const SerialisableNumber &number) noexcept
   {
-    CSSOMString builder;
+    StringBuilder builder;
     FormatNonfiniteCSSNumberValue(builder, number);
-    return builder;
+    return krys::move(builder).ToString();
   }
 
-  void FormatCSSNumberValue(CSSOMString &builder, const SerialisableNumber &number) noexcept
+  void FormatCSSNumberValue(StringBuilder &builder, const SerialisableNumber &number) noexcept
   {
     if (!std::isfinite(number.Value))
     {
@@ -49,13 +50,13 @@ namespace krys::boo::css
     }
 
     FormatCSSNumber(builder, number.Value);
-    builder.append(number.Suffix);
+    builder.Append(number.Suffix);
   }
 
   CSSOMString FormatCSSNumberValue(const SerialisableNumber &number) noexcept
   {
-    CSSOMString builder;
+    StringBuilder builder;
     FormatCSSNumberValue(builder, number);
-    return builder;
+    return krys::move(builder).ToString();
   }
 }

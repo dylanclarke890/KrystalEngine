@@ -13,6 +13,7 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Style/RuleData.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
@@ -161,19 +162,19 @@ namespace krys::boo::css
   CSSOMString CSSStyleRule::CssText() const noexcept
   {
     auto declarations = _styleRule->Properties().AsText(DefaultSerialisationContext());
-    CSSOMString rules;
+    StringBuilder rules;
     CssTextForRules(rules);
     return CssTextInternal(declarations, rules);
   }
 
-  void CSSStyleRule::CssTextForRules(CSSOMString &rules) const noexcept
+  void CSSStyleRule::CssTextForRules(StringBuilder &rules) const noexcept
   {
     for (uint32 index = 0; index < Length(); ++index)
     {
       auto ruleText = Item(index)->CssText();
       if (!ruleText.empty())
       {
-        rules.append(u8"\n  ").append(ruleText);
+        rules.Append(u8"\n  ", ruleText);
       }
     }
   }
@@ -181,52 +182,52 @@ namespace krys::boo::css
   CSSOMString CSSStyleRule::CssText(const SerialisationContext &context) const noexcept
   {
     auto declarations = _styleRule->Properties().AsText(context);
-    CSSOMString rules;
+    StringBuilder rules;
     CssTextForRulesWithReplacementURLs(rules, context);
     return CssTextInternal(declarations, rules);
   }
 
-  void CSSStyleRule::CssTextForRulesWithReplacementURLs(CSSOMString &rules,
+  void CSSStyleRule::CssTextForRulesWithReplacementURLs(StringBuilder &rules,
                                                         const SerialisationContext &context) const noexcept
   {
     for (uint32 index = 0; index < Length(); index++)
     {
-      rules.append(u8"\n  ").append(Item(index)->CssText(context));
+      rules.Append(u8"\n  ", Item(index)->CssText(context));
     }
   }
 
   CSSOMString CSSStyleRule::CssTextInternal(const CSSOMString &declarations,
-                                            const CSSOMString &rules) const noexcept
+                                            const StringBuilder &rules) const noexcept
   {
-    CSSOMString builder;
-    builder.append(SelectorText()).append(u8" {");
+    StringBuilder builder;
+    builder.Append(SelectorText(), u8" {");
 
-    if (declarations.empty() && rules.empty())
+    if (declarations.empty() && rules.IsEmpty())
     {
-      builder.append(u8" }");
-      return builder;
+      builder.Append(u8" }");
+      return krys::move(builder).ToString();
     }
 
-    if (rules.empty())
+    if (rules.IsEmpty())
     {
-      builder.push_back(u8' ');
-      builder.append(declarations);
-      builder.append(u8" }");
-      return builder;
+      builder.Append(u8' ');
+      builder.Append(declarations);
+      builder.Append(u8" }");
+      return krys::move(builder).ToString();
     }
 
     if (declarations.empty())
     {
-      builder.append(rules);
-      builder.append(u8"\n}");
-      return builder;
+      builder.Append(rules);
+      builder.Append(u8"\n}");
+      return krys::move(builder).ToString();
     }
 
-    builder.append(u8"\n  ");
-    builder.append(declarations);
-    builder.append(rules);
-    builder.append(u8"\n}");
-    return builder;
+    builder.Append(u8"\n  ");
+    builder.Append(declarations);
+    builder.Append(rules);
+    builder.Append(u8"\n}");
+    return krys::move(builder).ToString();
   }
 
   // FIXME: share all methods below with CSSGroupingRule.

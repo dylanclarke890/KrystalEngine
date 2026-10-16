@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/Shapes/CircleFunction.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -19,12 +20,12 @@ namespace krys::boo::css
     }
   }
 
-  void Serialiser<Circle>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<Circle>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                       const Circle &value) noexcept
   {
     // <circle()> = circle( <radial-size>? [ at <position> ]? )
 
-    auto lengthBefore = builder.size();
+    auto lengthBefore = builder.Length();
 
     if (!HasDefaultValueForCircleRadius(value.Radius))
     {
@@ -35,8 +36,8 @@ namespace krys::boo::css
     {
       // FIXME: To match other serialization of Percentage, this should not serialize if equal to the default
       // value of 50% 50%, but this does not match the tests.
-      bool wroteSomething = builder.size() != lengthBefore;
-      builder.append(wroteSomething ? u8" at " : u8"at ");
+      bool wroteSomething = builder.Length() != lengthBefore;
+      builder.Append(wroteSomething ? u8" at " : u8"at ");
       Serialise(builder, context, *value.Position);
     }
   }

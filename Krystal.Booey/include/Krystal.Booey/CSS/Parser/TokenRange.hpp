@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Parser/Token.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 
 namespace krys::boo::css
@@ -181,13 +182,13 @@ namespace krys::boo::css
 
     CSSOMString Serialise(TokenSerialisationMode mode) const
     {
-      CSSOMString builder;
+      StringBuilder builder;
       for (size_t i = 0; i < _tokens.size(); ++i)
       {
         _tokens[i].Serialise(builder, (i + 1) == _tokens.size() ? nullptr : &_tokens[i + 1], mode);
       }
 
-      return builder;
+      return krys::move(builder).ToString();
     }
 
     /// @brief The tokens remaining in the range.

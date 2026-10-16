@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Calc/SymbolTable.hpp"
 #include "Krystal.Booey/CSS/Values/NoConversionDataRequiredTag.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Utils/ZipTuple.hpp"
@@ -959,7 +960,7 @@ namespace krys::boo::style
   struct SerialiseInvoker
   {
     template <typename StyleType, typename... Rest>
-    void operator()(css::CSSOMString &builder, const css::SerialisationContext &context,
+    void operator()(StringBuilder &builder, const css::SerialisationContext &context,
                     const RenderStyle &style, const StyleType &value, Rest &&...rest) const noexcept
     {
       Serialiser<StyleType> {}(builder, context, style, value, std::forward<Rest>(rest)...);
@@ -970,16 +971,16 @@ namespace krys::boo::style
                                                const RenderStyle &style, const StyleType &value,
                                                Rest &&...rest) const noexcept
     {
-      css::CSSOMString builder;
+      StringBuilder builder;
       this->operator()(builder, context, style, value, std::forward<Rest>(rest)...);
-      return builder;
+      return krys::move(builder).ToString();
     }
   };
 
   constexpr SerialiseInvoker Serialise {};
 
   template <typename StyleType, typename... Rest>
-  void SerialisationForCSSOnOptionalLike(css::CSSOMString &builder, const css::SerialisationContext &context,
+  void SerialisationForCSSOnOptionalLike(StringBuilder &builder, const css::SerialisationContext &context,
                                          const RenderStyle &style, const StyleType &value,
                                          Rest &&...rest) noexcept
   {
@@ -992,7 +993,7 @@ namespace krys::boo::style
   }
 
   template <typename StyleType, typename... Rest>
-  void SerialisationForCSSOnTupleLike(css::CSSOMString &builder, const css::SerialisationContext &context,
+  void SerialisationForCSSOnTupleLike(StringBuilder &builder, const css::SerialisationContext &context,
                                       const RenderStyle &style, const StyleType &value,
                                       css::CSSOMStringView separator, Rest &&...rest) noexcept
   {
@@ -1005,12 +1006,12 @@ namespace krys::boo::style
           return;
         }
 
-        builder.append(std::exchange(swappedSeparator, separator));
+        builder.Append(std::exchange(swappedSeparator, separator));
         Serialise(builder, context, style, *element, rest...);
       },
       [&](const auto &element)
       {
-        builder.append(std::exchange(swappedSeparator, separator));
+        builder.Append(std::exchange(swappedSeparator, separator));
         Serialise(builder, context, style, element, rest...);
       });
 
@@ -1018,7 +1019,7 @@ namespace krys::boo::style
   }
 
   template <typename StyleType, typename... Rest>
-  void SerialisationForCSSOnTupleLikeCoalescing(css::CSSOMString &builder,
+  void SerialisationForCSSOnTupleLikeCoalescing(StringBuilder &builder,
                                                 const css::SerialisationContext &context,
                                                 const RenderStyle &style, const StyleType &value,
                                                 css::CSSOMStringView separator, Rest &&...rest) noexcept
@@ -1064,20 +1065,20 @@ namespace krys::boo::style
   }
 
   template <typename StyleType, typename... Rest>
-  void SerialisationForCSSOnRangeLike(css::CSSOMString &builder, const css::SerialisationContext &context,
+  void SerialisationForCSSOnRangeLike(StringBuilder &builder, const css::SerialisationContext &context,
                                       const RenderStyle &style, const StyleType &value,
                                       css::CSSOMStringView separator, Rest &&...rest) noexcept
   {
     css::CSSOMStringView swappedSeparator = u8"";
     for (const auto &element : value)
     {
-      builder.append(std::exchange(swappedSeparator, separator));
+      builder.Append(std::exchange(swappedSeparator, separator));
       Serialise(builder, context, style, element, rest...);
     }
   }
 
   template <typename StyleType, typename... Rest>
-  void SerialisationForCSSOnVariantLike(css::CSSOMString &builder, const css::SerialisationContext &context,
+  void SerialisationForCSSOnVariantLike(StringBuilder &builder, const css::SerialisationContext &context,
                                         const RenderStyle &style, const StyleType &value,
                                         Rest &&...rest) noexcept
   {
@@ -1090,7 +1091,7 @@ namespace krys::boo::style
   struct Serialiser<StyleType>
   {
     template <typename... Rest>
-    void operator()(css::CSSOMString &, const css::SerialisationContext &, const RenderStyle &,
+    void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &,
                     const StyleType &, Rest &&...) noexcept
     {
     }
@@ -1101,7 +1102,7 @@ namespace krys::boo::style
   struct Serialiser<StyleType>
   {
     template <typename... Rest>
-    void operator()(css::CSSOMString &builder, const css::SerialisationContext &context,
+    void operator()(StringBuilder &builder, const css::SerialisationContext &context,
                     const RenderStyle &style, const StyleType &value, Rest &&...rest) noexcept
     {
       SerialisationForCSSOnOptionalLike(builder, context, style, value, std::forward<Rest>(rest)...);
@@ -1113,7 +1114,7 @@ namespace krys::boo::style
   struct Serialiser<StyleType>
   {
     template <typename... Rest>
-    void operator()(css::CSSOMString &builder, const css::SerialisationContext &context,
+    void operator()(StringBuilder &builder, const css::SerialisationContext &context,
                     const RenderStyle &style, const StyleType &value, Rest &&...rest) noexcept
     {
       if constexpr (css::SerialisationCoalescing<StyleType> == css::SerialisationCoalescingType::Minimal)
@@ -1136,7 +1137,7 @@ namespace krys::boo::style
   struct Serialiser<StyleType>
   {
     template <typename... Rest>
-    void operator()(css::CSSOMString &builder, const css::SerialisationContext &context,
+    void operator()(StringBuilder &builder, const css::SerialisationContext &context,
                     const RenderStyle &style, const StyleType &value, Rest &&...rest) noexcept
     {
       SerialisationForCSSOnRangeLike(builder, context, style, value,
@@ -1150,7 +1151,7 @@ namespace krys::boo::style
   struct Serialiser<StyleType>
   {
     template <typename... Rest>
-    void operator()(css::CSSOMString &builder, const css::SerialisationContext &context,
+    void operator()(StringBuilder &builder, const css::SerialisationContext &context,
                     const RenderStyle &style, const StyleType &value, Rest &&...rest) noexcept
     {
       SerialisationForCSSOnVariantLike(builder, context, style, value, std::forward<Rest>(rest)...);
@@ -1162,7 +1163,7 @@ namespace krys::boo::style
   struct Serialiser<StyleType>
   {
     template <typename... Rest>
-    void operator()(css::CSSOMString &builder, const css::SerialisationContext &context, const RenderStyle &,
+    void operator()(StringBuilder &builder, const css::SerialisationContext &context, const RenderStyle &,
                     const StyleType &value, Rest &&...rest) noexcept
     {
       css::Serialise(builder, context, value, std::forward<Rest>(rest)...);
@@ -1174,14 +1175,14 @@ namespace krys::boo::style
   struct Serialiser<css::FunctionNotation<Name, StyleType>>
   {
     template <typename... Rest>
-    void operator()(css::CSSOMString &builder, const css::SerialisationContext &context,
+    void operator()(StringBuilder &builder, const css::SerialisationContext &context,
                     const RenderStyle &style, const css::FunctionNotation<Name, StyleType> &value,
                     Rest &&...rest) noexcept
     {
-      builder.append(css::ToLower(value.Name));
-      builder.push_back(u8'(');
+      builder.Append(css::ToLower(value.Name));
+      builder.Append(u8'(');
       Serialise(builder, context, style, value.Parameters, std::forward<Rest>(rest)...);
-      builder.push_back(u8')');
+      builder.Append(u8')');
     }
   };
 

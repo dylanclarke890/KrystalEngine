@@ -16,6 +16,7 @@
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/ScopeRuleSets.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -553,7 +554,7 @@ namespace krys::boo::style
     krys_debug_assert(
       css::IsExposed(propertyID, _element->NodeDocument().CssParserContext().PropertySettings));
 
-    css::CSSOMString builder;
+    StringBuilder builder;
 
     ExtractorState state {
       .ValueType = valueType,
@@ -566,7 +567,7 @@ namespace krys::boo::style
     };
     ExtractorGenerated::ExtractValueSerialisation(state, builder, context, propertyID);
 
-    return builder;
+    return krys::move(builder).ToString();
   }
 
   bool Extractor::PropertyMatches(css::PropertyId propertyID, const css::Value *value) const noexcept

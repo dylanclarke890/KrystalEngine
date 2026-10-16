@@ -12,6 +12,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueCreation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordSerialisation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -132,7 +133,7 @@ namespace krys::boo::style
 
   // MARK: - Serialization
 
-  void Serialiser<BasicShapePath>::operator()(css::CSSOMString &builder,
+  void Serialiser<BasicShapePath>::operator()(StringBuilder &builder,
                                               const css::SerialisationContext &context,
                                               const RenderStyle &style, const BasicShapePath &shape,
                                               PathConversion conversion) noexcept
@@ -144,7 +145,7 @@ namespace krys::boo::style
     }
 
     Serialise(builder, context, style, shape.GetShape(), conversion);
-    builder.push_back(u8' ');
+    builder.Append(u8' ');
     Serialise(builder, context, style, shape.ReferenceBox());
   }
 }

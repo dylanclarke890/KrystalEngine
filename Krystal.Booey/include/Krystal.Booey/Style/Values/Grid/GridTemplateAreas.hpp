@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Style/Values/Grid/GridNamedAreaMap.hpp"
 #include "Krystal.Booey/Style/Values/Grid/GridNamedLinesMap.hpp"
 #include "Krystal.Booey/Style/Values/Grid/GridTrackSizingDirection.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -77,7 +78,7 @@ namespace krys::boo::style
   template <>
   struct Serialiser<GridTemplateAreas>
   {
-    void operator()(css::CSSOMString &, const css::SerialisationContext &, const RenderStyle &,
+    void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &,
                     const GridTemplateAreas &) noexcept;
   };
 }

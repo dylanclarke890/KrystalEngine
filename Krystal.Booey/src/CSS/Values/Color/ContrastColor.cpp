@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Values/Color/ContrastColor.hpp"
 #include "Krystal.Booey/CSS/Values/Color/ContrastColorResolver.hpp"
 #include "Krystal.Booey/CSS/Values/Color/PlatformColorResolutionState.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -22,12 +23,12 @@ namespace krys::boo::css
     return ContainsColorSchemeDependentColor(unresolved.Color);
   }
 
-  void Serialiser<ContrastColor>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<ContrastColor>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                              const ContrastColor &value) noexcept
   {
-    builder.append(u8"contrast-color(");
+    builder.Append(u8"contrast-color(");
     Serialise(builder, context, value.Color);
-    builder.push_back(u8')');
+    builder.Append(u8')');
   }
 
   void ComputedStyleDependenciesCollector<ContrastColor>::operator()(ComputedStyleDependencies &dependencies,

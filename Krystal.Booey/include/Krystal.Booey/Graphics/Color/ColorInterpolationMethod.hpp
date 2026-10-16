@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Graphics/Color/ColorTypes.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Visitor.hpp"
@@ -210,12 +211,12 @@ namespace krys::boo
     krys_unreachable();
   }
 
-  void SerialisationForCSS(utf8_string &builder,
+  void SerialisationForCSS(StringBuilder &builder,
                            ColorInterpolationColorSpace interpolationColorSpace) noexcept;
 
-  void SerialisationForCSS(utf8_string &builder, HueInterpolationMethod hueInterpolationMethod) noexcept;
+  void SerialisationForCSS(StringBuilder &builder, HueInterpolationMethod hueInterpolationMethod) noexcept;
 
-  void SerialisationForCSS(utf8_string &builder, const ColorInterpolationMethod &method) noexcept;
+  void SerialisationForCSS(StringBuilder &builder, const ColorInterpolationMethod &method) noexcept;
 
   KRYS_NODISCARD utf8_string SerialisationForCSS(const ColorInterpolationMethod &method) noexcept;
 }

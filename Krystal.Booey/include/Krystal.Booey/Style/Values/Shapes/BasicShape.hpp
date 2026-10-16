@@ -11,6 +11,7 @@
 #include "Krystal.Booey/Style/Values/Shapes/ShapeFunction.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/WindRuleComputation.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/XywhFunction.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -55,7 +56,7 @@ namespace krys::boo::style
   template <>
   struct Serialiser<BasicShape>
   {
-    void operator()(css::CSSOMString &, const css::SerialisationContext &, const RenderStyle &,
+    void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &,
                     const BasicShape &, PathConversion = PathConversion::None) noexcept;
   };
 

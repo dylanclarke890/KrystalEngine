@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Graphics/FontPlatformData.hpp"
 #include "Krystal.Core/Hash.hpp"
-#include <format>
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo
 {
@@ -90,10 +90,16 @@ namespace krys::boo
 
   utf8_string FontPlatformData::Description() const noexcept
   {
-    auto family = FamilyName();
-    auto description =
-      std::format("{} {}px{}{}", reinterpret_cast<const char *>(family.c_str()), _size,
-                  _syntheticBold ? " synthetic-bold" : "", _syntheticOblique ? " synthetic-oblique" : "");
-    return utf8_string {reinterpret_cast<const char8 *>(description.data()), description.size()};
+    StringBuilder description;
+    description.Append(FamilyName(), u8' ', _size, u8"px");
+    if (_syntheticBold)
+    {
+      description.Append(u8" synthetic-bold");
+    }
+    if (_syntheticOblique)
+    {
+      description.Append(u8" synthetic-oblique");
+    }
+    return krys::move(description).ToString();
   }
 }

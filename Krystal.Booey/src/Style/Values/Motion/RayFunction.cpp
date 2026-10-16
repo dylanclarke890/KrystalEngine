@@ -1,10 +1,11 @@
 ﻿#include "Krystal.Booey/Style/Values/Motion/RayFunction.hpp"
 
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
-  void Serialiser<Ray>::operator()(css::CSSOMString &builder, const css::SerialisationContext &context,
+  void Serialiser<Ray>::operator()(StringBuilder &builder, const css::SerialisationContext &context,
                                    const RenderStyle &style, const Ray &value) noexcept
   {
     // ray() = ray( <angle> && <ray-size>? && contain? && [at <position>]? )
@@ -14,19 +15,19 @@ namespace krys::boo::style
 
     if (!std::holds_alternative<css::keywords::ClosestSide>(value.Size))
     {
-      builder.push_back(u8' ');
+      builder.Append(u8' ');
       Serialise(builder, context, style, value.Size);
     }
 
     if (value.Contain)
     {
-      builder.push_back(u8' ');
+      builder.Append(u8' ');
       Serialise(builder, context, style, *value.Contain);
     }
 
     if (value.Position)
     {
-      builder.append(u8" at ");
+      builder.Append(u8" at ");
       Serialise(builder, context, style, *value.Position);
     }
   }

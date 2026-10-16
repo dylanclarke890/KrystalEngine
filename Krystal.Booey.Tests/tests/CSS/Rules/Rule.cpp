@@ -5,6 +5,7 @@
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParserContext.hpp"
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css::tests
 {
@@ -17,7 +18,7 @@ namespace krys::boo::css::tests
 
     KRYS_NODISCARD std::string MediaText(const mq::MediaQueryList &list)
     {
-      CSSOMString result;
+      StringBuilder result;
       mq::Serialise(result, list);
       return ToNarrow(result);
     }

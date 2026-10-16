@@ -13,6 +13,7 @@
 #include "Krystal.Booey/CSS/Rules/PositionTryRule.hpp"
 #include "Krystal.Booey/CSS/Rules/ViewTransitionRule.hpp"
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css::tests
 {
@@ -54,21 +55,21 @@ namespace krys::boo::css::tests
 
     KRYS_NODISCARD std::string MediaText(const mq::MediaQueryList &list)
     {
-      CSSOMString text;
+      StringBuilder text;
       mq::Serialise(text, list);
       return ToNarrow(text);
     }
 
     KRYS_NODISCARD std::string LayerText(const CascadeLayerName &name)
     {
-      CSSOMString text;
+      StringBuilder text;
       for (const auto &part : name)
       {
-        if (!text.empty())
+        if (!text.IsEmpty())
         {
-          text += u8'.';
+          text.Append(u8'.');
         }
-        text += part.View();
+        text.Append(part.View());
       }
       return ToNarrow(text);
     }
@@ -282,7 +283,7 @@ namespace krys::boo::css::tests
       auto sheet = ParseSheet(u8"@container sidebar (min-width: 400px) { a {} } @container { b {} }");
       REQUIRE(sheet->RuleCount() == 1);
       auto &container = Downcast<ContainerRule>(*sheet->RuleAt(0));
-      CSSOMString text;
+      StringBuilder text;
       cq::Serialise(text, container.ContainerQuery());
       CHECK(ToNarrow(text) == "sidebar (min-width: 400px)");
       CHECK(container.ChildRules().size() == 1);

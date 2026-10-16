@@ -5,6 +5,7 @@
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryFeatures.hpp"
 #include "Krystal.Booey/CSS/Values/RatioValue.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css::tests
 {
@@ -18,7 +19,7 @@ namespace krys::boo::css::tests
     /// @brief Parses `text` as a media query list and serialises it, as `matchMedia(text).media` does.
     KRYS_NODISCARD std::string Roundtrip(utf8_stringview text)
     {
-      CSSOMString result;
+      StringBuilder result;
       mq::Serialise(result, Parse(text));
       return ToNarrow(result);
     }
@@ -299,7 +300,7 @@ namespace krys::boo::css::tests
       {
         return {};
       }
-      CSSOMString result;
+      StringBuilder result;
       mq::Serialise(result, *query);
       return ToNarrow(result);
     };

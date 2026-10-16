@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/Graphics/FontTaggedSettings.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -19,15 +20,15 @@ namespace krys::boo::style
   template <>
   struct Serialiser<FontOpentypeTag>
   {
-    void operator()(css::CSSOMString &builder, const css::SerialisationContext &, const RenderStyle &,
+    void operator()(StringBuilder &builder, const css::SerialisationContext &, const RenderStyle &,
                     const FontOpentypeTag &tag) noexcept
     {
-      builder.push_back(u8'"');
+      builder.Append(u8'"');
       for (auto c : tag.Value)
       {
-        builder.push_back(static_cast<char8>(c));
+        builder.Append(static_cast<char8>(c));
       }
-      builder.push_back(u8'"');
+      builder.Append(u8'"');
     }
   };
 }

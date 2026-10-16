@@ -9,6 +9,7 @@
 #include "Krystal.Booey/Style/Values/Easing/SpringEasingFunction.hpp"
 #include "Krystal.Booey/Style/Values/Easing/StepsEasingFunction.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -190,7 +191,7 @@ namespace krys::boo::style
 
   // MARK: - Serialization
 
-  void Serialiser<EasingFunction>::operator()(css::CSSOMString &builder,
+  void Serialiser<EasingFunction>::operator()(StringBuilder &builder,
                                               const css::SerialisationContext &context,
                                               const RenderStyle &style, const EasingFunction &value) noexcept
   {

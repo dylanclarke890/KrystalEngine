@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Values/Grid/GridNamedAreaMap.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 
 namespace krys::boo::css
@@ -80,7 +81,7 @@ namespace krys::boo::css
 
   namespace
   {
-    void SerialiseGridNamedAreaMapPosition(CSSOMString &builder, const GridNamedAreaMap::MapType &map,
+    void SerialiseGridNamedAreaMapPosition(StringBuilder &builder, const GridNamedAreaMap::MapType &map,
                                            size_t row, size_t column) noexcept
     {
       HashSet<CSSOMString> candidates;
@@ -97,33 +98,33 @@ namespace krys::boo::css
         if (column >= area.Columns.StartLine() && column < area.Columns.EndLine()
             && candidates.contains(name))
         {
-          builder.append(name);
+          builder.Append(name);
           return;
         }
       }
 
-      builder.push_back(u8'.');
+      builder.Append(u8'.');
     }
   }
 
-  void Serialiser<GridNamedAreaMap>::operator()(CSSOMString &builder, const SerialisationContext &,
+  void Serialiser<GridNamedAreaMap>::operator()(StringBuilder &builder, const SerialisationContext &,
                                                 const GridNamedAreaMap &value) noexcept
   {
     for (size_t row = 0; row < value.RowCount; ++row)
     {
-      builder.push_back(u8'"');
+      builder.Append(u8'"');
       for (size_t column = 0; column < value.ColumnCount; ++column)
       {
         SerialiseGridNamedAreaMapPosition(builder, value.Map, row, column);
         if (column != value.ColumnCount - 1)
         {
-          builder.push_back(u8' ');
+          builder.Append(u8' ');
         }
       }
-      builder.push_back(u8'"');
+      builder.Append(u8'"');
       if (row != value.RowCount - 1)
       {
-        builder.push_back(u8' ');
+        builder.Append(u8' ');
       }
     }
   }

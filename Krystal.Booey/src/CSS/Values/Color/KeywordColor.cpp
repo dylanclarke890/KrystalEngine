@@ -2,6 +2,7 @@
 #include "Krystal.Booey/CSS/Values/Color/PlatformColorResolutionState.hpp"
 #include "Krystal.Booey/Graphics/Color/NamedColors.hpp"
 #include "Krystal.Booey/Style/Values/Color/SystemColor.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -107,9 +108,9 @@ namespace krys::boo::css
     return IsSystemColorKeyword(unresolved.Value);
   }
 
-  void Serialiser<KeywordColor>::operator()(CSSOMString &builder, const SerialisationContext &,
+  void Serialiser<KeywordColor>::operator()(StringBuilder &builder, const SerialisationContext &,
                                             const KeywordColor &value) noexcept
   {
-    builder.append(ToLower(value.Value));
+    builder.Append(ToLower(value.Value));
   }
 }

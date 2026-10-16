@@ -3,6 +3,7 @@
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css::tests
 {
@@ -117,7 +118,8 @@ namespace krys::boo::css::tests
     {
       CHECK(ToNarrow(list->SerialiseItems(DefaultSerialisationContext())) == "1px auto 3px");
 
-      CSSOMString builder {u8"x: "};
+      StringBuilder builder;
+      builder.Append(u8"x: ");
       list->SerialiseItems(builder, DefaultSerialisationContext());
       CHECK(ToNarrow(builder) == "x: 1px auto 3px");
     }

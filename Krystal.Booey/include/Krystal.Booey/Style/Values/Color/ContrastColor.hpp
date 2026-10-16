@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/CSS/Values/Color/ContrastColor.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -22,7 +23,7 @@ namespace krys::boo::style
                                          const boo::Color &currentColor) noexcept;
   KRYS_NODISCARD bool ContainsCurrentColor(const ContrastColor &contrastColor) noexcept;
 
-  void SerialisationForCSSTokenization(css::CSSOMString &builder, const css::SerialisationContext &context,
+  void SerialisationForCSSTokenization(StringBuilder &builder, const css::SerialisationContext &context,
                                        const ContrastColor &value) noexcept;
   KRYS_NODISCARD css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
                                                                   const ContrastColor &value) noexcept;

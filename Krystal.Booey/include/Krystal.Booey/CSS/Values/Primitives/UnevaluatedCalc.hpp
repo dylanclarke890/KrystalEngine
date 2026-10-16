@@ -4,6 +4,7 @@
 #include "Krystal.Booey/CSS/Values/Primitives/Concepts.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -57,7 +58,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool RequiresConversionData() const noexcept;
 
-    void SerialisationForCSS(CSSOMString &, const SerialisationContext &) const noexcept;
+    void SerialisationForCSS(StringBuilder &, const SerialisationContext &) const noexcept;
     void CollectComputedStyleDependencies(ComputedStyleDependencies &) const noexcept;
 
     KRYS_NODISCARD UnevaluatedCalcBase SimplifyBase(const ToLengthConversionData &,
@@ -192,7 +193,7 @@ namespace krys::boo::css
   template <Calc T>
   struct Serialiser<T>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context, const T &value) noexcept
+    void operator()(StringBuilder &builder, const SerialisationContext &context, const T &value) noexcept
     {
       value.SerialisationForCSS(builder, context);
     }

@@ -10,6 +10,7 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/Encodings/Encode.hpp"
 #include "Krystal.Core/Text/Encodings/UTF.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/String.hpp"
 
@@ -250,7 +251,7 @@ namespace krys::boo::css
       return _unicodeRangeEnd;
     }
 
-    void Serialise(CSSOMString &builder, const Token *nextToken = nullptr,
+    void Serialise(StringBuilder &builder, const Token *nextToken = nullptr,
                    TokenSerialisationMode mode = TokenSerialisationMode::Normal) const noexcept;
 
   private:

@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Values/Color/ColorLayersResolver.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorResolutionState.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include <algorithm>
 
 namespace krys::boo::style
@@ -70,15 +71,15 @@ namespace krys::boo::style
 
   // MARK: - Serialisation
 
-  void SerialisationForCSSTokenization(css::CSSOMString &builder, const css::SerialisationContext &context,
+  void SerialisationForCSSTokenization(StringBuilder &builder, const css::SerialisationContext &context,
                                        const ColorLayers &value) noexcept
   {
-    builder.append(u8"color-layers(");
+    builder.Append(u8"color-layers(");
 
     if (value.BlendMode != BlendMode::Normal)
     {
-      builder.append(css::ToLower(ToValueId(value.BlendMode)));
-      builder.append(u8", ");
+      builder.Append(css::ToLower(ToValueId(value.BlendMode)));
+      builder.Append(u8", ");
     }
 
     auto first = true;
@@ -86,20 +87,20 @@ namespace krys::boo::style
     {
       if (!first)
       {
-        builder.append(u8", ");
+        builder.Append(u8", ");
       }
       first = false;
       SerialisationForCSSTokenization(builder, context, color);
     }
 
-    builder.push_back(u8')');
+    builder.Append(u8')');
   }
 
   css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
                                                    const ColorLayers &colorLayers) noexcept
   {
-    css::CSSOMString builder;
+    StringBuilder builder;
     SerialisationForCSSTokenization(builder, context, colorLayers);
-    return builder;
+    return krys::move(builder).ToString();
   }
 }

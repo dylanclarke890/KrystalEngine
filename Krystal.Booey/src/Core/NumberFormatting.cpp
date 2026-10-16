@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Core/NumberFormatting.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include <charconv>
 #include <cmath>
@@ -8,17 +9,17 @@
 
 namespace krys::boo
 {
-  void FormatCSSNumber(utf8_string &builder, double number) noexcept
+  void FormatCSSNumber(StringBuilder &builder, double number) noexcept
   {
     if (std::isnan(number))
     {
-      builder.append(u8"NaN");
+      builder.Append(u8"NaN");
       return;
     }
 
     if (std::isinf(number))
     {
-      builder.append(number < 0 ? u8"-infinity" : u8"infinity");
+      builder.Append(number < 0 ? u8"-infinity" : u8"infinity");
       return;
     }
 
@@ -48,30 +49,30 @@ namespace krys::boo
       formatted.remove_prefix(1);
     }
 
-    builder.append(formatted.begin(), formatted.end());
+    builder.Append(formatted);
   }
 
   utf8_string FormatCSSNumber(double number) noexcept
   {
-    utf8_string builder;
+    StringBuilder builder;
     FormatCSSNumber(builder, number);
-    return builder;
+    return krys::move(builder).ToString();
   }
 
-  void FormatNumberFixedPrecision(utf8_string &builder, double number, uint32 significantFigures,
+  void FormatNumberFixedPrecision(StringBuilder &builder, double number, uint32 significantFigures,
                                   bool truncateTrailingZeros) noexcept
   {
     krys_debug_assert(significantFigures >= 1 && significantFigures <= 100);
 
     if (std::isnan(number))
     {
-      builder.append(u8"NaN");
+      builder.Append(u8"NaN");
       return;
     }
 
     if (std::isinf(number))
     {
-      builder.append(number < 0 ? u8"-Infinity" : u8"Infinity");
+      builder.Append(number < 0 ? u8"-Infinity" : u8"Infinity");
       return;
     }
 
@@ -143,13 +144,10 @@ namespace krys::boo
       }
     }
 
+    builder.Append(formatted);
     if (exponential)
     {
-      formatted.push_back('e');
-      formatted.push_back(exponent < 0 ? '-' : '+');
-      formatted.append(std::to_string(exponent < 0 ? -exponent : exponent));
+      builder.Append(u8'e', exponent < 0 ? u8'-' : u8'+', exponent < 0 ? -exponent : exponent);
     }
-
-    builder.append(formatted.begin(), formatted.end());
   }
 }

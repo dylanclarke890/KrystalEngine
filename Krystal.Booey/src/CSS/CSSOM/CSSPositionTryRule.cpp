@@ -4,6 +4,7 @@
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/PositionTryRule.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -27,21 +28,21 @@ namespace krys::boo::css
 
   CSSOMString CSSPositionTryRule::CssText() const noexcept
   {
-    CSSOMString builder;
-    builder.append(u8"@position-try ").append(Name().View()).append(u8" {");
+    StringBuilder builder;
+    builder.Append(u8"@position-try ", Name().View(), u8" {");
 
     auto properties = _positionTryRule->ProtectedProperties();
     if (auto declarations = properties->AsText(DefaultSerialisationContext()); !declarations.empty())
     {
-      builder.append(u8" ").append(declarations).push_back(u8' ');
+      builder.Append(u8" ", declarations, u8' ');
     }
     else
     {
-      builder.push_back(u8' ');
+      builder.Append(u8' ');
     }
 
-    builder.push_back(u8'}');
-    return builder;
+    builder.Append(u8'}');
+    return krys::move(builder).ToString();
   }
 
   void CSSPositionTryRule::Reattach(Rule &rule) noexcept

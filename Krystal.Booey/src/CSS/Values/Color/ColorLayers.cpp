@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Values/Color/ColorLayersResolver.hpp"
 #include "Krystal.Booey/CSS/Values/Color/PlatformColorResolutionState.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -34,15 +35,15 @@ namespace krys::boo::css
                                [](const auto &color) { return ContainsColorSchemeDependentColor(color); });
   }
 
-  void Serialiser<ColorLayers>::operator()(CSSOMString &builder, const SerialisationContext &context,
+  void Serialiser<ColorLayers>::operator()(StringBuilder &builder, const SerialisationContext &context,
                                            const ColorLayers &value) noexcept
   {
-    builder.append(u8"color-layers(");
+    builder.Append(u8"color-layers(");
 
     if (value.BlendMode != BlendMode::Normal)
     {
-      builder.append(ToLower(ToValueId(value.BlendMode)));
-      builder.append(u8", ");
+      builder.Append(ToLower(ToValueId(value.BlendMode)));
+      builder.Append(u8", ");
     }
 
     auto first = true;
@@ -50,13 +51,13 @@ namespace krys::boo::css
     {
       if (!first)
       {
-        builder.append(u8", ");
+        builder.Append(u8", ");
       }
       first = false;
       Serialise(builder, context, color);
     }
 
-    builder.push_back(u8')');
+    builder.Append(u8')');
   }
 
   void ComputedStyleDependenciesCollector<ColorLayers>::operator()(ComputedStyleDependencies &dependencies,

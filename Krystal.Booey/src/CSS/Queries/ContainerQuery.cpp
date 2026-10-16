@@ -2,6 +2,7 @@
 #include "Krystal.Booey/CSS/Markup.hpp"
 #include "Krystal.Booey/CSS/Queries/ContainerQueryFeatures.hpp"
 #include "Krystal.Booey/CSS/Queries/GenericMediaQuerySerialisation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css::cq
 {
@@ -30,12 +31,12 @@ namespace krys::boo::css::cq
     return Axis::None;
   }
 
-  void Serialise(CSSOMString &builder, const ContainerQuery &query) noexcept
+  void Serialise(StringBuilder &builder, const ContainerQuery &query) noexcept
   {
     if (query.Name != CSSOMStringAtom::Null() && query.Name != CSSOMStringAtom::Empty())
     {
       SerialiseIdentifier(CSSOMString(query.Name.View()), builder);
-      builder += u8' ';
+      builder.Append(u8' ');
     }
 
     mq::Serialise(builder, query.Condition);

@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/CSS/Values/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -23,7 +24,7 @@ namespace krys::boo::css
   template <>
   struct Serialiser<ColorLayers>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context,
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
                     const ColorLayers &value) noexcept;
   };
 

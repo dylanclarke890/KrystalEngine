@@ -9,6 +9,7 @@
 #include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -107,7 +108,7 @@ namespace krys::boo::style
   // MARK: - Serialization
 
   void Serialiser<EnumSet<TextDecorationLine::Flag>>::operator()(
-    css::CSSOMString &builder, const css::SerialisationContext &, const RenderStyle &,
+    StringBuilder &builder, const css::SerialisationContext &, const RenderStyle &,
     const EnumSet<TextDecorationLine::Flag> &value) noexcept
   {
     krys_debug_assert(!value.IsEmpty());
@@ -119,9 +120,9 @@ namespace krys::boo::style
       {
         if (needsSpace)
         {
-          builder.push_back(u8' ');
+          builder.Append(u8' ');
         }
-        builder.append(css::ToLower(valueID));
+        builder.Append(css::ToLower(valueID));
         needsSpace = true;
       }
     };

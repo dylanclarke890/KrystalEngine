@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -71,7 +72,7 @@ namespace krys::boo::style
 
   // MARK: - Serialisation
 
-  void Serialiser<URL>::operator()(css::CSSOMString &builder, const css::SerialisationContext &context,
+  void Serialiser<URL>::operator()(StringBuilder &builder, const css::SerialisationContext &context,
                                    const RenderStyle &style, const URL &value) noexcept
   {
     css::Serialise(builder, context, ConvertToCSS(value, style));

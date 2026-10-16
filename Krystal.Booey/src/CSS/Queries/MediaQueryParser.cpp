@@ -5,6 +5,7 @@
 #include "Krystal.Booey/CSS/Queries/GenericMediaQuerySerialisation.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryFeatures.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css::mq
 {
@@ -201,26 +202,26 @@ namespace krys::boo::css::mq
     return MediaQuery {prefix, mediaType, krys::move(condition)};
   }
 
-  void Serialise(CSSOMString &builder, const MediaQueryList &list) noexcept
+  void Serialise(StringBuilder &builder, const MediaQueryList &list) noexcept
   {
     for (size_t i = 0; i < list.size(); ++i)
     {
       if (i)
       {
-        builder += u8", ";
+        builder.Append(u8", ");
       }
       Serialise(builder, list[i]);
     }
   }
 
-  void Serialise(CSSOMString &builder, const MediaQuery &query) noexcept
+  void Serialise(StringBuilder &builder, const MediaQuery &query) noexcept
   {
     if (query.Prefix)
     {
       switch (*query.Prefix)
       {
-        case Prefix::Not:  builder += u8"not "; break;
-        case Prefix::Only: builder += u8"only "; break;
+        case Prefix::Not:  builder.Append(u8"not "); break;
+        case Prefix::Only: builder.Append(u8"only "); break;
       }
     }
 
@@ -231,7 +232,7 @@ namespace krys::boo::css::mq
       SerialiseIdentifier(CSSOMString(query.MediaType.View()), builder);
       if (query.Condition)
       {
-        builder += u8" and ";
+        builder.Append(u8" and ");
       }
     }
 

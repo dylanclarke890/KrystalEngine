@@ -7,6 +7,7 @@
 #include "Krystal.Booey/CSS/Rules/ImportRule.hpp"
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -63,35 +64,35 @@ namespace krys::boo::css
 
   CSSOMString CSSImportRule::CssTextInternal(const CSSOMString &urlString) const noexcept
   {
-    CSSOMString builder;
-    builder.append(u8"@import ").append(SerialiseURL(urlString));
+    StringBuilder builder;
+    builder.Append(u8"@import ", SerialiseURL(urlString));
 
     if (auto layerName = LayerName())
     {
       if (layerName->empty())
       {
-        builder.append(u8" layer");
+        builder.Append(u8" layer");
       }
       else
       {
-        builder.append(u8" layer(").append(*layerName).push_back(u8')');
+        builder.Append(u8" layer(", *layerName, u8')');
       }
     }
 
     auto supports = SupportsText();
     if (!supports.empty())
     {
-      builder.append(u8" supports(").append(supports).push_back(u8')');
+      builder.Append(u8" supports(", supports, u8')');
     }
 
     if (!MediaQueries().empty())
     {
-      builder.push_back(u8' ');
+      builder.Append(u8' ');
       mq::Serialise(builder, MediaQueries());
     }
 
-    builder.push_back(u8';');
-    return builder;
+    builder.Append(u8';');
+    return krys::move(builder).ToString();
   }
 
   CSSOMString CSSImportRule::CssText() const noexcept

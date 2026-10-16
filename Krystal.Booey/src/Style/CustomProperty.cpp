@@ -13,6 +13,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/KeywordSerialisation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueCreation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Utils/PointerComparison.hpp"
 
 namespace krys::boo::style
@@ -68,12 +69,12 @@ namespace krys::boo::style
   css::CSSOMString CustomProperty::PropertyValueSerialisation(const css::SerialisationContext &context,
                                                               const RenderStyle &style) const noexcept
   {
-    css::CSSOMString builder;
+    StringBuilder builder;
     PropertyValueSerialisation(builder, context, style);
-    return builder;
+    return krys::move(builder).ToString();
   }
 
-  void CustomProperty::PropertyValueSerialisation(css::CSSOMString &builder,
+  void CustomProperty::PropertyValueSerialisation(StringBuilder &builder,
                                                   const css::SerialisationContext &context,
                                                   const RenderStyle &style) const noexcept
   {
@@ -90,7 +91,7 @@ namespace krys::boo::style
         // "The guaranteed-invalid value serializes as the empty string".
         // https://drafts.csswg.org/css-variables-2/#guaranteed-invalid
       },
-      [&](const Ref<css::VariableData> &value) { builder.append(value->Serialise()); },
+      [&](const Ref<css::VariableData> &value) { builder.Append(value->Serialise()); },
       [&](const Value &value) { serialiseValue(value); },
       [&](const ValueList &valueList)
       {
@@ -99,7 +100,7 @@ namespace krys::boo::style
         {
           if (i)
           {
-            builder.append(separator);
+            builder.Append(separator);
           }
           serialiseValue(valueList.Values[i]);
         }
@@ -110,12 +111,12 @@ namespace krys::boo::style
     CustomProperty::PropertyValueSerialisationForTokenization(const css::SerialisationContext &context,
                                                               const RenderStyle &style) const noexcept
   {
-    css::CSSOMString builder;
+    StringBuilder builder;
     PropertyValueSerialisationForTokenization(builder, context, style);
-    return builder;
+    return krys::move(builder).ToString();
   }
 
-  void CustomProperty::PropertyValueSerialisationForTokenization(css::CSSOMString &builder,
+  void CustomProperty::PropertyValueSerialisationForTokenization(StringBuilder &builder,
                                                                  const css::SerialisationContext &context,
                                                                  const RenderStyle &style) const noexcept
   {
@@ -141,7 +142,7 @@ namespace krys::boo::style
         // "The guaranteed-invalid value serializes as the empty string".
         // https://drafts.csswg.org/css-variables-2/#guaranteed-invalid
       },
-      [&](const Ref<css::VariableData> &value) { builder.append(value->Serialise()); },
+      [&](const Ref<css::VariableData> &value) { builder.Append(value->Serialise()); },
       [&](const Value &value) { serialiseValue(value); },
       [&](const ValueList &valueList)
       {
@@ -150,7 +151,7 @@ namespace krys::boo::style
         {
           if (i)
           {
-            builder.append(separator);
+            builder.Append(separator);
           }
           serialiseValue(valueList.Values[i]);
         }

@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Values/Primitives/URLModifiers.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -51,7 +52,8 @@ namespace krys::boo::css
   template <>
   struct Serialiser<CSSURL>
   {
-    void operator()(CSSOMString &builder, const SerialisationContext &context, const CSSURL &value) noexcept;
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
+                    const CSSURL &value) noexcept;
   };
 
   /// @brief Resolves `string` against the context's base URL. Empty and fragment-only URLs aren't resolved

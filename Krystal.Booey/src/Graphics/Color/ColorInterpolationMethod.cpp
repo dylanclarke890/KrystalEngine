@@ -1,14 +1,15 @@
 ﻿#include "Krystal.Booey/Graphics/Color/ColorInterpolationMethod.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo
 {
-  void SerialisationForCSS(utf8_string &builder,
+  void SerialisationForCSS(StringBuilder &builder,
                            ColorInterpolationColorSpace interpolationColorSpace) noexcept
   {
-    builder.append(SerialisationForCSS(interpolationColorSpace));
+    builder.Append(SerialisationForCSS(interpolationColorSpace));
   }
 
-  void SerialisationForCSS(utf8_string &builder, HueInterpolationMethod hueInterpolationMethod) noexcept
+  void SerialisationForCSS(StringBuilder &builder, HueInterpolationMethod hueInterpolationMethod) noexcept
   {
     switch (hueInterpolationMethod)
     {
@@ -18,23 +19,23 @@ namespace krys::boo
       }
       case HueInterpolationMethod::Longer:
       {
-        builder.append(u8" longer hue");
+        builder.Append(u8" longer hue");
         break;
       }
       case HueInterpolationMethod::Increasing:
       {
-        builder.append(u8" increasing hue");
+        builder.Append(u8" increasing hue");
         break;
       }
       case HueInterpolationMethod::Decreasing:
       {
-        builder.append(u8" decreasing hue");
+        builder.Append(u8" decreasing hue");
         break;
       }
     }
   }
 
-  void SerialisationForCSS(utf8_string &builder, const ColorInterpolationMethod &method) noexcept
+  void SerialisationForCSS(StringBuilder &builder, const ColorInterpolationMethod &method) noexcept
   {
     krys::SwitchOn(method.ColorSpace,
                    [&]<typename MethodColorSpace>(const MethodColorSpace &type)
@@ -49,8 +50,8 @@ namespace krys::boo
 
   utf8_string SerialisationForCSS(const ColorInterpolationMethod &method) noexcept
   {
-    utf8_string builder;
+    StringBuilder builder;
     SerialisationForCSS(builder, method);
-    return builder;
+    return krys::move(builder).ToString();
   }
 }

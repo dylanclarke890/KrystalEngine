@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -81,11 +82,12 @@ namespace krys::boo::css
 
   CSSOMString FunctionValue::CustomCSSText(const SerialisationContext &context) const noexcept
   {
-    CSSOMString result {ToString(_name)};
-    result.push_back(u8'(');
+    StringBuilder result;
+    result.Append(ToString(_name));
+    result.Append(u8'(');
     SerialiseItems(result, context);
-    result.push_back(u8')');
-    return result;
+    result.Append(u8')');
+    return krys::move(result).ToString();
   }
 
   bool FunctionValue::AddDerivedHash(size_t &seed) const noexcept

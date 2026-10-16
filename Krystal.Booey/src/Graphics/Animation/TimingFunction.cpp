@@ -2,6 +2,7 @@
 #include "Krystal.Booey/Core/NumberFormatting.hpp"
 #include "Krystal.Booey/Graphics/SpringSolver.hpp"
 #include "Krystal.Booey/Graphics/UnitBezier.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -11,77 +12,77 @@ namespace krys::boo
   namespace
   {
     // The text of a timing function, written as its CSS function.
-    void AppendFunctionText(utf8_string &ts, const TimingFunction &timingFunction) noexcept
+    void AppendFunctionText(StringBuilder &ts, const TimingFunction &timingFunction) noexcept
     {
       switch (timingFunction.GetType())
       {
         case TimingFunction::Type::LinearFunction:
         {
           const auto &function = Downcast<LinearTimingFunction>(timingFunction);
-          ts.append(u8"linear(");
+          ts.Append(u8"linear(");
           for (size_t i = 0; i < function.Points().size(); ++i)
           {
             if (i)
             {
-              ts.append(u8", ");
+              ts.Append(u8", ");
             }
 
             const auto &point = function.Points()[i];
             FormatCSSNumber(ts, point.Value);
-            ts.push_back(u8' ');
+            ts.Append(u8' ');
             FormatCSSNumber(ts, point.Progress * 100.0);
-            ts.push_back(u8'%');
+            ts.Append(u8'%');
           }
-          ts.push_back(u8')');
+          ts.Append(u8')');
           break;
         }
         case TimingFunction::Type::CubicBezierFunction:
         {
           const auto &function = Downcast<CubicBezierTimingFunction>(timingFunction);
-          ts.append(u8"cubic-bezier(");
+          ts.Append(u8"cubic-bezier(");
           FormatCSSNumber(ts, function.X1());
-          ts.append(u8", ");
+          ts.Append(u8", ");
           FormatCSSNumber(ts, function.Y1());
-          ts.append(u8", ");
+          ts.Append(u8", ");
           FormatCSSNumber(ts, function.X2());
-          ts.append(u8", ");
+          ts.Append(u8", ");
           FormatCSSNumber(ts, function.Y2());
-          ts.push_back(u8')');
+          ts.Append(u8')');
           break;
         }
         case TimingFunction::Type::StepsFunction:
         {
           const auto &function = Downcast<StepsTimingFunction>(timingFunction);
-          ts.append(u8"steps(");
+          ts.Append(u8"steps(");
           FormatCSSNumber(ts, function.NumberOfSteps());
           if (auto stepPosition = function.GetStepPosition())
           {
-            ts.append(u8", ");
+            ts.Append(u8", ");
             switch (stepPosition.value())
             {
-              case StepsTimingFunction::StepPosition::JumpStart: ts.append(u8"jump-start"); break;
-              case StepsTimingFunction::StepPosition::JumpEnd:   ts.append(u8"jump-end"); break;
-              case StepsTimingFunction::StepPosition::JumpNone:  ts.append(u8"jump-none"); break;
-              case StepsTimingFunction::StepPosition::JumpBoth:  ts.append(u8"jump-both"); break;
-              case StepsTimingFunction::StepPosition::Start:     ts.append(u8"start"); break;
-              case StepsTimingFunction::StepPosition::End:       ts.append(u8"end"); break;
+              case StepsTimingFunction::StepPosition::JumpStart: ts.Append(u8"jump-start"); break;
+              case StepsTimingFunction::StepPosition::JumpEnd:   ts.Append(u8"jump-end"); break;
+              case StepsTimingFunction::StepPosition::JumpNone:  ts.Append(u8"jump-none"); break;
+              case StepsTimingFunction::StepPosition::JumpBoth:  ts.Append(u8"jump-both"); break;
+              case StepsTimingFunction::StepPosition::Start:     ts.Append(u8"start"); break;
+              case StepsTimingFunction::StepPosition::End:       ts.Append(u8"end"); break;
             }
           }
-          ts.push_back(u8')');
+          ts.Append(u8')');
           break;
         }
         case TimingFunction::Type::SpringFunction:
         {
           const auto &function = Downcast<SpringTimingFunction>(timingFunction);
-          ts.append(u8"spring(");
+          ts.Append(u8"spring(");
           FormatCSSNumber(ts, function.Mass());
-          ts.push_back(u8' ');
+          ts.Append(u8' ');
           FormatCSSNumber(ts, function.Stiffness());
-          ts.push_back(u8' ');
+          ts.Append(u8' ');
           FormatCSSNumber(ts, function.Damping());
-          ts.push_back(u8' ');
+          ts.Append(u8' ');
           FormatCSSNumber(ts, function.InitialVelocity());
-          ts.push_back(u8')');
+          ts.Append(u8')');
           break;
         }
       }
@@ -228,16 +229,17 @@ namespace krys::boo
       if (function->GetStepPosition() == StepsTimingFunction::StepPosition::JumpEnd
           || function->GetStepPosition() == StepsTimingFunction::StepPosition::End)
       {
-        utf8_string result {u8"steps("};
+        StringBuilder result;
+        result.Append(u8"steps(");
         FormatCSSNumber(result, function->NumberOfSteps());
-        result.push_back(u8')');
-        return result;
+        result.Append(u8')');
+        return krys::move(result).ToString();
       }
     }
 
-    utf8_string result;
+    StringBuilder result;
     AppendFunctionText(result, *this);
-    return result;
+    return krys::move(result).ToString();
   }
 
   bool LinearTimingFunction::Equals(const TimingFunction &other) const noexcept

@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 
 namespace krys::boo::style
@@ -318,7 +319,7 @@ namespace krys::boo::style
   template <>
   struct Serialiser<EnumSet<TextDecorationLine::Flag>>
   {
-    void operator()(css::CSSOMString &, const css::SerialisationContext &, const RenderStyle &,
+    void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &,
                     const EnumSet<TextDecorationLine::Flag> &) noexcept;
   };
 }

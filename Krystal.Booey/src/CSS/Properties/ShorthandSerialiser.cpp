@@ -21,6 +21,7 @@
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Booey/CSS/Values/VariableReferenceValue.hpp"
 #include "Krystal.Booey/Style/Extractor.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include <algorithm>
 
@@ -489,31 +490,35 @@ namespace krys::boo::css
     {
       krys_debug_assert(lengthLimit <= Length());
 
-      CSSOMString result;
+      StringBuilder result;
       CSSOMStringView prefix = u8"";
       for (auto i = 0uz; i < lengthLimit; ++i)
       {
-        result.append(std::exchange(prefix, separator));
-        result.append(SerialiseLonghandValue(i));
+        result.Append(std::exchange(prefix, separator));
+        result.Append(SerialiseLonghandValue(i));
       }
 
-      return result;
+      return krys::move(result).ToString();
     }
 
     CSSOMString ShorthandSerialiser::SerialiseLonghandsOmittingInitialValues() const noexcept
     {
-      CSSOMString result;
+      StringBuilder result;
       CSSOMStringView prefix = u8"";
       for (auto longhand : Longhands())
       {
         if (!IsInitialValue(longhand))
         {
-          result.append(std::exchange(prefix, u8" "));
-          result.append(SerialiseValue(longhand));
+          result.Append(std::exchange(prefix, u8" "));
+          result.Append(SerialiseValue(longhand));
         }
       }
 
-      return result.empty() ? SerialiseLonghandValue(0) : result;
+      if (result.IsEmpty())
+      {
+        return SerialiseLonghandValue(0);
+      }
+      return krys::move(result).ToString();
     }
 
     CSSOMString ShorthandSerialiser::SerialiseLonghandsOmittingTrailingInitialValue(
@@ -632,13 +637,13 @@ namespace krys::boo::css
         return value && value->IsValuePairValue();
       }
 
-      void Serialise(CSSOMString &builder, const SerialisationContext &context) const noexcept
+      void Serialise(StringBuilder &builder, const SerialisationContext &context) const noexcept
       {
         // If all are skipped, then serialize the first.
         auto range = Span<const bool>(_skipSerialising.data(), _shorthand.Size());
         bool allSkipped = std::ranges::find(range, false) == range.end();
 
-        CSSOMStringView separator = builder.empty() ? u8"" : u8", ";
+        CSSOMStringView separator = builder.IsEmpty() ? u8"" : u8", ";
         auto longhands = _shorthand.Properties();
         for (auto j = 0uz; j < longhands.size(); ++j)
         {
@@ -653,14 +658,14 @@ namespace krys::boo::css
             separator = u8" / ";
           }
 
-          builder.append(separator);
+          builder.Append(separator);
           if (auto &value = _values[j])
           {
-            builder.append(SerialiseLonghandValue(context, longhand, *value));
+            builder.Append(SerialiseLonghandValue(context, longhand, *value));
           }
           else
           {
-            builder.append(InitialValueTextForLonghand(longhand));
+            builder.Append(InitialValueTextForLonghand(longhand));
           }
 
           separator = u8" ";
@@ -686,7 +691,7 @@ namespace krys::boo::css
 
       // Now go through all longhands and ensure we repeat items earlier in the list
       // should there not be a specified value.
-      CSSOMString result;
+      StringBuilder result;
       for (auto listItemIndex = 0u; listItemIndex < numberOfItemsForCoordinatingListBaseProperty;
            ++listItemIndex)
       {
@@ -723,7 +728,7 @@ namespace krys::boo::css
         layerValues.Serialise(result, _serialisationContext);
       }
 
-      return result;
+      return krys::move(result).ToString();
     }
 
     Maybe<CSSOMString> ShorthandSerialiser::SerialiseLayered() const noexcept
@@ -737,7 +742,7 @@ namespace krys::boo::css
         }
       }
 
-      CSSOMString result;
+      StringBuilder result;
       for (auto i = 0u; i < numLayers; i++)
       {
         LayerValues layerValues {_shorthand};
@@ -929,7 +934,7 @@ namespace krys::boo::css
         layerValues.Serialise(result, _serialisationContext);
       }
 
-      return result;
+      return krys::move(result).ToString();
     }
 
     Maybe<CSSOMString> ShorthandSerialiser::SerialiseBorder(size_t sectionLength) const noexcept
@@ -980,7 +985,7 @@ namespace krys::boo::css
     Maybe<CSSOMString> ShorthandSerialiser::SerialiseBorderImage() const noexcept
     {
       krys_debug_assert(Length() == 5);
-      CSSOMString result;
+      StringBuilder result;
       bool omittedSlice = false;
       bool omittedWidth = false;
       CSSOMStringView separator = u8"";
@@ -1040,17 +1045,17 @@ namespace krys::boo::css
           separator = omittedWidth ? u8" / / " : u8" / ";
         }
 
-        result.append(separator);
-        result.append(valueText);
+        result.Append(separator);
+        result.Append(valueText);
         separator = u8" ";
       }
 
-      if (result.empty())
+      if (result.IsEmpty())
       {
         return NameString(ValueId::None);
       }
 
-      return result;
+      return krys::move(result).ToString();
     }
 
     CSSOMString ShorthandSerialiser::SerialiseBorderRadius() const noexcept
@@ -1075,7 +1080,7 @@ namespace krys::boo::css
         }
       }
 
-      CSSOMString result;
+      StringBuilder result;
       auto serialiseRadii = [&](const Array<const Value *, 4> &r)
       {
         auto count = 1uz;
@@ -1096,21 +1101,21 @@ namespace krys::boo::css
         {
           if (i)
           {
-            result.push_back(u8' ');
+            result.Append(u8' ');
           }
 
-          result.append(r[i]->CssText(_serialisationContext));
+          result.Append(r[i]->CssText(_serialisationContext));
         }
       };
 
       serialiseRadii(horizontalRadii);
       if (serialiseBoth)
       {
-        result.append(u8" / ");
+        result.Append(u8" / ");
         serialiseRadii(verticalRadii);
       }
 
-      return result;
+      return krys::move(result).ToString();
     }
 
     Maybe<CSSOMString> ShorthandSerialiser::SerialiseBreakInside() const noexcept
@@ -1248,41 +1253,41 @@ namespace krys::boo::css
       bool includeWidth = widthKeyword != ValueId::Normal;
       bool includeLineHeight = !IsLonghandInitialValue(lineHeightIndex);
 
-      CSSOMString result;
+      StringBuilder result;
       if (includeStyle)
       {
-        result.append(SerialiseLonghandValue(styleIndex));
+        result.Append(SerialiseLonghandValue(styleIndex));
       }
 
       if (includeCaps)
       {
-        result.append(includeStyle ? u8" " : u8"");
-        result.append(ToString(capsKeyword));
+        result.Append(includeStyle ? u8" " : u8"");
+        result.Append(ToString(capsKeyword));
       }
 
       if (includeWeight)
       {
-        result.append(includeStyle || includeCaps ? u8" " : u8"");
-        result.append(SerialiseLonghandValue(weightIndex));
+        result.Append(includeStyle || includeCaps ? u8" " : u8"");
+        result.Append(SerialiseLonghandValue(weightIndex));
       }
 
       if (includeWidth)
       {
-        result.append(includeStyle || includeCaps || includeWeight ? u8" " : u8"");
-        result.append(ToString(widthKeyword));
+        result.Append(includeStyle || includeCaps || includeWeight ? u8" " : u8"");
+        result.Append(ToString(widthKeyword));
       }
 
-      result.append(includeStyle || includeCaps || includeWeight || includeWidth ? u8" " : u8"");
-      result.append(SerialiseLonghandValue(sizeIndex));
+      result.Append(includeStyle || includeCaps || includeWeight || includeWidth ? u8" " : u8"");
+      result.Append(SerialiseLonghandValue(sizeIndex));
       if (includeLineHeight)
       {
-        result.append(u8" / ");
-        result.append(SerialiseLonghandValue(lineHeightIndex));
+        result.Append(u8" / ");
+        result.Append(SerialiseLonghandValue(lineHeightIndex));
       }
 
-      result.push_back(u8' ');
-      result.append(SerialiseLonghandValue(familyIndex));
-      return result;
+      result.Append(u8' ');
+      result.Append(SerialiseLonghandValue(familyIndex));
+      return krys::move(result).ToString();
     }
 
     CSSOMString ShorthandSerialiser::SerialiseFontSynthesis() const noexcept
@@ -1433,17 +1438,18 @@ namespace krys::boo::css
         return null;
       }
 
-      CSSOMString result = u8"auto-flow";
-      result.append(dense);
+      StringBuilder result;
+      result.Append(u8"auto-flow");
+      result.Append(dense);
       if (!IsValueIdIncludingList(autoRows, ValueId::Auto))
       {
-        result.push_back(u8' ');
-        result.append(SerialiseLonghandValue(autoRowsIndex));
+        result.Append(u8' ');
+        result.Append(SerialiseLonghandValue(autoRowsIndex));
       }
 
-      result.append(u8" / ");
-      result.append(SerialiseLonghandValue(columnsIndex));
-      return result;
+      result.Append(u8" / ");
+      result.Append(SerialiseLonghandValue(columnsIndex));
+      return krys::move(result).ToString();
     }
 
     KRYS_NODISCARD bool CanOmitTrailingGridAreaValue(const Value &value, const Value &trailing,
@@ -1558,24 +1564,24 @@ namespace krys::boo::css
         return null;
       }
 
-      CSSOMString result;
+      StringBuilder result;
       auto row = 0uz;
       for (auto &currentValue : Downcast<ValueList>(*rowTrackSizes))
       {
-        if (!result.empty())
+        if (!result.IsEmpty())
         {
-          result.push_back(u8' ');
+          result.Append(u8' ');
         }
 
         if (auto *lineNames = DynamicDowncast<GridLineNamesValue>(currentValue))
         {
-          result.append(lineNames->CustomCSSText(_serialisationContext));
+          result.Append(lineNames->CustomCSSText(_serialisationContext));
         }
         else
         {
-          result.push_back(u8'"');
-          result.append(areasValue->StringForRow(row));
-          result.push_back(u8'"');
+          result.Append(u8'"');
+          result.Append(areasValue->StringForRow(row));
+          result.Append(u8'"');
           if (!isValidTrackSize(currentValue))
           {
             return null;
@@ -1583,8 +1589,8 @@ namespace krys::boo::css
 
           if (!IsValueId(currentValue, ValueId::Auto))
           {
-            result.push_back(u8' ');
-            result.append(currentValue.CssText(_serialisationContext));
+            result.Append(u8' ');
+            result.Append(currentValue.CssText(_serialisationContext));
           }
 
           row++;
@@ -1593,11 +1599,11 @@ namespace krys::boo::css
 
       if (!IsLonghandValueNone(columnsIndex))
       {
-        result.append(u8" / ");
-        result.append(SerialiseLonghandValue(columnsIndex));
+        result.Append(u8" / ");
+        result.Append(SerialiseLonghandValue(columnsIndex));
       }
 
-      return result;
+      return krys::move(result).ToString();
     }
 
     CSSOMString ShorthandSerialiser::SerialiseOffset() const noexcept
@@ -1630,37 +1636,37 @@ namespace krys::boo::css
         return SerialiseLonghandValue(pathIndex);
       }
 
-      CSSOMString result;
+      StringBuilder result;
       if (includePosition)
       {
-        result.append(SerialiseLonghandValue(positionIndex));
+        result.Append(SerialiseLonghandValue(positionIndex));
       }
 
       if (includePath)
       {
-        result.append(includePosition ? u8" " : u8"");
-        result.append(SerialiseLonghandValue(pathIndex));
+        result.Append(includePosition ? u8" " : u8"");
+        result.Append(SerialiseLonghandValue(pathIndex));
       }
 
       if (includeDistance)
       {
-        result.push_back(u8' ');
-        result.append(SerialiseLonghandValue(distanceIndex));
+        result.Append(u8' ');
+        result.Append(SerialiseLonghandValue(distanceIndex));
       }
 
       if (includeRotate)
       {
-        result.push_back(u8' ');
-        result.append(SerialiseLonghandValue(rotateIndex));
+        result.Append(u8' ');
+        result.Append(SerialiseLonghandValue(rotateIndex));
       }
 
       if (includeAnchor)
       {
-        result.append(u8" / ");
-        result.append(SerialiseLonghandValue(anchorIndex));
+        result.Append(u8" / ");
+        result.Append(SerialiseLonghandValue(anchorIndex));
       }
 
-      return result;
+      return krys::move(result).ToString();
     }
 
     Maybe<CSSOMString> ShorthandSerialiser::SerialisePageBreak() const noexcept
@@ -1837,7 +1843,7 @@ namespace krys::boo::css
           return null;
         }
 
-        CSSOMString result;
+        StringBuilder result;
         for (auto i = 0u; i < startList->size(); i++)
         {
           auto *start = startList->Item(i);
@@ -1847,20 +1853,20 @@ namespace krys::boo::css
           auto serialisedStart = SerialiseSingleAnimationRange(*start, SingleAnimationRangeType::Start);
           auto serialisedEnd =
             SerialiseSingleAnimationRange(*endList->Item(i), SingleAnimationRangeType::End, startId);
-          result.append(serialisedStart);
+          result.Append(serialisedStart);
           if (!serialisedEnd.empty())
           {
-            result.push_back(u8' ');
-            result.append(serialisedEnd);
+            result.Append(u8' ');
+            result.Append(serialisedEnd);
           }
 
           if (i < startList->size() - 1)
           {
-            result.append(u8", ");
+            result.Append(u8", ");
           }
         }
 
-        return result;
+        return krys::move(result).ToString();
       }
 
       auto *startPair = DynamicDowncast<ValuePair>(startValue);

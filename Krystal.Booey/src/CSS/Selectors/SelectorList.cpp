@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -212,22 +213,22 @@ namespace krys::boo::css
 
   CSSOMString SelectorList::SelectorsText() const noexcept
   {
-    CSSOMString result;
+    StringBuilder result;
     BuildSelectorsText(result);
-    return result;
+    return krys::move(result).ToString();
   }
 
-  void SelectorList::BuildSelectorsText(CSSOMString &builder) const noexcept
+  void SelectorList::BuildSelectorsText(StringBuilder &builder) const noexcept
   {
     bool first = true;
     for (const auto &selector : *this)
     {
       if (!first)
       {
-        builder += u8", ";
+        builder.Append(u8", ");
       }
       first = false;
-      builder += selector.SelectorText();
+      builder.Append(selector.SelectorText());
     }
   }
 

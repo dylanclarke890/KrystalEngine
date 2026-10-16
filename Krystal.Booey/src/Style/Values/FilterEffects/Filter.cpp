@@ -21,6 +21,7 @@
 #include "Krystal.Booey/Style/Values/FilterEffects/SaturateFunction.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/SepiaFunction.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -198,7 +199,7 @@ namespace krys::boo::style
 
   // MARK: - Serialization
 
-  void Serialiser<Filter>::operator()(css::CSSOMString &builder, const css::SerialisationContext &context,
+  void Serialiser<Filter>::operator()(StringBuilder &builder, const css::SerialisationContext &context,
                                       const RenderStyle &style, const Filter &value) noexcept
   {
     css::Serialise(builder, context, ConvertToCSS(value, style));

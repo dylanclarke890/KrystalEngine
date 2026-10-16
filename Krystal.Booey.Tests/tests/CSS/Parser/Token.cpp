@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/String.hpp"
 
@@ -54,7 +55,7 @@ namespace krys::boo::css::tests
 
     KRYS_NODISCARD string Serialise(const Token &token) noexcept
     {
-      CSSOMString builder;
+      StringBuilder builder;
       token.Serialise(builder);
       return ToNarrow(builder);
     }
@@ -527,12 +528,13 @@ namespace krys::boo::css::tests
   TEST_CASE("Token::Serialise(appends)", "[CSS][Token]")
   {
     // Serialise appends to the builder rather than replacing it.
-    CSSOMString builder = u8"x:";
+    StringBuilder builder;
+    builder.Append(u8"x:");
     TokenizeOne(u8"foo").Serialise(builder);
     CHECK(ToNarrow(builder) == "x:foo");
 
     // No next token means no comment.
-    builder.clear();
+    builder.Clear();
     TokenizeOne(u8"a").Serialise(builder, nullptr);
     CHECK(ToNarrow(builder) == "a");
   }

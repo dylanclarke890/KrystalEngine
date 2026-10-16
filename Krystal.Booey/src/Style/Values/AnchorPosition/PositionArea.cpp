@@ -10,6 +10,7 @@
 #include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Values/AnchorPosition/PositionTryFallbackTactic.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -642,7 +643,7 @@ namespace krys::boo::style
 
   // MARK: - Serialization
 
-  void Serialiser<PositionAreaValue>::operator()(css::CSSOMString &builder,
+  void Serialiser<PositionAreaValue>::operator()(StringBuilder &builder,
                                                  const css::SerialisationContext &context,
                                                  const RenderStyle &, const PositionAreaValue &value) noexcept
   {
@@ -650,7 +651,7 @@ namespace krys::boo::style
     auto inlineOrYAxisKeyword = KeywordForPositionAreaSpan(value.InlineOrYAxis());
 
     // FIXME: Do this more efficiently without creating and destroying a css::Value object.
-    builder.append(
+    builder.Append(
       css::PropertyParserHelpers::ValueForPositionArea(blockOrXAxisKeyword, inlineOrYAxisKeyword,
                                                        css::PropertyParserHelpers::ValueType::Computed)
         ->CssText(context));

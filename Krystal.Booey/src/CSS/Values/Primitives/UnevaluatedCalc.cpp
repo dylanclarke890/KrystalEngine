@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/Primitives/UnevaluatedCalc.hpp"
 #include "Krystal.Booey/CSS/Calc/Value.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -48,10 +49,10 @@ namespace krys::boo::css
     return ProtectedCalc()->RequiresConversionData();
   }
 
-  void UnevaluatedCalcBase::SerialisationForCSS(CSSOMString &builder,
+  void UnevaluatedCalcBase::SerialisationForCSS(StringBuilder &builder,
                                                 const SerialisationContext &context) const noexcept
   {
-    builder.append(ProtectedCalc()->CssText(context));
+    builder.Append(ProtectedCalc()->CssText(context));
   }
 
   void UnevaluatedCalcBase::CollectComputedStyleDependencies(

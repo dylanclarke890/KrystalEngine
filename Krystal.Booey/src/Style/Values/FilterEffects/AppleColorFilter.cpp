@@ -16,6 +16,7 @@
 #include "Krystal.Booey/Style/Values/FilterEffects/SaturateFunction.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/SepiaFunction.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
 namespace krys::boo::style
@@ -178,7 +179,7 @@ namespace krys::boo::style
 
   // MARK: - Serialization
 
-  void Serialiser<AppleColorFilter>::operator()(css::CSSOMString &builder,
+  void Serialiser<AppleColorFilter>::operator()(StringBuilder &builder,
                                                 const css::SerialisationContext &context,
                                                 const RenderStyle &style,
                                                 const AppleColorFilter &value) noexcept

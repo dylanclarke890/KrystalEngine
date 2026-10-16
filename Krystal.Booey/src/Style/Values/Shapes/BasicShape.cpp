@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -41,7 +42,7 @@ namespace krys::boo::style
 
   // MARK: - Serialization
 
-  void Serialiser<BasicShape>::operator()(css::CSSOMString &builder, const css::SerialisationContext &context,
+  void Serialiser<BasicShape>::operator()(StringBuilder &builder, const css::SerialisationContext &context,
                                           const RenderStyle &style, const BasicShape &value,
                                           PathConversion conversion) noexcept
   {

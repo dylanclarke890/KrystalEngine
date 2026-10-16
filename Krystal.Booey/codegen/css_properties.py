@@ -9415,7 +9415,7 @@ class GenerateStyleExtractorGenerated:
             to,
             "extractorState.AllowVisitedStyle",
             [
-                f"builder.append(SerialisationForCSS(extractorState.Style.VisitedDependentColor(css::{property.id})));",
+                f"builder.Append(SerialisationForCSS(extractorState.Style.VisitedDependentColor(css::{property.id})));",
                 "return;",
             ],
         )
@@ -9477,7 +9477,7 @@ class GenerateStyleExtractorGenerated:
         pattern = property.codegen_properties.shorthand_style_extractor_pattern
         self._write_function(
             to,
-            f"static void Extract{property.id_without_prefix}ShorthandSerialisation(ExtractorState &extractorState, css::CSSOMString &builder, const css::SerialisationContext &context) noexcept",
+            f"static void Extract{property.id_without_prefix}ShorthandSerialisation(ExtractorState &extractorState, StringBuilder &builder, const css::SerialisationContext &context) noexcept",
             lambda: to.write(
                 f"Extract{pattern}ShorthandSerialisation(extractorState, builder, context, css::{property.id_without_prefix}Shorthand());"
             ),
@@ -9513,7 +9513,7 @@ class GenerateStyleExtractorGenerated:
 
         self._write_function(
             to,
-            f"static void Extract{property.id_without_prefix}Serialisation(ExtractorState &extractorState, css::CSSOMString &builder, const css::SerialisationContext &context) noexcept",
+            f"static void Extract{property.id_without_prefix}Serialisation(ExtractorState &extractorState, StringBuilder &builder, const css::SerialisationContext &context) noexcept",
             body,
         )
 
@@ -9621,7 +9621,7 @@ class GenerateStyleExtractorGenerated:
     def _generate_style_extractor_generated_cpp_extractor_generated_extract_serialisation(self, *, to: Writer):
         self._generate_dispatch(
             to=to,
-            signature="void ExtractorGenerated::ExtractValueSerialisation(ExtractorState &extractorState, css::CSSOMString &builder, const css::SerialisationContext &context, css::PropertyId id) noexcept",
+            signature="void ExtractorGenerated::ExtractValueSerialisation(ExtractorState &extractorState, StringBuilder &builder, const css::SerialisationContext &context, css::PropertyId id) noexcept",
             skipped="return;",
             logical=[
                 "ExtractValueSerialisation(extractorState, builder, context, css::Property::ResolveDirectionAwareProperty(id, extractorState.Style.GetWritingMode()));",

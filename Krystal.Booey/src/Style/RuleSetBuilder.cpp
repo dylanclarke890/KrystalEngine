@@ -14,9 +14,9 @@
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include <algorithm>
-#include <format>
 #include <random>
 #include <utility>
 
@@ -477,9 +477,9 @@ namespace krys::boo::style
       if (name.empty())
       {
         // Make unique name for an anonymous layer.
-        auto anonymousName = std::format("anon_{}", RandomNumber());
-        return css::CascadeLayerName {
-          css::CSSOMStringAtom(css::CSSOMString(anonymousName.begin(), anonymousName.end()))};
+        StringBuilder anonymousName;
+        anonymousName.Append(u8"anon_", RandomNumber());
+        return css::CascadeLayerName {anonymousName.ToAtomString()};
       }
       return name;
     };

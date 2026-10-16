@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorResolutionState.hpp"
 #include "Krystal.Booey/Style/Values/Color/ResolvedColor.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -69,49 +70,49 @@ namespace krys::boo::style
   }
 
   template <typename D>
-  void SerialisationForCSSTokenization(css::CSSOMString &builder, const css::SerialisationContext &context,
+  void SerialisationForCSSTokenization(StringBuilder &builder, const css::SerialisationContext &context,
                                        const RelativeColor<D> &relative) noexcept
   {
     using ColorType = typename D::ColorType;
 
     if constexpr (D::UsesColorFunctionForSerialisation)
     {
-      builder.append(u8"color(from ");
+      builder.Append(u8"color(from ");
       SerialisationForCSSTokenization(builder, context, relative.Origin);
-      builder.push_back(u8' ');
-      builder.append(boo::Serialisation(ColorSpaceFor<ColorType>));
+      builder.Append(u8' ');
+      builder.Append(boo::Serialisation(ColorSpaceFor<ColorType>));
     }
     else
     {
-      builder.append(D::SerialisationFunctionName);
-      builder.append(u8"(from ");
+      builder.Append(D::SerialisationFunctionName);
+      builder.Append(u8"(from ");
       SerialisationForCSSTokenization(builder, context, relative.Origin);
     }
 
     const auto &[c1, c2, c3, alpha] = relative.Components;
 
-    builder.push_back(u8' ');
+    builder.Append(u8' ');
     css::Serialise(builder, context, c1);
-    builder.push_back(u8' ');
+    builder.Append(u8' ');
     css::Serialise(builder, context, c2);
-    builder.push_back(u8' ');
+    builder.Append(u8' ');
     css::Serialise(builder, context, c3);
 
     if (alpha)
     {
-      builder.append(u8" / ");
+      builder.Append(u8" / ");
       css::Serialise(builder, context, *alpha);
     }
 
-    builder.push_back(u8')');
+    builder.Append(u8')');
   }
 
   template <typename D>
   KRYS_NODISCARD css::CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
                                                                   const RelativeColor<D> &relative) noexcept
   {
-    css::CSSOMString builder;
+    StringBuilder builder;
     SerialisationForCSSTokenization(builder, context, relative);
-    return builder;
+    return krys::move(builder).ToString();
   }
 }
