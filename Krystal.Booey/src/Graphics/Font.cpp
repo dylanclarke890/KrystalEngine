@@ -2,6 +2,7 @@
 #include "Krystal.Booey/Core/CharacterProperties.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/FontDescription.hpp"
+#include "Krystal.Booey/Graphics/SystemFallbackFontCache.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
@@ -45,7 +46,7 @@ namespace krys::boo
 
   Font::~Font() noexcept
   {
-    // FIXME: Remove the font from the system fallback font cache, once there is one.
+    SystemFallbackFontCache::Singleton().Remove(this);
   }
 
   // Estimates of avgCharWidth and maxCharWidth for platforms that don't support accessing these values from
@@ -350,6 +351,14 @@ namespace krys::boo
     }
 
     return PlatformData().Description();
+  }
+
+  RefPtr<Font> Font::SystemFallbackFontForCharacterCluster(
+    utf8_stringview characterCluster, const FontDescription &description,
+    ResolvedEmojiPolicy resolvedEmojiPolicy, boo::IsForPlatformFont isForPlatformFont) const noexcept
+  {
+    return SystemFallbackFontCache::Singleton().SystemFallbackFontForCharacterCluster(
+      this, characterCluster, description, resolvedEmojiPolicy, isForPlatformFont);
   }
 
   RefPtr<Font> Font::CreateScaledFont(const FontDescription &fontDescription,

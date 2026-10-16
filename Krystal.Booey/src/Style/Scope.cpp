@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp"
+#include "Krystal.Booey/CSS/CSSFontSelector.hpp"
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/StyleSheet.hpp"
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
@@ -162,11 +163,12 @@ namespace krys::boo::style
 
     _resolver->RuleSets().SetDynamicViewTransitionsStyle(_dynamicViewTransitionsStyle.get());
 
-    // FIXME: Tell the document's font selector that a build started and completed, and add the SVG font face
-    // rules, once there are fonts.
+    _document->GetFontSelector().BuildStarted();
 
     _resolver->RuleSets().InitializeUserStyle();
     _resolver->AppendAuthorStyleSheets(_activeStyleSheets);
+
+    _document->GetFontSelector().BuildCompleted();
 
     _isUpdatingStyleResolver = isUpdatingStyleResolver;
   }

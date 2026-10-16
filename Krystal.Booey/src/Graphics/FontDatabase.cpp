@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Graphics/FontDatabase.hpp"
 #include "Krystal.Booey/Graphics/BundledFonts.hpp"
+#include "Krystal.Booey/Graphics/FontCache.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
@@ -128,6 +129,8 @@ namespace krys::boo
     if (count)
     {
       ++_generation;
+      // Families that weren't found may be found now.
+      FontCache::InvalidateAllFontCaches();
     }
     return count;
   }

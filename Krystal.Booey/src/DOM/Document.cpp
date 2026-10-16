@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/CSS/Calc/RandomCachingKeyMap.hpp"
+#include "Krystal.Booey/CSS/CSSFontSelector.hpp"
 #include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
@@ -96,6 +97,11 @@ namespace krys::boo::dom
     if (_mediaQueryMatcher)
     {
       _mediaQueryMatcher->DocumentDestroyed();
+    }
+    if (_fontSelector)
+    {
+      _fontSelector->UnregisterForInvalidationCallbacks(*this);
+      static_cast<css::CSSFontSelector &>(*_fontSelector).ClearFonts();
     }
   }
 
@@ -1065,6 +1071,10 @@ namespace krys::boo::dom
     _settings = krys::move(settings);
     InvalidateCachedCSSParserContext();
     _exposedComputedCSSPropertyIds = null;
+    if (_fontSelector)
+    {
+      static_cast<css::CSSFontSelector &>(*_fontSelector).SettingsChanged();
+    }
     ScheduleFullStyleRebuild();
   }
 
@@ -1241,6 +1251,29 @@ namespace krys::boo::dom
     }
 
     return result;
+  }
+
+  css::CSSFontSelector &Document::GetFontSelector() const noexcept
+  {
+    if (!_fontSelector)
+    {
+      auto &document = const_cast<Document &>(*this);
+      _fontSelector = css::CSSFontSelector::Create(document);
+      _fontSelector->RegisterForInvalidationCallbacks(document);
+    }
+    return static_cast<css::CSSFontSelector &>(*_fontSelector);
+  }
+
+  void Document::FontsNeedUpdate(FontSelector &) noexcept
+  {
+    InvalidateMatchedPropertiesCacheAndForceStyleRecalc();
+  }
+
+  void Document::InvalidateMatchedPropertiesCacheAndForceStyleRecalc() noexcept
+  {
+    StyleScope().InvalidateMatchedDeclarationsCache();
+
+    ScheduleFullStyleRebuild();
   }
 
   void Document::ScheduleFullStyleRebuild() noexcept

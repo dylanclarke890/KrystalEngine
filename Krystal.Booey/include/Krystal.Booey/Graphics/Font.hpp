@@ -286,6 +286,12 @@ namespace krys::boo
     KRYS_NODISCARD bool PlatformSupportsCodePoint(char32 character,
                                                   Maybe<char32> variation = null) const noexcept;
 
+    /// @brief The font to draw @p characterCluster (UTF-8) with when this font lacks it, or null if no font
+    /// has it.
+    KRYS_NODISCARD RefPtr<Font> SystemFallbackFontForCharacterCluster(
+      utf8_stringview characterCluster, const FontDescription &description,
+      ResolvedEmojiPolicy resolvedEmojiPolicy, boo::IsForPlatformFont isForPlatformFont) const noexcept;
+
     KRYS_NODISCARD const GlyphPage *GetGlyphPage(uint32 pageNumber) const noexcept;
 
     void DeterminePitch() noexcept;

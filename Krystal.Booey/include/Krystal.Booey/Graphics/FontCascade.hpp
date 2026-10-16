@@ -2,7 +2,9 @@
 
 #include "Krystal.Booey/Core/CharacterProperties.hpp"
 #include "Krystal.Booey/Graphics/FontCascadeDescription.hpp"
+#include "Krystal.Booey/Graphics/FontCascadeFonts.hpp"
 #include "Krystal.Booey/Graphics/FontMetrics.hpp"
+#include "Krystal.Booey/Graphics/FontSelector.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Text/Unicode.hpp"
@@ -10,10 +12,8 @@
 namespace krys::boo
 {
   /// @brief The fonts a run of text is drawn with: a description, the spacing applied between letters and
-  /// words, and the fonts that description resolves to.
-  /// @note FIXME: There's no font backend yet, so a cascade holds only its description and spacing: no fonts,
-  /// font selector, glyph, width, drawing or text layout APIs. Its primary font's metrics are a fallback
-  /// derived from the computed size (see `MetricsOfPrimaryFont`).
+  /// words, and the fonts that description resolves to (with the document's font selector).
+  /// @note FIXME: No width, drawing or text layout APIs yet (text measurement comes next).
   class FontCascade final
   {
   private:
@@ -27,22 +27,33 @@ namespace krys::boo
 
     mutable FontCascadeDescription _fontDescription;
     Spacing _spacing;
-    mutable FontMetrics _primaryFontMetrics;
+    mutable RefPtr<FontCascadeFonts> _fonts;
+    mutable RefPtr<FontSelector> _fontSelector;
     mutable uint32 _generation {0};
+    bool _useBackslashAsYenSymbol {false};
     bool _enableKerning {false};   // Computed from _fontDescription.
     bool _requiresShaping {false}; // Computed from _fontDescription.
 
   public:
-    FontCascade() noexcept = default;
+    FontCascade() noexcept;
     explicit FontCascade(FontCascadeDescription &&) noexcept;
     FontCascade(FontCascadeDescription &&, const FontCascade &) noexcept;
+    /// @brief A cascade with only the font of @p platformData.
+    explicit FontCascade(const FontPlatformData &platformData,
+                         FontSmoothingMode fontSmoothingMode = FontSmoothingMode::Auto) noexcept;
 
-    FontCascade(const FontCascade &) noexcept = default;
-    FontCascade &operator=(const FontCascade &) noexcept = default;
+    FontCascade(const FontCascade &) noexcept;
+    FontCascade &operator=(const FontCascade &) noexcept;
+    ~FontCascade() noexcept;
 
-    /// @note FIXME: Upstream also compares the fonts, the font selector and their versions, and two cascades
-    /// with no fonts are never equal. With no fonts, the description and the spacing are compared.
     KRYS_NODISCARD bool operator==(const FontCascade &other) const noexcept;
+
+    /// @brief Whether the cascade's fonts are up to date with the font cache and @p fontSelector.
+    KRYS_NODISCARD bool IsCurrent(const FontSelector &fontSelector) const noexcept;
+    void UpdateFonts(Ref<FontCascadeFonts> &&fonts) const noexcept;
+    /// @brief Resolves the cascade's fonts again, with @p fontSelector.
+    void Update(RefPtr<FontSelector> &&fontSelector = nullptr) const noexcept;
+    KRYS_NODISCARD uint32 FontSelectorVersion() const noexcept;
 
     KRYS_NODISCARD const FontCascadeDescription &GetFontDescription() const noexcept
     {
@@ -124,14 +135,59 @@ namespace krys::boo
       return _fontDescription.WidthVariant();
     }
 
+    KRYS_NODISCARD bool IsFixedPitch() const noexcept;
+
+    KRYS_NODISCARD bool IsPlatformFont() const noexcept
+    {
+      return EnsureFonts().IsForPlatformFont();
+    }
+
     /// @brief The metrics of the primary font.
-    /// @note FIXME: Until there's a font backend, there's no primary font: the metrics are an ascent of 1em,
-    /// a line spacing of 1.2em and an ideogram width of 1em, with no descent, line gap, x-height, cap height
-    /// or zero width (so `ex`, `cap` and `ch` use their CSS fallbacks).
-    KRYS_NODISCARD const FontMetrics &MetricsOfPrimaryFont() const noexcept;
+    KRYS_NODISCARD const FontMetrics &MetricsOfPrimaryFont() const noexcept
+    {
+      return PrimaryFont()->GetFontMetrics();
+    }
 
     /// @brief The advance of the `0` glyph, or 0.5em when it can't be determined.
     KRYS_NODISCARD float ZeroWidth() const noexcept;
+
+    /// @brief The font of the first family that has a font, which the cascade's metrics come from.
+    KRYS_NODISCARD Ref<const Font> PrimaryFont() const noexcept;
+    KRYS_NODISCARD const FontRanges &FallbackRangesAt(uint32 index) const noexcept;
+    KRYS_NODISCARD GlyphData
+      GlyphDataForCharacter(char32 character, bool mirror, FontVariant variant = AutoVariant,
+                            Maybe<ResolvedEmojiPolicy> resolvedEmojiPolicy = null) const noexcept;
+
+    /// @brief The font of the first code point of @p text (UTF-8), or null if no font has it.
+    KRYS_NODISCARD RefPtr<const Font> FontForCombiningCharacterSequence(utf8_stringview text) const noexcept;
+
+    KRYS_NODISCARD static bool IsCJKIdeograph(char32 c) noexcept;
+    KRYS_NODISCARD static bool IsCJKIdeographOrSymbol(char32 c) noexcept;
+
+    KRYS_NODISCARD static ResolvedEmojiPolicy ResolveEmojiPolicy(FontVariantEmoji fontVariantEmoji,
+                                                                 char32) noexcept;
+
+    KRYS_NODISCARD FontSelector *GetFontSelector() const noexcept
+    {
+      return _fontSelector.get();
+    }
+
+    KRYS_NODISCARD bool UseBackslashAsYenSymbol() const noexcept
+    {
+      return _useBackslashAsYenSymbol;
+    }
+
+    KRYS_NODISCARD FontCascadeFonts *Fonts() const noexcept
+    {
+      return _fonts.get();
+    }
+
+    KRYS_NODISCARD bool IsLoadingCustomFonts() const noexcept;
+
+    void UpdateUseBackslashAsYenSymbol() noexcept
+    {
+      _useBackslashAsYenSymbol = ComputeUseBackslashAsYenSymbol();
+    }
 
     KRYS_NODISCARD constexpr static float SyntheticObliqueAngle() noexcept
     {
@@ -186,6 +242,21 @@ namespace krys::boo
              || c == text::ZeroWidthJoiner;
     }
 
+    KRYS_NODISCARD static char32 NormalizeSpaces(char32 character) noexcept
+    {
+      if (TreatAsSpace(character))
+      {
+        return text::Space;
+      }
+
+      if (TreatAsZeroWidthSpace(character))
+      {
+        return text::ZeroWidthSpace;
+      }
+
+      return character;
+    }
+
     KRYS_NODISCARD static bool TreatAsZeroWidthSpaceInComplexScript(char32 c) noexcept
     {
       return c < text::Space || (c >= text::DeleteCharacter && c < text::NoBreakSpace)
@@ -210,6 +281,11 @@ namespace krys::boo
     }
 
   private:
+    /// @brief The cascade's fonts, resolved without a font selector if they haven't been resolved yet.
+    KRYS_NODISCARD FontCascadeFonts &EnsureFonts() const noexcept;
+
+    KRYS_NODISCARD bool ComputeUseBackslashAsYenSymbol() const noexcept;
+
     KRYS_NODISCARD bool AdvancedTextRenderingMode() const noexcept
     {
       return _fontDescription.GetTextRenderingMode() != TextRenderingMode::OptimizeSpeed;

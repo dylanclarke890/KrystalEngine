@@ -748,6 +748,16 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Graphics/GlyphMetricsMap.hpp
   include/Krystal.Booey/Graphics/GlyphPage.hpp
 
+  # Font selection (t2b)
+  include/Krystal.Booey/CSS/CSSFontSelector.hpp
+  include/Krystal.Booey/Graphics/FontCache.hpp
+  include/Krystal.Booey/Graphics/FontCascadeCache.hpp
+  include/Krystal.Booey/Graphics/FontCascadeFonts.hpp
+  include/Krystal.Booey/Graphics/FontGenericFamilies.hpp
+  include/Krystal.Booey/Graphics/FontRanges.hpp
+  include/Krystal.Booey/Graphics/FontSelector.hpp
+  include/Krystal.Booey/Graphics/SystemFallbackFontCache.hpp
+
   # Interaction state
   include/Krystal.Booey/DOM/FocusOptions.hpp
   include/Krystal.Booey/DOM/UserActionElementSet.hpp
@@ -1925,6 +1935,15 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Graphics/FontDatabase.cpp
   src/Graphics/FontPlatformData.cpp
   src/Graphics/FreeTypeFace.cpp
+
+  # Font selection (t2b)
+  src/CSS/CSSFontSelector.cpp
+  src/Graphics/FontCache.cpp
+  src/Graphics/FontCascadeCache.cpp
+  src/Graphics/FontCascadeFonts.cpp
+  src/Graphics/FontGenericFamilies.cpp
+  src/Graphics/FontRanges.cpp
+  src/Graphics/SystemFallbackFontCache.cpp
 )
 
 target_precompile_headers(Krystal.Booey

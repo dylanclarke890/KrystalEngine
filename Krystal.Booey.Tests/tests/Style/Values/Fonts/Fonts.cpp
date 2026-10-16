@@ -1,4 +1,5 @@
-﻿#include "catch2/catch_test_macros.hpp"
+﻿#include "catch2/catch_approx.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/CSS/WebKitFontFamilyNames.hpp"
@@ -137,15 +138,16 @@ namespace krys::boo::style::tests
     CHECK(Serialised(capHeight) == "cap-height 0.75");
     CHECK(Created(capHeight) == "cap-height 0.75");
 
-    // `from-font` resolves against the primary font, whose fallback metrics have no x-height or cap height.
+    // `from-font` resolves against the primary font: the bundled Liberation Sans, whose x-height is
+    // 1082/2048em and whose water ideogram is missing (1em).
     auto fromFont = Convert<FontSizeAdjust>(PropertyId::FontSizeAdjust, u8"ic-width from-font");
     CHECK(fromFont.IsFromFont());
     CHECK(fromFont.GetMetric() == FontSizeAdjust::Metric::IcWidth);
     CHECK(fromFont.ResolvedMetricValue(Style) == 1.f);
     CHECK(Serialised(fromFont) == "ic-width 1");
-    CHECK_FALSE(
-      Convert<FontSizeAdjust>(PropertyId::FontSizeAdjust, u8"from-font").ResolvedMetricValue(Style));
-    CHECK(Serialised(Convert<FontSizeAdjust>(PropertyId::FontSizeAdjust, u8"from-font")) == "none");
+    CHECK(*Convert<FontSizeAdjust>(PropertyId::FontSizeAdjust, u8"from-font").ResolvedMetricValue(Style)
+          == Catch::Approx(1082.f / 2048.f));
+    CHECK(Serialised(Convert<FontSizeAdjust>(PropertyId::FontSizeAdjust, u8"from-font")) == "0.52832");
 
     CHECK(Blending<FontSizeAdjust> {}.CanBlend(
       number, FontSizeAdjust {FontSizeAdjust::Metric::ExHeight, FontSizeAdjust::Number {1}}));

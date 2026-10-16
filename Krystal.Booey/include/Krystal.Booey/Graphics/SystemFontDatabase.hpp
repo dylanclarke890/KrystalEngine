@@ -51,6 +51,8 @@ namespace krys::boo
     SystemFontDatabase() noexcept = default;
 
   private:
+    friend class FontCache;
+
     void Invalidate() noexcept;
     void PlatformInvalidate() noexcept;
 

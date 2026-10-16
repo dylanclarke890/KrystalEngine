@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/CSS/CSSFontSelector.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Style/BuilderStateInlines.hpp"
 
@@ -138,15 +139,24 @@ namespace krys::boo::style
 
   void BuilderState::UpdateFont() noexcept
   {
-    // FIXME: The font needs an update when it's dirty or the cascade has no fonts, and cascades have no fonts
-    // until there's a font backend, so it always needs one.
+    auto &fontSelector = GetDocument().GetFontSelector();
+
+    auto needsUpdate = [&]
+    {
+      return _fontDirty || !_style.GetFontCascade().Fonts();
+    };
+
+    if (!needsUpdate())
+    {
+      return;
+    }
 
     UpdateFontForGenericFamilyChange();
     UpdateFontForZoomChange();
     UpdateFontForOrientationChange();
     UpdateFontForSizeChange();
 
-    // FIXME: Update the font cascade's fonts from the document's font selector once there is one.
+    _style.GetFontCascade().Update(ShareRefPtr<FontSelector>(&fontSelector));
 
     _fontDirty = false;
   }

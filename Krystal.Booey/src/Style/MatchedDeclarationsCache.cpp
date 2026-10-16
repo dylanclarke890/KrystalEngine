@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Style/MatchedDeclarationsCache.hpp"
+#include "Krystal.Booey/CSS/CSSFontSelector.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
@@ -63,9 +64,17 @@ namespace krys::boo::style
       return false;
     }
 
-    // FIXME: Getting computed style after a font environment change but before full style resolution may
-    // involve styles with non-current fonts, which upstream doesn't cache (`FontCascade::isCurrent` against
-    // the document's font selector). There's no font selector yet.
+    // Getting computed style after a font environment change but before full style resolution may involve
+    // styles with non-current fonts. Avoid caching them.
+    auto &fontSelector = element.NodeDocument().GetFontSelector();
+    if (!style.GetFontCascade().IsCurrent(fontSelector))
+    {
+      return false;
+    }
+    if (!parentStyle.GetFontCascade().IsCurrent(fontSelector))
+    {
+      return false;
+    }
 
     if (element.HasRandomCachingKeyMap())
     {

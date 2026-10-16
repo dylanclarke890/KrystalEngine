@@ -96,15 +96,17 @@ namespace krys::boo::css::tests
 
     SECTION("Font-relative units resolve against the initial font")
     {
+      // The initial font is the bundled Liberation Sans at 16px: an x-height of 8.453125px, a zero width of
+      // 8.8984375px, a cap height of 11.0078125px, a line spacing of 18px and no water ideogram (1em).
       REQUIRE(Document->MatchMedia(u8"(width: 50em)")->Matches());
       REQUIRE(Document->MatchMedia(u8"(width: 50rem)")->Matches());
-      REQUIRE(Document->MatchMedia(u8"(width: 100rex)")->Matches());
-      REQUIRE(Document->MatchMedia(u8"(min-width: 41.6rlh) and (max-width: 41.7rlh)")->Matches());
-      REQUIRE(Document->MatchMedia(u8"(width: 100ex)")->Matches());
-      REQUIRE(Document->MatchMedia(u8"(width: 100ch)")->Matches());
+      REQUIRE(Document->MatchMedia(u8"(min-width: 94.6rex) and (max-width: 94.7rex)")->Matches());
+      REQUIRE(Document->MatchMedia(u8"(min-width: 44.4rlh) and (max-width: 44.5rlh)")->Matches());
+      REQUIRE(Document->MatchMedia(u8"(min-width: 94.6ex) and (max-width: 94.7ex)")->Matches());
+      REQUIRE(Document->MatchMedia(u8"(min-width: 89.9ch) and (max-width: 90ch)")->Matches());
       REQUIRE(Document->MatchMedia(u8"(width: 50ic)")->Matches());
-      REQUIRE(Document->MatchMedia(u8"(width: 50cap)")->Matches());
-      REQUIRE(Document->MatchMedia(u8"(min-width: 41.6lh) and (max-width: 41.7lh)")->Matches());
+      REQUIRE(Document->MatchMedia(u8"(min-width: 72.6cap) and (max-width: 72.7cap)")->Matches());
+      REQUIRE(Document->MatchMedia(u8"(min-width: 44.4lh) and (max-width: 44.5lh)")->Matches());
       REQUIRE_FALSE(Document->MatchMedia(u8"(min-width: 51em)")->Matches());
     }
 

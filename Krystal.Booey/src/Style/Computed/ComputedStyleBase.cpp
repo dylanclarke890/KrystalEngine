@@ -214,8 +214,12 @@ namespace krys::boo::style
       return;
     }
 
-    // FIXME: Update the new font cascade with the existing cascade's font selector once fonts load.
-    SetFontCascade(FontCascade {krys::move(description), GetFontCascade()});
+    auto existingFontCascade = GetFontCascade();
+    RefPtr<FontSelector> fontSelector = ShareRefPtr(existingFontCascade.GetFontSelector());
+
+    auto newCascade = FontCascade {krys::move(description), existingFontCascade};
+    newCascade.Update(krys::move(fontSelector));
+    SetFontCascade(krys::move(newCascade));
   }
 
   bool ComputedStyleBase::SetFontDescriptionWithoutUpdate(FontCascadeDescription &&description) noexcept

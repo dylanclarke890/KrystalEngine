@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Style/ResolveForDocument.hpp"
+#include "Krystal.Booey/CSS/CSSFontSelector.hpp"
 #include "Krystal.Booey/CSS/WebKitFontFamilyNames.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
@@ -68,7 +69,8 @@ namespace krys::boo::style
 
     auto fontCascade = FontCascade {krys::move(fontDescription), documentStyle.GetFontCascade()};
 
-    // FIXME: Upstream gives the font cascade the document's font selector here; there's no font selector.
+    // We don't just call setFontDescription() because we need to provide the fontSelector to the FontCascade.
+    fontCascade.Update(ShareRefPtr<FontSelector>(&document.GetFontSelector()));
     documentStyle.SetFontCascade(krys::move(fontCascade));
 
     documentStyle.SetEvaluationTimeZoomEnabled(document.GetSettings().Values.EvaluationTimeZoomEnabled);

@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Graphics/FontDescription.hpp"
+#include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/CSS/WebKitFontFamilyNames.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
@@ -268,19 +269,26 @@ namespace krys::boo::tests
     CHECK(cascade.RequiresShaping());
     CHECK(cascade.Generation() != 0);
 
-    SECTION("fallback metrics")
+    SECTION("primary font metrics")
     {
+      // No family is given, so the primary font is the bundled Liberation Sans.
       const auto &metrics = cascade.MetricsOfPrimaryFont();
-      CHECK(metrics.IntAscent() == 20);
-      CHECK(metrics.IntLineSpacing() == 24);
+      CHECK(metrics.IntAscent() == 18);
+      CHECK(metrics.IntLineSpacing() == 23);
       CHECK(*metrics.IdeogramWidth() == 20.f);
-      CHECK_FALSE(metrics.XHeight());
-      CHECK_FALSE(metrics.CapHeight());
-      CHECK(cascade.ZeroWidth() == 10.f);
+      CHECK(*metrics.XHeight() == Catch::Approx(10.56640625f));
+      CHECK(*metrics.CapHeight() == Catch::Approx(13.759765625f));
+      CHECK(cascade.ZeroWidth() == Catch::Approx(11.123046875f));
+      CHECK(cascade.PrimaryFont()->PlatformData().FamilyName() == u8"Liberation Sans");
     }
 
     SECTION("spacing and equality")
     {
+      // Cascades without fonts are never equal.
+      FontCascade unresolved = cascade;
+      CHECK_FALSE(unresolved == cascade);
+
+      cascade.Update();
       FontCascade copy = cascade;
       CHECK(copy == cascade);
       copy.SetLetterSpacing(2.f);

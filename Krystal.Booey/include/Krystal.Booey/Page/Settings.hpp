@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Graphics/FontGenericFamilies.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/RefCounted.hpp"
@@ -15,6 +16,10 @@ namespace krys::boo
     int32 MinimumFontSize {0};
     int32 MinimumLogicalFontSize {0};
     bool EvaluationTimeZoomEnabled {false};
+    /// @brief Whether characters no family has try the pictograph family before the registered fonts.
+    bool FontFallbackPrefersPictographs {false};
+    /// @brief The families the generic families resolve to; none by default, so they use the bundled font.
+    boo::FontGenericFamilies FontGenericFamilies;
   };
 
   /// @brief The host's settings for a document: the features without a specification it turns on, the

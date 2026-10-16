@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Style/Resolver.hpp"
+#include "Krystal.Booey/CSS/CSSFontSelector.hpp"
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
@@ -151,8 +152,13 @@ namespace krys::boo::style
       _rootDefaultStyle = StyleForElement(*documentElement, {Document().InitialContainingBlockStyle()},
                                           RuleMatchingBehavior::MatchOnlyUserAgentRules)
                             .Style;
-      // FIXME: Upstream updates the root default style's font cascade with the document's font selector and
-      // loads its primary font here; there are no fonts.
+      // Turn off assertion against font lookups during style resolver initialization. We may need root style
+      // font for media queries.
+      auto &fontSelector = Document().GetFontSelector();
+      fontSelector.IncrementIsComputingRootStyleFont();
+      _rootDefaultStyle->GetFontCascade().Update(ShareRefPtr<FontSelector>(&fontSelector));
+      std::ignore = _rootDefaultStyle->GetFontCascade().PrimaryFont();
+      fontSelector.DecrementIsComputingRootStyleFont();
     }
 
     if (_rootDefaultStyle && view)
@@ -181,7 +187,11 @@ namespace krys::boo::style
   {
     _ruleSets.AppendAuthorStyleSheets(styleSheets, _mediaQueryEvaluator);
 
-    // FIXME: Update the render view's font cascade with the document's font selector, once there are fonts.
+    if (Document().GetRenderView())
+    {
+      Document().RenderViewStyle().GetFontCascade().Update(
+        ShareRefPtr<FontSelector>(&Document().GetFontSelector()));
+    }
   }
 
   KeyframesRuleMap &Resolver::UserAgentKeyframes() noexcept

@@ -14,6 +14,7 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
+#include "Krystal.Booey/Graphics/FontSelector.hpp"
 #include "Krystal.Booey/HTML/Enums/DocumentReadyState.hpp"
 #include "Krystal.Booey/HTML/Enums/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/HTML/Types/HTMLOrSVGScriptElement.hpp"
@@ -36,6 +37,7 @@ namespace krys::boo
 
 namespace krys::boo::css
 {
+  class CSSFontSelector;
   class MediaQueryList;
   class MediaQueryMatcher;
   class StyleSheetList;
@@ -88,7 +90,7 @@ namespace krys::boo::dom
   class VisitedLinkState;
 
   /// @see https://dom.spec.whatwg.org/#interface-document
-  class Document : public ContainerNode, public DocumentOrShadowRoot
+  class Document : public ContainerNode, public DocumentOrShadowRoot, public FontSelectorClient
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Document);
     KRYS_TYPE_CAST_TRAITS_ACCESS();
@@ -152,6 +154,7 @@ namespace krys::boo::dom
     List<WeakPtr<ShadowRoot>> _inDocumentShadowRoots;
     RefPtr<css::StyleSheetList> _styleSheetList;
     RefPtr<css::MediaQueryMatcher> _mediaQueryMatcher;
+    mutable RefPtr<FontSelector> _fontSelector;
 
     WeakPtr<LocalFrame> _frame;
     // FIXME: Stands in for the render tree, which there isn't yet: a document has a render view while it's
@@ -688,6 +691,14 @@ namespace krys::boo::dom
     UpdateLayoutResult UpdateLayoutIgnorePendingStylesheets() noexcept;
 
 #pragma endregion
+
+    /// @brief The document's font selector, which resolves the families its styles name.
+    KRYS_NODISCARD css::CSSFontSelector &GetFontSelector() const noexcept;
+
+    /// @brief Restyles the document after the fonts its font selector provides changed.
+    void FontsNeedUpdate(FontSelector &selector) noexcept override;
+
+    void InvalidateMatchedPropertiesCacheAndForceStyleRecalc() noexcept;
 
     /// @brief Determines whether links are visited, for `:visited` and the link styles.
     KRYS_NODISCARD VisitedLinkState &GetVisitedLinkState() const noexcept;

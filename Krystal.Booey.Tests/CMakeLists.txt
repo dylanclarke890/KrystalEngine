@@ -350,6 +350,8 @@ target_sources(Krystal.Booey.Tests
 
 		# Style
 		tests/Graphics/Font.cpp
+		tests/Graphics/FontCache.cpp
+		tests/CSS/CSSFontSelector.cpp
 		tests/Graphics/FontDatabase.cpp
 		tests/Page/LocalFrameView.cpp
 		tests/Page/Settings.cpp
