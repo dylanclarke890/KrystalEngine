@@ -711,6 +711,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/RenderElement.hpp
   include/Krystal.Booey/Rendering/RenderObject.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp
+  include/Krystal.Booey/Rendering/Updating/RenderTreeUpdaterGeneratedContent.hpp
 
   # Computed style output (f6a)
   include/Krystal.Booey/CSS/CSSComputedStyleDeclaration.hpp
@@ -1913,6 +1914,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/RenderElement.cpp
   src/Rendering/RenderObject.cpp
   src/Rendering/Updating/RenderTreeUpdater.cpp
+  src/Rendering/Updating/RenderTreeUpdaterGeneratedContent.cpp
   src/Style/ContainerQueryEvaluator.cpp
   src/Style/TreeResolver.cpp
   src/Style/Update.cpp
@@ -2164,6 +2166,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/NodeIterator.hpp
       include/Krystal.Booey/DOM/NodeList.hpp
       include/Krystal.Booey/DOM/ProcessingInstruction.hpp
+      include/Krystal.Booey/DOM/PseudoElement.hpp
       include/Krystal.Booey/DOM/Range.hpp
       include/Krystal.Booey/DOM/SelectorQuery.hpp
       include/Krystal.Booey/DOM/ShadowRoot.hpp
@@ -2486,6 +2489,7 @@ target_sources(Krystal.Booey
     src/DOM/Node.cpp
     src/DOM/NodeIterator.cpp
     src/DOM/ProcessingInstruction.cpp
+    src/DOM/PseudoElement.cpp
     src/DOM/Range.cpp
     src/DOM/SelectorQuery.cpp
     src/DOM/ShadowRoot.cpp

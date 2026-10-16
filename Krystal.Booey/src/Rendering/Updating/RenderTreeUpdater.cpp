@@ -8,6 +8,7 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Updating/RenderTreeUpdaterGeneratedContent.hpp"
 #include "Krystal.Booey/Style/TreeResolver.hpp"
 #include "Krystal.Booey/Style/Update.hpp"
 
@@ -24,7 +25,7 @@ namespace krys::boo
 
   RenderTreeUpdater::RenderTreeUpdater(dom::Document &document,
                                        style::PostResolutionCallbackDisabler &) noexcept
-      : _document(ShareRef(document))
+      : _document(ShareRef(document)), _generatedContent(CreateUnique<GeneratedContent>(*this))
   {
   }
 
@@ -160,13 +161,17 @@ namespace krys::boo
   {
     _parentStack.push_back(Parent(element, update));
 
-    // FIXME: The ::before pseudo-element (updateBeforeDescendants), once there's generated content.
+    UpdateBeforeDescendants(element, update);
   }
 
   void RenderTreeUpdater::PopParent() noexcept
   {
-    // FIXME: The ::after and ::backdrop pseudo-elements (updateAfterDescendants), once there's generated
-    // content.
+    auto &parent = _parentStack.back();
+    if (parent.Element)
+    {
+      UpdateAfterDescendants(*parent.Element, parent.Update);
+    }
+
     _parentStack.pop_back();
   }
 
@@ -178,6 +183,30 @@ namespace krys::boo
     {
       PopParent();
     }
+  }
+
+  void RenderTreeUpdater::UpdateBeforeDescendants(dom::Element &element,
+                                                  const style::ElementUpdate *update) noexcept
+  {
+    if (update)
+    {
+      GetGeneratedContent().UpdateBeforeOrAfterPseudoElement(element, *update, PseudoElementType::Before);
+    }
+
+    // FIXME: The previous renderer of the insertion position (storePreviousRenderer), once there's a render
+    // tree.
+  }
+
+  void RenderTreeUpdater::UpdateAfterDescendants(dom::Element &element,
+                                                 const style::ElementUpdate *update) noexcept
+  {
+    if (update)
+    {
+      GetGeneratedContent().UpdateBeforeOrAfterPseudoElement(element, *update, PseudoElementType::After);
+    }
+
+    // FIXME: The ::backdrop renderer, writing suggestions, view transitions, RenderTreeBuilder's
+    // updateAfterDescendants and didAttachRenderers, once there's a render tree.
   }
 
   void RenderTreeUpdater::UpdateElementRenderer(dom::Element &element,
@@ -311,8 +340,8 @@ namespace krys::boo
 
   void RenderTreeUpdater::TearDownRenderers(dom::Element &root, TeardownType teardownType) noexcept
   {
-    // FIXME: Animations (cancelling style-originated animations), generated content, repaint and layout
-    // invalidation, once there are any.
+    // FIXME: Animations (cancelling style-originated animations), ::marker, repaint and layout invalidation,
+    // once there are any.
     auto tearDown = [&](dom::Element &element)
     {
       // Make sure we don't leave any renderers behind in nodes outside the composed tree.
@@ -334,6 +363,9 @@ namespace krys::boo
         case TeardownType::RendererUpdate:
         case TeardownType::RendererUpdateCancelingAnimations: break;
       }
+
+      GeneratedContent::RemoveBeforePseudoElement(element);
+      GeneratedContent::RemoveAfterPseudoElement(element);
 
       // FIXME: Repaint, layout invalidation and anonymous wrapper clean-up, once there's a render tree.
       if (element.Renderer())

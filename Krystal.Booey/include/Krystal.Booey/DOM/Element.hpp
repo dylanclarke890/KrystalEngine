@@ -15,6 +15,7 @@
 
 namespace krys::boo
 {
+  enum class PseudoElementType : uint8;
   class RenderElement;
   class RenderStyle;
   class RenderTreeUpdater;
@@ -44,6 +45,7 @@ namespace krys::boo::dom
   class ElementRareData;
   class HTMLCollection;
   class NodeList;
+  class PseudoElement;
   class ShadowRoot;
 
   /// @see https://dom.spec.whatwg.org/#interface-element
@@ -488,6 +490,24 @@ namespace krys::boo::dom
 
     /// @brief The element's renderer, or null if it isn't rendered.
     KRYS_NODISCARD RenderElement *Renderer() const noexcept;
+
+    /// @brief The element's `::before` pseudo-element, or null if it has none.
+    KRYS_NODISCARD PseudoElement *BeforePseudoElement() const noexcept;
+
+    /// @brief The element's `::after` pseudo-element, or null if it has none.
+    KRYS_NODISCARD PseudoElement *AfterPseudoElement() const noexcept;
+
+    /// @brief The element's `::before` or `::after` pseudo-element (@p type), created if it doesn't exist.
+    PseudoElement &EnsurePseudoElement(PseudoElementType type) noexcept;
+
+    /// @brief The pseudo-element @p pseudoElementIdentifier if it's a `::before` or `::after` that exists.
+    KRYS_NODISCARD RefPtr<PseudoElement>
+      PseudoElementIfExists(const style::PseudoElementIdentifier &pseudoElementIdentifier) noexcept;
+    KRYS_NODISCARD RefPtr<const PseudoElement>
+      PseudoElementIfExists(const style::PseudoElementIdentifier &pseudoElementIdentifier) const noexcept;
+
+    void ClearBeforePseudoElement() noexcept;
+    void ClearAfterPseudoElement() noexcept;
 
     void InvalidateStyle() noexcept;
     void InvalidateStyleAndLayerComposition() noexcept;

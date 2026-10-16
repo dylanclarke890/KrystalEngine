@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
+#include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/HTMLStyleElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -208,7 +209,13 @@ namespace krys::boo::style::tests
     auto *firstLine = q.GetCachedPseudoStyle({PseudoElementType::FirstLine});
     REQUIRE(firstLine);
     CHECK(firstLine->GetColor() == Blue);
-    CHECK(fixture.ById(u8"q").ComputedStyle(PseudoElementIdentifier {PseudoElementType::Before}) == before);
+    // ::before has a pseudo-element, whose own style is its computed style.
+    auto *beforeElement = fixture.ById(u8"q").BeforePseudoElement();
+    REQUIRE(beforeElement);
+    CHECK(fixture.ById(u8"q").ComputedStyle(PseudoElementIdentifier {PseudoElementType::Before})
+          == beforeElement->GetRenderStyle());
+    CHECK(fixture.ById(u8"q").ComputedStyle(PseudoElementIdentifier {PseudoElementType::Before})->GetColor()
+          == Red);
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "TreeResolver: shadow trees", "[Style][TreeResolver]")

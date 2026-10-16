@@ -109,6 +109,8 @@ namespace krys::boo::dom
     if (auto *element = DynamicDowncast<Element>(removedNode))
     {
       element->NodeDocument().UserActionElements().ClearAllForElement(*element);
+      element->ClearBeforePseudoElement();
+      element->ClearAfterPseudoElement();
     }
 
     // Shadow roots and the nodes in their trees stay in their shadow trees; the removed node and the rest of

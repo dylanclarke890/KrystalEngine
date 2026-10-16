@@ -15,6 +15,8 @@ namespace krys::boo
 
 namespace krys::boo::dom
 {
+  class PseudoElement;
+
   class ElementRareData : public ParentNodeRareData
   {
     struct PseudoElementIdentifierHash
@@ -29,6 +31,8 @@ namespace krys::boo::dom
     uint16 _childIndex {0};
     UniquePtr<RenderStyle> _computedStyle;
     UniquePtr<RenderStyle> _displayContentsOrNoneStyle;
+    RefPtr<PseudoElement> _beforePseudoElement;
+    RefPtr<PseudoElement> _afterPseudoElement;
     HashMap<Maybe<style::PseudoElementIdentifier>, Ref<css::calc::RandomCachingKeyMap>,
             PseudoElementIdentifierHash>
       _randomCachingKeyMaps;
@@ -65,6 +69,19 @@ namespace krys::boo::dom
     }
 
     void SetDisplayContentsOrNoneStyle(UniquePtr<RenderStyle> style) noexcept;
+
+    KRYS_NODISCARD PseudoElement *BeforePseudoElement() const noexcept
+    {
+      return _beforePseudoElement.get();
+    }
+
+    KRYS_NODISCARD PseudoElement *AfterPseudoElement() const noexcept
+    {
+      return _afterPseudoElement.get();
+    }
+
+    void SetBeforePseudoElement(RefPtr<PseudoElement> &&pseudoElement) noexcept;
+    void SetAfterPseudoElement(RefPtr<PseudoElement> &&pseudoElement) noexcept;
 
     /// @brief The `random()` base values of the element (or one of its pseudo-elements).
     KRYS_NODISCARD Ref<css::calc::RandomCachingKeyMap>

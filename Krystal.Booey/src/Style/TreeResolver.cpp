@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
+#include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
@@ -334,7 +335,8 @@ namespace krys::boo::style
     // FIXME: These elements should not change renderer based on appearance property.
     if (auto *htmlElement = DynamicDowncast<html::HTMLElement>(element);
         htmlElement
-        && ((Is<html::HTMLInputElement>(*htmlElement) && Downcast<html::HTMLInputElement>(*htmlElement).IsSearchField())
+        && ((Is<html::HTMLInputElement>(*htmlElement)
+             && Downcast<html::HTMLInputElement>(*htmlElement).IsSearchField())
             || Is<html::HTMLMeterElement>(*htmlElement) || Is<html::HTMLProgressElement>(*htmlElement)))
     {
       if (existingStyle && update.Style->UsedAppearance() != existingStyle->UsedAppearance())
@@ -913,8 +915,19 @@ namespace krys::boo::style
                                              DescendantsToResolve parentDescendantsToResolve,
                                              EnumSet<Change> parentChanges) noexcept -> Maybe<ResolutionType>
   {
-    // FIXME: Combine with the validity of the ::before and ::after pseudo-element nodes, once there are any.
-    auto combinedValidity = element.StyleValidity();
+    auto combinedValidity = [&]
+    {
+      auto validity = element.StyleValidity();
+      if (auto *pseudoElement = element.BeforePseudoElement())
+      {
+        validity = std::max(validity, pseudoElement->StyleValidity());
+      }
+      if (auto *pseudoElement = element.AfterPseudoElement())
+      {
+        validity = std::max(validity, pseudoElement->StyleValidity());
+      }
+      return validity;
+    }();
 
     if (parentDescendantsToResolve == DescendantsToResolve::None)
     {
@@ -983,7 +996,14 @@ namespace krys::boo::style
   static void ClearNeedsStyleResolution(dom::Element &element) noexcept
   {
     element.SetHasValidStyle();
-    // FIXME: Also the ::before and ::after pseudo-element nodes, once there are any.
+    if (auto *before = element.BeforePseudoElement())
+    {
+      before->SetHasValidStyle();
+    }
+    if (auto *after = element.AfterPseudoElement())
+    {
+      after->SetHasValidStyle();
+    }
   }
 
   static bool HasLoadingStylesheet(const Scope &styleScope, const dom::Element &element,

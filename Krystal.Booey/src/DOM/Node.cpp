@@ -14,6 +14,7 @@
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeAncestorIterator.hpp"
 #include "Krystal.Booey/DOM/NodeList.hpp"
 #include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
+#include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
@@ -407,6 +408,10 @@ namespace krys::boo::dom
     if (auto *slot = SlotAlgorithms::GetAssignedSlot(*this))
     {
       return slot;
+    }
+    if (auto *pseudoElement = DynamicDowncast<PseudoElement>(*this))
+    {
+      return pseudoElement->HostElement();
     }
     if (auto *parent = ParentNode())
     {

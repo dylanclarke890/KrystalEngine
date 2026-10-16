@@ -31,7 +31,9 @@ namespace krys::boo::dom
     /// @brief Set while the element has user action state (hover, active or focus) in its document's
     /// `UserActionElementSet`.
     IsUserActionElement = 1 << 16,
+    /// @brief Set on the `PseudoElement`s generated for `::before` and `::after`.
+    IsPseudoElement = 1 << 17,
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeFlags, 17u);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeFlags, 18u);

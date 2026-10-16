@@ -488,6 +488,11 @@ namespace krys::boo::dom
       return HasNodeFlag(NodeFlags::IsMathMLElement);
     }
 
+    KRYS_NODISCARD bool IsPseudoElement() const noexcept
+    {
+      return HasNodeFlag(NodeFlags::IsPseudoElement);
+    }
+
     /// @brief Whether this is an element with an inline style (`StyledElement`).
     KRYS_NODISCARD bool IsStyledElement() const noexcept
     {

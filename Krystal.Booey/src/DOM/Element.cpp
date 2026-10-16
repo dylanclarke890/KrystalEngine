@@ -19,6 +19,7 @@
 #include "Krystal.Booey/DOM/Mixins/Slottable.hpp"
 #include "Krystal.Booey/DOM/NamedNodeMap.hpp"
 #include "Krystal.Booey/DOM/NodeList.hpp"
+#include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/SelectorQuery.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/StyledElement.hpp"
@@ -46,7 +47,21 @@ namespace krys::boo::dom
   {
   }
 
-  Element::~Element() noexcept = default;
+  Element::~Element() noexcept
+  {
+    // FIXME: The pseudo-elements of a destroyed document's elements still have renderers, until the document
+    // tears its render tree down when it's destroyed.
+    for (auto *pseudoElement : {BeforePseudoElement(), AfterPseudoElement()})
+    {
+      if (pseudoElement && pseudoElement->Renderer())
+      {
+        pseudoElement->SetRenderer(nullptr);
+        pseudoElement->_ownedRenderer = nullptr;
+      }
+    }
+    ClearBeforePseudoElement();
+    ClearAfterPseudoElement();
+  }
 
   ElementRareData &Element::EnsureElementRareData() noexcept
   {
@@ -273,7 +288,13 @@ namespace krys::boo::dom
       return nullptr;
     }
 
-    // FIXME: Before and after pseudo-elements as nodes (PseudoElement), which have their own computed style.
+    if (pseudoElementIdentifier)
+    {
+      if (auto pseudoElement = PseudoElementIfExists(*pseudoElementIdentifier))
+      {
+        return pseudoElement->ComputedStyle();
+      }
+    }
 
     // FIXME: This should call resolveComputedStyle() unconditionally so we check if the style is valid.
     auto *style = ExistingComputedStyle();
@@ -371,7 +392,7 @@ namespace krys::boo::dom
     // This way renderOrDisplayContentsStyle() always returns consistent styles matching the rendering state.
     krys_debug_assert(
       style && (style->Display() == DisplayType::Contents || style->Display() == DisplayType::None));
-    krys_debug_assert(!Renderer());
+    krys_debug_assert(!Renderer() || IsPseudoElement());
     EnsureElementRareData().SetDisplayContentsOrNoneStyle(krys::move(style));
   }
 
@@ -397,6 +418,86 @@ namespace krys::boo::dom
   RenderElement *Element::Renderer() const noexcept
   {
     return static_cast<RenderElement *>(Node::Renderer());
+  }
+
+  PseudoElement &Element::EnsurePseudoElement(PseudoElementType type) noexcept
+  {
+    if (type == PseudoElementType::Before)
+    {
+      if (!BeforePseudoElement())
+      {
+        EnsureElementRareData().SetBeforePseudoElement(PseudoElement::Create(*this, type));
+      }
+      return *BeforePseudoElement();
+    }
+
+    krys_debug_assert(type == PseudoElementType::After);
+    if (!AfterPseudoElement())
+    {
+      EnsureElementRareData().SetAfterPseudoElement(PseudoElement::Create(*this, type));
+    }
+    return *AfterPseudoElement();
+  }
+
+  PseudoElement *Element::BeforePseudoElement() const noexcept
+  {
+    return _elementRareData ? _elementRareData->BeforePseudoElement() : nullptr;
+  }
+
+  PseudoElement *Element::AfterPseudoElement() const noexcept
+  {
+    return _elementRareData ? _elementRareData->AfterPseudoElement() : nullptr;
+  }
+
+  RefPtr<PseudoElement>
+    Element::PseudoElementIfExists(const style::PseudoElementIdentifier &pseudoElementIdentifier) noexcept
+  {
+    if (pseudoElementIdentifier.Type == PseudoElementType::Before)
+    {
+      return ShareRefPtr(BeforePseudoElement());
+    }
+    if (pseudoElementIdentifier.Type == PseudoElementType::After)
+    {
+      return ShareRefPtr(AfterPseudoElement());
+    }
+    return nullptr;
+  }
+
+  RefPtr<const PseudoElement> Element::PseudoElementIfExists(
+    const style::PseudoElementIdentifier &pseudoElementIdentifier) const noexcept
+  {
+    return const_cast<Element &>(*this).PseudoElementIfExists(pseudoElementIdentifier);
+  }
+
+  static void DisconnectPseudoElement(PseudoElement *pseudoElement) noexcept
+  {
+    if (!pseudoElement)
+    {
+      return;
+    }
+    krys_debug_assert(!pseudoElement->Renderer());
+    krys_debug_assert(pseudoElement->HostElement());
+    pseudoElement->ClearHostElement();
+  }
+
+  void Element::ClearBeforePseudoElement() noexcept
+  {
+    if (!_elementRareData || !_elementRareData->BeforePseudoElement())
+    {
+      return;
+    }
+    DisconnectPseudoElement(_elementRareData->BeforePseudoElement());
+    _elementRareData->SetBeforePseudoElement(nullptr);
+  }
+
+  void Element::ClearAfterPseudoElement() noexcept
+  {
+    if (!_elementRareData || !_elementRareData->AfterPseudoElement())
+    {
+      return;
+    }
+    DisconnectPseudoElement(_elementRareData->AfterPseudoElement());
+    _elementRareData->SetAfterPseudoElement(nullptr);
   }
 
   namespace
