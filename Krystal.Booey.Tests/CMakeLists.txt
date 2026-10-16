@@ -116,6 +116,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/CSSOM/CSSSupportsRule.cpp
 		tests/CSS/CSSOM/CSSViewTransitionRule.cpp
 		tests/CSS/Counter/CounterStyle.cpp
+		tests/CSS/CSSComputedStyleDeclaration.cpp
 		tests/CSS/CSSStyleProperties.cpp
 		tests/CSS/CSSStyleSheet.cpp
 		tests/CSS/CSSStyleSheetObservableArray.cpp
@@ -355,6 +356,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/CustomPropertyRegistry.cpp
 		tests/Style/Calc/Tree.cpp
 		tests/Style/ElementRuleCollector.cpp
+		tests/Style/Extractor.cpp
 		tests/Style/MatchedDeclarationsCache.cpp
 		tests/Style/MatchResultCache.cpp
 		tests/Style/PropertyCascade.cpp

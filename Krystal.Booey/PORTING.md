@@ -33,19 +33,20 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - **CSSOM** (2026-10-14): `CSSStyleSheet`, `StyleSheet`, `MediaList`, the rule wrappers, `CSSStyleDeclaration` and the descriptor classes, with copy-on-write of shared contents. See *CSSOM*.
 - **Media query evaluation** (2026-10-14): every media feature, against a host-filled `MediaEnvironment`. See *Media query evaluation*.
 - **DOM integration**, layers e0 to e7 (2026-10-14): `DocumentOrShadowRoot`, the document URL, base URL and parser context, inline styles (`StyledElement`), style scopes, `<style>` sheet owners and `styleSheets`, `adoptedStyleSheets`, selector matching (`querySelector()`, `matches()`, `closest()`), `matchMedia()`. See *DOM integration*.
-- **Style resolution**, layers f0 to f5d (2026-10-14 to 15): rule sets, the user agent sheets, matching and the cascade (f0 to f2); every computed value type, the data groups, `ComputedStyle` and `RenderStyle` (f3a to f3f4); the builder state, the generated builder, registered custom properties and `Builder` with `var()` and `revert` (f4a to f4d); the adjuster (f5a); element resolution with the matched declarations and match result caches (f5b); presentational hints on HTML, SVG and MathML elements and the `<body>` link colours (f5c); the tree resolver, the DOM's style state (style validity, the styles elements keep, the direct invalidations), the composed tree iterators and container queries (f5d). See *Style resolution*.
+- **Style resolution**, layers f0 to f6a (2026-10-14 to 15): rule sets, the user agent sheets, matching and the cascade (f0 to f2); every computed value type, the data groups, `ComputedStyle` and `RenderStyle` (f3a to f3f4); the builder state, the generated builder, registered custom properties and `Builder` with `var()` and `revert` (f4a to f4d); the adjuster (f5a); element resolution with the matched declarations and match result caches (f5b); presentational hints on HTML, SVG and MathML elements and the `<body>` link colours (f5c); the tree resolver, the DOM's style state (style validity, the styles elements keep, the direct invalidations), the composed tree iterators and container queries (f5d); computed style output: `Style::Extractor`, `getComputedStyle` and the transform resolver (f6a). See *Style resolution*.
 
-**Next:** style resolution, layer f6 (output and invalidation). See *Style resolution*.
+**Next:** style resolution, layer f6b (the selector-based style invalidation). See *Style resolution*.
 
 **Open:**
 - **Rendering:** there's no render tree. `RenderTreeUpdater` is a stand-in that keeps the style each element's renderer would hold on the element (`Node::GetRenderStyle`) and the render view's style on the document (`Document::RenderViewStyle`); text renderers, generated content, rebuild roots and the top layer wait for it. Without principal boxes, size container queries and container units are unknown and the seam's `RenderBoxOf` is null. Layout interleaving is a loop without layout. Anchor positioning (position options, position visibility, the tree resolution state) and elements with custom style resolve callbacks are FIXMEs in the tree resolver.
-- **Style resolution, f6:** `Style::Extractor` (and the `SerialiseShorthandValue` overload that takes one; FIXME in `ShorthandSerialiser.hpp`), `getComputedStyle`, the style invalidators (class, id, attribute, pseudo-class, child and sheet changes; with child changes, `CountElementsBefore` can use the cached child index, FIXME in `SelectorChecker.cpp`). Viewport unit invalidation: registered custom properties with viewport units in their initial value don't call `Document::SetHasStyleWithViewportUnits()` yet (FIXME in `src/Style/CustomPropertyRegistry.cpp`).
-- **The Style seam** (`Style/Seam.hpp`) still stands in for `RenderView`, `RenderElement`, `RenderBox`, `RenderTheme`'s focus ring metrics, `AnchorPositionEvaluator`, the settings values (`SettingsValues`, the upstream defaults), the document's colour options (`DocumentUseDarkAppearance`, `DocumentStyleColorOptions`) and its security and keyframes functions. `RenderStyle` and `BuilderState` are the real classes (f3f4, f4a).
+- **Style resolution, f6b:** the style invalidators (class, id, attribute, pseudo-class, child and sheet changes; with child changes, `CountElementsBefore` can use the cached child index, FIXME in `SelectorChecker.cpp`). Viewport unit invalidation: registered custom properties with viewport units in their initial value don't call `Document::SetHasStyleWithViewportUnits()` yet (FIXME in `src/Style/CustomPropertyRegistry.cpp`).
+- **The Style seam** (`Style/Seam.hpp`) still stands in for `RenderView`, `RenderElement`, `RenderBoxModelObject`, `RenderBox`, `RenderBlock`, `RenderGrid`, `RenderInline` (unreachable stubs for the extractor's layout branches since f6a), `RenderTheme`'s focus ring metrics, `AnchorPositionEvaluator`, the settings values (`SettingsValues`, the upstream defaults), the document's colour options (`DocumentUseDarkAppearance`, `DocumentStyleColorOptions`) and its security and keyframes functions. `RenderStyle` and `BuilderState` are the real classes (f3f4, f4a).
 - **Settings:** there is no `Settings`. Parser contexts use default settings, so features behind a settings flag that's on by default upstream are off in author sheets (`@view-transition` via crossDocumentViewTransitionsEnabled, `@position-try` via cssAnchorPositioningEnabled, `text-decoration-line: spelling-error | grammar-error`, ...); user agent sheets turn on upstream's list. The `ParserContext(const Settings &)` and generated `PropertySettings(const Settings &)` constructors wait for it.
 - **Resource loading:** `<link>` sheets, `@import` loading and the loader half of `StyleSheetContents` (`ParseAuthorStyleSheet`, `NotifyLoadedSheet`, `SubresourcesAllowReuse`, `IsLoadingSubresources`); `ImageValue::IsPending`, `LoadImage`, `GetCachedImage`, `KnownToBeOpaque` and its cached image; `FontFaceSrcResourceValue::GetFontLoadRequest` (`CustomTraverseSubresources` returns `false` until then); `applyModifiersToLoaderOptions`.
-- **Fonts and drawing:** `FontCascade` is a shell (no font data or font selector) and `Path` has no platform implementation. `StyleResolveForFont` waits for the `FontFace` interface and canvas, as do the string parsers behind them (`ParseUnresolvedFont`, `ParseFontFaceSrc`, `ParseFontFaceSizeAdjust`, `ParseFontFaceUnicodeRange`, `ParseFontFaceDisplay`, `ParseFontFaceFontStyle`, `ParseFontFaceFeatureSettings`, `ParseFontFaceFontWidth`, `ParseFontFaceFontWeight`; FIXME in `Consumers/Font.hpp`; they need the document and six need the generated `PropertyParsing`). `FontSelectionValueInlines.hpp` is still raw WebKit and not built. `FontFaceSrcLocalValue`'s SVG font element and `parseKerningUnicodeString`/`parseGlyphName` wait for SVG fonts.
+- **Fonts and drawing:** `FontCascade` is a shell (no font data or font selector) and `Path` has no platform implementation. `StyleResolveForFont` waits for the `FontFace` interface and canvas, as do the string parsers behind them (`ParseUnresolvedFont`, `ParseFontFaceSrc`, `ParseFontFaceSizeAdjust`, `ParseFontFaceUnicodeRange`, `ParseFontFaceDisplay`, `ParseFontFaceFontStyle`, `ParseFontFaceFeatureSettings`, `ParseFontFaceFontWidth`, `ParseFontFaceFontWeight`; FIXME in `Consumers/Font.hpp`; they need the document and six need the generated `PropertyParsing`). `FontFaceSrcLocalValue`'s SVG font element and `parseKerningUnicodeString`/`parseGlyphName` wait for SVG fonts.
 - **Animations:** keyframe styles (`styleForKeyframe`, `keyframeStylesForAnimation`), the tree resolver's animated updates (`Styleable`'s animation half, @starting-style, after-change styles), interpolation, `parseEasingFunctionDeprecated` and `parseTransformRaw`. `SingleAnimationRangeType` is declared twice (`css`, in `Consumers/Timeline.hpp`, and `style`, in `SingleAnimationRange.hpp`); the `css` one should go. Canvas: `parseFilterValueListOrNoneRaw`.
-- **CSSOM:** the async `replace()` (promises), the Typed OM (`styleMap`).
+- **CSSOM:** the async `replace()` (promises), the Typed OM (`styleMap`). `getComputedStyle` is a free function until there's a window (FIXME in `CSS/CSSComputedStyleDeclaration.hpp`).
+- **Style differences:** `Style::Difference` (`style/StyleDifference.h`, `.cpp`: repaint and layout decisions) waits for the render tree, its only consumer (decided 2026-10-15).
 - **DOM** (deferred by choice): no document is freed (a container doesn't release its children and every node, including the document itself, holds its document; upstream breaks the cycle with the referencing-node count). Mutation observers never deliver records (TODOs in `MutationObserverAlgorithms.cpp`; can be built on `html::EventLoop`). `NodeAlgorithms::Equals` compares attributes by position. `Document::Head()` returns null for parsed documents. Only `classList` follows its attribute (`relList`, `sandbox`, `sizes`, `blocking`, `htmlFor` should update from `Element::OnAttributeChanged`). `TreeQueries::NextShadowIncluding` visits a host's children before its shadow root. Shadow roots have no part mappings (`exportparts`), so `::part()` stays in the host's scope. Documents have no focused area (`:focus`, `:focus-visible` never match). `MediaEnvironment` is process-wide until documents have frames.
 - **URL:** the DOM `URL` interface and `URLSearchParams` (WPT `setters_tests.json`).
 - **Krystal.Core:** the `IntrusivePtr` `Downcast`/`DynamicDowncast` overloads can't take an explicit target and `Downcast` rejects null (FIXME workaround in `OffsetRotateValue.cpp`); `StringBuilder` and `DefaultHash<StringAtom>` aren't ported (the latter for hashing `Style::GridPosition`).
@@ -1296,14 +1297,14 @@ Tests: `tests/CSS/Selectors/SelectorParser.cpp` (the `data/css-selector-parser/*
 
 ### Layer d2: declaration blocks (2026-10-13)
 
-Graph from `css/StyleProperties.cpp`, `MutableStyleProperties.cpp`, `ImmutableStyleProperties.cpp` and `ShorthandSerializer.cpp` (headers-only): 106 files (`tools/port/out/declarations.md`), nearly all done. New for d2: the four entries, `CSSPropertyInitialValues.cpp` and the review of `CSSProperty.h`. Boundaries: `CSSParser.h` (d5), `CSSStyleProperties.h` (CSSOM wrappers), `StyleExtractor.h` (Style), `FontSelectionValueInlines.h` (not needed: see differences). The Krystal files were an own partial port (headers mostly upstream's, no `Mutable`/`Immutable`/serialiser `.cpp`, never built). Decided with the user: the `CSSParser`-dependent methods are declared and FIXME'd until d5, the CSSOM wrapper half is removed until the CSSOM slice, `Property.hpp` is reviewed and `PropertyInitialValues.cpp` ported here, and `Packed.hpp` (Krystal.Core) is fixed and tested.
+Graph from `css/StyleProperties.cpp`, `MutableStyleProperties.cpp`, `ImmutableStyleProperties.cpp` and `ShorthandSerializer.cpp` (headers-only): 106 files (`tools/port/out/declarations.md`), nearly all done. New for d2: the four entries, `CSSPropertyInitialValues.cpp` and the review of `CSSProperty.h`. Boundaries: `CSSParser.h` (d5), `CSSStyleProperties.h` (CSSOM wrappers), `StyleExtractor.h` (Style; came with f6a), `FontSelectionValueInlines.h` (not needed then; ported with f6a). The Krystal files were an own partial port (headers mostly upstream's, no `Mutable`/`Immutable`/serialiser `.cpp`, never built). Decided with the user: the `CSSParser`-dependent methods are declared and FIXME'd until d5, the CSSOM wrapper half is removed until the CSSOM slice, `Property.hpp` is reviewed and `PropertyInitialValues.cpp` ported here, and `Packed.hpp` (Krystal.Core) is fixed and tested.
 
 | WebKit | Verdict | Krystal | CMake | Notes |
 |---|---|---|---|---|
 | `css/StyleProperties.h`, `.cpp`, `StylePropertiesInlines.h` | `have` | `CSS/Properties/StyleProperties.hpp`, `StylePropertiesInlines.hpp`, `src/.../StyleProperties.cpp` | on | tested. |
 | `css/MutableStyleProperties.h`, `.cpp` | `have` | `CSS/Properties/MutableStyleProperties.hpp`, `src/.../MutableStyleProperties.cpp` | on | tested. |
 | `css/ImmutableStyleProperties.h`, `.cpp` | `have` | `CSS/Properties/ImmutableStyleProperties.hpp`, `src/.../ImmutableStyleProperties.cpp` | on | tested, including deduplication. |
-| `css/ShorthandSerializer.h`, `.cpp` | `have` | `CSS/Properties/ShorthandSerialiser.hpp`, `src/.../ShorthandSerialiser.cpp` | on | tested. No `Style::Extractor` overload., every shorthand family. |
+| `css/ShorthandSerializer.h`, `.cpp` | `have` | `CSS/Properties/ShorthandSerialiser.hpp`, `src/.../ShorthandSerialiser.cpp` | on | tested, every shorthand family. The `Style::Extractor` overload came with f6a. |
 | `css/CSSPropertyInitialValues.h`, `.cpp` | `have` | `CSS/Properties/PropertyInitialValues.hpp`, `src/.../PropertyInitialValues.cpp` | on | tested. Uses the generated `InitialValues.hpp`. |
 | `css/CSSProperty.h`, `.cpp` | `have` | `CSS/Properties/Property.hpp`, `src/.../Property.cpp` | on (already) | See bugs and differences. |
 | `wtf/Packed.h` | `have` | Krystal.Core `Types/Packed.hpp` | header | tested (`Krystal.Core.Tests/tests/Types/Packed.cpp`). See bugs. |
@@ -1328,7 +1329,7 @@ Graph from `css/StyleProperties.cpp`, `MutableStyleProperties.cpp`, `ImmutableSt
 - Null strings: `SerialiseShorthandValue` returns `Maybe<CSSOMString>` (`null` = can't be represented by the shorthand); `GetPropertyValue` returns `""` for it. Inside the serialiser, `SerialiseCommonValue`, `SerialiseBorder` and the other null-returning helpers also use `Maybe`.
 - Indices are `Maybe<uint32>` (upstream `int`, -1 for not found); counts are `uint32`.
 - The string setters (`SetProperty(id, string, ...)`, `SetCustomProperty`, `ParseDeclaration`) came with d5. Tests build blocks with `PropertyParser`/`VariableParser` and `AddParsedProperties` (`StylePropertiesTestUtils.hpp`).
-- No `Style::Extractor` overload of `SerialiseShorthandValue` (FIXME; comes with computed style).
+- The `Style::Extractor` overload of `SerialiseShorthandValue` came with f6a.
 - Dropped with the legacy `-webkit-` shorthands: the `WebkitMask`, `WebkitBorderImage`, `WebkitMaskBoxImage`, `WebkitBorderRadius`, `WebkitColumnBreak*`, `WebkitPerspective`, `WebkitTextOrientation` and `WebkitTextStroke` cases and `serializeColumnBreak`; the `-webkit-mask-clip` layer case. So `border-image` only checks that a `BorderImageWidthValue` doesn't override the border widths (only the legacy shorthand could set that).
 - The font shorthand's width percentage → keyword conversion matches the nine keyword percentages exactly (`FontWidthKeyword(double)`) instead of round-tripping through `FontSelectionValue`; the results are the same (the keyword values are exactly representable, and anything that isn't failed the round trip upstream). `FontSelectionValue` isn't ported.
 - `InitialValueTextForLonghand` also handles `0deg` (`glyph-orientation-horizontal`; upstream hits `ASSERT_NOT_REACHED`, though only an implicit initial value would reach it).
@@ -1479,7 +1480,7 @@ Graph from the 35 CSSOM `.cpp`s (`css/CSS*Rule*.cpp`, `CSSStyleSheet.cpp`, `Styl
 **Decisions (2026-10-13/14):**
 - The CSSOM reaches the DOM through `style::Scope` (e3), `Document` (base URL, URL completion and parser context since e1) and the seam's `DocumentCanRequest` and keyframes notification. `<style>` ownership, inline styles, `adoptedStyleSheets` and `document.styleSheets` came with the DOM integration (e2 to e5).
 - One layer (sheet, declarations and every rule wrapper together), because `Rule::CreateCSSOMWrapper` needs every wrapper and several wrappers need the declarations.
-- Dropped as non-standard: `DeprecatedCSSOMValue` (`getPropertyCSSValue`), the epub-cased IDL attributes and the `epub` prefix in script property names. `CSSInternalBaseAppearanceRule` is dropped with its rule (d4). Deferred: the Typed OM (`styleMap`), the computed style declaration and the async `replace()`.
+- Dropped as non-standard: `DeprecatedCSSOMValue` (`getPropertyCSSValue`), the epub-cased IDL attributes and the `epub` prefix in script property names. `CSSInternalBaseAppearanceRule` is dropped with its rule (d4). Deferred: the Typed OM (`styleMap`) and the async `replace()`; the computed style declaration came with f6a.
 
 | WebKit | Verdict | Krystal | CMake | Notes |
 |---|---|---|---|---|
@@ -1503,7 +1504,7 @@ Graph from the 35 CSSOM `.cpp`s (`css/CSS*Rule*.cpp`, `CSSStyleSheet.cpp`, `Styl
 | `style/StyleResolver.h` | `port` | `Style/Resolver.hpp` | on | Ported in f0 (rule sets) and f5b (element resolution). |
 | `css/StyleSheetList.h`, `.cpp` | `port` | `CSS/StyleSheetList.hpp`, `src/...` | on | Since e4 of the DOM integration. |
 | `css/CSSStyleSheetObservableArray.h`, `.cpp` | `port` | `CSS/CSSStyleSheetObservableArray.hpp`, `src/...` | on | Since e5 of the DOM integration. |
-| `css/CSSComputedStyleDeclaration.h`, `.cpp` | `?` | | | `getComputedStyle`; comes with f6 (needs `Style::Extractor`). |
+| `css/CSSComputedStyleDeclaration.h`, `.cpp` | `port` | `CSS/CSSComputedStyleDeclaration.hpp`, `src/...` | on | Since f6a; see there. |
 | `css/DeprecatedCSSOM*` | `wont` | | | Non-standard (`getPropertyCSSValue`). |
 | `css/typedom/*` | `?` | | | The Typed OM, a slice of its own. |
 | `css/StyleAttributeMutationScope.h` | `port` | | | Ported in e2. |
@@ -1587,7 +1588,7 @@ Connects the CSS port to the DOM (`DOM/`, `HTML/`), which is written from the WH
 - **e5, `adoptedStyleSheets`:** on `DocumentOrShadowRoot`; `CSSStyleSheetObservableArray` becomes a plain C++ list API with the same checks; adopting tree scopes in `CSSStyleSheet`. Done.
 - **e6, selector matching:** `SelectorChecker` (`QueryingRules` mode, no JIT, `SelectorFilter` or relations), then `SelectorQuery`/`SelectorQueryCache`. Done (one layer).
 - **e7, `matchMedia`:** `MediaQueryMatcher`, `MediaQueryList`, `MediaQueryListEvent`, on `Document` (there's no window). Done.
-- **Deferred:** `<link>` loading, `xml-stylesheet`, `@import`, render blocking (resource loader); `SVGStyleElement`; the `*ChangeInvalidation` classes and `getComputedStyle` (f6).
+- **Deferred:** `<link>` loading, `xml-stylesheet`, `@import`, render blocking (resource loader); `SVGStyleElement`; the `*ChangeInvalidation` classes (f6b). `getComputedStyle` came with f6a.
 
 **Decisions (2026-10-14):**
 - No `TreeScope`. Its state lives on `DocumentOrShadowRoot` (the spec mixin, now a base of `Document` and `ShadowRoot`), and the tree scope of a node is found by walking to its root (`TreeQueries::Root`) instead of upstream's cached `Node::treeScope()`.
@@ -1662,7 +1663,7 @@ Graph from `dom/StyledElement.cpp` and `css/StyleAttributeMutationScope.cpp` (he
 **Bugs fixed (DOM):** cloning an element appended the original's `Attr` nodes to the clone instead of the copies (`NodeAlgorithms` clone), moving them out from under the original. `PropertySetCSSStyleProperties` was missing upstream's mutation scopes (no records for CSSOM changes).
 
 **Differences:**
-- No style invalidation yet (f6): `StyleAttributeChanged`, `DirtyStyleAttribute` and `InvalidateStyleAttribute` don't invalidate style and never synchronise eagerly for `[style]` selectors (FIXMEs).
+- Style invalidation (`StyleAttributeChanged`, `InvalidateStyleAttribute`, eager synchronisation for `[style]` selectors) came with f5d.
 - SPEC-VIOLATION(CSP): the attribute is parsed without the Content Security Policy check (there is no CSP).
 - No shareable element data, so upstream's "skip reparsing shared inline style" path doesn't exist; an attribute without a CSSOM wrapper is always parsed into a new immutable declaration.
 - Dropped: `usesStyleBasedEditability` (`Document::setHasElementUsingStyleBasedEditability`; there's no editing), `addSubresourceAttributeURLs`/`replaceURLsInAttributeValue` (web archives), the inspector hooks, `setDidMutateSubtreeAfterSetInnerHTMLOnAncestors`, SVG `invalidateInstances` and `ensureAttributeStyleMap` (Typed OM). The presentational hint half came with f5c.
@@ -1674,7 +1675,7 @@ Tests: `tests/DOM/StyledElement.cpp` (element types, the `style` attribute, CSSO
 
 ### Layer e3: style scopes (2026-10-14)
 
-Graph from `style/StyleScope.cpp` (headers-only): 131 files (`tools/port/out/style-scope.md`); the new pieces are `Style::Scope` itself, `Document::inDocumentShadowRoots` and the `sheet()` of the sheet owners. The resolver and media query re-evaluation parts came with f0; invalidation (f6), layout dependencies and anchor positioning are still open.
+Graph from `style/StyleScope.cpp` (headers-only): 131 files (`tools/port/out/style-scope.md`); the new pieces are `Style::Scope` itself, `Document::inDocumentShadowRoots` and the `sheet()` of the sheet owners. The resolver and media query re-evaluation parts came with f0; invalidation (f6b), layout dependencies and anchor positioning are still open.
 
 **Decisions (2026-10-14):** fix the three shadow-tree/ref-counting DOM bugs below in this layer; give `<style>` and `<link>` LinkStyle's `Sheet()` now (null until e4 or the resource loader) so `CollectActiveStyleSheets` is complete. Until something creates those sheets, collection, tree order, filtering and style sheet sets can't be tested; they're tested with e4 (FIXME in `tests/Style/Scope.cpp`).
 
@@ -1695,7 +1696,7 @@ Graph from `style/StyleScope.cpp` (headers-only): 131 files (`tools/port/out/sty
 - Moving a host (`moveBefore`) tripped `NodeMoved`'s assertion on its shadow root, which has no parent.
 
 **Differences:**
-- No render tree: `UpdateActiveStyleSheets` always runs (no living-render-tree gate, no deferral during style recalc) and doesn't analyse the change or invalidate style (FIXMEs, f6); `ScheduleUpdate` doesn't invalidate `:host`/`::slotted`. The resolver, `usesHasPseudoClass`, shared shadow tree resolvers and media query re-evaluation came with f0, the registries with f0 and f4c, the match result cache with f5b. Not ported: `usesStyleBasedEditability`, viewport changes, layout dependencies, anchor positioning.
+- No render tree: `UpdateActiveStyleSheets` always runs (no living-render-tree gate, no deferral during style recalc) and doesn't analyse the change or invalidate style (FIXMEs, f6b); `ScheduleUpdate` doesn't invalidate `:host`/`::slotted`. The resolver, `usesHasPseudoClass`, shared shadow tree resolvers and media query re-evaluation came with f0, the registries with f0 and f4c, the match result cache with f5b. Not ported: `usesStyleBasedEditability`, viewport changes, layout dependencies, anchor positioning.
 - Updates are a task on `html::EventLoop` (DOM manipulation task source) instead of a zero-delay timer. A queued task isn't cancelled when the update is flushed early; it finds nothing to do.
 - No extension style sheets or `authorAndUserStylesEnabled` setting; no user agent shadow roots; no inspector.
 - `CollectActiveStyleSheets`: xml-stylesheet processing instructions and `SVGStyleElement` are skipped (FIXMEs; no sheets yet). Adopted sheets came with e5. A `<link>`'s "enabled via script" state and its loading branch come with the resource loader. As upstream, `rel` is checked for the substring `alternate`, case-sensitively.
@@ -1837,7 +1838,7 @@ Tests: `tests/CSS/Media/MediaQueryList.cpp` (evaluation against the environment,
 
 ---
 
-## Style resolution (layers f0 to f6, 2026-10-14 to 15) — f0 to f5d done
+## Style resolution (layers f0 to f6, 2026-10-14 to 15) — f0 to f6a done
 
 From matched rules to computed styles. Upstream: the resolver (`style/` top level, ~115 files and ~31k lines: rule sets, matching, the cascade, the builder, the tree resolver, invalidation), the computed style it writes into (`style/computed`, 16 files, plus storage generated from `CSSProperties.json`), its data groups (`rendering/style`, 113 files, ~17.6k lines) and the computed value types (`style/values`, ~400 files, ported in f3).
 
@@ -1854,7 +1855,7 @@ From matched rules to computed styles. Upstream: the resolver (`style/` top leve
 - **f3, computed style storage:** `style/computed`, the `rendering/style` data groups, codegen for the computed style and render style properties, every remaining `style/values` type with its conversions, `StyleCustomProperty` (moved from f2). Replaced the seam's `RenderStyle`. Done in sublayers f3a to f3f4 (2026-10-14 to 15); see *Plan for layer f3*.
 - **f4, the builder (done in sublayers f4a to f4d on 2026-10-15; see *Plan for layer f4*):** `BuilderState`, `Builder`, `BuilderCustom`, `BuilderChecking`, codegen for the generated builder; font resolution (`StyleResolveForFont`, `StyleFontSizeFunctions`) against a font description without platform font data; the remaining deferred value definitions (`PendingSubstitutionValue`, `CreateStyleImage` without loading); moved from f2: `CustomPropertyRegistry`, `CSSRegisteredCustomProperty` and `@property` registration (they need the render style's custom property storage and the typed custom property parsing), `var()` resolution (the deferred `VariableReferenceValue` definitions and the typed custom property parser functions: the builder applies custom properties on demand) and applying `revert`/`revert-layer` (the builder builds the rollback cascades).
 - **f5, the resolver (planned in sublayers f5a to f5d on 2026-10-15, done; see *Plan for layer f5*):** `Style::Resolver`, `TreeResolver`, `Update`, `StyleAdjuster`, `MatchedDeclarationsCache`, `MatchResultCache` (moved from f1: it caches the resolved style), `StyleResolveForDocument`; `ContainerQueryEvaluator` (`style()` queries; size queries are unknown without layout); the user agent root style in `MediaQueryMatcher` (done in f5b); presentational hints and `<body>` colours.
-- **f6, output and invalidation:** `Style::Extractor` (and its generated half), `getComputedStyle` (`CSSComputedStyleDeclaration`), `StyleDifference`, `StyleInvalidator` and the `*ChangeInvalidation` classes, hooked to the DOM's change steps.
+- **f6, output and invalidation (planned in sublayers on 2026-10-15, f6a done):** f6a, output: `Style::Extractor` (and its generated half), `getComputedStyle` (`CSSComputedStyleDeclaration`); f6b, invalidation: `StyleInvalidator` and the `*ChangeInvalidation` classes, hooked to the DOM's change steps. `StyleDifference` waits for the render tree (decided by the user: only renderers consume it).
 - **Deferred:** animations and transitions (`StyleInterpolation*`, `Styleable`, the changed animatable properties), `AnchorPositionEvaluator` (layout), `InlineTextBoxStyle`, resource loading.
 
 ### Layer f0: rule sets (2026-10-14)
@@ -1903,7 +1904,7 @@ Graphs from the nine f0 entries (headers-only): `style/RuleSet.cpp` (89 files), 
 
 **Differences:**
 - The resolver's media type comes from the `MediaEnvironment` (upstream: the frame's view). Element resolution came with f5b; keyframe styles come with animations.
-- `Style::Scope` updates the resolver but doesn't invalidate style after a sheet change (FIXME, f6), and doesn't invalidate `:host`/`::slotted` style on a contents change. No font selector, SVG font face rules or render view font update (FIXMEs); the custom property registry and match result cache came with f4c and f5b. Shared shadow tree resolvers evict the first entry when there are more than 256 (upstream: a random one). No user agent shadow roots, so `isForUserAgentShadowTree` is false.
+- `Style::Scope` updates the resolver but doesn't invalidate style after a sheet change (FIXME, f6b), and doesn't invalidate `:host`/`::slotted` style on a contents change. No font selector, SVG font face rules or render view font update (FIXMEs); the custom property registry and match result cache came with f4c and f5b. Shared shadow tree resolvers evict the first entry when there are more than 256 (upstream: a random one). No user agent shadow roots, so `isForUserAgentShadowTree` is false.
 - `ScopeRuleSets` has no user style sheets (`initializeUserStyle` adds nothing; FIXME: extension style sheets) and no inspector wrappers. Its invalidation rule set builders are kept in first-seen order (upstream: a hash map's order).
 - `RuleSetBuilder` keeps a dynamic media query's affected rules in first-seen order (upstream: a hash set copied to a vector). Anonymous cascade layers get a random `anon_` name from `std::mt19937_64` (upstream: a cryptographically random number).
 - `RuleSet` doesn't clone `::cue` rules for the cue background box (`::-internal-cue-background` was dropped with the internal pseudos) and doesn't skip SVG animatable attributes when bucketing attribute selectors (no SMIL; FIXMEs).
@@ -2701,7 +2702,7 @@ Graphs: the f5 plan's. `dom/StyledElement.h`, `.cpp` (the presentational hint st
 - One layer, as decided by the user, with the missing element classes added: `HTMLFontElement`, `HTMLMarqueeElement`, `HTMLFrameSetElement` (with their reflected attributes; marquee's numeric attributes and `start()`/`stop()` are a TODO) and the shared bases `HTMLTablePartElement` (cells, columns, rows, row groups) and `HTMLPlugInElement` (`<embed>`, `<object>`).
 - Container queries moved to f5d (decided by the user): the evaluator reads each container's resolved style, which elements don't keep until f5d.
 - Settings use upstream's defaults: `hiddenUntilFoundEnabled` on (`hidden=until-found` maps to `content-visibility: hidden`), `cssDPropertyEnabled` off (no `d` hint, and no `SVGPathElement`), `coreMathMLEnabled` off (the deprecated MathML attributes map and `mathsize` keywords convert), `cssMathDepthEnabled` off (so `scriptlevel` parses to nothing).
-- No style invalidation yet: changing a hint attribute rebuilds the hints on the next resolution; the subtree invalidation upstream does (`invalidateStyleInternal`, the table's cells, `<body>` link colours) is a FIXME (f6).
+- Changing a hint attribute rebuilds the hints on the next resolution; the subtree invalidation upstream does (`invalidateStyleInternal`, the table's cells, `<body>` link colours) came with f5d.
 
 | WebKit | Verdict | Krystal | CMake | Notes |
 |---|---|---|---|---|
@@ -2736,7 +2737,7 @@ Graphs: the f5 plan's (`f5-StyleTreeResolver.md`, `f5-StyleUpdate.md`, `f5-Conta
 
 **Decisions (2026-10-15):**
 - One layer, as decided by the user, with container queries.
-- The direct invalidations come now (decided by the user): insertion (and moves) invalidate the inserted subtree, removal tears down its renderers, inline style and presentational hint changes invalidate the element, the `<body>` link colours and the table's cell borders invalidate the subtree, and attaching a shadow root or changing slot assignments rebuilds the host's subtree. The selector-based invalidators (class, id, attribute, pseudo-class, child and sheet changes, `ChildChangeInvalidation`) stay in f6.
+- The direct invalidations come now (decided by the user): insertion (and moves) invalidate the inserted subtree, removal tears down its renderers, inline style and presentational hint changes invalidate the element, the `<body>` link colours and the table's cell borders invalidate the subtree, and attaching a shadow root or changing slot assignments rebuilds the host's subtree. The selector-based invalidators (class, id, attribute, pseudo-class, child and sheet changes, `ChildChangeInvalidation`) stay in f6 (f6b).
 - No render tree: `RenderTreeUpdater` is a stand-in. It stores each element's renderer style on the element (`Element::_rendererStyle`, which `Node::GetRenderStyle` returns), the `display: contents`/`none` styles as upstream, and the render view's style on the document (`Document::RenderViewStyle`). Teardown drops the renderer styles of a subtree. Text renderers, generated content, rebuild roots, pseudo-style cache checks, the top layer and layout come with the render tree.
 - Without layout, the interleaving loop resolves the deferred descendants of query containers on the next pass with no layout in between; size queries and container units are unknown (no principal boxes).
 - Documents need a full style rebuild at first (`_needsFullStyleRebuild` starts true): upstream's initial rebuild comes from creating the render tree. There's no style recalc timer: the host calls `UpdateStyleIfNeeded` (FIXME, the event loop).
@@ -2766,8 +2767,49 @@ Graphs: the f5 plan's (`f5-StyleTreeResolver.md`, `f5-StyleUpdate.md`, `f5-Conta
 - `Update` and the other checked-pointer targets must be heap-allocated in Krystal (no stack exception), so the empty update in `StyleForElementIgnoringPendingStylesheets` is.
 - `CharacterData::ContainsOnlyASCIIWhitespace` is computed each time (upstream caches it in node flags).
 - No `PseudoElement` nodes: `::before`/`::after` styles live in the element's pseudo-style cache only, and their validity isn't combined with the element's.
-- `CountElementsBefore` doesn't read the cached child index until child changes invalidate siblings (f6).
+- `CountElementsBefore` doesn't read the cached child index until child changes invalidate siblings (f6b).
 - `ResolveStyle` sets the render view's style on its first rebuild even when the initial containing block style was already created on demand.
 - Removal tears down the removed subtree's renderers in the removing steps (upstream: before removal). Moves tear down and invalidate the moved subtree.
 
 Tests: `tests/Style/TreeResolver.cpp` (first resolution, `display: none` and `contents`, restyling after insertion, removal, inline style, hint and explicit invalidation, the document element and `<body>` (root-relative units, text colour, writing mode propagation), style relations and pseudo-element styles, shadow trees and slots, container queries and container selection, `Update`), `tests/DOM/Iterators/ComposedTreeIterator.cpp`: 8 new cases; `tests/Style/Resolver.cpp` updated (`StyleForPage` needs the document's style resolved).
+
+### Layer f6a: computed style output (2026-10-15)
+
+Graph from `style/StyleExtractor.cpp` and `css/CSSComputedStyleDeclaration.cpp` (headers-only): 140 files (`tools/port/out/f6a.md`), all done but the entries and what they reach directly: `StyleExtractor.h`, `.cpp`, `StyleExtractorState.h`, `StyleExtractorGenerated.h` and its generator (`GenerateStyleExtractorGenerated`), `StyleExtractorCustom.h`, `StyleOrderedNamedLinesCollector.h`, `StyleTransformResolver.h`, `.cpp`, `css/FontSelectionValueInlines.h`, `css/CSSComputedStyleDeclaration.h`, `.cpp` and `LocalDOMWindow::getComputedStyle`.
+
+**Decisions (2026-10-15):**
+- f6 is split (decided by the user): f6a is the output, f6b the invalidation. `Style::Difference` waits for the render tree.
+- `getComputedStyle` is a free function, `css::GetComputedStyle(element, pseudoElement)`, until there's a window (decided by the user).
+- The extractor's layout-dependent branches port against seam stubs (decided by the user): `RenderBoxModelObject`, `RenderBlock`, `RenderGrid` and `RenderInline` join the seam with the members the branches call, all unreachable (`krys_unreachable`). Nothing creates a renderer (`RendererOf` is null), so resolved values are computed values, as upstream's for an element without a renderer: sizes, insets, margins and padding are their computed values, `transform` is `none` and grid templates keep `repeat()`.
+- The generated extractor is written to `Style/ExtractorGenerated.cpp` in the build's codegen directory and compiled with `/bigobj`, like the generated builder.
+- Dropped with their properties: the custom extractors of `-webkit-border-image`, `-webkit-border-radius`, `-webkit-column-break-*`, `-webkit-mask-box-image`, `-webkit-mask-composite` and `-webkit-mask-source-type`, and `isLayoutDependent`'s `-webkit-backdrop-filter`. Kept: `-webkit-text-combine`, `-webkit-ruby-position`, `-webkit-mask-position` (in the JSON).
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `style/StyleExtractor.h`, `.cpp` | `port` | `Style/Extractor.hpp`, `src/...` | on | tested. Animations (accelerated properties, keyframe effects), frames and layout updates are FIXMEs; layout updates update style. |
+| `style/StyleExtractorState.h` | `port` | `Style/ExtractorState.hpp` | on | tested. |
+| `style/StyleExtractorGenerated.h`, `css/process-css-properties.py` (`GenerateStyleExtractorGenerated`) | `port` | `Style/ExtractorGenerated.hpp`, `codegen/css_properties.py` → `Style/ExtractorGenerated.cpp` (generated) | on | tested. |
+| `style/StyleExtractorCustom.h` | `port` | `Style/ExtractorCustom.hpp` | on | tested. See decisions. |
+| `style/StyleOrderedNamedLinesCollector.h` | `port` | `Style/OrderedNamedLinesCollector.hpp` | on | Only reached with a grid renderer. |
+| `style/StyleTransformResolver.h`, `.cpp` | `port` | `Style/TransformResolver.hpp`, `src/...` | on | Only reached with a renderer. |
+| `css/FontSelectionValueInlines.h` | `port` | `CSS/FontSelectionValueInlines.hpp` | on | tested through the `font` shorthand. Was raw WebKit. |
+| `css/CSSComputedStyleDeclaration.h`, `.cpp` | `port` | `CSS/CSSComputedStyleDeclaration.hpp`, `src/...` | on | tested. |
+| `page/LocalDOMWindow.cpp` (`getComputedStyle`) | `port` | `css::GetComputedStyle` | on | tested. See decisions. |
+| `css/ShorthandSerializer.cpp` (`Style::Extractor` overload) | `port` | `src/CSS/Properties/ShorthandSerialiser.cpp` | on | tested. |
+| `dom/Document.cpp` (`exposedComputedCSSPropertyIDs`) | `port` | `dom::Document` | on | tested. |
+
+**Bugs fixed:**
+- Upstream bug (inherited in f4d): the builder never applied the medium priority properties (`background-image`, `mask-image`). The generator gives them their own range (`FirstMediumPriorityProperty` to `LastMediumPriorityProperty`, between the high and the low priority ones) but `Builder::applyNonHighPriorityProperties` only applies the low range, so background and mask images were silently dropped. `ApplyNonHighPriorityProperties` now applies the medium range first (decided by the user). Tested in `tests/Style/Builder.cpp`.
+
+**Added (upstream API):** `Extractor`, `ExtractorState`, `ExtractorGenerated`, `ExtractorCustom` and its adaptors, `TransformResolver`, `OrderedNamedLinesCollector` and its grid and subgrid collectors, `FontWeightValue`, `FontWidthKeyword`, `FontWidthValue`, `FontStyleKeyword`, `NormalizedFontItalicValue`, `CSSComputedStyleDeclaration`, `css::GetComputedStyle`, `SerialiseShorthandValue(context, extractor, shorthand)`, `Document::ExposedComputedCSSPropertyIds`; the seam's `RendererOf` and render object stubs. `Node::IsInShadowTree`/`IsInDocumentTree` are public, as upstream.
+
+**Names:** `extract*` → `Extract*`, `*Serialization` → `*Serialisation`, `computedValue` → `ComputedValue`; `ExtractorState`'s members are PascalCase (`ValueType`, `Style`, `Element`, `PseudoElementIdentifier`, `Renderer`, `AllowVisitedStyle`, `Pool`); `extractor()` → `GetExtractor()`; `WTF::interleave` → `AppendInterleaved`; `compareCSSValuePtr` → `CompareCSSValuePtr` (in `ExtractorCustom.hpp`).
+
+**Differences:**
+- Dropped: `Extractor::propertyMatches(CSSPropertyID, CSSValueID)` (declared but never defined upstream), `ExtractorCustom::extractZoom` (likewise), the direct serialisation validation (`VALIDATE_DIRECT_COMPUTED_VALUE_SERIALIZATION`; the tests compare both serialisations for every computed property instead).
+- `TransformResolver` holds a reference to its computed style (upstream: a `CheckedRef`; `ComputedStyle` isn't a checked pointer target).
+- No `Settings`: exposure checks pass null settings, so settings-gated properties are exposed (FIXME), and the transform operation data of a renderer has no motion path data (FIXME, the render tree).
+- No `SVGElement::isValid` (conditional processing): `display` is extracted for every SVG element (FIXME).
+- `SerialiseShorthandValue` returns `Maybe` for declaration blocks; the extractor overload returns the empty string where upstream does.
+
+Tests: `tests/Style/Extractor.cpp` (longhands and their adjustments, shorthands, custom properties, copies and matching, text nodes, and every computed property's direct serialisation against its value's), `tests/CSS/CSSComputedStyleDeclaration.cpp` (`getComputedStyle`, read-only, items and length, liveness, pseudo-elements): 5 new cases; `tests/Style/Builder.cpp`: the medium priority properties.

@@ -2,6 +2,7 @@
 #include "Krystal.Booey/CSS/Calc/RandomCachingKeyMap.hpp"
 #include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryMatcher.hpp"
 #include "Krystal.Booey/CSS/StyleSheetList.hpp"
 #include "Krystal.Booey/CSS/Values/Color/KeywordColor.hpp"
@@ -824,6 +825,32 @@ namespace krys::boo::dom
   bool Document::HasPendingFullStyleRebuild() const noexcept
   {
     return HasPendingStyleRecalc() && _needsFullStyleRebuild;
+  }
+
+  const FixedVector<css::PropertyId> &Document::ExposedComputedCSSPropertyIds() noexcept
+  {
+    if (!_exposedComputedCSSPropertyIds.has_value())
+    {
+      // FIXME: Settings. Properties disabled by settings are exposed.
+      List<css::PropertyId> exposed;
+      for (auto property : css::ComputedPropertyIds)
+      {
+        if (!css::IsExposed(property, nullptr))
+        {
+          continue;
+        }
+        // If the standard property is exposed no need to expose the alias.
+        if (auto standard = css::CascadeAliasProperty(property);
+            standard != property && css::IsExposed(standard, nullptr))
+        {
+          continue;
+        }
+        exposed.push_back(property);
+      }
+      auto &ids = _exposedComputedCSSPropertyIds.emplace(exposed.size());
+      std::ranges::copy(exposed, ids.begin());
+    }
+    return *_exposedComputedCSSPropertyIds;
   }
 
   void Document::UpdateRenderTree(UniquePtr<style::Update> styleUpdate) noexcept

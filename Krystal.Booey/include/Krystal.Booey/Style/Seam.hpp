@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Core/BoxSides.hpp"
 #include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
@@ -7,8 +8,11 @@
 #include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
+#include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/LayoutRect.hpp"
+#include "Krystal.Booey/Graphics/LayoutSize.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/AnchorSizeDimension.hpp"
 #include "Krystal.Booey/Style/PropertyCascade.hpp"
@@ -16,8 +20,10 @@
 #include "Krystal.Booey/Style/ScopedName.hpp"
 #include "Krystal.Booey/Style/ScopeOrdinal.hpp"
 #include "Krystal.Booey/Style/Values/AnchorPosition/PositionTryFallbackTactic.hpp"
+#include "Krystal.Booey/Style/Values/Box/MarginTrim.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/AppleColorFilter.hpp"
+#include "Krystal.Booey/Style/Values/Grid/GridTrackSizingDirection.hpp"
 #include "Krystal.Booey/Style/Values/Math/MathDepth.hpp"
 #include "Krystal.Booey/Style/Values/Sizing/AspectRatio.hpp"
 #include "Krystal.Booey/Style/Values/Text/TextAlign.hpp"
@@ -29,6 +35,7 @@
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -36,10 +43,11 @@
 #include <bitset>
 
 // FIXME: Placeholders for the rendering, font and style-resolver types that length resolution, calc
-// evaluation, colour resolution and the computed value conversions need. Each declares only the members those
-// callers use, under its upstream name. None can be constructed but `SettingsValues`. Each type moves to its
-// own header, with its real implementation, when its slice is ported:
-//   - `RenderView`, `RenderElement`, `RenderBox`, `RenderTheme` (focus ring metrics): rendering.
+// evaluation, colour resolution, the computed value conversions and the extractor need. Each declares only the
+// members those callers use, under its upstream name. None can be constructed but `SettingsValues`. Each type
+// moves to its own header, with its real implementation, when its slice is ported:
+//   - `RenderView`, `RenderElement` (with the `RenderObject` members), `RenderBoxModelObject`, `RenderBox`,
+//     `RenderBlock`, `RenderGrid`, `RenderInline`, `RenderTheme` (focus ring metrics): rendering.
 //   - `style::AnchorPositionEvaluator`: anchor positioning (`Style/AnchorPositionEvaluator.hpp`, unreviewed).
 //   - `SettingsValues`: `Settings`.
 //   - the `Document*` colour functions: `dom::Document` (upstream members) once it has a page and settings.
@@ -124,6 +132,17 @@ namespace krys::boo
     KRYS_NODISCARD FloatSize SizeForCSSDefaultViewportUnits() const noexcept;
   };
 
+  class RenderBlock;
+  class RenderBox;
+
+  /// @brief Collapses `AvailableLogicalHeightType` (`RenderBox.h`).
+  enum class AvailableLogicalHeightType : bool
+  {
+    ExcludeMarginBorderPadding,
+    IncludeMarginBorderPadding
+  };
+
+  // The `RenderObject` members are declared on `RenderElement`.
   class RenderElement : public CanMakeCheckedPtr<RenderElement>
   {
     KRYS_NON_COPY_MOVABLE(RenderElement);
@@ -131,9 +150,56 @@ namespace krys::boo
 
   public:
     RenderElement() = delete;
+
+    KRYS_NODISCARD const RenderStyle &Style() const noexcept;
+    KRYS_NODISCARD const RenderElement *Parent() const noexcept;
+    KRYS_NODISCARD const RenderElement *Container() const noexcept;
+    KRYS_NODISCARD const RenderBlock *ContainingBlock() const noexcept;
+
+    KRYS_NODISCARD bool IsRenderBoxModelObject() const noexcept;
+    KRYS_NODISCARD bool IsRenderBox() const noexcept;
+    KRYS_NODISCARD bool IsRenderBlock() const noexcept;
+    KRYS_NODISCARD bool IsRenderGrid() const noexcept;
+    KRYS_NODISCARD bool IsRenderInline() const noexcept;
+    KRYS_NODISCARD bool IsRenderOrLegacyRenderSVGModelObject() const noexcept;
+
+    KRYS_NODISCARD bool IsInline() const noexcept;
+    KRYS_NODISCARD bool IsBlockLevelReplacedOrAtomicInline() const noexcept;
+    KRYS_NODISCARD bool IsBlockLevelBox() const noexcept;
+    KRYS_NODISCARD bool IsFlexItem() const noexcept;
+    KRYS_NODISCARD bool IsGridItem() const noexcept;
+    KRYS_NODISCARD bool IsHorizontalWritingMode() const noexcept;
+
+    KRYS_NODISCARD FloatRect TransformReferenceBoxRect(const RenderStyle &) const noexcept;
   };
 
-  class RenderBox : public RenderElement
+  class RenderBoxModelObject : public RenderElement
+  {
+    KRYS_NON_COPY_MOVABLE(RenderBoxModelObject);
+
+  public:
+    RenderBoxModelObject() = delete;
+
+    KRYS_NODISCARD LayoutUnit OffsetLeft() const noexcept;
+    KRYS_NODISCARD LayoutUnit OffsetTop() const noexcept;
+    KRYS_NODISCARD LayoutUnit OffsetWidth() const noexcept;
+    KRYS_NODISCARD LayoutUnit OffsetHeight() const noexcept;
+
+    KRYS_NODISCARD LayoutUnit ComputedCSSPaddingTop() const noexcept;
+    KRYS_NODISCARD LayoutUnit ComputedCSSPaddingRight() const noexcept;
+    KRYS_NODISCARD LayoutUnit ComputedCSSPaddingBottom() const noexcept;
+    KRYS_NODISCARD LayoutUnit ComputedCSSPaddingLeft() const noexcept;
+
+    KRYS_NODISCARD bool IsPositioned() const noexcept;
+    KRYS_NODISCARD bool IsOutOfFlowPositioned() const noexcept;
+    KRYS_NODISCARD bool IsRelativelyPositioned() const noexcept;
+    KRYS_NODISCARD bool IsStickilyPositioned() const noexcept;
+
+    KRYS_NODISCARD LayoutSize RelativePositionOffset() const noexcept;
+    KRYS_NODISCARD LayoutUnit ContainingBlockLogicalWidthForContent() const noexcept;
+  };
+
+  class RenderBox : public RenderBoxModelObject
   {
     KRYS_NON_COPY_MOVABLE(RenderBox);
 
@@ -144,6 +210,62 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutUnit ContentBoxWidth() const noexcept;
     KRYS_NODISCARD LayoutUnit ContentBoxHeight() const noexcept;
+    KRYS_NODISCARD LayoutUnit ContentBoxLogicalWidth() const noexcept;
+    KRYS_NODISCARD LayoutUnit ContentBoxLogicalHeight() const noexcept;
+    KRYS_NODISCARD LayoutRect BorderBoxRect() const noexcept;
+    KRYS_NODISCARD LayoutRect ComputedCSSContentBoxRect() const noexcept;
+
+    KRYS_NODISCARD LayoutUnit MarginTop() const noexcept;
+    KRYS_NODISCARD LayoutUnit MarginRight() const noexcept;
+    KRYS_NODISCARD LayoutUnit MarginBottom() const noexcept;
+    KRYS_NODISCARD LayoutUnit MarginLeft() const noexcept;
+    KRYS_NODISCARD bool HasTrimmedMargin(Maybe<style::MarginTrimSide>) const noexcept;
+
+    /// @brief Collapses `enclosingClippingBoxForStickyPosition().first`.
+    KRYS_NODISCARD const RenderBox &EnclosingClippingBoxForStickyPosition() const noexcept;
+    /// @brief Collapses `containingBlockRangeForPositioned(containingBlock, axis).size()`.
+    KRYS_NODISCARD LayoutUnit ContainingBlockRangeSizeForPositioned(const RenderBoxModelObject &,
+                                                                    BoxAxis) const noexcept;
+    KRYS_NODISCARD
+    LayoutUnit ContainingBlockLogicalHeightForContent(AvailableLogicalHeightType) const noexcept;
+  };
+
+  class RenderBlock : public RenderBox
+  {
+    KRYS_NON_COPY_MOVABLE(RenderBlock);
+
+  public:
+    RenderBlock() = delete;
+
+    KRYS_NODISCARD LayoutUnit PaddingBoxWidth() const noexcept;
+    KRYS_NODISCARD LayoutUnit PaddingBoxHeight() const noexcept;
+  };
+
+  class RenderGrid : public RenderBlock
+  {
+    KRYS_NON_COPY_MOVABLE(RenderGrid);
+
+  public:
+    RenderGrid() = delete;
+
+    KRYS_NODISCARD const List<LayoutUnit> &Positions(style::GridTrackSizingDirection) const noexcept;
+    KRYS_NODISCARD bool IsSubgrid(style::GridTrackSizingDirection) const noexcept;
+    KRYS_NODISCARD uint32 NumTracks(style::GridTrackSizingDirection) const noexcept;
+    KRYS_NODISCARD uint32 AutoRepeatCountForDirection(style::GridTrackSizingDirection) const noexcept;
+    KRYS_NODISCARD List<LayoutUnit>
+      TrackSizesForComputedStyle(style::GridTrackSizingDirection) const noexcept;
+    KRYS_NODISCARD int32 ExplicitGridStartForDirection(style::GridTrackSizingDirection) const noexcept;
+  };
+
+  class RenderInline : public RenderBoxModelObject
+  {
+    KRYS_NON_COPY_MOVABLE(RenderInline);
+
+  public:
+    RenderInline() = delete;
+
+    KRYS_NODISCARD LayoutUnit InnerPaddingBoxWidth() const noexcept;
+    KRYS_NODISCARD LayoutUnit InnerPaddingBoxHeight() const noexcept;
   };
 
   /// @brief Collapses `adjustForAbsoluteZoom(value, renderView)` (`RenderView` is a `RenderElement`).
@@ -155,6 +277,13 @@ namespace krys::boo
   /// @brief Collapses `dynamicDowncast<RenderBox>(element.renderer())`. Nothing creates a render tree yet, so
   /// it's always null.
   KRYS_NODISCARD const RenderBox *RenderBoxOf(const dom::Element &) noexcept;
+
+  /// @brief Collapses `element.renderer()`. Nothing creates a render tree yet, so it's always null.
+  KRYS_NODISCARD const RenderElement *RendererOf(const dom::Element &) noexcept;
+
+  /// @brief Collapses `Styleable(element, pseudoElementIdentifier).renderer()`. Always null, as above.
+  KRYS_NODISCARD const RenderElement *RendererOf(const dom::Element &,
+                                                 const Maybe<style::PseudoElementIdentifier> &) noexcept;
 
   /// @brief Collapses `document.useDarkAppearance(style)` for a document with no page and default settings:
   /// dark only when the style's colour scheme is dark only.
@@ -197,3 +326,19 @@ namespace krys::boo::style
                                                      const BuilderPositionTryFallback &) noexcept;
   };
 }
+
+#define KRYS_SEAM_RENDERER_TYPE_CAST(Type)                                                                   \
+  KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::Type)                                                    \
+    KRYS_NODISCARD static bool IsType(const krys::boo::RenderElement &renderer) noexcept                     \
+    {                                                                                                        \
+      return renderer.Is##Type();                                                                            \
+    }                                                                                                        \
+  KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
+
+KRYS_SEAM_RENDERER_TYPE_CAST(RenderBoxModelObject);
+KRYS_SEAM_RENDERER_TYPE_CAST(RenderBox);
+KRYS_SEAM_RENDERER_TYPE_CAST(RenderBlock);
+KRYS_SEAM_RENDERER_TYPE_CAST(RenderGrid);
+KRYS_SEAM_RENDERER_TYPE_CAST(RenderInline);
+
+#undef KRYS_SEAM_RENDERER_TYPE_CAST

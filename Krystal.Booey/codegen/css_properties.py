@@ -69,7 +69,7 @@ def generate(args: argparse.Namespace):
             # TODO: Uncomment these generators when they are supported.
             # GenerateStyleChangedAnimatablePropertiesGenerated,
             GenerateStyleComputedStyleProperties,
-            # GenerateStyleExtractorGenerated,
+            GenerateStyleExtractorGenerated,
             # GenerateStyleInterpolationWrapperMap,
             GenerateRenderStyleProperties,
         ]
@@ -9341,7 +9341,7 @@ class GenerateStyleBuilderGenerated:
                 self._generate_style_builder_generated_cpp_builder_generated_apply(to=writer)
 
 
-# Generates `StyleExtractorGenerated.cpp`.
+# Generates `Style/ExtractorGenerated.cpp`.
 class GenerateStyleExtractorGenerated:
     def __init__(self, generation_context: GenerationContext):
         self.generation_context = generation_context
@@ -9357,94 +9357,120 @@ class GenerateStyleExtractorGenerated:
     def style_properties(self):
         return self.generation_context.properties_and_descriptors.style_properties
 
-    # MARK: - Helper generator functions for StyleExtractorGenerated.cpp
+    # MARK: - Helper generator functions for ExtractorGenerated.cpp
 
     @staticmethod
     def wrap_in_converter(property, value):
-        return f"createCSSValue(extractorState.pool, extractorState.style, {value})"
+        return f"CreateCSSValue(extractorState.Pool, extractorState.Style, {value})"
 
     @staticmethod
-    def wrap_in_serializer(property, value):
-        return f"serializationForCSS(builder, context, extractorState.style, {value})"
+    def wrap_in_serialiser(property, value):
+        return f"Serialise(builder, context, extractorState.Style, {value})"
+
+    def _write_if(self, to: Writer, condition: str, statements: list[str]):
+        to.write(f"if ({condition})")
+        to.write("{")
+        with to.indent():
+            for statement in statements:
+                to.write(statement)
+        to.write("}")
+
+    def _write_function(self, to: Writer, signature: str, write_body):
+        to.write(signature)
+        to.write("{")
+        with to.indent():
+            write_body()
+        to.write("}")
 
     # Color property getters.
 
     def _generate_visited_link_color_supporting_property_value_getter(self, to: Writer, property):
-        to.write(f"if (extractorState.allowVisitedStyle)")
-        with to.block():
-            to.write(
-                f"return extractorState.pool.createColorValue(extractorState.style.visitedDependentColor({property.id}));"
-            )
+        self._write_if(
+            to,
+            "extractorState.AllowVisitedStyle",
+            [
+                f"return extractorState.Pool.CreateColorValue(extractorState.Style.VisitedDependentColor(css::{property.id}));"
+            ],
+        )
         self._generate_property_value_getter(to, property)
 
-    def _generate_visited_link_color_supporting_property_value_serialization_getter(self, to: Writer, property):
-        to.write(f"if (extractorState.allowVisitedStyle)")
-        with to.block():
-            to.write(
-                f"builder.append(WebCore::serializationForCSS(extractorState.style.visitedDependentColor({property.id})));"
-            )
-            to.write(f"return;")
-        self._generate_property_value_serialization_getter(to, property)
+    def _generate_visited_link_color_supporting_property_value_serialisation_getter(self, to: Writer, property):
+        self._write_if(
+            to,
+            "extractorState.AllowVisitedStyle",
+            [
+                f"builder.append(SerialisationForCSS(extractorState.Style.VisitedDependentColor(css::{property.id})));",
+                "return;",
+            ],
+        )
+        self._generate_property_value_serialisation_getter(to, property)
 
     # Animation property getters.
 
     def _generate_coordinated_value_list_property_value_getter(self, to: Writer, property):
-        with to.lambda_block(
-            signature=f"auto mapper = [](auto& extractorState, const auto& value, const Maybe<{property.type_name_for_coordinated_value_list}::value_type>&, const auto&) -> Ref<Value>"
-        ):
-            to.write(f"return {GenerateStyleExtractorGenerated.wrap_in_converter(property, 'value')};")
         to.write(
-            f"return extractCoordinatedValueListValue<{property.id_or_cascade_alias_id}>(extractorState, extractorState.style.{property.method_name_for_get_coordinated_value_list}(), mapper);"
+            f"auto mapper = [](auto &extractorState, const auto &value, const Maybe<{property.type_name_for_coordinated_value_list}::value_type> &, const auto &) -> Ref<css::Value>"
+        )
+        to.write("{")
+        with to.indent():
+            to.write(f"return {GenerateStyleExtractorGenerated.wrap_in_converter(property, 'value')};")
+        to.write("};")
+        to.write(
+            f"return ExtractCoordinatedValueListValue<css::{property.id_or_cascade_alias_id}>(extractorState, extractorState.Style.{property.method_name_for_get_coordinated_value_list}(), mapper);"
         )
 
-    def _generate_coordinated_value_list_property_value_serialization_getter(self, to: Writer, property):
-        with to.lambda_block(
-            signature=f"auto mapper = [](auto& extractorState, auto& builder, const auto& context, const auto& value, const Maybe<{property.type_name_for_coordinated_value_list}::value_type>&, const auto&)"
-        ):
-            to.write(f"{GenerateStyleExtractorGenerated.wrap_in_serializer(property, 'value')};")
+    def _generate_coordinated_value_list_property_value_serialisation_getter(self, to: Writer, property):
         to.write(
-            f"extractCoordinatedValueListSerialisation<{property.id_or_cascade_alias_id}>(extractorState, builder, context, extractorState.style.{property.method_name_for_get_coordinated_value_list}(), mapper);"
+            f"auto mapper = [](auto &extractorState, auto &builder, const auto &context, const auto &value, const Maybe<{property.type_name_for_coordinated_value_list}::value_type> &, const auto &)"
+        )
+        to.write("{")
+        with to.indent():
+            to.write(f"{GenerateStyleExtractorGenerated.wrap_in_serialiser(property, 'value')};")
+        to.write("};")
+        to.write(
+            f"ExtractCoordinatedValueListSerialisation<css::{property.id_or_cascade_alias_id}>(extractorState, builder, context, extractorState.Style.{property.method_name_for_get_coordinated_value_list}(), mapper);"
         )
 
     # All other property value getters.
 
     def _generate_property_value_getter(self, to: Writer, property):
         to.write(
-            f"return {GenerateStyleExtractorGenerated.wrap_in_converter(property, f'extractorState.style.{property.codegen_properties.render_style_getter}()')};"
+            f"return {GenerateStyleExtractorGenerated.wrap_in_converter(property, f'extractorState.Style.{property.codegen_properties.render_style_getter}()')};"
         )
 
-    def _generate_property_value_serialization_getter(self, to: Writer, property):
+    def _generate_property_value_serialisation_getter(self, to: Writer, property):
         to.write(
-            f"{GenerateStyleExtractorGenerated.wrap_in_serializer(property, f'extractorState.style.{property.codegen_properties.render_style_getter}()')};"
+            f"{GenerateStyleExtractorGenerated.wrap_in_serialiser(property, f'extractorState.Style.{property.codegen_properties.render_style_getter}()')};"
         )
 
     # Shorthand property value getter.
 
     def _generate_style_extractor_generated_cpp_shorthand_value_extractor(self, to: Writer, property: StyleProperty):
-        with to.function_block(
-            signature=f"static RefPtr<Value> extract{property.id_without_prefix}Shorthand(ExtractorState& extractorState) noexcept"
-        ):
-            to.write(
-                f"return extract{property.codegen_properties.shorthand_style_extractor_pattern}Shorthand(extractorState, {property.id_without_prefix}Shorthand());"
-            )
+        pattern = property.codegen_properties.shorthand_style_extractor_pattern
+        self._write_function(
+            to,
+            f"KRYS_NODISCARD static RefPtr<css::Value> Extract{property.id_without_prefix}Shorthand(ExtractorState &extractorState) noexcept",
+            lambda: to.write(
+                f"return Extract{pattern}Shorthand(extractorState, css::{property.id_without_prefix}Shorthand());"
+            ),
+        )
 
-    def _generate_style_extractor_generated_cpp_shorthand_value_serialization_extractor(
+    def _generate_style_extractor_generated_cpp_shorthand_value_serialisation_extractor(
         self, to: Writer, property: StyleProperty
     ):
-        with to.function_block(
-            signature=f"static void extract{property.id_without_prefix}ShorthandSerialisation(ExtractorState& extractorState, StringBuilder& builder, const SerialisationContext& context) noexcept"
-        ):
-            to.write(
-                f"extract{property.codegen_properties.shorthand_style_extractor_pattern}ShorthandSerialisation(extractorState, builder, context, {property.id_without_prefix}Shorthand());"
-            )
+        pattern = property.codegen_properties.shorthand_style_extractor_pattern
+        self._write_function(
+            to,
+            f"static void Extract{property.id_without_prefix}ShorthandSerialisation(ExtractorState &extractorState, css::CSSOMString &builder, const css::SerialisationContext &context) noexcept",
+            lambda: to.write(
+                f"Extract{pattern}ShorthandSerialisation(extractorState, builder, context, css::{property.id_without_prefix}Shorthand());"
+            ),
+        )
 
     # Longhand property value getter.
 
     def _generate_style_extractor_generated_cpp_value_extractor(self, to: Writer, property: StyleProperty):
-        to.write(f"static RefPtr<Value> extract{property.id_without_prefix}(ExtractorState& extractorState)")
-        to.write(f"{{")
-
-        with to.indent():
+        def body():
             if property.codegen_properties.visited_link_color_support:
                 self._generate_visited_link_color_supporting_property_value_getter(to, property)
             elif property.codegen_properties.coordinated_value_list_property:
@@ -9452,29 +9478,33 @@ class GenerateStyleExtractorGenerated:
             else:
                 self._generate_property_value_getter(to, property)
 
-        to.write(f"}}")
+        self._write_function(
+            to,
+            f"KRYS_NODISCARD static RefPtr<css::Value> Extract{property.id_without_prefix}(ExtractorState &extractorState) noexcept",
+            body,
+        )
 
-    def _generate_style_extractor_generated_cpp_value_serialization_extractor(
+    def _generate_style_extractor_generated_cpp_value_serialisation_extractor(
         self, to: Writer, property: StyleProperty
     ):
-        to.write(
-            f"static void extract{property.id_without_prefix}Serialisation(ExtractorState& extractorState, StringBuilder& builder, const SerialisationContext& context)"
-        )
-        to.write(f"{{")
-
-        with to.indent():
+        def body():
             if property.codegen_properties.visited_link_color_support:
-                self._generate_visited_link_color_supporting_property_value_serialization_getter(to, property)
+                self._generate_visited_link_color_supporting_property_value_serialisation_getter(to, property)
             elif property.codegen_properties.coordinated_value_list_property:
-                self._generate_coordinated_value_list_property_value_serialization_getter(to, property)
+                self._generate_coordinated_value_list_property_value_serialisation_getter(to, property)
             else:
-                self._generate_property_value_serialization_getter(to, property)
+                self._generate_property_value_serialisation_getter(to, property)
 
-        to.write(f"}}")
+        self._write_function(
+            to,
+            f"static void Extract{property.id_without_prefix}Serialisation(ExtractorState &extractorState, css::CSSOMString &builder, const css::SerialisationContext &context) noexcept",
+            body,
+        )
 
     def _generate_style_extractor_generated_cpp_extractor_functions_class(self, *, to: Writer):
-        to.write(f"class ExtractorFunctions {{")
-        to.write(f"public:")
+        to.write("class ExtractorFunctions")
+        to.write("{")
+        to.write("public:")
 
         with to.indent():
             for property in self.properties_and_descriptors.all_unique:
@@ -9492,140 +9522,105 @@ class GenerateStyleExtractorGenerated:
                     if not property.codegen_properties.shorthand_style_extractor_pattern:
                         continue
                     self._generate_style_extractor_generated_cpp_shorthand_value_extractor(to, property)
-                    self._generate_style_extractor_generated_cpp_shorthand_value_serialization_extractor(to, property)
+                    self._generate_style_extractor_generated_cpp_shorthand_value_serialisation_extractor(to, property)
                 else:
                     self._generate_style_extractor_generated_cpp_value_extractor(to, property)
-                    self._generate_style_extractor_generated_cpp_value_serialization_extractor(to, property)
+                    self._generate_style_extractor_generated_cpp_value_serialisation_extractor(to, property)
 
-        to.write(f"}};")
+        to.write("};")
+
+    @staticmethod
+    def _scope_for_function(property):
+        if property.codegen_properties.style_extractor_custom:
+            return "ExtractorCustom"
+        if property.codegen_properties.longhands and not property.codegen_properties.shorthand_style_extractor_pattern:
+            return "ExtractorCustom"
+        return "ExtractorFunctions"
+
+    def _generate_dispatch(self, *, to: Writer, signature: str, skipped: str, logical: list[str], shorthand, longhand, after: list[str]):
+        to.write(signature)
+        to.write("{")
+        with to.indent():
+            to.write("switch (id)")
+            to.write("{")
+            with to.indent():
+                to.write("case css::PropertyId::Invalid:")
+                with to.indent():
+                    to.write("break;")
+                to.write("case css::PropertyId::Custom:")
+                with to.indent():
+                    to.write('krys_debug_assert_msg(false, "custom properties are extracted by name");')
+                    to.write("break;")
+
+                for property in self.properties_and_descriptors.all_unique:
+                    to.write(f"case css::{property.id}:")
+                    with to.indent():
+                        if not isinstance(property, StyleProperty):
+                            to.write("// Skipped - Descriptor-only property")
+                            to.write(skipped)
+                        elif property.codegen_properties.internal_only:
+                            to.write("// Skipped - Internal only")
+                            to.write(skipped)
+                        elif property.codegen_properties.skip_style_extractor:
+                            to.write("// Skipped - Not computable")
+                            to.write(skipped)
+                        elif (
+                            property.codegen_properties.is_logical
+                            and not property.codegen_properties.style_extractor_custom
+                        ):
+                            to.write("// Logical properties are handled by recursing using the direction resolved property.")
+                            for line in logical:
+                                to.write(line)
+                        elif property.codegen_properties.longhands:
+                            to.write("krys_debug_assert(css::IsShorthand(id));")
+                            for line in shorthand(self._scope_for_function(property), property):
+                                to.write(line)
+                        else:
+                            for line in longhand(self._scope_for_function(property), property):
+                                to.write(line)
+            to.write("}")
+            to.write('krys_debug_assert_msg(false, "unknown property");')
+            for line in after:
+                to.write(line)
+        to.write("}")
+        to.newline()
 
     # Property getter dispatch.
 
     def _generate_style_extractor_generated_cpp_extractor_generated_extract_value(self, *, to: Writer):
-        to.write_block("""
-            RefPtr<Value> ExtractorGenerated::extractValue(ExtractorState& extractorState, PropertyId id)
-            {
-                switch (id) {
-                case PropertyId::CSSPropertyInvalid:
-                    break;
-                case PropertyId::CSSPropertyCustom:
-                    ASSERT_NOT_REACHED();
-                    break;""")
+        self._generate_dispatch(
+            to=to,
+            signature="RefPtr<css::Value> ExtractorGenerated::ExtractValue(ExtractorState &extractorState, css::PropertyId id) noexcept",
+            skipped="return nullptr;",
+            logical=[
+                "return ExtractValue(extractorState, css::Property::ResolveDirectionAwareProperty(id, extractorState.Style.GetWritingMode()));"
+            ],
+            shorthand=lambda scope, property: [f"return {scope}::Extract{property.id_without_prefix}Shorthand(extractorState);"],
+            longhand=lambda scope, property: [f"return {scope}::Extract{property.id_without_prefix}(extractorState);"],
+            after=["return nullptr;"],
+        )
 
-        with to.indent():
+    # Property serialisation dispatch.
 
-            def scope_for_function(property):
-                if property.codegen_properties.style_extractor_custom:
-                    return "ExtractorCustom"
-                if (
-                    property.codegen_properties.longhands
-                    and not property.codegen_properties.shorthand_style_extractor_pattern
-                ):
-                    return "ExtractorCustom"
-                return "ExtractorFunctions"
-
-            for property in self.properties_and_descriptors.all_unique:
-                to.write(f"case {property.id}:")
-                with to.indent():
-                    if not isinstance(property, StyleProperty):
-                        to.write(f"// Skipped - Descriptor-only property")
-                        to.write(f"return nullptr;")
-                    elif property.codegen_properties.internal_only:
-                        to.write(f"// Skipped - Internal only")
-                        to.write(f"return nullptr;")
-                    elif property.codegen_properties.skip_style_extractor:
-                        to.write(f"// Skipped - Not computable")
-                        to.write(f"return nullptr;")
-                    elif (
-                        property.codegen_properties.is_logical
-                        and not property.codegen_properties.style_extractor_custom
-                    ):
-                        to.write(
-                            f"// Logical properties are handled by recursing using the direction resolved property."
-                        )
-                        to.write(
-                            f"return extractValue(extractorState, Property::resolveDirectionAwareProperty(id, extractorState.style.writingMode()));"
-                        )
-                    elif property.codegen_properties.longhands:
-                        to.write(f"ASSERT(isShorthand(id));")
-                        to.write(
-                            f"return {scope_for_function(property)}::extract{property.id_without_prefix}Shorthand(extractorState);"
-                        )
-                    else:
-                        to.write(
-                            f"return {scope_for_function(property)}::extract{property.id_without_prefix}(extractorState);"
-                        )
-
-            to.write(f"}}")
-            to.write(f"ASSERT_NOT_REACHED();")
-            to.write(f"return nullptr;")
-        to.write(f"}}")
-        to.newline()
-
-    # Property serialization dispatch.
-
-    def _generate_style_extractor_generated_cpp_extractor_generated_extract_serialization(self, *, to):
-        to.write_block("""
-            void ExtractorGenerated::extractValueSerialisation(ExtractorState& extractorState, StringBuilder& builder, const SerialisationContext& context, PropertyId id)
-            {
-                switch (id) {
-                case PropertyId::CSSPropertyInvalid:
-                    break;
-                case PropertyId::CSSPropertyCustom:
-                    ASSERT_NOT_REACHED();
-                    break;""")
-
-        with to.indent():
-
-            def scope_for_function(property):
-                if property.codegen_properties.style_extractor_custom:
-                    return "ExtractorCustom"
-                if (
-                    property.codegen_properties.longhands
-                    and not property.codegen_properties.shorthand_style_extractor_pattern
-                ):
-                    return "ExtractorCustom"
-                return "ExtractorFunctions"
-
-            for property in self.properties_and_descriptors.all_unique:
-                to.write(f"case {property.id}:")
-                with to.indent():
-                    if not isinstance(property, StyleProperty):
-                        to.write(f"// Skipped - Descriptor-only property")
-                        to.write(f"return;")
-                    elif property.codegen_properties.internal_only:
-                        to.write(f"// Skipped - Internal only")
-                        to.write(f"return;")
-                    elif property.codegen_properties.skip_style_extractor:
-                        to.write(f"// Skipped - Not computable")
-                        to.write(f"return;")
-                    elif (
-                        property.codegen_properties.is_logical
-                        and not property.codegen_properties.style_extractor_custom
-                    ):
-                        to.write(
-                            f"// Logical properties are handled by recursing using the direction resolved property."
-                        )
-                        to.write(
-                            f"extractValueSerialisation(extractorState, builder, context, Property::resolveDirectionAwareProperty(id, extractorState.style.writingMode()));"
-                        )
-                        to.write(f"return;")
-                    elif property.codegen_properties.longhands:
-                        to.write(f"ASSERT(isShorthand(id));")
-                        to.write(
-                            f"{scope_for_function(property)}::extract{property.id_without_prefix}ShorthandSerialisation(extractorState, builder, context);"
-                        )
-                        to.write(f"return;")
-                    else:
-                        to.write(
-                            f"{scope_for_function(property)}::extract{property.id_without_prefix}Serialisation(extractorState, builder, context);"
-                        )
-                        to.write(f"return;")
-
-            to.write(f"}}")
-            to.write(f"ASSERT_NOT_REACHED();")
-        to.write(f"}}")
-        to.newline()
+    def _generate_style_extractor_generated_cpp_extractor_generated_extract_serialisation(self, *, to: Writer):
+        self._generate_dispatch(
+            to=to,
+            signature="void ExtractorGenerated::ExtractValueSerialisation(ExtractorState &extractorState, css::CSSOMString &builder, const css::SerialisationContext &context, css::PropertyId id) noexcept",
+            skipped="return;",
+            logical=[
+                "ExtractValueSerialisation(extractorState, builder, context, css::Property::ResolveDirectionAwareProperty(id, extractorState.Style.GetWritingMode()));",
+                "return;",
+            ],
+            shorthand=lambda scope, property: [
+                f"{scope}::Extract{property.id_without_prefix}ShorthandSerialisation(extractorState, builder, context);",
+                "return;",
+            ],
+            longhand=lambda scope, property: [
+                f"{scope}::Extract{property.id_without_prefix}Serialisation(extractorState, builder, context);",
+                "return;",
+            ],
+            after=[],
+        )
 
     def generate_style_extractor_generated_cpp(self):
         with open(self.generation_context.output_cpp_path("Style/ExtractorGenerated.cpp"), "w") as output_file:
@@ -9635,20 +9630,20 @@ class GenerateStyleExtractorGenerated:
                 generator_name=GENERATOR_NAME,
                 for_header="Krystal.Booey/Style/ExtractorGenerated.hpp",
                 headers=[
-                    "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp",
                     "Krystal.Booey/CSS/Properties/Property.hpp",
-                    "Krystal.Booey/CSS/Serialisation/ColorSerialisation.hpp",
-                    "Krystal.Booey/Rendering/Style/RenderStyle.hpp",
+                    "Krystal.Booey/CSS/Properties/PropertyId.hpp",
+                    "Krystal.Booey/CSS/Properties/PropertyShorthandFunctions.hpp",
+                    "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp",
+                    "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp",
                     "Krystal.Booey/Style/ExtractorCustom.hpp",
                     "Krystal.Booey/Style/ExtractorState.hpp",
-                    "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp",
                 ],
             )
 
-            with writer.namespace(namespace="krys::boo"):
+            with writer.namespace(namespace="krys::boo::style"):
                 self._generate_style_extractor_generated_cpp_extractor_functions_class(to=writer)
                 self._generate_style_extractor_generated_cpp_extractor_generated_extract_value(to=writer)
-                self._generate_style_extractor_generated_cpp_extractor_generated_extract_serialization(to=writer)
+                self._generate_style_extractor_generated_cpp_extractor_generated_extract_serialisation(to=writer)
 
 
 # Generates `StyleInterpolationWrapperMap.h` and `StyleInterpolationWrapperMap.cpp`.

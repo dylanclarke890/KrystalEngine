@@ -128,6 +128,9 @@ namespace krys::boo::style
   {
     krys_debug_assert(!_state->FontDirty());
 
+    // Medium priority properties (the coordinating list base properties) determine the lengths of the
+    // coordinated value lists, so they apply before the other properties of those lists.
+    ApplyProperties(css::FirstMediumPriorityProperty, css::LastMediumPriorityProperty);
     ApplyProperties(css::FirstLowPriorityProperty, css::LastLowPriorityProperty);
     ApplyLogicalGroupProperties();
     // Any referenced custom properties are already resolved. This will resolve the remaining ones.

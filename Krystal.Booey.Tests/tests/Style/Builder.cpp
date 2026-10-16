@@ -128,6 +128,20 @@ namespace krys::boo::style::tests
       CHECK(Serialised(Style.MarginTop()) == "4px");
     }
 
+    SECTION("The coordinating list base properties are applied")
+    {
+      // Author properties that disable native appearance are applied to an element.
+      auto div = Document->CreateElement(u8"div");
+      REQUIRE_FALSE(div.HasException());
+      Reset(div.Value().get());
+      BuilderFixture::Build(PropertyId::BackgroundImage, u8"linear-gradient(red, blue), none");
+      REQUIRE(Style.GetBackgroundLayers().ComputedLength() == 2);
+      CHECK(Style.GetBackgroundLayers().ComputedFirst().HasImage());
+      CHECK(Style.GetBackgroundLayers().ComputedFirst().IsImageSet());
+      BuilderFixture::Build(PropertyId::MaskImage, u8"linear-gradient(red, blue)");
+      CHECK(Style.GetMaskLayers().ComputedFirst().HasImage());
+    }
+
     SECTION("An empty cascade applies nothing")
     {
       Build();

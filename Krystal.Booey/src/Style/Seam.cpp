@@ -60,6 +60,272 @@ namespace krys::boo
     krys_unreachable();
   }
 
+  const RenderStyle &RenderElement::Style() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  const RenderElement *RenderElement::Parent() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  const RenderElement *RenderElement::Container() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  const RenderBlock *RenderElement::ContainingBlock() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  bool RenderElement::IsRenderBoxModelObject() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  bool RenderElement::IsRenderBox() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  bool RenderElement::IsRenderBlock() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  bool RenderElement::IsRenderGrid() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  bool RenderElement::IsRenderInline() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  bool RenderElement::IsRenderOrLegacyRenderSVGModelObject() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  bool RenderElement::IsInline() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  bool RenderElement::IsBlockLevelReplacedOrAtomicInline() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  bool RenderElement::IsBlockLevelBox() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  bool RenderElement::IsFlexItem() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  bool RenderElement::IsGridItem() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  bool RenderElement::IsHorizontalWritingMode() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  FloatRect RenderElement::TransformReferenceBoxRect(const RenderStyle &) const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutUnit RenderBoxModelObject::OffsetLeft() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutUnit RenderBoxModelObject::OffsetTop() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutUnit RenderBoxModelObject::OffsetWidth() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutUnit RenderBoxModelObject::OffsetHeight() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutUnit RenderBoxModelObject::ComputedCSSPaddingTop() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutUnit RenderBoxModelObject::ComputedCSSPaddingRight() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutUnit RenderBoxModelObject::ComputedCSSPaddingBottom() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutUnit RenderBoxModelObject::ComputedCSSPaddingLeft() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  bool RenderBoxModelObject::IsPositioned() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  bool RenderBoxModelObject::IsOutOfFlowPositioned() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  bool RenderBoxModelObject::IsRelativelyPositioned() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  bool RenderBoxModelObject::IsStickilyPositioned() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutSize RenderBoxModelObject::RelativePositionOffset() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutUnit RenderBoxModelObject::ContainingBlockLogicalWidthForContent() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutUnit RenderBox::ContentBoxLogicalWidth() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutUnit RenderBox::ContentBoxLogicalHeight() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutRect RenderBox::BorderBoxRect() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutRect RenderBox::ComputedCSSContentBoxRect() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutUnit RenderBox::MarginTop() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutUnit RenderBox::MarginRight() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutUnit RenderBox::MarginBottom() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutUnit RenderBox::MarginLeft() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  bool RenderBox::HasTrimmedMargin(Maybe<style::MarginTrimSide>) const noexcept
+  {
+    krys_unreachable();
+  }
+
+  const RenderBox &RenderBox::EnclosingClippingBoxForStickyPosition() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutUnit RenderBox::ContainingBlockRangeSizeForPositioned(const RenderBoxModelObject &,
+                                                              BoxAxis) const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutUnit RenderBox::ContainingBlockLogicalHeightForContent(AvailableLogicalHeightType) const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutUnit RenderBlock::PaddingBoxWidth() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutUnit RenderBlock::PaddingBoxHeight() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  const List<LayoutUnit> &RenderGrid::Positions(style::GridTrackSizingDirection) const noexcept
+  {
+    krys_unreachable();
+  }
+
+  bool RenderGrid::IsSubgrid(style::GridTrackSizingDirection) const noexcept
+  {
+    krys_unreachable();
+  }
+
+  uint32 RenderGrid::NumTracks(style::GridTrackSizingDirection) const noexcept
+  {
+    krys_unreachable();
+  }
+
+  uint32 RenderGrid::AutoRepeatCountForDirection(style::GridTrackSizingDirection) const noexcept
+  {
+    krys_unreachable();
+  }
+
+  List<LayoutUnit> RenderGrid::TrackSizesForComputedStyle(style::GridTrackSizingDirection) const noexcept
+  {
+    krys_unreachable();
+  }
+
+  int32 RenderGrid::ExplicitGridStartForDirection(style::GridTrackSizingDirection) const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutUnit RenderInline::InnerPaddingBoxWidth() const noexcept
+  {
+    krys_unreachable();
+  }
+
+  LayoutUnit RenderInline::InnerPaddingBoxHeight() const noexcept
+  {
+    krys_unreachable();
+  }
+
   bool RenderBox::HasEligibleContainmentForSizeQuery() const noexcept
   {
     krys_unreachable();
@@ -110,6 +376,17 @@ namespace krys::boo
   }
 
   const RenderBox *RenderBoxOf(const dom::Element &) noexcept
+  {
+    return nullptr;
+  }
+
+  const RenderElement *RendererOf(const dom::Element &) noexcept
+  {
+    return nullptr;
+  }
+
+  const RenderElement *RendererOf(const dom::Element &,
+                                  const Maybe<style::PseudoElementIdentifier> &) noexcept
   {
     return nullptr;
   }

@@ -326,6 +326,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#get-the-parent
     KRYS_NODISCARD EventTarget *GetParent(Event &event) const noexcept override;
 
+  public:
 #pragma region Tree Scope
 
     /// @see https://dom.spec.whatwg.org/#concept-shadow-tree
@@ -342,6 +343,7 @@ namespace krys::boo::dom
 
 #pragma endregion
 
+  protected:
 #pragma region Registered Observers
 
     /// @see https://dom.spec.whatwg.org/#registered-observer-list

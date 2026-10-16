@@ -20,6 +20,7 @@
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Booey/CSS/Values/VariableReferenceValue.hpp"
+#include "Krystal.Booey/Style/Extractor.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include <algorithm>
 
@@ -99,7 +100,8 @@ namespace krys::boo::css
       const SerialisationContext &_serialisationContext;
 
     public:
-      ShorthandSerialiser(const SerialisationContext &serialisationContext, const StyleProperties &properties,
+      template <typename TProperties>
+      ShorthandSerialiser(const SerialisationContext &serialisationContext, const TProperties &properties,
                           PropertyId shorthandId) noexcept
           : _shorthand(ShorthandForProperty(shorthandId)), _serialisationContext(serialisationContext)
       {
@@ -182,6 +184,7 @@ namespace krys::boo::css
 
       KRYS_NODISCARD bool SubsequentLonghandsHaveInitialValues(size_t index) const noexcept;
 
+      KRYS_NODISCARD bool CommonSerialisationChecks(const style::Extractor &properties) noexcept;
       KRYS_NODISCARD bool CommonSerialisationChecks(const StyleProperties &properties) noexcept;
 
       KRYS_NODISCARD CSSOMString SerialiseLonghands() const noexcept;
@@ -239,6 +242,26 @@ namespace krys::boo::css
       }
 
       return true;
+    }
+
+    bool ShorthandSerialiser::CommonSerialisationChecks(const style::Extractor &properties) noexcept
+    {
+      krys_debug_assert(Length() && Length() <= MaxShorthandLength);
+
+      krys_debug_assert(_shorthand.Id() != PropertyId::All);
+
+      for (auto i = 0uz; i < Length(); ++i)
+      {
+        auto longhandValue = properties.PropertyValue(LonghandProperty(i));
+        if (!longhandValue)
+        {
+          _result = CSSOMString {};
+          return true;
+        }
+        _longhandValues[i] = longhandValue;
+      }
+
+      return false;
     }
 
     bool ShorthandSerialiser::CommonSerialisationChecks(const StyleProperties &properties) noexcept
@@ -1898,5 +1921,11 @@ namespace krys::boo::css
                                              const StyleProperties &properties, PropertyId shorthand) noexcept
   {
     return ShorthandSerialiser(context, properties, shorthand).Serialise();
+  }
+
+  CSSOMString SerialiseShorthandValue(const SerialisationContext &context, const style::Extractor &extractor,
+                                      PropertyId shorthand) noexcept
+  {
+    return ShorthandSerialiser(context, extractor, shorthand).Serialise().value_or(CSSOMString {});
   }
 }

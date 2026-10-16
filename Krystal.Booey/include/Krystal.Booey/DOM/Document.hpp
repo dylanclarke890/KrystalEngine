@@ -17,6 +17,7 @@
 #include "Krystal.Booey/HTML/Enums/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/HTML/Types/HTMLOrSVGScriptElement.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Core/Types/FixedVector.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
@@ -32,6 +33,8 @@ namespace krys::boo::css
   class MediaQueryMatcher;
   class StyleSheetList;
   struct ParserContext;
+
+  enum class PropertyId : uint16;
 }
 
 namespace krys::boo::style
@@ -144,6 +147,7 @@ namespace krys::boo::dom
     bool _isResolvingTreeStyle {false};
     bool _ignorePendingStylesheets {false};
     bool _hasNodesWithMissingStyle {false};
+    Maybe<FixedVector<css::PropertyId>> _exposedComputedCSSPropertyIds;
 
     boo::Color _textColor {boo::Color::black};
     boo::Color _linkColor;
@@ -533,6 +537,9 @@ namespace krys::boo::dom
     {
       return _hasStyleWithViewportUnits;
     }
+
+    /// @brief The properties a computed style declaration lists, in order.
+    KRYS_NODISCARD const FixedVector<css::PropertyId> &ExposedComputedCSSPropertyIds() noexcept;
 
     /// @brief The colour of `-internal-document-text-color`: the `<body>` element's colour, as of its last
     /// style resolution, or black.
