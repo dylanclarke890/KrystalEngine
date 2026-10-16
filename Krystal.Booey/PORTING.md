@@ -36,7 +36,7 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 - **Style resolution**, layers f0 to f6b (2026-10-14 to 15): rule sets, the user agent sheets, matching and the cascade (f0 to f2); every computed value type, the data groups, `ComputedStyle` and `RenderStyle` (f3a to f3f4); the builder state, the generated builder, registered custom properties and `Builder` with `var()` and `revert` (f4a to f4d); the adjuster (f5a); element resolution with the matched declarations and match result caches (f5b); presentational hints on HTML, SVG and MathML elements and the `<body>` link colours (f5c); the tree resolver, the DOM's style state (style validity, the styles elements keep, the direct invalidations), the composed tree iterators and container queries (f5d); computed style output: `Style::Extractor`, `getComputedStyle` and the transform resolver (f6a); style invalidation: `Style::Invalidator` and the class, ID, attribute, pseudo-class and child change invalidations, hooked to the DOM's change steps, and style sheet changes (f6b). See *Style resolution*.
 - **Interaction state**, layers i1 and i2 (2026-10-16): hover, active and focus state (`UserActionElementSet`, the `Element` setters, `Document::UpdateHoverActiveState`) with `:hover`, `:active`, `:focus`, `:focus-visible` and `:focus-within`; the HTML focus model (focusable areas, the focusing, unfocusing and focus update steps, `focus()`, `blur()`, `tabIndex`, `activeElement`, `hasFocus()`, focus events). See *Interaction state*.
 
-**Next:** not planned yet; the candidates are in *Open* and `TODO.md` (viewport changes, the event loop, resource loading, the render tree, animations).
+**Next:** the render tree and layout, planned in *Plan: render tree and layout* (2026-10-16); the prerequisite slices come first. Other candidates are in *Open* and `TODO.md` (the event loop, resource loading, animations).
 
 **Open:**
 - **Rendering:** there's no render tree. `RenderTreeUpdater` is a stand-in that keeps the style each element's renderer would hold on the element (`Node::GetRenderStyle`) and the render view's style on the document (`Document::RenderViewStyle`); text renderers, generated content, rebuild roots and the top layer wait for it. Without principal boxes, size container queries and container units are unknown and the seam's `RenderBoxOf` is null. Layout interleaving is a loop without layout. Anchor positioning (position options, position visibility, the tree resolution state) and elements with custom style resolve callbacks are FIXMEs in the tree resolver.
@@ -2919,3 +2919,49 @@ Graphs: none (no `css/` or `style/` entries). Read: `dom/UserActionElementSet.h`
 - No autofocus candidates processing (it runs in the rendering update; FIXME), no focus fixup when the focused element stops being focusable (likewise), no change events on blur (no editing), and no events at a Window.
 
 Tests: `tests/DOM/UserActionElementSet.cpp` (flags, hover and active chains, presses and releases, removal, `:has(:hover)`, the hover quirk, focus state, system focus, shadow hosts), `tests/HTML/Algorithms/FocusAlgorithms.cpp` (tabindex, focusable areas, `focus()`, `blur()`, events and related targets, removal, system focus, focus visibility, clicks, delegating shadow hosts, autofocus delegates), `tests/DOM/Algorithms/TreeQueries.cpp` (shadow-including ancestry, retargeting): 10 new cases.
+
+## Plan: render tree and layout (2026-10-16)
+
+Graph from `rendering/RenderObject.h`, `RenderElement.h`, `RenderBox.h`, `RenderBlockFlow.h`, `RenderText.h`, `RenderView.h` and `updating/RenderTreeBuilder.h` (headers-only, `--follow rendering/ layout/`): 274 files to port, about 210 boundary includes (`tools/port/out/scope-render.md`). The core `.cpp` files are about 45k lines; `rendering/` is about 132k in all.
+
+**Upstream's shape:** block, flex, grid and table layout are the `Render*` classes. The layout tree (`layout::Box`, `layout/layouttree/`) is built from the render tree by `LayoutIntegrationBoxTreeUpdater` and is used for inline content (`LayoutIntegration::LineLayout`); the legacy line layout (`LegacyLineLayout`, the legacy inline boxes) only runs for SVG text (`RenderBlockFlow.cpp`, `setLineLayoutPath`). So the layout tree comes after the render tree, with the same prerequisites.
+
+**Decisions (2026-10-16, by the user):**
+- Text shaping uses HarfBuzz from the start (vcpkg `harfbuzz`, with FreeType, already in `vcpkg.json` for `Krystal.Gfx`), not just the simple `WidthIterator` path.
+
+### Prerequisites
+
+1. **Frame view.** 53 files in `rendering/` and `layout/` read the document's view. Needs `LocalFrameView`'s layout-facing half (viewport size, `LocalFrameViewLayoutContext` for layout scheduling) and `Document::renderView()`; not necessarily the Page/Frame/Widget hierarchy. Moves `MediaEnvironment` from process-wide to per view, and brings media query re-evaluation and viewport unit invalidation on viewport changes (`TODO.md`, *Viewport changes*).
+2. **Fonts.** A real `FontCascade`: `Font`, `GlyphPage`, `TextRun`, `WidthIterator`, `SurrogatePairAwareTextIterator`, the complex text path on HarfBuzz, font metrics (baselines, line spacing), the font selector (`CSSFontSelector`). Makes the font-relative units real (`ex`, `ch`, `cap`, `ic`).
+3. **Text.** `platform/text`: `BidiResolver`, `BidiContext`, `UnicodeBidi` (ICU `ubidi`), line breaking (ICU `ubrk`, `BreakablePositions`), `TextTransform`, `TextSpacing`; `Hyphenation` can be a stub. Unblocks `dir=auto` and `<bdi>`.
+4. **DOM.**
+   - A renderer pointer on `Node`, replacing `Element::_rendererStyle`.
+   - `Element::CreateElementRenderer` (134 overrides upstream; only the ported renderer types) and the text node's renderer creation.
+   - `PseudoElement` nodes: generated content hangs its renderers off them. Today `::before`/`::after` live only in the element's pseudo-style cache, so the tree resolver and `RenderTreeUpdater` change with them.
+5. **Style.** `Style::Difference` (deferred until now, 2026-10-15). The seam's render object stubs (`RenderView`, `RenderElement`, `RenderBoxModelObject`, `RenderBox`, `RenderBlock`, `RenderGrid`, `RenderInline`, `RenderTheme`) and its always-null `RendererOf`/`RenderBoxOf` go as the real classes arrive; size container queries and container units follow. `StylePendingResources` can be a stub until resource loading.
+6. **Settings.** About 55 distinct settings are read in `rendering/` and `layout/`; per *Settings*, standard features are always on and the rest use upstream's defaults in code.
+7. **Smaller gaps.** Krystal.Core's `StringBuilder` (`RenderText`, counters, list markers); `TransformState`, `PODIntervalTree` (floats), `LayoutRange`, `RenderGeometryMap`; check `RectEdges`/`BoxSides`. The `Layout*`/`Float*`/`Int*` geometry and the transforms are done.
+
+### Out of scope at first
+
+| Area | Coupling upstream | Plan |
+|---|---|---|
+| Painting (`GraphicsContext`, the painters) | 167 files in `rendering/` | Render tree and layout first; painting later (a display list into `Krystal.Gfx`?). Paint methods are FIXMEs. |
+| `RenderLayer`, compositing, scrolling | `RenderLayer.cpp` (7k lines), `RenderLayerBacking`, `RenderLayerCompositor`, `ScrollableArea`, scrollbars | A minimal `RenderLayer` (positioned descendants, z-order, overflow clip); compositing `wont`. |
+| Editing, selection, caret, document markers | `FrameSelection`, `VisiblePosition`, `RenderSelection` | `wont` for now. |
+| Accessibility (`AXObjectCache`) | 2 boundary includes | `wont`. |
+| Hit testing (`HitTestResult`, `HitTestLocation`) | throughout | A later slice; replaces the host-driven `UpdateHoverActiveState`. |
+| SVG and MathML renderers | about 60 files; SVG text needs the legacy line layout | Later slices. |
+| Form control renderers (`RenderTextControl`, `RenderMenuList`, `RenderButton`, `RenderTheme`) | user agent shadow trees (none yet) | Later; laid out as blocks meanwhile. |
+| Images, media, iframes, embeds, canvas | the loader, `CachedImage` | Replaced elements with zero intrinsic size until resource loading. |
+| Multi-column, fragmentation, ruby, marquee, `-webkit-box` | `RenderMultiColumn*`, `RenderFragment*`, `RenderDeprecatedFlexibleBox` | Later. `-webkit-box` is a legacy alias but `line-clamp` relies on it: decide under the non-standard feature rule. |
+| Anchor positioning, view transitions, text autosizing | already FIXMEs | Later or `wont`. |
+
+### Order
+
+1. **Frame view and viewport.**
+2. **Platform text and fonts** (FreeType and HarfBuzz, `FontCascade`, bidi, line breaking). Independent of 1.
+3. **DOM groundwork:** the renderer pointer, `PseudoElement`, `CreateElementRenderer`, `StringBuilder`.
+4. **`Style::Difference`.**
+5. **The render tree:** `RenderObject`, `RenderElement`, `RenderBoxModelObject`, `RenderBox`, `RenderBlock`, `RenderBlockFlow`, `RenderInline`, `RenderText`, `RenderView`; `RenderTreeBuilder` (block, inline, continuation, list, first-letter); the real `RenderTreeUpdater`; generated content (quotes, counters, list markers). The seam's render stubs go.
+6. **Layout:** block layout with the minimal `RenderLayer`; the layout tree and inline layout (`layout/layouttree/`, `formattingContexts/inline/`, `integration/inline/`); then flex, grid and table.
