@@ -26,6 +26,8 @@ namespace krys::boo::svg
 
 namespace krys::boo::style
 {
+  class Update;
+
   /// @brief Adjusts a computed style for its element and parent: blockification and inlinification, used
   /// z-index, overflow, text decorations in effect, and the element-specific rules.
   class Adjuster
@@ -47,6 +49,10 @@ namespace krys::boo::style
     static void AdjustSVGElementStyle(RenderStyle &style, const svg::SVGElement &svgElement) noexcept;
     static bool AdjustEventListenerRegionTypesForRootStyle(RenderStyle &rootStyle,
                                                            const dom::Document &document) noexcept;
+    /// @brief Propagates the writing mode and direction of the document element (or `<body>`) to the initial
+    /// containing block and the document element's used style.
+    static void PropagateToDocumentElementAndInitialContainingBlock(Update &update,
+                                                                    const dom::Document &document) noexcept;
     KRYS_NODISCARD static UniquePtr<RenderStyle>
       RestoreUsedDocumentElementStyleToComputed(const RenderStyle &style) noexcept;
 

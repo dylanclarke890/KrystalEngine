@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Adjuster.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
@@ -10,6 +11,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp"
+#include "Krystal.Booey/Style/Update.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGForeignObjectElement.hpp"
 
@@ -856,6 +858,87 @@ namespace krys::boo::style
           style.SetMinHeight(css::keywords::Auto {});
         }
       }
+    }
+  }
+
+  void Adjuster::PropagateToDocumentElementAndInitialContainingBlock(Update &update,
+                                                                     const dom::Document &document) noexcept
+  {
+    auto body = document.Body();
+    auto *bodyStyle = body ? update.ElementStyle(*body) : nullptr;
+    auto *documentElementStyle = update.ElementStyle(*document.DocumentElement());
+
+    if (!documentElementStyle)
+    {
+      return;
+    }
+
+    // https://drafts.csswg.org/css-contain-2/#contain-property
+    // "Additionally, when any containments are active on either the HTML html or body elements, propagation
+    // of properties from the body element to the initial containing block, the viewport, or the canvas
+    // background, is disabled."
+    auto shouldPropagateFromBody = [&]
+    {
+      if (bodyStyle && !bodyStyle->UsedContain().IsNone())
+      {
+        return false;
+      }
+      return documentElementStyle->UsedContain().IsNone();
+    }();
+
+    auto writingMode = [&]
+    {
+      if (shouldPropagateFromBody && bodyStyle && bodyStyle->HasExplicitlySetWritingMode())
+      {
+        return bodyStyle->GetWritingMode().ComputedWritingMode();
+      }
+      if (documentElementStyle->HasExplicitlySetWritingMode())
+      {
+        return documentElementStyle->GetWritingMode().ComputedWritingMode();
+      }
+      return ComputedStyle::InitialWritingMode();
+    }();
+
+    auto direction = [&]
+    {
+      if (documentElementStyle->HasExplicitlySetDirection())
+      {
+        return documentElementStyle->GetWritingMode().ComputedTextDirection();
+      }
+      if (shouldPropagateFromBody && bodyStyle && bodyStyle->HasExplicitlySetDirection())
+      {
+        return bodyStyle->GetWritingMode().ComputedTextDirection();
+      }
+      return ComputedStyle::InitialDirection();
+    }();
+
+    // https://drafts.csswg.org/css-writing-modes-3/#icb
+    auto &renderViewStyle = document.RenderViewStyle();
+    auto viewWritingMode = renderViewStyle.GetWritingMode();
+    if (writingMode != viewWritingMode.ComputedWritingMode()
+        || direction != viewWritingMode.ComputedTextDirection())
+    {
+      auto newRootStyle = RenderStyle::ClonePtr(renderViewStyle);
+      newRootStyle->SetWritingMode(writingMode);
+      newRootStyle->SetDirection(direction);
+      // FIXME: setColumnStylesFromPaginationMode, once documents have a view with a pagination mode.
+      update.AddInitialContainingBlockUpdate(krys::move(newRootStyle));
+    }
+
+    // https://drafts.csswg.org/css-writing-modes-3/#principal-flow
+    if (writingMode != documentElementStyle->GetWritingMode().ComputedWritingMode()
+        || direction != documentElementStyle->GetWritingMode().ComputedTextDirection())
+    {
+      auto documentElement = const_cast<dom::Document &>(document).DocumentElement();
+      auto *documentElementUpdate = update.GetElementUpdate(*documentElement);
+      if (!documentElementUpdate)
+      {
+        update.AddElement(*documentElement, nullptr, {RenderStyle::ClonePtr(*documentElementStyle)});
+        documentElementUpdate = update.GetElementUpdate(*documentElement);
+      }
+      documentElementUpdate->Style->SetWritingMode(writingMode);
+      documentElementUpdate->Style->SetDirection(direction);
+      documentElementUpdate->Changes.Add(Change::Inherited);
     }
   }
 

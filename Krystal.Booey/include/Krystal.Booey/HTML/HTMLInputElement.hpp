@@ -207,6 +207,9 @@ namespace krys::boo::html
     /// @brief Whether the `type` attribute is in the Password state.
     KRYS_NODISCARD bool IsPasswordField() const noexcept;
 
+    /// @brief Whether the `type` attribute is in the Search state.
+    KRYS_NODISCARD bool IsSearchField() const noexcept;
+
     /// @brief Whether the `type` attribute is in the Image Button state.
     KRYS_NODISCARD bool IsImageButton() const noexcept;
 

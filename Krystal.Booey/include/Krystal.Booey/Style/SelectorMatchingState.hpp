@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Selectors/SelectorFilter.hpp"
+#include "Krystal.Booey/Style/ContainerQueryEvaluator.hpp"
 #include "Krystal.Booey/Style/HasSelectorFilter.hpp"
 #include "Krystal.Core/Hash.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
@@ -29,12 +30,12 @@ namespace krys::boo::style
     }
   };
 
-  /// @brief Selector matching state that lives for a style resolution: the ancestor filter and the `:has()`
-  /// match cache and filters.
+  /// @brief Selector matching state that lives for a style resolution: the ancestor filter, the container
+  /// query evaluation state and the `:has()` match cache and filters.
   struct SelectorMatchingState
   {
     css::SelectorFilter SelectorFilter;
-    // FIXME: ContainerQueryEvaluationState, with the container query evaluator.
+    style::ContainerQueryEvaluationState ContainerQueryEvaluationState;
     HashMap<HasPseudoClassCacheKey, HasPseudoClassMatch, HasPseudoClassKeyHash> HasPseudoClassMatchCache;
     HashMap<HasPseudoClassFilterKey, UniquePtr<HasSelectorFilter>, HasPseudoClassKeyHash>
       HasPseudoClassSelectorFilters;

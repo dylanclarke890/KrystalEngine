@@ -68,7 +68,7 @@ namespace krys::boo::style
     // available via DOM.
     const RenderStyle *DocumentElementStyle {nullptr};
     style::SelectorMatchingState *SelectorMatchingState {nullptr};
-    // FIXME: `treeResolutionState` (the anchor-positioned states) comes with the tree resolver.
+    // FIXME: `treeResolutionState` (the anchor-positioned states) comes with anchor positioning.
 
     bool IsSVGUseTreeRoot {false};
   };

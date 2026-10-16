@@ -318,6 +318,12 @@ namespace krys::boo::html
     return type && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*type, u8"password");
   }
 
+  bool HTMLInputElement::IsSearchField() const noexcept
+  {
+    auto type = GetAttribute(u8"type");
+    return type && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*type, u8"search");
+  }
+
   bool HTMLInputElement::IsImageButton() const noexcept
   {
     auto type = GetAttribute(u8"type");

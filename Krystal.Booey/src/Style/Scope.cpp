@@ -233,7 +233,7 @@ namespace krys::boo::style
   void Scope::ClearResolver() noexcept
   {
     krys_assert(!_isUpdatingStyleResolver);
-    // FIXME: Also assert that the document isn't resolving its tree style, once there is a tree resolver.
+    krys_assert(!_document->IsResolvingTreeStyle());
 
     _resolver = nullptr;
     GetCustomPropertyRegistry().ClearRegisteredFromStylesheets();

@@ -278,8 +278,8 @@ namespace krys::boo::style
     }
 
     _style.SetUsesTreeCountingFunctions();
-    // FIXME: Mark the parent's children as affected by forward and backward positional rules once elements
-    // keep their style relations (invalidation).
+    parent->SetChildrenAffectedByBackwardPositionalRules();
+    parent->SetChildrenAffectedByForwardPositionalRules();
 
     uint32 count = 1;
     for (auto sibling = GetElement()->PreviousElementSibling(); sibling;
@@ -307,8 +307,8 @@ namespace krys::boo::style
     }
 
     _style.SetUsesTreeCountingFunctions();
-    // FIXME: Mark the parent's children as affected by forward and backward positional rules once elements
-    // keep their style relations (invalidation).
+    parent->SetChildrenAffectedByBackwardPositionalRules();
+    parent->SetChildrenAffectedByForwardPositionalRules();
 
     uint32 count = 1;
     for (auto sibling = GetElement()->PreviousElementSibling(); sibling;

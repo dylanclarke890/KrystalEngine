@@ -63,7 +63,7 @@ namespace krys::boo::style
     const RenderStyle *ParentStyle {};
     const RenderStyle *RootElementStyle {};
     RefPtr<const dom::Element> Element {};
-    // FIXME: `treeResolutionState` (the anchor-positioned states) comes with the tree resolver.
+    // FIXME: `treeResolutionState` (the anchor-positioned states) comes with anchor positioning.
     Maybe<BuilderPositionTryFallback> PositionTryFallback {};
   };
 
@@ -207,7 +207,7 @@ namespace krys::boo::style
     KRYS_NODISCARD uint32 SiblingCount() noexcept;
     KRYS_NODISCARD uint32 SiblingIndex() noexcept;
 
-    // FIXME: `anchorPositionedStates()` comes with the tree resolver.
+    // FIXME: `anchorPositionedStates()` comes with anchor positioning.
     KRYS_NODISCARD const Maybe<BuilderPositionTryFallback> &GetPositionTryFallback() const noexcept
     {
       return _context.PositionTryFallback;

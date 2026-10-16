@@ -670,6 +670,12 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Builder.hpp
   include/Krystal.Booey/Style/Change.hpp
   include/Krystal.Booey/Style/ResolvedStyle.hpp
+  include/Krystal.Booey/Style/ContainerQueryEvaluator.hpp
+  include/Krystal.Booey/Style/Styleable.hpp
+  include/Krystal.Booey/Style/TreeResolver.hpp
+  include/Krystal.Booey/Style/Update.hpp
+  include/Krystal.Booey/Style/Validity.hpp
+  include/Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp
   include/Krystal.Booey/Style/MatchedDeclarationsCache.hpp
   include/Krystal.Booey/Style/MatchResultCache.hpp
   include/Krystal.Booey/Style/ResolveForDocument.hpp
@@ -1792,6 +1798,12 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Style/MatchResultCache.cpp
   src/Style/Relations.cpp
   src/Style/ResolveForDocument.cpp
+
+  # The tree resolver and container queries (f5d)
+  src/Rendering/Updating/RenderTreeUpdater.cpp
+  src/Style/ContainerQueryEvaluator.cpp
+  src/Style/TreeResolver.cpp
+  src/Style/Update.cpp
 )
 
 target_precompile_headers(Krystal.Booey
@@ -1937,12 +1949,16 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/Enums/InsertAdjacentWhere.hpp
       include/Krystal.Booey/DOM/Enums/MutationRecordType.hpp
       include/Krystal.Booey/DOM/Enums/NodeFlags.hpp
+      include/Krystal.Booey/DOM/Enums/NodeStyleFlags.hpp
       include/Krystal.Booey/DOM/Enums/NodeType.hpp
       include/Krystal.Booey/DOM/Enums/QuirksMode.hpp
       include/Krystal.Booey/DOM/Enums/ShadowRootMode.hpp
       include/Krystal.Booey/DOM/Enums/SlotAssignmentMode.hpp
       include/Krystal.Booey/DOM/Enums/WhatToShow.hpp
       include/Krystal.Booey/DOM/Event.hpp
+      include/Krystal.Booey/DOM/Iterators/ComposedTreeAncestorIterator.hpp
+      include/Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp
+      include/Krystal.Booey/DOM/Iterators/ElementAndTextDescendantIterator.hpp
       include/Krystal.Booey/DOM/EventTarget.hpp
       include/Krystal.Booey/DOM/HTMLCollection.hpp
       include/Krystal.Booey/DOM/HTMLDocument.hpp
@@ -2288,8 +2304,10 @@ target_sources(Krystal.Booey
     src/DOM/Internals/NodeList/LiveNodeList.cpp
     src/DOM/Internals/NodeList/StaticNodeList.cpp
     src/DOM/Internals/QualifiedNameCache.cpp
+    src/DOM/Internals/RareData/ElementRareData.cpp
     src/DOM/Internals/RareData/NodeRareData.cpp
     src/DOM/Internals/RareData/ParentNodeRareData.cpp
+    src/DOM/Iterators/ComposedTreeIterator.cpp
     src/DOM/Mixins/ChildNode.cpp
     src/DOM/Mixins/NonDocumentTypeChildNode.cpp
     src/DOM/Mixins/NonElementParentNode.cpp

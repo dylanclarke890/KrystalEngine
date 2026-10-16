@@ -118,6 +118,42 @@ namespace krys::boo::html
 
   namespace
   {
+    KRYS_NODISCARD bool HasHTMLTagName(const dom::Element &element, TagName tagName) noexcept
+    {
+      return Is<HTMLElement>(element) && element.TagQualifiedName().TagName() == tagName;
+    }
+
+    KRYS_NODISCARD bool IsTableCellAncestor(const dom::Element &element) noexcept
+    {
+      return HasHTMLTagName(element, TagName::thead) || HasHTMLTagName(element, TagName::tbody)
+             || HasHTMLTagName(element, TagName::tfoot) || HasHTMLTagName(element, TagName::tr)
+             || HasHTMLTagName(element, TagName::th);
+    }
+
+    bool SetTableCellsChanged(dom::Element &element) noexcept
+    {
+      bool cellChanged = false;
+
+      if (HasHTMLTagName(element, TagName::td))
+      {
+        cellChanged = true;
+      }
+      else if (IsTableCellAncestor(element))
+      {
+        for (auto child = element.FirstElementChild(); child; child = child->NextElementSibling())
+        {
+          cellChanged |= SetTableCellsChanged(*child);
+        }
+      }
+
+      if (cellChanged)
+      {
+        element.InvalidateStyleForSubtree();
+      }
+
+      return cellChanged;
+    }
+
     KRYS_NODISCARD bool GetBordersFromFrameAttributeValue(dom::DOMStringView value, bool &borderTop,
                                                           bool &borderRight, bool &borderBottom,
                                                           bool &borderLeft) noexcept
@@ -394,7 +430,15 @@ namespace krys::boo::html
     if (bordersBefore != GetCellBorders() || oldPadding != _padding)
     {
       _sharedCellStyle = nullptr;
-      // FIXME: Invalidate the style of the table's cells once there is style invalidation.
+      bool cellChanged = false;
+      for (auto child = FirstElementChild(); child; child = child->NextElementSibling())
+      {
+        cellChanged |= SetTableCellsChanged(*child);
+      }
+      if (cellChanged)
+      {
+        InvalidateStyleForSubtree();
+      }
     }
   }
 

@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
 
 namespace krys::boo::dom
 {
@@ -268,6 +269,16 @@ namespace krys::boo::dom
     if (slottables != slot._assignedNodes)
     {
       SignalSlotChange(slot);
+
+      // The composed tree changed under the host.
+      if (auto *shadowRoot = TreeQueries::ContainingShadowRoot(slot))
+      {
+        if (auto host = ShareRefPtr(shadowRoot->Host()))
+        {
+          RenderTreeUpdater::TearDownRenderersAfterSlotChange(*host);
+          host->InvalidateStyleForSubtree();
+        }
+      }
     }
 
     slot._assignedNodes = std::move(slottables);

@@ -20,6 +20,7 @@
 #include "Krystal.Booey/DOM/StyledElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/Style/ContainerQueryEvaluator.hpp"
 #include "Krystal.Booey/Style/DeclarationOrigin.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
@@ -682,10 +683,37 @@ namespace krys::boo::style
       return true;
     }
 
-    // FIXME: Evaluate the queries with a container query evaluator, in the selection mode the rule needs
-    // (part pseudo-element, pseudo-element or element). Until there is one, every container query is unknown,
-    // as when the element has no eligible query container.
-    return false;
+    // Style bits indicating which pseudo-elements match are set during regular element matching. Container
+    // queries need to be evaluate in the right mode.
+    auto selectionMode = [&]
+    {
+      if (matchRequest.MatchingPartPseudoElementRules)
+      {
+        return ContainerQueryEvaluator::SelectionMode::PartPseudoElement;
+      }
+      if (ruleData.CanMatchPseudoElement()
+          && !css::ComplexSelectorMatchesElementBackedPseudoElement(*ruleData.Selector()))
+      {
+        return ContainerQueryEvaluator::SelectionMode::PseudoElement;
+      }
+      return ContainerQueryEvaluator::SelectionMode::Element;
+    }();
+
+    auto *containerQueryEvaluationState =
+      _selectorMatchingState ? &_selectorMatchingState->ContainerQueryEvaluationState : nullptr;
+
+    // "Style rules defined on an element inside multiple nested container queries apply when all of the
+    // wrapping container queries are true for that element."
+    ContainerQueryEvaluator evaluator(Element(), selectionMode, matchRequest.StyleScopeOrdinal,
+                                      containerQueryEvaluationState);
+    for (auto *query : queries)
+    {
+      if (!evaluator.Evaluate(*query))
+      {
+        return false;
+      }
+    }
+    return true;
   }
 
   std::pair<bool, Maybe<List<ElementRuleCollector::ScopingRootWithDistance>>>

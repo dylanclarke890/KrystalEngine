@@ -109,14 +109,9 @@ namespace krys::boo
     return nullptr;
   }
 
-  const RenderStyle *RenderStyleOf(const dom::Element &) noexcept
-  {
-    krys_unreachable();
-  }
-
   const RenderBox *RenderBoxOf(const dom::Element &) noexcept
   {
-    krys_unreachable();
+    return nullptr;
   }
 
   bool DocumentUseDarkAppearance(const dom::Document &, const RenderStyle *style) noexcept
@@ -162,13 +157,6 @@ namespace krys::boo::style
 
   Maybe<double> AnchorPositionEvaluator::EvaluateSize(BuilderState &, Maybe<ScopedName>,
                                                       Maybe<AnchorSizeDimension>) noexcept
-  {
-    krys_unreachable();
-  }
-
-  RefPtr<const dom::Element>
-    ContainerQueryEvaluator::SelectContainer(css::cq::Axis, const css::CSSOMString &, const dom::Element &,
-                                             ContainerQueryEvaluator::SelectionMode) noexcept
   {
     krys_unreachable();
   }

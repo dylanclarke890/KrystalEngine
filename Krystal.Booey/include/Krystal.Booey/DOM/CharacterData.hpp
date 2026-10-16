@@ -4,6 +4,8 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
+#include <algorithm>
 
 namespace krys::boo::dom
 {
@@ -34,6 +36,12 @@ namespace krys::boo::dom
 
     /// @see https://dom.spec.whatwg.org/#dom-characterdata-data
     ExceptionOr<void> Data(DOMString &&data) noexcept;
+
+    /// @brief Whether the data is empty or only ASCII whitespace.
+    KRYS_NODISCARD bool ContainsOnlyASCIIWhitespace() const noexcept
+    {
+      return std::ranges::all_of(_data, [](char8_t c) { return text::IsASCIIWhitespace(c); });
+    }
 
     /// @see https://dom.spec.whatwg.org/#dom-characterdata-length
     KRYS_NODISCARD size_t Length() const noexcept

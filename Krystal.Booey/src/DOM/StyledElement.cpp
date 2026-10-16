@@ -10,6 +10,8 @@
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Style/Resolver.hpp"
+#include "Krystal.Booey/Style/Scope.hpp"
 
 namespace krys::boo::dom
 {
@@ -76,7 +78,7 @@ namespace krys::boo::dom
       else if (HasPresentationalHintsForAttribute(localName, namespaceURI))
       {
         _presentationalHintStyleIsDirty = true;
-        // FIXME: Invalidate the element's style once there is style invalidation.
+        InvalidateStyleInternal();
       }
     }
   }
@@ -207,8 +209,7 @@ namespace krys::boo::dom
 
     ClearNodeFlag(NodeFlags::StyleAttributeIsDirty);
 
-    // FIXME: Invalidate the element's inline style (Style::Validity::InlineStyleInvalid) once there is style
-    // resolution.
+    Node::InvalidateStyle(style::Validity::InlineStyleInvalid);
   }
 
   void StyledElement::DirtyStyleAttribute() noexcept
@@ -216,16 +217,27 @@ namespace krys::boo::dom
     SetNodeFlag(NodeFlags::StyleAttributeIsDirty);
 
     // FIXME: Synchronise immediately (with attribute change invalidation) when the rule sets have selectors
-    // for the style attribute, once there are rule sets.
+    // for the style attribute, once there's attribute change invalidation.
   }
 
   void StyledElement::InvalidateStyleAttribute() noexcept
   {
     SetNodeFlag(NodeFlags::StyleAttributeIsDirty);
 
-    // FIXME: Invalidate the element's style (inline style only when no selector targets the style attribute),
-    // and synchronise immediately when one targets it in a non-subject position, once there is style
-    // resolution and there are rule sets.
+    // Inline style invalidation optimization does not work if there are selectors targeting the style
+    // attribute as some rule may start or stop matching.
+    auto selectorsForStyleAttribute =
+      style::Scope::ForNode(*this).GetResolver().RuleSets().GetSelectorsForStyleAttribute();
+    auto validity = selectorsForStyleAttribute == style::SelectorsForStyleAttribute::None
+                      ? style::Validity::InlineStyleInvalid
+                      : style::Validity::ElementInvalid;
+
+    Node::InvalidateStyle(validity);
+
+    // FIXME: Invalidate the instances of SVG elements, once there are SVG <use> instances.
+
+    // FIXME: In the rare case of selectors like "[style] ~ div" we need to synchronize immediately to
+    // invalidate, once there's attribute change invalidation.
   }
 
   void StyledElement::InlineStyleChanged() noexcept

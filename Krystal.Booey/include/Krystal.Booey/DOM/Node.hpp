@@ -3,11 +3,14 @@
 #include "Krystal.Booey/DOM/Dicts/GetRootNodeOptions.hpp"
 #include "Krystal.Booey/DOM/Enums/DocumentPosition.hpp"
 #include "Krystal.Booey/DOM/Enums/NodeFlags.hpp"
+#include "Krystal.Booey/DOM/Enums/NodeStyleFlags.hpp"
 #include "Krystal.Booey/DOM/Enums/NodeType.hpp"
 #include "Krystal.Booey/DOM/EventTarget.hpp"
 #include "Krystal.Booey/DOM/Internals/RareData/NodeRareData.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+#include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
+#include "Krystal.Booey/Style/Validity.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
@@ -15,6 +18,11 @@
 #include "Krystal.Core/Types/CheckedPtr.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+
+namespace krys::boo
+{
+  class RenderStyle;
+}
 
 namespace krys::boo::dom
 {
@@ -41,6 +49,8 @@ namespace krys::boo::dom
   private:
     NodeFlags _flags : BitCount<NodeFlags>() {NodeFlags::None};
     NodeType _nodeType : BitCount<NodeType>() {NodeType::NONE};
+    style::Validity _styleValidity : BitCount<style::Validity>() {style::Validity::Valid};
+    NodeStyleFlags _styleFlags : BitCount<NodeStyleFlags>() {NodeStyleFlags::None};
     RefPtr<Document> _nodeDocument;
     CheckedPtr<ContainerNode> _parentNode;
     CheckedPtr<Node> _previousSibling;
@@ -211,6 +221,83 @@ namespace krys::boo::dom
     {
       return *_nodeDocument;
     }
+
+#pragma region Style
+
+    /// @brief Whether the node's style needs resolving again.
+    KRYS_NODISCARD bool NeedsStyleRecalc() const noexcept
+    {
+      return StyleValidity() != style::Validity::Valid || HasInvalidRenderer();
+    }
+
+    KRYS_NODISCARD style::Validity StyleValidity() const noexcept
+    {
+      return _styleValidity;
+    }
+
+    KRYS_NODISCARD bool HasInvalidRenderer() const noexcept
+    {
+      return HasNodeFlag(NodeFlags::HasInvalidRenderer);
+    }
+
+    KRYS_NODISCARD bool StyleResolutionShouldRecompositeLayer() const noexcept
+    {
+      return HasNodeFlag(NodeFlags::StyleResolutionShouldRecompositeLayer);
+    }
+
+    /// @brief Whether a descendant's style needs resolving again.
+    KRYS_NODISCARD bool ChildNeedsStyleRecalc() const noexcept
+    {
+      return HasStyleFlag(NodeStyleFlags::DescendantNeedsStyleResolution);
+    }
+
+    /// @brief Whether a child's style needs resolving again.
+    KRYS_NODISCARD bool DirectChildNeedsStyleRecalc() const noexcept
+    {
+      return HasStyleFlag(NodeStyleFlags::DirectChildNeedsStyleResolution);
+    }
+
+    void SetChildNeedsStyleRecalc() noexcept
+    {
+      SetStyleFlag(NodeStyleFlags::DescendantNeedsStyleResolution);
+    }
+
+    void SetDirectChildNeedsStyleRecalc() noexcept
+    {
+      SetStyleFlag(NodeStyleFlags::DirectChildNeedsStyleResolution);
+    }
+
+    void ClearChildNeedsStyleRecalc() noexcept
+    {
+      ClearStyleFlags(NodeStyleFlags::DescendantNeedsStyleResolution
+                      | NodeStyleFlags::DirectChildNeedsStyleResolution);
+    }
+
+    void SetHasValidStyle() noexcept
+    {
+      _styleValidity = style::Validity::Valid;
+      ClearNodeFlag(NodeFlags::IsComputedStyleInvalid | NodeFlags::HasInvalidRenderer
+                    | NodeFlags::StyleResolutionShouldRecompositeLayer);
+    }
+
+    /// @brief The style the node is rendered with, or null if it isn't rendered.
+    // FIXME: Elements keep the style a renderer would hold (see `RenderTreeUpdater`); text nodes, which
+    // have no renderers either, have none.
+    KRYS_NODISCARD const RenderStyle *GetRenderStyle() const noexcept;
+
+    /// @brief The computed style of the node: an element's own, or else its parent element's in the composed
+    /// tree.
+    KRYS_NODISCARD const RenderStyle *ComputedStyle() noexcept;
+    KRYS_NODISCARD virtual const RenderStyle *
+      ComputedStyle(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
+
+    /// @brief The parent in the composed (flat) tree: the assigned slot, the host of a shadow root, or else
+    /// the parent.
+    KRYS_NODISCARD ContainerNode *ParentInComposedTree() const noexcept;
+    KRYS_NODISCARD Element *ParentElementInComposedTree() const noexcept;
+    KRYS_NODISCARD bool IsComposedTreeDescendantOf(const Node &node) const noexcept;
+
+#pragma endregion
 
 #pragma region Style Sheet Owner
 
@@ -432,6 +519,32 @@ namespace krys::boo::dom
 
 #pragma endregion
 
+#pragma region Style Invalidation
+
+    /// @brief Marks the node's style invalid, and its composed tree ancestors as having a descendant to
+    /// resolve.
+    void InvalidateStyle(style::Validity validity,
+                         style::InvalidationMode mode = style::InvalidationMode::Normal) noexcept;
+    void UpdateAncestorsForStyleRecalc() noexcept;
+    void MarkAncestorsForInvalidatedStyle() noexcept;
+
+    KRYS_NODISCARD bool HasStyleFlag(NodeStyleFlags flag) const noexcept
+    {
+      return HasFlag(_styleFlags, flag);
+    }
+
+    void SetStyleFlag(NodeStyleFlags flag) noexcept
+    {
+      _styleFlags = _styleFlags | flag;
+    }
+
+    void ClearStyleFlags(NodeStyleFlags flags) noexcept
+    {
+      _styleFlags = _styleFlags & ~flags;
+    }
+
+#pragma endregion
+
 #pragma region Node Flags
 
     void SetNodeFlag(NodeFlags flag) noexcept
@@ -450,6 +563,9 @@ namespace krys::boo::dom
     }
 
 #pragma endregion
+
+  private:
+    void AdjustStyleValidity(style::Validity validity, style::InvalidationMode mode) noexcept;
   };
 }
 

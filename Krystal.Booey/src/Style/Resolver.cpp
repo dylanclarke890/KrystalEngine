@@ -42,7 +42,7 @@ namespace krys::boo::style
     const RenderStyle *_parentStyle {};
     UniquePtr<const RenderStyle> _ownedParentStyle;
     const RenderStyle *_rootElementStyle {};
-    // FIXME: The tree resolution state comes with the tree resolver.
+    // FIXME: The tree resolution state (the anchor-positioned states) comes with anchor positioning.
 
   public:
     State() noexcept = default;
@@ -63,10 +63,12 @@ namespace krys::boo::style
       {
         _rootElementStyle = documentElementStyle;
       }
+      else if (auto *documentElementRenderStyle = documentElement->GetRenderStyle())
+      {
+        _rootElementStyle = documentElementRenderStyle;
+      }
       else
       {
-        // FIXME: Use the document element's style once elements keep their resolved styles (the tree
-        // resolver).
         _rootElementStyle = document.InitialContainingBlockStyle();
       }
     }
@@ -423,22 +425,17 @@ namespace krys::boo::style
   UniquePtr<RenderStyle> Resolver::StyleForPage(int32 pageIndex) noexcept
   {
     auto documentElement = Document().DocumentElement();
-    if (!documentElement)
+    if (!documentElement || !documentElement->GetRenderStyle())
     {
       return RenderStyle::CreatePtr();
     }
-
-    // FIXME: Use the document element's style once elements keep their resolved styles (the tree resolver);
-    // until then it's resolved here.
-    auto documentElementStyle =
-      StyleForElement(*documentElement, {Document().InitialContainingBlockStyle()}).Style;
 
     auto state = State(*documentElement, Document().InitialContainingBlockStyle(), nullptr);
 
     state.SetStyle(RenderStyle::CreatePtr());
     state.Style()->InheritFrom(*state.RootElementStyle());
 
-    PageRuleCollector collector(_ruleSets, documentElementStyle->GetWritingMode());
+    PageRuleCollector collector(_ruleSets, documentElement->GetRenderStyle()->GetWritingMode());
     collector.MatchAllPageRules(pageIndex);
 
     auto &result = collector.GetMatchResult();

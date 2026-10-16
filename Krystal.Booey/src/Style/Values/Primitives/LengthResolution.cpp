@@ -9,6 +9,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/ContainerQueryEvaluator.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 #include "Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp"
@@ -59,7 +60,7 @@ namespace krys::boo::style
       return 0;
     }
 
-    return LengthOfViewportPhysicalAxisForLogicalAxis(logicalAxis, size, RenderStyleOf(*rootElement));
+    return LengthOfViewportPhysicalAxisForLogicalAxis(logicalAxis, size, rootElement->GetRenderStyle());
   }
 
   double ComputeUnzoomedNonCalcLengthDouble(double value, css::LengthUnit lengthUnit,

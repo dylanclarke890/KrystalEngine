@@ -362,6 +362,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/Resolver.cpp
 		tests/Style/RuleSet.cpp
 		tests/Style/Scope.cpp
+		tests/Style/TreeResolver.cpp
 		tests/Style/UserAgentStyle.cpp
 		tests/Style/ScopedName.cpp
 		tests/Style/StyleSheetContentsCache.cpp
@@ -398,6 +399,7 @@ target_sources(Krystal.Booey.Tests
 
 		# DOM
 		tests/DOM/Algorithms/EventDispatcher.cpp
+		tests/DOM/Iterators/ComposedTreeIterator.cpp
 		tests/DOM/Algorithms/Mixins.cpp
 		tests/DOM/Algorithms/MutationAlgorithms.cpp
 		tests/DOM/Algorithms/NameValidation.cpp

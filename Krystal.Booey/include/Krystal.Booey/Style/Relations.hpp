@@ -17,6 +17,8 @@ namespace krys::boo::dom
 
 namespace krys::boo::style
 {
+  class Update;
+
   /// @brief A dependency of an element's style on its tree position, recorded while matching selectors.
   struct Relation
   {
@@ -62,5 +64,7 @@ namespace krys::boo::style
   /// @brief Copies the relation state (`:empty`, `:first-child`, `:last-child`) of @p from to @p to.
   void CopyRelations(RenderStyle &to, const RenderStyle &from) noexcept;
 
-  // FIXME: commitRelations (setting the element style flags) comes with the tree resolver's Update.
+  /// @brief Sets the style flags of the elements @p relations are about, and the relation state of their new
+  /// styles in @p update.
+  void CommitRelations(UniquePtr<Relations> relations, Update &update) noexcept;
 }

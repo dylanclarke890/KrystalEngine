@@ -11,6 +11,7 @@
 #include "Krystal.Booey/DOM/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Internals/RareData/ElementRareData.hpp"
+#include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Mixins/ChildNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonDocumentTypeChildNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/ParentNode.hpp"
@@ -23,6 +24,11 @@
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
+#include "Krystal.Booey/Style/Change.hpp"
+#include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/TreeResolver.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <ranges>
 
@@ -53,6 +59,396 @@ namespace krys::boo::dom
       .EnsureRandomCachingKeyMap(pseudoElementIdentifier)
       ->LookupCSSRandomBaseValue(key);
   }
+
+#pragma region Style
+
+  const RenderStyle *Element::ExistingComputedStyle() const noexcept
+  {
+    if (_elementRareData)
+    {
+      if (auto *style = _elementRareData->ComputedStyle())
+      {
+        return style;
+      }
+    }
+
+    if (HasDisplayNone())
+    {
+      return _elementRareData->DisplayContentsOrNoneStyle();
+    }
+
+    return RenderOrDisplayContentsStyle();
+  }
+
+  const RenderStyle *Element::RenderOrDisplayContentsStyle() const noexcept
+  {
+    return RenderOrDisplayContentsStyle(null);
+  }
+
+  const RenderStyle *Element::RenderOrDisplayContentsStyle(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept
+  {
+    if (pseudoElementIdentifier)
+    {
+      if (auto *style = RenderOrDisplayContentsStyle())
+      {
+        if (auto *cachedPseudoStyle = style->GetCachedPseudoStyle(*pseudoElementIdentifier))
+        {
+          return cachedPseudoStyle;
+        }
+      }
+
+      return nullptr;
+    }
+
+    if (HasDisplayContents())
+    {
+      return _elementRareData->DisplayContentsOrNoneStyle();
+    }
+
+    return GetRenderStyle();
+  }
+
+  const RenderStyle *Element::ResolveComputedStyle(ResolveComputedStyleMode mode) noexcept
+  {
+    krys_debug_assert(IsConnected());
+
+    auto document = ShareRef(NodeDocument());
+    document->StyleScope().FlushPendingUpdate();
+
+    bool isInDisplayNoneTree = false;
+
+    // Traverse the ancestor chain to find the rootmost element that has invalid computed style.
+    auto rootmostInvalidElement = [&]() -> RefPtr<const Element>
+    {
+      // In ResolveComputedStyleMode::RenderedOnly case we check for display:none ancestors.
+      if (mode != ResolveComputedStyleMode::RenderedOnly && !document->HasPendingStyleRecalc()
+          && ExistingComputedStyle())
+      {
+        return nullptr;
+      }
+
+      if (document->HasPendingFullStyleRebuild())
+      {
+        return document->DocumentElement();
+      }
+
+      auto documentElement = document->DocumentElement();
+      if (!documentElement || documentElement->HasNodeFlag(NodeFlags::IsComputedStyleInvalid))
+      {
+        return documentElement;
+      }
+
+      RefPtr<const Element> rootmost;
+
+      for (auto element = ShareRefPtr<const Element>(this); element;
+           element = ShareRefPtr<const Element>(element->ParentElementInComposedTree()))
+      {
+        if (element->HasNodeFlag(NodeFlags::IsComputedStyleInvalid))
+        {
+          rootmost = element;
+          continue;
+        }
+        auto *existing = element->ExistingComputedStyle();
+        if (!existing)
+        {
+          rootmost = element;
+          continue;
+        }
+        if (mode == ResolveComputedStyleMode::RenderedOnly && existing->Display() == DisplayType::None)
+        {
+          isInDisplayNoneTree = true;
+          // Invalid ancestor style may still affect this display:none style.
+          rootmost = nullptr;
+        }
+      }
+      return rootmost;
+    }();
+
+    if (!rootmostInvalidElement)
+    {
+      if (isInDisplayNoneTree)
+      {
+        return nullptr;
+      }
+      return ExistingComputedStyle();
+    }
+
+    auto ancestorWithValidStyle = ShareRefPtr(rootmostInvalidElement->ParentElementInComposedTree());
+
+    List<RefPtr<Element>> elementsRequiringComputedStyle;
+    for (auto toResolve = ShareRefPtr(this); toResolve != ancestorWithValidStyle;
+         toResolve = ShareRefPtr(toResolve->ParentElementInComposedTree()))
+    {
+      elementsRequiringComputedStyle.push_back(toResolve);
+    }
+
+    auto *computedStyle = ancestorWithValidStyle ? ancestorWithValidStyle->ExistingComputedStyle() : nullptr;
+
+    style::PostResolutionCallbackDisabler disabler(*document,
+                                                   style::PostResolutionCallbackDisabler::DrainCallbacks::No);
+
+    // Resolve and cache styles starting from the most distant ancestor.
+    // FIXME: This is not as efficient as it could be. For example if an ancestor has a non-inherited style
+    // change but the styles are otherwise clean we would not need to re-resolve descendants.
+    for (auto &element : elementsRequiringComputedStyle | std::views::reverse)
+    {
+      if (computedStyle && computedStyle->GetContainerType() != ContainerType::Normal
+          && mode != ResolveComputedStyleMode::Editability)
+      {
+        // If we find a query container we need to bail out and do full style update to resolve it.
+        if (document->UpdateStyleIfNeeded())
+        {
+          return ComputedStyle();
+        }
+      }
+      auto style = document->StyleForElementIgnoringPendingStylesheets(*element, computedStyle);
+      computedStyle = style.get();
+      auto &rareData = element->EnsureElementRareData();
+      if (auto *existing = rareData.ComputedStyle())
+      {
+        auto changes = style::DetermineChanges(*existing, *style);
+        changes.Remove(style::Change::NonInherited);
+        if (!changes.IsEmpty())
+        {
+          for (auto &child : ComposedTreeChildren(*element))
+          {
+            if (auto *childElement = DynamicDowncast<Element>(child))
+            {
+              childElement->SetNodeFlag(NodeFlags::IsComputedStyleInvalid);
+            }
+          }
+        }
+      }
+      rareData.SetComputedStyle(krys::move(style));
+      element->ClearNodeFlag(NodeFlags::IsComputedStyleInvalid);
+
+      if (mode == ResolveComputedStyleMode::RenderedOnly && computedStyle->Display() == DisplayType::None)
+      {
+        return nullptr;
+      }
+    }
+
+    return computedStyle;
+  }
+
+  const RenderStyle &
+    Element::ResolvePseudoElementStyle(const style::PseudoElementIdentifier &pseudoElementIdentifier) noexcept
+  {
+    auto *parentStyle = ExistingComputedStyle();
+    krys_debug_assert(parentStyle);
+    krys_debug_assert(!parentStyle->GetCachedPseudoStyle(pseudoElementIdentifier));
+
+    auto document = ShareRef(NodeDocument());
+    style::PostResolutionCallbackDisabler disabler(*document,
+                                                   style::PostResolutionCallbackDisabler::DrainCallbacks::No);
+
+    auto style =
+      document->StyleForElementIgnoringPendingStylesheets(*this, parentStyle, pseudoElementIdentifier);
+    if (!style)
+    {
+      style = RenderStyle::CreatePtr();
+      style->InheritFrom(*parentStyle);
+      style->SetPseudoElementIdentifier(pseudoElementIdentifier);
+    }
+
+    auto *computedStyle = style.get();
+    const_cast<RenderStyle *>(parentStyle)->AddCachedPseudoStyle(krys::move(style));
+    krys_debug_assert(parentStyle->GetCachedPseudoStyle(pseudoElementIdentifier));
+    return *computedStyle;
+  }
+
+  const RenderStyle *
+    Element::ComputedStyle(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
+  {
+    if (!IsConnected())
+    {
+      return nullptr;
+    }
+
+    // FIXME: Before and after pseudo-elements as nodes (PseudoElement), which have their own computed style.
+
+    // FIXME: This should call resolveComputedStyle() unconditionally so we check if the style is valid.
+    auto *style = ExistingComputedStyle();
+    if (!style)
+    {
+      style = ResolveComputedStyle();
+    }
+
+    if (pseudoElementIdentifier)
+    {
+      if (auto *cachedPseudoStyle = style->GetCachedPseudoStyle(*pseudoElementIdentifier))
+      {
+        return cachedPseudoStyle;
+      }
+      return &ResolvePseudoElementStyle(*pseudoElementIdentifier);
+    }
+
+    return style;
+  }
+
+  void Element::ResetComputedStyle() noexcept
+  {
+    if (!_elementRareData || !_elementRareData->ComputedStyle())
+    {
+      return;
+    }
+
+    // FIXME: willResetComputedStyle for elements with custom style resolve callbacks.
+    _elementRareData->SetComputedStyle(nullptr);
+    for (auto *descendant = TreeQueries::Next(*this, this); descendant;
+         descendant = TreeQueries::Next(*descendant, this))
+    {
+      auto *child = DynamicDowncast<Element>(*descendant);
+      if (!child || !child->_elementRareData || !child->_elementRareData->ComputedStyle()
+          || child->HasDisplayContents() || child->HasDisplayNone())
+      {
+        continue;
+      }
+      child->_elementRareData->SetComputedStyle(nullptr);
+    }
+  }
+
+  void Element::ResetStyleRelations() noexcept
+  {
+    ClearStyleFlags(NodeStyleFlags::StyleAffectedByEmpty);
+    ClearStyleFlags(NodeStyleFlags::AffectedByHasWithPositionalPseudoClass);
+    if (!_elementRareData)
+    {
+      return;
+    }
+    _elementRareData->SetChildIndex(0);
+  }
+
+  void Element::ResetChildStyleRelations() noexcept
+  {
+    ClearStyleFlags(NodeStyleFlags::ChildrenAffectedByFirstChildRules
+                    | NodeStyleFlags::ChildrenAffectedByLastChildRules
+                    | NodeStyleFlags::ChildrenAffectedByForwardPositionalRules
+                    | NodeStyleFlags::ChildrenAffectedByBackwardPositionalRules);
+  }
+
+  void Element::ResetAllDescendantStyleRelations() noexcept
+  {
+    ResetChildStyleRelations();
+
+    ClearStyleFlags(NodeStyleFlags::DescendantsAffectedByForwardPositionalRules
+                    | NodeStyleFlags::DescendantsAffectedByBackwardPositionalRules);
+  }
+
+  bool Element::HasDisplayContents() const noexcept
+  {
+    if (!_elementRareData)
+    {
+      return false;
+    }
+    auto *style = _elementRareData->DisplayContentsOrNoneStyle();
+    return style && style->Display() == DisplayType::Contents;
+  }
+
+  bool Element::HasDisplayNone() const noexcept
+  {
+    if (!_elementRareData)
+    {
+      return false;
+    }
+    auto *style = _elementRareData->DisplayContentsOrNoneStyle();
+    return style && style->Display() == DisplayType::None;
+  }
+
+  void Element::StoreDisplayContentsOrNoneStyle(UniquePtr<RenderStyle> style) noexcept
+  {
+    // This is used by RenderTreeBuilder to store the style for Elements with display:{contents|none}.
+    // Normally style is held in renderers but display:contents doesn't generate one.
+    // This is kept distinct from ElementRareData::computedStyle() which can update outside style resolution.
+    // This way renderOrDisplayContentsStyle() always returns consistent styles matching the rendering state.
+    krys_debug_assert(
+      style && (style->Display() == DisplayType::Contents || style->Display() == DisplayType::None));
+    krys_debug_assert(!_rendererStyle);
+    EnsureElementRareData().SetDisplayContentsOrNoneStyle(krys::move(style));
+  }
+
+  void Element::ClearDisplayContentsOrNoneStyle() noexcept
+  {
+    if (!_elementRareData)
+    {
+      return;
+    }
+    _elementRareData->SetDisplayContentsOrNoneStyle(nullptr);
+  }
+
+  bool Element::RendererIsNeeded(const RenderStyle &style) noexcept
+  {
+    return style.Display() != DisplayType::None && style.Display() != DisplayType::Contents;
+  }
+
+  void Element::InvalidateStyle() noexcept
+  {
+    Node::InvalidateStyle(style::Validity::ElementInvalid);
+  }
+
+  void Element::InvalidateStyleAndLayerComposition() noexcept
+  {
+    Node::InvalidateStyle(style::Validity::ElementInvalid, style::InvalidationMode::RecompositeLayer);
+  }
+
+  void Element::InvalidateStyleForSubtree() noexcept
+  {
+    Node::InvalidateStyle(style::Validity::SubtreeInvalid);
+  }
+
+  void Element::InvalidateStyleAndRenderersForSubtree() noexcept
+  {
+    Node::InvalidateStyle(style::Validity::SubtreeInvalid, style::InvalidationMode::RebuildRenderer);
+  }
+
+  void Element::InvalidateRenderer() noexcept
+  {
+    Node::InvalidateStyle(style::Validity::Valid, style::InvalidationMode::RebuildRenderer);
+  }
+
+  void Element::InvalidateStyleInternal() noexcept
+  {
+    Node::InvalidateStyle(style::Validity::ElementInvalid);
+  }
+
+  void Element::InvalidateStyleForSubtreeInternal() noexcept
+  {
+    Node::InvalidateStyle(style::Validity::SubtreeInvalid);
+  }
+
+  void Element::InvalidateForQueryContainerSizeChange() noexcept
+  {
+    // FIXME: Ideally we would just recompute things that are actually affected by containers queries within
+    // the subtree.
+    Node::InvalidateStyle(style::Validity::SubtreeInvalid);
+    SetNodeFlag(NodeFlags::NeedsUpdateQueryContainerDependentStyle);
+  }
+
+  void Element::InvalidateForResumingQueryContainerResolution() noexcept
+  {
+    SetChildNeedsStyleRecalc();
+    MarkAncestorsForInvalidatedStyle();
+  }
+
+  bool Element::HasFlagsSetDuringStylingOfChildren() const noexcept
+  {
+    return ChildrenAffectedByFirstChildRules() || ChildrenAffectedByLastChildRules()
+           || ChildrenAffectedByForwardPositionalRules() || DescendantsAffectedByForwardPositionalRules()
+           || ChildrenAffectedByBackwardPositionalRules() || DescendantsAffectedByBackwardPositionalRules();
+  }
+
+  uint32 Element::ChildIndex() const noexcept
+  {
+    return _elementRareData ? _elementRareData->ChildIndex() : 0;
+  }
+
+  void Element::SetChildIndex(uint32 index) noexcept
+  {
+    EnsureElementRareData().SetChildIndex(index);
+  }
+
+#pragma endregion
 
   bool Element::HasRandomCachingKeyMap() const noexcept
   {

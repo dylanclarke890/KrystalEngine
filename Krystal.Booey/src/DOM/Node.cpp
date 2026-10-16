@@ -11,12 +11,14 @@
 #include "Krystal.Booey/DOM/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/DocumentType.hpp"
+#include "Krystal.Booey/DOM/Iterators/ComposedTreeAncestorIterator.hpp"
 #include "Krystal.Booey/DOM/NodeList.hpp"
 #include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 
 namespace krys::boo::dom
 {
@@ -359,6 +361,170 @@ namespace krys::boo::dom
     }
 
     return Exception {ExceptionCode::HierarchyRequestError};
+  }
+
+#pragma endregion
+
+#pragma region Style
+
+  const RenderStyle *Node::GetRenderStyle() const noexcept
+  {
+    if (auto *element = DynamicDowncast<Element>(*this))
+    {
+      return element->_rendererStyle.get();
+    }
+    return nullptr;
+  }
+
+  const RenderStyle *Node::ComputedStyle() noexcept
+  {
+    return ComputedStyle(null);
+  }
+
+  const RenderStyle *
+    Node::ComputedStyle(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
+  {
+    auto composedParent = ShareRefPtr(ParentElementInComposedTree());
+    return composedParent ? composedParent->ComputedStyle(pseudoElementIdentifier) : nullptr;
+  }
+
+  ContainerNode *Node::ParentInComposedTree() const noexcept
+  {
+    if (auto *slot = SlotAlgorithms::GetAssignedSlot(*this))
+    {
+      return slot;
+    }
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(*this))
+    {
+      return shadowRoot->Host();
+    }
+    return ParentNode();
+  }
+
+  Element *Node::ParentElementInComposedTree() const noexcept
+  {
+    if (auto *slot = SlotAlgorithms::GetAssignedSlot(*this))
+    {
+      return slot;
+    }
+    if (auto *parent = ParentNode())
+    {
+      if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(*parent))
+      {
+        return shadowRoot->Host();
+      }
+      if (auto *element = DynamicDowncast<Element>(*parent))
+      {
+        return element;
+      }
+    }
+    return nullptr;
+  }
+
+  bool Node::IsComposedTreeDescendantOf(const Node &node) const noexcept
+  {
+    for (auto *currentAncestor = ParentElementInComposedTree(); currentAncestor;
+         currentAncestor = currentAncestor->ParentElementInComposedTree())
+    {
+      if (currentAncestor == &node)
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void Node::AdjustStyleValidity(style::Validity validity, style::InvalidationMode mode) noexcept
+  {
+    if (validity > StyleValidity())
+    {
+      _styleValidity = validity;
+    }
+
+    switch (mode)
+    {
+      case style::InvalidationMode::Normal: break;
+      case style::InvalidationMode::RecompositeLayer:
+        SetNodeFlag(NodeFlags::StyleResolutionShouldRecompositeLayer);
+        break;
+      case style::InvalidationMode::RebuildRenderer:
+      case style::InvalidationMode::InsertedIntoAncestor: SetNodeFlag(NodeFlags::HasInvalidRenderer); break;
+    }
+  }
+
+  void Node::UpdateAncestorsForStyleRecalc() noexcept
+  {
+    MarkAncestorsForInvalidatedStyle();
+
+    auto documentElement = NodeDocument().DocumentElement();
+    if (!documentElement)
+    {
+      return;
+    }
+    if (!documentElement->ChildNeedsStyleRecalc() && !documentElement->NeedsStyleRecalc())
+    {
+      return;
+    }
+
+    auto document = ShareRef(NodeDocument());
+    document->SetChildNeedsStyleRecalc();
+    document->ScheduleStyleRecalc();
+  }
+
+  void Node::MarkAncestorsForInvalidatedStyle() noexcept
+  {
+    auto composedAncestors = ComposedTreeAncestors(*this);
+    auto it = composedAncestors.begin();
+    auto end = composedAncestors.end();
+    if (it != end)
+    {
+      it->SetDirectChildNeedsStyleRecalc();
+
+      for (; it != end; ++it)
+      {
+        // Iterator skips over shadow roots.
+        if (auto *shadowRoot = TreeQueries::GetShadowRoot(*it))
+        {
+          shadowRoot->SetChildNeedsStyleRecalc();
+        }
+        if (it->ChildNeedsStyleRecalc())
+        {
+          break;
+        }
+        it->SetChildNeedsStyleRecalc();
+      }
+    }
+  }
+
+  void Node::InvalidateStyle(style::Validity validity, style::InvalidationMode mode) noexcept
+  {
+    // FIXME: Every connected node is in a rendered document; documents without a browsing context are styled
+    // too.
+    if (!IsConnected())
+    {
+      return;
+    }
+
+    // FIXME: This should eventually be an ASSERT.
+    if (NodeDocument().InRenderTreeUpdate())
+    {
+      return;
+    }
+
+    if (validity != style::Validity::Valid)
+    {
+      SetNodeFlag(NodeFlags::IsComputedStyleInvalid);
+    }
+
+    bool markAncestors =
+      StyleValidity() == style::Validity::Valid || mode == style::InvalidationMode::InsertedIntoAncestor;
+
+    AdjustStyleValidity(validity, mode);
+
+    if (markAncestors)
+    {
+      UpdateAncestorsForStyleRecalc();
+    }
   }
 
 #pragma endregion

@@ -98,6 +98,8 @@ namespace krys::boo::css
 
     KRYS_NODISCARD int32 CountElementsBefore(const dom::Element &element) noexcept
     {
+      // FIXME: Stop at the first sibling with a cached child index (`Element::ChildIndex`), once child
+      // changes invalidate the siblings' styles (ChildChangeInvalidation), which resets it.
       int32 count = 0;
       for (auto *sibling = dom::TreeQueries::PreviousElementSibling(element); sibling;
            sibling = dom::TreeQueries::PreviousElementSibling(*sibling))

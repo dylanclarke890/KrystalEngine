@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
 
 namespace krys::boo::dom
 {
@@ -17,6 +18,8 @@ namespace krys::boo::dom
         shadowRoot->SetNodeFlag(NodeFlags::IsConnected);
       }
 
+      insertedNode.InvalidateStyle(style::Validity::SubtreeInvalid,
+                                   style::InvalidationMode::InsertedIntoAncestor);
       insertedNode.OnInsert();
       return;
     }
@@ -41,6 +44,8 @@ namespace krys::boo::dom
       insertedNode.SetNodeFlag(NodeFlags::IsInShadowTree);
     }
 
+    insertedNode.InvalidateStyle(style::Validity::SubtreeInvalid,
+                                 style::InvalidationMode::InsertedIntoAncestor);
     insertedNode.OnInsert();
   }
 
@@ -56,6 +61,12 @@ namespace krys::boo::dom
 
   void ExtensibilityHooks::NodeMoved(Node &movedNode, bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
+    // A moved subtree is styled again in its new place.
+    if (auto *element = DynamicDowncast<Element>(movedNode); element && isSubtreeRoot)
+    {
+      RenderTreeUpdater::TearDownRenderers(*element);
+    }
+
     if (Is<ShadowRoot>(movedNode))
     {
       movedNode.OnMove(isSubtreeRoot, oldAncestor);
@@ -79,12 +90,19 @@ namespace krys::boo::dom
       movedNode.ClearNodeFlag(NodeFlags::IsInShadowTree);
     }
 
+    movedNode.InvalidateStyle(style::Validity::SubtreeInvalid, style::InvalidationMode::InsertedIntoAncestor);
     movedNode.OnMove(isSubtreeRoot, oldAncestor);
   }
 
   void ExtensibilityHooks::NodeRemoved(Node &removedNode, bool isSubtreeRoot,
                                        ContainerNode &oldAncestor) noexcept
   {
+    // The removed subtree's renderers go with it.
+    if (auto *element = DynamicDowncast<Element>(removedNode); element && isSubtreeRoot)
+    {
+      RenderTreeUpdater::TearDownRenderers(*element);
+    }
+
     removedNode.ClearNodeFlag(NodeFlags::IsConnected);
 
     // Shadow roots and the nodes in their trees stay in their shadow trees; the removed node and the rest of

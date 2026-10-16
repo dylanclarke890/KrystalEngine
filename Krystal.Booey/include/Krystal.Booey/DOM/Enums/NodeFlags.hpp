@@ -23,7 +23,12 @@ namespace krys::boo::dom
     /// @brief Set when the inline style has changed since the `style` attribute was last written; see
     /// `Element::SynchronizeAllAttributes`.
     StyleAttributeIsDirty = 1 << 11,
+    /// @brief Set when the element's computed style (`Element::ComputedStyle`) may be out of date.
+    IsComputedStyleInvalid = 1 << 12,
+    HasInvalidRenderer = 1 << 13,
+    StyleResolutionShouldRecompositeLayer = 1 << 14,
+    NeedsUpdateQueryContainerDependentStyle = 1 << 15,
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeFlags, 12u);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeFlags, 16u);

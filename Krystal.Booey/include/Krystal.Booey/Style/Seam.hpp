@@ -2,7 +2,6 @@
 
 #include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/Core/WritingMode.hpp"
-#include "Krystal.Booey/CSS/Queries/ContainerQueryAxis.hpp"
 #include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
@@ -41,8 +40,7 @@
 // callers use, under its upstream name. None can be constructed but `SettingsValues`. Each type moves to its
 // own header, with its real implementation, when its slice is ported:
 //   - `RenderView`, `RenderElement`, `RenderBox`, `RenderTheme` (focus ring metrics): rendering.
-//   - `style::AnchorPositionEvaluator`, `style::ContainerQueryEvaluator`: the style resolver
-//     (`Style/AnchorPositionEvaluator.hpp`, unreviewed).
+//   - `style::AnchorPositionEvaluator`: anchor positioning (`Style/AnchorPositionEvaluator.hpp`, unreviewed).
 //   - `SettingsValues`: `Settings`.
 //   - the `Document*` colour functions: `dom::Document` (upstream members) once it has a page and settings.
 //   - the `Document*` security and keyframes functions: `dom::Document` (upstream members) once it has a
@@ -154,10 +152,8 @@ namespace krys::boo
   /// @brief Collapses `document.renderView()`. Nothing creates a render tree yet, so it's always null.
   KRYS_NODISCARD const RenderView *RenderViewOf(const dom::Document &) noexcept;
 
-  /// @brief Collapses `element.renderStyle()`.
-  KRYS_NODISCARD const RenderStyle *RenderStyleOf(const dom::Element &) noexcept;
-
-  /// @brief Collapses `dynamicDowncast<RenderBox>(element.renderer())`.
+  /// @brief Collapses `dynamicDowncast<RenderBox>(element.renderer())`. Nothing creates a render tree yet, so
+  /// it's always null.
   KRYS_NODISCARD const RenderBox *RenderBoxOf(const dom::Element &) noexcept;
 
   /// @brief Collapses `document.useDarkAppearance(style)` for a document with no page and default settings:
@@ -199,22 +195,5 @@ namespace krys::boo::style
     KRYS_NODISCARD static css::ValueId
       ResolvePositionTryFallbackValueForSelfPosition(css::PropertyId, css::ValueId position, WritingMode,
                                                      const BuilderPositionTryFallback &) noexcept;
-  };
-
-  class ContainerQueryEvaluator
-  {
-  public:
-    enum class SelectionMode : uint8
-    {
-      Element,
-      PseudoElement,
-      PartPseudoElement
-    };
-
-    ContainerQueryEvaluator() = delete;
-
-    KRYS_NODISCARD static RefPtr<const dom::Element>
-      SelectContainer(css::cq::Axis, const css::CSSOMString &name, const dom::Element &,
-                      SelectionMode = SelectionMode::Element) noexcept;
   };
 }

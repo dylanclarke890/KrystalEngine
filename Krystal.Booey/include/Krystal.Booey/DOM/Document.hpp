@@ -23,6 +23,7 @@
 namespace krys::boo
 {
   class RenderStyle;
+  class RenderTreeUpdater;
 }
 
 namespace krys::boo::css
@@ -31,6 +32,12 @@ namespace krys::boo::css
   class MediaQueryMatcher;
   class StyleSheetList;
   struct ParserContext;
+}
+
+namespace krys::boo::style
+{
+  class Update;
+  struct PseudoElementIdentifier;
 }
 
 namespace krys::boo::css::calc
@@ -88,6 +95,8 @@ namespace krys::boo::dom
     friend class html::HTMLTreeBuilder;
     friend class html::RenderBlocking;
 
+    friend class ::krys::boo::RenderTreeUpdater;
+
   private:
     UniquePtr<DocumentRareData> _documentRareData;
     UniquePtr<DOMImplementation> _implementation;
@@ -123,8 +132,18 @@ namespace krys::boo::dom
 
     mutable UniquePtr<VisitedLinkState> _visitedLinkState;
     mutable UniquePtr<RenderStyle> _initialContainingBlockStyle;
+    // FIXME: The style of the render view, which there isn't yet; `RenderTreeUpdater` keeps it here.
+    UniquePtr<RenderStyle> _renderViewStyle;
     mutable RefPtr<css::calc::RandomCachingKeyMap> _randomCachingKeyMap;
     bool _hasStyleWithViewportUnits {false};
+
+    // FIXME: Documents create their render trees on their first style resolution, which is a rebuild.
+    bool _needsFullStyleRebuild {true};
+    bool _inStyleRecalc {false};
+    bool _inRenderTreeUpdate {false};
+    bool _isResolvingTreeStyle {false};
+    bool _ignorePendingStylesheets {false};
+    bool _hasNodesWithMissingStyle {false};
 
     boo::Color _textColor {boo::Color::black};
     boo::Color _linkColor;
@@ -434,8 +453,73 @@ namespace krys::boo::dom
     /// @brief The style of the initial containing block, which the document element inherits from.
     /// @note This may end up differing from the used style of the initial containing block due to
     /// adjustments.
-    // FIXME: Created on first use until the document resolves its style, which keeps it up to date.
+    // FIXME: Created on first use if the document hasn't resolved its style (style resolution keeps it up to
+    // date), as resolvers are used outside style resolution.
     KRYS_NODISCARD const RenderStyle *InitialContainingBlockStyle() const noexcept;
+
+    /// @brief The used style of the initial containing block: its computed style, with the writing mode and
+    /// direction propagated from the document element or `<body>`.
+    // FIXME: The style of the render view, once there is one.
+    KRYS_NODISCARD const RenderStyle &RenderViewStyle() const noexcept;
+
+    enum class ResolveStyleType : bool
+    {
+      Normal,
+      Rebuild
+    };
+
+    /// @brief Resolves the styles of the elements that need resolving and applies them.
+    void ResolveStyle(ResolveStyleType type = ResolveStyleType::Normal) noexcept;
+
+    /// @brief Resolves style if anything needs resolving.
+    /// @return Whether style was resolved.
+    bool UpdateStyleIfNeeded() noexcept;
+    bool UpdateStyleIfNeededIgnoringPendingStylesheets() noexcept;
+
+    /// @brief Whether an element's style, or the style sheets, need updating.
+    KRYS_NODISCARD bool NeedsStyleRecalc() const noexcept;
+    KRYS_NODISCARD bool HasPendingStyleRecalc() const noexcept;
+    KRYS_NODISCARD bool HasPendingFullStyleRebuild() const noexcept;
+
+    void ScheduleFullStyleRebuild() noexcept;
+    void ScheduleStyleRecalc() noexcept;
+    void UnscheduleStyleRecalc() noexcept;
+
+    KRYS_NODISCARD bool InStyleRecalc() const noexcept
+    {
+      return _inStyleRecalc;
+    }
+
+    KRYS_NODISCARD bool InRenderTreeUpdate() const noexcept
+    {
+      return _inRenderTreeUpdate;
+    }
+
+    KRYS_NODISCARD bool IsResolvingTreeStyle() const noexcept
+    {
+      return _isResolvingTreeStyle;
+    }
+
+    void SetIsResolvingTreeStyle(bool value) noexcept
+    {
+      _isResolvingTreeStyle = value;
+    }
+
+    KRYS_NODISCARD bool IsIgnoringPendingStylesheets() const noexcept
+    {
+      return _ignorePendingStylesheets;
+    }
+
+    void SetHasNodesWithMissingStyle() noexcept
+    {
+      _hasNodesWithMissingStyle = true;
+    }
+
+    /// @brief The style of @p element (or of one of its pseudo-elements) inheriting from @p parentStyle,
+    /// resolved outside style resolution.
+    KRYS_NODISCARD UniquePtr<RenderStyle> StyleForElementIgnoringPendingStylesheets(
+      Element &element, const RenderStyle *parentStyle,
+      const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier = null) noexcept;
 
     /// @brief Determines whether links are visited, for `:visited` and the link styles.
     KRYS_NODISCARD VisitedLinkState &GetVisitedLinkState() const noexcept;
@@ -450,8 +534,8 @@ namespace krys::boo::dom
       return _hasStyleWithViewportUnits;
     }
 
-    /// @brief The colour of `-internal-document-text-color`.
-    // FIXME: The tree resolver sets it from the <body> element's colour; until then it's black.
+    /// @brief The colour of `-internal-document-text-color`: the `<body>` element's colour, as of its last
+    /// style resolution, or black.
     KRYS_NODISCARD const boo::Color &TextColor() const noexcept
     {
       return _textColor;
@@ -621,6 +705,8 @@ namespace krys::boo::dom
 
   protected:
     void SetQuirksMode(QuirksMode mode) noexcept;
+
+    void UpdateRenderTree(UniquePtr<style::Update> styleUpdate) noexcept;
 
     /// @brief Finds the first `base` element with an `href` in the document tree and updates the document
     /// base URL from it. Called whenever a `base` element is inserted, removed or moved, or its `href`

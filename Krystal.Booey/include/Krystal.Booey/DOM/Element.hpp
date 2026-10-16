@@ -14,6 +14,7 @@
 namespace krys::boo
 {
   class RenderStyle;
+  class RenderTreeUpdater;
 }
 
 namespace krys::boo::css::calc
@@ -61,6 +62,8 @@ namespace krys::boo::dom
     friend class html::HTMLElementStack;
     friend class html::HTMLTreeBuilder;
 
+    friend class ::krys::boo::RenderTreeUpdater;
+
   private:
     QualifiedName _qualifiedName;
     RefPtr<ShadowRoot> _shadowRoot;
@@ -78,6 +81,10 @@ namespace krys::boo::dom
     RefPtr<html::HTMLSlotElement> _assignedSlot;
     /// @see https://dom.spec.whatwg.org/#slotable-manual-slot-assignment
     WeakPtr<html::HTMLSlotElement> _manuallyAssignedSlot;
+
+    // FIXME: The style the element's renderer would hold; there's no render tree, so `RenderTreeUpdater`
+    // keeps it on the element.
+    UniquePtr<RenderStyle> _rendererStyle;
 
   protected:
     Element(Document &document, const QualifiedName &name, NodeFlags nodeFlags) noexcept;
@@ -421,8 +428,198 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD bool HasRandomCachingKeyMap() const noexcept;
 
+#pragma region Style
+
+    enum class ResolveComputedStyleMode : uint8
+    {
+      Normal,
+      RenderedOnly,
+      Editability
+    };
+
+    using Node::ComputedStyle;
+
+    /// @brief The computed style of the element or one of its pseudo-elements, resolved if it isn't known.
+    /// Null if the element isn't connected.
+    KRYS_NODISCARD const RenderStyle *
+      ComputedStyle(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept override;
+
+    /// @brief Resolves the computed style of the element and of its composed tree ancestors whose styles are
+    /// unknown or out of date, outside style resolution.
+    /// @return Null in `RenderedOnly` mode if the element or an ancestor has `display: none`.
+    KRYS_NODISCARD const RenderStyle *
+      ResolveComputedStyle(ResolveComputedStyleMode mode = ResolveComputedStyleMode::Normal) noexcept;
+
+    /// @brief The element's computed style if it's known: the one resolved outside style resolution, or else
+    /// the one it's rendered with.
+    KRYS_NODISCARD const RenderStyle *ExistingComputedStyle() const noexcept;
+
+    /// @brief The style the element is rendered with, including with `display: contents`.
+    KRYS_NODISCARD const RenderStyle *RenderOrDisplayContentsStyle() const noexcept;
+    KRYS_NODISCARD const RenderStyle *RenderOrDisplayContentsStyle(
+      const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+
+    /// @brief Drops the computed styles of the element and its descendants.
+    void ResetComputedStyle() noexcept;
+    void ResetStyleRelations() noexcept;
+    void ResetChildStyleRelations() noexcept;
+    void ResetAllDescendantStyleRelations() noexcept;
+
+    KRYS_NODISCARD bool HasDisplayContents() const noexcept;
+    KRYS_NODISCARD bool HasDisplayNone() const noexcept;
+    void StoreDisplayContentsOrNoneStyle(UniquePtr<RenderStyle> style) noexcept;
+    void ClearDisplayContentsOrNoneStyle() noexcept;
+
+    /// @brief Whether the element would have a renderer with @p style.
+    // FIXME: The overrides (form controls, frame sets, SVG elements, ...) come with the render tree.
+    KRYS_NODISCARD virtual bool RendererIsNeeded(const RenderStyle &style) noexcept;
+
+    void InvalidateStyle() noexcept;
+    void InvalidateStyleAndLayerComposition() noexcept;
+    void InvalidateStyleForSubtree() noexcept;
+    void InvalidateStyleAndRenderersForSubtree() noexcept;
+    void InvalidateRenderer() noexcept;
+    void InvalidateStyleInternal() noexcept;
+    void InvalidateStyleForSubtreeInternal() noexcept;
+    void InvalidateForQueryContainerSizeChange() noexcept;
+    void InvalidateForResumingQueryContainerResolution() noexcept;
+
+    KRYS_NODISCARD bool NeedsUpdateQueryContainerDependentStyle() const noexcept
+    {
+      return HasNodeFlag(NodeFlags::NeedsUpdateQueryContainerDependentStyle);
+    }
+
+    void ClearNeedsUpdateQueryContainerDependentStyle() noexcept
+    {
+      ClearNodeFlag(NodeFlags::NeedsUpdateQueryContainerDependentStyle);
+    }
+
+    KRYS_NODISCARD bool StyleAffectedByEmpty() const noexcept
+    {
+      return HasStyleFlag(NodeStyleFlags::StyleAffectedByEmpty);
+    }
+
+    KRYS_NODISCARD bool StyleIsAffectedByPreviousSibling() const noexcept
+    {
+      return HasStyleFlag(NodeStyleFlags::StyleIsAffectedByPreviousSibling);
+    }
+
+    KRYS_NODISCARD bool DescendantsAffectedByPreviousSibling() const noexcept
+    {
+      return HasStyleFlag(NodeStyleFlags::DescendantsAffectedByPreviousSibling);
+    }
+
+    KRYS_NODISCARD bool AffectsNextSiblingElementStyle() const noexcept
+    {
+      return HasStyleFlag(NodeStyleFlags::AffectsNextSiblingElementStyle);
+    }
+
+    KRYS_NODISCARD bool ChildrenAffectedByFirstChildRules() const noexcept
+    {
+      return HasStyleFlag(NodeStyleFlags::ChildrenAffectedByFirstChildRules);
+    }
+
+    KRYS_NODISCARD bool ChildrenAffectedByLastChildRules() const noexcept
+    {
+      return HasStyleFlag(NodeStyleFlags::ChildrenAffectedByLastChildRules);
+    }
+
+    KRYS_NODISCARD bool ChildrenAffectedByForwardPositionalRules() const noexcept
+    {
+      return HasStyleFlag(NodeStyleFlags::ChildrenAffectedByForwardPositionalRules);
+    }
+
+    KRYS_NODISCARD bool DescendantsAffectedByForwardPositionalRules() const noexcept
+    {
+      return HasStyleFlag(NodeStyleFlags::DescendantsAffectedByForwardPositionalRules);
+    }
+
+    KRYS_NODISCARD bool ChildrenAffectedByBackwardPositionalRules() const noexcept
+    {
+      return HasStyleFlag(NodeStyleFlags::ChildrenAffectedByBackwardPositionalRules);
+    }
+
+    KRYS_NODISCARD bool DescendantsAffectedByBackwardPositionalRules() const noexcept
+    {
+      return HasStyleFlag(NodeStyleFlags::DescendantsAffectedByBackwardPositionalRules);
+    }
+
+    KRYS_NODISCARD bool AffectedByHasWithPositionalPseudoClass() const noexcept
+    {
+      return HasStyleFlag(NodeStyleFlags::AffectedByHasWithPositionalPseudoClass);
+    }
+
+    /// @brief Whether selector matching set a flag on the element while matching its children.
+    KRYS_NODISCARD bool HasFlagsSetDuringStylingOfChildren() const noexcept;
+
+    /// @brief The element's index among its parent's element children, plus one, as cached by selector
+    /// matching; zero if it isn't known.
+    KRYS_NODISCARD uint32 ChildIndex() const noexcept;
+
+    void SetStyleAffectedByEmpty() noexcept
+    {
+      SetStyleFlag(NodeStyleFlags::StyleAffectedByEmpty);
+    }
+
+    void SetStyleIsAffectedByPreviousSibling() noexcept
+    {
+      SetStyleFlag(NodeStyleFlags::StyleIsAffectedByPreviousSibling);
+    }
+
+    void SetDescendantsAffectedByPreviousSibling() noexcept
+    {
+      SetStyleFlag(NodeStyleFlags::DescendantsAffectedByPreviousSibling);
+    }
+
+    void SetAffectsNextSiblingElementStyle() noexcept
+    {
+      SetStyleFlag(NodeStyleFlags::AffectsNextSiblingElementStyle);
+    }
+
+    void SetChildrenAffectedByFirstChildRules() noexcept
+    {
+      SetStyleFlag(NodeStyleFlags::ChildrenAffectedByFirstChildRules);
+    }
+
+    void SetChildrenAffectedByLastChildRules() noexcept
+    {
+      SetStyleFlag(NodeStyleFlags::ChildrenAffectedByLastChildRules);
+    }
+
+    void SetChildrenAffectedByForwardPositionalRules() noexcept
+    {
+      SetStyleFlag(NodeStyleFlags::ChildrenAffectedByForwardPositionalRules);
+    }
+
+    void SetDescendantsAffectedByForwardPositionalRules() noexcept
+    {
+      SetStyleFlag(NodeStyleFlags::DescendantsAffectedByForwardPositionalRules);
+    }
+
+    void SetChildrenAffectedByBackwardPositionalRules() noexcept
+    {
+      SetStyleFlag(NodeStyleFlags::ChildrenAffectedByBackwardPositionalRules);
+    }
+
+    void SetDescendantsAffectedByBackwardPositionalRules() noexcept
+    {
+      SetStyleFlag(NodeStyleFlags::DescendantsAffectedByBackwardPositionalRules);
+    }
+
+    void SetAffectedByHasWithPositionalPseudoClass() noexcept
+    {
+      SetStyleFlag(NodeStyleFlags::AffectedByHasWithPositionalPseudoClass);
+    }
+
+    void SetChildIndex(uint32 index) noexcept;
+
+#pragma endregion
+
   private:
     KRYS_NODISCARD ElementRareData &EnsureElementRareData() noexcept;
+
+    KRYS_NODISCARD const RenderStyle &
+      ResolvePseudoElementStyle(const style::PseudoElementIdentifier &pseudoElementIdentifier) noexcept;
 
   protected:
     /// @brief Sets an attribute in the null namespace to `value` without running the attribute change steps

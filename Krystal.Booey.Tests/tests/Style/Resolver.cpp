@@ -404,6 +404,11 @@ namespace krys::boo::style::tests
 
     SECTION("Pages")
     {
+      // Without a resolved document element style there's no writing mode to resolve pages against.
+      auto unresolved = GetResolver().StyleForPage(0);
+      CHECK(Serialised(*unresolved, unresolved->MarginTop()) == "0px");
+
+      Document->UpdateStyleIfNeeded();
       auto first = GetResolver().StyleForPage(0);
       CHECK(Serialised(*first, first->MarginTop()) == "7px");
       CHECK(Serialised(*first, first->MarginLeft()) == "9px");

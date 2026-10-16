@@ -37,6 +37,13 @@ namespace krys::boo::html
 
 #pragma endregion
 
+    /// @brief The slot's assigned nodes, or null if it has none.
+    /// @see https://dom.spec.whatwg.org/#slot-assigned-nodes
+    KRYS_NODISCARD const List<Ref<dom::Node>> *AssignedNodes() const noexcept
+    {
+      return _assignedNodes.empty() ? nullptr : &_assignedNodes;
+    }
+
   protected:
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,

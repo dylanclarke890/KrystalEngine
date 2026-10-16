@@ -9,6 +9,7 @@
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
 #include <utility>
 
 namespace krys::boo::dom
@@ -325,12 +326,16 @@ namespace krys::boo::dom
     shadow->_clonable = clonable;
     shadow->_serializable = serializable;
 
+    RenderTreeUpdater::TearDownRenderersForShadowRootInsertion(element);
+
     element._shadowRoot = shadow;
 
     if (element.IsConnected())
     {
       ExtensibilityHooks::NodeInserted(*shadow, false);
     }
+
+    element.InvalidateStyleAndRenderersForSubtree();
 
     return {};
   }

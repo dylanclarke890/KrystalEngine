@@ -43,12 +43,21 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTitleElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
-#include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
+#include "Krystal.Booey/Style/Change.hpp"
+#include "Krystal.Booey/Style/Relations.hpp"
+#include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/Style/ResolveForDocument.hpp"
+#include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
+#include "Krystal.Booey/Style/TreeResolver.hpp"
+#include "Krystal.Booey/Style/Update.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGScriptElement.hpp"
+#include "Krystal.Core/Utils/SetForScope.hpp"
 
 namespace krys::boo::dom
 {
@@ -777,6 +786,230 @@ namespace krys::boo::dom
     return _initialContainingBlockStyle.get();
   }
 
+  const RenderStyle &Document::RenderViewStyle() const noexcept
+  {
+    if (_renderViewStyle)
+    {
+      return *_renderViewStyle;
+    }
+    return *InitialContainingBlockStyle();
+  }
+
+  void Document::ScheduleFullStyleRebuild() noexcept
+  {
+    _needsFullStyleRebuild = true;
+    ScheduleStyleRecalc();
+  }
+
+  void Document::ScheduleStyleRecalc() noexcept
+  {
+    krys_debug_assert(ChildNeedsStyleRecalc() || _needsFullStyleRebuild);
+
+    // FIXME: Start the style recalc timer, once there's an event loop. Until then the host resolves style
+    // (UpdateStyleIfNeeded) when it needs it.
+  }
+
+  void Document::UnscheduleStyleRecalc() noexcept
+  {
+    krys_debug_assert(!ChildNeedsStyleRecalc());
+
+    _needsFullStyleRebuild = false;
+  }
+
+  bool Document::HasPendingStyleRecalc() const noexcept
+  {
+    return NeedsStyleRecalc() && !_inStyleRecalc;
+  }
+
+  bool Document::HasPendingFullStyleRebuild() const noexcept
+  {
+    return HasPendingStyleRecalc() && _needsFullStyleRebuild;
+  }
+
+  void Document::UpdateRenderTree(UniquePtr<style::Update> styleUpdate) noexcept
+  {
+    krys_debug_assert(!InRenderTreeUpdate());
+
+    style::PostResolutionCallbackDisabler callbackDisabler(*this);
+    {
+      SetForScope inRenderTreeUpdate(_inRenderTreeUpdate, true);
+      {
+        RenderTreeUpdater updater(*this, callbackDisabler);
+        updater.Commit(krys::move(styleUpdate));
+      }
+    }
+  }
+
+  void Document::ResolveStyle(ResolveStyleType type) noexcept
+  {
+    if (_inStyleRecalc)
+    {
+      return;
+    }
+
+    // FIXME: We should update style on our ancestor chain before proceeding, however doing so at
+    // the time this comment was originally written caused several tests to crash.
+
+    StyleScope().FlushPendingUpdate();
+
+    {
+      style::PostResolutionCallbackDisabler disabler(*this);
+
+      _inStyleRecalc = true;
+
+      if (_needsFullStyleRebuild)
+      {
+        type = ResolveStyleType::Rebuild;
+      }
+
+      if (type == ResolveStyleType::Rebuild)
+      {
+        // This may get set again during style resolve.
+        _hasNodesWithMissingStyle = false;
+
+        auto newStyle = style::ResolveForDocument(*this);
+
+        auto documentChanges = _initialContainingBlockStyle
+                                 ? style::DetermineChanges(newStyle, *_initialContainingBlockStyle)
+                                 : EnumSet<style::Change> {style::Change::Renderer};
+        if (!documentChanges.IsEmpty() || !_renderViewStyle)
+        {
+          _initialContainingBlockStyle = RenderStyle::ClonePtr(newStyle);
+          // The used style may end up differing from the computed style due to propagation of properties from
+          // elements.
+          _renderViewStyle = RenderStyle::ClonePtr(newStyle);
+        }
+
+        if (auto documentElement = DocumentElement())
+        {
+          documentElement->InvalidateStyleForSubtree();
+        }
+      }
+
+      {
+        // FIXME: The pending render tree update (text and SVG renderer updates), once there are renderers.
+        style::TreeResolver resolver(*this);
+        auto styleUpdate = resolver.Resolve();
+
+        while (resolver.NeedsInterleavedLayout())
+        {
+          if (styleUpdate)
+          {
+            UpdateRenderTree(krys::move(styleUpdate));
+
+            // FIXME: The interleaved layout, once there's layout.
+          }
+
+          styleUpdate = resolver.Resolve();
+        }
+
+        SetHasValidStyle();
+        ClearChildNeedsStyleRecalc();
+        UnscheduleStyleRecalc();
+
+        _inStyleRecalc = false;
+
+        if (styleUpdate)
+        {
+          UpdateRenderTree(krys::move(styleUpdate));
+        }
+      }
+    }
+  }
+
+  bool Document::NeedsStyleRecalc() const noexcept
+  {
+    if (_needsFullStyleRebuild)
+    {
+      return true;
+    }
+
+    if (ChildNeedsStyleRecalc())
+    {
+      return true;
+    }
+
+    if (StyleScope().HasPendingUpdate())
+    {
+      return true;
+    }
+
+    return false;
+  }
+
+  bool Document::UpdateStyleIfNeeded() noexcept
+  {
+    StyleScope().FlushPendingUpdate();
+
+    if (!NeedsStyleRecalc())
+    {
+      return false;
+    }
+
+    ResolveStyle();
+    return true;
+  }
+
+  bool Document::UpdateStyleIfNeededIgnoringPendingStylesheets() noexcept
+  {
+    SetForScope ignorePendingStylesheets(_ignorePendingStylesheets, true);
+    // FIXME: This should just invalidate elements with missing styles.
+    if (_hasNodesWithMissingStyle)
+    {
+      ScheduleFullStyleRebuild();
+    }
+
+    // FIXME: Update the relevancy of content-visibility elements, once there's content relevancy.
+
+    return UpdateStyleIfNeeded();
+  }
+
+  UniquePtr<RenderStyle> Document::StyleForElementIgnoringPendingStylesheets(
+    Element &element, const RenderStyle *parentStyle,
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
+  {
+    krys_debug_assert(&element.NodeDocument() == this);
+    krys_debug_assert(!pseudoElementIdentifier || parentStyle);
+    krys_debug_assert(style::PostResolutionCallbacksAreSuspended());
+
+    Maybe<RenderStyle> updatedDocumentStyle;
+    if (!parentStyle && _needsFullStyleRebuild)
+    {
+      updatedDocumentStyle.emplace(style::ResolveForDocument(*this));
+      parentStyle = &*updatedDocumentStyle;
+    }
+
+    SetForScope change(_ignorePendingStylesheets, true);
+    auto resolver = ShareRef(style::Scope::ForNode(element).GetResolver());
+
+    auto elementStyle = resolver->StyleForElement(element, {parentStyle});
+    if (pseudoElementIdentifier)
+    {
+      auto type = pseudoElementIdentifier->Type;
+      if ((type == PseudoElementType::FirstLetter || type == PseudoElementType::FirstLine)
+          && elementStyle.Style && !style::SupportsFirstLineAndLetterPseudoElement(*elementStyle.Style))
+      {
+        return {};
+      }
+
+      auto style = resolver->StyleForPseudoElement(
+        element, style::PseudoElementRequest(*pseudoElementIdentifier), {parentStyle});
+      if (!style)
+      {
+        return nullptr;
+      }
+      return krys::move(style->Style);
+    }
+
+    if (elementStyle.Relations)
+    {
+      auto emptyUpdate = CreateUnique<style::Update>(*this);
+      style::CommitRelations(krys::move(elementStyle.Relations), *emptyUpdate);
+    }
+
+    return krys::move(elementStyle.Style);
+  }
+
   VisitedLinkState &Document::GetVisitedLinkState() const noexcept
   {
     if (!_visitedLinkState)
@@ -811,8 +1044,7 @@ namespace krys::boo::dom
     {
       return _activeLinkColor;
     }
-    return css::ColorFromKeyword(css::ValueId::WebkitActivelink,
-                                 DocumentStyleColorOptions(*this, &style));
+    return css::ColorFromKeyword(css::ValueId::WebkitActivelink, DocumentStyleColorOptions(*this, &style));
   }
 
   void Document::ResetLinkColor() noexcept

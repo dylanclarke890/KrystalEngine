@@ -155,7 +155,7 @@ namespace krys::boo::html
         {
           document.ResetVisitedLinkColor();
         }
-        // FIXME: Invalidate the style of the subtree once there is style invalidation.
+        InvalidateStyleForSubtree();
         return;
       }
       if (localName == u8"alink")
@@ -168,7 +168,7 @@ namespace krys::boo::html
         {
           document.ResetActiveLinkColor();
         }
-        // FIXME: Invalidate the style of the subtree once there is style invalidation.
+        InvalidateStyleForSubtree();
         return;
       }
       if (localName == u8"link")
@@ -181,7 +181,7 @@ namespace krys::boo::html
         {
           document.ResetLinkColor();
         }
-        // FIXME: Invalidate the style of the subtree once there is style invalidation.
+        InvalidateStyleForSubtree();
         return;
       }
     }
