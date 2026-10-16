@@ -702,6 +702,8 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Adjuster.hpp
   include/Krystal.Booey/Style/Builder.hpp
   include/Krystal.Booey/Style/Change.hpp
+  include/Krystal.Booey/Style/Difference.hpp
+  include/Krystal.Booey/Style/InlineTextBoxStyle.hpp
   include/Krystal.Booey/Style/ResolvedStyle.hpp
   include/Krystal.Booey/Style/ContainerQueryEvaluator.hpp
   include/Krystal.Booey/Style/Styleable.hpp
@@ -1903,6 +1905,8 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Style/Adjuster.cpp
   src/Style/Builder.cpp
   src/Style/Change.cpp
+  src/Style/Difference.cpp
+  src/Style/InlineTextBoxStyle.cpp
 
   # Element resolution (f5b)
   src/Style/MatchedDeclarationsCache.cpp

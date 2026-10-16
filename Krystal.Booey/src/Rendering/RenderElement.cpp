@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/HTML/HTMLMarqueeElement.hpp"
 
 namespace krys::boo
 {
@@ -134,8 +135,87 @@ namespace krys::boo
     return nullptr;
   }
 
-  void RenderElement::SetStyle(RenderStyle &&style) noexcept
+  style::Difference RenderElement::AdjustStyleDifference(style::Difference diff) const noexcept
   {
+    // FIXME: Renderers have no layers yet (hasLayer() is false), so the composited cases and the layer status
+    // changes of plug-ins, iframes and canvas don't apply.
+
+    // If transform changed, and we are not composited, need to do a layout.
+    if (diff.ContextSensitiveProperties.Contains(style::DifferenceContextSensitiveProperty::Transform))
+    {
+      // FIXME: when transforms are taken into account for overflow, we will need to do a layout.
+      diff.Result = std::max(diff.Result, style::DifferenceResult::Layout);
+    }
+
+    if (diff.ContextSensitiveProperties.Contains(style::DifferenceContextSensitiveProperty::Opacity))
+    {
+      diff.Result = std::max(diff.Result, style::DifferenceResult::RepaintLayer);
+    }
+
+    if (diff.ContextSensitiveProperties.Contains(style::DifferenceContextSensitiveProperty::ClipPath))
+    {
+      diff.Result = std::max(diff.Result, style::DifferenceResult::Repaint);
+    }
+
+    if (diff.ContextSensitiveProperties.Contains(style::DifferenceContextSensitiveProperty::WillChange))
+    {
+      if (Style().GetWillChange().CanTriggerCompositing())
+      {
+        diff.Result = std::max(diff.Result, style::DifferenceResult::RecompositeLayer);
+      }
+    }
+
+    if (IsHTMLMarquee())
+    {
+      diff.Result = std::max(diff.Result, style::DifferenceResult::Layout);
+    }
+
+    // If we have no layer(), just treat a RepaintLayer hint as a normal Repaint.
+    if (diff == style::DifferenceResult::RepaintLayer)
+    {
+      diff.Result = style::DifferenceResult::Repaint;
+    }
+
+    return diff;
+  }
+
+  bool RenderElement::IsHTMLMarquee() const noexcept
+  {
+    auto *element = GetElement();
+    if (!element || element->Renderer() != this)
+    {
+      return false;
+    }
+    auto *htmlElement = DynamicDowncast<html::HTMLElement>(*element);
+    return htmlElement && Is<html::HTMLMarqueeElement>(*htmlElement);
+  }
+
+  void RenderElement::InitializeStyle() noexcept
+  {
+    // FIXME: Pending resources (Style::loadPendingResources), styleWillChange and styleDidChange with
+    // DifferenceResult::NewStyle, and view transitions, once there are any.
+    _hasInitializedStyle = true;
+  }
+
+  void RenderElement::SetStyle(RenderStyle &&style, style::DifferenceResult minimalStyleDifference) noexcept
+  {
+    // FIXME: Should change RenderView so it can use initializeStyle too.
+    // If we do that, we can assert m_hasInitializedStyle unconditionally,
+    // and remove the check of m_hasInitializedStyle below too.
+    krys_debug_assert(_hasInitializedStyle);
+
+    auto diff = style::Difference {};
+    if (_hasInitializedStyle)
+    {
+      diff = style::GetDifference(_style, style);
+    }
+
+    diff.Result = std::max(diff.Result, minimalStyleDifference);
+    diff = AdjustStyleDifference(diff);
+
+    // FIXME: Pending resources, the repaint before the change, styleWillChange, styleDidChange (also of the
+    // text children), and the layout and repaint the difference asks for, once there's layout and painting.
+    (void)diff;
     _style = krys::move(style);
   }
 

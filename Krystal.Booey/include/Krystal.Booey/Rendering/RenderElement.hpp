@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
+#include "Krystal.Booey/Style/Difference.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
@@ -38,6 +39,7 @@ namespace krys::boo
 
   private:
     RenderStyle _style;
+    bool _hasInitializedStyle {false};
 
   public:
     /// @brief Displays that get a block flow instead of their usual renderer.
@@ -64,9 +66,19 @@ namespace krys::boo
       return _style;
     }
 
-    /// @brief Replaces the renderer's style.
-    /// @note FIXME: Doesn't diff the styles or invalidate layout and painting (`Style::Difference`).
-    void SetStyle(RenderStyle &&style) noexcept;
+    KRYS_NODISCARD bool HasInitializedStyle() const noexcept
+    {
+      return _hasInitializedStyle;
+    }
+
+    /// @brief Takes the style the renderer was created with as its first style.
+    void InitializeStyle() noexcept;
+
+    /// @brief Replaces the renderer's style, doing at least @p minimalStyleDifference of the work a style
+    /// change needs.
+    /// @note FIXME: The difference doesn't invalidate layout or painting yet (no layout, painting or layers).
+    void SetStyle(RenderStyle &&style,
+                  style::DifferenceResult minimalStyleDifference = style::DifferenceResult::Equal) noexcept;
 
     /// @brief The element rendered, or null for an anonymous box.
     KRYS_NODISCARD dom::Element *GetElement() const noexcept;
@@ -92,6 +104,9 @@ namespace krys::boo
   private:
     RenderElement(Type type, dom::ContainerNode &elementOrDocument, RenderStyle &&style,
                   EnumSet<TypeFlag> flags, TypeSpecificFlags typeSpecificFlags) noexcept;
+
+    KRYS_NODISCARD style::Difference AdjustStyleDifference(style::Difference diff) const noexcept;
+    KRYS_NODISCARD bool IsHTMLMarquee() const noexcept;
   };
 }
 

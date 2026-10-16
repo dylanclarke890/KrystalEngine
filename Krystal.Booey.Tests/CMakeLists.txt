@@ -381,6 +381,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/RuleSet.cpp
 		tests/Style/Scope.cpp
 		tests/Style/TreeResolver.cpp
+		tests/Style/Difference.cpp
 		tests/Style/UserAgentStyle.cpp
 		tests/Style/ScopedName.cpp
 		tests/Style/StyleSheetContentsCache.cpp

@@ -262,10 +262,9 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The style difference to apply (`RecompositeLayer`, `Equal`), once there's a `Style::Difference`.
     if (elementUpdate.RecompositeLayer)
     {
-      renderer->SetStyle(krys::move(elementUpdateStyle));
+      renderer->SetStyle(krys::move(elementUpdateStyle), style::DifferenceResult::RecompositeLayer);
       return;
     }
 
@@ -276,7 +275,7 @@ namespace krys::boo
       return;
     }
 
-    renderer->SetStyle(krys::move(elementUpdateStyle));
+    renderer->SetStyle(krys::move(elementUpdateStyle), style::DifferenceResult::Equal);
   }
 
   void RenderTreeUpdater::CreateRenderer(dom::Element &element, RenderStyle &&style) noexcept
@@ -294,6 +293,8 @@ namespace krys::boo
     }
 
     element.SetRenderer(newRenderer.get());
+
+    newRenderer->InitializeStyle();
     // FIXME: The render tree owns renderers; until there is one, the element does.
     element._ownedRenderer = krys::move(newRenderer);
   }
