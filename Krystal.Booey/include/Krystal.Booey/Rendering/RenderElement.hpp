@@ -94,6 +94,9 @@ namespace krys::boo
       return _lastChild;
     }
 
+    KRYS_NODISCARD RenderObject *FirstInFlowChild() const noexcept;
+    KRYS_NODISCARD RenderObject *LastInFlowChild() const noexcept;
+
     KRYS_NODISCARD RenderObject *FirstChildSlow() const noexcept final
     {
       return FirstChild();
@@ -132,6 +135,8 @@ namespace krys::boo
     KRYS_NODISCARD bool IsBeforeContent() const noexcept;
     KRYS_NODISCARD bool IsAfterContent() const noexcept;
     KRYS_NODISCARD bool IsBeforeOrAfterContent() const noexcept;
+    KRYS_NODISCARD static bool IsBeforeContent(const RenderObject *renderer) noexcept;
+    KRYS_NODISCARD static bool IsAfterContent(const RenderObject *renderer) noexcept;
 
     /// @brief The element whose content this renderer renders: the host of a pseudo-element.
     KRYS_NODISCARD dom::Element *GeneratingElement() const noexcept;

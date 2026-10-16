@@ -32,8 +32,8 @@ namespace krys::boo
   class RenderView;
 
   /// @brief Applies a style update to the render tree.
-  // FIXME: Text renderers, the renderers of generated content, ::marker, ::backdrop, the anonymous box rules,
-  // rebuild roots, the top layer and layout come with the rest of the render tree.
+  // FIXME: Text renderers, the renderers of generated content, ::marker, ::backdrop, the top layer and layout
+  // come with the rest of the render tree.
   class RenderTreeUpdater
   {
     KRYS_NON_COPY_MOVABLE(RenderTreeUpdater);
@@ -79,6 +79,7 @@ namespace krys::boo
     static void TearDownRenderersAfterSlotChange(dom::Element &host) noexcept;
 
   private:
+    void UpdateRebuildRoots() noexcept;
     void UpdateRenderTree(dom::ContainerNode &root) noexcept;
     void UpdateElementRenderer(dom::Element &element, const style::ElementUpdate &elementUpdate) noexcept;
     void UpdateRendererStyle(RenderElement &renderer, RenderStyle &&newStyle,

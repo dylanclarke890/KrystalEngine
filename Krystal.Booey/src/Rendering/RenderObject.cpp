@@ -44,6 +44,39 @@ namespace krys::boo
     return false;
   }
 
+  RenderObject *RenderObject::PreviousInFlowSibling() const noexcept
+  {
+    auto *previousSibling = PreviousSibling();
+    while (previousSibling && !previousSibling->IsInFlow())
+    {
+      previousSibling = previousSibling->PreviousSibling();
+    }
+    return previousSibling;
+  }
+
+  RenderObject *RenderObject::NextInFlowSibling() const noexcept
+  {
+    auto *nextSibling = NextSibling();
+    while (nextSibling && !nextSibling->IsInFlow())
+    {
+      nextSibling = nextSibling->NextSibling();
+    }
+    return nextSibling;
+  }
+
+  bool RenderObject::IsAtomicInlineLevelBox() const noexcept
+  {
+    return Style().IsDisplayInlineType()
+           && !(Style().Display() == DisplayType::Inline && !IsBlockLevelReplacedOrAtomicInline());
+  }
+
+  bool RenderObject::IsNonReplacedAtomicInlineLevelBox() const noexcept
+  {
+    // FIXME: Check if iframe should really behave like non-replaced here.
+    // FIXME: Inline iframes, once there are iframe renderers.
+    return !IsRenderReplaced() && IsAtomicInlineLevelBox();
+  }
+
   void RenderObject::SetParent(RenderElement *parent) noexcept
   {
     _parent = parent;

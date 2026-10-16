@@ -245,8 +245,13 @@ namespace krys::boo::tests
     {
       CHECK(renderer(u8"child").ContainingBlock() == &renderer(u8"static"));
       CHECK(renderer(u8"child").Container() == &renderer(u8"static"));
-      // An inline's containing block skips inline ancestors; its container is its parent.
-      CHECK(renderer(u8"b").ContainingBlock() == &renderer(u8"static"));
+      // An inline's containing block skips inline ancestors; its container is its parent. The span is wrapped
+      // in an anonymous block, since its siblings are blocks.
+      auto *wrapper = renderer(u8"span").Parent();
+      REQUIRE(wrapper);
+      CHECK(wrapper->IsAnonymousBlock());
+      CHECK(wrapper->Parent() == &renderer(u8"static"));
+      CHECK(renderer(u8"b").ContainingBlock() == wrapper);
       CHECK(renderer(u8"b").Container() == &renderer(u8"span"));
       CHECK(renderer(u8"body").ContainingBlock() == fixture.Document->DocumentElement()->Renderer());
     }

@@ -321,6 +321,44 @@ namespace krys::boo
     return true;
   }
 
+  bool RenderElement::IsBeforeContent(const RenderObject *renderer) noexcept
+  {
+    auto *element = DynamicDowncast<RenderElement>(renderer);
+    return element && element->IsBeforeContent();
+  }
+
+  bool RenderElement::IsAfterContent(const RenderObject *renderer) noexcept
+  {
+    auto *element = DynamicDowncast<RenderElement>(renderer);
+    return element && element->IsAfterContent();
+  }
+
+  RenderObject *RenderElement::FirstInFlowChild() const noexcept
+  {
+    if (auto *firstChild = FirstChild())
+    {
+      if (firstChild->IsInFlow())
+      {
+        return firstChild;
+      }
+      return firstChild->NextInFlowSibling();
+    }
+    return nullptr;
+  }
+
+  RenderObject *RenderElement::LastInFlowChild() const noexcept
+  {
+    if (auto *lastChild = LastChild())
+    {
+      if (lastChild->IsInFlow())
+      {
+        return lastChild;
+      }
+      return lastChild->PreviousInFlowSibling();
+    }
+    return nullptr;
+  }
+
   bool RenderElement::IsBeforeOrAfterContent() const noexcept
   {
     return IsBeforeContent() || IsAfterContent();

@@ -8,6 +8,8 @@
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
+#include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
@@ -85,9 +87,7 @@ namespace krys::boo
 
     _styleUpdate = krys::move(styleUpdate);
 
-    // FIXME: Rebuild roots (updateRebuildRoots: continuations, anonymous flex items, blocks in inlines), once
-    // there are anonymous boxes.
-    (void)_styleUpdate->TakeRebuildRoots();
+    UpdateRebuildRoots();
 
     UpdateRenderViewStyle();
 
@@ -105,10 +105,128 @@ namespace krys::boo
       UpdateRenderTree(*renderingRoot);
     }
 
-    // FIXME: Quotes and counters (generatedContent().updateRemainingQuotes/updateCounters) and
-    // RenderTreeBuilder's updateAfterDescendants of the render view, once there's generated content.
+    // FIXME: Quotes and counters (generatedContent().updateRemainingQuotes/updateCounters), once there's
+    // generated content.
+
+    _builder->UpdateAfterDescendants(GetRenderView());
 
     _styleUpdate = nullptr;
+  }
+
+  void RenderTreeUpdater::UpdateRebuildRoots() noexcept
+  {
+    auto findNewRebuildRoot = [&](dom::Element &root) -> dom::Element *
+    {
+      auto *renderingAncestor = FindRenderingAncestor(root);
+      if (!renderingAncestor)
+      {
+        return nullptr;
+      }
+      auto *rootRenderer = root.Renderer();
+      // FIXME: Renderers inside a continuation, once there are continuations.
+      auto isInsideAnonymousFlexItemWithSiblings = [&]
+      {
+        if (!Is<RenderFlexibleBox>(renderingAncestor->Renderer()))
+        {
+          return false;
+        }
+        if (!root.PreviousSibling() || !root.PreviousSibling()->Renderer() || !root.NextSibling()
+            || !root.NextSibling()->Renderer())
+        {
+          return false;
+        }
+        // Direct children of a flex box are supposed to be individual flex items.
+        if (auto *parent = root.PreviousSibling()->Renderer()->Parent(); parent && parent->IsAnonymousBlock())
+        {
+          return true;
+        }
+        return false;
+      };
+      auto isBlockInInline = [&]
+      {
+        if (!Is<RenderInline>(renderingAncestor->Renderer()))
+        {
+          return false;
+        }
+        return rootRenderer && rootRenderer->IsInFlow() && !rootRenderer->IsInline();
+      };
+      if (isInsideAnonymousFlexItemWithSiblings() || isBlockInInline()
+          || RenderTreeBuilder::IsRebuildRootForChildren(*renderingAncestor->Renderer()))
+      {
+        return renderingAncestor;
+      }
+      return nullptr;
+    };
+
+    auto addForRebuild = [&](dom::Element &element)
+    {
+      auto *existingUpdate = _styleUpdate->GetElementUpdate(element);
+      if (existingUpdate)
+      {
+        if (existingUpdate->Changes.Contains(style::Change::Renderer))
+        {
+          return false;
+        }
+        existingUpdate->Changes.Add(style::Change::Renderer);
+        return true;
+      }
+
+      auto *existingStyle = element.RenderOrDisplayContentsStyle();
+      if (!existingStyle)
+      {
+        return false;
+      }
+
+      auto *parent = dom::ComposedTreeAncestors(element).First();
+      _styleUpdate->AddElement(
+        element, parent,
+        style::ElementUpdate {
+          CreateUnique<RenderStyle>(RenderStyle::CloneIncludingPseudoElements(*existingStyle)),
+          style::Change::Renderer});
+      return true;
+    };
+
+    auto addSubtreeForRebuild = [&](dom::Element &root)
+    {
+      if (!addForRebuild(root))
+      {
+        return;
+      }
+      auto descendants = dom::ComposedTreeDescendants(root);
+      auto it = descendants.begin();
+      auto end = descendants.end();
+      while (it != end)
+      {
+        auto *descendant = DynamicDowncast<dom::Element>(*it);
+        if (!descendant)
+        {
+          it.TraverseNext();
+          continue;
+        }
+        if (!addForRebuild(*descendant))
+        {
+          it.TraverseNextSkippingChildren();
+          continue;
+        }
+        it.TraverseNext();
+      }
+    };
+
+    while (true)
+    {
+      auto rebuildRoots = _styleUpdate->TakeRebuildRoots();
+      if (rebuildRoots.isEmpty())
+      {
+        break;
+      }
+      for (auto &rebuildRoot : rebuildRoots)
+      {
+        if (auto *newRebuildRoot = findNewRebuildRoot(*rebuildRoot))
+        {
+          addSubtreeForRebuild(*newRebuildRoot);
+        }
+      }
+    }
   }
 
   static bool ShouldCreateRenderer(const dom::Element &element, const RenderElement &parentRenderer) noexcept
@@ -273,16 +391,26 @@ namespace krys::boo
       GetGeneratedContent().UpdateBeforeOrAfterPseudoElement(element, *update, PseudoElementType::After);
     }
 
-    // FIXME: The ::backdrop renderer, writing suggestions, view transitions, RenderTreeBuilder's
-    // updateAfterDescendants and didAttachRenderers, once there are any.
+    auto *renderer = element.Renderer();
+    if (!renderer)
+    {
+      // FIXME: View transitions, once there are any.
+      return;
+    }
+
+    // FIXME: The ::backdrop renderer, writing suggestions and view transitions, once there are any.
+
+    _builder->UpdateAfterDescendants(*renderer);
+
+    // FIXME: Custom style resolve callbacks (didAttachRenderers), once there are any.
   }
 
   void RenderTreeUpdater::UpdateRendererStyle(RenderElement &renderer, RenderStyle &&newStyle,
                                               style::DifferenceResult minimalStyleDifference) noexcept
   {
-    // FIXME: Normalize the tree after the style change (RenderTreeBuilder::normalizeTreeAfterStyleChange),
-    // once there are anonymous boxes.
+    auto oldStyle = RenderStyle::Clone(renderer.Style());
     renderer.SetStyle(krys::move(newStyle), minimalStyleDifference);
+    _builder->NormalizeTreeAfterStyleChange(renderer, oldStyle);
   }
 
   void RenderTreeUpdater::UpdateElementRenderer(dom::Element &element,

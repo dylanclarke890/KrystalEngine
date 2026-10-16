@@ -352,6 +352,9 @@ namespace krys::boo
       return _next;
     }
 
+    KRYS_NODISCARD RenderObject *PreviousInFlowSibling() const noexcept;
+    KRYS_NODISCARD RenderObject *NextInFlowSibling() const noexcept;
+
     // Use RenderElement versions instead.
     KRYS_NODISCARD virtual RenderObject *FirstChildSlow() const noexcept
     {
@@ -374,6 +377,10 @@ namespace krys::boo
     KRYS_NODISCARD RenderObject *LastLeafChild() const noexcept;
 
     KRYS_NODISCARD virtual bool CanHaveChildren() const noexcept = 0;
+    KRYS_NODISCARD virtual bool CreatesAnonymousWrapper() const noexcept
+    {
+      return false;
+    }
     KRYS_NODISCARD virtual bool CanHaveGeneratedChildren() const noexcept;
 
     /// @brief The render tree's root.
@@ -571,6 +578,9 @@ namespace krys::boo
     {
       return !_stateFlags.Contains(StateFlag::VerticalWritingMode);
     }
+
+    KRYS_NODISCARD bool IsAtomicInlineLevelBox() const noexcept;
+    KRYS_NODISCARD bool IsNonReplacedAtomicInlineLevelBox() const noexcept;
 
     KRYS_NODISCARD bool IsExcludedFromNormalLayout() const noexcept
     {

@@ -736,6 +736,10 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/RenderTableCol.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp
+  include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlock.hpp
+  include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlockFlow.hpp
+  include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderInline.hpp
+  include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderTable.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreePosition.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeUpdaterGeneratedContent.hpp
 
@@ -1961,6 +1965,10 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/RenderTableCol.cpp
   src/Rendering/Updating/RenderTreeUpdater.cpp
   src/Rendering/Updating/RenderTreeBuilder.cpp
+  src/Rendering/Updating/RenderTreeBuilderBlock.cpp
+  src/Rendering/Updating/RenderTreeBuilderBlockFlow.cpp
+  src/Rendering/Updating/RenderTreeBuilderInline.cpp
+  src/Rendering/Updating/RenderTreeBuilderTable.cpp
   src/Rendering/Updating/RenderTreePosition.cpp
   src/Rendering/Updating/RenderTreeUpdaterGeneratedContent.cpp
   src/Style/ContainerQueryEvaluator.cpp

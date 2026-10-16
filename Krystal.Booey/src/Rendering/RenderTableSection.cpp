@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/RenderTableSection.hpp"
+#include "Krystal.Booey/Rendering/RenderTableRow.hpp"
 
 namespace krys::boo
 {
@@ -18,4 +19,14 @@ namespace krys::boo
 
   // Do not add any code in below destructor. Add it to willBeDestroyed() instead.
   RenderTableSection::~RenderTableSection() noexcept = default;
+
+  RenderTableRow *RenderTableSection::FirstRow() const noexcept
+  {
+    return Downcast<RenderTableRow>(FirstChild());
+  }
+
+  RenderTableRow *RenderTableSection::LastRow() const noexcept
+  {
+    return Downcast<RenderTableRow>(LastChild());
+  }
 }

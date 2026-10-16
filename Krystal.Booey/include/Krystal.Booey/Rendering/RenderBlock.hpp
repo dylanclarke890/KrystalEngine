@@ -25,6 +25,11 @@ namespace krys::boo
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override;
 
+    KRYS_NODISCARD virtual bool CanDropAnonymousBlockChild() const noexcept
+    {
+      return true;
+    }
+
     // FIXME: Layout queries, reachable only through `RendererOf` and `RenderBoxOf`, which return null until
     // there's layout.
     KRYS_NODISCARD LayoutUnit PaddingBoxWidth() const noexcept;

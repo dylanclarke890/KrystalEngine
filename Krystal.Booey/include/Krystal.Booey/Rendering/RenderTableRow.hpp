@@ -7,6 +7,9 @@
 
 namespace krys::boo
 {
+  class RenderTableCell;
+  class RenderTableSection;
+
   /// @brief A table row.
   // FIXME: The row index and row layout come with the table builder and layout.
   class RenderTableRow final : public RenderBox
@@ -18,6 +21,14 @@ namespace krys::boo
     RenderTableRow(dom::Element &element, RenderStyle &&style) noexcept;
     RenderTableRow(dom::Document &document, RenderStyle &&style) noexcept;
     ~RenderTableRow() noexcept override;
+
+    KRYS_NODISCARD RenderTableRow *NextRow() const noexcept;
+    KRYS_NODISCARD RenderTableRow *PreviousRow() const noexcept;
+
+    KRYS_NODISCARD RenderTableCell *FirstCell() const noexcept;
+    KRYS_NODISCARD RenderTableCell *LastCell() const noexcept;
+
+    KRYS_NODISCARD RenderTableSection *Section() const noexcept;
 
     KRYS_NODISCARD bool CanHaveChildren() const noexcept override
     {

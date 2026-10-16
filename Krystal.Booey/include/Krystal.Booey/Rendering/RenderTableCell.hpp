@@ -7,6 +7,9 @@
 
 namespace krys::boo
 {
+  class RenderTableRow;
+  class RenderTableSection;
+
   /// @brief A table cell.
   // FIXME: Spans, the column index, collapsed borders and cell layout come with the table builder and layout.
   class RenderTableCell final : public RenderBlockFlow
@@ -18,6 +21,12 @@ namespace krys::boo
     RenderTableCell(dom::Element &element, RenderStyle &&style) noexcept;
     RenderTableCell(dom::Document &document, RenderStyle &&style) noexcept;
     ~RenderTableCell() noexcept override;
+
+    KRYS_NODISCARD RenderTableCell *NextCell() const noexcept;
+    KRYS_NODISCARD RenderTableCell *PreviousCell() const noexcept;
+
+    KRYS_NODISCARD RenderTableRow *Row() const noexcept;
+    KRYS_NODISCARD RenderTableSection *Section() const noexcept;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {

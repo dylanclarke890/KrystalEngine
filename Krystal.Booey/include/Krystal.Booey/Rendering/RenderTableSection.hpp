@@ -7,6 +7,8 @@
 
 namespace krys::boo
 {
+  class RenderTableRow;
+
   /// @brief A table row group.
   // FIXME: The grid of rows and cells, collapsed borders and section layout come with the table builder and
   // layout.
@@ -19,6 +21,9 @@ namespace krys::boo
     RenderTableSection(dom::Element &element, RenderStyle &&style) noexcept;
     RenderTableSection(dom::Document &document, RenderStyle &&style) noexcept;
     ~RenderTableSection() noexcept override;
+
+    KRYS_NODISCARD RenderTableRow *FirstRow() const noexcept;
+    KRYS_NODISCARD RenderTableRow *LastRow() const noexcept;
 
     KRYS_NODISCARD bool CanHaveChildren() const noexcept override
     {
