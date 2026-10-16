@@ -4,8 +4,10 @@
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/FontMetrics.hpp"
 #include "Krystal.Booey/Graphics/FontPlatformData.hpp"
+#include "Krystal.Booey/Graphics/GlyphBufferMembers.hpp"
 #include "Krystal.Booey/Graphics/GlyphMetricsMap.hpp"
 #include "Krystal.Booey/Graphics/GlyphPage.hpp"
+#include "Krystal.Booey/Graphics/HbUniquePtr.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -22,6 +24,8 @@
 namespace krys::boo
 {
   class FontDescription;
+  class GlyphBuffer;
+  enum class TextDirection : bool;
 
   enum FontVariant : uint8
   {
@@ -134,6 +138,7 @@ namespace krys::boo
     Attributes _attributes;
 
     mutable UniquePtr<DerivedFonts> _derivedFontData;
+    mutable HbUniquePtr<hb_font_t> _harfBuzzFont;
 
     Glyph _spaceGlyph {0};
     Glyph _zeroWidthSpaceGlyph {0};
@@ -252,6 +257,19 @@ namespace krys::boo
 
     KRYS_NODISCARD float WidthForGlyph(Glyph glyph, SyntheticBoldInclusion syntheticBoldInclusion =
                                                       SyntheticBoldInclusion::Incorporate) const noexcept;
+
+    /// @brief The HarfBuzz font that shapes text with this font, at its size, or null if HarfBuzz can't read
+    /// its face.
+    KRYS_NODISCARD hb_font_t *HarfBuzzFont() const noexcept;
+
+    /// @brief Applies kerning and ligatures to the glyphs of @p glyphBuffer from @p beginningGlyphIndex, and
+    /// returns the advance before the first of them.
+    /// @note FIXME: Doesn't transform anything: text that needs shaping is shaped on the complex path.
+    KRYS_NODISCARD GlyphBufferAdvance ApplyTransforms(GlyphBuffer &glyphBuffer, uint32 beginningGlyphIndex,
+                                                      uint32 beginningStringIndex, bool enableKerning,
+                                                      bool requiresShaping, const StringAtom &locale,
+                                                      utf8_stringview text,
+                                                      TextDirection textDirection) const noexcept;
 
     KRYS_NODISCARD float SpaceWidth(
       SyntheticBoldInclusion syntheticBoldInclusion = SyntheticBoldInclusion::Incorporate) const noexcept

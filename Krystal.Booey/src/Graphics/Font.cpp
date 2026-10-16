@@ -291,6 +291,12 @@ namespace krys::boo
     return derivedFontData.SmallCapsFont.get();
   }
 
+  GlyphBufferAdvance Font::ApplyTransforms(GlyphBuffer &, uint32, uint32, bool, bool, const StringAtom &,
+                                           utf8_stringview, TextDirection) const noexcept
+  {
+    return MakeGlyphBufferAdvance();
+  }
+
   RefPtr<Font> Font::HalfWidthFont() const noexcept
   {
     if (IsSystemFontFallbackPlaceholder())

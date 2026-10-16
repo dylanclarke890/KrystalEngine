@@ -34,6 +34,10 @@ target_link_libraries(Krystal.Booey PUBLIC ICU::uc PRIVATE ICU::dt)
 find_package(Freetype REQUIRED)
 target_link_libraries(Krystal.Booey PRIVATE Freetype::Freetype)
 
+# Third-party - HarfBuzz (shaping)
+find_package(harfbuzz CONFIG REQUIRED)
+target_link_libraries(Krystal.Booey PRIVATE harfbuzz::harfbuzz)
+
 # Custom build step for python codegen scripts
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 find_program(GPERF_EXECUTABLE NAMES gperf REQUIRED)
@@ -757,6 +761,17 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Graphics/FontRanges.hpp
   include/Krystal.Booey/Graphics/FontSelector.hpp
   include/Krystal.Booey/Graphics/SystemFallbackFontCache.hpp
+
+  # Text measurement (t3a)
+  include/Krystal.Booey/Graphics/GlyphBuffer.hpp
+  include/Krystal.Booey/Graphics/GlyphBufferMembers.hpp
+  include/Krystal.Booey/Graphics/TextRun.hpp
+  include/Krystal.Booey/Graphics/WidthCache.hpp
+  include/Krystal.Booey/Graphics/WidthIterator.hpp
+
+  # Shaping (t3b)
+  include/Krystal.Booey/Graphics/ComplexTextController.hpp
+  include/Krystal.Booey/Graphics/HbUniquePtr.hpp
 
   # Interaction state
   include/Krystal.Booey/DOM/FocusOptions.hpp
@@ -1944,6 +1959,14 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Graphics/FontGenericFamilies.cpp
   src/Graphics/FontRanges.cpp
   src/Graphics/SystemFallbackFontCache.cpp
+
+  # Text measurement (t3a)
+  src/Graphics/WidthIterator.cpp
+
+  # Shaping (t3b)
+  src/Graphics/ComplexTextController.cpp
+  src/Graphics/ComplexTextControllerHarfBuzz.cpp
+  src/Graphics/FontHarfBuzz.cpp
 )
 
 target_precompile_headers(Krystal.Booey

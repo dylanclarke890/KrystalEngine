@@ -123,6 +123,8 @@ namespace krys::boo
     KRYS_NODISCARD size_t FontCount() const noexcept;
     KRYS_NODISCARD size_t InactiveFontCount() const noexcept;
     void PurgeInactiveFontData(uint32 count = UINT32_MAX) noexcept;
+    /// @brief Purges the inactive fonts and clears the width caches.
+    void ReleaseNoncriticalMemory() noexcept;
 
     void UpdateFontCascade(const FontCascade &fontCascade) noexcept;
 

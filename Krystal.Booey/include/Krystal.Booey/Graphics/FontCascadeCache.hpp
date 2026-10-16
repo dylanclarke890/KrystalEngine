@@ -86,6 +86,7 @@ namespace krys::boo
     KRYS_NODISCARD static FontCascadeCache &Singleton() noexcept;
 
     void Invalidate() noexcept;
+    void ClearWidthCaches() noexcept;
     void PruneUnreferencedEntries() noexcept;
     void PruneSystemFallbackFonts() noexcept;
 

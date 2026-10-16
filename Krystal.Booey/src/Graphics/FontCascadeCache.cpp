@@ -60,6 +60,14 @@ namespace krys::boo
     _entries.clear();
   }
 
+  void FontCascadeCache::ClearWidthCaches() noexcept
+  {
+    for (auto &[key, fonts] : _entries)
+    {
+      fonts->GetWidthCache().Clear();
+    }
+  }
+
   void FontCascadeCache::PruneUnreferencedEntries() noexcept
   {
     std::erase_if(_entries, [](auto &entry) { return entry.second->HasOneRef(); });

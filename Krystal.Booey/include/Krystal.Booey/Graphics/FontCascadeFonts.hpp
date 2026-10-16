@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Core/TextFlags.hpp"
 #include "Krystal.Booey/Graphics/FontRanges.hpp"
 #include "Krystal.Booey/Graphics/GlyphPage.hpp"
+#include "Krystal.Booey/Graphics/WidthCache.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
@@ -69,6 +70,8 @@ namespace krys::boo
 
     HashSet<RefPtr<Font>> _systemFallbackFontSet;
 
+    WidthCache _widthCache;
+
     WeakPtr<const Font> _cachedPrimaryFont;
 
     uint16 _generation {0};
@@ -109,6 +112,15 @@ namespace krys::boo
                                                               FontSelector *fontSelector) noexcept;
 
     KRYS_NODISCARD bool IsLoadingCustomFonts() const noexcept;
+
+    KRYS_NODISCARD WidthCache &GetWidthCache() noexcept
+    {
+      return _widthCache;
+    }
+    KRYS_NODISCARD const WidthCache &GetWidthCache() const noexcept
+    {
+      return _widthCache;
+    }
 
     // FIXME: It should be possible to combine fontSelectorVersion and generation.
     KRYS_NODISCARD uint16 Generation() const noexcept

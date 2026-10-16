@@ -147,6 +147,12 @@ namespace krys::boo
     return count;
   }
 
+  void FontCache::ReleaseNoncriticalMemory() noexcept
+  {
+    PurgeInactiveFontData();
+    _fontCascadeCache.ClearWidthCaches();
+  }
+
   void FontCache::PurgeInactiveFontData(uint32 purgeCount) noexcept
   {
     _fontCascadeCache.PruneUnreferencedEntries();

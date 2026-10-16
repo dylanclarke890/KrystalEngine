@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Core/TextSpacing.hpp"
 #include "Krystal.Booey/Core/CharacterProperties.hpp"
+#include "Krystal.Booey/Graphics/Font.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/Unicode.hpp"
 
@@ -45,6 +46,13 @@ namespace krys::boo
   bool TextAutospace::ShouldApplySpacing(char32_t firstCharacter, char32_t secondCharacter) const noexcept
   {
     return ShouldApplySpacing(GetCharacterClass(firstCharacter), GetCharacterClass(secondCharacter));
+  }
+
+  float TextAutospace::TextAutospaceSize(const Font &font) noexcept
+  {
+    // https://www.w3.org/TR/css-text-4/#text-autospace-property
+    // The amount of space introduced by these keywords is 1/8 of the CJK advance measure, i.e 0.125ic.
+    return 0.125f * font.GetFontMetrics().IdeogramWidth().value_or(0);
   }
 
   namespace text_spacing
@@ -153,6 +161,12 @@ namespace krys::boo
       }
       // FIXME: implement remaining classes for text-autospace: punctuation
       return CharacterClass::Undefined;
+    }
+
+    RefPtr<Font> GetHalfWidthFontIfNeeded(const Font &font, const TextSpacingTrim &textSpacingTrim,
+                                          CharactersData &charactersData) noexcept
+    {
+      return textSpacingTrim.ShouldTrimSpacing(charactersData) ? font.HalfWidthFont() : nullptr;
     }
   }
 }

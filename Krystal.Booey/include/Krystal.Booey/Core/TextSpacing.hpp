@@ -3,9 +3,11 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {
+  class Font;
   class TextSpacingTrim;
 
   namespace text_spacing
@@ -39,7 +41,11 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsIdeograph(char32_t character) noexcept;
 
-    // FIXME: `getHalfWidthFontIfNeeded` comes with fonts.
+    /// @brief The half width version of @p font if @p textSpacingTrim trims the spacing of the current
+    /// character of @p charactersData, else null.
+    KRYS_NODISCARD RefPtr<Font> GetHalfWidthFontIfNeeded(const Font &font,
+                                                         const TextSpacingTrim &textSpacingTrim,
+                                                         CharactersData &charactersData) noexcept;
 
     struct SpacingState
     {
@@ -153,6 +159,7 @@ namespace krys::boo
     KRYS_NODISCARD bool ShouldApplySpacing(text_spacing::CharacterClass firstCharacterClass,
                                            text_spacing::CharacterClass secondCharacterClass) const noexcept;
     KRYS_NODISCARD bool ShouldApplySpacing(char32_t firstCharacter, char32_t secondCharacter) const noexcept;
-    // FIXME: `textAutospaceSize(const Font &)` comes with fonts.
+    /// @brief The space added between ideographs and non-ideographs: 1/8 of @p font's CJK advance.
+    KRYS_NODISCARD static float TextAutospaceSize(const Font &font) noexcept;
   };
 }

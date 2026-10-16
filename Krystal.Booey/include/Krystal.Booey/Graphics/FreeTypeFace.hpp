@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/FontSelectionAlgorithm.hpp"
+#include "Krystal.Booey/Graphics/HbUniquePtr.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
@@ -54,6 +55,7 @@ namespace krys::boo
     utf8_string _postScriptName;
     FontSelectionCapabilities _capabilities;
     bool _isFixedPitch {false};
+    mutable HbUniquePtr<hb_face_t> _harfBuzzFace;
 
     FreeTypeFace(Ref<FontFileData> &&data, FT_Face face) noexcept;
 
@@ -98,6 +100,9 @@ namespace krys::boo
     {
       return _isFixedPitch;
     }
+
+    /// @brief The HarfBuzz face of this face, read from the same font data.
+    KRYS_NODISCARD hb_face_t *HarfBuzzFace() const noexcept;
 
     KRYS_NODISCARD uint32 UnitsPerEm() const noexcept;
 
