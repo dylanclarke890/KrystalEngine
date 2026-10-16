@@ -241,6 +241,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/ScopedName.hpp
   include/Krystal.Booey/Style/ScopeOrdinal.hpp
   include/Krystal.Booey/Style/Seam.hpp
+  include/Krystal.Booey/Style/SeamRenderers.hpp
   include/Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp
   include/Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp
 
@@ -707,6 +708,8 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/TreeResolver.hpp
   include/Krystal.Booey/Style/Update.hpp
   include/Krystal.Booey/Style/Validity.hpp
+  include/Krystal.Booey/Rendering/RenderElement.hpp
+  include/Krystal.Booey/Rendering/RenderObject.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp
 
   # Computed style output (f6a)
@@ -1907,6 +1910,8 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Style/ResolveForDocument.cpp
 
   # The tree resolver and container queries (f5d)
+  src/Rendering/RenderElement.cpp
+  src/Rendering/RenderObject.cpp
   src/Rendering/Updating/RenderTreeUpdater.cpp
   src/Style/ContainerQueryEvaluator.cpp
   src/Style/TreeResolver.cpp

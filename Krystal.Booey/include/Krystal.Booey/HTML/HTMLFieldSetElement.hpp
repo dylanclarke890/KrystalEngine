@@ -45,6 +45,8 @@ namespace krys::boo::html
     // undefined setCustomValidity(dom::DOMString error);
 
 #pragma endregion
+
+    KRYS_NODISCARD UniquePtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept final;
   };
 }
 

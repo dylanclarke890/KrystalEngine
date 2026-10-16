@@ -25,10 +25,10 @@ namespace krys::boo
   class RenderStyle;
 
   /// @brief Applies a style update to the render tree.
-  // FIXME: There's no render tree yet. This stand-in keeps the style each element's renderer would hold on
-  // the element (`Node::GetRenderStyle`), the style of elements with `display: contents` or `display: none`
-  // as upstream, and the render view's style on the document. Text renderers, generated content (::before,
-  // ::after, ::marker, ::backdrop), rebuild roots, the top layer and layout come with the render tree.
+  // FIXME: There's no render tree yet. Elements get renderers that aren't attached to one (the element owns
+  // its renderer), the style of elements with `display: contents` or `display: none` is kept as upstream, and
+  // the render view's style is on the document. Text renderers, generated content (::before, ::after,
+  // ::marker, ::backdrop), rebuild roots, the top layer and layout come with the render tree.
   class RenderTreeUpdater
   {
     KRYS_NON_COPY_MOVABLE(RenderTreeUpdater);
@@ -68,6 +68,7 @@ namespace krys::boo
   private:
     void UpdateRenderTree(dom::ContainerNode &root) noexcept;
     void UpdateElementRenderer(dom::Element &element, const style::ElementUpdate &elementUpdate) noexcept;
+    void CreateRenderer(dom::Element &element, RenderStyle &&style) noexcept;
     void UpdateRenderViewStyle() noexcept;
 
     void PushParent(dom::Element &element, const style::ElementUpdate *update) noexcept;

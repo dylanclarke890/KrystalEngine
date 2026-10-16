@@ -1,11 +1,20 @@
 ﻿#include "Krystal.Booey/HTML/HTMLFieldSetElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
 
 namespace krys::boo::html
 {
   HTMLFieldSetElement::HTMLFieldSetElement(dom::Document &document) noexcept
       : HTMLElement(document, HTMLElementInterface::FieldSet)
   {
+  }
+
+  UniquePtr<RenderElement> HTMLFieldSetElement::CreateElementRenderer(RenderStyle &&style) noexcept
+  {
+    // Fieldsets should make a block flow if display: inline or table types are set.
+    return RenderElement::CreateFor(*this, krys::move(style),
+                                    {RenderElement::ConstructBlockLevelRendererFor::Inline,
+                                     RenderElement::ConstructBlockLevelRendererFor::TableOrTablePart});
   }
 
 #pragma region HTMLFieldSetElement

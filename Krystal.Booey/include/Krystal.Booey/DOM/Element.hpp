@@ -15,6 +15,7 @@
 
 namespace krys::boo
 {
+  class RenderElement;
   class RenderStyle;
   class RenderTreeUpdater;
 }
@@ -85,9 +86,8 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#slotable-manual-slot-assignment
     WeakPtr<html::HTMLSlotElement> _manuallyAssignedSlot;
 
-    // FIXME: The style the element's renderer would hold; there's no render tree, so `RenderTreeUpdater`
-    // keeps it on the element.
-    UniquePtr<RenderStyle> _rendererStyle;
+    // FIXME: The element owns its renderer until the render tree does.
+    UniquePtr<RenderElement> _ownedRenderer;
 
   protected:
     Element(Document &document, const QualifiedName &name, NodeFlags nodeFlags) noexcept;
@@ -477,9 +477,17 @@ namespace krys::boo::dom
     void StoreDisplayContentsOrNoneStyle(UniquePtr<RenderStyle> style) noexcept;
     void ClearDisplayContentsOrNoneStyle() noexcept;
 
+    /// @brief The renderer the element gets with @p style, or null if it gets none.
+    // FIXME: The insertion position in the render tree, and the overrides that need renderer classes (images,
+    // line breaks, form controls, media, frames, MathML, SVG, ...).
+    KRYS_NODISCARD virtual UniquePtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept;
+
     /// @brief Whether the element would have a renderer with @p style.
     // FIXME: The overrides (form controls, frame sets, SVG elements, ...) come with the render tree.
     KRYS_NODISCARD virtual bool RendererIsNeeded(const RenderStyle &style) noexcept;
+
+    /// @brief The element's renderer, or null if it isn't rendered.
+    KRYS_NODISCARD RenderElement *Renderer() const noexcept;
 
     void InvalidateStyle() noexcept;
     void InvalidateStyleAndLayerComposition() noexcept;

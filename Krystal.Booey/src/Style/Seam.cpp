@@ -21,6 +21,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCursorImage.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/SeamRenderers.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
@@ -64,52 +65,12 @@ namespace krys::boo
     return FrameViewOf(*this).SizeForCSSDefaultViewportUnits();
   }
 
-  const RenderStyle &RenderElement::Style() const noexcept
-  {
-    krys_unreachable();
-  }
-
-  const RenderElement *RenderElement::Parent() const noexcept
-  {
-    krys_unreachable();
-  }
-
   const RenderElement *RenderElement::Container() const noexcept
   {
     krys_unreachable();
   }
 
   const RenderBlock *RenderElement::ContainingBlock() const noexcept
-  {
-    krys_unreachable();
-  }
-
-  bool RenderElement::IsRenderBoxModelObject() const noexcept
-  {
-    krys_unreachable();
-  }
-
-  bool RenderElement::IsRenderBox() const noexcept
-  {
-    krys_unreachable();
-  }
-
-  bool RenderElement::IsRenderBlock() const noexcept
-  {
-    krys_unreachable();
-  }
-
-  bool RenderElement::IsRenderGrid() const noexcept
-  {
-    krys_unreachable();
-  }
-
-  bool RenderElement::IsRenderInline() const noexcept
-  {
-    krys_unreachable();
-  }
-
-  bool RenderElement::IsRenderOrLegacyRenderSVGModelObject() const noexcept
   {
     krys_unreachable();
   }

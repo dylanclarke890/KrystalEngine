@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/TreeResolver.hpp"
 #include "Krystal.Booey/Style/Update.hpp"
@@ -29,15 +30,14 @@ namespace krys::boo
 
   RenderTreeUpdater::~RenderTreeUpdater() noexcept = default;
 
-  // FIXME: The document always has a renderer (its render view); elements have one if they keep a renderer
-  // style.
+  // FIXME: The document always has a renderer (its render view, which isn't a `RenderObject` yet).
   static bool HasRenderer(const dom::Node &node) noexcept
   {
     if (Is<dom::Document>(node))
     {
       return true;
     }
-    return node.GetRenderStyle();
+    return node.Renderer();
   }
 
   static dom::Element *FindRenderingAncestor(dom::Node &node) noexcept
@@ -219,26 +219,54 @@ namespace krys::boo
 
     // FIXME: The last remembered size for contain-intrinsic-size, once there's layout.
 
-    bool shouldCreateNewRenderer = !HasRenderer(element) && !hasDisplayContentsOrNone;
+    // FIXME: Elements in the top layer under skipped content, once there's a top layer.
+    bool shouldCreateNewRenderer = !element.Renderer() && !hasDisplayContentsOrNone;
     if (shouldCreateNewRenderer)
     {
-      element._rendererStyle = CreateUnique<RenderStyle>(krys::move(elementUpdateStyle));
+      CreateRenderer(element, krys::move(elementUpdateStyle));
       return;
     }
 
-    if (!HasRenderer(element))
+    auto *renderer = element.Renderer();
+    if (!renderer)
     {
+      return;
+    }
+
+    // FIXME: The style difference to apply (`RecompositeLayer`, `Equal`), once there's a `Style::Difference`.
+    if (elementUpdate.RecompositeLayer)
+    {
+      renderer->SetStyle(krys::move(elementUpdateStyle));
       return;
     }
 
     // FIXME: Pseudo-element styles that changed without the element's style changing
-    // (pseudoStyleCacheIsInvalid), once there's a render tree.
-    if (!elementUpdate.RecompositeLayer && elementUpdate.Changes.IsEmpty())
+    // (pseudoStyleCacheIsInvalid), once there are generated content renderers.
+    if (elementUpdate.Changes.IsEmpty())
     {
       return;
     }
 
-    element._rendererStyle = CreateUnique<RenderStyle>(krys::move(elementUpdateStyle));
+    renderer->SetStyle(krys::move(elementUpdateStyle));
+  }
+
+  void RenderTreeUpdater::CreateRenderer(dom::Element &element, RenderStyle &&style) noexcept
+  {
+    if (!element.RendererIsNeeded(style))
+    {
+      return;
+    }
+
+    // FIXME: The insertion position in the render tree.
+    auto newRenderer = element.CreateElementRenderer(krys::move(style));
+    if (!newRenderer)
+    {
+      return;
+    }
+
+    element.SetRenderer(newRenderer.get());
+    // FIXME: The render tree owns renderers; until there is one, the element does.
+    element._ownedRenderer = krys::move(newRenderer);
   }
 
   void RenderTreeUpdater::UpdateRenderViewStyle() noexcept
@@ -307,7 +335,12 @@ namespace krys::boo
         case TeardownType::RendererUpdateCancelingAnimations: break;
       }
 
-      element._rendererStyle = nullptr;
+      // FIXME: Repaint, layout invalidation and anonymous wrapper clean-up, once there's a render tree.
+      if (element.Renderer())
+      {
+        element.SetRenderer(nullptr);
+        element._ownedRenderer = nullptr;
+      }
     };
 
     tearDown(root);

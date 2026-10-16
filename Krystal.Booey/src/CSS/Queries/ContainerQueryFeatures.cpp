@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Style/Builder.hpp"
 #include "Krystal.Booey/Style/CustomProperty.hpp"
 #include "Krystal.Booey/Style/MatchResult.hpp"
+#include "Krystal.Booey/Style/SeamRenderers.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
 namespace krys::boo::css::cq

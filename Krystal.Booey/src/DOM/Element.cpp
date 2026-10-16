@@ -27,6 +27,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Change.hpp"
@@ -370,7 +371,7 @@ namespace krys::boo::dom
     // This way renderOrDisplayContentsStyle() always returns consistent styles matching the rendering state.
     krys_debug_assert(
       style && (style->Display() == DisplayType::Contents || style->Display() == DisplayType::None));
-    krys_debug_assert(!_rendererStyle);
+    krys_debug_assert(!Renderer());
     EnsureElementRareData().SetDisplayContentsOrNoneStyle(krys::move(style));
   }
 
@@ -383,9 +384,19 @@ namespace krys::boo::dom
     _elementRareData->SetDisplayContentsOrNoneStyle(nullptr);
   }
 
+  UniquePtr<RenderElement> Element::CreateElementRenderer(RenderStyle &&style) noexcept
+  {
+    return RenderElement::CreateFor(*this, krys::move(style));
+  }
+
   bool Element::RendererIsNeeded(const RenderStyle &style) noexcept
   {
     return style.Display() != DisplayType::None && style.Display() != DisplayType::Contents;
+  }
+
+  RenderElement *Element::Renderer() const noexcept
+  {
+    return static_cast<RenderElement *>(Node::Renderer());
   }
 
   namespace

@@ -21,6 +21,7 @@
 
 namespace krys::boo
 {
+  class RenderObject;
   class RenderStyle;
 }
 
@@ -56,6 +57,7 @@ namespace krys::boo::dom
     CheckedPtr<Node> _previousSibling;
     CheckedPtr<Node> _nextSibling;
     UniquePtr<NodeRareData> _nodeRareData;
+    RenderObject *_renderer {nullptr};
 
   protected:
     Node(Document &document, NodeType type, NodeFlags flags) noexcept;
@@ -280,9 +282,19 @@ namespace krys::boo::dom
                     | NodeFlags::StyleResolutionShouldRecompositeLayer);
     }
 
+    /// @brief The object the node is rendered as, or null if it isn't rendered.
+    /// @note FIXME: Only elements have renderers until text renderers are ported.
+    KRYS_NODISCARD RenderObject *Renderer() const noexcept
+    {
+      return _renderer;
+    }
+
+    void SetRenderer(RenderObject *renderer) noexcept
+    {
+      _renderer = renderer;
+    }
+
     /// @brief The style the node is rendered with, or null if it isn't rendered.
-    // FIXME: Elements keep the style a renderer would hold (see `RenderTreeUpdater`); text nodes, which
-    // have no renderers either, have none.
     KRYS_NODISCARD const RenderStyle *GetRenderStyle() const noexcept;
 
     /// @brief The computed style of the node: an element's own, or else its parent element's in the composed

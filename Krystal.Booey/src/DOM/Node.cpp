@@ -369,11 +369,12 @@ namespace krys::boo::dom
 
   const RenderStyle *Node::GetRenderStyle() const noexcept
   {
-    if (auto *element = DynamicDowncast<Element>(*this))
+    auto *renderer = Renderer();
+    if (!renderer)
     {
-      return element->_rendererStyle.get();
+      return nullptr;
     }
-    return nullptr;
+    return &renderer->Style();
   }
 
   const RenderStyle *Node::ComputedStyle() noexcept
