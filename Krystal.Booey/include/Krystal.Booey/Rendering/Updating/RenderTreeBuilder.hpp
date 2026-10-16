@@ -19,8 +19,8 @@ namespace krys::boo
 
   /// @brief Builds and tears down the render tree: attaches renderers to their parents, wrapping them in the
   /// anonymous boxes the CSS box tree needs, and detaches and destroys them, cleaning the wrappers up.
-  // FIXME: The first letter, list, multi-column, ruby, form control, SVG and MathML builders come with their
-  // renderers. There are no continuations: blocks in inlines are laid out in inline layout
+  // FIXME: The multi-column, ruby, form control, SVG and MathML builders come with their renderers. There are
+  // no continuations: blocks in inlines are laid out in inline layout
   // (`blocksInInlineLayoutEnabled`, on by default upstream).
   class RenderTreeBuilder
   {
@@ -60,7 +60,9 @@ namespace krys::boo
 
     class Block;
     class BlockFlow;
+    class FirstLetter;
     class Inline;
+    class List;
     class Table;
 
   private:
@@ -72,6 +74,8 @@ namespace krys::boo
     UniquePtr<Block> _blockBuilder;
     UniquePtr<BlockFlow> _blockFlowBuilder;
     UniquePtr<Inline> _inlineBuilder;
+    UniquePtr<FirstLetter> _firstLetterBuilder;
+    UniquePtr<List> _listBuilder;
     IsInternalMove _internalMovesType {IsInternalMove::No};
     TearDownType _tearDownType {TearDownType::Root};
     const RenderElement *_subtreeDestroyRoot {nullptr};
@@ -181,6 +185,14 @@ namespace krys::boo
     KRYS_NODISCARD Inline &InlineBuilder() noexcept
     {
       return *_inlineBuilder;
+    }
+    KRYS_NODISCARD FirstLetter &FirstLetterBuilder() noexcept
+    {
+      return *_firstLetterBuilder;
+    }
+    KRYS_NODISCARD List &ListBuilder() noexcept
+    {
+      return *_listBuilder;
     }
   };
 }

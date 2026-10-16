@@ -89,7 +89,7 @@ namespace krys::boo
 
     /// @brief The last code point of the in-flow text before this one, which capitalization continues from (a
     /// space if there's none).
-    KRYS_NODISCARD utf8_string PreviousCharacter() const noexcept;
+    KRYS_NODISCARD virtual utf8_string PreviousCharacter() const noexcept;
 
   protected:
     RenderText(Type type, dom::Node &node, utf8_string text) noexcept;

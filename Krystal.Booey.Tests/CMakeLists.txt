@@ -360,8 +360,11 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/RenderBox.cpp
 		tests/Rendering/RenderElement.cpp
 		tests/Rendering/RenderIterator.cpp
+		tests/Rendering/RenderCounter.cpp
+		tests/Rendering/RenderListItem.cpp
 		tests/Rendering/RenderText.cpp
 		tests/Rendering/Updating/RenderTreeBuilder.cpp
+		tests/Rendering/Updating/RenderTreeBuilderFirstLetter.cpp
 		tests/Page/Settings.cpp
 		tests/Style/Adjuster.cpp
 		tests/Style/AttributeChangeInvalidation.cpp

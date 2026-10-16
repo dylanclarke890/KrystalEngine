@@ -2,6 +2,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/RenderCounter.hpp"
 
 namespace krys::boo
 {
@@ -54,5 +55,15 @@ namespace krys::boo
   FloatSize RenderView::SizeForCSSDefaultViewportUnits() const noexcept
   {
     return _frameView.SizeForCSSDefaultViewportUnits();
+  }
+
+  void RenderView::AddCounterNeedingUpdate(RenderCounter &renderer) noexcept
+  {
+    _countersNeedingUpdate.try_emplace(&renderer, CreateWeakPtr(&renderer));
+  }
+
+  RenderCounterSet RenderView::TakeCountersNeedingUpdate() noexcept
+  {
+    return std::exchange(_countersNeedingUpdate, {});
   }
 }

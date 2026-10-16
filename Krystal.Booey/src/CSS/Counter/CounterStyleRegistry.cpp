@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp"
+#include "Krystal.Booey/Style/Values/CounterStyles/CounterStyle.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
@@ -157,6 +158,11 @@ namespace krys::boo::css
   {
     ResolveReferencesIfNeeded();
     return GetCounterStyle(name, &_authorCounterStyles);
+  }
+
+  Ref<CounterStyle> CounterStyleRegistry::ResolvedCounterStyle(const style::CounterStyle &style) noexcept
+  {
+    return ResolvedCounterStyle(style.Identifier.Value);
   }
 
   CounterStyleMap &CounterStyleRegistry::UserAgentCounterStyles() noexcept

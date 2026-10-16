@@ -1,12 +1,61 @@
 ﻿#include "Krystal.Booey/HTML/HTMLOListElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
+#include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
+#include "Krystal.Booey/Rendering/RenderListItem.hpp"
 
 namespace krys::boo::html
 {
   HTMLOListElement::HTMLOListElement(dom::Document &document) noexcept
       : HTMLElement(document, HTMLElementInterface::OList)
   {
+  }
+
+  void HTMLOListElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                                            Maybe<dom::DOMStringView> value,
+                                            dom::DOMStringAtom namespaceURI) noexcept
+  {
+    if (namespaceURI == dom::DOMStringAtom::Null())
+    {
+      if (localName == u8"start")
+      {
+        auto oldStart = StartValue();
+        _start = null;
+        if (value)
+        {
+          if (auto parsed = Numbers::ParseInteger(*value);
+              parsed.Success() && parsed.Value >= std::numeric_limits<int32>::min()
+              && parsed.Value <= std::numeric_limits<int32>::max())
+          {
+            _start = static_cast<int32>(parsed.Value);
+          }
+        }
+        if (oldStart != StartValue())
+        {
+          RenderListItem::UpdateItemValuesForOrderedList(*this);
+        }
+      }
+      else if (localName == u8"reversed")
+      {
+        bool reversed = value.has_value();
+        if (reversed != _isReversed)
+        {
+          _isReversed = reversed;
+          RenderListItem::UpdateItemValuesForOrderedList(*this);
+        }
+      }
+    }
+
+    HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
+  }
+
+  uint32 HTMLOListElement::ItemCount() const noexcept
+  {
+    if (!_itemCount)
+    {
+      _itemCount = RenderListItem::ItemCountForOrderedList(*this);
+    }
+    return *_itemCount;
   }
 
 #pragma region HTMLOListElement

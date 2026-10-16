@@ -736,6 +736,13 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/RenderTableCol.hpp
   include/Krystal.Booey/Rendering/RenderText.hpp
   include/Krystal.Booey/Rendering/RenderLineBreak.hpp
+  include/Krystal.Booey/Rendering/CounterNode.hpp
+  include/Krystal.Booey/Rendering/RenderCounter.hpp
+  include/Krystal.Booey/Rendering/RenderListMarker.hpp
+  include/Krystal.Booey/Rendering/RenderQuote.hpp
+  include/Krystal.Booey/Rendering/RenderTextFragment.hpp
+  include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderFirstLetter.hpp
+  include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderList.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlock.hpp
@@ -1967,6 +1974,13 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/RenderTableCol.cpp
   src/Rendering/RenderText.cpp
   src/Rendering/RenderLineBreak.cpp
+  src/Rendering/CounterNode.cpp
+  src/Rendering/RenderCounter.cpp
+  src/Rendering/RenderListMarker.cpp
+  src/Rendering/RenderQuote.cpp
+  src/Rendering/RenderTextFragment.cpp
+  src/Rendering/Updating/RenderTreeBuilderFirstLetter.cpp
+  src/Rendering/Updating/RenderTreeBuilderList.cpp
   src/Rendering/Updating/RenderTreeUpdater.cpp
   src/Rendering/Updating/RenderTreeBuilder.cpp
   src/Rendering/Updating/RenderTreeBuilderBlock.cpp

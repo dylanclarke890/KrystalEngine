@@ -2,9 +2,11 @@
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/generators/catch_generators.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
+#include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 
@@ -672,6 +674,62 @@ namespace krys::boo::dom::tests
     CHECK(EventTargetAlgorithms::Retarget(deep.get(), *inner) == deep.get());
     // Nodes outside shadow trees are returned as they are.
     CHECK(EventTargetAlgorithms::Retarget(host.get(), *inner) == host.get());
+  }
+
+#pragma endregion
+
+#pragma region Pseudo-element aware traversal
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "TreeQueries: traversal including pseudo-elements",
+                   "[DOM][TreeQueries]")
+  {
+    style::tests::ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
+      #p::before, #p::after, #empty::before { content: "x" }
+    </style><div id=root><p id=p><b id=b></b></p><i id=empty></i><s id=s></s></div>)"};
+    fixture.Document->UpdateStyleIfNeeded();
+
+    auto &root = fixture.ById(u8"root");
+    auto &p = fixture.ById(u8"p");
+    auto &b = fixture.ById(u8"b");
+    auto &empty = fixture.ById(u8"empty");
+    auto *before = p.BeforePseudoElement();
+    auto *after = p.AfterPseudoElement();
+    auto *emptyBefore = empty.BeforePseudoElement();
+    REQUIRE(before);
+    REQUIRE(after);
+    REQUIRE(emptyBefore);
+
+    CHECK(TreeQueries::PseudoAwareFirstChild(p) == before);
+    CHECK(TreeQueries::PseudoAwareLastChild(p) == after);
+    CHECK(TreeQueries::PseudoAwareNextSibling(*before) == &b);
+    CHECK(TreeQueries::PseudoAwareNextSibling(b) == after);
+    CHECK(TreeQueries::PseudoAwarePreviousSibling(b) == before);
+    CHECK(TreeQueries::PseudoAwarePreviousSibling(*after) == &b);
+    CHECK_FALSE(TreeQueries::PseudoAwarePreviousSibling(*before));
+    // An element with only a ::before.
+    CHECK(TreeQueries::PseudoAwareFirstChild(empty) == emptyBefore);
+    CHECK(TreeQueries::PseudoAwareLastChild(empty) == emptyBefore);
+
+    // Tree order: root, p, ::before, b, ::after, empty, ::before, s.
+    List<Element *> order;
+    for (Element *element = &root; element;
+         element = TreeQueries::NextElementIncludingPseudo(*element, &root))
+    {
+      order.push_back(element);
+    }
+    CHECK(order == List<Element *> {&root, &p, before, &b, after, &empty, emptyBefore, &fixture.ById(u8"s")});
+
+    List<Element *> reversed;
+    for (Element *element = &fixture.ById(u8"s"); element;
+         element = TreeQueries::PreviousElementIncludingPseudo(*element, &root))
+    {
+      reversed.push_back(element);
+    }
+    CHECK(reversed
+          == List<Element *> {&fixture.ById(u8"s"), emptyBefore, &empty, after, &b, before, &p, &root});
+
+    CHECK(TreeQueries::NextElementIncludingPseudoSkippingChildren(p, &root) == &empty);
+    CHECK(TreeQueries::PseudoAwarePreviousElementSibling(empty) == &p);
   }
 
 #pragma endregion

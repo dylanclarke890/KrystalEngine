@@ -9,6 +9,11 @@ namespace krys::boo::html
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLOListElement);
 
+  private:
+    Maybe<int32> _start;
+    mutable Maybe<uint32> _itemCount;
+    bool _isReversed {false};
+
   public:
     HTMLOListElement(dom::Document &document) noexcept;
 
@@ -44,13 +49,36 @@ namespace krys::boo::html
 
 #pragma endregion
 
+    /// @brief The value the list's numbering starts from: the start attribute, else the number of items for a
+    /// reversed list, else 1.
+    /// @note It doesn't trigger layout because it is called from rendering code.
+    KRYS_NODISCARD int32 StartValue() const noexcept
+    {
+      return _start ? *_start : (_isReversed ? static_cast<int32>(ItemCount()) : 1);
+    }
+    KRYS_NODISCARD bool IsReversed() const noexcept
+    {
+      return _isReversed;
+    }
+    void ItemCountChanged() noexcept
+    {
+      _itemCount = null;
+    }
+
   protected:
+    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                            Maybe<dom::DOMStringView> value,
+                            dom::DOMStringAtom namespaceURI) noexcept override;
+
     KRYS_NODISCARD bool
       HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                          dom::DOMStringAtom namespaceURI) const noexcept override;
     void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
+
+  private:
+    KRYS_NODISCARD uint32 ItemCount() const noexcept;
   };
 }
 

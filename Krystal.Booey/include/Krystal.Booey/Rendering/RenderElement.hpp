@@ -16,6 +16,12 @@ namespace krys::boo::dom
   class Element;
 }
 
+namespace krys::boo::style
+{
+  class PseudoElementRequest;
+  struct PseudoElementIdentifier;
+}
+
 namespace krys::boo
 {
   enum class RenderElementConstructBlockLevelRendererFor : uint8
@@ -44,6 +50,8 @@ namespace krys::boo
     RenderObject *_firstChild {nullptr};
     RenderObject *_lastChild {nullptr};
     bool _hasInitializedStyle {false};
+    bool _hasCounterNodeMap {false};
+    bool _isFirstLetter {false};
 
   public:
     /// @brief Displays that get a block flow instead of their usual renderer.
@@ -71,6 +79,25 @@ namespace krys::boo
     KRYS_NODISCARD bool HasInitializedStyle() const noexcept
     {
       return _hasInitializedStyle;
+    }
+
+    KRYS_NODISCARD bool HasCounterNodeMap() const noexcept
+    {
+      return _hasCounterNodeMap;
+    }
+    void SetHasCounterNodeMap(bool f) noexcept
+    {
+      _hasCounterNodeMap = f;
+    }
+
+    /// @brief Whether this renders the `::first-letter` of a block.
+    KRYS_NODISCARD bool IsFirstLetter() const noexcept
+    {
+      return _isFirstLetter;
+    }
+    void SetIsFirstLetter() noexcept
+    {
+      _isFirstLetter = true;
     }
 
     /// @brief Takes the style the renderer was created with as its first style.
@@ -120,6 +147,8 @@ namespace krys::boo
     KRYS_NODISCARD bool IsFixedPositioned() const noexcept;
     KRYS_NODISCARD bool IsAbsolutelyPositioned() const noexcept;
 
+    KRYS_NODISCARD bool IsWritingModeRoot() const noexcept;
+
     KRYS_NODISCARD bool IsFlexItemIncludingDeprecated() const noexcept
     {
       return !IsInline() && !IsFloatingOrOutOfFlowPositioned() && Parent()
@@ -137,6 +166,16 @@ namespace krys::boo
     KRYS_NODISCARD bool IsBeforeOrAfterContent() const noexcept;
     KRYS_NODISCARD static bool IsBeforeContent(const RenderObject *renderer) noexcept;
     KRYS_NODISCARD static bool IsAfterContent(const RenderObject *renderer) noexcept;
+
+    /// @brief The style of the pseudo-element @p pseudoElementIdentifier of this renderer's element,
+    /// resolving and caching it if it isn't cached yet.
+    KRYS_NODISCARD const RenderStyle *
+      GetCachedPseudoStyle(const style::PseudoElementIdentifier &pseudoElementIdentifier,
+                           const RenderStyle *parentStyle = nullptr) const noexcept;
+    KRYS_NODISCARD UniquePtr<RenderStyle>
+      GetUncachedPseudoStyle(const style::PseudoElementRequest &pseudoElementRequest,
+                             const RenderStyle *parentStyle = nullptr,
+                             const RenderStyle *ownStyle = nullptr) const noexcept;
 
     /// @brief The element whose content this renderer renders: the host of a pseudo-element.
     KRYS_NODISCARD dom::Element *GeneratingElement() const noexcept;

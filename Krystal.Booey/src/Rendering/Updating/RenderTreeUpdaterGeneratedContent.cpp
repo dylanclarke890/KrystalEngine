@@ -1,6 +1,11 @@
 ﻿#include "Krystal.Booey/Rendering/Updating/RenderTreeUpdaterGeneratedContent.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
+#include "Krystal.Booey/Rendering/RenderCounter.hpp"
+#include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/RenderQuote.hpp"
+#include "Krystal.Booey/Rendering/RenderTextFragment.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
@@ -12,6 +17,130 @@ namespace krys::boo
   RenderTreeUpdater::GeneratedContent::GeneratedContent(RenderTreeUpdater &updater) noexcept
       : _updater(updater)
   {
+  }
+
+  void RenderTreeUpdater::GeneratedContent::UpdateRemainingQuotes() noexcept
+  {
+    if (!_updater.GetRenderView().HasQuotesNeedingUpdate())
+    {
+      return;
+    }
+    UpdateQuotesUpTo(nullptr);
+    _previousUpdatedQuote = nullptr;
+    _updater.GetRenderView().SetHasQuotesNeedingUpdate(false);
+  }
+
+  void RenderTreeUpdater::GeneratedContent::UpdateQuotesUpTo(RenderQuote *lastQuote) noexcept
+  {
+    auto quoteRenderers = DescendantsOfType<RenderQuote>(_updater.GetRenderView());
+    auto it = _previousUpdatedQuote ? ++quoteRenderers.at(*_previousUpdatedQuote) : quoteRenderers.begin();
+    auto end = quoteRenderers.end();
+    for (; it != end; ++it)
+    {
+      auto &quote = *it;
+      // Quote character depends on quote depth so we chain the updates.
+      quote.UpdateRenderer(*_updater._builder, _previousUpdatedQuote.get());
+      _previousUpdatedQuote = CreateWeakPtr(&quote);
+      if (&quote == lastQuote)
+      {
+        return;
+      }
+    }
+    krys_debug_assert(!lastQuote);
+  }
+
+  void RenderTreeUpdater::GeneratedContent::UpdateCounters() noexcept
+  {
+    auto update = [&]
+    {
+      auto counters = _updater.GetRenderView().TakeCountersNeedingUpdate();
+      for (auto &[address, counter] : counters)
+      {
+        if (counter)
+        {
+          counter->UpdateCounter();
+        }
+      }
+    };
+    // Update twice and hope it stabilizes.
+    update();
+    update();
+  }
+
+  static RenderPtr<RenderObject> CreateContentRenderer(const style::Content::Text &value,
+                                                       const utf8_string &altText, dom::Document &document,
+                                                       const RenderStyle &) noexcept
+  {
+    if (value.Value.empty() && altText.empty())
+    {
+      return {};
+    }
+
+    auto contentRenderer = CreateRenderer<RenderTextFragment>(document, value.Value);
+    contentRenderer->SetAltText(altText);
+    return contentRenderer;
+  }
+
+  static RenderPtr<RenderObject> CreateContentRenderer(const style::Content::Image &, const utf8_string &,
+                                                       dom::Document &, const RenderStyle &) noexcept
+  {
+    // FIXME: A RenderImage for the image, once there are images.
+    return {};
+  }
+
+  static RenderPtr<RenderObject> CreateContentRenderer(const style::Content::Counter &value,
+                                                       const utf8_string &, dom::Document &document,
+                                                       const RenderStyle &) noexcept
+  {
+    return CreateRenderer<RenderCounter>(document, value);
+  }
+
+  static RenderPtr<RenderObject> CreateContentRenderer(const style::Content::Quote &value,
+                                                       const utf8_string &, dom::Document &document,
+                                                       const RenderStyle &pseudoStyle) noexcept
+  {
+    auto contentRenderer = CreateRenderer<RenderQuote>(
+      document, RenderStyle::CreateStyleInheritingFromPseudoStyle(pseudoStyle), value.Value);
+    contentRenderer->InitializeStyle();
+    return contentRenderer;
+  }
+
+  static void CreateContentRenderers(RenderTreeBuilder &builder, RenderElement &pseudoRenderer,
+                                     const RenderStyle &style) noexcept
+  {
+    if (auto *contentData = style.GetContent().TryData())
+    {
+      auto altText = contentData->AltText.value_or(utf8_string {});
+      for (auto &contentItem : contentData->List)
+      {
+        krys::SwitchOn(contentItem,
+                       [&](const auto &item)
+                       {
+                         if (auto child =
+                               CreateContentRenderer(item, altText, pseudoRenderer.GetDocument(), style);
+                             child && pseudoRenderer.IsChildAllowed(*child, style))
+                         {
+                           builder.Attach(pseudoRenderer, krys::move(child));
+                         }
+                       });
+      }
+    }
+    // FIXME: Assert that without content, the pseudo-element is only here for animations, once there are
+    // animations.
+  }
+
+  static void UpdateStyleForContentRenderers(RenderElement &pseudoRenderer, const RenderStyle &style) noexcept
+  {
+    for (auto &contentRenderer : DescendantsOfType<RenderElement>(pseudoRenderer))
+    {
+      // We only manage the style for the generated content which must be images or text.
+      // FIXME: Images, once there are images.
+      if (!Is<RenderQuote>(contentRenderer))
+      {
+        continue;
+      }
+      contentRenderer.SetStyle(RenderStyle::CreateStyleInheritingFromPseudoStyle(style));
+    }
   }
 
   void RenderTreeUpdater::GeneratedContent::UpdateBeforeOrAfterPseudoElement(
@@ -111,9 +240,23 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The content renderers (createContentRenderers when the renderer changes, else
-    // updateStyleForContentRenderers), quotes and RenderTreeBuilder::updateAfterDescendants, once there's a
-    // render tree.
+    if (styleChanges.Contains(style::Change::Renderer))
+    {
+      CreateContentRenderers(*_updater._builder, *pseudoElementRenderer, *updateStyle);
+    }
+    else
+    {
+      UpdateStyleForContentRenderers(*pseudoElementRenderer, *updateStyle);
+    }
+
+    if (_updater.GetRenderView().HasQuotesNeedingUpdate())
+    {
+      for (auto &child : DescendantsOfType<RenderQuote>(*pseudoElementRenderer))
+      {
+        UpdateQuotesUpTo(&child);
+      }
+    }
+    _updater._builder->UpdateAfterDescendants(*pseudoElementRenderer);
   }
 
   bool RenderTreeUpdater::GeneratedContent::NeedsPseudoElement(const RenderStyle *style) noexcept

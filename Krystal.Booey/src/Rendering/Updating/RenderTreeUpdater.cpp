@@ -106,8 +106,8 @@ namespace krys::boo
       UpdateRenderTree(*renderingRoot);
     }
 
-    // FIXME: Quotes and counters (generatedContent().updateRemainingQuotes/updateCounters), once there's
-    // generated content.
+    GetGeneratedContent().UpdateRemainingQuotes();
+    GetGeneratedContent().UpdateCounters();
 
     _builder->UpdateAfterDescendants(GetRenderView());
 
@@ -847,7 +847,7 @@ namespace krys::boo
         GeneratedContent::RemoveBeforePseudoElement(element, builder);
         GeneratedContent::RemoveAfterPseudoElement(element, builder);
 
-        // FIXME: The ::marker's animations, once there are list markers.
+        // FIXME: The ::marker's animations, once there are animations.
 
         if (auto *renderer = element.Renderer())
         {

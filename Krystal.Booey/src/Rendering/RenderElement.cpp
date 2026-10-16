@@ -6,6 +6,10 @@
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
+#include "Krystal.Booey/Rendering/RenderCounter.hpp"
+#include "Krystal.Booey/Style/PseudoElementRequest.hpp"
+#include "Krystal.Booey/Style/ResolvedStyle.hpp"
+#include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
@@ -251,10 +255,91 @@ namespace krys::boo
     (void)newStyle;
   }
 
-  void RenderElement::StyleDidChange(style::Difference, const RenderStyle *) noexcept
+  const RenderStyle *
+    RenderElement::GetCachedPseudoStyle(const style::PseudoElementIdentifier &pseudoElementIdentifier,
+                                        const RenderStyle *parentStyle) const noexcept
   {
-    // FIXME: Images, SVG resources, counters, the layout the difference asks for, out-of-flow static
-    // positions, cursors, outline-auto ancestors, scroll anchoring and line layout, once there are any.
+    if (AllPublicPseudoElementTypes.Contains(pseudoElementIdentifier.Type)
+        && !Style().HasPseudoStyle(pseudoElementIdentifier.Type))
+    {
+      return nullptr;
+    }
+
+    auto *cachedStyle = Style().GetCachedPseudoStyle(pseudoElementIdentifier);
+    if (cachedStyle)
+    {
+      return cachedStyle;
+    }
+
+    auto result = GetUncachedPseudoStyle(style::PseudoElementRequest(pseudoElementIdentifier), parentStyle);
+    if (result)
+    {
+      return const_cast<RenderStyle &>(_style).AddCachedPseudoStyle(krys::move(result));
+    }
+    return nullptr;
+  }
+
+  UniquePtr<RenderStyle>
+    RenderElement::GetUncachedPseudoStyle(const style::PseudoElementRequest &pseudoElementRequest,
+                                          const RenderStyle *parentStyle,
+                                          const RenderStyle *ownStyle) const noexcept
+  {
+    if (AllPublicPseudoElementTypes.Contains(pseudoElementRequest.GetType()) && !ownStyle
+        && !Style().HasPseudoStyle(pseudoElementRequest.GetType()))
+    {
+      return nullptr;
+    }
+
+    if (!parentStyle)
+    {
+      krys_debug_assert(!ownStyle);
+      parentStyle = &Style();
+    }
+
+    if (IsAnonymous())
+    {
+      return nullptr;
+    }
+
+    auto element = ShareRef(*GetElement());
+    auto &styleResolver = element->StyleResolver();
+
+    auto resolvedStyle = styleResolver.StyleForPseudoElement(*element, pseudoElementRequest, {parentStyle});
+    if (!resolvedStyle)
+    {
+      return nullptr;
+    }
+
+    // FIXME: Load the style's pending resources, once there's resource loading.
+
+    return krys::move(resolvedStyle->Style);
+  }
+
+  void RenderElement::StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept
+  {
+    // FIXME: Images and SVG resources, once there are any.
+
+    if (!Parent())
+    {
+      return;
+    }
+
+    if (diff == style::DifferenceResult::Layout || diff == style::DifferenceResult::Overflow)
+    {
+      RenderCounter::RendererStyleChanged(*this, oldStyle, _style);
+
+      // FIXME: The layout the difference asks for, once there's layout.
+    }
+
+    // FIXME: Out-of-flow static positions, cursors, outline-auto ancestors, scroll anchoring and line layout,
+    // once there are any.
+  }
+
+  bool RenderElement::IsWritingModeRoot() const noexcept
+  {
+    return !Parent()
+           || Parent()->Style().GetWritingMode().ComputedWritingMode()
+                != Style().GetWritingMode().ComputedWritingMode();
   }
 
   bool RenderElement::IsFixedPositioned() const noexcept
@@ -610,8 +695,15 @@ namespace krys::boo
 
   void RenderElement::WillBeDestroyed() noexcept
   {
-    // FIXME: Slow repaint objects, visibility callbacks, counter nodes, the subtree layout root, image
-    // clients, outlines, paused image animations and the other upstream clean-up, once there are any.
+    // FIXME: Slow repaint objects and visibility callbacks, once there are any.
+
+    if (HasCounterNodeMap())
+    {
+      RenderCounter::DestroyCounterNodes(*this);
+    }
+
+    // FIXME: The subtree layout root, image clients, outlines, paused image animations and the other upstream
+    // clean-up, once there are any.
     RenderObject::WillBeDestroyed();
   }
 }

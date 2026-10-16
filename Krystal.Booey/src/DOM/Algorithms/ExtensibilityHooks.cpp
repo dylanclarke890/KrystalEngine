@@ -9,18 +9,6 @@
 
 namespace krys::boo::dom
 {
-  static void TearDownRenderers(Node &node) noexcept
-  {
-    if (auto *element = DynamicDowncast<Element>(node))
-    {
-      RenderTreeUpdater::TearDownRenderers(*element);
-    }
-    else if (auto *text = DynamicDowncast<Text>(node))
-    {
-      RenderTreeUpdater::TearDownRenderer(*text);
-    }
-  }
-
   void ExtensibilityHooks::NodeInserted(Node &insertedNode, bool isSubtreeRoot) noexcept
   {
     // NOTE: a shadow root has no parent: it's connected when its host is, and it's always in a shadow tree
@@ -75,12 +63,6 @@ namespace krys::boo::dom
 
   void ExtensibilityHooks::NodeMoved(Node &movedNode, bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
-    // A moved subtree is styled again in its new place.
-    if (isSubtreeRoot)
-    {
-      TearDownRenderers(movedNode);
-    }
-
     if (Is<ShadowRoot>(movedNode))
     {
       movedNode.OnMove(isSubtreeRoot, oldAncestor);
@@ -108,15 +90,21 @@ namespace krys::boo::dom
     movedNode.OnMove(isSubtreeRoot, oldAncestor);
   }
 
+  void ExtensibilityHooks::DestroyRenderTreeIfNeeded(Node &child) noexcept
+  {
+    if (auto *element = DynamicDowncast<Element>(child))
+    {
+      RenderTreeUpdater::TearDownRenderers(*element);
+    }
+    else if (auto *text = DynamicDowncast<Text>(child))
+    {
+      RenderTreeUpdater::TearDownRenderer(*text);
+    }
+  }
+
   void ExtensibilityHooks::NodeRemoved(Node &removedNode, bool isSubtreeRoot,
                                        ContainerNode &oldAncestor) noexcept
   {
-    // The removed subtree's renderers go with it.
-    if (isSubtreeRoot)
-    {
-      TearDownRenderers(removedNode);
-    }
-
     removedNode.ClearNodeFlag(NodeFlags::IsConnected);
 
     if (auto *element = DynamicDowncast<Element>(removedNode))

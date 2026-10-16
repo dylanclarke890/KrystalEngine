@@ -4,6 +4,7 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
+#include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
@@ -100,7 +101,7 @@ namespace krys::boo
   /// @brief A node of the render tree: the box, text or other object a node (or, for anonymous objects, the
   /// document) is rendered as.
   /// @note FIXME: There's no render tree yet: renderers have no parent, children, layout or painting.
-  class RenderObject : public CanMakeCheckedPtr<RenderObject>
+  class RenderObject : public CanMakeWeakPtr<RenderObject>, public CanMakeCheckedPtr<RenderObject>
   {
     KRYS_NON_COPY_MOVABLE(RenderObject);
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderObject);
@@ -386,6 +387,8 @@ namespace krys::boo
     /// @brief The render tree's root.
     KRYS_NODISCARD RenderView &View() const noexcept;
 
+    KRYS_NODISCARD RenderElement *FirstNonAnonymousAncestor() const noexcept;
+
     /// @brief Whether the object is in its document's render tree.
     KRYS_NODISCARD bool IsRooted() const noexcept;
 
@@ -526,6 +529,18 @@ namespace krys::boo
     KRYS_NODISCARD bool IsRenderView() const noexcept
     {
       return _type == Type::View;
+    }
+    KRYS_NODISCARD bool IsRenderTextFragment() const noexcept
+    {
+      return _type == Type::TextFragment;
+    }
+    KRYS_NODISCARD bool IsRenderCounter() const noexcept
+    {
+      return _type == Type::Counter;
+    }
+    KRYS_NODISCARD bool IsRenderQuote() const noexcept
+    {
+      return _type == Type::Quote;
     }
     KRYS_NODISCARD bool IsLegacyRenderSVGModelObject() const noexcept
     {

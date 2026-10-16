@@ -9,6 +9,8 @@
 
 namespace krys::boo
 {
+  class RenderTextFragment;
+
   /// @brief A renderer that follows the CSS box model: a box or an inline box.
   // FIXME: Painting (backgrounds, borders, box shadows), continuations, sticky positioning and the geometry
   // come with layout and painting.
@@ -35,12 +37,18 @@ namespace krys::boo
     KRYS_NODISCARD LayoutSize RelativePositionOffset() const noexcept;
     KRYS_NODISCARD LayoutUnit ContainingBlockLogicalWidthForContent() const noexcept;
 
+    /// @brief For a `::first-letter` renderer, the text after the first letter.
+    KRYS_NODISCARD RenderTextFragment *FirstLetterRemainingText() const noexcept;
+    void SetFirstLetterRemainingText(RenderTextFragment &remainingText) noexcept;
+    void ClearFirstLetterRemainingText() noexcept;
+
   protected:
     RenderBoxModelObject(Type type, dom::Element &element, RenderStyle &&style,
                          EnumSet<TypeFlag> baseTypeFlags, TypeSpecificFlags typeSpecificFlags) noexcept;
     RenderBoxModelObject(Type type, dom::Document &document, RenderStyle &&style,
                          EnumSet<TypeFlag> baseTypeFlags, TypeSpecificFlags typeSpecificFlags) noexcept;
 
+    void WillBeDestroyed() noexcept override;
     void UpdateFromStyle() noexcept override;
   };
 }

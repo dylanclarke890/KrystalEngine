@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/DocumentType.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Node.hpp"
+#include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include <ranges>
@@ -601,6 +602,202 @@ namespace krys::boo::dom
       }
     }
 
+    return nullptr;
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD Element *ParentOrHostOfPseudo(const Node &node) noexcept
+    {
+      auto *pseudoElement = DynamicDowncast<PseudoElement>(node);
+      return pseudoElement ? pseudoElement->HostElement() : node.ParentElement();
+    }
+
+    KRYS_NODISCARD bool IsPseudoElementOfType(const Node &node, PseudoElementType type) noexcept
+    {
+      auto *pseudoElement = DynamicDowncast<PseudoElement>(node);
+      return pseudoElement && pseudoElement->GetPseudoElementType() == type;
+    }
+
+    KRYS_NODISCARD const Node *ParentOrHostNodeOfPseudo(const Node &node) noexcept
+    {
+      auto *pseudoElement = DynamicDowncast<PseudoElement>(node);
+      return pseudoElement ? static_cast<const Node *>(pseudoElement->HostElement()) : node.ParentNode();
+    }
+  }
+
+  Node *TreeQueries::PseudoAwarePreviousSibling(const Node &node) noexcept
+  {
+    auto *parentOrHost = ParentOrHostOfPseudo(node);
+    if (parentOrHost && !node.PreviousSibling())
+    {
+      if (IsPseudoElementOfType(node, PseudoElementType::After) && parentOrHost->LastChild())
+      {
+        return parentOrHost->LastChild();
+      }
+      if (!IsPseudoElementOfType(node, PseudoElementType::Before))
+      {
+        return parentOrHost->BeforePseudoElement();
+      }
+    }
+    return node.PreviousSibling();
+  }
+
+  Node *TreeQueries::PseudoAwareNextSibling(const Node &node) noexcept
+  {
+    auto *parentOrHost = ParentOrHostOfPseudo(node);
+    if (parentOrHost && !node.NextSibling())
+    {
+      if (IsPseudoElementOfType(node, PseudoElementType::Before) && parentOrHost->FirstChild())
+      {
+        return parentOrHost->FirstChild();
+      }
+      if (!IsPseudoElementOfType(node, PseudoElementType::After))
+      {
+        return parentOrHost->AfterPseudoElement();
+      }
+    }
+    return node.NextSibling();
+  }
+
+  Node *TreeQueries::PseudoAwareFirstChild(const Node &node) noexcept
+  {
+    if (auto *currentElement = DynamicDowncast<Element>(node))
+    {
+      Node *first = currentElement->BeforePseudoElement();
+      if (first)
+      {
+        return first;
+      }
+      first = currentElement->FirstChild();
+      if (!first)
+      {
+        first = currentElement->AfterPseudoElement();
+      }
+      return first;
+    }
+    return node.FirstChild();
+  }
+
+  Node *TreeQueries::PseudoAwareLastChild(const Node &node) noexcept
+  {
+    if (auto *currentElement = DynamicDowncast<Element>(node))
+    {
+      Node *last = currentElement->AfterPseudoElement();
+      if (last)
+      {
+        return last;
+      }
+      last = currentElement->LastChild();
+      if (!last)
+      {
+        last = currentElement->BeforePseudoElement();
+      }
+      return last;
+    }
+    return node.LastChild();
+  }
+
+  Node *TreeQueries::PreviousIncludingPseudo(const Node &current, const Node *stayWithin) noexcept
+  {
+    if (&current == stayWithin)
+    {
+      return nullptr;
+    }
+    if (auto *previous = PseudoAwarePreviousSibling(current))
+    {
+      while (auto *lastChild = PseudoAwareLastChild(*previous))
+      {
+        previous = lastChild;
+      }
+      return previous;
+    }
+    return const_cast<Node *>(ParentOrHostNodeOfPseudo(current));
+  }
+
+  Node *TreeQueries::NextIncludingPseudo(const Node &current, const Node *stayWithin) noexcept
+  {
+    if (auto *next = PseudoAwareFirstChild(current))
+    {
+      return next;
+    }
+    return NextIncludingPseudoSkippingChildren(current, stayWithin);
+  }
+
+  Node *TreeQueries::NextIncludingPseudoSkippingChildren(const Node &current, const Node *stayWithin) noexcept
+  {
+    if (&current == stayWithin)
+    {
+      return nullptr;
+    }
+    if (auto *next = PseudoAwareNextSibling(current))
+    {
+      return next;
+    }
+    for (auto *ancestor = ParentOrHostNodeOfPseudo(current); ancestor; ancestor = ancestor->ParentNode())
+    {
+      if (ancestor == stayWithin)
+      {
+        return nullptr;
+      }
+      if (auto *next = PseudoAwareNextSibling(*ancestor))
+      {
+        return next;
+      }
+    }
+    return nullptr;
+  }
+
+  Element *TreeQueries::PreviousElementIncludingPseudo(const Node &current, const Node *stayWithin) noexcept
+  {
+    for (auto *node = PreviousIncludingPseudo(current, stayWithin); node;
+         node = PreviousIncludingPseudo(*node, stayWithin))
+    {
+      if (auto *element = DynamicDowncast<Element>(*node))
+      {
+        return element;
+      }
+    }
+    return nullptr;
+  }
+
+  Element *TreeQueries::NextElementIncludingPseudo(const Node &current, const Node *stayWithin) noexcept
+  {
+    for (auto *node = NextIncludingPseudo(current, stayWithin); node;
+         node = NextIncludingPseudo(*node, stayWithin))
+    {
+      if (auto *element = DynamicDowncast<Element>(*node))
+      {
+        return element;
+      }
+    }
+    return nullptr;
+  }
+
+  Element *TreeQueries::NextElementIncludingPseudoSkippingChildren(const Node &current,
+                                                                   const Node *stayWithin) noexcept
+  {
+    for (auto *node = NextIncludingPseudoSkippingChildren(current, stayWithin); node;
+         node = NextIncludingPseudoSkippingChildren(*node, stayWithin))
+    {
+      if (auto *element = DynamicDowncast<Element>(*node))
+      {
+        return element;
+      }
+    }
+    return nullptr;
+  }
+
+  Element *TreeQueries::PseudoAwarePreviousElementSibling(const Node &node) noexcept
+  {
+    for (auto *sibling = PseudoAwarePreviousSibling(node); sibling;
+         sibling = PseudoAwarePreviousSibling(*sibling))
+    {
+      if (auto *element = DynamicDowncast<Element>(*sibling))
+      {
+        return element;
+      }
+    }
     return nullptr;
   }
 

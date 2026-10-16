@@ -33,7 +33,7 @@ namespace krys::boo::tests
       return css::tests::ToNarrow(element->GetAttribute(u8"id").value_or(u8""));
     }
 
-    /// @brief The children of @p parent, described, with their own children in parentheses.
+    /// @brief The element children of @p parent, described, with their own element children in parentheses.
     KRYS_NODISCARD std::string Tree(const RenderElement &parent)
     {
       std::string tree;
@@ -44,9 +44,9 @@ namespace krys::boo::tests
           tree += ' ';
         }
         tree += Describe(child);
-        if (child.FirstChild())
+        if (auto children = Tree(child); !children.empty())
         {
-          tree += '(' + Tree(child) + ')';
+          tree += '(' + children + ')';
         }
       }
       return tree;
@@ -164,8 +164,8 @@ namespace krys::boo::tests
       CHECK_FALSE(fixture.ById(u8"h1").Renderer());
       CHECK_FALSE(host.BeforePseudoElement());
       CHECK(ChildIds(*body) == List<std::string> {"a", "p"});
-      // host, its pseudo-elements, their anonymous wrappers and h1.
-      CHECK(view->RendererCount() == count - 7);
+      // host, its pseudo-elements, their content, their anonymous wrappers and h1.
+      CHECK(view->RendererCount() == count - 9);
     }
 
     SECTION("Destroying the render tree")

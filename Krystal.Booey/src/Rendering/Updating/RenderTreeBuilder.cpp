@@ -5,16 +5,20 @@
 #include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
+#include "Krystal.Booey/Rendering/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/RenderTableRow.hpp"
 #include "Krystal.Booey/Rendering/RenderTableSection.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Rendering/RenderTextFragment.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlock.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlockFlow.hpp"
+#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderFirstLetter.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderInline.hpp"
+#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderList.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderTable.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
@@ -74,7 +78,8 @@ namespace krys::boo
 
   RenderTreeBuilder::RenderTreeBuilder(RenderView &view) noexcept
       : _view(view), _tableBuilder(CreateUnique<Table>(*this)), _blockBuilder(CreateUnique<Block>(*this)),
-        _blockFlowBuilder(CreateUnique<BlockFlow>(*this)), _inlineBuilder(CreateUnique<Inline>(*this))
+        _blockFlowBuilder(CreateUnique<BlockFlow>(*this)), _inlineBuilder(CreateUnique<Inline>(*this)),
+        _firstLetterBuilder(CreateUnique<FirstLetter>(*this)), _listBuilder(CreateUnique<List>(*this))
   {
     krys_assert(!s_current || &_view != &s_current->_view);
     _previous = s_current;
@@ -128,7 +133,12 @@ namespace krys::boo
 
     auto toDestroy = Detach(*renderer.Parent(), renderer, WillBeDestroyed::Yes, canCollapseAnonymousBlock);
 
-    // FIXME: The first letter and continuation clean-up, once there are text fragments and continuations.
+    if (auto *textFragment = DynamicDowncast<RenderTextFragment>(renderer))
+    {
+      FirstLetterBuilder().CleanupOnDestroy(*textFragment);
+    }
+
+    // FIXME: The continuation clean-up, once there are continuations.
 
     auto tearDownSubTreeIfApplicable = [&]
     {
@@ -365,9 +375,19 @@ namespace krys::boo
 
     newChild->InsertedIntoTree();
 
-    // FIXME: Line layout invalidation, fragmented flow state, multi-column descendants, list marker numbers,
-    // the layout bits of the child and its parent, the accessibility cache and outline-auto ancestors, once
-    // there are any.
+    // FIXME: Line layout invalidation, once there's line layout.
+
+    if (_internalMovesType == IsInternalMove::No)
+    {
+      // FIXME: The fragmented flow state and multi-column descendants, once there are fragmented flows.
+      if (auto *listItemRenderer = DynamicDowncast<RenderListItem>(*newChild))
+      {
+        listItemRenderer->UpdateListMarkerNumbers();
+      }
+    }
+
+    // FIXME: The layout bits of the child and its parent, the accessibility cache and outline-auto ancestors,
+    // once there are any.
   }
 
   void RenderTreeBuilder::Move(RenderBoxModelObject &from, RenderBoxModelObject &to, RenderObject &child,
@@ -448,7 +468,23 @@ namespace krys::boo
       // Save our next sibling as moveChildTo will clear it.
       auto *nextSibling = child->NextSibling();
 
-      // FIXME: Skip the first letter of a text fragment, once there are text fragments.
+      // FIXME: This logic here fails to detect the first letter in certain cases
+      // and skips a valid sibling renderer (see webkit.org/b/163737).
+      // Check to make sure we're not saving the firstLetter as the nextSibling.
+      // When the |child| object will be moved, its firstLetter will be recreated,
+      // so saving it now in nextSibling would leave us with a stale object.
+      if (Is<RenderTextFragment>(*child) && Is<RenderText>(nextSibling))
+      {
+        if (auto *block = Downcast<RenderTextFragment>(*child).BlockForAccompanyingFirstLetter())
+        {
+          auto [firstLetter, firstLetterContainer] = block->FirstLetterAndContainer(child);
+          // This is the first letter, skip it.
+          if (firstLetter == nextSibling)
+          {
+            nextSibling = nextSibling->NextSibling();
+          }
+        }
+      }
 
       Move(from, to, *child, beforeChild, normalizeAfterInsertion);
       child = nextSibling;
@@ -825,10 +861,22 @@ namespace krys::boo
     // WARNING: rendererToDestroy is deleted here.
   }
 
-  void RenderTreeBuilder::UpdateAfterDescendants(RenderElement &) noexcept
+  void RenderTreeBuilder::UpdateAfterDescendants(RenderElement &renderer) noexcept
   {
-    // FIXME: The first letter, the list item marker, multi-column flows, form controls and SVG roots, once
-    // there are their builders.
+    // FIXME: SVG roots, once there are SVG renderers.
+
+    // Do not early return here in any case. For example, RenderListItem derives
+    // from RenderBlockFlow and indirectly from RenderBlock thus fulfilling all
+    // update conditions below.
+    if (auto *block = DynamicDowncast<RenderBlock>(renderer))
+    {
+      FirstLetterBuilder().UpdateAfterDescendants(*block);
+    }
+    if (auto *listItem = DynamicDowncast<RenderListItem>(renderer))
+    {
+      ListBuilder().UpdateItemMarker(*listItem);
+    }
+    // FIXME: Multi-column flows and form controls, once there are their builders.
   }
 
   RenderPtr<RenderObject> RenderTreeBuilder::DetachFromRenderGrid(RenderGrid &parent, RenderObject &child,
@@ -857,6 +905,11 @@ namespace krys::boo
 
     // FIXME: Resetting the state of renderers that had layout, line layout invalidation and the fragmented
     // flow state, once there's layout.
+    if (auto *listItemRenderer = DynamicDowncast<RenderListItem>(child);
+        listItemRenderer && _internalMovesType == IsInternalMove::No)
+    {
+      listItemRenderer->UpdateListMarkerNumbers();
+    }
 
     child.WillBeRemovedFromTree();
     // WARNING: There should be no code running between willBeRemovedFromTree() and the actual removal below.

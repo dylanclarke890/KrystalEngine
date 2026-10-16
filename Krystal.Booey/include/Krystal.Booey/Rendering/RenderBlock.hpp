@@ -4,6 +4,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/Pair.hpp"
 
 namespace krys::boo
 {
@@ -29,6 +30,11 @@ namespace krys::boo
     {
       return true;
     }
+
+    /// @brief The renderer whose text starts with the block's `::first-letter` (or the first letter's own
+    /// renderer, once it's built), and the renderer that holds the first letter.
+    KRYS_NODISCARD Pair<RenderObject *, RenderElement *>
+      FirstLetterAndContainer(RenderObject *skipThisAsFirstLetter = nullptr) noexcept;
 
     // FIXME: Layout queries, reachable only through `RendererOf` and `RenderBoxOf`, which return null until
     // there's layout.

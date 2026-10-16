@@ -470,6 +470,9 @@ namespace krys::boo::dom
       ChildChangeStyleInvalidation removalStyleInvalidation(oldParent,
                                                             MakeChildChangeForRemoval(oldParent, node), node);
 
+      // A moved subtree is styled again in its new place.
+      ExtensibilityHooks::DestroyRenderTreeIfNeeded(node);
+
       if (auto previousSibling = node.PreviousSibling())
       {
         previousSibling->SetNextSibling(node.NextSibling());
@@ -792,6 +795,8 @@ namespace krys::boo::dom
 
     {
       ChildChangeStyleInvalidation styleInvalidation(parent, MakeChildChangeForRemoval(parent, node), node);
+
+      ExtensibilityHooks::DestroyRenderTreeIfNeeded(node);
 
       if (auto previousSibling = node.PreviousSibling())
       {

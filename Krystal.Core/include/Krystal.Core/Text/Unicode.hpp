@@ -16,6 +16,7 @@ namespace krys::text
   constexpr char32 ActivateSymmetricSwapping = 0x206B;
   constexpr char32 AegeanWordSeparatorDot = 0x10101;
   constexpr char32 AegeanWordSeparatorLine = 0x10100;
+  constexpr char32 Apostrophe = 0x0027;
   constexpr char32 ArabicIndicPerMilleSign = 0x0609;
   constexpr char32 ArabicIndicPerTenThousandSign = 0x060A;
   constexpr char32 ArabicPercentSign = 0x066A;
@@ -62,6 +63,7 @@ namespace krys::text
   constexpr char32 PilcrowSign = 0x00B6;
   constexpr char32 PopDirectionalFormatting = 0x202C;
   constexpr char32 PopDirectionalIsolate = 0x2069;
+  constexpr char32 QuotationMark = 0x0022;
   constexpr char32 ReversedPilcrowSign = 0x204B;
   constexpr char32 RightDoubleQuotationMark = 0x201D;
   constexpr char32 RightSingleQuotationMark = 0x2019;

@@ -31,6 +31,10 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#concept-node-remove-ext
     static void NodeRemoved(Node &removedNode, bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept;
 
+    /// @brief Destroys the renderers of @p child, which is about to be removed or moved. It's still in the
+    /// tree, so renderers that depend on their place (list items, counters) can update their neighbours.
+    static void DestroyRenderTreeIfNeeded(Node &child) noexcept;
+
     /// @see https://dom.spec.whatwg.org/#concept-node-clone-ext
     static void NodeCloned(Node &node, Node &copy, bool subtree) noexcept;
 

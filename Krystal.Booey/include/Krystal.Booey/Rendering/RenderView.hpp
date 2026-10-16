@@ -6,14 +6,21 @@
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {
   class LocalFrameView;
+  class RenderCounter;
+
+  /// @brief Counters whose text needs updating, keyed by address; the weak pointer tells whether the counter
+  /// is still alive.
+  using RenderCounterSet = HashMap<const RenderCounter *, WeakPtr<RenderCounter>>;
 
   /// @brief The root of a document's render tree, shown in the document's view.
-  // FIXME: Layout, painting, layers, selection, printing and the repaint, compositing and quote/counter
-  // bookkeeping come with layout and painting.
+  // FIXME: Layout, painting, layers, selection, printing and the repaint and compositing bookkeeping come
+  // with layout and painting.
   class RenderView final : public RenderBlockFlow
   {
     KRYS_NON_COPY_MOVABLE(RenderView);
@@ -25,6 +32,8 @@ namespace krys::boo
     // FIXME: Stands in for the layout bits renderers have, until there's layout: a new render view needs
     // layout, and style changes don't mark it.
     bool _needsLayout {true};
+    bool _hasQuotesNeedingUpdate {false};
+    RenderCounterSet _countersNeedingUpdate;
 
   public:
     RenderView(dom::Document &document, RenderStyle &&style) noexcept;
@@ -70,6 +79,18 @@ namespace krys::boo
     {
       _needsLayout = false;
     }
+
+    KRYS_NODISCARD bool HasQuotesNeedingUpdate() const noexcept
+    {
+      return _hasQuotesNeedingUpdate;
+    }
+    void SetHasQuotesNeedingUpdate(bool b) noexcept
+    {
+      _hasQuotesNeedingUpdate = b;
+    }
+
+    void AddCounterNeedingUpdate(RenderCounter &renderer) noexcept;
+    KRYS_NODISCARD RenderCounterSet TakeCountersNeedingUpdate() noexcept;
 
     KRYS_NODISCARD FloatSize SizeForCSSSmallViewportUnits() const noexcept;
     KRYS_NODISCARD FloatSize SizeForCSSLargeViewportUnits() const noexcept;

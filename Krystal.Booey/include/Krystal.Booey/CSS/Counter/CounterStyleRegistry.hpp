@@ -7,6 +7,11 @@
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
+namespace krys::boo::style
+{
+  struct CounterStyle;
+}
+
 namespace krys::boo::css
 {
   using CounterStyleMap = HashMap<CSSOMStringAtom, Ref<CounterStyle>>;
@@ -25,8 +30,9 @@ namespace krys::boo::css
     KRYS_NODISCARD static Ref<CounterStyle> DecimalCounter() noexcept;
 
     /// @brief The counter style named @p name, with its references resolved.
-    // FIXME: Take a Style::CounterStyle once the computed list-style-type and counter() values are ported.
     KRYS_NODISCARD Ref<CounterStyle> ResolvedCounterStyle(const CSSOMStringAtom &name) noexcept;
+    /// @brief The counter style @p style names, with its references resolved.
+    KRYS_NODISCARD Ref<CounterStyle> ResolvedCounterStyle(const style::CounterStyle &style) noexcept;
     void ResolveReferencesIfNeeded() noexcept;
 
     void AddCounterStyle(const CounterStyleDescriptors &descriptors) noexcept;

@@ -406,6 +406,16 @@ namespace krys::boo
     return *GetDocument().GetRenderView();
   }
 
+  RenderElement *RenderObject::FirstNonAnonymousAncestor() const noexcept
+  {
+    auto *ancestor = Parent();
+    while (ancestor && ancestor->IsAnonymous())
+    {
+      ancestor = ancestor->Parent();
+    }
+    return ancestor;
+  }
+
   bool RenderObject::IsRooted() const noexcept
   {
     return IsDescendantOf(&View());

@@ -34,6 +34,9 @@ namespace krys::boo
   protected:
     void UpdateFromStyle() noexcept override;
   };
+
+  /// @brief Whether @p renderer holds nothing but collapsible whitespace (and floating or out-of-flow boxes).
+  KRYS_NODISCARD bool IsEmptyInline(const RenderInline &renderer) noexcept;
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::RenderInline)

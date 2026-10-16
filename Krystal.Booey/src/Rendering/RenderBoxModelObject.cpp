@@ -1,8 +1,23 @@
 ﻿#include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
+#include "Krystal.Booey/Rendering/RenderTextFragment.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {
+  namespace
+  {
+    // Entries are removed when their first-letter renderer is destroyed.
+    using FirstLetterRemainingTextMap = HashMap<const RenderBoxModelObject *, WeakPtr<RenderTextFragment>>;
+
+    KRYS_NODISCARD FirstLetterRemainingTextMap &GetFirstLetterRemainingTextMap() noexcept
+    {
+      static FirstLetterRemainingTextMap map;
+      return map;
+    }
+  }
+
   RenderBoxModelObject::RenderBoxModelObject(Type type, dom::Element &element, RenderStyle &&style,
                                              EnumSet<TypeFlag> baseTypeFlags,
                                              TypeSpecificFlags typeSpecificFlags) noexcept
@@ -22,6 +37,40 @@ namespace krys::boo
   }
 
   RenderBoxModelObject::~RenderBoxModelObject() noexcept = default;
+
+  void RenderBoxModelObject::WillBeDestroyed() noexcept
+  {
+    // FIXME: The image quality controller, once there's painting.
+    if (IsFirstLetter())
+    {
+      GetFirstLetterRemainingTextMap().erase(this);
+    }
+
+    RenderLayerModelObject::WillBeDestroyed();
+  }
+
+  RenderTextFragment *RenderBoxModelObject::FirstLetterRemainingText() const noexcept
+  {
+    if (!IsFirstLetter())
+    {
+      return nullptr;
+    }
+    auto &map = GetFirstLetterRemainingTextMap();
+    auto it = map.find(this);
+    return it != map.end() ? it->second.get() : nullptr;
+  }
+
+  void RenderBoxModelObject::SetFirstLetterRemainingText(RenderTextFragment &remainingText) noexcept
+  {
+    krys_debug_assert(IsFirstLetter());
+    GetFirstLetterRemainingTextMap()[this] = CreateWeakPtr(&remainingText);
+  }
+
+  void RenderBoxModelObject::ClearFirstLetterRemainingText() noexcept
+  {
+    krys_debug_assert(IsFirstLetter());
+    GetFirstLetterRemainingTextMap().erase(this);
+  }
 
   bool RenderBoxModelObject::HasVisibleBoxDecorationStyle() const noexcept
   {

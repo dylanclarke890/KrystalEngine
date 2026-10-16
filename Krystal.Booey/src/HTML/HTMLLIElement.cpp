@@ -16,7 +16,7 @@ namespace krys::boo::html
 
   int32 HTMLLIElement::Value() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"value");
+    return Reflection::Reflect<int32>(*this, u8"value");
   }
 
   void HTMLLIElement::Value(int32 value) noexcept

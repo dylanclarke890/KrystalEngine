@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/RenderInline.hpp"
+#include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
+#include "Krystal.Booey/Rendering/RenderText.hpp"
 
 namespace krys::boo
 {
@@ -57,5 +59,30 @@ namespace krys::boo
   LayoutUnit RenderInline::InnerPaddingBoxHeight() const noexcept
   {
     krys_unreachable();
+  }
+
+  bool IsEmptyInline(const RenderInline &renderer) noexcept
+  {
+    for (auto &current : ChildrenOfType<RenderObject>(renderer))
+    {
+      if (current.IsFloatingOrOutOfFlowPositioned())
+      {
+        continue;
+      }
+      if (auto *text = DynamicDowncast<RenderText>(current))
+      {
+        if (!text->ContainsOnlyCollapsibleWhitespace())
+        {
+          return false;
+        }
+        continue;
+      }
+      auto *renderInline = DynamicDowncast<RenderInline>(current);
+      if (!renderInline || !IsEmptyInline(*renderInline))
+      {
+        return false;
+      }
+    }
+    return true;
   }
 }
