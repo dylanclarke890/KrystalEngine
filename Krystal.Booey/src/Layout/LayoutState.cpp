@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Layout/LayoutState.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Block/BlockFormattingState.hpp"
+#include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineContentCache.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInitialContainingBlock.hpp"
 
 namespace krys::boo::layout
@@ -96,6 +97,17 @@ namespace krys::boo::layout
     return *_blockFormattingStates.at(&blockFormattingContextRoot);
   }
 
+  InlineContentCache &LayoutState::GetInlineContentCache(const ElementBox &formattingContextRoot) noexcept
+  {
+    krys_debug_assert(formattingContextRoot.EstablishesInlineFormattingContext());
+    auto &inlineContentCache = _inlineContentCaches[&formattingContextRoot];
+    if (!inlineContentCache)
+    {
+      inlineContentCache = CreateUnique<InlineContentCache>();
+    }
+    return *inlineContentCache;
+  }
+
   BlockFormattingState &
     LayoutState::EnsureBlockFormattingState(const ElementBox &formattingContextRoot) noexcept
   {
@@ -113,6 +125,12 @@ namespace krys::boo::layout
   {
     krys_debug_assert(formattingContextRoot.EstablishesBlockFormattingContext());
     _blockFormattingStates.erase(&formattingContextRoot);
+  }
+
+  void LayoutState::DestroyInlineContentCache(const ElementBox &formattingContextRoot) noexcept
+  {
+    krys_debug_assert(formattingContextRoot.EstablishesInlineFormattingContext());
+    _inlineContentCaches.erase(&formattingContextRoot);
   }
 
   void LayoutState::LayoutWithFormattingContextForBox(const ElementBox &box,

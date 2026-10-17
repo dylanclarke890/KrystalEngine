@@ -97,7 +97,10 @@ namespace krys::boo::style
       return _value.ShouldApplySpacing(firstCharacterClass, secondCharacterClass);
     }
 
-    // FIXME: `shouldApplySpacing(char32_t, char32_t)` comes with text layout (see `boo::TextAutospace`).
+    KRYS_NODISCARD bool ShouldApplySpacing(char32_t firstCharacter, char32_t secondCharacter) const noexcept
+    {
+      return _value.ShouldApplySpacing(firstCharacter, secondCharacter);
+    }
 
     KRYS_NODISCARD constexpr bool operator==(const TextAutospace &) const noexcept = default;
 

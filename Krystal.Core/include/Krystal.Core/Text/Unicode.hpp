@@ -37,6 +37,8 @@ namespace krys::text
   constexpr char32 FullwidthPercentSign = 0xFF05;
   constexpr char32 FunctionApplication = 0x2061;
   constexpr char32 HiraganaLetterSmallA = 0x3041;
+  constexpr char32 HorizontalEllipsis = 0x2026;
+  constexpr char32 IdeographicSpace = 0x3000;
   constexpr char32 InhibitArabicFormShaping = 0x206C;
   constexpr char32 InhibitSymmetricSwapping = 0x206A;
   constexpr char32 InvisibleSeparator = 0x2063;
@@ -84,6 +86,7 @@ namespace krys::text
   constexpr char32 TibetanMarkIntersyllabicTsheg = 0x0F0B;
   constexpr char32 TironianSignEt = 0x204A;
   constexpr char32 UgariticWordDivider = 0x1039F;
+  constexpr char32 VerticalEllipsis = 0x22EE;
   constexpr char32 WhiteBullet = 0x25E6;
   constexpr char32 WordJoiner = 0x2060;
   constexpr char32 YenSign = 0x00A5;

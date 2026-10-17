@@ -3,6 +3,7 @@
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Block/BlockFormattingState.hpp"
+#include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineContentCache.hpp"
 #include "Krystal.Booey/Layout/Integration/LayoutIntegrationBoxTreeUpdater.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInitialContainingBlock.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -89,6 +90,22 @@ namespace krys::boo::tests
 
       layoutState.DestroyBlockFormattingState(rootBox);
       CHECK_FALSE(layoutState.HasFormattingState(rootBox));
+    }
+
+    SECTION("Inline content caches")
+    {
+      auto &rootRenderer = Downcast<RenderBlockFlow>(*fixture.ById(u8"root").Renderer());
+      auto &rootBox = *layout_integration::BoxTreeUpdater(rootRenderer).Build();
+
+      auto &inlineContentCache = layoutState.GetInlineContentCache(rootBox);
+      CHECK(&layoutState.GetInlineContentCache(rootBox) == &inlineContentCache);
+      CHECK(inlineContentCache.GetInlineItems().IsEmpty());
+      inlineContentCache.SetMinimumContentSize(10);
+      CHECK(layoutState.GetInlineContentCache(rootBox).MinimumContentSize() == 10.f);
+
+      // A destroyed cache starts again empty.
+      layoutState.DestroyInlineContentCache(rootBox);
+      CHECK_FALSE(layoutState.GetInlineContentCache(rootBox).MinimumContentSize());
     }
 
     SECTION("A secondary layout state keeps its own geometries")

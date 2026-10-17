@@ -784,6 +784,15 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Layout/FormattingContexts/Block/BlockFormattingState.hpp
   include/Krystal.Booey/Layout/FormattingContexts/Block/BlockLayoutState.hpp
   include/Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextBreakingPositionContext.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextBreakingPositionCache.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineLineTypes.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineItem.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineTextItem.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineSoftLineBreakItem.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineContentCache.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineItemsBuilder.hpp
+  include/Krystal.Booey/Rendering/BreakablePositions.hpp
   include/Krystal.Booey/Layout/Floats/FloatAvoider.hpp
   include/Krystal.Booey/Layout/Floats/PlacedFloats.hpp
   include/Krystal.Booey/Layout/Floats/FloatingContext.hpp
@@ -2057,6 +2066,11 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Layout/FormattingContexts/FormattingContext.cpp
   src/Layout/FormattingContexts/Block/BlockFormattingState.cpp
   src/Layout/FormattingContexts/Inline/Text/TextUtil.cpp
+  src/Layout/FormattingContexts/Inline/Text/TextBreakingPositionCache.cpp
+  src/Layout/FormattingContexts/Inline/InlineItem.cpp
+  src/Layout/FormattingContexts/Inline/InlineTextItem.cpp
+  src/Layout/FormattingContexts/Inline/InlineItemsBuilder.cpp
+  src/Rendering/BreakablePositions.cpp
   src/Layout/Floats/FloatAvoider.cpp
   src/Layout/Floats/PlacedFloats.cpp
   src/Layout/Floats/FloatingContext.cpp

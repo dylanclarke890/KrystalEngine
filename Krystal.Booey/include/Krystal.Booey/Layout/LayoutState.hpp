@@ -28,11 +28,11 @@ namespace krys::boo::layout
 {
   class BlockFormattingState;
   class FormattingState;
+  class InlineContentCache;
   class InlineLayoutState;
 
   /// @brief The geometry of the layout boxes, and the formatting states of their formatting contexts.
-  // FIXME: The inline content caches (inlineContentCache, destroyInlineContentCache), once there are inline
-  // items, and the table formatting states, once there's a table formatting context.
+  // FIXME: The table formatting states, once there's a table formatting context.
   class LayoutState : public CanMakeWeakPtr<LayoutState>, public CanMakeCheckedPtr<LayoutState>
   {
     KRYS_NON_COPY_MOVABLE(LayoutState);
@@ -66,6 +66,7 @@ namespace krys::boo::layout
     const Type _type;
 
     HashMap<const ElementBox *, UniquePtr<BlockFormattingState>> _blockFormattingStates;
+    HashMap<const ElementBox *, UniquePtr<InlineContentCache>> _inlineContentCaches;
 
     HashMap<const Box *, UniquePtr<BoxGeometry>> _layoutBoxToBoxGeometry;
     QuirksMode _quirksMode {QuirksMode::No};
@@ -93,6 +94,9 @@ namespace krys::boo::layout
 
     void UpdateQuirksMode(const dom::Document &document) noexcept;
 
+    KRYS_NODISCARD InlineContentCache &
+      GetInlineContentCache(const ElementBox &formattingContextRoot) noexcept;
+
     BlockFormattingState &EnsureBlockFormattingState(const ElementBox &formattingContextRoot) noexcept;
 
     KRYS_NODISCARD BlockFormattingState &
@@ -102,6 +106,7 @@ namespace krys::boo::layout
       FormattingStateForFormattingContext(const ElementBox &formattingRoot) const noexcept;
 
     void DestroyBlockFormattingState(const ElementBox &formattingContextRoot) noexcept;
+    void DestroyInlineContentCache(const ElementBox &formattingContextRoot) noexcept;
 
     KRYS_NODISCARD bool HasFormattingState(const ElementBox &formattingRoot) const noexcept;
 
