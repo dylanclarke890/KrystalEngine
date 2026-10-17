@@ -41,6 +41,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLBaseElement.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/HTMLFrameSetElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHeadElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/HTML/HTMLScriptElement.hpp"
@@ -1446,9 +1447,14 @@ namespace krys::boo::dom
         {
           if (styleUpdate)
           {
+            SetForScope interleavedLayoutScope(_isInStyleInterleavedLayout, true);
+
             UpdateRenderTree(krys::move(styleUpdate));
 
-            // FIXME: The interleaved layout, once there's layout.
+            if (auto *frameView = View(); frameView && frameView->LayoutContext().NeedsLayout())
+            {
+              frameView->LayoutContext().InterleavedLayout();
+            }
           }
 
           styleUpdate = resolver.Resolve();
@@ -1737,4 +1743,145 @@ namespace krys::boo::dom
   }
 
 #pragma endregion
+
+  namespace
+  {
+    // See https://www.w3.org/TR/cssom-view-1/#potentially-scrollable.
+    KRYS_NODISCARD bool IsBodyPotentiallyScrollable(Document &document, html::HTMLBodyElement &body) noexcept
+    {
+      // An element is potentially scrollable if all of the following conditions are true:
+      // - The element has an associated CSS layout box.
+      // - The element is not the HTML body element, or it is and the root element's used value of the
+      //   overflow-x or overflow-y properties is not visible.
+      // - The element's used value of the overflow-x or overflow-y properties is not visible.
+      //
+      // FIXME: We should use RenderObject::hasNonVisibleOverflow() instead of Element::computedStyle() but
+      // the used values are currently not correctly updated. See https://webkit.org/b/182292.
+      auto documentElement = document.DocumentElement();
+      if (!body.Renderer() || !documentElement)
+      {
+        return false;
+      }
+      auto *documentElementStyle = documentElement->ComputedStyle(null);
+      if (!documentElementStyle || documentElementStyle->IsOverflowVisible())
+      {
+        return false;
+      }
+      auto *bodyStyle = body.ComputedStyle(null);
+      return bodyStyle && !bodyStyle->IsOverflowVisible();
+    }
+
+    KRYS_NODISCARD float ZoomForClient(const RenderStyle &style) noexcept
+    {
+      return style.UsedZoom();
+    }
+  }
+
+  RefPtr<Element> Document::ScrollingElementForAPI() noexcept
+  {
+    if (InQuirksMode())
+    {
+      UpdateLayoutIgnorePendingStylesheets();
+    }
+    return ScrollingElement();
+  }
+
+  RefPtr<Element> Document::ScrollingElement() noexcept
+  {
+    // See https://drafts.csswg.org/cssom-view/#dom-document-scrollingelement.
+    // The scrollingElement attribute, on getting, must run these steps:
+    // 1. If the Document is in quirks mode, follow these substeps:
+    if (InQuirksMode())
+    {
+      // 1. If the HTML body element exists, and it is not potentially scrollable, return the
+      // HTML body element and abort these steps.
+      if (auto firstBody = Body(); firstBody && !IsBodyPotentiallyScrollable(*this, *firstBody))
+      {
+        return firstBody;
+      }
+
+      // 2. Return null and abort these steps.
+      return nullptr;
+    }
+
+    // 2. If there is a root element, return the root element and abort these steps.
+    // 3. Return null.
+    return DocumentElement();
+  }
+
+  html::HTMLElement *Document::BodyOrFrameset() const noexcept
+  {
+    // Return the first body or frameset child of the html element.
+    auto element = DocumentElement();
+    if (!element || !Is<html::HTMLHtmlElement>(*element))
+    {
+      return nullptr;
+    }
+    for (auto *child = element->FirstChild(); child; child = child->NextSibling())
+    {
+      auto *childElement = DynamicDowncast<html::HTMLElement>(child);
+      if (childElement
+          && (Is<html::HTMLBodyElement>(*childElement) || Is<html::HTMLFrameSetElement>(*childElement)))
+      {
+        return const_cast<html::HTMLElement *>(childElement);
+      }
+    }
+    return nullptr;
+  }
+
+  void Document::ConvertAbsoluteToClientQuads(List<FloatQuad> &quads, const RenderStyle &style) const noexcept
+  {
+    auto *frameView = View();
+    if (!frameView)
+    {
+      return;
+    }
+
+    float inverseFrameScale = frameView->AbsoluteToDocumentScaleFactor(ZoomForClient(style));
+    auto documentToClientOffset = frameView->DocumentToClientOffset();
+
+    for (auto &quad : quads)
+    {
+      if (inverseFrameScale != 1)
+      {
+        quad.Scale(inverseFrameScale);
+      }
+
+      quad.Move(documentToClientOffset);
+    }
+  }
+
+  void Document::ConvertAbsoluteToClientRects(List<FloatRect> &rects, const RenderStyle &style) const noexcept
+  {
+    auto *frameView = View();
+    if (!frameView)
+    {
+      return;
+    }
+
+    float inverseFrameScale = frameView->AbsoluteToDocumentScaleFactor(ZoomForClient(style));
+    auto documentToClientOffset = frameView->DocumentToClientOffset();
+
+    for (auto &rect : rects)
+    {
+      if (inverseFrameScale != 1)
+      {
+        rect.Scale(inverseFrameScale);
+      }
+
+      rect.Move(documentToClientOffset);
+    }
+  }
+
+  void Document::ConvertAbsoluteToClientRect(FloatRect &rect, const RenderStyle &style) const noexcept
+  {
+    auto *frameView = View();
+    if (!frameView)
+    {
+      return;
+    }
+
+    rect = frameView->AbsoluteToDocumentRect(rect, ZoomForClient(style));
+    rect = frameView->DocumentToClientRect(rect);
+  }
 }

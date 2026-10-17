@@ -5,6 +5,8 @@
 #include "Krystal.Booey/HTML/HTMLMarqueeElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableCellElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableElement.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
@@ -32,6 +34,7 @@
 #include "Krystal.Booey/Style/PseudoElementRequest.hpp"
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
+#include "Krystal.Booey/Style/Values/ScrollSnap/ScrollMargin.hpp"
 
 namespace krys::boo
 {
@@ -1270,4 +1273,195 @@ namespace krys::boo
   }
 
 #pragma endregion
+
+  namespace
+  {
+    KRYS_NODISCARD bool GetLeadingCorner(const RenderElement &renderer, FloatPoint &point,
+                                         bool &insideFixed) noexcept
+    {
+      // FIXME: SVG renderers' stroke bounding boxes, once there's SVG.
+      if (!renderer.IsInline() || renderer.IsBlockLevelReplacedOrAtomicInline())
+      {
+        point = renderer.LocalToAbsolute(FloatPoint(), MapCoordinatesMode::UseTransforms, &insideFixed);
+        return true;
+      }
+
+      // find the next text/image child, to get a position
+      const RenderObject *o = &renderer;
+      while (o)
+      {
+        const auto *p = o;
+        if (auto *child = o->FirstChildSlow())
+        {
+          o = child;
+        }
+        else if (o->NextSibling())
+        {
+          o = o->NextSibling();
+        }
+        else
+        {
+          const RenderObject *next = nullptr;
+          while (!next && o->Parent())
+          {
+            o = o->Parent();
+            next = o->NextSibling();
+          }
+          o = next;
+
+          if (!o)
+          {
+            break;
+          }
+        }
+        krys_debug_assert(o);
+
+        if (!o->IsInline() || o->IsBlockLevelReplacedOrAtomicInline())
+        {
+          point = o->LocalToAbsolute(FloatPoint(), MapCoordinatesMode::UseTransforms, &insideFixed);
+          return true;
+        }
+
+        auto *textRenderer = DynamicDowncast<RenderText>(*o);
+        if (p->GetNode() && p->GetNode() == renderer.GetElement() && textRenderer
+            && !inline_iterator::LineLeftmostTextBoxFor(*textRenderer))
+        {
+          // do nothing - skip unrendered whitespace that is a child or next sibling of the anchor
+        }
+        else if (textRenderer || o->IsBlockLevelReplacedOrAtomicInline())
+        {
+          point = FloatPoint();
+          if (textRenderer)
+          {
+            if (auto run = inline_iterator::LineLeftmostTextBoxFor(*textRenderer))
+            {
+              point.Move(static_cast<float>(textRenderer->LinesBoundingBox().X()),
+                         run->GetLineBox()->ContentLogicalTop());
+            }
+          }
+          else if (auto *box = DynamicDowncast<RenderBox>(*o))
+          {
+            point.MoveBy(FloatPoint(box->Location()));
+          }
+          point = o->Container()->LocalToAbsolute(point, MapCoordinatesMode::UseTransforms, &insideFixed);
+          return true;
+        }
+      }
+
+      // If the target doesn't have any children or siblings that could be used to calculate the scroll
+      // position, we must be at the end of the document. Scroll to the bottom.
+      // FIXME: who said anything about scrolling?
+      if (!o && renderer.GetDocument().View())
+      {
+        point = FloatPoint(0, static_cast<float>(renderer.View().LayoutOverflowRect().MaxY().ToInt()));
+        return true;
+      }
+      return false;
+    }
+
+    KRYS_NODISCARD bool GetTrailingCorner(const RenderElement &renderer, FloatPoint &point,
+                                          bool &insideFixed) noexcept
+    {
+      // FIXME: SVG renderers' stroke bounding boxes, once there's SVG.
+      if (!renderer.IsInline() || renderer.IsBlockLevelReplacedOrAtomicInline())
+      {
+        point = renderer.LocalToAbsolute(FloatPoint(Downcast<RenderBox>(renderer).Size()),
+                                         MapCoordinatesMode::UseTransforms, &insideFixed);
+        return true;
+      }
+
+      // find the last text/image child, to get a position
+      const RenderObject *o = &renderer;
+      while (o)
+      {
+        if (auto *child = o->LastChildSlow())
+        {
+          o = child;
+        }
+        else if (o->PreviousSibling())
+        {
+          o = o->PreviousSibling();
+        }
+        else
+        {
+          const RenderObject *prev = nullptr;
+          while (!prev)
+          {
+            o = o->Parent();
+            if (!o)
+            {
+              return false;
+            }
+            prev = o->PreviousSibling();
+          }
+          o = prev;
+        }
+        krys_debug_assert(o);
+        if (auto *textRenderer = DynamicDowncast<RenderText>(*o);
+            textRenderer || o->IsBlockLevelReplacedOrAtomicInline())
+        {
+          point = FloatPoint();
+          if (textRenderer)
+          {
+            auto linesBox = LayoutRect(textRenderer->LinesBoundingBox());
+            if (!linesBox.MaxX() && !linesBox.MaxY())
+            {
+              continue;
+            }
+            point.MoveBy(FloatPoint(linesBox.MaxXMaxYCorner()));
+          }
+          else
+          {
+            point.MoveBy(FloatPoint(Downcast<RenderBox>(*o).FrameRect().MaxXMaxYCorner()));
+          }
+          point = o->Container()->LocalToAbsolute(point, MapCoordinatesMode::UseTransforms, &insideFixed);
+          return true;
+        }
+      }
+      return true;
+    }
+  }
+
+  LayoutRect RenderElement::AbsoluteAnchorRect(bool *insideFixed) const noexcept
+  {
+    FloatPoint leading;
+    FloatPoint trailing;
+    bool leadingInFixed = false;
+    bool trailingInFixed = false;
+    (void)GetLeadingCorner(*this, leading, leadingInFixed);
+    (void)GetTrailingCorner(*this, trailing, trailingInFixed);
+
+    auto upperLeft = leading;
+    auto lowerRight = trailing;
+
+    // Vertical writing modes might mean the leading point is not in the top left
+    if (!IsInline() || IsBlockLevelReplacedOrAtomicInline())
+    {
+      upperLeft = FloatPoint(std::min(leading.X(), trailing.X()), std::min(leading.Y(), trailing.Y()));
+      lowerRight = FloatPoint(std::max(leading.X(), trailing.X()), std::max(leading.Y(), trailing.Y()));
+    } // Otherwise, it's not obvious what to do.
+
+    if (insideFixed)
+    {
+      // For now, just look at the leading corner. Handling one inside fixed and one not would be tricky.
+      *insideFixed = leadingInFixed;
+    }
+
+    return EnclosingLayoutRect(FloatRect(upperLeft, lowerRight.ExpandedTo(upperLeft) - upperLeft));
+  }
+
+  Pair<LayoutRect, LayoutRect>
+    RenderElement::AbsoluteAnchorRectWithScrollMargin(bool *insideFixed) const noexcept
+  {
+    auto anchorRect = AbsoluteAnchorRect(insideFixed);
+
+    const auto &scrollMarginBox = Style().GetScrollMarginBox();
+    // The scroll snap specification says that the scroll-margin should be applied in the
+    // coordinate system of the scroll container and applied to the rectangular bounding
+    // box of the transformed border box of the target element.
+    // See https://www.w3.org/TR/css-scroll-snap-1/#scroll-margin.
+    auto marginRect = anchorRect;
+    marginRect.Expand(style::ExtentForRect(scrollMarginBox, anchorRect));
+    return {marginRect, anchorRect};
+  }
 }

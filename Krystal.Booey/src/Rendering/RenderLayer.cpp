@@ -1928,6 +1928,54 @@ namespace krys::boo
     return Renderer().IsTransformed();
   }
 
+  namespace
+  {
+    KRYS_NODISCARD dom::Element *FlattenedParent(dom::Element *element) noexcept
+    {
+      if (!element)
+      {
+        return nullptr;
+      }
+      auto *parent = element->ParentElementInComposedTree();
+      while (parent)
+      {
+        auto *parentStyle = parent->IsConnected() ? parent->ResolveComputedStyle() : nullptr;
+        if (!parentStyle || parentStyle->Display() != DisplayType::Contents)
+        {
+          break;
+        }
+        parent = parent->ParentElementInComposedTree();
+      }
+      return parent;
+    }
+  }
+
+  bool RenderLayer::AncestorLayerIsDOMParent(const RenderLayer *ancestor) const noexcept
+  {
+    if (!ancestor)
+    {
+      return false;
+    }
+    auto *parent = FlattenedParent(Renderer().GetElement());
+    if (parent && ancestor->Renderer().GetElement() == parent)
+    {
+      return true;
+    }
+    if (auto pseudoElementType = Renderer().Style().GetPseudoElementType())
+    {
+      auto parentPseudoId = ParentPseudoElement(*pseudoElementType);
+      return parentPseudoId && *parentPseudoId == ancestor->Renderer().Style().GetPseudoElementType();
+    }
+    return false;
+  }
+
+  bool RenderLayer::ParticipatesInPreserve3D() const noexcept
+  {
+    return AncestorLayerIsDOMParent(Parent()) && Parent()->Preserves3D()
+           && (Transform() || Renderer().Style().GetBackfaceVisibility() == BackfaceVisibility::Hidden
+               || Preserves3D());
+  }
+
   bool RenderLayer::Preserves3D() const noexcept
   {
     return Renderer().Style().Preserves3D();
@@ -3262,4 +3310,30 @@ namespace krys::boo
   }
 
 #pragma endregion
+
+  bool
+    RenderLayer::ShouldTryToScrollForScrollIntoView(const ScrollRectToVisibleOptions &options) const noexcept
+  {
+    if (!Renderer().IsRenderBox() || !Renderer().HasNonVisibleOverflow())
+    {
+      return false;
+    }
+
+    if (options.AllowOverflowHidden == AllowScrollingOverflowHidden::No)
+    {
+      if (Renderer().Style().OverflowX() == Overflow::Hidden
+          && Renderer().Style().OverflowY() == Overflow::Hidden)
+      {
+        return false;
+      }
+    }
+
+    // FIXME: Boxes being autoscrolled (autoscrollInProgress), once there's autoscrolling.
+
+    auto &box = *GetRenderBox();
+
+    // Programmatic scrolls can scroll overflow: hidden but not overflow: clip.
+    return box.HasPotentiallyScrollableOverflow()
+           && (box.HasHorizontalOverflow() || box.HasVerticalOverflow());
+  }
 }

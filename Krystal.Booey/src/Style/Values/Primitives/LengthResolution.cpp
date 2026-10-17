@@ -6,6 +6,7 @@
 #include "Krystal.Booey/CSS/Values/Units.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -293,7 +294,7 @@ namespace krys::boo::style
       // queries on that axis."
       while ((element = ContainerQueryEvaluator::SelectContainer(physicalAxis, {}, *element, mode)))
       {
-        auto *containerRenderer = RenderBoxOf(*element);
+        auto *containerRenderer = DynamicDowncast<RenderBox>(element->Renderer());
         if (containerRenderer && containerRenderer->HasEligibleContainmentForSizeQuery())
         {
           auto widthOrHeight = physicalAxis == css::cq::Axis::Width ? containerRenderer->ContentBoxWidth()

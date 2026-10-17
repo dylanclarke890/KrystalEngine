@@ -1713,4 +1713,18 @@ namespace krys::boo
     return !Table()->CellAfter(this) || !Table()->CellBefore(this);
   }
 #endif
+
+  LayoutSize RenderTableCell::OffsetFromContainer(const RenderElement &container, const LayoutPoint &point,
+                                                  bool *offsetDependsOnPoint) const noexcept
+  {
+    krys_debug_assert(&container == Container());
+
+    auto offset = RenderBlockFlow::OffsetFromContainer(container, point, offsetDependsOnPoint);
+    if (auto *containerOfRow = container.Container(); containerOfRow && Parent())
+    {
+      offset -= ParentBox()->OffsetFromContainer(*containerOfRow, point);
+    }
+
+    return offset;
+  }
 }

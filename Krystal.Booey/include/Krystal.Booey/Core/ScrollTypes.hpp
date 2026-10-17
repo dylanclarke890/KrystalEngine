@@ -125,6 +125,21 @@ namespace krys::boo
     AlwaysOn
   };
 
+  /// @brief Whether scrolling something into view scrolls, and how far up the frames it goes.
+  enum class SelectionRevealMode : uint8
+  {
+    Reveal,
+    RevealUpToMainFrame,
+    DelegateMainFrameScroll,
+    DoNotReveal
+  };
+
+  enum class AllowScrollingOverflowHidden : bool
+  {
+    No,
+    Yes
+  };
+
   struct ScrollPositionChangeOptions
   {
     ScrollType Type;

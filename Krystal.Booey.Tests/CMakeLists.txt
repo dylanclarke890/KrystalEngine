@@ -387,6 +387,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/RenderFlexibleBox.cpp
 		tests/Rendering/RenderGrid.cpp
 		tests/Rendering/RenderTable.cpp
+		tests/Rendering/RenderObject.cpp
+		tests/Platform/ScrollAlignment.cpp
 		tests/Rendering/LineClampUpdater.cpp
 		tests/Rendering/Updating/RenderTreeBuilderRuby.cpp
 		tests/Rendering/BreakablePositions.cpp
@@ -416,6 +418,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/RuleSet.cpp
 		tests/Style/Scope.cpp
 		tests/Style/TreeResolver.cpp
+		tests/Style/ContainerQueryEvaluator.cpp
 		tests/Style/Difference.cpp
 		tests/Style/UserAgentStyle.cpp
 		tests/Style/ScopedName.cpp
@@ -479,6 +482,8 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/DOMImplementation.cpp
 		tests/DOM/DOMTokenList.cpp
 		tests/DOM/Element.cpp
+		tests/DOM/ElementCSSOMView.cpp
+		tests/DOM/DOMRectList.cpp
 		tests/DOM/HTMLCollection.cpp
 		tests/DOM/MutationObserver.cpp
 		tests/DOM/NamedNodeMap.cpp

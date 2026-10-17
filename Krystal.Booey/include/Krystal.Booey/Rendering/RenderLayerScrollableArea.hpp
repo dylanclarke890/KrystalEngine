@@ -70,6 +70,14 @@ namespace krys::boo
                                 const ScrollPositionChangeOptions &options =
                                   ScrollPositionChangeOptions::CreateProgrammatic()) noexcept;
 
+    /// @brief Scrolls so the absolute rect is aligned as asked.
+    /// @return The rect in absolute coordinates after scrolling.
+    LayoutRect ScrollRectToVisible(const LayoutRect &absoluteRect,
+                                   const ScrollRectToVisibleOptions &options) noexcept;
+    Maybe<LayoutRect> UpdateScrollPositionForScrollIntoView(const ScrollPositionChangeOptions &options,
+                                                            const LayoutRect &revealRect,
+                                                            const LayoutRect &localExposeRect) noexcept;
+
     void ScrollToXPosition(int32 x, const ScrollPositionChangeOptions &options) noexcept;
     void ScrollToYPosition(int32 y, const ScrollPositionChangeOptions &options) noexcept;
     void SetScrollPosition(const ScrollPosition &position,

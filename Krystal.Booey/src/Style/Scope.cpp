@@ -8,6 +8,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
+#include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
@@ -17,6 +18,8 @@
 #include "Krystal.Booey/HTML/HTMLStyleElement.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/RenderBox.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/CustomPropertyRegistry.hpp"
 #include "Krystal.Booey/Style/Invalidator.hpp"
@@ -1071,5 +1074,78 @@ namespace krys::boo::style
       host = dom::TreeQueries::ShadowHost(*host);
     }
     return host;
+  }
+
+  bool Scope::InvalidateForLayoutDependencies(LayoutDependencyUpdateContext &context) noexcept
+  {
+    auto didInvalidate = false;
+    didInvalidate |= InvalidateForContainerDependencies(context);
+    // FIXME: The anchor-positioned boxes and position-try fallbacks (invalidateForAnchorDependencies,
+    // invalidateForPositionTryFallbacks), once there's anchor positioning.
+    return didInvalidate;
+  }
+
+  bool Scope::InvalidateForContainerDependencies(LayoutDependencyUpdateContext &context) noexcept
+  {
+    krys_debug_assert(!_shadowRoot);
+
+    auto *renderView = _document->GetRenderView();
+    if (!renderView)
+    {
+      return false;
+    }
+
+    auto previousQueryContainerDimensions = krys::move(_queryContainerDimensionsOnLastUpdate);
+    _queryContainerDimensionsOnLastUpdate.clear();
+
+    List<dom::Element *> containersToInvalidate;
+
+    for (const auto *containerRenderer : renderView->ContainerQueryBoxes())
+    {
+      auto *containerElement = containerRenderer->GetElement();
+
+      // Invalidation uses real elements, replace ::before/::after with its host.
+      if (auto *pseudoElement = DynamicDowncast<dom::PseudoElement>(containerElement))
+      {
+        containerElement = pseudoElement->HostElement();
+      }
+
+      if (!containerElement)
+      {
+        continue;
+      }
+
+      auto size = containerRenderer->LogicalSize();
+
+      auto sizeChanged = [&](LayoutSize oldSize)
+      {
+        switch (containerRenderer->Style().GetContainerType())
+        {
+          case ContainerType::InlineSize: return size.Width() != oldSize.Width();
+          case ContainerType::Size:       return size != oldSize;
+          case ContainerType::Normal:     break;
+        }
+        krys_unreachable();
+      };
+
+      auto it = previousQueryContainerDimensions.find(containerElement);
+      bool changed =
+        it == previousQueryContainerDimensions.end() || !it->second.first || sizeChanged(it->second.second);
+      // Protect against unstable layout by invalidating only once per container.
+      if (changed && context.InvalidatedContainers.insert(containerElement).second)
+      {
+        containersToInvalidate.push_back(containerElement);
+      }
+      _queryContainerDimensionsOnLastUpdate.insert_or_assign(
+        containerElement, Pair<WeakPtr<const dom::Element>, LayoutSize> {
+                            CreateWeakPtr<const dom::Element>(containerElement), size});
+    }
+
+    for (auto *toInvalidate : containersToInvalidate)
+    {
+      toInvalidate->InvalidateForQueryContainerSizeChange();
+    }
+
+    return !containersToInvalidate.empty();
   }
 }

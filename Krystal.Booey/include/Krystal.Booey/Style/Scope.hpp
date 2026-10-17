@@ -2,12 +2,14 @@
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Graphics/IntSize.hpp"
+#include "Krystal.Booey/Graphics/LayoutSize.hpp"
 #include "Krystal.Booey/Style/ScopeOrdinal.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
@@ -129,7 +131,17 @@ namespace krys::boo::style
 
     UniquePtr<MatchResultCache> _matchResultCache;
 
+    // Keyed by address; the weak pointer tells a destroyed container from a new one at the same address.
+    HashMap<const dom::Element *, Pair<WeakPtr<const dom::Element>, LayoutSize>>
+      _queryContainerDimensionsOnLastUpdate;
+
   public:
+    /// @brief What the invalidations for layout dependencies have already invalidated in one layout.
+    struct LayoutDependencyUpdateContext
+    {
+      HashSet<const dom::Element *> InvalidatedContainers;
+    };
+
     explicit Scope(dom::Document &document) noexcept;
     explicit Scope(dom::ShadowRoot &shadowRoot) noexcept;
     ~Scope() noexcept;
@@ -252,6 +264,10 @@ namespace krys::boo::style
     KRYS_NODISCARD static Scope &ForNode(dom::Node &node) noexcept;
     KRYS_NODISCARD static const Scope &ForNode(const dom::Node &node) noexcept;
 
+    /// @brief Invalidates the styles that depend on the last layout.
+    /// @return Whether anything was invalidated, so the document needs another style update and layout.
+    bool InvalidateForLayoutDependencies(LayoutDependencyUpdateContext &context) noexcept;
+
     /// @brief Collapses `setLastSuccessfulPositionOptionIndexMap({ })`.
     // FIXME: A no-op until anchor positioning records the last successful position options.
     void ClearLastSuccessfulPositionOptionIndexMap() noexcept
@@ -259,6 +275,8 @@ namespace krys::boo::style
     }
 
   private:
+    bool InvalidateForContainerDependencies(LayoutDependencyUpdateContext &context) noexcept;
+
     KRYS_NODISCARD Scope &DocumentScope() noexcept;
     KRYS_NODISCARD dom::DocumentOrShadowRoot &TreeScope() noexcept;
 

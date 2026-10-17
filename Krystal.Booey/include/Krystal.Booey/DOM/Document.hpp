@@ -14,6 +14,8 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
+#include "Krystal.Booey/Graphics/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/FontSelector.hpp"
 #include "Krystal.Booey/HTML/Enums/DocumentReadyState.hpp"
 #include "Krystal.Booey/HTML/Enums/DocumentVisibilityState.hpp"
@@ -175,6 +177,7 @@ namespace krys::boo::dom
     bool _needsFullStyleRebuild {true};
     bool _inStyleRecalc {false};
     bool _inRenderTreeUpdate {false};
+    bool _isInStyleInterleavedLayout {false};
     bool _isResolvingTreeStyle {false};
     bool _ignorePendingStylesheets {false};
     bool _hasNodesWithMissingStyle {false};
@@ -598,6 +601,12 @@ namespace krys::boo::dom
       return _inStyleRecalc;
     }
 
+    /// @brief Whether the document is laid out in the middle of a style update, for container queries.
+    KRYS_NODISCARD bool IsInStyleInterleavedLayout() const noexcept
+    {
+      return _isInStyleInterleavedLayout;
+    }
+
     KRYS_NODISCARD bool InRenderTreeUpdate() const noexcept
     {
       return _inRenderTreeUpdate;
@@ -701,6 +710,20 @@ namespace krys::boo::dom
     /// @brief Updates style, then lays the document out if it needs it.
     UpdateLayoutResult UpdateLayout() noexcept;
     UpdateLayoutResult UpdateLayoutIgnorePendingStylesheets() noexcept;
+
+    /// @brief The element that scrolls the viewport: the root element, or in quirks mode the body unless it's
+    /// potentially scrollable.
+    /// @see https://drafts.csswg.org/cssom-view/#dom-document-scrollingelement
+    KRYS_NODISCARD RefPtr<Element> ScrollingElement() noexcept;
+    /// @brief The scrolling element, after updating layout in quirks mode.
+    KRYS_NODISCARD RefPtr<Element> ScrollingElementForAPI() noexcept;
+    /// @brief The first body or frameset child of the html element.
+    KRYS_NODISCARD html::HTMLElement *BodyOrFrameset() const noexcept;
+
+    /// @brief Converts absolute quads (or rects) to the client coordinates of the CSSOM View APIs.
+    void ConvertAbsoluteToClientQuads(List<FloatQuad> &quads, const RenderStyle &style) const noexcept;
+    void ConvertAbsoluteToClientRects(List<FloatRect> &rects, const RenderStyle &style) const noexcept;
+    void ConvertAbsoluteToClientRect(FloatRect &rect, const RenderStyle &style) const noexcept;
 
 #pragma endregion
 

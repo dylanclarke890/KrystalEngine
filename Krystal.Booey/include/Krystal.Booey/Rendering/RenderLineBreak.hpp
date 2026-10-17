@@ -46,6 +46,9 @@ namespace krys::boo
 
     KRYS_NODISCARD IntRect LinesBoundingBox() const noexcept;
 
+    void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
+    void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
+
   private:
     KRYS_NODISCARD bool RequiresLayer() const noexcept final
     {

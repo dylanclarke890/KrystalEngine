@@ -9,6 +9,8 @@
 #include "Krystal.Booey/Graphics/IntSize.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
+#include "Krystal.Booey/Page/ScrollBehavior.hpp"
+#include "Krystal.Booey/Platform/ScrollAlignment.hpp"
 #include "Krystal.Booey/Rendering/ClipRect.hpp"
 #include "Krystal.Booey/Rendering/LayerFragment.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
@@ -48,6 +50,19 @@ namespace krys::boo
   {
     No,
     Yes
+  };
+
+  /// @brief How to scroll a rect into view.
+  // FIXME: Cross-origin scrolling (shouldAllowCrossOriginScrolling) and forward-only scrolling
+  // (onlyAllowForwardScrolling), once there are frames and find-in-page.
+  struct ScrollRectToVisibleOptions
+  {
+    SelectionRevealMode RevealMode {SelectionRevealMode::Reveal};
+    ScrollAlignment AlignX {ScrollAlignment::AlignCenterIfNeeded};
+    ScrollAlignment AlignY {ScrollAlignment::AlignCenterIfNeeded};
+    ScrollBehavior Behavior {ScrollBehavior::Auto};
+    AllowScrollingOverflowHidden AllowOverflowHidden {AllowScrollingOverflowHidden::Yes};
+    Maybe<LayoutRect> VisibilityCheckRect;
   };
 
   enum class RepaintStatus : uint8
@@ -729,6 +744,9 @@ namespace krys::boo
     KRYS_NODISCARD FloatPoint PerspectiveOrigin() const noexcept;
     KRYS_NODISCARD FloatPoint3D TransformOriginPixelSnappedIfNeeded() const noexcept;
     KRYS_NODISCARD bool Preserves3D() const noexcept;
+    /// @brief Whether this layer is part of its parent's 3D rendering context.
+    KRYS_NODISCARD bool ParticipatesInPreserve3D() const noexcept;
+    KRYS_NODISCARD bool AncestorLayerIsDOMParent(const RenderLayer *ancestor) const noexcept;
     KRYS_NODISCARD bool HasPerspective() const noexcept;
     KRYS_NODISCARD bool Has3DTransform() const noexcept
     {
@@ -776,6 +794,9 @@ namespace krys::boo
     void SetIsHiddenByOverflowTruncation(bool isHidden) noexcept;
 
     KRYS_NODISCARD RenderLayerScrollableArea *GetScrollableArea() const noexcept;
+    /// @brief Whether scrolling a rect into view may scroll this layer.
+    KRYS_NODISCARD bool
+      ShouldTryToScrollForScrollIntoView(const ScrollRectToVisibleOptions &options) const noexcept;
     RenderLayerScrollableArea *EnsureLayerScrollableArea() noexcept;
 
     KRYS_NODISCARD IntSize VisibleSize() const noexcept;

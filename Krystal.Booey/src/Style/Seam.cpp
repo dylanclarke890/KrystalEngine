@@ -61,22 +61,6 @@ namespace krys::boo
     return document.GetRenderView();
   }
 
-  const RenderBox *RenderBoxOf(const dom::Element &) noexcept
-  {
-    return nullptr;
-  }
-
-  const RenderElement *RendererOf(const dom::Element &) noexcept
-  {
-    return nullptr;
-  }
-
-  const RenderElement *RendererOf(const dom::Element &,
-                                  const Maybe<style::PseudoElementIdentifier> &) noexcept
-  {
-    return nullptr;
-  }
-
   bool DocumentUseDarkAppearance(const dom::Document &, const RenderStyle *style) noexcept
   {
     // Collapses `Document::useDarkAppearance`: there's no document colour scheme and the page is light, so

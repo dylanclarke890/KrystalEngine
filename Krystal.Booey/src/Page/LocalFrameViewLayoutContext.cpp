@@ -42,8 +42,39 @@ namespace krys::boo
 
     PerformLayout();
 
-    // FIXME: Invalidate the styles that depend on layout (Scope::invalidateForLayoutDependencies: anchor
-    // positioning and the interleaved container query layouts) and lay out again, once there's layout.
+    if (protectedView->HasOneRef())
+    {
+      return;
+    }
+
+    style::Scope::LayoutDependencyUpdateContext layoutDependencyUpdateContext;
+    while (Document()
+           && Document()->StyleScope().InvalidateForLayoutDependencies(layoutDependencyUpdateContext))
+    {
+      Document()->UpdateStyleIfNeeded();
+
+      if (!NeedsLayout())
+      {
+        break;
+      }
+
+      PerformLayout();
+
+      if (protectedView->HasOneRef())
+      {
+        return;
+      }
+    }
+  }
+
+  void LocalFrameViewLayoutContext::InterleavedLayout() noexcept
+  {
+    Ref protectedView = ShareRef(_frameView);
+
+    PerformLayout();
+
+    style::Scope::LayoutDependencyUpdateContext layoutDependencyUpdateContext;
+    Document()->StyleScope().InvalidateForLayoutDependencies(layoutDependencyUpdateContext);
   }
 
   void LocalFrameViewLayoutContext::PerformLayout() noexcept
@@ -67,9 +98,11 @@ namespace krys::boo
     {
       SetForScope layoutPhase(_layoutPhase, LayoutPhase::InPreLayout);
 
-      // FIXME: Skip this in style-interleaved layout and run the remaining post-layout tasks first, once
-      // there's layout.
-      UpdateStyleForLayout();
+      // FIXME: Run the remaining post-layout tasks first, once there are those.
+      if (!Document()->IsInStyleInterleavedLayout())
+      {
+        UpdateStyleForLayout();
+      }
 
       if (!GetRenderView())
       {

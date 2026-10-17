@@ -1,8 +1,15 @@
 ﻿#include "Krystal.Booey/Rendering/RenderInline.hpp"
+#include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
+#include "Krystal.Booey/Rendering/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Calc/TreeEvaluation.hpp"
 
@@ -142,6 +149,187 @@ namespace krys::boo
     return ComputeMargin(this, Style().MarginAfter(writingMode), Style().UsedZoomForLength());
   }
 
+  namespace
+  {
+    // The rects of an inline's line boxes, or a single empty rect when it has none.
+    KRYS_NODISCARD List<FloatRect> LineBoxRects(const RenderInline &renderInline) noexcept
+    {
+      if (auto *lineLayout = layout_integration::LineLayout::Containing(renderInline))
+      {
+        auto inlineBoxRects = lineLayout->CollectInlineBoxRects(renderInline);
+        if (inlineBoxRects.empty())
+        {
+          return {FloatRect()};
+        }
+        return inlineBoxRects;
+      }
+      return {FloatRect()};
+    }
+  }
+
+  void RenderInline::BoundingRects(List<LayoutRect> &rects,
+                                   const LayoutPoint &accumulatedOffset) const noexcept
+  {
+    for (const auto &rect : LineBoxRects(*this))
+    {
+      auto layoutRect = LayoutRect(rect);
+      layoutRect.MoveBy(accumulatedOffset);
+      rects.push_back(layoutRect);
+    }
+    // There are no continuations: blocks in inlines are laid out in the inline's lines.
+  }
+
+  void RenderInline::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
+  {
+    for (const auto &rect : LineBoxRects(*this))
+    {
+      quads.push_back(LocalToAbsoluteQuad(rect, MapCoordinatesMode::UseTransforms, wasFixed));
+    }
+  }
+
+  LayoutSize RenderInline::OffsetForInFlowPositionedInline(const RenderBox *child) const noexcept
+  {
+    // FIXME: This function isn't right with mixed writing modes.
+    if (!IsInFlowPositioned())
+    {
+      krys_debug_assert(false);
+      return {};
+    }
+
+    if (!HasLayer())
+    {
+      // It looks like we are inflow positioned but no layer created yet. It essentially means we don't have
+      // an position offset yet.
+      return {};
+    }
+
+    // When we have an enclosing relpositioned inline, we need to add in the offset of the first line
+    // box from the rest of the content, but only in the cases where we know we're positioned
+    // relative to the inline itself.
+    auto inlinePosition = Layer()->StaticInlinePosition();
+    auto blockPosition = Layer()->StaticBlockPosition();
+    if (layout_integration::LineLayout::Containing(*this))
+    {
+      if (!LayoutBox())
+      {
+        // Repaint may be issued on subtrees during content mutation with newly inserted renderers.
+        krys_debug_assert(NeedsLayout());
+        return {};
+      }
+      if (auto inlineBox = inline_iterator::LineLeftmostInlineBoxFor(*this))
+      {
+        inlinePosition = LayoutUnit::FromFloatRound(inlineBox->LogicalLeftIgnoringInlineDirection());
+        blockPosition = LayoutUnit(inlineBox->LogicalTop());
+      }
+      else if (auto *blockContainer = ContainingBlock())
+      {
+        // This must be a block with no in-flow content e.g. <div><span><abs pos box></span></div> where we
+        // don't construct any display box at all.
+        auto contentBoxLocation = blockContainer->ContentBoxLocation();
+        inlinePosition = contentBoxLocation.X();
+        blockPosition = contentBoxLocation.Y();
+      }
+    }
+
+    // Per http://www.w3.org/TR/CSS2/visudet.html#abs-non-replaced-width an absolute positioned box with a
+    // static position should locate itself as though it is a normal flow box in relation to its containing
+    // block.
+    LayoutSize logicalOffset;
+    const auto &childStyle = child->Style();
+    auto isHorizontal = GetWritingMode().IsHorizontal();
+    if (!childStyle.HasStaticInlinePosition(isHorizontal) || !childStyle.GetPositionArea().IsNone()
+        || childStyle.GetJustifySelf().IsAnchorCenter())
+    {
+      logicalOffset.SetWidth(inlinePosition);
+    }
+
+    if (!childStyle.HasStaticBlockPosition(isHorizontal) || !childStyle.GetPositionArea().IsNone()
+        || childStyle.GetAlignSelf().IsAnchorCenter())
+    {
+      logicalOffset.SetHeight(blockPosition);
+    }
+
+    return isHorizontal ? logicalOffset : logicalOffset.TransposedSize();
+  }
+
+  LayoutSize RenderInline::OffsetFromContainer(KRYS_MAYBE_UNUSED const RenderElement &container,
+                                               const LayoutPoint &, bool *offsetDependsOnPoint) const noexcept
+  {
+    krys_debug_assert(&container == Container());
+
+    LayoutSize offset;
+    if (IsInFlowPositioned())
+    {
+      offset += OffsetForInFlowPosition();
+    }
+
+    if (auto *box = DynamicDowncast<RenderBox>(container))
+    {
+      offset -= ToLayoutSize(LayoutPoint(box->GetScrollPosition()));
+    }
+
+    if (offsetDependsOnPoint)
+    {
+      // FIXME: Fragmented flows make the offset depend on the point too, once there are those.
+      *offsetDependsOnPoint = Is<RenderBox>(container) && container.GetWritingMode().IsBlockFlipped();
+    }
+
+    return offset;
+  }
+
+  void RenderInline::MapLocalToContainer(const RenderLayerModelObject *ancestorContainer,
+                                         TransformState &transformState, EnumSet<MapCoordinatesMode> mode,
+                                         bool *wasFixed) const noexcept
+  {
+    if (ancestorContainer == this)
+    {
+      return;
+    }
+
+    if (View().FrameView().LayoutContext().IsPaintOffsetCacheEnabled() && !ancestorContainer)
+    {
+      auto *layoutState = View().FrameView().LayoutContext().LayoutState();
+      auto offset = layoutState->PaintOffset();
+      if (Style().HasInFlowPosition() && Layer())
+      {
+        offset += Layer()->OffsetForInFlowPosition();
+      }
+      transformState.Move(offset);
+      return;
+    }
+
+    bool containerSkipped = false;
+    auto *container = Container(ancestorContainer, containerSkipped);
+    if (!container)
+    {
+      return;
+    }
+
+    if (mode.Contains(MapCoordinatesMode::ApplyContainerFlip))
+    {
+      if (auto *box = DynamicDowncast<RenderBox>(*container))
+      {
+        if (container->GetWritingMode().IsBlockFlipped())
+        {
+          auto centerPoint = LayoutPoint(transformState.MappedPoint());
+          transformState.Move(box->FlipForWritingMode(centerPoint) - centerPoint);
+        }
+        mode.Remove(MapCoordinatesMode::ApplyContainerFlip);
+      }
+    }
+
+    auto containerOffset = OffsetFromContainer(*container, LayoutPoint(transformState.MappedPoint()));
+
+    PushOntoTransformState(transformState, mode, ancestorContainer, container, containerOffset,
+                           containerSkipped);
+    if (containerSkipped)
+    {
+      return;
+    }
+
+    container->MapLocalToContainer(ancestorContainer, transformState, mode, wasFixed);
+  }
+
   IntRect RenderInline::LinesBoundingBox() const noexcept
   {
     if (auto *layout = layout_integration::LineLayout::Containing(*this))
@@ -149,8 +337,8 @@ namespace krys::boo
       if (!LayoutBox() || !layout->Contains(*this))
       {
         // Repaint may be issued on subtrees during content mutation with newly inserted renderers
-        // (or we just forgot to initiate layout before querying geometry on stale content after moving inline boxes
-        // between blocks).
+        // (or we just forgot to initiate layout before querying geometry on stale content after moving inline
+        // boxes between blocks).
         krys_debug_assert(NeedsLayout());
         return {};
       }

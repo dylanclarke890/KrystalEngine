@@ -738,6 +738,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/Shapes/RectangleLayoutShape.hpp
   include/Krystal.Booey/Rendering/Shapes/PolygonLayoutShape.hpp
   include/Krystal.Booey/Rendering/Shapes/ShapeOutsideInfo.hpp
+  include/Krystal.Booey/Platform/ScrollAlignment.hpp
   include/Krystal.Booey/Platform/ScrollableArea.hpp
   include/Krystal.Booey/Platform/Scrollbar.hpp
   include/Krystal.Booey/Platform/ScrollbarTheme.hpp
@@ -905,6 +906,8 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   # Frame view and viewport
   include/Krystal.Booey/Page/LocalFrame.hpp
   include/Krystal.Booey/Page/LocalFrameView.hpp
+  include/Krystal.Booey/Page/ScrollBehavior.hpp
+  include/Krystal.Booey/Page/ScrollOptions.hpp
   include/Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp
   include/Krystal.Booey/Rendering/Pagination.hpp
 
@@ -946,6 +949,10 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
 
   # Interaction state
   include/Krystal.Booey/DOM/FocusOptions.hpp
+  include/Krystal.Booey/DOM/DOMRectReadOnly.hpp
+  include/Krystal.Booey/DOM/DOMRect.hpp
+  include/Krystal.Booey/DOM/DOMRectList.hpp
+  include/Krystal.Booey/DOM/Dicts/DOMRectInit.hpp
   include/Krystal.Booey/DOM/UserActionElementSet.hpp
   include/Krystal.Booey/Rendering/HitTestRequest.hpp
   include/Krystal.Booey/Rendering/HitTestSource.hpp
@@ -1709,6 +1716,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Media/MediaQueryList.cpp
   src/CSS/Media/MediaQueryListEvent.cpp
   src/Style/StyleSheetContentsCache.cpp
+  src/Style/Styleable.cpp
 
   # DOM integration, layer e2 (inline styles)
   src/CSS/StyleAttributeMutationScope.cpp
@@ -2101,6 +2109,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/Shapes/RectangleLayoutShape.cpp
   src/Rendering/Shapes/PolygonLayoutShape.cpp
   src/Rendering/Shapes/ShapeOutsideInfo.cpp
+  src/Platform/ScrollAlignment.cpp
   src/Platform/ScrollableArea.cpp
   src/Platform/Scrollbar.cpp
   src/Platform/ScrollbarTheme.cpp
@@ -2238,12 +2247,14 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
 
   # Interaction state
   src/DOM/UserActionElementSet.cpp
+  src/DOM/DOMRectList.cpp
   src/HTML/Algorithms/FocusAlgorithms.cpp
   src/HTML/Mixins/HTMLOrSVGOrMathMLElement.cpp
 
   # Frame view and viewport
   src/Page/LocalFrame.cpp
   src/Page/LocalFrameView.cpp
+  src/Page/ScrollBehavior.cpp
   src/Page/LocalFrameViewLayoutContext.cpp
 
   # Platform text (t1)
@@ -2526,6 +2537,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/Graphics/Transforms/AffineTransform.hpp
       include/Krystal.Booey/Graphics/Transforms/Quaternion.hpp
       include/Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp
+      include/Krystal.Booey/Graphics/Transforms/TransformState.hpp
 
       # HTML
       include/Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp
@@ -2827,6 +2839,7 @@ target_sources(Krystal.Booey
     src/Graphics/Transforms/AffineTransform.cpp
     src/Graphics/Transforms/Quaternion.cpp
     src/Graphics/Transforms/TransformationMatrix.cpp
+    src/Graphics/Transforms/TransformState.cpp
 
     # HTML
     src/HTML/Algorithms/CustomElementAlgorithms.cpp

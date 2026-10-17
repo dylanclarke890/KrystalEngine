@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Graphics/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/Layout/Integration/LayoutIntegrationFormattingContextLayout.hpp"
 #include "Krystal.Booey/Layout/LayoutState.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInitialContainingBlock.hpp"
@@ -7,6 +9,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderCounter.hpp"
+#include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 
 namespace krys::boo
@@ -210,5 +213,54 @@ namespace krys::boo
     // FIXME: Fixed elements that lay out relative to the frame, and the layout viewport
     // (visualViewportEnabled), once the frame view scrolls.
     return ClientLogicalHeight();
+  }
+
+  void RenderView::MapLocalToContainer(KRYS_MAYBE_UNUSED const RenderLayerModelObject *ancestorContainer,
+                                       TransformState &transformState, EnumSet<MapCoordinatesMode> mode,
+                                       KRYS_MAYBE_UNUSED bool *wasFixed) const noexcept
+  {
+    // If a container was specified, and was not nullptr or the RenderView,
+    // then we should have found it by now.
+    krys_debug_assert(!ancestorContainer || ancestorContainer == this);
+    krys_debug_assert(!wasFixed || *wasFixed == mode.Contains(MapCoordinatesMode::IsFixed));
+
+    // FIXME: Fixed boxes move with the view's scroll position (scrollPositionRespectingCustomFixedPosition),
+    // once the frame view scrolls.
+
+    if (!ancestorContainer && mode.Contains(MapCoordinatesMode::UseTransforms)
+        && ShouldUseTransformFromContainer(nullptr))
+    {
+      TransformationMatrix t;
+      GetTransformFromContainer(LayoutSize(), t);
+      transformState.ApplyTransform(t);
+    }
+  }
+
+  void RenderView::MapAbsoluteToLocalPoint(EnumSet<MapCoordinatesMode> mode,
+                                           TransformState &transformState) const noexcept
+  {
+    if (mode.Contains(MapCoordinatesMode::UseTransforms) && ShouldUseTransformFromContainer(nullptr))
+    {
+      TransformationMatrix t;
+      GetTransformFromContainer(LayoutSize(), t);
+      transformState.ApplyTransform(t);
+    }
+
+    // FIXME: Fixed boxes move with the view's scroll position, once the frame view scrolls.
+  }
+
+  void RenderView::BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept
+  {
+    // FIXME: It's weird that this gets is size from the layer.
+    rects.push_back(LayoutRect {accumulatedOffset, LayoutSize(Layer()->Size())});
+  }
+
+  void RenderView::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
+  {
+    if (wasFixed)
+    {
+      *wasFixed = false;
+    }
+    quads.push_back(FloatRect(FloatPoint(), FloatSize(Layer()->Size())));
   }
 }

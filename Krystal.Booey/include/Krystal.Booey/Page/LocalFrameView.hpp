@@ -1,11 +1,13 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Graphics/IntSize.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/Pagination.hpp"
+#include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -192,6 +194,26 @@ namespace krys::boo
     KRYS_NODISCARD FloatSize SizeForCSSLargeViewportUnits() const noexcept;
 
     KRYS_NODISCARD FloatSize SizeForCSSDynamicViewportUnits() const noexcept;
+
+    /// @brief Scrolls the layers that contain @p renderer so @p absoluteRect is visible as asked.
+    /// @return Whether anything was asked to scroll.
+    static bool ScrollRectToVisible(const LayoutRect &absoluteRect, const RenderObject &renderer,
+                                    bool insideFixed, const ScrollRectToVisibleOptions &options) noexcept;
+
+    /// @brief Scrolls the document's focused element into view.
+    // FIXME: This scrolls right away rather than on a zero-delay timer, since there's no event loop.
+    void ScheduleScrollToFocusedElement(SelectionRevealMode selectionRevealMode) noexcept;
+
+    /// @brief The scale from document coordinates to absolute ones: @p usedZoom (which already includes the
+    /// page zoom) if given, or else the page zoom.
+    // FIXME: The frame scale factor, once frames can be scaled.
+    KRYS_NODISCARD float DocumentToAbsoluteScaleFactor(Maybe<float> usedZoom = null) const noexcept;
+    KRYS_NODISCARD float AbsoluteToDocumentScaleFactor(Maybe<float> usedZoom = null) const noexcept;
+    KRYS_NODISCARD FloatRect AbsoluteToDocumentRect(FloatRect rect,
+                                                    Maybe<float> usedZoom = null) const noexcept;
+    /// @brief The offset from document coordinates to client (viewport) ones.
+    KRYS_NODISCARD FloatSize DocumentToClientOffset() const noexcept;
+    KRYS_NODISCARD FloatRect DocumentToClientRect(FloatRect rect) const noexcept;
 
   private:
     void AvailableContentSizeChanged() noexcept;

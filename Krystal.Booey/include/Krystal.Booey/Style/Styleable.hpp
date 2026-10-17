@@ -5,11 +5,16 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
+namespace krys::boo
+{
+  class RenderElement;
+}
+
 namespace krys::boo::style
 {
   /// @brief An element, or one of its pseudo-elements: something that is styled.
   // FIXME: The animation half (keyframe effects, CSS animations and transitions, scroll and view timelines,
-  // the last style change event style) comes with animations; the renderer with the render tree.
+  // the last style change event style) comes with animations.
   struct Styleable
   {
     dom::Element &Element;
@@ -35,6 +40,9 @@ namespace krys::boo::style
     {
       return ShareRef(Element);
     }
+
+    /// @brief The renderer of the element or of its pseudo-element.
+    KRYS_NODISCARD RenderElement *Renderer() const noexcept;
   };
 
   /// @brief A weak reference to a `Styleable`.

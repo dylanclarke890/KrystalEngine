@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
+#include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderTable.hpp"
@@ -618,6 +619,22 @@ namespace krys::boo
                                                        style.UsedZoomForLength()));
     }
     return offset;
+  }
+
+  void RenderBoxModelObject::MapAbsoluteToLocalPoint(EnumSet<MapCoordinatesMode> mode,
+                                                     TransformState &transformState) const noexcept
+  {
+    auto *container = Container();
+    if (!container)
+    {
+      return;
+    }
+
+    container->MapAbsoluteToLocalPoint(mode, transformState);
+
+    auto containerOffset = OffsetFromContainer(*container, LayoutPoint());
+
+    PushOntoTransformState(transformState, mode, nullptr, container, containerOffset, false);
   }
 
   LayoutSize RenderBoxModelObject::OffsetForInFlowPosition() const noexcept

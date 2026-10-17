@@ -98,6 +98,8 @@ namespace krys::boo
     ~LocalFrameViewLayoutContext() noexcept;
 
     void Layout() noexcept;
+    /// @brief Lays out between style updates, so container queries can read their containers' sizes.
+    void InterleavedLayout() noexcept;
     KRYS_NODISCARD bool NeedsLayout() const noexcept;
 
     // We rely on the side-effects of layout, like compositing updates, to update state in various subsystems

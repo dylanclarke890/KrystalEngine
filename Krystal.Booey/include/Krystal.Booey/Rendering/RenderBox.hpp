@@ -2,6 +2,8 @@
 
 #include "Krystal.Booey/Core/BoxExtents.hpp"
 #include "Krystal.Booey/Core/BoxSides.hpp"
+#include "Krystal.Booey/Core/ScrollTypes.hpp"
+#include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/LayoutRange.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
@@ -709,6 +711,34 @@ namespace krys::boo
     KRYS_NODISCARD bool RequiresLayerWithScrollableArea() const noexcept;
     KRYS_NODISCARD int32 ScrollLeft() const noexcept;
     KRYS_NODISCARD int32 ScrollTop() const noexcept;
+    KRYS_NODISCARD ScrollPosition GetScrollPosition() const noexcept;
+    void SetScrollLeft(int32 newLeft, const ScrollPositionChangeOptions &options =
+                                        ScrollPositionChangeOptions::CreateProgrammatic()) noexcept;
+    void SetScrollTop(int32 newTop, const ScrollPositionChangeOptions &options =
+                                      ScrollPositionChangeOptions::CreateProgrammatic()) noexcept;
+    void SetScrollPosition(const ScrollPosition &position,
+                           const ScrollPositionChangeOptions &options =
+                             ScrollPositionChangeOptions::CreateProgrammatic()) noexcept;
+
+#pragma region Geometry mapping
+
+    void MapLocalToContainer(const RenderLayerModelObject *ancestorContainer, TransformState &transformState,
+                             EnumSet<MapCoordinatesMode> mode, bool *wasFixed) const noexcept override;
+    void MapAbsoluteToLocalPoint(EnumSet<MapCoordinatesMode> mode,
+                                 TransformState &transformState) const noexcept override;
+    KRYS_NODISCARD LayoutSize
+      OffsetFromContainer(const RenderElement &container, const LayoutPoint &point,
+                          bool *offsetDependsOnPoint = nullptr) const noexcept override;
+    void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
+    void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
+    /// @brief The content box in absolute coordinates.
+    KRYS_NODISCARD FloatQuad AbsoluteContentQuad() const noexcept;
+
+    /// @brief The scroll padding, resolved against @p viewportRect.
+    KRYS_NODISCARD LayoutBoxExtent
+      ScrollPaddingForViewportRect(const LayoutRect &viewportRect) const noexcept;
+
+#pragma endregion
     KRYS_NODISCARD virtual int32 VerticalScrollbarWidth() const noexcept;
     KRYS_NODISCARD virtual int32 HorizontalScrollbarHeight() const noexcept;
     KRYS_NODISCARD int32 IntrinsicScrollbarLogicalWidthIncludingGutter() const noexcept;

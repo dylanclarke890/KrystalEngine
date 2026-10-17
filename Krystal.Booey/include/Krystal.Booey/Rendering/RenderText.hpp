@@ -213,6 +213,9 @@ namespace krys::boo
     /// space if there's none).
     KRYS_NODISCARD virtual utf8_string PreviousCharacter() const noexcept;
 
+    void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
+    void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
+
   protected:
     RenderText(Type type, dom::Node &node, utf8_string text) noexcept;
 

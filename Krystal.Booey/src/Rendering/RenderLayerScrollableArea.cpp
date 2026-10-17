@@ -1,7 +1,9 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Platform/ScrollAlignment.hpp"
 #include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/LayoutScope.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
@@ -979,5 +981,90 @@ namespace krys::boo
       _vBar->StyleChanged();
     }
     // FIXME: The custom scroll corner and resizer styles, once there are any.
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD LayoutRect GetLocalExposeRect(const LayoutRect &absoluteRect, RenderBox *box,
+                                                 int32 verticalScrollbarWidth,
+                                                 const LayoutRect &layerBounds) noexcept
+    {
+      auto localExposeRect =
+        LayoutRect(box->AbsoluteToLocalQuad(FloatQuad(FloatRect(absoluteRect))).BoundingBox());
+
+      // localExposedRect is now the absolute rect in local coordinates, but relative to the
+      // border edge. Make the rectangle relative to the scrollable area.
+      localExposeRect.MoveBy(-LayoutPoint(box->BorderLeft(), box->BorderTop()));
+
+      if (box->Style().ShouldPlaceVerticalScrollbarOnLeft())
+      {
+        // For `direction: rtl; writing-mode: horizontal-{tb,bt}` and `writing-mode: vertical-rl`
+        // boxes, the scroll bar is on the left side. The visible rect starts from the right side
+        // of the scroll bar. So the x of localExposeRect should start from the same position too.
+        localExposeRect.MoveBy(LayoutPoint(LayoutUnit(-verticalScrollbarWidth), 0_lu));
+      }
+
+      // scroll-padding applies to the scroll container, but expand the rectangle that we want to expose in
+      // order simulate padding the scroll container. This rectangle is passed up the tree of scrolling
+      // elements to ensure that the padding on this scroll container is maintained.
+      localExposeRect.Expand(box->ScrollPaddingForViewportRect(layerBounds));
+      return localExposeRect;
+    }
+  }
+
+  LayoutRect
+    RenderLayerScrollableArea::ScrollRectToVisible(const LayoutRect &absoluteRect,
+                                                   const ScrollRectToVisibleOptions &options) noexcept
+  {
+    auto *box = _layer.GetRenderBox();
+    krys_debug_assert(box);
+
+    auto layerBounds = LayoutRect(0_lu, 0_lu, box->ClientWidth(), box->ClientHeight());
+
+    auto localExposeRect = GetLocalExposeRect(absoluteRect, box, VerticalScrollbarWidth(), layerBounds);
+    Maybe<LayoutRect> localVisiblityRect;
+    if (options.VisibilityCheckRect)
+    {
+      localVisiblityRect =
+        GetLocalExposeRect(*options.VisibilityCheckRect, box, VerticalScrollbarWidth(), layerBounds);
+    }
+
+    auto revealRect = GetRectToExposeForScrollIntoView(layerBounds, localExposeRect, options.AlignX,
+                                                       options.AlignY, localVisiblityRect);
+    // FIXME: Smooth scrolling (useSmoothScrolling), once there are scroll animations.
+    auto scrollPositionOptions = ScrollPositionChangeOptions::CreateProgrammatic();
+    if (auto result =
+          UpdateScrollPositionForScrollIntoView(scrollPositionOptions, revealRect, localExposeRect))
+    {
+      return *result;
+    }
+    return absoluteRect;
+  }
+
+  Maybe<LayoutRect> RenderLayerScrollableArea::UpdateScrollPositionForScrollIntoView(
+    const ScrollPositionChangeOptions &options, const LayoutRect &revealRect,
+    const LayoutRect &localExposeRect) noexcept
+  {
+    auto *box = _layer.GetRenderBox();
+    krys_debug_assert(box);
+
+    auto clampedScrollOffset =
+      ClampScrollOffset(GetScrollOffset() + ToIntSize(RoundedIntRect(revealRect).Location()));
+    if (clampedScrollOffset == GetScrollOffset()
+        && GetScrollAnimationStatus() == ScrollAnimationStatus::NotAnimating)
+    {
+      return null;
+    }
+
+    auto oldScrollOffset = GetScrollOffset();
+    auto realScrollOffset = ScrollToOffset(clampedScrollOffset, options);
+
+    auto scrollOffsetDifference = realScrollOffset - oldScrollOffset;
+    auto localExposeRectScrolled = localExposeRect;
+    localExposeRectScrolled.Move(-LayoutSize(scrollOffsetDifference));
+    return LayoutRect(box
+                        ->LocalToAbsoluteQuad(FloatQuad(FloatRect(localExposeRectScrolled)),
+                                              MapCoordinatesMode::UseTransforms)
+                        .BoundingBox());
   }
 }

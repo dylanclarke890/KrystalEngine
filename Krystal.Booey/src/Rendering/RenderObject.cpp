@@ -2,6 +2,9 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
+#include "Krystal.Booey/Graphics/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFieldSetElement.hpp"
 #include "Krystal.Booey/HTML/HTMLLegendElement.hpp"
@@ -9,10 +12,12 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
+#include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -466,41 +471,361 @@ namespace krys::boo
   // have to use container().
   // FIXME: The repaint container variant (container(repaintContainer, repaintContainerSkipped)), once there's
   // painting.
-  RenderElement *RenderObject::Container() const noexcept
+  namespace
   {
-    // FIXME: See https://bugs.webkit.org/show_bug.cgi?id=270977 for RenderLineBreak special treatment.
-    if (!IsRenderElement() || IsRenderText() || IsRenderLineBreak())
+    RenderElement *ContainerForElement(const RenderObject &renderer,
+                                       const RenderLayerModelObject *repaintContainer,
+                                       bool *repaintContainerSkipped) noexcept
     {
-      return Parent();
-    }
-
-    auto &renderElement = static_cast<const RenderElement &>(*this);
-    if (dom::IsInTopLayerOrBackdrop(renderElement.Style(), renderElement.GetElement()))
-    {
-      return &renderElement.View();
-    }
-    auto position = renderElement.Style().GetPosition();
-    if (position == PositionType::Static || position == PositionType::Relative
-        || position == PositionType::Sticky)
-    {
-      return renderElement.Parent();
-    }
-    auto *parent = renderElement.Parent();
-    if (position == PositionType::Absolute)
-    {
-      for (; parent && !parent->CanContainAbsolutelyPositionedObjects(); parent = parent->Parent())
+      // This method is extremely similar to ContainingBlock(), but with a few notable
+      // exceptions.
+      // (1) For normal flow elements, it just returns the parent.
+      // (2) For absolute positioned elements, it will return a relative positioned inline, while
+      // ContainingBlock() skips to the non-anonymous containing block.
+      // This does mean that ComputeOutOfFlowPositionedLogicalWidth and
+      // ComputeOutOfFlowPositionedLogicalHeight have to use Container().
+      // FIXME: See https://bugs.webkit.org/show_bug.cgi?id=270977 for RenderLineBreak special treatment.
+      if (!renderer.IsRenderElement() || renderer.IsRenderText() || renderer.IsRenderLineBreak())
       {
+        return renderer.Parent();
+      }
+
+      auto &renderElement = static_cast<const RenderElement &>(renderer);
+      auto updateRepaintContainerSkippedFlagIfApplicable = [&]
+      {
+        if (!repaintContainerSkipped)
+        {
+          return;
+        }
+        *repaintContainerSkipped = false;
+        if (repaintContainer == &renderElement.View())
+        {
+          return;
+        }
+        for (auto *ancestor = renderElement.Parent(); ancestor; ancestor = ancestor->Parent())
+        {
+          if (repaintContainer == ancestor)
+          {
+            *repaintContainerSkipped = true;
+            break;
+          }
+        }
+      };
+      if (dom::IsInTopLayerOrBackdrop(renderElement.Style(), renderElement.GetElement()))
+      {
+        updateRepaintContainerSkippedFlagIfApplicable();
+        return &renderElement.View();
+      }
+      auto position = renderElement.Style().GetPosition();
+      if (position == PositionType::Static || position == PositionType::Relative
+          || position == PositionType::Sticky)
+      {
+        return renderElement.Parent();
+      }
+      auto *parent = renderElement.Parent();
+      if (position == PositionType::Absolute)
+      {
+        for (; parent && !parent->CanContainAbsolutelyPositionedObjects(); parent = parent->Parent())
+        {
+          if (repaintContainerSkipped && repaintContainer == parent)
+          {
+            *repaintContainerSkipped = true;
+          }
+        }
+        return parent;
+      }
+      for (; parent && !parent->CanContainFixedPositionObjects(); parent = parent->Parent())
+      {
+        if (dom::IsInTopLayerOrBackdrop(parent->Style(), parent->GetElement()))
+        {
+          updateRepaintContainerSkippedFlagIfApplicable();
+          return &renderElement.View();
+        }
+        if (repaintContainerSkipped && repaintContainer == parent)
+        {
+          *repaintContainerSkipped = true;
+        }
       }
       return parent;
     }
-    for (; parent && !parent->CanContainFixedPositionObjects(); parent = parent->Parent())
+  }
+
+  RenderElement *RenderObject::Container() const noexcept
+  {
+    return ContainerForElement(*this, nullptr, nullptr);
+  }
+
+  RenderElement *RenderObject::Container(const RenderLayerModelObject *repaintContainer,
+                                         bool &repaintContainerSkipped) const noexcept
+  {
+    repaintContainerSkipped = false;
+    return ContainerForElement(*this, repaintContainer, &repaintContainerSkipped);
+  }
+
+  FloatPoint RenderObject::LocalToAbsolute(const FloatPoint &localPoint, EnumSet<MapCoordinatesMode> mode,
+                                           bool *wasFixed) const noexcept
+  {
+    TransformState transformState(TransformState::TransformDirection::ApplyTransform, localPoint);
+    mode.Add(MapCoordinatesMode::ApplyContainerFlip);
+    MapLocalToContainer(nullptr, transformState, mode, wasFixed);
+
+    return transformState.MappedPoint();
+  }
+
+  FloatPoint RenderObject::LocalToAbsolute() const noexcept
+  {
+    return LocalToAbsolute(FloatPoint());
+  }
+
+  // FIXME: Should this exist? It is lossy but not obvious when called.
+  FloatPoint RenderObject::AbsoluteToLocal(const FloatPoint &containerPoint,
+                                           EnumSet<MapCoordinatesMode> mode) const noexcept
+  {
+    TransformState transformState(TransformState::TransformDirection::UnapplyInverseTransform,
+                                  containerPoint);
+    MapAbsoluteToLocalPoint(mode, transformState);
+
+    return transformState.MappedPoint();
+  }
+
+  FloatQuad RenderObject::AbsoluteToLocalQuad(const FloatQuad &quad,
+                                              EnumSet<MapCoordinatesMode> mode) const noexcept
+  {
+    TransformState transformState(TransformState::TransformDirection::UnapplyInverseTransform,
+                                  quad.BoundingBox().Center(), quad);
+    MapAbsoluteToLocalPoint(mode, transformState);
+    return transformState.MappedQuad();
+  }
+
+  void RenderObject::MapLocalToContainer(const RenderLayerModelObject *ancestorContainer,
+                                         TransformState &transformState, EnumSet<MapCoordinatesMode> mode,
+                                         bool *wasFixed) const noexcept
+  {
+    if (ancestorContainer == this)
     {
-      if (dom::IsInTopLayerOrBackdrop(parent->Style(), parent->GetElement()))
+      return;
+    }
+
+    auto *parent = Parent();
+    if (!parent)
+    {
+      return;
+    }
+
+    // FIXME: this should call OffsetFromContainer to share code, but I'm not sure it's ever called.
+    auto centerPoint = LayoutPoint(transformState.MappedPoint());
+    if (auto *parentAsBox = DynamicDowncast<RenderBox>(*parent))
+    {
+      if (mode.Contains(MapCoordinatesMode::ApplyContainerFlip))
       {
-        return &renderElement.View();
+        if (parentAsBox->GetWritingMode().IsBlockFlipped())
+        {
+          transformState.Move(parentAsBox->FlipForWritingMode(LayoutPoint(transformState.MappedPoint()))
+                              - centerPoint);
+        }
+        mode.Remove(MapCoordinatesMode::ApplyContainerFlip);
+      }
+      transformState.Move(-ToLayoutSize(LayoutPoint(parentAsBox->GetScrollPosition())));
+    }
+
+    parent->MapLocalToContainer(ancestorContainer, transformState, mode, wasFixed);
+  }
+
+  void RenderObject::MapAbsoluteToLocalPoint(EnumSet<MapCoordinatesMode> mode,
+                                             TransformState &transformState) const noexcept
+  {
+    if (auto *parent = Parent())
+    {
+      parent->MapAbsoluteToLocalPoint(mode, transformState);
+      if (auto *box = DynamicDowncast<RenderBox>(*parent))
+      {
+        transformState.Move(ToLayoutSize(LayoutPoint(box->GetScrollPosition())));
       }
     }
-    return parent;
+  }
+
+  bool RenderObject::ShouldUseTransformFromContainer(const RenderElement *containerObject) const noexcept
+  {
+    if (IsTransformed())
+    {
+      return true;
+    }
+    // FIXME: The layer's anchor scroll adjustment, once there's anchor positioning.
+    if (containerObject && containerObject->Style().HasPerspective())
+    {
+      return containerObject == Parent();
+    }
+    return false;
+  }
+
+  // FIXME: Now that it's no longer passed a container maybe this should be renamed?
+  void RenderObject::GetTransformFromContainer(const LayoutSize &offsetInContainer,
+                                               TransformationMatrix &transform) const noexcept
+  {
+    transform.MakeIdentity();
+    transform.Translate(offsetInContainer.Width().ToDouble(), offsetInContainer.Height().ToDouble());
+    RenderLayer *layer = nullptr;
+    if (HasLayer() && (layer = static_cast<const RenderLayerModelObject &>(*this).Layer())
+        && layer->Transform())
+    {
+      transform *= layer->CurrentTransform();
+    }
+
+    auto *perspectiveObject = Parent();
+
+    if (perspectiveObject && perspectiveObject->HasLayer() && perspectiveObject->Style().HasPerspective())
+    {
+      // Perpsective on the container affects us, so we have to factor it in here.
+      auto perspectiveOrigin =
+        static_cast<const RenderLayerModelObject &>(*perspectiveObject).Layer()->PerspectiveOrigin();
+
+      TransformationMatrix perspectiveMatrix;
+      perspectiveMatrix.ApplyPerspective(perspectiveObject->Style().UsedPerspective());
+
+      transform.TranslateRight3d(-perspectiveOrigin.X(), -perspectiveOrigin.Y(), 0);
+      transform = perspectiveMatrix * transform;
+      transform.TranslateRight3d(perspectiveOrigin.X(), perspectiveOrigin.Y(), 0);
+    }
+  }
+
+  void RenderObject::PushOntoTransformState(TransformState &transformState, EnumSet<MapCoordinatesMode> mode,
+                                            const RenderLayerModelObject *repaintContainer,
+                                            const RenderElement *container,
+                                            const LayoutSize &offsetInContainer,
+                                            bool containerSkipped) const noexcept
+  {
+    bool preserve3D = mode.Contains(MapCoordinatesMode::UseTransforms) && ParticipatesInPreserve3D();
+    auto accumulation = preserve3D ? TransformState::TransformAccumulation::AccumulateTransform
+                                   : TransformState::TransformAccumulation::FlattenTransform;
+    if (mode.Contains(MapCoordinatesMode::UseTransforms) && ShouldUseTransformFromContainer(container))
+    {
+      TransformationMatrix matrix;
+      GetTransformFromContainer(offsetInContainer, matrix);
+      transformState.ApplyTransform(matrix, accumulation);
+    }
+    else
+    {
+      transformState.Move(offsetInContainer.Width(), offsetInContainer.Height(), accumulation);
+    }
+
+    if (containerSkipped)
+    {
+      // There can't be a transform between repaintContainer and container, because transforms create
+      // containers, so it should be safe to just subtract the delta between the repaintContainer and
+      // container.
+      auto containerOffset = repaintContainer->OffsetFromAncestorContainer(*container);
+      transformState.Move(-containerOffset.Width(), -containerOffset.Height(), accumulation);
+    }
+  }
+
+  FloatQuad RenderObject::LocalToAbsoluteQuad(const FloatQuad &quad, EnumSet<MapCoordinatesMode> mode,
+                                              bool *wasFixed) const noexcept
+  {
+    return LocalToContainerQuad(quad, nullptr, mode, wasFixed);
+  }
+
+  FloatQuad RenderObject::LocalToContainerQuad(const FloatQuad &localQuad,
+                                               const RenderLayerModelObject *container,
+                                               EnumSet<MapCoordinatesMode> mode,
+                                               bool *wasFixed) const noexcept
+  {
+    // Track the point at the center of the quad's bounding box. As MapLocalToContainer() calls
+    // OffsetFromContainer(), it will use that point as the reference point to decide which column's transform
+    // to apply in multiple-column blocks.
+    TransformState transformState(TransformState::TransformDirection::ApplyTransform,
+                                  localQuad.BoundingBox().Center(), localQuad);
+    mode.Add(MapCoordinatesMode::ApplyContainerFlip);
+    MapLocalToContainer(container, transformState, mode, wasFixed);
+
+    return transformState.MappedQuad();
+  }
+
+  FloatPoint RenderObject::LocalToContainerPoint(const FloatPoint &localPoint,
+                                                 const RenderLayerModelObject *container,
+                                                 EnumSet<MapCoordinatesMode> mode,
+                                                 bool *wasFixed) const noexcept
+  {
+    TransformState transformState(TransformState::TransformDirection::ApplyTransform, localPoint);
+    mode.Add(MapCoordinatesMode::ApplyContainerFlip);
+    MapLocalToContainer(container, transformState, mode, wasFixed);
+
+    return transformState.MappedPoint();
+  }
+
+  LayoutSize RenderObject::OffsetFromContainer(KRYS_MAYBE_UNUSED const RenderElement &container,
+                                               const LayoutPoint &, bool *offsetDependsOnPoint) const noexcept
+  {
+    krys_debug_assert(&container == Container());
+
+    LayoutSize offset;
+    if (auto *box = DynamicDowncast<RenderBox>(container))
+    {
+      offset -= ToLayoutSize(LayoutPoint(box->GetScrollPosition()));
+    }
+
+    // FIXME: Fragmented flows make the offset depend on the point, once there are those.
+    if (offsetDependsOnPoint)
+    {
+      *offsetDependsOnPoint = false;
+    }
+
+    return offset;
+  }
+
+  LayoutSize RenderObject::OffsetFromAncestorContainer(const RenderElement &container) const noexcept
+  {
+    LayoutSize offset;
+    LayoutPoint referencePoint;
+    const RenderObject *currentContainer = this;
+    do
+    {
+      auto *nextContainer = currentContainer->Container();
+      krys_debug_assert(nextContainer); // This means we reached the top without finding container.
+      if (!nextContainer)
+      {
+        break;
+      }
+      krys_debug_assert(!currentContainer->IsTransformed());
+      auto currentOffset = currentContainer->OffsetFromContainer(*nextContainer, referencePoint);
+      offset += currentOffset;
+      referencePoint.Move(currentOffset);
+      currentContainer = nextContainer;
+    } while (currentContainer != &container);
+
+    return offset;
+  }
+
+  bool RenderObject::ParticipatesInPreserve3D() const noexcept
+  {
+    return HasLayer()
+           && static_cast<const RenderLayerModelObject &>(*this).Layer()->ParticipatesInPreserve3D();
+  }
+
+  IntRect RenderObject::AbsoluteBoundingBoxRect(bool useTransforms, bool *wasFixed) const noexcept
+  {
+    if (useTransforms)
+    {
+      List<FloatQuad> quads;
+      AbsoluteQuads(quads, wasFixed);
+      return EnclosingIntRect(UnitedBoundingBoxes(quads)).ToRectWithExtentsClippedToNumericLimits();
+    }
+
+    auto absPos = LocalToAbsolute(FloatPoint(), {} /* ignore transforms */, wasFixed);
+    List<LayoutRect> rects;
+    BoundingRects(rects, FlooredLayoutPoint(absPos));
+
+    if (rects.empty())
+    {
+      return IntRect();
+    }
+
+    auto result = UnionRect(rects);
+    return SnappedIntRect(result).ToRectWithExtentsClippedToNumericLimits();
+  }
+
+  IntRect RenderObject::AbsoluteBoundingBoxRectIgnoringTransforms() const noexcept
+  {
+    return AbsoluteBoundingBoxRect(false);
   }
 
   RenderView &RenderObject::View() const noexcept

@@ -6,6 +6,7 @@
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include <string>
 
 namespace krys::boo::html::mixins
@@ -118,7 +119,11 @@ namespace krys::boo::html::mixins
 
     FocusAlgorithms::FocusingSteps(element, nullptr, withVisibility);
 
-    // FIXME: Scroll the element into view unless options.PreventScroll, once there's layout and scrolling.
+    if (auto *view = element.NodeDocument().View())
+    {
+      view->ScheduleScrollToFocusedElement(options.PreventScroll ? SelectionRevealMode::DoNotReveal
+                                                                 : SelectionRevealMode::Reveal);
+    }
   }
 
   void HTMLOrSVGOrMathMLElement::Blur(dom::Element &element) noexcept

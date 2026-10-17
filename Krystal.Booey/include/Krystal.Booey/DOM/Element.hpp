@@ -2,6 +2,8 @@
 
 #include "Krystal.Booey/DOM/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Dicts/ShadowRootInit.hpp"
+#include "Krystal.Booey/DOM/DOMRect.hpp"
+#include "Krystal.Booey/DOM/DOMRectList.hpp"
 #include "Krystal.Booey/DOM/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Enums/CustomElementState.hpp"
 #include "Krystal.Booey/DOM/Enums/InsertAdjacentWhere.hpp"
@@ -9,10 +11,13 @@
 #include "Krystal.Booey/DOM/NamedNodeMap.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
+#include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
+#include "Krystal.Booey/Page/ScrollOptions.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
@@ -233,6 +238,54 @@ namespace krys::boo::dom
 
     /// @see https://dom.spec.whatwg.org/#dom-element-insertadjacenttext
     ExceptionOr<void> InsertAdjacentText(InsertAdjacentWhere where, DOMString &&data) noexcept;
+
+#pragma endregion
+
+#pragma region Element (CSSOM View) - https://drafts.csswg.org/cssom-view/#extension-to-the-element-interface
+
+    /// @brief The bounding boxes of the element's boxes, in client coordinates.
+    KRYS_NODISCARD Ref<DOMRectList> GetClientRects() noexcept;
+    /// @brief The union of the element's boxes, in client coordinates.
+    KRYS_NODISCARD Ref<DOMRect> GetBoundingClientRect() noexcept;
+    KRYS_NODISCARD FloatRect BoundingClientRect() noexcept;
+    /// @brief The element's renderer and the union of its boxes in absolute coordinates, without updating
+    /// layout; null if it has no boxes.
+    KRYS_NODISCARD Maybe<Pair<RenderElement *, FloatRect>> BoundingAbsoluteRectWithoutLayout() const noexcept;
+
+    /// @brief Scrolls the element's ancestors so the element is aligned as @p options ask.
+    void ScrollIntoView(const ScrollIntoViewOptions &options = {}) noexcept;
+    /// @brief Scrolls the element's ancestors so its start (or, if @p alignToTop is false, its end) is
+    /// aligned with theirs.
+    void ScrollIntoView(bool alignToTop) noexcept;
+
+    void Scroll(const ScrollToOptions &options = {}) noexcept;
+    void Scroll(double x, double y) noexcept;
+    void ScrollTo(const ScrollToOptions &options = {}) noexcept;
+    void ScrollTo(double x, double y) noexcept;
+    void ScrollBy(const ScrollToOptions &options = {}) noexcept;
+    void ScrollBy(double x, double y) noexcept;
+
+    KRYS_NODISCARD int32 ScrollTop() noexcept;
+    void SetScrollTop(int32 newTop) noexcept;
+    KRYS_NODISCARD int32 ScrollLeft() noexcept;
+    void SetScrollLeft(int32 newLeft) noexcept;
+    KRYS_NODISCARD int32 ScrollWidth() noexcept;
+    KRYS_NODISCARD int32 ScrollHeight() noexcept;
+    KRYS_NODISCARD int32 ClientTop() noexcept;
+    KRYS_NODISCARD int32 ClientLeft() noexcept;
+    KRYS_NODISCARD int32 ClientWidth() noexcept;
+    KRYS_NODISCARD int32 ClientHeight() noexcept;
+
+    /// @brief The nearest positioned (or table) ancestor the offset values are relative to, retargeted out of
+    /// shadow trees the element isn't in.
+    /// @see https://drafts.csswg.org/cssom-view/#extensions-to-the-htmlelement-interface
+    KRYS_NODISCARD Element *OffsetParent() noexcept;
+    /// @brief The offset parent, without retargeting it out of shadow trees.
+    KRYS_NODISCARD Element *OffsetParentIgnoringShadowTrees() noexcept;
+    KRYS_NODISCARD int32 OffsetTop() noexcept;
+    KRYS_NODISCARD int32 OffsetLeft() noexcept;
+    KRYS_NODISCARD int32 OffsetWidth() noexcept;
+    KRYS_NODISCARD int32 OffsetHeight() noexcept;
 
 #pragma endregion
 

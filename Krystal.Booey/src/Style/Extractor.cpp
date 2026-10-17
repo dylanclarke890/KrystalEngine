@@ -18,6 +18,7 @@
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/ScopeRuleSets.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
+#include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
@@ -310,13 +311,13 @@ namespace krys::boo::style
     }
     if (_pseudoElementIdentifier)
     {
-      return RendererOf(*element, _pseudoElementIdentifier);
+      return Styleable(*element, _pseudoElementIdentifier).Renderer();
     }
     if (element->HasDisplayContents())
     {
       return nullptr;
     }
-    return RendererOf(*element);
+    return element->Renderer();
   }
 
   bool Extractor::UpdateStyleIfNeededForProperty(dom::Element &element, css::PropertyId propertyID) noexcept

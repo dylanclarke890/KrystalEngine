@@ -116,17 +116,6 @@ namespace krys::boo
   /// view.
   KRYS_NODISCARD const RenderView *RenderViewOf(const dom::Document &) noexcept;
 
-  /// @brief Collapses `dynamicDowncast<RenderBox>(element.renderer())`. Nothing creates a render tree yet, so
-  /// it's always null.
-  KRYS_NODISCARD const RenderBox *RenderBoxOf(const dom::Element &) noexcept;
-
-  /// @brief Collapses `element.renderer()`. Nothing creates a render tree yet, so it's always null.
-  KRYS_NODISCARD const RenderElement *RendererOf(const dom::Element &) noexcept;
-
-  /// @brief Collapses `Styleable(element, pseudoElementIdentifier).renderer()`. Always null, as above.
-  KRYS_NODISCARD const RenderElement *RendererOf(const dom::Element &,
-                                                 const Maybe<style::PseudoElementIdentifier> &) noexcept;
-
   /// @brief Collapses `document.useDarkAppearance(style)` for a document with no page and default settings:
   /// dark only when the style's colour scheme is dark only.
   KRYS_NODISCARD bool DocumentUseDarkAppearance(const dom::Document &, const RenderStyle *) noexcept;

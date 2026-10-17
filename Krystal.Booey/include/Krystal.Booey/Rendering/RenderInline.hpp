@@ -56,10 +56,19 @@ namespace krys::boo
 
     KRYS_NODISCARD IntRect LinesBoundingBox() const noexcept;
 
+    /// @brief The offset an absolutely positioned descendant gets from this in-flow positioned inline.
+    KRYS_NODISCARD LayoutSize OffsetForInFlowPositionedInline(const RenderBox *child) const noexcept;
+
+    void MapLocalToContainer(const RenderLayerModelObject *ancestorContainer, TransformState &transformState,
+                             EnumSet<MapCoordinatesMode> mode, bool *wasFixed) const noexcept override;
+    KRYS_NODISCARD LayoutSize
+      OffsetFromContainer(const RenderElement &container, const LayoutPoint &point,
+                          bool *offsetDependsOnPoint = nullptr) const noexcept override;
+    void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
+    void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
+
     KRYS_NODISCARD bool RequiresLayer() const noexcept override;
 
-    // FIXME: Layout queries, reachable only through `RendererOf` and `RenderBoxOf`, which return null until
-    // there's layout.
     KRYS_NODISCARD LayoutUnit InnerPaddingBoxWidth() const noexcept;
     KRYS_NODISCARD LayoutUnit InnerPaddingBoxHeight() const noexcept;
 

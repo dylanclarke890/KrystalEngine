@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Core/TextBreakIterator.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Font.hpp"
 #include "Krystal.Booey/Graphics/TextRun.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
@@ -1498,5 +1499,25 @@ namespace krys::boo
     }
 
     return std::max(width, 0.f);
+  }
+
+  void RenderText::BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept
+  {
+    for (auto &run : inline_iterator::TextBoxesFor(*this))
+    {
+      auto rect = LayoutRect {run.VisualRectIgnoringBlockDirection()};
+      rect.MoveBy(accumulatedOffset);
+      rects.push_back(rect);
+    }
+  }
+
+  void RenderText::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
+  {
+    for (auto &textBox : inline_iterator::TextBoxesFor(*this))
+    {
+      // FIXME: SVG text boxes' transforms (calculateBoundariesIncludingSVGTransform), once there's SVG.
+      quads.push_back(LocalToAbsoluteQuad(textBox.VisualRectIgnoringBlockDirection(),
+                                          MapCoordinatesMode::UseTransforms, wasFixed));
+    }
   }
 }

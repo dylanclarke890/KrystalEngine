@@ -23,7 +23,7 @@ Open work outside the WebKit port's current slice. Port-specific detail (verdict
 - **Document language** — no default language from a `Content-Language` pragma or header (`EffectiveLang`). https://html.spec.whatwg.org/#pragma-set-default-language
 - **Typed OM** — `styleMap`, `attributeStyleMap`, `computedStyleMap()` and `css/typedom` aren't ported; needs `DOMMatrix` and `ParseTransformRaw` first (`CSS/Properties/Consumers/Transform.hpp`). https://drafts.css-houdini.org/css-typed-om/
 - **CSSOM** — async `CSSStyleSheet.replace()` (promises); `getComputedStyle` is a free function until there's a window (`CSS/CSSComputedStyleDeclaration.hpp`).
-- **Layout** — block, inline, flex, grid and table layout are done, and style can't read layout yet: size container queries and container units are unknown (the seam's `RenderBoxOf` is null) and there's no anchor positioning (`Style/Seam.hpp`, `PORTING.md` *Open*).
+- **Layout** — block, inline, flex, grid and table layout are done, and style reads layout (size container queries and container units); the CSSOM View geometry and scrolling APIs are done. There's no anchor positioning, and the viewport doesn't scroll, so the scrolling element's scroll APIs do nothing (`PORTING.md` *Open*, *Layout L5*).
 
 ## DOM
 

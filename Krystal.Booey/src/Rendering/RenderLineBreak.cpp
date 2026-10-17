@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
+#include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/HTMLWBRElement.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 
 namespace krys::boo
@@ -28,5 +30,32 @@ namespace krys::boo
     }
 
     return EnclosingIntRect(run->VisualRectIgnoringBlockDirection());
+  }
+
+  void RenderLineBreak::BoundingRects(List<LayoutRect> &rects,
+                                      const LayoutPoint &accumulatedOffset) const noexcept
+  {
+    auto box = inline_iterator::BoxFor(*this);
+    if (!box)
+    {
+      return;
+    }
+
+    auto rect = LayoutRect {box->VisualRectIgnoringBlockDirection()};
+    rect.MoveBy(accumulatedOffset);
+    rects.push_back(rect);
+  }
+
+  void RenderLineBreak::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
+  {
+    auto box = inline_iterator::BoxFor(*this);
+    if (!box)
+    {
+      return;
+    }
+
+    auto rect = box->VisualRectIgnoringBlockDirection();
+    quads.push_back(LocalToAbsoluteQuad(FloatRect(rect.Location(), rect.Size()),
+                                        MapCoordinatesMode::UseTransforms, wasFixed));
   }
 }

@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
@@ -88,12 +89,11 @@ namespace krys::boo::style
     auto &document = _element->NodeDocument();
     auto *rootStyle = document.DocumentElement()->GetRenderStyle();
 
-    // FIXME: The container's principal box (`container->renderer()`), once there's a render tree.
     return css::mq::FeatureEvaluationContext {
       WeakRef<const dom::Document>::WithRef(document),
       css::ToLengthConversionData {*containerStyle, rootStyle, containerParentStyle, RenderViewOf(document),
                                    container.get()},
-      nullptr};
+      ShareCheckedPtr<const RenderElement>(container->Renderer())};
   }
 
   RefPtr<const dom::Element>
@@ -125,9 +125,8 @@ namespace krys::boo::style
           {
             return true;
           }
-          // FIXME: Check the principal box's writing mode (`isHorizontalWritingMode`), once there's a render
-          // tree.
-          krys_unreachable();
+          return !HasFlag(requiredAxes, principalBox->IsHorizontalWritingMode() ? css::cq::Axis::Height
+                                                                                : css::cq::Axis::Width);
         case ContainerType::Normal: return false;
       }
       krys_unreachable();
@@ -141,8 +140,7 @@ namespace krys::boo::style
       {
         return false;
       }
-      // FIXME: The candidate's renderer, once there's a render tree.
-      if (!isValidContainerForRequiredAxes(style->GetContainerType(), nullptr))
+      if (!isValidContainerForRequiredAxes(style->GetContainerType(), candidateElement.Renderer()))
       {
         return false;
       }

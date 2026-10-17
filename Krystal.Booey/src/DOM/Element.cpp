@@ -8,6 +8,7 @@
 #include "Krystal.Booey/DOM/Algorithms/OrderedSet.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
@@ -25,10 +26,19 @@
 #include "Krystal.Booey/DOM/StyledElement.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/DOM/UserActionElementSet.hpp"
+#include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Platform/ScrollAlignment.hpp"
+#include "Krystal.Booey/Rendering/RenderBox.hpp"
+#include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Change.hpp"
@@ -36,7 +46,9 @@
 #include "Krystal.Booey/Style/Invalidator.hpp"
 #include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/TreeResolver.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <ranges>
 
@@ -1531,5 +1543,712 @@ namespace krys::boo::dom
     // FIXME: Whether the element is in the top layer (modal dialogs, popovers, fullscreen), once there's a
     // top layer.
     return style.GetPseudoElementType() == PseudoElementType::Backdrop;
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD ScrollAlignment ToScrollAlignmentForInlineDirection(Maybe<ScrollLogicalPosition> position,
+                                                                       WritingMode writingMode) noexcept
+    {
+      switch (position.value_or(ScrollLogicalPosition::Nearest))
+      {
+        case ScrollLogicalPosition::Start:
+        {
+          switch (writingMode.BlockDirection())
+          {
+            case FlowDirection::TopToBottom:
+            case FlowDirection::BottomToTop:
+              return writingMode.IsInlineLeftToRight() ? ScrollAlignment::AlignLeftAlways
+                                                       : ScrollAlignment::AlignRightAlways;
+            case FlowDirection::LeftToRight:
+            case FlowDirection::RightToLeft:
+              return writingMode.IsInlineTopToBottom() ? ScrollAlignment::AlignTopAlways
+                                                       : ScrollAlignment::AlignBottomAlways;
+          }
+          return ScrollAlignment::AlignLeftAlways;
+        }
+        case ScrollLogicalPosition::Center: return ScrollAlignment::AlignCenterAlways;
+        case ScrollLogicalPosition::End:
+        {
+          switch (writingMode.BlockDirection())
+          {
+            case FlowDirection::TopToBottom:
+            case FlowDirection::BottomToTop:
+              return writingMode.IsInlineLeftToRight() ? ScrollAlignment::AlignRightAlways
+                                                       : ScrollAlignment::AlignLeftAlways;
+            case FlowDirection::LeftToRight:
+            case FlowDirection::RightToLeft:
+              return writingMode.IsInlineTopToBottom() ? ScrollAlignment::AlignBottomAlways
+                                                       : ScrollAlignment::AlignTopAlways;
+          }
+          return ScrollAlignment::AlignRightAlways;
+        }
+        case ScrollLogicalPosition::Nearest: return ScrollAlignment::AlignToEdgeIfNeeded;
+      }
+      return ScrollAlignment::AlignToEdgeIfNeeded;
+    }
+
+    KRYS_NODISCARD ScrollAlignment ToScrollAlignmentForBlockDirection(Maybe<ScrollLogicalPosition> position,
+                                                                      WritingMode writingMode) noexcept
+    {
+      switch (position.value_or(ScrollLogicalPosition::Start))
+      {
+        case ScrollLogicalPosition::Start:
+        {
+          switch (writingMode.BlockDirection())
+          {
+            case FlowDirection::TopToBottom: return ScrollAlignment::AlignTopAlways;
+            case FlowDirection::BottomToTop: return ScrollAlignment::AlignBottomAlways;
+            case FlowDirection::LeftToRight: return ScrollAlignment::AlignLeftAlways;
+            case FlowDirection::RightToLeft: return ScrollAlignment::AlignRightAlways;
+          }
+          return ScrollAlignment::AlignTopAlways;
+        }
+        case ScrollLogicalPosition::Center: return ScrollAlignment::AlignCenterAlways;
+        case ScrollLogicalPosition::End:
+        {
+          switch (writingMode.BlockDirection())
+          {
+            case FlowDirection::TopToBottom: return ScrollAlignment::AlignBottomAlways;
+            case FlowDirection::BottomToTop: return ScrollAlignment::AlignTopAlways;
+            case FlowDirection::LeftToRight: return ScrollAlignment::AlignRightAlways;
+            case FlowDirection::RightToLeft: return ScrollAlignment::AlignLeftAlways;
+          }
+          return ScrollAlignment::AlignBottomAlways;
+        }
+        case ScrollLogicalPosition::Nearest: return ScrollAlignment::AlignToEdgeIfNeeded;
+      }
+      return ScrollAlignment::AlignToEdgeIfNeeded;
+    }
+
+    KRYS_NODISCARD double LocalZoomForRenderer(const RenderElement &renderer) noexcept
+    {
+      // FIXME: This does the wrong thing if two opposing zooms are in effect and canceled each
+      // other out, but the alternative is that we'd have to crawl up the whole render tree every
+      // time (or store an additional bit in the RenderStyle to indicate that a zoom was specified).
+      double zoomFactor = 1;
+      if (renderer.Style().UsedZoom() != 1)
+      {
+        // Need to find the nearest enclosing RenderElement that set up
+        // a differing zoom, and then we divide our result by it to eliminate the zoom.
+        const RenderElement *prev = &renderer;
+        for (const RenderElement *curr = prev->Parent(); curr; curr = curr->Parent())
+        {
+          if (curr->Style().UsedZoom() != prev->Style().UsedZoom())
+          {
+            zoomFactor = style::Evaluate<double>(prev->Style().GetZoom());
+            break;
+          }
+          prev = curr;
+        }
+        if (prev->IsRenderView())
+        {
+          zoomFactor = style::Evaluate<double>(prev->Style().GetZoom());
+        }
+      }
+      return zoomFactor;
+    }
+
+    enum class LegacyCSSOMElementMetricsRoundingStrategy : bool
+    {
+      Round,
+      Floor
+    };
+
+    KRYS_NODISCARD int32
+      ConvertToNonSubpixelValue(double value, LegacyCSSOMElementMetricsRoundingStrategy roundStrategy =
+                                                LegacyCSSOMElementMetricsRoundingStrategy::Round) noexcept
+    {
+      return static_cast<int32>(roundStrategy == LegacyCSSOMElementMetricsRoundingStrategy::Round
+                                  ? std::round(value)
+                                  : std::floor(value));
+    }
+
+    KRYS_NODISCARD int32 AdjustOffsetForZoomAndSubpixelLayout(const RenderBoxModelObject &renderer,
+                                                              const LayoutUnit &offset) noexcept
+    {
+      auto offsetLeft = LayoutUnit(RoundToInt(offset));
+      double zoomFactor = LocalZoomForRenderer(renderer);
+      if (zoomFactor == 1)
+      {
+        return ConvertToNonSubpixelValue(offsetLeft.ToDouble(),
+                                         LegacyCSSOMElementMetricsRoundingStrategy::Floor);
+      }
+      return ConvertToNonSubpixelValue(offsetLeft.ToDouble() / zoomFactor);
+    }
+
+    KRYS_NODISCARD int32 ClampToInteger(double value) noexcept
+    {
+      if (std::isnan(value))
+      {
+        return 0;
+      }
+      return static_cast<int32>(std::clamp(value, static_cast<double>(std::numeric_limits<int32>::min()),
+                                           static_cast<double>(std::numeric_limits<int32>::max())));
+    }
+
+    /// @brief Whether @p ancestorRoot, the root of a tree, is the root of the tree of @p node or of one of
+    /// the trees its shadow-including ancestors are in.
+    KRYS_NODISCARD bool IsAncestorTreeScope(const Node &ancestorRoot, const Node &node) noexcept
+    {
+      return TreeQueries::IsShadowIncludingInclusiveAncestor(ancestorRoot, node);
+    }
+
+    KRYS_NODISCARD bool ShouldObtainBoundsFromBoxModel(const Element &element) noexcept
+    {
+      // FIXME: SVG renderers (RenderSVGModelObject), once there's SVG.
+      return element.Renderer() && element.Renderer()->IsRenderBoxModelObject();
+    }
+
+    KRYS_NODISCARD RenderBox *RenderBoxOf(const Element &element) noexcept
+    {
+      return DynamicDowncast<RenderBox>(element.Renderer());
+    }
+  }
+
+  Ref<DOMRectList> Element::GetClientRects() noexcept
+  {
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets();
+
+    auto *renderer = Renderer();
+
+    List<FloatQuad> quads;
+
+    // FIXME: SVG elements' bounding boxes, and the option and optgroup elements of list boxes, once there's
+    // SVG and form controls.
+    if (ShouldObtainBoundsFromBoxModel(*this))
+    {
+      renderer->AbsoluteQuads(quads);
+    }
+
+    // FIXME: Handle table/inline-table with a caption.
+
+    if (quads.empty())
+    {
+      return DOMRectList::Create();
+    }
+
+    NodeDocument().ConvertAbsoluteToClientQuads(quads, renderer->Style());
+    return DOMRectList::Create(quads);
+  }
+
+  Maybe<Pair<RenderElement *, FloatRect>> Element::BoundingAbsoluteRectWithoutLayout() const noexcept
+  {
+    auto *renderer = Renderer();
+    List<FloatQuad> quads;
+    // FIXME: SVG elements' bounding boxes, and the option and optgroup elements of list boxes, once there's
+    // SVG and form controls.
+    if (ShouldObtainBoundsFromBoxModel(*this))
+    {
+      renderer->AbsoluteQuads(quads);
+    }
+
+    if (quads.empty())
+    {
+      return null;
+    }
+
+    return Pair<RenderElement *, FloatRect> {renderer, UnitedBoundingBoxes(quads)};
+  }
+
+  FloatRect Element::BoundingClientRect() noexcept
+  {
+    auto &document = NodeDocument();
+    document.UpdateLayoutIgnorePendingStylesheets();
+    auto pair = BoundingAbsoluteRectWithoutLayout();
+    if (!pair)
+    {
+      return {};
+    }
+    auto *renderer = pair->first;
+    auto result = pair->second;
+    document.ConvertAbsoluteToClientRect(result, renderer->Style());
+    return result;
+  }
+
+  Ref<DOMRect> Element::GetBoundingClientRect() noexcept
+  {
+    return DOMRect::Create(BoundingClientRect());
+  }
+
+  void Element::ScrollIntoView(const ScrollIntoViewOptions &options) noexcept
+  {
+    auto &document = NodeDocument();
+    // FIXME: Make content-visibility: auto content relevant (updateContentRelevancyForScrollIfNeeded), once
+    // content relevancy is computed.
+    document.UpdateLayoutIgnorePendingStylesheets();
+
+    // FIXME: Scroll a list box to the option or optgroup, once there are form controls.
+    auto *renderer = Renderer();
+    if (!renderer)
+    {
+      return;
+    }
+
+    bool insideFixed = false;
+    auto absoluteBounds = renderer->AbsoluteAnchorRectWithScrollMargin(&insideFixed).first;
+
+    auto writingMode = renderer->GetWritingMode();
+    auto alignX = ToScrollAlignmentForInlineDirection(options.InlinePosition, writingMode);
+    auto alignY = ToScrollAlignmentForBlockDirection(options.BlockPosition, writingMode);
+    alignX.DisableLegacyHorizontalVisibilityThreshold();
+
+    bool isHorizontal = writingMode.IsHorizontal();
+    ScrollRectToVisibleOptions visibleOptions;
+    visibleOptions.RevealMode = SelectionRevealMode::Reveal;
+    visibleOptions.AlignX = isHorizontal ? alignX : alignY;
+    visibleOptions.AlignY = isHorizontal ? alignY : alignX;
+    visibleOptions.Behavior = options.Behavior.value_or(ScrollBehavior::Auto);
+    LocalFrameView::ScrollRectToVisible(absoluteBounds, *renderer, insideFixed, visibleOptions);
+  }
+
+  void Element::ScrollIntoView(bool alignToTop) noexcept
+  {
+    ScrollIntoViewOptions options;
+    if (!alignToTop)
+    {
+      options.BlockPosition = ScrollLogicalPosition::End;
+    }
+    ScrollIntoView(options);
+  }
+
+  void Element::Scroll(const ScrollToOptions &options) noexcept
+  {
+    ScrollTo(options);
+  }
+
+  void Element::Scroll(double x, double y) noexcept
+  {
+    ScrollTo(x, y);
+  }
+
+  void Element::ScrollBy(const ScrollToOptions &options) noexcept
+  {
+    auto scrollToOptions = NormalizeNonFiniteCoordinatesOrFallBackTo(options, 0, 0);
+    *scrollToOptions.Left += ScrollLeft();
+    *scrollToOptions.Top += ScrollTop();
+    // FIXME: Directional scroll snapping with the original delta, once there's scroll snapping.
+    ScrollTo(scrollToOptions);
+  }
+
+  void Element::ScrollBy(double x, double y) noexcept
+  {
+    ScrollBy(ScrollToOptions(x, y));
+  }
+
+  void Element::ScrollTo(const ScrollToOptions &options) noexcept
+  {
+    auto &document = NodeDocument();
+
+    // We can avoid triggering layout if this is a scrollTo(0,0) on a element that cannot be the
+    // scrollingElement, and was last scrolled to 0,0.
+    auto canShortCircuitScroll = [&]()
+    {
+      if (!options.Left || !options.Top)
+      {
+        return false;
+      }
+
+      if (*options.Left || *options.Top)
+      {
+        return false;
+      }
+
+      // document().scrollingElement() requires up-to-date style, so bail if this element could be the
+      // scrollingElement().
+      if (document.DocumentElement() == this || document.Body().get() == this)
+      {
+        return false;
+      }
+
+      // FIXME: Elements that have ever been smooth-scrolled (hasEverHadSmoothScroll), once there's smooth
+      // scrolling.
+      return SavedLayerScrollPosition().IsZero();
+    };
+
+    if (canShortCircuitScroll())
+    {
+      return;
+    }
+
+    document.UpdateLayoutIgnorePendingStylesheets();
+
+    if (document.ScrollingElement() == this)
+    {
+      // If the element is the scrolling element and is not potentially scrollable,
+      // invoke scroll() on window with options as the only argument, and terminate these steps.
+      // FIXME: Scroll the window, once the frame view scrolls.
+      return;
+    }
+
+    // If the element does not have any associated CSS layout box, the element has no associated scrolling
+    // box, or the element has no overflow, terminate these steps.
+    auto *renderer = RenderBoxOf(*this);
+    // FIXME: Single-line text controls scroll their inner text element, once there are form controls.
+    if (!renderer || !renderer->HasNonVisibleOverflow())
+    {
+      return;
+    }
+
+    auto scrollToOptions = NormalizeNonFiniteCoordinatesOrFallBackTo(
+      options, AdjustForAbsoluteZoom(renderer->ScrollLeft(), renderer->Style()),
+      AdjustForAbsoluteZoom(renderer->ScrollTop(), renderer->Style()));
+    IntPoint scrollPosition(ClampToInteger(*scrollToOptions.Left * renderer->Style().UsedZoom()),
+                            ClampToInteger(*scrollToOptions.Top * renderer->Style().UsedZoom()));
+
+    // FIXME: Smooth scrolling (useSmoothScrolling), once there are scroll animations.
+    renderer->SetScrollPosition(scrollPosition, ScrollPositionChangeOptions::CreateProgrammatic());
+  }
+
+  void Element::ScrollTo(double x, double y) noexcept
+  {
+    ScrollTo(ScrollToOptions(x, y));
+  }
+
+  int32 Element::OffsetLeft() noexcept
+  {
+    auto offset = 0;
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets();
+    if (auto *renderer = DynamicDowncast<RenderBoxModelObject>(Renderer()))
+    {
+      offset = AdjustOffsetForZoomAndSubpixelLayout(*renderer, renderer->OffsetLeft());
+    }
+
+    // Add the offsets of the offset parents in shadow trees the element isn't in.
+    auto *parent = OffsetParentIgnoringShadowTrees();
+    if (!parent || !parent->IsInShadowTree() || TreeQueries::SameRoot(*parent, *this))
+    {
+      return offset;
+    }
+
+    while (parent && !IsAncestorTreeScope(TreeQueries::Root(*parent), *this))
+    {
+      if (auto *parentRenderer = DynamicDowncast<RenderBoxModelObject>(parent->Renderer()))
+      {
+        offset += AdjustOffsetForZoomAndSubpixelLayout(*parentRenderer, parentRenderer->OffsetLeft());
+      }
+      parent = parent->OffsetParentIgnoringShadowTrees();
+    }
+
+    return offset;
+  }
+
+  int32 Element::OffsetTop() noexcept
+  {
+    auto offset = 0;
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets();
+    if (auto *renderer = DynamicDowncast<RenderBoxModelObject>(Renderer()))
+    {
+      offset = AdjustOffsetForZoomAndSubpixelLayout(*renderer, renderer->OffsetTop());
+    }
+
+    // Add the offsets of the offset parents in shadow trees the element isn't in.
+    auto *parent = OffsetParentIgnoringShadowTrees();
+    if (!parent || !parent->IsInShadowTree() || TreeQueries::SameRoot(*parent, *this))
+    {
+      return offset;
+    }
+
+    while (parent && !IsAncestorTreeScope(TreeQueries::Root(*parent), *this))
+    {
+      if (auto *parentRenderer = DynamicDowncast<RenderBoxModelObject>(parent->Renderer()))
+      {
+        offset += AdjustOffsetForZoomAndSubpixelLayout(*parentRenderer, parentRenderer->OffsetTop());
+      }
+      parent = parent->OffsetParentIgnoringShadowTrees();
+    }
+
+    return offset;
+  }
+
+  int32 Element::OffsetWidth() noexcept
+  {
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets();
+    if (auto *renderer = DynamicDowncast<RenderBoxModelObject>(Renderer()))
+    {
+      auto offsetWidth = LayoutUnit(RoundToInt(renderer->OffsetWidth()));
+      return ConvertToNonSubpixelValue(
+        AdjustLayoutUnitForAbsoluteZoom(offsetWidth, renderer->Style()).ToDouble());
+    }
+    return 0;
+  }
+
+  int32 Element::OffsetHeight() noexcept
+  {
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets();
+    if (auto *renderer = DynamicDowncast<RenderBoxModelObject>(Renderer()))
+    {
+      auto offsetHeight = LayoutUnit(RoundToInt(renderer->OffsetHeight()));
+      return ConvertToNonSubpixelValue(
+        AdjustLayoutUnitForAbsoluteZoom(offsetHeight, renderer->Style()).ToDouble());
+    }
+    return 0;
+  }
+
+  Element *Element::OffsetParent() noexcept
+  {
+    auto *element = OffsetParentIgnoringShadowTrees();
+    if (!element || !element->IsInShadowTree())
+    {
+      return element;
+    }
+    while (element && !TreeQueries::IsShadowIncludingDescendant(*this, TreeQueries::Root(*element)))
+    {
+      element = element->OffsetParentIgnoringShadowTrees();
+    }
+    return element;
+  }
+
+  Element *Element::OffsetParentIgnoringShadowTrees() noexcept
+  {
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets();
+    auto *renderer = Renderer();
+    if (!renderer)
+    {
+      return nullptr;
+    }
+    auto *offsetParent = renderer->OffsetParent();
+    return offsetParent ? offsetParent->GetElement() : nullptr;
+  }
+
+  int32 Element::ClientLeft() noexcept
+  {
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets();
+
+    if (auto *renderer = RenderBoxOf(*this))
+    {
+      auto clientLeft = LayoutUnit(RoundToInt(renderer->ClientLeft()));
+      return ConvertToNonSubpixelValue(
+        AdjustLayoutUnitForAbsoluteZoom(clientLeft, renderer->Style()).ToDouble());
+    }
+    return 0;
+  }
+
+  int32 Element::ClientTop() noexcept
+  {
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets();
+
+    if (auto *renderer = RenderBoxOf(*this))
+    {
+      auto clientTop = LayoutUnit(RoundToInt(renderer->ClientTop()));
+      return ConvertToNonSubpixelValue(
+        AdjustLayoutUnitForAbsoluteZoom(clientTop, renderer->Style()).ToDouble());
+    }
+    return 0;
+  }
+
+  int32 Element::ClientWidth() noexcept
+  {
+    auto &document = NodeDocument();
+    document.UpdateLayoutIgnorePendingStylesheets();
+
+    if (!document.HasLivingRenderTree())
+    {
+      return 0;
+    }
+
+    auto &renderView = *document.GetRenderView();
+
+    // When in strict mode, clientWidth for the document element should return the width of the containing
+    // frame. When in quirks mode, clientWidth for the body element should return the width of the containing
+    // frame.
+    bool inQuirksMode = document.InQuirksMode();
+    if ((!inQuirksMode && document.DocumentElement() == this)
+        || (inQuirksMode && IsHTMLElement() && document.BodyOrFrameset() == this))
+    {
+      return AdjustForAbsoluteZoom(renderView.FrameView().LayoutWidth(), renderView);
+    }
+
+    if (auto *renderer = RenderBoxOf(*this))
+    {
+      auto clientWidth = LayoutUnit(RoundToInt(renderer->ClientWidth()));
+      // clientWidth/Height is the visual portion of the box content, not including
+      // borders or scroll bars, but includes padding. And per
+      // https://www.w3.org/TR/CSS2/tables.html#model,
+      // table wrapper box is a principal block box that contains the table box
+      // itself and any caption boxes, and table grid box is a block-level box that
+      // contains the table's internal table boxes. When table's border is specified
+      // in CSS, the border is added to table grid box, not table wrapper box.
+      // There's no table wrapper box, and we are supposed to retrieve clientWidth/Height
+      // from table wrapper box, not table grid box. So when we retrieve
+      // clientWidth/Height, it includes table's border size.
+      if (renderer->IsRenderTable())
+      {
+        if (renderer->Style().GetBoxSizing() == BoxSizing::ContentBox)
+        {
+          clientWidth += renderer->PaddingLeft() + renderer->PaddingRight();
+        }
+        clientWidth += renderer->BorderLeft() + renderer->BorderRight();
+      }
+      return ConvertToNonSubpixelValue(
+        AdjustLayoutUnitForAbsoluteZoom(clientWidth, renderer->Style()).ToDouble());
+    }
+    return 0;
+  }
+
+  int32 Element::ClientHeight() noexcept
+  {
+    auto &document = NodeDocument();
+    document.UpdateLayoutIgnorePendingStylesheets();
+
+    if (!document.HasLivingRenderTree())
+    {
+      return 0;
+    }
+
+    auto &renderView = *document.GetRenderView();
+
+    // When in strict mode, clientHeight for the document element should return the height of the containing
+    // frame. When in quirks mode, clientHeight for the body element should return the height of the
+    // containing frame.
+    bool inQuirksMode = document.InQuirksMode();
+    if ((!inQuirksMode && document.DocumentElement() == this)
+        || (inQuirksMode && IsHTMLElement() && document.BodyOrFrameset() == this))
+    {
+      return AdjustForAbsoluteZoom(renderView.FrameView().LayoutHeight(), renderView);
+    }
+
+    if (auto *renderer = RenderBoxOf(*this))
+    {
+      auto clientHeight = LayoutUnit(RoundToInt(renderer->ClientHeight()));
+      // See ClientWidth() for why the table's padding and borders are added.
+      if (renderer->IsRenderTable())
+      {
+        if (renderer->Style().GetBoxSizing() == BoxSizing::ContentBox)
+        {
+          clientHeight += renderer->PaddingTop() + renderer->PaddingBottom();
+        }
+        clientHeight += renderer->BorderTop() + renderer->BorderBottom();
+      }
+      return ConvertToNonSubpixelValue(
+        AdjustLayoutUnitForAbsoluteZoom(clientHeight, renderer->Style()).ToDouble());
+    }
+    return 0;
+  }
+
+  int32 Element::ScrollLeft() noexcept
+  {
+    auto &document = NodeDocument();
+    document.UpdateLayoutIgnorePendingStylesheets();
+
+    if (document.ScrollingElement() == this)
+    {
+      // FIXME: The frame view's scroll position, once it scrolls.
+      return 0;
+    }
+
+    if (auto *renderer = RenderBoxOf(*this))
+    {
+      return AdjustForAbsoluteZoom(renderer->ScrollLeft(), renderer->Style());
+    }
+    return 0;
+  }
+
+  int32 Element::ScrollTop() noexcept
+  {
+    auto &document = NodeDocument();
+    document.UpdateLayoutIgnorePendingStylesheets();
+
+    if (document.ScrollingElement() == this)
+    {
+      // FIXME: The frame view's scroll position, once it scrolls.
+      return 0;
+    }
+
+    if (auto *renderer = RenderBoxOf(*this))
+    {
+      return AdjustForAbsoluteZoom(renderer->ScrollTop(), renderer->Style());
+    }
+    return 0;
+  }
+
+  void Element::SetScrollLeft(int32 newLeft) noexcept
+  {
+    auto &document = NodeDocument();
+    document.UpdateLayoutIgnorePendingStylesheets();
+
+    // FIXME: Smooth scrolling (useSmoothScrolling), once there are scroll animations.
+    auto options = ScrollPositionChangeOptions::CreateProgrammatic();
+
+    if (document.ScrollingElement() == this)
+    {
+      // FIXME: Scroll the frame view, once it scrolls.
+      return;
+    }
+
+    if (auto *renderer = RenderBoxOf(*this))
+    {
+      int32 clampedLeft = ClampToInteger(newLeft * renderer->Style().UsedZoom());
+      renderer->SetScrollLeft(clampedLeft, options);
+      // FIXME: Clear the latched wheel event state (setScrollShouldClearLatchedState), once there are wheel
+      // events.
+    }
+  }
+
+  void Element::SetScrollTop(int32 newTop) noexcept
+  {
+    auto &document = NodeDocument();
+    document.UpdateLayoutIgnorePendingStylesheets();
+
+    // FIXME: Smooth scrolling (useSmoothScrolling), once there are scroll animations.
+    auto options = ScrollPositionChangeOptions::CreateProgrammatic();
+
+    if (document.ScrollingElement() == this)
+    {
+      // FIXME: Scroll the frame view, once it scrolls.
+      return;
+    }
+
+    if (auto *renderer = RenderBoxOf(*this))
+    {
+      int32 clampedTop = ClampToInteger(newTop * renderer->Style().UsedZoom());
+      renderer->SetScrollTop(clampedTop, options);
+      // FIXME: Clear the latched wheel event state (setScrollShouldClearLatchedState), once there are wheel
+      // events.
+    }
+  }
+
+  int32 Element::ScrollWidth() noexcept
+  {
+    auto &document = NodeDocument();
+    document.UpdateLayoutIgnorePendingStylesheets();
+
+    if (document.ScrollingElement() == this)
+    {
+      // FIXME: The frame view's contents width, once it scrolls; until then, the render view's.
+      if (auto *renderView = document.GetRenderView())
+      {
+        return AdjustForAbsoluteZoom(renderView->ScrollWidth(), renderView->Style());
+      }
+      return 0;
+    }
+
+    if (auto *renderer = RenderBoxOf(*this))
+    {
+      return AdjustForAbsoluteZoom(renderer->ScrollWidth(), renderer->Style());
+    }
+    return 0;
+  }
+
+  int32 Element::ScrollHeight() noexcept
+  {
+    auto &document = NodeDocument();
+    document.UpdateLayoutIgnorePendingStylesheets();
+
+    if (document.ScrollingElement() == this)
+    {
+      // FIXME: The frame view's contents height, once it scrolls; until then, the render view's.
+      if (auto *renderView = document.GetRenderView())
+      {
+        return AdjustForAbsoluteZoom(renderView->ScrollHeight(), renderView->Style());
+      }
+      return 0;
+    }
+
+    if (auto *renderer = RenderBoxOf(*this))
+    {
+      return AdjustForAbsoluteZoom(renderer->ScrollHeight(), renderer->Style());
+    }
+    return 0;
   }
 }

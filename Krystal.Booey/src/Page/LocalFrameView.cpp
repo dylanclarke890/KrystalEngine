@@ -1,6 +1,12 @@
 ﻿#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
+#include "Krystal.Booey/Rendering/RenderObject.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
@@ -320,5 +326,142 @@ namespace krys::boo
     }
 
     return FloatSize(UnobscuredContentRect().Size());
+  }
+
+  namespace
+  {
+    void AdjustScrollRectToVisibleOptionsForHiddenOverflow(ScrollRectToVisibleOptions &options,
+                                                           const RenderStyle &style) noexcept
+    {
+      if (options.AllowOverflowHidden == AllowScrollingOverflowHidden::Yes)
+      {
+        return;
+      }
+      if (style.OverflowX() == Overflow::Hidden)
+      {
+        options.AlignX = ScrollAlignment::NoScroll;
+      }
+      if (style.OverflowY() == Overflow::Hidden)
+      {
+        options.AlignY = ScrollAlignment::NoScroll;
+      }
+    }
+  }
+
+  bool LocalFrameView::ScrollRectToVisible(const LayoutRect &absoluteRect, const RenderObject &renderer,
+                                           KRYS_MAYBE_UNUSED bool insideFixed,
+                                           const ScrollRectToVisibleOptions &options) noexcept
+  {
+    if (options.RevealMode == SelectionRevealMode::DoNotReveal)
+    {
+      return false;
+    }
+
+    if (renderer.IsSkippedContent())
+    {
+      return false;
+    }
+
+    auto *layer = renderer.EnclosingLayer();
+    if (!layer)
+    {
+      return false;
+    }
+
+    // FIXME: It would be nice to use RenderLayer::enclosingScrollableLayer here, but that seems to skip
+    // overflow:hidden layers.
+    auto adjustedRect = absoluteRect;
+    auto adjustedOptions = options;
+
+    for (; layer; layer = layer->EnclosingContainingBlockLayer(CrossFrameBoundaries::No))
+    {
+      if (layer->ShouldTryToScrollForScrollIntoView(adjustedOptions))
+      {
+        AdjustScrollRectToVisibleOptionsForHiddenOverflow(adjustedOptions, layer->Renderer().Style());
+        adjustedRect = layer->EnsureLayerScrollableArea()->ScrollRectToVisible(adjustedRect, adjustedOptions);
+        if (adjustedOptions.VisibilityCheckRect)
+        {
+          adjustedOptions.VisibilityCheckRect->SetLocation(adjustedRect.Location());
+        }
+      }
+      // FIXME: Adjust the fixed axes for anchor-positioned fixed boxes (adjustForScrollByAnchor), once
+      // there's anchor positioning.
+    }
+
+    // FIXME: Scroll the frame itself (scrollRectToVisibleInTopLevelView, scrollRectToVisibleInChildView),
+    // once the frame view scrolls.
+    return true;
+  }
+
+  void LocalFrameView::ScheduleScrollToFocusedElement(SelectionRevealMode selectionRevealMode) noexcept
+  {
+    if (selectionRevealMode == SelectionRevealMode::DoNotReveal)
+    {
+      return;
+    }
+
+    auto *document = Frame().Document();
+    if (!document)
+    {
+      return;
+    }
+
+    document->UpdateLayoutIgnorePendingStylesheets();
+
+    auto *focusedElement = document->FocusedElement();
+    if (!focusedElement)
+    {
+      return;
+    }
+
+    // FIXME: Scroll to the shadow host of an element in a user agent shadow root, and to the element a
+    // focused element delegates its focus appearance to, once there are user agent shadow roots and form
+    // controls.
+    auto *renderer = focusedElement->Renderer();
+    if (!renderer)
+    {
+      return;
+    }
+
+    bool insideFixed = false;
+    auto [anchorRectWithScrollMargin, anchorRect] =
+      renderer->AbsoluteAnchorRectWithScrollMargin(&insideFixed);
+    ScrollRectToVisibleOptions options;
+    options.RevealMode = selectionRevealMode;
+    options.VisibilityCheckRect = anchorRect;
+    ScrollRectToVisible(anchorRectWithScrollMargin, *renderer, insideFixed, options);
+  }
+
+  float LocalFrameView::DocumentToAbsoluteScaleFactor(Maybe<float> usedZoom) const noexcept
+  {
+    // If usedZoom is passed, it already factors in pageZoomFactor().
+    return usedZoom ? *usedZoom : Frame().PageZoomFactor();
+  }
+
+  float LocalFrameView::AbsoluteToDocumentScaleFactor(Maybe<float> usedZoom) const noexcept
+  {
+    // If usedZoom is passed, it already factors in pageZoomFactor().
+    return 1 / DocumentToAbsoluteScaleFactor(usedZoom);
+  }
+
+  FloatRect LocalFrameView::AbsoluteToDocumentRect(FloatRect rect, Maybe<float> usedZoom) const noexcept
+  {
+    rect.Scale(AbsoluteToDocumentScaleFactor(usedZoom));
+    return rect;
+  }
+
+  FloatSize LocalFrameView::DocumentToClientOffset() const noexcept
+  {
+    auto clientOrigin =
+      -FloatSize(static_cast<float>(VisibleContentRect().X()), static_cast<float>(VisibleContentRect().Y()));
+
+    // Layout and visual viewports are affected by page zoom, so we need to factor that out.
+    return clientOrigin.Scaled(1 / Frame().PageZoomFactor());
+  }
+
+  FloatRect LocalFrameView::DocumentToClientRect(FloatRect rect) const noexcept
+  {
+    rect.Move(DocumentToClientOffset());
+    return rect;
   }
 }

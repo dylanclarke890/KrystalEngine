@@ -11,6 +11,7 @@
 #include "Krystal.Core/Types/CheckedPtr.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
@@ -28,11 +29,20 @@ namespace krys::boo::layout
 
 namespace krys::boo
 {
+  class FloatPoint;
+  class FloatQuad;
+  class IntRect;
+  class LayoutPoint;
+  class LayoutRect;
+  class LayoutSize;
   class RenderBlock;
   class RenderElement;
   class RenderLayer;
+  class RenderLayerModelObject;
   class RenderTreeBuilder;
   class RenderView;
+  class TransformState;
+  class TransformationMatrix;
 
   // FIXME: SVG transforms and view transition captures come with their features.
   enum class RenderObjectStateFlag : uint8
@@ -57,6 +67,15 @@ namespace krys::boo
     ChildrenInline,
     PaintContainmentApplies,
     WasSkippedDuringLastLayoutDueToContentVisibility
+  };
+
+  /// @brief How coordinates are mapped between a renderer and its ancestors.
+  enum class MapCoordinatesMode : uint8
+  {
+    IsFixed,
+    UseTransforms,
+    ApplyContainerFlip,
+    IgnoreStickyOffsets
   };
 
   /// @brief Whether marking a renderer as needing layout also marks its containing blocks.
@@ -734,6 +753,77 @@ namespace krys::boo
 
     // Returns the object containing this one. Can be different from parent for positioned elements.
     KRYS_NODISCARD RenderElement *Container() const noexcept;
+    /// @brief The object containing this one, and whether @p repaintContainer was skipped to reach it.
+    KRYS_NODISCARD RenderElement *Container(const RenderLayerModelObject *repaintContainer,
+                                            bool &repaintContainerSkipped) const noexcept;
+
+#pragma region Geometry mapping
+
+    /// @brief Converts a point in this renderer's coordinates to absolute (render view) coordinates.
+    KRYS_NODISCARD FloatPoint LocalToAbsolute(const FloatPoint &localPoint,
+                                              EnumSet<MapCoordinatesMode> mode = {},
+                                              bool *wasFixed = nullptr) const noexcept;
+    KRYS_NODISCARD FloatPoint LocalToAbsolute() const noexcept;
+    /// @brief Converts an absolute point to this renderer's coordinates.
+    KRYS_NODISCARD FloatPoint AbsoluteToLocal(const FloatPoint &containerPoint,
+                                              EnumSet<MapCoordinatesMode> mode = {}) const noexcept;
+    KRYS_NODISCARD FloatQuad AbsoluteToLocalQuad(const FloatQuad &quad,
+                                                 EnumSet<MapCoordinatesMode> mode = {}) const noexcept;
+
+    /// @brief Converts a quad in this renderer's coordinates to absolute (render view) coordinates.
+    KRYS_NODISCARD FloatQuad LocalToAbsoluteQuad(
+      const FloatQuad &quad, EnumSet<MapCoordinatesMode> mode = MapCoordinatesMode::UseTransforms,
+      bool *wasFixed = nullptr) const noexcept;
+    /// @brief Converts a quad in this renderer's coordinates to @p container's (absolute if null).
+    KRYS_NODISCARD FloatQuad
+      LocalToContainerQuad(const FloatQuad &localQuad, const RenderLayerModelObject *container,
+                           EnumSet<MapCoordinatesMode> mode = MapCoordinatesMode::UseTransforms,
+                           bool *wasFixed = nullptr) const noexcept;
+    KRYS_NODISCARD FloatPoint
+      LocalToContainerPoint(const FloatPoint &localPoint, const RenderLayerModelObject *container,
+                            EnumSet<MapCoordinatesMode> mode = MapCoordinatesMode::UseTransforms,
+                            bool *wasFixed = nullptr) const noexcept;
+
+    /// @brief Maps the coordinates in @p transformState from this renderer's space to @p ancestorContainer's
+    /// (absolute if null).
+    virtual void MapLocalToContainer(const RenderLayerModelObject *ancestorContainer,
+                                     TransformState &transformState, EnumSet<MapCoordinatesMode> mode,
+                                     bool *wasFixed) const noexcept;
+    /// @brief Maps the coordinates in @p transformState from absolute coordinates to this renderer's.
+    virtual void MapAbsoluteToLocalPoint(EnumSet<MapCoordinatesMode> mode,
+                                         TransformState &transformState) const noexcept;
+
+    /// @brief The offset from @p container (which must be this renderer's container) to this renderer.
+    KRYS_NODISCARD virtual LayoutSize
+      OffsetFromContainer(const RenderElement &container, const LayoutPoint &point,
+                          bool *offsetDependsOnPoint = nullptr) const noexcept;
+    /// @brief The offset from an ancestor @p container, without transforms, to this renderer.
+    KRYS_NODISCARD LayoutSize OffsetFromAncestorContainer(const RenderElement &container) const noexcept;
+
+    /// @brief Appends the renderer's border boxes, or line boxes, offset by @p offsetFromRoot.
+    virtual void BoundingRects(List<LayoutRect> &, const LayoutPoint & /* offsetFromRoot */) const noexcept
+    {
+    }
+    /// @brief Appends the renderer's border boxes, or line boxes, in absolute coordinates.
+    virtual void AbsoluteQuads(List<FloatQuad> &, bool * /*wasFixed*/ = nullptr) const noexcept
+    {
+    }
+
+    /// @brief The bounding box of the renderer in absolute coordinates.
+    KRYS_NODISCARD IntRect AbsoluteBoundingBoxRect(bool useTransforms = true,
+                                                   bool *wasFixed = nullptr) const noexcept;
+    KRYS_NODISCARD IntRect AbsoluteBoundingBoxRectIgnoringTransforms() const noexcept;
+
+    KRYS_NODISCARD bool ShouldUseTransformFromContainer(const RenderElement *containerObject) const noexcept;
+    void GetTransformFromContainer(const LayoutSize &offsetInContainer,
+                                   TransformationMatrix &transform) const noexcept;
+    void PushOntoTransformState(TransformState &transformState, EnumSet<MapCoordinatesMode> mode,
+                                const RenderLayerModelObject *repaintContainer,
+                                const RenderElement *container, const LayoutSize &offsetInContainer,
+                                bool containerSkipped) const noexcept;
+    KRYS_NODISCARD bool ParticipatesInPreserve3D() const noexcept;
+
+#pragma endregion
 
     KRYS_NODISCARD RenderBlock *ContainingBlock() const noexcept;
     KRYS_NODISCARD static RenderBlock *ContainingBlockForPositionType(PositionType positionType,

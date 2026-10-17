@@ -7,6 +7,7 @@
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
@@ -41,6 +42,8 @@ namespace krys::boo
     uint64 _rendererCount {1};
     bool _hasQuotesNeedingUpdate {false};
     RenderCounterSet _countersNeedingUpdate;
+    // Keyed by address: a box unregisters itself when it's destroyed or stops being a query container.
+    HashSet<const RenderBox *> _containerQueryBoxes;
 
   public:
     RenderView(dom::Document &document, RenderStyle &&style) noexcept;
@@ -135,6 +138,27 @@ namespace krys::boo
     KRYS_NODISCARD FloatSize SizeForCSSLargeViewportUnits() const noexcept;
     KRYS_NODISCARD FloatSize SizeForCSSDynamicViewportUnits() const noexcept;
     KRYS_NODISCARD FloatSize SizeForCSSDefaultViewportUnits() const noexcept;
+
+    void RegisterContainerQueryBox(const RenderBox &box) noexcept
+    {
+      _containerQueryBoxes.insert(&box);
+    }
+    void UnregisterContainerQueryBox(const RenderBox &box) noexcept
+    {
+      _containerQueryBoxes.erase(&box);
+    }
+    /// @brief The boxes of the query containers.
+    KRYS_NODISCARD const HashSet<const RenderBox *> &ContainerQueryBoxes() const noexcept
+    {
+      return _containerQueryBoxes;
+    }
+
+    void MapLocalToContainer(const RenderLayerModelObject *ancestorContainer, TransformState &transformState,
+                             EnumSet<MapCoordinatesMode> mode, bool *wasFixed) const noexcept override;
+    void MapAbsoluteToLocalPoint(EnumSet<MapCoordinatesMode> mode,
+                                 TransformState &transformState) const noexcept override;
+    void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
+    void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
 
   private:
     void UpdateInitialContainingBlockSize() noexcept;

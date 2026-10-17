@@ -33,8 +33,8 @@ namespace krys::boo
   /// @brief A table cell: its place in the grid, its spans, its collapsed borders and its layout.
   // FIXME: Painting (paint, paintCollapsedBorders, paintBackgroundsBehindCell, paintBoxDecorations,
   // paintMask, the collapsed borders collected for painting), repaints (localRectsForRepaint,
-  // computeVisibleRectsInContainer), sticky positioning (frameRectForStickyPositioning) and geometry mapping
-  // (offsetFromContainer), once there are those.
+  // computeVisibleRectsInContainer) and sticky positioning (frameRectForStickyPositioning), once there are
+  // those.
   class RenderTableCell final : public RenderBlockFlow
   {
     KRYS_NON_COPY_MOVABLE(RenderTableCell);
@@ -125,6 +125,10 @@ namespace krys::boo
     KRYS_NODISCARD LayoutUnit BorderEnd() const noexcept override;
     KRYS_NODISCARD LayoutUnit BorderBefore() const noexcept override;
     KRYS_NODISCARD LayoutUnit BorderAfter() const noexcept override;
+
+    KRYS_NODISCARD LayoutSize
+      OffsetFromContainer(const RenderElement &container, const LayoutPoint &point,
+                          bool *offsetDependsOnPoint = nullptr) const noexcept override;
 
     void Layout() noexcept override;
 

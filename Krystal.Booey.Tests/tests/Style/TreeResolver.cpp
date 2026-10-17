@@ -264,12 +264,12 @@ namespace krys::boo::style::tests
     auto &document = *fixture.Document;
     document.UpdateStyleIfNeeded();
 
-    // Descendants of size containers are resolved after the container (and its layout, once there is any).
+    // Descendants of size containers are resolved after the container and its layout.
     auto &p = Rendered(fixture.ById(u8"p"));
     CHECK(p.GetColor() == Blue);
     CHECK(ResolverFixture::Serialised(p, p.Width()) == "auto");
-    // Size queries are unknown without a principal box.
-    CHECK(ResolverFixture::Serialised(p, p.Height()) == "auto");
+    // The size query is evaluated against the container's box, which is as wide as the viewport.
+    CHECK(ResolverFixture::Serialised(p, p.Height()) == "5px");
 
     auto &q = Rendered(fixture.ById(u8"q"));
     CHECK(q.GetColor() == Red);

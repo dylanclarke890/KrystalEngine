@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLButtonElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHtmlElement.hpp"
@@ -23,6 +24,7 @@
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
+#include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/RenderReplaced.hpp"
 #include "Krystal.Booey/Rendering/RenderTable.hpp"
@@ -34,6 +36,7 @@
 #include "Krystal.Booey/Rendering/TransformOperationData.hpp"
 #include "Krystal.Booey/Style/Calc/TreeEvaluation.hpp"
 #include "Krystal.Booey/Style/TransformResolver.hpp"
+#include "Krystal.Booey/Style/Values/ScrollSnap/ScrollPadding.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include <cmath>
 
@@ -113,8 +116,12 @@ namespace krys::boo
 
   void RenderBox::WillBeDestroyed() noexcept
   {
-    // FIXME: Stop autoscrolling, and unregister the box's scroll snap positions, container query box,
-    // anchors, position-try box and anchor scroll adjusters, once there are any.
+    // FIXME: Stop autoscrolling, and unregister the box's scroll snap positions, anchors, position-try box
+    // and anchor scroll adjusters, once there are any.
+    if (HasInitializedStyle() && Style().GetContainerType() != ContainerType::Normal)
+    {
+      View().UnregisterContainerQueryBox(*this);
+    }
 
     // The weak maps upstream forget the box by themselves.
     OverridingLogicalHeightMap().erase(this);
@@ -229,8 +236,15 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Scroll snap positions, container query boxes, position-try boxes and anchor-positioned boxes,
-    // once there are any.
+    // FIXME: Scroll snap positions, position-try boxes and anchor-positioned boxes, once there are any.
+    if (newStyle.GetContainerType() != ContainerType::Normal)
+    {
+      View().RegisterContainerQueryBox(*this);
+    }
+    else if (oldStyle && oldStyle->GetContainerType() != ContainerType::Normal)
+    {
+      View().UnregisterContainerQueryBox(*this);
+    }
 
     RenderBoxModelObject::StyleWillChange(diff, newStyle);
   }
@@ -733,6 +747,198 @@ namespace krys::boo
     // FIXME: Need to work right with writing modes.
     // FIXME: This should use snappedIntSize() instead with absolute coordinates.
     return RoundToInt(std::max(ClientHeight(), LayoutOverflowRect().MaxY() - BorderTop()));
+  }
+
+  ScrollPosition RenderBox::GetScrollPosition() const noexcept
+  {
+    if (!HasPotentiallyScrollableOverflow())
+    {
+      return {0, 0};
+    }
+
+    krys_debug_assert(HasLayer());
+    auto *scrollableArea = Layer()->GetScrollableArea();
+    if (!scrollableArea)
+    {
+      return {0, 0};
+    }
+
+    return scrollableArea->GetScrollPosition();
+  }
+
+  void RenderBox::SetScrollLeft(int32 newLeft, const ScrollPositionChangeOptions &options) noexcept
+  {
+    if (!HasPotentiallyScrollableOverflow() || !Layer())
+    {
+      return;
+    }
+    auto *scrollableArea = Layer()->GetScrollableArea();
+    krys_debug_assert(scrollableArea);
+    // FIXME: The wheel event monitor (setupWheelEventMonitor), once there are wheel events.
+    scrollableArea->ScrollToXPosition(newLeft, options);
+  }
+
+  void RenderBox::SetScrollTop(int32 newTop, const ScrollPositionChangeOptions &options) noexcept
+  {
+    if (!HasPotentiallyScrollableOverflow() || !Layer())
+    {
+      return;
+    }
+    auto *scrollableArea = Layer()->GetScrollableArea();
+    krys_debug_assert(scrollableArea);
+    // FIXME: The wheel event monitor (setupWheelEventMonitor), once there are wheel events.
+    scrollableArea->ScrollToYPosition(newTop, options);
+  }
+
+  void RenderBox::SetScrollPosition(const ScrollPosition &position,
+                                    const ScrollPositionChangeOptions &options) noexcept
+  {
+    if (!HasPotentiallyScrollableOverflow() || !Layer())
+    {
+      return;
+    }
+    auto *scrollableArea = Layer()->GetScrollableArea();
+    krys_debug_assert(scrollableArea);
+    // FIXME: The wheel event monitor (setupWheelEventMonitor), once there are wheel events.
+    scrollableArea->SetScrollPosition(position, options);
+  }
+
+  void RenderBox::BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept
+  {
+    rects.push_back({accumulatedOffset, Size()});
+  }
+
+  void RenderBox::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
+  {
+    // FIXME: Boxes in a fragmented flow (absoluteQuadsForBox), once there are fragmented flows.
+    auto localRect = FloatRect {0, 0, Width().ToFloat(), Height().ToFloat()};
+    quads.push_back(LocalToAbsoluteQuad(localRect, MapCoordinatesMode::UseTransforms, wasFixed));
+  }
+
+  FloatQuad RenderBox::AbsoluteContentQuad() const noexcept
+  {
+    auto rect = ContentBoxRect();
+    return LocalToAbsoluteQuad(FloatRect(rect));
+  }
+
+  void RenderBox::MapLocalToContainer(const RenderLayerModelObject *ancestorContainer,
+                                      TransformState &transformState, EnumSet<MapCoordinatesMode> mode,
+                                      bool *wasFixed) const noexcept
+  {
+    if (ancestorContainer == this)
+    {
+      return;
+    }
+
+    if (!ancestorContainer && View().FrameView().LayoutContext().IsPaintOffsetCacheEnabled())
+    {
+      auto *layoutState = View().FrameView().LayoutContext().LayoutState();
+      auto offset = layoutState->PaintOffset() + LocationOffset();
+      if (Style().HasInFlowPosition() && Layer())
+      {
+        offset += Layer()->OffsetForInFlowPosition();
+      }
+      transformState.Move(offset);
+      return;
+    }
+
+    bool containerSkipped = false;
+    auto *container = Container(ancestorContainer, containerSkipped);
+    if (!container)
+    {
+      return;
+    }
+
+    bool isFixedPos = IsFixedPositioned();
+    // If this box has a transform, it acts as a fixed position container for fixed descendants,
+    // and may itself also be fixed position. So propagate 'fixed' up only if this box is fixed position.
+    if (isFixedPos)
+    {
+      mode.Add(MapCoordinatesMode::IsFixed);
+    }
+    else if (mode.Contains(MapCoordinatesMode::IsFixed) && CanContainFixedPositionObjects())
+    {
+      mode.Remove(MapCoordinatesMode::IsFixed);
+    }
+
+    if (wasFixed)
+    {
+      *wasFixed = mode.Contains(MapCoordinatesMode::IsFixed);
+    }
+
+    auto containerOffset = OffsetFromContainer(*container, LayoutPoint(transformState.MappedPoint()));
+
+    // FIXME: Remove the sticky position offset when sticky offsets are ignored (IgnoreStickyOffsets), once
+    // there's sticky positioning.
+
+    PushOntoTransformState(transformState, mode, ancestorContainer, container, containerOffset,
+                           containerSkipped);
+    if (containerSkipped)
+    {
+      return;
+    }
+
+    mode.Remove(MapCoordinatesMode::ApplyContainerFlip);
+
+    container->MapLocalToContainer(ancestorContainer, transformState, mode, wasFixed);
+  }
+
+  void RenderBox::MapAbsoluteToLocalPoint(EnumSet<MapCoordinatesMode> mode,
+                                          TransformState &transformState) const noexcept
+  {
+    bool isFixedPos = IsFixedPositioned();
+    if (isFixedPos)
+    {
+      mode.Add(MapCoordinatesMode::IsFixed);
+    }
+    else if (mode.Contains(MapCoordinatesMode::IsFixed) && CanContainFixedPositionObjects())
+    {
+      // If this box has a transform, it acts as a fixed position container for fixed descendants,
+      // and may itself also be fixed position. So propagate 'fixed' up only if this box is fixed position.
+      mode.Remove(MapCoordinatesMode::IsFixed);
+    }
+
+    RenderBoxModelObject::MapAbsoluteToLocalPoint(mode, transformState);
+  }
+
+  LayoutSize RenderBox::OffsetFromContainer(KRYS_MAYBE_UNUSED const RenderElement &container,
+                                            const LayoutPoint &, bool *offsetDependsOnPoint) const noexcept
+  {
+    krys_debug_assert(&container == Container());
+
+    LayoutSize offset;
+    if (IsInFlowPositioned())
+    {
+      offset += OffsetForInFlowPosition();
+    }
+
+    if (!IsInline() || IsBlockLevelReplacedOrAtomicInline())
+    {
+      offset += TopLeftLocationOffset();
+    }
+
+    if (auto *boxContainer = DynamicDowncast<RenderBox>(container))
+    {
+      offset -= ToLayoutSize(LayoutPoint(boxContainer->GetScrollPosition()));
+    }
+
+    if (IsAbsolutelyPositioned() && container.IsInFlowPositioned())
+    {
+      if (auto *inlineContainer = DynamicDowncast<RenderInline>(container))
+      {
+        offset += inlineContainer->OffsetForInFlowPositionedInline(this);
+      }
+    }
+
+    // FIXME: Fragmented flows make the offset depend on the point, once there are those.
+    (void)offsetDependsOnPoint;
+
+    return offset;
+  }
+
+  LayoutBoxExtent RenderBox::ScrollPaddingForViewportRect(const LayoutRect &viewportRect) const noexcept
+  {
+    return style::ExtentForRect(Style().GetScrollPaddingBox(), viewportRect, style::ZoomNeeded {});
   }
 
   int32 RenderBox::ScrollLeft() const noexcept

@@ -8,6 +8,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo::dom
@@ -241,6 +242,13 @@ namespace krys::boo
     KRYS_NODISCARD Overflow EffectiveOverflowBlockDirection() const noexcept;
     KRYS_NODISCARD Overflow EffectiveOverflowInlineDirection() const noexcept;
     KRYS_NODISCARD bool HasPotentiallyScrollableOverflow() const noexcept;
+
+    /// @brief The absolute rect a fragment link or scrollIntoView() scrolls to: from the leading corner of
+    /// the renderer to its trailing corner.
+    KRYS_NODISCARD LayoutRect AbsoluteAnchorRect(bool *insideFixed = nullptr) const noexcept;
+    /// @brief The anchor rect expanded by the scroll margin, and the anchor rect.
+    KRYS_NODISCARD Pair<LayoutRect, LayoutRect>
+      AbsoluteAnchorRectWithScrollMargin(bool *insideFixed = nullptr) const noexcept;
 
     KRYS_NODISCARD bool HasClip() const noexcept;
     KRYS_NODISCARD bool HasClipOrNonVisibleOverflow() const noexcept;

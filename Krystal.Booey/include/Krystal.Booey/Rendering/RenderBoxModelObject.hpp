@@ -52,6 +52,9 @@ namespace krys::boo
     // computeStickyPositionConstraints, stickyPositionOffset), once there's scrolling.
     KRYS_NODISCARD LayoutSize OffsetForInFlowPosition() const noexcept;
 
+    void MapAbsoluteToLocalPoint(EnumSet<MapCoordinatesMode> mode,
+                                 TransformState &transformState) const noexcept override;
+
     KRYS_NODISCARD virtual LayoutUnit OffsetLeft() const noexcept;
     KRYS_NODISCARD virtual LayoutUnit OffsetTop() const noexcept;
     KRYS_NODISCARD virtual LayoutUnit OffsetWidth() const noexcept = 0;
