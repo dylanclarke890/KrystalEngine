@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineLineBoxBuilder.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingContext.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineLineBoxVerticalAligner.hpp"
+#include "Krystal.Booey/Layout/FormattingContexts/Inline/Ruby/RubyFormattingContext.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxGeometry.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxInlines.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInlineTextBox.hpp"
@@ -230,8 +231,10 @@ namespace krys::boo::layout
           inlineBox.SetLogicalHeight({});
         }
       }
-      // FIXME: Apply the ruby annotation contribution to the layout bounds when the line has
-      // non-line-spanning ruby content.
+      if (_lineHasNonLineSpanningRubyContent)
+      {
+        RubyFormattingContext::ApplyAnnotationContributionToLayoutBounds(lineBox, GetFormattingContext());
+      }
       ComputeLineBoxGeometry(lineBox);
       AdjustOutsideListMarkersPosition(lineBox);
     }
@@ -614,6 +617,7 @@ namespace krys::boo::layout
         if (run.IsInlineBoxStart())
         {
           inlineBox.SetIsFirstBox();
+          _lineHasNonLineSpanningRubyContent = _lineHasNonLineSpanningRubyContent || layoutBox.IsRubyBase();
         }
         lineBox.AddInlineLevelBox(krys::move(inlineBox));
         continue;

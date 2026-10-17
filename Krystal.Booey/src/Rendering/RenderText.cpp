@@ -596,9 +596,8 @@ namespace krys::boo
 
   namespace
   {
-    // FIXME: Update the text content for partial layout (LineLayout::updateTextContent) with the offset and
-    // old length, once there's partial layout.
-    void InvalidateLineLayoutPathOnContentChangeIfNeeded(RenderText &renderer) noexcept
+    void InvalidateLineLayoutPathOnContentChangeIfNeeded(RenderText &renderer, Maybe<size_t> offset,
+                                                         size_t oldLength) noexcept
     {
       auto *container = layout_integration::LineLayout::BlockContainer(renderer);
       if (!container)
@@ -614,6 +613,11 @@ namespace krys::boo
 
       if (layout_integration::LineLayout::ShouldInvalidateLineLayoutAfterContentChange(*container, renderer,
                                                                                        *inlineLayout))
+      {
+        container->InvalidateLineLayout(RenderBlockFlow::InvalidationReason::ContentChange);
+        return;
+      }
+      if (!inlineLayout->UpdateTextContent(renderer, offset, oldLength))
       {
         container->InvalidateLineLayout(RenderBlockFlow::InvalidationReason::ContentChange);
       }
@@ -642,19 +646,20 @@ namespace krys::boo
     SetTextInternal(krys::move(newContent), force);
     if (isDifferent || force)
     {
-      InvalidateLineLayoutPathOnContentChangeIfNeeded(*this);
+      InvalidateLineLayoutPathOnContentChangeIfNeeded(*this, {}, {});
     }
   }
 
-  void RenderText::SetTextWithOffset(utf8_string newText, uint32) noexcept
+  void RenderText::SetTextWithOffset(utf8_string newText, uint32 offset) noexcept
   {
     if (_text == newText)
     {
       return;
     }
 
+    auto oldLength = _text.size();
     SetTextInternal(krys::move(newText), false);
-    InvalidateLineLayoutPathOnContentChangeIfNeeded(*this);
+    InvalidateLineLayoutPathOnContentChangeIfNeeded(*this, offset, oldLength);
   }
 
   utf8_string RenderText::TextWithoutConvertingBackslashToYenSymbol() const noexcept
@@ -908,7 +913,8 @@ namespace krys::boo
 
     if (!length
         || (stripFrontSpaces
-            && std::ranges::all_of(_text, [](char8 character) { return text::IsASCIIWhitespace(character); })))
+            && std::ranges::all_of(_text,
+                                   [](char8 character) { return text::IsASCIIWhitespace(character); })))
     {
       return widths;
     }

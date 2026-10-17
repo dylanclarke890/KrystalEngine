@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/BlockStepSizing.hpp"
 #include "Krystal.Booey/Rendering/InlineWalker.hpp"
+#include "Krystal.Booey/Rendering/LineClampUpdater.hpp"
 #include "Krystal.Booey/Rendering/RenderAncestorIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"
@@ -19,6 +20,7 @@
 #include "Krystal.Booey/Rendering/Shapes/ShapeOutsideInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/TextBoxTrimmer.hpp"
 #include "Krystal.Core/Text/Unicode.hpp"
 
 namespace krys::boo
@@ -296,8 +298,9 @@ namespace krys::boo
   {
     krys_debug_assert(!FirstChild());
 
-    // FIXME: Empty block containers produce empty formatting lines which may affect trim-start/end
-    // (TextBoxTrimmer), once there's inline layout. Repaint (LayoutRepainter), once there's painting.
+    // Empty block containers produce empty formatting lines which may affect trim-start/end.
+    auto textBoxTrimmer = TextBoxTrimmer {*this};
+    // FIXME: Repaint (LayoutRepainter), once there's painting.
 
     // FIXME: Instead of taking floats from previous sibling and forwarding them to next unconditionally, we
     // should completely skip these empty block containers.
@@ -648,8 +651,8 @@ namespace krys::boo
   {
     if (!FirstChild())
     {
-      // FIXME: Empty block containers produce empty formatting lines which may affect trim-start/end
-      // (TextBoxTrimmer), once there's inline layout.
+      // Empty block containers produce empty formatting lines which may affect trim-start/end.
+      auto textBoxTrimmer = TextBoxTrimmer {*this};
 
       auto logicalHeight = BorderAndPaddingLogicalHeight() + LayoutUnit(ScrollbarLogicalHeight());
       if (HasLineIfEmpty())
@@ -667,11 +670,37 @@ namespace krys::boo
     // FIXME: Skip the content that content-visibility skips (isSkippedContentRootForLayout), once layout
     // skips content.
 
-    // FIXME: Trim the text boxes (TextBoxTrimmer) and update the line clamp (LineClampUpdater), and apply
-    // text-box-trim's end to the last formatted line, once there's inline layout.
-    ChildrenInline()
-      ? LayoutInlineChildren(relayoutChildren, previousHeight, repaintLogicalTop, repaintLogicalBottom)
-      : LayoutBlockChildren(relayoutChildren, maxFloatLogicalBottom);
+    {
+      auto textBoxTrimmer = TextBoxTrimmer {*this};
+      auto lineClampUpdater = LineClampUpdater {*this};
+      ChildrenInline()
+        ? LayoutInlineChildren(relayoutChildren, previousHeight, repaintLogicalTop, repaintLogicalBottom)
+        : LayoutBlockChildren(relayoutChildren, maxFloatLogicalBottom);
+    }
+    {
+      auto applyTextBoxTrimEndIfNeeded = [&]
+      {
+        // With block children and blocks-inside-inline, there's no way to tell what the last formatted line
+        // is until after we finished laying out the subtree. Dirty the last formatted line (in the last IFC)
+        // and issue relayout with forcing trimming the last line if applicable.
+        if (auto *rootForLastFormattedLine = TextBoxTrimmer::LastInlineFormattingContextRootForTrimEnd(*this))
+        {
+          krys_debug_assert(rootForLastFormattedLine != this);
+          // FIXME: We should be able to damage the last line only.
+          for (RenderBlock *ancestor = rootForLastFormattedLine; ancestor && ancestor != this;
+               ancestor = ancestor->ContainingBlock())
+          {
+            ancestor->SetNeedsLayout(RenderObjectMarkingBehavior::MarkOnlyThis);
+          }
+
+          auto textBoxTrimmer = TextBoxTrimmer {*this, *rootForLastFormattedLine};
+          ChildrenInline() ? LayoutInlineChildren(RelayoutChildren::No, previousHeight, repaintLogicalTop,
+                                                  repaintLogicalBottom)
+                           : LayoutBlockChildren(RelayoutChildren::No, maxFloatLogicalBottom);
+        }
+      };
+      applyTextBoxTrimEndIfNeeded();
+    }
   }
 
   void RenderBlockFlow::LayoutBlockChildren(RelayoutChildren relayoutChildren,
@@ -3329,8 +3358,7 @@ namespace krys::boo
           && InlineLayout();
         if (shouldTriggerFullLayout)
         {
-          // FIXME: Invalidate the box's content for partial layout (LineLayout::boxContentWillChange), once
-          // there's partial layout.
+          (void)InlineLayout()->BoxContentWillChange(*inlineLevelBox);
           contentNeedsNormalChildLayoutOnly = false;
         }
       }

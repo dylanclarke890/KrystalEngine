@@ -742,6 +742,8 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Platform/ScrollbarTheme.hpp
   include/Krystal.Booey/Rendering/RenderOverflow.hpp
   include/Krystal.Booey/Rendering/RenderLayoutState.hpp
+  include/Krystal.Booey/Rendering/TextBoxTrimmer.hpp
+  include/Krystal.Booey/Rendering/LineClampUpdater.hpp
   include/Krystal.Booey/Rendering/RenderBox.hpp
   include/Krystal.Booey/Rendering/RenderBlock.hpp
   include/Krystal.Booey/Rendering/RenderBlockFlow.hpp
@@ -816,6 +818,11 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Layout/FormattingContexts/Inline/TextOnlySimpleLineBuilder.hpp
   include/Krystal.Booey/Layout/FormattingContexts/Inline/RangeBasedLineBuilder.hpp
   include/Krystal.Booey/Layout/FormattingContexts/Inline/IntrinsicWidthHandler.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineContentAligner.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineContentConstrainer.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/Invalidation/InlineDamage.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/Invalidation/InlineInvalidation.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/Ruby/RubyFormattingContext.hpp
   include/Krystal.Booey/Rendering/BreakablePositions.hpp
   include/Krystal.Booey/Layout/Floats/FloatAvoider.hpp
   include/Krystal.Booey/Layout/Floats/PlacedFloats.hpp
@@ -837,6 +844,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/RenderTextFragment.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderFirstLetter.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderList.hpp
+  include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderRuby.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlock.hpp
@@ -2070,6 +2078,8 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Platform/Scrollbar.cpp
   src/Platform/ScrollbarTheme.cpp
   src/Rendering/RenderLayoutState.cpp
+  src/Rendering/TextBoxTrimmer.cpp
+  src/Rendering/LineClampUpdater.cpp
   src/Rendering/RenderBox.cpp
   src/Rendering/RenderBlock.cpp
   src/Rendering/RenderBlockFlow.cpp
@@ -2122,6 +2132,10 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Layout/FormattingContexts/Inline/TextOnlySimpleLineBuilder.cpp
   src/Layout/FormattingContexts/Inline/RangeBasedLineBuilder.cpp
   src/Layout/FormattingContexts/Inline/IntrinsicWidthHandler.cpp
+  src/Layout/FormattingContexts/Inline/InlineContentAligner.cpp
+  src/Layout/FormattingContexts/Inline/InlineContentConstrainer.cpp
+  src/Layout/FormattingContexts/Inline/Invalidation/InlineInvalidation.cpp
+  src/Layout/FormattingContexts/Inline/Ruby/RubyFormattingContext.cpp
   src/Rendering/BreakablePositions.cpp
   src/Layout/Floats/FloatAvoider.cpp
   src/Layout/Floats/PlacedFloats.cpp
@@ -2141,6 +2155,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/RenderTextFragment.cpp
   src/Rendering/Updating/RenderTreeBuilderFirstLetter.cpp
   src/Rendering/Updating/RenderTreeBuilderList.cpp
+  src/Rendering/Updating/RenderTreeBuilderRuby.cpp
   src/Rendering/Updating/RenderTreeUpdater.cpp
   src/Rendering/Updating/RenderTreeBuilder.cpp
   src/Rendering/Updating/RenderTreeBuilderBlock.cpp

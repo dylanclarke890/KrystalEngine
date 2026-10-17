@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingContext.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineLevelBox.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineTextItem.hpp"
+#include "Krystal.Booey/Layout/FormattingContexts/Inline/Ruby/RubyFormattingContext.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxInlines.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
@@ -747,8 +748,8 @@ namespace krys::boo::layout
       }
       return nullptr;
     };
-    // FIXME: Inter-character annotations don't count, once there's ruby layout.
-    if (auto *rubyBase = enclosingRubyBase(); rubyBase && rubyBase->AssociatedRubyAnnotationBox())
+    if (auto *rubyBase = enclosingRubyBase();
+        rubyBase && RubyFormattingContext::HasInterlinearAnnotation(*rubyBase))
     {
       auto annotationPosition = rubyBase->Style().GetRubyPosition();
       if ((hasAboveTextEmphasis && annotationPosition == RubyPosition::Over)

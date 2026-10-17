@@ -5,6 +5,7 @@
 #include "Krystal.Booey/HTML/HTMLMarqueeElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableCellElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableElement.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -27,6 +28,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderRuby.hpp"
 #include "Krystal.Booey/Style/PseudoElementRequest.hpp"
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
@@ -256,9 +258,25 @@ namespace krys::boo
     auto *oldStyle = HasInitializedStyle() ? &Style() : nullptr;
     if (oldStyle)
     {
-      // FIXME: Line layout, the stacking context's z-order lists, rendering-dependent regions, the
-      // accessibility cache, the enclosing layer's visible content status and event region and the
-      // fragmented flow, once there are any.
+      if (diff >= style::DifferenceResult::Repaint && LayoutBox())
+      {
+        // FIXME: It is highly unlikely that a style mutation has effect on both the formatting context the
+        // box lives in and the one it establishes but calling only one would require to come up with a list
+        // of properties that only affects one or the other.
+        if (auto *inlineFormattingContextRoot = DynamicDowncast<RenderBlockFlow>(*this);
+            inlineFormattingContextRoot && inlineFormattingContextRoot->InlineLayout())
+        {
+          (void)inlineFormattingContextRoot->InlineLayout()->RootStyleWillChange(*inlineFormattingContextRoot,
+                                                                                 newStyle);
+        }
+        if (auto *lineLayout = layout_integration::LineLayout::Containing(*this))
+        {
+          (void)lineLayout->StyleWillChange(*this, newStyle, diff);
+        }
+      }
+      // FIXME: The stacking context's z-order lists, rendering-dependent regions, the accessibility cache,
+      // the enclosing layer's visible content status and event region and the fragmented flow, once there are
+      // any.
 
       if (IsFloating() && _style.Floating() != newStyle.Floating())
       {
@@ -387,8 +405,17 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Out-of-flow static positions, cursors, outline-auto ancestors, scroll anchoring and line layout,
-    // once there are any.
+    // FIXME: Out-of-flow static positions, cursors, outline-auto ancestors and scroll anchoring, once there
+    // are any.
+
+    // FIXME: First line change on the block comes in as equal on inline boxes.
+    auto needsLayoutBoxStyleUpdate =
+      (diff >= style::DifferenceResult::Repaint || (Is<RenderInline>(*this) && &Style() != &FirstLineStyle()))
+      && LayoutBox();
+    if (needsLayoutBoxStyleUpdate)
+    {
+      layout_integration::LineLayout::UpdateStyle(*this);
+    }
   }
 
   void RenderElement::PropagateStyleToAnonymousChildren(StylePropagationType propagationType) noexcept
@@ -415,8 +442,15 @@ namespace krys::boo
         continue;
       }
 
-      // FIXME: Anonymous ruby boxes take the ruby style (createAnonymousStyleForRuby), once there's ruby.
-      auto newStyle = RenderStyle::CreateAnonymousStyleWithDisplay(Style(), elementChild.Style().Display());
+      auto newStyle = [&]
+      {
+        auto display = elementChild.Style().Display();
+        if (display == DisplayType::RubyBase || display == DisplayType::Ruby)
+        {
+          return CreateAnonymousStyleForRuby(Style(), display);
+        }
+        return RenderStyle::CreateAnonymousStyleWithDisplay(Style(), display);
+      }();
 
       if (Style().SpecifiesColumns())
       {

@@ -9,6 +9,11 @@ namespace krys::boo
   class RenderBlockFlow;
 }
 
+namespace krys::boo::layout
+{
+  class InlineDamage;
+}
+
 namespace krys::boo::layout_integration
 {
   class InlineContent;
@@ -24,11 +29,15 @@ namespace krys::boo::layout_integration
     explicit InlineContentBuilder(const RenderBlockFlow &blockFlow) noexcept;
 
     /// @return The rect the content covered before and after, to repaint.
-    FloatRect Build(layout::InlineLayoutResult &&layoutResult, InlineContent &inlineContent) const noexcept;
+    FloatRect Build(layout::InlineLayoutResult &&layoutResult, InlineContent &inlineContent,
+                    const layout::InlineDamage *lineDamage) const noexcept;
     void UpdateLineOverflow(InlineContent &inlineContent) const noexcept;
 
   private:
     void AdjustDisplayLines(InlineContent &inlineContent, size_t startIndex) const noexcept;
+    FloatRect HandlePartialDisplayContentUpdate(layout::InlineLayoutResult &&layoutResult,
+                                                InlineContent &inlineContent,
+                                                const layout::InlineDamage *lineDamage) const noexcept;
     void
       ComputeIsFirstIsLastBoxAndBidiReorderingForInlineContent(inline_display::Boxes &boxes) const noexcept;
   };

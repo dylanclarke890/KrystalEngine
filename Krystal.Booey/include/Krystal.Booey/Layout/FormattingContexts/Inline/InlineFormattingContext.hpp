@@ -17,6 +17,7 @@ namespace krys::boo::layout
   class AbstractLineBuilder;
   class InlineContentCache;
   class LayoutState;
+  class InlineDamage;
   class LineBox;
 
   struct InlineLayoutResult
@@ -39,8 +40,6 @@ namespace krys::boo::layout
 
   // This class implements the layout logic for inline formatting context.
   // https://www.w3.org/TR/CSS22/visuren.html#inline-formatting
-  // FIXME: Partial layout (InlineDamage) and text-wrap: balance and pretty (InlineContentConstrainer) come
-  // with invalidation.
   class InlineFormattingContext
   {
     KRYS_NON_COPY_MOVABLE(InlineFormattingContext);
@@ -65,11 +64,13 @@ namespace krys::boo::layout
     InlineFormattingContext(const ElementBox &formattingContextRoot, LayoutState &globalLayoutState,
                             BlockLayoutState &parentBlockLayoutState) noexcept;
 
-    KRYS_NODISCARD InlineLayoutResult Layout(const ConstraintsForInlineContent &constraints) noexcept;
+    KRYS_NODISCARD InlineLayoutResult Layout(const ConstraintsForInlineContent &constraints,
+                                             InlineDamage *lineDamage = nullptr) noexcept;
 
-    KRYS_NODISCARD std::pair<LayoutUnit, LayoutUnit> MinimumMaximumContentSize() noexcept;
-    KRYS_NODISCARD LayoutUnit MinimumContentSize() noexcept;
-    KRYS_NODISCARD LayoutUnit MaximumContentSize() noexcept;
+    KRYS_NODISCARD std::pair<LayoutUnit, LayoutUnit>
+      MinimumMaximumContentSize(InlineDamage *lineDamage = nullptr) noexcept;
+    KRYS_NODISCARD LayoutUnit MinimumContentSize(InlineDamage *lineDamage = nullptr) noexcept;
+    KRYS_NODISCARD LayoutUnit MaximumContentSize(InlineDamage *lineDamage = nullptr) noexcept;
 
     KRYS_NODISCARD const ElementBox &Root() const noexcept
     {
@@ -111,7 +112,8 @@ namespace krys::boo::layout
                                                  const InlineItemList &inlineItemList,
                                                  InlineItemRange needsLayoutRange,
                                                  Maybe<PreviousLine> previousLine,
-                                                 const ConstraintsForInlineContent &constraints) noexcept;
+                                                 const ConstraintsForInlineContent &constraints,
+                                                 const InlineDamage *lineDamage) noexcept;
     void LayoutFloatContentOnly(const ConstraintsForInlineContent &constraints) noexcept;
 
     InlineRect CreateDisplayContentForInlineContent(const LineBox &lineBox,
@@ -133,7 +135,7 @@ namespace krys::boo::layout
                                                 const InlineItemList &inlineItemList,
                                                 InlineLayoutResult &layoutResult) noexcept;
     void InitializeInlineLayoutState(const LayoutState &globalLayoutState) noexcept;
-    void RebuildInlineItemListIfNeeded() noexcept;
+    void RebuildInlineItemListIfNeeded(InlineDamage *lineDamage) noexcept;
 
     KRYS_NODISCARD InlineContentCache &GetInlineContentCache() noexcept
     {

@@ -8,6 +8,7 @@
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
@@ -20,6 +21,7 @@ namespace krys::boo
 {
   class LocalFrame;
   class LocalFrameView;
+  class RenderBlockFlow;
   class RenderBox;
   class RenderLayoutState;
   class RenderElement;
@@ -47,6 +49,14 @@ namespace krys::boo
       InPostLayout
     };
 
+    /// @brief The `text-box-trim` sides in effect for the block container being laid out: whether the first
+    /// formatted line's start is trimmed, and the root of the last formatted line (whose end is trimmed).
+    struct TextBoxTrim
+    {
+      bool TrimFirstFormattedLine {false};
+      WeakPtr<const RenderBlockFlow> LastFormattedLineRoot;
+    };
+
   private:
     enum class LayoutNestedState : uint8
     {
@@ -67,6 +77,7 @@ namespace krys::boo
     WeakPtr<RenderElement> _subtreeLayoutRoot;
     bool _needsFullRepaint {true};
     uint32 _paintOffsetCacheDisableCount {0};
+    Maybe<TextBoxTrim> _textBoxTrim;
     // Keyed by address: flex layout removes each item it adds.
     HashSet<const RenderBox *> _percentHeightIgnoreList;
 
@@ -116,6 +127,15 @@ namespace krys::boo
     void DisablePercentHeightResolveFor(const RenderBox &flexItem) noexcept;
     void EnablePercentHeightResolveFor(const RenderBox &flexItem) noexcept;
     KRYS_NODISCARD bool IsPercentHeightResolveDisabledFor(const RenderBox &flexItem) const noexcept;
+
+    KRYS_NODISCARD Maybe<TextBoxTrim> GetTextBoxTrim() const noexcept
+    {
+      return _textBoxTrim;
+    }
+    void SetTextBoxTrim(Maybe<TextBoxTrim> textBoxTrim) noexcept
+    {
+      _textBoxTrim = krys::move(textBoxTrim);
+    }
 
     /// @brief The renderer the next layout starts from, if it's a subtree layout.
     KRYS_NODISCARD RenderElement *SubtreeLayoutRoot() const noexcept;

@@ -333,9 +333,12 @@ namespace krys::boo
   void RenderTreeBuilder::Table::CollapseAndDestroyAnonymousSiblingCells(
     const RenderTableCell &willBeDestroyed) noexcept
   {
-    // FIXME: Invalidate the line layout of the cell that's destroyed, once there's line layout.
-    auto nextCellToDestroy = CollapseAndDetachAnonymousNextSibling(
-      willBeDestroyed.Row(), willBeDestroyed.PreviousCell(), willBeDestroyed.NextCell());
+    if (auto nextCellToDestroy = CollapseAndDetachAnonymousNextSibling(
+          willBeDestroyed.Row(), willBeDestroyed.PreviousCell(), willBeDestroyed.NextCell()))
+    {
+      Downcast<RenderTableCell>(*nextCellToDestroy)
+        .InvalidateLineLayout(RenderBlockFlow::InvalidationReason::InternalMove);
+    }
   }
 
   void RenderTreeBuilder::Table::CollapseAndDestroyAnonymousSiblingRows(

@@ -337,7 +337,10 @@ namespace krys::boo
         _builder.MoveAllChildrenIncludingFloats(nextBlock, previousBlock, NormalizeAfterInsertion::No);
 
         // Delete the now-empty block's lines and nuke it.
-        // FIXME: Invalidate the line layout, once there's line layout.
+        if (auto *blockFlow = DynamicDowncast<RenderBlockFlow>(nextBlock))
+        {
+          blockFlow->InvalidateLineLayout(RenderBlockFlow::InvalidationReason::InternalMove);
+        }
         _builder.Destroy(nextBlock);
         nextSibling = nullptr;
       }
@@ -396,7 +399,15 @@ namespace krys::boo
       }
     }
 
-    // FIXME: If this was our last child, clear out the line boxes, once there's line layout.
+    if (!parent.FirstChild())
+    {
+      // If this was our last child be sure to clear out our line boxes.
+      if (auto *blockFlow = DynamicDowncast<RenderBlockFlow>(parent);
+          blockFlow && blockFlow->ChildrenInline())
+      {
+        blockFlow->InvalidateLineLayout(RenderBlockFlow::InvalidationReason::InternalMove);
+      }
+    }
     return takenChild;
   }
 
@@ -409,7 +420,11 @@ namespace krys::boo
     MoveAllChildrenToInternal(child, parent);
     auto toBeDeleted = _builder.DetachFromRenderElement(parent, child, WillBeDestroyed::Yes);
 
-    // FIXME: Delete the now-empty block's lines, once there's line layout.
+    // Delete the now-empty block's lines and nuke it.
+    if (auto *blockFlow = DynamicDowncast<RenderBlockFlow>(parent))
+    {
+      blockFlow->InvalidateLineLayout(RenderBlockFlow::InvalidationReason::InternalMove);
+    }
   }
 
   RenderPtr<RenderObject>

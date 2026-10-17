@@ -654,7 +654,10 @@ namespace krys::boo
     SetEverHadLayout();
     SetHadSkippedLayout(hadSkippedLayout == HadSkippedLayout::Yes);
 
-    // FIXME: Tell the layer its and its children's positions need updating, once there are layers.
+    if (HasLayer())
+    {
+      Downcast<RenderLayerModelObject>(*this).Layer()->SetSelfAndChildrenNeedPositionUpdate();
+    }
     _stateFlags.Remove(StateFlag::NeedsLayout);
     SetOutOfFlowChildNeedsLayoutBit(false);
     SetNeedsSimplifiedNormalFlowLayoutBit(false);

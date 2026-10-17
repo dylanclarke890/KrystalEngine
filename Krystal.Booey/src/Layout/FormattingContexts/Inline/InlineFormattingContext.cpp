@@ -2,12 +2,14 @@
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Display/InlineDisplayContentBuilder.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Display/InlineDisplayLineBuilder.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineContentCache.hpp"
+#include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineContentConstrainer.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineItemsBuilder.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineLineBox.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineLineBoxBuilder.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineLineBuilder.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineTextItem.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/IntrinsicWidthHandler.hpp"
+#include "Krystal.Booey/Layout/FormattingContexts/Inline/Invalidation/InlineInvalidation.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/RangeBasedLineBuilder.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/TextOnlySimpleLineBuilder.hpp"
 #include "Krystal.Booey/Layout/LayoutState.hpp"
@@ -31,6 +33,41 @@ namespace krys::boo::layout
       static constexpr size_t MaximumEstimatedDisplayBoxSize = 1'000;
       // This value represents a simple average derived from typical web page content.
       return std::min<size_t>(MaximumEstimatedDisplayBoxSize, static_cast<size_t>(inlineItemSize * 0.6));
+    }
+
+    KRYS_NODISCARD Maybe<InlineItemRange> PartialRangeForDamage(const InlineItemList &inlineItemList,
+                                                                const InlineDamage &lineDamage) noexcept
+    {
+      auto layoutStartPosition = lineDamage.LayoutStartPosition()->InlineItemPos;
+      if (layoutStartPosition.Index >= inlineItemList.size())
+      {
+        krys_debug_assert(false);
+        return {};
+      }
+      auto *damagedInlineTextItem =
+        DynamicDowncast<InlineTextItem>(inlineItemList[layoutStartPosition.Index]);
+      if (layoutStartPosition.Offset
+          && (!damagedInlineTextItem || layoutStartPosition.Offset >= damagedInlineTextItem->Length()))
+      {
+        krys_debug_assert(false);
+        return {};
+      }
+      return InlineItemRange {layoutStartPosition, {inlineItemList.size(), 0}};
+    }
+
+    KRYS_NODISCARD bool MayExitFromPartialLayout(const InlineDamage &lineDamage, size_t lineIndex,
+                                                 const inline_display::Boxes &newContent) noexcept
+    {
+      if (lineDamage.LayoutStartPosition()->LineIndex == lineIndex)
+      {
+        // Never stop at the damaged line. Adding trailing overflowing content could easily produce the
+        // same set of display boxes for the first damaged line.
+        return false;
+      }
+      auto trailingContentFromPreviousLayout = lineDamage.TrailingContentForLine(lineIndex);
+      return trailingContentFromPreviousLayout
+               ? (!newContent.empty() && *trailingContentFromPreviousLayout == newContent.back())
+               : false;
     }
 
     KRYS_NODISCARD bool IsEmptyInlineContent(const InlineItemList &inlineItemList) noexcept
@@ -102,9 +139,10 @@ namespace krys::boo::layout
     InitializeInlineLayoutState(globalLayoutState);
   }
 
-  InlineLayoutResult InlineFormattingContext::Layout(const ConstraintsForInlineContent &constraints) noexcept
+  InlineLayoutResult InlineFormattingContext::Layout(const ConstraintsForInlineContent &constraints,
+                                                     InlineDamage *lineDamage) noexcept
   {
-    RebuildInlineItemListIfNeeded();
+    RebuildInlineItemListIfNeeded(lineDamage);
 
     if (FormattingUtils().ShouldDiscardRemainingContentInBlockDirection())
     {
@@ -116,14 +154,30 @@ namespace krys::boo::layout
 
     if (!Root().HasInFlowChild() && !Root().HasOutOfFlowChild())
     {
+      // Float only content does not support partial layout.
+      krys_debug_assert(!InlineInvalidation::MayOnlyNeedPartialLayout(lineDamage));
       LayoutFloatContentOnly(constraints);
       return {{}, InlineLayoutResult::Range::Full};
     }
 
     auto &inlineItems = GetInlineContentCache().GetInlineItems();
     auto &inlineItemList = inlineItems.Content();
-    // FIXME: Lay out only the damaged range once partial layout is supported.
-    auto needsLayoutRange = InlineItemRange {{}, {inlineItemList.size(), {}}};
+    auto needsLayoutRange = [&]() -> InlineItemRange
+    {
+      if (!InlineInvalidation::MayOnlyNeedPartialLayout(lineDamage))
+      {
+        return {{}, {inlineItemList.size(), {}}};
+      }
+      if (auto partialRange = PartialRangeForDamage(inlineItemList, *lineDamage))
+      {
+        return *partialRange;
+      }
+      // We should be able to produce partial range for partial layout.
+      krys_debug_assert(false);
+      // Let's turn this unexpected state to full layout.
+      lineDamage = nullptr;
+      return {{}, {inlineItemList.size(), {}}};
+    }();
 
     if (needsLayoutRange.IsEmpty())
     {
@@ -131,13 +185,39 @@ namespace krys::boo::layout
       return {};
     }
 
-    auto previousLine = Maybe<PreviousLine> {};
+    auto previousLine = [&]() -> Maybe<PreviousLine>
+    {
+      if (!needsLayoutRange.Start)
+      {
+        return {};
+      }
+      if (!lineDamage || !lineDamage->LayoutStartPosition())
+      {
+        krys_debug_assert(false);
+        return {};
+      }
+      auto lastLineIndex = lineDamage->LayoutStartPosition()->LineIndex - 1;
+      // FIXME: We should be able to extract the last line information and provide it to layout as "previous
+      // line" (ends in line break and inline direction).
+      return PreviousLine {lastLineIndex, {}, {}, {}, {}};
+    }();
 
     auto &inlineLayoutState = GetLayoutState();
-    inlineLayoutState.SetLineCount(0);
+    inlineLayoutState.SetLineCount(previousLine ? previousLine->LineIndex + 1 : 0);
+    // FIXME: This needs partial support when line-clamped content has nested blocks.
     inlineLayoutState.SetLineCountWithInlineContentIncludingNestedBlocks(inlineLayoutState.LineCount());
 
-    // FIXME: Constrain the line widths for text-wrap: balance and pretty.
+    auto textWrapStyle = Root().Style().GetTextWrapStyle();
+    if (Root().Style().GetTextWrapMode() == TextWrapMode::Wrap
+        && (textWrapStyle == TextWrapStyle::Balance || textWrapStyle == TextWrapStyle::Pretty))
+    {
+      auto constrainer = InlineContentConstrainer {*this, inlineItemList, constraints.Horizontal()};
+      auto constrainedLineWidths = constrainer.ComputeParagraphLevelConstraints(textWrapStyle);
+      if (constrainedLineWidths)
+      {
+        inlineLayoutState.SetAvailableLineWidthOverride({krys::move(*constrainedLineWidths)});
+      }
+    }
 
     if (TextOnlySimpleLineBuilder::IsEligibleForSimplifiedTextOnlyInlineLayoutByContent(
           inlineItems, inlineLayoutState.GetPlacedFloats())
@@ -145,20 +225,23 @@ namespace krys::boo::layout
     {
       auto simplifiedLineBuilder =
         TextOnlySimpleLineBuilder {*this, Root(), constraints.Horizontal(), inlineItemList};
-      return LineLayout(simplifiedLineBuilder, inlineItemList, needsLayoutRange, previousLine, constraints);
+      return LineLayout(simplifiedLineBuilder, inlineItemList, needsLayoutRange, previousLine, constraints,
+                        lineDamage);
     }
     if (RangeBasedLineBuilder::IsEligibleForRangeInlineLayout(*this, needsLayoutRange, inlineItems,
                                                               inlineLayoutState.GetPlacedFloats()))
     {
       auto rangeBasedLineBuilder = RangeBasedLineBuilder {*this, constraints.Horizontal(), inlineItems};
-      return LineLayout(rangeBasedLineBuilder, inlineItemList, needsLayoutRange, previousLine, constraints);
+      return LineLayout(rangeBasedLineBuilder, inlineItemList, needsLayoutRange, previousLine, constraints,
+                        lineDamage);
     }
     auto lineBuilder = LineBuilder {*this, constraints.Horizontal(), inlineItemList,
                                     GetInlineContentCache().GetTextSpacingContext()};
-    return LineLayout(lineBuilder, inlineItemList, needsLayoutRange, previousLine, constraints);
+    return LineLayout(lineBuilder, inlineItemList, needsLayoutRange, previousLine, constraints, lineDamage);
   }
 
-  std::pair<LayoutUnit, LayoutUnit> InlineFormattingContext::MinimumMaximumContentSize() noexcept
+  std::pair<LayoutUnit, LayoutUnit>
+    InlineFormattingContext::MinimumMaximumContentSize(InlineDamage *lineDamage) noexcept
   {
     auto &inlineContentCache = GetInlineContentCache();
     auto minimumContentSize = inlineContentCache.MinimumContentSize();
@@ -169,7 +252,7 @@ namespace krys::boo::layout
       return {LayoutUnit::FromFloatCeil(*minimumContentSize), LayoutUnit::FromFloatCeil(*maximumContentSize)};
     }
 
-    RebuildInlineItemListIfNeeded();
+    RebuildInlineItemListIfNeeded(lineDamage);
     auto &inlineItems = inlineContentCache.GetInlineItems();
 
     if (!IsEmptyInlineContent(inlineItems.Content()))
@@ -206,7 +289,7 @@ namespace krys::boo::layout
     return {LayoutUnit::FromFloatCeil(*minimumContentSize), LayoutUnit::FromFloatCeil(*maximumContentSize)};
   }
 
-  LayoutUnit InlineFormattingContext::MinimumContentSize() noexcept
+  LayoutUnit InlineFormattingContext::MinimumContentSize(InlineDamage *lineDamage) noexcept
   {
     auto &inlineContentCache = GetInlineContentCache();
     if (inlineContentCache.MinimumContentSize())
@@ -214,7 +297,7 @@ namespace krys::boo::layout
       return LayoutUnit::FromFloatCeil(*inlineContentCache.MinimumContentSize());
     }
 
-    RebuildInlineItemListIfNeeded();
+    RebuildInlineItemListIfNeeded(lineDamage);
     auto &inlineItems = inlineContentCache.GetInlineItems();
     auto minimumContentSize = InlineLayoutUnit {};
     if (!IsEmptyInlineContent(inlineItems.Content()))
@@ -225,7 +308,7 @@ namespace krys::boo::layout
     return LayoutUnit::FromFloatCeil(minimumContentSize);
   }
 
-  LayoutUnit InlineFormattingContext::MaximumContentSize() noexcept
+  LayoutUnit InlineFormattingContext::MaximumContentSize(InlineDamage *lineDamage) noexcept
   {
     auto &inlineContentCache = GetInlineContentCache();
     if (inlineContentCache.MaximumContentSize())
@@ -233,7 +316,7 @@ namespace krys::boo::layout
       return LayoutUnit::FromFloatCeil(*inlineContentCache.MaximumContentSize());
     }
 
-    RebuildInlineItemListIfNeeded();
+    RebuildInlineItemListIfNeeded(lineDamage);
     auto &inlineItems = inlineContentCache.GetInlineItems();
     auto maximumContentSize = InlineLayoutUnit {};
     if (!IsEmptyInlineContent(inlineItems.Content()))
@@ -251,17 +334,24 @@ namespace krys::boo::layout
     return LayoutUnit::FromFloatCeil(maximumContentSize);
   }
 
-  InlineLayoutResult InlineFormattingContext::LineLayout(
-    AbstractLineBuilder &lineBuilder, const InlineItemList &inlineItemList, InlineItemRange needsLayoutRange,
-    Maybe<PreviousLine> previousLine, const ConstraintsForInlineContent &constraints) noexcept
+  InlineLayoutResult InlineFormattingContext::LineLayout(AbstractLineBuilder &lineBuilder,
+                                                         const InlineItemList &inlineItemList,
+                                                         InlineItemRange needsLayoutRange,
+                                                         Maybe<PreviousLine> previousLine,
+                                                         const ConstraintsForInlineContent &constraints,
+                                                         const InlineDamage *lineDamage) noexcept
   {
     krys_debug_assert(!needsLayoutRange.IsEmpty());
     auto layoutResult = InlineLayoutResult {};
     auto &inlineLayoutState = GetLayoutState();
     auto &marginState = inlineLayoutState.ParentBlockLayoutState().GetMarginState();
 
-    if (CreateDisplayContentForLineFromCachedContent(constraints, layoutResult)
-        || CreateDisplayContentForEmptyInlineContent(constraints, inlineItemList, layoutResult))
+    auto isPartialLayout = InlineInvalidation::MayOnlyNeedPartialLayout(lineDamage);
+    krys_debug_assert(isPartialLayout || !previousLine);
+
+    if (!isPartialLayout
+        && (CreateDisplayContentForLineFromCachedContent(constraints, layoutResult)
+            || CreateDisplayContentForEmptyInlineContent(constraints, inlineItemList, layoutResult)))
     {
       layoutResult.ContentRange = InlineLayoutResult::Range::Full;
       HandleAfterSideMargin(marginState, layoutResult.DisplayContent);
@@ -305,7 +395,14 @@ namespace krys::boo::layout
         leadingInlineItemPosition == needsLayoutRange.End && lineLayoutResult.Floats.SuspendedFloats.empty();
       if (isEndOfContent)
       {
-        layoutResult.ContentRange = InlineLayoutResult::Range::Full;
+        layoutResult.ContentRange =
+          !isPartialLayout ? InlineLayoutResult::Range::Full : InlineLayoutResult::Range::FullFromDamage;
+        break;
+      }
+      if (isPartialLayout
+          && MayExitFromPartialLayout(*lineDamage, lineIndex, layoutResult.DisplayContent.BoxList))
+      {
+        layoutResult.ContentRange = InlineLayoutResult::Range::PartialFromDamage;
         break;
       }
 
@@ -313,7 +410,8 @@ namespace krys::boo::layout
       {
         ResetBoxGeometriesForDiscardedContent({leadingInlineItemPosition, needsLayoutRange.End},
                                               lineLayoutResult.Floats.SuspendedFloats);
-        layoutResult.ContentRange = InlineLayoutResult::Range::Full;
+        layoutResult.ContentRange =
+          !isPartialLayout ? InlineLayoutResult::Range::Full : InlineLayoutResult::Range::FullFromDamage;
         layoutResult.DidDiscardContent = true;
         break;
       }
@@ -623,16 +721,41 @@ namespace krys::boo::layout
     return _globalLayoutState.EnsureGeometryForBox(layoutBox);
   }
 
-  void InlineFormattingContext::RebuildInlineItemListIfNeeded() noexcept
+  void InlineFormattingContext::RebuildInlineItemListIfNeeded(InlineDamage *lineDamage) noexcept
   {
     auto &inlineContentCache = GetInlineContentCache();
-    // FIXME: Rebuild a damaged inline item list (partially) once invalidation is supported.
-    if (!inlineContentCache.GetInlineItems().IsEmpty())
+    auto inlineItemListNeedsUpdate =
+      inlineContentCache.GetInlineItems().IsEmpty() || (lineDamage && lineDamage->IsInlineItemListDirty());
+    if (!inlineItemListNeedsUpdate)
     {
       return;
     }
 
-    InlineItemsBuilder {inlineContentCache, Root()}.Build({});
+    auto startPositionForInlineItemsBuilding = [&]() -> InlineItemPosition
+    {
+      if (!lineDamage)
+      {
+        krys_debug_assert(inlineContentCache.GetInlineItems().IsEmpty());
+        return {};
+      }
+      if (auto startPosition = lineDamage->LayoutStartPosition())
+      {
+        if (lineDamage->Reasons().Contains(InlineDamage::Reason::Pagination))
+        {
+          // FIXME: We don't support partial rebuild with certain types of content. Let's just re-collect
+          // inline items.
+          return {};
+        }
+        return startPosition->InlineItemPos;
+      }
+      // Unsupported damage. Need to run full build/layout.
+      return {};
+    };
+    InlineItemsBuilder {inlineContentCache, Root()}.Build(startPositionForInlineItemsBuilding());
+    if (lineDamage)
+    {
+      lineDamage->SetInlineItemListClean();
+    }
     inlineContentCache.ClearMaximumIntrinsicWidthLineContent();
   }
 }

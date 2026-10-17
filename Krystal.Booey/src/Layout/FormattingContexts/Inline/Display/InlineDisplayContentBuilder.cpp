@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Layout/FormattingContexts/FormattingContext.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingContext.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingUtils.hpp"
+#include "Krystal.Booey/Layout/FormattingContexts/Inline/Ruby/RubyFormattingContext.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxGeometry.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxInlines.hpp"
@@ -12,6 +13,7 @@
 #include "Krystal.Booey/Style/InlineTextBoxStyle.hpp"
 #include "Krystal.Booey/Style/Values/Borders/Shadow.hpp"
 #include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Types/HashSet.hpp"
 
 #include <algorithm>
 #include <ranges>
@@ -345,7 +347,7 @@ namespace krys::boo::layout
     {
       ProcessNonBidiContent(lineLayoutResult, boxes);
     }
-    // FIXME: Process ruby content (annotation boxes, alignment offsets and overhang).
+    ProcessRubyContent(boxes, lineLayoutResult);
 
     CollectInkOverflowForTextDecorations(boxes);
     CollectInkOverflowForInlineBoxes(boxes);
@@ -594,6 +596,7 @@ namespace krys::boo::layout
                       || (!inlineBox.IsFirstBox() && lineRun.IsLineSpanningInlineBoxStart()));
 
     auto &layoutBox = lineRun.LayoutBox();
+    _hasSeenRubyBase = _hasSeenRubyBase || layoutBox.IsRubyBase();
     _hasSeenNestedInlineBoxesWithDifferentFontCascade =
       _hasSeenNestedInlineBoxesWithDifferentFontCascade
       || IsNestedInlineBoxWithDifferentFontCascadeFromParent(layoutBox, IsFirstFormattedLine());
@@ -627,6 +630,7 @@ namespace krys::boo::layout
   {
     // Geometries for inline boxes at bidi boundaries are computed at a post-process step.
     auto isContentful = true;
+    _hasSeenRubyBase = _hasSeenRubyBase || layoutBox.IsRubyBase();
     boxes.push_back({LineIndex(),
                      inline_display::Box::Type::NonRootInlineBox,
                      layoutBox,
@@ -638,6 +642,25 @@ namespace krys::boo::layout
                      null,
                      isContentful,
                      IsLineFullyTruncatedInBlockDirection()});
+  }
+
+  void InlineDisplayContentBuilder::InsertRubyAnnotationBox(const Box &annotationBox,
+                                                            size_t insertionPosition,
+                                                            const InlineRect &borderBoxRect,
+                                                            inline_display::Boxes &boxes) noexcept
+  {
+    boxes.insert(boxes.begin() + static_cast<ptrdiff_t>(insertionPosition),
+                 inline_display::Box {LineIndex(),
+                                      inline_display::Box::Type::AtomicInlineBox,
+                                      annotationBox,
+                                      UBIDI_DEFAULT_LTR,
+                                      borderBoxRect,
+                                      borderBoxRect,
+                                      IsFirstFormattedLine(),
+                                      {},
+                                      null,
+                                      true,
+                                      IsLineFullyTruncatedInBlockDirection()});
   }
 
   void InlineDisplayContentBuilder::ProcessNonBidiContent(const LineLayoutResult &lineLayoutResult,
@@ -955,7 +978,11 @@ namespace krys::boo::layout
         contentLineRightEdge +=
           (BorderLineRight(boxGeometry, boxWritingMode) + PaddingLineRight(boxGeometry, boxWritingMode))
             .ToFloat();
-        // FIXME: Add the ruby base's end additional logical width for ruby bases.
+        auto logicalWidth = contentLineRightEdge - logicalRect.Left();
+        contentLineRightEdge += layoutBox.IsRubyBase()
+                                  ? RubyFormattingContext::BaseEndAdditionalLogicalWidth(
+                                      layoutBox, displayBox, logicalWidth, GetFormattingContext())
+                                  : 0.f;
         logicalRect.SetRight(contentLineRightEdge);
         contentLineRightEdge += MarginLineRight(boxGeometry, boxWritingMode).ToFloat();
       }
@@ -1552,6 +1579,186 @@ namespace krys::boo::layout
         visualRect.SetHeight(logicalRect.Width());
         return visualRect;
       default: krys_debug_assert(false); return visualRect;
+    }
+  }
+
+  size_t
+    InlineDisplayContentBuilder::ProcessRubyBase(size_t rubyBaseStart, inline_display::Boxes &displayBoxes,
+                                                 List<IndexRange> &interlinearRubyColumnRangeList,
+                                                 List<size_t> &rubyBaseStartIndexListWithAnnotation) noexcept
+  {
+    auto &formattingContext = GetFormattingContext();
+    auto &rubyBaseDisplayBox = displayBoxes[rubyBaseStart];
+    auto &rubyBaseLayoutBox = rubyBaseDisplayBox.LayoutBox();
+    krys_debug_assert(rubyBaseDisplayBox.IsInlineBox());
+    auto baseBorderBoxLogicalRect =
+      BoxGeometry::BorderBoxRect(formattingContext.GeometryForBox(rubyBaseLayoutBox));
+
+    auto *annotationBox = rubyBaseLayoutBox.AssociatedRubyAnnotationBox();
+    if (annotationBox)
+    {
+      rubyBaseStartIndexListWithAnnotation.push_back(rubyBaseStart);
+    }
+
+    auto rubyBaseEnd = displayBoxes.size();
+    auto &rubyBox = rubyBaseLayoutBox.Parent();
+    auto &rubyBoxParent = rubyBox.Parent();
+    for (auto index = rubyBaseStart + 1; index < displayBoxes.size(); ++index)
+    {
+      auto &baseContentLayoutBox = displayBoxes[index].LayoutBox();
+      if (baseContentLayoutBox.IsRubyBase())
+      {
+        index = ProcessRubyBase(index, displayBoxes, interlinearRubyColumnRangeList,
+                                rubyBaseStartIndexListWithAnnotation);
+        if (RubyFormattingContext::HasInterlinearAnnotation(baseContentLayoutBox))
+        {
+          auto &interlinearAnnotationBox = *baseContentLayoutBox.AssociatedRubyAnnotationBox();
+          auto isNestedRubyBase = [&]
+          {
+            for (const Box *ancestor = &baseContentLayoutBox.Parent(); ancestor != &Root();
+                 ancestor = &ancestor->Parent())
+            {
+              if (ancestor->IsRubyBase())
+              {
+                return ancestor == &rubyBaseLayoutBox;
+              }
+            }
+            return false;
+          };
+          if (isNestedRubyBase())
+          {
+            auto nestedAnnotationMarginBoxRect =
+              BoxGeometry::MarginBoxRect(formattingContext.GeometryForBox(interlinearAnnotationBox));
+            baseBorderBoxLogicalRect.ExpandToContain(nestedAnnotationMarginBoxRect);
+          }
+        }
+
+        if (index == displayBoxes.size())
+        {
+          rubyBaseEnd = index;
+          break;
+        }
+      }
+
+      auto &layoutBox = displayBoxes[index].LayoutBox();
+      if (&layoutBox.Parent() == &rubyBox || &layoutBox.Parent() == &rubyBoxParent)
+      {
+        rubyBaseEnd = index;
+        break;
+      }
+    }
+
+    if (RubyFormattingContext::HasInterlinearAnnotation(rubyBaseLayoutBox))
+    {
+      interlinearRubyColumnRangeList.push_back({rubyBaseStart, rubyBaseEnd});
+    }
+
+    if (annotationBox)
+    {
+      auto placeAndSizeAnnotationBox = [&]
+      {
+        if (RubyFormattingContext::HasInterCharacterAnnotation(rubyBaseLayoutBox))
+        {
+          auto letterSpacing = LayoutUnit {rubyBaseLayoutBox.Style().UsedLetterSpacing()};
+          // FIXME: Consult the LineBox to see if letter spacing indeed applies.
+          baseBorderBoxLogicalRect.SetWidth(
+            std::max(LayoutUnit {}, baseBorderBoxLogicalRect.Width() - letterSpacing));
+        }
+
+        // FIXME: There is a confusion here. The functions expect margin box.
+        auto borderBoxLogicalTopLeft = RubyFormattingContext::PlaceAnnotationBox(
+          rubyBaseLayoutBox, baseBorderBoxLogicalRect, formattingContext);
+        auto contentBoxLogicalSize = RubyFormattingContext::SizeAnnotationBox(
+          rubyBaseLayoutBox, baseBorderBoxLogicalRect, formattingContext);
+        auto &annotationBoxGeometry = formattingContext.GeometryForBox(*annotationBox);
+        annotationBoxGeometry.SetTopLeft(ToLayoutPoint(borderBoxLogicalTopLeft));
+        annotationBoxGeometry.SetContentBoxSize(ToLayoutSize(contentBoxLogicalSize));
+      };
+      placeAndSizeAnnotationBox();
+    }
+    return rubyBaseEnd;
+  }
+
+  void InlineDisplayContentBuilder::ProcessRubyContent(inline_display::Boxes &displayBoxes,
+                                                       const LineLayoutResult &lineLayoutResult) noexcept
+  {
+    if (Root().IsRubyAnnotationBox())
+    {
+      RubyFormattingContext::ApplyAnnotationAlignmentOffset(
+        displayBoxes, lineLayoutResult.RubyAlignment.AnnotationAlignmentOffset, GetFormattingContext());
+    }
+
+    if (!_hasSeenRubyBase)
+    {
+      return;
+    }
+
+    HashSet<const Box *> lineSpanningRubyBaseList;
+    for (auto &lineRun : lineLayoutResult.Runs)
+    {
+      if (lineRun.IsLineSpanningInlineBoxStart() && lineRun.LayoutBox().IsRubyBase())
+      {
+        lineSpanningRubyBaseList.insert(&lineRun.LayoutBox());
+      }
+    }
+
+    auto rubyBasesMayHaveCollapsed = !lineLayoutResult.BidiDirectionality.VisualOrderList.empty();
+    RubyFormattingContext::ApplyAlignmentOffsetList(
+      displayBoxes, lineLayoutResult.RubyAlignment.BaseAlignmentOffsetList,
+      rubyBasesMayHaveCollapsed ? RubyFormattingContext::RubyBasesMayNeedResizing::Yes
+                                : RubyFormattingContext::RubyBasesMayNeedResizing::No,
+      GetFormattingContext());
+
+    List<IndexRange> interlinearRubyColumnRangeList;
+    List<size_t> rubyBaseStartIndexListWithAnnotation;
+    for (size_t index = 1; index < displayBoxes.size(); ++index)
+    {
+      auto &displayBox = displayBoxes[index];
+      if (!displayBox.IsNonRootInlineBox() || !displayBox.LayoutBox().IsRubyBase())
+      {
+        continue;
+      }
+      if (lineSpanningRubyBaseList.contains(&displayBox.LayoutBox()))
+      {
+        // FIXME: Base content split across multiple lines don't affect annotation atm.
+        continue;
+      }
+
+      index = ProcessRubyBase(index, displayBoxes, interlinearRubyColumnRangeList,
+                              rubyBaseStartIndexListWithAnnotation);
+    }
+    RubyFormattingContext::ApplyRubyOverhang(GetFormattingContext(), GetLineBox().LogicalRect().Height(),
+                                             displayBoxes, interlinearRubyColumnRangeList);
+
+    auto lineBoxLogicalRect = GetLineBox().LogicalRect();
+    auto writingMode = Root().GetWritingMode();
+    auto isHorizontalWritingMode = writingMode.IsHorizontal();
+    for (auto baseIndex : rubyBaseStartIndexListWithAnnotation | std::views::reverse)
+    {
+      auto &annotationBox = *displayBoxes[baseIndex].LayoutBox().AssociatedRubyAnnotationBox();
+      auto annotationBorderBoxVisualRect = [&]
+      {
+        // FIXME: We may wanna go back to full logical geometry on BoxGeometry (instead of this with visual
+        // left) and resolve it when render tree needs it.
+        auto borderBoxLogicalRect = InlineRect {
+          FloatRect {BoxGeometry::BorderBoxRect(GetFormattingContext().GeometryForBox(annotationBox))}};
+        borderBoxLogicalRect.SetTop(borderBoxLogicalRect.Top() - lineBoxLogicalRect.Top());
+        auto visualRect = MapInlineRectLogicalToVisual(borderBoxLogicalRect, lineBoxLogicalRect, writingMode);
+        if (writingMode.IsLineOverLeft())
+        {
+          visualRect.SetTop(borderBoxLogicalRect.Left());
+        }
+        if (isHorizontalWritingMode)
+        {
+          visualRect.MoveVertically(lineBoxLogicalRect.Top());
+        }
+        else
+        {
+          visualRect.MoveHorizontally(lineBoxLogicalRect.Top());
+        }
+        return visualRect;
+      };
+      InsertRubyAnnotationBox(annotationBox, baseIndex + 1, annotationBorderBoxVisualRect(), displayBoxes);
     }
   }
 

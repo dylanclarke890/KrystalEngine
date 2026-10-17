@@ -58,7 +58,7 @@ namespace krys::boo
 
   void RenderReplaced::WillBeDestroyed() noexcept
   {
-    // FIXME: Dirty the parent's line from the changed child, once there's line layout.
+    // FIXME: Dirty the parent's legacy line boxes (dirtyLineFromChangedChild), once there's SVG text.
     RenderBox::WillBeDestroyed();
   }
 

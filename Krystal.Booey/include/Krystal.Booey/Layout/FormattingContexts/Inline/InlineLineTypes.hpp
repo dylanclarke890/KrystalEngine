@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Core/TextFlags.hpp"
 #include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/Layout/LayoutUnits.hpp"
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -95,6 +96,45 @@ namespace krys::boo::layout
 
     InlineItemPosition Start;
     InlineItemPosition End;
+  };
+
+  /// @brief A half-open range of indexes into a run or display box list. Empty ranges are canonicalised to
+  /// [0, 0).
+  class IndexRange
+  {
+  private:
+    size_t _begin {0};
+    size_t _end {0};
+
+  public:
+    IndexRange() noexcept = default;
+    IndexRange(size_t begin, size_t end) noexcept : _begin(begin), _end(end)
+    {
+      krys_debug_assert(_end >= _begin);
+      if (_begin == _end)
+      {
+        _begin = 0;
+        _end = 0;
+      }
+    }
+
+    KRYS_NODISCARD size_t Begin() const noexcept
+    {
+      return _begin;
+    }
+    KRYS_NODISCARD size_t End() const noexcept
+    {
+      return _end;
+    }
+    KRYS_NODISCARD size_t Distance() const noexcept
+    {
+      return _end - _begin;
+    }
+    KRYS_NODISCARD explicit operator bool() const noexcept
+    {
+      return _begin != _end;
+    }
+    KRYS_NODISCARD friend bool operator==(const IndexRange &, const IndexRange &) noexcept = default;
   };
 
   struct PreviousLine

@@ -22,6 +22,7 @@ namespace krys::boo::layout
     const InlineFormattingContext &_inlineFormattingContext;
     LineLayoutResult &_lineLayoutResult;
     bool _fallbackFontRequiresIdeographicBaseline {false};
+    bool _lineHasNonLineSpanningRubyContent {false};
     HashMap<const InlineLevelBox *, TextUtil::FallbackFontList> _fallbackFontsForInlineBoxes;
     List<size_t> _outsideListMarkers;
 

@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingConstraints.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingContext.hpp"
+#include "Krystal.Booey/Layout/FormattingContexts/Inline/Invalidation/InlineDamage.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
@@ -47,8 +48,7 @@ namespace krys::boo::layout_integration
   /// @brief Lays out a block container's inline content with the inline formatting context and hands the
   /// result to the render tree: the lines and boxes, the geometry of the boxes in it, its height and
   /// baselines.
-  // FIXME: Partial layout and invalidation (InlineDamage), painting, hit testing, pagination and SVG text,
-  // once there are those.
+  // FIXME: Painting, hit testing, pagination and SVG text, once there are those.
   class LineLayout final : public CanMakeCheckedPtr<LineLayout>
   {
     KRYS_NON_COPY_MOVABLE(LineLayout);
@@ -70,6 +70,7 @@ namespace krys::boo::layout_integration
     Maybe<layout::ConstraintsForInlineContent> _inlineContentConstraints;
     UniquePtr<InlineContent> _inlineContent;
     BoxGeometryUpdater _boxGeometryUpdater;
+    UniquePtr<layout::InlineDamage> _lineDamage;
 
   public:
     explicit LineLayout(RenderBlockFlow &flow) noexcept;
@@ -81,7 +82,6 @@ namespace krys::boo::layout_integration
 
     KRYS_NODISCARD static bool CanUseFor(const RenderBlockFlow &flow) noexcept;
     KRYS_NODISCARD static bool CanUseForPreferredWidthComputation(const RenderBlockFlow &flow) noexcept;
-    /// @note Without partial layout, any change invalidates the whole line layout.
     KRYS_NODISCARD static bool
       ShouldInvalidateLineLayoutAfterContentChange(const RenderBlockFlow &parent,
                                                    const RenderObject &rendererWithNewContent,
@@ -94,6 +94,15 @@ namespace krys::boo::layout_integration
     void UpdateFormattingContexGeometries(LayoutUnit availableLogicalWidth) noexcept;
     void UpdateOverflow() noexcept;
     static void UpdateStyle(const RenderObject &renderer) noexcept;
+
+    // Partial invalidation.
+    bool InsertedIntoTree(const RenderElement &parent, RenderObject &child) noexcept;
+    bool RemovedFromTree(const RenderElement &parent, RenderObject &child) noexcept;
+    bool UpdateTextContent(const RenderText &textRenderer, Maybe<size_t> offset, size_t oldLength) noexcept;
+    bool RootStyleWillChange(const RenderBlockFlow &root, const RenderStyle &newStyle) noexcept;
+    bool StyleWillChange(const RenderElement &renderer, const RenderStyle &newStyle,
+                         style::Difference diff) noexcept;
+    bool BoxContentWillChange(const RenderBox &renderer) noexcept;
 
     KRYS_NODISCARD std::pair<LayoutUnit, LayoutUnit> ComputeIntrinsicWidthConstraints() noexcept;
 
@@ -113,6 +122,18 @@ namespace krys::boo::layout_integration
     KRYS_NODISCARD bool Contains(const RenderElement &renderer) const noexcept;
 
     KRYS_NODISCARD bool IsPaginated() const noexcept;
+    KRYS_NODISCARD bool IsDamaged() const noexcept
+    {
+      return static_cast<bool>(_lineDamage);
+    }
+    KRYS_NODISCARD const layout::InlineDamage *Damage() const noexcept
+    {
+      return _lineDamage.get();
+    }
+    KRYS_NODISCARD bool HasDetachedContent() const noexcept
+    {
+      return _lineDamage && _lineDamage->HasDetachedContent();
+    }
     KRYS_NODISCARD size_t LineCount() const noexcept;
     KRYS_NODISCARD bool HasContentfulInlineOrBlockLine() const noexcept;
     KRYS_NODISCARD bool HasContentfulInlineLine() const noexcept;
@@ -172,6 +193,8 @@ namespace krys::boo::layout_integration
 
     void ClearInlineContent() noexcept;
     void ReleaseCachesAndResetDamage() noexcept;
+
+    layout::InlineDamage &EnsureLineDamage() noexcept;
 
     KRYS_NODISCARD LayoutUnit BaselineForLine(const inline_display::Line &line) const noexcept;
   };

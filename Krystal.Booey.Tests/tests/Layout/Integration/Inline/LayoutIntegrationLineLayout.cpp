@@ -15,24 +15,14 @@ namespace krys::boo::layout_integration::tests
 
   namespace
   {
-    // Ahem's glyphs are 1em squares, so at 10px every character is 10px wide and a line is 10px tall.
-    constexpr auto AhemStyle = u8"body { margin: 0; font: 10px Ahem }";
-
     KRYS_NODISCARD utf8_string Dump(ResolverFixture &fixture) noexcept
     {
-      return ExternalRepresentation(fixture.Frame.get(), {RenderAsTextFlag::ShowIDAndClass});
+      return layout::tests::DumpWithIds(fixture);
     }
 
     KRYS_NODISCARD utf8_string Document(utf8_stringview style, utf8_stringview body) noexcept
     {
-      layout::tests::RegisterAhem();
-      auto html = utf8_string {u8"<!DOCTYPE html><style>"};
-      html += AhemStyle;
-      html += style;
-      html += u8"</style><body>";
-      html += body;
-      html += u8"</body>";
-      return html;
+      return layout::tests::AhemDocument(style, body);
     }
 
     KRYS_NODISCARD RenderBlockFlow &BlockFlowOf(ResolverFixture &fixture, dom::DOMStringView id) noexcept

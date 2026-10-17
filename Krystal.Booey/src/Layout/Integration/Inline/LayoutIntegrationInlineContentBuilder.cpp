@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContentBuilder.hpp"
 #include "Krystal.Booey/Graphics/Font.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Layout/FormattingContexts/Inline/Invalidation/InlineDamage.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContent.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInlineTextBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
@@ -104,22 +105,30 @@ namespace krys::boo::layout_integration
   }
 
   FloatRect InlineContentBuilder::Build(layout::InlineLayoutResult &&layoutResult,
-                                        InlineContent &inlineContent) const noexcept
+                                        InlineContent &inlineContent,
+                                        const layout::InlineDamage *lineDamage) const noexcept
   {
     inlineContent.ReleaseCaches();
-
-    // FIXME: Update the damaged lines only (handlePartialDisplayContentUpdate), once there's partial layout.
-    krys_debug_assert(layoutResult.ContentRange == layout::InlineLayoutResult::Range::Full);
     auto damageRect = FloatRect {};
-    for (auto &line : inlineContent.DisplayContent().LineList)
+
+    if (layoutResult.ContentRange == layout::InlineLayoutResult::Range::Full)
     {
-      damageRect.Unite(line.InkOverflow());
+      for (auto &line : inlineContent.DisplayContent().LineList)
+      {
+        damageRect.Unite(line.InkOverflow());
+      }
+
+      inlineContent.DisplayContent().Set(krys::move(layoutResult.DisplayContent));
+      AdjustDisplayLines(inlineContent, 0);
+
+      for (auto &line : inlineContent.DisplayContent().LineList)
+      {
+        damageRect.Unite(line.InkOverflow());
+      }
     }
-    inlineContent.DisplayContent().Set(krys::move(layoutResult.DisplayContent));
-    AdjustDisplayLines(inlineContent, 0);
-    for (auto &line : inlineContent.DisplayContent().LineList)
+    else
     {
-      damageRect.Unite(line.InkOverflow());
+      damageRect = HandlePartialDisplayContentUpdate(krys::move(layoutResult), inlineContent, lineDamage);
     }
 
     ComputeIsFirstIsLastBoxAndBidiReorderingForInlineContent(inlineContent.DisplayContent().BoxList);
@@ -254,7 +263,8 @@ namespace krys::boo::layout_integration
         if (box.IsInlineBox())
         {
           bool hasSelfPaintingLayer =
-            Downcast<RenderLayerModelObject>(*box.LayoutBox().RendererForIntegration()).HasSelfPaintingLayer();
+            Downcast<RenderLayerModelObject>(*box.LayoutBox().RendererForIntegration())
+              .HasSelfPaintingLayer();
           if (!hasSelfPaintingLayer)
           {
             lineInkOverflowRect.Unite(box.InkOverflow());
@@ -345,5 +355,151 @@ namespace krys::boo::layout_integration
       boxes[index].SetIsLastForLayoutBox();
     }
     boxes[lastRootInlineBoxIndex].SetIsLastForLayoutBox();
+  }
+  FloatRect InlineContentBuilder::HandlePartialDisplayContentUpdate(
+    layout::InlineLayoutResult &&layoutResult, InlineContent &inlineContent,
+    const layout::InlineDamage *lineDamage) const noexcept
+  {
+    auto firstDamagedLineIndex = [&]() -> Maybe<size_t>
+    {
+      auto &displayContentFromPreviousLayout = inlineContent.DisplayContent();
+      if (!lineDamage || !lineDamage->LayoutStartPosition()
+          || !displayContentFromPreviousLayout.LineList.size())
+      {
+        return {};
+      }
+      auto canidateLineIndex = lineDamage->LayoutStartPosition()->LineIndex;
+      if (canidateLineIndex >= displayContentFromPreviousLayout.LineList.size())
+      {
+        krys_debug_assert(false);
+        return {};
+      }
+      if (layoutResult.DisplayContent.BoxList.size()
+          && canidateLineIndex > layoutResult.DisplayContent.BoxList[0].LineIndex())
+      {
+        // We should never generate lines _before_ the damaged line.
+        krys_debug_assert(false);
+        return {};
+      }
+      return canidateLineIndex;
+    }();
+
+    auto firstDamagedBoxIndex = [&]() -> Maybe<size_t>
+    {
+      auto &displayContentFromPreviousLayout = inlineContent.DisplayContent();
+      return firstDamagedLineIndex
+               ? Maybe<size_t> {displayContentFromPreviousLayout.LineList[*firstDamagedLineIndex]
+                                  .FirstBoxIndex()}
+               : null;
+    }();
+
+    auto numberOfDamagedLines = [&]() -> Maybe<size_t>
+    {
+      if (!firstDamagedLineIndex)
+      {
+        return {};
+      }
+      auto &displayContentFromPreviousLayout = inlineContent.DisplayContent();
+      krys_debug_assert(layoutResult.ContentRange != layout::InlineLayoutResult::Range::Full);
+      auto canidateLineCount = layoutResult.ContentRange == layout::InlineLayoutResult::Range::FullFromDamage
+                                 ? displayContentFromPreviousLayout.LineList.size() - *firstDamagedLineIndex
+                                 : layoutResult.DisplayContent.LineList.size();
+
+      if (*firstDamagedLineIndex + canidateLineCount > displayContentFromPreviousLayout.LineList.size())
+      {
+        krys_debug_assert(false);
+        return {};
+      }
+      return canidateLineCount;
+    }();
+
+    auto numberOfDamagedBoxes = [&]() -> Maybe<size_t>
+    {
+      if (!firstDamagedLineIndex || !numberOfDamagedLines || !firstDamagedBoxIndex)
+      {
+        return {};
+      }
+      auto &displayContentFromPreviousLayout = inlineContent.DisplayContent();
+      krys_debug_assert(*firstDamagedLineIndex + *numberOfDamagedLines
+                        <= displayContentFromPreviousLayout.LineList.size());
+      size_t boxCount = 0;
+      for (size_t i = 0; i < *numberOfDamagedLines; ++i)
+      {
+        boxCount += displayContentFromPreviousLayout.LineList[*firstDamagedLineIndex + i].BoxCount();
+      }
+      krys_debug_assert(boxCount);
+      return boxCount;
+    }();
+
+    if (!firstDamagedLineIndex || !numberOfDamagedLines || !firstDamagedBoxIndex || !numberOfDamagedBoxes)
+    {
+      krys_debug_assert(false);
+      return {};
+    }
+
+    auto numberOfNewLines = layoutResult.DisplayContent.LineList.size();
+    auto numberOfNewBoxes = layoutResult.DisplayContent.BoxList.size();
+
+    auto damagedRect = FloatRect {};
+    auto adjustDamagedRectWithLineRange = [&](size_t firstLineIndex, size_t lineCount)
+    {
+      auto &lines = inlineContent.DisplayContent().LineList;
+      krys_debug_assert(firstLineIndex + lineCount <= lines.size());
+      for (size_t i = 0; i < lineCount; ++i)
+      {
+        damagedRect.Unite(lines[firstLineIndex + i].InkOverflow());
+      }
+    };
+
+    // Repaint the damaged content boundary.
+    adjustDamagedRectWithLineRange(*firstDamagedLineIndex, *numberOfDamagedLines);
+
+    switch (layoutResult.ContentRange)
+    {
+      case layout::InlineLayoutResult::Range::FullFromDamage:
+      {
+        auto &displayContent = inlineContent.DisplayContent();
+        displayContent.Remove(*firstDamagedLineIndex, *numberOfDamagedLines, *firstDamagedBoxIndex,
+                              *numberOfDamagedBoxes);
+        displayContent.Append(krys::move(layoutResult.DisplayContent));
+        break;
+      }
+      case layout::InlineLayoutResult::Range::PartialFromDamage:
+      {
+        auto &displayContent = inlineContent.DisplayContent();
+        displayContent.Remove(*firstDamagedLineIndex, *numberOfDamagedLines, *firstDamagedBoxIndex,
+                              *numberOfDamagedBoxes);
+        displayContent.Insert(krys::move(layoutResult.DisplayContent), *firstDamagedLineIndex,
+                              *firstDamagedBoxIndex);
+
+        auto adjustCachedBoxIndexesIfNeeded = [&]
+        {
+          if (numberOfNewBoxes == *numberOfDamagedBoxes)
+          {
+            return;
+          }
+          auto firstCleanLineIndex = *firstDamagedLineIndex + *numberOfDamagedLines;
+          auto &lines = displayContent.LineList;
+          for (size_t cleanLineIndex = firstCleanLineIndex; cleanLineIndex < lines.size(); ++cleanLineIndex)
+          {
+            // The box count may have shrunk: the first box index moves by the difference either way.
+            auto adjustedFirstBoxIndex =
+              lines[cleanLineIndex].FirstBoxIndex() + numberOfNewBoxes - *numberOfDamagedBoxes;
+            krys_debug_assert(adjustedFirstBoxIndex > 0);
+            lines[cleanLineIndex].SetFirstBoxIndex(adjustedFirstBoxIndex);
+          }
+        };
+        adjustCachedBoxIndexesIfNeeded();
+        break;
+      }
+      case layout::InlineLayoutResult::Range::Full:
+      default:                                      krys_debug_assert(false);
+    }
+
+    AdjustDisplayLines(inlineContent, *firstDamagedLineIndex);
+    // Repaint the new content boundary.
+    adjustDamagedRectWithLineRange(*firstDamagedLineIndex, numberOfNewLines);
+
+    return damagedRect;
   }
 }

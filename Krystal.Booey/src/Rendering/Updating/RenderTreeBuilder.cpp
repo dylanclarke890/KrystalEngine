@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Node.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
@@ -19,6 +20,7 @@
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderFirstLetter.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderInline.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderList.hpp"
+#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderRuby.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderTable.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
@@ -28,6 +30,51 @@ namespace krys::boo
 
   namespace
   {
+    enum class IsRemoval : bool
+    {
+      No,
+      Yes
+    };
+    void InvalidateLineLayout(RenderObject &renderer, IsRemoval isRemoval) noexcept
+    {
+      auto *container = layout_integration::LineLayout::BlockContainer(renderer);
+      if (!container)
+      {
+        return;
+      }
+
+      // FIXME: Marquees that ran preferred width computation without layout, once there are marquees.
+      if (isRemoval == IsRemoval::Yes && !renderer.EverHadLayout())
+      {
+        // Certain mutations can make renderer to be removed before running layout. In such cases we don't
+        // have to try to run invalidation only remove it from layout tree.
+        if (auto *inlineLayout = container->InlineLayout())
+        {
+          (void)inlineLayout->RemovedFromTree(*renderer.Parent(), renderer);
+        }
+        return;
+      }
+
+      auto shouldInvalidateLineLayout = [&](layout_integration::LineLayout &inlineLayout)
+      {
+        if (layout_integration::LineLayout::ShouldInvalidateLineLayoutAfterTreeMutation(
+              *container, renderer, inlineLayout, isRemoval == IsRemoval::Yes))
+        {
+          return true;
+        }
+        if (isRemoval == IsRemoval::Yes)
+        {
+          return !inlineLayout.RemovedFromTree(*renderer.Parent(), renderer);
+        }
+        return !inlineLayout.InsertedIntoTree(*renderer.Parent(), renderer);
+      };
+      if (auto *inlineLayout = container->InlineLayout();
+          inlineLayout && shouldInvalidateLineLayout(*inlineLayout))
+      {
+        container->InvalidateLineLayout(RenderBlockFlow::InvalidationReason::InsertionOrRemoval);
+      }
+    }
+
     void GetInlineRun(RenderObject *start, RenderObject *boundary, RenderObject *&inlineRunStart,
                       RenderObject *&inlineRunEnd) noexcept
     {
@@ -79,7 +126,8 @@ namespace krys::boo
   RenderTreeBuilder::RenderTreeBuilder(RenderView &view) noexcept
       : _view(view), _tableBuilder(CreateUnique<Table>(*this)), _blockBuilder(CreateUnique<Block>(*this)),
         _blockFlowBuilder(CreateUnique<BlockFlow>(*this)), _inlineBuilder(CreateUnique<Inline>(*this)),
-        _firstLetterBuilder(CreateUnique<FirstLetter>(*this)), _listBuilder(CreateUnique<List>(*this))
+        _firstLetterBuilder(CreateUnique<FirstLetter>(*this)), _listBuilder(CreateUnique<List>(*this)),
+        _rubyBuilder(CreateUnique<Ruby>(*this))
   {
     krys_assert(!s_current || &_view != &s_current->_view);
     _previous = s_current;
@@ -200,8 +248,21 @@ namespace krys::boo
     }
     // FIXME: A beforeChild that's a column spanner, once there are multi-column flows.
 
-    // FIXME: SVG text, style-based ruby (ruby displays are rebuild roots until then), buttons, menu lists,
-    // SVG containers and roots and MathML, once there are their renderers and builders.
+    // FIXME: SVG text, buttons, menu lists, SVG containers and roots and MathML, once there are their
+    // renderers and builders.
+
+    if (parent.Style().Display() == DisplayType::Ruby || parent.Style().Display() == DisplayType::RubyBlock)
+    {
+      auto &parentCandidate =
+        RubyBuilder().FindOrCreateParentForStyleBasedRubyChild(parent, *child, beforeChild);
+      if (&parentCandidate == &parent)
+      {
+        RubyBuilder().AttachForStyleBasedRuby(parentCandidate, krys::move(child), beforeChild);
+        return;
+      }
+      insertRecursiveIfNeeded(parentCandidate);
+      return;
+    }
 
     if (auto *parentBlockFlow = DynamicDowncast<RenderBlockFlow>(parent))
     {
@@ -374,8 +435,7 @@ namespace krys::boo
     }
 
     newChild->InsertedIntoTree();
-
-    // FIXME: Line layout invalidation, once there's line layout.
+    InvalidateLineLayout(*newChild, IsRemoval::No);
 
     if (_internalMovesType == IsInternalMove::No)
     {
@@ -461,9 +521,26 @@ namespace krys::boo
       AttachToRenderElementInternal(to, krys::move(childToMove), beforeChild);
     }
 
-    // FIXME: When moving a subtree out of a BFC, make the line boxes of its inline tree unreachable (mark the
-    // containing blocks for layout up to the block flow, and invalidate its line layout), once there's
-    // layout.
+    auto findBFCRootAndDestroyInlineTree = [&]
+    {
+      for (RenderElement *containingBlock = &from; containingBlock;
+           containingBlock = containingBlock->ContainingBlock())
+      {
+        containingBlock->SetNeedsLayout();
+        if (auto *blockFlow = DynamicDowncast<RenderBlockFlow>(*containingBlock))
+        {
+          blockFlow->InvalidateLineLayout(RenderBlockFlow::InvalidationReason::InternalMove);
+          break;
+        }
+      }
+    };
+    // When moving a subtree out of a BFC we need to make sure that the line boxes generated for the inline
+    // tree are not accessible anymore from the renderers. Let's find the BFC root and nuke the inline tree
+    // (At some point we are going to destroy the subtree instead of moving these renderers around.)
+    if (Is<RenderInline>(child))
+    {
+      findBFCRootAndDestroyInlineTree();
+    }
   }
 
   void RenderTreeBuilder::Move(RenderBoxModelObject &from, RenderBoxModelObject &to, RenderObject &child,
@@ -649,7 +726,10 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Invalidate the line layout, once there's line layout.
+    if (auto *blockFlow = DynamicDowncast<RenderBlockFlow>(parent))
+    {
+      blockFlow->InvalidateLineLayout(RenderBlockFlow::InvalidationReason::InternalMove);
+    }
 
     while (child)
     {
@@ -1010,8 +1090,14 @@ namespace krys::boo
       ResetRendererStateOnDetach(parent, child, willBeDestroyed, _internalMovesType);
     }
 
-    // FIXME: Line layout invalidation and the fragmented flow state, once there's line layout and fragmented
-    // flows.
+    if (_tearDownType == TearDownType::Root || Is<RenderInline>(_subtreeDestroyRoot))
+    {
+      // In case of partial damage on the inline content (the block root is not going away), we need to
+      // initiate inline layout invalidation on leaf renderers too.
+      InvalidateLineLayout(child, IsRemoval::Yes);
+    }
+
+    // FIXME: The fragmented flow state, once there are fragmented flows.
 
     child.WillBeRemovedFromTree();
     // WARNING: There should be no code running between willBeRemovedFromTree() and the actual removal below.

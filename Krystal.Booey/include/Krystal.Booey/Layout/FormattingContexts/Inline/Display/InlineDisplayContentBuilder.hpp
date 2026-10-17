@@ -36,6 +36,7 @@ namespace krys::boo::layout
     bool _contentHasInkOverflow {false};
     bool _hasSeenTextDecoration {false};
     bool _hasSeenNestedInlineBoxesWithDifferentFontCascade {false};
+    bool _hasSeenRubyBase {false};
 
   public:
     InlineDisplayContentBuilder(InlineFormattingContext &formattingContext,
@@ -66,6 +67,14 @@ namespace krys::boo::layout
                                    const InlineRect &inlineBoxBorderBox,
                                    inline_display::Boxes &boxes) noexcept;
     void AppendInlineDisplayBoxAtBidiBoundary(const Box &layoutBox, inline_display::Boxes &boxes) noexcept;
+    void InsertRubyAnnotationBox(const Box &annotationBox, size_t insertionPosition,
+                                 const InlineRect &borderBoxRect, inline_display::Boxes &boxes) noexcept;
+
+    KRYS_NODISCARD size_t ProcessRubyBase(size_t rubyBaseStart, inline_display::Boxes &displayBoxes,
+                                          List<IndexRange> &interlinearRubyColumnRangeList,
+                                          List<size_t> &rubyBaseStartIndexListWithAnnotation) noexcept;
+    void ProcessRubyContent(inline_display::Boxes &displayBoxes,
+                            const LineLayoutResult &lineLayoutResult) noexcept;
 
     KRYS_NODISCARD static InlineRect MapInlineRectLogicalToVisual(const InlineRect &logicalRect,
                                                                   const InlineRect &containerLogicalRect,

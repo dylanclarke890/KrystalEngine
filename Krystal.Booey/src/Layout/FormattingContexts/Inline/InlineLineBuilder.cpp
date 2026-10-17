@@ -2,9 +2,11 @@
 #include "Krystal.Booey/Core/UnicodeBidi.hpp"
 #include "Krystal.Booey/Graphics/ComplexTextController.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineContentAligner.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingContext.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingUtils.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineQuirks.hpp"
+#include "Krystal.Booey/Layout/FormattingContexts/Inline/Ruby/RubyFormattingContext.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxGeometry.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxInlines.hpp"
@@ -889,8 +891,35 @@ namespace krys::boo::layout
             return;
           }
 
-          // FIXME: Ruby alignment (RubyFormattingContext) and text-align: justify (InlineContentAligner) come
-          // with ruby and the content aligner.
+          auto spaceToDistribute =
+            horizontalAvailableSpace - _line.ContentLogicalWidth()
+            + (_line.IsHangingTrailingContentWhitespace() ? _line.HangingTrailingContentWidth() : 0.f);
+          if (Root().IsRubyAnnotationBox()
+              && rootStyle.GetTextAlign() == style::ComputedStyle::InitialTextAlign())
+          {
+            lineContent->RubyAnnotationOffset = RubyFormattingContext::ApplyRubyAlignOnAnnotationBox(
+              _line, spaceToDistribute, GetFormattingContext());
+            _line.InflateContentLogicalWidth(spaceToDistribute);
+            _line.AdjustContentRightWithRubyAlign(2 * lineContent->RubyAnnotationOffset);
+            return;
+          }
+          // Text is justified according to the method specified by the text-justify property, in order to
+          // exactly fill the line box. Unless otherwise specified by text-align-last, the last line before a
+          // forced break or the end of the block is start-aligned.
+          auto hasTextAlignJustify = (isLastInlineContent || _line.Runs().back().IsLineBreak())
+                                       ? rootStyle.GetTextAlignLast() == style::TextAlignLast::Justify
+                                       : rootStyle.GetTextAlign() == style::TextAlign::Justify;
+          if (hasTextAlignJustify)
+          {
+            auto additionalSpaceForAlignedContent = InlineContentAligner::ApplyTextAlignJustify(
+              _line.Runs(), spaceToDistribute, _line.HangingTrailingWhitespaceLength());
+            _line.InflateContentLogicalWidth(additionalSpaceForAlignedContent);
+          }
+          if (_line.HasRubyContent())
+          {
+            lineContent->RubyBaseAlignmentOffsetList =
+              RubyFormattingContext::ApplyRubyAlign(_line, GetFormattingContext());
+          }
         };
         applyRunBasedAlignmentIfApplicable();
       }
@@ -1425,8 +1454,31 @@ namespace krys::boo::layout
       {
         auto logicalWidth = GetFormattingContext().FormattingUtils().InlineItemWidth(
           inlineItem, currentLogicalRight, isFirstFormattedLineCandidate);
-        // FIXME: Ruby bases reserve room for their annotations (RubyFormattingContext), once there's ruby
-        // layout.
+        auto &layoutBox = inlineItem.LayoutBox();
+        if (layoutBox.IsRubyBase())
+        {
+          if (inlineItem.IsInlineBoxStart())
+          {
+            // There should only be one ruby base per/annotation candidate content as we allow line breaking
+            // between bases unless some special characters between ruby bases prevent us from doing so (see
+            // RubyFormattingContext::canBreakAtCharacter)
+            if (auto marginBoxWidth =
+                  RubyFormattingContext::AnnotationBoxLogicalWidth(layoutBox, GetFormattingContext());
+                marginBoxWidth > 0)
+            {
+              auto &inlineContent = lineCandidate.Content;
+              inlineContent.SetMinimumRequiredWidth(
+                inlineContent.GetContinuousContent().MinimumRequiredWidth().value_or(InlineLayoutUnit {})
+                + marginBoxWidth);
+            }
+          }
+          else
+          {
+            logicalWidth += RubyFormattingContext::BaseEndAdditionalLogicalWidth(
+              layoutBox, _line.Runs(), lineCandidate.Content.GetContinuousContent().Runs(),
+              GetFormattingContext());
+          }
+        }
 
         contentHasInlineItemsWithDecorationClone |=
           inlineItem.IsInlineBoxStart() && style.GetBoxDecorationBreak() == BoxDecorationBreak::Clone;

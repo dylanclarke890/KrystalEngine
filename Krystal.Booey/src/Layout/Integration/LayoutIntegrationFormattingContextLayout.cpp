@@ -10,6 +10,7 @@
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/Shapes/ShapeOutsideInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/TextBoxTrimmer.hpp"
 
 namespace krys::boo::layout_integration
 {
@@ -151,11 +152,22 @@ namespace krys::boo::layout_integration
     // The legacy line clamp (-webkit-line-clamp) was dropped, so only the floats need updating.
     PopulateRootRendererWithFloatsFromIFC(rootBlockContainer, placedFloats);
 
-    // FIXME: Disable text-box-trim at the block's start on subsequent lines (TextBoxTrimStartDisabler), once
-    // there's text-box-trim.
-    auto positionAndMargin = rootBlockContainer.LayoutBlockChildFromInlineLayout(
-      blockRenderer, blockLineLogicalTopLeft.Y(),
-      layout::IntegrationUtils::ToMarginInfo(parentBlockLayoutState.GetMarginState()));
+    auto positionAndMargin = RenderBlockFlow::BlockPositionAndMargin {};
+    auto layoutBlockRenderer = [&]
+    {
+      if (inlineLayoutState.LineCount())
+      {
+        auto textBoxTrimStartDisabler = TextBoxTrimStartDisabler {blockRenderer};
+        positionAndMargin = rootBlockContainer.LayoutBlockChildFromInlineLayout(
+          blockRenderer, blockLineLogicalTopLeft.Y(),
+          layout::IntegrationUtils::ToMarginInfo(parentBlockLayoutState.GetMarginState()));
+        return;
+      }
+      positionAndMargin = rootBlockContainer.LayoutBlockChildFromInlineLayout(
+        blockRenderer, blockLineLogicalTopLeft.Y(),
+        layout::IntegrationUtils::ToMarginInfo(parentBlockLayoutState.GetMarginState()));
+    };
+    layoutBlockRenderer();
     krys_debug_assert(!blockRenderer.NeedsLayout());
 
     auto updateIFCAfterLayout = [&]

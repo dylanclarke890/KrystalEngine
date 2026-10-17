@@ -5,6 +5,8 @@
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineContentCache.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingUtils.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineItemsBuilder.hpp"
+#include "Krystal.Booey/Layout/FormattingContexts/Inline/Invalidation/InlineInvalidation.hpp"
+#include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContent.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContentBuilder.hpp"
 #include "Krystal.Booey/Layout/Integration/LayoutIntegrationBoxTreeUpdater.hpp"
@@ -13,6 +15,7 @@
 #include "Krystal.Booey/Layout/LayoutTree/FormattingContextBoxIterator.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxGeometry.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxInlines.hpp"
+#include "Krystal.Booey/Layout/LayoutTree/LayoutInlineTextBox.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/FloatingObjects.hpp"
@@ -35,6 +38,185 @@ namespace krys::boo::layout_integration
 {
   namespace
   {
+    enum class TypeOfChangeForInvalidation : uint8
+    {
+      NodeInsertion,
+      NodeRemoval,
+      NodeMutation
+    };
+    KRYS_NODISCARD bool CanUseForLineLayout(const RenderBlockFlow &) noexcept;
+
+    KRYS_NODISCARD bool
+      ShouldInvalidateLineLayoutAfterChangeFor(const RenderBlockFlow &rootBlockContainer,
+                                               const RenderObject &renderer, const LineLayout &lineLayout,
+                                               TypeOfChangeForInvalidation typeOfChange) noexcept
+    {
+      auto isSupportedRendererWithChange = [&](const RenderObject &renderer)
+      {
+        if (Is<RenderText>(renderer))
+        {
+          return true;
+        }
+        if (!renderer.IsInFlow())
+        {
+          return false;
+        }
+        if (Is<RenderLineBreak>(renderer))
+        {
+          return true;
+        }
+        if (auto *renderBox = DynamicDowncast<RenderBox>(renderer);
+            renderBox && renderBox->HasRelativeDimensions())
+        {
+          return false;
+        }
+        if (Is<RenderReplaced>(renderer))
+        {
+          return typeOfChange == TypeOfChangeForInvalidation::NodeInsertion;
+        }
+        if (auto *inlineRenderer = DynamicDowncast<RenderInline>(renderer))
+        {
+          return typeOfChange == TypeOfChangeForInvalidation::NodeInsertion && !inlineRenderer->FirstChild();
+        }
+        return false;
+      };
+      if (!isSupportedRendererWithChange(renderer))
+      {
+        return true;
+      }
+
+      auto isSupportedParent = [&]
+      {
+        auto *parent = renderer.Parent();
+        // Content append under existing inline box is not yet supported.
+        return Is<RenderBlockFlow>(parent) || (Is<RenderInline>(parent) && !parent->EverHadLayout());
+      };
+      if (!isSupportedParent())
+      {
+        return true;
+      }
+      if (rootBlockContainer.ContainsFloats())
+      {
+        return true;
+      }
+
+      auto isBidiContent = [&]
+      {
+        if (lineLayout.ContentNeedsVisualReordering())
+        {
+          return true;
+        }
+        if (auto *textRenderer = DynamicDowncast<RenderText>(renderer))
+        {
+          auto hasStrongDirectionalityContent = textRenderer->HasStrongDirectionalityContent();
+          if (!hasStrongDirectionalityContent)
+          {
+            hasStrongDirectionalityContent =
+              layout::TextUtil::ContainsStrongDirectionalityText(textRenderer->Text());
+            const_cast<RenderText *>(textRenderer)
+              ->SetHasStrongDirectionalityContent(*hasStrongDirectionalityContent);
+          }
+          return *hasStrongDirectionalityContent;
+        }
+        if (auto *renderInline = DynamicDowncast<RenderInline>(renderer))
+        {
+          auto &style = renderInline->Style();
+          return style.GetWritingMode().IsBidiRTL()
+                 || (style.RtlOrdering() == Order::Logical && style.GetUnicodeBidi() != UnicodeBidi::Normal);
+        }
+        return false;
+      };
+      if (isBidiContent())
+      {
+        // FIXME: InlineItemsBuilder needs some work to support paragraph level bidi handling.
+        return true;
+      }
+      auto hasFirstLetter = [&]
+      {
+        // FIXME: RenderTreeUpdater::updateTextRenderer produces odd values for offset/length when
+        // first-letter is present webkit.org/b/263343
+        if (rootBlockContainer.Style().HasPseudoStyle(PseudoElementType::FirstLetter))
+        {
+          return true;
+        }
+        if (rootBlockContainer.IsAnonymous())
+        {
+          return rootBlockContainer.ContainingBlock()
+                 && rootBlockContainer.ContainingBlock()->Style().HasPseudoStyle(
+                   PseudoElementType::FirstLetter);
+        }
+        return false;
+      };
+      if (hasFirstLetter())
+      {
+        return true;
+      }
+
+      if (auto *previousDamage = lineLayout.Damage();
+          previousDamage
+          && (previousDamage->Reasons()
+                != EnumSet<layout::InlineDamage::Reason> {layout::InlineDamage::Reason::Append}
+              || !previousDamage->LayoutStartPosition()))
+      {
+        // Only support subsequent append operations where we managed to invalidate the content for partial
+        // layout.
+        return true;
+      }
+
+      auto &rootBlockContainerStyle = rootBlockContainer.Style();
+      auto shouldBalance = rootBlockContainerStyle.GetTextWrapMode() == TextWrapMode::Wrap
+                           && rootBlockContainerStyle.GetTextWrapStyle() == TextWrapStyle::Balance;
+      auto shouldPrettify = rootBlockContainerStyle.GetTextWrapMode() == TextWrapMode::Wrap
+                            && rootBlockContainerStyle.GetTextWrapStyle() == TextWrapStyle::Pretty;
+      auto hasAutospace = !rootBlockContainerStyle.GetTextAutospace().IsNoAutospace();
+      if (rootBlockContainer.GetWritingMode().IsBidiRTL() || shouldBalance || shouldPrettify || hasAutospace)
+      {
+        return true;
+      }
+
+      auto rootHasNonSupportedRenderer = [&](bool shouldOnlyCheckForRelativeDimension = false)
+      {
+        for (auto *sibling = rootBlockContainer.FirstChild(); sibling; sibling = sibling->NextSibling())
+        {
+          if (auto *inlineBox = DynamicDowncast<RenderInline>(*sibling);
+              inlineBox && !inlineBox->Style().GetTextAutospace().IsNoAutospace())
+          {
+            return true;
+          }
+
+          auto siblingHasRelativeDimensions = false;
+          if (auto *renderBox = DynamicDowncast<RenderBox>(*sibling);
+              renderBox && renderBox->HasRelativeDimensions())
+          {
+            siblingHasRelativeDimensions = true;
+          }
+
+          if (shouldOnlyCheckForRelativeDimension && !siblingHasRelativeDimensions)
+          {
+            continue;
+          }
+
+          if (siblingHasRelativeDimensions
+              || (!Is<RenderText>(*sibling) && !Is<RenderLineBreak>(*sibling)
+                  && !Is<RenderReplaced>(*sibling)))
+          {
+            return true;
+          }
+        }
+        return !CanUseForLineLayout(rootBlockContainer);
+      };
+      switch (typeOfChange)
+      {
+        case TypeOfChangeForInvalidation::NodeRemoval:
+          return (!renderer.PreviousSibling() && !renderer.NextSibling()) || rootHasNonSupportedRenderer();
+        case TypeOfChangeForInvalidation::NodeInsertion:
+          return rootHasNonSupportedRenderer(!renderer.NextSibling());
+        case TypeOfChangeForInvalidation::NodeMutation: return rootHasNonSupportedRenderer();
+      }
+      krys_debug_assert(false);
+      return true;
+    }
+
     KRYS_NODISCARD const inline_display::Line &
       LastLineWithInflowContent(const inline_display::Lines &lines) noexcept
     {
@@ -74,6 +256,31 @@ namespace krys::boo::layout_integration
                                                     false};
       }
       return null;
+    }
+
+    KRYS_NODISCARD inline layout::BlockLayoutState::TextBoxTrim
+      TextBoxTrim(const RenderBlockFlow &rootRenderer) noexcept
+    {
+      auto textBoxTrim = rootRenderer.View().FrameView().LayoutContext().GetTextBoxTrim();
+      if (!textBoxTrim)
+      {
+        return {};
+      }
+
+      auto textBoxTrimForIFC = layout::BlockLayoutState::TextBoxTrim {};
+      auto isLineInverted = rootRenderer.GetWritingMode().IsLineInverted();
+      if (textBoxTrim->TrimFirstFormattedLine)
+      {
+        textBoxTrimForIFC.Add(isLineInverted ? layout::BlockLayoutState::TextBoxTrimSide::End
+                                             : layout::BlockLayoutState::TextBoxTrimSide::Start);
+      }
+
+      if (textBoxTrim->LastFormattedLineRoot.get() == &rootRenderer)
+      {
+        textBoxTrimForIFC.Add(isLineInverted ? layout::BlockLayoutState::TextBoxTrimSide::Start
+                                             : layout::BlockLayoutState::TextBoxTrimSide::End);
+      }
+      return textBoxTrimForIFC;
     }
 
     KRYS_NODISCARD float BaselineForEmptyContent(const RenderBlockFlow &rootRenderer) noexcept
@@ -171,7 +378,7 @@ namespace krys::boo::layout_integration
     auto &rootRenderer = Flow();
     auto shouldPopulateBreakingPositionCache = [&]
     {
-      auto mayHaveInvalidContent = !_inlineContent;
+      auto mayHaveInvalidContent = IsDamaged() || !_inlineContent;
       if (_document->RenderTreeBeingDestroyed() || mayHaveInvalidContent)
       {
         return false;
@@ -187,6 +394,7 @@ namespace krys::boo::layout_integration
     GetLayoutState().DestroyInlineContentCache(RootLayoutBox());
     GetLayoutState().DestroyBlockFormattingState(RootLayoutBox());
     _boxGeometryUpdater.Clear();
+    _lineDamage = nullptr;
     _rootLayoutBox = nullptr;
 
     BoxTreeUpdater {rootRenderer, *_document}.TearDown();
@@ -286,18 +494,22 @@ namespace krys::boo::layout_integration
     return CanUseForPreferredWidthComputationImpl(flow);
   }
 
-  bool LineLayout::ShouldInvalidateLineLayoutAfterContentChange(const RenderBlockFlow &, const RenderObject &,
-                                                                const LineLayout &) noexcept
+  bool LineLayout::ShouldInvalidateLineLayoutAfterContentChange(const RenderBlockFlow &parent,
+                                                                const RenderObject &rendererWithNewContent,
+                                                                const LineLayout &lineLayout) noexcept
   {
-    // FIXME: Partial invalidation (shouldInvalidateLineLayoutAfterChangeFor), once there's partial layout.
-    return true;
+    return ShouldInvalidateLineLayoutAfterChangeFor(parent, rendererWithNewContent, lineLayout,
+                                                    TypeOfChangeForInvalidation::NodeMutation);
   }
 
-  bool LineLayout::ShouldInvalidateLineLayoutAfterTreeMutation(const RenderBlockFlow &, const RenderObject &,
-                                                               const LineLayout &, bool) noexcept
+  bool LineLayout::ShouldInvalidateLineLayoutAfterTreeMutation(const RenderBlockFlow &parent,
+                                                               const RenderObject &renderer,
+                                                               const LineLayout &lineLayout,
+                                                               bool isRemoval) noexcept
   {
-    // FIXME: Partial invalidation (shouldInvalidateLineLayoutAfterChangeFor), once there's partial layout.
-    return true;
+    return ShouldInvalidateLineLayoutAfterChangeFor(parent, renderer, lineLayout,
+                                                    isRemoval ? TypeOfChangeForInvalidation::NodeRemoval
+                                                              : TypeOfChangeForInvalidation::NodeInsertion);
   }
 
   void LineLayout::UpdateFormattingContexGeometries(LayoutUnit availableLogicalWidth) noexcept
@@ -311,6 +523,159 @@ namespace krys::boo::layout_integration
   void LineLayout::UpdateStyle(const RenderObject &renderer) noexcept
   {
     BoxTreeUpdater::UpdateStyle(renderer);
+  }
+
+  bool LineLayout::RootStyleWillChange(const RenderBlockFlow &root, const RenderStyle &newStyle) noexcept
+  {
+    if (!root.LayoutBox() || !root.LayoutBox()->IsElementBox())
+    {
+      krys_debug_assert(false);
+      return false;
+    }
+    if (!_inlineContent)
+    {
+      return false;
+    }
+
+    return layout::InlineInvalidation {EnsureLineDamage(), _inlineContentCache.GetInlineItems().Content(),
+                                       _inlineContent->DisplayContent()}
+      .RootStyleWillChange(*root.LayoutBox(), newStyle);
+  }
+
+  bool LineLayout::StyleWillChange(const RenderElement &renderer, const RenderStyle &newStyle,
+                                   style::Difference diff) noexcept
+  {
+    if (!renderer.LayoutBox())
+    {
+      krys_debug_assert(false);
+      return false;
+    }
+    if (!_inlineContent)
+    {
+      return false;
+    }
+
+    return layout::InlineInvalidation {EnsureLineDamage(), _inlineContentCache.GetInlineItems().Content(),
+                                       _inlineContent->DisplayContent()}
+      .StyleWillChange(*renderer.LayoutBox(), newStyle, diff);
+  }
+
+  bool LineLayout::BoxContentWillChange(const RenderBox &renderer) noexcept
+  {
+    if (!_inlineContent || !renderer.LayoutBox())
+    {
+      return false;
+    }
+
+    return layout::InlineInvalidation {EnsureLineDamage(), _inlineContentCache.GetInlineItems().Content(),
+                                       _inlineContent->DisplayContent()}
+      .InlineLevelBoxContentWillChange(*renderer.LayoutBox());
+  }
+
+  bool LineLayout::InsertedIntoTree(const RenderElement &parent, RenderObject &child) noexcept
+  {
+    if (Flow().Style().IsSkippedRootOrSkippedContent())
+    {
+      return false;
+    }
+
+    if (!_inlineContent)
+    {
+      // This should only be called on partial layout.
+      krys_debug_assert(false);
+      return false;
+    }
+
+    auto &childLayoutBox = BoxTreeUpdater {Flow()}.Insert(parent, child, child.PreviousSibling());
+    if (auto *childInlineTextBox = DynamicDowncast<layout::InlineTextBox>(childLayoutBox))
+    {
+      auto invalidation = layout::InlineInvalidation {
+        EnsureLineDamage(), _inlineContentCache.GetInlineItems().Content(), _inlineContent->DisplayContent()};
+      return invalidation.TextInserted(*childInlineTextBox);
+    }
+
+    if (childLayoutBox.IsLineBreakBox() || childLayoutBox.IsReplacedBox() || childLayoutBox.IsInlineBox())
+    {
+      auto invalidation = layout::InlineInvalidation {
+        EnsureLineDamage(), _inlineContentCache.GetInlineItems().Content(), _inlineContent->DisplayContent()};
+      return invalidation.InlineLevelBoxInserted(childLayoutBox);
+    }
+
+    krys_debug_assert(false);
+    return false;
+  }
+
+  bool LineLayout::RemovedFromTree(const RenderElement &parent, RenderObject &child) noexcept
+  {
+    if (Flow().Style().IsSkippedRootOrSkippedContent())
+    {
+      return false;
+    }
+
+    if (!child.EverHadLayout())
+    {
+      EnsureLineDamage().AddDetachedBox(BoxTreeUpdater {Flow()}.Remove(parent, child));
+      return false;
+    }
+
+    if (!_inlineContent)
+    {
+      // This should only be called on partial layout.
+      krys_debug_assert(false);
+      return false;
+    }
+
+    auto &childLayoutBox = *child.LayoutBox();
+    auto *childInlineTextBox = DynamicDowncast<layout::InlineTextBox>(childLayoutBox);
+    auto invalidation = layout::InlineInvalidation {
+      EnsureLineDamage(), _inlineContentCache.GetInlineItems().Content(), _inlineContent->DisplayContent()};
+    auto boxIsInvalidated = childInlineTextBox ? invalidation.TextWillBeRemoved(*childInlineTextBox)
+                            : childLayoutBox.IsLineBreakBox()
+                              ? invalidation.InlineLevelBoxWillBeRemoved(childLayoutBox)
+                              : false;
+    if (boxIsInvalidated)
+    {
+      _lineDamage->AddDetachedBox(BoxTreeUpdater {Flow()}.Remove(parent, child));
+    }
+    return boxIsInvalidated;
+  }
+
+  bool LineLayout::UpdateTextContent(const RenderText &textRenderer, Maybe<size_t> offset,
+                                     size_t oldLength) noexcept
+  {
+    if (Flow().Style().IsSkippedRootOrSkippedContent())
+    {
+      return false;
+    }
+
+    if (!_inlineContent)
+    {
+      // This is supposed to be only called on partial layout, but
+      // RenderText::setText may be (force) called after min/max size computation and before layout.
+      // We may need to invalidate anyway to clean up inline item list.
+      return false;
+    }
+
+    BoxTreeUpdater::UpdateContent(textRenderer);
+
+    auto invalidation = layout::InlineInvalidation {
+      EnsureLineDamage(), _inlineContentCache.GetInlineItems().Content(), _inlineContent->DisplayContent()};
+    auto &inlineTextBox = *textRenderer.LayoutBox();
+    if (!offset)
+    {
+      // Text content is entirely replaced.
+      return invalidation.TextInserted(inlineTextBox, 0);
+    }
+
+    if (*offset == oldLength)
+    {
+      // This is essentially just an append.
+      return invalidation.TextInserted(inlineTextBox);
+    }
+
+    auto newLength = inlineTextBox.Content().size();
+    return newLength >= oldLength ? invalidation.TextInserted(inlineTextBox, offset)
+                                  : invalidation.TextWillBeRemoved(inlineTextBox, offset);
   }
 
   void LineLayout::UpdateOverflow() noexcept
@@ -329,16 +694,30 @@ namespace krys::boo::layout_integration
       layout::InlineFormattingContext {RootLayoutBox(), GetLayoutState(), parentBlockLayoutState};
     // FIXME: This is where we need to switch between minimum and maximum box geometries.
     // Currently we only support content where min == max.
+    if (_lineDamage)
+    {
+      _inlineContentCache.ResetMinimumMaximumContentSizes();
+    }
     _boxGeometryUpdater.SetFormattingContextContentGeometry(null, layout::IntrinsicWidthMode::Minimum);
-    return inlineFormattingContext.MinimumMaximumContentSize();
+    return inlineFormattingContext.MinimumMaximumContentSize(_lineDamage.get());
   }
 
-  Maybe<LayoutRect> LineLayout::Layout(RenderBlockFlow::MarginInfo &marginInfo, ForceFullLayout) noexcept
+  Maybe<LayoutRect> LineLayout::Layout(RenderBlockFlow::MarginInfo &marginInfo,
+                                       ForceFullLayout forcedFullLayout) noexcept
   {
+    if (forcedFullLayout == ForceFullLayout::Yes && _lineDamage)
+    {
+      layout::InlineInvalidation::ResetInlineDamage(*_lineDamage);
+    }
+
     PreparePlacedFloats();
 
-    // FIXME: Partial layout should not rely on previous inline display content.
-    ClearInlineContent();
+    auto isPartialLayout = layout::InlineInvalidation::MayOnlyNeedPartialLayout(_lineDamage.get());
+    if (!isPartialLayout)
+    {
+      // FIXME: Partial layout should not rely on previous inline display content.
+      ClearInlineContent();
+    }
 
     krys_debug_assert(_inlineContentConstraints.has_value());
     auto intrusiveInitialLetterBottom = [&]() -> Maybe<LayoutUnit>
@@ -350,12 +729,11 @@ namespace krys::boo::layout_integration
       return null;
     };
 
-    // FIXME: The trimmed sides of text-box-trim (TextBoxTrimmer), once there's text-box-trim.
     auto parentBlockLayoutState =
       layout::BlockLayoutState {_blockFormattingState.GetPlacedFloats(),
                                 layout::IntegrationUtils::ToMarginState(marginInfo, {}),
                                 LineClamp(Flow()),
-                                {},
+                                TextBoxTrim(Flow()),
                                 Flow().Style().GetTextBoxEdge(),
                                 intrusiveInitialLetterBottom()};
     auto inlineFormattingContext =
@@ -364,9 +742,34 @@ namespace krys::boo::layout_integration
     inlineFormattingContext.GetLayoutState().SetNestedListMarkerOffsets(
       _boxGeometryUpdater.TakeNestedListMarkerOffsets());
 
-    auto layoutResult = inlineFormattingContext.Layout(*_inlineContentConstraints);
+    auto inlineContentConstraints = [&]() -> layout::ConstraintsForInlineContent
+    {
+      if (!isPartialLayout || !_inlineContent)
+      {
+        return *_inlineContentConstraints;
+      }
+      auto damagedLineIndex = _lineDamage->LayoutStartPosition()->LineIndex;
+      if (!damagedLineIndex)
+      {
+        return *_inlineContentConstraints;
+      }
+      if (damagedLineIndex >= _inlineContent->DisplayContent().LineList.size())
+      {
+        krys_debug_assert(false);
+        return *_inlineContentConstraints;
+      }
+      auto constraintsForInFlowContent = layout::ConstraintsForInFlowContent {
+        _inlineContentConstraints->Horizontal(), _lineDamage->LayoutStartPosition()->PartialContentTop};
+      return {constraintsForInFlowContent, _inlineContentConstraints->VisualLeft(),
+              _inlineContentConstraints->FormattingRootBorderBoxSize()};
+    };
+
+    auto layoutResult = inlineFormattingContext.Layout(inlineContentConstraints(), _lineDamage.get());
     auto didDiscardContent = layoutResult.DidDiscardContent;
-    (void)ConstructContent(inlineFormattingContext.GetLayoutState(), krys::move(layoutResult));
+    auto repaintRect =
+      LayoutRect {ConstructContent(inlineFormattingContext.GetLayoutState(), krys::move(layoutResult))};
+
+    _lineDamage = nullptr;
 
     // FIXME: Adjust the lines for pagination (adjustContentForPagination), once there's pagination.
 
@@ -380,13 +783,14 @@ namespace krys::boo::layout_integration
       return LayoutRect {};
     }
 
-    return null;
+    return isPartialLayout ? Maybe<LayoutRect> {repaintRect} : null;
   }
 
   FloatRect LineLayout::ConstructContent(const layout::InlineLayoutState &inlineLayoutState,
                                          layout::InlineLayoutResult &&layoutResult) noexcept
   {
-    auto damagedRect = InlineContentBuilder {Flow()}.Build(krys::move(layoutResult), EnsureInlineContent());
+    auto damagedRect =
+      InlineContentBuilder {Flow()}.Build(krys::move(layoutResult), EnsureInlineContent(), _lineDamage.get());
 
     _inlineContent->SetClearGapBeforeFirstLine(inlineLayoutState.ClearGapBeforeFirstLine());
     _inlineContent->SetClearGapAfterLastLine(inlineLayoutState.ClearGapAfterLastLine());
@@ -1103,6 +1507,19 @@ namespace krys::boo::layout_integration
     {
       _inlineContent->ReleaseCaches();
     }
+    if (_lineDamage)
+    {
+      layout::InlineInvalidation::ResetInlineDamage(*_lineDamage);
+    }
+  }
+
+  layout::InlineDamage &LineLayout::EnsureLineDamage() noexcept
+  {
+    if (!_lineDamage)
+    {
+      _lineDamage = CreateUnique<layout::InlineDamage>();
+    }
+    return *_lineDamage;
   }
 
   void LineLayout::ClearInlineContent() noexcept

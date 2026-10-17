@@ -229,13 +229,14 @@ namespace krys::boo::tests
       fixture.ById(u8"s").SetAttribute(u8"style", u8"color: red");
       fixture.ById(u8"bold").SetAttribute(u8"style", u8"color: green");
       (void)fixture.Document->UpdateLayout();
-    layout::tests::DetachLineLayouts(fixture);
+      layout::tests::DetachLineLayouts(fixture);
 
+      // The style change updated the box's style.
       auto &spanRenderer = RendererOf(fixture, u8"s");
-      CHECK_FALSE(BoxOf(fixture, u8"s").Style() == spanRenderer.Style());
-      layout_integration::BoxTreeUpdater::UpdateStyle(spanRenderer);
       CHECK(BoxOf(fixture, u8"s").Style() == spanRenderer.Style());
       CHECK_FALSE(BoxOf(fixture, u8"s").Style() == oldSpanStyle);
+      layout_integration::BoxTreeUpdater::UpdateStyle(spanRenderer);
+      CHECK(BoxOf(fixture, u8"s").Style() == spanRenderer.Style());
 
       auto &boldRenderer = RendererOf(fixture, u8"bold");
       layout_integration::BoxTreeUpdater::UpdateStyle(boldRenderer);
