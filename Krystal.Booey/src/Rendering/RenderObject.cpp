@@ -5,6 +5,7 @@
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFieldSetElement.hpp"
 #include "Krystal.Booey/HTML/HTMLLegendElement.hpp"
+#include "Krystal.Booey/Layout/LayoutTree/LayoutBox.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
@@ -32,7 +33,39 @@ namespace krys::boo
     }
   }
 
-  RenderObject::~RenderObject() noexcept = default;
+  RenderObject::~RenderObject() noexcept
+  {
+    ClearLayoutBox();
+  }
+
+  layout::Box *RenderObject::LayoutBox() noexcept
+  {
+    return _layoutBox.get();
+  }
+
+  const layout::Box *RenderObject::LayoutBox() const noexcept
+  {
+    return _layoutBox.get();
+  }
+
+  void RenderObject::SetLayoutBox(layout::Box &box) noexcept
+  {
+    _layoutBox = ShareCheckedPtr(&box);
+    _layoutBox->SetRendererForIntegration(this);
+  }
+
+  void RenderObject::ClearLayoutBox() noexcept
+  {
+    if (!_layoutBox)
+    {
+      return;
+    }
+
+    krys_debug_assert(_layoutBox->RendererForIntegration() == this);
+
+    _layoutBox->SetRendererForIntegration(nullptr);
+    _layoutBox = nullptr;
+  }
 
   void RenderObjectDeleter::operator()(RenderObject *renderer) const noexcept
   {

@@ -762,6 +762,34 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/CounterNode.hpp
   include/Krystal.Booey/Rendering/RenderCounter.hpp
   include/Krystal.Booey/Rendering/RenderListMarker.hpp
+  include/Krystal.Booey/Rendering/InlineWalker.hpp
+  include/Krystal.Booey/Layout/MarginTypes.hpp
+  include/Krystal.Booey/Layout/LayoutUnits.hpp
+  include/Krystal.Booey/Layout/LayoutState.hpp
+  include/Krystal.Booey/Layout/FormattingState.hpp
+  include/Krystal.Booey/Layout/LayoutTree/LayoutGeometryRect.hpp
+  include/Krystal.Booey/Layout/LayoutTree/LayoutBoxGeometry.hpp
+  include/Krystal.Booey/Layout/LayoutTree/LayoutBox.hpp
+  include/Krystal.Booey/Layout/LayoutTree/LayoutBoxInlines.hpp
+  include/Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp
+  include/Krystal.Booey/Layout/LayoutTree/LayoutInlineTextBox.hpp
+  include/Krystal.Booey/Layout/LayoutTree/LayoutInitialContainingBlock.hpp
+  include/Krystal.Booey/Layout/LayoutTree/LayoutIterator.hpp
+  include/Krystal.Booey/Layout/LayoutTree/LayoutChildIterator.hpp
+  include/Krystal.Booey/Layout/LayoutTree/LayoutDescendantIterator.hpp
+  include/Krystal.Booey/Layout/LayoutTree/LayoutContainingBlockChainIterator.hpp
+  include/Krystal.Booey/Layout/LayoutTree/FormattingContextBoxIterator.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/FormattingConstraints.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/FormattingContext.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Block/BlockFormattingState.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Block/BlockLayoutState.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp
+  include/Krystal.Booey/Layout/Floats/FloatAvoider.hpp
+  include/Krystal.Booey/Layout/Floats/PlacedFloats.hpp
+  include/Krystal.Booey/Layout/Floats/FloatingContext.hpp
+  include/Krystal.Booey/Layout/Integration/LayoutIntegrationBoxTreeUpdater.hpp
+  include/Krystal.Booey/Layout/Integration/LayoutIntegrationFormattingContextLayout.hpp
+  include/Krystal.Booey/Layout/Integration/LayoutIntegrationUtils.hpp
   include/Krystal.Booey/Rendering/RenderQuote.hpp
   include/Krystal.Booey/Rendering/RenderTextFragment.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderFirstLetter.hpp
@@ -2019,6 +2047,21 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/CounterNode.cpp
   src/Rendering/RenderCounter.cpp
   src/Rendering/RenderListMarker.cpp
+  src/Layout/LayoutState.cpp
+  src/Layout/FormattingState.cpp
+  src/Layout/LayoutTree/LayoutBoxGeometry.cpp
+  src/Layout/LayoutTree/LayoutBox.cpp
+  src/Layout/LayoutTree/LayoutElementBox.cpp
+  src/Layout/LayoutTree/LayoutInlineTextBox.cpp
+  src/Layout/LayoutTree/LayoutInitialContainingBlock.cpp
+  src/Layout/FormattingContexts/FormattingContext.cpp
+  src/Layout/FormattingContexts/Block/BlockFormattingState.cpp
+  src/Layout/FormattingContexts/Inline/Text/TextUtil.cpp
+  src/Layout/Floats/FloatAvoider.cpp
+  src/Layout/Floats/PlacedFloats.cpp
+  src/Layout/Floats/FloatingContext.cpp
+  src/Layout/Integration/LayoutIntegrationBoxTreeUpdater.cpp
+  src/Layout/Integration/LayoutIntegrationUtils.cpp
   src/Rendering/RenderQuote.cpp
   src/Rendering/RenderTextFragment.cpp
   src/Rendering/Updating/RenderTreeBuilderFirstLetter.cpp

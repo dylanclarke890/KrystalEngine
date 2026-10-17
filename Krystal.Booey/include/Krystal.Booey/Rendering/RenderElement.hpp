@@ -16,6 +16,11 @@ namespace krys::boo::dom
   class Element;
 }
 
+namespace krys::boo::layout
+{
+  class ElementBox;
+}
+
 namespace krys::boo::style
 {
   class PseudoElementRequest;
@@ -117,6 +122,9 @@ namespace krys::boo
 
     /// @brief The element rendered, or null for an anonymous box.
     KRYS_NODISCARD dom::Element *GetElement() const noexcept;
+
+    KRYS_NODISCARD layout::ElementBox *LayoutBox() noexcept;
+    KRYS_NODISCARD const layout::ElementBox *LayoutBox() const noexcept;
 
     KRYS_NODISCARD RenderObject *FirstChild() const noexcept
     {

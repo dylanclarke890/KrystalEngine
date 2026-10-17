@@ -7,7 +7,14 @@
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+
+namespace krys::boo::layout
+{
+  class InitialContainingBlock;
+  class LayoutState;
+}
 
 namespace krys::boo
 {
@@ -28,6 +35,9 @@ namespace krys::boo
 
   private:
     LocalFrameView &_frameView;
+    // Note that currently RenderView::layoutBox(), if it exists, is a child of _initialContainingBlock.
+    const UniquePtr<layout::InitialContainingBlock> _initialContainingBlock;
+    const UniquePtr<layout::LayoutState> _layoutState;
     uint64 _rendererCount {1};
     bool _hasQuotesNeedingUpdate {false};
     RenderCounterSet _countersNeedingUpdate;
@@ -50,6 +60,21 @@ namespace krys::boo
     {
       return _frameView;
     }
+
+    KRYS_NODISCARD layout::InitialContainingBlock &GetInitialContainingBlock() noexcept
+    {
+      return *_initialContainingBlock;
+    }
+    KRYS_NODISCARD const layout::InitialContainingBlock &GetInitialContainingBlock() const noexcept
+    {
+      return *_initialContainingBlock;
+    }
+    KRYS_NODISCARD layout::LayoutState &GetLayoutState() noexcept
+    {
+      return *_layoutState;
+    }
+
+    void UpdateQuirksMode() noexcept;
 
     KRYS_NODISCARD uint64 RendererCount() const noexcept
     {
@@ -110,6 +135,9 @@ namespace krys::boo
     KRYS_NODISCARD FloatSize SizeForCSSLargeViewportUnits() const noexcept;
     KRYS_NODISCARD FloatSize SizeForCSSDynamicViewportUnits() const noexcept;
     KRYS_NODISCARD FloatSize SizeForCSSDefaultViewportUnits() const noexcept;
+
+  private:
+    void UpdateInitialContainingBlockSize() noexcept;
   };
 }
 

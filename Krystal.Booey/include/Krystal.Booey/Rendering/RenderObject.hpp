@@ -8,6 +8,7 @@
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/CheckedPtr.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -18,6 +19,11 @@ namespace krys::boo::dom
 {
   class Document;
   class Node;
+}
+
+namespace krys::boo::layout
+{
+  class Box;
 }
 
 namespace krys::boo
@@ -343,6 +349,7 @@ namespace krys::boo
     PositionedState _positionedState {PositionedState::IsStaticallyPositioned};
     BoxDecorationState _boxDecorationState {BoxDecorationState::None};
     bool _isBeingDestroyed {false};
+    CheckedPtr<layout::Box> _layoutBox;
 
   public:
     /// @brief Anonymous objects should pass the document as their node, and they will then automatically be
@@ -407,6 +414,11 @@ namespace krys::boo
 
     /// @brief The render tree's root.
     KRYS_NODISCARD RenderView &View() const noexcept;
+
+    KRYS_NODISCARD layout::Box *LayoutBox() noexcept;
+    KRYS_NODISCARD const layout::Box *LayoutBox() const noexcept;
+    void SetLayoutBox(layout::Box &box) noexcept;
+    void ClearLayoutBox() noexcept;
 
     KRYS_NODISCARD RenderElement *FirstNonAnonymousAncestor() const noexcept;
 

@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Graphics/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Style/Difference.hpp"
@@ -14,6 +15,11 @@ namespace krys::boo::dom
   class Text;
 }
 
+namespace krys::boo::layout
+{
+  class InlineTextBox;
+}
+
 namespace krys::boo
 {
   class RenderInline;
@@ -21,7 +27,7 @@ namespace krys::boo
 
   /// @brief Renders a text node (or anonymous text, such as generated content): its text, after the style's
   /// text transform and text security.
-  // FIXME: Measurement (widths, preferred widths, the font code path and simplified measuring), line boxes,
+  // FIXME: Measurement (widths and preferred widths), line boxes,
   // selection, caret offsets, hit testing, painting and the secure text timer that reveals the last typed
   // character come with layout, painting and editing.
   class RenderText : public RenderObject
@@ -34,7 +40,12 @@ namespace krys::boo
     // The text before the text transform and text security, when they changed it.
     Maybe<utf8_string> _originalText;
     RenderInline *_inlineWrapperForDisplayContents {nullptr};
+    Maybe<bool> _canUseSimplifiedTextMeasuring;
+    Maybe<bool> _hasPositionDependentContentWidth;
+    Maybe<bool> _hasStrongDirectionalityContent;
     bool _useBackslashAsYenSymbol {false};
+    bool _containsOnlyASCII {false};
+    FontCascade::CodePath _fontCodePath {FontCascade::CodePath::Auto};
 
   public:
     RenderText(Type type, dom::Text &textNode, utf8_string text) noexcept;
@@ -44,6 +55,9 @@ namespace krys::boo
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override;
 
     KRYS_NODISCARD dom::Text *TextNode() const noexcept;
+
+    KRYS_NODISCARD layout::InlineTextBox *LayoutBox() noexcept;
+    KRYS_NODISCARD const layout::InlineTextBox *LayoutBox() const noexcept;
 
     /// @brief The bounding box of the text's line boxes.
     // FIXME: The union of the text boxes, once there's inline layout.
@@ -76,6 +90,44 @@ namespace krys::boo
     void SetTextWithOffset(utf8_string newText, uint32 offset) noexcept;
 
     KRYS_NODISCARD bool ContainsOnlyCollapsibleWhitespace() const noexcept;
+
+    KRYS_NODISCARD FontCascade::CodePath FontCodePath() const noexcept
+    {
+      return _fontCodePath;
+    }
+    KRYS_NODISCARD bool CanUseSimpleFontCodePath() const noexcept
+    {
+      return FontCodePath() == FontCascade::CodePath::Simple;
+    }
+    KRYS_NODISCARD bool ShouldUseSimpleGlyphOverflowCodePath() const noexcept
+    {
+      return FontCodePath() == FontCascade::CodePath::SimpleWithGlyphOverflow;
+    }
+
+    void SetCanUseSimplifiedTextMeasuring(bool canUseSimplifiedTextMeasuring) noexcept
+    {
+      _canUseSimplifiedTextMeasuring = canUseSimplifiedTextMeasuring;
+    }
+    KRYS_NODISCARD Maybe<bool> CanUseSimplifiedTextMeasuring() const noexcept
+    {
+      return _canUseSimplifiedTextMeasuring;
+    }
+    void SetHasPositionDependentContentWidth(bool hasPositionDependentContentWidth) noexcept
+    {
+      _hasPositionDependentContentWidth = hasPositionDependentContentWidth;
+    }
+    KRYS_NODISCARD Maybe<bool> HasPositionDependentContentWidth() const noexcept
+    {
+      return _hasPositionDependentContentWidth;
+    }
+    void SetHasStrongDirectionalityContent(bool hasStrongDirectionalityContent) noexcept
+    {
+      _hasStrongDirectionalityContent = hasStrongDirectionalityContent;
+    }
+    KRYS_NODISCARD Maybe<bool> HasStrongDirectionalityContent() const noexcept
+    {
+      return _hasStrongDirectionalityContent;
+    }
     KRYS_NODISCARD bool ContainsOnlyCSSWhitespace(size_t from, size_t length) const noexcept;
 
     /// @brief The rendered text, but with backslashes rather than yen signs.
@@ -109,6 +161,9 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD bool ComputeUseBackslashAsYenSymbol() const noexcept;
+    void ComputeFontCodePath() noexcept;
+    void InitiateFontLoadingByAccessingGlyphDataAndComputeCanUseSimplifiedTextMeasuring(
+      utf8_stringview textContent) noexcept;
     void SecureText(char32 maskingCharacter) noexcept;
   };
 

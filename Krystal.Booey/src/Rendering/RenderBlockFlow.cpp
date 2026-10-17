@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/BlockStepSizing.hpp"
+#include "Krystal.Booey/Rendering/InlineWalker.hpp"
 #include "Krystal.Booey/Rendering/RenderAncestorIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"
@@ -21,20 +22,6 @@ namespace krys::boo
 
   namespace
   {
-    // Visits the inline-level renderers of a block's inline content, descending into inline boxes.
-    // FIXME: Use the inline walker (InlineWalker), once there's inline layout.
-    template <typename TFunction>
-    void ForEachInlineLevelRenderer(RenderElement &parent, TFunction &&function) noexcept
-    {
-      for (auto *child = parent.FirstChild(); child; child = child->NextSibling())
-      {
-        function(*child);
-        if (auto *renderInline = DynamicDowncast<RenderInline>(*child))
-        {
-          ForEachInlineLevelRenderer(*renderInline, function);
-        }
-      }
-    }
 
     KRYS_NODISCARD bool IsSkippedContentRootOrSkippedContent(const RenderBlockFlow &blockFlow) noexcept
     {
@@ -874,15 +861,13 @@ namespace krys::boo
     // placed at the top of the content, as on an empty first line, and the block is as tall as an empty one.
     LayoutChildrenWithoutLineLayout();
     SetLogicalHeight(BorderAndPaddingBefore());
-    ForEachInlineLevelRenderer(*this,
-                               [&](RenderObject &renderer)
-                               {
-                                 if (auto *box = DynamicDowncast<RenderBox>(renderer);
-                                     box && box->IsFloating())
-                                 {
-                                   InsertFloatingBoxAndMarkForLayout(*box);
-                                 }
-                               });
+    for (auto walker = InlineWalker(*this); !walker.AtEnd(); walker.Advance())
+    {
+      if (auto *box = DynamicDowncast<RenderBox>(*walker.Current()); box && box->IsFloating())
+      {
+        InsertFloatingBoxAndMarkForLayout(*box);
+      }
+    }
     PositionNewFloats();
     SetLogicalHeight(BorderAndPaddingLogicalHeight() + LayoutUnit(ScrollbarLogicalHeight()));
   }
@@ -1894,8 +1879,10 @@ namespace krys::boo
 
     if (diff == style::DifferenceResult::Layout && SelfNeedsLayout() && ChildrenInline())
     {
-      ForEachInlineLevelRenderer(*this,
-                                 [](RenderObject &renderer) { renderer.SetNeedsPreferredWidthsUpdate(); });
+      for (auto walker = InlineWalker(*this); !walker.AtEnd(); walker.Advance())
+      {
+        walker.Current()->SetNeedsPreferredWidthsUpdate();
+      }
     }
 
     // FIXME: The styles of the multi-column flow's children, once there's multi-column layout.
@@ -2686,38 +2673,36 @@ namespace krys::boo
     }
 
     // Iterate over our block children and mark them as needed.
-    ForEachInlineLevelRenderer(*this,
-                               [&](RenderObject &renderer)
-                               {
-                                 auto *block = DynamicDowncast<RenderBlock>(renderer);
-                                 if (!block)
-                                 {
-                                   return;
-                                 }
+    for (auto walker = InlineWalker(*this); !walker.AtEnd(); walker.Advance())
+    {
+      auto *block = DynamicDowncast<RenderBlock>(walker.Current());
+      if (!block)
+      {
+        continue;
+      }
 
-                                 if (!floatToRemove && block->IsFloatingOrOutOfFlowPositioned())
-                                 {
-                                   return;
-                                 }
-                                 auto *blockFlow = DynamicDowncast<RenderBlockFlow>(*block);
-                                 if (!blockFlow)
-                                 {
-                                   if (block->ShrinkToAvoidFloats() && block->EverHadLayout())
-                                   {
-                                     block->SetChildNeedsLayout(markParents);
-                                   }
-                                   return;
-                                 }
-                                 auto shouldCheckSubtree =
-                                   IsSkippedContentRootOrSkippedContent(*blockFlow)
-                                   || (floatToRemove ? blockFlow->SubtreeContainsFloat(*floatToRemove)
-                                                     : blockFlow->SubtreeContainsFloats())
-                                   || blockFlow->ShrinkToAvoidFloats();
-                                 if (shouldCheckSubtree)
-                                 {
-                                   blockFlow->MarkAllDescendantsWithFloatsForLayout(floatToRemove, inLayout);
-                                 }
-                               });
+      if (!floatToRemove && block->IsFloatingOrOutOfFlowPositioned())
+      {
+        continue;
+      }
+      auto *blockFlow = DynamicDowncast<RenderBlockFlow>(*block);
+      if (!blockFlow)
+      {
+        if (block->ShrinkToAvoidFloats() && block->EverHadLayout())
+        {
+          block->SetChildNeedsLayout(markParents);
+        }
+        continue;
+      }
+      auto shouldCheckSubtree = IsSkippedContentRootOrSkippedContent(*blockFlow)
+                                || (floatToRemove ? blockFlow->SubtreeContainsFloat(*floatToRemove)
+                                                  : blockFlow->SubtreeContainsFloats())
+                                || blockFlow->ShrinkToAvoidFloats();
+      if (shouldCheckSubtree)
+      {
+        blockFlow->MarkAllDescendantsWithFloatsForLayout(floatToRemove, inLayout);
+      }
+    }
   }
 
   void RenderBlockFlow::MarkSiblingsWithFloatsForLayout(RenderBox *floatToRemove) noexcept

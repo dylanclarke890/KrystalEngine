@@ -2,13 +2,19 @@
 #include "Krystal.Booey/Core/TextBreakIterator.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/Graphics/Font.hpp"
+#include "Krystal.Booey/Graphics/TextRun.hpp"
+#include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
+#include "Krystal.Booey/Layout/LayoutTree/LayoutInlineTextBox.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Text/Unicode.hpp"
 #include <algorithm>
 #include <array>
+#include <bitset>
 #include <string>
 #include <unicode/ubrk.h>
 #include <unicode/ucasemap.h>
@@ -280,9 +286,10 @@ namespace krys::boo
   }
 
   RenderText::RenderText(Type type, dom::Node &node, utf8_string text) noexcept
-      : RenderObject(type, node, TypeFlag::IsText, {}), _text(krys::move(text))
+      : RenderObject(type, node, TypeFlag::IsText, {}), _text(krys::move(text)),
+        _containsOnlyASCII(text::IsASCII(utf8_stringview {_text}))
   {
-    // FIXME: The font code path, once there's measurement.
+    ComputeFontCodePath();
     krys_debug_assert(IsRenderText());
   }
 
@@ -301,6 +308,89 @@ namespace krys::boo
   utf8_stringview RenderText::RenderName() const noexcept
   {
     return u8"RenderText";
+  }
+
+  layout::InlineTextBox *RenderText::LayoutBox() noexcept
+  {
+    return Downcast<layout::InlineTextBox>(RenderObject::LayoutBox());
+  }
+
+  const layout::InlineTextBox *RenderText::LayoutBox() const noexcept
+  {
+    return Downcast<layout::InlineTextBox>(RenderObject::LayoutBox());
+  }
+
+  void RenderText::InitiateFontLoadingByAccessingGlyphDataAndComputeCanUseSimplifiedTextMeasuring(
+    utf8_stringview textContent) noexcept
+  {
+    const auto &style = Style();
+    const auto &fontCascade = style.GetFontCascade();
+    // See webkit.org/b/252668
+    auto fontVariant = AutoVariant;
+    _canUseSimplifiedTextMeasuring = CanUseSimpleFontCodePath();
+
+    auto fontVariantCaps = fontCascade.GetFontDescription().VariantCaps();
+    if (fontVariantCaps == FontVariantCaps::Small || fontVariantCaps == FontVariantCaps::AllSmall
+        || fontVariantCaps == FontVariantCaps::Petite || fontVariantCaps == FontVariantCaps::AllPetite)
+    {
+      // This matches the behavior of ComplexTextController::collectComplexTextRuns(): that function doesn't
+      // perform font fallback on the capitalized characters when small caps is enabled, so we shouldn't here
+      // either.
+      fontVariant = NormalVariant;
+      _canUseSimplifiedTextMeasuring = false;
+    }
+
+    auto whitespaceIsCollapsed = style.CollapseWhiteSpace();
+    Ref<const Font> primaryFont = fontCascade.PrimaryFont();
+    _canUseSimplifiedTextMeasuring =
+      *_canUseSimplifiedTextMeasuring && !fontCascade.WordSpacing() && !fontCascade.LetterSpacing()
+      && !primaryFont->SyntheticBoldOffset()
+      && (&FirstLineStyle() == &style || &fontCascade == &FirstLineStyle().GetFontCascade());
+
+    if (*_canUseSimplifiedTextMeasuring)
+    {
+      // Additional check on the font codepath.
+      auto run = TextRun(textContent);
+      run.SetCharacterScanForCodePath(false);
+      _canUseSimplifiedTextMeasuring = fontCascade.GetCodePath(run) == FontCascade::CodePath::Simple;
+    }
+
+    _hasPositionDependentContentWidth = false;
+    _hasStrongDirectionalityContent = false;
+    auto mayHaveStrongDirectionalityContent = !text::IsASCII(textContent);
+    // FIXME: Pre-warm glyph loading in FontCascade with the most common range.
+    std::bitset<256> hasSeen;
+    for (auto it = text::CodePointIterator(textContent); !it.AtEnd(); ++it)
+    {
+      auto character = *it;
+      if (character < 256)
+      {
+        if (hasSeen.test(character))
+        {
+          continue;
+        }
+        hasSeen.set(character);
+      }
+
+      _canUseSimplifiedTextMeasuring = *_canUseSimplifiedTextMeasuring
+                                       && fontCascade.CanUseSimplifiedTextMeasuring(
+                                         character, fontVariant, whitespaceIsCollapsed, *primaryFont);
+      _hasPositionDependentContentWidth =
+        *_hasPositionDependentContentWidth || character == text::TabCharacter;
+      _hasStrongDirectionalityContent = *_hasStrongDirectionalityContent
+                                        || (mayHaveStrongDirectionalityContent
+                                            && layout::TextUtil::IsStrongDirectionalityCharacter(character));
+    }
+  }
+
+  void RenderText::ComputeFontCodePath() noexcept
+  {
+    if (_containsOnlyASCII)
+    {
+      _fontCodePath = FontCascade::CodePath::Simple;
+      return;
+    }
+    _fontCodePath = FontCascade::CharacterRangeCodePath(_text);
   }
 
   dom::Text *RenderText::TextNode() const noexcept
@@ -327,9 +417,15 @@ namespace krys::boo
       // FIXME: The known-to-have-no-overflow-and-no-fallback-fonts state, once there's text measurement.
     }
 
-    // FIXME: The font loading and the simplified measuring state, once there's text measurement.
-
     const auto &newStyle = Style();
+    if (!oldStyle)
+    {
+      InitiateFontLoadingByAccessingGlyphDataAndComputeCanUseSimplifiedTextMeasuring(_text);
+    }
+    if (oldStyle && !oldStyle->FontCascadeEqual(newStyle))
+    {
+      _canUseSimplifiedTextMeasuring = null;
+    }
 
     bool needsResetText = false;
     if (!oldStyle)
@@ -455,7 +551,11 @@ namespace krys::boo
       case TextSecurity::Square: SecureText(text::BlackSquare); break;
     }
 
-    // FIXME: The font code path and the measuring state, once there's measurement.
+    _containsOnlyASCII = text::IsASCII(utf8_stringview {_text});
+    ComputeFontCodePath();
+    _canUseSimplifiedTextMeasuring = null;
+    _hasPositionDependentContentWidth = null;
+    _hasStrongDirectionalityContent = null;
 
     if (_text != originalText)
     {

@@ -370,6 +370,11 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/Shapes/ShapeOutsideInfo.cpp
 		tests/Rendering/RenderListItem.cpp
 		tests/Rendering/RenderListMarker.cpp
+		tests/Layout/LayoutState.cpp
+		tests/Layout/LayoutTree/LayoutBoxGeometry.cpp
+		tests/Layout/Floats/FloatingContext.cpp
+		tests/Layout/Integration/LayoutIntegrationBoxTreeUpdater.cpp
+		tests/Layout/Integration/LayoutIntegrationUtils.cpp
 		tests/Rendering/RenderText.cpp
 		tests/Rendering/Updating/RenderTreeBuilder.cpp
 		tests/Rendering/Updating/RenderTreeBuilderFirstLetter.cpp

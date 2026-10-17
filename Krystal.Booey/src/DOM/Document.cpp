@@ -1727,6 +1727,12 @@ namespace krys::boo::dom
     }
 
     _quirksMode = mode;
+
+    if (auto *view = GetRenderView())
+    {
+      view->UpdateQuirksMode();
+    }
+
     InvalidateCachedCSSParserContext();
   }
 

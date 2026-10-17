@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Layout/LayoutState.hpp"
+#include "Krystal.Booey/Layout/LayoutTree/LayoutInitialContainingBlock.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
@@ -9,7 +11,14 @@
 namespace krys::boo
 {
   RenderView::RenderView(dom::Document &document, RenderStyle &&style) noexcept
-      : RenderBlockFlow(Type::View, document, krys::move(style)), _frameView(*document.View())
+      : RenderBlockFlow(Type::View, document, krys::move(style)), _frameView(*document.View()),
+        _initialContainingBlock(CreateUnique<layout::InitialContainingBlock>(RenderStyle::Clone(Style()))),
+        // FIXME: The formatting context callbacks (layoutWithFormattingContextForBox,
+        // formattingContextRootLogicalWidthForType, formattingContextRootLogicalHeightForType and
+        // layoutWithFormattingContextForBlockInInline), once there's LineLayout.
+        _layoutState(CreateUnique<layout::LayoutState>(document, *_initialContainingBlock,
+                                                       layout::LayoutState::Type::Primary, nullptr, nullptr,
+                                                       nullptr, nullptr))
   {
     // FIXME: We should find a way to enforce this at compile time.
     krys_debug_assert(document.View());
@@ -59,6 +68,17 @@ namespace krys::boo
     return _frameView.SizeForCSSDefaultViewportUnits();
   }
 
+  void RenderView::UpdateQuirksMode() noexcept
+  {
+    _layoutState->UpdateQuirksMode(GetDocument());
+  }
+
+  void RenderView::UpdateInitialContainingBlockSize() noexcept
+  {
+    // Initial containing block has no margin/padding/border.
+    _layoutState->EnsureGeometryForBox(*_initialContainingBlock).SetContentBoxSize(FrameView().Size());
+  }
+
   void RenderView::AddCounterNeedingUpdate(RenderCounter &renderer) noexcept
   {
     _countersNeedingUpdate.try_emplace(&renderer, CreateWeakPtr(&renderer));
@@ -102,7 +122,8 @@ namespace krys::boo
     // FIXME: The page height when printing and whether it changed, once there's printing.
     LayoutStateMaintainer statePusher(*this, {}, false);
 
-    // FIXME: The initial containing block's size, once there's a layout state for queries.
+    // FIXME: This should be called only when frame view (or the canvas we render onto) size changes.
+    UpdateInitialContainingBlockSize();
     RenderBlockFlow::Layout();
 
 #if KRYS_DEBUG

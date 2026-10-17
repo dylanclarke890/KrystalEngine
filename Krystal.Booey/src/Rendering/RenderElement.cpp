@@ -5,6 +5,7 @@
 #include "Krystal.Booey/HTML/HTMLMarqueeElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableCellElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableElement.hpp"
+#include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
@@ -778,6 +779,16 @@ namespace krys::boo
   dom::Element *RenderElement::GetElement() const noexcept
   {
     return static_cast<dom::Element *>(GetNode());
+  }
+
+  layout::ElementBox *RenderElement::LayoutBox() noexcept
+  {
+    return Downcast<layout::ElementBox>(RenderObject::LayoutBox());
+  }
+
+  const layout::ElementBox *RenderElement::LayoutBox() const noexcept
+  {
+    return Downcast<layout::ElementBox>(RenderObject::LayoutBox());
   }
 
   void RenderElement::DidAttachChild(RenderObject &child, RenderObject *) noexcept
