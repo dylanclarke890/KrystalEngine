@@ -385,6 +385,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/Style/GridArea.hpp
   include/Krystal.Booey/Rendering/Style/GridSpan.hpp
   include/Krystal.Booey/Style/Values/Grid/GridPosition.hpp
+  include/Krystal.Booey/Style/Values/Grid/GridPositionsResolver.hpp
   include/Krystal.Booey/Style/Values/Grid/GridPositionSide.hpp
   include/Krystal.Booey/Style/Values/Grid/GridTrackSizingDirection.hpp
   include/Krystal.Booey/CSS/Values/Easing/CubicBezierEasingFunction.hpp
@@ -754,6 +755,13 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/BaselineAlignment.hpp
   include/Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp
   include/Krystal.Booey/Rendering/RenderGrid.hpp
+  include/Krystal.Booey/Rendering/AncestorSubgridIterator.hpp
+  include/Krystal.Booey/Rendering/Grid.hpp
+  include/Krystal.Booey/Rendering/GridBaselineAlignment.hpp
+  include/Krystal.Booey/Rendering/GridLayoutFunctions.hpp
+  include/Krystal.Booey/Rendering/GridLayoutState.hpp
+  include/Krystal.Booey/Rendering/GridMasonryLayout.hpp
+  include/Krystal.Booey/Rendering/GridTrackSizingAlgorithm.hpp
   include/Krystal.Booey/Rendering/RenderListItem.hpp
   include/Krystal.Booey/Rendering/RenderTable.hpp
   include/Krystal.Booey/Rendering/RenderTableCell.hpp
@@ -793,6 +801,11 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Layout/FormattingContexts/Flex/FlexFormattingUtils.hpp
   include/Krystal.Booey/Layout/FormattingContexts/Flex/FlexLayout.hpp
   include/Krystal.Booey/Layout/FormattingContexts/Flex/FlexFormattingContext.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Grid/GridTypes.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Grid/UnplacedGridItem.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Grid/PlacedGridItem.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Grid/GridLayout.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Grid/GridFormattingContext.hpp
   include/Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp
   include/Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextBreakingPositionContext.hpp
   include/Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextBreakingPositionCache.hpp
@@ -843,6 +856,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContentBuilder.hpp
   include/Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp
   include/Krystal.Booey/Layout/Integration/Flex/LayoutIntegrationFlexLayout.hpp
+  include/Krystal.Booey/Layout/Integration/Grid/LayoutIntegrationGridLayout.hpp
   include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorBoxModernPath.hpp
   include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorBox.hpp
   include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp
@@ -1504,6 +1518,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/GridTemplateAreasValue.cpp
   src/Rendering/Style/GridSpan.cpp
   src/Style/Values/Grid/GridPosition.cpp
+  src/Style/Values/Grid/GridPositionsResolver.cpp
   src/CSS/Values/EasingFunctionValue.cpp
   src/CSS/Values/BoxShadowPropertyValue.cpp
   src/CSS/Values/TextShadowPropertyValue.cpp
@@ -2099,6 +2114,13 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/BaselineAlignment.cpp
   src/Rendering/RenderDeprecatedFlexibleBox.cpp
   src/Rendering/RenderGrid.cpp
+  src/Rendering/AncestorSubgridIterator.cpp
+  src/Rendering/Grid.cpp
+  src/Rendering/GridBaselineAlignment.cpp
+  src/Rendering/GridLayoutFunctions.cpp
+  src/Rendering/GridLayoutState.cpp
+  src/Rendering/GridMasonryLayout.cpp
+  src/Rendering/GridTrackSizingAlgorithm.cpp
   src/Rendering/RenderListItem.cpp
   src/Rendering/RenderTable.cpp
   src/Rendering/RenderTableCell.cpp
@@ -2142,6 +2164,13 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Layout/FormattingContexts/Flex/FlexFormattingUtils.cpp
   src/Layout/FormattingContexts/Flex/FlexLayout.cpp
   src/Layout/FormattingContexts/Flex/FlexFormattingContext.cpp
+  src/Layout/FormattingContexts/Grid/UnplacedGridItem.cpp
+  src/Layout/FormattingContexts/Grid/PlacedGridItem.cpp
+  src/Layout/FormattingContexts/Grid/ImplicitGrid.cpp
+  src/Layout/FormattingContexts/Grid/TrackSizingAlgorithm.cpp
+  src/Layout/FormattingContexts/Grid/GridLayoutUtils.cpp
+  src/Layout/FormattingContexts/Grid/GridLayout.cpp
+  src/Layout/FormattingContexts/Grid/GridFormattingContext.cpp
   src/Layout/FormattingContexts/Inline/InlineLineBuilder.cpp
   src/Layout/FormattingContexts/Inline/TextOnlySimpleLineBuilder.cpp
   src/Layout/FormattingContexts/Inline/RangeBasedLineBuilder.cpp
@@ -2162,6 +2191,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Layout/Integration/Inline/LayoutIntegrationInlineContentBuilder.cpp
   src/Layout/Integration/Inline/LayoutIntegrationLineLayout.cpp
   src/Layout/Integration/Flex/LayoutIntegrationFlexLayout.cpp
+  src/Layout/Integration/Grid/LayoutIntegrationGridLayout.cpp
   src/Layout/Integration/Inline/InlineIteratorBox.cpp
   src/Layout/Integration/Inline/InlineIteratorTextBox.cpp
   src/Layout/Integration/Inline/InlineIteratorInlineBox.cpp

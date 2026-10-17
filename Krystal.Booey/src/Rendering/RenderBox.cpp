@@ -11,6 +11,7 @@
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/FloatingObjects.hpp"
+#include "Krystal.Booey/Rendering/GridLayoutFunctions.hpp"
 #include "Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp"
 #include "Krystal.Booey/Rendering/RenderAncestorIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
@@ -285,13 +286,13 @@ namespace krys::boo
       InvalidateAncestorBackgroundObscurationStatus();
     }
 
-    // FIXME: The view's scrollbar overlay style and the compositor, and the grid position, once there are
-    // any.
+    // FIXME: The view's scrollbar overlay style and the compositor, once there are any.
 
     if ((oldStyle && !oldStyle->GetShapeOutside().IsNone()) || !Style().GetShapeOutside().IsNone())
     {
       UpdateShapeOutsideInfoAfterStyleChange(Style(), oldStyle);
     }
+    UpdateGridPositionAfterStyleChange(Style(), oldStyle);
 
     // Changing the position from/to absolute can potentially create/remove flex/grid items, as absolutely
     // positioned children of a flex/grid box are out-of-flow, and thus, not flex/grid items. This means that
@@ -2343,10 +2344,10 @@ namespace krys::boo
     {
       // FIXME: The masonry logic should not be living in RenderBox; it should ideally live in RenderGrid.
       // This is a temporary solution to prevent regressions.
-      // FIXME: Orthogonal grid items in masonry columns (GridLayoutFunctions::isOrthogonalGridItem), once
-      // there's grid layout.
       auto *renderGrid = Downcast<RenderGrid>(Parent());
-      return renderGrid->IsMasonry(style::GridTrackSizingDirection::Columns) || !HasStretchedLogicalWidth();
+      return (renderGrid->AreMasonryColumns()
+              && !GridLayoutFunctions::IsOrthogonalGridItem(*renderGrid, *this))
+             || !HasStretchedLogicalWidth();
     }
 
     // This code may look a bit strange.  Basically width:intrinsic should clamp the size when testing both
@@ -3923,6 +3924,47 @@ namespace krys::boo
       return;
     }
     AddOverflowWithRendererOffset(*floatBox.Renderer(), floatBox.LocationOffsetOfBorderBox());
+  }
+
+  static bool HasEquivalentGridPositioningStyle(const RenderStyle &style,
+                                                const RenderStyle &oldStyle) noexcept
+  {
+    return oldStyle.GridItemColumnStart() == style.GridItemColumnStart()
+           && oldStyle.GridItemColumnEnd() == style.GridItemColumnEnd()
+           && oldStyle.GridItemRowStart() == style.GridItemRowStart()
+           && oldStyle.GridItemRowEnd() == style.GridItemRowEnd() && oldStyle.GetOrder() == style.GetOrder()
+           && oldStyle.HasOutOfFlowPosition() == style.HasOutOfFlowPosition()
+           && (oldStyle.GridTemplateColumns().Subgrid == style.GridTemplateColumns().Subgrid
+               || style.GridTemplateColumns().OrderedNamedLines.Map.empty())
+           && (oldStyle.GridTemplateRows().Subgrid == style.GridTemplateRows().Subgrid
+               || style.GridTemplateRows().OrderedNamedLines.Map.empty());
+  }
+
+  void RenderBox::UpdateGridPositionAfterStyleChange(const RenderStyle &style,
+                                                     const RenderStyle *oldStyle) noexcept
+  {
+    if (!oldStyle)
+    {
+      return;
+    }
+    auto *parentGrid = DynamicDowncast<RenderGrid>(Parent());
+    if (!parentGrid)
+    {
+      return;
+    }
+
+    // Positioned items don't participate on the layout of the grid,
+    // so we don't need to mark the grid as dirty if they change positions.
+    if ((oldStyle->HasOutOfFlowPosition() && style.HasOutOfFlowPosition())
+        || HasEquivalentGridPositioningStyle(style, *oldStyle))
+    {
+      return;
+    }
+
+    // It should be possible to not dirty the grid in some cases (like moving an
+    // explicitly placed grid item).
+    // For now, it's more simple to just always recompute the grid.
+    parentGrid->SetNeedsItemPlacement();
   }
 
   void RenderBox::UpdateShapeOutsideInfoAfterStyleChange(const RenderStyle &style,

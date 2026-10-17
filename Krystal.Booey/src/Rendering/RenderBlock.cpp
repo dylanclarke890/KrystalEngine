@@ -1119,9 +1119,9 @@ namespace krys::boo
 
   void RenderBlock::LayoutBlock(RelayoutChildren, LayoutUnit) noexcept
   {
-    // FIXME: Stands in for the layout of the grid and the table classes until they're ported (upstream
-    // asserts this isn't reached): lays out the children without placing or sizing anything, and clears the
-    // inline content, which has no lines yet.
+    // FIXME: Stands in for the layout of the table classes until they're ported (upstream asserts this isn't
+    // reached): lays out the children without placing or sizing anything, and clears the inline content,
+    // which has no lines yet.
     LayoutChildrenWithoutLineLayout();
   }
 

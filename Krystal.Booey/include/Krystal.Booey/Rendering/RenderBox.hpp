@@ -813,6 +813,7 @@ namespace krys::boo
 
     void UpdateShapeOutsideInfoAfterStyleChange(const RenderStyle &style,
                                                 const RenderStyle *oldStyle) noexcept;
+    void UpdateGridPositionAfterStyleChange(const RenderStyle &style, const RenderStyle *oldStyle) noexcept;
     ShapeOutsideInfo &EnsureShapeOutsideInfo() noexcept;
     void RemoveShapeOutsideInfo() noexcept;
 

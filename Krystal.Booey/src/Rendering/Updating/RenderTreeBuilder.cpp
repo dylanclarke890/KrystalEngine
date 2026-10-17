@@ -821,7 +821,14 @@ namespace krys::boo
         InlineBuilder().ChildBecameNonInline(*parentInlineRenderer, child);
       }
       // WARNING: original parent might be deleted at this point.
-      // FIXME: Re-run the grid items placement if a grid gained an item, once there's grid layout.
+      if (auto *newParent = child.Parent(); newParent != parent)
+      {
+        if (auto *gridRenderer = DynamicDowncast<RenderGrid>(newParent))
+        {
+          // We need to re-run the grid items placement if it had gained a new item.
+          gridRenderer->SetNeedsItemPlacement();
+        }
+      }
       return;
     }
     // An anonymous block must be made to wrap this inline.
@@ -1044,8 +1051,13 @@ namespace krys::boo
     auto takenChild = BlockBuilder().Detach(parent, child, willBeDestroyed, CanCollapseAnonymousBlock::Yes);
     // Positioned grid items do not take up space or otherwise participate in the layout of the grid,
     // for that reason we don't need to mark the grid as dirty when they are removed.
-    // FIXME: Otherwise, the grid needs to be recomputed as it might contain auto-placed items that will
-    // change their position (setNeedsItemPlacement), once there's grid layout.
+    if (child.IsOutOfFlowPositioned())
+    {
+      return takenChild;
+    }
+
+    // The grid needs to be recomputed as it might contain auto-placed items that will change their position.
+    parent.SetNeedsItemPlacement();
     return takenChild;
   }
 
@@ -1125,7 +1137,10 @@ namespace krys::boo
     // will change their position. Positioned grid items do not take up space or
     // otherwise participate in the layout of the grid, for that reason we don't
     // need to mark the grid as dirty when they are added.
-    // FIXME: Mark the grid for item placement (setNeedsItemPlacement), once there's grid layout.
+    if (!child->IsOutOfFlowPositioned())
+    {
+      parent.SetNeedsItemPlacement();
+    }
 
     BlockBuilder().Attach(parent, krys::move(child), beforeChild);
   }

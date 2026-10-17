@@ -201,8 +201,25 @@ namespace krys::boo
 
   void PositionedLayoutConstraints::CaptureGridArea() noexcept
   {
-    // FIXME: A grid container's out-of-flow boxes are contained by their grid area
-    // (gridAreaRangeForOutOfFlow), once there's grid layout.
+    const auto *gridContainer = DynamicDowncast<RenderGrid>(_container);
+    if (!gridContainer)
+    {
+      return;
+    }
+
+    if (LogicalBoxAxis::Inline == _containingAxis)
+    {
+      _containingRange =
+        gridContainer->GridAreaRangeForOutOfFlow(_renderer, style::GridTrackSizingDirection::Columns);
+      _containingInlineSize = _containingRange.Size();
+    }
+    else
+    {
+      _containingRange =
+        gridContainer->GridAreaRangeForOutOfFlow(_renderer, style::GridTrackSizingDirection::Rows);
+      _containingInlineSize =
+        gridContainer->GridAreaRangeForOutOfFlow(_renderer, style::GridTrackSizingDirection::Columns).Size();
+    }
   }
 
   LayoutRange PositionedLayoutConstraints::ExtractRange(LayoutRect anchorRect) noexcept

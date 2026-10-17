@@ -1523,7 +1523,7 @@ namespace krys::boo::style
       auto computedTrackSizes = renderGrid->TrackSizesForComputedStyle(direction);
       // Named grid line indices are relative to the explicit grid, but we are including all tracks.
       // So we need to subtract the number of leading implicit tracks in order to get the proper line index.
-      int32 offset = -renderGrid->ExplicitGridStartForDirection(direction);
+      auto offset = -static_cast<int32>(renderGrid->ExplicitGridStartForDirection(direction));
 
       int32 start = 0;
       auto end = static_cast<int32>(computedTrackSizes.size());
