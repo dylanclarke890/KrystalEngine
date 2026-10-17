@@ -752,6 +752,29 @@ namespace krys::boo
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
     void UpdateFromStyle() noexcept override;
 
+  public:
+    KRYS_NODISCARD bool RequiresLayer() const noexcept override;
+
+    void ApplyTransform(TransformationMatrix &transform, const RenderStyle &style,
+                        const FloatRect &boundingBox,
+                        EnumSet<style::TransformResolverOption> options) const noexcept override;
+    using RenderLayerModelObject::ApplyTransform;
+
+    KRYS_NODISCARD FloatRect ReferenceBoxRect(CSSBoxType boxType) const noexcept override;
+
+    KRYS_NODISCARD virtual LayoutRect
+      OverflowClipRect(const LayoutPoint &location,
+                       OverlayScrollbarSizeRelevancy relevancy =
+                         OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize) const noexcept;
+    KRYS_NODISCARD virtual LayoutRect
+      OverflowClipRectForChildLayers(const LayoutPoint &location,
+                                     OverlayScrollbarSizeRelevancy relevancy) const noexcept
+    {
+      return OverflowClipRect(location, relevancy);
+    }
+    KRYS_NODISCARD LayoutRect ClipRect(const LayoutPoint &location) const noexcept;
+
+  protected:
     void WillBeDestroyed() noexcept override;
 
     KRYS_NODISCARD bool ShouldTrimChildMargin(style::MarginTrimSide type,

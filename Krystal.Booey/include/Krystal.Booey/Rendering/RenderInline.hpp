@@ -56,6 +56,8 @@ namespace krys::boo
 
     KRYS_NODISCARD IntRect LinesBoundingBox() const noexcept;
 
+    KRYS_NODISCARD bool RequiresLayer() const noexcept override;
+
     // FIXME: Layout queries, reachable only through `RendererOf` and `RenderBoxOf`, which return null until
     // there's layout.
     KRYS_NODISCARD LayoutUnit InnerPaddingBoxWidth() const noexcept;

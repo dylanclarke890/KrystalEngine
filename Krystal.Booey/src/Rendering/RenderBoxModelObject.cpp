@@ -706,4 +706,20 @@ namespace krys::boo
   }
 
 #pragma endregion
+
+  bool RenderBoxModelObject::RequiresLayer() const noexcept
+  {
+    // FIXME: Reflections were dropped; view transition captures, once there are view transitions.
+    return IsDocumentElementRenderer() || IsPositioned() || CreatesGroup() || HasTransformRelatedProperty()
+           || HasHiddenBackface() || RequiresRenderingConsolidationForViewTransition();
+  }
+
+  void RenderBoxModelObject::ApplyTransform(TransformationMatrix &, const RenderStyle &, const FloatRect &,
+                                            EnumSet<style::TransformResolverOption>) const noexcept
+  {
+    // applyTransform() is only used through RenderLayer*, which only invokes this for RenderBox derived
+    // renderers, thus not for RenderInline/RenderLineBreak - the other two renderers that inherit from
+    // RenderBoxModelObject.
+    krys_debug_assert(false);
+  }
 }

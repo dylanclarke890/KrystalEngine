@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
@@ -103,7 +104,13 @@ namespace krys::boo
     {
       SetForScope layoutPhase(_layoutPhase, LayoutPhase::InPostLayout);
       krys_debug_assert(!layoutRoot->NeedsLayout());
-      // FIXME: Update the layer positions (didLayout) and run the post-layout tasks, once there are layers.
+      // FIXME: Defer the layer position update (canDeferUpdateLayerPositions), compare the repaint rect
+      // environment, update compositing and run the post-layout tasks, once there's painting and compositing.
+      if (auto *renderView = GetRenderView(); renderView && renderView->Layer())
+      {
+        renderView->Layer()->UpdateLayerPositionsAfterLayout(NeedsFullRepaint(), false);
+      }
+      krys_debug_assert(_percentHeightIgnoreList.empty());
     }
   }
 

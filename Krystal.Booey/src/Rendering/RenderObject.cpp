@@ -11,8 +11,11 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
+#include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
+#include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 namespace krys::boo
@@ -223,6 +226,37 @@ namespace krys::boo
   {
     auto *element = DynamicDowncast<html::HTMLElement>(GetNode());
     return element && Is<html::HTMLFieldSetElement>(*element);
+  }
+
+  RenderLayer *RenderObject::EnclosingLayer() const noexcept
+  {
+    for (const RenderObject *renderer = this; renderer; renderer = renderer->Parent())
+    {
+      if (auto *layerModelObject = DynamicDowncast<RenderLayerModelObject>(*renderer);
+          layerModelObject && layerModelObject->HasLayer())
+      {
+        return layerModelObject->Layer();
+      }
+    }
+    return nullptr;
+  }
+
+  bool RenderObject::IsSkippedContent() const noexcept
+  {
+    if (Is<RenderText>(*this))
+    {
+      return Style().IsSkippedRootOrSkippedContent();
+    }
+
+    if (auto *renderBox = DynamicDowncast<RenderBox>(*this); renderBox && renderBox->IsColumnSpanner())
+    {
+      // Checking if parent is root or part of a skipped tree does not work in cases when the renderer is
+      // moved out of its original position (e.g. column spanners).
+      auto *element = renderBox->GetElement();
+      return renderBox->Style().IsSkippedRootOrSkippedContent()
+             && !(element && boo::IsSkippedContentRoot(renderBox->Style(), *element));
+    }
+    return Parent() && Parent()->Style().IsSkippedRootOrSkippedContent();
   }
 
   bool RenderObject::IsTransformed() const noexcept

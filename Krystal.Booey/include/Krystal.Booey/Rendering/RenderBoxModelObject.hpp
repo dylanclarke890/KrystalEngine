@@ -33,6 +33,13 @@ namespace krys::boo
 
     KRYS_NODISCARD bool HasVisibleBoxDecorationStyle() const noexcept;
 
+    KRYS_NODISCARD bool RequiresLayer() const noexcept override;
+
+    void ApplyTransform(TransformationMatrix &transform, const RenderStyle &style,
+                        const FloatRect &boundingBox,
+                        EnumSet<style::TransformResolverOption> options) const noexcept override;
+    using RenderLayerModelObject::ApplyTransform;
+
     KRYS_NODISCARD LayoutSize RelativePositionOffset() const noexcept;
     // FIXME: Sticky positioning (constrainingRectForStickyPosition, enclosingClippingBoxForStickyPosition,
     // computeStickyPositionConstraints, stickyPositionOffset), once there's scrolling.

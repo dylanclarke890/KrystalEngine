@@ -21,7 +21,9 @@
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/TransformOperationData.hpp"
 #include "Krystal.Booey/Style/Calc/TreeEvaluation.hpp"
+#include "Krystal.Booey/Style/TransformResolver.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include <cmath>
 
@@ -4364,5 +4366,102 @@ namespace krys::boo
                                                               BoxAxis) const noexcept
   {
     krys_unreachable();
+  }
+
+  bool RenderBox::RequiresLayer() const noexcept
+  {
+    // FIXME: Running accelerated animations too, once there are any.
+    return RenderBoxModelObject::RequiresLayer() || HasNonVisibleOverflow() || Style().SpecifiesColumns()
+           || Style().UsedContain().Contains(style::ContainValue::Layout) || !Style().UsedZIndex().IsAuto();
+  }
+
+  void RenderBox::ApplyTransform(TransformationMatrix &t, const RenderStyle &style,
+                                 const FloatRect &boundingBox,
+                                 EnumSet<style::TransformResolverOption> options) const noexcept
+  {
+    // FIXME: The motion path data of the box (TransformOperationData's renderer constructor), once there are
+    // motion paths.
+    style::TransformResolver::ApplyTransform(t, style, TransformOperationData(boundingBox), options);
+  }
+
+  FloatRect RenderBox::ReferenceBoxRect(CSSBoxType boxType) const noexcept
+  {
+    switch (boxType)
+    {
+      case CSSBoxType::ContentBox:
+      case CSSBoxType::FillBox:    return FloatRect(ContentBoxRect());
+      case CSSBoxType::PaddingBox: return FloatRect(PaddingBoxRect());
+      case CSSBoxType::MarginBox:  return FloatRect(MarginBoxRect());
+      // stroke-box, view-box compute to border-box for HTML elements.
+      case CSSBoxType::StrokeBox:
+      case CSSBoxType::ViewBox:
+      case CSSBoxType::BorderBox:
+      case CSSBoxType::BoxMissing: return FloatRect(BorderBoxRect());
+    }
+
+    krys_debug_assert(false);
+    return {};
+  }
+
+  LayoutRect RenderBox::OverflowClipRect(const LayoutPoint &location,
+                                         OverlayScrollbarSizeRelevancy) const noexcept
+  {
+    LayoutRect clipRect = BorderBoxRect();
+    clipRect.SetLocation(location + clipRect.Location() + LayoutSize(BorderLeft(), BorderTop()));
+    clipRect.SetSize(clipRect.Size()
+                     - LayoutSize(BorderLeft() + BorderRight(), BorderTop() + BorderBottom()));
+    if (Style().OverflowX() == Overflow::Clip && Style().OverflowY() == Overflow::Visible)
+    {
+      clipRect.ExpandToInfiniteY();
+    }
+    else if (Style().OverflowY() == Overflow::Clip && Style().OverflowX() == Overflow::Visible)
+    {
+      clipRect.ExpandToInfiniteX();
+    }
+
+    // FIXME: Subtract out the scrollable area's scrollbars, once there is one.
+
+    return clipRect;
+  }
+
+  LayoutRect RenderBox::ClipRect(const LayoutPoint &location) const noexcept
+  {
+    auto borderBoxRect = this->BorderBoxRect();
+    auto clipRect = LayoutRect(borderBoxRect.Location() + location, borderBoxRect.Size());
+
+    return Style().GetClip().SwitchOn(
+      [&](const css::keywords::Auto &) { return clipRect; },
+      [&](const style::ClipRect &rect)
+      {
+        if (auto clipLeft = rect.Value->Left().TryLength())
+        {
+          auto c = LayoutUnit {clipLeft->ResolveZoom(style::ZoomNeeded {})};
+          clipRect.Move(c, 0_lu);
+          clipRect.Contract(c, 0_lu);
+        }
+
+        // We don't use the fragment-specific border box's width and height since clip offsets are (stupidly)
+        // specified from the left and top edges. Therefore it's better to avoid constraining to smaller
+        // widths and heights.
+
+        if (auto clipRight = rect.Value->Right().TryLength())
+        {
+          clipRect.Contract(Width() - LayoutUnit {clipRight->ResolveZoom(style::ZoomNeeded {})}, 0_lu);
+        }
+
+        if (auto clipTop = rect.Value->Top().TryLength())
+        {
+          auto c = LayoutUnit {clipTop->ResolveZoom(style::ZoomNeeded {})};
+          clipRect.Move(0_lu, c);
+          clipRect.Contract(0_lu, c);
+        }
+
+        if (auto clipBottom = rect.Value->Bottom().TryLength())
+        {
+          clipRect.Contract(0_lu, Height() - LayoutUnit {clipBottom->ResolveZoom(style::ZoomNeeded {})});
+        }
+
+        return clipRect;
+      });
   }
 }

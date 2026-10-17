@@ -66,6 +66,11 @@ namespace krys::boo
 
     void Layout() noexcept override;
 
+    KRYS_NODISCARD bool RequiresLayer() const noexcept override
+    {
+      return true;
+    }
+
     KRYS_NODISCARD LogicalExtentComputedValues
       ComputeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logicalTop) const noexcept override;
     void UpdateLogicalWidth() noexcept override;

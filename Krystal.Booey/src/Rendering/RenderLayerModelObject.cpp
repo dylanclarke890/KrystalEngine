@@ -1,4 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
+#include "Krystal.Booey/Rendering/RenderBlock.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Style/TransformResolver.hpp"
 
 namespace krys::boo
 {
@@ -20,13 +23,62 @@ namespace krys::boo
     krys_debug_assert(IsRenderLayerModelObject());
   }
 
+  namespace
+  {
+    // Used to store state between styleWillChange and styleDidChange
+    bool s_wasFloating = false;
+    bool s_hadLayer = false;
+    bool s_wasTransformed = false;
+    bool s_layerWasSelfPainting = false;
+  }
+
   // Do not add any code in below destructor. Add it to willBeDestroyed() instead.
   RenderLayerModelObject::~RenderLayerModelObject() noexcept = default;
 
+  void RenderLayerModelObject::WillBeDestroyed() noexcept
+  {
+    // FIXME: Forget viewport-constrained positioned objects, once the frame view tracks them.
+
+    DestroyLayer();
+
+    RenderElement::WillBeDestroyed();
+  }
+
+  void RenderLayerModelObject::DestroyLayer() noexcept
+  {
+    SetHasLayer(false);
+    _layer = nullptr;
+  }
+
+  void RenderLayerModelObject::CreateLayer() noexcept
+  {
+    krys_debug_assert(!_layer);
+    _layer = RenderLayer::Create(*this);
+    SetHasLayer(true);
+    _layer->InsertOnlyThisLayer();
+  }
+
+  bool RenderLayerModelObject::HasSelfPaintingLayer() const noexcept
+  {
+    return _layer && _layer->IsSelfPaintingLayer();
+  }
+
   void RenderLayerModelObject::StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept
   {
-    // FIXME: Remember whether the renderer was floating, had a layer and was transformed, and clear the
-    // layer's clip rects, once there are layers.
+    s_wasFloating = IsFloating();
+    s_hadLayer = HasLayer();
+    s_wasTransformed = IsTransformed();
+    if (s_hadLayer)
+    {
+      s_layerWasSelfPainting = Layer()->IsSelfPaintingLayer();
+    }
+
+    const auto *oldStyle = HasInitializedStyle() ? &Style() : nullptr;
+    if (diff == style::DifferenceResult::RepaintLayer && Parent() && oldStyle
+        && oldStyle->GetClip() != newStyle.GetClip())
+    {
+      Layer()->ClearClipRectsIncludingDescendants();
+    }
     RenderElement::StyleWillChange(diff, newStyle);
   }
 
@@ -35,7 +87,99 @@ namespace krys::boo
     UpdateFromStyle();
     RenderElement::StyleDidChange(diff, oldStyle);
 
-    // FIXME: Create or destroy the layer, relayout parents of out-of-flow boxes whose display type changed,
-    // and update the SVG layer and transform state, once there are layers and layout.
+    // When an out-of-flow-positioned element changes its display between block and inline-block,
+    // then an incremental layout on the element's containing block lays out the element through
+    // LayoutPositionedObjects, which skips laying out the element's parent.
+    // The element's parent needs to relayout so that it calls
+    // RenderBlockFlow::setStaticInlinePositionForChild with the out-of-flow-positioned child, so
+    // that when it's laid out, its RenderBox::computeOutOfFlowPositionedLogicalWidth/Height takes into
+    // account its new inline/block position rather than its old block/inline position.
+    // Position changes and other types of display changes are handled elsewhere.
+    if ((oldStyle && IsOutOfFlowPositioned() && Parent() && (Parent() != ContainingBlock()))
+        && (Style().GetPosition() == oldStyle->GetPosition())
+        && (Style().IsOriginalDisplayInlineType() != oldStyle->IsOriginalDisplayInlineType())
+        && ((Style().IsOriginalDisplayBlockType()) || (Style().IsOriginalDisplayInlineType()))
+        && ((oldStyle->IsOriginalDisplayBlockType()) || (oldStyle->IsOriginalDisplayInlineType())))
+    {
+      Parent()->SetChildNeedsLayout();
+    }
+
+    if (RequiresLayer())
+    {
+      // FIXME: No layers inside hidden SVG subtrees (layerCreationAllowedForSubtree), once there's SVG.
+      if (!Layer())
+      {
+        if (s_wasFloating && IsFloating())
+        {
+          SetChildNeedsLayout();
+        }
+        CreateLayer();
+        if (Parent() && !NeedsLayout())
+        {
+          Layer()->SetRepaintStatus(RepaintStatus::NeedsFullRepaint);
+        }
+      }
+    }
+    else if (Layer() && Layer()->Parent())
+    {
+      if (oldStyle && oldStyle->HasBlendMode())
+      {
+        Layer()->WillRemoveChildWithBlendMode();
+      }
+      // All transform-related properties force layers, so we know we don't have one or the object doesn't
+      // support them.
+      SetHasTransformRelatedProperty(false);
+
+      // FIXME: Repaint the about to be destroyed self-painting layer, once there's painting.
+
+      Layer()->RemoveOnlyThisLayer(); // calls destroyLayer() which clears m_layer
+      if (s_wasFloating && IsFloating())
+      {
+        SetChildNeedsLayout();
+      }
+      if (s_wasTransformed)
+      {
+        SetNeedsLayoutAndPreferredWidthsUpdate();
+      }
+    }
+
+    if (Layer())
+    {
+      Layer()->StyleChanged(diff, oldStyle);
+      if (s_hadLayer && Layer()->IsSelfPaintingLayer() != s_layerWasSelfPainting)
+      {
+        SetChildNeedsLayout();
+      }
+    }
+
+    // FIXME: Viewport-constrained objects, scrollbar steps and scroll snap containers, once there's
+    // scrolling.
+  }
+
+  TransformationMatrix *RenderLayerModelObject::LayerTransform() const noexcept
+  {
+    if (HasLayer())
+    {
+      return Layer()->Transform();
+    }
+    return nullptr;
+  }
+
+  void RenderLayerModelObject::UpdateLayerTransform() noexcept
+  {
+    // FIXME: Boxes with an offset path that depends on the containing block's layout update after it
+    // (setBoxNeedsTransformUpdateAfterContainerLayout), once there are motion paths.
+    // Transform-origin depends on box size, so we need to update the layer transform after layout.
+    if (HasLayer())
+    {
+      Layer()->UpdateTransform();
+    }
+  }
+
+  void RenderLayerModelObject::ApplyTransform(TransformationMatrix &transform, const RenderStyle &style,
+                                              const FloatRect &boundingBox) const noexcept
+  {
+    // FIXME: Shouldn't this be using Style::TransformResolver::individualTransformOperations?
+    ApplyTransform(transform, style, boundingBox, style::TransformResolver::AllTransformOperations);
   }
 }

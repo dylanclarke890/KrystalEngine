@@ -51,6 +51,10 @@ namespace krys::boo
     }
 
   private:
+    KRYS_NODISCARD bool RequiresLayer() const noexcept final
+    {
+      return false;
+    }
     KRYS_NODISCARD LayoutUnit MarginTop() const noexcept final
     {
       return 0_lu;

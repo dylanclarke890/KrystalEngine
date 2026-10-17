@@ -38,6 +38,7 @@ namespace krys::boo
 {
   class RenderBlock;
   class RenderBoxModelObject;
+  class RenderLayer;
 
   /// @brief A renderer with its own style: an element's, or an anonymous box's.
   class RenderElement : public RenderObject
@@ -232,6 +233,31 @@ namespace krys::boo
     KRYS_NODISCARD bool HasClip() const noexcept;
     KRYS_NODISCARD bool HasClipOrNonVisibleOverflow() const noexcept;
 
+    KRYS_NODISCARD bool HasClipPath() const noexcept;
+    KRYS_NODISCARD bool HasFilter() const noexcept;
+    KRYS_NODISCARD bool HasMask() const noexcept;
+    KRYS_NODISCARD bool HasBackdropFilter() const noexcept;
+    KRYS_NODISCARD bool HasBlendMode() const noexcept;
+    KRYS_NODISCARD bool IsTransparent() const noexcept;
+    KRYS_NODISCARD bool HasHiddenBackface() const noexcept;
+    KRYS_NODISCARD static bool CreatesGroupForStyle(const RenderStyle &style) noexcept;
+    KRYS_NODISCARD bool CreatesGroup() const noexcept
+    {
+      return CreatesGroupForStyle(Style());
+    }
+    KRYS_NODISCARD bool HasViewTransitionName() const noexcept;
+    KRYS_NODISCARD bool IsViewTransitionRoot() const noexcept;
+    KRYS_NODISCARD bool RequiresRenderingConsolidationForViewTransition() const noexcept;
+
+    KRYS_NODISCARD FloatRect TransformReferenceBoxRect() const noexcept;
+    KRYS_NODISCARD FloatRect TransformReferenceBoxRect(const RenderStyle &style) const noexcept;
+    KRYS_NODISCARD virtual FloatRect ReferenceBoxRect(CSSBoxType boxType) const noexcept;
+
+    KRYS_NODISCARD RenderLayer *LayerParent() const noexcept;
+    KRYS_NODISCARD RenderLayer *LayerNextSibling(RenderLayer &parentLayer) const noexcept;
+    void RemoveLayers() noexcept;
+    void MoveLayers(RenderLayer &newParent) noexcept;
+
     KRYS_NODISCARD bool CanEstablishContainingBlockWithTransform() const noexcept;
     KRYS_NODISCARD bool
       MayContainOutOfFlowPositionedObjects(const RenderStyle *styleToUse = nullptr) const noexcept;
@@ -248,10 +274,6 @@ namespace krys::boo
     KRYS_NODISCARD bool ShouldApplyStyleContainment() const noexcept;
     KRYS_NODISCARD bool ShouldApplyPaintContainment(const RenderStyle *styleToUse = nullptr) const noexcept;
     KRYS_NODISCARD bool HasEligibleContainmentForSizeQuery() const noexcept;
-
-    // FIXME: Layout queries, reachable only through `RendererOf` and `RenderBoxOf`, which return null until
-    // there's layout.
-    KRYS_NODISCARD FloatRect TransformReferenceBoxRect(const RenderStyle &) const noexcept;
 
   protected:
     RenderElement(Type type, dom::Element &element, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags,

@@ -84,7 +84,8 @@ namespace krys::boo
 
     ClearOverflow();
     AddVisualEffectOverflow();
-    // FIXME: Repaint after layout and update the layer transform, once there are layers and painting.
+    UpdateLayerTransform();
+    // FIXME: Repaint after layout, once there's painting.
     InvalidateBackgroundObscurationStatus();
     ClearNeedsLayout();
 

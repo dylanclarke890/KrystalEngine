@@ -24,6 +24,7 @@ namespace krys::boo
 {
   class RenderBlock;
   class RenderElement;
+  class RenderLayer;
   class RenderTreeBuilder;
   class RenderView;
 
@@ -678,6 +679,10 @@ namespace krys::boo
       return _stateFlags.Contains(StateFlag::HasTransformRelatedProperty);
     }
     KRYS_NODISCARD bool IsTransformed() const noexcept;
+
+    KRYS_NODISCARD RenderLayer *EnclosingLayer() const noexcept;
+
+    KRYS_NODISCARD bool IsSkippedContent() const noexcept;
     KRYS_NODISCARD bool HasTransformOrPerspective() const noexcept;
 
     KRYS_NODISCARD bool PaintContainmentApplies() const noexcept

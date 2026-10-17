@@ -146,4 +146,12 @@ namespace krys::boo
     // FIXME: The bounding box of the inline's line boxes, once there's inline layout.
     return {};
   }
+
+  bool RenderInline::RequiresLayer() const noexcept
+  {
+    // FIXME: Running accelerated animations too, once there are any.
+    return IsInFlowPositioned() || CreatesGroup() || HasClipPath()
+           || Style().GetWillChange().CanCreateStackingContext()
+           || RequiresRenderingConsolidationForViewTransition();
+  }
 }

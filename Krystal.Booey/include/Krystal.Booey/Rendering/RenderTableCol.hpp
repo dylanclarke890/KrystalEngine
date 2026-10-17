@@ -36,6 +36,10 @@ namespace krys::boo
     {
       krys_debug_assert(false);
     }
+    KRYS_NODISCARD bool RequiresLayer() const noexcept override
+    {
+      return false;
+    }
 
   public:
     KRYS_NODISCARD bool IsTableColumn() const noexcept;

@@ -13,6 +13,7 @@
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
+#include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/RenderTableCaption.hpp"
@@ -705,11 +706,6 @@ namespace krys::boo
     return false;
   }
 
-  FloatRect RenderElement::TransformReferenceBoxRect(const RenderStyle &) const noexcept
-  {
-    krys_unreachable();
-  }
-
   dom::Element *RenderElement::GetElement() const noexcept
   {
     return static_cast<dom::Element *>(GetNode());
@@ -789,16 +785,255 @@ namespace krys::boo
     return RenderPtr<RenderObject>(&renderer);
   }
 
+  bool RenderElement::HasClipPath() const noexcept
+  {
+    return Style().HasClipPath();
+  }
+
+  bool RenderElement::HasFilter() const noexcept
+  {
+    return Style().HasFilter();
+  }
+
+  bool RenderElement::HasMask() const noexcept
+  {
+    return Style().HasMask();
+  }
+
+  bool RenderElement::HasBackdropFilter() const noexcept
+  {
+    return Style().HasBackdropFilter();
+  }
+
+  bool RenderElement::HasBlendMode() const noexcept
+  {
+    return Style().HasBlendMode();
+  }
+
+  bool RenderElement::IsTransparent() const noexcept
+  {
+    return Style().HasOpacity();
+  }
+
+  bool RenderElement::HasHiddenBackface() const noexcept
+  {
+    return Style().GetBackfaceVisibility() == BackfaceVisibility::Hidden;
+  }
+
+  bool RenderElement::CreatesGroupForStyle(const RenderStyle &style) noexcept
+  {
+    return style.HasOpacity() || style.HasMask() || style.HasClipPath() || style.HasFilter()
+           || style.HasBackdropFilter() || style.HasBlendMode();
+  }
+
+  bool RenderElement::HasViewTransitionName() const noexcept
+  {
+    return !Style().GetViewTransitionName().IsNone();
+  }
+
+  bool RenderElement::IsViewTransitionRoot() const noexcept
+  {
+    return Style().GetPseudoElementType() == PseudoElementType::ViewTransition;
+  }
+
+  bool RenderElement::RequiresRenderingConsolidationForViewTransition() const noexcept
+  {
+    // FIXME: Renderers captured in a view transition too, once there are view transitions.
+    return HasViewTransitionName();
+  }
+
+  FloatRect RenderElement::TransformReferenceBoxRect() const noexcept
+  {
+    return TransformReferenceBoxRect(Style());
+  }
+
+  FloatRect RenderElement::TransformReferenceBoxRect(const RenderStyle &style) const noexcept
+  {
+    return ReferenceBoxRect(TransformBoxToCSSBoxType(style.GetTransformBox()));
+  }
+
+  FloatRect RenderElement::ReferenceBoxRect(CSSBoxType) const noexcept
+  {
+    // CSS box model code is implemented in RenderBox::referenceBoxRect().
+    // FIXME: The reference boxes of SVG renderers, once there's SVG.
+    return {};
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD RenderLayer *FindNextLayer(const RenderElement &currRenderer,
+                                              const RenderLayer &parentLayer,
+                                              const RenderObject *siblingToTraverseFrom,
+                                              bool checkParent = true) noexcept
+    {
+      // Step 1: If our layer is a child of the desired parent, then return our layer.
+      auto *ourLayer =
+        currRenderer.HasLayer() ? Downcast<RenderLayerModelObject>(currRenderer).Layer() : nullptr;
+      if (ourLayer && ourLayer->Parent() == &parentLayer)
+      {
+        return ourLayer;
+      }
+
+      // Step 2: If we don't have a layer, or our layer is the desired parent, then descend
+      // into our siblings trying to find the next layer whose parent is the desired parent.
+      if (!ourLayer || ourLayer == &parentLayer)
+      {
+        for (auto *child = siblingToTraverseFrom ? siblingToTraverseFrom->NextSibling()
+                                                 : currRenderer.FirstChild();
+             child; child = child->NextSibling())
+        {
+          auto *element = DynamicDowncast<RenderElement>(*child);
+          if (!element)
+          {
+            continue;
+          }
+          if (auto *nextLayer = FindNextLayer(*element, parentLayer, nullptr, false))
+          {
+            return nextLayer;
+          }
+        }
+      }
+
+      // Step 3: If our layer is the desired parent layer, then we're finished. We didn't
+      // find anything.
+      if (ourLayer == &parentLayer)
+      {
+        return nullptr;
+      }
+
+      // Step 4: If |checkParent| is set, climb up to our parent and check its siblings that
+      // follow us to see if we can locate a layer.
+      if (checkParent && currRenderer.Parent())
+      {
+        return FindNextLayer(*currRenderer.Parent(), parentLayer, &currRenderer, true);
+      }
+
+      return nullptr;
+    }
+
+    KRYS_NODISCARD RenderLayer *LayerNextSiblingRespectingTopLayer(const RenderElement &renderer,
+                                                                   const RenderLayer &parentLayer) noexcept
+    {
+      // FIXME: Top layer renderers follow the top layer's order (topLayerRenderLayers), once there's a top
+      // layer.
+      return FindNextLayer(*renderer.Parent(), parentLayer, &renderer);
+    }
+
+    void AddLayers(const RenderElement &insertedRenderer, RenderElement &currentRenderer,
+                   RenderLayer &parentLayer) noexcept
+    {
+      if (currentRenderer.HasLayer())
+      {
+        // FIXME: Top layer and backdrop renderers go in the view's layer, once there's a top layer.
+        auto *beforeChild = LayerNextSiblingRespectingTopLayer(insertedRenderer, parentLayer);
+        parentLayer.AddChild(*Downcast<RenderLayerModelObject>(currentRenderer).Layer(), beforeChild);
+        return;
+      }
+
+      for (auto &child : ChildrenOfType<RenderElement>(currentRenderer))
+      {
+        AddLayers(insertedRenderer, child, parentLayer);
+      }
+    }
+  }
+
+  void RenderElement::RemoveLayers() noexcept
+  {
+    auto *parentLayer = LayerParent();
+    if (!parentLayer)
+    {
+      return;
+    }
+
+    if (HasLayer())
+    {
+      parentLayer->RemoveChild(*Downcast<RenderLayerModelObject>(*this).Layer());
+      return;
+    }
+
+    for (auto &child : ChildrenOfType<RenderElement>(*this))
+    {
+      child.RemoveLayers();
+    }
+  }
+
+  void RenderElement::MoveLayers(RenderLayer &newParent) noexcept
+  {
+    if (HasLayer())
+    {
+      // FIXME: Top layer and backdrop renderers stay in the view's layer, once there's a top layer.
+      auto *layer = Downcast<RenderLayerModelObject>(*this).Layer();
+      if (auto *layerParent = layer->Parent())
+      {
+        layerParent->RemoveChild(*layer);
+      }
+      newParent.AddChild(*layer);
+      return;
+    }
+
+    for (auto &child : ChildrenOfType<RenderElement>(*this))
+    {
+      child.MoveLayers(newParent);
+    }
+  }
+
+  RenderLayer *RenderElement::LayerParent() const noexcept
+  {
+    // FIXME: Top layer and backdrop renderers' layers are children of the view's layer, once there's a top
+    // layer.
+    return Parent()->EnclosingLayer();
+  }
+
+  // This answers the question "if this renderer had a layer, what would its next sibling layer be".
+  RenderLayer *RenderElement::LayerNextSibling(RenderLayer &parentLayer) const noexcept
+  {
+    return LayerNextSiblingRespectingTopLayer(*this, parentLayer);
+  }
+
   void RenderElement::InsertedIntoTree() noexcept
   {
-    // FIXME: Keep the layer hierarchy updated and the parent layer's visible content status, once there are
-    // layers.
+    // Keep our layer hierarchy updated. Optimize for the common case where we don't have any children
+    // and don't have a layer attached to ourselves.
+    if (FirstChild() || HasLayer())
+    {
+      if (auto *parentLayer = LayerParent())
+      {
+        AddLayers(*this, *this, *parentLayer);
+      }
+    }
+
+    // If |this| is visible but this object was not, tell the layer it has some visible content
+    // that needs to be drawn and layer visibility optimization can't be used
+    if (Parent()->Style().UsedVisibility() != Visibility::Visible
+        && Style().UsedVisibility() == Visibility::Visible && !HasLayer())
+    {
+      if (auto *parentLayer = LayerParent())
+      {
+        parentLayer->DirtyVisibleContentStatus();
+      }
+    }
+
     RenderObject::InsertedIntoTree();
   }
 
   void RenderElement::WillBeRemovedFromTree() noexcept
   {
-    // FIXME: The enclosing layer's visible content status and the layer hierarchy, once there are layers.
+    // If we remove a visible child from an invisible parent, we don't know the layer visibility any more.
+    if (Parent()->Style().UsedVisibility() != Visibility::Visible
+        && Style().UsedVisibility() == Visibility::Visible && !HasLayer())
+    {
+      // FIXME: should get parent layer. Necessary?
+      if (auto *enclosingLayer = Parent()->EnclosingLayer())
+      {
+        enclosingLayer->DirtyVisibleContentStatus();
+      }
+    }
+    // Keep our layer hierarchy updated.
+    if (FirstChild() || HasLayer())
+    {
+      RemoveLayers();
+    }
+
     RenderObject::WillBeRemovedFromTree();
   }
 
