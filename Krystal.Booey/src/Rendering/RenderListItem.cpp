@@ -290,7 +290,10 @@ namespace krys::boo
   void RenderListItem::UpdateValue() noexcept
   {
     _value = null;
-    // FIXME: Mark the marker for layout and a preferred widths update, once there's layout.
+    if (_marker)
+    {
+      _marker->SetNeedsLayoutAndPreferredWidthsUpdate();
+    }
   }
 
   void RenderListItem::StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept
@@ -324,7 +327,10 @@ namespace krys::boo
 
   void RenderListItem::CounterDirectivesChanged() noexcept
   {
-    // FIXME: Mark the marker for layout and a preferred widths update, once there's layout.
+    if (_marker)
+    {
+      _marker->SetNeedsLayoutAndPreferredWidthsUpdate();
+    }
 
     UpdateValue();
     auto *list = EnclosingList(*this);

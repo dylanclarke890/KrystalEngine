@@ -138,7 +138,7 @@ namespace krys::boo
   }
 
   void RenderTreeBuilder::Block::MoveAllChildrenToInternal(RenderBoxModelObject &from,
-                                                          RenderElement &newParent) noexcept
+                                                           RenderElement &newParent) noexcept
   {
     while (from.FirstChild())
     {
@@ -298,7 +298,7 @@ namespace krys::boo
       auto &previousBlock = Downcast<RenderBlock>(*previousSibling);
       auto &nextBlock = Downcast<RenderBlock>(*nextSibling);
 
-      // FIXME: The layout bits, once there's layout.
+      previousBlock.SetNeedsLayoutAndPreferredWidthsUpdate();
       if (previousBlock.ChildrenInline() != nextBlock.ChildrenInline())
       {
         auto &inlineChildrenBlock = previousBlock.ChildrenInline() ? previousBlock : nextBlock;
@@ -317,6 +317,7 @@ namespace krys::boo
         RenderObject *beforeChild =
           &previousBlock == &inlineChildrenBlock ? blockChildrenBlock.FirstChild() : nullptr;
         _builder.AttachToRenderElementInternal(blockChildrenBlock, krys::move(blockToMove), beforeChild);
+        nextBlock.SetNeedsLayoutAndPreferredWidthsUpdate();
 
         // inlineChildrenBlock got reparented to blockChildrenBlock, so it is no longer a child
         // of "this". we null out previousSibling or nextSibling so that is not used later in the function.
@@ -401,7 +402,7 @@ namespace krys::boo
 
   void RenderTreeBuilder::Block::DropAnonymousBoxChild(RenderBlock &parent, RenderBlock &child) noexcept
   {
-    // FIXME: The layout bits, once there's layout.
+    parent.SetNeedsLayoutAndPreferredWidthsUpdate();
     parent.SetChildrenInline(child.ChildrenInline());
 
     // FIXME: This should really just be a moveAllChilrenTo (see webkit.org/b/182495)

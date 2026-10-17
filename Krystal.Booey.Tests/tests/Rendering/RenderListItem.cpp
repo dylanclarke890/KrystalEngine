@@ -110,6 +110,9 @@ namespace krys::boo::tests
       CHECK(Item(fixture, u8"s1").Value() == 6);
       CHECK(Item(fixture, u8"s2").Value() == 7);
 
+      // Removing an item renumbers the following ones once it has been laid out.
+      (void)document.UpdateLayout();
+      CHECK(Downcast<RenderListItem>(*inserted->Renderer()).EverHadLayout());
       REQUIRE_FALSE(inserted->Remove().HasException());
       document.UpdateStyleIfNeeded();
       CHECK(Item(fixture, u8"s1").Value() == 5);

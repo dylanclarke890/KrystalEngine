@@ -66,4 +66,18 @@ namespace krys::boo
   {
     return std::exchange(_countersNeedingUpdate, {});
   }
+
+  void RenderView::Layout() noexcept
+  {
+    // FIXME: Printing (the page size and the preferred widths it sets), and relaying out the children whose
+    // height depends on the view when its size changes, once there's box geometry.
+
+    if (!NeedsLayout())
+    {
+      return;
+    }
+
+    // FIXME: The layout state, and the initial containing block's size, once there's box geometry.
+    RenderBlockFlow::Layout();
+  }
 }

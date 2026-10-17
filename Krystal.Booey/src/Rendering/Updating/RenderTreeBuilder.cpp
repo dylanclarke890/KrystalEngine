@@ -386,8 +386,53 @@ namespace krys::boo
       }
     }
 
-    // FIXME: The layout bits of the child and its parent, the accessibility cache and outline-auto ancestors,
-    // once there are any.
+    newChild->SetNeedsLayoutAndPreferredWidthsUpdate();
+    auto isOutOfFlowBox = newChild->Style().HasOutOfFlowPosition();
+    if (!isOutOfFlowBox)
+    {
+      parent.SetNeedsPreferredWidthsUpdate();
+    }
+
+    if (!parent.NormalChildNeedsLayout())
+    {
+      if (isOutOfFlowBox)
+      {
+        auto isEligibleForStaticPositionLayoutOnly = [&]
+        {
+          // setNeedsLayoutAndPreferredWidthsUpdate above already takes care of propagating dirty bits on the
+          // ancestor chain, but in order to compute static position for out of flow boxes, the parent has to
+          // run normal flow layout as well (as opposed to simplified)
+          if (newChild->ContainingBlock() != &parent)
+          {
+            return false;
+          }
+          // FIXME: Video, once there's video.
+          // Since we can't actually run static position only layout for a block container
+          // (RenderBlockFlow::layoutBlock() does not have such fine grained layout flow) floats get rebuilt
+          // which assumes (see intruding floats) parent block containers do the same.
+          // FIXME: Whether the block contains floats, once there are floating objects; until then, no block
+          // is eligible.
+          return !Is<RenderBlock>(parent);
+        };
+        if (isEligibleForStaticPositionLayoutOnly())
+        {
+          // FIXME: Introduce a dirty bit to bridge the gap between parent and containing block which would
+          // not trigger layout but a simple traversal all the way to the direct parent and also expand it
+          // non-direct parent cases.
+          parent.SetOutOfFlowChildNeedsStaticPositionLayout();
+        }
+        else
+        {
+          parent.SetChildNeedsLayout();
+        }
+      }
+      else
+      {
+        parent.SetChildNeedsLayout();
+      }
+    }
+
+    // FIXME: The accessibility cache and outline-auto ancestors, once there are any.
   }
 
   void RenderTreeBuilder::Move(RenderBoxModelObject &from, RenderBoxModelObject &to, RenderObject &child,
@@ -890,9 +935,30 @@ namespace krys::boo
     return takenChild;
   }
 
+  static void ResetRendererStateOnDetach(RenderElement &, RenderObject &child,
+                                         RenderTreeBuilder::WillBeDestroyed willBeDestroyed,
+                                         RenderTreeBuilder::IsInternalMove isInternalMove) noexcept
+  {
+    // FIXME: Remove floating and out-of-flow boxes from their blocks' lists, and clear a flex box's cached
+    // sizes of the item, once there's block and flex layout.
+
+    if (willBeDestroyed == RenderTreeBuilder::WillBeDestroyed::No)
+    {
+      child.SetNeedsLayoutAndPreferredWidthsUpdate();
+    }
+
+    // FIXME: The legacy text boxes of SVG text, once there's SVG.
+
+    if (auto *listItemRenderer = DynamicDowncast<RenderListItem>(child);
+        listItemRenderer && isInternalMove == RenderTreeBuilder::IsInternalMove::No)
+    {
+      listItemRenderer->UpdateListMarkerNumbers();
+    }
+  }
+
   RenderPtr<RenderObject> RenderTreeBuilder::DetachFromRenderElement(RenderElement &parent,
                                                                      RenderObject &child,
-                                                                     WillBeDestroyed) noexcept
+                                                                     WillBeDestroyed willBeDestroyed) noexcept
   {
     // FIXME: Assert layout isn't mutating the render tree, once there's layout.
     krys_debug_assert(parent.CanHaveChildren() || parent.CanHaveGeneratedChildren());
@@ -903,13 +969,13 @@ namespace krys::boo
       return parent.DetachRendererInternal(child);
     }
 
-    // FIXME: Resetting the state of renderers that had layout, line layout invalidation and the fragmented
-    // flow state, once there's layout.
-    if (auto *listItemRenderer = DynamicDowncast<RenderListItem>(child);
-        listItemRenderer && _internalMovesType == IsInternalMove::No)
+    if (child.EverHadLayout())
     {
-      listItemRenderer->UpdateListMarkerNumbers();
+      ResetRendererStateOnDetach(parent, child, willBeDestroyed, _internalMovesType);
     }
+
+    // FIXME: Line layout invalidation and the fragmented flow state, once there's line layout and fragmented
+    // flows.
 
     child.WillBeRemovedFromTree();
     // WARNING: There should be no code running between willBeRemovedFromTree() and the actual removal below.
@@ -934,12 +1000,13 @@ namespace krys::boo
     BlockBuilder().Attach(parent, krys::move(child), beforeChild);
   }
 
-  void RenderTreeBuilder::MarkBoxForRelayoutAfterSplit(RenderBoxModelObject &) noexcept
+  void RenderTreeBuilder::MarkBoxForRelayoutAfterSplit(RenderBoxModelObject &box) noexcept
   {
     // FIXME: The table code should handle that automatically. If not,
     // we should fix it and remove the table part checks.
-    // FIXME: Recalculate the table's sections or the section's cells, and mark the box for layout, once
-    // there's layout.
+    // FIXME: Recalculate the table's sections or the section's cells, once there's table layout.
+
+    box.SetNeedsLayoutAndPreferredWidthsUpdate();
   }
 
   void RenderTreeBuilder::RemoveFloatingObjects(RenderBlock &) noexcept

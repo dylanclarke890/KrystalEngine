@@ -805,6 +805,65 @@ namespace krys::boo
     InvalidateRebuildRootIfNeeded(text);
   }
 
+  enum class DidRepaintAndMarkContainingBlock : bool
+  {
+    No,
+    Yes
+  };
+  static Maybe<DidRepaintAndMarkContainingBlock>
+    RepaintAndMarkContainingBlockDirtyBeforeTearDown(const dom::Element &root,
+                                                     auto composedTreeDescendants) noexcept
+  {
+    auto *destroyRootRenderer = root.Renderer();
+    if (destroyRootRenderer && destroyRootRenderer->RenderTreeBeingDestroyed())
+    {
+      return null;
+    }
+
+    auto markContainingBlockDirty = [&](RenderElement &renderer)
+    {
+      auto *container = renderer.Container();
+      if (!container)
+      {
+        krys_debug_assert(false);
+        renderer.SetNeedsLayout();
+        return;
+      }
+      if (!renderer.IsOutOfFlowPositioned())
+      {
+        container->SetChildNeedsLayout();
+        container->SetNeedsPreferredWidthsUpdate();
+        return;
+      }
+      container->SetNeedsLayoutForOverflowChange();
+    };
+
+    // FIXME: Repaint the destroy root and the ::backdrop renderers, once there's painting.
+    if (destroyRootRenderer)
+    {
+      markContainingBlockDirty(*destroyRootRenderer);
+    }
+
+    for (auto it = composedTreeDescendants.begin(), end = composedTreeDescendants.end(); it != end;
+         it.TraverseNext())
+    {
+      auto *renderElement = DynamicDowncast<RenderElement>(it->Renderer());
+      if (!renderElement)
+      {
+        continue;
+      }
+      // FIXME: Clear the selection if the renderer is at one of its ends, and repaint floats and positioned
+      // boxes, once there's selection and painting.
+      if (renderElement->IsOutOfFlowPositioned())
+      {
+        // FIXME: Ideally we would check if containing block is the destory root or a descendent of the
+        // destroy root.
+        markContainingBlockDirty(*renderElement);
+      }
+    }
+    return destroyRootRenderer ? DidRepaintAndMarkContainingBlock::Yes : DidRepaintAndMarkContainingBlock::No;
+  }
+
   void RenderTreeUpdater::TearDownRenderers(dom::Element &root, TeardownType teardownType,
                                             RenderTreeBuilder &builder) noexcept
   {
@@ -816,7 +875,7 @@ namespace krys::boo
       teardownStack.push_back(&element);
     };
 
-    auto pop = [&](uint32 depth)
+    auto pop = [&](uint32 depth, NeedsRepaintAndLayout needsRepaintAndLayout)
     {
       while (teardownStack.size() > depth)
       {
@@ -851,7 +910,16 @@ namespace krys::boo
 
         if (auto *renderer = element.Renderer())
         {
-          // FIXME: Repaint and layout invalidation, and the ::backdrop renderer, once there are any.
+          if (needsRepaintAndLayout == NeedsRepaintAndLayout::Yes)
+          {
+            // FIXME: Repaint the renderer, once there's painting.
+            if (auto *parent = renderer->Parent())
+            {
+              parent->SetChildNeedsLayout();
+              parent->SetNeedsPreferredWidthsUpdate();
+            }
+          }
+          // FIXME: The ::backdrop renderer, once there's a top layer.
           builder.DestroyAndCleanUpAnonymousWrappers(*renderer, root.Renderer());
           element.SetRenderer(nullptr);
         }
@@ -862,22 +930,26 @@ namespace krys::boo
 
     push(root);
 
-    // FIXME: Repaint and mark containing blocks dirty before the teardown, once there's layout.
     auto descendants = dom::ComposedTreeDescendants(root);
+    auto didRepaintRoot = RepaintAndMarkContainingBlockDirtyBeforeTearDown(root, descendants);
+    auto needsDescendantRepaintAndLayout =
+      !didRepaintRoot || *didRepaintRoot == DidRepaintAndMarkContainingBlock::Yes
+        ? NeedsRepaintAndLayout::No
+        : NeedsRepaintAndLayout::Yes;
     for (auto it = descendants.begin(), end = descendants.end(); it != end; it.TraverseNext())
     {
-      pop(it.Depth());
+      pop(it.Depth(), needsDescendantRepaintAndLayout);
 
       if (auto *text = DynamicDowncast<dom::Text>(*it))
       {
-        TearDownTextRenderer(*text, &root, builder);
+        TearDownTextRenderer(*text, &root, builder, needsDescendantRepaintAndLayout);
         continue;
       }
 
       push(Downcast<dom::Element>(*it));
     }
 
-    pop(0);
+    pop(0, needsDescendantRepaintAndLayout);
 
     // FIXME: Leftover pagination renderers, once there's multi-column layout.
   }
@@ -893,7 +965,7 @@ namespace krys::boo
       }
       if (auto *text = DynamicDowncast<dom::Text>(*child))
       {
-        TearDownTextRenderer(*text, &element, builder);
+        TearDownTextRenderer(*text, &element, builder, NeedsRepaintAndLayout::No);
         continue;
       }
       if (auto *childElement = DynamicDowncast<dom::Element>(*child))
@@ -904,14 +976,23 @@ namespace krys::boo
   }
 
   void RenderTreeUpdater::TearDownTextRenderer(dom::Text &text, const dom::ContainerNode *root,
-                                               RenderTreeBuilder &builder) noexcept
+                                               RenderTreeBuilder &builder,
+                                               NeedsRepaintAndLayout needsRepaintAndLayout) noexcept
   {
     auto *renderer = text.Renderer();
     if (!renderer)
     {
       return;
     }
-    // FIXME: Repaint and layout invalidation, once there's layout.
+    if (needsRepaintAndLayout == NeedsRepaintAndLayout::Yes)
+    {
+      // FIXME: Repaint the renderer, once there's painting.
+      if (auto *parent = renderer->Parent())
+      {
+        parent->SetChildNeedsLayout();
+        parent->SetNeedsPreferredWidthsUpdate();
+      }
+    }
     builder.DestroyAndCleanUpAnonymousWrappers(
       *renderer, root ? DynamicDowncast<RenderElement>(root->Renderer()) : nullptr);
     text.SetRenderer(nullptr);

@@ -7,9 +7,6 @@
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderCounter.hpp"
-#include "Krystal.Booey/Style/PseudoElementRequest.hpp"
-#include "Krystal.Booey/Style/ResolvedStyle.hpp"
-#include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
@@ -25,6 +22,9 @@
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Style/PseudoElementRequest.hpp"
+#include "Krystal.Booey/Style/ResolvedStyle.hpp"
+#include "Krystal.Booey/Style/Resolver.hpp"
 
 namespace krys::boo
 {
@@ -213,6 +213,7 @@ namespace krys::boo
     StyleWillChange(diff, style);
     auto oldStyle = krys::move(_style);
     _style = krys::move(style);
+    bool detachedFromParent = !Parent();
 
     // FIXME: The fragmented flow state when the containing block changes, once there are fragmented flows.
 
@@ -224,8 +225,25 @@ namespace krys::boo
       child.StyleDidChange(diff, &oldStyle);
     }
 
-    // FIXME: Adjust the difference again and do the layout and repaint it asks for, once there are layout and
-    // painting.
+    // FIXME: |this| might be destroyed here. This can currently happen for a RenderTextFragment when
+    // its first-letter block gets an update in RenderTextFragment::styleDidChange. For RenderTextFragment(s),
+    // we will safely bail out with the detachedFromParent flag. We might want to broaden this condition
+    // in the future as we move renderer changes out of layout and into style changes.
+    if (detachedFromParent)
+    {
+      return;
+    }
+
+    // Now that the layer (if any) has been updated, we need to adjust the diff again,
+    // check whether we should layout now, and decide if we need to repaint.
+    auto updatedDiff = AdjustStyleDifference(diff);
+
+    if (diff <= style::DifferenceResult::LayoutOutOfFlowMovementOnly)
+    {
+      SetNeedsLayoutForStyleDifference(updatedDiff, &oldStyle);
+    }
+
+    // FIXME: The repaint the difference asks for, once there's painting.
   }
 
   void RenderElement::StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept
@@ -328,8 +346,21 @@ namespace krys::boo
     {
       RenderCounter::RendererStyleChanged(*this, oldStyle, _style);
 
-      // FIXME: The layout the difference asks for, once there's layout.
+      // If the object already needs layout, then setNeedsLayout won't do
+      // any work. But if the containing block has changed, then we may need
+      // to mark the new containing blocks for layout. The change that can
+      // directly affect the containing block of this object is a change to
+      // the position style.
+      if (NeedsLayout() && oldStyle && oldStyle->GetPosition() != _style.GetPosition())
+      {
+        ScheduleLayout(MarkContainingBlocksForLayout());
+      }
     }
+
+    SetNeedsLayoutForStyleDifference(diff, oldStyle);
+
+    // FIXME: An out-of-flow box whose original display changed between block and inline marks its static
+    // position's containing block, once there's out-of-flow layout.
 
     // FIXME: Out-of-flow static positions, cursors, outline-auto ancestors, scroll anchoring and line layout,
     // once there are any.
@@ -706,4 +737,110 @@ namespace krys::boo
     // clean-up, once there are any.
     RenderObject::WillBeDestroyed();
   }
+
+#pragma region Layout
+
+  void RenderElement::Layout() noexcept
+  {
+    krys_debug_assert(NeedsLayout());
+    for (auto *child = FirstChild(); child; child = child->NextSibling())
+    {
+      if (child->NeedsLayout())
+      {
+        Downcast<RenderElement>(*child).Layout();
+      }
+      krys_debug_assert(!child->NeedsLayout());
+    }
+    ClearNeedsLayout();
+  }
+
+  void RenderElement::SetChildNeedsLayout(MarkingBehavior markParents) noexcept
+  {
+    krys_debug_assert(!IsSetNeedsLayoutForbidden());
+    if (NormalChildNeedsLayout())
+    {
+      return;
+    }
+    SetNormalChildNeedsLayoutBit(true);
+    if (markParents == MarkingBehavior::MarkContainingBlockChain)
+    {
+      ScheduleLayout(MarkContainingBlocksForLayout());
+    }
+  }
+
+  void RenderElement::SetNeedsOutOfFlowMovementLayout(const RenderStyle *) noexcept
+  {
+    krys_debug_assert(!IsSetNeedsLayoutForbidden());
+    if (NeedsOutOfFlowMovementLayout())
+    {
+      return;
+    }
+    SetNeedsOutOfFlowMovementLayoutBit(true);
+    ScheduleLayout(MarkContainingBlocksForLayout());
+    // FIXME: Mark the layer as needing a full repaint, once there are layers.
+  }
+
+  void RenderElement::ClearChildNeedsLayout() noexcept
+  {
+    SetNormalChildNeedsLayoutBit(false);
+    SetOutOfFlowChildNeedsLayoutBit(false);
+    SetNeedsSimplifiedNormalFlowLayoutBit(false);
+    SetNeedsOutOfFlowMovementLayoutBit(false);
+    SetOutOfFlowChildNeedsStaticPositionLayoutBit(false);
+  }
+
+  void RenderElement::SetNeedsLayoutForStyleDifference(style::Difference diff,
+                                                       const RenderStyle *oldStyle) noexcept
+  {
+    if (diff == style::DifferenceResult::Layout)
+    {
+      SetNeedsLayoutAndPreferredWidthsUpdate();
+    }
+    else if (diff == style::DifferenceResult::LayoutOutOfFlowMovementOnly)
+    {
+      SetNeedsOutOfFlowMovementLayout(oldStyle);
+    }
+    else if (diff == style::DifferenceResult::OverflowAndOutOfFlowMovement)
+    {
+      SetNeedsOutOfFlowMovementLayout(oldStyle);
+      SetNeedsLayoutForOverflowChange();
+    }
+    else if (diff == style::DifferenceResult::Overflow)
+    {
+      SetNeedsLayoutForOverflowChange();
+    }
+  }
+
+  void RenderElement::SetNeedsLayoutForOverflowChange() noexcept
+  {
+    krys_debug_assert(!IsSetNeedsLayoutForbidden());
+    // FIXME: Eagerly preventing simplified layout due to the (unlikely) possibility of a size change
+    // is possibly wasteful. We could in theory detect an actual change during layout, and
+    // unwind back to restart proper layout.
+    if (OverflowChangesMayAffectLayout())
+    {
+      SetNeedsLayout();
+      return;
+    }
+    if (NeedsSimplifiedNormalFlowLayout())
+    {
+      return;
+    }
+    SetNeedsSimplifiedNormalFlowLayoutBit(true);
+    ScheduleLayout(MarkContainingBlocksForLayout());
+    // FIXME: Mark the layer as needing a full repaint, once there are layers.
+  }
+
+  void RenderElement::SetOutOfFlowChildNeedsStaticPositionLayout() noexcept
+  {
+    // FIXME: Currently this dirty bit has a very limited useage but should be expanded to
+    // optimize all kinds of out-of-flow cases.
+    // It's also assumed that regular, positioned child related bits are already set.
+    krys_debug_assert(!IsSetNeedsLayoutForbidden());
+    krys_debug_assert(OutOfFlowChildNeedsLayout() || SelfNeedsLayout() || NeedsSimplifiedNormalFlowLayout()
+                      || !Parent());
+    SetOutOfFlowChildNeedsStaticPositionLayoutBit(true);
+  }
+
+#pragma endregion
 }

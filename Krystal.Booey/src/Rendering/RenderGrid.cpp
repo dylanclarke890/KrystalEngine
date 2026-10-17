@@ -61,4 +61,36 @@ namespace krys::boo
   {
     krys_unreachable();
   }
+
+  bool RenderGrid::IsMasonry() const noexcept
+  {
+    return IsMasonry(style::GridTrackSizingDirection::Rows)
+           || IsMasonry(style::GridTrackSizingDirection::Columns);
+  }
+
+  // Masonry Spec Section 2
+  // "If masonry is specified for both grid-template-columns and grid-template-rows, then the used value for
+  // grid-template-columns is none, and thus the inline axis will be the grid axis."
+  bool RenderGrid::IsMasonry(style::GridTrackSizingDirection direction) const noexcept
+  {
+    // isSubgrid will return false if the masonry axis matches. Need to check style if we are a subgrid
+    const auto &tracks = direction == style::GridTrackSizingDirection::Columns ? Style().GridTemplateColumns()
+                                                                               : Style().GridTemplateRows();
+    if (auto *parentGrid = DynamicDowncast<RenderGrid>(Parent()); parentGrid && tracks.Subgrid)
+    {
+      return parentGrid->IsMasonry(direction);
+    }
+    if (Style().Display() != DisplayType::GridLanes && Style().Display() != DisplayType::InlineGridLanes)
+    {
+      return false;
+    }
+    return (direction == style::GridTrackSizingDirection::Columns) == Style().GetGridAutoFlow().IsColumn();
+  }
+
+  bool RenderGrid::IsExtrinsicallySized() const noexcept
+  {
+    // FIXME: Whether the grid's size doesn't depend on its content (auto width in block layout, fixed height,
+    // no content-sized tracks, and items placed within the explicit tracks), once there's grid layout.
+    return false;
+  }
 }

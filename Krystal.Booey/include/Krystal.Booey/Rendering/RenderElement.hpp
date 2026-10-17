@@ -149,6 +149,29 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsWritingModeRoot() const noexcept;
 
+    /// @brief Lays out this renderer and its descendants that need layout.
+    virtual void Layout() noexcept;
+    void LayoutIfNeeded() noexcept
+    {
+      if (NeedsLayout())
+      {
+        Layout();
+      }
+    }
+
+    void
+      SetChildNeedsLayout(MarkingBehavior markParents = MarkingBehavior::MarkContainingBlockChain) noexcept;
+    void ClearChildNeedsLayout() noexcept;
+    void SetNeedsOutOfFlowMovementLayout(const RenderStyle *oldStyle) noexcept;
+    void SetNeedsLayoutForStyleDifference(style::Difference diff, const RenderStyle *oldStyle) noexcept;
+    void SetNeedsLayoutForOverflowChange() noexcept;
+    void SetOutOfFlowChildNeedsStaticPositionLayout() noexcept;
+
+    KRYS_NODISCARD virtual bool OverflowChangesMayAffectLayout() const noexcept
+    {
+      return false;
+    }
+
     KRYS_NODISCARD bool IsFlexItemIncludingDeprecated() const noexcept
     {
       return !IsInline() && !IsFloatingOrOutOfFlowPositioned() && Parent()

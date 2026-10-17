@@ -4,8 +4,11 @@
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFieldSetElement.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -430,7 +433,9 @@ namespace krys::boo
   {
     krys_debug_assert(!_parent);
 
-    // FIXME: The accessibility cache, view transitions and rare data, once there are any.
+    // FIXME: The accessibility cache and view transitions, once there are any.
+
+    RemoveRareData();
 
     if (auto *node = GetNode())
     {
@@ -487,4 +492,303 @@ namespace krys::boo
     }
     return static_cast<const RenderElement &>(*this).Style();
   }
+
+#pragma region Layout bits
+
+  static bool IsLayoutBoundary(const RenderElement &renderer) noexcept
+  {
+    // FIXME: In future it may be possible to broaden these conditions in order to improve performance.
+    if (renderer.IsRenderView())
+    {
+      return true;
+    }
+
+    const auto &style = renderer.Style();
+    // FIXME: Text controls that aren't flex or grid items and aren't sized by their content, once there are
+    // form controls.
+
+    if (renderer.ShouldApplyLayoutContainment() && renderer.ShouldApplySizeContainment())
+    {
+      return true;
+    }
+
+    // FIXME: SVG roots, once there's SVG.
+
+    if (!renderer.HasNonVisibleOverflow())
+    {
+      // While createsNewFormattingContext (a few lines below) covers this case, overflow visible is a super
+      // common value so we should be able to bail out here fast.
+      return false;
+    }
+
+    if (style.Width().IsIntrinsicOrLegacyIntrinsicOrAuto()
+        || style.Height().IsIntrinsicOrLegacyIntrinsicOrAuto() || style.Height().IsPercentOrCalculated())
+    {
+      return false;
+    }
+
+    // FIXME: Layer-aware SVG renderers, once there's SVG.
+
+    // Table parts can't be relayout roots since the table is responsible for layouting all the parts.
+    if (renderer.IsTablePart())
+    {
+      return false;
+    }
+
+    if (auto *renderBlock = DynamicDowncast<RenderBlock>(renderer);
+        !renderBlock || !renderBlock->CreatesNewFormattingContext())
+    {
+      return false;
+    }
+
+    return true;
+  }
+
+  void RenderObject::ClearNeedsLayout(HadSkippedLayout hadSkippedLayout) noexcept
+  {
+    // FIXME: Consider not setting the "ever had layout" bit to true when "hadSkippedLayout"
+    SetEverHadLayout();
+    SetHadSkippedLayout(hadSkippedLayout == HadSkippedLayout::Yes);
+
+    // FIXME: Tell the layer its and its children's positions need updating, once there are layers.
+    _stateFlags.Remove(StateFlag::NeedsLayout);
+    SetOutOfFlowChildNeedsLayoutBit(false);
+    SetNeedsSimplifiedNormalFlowLayoutBit(false);
+    SetNormalChildNeedsLayoutBit(false);
+    SetOutOfFlowChildNeedsStaticPositionLayoutBit(false);
+    SetNeedsOutOfFlowMovementLayoutBit(false);
+    // FIXME: Assert the out-of-flow descendants of a block don't need layout, once there are out-of-flow box
+    // lists.
+  }
+
+  void RenderObject::ScheduleLayout(RenderElement *layoutRoot) noexcept
+  {
+    if (auto *renderView = DynamicDowncast<RenderView>(layoutRoot))
+    {
+      renderView->FrameView().LayoutContext().ScheduleLayout();
+      return;
+    }
+
+    if (layoutRoot && layoutRoot->IsRooted())
+    {
+      layoutRoot->View().FrameView().LayoutContext().ScheduleSubtreeLayout(*layoutRoot);
+    }
+  }
+
+  void RenderObject::SetNeedsLayout(MarkingBehavior markParents) noexcept
+  {
+    krys_debug_assert(!IsSetNeedsLayoutForbidden());
+    if (SelfNeedsLayout())
+    {
+      return;
+    }
+    _stateFlags.Add(StateFlag::NeedsLayout);
+    if (markParents == MarkingBehavior::MarkContainingBlockChain)
+    {
+      ScheduleLayout(MarkContainingBlocksForLayout());
+    }
+    // FIXME: Mark the layer as needing a full repaint, once there are layers.
+  }
+
+  RenderElement *RenderObject::MarkContainingBlocksForLayout(RenderElement *layoutRoot) noexcept
+  {
+    krys_debug_assert(!IsSetNeedsLayoutForbidden());
+    if (Is<RenderView>(*this))
+    {
+      return Downcast<RenderElement>(this);
+    }
+
+    RenderElement *ancestor = Container();
+
+    bool simplifiedNormalFlowLayout =
+      NeedsSimplifiedNormalFlowLayout() && !SelfNeedsLayout() && !NormalChildNeedsLayout();
+    bool hasOutOfFlowPosition = IsOutOfFlowPositioned();
+
+    while (ancestor)
+    {
+      // FIXME: Remove this once we remove the special cases for counters, quotes and mathml calling
+      // setNeedsLayout during preferred width computation.
+      SetLayoutNeededForbiddenScope layoutForbiddenScope(*ancestor, IsSetNeedsLayoutForbidden());
+
+      // Don't mark the outermost object of an unrooted subtree. That object will be
+      // marked when the subtree is added to the document.
+      RenderElement *container = ancestor->Container();
+      if (!container && !ancestor->IsRenderView())
+      {
+        // Internal render tree shuffle.
+        return nullptr;
+      }
+
+      if (simplifiedNormalFlowLayout && ancestor->OverflowChangesMayAffectLayout())
+      {
+        simplifiedNormalFlowLayout = false;
+      }
+
+      if (hasOutOfFlowPosition)
+      {
+        bool willSkipRelativelyPositionedInlines = !ancestor->IsRenderBlock() || ancestor->IsAnonymousBlock();
+        // Skip relatively positioned inlines and anonymous blocks to get to the enclosing RenderBlock.
+        while (ancestor && (!ancestor->IsRenderBlock() || ancestor->IsAnonymousBlock()))
+        {
+          ancestor = ancestor->Container();
+        }
+        if (!ancestor || ancestor->OutOfFlowChildNeedsLayout())
+        {
+          return nullptr;
+        }
+        if (willSkipRelativelyPositionedInlines)
+        {
+          container = ancestor->Container();
+        }
+        ancestor->SetOutOfFlowChildNeedsLayoutBit(true);
+        simplifiedNormalFlowLayout = true;
+      }
+      else if (simplifiedNormalFlowLayout)
+      {
+        if (ancestor->NeedsSimplifiedNormalFlowLayout())
+        {
+          return nullptr;
+        }
+        ancestor->SetNeedsSimplifiedNormalFlowLayoutBit(true);
+      }
+      else
+      {
+        if (ancestor->NormalChildNeedsLayout())
+        {
+          return nullptr;
+        }
+        ancestor->SetNormalChildNeedsLayoutBit(true);
+      }
+      krys_debug_assert(!ancestor->IsSetNeedsLayoutForbidden());
+
+      if (layoutRoot)
+      {
+        // Having a valid layout root also mean we should not stop at layout boundaries.
+        if (ancestor == layoutRoot)
+        {
+          return layoutRoot;
+        }
+      }
+      else if (IsLayoutBoundary(*ancestor))
+      {
+        return ancestor;
+      }
+
+      if (auto *renderGrid = DynamicDowncast<RenderGrid>(container);
+          renderGrid && renderGrid->IsExtrinsicallySized())
+      {
+        simplifiedNormalFlowLayout = true;
+      }
+
+      hasOutOfFlowPosition = ancestor->IsOutOfFlowPositioned();
+      ancestor = container;
+    }
+    return nullptr;
+  }
+
+  void RenderObject::SetNeedsPreferredWidthsUpdate(MarkingBehavior markParents) noexcept
+  {
+    if (NeedsPreferredLogicalWidthsUpdate()
+        && (!HasRareData() || !GetRareData().PreferredLogicalWidthsNeedUpdateIsMarkOnlyThis))
+    {
+      // Both this and our ancestor chain are already marked dirty.
+      return;
+    }
+
+    _stateFlags.Add(StateFlag::PreferredLogicalWidthsNeedUpdate);
+    if (IsOutOfFlowPositioned())
+    {
+      // A positioned object has no effect on the min/max width of its containing block ever. No need to mark
+      // ancestor chain.
+      return;
+    }
+
+    if (markParents == MarkingBehavior::MarkOnlyThis)
+    {
+      EnsureRareData().PreferredLogicalWidthsNeedUpdateIsMarkOnlyThis = true;
+      return;
+    }
+
+    InvalidateContainerPreferredLogicalWidths();
+    if (HasRareData())
+    {
+      EnsureRareData().PreferredLogicalWidthsNeedUpdateIsMarkOnlyThis = false;
+    }
+  }
+
+  void RenderObject::InvalidateContainerPreferredLogicalWidths() noexcept
+  {
+    // In order to avoid pathological behavior when inlines are deeply nested, we do include them
+    // in the chain that we mark dirty (even though they're kind of irrelevant).
+    RenderElement *ancestor = IsRenderTableCell() ? ContainingBlock() : Container();
+    while (ancestor)
+    {
+      if (ancestor->NeedsPreferredLogicalWidthsUpdate()
+          && (!ancestor->HasRareData()
+              || !ancestor->GetRareData().PreferredLogicalWidthsNeedUpdateIsMarkOnlyThis))
+      {
+        break;
+      }
+      // Don't invalidate the outermost object of an unrooted subtree. That object will be
+      // invalidated when the subtree is added to the document.
+      RenderElement *container =
+        ancestor->IsRenderTableCell() ? ancestor->ContainingBlock() : ancestor->Container();
+      if (!container && !ancestor->IsRenderView())
+      {
+        break;
+      }
+
+      ancestor->_stateFlags.Add(StateFlag::PreferredLogicalWidthsNeedUpdate);
+      if (ancestor->Style().HasOutOfFlowPosition())
+      {
+        // A positioned object has no effect on the min/max width of its containing block ever.
+        // We can optimize this case and not go up any further.
+        break;
+      }
+      ancestor = container;
+    }
+  }
+
+  auto RenderObject::GetRareDataMap() noexcept -> RareDataMap &
+  {
+    static RareDataMap map;
+    return map;
+  }
+
+  auto RenderObject::GetRareData() const noexcept -> const RareData &
+  {
+    krys_debug_assert(HasRareData());
+    return *GetRareDataMap().find(this)->second;
+  }
+
+  auto RenderObject::EnsureRareData() noexcept -> RareData &
+  {
+    _stateFlags.Add(StateFlag::HasRareData);
+    auto &data = GetRareDataMap()[this];
+    if (!data)
+    {
+      data = CreateUnique<RareData>();
+    }
+    return *data;
+  }
+
+  void RenderObject::RemoveRareData() noexcept
+  {
+    GetRareDataMap().erase(this);
+    _stateFlags.Remove(StateFlag::HasRareData);
+  }
+
+  RenderObject::SetLayoutNeededForbiddenScope::SetLayoutNeededForbiddenScope(const RenderObject &renderObject,
+                                                                             bool isForbidden) noexcept
+      : _renderObject(renderObject), _preexistingForbidden(renderObject.IsSetNeedsLayoutForbidden())
+  {
+    _renderObject.SetNeedsLayoutIsForbidden(isForbidden);
+  }
+
+  RenderObject::SetLayoutNeededForbiddenScope::~SetLayoutNeededForbiddenScope() noexcept
+  {
+    _renderObject.SetNeedsLayoutIsForbidden(_preexistingForbidden);
+  }
+
+#pragma endregion
 }

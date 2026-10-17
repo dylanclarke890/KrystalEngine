@@ -8,6 +8,12 @@
 
 namespace krys::boo
 {
+  enum class RelayoutChildren : bool
+  {
+    No,
+    Yes
+  };
+
   /// @brief A box that contains other boxes: a block container, flex, grid or table.
   // FIXME: Layout (block layout, positioned and percent-height descendants, floats), line boxes,
   // continuations, selection and painting come with layout and painting.
@@ -35,6 +41,14 @@ namespace krys::boo
     /// renderer, once it's built), and the renderer that holds the first letter.
     KRYS_NODISCARD Pair<RenderObject *, RenderElement *>
       FirstLetterAndContainer(RenderObject *skipThisAsFirstLetter = nullptr) noexcept;
+
+    KRYS_NODISCARD bool
+      EstablishesIndependentFormattingContextIgnoringDisplayType(const RenderStyle &style) const noexcept;
+    KRYS_NODISCARD bool EstablishesIndependentFormattingContext() const noexcept;
+    KRYS_NODISCARD bool CreatesNewFormattingContext() const noexcept;
+
+    void Layout() noexcept override;
+    virtual void LayoutBlock(RelayoutChildren relayoutChildren, LayoutUnit pageLogicalHeight = 0_lu) noexcept;
 
     // FIXME: Layout queries, reachable only through `RendererOf` and `RenderBoxOf`, which return null until
     // there's layout.

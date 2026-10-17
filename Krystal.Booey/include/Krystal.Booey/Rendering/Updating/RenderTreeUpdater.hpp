@@ -125,7 +125,13 @@ namespace krys::boo
                                   RenderTreeBuilder &builder) noexcept;
     static void TearDownLeftoverChildrenOfComposedTree(dom::Element &element,
                                                        RenderTreeBuilder &builder) noexcept;
-    static void TearDownTextRenderer(dom::Text &text, const dom::ContainerNode *root,
-                                     RenderTreeBuilder &builder) noexcept;
+    enum class NeedsRepaintAndLayout : bool
+    {
+      No,
+      Yes
+    };
+    static void
+      TearDownTextRenderer(dom::Text &text, const dom::ContainerNode *root, RenderTreeBuilder &builder,
+                           NeedsRepaintAndLayout needsRepaintAndLayout = NeedsRepaintAndLayout::Yes) noexcept;
   };
 }

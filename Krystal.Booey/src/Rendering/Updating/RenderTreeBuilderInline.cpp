@@ -30,8 +30,9 @@ namespace krys::boo
       beforeChild = _builder.SplitAnonymousBoxesAroundChild(parent, *beforeChild);
     }
 
-    // FIXME: The child's layout bits, once there's layout.
+    auto &childToAdd = *child;
     _builder.AttachToRenderElement(parent, krys::move(child), beforeChild);
+    childToAdd.SetNeedsLayoutAndPreferredWidthsUpdate();
   }
 
   void RenderTreeBuilder::Inline::ChildBecameNonInline(RenderInline &, RenderElement &) noexcept

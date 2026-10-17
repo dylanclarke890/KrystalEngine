@@ -1,6 +1,9 @@
 ﻿#include "Krystal.Booey/Rendering/RenderBlock.hpp"
+#include "Krystal.Booey/Rendering/RenderGrid.hpp"
+#include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 namespace krys::boo
@@ -190,5 +193,125 @@ namespace krys::boo
     }
 
     return {firstLetter, firstLetterContainer};
+  }
+
+  bool RenderBlock::EstablishesIndependentFormattingContextIgnoringDisplayType(
+    const RenderStyle &style) const noexcept
+  {
+    if (!GetElement())
+    {
+      krys_debug_assert(IsAnonymous());
+      return false;
+    }
+
+    auto isBlockBoxWithPotentiallyScrollableOverflow = [&]
+    {
+      return style.IsDisplayBlockLevel() && style.DoesDisplayGenerateBlockContainer()
+             && HasNonVisibleOverflow() && style.OverflowX() != Overflow::Clip
+             && style.OverflowX() != Overflow::Visible;
+    };
+
+    return style.IsFloating() || style.HasOutOfFlowPosition() || isBlockBoxWithPotentiallyScrollableOverflow()
+           || style.UsedContain().Contains(style::ContainValue::Layout)
+           || style.GetContainerType() != ContainerType::Normal
+           || boo::ShouldApplyPaintContainment(style, *GetElement())
+           || (style.IsDisplayBlockLevel() && !style.GetBlockStepSize().IsNone());
+  }
+
+  bool RenderBlock::EstablishesIndependentFormattingContext() const noexcept
+  {
+    const auto &style = Style();
+    if (EstablishesIndependentFormattingContextIgnoringDisplayType(style))
+    {
+      return true;
+    }
+
+    if (IsGridItem())
+    {
+      // Grid items establish a new independent formatting context, unless they're a subgrid
+      // https://drafts.csswg.org/css-grid-2/#grid-item-display
+      if (!style.GridTemplateColumns().Subgrid && !style.GridTemplateRows().Subgrid)
+      {
+        return true;
+      }
+      // Masonry makes grid items not subgrids.
+      if (auto *parentGridBox = DynamicDowncast<RenderGrid>(Parent()))
+      {
+        return parentGridBox->IsMasonry();
+      }
+    }
+
+    return false;
+  }
+
+  bool RenderBlock::CreatesNewFormattingContext() const noexcept
+  {
+    // Writing-mode changes establish an independent block formatting context
+    // if the box is a block-container.
+    // https://drafts.csswg.org/css-writing-modes/#block-flow
+    if (IsWritingModeRoot() && IsBlockContainer())
+    {
+      return true;
+    }
+    const auto &style = Style();
+    if (IsBlockContainer() && !style.GetAlignContent().IsNormal())
+    {
+      return true;
+    }
+    // FIXME: SVG foreign objects, once there's SVG.
+    return IsNonReplacedAtomicInlineLevelBox()
+           || style.IsDisplayFlexibleBoxIncludingDeprecatedOrGridFormattingContextBox()
+           || IsFlexItemIncludingDeprecated() || IsRenderTable() || IsRenderTableCell()
+           || IsRenderTableCaption() || IsFieldset() || IsDocumentElementRenderer()
+           || IsRenderFragmentedFlow() || style.SpecifiesColumns() || style.GetColumnSpan() == ColumnSpan::All
+           || style.Display() == DisplayType::FlowRoot || EstablishesIndependentFormattingContext();
+  }
+
+  void RenderBlock::Layout() noexcept
+  {
+    // Table cells call layoutBlock directly, so don't add any logic here. Put code into layoutBlock().
+    // FIXME: The layout scope, once there's a layout state.
+    LayoutBlock(RelayoutChildren::No);
+
+    // FIXME: Clear the layout overflow of a lightweight control clip, once there are form controls.
+
+    InvalidateBackgroundObscurationStatus();
+  }
+
+  namespace
+  {
+    // Lays out the boxes of an inline subtree that aren't part of its lines, and clears the rest.
+    void LayoutInlineContentWithoutLineLayout(RenderElement &parent) noexcept
+    {
+      for (auto *child = parent.FirstChild(); child; child = child->NextSibling())
+      {
+        if (!child->NeedsLayout())
+        {
+          continue;
+        }
+        if (auto *renderInline = DynamicDowncast<RenderInline>(*child))
+        {
+          LayoutInlineContentWithoutLineLayout(*renderInline);
+          renderInline->ClearNeedsLayout();
+        }
+        else if (auto *element = DynamicDowncast<RenderElement>(*child))
+        {
+          element->Layout();
+        }
+        else
+        {
+          child->ClearNeedsLayout();
+        }
+      }
+    }
+  }
+
+  void RenderBlock::LayoutBlock(RelayoutChildren, LayoutUnit) noexcept
+  {
+    // FIXME: Stands in for the block layout of the subclasses (RenderBlockFlow, the flex box, the grid and
+    // the table classes) until they come in the next layout slices: lays out the children without placing or
+    // sizing anything, and clears the inline content, which has no lines yet.
+    LayoutInlineContentWithoutLineLayout(*this);
+    ClearNeedsLayout();
   }
 }

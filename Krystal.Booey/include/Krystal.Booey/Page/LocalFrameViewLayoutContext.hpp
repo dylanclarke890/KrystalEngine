@@ -3,6 +3,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo::dom
 {
@@ -13,13 +14,13 @@ namespace krys::boo
 {
   class LocalFrame;
   class LocalFrameView;
+  class RenderElement;
   class RenderView;
 
   /// @brief Schedules and runs a view's layout: the style updates layout needs first, then the layout of the
   /// render tree.
-  /// @note FIXME: There's no render tree to lay out: layout updates style (re-evaluating the media queries
-  /// that depend on the viewport) and stops where the render tree's layout would run. There's no layout timer
-  /// either: a scheduled layout is pending until the host runs it (`Layout()` or `Document::UpdateLayout()`).
+  /// @note FIXME: There's no layout timer: a scheduled layout is pending until the host runs it (`Layout()`
+  /// or `Document::UpdateLayout()`).
   class LocalFrameViewLayoutContext final
   {
     KRYS_NON_COPY_MOVABLE(LocalFrameViewLayoutContext);
@@ -51,6 +52,7 @@ namespace krys::boo
     bool _firstLayout {true};
     bool _setNeedsLayoutWasDeferred {false};
     uint32 _disableSetNeedsLayoutCount {0};
+    WeakPtr<RenderElement> _subtreeLayoutRoot;
 
   public:
     explicit LocalFrameViewLayoutContext(LocalFrameView &frameView) noexcept;
@@ -65,6 +67,15 @@ namespace krys::boo
 
     void ScheduleLayout() noexcept;
     void UnscheduleLayout() noexcept;
+    void ScheduleSubtreeLayout(RenderElement &layoutRoot) noexcept;
+
+    /// @brief The renderer the next layout starts from, if it's a subtree layout.
+    KRYS_NODISCARD RenderElement *SubtreeLayoutRoot() const noexcept;
+    void ClearSubtreeLayoutRoot() noexcept
+    {
+      _subtreeLayoutRoot = nullptr;
+    }
+    void ConvertSubtreeLayoutToFullLayout() noexcept;
 
     void DisableSetNeedsLayout() noexcept;
     void EnableSetNeedsLayout() noexcept;
@@ -125,5 +136,7 @@ namespace krys::boo
     }
 
     void UpdateStyleForLayout() noexcept;
+
+    void SetSubtreeLayoutRoot(RenderElement &layoutRoot) noexcept;
   };
 }

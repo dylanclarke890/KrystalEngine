@@ -29,9 +29,6 @@ namespace krys::boo
   private:
     LocalFrameView &_frameView;
     uint64 _rendererCount {1};
-    // FIXME: Stands in for the layout bits renderers have, until there's layout: a new render view needs
-    // layout, and style changes don't mark it.
-    bool _needsLayout {true};
     bool _hasQuotesNeedingUpdate {false};
     RenderCounterSet _countersNeedingUpdate;
 
@@ -67,18 +64,7 @@ namespace krys::boo
       --_rendererCount;
     }
 
-    KRYS_NODISCARD bool NeedsLayout() const noexcept
-    {
-      return _needsLayout;
-    }
-    void SetNeedsLayout() noexcept
-    {
-      _needsLayout = true;
-    }
-    void ClearNeedsLayout() noexcept
-    {
-      _needsLayout = false;
-    }
+    void Layout() noexcept override;
 
     KRYS_NODISCARD bool HasQuotesNeedingUpdate() const noexcept
     {

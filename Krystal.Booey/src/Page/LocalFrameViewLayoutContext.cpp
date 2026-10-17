@@ -2,6 +2,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
@@ -76,9 +77,32 @@ namespace krys::boo
       _firstLayout = false;
     }
 
-    // FIXME: Lay out the render tree (or the subtree layout root), adjust the view's size and run the
-    // post-layout tasks, once there's a render tree.
-    GetRenderView()->ClearNeedsLayout();
+    WeakPtr<RenderElement> layoutRoot;
+    {
+      SetForScope layoutPhase(_layoutPhase, LayoutPhase::InPreLayout);
+      layoutRoot = CreateWeakPtr(SubtreeLayoutRoot() ? SubtreeLayoutRoot()
+                                                     : static_cast<RenderElement *>(GetRenderView()));
+      // FIXME: The full repaint of a first layout, once there's painting.
+    }
+
+    {
+      SetForScope layoutPhase(_layoutPhase, LayoutPhase::InRenderTreeLayout);
+      // FIXME: The subtree layout state, and the repaint region accumulator, once there's painting.
+      layoutRoot->Layout();
+      // FIXME: The layout areas the inspector reports, once there's an inspector.
+      ClearSubtreeLayoutRoot();
+    }
+
+    {
+      SetForScope layoutPhase(_layoutPhase, LayoutPhase::InViewSizeAdjust);
+      // FIXME: Adjust the view's size to the document's (adjustViewSize), once there are scroll views.
+    }
+
+    {
+      SetForScope layoutPhase(_layoutPhase, LayoutPhase::InPostLayout);
+      krys_debug_assert(!layoutRoot->NeedsLayout());
+      // FIXME: Update the layer positions (didLayout) and run the post-layout tasks, once there are layers.
+    }
   }
 
   bool LocalFrameViewLayoutContext::NeedsLayout() const noexcept
@@ -92,7 +116,7 @@ namespace krys::boo
     // Document::shouldScheduleLayout takes care of preventing us from scheduling
     // layout in that case.
     auto *renderView = GetRenderView();
-    return IsLayoutPending() || (renderView && renderView->NeedsLayout())
+    return IsLayoutPending() || (renderView && renderView->NeedsLayout()) || SubtreeLayoutRoot()
            || (_disableSetNeedsLayoutCount && _setNeedsLayoutWasDeferred);
   }
 
@@ -134,6 +158,11 @@ namespace krys::boo
       return;
     }
 
+    if (SubtreeLayoutRoot())
+    {
+      ConvertSubtreeLayoutToFullLayout();
+    }
+
     if (IsLayoutPending())
     {
       return;
@@ -165,12 +194,104 @@ namespace krys::boo
       return false;
     }
 
-    if (!GetRenderView())
+    // FIXME: Not while the view is painting, once there's painting.
+
+    if (!SubtreeLayoutRoot() && !GetRenderView())
     {
       return false;
     }
 
     return true;
+  }
+
+  static bool IsObjectAncestorContainerOf(RenderElement &ancestor, RenderElement &descendant) noexcept
+  {
+    for (auto *renderer = &descendant; renderer; renderer = renderer->Container())
+    {
+      if (renderer == &ancestor)
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void LocalFrameViewLayoutContext::ScheduleSubtreeLayout(RenderElement &layoutRoot) noexcept
+  {
+    krys_debug_assert(GetRenderView());
+    auto &renderView = *GetRenderView();
+
+    // Try to catch unnecessary work during render tree teardown.
+    krys_debug_assert(!renderView.RenderTreeBeingDestroyed());
+    krys_debug_assert(Frame().View() == &_frameView);
+
+    if (renderView.NeedsLayout() && !SubtreeLayoutRoot())
+    {
+      (void)layoutRoot.MarkContainingBlocksForLayout(&renderView);
+      return;
+    }
+
+    if (!IsLayoutPending() && IsLayoutSchedulingEnabled())
+    {
+      krys_debug_assert(!layoutRoot.Container() || Is<RenderView>(layoutRoot.Container())
+                        || !layoutRoot.Container()->NeedsLayout());
+      SetSubtreeLayoutRoot(layoutRoot);
+      // FIXME: Start the layout timer, once there's an event loop.
+      _layoutPending = true;
+      return;
+    }
+
+    auto *subtreeLayoutRoot = SubtreeLayoutRoot();
+    if (subtreeLayoutRoot == &layoutRoot)
+    {
+      return;
+    }
+
+    if (!subtreeLayoutRoot)
+    {
+      // We already have a pending (full) layout. Just mark the subtree for layout.
+      (void)layoutRoot.MarkContainingBlocksForLayout(&renderView);
+      return;
+    }
+
+    if (IsObjectAncestorContainerOf(*subtreeLayoutRoot, layoutRoot))
+    {
+      // Keep the current root.
+      (void)layoutRoot.MarkContainingBlocksForLayout(subtreeLayoutRoot);
+      krys_debug_assert(!subtreeLayoutRoot->Container() || Is<RenderView>(subtreeLayoutRoot->Container())
+                        || !subtreeLayoutRoot->Container()->NeedsLayout());
+      return;
+    }
+
+    if (IsObjectAncestorContainerOf(layoutRoot, *subtreeLayoutRoot))
+    {
+      // Re-root at newRelayoutRoot.
+      (void)subtreeLayoutRoot->MarkContainingBlocksForLayout(&layoutRoot);
+      SetSubtreeLayoutRoot(layoutRoot);
+      krys_debug_assert(!layoutRoot.Container() || Is<RenderView>(layoutRoot.Container())
+                        || !layoutRoot.Container()->NeedsLayout());
+      return;
+    }
+    // Two disjoint subtrees need layout. Mark both of them and issue a full layout instead.
+    ConvertSubtreeLayoutToFullLayout();
+    (void)layoutRoot.MarkContainingBlocksForLayout(&renderView);
+  }
+
+  RenderElement *LocalFrameViewLayoutContext::SubtreeLayoutRoot() const noexcept
+  {
+    return _subtreeLayoutRoot.get();
+  }
+
+  void LocalFrameViewLayoutContext::ConvertSubtreeLayoutToFullLayout() noexcept
+  {
+    krys_debug_assert(SubtreeLayoutRoot());
+    (void)SubtreeLayoutRoot()->MarkContainingBlocksForLayout(GetRenderView());
+    ClearSubtreeLayoutRoot();
+  }
+
+  void LocalFrameViewLayoutContext::SetSubtreeLayoutRoot(RenderElement &layoutRoot) noexcept
+  {
+    _subtreeLayoutRoot = CreateWeakPtr(&layoutRoot);
   }
 
   void LocalFrameViewLayoutContext::UpdateStyleForLayout() noexcept

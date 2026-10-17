@@ -25,6 +25,10 @@ namespace krys::boo
     // FIXME: Layout queries, reachable only through `RendererOf` and `RenderBoxOf`, which return null until
     // there's layout.
     KRYS_NODISCARD const List<LayoutUnit> &Positions(style::GridTrackSizingDirection) const noexcept;
+
+    KRYS_NODISCARD bool IsMasonry() const noexcept;
+    KRYS_NODISCARD bool IsMasonry(style::GridTrackSizingDirection direction) const noexcept;
+    KRYS_NODISCARD bool IsExtrinsicallySized() const noexcept;
     KRYS_NODISCARD bool IsSubgrid(style::GridTrackSizingDirection) const noexcept;
     KRYS_NODISCARD uint32 NumTracks(style::GridTrackSizingDirection) const noexcept;
     KRYS_NODISCARD uint32 AutoRepeatCountForDirection(style::GridTrackSizingDirection) const noexcept;

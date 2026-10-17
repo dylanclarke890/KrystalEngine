@@ -49,8 +49,8 @@ namespace krys::boo
       }
     }
 
-    // Capitalizes the code point at startOffset into output, and returns the number of bytes of textContent it
-    // consumed (none if it's left as it is).
+    // Capitalizes the code point at startOffset into output, and returns the number of bytes of textContent
+    // it consumed (none if it's left as it is).
     KRYS_NODISCARD size_t CapitalizeCharacter(utf8_stringview textContent, size_t startOffset,
                                               StringBuilder &output) noexcept
     {
@@ -315,13 +315,19 @@ namespace krys::boo
     return false;
   }
 
-  void RenderText::StyleDidChange(style::Difference, const RenderStyle *oldStyle) noexcept
+  void RenderText::StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept
   {
     // There is no need to ever schedule repaints from a style change of a text run, since
     // we already did this for the parent of the text run.
     // We do have to schedule layouts, though, since a style change can force us to
     // need to relayout.
-    // FIXME: The layout bits, the font loading and the simplified measuring state, once there's layout.
+    if (diff == style::DifferenceResult::Layout)
+    {
+      SetNeedsLayoutAndPreferredWidthsUpdate();
+      // FIXME: The known-to-have-no-overflow-and-no-fallback-fonts state, once there's text measurement.
+    }
+
+    // FIXME: The font loading and the simplified measuring state, once there's text measurement.
 
     const auto &newStyle = Style();
 
@@ -485,7 +491,8 @@ namespace krys::boo
 
     SetRenderedText(krys::move(text));
 
-    // FIXME: The layout bits and the accessibility cache, once there are any.
+    SetNeedsLayoutAndPreferredWidthsUpdate();
+    // FIXME: The accessibility cache, once there is one.
   }
 
   void RenderText::SetText(utf8_string newContent, bool force) noexcept

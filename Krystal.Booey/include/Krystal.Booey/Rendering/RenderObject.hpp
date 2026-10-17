@@ -9,7 +9,10 @@
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo::dom
 {
@@ -24,20 +27,36 @@ namespace krys::boo
   class RenderTreeBuilder;
   class RenderView;
 
-  // FIXME: The layout bits (NeedsLayout, NormalChildNeedsLayout, ...), EverHadLayout, rare data, SVG
-  // transforms, skipped content and view transition captures come with layout and their features.
+  // FIXME: SVG transforms and view transition captures come with their features.
   enum class RenderObjectStateFlag : uint8
   {
     IsBlock,
     IsBlockLevelReplacedOrAtomicInline,
+    NeedsLayout,
+    NeedsOutOfFlowMovementLayout,
+    NormalChildNeedsLayout,
+    OutOfFlowChildNeedsLayout,
+    NeedsSimplifiedNormalFlowLayout,
+    OutOfFlowChildNeedsStaticPositionLayout,
+    EverHadLayout,
     IsExcludedFromNormalLayout,
     Floating,
     VerticalWritingMode,
+    PreferredLogicalWidthsNeedUpdate,
+    HasRareData,
     HasLayer,
     HasNonVisibleOverflow,
     HasTransformRelatedProperty,
     ChildrenInline,
-    PaintContainmentApplies
+    PaintContainmentApplies,
+    WasSkippedDuringLastLayoutDueToContentVisibility
+  };
+
+  /// @brief Whether marking a renderer as needing layout also marks its containing blocks.
+  enum class RenderObjectMarkingBehavior : bool
+  {
+    MarkOnlyThis,
+    MarkContainingBlockChain
   };
 
   enum class RenderObjectTypeFlag : uint8
@@ -86,7 +105,7 @@ namespace krys::boo
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectStateFlag, 10uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectStateFlag, 20uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectTypeFlag, 8uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectBlockFlowFlag, 5uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectLineBreakFlag, 1uz);
@@ -319,6 +338,7 @@ namespace krys::boo
     Type _type;
     TypeSpecificFlags _typeSpecificFlags;
     EnumSet<StateFlag> _stateFlags;
+    mutable bool _setNeedsLayoutForbidden {false};
     PositionedState _positionedState {PositionedState::IsStaticallyPositioned};
     BoxDecorationState _boxDecorationState {BoxDecorationState::None};
     bool _isBeingDestroyed {false};
@@ -696,6 +716,175 @@ namespace krys::boo
     /// @brief The style the object is rendered with: an element's own, or a text's parent's.
     KRYS_NODISCARD const RenderStyle &Style() const noexcept;
 
+#pragma region Layout bits
+
+    using MarkingBehavior = RenderObjectMarkingBehavior;
+    enum class HadSkippedLayout : bool
+    {
+      No,
+      Yes
+    };
+
+    KRYS_NODISCARD bool EverHadLayout() const noexcept
+    {
+      return _stateFlags.Contains(StateFlag::EverHadLayout);
+    }
+    KRYS_NODISCARD Maybe<bool> WasSkippedDuringLastLayoutDueToContentVisibility() const noexcept
+    {
+      return EverHadLayout() ? Maybe<bool> {_stateFlags.Contains(
+                                 StateFlag::WasSkippedDuringLastLayoutDueToContentVisibility)}
+                             : null;
+    }
+
+    KRYS_NODISCARD bool NeedsLayout() const noexcept
+    {
+      return SelfNeedsLayout() || NormalChildNeedsLayout() || OutOfFlowChildNeedsLayout()
+             || NeedsSimplifiedNormalFlowLayout() || NeedsOutOfFlowMovementLayout();
+    }
+    KRYS_NODISCARD bool NeedsPreferredLogicalWidthsUpdate() const noexcept
+    {
+      return _stateFlags.Contains(StateFlag::PreferredLogicalWidthsNeedUpdate);
+    }
+
+    KRYS_NODISCARD bool SelfNeedsLayout() const noexcept
+    {
+      return _stateFlags.Contains(StateFlag::NeedsLayout);
+    }
+    KRYS_NODISCARD bool NeedsOutOfFlowMovementLayout() const noexcept
+    {
+      return _stateFlags.Contains(StateFlag::NeedsOutOfFlowMovementLayout);
+    }
+    KRYS_NODISCARD bool NeedsOutOfFlowMovementLayoutOnly() const noexcept
+    {
+      return NeedsOutOfFlowMovementLayout() && !SelfNeedsLayout() && !NormalChildNeedsLayout()
+             && !OutOfFlowChildNeedsLayout() && !NeedsSimplifiedNormalFlowLayout();
+    }
+
+    KRYS_NODISCARD bool OutOfFlowChildNeedsLayout() const noexcept
+    {
+      return _stateFlags.Contains(StateFlag::OutOfFlowChildNeedsLayout);
+    }
+    KRYS_NODISCARD bool NeedsSimplifiedNormalFlowLayout() const noexcept
+    {
+      return _stateFlags.Contains(StateFlag::NeedsSimplifiedNormalFlowLayout);
+    }
+    KRYS_NODISCARD bool NeedsSimplifiedNormalFlowLayoutOnly() const noexcept
+    {
+      return NeedsSimplifiedNormalFlowLayout() && !SelfNeedsLayout() && !NormalChildNeedsLayout()
+             && !OutOfFlowChildNeedsLayout() && !NeedsOutOfFlowMovementLayout();
+    }
+    KRYS_NODISCARD bool NeedsNormalChildOrSimplifiedLayoutOnly() const noexcept
+    {
+      return (NormalChildNeedsLayout() || NeedsSimplifiedNormalFlowLayout()) && !SelfNeedsLayout()
+             && !OutOfFlowChildNeedsLayout() && !NeedsOutOfFlowMovementLayout();
+    }
+    KRYS_NODISCARD bool NormalChildNeedsLayout() const noexcept
+    {
+      return _stateFlags.Contains(StateFlag::NormalChildNeedsLayout);
+    }
+    KRYS_NODISCARD bool OutOfFlowChildNeedsStaticPositionLayout() const noexcept
+    {
+      return _stateFlags.Contains(StateFlag::OutOfFlowChildNeedsStaticPositionLayout);
+    }
+
+    /// @brief Marks the containing blocks of this renderer as having a child that needs layout, up to
+    /// @p layoutRoot or the first layout boundary.
+    /// @return The renderer to lay out from, or null if the chain was already marked or isn't rooted.
+    RenderElement *MarkContainingBlocksForLayout(RenderElement *layoutRoot = nullptr) noexcept;
+    void SetNeedsLayout(MarkingBehavior markParents = MarkingBehavior::MarkContainingBlockChain) noexcept;
+    void ClearNeedsLayout(HadSkippedLayout hadSkippedLayout = HadSkippedLayout::No) noexcept;
+    void SetNeedsPreferredWidthsUpdate(
+      MarkingBehavior markParents = MarkingBehavior::MarkContainingBlockChain) noexcept;
+    void ClearNeedsPreferredWidthsUpdate() noexcept
+    {
+      _stateFlags.Remove(StateFlag::PreferredLogicalWidthsNeedUpdate);
+    }
+    void SetNeedsLayoutAndPreferredWidthsUpdate() noexcept
+    {
+      SetNeedsLayout();
+      SetNeedsPreferredWidthsUpdate();
+    }
+
+    /// @brief Asserts if the renderer is marked as needing layout while the scope lives.
+    class SetLayoutNeededForbiddenScope
+    {
+      KRYS_NON_COPY_MOVABLE(SetLayoutNeededForbiddenScope);
+
+    private:
+      const RenderObject &_renderObject;
+      bool _preexistingForbidden;
+
+    public:
+      explicit SetLayoutNeededForbiddenScope(const RenderObject &renderObject,
+                                             bool isForbidden = true) noexcept;
+      ~SetLayoutNeededForbiddenScope() noexcept;
+    };
+    KRYS_NODISCARD bool IsSetNeedsLayoutForbidden() const noexcept
+    {
+      return _setNeedsLayoutForbidden;
+    }
+
+#pragma endregion
+
+  protected:
+    static void ScheduleLayout(RenderElement *layoutRoot) noexcept;
+
+    void SetNeedsOutOfFlowMovementLayoutBit(bool b) noexcept
+    {
+      _stateFlags.Set(StateFlag::NeedsOutOfFlowMovementLayout, b);
+    }
+    void SetNormalChildNeedsLayoutBit(bool b) noexcept
+    {
+      _stateFlags.Set(StateFlag::NormalChildNeedsLayout, b);
+    }
+    void SetOutOfFlowChildNeedsLayoutBit(bool b) noexcept
+    {
+      _stateFlags.Set(StateFlag::OutOfFlowChildNeedsLayout, b);
+    }
+    void SetNeedsSimplifiedNormalFlowLayoutBit(bool b) noexcept
+    {
+      _stateFlags.Set(StateFlag::NeedsSimplifiedNormalFlowLayout, b);
+    }
+    void SetOutOfFlowChildNeedsStaticPositionLayoutBit(bool b) noexcept
+    {
+      _stateFlags.Set(StateFlag::OutOfFlowChildNeedsStaticPositionLayout, b);
+    }
+    void SetEverHadLayout() noexcept
+    {
+      _stateFlags.Add(StateFlag::EverHadLayout);
+    }
+    void SetHadSkippedLayout(bool b) noexcept
+    {
+      _stateFlags.Set(StateFlag::WasSkippedDuringLastLayoutDueToContentVisibility, b);
+    }
+    void InvalidateContainerPreferredLogicalWidths() noexcept;
+
+    void SetNeedsLayoutIsForbidden(bool flag) const noexcept
+    {
+      _setNeedsLayoutForbidden = flag;
+    }
+
+    /// @brief The data few renderers need, kept out of line.
+    struct RareData
+    {
+      // Dirty bit was set with MarkingBehavior::MarkOnlyThis
+      bool PreferredLogicalWidthsNeedUpdateIsMarkOnlyThis {false};
+      // FIXME: Reflections, outline-auto ancestors, trimmed margins, referenced SVG resources, the ::backdrop
+      // renderer and the control part, once there are any.
+    };
+    KRYS_NODISCARD bool HasRareData() const noexcept
+    {
+      return _stateFlags.Contains(StateFlag::HasRareData);
+    }
+    KRYS_NODISCARD const RareData &GetRareData() const noexcept;
+    KRYS_NODISCARD RareData &EnsureRareData() noexcept;
+    void RemoveRareData() noexcept;
+
+  private:
+    // Entries are removed when their renderer is destroyed.
+    using RareDataMap = HashMap<const RenderObject *, UniquePtr<RareData>>;
+    KRYS_NODISCARD static RareDataMap &GetRareDataMap() noexcept;
+
   protected:
     void SetPreviousSibling(RenderObject *previous) noexcept
     {
@@ -730,6 +919,14 @@ namespace krys::boo
     }
 
     void SetHasVisibleBoxDecorations(bool b = true) noexcept;
+    void InvalidateBackgroundObscurationStatus() noexcept
+    {
+      if (!HasVisibleBoxDecorations())
+      {
+        return;
+      }
+      _boxDecorationState = BoxDecorationState::InvalidObscurationStatus;
+    }
 
     void SetBlockLevelReplacedOrAtomicInline(bool b = true) noexcept
     {
