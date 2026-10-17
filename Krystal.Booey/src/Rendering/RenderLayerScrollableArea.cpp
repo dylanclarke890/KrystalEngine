@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
+#include "Krystal.Booey/Rendering/LayoutScope.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
@@ -261,8 +262,10 @@ namespace krys::boo
     auto &renderer = _layer.Renderer();
     if (reason == AvailableSizeChangeReason::ScrollbarsChanged)
     {
-      // FIXME: Force the block to relayout its children (setShouldForceRelayoutChildren), once there's block
-      // layout.
+      if (auto *renderBlock = DynamicDowncast<RenderBlock>(renderer))
+      {
+        renderBlock->SetShouldForceRelayoutChildren(true);
+      }
       renderer.SetNeedsLayout();
     }
   }
@@ -827,8 +830,8 @@ namespace krys::boo
           if (auto *block = DynamicDowncast<RenderBlock>(renderer))
           {
             // FIXME: Calling layoutBlock here is a bit of a layering violation.
-            // FIXME: The layout scope, and telling the block its scrollbars changed (scrollbarsChanged), once
-            // there's block layout.
+            auto scope = LayoutScope {*block};
+            block->ScrollbarsChanged(autoHorizontalScrollBarChanged, autoVerticalScrollBarChanged);
             block->LayoutBlock(RelayoutChildren::Yes);
           }
           else

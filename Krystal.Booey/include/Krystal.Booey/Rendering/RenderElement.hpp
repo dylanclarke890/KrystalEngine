@@ -54,6 +54,9 @@ namespace krys::boo
     bool _hasInitializedStyle {false};
     bool _hasCounterNodeMap {false};
     bool _isFirstLetter {false};
+    bool _renderBlockHasMarginBeforeQuirk {false};
+    bool _renderBlockHasMarginAfterQuirk {false};
+    bool _renderBlockShouldForceRelayoutChildren {false};
 
   public:
     /// @brief Displays that get a block flow instead of their usual renderer.
@@ -287,6 +290,42 @@ namespace krys::boo
     // outlines, scroll anchoring, line layout) comes with layout and painting.
     virtual void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept;
     virtual void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept;
+
+    enum class StylePropagationType
+    {
+      AllChildren,
+      BlockAndRubyChildren
+    };
+    void PropagateStyleToAnonymousChildren(StylePropagationType propagationType) noexcept;
+
+    virtual void UpdateAnonymousChildStyle(RenderStyle &) const noexcept
+    {
+    }
+
+    void SetRenderBlockHasMarginBeforeQuirk(bool b) noexcept
+    {
+      _renderBlockHasMarginBeforeQuirk = b;
+    }
+    void SetRenderBlockHasMarginAfterQuirk(bool b) noexcept
+    {
+      _renderBlockHasMarginAfterQuirk = b;
+    }
+    void SetRenderBlockShouldForceRelayoutChildren(bool b) noexcept
+    {
+      _renderBlockShouldForceRelayoutChildren = b;
+    }
+    KRYS_NODISCARD bool RenderBlockHasMarginBeforeQuirk() const noexcept
+    {
+      return _renderBlockHasMarginBeforeQuirk;
+    }
+    KRYS_NODISCARD bool RenderBlockHasMarginAfterQuirk() const noexcept
+    {
+      return _renderBlockHasMarginAfterQuirk;
+    }
+    KRYS_NODISCARD bool RenderBlockShouldForceRelayoutChildren() const noexcept
+    {
+      return _renderBlockShouldForceRelayoutChildren;
+    }
 
   private:
     RenderElement(Type type, dom::ContainerNode &elementOrDocument, RenderStyle &&style,

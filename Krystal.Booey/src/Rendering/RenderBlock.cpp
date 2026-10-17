@@ -1,9 +1,14 @@
 ﻿#include "Krystal.Booey/Rendering/RenderBlock.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Rendering/LayoutScope.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -577,15 +582,187 @@ namespace krys::boo
            || style.Display() == DisplayType::FlowRoot || EstablishesIndependentFormattingContext();
   }
 
+  void RenderBlock::StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept
+  {
+    SetBlockLevelReplacedOrAtomicInline(newStyle.IsDisplayInlineType());
+    // FIXME: Remove the out-of-flow boxes whose containing block changes
+    // (removeOutOfFlowBoxesIfNeededOnStyleChange), once there's out-of-flow layout, and let a legend that
+    // starts floating rejoin normal layout, once there are fieldsets.
+    RenderBox::StyleWillChange(diff, newStyle);
+  }
+
+  bool RenderBlock::ScrollbarWidthDidChange(const RenderStyle &oldStyle, const RenderStyle &newStyle,
+                                            ScrollbarOrientation orientation) const noexcept
+  {
+    return (orientation == ScrollbarOrientation::Vertical ? IncludeVerticalScrollbarSize()
+                                                          : IncludeHorizontalScrollbarSize())
+           && oldStyle.GetScrollbarWidth() != newStyle.GetScrollbarWidth();
+  }
+
+  bool RenderBlock::ContentBoxLogicalWidthChanged(const RenderStyle &oldStyle,
+                                                  const RenderStyle &newStyle) const noexcept
+  {
+    if (newStyle.GetWritingMode().IsHorizontal())
+    {
+      return oldStyle.BorderLeftWidth() != newStyle.BorderLeftWidth()
+             || oldStyle.BorderRightWidth() != newStyle.BorderRightWidth()
+             || oldStyle.PaddingLeft() != newStyle.PaddingLeft()
+             || oldStyle.PaddingRight() != newStyle.PaddingRight()
+             || ScrollbarWidthDidChange(oldStyle, newStyle, ScrollbarOrientation::Vertical);
+    }
+
+    return oldStyle.BorderTopWidth() != newStyle.BorderTopWidth()
+           || oldStyle.BorderBottomWidth() != newStyle.BorderBottomWidth()
+           || oldStyle.PaddingTop() != newStyle.PaddingTop()
+           || oldStyle.PaddingBottom() != newStyle.PaddingBottom()
+           || ScrollbarWidthDidChange(oldStyle, newStyle, ScrollbarOrientation::Horizontal);
+  }
+
+  void RenderBlock::StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept
+  {
+    RenderBox::StyleDidChange(diff, oldStyle);
+
+    // FIXME: Adjust the fragmented flow state when the containing block changes, once there are fragmented
+    // flows.
+
+    PropagateStyleToAnonymousChildren(StylePropagationType::BlockAndRubyChildren);
+
+    // It's possible for our border/padding to change, but for the overall logical width of the block to
+    // end up being the same. We keep track of this change so in layoutBlock, we can know to set
+    // relayoutChildren=true.
+    auto shouldForceRelayoutChildren = false;
+    if (oldStyle && diff == style::DifferenceResult::Layout && NeedsLayout())
+    {
+      // FIXME: Also when the padding box's logical height changed and there are out-of-flow boxes, which are
+      // anchored to it (paddingBoxLogicaHeightChanged), once there's out-of-flow layout.
+      shouldForceRelayoutChildren = ContentBoxLogicalWidthChanged(*oldStyle, Style());
+    }
+    SetShouldForceRelayoutChildren(shouldForceRelayoutChildren);
+  }
+
+  bool RenderBlock::ChildrenPreventSelfCollapsing() const noexcept
+  {
+    // Whether or not we collapse is dependent on whether all our normal flow children
+    // are also self-collapsing.
+    for (RenderBox *child = FirstChildBox(); child; child = child->NextSiblingBox())
+    {
+      if (child->IsFloatingOrOutOfFlowPositioned())
+      {
+        continue;
+      }
+      if (!child->IsSelfCollapsingBlock())
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool RenderBlock::IsSelfCollapsingBlock() const noexcept
+  {
+    // We are not self-collapsing if we
+    // (a) have a non-zero height according to layout (an optimization to avoid wasting time)
+    // (b) are a table,
+    // (c) have border/padding,
+    // (d) have a min-height
+    // (e) have specified that one of our margins can't collapse using a CSS extension
+
+    if (IsOutOfFlowPositioned())
+    {
+      return false;
+    }
+
+    auto minHeightIsPositive = [&]
+    {
+      const auto &logicalMinHeight = Style().LogicalMinHeight();
+      if (auto fixedValue = logicalMinHeight.TryFixed())
+      {
+        return fixedValue->IsPositive();
+      }
+      if (auto percentageValue = logicalMinHeight.TryPercentage())
+      {
+        return percentageValue->IsPositive();
+      }
+      return logicalMinHeight.IsCalculated();
+    };
+
+    auto heightIsZeroOrAuto = [&]
+    {
+      auto handleNonZeroPercentageOrCalc = [&]
+      {
+        // While in quirks mode there's always a fixed height ancestor to resolve percent value against (ICB),
+        // in standards mode we can only use the containing block.
+        if (GetDocument().InQuirksMode())
+        {
+          return false;
+        }
+        auto *containingBlock = this->ContainingBlock();
+        if (!containingBlock)
+        {
+          krys_debug_assert(false);
+          return false;
+        }
+        return Is<RenderView>(*containingBlock) || !containingBlock->Style().LogicalHeight().IsFixed();
+      };
+
+      const auto &logicalHeight = Style().LogicalHeight();
+      if (auto fixedValue = logicalHeight.TryFixed())
+      {
+        return fixedValue->IsZero();
+      }
+      if (auto percentageValue = logicalHeight.TryPercentage())
+      {
+        if (percentageValue->IsZero())
+        {
+          return true;
+        }
+        return handleNonZeroPercentageOrCalc();
+      }
+      if (logicalHeight.IsCalculated())
+      {
+        return handleNonZeroPercentageOrCalc();
+      }
+      return logicalHeight.IsAuto();
+    };
+
+    if (LogicalHeight() > 0 || IsRenderTable() || BorderAndPaddingLogicalHeight() || minHeightIsPositive())
+    {
+      return false;
+    }
+
+    if (heightIsZeroOrAuto())
+    {
+      // If the height is 0 or auto, then whether or not we are a self-collapsing block depends
+      // on whether we have content that is all self-collapsing or not.
+      return !CreatesNewFormattingContext() && !ChildrenPreventSelfCollapsing();
+    }
+
+    return false;
+  }
+
   void RenderBlock::Layout() noexcept
   {
     // Table cells call layoutBlock directly, so don't add any logic here. Put code into layoutBlock().
-    // FIXME: The layout scope, once there's a layout state.
-    LayoutBlock(RelayoutChildren::No);
+    {
+      auto scope = LayoutScope {*this};
+      LayoutBlock(RelayoutChildren::No);
+    }
 
     // FIXME: Clear the layout overflow of a lightweight control clip, once there are form controls.
 
     InvalidateBackgroundObscurationStatus();
+  }
+
+  bool RenderBlock::RecomputeLogicalWidth() noexcept
+  {
+    LayoutUnit oldWidth = LogicalWidth();
+
+    UpdateLogicalWidth();
+
+    bool hasBorderOrPaddingLogicalWidthChanged = this->HasBorderOrPaddingLogicalWidthChanged();
+    SetShouldForceRelayoutChildren(false);
+
+    return oldWidth != LogicalWidth() || hasBorderOrPaddingLogicalWidthChanged;
   }
 
   namespace
@@ -618,12 +795,429 @@ namespace krys::boo
 
   void RenderBlock::LayoutBlock(RelayoutChildren, LayoutUnit) noexcept
   {
-    // FIXME: Stands in for the block layout of the subclasses (RenderBlockFlow, the flex box, the grid and
-    // the table classes) until they come in the next layout slices: lays out the children without placing or
-    // sizing anything, and clears the inline content, which has no lines yet.
+    // FIXME: Stands in for the layout of the flex box, the grid and the table classes until they're ported
+    // (upstream asserts this isn't reached): lays out the children without placing or sizing anything, and
+    // clears the inline content, which has no lines yet.
+    LayoutChildrenWithoutLineLayout();
+  }
+
+  void RenderBlock::LayoutChildrenWithoutLineLayout() noexcept
+  {
     LayoutInlineContentWithoutLineLayout(*this);
+  }
+
+  // Overflow is always relative to the border-box of the element in question.
+  // Therefore, if the element has a vertical scrollbar placed on the left, an overflow rect at x=2px would
+  // conceptually intersect the scrollbar.
+  void RenderBlock::ComputeOverflow(LayoutUnit oldClientAfterEdge,
+                                    EnumSet<ComputeOverflowOptions> options) noexcept
+  {
+    ClearOverflow();
+    AddOverflowFromInFlowChildren(options);
+    AddOverflowFromOutOfFlowBoxes();
+
+    if (HasNonVisibleOverflow())
+    {
+      auto includePaddingAfter = [&]
+      {
+        // When we have overflow clip, propagate the original spillout since it will include collapsed bottom
+        // margins and bottom padding.
+        auto clientRect = FlippedClientBoxRect();
+        auto rectToApply = clientRect;
+        // Set the axis we don't care about to be 1, since we want this overflow to always be considered
+        // reachable.
+        if (IsHorizontalWritingMode())
+        {
+          rectToApply.SetWidth(1_lu);
+          rectToApply.SetHeight(std::max(0_lu, oldClientAfterEdge - clientRect.Y()));
+        }
+        else
+        {
+          rectToApply.SetWidth(std::max(0_lu, oldClientAfterEdge - clientRect.X()));
+          rectToApply.SetHeight(1_lu);
+        }
+        AddLayoutOverflow(rectToApply);
+      };
+      includePaddingAfter();
+      if (HasRenderOverflow())
+      {
+        _overflow->SetLayoutClientAfterEdge(oldClientAfterEdge);
+      }
+    }
+
+    // Add visual overflow from box-shadow, border-image-outset and outline.
+    AddVisualEffectOverflow();
+
+    // Add visual overflow from theme.
+    AddVisualOverflowFromTheme();
+  }
+
+  void RenderBlock::ClearLayoutOverflow() noexcept
+  {
+    if (!_overflow)
+    {
+      return;
+    }
+
+    if (VisualOverflowRect() == BorderBoxRect())
+    {
+      // FIXME: Implement complete solution for fragments overflow.
+      ClearOverflow();
+      return;
+    }
+
+    _overflow->SetLayoutOverflow(BorderBoxRect());
+  }
+
+  void RenderBlock::AddOverflowFromOutOfFlowBoxes() noexcept
+  {
+    // FIXME: The layout overflow of absolutely positioned descendants, once there's out-of-flow layout.
+  }
+
+  void RenderBlock::AddVisualOverflowFromTheme() noexcept
+  {
+    if (!Style().HasUsedAppearance())
+    {
+      return;
+    }
+
+    // FIXME: The theme's repaint rect (RenderTheme::adjustRepaintRect), once there's a theme.
+    AddVisualOverflow(LayoutRect(SnappedIntRect(BorderBoxRect())));
+  }
+
+  void RenderBlock::SetLogicalLeftForChild(RenderBox &child, LayoutUnit logicalLeft,
+                                           ApplyLayoutDeltaMode applyDelta) noexcept
+  {
+    if (IsHorizontalWritingMode())
+    {
+      if (applyDelta == ApplyLayoutDelta)
+      {
+        View().FrameView().LayoutContext().AddLayoutDelta(LayoutSize(child.X() - logicalLeft, 0_lu));
+      }
+      child.SetX(logicalLeft);
+    }
+    else
+    {
+      if (applyDelta == ApplyLayoutDelta)
+      {
+        View().FrameView().LayoutContext().AddLayoutDelta(LayoutSize(0_lu, child.Y() - logicalLeft));
+      }
+      child.SetY(logicalLeft);
+    }
+  }
+
+  void RenderBlock::SetLogicalTopForChild(RenderBox &child, LayoutUnit logicalTop,
+                                          ApplyLayoutDeltaMode applyDelta) noexcept
+  {
+    if (IsHorizontalWritingMode())
+    {
+      if (applyDelta == ApplyLayoutDelta)
+      {
+        View().FrameView().LayoutContext().AddLayoutDelta(LayoutSize(0_lu, child.Y() - logicalTop));
+      }
+      child.SetY(logicalTop);
+    }
+    else
+    {
+      if (applyDelta == ApplyLayoutDelta)
+      {
+        View().FrameView().LayoutContext().AddLayoutDelta(LayoutSize(child.X() - logicalTop, 0_lu));
+      }
+      child.SetX(logicalTop);
+    }
+  }
+
+  void RenderBlock::UpdateBlockChildDirtyBitsBeforeLayout(RelayoutChildren relayoutChildren,
+                                                          RenderBox &child) noexcept
+  {
+    if (child.IsOutOfFlowPositioned())
+    {
+      return;
+    }
+
+    // FIXME: Technically percentage height objects only need a relayout if their percentage isn't going to be
+    // turned into an auto value. Add a method to determine this, so that we can avoid the relayout.
+    auto childHasRelativeHeight = [&]
+    {
+      const auto &style = child.Style();
+      return style.Height().IsPercentOrCalculated() || style.MinHeight().IsPercentOrCalculated()
+             || style.MaxHeight().IsPercentOrCalculated();
+    };
+    if (relayoutChildren == RelayoutChildren::Yes || (childHasRelativeHeight() && !IsRenderView()))
+    {
+      child.SetChildNeedsLayout(MarkingBehavior::MarkOnlyThis);
+    }
+
+    // If relayoutChildren is set and the child has percentage padding or an embedded content box, we also
+    // need to invalidate the childs pref widths.
+    if (relayoutChildren == RelayoutChildren::Yes && child.ShouldInvalidatePreferredWidths())
+    {
+      child.SetNeedsPreferredWidthsUpdate(MarkingBehavior::MarkOnlyThis);
+    }
+  }
+
+  void RenderBlock::SimplifiedNormalFlowLayout() noexcept
+  {
+    krys_debug_assert(!ChildrenInline());
+
+    for (auto &box : ChildrenOfType<RenderBox>(*this))
+    {
+      if (!box.IsOutOfFlowPositioned())
+      {
+        box.LayoutIfNeeded();
+      }
+    }
+  }
+
+  bool RenderBlock::CanPerformSimplifiedLayout() const noexcept
+  {
+    if (SelfNeedsLayout() || NormalChildNeedsLayout() || OutOfFlowChildNeedsStaticPositionLayout())
+    {
+      return false;
+    }
+    // FIXME: Content skipped by content-visibility (wasSkippedDuringLastLayoutDueToContentVisibility,
+    // isSkippedContentRootForLayout), once layout skips content.
+    return OutOfFlowChildNeedsLayout() || NeedsSimplifiedNormalFlowLayout();
+  }
+
+  bool RenderBlock::SimplifiedLayout() noexcept
+  {
+    if (!CanPerformSimplifiedLayout())
+    {
+      return false;
+    }
+
+    LayoutStateMaintainer statePusher(*this, LocationOffset(),
+                                      IsTransformed() || Style().GetWritingMode().IsBlockFlipped());
+    if (NeedsOutOfFlowMovementLayout() && !TryLayoutDoingOutOfFlowMovementOnly())
+    {
+      return false;
+    }
+
+    // Lay out positioned descendants or objects that just need to recompute overflow.
+    if (NeedsSimplifiedNormalFlowLayout())
+    {
+      SimplifiedNormalFlowLayout();
+    }
+
+    // FIXME: Apply a forced break after the content of a fragmented flow, once there are fragmented flows.
+
+    // Lay out our positioned objects if our positioned child bit is set.
+    // Also, if an absolute position element inside a relative positioned container moves, and the absolute
+    // element has a fixed position child, neither the fixed element nor its container learn of the movement
+    // since outOfFlowChildNeedsLayout() is only marked as far as the relative positioned container. So if we
+    // can have fixed pos objects in our positioned objects list check if any of them are statically
+    // positioned and thus need to move with their absolute ancestors.
+    bool canContainFixedPosObjects = CanContainFixedPositionObjects();
+    if (OutOfFlowChildNeedsLayout() || canContainFixedPosObjects)
+    {
+      LayoutOutOfFlowBoxes(RelayoutChildren::No, !OutOfFlowChildNeedsLayout() && canContainFixedPosObjects);
+    }
+
+    // Recompute our overflow information.
+    // FIXME: We could do better here by computing a temporary overflow object from layoutOutOfFlowBoxes and
+    // only updating our overflow if we either used to have overflow or if the new temporary object has
+    // overflow. For now just always recompute overflow.  This is no worse performance-wise than the old code
+    // that called rightmostPosition and lowestPosition on every relayout so it's not a regression.
+    // computeOverflow expects the bottom edge before we clamp our height. Since this information isn't
+    // available during simplifiedLayout, we cache the value in m_overflow.
+    LayoutUnit oldClientAfterEdge =
+      HasRenderOverflow() ? _overflow->LayoutClientAfterEdge() : ClientLogicalBottom();
+    ComputeOverflow(oldClientAfterEdge, {ComputeOverflowOptions::RecomputeFloats});
+
+    UpdateLayerTransform();
+
     UpdateScrollInfoAfterLayout();
+
     ClearNeedsLayout();
+    return true;
+  }
+
+  void RenderBlock::LayoutOutOfFlowBoxes(RelayoutChildren, bool) noexcept
+  {
+    // FIXME: Lay out the out-of-flow boxes (layoutOutOfFlowBox), once there's out-of-flow layout. Until then
+    // they're laid out in place, like in-flow children.
+    for (auto &box : ChildrenOfType<RenderBox>(*this))
+    {
+      if (box.IsOutOfFlowPositioned())
+      {
+        box.LayoutIfNeeded();
+      }
+    }
+  }
+
+  bool RenderBlock::HasLineIfEmpty() const noexcept
+  {
+    // FIXME: A root editable element has a line even when empty, once there's editing.
+    return false;
+  }
+
+  Maybe<LayoutUnit> RenderBlock::FirstLineBaseline() const noexcept
+  {
+    if (ShouldApplyLayoutContainment())
+    {
+      return null;
+    }
+
+    if (IsWritingModeRoot() && !IsFlexItem())
+    {
+      return null;
+    }
+
+    auto firstInFlowBaseline = [&]() -> Maybe<LayoutUnit>
+    {
+      for (auto *child = FirstInFlowChildBox(); child; child = child->NextInFlowSiblingBox())
+      {
+        // FIXME: Skip a legend placed in the border, once there are fieldsets.
+        if (auto baseline = child->FirstLineBaseline())
+        {
+          // FIXME: Keep the subpixel logical top when subpixel inline layout is enabled.
+          return LayoutUnit(child->LogicalTop().ToInt()) + *baseline;
+        }
+      }
+      return null;
+    };
+    return firstInFlowBaseline();
+  }
+
+  Maybe<LayoutUnit> RenderBlock::LastLineBaseline() const noexcept
+  {
+    if (ShouldApplyLayoutContainment())
+    {
+      return null;
+    }
+
+    if (IsWritingModeRoot() && !IsFlexItem())
+    {
+      return null;
+    }
+
+    auto lastInFlowBaseline = [&]() -> Maybe<LayoutUnit>
+    {
+      for (auto *child = LastInFlowChildBox(); child; child = child->PreviousInFlowSiblingBox())
+      {
+        // FIXME: Skip a legend placed in the border, once there are fieldsets.
+        if (auto baseline = child->LastLineBaseline())
+        {
+          // FIXME: Keep the subpixel logical top when subpixel inline layout is enabled.
+          return LayoutUnit(child->LogicalTop().ToInt()) + *baseline;
+        }
+      }
+      return null;
+    };
+    return lastInFlowBaseline();
+  }
+
+  void RenderBlock::SetTrimmedMarginForChild(RenderBox &child, style::MarginTrimSide side) noexcept
+  {
+    switch (side)
+    {
+      case style::MarginTrimSide::BlockStart:  SetMarginBeforeForChild(child, 0_lu); break;
+      case style::MarginTrimSide::BlockEnd:    SetMarginAfterForChild(child, 0_lu); break;
+      case style::MarginTrimSide::InlineStart: SetMarginStartForChild(child, 0_lu); break;
+      case style::MarginTrimSide::InlineEnd:   SetMarginEndForChild(child, 0_lu); break;
+    }
+
+    child.MarkMarginAsTrimmed(side);
+  }
+
+  LayoutUnit RenderBlock::CollapsedMarginBeforeForChild(const RenderBox &child) const noexcept
+  {
+    // If the child has the same directionality as we do, then we can just return its
+    // collapsed margin.
+    if (!child.IsWritingModeRoot())
+    {
+      return child.CollapsedMarginBefore();
+    }
+
+    // The child has a different directionality.  If the child is parallel, then it's just
+    // flipped relative to us.  We can use the collapsed margin for the opposite edge.
+    if (child.IsHorizontalWritingMode() == IsHorizontalWritingMode())
+    {
+      return child.CollapsedMarginAfter();
+    }
+
+    // The child is perpendicular to us, which means its margins don't collapse but are on the
+    // "logical left/right" sides of the child box.  We can just return the raw margin in this case.
+    return MarginBeforeForChild(child);
+  }
+
+  LayoutUnit RenderBlock::CollapsedMarginAfterForChild(const RenderBox &child) const noexcept
+  {
+    // If the child has the same directionality as we do, then we can just return its
+    // collapsed margin.
+    if (!child.IsWritingModeRoot())
+    {
+      return child.CollapsedMarginAfter();
+    }
+
+    // The child has a different directionality.  If the child is parallel, then it's just
+    // flipped relative to us.  We can use the collapsed margin for the opposite edge.
+    if (child.IsHorizontalWritingMode() == IsHorizontalWritingMode())
+    {
+      return child.CollapsedMarginBefore();
+    }
+
+    // The child is perpendicular to us, which means its margins don't collapse but are on the
+    // "logical left/right" side of the child box.  We can just return the raw margin in this case.
+    return MarginAfterForChild(child);
+  }
+
+  bool RenderBlock::HasMarginBeforeQuirk(const RenderBox &child) const noexcept
+  {
+    // If the child has the same directionality as we do, then we can just return its
+    // margin quirk.
+    if (!child.IsWritingModeRoot())
+    {
+      auto *childBlock = DynamicDowncast<RenderBlock>(child);
+      return childBlock ? childBlock->HasMarginBeforeQuirk() : child.Style().MarginBefore().HasQuirk();
+    }
+
+    // The child has a different directionality. If the child is parallel, then it's just
+    // flipped relative to us. We can use the opposite edge.
+    if (child.IsHorizontalWritingMode() == IsHorizontalWritingMode())
+    {
+      auto *childBlock = DynamicDowncast<RenderBlock>(child);
+      return childBlock ? childBlock->HasMarginAfterQuirk() : child.Style().MarginAfter().HasQuirk();
+    }
+
+    // The child is perpendicular to us and box sides are never quirky in html.css, and we don't really care
+    // about whether or not authors specified quirky ems, since they're an implementation detail.
+    return false;
+  }
+
+  bool RenderBlock::HasMarginAfterQuirk(const RenderBox &child) const noexcept
+  {
+    // If the child has the same directionality as we do, then we can just return its
+    // margin quirk.
+    if (!child.IsWritingModeRoot())
+    {
+      auto *childBlock = DynamicDowncast<RenderBlock>(child);
+      return childBlock ? childBlock->HasMarginAfterQuirk() : child.Style().MarginAfter().HasQuirk();
+    }
+
+    // The child has a different directionality. If the child is parallel, then it's just
+    // flipped relative to us. We can use the opposite edge.
+    if (child.IsHorizontalWritingMode() == IsHorizontalWritingMode())
+    {
+      auto *childBlock = DynamicDowncast<RenderBlock>(child);
+      return childBlock ? childBlock->HasMarginBeforeQuirk() : child.Style().MarginBefore().HasQuirk();
+    }
+
+    // The child is perpendicular to us and box sides are never quirky in html.css, and we don't really care
+    // about whether or not authors specified quirky ems, since they're an implementation detail.
+    return false;
+  }
+
+  void RenderBlock::UpdateDescendantTransformsAfterLayout() noexcept
+  {
+    // FIXME: Update the transforms of the boxes whose transform depends on this container's size
+    // (takeBoxesNeedingTransformUpdateAfterContainerLayout), once there are motion paths.
+  }
+
+  void RenderBlock::LayoutExcludedChildren(RelayoutChildren) noexcept
+  {
+    // FIXME: Lay out a fieldset's legend inside its border, once there are fieldsets.
   }
 
   void RenderBlock::ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,

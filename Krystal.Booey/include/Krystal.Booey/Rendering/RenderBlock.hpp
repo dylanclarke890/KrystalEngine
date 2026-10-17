@@ -18,14 +18,21 @@ namespace krys::boo
   using TrackedRendererListHashSet = ListHashSet<RenderBox *>;
 
   /// @brief A box that contains other boxes: a block container, flex, grid or table.
-  // FIXME: Layout (block layout, positioned and percent-height descendants, floats), line boxes,
-  // continuations, selection and painting come with layout and painting.
+  // FIXME: Out-of-flow descendants, floats, line boxes, continuations, fragmentation, selection and painting
+  // come with the rest of layout and with painting.
   class RenderBlock : public RenderBox
   {
+    friend class RenderBlockFlow;
     KRYS_NON_COPY_MOVABLE(RenderBlock);
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderBlock);
 
   public:
+    enum ApplyLayoutDeltaMode
+    {
+      ApplyLayoutDelta,
+      DoNotApplyLayoutDelta
+    };
+
     ~RenderBlock() noexcept override;
 
     KRYS_NODISCARD bool CanHaveChildren() const noexcept override
@@ -50,10 +57,41 @@ namespace krys::boo
     KRYS_NODISCARD bool EstablishesIndependentFormattingContext() const noexcept;
     KRYS_NODISCARD bool CreatesNewFormattingContext() const noexcept;
 
-    void Layout() noexcept override;
-
-    void UpdateScrollInfoAfterLayout() noexcept;
     virtual void LayoutBlock(RelayoutChildren relayoutChildren, LayoutUnit pageLogicalHeight = 0_lu) noexcept;
+
+    void SetHasMarginBeforeQuirk(bool b) noexcept
+    {
+      SetRenderBlockHasMarginBeforeQuirk(b);
+    }
+    void SetHasMarginAfterQuirk(bool b) noexcept
+    {
+      SetRenderBlockHasMarginAfterQuirk(b);
+    }
+    void SetShouldForceRelayoutChildren(bool b) noexcept
+    {
+      SetRenderBlockShouldForceRelayoutChildren(b);
+    }
+
+    KRYS_NODISCARD bool HasMarginBeforeQuirk() const noexcept
+    {
+      return RenderBlockHasMarginBeforeQuirk();
+    }
+    KRYS_NODISCARD bool HasMarginAfterQuirk() const noexcept
+    {
+      return RenderBlockHasMarginAfterQuirk();
+    }
+    KRYS_NODISCARD bool HasBorderOrPaddingLogicalWidthChanged() const noexcept
+    {
+      return RenderBlockShouldForceRelayoutChildren();
+    }
+
+    KRYS_NODISCARD bool HasMarginBeforeQuirk(const RenderBox &child) const noexcept;
+    KRYS_NODISCARD bool HasMarginAfterQuirk(const RenderBox &child) const noexcept;
+
+    virtual void ScrollbarsChanged(bool /*horizontalScrollbarChanged*/,
+                                   bool /*verticalScrollbarChanged*/) noexcept
+    {
+    }
 
     void AddPercentHeightDescendant(RenderBox &descendant) noexcept;
     static void RemovePercentHeightDescendant(RenderBox &descendant) noexcept;
@@ -91,6 +129,10 @@ namespace krys::boo
     {
       return IsHorizontalWritingMode() ? child.Height() : child.Width();
     }
+    KRYS_NODISCARD LayoutUnit LogicalMarginBoxHeightForChild(const RenderBox &child) const noexcept
+    {
+      return IsHorizontalWritingMode() ? child.MarginBoxRect().Height() : child.MarginBoxRect().Width();
+    }
     KRYS_NODISCARD LayoutSize LogicalSizeForChild(const RenderBox &child) const noexcept
     {
       return IsHorizontalWritingMode() ? child.Size() : child.Size().TransposedSize();
@@ -103,6 +145,10 @@ namespace krys::boo
     {
       return IsHorizontalWritingMode() ? child.X() : child.Y();
     }
+    void SetLogicalLeftForChild(RenderBox &child, LayoutUnit logicalLeft,
+                                ApplyLayoutDeltaMode applyDelta = DoNotApplyLayoutDelta) noexcept;
+    void SetLogicalTopForChild(RenderBox &child, LayoutUnit logicalTop,
+                               ApplyLayoutDeltaMode applyDelta = DoNotApplyLayoutDelta) noexcept;
     KRYS_NODISCARD LayoutUnit MarginBeforeForChild(const RenderBoxModelObject &child) const noexcept
     {
       return child.MarginBefore(Style().GetWritingMode());
@@ -135,6 +181,9 @@ namespace krys::boo
     {
       child.SetMarginAfter(value, Style().GetWritingMode());
     }
+    void SetTrimmedMarginForChild(RenderBox &child, style::MarginTrimSide side) noexcept;
+    KRYS_NODISCARD LayoutUnit CollapsedMarginBeforeForChild(const RenderBox &child) const noexcept;
+    KRYS_NODISCARD LayoutUnit CollapsedMarginAfterForChild(const RenderBox &child) const noexcept;
 
     KRYS_NODISCARD LayoutUnit AvailableLogicalWidthForContent() const noexcept
     {
@@ -151,6 +200,19 @@ namespace krys::boo
     void ComputeChildPreferredLogicalWidths(RenderBox &childBox, LayoutUnit &minPreferredLogicalWidth,
                                             LayoutUnit &maxPreferredLogicalWidth) const noexcept;
 
+    KRYS_NODISCARD virtual bool HasLineIfEmpty() const noexcept;
+
+    void UpdateDescendantTransformsAfterLayout() noexcept;
+
+    KRYS_NODISCARD virtual bool CanPerformSimplifiedLayout() const noexcept;
+
+    void ClearLayoutOverflow() noexcept;
+
+    /// @brief Lays out the children that normal layout skips: a fieldset's legend.
+    virtual void LayoutExcludedChildren(RelayoutChildren relayoutChildren) noexcept;
+
+    void UpdateScrollInfoAfterLayout() noexcept;
+
   protected:
     RenderBlock(Type type, dom::Element &element, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags = {},
                 TypeSpecificFlags typeSpecificFlags = {}) noexcept;
@@ -158,6 +220,34 @@ namespace krys::boo
                 TypeSpecificFlags typeSpecificFlags = {}) noexcept;
 
     void WillBeDestroyed() noexcept override;
+
+    void Layout() noexcept override;
+
+    // FIXME: Lays out the out-of-flow boxes, once there's out-of-flow layout.
+    void LayoutOutOfFlowBoxes(RelayoutChildren relayoutChildren,
+                              bool fixedPositionObjectsOnly = false) noexcept;
+
+    void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept override;
+    void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
+
+    bool SimplifiedLayout() noexcept;
+    virtual void SimplifiedNormalFlowLayout() noexcept;
+
+    virtual void ComputeOverflow(LayoutUnit oldClientAfterEdge,
+                                 EnumSet<ComputeOverflowOptions> options = {}) noexcept;
+    void AddOverflowFromOutOfFlowBoxes() noexcept;
+    void AddVisualOverflowFromTheme() noexcept;
+
+    void UpdateBlockChildDirtyBitsBeforeLayout(RelayoutChildren relayoutChildren, RenderBox &child) noexcept;
+
+    // FIXME: Stands in for inline layout until it's ported: lays out the boxes of the inline content that
+    // aren't part of its lines, and clears the rest.
+    void LayoutChildrenWithoutLineLayout() noexcept;
+
+    bool RecomputeLogicalWidth() noexcept;
+
+    KRYS_NODISCARD Maybe<LayoutUnit> FirstLineBaseline() const noexcept override;
+    KRYS_NODISCARD Maybe<LayoutUnit> LastLineBaseline() const noexcept override;
 
     void ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,
                                        LayoutUnit &maxLogicalWidth) const noexcept override;
@@ -177,6 +267,15 @@ namespace krys::boo
     {
       return fixedOffset;
     }
+
+  private:
+    KRYS_NODISCARD bool IsSelfCollapsingBlock() const noexcept override;
+    KRYS_NODISCARD virtual bool ChildrenPreventSelfCollapsing() const noexcept;
+
+    KRYS_NODISCARD bool ContentBoxLogicalWidthChanged(const RenderStyle &oldStyle,
+                                                      const RenderStyle &newStyle) const noexcept;
+    KRYS_NODISCARD bool ScrollbarWidthDidChange(const RenderStyle &oldStyle, const RenderStyle &newStyle,
+                                                ScrollbarOrientation orientation) const noexcept;
   };
 }
 

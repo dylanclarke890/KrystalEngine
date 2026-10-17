@@ -25,6 +25,7 @@
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/PseudoElementRequest.hpp"
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
@@ -367,6 +368,54 @@ namespace krys::boo
 
     // FIXME: Out-of-flow static positions, cursors, outline-auto ancestors, scroll anchoring and line layout,
     // once there are any.
+  }
+
+  void RenderElement::PropagateStyleToAnonymousChildren(StylePropagationType propagationType) noexcept
+  {
+    // FIXME: We could save this call when the change only affected non-inherited properties.
+    for (auto &elementChild : ChildrenOfType<RenderElement>(*this))
+    {
+      if (!elementChild.IsAnonymous() || elementChild.Style().GetPseudoElementType()
+          || elementChild.IsViewTransitionContainingBlock())
+      {
+        continue;
+      }
+
+      bool isBlockOrRuby =
+        Is<RenderBlock>(elementChild) || elementChild.Style().Display() == DisplayType::Ruby;
+      if (propagationType == StylePropagationType::BlockAndRubyChildren && !isBlockOrRuby)
+      {
+        continue;
+      }
+
+      // RenderFragmentedFlows are updated through the RenderView::styleDidChange function.
+      if (elementChild.IsRenderFragmentedFlow())
+      {
+        continue;
+      }
+
+      // FIXME: Anonymous ruby boxes take the ruby style (createAnonymousStyleForRuby), once there's ruby.
+      auto newStyle = RenderStyle::CreateAnonymousStyleWithDisplay(Style(), elementChild.Style().Display());
+
+      if (Style().SpecifiesColumns())
+      {
+        if (elementChild.Style().SpecifiesColumns())
+        {
+          newStyle.InheritColumnPropertiesFrom(Style());
+        }
+        if (elementChild.Style().GetColumnSpan() == ColumnSpan::All)
+        {
+          newStyle.SetColumnSpan(ColumnSpan::All);
+        }
+      }
+
+      // FIXME: Preserve the position of anonymous block continuations, which can be relative or sticky
+      // positioned when they contain block descendants of positioned inlines, once there are continuations.
+
+      UpdateAnonymousChildStyle(newStyle);
+
+      elementChild.SetStyle(krys::move(newStyle));
+    }
   }
 
   const RenderStyle &RenderElement::FirstLineStyle() const noexcept

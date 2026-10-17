@@ -724,6 +724,8 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/RenderLayer.hpp
   include/Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp
   include/Krystal.Booey/Rendering/RenderTreeAsText.hpp
+  include/Krystal.Booey/Rendering/LayoutScope.hpp
+  include/Krystal.Booey/Rendering/BlockStepSizing.hpp
   include/Krystal.Booey/Platform/ScrollableArea.hpp
   include/Krystal.Booey/Platform/Scrollbar.hpp
   include/Krystal.Booey/Platform/ScrollbarTheme.hpp
@@ -1970,6 +1972,8 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/RenderLayer.cpp
   src/Rendering/RenderLayerScrollableArea.cpp
   src/Rendering/RenderTreeAsText.cpp
+  src/Rendering/LayoutScope.cpp
+  src/Rendering/BlockStepSizing.cpp
   src/Platform/ScrollableArea.cpp
   src/Platform/Scrollbar.cpp
   src/Platform/ScrollbarTheme.cpp

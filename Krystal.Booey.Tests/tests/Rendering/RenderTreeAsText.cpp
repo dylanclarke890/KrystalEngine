@@ -8,7 +8,7 @@ namespace krys::boo::tests
 
   namespace
   {
-    // FIXME: Every box is 0x0 until block layout sizes them; the dumps' geometry changes then.
+    // FIXME: Text has no lines until inline layout, so the blocks that hold only text are empty.
     constexpr const char8 *Markup = u8R"html(<!DOCTYPE html><style>
       #a { color: red; background-color: blue; border: 2px solid green; border-left: 3px dashed green }
       #rel { position: relative; z-index: 2 }
@@ -35,17 +35,17 @@ namespace krys::boo::tests
 
     SECTION("The layers that paint")
     {
-      // Nothing intersects the empty view, so only the root layers dump.
-      CHECK(ExternalRepresentation(fixture.Frame.get()) == u8R"(layer at (0,0) size 0x0
-  RenderView at (0,0) size 0x0
-layer at (0,0) size 0x0 layerType: background only
-layer at (0,0) size 0x0 layerType: foreground only
-  RenderBlock {HTML} at (0,0) size 0x0
-    RenderBody {BODY} at (0,0) size 0x0
-      RenderBlock {DIV} at (0,0) size 0x0 [color=#FF0000] [bgcolor=#0000FF] [border: (2px solid #008000) (3px dashed #008000)]
+      // The empty layers don't intersect the view, so they don't dump.
+      CHECK(ExternalRepresentation(fixture.Frame.get()) == u8R"(layer at (0,0) size 800x600
+  RenderView at (0,0) size 800x600
+layer at (0,0) size 800x28 layerType: background only
+layer at (0,0) size 800x28 layerType: foreground only
+  RenderBlock {HTML} at (0,0) size 800x28
+    RenderBody {BODY} at (8,8) size 784x4
+      RenderBlock {DIV} at (0,0) size 784x4 [color=#FF0000] [bgcolor=#0000FF] [border: (2px solid #008000) (3px dashed #008000)]
         RenderText {#text} at (0,0) size 0x0
-      RenderBlock {UL} at (0,0) size 0x0
-        RenderListItem {LI} at (0,0) size 0x0
+      RenderBlock {UL} at (0,20) size 784x0
+        RenderListItem {LI} at (40,0) size 744x0
           RenderListMarker at (0,0) size 0x0
           RenderText {#text} at (0,0) size 0x0
 )");
@@ -57,28 +57,28 @@ layer at (0,0) size 0x0 layerType: foreground only
                                    {RenderAsTextFlag::ShowAllLayers, RenderAsTextFlag::ShowLayerNesting,
                                     RenderAsTextFlag::ShowIDAndClass, RenderAsTextFlag::ShowLayoutState,
                                     RenderAsTextFlag::ShowOverflow})
-            == u8R"(layer at (0,0) size 0x0
-  RenderView at (0,0) size 0x0
+            == u8R"(layer at (0,0) size 800x600
+  RenderView at (0,0) size 800x600
  positive z-order list (1)
-  layer at (0,0) size 0x0 layerType: background only
+  layer at (0,0) size 800x28 layerType: background only
    negative z-order list (1)
     layer at (0,0) size 0x0
       RenderBlock (positioned) zI: -1 {DIV} at (0,0) size 0x0 id="neg"
-  layer at (0,0) size 0x0 layerType: foreground only
-    RenderBlock {HTML} at (0,0) size 0x0
-      RenderBody {BODY} at (0,0) size 0x0
-        RenderBlock {DIV} at (0,0) size 0x0 [color=#FF0000] [bgcolor=#0000FF] [border: (2px solid #008000) (3px dashed #008000)] id="a" class="x y"
+  layer at (0,0) size 800x28 layerType: foreground only
+    RenderBlock {HTML} at (0,0) size 800x28
+      RenderBody {BODY} at (8,8) size 784x4
+        RenderBlock {DIV} at (0,0) size 784x4 [color=#FF0000] [bgcolor=#0000FF] [border: (2px solid #008000) (3px dashed #008000)] id="a" class="x y"
           RenderText {#text} at (0,0) size 0x0
-        RenderBlock {UL} at (0,0) size 0x0
-          RenderListItem {LI} at (0,0) size 0x0
+        RenderBlock {UL} at (0,20) size 784x0
+          RenderListItem {LI} at (40,0) size 744x0
             RenderListMarker at (0,0) size 0x0
             RenderText {#text} at (0,0) size 0x0
    normal flow list (1)
-    layer at (0,0) size 0x0
-      RenderBlock {DIV} at (0,0) size 0x0 id="normal"
+    layer at (8,12) size 784x0
+      RenderBlock {DIV} at (0,4) size 784x0 id="normal"
    positive z-order list (1)
-    layer at (0,0) size 0x0
-      RenderBlock (relative positioned) zI: 2 {DIV} at (0,0) size 0x0 id="rel"
+    layer at (8,12) size 784x0
+      RenderBlock (relative positioned) zI: 2 {DIV} at (0,4) size 784x0 id="rel"
 )");
     }
 
@@ -101,8 +101,8 @@ layer at (0,0) size 0x0 layerType: foreground only
     {
       // Only boxes with a layer dump.
       CHECK(ExternalRepresentation(&fixture.ById(u8"a")) == u8"");
-      CHECK(ExternalRepresentation(&fixture.ById(u8"rel")) == u8R"(layer at (0,0) size 0x0
-  RenderBlock (relative positioned) zI: 2 {DIV} at (0,0) size 0x0
+      CHECK(ExternalRepresentation(&fixture.ById(u8"rel")) == u8R"(layer at (0,0) size 784x0
+  RenderBlock (relative positioned) zI: 2 {DIV} at (0,4) size 784x0
 )");
     }
   }

@@ -3808,28 +3808,30 @@ namespace krys::boo
     return LayoutRect(overflowMinX, overflowMinY, overflowMaxX - overflowMinX, overflowMaxY - overflowMinY);
   }
 
-  void RenderBox::AddOverflowFromInFlowChildren() noexcept
+  void RenderBox::AddOverflowFromInFlowChildren(EnumSet<ComputeOverflowOptions> options) noexcept
   {
     for (auto &child : ChildrenOfType<RenderBox>(*this))
     {
       if (!child.IsFloatingOrOutOfFlowPositioned())
       {
-        AddOverflowFromContainedBox(child);
+        AddOverflowFromContainedBox(child, options);
       }
     }
   }
 
-  void RenderBox::AddOverflowFromContainedBox(const RenderBox &child) noexcept
+  void RenderBox::AddOverflowFromContainedBox(const RenderBox &child,
+                                              EnumSet<ComputeOverflowOptions> options) noexcept
   {
     krys_debug_assert(!child.IsFloating());
-    AddOverflowWithRendererOffset(child, child.LocationOffset());
+    AddOverflowWithRendererOffset(child, child.LocationOffset(), options);
   }
 
   // 'offsetFromThis' is normally the renderer's position (RenderBox::location()).
   // However in case of a float box, it may belong to a different container
   // (but is intrusive to this container hence calling this function),
   // meaning that the renderer's position may not be the same as its actual offset from this container.
-  void RenderBox::AddOverflowWithRendererOffset(const RenderBox &renderer, LayoutSize offsetFromThis) noexcept
+  void RenderBox::AddOverflowWithRendererOffset(const RenderBox &renderer, LayoutSize offsetFromThis,
+                                                EnumSet<ComputeOverflowOptions>) noexcept
   {
     // Never allow flow threads to propagate overflow up to a parent.
     if (renderer.IsRenderFragmentedFlow())

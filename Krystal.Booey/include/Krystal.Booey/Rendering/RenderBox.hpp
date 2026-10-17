@@ -245,8 +245,13 @@ namespace krys::boo
     void AddVisualEffectOverflow() noexcept;
     KRYS_NODISCARD LayoutRect ApplyVisualEffectOverflow(const LayoutRect &borderBox) const noexcept;
 
-    virtual void AddOverflowFromInFlowChildren() noexcept;
-    void AddOverflowFromContainedBox(const RenderBox &child) noexcept;
+    enum class ComputeOverflowOptions : uint8
+    {
+      RecomputeFloats,
+    };
+    virtual void AddOverflowFromInFlowChildren(EnumSet<ComputeOverflowOptions> options = {}) noexcept;
+    void AddOverflowFromContainedBox(const RenderBox &child,
+                                     EnumSet<ComputeOverflowOptions> options = {}) noexcept;
 
     KRYS_NODISCARD LayoutRect
       LogicalVisualOverflowRectForPropagation(WritingMode parentWritingMode) const noexcept;
@@ -877,7 +882,8 @@ namespace krys::boo
     KRYS_NODISCARD LayoutPoint TopLeftLocationWithFlipping() const noexcept;
 
   private:
-    void AddOverflowWithRendererOffset(const RenderBox &renderer, LayoutSize offsetFromThis) noexcept;
+    void AddOverflowWithRendererOffset(const RenderBox &renderer, LayoutSize offsetFromThis,
+                                       EnumSet<ComputeOverflowOptions> options = {}) noexcept;
 
     template <typename Function>
     KRYS_NODISCARD LayoutUnit ComputeOrTrimInlineMargin(const RenderBlock &containingBlock,
