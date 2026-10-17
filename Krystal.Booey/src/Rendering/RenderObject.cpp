@@ -623,8 +623,22 @@ namespace krys::boo
     SetNormalChildNeedsLayoutBit(false);
     SetOutOfFlowChildNeedsStaticPositionLayoutBit(false);
     SetNeedsOutOfFlowMovementLayoutBit(false);
-    // FIXME: Assert the out-of-flow descendants of a block don't need layout, once there are out-of-flow box
-    // lists.
+#if KRYS_DEBUG
+    auto checkIfOutOfFlowDescendantsNeedLayout = [&](auto &renderBlock)
+    {
+      if (auto *outOfFlowDescendants = renderBlock.OutOfFlowBoxes())
+      {
+        for (auto *renderer : *outOfFlowDescendants)
+        {
+          krys_debug_assert(!renderer->NeedsLayout());
+        }
+      }
+    };
+    if (auto *renderBlock = DynamicDowncast<RenderBlock>(*this))
+    {
+      checkIfOutOfFlowDescendantsNeedLayout(*renderBlock);
+    }
+#endif
   }
 
   void RenderObject::ScheduleLayout(RenderElement *layoutRoot) noexcept

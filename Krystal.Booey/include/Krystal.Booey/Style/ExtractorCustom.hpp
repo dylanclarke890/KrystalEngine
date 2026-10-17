@@ -191,12 +191,12 @@ namespace krys::boo::style
             if (isVerticalProperty)
             {
               containingBlockSize =
-                box->ContainingBlockRangeSizeForPositioned(*containingBlock, BoxAxis::Vertical);
+                box->ContainingBlockRangeForPositioned(*containingBlock, BoxAxis::Vertical).Size();
             }
             else
             {
               containingBlockSize =
-                box->ContainingBlockRangeSizeForPositioned(*containingBlock, BoxAxis::Horizontal);
+                box->ContainingBlockRangeForPositioned(*containingBlock, BoxAxis::Horizontal).Size();
             }
           }
           else

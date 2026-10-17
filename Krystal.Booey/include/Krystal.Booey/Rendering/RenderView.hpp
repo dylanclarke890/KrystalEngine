@@ -85,6 +85,9 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutUnit PageOrViewLogicalHeight() const noexcept;
 
+    KRYS_NODISCARD LayoutUnit ClientLogicalWidthForFixedPosition() const noexcept;
+    KRYS_NODISCARD LayoutUnit ClientLogicalHeightForFixedPosition() const noexcept;
+
     KRYS_NODISCARD bool ShouldUsePrintingLayout() const noexcept
     {
       // FIXME: Printing, once there is any.

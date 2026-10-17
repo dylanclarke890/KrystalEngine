@@ -722,4 +722,49 @@ namespace krys::boo
     // RenderBoxModelObject.
     krys_debug_assert(false);
   }
+
+  void RenderBoxModelObject::RemoveOutOfFlowBoxesIfNeededOnStyleChange(RenderBlock &delegateBlock,
+                                                                       const RenderStyle &oldStyle,
+                                                                       const RenderStyle &newStyle) noexcept
+  {
+    auto wasContainingBlockForFixedContent = CanContainFixedPositionObjects(&oldStyle);
+    auto wasContainingBlockForAbsoluteContent = CanContainAbsolutelyPositionedObjects(&oldStyle);
+    auto isContainingBlockForFixedContent = CanContainFixedPositionObjects(&newStyle);
+    auto isContainingBlockForAbsoluteContent = CanContainAbsolutelyPositionedObjects(&newStyle);
+
+    // FIXME: If an inline becomes a containing block, but the delegate was already one (or vice-versa),
+    // then we don't really need to remove the out-of-flows from the delegate only for them to be re-added
+    // to the same spot. We would need to correctly mark for layout instead though.
+
+    if ((wasContainingBlockForFixedContent && !isContainingBlockForFixedContent)
+        || (wasContainingBlockForAbsoluteContent && !isContainingBlockForAbsoluteContent))
+    {
+      // We are no longer the containing block for out-of-flow descendants.
+      delegateBlock.RemoveOutOfFlowBoxes({}, RenderBlock::ContainingBlockState::NewContainingBlock);
+    }
+
+    if (!wasContainingBlockForFixedContent && isContainingBlockForFixedContent)
+    {
+      // We are a new containing block for all out-of-flow boxes. Find first ancestor that has our fixed
+      // positioned boxes and remove them. They will be inserted into our positioned objects list during their
+      // static position layout.
+      if (auto *containingBlock = RenderObject::ContainingBlockForPositionType(PositionType::Fixed, *this))
+      {
+        containingBlock->RemoveOutOfFlowBoxes(&delegateBlock,
+                                              RenderBlock::ContainingBlockState::NewContainingBlock);
+      }
+    }
+
+    if (!wasContainingBlockForAbsoluteContent && isContainingBlockForAbsoluteContent)
+    {
+      // We are a new containing block for absolute positioning.
+      // Remove our absolutely positioned descendants from their current containing block.
+      // They will be inserted into our positioned objects list during layout.
+      if (auto *containingBlock = RenderObject::ContainingBlockForPositionType(PositionType::Absolute, *this))
+      {
+        containingBlock->RemoveOutOfFlowBoxes(&delegateBlock,
+                                              RenderBlock::ContainingBlockState::NewContainingBlock);
+      }
+    }
+  }
 }

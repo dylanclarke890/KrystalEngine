@@ -62,8 +62,8 @@ layer at (0,0) size 800x28 layerType: foreground only
  positive z-order list (1)
   layer at (0,0) size 800x28 layerType: background only
    negative z-order list (1)
-    layer at (0,0) size 0x0
-      RenderBlock (positioned) zI: -1 {DIV} at (0,0) size 0x0 id="neg"
+    layer at (8,12) size 0x0
+      RenderBlock (positioned) zI: -1 {DIV} at (8,12) size 0x0 id="neg"
   layer at (0,0) size 800x28 layerType: foreground only
     RenderBlock {HTML} at (0,0) size 800x28
       RenderBody {BODY} at (8,8) size 784x4

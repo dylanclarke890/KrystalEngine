@@ -154,4 +154,24 @@ namespace krys::boo
            || Style().GetWillChange().CanCreateStackingContext()
            || RequiresRenderingConsolidationForViewTransition();
   }
+
+  void RenderInline::StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept
+  {
+    RenderBoxModelObject::StyleWillChange(diff, newStyle);
+
+    // RenderInlines forward their absolute positioned descendants to their (non-anonymous) containing block.
+    // Check if this non-anonymous containing block can hold the absolute positioned elements when the inline
+    // is no longer positioned.
+    auto *container = ContainingBlock();
+    if (!container)
+    {
+      return;
+    }
+
+    const RenderStyle *oldStyle = HasInitializedStyle() ? &Style() : nullptr;
+    if (oldStyle)
+    {
+      RemoveOutOfFlowBoxesIfNeededOnStyleChange(*container, *oldStyle, newStyle);
+    }
+  }
 }

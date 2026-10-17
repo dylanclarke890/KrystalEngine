@@ -18,8 +18,8 @@ namespace krys::boo
   using TrackedRendererListHashSet = ListHashSet<RenderBox *>;
 
   /// @brief A box that contains other boxes: a block container, flex, grid or table.
-  // FIXME: Out-of-flow descendants, floats, line boxes, continuations, fragmentation, selection and painting
-  // come with the rest of layout and with painting.
+  // FIXME: Floats, line boxes, continuations, fragmentation, selection and painting come with the rest of
+  // layout and with painting.
   class RenderBlock : public RenderBox
   {
     friend class RenderBlockFlow;
@@ -58,6 +58,28 @@ namespace krys::boo
     KRYS_NODISCARD bool CreatesNewFormattingContext() const noexcept;
 
     virtual void LayoutBlock(RelayoutChildren relayoutChildren, LayoutUnit pageLogicalHeight = 0_lu) noexcept;
+
+    void AddOutOfFlowBox(RenderBox &outOfFlowBox) noexcept;
+    static void RemoveOutOfFlowBox(const RenderBox &rendererToRemove) noexcept;
+    enum class ContainingBlockState : bool
+    {
+      NewContainingBlock,
+      SameContainingBlock
+    };
+    void RemoveOutOfFlowBoxes(
+      const RenderBlock *newContainingBlockCandidate,
+      ContainingBlockState containingBlockState = ContainingBlockState::SameContainingBlock) noexcept;
+
+    KRYS_NODISCARD TrackedRendererListHashSet *OutOfFlowBoxes() const noexcept;
+    KRYS_NODISCARD bool HasOutOfFlowBoxes() const noexcept
+    {
+      auto *renderers = OutOfFlowBoxes();
+      return renderers && !renderers->isEmpty();
+    }
+
+    KRYS_NODISCARD bool IsContainingBlockAncestorFor(RenderObject &renderer) const noexcept;
+
+    void MarkOutOfFlowBoxesForLayout() noexcept;
 
     void SetHasMarginBeforeQuirk(bool b) noexcept
     {
@@ -223,9 +245,12 @@ namespace krys::boo
 
     void Layout() noexcept override;
 
-    // FIXME: Lays out the out-of-flow boxes, once there's out-of-flow layout.
     void LayoutOutOfFlowBoxes(RelayoutChildren relayoutChildren,
                               bool fixedPositionObjectsOnly = false) noexcept;
+    virtual void LayoutOutOfFlowBox(RenderBox &outOfFlowBox, RelayoutChildren relayoutChildren,
+                                    bool fixedPositionObjectsOnly) noexcept;
+
+    void MarkFixedPositionBoxForLayoutIfNeeded(RenderBox &positionedChild) noexcept;
 
     void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept override;
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
@@ -273,6 +298,8 @@ namespace krys::boo
     KRYS_NODISCARD virtual bool ChildrenPreventSelfCollapsing() const noexcept;
 
     KRYS_NODISCARD bool ContentBoxLogicalWidthChanged(const RenderStyle &oldStyle,
+                                                      const RenderStyle &newStyle) const noexcept;
+    KRYS_NODISCARD bool PaddingBoxLogicaHeightChanged(const RenderStyle &oldStyle,
                                                       const RenderStyle &newStyle) const noexcept;
     KRYS_NODISCARD bool ScrollbarWidthDidChange(const RenderStyle &oldStyle, const RenderStyle &newStyle,
                                                 ScrollbarOrientation orientation) const noexcept;

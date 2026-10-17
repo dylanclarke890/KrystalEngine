@@ -146,6 +146,30 @@ namespace krys
       return {const_iterator(position), true};
     }
 
+    /// @brief Adds @p value at the end, or moves it there if it's already in the set.
+    std::pair<const_iterator, bool> appendOrMoveToLast(const T &value)
+    {
+      if (auto found = _index.find(value); found != _index.end())
+      {
+        _values.splice(_values.end(), _values, found->second);
+        return {const_iterator(found->second), false};
+      }
+      return add(value);
+    }
+
+    /// @brief Adds @p value before @p beforeValue, unless it's already in the set.
+    std::pair<const_iterator, bool> insertBefore(const_iterator beforeValue, const T &value)
+    {
+      if (auto found = _index.find(value); found != _index.end())
+      {
+        return {const_iterator(found->second), false};
+      }
+
+      auto position = _values.insert(beforeValue, value);
+      _index.emplace(*position, position);
+      return {const_iterator(position), true};
+    }
+
     bool remove(const T &value)
     {
       auto found = _index.find(value);

@@ -502,7 +502,8 @@ namespace krys::boo
     {
       if (auto *blockFlow = DynamicDowncast<RenderBlock>(from))
       {
-        // FIXME: Remove the out-of-flow boxes and percent height descendants, once there's layout.
+        blockFlow->RemoveOutOfFlowBoxes(nullptr);
+        RenderBlock::RemovePercentHeightDescendant(*blockFlow);
         RemoveFloatingObjects(*blockFlow);
       }
     }
@@ -852,9 +853,29 @@ namespace krys::boo
 
     auto *destroyRoot = &destroyRootIncludingAnonymous();
 
-    // FIXME: Remove floats and out-of-flow positioned objects from their containing block before detaching
-    // the renderer from the tree, including the anonymous block descendants we are about to destroy, once
-    // there's layout.
+    auto clearFloatsAndOutOfFlowPositionedObjects = [&]
+    {
+      // Remove floats and out-of-flow positioned objects from their containing block before detaching
+      // the renderer from the tree. It includes all the anonymous block descendants that we are about
+      // to destroy as well as part of the cleanup process below.
+      auto *destroyRootElement = DynamicDowncast<RenderElement>(destroyRoot);
+      if (!destroyRootElement)
+      {
+        return;
+      }
+      for (auto &descendant : DescendantsOfType<RenderBox>(*destroyRootElement))
+      {
+        if (descendant.IsFloatingOrOutOfFlowPositioned())
+        {
+          descendant.RemoveFloatingOrOutOfFlowChildFromBlockLists();
+        }
+      }
+      if (auto *box = DynamicDowncast<RenderBox>(destroyRoot); box && box->IsFloatingOrOutOfFlowPositioned())
+      {
+        box->RemoveFloatingOrOutOfFlowChildFromBlockLists();
+      }
+    };
+    clearFloatsAndOutOfFlowPositionedObjects();
 
     auto collapseAndDestroyAnonymousSiblings = [&]
     {
@@ -939,8 +960,11 @@ namespace krys::boo
                                          RenderTreeBuilder::WillBeDestroyed willBeDestroyed,
                                          RenderTreeBuilder::IsInternalMove isInternalMove) noexcept
   {
-    // FIXME: Remove floating and out-of-flow boxes from their blocks' lists, and clear a flex box's cached
-    // sizes of the item, once there's block and flex layout.
+    if (child.IsFloatingOrOutOfFlowPositioned())
+    {
+      Downcast<RenderBox>(child).RemoveFloatingOrOutOfFlowChildFromBlockLists();
+    }
+    // FIXME: Otherwise clear a flex box's cached sizes of the item, once there's flex layout.
 
     if (willBeDestroyed == RenderTreeBuilder::WillBeDestroyed::No)
     {

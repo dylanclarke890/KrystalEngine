@@ -64,6 +64,7 @@ namespace krys::boo
     KRYS_NODISCARD LayoutUnit InnerPaddingBoxHeight() const noexcept;
 
   protected:
+    void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept override;
     void UpdateFromStyle() noexcept override;
   };
 

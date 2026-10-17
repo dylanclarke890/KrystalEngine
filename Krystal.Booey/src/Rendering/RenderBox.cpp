@@ -10,11 +10,13 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
+#include "Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
+#include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderListMarker.hpp"
@@ -117,8 +119,28 @@ namespace krys::boo
     GridAreaContentLogicalHeightMap().erase(this);
     GridAreaContentLogicalWidthMap().erase(this);
     RenderBlock::RemovePercentHeightDescendant(*this);
+    RenderBlock::RemoveOutOfFlowBox(*this);
 
     RenderBoxModelObject::WillBeDestroyed();
+  }
+
+  void RenderBox::RemoveFloatingOrOutOfFlowChildFromBlockLists() noexcept
+  {
+    krys_debug_assert(!RenderTreeBeingDestroyed());
+
+    if (IsFloating())
+    {
+      // FIXME: Remove the float from its blocks' floating objects and mark them for layout
+      // (removeFloatingAndInvalidateForLayout), once there's float layout.
+      return;
+    }
+
+    if (IsOutOfFlowPositioned())
+    {
+      return RenderBlock::RemoveOutOfFlowBox(*this);
+    }
+
+    krys_debug_assert(false);
   }
 
   void RenderBox::StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept
@@ -159,7 +181,10 @@ namespace krys::boo
         {
           Parent()->SetChildNeedsLayout();
         }
-        // FIXME: Remove the box from its block's float list, once there are floating objects.
+        if (IsFloating() && !IsOutOfFlowPositioned() && newStyle.HasOutOfFlowPosition())
+        {
+          RemoveFloatingOrOutOfFlowChildFromBlockLists();
+        }
       }
     }
 
@@ -1567,8 +1592,11 @@ namespace krys::boo
       return {};
     }
 
-    // FIXME: The containing inline size of an out-of-flow box (PositionedLayoutConstraints), once there's
-    // out-of-flow layout.
+    if (IsOutOfFlowPositioned())
+    {
+      PositionedLayoutConstraints constraints(*this, LogicalBoxAxis::Inline);
+      return constraints.ContainingInlineSize();
+    }
 
     if (IsGridItem())
     {
@@ -1718,8 +1746,9 @@ namespace krys::boo
     {
       krys_debug_assert(!OverridingBorderBoxLogicalWidth());
       krys_debug_assert(!OverridingLogicalWidthForFlexBasisComputation());
-      // FIXME: The logical width of out-of-flow positioned boxes (computeOutOfFlowPositionedLogicalWidth),
-      // once there's out-of-flow layout.
+      // FIXME: This calculation is not patched for block-flow yet.
+      // https://bugs.webkit.org/show_bug.cgi?id=46500
+      ComputeOutOfFlowPositionedLogicalWidth(computedValues);
       return;
     }
 
@@ -2427,8 +2456,7 @@ namespace krys::boo
 
     if (IsOutOfFlowPositioned())
     {
-      // FIXME: The logical height of out-of-flow positioned boxes (computeOutOfFlowPositionedLogicalHeight),
-      // once there's out-of-flow layout.
+      ComputeOutOfFlowPositionedLogicalHeight(computedValues);
       return computedValues;
     }
 
@@ -3157,8 +3185,12 @@ namespace krys::boo
       return borderBoxLogicalHeight;
     }
 
-    // FIXME: Percentages of out-of-flow positioned boxes resolve against their containing block's size
-    // (PositionedLayoutConstraints), once there's out-of-flow layout.
+    if (logicalHeight.IsPercentOrCalculated() && IsOutOfFlowPositioned() && !IsRenderFragmentedFlow())
+    {
+      PositionedLayoutConstraints constraints(*this, LogicalBoxAxis::Block);
+      return AdjustContentBoxLogicalHeightForBoxSizing(style::Evaluate<LayoutUnit>(
+        logicalHeight, constraints.ContainingSize(), Style().UsedZoomForLength()));
+    }
 
     if (auto computedContentAndScrollbarLogicalHeight =
           ComputeContentAndScrollbarLogicalHeightUsing(logicalHeight, null))
@@ -4496,10 +4528,373 @@ namespace krys::boo
     krys_unreachable();
   }
 
-  LayoutUnit RenderBox::ContainingBlockRangeSizeForPositioned(const RenderBoxModelObject &,
-                                                              BoxAxis) const noexcept
+  LayoutRange RenderBox::ContainingBlockRangeForPositioned(const RenderBoxModelObject &container,
+                                                           BoxAxis physicalAxis) const noexcept
   {
-    krys_unreachable();
+    krys_debug_assert(container.CanContainAbsolutelyPositionedObjects()
+                      || container.CanContainFixedPositionObjects());
+
+    bool isContainerInlineAxis = physicalAxis == container.Style().GetWritingMode().InlineAxis();
+    auto startEdge = isContainerInlineAxis ? container.BorderLogicalLeft() : container.BorderBefore();
+
+    if (IsFixedPositioned())
+    {
+      if (auto *renderView = DynamicDowncast<RenderView>(container))
+      {
+        return isContainerInlineAxis
+                 ? LayoutRange(startEdge, renderView->ClientLogicalWidthForFixedPosition())
+                 : LayoutRange(startEdge, renderView->ClientLogicalHeightForFixedPosition());
+      }
+    }
+
+    // Inline containing blocks are formed by relatively-positioned inline boxes.
+    // FIXME: A block's inline continuation forms the containing block (inlineContinuation), once there are
+    // continuations.
+    if (auto *inlineContainer = DynamicDowncast<RenderInline>(container))
+    {
+      return isContainerInlineAxis ? LayoutRange(startEdge, inlineContainer->InnerPaddingBoxWidth())
+                                   : LayoutRange(startEdge, inlineContainer->InnerPaddingBoxHeight());
+    }
+
+    const RenderBlock *containingBlock = DynamicDowncast<RenderBlock>(container);
+    if (!containingBlock)
+    {
+      containingBlock = container.ContainingBlock();
+    }
+    if (!containingBlock)
+    {
+      krys_debug_assert(false);
+      return {};
+    }
+
+    // FIXME: The first fragment's size when the containing block is a fragmented flow, and the fragment's
+    // width inside one, once there are fragmented flows.
+
+    return BoxAxis::Horizontal == physicalAxis ? LayoutRange(startEdge, containingBlock->ClientWidth())
+                                               : LayoutRange(startEdge, containingBlock->ClientHeight());
+  }
+
+  void RenderBox::ComputeOutOfFlowPositionedLogicalWidth(
+    LogicalExtentComputedValues &computedValues) const noexcept
+  {
+    krys_debug_assert(IsOutOfFlowPositioned());
+
+    if (auto *replaced = DynamicDowncast<RenderReplaced>(this))
+    {
+      return replaced->ComputeReplacedOutOfFlowPositionedLogicalWidth(computedValues);
+    }
+
+    // QUESTIONS
+    // FIXME 1: Should we still deal with these the cases of 'left' or 'right' having
+    // the type 'static' in determining whether to calculate the static distance?
+    // NOTE: 'static' is not a legal value for 'left' or 'right' as of CSS 2.1.
+
+    // FIXME 2: Can perhaps optimize out cases when max-width/min-width are greater
+    // than or less than the computed width().  Be careful of box-sizing and
+    // percentage issues.
+
+    // The following is based off of the W3C Working Draft from April 11, 2006 of
+    // CSS 2.1: Section 10.3.7 "Absolutely positioned, non-replaced elements"
+    // <http://www.w3.org/TR/CSS21/visudet.html#abs-non-replaced-width>
+    // (block-style-comments in this function and in computeOutOfFlowPositionedLogicalWidthUsing()
+    // correspond to text from the spec)
+
+    PositionedLayoutConstraints inlineConstraints(*this, LogicalBoxAxis::Inline);
+    inlineConstraints.ComputeInsets();
+
+    // Calculate the used width. See CSS2 § 10.3.7.
+    const auto &styleToUse = Style();
+    auto usedWidth =
+      ComputeOutOfFlowPositionedLogicalWidthUsing(styleToUse.LogicalWidth(), inlineConstraints);
+
+    LayoutUnit transferredMinSize = LayoutUnit::Min();
+    LayoutUnit transferredMaxSize = LayoutUnit::Max();
+    if (ShouldComputeLogicalHeightFromAspectRatio())
+    {
+      std::tie(transferredMinSize, transferredMaxSize) = ComputeMinMaxLogicalWidthFromAspectRatio();
+    }
+
+    // Clamp by max-width.
+    auto usedMaxWidth = LayoutUnit::Max();
+    if (const auto &logicalMaxWidth = styleToUse.LogicalMaxWidth(); !logicalMaxWidth.IsNone())
+    {
+      usedMaxWidth = ComputeOutOfFlowPositionedLogicalWidthUsing(logicalMaxWidth, inlineConstraints);
+    }
+    if (transferredMaxSize < usedMaxWidth)
+    {
+      usedMaxWidth = ComputeOutOfFlowPositionedLogicalWidthUsing(
+        style::MaximumSize {style::MaximumSize::Fixed {transferredMaxSize.ToFloat()}}, inlineConstraints);
+    }
+    if (usedWidth > usedMaxWidth)
+    {
+      usedWidth = usedMaxWidth;
+    }
+
+    // Clamp by min-width.
+    auto usedMinWidth = LayoutUnit::Min();
+    if (const auto &logicalMinWidth = styleToUse.LogicalMinWidth();
+        !logicalMinWidth.IsKnownZero() || logicalMinWidth.IsIntrinsic())
+    {
+      usedMinWidth = ComputeOutOfFlowPositionedLogicalWidthUsing(logicalMinWidth, inlineConstraints);
+    }
+    if (transferredMinSize > usedMinWidth)
+    {
+      usedMinWidth = ComputeOutOfFlowPositionedLogicalWidthUsing(
+        style::MinimumSize {style::MinimumSize::Fixed {transferredMinSize.ToFloat()}}, inlineConstraints);
+    }
+    if (usedWidth < usedMinWidth)
+    {
+      usedWidth = usedMinWidth;
+    }
+
+    bool hasWidthBorderBoxAspectRatio = Style().HasAspectRatio()
+                                        && Style().BoxSizingForAspectRatio() == BoxSizing::BorderBox
+                                        && Style().LogicalWidth().IsAuto();
+
+    // Set the final width value.
+    computedValues.Extent =
+      hasWidthBorderBoxAspectRatio ? usedWidth : usedWidth + inlineConstraints.BordersPlusPadding();
+
+    // Calculate the position.
+    inlineConstraints.ResolvePosition(computedValues);
+    inlineConstraints.FixupLogicalLeftPosition(computedValues);
+
+    // FIXME: Adjust logicalLeft for the flipped version of our writing mode in fragments, once there are
+    // fragmented flows.
+  }
+
+  template <typename SizeType>
+  LayoutUnit RenderBox::ComputeOutOfFlowPositionedLogicalWidthUsing(
+    const SizeType &logicalWidth, const PositionedLayoutConstraints &inlineConstraints) const noexcept
+  {
+    auto fallback = [&]() -> LayoutUnit
+    {
+      bool shrinkToFit = inlineConstraints.InsetFitsContent()
+                         || !inlineConstraints.AlignmentAppliesStretch(ItemPosition::Stretch);
+      if (shrinkToFit)
+      {
+        auto preferredWidth = MaxPreferredLogicalWidth() - inlineConstraints.BordersPlusPadding();
+        auto preferredMinWidth = MinPreferredLogicalWidth() - inlineConstraints.BordersPlusPadding();
+        return std::min(std::max(preferredMinWidth, inlineConstraints.AvailableContentSpace()),
+                        preferredWidth);
+      }
+      return std::max(0_lu, inlineConstraints.AvailableContentSpace());
+    };
+
+    auto intrinsic = [&]() -> LayoutUnit
+    {
+      auto availableSpace = inlineConstraints.ContainingSize();
+      availableSpace -= inlineConstraints.InsetBeforeValue();
+      availableSpace -= inlineConstraints.InsetAfterValue();
+      return std::max(0_lu, ComputeIntrinsicLogicalWidthUsing(logicalWidth, availableSpace,
+                                                              inlineConstraints.BordersPlusPadding())
+                              - inlineConstraints.BordersPlusPadding());
+    };
+
+    if (logicalWidth.IsSpecified())
+    {
+      return AdjustContentBoxLogicalWidthForBoxSizing(style::Evaluate<LayoutUnit>(
+        logicalWidth, inlineConstraints.ContainingSize(), Style().UsedZoomForLength()));
+    }
+    if (logicalWidth.IsFitContent() || logicalWidth.IsFillAvailable() || logicalWidth.IsMinContent()
+        || logicalWidth.IsMaxContent())
+    {
+      return intrinsic();
+    }
+    if (logicalWidth.IsIntrinsicKeyword() || logicalWidth.IsMinIntrinsic())
+    {
+      if (ShouldComputeLogicalWidthFromAspectRatio())
+      {
+        return inlineConstraints.ContainingSize();
+      }
+      return fallback();
+    }
+    if constexpr (std::same_as<SizeType, style::MaximumSize>)
+    {
+      krys_debug_assert(logicalWidth.IsNone());
+      return inlineConstraints.ContainingSize();
+    }
+    else
+    {
+      krys_debug_assert(logicalWidth.IsAuto());
+      if constexpr (std::same_as<SizeType, style::MinimumSize>)
+      {
+        if (ShouldComputeLogicalWidthFromAspectRatio())
+        {
+          LayoutUnit minLogicalWidth;
+          LayoutUnit maxLogicalWidth;
+          ComputeIntrinsicLogicalWidths(minLogicalWidth, maxLogicalWidth);
+          return minLogicalWidth;
+        }
+        return 0_lu;
+      }
+      else
+      {
+        if (ShouldComputeLogicalWidthFromAspectRatio())
+        {
+          return ComputeLogicalWidthFromAspectRatio();
+        }
+        return fallback();
+      }
+    }
+  }
+
+  void RenderBox::ComputeOutOfFlowPositionedLogicalHeight(
+    LogicalExtentComputedValues &computedValues) const noexcept
+  {
+    krys_debug_assert(IsOutOfFlowPositioned());
+
+    if (auto *replaced = DynamicDowncast<RenderReplaced>(this))
+    {
+      return replaced->ComputeReplacedOutOfFlowPositionedLogicalHeight(computedValues);
+    }
+
+    PositionedLayoutConstraints blockConstraints(*this, LogicalBoxAxis::Block);
+    blockConstraints.ComputeInsets();
+
+    // Calculate the used height. See CSS2 § 10.6.4.
+    const auto &styleToUse = Style();
+    LayoutUnit computedHeight = computedValues.Extent;
+    LayoutUnit usedHeight = ComputeOutOfFlowPositionedLogicalHeightUsing(styleToUse.LogicalHeight(),
+                                                                         computedHeight, blockConstraints);
+
+    // Clamp by max height.
+    if (const auto &logicalMaxHeight = styleToUse.LogicalMaxHeight(); !logicalMaxHeight.IsNone())
+    {
+      auto usedMaxHeight =
+        ComputeOutOfFlowPositionedLogicalHeightUsing(logicalMaxHeight, computedHeight, blockConstraints);
+      if (usedHeight > usedMaxHeight)
+      {
+        usedHeight = usedMaxHeight;
+      }
+    }
+
+    // Clamp by min height.
+    if (const auto &logicalMinHeight = styleToUse.LogicalMinHeight();
+        logicalMinHeight.IsAuto() || !logicalMinHeight.IsKnownZero() || logicalMinHeight.IsIntrinsic())
+    {
+      auto usedMinHeight =
+        ComputeOutOfFlowPositionedLogicalHeightUsing(logicalMinHeight, computedHeight, blockConstraints);
+      if (usedHeight < usedMinHeight)
+      {
+        usedHeight = usedMinHeight;
+      }
+    }
+
+    // Set the final height value.
+    computedValues.Extent = usedHeight + blockConstraints.BordersPlusPadding();
+
+    // Calculate the position.
+    blockConstraints.ResolvePosition(computedValues);
+    blockConstraints.AdjustLogicalTopWithLogicalHeightIfNeeded(computedValues);
+
+    // FIXME: Adjust logicalTop for perpendicular writing modes in fragments, once there are fragmented flows.
+  }
+
+  LayoutUnit RenderBox::ComputeOutOfFlowPositionedLogicalHeightUsing(
+    const style::PreferredSize &logicalHeight, LayoutUnit computedHeight,
+    const PositionedLayoutConstraints &blockConstraints) const noexcept
+  {
+    auto contentLogicalHeight = computedHeight - blockConstraints.BordersPlusPadding();
+
+    // Height is never unsolved for tables.
+    if (IsRenderTable())
+    {
+      return contentLogicalHeight;
+    }
+
+    bool fromAspectRatio = ShouldComputeLogicalHeightFromAspectRatio();
+    bool logicalHeightIsAuto = logicalHeight.IsAuto() && !fromAspectRatio;
+
+    if (!logicalHeightIsAuto)
+    {
+      if (logicalHeight.IsIntrinsic())
+      {
+        return AdjustContentBoxLogicalHeightForBoxSizing(
+          ComputeIntrinsicLogicalContentHeightUsing(logicalHeight, contentLogicalHeight,
+                                                    blockConstraints.BordersPlusPadding())
+            .value_or(0_lu));
+      }
+      if (fromAspectRatio)
+      {
+        auto resolvedLogicalHeight = BlockSizeFromAspectRatio(
+          HorizontalBorderAndPaddingExtent(), VerticalBorderAndPaddingExtent(),
+          static_cast<double>(LayoutUnit {Style().LogicalAspectRatio()}), Style().BoxSizingForAspectRatio(),
+          LogicalWidth(), Style().GetAspectRatio(), IsRenderReplaced());
+        return std::max(LayoutUnit(), resolvedLogicalHeight - blockConstraints.BordersPlusPadding());
+      }
+      return AdjustContentBoxLogicalHeightForBoxSizing(style::Evaluate<LayoutUnit>(
+        logicalHeight, blockConstraints.ContainingSize(), Style().UsedZoomForLength()));
+    }
+
+    bool shrinkToFit =
+      blockConstraints.InsetFitsContent() || !blockConstraints.AlignmentAppliesStretch(ItemPosition::Stretch);
+    if (!shrinkToFit)
+    {
+      return std::max<LayoutUnit>(0_lu, blockConstraints.AvailableContentSpace());
+    }
+
+    return contentLogicalHeight;
+  }
+
+  LayoutUnit RenderBox::ComputeOutOfFlowPositionedLogicalHeightUsing(
+    const style::MinimumSize &originalLogicalHeight, LayoutUnit computedHeight,
+    const PositionedLayoutConstraints &blockConstraints) const noexcept
+  {
+    auto contentLogicalHeight = computedHeight - blockConstraints.BordersPlusPadding();
+
+    // Height is never unsolved for tables.
+    if (IsRenderTable())
+    {
+      return contentLogicalHeight;
+    }
+
+    auto logicalHeight = originalLogicalHeight;
+
+    if (logicalHeight.IsAuto())
+    {
+      if (ShouldComputeLogicalHeightFromAspectRatio())
+      {
+        logicalHeight = style::MinimumSize::Fixed {computedHeight.ToFloat()};
+      }
+      else
+      {
+        logicalHeight = style::MinimumSize::Fixed {0};
+      }
+    }
+
+    if (logicalHeight.IsIntrinsic())
+    {
+      return AdjustContentBoxLogicalHeightForBoxSizing(
+        ComputeIntrinsicLogicalContentHeightUsing(logicalHeight, contentLogicalHeight,
+                                                  blockConstraints.BordersPlusPadding())
+          .value_or(0_lu));
+    }
+    return AdjustContentBoxLogicalHeightForBoxSizing(style::Evaluate<LayoutUnit>(
+      logicalHeight, blockConstraints.ContainingSize(), Style().UsedZoomForLength()));
+  }
+
+  LayoutUnit RenderBox::ComputeOutOfFlowPositionedLogicalHeightUsing(
+    const style::MaximumSize &logicalHeight, LayoutUnit computedHeight,
+    const PositionedLayoutConstraints &blockConstraints) const noexcept
+  {
+    auto contentLogicalHeight = computedHeight - blockConstraints.BordersPlusPadding();
+
+    // Height is never unsolved for tables.
+    if (IsRenderTable())
+    {
+      return contentLogicalHeight;
+    }
+
+    if (logicalHeight.IsIntrinsic())
+    {
+      return AdjustContentBoxLogicalHeightForBoxSizing(
+        ComputeIntrinsicLogicalContentHeightUsing(logicalHeight, contentLogicalHeight,
+                                                  blockConstraints.BordersPlusPadding())
+          .value_or(0_lu));
+    }
+    return AdjustContentBoxLogicalHeightForBoxSizing(style::Evaluate<LayoutUnit>(
+      logicalHeight, blockConstraints.ContainingSize(), Style().UsedZoomForLength()));
   }
 
   bool RenderBox::RequiresLayer() const noexcept

@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/Core/BoxExtents.hpp"
 #include "Krystal.Booey/Core/BoxSides.hpp"
+#include "Krystal.Booey/Graphics/LayoutRange.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderOverflow.hpp"
@@ -16,6 +17,7 @@
 
 namespace krys::boo
 {
+  class PositionedLayoutConstraints;
   class RenderBlock;
 
   enum class AvailableLogicalHeightType : bool
@@ -750,10 +752,8 @@ namespace krys::boo
     /// @brief Collapses `enclosingClippingBoxForStickyPosition().first`.
     // FIXME: Sticky positioning, once there's scrolling.
     KRYS_NODISCARD const RenderBox &EnclosingClippingBoxForStickyPosition() const noexcept;
-    /// @brief Collapses `containingBlockRangeForPositioned(containingBlock, axis).size()`.
-    // FIXME: Out-of-flow positioning (PositionedLayoutConstraints), once there's out-of-flow layout.
-    KRYS_NODISCARD LayoutUnit ContainingBlockRangeSizeForPositioned(
-      const RenderBoxModelObject &containingBlock, BoxAxis physicalAxis) const noexcept;
+    KRYS_NODISCARD LayoutRange ContainingBlockRangeForPositioned(const RenderBoxModelObject &container,
+                                                                 BoxAxis physicalAxis) const noexcept;
 
   protected:
     RenderBox(Type type, dom::Element &element, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags = {},
@@ -786,6 +786,9 @@ namespace krys::boo
       return OverflowClipRect(location, relevancy);
     }
     KRYS_NODISCARD LayoutRect ClipRect(const LayoutPoint &location) const noexcept;
+
+  public:
+    void RemoveFloatingOrOutOfFlowChildFromBlockLists() noexcept;
 
   protected:
     void WillBeDestroyed() noexcept override;
@@ -893,6 +896,21 @@ namespace krys::boo
     KRYS_NODISCARD LayoutUnit FillAvailableMeasure(LayoutUnit availableLogicalWidth) const noexcept;
     KRYS_NODISCARD LayoutUnit FillAvailableMeasure(LayoutUnit availableLogicalWidth, LayoutUnit &marginStart,
                                                    LayoutUnit &marginEnd) const noexcept;
+
+    void ComputeOutOfFlowPositionedLogicalWidth(LogicalExtentComputedValues &computedValues) const noexcept;
+    void ComputeOutOfFlowPositionedLogicalHeight(LogicalExtentComputedValues &computedValues) const noexcept;
+    template <typename SizeType>
+    KRYS_NODISCARD LayoutUnit ComputeOutOfFlowPositionedLogicalWidthUsing(
+      const SizeType &logicalWidth, const PositionedLayoutConstraints &inlineConstraints) const noexcept;
+    KRYS_NODISCARD LayoutUnit ComputeOutOfFlowPositionedLogicalHeightUsing(
+      const style::PreferredSize &logicalHeight, LayoutUnit computedHeight,
+      const PositionedLayoutConstraints &blockConstraints) const noexcept;
+    KRYS_NODISCARD LayoutUnit ComputeOutOfFlowPositionedLogicalHeightUsing(
+      const style::MinimumSize &logicalHeight, LayoutUnit computedHeight,
+      const PositionedLayoutConstraints &blockConstraints) const noexcept;
+    KRYS_NODISCARD LayoutUnit ComputeOutOfFlowPositionedLogicalHeightUsing(
+      const style::MaximumSize &logicalHeight, LayoutUnit computedHeight,
+      const PositionedLayoutConstraints &blockConstraints) const noexcept;
 
     enum class IntrinsicKeyword : uint8
     {

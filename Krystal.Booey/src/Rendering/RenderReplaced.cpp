@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderReplaced.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -752,8 +753,11 @@ namespace krys::boo
   {
     auto calculateContainerWidth = [&]
     {
-      // FIXME: The containing inline size of out-of-flow positioned boxes (PositionedLayoutConstraints), once
-      // there's out-of-flow layout.
+      if (IsOutOfFlowPositioned())
+      {
+        PositionedLayoutConstraints constraints(*this, LogicalBoxAxis::Inline);
+        return constraints.ContainingSize();
+      }
       if (IsHorizontalWritingMode() == ContainingBlock()->IsHorizontalWritingMode())
       {
         return ContainingBlockLogicalWidthForContent();
@@ -939,9 +943,12 @@ namespace krys::boo
       }
 
       LayoutUnit availableHeight;
-      // FIXME: The containing block size of out-of-flow positioned boxes (PositionedLayoutConstraints), once
-      // there's out-of-flow layout.
-      if (stretchedHeight)
+      if (IsOutOfFlowPositioned())
+      {
+        PositionedLayoutConstraints constraints(*this, LogicalBoxAxis::Block);
+        availableHeight = constraints.ContainingSize();
+      }
+      else if (stretchedHeight)
       {
         availableHeight = *stretchedHeight;
       }
@@ -1029,5 +1036,35 @@ namespace krys::boo
     RenderReplaced::ComputeReplacedLogicalHeightUsing(const style::MaximumSize &logicalHeight) const noexcept
   {
     return ComputeReplacedLogicalHeightUsingGeneric(logicalHeight);
+  }
+
+  void RenderReplaced::ComputeReplacedOutOfFlowPositionedLogicalWidth(
+    LogicalExtentComputedValues &computedValues) const noexcept
+  {
+    PositionedLayoutConstraints inlineConstraints(*this, LogicalBoxAxis::Inline);
+    inlineConstraints.ComputeInsets();
+
+    // NOTE: This value of width is final in that the min/max width calculations
+    // are dealt with in computeReplacedWidth(). This means that the steps to produce
+    // correct max/min in the non-replaced version, are not necessary.
+    computedValues.Extent = ComputeReplacedLogicalWidth() + BorderAndPaddingLogicalWidth();
+
+    inlineConstraints.ResolvePosition(computedValues);
+    inlineConstraints.FixupLogicalLeftPosition(computedValues);
+  }
+
+  void RenderReplaced::ComputeReplacedOutOfFlowPositionedLogicalHeight(
+    LogicalExtentComputedValues &computedValues) const noexcept
+  {
+    PositionedLayoutConstraints blockConstraints(*this, LogicalBoxAxis::Block);
+    blockConstraints.ComputeInsets();
+
+    // NOTE: This value of height is final in that the min/max height calculations
+    // are dealt with in computeReplacedHeight(). This means that the steps to produce
+    // correct max/min in the non-replaced version, are not necessary.
+    computedValues.Extent = ComputeReplacedLogicalHeight() + BorderAndPaddingLogicalHeight();
+
+    blockConstraints.ResolvePosition(computedValues);
+    blockConstraints.AdjustLogicalTopWithLogicalHeightIfNeeded(computedValues);
   }
 }

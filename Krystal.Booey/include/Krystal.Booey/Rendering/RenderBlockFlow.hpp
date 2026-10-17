@@ -94,7 +94,7 @@ namespace krys::boo
   };
 
   /// @brief A block container that lays out block or inline content.
-  // FIXME: Inline layout (line boxes), floats, out-of-flow static positions, pagination, multi-column flows,
+  // FIXME: Inline layout (line boxes), floats, pagination, multi-column flows,
   // text autosizing, hit testing, selection and painting come with the rest of layout and with painting.
   class RenderBlockFlow : public RenderBlock
   {
@@ -283,7 +283,14 @@ namespace krys::boo
     void LayoutBlockChild(RenderBox &child, MarginInfo &marginInfo, LayoutUnit &previousFloatLogicalBottom,
                           LayoutUnit &maxFloatLogicalBottom) noexcept;
 
+    void AdjustOutOfFlowBlock(RenderBox &child, const MarginInfo &marginInfo) noexcept;
+
     void TrimBlockEndChildrenMargins() noexcept;
+
+    void SetStaticInlinePositionForChild(RenderBox &child, LayoutUnit inlinePosition) noexcept;
+    void UpdateStaticInlinePositionForChild(RenderBox &child, LayoutUnit logicalTop) noexcept;
+
+    KRYS_NODISCARD LayoutUnit StaticInlinePositionForOriginalDisplayInline(LayoutUnit logicalTop) noexcept;
 
     LayoutUnit CollapseMargins(RenderBox &child, MarginInfo &marginInfo) noexcept;
     LayoutUnit CollapseMarginsWithChildInfo(RenderBox *child, MarginInfo &marginInfo) noexcept;

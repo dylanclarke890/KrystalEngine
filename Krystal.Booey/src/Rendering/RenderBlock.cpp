@@ -180,10 +180,268 @@ namespace krys::boo
     }
   }
 
+  namespace
+  {
+    // The weak maps upstream are keyed by address here: a containing block's entries are removed when it's
+    // destroyed, and a box's when it's destroyed or leaves its containing block.
+    class OutOfFlowDescendantsMap
+    {
+    private:
+      using DescendantsMap = HashMap<const RenderBlock *, UniquePtr<TrackedRendererListHashSet>>;
+      using ContainerMap = HashMap<const RenderBox *, const RenderBlock *>;
+
+      DescendantsMap _descendantsMap;
+      ContainerMap _containerMap;
+
+    public:
+      void AddDescendant(const RenderBlock &containingBlock, RenderBox &outOfFlowDescendant) noexcept
+      {
+        // Protect against double insert where a descendant would end up with multiple containing blocks.
+        if (auto previous = _containerMap.find(&outOfFlowDescendant);
+            previous != _containerMap.end() && previous->second != &containingBlock)
+        {
+          if (auto *descendants = PositionedRenderers(*previous->second))
+          {
+            descendants->remove(&outOfFlowDescendant);
+          }
+        }
+
+        auto &descendants = _descendantsMap[&containingBlock];
+        if (!descendants)
+        {
+          descendants = CreateUnique<TrackedRendererListHashSet>();
+        }
+
+        auto isNewEntry = false;
+        if (!Is<RenderView>(containingBlock) || descendants->isEmpty())
+        {
+          isNewEntry = descendants->add(&outOfFlowDescendant).second;
+        }
+        else if (outOfFlowDescendant.IsFixedPositioned()
+                 || dom::IsInTopLayerOrBackdrop(outOfFlowDescendant.Style(),
+                                                outOfFlowDescendant.GetElement()))
+        {
+          isNewEntry = descendants->appendOrMoveToLast(&outOfFlowDescendant).second;
+        }
+        else
+        {
+          auto ensureLayoutDepentBoxPosition = [&]
+          {
+            // RenderView is a special containing block as it may hold both absolute and fixed positioned
+            // containing blocks. When a fixed positioned box is also a descendant of an absolute positioned
+            // box anchored to the RenderView, we have to make sure that the absolute positioned box is
+            // inserted before the fixed box to follow block layout dependency.
+            for (auto it = descendants->begin(); it != descendants->end(); ++it)
+            {
+              if ((*it)->IsFixedPositioned())
+              {
+                isNewEntry = descendants->insertBefore(it, &outOfFlowDescendant).second;
+                return;
+              }
+            }
+            isNewEntry = descendants->appendOrMoveToLast(&outOfFlowDescendant).second;
+          };
+          ensureLayoutDepentBoxPosition();
+        }
+
+        if (!isNewEntry)
+        {
+          krys_debug_assert(_containerMap.contains(&outOfFlowDescendant));
+          return;
+        }
+        _containerMap[&outOfFlowDescendant] = &containingBlock;
+      }
+
+      void RemoveDescendant(const RenderBox &outOfFlowDescendant) noexcept
+      {
+        auto containerIterator = _containerMap.find(&outOfFlowDescendant);
+        if (containerIterator == _containerMap.end())
+        {
+          return;
+        }
+        const auto *containingBlock = containerIterator->second;
+        _containerMap.erase(containerIterator);
+
+        auto descendantsIterator = _descendantsMap.find(containingBlock);
+        krys_debug_assert(descendantsIterator != _descendantsMap.end());
+        if (descendantsIterator == _descendantsMap.end())
+        {
+          return;
+        }
+
+        auto &descendants = descendantsIterator->second;
+        auto *descendant = const_cast<RenderBox *>(&outOfFlowDescendant);
+        krys_debug_assert(descendants->contains(descendant));
+
+        descendants->remove(descendant);
+        if (descendants->isEmpty())
+        {
+          _descendantsMap.erase(descendantsIterator);
+        }
+      }
+
+      void RemoveContainingBlock(const RenderBlock &containingBlock) noexcept
+      {
+        auto descendantsIterator = _descendantsMap.find(&containingBlock);
+        if (descendantsIterator == _descendantsMap.end())
+        {
+          return;
+        }
+        auto descendants = krys::move(descendantsIterator->second);
+        _descendantsMap.erase(descendantsIterator);
+
+        for (auto *renderer : *descendants)
+        {
+          _containerMap.erase(renderer);
+        }
+      }
+
+      KRYS_NODISCARD TrackedRendererListHashSet *
+        PositionedRenderers(const RenderBlock &containingBlock) const noexcept
+      {
+        auto it = _descendantsMap.find(&containingBlock);
+        return it != _descendantsMap.end() ? it->second.get() : nullptr;
+      }
+    };
+
+    KRYS_NODISCARD OutOfFlowDescendantsMap &GetOutOfFlowDescendantsMap() noexcept
+    {
+      static OutOfFlowDescendantsMap mapForOutOfFlowDescendants;
+      return mapForOutOfFlowDescendants;
+    }
+  }
+
   void RenderBlock::WillBeDestroyed() noexcept
   {
     RemoveContainerFromTrackedRendererMaps(*this);
+    GetOutOfFlowDescendantsMap().RemoveContainingBlock(*this);
     RenderBox::WillBeDestroyed();
+  }
+
+  TrackedRendererListHashSet *RenderBlock::OutOfFlowBoxes() const noexcept
+  {
+    return GetOutOfFlowDescendantsMap().PositionedRenderers(*this);
+  }
+
+  void RenderBlock::AddOutOfFlowBox(RenderBox &outOfFlowBox) noexcept
+  {
+    krys_debug_assert(outOfFlowBox.IsOutOfFlowPositioned());
+    krys_debug_assert(!IsAnonymousBlock());
+
+    outOfFlowBox.ClearGridAreaContentSize();
+
+    if (outOfFlowBox.IsRenderFragmentedFlow())
+    {
+      return;
+    }
+    // FIXME: Find out if we can do this as part of outOfFlowBox.setChildNeedsLayout(MarkOnlyThis)
+    if (outOfFlowBox.NeedsLayout())
+    {
+      // We should turn this bit on only while in layout.
+      krys_debug_assert(OutOfFlowChildNeedsLayout() || View().FrameView().LayoutContext().IsInLayout());
+      SetOutOfFlowChildNeedsLayoutBit(true);
+    }
+    GetOutOfFlowDescendantsMap().AddDescendant(*this, outOfFlowBox);
+  }
+
+  void RenderBlock::RemoveOutOfFlowBox(const RenderBox &rendererToRemove) noexcept
+  {
+    GetOutOfFlowDescendantsMap().RemoveDescendant(rendererToRemove);
+  }
+
+  namespace
+  {
+    void MarkRendererAndParentForLayout(RenderBox &renderer) noexcept
+    {
+      renderer.SetChildNeedsLayout(RenderObjectMarkingBehavior::MarkOnlyThis);
+      if (renderer.ShouldInvalidatePreferredWidths())
+      {
+        renderer.SetNeedsPreferredWidthsUpdate(RenderObjectMarkingBehavior::MarkOnlyThis);
+      }
+      auto *parentBlock = RenderObject::ContainingBlockForPositionType(PositionType::Static, renderer);
+      if (!parentBlock)
+      {
+        krys_debug_assert(false);
+        return;
+      }
+      // Parent has to be mark for layout to run static positioning on the out-of-flow content.
+      parentBlock->SetChildNeedsLayout();
+    }
+  }
+
+  void RenderBlock::RemoveOutOfFlowBoxes(const RenderBlock *newContainingBlockCandidate,
+                                         ContainingBlockState containingBlockState) noexcept
+  {
+    auto *outOfFlowDescendants = OutOfFlowBoxes();
+    if (!outOfFlowDescendants)
+    {
+      return;
+    }
+
+    List<RenderBox *> renderersToRemove;
+    if (!newContainingBlockCandidate)
+    {
+      // We don't form containing block for these boxes anymore (either through style change or internal
+      // render tree shuffle)
+      for (auto *renderer : *outOfFlowDescendants)
+      {
+        renderersToRemove.push_back(renderer);
+
+        MarkRendererAndParentForLayout(*renderer);
+        auto markNewContainingBlockForLayout = [&]
+        {
+          auto isAbsolutePositioned = renderer->IsAbsolutelyPositioned();
+          // During style change we can't tell which ancestor is going to be the final containing block, so
+          // let's just mark the new candidate dirty.
+          auto *newContainingBlock = ContainingBlock();
+          for (; newContainingBlock
+                 && (isAbsolutePositioned ? !newContainingBlock->CanContainAbsolutelyPositionedObjects()
+                                          : newContainingBlock->CanContainFixedPositionObjects());
+               newContainingBlock = newContainingBlock->ContainingBlock())
+          {
+          }
+          if (newContainingBlock)
+          {
+            newContainingBlock->SetNeedsLayout();
+          }
+        };
+        markNewContainingBlockForLayout();
+      }
+    }
+    else if (containingBlockState == ContainingBlockState::NewContainingBlock)
+    {
+      // Some of the positioned boxes are getting transferred over to newContainingBlockCandidate.
+      for (auto *renderer : *outOfFlowDescendants)
+      {
+        if (!renderer->IsDescendantOf(newContainingBlockCandidate))
+        {
+          continue;
+        }
+        renderersToRemove.push_back(renderer);
+        MarkRendererAndParentForLayout(*renderer);
+      }
+    }
+    else
+    {
+      krys_debug_assert(false);
+    }
+
+    for (auto *renderer : renderersToRemove)
+    {
+      RemoveOutOfFlowBox(*renderer);
+    }
+  }
+
+  bool RenderBlock::IsContainingBlockAncestorFor(RenderObject &renderer) const noexcept
+  {
+    for (const auto *ancestor = renderer.ContainingBlock(); ancestor; ancestor = ancestor->ContainingBlock())
+    {
+      if (ancestor == this)
+      {
+        return true;
+      }
+    }
+    return false;
   }
 
   void RenderBlock::AddPercentHeightDescendant(RenderBox &descendant) noexcept
@@ -584,10 +842,13 @@ namespace krys::boo
 
   void RenderBlock::StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept
   {
+    const RenderStyle *oldStyle = HasInitializedStyle() ? &Style() : nullptr;
     SetBlockLevelReplacedOrAtomicInline(newStyle.IsDisplayInlineType());
-    // FIXME: Remove the out-of-flow boxes whose containing block changes
-    // (removeOutOfFlowBoxesIfNeededOnStyleChange), once there's out-of-flow layout, and let a legend that
-    // starts floating rejoin normal layout, once there are fieldsets.
+    if (oldStyle)
+    {
+      RemoveOutOfFlowBoxesIfNeededOnStyleChange(*this, *oldStyle, newStyle);
+      // FIXME: A legend that starts floating rejoins normal layout, once there are fieldsets.
+    }
     RenderBox::StyleWillChange(diff, newStyle);
   }
 
@@ -597,6 +858,26 @@ namespace krys::boo
     return (orientation == ScrollbarOrientation::Vertical ? IncludeVerticalScrollbarSize()
                                                           : IncludeHorizontalScrollbarSize())
            && oldStyle.GetScrollbarWidth() != newStyle.GetScrollbarWidth();
+  }
+
+  bool RenderBlock::PaddingBoxLogicaHeightChanged(const RenderStyle &oldStyle,
+                                                  const RenderStyle &newStyle) const noexcept
+  {
+    auto scrollbarHeightDidChange = [&](auto orientation)
+    {
+      return (orientation == ScrollbarOrientation::Vertical ? IncludeVerticalScrollbarSize()
+                                                            : IncludeHorizontalScrollbarSize())
+             && oldStyle.GetScrollbarWidth() != newStyle.GetScrollbarWidth();
+    };
+    if (newStyle.GetWritingMode().IsHorizontal())
+    {
+      return oldStyle.BorderTopWidth() != newStyle.BorderTopWidth()
+             || oldStyle.BorderBottomWidth() != newStyle.BorderBottomWidth()
+             || scrollbarHeightDidChange(ScrollbarOrientation::Horizontal);
+    }
+    return oldStyle.BorderLeftWidth() != newStyle.BorderLeftWidth()
+           || oldStyle.BorderRightWidth() != newStyle.BorderRightWidth()
+           || scrollbarHeightDidChange(ScrollbarOrientation::Vertical);
   }
 
   bool RenderBlock::ContentBoxLogicalWidthChanged(const RenderStyle &oldStyle,
@@ -633,9 +914,10 @@ namespace krys::boo
     auto shouldForceRelayoutChildren = false;
     if (oldStyle && diff == style::DifferenceResult::Layout && NeedsLayout())
     {
-      // FIXME: Also when the padding box's logical height changed and there are out-of-flow boxes, which are
-      // anchored to it (paddingBoxLogicaHeightChanged), once there's out-of-flow layout.
-      shouldForceRelayoutChildren = ContentBoxLogicalWidthChanged(*oldStyle, Style());
+      // Out-of-flow boxes anchored to the padding box.
+      shouldForceRelayoutChildren =
+        ContentBoxLogicalWidthChanged(*oldStyle, Style())
+        || (OutOfFlowBoxes() && PaddingBoxLogicaHeightChanged(*oldStyle, Style()));
     }
     SetShouldForceRelayoutChildren(shouldForceRelayoutChildren);
   }
@@ -767,18 +1049,27 @@ namespace krys::boo
 
   namespace
   {
-    // Lays out the boxes of an inline subtree that aren't part of its lines, and clears the rest.
-    void LayoutInlineContentWithoutLineLayout(RenderElement &parent) noexcept
+    // Lays out the boxes of an inline subtree that aren't part of its lines, and clears the rest. Out-of-flow
+    // boxes are given to their containing block, with the start of the block's content as their static
+    // position.
+    void LayoutInlineContentWithoutLineLayout(RenderBlock &block, RenderElement &parent) noexcept
     {
       for (auto *child = parent.FirstChild(); child; child = child->NextSibling())
       {
+        if (auto *box = DynamicDowncast<RenderBox>(*child); box && box->IsOutOfFlowPositioned())
+        {
+          box->ContainingBlock()->AddOutOfFlowBox(*box);
+          box->Layer()->SetStaticInlinePosition(block.StartOffsetForContent());
+          box->Layer()->SetStaticBlockPosition(block.BorderAndPaddingBefore());
+          continue;
+        }
         if (!child->NeedsLayout())
         {
           continue;
         }
         if (auto *renderInline = DynamicDowncast<RenderInline>(*child))
         {
-          LayoutInlineContentWithoutLineLayout(*renderInline);
+          LayoutInlineContentWithoutLineLayout(block, *renderInline);
           renderInline->ClearNeedsLayout();
         }
         else if (auto *element = DynamicDowncast<RenderElement>(*child))
@@ -803,7 +1094,7 @@ namespace krys::boo
 
   void RenderBlock::LayoutChildrenWithoutLineLayout() noexcept
   {
-    LayoutInlineContentWithoutLineLayout(*this);
+    LayoutInlineContentWithoutLineLayout(*this, *this);
   }
 
   // Overflow is always relative to the border-box of the element in question.
@@ -871,7 +1162,21 @@ namespace krys::boo
 
   void RenderBlock::AddOverflowFromOutOfFlowBoxes() noexcept
   {
-    // FIXME: The layout overflow of absolutely positioned descendants, once there's out-of-flow layout.
+    TrackedRendererListHashSet *outOfFlowDescendants = OutOfFlowBoxes();
+    if (!outOfFlowDescendants)
+    {
+      return;
+    }
+
+    for (auto *outOfFlowBox : *outOfFlowDescendants)
+    {
+      // Fixed positioned elements don't contribute to layout overflow, since they don't scroll with the
+      // content.
+      if (outOfFlowBox->IsAbsolutelyPositioned())
+      {
+        AddOverflowFromContainedBox(*outOfFlowBox);
+      }
+    }
   }
 
   void RenderBlock::AddVisualOverflowFromTheme() noexcept
@@ -1033,16 +1338,164 @@ namespace krys::boo
     return true;
   }
 
-  void RenderBlock::LayoutOutOfFlowBoxes(RelayoutChildren, bool) noexcept
+  void RenderBlock::MarkFixedPositionBoxForLayoutIfNeeded(RenderBox &positionedChild) noexcept
   {
-    // FIXME: Lay out the out-of-flow boxes (layoutOutOfFlowBox), once there's out-of-flow layout. Until then
-    // they're laid out in place, like in-flow children.
-    for (auto &box : ChildrenOfType<RenderBox>(*this))
+    if (positionedChild.Style().GetPosition() != PositionType::Fixed)
     {
-      if (box.IsOutOfFlowPositioned())
+      return;
+    }
+
+    bool hasStaticBlockPosition = positionedChild.Style().HasStaticBlockPosition(IsHorizontalWritingMode());
+    bool hasStaticInlinePosition = positionedChild.Style().HasStaticInlinePosition(IsHorizontalWritingMode());
+    if (!hasStaticBlockPosition && !hasStaticInlinePosition)
+    {
+      return;
+    }
+
+    auto *parent = positionedChild.Parent();
+    while (parent && !Is<RenderView>(*parent) && parent->Style().GetPosition() != PositionType::Absolute)
+    {
+      parent = parent->Parent();
+    }
+    if (!parent || parent->Style().GetPosition() != PositionType::Absolute)
+    {
+      return;
+    }
+
+    if (hasStaticInlinePosition)
+    {
+      LogicalExtentComputedValues computedValues;
+      positionedChild.ComputeLogicalWidth(computedValues);
+      LayoutUnit newLeft = computedValues.Position;
+      if (newLeft != positionedChild.LogicalLeft())
       {
-        box.LayoutIfNeeded();
+        positionedChild.SetChildNeedsLayout(MarkingBehavior::MarkOnlyThis);
       }
+    }
+    else if (hasStaticBlockPosition)
+    {
+      auto logicalTop = positionedChild.LogicalTop();
+      if (logicalTop
+          != positionedChild.ComputeLogicalHeight(positionedChild.LogicalHeight(), logicalTop).Position)
+      {
+        positionedChild.SetChildNeedsLayout(MarkingBehavior::MarkOnlyThis);
+      }
+    }
+  }
+
+  void RenderBlock::LayoutOutOfFlowBox(RenderBox &outOfFlowBox, RelayoutChildren relayoutChildren,
+                                       bool fixedPositionObjectsOnly) noexcept
+  {
+    krys_debug_assert(outOfFlowBox.IsOutOfFlowPositioned());
+
+    // FIXME: Content skipped by content-visibility (isSkippedContentRootForLayout), once layout skips
+    // content, and the box's fragment range, once there are fragmented flows.
+
+    // A fixed position element with an absolute positioned ancestor has no way of knowing if the latter has
+    // changed position. So if this is a fixed position element, mark it for layout if it has an abspos
+    // ancestor and needs to move with that ancestor, i.e. it has static position.
+    MarkFixedPositionBoxForLayoutIfNeeded(outOfFlowBox);
+    if (fixedPositionObjectsOnly)
+    {
+      outOfFlowBox.LayoutIfNeeded();
+      return;
+    }
+
+    // When a non-positioned block element moves, it may have positioned children that are implicitly
+    // positioned relative to the non-positioned block.  Rather than trying to detect all of these movement
+    // cases, we just always lay out positioned objects that are positioned implicitly like this.  Such
+    // objects are rare, and so in typical DHTML menu usage (where everything is positioned explicitly) this
+    // should not incur a performance penalty.
+    if (relayoutChildren == RelayoutChildren::Yes
+        || (outOfFlowBox.Style().HasStaticBlockPosition(IsHorizontalWritingMode())
+            && outOfFlowBox.Parent() != this))
+    {
+      outOfFlowBox.SetChildNeedsLayout(MarkingBehavior::MarkOnlyThis);
+    }
+
+    // If relayoutChildren is set and the child has percentage padding or an embedded content box, we also
+    // need to invalidate the childs pref widths.
+    if (relayoutChildren == RelayoutChildren::Yes && outOfFlowBox.ShouldInvalidatePreferredWidths())
+    {
+      outOfFlowBox.SetNeedsPreferredWidthsUpdate(MarkingBehavior::MarkOnlyThis);
+    }
+
+    // FIXME: Mark the box for relayout when its pagination changed, once there's pagination.
+
+    // We don't have to do a full layout.  We just have to update our position. Try that first. If we have
+    // shrink-to-fit width and we hit the available width constraint, the layoutIfNeeded() will catch it and
+    // do a full layout.
+    if (outOfFlowBox.NeedsOutOfFlowMovementLayoutOnly() && outOfFlowBox.TryLayoutDoingOutOfFlowMovementOnly())
+    {
+      // FIXME: Capture the scroll snapshots of anchor-positioned boxes, once there's anchor positioning.
+      outOfFlowBox.ClearNeedsLayout();
+    }
+
+    // If we are paginated or in a line grid, compute a vertical position for our object now.
+    // If it's wrong we'll lay out again.
+    LayoutUnit oldLogicalTop;
+    auto *layoutState = View().FrameView().LayoutContext().LayoutState();
+    bool needsBlockDirectionLocationSetBeforeLayout =
+      outOfFlowBox.NeedsLayout() && layoutState && layoutState->NeedsBlockDirectionLocationSetBeforeLayout();
+    if (needsBlockDirectionLocationSetBeforeLayout)
+    {
+      if (IsHorizontalWritingMode() == outOfFlowBox.IsHorizontalWritingMode())
+      {
+        outOfFlowBox.UpdateLogicalHeight();
+      }
+      else
+      {
+        outOfFlowBox.UpdateLogicalWidth();
+      }
+      oldLogicalTop = LogicalTopForChild(outOfFlowBox);
+    }
+
+    outOfFlowBox.LayoutIfNeeded();
+
+    // FIXME: The static position of a flex box's out-of-flow child depends on its size, so it may have to
+    // lay out again (setStaticPositionForPositionedLayout), once there's flex layout.
+    bool layoutChanged = false;
+
+    // Lay out again if our estimate was wrong.
+    if (layoutChanged
+        || (needsBlockDirectionLocationSetBeforeLayout && LogicalTopForChild(outOfFlowBox) != oldLogicalTop))
+    {
+      outOfFlowBox.SetChildNeedsLayout(MarkingBehavior::MarkOnlyThis);
+      outOfFlowBox.LayoutIfNeeded();
+    }
+
+    // FIXME: Relayout the box when its fragment range changed, and adjust a size-contained box for
+    // pagination, once there are fragmented flows and pagination.
+  }
+
+  void RenderBlock::LayoutOutOfFlowBoxes(RelayoutChildren relayoutChildren,
+                                         bool fixedPositionObjectsOnly) noexcept
+  {
+    auto *outOfFlowDescendants = OutOfFlowBoxes();
+    if (!outOfFlowDescendants)
+    {
+      return;
+    }
+
+    // Do not cache outOfFlowDescendants->end() in a local variable, since |outOfFlowDescendants| can be
+    // mutated as it is walked. We always need to fetch the new end() value dynamically.
+    for (auto it = outOfFlowDescendants->begin(); it != outOfFlowDescendants->end(); ++it)
+    {
+      LayoutOutOfFlowBox(**it, relayoutChildren, fixedPositionObjectsOnly);
+    }
+  }
+
+  void RenderBlock::MarkOutOfFlowBoxesForLayout() noexcept
+  {
+    auto *outOfFlowDescendants = OutOfFlowBoxes();
+    if (!outOfFlowDescendants)
+    {
+      return;
+    }
+
+    for (auto *descendant : *outOfFlowDescendants)
+    {
+      descendant->SetChildNeedsLayout();
     }
   }
 

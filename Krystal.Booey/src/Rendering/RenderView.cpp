@@ -175,4 +175,18 @@ namespace krys::boo
   {
     return Style().GetWritingMode().IsHorizontal() ? ViewHeight() : ViewWidth();
   }
+
+  LayoutUnit RenderView::ClientLogicalWidthForFixedPosition() const noexcept
+  {
+    // FIXME: Fixed elements that lay out relative to the frame, and the layout viewport
+    // (visualViewportEnabled), once the frame view scrolls.
+    return ClientLogicalWidth();
+  }
+
+  LayoutUnit RenderView::ClientLogicalHeightForFixedPosition() const noexcept
+  {
+    // FIXME: Fixed elements that lay out relative to the frame, and the layout viewport
+    // (visualViewportEnabled), once the frame view scrolls.
+    return ClientLogicalHeight();
+  }
 }

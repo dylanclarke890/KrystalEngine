@@ -142,6 +142,8 @@ namespace krys::boo
     void ClearFirstLetterRemainingText() noexcept;
 
   protected:
+    void RemoveOutOfFlowBoxesIfNeededOnStyleChange(RenderBlock &delegateBlock, const RenderStyle &oldStyle,
+                                                   const RenderStyle &newStyle) noexcept;
     RenderBoxModelObject(Type type, dom::Element &element, RenderStyle &&style,
                          EnumSet<TypeFlag> baseTypeFlags, TypeSpecificFlags typeSpecificFlags) noexcept;
     RenderBoxModelObject(Type type, dom::Document &document, RenderStyle &&style,

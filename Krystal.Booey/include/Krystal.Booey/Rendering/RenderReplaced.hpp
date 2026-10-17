@@ -74,6 +74,11 @@ namespace krys::boo
       ComputeReplacedLogicalHeight(Maybe<LayoutUnit> estimatedUsedWidth = null) const noexcept;
 
     KRYS_NODISCARD bool ReplacedMinLogicalHeightComputesAsNone() const noexcept;
+
+    void ComputeReplacedOutOfFlowPositionedLogicalWidth(
+      LogicalExtentComputedValues &computedValues) const noexcept;
+    void ComputeReplacedOutOfFlowPositionedLogicalHeight(
+      LogicalExtentComputedValues &computedValues) const noexcept;
     KRYS_NODISCARD bool ReplacedMaxLogicalHeightComputesAsNone() const noexcept;
 
   protected:

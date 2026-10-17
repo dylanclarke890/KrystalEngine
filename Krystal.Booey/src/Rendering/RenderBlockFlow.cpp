@@ -566,8 +566,8 @@ namespace krys::boo
 
       if (child.IsOutOfFlowPositioned())
       {
-        // FIXME: Add the box to its containing block's out-of-flow boxes and set its static position
-        // (adjustOutOfFlowBlock), once there's out-of-flow layout.
+        child.ContainingBlock()->AddOutOfFlowBox(child);
+        AdjustOutOfFlowBlock(child, marginInfo);
         continue;
       }
       if (child.IsFloating())
@@ -880,6 +880,97 @@ namespace krys::boo
 #if KRYS_DEBUG
     krys_debug_assert(View().FrameView().LayoutContext().LayoutDelta() == oldLayoutDelta);
 #endif
+  }
+
+  void RenderBlockFlow::AdjustOutOfFlowBlock(RenderBox &child, const MarginInfo &marginInfo) noexcept
+  {
+    bool isHorizontal = IsHorizontalWritingMode();
+    bool hasStaticBlockPosition = child.Style().HasStaticBlockPosition(isHorizontal);
+
+    LayoutUnit logicalTop = LogicalHeight();
+    UpdateStaticInlinePositionForChild(child, logicalTop);
+
+    if (!marginInfo.CanCollapseWithMarginBefore())
+    {
+      // Positioned blocks don't collapse margins, so add the margin provided by
+      // the container now. The child's own margin is added later when calculating its logical top.
+      LayoutUnit collapsedBeforePos = marginInfo.PositiveMargin();
+      LayoutUnit collapsedBeforeNeg = marginInfo.NegativeMargin();
+      logicalTop += collapsedBeforePos - collapsedBeforeNeg;
+    }
+
+    RenderLayer *childLayer = child.Layer();
+    if (childLayer->StaticBlockPosition() != logicalTop)
+    {
+      childLayer->SetStaticBlockPosition(logicalTop);
+      if (hasStaticBlockPosition)
+      {
+        child.SetChildNeedsLayout(MarkingBehavior::MarkOnlyThis);
+      }
+    }
+  }
+
+  void RenderBlockFlow::UpdateStaticInlinePositionForChild(RenderBox &child, LayoutUnit logicalTop) noexcept
+  {
+    if (child.Style().IsOriginalDisplayInlineType())
+    {
+      SetStaticInlinePositionForChild(child, StaticInlinePositionForOriginalDisplayInline(logicalTop));
+    }
+    else
+    {
+      SetStaticInlinePositionForChild(child, StartOffsetForContent());
+    }
+  }
+
+  void RenderBlockFlow::SetStaticInlinePositionForChild(RenderBox &child, LayoutUnit inlinePosition) noexcept
+  {
+    // FIXME: Shift the inline position to exclude the fragment offset, once there are fragmented flows.
+    child.Layer()->SetStaticInlinePosition(inlinePosition);
+  }
+
+  LayoutUnit RenderBlockFlow::StaticInlinePositionForOriginalDisplayInline(LayoutUnit logicalTop) noexcept
+  {
+    style::TextAlign textAlign = Style().GetTextAlign();
+
+    float logicalLeft = LogicalLeftOffsetForLine(logicalTop).ToFloat();
+    float logicalRight = LogicalRightOffsetForLine(logicalTop).ToFloat();
+
+    auto writingMode = Style().GetWritingMode();
+    bool isRightAligned = false;
+    switch (textAlign)
+    {
+      case style::TextAlign::Left:
+      case style::TextAlign::WebKitLeft:   break;
+      case style::TextAlign::Right:
+      case style::TextAlign::WebKitRight:  isRightAligned = true; break;
+      case style::TextAlign::Center:
+      case style::TextAlign::WebKitCenter: logicalLeft += (logicalRight - logicalLeft) / 2; break;
+      case style::TextAlign::Justify:
+      case style::TextAlign::Start:
+        if (writingMode.IsBidiRTL())
+        {
+          isRightAligned = true;
+        }
+        break;
+      case style::TextAlign::End:
+        if (writingMode.IsBidiLTR())
+        {
+          isRightAligned = true;
+        }
+        break;
+    }
+
+    if (isRightAligned == writingMode.IsLogicalLeftLineLeft())
+    {
+      logicalLeft = logicalRight;
+    }
+
+    if (!writingMode.IsLogicalLeftInlineStart())
+    {
+      return LayoutUnit(LogicalWidth().ToFloat() - logicalLeft);
+    }
+
+    return LayoutUnit(logicalLeft);
   }
 
   void RenderBlockFlow::DetermineLogicalLeftPositionForChild(RenderBox &child,

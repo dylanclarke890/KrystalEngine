@@ -256,8 +256,21 @@ namespace krys::boo
     if (oldStyle)
     {
       // FIXME: Line layout, the stacking context's z-order lists, rendering-dependent regions, the
-      // accessibility cache, the enclosing layer's visible content status and event region, the floating and
-      // positioned object lists and the fragmented flow, once there are any.
+      // accessibility cache, the enclosing layer's visible content status and event region and the
+      // fragmented flow, once there are any.
+
+      if (IsFloating() && _style.Floating() != newStyle.Floating())
+      {
+        // For changes in float styles, we need to conceivably remove ourselves
+        // from the floating objects list.
+        Downcast<RenderBox>(*this).RemoveFloatingOrOutOfFlowChildFromBlockLists();
+      }
+      else if (IsOutOfFlowPositioned() && _style.GetPosition() != newStyle.GetPosition())
+      {
+        // For changes in positioning styles, we need to conceivably remove ourselves
+        // from the positioned objects list.
+        Downcast<RenderBox>(*this).RemoveFloatingOrOutOfFlowChildFromBlockLists();
+      }
 
       // reset style flags
       if (diff == style::DifferenceResult::Layout
@@ -363,8 +376,15 @@ namespace krys::boo
 
     SetNeedsLayoutForStyleDifference(diff, oldStyle);
 
-    // FIXME: An out-of-flow box whose original display changed between block and inline marks its static
-    // position's containing block, once there's out-of-flow layout.
+    if (IsOutOfFlowPositioned() && oldStyle
+        && oldStyle->IsOriginalDisplayBlockType() != Style().IsOriginalDisplayBlockType())
+    {
+      if (auto *ancestor = RenderObject::ContainingBlockForPositionType(PositionType::Static, *this))
+      {
+        ancestor->SetNeedsLayout();
+        ancestor->SetOutOfFlowChildNeedsStaticPositionLayout();
+      }
+    }
 
     // FIXME: Out-of-flow static positions, cursors, outline-auto ancestors, scroll anchoring and line layout,
     // once there are any.
