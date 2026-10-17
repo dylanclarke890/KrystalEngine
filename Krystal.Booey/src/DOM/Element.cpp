@@ -439,6 +439,20 @@ namespace krys::boo::dom
     return _elementRareData ? _elementRareData->AfterPseudoElement() : nullptr;
   }
 
+  IntPoint Element::SavedLayerScrollPosition() const noexcept
+  {
+    return _elementRareData ? _elementRareData->SavedLayerScrollPosition() : IntPoint();
+  }
+
+  void Element::SetSavedLayerScrollPosition(const IntPoint &position) noexcept
+  {
+    if (position.IsZero() && !_elementRareData)
+    {
+      return;
+    }
+    EnsureElementRareData().SetSavedLayerScrollPosition(position);
+  }
+
   RefPtr<PseudoElement>
     Element::PseudoElementIfExists(const style::PseudoElementIdentifier &pseudoElementIdentifier) noexcept
   {

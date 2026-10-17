@@ -51,6 +51,8 @@ namespace krys::boo
     KRYS_NODISCARD bool CreatesNewFormattingContext() const noexcept;
 
     void Layout() noexcept override;
+
+    void UpdateScrollInfoAfterLayout() noexcept;
     virtual void LayoutBlock(RelayoutChildren relayoutChildren, LayoutUnit pageLogicalHeight = 0_lu) noexcept;
 
     void AddPercentHeightDescendant(RenderBox &descendant) noexcept;

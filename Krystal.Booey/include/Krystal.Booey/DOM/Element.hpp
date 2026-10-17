@@ -9,6 +9,7 @@
 #include "Krystal.Booey/DOM/NamedNodeMap.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
+#include "Krystal.Booey/Graphics/IntPoint.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -499,6 +500,10 @@ namespace krys::boo::dom
 
     /// @brief The element's `::before` pseudo-element, or null if it has none.
     KRYS_NODISCARD PseudoElement *BeforePseudoElement() const noexcept;
+
+    /// @brief The scroll position of the element's layer, kept while the element has no renderer.
+    KRYS_NODISCARD IntPoint SavedLayerScrollPosition() const noexcept;
+    void SetSavedLayerScrollPosition(const IntPoint &position) noexcept;
 
     /// @brief The element's `::after` pseudo-element, or null if it has none.
     KRYS_NODISCARD PseudoElement *AfterPseudoElement() const noexcept;

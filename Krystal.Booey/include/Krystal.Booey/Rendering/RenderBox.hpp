@@ -687,6 +687,14 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IncludeVerticalScrollbarSize() const noexcept;
     KRYS_NODISCARD bool IncludeHorizontalScrollbarSize() const noexcept;
+    KRYS_NODISCARD bool CanUseOverlayScrollbars() const noexcept;
+    KRYS_NODISCARD bool HasAutoScrollbar(ScrollbarOrientation orientation) const noexcept;
+    KRYS_NODISCARD bool HasAlwaysPresentScrollbar(ScrollbarOrientation orientation) const noexcept;
+    KRYS_NODISCARD bool CanBeProgramaticallyScrolled() const noexcept;
+    KRYS_NODISCARD bool CanBeScrolledAndHasScrollableArea() const noexcept;
+    KRYS_NODISCARD bool RequiresLayerWithScrollableArea() const noexcept;
+    KRYS_NODISCARD int32 ScrollLeft() const noexcept;
+    KRYS_NODISCARD int32 ScrollTop() const noexcept;
     KRYS_NODISCARD virtual int32 VerticalScrollbarWidth() const noexcept;
     KRYS_NODISCARD virtual int32 HorizontalScrollbarHeight() const noexcept;
     KRYS_NODISCARD int32 IntrinsicScrollbarLogicalWidthIncludingGutter() const noexcept;

@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
+#include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -621,6 +622,7 @@ namespace krys::boo
     // the table classes) until they come in the next layout slices: lays out the children without placing or
     // sizing anything, and clears the inline content, which has no lines yet.
     LayoutInlineContentWithoutLineLayout(*this);
+    UpdateScrollInfoAfterLayout();
     ClearNeedsLayout();
   }
 
@@ -877,6 +879,16 @@ namespace krys::boo
     else if (computedInlineSize.IsMinContent())
     {
       maxPreferredLogicalWidth = minPreferredLogicalWidth;
+    }
+  }
+
+  void RenderBlock::UpdateScrollInfoAfterLayout() noexcept
+  {
+    // FIXME: Delay the update while a scroll info update transaction is open
+    // (isDelayingUpdateScrollInfoAfterLayout), once flex and grid layout open them.
+    if (HasNonVisibleOverflow() && Layer())
+    {
+      Layer()->UpdateScrollInfoAfterLayout();
     }
   }
 }

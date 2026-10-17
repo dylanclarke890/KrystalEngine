@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/CSS/Calc/RandomCachingKeyMap.hpp"
 #include "Krystal.Booey/DOM/Internals/RareData/ParentNodeRareData.hpp"
+#include "Krystal.Booey/Graphics/IntPoint.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -29,6 +30,7 @@ namespace krys::boo::dom
 
   private:
     uint16 _childIndex {0};
+    IntPoint _savedLayerScrollPosition;
     UniquePtr<RenderStyle> _computedStyle;
     UniquePtr<RenderStyle> _displayContentsOrNoneStyle;
     RefPtr<PseudoElement> _beforePseudoElement;
@@ -81,6 +83,15 @@ namespace krys::boo::dom
     }
 
     void SetBeforePseudoElement(RefPtr<PseudoElement> &&pseudoElement) noexcept;
+
+    KRYS_NODISCARD IntPoint SavedLayerScrollPosition() const noexcept
+    {
+      return _savedLayerScrollPosition;
+    }
+    void SetSavedLayerScrollPosition(IntPoint position) noexcept
+    {
+      _savedLayerScrollPosition = position;
+    }
     void SetAfterPseudoElement(RefPtr<PseudoElement> &&pseudoElement) noexcept;
 
     /// @brief The `random()` base values of the element (or one of its pseudo-elements).

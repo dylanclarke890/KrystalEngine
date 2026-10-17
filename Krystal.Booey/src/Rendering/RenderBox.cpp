@@ -9,11 +9,14 @@
 #include "Krystal.Booey/HTML/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
+#include "Krystal.Booey/Rendering/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/RenderReplaced.hpp"
 #include "Krystal.Booey/Rendering/RenderTable.hpp"
@@ -636,8 +639,11 @@ namespace krys::boo
 
   int32 RenderBox::ScrollWidth() const noexcept
   {
-    // FIXME: The layer's scroll width when the box has potentially scrollable overflow, once there are
-    // layers. For objects with visible overflow, this matches IE.
+    if (HasPotentiallyScrollableOverflow() && Layer())
+    {
+      return Layer()->ScrollWidth();
+    }
+    // For objects with visible overflow, this matches IE.
     if (Style().GetWritingMode().IsLogicalLeftInlineStart())
     {
       // FIXME: This should use snappedIntSize() instead with absolute coordinates.
@@ -648,11 +654,26 @@ namespace krys::boo
 
   int32 RenderBox::ScrollHeight() const noexcept
   {
-    // FIXME: The layer's scroll height when the box has potentially scrollable overflow, once there are
-    // layers. For objects with visible overflow, this matches IE.
+    if (HasPotentiallyScrollableOverflow() && Layer())
+    {
+      return Layer()->ScrollHeight();
+    }
+    // For objects with visible overflow, this matches IE.
     // FIXME: Need to work right with writing modes.
     // FIXME: This should use snappedIntSize() instead with absolute coordinates.
     return RoundToInt(std::max(ClientHeight(), LayoutOverflowRect().MaxY() - BorderTop()));
+  }
+
+  int32 RenderBox::ScrollLeft() const noexcept
+  {
+    auto *scrollableArea = Layer() ? Layer()->GetScrollableArea() : nullptr;
+    return (HasNonVisibleOverflow() && scrollableArea) ? scrollableArea->GetScrollPosition().X() : 0;
+  }
+
+  int32 RenderBox::ScrollTop() const noexcept
+  {
+    auto *scrollableArea = Layer() ? Layer()->GetScrollableArea() : nullptr;
+    return (HasNonVisibleOverflow() && scrollableArea) ? scrollableArea->GetScrollPosition().Y() : 0;
   }
 
   LayoutUnit RenderBox::OffsetLeft() const noexcept
@@ -3415,9 +3436,8 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Legacy scrollbar styles and the scrollbar theme's overlay scrollbars, once there are scrollbars.
-    // Until then scrollbars take no space, as overlay scrollbars.
-    return false;
+    // The legacy scrollbar style (::-webkit-scrollbar) was dropped.
+    return !ScrollbarTheme::Theme().UsesOverlayScrollbars();
   }
 
   bool RenderBox::HasIntrinsicAspectRatio() const noexcept
@@ -3432,30 +3452,142 @@ namespace krys::boo
 
   bool RenderBox::IncludeVerticalScrollbarSize() const noexcept
   {
-    // FIXME: Whether the layer has overlay scrollbars, once there are layers.
-    return HasNonVisibleOverflow() && HasLayer()
+    return HasNonVisibleOverflow() && Layer() && !Layer()->HasOverlayScrollbars()
            && (Style().OverflowY() == Overflow::Scroll || Style().OverflowY() == Overflow::Auto
                || (Style().OverflowY() == Overflow::Hidden && !Style().GetScrollbarGutter().IsAuto()));
   }
 
   bool RenderBox::IncludeHorizontalScrollbarSize() const noexcept
   {
-    // FIXME: Whether the layer has overlay scrollbars, once there are layers.
-    return HasNonVisibleOverflow() && HasLayer()
+    return HasNonVisibleOverflow() && Layer() && !Layer()->HasOverlayScrollbars()
            && (Style().OverflowX() == Overflow::Scroll || Style().OverflowX() == Overflow::Auto
                || (Style().OverflowX() == Overflow::Hidden && !Style().GetScrollbarGutter().IsAuto()));
   }
 
+  bool RenderBox::CanUseOverlayScrollbars() const noexcept
+  {
+    // The legacy scrollbar style (::-webkit-scrollbar) was dropped.
+    return ScrollbarTheme::Theme().UsesOverlayScrollbars();
+  }
+
+  bool RenderBox::HasAutoScrollbar(ScrollbarOrientation orientation) const noexcept
+  {
+    if (!HasNonVisibleOverflow())
+    {
+      return false;
+    }
+
+    auto isAutoOrScrollWithOverlayScrollbar = [&](Overflow overflow)
+    {
+      return overflow == Overflow::Auto || (overflow == Overflow::Scroll && CanUseOverlayScrollbars());
+    };
+
+    switch (orientation)
+    {
+      case ScrollbarOrientation::Horizontal: return isAutoOrScrollWithOverlayScrollbar(Style().OverflowX());
+      case ScrollbarOrientation::Vertical:   return isAutoOrScrollWithOverlayScrollbar(Style().OverflowY());
+    }
+    return false;
+  }
+
+  bool RenderBox::HasAlwaysPresentScrollbar(ScrollbarOrientation orientation) const noexcept
+  {
+    if (!HasNonVisibleOverflow())
+    {
+      return false;
+    }
+
+    auto isAlwaysVisibleScrollbar = [&](Overflow overflow)
+    {
+      return overflow == Overflow::Scroll && !CanUseOverlayScrollbars();
+    };
+
+    switch (orientation)
+    {
+      case ScrollbarOrientation::Horizontal: return isAlwaysVisibleScrollbar(Style().OverflowX());
+      case ScrollbarOrientation::Vertical:   return isAlwaysVisibleScrollbar(Style().OverflowY());
+    }
+    return false;
+  }
+
+  bool RenderBox::CanBeProgramaticallyScrolled() const noexcept
+  {
+    if (IsRenderView())
+    {
+      return true;
+    }
+
+    if (!HasPotentiallyScrollableOverflow())
+    {
+      return false;
+    }
+
+    if (HasScrollableOverflowX() || HasScrollableOverflowY())
+    {
+      return true;
+    }
+
+    // FIXME: Editable elements too (hasEditableStyle), once there's editing.
+    return false;
+  }
+
+  bool RenderBox::CanBeScrolledAndHasScrollableArea() const noexcept
+  {
+    return CanBeProgramaticallyScrolled() && (HasHorizontalOverflow() || HasVerticalOverflow());
+  }
+
+  bool RenderBox::RequiresLayerWithScrollableArea() const noexcept
+  {
+    // FIXME: This is wrong; these boxes' layers should not need ScrollableAreas via RenderLayer.
+    if (IsRenderView() || IsDocumentElementRenderer())
+    {
+      return true;
+    }
+
+    if (HasPotentiallyScrollableOverflow())
+    {
+      return true;
+    }
+
+    if (Style().GetResize() != style::Resize::None)
+    {
+      return true;
+    }
+
+    // FIXME: Marquees with a marquee behavior, once there are marquees (the marquee properties were dropped,
+    // so the behavior is always the initial `scroll`).
+    if (IsHTMLMarquee())
+    {
+      return true;
+    }
+
+    return false;
+  }
+
   int32 RenderBox::VerticalScrollbarWidth() const noexcept
   {
-    // FIXME: The scrollable area's vertical scrollbar width, once there are layers.
-    return 0;
+    auto *scrollableArea = Layer() ? Layer()->GetScrollableArea() : nullptr;
+    if (!scrollableArea)
+    {
+      return 0;
+    }
+    return IncludeVerticalScrollbarSize()
+             ? scrollableArea->VerticalScrollbarWidth(
+                 OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize, IsHorizontalWritingMode())
+             : 0;
   }
 
   int32 RenderBox::HorizontalScrollbarHeight() const noexcept
   {
-    // FIXME: The scrollable area's horizontal scrollbar height, once there are layers.
-    return 0;
+    auto *scrollableArea = Layer() ? Layer()->GetScrollableArea() : nullptr;
+    if (!scrollableArea)
+    {
+      return 0;
+    }
+    return IncludeHorizontalScrollbarSize()
+             ? scrollableArea->HorizontalScrollbarHeight(
+                 OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize, IsHorizontalWritingMode())
+             : 0;
   }
 
   int32 RenderBox::IntrinsicScrollbarLogicalWidthIncludingGutter() const noexcept
@@ -4404,7 +4536,7 @@ namespace krys::boo
   }
 
   LayoutRect RenderBox::OverflowClipRect(const LayoutPoint &location,
-                                         OverlayScrollbarSizeRelevancy) const noexcept
+                                         OverlayScrollbarSizeRelevancy relevancy) const noexcept
   {
     LayoutRect clipRect = BorderBoxRect();
     clipRect.SetLocation(location + clipRect.Location() + LayoutSize(BorderLeft(), BorderTop()));
@@ -4419,7 +4551,18 @@ namespace krys::boo
       clipRect.ExpandToInfiniteX();
     }
 
-    // FIXME: Subtract out the scrollable area's scrollbars, once there is one.
+    // Subtract out scrollbars if we have them.
+    if (auto *scrollableArea = Layer() ? Layer()->GetScrollableArea() : nullptr)
+    {
+      if (Style().ShouldPlaceVerticalScrollbarOnLeft())
+      {
+        clipRect.Move(
+          LayoutUnit(scrollableArea->VerticalScrollbarWidth(relevancy, IsHorizontalWritingMode())), 0_lu);
+      }
+      clipRect.Contract(
+        LayoutUnit(scrollableArea->VerticalScrollbarWidth(relevancy, IsHorizontalWritingMode())),
+        LayoutUnit(scrollableArea->HorizontalScrollbarHeight(relevancy, IsHorizontalWritingMode())));
+    }
 
     return clipRect;
   }

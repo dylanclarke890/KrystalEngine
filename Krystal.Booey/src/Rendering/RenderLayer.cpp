@@ -1,11 +1,13 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderTableRow.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
@@ -188,7 +190,8 @@ namespace krys::boo
 
   RenderLayer::~RenderLayer() noexcept
   {
-    // FIXME: The scrollable area, filters, clip path and backing, once there are any.
+    ClearLayerScrollableArea();
+    // FIXME: Filters, the clip path and the backing, once there are any.
 
     // Child layers will be deleted by their corresponding render objects, so
     // we don't need to delete them ourselves.
@@ -862,7 +865,10 @@ namespace krys::boo
         flags.Add(UpdateLayerPositionsFlag::SeenStickyLayer);
       }
 
-      // FIXME: Composited scrolling ancestors, once there's composited scrolling.
+      if (parent->_hasCompositedScrollingAncestor || parent->HasCompositedScrollableOverflow())
+      {
+        flags.Add(UpdateLayerPositionsFlag::SeenCompositedScrollingLayer);
+      }
     }
 
     return flags;
@@ -926,7 +932,9 @@ namespace krys::boo
            || _hasTransformedAncestor != flags.Contains(UpdateLayerPositionsFlag::SeenTransformedLayer)
            || _has3DTransformedAncestor != flags.Contains(UpdateLayerPositionsFlag::Seen3DTransformedLayer)
            || _hasFixedAncestor != flags.Contains(UpdateLayerPositionsFlag::SeenFixedLayer)
-           || _hasPaginatedAncestor != flags.Contains(UpdateLayerPositionsFlag::UpdatePagination);
+           || _hasPaginatedAncestor != flags.Contains(UpdateLayerPositionsFlag::UpdatePagination)
+           || _hasCompositedScrollingAncestor
+                != flags.Contains(UpdateLayerPositionsFlag::SeenCompositedScrollingLayer);
   }
 
   void RenderLayer::RecursiveUpdateLayerPositions(EnumSet<UpdateLayerPositionsFlag> flags) noexcept
@@ -951,11 +959,21 @@ namespace krys::boo
       flags.Add(UpdateLayerPositionsFlag::SubtreeNeedsUpdate);
     }
 
-    // FIXME: Apply the post-layout scroll position, and position the overflow controls, once there's a
-    // scrollable area.
+    if (_scrollableArea)
+    {
+      _scrollableArea->ApplyPostLayoutScrollPositionIfNeeded();
+    }
 
     // Clear our cached clip rect information.
     ClearClipRects();
+
+    if (_scrollableArea && _scrollableArea->HasOverflowControls())
+    {
+      // FIXME: It looks suspicious to call convertToLayerCoords here
+      // as canUseOffsetFromAncestor may be true for an ancestor layer.
+      auto offsetFromRoot = OffsetFromAncestor(Root());
+      (void)_scrollableArea->PositionOverflowControls(RoundedIntSize(offsetFromRoot));
+    }
 
     UpdateDescendantDependentFlags();
 
@@ -983,6 +1001,7 @@ namespace krys::boo
     _hasFixedAncestor = flags.Contains(UpdateLayerPositionsFlag::SeenFixedLayer);
     _hasStickyAncestor = flags.Contains(UpdateLayerPositionsFlag::SeenStickyLayer);
     _hasPaginatedAncestor = flags.Contains(UpdateLayerPositionsFlag::UpdatePagination);
+    _hasCompositedScrollingAncestor = flags.Contains(UpdateLayerPositionsFlag::SeenCompositedScrollingLayer);
 
     if (!IsRenderViewLayer())
     {
@@ -1011,6 +1030,11 @@ namespace krys::boo
     if (_hasStickyAncestor || Renderer().IsStickilyPositioned())
     {
       flags.Add(UpdateLayerPositionsFlag::SeenStickyLayer);
+    }
+
+    if (HasCompositedScrollableOverflow())
+    {
+      flags.Add(UpdateLayerPositionsFlag::SeenCompositedScrollingLayer);
     }
 
     if (flags.ContainsAny(InvalidationLayerPositionsFlags())
@@ -1089,9 +1113,34 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Subtract the enclosing positioned (or parent) layer's scroll position, and move out-of-flow
-    // boxes inside an in-flow positioned inline with it (offsetForInFlowPositionedInline), once there's a
-    // scrollable area and inline layout. Assign the scrolling scopes, once there's composited scrolling.
+    // Subtract our parent's scroll offset.
+    RenderLayer *positionedParent;
+    if (Renderer().IsOutOfFlowPositioned()
+        && (positionedParent = EnclosingAncestorForPosition(Renderer().Style().GetPosition())))
+    {
+      // For positioned layers, we subtract out the enclosing positioned layer's scroll offset.
+      if (positionedParent->Renderer().HasNonVisibleOverflow())
+      {
+        if (auto *positionedParentScrollableArea = positionedParent->GetScrollableArea())
+        {
+          localPoint -= LayoutSize(ToIntSize(positionedParentScrollableArea->GetScrollPosition()));
+        }
+      }
+      // FIXME: Move out-of-flow boxes inside an in-flow positioned inline with it
+      // (offsetForInFlowPositionedInline), once there's inline layout.
+    }
+    else if (auto *parentLayer = Parent())
+    {
+      if (parentLayer->Renderer().HasNonVisibleOverflow())
+      {
+        if (auto *parentLayerScrollableArea = parentLayer->GetScrollableArea())
+        {
+          localPoint -= LayoutSize(ToIntSize(parentLayerScrollableArea->GetScrollPosition()));
+        }
+      }
+    }
+
+    // FIXME: The scrolling scopes, once there's composited scrolling.
 
     if (Renderer().IsInFlowPositioned())
     {
@@ -1541,9 +1590,9 @@ namespace krys::boo
       return true;
     }
 
-    // FIXME: Overlay scrollbars, composited scrollable overflow, canvases, video, embedded objects and
-    // iframes too, once there are any.
-    return Renderer().IsRenderTableRow() || Renderer().IsRenderFragmentedFlow();
+    // FIXME: Canvases, video, embedded objects and iframes too, once there are any.
+    return HasOverlayScrollbars() || HasCompositedScrollableOverflow() || Renderer().IsRenderTableRow()
+           || Renderer().IsRenderFragmentedFlow();
   }
 
   void RenderLayer::UpdateSelfPaintingLayer() noexcept
@@ -1586,8 +1635,8 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Overflow controls, once there's a scrollable area.
-    return HasVisibleBoxDecorationsOrBackground();
+    return HasVisibleBoxDecorationsOrBackground()
+           || (_scrollableArea && _scrollableArea->HasOverflowControls());
   }
 
   bool RenderLayer::IsVisibilityHiddenOrOpacityZero() const noexcept
@@ -1605,7 +1654,7 @@ namespace krys::boo
 
 #pragma region Style
 
-  void RenderLayer::StyleChanged(style::Difference, const RenderStyle *oldStyle) noexcept
+  void RenderLayer::StyleChanged(style::Difference diff, const RenderStyle *oldStyle) noexcept
   {
     SetIsNormalFlowOnly(ShouldBeNormalFlowOnly());
 
@@ -1634,7 +1683,7 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Create or destroy the scrollable area (updateLayerScrollableArea), once there is one.
+    UpdateLayerScrollableArea();
 
     // FIXME: RenderLayer already handles visibility changes through our visibility dirty bits. This logic
     // could likely be folded along with the rest.
@@ -1652,8 +1701,18 @@ namespace krys::boo
         }
       }
 
-      // FIXME: The view transition name and the scrollable area's scroll corner and composited scrollable
-      // overflow, once there are view transitions and a scrollable area.
+      // FIXME: The view transition name, once there are view transitions.
+
+      // Visibility and scrollability are input to canUseCompositedScrolling().
+      if (_scrollableArea)
+      {
+        // FIXME: Invalidate the scroll corner when the writing mode changes, once there's painting.
+        if (visibilityChanged || oldStyle->IsOverflowVisible() != Renderer().Style().IsOverflowVisible())
+        {
+          _scrollableArea->ComputeHasCompositedScrollableOverflow(
+            diff <= style::DifferenceResult::RepaintLayer ? LayoutUpToDate::Yes : LayoutUpToDate::No);
+        }
+      }
 
       if (oldStyle->IsOverflowVisible() != Renderer().Style().IsOverflowVisible())
       {
@@ -1671,11 +1730,21 @@ namespace krys::boo
       }
     }
 
-    // FIXME: The marquee and the scrollbars, once there's a scrollable area.
+    if (_scrollableArea)
+    {
+      // FIXME: The marquee, once there are marquees.
+      _scrollableArea->UpdateScrollbarsAfterStyleChange(oldStyle);
+    }
 
     // Overlay scrollbars can make this layer self-painting so we need
     // to recompute the bit once scrollbars have been updated.
     UpdateSelfPaintingLayer();
+
+    // FIXME: Need to detect a swap from custom to native scrollbars (and vice versa).
+    if (_scrollableArea)
+    {
+      _scrollableArea->UpdateAllScrollbarRelatedStyle();
+    }
 
     UpdateDescendantDependentFlags();
     UpdateBlendMode();
@@ -2891,6 +2960,305 @@ namespace krys::boo
     }
     unionBounds.Move(offsetFromRoot);
     return unionBounds;
+  }
+
+#pragma endregion
+
+#pragma region Scrolling
+
+  RenderLayerScrollableArea *RenderLayer::GetScrollableArea() const noexcept
+  {
+    return _scrollableArea.get();
+  }
+
+  RenderLayerScrollableArea *RenderLayer::EnsureLayerScrollableArea() noexcept
+  {
+    bool hadScrollableArea = GetScrollableArea();
+
+    if (!_scrollableArea)
+    {
+      _scrollableArea = CreateUnique<RenderLayerScrollableArea>(*this);
+    }
+
+    if (!hadScrollableArea)
+    {
+      // FIXME: The compositing configuration update for asynchronous overflow scrolling, once there's
+      // compositing.
+      _scrollableArea->RestoreScrollPosition();
+    }
+
+    return _scrollableArea.get();
+  }
+
+  void RenderLayer::ClearLayerScrollableArea() noexcept
+  {
+    if (_scrollableArea)
+    {
+      _scrollableArea->Clear();
+      _scrollableArea = nullptr;
+    }
+  }
+
+  void RenderLayer::UpdateLayerScrollableArea() noexcept
+  {
+    bool hasScrollableArea = GetScrollableArea();
+    bool needsScrollableArea = [&]
+    {
+      auto *box = DynamicDowncast<RenderBox>(Renderer());
+      return box && box->RequiresLayerWithScrollableArea();
+    }();
+
+    if (needsScrollableArea == hasScrollableArea)
+    {
+      return;
+    }
+
+    if (needsScrollableArea)
+    {
+      (void)EnsureLayerScrollableArea();
+    }
+    else
+    {
+      ClearLayerScrollableArea();
+      // FIXME: The compositing configuration update for asynchronous overflow scrolling, once there's
+      // compositing.
+    }
+
+    // FIXME: Tell the inspector the scrollbars changed, once there's an inspector.
+  }
+
+  IntSize RenderLayer::VisibleSize() const noexcept
+  {
+    RenderBox *box = GetRenderBox();
+    if (!box)
+    {
+      return IntSize();
+    }
+
+    return IntSize(RoundToInt(box->ClientWidth()), RoundToInt(box->ClientHeight()));
+  }
+
+  int32 RenderLayer::ScrollWidth() const noexcept
+  {
+    if (_scrollableArea)
+    {
+      return _scrollableArea->ScrollWidth();
+    }
+
+    RenderBox *box = GetRenderBox();
+    krys_debug_assert(box);
+    LayoutRect overflowRect(box->LayoutOverflowRect());
+    box->FlipForWritingMode(overflowRect);
+    return RoundToInt(overflowRect.MaxX() - overflowRect.X());
+  }
+
+  int32 RenderLayer::ScrollHeight() const noexcept
+  {
+    if (_scrollableArea)
+    {
+      return _scrollableArea->ScrollHeight();
+    }
+
+    RenderBox *box = GetRenderBox();
+    krys_debug_assert(box);
+    LayoutRect overflowRect(box->LayoutOverflowRect());
+    box->FlipForWritingMode(overflowRect);
+    return RoundToInt(overflowRect.MaxY() - overflowRect.Y());
+  }
+
+  RenderLayer *RenderLayer::EnclosingScrollableLayer(IncludeSelfOrNot includeSelf,
+                                                     CrossFrameBoundaries crossFrameBoundaries) const noexcept
+  {
+    auto isConsideredScrollable = [](const RenderLayer &layer)
+    {
+      auto *box = DynamicDowncast<RenderBox>(layer.Renderer());
+      return box && box->CanBeScrolledAndHasScrollableArea();
+    };
+
+    if (includeSelf == IncludeSelf && isConsideredScrollable(*this))
+    {
+      return const_cast<RenderLayer *>(this);
+    }
+
+    for (auto *nextLayer = EnclosingContainingBlockLayer(crossFrameBoundaries); nextLayer;
+         nextLayer = nextLayer->EnclosingContainingBlockLayer(crossFrameBoundaries))
+    {
+      if (isConsideredScrollable(*nextLayer))
+      {
+        return nextLayer;
+      }
+    }
+
+    return nullptr;
+  }
+
+  void RenderLayer::UpdateScrollInfoAfterLayout() noexcept
+  {
+    UpdateLayerScrollableArea();
+    if (_scrollableArea)
+    {
+      _scrollableArea->UpdateScrollInfoAfterLayout();
+    }
+  }
+
+  void RenderLayer::UpdateScrollbarSteps() noexcept
+  {
+    if (_scrollableArea)
+    {
+      _scrollableArea->UpdateScrollbarSteps();
+    }
+  }
+
+  bool RenderLayer::CanUseCompositedScrolling() const noexcept
+  {
+    if (_scrollableArea)
+    {
+      return _scrollableArea->CanUseCompositedScrolling();
+    }
+    return false;
+  }
+
+  bool RenderLayer::HasCompositedScrollableOverflow() const noexcept
+  {
+    if (_scrollableArea)
+    {
+      return _scrollableArea->HasCompositedScrollableOverflow();
+    }
+    return false;
+  }
+
+  void RenderLayer::ComputeHasCompositedScrollableOverflow(LayoutUpToDate layoutUpToDate) noexcept
+  {
+    if (_scrollableArea)
+    {
+      _scrollableArea->ComputeHasCompositedScrollableOverflow(layoutUpToDate);
+    }
+  }
+
+  bool RenderLayer::HasOverlayScrollbars() const noexcept
+  {
+    if (_scrollableArea)
+    {
+      return _scrollableArea->HasOverlayScrollbars();
+    }
+    return false;
+  }
+
+  bool RenderLayer::UsesCompositedScrolling() const noexcept
+  {
+    // FIXME: Only composited layers scroll with compositing, once there's compositing.
+    return false;
+  }
+
+  bool RenderLayer::CanResize() const noexcept
+  {
+    // We need a special case for <iframe> because they never have
+    // hasNonVisibleOverflow(). However, they do "implicitly" clip their contents, so
+    // we want to allow resizing them also.
+    // FIXME: iframes too, once there are any.
+    return Renderer().HasNonVisibleOverflow() && Renderer().Style().GetResize() != style::Resize::None;
+  }
+
+  RenderLayer::OverflowControlRects RenderLayer::OverflowControlsRects() const noexcept
+  {
+    if (_scrollableArea)
+    {
+      return _scrollableArea->OverflowControlsRects();
+    }
+
+    const auto &renderBox = Downcast<RenderBox>(Renderer());
+    // Scrollbars sit inside the border box.
+    auto overflowControlsPositioningRect = SnappedIntRect(renderBox.PaddingBoxRectIncludingScrollbar());
+
+    bool placeVerticalScrollbarOnTheLeft = renderBox.Style().ShouldPlaceVerticalScrollbarOnLeft();
+    bool haveResizer =
+      Renderer().Style().GetResize() != style::Resize::None && !Renderer().Style().GetPseudoElementType();
+
+    OverflowControlRects result;
+    auto cornerRect = [&](IntSize cornerSize)
+    {
+      if (placeVerticalScrollbarOnTheLeft)
+      {
+        auto bottomLeftCorner = overflowControlsPositioningRect.MinXMaxYCorner();
+        return IntRect {{bottomLeftCorner.X(), bottomLeftCorner.Y() - cornerSize.Height()}, cornerSize};
+      }
+      return IntRect {overflowControlsPositioningRect.MaxXMaxYCorner() - cornerSize, cornerSize};
+    };
+
+    if (haveResizer)
+    {
+      auto scrollbarThickness = ScrollbarTheme::Theme().ScrollbarThickness();
+      result.Resizer = cornerRect({scrollbarThickness, scrollbarThickness});
+    }
+
+    return result;
+  }
+
+  void RenderLayer::UpdateLayerPositionsAfterOverflowScroll() noexcept
+  {
+    // FIXME: Invalidate the document markers' rects (willUpdateLayerPositions), once there are document
+    // markers.
+
+    // FIXME: why is it OK to not check the ancestors of this layer in order to
+    // initialize the HasSeenViewportConstrainedAncestor and HasSeenAncestorWithOverflowClip flags?
+    RecursiveUpdateLayerPositionsAfterScroll(UpdateLayerPositionsAfterScrollFlag::IsOverflowScroll);
+  }
+
+  void RenderLayer::UpdateLayerPositionsAfterDocumentScroll() noexcept
+  {
+    krys_debug_assert(IsRenderViewLayer());
+
+    // FIXME: Invalidate the document markers' rects (willUpdateLayerPositions), once there are document
+    // markers.
+    RecursiveUpdateLayerPositionsAfterScroll();
+  }
+
+  void RenderLayer::RecursiveUpdateLayerPositionsAfterScroll(
+    EnumSet<UpdateLayerPositionsAfterScrollFlag> flags) noexcept
+  {
+    // FIXME: This shouldn't be needed, but there are some corner cases where
+    // these flags are still dirty. Update so that the check below is valid.
+    UpdateDescendantDependentFlags();
+
+    // If we have no visible content and no visible descendants, there is no point recomputing
+    // our rectangles as they will be empty. If our visibility changes, we are expected to
+    // recompute all our positions anyway.
+    if (!_hasVisibleDescendant && !_hasVisibleContent)
+    {
+      return;
+    }
+
+    bool positionChanged = UpdateLayerPosition();
+    if (positionChanged)
+    {
+      flags.Add(UpdateLayerPositionsAfterScrollFlag::HasChangedAncestor);
+    }
+
+    if (flags.ContainsAny({UpdateLayerPositionsAfterScrollFlag::HasChangedAncestor,
+                           UpdateLayerPositionsAfterScrollFlag::HasSeenViewportConstrainedAncestor,
+                           UpdateLayerPositionsAfterScrollFlag::IsOverflowScroll}))
+    {
+      ClearClipRects();
+    }
+
+    if (Renderer().Style().HasViewportConstrainedPosition())
+    {
+      flags.Add(UpdateLayerPositionsAfterScrollFlag::HasSeenViewportConstrainedAncestor);
+    }
+
+    if (Renderer().HasNonVisibleOverflow())
+    {
+      flags.Add(UpdateLayerPositionsAfterScrollFlag::HasSeenAncestorWithOverflowClip);
+    }
+
+    // FIXME: Compute the repaint rects of self-painting layers that moved, once there's painting.
+
+    for (auto *child = FirstChild(); child; child = child->NextSibling())
+    {
+      child->RecursiveUpdateLayerPositionsAfterScroll(flags);
+    }
+
+    // FIXME: The marquee position, once there are marquees.
   }
 
 #pragma endregion

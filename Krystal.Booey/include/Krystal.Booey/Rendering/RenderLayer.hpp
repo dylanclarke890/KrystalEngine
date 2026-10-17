@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/Graphics/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/FloatPoint3D.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
@@ -35,6 +36,7 @@ namespace krys::boo
   class ClipRectsCache;
   class RenderBox;
   class RenderLayerModelObject;
+  class RenderLayerScrollableArea;
   class RenderStyle;
 
   enum IncludeSelfOrNot
@@ -71,10 +73,10 @@ namespace krys::boo
     RespectOverflowClip
   };
 
-  enum class OverlayScrollbarSizeRelevancy : bool
+  enum class LayoutUpToDate : bool
   {
-    IgnoreOverlayScrollbarSize,
-    IncludeOverlayScrollbarSize
+    No,
+    Yes
   };
 
   /// @brief The layer of a renderer that needs one: it positions, clips and orders (in z-order) the
@@ -87,7 +89,22 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(RenderLayer);
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderLayer);
 
+    friend class RenderLayerScrollableArea;
+
   public:
+    struct OverflowControlRects
+    {
+      IntRect HorizontalScrollbar;
+      IntRect VerticalScrollbar;
+      IntRect ScrollCorner;
+      IntRect Resizer;
+
+      KRYS_NODISCARD IntRect ScrollCornerOrResizerRect() const noexcept
+      {
+        return !ScrollCorner.IsEmpty() ? ScrollCorner : Resizer;
+      }
+    };
+
     class LayerList
     {
       friend class RenderLayer;
@@ -272,6 +289,8 @@ namespace krys::boo
     bool _hasTransformedAncestor : 1 {false};
     bool _has3DTransformedAncestor : 1 {false};
 
+    bool _hasCompositedScrollingAncestor : 1 {false}; // In the layer-order tree.
+
     bool _hasStickyAncestor : 1 {false};
     bool _hasFixedAncestor : 1 {false};
     bool _hasPaginatedAncestor : 1 {false};
@@ -316,6 +335,8 @@ namespace krys::boo
     UniquePtr<ClipRectsCache> _clipRectsCache;
 
     UniquePtr<TransformationMatrix> _transform;
+
+    UniquePtr<RenderLayerScrollableArea> _scrollableArea;
 
     // Pointer to the enclosing RenderLayer that caused us to be paginated. It is 0 if we are not paginated.
     WeakPtr<RenderLayer> _enclosingPaginationLayer;
@@ -754,6 +775,41 @@ namespace krys::boo
 
     void SetIsHiddenByOverflowTruncation(bool isHidden) noexcept;
 
+    KRYS_NODISCARD RenderLayerScrollableArea *GetScrollableArea() const noexcept;
+    RenderLayerScrollableArea *EnsureLayerScrollableArea() noexcept;
+
+    KRYS_NODISCARD IntSize VisibleSize() const noexcept;
+
+    KRYS_NODISCARD int32 ScrollWidth() const noexcept;
+    KRYS_NODISCARD int32 ScrollHeight() const noexcept;
+
+    // Returns the nearest enclosing layer that is scrollable.
+    // FIXME: This can return the RenderView's layer when callers probably want the FrameView as a
+    // ScrollableArea.
+    KRYS_NODISCARD RenderLayer *
+      EnclosingScrollableLayer(IncludeSelfOrNot includeSelf,
+                               CrossFrameBoundaries crossFrameBoundaries) const noexcept;
+
+    // Returns true when the layer could do touch scrolling, but doesn't look at whether there is actually
+    // scrollable overflow.
+    KRYS_NODISCARD bool CanUseCompositedScrolling() const noexcept;
+    // Returns true when there is actually scrollable overflow (requires layout to be up-to-date).
+    KRYS_NODISCARD bool HasCompositedScrollableOverflow() const noexcept;
+    void ComputeHasCompositedScrollableOverflow(LayoutUpToDate layoutUpToDate) noexcept;
+
+    KRYS_NODISCARD bool HasOverlayScrollbars() const noexcept;
+    KRYS_NODISCARD bool UsesCompositedScrolling() const noexcept;
+
+    void UpdateScrollInfoAfterLayout() noexcept;
+    void UpdateScrollbarSteps() noexcept;
+
+    KRYS_NODISCARD bool CanResize() const noexcept;
+
+    KRYS_NODISCARD OverflowControlRects OverflowControlsRects() const noexcept;
+
+    void UpdateLayerPositionsAfterOverflowScroll() noexcept;
+    void UpdateLayerPositionsAfterDocumentScroll() noexcept;
+
   private:
     void SetNextSibling(RenderLayer *next) noexcept;
     void SetPreviousSibling(RenderLayer *prev) noexcept;
@@ -810,6 +866,19 @@ namespace krys::boo
                                                          bool temporaryClipRects = false) const noexcept;
 
     void UpdateSelfPaintingLayer() noexcept;
+
+    void UpdateLayerScrollableArea() noexcept;
+    void ClearLayerScrollableArea() noexcept;
+
+    enum class UpdateLayerPositionsAfterScrollFlag : uint8
+    {
+      IsOverflowScroll = 1 << 0,
+      HasSeenViewportConstrainedAncestor = 1 << 1,
+      HasSeenAncestorWithOverflowClip = 1 << 2,
+      HasChangedAncestor = 1 << 3,
+    };
+    void RecursiveUpdateLayerPositionsAfterScroll(
+      EnumSet<UpdateLayerPositionsAfterScrollFlag> flags = {}) noexcept;
 
     KRYS_NODISCARD static EnumSet<UpdateLayerPositionsFlag>
       FlagsForUpdateLayerPositions(RenderLayer &startingLayer) noexcept;

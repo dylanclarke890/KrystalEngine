@@ -110,6 +110,7 @@ namespace krys::boo::dom
     if (auto *element = DynamicDowncast<Element>(removedNode))
     {
       element->NodeDocument().UserActionElements().ClearAllForElement(*element);
+      element->SetSavedLayerScrollPosition({});
       element->ClearBeforePseudoElement();
       element->ClearAfterPseudoElement();
     }
