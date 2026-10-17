@@ -1,6 +1,9 @@
 ﻿#include "Krystal.Booey/Rendering/RenderInline.hpp"
+#include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Style/Calc/TreeEvaluation.hpp"
 
 namespace krys::boo
 {
@@ -84,5 +87,63 @@ namespace krys::boo
       }
     }
     return true;
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD LayoutUnit ComputeMargin(const RenderInline *renderer, const style::MarginEdge &margin,
+                                            const style::ZoomFactor &zoomFactor) noexcept
+    {
+      return style::EvaluateMinimum<LayoutUnit>(
+        margin,
+        [&] { return std::max<LayoutUnit>(0_lu, renderer->ContainingBlock()->ContentBoxLogicalWidth()); },
+        zoomFactor);
+    }
+  }
+
+  LayoutUnit RenderInline::MarginLeft() const noexcept
+  {
+    return ComputeMargin(this, Style().MarginLeft(), Style().UsedZoomForLength());
+  }
+
+  LayoutUnit RenderInline::MarginRight() const noexcept
+  {
+    return ComputeMargin(this, Style().MarginRight(), Style().UsedZoomForLength());
+  }
+
+  LayoutUnit RenderInline::MarginTop() const noexcept
+  {
+    return ComputeMargin(this, Style().MarginTop(), Style().UsedZoomForLength());
+  }
+
+  LayoutUnit RenderInline::MarginBottom() const noexcept
+  {
+    return ComputeMargin(this, Style().MarginBottom(), Style().UsedZoomForLength());
+  }
+
+  LayoutUnit RenderInline::MarginStart(WritingMode writingMode) const noexcept
+  {
+    return ComputeMargin(this, Style().MarginStart(writingMode), Style().UsedZoomForLength());
+  }
+
+  LayoutUnit RenderInline::MarginEnd(WritingMode writingMode) const noexcept
+  {
+    return ComputeMargin(this, Style().MarginEnd(writingMode), Style().UsedZoomForLength());
+  }
+
+  LayoutUnit RenderInline::MarginBefore(WritingMode writingMode) const noexcept
+  {
+    return ComputeMargin(this, Style().MarginBefore(writingMode), Style().UsedZoomForLength());
+  }
+
+  LayoutUnit RenderInline::MarginAfter(WritingMode writingMode) const noexcept
+  {
+    return ComputeMargin(this, Style().MarginAfter(writingMode), Style().UsedZoomForLength());
+  }
+
+  IntRect RenderInline::LinesBoundingBox() const noexcept
+  {
+    // FIXME: The bounding box of the inline's line boxes, once there's inline layout.
+    return {};
   }
 }

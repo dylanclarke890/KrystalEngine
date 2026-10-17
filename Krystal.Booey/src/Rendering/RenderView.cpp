@@ -2,7 +2,9 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderCounter.hpp"
+#include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 
 namespace krys::boo
 {
@@ -69,15 +71,108 @@ namespace krys::boo
 
   void RenderView::Layout() noexcept
   {
-    // FIXME: Printing (the page size and the preferred widths it sets), and relaying out the children whose
-    // height depends on the view when its size changes, once there's box geometry.
+    // FIXME: Printing (the page size and the preferred widths it sets), once there is any.
 
+    // Use calcWidth/Height to get the new width/height, since this will take the full page zoom factor into
+    // account.
+    bool relayoutChildren =
+      !ShouldUsePrintingLayout() && (Width() != ViewWidth() || Height() != ViewHeight());
+    if (relayoutChildren)
+    {
+      SetChildNeedsLayout(MarkingBehavior::MarkOnlyThis);
+
+      for (auto &box : ChildrenOfType<RenderBox>(*this))
+      {
+        // FIXME: SVG roots too, once there's SVG.
+        if (box.HasRelativeLogicalHeight() || box.Style().LogicalHeight().IsPercentOrCalculated()
+            || box.Style().LogicalMinHeight().IsPercentOrCalculated()
+            || box.Style().LogicalMaxHeight().IsPercentOrCalculated())
+        {
+          box.SetChildNeedsLayout(MarkingBehavior::MarkOnlyThis);
+        }
+      }
+    }
+
+    krys_debug_assert(!FrameView().LayoutContext().LayoutState());
     if (!NeedsLayout())
     {
       return;
     }
 
-    // FIXME: The layout state, and the initial containing block's size, once there's box geometry.
+    // FIXME: The page height when printing and whether it changed, once there's printing.
+    LayoutStateMaintainer statePusher(*this, {}, false);
+
+    // FIXME: The initial containing block's size, once there's a layout state for queries.
     RenderBlockFlow::Layout();
+
+#if KRYS_DEBUG
+    FrameView().LayoutContext().CheckLayoutState();
+#endif
+  }
+
+  RenderBox::LogicalExtentComputedValues RenderView::ComputeLogicalHeight(LayoutUnit logicalHeight,
+                                                                          LayoutUnit) const noexcept
+  {
+    return {!ShouldUsePrintingLayout() ? LayoutUnit(ViewLogicalHeight()) : logicalHeight, 0_lu,
+            ComputedMarginValues()};
+  }
+
+  int32 RenderView::ViewLogicalWidth() const noexcept
+  {
+    return Style().GetWritingMode().IsHorizontal() ? ViewWidth() : ViewHeight();
+  }
+
+  void RenderView::UpdateLogicalWidth() noexcept
+  {
+    // FIXME: The page width when printing, once there is any.
+    SetLogicalWidth(LayoutUnit(ViewLogicalWidth()));
+  }
+
+  LayoutUnit RenderView::AvailableLogicalHeight(AvailableLogicalHeightType) const noexcept
+  {
+    // Make sure block progression pagination for percentages uses the column extent and
+    // not the view's extent. See https://bugs.webkit.org/show_bug.cgi?id=135204.
+    // FIXME: The column height of a multi-column view, once there are columns.
+
+    auto layoutSize = _frameView.GetLayoutSize();
+    return LayoutUnit(IsHorizontalWritingMode() ? layoutSize.Height() : layoutSize.Width());
+  }
+
+  LayoutUnit RenderView::PageOrViewLogicalHeight() const noexcept
+  {
+    // FIXME: The page height when printing, and the pagination's page length in a multi-column view, once
+    // there are any.
+    return LayoutUnit(ViewLogicalHeight());
+  }
+
+  int32 RenderView::ViewHeight() const noexcept
+  {
+    int32 height = 0;
+    if (!ShouldUsePrintingLayout())
+    {
+      height = _frameView.LayoutHeight();
+      height = _frameView.UseFixedLayout()
+                 ? static_cast<int32>(std::ceil(Style().UsedZoom() * static_cast<float>(height)))
+                 : height;
+    }
+    return height;
+  }
+
+  int32 RenderView::ViewWidth() const noexcept
+  {
+    int32 width = 0;
+    if (!ShouldUsePrintingLayout())
+    {
+      width = _frameView.LayoutWidth();
+      width = _frameView.UseFixedLayout()
+                ? static_cast<int32>(std::ceil(Style().UsedZoom() * static_cast<float>(width)))
+                : width;
+    }
+    return width;
+  }
+
+  int32 RenderView::ViewLogicalHeight() const noexcept
+  {
+    return Style().GetWritingMode().IsHorizontal() ? ViewHeight() : ViewWidth();
   }
 }

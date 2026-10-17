@@ -677,6 +677,8 @@ namespace krys::boo
     {
       return _stateFlags.Contains(StateFlag::HasTransformRelatedProperty);
     }
+    KRYS_NODISCARD bool IsTransformed() const noexcept;
+    KRYS_NODISCARD bool HasTransformOrPerspective() const noexcept;
 
     KRYS_NODISCARD bool PaintContainmentApplies() const noexcept
     {
@@ -685,6 +687,23 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsDocumentElementRenderer() const noexcept;
     KRYS_NODISCARD bool IsFieldset() const noexcept;
+    KRYS_NODISCARD bool IsLegend() const noexcept;
+    KRYS_NODISCARD bool IsExcludedAndPlacedInBorder() const noexcept
+    {
+      return IsExcludedFromNormalLayout() && IsLegend();
+    }
+
+    void InvalidateBackgroundObscurationStatus() noexcept
+    {
+      if (!HasVisibleBoxDecorations())
+      {
+        return;
+      }
+      _boxDecorationState = BoxDecorationState::InvalidObscurationStatus;
+    }
+
+    KRYS_NODISCARD const RenderStyle &FirstLineStyle() const noexcept;
+    KRYS_NODISCARD virtual const RenderStyle &OutlineStyleForRepaint() const noexcept;
     KRYS_NODISCARD bool IsBody() const noexcept;
     KRYS_NODISCARD bool IsPseudoElement() const noexcept;
 
@@ -869,8 +888,9 @@ namespace krys::boo
     {
       // Dirty bit was set with MarkingBehavior::MarkOnlyThis
       bool PreferredLogicalWidthsNeedUpdateIsMarkOnlyThis {false};
-      // FIXME: Reflections, outline-auto ancestors, trimmed margins, referenced SVG resources, the ::backdrop
-      // renderer and the control part, once there are any.
+      EnumSet<style::MarginTrimSide> TrimmedMargins;
+      // FIXME: Reflections, outline-auto ancestors, referenced SVG resources, the ::backdrop renderer and the
+      // control part, once there are any.
     };
     KRYS_NODISCARD bool HasRareData() const noexcept
     {
@@ -919,14 +939,6 @@ namespace krys::boo
     }
 
     void SetHasVisibleBoxDecorations(bool b = true) noexcept;
-    void InvalidateBackgroundObscurationStatus() noexcept
-    {
-      if (!HasVisibleBoxDecorations())
-      {
-        return;
-      }
-      _boxDecorationState = BoxDecorationState::InvalidObscurationStatus;
-    }
 
     void SetBlockLevelReplacedOrAtomicInline(bool b = true) noexcept
     {

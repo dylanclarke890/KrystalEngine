@@ -19,6 +19,12 @@ namespace krys::boo
     ~RenderDeprecatedFlexibleBox() noexcept override;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override;
+
+    KRYS_NODISCARD bool IsStretchingChildren() const noexcept
+    {
+      // FIXME: Set while the legacy box lays out its children, once it has a layout.
+      return false;
+    }
   };
 }
 

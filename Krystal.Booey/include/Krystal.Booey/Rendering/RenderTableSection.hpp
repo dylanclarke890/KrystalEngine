@@ -35,6 +35,11 @@ namespace krys::boo
       return (IsAnonymous() || IsPseudoElement()) ? u8"RenderTableSection (anonymous)"
                                                   : u8"RenderTableSection";
     }
+
+  private:
+    void ComputeIntrinsicLogicalWidths(LayoutUnit &, LayoutUnit &) const noexcept override
+    {
+    }
   };
 }
 

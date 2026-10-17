@@ -37,6 +37,7 @@ KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderElementConstructBlockLevelRe
 namespace krys::boo
 {
   class RenderBlock;
+  class RenderBoxModelObject;
 
   /// @brief A renderer with its own style: an element's, or an anonymous box's.
   class RenderElement : public RenderObject
@@ -149,6 +150,19 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsWritingModeRoot() const noexcept;
 
+    KRYS_NODISCARD bool IsAnonymousForPercentageResolution() const noexcept
+    {
+      // FIXME: View transition pseudo-elements, once there are view transitions.
+      return IsAnonymous();
+    }
+
+    /// @see https://drafts.csswg.org/cssom-view/#dom-htmlelement-offsetparent
+    KRYS_NODISCARD RenderBoxModelObject *OffsetParent() const noexcept;
+
+    KRYS_NODISCARD bool IsHTMLMarquee() const noexcept;
+
+    KRYS_NODISCARD const RenderStyle &FirstLineStyle() const noexcept;
+
     /// @brief Lays out this renderer and its descendants that need layout.
     virtual void Layout() noexcept;
     void LayoutIfNeeded() noexcept
@@ -170,6 +184,12 @@ namespace krys::boo
     KRYS_NODISCARD virtual bool OverflowChangesMayAffectLayout() const noexcept
     {
       return false;
+    }
+
+    KRYS_NODISCARD bool IsDeprecatedFlexItem() const noexcept
+    {
+      return !IsInline() && !IsFloatingOrOutOfFlowPositioned() && Parent()
+             && Parent()->IsRenderDeprecatedFlexibleBox();
     }
 
     KRYS_NODISCARD bool IsFlexItemIncludingDeprecated() const noexcept
@@ -255,7 +275,6 @@ namespace krys::boo
     KRYS_NODISCARD RenderPtr<RenderObject> DetachRendererInternal(RenderObject &renderer) noexcept;
 
     KRYS_NODISCARD style::Difference AdjustStyleDifference(style::Difference diff) const noexcept;
-    KRYS_NODISCARD bool IsHTMLMarquee() const noexcept;
   };
 }
 

@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFieldSetElement.hpp"
+#include "Krystal.Booey/HTML/HTMLLegendElement.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
@@ -222,6 +223,37 @@ namespace krys::boo
   {
     auto *element = DynamicDowncast<html::HTMLElement>(GetNode());
     return element && Is<html::HTMLFieldSetElement>(*element);
+  }
+
+  bool RenderObject::IsTransformed() const noexcept
+  {
+    // FIXME: SVG transforms too, once there's SVG.
+    return HasTransformRelatedProperty() && Style().AffectsTransform();
+  }
+
+  bool RenderObject::HasTransformOrPerspective() const noexcept
+  {
+    return HasTransformRelatedProperty() && (IsTransformed() || Style().HasPerspective());
+  }
+
+  bool RenderObject::IsLegend() const noexcept
+  {
+    auto *element = DynamicDowncast<html::HTMLElement>(GetNode());
+    return element && Is<html::HTMLLegendElement>(*element);
+  }
+
+  const RenderStyle &RenderObject::FirstLineStyle() const noexcept
+  {
+    if (IsRenderText())
+    {
+      return Parent()->FirstLineStyle();
+    }
+    return Downcast<RenderElement>(*this).FirstLineStyle();
+  }
+
+  const RenderStyle &RenderObject::OutlineStyleForRepaint() const noexcept
+  {
+    return Style();
   }
 
   bool RenderObject::IsBody() const noexcept

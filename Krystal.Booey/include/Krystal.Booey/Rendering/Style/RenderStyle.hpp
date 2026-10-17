@@ -44,6 +44,11 @@ namespace krys::boo
     KRYS_NODISCARD static RenderStyle
       CreateStyleInheritingFromPseudoStyle(const RenderStyle &pseudoStyle) noexcept;
 
+    /// @return The logical left/right float of the renderer (block-relative).
+    KRYS_NODISCARD static UsedFloat GetUsedFloat(const RenderElement &renderer) noexcept;
+    /// @return The logical left/right clear of the renderer (block-relative).
+    KRYS_NODISCARD static UsedClear GetUsedClear(const RenderElement &renderer) noexcept;
+
     void InheritFrom(const RenderStyle &) noexcept;
     void InheritIgnoringCustomPropertiesFrom(const RenderStyle &) noexcept;
     void InheritUnicodeBidiFrom(const RenderStyle &) noexcept;

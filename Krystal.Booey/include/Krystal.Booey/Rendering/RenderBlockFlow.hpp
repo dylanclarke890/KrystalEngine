@@ -15,6 +15,10 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(RenderBlockFlow);
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderBlockFlow);
 
+  protected:
+    void ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,
+                                       LayoutUnit &maxLogicalWidth) const noexcept override;
+
   public:
     RenderBlockFlow(Type type, dom::Element &element, RenderStyle &&style,
                     EnumSet<BlockFlowFlag> flags = {}) noexcept;

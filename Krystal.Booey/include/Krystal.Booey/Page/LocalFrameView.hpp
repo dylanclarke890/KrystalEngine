@@ -43,6 +43,7 @@ namespace krys::boo
     IntRect _frameRect;
     IntSize _fixedLayoutSize;
     bool _useFixedLayout {false};
+    bool _hasFlippedBlockRenderers {false};
     css::CSSOMStringAtom _mediaType;
     boo::Pagination _pagination;
     Maybe<OverrideViewportSize> _defaultViewportSizeOverride;
@@ -122,6 +123,15 @@ namespace krys::boo
     KRYS_NODISCARD bool UseFixedLayout() const noexcept
     {
       return _useFixedLayout;
+    }
+
+    KRYS_NODISCARD bool HasFlippedBlockRenderers() const noexcept
+    {
+      return _hasFlippedBlockRenderers;
+    }
+    void SetHasFlippedBlockRenderers(bool b) noexcept
+    {
+      _hasFlippedBlockRenderers = b;
     }
 
     void SetUseFixedLayout(bool enable) noexcept;

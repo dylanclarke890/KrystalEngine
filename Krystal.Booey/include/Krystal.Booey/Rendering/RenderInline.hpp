@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -25,6 +26,35 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override;
+
+    KRYS_NODISCARD LayoutUnit MarginLeft() const noexcept final;
+    KRYS_NODISCARD LayoutUnit MarginRight() const noexcept final;
+    KRYS_NODISCARD LayoutUnit MarginTop() const noexcept final;
+    KRYS_NODISCARD LayoutUnit MarginBottom() const noexcept final;
+    KRYS_NODISCARD LayoutUnit MarginBefore(WritingMode writingMode) const noexcept final;
+    KRYS_NODISCARD LayoutUnit MarginAfter(WritingMode writingMode) const noexcept final;
+    KRYS_NODISCARD LayoutUnit MarginStart(WritingMode writingMode) const noexcept final;
+    KRYS_NODISCARD LayoutUnit MarginEnd(WritingMode writingMode) const noexcept final;
+    using RenderBoxModelObject::MarginAfter;
+    using RenderBoxModelObject::MarginBefore;
+    using RenderBoxModelObject::MarginEnd;
+    using RenderBoxModelObject::MarginStart;
+
+    KRYS_NODISCARD LayoutRect BorderBoundingBox() const noexcept final
+    {
+      return LayoutRect(LayoutPoint(), LinesBoundingBox().Size());
+    }
+
+    KRYS_NODISCARD LayoutUnit OffsetWidth() const noexcept final
+    {
+      return LayoutUnit(LinesBoundingBox().Width());
+    }
+    KRYS_NODISCARD LayoutUnit OffsetHeight() const noexcept final
+    {
+      return LayoutUnit(LinesBoundingBox().Height());
+    }
+
+    KRYS_NODISCARD IntRect LinesBoundingBox() const noexcept;
 
     // FIXME: Layout queries, reachable only through `RendererOf` and `RenderBoxOf`, which return null until
     // there's layout.

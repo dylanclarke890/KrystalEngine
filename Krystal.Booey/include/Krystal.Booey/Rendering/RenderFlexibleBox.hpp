@@ -14,6 +14,10 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(RenderFlexibleBox);
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderFlexibleBox);
 
+  private:
+    bool _shouldResetFlexItemLogicalHeightBeforeLayout {false};
+    bool _isComputingFlexBaseSizes {false};
+
   public:
     RenderFlexibleBox(Type type, dom::Element &element, RenderStyle &&style) noexcept;
     RenderFlexibleBox(Type type, dom::Document &document, RenderStyle &&style) noexcept;
@@ -23,6 +27,34 @@ namespace krys::boo
     {
       return u8"RenderFlexibleBox";
     }
+
+    KRYS_NODISCARD bool IsHorizontalFlow() const noexcept;
+    KRYS_NODISCARD bool IsColumnFlow() const noexcept;
+    KRYS_NODISCARD bool IsColumnOrRowReverse() const noexcept;
+    KRYS_NODISCARD bool IsWrapReverse() const noexcept;
+
+    KRYS_NODISCARD Maybe<LayoutUnit>
+      UsedFlexItemOverridingLogicalHeightForPercentageResolution(const RenderBox &flexItem) const noexcept;
+    KRYS_NODISCARD bool CanUseFlexItemForPercentageResolution(const RenderBox &flexItem) const noexcept;
+
+    KRYS_NODISCARD bool ShouldApplyMinBlockSizeAutoForFlexItem(const RenderBox &flexItem) const noexcept;
+
+    KRYS_NODISCARD bool IsComputingFlexBaseSizes() const noexcept
+    {
+      return _isComputingFlexBaseSizes;
+    }
+
+    KRYS_NODISCARD bool ShouldResetFlexItemLogicalHeightBeforeLayout() const noexcept
+    {
+      return _shouldResetFlexItemLogicalHeightBeforeLayout;
+    }
+
+  private:
+    KRYS_NODISCARD bool MainAxisIsFlexItemInlineAxis(const RenderBox &flexItem) const noexcept;
+    KRYS_NODISCARD const style::MinimumSize &
+      MinMainSizeLengthForFlexItem(const RenderBox &flexItem) const noexcept;
+    KRYS_NODISCARD Overflow MainAxisOverflowForFlexItem(const RenderBox &flexItem) const noexcept;
+    KRYS_NODISCARD bool ShouldApplyMinSizeAutoForFlexItem(const RenderBox &flexItem) const noexcept;
   };
 }
 

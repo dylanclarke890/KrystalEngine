@@ -88,6 +88,19 @@ namespace krys::boo
 
   private:
     void WillBeDestroyed() noexcept final;
+
+    // FIXME: The marker's width from its image or text, and its inline margins (updateInlineMargins), once
+    // there's inline layout.
+    void ComputePreferredLogicalWidths() noexcept final
+    {
+      krys_debug_assert(NeedsPreferredLogicalWidthsUpdate());
+      _minPreferredLogicalWidth = _maxPreferredLogicalWidth = 0_lu;
+      ClearNeedsPreferredWidthsUpdate();
+    }
+    void ComputeIntrinsicLogicalWidths(LayoutUnit &, LayoutUnit &) const noexcept override
+    {
+      krys_debug_assert(false);
+    }
     KRYS_NODISCARD bool CanHaveChildren() const noexcept final
     {
       return false;

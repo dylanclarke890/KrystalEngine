@@ -26,6 +26,18 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool IsTableColumnGroup() const noexcept;
+
+  private:
+    void ComputePreferredLogicalWidths() noexcept override
+    {
+      krys_debug_assert(false);
+    }
+    void ComputeIntrinsicLogicalWidths(LayoutUnit &, LayoutUnit &) const noexcept override
+    {
+      krys_debug_assert(false);
+    }
+
+  public:
     KRYS_NODISCARD bool IsTableColumn() const noexcept;
 
     KRYS_NODISCARD bool IsChildAllowed(const RenderObject &child,

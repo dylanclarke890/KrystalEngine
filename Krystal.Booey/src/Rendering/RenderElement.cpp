@@ -3,6 +3,8 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/HTML/HTMLMarqueeElement.hpp"
+#include "Krystal.Booey/HTML/HTMLTableCellElement.hpp"
+#include "Krystal.Booey/HTML/HTMLTableElement.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
@@ -364,6 +366,82 @@ namespace krys::boo
 
     // FIXME: Out-of-flow static positions, cursors, outline-auto ancestors, scroll anchoring and line layout,
     // once there are any.
+  }
+
+  const RenderStyle &RenderElement::FirstLineStyle() const noexcept
+  {
+    // FIXME: It would be better to just set anonymous block first-line styles correctly.
+    if (IsAnonymousBlock())
+    {
+      if (!PreviousInFlowSibling())
+      {
+        if (auto *firstLineStyle = Parent()->Style().GetCachedPseudoStyle({PseudoElementType::FirstLine}))
+        {
+          return *firstLineStyle;
+        }
+      }
+      return Style();
+    }
+
+    if (auto *firstLineStyle = Style().GetCachedPseudoStyle({PseudoElementType::FirstLine}))
+    {
+      return *firstLineStyle;
+    }
+
+    return Style();
+  }
+
+  RenderBoxModelObject *RenderElement::OffsetParent() const noexcept
+  {
+    // If any of the following holds true return null and stop this algorithm:
+    // A is the root element.
+    // A is the HTML body element.
+    // The computed value of the position property for element A is fixed.
+    if (IsDocumentElementRenderer() || IsBody() || (IsFixedPositioned() && Is<RenderView>(Container())))
+    {
+      return nullptr;
+    }
+
+    // If A is an area HTML element which has a map HTML element somewhere in the ancestor
+    // chain return the nearest ancestor map HTML element and stop this algorithm.
+    // FIXME: Implement!
+
+    // Return the nearest ancestor element of A for which at least one of the following is
+    // true and stop this algorithm if such an ancestor is found:
+    //     * The element is a containing block of absolutely-positioned descendants (regardless
+    //       of whether there are any absolutely-positioned descendants).
+    //     * The element is a containing block of fixed-positioned descendants.
+    //     * It is the HTML body element.
+    //     * The computed value of the position property of A is static and the ancestor
+    //       is one of the following HTML elements: td, th, or table.
+    //     * Our own extension: if there is a difference in the effective zoom
+
+    bool skipTables = IsPositioned();
+    float currZoom = Style().UsedZoom();
+    auto *current = Parent();
+    while (current
+           && (!current->GetElement()
+               || (!current->IsBody()
+                   && !(IsFixedPositioned() ? current->CanContainFixedPositionObjects()
+                                            : current->CanContainAbsolutelyPositionedObjects()))))
+    {
+      auto *element = DynamicDowncast<html::HTMLElement>(current->GetElement());
+      if (!skipTables && element
+          && (Is<html::HTMLTableElement>(*element) || Is<html::HTMLTableCellElement>(*element)))
+      {
+        break;
+      }
+
+      float newZoom = current->Style().UsedZoom();
+      if (currZoom != newZoom)
+      {
+        break;
+      }
+      currZoom = newZoom;
+      current = current->Parent();
+    }
+
+    return DynamicDowncast<RenderBoxModelObject>(current);
   }
 
   bool RenderElement::IsWritingModeRoot() const noexcept

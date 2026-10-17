@@ -20,4 +20,35 @@ namespace krys::boo
 
   // Do not add any code in below destructor. Add it to willBeDestroyed() instead.
   RenderBlockFlow::~RenderBlockFlow() noexcept = default;
+
+  void RenderBlockFlow::ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,
+                                                      LayoutUnit &maxLogicalWidth) const noexcept
+  {
+    if (ShouldApplySizeOrInlineSizeContainment())
+    {
+      if (auto width = ExplicitIntrinsicInnerLogicalWidth())
+      {
+        minLogicalWidth = *width;
+        maxLogicalWidth = *width;
+      }
+    }
+    else if (ChildrenInline())
+    {
+      // FIXME: The preferred widths of inline content (computeInlinePreferredLogicalWidths), once there's
+      // inline layout.
+    }
+    else
+    {
+      ComputeBlockPreferredLogicalWidths(minLogicalWidth, maxLogicalWidth);
+    }
+
+    maxLogicalWidth = std::max(minLogicalWidth, maxLogicalWidth);
+
+    // FIXME: Multi-column widths (adjustIntrinsicLogicalWidthsForColumns), horizontal marquees, and a table
+    // cell's fixed width, once there are columns, marquees and table layout.
+
+    auto scrollbarWidth = LayoutUnit(IntrinsicScrollbarLogicalWidthIncludingGutter());
+    maxLogicalWidth += scrollbarWidth;
+    minLogicalWidth += scrollbarWidth;
+  }
 }

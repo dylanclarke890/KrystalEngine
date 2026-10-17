@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -43,7 +44,58 @@ namespace krys::boo
       return IsWBR();
     }
 
+    KRYS_NODISCARD IntRect LinesBoundingBox() const noexcept
+    {
+      // FIXME: The bounding box of the line break's run, once there's inline layout.
+      return {};
+    }
+
   private:
+    KRYS_NODISCARD LayoutUnit MarginTop() const noexcept final
+    {
+      return 0_lu;
+    }
+    KRYS_NODISCARD LayoutUnit MarginBottom() const noexcept final
+    {
+      return 0_lu;
+    }
+    KRYS_NODISCARD LayoutUnit MarginLeft() const noexcept final
+    {
+      return 0_lu;
+    }
+    KRYS_NODISCARD LayoutUnit MarginRight() const noexcept final
+    {
+      return 0_lu;
+    }
+    KRYS_NODISCARD LayoutUnit MarginBefore(WritingMode) const noexcept final
+    {
+      return 0_lu;
+    }
+    KRYS_NODISCARD LayoutUnit MarginAfter(WritingMode) const noexcept final
+    {
+      return 0_lu;
+    }
+    KRYS_NODISCARD LayoutUnit MarginStart(WritingMode) const noexcept final
+    {
+      return 0_lu;
+    }
+    KRYS_NODISCARD LayoutUnit MarginEnd(WritingMode) const noexcept final
+    {
+      return 0_lu;
+    }
+    KRYS_NODISCARD LayoutUnit OffsetWidth() const noexcept final
+    {
+      return LayoutUnit(LinesBoundingBox().Width());
+    }
+    KRYS_NODISCARD LayoutUnit OffsetHeight() const noexcept final
+    {
+      return LayoutUnit(LinesBoundingBox().Height());
+    }
+    KRYS_NODISCARD LayoutRect BorderBoundingBox() const noexcept final
+    {
+      return LayoutRect(LayoutPoint(), LinesBoundingBox().Size());
+    }
+
     KRYS_NODISCARD bool CanHaveChildren() const noexcept final
     {
       return false;

@@ -13,6 +13,7 @@
 #include "Krystal.Booey/Graphics/PathTraversalState.hpp"
 #include "Krystal.Booey/Graphics/Transforms/ScaleTransformOperation.hpp"
 #include "Krystal.Booey/Rendering/MotionPath.hpp"
+#include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleBase+ConstructionInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
@@ -608,5 +609,42 @@ namespace krys::boo
       return writingMode.IsInlineLeftToRight() ? BorderRight() : BorderLeft();
     }
     return writingMode.IsInlineTopToBottom() ? BorderBottom() : BorderTop();
+  }
+
+  UsedClear RenderStyle::GetUsedClear(const RenderElement &renderer) noexcept
+  {
+    auto computedClear = renderer.Style().GetClear();
+    auto writingMode = renderer.ContainingBlock()->Style().GetWritingMode();
+    switch (computedClear)
+    {
+      case Clear::None:  return UsedClear::None;
+      case Clear::Both:  return UsedClear::Both;
+      case Clear::Left:  return writingMode.IsLogicalLeftLineLeft() ? UsedClear::Left : UsedClear::Right;
+      case Clear::Right: return writingMode.IsLogicalLeftLineLeft() ? UsedClear::Right : UsedClear::Left;
+      case Clear::InlineStart:
+        return writingMode.IsLogicalLeftInlineStart() ? UsedClear::Left : UsedClear::Right;
+      case Clear::InlineEnd:
+        return writingMode.IsLogicalLeftInlineStart() ? UsedClear::Right : UsedClear::Left;
+    }
+
+    krys_unreachable();
+  }
+
+  UsedFloat RenderStyle::GetUsedFloat(const RenderElement &renderer) noexcept
+  {
+    auto computedFloat = renderer.Style().Floating();
+    auto writingMode = renderer.ContainingBlock()->Style().GetWritingMode();
+    switch (computedFloat)
+    {
+      case Float::None:  return UsedFloat::None;
+      case Float::Left:  return writingMode.IsLogicalLeftLineLeft() ? UsedFloat::Left : UsedFloat::Right;
+      case Float::Right: return writingMode.IsLogicalLeftLineLeft() ? UsedFloat::Right : UsedFloat::Left;
+      case Float::InlineStart:
+        return writingMode.IsLogicalLeftInlineStart() ? UsedFloat::Left : UsedFloat::Right;
+      case Float::InlineEnd:
+        return writingMode.IsLogicalLeftInlineStart() ? UsedFloat::Right : UsedFloat::Left;
+    }
+
+    krys_unreachable();
   }
 }

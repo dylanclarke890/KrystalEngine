@@ -66,6 +66,26 @@ namespace krys::boo
 
     void Layout() noexcept override;
 
+    KRYS_NODISCARD LogicalExtentComputedValues
+      ComputeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logicalTop) const noexcept override;
+    void UpdateLogicalWidth() noexcept override;
+    KRYS_NODISCARD LayoutUnit
+      AvailableLogicalHeight(AvailableLogicalHeightType heightType) const noexcept override;
+
+    // The same as the FrameView's layoutHeight/layoutWidth but with null check guards.
+    KRYS_NODISCARD int32 ViewHeight() const noexcept;
+    KRYS_NODISCARD int32 ViewWidth() const noexcept;
+    KRYS_NODISCARD int32 ViewLogicalWidth() const noexcept;
+    KRYS_NODISCARD int32 ViewLogicalHeight() const noexcept;
+
+    KRYS_NODISCARD LayoutUnit PageOrViewLogicalHeight() const noexcept;
+
+    KRYS_NODISCARD bool ShouldUsePrintingLayout() const noexcept
+    {
+      // FIXME: Printing, once there is any.
+      return false;
+    }
+
     KRYS_NODISCARD bool HasQuotesNeedingUpdate() const noexcept
     {
       return _hasQuotesNeedingUpdate;

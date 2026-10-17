@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
@@ -73,8 +74,6 @@ namespace krys::boo
       {
         return;
       }
-
-      _firstLayout = false;
     }
 
     WeakPtr<RenderElement> layoutRoot;
@@ -82,12 +81,15 @@ namespace krys::boo
       SetForScope layoutPhase(_layoutPhase, LayoutPhase::InPreLayout);
       layoutRoot = CreateWeakPtr(SubtreeLayoutRoot() ? SubtreeLayoutRoot()
                                                      : static_cast<RenderElement *>(GetRenderView()));
-      // FIXME: The full repaint of a first layout, once there's painting.
+      // FIXME: Printing repaints everything too, once there's printing.
+      _needsFullRepaint = Is<RenderView>(*layoutRoot) && _firstLayout;
+      _firstLayout = false;
     }
 
     {
       SetForScope layoutPhase(_layoutPhase, LayoutPhase::InRenderTreeLayout);
-      // FIXME: The subtree layout state, and the repaint region accumulator, once there's painting.
+      SubtreeLayoutStateMaintainer subtreeLayoutStateMaintainer(SubtreeLayoutRoot());
+      // FIXME: The repaint region accumulator, once there's painting.
       layoutRoot->Layout();
       // FIXME: The layout areas the inspector reports, once there's an inspector.
       ClearSubtreeLayoutRoot();
@@ -315,4 +317,99 @@ namespace krys::boo
     // the layout beats any sort of style recalc update that needs to occur.
     document->UpdateStyleIfNeeded();
   }
+
+  void LocalFrameViewLayoutContext::DisablePercentHeightResolveFor(const RenderBox &flexItem) noexcept
+  {
+    _percentHeightIgnoreList.insert(&flexItem);
+  }
+
+  void LocalFrameViewLayoutContext::EnablePercentHeightResolveFor(const RenderBox &flexItem) noexcept
+  {
+    _percentHeightIgnoreList.erase(&flexItem);
+  }
+
+  bool
+    LocalFrameViewLayoutContext::IsPercentHeightResolveDisabledFor(const RenderBox &flexItem) const noexcept
+  {
+    return _percentHeightIgnoreList.contains(&flexItem);
+  }
+
+  LayoutSize LocalFrameViewLayoutContext::LayoutDelta() const noexcept
+  {
+    if (auto *layoutState = this->LayoutState())
+    {
+      return layoutState->LayoutDelta();
+    }
+    return {};
+  }
+
+  void LocalFrameViewLayoutContext::AddLayoutDelta(const LayoutSize &delta) noexcept
+  {
+    if (auto *layoutState = this->LayoutState())
+    {
+      layoutState->AddLayoutDelta(delta);
+    }
+  }
+
+#if KRYS_DEBUG
+  bool LocalFrameViewLayoutContext::LayoutDeltaMatches(const LayoutSize &delta) const noexcept
+  {
+    if (auto *layoutState = this->LayoutState())
+    {
+      return layoutState->LayoutDeltaMatches(delta);
+    }
+    return false;
+  }
+#endif
+
+  RenderLayoutState *LocalFrameViewLayoutContext::LayoutState() const noexcept
+  {
+    if (_layoutStateStack.empty())
+    {
+      return nullptr;
+    }
+    return _layoutStateStack.back().get();
+  }
+
+  void LocalFrameViewLayoutContext::PushLayoutState(RenderElement &root) noexcept
+  {
+    krys_debug_assert(!_paintOffsetCacheDisableCount);
+    krys_debug_assert(!LayoutState());
+
+    _layoutStateStack.push_back(CreateUnique<RenderLayoutState>(root));
+  }
+
+  bool LocalFrameViewLayoutContext::PushLayoutState(RenderBox &renderer, const LayoutSize &offset,
+                                                    LayoutUnit pageHeight, bool pageHeightChanged) noexcept
+  {
+    // We push LayoutState even if layoutState is disabled because it stores layoutDelta too.
+    // FIXME: Boxes inside a fragmented flow (enclosingFragmentedFlow) too, once there's fragmentation.
+    auto *layoutState = this->LayoutState();
+    if (!layoutState || !NeedsFullRepaint() || layoutState->IsPaginated())
+    {
+      _layoutStateStack.push_back(
+        CreateUnique<RenderLayoutState>(_layoutStateStack, renderer, offset, pageHeight, pageHeightChanged,
+                                        layoutState ? layoutState->GetLineClamp() : null));
+      return true;
+    }
+    return false;
+  }
+
+  void LocalFrameViewLayoutContext::PopLayoutState() noexcept
+  {
+    if (!LayoutState())
+    {
+      return;
+    }
+
+    _layoutStateStack.pop_back();
+  }
+
+#if KRYS_DEBUG
+  void LocalFrameViewLayoutContext::CheckLayoutState() const noexcept
+  {
+    krys_debug_assert(LayoutDeltaMatches(LayoutSize()));
+    krys_debug_assert(!_paintOffsetCacheDisableCount);
+  }
+#endif
 }

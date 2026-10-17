@@ -1,6 +1,12 @@
 ﻿#include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/RenderBlock.hpp"
+#include "Krystal.Booey/Rendering/RenderTable.hpp"
+#include "Krystal.Booey/Rendering/RenderTableRow.hpp"
 #include "Krystal.Booey/Rendering/RenderTextFragment.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Style/Calc/TreeEvaluation.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
@@ -90,56 +96,614 @@ namespace krys::boo
     SetPositionState(styleToUse.GetPosition());
     SetHorizontalWritingMode(styleToUse.GetWritingMode().IsHorizontal());
     SetPaintContainmentApplies(ShouldApplyPaintContainment());
-    // FIXME: Tell the frame view it has flipped block renderers, once it paints.
+    if (Style().GetWritingMode().IsBlockFlipped())
+    {
+      View().FrameView().SetHasFlippedBlockRenderers(true);
+    }
   }
 
-  LayoutUnit RenderBoxModelObject::OffsetLeft() const noexcept
-  {
-    krys_unreachable();
-  }
-
-  LayoutUnit RenderBoxModelObject::OffsetTop() const noexcept
-  {
-    krys_unreachable();
-  }
-
-  LayoutUnit RenderBoxModelObject::OffsetWidth() const noexcept
-  {
-    krys_unreachable();
-  }
-
-  LayoutUnit RenderBoxModelObject::OffsetHeight() const noexcept
-  {
-    krys_unreachable();
-  }
+#pragma region Geometry
 
   LayoutUnit RenderBoxModelObject::ComputedCSSPaddingTop() const noexcept
   {
-    krys_unreachable();
-  }
-
-  LayoutUnit RenderBoxModelObject::ComputedCSSPaddingRight() const noexcept
-  {
-    krys_unreachable();
+    return ResolveLengthPercentageUsingContainerLogicalWidth(Style().PaddingTop(),
+                                                             Style().UsedZoomForLength());
   }
 
   LayoutUnit RenderBoxModelObject::ComputedCSSPaddingBottom() const noexcept
   {
-    krys_unreachable();
+    return ResolveLengthPercentageUsingContainerLogicalWidth(Style().PaddingBottom(),
+                                                             Style().UsedZoomForLength());
   }
 
   LayoutUnit RenderBoxModelObject::ComputedCSSPaddingLeft() const noexcept
   {
-    krys_unreachable();
+    return ResolveLengthPercentageUsingContainerLogicalWidth(Style().PaddingLeft(),
+                                                             Style().UsedZoomForLength());
   }
 
-  LayoutSize RenderBoxModelObject::RelativePositionOffset() const noexcept
+  LayoutUnit RenderBoxModelObject::ComputedCSSPaddingRight() const noexcept
   {
-    krys_unreachable();
+    return ResolveLengthPercentageUsingContainerLogicalWidth(Style().PaddingRight(),
+                                                             Style().UsedZoomForLength());
+  }
+
+  LayoutUnit RenderBoxModelObject::ComputedCSSPaddingBefore() const noexcept
+  {
+    return ResolveLengthPercentageUsingContainerLogicalWidth(Style().PaddingBefore(),
+                                                             Style().UsedZoomForLength());
+  }
+
+  LayoutUnit RenderBoxModelObject::ComputedCSSPaddingAfter() const noexcept
+  {
+    return ResolveLengthPercentageUsingContainerLogicalWidth(Style().PaddingAfter(),
+                                                             Style().UsedZoomForLength());
+  }
+
+  LayoutUnit RenderBoxModelObject::ComputedCSSPaddingStart() const noexcept
+  {
+    return ResolveLengthPercentageUsingContainerLogicalWidth(Style().PaddingStart(),
+                                                             Style().UsedZoomForLength());
+  }
+
+  LayoutUnit RenderBoxModelObject::ComputedCSSPaddingEnd() const noexcept
+  {
+    return ResolveLengthPercentageUsingContainerLogicalWidth(Style().PaddingEnd(),
+                                                             Style().UsedZoomForLength());
+  }
+
+  RectEdges<LayoutUnit> RenderBoxModelObject::Padding() const noexcept
+  {
+    return {ComputedCSSPaddingTop(), ComputedCSSPaddingRight(), ComputedCSSPaddingBottom(),
+            ComputedCSSPaddingLeft()};
+  }
+
+  LayoutUnit RenderBoxModelObject::PaddingTop() const noexcept
+  {
+    return ComputedCSSPaddingTop();
+  }
+
+  LayoutUnit RenderBoxModelObject::PaddingBottom() const noexcept
+  {
+    return ComputedCSSPaddingBottom();
+  }
+
+  LayoutUnit RenderBoxModelObject::PaddingLeft() const noexcept
+  {
+    return ComputedCSSPaddingLeft();
+  }
+
+  LayoutUnit RenderBoxModelObject::PaddingRight() const noexcept
+  {
+    return ComputedCSSPaddingRight();
+  }
+
+  LayoutUnit RenderBoxModelObject::PaddingBefore() const noexcept
+  {
+    return ComputedCSSPaddingBefore();
+  }
+
+  LayoutUnit RenderBoxModelObject::PaddingAfter() const noexcept
+  {
+    return ComputedCSSPaddingAfter();
+  }
+
+  LayoutUnit RenderBoxModelObject::PaddingStart() const noexcept
+  {
+    return ComputedCSSPaddingStart();
+  }
+
+  LayoutUnit RenderBoxModelObject::PaddingEnd() const noexcept
+  {
+    return ComputedCSSPaddingEnd();
+  }
+
+  RectEdges<LayoutUnit> RenderBoxModelObject::BorderWidths() const noexcept
+  {
+    return {BorderTop(), BorderRight(), BorderBottom(), BorderLeft()};
+  }
+
+  LayoutUnit RenderBoxModelObject::BorderTop() const noexcept
+  {
+    return style::Evaluate<LayoutUnit>(Style().BorderTopWidth(), style::ZoomNeeded {});
+  }
+
+  LayoutUnit RenderBoxModelObject::BorderBottom() const noexcept
+  {
+    return style::Evaluate<LayoutUnit>(Style().BorderBottomWidth(), style::ZoomNeeded {});
+  }
+
+  LayoutUnit RenderBoxModelObject::BorderLeft() const noexcept
+  {
+    return style::Evaluate<LayoutUnit>(Style().BorderLeftWidth(), style::ZoomNeeded {});
+  }
+
+  LayoutUnit RenderBoxModelObject::BorderRight() const noexcept
+  {
+    return style::Evaluate<LayoutUnit>(Style().BorderRightWidth(), style::ZoomNeeded {});
+  }
+
+  LayoutUnit RenderBoxModelObject::HorizontalBorderExtent() const noexcept
+  {
+    return BorderLeft() + BorderRight();
+  }
+
+  LayoutUnit RenderBoxModelObject::VerticalBorderExtent() const noexcept
+  {
+    return BorderTop() + BorderBottom();
+  }
+
+  LayoutUnit RenderBoxModelObject::BorderBefore() const noexcept
+  {
+    return style::Evaluate<LayoutUnit>(Style().BorderWidthBefore(), style::ZoomNeeded {});
+  }
+
+  LayoutUnit RenderBoxModelObject::BorderAfter() const noexcept
+  {
+    return style::Evaluate<LayoutUnit>(Style().BorderWidthAfter(), style::ZoomNeeded {});
+  }
+
+  LayoutUnit RenderBoxModelObject::BorderStart() const noexcept
+  {
+    return style::Evaluate<LayoutUnit>(Style().BorderWidthStart(), style::ZoomNeeded {});
+  }
+
+  LayoutUnit RenderBoxModelObject::BorderEnd() const noexcept
+  {
+    return style::Evaluate<LayoutUnit>(Style().BorderWidthEnd(), style::ZoomNeeded {});
+  }
+
+  LayoutUnit RenderBoxModelObject::BorderAndPaddingStart() const noexcept
+  {
+    return BorderStart() + PaddingStart();
+  }
+
+  LayoutUnit RenderBoxModelObject::BorderAndPaddingEnd() const noexcept
+  {
+    return BorderEnd() + PaddingEnd();
+  }
+
+  LayoutUnit RenderBoxModelObject::BorderAndPaddingBefore() const noexcept
+  {
+    return BorderBefore() + PaddingBefore();
+  }
+
+  LayoutUnit RenderBoxModelObject::BorderAndPaddingAfter() const noexcept
+  {
+    return BorderAfter() + PaddingAfter();
+  }
+
+  LayoutUnit RenderBoxModelObject::MarginAndBorderAndPaddingStart() const noexcept
+  {
+    return MarginStart() + BorderStart() + PaddingStart();
+  }
+
+  LayoutUnit RenderBoxModelObject::MarginAndBorderAndPaddingEnd() const noexcept
+  {
+    return MarginEnd() + BorderEnd() + PaddingEnd();
+  }
+
+  LayoutUnit RenderBoxModelObject::MarginAndBorderAndPaddingBefore() const noexcept
+  {
+    return MarginBefore() + BorderBefore() + PaddingBefore();
+  }
+
+  LayoutUnit RenderBoxModelObject::MarginAndBorderAndPaddingAfter() const noexcept
+  {
+    return MarginAfter() + BorderAfter() + PaddingAfter();
+  }
+
+  LayoutUnit RenderBoxModelObject::VerticalBorderAndPaddingExtent() const noexcept
+  {
+    return BorderTop() + BorderBottom() + PaddingTop() + PaddingBottom();
+  }
+
+  LayoutUnit RenderBoxModelObject::HorizontalBorderAndPaddingExtent() const noexcept
+  {
+    return BorderLeft() + BorderRight() + PaddingLeft() + PaddingRight();
+  }
+
+  LayoutUnit RenderBoxModelObject::BorderAndPaddingLogicalHeight() const noexcept
+  {
+    return BorderAndPaddingBefore() + BorderAndPaddingAfter();
+  }
+
+  LayoutUnit RenderBoxModelObject::BorderAndPaddingLogicalWidth() const noexcept
+  {
+    return BorderStart() + BorderEnd() + PaddingStart() + PaddingEnd();
+  }
+
+  LayoutUnit RenderBoxModelObject::BorderAndPaddingLogicalLeft() const noexcept
+  {
+    return Style().GetWritingMode().IsHorizontal() ? BorderLeft() + PaddingLeft()
+                                                   : BorderTop() + PaddingTop();
+  }
+
+  LayoutUnit RenderBoxModelObject::BorderAndPaddingLogicalRight() const noexcept
+  {
+    return Style().GetWritingMode().IsHorizontal() ? BorderRight() + PaddingRight()
+                                                   : BorderBottom() + PaddingBottom();
+  }
+
+  LayoutUnit RenderBoxModelObject::BorderLogicalLeft() const noexcept
+  {
+    return Style().GetWritingMode().IsHorizontal() ? BorderLeft() : BorderTop();
+  }
+
+  LayoutUnit RenderBoxModelObject::BorderLogicalRight() const noexcept
+  {
+    return Style().GetWritingMode().IsHorizontal() ? BorderRight() : BorderBottom();
+  }
+
+  LayoutUnit RenderBoxModelObject::BorderLogicalWidth() const noexcept
+  {
+    return BorderStart() + BorderEnd();
+  }
+
+  LayoutUnit RenderBoxModelObject::BorderLogicalHeight() const noexcept
+  {
+    return BorderBefore() + BorderAfter();
+  }
+
+  LayoutUnit RenderBoxModelObject::PaddingLogicalLeft() const noexcept
+  {
+    return Style().GetWritingMode().IsHorizontal() ? PaddingLeft() : PaddingTop();
+  }
+
+  LayoutUnit RenderBoxModelObject::PaddingLogicalRight() const noexcept
+  {
+    return Style().GetWritingMode().IsHorizontal() ? PaddingRight() : PaddingBottom();
+  }
+
+  LayoutUnit RenderBoxModelObject::PaddingLogicalWidth() const noexcept
+  {
+    return PaddingStart() + PaddingEnd();
+  }
+
+  LayoutUnit RenderBoxModelObject::PaddingLogicalHeight() const noexcept
+  {
+    return PaddingBefore() + PaddingAfter();
+  }
+
+  LayoutUnit RenderBoxModelObject::MarginBefore() const noexcept
+  {
+    return MarginBefore(Style().GetWritingMode());
+  }
+
+  LayoutUnit RenderBoxModelObject::MarginAfter() const noexcept
+  {
+    return MarginAfter(Style().GetWritingMode());
+  }
+
+  LayoutUnit RenderBoxModelObject::MarginStart() const noexcept
+  {
+    return MarginStart(Style().GetWritingMode());
+  }
+
+  LayoutUnit RenderBoxModelObject::MarginEnd() const noexcept
+  {
+    return MarginEnd(Style().GetWritingMode());
+  }
+
+  LayoutUnit RenderBoxModelObject::VerticalMarginExtent() const noexcept
+  {
+    return MarginTop() + MarginBottom();
+  }
+
+  LayoutUnit RenderBoxModelObject::HorizontalMarginExtent() const noexcept
+  {
+    return MarginLeft() + MarginRight();
+  }
+
+  LayoutUnit RenderBoxModelObject::MarginLogicalHeight() const noexcept
+  {
+    return MarginBefore() + MarginAfter();
+  }
+
+  LayoutUnit RenderBoxModelObject::MarginLogicalWidth() const noexcept
+  {
+    return MarginStart() + MarginEnd();
+  }
+
+  bool RenderBoxModelObject::HasInlineDirectionBordersOrPadding() const noexcept
+  {
+    return BorderStart() || BorderEnd() || PaddingStart() || PaddingEnd();
+  }
+
+  bool RenderBoxModelObject::HasInlineDirectionBordersPaddingOrMargin() const noexcept
+  {
+    return HasInlineDirectionBordersOrPadding() || MarginStart() || MarginEnd();
   }
 
   LayoutUnit RenderBoxModelObject::ContainingBlockLogicalWidthForContent() const noexcept
   {
-    krys_unreachable();
+    if (auto *containingBlock = ContainingBlock())
+    {
+      return containingBlock->ContentBoxLogicalWidth();
+    }
+    return {};
   }
+
+  static LayoutSize AccumulateInFlowPositionOffsets(const RenderBoxModelObject &) noexcept
+  {
+    // FIXME: The in-flow offsets of the inline ancestors of an anonymous block's inline continuation, once
+    // there are continuations.
+    return {};
+  }
+
+  static bool IsOutOfFlowPositionedWithImplicitHeight(const RenderBoxModelObject &child) noexcept
+  {
+    return child.IsOutOfFlowPositioned() && !child.Style().InsetBefore().IsAuto()
+           && !child.Style().InsetAfter().IsAuto();
+  }
+
+  RenderBlock *RenderBoxModelObject::ContainingBlockForAutoHeightDetectionGeneric(
+    const auto &logicalHeight) const noexcept
+  {
+    // For percentage heights: The percentage is calculated with respect to the
+    // height of the generated box's containing block. If the height of the
+    // containing block is not specified explicitly (i.e., it depends on content
+    // height), and this element is not absolutely positioned, the used height is
+    // calculated as if 'auto' was specified.
+    if (!logicalHeight.IsPercentOrCalculated() || IsOutOfFlowPositioned())
+    {
+      return nullptr;
+    }
+
+    // Anonymous block boxes are ignored when resolving percentage values that
+    // would refer to it: the closest non-anonymous ancestor box is used instead.
+    auto *cb = ContainingBlock();
+    while (cb && cb->IsAnonymousForPercentageResolution() && !Is<RenderView>(cb))
+    {
+      cb = cb->ContainingBlock();
+    }
+    if (!cb)
+    {
+      return nullptr;
+    }
+
+    // Matching RenderBox::percentageLogicalHeightIsResolvable() by
+    // ignoring table cell's attribute value, where it says that table cells
+    // violate what the CSS spec says to do with heights. Basically we don't care
+    // if the cell specified a height or not.
+    if (cb->IsRenderTableCell())
+    {
+      return nullptr;
+    }
+
+    // Match RenderBox::availableLogicalHeightUsing by special casing the layout
+    // view. The available height is taken from the frame.
+    if (cb->IsRenderView())
+    {
+      return nullptr;
+    }
+
+    if (IsOutOfFlowPositionedWithImplicitHeight(*cb))
+    {
+      return nullptr;
+    }
+
+    return cb;
+  }
+
+  RenderBlock *RenderBoxModelObject::ContainingBlockForAutoHeightDetection(
+    const style::PreferredSize &logicalHeight) const noexcept
+  {
+    return ContainingBlockForAutoHeightDetectionGeneric(logicalHeight);
+  }
+
+  RenderBlock *RenderBoxModelObject::ContainingBlockForAutoHeightDetection(
+    const style::MinimumSize &logicalHeight) const noexcept
+  {
+    return ContainingBlockForAutoHeightDetectionGeneric(logicalHeight);
+  }
+
+  RenderBlock *RenderBoxModelObject::ContainingBlockForAutoHeightDetection(
+    const style::MaximumSize &logicalHeight) const noexcept
+  {
+    return ContainingBlockForAutoHeightDetectionGeneric(logicalHeight);
+  }
+
+  LayoutSize RenderBoxModelObject::RelativePositionOffset() const noexcept
+  {
+    auto *containingBlock = ContainingBlock();
+
+    const auto &style = Style();
+    const auto &left = style.Left();
+    const auto &right = style.Right();
+    const auto &top = style.Top();
+    const auto &bottom = style.Bottom();
+
+    auto offset = AccumulateInFlowPositionOffsets(*this);
+    auto topFixed = top.TryFixed();
+    auto leftFixed = left.TryFixed();
+    if (topFixed && leftFixed && bottom.IsAuto() && right.IsAuto()
+        && containingBlock->Style().GetWritingMode().IsAnyLeftToRight())
+    {
+      offset.Expand(LayoutUnit(leftFixed->ResolveZoom(style.UsedZoomForLength())),
+                    LayoutUnit(topFixed->ResolveZoom(style.UsedZoomForLength())));
+      return offset;
+    }
+
+    // Objects that shrink to avoid floats normally use available line width when computing containing block
+    // width. However in the case of relative positioning using percentages, we can't do this. The offset
+    // should always be resolved using the available width of the containing block. Therefore we don't use
+    // containingBlockLogicalWidthForContent() here, but instead explicitly call availableWidth on our
+    // containing block.
+    if (!left.IsAuto() || !right.IsAuto())
+    {
+      auto availableWidth = [&]
+      {
+        auto *renderBox = DynamicDowncast<RenderBox>(*this);
+        if (!renderBox || !renderBox->IsGridItem())
+        {
+          return containingBlock->ContentBoxWidth();
+        }
+        // For grid items the containing block is the grid area, so offsets should be resolved against that.
+        auto containingBlockContentWidth =
+          renderBox->GridAreaContentWidth(containingBlock->Style().GetWritingMode());
+        if (!containingBlockContentWidth || !*containingBlockContentWidth)
+        {
+          krys_debug_assert(false);
+          return containingBlock->ContentBoxWidth();
+        }
+        return **containingBlockContentWidth;
+      };
+      if (!left.IsAuto())
+      {
+        if (!right.IsAuto() && !containingBlock->Style().GetWritingMode().IsAnyLeftToRight())
+        {
+          offset.SetWidth(-style::Evaluate<LayoutUnit>(right, !right.IsFixed() ? availableWidth() : 0_lu,
+                                                       style.UsedZoomForLength()));
+        }
+        else
+        {
+          offset.Expand(style::Evaluate<LayoutUnit>(left, !left.IsFixed() ? availableWidth() : 0_lu,
+                                                    style.UsedZoomForLength()),
+                        0_lu);
+        }
+      }
+      else if (!right.IsAuto())
+      {
+        offset.Expand(-style::Evaluate<LayoutUnit>(right, !right.IsFixed() ? availableWidth() : 0_lu,
+                                                   style.UsedZoomForLength()),
+                      0_lu);
+      }
+    }
+
+    // If the containing block of a relatively positioned element does not
+    // specify a height, a percentage top or bottom offset should be resolved as
+    // auto. An exception to this is if the containing block has the WinIE quirk
+    // where <html> and <body> assume the size of the viewport. In this case,
+    // calculate the percent offset based on this height.
+    // See <https://bugs.webkit.org/show_bug.cgi?id=26396>.
+    // Another exception is a grid item, as the containing block is the grid area:
+    // https://drafts.csswg.org/css-grid/#grid-item-sizing
+    if (top.IsAuto() && bottom.IsAuto())
+    {
+      return offset;
+    }
+
+    auto containingBlockHasDefiniteHeight = !containingBlock->HasAutoHeightOrContainingBlockWithAutoHeight()
+                                            || containingBlock->StretchesToViewport();
+    auto availableHeight = [&]
+    {
+      auto *renderBox = DynamicDowncast<RenderBox>(*this);
+      if (!renderBox || !renderBox->IsGridItem())
+      {
+        return containingBlock->ContentBoxHeight();
+      }
+      // For grid items the containing block is the grid area, so offsets should be resolved against that.
+      auto containingBlockContentHeight =
+        renderBox->GridAreaContentHeight(containingBlock->Style().GetWritingMode());
+      if (!containingBlockContentHeight || !*containingBlockContentHeight)
+      {
+        krys_debug_assert(false);
+        return containingBlock->ContentBoxHeight();
+      }
+      return **containingBlockContentHeight;
+    };
+    if (!top.IsAuto() && (!top.IsPercentOrCalculated() || containingBlockHasDefiniteHeight))
+    {
+      // FIXME: The computation of the available height is repeated later for "bottom".
+      // We could refactor this and move it to some common code for both ifs, however moving it outside of the
+      // ifs is not possible as it'd cause performance regressions.
+      offset.Expand(0_lu, style::Evaluate<LayoutUnit>(top, !top.IsFixed() ? availableHeight() : 0_lu,
+                                                      style.UsedZoomForLength()));
+    }
+    else if (!bottom.IsAuto() && (!bottom.IsPercentOrCalculated() || containingBlockHasDefiniteHeight))
+    {
+      // FIXME: Check comment above for "top", it applies here too.
+      offset.Expand(0_lu, -style::Evaluate<LayoutUnit>(bottom, !bottom.IsFixed() ? availableHeight() : 0_lu,
+                                                       style.UsedZoomForLength()));
+    }
+    return offset;
+  }
+
+  LayoutSize RenderBoxModelObject::OffsetForInFlowPosition() const noexcept
+  {
+    if (IsRelativelyPositioned())
+    {
+      return RelativePositionOffset();
+    }
+
+    // FIXME: The sticky position offset, once there's scrolling.
+
+    return {};
+  }
+
+  LayoutPoint
+    RenderBoxModelObject::AdjustedPositionRelativeToOffsetParent(const LayoutPoint &startPoint) const noexcept
+  {
+    // If the element is the HTML body element or doesn't have a parent
+    // return 0 and stop this algorithm.
+    if (IsBody() || !Parent())
+    {
+      return {};
+    }
+
+    LayoutPoint referencePoint = startPoint;
+
+    // If the offsetParent of the element is null, or is the HTML body element,
+    // return the distance between the canvas origin and the left border edge
+    // of the element and stop this algorithm.
+    if (const auto *offsetParent = OffsetParent())
+    {
+      if (auto *renderBox = DynamicDowncast<RenderBox>(*offsetParent);
+          renderBox && !offsetParent->IsBody() && !Is<RenderTable>(*offsetParent))
+      {
+        referencePoint.Move(-renderBox->BorderLeft(), -renderBox->BorderTop());
+      }
+      // FIXME: Inside an inline formatting context, the position of the inline offset parent's first inline
+      // box (firstInlineBoxTopLeft), once there's inline layout.
+
+      // FIXME: Also when the renderer is in a fragmented flow, once there are fragmented flows.
+      if (!IsOutOfFlowPositioned())
+      {
+        if (IsRelativelyPositioned())
+        {
+          referencePoint.Move(RelativePositionOffset());
+        }
+        // FIXME: The sticky position offset, once there's scrolling.
+
+        auto *ancestor = Parent();
+        while (ancestor != offsetParent)
+        {
+          // FIXME: What are we supposed to do inside SVG content?
+          // FIXME: The translation of a multi-column flow, once there are multi-column flows.
+          if (auto *renderBox = DynamicDowncast<RenderBox>(*ancestor);
+              renderBox && !Is<RenderTableRow>(*ancestor))
+          {
+            referencePoint.MoveBy(renderBox->TopLeftLocation());
+          }
+
+          ancestor = ancestor->Parent();
+        }
+
+        if (auto *renderBox = DynamicDowncast<RenderBox>(*offsetParent);
+            renderBox && offsetParent->IsBody() && !offsetParent->IsPositioned())
+        {
+          referencePoint.MoveBy(renderBox->TopLeftLocation());
+        }
+      }
+    }
+
+    return referencePoint;
+  }
+
+  LayoutUnit RenderBoxModelObject::OffsetLeft() const noexcept
+  {
+    // Note that RenderInline and RenderBox override this to pass a different
+    // startPoint to adjustedPositionRelativeToOffsetParent.
+    return AdjustedPositionRelativeToOffsetParent(LayoutPoint()).X();
+  }
+
+  LayoutUnit RenderBoxModelObject::OffsetTop() const noexcept
+  {
+    // Note that RenderInline and RenderBox override this to pass a different
+    // startPoint to adjustedPositionRelativeToOffsetParent.
+    return AdjustedPositionRelativeToOffsetParent(LayoutPoint()).Y();
+  }
+
+#pragma endregion
 }

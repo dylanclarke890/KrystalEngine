@@ -1,8 +1,14 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Core/LayoutUnit.hpp"
+#include "Krystal.Booey/Graphics/LayoutSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Debug.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/HashSet.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo::dom
@@ -14,6 +20,8 @@ namespace krys::boo
 {
   class LocalFrame;
   class LocalFrameView;
+  class RenderBox;
+  class RenderLayoutState;
   class RenderElement;
   class RenderView;
 
@@ -23,6 +31,10 @@ namespace krys::boo
   /// or `Document::UpdateLayout()`).
   class LocalFrameViewLayoutContext final
   {
+    friend class LayoutStateMaintainer;
+    friend class LayoutStateDisabler;
+    friend class SubtreeLayoutStateMaintainer;
+
     KRYS_NON_COPY_MOVABLE(LocalFrameViewLayoutContext);
 
   public:
@@ -53,6 +65,10 @@ namespace krys::boo
     bool _setNeedsLayoutWasDeferred {false};
     uint32 _disableSetNeedsLayoutCount {0};
     WeakPtr<RenderElement> _subtreeLayoutRoot;
+    bool _needsFullRepaint {true};
+    uint32 _paintOffsetCacheDisableCount {0};
+    // Keyed by address: flex layout removes each item it adds.
+    HashSet<const RenderBox *> _percentHeightIgnoreList;
 
   public:
     explicit LocalFrameViewLayoutContext(LocalFrameView &frameView) noexcept;
@@ -68,6 +84,38 @@ namespace krys::boo
     void ScheduleLayout() noexcept;
     void UnscheduleLayout() noexcept;
     void ScheduleSubtreeLayout(RenderElement &layoutRoot) noexcept;
+
+    void SetNeedsFullRepaint() noexcept
+    {
+      _needsFullRepaint = true;
+    }
+    KRYS_NODISCARD bool NeedsFullRepaint() const noexcept
+    {
+      return _needsFullRepaint;
+    }
+
+    KRYS_NODISCARD RenderLayoutState *LayoutState() const noexcept;
+    // Returns true if layoutState should be used for its cached offset and clip.
+    KRYS_NODISCARD bool IsPaintOffsetCacheEnabled() const noexcept
+    {
+      return !_paintOffsetCacheDisableCount && LayoutState();
+    }
+#if KRYS_DEBUG
+    void CheckLayoutState() const noexcept;
+#endif
+    // layoutDelta is used transiently during layout to store how far an object has moved from its
+    // last layout location, in order to repaint correctly.
+    // If we're doing a full repaint m_layoutState will be 0, but in that case layoutDelta doesn't matter.
+    KRYS_NODISCARD LayoutSize LayoutDelta() const noexcept;
+    void AddLayoutDelta(const LayoutSize &delta) noexcept;
+#if KRYS_DEBUG
+    KRYS_NODISCARD bool LayoutDeltaMatches(const LayoutSize &delta) const noexcept;
+#endif
+    using LayoutStateStack = List<UniquePtr<RenderLayoutState>>;
+
+    void DisablePercentHeightResolveFor(const RenderBox &flexItem) noexcept;
+    void EnablePercentHeightResolveFor(const RenderBox &flexItem) noexcept;
+    KRYS_NODISCARD bool IsPercentHeightResolveDisabledFor(const RenderBox &flexItem) const noexcept;
 
     /// @brief The renderer the next layout starts from, if it's a subtree layout.
     KRYS_NODISCARD RenderElement *SubtreeLayoutRoot() const noexcept;
@@ -125,6 +173,30 @@ namespace krys::boo
     KRYS_NODISCARD RenderView *GetRenderView() const noexcept;
 
   private:
+    // These functions may only be accessed by LayoutStateMaintainer.
+    // Subtree push
+    void PushLayoutState(RenderElement &root) noexcept;
+    bool PushLayoutState(RenderBox &renderer, const LayoutSize &offset, LayoutUnit pageHeight = 0_lu,
+                         bool pageHeightChanged = false) noexcept;
+    void PopLayoutState() noexcept;
+
+    // Suspends the LayoutState optimization. Used under transforms that cannot be represented by
+    // LayoutState (common in SVG) and when manipulating the render tree during layout in ways
+    // that can trigger repaint of a non-child (e.g. when a list item moves its list marker around).
+    // Note that even when disabled, LayoutState is still used to store layoutDelta.
+    // These functions may only be accessed by LayoutStateMaintainer or LayoutStateDisabler.
+    void DisablePaintOffsetCache() noexcept
+    {
+      _paintOffsetCacheDisableCount++;
+    }
+    void EnablePaintOffsetCache() noexcept
+    {
+      krys_debug_assert(_paintOffsetCacheDisableCount > 0);
+      _paintOffsetCacheDisableCount--;
+    }
+
+    LayoutStateStack _layoutStateStack;
+
     KRYS_NODISCARD bool NeedsLayoutInternal() const noexcept;
 
     void PerformLayout() noexcept;

@@ -16,6 +16,9 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(RenderGrid);
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderGrid);
 
+  private:
+    mutable bool _isComputingTrackSizes {false};
+
   public:
     RenderGrid(dom::Element &element, RenderStyle &&style) noexcept;
     ~RenderGrid() noexcept override;
@@ -29,6 +32,20 @@ namespace krys::boo
     KRYS_NODISCARD bool IsMasonry() const noexcept;
     KRYS_NODISCARD bool IsMasonry(style::GridTrackSizingDirection direction) const noexcept;
     KRYS_NODISCARD bool IsExtrinsicallySized() const noexcept;
+    KRYS_NODISCARD bool
+      IsSubgridInParentDirection(style::GridTrackSizingDirection parentDirection) const noexcept;
+
+    KRYS_NODISCARD bool IsComputingTrackSizes() const noexcept
+    {
+      return _isComputingTrackSizes;
+    }
+
+    KRYS_NODISCARD ItemPosition
+      SelfAlignmentNormalBehavior(const RenderBox *gridItem = nullptr) const noexcept override
+    {
+      krys_debug_assert(gridItem);
+      return gridItem->IsRenderReplaced() ? ItemPosition::Start : ItemPosition::Stretch;
+    }
     KRYS_NODISCARD bool IsSubgrid(style::GridTrackSizingDirection) const noexcept;
     KRYS_NODISCARD uint32 NumTracks(style::GridTrackSizingDirection) const noexcept;
     KRYS_NODISCARD uint32 AutoRepeatCountForDirection(style::GridTrackSizingDirection) const noexcept;

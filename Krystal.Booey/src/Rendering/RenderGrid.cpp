@@ -37,9 +37,44 @@ namespace krys::boo
     krys_unreachable();
   }
 
-  bool RenderGrid::IsSubgrid(style::GridTrackSizingDirection) const noexcept
+  bool RenderGrid::IsSubgrid(style::GridTrackSizingDirection direction) const noexcept
   {
-    krys_unreachable();
+    // If the grid container is forced to establish an independent formatting
+    // context (like contain layout, or position:absolute), then the used value
+    // of grid-template-rows/columns is 'none' and the container is not a subgrid.
+    // https://drafts.csswg.org/css-grid-2/#subgrid-listing
+    if (EstablishesIndependentFormattingContextIgnoringDisplayType(Style()))
+    {
+      return false;
+    }
+    const auto &tracks = direction == style::GridTrackSizingDirection::Columns ? Style().GridTemplateColumns()
+                                                                               : Style().GridTemplateRows();
+    if (!tracks.Subgrid)
+    {
+      return false;
+    }
+    auto *renderGrid = DynamicDowncast<RenderGrid>(Parent());
+    if (!renderGrid)
+    {
+      return false;
+    }
+    return !renderGrid->IsMasonry(direction);
+  }
+
+  bool RenderGrid::IsSubgridInParentDirection(style::GridTrackSizingDirection parentDirection) const noexcept
+  {
+    auto *renderGrid = DynamicDowncast<RenderGrid>(Parent());
+    if (!renderGrid)
+    {
+      return false;
+    }
+    // The flow-aware direction: an orthogonal item's columns are its parent's rows.
+    auto isOrthogonal = IsHorizontalWritingMode() != renderGrid->IsHorizontalWritingMode();
+    auto direction = !isOrthogonal ? parentDirection
+                     : parentDirection == style::GridTrackSizingDirection::Columns
+                       ? style::GridTrackSizingDirection::Rows
+                       : style::GridTrackSizingDirection::Columns;
+    return IsSubgrid(direction);
   }
 
   uint32 RenderGrid::NumTracks(style::GridTrackSizingDirection) const noexcept
