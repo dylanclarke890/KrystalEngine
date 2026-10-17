@@ -2,6 +2,7 @@
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Text/TextStream.hpp"
 
 namespace krys::boo
 {
@@ -156,5 +157,15 @@ namespace krys::boo
     }
 
     return clippedRect;
+  }
+
+  TextStream &operator<<(TextStream &ts, const IntRect &r) noexcept
+  {
+    if (ts.HasFormattingFlag(TextStream::Formatting::SVGStyleRect))
+    {
+      return ts << "at (" << r.X() << ',' << r.Y() << ") size " << r.Width() << 'x' << r.Height();
+    }
+
+    return ts << r.Location() << ' ' << r.Size();
   }
 }

@@ -190,6 +190,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Text/HexNumber.hpp
       include/Krystal.Core/Text/ICodec.hpp
       include/Krystal.Core/Text/StringBuilder.hpp
+      include/Krystal.Core/Text/TextStream.hpp
       include/Krystal.Core/Text/Unicode.hpp
 
       # Time
@@ -286,4 +287,5 @@ target_sources(Krystal.Core
 
     # Text
     src/Text/StringBuilder.cpp
+    src/Text/TextStream.cpp
 )

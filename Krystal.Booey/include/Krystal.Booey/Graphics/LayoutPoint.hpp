@@ -7,6 +7,11 @@
 #include "Krystal.Core/Attributes.hpp"
 #include <algorithm>
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   /// @brief A point in layout units.
@@ -299,4 +304,6 @@ namespace krys::boo
       return point - Clamp(point);
     }
   };
+
+  TextStream &operator<<(TextStream &ts, const LayoutPoint &value) noexcept;
 }

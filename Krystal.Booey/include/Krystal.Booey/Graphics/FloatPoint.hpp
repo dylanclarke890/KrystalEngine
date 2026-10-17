@@ -11,6 +11,11 @@
 #include <algorithm>
 #include <cmath>
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   class AffineTransform;
@@ -328,6 +333,8 @@ namespace krys::boo
   {
     return AreEssentiallyEqual(a.X(), b.X()) && AreEssentiallyEqual(a.Y(), b.Y());
   }
+
+  TextStream &operator<<(TextStream &ts, const FloatPoint &value) noexcept;
 }
 
 namespace krys

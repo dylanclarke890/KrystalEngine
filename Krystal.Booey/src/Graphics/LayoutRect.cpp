@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Graphics/LayoutRect.hpp"
+#include "Krystal.Core/Text/TextStream.hpp"
 
 namespace krys::boo
 {
@@ -201,5 +202,15 @@ namespace krys::boo
     FloatPoint location = FloorPointToDevicePixels(rect.MinXMinYCorner(), pixelSnappingFactor);
     FloatPoint maxPoint = CeilPointToDevicePixels(rect.MaxXMaxYCorner(), pixelSnappingFactor);
     return FloatRect(location, maxPoint - location);
+  }
+
+  TextStream &operator<<(TextStream &ts, const LayoutRect &r) noexcept
+  {
+    if (ts.HasFormattingFlag(TextStream::Formatting::LayoutUnitsAsIntegers))
+    {
+      return ts << SnappedIntRect(r);
+    }
+
+    return ts << FloatRect(r);
   }
 }

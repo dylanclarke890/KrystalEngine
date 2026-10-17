@@ -7,6 +7,11 @@
 #include "Krystal.Core/Types/Markable.hpp"
 #include <algorithm>
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   class IntRect;
@@ -435,6 +440,8 @@ namespace krys::boo
   KRYS_NODISCARD IntRect EnclosingIntRect(const FloatRect &rect) noexcept;
   KRYS_NODISCARD IntRect EnclosingIntRectPreservingEmptyRects(const FloatRect &rect) noexcept;
   KRYS_NODISCARD IntRect RoundedIntRect(const FloatRect &rect) noexcept;
+
+  TextStream &operator<<(TextStream &ts, const FloatRect &value) noexcept;
 }
 
 namespace krys

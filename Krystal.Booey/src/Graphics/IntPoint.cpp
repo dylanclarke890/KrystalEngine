@@ -2,6 +2,7 @@
 #include "Krystal.Booey/Graphics/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Text/TextStream.hpp"
 
 namespace krys::boo
 {
@@ -13,5 +14,10 @@ namespace krys::boo
   IntPoint IntPoint::ConstrainedWithin(const IntRect &rect) const noexcept
   {
     return ConstrainedBetween(rect.MinXMinYCorner(), rect.MaxXMaxYCorner());
+  }
+
+  TextStream &operator<<(TextStream &ts, const IntPoint &p) noexcept
+  {
+    return ts << '(' << p.X() << ',' << p.Y() << ')';
   }
 }

@@ -9,6 +9,11 @@
 #include <algorithm>
 #include <cmath>
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   /// @brief A width and height in floating point.
@@ -271,4 +276,6 @@ namespace krys::boo
   {
     return IntPoint(ClampToInteger(std::floor(p.Width())), ClampToInteger(std::floor(p.Height())));
   }
+
+  TextStream &operator<<(TextStream &ts, const FloatSize &value) noexcept;
 }

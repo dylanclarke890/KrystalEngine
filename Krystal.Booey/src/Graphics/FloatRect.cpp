@@ -2,6 +2,7 @@
 #include "Krystal.Booey/Core/FloatConversion.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Text/TextStream.hpp"
 
 namespace krys::boo
 {
@@ -191,5 +192,19 @@ namespace krys::boo
   IntRect RoundedIntRect(const FloatRect &rect) noexcept
   {
     return IntRect(RoundedIntPoint(rect.Location()), RoundedIntSize(rect.Size()));
+  }
+
+  TextStream &operator<<(TextStream &ts, const FloatRect &r) noexcept
+  {
+    if (ts.HasFormattingFlag(TextStream::Formatting::SVGStyleRect))
+    {
+      // FIXME: callers should use the NumberRespectingIntegers flag.
+      return ts << "at (" << TextStream::FormatNumberRespectingIntegers(r.X()) << ','
+                << TextStream::FormatNumberRespectingIntegers(r.Y()) << ") size "
+                << TextStream::FormatNumberRespectingIntegers(r.Width()) << "x"
+                << TextStream::FormatNumberRespectingIntegers(r.Height());
+    }
+
+    return ts << r.Location() << ' ' << r.Size();
   }
 }

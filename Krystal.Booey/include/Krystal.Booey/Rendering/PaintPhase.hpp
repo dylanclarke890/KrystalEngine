@@ -34,37 +34,36 @@ namespace krys::boo
 
   enum class PaintBehavior : uint32
   {
-    Normal = 0,
-    SelectionOnly = 1 << 0,
-    SkipSelectionHighlight = 1 << 1,
-    ForceBlackText = 1 << 2,
-    ForceWhiteText = 1 << 3,
-    ForceBlackBorder = 1 << 4,
-    RenderingSVGClipOrMask = 1 << 5,
-    SkipRootBackground = 1 << 6,
-    RootBackgroundOnly = 1 << 7,
-    SelectionAndBackgroundsOnly = 1 << 8,
-    ExcludeSelection = 1 << 9,
-    FlattenCompositingLayers = 1 << 10, // Paint doesn't stop at compositing layer boundaries.
+    SelectionOnly,
+    SkipSelectionHighlight,
+    ForceBlackText,
+    ForceWhiteText,
+    ForceBlackBorder,
+    RenderingSVGClipOrMask,
+    SkipRootBackground,
+    RootBackgroundOnly,
+    SelectionAndBackgroundsOnly,
+    ExcludeSelection,
+    FlattenCompositingLayers, // Paint doesn't stop at compositing layer boundaries.
     // Paint should always complete image decoding of painted images.
-    ForceSynchronousImageDecode = 1 << 11,
+    ForceSynchronousImageDecode,
     // Paint should always start asynchronous image decode of painted images, unless otherwise specified.
-    DefaultAsynchronousImageDecode = 1 << 12,
-    CompositedOverflowScrollContent = 1 << 13,
-    AnnotateLinks = 1 << 14, // Collect all renderers with links to annotate their URLs (e.g. PDFs)
-    EventRegionIncludeForeground = 1 << 15, // FIXME: Event region painting should use paint phases.
-    EventRegionIncludeBackground = 1 << 16,
+    DefaultAsynchronousImageDecode,
+    CompositedOverflowScrollContent,
+    AnnotateLinks,                // Collect all renderers with links to annotate their URLs (e.g. PDFs)
+    EventRegionIncludeForeground, // FIXME: Event region painting should use paint phases.
+    EventRegionIncludeBackground,
     // Paint is updating external backing store and visits all content, including composited content and
     // always completes image decoding of painted images. FIXME: Will be removed.
-    Snapshotting = 1 << 17,
-    DontShowVisitedLinks = 1 << 18,
-    ExcludeReplacedContentExceptForIFrames = 1 << 19,
-    ExcludeText = 1 << 20,
-    FixedAndStickyLayersOnly = 1 << 21,
-    DrawsHDRContent = 1 << 22,
-    DraggableSnapshot = 1 << 23,
+    Snapshotting,
+    DontShowVisitedLinks,
+    ExcludeReplacedContentExceptForIFrames,
+    ExcludeText,
+    FixedAndStickyLayersOnly,
+    DrawsHDRContent,
+    DraggableSnapshot,
   };
 }
 
 KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::PaintPhase, 14uz)
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::PaintBehavior, 24uz)
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::PaintBehavior, 23uz)

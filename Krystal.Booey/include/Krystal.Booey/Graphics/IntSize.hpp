@@ -4,6 +4,11 @@
 #include "Krystal.Core/Numeric.hpp"
 #include <algorithm>
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   class FloatSize;
@@ -183,4 +188,6 @@ namespace krys::boo
   {
     return IntSize(-size.Width(), -size.Height());
   }
+
+  TextStream &operator<<(TextStream &ts, const IntSize &value) noexcept;
 }

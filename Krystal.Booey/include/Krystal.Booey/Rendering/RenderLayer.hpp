@@ -148,10 +148,10 @@ namespace krys::boo
 
     enum class ClipRectsOption : uint8
     {
-      RespectOverflowClip = 1 << 0,
-      IncludeOverlayScrollbarSize = 1 << 1,
-      Temporary = 1 << 2,
-      OutsideFilter = 1 << 3,
+      RespectOverflowClip,
+      IncludeOverlayScrollbarSize,
+      Temporary,
+      OutsideFilter,
     };
 
     static constexpr EnumSet<ClipRectsOption> ClipRectOptionsForPaintingOverflowContents {};
@@ -189,19 +189,19 @@ namespace krys::boo
 
     enum CalculateLayerBoundsFlag : uint16
     {
-      IncludeSelfTransform = 1 << 0,
-      UseLocalClipRectIfPossible = 1 << 1,
-      IncludeFilterOutsets = 1 << 2,
-      IncludePaintedFilterOutsets = 1 << 3,
-      ExcludeHiddenDescendants = 1 << 4,
-      DontConstrainForMask = 1 << 5,
-      IncludeCompositedDescendants = 1 << 6,
-      UseFragmentBoxesExcludingCompositing = 1 << 7,
-      UseFragmentBoxesIncludingCompositing = 1 << 8,
-      IncludeRootBackgroundPaintingArea = 1 << 9,
-      PreserveAncestorFlags = 1 << 10,
-      UseLocalClipRectExcludingCompositingIfPossible = 1 << 11,
-      ExcludeViewTransitionCapturedDescendants = 1 << 12,
+      IncludeSelfTransform,
+      UseLocalClipRectIfPossible,
+      IncludeFilterOutsets,
+      IncludePaintedFilterOutsets,
+      ExcludeHiddenDescendants,
+      DontConstrainForMask,
+      IncludeCompositedDescendants,
+      UseFragmentBoxesExcludingCompositing,
+      UseFragmentBoxesIncludingCompositing,
+      IncludeRootBackgroundPaintingArea,
+      PreserveAncestorFlags,
+      UseLocalClipRectExcludingCompositingIfPossible,
+      ExcludeViewTransitionCapturedDescendants,
     };
     static constexpr EnumSet<CalculateLayerBoundsFlag> DefaultCalculateLayerBoundsFlags()
     {
@@ -218,26 +218,26 @@ namespace krys::boo
   private:
     enum class LayerPositionUpdates : uint8
     {
-      NeedsPositionUpdate = 1 << 0,
-      DescendantNeedsPositionUpdate = 1 << 1,
-      AllChildrenNeedPositionUpdate = 1 << 2,
-      AllDescendantsNeedPositionUpdate = 1 << 3,
+      NeedsPositionUpdate,
+      DescendantNeedsPositionUpdate,
+      AllChildrenNeedPositionUpdate,
+      AllDescendantsNeedPositionUpdate,
     };
 
     enum class UpdateLayerPositionsFlag : uint16
     {
-      CheckForRepaint = 1 << 0,
-      NeedsFullRepaintInBacking = 1 << 1,
-      ContainingClippingLayerChangedSize = 1 << 2,
-      UpdatePagination = 1 << 3,
-      SeenFixedLayer = 1 << 4,
-      SeenFixedContainingBlockLayer = 1 << 5,
-      SeenTransformedLayer = 1 << 6,
-      Seen3DTransformedLayer = 1 << 7,
-      SeenCompositedScrollingLayer = 1 << 8,
-      SubtreeNeedsUpdate = 1 << 9,
-      EnvironmentChanged = 1 << 10,
-      SeenStickyLayer = 1 << 11,
+      CheckForRepaint,
+      NeedsFullRepaintInBacking,
+      ContainingClippingLayerChangedSize,
+      UpdatePagination,
+      SeenFixedLayer,
+      SeenFixedContainingBlockLayer,
+      SeenTransformedLayer,
+      Seen3DTransformedLayer,
+      SeenCompositedScrollingLayer,
+      SubtreeNeedsUpdate,
+      EnvironmentChanged,
+      SeenStickyLayer,
     };
 
     // UpdateLayerPositionsFlags that describe changes to the layer tree
@@ -872,10 +872,10 @@ namespace krys::boo
 
     enum class UpdateLayerPositionsAfterScrollFlag : uint8
     {
-      IsOverflowScroll = 1 << 0,
-      HasSeenViewportConstrainedAncestor = 1 << 1,
-      HasSeenAncestorWithOverflowClip = 1 << 2,
-      HasChangedAncestor = 1 << 3,
+      IsOverflowScroll,
+      HasSeenViewportConstrainedAncestor,
+      HasSeenAncestorWithOverflowClip,
+      HasChangedAncestor,
     };
     void RecursiveUpdateLayerPositionsAfterScroll(
       EnumSet<UpdateLayerPositionsAfterScrollFlag> flags = {}) noexcept;

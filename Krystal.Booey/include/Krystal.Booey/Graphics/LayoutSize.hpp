@@ -6,6 +6,11 @@
 #include "Krystal.Core/Attributes.hpp"
 #include <algorithm>
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   enum class AspectRatioFit
@@ -258,4 +263,6 @@ namespace krys::boo
       return size - Clamp(size);
     }
   };
+
+  TextStream &operator<<(TextStream &ts, const LayoutSize &value) noexcept;
 }

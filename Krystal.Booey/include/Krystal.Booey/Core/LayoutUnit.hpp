@@ -8,6 +8,11 @@
 #include <cmath>
 #include <compare>
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   constexpr int32 LayoutUnitFractionalBits = 6;
@@ -760,6 +765,8 @@ namespace krys::boo
       return LayoutUnit(static_cast<uint64>(value));
     }
   }
+
+  TextStream &operator<<(TextStream &ts, const LayoutUnit &value) noexcept;
 }
 
 namespace krys

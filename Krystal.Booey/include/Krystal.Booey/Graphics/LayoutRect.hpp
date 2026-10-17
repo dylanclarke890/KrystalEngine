@@ -8,6 +8,11 @@
 #include "Krystal.Core/Types/Span.hpp"
 #include <algorithm>
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   /// @brief An axis-aligned rectangle in layout units.
@@ -457,4 +462,6 @@ namespace krys::boo
 
   KRYS_NODISCARD FloatRect EncloseRectToDevicePixels(const LayoutRect &rect,
                                                      float pixelSnappingFactor) noexcept;
+
+  TextStream &operator<<(TextStream &ts, const LayoutRect &value) noexcept;
 }

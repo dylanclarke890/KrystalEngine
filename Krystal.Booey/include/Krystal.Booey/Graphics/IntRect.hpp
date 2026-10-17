@@ -5,6 +5,11 @@
 #include "Krystal.Core/Attributes.hpp"
 #include <algorithm>
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   class FloatRect;
@@ -317,4 +322,6 @@ namespace krys::boo
     IntRect t = r;
     return t -= offset;
   }
+
+  TextStream &operator<<(TextStream &ts, const IntRect &value) noexcept;
 }

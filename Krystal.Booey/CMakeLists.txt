@@ -723,6 +723,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/LayerFragment.hpp
   include/Krystal.Booey/Rendering/RenderLayer.hpp
   include/Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp
+  include/Krystal.Booey/Rendering/RenderTreeAsText.hpp
   include/Krystal.Booey/Platform/ScrollableArea.hpp
   include/Krystal.Booey/Platform/Scrollbar.hpp
   include/Krystal.Booey/Platform/ScrollbarTheme.hpp
@@ -1968,6 +1969,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/RenderBoxModelObject.cpp
   src/Rendering/RenderLayer.cpp
   src/Rendering/RenderLayerScrollableArea.cpp
+  src/Rendering/RenderTreeAsText.cpp
   src/Platform/ScrollableArea.cpp
   src/Platform/Scrollbar.cpp
   src/Platform/ScrollbarTheme.cpp
@@ -2511,6 +2513,7 @@ target_sources(Krystal.Booey
 
     # Core
     src/Core/EncodingRegistry.cpp
+    src/Core/LayoutUnit.cpp
     src/Core/NumberFormatting.cpp
     src/Core/TextBreakIterator.cpp
 
@@ -2604,11 +2607,14 @@ target_sources(Krystal.Booey
     src/Graphics/FloatPoint3D.cpp
     src/Graphics/FloatQuad.cpp
     src/Graphics/FloatRect.cpp
+    src/Graphics/FloatSize.cpp
     src/Graphics/GeometryUtilities.cpp
     src/Graphics/IntPoint.cpp
     src/Graphics/IntRect.cpp
     src/Graphics/IntSize.cpp
+    src/Graphics/LayoutPoint.cpp
     src/Graphics/LayoutRect.cpp
+    src/Graphics/LayoutSize.cpp
     src/Graphics/Region.cpp
     src/Graphics/Transforms/AffineTransform.cpp
     src/Graphics/Transforms/Quaternion.cpp

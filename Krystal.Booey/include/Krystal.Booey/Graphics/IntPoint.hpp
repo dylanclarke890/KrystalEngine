@@ -6,6 +6,11 @@
 #include <algorithm>
 #include <cmath>
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   class FloatPoint;
@@ -179,4 +184,6 @@ namespace krys::boo
   {
     return ((*this) - point).DiagonalLengthSquared();
   }
+
+  TextStream &operator<<(TextStream &ts, const IntPoint &value) noexcept;
 }

@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Style/Difference.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -43,6 +44,13 @@ namespace krys::boo
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override;
 
     KRYS_NODISCARD dom::Text *TextNode() const noexcept;
+
+    /// @brief The bounding box of the text's line boxes.
+    // FIXME: The union of the text boxes, once there's inline layout.
+    KRYS_NODISCARD IntRect LinesBoundingBox() const noexcept
+    {
+      return {};
+    }
 
     /// @brief The text before the text transform and text security.
     KRYS_NODISCARD virtual utf8_string OriginalText() const noexcept;
