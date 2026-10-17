@@ -57,6 +57,7 @@ namespace krys::boo
     bool _renderBlockHasMarginBeforeQuirk {false};
     bool _renderBlockHasMarginAfterQuirk {false};
     bool _renderBlockShouldForceRelayoutChildren {false};
+    bool _renderBoxHasShapeOutsideInfo {false};
 
   public:
     /// @brief Displays that get a block flow instead of their usual renderer.
@@ -325,6 +326,14 @@ namespace krys::boo
     KRYS_NODISCARD bool RenderBlockShouldForceRelayoutChildren() const noexcept
     {
       return _renderBlockShouldForceRelayoutChildren;
+    }
+    void SetRenderBoxHasShapeOutsideInfo(bool b) noexcept
+    {
+      _renderBoxHasShapeOutsideInfo = b;
+    }
+    KRYS_NODISCARD bool RenderBoxHasShapeOutsideInfo() const noexcept
+    {
+      return _renderBoxHasShapeOutsideInfo;
     }
 
   private:

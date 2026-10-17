@@ -10,8 +10,11 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
+#include "Krystal.Booey/Rendering/FloatingObjects.hpp"
 #include "Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp"
+#include "Krystal.Booey/Rendering/RenderAncestorIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
+#include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
@@ -24,6 +27,7 @@
 #include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
+#include "Krystal.Booey/Rendering/Shapes/ShapeOutsideInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/TransformOperationData.hpp"
@@ -120,8 +124,42 @@ namespace krys::boo
     GridAreaContentLogicalWidthMap().erase(this);
     RenderBlock::RemovePercentHeightDescendant(*this);
     RenderBlock::RemoveOutOfFlowBox(*this);
+    RemoveShapeOutsideInfo();
 
     RenderBoxModelObject::WillBeDestroyed();
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD RenderBlockFlow *OutermostBlockContainingFloatingObject(RenderBox &box) noexcept
+    {
+      krys_debug_assert(box.IsFloating());
+      RenderBlockFlow *parentBlock = nullptr;
+      for (auto &ancestor : AncestorsOfType<RenderBlockFlow>(box))
+      {
+        if (!parentBlock || ancestor.ContainsFloat(box))
+        {
+          parentBlock = &ancestor;
+        }
+      }
+      return parentBlock;
+    }
+  }
+
+  void RenderBox::RemoveFloatingAndInvalidateForLayout() noexcept
+  {
+    krys_debug_assert(IsFloating());
+
+    if (RenderTreeBeingDestroyed())
+    {
+      return;
+    }
+
+    if (auto *ancestor = OutermostBlockContainingFloatingObject(*this))
+    {
+      ancestor->MarkSiblingsWithFloatsForLayout(this);
+      ancestor->MarkAllDescendantsWithFloatsForLayout(this, false);
+    }
   }
 
   void RenderBox::RemoveFloatingOrOutOfFlowChildFromBlockLists() noexcept
@@ -130,9 +168,7 @@ namespace krys::boo
 
     if (IsFloating())
     {
-      // FIXME: Remove the float from its blocks' floating objects and mark them for layout
-      // (removeFloatingAndInvalidateForLayout), once there's float layout.
-      return;
+      return RemoveFloatingAndInvalidateForLayout();
     }
 
     if (IsOutOfFlowPositioned())
@@ -245,8 +281,13 @@ namespace krys::boo
       InvalidateAncestorBackgroundObscurationStatus();
     }
 
-    // FIXME: The view's scrollbar overlay style and the compositor, the shape outside and the grid position,
-    // once there are any.
+    // FIXME: The view's scrollbar overlay style and the compositor, and the grid position, once there are
+    // any.
+
+    if ((oldStyle && !oldStyle->GetShapeOutside().IsNone()) || !Style().GetShapeOutside().IsNone())
+    {
+      UpdateShapeOutsideInfoAfterStyleChange(Style(), oldStyle);
+    }
 
     // Changing the position from/to absolute can potentially create/remove flex/grid items, as absolutely
     // positioned children of a flex/grid box are out-of-flow, and thus, not flex/grid items. This means that
@@ -3849,6 +3890,102 @@ namespace krys::boo
         AddOverflowFromContainedBox(child, options);
       }
     }
+  }
+
+  void RenderBox::AddOverflowFromFloatBox(const FloatingObject &floatBox) noexcept
+  {
+    if (!floatBox.Renderer())
+    {
+      return;
+    }
+    AddOverflowWithRendererOffset(*floatBox.Renderer(), floatBox.LocationOffsetOfBorderBox());
+  }
+
+  void RenderBox::UpdateShapeOutsideInfoAfterStyleChange(const RenderStyle &style,
+                                                         const RenderStyle *oldStyle) noexcept
+  {
+    style::ShapeOutside shapeOutside = style.GetShapeOutside();
+    style::ShapeOutside oldShapeOutside =
+      oldStyle ? oldStyle->GetShapeOutside() : style::ComputedStyle::InitialShapeOutside();
+
+    style::ShapeMargin shapeMargin = style.GetShapeMargin();
+    style::ShapeMargin oldShapeMargin =
+      oldStyle ? oldStyle->GetShapeMargin() : style::ComputedStyle::InitialShapeMargin();
+
+    style::ShapeImageThreshold shapeImageThreshold = style.GetShapeImageThreshold();
+    style::ShapeImageThreshold oldShapeImageThreshold =
+      oldStyle ? oldStyle->GetShapeImageThreshold() : style::ComputedStyle::InitialShapeImageThreshold();
+
+    // FIXME: A future optimization would do a deep comparison for equality. (bug 100811)
+    if (shapeOutside == oldShapeOutside && shapeMargin == oldShapeMargin
+        && shapeImageThreshold == oldShapeImageThreshold)
+    {
+      return;
+    }
+
+    if (shapeOutside.IsNone())
+    {
+      RemoveShapeOutsideInfo();
+    }
+    else
+    {
+      EnsureShapeOutsideInfo().MarkShapeAsDirty();
+    }
+
+    if (!shapeOutside.IsNone() || shapeOutside != oldShapeOutside)
+    {
+      MarkShapeOutsideDependentsForLayout();
+    }
+  }
+
+  namespace
+  {
+    // The weak map upstream is keyed by address here: a box's entry is removed when it's destroyed.
+    using ShapeOutsideInfoMap = HashMap<const RenderBox *, UniquePtr<ShapeOutsideInfo>>;
+
+    KRYS_NODISCARD ShapeOutsideInfoMap &GetShapeOutsideInfoMap() noexcept
+    {
+      static ShapeOutsideInfoMap staticInfoMap;
+      return staticInfoMap;
+    }
+  }
+
+  ShapeOutsideInfo *RenderBox::GetShapeOutsideInfo() const noexcept
+  {
+    if (!RenderBoxHasShapeOutsideInfo())
+    {
+      return nullptr;
+    }
+
+    if (!ShapeOutsideInfo::IsEnabledFor(*this))
+    {
+      return nullptr;
+    }
+
+    auto it = GetShapeOutsideInfoMap().find(this);
+    return it != GetShapeOutsideInfoMap().end() ? it->second.get() : nullptr;
+  }
+
+  ShapeOutsideInfo &RenderBox::EnsureShapeOutsideInfo() noexcept
+  {
+    SetRenderBoxHasShapeOutsideInfo(true);
+    auto &info = GetShapeOutsideInfoMap()[this];
+    if (!info)
+    {
+      info = CreateUnique<ShapeOutsideInfo>(*this);
+    }
+    return *info;
+  }
+
+  void RenderBox::RemoveShapeOutsideInfo() noexcept
+  {
+    if (!RenderBoxHasShapeOutsideInfo())
+    {
+      return;
+    }
+
+    SetRenderBoxHasShapeOutsideInfo(false);
+    GetShapeOutsideInfoMap().erase(this);
   }
 
   void RenderBox::AddOverflowFromContainedBox(const RenderBox &child,

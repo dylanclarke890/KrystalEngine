@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Rendering/FloatingObjects.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -94,14 +95,19 @@ namespace krys::boo
   };
 
   /// @brief A block container that lays out block or inline content.
-  // FIXME: Inline layout (line boxes), floats, pagination, multi-column flows,
+  // FIXME: Inline layout (line boxes), pagination, multi-column flows,
   // text autosizing, hit testing, selection and painting come with the rest of layout and with painting.
   class RenderBlockFlow : public RenderBlock
   {
     KRYS_NON_COPY_MOVABLE(RenderBlockFlow);
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderBlockFlow);
 
+  private:
+    // Used to store state between styleWillChange and styleDidChange
+    static bool s_canPropagateFloatIntoSibling;
+
   protected:
+    UniquePtr<FloatingObjects> _floatingObjects;
     UniquePtr<RenderBlockFlowRareData> _rareBlockFlowData;
 
   public:
@@ -306,18 +312,121 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ChildrenPreventSelfCollapsing() const noexcept final;
 
-    // FIXME: Floats (the floating objects, containsFloat, lowestFloatLogicalBottom, the overhanging and
-    // intruding floats) come with float layout; until then a block flow has no floats.
-    KRYS_NODISCARD bool ContainsFloat(const RenderBox &) const noexcept
+    void AdjustFloatingBlock(const MarginInfo &marginInfo) noexcept;
+
+    KRYS_NODISCARD bool ContainsFloats() const noexcept override
     {
-      return false;
+      return _floatingObjects && !_floatingObjects->Set().isEmpty();
     }
-    KRYS_NODISCARD LayoutUnit LowestFloatLogicalBottom() const noexcept
-    {
-      return 0_lu;
-    }
+    KRYS_NODISCARD bool ContainsFloat(const RenderBox &renderer) const noexcept;
+    KRYS_NODISCARD bool SubtreeContainsFloats() const noexcept;
+    KRYS_NODISCARD bool SubtreeContainsFloat(const RenderBox &renderer) const noexcept;
+
+    KRYS_NODISCARD LayoutUnit LowestFloatLogicalBottom(
+      FloatingObject::Type floatType = FloatingObject::FloatLeftRight) const noexcept;
+
+    void RemoveFloatingObjects() noexcept;
     void MarkAllDescendantsWithFloatsForLayout(RenderBox *floatToRemove = nullptr,
                                                bool inLayout = true) noexcept;
+    void MarkSiblingsWithFloatsForLayout(RenderBox *floatToRemove = nullptr) noexcept;
+
+    KRYS_NODISCARD const FloatingObjectSet *GetFloatingObjectSet() const noexcept
+    {
+      return _floatingObjects ? &_floatingObjects->Set() : nullptr;
+    }
+
+    FloatingObject &InsertFloatingBox(RenderBox &floatBox) noexcept;
+
+    KRYS_NODISCARD LayoutUnit LogicalTopForFloat(const FloatingObject &floatingObject) const noexcept
+    {
+      return IsHorizontalWritingMode() ? floatingObject.Y() : floatingObject.X();
+    }
+    KRYS_NODISCARD LayoutUnit LogicalBottomForFloat(const FloatingObject &floatingObject) const noexcept
+    {
+      return IsHorizontalWritingMode() ? floatingObject.MaxY() : floatingObject.MaxX();
+    }
+    KRYS_NODISCARD LayoutUnit LogicalLeftForFloat(const FloatingObject &floatingObject) const noexcept
+    {
+      return IsHorizontalWritingMode() ? floatingObject.X() : floatingObject.Y();
+    }
+    KRYS_NODISCARD LayoutUnit LogicalRightForFloat(const FloatingObject &floatingObject) const noexcept
+    {
+      return IsHorizontalWritingMode() ? floatingObject.MaxX() : floatingObject.MaxY();
+    }
+    KRYS_NODISCARD LayoutUnit LogicalWidthForFloat(const FloatingObject &floatingObject) const noexcept
+    {
+      return IsHorizontalWritingMode() ? floatingObject.Width() : floatingObject.Height();
+    }
+    KRYS_NODISCARD LayoutUnit LogicalHeightForFloat(const FloatingObject &floatingObject) const noexcept
+    {
+      return IsHorizontalWritingMode() ? floatingObject.Height() : floatingObject.Width();
+    }
+
+    void SetLogicalTopForFloat(FloatingObject &floatingObject, LayoutUnit logicalTop) const noexcept
+    {
+      if (IsHorizontalWritingMode())
+      {
+        floatingObject.SetY(logicalTop);
+      }
+      else
+      {
+        floatingObject.SetX(logicalTop);
+      }
+    }
+    void SetLogicalLeftForFloat(FloatingObject &floatingObject, LayoutUnit logicalLeft) const noexcept
+    {
+      if (IsHorizontalWritingMode())
+      {
+        floatingObject.SetX(logicalLeft);
+      }
+      else
+      {
+        floatingObject.SetY(logicalLeft);
+      }
+    }
+    void SetLogicalHeightForFloat(FloatingObject &floatingObject, LayoutUnit logicalHeight) const noexcept
+    {
+      if (IsHorizontalWritingMode())
+      {
+        floatingObject.SetHeight(logicalHeight);
+      }
+      else
+      {
+        floatingObject.SetWidth(logicalHeight);
+      }
+    }
+    void SetLogicalWidthForFloat(FloatingObject &floatingObject, LayoutUnit logicalWidth) const noexcept
+    {
+      if (IsHorizontalWritingMode())
+      {
+        floatingObject.SetWidth(logicalWidth);
+      }
+      else
+      {
+        floatingObject.SetHeight(logicalWidth);
+      }
+    }
+    void SetLogicalMarginsForFloat(FloatingObject &floatingObject, LayoutUnit logicalLeftMargin,
+                                   LayoutUnit logicalBeforeMargin) const noexcept
+    {
+      if (IsHorizontalWritingMode())
+      {
+        floatingObject.SetMarginOffset(LayoutSize(logicalLeftMargin, logicalBeforeMargin));
+      }
+      else
+      {
+        floatingObject.SetMarginOffset(LayoutSize(logicalBeforeMargin, logicalLeftMargin));
+      }
+    }
+
+    KRYS_NODISCARD LayoutPoint FlipFloatForWritingModeForChild(const FloatingObject &child,
+                                                               const LayoutPoint &point) const noexcept;
+
+    /// @brief Copies the floats this block has, and @p toBlockFlow doesn't, to @p toBlockFlow, when the tree
+    /// merges this anonymous block into it.
+    void AddFloatsToNewParent(RenderBlockFlow &toBlockFlow) const noexcept;
+
+    KRYS_NODISCARD Maybe<LayoutUnit> LowestInitialLetterLogicalBottom() const noexcept;
 
     KRYS_NODISCARD LayoutUnit LogicalHeightForChildForFragmentation(const RenderBox &child) const noexcept
     {
@@ -419,7 +528,18 @@ namespace krys::boo
     void SetMaxMarginBeforeValues(LayoutUnit pos, LayoutUnit neg) noexcept;
     void SetMaxMarginAfterValues(LayoutUnit pos, LayoutUnit neg) noexcept;
 
+    void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept override;
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
+
+    void ComputeOverflow(LayoutUnit oldClientAfterEdge,
+                         EnumSet<ComputeOverflowOptions> options = {}) noexcept override;
+
+    void CreateFloatingObjects() noexcept;
+
+    KRYS_NODISCARD LayoutUnit LogicalRightFloatOffsetForLine(
+      LayoutUnit logicalTop, LayoutUnit fixedOffset, LayoutUnit logicalHeight) const noexcept override;
+    KRYS_NODISCARD LayoutUnit LogicalLeftFloatOffsetForLine(LayoutUnit logicalTop, LayoutUnit fixedOffset,
+                                                            LayoutUnit logicalHeight) const noexcept override;
 
     KRYS_NODISCARD Maybe<LayoutUnit> FirstLineBaseline() const noexcept override;
     KRYS_NODISCARD Maybe<LayoutUnit> LastLineBaseline() const noexcept override;
@@ -429,8 +549,37 @@ namespace krys::boo
   private:
     bool RecomputeLogicalWidthAndColumnWidth() noexcept;
 
-    KRYS_NODISCARD LayoutUnit AddOverhangingFloats(RenderBlockFlow &child,
-                                                   bool makeChildPaintOtherFloats) noexcept;
+    KRYS_NODISCARD RenderBlockFlow *
+      PreviousSiblingWithOverhangingFloats(bool &parentHasFloats) const noexcept;
+
+    void InsertFloatingBoxAndMarkForLayout(RenderBox &floatBox) noexcept;
+    void RemoveFloatingBox(RenderBox &floatBox) noexcept;
+    void ComputeLogicalLocationForFloat(FloatingObject &floatingObject,
+                                        LayoutUnit &logicalTopOffset) noexcept;
+    void AdjustInitialLetterPosition(RenderBox &childBox, LayoutUnit &logicalTopOffset,
+                                     LayoutUnit &marginBeforeOffset) noexcept;
+
+    // Called from lineWidth, to position the floats added in the last line.
+    // Returns true if and only if it has positioned any floats.
+    bool PositionNewFloats() noexcept;
+    void ClearFloats(UsedClear usedClear) noexcept;
+
+    KRYS_NODISCARD LayoutUnit LogicalRightOffsetForPositioningFloat(
+      LayoutUnit logicalTop, LayoutUnit fixedOffset, LayoutUnit *heightRemaining) const noexcept;
+    KRYS_NODISCARD LayoutUnit LogicalLeftOffsetForPositioningFloat(
+      LayoutUnit logicalTop, LayoutUnit fixedOffset, LayoutUnit *heightRemaining) const noexcept;
+
+    KRYS_NODISCARD LayoutUnit NextFloatLogicalBottomBelow(LayoutUnit logicalHeight) const noexcept;
+    KRYS_NODISCARD LayoutUnit NextFloatLogicalBottomBelowForBlock(LayoutUnit logicalHeight) const noexcept;
+
+    LayoutUnit AddOverhangingFloats(RenderBlockFlow &child, bool makeChildPaintOtherFloats) noexcept;
+    KRYS_NODISCARD bool HasOverhangingFloat(RenderBox &renderer) const noexcept;
+    void AddIntrudingFloats(RenderBlockFlow *previousBlock, RenderBlockFlow *container,
+                            LayoutUnit logicalLeftOffset, LayoutUnit logicalTopOffset) noexcept;
+    KRYS_NODISCARD bool HasOverhangingFloats() const noexcept
+    {
+      return Parent() && ContainsFloats() && LowestFloatLogicalBottom() > LogicalHeight();
+    }
     KRYS_NODISCARD LayoutUnit ComputedClearDeltaForChild(RenderBox &child, LayoutUnit yPos) noexcept;
 
     void

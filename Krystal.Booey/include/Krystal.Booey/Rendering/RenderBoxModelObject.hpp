@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Graphics/LayoutPoint.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/LayoutSize.hpp"
+#include "Krystal.Booey/Rendering/BorderShape.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Style/Calc/TreeEvaluation.hpp"
 #include "Krystal.Booey/Style/Values/Box/Margin.hpp"
@@ -140,6 +141,12 @@ namespace krys::boo
     KRYS_NODISCARD RenderTextFragment *FirstLetterRemainingText() const noexcept;
     void SetFirstLetterRemainingText(RenderTextFragment &remainingText) noexcept;
     void ClearFirstLetterRemainingText() noexcept;
+
+  public:
+    /// @brief The shape of the content box, inset from the border box by the borders and the padding.
+    KRYS_NODISCARD BorderShape BorderShapeForContentClipping(const LayoutRect &borderBoxRect,
+                                                             RectEdges<bool> closedEdges = {
+                                                               true}) const noexcept;
 
   protected:
     void RemoveOutOfFlowBoxesIfNeededOnStyleChange(RenderBlock &delegateBlock, const RenderStyle &oldStyle,

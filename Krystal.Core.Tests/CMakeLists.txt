@@ -64,6 +64,7 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Types/CompactVariant.cpp
 	PRIVATE tests/Types/DataRef.cpp
 	PRIVATE tests/Types/FixedVector.cpp
+	PRIVATE tests/Types/IntervalTree.cpp
 	PRIVATE tests/Types/ListHashSet.cpp
 	PRIVATE tests/Types/Packed.cpp
 

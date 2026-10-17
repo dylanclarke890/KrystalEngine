@@ -17,7 +17,9 @@
 
 namespace krys::boo
 {
+  class FloatingObject;
   class PositionedLayoutConstraints;
+  class ShapeOutsideInfo;
   class RenderBlock;
 
   enum class AvailableLogicalHeightType : bool
@@ -789,9 +791,28 @@ namespace krys::boo
 
   public:
     void RemoveFloatingOrOutOfFlowChildFromBlockLists() noexcept;
+    void RemoveFloatingAndInvalidateForLayout() noexcept;
+
+    void MarkShapeOutsideDependentsForLayout() noexcept
+    {
+      if (IsFloating())
+      {
+        RemoveFloatingOrOutOfFlowChildFromBlockLists();
+      }
+    }
+
+    /// @brief The box's `shape-outside`, if it's a float with one.
+    KRYS_NODISCARD ShapeOutsideInfo *GetShapeOutsideInfo() const noexcept;
+
+    void AddOverflowFromFloatBox(const FloatingObject &floatBox) noexcept;
 
   protected:
     void WillBeDestroyed() noexcept override;
+
+    void UpdateShapeOutsideInfoAfterStyleChange(const RenderStyle &style,
+                                                const RenderStyle *oldStyle) noexcept;
+    ShapeOutsideInfo &EnsureShapeOutsideInfo() noexcept;
+    void RemoveShapeOutsideInfo() noexcept;
 
     KRYS_NODISCARD bool ShouldTrimChildMargin(style::MarginTrimSide type,
                                               const RenderBox &child) const noexcept;

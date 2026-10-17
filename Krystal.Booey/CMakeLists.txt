@@ -728,6 +728,15 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/BlockStepSizing.hpp
   include/Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp
   include/Krystal.Booey/Graphics/LayoutRange.hpp
+  include/Krystal.Booey/Graphics/FloatPolygon.hpp
+  include/Krystal.Booey/Rendering/BorderShape.hpp
+  include/Krystal.Booey/Rendering/FloatingObjects.hpp
+  include/Krystal.Booey/Rendering/Shapes/LayoutShape.hpp
+  include/Krystal.Booey/Rendering/Shapes/ShapeInterval.hpp
+  include/Krystal.Booey/Rendering/Shapes/BoxLayoutShape.hpp
+  include/Krystal.Booey/Rendering/Shapes/RectangleLayoutShape.hpp
+  include/Krystal.Booey/Rendering/Shapes/PolygonLayoutShape.hpp
+  include/Krystal.Booey/Rendering/Shapes/ShapeOutsideInfo.hpp
   include/Krystal.Booey/Platform/ScrollableArea.hpp
   include/Krystal.Booey/Platform/Scrollbar.hpp
   include/Krystal.Booey/Platform/ScrollbarTheme.hpp
@@ -1978,6 +1987,14 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/BlockStepSizing.cpp
   src/Rendering/PositionedLayoutConstraints.cpp
   src/Graphics/LayoutRange.cpp
+  src/Graphics/FloatPolygon.cpp
+  src/Rendering/BorderShape.cpp
+  src/Rendering/FloatingObjects.cpp
+  src/Rendering/Shapes/LayoutShape.cpp
+  src/Rendering/Shapes/BoxLayoutShape.cpp
+  src/Rendering/Shapes/RectangleLayoutShape.cpp
+  src/Rendering/Shapes/PolygonLayoutShape.cpp
+  src/Rendering/Shapes/ShapeOutsideInfo.cpp
   src/Platform/ScrollableArea.cpp
   src/Platform/Scrollbar.cpp
   src/Platform/ScrollbarTheme.cpp

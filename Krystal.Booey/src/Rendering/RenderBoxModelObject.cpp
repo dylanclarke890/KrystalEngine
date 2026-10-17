@@ -767,4 +767,20 @@ namespace krys::boo
       }
     }
   }
+
+  BorderShape RenderBoxModelObject::BorderShapeForContentClipping(const LayoutRect &borderBoxRect,
+                                                                  RectEdges<bool> closedEdges) const noexcept
+  {
+    auto borderWidths = this->BorderWidths();
+    auto padding = this->Padding();
+
+    auto contentBoxInsets = RectEdges<LayoutUnit> {
+      borderWidths.Top() + padding.Top(),
+      borderWidths.Right() + padding.Right(),
+      borderWidths.Bottom() + padding.Bottom(),
+      borderWidths.Left() + padding.Left(),
+    };
+
+    return BorderShape::ShapeForBorderRect(Style(), borderBoxRect, contentBoxInsets, closedEdges);
+  }
 }

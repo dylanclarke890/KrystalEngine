@@ -20,6 +20,6 @@ namespace krys::boo
     RenderBlockFlow &from, RenderBlock &to, NormalizeAfterInsertion normalizeAfterInsertion) noexcept
   {
     _builder.MoveAllChildren(from, to, normalizeAfterInsertion);
-    // FIXME: Add the floats to the new parent (addFloatsToNewParent), once there are floating objects.
+    from.AddFloatsToNewParent(Downcast<RenderBlockFlow>(to));
   }
 }

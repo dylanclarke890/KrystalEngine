@@ -410,9 +410,11 @@ namespace krys::boo
           // Since we can't actually run static position only layout for a block container
           // (RenderBlockFlow::layoutBlock() does not have such fine grained layout flow) floats get rebuilt
           // which assumes (see intruding floats) parent block containers do the same.
-          // FIXME: Whether the block contains floats, once there are floating objects; until then, no block
-          // is eligible.
-          return !Is<RenderBlock>(parent);
+          if (auto *renderBlock = DynamicDowncast<RenderBlock>(parent))
+          {
+            return !renderBlock->ContainsFloats();
+          }
+          return true;
         };
         if (isEligibleForStaticPositionLayoutOnly())
         {
@@ -600,8 +602,18 @@ namespace krys::boo
       {
         if (auto *blockFlow = DynamicDowncast<RenderBlockFlow>(renderer))
         {
-          // FIXME: Clear the descendant floats, which can't intrude other, sibling block containers anymore,
-          // once there are floating objects.
+          auto clearDescendantFloats = [&]
+          {
+            // These descendent floats can not intrude other, sibling block containers anymore.
+            for (auto &descendant : DescendantsOfType<RenderBox>(*blockFlow))
+            {
+              if (descendant.IsFloating())
+              {
+                descendant.RemoveFloatingAndInvalidateForLayout();
+              }
+            }
+          };
+          clearDescendantFloats();
           RemoveFloatingObjects(*blockFlow);
           // Fresh floats need to be reparented if they actually belong to the previous anonymous block.
           // It copies the logic of RenderBlock::addChildIgnoringContinuation
@@ -1033,10 +1045,38 @@ namespace krys::boo
     box.SetNeedsLayoutAndPreferredWidthsUpdate();
   }
 
-  void RenderTreeBuilder::RemoveFloatingObjects(RenderBlock &) noexcept
+  void RenderTreeBuilder::RemoveFloatingObjects(RenderBlock &renderer) noexcept
   {
-    // FIXME: Remove the floating objects of a block flow and its descendants from their block lists, once
-    // there are floating objects.
+    if (renderer.RenderTreeBeingDestroyed())
+    {
+      return;
+    }
+
+    auto *blockFlow = DynamicDowncast<RenderBlockFlow>(renderer);
+    if (!blockFlow)
+    {
+      return;
+    }
+
+    auto *floatingObjects = blockFlow->GetFloatingObjectSet();
+    if (!floatingObjects)
+    {
+      return;
+    }
+    // Here we remove the floating objects from the descendants as well.
+    krys::List<FloatingObject *> copyOfFloatingObjects;
+    for (const auto &floatingObject : *floatingObjects)
+    {
+      copyOfFloatingObjects.push_back(floatingObject.get());
+    }
+    for (auto *floatingObject : copyOfFloatingObjects)
+    {
+      if (!floatingObject->Renderer())
+      {
+        continue;
+      }
+      floatingObject->Renderer()->RemoveFloatingOrOutOfFlowChildFromBlockLists();
+    }
   }
 
   RenderPtr<RenderBox>
