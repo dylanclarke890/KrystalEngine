@@ -61,6 +61,10 @@ namespace krys::boo::html
       AdditionalPresentationalHintStyle() const noexcept override;
 
   protected:
+    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                            Maybe<dom::DOMStringView> value,
+                            dom::DOMStringAtom namespaceURI) noexcept override;
+
     KRYS_NODISCARD bool
       HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                          dom::DOMStringAtom namespaceURI) const noexcept override;

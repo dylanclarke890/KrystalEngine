@@ -1080,54 +1080,9 @@ namespace krys::boo
     return oldWidth != LogicalWidth() || hasBorderOrPaddingLogicalWidthChanged;
   }
 
-  namespace
-  {
-    // Lays out the boxes of an inline subtree that aren't part of its lines, and clears the rest. Out-of-flow
-    // boxes are given to their containing block, with the start of the block's content as their static
-    // position.
-    void LayoutInlineContentWithoutLineLayout(RenderBlock &block, RenderElement &parent) noexcept
-    {
-      for (auto *child = parent.FirstChild(); child; child = child->NextSibling())
-      {
-        if (auto *box = DynamicDowncast<RenderBox>(*child); box && box->IsOutOfFlowPositioned())
-        {
-          box->ContainingBlock()->AddOutOfFlowBox(*box);
-          box->Layer()->SetStaticInlinePosition(block.StartOffsetForContent());
-          box->Layer()->SetStaticBlockPosition(block.BorderAndPaddingBefore());
-          continue;
-        }
-        if (!child->NeedsLayout())
-        {
-          continue;
-        }
-        if (auto *renderInline = DynamicDowncast<RenderInline>(*child))
-        {
-          LayoutInlineContentWithoutLineLayout(block, *renderInline);
-          renderInline->ClearNeedsLayout();
-        }
-        else if (auto *element = DynamicDowncast<RenderElement>(*child))
-        {
-          element->Layout();
-        }
-        else
-        {
-          child->ClearNeedsLayout();
-        }
-      }
-    }
-  }
-
   void RenderBlock::LayoutBlock(RelayoutChildren, LayoutUnit) noexcept
   {
-    // FIXME: Stands in for the layout of the table classes until they're ported (upstream asserts this isn't
-    // reached): lays out the children without placing or sizing anything, and clears the inline content,
-    // which has no lines yet.
-    LayoutChildrenWithoutLineLayout();
-  }
-
-  void RenderBlock::LayoutChildrenWithoutLineLayout() noexcept
-  {
-    LayoutInlineContentWithoutLineLayout(*this, *this);
+    krys_debug_assert(false);
   }
 
   // Overflow is always relative to the border-box of the element in question.

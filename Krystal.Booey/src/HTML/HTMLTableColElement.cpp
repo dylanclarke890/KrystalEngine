@@ -2,6 +2,7 @@
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/HTMLTableElement.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
+#include "Krystal.Booey/Rendering/RenderTableCol.hpp"
 
 namespace krys::boo::html
 {
@@ -11,6 +12,28 @@ namespace krys::boo::html
   }
 
 #pragma region HTMLTableColElement
+
+  void HTMLTableColElement::OnAttributeChanged(dom::DOMStringAtom localName,
+                                               Maybe<dom::DOMStringView> oldValue,
+                                               Maybe<dom::DOMStringView> value,
+                                               dom::DOMStringAtom namespaceURI) noexcept
+  {
+    HTMLTablePartElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
+    if (namespaceURI != dom::DOMStringAtom::Null())
+    {
+      return;
+    }
+
+    if (localName == u8"span")
+    {
+      if (auto *col = DynamicDowncast<RenderTableCol>(Renderer()))
+      {
+        col->UpdateFromElement();
+      }
+    }
+    // FIXME: Lay the column out again when its width attribute changes to a different integer
+    // (parseHTMLInteger), once there's an HTML integer parser.
+  }
 
   uint32 HTMLTableColElement::Span() const noexcept
   {

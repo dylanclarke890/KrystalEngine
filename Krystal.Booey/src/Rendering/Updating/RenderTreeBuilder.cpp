@@ -1149,7 +1149,16 @@ namespace krys::boo
   {
     // FIXME: The table code should handle that automatically. If not,
     // we should fix it and remove the table part checks.
-    // FIXME: Recalculate the table's sections or the section's cells, once there's table layout.
+    if (auto *table = DynamicDowncast<RenderTable>(box))
+    {
+      // Because we may have added some sections with already computed column structures, we need to
+      // sync the table structure with them now. This avoids crashes when adding new cells to the table.
+      table->ForceSectionsRecalc();
+    }
+    else if (auto *tableSection = DynamicDowncast<RenderTableSection>(box))
+    {
+      tableSection->SetNeedsCellRecalc();
+    }
 
     box.SetNeedsLayoutAndPreferredWidthsUpdate();
   }

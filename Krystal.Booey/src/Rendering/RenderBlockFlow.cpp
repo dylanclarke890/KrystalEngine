@@ -15,6 +15,7 @@
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
+#include "Krystal.Booey/Rendering/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Shapes/ShapeOutsideInfo.hpp"
@@ -280,8 +281,19 @@ namespace krys::boo
 
     maxLogicalWidth = std::max(minLogicalWidth, maxLogicalWidth);
 
-    // FIXME: Multi-column widths (adjustIntrinsicLogicalWidthsForColumns), horizontal marquees, and a table
-    // cell's fixed width, once there are columns, marquees and table layout.
+    // FIXME: Multi-column widths (adjustIntrinsicLogicalWidthsForColumns) and horizontal marquees, once there
+    // are columns and marquees.
+
+    if (auto *cell = DynamicDowncast<RenderTableCell>(*this))
+    {
+      auto [tableCellWidth, usedZoom] = cell->StyleOrColLogicalWidth();
+      if (auto fixedTableCellWidth = tableCellWidth.TryFixed();
+          fixedTableCellWidth && fixedTableCellWidth->IsPositive())
+      {
+        maxLogicalWidth =
+          std::max(minLogicalWidth, AdjustContentBoxLogicalWidthForBoxSizing(*fixedTableCellWidth));
+      }
+    }
 
     auto scrollbarWidth = LayoutUnit(IntrinsicScrollbarLogicalWidthIncludingGutter());
     maxLogicalWidth += scrollbarWidth;

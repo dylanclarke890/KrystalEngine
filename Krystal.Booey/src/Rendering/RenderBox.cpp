@@ -1317,6 +1317,13 @@ namespace krys::boo
     OverridingLogicalWidthMapForFlexBasisComputation().erase(this);
   }
 
+  LayoutUnit RenderBox::AdjustBorderBoxLogicalWidthForBoxSizing(
+    const style::Length<css::NonNegativeUnzoomed> &logicalWidth) const noexcept
+  {
+    return AdjustBorderBoxLogicalWidthForBoxSizing(
+      style::Evaluate<LayoutUnit>(logicalWidth, Style().UsedZoomForLength()));
+  }
+
   LayoutUnit
     RenderBox::AdjustBorderBoxLogicalWidthForBoxSizing(LayoutUnit computedLogicalWidth) const noexcept
   {
@@ -1336,6 +1343,13 @@ namespace krys::boo
       return height + bordersPlusPadding;
     }
     return std::max(height, bordersPlusPadding);
+  }
+
+  LayoutUnit RenderBox::AdjustContentBoxLogicalWidthForBoxSizing(
+    const style::Length<css::NonNegativeUnzoomed> &logicalWidth) const noexcept
+  {
+    return AdjustContentBoxLogicalWidthForBoxSizing(
+      style::Evaluate<LayoutUnit>(logicalWidth, Style().UsedZoomForLength()));
   }
 
   LayoutUnit
@@ -2517,8 +2531,18 @@ namespace krys::boo
       return computedValues;
     }
 
-    // FIXME: Let a table cell compute its preferred size, and use the logical width of orthogonal cells set
-    // by table layout, once there's table layout.
+    // Let's allow the table cell to compute its preferred size.
+    if (auto *tableCell = DynamicDowncast<RenderTableCell>(*this);
+        tableCell && !tableCell->IsComputingPreferredSize())
+    {
+      // Use the value set by table layout for orthogonal cells which in this case the logical width of the
+      // cell from the table's point of view. see RenderTableCell::SetCellLogicalWidth.
+      if (tableCell->IsOrthogonal())
+      {
+        computedValues.Extent = OverridingBorderBoxLogicalHeight().value_or(computedValues.Extent);
+      }
+      return computedValues;
+    }
 
     if (IsOutOfFlowPositioned())
     {
@@ -2990,6 +3014,32 @@ namespace krys::boo
            && containingBlock.Style().LogicalHeight().IsAuto();
   }
 
+  static bool TableCellShouldHaveZeroInitialSize(const RenderTableCell &tableCell, const RenderBox &child,
+                                                 bool scrollsOverflowY) noexcept
+  {
+    // Normally we would let the cell size intrinsically, but scrolling overflow has to be
+    // treated differently, since WinIE lets scrolled overflow fragments shrink as needed.
+    // While we can't get all cases right, we can at least detect when the cell has a specified
+    // height or when the table has a specified height. In these cases we want to initially have
+    // no size and allow the flexing of the table or the cell to its specified height to cause us
+    // to grow to fill the space. This could end up being wrong in some cases, but it is
+    // preferable to the alternative (sizing intrinsically and making the row end up too big).
+    if (!scrollsOverflowY)
+    {
+      return false;
+    }
+    if (tableCell.Style().LogicalHeight().IsAuto() && tableCell.Table()->Style().LogicalHeight().IsAuto())
+    {
+      return false;
+    }
+    if (child.IsBlockLevelReplacedOrAtomicInline())
+    {
+      return false;
+    }
+    // FIXME: Form controls other than fieldsets (HTMLFormControlElement), once there are those.
+    return true;
+  }
+
   template <typename SizeType>
   Maybe<LayoutUnit> RenderBox::ComputePercentageLogicalHeightGeneric(
     const SizeType &logicalHeight, UpdatePercentageHeightDescendants updateDescendants) const noexcept
@@ -3049,9 +3099,7 @@ namespace krys::boo
       auto tableCellLogicalHeight = tableCell->OverridingBorderBoxLogicalHeight();
       if (!tableCellLogicalHeight)
       {
-        // FIXME: Scrolling overflow in a cell with a specified height, or a table with one, initially has no
-        // size (tableCellShouldHaveZeroInitialSize), once there's table layout.
-        return null;
+        return TableCellShouldHaveZeroInitialSize(*tableCell, *this, ScrollsOverflowY()) ? Maybe(0_lu) : null;
       }
       // Note: can't use contentBoxLogicalHeight here on table cells due to intrinsic padding.
       overridingAvailableSize = *tableCellLogicalHeight - tableCell->ComputedCSSPaddingBefore()

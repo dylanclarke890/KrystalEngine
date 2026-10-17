@@ -764,6 +764,9 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/GridTrackSizingAlgorithm.hpp
   include/Krystal.Booey/Rendering/RenderListItem.hpp
   include/Krystal.Booey/Rendering/RenderTable.hpp
+  include/Krystal.Booey/Rendering/TableLayout.hpp
+  include/Krystal.Booey/Rendering/AutoTableLayout.hpp
+  include/Krystal.Booey/Rendering/FixedTableLayout.hpp
   include/Krystal.Booey/Rendering/RenderTableCell.hpp
   include/Krystal.Booey/Rendering/RenderTableCaption.hpp
   include/Krystal.Booey/Rendering/RenderTableSection.hpp
@@ -2123,6 +2126,8 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/GridTrackSizingAlgorithm.cpp
   src/Rendering/RenderListItem.cpp
   src/Rendering/RenderTable.cpp
+  src/Rendering/AutoTableLayout.cpp
+  src/Rendering/FixedTableLayout.cpp
   src/Rendering/RenderTableCell.cpp
   src/Rendering/RenderTableCaption.cpp
   src/Rendering/RenderTableSection.cpp

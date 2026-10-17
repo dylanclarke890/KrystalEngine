@@ -16,6 +16,7 @@
 #include "Krystal.Booey/Rendering/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/RenderReplaced.hpp"
 #include "Krystal.Booey/Rendering/RenderTable.hpp"
+#include "Krystal.Booey/Rendering/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Shapes/ShapeOutsideInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -84,17 +85,31 @@ namespace krys::boo::layout_integration
       return style::EvaluateMinimum<LayoutUnit>(paddingEdge, *availableWidth, usedZoom);
     }
 
-    // FIXME: Collapsed table borders (RenderTable/RenderTableCell::borderWidths), once there's table layout,
-    // and the fieldset's intrinsic border (intrinsicBorderForFieldset), once there are form controls.
-    inline void AdjustBorderForTableAndFieldset(const RenderBoxModelObject &,
-                                                RectEdges<LayoutUnit> &) noexcept
+    // FIXME: The fieldset's intrinsic border (intrinsicBorderForFieldset), once there are form controls.
+    inline void AdjustBorderForTableAndFieldset(const RenderBoxModelObject &renderer,
+                                                RectEdges<LayoutUnit> &borderWidths) noexcept
     {
+      if (auto *table = DynamicDowncast<RenderTable>(renderer); table && table->CollapseBorders())
+      {
+        borderWidths = table->BorderWidths();
+        return;
+      }
+
+      if (auto *tableCell = DynamicDowncast<RenderTableCell>(renderer);
+          tableCell && tableCell->Table()->CollapseBorders())
+      {
+        borderWidths = tableCell->BorderWidths();
+        return;
+      }
     }
 
-    // FIXME: The table cell's intrinsic padding (intrinsicPaddingBefore/After), once there's table layout.
     KRYS_NODISCARD inline layout::BoxGeometry::VerticalEdges
-      IntrinsicPaddingForTableCell(const RenderBox &) noexcept
+      IntrinsicPaddingForTableCell(const RenderBox &renderer) noexcept
     {
+      if (auto *tableCell = DynamicDowncast<RenderTableCell>(renderer))
+      {
+        return {tableCell->IntrinsicPaddingBefore(), tableCell->IntrinsicPaddingAfter()};
+      }
       return {};
     }
 
@@ -405,7 +420,8 @@ namespace krys::boo::layout_integration
 
   BoxGeometryUpdater::BoxGeometryUpdater(layout::LayoutState &layoutState,
                                          const layout::ElementBox &rootLayoutBox) noexcept
-      : _layoutState(WeakPtr<layout::LayoutState>::WithRef(layoutState)), _rootLayoutBox(ShareCheckedPtr(&rootLayoutBox))
+      : _layoutState(WeakPtr<layout::LayoutState>::WithRef(layoutState)),
+        _rootLayoutBox(ShareCheckedPtr(&rootLayoutBox))
   {
   }
 

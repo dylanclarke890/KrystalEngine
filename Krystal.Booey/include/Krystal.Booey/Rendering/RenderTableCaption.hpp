@@ -7,8 +7,9 @@
 
 namespace krys::boo
 {
+  class RenderTable;
+
   /// @brief A table caption.
-  // FIXME: Caption layout comes with layout.
   class RenderTableCaption final : public RenderBlockFlow
   {
     KRYS_NON_COPY_MOVABLE(RenderTableCaption);
@@ -17,6 +18,14 @@ namespace krys::boo
   public:
     RenderTableCaption(dom::Element &element, RenderStyle &&style) noexcept;
     ~RenderTableCaption() noexcept override;
+
+  private:
+    void InsertedIntoTree() noexcept override;
+    void WillBeRemovedFromTree() noexcept override;
+
+    KRYS_NODISCARD LayoutUnit ContainingBlockLogicalWidthForContent() const noexcept final;
+
+    KRYS_NODISCARD RenderTable *Table() const noexcept;
   };
 }
 

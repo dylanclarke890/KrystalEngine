@@ -7,15 +7,25 @@
 
 namespace krys::boo
 {
+  class RenderTable;
   class RenderTableCell;
   class RenderTableSection;
+  struct BorderValue;
 
   /// @brief A table row.
-  // FIXME: The row index and row layout come with the table builder and layout.
+  // FIXME: Painting and hit testing (paint, paintOutlineForRowIfNeeded, nodeAtPoint), and repaints
+  // (clippedOverflowRect, rectsForRepaintingAfterLayout, imageChanged), once there are those.
   class RenderTableRow final : public RenderBox
   {
     KRYS_NON_COPY_MOVABLE(RenderTableRow);
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderTableRow);
+
+  public:
+    constexpr static uint32 UnsetRowIndex = 0x7F'FF'FF'FF;
+    constexpr static uint32 MaxRowIndex = 0x7F'FF'FF'FE; // 2,147,483,646
+
+  private:
+    uint32 _rowIndex : 31 {UnsetRowIndex};
 
   public:
     RenderTableRow(dom::Element &element, RenderStyle &&style) noexcept;
@@ -28,19 +38,41 @@ namespace krys::boo
     KRYS_NODISCARD RenderTableCell *FirstCell() const noexcept;
     KRYS_NODISCARD RenderTableCell *LastCell() const noexcept;
 
+    KRYS_NODISCARD RenderTable *Table() const noexcept;
     KRYS_NODISCARD RenderTableSection *Section() const noexcept;
+
+    void SetRowIndex(uint32 rowIndex) noexcept;
+    KRYS_NODISCARD bool RowIndexWasSet() const noexcept
+    {
+      return _rowIndex != UnsetRowIndex;
+    }
+    KRYS_NODISCARD uint32 RowIndex() const noexcept
+    {
+      krys_debug_assert(RowIndexWasSet());
+      return _rowIndex;
+    }
+
+    KRYS_NODISCARD const BorderValue &BorderAdjoiningTableStart() const noexcept;
+    KRYS_NODISCARD const BorderValue &BorderAdjoiningTableEnd() const noexcept;
+    KRYS_NODISCARD const BorderValue &BorderAdjoiningStartCell(const RenderTableCell &cell) const noexcept;
+    KRYS_NODISCARD const BorderValue &BorderAdjoiningEndCell(const RenderTableCell &cell) const noexcept;
+
+    void DidInsertTableCell(RenderTableCell &child, RenderObject *beforeChild) noexcept;
 
     KRYS_NODISCARD bool CanHaveChildren() const noexcept override
     {
       return true;
     }
-
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {
       return (IsAnonymous() || IsPseudoElement()) ? u8"RenderTableRow (anonymous)" : u8"RenderTableRow";
     }
 
   private:
+    void WillBeRemovedFromTree() noexcept override;
+    void Layout() noexcept override;
+    void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
+
     void ComputeIntrinsicLogicalWidths(LayoutUnit &, LayoutUnit &) const noexcept override
     {
     }

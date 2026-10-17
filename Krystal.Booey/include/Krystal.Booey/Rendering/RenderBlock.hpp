@@ -307,10 +307,6 @@ namespace krys::boo
 
     void UpdateBlockChildDirtyBitsBeforeLayout(RelayoutChildren relayoutChildren, RenderBox &child) noexcept;
 
-    // FIXME: Stands in for inline layout until it's ported: lays out the boxes of the inline content that
-    // aren't part of its lines, and clears the rest.
-    void LayoutChildrenWithoutLineLayout() noexcept;
-
     bool RecomputeLogicalWidth() noexcept;
 
     KRYS_NODISCARD Maybe<LayoutUnit> FirstLineBaseline() const noexcept override;

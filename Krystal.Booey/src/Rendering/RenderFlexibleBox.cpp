@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderReplaced.hpp"
+#include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleContentAlignmentData.hpp"
@@ -1122,9 +1123,16 @@ namespace krys::boo
       {
         return height;
       }
-      // FIXME: Add the captions' height to a table's specified height (sumCaptionsLogicalHeight), once
-      // there's table layout: tables interpret overriding sizes as the size of captions + rows.
-      return *height + LayoutUnit(flexItem.ScrollbarLogicalHeight());
+      // Tables interpret overriding sizes as the size of captions + rows. However the specified height of a
+      // table only includes the size of the rows. That's why we need to add the size of the captions here so
+      // that the table layout algorithm behaves appropriately.
+      LayoutUnit captionsHeight;
+      if (auto *table = DynamicDowncast<RenderTable>(flexItem);
+          table && FlexItemMainSizeIsDefinite(flexItem, size))
+      {
+        captionsHeight = table->SumCaptionsLogicalHeight();
+      }
+      return *height + LayoutUnit(flexItem.ScrollbarLogicalHeight()) + captionsHeight;
     }
 
     // computeLogicalWidth always re-computes the intrinsic widths. However, when

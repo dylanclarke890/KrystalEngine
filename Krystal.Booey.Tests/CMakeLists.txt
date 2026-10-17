@@ -386,6 +386,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/TextBoxTrimmer.cpp
 		tests/Rendering/RenderFlexibleBox.cpp
 		tests/Rendering/RenderGrid.cpp
+		tests/Rendering/RenderTable.cpp
 		tests/Rendering/LineClampUpdater.cpp
 		tests/Rendering/Updating/RenderTreeBuilderRuby.cpp
 		tests/Rendering/BreakablePositions.cpp

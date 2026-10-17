@@ -234,9 +234,14 @@ namespace krys::boo
       beforeChild = _builder.SplitAnonymousBoxesAroundChild(parent, *beforeChild);
     }
 
+    auto &newChild = *child;
     krys_debug_assert(!beforeChild || Is<RenderTableCell>(*beforeChild));
     _builder.AttachToRenderElement(parent, krys::move(child), beforeChild);
-    // FIXME: Tell the row a cell was inserted (didInsertTableCell), once there's table layout.
+    // FIXME: child should always be a RenderTableCell at this point.
+    if (auto *renderTableCell = DynamicDowncast<RenderTableCell>(newChild))
+    {
+      parent.DidInsertTableCell(*renderTableCell, beforeChild);
+    }
   }
 
   void RenderTreeBuilder::Table::Attach(RenderTableSection &parent, RenderPtr<RenderObject> child,
@@ -247,7 +252,11 @@ namespace krys::boo
       beforeChild = _builder.SplitAnonymousBoxesAroundChild(parent, *beforeChild);
     }
 
-    // FIXME: Tell the section a row will be inserted (willInsertTableRow), once there's table layout.
+    // FIXME: child should always be a RenderTableRow at this point.
+    if (auto *renderTableRow = DynamicDowncast<RenderTableRow>(child.get()))
+    {
+      parent.WillInsertTableRow(*renderTableRow, beforeChild);
+    }
     krys_debug_assert(!beforeChild || Is<RenderTableRow>(*beforeChild));
     _builder.AttachToRenderElement(parent, krys::move(child), beforeChild);
   }
@@ -260,8 +269,16 @@ namespace krys::boo
       beforeChild = _builder.SplitAnonymousBoxesAroundChild(parent, *beforeChild);
     }
 
-    // FIXME: Tell the table a section or column will be inserted (willInsertTableSection,
-    // willInsertTableColumn), once there's table layout.
+    auto &newChild = *child;
+    if (auto *renderTableSection = DynamicDowncast<RenderTableSection>(newChild))
+    {
+      parent.WillInsertTableSection(*renderTableSection, beforeChild);
+    }
+    else if (auto *renderTableCol = DynamicDowncast<RenderTableCol>(newChild))
+    {
+      parent.WillInsertTableColumn(*renderTableCol, beforeChild);
+    }
+
     _builder.AttachToRenderElement(parent, krys::move(child), beforeChild);
   }
 

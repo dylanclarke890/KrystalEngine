@@ -509,8 +509,12 @@ namespace krys::boo
     void ClearOverridingLogicalHeightForFlexBasisComputation() noexcept;
     void ClearOverridingLogicalWidthForFlexBasisComputation() noexcept;
 
+    KRYS_NODISCARD LayoutUnit AdjustBorderBoxLogicalWidthForBoxSizing(
+      const style::Length<css::NonNegativeUnzoomed> &logicalWidth) const noexcept;
     KRYS_NODISCARD LayoutUnit
       AdjustBorderBoxLogicalWidthForBoxSizing(LayoutUnit computedLogicalWidth) const noexcept;
+    KRYS_NODISCARD LayoutUnit AdjustContentBoxLogicalWidthForBoxSizing(
+      const style::Length<css::NonNegativeUnzoomed> &logicalWidth) const noexcept;
     KRYS_NODISCARD LayoutUnit
       AdjustContentBoxLogicalWidthForBoxSizing(LayoutUnit computedLogicalWidth) const noexcept;
     // Overridden by fieldsets to subtract out the intrinsic border.
@@ -908,6 +912,8 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutPoint TopLeftLocationWithFlipping() const noexcept;
 
+    void ComputeOutOfFlowPositionedLogicalWidth(LogicalExtentComputedValues &computedValues) const noexcept;
+
   private:
     void AddOverflowWithRendererOffset(const RenderBox &renderer, LayoutSize offsetFromThis,
                                        EnumSet<ComputeOverflowOptions> options = {}) noexcept;
@@ -921,7 +927,6 @@ namespace krys::boo
     KRYS_NODISCARD LayoutUnit FillAvailableMeasure(LayoutUnit availableLogicalWidth, LayoutUnit &marginStart,
                                                    LayoutUnit &marginEnd) const noexcept;
 
-    void ComputeOutOfFlowPositionedLogicalWidth(LogicalExtentComputedValues &computedValues) const noexcept;
     void ComputeOutOfFlowPositionedLogicalHeight(LogicalExtentComputedValues &computedValues) const noexcept;
     template <typename SizeType>
     KRYS_NODISCARD LayoutUnit ComputeOutOfFlowPositionedLogicalWidthUsing(

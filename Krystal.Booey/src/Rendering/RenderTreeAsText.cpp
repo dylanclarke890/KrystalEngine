@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
-#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
@@ -164,10 +164,16 @@ namespace krys::boo
     {
       r = LayoutRect(inlineFlow->LinesBoundingBox());
     }
+    else if (auto *cell = DynamicDowncast<RenderTableCell>(o))
+    {
+      // FIXME: Deliberately dump the "inner" box of table cells, since that is what current results reflect.
+      // We'd like to clean up the results to dump both the outer box and the intrinsic padding so that both
+      // bits of information are captured by the results.
+      r = LayoutRect(cell->X(), cell->Y() + cell->IntrinsicPaddingBefore(), cell->Width(),
+                     cell->Height() - cell->IntrinsicPaddingBefore() - cell->IntrinsicPaddingAfter());
+    }
     else if (auto *box = DynamicDowncast<RenderBox>(o))
     {
-      // FIXME: Deliberately dump the "inner" box of table cells (without their intrinsic padding), since that
-      // is what current results reflect, once table layout gives them intrinsic padding.
       r = box->FrameRect();
     }
     // FIXME: Convert layout test results to report sub-pixel values, in the meantime using enclosingIntRect
@@ -282,7 +288,11 @@ namespace krys::boo
       // FIXME: The padding of MathML blocks, once there's MathML.
     }
 
-    // FIXME: A table cell's row and column indices and spans ([r= c= rs= cs=]), once there's table layout.
+    if (auto *cell = DynamicDowncast<RenderTableCell>(o))
+    {
+      ts << " [r=" << cell->RowIndex() << " c=" << cell->Col() << " rs=" << cell->RowSpan()
+         << " cs=" << cell->ColSpan() << ']';
+    }
 
     if (auto *listMarker = DynamicDowncast<RenderListMarker>(o))
     {
@@ -428,9 +438,13 @@ namespace krys::boo
         auto y = static_cast<int32>(rect.Y());
         // FIXME: Use non-logical width.
         auto logicalWidth =
-          static_cast<int32>(std::ceil(rect.X() + (textRun.IsHorizontal() ? rect.Width() : rect.Height()))) - x;
-        // FIXME: Subtract the table cell's intrinsic padding (a temporary adjustment until the results are updated),
-        // once there's table layout.
+          static_cast<int32>(std::ceil(rect.X() + (textRun.IsHorizontal() ? rect.Width() : rect.Height())))
+          - x;
+        // FIXME: Table cell adjustment is temporary until results can be updated.
+        if (auto *tableCell = DynamicDowncast<RenderTableCell>(*textRenderer.ContainingBlock()))
+        {
+          y -= tableCell->IntrinsicPaddingBefore().Floor();
+        }
 
         ts << "text run at (" << x << ',' << y << ") width " << logicalWidth;
         if (!textRun.IsLeftToRightDirection())
@@ -440,7 +454,8 @@ namespace krys::boo
         ts << ": " << QuoteAndEscapeNonPrintables(textRun.OriginalText());
         if (textRun.HasHyphen())
         {
-          ts << " + hyphen string " << QuoteAndEscapeNonPrintables(textRenderer.Style().HyphenString().View());
+          ts << " + hyphen string "
+             << QuoteAndEscapeNonPrintables(textRenderer.Style().HyphenString().View());
         }
         ts << '\n';
       };
