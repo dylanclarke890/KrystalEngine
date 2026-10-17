@@ -750,6 +750,8 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/RenderInline.hpp
   include/Krystal.Booey/Rendering/RenderReplaced.hpp
   include/Krystal.Booey/Rendering/RenderFlexibleBox.hpp
+  include/Krystal.Booey/Rendering/OrderIterator.hpp
+  include/Krystal.Booey/Rendering/BaselineAlignment.hpp
   include/Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp
   include/Krystal.Booey/Rendering/RenderGrid.hpp
   include/Krystal.Booey/Rendering/RenderListItem.hpp
@@ -785,6 +787,12 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Layout/FormattingContexts/FormattingContext.hpp
   include/Krystal.Booey/Layout/FormattingContexts/Block/BlockFormattingState.hpp
   include/Krystal.Booey/Layout/FormattingContexts/Block/BlockLayoutState.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Flex/FlexFormattingConstraints.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Flex/FlexRect.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Flex/LogicalFlexItem.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Flex/FlexFormattingUtils.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Flex/FlexLayout.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Flex/FlexFormattingContext.hpp
   include/Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp
   include/Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextBreakingPositionContext.hpp
   include/Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextBreakingPositionCache.hpp
@@ -834,6 +842,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContent.hpp
   include/Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContentBuilder.hpp
   include/Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp
+  include/Krystal.Booey/Layout/Integration/Flex/LayoutIntegrationFlexLayout.hpp
   include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorBoxModernPath.hpp
   include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorBox.hpp
   include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp
@@ -2086,6 +2095,8 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/RenderInline.cpp
   src/Rendering/RenderReplaced.cpp
   src/Rendering/RenderFlexibleBox.cpp
+  src/Rendering/OrderIterator.cpp
+  src/Rendering/BaselineAlignment.cpp
   src/Rendering/RenderDeprecatedFlexibleBox.cpp
   src/Rendering/RenderGrid.cpp
   src/Rendering/RenderListItem.cpp
@@ -2128,6 +2139,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Layout/FormattingContexts/Inline/InlineLineBoxBuilder.cpp
   src/Layout/FormattingContexts/Inline/InlineFormattingContext.cpp
   src/Layout/FormattingContexts/Inline/AbstractLineBuilder.cpp
+  src/Layout/FormattingContexts/Flex/FlexFormattingUtils.cpp
+  src/Layout/FormattingContexts/Flex/FlexLayout.cpp
+  src/Layout/FormattingContexts/Flex/FlexFormattingContext.cpp
   src/Layout/FormattingContexts/Inline/InlineLineBuilder.cpp
   src/Layout/FormattingContexts/Inline/TextOnlySimpleLineBuilder.cpp
   src/Layout/FormattingContexts/Inline/RangeBasedLineBuilder.cpp
@@ -2147,6 +2161,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Layout/Integration/Inline/LayoutIntegrationInlineContent.cpp
   src/Layout/Integration/Inline/LayoutIntegrationInlineContentBuilder.cpp
   src/Layout/Integration/Inline/LayoutIntegrationLineLayout.cpp
+  src/Layout/Integration/Flex/LayoutIntegrationFlexLayout.cpp
   src/Layout/Integration/Inline/InlineIteratorBox.cpp
   src/Layout/Integration/Inline/InlineIteratorTextBox.cpp
   src/Layout/Integration/Inline/InlineIteratorInlineBox.cpp

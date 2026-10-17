@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
 #include "Krystal.Booey/Rendering/FloatingObjects.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
+#include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/Shapes/ShapeOutsideInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/TextBoxTrimmer.hpp"
@@ -222,13 +223,22 @@ namespace krys::boo::layout_integration
   {
     krys_debug_assert(box.EstablishesFormattingContext());
 
+    auto &renderer = Downcast<RenderBox>(*box.RendererForIntegration());
     switch (logicalHeightType)
     {
       case LogicalHeightType::MinContent:
-        // FIXME: The flex item's cached intrinsic content height
-        // (cachedFlexItemIntrinsicContentLogicalHeight), once there's flex layout.
+      {
+        // Since currently we can't ask RenderBox for content height, this is limited to flex items
+        // where the legacy flex layout "fixed" this by caching the content height in
+        // RenderBox::updateLogicalHeight before additional height constraints applied.
+        if (auto *flexContainer = DynamicDowncast<RenderFlexibleBox>(renderer.Parent()))
+        {
+          return flexContainer->CachedFlexItemIntrinsicContentLogicalHeight(renderer);
+        }
+        // FIXME: Not implemented yet.
         krys_debug_assert(false);
         return {};
+      }
     }
     krys_debug_assert(false);
     return {};

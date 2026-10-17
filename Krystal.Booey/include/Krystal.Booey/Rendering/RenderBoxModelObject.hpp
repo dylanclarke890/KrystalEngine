@@ -21,6 +21,12 @@ namespace krys::boo
   class RenderBlock;
   class RenderTextFragment;
 
+  enum class LineDirection : bool
+  {
+    Horizontal,
+    Vertical
+  };
+
   /// @brief A renderer that follows the CSS box model: a box or an inline box.
   // FIXME: Painting (backgrounds, borders, box shadows), continuations and sticky positioning come with
   // painting and scrolling.

@@ -199,7 +199,11 @@ namespace krys::boo
           // We are about to go out of flow. Before that takes place, we need to mark the
           // current containing block chain for preferred widths recalculation.
           SetNeedsLayoutAndPreferredWidthsUpdate();
-          // FIXME: Clear the flex container's cached sizes of the item, once there's flex layout.
+          if (auto *flexContainer = DynamicDowncast<RenderFlexibleBox>(Parent()))
+          {
+            flexContainer->ClearCachedFlexItemIntrinsicContentLogicalHeight(*this);
+            flexContainer->ClearCachedMainSizeForFlexItem(*this);
+          }
           if (dom::IsInTopLayerOrBackdrop(Style(), GetElement()))
           {
             // Since top layer's containing block is driven by the associated element's state (see
@@ -2433,6 +2437,27 @@ namespace krys::boo
     SetLogicalHeight(intrinsicHeight + borderAndPadding + LayoutUnit(ScrollbarLogicalHeight()));
   }
 
+  void RenderBox::CacheIntrinsicContentLogicalHeightForFlexItem(LayoutUnit height) const noexcept
+  {
+    // FIXME: it should be enough with checking hasOverridingLogicalHeight() as this logic could be shared
+    // by any layout system using overrides like grid or flex. However this causes a never ending sequence of
+    // calls between layoutBlock() <-> relayoutToAvoidWidows().
+    if (IsFloatingOrOutOfFlowPositioned())
+    {
+      return;
+    }
+    auto *flexibleBox = DynamicDowncast<RenderFlexibleBox>(Parent());
+    if (!flexibleBox)
+    {
+      return;
+    }
+    if (OverridingBorderBoxLogicalHeight() || ShouldComputeLogicalHeightFromAspectRatio())
+    {
+      return;
+    }
+    flexibleBox->SetCachedFlexItemIntrinsicContentLogicalHeight(*this, height);
+  }
+
   void RenderBox::UpdateLogicalHeight() noexcept
   {
     if (ShouldApplySizeContainment() && !IsRenderGrid())
@@ -2440,8 +2465,7 @@ namespace krys::boo
       OverrideLogicalHeightForSizeContainment();
     }
 
-    // FIXME: Cache the intrinsic content height of a flex item
-    // (cacheIntrinsicContentLogicalHeightForFlexItem), once there's flex layout.
+    CacheIntrinsicContentLogicalHeightForFlexItem(ContentBoxLogicalHeight());
     auto computedValues = ComputeLogicalHeight(LogicalHeight(), LogicalTop());
     SetLogicalHeight(computedValues.Extent);
     SetLogicalTop(computedValues.Position);

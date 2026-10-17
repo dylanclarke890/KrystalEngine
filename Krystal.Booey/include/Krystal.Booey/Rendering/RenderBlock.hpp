@@ -255,8 +255,27 @@ namespace krys::boo
 
     /// @brief Lays out the children that normal layout skips: a fieldset's legend.
     virtual void LayoutExcludedChildren(RelayoutChildren relayoutChildren) noexcept;
+    /// @brief Computes the preferred widths of the children that normal layout skips.
+    /// @return Whether there were any.
+    KRYS_NODISCARD virtual bool
+      ComputePreferredWidthsForExcludedChildren(LayoutUnit &minWidth, LayoutUnit &maxWidth) const noexcept;
+
+    KRYS_NODISCARD LayoutUnit MarginIntrinsicLogicalWidthForChild(RenderBox &child) const noexcept;
 
     void UpdateScrollInfoAfterLayout() noexcept;
+
+    // Delay updating scrollbars until endAndCommitUpdateScrollInfoAfterLayoutTransaction() is called. These
+    // functions are used when a flexbox is laying out its descendants. If multiple calls are made to
+    // beginUpdateScrollInfoAfterLayoutTransaction() then endAndCommitUpdateScrollInfoAfterLayoutTransaction()
+    // will do nothing until it is called the same number of times.
+    void BeginUpdateScrollInfoAfterLayoutTransaction() noexcept;
+    void EndAndCommitUpdateScrollInfoAfterLayoutTransaction() noexcept;
+
+    void RemoveFromUpdateScrollInfoAfterLayoutTransaction() noexcept;
+
+    /// @brief The logical bottom of a flex or grid container's layout overflow: its in-flow children's margin
+    /// boxes plus its after padding, and at least its client box.
+    KRYS_NODISCARD static LayoutUnit LayoutOverflowLogicalBottom(const RenderBlock &renderer) noexcept;
 
   protected:
     RenderBlock(Type type, dom::Element &element, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags = {},

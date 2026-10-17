@@ -542,6 +542,7 @@ namespace krys::boo
 
     virtual void UpdateLogicalWidth() noexcept;
     void UpdateLogicalHeight() noexcept;
+    void CacheIntrinsicContentLogicalHeightForFlexItem(LayoutUnit height) const noexcept;
     KRYS_NODISCARD virtual LogicalExtentComputedValues
       ComputeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logicalTop) const noexcept;
     void ComputeLogicalWidth(LogicalExtentComputedValues &computedValues) const noexcept;

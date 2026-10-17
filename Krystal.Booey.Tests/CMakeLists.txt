@@ -384,6 +384,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Layout/FormattingContexts/Inline/Ruby/RubyFormattingContext.cpp
 		tests/Layout/FormattingContexts/Inline/Invalidation/InlineInvalidation.cpp
 		tests/Rendering/TextBoxTrimmer.cpp
+		tests/Rendering/RenderFlexibleBox.cpp
 		tests/Rendering/LineClampUpdater.cpp
 		tests/Rendering/Updating/RenderTreeBuilderRuby.cpp
 		tests/Rendering/BreakablePositions.cpp

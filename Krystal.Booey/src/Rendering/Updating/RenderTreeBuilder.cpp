@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"
+#include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderListItem.hpp"
@@ -1048,7 +1049,7 @@ namespace krys::boo
     return takenChild;
   }
 
-  static void ResetRendererStateOnDetach(RenderElement &, RenderObject &child,
+  static void ResetRendererStateOnDetach(RenderElement &parent, RenderObject &child,
                                          RenderTreeBuilder::WillBeDestroyed willBeDestroyed,
                                          RenderTreeBuilder::IsInternalMove isInternalMove) noexcept
   {
@@ -1056,7 +1057,14 @@ namespace krys::boo
     {
       Downcast<RenderBox>(child).RemoveFloatingOrOutOfFlowChildFromBlockLists();
     }
-    // FIXME: Otherwise clear a flex box's cached sizes of the item, once there's flex layout.
+    else if (auto *parentFlexibleBox = DynamicDowncast<RenderFlexibleBox>(parent))
+    {
+      if (auto *childBox = DynamicDowncast<RenderBox>(child))
+      {
+        parentFlexibleBox->ClearCachedFlexItemIntrinsicContentLogicalHeight(*childBox);
+        parentFlexibleBox->ClearCachedMainSizeForFlexItem(*childBox);
+      }
+    }
 
     if (willBeDestroyed == RenderTreeBuilder::WillBeDestroyed::No)
     {

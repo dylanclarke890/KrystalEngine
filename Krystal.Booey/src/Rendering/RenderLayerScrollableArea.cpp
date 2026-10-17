@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Rendering/LayoutScope.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
+#include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -841,7 +842,13 @@ namespace krys::boo
         }
       }
 
-      // FIXME: Clear the parent flex box's cached main size of the item, once there's flex layout.
+      // FIXME: This does not belong here.
+      auto *parent = renderer.Parent();
+      if (auto *parentFlexibleBox = DynamicDowncast<RenderFlexibleBox>(parent);
+          parentFlexibleBox && renderer.IsRenderBox())
+      {
+        parentFlexibleBox->ClearCachedMainSizeForFlexItem(*_layer.GetRenderBox());
+      }
     }
 
     // Set up the range.

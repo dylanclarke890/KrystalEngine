@@ -8,6 +8,7 @@
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/ListHashSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
@@ -21,6 +22,7 @@ namespace krys::boo
 {
   class LocalFrame;
   class LocalFrameView;
+  class RenderBlock;
   class RenderBlockFlow;
   class RenderBox;
   class RenderLayoutState;
@@ -57,6 +59,15 @@ namespace krys::boo
       WeakPtr<const RenderBlockFlow> LastFormattedLineRoot;
     };
 
+    /// @brief The blocks whose scroll info update is delayed until the outermost transaction (a flex
+    /// container's layout) commits.
+    struct UpdateScrollInfoAfterLayoutTransaction
+    {
+      int32 NestedCount {0};
+      // Keyed by address: a block removes itself when it's destroyed.
+      ListHashSet<RenderBlock *> Blocks;
+    };
+
   private:
     enum class LayoutNestedState : uint8
     {
@@ -78,6 +89,7 @@ namespace krys::boo
     bool _needsFullRepaint {true};
     uint32 _paintOffsetCacheDisableCount {0};
     Maybe<TextBoxTrim> _textBoxTrim;
+    Maybe<UpdateScrollInfoAfterLayoutTransaction> _updateScrollInfoAfterLayoutTransaction;
     // Keyed by address: flex layout removes each item it adds.
     HashSet<const RenderBox *> _percentHeightIgnoreList;
 
@@ -135,6 +147,21 @@ namespace krys::boo
     void SetTextBoxTrim(Maybe<TextBoxTrim> textBoxTrim) noexcept
     {
       _textBoxTrim = krys::move(textBoxTrim);
+    }
+
+    KRYS_NODISCARD UpdateScrollInfoAfterLayoutTransaction &
+      GetUpdateScrollInfoAfterLayoutTransaction() noexcept
+    {
+      if (!_updateScrollInfoAfterLayoutTransaction)
+      {
+        _updateScrollInfoAfterLayoutTransaction.emplace();
+      }
+      return *_updateScrollInfoAfterLayoutTransaction;
+    }
+    KRYS_NODISCARD UpdateScrollInfoAfterLayoutTransaction *
+      UpdateScrollInfoAfterLayoutTransactionIfExists() noexcept
+    {
+      return _updateScrollInfoAfterLayoutTransaction ? &*_updateScrollInfoAfterLayoutTransaction : nullptr;
     }
 
     /// @brief The renderer the next layout starts from, if it's a subtree layout.

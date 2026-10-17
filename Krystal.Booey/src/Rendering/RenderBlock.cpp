@@ -314,6 +314,7 @@ namespace krys::boo
 
   void RenderBlock::WillBeDestroyed() noexcept
   {
+    RemoveFromUpdateScrollInfoAfterLayoutTransaction();
     RemoveContainerFromTrackedRendererMaps(*this);
     GetOutOfFlowDescendantsMap().RemoveContainingBlock(*this);
     RenderBox::WillBeDestroyed();
@@ -1118,9 +1119,9 @@ namespace krys::boo
 
   void RenderBlock::LayoutBlock(RelayoutChildren, LayoutUnit) noexcept
   {
-    // FIXME: Stands in for the layout of the flex box, the grid and the table classes until they're ported
-    // (upstream asserts this isn't reached): lays out the children without placing or sizing anything, and
-    // clears the inline content, which has no lines yet.
+    // FIXME: Stands in for the layout of the grid and the table classes until they're ported (upstream
+    // asserts this isn't reached): lays out the children without placing or sizing anything, and clears the
+    // inline content, which has no lines yet.
     LayoutChildrenWithoutLineLayout();
   }
 
@@ -1484,9 +1485,17 @@ namespace krys::boo
 
     outOfFlowBox.LayoutIfNeeded();
 
-    // FIXME: The static position of a flex box's out-of-flow child depends on its size, so it may have to
-    // lay out again (setStaticPositionForPositionedLayout), once there's flex layout.
+    auto *parent = outOfFlowBox.Parent();
     bool layoutChanged = false;
+    if (auto *flexibleBox = DynamicDowncast<RenderFlexibleBox>(*parent);
+        flexibleBox && flexibleBox->SetStaticPositionForPositionedLayout(outOfFlowBox))
+    {
+      // The static position of an abspos child of a flexbox depends on its size
+      // (for example, they can be centered). So we may have to reposition the
+      // item after layout.
+      // FIXME: We could probably avoid a layout here and just reposition?
+      layoutChanged = true;
+    }
 
     // Lay out again if our estimate was wrong.
     if (layoutChanged
@@ -1781,8 +1790,13 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The rendered legend of a fieldset (computePreferredWidthsForExcludedChildren), once there are
-    // fieldsets.
+    LayoutUnit childMinWidth;
+    LayoutUnit childMaxWidth;
+    if (ComputePreferredWidthsForExcludedChildren(childMinWidth, childMaxWidth))
+    {
+      minLogicalWidth = std::max(childMinWidth, minLogicalWidth);
+      maxLogicalWidth = std::max(childMaxWidth, maxLogicalWidth);
+    }
 
     LayoutUnit floatLeftWidth;
     LayoutUnit floatRightWidth;
@@ -1961,13 +1975,123 @@ namespace krys::boo
     }
   }
 
+  namespace
+  {
+    KRYS_NODISCARD inline bool IsDelayingUpdateScrollInfoAfterLayout(const RenderBlock &renderer) noexcept
+    {
+      auto *transaction =
+        renderer.View().FrameView().LayoutContext().UpdateScrollInfoAfterLayoutTransactionIfExists();
+      // FIXME: https://bugs.webkit.org/show_bug.cgi?id=97937
+      // Workaround for now. We cannot delay the scroll info for overflow
+      // for items with opposite writing directions, as the contents needs
+      // to overflow in that direction
+      return transaction && transaction->NestedCount && !renderer.GetWritingMode().IsBlockFlipped();
+    }
+  }
+
+  void RenderBlock::BeginUpdateScrollInfoAfterLayoutTransaction() noexcept
+  {
+    ++View().FrameView().LayoutContext().GetUpdateScrollInfoAfterLayoutTransaction().NestedCount;
+  }
+
+  void RenderBlock::EndAndCommitUpdateScrollInfoAfterLayoutTransaction() noexcept
+  {
+    auto *transaction = View().FrameView().LayoutContext().UpdateScrollInfoAfterLayoutTransactionIfExists();
+    krys_debug_assert(transaction);
+    if (--transaction->NestedCount)
+    {
+      return;
+    }
+
+    // Calling RenderLayer::updateScrollInfoAfterLayout() may cause its associated block to layout again and
+    // updates its scroll info (i.e. call RenderBlock::updateScrollInfoAfterLayout()). We decrement the
+    // nestedCount first so that all subsequent calls to RenderBlock::updateScrollInfoAfterLayout() are
+    // dispatched immediately. That is, to ensure that such subsequent calls aren't added to |transaction|
+    // while we are processing it.
+    auto blocksToUpdate = List<RenderBlock *>(transaction->Blocks.begin(), transaction->Blocks.end());
+    transaction->Blocks.clear();
+
+    for (auto *block : blocksToUpdate)
+    {
+      // FIXME: Clear the layout overflow of a lightweight control clip, once there are form controls.
+      if (block->HasNonVisibleOverflow())
+      {
+        block->Layer()->UpdateScrollInfoAfterLayout();
+      }
+    }
+  }
+
+  void RenderBlock::RemoveFromUpdateScrollInfoAfterLayoutTransaction() noexcept
+  {
+    if (auto *transaction =
+          View().FrameView().LayoutContext().UpdateScrollInfoAfterLayoutTransactionIfExists())
+    {
+      transaction->Blocks.remove(this);
+    }
+  }
+
   void RenderBlock::UpdateScrollInfoAfterLayout() noexcept
   {
-    // FIXME: Delay the update while a scroll info update transaction is open
-    // (isDelayingUpdateScrollInfoAfterLayout), once flex and grid layout open them.
-    if (HasNonVisibleOverflow() && Layer())
+    auto hasNonVisibleOverflow = HasNonVisibleOverflow();
+
+    if (IsDelayingUpdateScrollInfoAfterLayout(*this))
+    {
+      // FIXME: Also delay a lightweight control clip's update, once there are form controls.
+      if (hasNonVisibleOverflow)
+      {
+        View().FrameView().LayoutContext().UpdateScrollInfoAfterLayoutTransactionIfExists()->Blocks.add(this);
+        return;
+      }
+    }
+
+    if (hasNonVisibleOverflow && Layer())
     {
       Layer()->UpdateScrollInfoAfterLayout();
     }
+  }
+
+  LayoutUnit RenderBlock::MarginIntrinsicLogicalWidthForChild(RenderBox &child) const noexcept
+  {
+    // A margin has three types: fixed, percentage, and auto (variable).
+    // Auto and percentage margins become 0 when computing min/max width.
+    // Fixed margins can be added in as is.
+    auto &marginLeft = child.Style().MarginStart(GetWritingMode());
+    auto &marginRight = child.Style().MarginEnd(GetWritingMode());
+    const auto &zoomFactor = child.Style().UsedZoomForLength();
+    LayoutUnit margin;
+    if (auto fixedMarginLeft = marginLeft.TryFixed();
+        fixedMarginLeft && !ShouldTrimChildMargin(style::MarginTrimSide::InlineStart, child))
+    {
+      margin += fixedMarginLeft->ResolveZoom(zoomFactor);
+    }
+    if (auto fixedMarginRight = marginRight.TryFixed();
+        fixedMarginRight && !ShouldTrimChildMargin(style::MarginTrimSide::InlineEnd, child))
+    {
+      margin += fixedMarginRight->ResolveZoom(zoomFactor);
+    }
+    return margin;
+  }
+
+  bool RenderBlock::ComputePreferredWidthsForExcludedChildren(LayoutUnit &, LayoutUnit &) const noexcept
+  {
+    // FIXME: The rendered legend of a fieldset, once there are fieldsets.
+    return false;
+  }
+
+  LayoutUnit RenderBlock::LayoutOverflowLogicalBottom(const RenderBlock &renderer) noexcept
+  {
+    krys_debug_assert(Is<RenderGrid>(renderer) || Is<RenderFlexibleBox>(renderer));
+    auto maxChildLogicalBottom = LayoutUnit {};
+    for (auto &child : ChildrenOfType<RenderBox>(renderer))
+    {
+      if (child.IsOutOfFlowPositioned())
+      {
+        continue;
+      }
+      auto childLogicalBottom = renderer.LogicalTopForChild(child) + renderer.LogicalHeightForChild(child)
+                                + renderer.MarginAfterForChild(child);
+      maxChildLogicalBottom = std::max(maxChildLogicalBottom, childLogicalBottom);
+    }
+    return std::max(renderer.ClientLogicalBottom(), maxChildLogicalBottom + renderer.PaddingAfter());
   }
 }
