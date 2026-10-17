@@ -2,6 +2,8 @@
 #include "Krystal.Booey/CSS/Counter/CounterStyle.hpp"
 #include "Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/TextRun.hpp"
 #include "Krystal.Booey/Rendering/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
@@ -46,6 +48,69 @@ namespace krys::boo
         return TextDirection::LTR;
       }
       return TextDirection::RTL;
+    }
+
+    // This is temporary and will be removed when subpixel inline layout is enabled.
+    // FIXME: Stop snapping once inline layout is subpixel.
+    enum class SnapDirection : uint8
+    {
+      Floor,
+      Ceil,
+      Round
+    };
+    KRYS_NODISCARD float Snap(float value, SnapDirection direction = SnapDirection::Round) noexcept
+    {
+      switch (direction)
+      {
+        case SnapDirection::Floor: return std::floor(value);
+        case SnapDirection::Ceil:  return std::ceil(value);
+        case SnapDirection::Round: return std::round(value);
+      }
+      krys_debug_assert(false);
+      return value;
+    }
+
+    KRYS_NODISCARD utf8_string Reversed(utf8_stringview text) noexcept
+    {
+      List<char32> codePoints;
+      for (auto it = text::CodePointIterator(text); !it.AtEnd(); ++it)
+      {
+        codePoints.push_back(*it);
+      }
+      StringBuilder builder;
+      for (auto codePoint = codePoints.rbegin(); codePoint != codePoints.rend(); ++codePoint)
+      {
+        builder.Append(*codePoint);
+      }
+      return krys::move(builder).ToString();
+    }
+
+    KRYS_NODISCARD utf8_string TextForRun(const ListMarkerTextContent &textContent,
+                                          const RenderStyle &style) noexcept
+    {
+      krys_debug_assert(!textContent.IsEmpty());
+
+      // Since the bidi algorithm doesn't run on this text, we instead reorder the characters here.
+      // We use u_charDirection to figure out if the marker text is RTL and assume the suffix matches the
+      // surrounding direction.
+      StringBuilder textForRun;
+      if (textContent.TextDirection == TextDirection::LTR)
+      {
+        if (style.GetWritingMode().IsBidiLTR())
+        {
+          return textContent.TextWithSuffix;
+        }
+        textForRun.Append(Reversed(textContent.Suffix()), textContent.TextWithoutSuffix());
+      }
+      else
+      {
+        if (!style.GetWritingMode().IsBidiLTR())
+        {
+          return Reversed(textContent.TextWithSuffix);
+        }
+        textForRun.Append(Reversed(textContent.TextWithoutSuffix()), textContent.Suffix());
+      }
+      return krys::move(textForRun).ToString();
     }
   }
 
@@ -92,18 +157,74 @@ namespace krys::boo
     return _image && !_image->ErrorOccurred();
   }
 
+  RenderBox *RenderListMarker::ParentBox(RenderBox &box) noexcept
+  {
+    krys_debug_assert(_listItem);
+    // FIXME: The column spanner placeholder's parent inside a multi-column flow, once there's multi-column
+    // layout.
+    return box.ParentBox();
+  }
+
+  void RenderListMarker::Layout() noexcept
+  {
+    krys_debug_assert(NeedsLayout());
+
+    LayoutUnit blockOffset;
+    for (auto *ancestor = ParentBox(*this); ancestor && ancestor != _listItem.get();
+         ancestor = ParentBox(*ancestor))
+    {
+      blockOffset += ancestor->LogicalTop();
+    }
+
+    _lineLogicalOffsetForListItem = _listItem->LogicalLeftOffsetForLine(blockOffset);
+
+    if (IsImage())
+    {
+      UpdateInlineMarginsAndContent();
+      // FIXME: The image's size, once there's image loading.
+      SetWidth(0_lu);
+      SetHeight(0_lu);
+      _layoutBounds = {Height().ToFloat(), 0.f};
+    }
+    else
+    {
+      SetLogicalWidth(MinPreferredLogicalWidth());
+      SetLogicalHeight(LayoutUnit(Style().MetricsOfPrimaryFont().IntHeight()));
+      _layoutBounds = LayoutBoundForTextContent(_textContent.TextWithSuffix);
+    }
+
+    SetMarginStart(0_lu);
+    SetMarginEnd(0_lu);
+
+    if (auto fixedStartMargin = Style().MarginStart().TryFixed())
+    {
+      SetMarginStart(LayoutUnit(fixedStartMargin->ResolveZoom(Style().UsedZoomForLength())));
+    }
+    if (auto fixedEndMargin = Style().MarginEnd().TryFixed())
+    {
+      SetMarginEnd(LayoutUnit(fixedEndMargin->ResolveZoom(Style().UsedZoomForLength())));
+    }
+
+    ClearNeedsLayout();
+  }
+
   void RenderListMarker::UpdateInlineMarginsAndContent() noexcept
   {
-    // FIXME: Only update the content when the preferred widths need updating, and update the inline margins,
-    // once there's layout.
-    UpdateContent();
+    // FIXME: It's messy to use the preferredLogicalWidths dirty bit for this optimization, also unclear if
+    // this is premature optimization.
+    if (NeedsPreferredLogicalWidthsUpdate())
+    {
+      UpdateContent();
+    }
+    UpdateInlineMargins();
   }
 
   void RenderListMarker::UpdateContent() noexcept
   {
     if (IsImage())
     {
-      // FIXME: The image's container size, once there's image loading and layout.
+      // FIXME: The image's container size (a default bullet of half the ascent, or the image's intrinsic
+      // size), once there's image loading.
       _textContent = {
         .TextWithSuffix = {},
         .TextWithoutSuffixLength = 0,
@@ -147,6 +268,93 @@ namespace krys::boo
       });
   }
 
+  void RenderListMarker::ComputePreferredLogicalWidths() noexcept
+  {
+    krys_debug_assert(NeedsPreferredLogicalWidthsUpdate());
+    UpdateContent();
+
+    if (IsImage())
+    {
+      // FIXME: The image's size, once there's image loading.
+      _minPreferredLogicalWidth = _maxPreferredLogicalWidth = 0_lu;
+      ClearNeedsPreferredWidthsUpdate();
+      UpdateInlineMargins();
+      return;
+    }
+
+    const FontCascade &font = Style().GetFontCascade();
+
+    LayoutUnit logicalWidth;
+    if (WidthUsesMetricsOfPrimaryFont())
+    {
+      logicalWidth = LayoutUnit((font.MetricsOfPrimaryFont().IntAscent() * 2 / 3 + 1) / 2 + 2);
+    }
+    else if (!_textContent.IsEmpty())
+    {
+      auto text = TextForRun(_textContent, Style());
+      logicalWidth = LayoutUnit(font.Width(TextRun(text)));
+    }
+
+    _minPreferredLogicalWidth = logicalWidth;
+    _maxPreferredLogicalWidth = logicalWidth;
+
+    ClearNeedsPreferredWidthsUpdate();
+
+    UpdateInlineMargins();
+  }
+
+  void RenderListMarker::UpdateInlineMargins() noexcept
+  {
+    constexpr int32 markerPadding = 7;
+    const FontMetrics &fontMetrics = Style().MetricsOfPrimaryFont();
+
+    auto marginsForInsideMarker = [&]() -> Pair<LayoutUnit, LayoutUnit>
+    {
+      if (IsImage())
+      {
+        return {0_lu, LayoutUnit(markerPadding)};
+      }
+
+      if (WidthUsesMetricsOfPrimaryFont())
+      {
+        return {LayoutUnit(-1), LayoutUnit(fontMetrics.IntAscent()) - MinPreferredLogicalWidth() + 1};
+      }
+
+      return {0_lu, 0_lu};
+    };
+
+    auto marginsForOutsideMarker = [&]() -> Pair<LayoutUnit, LayoutUnit>
+    {
+      if (IsImage())
+      {
+        return {-MinPreferredLogicalWidth() - markerPadding, LayoutUnit(markerPadding)};
+      }
+
+      int32 offset = fontMetrics.IntAscent() * 2 / 3;
+      if (WidthUsesMetricsOfPrimaryFont())
+      {
+        return {LayoutUnit(-offset - markerPadding - 1),
+                LayoutUnit(offset + markerPadding + 1) - MinPreferredLogicalWidth()};
+      }
+
+      if (_textContent.IsEmpty())
+      {
+        return {0_lu, 0_lu};
+      }
+
+      if (Style().GetListStyleType().IsString())
+      {
+        return {-MinPreferredLogicalWidth(), 0_lu};
+      }
+
+      return {-MinPreferredLogicalWidth() - offset / 2, LayoutUnit(offset / 2)};
+    };
+
+    auto [marginStart, marginEnd] = IsInside() ? marginsForInsideMarker() : marginsForOutsideMarker();
+    MutableStyle().SetMarginStart(style::MarginEdge::Fixed {marginStart.ToFloat()});
+    MutableStyle().SetMarginEnd(style::MarginEdge::Fixed {marginEnd.ToFloat()});
+  }
+
   bool RenderListMarker::IsInside() const noexcept
   {
     return Style().GetListStylePosition() == ListStylePosition::Inside;
@@ -176,5 +384,59 @@ namespace krys::boo
       return nullptr;
     }
     return GetDocument().StyleScope().GetCounterStyleRegistry().ResolvedCounterStyle(*counterStyle);
+  }
+
+  bool RenderListMarker::WidthUsesMetricsOfPrimaryFont() const noexcept
+  {
+    const auto &listType = Style().GetListStyleType();
+    return listType.IsCircle() || listType.IsDisc() || listType.IsSquare();
+  }
+
+  Pair<float, float> RenderListMarker::LayoutBoundForTextContent(utf8_stringview text) const noexcept
+  {
+    // FIXME: This should be part of the inline box builder.
+    // This is essentially what we do in LineBoxBuilder::enclosingAscentDescentWithFallbackFonts.
+    auto ascentAndDescent = [&](const FontMetrics &fontMetrics)
+    {
+      auto ascent = Snap(fontMetrics.Ascent());
+      auto descent = Snap(fontMetrics.Descent());
+      auto halfLeading = (Snap(fontMetrics.LineSpacing()) - (ascent + descent)) / 2.f;
+      return Pair<float, float> {Snap(ascent + halfLeading, SnapDirection::Floor),
+                                 Snap(descent + halfLeading, SnapDirection::Ceil)};
+    };
+    const auto &style = Style();
+    const auto &metricsOfPrimaryFont = style.MetricsOfPrimaryFont();
+    auto primaryFontHeight = Snap(metricsOfPrimaryFont.Height());
+
+    if (style.GetLineHeight().IsNormal())
+    {
+      auto maxAscentAndDescent = ascentAndDescent(metricsOfPrimaryFont);
+
+      HashSet<RefPtr<const Font>> fallbackFonts;
+      (void)style.GetFontCascade().Width(
+        TextRun(text, 0, 0, ExpansionBehavior::DefaultBehavior(), style.GetWritingMode().BidiDirection()),
+        &fallbackFonts);
+      for (const auto &fallbackFont : fallbackFonts)
+      {
+        const auto &fontMetrics = fallbackFont->GetFontMetrics();
+        if (primaryFontHeight >= Snap(fontMetrics.Height(), SnapDirection::Floor))
+        {
+          // FIXME: Figure out why certain symbols (e.g. disclosure-open) would initiate fallback fonts with
+          // just slightly different (subpixel) metrics. This is mainly about preserving legacy behavior.
+          continue;
+        }
+        auto ascentDescent = ascentAndDescent(fontMetrics);
+        maxAscentAndDescent.first = std::max(maxAscentAndDescent.first, ascentDescent.first);
+        maxAscentAndDescent.second = std::max(maxAscentAndDescent.second, ascentDescent.second);
+      }
+      return maxAscentAndDescent;
+    }
+
+    auto primaryFontAscentAndDescent = ascentAndDescent(metricsOfPrimaryFont);
+    auto halfLeading = (Snap(style.ComputedLineHeight(), SnapDirection::Floor)
+                        - (primaryFontAscentAndDescent.first + primaryFontAscentAndDescent.second))
+                       / 2.f;
+    return {Snap(primaryFontAscentAndDescent.first + halfLeading, SnapDirection::Floor),
+            Snap(primaryFontAscentAndDescent.second + halfLeading, SnapDirection::Ceil)};
   }
 }

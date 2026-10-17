@@ -307,6 +307,17 @@ namespace krys::boo
     }
   }
 
+  void RenderListItem::ComputePreferredLogicalWidths() noexcept
+  {
+    // FIXME: RenderListMarker::updateInlineMargins() mutates margin style which affects preferred widths.
+    if (_marker && _marker->NeedsPreferredLogicalWidthsUpdate())
+    {
+      _marker->UpdateInlineMarginsAndContent();
+    }
+
+    RenderBlockFlow::ComputePreferredLogicalWidths();
+  }
+
   utf8_string RenderListItem::MarkerTextWithoutSuffix() const noexcept
   {
     if (!_marker)

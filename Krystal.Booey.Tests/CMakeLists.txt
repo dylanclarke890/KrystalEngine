@@ -369,6 +369,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/FloatingObjects.cpp
 		tests/Rendering/Shapes/ShapeOutsideInfo.cpp
 		tests/Rendering/RenderListItem.cpp
+		tests/Rendering/RenderListMarker.cpp
 		tests/Rendering/RenderText.cpp
 		tests/Rendering/Updating/RenderTreeBuilder.cpp
 		tests/Rendering/Updating/RenderTreeBuilderFirstLetter.cpp

@@ -5,6 +5,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
@@ -44,9 +45,8 @@ namespace krys::boo
 
   /// @brief Used to render the list item's marker.
   /// The RenderListMarker always has to be a child of a RenderListItem.
-  // FIXME: Layout (the preferred widths, the inline margins, the line offsets and the layout bounds),
-  // painting, selection and image loading (the image client) come with layout, painting and resource
-  // loading.
+  // FIXME: Painting (paint, relativeMarkerRect), selection and image loading (the image client, imageChanged)
+  // come with painting and resource loading.
   class RenderListMarker final : public RenderBox
   {
     KRYS_NON_COPY_MOVABLE(RenderListMarker);
@@ -57,6 +57,8 @@ namespace krys::boo
     RefPtr<StyleImage> _image;
 
     WeakPtr<RenderListItem> _listItem;
+    LayoutUnit _lineLogicalOffsetForListItem;
+    Pair<float, float> _layoutBounds;
 
   public:
     RenderListMarker(RenderListItem &listItem, RenderStyle &&style) noexcept;
@@ -84,19 +86,22 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsImage() const noexcept;
 
+    KRYS_NODISCARD LayoutUnit LineLogicalOffsetForListItem() const noexcept
+    {
+      return _lineLogicalOffsetForListItem;
+    }
     KRYS_NODISCARD const RenderListItem *ListItem() const noexcept;
+
+    /// @brief The marker's ascent and descent on its line.
+    KRYS_NODISCARD Pair<float, float> LayoutBounds() const noexcept
+    {
+      return _layoutBounds;
+    }
 
   private:
     void WillBeDestroyed() noexcept final;
 
-    // FIXME: The marker's width from its image or text, and its inline margins (updateInlineMargins), once
-    // there's inline layout.
-    void ComputePreferredLogicalWidths() noexcept final
-    {
-      krys_debug_assert(NeedsPreferredLogicalWidthsUpdate());
-      _minPreferredLogicalWidth = _maxPreferredLogicalWidth = 0_lu;
-      ClearNeedsPreferredWidthsUpdate();
-    }
+    void ComputePreferredLogicalWidths() noexcept final;
     void ComputeIntrinsicLogicalWidths(LayoutUnit &, LayoutUnit &) const noexcept override
     {
       krys_debug_assert(false);
@@ -107,10 +112,15 @@ namespace krys::boo
     }
     void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept final;
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept final;
+    void Layout() noexcept final;
+    KRYS_NODISCARD Pair<float, float> LayoutBoundForTextContent(utf8_stringview text) const noexcept;
 
+    void UpdateInlineMargins() noexcept;
     void UpdateContent() noexcept;
+    KRYS_NODISCARD RenderBox *ParentBox(RenderBox &box) noexcept;
 
     KRYS_NODISCARD RefPtr<css::CounterStyle> GetCounterStyle() const noexcept;
+    KRYS_NODISCARD bool WidthUsesMetricsOfPrimaryFont() const noexcept;
   };
 }
 

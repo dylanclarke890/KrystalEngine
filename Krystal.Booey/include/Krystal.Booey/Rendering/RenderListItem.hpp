@@ -17,8 +17,7 @@ namespace krys::boo
   class RenderListMarker;
 
   /// @brief A list item: a block flow with a marker and an ordinal value.
-  // FIXME: Painting and the preferred widths (which update the marker's margins and content) come with
-  // layout and painting.
+  // FIXME: Painting (paint), once there is painting.
   class RenderListItem final : public RenderBlockFlow
   {
     KRYS_NON_COPY_MOVABLE(RenderListItem);
@@ -65,6 +64,8 @@ namespace krys::boo
 
   private:
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept final;
+
+    void ComputePreferredLogicalWidths() noexcept final;
 
     void UpdateValueNow() const noexcept;
     void CounterDirectivesChanged() noexcept;

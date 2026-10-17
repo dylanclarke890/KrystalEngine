@@ -46,7 +46,7 @@ layer at (0,0) size 800x28 layerType: foreground only
         RenderText {#text} at (0,0) size 0x0
       RenderBlock {UL} at (0,20) size 784x0
         RenderListItem {LI} at (40,0) size 744x0
-          RenderListMarker at (0,0) size 0x0
+          RenderListMarker at (0,0) size 7x17: bullet
           RenderText {#text} at (0,0) size 0x0
 )");
     }
@@ -71,7 +71,7 @@ layer at (0,0) size 800x28 layerType: foreground only
           RenderText {#text} at (0,0) size 0x0
         RenderBlock {UL} at (0,20) size 784x0
           RenderListItem {LI} at (40,0) size 744x0
-            RenderListMarker at (0,0) size 0x0
+            RenderListMarker at (0,0) size 7x17: bullet
             RenderText {#text} at (0,0) size 0x0
    normal flow list (1)
     layer at (8,12) size 784x0
