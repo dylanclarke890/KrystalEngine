@@ -1,9 +1,11 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Graphics/TextRun.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/ListHashSet.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 
@@ -16,6 +18,16 @@ namespace krys::boo
   };
 
   using TrackedRendererListHashSet = ListHashSet<RenderBox *>;
+
+  class RenderText;
+  class TextRun;
+
+  /// @brief What a text run built from a style takes from it besides the visual order override.
+  enum class TextRunFlag : uint8
+  {
+    RespectDirection = 1 << 0,
+    RespectDirectionOverride = 1 << 1
+  };
 
   /// @brief A box that contains other boxes: a block container, flex, grid or table.
   // FIXME: Floats, line boxes, continuations, fragmentation, selection and painting come with the rest of
@@ -56,6 +68,17 @@ namespace krys::boo
       EstablishesIndependentFormattingContextIgnoringDisplayType(const RenderStyle &style) const noexcept;
     KRYS_NODISCARD bool EstablishesIndependentFormattingContext() const noexcept;
     KRYS_NODISCARD bool CreatesNewFormattingContext() const noexcept;
+
+    KRYS_NODISCARD static TextRun
+      ConstructTextRun(utf8_stringview stringView, const RenderStyle &style,
+                       ExpansionBehavior expansion = ExpansionBehavior::DefaultBehavior(),
+                       EnumSet<TextRunFlag> flags = {}) noexcept;
+    KRYS_NODISCARD static TextRun
+      ConstructTextRun(const RenderText &text, const RenderStyle &style,
+                       ExpansionBehavior expansion = ExpansionBehavior::DefaultBehavior()) noexcept;
+    KRYS_NODISCARD static TextRun
+      ConstructTextRun(const RenderText &text, size_t offset, size_t length, const RenderStyle &style,
+                       ExpansionBehavior expansion = ExpansionBehavior::DefaultBehavior()) noexcept;
 
     virtual void LayoutBlock(RelayoutChildren relayoutChildren, LayoutUnit pageLogicalHeight = 0_lu) noexcept;
 

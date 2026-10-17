@@ -90,8 +90,9 @@ namespace krys::boo::dom
 
       // Bailout if we need to synchronize attributes.
       static const DOMStringAtom styleAttr(u8"style");
-      static const QualifiedName styleName(DOMStringAtom::Null(), DOMStringAtom::Null(), styleAttr);
-      if (NameMatchesFilter(styleName, attribute.NamespacePrefix(), attribute.LocalNameLower(),
+      static NeverDestroyed<const QualifiedName> styleName(DOMStringAtom::Null(), DOMStringAtom::Null(),
+                                                           styleAttr);
+      if (NameMatchesFilter(styleName.get(), attribute.NamespacePrefix(), attribute.LocalNameLower(),
                             attribute.NamespaceURI()))
       {
         return false;

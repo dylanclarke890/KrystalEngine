@@ -1,13 +1,20 @@
 ﻿#include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Core/Hyphenation.hpp"
 #include "Krystal.Booey/Core/TextBreakIterator.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/Graphics/Font.hpp"
 #include "Krystal.Booey/Graphics/TextRun.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInlineTextBox.hpp"
+#include "Krystal.Booey/Rendering/BreakablePositions.hpp"
+#include "Krystal.Booey/Rendering/Line/WordTrailingSpace.hpp"
+#include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Style/Values/Text/TabSize.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
@@ -414,7 +421,7 @@ namespace krys::boo
     if (diff == style::DifferenceResult::Layout)
     {
       SetNeedsLayoutAndPreferredWidthsUpdate();
-      // FIXME: The known-to-have-no-overflow-and-no-fallback-fonts state, once there's text measurement.
+      _knownToHaveNoOverflowAndNoFallbackFonts = false;
     }
 
     const auto &newStyle = Style();
@@ -443,7 +450,15 @@ namespace krys::boo
       RenderText::SetText(OriginalText(), true);
     }
 
-    // FIXME: The line layout's style and the accessibility cache, once there are any.
+    // FIXME: First line change on the block comes in as equal on text.
+    auto needsLayoutBoxStyleUpdate =
+      LayoutBox() && (diff >= style::DifferenceResult::RecompositeLayer || (&Style() != &FirstLineStyle()));
+    if (needsLayoutBoxStyleUpdate)
+    {
+      layout_integration::LineLayout::UpdateStyle(*this);
+    }
+
+    // FIXME: The accessibility cache, once there is one.
 
     SetHorizontalWritingMode(newStyle.GetWritingMode().IsHorizontal());
   }
@@ -579,6 +594,32 @@ namespace krys::boo
     _text = krys::move(masked).ToString();
   }
 
+  namespace
+  {
+    // FIXME: Update the text content for partial layout (LineLayout::updateTextContent) with the offset and
+    // old length, once there's partial layout.
+    void InvalidateLineLayoutPathOnContentChangeIfNeeded(RenderText &renderer) noexcept
+    {
+      auto *container = layout_integration::LineLayout::BlockContainer(renderer);
+      if (!container)
+      {
+        return;
+      }
+
+      auto *inlineLayout = container->InlineLayout();
+      if (!inlineLayout)
+      {
+        return;
+      }
+
+      if (layout_integration::LineLayout::ShouldInvalidateLineLayoutAfterContentChange(*container, renderer,
+                                                                                       *inlineLayout))
+      {
+        container->InvalidateLineLayout(RenderBlockFlow::InvalidationReason::ContentChange);
+      }
+    }
+  }
+
   void RenderText::SetTextInternal(utf8_string text, bool force) noexcept
   {
     if (!force && text == OriginalText())
@@ -597,8 +638,12 @@ namespace krys::boo
 
   void RenderText::SetText(utf8_string newContent, bool force) noexcept
   {
+    auto isDifferent = newContent != _text;
     SetTextInternal(krys::move(newContent), force);
-    // FIXME: Invalidate the line layout on content changes, once there's line layout.
+    if (isDifferent || force)
+    {
+      InvalidateLineLayoutPathOnContentChangeIfNeeded(*this);
+    }
   }
 
   void RenderText::SetTextWithOffset(utf8_string newText, uint32) noexcept
@@ -609,7 +654,7 @@ namespace krys::boo
     }
 
     SetTextInternal(krys::move(newText), false);
-    // FIXME: Invalidate the line layout on content changes, once there's line layout.
+    InvalidateLineLayoutPathOnContentChangeIfNeeded(*this);
   }
 
   utf8_string RenderText::TextWithoutConvertingBackslashToYenSymbol() const noexcept
@@ -630,5 +675,822 @@ namespace krys::boo
   void RenderText::SetInlineWrapperForDisplayContents(RenderInline *wrapper) noexcept
   {
     _inlineWrapperForDisplayContents = wrapper;
+  }
+
+  namespace
+  {
+    struct DecodedCodePoint
+    {
+      char32 CodePoint {0};
+      size_t Length {0};
+    };
+
+    KRYS_NODISCARD inline DecodedCodePoint DecodeCodePointAt(utf8_stringview text, size_t offset) noexcept
+    {
+      auto decoded = text::DecodeUTF8(Span<const char8>(text.data() + offset, text.size() - offset));
+      return {decoded.CodePoint, static_cast<size_t>(decoded.Length)};
+    }
+
+    KRYS_NODISCARD inline char32 LastCodePoint(utf8_stringview text) noexcept
+    {
+      auto position = text.size() - 1;
+      while (position && text::IsTrailingUTF8(text[position]))
+      {
+        --position;
+      }
+      return DecodeCodePointAt(text, position).CodePoint;
+    }
+
+    KRYS_NODISCARD inline bool IsHangablePunctuationAtLineStart(char32 character) noexcept
+    {
+      return U_GET_GC_MASK(static_cast<UChar32>(character)) & (U_GC_PS_MASK | U_GC_PI_MASK | U_GC_PF_MASK);
+    }
+
+    KRYS_NODISCARD inline bool IsHangablePunctuationAtLineEnd(char32 character) noexcept
+    {
+      return U_GET_GC_MASK(static_cast<UChar32>(character)) & (U_GC_PE_MASK | U_GC_PI_MASK | U_GC_PF_MASK);
+    }
+
+    // -webkit-nbsp-mode was dropped, so only a space is a space.
+    KRYS_NODISCARD inline bool IsSpaceAccordingToStyle(char32 character) noexcept
+    {
+      return character == ' ';
+    }
+
+    KRYS_NODISCARD inline bool IsCollapsibleWhiteSpace(char32 character, const RenderStyle &style) noexcept
+    {
+      return character <= 0xFFFF && style.IsCollapsibleWhiteSpace(static_cast<char16_t>(character));
+    }
+
+    KRYS_NODISCARD inline float HyphenWidth(const RenderStyle &style, const FontCascade &font) noexcept
+    {
+      return font.Width(RenderBlock::ConstructTextRun(style.HyphenString().View(), style));
+    }
+
+    template <typename TMeasureTextCallback>
+    KRYS_NODISCARD float
+      MeasureTextConsideringPossibleTrailingSpace(bool currentCharacterIsSpace, size_t startIndex,
+                                                  size_t wordLength, WordTrailingSpace &wordTrailingSpace,
+                                                  HashSet<RefPtr<const Font>> &fallbackFonts,
+                                                  TMeasureTextCallback &&callback) noexcept
+    {
+      Maybe<float> wordTrailingSpaceWidth;
+      if (currentCharacterIsSpace)
+      {
+        wordTrailingSpaceWidth = wordTrailingSpace.Width(fallbackFonts);
+      }
+      if (wordTrailingSpaceWidth)
+      {
+        return callback(startIndex, wordLength + 1) - *wordTrailingSpaceWidth;
+      }
+      return callback(startIndex, wordLength);
+    }
+  }
+
+  IntRect RenderText::LinesBoundingBox() const noexcept
+  {
+    auto firstTextBox = inline_iterator::LineLeftmostTextBoxFor(*this);
+    if (!firstTextBox)
+    {
+      return {};
+    }
+
+    auto boundingBox = firstTextBox->VisualRectIgnoringBlockDirection();
+    for (auto textBox = firstTextBox; ++textBox;)
+    {
+      boundingBox.UniteEvenIfEmpty(textBox->VisualRectIgnoringBlockDirection());
+    }
+
+    return EnclosingIntRect(boundingBox);
+  }
+
+  IntPoint RenderText::FirstRunLocation() const noexcept
+  {
+    auto first = inline_iterator::LineLeftmostTextBoxFor(*this);
+    if (!first)
+    {
+      return {};
+    }
+    return IntPoint {first->VisualRectIgnoringBlockDirection().Location()};
+  }
+
+  float RenderText::WidthFromCache(const FontCascade &fontCascade, size_t start, size_t length, float xPos,
+                                   HashSet<RefPtr<const Font>> *fallbackFonts, GlyphOverflow *glyphOverflow,
+                                   const RenderStyle &style) const noexcept
+  {
+    // FIXME: The combined text's width (RenderCombineText::combinedTextWidth), once there's
+    // text-combine-upright.
+    auto run = RenderBlock::ConstructTextRun(*this, start, length, style);
+    run.SetCharacterScanForCodePath(!CanUseSimpleFontCodePath());
+    run.SetTabSize(!style.CollapseWhiteSpace(), style::ToPlatform<style::TabSize> {}(style.GetTabSize()));
+    run.SetXPos(xPos);
+    return fontCascade.Width(run, fallbackFonts, glyphOverflow);
+  }
+
+  float RenderText::WidthFromCacheConsideringPossibleTrailingSpace(
+    const RenderStyle &style, const FontCascade &font, size_t startIndex, size_t wordLength, float xPos,
+    bool currentCharacterIsSpace, WordTrailingSpace &wordTrailingSpace,
+    HashSet<RefPtr<const Font>> &fallbackFonts, GlyphOverflow &glyphOverflow) const noexcept
+  {
+    return MeasureTextConsideringPossibleTrailingSpace(
+      currentCharacterIsSpace, startIndex, wordLength, wordTrailingSpace, fallbackFonts,
+      [&](size_t from, size_t length)
+      { return WidthFromCache(font, from, length, xPos, &fallbackFonts, &glyphOverflow, style); });
+  }
+
+  float RenderText::HangablePunctuationStartWidth(size_t index) const noexcept
+  {
+    if (index >= _text.size())
+    {
+      return 0;
+    }
+
+    auto [character, characterLength] = DecodeCodePointAt(_text, index);
+    if (!IsHangablePunctuationAtLineStart(character))
+    {
+      return 0;
+    }
+
+    auto &style = Style();
+    return WidthFromCache(style.GetFontCascade(), index, characterLength, 0, nullptr, nullptr, style);
+  }
+
+  float RenderText::HangablePunctuationEndWidth(size_t index) const noexcept
+  {
+    if (index >= _text.size())
+    {
+      return 0;
+    }
+
+    auto [character, characterLength] = DecodeCodePointAt(_text, index);
+    if (!IsHangablePunctuationAtLineEnd(character))
+    {
+      return 0;
+    }
+
+    auto &style = Style();
+    return WidthFromCache(style.GetFontCascade(), index, characterLength, 0, nullptr, nullptr, style);
+  }
+
+  size_t RenderText::FirstCharacterIndexStrippingSpaces() const noexcept
+  {
+    if (!Style().CollapseWhiteSpace())
+    {
+      return 0;
+    }
+
+    size_t i = 0;
+    for (auto length = _text.size(); i < length; ++i)
+    {
+      if (_text[i] != ' ' && (_text[i] != '\n' || Style().PreserveNewline()) && _text[i] != '\t')
+      {
+        break;
+      }
+    }
+    return i;
+  }
+
+  size_t RenderText::LastCharacterIndexStrippingSpaces() const noexcept
+  {
+    if (_text.empty())
+    {
+      return 0;
+    }
+
+    if (!Style().CollapseWhiteSpace())
+    {
+      // The start of the last code point.
+      auto position = _text.size() - 1;
+      while (position && text::IsTrailingUTF8(_text[position]))
+      {
+        --position;
+      }
+      return position;
+    }
+
+    auto i = static_cast<ptrdiff_t>(_text.size()) - 1;
+    for (; i >= 0; --i)
+    {
+      if (_text[i] != ' ' && (_text[i] != '\n' || Style().PreserveNewline()) && _text[i] != '\t')
+      {
+        break;
+      }
+    }
+    // The start of that code point.
+    while (i > 0 && text::IsTrailingUTF8(_text[i]))
+    {
+      --i;
+    }
+    return static_cast<size_t>(std::max<ptrdiff_t>(i, 0));
+  }
+
+  RenderText::Widths RenderText::TrimmedPreferredWidths(float leadWidth, bool &stripFrontSpaces) noexcept
+  {
+    auto &style = Style();
+    bool collapseWhiteSpace = style.CollapseWhiteSpace();
+
+    if (!collapseWhiteSpace)
+    {
+      stripFrontSpaces = false;
+    }
+
+    if (_hasTab || NeedsPreferredLogicalWidthsUpdate() || !_minWidth || !_maxWidth)
+    {
+      ComputePreferredLogicalWidths(leadWidth, !_minWidth || !_maxWidth);
+    }
+
+    Widths widths;
+
+    widths.BeginWS = !stripFrontSpaces && _hasBeginWS;
+    widths.EndWS = _hasEndWS;
+
+    auto length = _text.size();
+
+    if (!length
+        || (stripFrontSpaces
+            && std::ranges::all_of(_text, [](char8 character) { return text::IsASCIIWhitespace(character); })))
+    {
+      return widths;
+    }
+
+    widths.EndZeroSpace = LastCodePoint(_text) == text::ZeroWidthSpace;
+
+    widths.Min = _minWidth.value_or(-1);
+    widths.Max = _maxWidth.value_or(-1);
+
+    widths.BeginMin = _beginMinWidth;
+    widths.EndMin = _endMinWidth;
+
+    widths.HasBreakableChar = _hasBreakableChar;
+    widths.HasBreak = _hasBreak;
+    widths.EndsWithBreak = _hasBreak && _text[length - 1] == '\n';
+
+    if (_text[0] == ' ' || (_text[0] == '\n' && !style.PreserveNewline()) || _text[0] == '\t')
+    {
+      auto &font = style.GetFontCascade(); // FIXME: This ignores first-line.
+      if (stripFrontSpaces)
+      {
+        widths.Max -= font.Width(RenderBlock::ConstructTextRun(u8" ", style));
+      }
+      else
+      {
+        widths.Max += font.WordSpacing();
+      }
+    }
+
+    stripFrontSpaces = collapseWhiteSpace && _hasEndWS;
+
+    if (!style.AutoWrap() || widths.Min > widths.Max)
+    {
+      widths.Min = widths.Max;
+    }
+
+    // Compute our max widths by scanning the string for newlines.
+    if (widths.HasBreak)
+    {
+      auto &font = style.GetFontCascade(); // FIXME: This ignores first-line.
+      bool firstLine = true;
+      widths.BeginMax = widths.Max;
+      widths.EndMax = widths.Max;
+      for (size_t i = 0; i < length; i++)
+      {
+        size_t lineLength = 0;
+        while (i + lineLength < length && _text[i + lineLength] != '\n')
+        {
+          lineLength++;
+        }
+
+        if (lineLength)
+        {
+          widths.EndMax =
+            WidthFromCache(font, i, lineLength, leadWidth + widths.EndMax, nullptr, nullptr, style);
+          if (firstLine)
+          {
+            firstLine = false;
+            leadWidth = 0;
+            widths.BeginMax = widths.EndMax;
+          }
+          i += lineLength;
+        }
+        else if (firstLine)
+        {
+          widths.BeginMax = 0;
+          firstLine = false;
+          leadWidth = 0;
+        }
+
+        if (i == length - 1)
+        {
+          // A <pre> run that ends with a newline, as in, e.g.,
+          // <pre>Some text\n\n<span>More text</pre>
+          widths.EndMax = 0;
+        }
+      }
+    }
+
+    return widths;
+  }
+
+  float RenderText::MinLogicalWidth() const noexcept
+  {
+    if (NeedsPreferredLogicalWidthsUpdate() || !_minWidth)
+    {
+      const_cast<RenderText &>(*this).ComputePreferredLogicalWidths(0, !NeedsPreferredLogicalWidthsUpdate());
+    }
+
+    return *_minWidth;
+  }
+
+  float RenderText::MaxLogicalWidth() const noexcept
+  {
+    if (NeedsPreferredLogicalWidthsUpdate() || !_maxWidth)
+    {
+      const_cast<RenderText &>(*this).ComputePreferredLogicalWidths(0, !NeedsPreferredLogicalWidthsUpdate());
+    }
+
+    return *_maxWidth;
+  }
+
+  void RenderText::ComputePreferredLogicalWidths(float leadWidth, bool forcedMinMaxWidthComputation) noexcept
+  {
+    HashSet<RefPtr<const Font>> fallbackFonts;
+    GlyphOverflow glyphOverflow;
+    ComputePreferredLogicalWidths(leadWidth, fallbackFonts, glyphOverflow, forcedMinMaxWidthComputation);
+    if (fallbackFonts.empty() && glyphOverflow.IsEmpty())
+    {
+      _knownToHaveNoOverflowAndNoFallbackFonts = true;
+    }
+  }
+
+  float RenderText::MaxWordFragmentWidth(const RenderStyle &style, const FontCascade &font,
+                                         utf8_stringview word, size_t minimumPrefixLength,
+                                         size_t minimumSuffixLength, bool currentCharacterIsSpace,
+                                         size_t characterIndex, float xPos, float entireWordWidth,
+                                         WordTrailingSpace &wordTrailingSpace,
+                                         HashSet<RefPtr<const Font>> &fallbackFonts,
+                                         GlyphOverflow &glyphOverflow) noexcept
+  {
+    size_t suffixStart = 0;
+    if (word.size() <= minimumSuffixLength)
+    {
+      return entireWordWidth;
+    }
+
+    List<size_t> hyphenLocations;
+    krys_debug_assert(word.size() >= minimumSuffixLength);
+    auto hyphenLocation = word.size() - minimumSuffixLength;
+    auto locale = style.ComputedLocale().GetPlatform();
+    while ((hyphenLocation = LastHyphenLocation(word, hyphenLocation, locale))
+           >= std::max<size_t>(minimumPrefixLength, 1))
+    {
+      hyphenLocations.push_back(hyphenLocation);
+    }
+
+    if (hyphenLocations.empty())
+    {
+      return entireWordWidth;
+    }
+
+    std::ranges::reverse(hyphenLocations);
+
+    // Consider the word "ABC-DEF-GHI" (where the '-' characters are hyphenation opportunities). We want to
+    // measure the width of "ABC-" and "DEF-", but not "GHI-". Instead, we should measure "GHI" the same way
+    // we measure regular unhyphenated words (by using wordTrailingSpace). Therefore, this function is split
+    // up into two parts - one that measures each prefix, and one that measures the single last suffix.
+
+    // FIXME: Breaking the string at these places in the middle of words doesn't work with complex text.
+    float minimumFragmentWidthToConsider = font.Size() * 5 / 4 + HyphenWidth(style, font);
+    float maxFragmentWidth = 0;
+    for (auto location : hyphenLocations)
+    {
+      auto fragmentLength = location - suffixStart;
+      auto fragmentWithHyphen = utf8_string {word.substr(suffixStart, fragmentLength)};
+      fragmentWithHyphen += style.HyphenString().View();
+
+      auto run = RenderBlock::ConstructTextRun(fragmentWithHyphen, style);
+      run.SetCharacterScanForCodePath(!CanUseSimpleFontCodePath());
+      float fragmentWidth = font.Width(run, &fallbackFonts, &glyphOverflow);
+
+      // Narrow prefixes are ignored.
+      if (fragmentWidth <= minimumFragmentWidthToConsider)
+      {
+        continue;
+      }
+
+      suffixStart += fragmentLength;
+      maxFragmentWidth = std::max(maxFragmentWidth, fragmentWidth);
+    }
+
+    if (!suffixStart)
+    {
+      // We didn't find any hyphenation opportunities that we're willing to actually use.
+      // Therefore, the width of the maximum fragment is just ... the width of the entire word.
+      return entireWordWidth;
+    }
+
+    auto suffixWidth = WidthFromCacheConsideringPossibleTrailingSpace(
+      style, font, characterIndex + suffixStart, word.size() - suffixStart, xPos, currentCharacterIsSpace,
+      wordTrailingSpace, fallbackFonts, glyphOverflow);
+    return std::max(maxFragmentWidth, suffixWidth);
+  }
+
+  void RenderText::ComputePreferredLogicalWidths(float leadWidth, HashSet<RefPtr<const Font>> &fallbackFonts,
+                                                 GlyphOverflow &glyphOverflow, bool) noexcept
+  {
+    _minWidth = 0.f;
+    _beginMinWidth = 0;
+    _endMinWidth = 0;
+    _maxWidth = 0.f;
+
+    float currMaxWidth = 0;
+    _hasBreakableChar = false;
+    _hasBreak = false;
+    _hasTab = false;
+    _hasBeginWS = false;
+    _hasEndWS = false;
+
+    auto &style = Style();
+    auto &font = style.GetFontCascade(); // FIXME: This ignores first-line.
+    float wordSpacing = font.WordSpacing();
+    auto string = utf8_stringview {_text};
+    auto length = string.size();
+    auto iteratorMode = layout::TextUtil::LineBreakIteratorMode(style.GetLineBreak());
+    auto contentAnalysis = layout::TextUtil::GetContentAnalysis(style.GetWordBreak());
+    CachedLineBreakIteratorFactory lineBreakIteratorFactory(string, style.ComputedLocale().GetPlatform(),
+                                                            iteratorMode, contentAnalysis);
+    bool needsWordSpacing = false;
+    bool ignoringSpaces = false;
+    bool isSpace = false;
+    bool firstWord = true;
+    bool firstLine = true;
+    Maybe<uint32> nextBreakable;
+    size_t lastWordBoundary = 0;
+
+    WordTrailingSpace wordTrailingSpace(style);
+    // If automatic hyphenation is allowed, we keep track of the width of the widest word (or word
+    // fragment) encountered so far, and only try hyphenating words that are wider.
+    float maxWordWidth = std::numeric_limits<float>::max();
+    size_t minimumPrefixLength = 0;
+    size_t minimumSuffixLength = 0;
+    if (style.GetHyphens() == Hyphens::Auto && CanHyphenate(style.ComputedLocale().GetPlatform()))
+    {
+      maxWordWidth = 0;
+
+      // Map 'hyphenate-limit-{before,after}: auto;' to 2.
+      auto before = style.HyphenateLimitBefore().TryValue();
+      minimumPrefixLength = before ? static_cast<size_t>(before->Value) : 2;
+      auto after = style.HyphenateLimitAfter().TryValue();
+      minimumSuffixLength = after ? static_cast<size_t>(after->Value) : 2;
+    }
+
+    Maybe<LayoutUnit> firstGlyphLeftOverflow;
+
+    // -webkit-nbsp-mode was dropped, so no-break spaces never break.
+    bool breakNBSP = false;
+
+    bool breakAnywhere = style.GetLineBreak() == LineBreak::Anywhere && style.AutoWrap();
+    // Note the deliberate omission of word-wrap/overflow-wrap's break-word value from this breakAll check.
+    // Those do not affect minimum preferred sizes. Note that break-word is a non-standard value for
+    // word-break, but we support it as though it means break-all.
+    bool breakAll =
+      (style.GetWordBreak() == WordBreak::BreakAll || style.GetWordBreak() == WordBreak::BreakWord
+       || style.GetOverflowWrap() == OverflowWrap::Anywhere)
+      && style.AutoWrap();
+    bool keepAllWords = style.GetWordBreak() == WordBreak::KeepAll;
+    bool canUseLineBreakShortcut = iteratorMode == TextBreakLineBehavior::Default
+                                   && contentAnalysis == TextBreakIterator::ContentAnalysis::Mechanical;
+
+    size_t i = 0;
+    while (i < length)
+    {
+      auto [c, characterLength] = DecodeCodePointAt(string, i);
+
+      bool previousCharacterIsSpace = isSpace;
+
+      bool isNewline = false;
+      if (c == '\n')
+      {
+        if (style.PreserveNewline())
+        {
+          _hasBreak = true;
+          isNewline = true;
+          isSpace = false;
+        }
+        else
+        {
+          isSpace = true;
+        }
+      }
+      else if (c == '\t')
+      {
+        if (!style.CollapseWhiteSpace())
+        {
+          _hasTab = true;
+          isSpace = false;
+        }
+        else
+        {
+          isSpace = true;
+        }
+      }
+      else
+      {
+        isSpace = c == ' ';
+      }
+
+      if ((isSpace || isNewline) && !i)
+      {
+        _hasBeginWS = true;
+      }
+      if ((isSpace || isNewline) && i + characterLength == length)
+      {
+        _hasEndWS = true;
+      }
+
+      ignoringSpaces |= style.CollapseWhiteSpace() && previousCharacterIsSpace && isSpace;
+      ignoringSpaces &= isSpace;
+
+      // Ignore spaces and soft hyphens
+      if (ignoringSpaces)
+      {
+        krys_debug_assert(lastWordBoundary == i);
+        lastWordBoundary += characterLength;
+        i += characterLength;
+        continue;
+      }
+      if (c == text::SoftHyphen && style.GetHyphens() != Hyphens::None)
+      {
+        krys_debug_assert(i >= lastWordBoundary);
+        currMaxWidth += WidthFromCache(font, lastWordBoundary, i - lastWordBoundary, leadWidth + currMaxWidth,
+                                       &fallbackFonts, &glyphOverflow, style);
+        if (!firstGlyphLeftOverflow)
+        {
+          firstGlyphLeftOverflow = glyphOverflow.Left;
+        }
+        lastWordBoundary = i + characterLength;
+        i += characterLength;
+        continue;
+      }
+
+      bool hasBreak =
+        breakAll
+        || BreakablePositions::IsBreakable(lineBreakIteratorFactory, static_cast<uint32>(i), nextBreakable,
+                                           breakNBSP, canUseLineBreakShortcut, keepAllWords, breakAnywhere);
+      bool betweenWords = true;
+      auto j = i;
+      while (c != '\n' && !IsSpaceAccordingToStyle(c) && c != '\t' && c != text::ZeroWidthSpace
+             && (c != text::SoftHyphen || style.GetHyphens() == Hyphens::None))
+      {
+        auto previousCharacter = c;
+        j += DecodeCodePointAt(string, j).Length;
+        if (j == length)
+        {
+          break;
+        }
+        c = DecodeCodePointAt(string, j).CodePoint;
+        if (BreakablePositions::IsBreakable(lineBreakIteratorFactory, static_cast<uint32>(j), nextBreakable,
+                                            breakNBSP, canUseLineBreakShortcut, keepAllWords, breakAnywhere)
+            && previousCharacter != text::SoftHyphen)
+        {
+          break;
+        }
+        if (breakAll)
+        {
+          // FIXME: This code is ultra wrong.
+          // The spec says "word-break: break-all: Any typographic letter units are treated as ID(“ideographic
+          // characters”) for the purpose of line-breaking." The spec describes how a "typographic letter
+          // unit" is a cluster, not a code point:
+          // https://drafts.csswg.org/css-text-3/#typographic-character-unit
+          betweenWords = false;
+          break;
+        }
+      }
+
+      auto wordLength = j - i;
+      if (wordLength)
+      {
+        float currMinWidth = 0;
+        bool isTrailingSpace = (j < length) && IsSpaceAccordingToStyle(c);
+        float w = WidthFromCacheConsideringPossibleTrailingSpace(
+          style, font, i, wordLength, leadWidth + currMaxWidth, isTrailingSpace, wordTrailingSpace,
+          fallbackFonts, glyphOverflow);
+        if (c == text::SoftHyphen && style.GetHyphens() != Hyphens::None)
+        {
+          currMinWidth = HyphenWidth(style, font);
+        }
+
+        if (w > maxWordWidth)
+        {
+          auto maxFragmentWidth = MaxWordFragmentWidth(
+            style, font, string.substr(i, wordLength), minimumPrefixLength, minimumSuffixLength,
+            isTrailingSpace, i, leadWidth + currMaxWidth, w, wordTrailingSpace, fallbackFonts, glyphOverflow);
+          // This, when combined with "currMinWidth += w" below, has the effect of executing
+          // "currMinWidth += maxFragmentWidth" instead.
+          currMinWidth += maxFragmentWidth - w;
+          maxWordWidth = std::max(maxWordWidth, maxFragmentWidth);
+        }
+
+        if (!firstGlyphLeftOverflow)
+        {
+          firstGlyphLeftOverflow = glyphOverflow.Left;
+        }
+        currMinWidth += w;
+        if (betweenWords)
+        {
+          if (lastWordBoundary == i)
+          {
+            currMaxWidth += w;
+          }
+          else
+          {
+            krys_debug_assert(j >= lastWordBoundary);
+            currMaxWidth += WidthFromCache(font, lastWordBoundary, j - lastWordBoundary,
+                                           leadWidth + currMaxWidth, &fallbackFonts, &glyphOverflow, style);
+          }
+          lastWordBoundary = j;
+        }
+
+        bool isCollapsibleWhiteSpace = (j < length) && IsCollapsibleWhiteSpace(c, style);
+        if (j < length && style.AutoWrap())
+        {
+          _hasBreakableChar = true;
+        }
+
+        // Add in wordSpacing to our currMaxWidth, but not if this is the last word on a line or the
+        // last word in the run.
+        if ((isTrailingSpace || isCollapsibleWhiteSpace) && !ContainsOnlyCSSWhitespace(j, length - j))
+        {
+          currMaxWidth += wordSpacing;
+        }
+
+        if (firstWord)
+        {
+          firstWord = false;
+          // If the first character in the run is breakable, then we consider ourselves to have a beginning
+          // minimum width of 0, since a break could occur right before our run starts, preventing us from
+          // ever being appended to a previous text run when considering the total minimum width of the
+          // containing block.
+          if (hasBreak)
+          {
+            _hasBreakableChar = true;
+          }
+          _beginMinWidth = hasBreak ? 0 : currMinWidth;
+        }
+        _endMinWidth = currMinWidth;
+
+        _minWidth = std::max(currMinWidth, *_minWidth);
+
+        i = j;
+      }
+      else
+      {
+        // Nowrap can never be broken, so don't bother setting the
+        // breakable character boolean. Pre can only be broken if we encounter a newline.
+        if (style.AutoWrap() || isNewline)
+        {
+          _hasBreakableChar = true;
+        }
+
+        if (isNewline)
+        {
+          // Only set if preserveNewline was true and we saw a newline.
+          if (firstLine)
+          {
+            firstLine = false;
+            leadWidth = 0;
+            if (!style.AutoWrap())
+            {
+              _beginMinWidth = currMaxWidth;
+            }
+          }
+
+          if (currMaxWidth > *_maxWidth)
+          {
+            _maxWidth = currMaxWidth;
+          }
+          currMaxWidth = 0;
+        }
+        else
+        {
+          auto run = RenderBlock::ConstructTextRun(*this, i, characterLength, style);
+          run.SetTabSize(!style.CollapseWhiteSpace(),
+                         style::ToPlatform<style::TabSize> {}(style.GetTabSize()));
+          run.SetXPos(leadWidth + currMaxWidth);
+
+          currMaxWidth += font.Width(run, &fallbackFonts);
+          glyphOverflow.Right = 0_lu;
+          needsWordSpacing = isSpace && !previousCharacterIsSpace && i + characterLength == length;
+        }
+        krys_debug_assert(lastWordBoundary == i);
+        lastWordBoundary += characterLength;
+        i += characterLength;
+      }
+    }
+
+    glyphOverflow.Left = firstGlyphLeftOverflow.value_or(glyphOverflow.Left);
+
+    if ((needsWordSpacing && length > 1) || (ignoringSpaces && !firstWord))
+    {
+      currMaxWidth += wordSpacing;
+    }
+
+    _maxWidth = std::max(currMaxWidth, *_maxWidth);
+
+    if (!style.AutoWrap())
+    {
+      _minWidth = _maxWidth;
+    }
+
+    if (style.GetWhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve
+        && style.GetTextWrapMode() == TextWrapMode::NoWrap)
+    {
+      if (firstLine)
+      {
+        _beginMinWidth = *_maxWidth;
+      }
+      _endMinWidth = currMaxWidth;
+    }
+
+    ClearNeedsPreferredWidthsUpdate();
+  }
+
+  float RenderText::Width(size_t from, size_t length, float xPos, bool firstLine,
+                          HashSet<RefPtr<const Font>> *fallbackFonts,
+                          GlyphOverflow *glyphOverflow) const noexcept
+  {
+    if (from >= _text.size())
+    {
+      return 0;
+    }
+
+    if (from + length > _text.size())
+    {
+      length = _text.size() - from;
+    }
+
+    auto &lineStyle = firstLine ? FirstLineStyle() : Style();
+    return Width(from, length, lineStyle.GetFontCascade(), xPos, fallbackFonts, glyphOverflow);
+  }
+
+  float RenderText::Width(size_t from, size_t length, const FontCascade &fontCascade, float xPos,
+                          HashSet<RefPtr<const Font>> *fallbackFonts,
+                          GlyphOverflow *glyphOverflow) const noexcept
+  {
+    krys_debug_assert(from + length <= _text.size());
+    if (_text.empty() || !length)
+    {
+      return 0.f;
+    }
+
+    auto &style = Style();
+    // FIXME: The combined text's width (RenderCombineText::combinedTextWidth), once there's
+    // text-combine-upright.
+
+    if (length == 1 && _text[from] == ' ')
+    {
+      return fontCascade.WidthOfSpaceString();
+    }
+
+    float width = 0.f;
+    if (&fontCascade == &style.GetFontCascade())
+    {
+      if (!style.PreserveNewline() && !from && length == _text.size()
+          && (!glyphOverflow || !glyphOverflow->ComputeBounds))
+      {
+        if (fallbackFonts)
+        {
+          krys_debug_assert(glyphOverflow);
+          if (NeedsPreferredLogicalWidthsUpdate() || !_knownToHaveNoOverflowAndNoFallbackFonts)
+          {
+            const_cast<RenderText &>(*this).ComputePreferredLogicalWidths(0, *fallbackFonts, *glyphOverflow);
+            if (fallbackFonts->empty() && glyphOverflow->IsEmpty())
+            {
+              _knownToHaveNoOverflowAndNoFallbackFonts = true;
+            }
+          }
+          // The rare case of when we switch between IFC and legacy preferred width computation.
+          width = _maxWidth ? *_maxWidth : MaxLogicalWidth();
+        }
+        else
+        {
+          width = MaxLogicalWidth();
+        }
+      }
+      else
+      {
+        width = WidthFromCache(fontCascade, from, length, xPos, fallbackFonts, glyphOverflow, style);
+      }
+    }
+    else
+    {
+      auto run = RenderBlock::ConstructTextRun(*this, from, length, style);
+      run.SetCharacterScanForCodePath(!CanUseSimpleFontCodePath());
+      run.SetTabSize(!style.CollapseWhiteSpace(), style::ToPlatform<style::TabSize> {}(style.GetTabSize()));
+      run.SetXPos(xPos);
+
+      width = fontCascade.Width(run, fallbackFonts, glyphOverflow);
+    }
+
+    return std::max(width, 0.f);
   }
 }

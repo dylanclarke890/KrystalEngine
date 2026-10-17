@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/RenderBlock.hpp"
+#include "Krystal.Booey/Core/UnicodeBidi.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
@@ -815,6 +816,37 @@ namespace krys::boo
     }
 
     return false;
+  }
+
+  TextRun RenderBlock::ConstructTextRun(utf8_stringview stringView, const RenderStyle &style,
+                                        ExpansionBehavior expansion, EnumSet<TextRunFlag> flags) noexcept
+  {
+    auto textDirection = TextDirection::LTR;
+    bool directionalOverride = style.RtlOrdering() == Order::Visual;
+    if (flags.Contains(TextRunFlag::RespectDirection))
+    {
+      textDirection = style.GetWritingMode().BidiDirection();
+    }
+    if (flags.Contains(TextRunFlag::RespectDirectionOverride))
+    {
+      directionalOverride |= IsOverride(style.GetUnicodeBidi());
+    }
+
+    // The security disc characters (-webkit-text-security) were dropped, so the text is used as it is.
+    return TextRun {stringView, 0, 0, expansion, textDirection, directionalOverride};
+  }
+
+  TextRun RenderBlock::ConstructTextRun(const RenderText &text, const RenderStyle &style,
+                                        ExpansionBehavior expansion) noexcept
+  {
+    return ConstructTextRun(utf8_stringview {text.Text()}, style, expansion);
+  }
+
+  TextRun RenderBlock::ConstructTextRun(const RenderText &text, size_t offset, size_t length,
+                                        const RenderStyle &style, ExpansionBehavior expansion) noexcept
+  {
+    krys_debug_assert(offset + length <= text.Text().size());
+    return ConstructTextRun(utf8_stringview {text.Text()}.substr(offset, length), style, expansion);
   }
 
   bool RenderBlock::CreatesNewFormattingContext() const noexcept

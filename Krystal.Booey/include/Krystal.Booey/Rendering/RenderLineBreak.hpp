@@ -44,11 +44,7 @@ namespace krys::boo
       return IsWBR();
     }
 
-    KRYS_NODISCARD IntRect LinesBoundingBox() const noexcept
-    {
-      // FIXME: The bounding box of the line break's run, once there's inline layout.
-      return {};
-    }
+    KRYS_NODISCARD IntRect LinesBoundingBox() const noexcept;
 
   private:
     KRYS_NODISCARD bool RequiresLayer() const noexcept final

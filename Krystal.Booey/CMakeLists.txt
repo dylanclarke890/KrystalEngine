@@ -792,6 +792,30 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineSoftLineBreakItem.hpp
   include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineContentCache.hpp
   include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineItemsBuilder.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineRect.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingConstraints.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/AvailableLineWidthOverride.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineLayoutState.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineContentBreaker.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/Display/InlineDisplayBox.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/Display/InlineDisplayLine.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/Display/InlineDisplayContent.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/Display/InlineDisplayLineBuilder.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/Display/InlineDisplayContentBuilder.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineLevelBox.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineLine.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/LineLayoutResult.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingUtils.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineQuirks.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingContext.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineLineBox.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineLineBoxVerticalAligner.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineLineBoxBuilder.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/AbstractLineBuilder.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/InlineLineBuilder.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/TextOnlySimpleLineBuilder.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/RangeBasedLineBuilder.hpp
+  include/Krystal.Booey/Layout/FormattingContexts/Inline/IntrinsicWidthHandler.hpp
   include/Krystal.Booey/Rendering/BreakablePositions.hpp
   include/Krystal.Booey/Layout/Floats/FloatAvoider.hpp
   include/Krystal.Booey/Layout/Floats/PlacedFloats.hpp
@@ -799,6 +823,16 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Layout/Integration/LayoutIntegrationBoxTreeUpdater.hpp
   include/Krystal.Booey/Layout/Integration/LayoutIntegrationFormattingContextLayout.hpp
   include/Krystal.Booey/Layout/Integration/LayoutIntegrationUtils.hpp
+  include/Krystal.Booey/Layout/Integration/LayoutIntegrationBoxGeometryUpdater.hpp
+  include/Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContent.hpp
+  include/Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContentBuilder.hpp
+  include/Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp
+  include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorBoxModernPath.hpp
+  include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorBox.hpp
+  include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp
+  include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp
+  include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp
+  include/Krystal.Booey/Rendering/Line/WordTrailingSpace.hpp
   include/Krystal.Booey/Rendering/RenderQuote.hpp
   include/Krystal.Booey/Rendering/RenderTextFragment.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderFirstLetter.hpp
@@ -2070,12 +2104,39 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Layout/FormattingContexts/Inline/InlineItem.cpp
   src/Layout/FormattingContexts/Inline/InlineTextItem.cpp
   src/Layout/FormattingContexts/Inline/InlineItemsBuilder.cpp
+  src/Layout/FormattingContexts/Inline/InlineContentBreaker.cpp
+  src/Layout/FormattingContexts/Inline/Display/InlineDisplayBox.cpp
+  src/Layout/FormattingContexts/Inline/Display/InlineDisplayContent.cpp
+  src/Layout/FormattingContexts/Inline/Display/InlineDisplayLineBuilder.cpp
+  src/Layout/FormattingContexts/Inline/Display/InlineDisplayContentBuilder.cpp
+  src/Layout/FormattingContexts/Inline/InlineLevelBox.cpp
+  src/Layout/FormattingContexts/Inline/InlineLine.cpp
+  src/Layout/FormattingContexts/Inline/InlineFormattingUtils.cpp
+  src/Layout/FormattingContexts/Inline/InlineQuirks.cpp
+  src/Layout/FormattingContexts/Inline/InlineLineBox.cpp
+  src/Layout/FormattingContexts/Inline/InlineLineBoxVerticalAligner.cpp
+  src/Layout/FormattingContexts/Inline/InlineLineBoxBuilder.cpp
+  src/Layout/FormattingContexts/Inline/InlineFormattingContext.cpp
+  src/Layout/FormattingContexts/Inline/AbstractLineBuilder.cpp
+  src/Layout/FormattingContexts/Inline/InlineLineBuilder.cpp
+  src/Layout/FormattingContexts/Inline/TextOnlySimpleLineBuilder.cpp
+  src/Layout/FormattingContexts/Inline/RangeBasedLineBuilder.cpp
+  src/Layout/FormattingContexts/Inline/IntrinsicWidthHandler.cpp
   src/Rendering/BreakablePositions.cpp
   src/Layout/Floats/FloatAvoider.cpp
   src/Layout/Floats/PlacedFloats.cpp
   src/Layout/Floats/FloatingContext.cpp
   src/Layout/Integration/LayoutIntegrationBoxTreeUpdater.cpp
   src/Layout/Integration/LayoutIntegrationUtils.cpp
+  src/Layout/Integration/LayoutIntegrationBoxGeometryUpdater.cpp
+  src/Layout/Integration/LayoutIntegrationFormattingContextLayout.cpp
+  src/Layout/Integration/Inline/LayoutIntegrationInlineContent.cpp
+  src/Layout/Integration/Inline/LayoutIntegrationInlineContentBuilder.cpp
+  src/Layout/Integration/Inline/LayoutIntegrationLineLayout.cpp
+  src/Layout/Integration/Inline/InlineIteratorBox.cpp
+  src/Layout/Integration/Inline/InlineIteratorTextBox.cpp
+  src/Layout/Integration/Inline/InlineIteratorInlineBox.cpp
+  src/Layout/Integration/Inline/InlineIteratorLineBox.cpp
   src/Rendering/RenderQuote.cpp
   src/Rendering/RenderTextFragment.cpp
   src/Rendering/Updating/RenderTreeBuilderFirstLetter.cpp

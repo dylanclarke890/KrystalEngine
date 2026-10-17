@@ -2214,19 +2214,32 @@ namespace krys::boo::css
       return _value.Contains(e);
     }
 
+    // The set's queries take the set it wraps, if it wraps one.
+    KRYS_NODISCARD constexpr static decltype(auto) UnwrapEnumSet(const EnumSet &set) noexcept
+    {
+      if constexpr (requires { set.Value; })
+      {
+        return (set.Value);
+      }
+      else
+      {
+        return (set);
+      }
+    }
+
     KRYS_NODISCARD constexpr bool ContainsAny(EnumSet other) const noexcept
     {
-      return _value.ContainsAny(other);
+      return _value.ContainsAny(UnwrapEnumSet(other));
     }
 
     KRYS_NODISCARD constexpr bool ContainsAll(EnumSet other) const noexcept
     {
-      return _value.ContainsAll(other);
+      return _value.ContainsAll(UnwrapEnumSet(other));
     }
 
     KRYS_NODISCARD constexpr bool ContainsOnly(EnumSet other) const noexcept
     {
-      return _value.ContainsOnly(other);
+      return _value.ContainsOnly(UnwrapEnumSet(other));
     }
 
     KRYS_NODISCARD constexpr decltype(auto) begin() const noexcept

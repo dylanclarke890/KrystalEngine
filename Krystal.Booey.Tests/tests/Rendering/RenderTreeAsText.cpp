@@ -8,7 +8,6 @@ namespace krys::boo::tests
 
   namespace
   {
-    // FIXME: Text has no lines until inline layout, so the blocks that hold only text are empty.
     constexpr const char8 *Markup = u8R"html(<!DOCTYPE html><style>
       #a { color: red; background-color: blue; border: 2px solid green; border-left: 3px dashed green }
       #rel { position: relative; z-index: 2 }
@@ -38,16 +37,18 @@ namespace krys::boo::tests
       // The empty layers don't intersect the view, so they don't dump.
       CHECK(ExternalRepresentation(fixture.Frame.get()) == u8R"(layer at (0,0) size 800x600
   RenderView at (0,0) size 800x600
-layer at (0,0) size 800x28 layerType: background only
-layer at (0,0) size 800x28 layerType: foreground only
-  RenderBlock {HTML} at (0,0) size 800x28
-    RenderBody {BODY} at (8,8) size 784x4
-      RenderBlock {DIV} at (0,0) size 784x4 [color=#FF0000] [bgcolor=#0000FF] [border: (2px solid #008000) (3px dashed #008000)]
-        RenderText {#text} at (0,0) size 0x0
-      RenderBlock {UL} at (0,20) size 784x0
-        RenderListItem {LI} at (40,0) size 744x0
-          RenderListMarker at (0,0) size 7x17: bullet
-          RenderText {#text} at (0,0) size 0x0
+layer at (0,0) size 800x80 layerType: background only
+layer at (0,0) size 800x80 layerType: foreground only
+  RenderBlock {HTML} at (0,0) size 800x80
+    RenderBody {BODY} at (8,8) size 784x56
+      RenderBlock {DIV} at (0,0) size 784x22 [color=#FF0000] [bgcolor=#0000FF] [border: (2px solid #008000) (3px dashed #008000)]
+        RenderText {#text} at (3,2) size 13x17
+          text run at (3,2) width 13: "hi"
+      RenderBlock {UL} at (0,38) size 784x18
+        RenderListItem {LI} at (40,0) size 744x18
+          RenderListMarker at (-17,0) size 7x17: bullet
+          RenderText {#text} at (0,0) size 27x17
+            text run at (0,0) width 27: "one"
 )");
     }
 
@@ -60,25 +61,27 @@ layer at (0,0) size 800x28 layerType: foreground only
             == u8R"(layer at (0,0) size 800x600
   RenderView at (0,0) size 800x600
  positive z-order list (1)
-  layer at (0,0) size 800x28 layerType: background only
+  layer at (0,0) size 800x80 layerType: background only
    negative z-order list (1)
-    layer at (8,12) size 0x0
-      RenderBlock (positioned) zI: -1 {DIV} at (8,12) size 0x0 id="neg"
-  layer at (0,0) size 800x28 layerType: foreground only
-    RenderBlock {HTML} at (0,0) size 800x28
-      RenderBody {BODY} at (8,8) size 784x4
-        RenderBlock {DIV} at (0,0) size 784x4 [color=#FF0000] [bgcolor=#0000FF] [border: (2px solid #008000) (3px dashed #008000)] id="a" class="x y"
-          RenderText {#text} at (0,0) size 0x0
-        RenderBlock {UL} at (0,20) size 784x0
-          RenderListItem {LI} at (40,0) size 744x0
-            RenderListMarker at (0,0) size 7x17: bullet
-            RenderText {#text} at (0,0) size 0x0
+    layer at (8,30) size 0x0
+      RenderBlock (positioned) zI: -1 {DIV} at (8,30) size 0x0 id="neg"
+  layer at (0,0) size 800x80 layerType: foreground only
+    RenderBlock {HTML} at (0,0) size 800x80
+      RenderBody {BODY} at (8,8) size 784x56
+        RenderBlock {DIV} at (0,0) size 784x22 [color=#FF0000] [bgcolor=#0000FF] [border: (2px solid #008000) (3px dashed #008000)] id="a" class="x y"
+          RenderText {#text} at (3,2) size 13x17
+            text run at (3,2) width 13: "hi"
+        RenderBlock {UL} at (0,38) size 784x18
+          RenderListItem {LI} at (40,0) size 744x18 (layout overflow -17,0 761x18) (visual overflow -17,0 761x18)
+            RenderListMarker at (-17,0) size 7x17: bullet
+            RenderText {#text} at (0,0) size 27x17
+              text run at (0,0) width 27: "one"
    normal flow list (1)
-    layer at (8,12) size 784x0
-      RenderBlock {DIV} at (0,4) size 784x0 id="normal"
+    layer at (8,30) size 784x0
+      RenderBlock {DIV} at (0,22) size 784x0 id="normal"
    positive z-order list (1)
-    layer at (8,12) size 784x0
-      RenderBlock (relative positioned) zI: 2 {DIV} at (0,4) size 784x0 id="rel"
+    layer at (8,30) size 784x0
+      RenderBlock (relative positioned) zI: 2 {DIV} at (0,22) size 784x0 id="rel"
 )");
     }
 
@@ -102,7 +105,7 @@ layer at (0,0) size 800x28 layerType: foreground only
       // Only boxes with a layer dump.
       CHECK(ExternalRepresentation(&fixture.ById(u8"a")) == u8"");
       CHECK(ExternalRepresentation(&fixture.ById(u8"rel")) == u8R"(layer at (0,0) size 784x0
-  RenderBlock (relative positioned) zI: 2 {DIV} at (0,4) size 784x0
+  RenderBlock (relative positioned) zI: 2 {DIV} at (0,22) size 784x0
 )");
     }
   }

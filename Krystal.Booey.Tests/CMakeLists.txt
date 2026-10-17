@@ -375,6 +375,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Layout/Floats/FloatingContext.cpp
 		tests/Layout/Integration/LayoutIntegrationBoxTreeUpdater.cpp
 		tests/Layout/Integration/LayoutIntegrationUtils.cpp
+		tests/Layout/Integration/Inline/LayoutIntegrationLineLayout.cpp
+		tests/Layout/FormattingContexts/Inline/InlineFormattingContext.cpp
 		tests/Layout/FormattingContexts/Inline/InlineItemsBuilder.cpp
 		tests/Layout/FormattingContexts/Inline/Text/TextUtil.cpp
 		tests/Rendering/BreakablePositions.cpp

@@ -29,6 +29,7 @@ namespace krys::text
   constexpr char32 CarriageReturn = 0x000D;
   constexpr char32 CjkWater = 0x6C34;
   constexpr char32 DeleteCharacter = 0x007F;
+  constexpr char32 EnDash = 0x2013;
   constexpr char32 EthiopicWordspace = 0x1361;
   constexpr char32 FirstStrongIsolate = 0x2068;
   constexpr char32 FullwidthAmpersand = 0xFF06;
@@ -38,6 +39,7 @@ namespace krys::text
   constexpr char32 FunctionApplication = 0x2061;
   constexpr char32 HiraganaLetterSmallA = 0x3041;
   constexpr char32 HorizontalEllipsis = 0x2026;
+  constexpr char32 Hyphen = 0x2010;
   constexpr char32 IdeographicSpace = 0x3000;
   constexpr char32 InhibitArabicFormShaping = 0x206C;
   constexpr char32 InhibitSymmetricSwapping = 0x206A;
@@ -66,6 +68,7 @@ namespace krys::text
   constexpr char32 PopDirectionalFormatting = 0x202C;
   constexpr char32 PopDirectionalIsolate = 0x2069;
   constexpr char32 QuotationMark = 0x0022;
+  constexpr char32 ReverseSolidus = 0x005C;
   constexpr char32 ReversedPilcrowSign = 0x204B;
   constexpr char32 RightDoubleQuotationMark = 0x201D;
   constexpr char32 RightSingleQuotationMark = 0x2019;

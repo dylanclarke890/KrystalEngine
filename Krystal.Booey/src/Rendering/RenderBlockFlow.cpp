@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/BlockStepSizing.hpp"
@@ -11,10 +13,13 @@
 #include "Krystal.Booey/Rendering/RenderIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
+#include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
+#include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Shapes/ShapeOutsideInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Core/Text/Unicode.hpp"
 
 namespace krys::boo
 {
@@ -264,8 +269,7 @@ namespace krys::boo
     }
     else if (ChildrenInline())
     {
-      // FIXME: The preferred widths of inline content (computeInlinePreferredLogicalWidths), once there's
-      // inline layout.
+      ComputeInlinePreferredLogicalWidths(minLogicalWidth, maxLogicalWidth);
     }
     else
     {
@@ -602,15 +606,22 @@ namespace krys::boo
     }
 
     // Now shift all our content.
-    // FIXME: Shift the lines of inline content, once there's inline layout.
-    for (auto *child = FirstChildBox(); child; child = child->NextSiblingBox())
+    if (auto *inlineLayout = InlineLayout())
     {
-      SetLogicalTopForChild(*child, LogicalTopForChild(*child) + space);
-      if (child->IsOutOfFlowPositioned() && child->Style().HasStaticBlockPosition(IsHorizontalWritingMode()))
+      inlineLayout->ShiftLinesBy(space);
+    }
+    else
+    {
+      for (auto *child = FirstChildBox(); child; child = child->NextSiblingBox())
       {
-        krys_debug_assert(child->Layer());
-        child->Layer()->SetStaticBlockPosition(child->Layer()->StaticBlockPosition() + space);
-        child->SetChildNeedsLayout(MarkingBehavior::MarkOnlyThis);
+        SetLogicalTopForChild(*child, LogicalTopForChild(*child) + space);
+        if (child->IsOutOfFlowPositioned()
+            && child->Style().HasStaticBlockPosition(IsHorizontalWritingMode()))
+        {
+          krys_debug_assert(child->Layer());
+          child->Layer()->SetStaticBlockPosition(child->Layer()->StaticBlockPosition() + space);
+          child->SetChildNeedsLayout(MarkingBehavior::MarkOnlyThis);
+        }
       }
     }
     if (_floatingObjects)
@@ -848,28 +859,43 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Walk the inline content (InlineWalker), lay out its boxes and update the lines' overflow, once
-    // there's inline layout.
-    LayoutChildrenWithoutLineLayout();
-  }
-
-  void RenderBlockFlow::LayoutInlineChildren(RelayoutChildren, LayoutUnit, LayoutUnit &,
-                                             LayoutUnit &) noexcept
-  {
-    // FIXME: Lay out the inline content (the line layout path, layoutInlineContent), once there's inline
-    // layout. Until then the content has no lines: its boxes are laid out where they are, its floats are
-    // placed at the top of the content, as on an empty first line, and the block is as tall as an empty one.
-    LayoutChildrenWithoutLineLayout();
-    SetLogicalHeight(BorderAndPaddingBefore());
+    bool shouldUpdateOverflow = false;
     for (auto walker = InlineWalker(*this); !walker.AtEnd(); walker.Advance())
     {
-      if (auto *box = DynamicDowncast<RenderBox>(*walker.Current()); box && box->IsFloating())
+      auto &renderer = *walker.Current();
+      if (auto *box = DynamicDowncast<RenderBox>(renderer))
       {
-        InsertFloatingBoxAndMarkForLayout(*box);
+        if (!box->IsOutOfFlowPositioned() && box->NeedsLayout())
+        {
+          box->Layout();
+          shouldUpdateOverflow = true;
+        }
+        continue;
+      }
+      if (Is<RenderText>(renderer) || Is<RenderInline>(renderer))
+      {
+        renderer.ClearNeedsLayout();
       }
     }
-    PositionNewFloats();
-    SetLogicalHeight(BorderAndPaddingLogicalHeight() + LayoutUnit(ScrollbarLogicalHeight()));
+
+    if (!shouldUpdateOverflow)
+    {
+      return;
+    }
+
+    if (auto *lineLayout = InlineLayout())
+    {
+      lineLayout->UpdateOverflow();
+    }
+  }
+
+  void RenderBlockFlow::LayoutInlineChildren(RelayoutChildren relayoutChildren, LayoutUnit previousHeight,
+                                             LayoutUnit &repaintLogicalTop,
+                                             LayoutUnit &repaintLogicalBottom) noexcept
+  {
+    ComputeAndSetLineLayoutPath();
+    // Without SVG text (the legacy line layout), inline content always takes the inline path.
+    LayoutInlineContent(relayoutChildren, previousHeight, repaintLogicalTop, repaintLogicalBottom);
   }
 
   void RenderBlockFlow::PerformBlockStepSizing(RenderBox &child,
@@ -1300,8 +1326,10 @@ namespace krys::boo
       return RenderBlock::ChildrenPreventSelfCollapsing();
     }
 
-    // FIXME: Whether the inline content has lines that aren't self-collapsing (isSelfCollapsingContent), once
-    // there's inline layout.
+    if (InlineLayout())
+    {
+      return !InlineLayout()->IsSelfCollapsingContent();
+    }
 
     // Containers with no children.
     return false;
@@ -2859,8 +2887,11 @@ namespace krys::boo
   {
     if (ChildrenInline())
     {
-      // FIXME: The overflow of the lines (addOverflowFromInlineChildren), and the fragments' visual overflow,
-      // once there's inline layout and fragmented flows.
+      if (auto *inlineLayout = InlineLayout())
+      {
+        inlineLayout->CollectOverflow();
+      }
+      // FIXME: Propagate the visual overflow to the containing fragments, once there are fragmented flows.
       return;
     }
     RenderBlock::AddOverflowFromInFlowChildren(options);
@@ -2897,7 +2928,10 @@ namespace krys::boo
       return RenderBlock::FirstLineBaseline();
     }
 
-    // FIXME: The first line's baseline, once there's inline layout.
+    if (auto *lineLayout = InlineLayout())
+    {
+      return lineLayout->FirstLineBaseline();
+    }
 
     if (HasLineIfEmpty())
     {
@@ -2925,7 +2959,10 @@ namespace krys::boo
       return RenderBlock::LastLineBaseline();
     }
 
-    // FIXME: The last line's baseline, once there's inline layout.
+    if (auto *lineLayout = InlineLayout())
+    {
+      return lineLayout->LastLineBaseline();
+    }
 
     if (HasLineIfEmpty())
     {
@@ -2974,5 +3011,1376 @@ namespace krys::boo
     // FIXME: Flip the allowance for a reversed column progression, once there's multi-column layout.
 
     return allowance;
+  }
+
+  void RenderBlockFlow::SetChildrenInline(bool value) noexcept
+  {
+    if (ChildrenInline() && !value)
+    {
+      SetLineLayoutPath(LineLayoutPath::UndeterminedPath);
+      _lineLayout = nullptr;
+    }
+
+    RenderBlock::SetChildrenInline(value);
+  }
+
+  RenderBlockFlow::BlockPositionAndMargin
+    RenderBlockFlow::LayoutBlockChildFromInlineLayout(RenderBox &child, LayoutUnit contentHeight,
+                                                      MarginInfo marginInfo) noexcept
+  {
+    // Render tree uses block height to track the child block layout position. Set it to the current position
+    // before calling LayoutBlockChild.
+    SetLogicalHeight(contentHeight);
+
+    auto previousFloatLogicalBottom = LayoutUnit {};
+    auto maxFloatLogicalBottom = LayoutUnit {};
+    LayoutBlockChild(child, marginInfo, previousFloatLogicalBottom, maxFloatLogicalBottom);
+    return {child.LogicalTop(), LogicalHeight(), marginInfo};
+  }
+
+  void RenderBlockFlow::ComputeAndSetLineLayoutPath() noexcept
+  {
+    if (GetLineLayoutPath() != LineLayoutPath::UndeterminedPath)
+    {
+      return;
+    }
+    // Without SVG text, inline content always uses the inline layout.
+    krys_debug_assert(layout_integration::LineLayout::CanUseFor(*this));
+    SetLineLayoutPath(LineLayoutPath::InlinePath);
+  }
+
+  bool RenderBlockFlow::HasContentfulInlineOrBlockLine() const noexcept
+  {
+    return InlineLayout() ? InlineLayout()->HasContentfulInlineOrBlockLine() : false;
+  }
+
+  bool RenderBlockFlow::HasContentfulInlineLine() const noexcept
+  {
+    return InlineLayout() ? InlineLayout()->HasContentfulInlineLine() : false;
+  }
+
+  bool RenderBlockFlow::HasBlocksInInlineLayout() const noexcept
+  {
+    auto *inlineLayout = InlineLayout();
+    return inlineLayout && inlineLayout->HasBlocks();
+  }
+
+  void RenderBlockFlow::InvalidateLineLayout(InvalidationReason invalidationReason) noexcept
+  {
+    if (GetLineLayoutPath() == LineLayoutPath::UndeterminedPath)
+    {
+      return;
+    }
+
+    auto issueNeedsLayoutIfApplicable = [&]
+    {
+      if (SelfNeedsLayout() || NormalChildNeedsLayout())
+      {
+        return;
+      }
+      // FIXME: We should just kick off a subtree layout here (if needed at all).
+      SetNeedsLayout();
+    };
+
+    if (InlineLayout())
+    {
+      krys_debug_assert(!_previousInlineLayoutContentTopAndBottomIncludingInkOverflow);
+      _previousInlineLayoutContentTopAndBottomIncludingInkOverflow =
+        InlineContentTopAndBottomIncludingInkOverflow();
+    }
+
+    switch (invalidationReason)
+    {
+      case InvalidationReason::InternalMove:
+        // FIXME: Defer recomputing whether the element is ignored (the accessibility cache), once there is
+        // one.
+        break;
+      case InvalidationReason::ContentChange:
+      {
+        // FIXME: Repaint the block and its out-of-flow content (the display content is removed here), once
+        // there's painting.
+        for (auto walker = InlineWalker(*this); !walker.AtEnd(); walker.Advance())
+        {
+          auto &renderer = *walker.Current();
+          if (!renderer.EverHadLayout())
+          {
+            continue;
+          }
+          renderer.SetNeedsPreferredWidthsUpdate();
+        }
+        issueNeedsLayoutIfApplicable();
+        break;
+      }
+      case InvalidationReason::InsertionOrRemoval:
+        SetLineLayoutPath(LineLayoutPath::UndeterminedPath);
+        issueNeedsLayoutIfApplicable();
+        break;
+    }
+
+    _lineLayout = nullptr;
+  }
+
+  size_t RenderBlockFlow::LineCount() const noexcept
+  {
+    if (!ChildrenInline())
+    {
+      krys_debug_assert(false);
+      return 0;
+    }
+    if (InlineLayout())
+    {
+      return InlineLayout()->LineCount();
+    }
+
+    return 0;
+  }
+
+  bool RenderBlockFlow::LayoutSimpleBlockContentInInline(MarginInfo &marginInfo) noexcept
+  {
+    if (!InlineLayout())
+    {
+      return false;
+    }
+
+    for (auto walker = InlineWalker(*this); !walker.AtEnd(); walker.Advance())
+    {
+      krys_debug_assert(!walker.Current()->SelfNeedsLayout());
+
+      auto *blockRenderer = DynamicDowncast<RenderBox>(*walker.Current());
+      if (!blockRenderer || !blockRenderer->IsBlockLevelBox())
+      {
+        continue;
+      }
+
+      auto logicalHeight = blockRenderer->LogicalHeight();
+      auto isEligibleForBlockOnlyLayout = [&]
+      {
+        // Do not interfere with margin collapsing.
+        if (!blockRenderer->IsInFlow() || !logicalHeight)
+        {
+          return false;
+        }
+        if (auto *renderBlock = DynamicDowncast<RenderBlock>(*blockRenderer))
+        {
+          return !renderBlock->ContainsFloats();
+        }
+        return true;
+      };
+      if (!isEligibleForBlockOnlyLayout())
+      {
+        return false;
+      }
+
+      auto displayBox = inline_iterator::BoxFor(*blockRenderer);
+      if (!displayBox)
+      {
+        krys_debug_assert(false);
+        return false;
+      }
+
+      auto logicalTop = blockRenderer->LogicalTop();
+      marginInfo = LayoutBlockChildFromInlineLayout(*blockRenderer, logicalTop, marginInfo).ChildMarginInfo;
+      auto shouldFallbackToNormalInlineLayout = [&]
+      {
+        if (logicalHeight != blockRenderer->LogicalHeight())
+        {
+          return true;
+        }
+        if (auto *renderBlock = DynamicDowncast<RenderBlock>(*blockRenderer))
+        {
+          return renderBlock->ContainsFloats();
+        }
+        return false;
+      };
+      if (shouldFallbackToNormalInlineLayout())
+      {
+        return false;
+      }
+      blockRenderer->SetLogicalTop(logicalTop);
+    }
+    return true;
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD bool
+      HasSimpleStaticPositionForInlineLevelOutOfFlowChildrenByStyle(const RenderStyle &rootStyle) noexcept
+    {
+      if (rootStyle.GetTextAlign() != style::TextAlign::Start)
+      {
+        return false;
+      }
+      if (!rootStyle.GetTextIndent().Length.IsKnownZero())
+      {
+        return false;
+      }
+      return true;
+    }
+  }
+
+  Pair<float, float> RenderBlockFlow::InlineContentTopAndBottomIncludingInkOverflow() const noexcept
+  {
+    if (_previousInlineLayoutContentTopAndBottomIncludingInkOverflow)
+    {
+      return *_previousInlineLayoutContentTopAndBottomIncludingInkOverflow;
+    }
+
+    if (!InlineLayout())
+    {
+      return {};
+    }
+
+    auto firstLineBox = inline_iterator::FirstLineBoxFor(*this);
+    auto lastLineBox = inline_iterator::LastLineBoxFor(*this);
+    if (!firstLineBox)
+    {
+      return {};
+    }
+
+    auto logicalTop = std::min(firstLineBox->LogicalTop(), firstLineBox->ContentLogicalTop());
+    auto logicalBottom = std::max(lastLineBox->LogicalBottom(), lastLineBox->ContentLogicalBottom());
+
+    if (!InlineLayout()->HasInkOverflow())
+    {
+      return {logicalTop, logicalBottom};
+    }
+
+    for (auto lineBox = firstLineBox; lineBox; lineBox.TraverseNext())
+    {
+      logicalTop = std::min(logicalTop, lineBox->InkOverflowLogicalTop());
+      logicalBottom = std::max(logicalBottom, lineBox->InkOverflowLogicalBottom());
+    }
+    return {logicalTop, logicalBottom};
+  }
+
+  RenderBlockFlow::InlineContentStatus
+    RenderBlockFlow::MarkInlineContentDirtyForLayout(RelayoutChildren relayoutChildren) noexcept
+  {
+    auto contentNeedsNormalChildLayoutOnly = true;
+    auto hasInFlowBlockLevelElement = false;
+    auto hasSimpleOutOfFlowContentOnly = !HasLineIfEmpty();
+    auto hasSimpleStaticPositionForInlineLevelOutOfFlowContentByStyle =
+      HasSimpleStaticPositionForInlineLevelOutOfFlowChildrenByStyle(Style());
+
+    for (auto walker = InlineWalker(*this); !walker.AtEnd(); walker.Advance())
+    {
+      auto &renderer = *walker.Current();
+      auto *box = DynamicDowncast<RenderBox>(renderer);
+      hasInFlowBlockLevelElement =
+        hasInFlowBlockLevelElement || (box && box->IsBlockLevelBox() && box->IsInFlow());
+      auto childNeedsLayout =
+        relayoutChildren == RelayoutChildren::Yes || (box && box->HasRelativeDimensions());
+      auto childNeedsPreferredWidthComputation =
+        relayoutChildren == RelayoutChildren::Yes && box && box->ShouldInvalidatePreferredWidths();
+      if (childNeedsLayout)
+      {
+        renderer.SetNeedsLayout(MarkingBehavior::MarkOnlyThis);
+      }
+      if (childNeedsPreferredWidthComputation)
+      {
+        renderer.SetNeedsPreferredWidthsUpdate(MarkingBehavior::MarkOnlyThis);
+      }
+
+      if (renderer.IsOutOfFlowPositioned())
+      {
+        renderer.ContainingBlock()->AddOutOfFlowBox(*box);
+        // FIXME: This is only needed because of the synchronous layout call in
+        // SetStaticPositionsForSimpleOutOfFlowContent which itself appears to be a workaround for a bad
+        // subtree layout.
+        auto &style = Downcast<RenderElement>(renderer).Style();
+        auto hasParentRelativeHeightOrTop = [&]
+        {
+          if (style.LogicalHeight().IsPercentOrCalculated() || style.LogicalTop().IsPercentOrCalculated())
+          {
+            return true;
+          }
+          return !style.LogicalBottom().IsAuto();
+        }();
+        if (hasParentRelativeHeightOrTop)
+        {
+          hasSimpleOutOfFlowContentOnly = false;
+        }
+
+        if (hasSimpleOutOfFlowContentOnly && style.IsOriginalDisplayInlineType())
+        {
+          hasSimpleOutOfFlowContentOnly = hasSimpleStaticPositionForInlineLevelOutOfFlowContentByStyle;
+        }
+      }
+      else
+      {
+        hasSimpleOutOfFlowContentOnly = false;
+      }
+
+      if (!renderer.NeedsLayout() && !renderer.NeedsPreferredLogicalWidthsUpdate())
+      {
+        continue;
+      }
+
+      // FIXME: Mark the parent inline box's layer for a full repaint when its text changed
+      // (setFullRepaintOnParentInlineBoxLayerIfNeeded), once there's painting.
+
+      if (auto *inlineLevelBox = DynamicDowncast<RenderBox>(renderer))
+      {
+        // FIXME: Move this to where the actual content change happens and call it on the parent IFC.
+        auto shouldTriggerFullLayout =
+          inlineLevelBox->IsInline()
+          && (inlineLevelBox->NeedsSimplifiedNormalFlowLayout() || inlineLevelBox->NormalChildNeedsLayout()
+              || inlineLevelBox->OutOfFlowChildNeedsLayout())
+          && InlineLayout();
+        if (shouldTriggerFullLayout)
+        {
+          // FIXME: Invalidate the box's content for partial layout (LineLayout::boxContentWillChange), once
+          // there's partial layout.
+          contentNeedsNormalChildLayoutOnly = false;
+        }
+      }
+
+      // Non inline box inline level elements (e.g. <img>) report self-needs-layout on style change, and
+      // RenderText also reports self-needs-layout on content change. Inline boxes report
+      // normal-child-needs-layout when their children need (any) layout.
+      contentNeedsNormalChildLayoutOnly =
+        contentNeedsNormalChildLayoutOnly
+        && (!renderer.NeedsLayout() || renderer.NeedsNormalChildOrSimplifiedLayoutOnly());
+
+      if (Is<RenderLineBreak>(renderer) || Is<RenderInline>(renderer) || Is<RenderText>(renderer))
+      {
+        renderer.ClearNeedsLayout();
+      }
+
+      // FIXME: Combine the text of text-combine-upright text (RenderCombineText::combineTextIfNeeded), once
+      // there's text-combine-upright.
+    }
+    return {hasSimpleOutOfFlowContentOnly,
+            hasInFlowBlockLevelElement ? Maybe<bool> {contentNeedsNormalChildLayoutOnly} : null};
+  }
+
+  void RenderBlockFlow::UpdateRepaintTopAndBottomAfterLayout(
+    RelayoutChildren relayoutChildren, Maybe<LayoutRect> partialRepaintRect,
+    Pair<float, float> oldContentTopAndBottomIncludingInkOverflow, LayoutUnit &repaintLogicalTop,
+    LayoutUnit &repaintLogicalBottom) noexcept
+  {
+    auto isFullLayout = SelfNeedsLayout() || relayoutChildren == RelayoutChildren::Yes;
+    if (isFullLayout)
+    {
+      if (!SelfNeedsLayout())
+      {
+        // In order to really trigger full repaint, the block container has to have the self layout flag set.
+        // Without having it set, repaint after layout logic only issues repaint on the diff of before/after
+        // repaint bounds. It results in incorrect repaint when the inline content changes (new text) and
+        // expands the same time. (it only affects shrink-to-fit type of containers).
+        // FIXME: We have the exact damaged rect here, should be able to issue repaint on both inline and
+        // block directions.
+        SetNeedsLayout(MarkingBehavior::MarkOnlyThis);
+      }
+      // Let's trigger full repaint instead for now.
+      // FIXME: We should revisit this behavior and run repaints strictly on visual overflow.
+      repaintLogicalTop = LayoutUnit {};
+      repaintLogicalBottom = LayoutUnit {};
+      return;
+    }
+
+    if (partialRepaintRect)
+    {
+      repaintLogicalTop = partialRepaintRect->Y();
+      repaintLogicalBottom = partialRepaintRect->MaxY();
+      return;
+    }
+
+    auto contentTopAndBottomIncludingInkOverflow = InlineContentTopAndBottomIncludingInkOverflow();
+    auto damageTopIncludingInkOverflow = std::min(oldContentTopAndBottomIncludingInkOverflow.first,
+                                                  contentTopAndBottomIncludingInkOverflow.first);
+    auto damageBottomIncludingInkOverflow = std::max(oldContentTopAndBottomIncludingInkOverflow.second,
+                                                     contentTopAndBottomIncludingInkOverflow.second);
+
+    repaintLogicalTop =
+      std::min(LayoutUnit::FromFloatFloor(damageTopIncludingInkOverflow), BorderAndPaddingBefore());
+    repaintLogicalBottom =
+      std::max(LayoutUnit::FromFloatCeil(damageBottomIncludingInkOverflow), LogicalHeight());
+  }
+
+  void RenderBlockFlow::LayoutInlineContent(RelayoutChildren relayoutChildren, LayoutUnit previousHeight,
+                                            LayoutUnit &repaintLogicalTop,
+                                            LayoutUnit &repaintLogicalBottom) noexcept
+  {
+    auto inlineContentStatus = MarkInlineContentDirtyForLayout(relayoutChildren);
+    if (inlineContentStatus.HasSimpleOutOfFlowContentOnly)
+    {
+      // Shortcut the layout.
+      _lineLayout = nullptr;
+
+      SetStaticPositionsForSimpleOutOfFlowContent();
+      SetLogicalHeight(BorderAndPaddingLogicalHeight() + LayoutUnit(ScrollbarLogicalHeight()));
+      return;
+    }
+
+    auto oldContentTopAndBottomIncludingInkOverflow = InlineContentTopAndBottomIncludingInkOverflow();
+    _previousInlineLayoutContentTopAndBottomIncludingInkOverflow = null;
+
+    auto mayRunSimpleBlockContentInInlineLayout =
+      inlineContentStatus.OnlyBlockContentNeedsLayout && *inlineContentStatus.OnlyBlockContentNeedsLayout;
+    if (mayRunSimpleBlockContentInInlineLayout)
+    {
+      auto marginInfo = MarginInfo {*this, MarginInfo::IgnoreScrollbarForAfterMargin::No};
+      if (LayoutSimpleBlockContentInInline(marginInfo))
+      {
+        SetLogicalHeight(previousHeight);
+        (void)HandleAfterSideOfBlock(
+          marginInfo,
+          previousHeight - (BorderAndPaddingLogicalHeight() + LayoutUnit(ScrollbarLogicalHeight())));
+        UpdateRepaintTopAndBottomAfterLayout(relayoutChildren, null,
+                                             oldContentTopAndBottomIncludingInkOverflow, repaintLogicalTop,
+                                             repaintLogicalBottom);
+        return;
+      }
+    }
+
+    if (!InlineLayout())
+    {
+      _lineLayout = CreateUnique<layout_integration::LineLayout>(*this);
+    }
+    auto &inlineLayout = *InlineLayout();
+
+    krys_debug_assert(ContainingBlock() || Is<RenderView>(*this));
+    inlineLayout.UpdateFormattingContexGeometries(ContainingBlock() ? ContainingBlockLogicalWidthForContent()
+                                                                    : LayoutUnit());
+
+    auto marginInfo = MarginInfo {*this, MarginInfo::IgnoreScrollbarForAfterMargin::No};
+    auto partialRepaintRect =
+      inlineLayout.Layout(marginInfo, relayoutChildren == RelayoutChildren::Yes
+                                        ? layout_integration::LineLayout::ForceFullLayout::Yes
+                                        : layout_integration::LineLayout::ForceFullLayout::No);
+
+    // The legacy line clamp (-webkit-line-clamp) was dropped, so the content is never clamped here
+    // (updateLineClampStateAndLogicalHeightAfterLayout).
+    auto contentBoxHeight = [&]() -> LayoutUnit
+    {
+      if (HasContentfulInlineOrBlockLine())
+      {
+        return inlineLayout.ContentLogicalHeight();
+      }
+      if (HasLineIfEmpty())
+      {
+        return LineHeight();
+      }
+      return {};
+    };
+    auto borderBoxLogicalHeight = HandleAfterSideOfBlock(marginInfo, contentBoxHeight());
+    SetLogicalHeight(borderBoxLogicalHeight);
+    UpdateRepaintTopAndBottomAfterLayout(relayoutChildren, partialRepaintRect,
+                                         oldContentTopAndBottomIncludingInkOverflow, repaintLogicalTop,
+                                         repaintLogicalBottom);
+
+    // FIXME: Tell the accessibility cache the inline content was laid out, once there is one.
+  }
+
+  void RenderBlockFlow::SetStaticPositionsForSimpleOutOfFlowContent() noexcept
+  {
+    krys_debug_assert(ChildrenInline());
+#ifndef NDEBUG
+    krys_debug_assert(!HasLineIfEmpty());
+    for (auto walker = InlineWalker(*this); !walker.AtEnd(); walker.Advance())
+    {
+      if (walker.Current()->Style().IsDisplayInlineType())
+      {
+        krys_debug_assert(HasSimpleStaticPositionForInlineLevelOutOfFlowChildrenByStyle(Style()));
+        break;
+      }
+    }
+#endif
+    // We have nothing but out-of-flow boxes so we don't need to run the actual line layout.
+    // Instead, we can just set the static positions to the point where all these boxes would end up.
+    // This is a common case when using transforms to animate positioned boxes.
+    auto staticPosition = LayoutPoint {BorderAndPaddingStart(), BorderAndPaddingBefore()};
+
+    for (auto walker = InlineWalker(*this); !walker.AtEnd(); walker.Advance())
+    {
+      auto &renderer = Downcast<RenderBox>(*walker.Current());
+      auto &layer = *renderer.Layer();
+
+      krys_debug_assert(renderer.IsOutOfFlowPositioned());
+
+      auto previousStaticPosition = LayoutPoint {layer.StaticInlinePosition(), layer.StaticBlockPosition()};
+      auto delta = staticPosition - previousStaticPosition;
+      auto hasStaticInlinePositioning = renderer.Style().HasStaticInlinePosition(IsHorizontalWritingMode());
+
+      layer.SetStaticInlinePosition(staticPosition.X());
+      layer.SetStaticBlockPosition(staticPosition.Y());
+
+      if (!delta.IsZero() && hasStaticInlinePositioning)
+      {
+        renderer.SetChildNeedsLayout(MarkingBehavior::MarkOnlyThis);
+      }
+    }
+  }
+
+  namespace
+  {
+    /// @brief Iterates the renderers that contribute to the inline min/max widths.
+    /// @note (1) Positioned content is skipped (since it does not contribute to min/max width of a block)
+    /// (2) We do not drill into the children of floats or replaced elements, since you can't break
+    /// in the middle of such an element.
+    /// (3) Inline flows (e.g., <a>, <span>, <i>) are walked twice, since each side can have
+    /// distinct borders/margin/padding that contribute to the min/max width.
+    struct InlineMinMaxIterator
+    {
+    private:
+      const RenderBlockFlow &_blockContainer;
+      RenderObject *_current {nullptr};
+      bool _isEndOfInline {false};
+      bool _initial {true};
+
+    public:
+      explicit InlineMinMaxIterator(const RenderBlockFlow &blockContainer) noexcept
+          : _blockContainer(blockContainer)
+      {
+      }
+
+      KRYS_NODISCARD bool IsEndOfInline() const noexcept
+      {
+        return _isEndOfInline;
+      }
+
+      RenderObject *Next() noexcept
+      {
+        RenderObject *candidate = _initial ? _blockContainer.FirstChild() : nullptr;
+        _initial = false;
+
+        bool oldEndOfInline = _isEndOfInline;
+        _isEndOfInline = false;
+        do
+        {
+          if (!oldEndOfInline && Is<RenderInline>(_current))
+          {
+            candidate = _current->FirstChildSlow();
+          }
+
+          if (!candidate)
+          {
+            // We hit the end of our inline. (It was empty, e.g., <span></span>.)
+            if (!oldEndOfInline && _current && _current->IsRenderInline())
+            {
+              candidate = _current;
+              _isEndOfInline = true;
+              break;
+            }
+
+            while (_current && _current != &_blockContainer)
+            {
+              candidate = _current->NextSibling();
+              if (candidate)
+              {
+                break;
+              }
+              _current = _current->Parent();
+              if (_current && _current != &_blockContainer && _current->IsRenderInline())
+              {
+                candidate = _current;
+                _isEndOfInline = true;
+                break;
+              }
+            }
+          }
+
+          if (!candidate)
+          {
+            break;
+          }
+
+          if (candidate->IsOutOfFlowPositioned())
+          {
+            _current = candidate;
+            candidate = nullptr;
+            continue;
+          }
+
+          if (Is<RenderInline>(*candidate) || candidate->IsRenderTextOrLineBreak() || candidate->IsFloating()
+              || candidate->IsBlockLevelReplacedOrAtomicInline())
+          {
+            break;
+          }
+
+          if (candidate->Style().IsDisplayBlockLevel())
+          {
+            break;
+          }
+
+          krys_debug_assert(false);
+          _current = candidate;
+          candidate = nullptr;
+        } while (_current || _current == &_blockContainer);
+        // Update our position.
+        _current = candidate;
+        return candidate;
+      }
+    };
+
+    template <typename TSize>
+    KRYS_NODISCARD LayoutUnit BorderMarginOrPaddingWidth(LayoutUnit childValue, const TSize &marginOrPadding,
+                                                         const style::ZoomFactor &zoomFactor) noexcept
+    {
+      if (auto fixed = marginOrPadding.TryFixed())
+      {
+        return LayoutUnit(fixed->ResolveZoom(zoomFactor));
+      }
+      if constexpr (std::same_as<TSize, style::MarginEdge>)
+      {
+        if (marginOrPadding.IsAuto())
+        {
+          return {};
+        }
+      }
+      return childValue;
+    }
+
+    KRYS_NODISCARD LayoutUnit GetBorderPaddingMargin(const RenderBoxModelObject &child,
+                                                     bool endOfInline) noexcept
+    {
+      auto &childStyle = child.Style();
+      const auto &childZoomFactor = childStyle.UsedZoomForLength();
+
+      if (endOfInline)
+      {
+        return BorderMarginOrPaddingWidth(child.MarginEnd(), childStyle.MarginEnd(), childZoomFactor)
+               + BorderMarginOrPaddingWidth(child.PaddingEnd(), childStyle.PaddingEnd(), childZoomFactor)
+               + child.BorderEnd();
+      }
+      return BorderMarginOrPaddingWidth(child.MarginStart(), childStyle.MarginStart(), childZoomFactor)
+             + BorderMarginOrPaddingWidth(child.PaddingStart(), childStyle.PaddingStart(), childZoomFactor)
+             + child.BorderStart();
+    }
+
+    inline void StripTrailingSpace(float &inlineMax, float &inlineMin,
+                                   RenderObject *trailingSpaceChild) noexcept
+    {
+      if (auto *renderText = DynamicDowncast<RenderText>(trailingSpaceChild))
+      {
+        // Collapse away the trailing space at the end of a block.
+        const auto &font = renderText->Style().GetFontCascade(); // FIXME: This ignores first-line.
+        float spaceWidth = font.Width(RenderBlock::ConstructTextRun(u8" ", renderText->Style()));
+        inlineMax -= spaceWidth + font.WordSpacing();
+        if (inlineMin > inlineMax)
+        {
+          inlineMin = inlineMax;
+        }
+      }
+    }
+
+    KRYS_NODISCARD inline Maybe<Pair<const RenderText *, const RenderText *>>
+      TrailingRubyBaseAndAdjacentTextContent(const RenderInline &rubyBase,
+                                             const RenderBlockFlow &blockContainer) noexcept
+    {
+      // This functions returns adjacent _content_ renderers by skipping non-inline content (floats,
+      // out-of-flow content) inline boxes and related annotation boxes. e.g. <ruby>
+      //       <span>base</span><rt>annotation</rt>
+      //       <span>adjacent base</span><rt>annotation</rt>
+      //      </ruby>
+      // returns "base" and "adjacent base" RenderText renderers.
+      if (!rubyBase.FirstInFlowChild())
+      {
+        return null;
+      }
+
+      auto shouldSkip = [&](const RenderObject &renderer)
+      {
+        if (Is<RenderText>(renderer))
+        {
+          return false;
+        }
+        if (Is<RenderInline>(renderer))
+        {
+          return true;
+        }
+        auto &renderBox = Downcast<RenderBoxModelObject>(renderer);
+        return !renderBox.IsInFlow() || renderBox.Style().Display() == DisplayType::RubyAnnotation;
+      };
+
+      auto walker = InlineWalker(blockContainer, const_cast<RenderObject *>(rubyBase.FirstInFlowChild()));
+      auto lastInlineChildOfRubyBase = [&]() -> RenderObject *
+      {
+        RenderObject *lastChild = nullptr;
+        for (; !walker.AtEnd(); walker.Advance())
+        {
+          auto *renderer = walker.Current();
+          if (renderer->Parent() == rubyBase.Parent())
+          {
+            return lastChild;
+          }
+          if (!shouldSkip(*renderer))
+          {
+            lastChild = renderer;
+          }
+        }
+        return nullptr;
+      };
+      auto *lastChild = lastInlineChildOfRubyBase();
+      if (!lastChild || !Is<RenderText>(*lastChild))
+      {
+        return null;
+      }
+
+      auto firstInlineAfterRubyBase = [&]() -> RenderObject *
+      {
+        for (; !walker.AtEnd(); walker.Advance())
+        {
+          if (!shouldSkip(*walker.Current()))
+          {
+            return walker.Current();
+          }
+        }
+        return nullptr;
+      };
+      auto *firstSibling = firstInlineAfterRubyBase();
+      if (!firstSibling || !Is<RenderText>(*firstSibling))
+      {
+        return null;
+      }
+
+      return Pair<const RenderText *, const RenderText *> {&Downcast<RenderText>(*lastChild),
+                                                           &Downcast<RenderText>(*firstSibling)};
+    }
+
+    KRYS_NODISCARD inline bool HasTrailingSoftWrapOpportunity(const RenderInline &rubyBase,
+                                                              const RenderBlockFlow &blockContainer) noexcept
+    {
+      if (!rubyBase.Parent()->Style().AutoWrap())
+      {
+        return false;
+      }
+
+      if (auto lastAndNextTextContent = TrailingRubyBaseAndAdjacentTextContent(rubyBase, blockContainer))
+      {
+        return layout::TextUtil::MayBreakInBetween(
+          lastAndNextTextContent->first->Text(), lastAndNextTextContent->first->Style(),
+          lastAndNextTextContent->second->Text(), lastAndNextTextContent->second->Style());
+      }
+      return false;
+    }
+
+    KRYS_NODISCARD inline LayoutUnit PreferredWidth(LayoutUnit preferredWidth, float result) noexcept
+    {
+      return std::max(preferredWidth, LayoutUnit::FromFloatCeil(result));
+    }
+
+    KRYS_NODISCARD inline Maybe<LayoutUnit>
+      TextIndentForBlockContainer(const RenderBlockFlow &renderer) noexcept
+    {
+      auto &style = renderer.Style();
+      if (auto fixedTextIndent = style.GetTextIndent().Length.TryFixed())
+      {
+        return !fixedTextIndent->IsZero()
+                 ? Maybe<LayoutUnit> {LayoutUnit {fixedTextIndent->ResolveZoom(style.UsedZoomForLength())}}
+                 : null;
+      }
+
+      auto indentValue = LayoutUnit {};
+      if (auto *containingBlock = renderer.ContainingBlock())
+      {
+        if (auto containingBlockFixedLogicalWidth = containingBlock->Style().LogicalWidth().TryFixed())
+        {
+          auto containingBlockFixedLogicalWidthValue = style::Evaluate<LayoutUnit>(
+            *containingBlockFixedLogicalWidth, containingBlock->Style().UsedZoomForLength());
+          // At this point of the shrink-to-fit computation, we don't have a used value for the containing
+          // block width (that's exactly to what we try to contribute here) unless the computed value is
+          // fixed.
+          indentValue =
+            style::Evaluate<LayoutUnit>(style.GetTextIndent().Length, containingBlockFixedLogicalWidthValue,
+                                        containingBlock->Style().UsedZoomForLength());
+        }
+      }
+      return indentValue ? Maybe<LayoutUnit> {indentValue} : null;
+    }
+  }
+
+  void RenderBlockFlow::ComputeInlinePreferredLogicalWidths(LayoutUnit &minLogicalWidth,
+                                                            LayoutUnit &maxLogicalWidth) const noexcept
+  {
+    krys_debug_assert(!ShouldApplyInlineSizeContainment());
+
+    if (const_cast<RenderBlockFlow &>(*this).TryComputePreferredWidthsUsingInlinePath(minLogicalWidth,
+                                                                                      maxLogicalWidth))
+    {
+      return;
+    }
+
+    float inlineMax = 0.f;
+    float inlineMin = 0.f;
+
+    const RenderStyle &styleToUse = Style();
+    // If we are at the start of a line, we want to ignore all white-space.
+    // Also strip spaces if we previously had text that ended in a trailing space.
+    bool stripFrontSpaces = true;
+    RenderObject *trailingSpaceChild = nullptr;
+
+    // Firefox and Opera will allow a table cell to grow to fit an image inside it under
+    // very specific cirucumstances (in order to match common WinIE renderings).
+    // Not supporting the quirk has caused us to mis-render some real sites.
+    bool allowImagesToBreak = !GetDocument().InQuirksMode() || !IsRenderTableCell()
+                              || !styleToUse.LogicalWidth().IsIntrinsicOrLegacyIntrinsicOrAuto();
+
+    bool oldAutoWrap = styleToUse.AutoWrap();
+
+    InlineMinMaxIterator childIterator(*this);
+
+    // Signals the text indent was more negative than the min preferred width
+    auto remainingNegativeTextIndent = Maybe<float> {};
+    auto textIndentForMinimum = TextIndentForBlockContainer(*this);
+    auto textIndentForMaximum = textIndentForMinimum;
+    const RenderBox *previousFloat = nullptr;
+    bool isPrevChildInlineFlow = false;
+    bool shouldBreakLineAfterText = false;
+    bool canHangPunctuationAtStart =
+      styleToUse.GetHangingPunctuation().Contains(style::HangingPunctuationValue::First);
+    bool canHangPunctuationAtEnd =
+      styleToUse.GetHangingPunctuation().Contains(style::HangingPunctuationValue::Last);
+    RenderText *lastText = nullptr;
+    struct RubyBaseContent
+    {
+      float MinimumWidth {0.f};
+      float MaxiumumWidth {0.f};
+      bool HasBreakingPositionAfter {false};
+    };
+    List<RubyBaseContent> rubyBaseContentStack;
+
+    bool addedStartPunctuationHang = false;
+
+    while (RenderObject *child = childIterator.Next())
+    {
+      // Interlinear annotations don't participate in inline layout, but they put a minimum width requirement
+      // on the associated ruby base.
+      auto isInterlinearTypeAnnotation = [&]
+      {
+        if (auto *renderBlock = DynamicDowncast<RenderBlock>(*child))
+        {
+          auto &style = renderBlock->Style();
+          return style.Display() == DisplayType::RubyAnnotation
+                 && (!style.IsInterCharacterRubyPosition()
+                     || styleToUse.GetWritingMode().IsVerticalTypographic());
+        }
+        return false;
+      };
+      if (isInterlinearTypeAnnotation())
+      {
+        auto annotationMinimumIntrinsicWidth = LayoutUnit {};
+        auto annotationMaximumIntrinsicWidth = LayoutUnit {};
+        ComputeChildPreferredLogicalWidths(Downcast<RenderBlock>(*child), annotationMinimumIntrinsicWidth,
+                                           annotationMaximumIntrinsicWidth);
+
+        if (!rubyBaseContentStack.empty())
+        {
+          // Annotation box is always preceded by the associated ruby base.
+          // inlineMin/max only gets expanded if the annotation is wider than the base content is.
+          auto baseContent = rubyBaseContentStack.back();
+          rubyBaseContentStack.pop_back();
+          inlineMax +=
+            std::max(0.f, annotationMaximumIntrinsicWidth.CeilToFloat() - baseContent.MaxiumumWidth);
+          if (baseContent.HasBreakingPositionAfter)
+          {
+            // When base end has breaking position, the inlineMin value is already reset as we are not
+            // tracking the inline content for this "line" anymore. However the annotation still belows to the
+            // current "line" so we have to update the minLogicalWidth in case annotation is wider than the
+            // base content.
+            minLogicalWidth +=
+              std::max(0.f, annotationMinimumIntrinsicWidth.CeilToFloat() - baseContent.MinimumWidth);
+          }
+          else
+          {
+            inlineMin +=
+              std::max(0.f, annotationMinimumIntrinsicWidth.CeilToFloat() - baseContent.MinimumWidth);
+          }
+        }
+        else
+        {
+          krys_debug_assert(false);
+        }
+        continue;
+      }
+
+      auto resetLineForForcedLineBreak = [&]
+      {
+        if (styleToUse.CollapseWhiteSpace())
+        {
+          StripTrailingSpace(inlineMax, inlineMin, trailingSpaceChild);
+        }
+        minLogicalWidth = PreferredWidth(minLogicalWidth, inlineMin);
+        maxLogicalWidth = PreferredWidth(maxLogicalWidth, inlineMax);
+        inlineMin = 0;
+        inlineMax = 0;
+        stripFrontSpaces = true;
+        trailingSpaceChild = nullptr;
+        textIndentForMinimum = null;
+        textIndentForMaximum = null;
+        remainingNegativeTextIndent = null;
+        addedStartPunctuationHang = true;
+        isPrevChildInlineFlow = false;
+        oldAutoWrap = child->Parent()->Style().AutoWrap();
+      };
+
+      if (child->IsBR())
+      {
+        resetLineForForcedLineBreak();
+        continue;
+      }
+
+      if (child->Style().IsDisplayBlockLevel() && !child->IsFloating() && Is<RenderBox>(*child))
+      {
+        resetLineForForcedLineBreak();
+
+        auto blockMinWidth = LayoutUnit {};
+        auto blockMaxWidth = LayoutUnit {};
+        ComputeChildPreferredLogicalWidths(Downcast<RenderBox>(*child), blockMinWidth, blockMaxWidth);
+
+        auto marginsInInlineDirection = LayoutUnit {};
+        if (auto fixedMarginStart = child->Style().MarginStart(GetWritingMode()).TryFixed())
+        {
+          marginsInInlineDirection +=
+            LayoutUnit::FromFloatCeil(fixedMarginStart->ResolveZoom(child->Style().UsedZoomForLength()));
+        }
+        if (auto fixedMarginEnd = child->Style().MarginEnd(GetWritingMode()).TryFixed())
+        {
+          marginsInInlineDirection +=
+            LayoutUnit::FromFloatCeil(fixedMarginEnd->ResolveZoom(child->Style().UsedZoomForLength()));
+        }
+
+        minLogicalWidth = std::max(minLogicalWidth, blockMinWidth + marginsInInlineDirection);
+        maxLogicalWidth = std::max(maxLogicalWidth, blockMaxWidth + marginsInInlineDirection);
+        continue;
+      }
+
+      // Step One: determine whether or not we need to terminate our current line.
+      // Each discrete chunk can become the new min-width, if it is the widest chunk
+      // seen so far, and it can also become the max-width.
+
+      // Children fall into three categories:
+      // (1) An inline flow object. These objects always have a min/max of 0,
+      // and are included in the iteration solely so that their margins can
+      // be added in.
+      //
+      // (2) An inline non-text non-flow object, e.g., an inline replaced element.
+      // These objects can always be on a line by themselves, so in this situation
+      // we need to break the current line, and then add in our own margins and min/max
+      // width on its own line, and then terminate the line.
+      //
+      // (3) A text object. Text runs can have breakable characters at the start,
+      // the middle or the end. They may also lose whitespace off the front if
+      // we're already ignoring whitespace. In order to compute accurate min-width
+      // information, we need three pieces of information.
+      // (a) the min-width of the first non-breakable run. Should be 0 if the text string
+      // starts with whitespace.
+      // (b) the min-width of the last non-breakable run. Should be 0 if the text string
+      // ends with whitespace.
+      // (c) the min/max width of the string (trimmed for whitespace).
+      //
+      // If the text string starts with whitespace, then we need to terminate our current line
+      // (unless we're already in a whitespace stripping mode.
+      //
+      // If the text string has a breakable character in the middle, but didn't start
+      // with whitespace, then we add the width of the first non-breakable run and
+      // then end the current line. We then need to use the intermediate min/max width
+      // values (if any of them are larger than our current min/max). We then look at
+      // the width of the last non-breakable run and use that to start a new line
+      // (unless we end in whitespace).
+      auto autoWrap = child->IsBlockLevelReplacedOrAtomicInline() || Is<RenderText>(*child)
+                        ? child->Parent()->Style().AutoWrap()
+                        : child->Style().AutoWrap();
+      auto childMin = 0.f;
+      auto childMax = 0.f;
+
+      if (!child->IsRenderText())
+      {
+        if (child->IsLineBreakOpportunity())
+        {
+          minLogicalWidth = PreferredWidth(minLogicalWidth, inlineMin);
+          inlineMin = 0;
+          continue;
+        }
+        auto &childStyle = Downcast<RenderElement>(*child).Style();
+        // Case (1) and (2). Inline replaced and inline flow elements.
+        if (auto *renderInline = DynamicDowncast<RenderInline>(*child))
+        {
+          // Add in padding/border/margin from the appropriate side of
+          // the element.
+          float bpm = GetBorderPaddingMargin(*renderInline, childIterator.IsEndOfInline()).ToFloat();
+          childMin += bpm;
+          childMax += bpm;
+
+          if (childStyle.Display() == DisplayType::RubyBase && !childIterator.IsEndOfInline())
+          {
+            rubyBaseContentStack.push_back({inlineMin, inlineMax, false});
+          }
+
+          inlineMin += childMin;
+          inlineMax += childMax;
+
+          if (childStyle.Display() == DisplayType::RubyBase && childIterator.IsEndOfInline())
+          {
+            if (!rubyBaseContentStack.empty())
+            {
+              auto rubyBaseStart = rubyBaseContentStack.back();
+              auto baseHasBreakingPositionAfter = HasTrailingSoftWrapOpportunity(*renderInline, *this);
+              rubyBaseContentStack.back() =
+                RubyBaseContent {inlineMin - rubyBaseStart.MinimumWidth,
+                                 inlineMax - rubyBaseStart.MaxiumumWidth, baseHasBreakingPositionAfter};
+              if (baseHasBreakingPositionAfter)
+              {
+                // Let's mark based end as a breaking opportunity. Note that annotation may chage the final
+                // value of minLogicalWidth.
+                minLogicalWidth = PreferredWidth(minLogicalWidth, inlineMin);
+                inlineMin = 0;
+              }
+            }
+            else
+            {
+              krys_debug_assert(false);
+            }
+          }
+
+          child->ClearNeedsPreferredWidthsUpdate();
+        }
+        else
+        {
+          const auto &childZoomFactor = childStyle.UsedZoomForLength();
+
+          // Inline replaced boxes add in their margins to their min/max values.
+          if (!child->IsFloating())
+          {
+            lastText = nullptr;
+          }
+          LayoutUnit margins;
+          if (auto fixedMarginStart = childStyle.MarginStart(GetWritingMode()).TryFixed())
+          {
+            margins += LayoutUnit::FromFloatCeil(fixedMarginStart->ResolveZoom(childZoomFactor));
+          }
+          if (auto fixedMarginEnd = childStyle.MarginEnd(GetWritingMode()).TryFixed())
+          {
+            margins += LayoutUnit::FromFloatCeil(fixedMarginEnd->ResolveZoom(childZoomFactor));
+          }
+          childMin += margins.CeilToFloat();
+          childMax += margins.CeilToFloat();
+        }
+      }
+
+      if (!Is<RenderInline>(*child) && !Is<RenderText>(*child))
+      {
+        // Case (2). Inline replaced boxes and floats.
+        // Terminate the current line as far as minwidth is concerned.
+        LayoutUnit childMinPreferredLogicalWidth;
+        LayoutUnit childMaxPreferredLogicalWidth;
+        auto *box = DynamicDowncast<RenderBox>(*child);
+        if (box->IsHorizontalWritingMode() != IsHorizontalWritingMode())
+        {
+          auto extent = box->ComputeLogicalHeight(box->BorderAndPaddingLogicalHeight(), 0_lu).Extent;
+          childMinPreferredLogicalWidth = extent;
+          childMaxPreferredLogicalWidth = extent;
+        }
+        else
+        {
+          ComputeChildPreferredLogicalWidths(*box, childMinPreferredLogicalWidth,
+                                             childMaxPreferredLogicalWidth);
+        }
+        childMin += childMinPreferredLogicalWidth.CeilToFloat();
+        childMax += childMaxPreferredLogicalWidth.CeilToFloat();
+
+        bool clearPreviousFloat = false;
+        if (box->IsFloating())
+        {
+          auto childClearValue = RenderStyle::GetUsedClear(*box);
+          if (previousFloat)
+          {
+            auto previousFloatValue = RenderStyle::GetUsedFloat(*previousFloat);
+            clearPreviousFloat =
+              (previousFloatValue == UsedFloat::Left
+               && (childClearValue == UsedClear::Left || childClearValue == UsedClear::Both))
+              || (previousFloatValue == UsedFloat::Right
+                  && (childClearValue == UsedClear::Right || childClearValue == UsedClear::Both));
+          }
+          previousFloat = box;
+        }
+
+        // FIXME: Images never break when allowImagesToBreak is off, once there are images.
+        bool canBreakReplacedElement = true;
+        (void)allowImagesToBreak;
+        if (((canBreakReplacedElement && (autoWrap || oldAutoWrap)
+              && (!isPrevChildInlineFlow || shouldBreakLineAfterText))
+             || clearPreviousFloat))
+        {
+          minLogicalWidth = PreferredWidth(minLogicalWidth, inlineMin);
+          inlineMin = 0;
+        }
+
+        // If we're supposed to clear the previous float, then terminate maxwidth as well.
+        if (clearPreviousFloat)
+        {
+          maxLogicalWidth = PreferredWidth(maxLogicalWidth, inlineMax);
+          inlineMax = 0;
+        }
+
+        // Add in text-indent. This is added in only once.
+        if (!box->IsFloating())
+        {
+          if (textIndentForMinimum)
+          {
+            childMin += LayoutUnit {textIndentForMinimum->CeilToFloat()}.ToFloat();
+            textIndentForMinimum =
+              childMin < 0 ? Maybe<LayoutUnit> {LayoutUnit::FromFloatCeil(childMin)} : null;
+          }
+
+          if (textIndentForMaximum)
+          {
+            childMax += LayoutUnit {textIndentForMaximum->CeilToFloat()}.ToFloat();
+            textIndentForMaximum =
+              childMax < 0 ? Maybe<LayoutUnit> {LayoutUnit::FromFloatCeil(childMax)} : null;
+          }
+        }
+
+        if (canHangPunctuationAtStart && !addedStartPunctuationHang && !box->IsFloating())
+        {
+          addedStartPunctuationHang = true;
+        }
+
+        // Add our width to the max.
+        inlineMax += std::max<float>(0, childMax);
+
+        if ((!autoWrap || !canBreakReplacedElement || (isPrevChildInlineFlow && !shouldBreakLineAfterText)))
+        {
+          if (box->IsFloating())
+          {
+            minLogicalWidth = PreferredWidth(minLogicalWidth, childMin);
+          }
+          else
+          {
+            inlineMin += childMin;
+          }
+        }
+        else
+        {
+          // Now check our line.
+          minLogicalWidth = PreferredWidth(minLogicalWidth, childMin);
+
+          // Now start a new line.
+          inlineMin = 0;
+        }
+
+        if (autoWrap && canBreakReplacedElement && isPrevChildInlineFlow)
+        {
+          minLogicalWidth = PreferredWidth(minLogicalWidth, inlineMin);
+          inlineMin = 0;
+        }
+
+        // We are no longer stripping whitespace at the start of a line.
+        if (!box->IsFloating())
+        {
+          stripFrontSpaces = false;
+          trailingSpaceChild = nullptr;
+          lastText = nullptr;
+        }
+      }
+      else if (auto *renderText = DynamicDowncast<RenderText>(*child))
+      {
+        // FIXME: Combine the text of text-combine-upright text (RenderCombineText::combineTextIfNeeded), once
+        // there's text-combine-upright.
+
+        // Determine if we have a breakable character. Pass in
+        // whether or not we should ignore any spaces at the front
+        // of the string. If those are going to be stripped out,
+        // then they shouldn't be considered in the breakable char
+        // check.
+        bool strippingBeginWS = stripFrontSpaces;
+        auto widths = renderText->TrimmedPreferredWidths(inlineMax, stripFrontSpaces);
+
+        childMin = widths.Min;
+        childMax = widths.Max;
+
+        // This text object will not be rendered, but it may still provide a breaking opportunity.
+        if (!widths.HasBreak && !childMax)
+        {
+          if (autoWrap && (widths.BeginWS || widths.EndWS || widths.EndZeroSpace))
+          {
+            minLogicalWidth = PreferredWidth(minLogicalWidth, inlineMin);
+            inlineMin = 0;
+          }
+          continue;
+        }
+
+        lastText = renderText;
+
+        if (stripFrontSpaces)
+        {
+          trailingSpaceChild = child;
+        }
+        else
+        {
+          trailingSpaceChild = nullptr;
+        }
+
+        // Add in text-indent. This is added in only once.
+        float ti = 0.f;
+        if (textIndentForMinimum || remainingNegativeTextIndent)
+        {
+          ti = textIndentForMinimum ? textIndentForMinimum->CeilToFloat()
+                                    : std::ceil(*remainingNegativeTextIndent);
+          childMin += ti;
+          widths.BeginMin += ti;
+          // It the text indent negative and larger than the child minimum, we re-use the remainder
+          // in future minimum calculations, but using the negative value again on the maximum
+          // will lead to under-counting the max pref width.
+          textIndentForMinimum = null;
+          remainingNegativeTextIndent = childMin < 0 ? Maybe<float> {childMin} : null;
+        }
+
+        if (textIndentForMaximum)
+        {
+          auto textIndent = textIndentForMaximum->CeilToFloat();
+          childMax += textIndent;
+          widths.BeginMax += textIndent;
+          textIndentForMaximum = null;
+        }
+
+        // See if we have a hanging punctuation situation at the start.
+        if (canHangPunctuationAtStart && !addedStartPunctuationHang)
+        {
+          auto startIndex = strippingBeginWS ? renderText->FirstCharacterIndexStrippingSpaces() : 0;
+          float hangStartWidth = renderText->HangablePunctuationStartWidth(startIndex);
+          childMin -= hangStartWidth;
+          widths.BeginMin -= hangStartWidth;
+          childMax -= hangStartWidth;
+          widths.BeginMax -= hangStartWidth;
+          addedStartPunctuationHang = true;
+        }
+
+        // If we have no breakable characters at all,
+        // then this is the easy case. We add ourselves to the current
+        // min and max and continue.
+        if (!widths.HasBreakableChar)
+        {
+          inlineMin += childMin;
+        }
+        else
+        {
+          // We have a breakable character. Now we need to know if
+          // we start and end with whitespace.
+          if (widths.BeginWS)
+          {
+            // End the current line.
+            minLogicalWidth = PreferredWidth(minLogicalWidth, inlineMin);
+          }
+          else
+          {
+            inlineMin += widths.BeginMin;
+            minLogicalWidth = PreferredWidth(minLogicalWidth, inlineMin);
+            childMin -= ti;
+          }
+
+          inlineMin = childMin;
+
+          if (widths.EndWS || widths.EndZeroSpace)
+          {
+            // We end in breakable space, which means we can end our current line.
+            minLogicalWidth = PreferredWidth(minLogicalWidth, inlineMin);
+            inlineMin = 0;
+            shouldBreakLineAfterText = false;
+          }
+          else
+          {
+            minLogicalWidth = PreferredWidth(minLogicalWidth, inlineMin);
+            inlineMin = widths.EndMin;
+            shouldBreakLineAfterText = true;
+          }
+        }
+
+        if (widths.HasBreak)
+        {
+          inlineMax += widths.BeginMax;
+          maxLogicalWidth = PreferredWidth(maxLogicalWidth, inlineMax);
+          maxLogicalWidth = PreferredWidth(maxLogicalWidth, childMax);
+          inlineMax = widths.EndMax;
+          textIndentForMinimum = null;
+          textIndentForMaximum = null;
+          remainingNegativeTextIndent = null;
+          addedStartPunctuationHang = true;
+          if (widths.EndsWithBreak)
+          {
+            stripFrontSpaces = true;
+          }
+        }
+        else
+        {
+          inlineMax += std::max<float>(0, childMax);
+        }
+      }
+
+      // Ignore spaces after a list marker.
+      if (child->IsRenderListMarker())
+      {
+        stripFrontSpaces = true;
+      }
+
+      isPrevChildInlineFlow = !child->IsRenderText() && child->IsRenderInline();
+      oldAutoWrap = autoWrap;
+    }
+
+    if (styleToUse.CollapseWhiteSpace())
+    {
+      StripTrailingSpace(inlineMax, inlineMin, trailingSpaceChild);
+    }
+
+    if (canHangPunctuationAtEnd && lastText && !lastText->Text().empty())
+    {
+      auto lastCodePointStart = [&]
+      {
+        auto &text = lastText->Text();
+        auto position = text.size() - 1;
+        while (position && text::IsTrailingUTF8(text[position]))
+        {
+          --position;
+        }
+        return position;
+      };
+      auto endIndex =
+        trailingSpaceChild == lastText ? lastText->LastCharacterIndexStrippingSpaces() : lastCodePointStart();
+      float endHangWidth = lastText->HangablePunctuationEndWidth(endIndex);
+      inlineMin -= endHangWidth;
+      inlineMax -= endHangWidth;
+    }
+
+    minLogicalWidth = PreferredWidth(minLogicalWidth, inlineMin);
+    maxLogicalWidth = PreferredWidth(maxLogicalWidth, inlineMax);
+  }
+
+  bool RenderBlockFlow::TryComputePreferredWidthsUsingInlinePath(LayoutUnit &minLogicalWidth,
+                                                                 LayoutUnit &maxLogicalWidth) noexcept
+  {
+    if (!FirstInFlowChild())
+    {
+      return false;
+    }
+
+    ComputeAndSetLineLayoutPath();
+
+    if (GetLineLayoutPath() != LineLayoutPath::InlinePath)
+    {
+      return false;
+    }
+
+    if (!layout_integration::LineLayout::CanUseForPreferredWidthComputation(*this))
+    {
+      return false;
+    }
+
+    if (!InlineLayout())
+    {
+      _lineLayout = CreateUnique<layout_integration::LineLayout>(*this);
+    }
+
+    std::tie(minLogicalWidth, maxLogicalWidth) = InlineLayout()->ComputeIntrinsicWidthConstraints();
+    for (auto walker = InlineWalker(*this); !walker.AtEnd(); walker.Advance())
+    {
+      auto *renderer = walker.Current();
+      renderer->ClearNeedsPreferredWidthsUpdate();
+      if (auto *renderText = DynamicDowncast<RenderText>(renderer))
+      {
+        renderText->ResetMinMaxWidth();
+      }
+    }
+    return true;
   }
 }

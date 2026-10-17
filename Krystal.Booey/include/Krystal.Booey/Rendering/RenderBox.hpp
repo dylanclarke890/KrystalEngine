@@ -733,6 +733,7 @@ namespace krys::boo
     KRYS_NODISCARD LayoutPoint FlipForWritingMode(const LayoutPoint &position) const noexcept;
     KRYS_NODISCARD LayoutSize FlipForWritingMode(const LayoutSize &offset) const noexcept;
     void FlipForWritingMode(LayoutRect &rect) const noexcept;
+    void FlipForWritingMode(FloatRect &rect) const noexcept;
 
 #pragma endregion
 

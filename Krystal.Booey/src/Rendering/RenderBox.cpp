@@ -4415,6 +4415,22 @@ namespace krys::boo
       rect.SetX(Width() - rect.MaxX());
     }
   }
+  void RenderBox::FlipForWritingMode(FloatRect &rect) const noexcept
+  {
+    if (!Style().GetWritingMode().IsBlockFlipped())
+    {
+      return;
+    }
+
+    if (IsHorizontalWritingMode())
+    {
+      rect.SetY(Height().ToFloat() - rect.MaxY());
+    }
+    else
+    {
+      rect.SetX(Width().ToFloat() - rect.MaxX());
+    }
+  }
 
   LayoutUnit RenderBox::FlipForWritingMode(LayoutUnit position) const noexcept
   {

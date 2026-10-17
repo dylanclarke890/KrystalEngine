@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextBreakingPositionCache.hpp"
+#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 namespace krys::boo::layout
@@ -26,7 +27,7 @@ namespace krys::boo::layout
 
   TextBreakingPositionCache &TextBreakingPositionCache::Singleton() noexcept
   {
-    static TextBreakingPositionCache cache;
+    static NeverDestroyed<TextBreakingPositionCache> cache;
     return cache;
   }
 

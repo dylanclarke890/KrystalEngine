@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Layout/Integration/LayoutIntegrationFormattingContextLayout.hpp"
 #include "Krystal.Booey/Layout/LayoutState.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInitialContainingBlock.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
@@ -13,12 +14,12 @@ namespace krys::boo
   RenderView::RenderView(dom::Document &document, RenderStyle &&style) noexcept
       : RenderBlockFlow(Type::View, document, krys::move(style)), _frameView(*document.View()),
         _initialContainingBlock(CreateUnique<layout::InitialContainingBlock>(RenderStyle::Clone(Style()))),
-        // FIXME: The formatting context callbacks (layoutWithFormattingContextForBox,
-        // formattingContextRootLogicalWidthForType, formattingContextRootLogicalHeightForType and
-        // layoutWithFormattingContextForBlockInInline), once there's LineLayout.
-        _layoutState(CreateUnique<layout::LayoutState>(document, *_initialContainingBlock,
-                                                       layout::LayoutState::Type::Primary, nullptr, nullptr,
-                                                       nullptr, nullptr))
+        _layoutState(CreateUnique<layout::LayoutState>(
+          document, *_initialContainingBlock, layout::LayoutState::Type::Primary,
+          layout_integration::LayoutWithFormattingContextForBox,
+          layout_integration::FormattingContextRootLogicalWidthForType,
+          layout_integration::FormattingContextRootLogicalHeightForType,
+          layout_integration::LayoutWithFormattingContextForBlockInInline))
   {
     // FIXME: We should find a way to enforce this at compile time.
     krys_debug_assert(document.View());

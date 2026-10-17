@@ -582,6 +582,11 @@ namespace krys::boo
     return _node.NodeDocument();
   }
 
+  WritingMode RenderObject::GetWritingMode() const noexcept
+  {
+    return Style().GetWritingMode();
+  }
+
   const RenderStyle &RenderObject::Style() const noexcept
   {
     if (IsRenderText())

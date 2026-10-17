@@ -1,12 +1,14 @@
 ﻿#include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
 namespace krys::boo::dom
 {
   const QualifiedName &PseudoElementTagName() noexcept
   {
-    static const QualifiedName name {DOMStringAtom::Null(), DOMStringAtom::Null(), u8"<pseudo>"};
+    static NeverDestroyed<const QualifiedName> name {DOMStringAtom::Null(), DOMStringAtom::Null(),
+                                                     u8"<pseudo>"};
     return name;
   }
 

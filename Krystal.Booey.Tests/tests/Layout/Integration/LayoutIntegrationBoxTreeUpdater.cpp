@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Layout/Integration/LayoutIntegrationBoxTreeUpdater.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/FormattingContext.hpp"
@@ -61,13 +62,15 @@ namespace krys::boo::tests
     </style><body><div id=root>a<span id=s>b<b id=bold>c</b></span><br id=br><wbr id=wbr><span id=ib>x</span>	tab</div>
     <div id=rtl>שלום</div></body>)html"};
     (void)fixture.Document->UpdateLayout();
+    // Layout built the blocks' layout trees with their line layouts; start from none.
+    layout::tests::DetachLineLayouts(fixture);
 
     auto &view = *fixture.Document->GetRenderView();
     auto &initialContainingBlock = view.GetInitialContainingBlock();
     auto &rootRenderer = BlockOf(fixture, u8"root");
     CHECK_FALSE(rootRenderer.LayoutBox());
 
-    auto &rootBox = *layout_integration::BoxTreeUpdater(rootRenderer).Build();
+    auto &rootBox = layout::tests::BuildBoxTree(rootRenderer);
     REQUIRE(rootRenderer.LayoutBox() == &rootBox);
     CHECK(rootBox.RendererForIntegration() == &rootRenderer);
     CHECK(&rootBox.Parent() == &initialContainingBlock);
@@ -139,7 +142,7 @@ namespace krys::boo::tests
       CHECK(tab.HasPositionDependentContentWidth());
 
       auto &rtlRenderer = BlockOf(fixture, u8"rtl");
-      auto &rtlBox = *layout_integration::BoxTreeUpdater(rtlRenderer).Build();
+      auto &rtlBox = layout::tests::BuildBoxTree(rtlRenderer);
       auto &hebrew = Downcast<layout::InlineTextBox>(*rtlBox.FirstChild());
       CHECK(hebrew.HasStrongDirectionalityContent());
       layout_integration::BoxTreeUpdater(rtlRenderer).TearDown();
@@ -226,6 +229,7 @@ namespace krys::boo::tests
       fixture.ById(u8"s").SetAttribute(u8"style", u8"color: red");
       fixture.ById(u8"bold").SetAttribute(u8"style", u8"color: green");
       (void)fixture.Document->UpdateLayout();
+    layout::tests::DetachLineLayouts(fixture);
 
       auto &spanRenderer = RendererOf(fixture, u8"s");
       CHECK_FALSE(BoxOf(fixture, u8"s").Style() == spanRenderer.Style());
@@ -270,6 +274,7 @@ namespace krys::boo::tests
       u8R"html(<!DOCTYPE html><body><div id=c style="overflow: hidden">text<div>block</div></div>
     <ul><li id=li>item</li></ul></body>)html"};
     (void)fixture.Document->UpdateLayout();
+    layout::tests::DetachLineLayouts(fixture);
 
     SECTION("An anonymous block gets its parent's overflow")
     {
@@ -277,7 +282,7 @@ namespace krys::boo::tests
       REQUIRE(anonymousBlock.IsAnonymousBlock());
       CHECK(anonymousBlock.Style().OverflowX() == Overflow::Visible);
 
-      auto &box = *layout_integration::BoxTreeUpdater(anonymousBlock).Build();
+      auto &box = layout::tests::BuildBoxTree(anonymousBlock);
       CHECK(box.IsAnonymous());
       CHECK_FALSE(box.IsPaddingApplicable());
       CHECK(box.IsAnonymousTextIndentCandidateForIntegration());
@@ -290,7 +295,7 @@ namespace krys::boo::tests
     SECTION("A list marker is a replaced box")
     {
       auto &listItem = Downcast<RenderListItem>(RendererOf(fixture, u8"li"));
-      auto &box = *layout_integration::BoxTreeUpdater(listItem).Build();
+      auto &box = layout::tests::BuildBoxTree(listItem);
       auto &marker = Downcast<layout::ElementBox>(*box.FirstChild());
       CHECK(marker.RendererForIntegration() == listItem.MarkerRenderer());
       CHECK(marker.IsListMarkerBox());

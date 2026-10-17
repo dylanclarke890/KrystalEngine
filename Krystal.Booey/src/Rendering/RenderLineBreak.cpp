@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
 #include "Krystal.Booey/HTML/HTMLWBRElement.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 
 namespace krys::boo
 {
@@ -16,5 +17,16 @@ namespace krys::boo
   void RenderLineBreak::UpdateFromStyle() noexcept
   {
     krys_assert(IsInline());
+  }
+
+  IntRect RenderLineBreak::LinesBoundingBox() const noexcept
+  {
+    auto run = inline_iterator::BoxFor(*this);
+    if (!run)
+    {
+      return {};
+    }
+
+    return EnclosingIntRect(run->VisualRectIgnoringBlockDirection());
   }
 }

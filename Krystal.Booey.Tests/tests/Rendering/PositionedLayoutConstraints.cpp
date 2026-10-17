@@ -125,8 +125,6 @@ layer at (790,590) size 10x10
                    "PositionedLayoutConstraints: inline containing blocks and content",
                    "[Rendering][PositionedLayoutConstraints]")
   {
-    // FIXME: Inline content has no lines until inline layout, so the static position of out-of-flow boxes in
-    // it is the start of the block's content box.
     ResolverFixture fixture {u8R"html(<!DOCTYPE html><style>
       body { margin: 0 }
       #block { padding: 5px }
@@ -134,8 +132,9 @@ layer at (790,590) size 10x10
     </style><body><div id=block>text <span><div id=abs></div></span></div></body>)html"};
 
     (void)fixture.Document->UpdateLayout();
+    // The block-level box's static position is below the line that holds the text.
     auto &box = BoxOf(fixture, u8"abs");
-    CHECK(box.Location() == LayoutPoint(5, 5));
+    CHECK(box.Location() == LayoutPoint(5, 23));
     CHECK(box.Size() == LayoutSize(10, 10));
     CHECK(HasOutOfFlowBox(*fixture.Document->GetRenderView(), box));
   }

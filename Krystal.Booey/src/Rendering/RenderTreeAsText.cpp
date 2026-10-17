@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
@@ -416,10 +417,38 @@ namespace krys::boo
 
   namespace
   {
-    void WriteTextRuns(TextStream &, const RenderText &) noexcept
+    void WriteTextRuns(TextStream &ts, const RenderText &textRenderer) noexcept
     {
-      // FIXME: The text runs of the text renderer's line boxes ("text run at (x,y) width w: "text""), once
-      // there's inline layout.
+      auto writeTextRun = [&](const inline_iterator::TextBox &textRun)
+      {
+        ts << Indent;
+
+        auto rect = textRun.VisualRectIgnoringBlockDirection();
+        auto x = static_cast<int32>(rect.X());
+        auto y = static_cast<int32>(rect.Y());
+        // FIXME: Use non-logical width.
+        auto logicalWidth =
+          static_cast<int32>(std::ceil(rect.X() + (textRun.IsHorizontal() ? rect.Width() : rect.Height()))) - x;
+        // FIXME: Subtract the table cell's intrinsic padding (a temporary adjustment until the results are updated),
+        // once there's table layout.
+
+        ts << "text run at (" << x << ',' << y << ") width " << logicalWidth;
+        if (!textRun.IsLeftToRightDirection())
+        {
+          ts << " RTL";
+        }
+        ts << ": " << QuoteAndEscapeNonPrintables(textRun.OriginalText());
+        if (textRun.HasHyphen())
+        {
+          ts << " + hyphen string " << QuoteAndEscapeNonPrintables(textRenderer.Style().HyphenString().View());
+        }
+        ts << '\n';
+      };
+
+      for (auto &run : inline_iterator::TextBoxesFor(textRenderer))
+      {
+        writeTextRun(run);
+      }
     }
   }
 

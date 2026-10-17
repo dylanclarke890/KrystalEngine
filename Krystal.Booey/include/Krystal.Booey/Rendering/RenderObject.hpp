@@ -520,6 +520,14 @@ namespace krys::boo
     {
       return IsRenderLineBreak() && HasWBRLineBreakFlag();
     }
+    KRYS_NODISCARD bool IsLineBreakOpportunity() const noexcept
+    {
+      return IsRenderLineBreak() && IsWBR();
+    }
+    KRYS_NODISCARD bool IsRenderTextOrLineBreak() const noexcept
+    {
+      return IsRenderText() || IsRenderLineBreak();
+    }
     KRYS_NODISCARD bool IsRenderTable() const noexcept
     {
       return _type == Type::Table;
@@ -751,6 +759,7 @@ namespace krys::boo
 
     /// @brief The style the object is rendered with: an element's own, or a text's parent's.
     KRYS_NODISCARD const RenderStyle &Style() const noexcept;
+    KRYS_NODISCARD WritingMode GetWritingMode() const noexcept;
 
 #pragma region Layout bits
 

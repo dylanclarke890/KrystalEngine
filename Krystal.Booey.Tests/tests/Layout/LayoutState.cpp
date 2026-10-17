@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Layout/LayoutState.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Block/BlockFormattingState.hpp"
@@ -48,7 +49,7 @@ namespace krys::boo::tests
     SECTION("Block formatting states")
     {
       auto &rootRenderer = Downcast<RenderBlockFlow>(*fixture.ById(u8"root").Renderer());
-      auto &rootBox = *layout_integration::BoxTreeUpdater(rootRenderer).Build();
+      auto &rootBox = layout::tests::BuildBoxTree(rootRenderer);
       CHECK_FALSE(layoutState.HasFormattingState(rootBox));
 
       auto &formattingState = layoutState.EnsureBlockFormattingState(rootBox);
@@ -95,7 +96,7 @@ namespace krys::boo::tests
     SECTION("Inline content caches")
     {
       auto &rootRenderer = Downcast<RenderBlockFlow>(*fixture.ById(u8"root").Renderer());
-      auto &rootBox = *layout_integration::BoxTreeUpdater(rootRenderer).Build();
+      auto &rootBox = layout::tests::BuildBoxTree(rootRenderer);
 
       auto &inlineContentCache = layoutState.GetInlineContentCache(rootBox);
       CHECK(&layoutState.GetInlineContentCache(rootBox) == &inlineContentCache);

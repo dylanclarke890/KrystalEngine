@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/RenderInline.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
@@ -143,7 +144,21 @@ namespace krys::boo
 
   IntRect RenderInline::LinesBoundingBox() const noexcept
   {
-    // FIXME: The bounding box of the inline's line boxes, once there's inline layout.
+    if (auto *layout = layout_integration::LineLayout::Containing(*this))
+    {
+      if (!LayoutBox() || !layout->Contains(*this))
+      {
+        // Repaint may be issued on subtrees during content mutation with newly inserted renderers
+        // (or we just forgot to initiate layout before querying geometry on stale content after moving inline boxes
+        // between blocks).
+        krys_debug_assert(NeedsLayout());
+        return {};
+      }
+      // FIXME: SVG inlines build the bounding box from their inline boxes, once there's SVG.
+      return EnclosingIntRect(layout->EnclosingBorderBoxRectFor(*this));
+    }
+
+    // Without a line layout (the legacy line boxes are not supported), the inline has no lines.
     return {};
   }
 

@@ -100,12 +100,11 @@ layer at (8,291) size 784x10
       p { margin: 1em 0 }
     </style><body><div id=ac><div></div></div><div id=trim><div></div><div></div></div><div id=v><div></div></div><div id=s><div></div></div><div id=bfc><div></div></div><p>text</p></body>)html"};
 
-    // The paragraph's text has no lines until inline layout, so it's self-collapsing.
     CHECK(Dump(fixture) == u8R"(layer at (0,0) size 800x600
   RenderView at (0,0) size 800x600
-layer at (0,0) size 800x277
-  RenderBlock {HTML} at (0,0) size 800x277
-    RenderBody {BODY} at (0,0) size 800x261
+layer at (0,0) size 800x311
+  RenderBlock {HTML} at (0,0) size 800x311
+    RenderBody {BODY} at (0,0) size 800x295
       RenderBlock {DIV} at (0,0) size 800x102 [border: (1px solid #000000)] id="ac"
         RenderBlock {DIV} at (1,41) size 798x20
       RenderBlock {DIV} at (0,102) size 800x32 [border: (1px solid #000000)] id="trim"
@@ -115,8 +114,9 @@ layer at (0,0) size 800x277
         RenderBlock {DIV} at (6,1) size 10x50
       RenderBlock {DIV} at (0,236) size 800x25 id="bfc"
         RenderBlock {DIV} at (0,20) size 800x5
-      RenderBlock {P} at (0,277) size 800x0
-        RenderText {#text} at (0,0) size 0x0
+      RenderBlock {P} at (0,277) size 800x18
+        RenderText {#text} at (0,0) size 26x17
+          text run at (0,0) width 26: "text"
 layer at (0,186) size 800x40 clip at (0,186) size 785x25 scrollHeight 100
   RenderBlock {DIV} at (0,186) size 800x40 id="s" (layout overflow 0,0 785x100)
     RenderBlock {DIV} at (0,0) size 785x100
@@ -136,11 +136,13 @@ layer at (0,186) size 800x40 clip at (0,186) size 785x25 scrollHeight 100
 layer at (0,0) size 800x600
   RenderBlock {HTML} at (0,0) size 800x600
     RenderBody {BODY} at (8,8) size 784x576
-      RenderBlock {P} at (0,0) size 784x0 id="q"
-        RenderText {#text} at (0,0) size 0x0
-      RenderBlock {DIV} at (0,0) size 784x10
-      RenderBlock {P} at (0,26) size 784x0
-        RenderText {#text} at (0,0) size 0x0
+      RenderBlock {P} at (0,0) size 784x18 id="q"
+        RenderText {#text} at (0,0) size 8x17
+          text run at (0,0) width 8: "x"
+      RenderBlock {DIV} at (0,34) size 784x10
+      RenderBlock {P} at (0,60) size 784x18
+        RenderText {#text} at (0,0) size 8x17
+          text run at (0,0) width 8: "y"
 )");
   }
 

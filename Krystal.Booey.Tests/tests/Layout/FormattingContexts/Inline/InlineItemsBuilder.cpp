@@ -381,6 +381,9 @@ b	c  d</div>
 world foo</div>
     </body>)html"};
     (void)fixture.Document->UpdateLayout();
+    // Releasing the line layouts layout made caches their breaking positions; start from an empty cache.
+    layout::tests::DetachLineLayouts(fixture);
+    breakingPositionCache.Clear();
 
     layout::InlineContentCache cache;
     auto &root = RootBoxOf(fixture, u8"text");

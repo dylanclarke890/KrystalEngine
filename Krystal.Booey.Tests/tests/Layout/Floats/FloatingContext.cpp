@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Layout/Floats/FloatingContext.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/Layout/Floats/PlacedFloats.hpp"
@@ -76,7 +77,7 @@ namespace krys::boo::tests
     (void)fixture.Document->UpdateLayout();
 
     auto &rootRenderer = Downcast<RenderBlockFlow>(*fixture.ById(u8"root").Renderer());
-    auto &rootBox = *layout_integration::BoxTreeUpdater(rootRenderer).Build();
+    auto &rootBox = layout::tests::BuildBoxTree(rootRenderer);
     auto &layoutState = fixture.Document->GetRenderView()->GetLayoutState();
 
     // The root's content box is 300px wide, with no borders or padding.
@@ -214,7 +215,7 @@ namespace krys::boo::tests
     (void)fixture.Document->UpdateLayout();
 
     auto &rootRenderer = Downcast<RenderBlockFlow>(*fixture.ById(u8"root").Renderer());
-    auto &rootBox = *layout_integration::BoxTreeUpdater(rootRenderer).Build();
+    auto &rootBox = layout::tests::BuildBoxTree(rootRenderer);
     auto &layoutState = fixture.Document->GetRenderView()->GetLayoutState();
     (void)SetGeometry(layoutState, rootBox, {300_lu, 0_lu});
     auto placedFloats = layout::PlacedFloats {rootBox};

@@ -5,7 +5,14 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+
+namespace krys::boo::layout_integration
+{
+  class LineLayout;
+}
 
 namespace krys::boo
 {
@@ -106,9 +113,29 @@ namespace krys::boo
     // Used to store state between styleWillChange and styleDidChange
     static bool s_canPropagateFloatIntoSibling;
 
+  public:
+    enum class InvalidationReason : uint8
+    {
+      InternalMove,       // (anon) block is moved or collapsed
+      InsertionOrRemoval, // child renderer gets constructed/goes away
+      ContentChange       // existing renderer gets changed (text content only atm)
+    };
+
+    // SVG text (the legacy line layout) isn't supported, so the path is either undetermined or inline.
+    enum class LineLayoutPath : bool
+    {
+      UndeterminedPath,
+      InlinePath
+    };
+
   protected:
     UniquePtr<FloatingObjects> _floatingObjects;
     UniquePtr<RenderBlockFlowRareData> _rareBlockFlowData;
+
+  private:
+    UniquePtr<layout_integration::LineLayout> _lineLayout;
+    LineLayoutPath _lineLayoutPath {LineLayoutPath::UndeterminedPath};
+    Maybe<Pair<float, float>> _previousInlineLayoutContentTopAndBottomIncludingInkOverflow;
 
   public:
     RenderBlockFlow(Type type, dom::Element &element, RenderStyle &&style,
@@ -119,6 +146,35 @@ namespace krys::boo
 
     void LayoutBlock(RelayoutChildren relayoutChildren,
                      LayoutUnit pageLogicalHeight = 0_lu) noexcept override;
+
+    void SetChildrenInline(bool value) noexcept final;
+
+    KRYS_NODISCARD bool HasContentfulInlineOrBlockLine() const noexcept;
+    KRYS_NODISCARD bool HasContentfulInlineLine() const noexcept;
+    KRYS_NODISCARD bool HasBlocksInInlineLayout() const noexcept;
+
+    void InvalidateLineLayout(InvalidationReason invalidationReason) noexcept;
+    void ComputeAndSetLineLayoutPath() noexcept;
+
+    KRYS_NODISCARD LineLayoutPath GetLineLayoutPath() const noexcept
+    {
+      return _lineLayoutPath;
+    }
+    void SetLineLayoutPath(LineLayoutPath path) noexcept
+    {
+      _lineLayoutPath = path;
+    }
+
+    KRYS_NODISCARD size_t LineCount() const noexcept;
+
+    KRYS_NODISCARD const layout_integration::LineLayout *InlineLayout() const noexcept
+    {
+      return _lineLayout.get();
+    }
+    KRYS_NODISCARD layout_integration::LineLayout *InlineLayout() noexcept
+    {
+      return _lineLayout.get();
+    }
 
     /// @brief The margin collapsing state while a block lays out its block children.
     class MarginInfo
@@ -288,6 +344,18 @@ namespace krys::boo
 
     void LayoutBlockChild(RenderBox &child, MarginInfo &marginInfo, LayoutUnit &previousFloatLogicalBottom,
                           LayoutUnit &maxFloatLogicalBottom) noexcept;
+
+    struct BlockPositionAndMargin
+    {
+      LayoutUnit ChildLogicalTop;
+      // Note that with self collapsing block, the container's logical bottom is not necessarily the child's
+      // logical top plus its logical height.
+      LayoutUnit ContainerLogicalBottom;
+      MarginInfo ChildMarginInfo;
+    };
+    /// @brief Lays out a block in inline content, called from the inline formatting context.
+    BlockPositionAndMargin LayoutBlockChildFromInlineLayout(RenderBox &child, LayoutUnit blockLogicalTop,
+                                                            MarginInfo marginInfo) noexcept;
 
     void AdjustOutOfFlowBlock(RenderBox &child, const MarginInfo &marginInfo) noexcept;
 
@@ -548,6 +616,27 @@ namespace krys::boo
 
   private:
     bool RecomputeLogicalWidthAndColumnWidth() noexcept;
+
+    struct InlineContentStatus
+    {
+      bool HasSimpleOutOfFlowContentOnly {false};
+      Maybe<bool> OnlyBlockContentNeedsLayout {};
+    };
+    void LayoutInlineContent(RelayoutChildren relayoutChildren, LayoutUnit previousHeight,
+                             LayoutUnit &repaintLogicalTop, LayoutUnit &repaintLogicalBottom) noexcept;
+    InlineContentStatus MarkInlineContentDirtyForLayout(RelayoutChildren relayoutChildren) noexcept;
+    bool LayoutSimpleBlockContentInInline(MarginInfo &marginInfo) noexcept;
+    void UpdateRepaintTopAndBottomAfterLayout(RelayoutChildren relayoutChildren,
+                                              Maybe<LayoutRect> partialRepaintRect,
+                                              Pair<float, float> oldContentTopAndBottomIncludingInkOverflow,
+                                              LayoutUnit &repaintLogicalTop,
+                                              LayoutUnit &repaintLogicalBottom) noexcept;
+    bool TryComputePreferredWidthsUsingInlinePath(LayoutUnit &minLogicalWidth,
+                                                  LayoutUnit &maxLogicalWidth) noexcept;
+    void ComputeInlinePreferredLogicalWidths(LayoutUnit &minLogicalWidth,
+                                             LayoutUnit &maxLogicalWidth) const noexcept;
+    void SetStaticPositionsForSimpleOutOfFlowContent() noexcept;
+    KRYS_NODISCARD Pair<float, float> InlineContentTopAndBottomIncludingInkOverflow() const noexcept;
 
     KRYS_NODISCARD RenderBlockFlow *
       PreviousSiblingWithOverhangingFloats(bool &parentHasFloats) const noexcept;

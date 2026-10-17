@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineItem.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineLineTypes.hpp"
+#include "Krystal.Booey/Layout/FormattingContexts/Inline/LineLayoutResult.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -10,7 +11,6 @@ namespace krys::boo::layout
 {
   /// @brief Content cached for subsequent layouts of an inline formatting context: its inline items, its
   /// text spacing and its intrinsic sizes.
-  // FIXME: The maximum intrinsic width line content (`LineLayoutResult`), with line building.
   class InlineContentCache
   {
     KRYS_NON_COPY_MOVABLE(InlineContentCache);
@@ -111,6 +111,7 @@ namespace krys::boo::layout
     InlineItems _inlineItems;
     TextSpacingContext _textSpacingContext;
 
+    Maybe<LineLayoutResult> _maximumIntrinsicWidthLineContent {};
     Maybe<InlineLayoutUnit> _minimumContentSize {};
     Maybe<InlineLayoutUnit> _maximumContentSize {};
 
@@ -124,6 +125,19 @@ namespace krys::boo::layout
     KRYS_NODISCARD InlineItems &GetInlineItems() noexcept
     {
       return _inlineItems;
+    }
+
+    void SetMaximumIntrinsicWidthLineContent(LineLayoutResult &&lineContent) noexcept
+    {
+      _maximumIntrinsicWidthLineContent = krys::move(lineContent);
+    }
+    void ClearMaximumIntrinsicWidthLineContent() noexcept
+    {
+      _maximumIntrinsicWidthLineContent = {};
+    }
+    KRYS_NODISCARD Maybe<LineLayoutResult> &MaximumIntrinsicWidthLineContent() noexcept
+    {
+      return _maximumIntrinsicWidthLineContent;
     }
 
     void SetMinimumContentSize(InlineLayoutUnit minimumContentSize) noexcept
@@ -146,6 +160,7 @@ namespace krys::boo::layout
     {
       _minimumContentSize = {};
       _maximumContentSize = {};
+      _maximumIntrinsicWidthLineContent = {};
     }
 
     KRYS_NODISCARD const InlineBoxBoundaryTextSpacings &GetInlineBoxBoundaryTextSpacings() const noexcept

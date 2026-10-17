@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Layout/Integration/LayoutIntegrationUtils.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/Layout/Integration/LayoutIntegrationBoxTreeUpdater.hpp"
@@ -108,14 +109,14 @@ namespace krys::boo::tests
     (void)fixture.Document->UpdateLayout();
 
     auto &flexRenderer = Downcast<RenderBlock>(*fixture.ById(u8"flex").Renderer());
-    auto &flexBox = *layout_integration::BoxTreeUpdater(flexRenderer).Build();
+    auto &flexBox = layout::tests::BuildBoxTree(flexRenderer);
     auto &flexItem = Downcast<layout::ElementBox>(*flexBox.FirstChild());
     CHECK(flexBox.EstablishesFlexFormattingContext());
     CHECK(flexItem.IsFlexItem());
     CHECK(flexItem.EstablishesIndependentFormattingContext());
 
     auto &gridRenderer = Downcast<RenderBlock>(*fixture.ById(u8"grid").Renderer());
-    auto &gridBox = *layout_integration::BoxTreeUpdater(gridRenderer).Build();
+    auto &gridBox = layout::tests::BuildBoxTree(gridRenderer);
     auto &gridItem = Downcast<layout::ElementBox>(*gridBox.FirstChild());
     CHECK(gridBox.EstablishesGridFormattingContext());
     CHECK(gridItem.IsGridItem());

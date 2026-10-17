@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Layout/Integration/LayoutIntegrationBoxTreeUpdater.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
+#include "Krystal.Booey/Layout/LayoutTree/FormattingContextBoxIterator.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInitialContainingBlock.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInlineTextBox.hpp"
@@ -146,8 +147,29 @@ namespace krys::boo::layout_integration
       return;
     }
 
-    // FIXME: Detach the boxes of the inline blocks that have their own line layout (a RenderBlockFlow with an
-    // inlineLayout()) and keep them under the initial containing block, once there's LineLayout.
+    List<layout::Box *> boxesToDetach;
+    for (auto &constLayoutBox : layout::FormattingContextBoxes(RootLayoutBox()))
+    {
+      auto &layoutBox = const_cast<layout::Box &>(constLayoutBox);
+      auto *renderer = layoutBox.RendererForIntegration();
+      if (!renderer)
+      {
+        continue;
+      }
+
+      auto *renderBlockFlow = DynamicDowncast<RenderBlockFlow>(*renderer);
+      auto isLFCInlineBlock = renderBlockFlow && renderBlockFlow->InlineLayout();
+      if (isLFCInlineBlock)
+      {
+        boxesToDetach.push_back(&layoutBox);
+      }
+    }
+
+    for (auto *toDetach : boxesToDetach)
+    {
+      auto detachedBox = toDetach->RemoveFromParent();
+      GetInitialContainingBlock().AppendChild(krys::move(detachedBox));
+    }
 
     if (&RootLayoutBox().Parent() == &GetInitialContainingBlock())
     {

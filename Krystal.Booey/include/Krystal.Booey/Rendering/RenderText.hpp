@@ -7,6 +7,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/String.hpp"
 
@@ -23,6 +24,7 @@ namespace krys::boo::layout
 namespace krys::boo
 {
   class RenderInline;
+  struct WordTrailingSpace;
   class RenderStyle;
 
   /// @brief Renders a text node (or anonymous text, such as generated content): its text, after the style's
@@ -45,6 +47,20 @@ namespace krys::boo
     Maybe<bool> _hasStrongDirectionalityContent;
     bool _useBackslashAsYenSymbol {false};
     bool _containsOnlyASCII {false};
+    bool _needsVisualReordering {false};
+
+    Maybe<float> _minWidth;
+    Maybe<float> _maxWidth;
+    float _beginMinWidth {0};
+    float _endMinWidth {0};
+    bool _hasBreakableChar {false}; // Whether or not we can be broken into multiple lines.
+    // Whether or not we have a hard break (e.g., <pre> with '\n').
+    bool _hasBreak {false};
+    // Whether or not we have a variable width tab character (e.g., <pre> with '\t').
+    bool _hasTab {false};
+    bool _hasBeginWS {false}; // Whether or not we begin with WS (only true if we aren't pre)
+    bool _hasEndWS {false};   // Whether or not we end with WS (only true if we aren't pre)
+    mutable bool _knownToHaveNoOverflowAndNoFallbackFonts {false};
     FontCascade::CodePath _fontCodePath {FontCascade::CodePath::Auto};
 
   public:
@@ -60,11 +76,48 @@ namespace krys::boo
     KRYS_NODISCARD const layout::InlineTextBox *LayoutBox() const noexcept;
 
     /// @brief The bounding box of the text's line boxes.
-    // FIXME: The union of the text boxes, once there's inline layout.
-    KRYS_NODISCARD IntRect LinesBoundingBox() const noexcept
+    KRYS_NODISCARD IntRect LinesBoundingBox() const noexcept;
+    /// @brief The location of the text's first text box.
+    KRYS_NODISCARD IntPoint FirstRunLocation() const noexcept;
+
+    /// @brief The preferred widths of the text, and how it can break, for the legacy inline preferred widths.
+    struct Widths
     {
-      return {};
+      float Min {0};
+      float Max {0};
+      float BeginMin {0};
+      float EndMin {0};
+      float BeginMax {0};
+      float EndMax {0};
+      bool BeginWS {false};
+      bool EndWS {false};
+      bool EndZeroSpace {false};
+      bool HasBreakableChar {false};
+      bool HasBreak {false};
+      bool EndsWithBreak {false};
+    };
+    KRYS_NODISCARD Widths TrimmedPreferredWidths(float leadWidth, bool &stripFrontSpaces) noexcept;
+
+    KRYS_NODISCARD float HangablePunctuationStartWidth(size_t index) const noexcept;
+    KRYS_NODISCARD float HangablePunctuationEndWidth(size_t index) const noexcept;
+    KRYS_NODISCARD size_t FirstCharacterIndexStrippingSpaces() const noexcept;
+    KRYS_NODISCARD size_t LastCharacterIndexStrippingSpaces() const noexcept;
+
+    KRYS_NODISCARD float MinLogicalWidth() const noexcept;
+    KRYS_NODISCARD float MaxLogicalWidth() const noexcept;
+    void ResetMinMaxWidth() noexcept
+    {
+      _minWidth = null;
+      _maxWidth = null;
     }
+
+    /// @brief The width of the text's bytes [from, from + length), in the first line's style if @p firstLine.
+    KRYS_NODISCARD float Width(size_t from, size_t length, float xPos, bool firstLine = false,
+                               HashSet<RefPtr<const Font>> *fallbackFonts = nullptr,
+                               GlyphOverflow *glyphOverflow = nullptr) const noexcept;
+    KRYS_NODISCARD float Width(size_t from, size_t length, const FontCascade &fontCascade, float xPos,
+                               HashSet<RefPtr<const Font>> *fallbackFonts = nullptr,
+                               GlyphOverflow *glyphOverflow = nullptr) const noexcept;
 
     /// @brief The text before the text transform and text security.
     KRYS_NODISCARD virtual utf8_string OriginalText() const noexcept;
@@ -102,6 +155,15 @@ namespace krys::boo
     KRYS_NODISCARD bool ShouldUseSimpleGlyphOverflowCodePath() const noexcept
     {
       return FontCodePath() == FontCascade::CodePath::SimpleWithGlyphOverflow;
+    }
+
+    KRYS_NODISCARD bool NeedsVisualReordering() const noexcept
+    {
+      return _needsVisualReordering;
+    }
+    void SetNeedsVisualReordering() noexcept
+    {
+      _needsVisualReordering = true;
     }
 
     void SetCanUseSimplifiedTextMeasuring(bool canUseSimplifiedTextMeasuring) noexcept
@@ -165,6 +227,26 @@ namespace krys::boo
     void InitiateFontLoadingByAccessingGlyphDataAndComputeCanUseSimplifiedTextMeasuring(
       utf8_stringview textContent) noexcept;
     void SecureText(char32 maskingCharacter) noexcept;
+
+    void ComputePreferredLogicalWidths(float leadWidth, bool forcedMinMaxWidthComputation = false) noexcept;
+    void ComputePreferredLogicalWidths(float leadWidth, HashSet<RefPtr<const Font>> &fallbackFonts,
+                                       GlyphOverflow &glyphOverflow,
+                                       bool forcedMinMaxWidthComputation = false) noexcept;
+    KRYS_NODISCARD float MaxWordFragmentWidth(const RenderStyle &style, const FontCascade &font,
+                                              utf8_stringview word, size_t minimumPrefixLength,
+                                              size_t minimumSuffixLength, bool currentCharacterIsSpace,
+                                              size_t characterIndex, float xPos, float entireWordWidth,
+                                              WordTrailingSpace &wordTrailingSpace,
+                                              HashSet<RefPtr<const Font>> &fallbackFonts,
+                                              GlyphOverflow &glyphOverflow) noexcept;
+    KRYS_NODISCARD float WidthFromCache(const FontCascade &fontCascade, size_t start, size_t length,
+                                        float xPos, HashSet<RefPtr<const Font>> *fallbackFonts,
+                                        GlyphOverflow *glyphOverflow,
+                                        const RenderStyle &style) const noexcept;
+    KRYS_NODISCARD float WidthFromCacheConsideringPossibleTrailingSpace(
+      const RenderStyle &style, const FontCascade &font, size_t startIndex, size_t wordLength, float xPos,
+      bool currentCharacterIsSpace, WordTrailingSpace &wordTrailingSpace,
+      HashSet<RefPtr<const Font>> &fallbackFonts, GlyphOverflow &glyphOverflow) const noexcept;
   };
 
   /// @brief Capitalizes the first letter of each word of @p string, which follows @p previousCharacter.
