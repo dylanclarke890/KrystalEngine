@@ -2,6 +2,7 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Colour/AlphaPremultiplication.hpp"
+#include "Krystal.Core/Colour/BlendMode.hpp"
 #include "Krystal.Core/Colour/ColourTypes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
@@ -26,7 +27,7 @@
 
 namespace krys::gfx
 {
-  /// @brief What a 2D frame draws into: a swapchain or a texture.
+  /// @brief What a 2D frame draws into: a swapchain or a texture, in a unorm format.
   struct Render2DTarget
   {
     /// @brief Used instead of `Texture` when valid.
@@ -34,7 +35,7 @@ namespace krys::gfx
     TextureHandle Texture {};
     uint32 Width {0u};
     uint32 Height {0u};
-    TextureFormat Format {TextureFormat::RGBA8Srgb};
+    TextureFormat Format {TextureFormat::RGBA8Unorm};
     /// @brief The target is cleared to this value first, in the target's encoding; otherwise its contents
     /// are kept.
     Maybe<Array<float, 4>> ClearColour {};
@@ -65,21 +66,31 @@ namespace krys::gfx
     uint32 MasksRasterised {0u};
     /// @brief Paths drawn from cached masks.
     uint32 MaskCacheHits {0u};
+    /// @brief Copies of what's beneath draws with blend modes.
+    uint32 BackdropCopies {0u};
   };
 
   /// @brief Draws 2D primitives through the RHI, batched in painter's order.
   ///
   /// Coordinates are pixels with a top-left origin, y pointing down. Colours are sRGB with straight alpha;
-  /// they're premultiplied for blending, in linear light on sRGB targets and as encoded on other targets.
-  /// Images are converted the same way: textures in sRGB formats are decoded by the GPU, others hold
-  /// sRGB-encoded values.
+  /// they're premultiplied and blended as encoded values, so targets are in unorm formats. Images in sRGB
+  /// formats are decoded by the GPU and encoded back by the shader; others hold encoded values.
   /// Edges are antialiased over one target pixel, centred on the edge, so edges on pixel boundaries stay
   /// sharp.
   ///
-  /// Drawing state (the transform and the clip) is a stack: `Save` pushes a copy, `Restore` pops it. Draws
-  /// are made in the current transform's coordinates and clipped to the current clip. Clip edges are
-  /// antialiased like any other edge: each draw's coverage is multiplied by how much of the pixel its clips
-  /// let through.
+  /// Drawing state (the transform, the clip and the blend mode) is a stack: `Save` pushes a copy, `Restore`
+  /// pops it. Draws are made in the current transform's coordinates and clipped to the current clip. Clip
+  /// edges are antialiased like any other edge: each draw's coverage is multiplied by how much of the pixel
+  /// its clips let through.
+  ///
+  /// Layers draw a group into an offscreen texture and composite it as one image: `BeginLayer` starts one
+  /// (saving the drawing state) and `EndLayer` composites it at its opacity (restoring the state). At `End`,
+  /// each layer gets a texture the size of what was drawn in it, within the clip, and its pass is recorded
+  /// before the pass that composites it.
+  ///
+  /// Blend modes mix a draw with what's beneath it. Most read it: the pass is split before the draw and the
+  /// pixels it reaches are copied. A swapchain can't be copied from, so in a frame that blends straight onto
+  /// one, the frame is drawn into a texture first; what was in the window before isn't blended with.
   ///
   /// A frame, between `Device::BeginFrame` and `Device::Submit`:
   /// @code
@@ -123,16 +134,22 @@ namespace krys::gfx
       Textured = 1u << 0u,
       /// @brief The texture's colours aren't premultiplied.
       StraightAlpha = 1u << 1u,
-      /// @brief The texture is in an sRGB format, so the GPU decodes it to linear light.
+      /// @brief The texture is in an sRGB format: the GPU decodes it, so the shader encodes it back.
       LinearTexels = 1u << 2u,
       /// @brief The texture holds coverage in its red channel, which multiplies the colour.
       Mask = 1u << 3u,
       /// @brief The hole rect is cut out.
       Hole = 1u << 4u,
     };
+    /// @brief The instance's `BlendMode` is in the flags from this bit, for five bits.
+    constexpr static uint32 BlendModeShift = 8u;
 
     /// @brief A chain's state when it has no shape clips.
     constexpr static uint32 NoChain = ~0u;
+    /// @brief The layer of draws made into the target itself.
+    constexpr static uint32 NoLayer = ~0u;
+    /// @brief The pass that composites the target, drawn offscreen, into its swapchain.
+    constexpr static uint32 WindowLayer = NoLayer - 1u;
     /// @brief The most shape clips a chain holds.
     constexpr static uint32 MaxClips = 16u;
 
@@ -143,6 +160,7 @@ namespace krys::gfx
       PixelRect2D Clip {};
       /// @brief The shape clips in effect, an index into the frame's chains, or `NoChain`.
       uint32 Chain {NoChain};
+      BlendMode Blend {BlendMode::Normal};
     };
 
     /// @brief A clip to a rounded rect, or out of one, in the coordinates of the transform it was made under.
@@ -154,7 +172,6 @@ namespace krys::gfx
       bool Out {false};
     };
 
-    /// @brief The shape clips in effect at once; they multiply.
     /// @brief A clip to a path, or out of one, under the transform it was made under.
     struct PathClip
     {
@@ -209,7 +226,8 @@ namespace krys::gfx
     static_assert(sizeof(ClipUniforms) == 48u + 64u * MaxClips,
                   "ClipUniforms mirrors the shader's std140 block.");
 
-    /// @brief A run of instances drawn with one scissor and texture. Untextured instances join any batch.
+    /// @brief A run of instances drawn into one layer with one scissor, texture and blend mode. Untextured
+    /// instances join any batch.
     struct Batch
     {
       uint32 FirstInstance {0u};
@@ -218,18 +236,80 @@ namespace krys::gfx
       uint32 Chain {NoChain};
       TextureHandle Texture {};
       SamplerHandle Sampler {};
+      /// @brief The layer the batch draws into, or `NoLayer` for the target.
+      uint32 Layer {NoLayer};
+      /// @brief The layer this batch composites, whose texture is only known at `End`; or `NoLayer`.
+      uint32 Composite {NoLayer};
+      BlendMode Blend {BlendMode::Normal};
+      /// @brief For a blend mode that reads what's beneath: the target pixels its instances reach, copied
+      /// before it's drawn.
+      PixelRect2D Backdrop {};
+    };
+
+    struct Layer
+    {
+      /// @brief The layer it's composited into, or `NoLayer` for the target.
+      uint32 Parent {NoLayer};
+      float Opacity {1.f};
+      BlendMode Blend {BlendMode::Normal};
+      /// @brief The clip when it began: nothing in it shows outside.
+      PixelRect2D Clip {};
+      /// @brief The target pixels its draws reach; at `End`, within the clip, its texture's extent.
+      PixelRect2D Bounds {};
+      /// @brief How many states were saved when it began, after its own save.
+      size_t SaveDepth {0u};
+      /// @brief Its composite instance in the parent, and that instance's batch.
+      uint32 CompositeInstance {0u};
+      uint32 CompositeBatch {0u};
+      bool HasComposite {false};
+      TextureHandle Texture {};
+    };
+
+    /// @brief A layer texture, reused by later frames.
+    struct LayerTexture
+    {
+      TextureHandle Texture {};
+      uint32 Width {0u};
+      uint32 Height {0u};
+      TextureFormat Format {TextureFormat::Undefined};
+      uint64 LastUsedFrame {0u};
+    };
+
+    /// @brief Where a pass draws, and which layer's batches it draws.
+    struct Pass
+    {
+      ColourAttachment Attachment {};
+      uint32 Width {0u};
+      uint32 Height {0u};
+      /// @brief The target pixel at the pass's top-left.
+      int32 OriginX {0};
+      int32 OriginY {0};
+      uint32 Layer {NoLayer};
     };
 
     struct FrameUniforms
     {
       Array<float, 2> ViewportSize;
-      uint32 DecodeSrgb;
-      uint32 Padding;
+      /// @brief The target pixel at the viewport's top-left.
+      Array<float, 2> Origin;
+    };
+
+    /// @brief What every pass of a frame draws with.
+    struct FrameResources
+    {
+      PipelineHandle Pipeline {};
+      /// @brief For `BlendMode::PlusLighter`.
+      PipelineHandle AdditivePipeline {};
+      TransientAllocation Instances {};
+      /// @brief Where blend modes copy what's beneath them, laid out as the pass they're in.
+      TextureHandle Backdrop {};
     };
 
     struct TargetPipeline
     {
       TextureFormat Format {TextureFormat::Undefined};
+      /// @brief Whether it adds colours rather than blending them over.
+      bool Additive {false};
       PipelineHandle Pipeline {};
     };
 
@@ -256,6 +336,13 @@ namespace krys::gfx
     List<RectInstance> _rects {};
     List<Batch> _batches {};
     List<ClipChain> _chains {};
+    List<Layer> _layers {};
+    /// @brief Layers in the order they ended: children before their parents.
+    List<uint32> _layerOrder {};
+    uint32 _currentLayer {NoLayer};
+    List<LayerTexture> _layerTextures {};
+    /// @brief The backdrop copies `End` has recorded this frame.
+    uint32 _backdropCopies {0u};
 
   public:
     /// @brief Compiles the shaders; pipelines are created per target format on first use.
@@ -268,8 +355,8 @@ namespace krys::gfx
 
     /// @brief Starts drawing into a target. Draws are recorded into `commands` on `End`.
     void Begin(CommandBuffer &commands, const Render2DTarget &target) noexcept;
-    /// @brief Records the frame: one render pass into the target, then the draws in the order they were
-    /// made.
+    /// @brief Records the frame: a render pass per layer, children first, then the target's, each with its
+    /// draws in the order they were made.
     void End() noexcept;
 
     /// @brief Pushes a copy of the drawing state.
@@ -333,6 +420,20 @@ namespace krys::gfx
     void DrawImage(TextureHandle texture, const Rect2D &destination,
                    const ImageOptions &options = {}) noexcept;
 
+    /// @brief Sets the blend mode later draws mix with what's beneath them by.
+    /// @note `BlendMode::PlusDarker` isn't supported: it asserts and draws normally.
+    void SetBlendMode(BlendMode mode) noexcept;
+    KRYS_NODISCARD BlendMode GetBlendMode() const noexcept;
+
+    /// @brief Saves the drawing state and starts drawing into a layer, composited by `EndLayer` at
+    /// `opacity` (from 0 to 1) with the current blend mode. Inside the layer, the blend mode is `Normal`.
+    void BeginLayer(float opacity) noexcept;
+    /// @brief Starts a layer as `BeginLayer(opacity)` does, composited with `blend`.
+    void BeginLayer(float opacity, BlendMode blend) noexcept;
+    /// @brief Composites the current layer into what's beneath it and restores the drawing state saved by
+    /// `BeginLayer`.
+    void EndLayer() noexcept;
+
     KRYS_NODISCARD const Renderer2DStats &GetStats() const noexcept
     {
       return _stats;
@@ -340,7 +441,7 @@ namespace krys::gfx
 
   private:
     KRYS_NODISCARD Expected<void> Initialise() noexcept;
-    KRYS_NODISCARD Expected<PipelineHandle> GetPipeline(TextureFormat format) noexcept;
+    KRYS_NODISCARD Expected<PipelineHandle> GetPipeline(TextureFormat format, bool additive) noexcept;
     /// @brief Adds a rounded rect in `transform`'s coordinates, its radii constrained.
     void AddRoundedRect(const RoundedRect2D &rect, Array<uint8, 4> colour,
                         const Transform2D &transform) noexcept;
@@ -349,13 +450,30 @@ namespace krys::gfx
     void AddInstance(RectInstance instance, const Transform2D &transform, TextureHandle texture,
                      SamplerHandle sampler) noexcept;
 
+    /// @brief Works out a finished layer's bounds and texture, and fills in its composite.
+    void FinishLayer(uint32 index) noexcept;
+    /// @brief A layer texture at least `width` by `height` that no earlier pass of this frame uses.
+    KRYS_NODISCARD TextureHandle AcquireLayerTexture(uint32 width, uint32 height) noexcept;
+    /// @brief Records one pass: its layer's batches into its attachment, split before each batch that
+    /// copies what's beneath it.
+    void RecordPass(CommandBuffer &commands, const Pass &pass, const FrameResources &resources) noexcept;
+
     /// @brief Adds a shape clip to the current chain, in a new chain.
     void AddClip(RoundedRect2D shape, bool out) noexcept;
     /// @brief Adds a path clip to the current chain, in a new chain.
     void AddPathClip(const Path2D &path, FillRule rule, bool out) noexcept;
 
+    /// @brief The target pixels an instance's quad reaches under `transform` (grown by a pixel for its
+    /// antialiased edge), within the clip.
+    KRYS_NODISCARD PixelRect2D Reach(const RectInstance &instance,
+                                     const Transform2D &transform) const noexcept;
+    /// @brief Whether a blend mode reads what's beneath the draw, so it's copied first.
+    KRYS_NODISCARD static bool CopiesBackdrop(BlendMode mode) noexcept;
+
     /// @brief The target pixels whose centres are inside the rect from (left, top) to (right, bottom).
     KRYS_NODISCARD static PixelRect2D ToPixelRect(float left, float top, float right, float bottom) noexcept;
     KRYS_NODISCARD static PixelRect2D Intersect(const PixelRect2D &a, const PixelRect2D &b) noexcept;
+    /// @brief The smallest rect holding both; an empty one adds nothing.
+    KRYS_NODISCARD static PixelRect2D Union(const PixelRect2D &a, const PixelRect2D &b) noexcept;
   };
 }

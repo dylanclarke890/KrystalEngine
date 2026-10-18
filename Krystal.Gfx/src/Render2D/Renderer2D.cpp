@@ -19,7 +19,7 @@ namespace krys::gfx
 layout(binding = 0, std140) uniform Frame
 {
   vec2 u_ViewportSize;
-  uint u_DecodeSrgb;
+  vec2 u_Origin; // the target pixel at the viewport's top-left
 };
 
 layout(location = 0) in vec4 a_Rect;        // x, y, width, height in local coordinates
@@ -36,18 +36,13 @@ layout(location = 0) out vec2 v_Position; // relative to the rect's centre, in l
 layout(location = 1) flat out vec2 v_HalfSize;
 layout(location = 2) flat out vec4 v_Radii;
 layout(location = 3) flat out mat2 v_InverseTranspose; // takes locations 3 and 4
-layout(location = 5) flat out vec4 v_Colour;           // premultiplied, in the target's blending space
+layout(location = 5) flat out vec4 v_Colour;           // sRGB, premultiplied
 layout(location = 6) out vec2 v_UV;
 layout(location = 7) flat out vec4 v_UVRect;
 layout(location = 8) flat out uint v_Flags;
 layout(location = 9) flat out vec4 v_Hole; // the hole's centre relative to the rect's, and its half size
 layout(location = 10) flat out vec4 v_HoleRadii;
 layout(location = 11) out vec2 v_Pixel; // in target pixels
-
-vec3 SrgbToLinear(vec3 c)
-{
-  return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), greaterThan(c, vec3(0.04045)));
-}
 
 void main()
 {
@@ -62,7 +57,7 @@ void main()
   vec2 position = (corner * 2.0 - 1.0) * (halfSize + pixelInLocal);
   vec2 local = a_Rect.xy + halfSize + position;
   vec2 pixel = linear * local + a_Translation;
-  vec2 ndc = pixel / u_ViewportSize * 2.0 - 1.0;
+  vec2 ndc = (pixel - u_Origin) / u_ViewportSize * 2.0 - 1.0;
   gl_Position = vec4(ndc.x, -ndc.y, 0.0, 1.0);
 
   v_Position = position;
@@ -75,10 +70,7 @@ void main()
   v_Hole = vec4(a_HoleRect.xy + a_HoleRect.zw * 0.5 - (a_Rect.xy + halfSize), a_HoleRect.zw * 0.5);
   v_HoleRadii = a_HoleRadii;
   v_Pixel = pixel;
-
-  // sRGB targets blend in linear light and encode on write; other targets blend the encoded values.
-  vec3 rgb = u_DecodeSrgb != 0u ? SrgbToLinear(a_Colour.rgb) : a_Colour.rgb;
-  v_Colour = vec4(rgb * a_Colour.a, a_Colour.a);
+  v_Colour = vec4(a_Colour.rgb * a_Colour.a, a_Colour.a);
 }
 )";
 
@@ -86,7 +78,7 @@ void main()
 layout(binding = 0, std140) uniform Frame
 {
   vec2 u_ViewportSize;
-  uint u_DecodeSrgb;
+  vec2 u_Origin; // the target pixel at the viewport's top-left
 };
 
 layout(binding = 0) uniform sampler2D u_Texture;
@@ -123,6 +115,9 @@ layout(binding = 1, std140) uniform Clips
 // The path clips' coverage, a texel per target pixel.
 layout(binding = 1) uniform sampler2D u_ClipMask;
 
+// What's beneath a draw with a blend mode, premultiplied, laid out as the pass.
+layout(binding = 2) uniform sampler2D u_Backdrop;
+
 layout(location = 0) out vec4 o_Colour;
 
 const uint Textured = 1u;
@@ -130,11 +125,24 @@ const uint StraightAlpha = 2u;
 const uint LinearTexels = 4u;
 const uint Mask = 8u;
 const uint Hole = 16u;
+const uint BlendModeShift = 8u;
 
-vec3 SrgbToLinear(vec3 c)
-{
-  return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), greaterThan(c, vec3(0.04045)));
-}
+// BlendMode's values.
+const uint BlendMultiply = 2u;
+const uint BlendScreen = 3u;
+const uint BlendDarken = 4u;
+const uint BlendLighten = 5u;
+const uint BlendOverlay = 6u;
+const uint BlendColorDodge = 7u;
+const uint BlendColorBurn = 8u;
+const uint BlendHardLight = 9u;
+const uint BlendSoftLight = 10u;
+const uint BlendDifference = 11u;
+const uint BlendExclusion = 12u;
+const uint BlendHue = 13u;
+const uint BlendSaturation = 14u;
+const uint BlendColor = 15u;
+const uint BlendLuminosity = 16u;
 
 vec3 LinearToSrgb(vec3 c)
 {
@@ -196,7 +204,7 @@ float ClipCoverage()
   return coverage;
 }
 
-// A texel, premultiplied and in the target's blending space.
+// A texel, sRGB-encoded and premultiplied.
 vec4 SampleTexture(vec2 dx, vec2 dy)
 {
   // Stay half a texel inside the source rect, so filtering never reads the texels around it.
@@ -211,19 +219,107 @@ vec4 SampleTexture(vec2 dx, vec2 dy)
     return vec4(texel.r);
   }
 
+  // The GPU decoded each channel of an sRGB texture; encoding each back gives the stored values, whether
+  // they're premultiplied or not.
+  if ((v_Flags & LinearTexels) != 0u)
+  {
+    texel.rgb = LinearToSrgb(texel.rgb);
+  }
   if ((v_Flags & StraightAlpha) != 0u)
   {
     texel.rgb *= texel.a;
   }
-
-  bool linearTexels = (v_Flags & LinearTexels) != 0u;
-  bool linearTarget = u_DecodeSrgb != 0u;
-  if (linearTexels != linearTarget && texel.a > 0.0)
-  {
-    vec3 rgb = texel.rgb / texel.a;
-    texel.rgb = (linearTarget ? SrgbToLinear(rgb) : LinearToSrgb(rgb)) * texel.a;
-  }
   return texel;
+}
+
+// The blend functions of Compositing and Blending Level 1, on straight colours: b is the backdrop's and s
+// the source's.
+vec3 HardLight(vec3 b, vec3 s)
+{
+  vec3 screen = 2.0 * s - 1.0;
+  return mix(b + screen - b * screen, b * 2.0 * s, lessThanEqual(s, vec3(0.5)));
+}
+
+vec3 ColorDodge(vec3 b, vec3 s)
+{
+  vec3 result = min(vec3(1.0), b / max(1.0 - s, 1e-6));
+  result = mix(result, vec3(1.0), greaterThanEqual(s, vec3(1.0)));
+  return mix(result, vec3(0.0), lessThanEqual(b, vec3(0.0)));
+}
+
+vec3 ColorBurn(vec3 b, vec3 s)
+{
+  vec3 result = 1.0 - min(vec3(1.0), (1.0 - b) / max(s, 1e-6));
+  result = mix(result, vec3(0.0), lessThanEqual(s, vec3(0.0)));
+  return mix(result, vec3(1.0), greaterThanEqual(b, vec3(1.0)));
+}
+
+vec3 SoftLight(vec3 b, vec3 s)
+{
+  vec3 d = mix(sqrt(b), ((16.0 * b - 12.0) * b + 4.0) * b, lessThanEqual(b, vec3(0.25)));
+  return mix(b + (2.0 * s - 1.0) * (d - b), b - (1.0 - 2.0 * s) * b * (1.0 - b), lessThanEqual(s, vec3(0.5)));
+}
+
+float Lum(vec3 c)
+{
+  return dot(c, vec3(0.3, 0.59, 0.11));
+}
+
+vec3 ClipColour(vec3 c)
+{
+  float l = Lum(c);
+  float n = min(c.r, min(c.g, c.b));
+  float x = max(c.r, max(c.g, c.b));
+  if (n < 0.0)
+  {
+    c = l + (c - l) * l / (l - n);
+  }
+  if (x > 1.0)
+  {
+    c = l + (c - l) * (1.0 - l) / (x - l);
+  }
+  return c;
+}
+
+vec3 SetLum(vec3 c, float l)
+{
+  return ClipColour(c + (l - Lum(c)));
+}
+
+float Sat(vec3 c)
+{
+  return max(c.r, max(c.g, c.b)) - min(c.r, min(c.g, c.b));
+}
+
+// Scales c so its largest channel minus its smallest is s, its smallest channel at 0.
+vec3 SetSat(vec3 c, float s)
+{
+  float n = min(c.r, min(c.g, c.b));
+  float x = max(c.r, max(c.g, c.b));
+  return x > n ? (c - n) * s / (x - n) : vec3(0.0);
+}
+
+vec3 Blend(uint mode, vec3 b, vec3 s)
+{
+  switch (mode)
+  {
+    case BlendMultiply: return b * s;
+    case BlendScreen: return b + s - b * s;
+    case BlendDarken: return min(b, s);
+    case BlendLighten: return max(b, s);
+    case BlendOverlay: return HardLight(s, b);
+    case BlendColorDodge: return ColorDodge(b, s);
+    case BlendColorBurn: return ColorBurn(b, s);
+    case BlendHardLight: return HardLight(b, s);
+    case BlendSoftLight: return SoftLight(b, s);
+    case BlendDifference: return abs(b - s);
+    case BlendExclusion: return b + s - 2.0 * b * s;
+    case BlendHue: return SetLum(SetSat(s, Sat(b)), Lum(b));
+    case BlendSaturation: return SetLum(SetSat(b, Sat(s)), Lum(b));
+    case BlendColor: return SetLum(s, Lum(b));
+    case BlendLuminosity: return SetLum(b, Lum(s));
+    default: return s;
+  }
 }
 
 void main()
@@ -244,7 +340,20 @@ void main()
   {
     colour *= SampleTexture(dx, dy);
   }
-  o_Colour = colour * coverage;
+  vec4 source = colour * coverage;
+
+  // Blend modes mix the source's colour with the backdrop's; normal blending then adds the backdrop
+  // through what the source leaves, so where the draw covers nothing, nothing changes.
+  uint blend = (v_Flags >> BlendModeShift) & 31u;
+  if (blend >= BlendMultiply && blend <= BlendLuminosity && source.a > 0.0)
+  {
+    vec4 backdrop = texelFetch(u_Backdrop, ivec2(floor(v_Pixel - u_Origin)), 0);
+    vec3 b = backdrop.a > 0.0 ? clamp(backdrop.rgb / backdrop.a, 0.0, 1.0) : vec3(0.0);
+    vec3 s = clamp(colour.rgb / colour.a, 0.0, 1.0);
+    vec3 mixed = mix(s, clamp(Blend(blend, b, s), 0.0, 1.0), backdrop.a);
+    source.rgb = mixed * source.a;
+  }
+  o_Colour = source;
 }
 )";
 
@@ -321,6 +430,10 @@ void main()
     {
       _device->Destroy(_whiteTexture);
     }
+    for (const auto &texture : _layerTextures)
+    {
+      _device->Destroy(texture.Texture);
+    }
   }
 
   Expected<void> Renderer2D::Initialise() noexcept
@@ -373,16 +486,112 @@ void main()
     krys_assert_msg(_commands == nullptr, "Begin called twice without End.");
     krys_assert_msg(target.Swapchain.IsValid() || target.Texture.IsValid(),
                     "The target needs a texture or swapchain.");
+    krys_assert_msg(!IsSrgbFormat(target.Format), "Render2D blends encoded values, so targets are unorm.");
     _commands = &commands;
     _target = target;
     _state = {.Transform = {},
               .Clip = {.X = 0, .Y = 0, .Width = target.Width, .Height = target.Height},
-              .Chain = NoChain};
+              .Chain = NoChain,
+              .Blend = BlendMode::Normal};
+    _backdropCopies = 0u;
     _chains.clear();
     _savedStates.clear();
     _rects.clear();
     _batches.clear();
+    _layers.clear();
+    _layerOrder.clear();
+    _currentLayer = NoLayer;
     _masks.ResetStats();
+
+    // Layer textures unused for a while go.
+    const uint64 frame = _device->FrameNumber();
+    std::erase_if(_layerTextures,
+                  [&](const LayerTexture &texture)
+                  {
+                    if (texture.LastUsedFrame + 120u < frame)
+                    {
+                      _device->Destroy(texture.Texture);
+                      return true;
+                    }
+                    return false;
+                  });
+  }
+
+  void Renderer2D::SetBlendMode(BlendMode mode) noexcept
+  {
+    krys_assert_msg(mode != BlendMode::PlusDarker, "BlendMode::PlusDarker isn't supported.");
+    _state.Blend = mode == BlendMode::PlusDarker ? BlendMode::Normal : mode;
+  }
+
+  BlendMode Renderer2D::GetBlendMode() const noexcept
+  {
+    return _state.Blend;
+  }
+
+  void Renderer2D::BeginLayer(float opacity) noexcept
+  {
+    BeginLayer(opacity, _state.Blend);
+  }
+
+  void Renderer2D::BeginLayer(float opacity, BlendMode blend) noexcept
+  {
+    krys_debug_assert_msg(_commands != nullptr, "BeginLayer outside Begin and End.");
+    krys_assert_msg(blend != BlendMode::PlusDarker, "BlendMode::PlusDarker isn't supported.");
+    Save();
+    _layers.push_back({.Parent = _currentLayer,
+                       .Opacity = std::isfinite(opacity) ? std::clamp(opacity, 0.f, 1.f) : 0.f,
+                       .Blend = blend == BlendMode::PlusDarker ? BlendMode::Normal : blend,
+                       .Clip = _state.Clip,
+                       .Bounds = {},
+                       .SaveDepth = _savedStates.size()});
+    _currentLayer = static_cast<uint32>(_layers.size() - 1u);
+    _state.Blend = BlendMode::Normal;
+  }
+
+  void Renderer2D::EndLayer() noexcept
+  {
+    krys_assert_msg(_currentLayer != NoLayer, "EndLayer without a matching BeginLayer.");
+    if (_currentLayer == NoLayer)
+    {
+      return;
+    }
+    const uint32 index = _currentLayer;
+    krys_debug_assert_msg(_savedStates.size() == _layers[index].SaveDepth,
+                          "Save and Restore inside a layer don't match.");
+    _currentLayer = _layers[index].Parent;
+    _layerOrder.push_back(index);
+    Restore();
+
+    // The composite goes in the parent now, in painter's order; its texture is only known at End. The
+    // layer's draws were already clipped, so the composite keeps only the scissor: clipping it again would
+    // fade antialiased clip edges twice.
+    if (_state.Clip.IsEmpty())
+    {
+      return;
+    }
+    auto &layer = _layers[index];
+    layer.CompositeBatch = static_cast<uint32>(_batches.size());
+    layer.CompositeInstance = static_cast<uint32>(_rects.size());
+    layer.HasComposite = true;
+    _batches.push_back({.FirstInstance = layer.CompositeInstance,
+                        .InstanceCount = 1u,
+                        .Scissor = _state.Clip,
+                        .Chain = NoChain,
+                        .Texture = {},
+                        .Sampler = {},
+                        .Layer = _currentLayer,
+                        .Composite = index,
+                        .Blend = layer.Blend,
+                        .Backdrop = {}});
+    _rects.push_back({.Rect = {},
+                      .Radii = {},
+                      .Linear = {1.f, 0.f, 0.f, 1.f},
+                      .Translation = {},
+                      .UV = {},
+                      .HoleRect = {},
+                      .HoleRadii = {},
+                      .Colour = {},
+                      .Flags = static_cast<uint32>(layer.Blend) << BlendModeShift});
   }
 
   void Renderer2D::Save() noexcept
@@ -871,15 +1080,29 @@ void main()
     }
     instance.Linear = {transform.A, transform.B, transform.C, transform.D};
     instance.Translation = {transform.E, transform.F};
+    instance.Flags |= static_cast<uint32>(_state.Blend) << BlendModeShift;
 
-    // Untextured instances join any batch with the same scissor; a textured one needs the batch's texture,
-    // or a batch that has none yet.
+    // A layer is as large as what's drawn in it.
+    const auto reach = Reach(instance, transform);
+    if (_currentLayer != NoLayer)
+    {
+      auto &layer = _layers[_currentLayer];
+      layer.Bounds = Union(layer.Bounds, reach);
+    }
+
+    // Untextured instances join any batch of their layer with the same scissor, chain and blend mode; a
+    // textured one needs the batch's texture, or a batch that has none yet. Composites only take untextured
+    // instances. A blend mode that reads the backdrop only joins a batch whose pixels it doesn't overlap,
+    // since the batch's backdrop is copied before any of it is drawn.
     const bool textured = texture.IsValid();
+    const bool copies = CopiesBackdrop(_state.Blend);
     auto joins = [&](const Batch &batch)
     {
-      return batch.Scissor == _state.Clip && batch.Chain == _state.Chain
-             && (!textured || !batch.Texture.IsValid()
-                 || (batch.Texture == texture && batch.Sampler == sampler));
+      const bool batchTextured = batch.Texture.IsValid() || batch.Composite != NoLayer;
+      return batch.Layer == _currentLayer && batch.Scissor == _state.Clip && batch.Chain == _state.Chain
+             && batch.Blend == _state.Blend
+             && (!textured || !batchTextured || (batch.Texture == texture && batch.Sampler == sampler))
+             && (!copies || (batch.Composite == NoLayer && Intersect(batch.Backdrop, reach).IsEmpty()));
     };
     if (_batches.empty() || !joins(_batches.back()))
     {
@@ -888,25 +1111,192 @@ void main()
                           .Scissor = _state.Clip,
                           .Chain = _state.Chain,
                           .Texture = {},
-                          .Sampler = {}});
+                          .Sampler = {},
+                          .Layer = _currentLayer,
+                          .Composite = NoLayer,
+                          .Blend = _state.Blend,
+                          .Backdrop = {}});
     }
 
     auto &batch = _batches.back();
-    if (textured && !batch.Texture.IsValid())
+    if (textured && !batch.Texture.IsValid() && batch.Composite == NoLayer)
     {
       batch.Texture = texture;
       batch.Sampler = sampler;
+    }
+    if (copies)
+    {
+      batch.Backdrop = Union(batch.Backdrop, reach);
     }
     ++batch.InstanceCount;
     _rects.push_back(instance);
   }
 
+  PixelRect2D Renderer2D::Reach(const RectInstance &instance, const Transform2D &transform) const noexcept
+  {
+    const auto &rect = instance.Rect;
+    const Array<Vec2f, 4> corners {
+      transform.Apply({rect[0], rect[1]}), transform.Apply({rect[0] + rect[2], rect[1]}),
+      transform.Apply({rect[0], rect[1] + rect[3]}), transform.Apply({rect[0] + rect[2], rect[1] + rect[3]})};
+    float left = corners[0].x;
+    float top = corners[0].y;
+    float right = corners[0].x;
+    float bottom = corners[0].y;
+    for (const auto &corner : corners)
+    {
+      left = std::min(left, corner.x);
+      top = std::min(top, corner.y);
+      right = std::max(right, corner.x);
+      bottom = std::max(bottom, corner.y);
+    }
+    if (!std::isfinite(left) || !std::isfinite(top) || !std::isfinite(right) || !std::isfinite(bottom))
+    {
+      return {};
+    }
+    const auto x0 = static_cast<int32>(std::floor(left)) - 1;
+    const auto y0 = static_cast<int32>(std::floor(top)) - 1;
+    const auto x1 = static_cast<int32>(std::ceil(right)) + 1;
+    const auto y1 = static_cast<int32>(std::ceil(bottom)) + 1;
+    return Intersect({.X = x0,
+                      .Y = y0,
+                      .Width = static_cast<uint32>(std::max(x1 - x0, 0)),
+                      .Height = static_cast<uint32>(std::max(y1 - y0, 0))},
+                     _state.Clip);
+  }
+
+  bool Renderer2D::CopiesBackdrop(BlendMode mode) noexcept
+  {
+    return mode != BlendMode::Normal && mode != BlendMode::PlusLighter && mode != BlendMode::PlusDarker;
+  }
+
   void Renderer2D::End() noexcept
   {
     krys_assert_msg(_commands != nullptr, "End without Begin.");
+    krys_debug_assert_msg(_currentLayer == NoLayer, "BeginLayer without a matching EndLayer.");
+    while (_currentLayer != NoLayer)
+    {
+      EndLayer();
+    }
     krys_debug_assert_msg(_savedStates.empty(), "Save without a matching Restore.");
     auto &commands = *_commands;
     _commands = nullptr;
+
+    // Children ended before their parents, so each layer's bounds are complete when it's finished.
+    for (const auto index : _layerOrder)
+    {
+      FinishLayer(index);
+    }
+
+    // The backdrop is laid out as the largest pass that copies one.
+    uint32 backdropWidth = 0u;
+    uint32 backdropHeight = 0u;
+    bool targetCopies = false;
+    bool additive = false;
+    for (const auto &batch : _batches)
+    {
+      additive = additive || batch.Blend == BlendMode::PlusLighter;
+      if (!CopiesBackdrop(batch.Blend) || batch.Backdrop.IsEmpty())
+      {
+        continue;
+      }
+      uint32 width = _target.Width;
+      uint32 height = _target.Height;
+      if (batch.Layer != NoLayer)
+      {
+        const auto desc = _device->GetTextureDesc(_layers[batch.Layer].Texture);
+        if (!desc)
+        {
+          continue;
+        }
+        width = desc->Width;
+        height = desc->Height;
+      }
+      else
+      {
+        targetCopies = true;
+      }
+      backdropWidth = std::max(backdropWidth, width);
+      backdropHeight = std::max(backdropHeight, height);
+    }
+
+    // A swapchain can't be copied from, so a frame that blends straight onto one is drawn into a texture,
+    // which is then composited into the window.
+    TextureHandle offscreen {};
+    if (targetCopies && _target.Swapchain.IsValid() && _target.Width > 0u && _target.Height > 0u)
+    {
+      offscreen = AcquireLayerTexture(_target.Width, _target.Height);
+    }
+    if (offscreen.IsValid())
+    {
+      const auto desc = _device->GetTextureDesc(offscreen);
+      const float width = static_cast<float>(desc->Width);
+      const float height = static_cast<float>(desc->Height);
+      _batches.push_back({.FirstInstance = static_cast<uint32>(_rects.size()),
+                          .InstanceCount = 1u,
+                          .Scissor = {.X = 0, .Y = 0, .Width = _target.Width, .Height = _target.Height},
+                          .Chain = NoChain,
+                          .Texture = offscreen,
+                          .Sampler = _nearestSampler,
+                          .Layer = WindowLayer,
+                          .Composite = NoLayer,
+                          .Blend = BlendMode::Normal,
+                          .Backdrop = {}});
+      _rects.push_back(
+        {.Rect = {0.f, 0.f, static_cast<float>(_target.Width), static_cast<float>(_target.Height)},
+         .Radii = {},
+         .Linear = {1.f, 0.f, 0.f, 1.f},
+         .Translation = {},
+         .UV = {0.f, 0.f, static_cast<float>(_target.Width) / width,
+                static_cast<float>(_target.Height) / height},
+         .HoleRect = {},
+         .HoleRadii = {},
+         .Colour = {255u, 255u, 255u, 255u},
+         .Flags = Textured});
+    }
+
+    FrameResources resources {};
+    if (backdropWidth > 0u && backdropHeight > 0u)
+    {
+      resources.Backdrop = AcquireLayerTexture(backdropWidth, backdropHeight);
+    }
+    if (!_rects.empty() && _target.Width > 0u && _target.Height > 0u)
+    {
+      auto created = GetPipeline(_target.Format, false);
+      auto createdAdditive =
+        additive ? GetPipeline(_target.Format, true) : Expected<PipelineHandle> {PipelineHandle {}};
+      const uint64 bytes = _rects.size() * sizeof(RectInstance);
+      resources.Instances = _device->AllocateTransient(bytes, alignof(RectInstance));
+      if (!created || !createdAdditive)
+      {
+        KRYS_LOG_ERROR("Render2D: {}", !created ? created.error() : createdAdditive.error());
+      }
+      else if (resources.Instances.IsValid())
+      {
+        resources.Pipeline = *created;
+        resources.AdditivePipeline = *createdAdditive;
+        std::memcpy(resources.Instances.Data.data(), _rects.data(), bytes);
+      }
+    }
+
+    // Each layer's pass comes before the pass that composites it; the target's comes last.
+    for (const auto index : _layerOrder)
+    {
+      const auto &layer = _layers[index];
+      if (!layer.Texture.IsValid())
+      {
+        continue;
+      }
+      const auto desc = _device->GetTextureDesc(layer.Texture);
+      RecordPass(
+        commands,
+        {.Attachment = {.Texture = layer.Texture, .Load = AttachmentLoadOp::Clear, .ClearColour = {}},
+         .Width = desc->Width,
+         .Height = desc->Height,
+         .OriginX = layer.Bounds.X,
+         .OriginY = layer.Bounds.Y,
+         .Layer = index},
+        resources);
+    }
 
     ColourAttachment attachment {.Texture = _target.Texture, .Swapchain = _target.Swapchain};
     attachment.Load = _target.ClearColour ? AttachmentLoadOp::Clear : AttachmentLoadOp::Load;
@@ -914,128 +1304,325 @@ void main()
     {
       attachment.ClearColour = *_target.ClearColour;
     }
-    commands.BeginRenderPass(RenderPassDesc::SingleColour(attachment));
-
-    if (!_rects.empty() && _target.Width > 0u && _target.Height > 0u)
+    if (offscreen.IsValid())
     {
-      auto pipeline = GetPipeline(_target.Format);
-      const uint64 rectBytes = _rects.size() * sizeof(RectInstance);
-      auto frame = _device->AllocateTransient(sizeof(FrameUniforms));
-      auto rects = _device->AllocateTransient(rectBytes, alignof(RectInstance));
-      if (!pipeline)
-      {
-        KRYS_LOG_ERROR("Render2D: {}", pipeline.error());
-      }
-      else if (frame.IsValid() && rects.IsValid())
-      {
-        const FrameUniforms uniforms {
-          .ViewportSize = {static_cast<float>(_target.Width), static_cast<float>(_target.Height)},
-          .DecodeSrgb = IsSrgbFormat(_target.Format) ? 1u : 0u,
-          .Padding = 0u};
-        std::memcpy(frame.Data.data(), &uniforms, sizeof(uniforms));
-        std::memcpy(rects.Data.data(), _rects.data(), rectBytes);
-
-        commands.BindPipeline(*pipeline);
-        commands.BindUniformBuffer(0u, frame.Buffer, frame.Offset, sizeof(FrameUniforms));
-        commands.BindVertexBuffer(0u, rects.Buffer, rects.Offset);
-        TextureHandle boundTexture {};
-        SamplerHandle boundSampler {};
-        uint64 boundChain = ~0ull;
-        for (const auto &batch : _batches)
-        {
-          // Every batch binds its clip chain, even an empty one: the shader always reads the block.
-          if (batch.Chain != boundChain)
-          {
-            auto clips = _device->AllocateTransient(sizeof(ClipUniforms));
-            if (!clips.IsValid())
-            {
-              break;
-            }
-            ClipUniforms data {};
-            TextureHandle clipMask = _whiteTexture;
-            if (batch.Chain != NoChain)
-            {
-              const auto &chain = _chains[batch.Chain];
-              if (chain.Mask.Texture.IsValid())
-              {
-                const auto &bounds = chain.Mask.Bounds;
-                data.MaskMode = chain.MaskOut ? ClipOutMask : ClipToMask;
-                data.MaskBounds = {bounds.X, bounds.Y, static_cast<int32>(bounds.Width),
-                                   static_cast<int32>(bounds.Height)};
-                data.MaskOrigin = {chain.Mask.Texels.X, chain.Mask.Texels.Y, 0, 0};
-                clipMask = chain.Mask.Texture;
-              }
-              const auto &shapes = chain.Shapes;
-              data.Count = static_cast<uint32>(shapes.size());
-              for (size_t i = 0u; i < shapes.size(); ++i)
-              {
-                const auto &clip = shapes[i];
-                const auto &rect = clip.Shape.Rect;
-                const auto &radii = clip.Shape.Radii;
-                const auto &inverse = clip.Inverse;
-                data.Clips[i] = {
-                  .Rect = {rect.X, rect.Y, rect.Width, rect.Height},
-                  .Radii = {radii.TopLeft, radii.TopRight, radii.BottomRight, radii.BottomLeft},
-                  .InverseLinear = {inverse.A, inverse.B, inverse.C, inverse.D},
-                  .InverseTranslation = {inverse.E, inverse.F, clip.Out ? 1.f : 0.f, 0.f}};
-              }
-            }
-            std::memcpy(clips.Data.data(), &data, sizeof(data));
-            commands.BindUniformBuffer(1u, clips.Buffer, clips.Offset, sizeof(ClipUniforms));
-            // Unit 1 always has a texture: drivers check every declared sampler at each draw.
-            commands.BindTexture(1u, clipMask, _nearestSampler);
-            boundChain = batch.Chain;
-          }
-
-          // Untextured batches never sample, but drivers still check the sampler's texture at every draw,
-          // so they get the white texture unless another one is already bound.
-          const auto texture = batch.Texture.IsValid()  ? batch.Texture
-                               : boundTexture.IsValid() ? boundTexture
-                                                        : _whiteTexture;
-          const auto sampler = batch.Texture.IsValid()  ? batch.Sampler
-                               : boundSampler.IsValid() ? boundSampler
-                                                        : _nearestSampler;
-          if (texture != boundTexture || sampler != boundSampler)
-          {
-            commands.BindTexture(0u, texture, sampler);
-            boundTexture = texture;
-            boundSampler = sampler;
-          }
-          commands.SetScissor(batch.Scissor.X, batch.Scissor.Y, batch.Scissor.Width, batch.Scissor.Height);
-          commands.Draw(4u, batch.InstanceCount, 0u, batch.FirstInstance);
-        }
-      }
+      // The offscreen target starts as the window would, or transparent when the window keeps its
+      // contents, which then show through; the window is cleared to transparent under an exact copy.
+      const auto window = attachment;
+      attachment = {.Texture = offscreen,
+                    .Load = AttachmentLoadOp::Clear,
+                    .ClearColour = _target.ClearColour ? *_target.ClearColour : Array<float, 4> {}};
+      RecordPass(commands,
+                 {.Attachment = attachment,
+                  .Width = _target.Width,
+                  .Height = _target.Height,
+                  .OriginX = 0,
+                  .OriginY = 0,
+                  .Layer = NoLayer},
+                 resources);
+      attachment = window;
+      attachment.ClearColour = {};
+      RecordPass(commands,
+                 {.Attachment = attachment,
+                  .Width = _target.Width,
+                  .Height = _target.Height,
+                  .OriginX = 0,
+                  .OriginY = 0,
+                  .Layer = WindowLayer},
+                 resources);
+    }
+    else
+    {
+      RecordPass(commands,
+                 {.Attachment = attachment,
+                  .Width = _target.Width,
+                  .Height = _target.Height,
+                  .OriginX = 0,
+                  .OriginY = 0,
+                  .Layer = NoLayer},
+                 resources);
     }
 
-    commands.EndRenderPass();
     _stats = {.Instances = static_cast<uint32>(_rects.size()),
               .Batches = static_cast<uint32>(_batches.size()),
               .MasksRasterised = _masks.Stats().Rasterised,
-              .MaskCacheHits = _masks.Stats().Hits};
+              .MaskCacheHits = _masks.Stats().Hits,
+              .BackdropCopies = _backdropCopies};
     _savedStates.clear();
     _rects.clear();
     _batches.clear();
     _chains.clear();
+    _layers.clear();
+    _layerOrder.clear();
   }
 
-  Expected<PipelineHandle> Renderer2D::GetPipeline(TextureFormat format) noexcept
+  void Renderer2D::FinishLayer(uint32 index) noexcept
+  {
+    auto &layer = _layers[index];
+    layer.Bounds = Intersect(layer.Bounds, layer.Clip);
+    if (!layer.HasComposite || layer.Opacity <= 0.f || layer.Bounds.IsEmpty())
+    {
+      // Nothing to show: the composite, if any, stays an empty instance.
+      return;
+    }
+
+    layer.Texture = AcquireLayerTexture(layer.Bounds.Width, layer.Bounds.Height);
+    if (!layer.Texture.IsValid())
+    {
+      return;
+    }
+    const auto desc = _device->GetTextureDesc(layer.Texture);
+    const float width = static_cast<float>(desc->Width);
+    const float height = static_cast<float>(desc->Height);
+    const auto &bounds = layer.Bounds;
+
+    // The composite draws the layer's texels one to one, premultiplied, at the layer's opacity.
+    auto &instance = _rects[layer.CompositeInstance];
+    instance.Rect = {static_cast<float>(bounds.X), static_cast<float>(bounds.Y),
+                     static_cast<float>(bounds.Width), static_cast<float>(bounds.Height)};
+    instance.UV = {0.f, 0.f, static_cast<float>(bounds.Width) / width,
+                   static_cast<float>(bounds.Height) / height};
+    instance.Colour = {255u, 255u, 255u, static_cast<uint8>(layer.Opacity * 255.f + 0.5f)};
+    instance.Flags = Textured | static_cast<uint32>(layer.Blend) << BlendModeShift;
+    auto &batch = _batches[layer.CompositeBatch];
+    batch.Texture = layer.Texture;
+    batch.Sampler = _nearestSampler;
+    if (CopiesBackdrop(layer.Blend))
+    {
+      batch.Backdrop = Intersect(bounds, batch.Scissor);
+    }
+
+    if (layer.Parent != NoLayer)
+    {
+      auto &parent = _layers[layer.Parent];
+      parent.Bounds = Union(parent.Bounds, bounds);
+    }
+  }
+
+  TextureHandle Renderer2D::AcquireLayerTexture(uint32 width, uint32 height) noexcept
+  {
+    // Any texture this frame hasn't used that's large enough, the smallest first; this frame's layer passes
+    // all run before the passes that composite them, so none can be shared within it.
+    const uint64 frame = _device->FrameNumber();
+    LayerTexture *best = nullptr;
+    for (auto &texture : _layerTextures)
+    {
+      if (texture.LastUsedFrame < frame && texture.Format == _target.Format && texture.Width >= width
+          && texture.Height >= height
+          && (best == nullptr || texture.Width * texture.Height < best->Width * best->Height))
+      {
+        best = &texture;
+      }
+    }
+    if (best != nullptr)
+    {
+      best->LastUsedFrame = frame;
+      return best->Texture;
+    }
+
+    // New textures round up to 64 pixels, so slightly different layers can reuse them.
+    const uint32 roundedWidth = (width + 63u) / 64u * 64u;
+    const uint32 roundedHeight = (height + 63u) / 64u * 64u;
+    auto texture = _device->CreateTexture({.Format = _target.Format,
+                                           .Width = roundedWidth,
+                                           .Height = roundedHeight,
+                                           .Usage = TextureUsage::RenderTarget | TextureUsage::Sampled,
+                                           .DebugName = u8"Render2D.Layer"});
+    krys_debug_assert_msg(texture.has_value(), "Couldn't create a layer texture.");
+    if (!texture)
+    {
+      return {};
+    }
+    _layerTextures.push_back({.Texture = *texture,
+                              .Width = roundedWidth,
+                              .Height = roundedHeight,
+                              .Format = _target.Format,
+                              .LastUsedFrame = frame});
+    return *texture;
+  }
+
+  void Renderer2D::RecordPass(CommandBuffer &commands, const Pass &pass,
+                              const FrameResources &resources) noexcept
+  {
+    commands.BeginRenderPass(RenderPassDesc::SingleColour(pass.Attachment));
+    if (!resources.Pipeline.IsValid() || pass.Width == 0u || pass.Height == 0u)
+    {
+      commands.EndRenderPass();
+      return;
+    }
+
+    auto frame = _device->AllocateTransient(sizeof(FrameUniforms));
+    if (!frame.IsValid())
+    {
+      commands.EndRenderPass();
+      return;
+    }
+    const FrameUniforms uniforms {
+      .ViewportSize = {static_cast<float>(pass.Width), static_cast<float>(pass.Height)},
+      .Origin = {static_cast<float>(pass.OriginX), static_cast<float>(pass.OriginY)}};
+    std::memcpy(frame.Data.data(), &uniforms, sizeof(uniforms));
+
+    PipelineHandle boundPipeline {};
+    TextureHandle boundTexture {};
+    SamplerHandle boundSampler {};
+    uint64 boundChain = ~0ull;
+    // Binds what every batch draws with, at the pass's start and again whenever it resumes.
+    auto bindFrame = [&]
+    {
+      commands.BindPipeline(resources.Pipeline);
+      commands.BindUniformBuffer(0u, frame.Buffer, frame.Offset, sizeof(FrameUniforms));
+      commands.BindVertexBuffer(0u, resources.Instances.Buffer, resources.Instances.Offset);
+      // Unit 2 always has a texture: drivers check every declared sampler at each draw.
+      commands.BindTexture(2u, resources.Backdrop.IsValid() ? resources.Backdrop : _whiteTexture,
+                           _nearestSampler);
+      boundPipeline = resources.Pipeline;
+      boundTexture = {};
+      boundSampler = {};
+      boundChain = ~0ull;
+    };
+    bindFrame();
+
+    const PixelRect2D viewport {.X = 0, .Y = 0, .Width = pass.Width, .Height = pass.Height};
+    for (const auto &batch : _batches)
+    {
+      if (batch.Layer != pass.Layer)
+      {
+        continue;
+      }
+      // The scissor is in target pixels; the pass's pixels start at its origin.
+      const auto scissor = Intersect({.X = batch.Scissor.X - pass.OriginX,
+                                      .Y = batch.Scissor.Y - pass.OriginY,
+                                      .Width = batch.Scissor.Width,
+                                      .Height = batch.Scissor.Height},
+                                     viewport);
+      if (scissor.IsEmpty())
+      {
+        continue;
+      }
+
+      // What's beneath the batch is copied first: the pass ends, the pixels the batch reaches are copied
+      // into the backdrop at the same place, and the pass resumes with its contents kept.
+      if (CopiesBackdrop(batch.Blend))
+      {
+        const auto region = Intersect({.X = batch.Backdrop.X - pass.OriginX,
+                                       .Y = batch.Backdrop.Y - pass.OriginY,
+                                       .Width = batch.Backdrop.Width,
+                                       .Height = batch.Backdrop.Height},
+                                      scissor);
+        if (region.IsEmpty() || !resources.Backdrop.IsValid() || !pass.Attachment.Texture.IsValid())
+        {
+          continue;
+        }
+        commands.EndRenderPass();
+        const TextureRegion copied {.X = static_cast<uint32>(region.X),
+                                    .Y = static_cast<uint32>(region.Y),
+                                    .Width = region.Width,
+                                    .Height = region.Height};
+        commands.BlitTexture(pass.Attachment.Texture, copied, resources.Backdrop, copied,
+                             SamplerFilter::Nearest);
+        ++_backdropCopies;
+        auto resumed = pass.Attachment;
+        resumed.Load = AttachmentLoadOp::Load;
+        commands.BeginRenderPass(RenderPassDesc::SingleColour(resumed));
+        bindFrame();
+      }
+
+      const auto pipeline =
+        batch.Blend == BlendMode::PlusLighter ? resources.AdditivePipeline : resources.Pipeline;
+      if (pipeline != boundPipeline)
+      {
+        commands.BindPipeline(pipeline);
+        boundPipeline = pipeline;
+      }
+
+      // Every batch binds its clip chain, even an empty one: the shader always reads the block.
+      if (batch.Chain != boundChain)
+      {
+        auto clips = _device->AllocateTransient(sizeof(ClipUniforms));
+        if (!clips.IsValid())
+        {
+          break;
+        }
+        ClipUniforms data {};
+        TextureHandle clipMask = _whiteTexture;
+        if (batch.Chain != NoChain)
+        {
+          const auto &chain = _chains[batch.Chain];
+          if (chain.Mask.Texture.IsValid())
+          {
+            const auto &bounds = chain.Mask.Bounds;
+            data.MaskMode = chain.MaskOut ? ClipOutMask : ClipToMask;
+            data.MaskBounds = {bounds.X, bounds.Y, static_cast<int32>(bounds.Width),
+                               static_cast<int32>(bounds.Height)};
+            data.MaskOrigin = {chain.Mask.Texels.X, chain.Mask.Texels.Y, 0, 0};
+            clipMask = chain.Mask.Texture;
+          }
+          const auto &shapes = chain.Shapes;
+          data.Count = static_cast<uint32>(shapes.size());
+          for (size_t i = 0u; i < shapes.size(); ++i)
+          {
+            const auto &clip = shapes[i];
+            const auto &rect = clip.Shape.Rect;
+            const auto &radii = clip.Shape.Radii;
+            const auto &inverse = clip.Inverse;
+            data.Clips[i] = {.Rect = {rect.X, rect.Y, rect.Width, rect.Height},
+                             .Radii = {radii.TopLeft, radii.TopRight, radii.BottomRight, radii.BottomLeft},
+                             .InverseLinear = {inverse.A, inverse.B, inverse.C, inverse.D},
+                             .InverseTranslation = {inverse.E, inverse.F, clip.Out ? 1.f : 0.f, 0.f}};
+          }
+        }
+        std::memcpy(clips.Data.data(), &data, sizeof(data));
+        commands.BindUniformBuffer(1u, clips.Buffer, clips.Offset, sizeof(ClipUniforms));
+        // Unit 1 always has a texture: drivers check every declared sampler at each draw.
+        commands.BindTexture(1u, clipMask, _nearestSampler);
+        boundChain = batch.Chain;
+      }
+
+      // Untextured batches never sample, but drivers still check the sampler's texture at every draw, so
+      // they get the white texture unless another one is already bound.
+      const auto texture = batch.Texture.IsValid()  ? batch.Texture
+                           : boundTexture.IsValid() ? boundTexture
+                                                    : _whiteTexture;
+      const auto sampler = batch.Texture.IsValid()  ? batch.Sampler
+                           : boundSampler.IsValid() ? boundSampler
+                                                    : _nearestSampler;
+      if (texture != boundTexture || sampler != boundSampler)
+      {
+        commands.BindTexture(0u, texture, sampler);
+        boundTexture = texture;
+        boundSampler = sampler;
+      }
+      commands.SetScissor(scissor.X, scissor.Y, scissor.Width, scissor.Height);
+      commands.Draw(4u, batch.InstanceCount, 0u, batch.FirstInstance);
+    }
+    commands.EndRenderPass();
+  }
+
+  Expected<PipelineHandle> Renderer2D::GetPipeline(TextureFormat format, bool additive) noexcept
   {
     for (const auto &entry : _pipelines)
     {
-      if (entry.Format == format)
+      if (entry.Format == format && entry.Additive == additive)
       {
         return entry.Pipeline;
       }
     }
 
+    // Additive pipelines draw `BlendMode::PlusLighter`: the sum of the premultiplied colours, clamped.
+    const auto blend = additive ? BlendState {.Enabled = true,
+                                              .SourceColour = BlendFactor::One,
+                                              .DestinationColour = BlendFactor::One,
+                                              .SourceAlpha = BlendFactor::One,
+                                              .DestinationAlpha = BlendFactor::One}
+                                : BlendState::PremultipliedAlpha();
     PipelineDesc desc {
       .VertexShader = _vertexShader,
       .FragmentShader = _fragmentShader,
       .Topology = PrimitiveTopology::TriangleStrip,
-      .Blend = BlendState::PremultipliedAlpha(),
+      .Blend = blend,
       .Raster = {.ScissorTest = true},
       .ColourFormats = {format},
-      .DebugName = u8"Render2D.Rect",
+      .DebugName = additive ? u8"Render2D.Rect.Additive" : u8"Render2D.Rect",
     };
     desc.VertexBuffers.push_back({
       .Stride = sizeof(RectInstance),
@@ -1056,7 +1643,7 @@ void main()
     {
       return Unexpected<string>(pipeline.error());
     }
-    _pipelines.push_back({.Format = format, .Pipeline = *pipeline});
+    _pipelines.push_back({.Format = format, .Additive = additive, .Pipeline = *pipeline});
     return *pipeline;
   }
 
@@ -1070,6 +1657,23 @@ void main()
             .Y = y0,
             .Width = x1 > x0 ? static_cast<uint32>(x1 - x0) : 0u,
             .Height = y1 > y0 ? static_cast<uint32>(y1 - y0) : 0u};
+  }
+
+  PixelRect2D Renderer2D::Union(const PixelRect2D &a, const PixelRect2D &b) noexcept
+  {
+    if (a.IsEmpty())
+    {
+      return b;
+    }
+    if (b.IsEmpty())
+    {
+      return a;
+    }
+    const int32 x0 = std::min(a.X, b.X);
+    const int32 y0 = std::min(a.Y, b.Y);
+    const int32 x1 = std::max(a.X + static_cast<int32>(a.Width), b.X + static_cast<int32>(b.Width));
+    const int32 y1 = std::max(a.Y + static_cast<int32>(a.Height), b.Y + static_cast<int32>(b.Height));
+    return {.X = x0, .Y = y0, .Width = static_cast<uint32>(x1 - x0), .Height = static_cast<uint32>(y1 - y0)};
   }
 
   PixelRect2D Renderer2D::Intersect(const PixelRect2D &a, const PixelRect2D &b) noexcept

@@ -6,6 +6,8 @@
 #include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/PathRasteriser.hpp"
+#include <algorithm>
+#include <cmath>
 #include <numbers>
 
 namespace krys::gfx::tests
@@ -174,18 +176,17 @@ namespace krys::gfx::tests
   TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: blends with straight alpha colours",
                    "[Gfx][Render2D][GPU]")
   {
-    // A unorm target blends the encoded values: half red over blue.
+    // Blending works on the encoded values: half red over blue.
     UseTarget(2u, 2u);
     Draw([](Renderer2D &renderer) { renderer.FillRect({0.f, 0.f, 2.f, 2.f}, SRGBA<uint8> {255, 0, 0, 128}); },
          Array<float, 4> {0.f, 0.f, 1.f, 1.f});
     CHECK(Near(Read()[0], {128, 0, 127, 255}));
 
-    // An sRGB target blends in linear light: half white over black is half the light, encoded as 188.
-    UseTarget(2u, 2u, TextureFormat::RGBA8Srgb);
+    // Half white over black is encoded half grey, as browsers blend, not half the light (188).
     Draw([](Renderer2D &renderer)
          { renderer.FillRect({0.f, 0.f, 2.f, 2.f}, SRGBA<uint8> {255, 255, 255, 128}); },
          Array<float, 4> {0.f, 0.f, 0.f, 1.f});
-    CHECK(Near(Read()[0], {188, 188, 188, 255}));
+    CHECK(Near(Read()[0], {128, 128, 128, 255}));
 
     // Opaque colours come back as they went in.
     Draw([](Renderer2D &renderer) { renderer.FillRect({0.f, 0.f, 2.f, 2.f}, SRGBA<uint8> {200, 100, 50}); });
@@ -537,25 +538,38 @@ namespace krys::gfx::tests
     }
   }
 
-  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: converts images to the target's encoding",
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: draws images in sRGB formats as stored",
                    "[Gfx][Render2D][GPU]")
   {
-    constexpr Array<Pixel, 1> texels {Pixel {188, 188, 188, 255}};
+    // The GPU decodes sRGB textures; the shader encodes them back, exactly, whatever their alpha.
+    UseTarget(2u, 2u);
 
-    SECTION("An sRGB texture into a unorm target")
+    SECTION("Opaque")
     {
-      UseTarget(2u, 2u);
+      constexpr Array<Pixel, 1> texels {Pixel {188, 100, 20, 255}};
       auto image = Image(1u, 1u, texels, TextureFormat::RGBA8Srgb);
       Draw([&](Renderer2D &renderer) { renderer.DrawImage(image, {0.f, 0.f, 2.f, 2.f}); });
       CHECK(Near(Read()[0], texels[0]));
     }
 
-    SECTION("A unorm texture into an sRGB target")
+    SECTION("Premultiplied")
     {
-      UseTarget(2u, 2u, TextureFormat::RGBA8Srgb);
-      auto image = Image(1u, 1u, texels);
+      constexpr Array<Pixel, 1> texels {Pixel {100, 50, 20, 128}};
+      auto image = Image(1u, 1u, texels, TextureFormat::RGBA8Srgb);
       Draw([&](Renderer2D &renderer) { renderer.DrawImage(image, {0.f, 0.f, 2.f, 2.f}); });
       CHECK(Near(Read()[0], texels[0]));
+    }
+
+    SECTION("Straight")
+    {
+      constexpr Array<Pixel, 1> texels {Pixel {200, 100, 40, 128}};
+      auto image = Image(1u, 1u, texels, TextureFormat::RGBA8Srgb);
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.DrawImage(image, {0.f, 0.f, 2.f, 2.f}, {.Alpha = AlphaPremultiplication::Unpremultiplied});
+        });
+      CHECK(Near(Read()[0], {100, 50, 20, 128}));
     }
   }
 
@@ -1322,6 +1336,421 @@ namespace krys::gfx::tests
       {
         CHECK(pixel == Red);
       }
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: composites layers as one image", "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(8u, 8u);
+    const SRGBA<uint8> red {255, 0, 0};
+    const SRGBA<uint8> blue {0, 0, 255};
+
+    SECTION("Opacity applies to the group, not to each draw")
+    {
+      // Where the rects overlap, only the blue on top shows, at half opacity.
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.BeginLayer(0.5f);
+          renderer.FillRect({0.f, 0.f, 6.f, 6.f}, red);
+          renderer.FillRect({2.f, 2.f, 6.f, 6.f}, blue);
+          renderer.EndLayer();
+        });
+
+      auto pixels = Read();
+      CHECK(Near(At(pixels, 0u, 0u), {128, 0, 0, 128}));
+      CHECK(Near(At(pixels, 3u, 3u), {0, 0, 128, 128}));
+      CHECK(Near(At(pixels, 7u, 7u), {0, 0, 128, 128}));
+      CHECK(At(pixels, 7u, 0u) == Clear);
+    }
+
+    SECTION("Layers nest, and keep painter's order")
+    {
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.FillRect({0.f, 0.f, 8.f, 8.f}, blue);
+          renderer.BeginLayer(0.5f);
+          renderer.BeginLayer(0.5f);
+          renderer.Translate(2.f, 0.f);
+          renderer.FillRect({0.f, 0.f, 2.f, 2.f}, red);
+          renderer.EndLayer();
+          renderer.EndLayer();
+          // Drawn after the layers, over them.
+          renderer.FillRect({3.f, 0.f, 1.f, 1.f}, SRGBA<uint8> {0, 255, 0});
+        });
+
+      // A quarter of the red over the blue.
+      auto pixels = Read();
+      CHECK(Near(At(pixels, 2u, 0u), {64, 0, 191, 255}));
+      CHECK(At(pixels, 3u, 0u) == Green);
+      CHECK(At(pixels, 0u, 0u) == Blue);
+      CHECK(At(pixels, 4u, 0u) == Blue);
+    }
+
+    SECTION("Nothing shows from empty or transparent layers")
+    {
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.BeginLayer(1.f);
+          renderer.EndLayer();
+          renderer.BeginLayer(0.f);
+          renderer.FillRect({0.f, 0.f, 8.f, 8.f}, red);
+          renderer.EndLayer();
+        });
+      for (const auto &pixel : Read())
+      {
+        CHECK(pixel == Clear);
+      }
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: draws the same through an opaque layer",
+                   "[Gfx][Render2D][GPU]")
+  {
+    // An opaque layer changes nothing, including antialiased clip edges, which the composite doesn't fade
+    // a second time.
+    auto scene = [](Renderer2D &renderer, bool layer)
+    {
+      renderer.FillRect({0.f, 0.f, 8.f, 8.f}, SRGBA<uint8> {0, 0, 255});
+      renderer.Save();
+      renderer.ClipRoundedRect({{1.f, 1.f, 6.f, 6.f}, CornerRadii2D::Uniform(3.f)});
+      if (layer)
+      {
+        renderer.BeginLayer(1.f);
+      }
+      renderer.FillRect({0.f, 0.f, 8.f, 8.f}, SRGBA<uint8> {255, 0, 0, 200});
+      renderer.FillRoundedRect({{2.f, 2.f, 4.f, 4.f}, CornerRadii2D::Uniform(1.5f)},
+                               SRGBA<uint8> {0, 255, 0, 160});
+      if (layer)
+      {
+        renderer.EndLayer();
+      }
+      renderer.Restore();
+    };
+
+    UseTarget(8u, 8u);
+    Draw([&](Renderer2D &renderer) { scene(renderer, false); });
+    auto direct = Read();
+    Draw([&](Renderer2D &renderer) { scene(renderer, true); });
+    CHECK(SameImage(direct, Read(), 2));
+  }
+
+  namespace
+  {
+    struct Rgb
+    {
+      double R;
+      double G;
+      double B;
+    };
+
+    KRYS_NODISCARD double Lum(Rgb c)
+    {
+      return 0.3 * c.R + 0.59 * c.G + 0.11 * c.B;
+    }
+
+    KRYS_NODISCARD Rgb ClipColour(Rgb c)
+    {
+      const double l = Lum(c);
+      const double n = std::min({c.R, c.G, c.B});
+      const double x = std::max({c.R, c.G, c.B});
+      if (n < 0.0)
+      {
+        c = {l + (c.R - l) * l / (l - n), l + (c.G - l) * l / (l - n), l + (c.B - l) * l / (l - n)};
+      }
+      if (x > 1.0)
+      {
+        c = {l + (c.R - l) * (1.0 - l) / (x - l), l + (c.G - l) * (1.0 - l) / (x - l),
+             l + (c.B - l) * (1.0 - l) / (x - l)};
+      }
+      return c;
+    }
+
+    KRYS_NODISCARD Rgb SetLum(Rgb c, double l)
+    {
+      const double d = l - Lum(c);
+      return ClipColour({c.R + d, c.G + d, c.B + d});
+    }
+
+    KRYS_NODISCARD double Sat(Rgb c)
+    {
+      return std::max({c.R, c.G, c.B}) - std::min({c.R, c.G, c.B});
+    }
+
+    // As the specification writes it: the largest channel becomes s, the smallest 0, the middle one scaled
+    // between them.
+    KRYS_NODISCARD Rgb SetSat(Rgb c, double s)
+    {
+      Array<double *, 3> channels {&c.R, &c.G, &c.B};
+      std::sort(channels.begin(), channels.end(), [](double *a, double *b) { return *a < *b; });
+      double &min = *channels[0];
+      double &mid = *channels[1];
+      double &max = *channels[2];
+      if (max > min)
+      {
+        mid = (mid - min) * s / (max - min);
+        max = s;
+      }
+      else
+      {
+        mid = 0.0;
+        max = 0.0;
+      }
+      min = 0.0;
+      return c;
+    }
+
+    KRYS_NODISCARD double Separable(BlendMode mode, double b, double s)
+    {
+      auto hardLight = [](double b, double s)
+      {
+        return s <= 0.5 ? b * 2.0 * s : b + (2.0 * s - 1.0) - b * (2.0 * s - 1.0);
+      };
+      switch (mode)
+      {
+        case BlendMode::Multiply:   return b * s;
+        case BlendMode::Screen:     return b + s - b * s;
+        case BlendMode::Darken:     return std::min(b, s);
+        case BlendMode::Lighten:    return std::max(b, s);
+        case BlendMode::Overlay:    return hardLight(s, b);
+        case BlendMode::ColorDodge: return b == 0.0 ? 0.0 : s == 1.0 ? 1.0 : std::min(1.0, b / (1.0 - s));
+        case BlendMode::ColorBurn:
+          return b == 1.0 ? 1.0 : s == 0.0 ? 0.0 : 1.0 - std::min(1.0, (1.0 - b) / s);
+        case BlendMode::HardLight: return hardLight(b, s);
+        case BlendMode::SoftLight:
+        {
+          if (s <= 0.5)
+          {
+            return b - (1.0 - 2.0 * s) * b * (1.0 - b);
+          }
+          const double d = b <= 0.25 ? ((16.0 * b - 12.0) * b + 4.0) * b : std::sqrt(b);
+          return b + (2.0 * s - 1.0) * (d - b);
+        }
+        case BlendMode::Difference: return std::abs(b - s);
+        case BlendMode::Exclusion:  return b + s - 2.0 * b * s;
+        default:                    return s;
+      }
+    }
+
+    /// @brief The blend function of Compositing and Blending Level 1.
+    KRYS_NODISCARD Rgb BlendFunction(BlendMode mode, Rgb b, Rgb s)
+    {
+      switch (mode)
+      {
+        case BlendMode::Hue:        return SetLum(SetSat(s, Sat(b)), Lum(b));
+        case BlendMode::Saturation: return SetLum(SetSat(b, Sat(s)), Lum(b));
+        case BlendMode::Color:      return SetLum(s, Lum(b));
+        case BlendMode::Luminosity: return SetLum(b, Lum(s));
+        default:                    return {Separable(mode, b.R, s.R), Separable(mode, b.G, s.G), Separable(mode, b.B, s.B)};
+      }
+    }
+
+    /// @brief A straight colour blended with a premultiplied backdrop pixel, then composited over it, as the
+    /// specification's formulas give it.
+    KRYS_NODISCARD Pixel Blended(BlendMode mode, const Pixel &backdrop, const Pixel &source,
+                                 double coverage = 1.0)
+    {
+      const double ab = backdrop[3] / 255.0;
+      auto straight = [&](uint8 value)
+      {
+        return ab > 0.0 ? std::min(value / 255.0 / ab, 1.0) : 0.0;
+      };
+      const Rgb b {straight(backdrop[0]), straight(backdrop[1]), straight(backdrop[2])};
+      const Rgb s {source[0] / 255.0, source[1] / 255.0, source[2] / 255.0};
+      const double as = source[3] / 255.0 * coverage;
+      const Rgb blended = BlendFunction(mode, b, s);
+
+      auto channel = [&](double cs, double blendedChannel, uint8 premultipliedBackdrop)
+      {
+        const double mixed = (1.0 - ab) * cs + ab * std::clamp(blendedChannel, 0.0, 1.0);
+        const double result = as * mixed + (1.0 - as) * premultipliedBackdrop / 255.0;
+        return static_cast<uint8>(std::clamp(result, 0.0, 1.0) * 255.0 + 0.5);
+      };
+      return {channel(s.R, blended.R, backdrop[0]), channel(s.G, blended.G, backdrop[1]),
+              channel(s.B, blended.B, backdrop[2]), static_cast<uint8>((as + ab * (1.0 - as)) * 255.0 + 0.5)};
+    }
+
+    KRYS_NODISCARD SRGBA<uint8> ToColour(const Pixel &pixel)
+    {
+      return {pixel[0], pixel[1], pixel[2], pixel[3]};
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: blends with every blend mode", "[Gfx][Render2D][GPU]")
+  {
+    // Four pairs, three pixels apart so each draw's reach misses the others' and they share one copy.
+    constexpr Array<Pixel, 4> backdrops {Pixel {200, 60, 30, 255}, Pixel {40, 180, 220, 255},
+                                         Pixel {200, 60, 30, 255}, Pixel {30, 120, 150, 160}};
+    constexpr Array<Pixel, 4> sources {Pixel {90, 200, 140, 255}, Pixel {230, 30, 120, 180},
+                                       Pixel {20, 240, 250, 100}, Pixel {120, 140, 10, 255}};
+    UseTarget(12u, 1u);
+
+    for (uint8 value = static_cast<uint8>(BlendMode::Multiply);
+         value <= static_cast<uint8>(BlendMode::Luminosity); ++value)
+    {
+      const auto mode = static_cast<BlendMode>(value);
+      CAPTURE(BlendModeName(mode));
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          for (size_t i = 0u; i < backdrops.size(); ++i)
+          {
+            renderer.FillRect({3.f * static_cast<float>(i), 0.f, 1.f, 1.f}, ToColour(backdrops[i]));
+          }
+        });
+      const auto before = Read();
+
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.SetBlendMode(mode);
+          for (size_t i = 0u; i < sources.size(); ++i)
+          {
+            renderer.FillRect({3.f * static_cast<float>(i), 0.f, 1.f, 1.f}, ToColour(sources[i]));
+          }
+        },
+        Maybe<Array<float, 4>> {});
+      CHECK(_renderer->GetStats().BackdropCopies == 1u);
+
+      const auto after = Read();
+      for (uint32 i = 0u; i < 4u; ++i)
+      {
+        CAPTURE(i);
+        CHECK(Near(At(after, 3u * i, 0u), Blended(mode, At(before, 3u * i, 0u), sources[i]), 2));
+        // Pixels the draws don't cover don't change.
+        CHECK(At(after, 3u * i + 1u, 0u) == Clear);
+      }
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: copies the backdrop once per overlapping draw",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(8u, 2u);
+    const SRGBA<uint8> grey {128, 128, 128};
+
+    SECTION("Overlapping draws blend with each other")
+    {
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.FillRect({0.f, 0.f, 8.f, 2.f}, SRGBA<uint8> {255, 255, 255});
+          renderer.SetBlendMode(BlendMode::Multiply);
+          renderer.FillRect({0.f, 0.f, 5.f, 2.f}, grey);
+          renderer.FillRect({3.f, 0.f, 5.f, 2.f}, grey);
+        });
+      CHECK(_renderer->GetStats().BackdropCopies == 2u);
+      auto pixels = Read();
+      CHECK(Near(At(pixels, 0u, 0u), {128, 128, 128, 255}));
+      CHECK(Near(At(pixels, 4u, 0u), {64, 64, 64, 255}));
+      CHECK(Near(At(pixels, 7u, 1u), {128, 128, 128, 255}));
+    }
+
+    SECTION("Antialiased edges blend by their coverage")
+    {
+      const Pixel backdrop {200, 100, 50, 255};
+      const Pixel source {128, 255, 128, 255};
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.FillRect({0.f, 0.f, 8.f, 2.f}, ToColour(backdrop));
+          renderer.SetBlendMode(BlendMode::Multiply);
+          renderer.FillRect({0.5f, 0.f, 3.f, 2.f}, ToColour(source));
+        });
+      auto pixels = Read();
+      CHECK(Near(At(pixels, 0u, 0u), Blended(BlendMode::Multiply, backdrop, source, 0.5), 2));
+      CHECK(Near(At(pixels, 1u, 0u), Blended(BlendMode::Multiply, backdrop, source), 2));
+      CHECK(Near(At(pixels, 3u, 0u), Blended(BlendMode::Multiply, backdrop, source, 0.5), 2));
+      CHECK(At(pixels, 5u, 0u) == backdrop);
+    }
+
+    SECTION("Plus lighter adds, without a copy")
+    {
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.FillRect({0.f, 0.f, 8.f, 2.f}, SRGBA<uint8> {100, 50, 200});
+          renderer.SetBlendMode(BlendMode::PlusLighter);
+          renderer.FillRect({0.f, 0.f, 4.f, 2.f}, SRGBA<uint8> {100, 250, 100});
+        });
+      CHECK(_renderer->GetStats().BackdropCopies == 0u);
+      auto pixels = Read();
+      CHECK(Near(At(pixels, 0u, 0u), {200, 255, 255, 255}));
+      CHECK(Near(At(pixels, 4u, 0u), {100, 50, 200, 255}));
+    }
+
+    SECTION("The blend mode is drawing state")
+    {
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.FillRect({0.f, 0.f, 8.f, 2.f}, SRGBA<uint8> {255, 255, 255});
+          renderer.Save();
+          renderer.SetBlendMode(BlendMode::Multiply);
+          CHECK(renderer.GetBlendMode() == BlendMode::Multiply);
+          renderer.Restore();
+          CHECK(renderer.GetBlendMode() == BlendMode::Normal);
+          renderer.FillRect({0.f, 0.f, 8.f, 2.f}, SRGBA<uint8> {128, 128, 128, 128});
+        });
+      CHECK(_renderer->GetStats().BackdropCopies == 0u);
+      CHECK(Near(Read()[0], {191, 191, 191, 255}));
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture,
+                   "Renderer2D: blends inside layers and composites layers with blend modes",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(8u, 2u);
+
+    SECTION("Inside a layer, draws blend with the layer's contents")
+    {
+      // Red times green is black; the blue beneath the layer isn't involved. The layer starts away from the
+      // target's corner, so its pixels are offset from the target's.
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.FillRect({0.f, 0.f, 8.f, 2.f}, SRGBA<uint8> {0, 0, 255});
+          renderer.BeginLayer(1.f);
+          renderer.FillRect({4.f, 0.f, 4.f, 2.f}, SRGBA<uint8> {255, 0, 0});
+          renderer.SetBlendMode(BlendMode::Multiply);
+          renderer.FillRect({5.f, 0.f, 2.f, 2.f}, SRGBA<uint8> {0, 255, 0});
+          renderer.EndLayer();
+        });
+      auto pixels = Read();
+      CHECK(At(pixels, 4u, 0u) == Red);
+      CHECK(Near(At(pixels, 5u, 1u), {0, 0, 0, 255}));
+      CHECK(At(pixels, 7u, 0u) == Red);
+      CHECK(At(pixels, 0u, 0u) == Blue);
+    }
+
+    SECTION("A layer composites with the blend mode it began with")
+    {
+      const Pixel backdrop {200, 100, 50, 255};
+      const Pixel source {128, 255, 128, 255};
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.FillRect({0.f, 0.f, 8.f, 2.f}, ToColour(backdrop));
+          renderer.SetBlendMode(BlendMode::Multiply);
+          renderer.BeginLayer(1.f);
+          // Inside, draws are normal again: the two rects don't multiply each other.
+          CHECK(renderer.GetBlendMode() == BlendMode::Normal);
+          renderer.FillRect({2.f, 0.f, 4.f, 2.f}, SRGBA<uint8> {0, 0, 0});
+          renderer.FillRect({2.f, 0.f, 4.f, 2.f}, ToColour(source));
+          renderer.EndLayer();
+          CHECK(renderer.GetBlendMode() == BlendMode::Multiply);
+          renderer.SetBlendMode(BlendMode::Normal);
+          renderer.BeginLayer(0.5f, BlendMode::Screen);
+          renderer.FillRect({6.f, 0.f, 2.f, 2.f}, ToColour(source));
+          renderer.EndLayer();
+        });
+      auto pixels = Read();
+      CHECK(At(pixels, 0u, 0u) == backdrop);
+      CHECK(Near(At(pixels, 3u, 1u), Blended(BlendMode::Multiply, backdrop, source), 2));
+      CHECK(Near(At(pixels, 7u, 0u), Blended(BlendMode::Screen, backdrop, {128, 255, 128, 128}), 2));
     }
   }
 }

@@ -138,7 +138,7 @@ namespace krys
       _renderer->Begin(commands, {.Swapchain = _context->Swapchain,
                                   .Width = _width,
                                   .Height = _height,
-                                  .Format = gfx::TextureFormat::RGBA8Srgb,
+                                  .Format = gfx::TextureFormat::RGBA8Unorm,
                                   .ClearColour = Array<float, 4> {0.02f, 0.02f, 0.03f, 1.f}});
 
       // A sidebar, a rounded panel, a translucent rounded overlay across both, and a rounded square sliding
@@ -264,10 +264,54 @@ namespace krys
                                  SRGBA<uint8> {90, 160, 120});
       _renderer->Restore();
 
+      // Opacity per draw against opacity for a group: on the left each circle is half transparent, so their
+      // overlap mixes; on the right they're opaque inside a layer that fades as one.
+      _renderer->FillRoundedRect({{595.f, 535.f, 50.f, 50.f}, gfx::CornerRadii2D::Uniform(25.f)},
+                                 SRGBA<uint8> {230, 60, 60, 128});
+      _renderer->FillRoundedRect({{620.f, 550.f, 50.f, 50.f}, gfx::CornerRadii2D::Uniform(25.f)},
+                                 SRGBA<uint8> {60, 90, 230, 128});
+      _renderer->BeginLayer(0.65f + 0.35f * std::sin(_time * 1.5f));
+      _renderer->FillRoundedRect({{690.f, 535.f, 50.f, 50.f}, gfx::CornerRadii2D::Uniform(25.f)},
+                                 SRGBA<uint8> {230, 60, 60});
+      _renderer->FillRoundedRect({{715.f, 550.f, 50.f, 50.f}, gfx::CornerRadii2D::Uniform(25.f)},
+                                 SRGBA<uint8> {60, 90, 230});
+      _renderer->EndLayer();
+
+      DrawBlendModes();
+
       _renderer->End();
     }
 
   private:
+    /// @brief The blend mode sample: circles bobbing over the image in multiply, screen, difference and
+    /// color, then two opaque squares in a layer composited with multiply.
+    void DrawBlendModes() noexcept
+    {
+      if (_image.IsValid())
+      {
+        _renderer->DrawImage(_image, {600.f, 625.f, 400.f, 80.f});
+      }
+
+      const SRGBA<uint8> orange {255, 140, 0};
+      const BlendMode modes[] = {BlendMode::Multiply, BlendMode::Screen, BlendMode::Difference,
+                                 BlendMode::Color};
+      for (int i = 0; i < 4; ++i)
+      {
+        const float bob = 10.f * std::sin(_time * 2.f + static_cast<float>(i));
+        _renderer->Save();
+        _renderer->SetBlendMode(modes[i]);
+        _renderer->FillRoundedRect({{610.f + static_cast<float>(i) * 80.f, 635.f + bob, 60.f, 60.f},
+                                    gfx::CornerRadii2D::Uniform(30.f)},
+                                   orange);
+        _renderer->Restore();
+      }
+
+      _renderer->BeginLayer(1.f, BlendMode::Multiply);
+      _renderer->FillRect({925.f, 640.f, 40.f, 40.f}, SRGBA<uint8> {255, 220, 60});
+      _renderer->FillRect({945.f, 655.f, 40.f, 40.f}, SRGBA<uint8> {80, 200, 255});
+      _renderer->EndLayer();
+    }
+
     /// @brief The stroke sample: joins, curves, dots, a dashed box, marching ants and a turning dashed line.
     void DrawStrokes() noexcept
     {

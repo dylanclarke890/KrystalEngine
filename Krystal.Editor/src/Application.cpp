@@ -164,7 +164,7 @@ namespace krys
       .Window = _context->Window->GetWindowHandle(),
       .Width = _context->Settings.WindowSettings.Size.Width,
       .Height = _context->Settings.WindowSettings.Size.Height,
-      .Format = gfx::TextureFormat::RGBA8Srgb,
+      .Format = gfx::TextureFormat::RGBA8Unorm,
       .VSync = _context->Settings.WindowSettings.VSync,
     });
     if (!swapchain.has_value())

@@ -87,6 +87,7 @@ target_sources(Krystal.Core
 
       # Colour
       include/Krystal.Core/Colour/AlphaPremultiplication.hpp
+      include/Krystal.Core/Colour/BlendMode.hpp
       include/Krystal.Core/Colour/ColourComponents.hpp
       include/Krystal.Core/Colour/ColourConversion.hpp
       include/Krystal.Core/Colour/ColourInterpolation.hpp

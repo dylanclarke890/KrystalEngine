@@ -2,9 +2,9 @@
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/WindRule.hpp"
+#include "Krystal.Core/Colour/BlendMode.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
-#include <string_view>
 
 namespace krys::boo
 {
@@ -26,27 +26,7 @@ namespace krys::boo
     Difference
   };
 
-  enum class BlendMode : uint8
-  {
-    Normal = 1, // Start with 1 to match SVG's blendmode enumeration.
-    Multiply,
-    Screen,
-    Darken,
-    Lighten,
-    Overlay,
-    ColorDodge,
-    ColorBurn,
-    HardLight,
-    SoftLight,
-    Difference,
-    Exclusion,
-    Hue,
-    Saturation,
-    Color,
-    Luminosity,
-    PlusDarker,
-    PlusLighter
-  };
+  using krys::BlendMode;
 
   struct CompositeMode
   {
@@ -161,16 +141,6 @@ namespace krys::boo
     CenterTextAlign,
     RightTextAlign
   };
-
-  /// @brief The CSS name of @p blendMode, such as `color-dodge`.
-  KRYS_NODISCARD constexpr std::string_view BlendModeName(BlendMode blendMode) noexcept
-  {
-    constexpr std::string_view blendOperatorNames[] = {
-      "normal",      "multiply",   "screen",     "darken",     "lighten",     "overlay",
-      "color-dodge", "color-burn", "hard-light", "soft-light", "difference",  "exclusion",
-      "hue",         "saturation", "color",      "luminosity", "plus-darker", "plus-lighter"};
-    return blendOperatorNames[static_cast<uint32>(blendMode) - static_cast<uint32>(BlendMode::Normal)];
-  }
 
   // FIXME: `compositeOperatorName`, `parseBlendMode` and `parseCompositeAndBlendOperator` come with the
   // canvas 2D context.

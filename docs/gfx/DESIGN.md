@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-18): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, G2f, strokes, and G2g, clips, are done); text (G3) and the Booey integration (G4) are drafts.
+Status (2026-10-18): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, G2f, strokes, G2g, clips, and G2h, layers and blend modes, are done); text (G3) and the Booey integration (G4) are drafts.
 
 ## Why
 
@@ -48,7 +48,7 @@ Decision (2026-10-17): the engine uses Booey's typed colours, moved into Krystal
 
 Where each layer gets its colours:
 - **The RHI has no colour type.** A clear value is four numbers in the target's encoding (`Array<float, 4>`, or integers for integer formats). Whether a value is sRGB or linear depends on the texture's `TextureFormat`, not on a colour class.
-- **Render2D and Krystal.UI** use the typed colours: vertex colours are `PackedColour::RGBA` (premultiplied `SRGBA<uint8>`), and blending happens in a colour space chosen by type.
+- **Render2D and Krystal.UI** use the typed colours: vertex colours are `PackedColour::RGBA` (premultiplied `SRGBA<uint8>`). Render2D blends sRGB-encoded values, as browsers do (decided in G2h2).
 
 ## Geometry
 
@@ -317,7 +317,8 @@ Decided (2026-10-18): one part at a time, each reviewed before the next. Revised
 | G2f2 | Done (2026-10-18). `StrokePath` through masks; `StrokeLine` for straight lines, analytic. |
 | G2g1 | Done (2026-10-18). Clips in the shader: `ClipRect` under any transform, `ClipRoundedRect`, `ClipOutRect`, `ClipOutRoundedRect` (see *G2g plan*). |
 | G2g2 | Done (2026-10-18). Path clips through masks: `ClipPath`, `ClipOutPath`. |
-| G2h | Layers: offscreen layers with opacity and blend modes. |
+| G2h1 | Done (2026-10-18). Layers with opacity: `BeginLayer`/`EndLayer`, pass ordering, the texture pool (see *G2h plan*). |
+| G2h2 | Done (2026-10-18). Blend modes: backdrop copies and a blend shader; blending on encoded values everywhere (see *G2h2 plan*). |
 | G2i | Gradients (linear, radial, conic) as `Paint`. |
 | G2j | Shadows: blurred coverage, following upstream's shadow state. |
 
@@ -344,6 +345,24 @@ Decided (2026-10-18): one part at a time, each reviewed before the next. Revised
 - **Per batch:** a clip change already starts a batch. Each batch binds a small uniform buffer with its clip chain (the shapes in effect), and the scissor is the chain's bounds, so pixels certainly outside are skipped; instances don't change. Clips whose edges are all on whole pixels under a transform that keeps rects axis-aligned are the scissor alone, which costs nothing.
 - **At most 16 shape clips** in a chain; more asserts (a tuning value; real pages rarely nest more than a few).
 - **Known seam:** where a shape's edge lies on a clip's edge, both partly cover the edge pixels and the product is fainter (a half times a half is a quarter, not a half), as in browsers built on Skia.
+
+### G2h plan (decided 2026-10-18)
+
+- **What for:** a layer draws a group into an offscreen texture and composites it as one image, as CSS `opacity` on an element with children, `mix-blend-mode` and `isolation` need. `BeginLayer(opacity, blend)` saves the drawing state and `EndLayer()` restores it, as upstream's `beginTransparencyLayer`/`endTransparencyLayer` do.
+- **Passes:** draws are already only recorded at `End`, so a layer's batches are kept apart and its pass is recorded before the pass that composites it: children before parents, the target last. Compositing is an image draw of the layer's texture (premultiplied, at the layer's opacity) in the parent; clips and transforms carry on inside layers unchanged, with each pass offsetting its viewport and scissor by the layer's position in target pixels.
+- **Textures:** layer textures have the target's format (8-bit, like browsers, rather than 16-bit float) and cover the bounds of what was drawn in the layer, within the clip, worked out at `End`. They come from a pool reused across frames but not within one, since every layer's pass runs before the parent pass that reads it.
+- **Blend modes (G2h2)** read the backdrop: the parent's pass is split at the layer, the backdrop copied, and a shader blends the two. Copying from a swapchain needs something the RHI doesn't have yet (likely drawing the frame offscreen when a blend mode is used); that's decided in G2h2.
+
+### G2h2 plan (decided 2026-10-18)
+
+- **Colour space (open decision 4, decided):** blending works on sRGB-encoded values everywhere, as browsers do. Render2D's targets and layers are unorm (`RGBA8Unorm`), and colours, images, coverage, layer opacity and blend functions all work on premultiplied encoded values; a target in an sRGB format asserts. The GPU still decodes images in sRGB formats when sampling them, and the shader encodes each channel back, which is exact for premultiplied and straight images alike. The editor's window becomes `RGBA8Unorm`; a 3D renderer sharing a window writes encoded values itself, as its final pass usually does.
+- **`BlendMode` moves to Core** (`Krystal.Core/Colour/BlendMode.hpp`, `krys::BlendMode` and `BlendModeName`), shared by Booey and Render2D. `PlusDarker` (Apple only) stays in the enum; Render2D asserts it isn't used and draws normally. `CompositeOperator` stays in Booey until canvas needs it.
+- **API:** `SetBlendMode`/`GetBlendMode` are drawing state, saved and restored with the rest. `BeginLayer(opacity)` composites the layer with the current blend mode, as upstream's `beginTransparencyLayer` does, and `BeginLayer(opacity, blend)` names it; inside a layer the blend mode starts as `Normal`.
+- **Backdrop copies:** a draw with a blend mode other than `Normal` and `PlusLighter` gets a batch of its own. At `End`, the pass it's in is split before it: the pass ends, the pixels the batch reaches (within its scissor) are copied with `BlitTexture` into a backdrop texture, and the pass resumes keeping its contents. A later draw with the same blend mode joins the batch when nothing else came between and its pixels don't overlap the batch's, so a dashed line or tiled background shares one copy. The backdrop texture has the pass's pixel layout, so the shader reads the fragment's own texel; one texture from the layer pool serves the whole frame.
+- **Shader:** the backdrop is on texture unit 2 (the white texture when unused). The shader un-premultiplies the backdrop and the source, applies the blend function `B(Cb, Cs)` (the separable and non-separable functions of Compositing and Blending Level 1) and outputs `as·((1 − ab)·Cs + ab·B)` with alpha `as`; normal blending then adds `(1 − as)·cb`, so the pipeline's blend state doesn't change and pixels the draw doesn't cover stay exactly as they were. `PlusLighter` is additive blending (a second pipeline, `ONE, ONE`) and needs no copy.
+- **Swapchains (option A of three):** a swapchain can't be copied from, so in a frame where a draw blends straight onto a swapchain target, the target's draws go into a pooled texture the window's size, cleared to the clear colour (or transparent), which is then composited into the window. When the target keeps its contents (`Load`), what was already in the window isn't part of the backdrop: top-level blend modes blend with what Render2D drew this frame, as a page's root is an isolated group. Texture targets are copied from directly. Rejected for now: letting the RHI copy from swapchains (B), which every backend would need.
+- **Later optimisation (C):** `KHR_blend_equation_advanced` (and `VK_EXT_blend_operation_advanced`) blend in hardware without copies, on drivers that have them; an opt-in for apps that know their hardware, with the copies as the fallback.
+- **Tests:** every mode against the specification's formulas computed on the CPU; antialiased edges; draws sharing a copy and draws that can't; blend draws inside a layer and a layer composited with a blend mode; `Save`/`Restore`; `PlusLighter`; sRGB images into unorm targets. The swapchain path only runs with a window, so the editor covers it: shapes over the image in several modes and a layer blended with `multiply`.
 
 ### G2a as built (2026-10-18)
 
@@ -435,6 +454,27 @@ Decided (2026-10-18): one part at a time, each reviewed before the next. Revised
 - The clip block gains the mask's mode (none, to, out), its bounds in target pixels and its first texel (48 bytes before the shapes, 1072 in all). Masks are a texel per target pixel, so the shader reads the fragment's own texel with `texelFetch`; outside the mask's bounds it covers nothing. The mask is on texture unit 1, which always has a texture (the white one when there's no mask), since drivers check every declared sampler.
 - Tests: two more cases in `tests/Render2D/Renderer2D.cpp`: pixels against the rasteriser's coverage when clipping to a path, out of one, and to two nested paths (to and out), where they multiply; a path clip with a rounded clip, even-odd and a transform; `Restore`; empty paths. The editor scrolls the image behind a turning star-shaped clip and cuts a circle out of a panel.
 
+### G2h1 as built (2026-10-18)
+
+- `BeginLayer(opacity)` saves the drawing state and starts a layer; `EndLayer()` restores it and adds the layer's composite to the parent, in painter's order. `End` closes any layer left open (asserting in debug builds), and `EndLayer` asserts when the saves and restores inside a layer don't match.
+- Every batch records the layer it draws into, and only joins batches of the same layer. A layer's bounds grow with each draw's reach (its quad's pixels, grown by one for the antialiased edge, within the clip); at `End`, in the order layers ended (children first), each layer's bounds are cut to its clip at `BeginLayer` and added to its parent's, and a layer that shows nothing (opacity 0, empty bounds, or composited under an empty clip) gets no texture or pass.
+- The composite is an instance and batch added at `EndLayer` and filled in at `End`: the layer's texels one to one at the layer's bounds, premultiplied, white at the layer's opacity, sampled nearest, with `LinearTexels` on sRGB targets (the layer holds premultiplied linear colours encoded per channel, which decode exactly). It keeps the parent's scissor but no shape or path clips: the layer's draws were already clipped, and clipping again would fade antialiased clip edges twice.
+- Passes: one per layer that shows, in the order layers ended, cleared to transparent, then the target's. Every pass draws only its layer's batches from one instance upload, with its own frame uniforms: the viewport is the pass's texture and the new `u_Origin` is the target pixel at its top-left, so instances, scissors (offset by the origin) and clips stay in target pixels.
+- Layer textures have the target's format, are rounded up to 64 pixels, and come from a pool: a texture this frame hasn't used and large enough is reused, the smallest first; textures unused for 120 frames are destroyed.
+- Tests: two more cases in `tests/Render2D/Renderer2D.cpp`: group opacity (overlapping opaque draws in a half-opaque layer show only the top one at half); nesting (a quarter of red over blue) and painter's order around layers; empty and transparent layers; and an opaque layer with a rounded clip, translucent fills and antialiased edges drawing the same as without the layer, on unorm and sRGB targets. The editor sets two translucent circles beside two opaque ones in a layer whose opacity pulses.
+
+### G2h2 as built (2026-10-18)
+
+- **Encoded blending:** the shaders no longer decode colours: colours are premultiplied as they are, the frame block loses `u_DecodeSrgb` (16 bytes: viewport size and origin), and `Begin` asserts the target isn't in an sRGB format. `Render2DTarget::Format` defaults to `RGBA8Unorm`, and the editor's swapchain is `RGBA8Unorm`. For an image in an sRGB format (`LinearTexels`), the shader encodes each decoded channel back before premultiplying a straight image, so premultiplied sRGB images are now exact too. Layer composites never set `LinearTexels`.
+- **`Krystal.Core/Colour/BlendMode.hpp`:** `BlendMode` and `BlendModeName`, moved from Booey's `Graphics/GraphicsTypes.hpp`, which keeps `using krys::BlendMode;` so `boo::BlendMode` (written by the generated style code) still names it.
+- **API:** `SetBlendMode`, `GetBlendMode`, `BeginLayer(opacity)` (with the current blend mode) and `BeginLayer(opacity, blend)`; the blend mode is in `DrawState`, and a layer starts with `Normal`. `PlusDarker` asserts and becomes `Normal`.
+- **Instances and batches:** the blend mode is in bits 8 to 12 of the instance's flags. A batch has one blend mode; for a mode that reads the backdrop (`CopiesBackdrop`: everything but `Normal`, `PlusLighter` and `PlusDarker`) it also keeps `Backdrop`, the union of its instances' reach, and an instance joins only when its reach misses that union, and never a layer's composite. The reach (the quad's pixels grown by one, within the clip) is now `Reach`, shared with layer bounds; a composite's backdrop is its layer's bounds within its scissor, filled in by `FinishLayer`.
+- **Passes:** `End` sizes one backdrop texture (from the layer pool) to the largest pass that copies. In `RecordPass`, a batch that copies ends the pass, blits its backdrop (within its scissor, in pass pixels) from the pass's texture to the same place in the backdrop, counts it (`Renderer2DStats::BackdropCopies`), resumes the pass with `Load` and binds everything again. The backdrop is always bound on unit 2 (the white texture when there's none). `PlusLighter` batches use a second pipeline per format, blending `ONE, ONE`.
+- **Swapchains:** when a batch drawn straight into a swapchain target copies, the target's pass draws into a pooled texture the target's size, cleared to the clear colour or transparent, and a last pass (`WindowLayer`) composites it into the window, cleared to transparent or kept.
+- **Shader:** the fragment shader un-premultiplies the source and the backdrop texel at `floor(v_Pixel - u_Origin)`, applies the blend function (`Blend`, with `HardLight`, `ColorDodge`, `ColorBurn`, `SoftLight`, `Lum`, `ClipColour`, `SetLum`, `Sat` and `SetSat`, as Compositing and Blending Level 1 writes them), mixes it with the source colour by the backdrop's alpha and premultiplies by the source's alpha; normal blending adds the rest.
+- **Known limits:** each batch that copies costs a pass split and a copy, and overlapping draws with a blend mode copy once each; reach is a bounding box, so draws near each other may not share a copy. Top-level blends on a swapchain target don't see what was in the window before the frame (see *G2h2 plan*).
+- Tests: three more cases in `tests/Render2D/Renderer2D.cpp`, against the specification's formulas computed on the CPU (with `SetSat` written as the specification sorts the channels): every mode from `Multiply` to `Luminosity` over four colour pairs, opaque and translucent, sharing one copy, with untouched pixels unchanged; overlapping draws copying twice and multiplying twice, antialiased edges at half coverage, `PlusLighter` without a copy, and `Save`/`Restore` of the blend mode; a blend inside a layer offset from the target's corner, and layers composited with `Multiply` (from the state) and `Screen` at half opacity. Changed: half white over black is now 128 (it was 188 on an sRGB target); images in sRGB formats come back as stored when opaque, premultiplied and straight; the opaque-layer comparison runs on unorm only. The editor bobs four circles over the image in `multiply`, `screen`, `difference` and `color`, and composites two opaque squares in a `multiply` layer.
+
 Testing: the device's hidden window gives tests a real OpenGL context (Krystal.Gfx.Tests). Render2D gets golden image tests: render offscreen, read back with `ReadTexture`, compare against a PNG with a tolerance.
 
 ## Open decisions
@@ -446,4 +486,4 @@ Decided (2026-10-18): the 2D renderer lives in Krystal.Gfx, as `Render2D/` (name
 1. **Module names:** Krystal.UI, Krystal.Assets.
 2. **Shaders:** GLSL with explicit binding slots now. Later, possibly SPIR-V compiled offline, which a Vulkan backend would need.
 3. **Text:** FreeType greyscale bitmaps into the glyph atlas first (recommended), or MSDF.
-4. **Blending space:** Render2D blends in linear light on sRGB targets and in sRGB-encoded values on other targets, so translucent colours look different by target format. Browsers blend encoded values everywhere; emulating them means blending encoded values on every target and an RGBA8Unorm window. Leaning that way, to be checked (2026-10-18).
+4. **Blending space:** decided (2026-10-18): encoded values everywhere, as browsers blend, with unorm targets and an `RGBA8Unorm` window (see *G2h2 plan*). Before, Render2D blended in linear light on sRGB targets and as encoded on other targets.
