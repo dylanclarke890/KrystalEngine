@@ -2,7 +2,7 @@
 
 - **Upstream:** `C:\Users\dylan\repos\WebKit` @ `300e80c70fd3` (2025-12-26). Never update the clone mid-port.
 - **Paths** are relative to `Source/WebCore` (WebKit) and `Krystal.Booey/include/Krystal.Booey` (Krystal) unless stated.
-- **Regenerate a slice:** `python tools/port/graph.py <entries...> --headers-only --out tools/port/out/<slice>.md` (to traverse outside `css/` and `style/`, pass all prefixes: `--follow css/ style/ platform/graphics/`; `--follow` replaces the defaults)
+- **Regenerate a slice:** `python tools/port/graph.py <entries...> --headers-only --out ../build/port/<slice>.md` (the output is temporary and untracked; the `tools/port/out/` paths in older sections were committed once and have been deleted, so regenerate them if needed. To traverse outside `css/` and `style/`, pass all prefixes: `--follow css/ style/ platform/graphics/`; `--follow` replaces the defaults)
 
 ## Verdicts
 

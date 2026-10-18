@@ -6,7 +6,7 @@ Booey's `CSS/` and `Style/` code is being ported from WebKit, one file or slice 
 
 Do these in order for each WebKit file (or tightly coupled group, e.g. a `.h`/`.cpp` pair):
 
-1. **Graph.** `python tools/port/graph.py <webkit path> --headers-only --out tools/port/out/<name>.md`. Also read the WebKit `.cpp`'s own includes: headers-only mode doesn't follow them. Only `css/` and `style/` are traversed by default; pass `--follow css/ style/ platform/graphics/` (etc.) for other directories: `--follow` replaces the defaults, so list `css/` and `style/` too. Note anything new for the ledger.
+1. **Graph.** `python tools/port/graph.py <webkit path> --headers-only --out ../build/port/<name>.md`. The output goes in the untracked build directory; never write it into the source tree. Also read the WebKit `.cpp`'s own includes: headers-only mode doesn't follow them. Only `css/` and `style/` are traversed by default; pass `--follow css/ style/ platform/graphics/` (etc.) for other directories: `--follow` replaces the defaults, so list `css/` and `style/` too. Note anything new for the ledger.
 2. **Read both sides in full.** The WebKit `.h`/`.cpp` (`C:\Users\dylan\repos\WebKit\Source\WebCore\...`) and the Krystal counterpart, if one exists.
 3. **Compare.** List declarations missing on either side, behaviour that differs, and bugs in the Krystal version (wrong semantics, undefined behaviour, members that are declared but never defined, wrong enum traits, names that clash with types).
 4. **Ask** before anything that changes scope: pulling in unreviewed files, choosing between upstream behaviour and the existing Krystal behaviour, or a decision that will affect other slices.
@@ -21,7 +21,7 @@ Do these in order for each WebKit file (or tightly coupled group, e.g. a `.h`/`.
 ```markdown
 ### `<Krystal name>` (<date>)
 
-Graph from `<webkit entry>` (headers-only): N files (`tools/port/out/<name>.md`). <Scope notes.>
+Graph from `<webkit entry>` (headers-only): N files. <Scope notes.>
 
 | WebKit | Verdict | Krystal | CMake | Notes |
 |---|---|---|---|---|
