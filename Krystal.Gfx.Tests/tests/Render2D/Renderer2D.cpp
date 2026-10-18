@@ -195,6 +195,32 @@ namespace krys::gfx::tests
     CHECK(Near(Read()[0], {200, 100, 50, 255}));
   }
 
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: draws into part of a larger texture unstretched",
+                   "[Gfx][Render2D][GPU]")
+  {
+    // As pooled textures are, rounded up past what's drawn: pixels map one to one, and clips line up with
+    // the shapes they clip.
+    UseTarget(8u, 8u);
+    _width = 4u;
+    _height = 4u;
+    Draw(
+      [](Renderer2D &renderer)
+      {
+        renderer.FillRect({1.f, 1.f, 2.f, 2.f}, SRGBA<uint8> {255, 0, 0});
+        renderer.ClipRoundedRect({{0.f, 3.f, 4.f, 1.f}, {}});
+        renderer.FillRect({0.f, 0.f, 4.f, 4.f}, SRGBA<uint8> {0, 0, 255});
+      });
+    _width = 8u;
+    _height = 8u;
+    auto pixels = Read();
+    CHECK(At(pixels, 0u, 0u) == Clear);
+    CHECK(At(pixels, 1u, 1u) == Red);
+    CHECK(At(pixels, 2u, 2u) == Red);
+    CHECK(At(pixels, 3u, 2u) == Clear);
+    CHECK(At(pixels, 1u, 3u) == Blue);
+    CHECK(At(pixels, 5u, 5u) == Clear);
+  }
+
   TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: keeps the target's contents without a clear colour",
                    "[Gfx][Render2D][GPU]")
   {

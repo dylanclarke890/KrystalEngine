@@ -5,6 +5,7 @@ target_link_libraries(Krystal.Gfx.Tests
     Krystal.Core
     Krystal.Gfx
     Catch2::Catch2WithMain
+    stb
 )
 
 set_target_properties(Krystal.Gfx.Tests
@@ -24,6 +25,12 @@ target_compile_options(Krystal.Gfx.Tests
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8>
 )
 
+# Render2D's goldens are kept in the source tree.
+target_compile_definitions(Krystal.Gfx.Tests
+  PRIVATE
+    KRYS_GFX_TESTS_GOLDEN_DIR="${CMAKE_CURRENT_SOURCE_DIR}/golden"
+)
+
 catch_discover_tests(Krystal.Gfx.Tests)
 
 target_sources(Krystal.Gfx.Tests
@@ -32,9 +39,12 @@ target_sources(Krystal.Gfx.Tests
     BASE_DIRS
       include
     FILES
+      include/Krystal.Gfx.Tests/Golden.hpp
       include/Krystal.Gfx.Tests/TestDevice.hpp
 
   PRIVATE
+    src/Golden.cpp
+
     tests/CommandBuffer.cpp
     tests/Formats.cpp
     tests/Pool.cpp
@@ -44,6 +54,7 @@ target_sources(Krystal.Gfx.Tests
 
     # Render2D
     tests/Render2D/CoverageBlur.cpp
+    tests/Render2D/Golden.cpp
     tests/Render2D/Gradient2D.cpp
     tests/Render2D/Path2D.cpp
     tests/Render2D/PathRasteriser.cpp

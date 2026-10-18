@@ -1916,7 +1916,20 @@ void main()
                               const FrameResources &resources) noexcept
   {
     commands.BeginRenderPass(RenderPassDesc::SingleColour(pass.Attachment));
-    if (!resources.Pipeline.IsValid() || pass.Width == 0u || pass.Height == 0u)
+
+    // The viewport covers the whole attachment, so a texture's own size, not what's drawn of it, maps
+    // pixels; pooled textures are rounded up, and a target may use only part of its texture.
+    uint32 width = pass.Width;
+    uint32 height = pass.Height;
+    if (pass.Attachment.Texture.IsValid())
+    {
+      if (const auto desc = _device->GetTextureDesc(pass.Attachment.Texture))
+      {
+        width = desc->Width;
+        height = desc->Height;
+      }
+    }
+    if (!resources.Pipeline.IsValid() || width == 0u || height == 0u)
     {
       commands.EndRenderPass();
       return;
@@ -1933,7 +1946,7 @@ void main()
     const bool eightBit = format == TextureFormat::R8Unorm || format == TextureFormat::RG8Unorm
                           || format == TextureFormat::RGBA8Unorm || format == TextureFormat::BGRA8Unorm;
     const FrameUniforms uniforms {
-      .ViewportSize = {static_cast<float>(pass.Width), static_cast<float>(pass.Height)},
+      .ViewportSize = {static_cast<float>(width), static_cast<float>(height)},
       .Origin = {static_cast<float>(pass.OriginX), static_cast<float>(pass.OriginY)},
       .Dither = eightBit ? 1.f / 255.f : 0.f,
       .Padding = {}};
@@ -1961,7 +1974,7 @@ void main()
     };
     bindFrame();
 
-    const PixelRect2D viewport {.X = 0, .Y = 0, .Width = pass.Width, .Height = pass.Height};
+    const PixelRect2D viewport {.X = 0, .Y = 0, .Width = width, .Height = height};
     for (const auto &batch : _batches)
     {
       if (batch.Layer != pass.Layer)

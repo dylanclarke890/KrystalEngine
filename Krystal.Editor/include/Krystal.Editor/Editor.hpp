@@ -139,341 +139,457 @@ namespace krys
                                   .Width = _width,
                                   .Height = _height,
                                   .Format = gfx::TextureFormat::RGBA8Unorm,
-                                  .ClearColour = Array<float, 4> {0.02f, 0.02f, 0.03f, 1.f}});
+                                  .ClearColour = Array<float, 4> {0.933f, 0.945f, 0.965f, 1.f}});
 
-      // A sidebar, a rounded panel, a translucent rounded overlay across both, and a rounded square sliding
-      // back and forth (with a circle riding on it).
-      const float width = static_cast<float>(_width);
-      const float height = static_cast<float>(_height);
-      _renderer->FillRect({0.f, 0.f, 240.f, height}, SRGBA<uint8> {40, 44, 52});
-      _renderer->FillRoundedRect({{260.f, 20.f, width - 280.f, 160.f}, gfx::CornerRadii2D::Uniform(12.f)},
-                                 SRGBA<uint8> {70, 130, 180});
-      _renderer->FillRoundedRect({{120.f, 120.f, 400.f, 200.f}, {.TopLeft = 40.f, .BottomRight = 40.f}},
-                                 SRGBA<uint8> {255, 140, 0, 128});
-
-      const float slide = (std::sin(_time) * 0.5f + 0.5f) * (width - 340.f);
-      _renderer->FillRoundedRect(
-        {{260.f + slide, height - 100.f, 80.f, 80.f}, gfx::CornerRadii2D::Uniform(16.f)},
-        SRGBA<uint8> {220, 50, 70});
-      _renderer->FillRoundedRect(
-        {{280.f + slide, height - 80.f, 40.f, 40.f}, gfx::CornerRadii2D::Uniform(20.f)},
-        SRGBA<uint8> {255, 255, 255});
-
-      // A list in the sidebar, clipped to a rounded rect, scrolling up forever.
-      _renderer->Save();
-      _renderer->ClipRoundedRect({{16.f, 16.f, 208.f, height - 32.f}, gfx::CornerRadii2D::Uniform(12.f)});
-      const float rowHeight = 36.f;
-      const float scroll = std::fmod(_time * 40.f, rowHeight * 2.f);
-      _renderer->Translate(16.f, 16.f - scroll);
-      for (uint32 row = 0u; static_cast<float>(row) * rowHeight < height + rowHeight * 2.f; ++row)
-      {
-        const bool even = row % 2u == 0u;
-        _renderer->FillRoundedRect({{0.f, static_cast<float>(row) * rowHeight, 208.f, rowHeight - 6.f},
-                                    gfx::CornerRadii2D::Uniform(6.f)},
-                                   even ? SRGBA<uint8> {62, 68, 81} : SRGBA<uint8> {52, 57, 68});
-      }
-      _renderer->Restore();
-
-      // A rounded square spinning about its centre.
-      _renderer->Save();
-      _renderer->Translate(width - 120.f, 300.f);
-      _renderer->Rotate(_time);
-      _renderer->FillRoundedRect({{-50.f, -50.f, 100.f, 100.f}, gfx::CornerRadii2D::Uniform(14.f)},
-                                 SRGBA<uint8> {120, 200, 120});
-      _renderer->Restore();
-
-      // The image, scaled up with nearest filtering in the panel, and turning with linear filtering.
-      if (_image.IsValid())
-      {
-        _renderer->DrawImage(_image, {280.f, 36.f, 128.f, 128.f}, {.Filter = gfx::SamplerFilter::Nearest});
-        _renderer->Save();
-        _renderer->Translate(width - 120.f, 480.f);
-        _renderer->Rotate(-_time * 0.5f);
-        _renderer->DrawImage(_image, {-48.f, -48.f, 96.f, 96.f}, {.Opacity = 0.85f});
-        _renderer->Restore();
-      }
-
-      // Paths: one star under each fill rule (even-odd leaves the middle hollow), a panel with elliptical
-      // corners, and a star turning, which needs a new mask every frame.
-      const auto star = Star(50.f);
-      _renderer->Save();
-      _renderer->Translate(440.f, 100.f);
-      _renderer->FillPath(star, gfx::FillRule::NonZero, SRGBA<uint8> {255, 215, 0});
-      _renderer->Translate(120.f, 0.f);
-      _renderer->FillPath(star, gfx::FillRule::EvenOdd, SRGBA<uint8> {255, 215, 0});
-      _renderer->Restore();
-
-      gfx::Path2D oval;
-      oval.AddRoundedRect({280.f, 200.f, 260.f, 90.f},
-                          {Vec2f {60.f, 30.f}, Vec2f {20.f, 40.f}, Vec2f {60.f, 30.f}, Vec2f {20.f, 40.f}});
-      _renderer->FillPath(oval, gfx::FillRule::NonZero, SRGBA<uint8> {150, 90, 200, 220});
-
-      // Borders: a frame around the image with a rounded hole (analytic), and one with elliptical inner
-      // corners (a path filled under even-odd, so through a mask).
-      // A drop shadow under the image's frame, clipped out of the frame so it never shows through it.
-      _renderer->Save();
-      _renderer->ClipOutRoundedRect({{272.f, 28.f, 144.f, 144.f}, gfx::CornerRadii2D::Uniform(4.f)});
-      _renderer->FillRoundedRect({{278.f, 36.f, 144.f, 144.f}, gfx::CornerRadii2D::Uniform(6.f)},
-                                 SRGBA<uint8> {0, 0, 0, 110});
-      _renderer->Restore();
-      _renderer->FillRectWithRoundedHole({272.f, 28.f, 144.f, 144.f},
-                                         {{280.f, 36.f, 128.f, 128.f}, gfx::CornerRadii2D::Uniform(10.f)},
-                                         SRGBA<uint8> {230, 230, 240});
-      gfx::Path2D ovalBorder;
-      ovalBorder.AddRect({560.f, 200.f, 200.f, 90.f});
-      ovalBorder.AddRoundedRect({572.f, 206.f, 176.f, 78.f}, {Vec2f {40.f, 20.f}, Vec2f {40.f, 20.f},
-                                                              Vec2f {40.f, 20.f}, Vec2f {40.f, 20.f}});
-      _renderer->FillPath(ovalBorder, gfx::FillRule::EvenOdd, SRGBA<uint8> {230, 230, 240});
-
-      _renderer->Save();
-      _renderer->Translate(width - 120.f, 120.f);
-      _renderer->Rotate(_time * 0.8f);
-      _renderer->FillPath(star, gfx::FillRule::NonZero, SRGBA<uint8> {255, 255, 255, 200});
-      _renderer->Restore();
-
-      DrawStrokes();
-
-      // Path clips: the image scrolling behind a turning star-shaped window, and a panel with a circle cut
-      // out of it.
-      if (_image.IsValid())
-      {
-        _renderer->Save();
-        _renderer->Translate(340.f, 565.f);
-        _renderer->Rotate(_time * 0.4f);
-        _renderer->ClipPath(Star(45.f), gfx::FillRule::NonZero);
-        _renderer->SetTransform({});
-        const float drift = std::fmod(_time * 20.f, 32.f);
-        for (int y = 0; y < 4; ++y)
-        {
-          for (int x = 0; x < 4; ++x)
-          {
-            _renderer->DrawImage(_image,
-                                 {290.f + static_cast<float>(x) * 32.f - drift,
-                                  515.f + static_cast<float>(y) * 32.f - drift, 32.f, 32.f},
-                                 {.Filter = gfx::SamplerFilter::Nearest});
-          }
-        }
-        _renderer->Restore();
-      }
-
-      gfx::Path2D hole;
-      hole.AddEllipse({490.f, 565.f}, {22.f, 22.f});
-      _renderer->Save();
-      _renderer->ClipOutPath(hole, gfx::FillRule::NonZero);
-      _renderer->FillRoundedRect({{420.f, 528.f, 140.f, 74.f}, gfx::CornerRadii2D::Uniform(10.f)},
-                                 SRGBA<uint8> {90, 160, 120});
-      _renderer->Restore();
-
-      // Opacity per draw against opacity for a group: on the left each circle is half transparent, so their
-      // overlap mixes; on the right they're opaque inside a layer that fades as one.
-      _renderer->FillRoundedRect({{595.f, 535.f, 50.f, 50.f}, gfx::CornerRadii2D::Uniform(25.f)},
-                                 SRGBA<uint8> {230, 60, 60, 128});
-      _renderer->FillRoundedRect({{620.f, 550.f, 50.f, 50.f}, gfx::CornerRadii2D::Uniform(25.f)},
-                                 SRGBA<uint8> {60, 90, 230, 128});
-      _renderer->BeginLayer(0.65f + 0.35f * std::sin(_time * 1.5f));
-      _renderer->FillRoundedRect({{690.f, 535.f, 50.f, 50.f}, gfx::CornerRadii2D::Uniform(25.f)},
-                                 SRGBA<uint8> {230, 60, 60});
-      _renderer->FillRoundedRect({{715.f, 550.f, 50.f, 50.f}, gfx::CornerRadii2D::Uniform(25.f)},
-                                 SRGBA<uint8> {60, 90, 230});
-      _renderer->EndLayer();
-
-      DrawBlendModes();
-      DrawGradients();
-      DrawShadows();
+      DrawHeader();
+      DrawCard(24.f, 80.f, 392.f, 616.f);
+      DrawCard(444.f, 80.f, 392.f, 616.f);
+      DrawCard(864.f, 80.f, 392.f, 616.f);
+      DrawClipping(24.f, 80.f);
+      DrawShadows(444.f, 80.f);
+      DrawCompositing(864.f, 80.f);
 
       _renderer->End();
     }
 
   private:
-    /// @brief The shadow sample: a card lifting on a soft shadow, a well with an inset shadow (drawn as
-    /// `box-shadow: inset` is) and a star whose shadow swings round it.
-    void DrawShadows() noexcept
+    KRYS_NODISCARD static gfx::RoundedRect2D Rounded(float x, float y, float width, float height,
+                                                     float radius) noexcept
+    {
+      return {{x, y, width, height}, gfx::CornerRadii2D::Uniform(radius)};
+    }
+
+    KRYS_NODISCARD static ExtendedSRGBA<float> Hex(uint32 rgb) noexcept
+    {
+      return {static_cast<float>((rgb >> 16u) & 255u) / 255.f, static_cast<float>((rgb >> 8u) & 255u) / 255.f,
+              static_cast<float>(rgb & 255u) / 255.f, 1.f};
+    }
+
+    KRYS_NODISCARD static SRGBA<uint8> Rgb(uint32 rgb, uint8 alpha = 255u) noexcept
+    {
+      return {static_cast<uint8>((rgb >> 16u) & 255u), static_cast<uint8>((rgb >> 8u) & 255u),
+              static_cast<uint8>(rgb & 255u), alpha};
+    }
+
+    /// @brief An outer `box-shadow` as a browser paints it: the box's shape, moved out of view, casts the
+    /// shadow, clipped out of the box a pixel inside its edge (the box is opaque), so it shows only around
+    /// it.
+    void BoxShadow(const gfx::RoundedRect2D &box, Vec2f offset, float blur, SRGBA<uint8> colour) noexcept
+    {
+      constexpr float away = 10'000.f;
+      auto clipOut = box;
+      clipOut.Rect = {box.Rect.X + 1.f, box.Rect.Y + 1.f, box.Rect.Width - 2.f, box.Rect.Height - 2.f};
+      auto moved = box;
+      moved.Rect.X += away;
+      _renderer->Save();
+      _renderer->ClipOutRoundedRect(clipOut);
+      _renderer->SetDropShadow({.Offset = {offset.x - away, offset.y}, .BlurRadius = blur, .Colour = colour});
+      _renderer->FillRoundedRect(moved, SRGBA<uint8> {0, 0, 0});
+      _renderer->Restore();
+    }
+
+    /// @brief An inset `box-shadow` as a browser paints it: a rect with the box as its hole, moved out of
+    /// view, casts the shadow inside a clip to the box.
+    void InsetShadow(const gfx::RoundedRect2D &box, Vec2f offset, float blur, SRGBA<uint8> colour) noexcept
+    {
+      constexpr float away = 10'000.f;
+      const float reach = blur + std::abs(offset.x) + std::abs(offset.y) + 2.f;
+      const auto &rect = box.Rect;
+      _renderer->Save();
+      _renderer->ClipRoundedRect(box);
+      _renderer->SetDropShadow({.Offset = {offset.x - away, offset.y}, .BlurRadius = blur, .Colour = colour});
+      _renderer->Translate(away, 0.f);
+      _renderer->FillRectWithRoundedHole(
+        {rect.X - reach, rect.Y - reach, rect.Width + 2.f * reach, rect.Height + 2.f * reach}, box,
+        SRGBA<uint8> {0, 0, 0});
+      _renderer->Restore();
+    }
+
+    /// @brief A white tile with a two-layer shadow, as design systems draw cards.
+    void DrawTile(const gfx::RoundedRect2D &tile, SRGBA<uint8> colour = {255, 255, 255}) noexcept
+    {
+      BoxShadow(tile, {0.f, 1.f}, 3.f, Rgb(0x000000, 30));
+      BoxShadow(tile, {0.f, 4.f}, 12.f, Rgb(0x000000, 22));
+      _renderer->FillRoundedRect(tile, colour);
+    }
+
+    /// @brief A placeholder for a line of text, since there's no text yet.
+    void DrawLabel(float x, float y, float width, SRGBA<uint8> colour = {205, 211, 222}) noexcept
+    {
+      _renderer->FillRoundedRect(Rounded(x, y, width, 8.f, 4.f), colour);
+    }
+
+    void DrawHeader() noexcept
     {
       using namespace gfx;
-      const SRGBA<uint8> card {236, 238, 244};
-
-      const float lift = 0.5f + 0.5f * std::sin(_time * 1.7f);
+      const float width = static_cast<float>(_width);
+      const Gradient2D header {
+        .Shape = LinearGradient2D {{0.f, 0.f}, {width, 0.f}},
+        .Stops = {{.Offset = 0.f, .Colour = Hex(0x4f6df5)}, {.Offset = 1.f, .Colour = Hex(0xb04ff5)}}};
       _renderer->Save();
-      _renderer->SetDropShadow({.Offset = {0.f, 2.f + 6.f * lift},
-                                .BlurRadius = 6.f + 14.f * lift,
-                                .Colour = SRGBA<uint8> {0, 0, 0, 150}});
-      _renderer->FillRoundedRect({{262.f, 632.f - 3.f * lift, 90.f, 60.f}, CornerRadii2D::Uniform(10.f)},
-                                 card);
+      _renderer->SetDropShadow({.Offset = {0.f, 2.f}, .BlurRadius = 10.f, .Colour = Rgb(0x2a2050, 70)});
+      _renderer->FillRect({0.f, 0.f, width, 56.f}, header);
+      _renderer->Restore();
+      _renderer->FillRoundedRect(Rounded(20.f, 16.f, 24.f, 24.f, 12.f), Rgb(0xffffff));
+      for (int i = 0; i < 4; ++i)
+      {
+        _renderer->FillRoundedRect(Rounded(64.f + static_cast<float>(i) * 92.f, 22.f, 76.f, 12.f, 6.f),
+                                   Rgb(0xffffff, i == 0 ? 230 : 110));
+      }
+    }
+
+    void DrawCard(float x, float y, float width, float height) noexcept
+    {
+      const auto card = Rounded(x, y, width, height, 16.f);
+      BoxShadow(card, {0.f, 2.f}, 6.f, Rgb(0x1a2240, 26));
+      BoxShadow(card, {0.f, 12.f}, 32.f, Rgb(0x1a2240, 30));
+      _renderer->FillRoundedRect(card, Rgb(0xffffff));
+      DrawLabel(x + 24.f, y + 22.f, 140.f, Rgb(0x8a93a6));
+    }
+
+    /// @brief Mask clipping: a turning star window, a panel with orbiting holes, two path clips at once, a
+    /// turning rounded clip, a ring chart and an avatar.
+    void DrawClipping(float x, float y) noexcept
+    {
+      using namespace gfx;
+
+      // The image scrolling behind a turning star.
+      const Vec2f star {x + 110.f, y + 160.f};
+      _renderer->Save();
+      _renderer->Translate(star.x, star.y);
+      _renderer->Rotate(_time * 0.4f);
+      _renderer->ClipPath(Star(82.f), FillRule::NonZero);
+      _renderer->SetTransform({});
+      const float drift = std::fmod(_time * 20.f, 40.f);
+      for (int row = 0; row < 6; ++row)
+      {
+        for (int column = 0; column < 6; ++column)
+        {
+          if (_image.IsValid())
+          {
+            _renderer->DrawImage(_image,
+                                 {star.x - 100.f + static_cast<float>(column) * 40.f - drift,
+                                  star.y - 100.f + static_cast<float>(row) * 40.f - drift, 40.f, 40.f},
+                                 {.Filter = SamplerFilter::Nearest});
+          }
+        }
+      }
       _renderer->Restore();
 
-      // The inset shadow: a rect with the well as its hole, moved out of a clip to the well, its shadow
-      // offset back in.
-      const RoundedRect2D well {{372.f, 632.f, 90.f, 60.f}, CornerRadii2D::Uniform(10.f)};
-      _renderer->FillRoundedRect(well, card);
+      // A gradient panel with three holes orbiting in it.
+      const auto panel = Rounded(x + 222.f, y + 80.f, 148.f, 150.f, 18.f);
+      Path2D holes;
+      for (int i = 0; i < 3; ++i)
+      {
+        const float angle = _time * 0.9f + static_cast<float>(i) * 2.0944f;
+        holes.AddEllipse({x + 296.f + 38.f * std::cos(angle), y + 155.f + 38.f * std::sin(angle)},
+                         {16.f, 16.f});
+      }
+      const Gradient2D panelFill {
+        .Shape = LinearGradient2D {{panel.Rect.X, panel.Rect.Y},
+                                   {panel.Rect.X + panel.Rect.Width, panel.Rect.Y + panel.Rect.Height}},
+        .Stops = {{.Offset = 0.f, .Colour = Hex(0x06d6a0)}, {.Offset = 1.f, .Colour = Hex(0x118ab2)}}};
       _renderer->Save();
-      _renderer->ClipRoundedRect(well);
+      _renderer->ClipOutPath(holes, FillRule::NonZero);
+      _renderer->FillRoundedRect(panel, panelFill);
+      _renderer->Restore();
+
+      // Two path clips at once: a circle and a turning star, their masks multiplied.
+      const Vec2f both {x + 110.f, y + 350.f};
+      Path2D circle;
+      circle.AddEllipse(both, {80.f, 80.f});
+      const Gradient2D wheel {.Shape = ConicGradient2D {both, 0.f},
+                              .Stops = {{.Offset = 0.f, .Colour = Hex(0xef476f)},
+                                        {.Offset = 0.33f, .Colour = Hex(0xffd166)},
+                                        {.Offset = 0.66f, .Colour = Hex(0x06d6a0)},
+                                        {.Offset = 1.f, .Colour = Hex(0xef476f)}}};
+      _renderer->Save();
+      _renderer->ClipPath(circle, FillRule::NonZero);
+      _renderer->Translate(both.x, both.y);
+      _renderer->Rotate(-_time * 0.3f);
+      _renderer->ClipPath(Star(110.f), FillRule::NonZero);
+      _renderer->SetTransform({});
+      _renderer->FillRect({both.x - 90.f, both.y - 90.f, 180.f, 180.f}, wheel);
+      _renderer->Restore();
+
+      // Stripes behind a rounded clip that rocks.
+      const Vec2f rocking {x + 296.f, y + 350.f};
+      _renderer->Save();
+      _renderer->Translate(rocking.x, rocking.y);
+      _renderer->Rotate(std::sin(_time * 0.8f) * 0.5f);
+      _renderer->ClipRoundedRect(Rounded(-66.f, -52.f, 132.f, 104.f, 24.f));
+      _renderer->SetTransform({});
+      _renderer->FillRect({rocking.x - 100.f, rocking.y - 100.f, 200.f, 200.f}, Rgb(0xffd166));
+      const float shift = std::fmod(_time * 16.f, 28.f);
+      for (int i = -8; i <= 8; ++i)
+      {
+        const float offset = static_cast<float>(i) * 28.f + shift;
+        _renderer->StrokeLine({rocking.x + offset - 100.f, rocking.y - 100.f},
+                              {rocking.x + offset + 100.f, rocking.y + 100.f}, {.Width = 10.f},
+                              Rgb(0xef476f));
+      }
+      _renderer->Restore();
+
+      // A ring chart: a conic gradient with hard stops, clipped to a ring (even-odd).
+      const Vec2f ring {x + 110.f, y + 530.f};
+      Path2D band;
+      band.AddEllipse(ring, {62.f, 62.f});
+      band.AddEllipse(ring, {38.f, 38.f});
+      const float share = 0.35f + 0.15f * std::sin(_time * 0.7f);
+      const Gradient2D chart {.Shape = ConicGradient2D {ring, 0.f},
+                              .Stops = {{.Offset = 0.f, .Colour = Hex(0x4f6df5)},
+                                        {.Offset = share, .Colour = Hex(0x4f6df5)},
+                                        {.Offset = share, .Colour = Hex(0xffd166)},
+                                        {.Offset = share + 0.25f, .Colour = Hex(0xffd166)},
+                                        {.Offset = share + 0.25f, .Colour = Hex(0xe3e7ef)},
+                                        {.Offset = 1.f, .Colour = Hex(0xe3e7ef)}}};
+      _renderer->Save();
+      _renderer->ClipPath(band, FillRule::EvenOdd);
+      _renderer->FillRect({ring.x - 64.f, ring.y - 64.f, 128.f, 128.f}, chart);
+      _renderer->Restore();
+
+      // A progress bar: a gradient inside a rounded clip, with stripes sliding along it.
+      const auto track = Rounded(x + 222.f, y + 480.f, 148.f, 20.f, 10.f);
+      _renderer->FillRoundedRect(track, Rgb(0xe3e7ef));
+      const float progress = 0.5f + 0.45f * std::sin(_time * 0.6f);
+      const Gradient2D fill {
+        .Shape = LinearGradient2D {{track.Rect.X, 0.f}, {track.Rect.X + track.Rect.Width, 0.f}},
+        .Stops = {{.Offset = 0.f, .Colour = Hex(0x4f6df5)}, {.Offset = 1.f, .Colour = Hex(0xb04ff5)}}};
+      _renderer->Save();
+      _renderer->ClipRoundedRect(track);
+      _renderer->FillRoundedRect(Rounded(track.Rect.X, track.Rect.Y, track.Rect.Width * progress, 20.f, 10.f),
+                                 fill);
+      _renderer->StrokeLine({track.Rect.X - 20.f, track.Rect.Y + 10.f},
+                            {track.Rect.X + track.Rect.Width * progress, track.Rect.Y + 10.f},
+                            {.Width = 20.f, .Dashes = {6.f, 10.f}, .DashOffset = -_time * 30.f},
+                            Rgb(0xffffff, 60));
+      _renderer->Restore();
+
+      // An avatar: the image clipped to a circle, with a ring and a shadow.
+      const Vec2f avatar {x + 296.f, y + 565.f};
+      Path2D face;
+      face.AddEllipse(avatar, {32.f, 32.f});
+      _renderer->Save();
+      _renderer->SetDropShadow({.Offset = {0.f, 3.f}, .BlurRadius = 10.f, .Colour = Rgb(0x000000, 70)});
+      _renderer->FillPath(face, FillRule::NonZero, Rgb(0xffffff));
+      _renderer->Restore();
+      if (_image.IsValid())
+      {
+        _renderer->Save();
+        _renderer->ClipPath(face, FillRule::NonZero);
+        _renderer->DrawImage(_image, {avatar.x - 32.f, avatar.y - 32.f, 64.f, 64.f});
+        _renderer->Restore();
+      }
+      _renderer->StrokePath(face, {.Width = 3.f}, Rgb(0xffffff));
+    }
+
+    /// @brief Shadows: elevations, sharp, inset, glowing and translucent shadows, shadows of paths and
+    /// strokes, shadows under transforms, and a card lifting.
+    void DrawShadows(float x, float y) noexcept
+    {
+      using namespace gfx;
+
+      // Elevations, as a design system steps them.
+      const float blurs[] {2.f, 6.f, 14.f, 28.f};
+      const float drops[] {1.f, 3.f, 6.f, 12.f};
+      for (int i = 0; i < 4; ++i)
+      {
+        const auto tile = Rounded(x + 24.f + static_cast<float>(i) * 90.f, y + 64.f, 74.f, 64.f, 10.f);
+        BoxShadow(tile, {0.f, drops[i]}, blurs[i], Rgb(0x000000, 70));
+        _renderer->FillRoundedRect(tile, Rgb(0xffffff));
+      }
+
+      // Sharp, inset, glowing on a dark tile, and translucent (its shadow fades with it).
+      const float row = y + 160.f;
+      const auto sharp = Rounded(x + 24.f, row, 74.f, 64.f, 0.f);
+      BoxShadow(sharp, {6.f, 6.f}, 0.f, Rgb(0x4f6df5));
+      _renderer->FillRoundedRect(sharp, Rgb(0xffffff));
+      DrawLabel(sharp.Rect.X + 12.f, row + 14.f, 40.f);
+
+      const auto well = Rounded(x + 114.f, row, 74.f, 64.f, 14.f);
+      _renderer->FillRoundedRect(well, Rgb(0xeef1f6));
+      InsetShadow(well, {0.f, 3.f}, 10.f, Rgb(0x000000, 110));
+
+      const auto dark = Rounded(x + 204.f, row, 74.f, 64.f, 14.f);
+      _renderer->Save();
       _renderer->SetDropShadow(
-        {.Offset = {-1'000.f + 3.f, 4.f}, .BlurRadius = 10.f, .Colour = SRGBA<uint8> {0, 0, 0, 160}});
-      _renderer->Translate(1'000.f, 0.f);
-      _renderer->FillRectWithRoundedHole({332.f, 592.f, 170.f, 140.f}, well, SRGBA<uint8> {0, 0, 0});
+        {.Offset = {}, .BlurRadius = 18.f + 6.f * std::sin(_time * 2.f), .Colour = Rgb(0x00e5ff, 200)});
+      _renderer->FillRoundedRect(dark, Rgb(0x23283a));
       _renderer->Restore();
+
+      const auto glass = Rounded(x + 294.f, row, 74.f, 64.f, 14.f);
+      _renderer->Save();
+      _renderer->SetDropShadow({.Offset = {0.f, 6.f}, .BlurRadius = 12.f, .Colour = Rgb(0x000000, 160)});
+      _renderer->FillRoundedRect(glass, Rgb(0x4f6df5, 110));
+      _renderer->Restore();
+
+      // Shadows of paths and strokes: a star, a zigzag, dots and a ring.
+      const float shapes = y + 300.f;
+      _renderer->Save();
+      _renderer->SetDropShadow({.Offset = {3.f, 5.f}, .BlurRadius = 8.f, .Colour = Rgb(0x000000, 90)});
+      _renderer->Save();
+      _renderer->Translate(x + 62.f, shapes);
+      _renderer->FillPath(Star(36.f), FillRule::NonZero, Rgb(0xffd166));
+      _renderer->Restore();
+      Path2D zigzag;
+      zigzag.MoveTo({x + 110.f, shapes + 20.f});
+      zigzag.LineTo({x + 135.f, shapes - 20.f});
+      zigzag.LineTo({x + 160.f, shapes + 20.f});
+      zigzag.LineTo({x + 185.f, shapes - 20.f});
+      _renderer->StrokePath(zigzag, {.Width = 8.f, .Cap = LineCap::Round, .Join = LineJoin::Round},
+                            Rgb(0xef476f));
+      _renderer->StrokeLine({x + 210.f, shapes}, {x + 280.f, shapes},
+                            {.Width = 10.f, .Cap = LineCap::Round, .Dashes = {0.f, 20.f}}, Rgb(0x06d6a0));
+      Path2D ring;
+      ring.AddEllipse({x + 330.f, shapes}, {26.f, 26.f});
+      _renderer->StrokePath(ring, {.Width = 6.f}, Rgb(0x4f6df5));
+      _renderer->Restore();
+
+      // Under transforms: the shadow turning with its card (current coordinates) and staying put
+      // (ignoring transforms, as canvas does), and a card squashed by a scale.
+      const float turned = y + 420.f;
+      for (int i = 0; i < 2; ++i)
+      {
+        _renderer->Save();
+        _renderer->Translate(x + 70.f + static_cast<float>(i) * 120.f, turned);
+        _renderer->Rotate(std::sin(_time * 0.9f) * 0.6f);
+        _renderer->SetShadowsIgnoreTransforms(i == 1);
+        _renderer->SetDropShadow({.Offset = {0.f, 8.f}, .BlurRadius = 12.f, .Colour = Rgb(0x000000, 90)});
+        _renderer->FillRoundedRect(Rounded(-38.f, -28.f, 76.f, 56.f, 10.f), Rgb(0xffffff));
+        _renderer->Restore();
+      }
+      _renderer->Save();
+      _renderer->Translate(x + 320.f, turned);
+      _renderer->Scale(1.4f, 0.7f);
+      _renderer->SetDropShadow({.Offset = {0.f, 8.f}, .BlurRadius = 12.f, .Colour = Rgb(0x000000, 90)});
+      _renderer->FillRoundedRect(Rounded(-26.f, -36.f, 52.f, 72.f, 10.f), Rgb(0xffffff));
+      _renderer->Restore();
+
+      // A card lifting on its shadow, and a star whose shadow swings round it.
+      const float lift = 0.5f + 0.5f * std::sin(_time * 1.7f);
+      const auto lifted = Rounded(x + 24.f, y + 520.f - 4.f * lift, 160.f, 64.f, 12.f);
+      BoxShadow(lifted, {0.f, 2.f + 8.f * lift}, 6.f + 18.f * lift, Rgb(0x000000, 80));
+      _renderer->FillRoundedRect(lifted, Rgb(0xffffff));
+      DrawLabel(lifted.Rect.X + 16.f, lifted.Rect.Y + 18.f, 90.f);
+      DrawLabel(lifted.Rect.X + 16.f, lifted.Rect.Y + 36.f, 120.f, Rgb(0xe3e7ef));
 
       _renderer->Save();
       _renderer->SetDropShadow({.Offset = {8.f * std::cos(_time), 8.f * std::sin(_time)},
-                                .BlurRadius = 8.f,
-                                .Colour = SRGBA<uint8> {20, 10, 60, 170}});
-      _renderer->Translate(530.f, 662.f);
-      _renderer->FillPath(Star(30.f), FillRule::NonZero, SRGBA<uint8> {255, 200, 60});
+                                .BlurRadius = 10.f,
+                                .Colour = Rgb(0x1a1040, 110)});
+      _renderer->Translate(x + 300.f, y + 552.f);
+      _renderer->FillPath(Star(36.f), FillRule::NonZero, Rgb(0xb04ff5));
       _renderer->Restore();
     }
 
-    /// @brief The gradient sample: a turning linear gradient, a radial one with a circling focal point and a
-    /// turning conic one, then a bar interpolated in OKLCH the long way round and a subtle grey bar that
-    /// shows the dithering.
-    void DrawGradients() noexcept
+    /// @brief Compositing (there are no filters yet): blend modes over the image, opacity per draw against
+    /// a group's, a layer composited with multiply, additive light, and gradients.
+    void DrawCompositing(float x, float y) noexcept
     {
       using namespace gfx;
-      const ExtendedSRGBA<float> orange {1.f, 0.55f, 0.f, 1.f};
-      const ExtendedSRGBA<float> purple {0.45f, 0.2f, 0.9f, 1.f};
 
-      // The line turns about the tile's centre.
-      const Vec2f centre {1073.f, 593.f};
-      const Vec2f along {33.f * std::cos(_time), 33.f * std::sin(_time)};
-      const Gradient2D linear {
-        .Shape = LinearGradient2D {{centre.x - along.x, centre.y - along.y},
-                                   {centre.x + along.x, centre.y + along.y}},
-        .Stops = {{.Offset = 0.f, .Colour = orange}, {.Offset = 1.f, .Colour = purple}}};
-      _renderer->FillRoundedRect({{1040.f, 560.f, 66.f, 66.f}, CornerRadii2D::Uniform(10.f)}, linear);
-
-      const Vec2f focus {1153.f + 14.f * std::cos(_time * 1.3f), 593.f + 14.f * std::sin(_time * 1.3f)};
-      const Gradient2D radial {.Shape = RadialGradient2D {focus, {1153.f, 593.f}, 0.f, 33.f},
-                               .Stops = {{.Offset = 0.f, .Colour = {1.f, 1.f, 1.f, 1.f}},
-                                         {.Offset = 1.f, .Colour = {0.1f, 0.3f, 0.8f, 1.f}}}};
-      _renderer->FillRoundedRect({{1120.f, 560.f, 66.f, 66.f}, CornerRadii2D::Uniform(33.f)}, radial);
-
-      const Gradient2D conic {.Shape = ConicGradient2D {{1233.f, 593.f}, _time * 0.7f},
-                              .Stops = {{.Offset = 0.f, .Colour = {1.f, 0.2f, 0.2f, 1.f}},
-                                        {.Offset = 0.33f, .Colour = {1.f, 0.9f, 0.2f, 1.f}},
-                                        {.Offset = 0.5f, .Colour = {1.f, 0.9f, 0.2f, 1.f}},
-                                        {.Offset = 0.5f, .Colour = {0.2f, 0.7f, 1.f, 1.f}},
-                                        {.Offset = 1.f, .Colour = {1.f, 0.2f, 0.2f, 1.f}}}};
-      _renderer->FillRoundedRect({{1200.f, 560.f, 66.f, 66.f}, CornerRadii2D::Uniform(33.f)}, conic);
-
-      const Gradient2D hues {
-        .Shape = LinearGradient2D {{1040.f, 0.f}, {1266.f, 0.f}},
-        .Stops = {{.Offset = 0.f, .Colour = {1.f, 0.f, 0.f, 1.f}},
-                  {.Offset = 1.f, .Colour = {0.f, 0.f, 1.f, 1.f}}},
-        .Interpolation = {.ColourSpace = ColourInterpolationMethod::OKLCH {HueInterpolationMethod::Longer},
-                          .AlphaPremultiplication = AlphaPremultiplication::Premultiplied}};
-      _renderer->FillRoundedRect({{1040.f, 640.f, 226.f, 22.f}, CornerRadii2D::Uniform(4.f)}, hues);
-
-      const Gradient2D greys {.Shape = LinearGradient2D {{1040.f, 0.f}, {1266.f, 0.f}},
-                              .Stops = {{.Offset = 0.f, .Colour = {0.16f, 0.17f, 0.2f, 1.f}},
-                                        {.Offset = 1.f, .Colour = {0.24f, 0.25f, 0.29f, 1.f}}}};
-      _renderer->FillRoundedRect({{1040.f, 672.f, 226.f, 22.f}, CornerRadii2D::Uniform(4.f)}, greys);
-    }
-
-    /// @brief The blend mode sample: circles bobbing over the image in multiply, screen, difference and
-    /// color, then two opaque squares in a layer composited with multiply.
-    void DrawBlendModes() noexcept
-    {
+      // Six blend modes over the image.
+      const auto backdrop = Rounded(x + 24.f, y + 60.f, 344.f, 110.f, 12.f);
+      _renderer->Save();
+      _renderer->ClipRoundedRect(backdrop);
       if (_image.IsValid())
       {
-        _renderer->DrawImage(_image, {600.f, 625.f, 400.f, 80.f});
+        _renderer->DrawImage(_image, backdrop.Rect);
       }
-
-      const SRGBA<uint8> orange {255, 140, 0};
-      const BlendMode modes[] = {BlendMode::Multiply, BlendMode::Screen, BlendMode::Difference,
-                                 BlendMode::Color};
-      for (int i = 0; i < 4; ++i)
+      const BlendMode modes[] {BlendMode::Multiply,   BlendMode::Screen, BlendMode::Overlay,
+                               BlendMode::Difference, BlendMode::Hue,    BlendMode::Luminosity};
+      for (int i = 0; i < 6; ++i)
       {
-        const float bob = 10.f * std::sin(_time * 2.f + static_cast<float>(i));
+        const float bob = 12.f * std::sin(_time * 2.f + static_cast<float>(i));
         _renderer->Save();
         _renderer->SetBlendMode(modes[i]);
-        _renderer->FillRoundedRect({{610.f + static_cast<float>(i) * 80.f, 635.f + bob, 60.f, 60.f},
-                                    gfx::CornerRadii2D::Uniform(30.f)},
-                                   orange);
+        _renderer->FillRoundedRect(
+          Rounded(x + 36.f + static_cast<float>(i) * 56.f, y + 92.f + bob, 46.f, 46.f, 23.f), Rgb(0xff8c00));
         _renderer->Restore();
       }
+      _renderer->Restore();
 
-      _renderer->BeginLayer(1.f, BlendMode::Multiply);
-      _renderer->FillRect({925.f, 640.f, 40.f, 40.f}, SRGBA<uint8> {255, 220, 60});
-      _renderer->FillRect({945.f, 655.f, 40.f, 40.f}, SRGBA<uint8> {80, 200, 255});
+      // Opacity per draw (the overlap mixes) and for a group (it fades as one).
+      const float circles = y + 200.f;
+      _renderer->FillRoundedRect(Rounded(x + 24.f, circles, 56.f, 56.f, 28.f), Rgb(0xef476f, 128));
+      _renderer->FillRoundedRect(Rounded(x + 54.f, circles + 18.f, 56.f, 56.f, 28.f), Rgb(0x4f6df5, 128));
+      _renderer->BeginLayer(0.5f + 0.4f * std::sin(_time * 1.5f));
+      _renderer->FillRoundedRect(Rounded(x + 130.f, circles, 56.f, 56.f, 28.f), Rgb(0xef476f));
+      _renderer->FillRoundedRect(Rounded(x + 160.f, circles + 18.f, 56.f, 56.f, 28.f), Rgb(0x4f6df5));
       _renderer->EndLayer();
-    }
 
-    /// @brief The stroke sample: joins, curves, dots, a dashed box, marching ants and a turning dashed line.
-    void DrawStrokes() noexcept
-    {
-      const SRGBA<uint8> blue {120, 180, 255};
-      const SRGBA<uint8> light {230, 230, 240};
+      // A layer composited with multiply over stripes.
+      const auto stripes = Rounded(x + 244.f, circles, 124.f, 74.f, 10.f);
+      _renderer->Save();
+      _renderer->ClipRoundedRect(stripes);
+      for (int i = 0; i < 6; ++i)
+      {
+        _renderer->FillRect({stripes.Rect.X + static_cast<float>(i) * 21.f, stripes.Rect.Y, 21.f, 74.f},
+                            i % 2 == 0 ? Rgb(0xffd166) : Rgb(0x06d6a0));
+      }
+      _renderer->BeginLayer(1.f, BlendMode::Multiply);
+      _renderer->FillRoundedRect(Rounded(stripes.Rect.X + 18.f, circles + 12.f, 50.f, 50.f, 8.f),
+                                 Rgb(0x8ecae6));
+      _renderer->FillRoundedRect(Rounded(stripes.Rect.X + 52.f, circles + 12.f, 50.f, 50.f, 8.f),
+                                 Rgb(0xf4a6c6));
+      _renderer->EndLayer();
+      _renderer->Restore();
 
-      // The same zigzag under each join: miter, round and bevel.
-      const gfx::LineJoin joins[] = {gfx::LineJoin::Miter, gfx::LineJoin::Round, gfx::LineJoin::Bevel};
+      // Additive light (plus-lighter) on a dark tile.
+      const auto night = Rounded(x + 24.f, y + 300.f, 344.f, 120.f, 14.f);
+      _renderer->FillRoundedRect(night, Rgb(0x14182a));
+      _renderer->Save();
+      _renderer->ClipRoundedRect(night);
+      _renderer->SetBlendMode(BlendMode::PlusLighter);
+      const uint32 lights[] {0xd02020, 0x20c040, 0x2040e0};
       for (int i = 0; i < 3; ++i)
       {
-        const float left = 290.f + static_cast<float>(i) * 150.f;
-        gfx::Path2D zigzag;
-        zigzag.MoveTo({left, 400.f});
-        zigzag.LineTo({left + 30.f, 345.f});
-        zigzag.LineTo({left + 60.f, 400.f});
-        zigzag.LineTo({left + 90.f, 345.f});
-        zigzag.LineTo({left + 120.f, 400.f});
-        _renderer->StrokePath(zigzag, {.Width = 10.f, .Join = joins[i]}, blue);
+        const float angle = _time * 0.8f + static_cast<float>(i) * 2.0944f;
+        const Vec2f centre {x + 196.f + 34.f * std::cos(angle), y + 360.f + 22.f * std::sin(angle)};
+        const Gradient2D glow {.Shape = RadialGradient2D {centre, centre, 0.f, 56.f},
+                               .Stops = {{.Offset = 0.f, .Colour = Hex(lights[i])},
+                                         {.Offset = 1.f, .Colour = {0.f, 0.f, 0.f, 0.f}}}};
+        _renderer->FillRect({centre.x - 56.f, centre.y - 56.f, 112.f, 112.f}, glow);
       }
-
-      // A wave of cubics with round caps.
-      gfx::Path2D wave;
-      wave.MoveTo({290.f, 450.f});
-      for (int i = 0; i < 4; ++i)
-      {
-        const float left = 290.f + static_cast<float>(i) * 105.f;
-        wave.CubicTo({left + 35.f, 420.f}, {left + 70.f, 480.f}, {left + 105.f, 450.f});
-      }
-      _renderer->StrokePath(wave, {.Width = 6.f, .Cap = gfx::LineCap::Round}, SRGBA<uint8> {255, 160, 90});
-
-      // Round dots: zero-length dashes under round caps, drawn without masks.
-      _renderer->StrokeLine({295.f, 505.f}, {705.f, 505.f},
-                            {.Width = 6.f, .Cap = gfx::LineCap::Round, .Dashes = {0.f, 14.f}}, light);
-
-      // A dashed box from four straight lines.
-      const gfx::StrokeStyle dashed {.Width = 2.f, .Dashes = {8.f, 5.f}};
-      const Vec2f corners[] = {{780.f, 345.f}, {1000.f, 345.f}, {1000.f, 470.f}, {780.f, 470.f}};
-      for (int i = 0; i < 4; ++i)
-      {
-        _renderer->StrokeLine(corners[i], corners[(i + 1) % 4], dashed, light);
-      }
-
-      // Inside the box, the image scrolls behind a rounded clip that turns.
-      if (_image.IsValid())
-      {
-        _renderer->Save();
-        _renderer->Translate(890.f, 407.f);
-        _renderer->Rotate(std::sin(_time * 0.7f) * 0.6f);
-        _renderer->ClipRoundedRect({{-80.f, -42.f, 160.f, 84.f}, gfx::CornerRadii2D::Uniform(18.f)});
-        _renderer->SetTransform({});
-        const float scroll = std::fmod(_time * 30.f, 64.f);
-        for (int y = 0; y < 4; ++y)
-        {
-          for (int x = 0; x < 5; ++x)
-          {
-            _renderer->DrawImage(_image,
-                                 {770.f + static_cast<float>(x) * 64.f - scroll,
-                                  335.f + static_cast<float>(y) * 64.f - scroll, 64.f, 64.f},
-                                 {.Filter = gfx::SamplerFilter::Nearest});
-          }
-        }
-        _renderer->Restore();
-      }
-
-      // Marching ants: a dashed circle whose pattern slides round it.
-      gfx::Path2D circle;
-      circle.AddEllipse({890.f, 560.f}, {50.f, 50.f});
-      _renderer->StrokePath(circle, {.Width = 3.f, .Dashes = {10.f, 6.f}, .DashOffset = -_time * 24.f},
-                            light);
-
-      // A dashed line turning inside the circle, under the renderer's transform.
-      _renderer->Save();
-      _renderer->Translate(890.f, 560.f);
-      _renderer->Rotate(_time);
-      _renderer->StrokeLine({-38.f, 0.f}, {38.f, 0.f},
-                            {.Width = 4.f, .Cap = gfx::LineCap::Square, .Dashes = {6.f, 6.f}}, blue);
       _renderer->Restore();
+
+      // Gradients: a turning linear one, a radial one with a circling focus, a turning conic one, a bar in
+      // OKLCH the long way round and a subtle grey bar that shows the dithering.
+      const float tiles = y + 450.f;
+      const Vec2f linearCentre {x + 57.f, tiles + 33.f};
+      const Vec2f along {33.f * std::cos(_time), 33.f * std::sin(_time)};
+      const Gradient2D linear {
+        .Shape = LinearGradient2D {{linearCentre.x - along.x, linearCentre.y - along.y},
+                                   {linearCentre.x + along.x, linearCentre.y + along.y}},
+        .Stops = {{.Offset = 0.f, .Colour = Hex(0xff8c00)}, {.Offset = 1.f, .Colour = Hex(0x7333e6)}}};
+      _renderer->FillRoundedRect(Rounded(x + 24.f, tiles, 66.f, 66.f, 12.f), linear);
+
+      const Vec2f radialCentre {x + 143.f, tiles + 33.f};
+      const Vec2f focus {radialCentre.x + 14.f * std::cos(_time * 1.3f),
+                         radialCentre.y + 14.f * std::sin(_time * 1.3f)};
+      const Gradient2D radial {
+        .Shape = RadialGradient2D {focus, radialCentre, 0.f, 33.f},
+        .Stops = {{.Offset = 0.f, .Colour = Hex(0xffffff)}, {.Offset = 1.f, .Colour = Hex(0x1a4dcc)}}};
+      _renderer->FillRoundedRect(Rounded(x + 110.f, tiles, 66.f, 66.f, 33.f), radial);
+
+      const Gradient2D conic {.Shape = ConicGradient2D {{x + 229.f, tiles + 33.f}, _time * 0.7f},
+                              .Stops = {{.Offset = 0.f, .Colour = Hex(0xef476f)},
+                                        {.Offset = 0.5f, .Colour = Hex(0xffd166)},
+                                        {.Offset = 0.5f, .Colour = Hex(0x118ab2)},
+                                        {.Offset = 1.f, .Colour = Hex(0xef476f)}}};
+      _renderer->FillRoundedRect(Rounded(x + 196.f, tiles, 66.f, 66.f, 33.f), conic);
+
+      const Gradient2D hues {
+        .Shape = LinearGradient2D {{x + 24.f, 0.f}, {x + 368.f, 0.f}},
+        .Stops = {{.Offset = 0.f, .Colour = Hex(0xff0000)}, {.Offset = 1.f, .Colour = Hex(0x0000ff)}},
+        .Interpolation = {.ColourSpace = ColourInterpolationMethod::OKLCH {HueInterpolationMethod::Longer},
+                          .AlphaPremultiplication = AlphaPremultiplication::Premultiplied}};
+      _renderer->FillRoundedRect(Rounded(x + 24.f, tiles + 86.f, 344.f, 20.f, 6.f), hues);
+
+      const Gradient2D greys {
+        .Shape = LinearGradient2D {{x + 24.f, 0.f}, {x + 368.f, 0.f}},
+        .Stops = {{.Offset = 0.f, .Colour = Hex(0xd8dce4)}, {.Offset = 1.f, .Colour = Hex(0xeef1f6)}}};
+      _renderer->FillRoundedRect(Rounded(x + 24.f, tiles + 116.f, 344.f, 20.f, 6.f), greys);
     }
 
     /// @brief A five-pointed star drawn in one stroke, so its contour crosses itself.

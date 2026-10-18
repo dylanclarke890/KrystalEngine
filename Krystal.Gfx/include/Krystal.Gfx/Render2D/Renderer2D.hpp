@@ -372,6 +372,7 @@ namespace krys::gfx
     struct Pass
     {
       ColourAttachment Attachment {};
+      /// @brief The swapchain's size; a pass into a texture takes the texture's, which the viewport covers.
       uint32 Width {0u};
       uint32 Height {0u};
       /// @brief The target pixel at the pass's top-left.
