@@ -2,6 +2,7 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Visitor.hpp"
 #include "Krystal.Gfx/Render2D/Dashing.hpp"
 #include <algorithm>
 #include <cmath>
@@ -20,6 +21,7 @@ layout(binding = 0, std140) uniform Frame
 {
   vec2 u_ViewportSize;
   vec2 u_Origin; // the target pixel at the viewport's top-left
+  float u_Dither; // how far gradients are dithered: a colour step, or 0
 };
 
 layout(location = 0) in vec4 a_Rect;        // x, y, width, height in local coordinates
@@ -79,6 +81,7 @@ layout(binding = 0, std140) uniform Frame
 {
   vec2 u_ViewportSize;
   vec2 u_Origin; // the target pixel at the viewport's top-left
+  float u_Dither; // how far gradients are dithered: a colour step, or 0
 };
 
 layout(binding = 0) uniform sampler2D u_Texture;
@@ -118,6 +121,19 @@ layout(binding = 1) uniform sampler2D u_ClipMask;
 // What's beneath a draw with a blend mode, premultiplied, laid out as the pass.
 layout(binding = 2) uniform sampler2D u_Backdrop;
 
+// The batch's gradient: its stops are linear in premultiplied sRGB-encoded colours.
+layout(binding = 2, std140) uniform Gradient
+{
+  uint u_GradientShape;  // 1: linear; 2: radial; 3: conic
+  uint u_GradientSpread; // 0: pad; 1: reflect; 2: repeat
+  uint u_GradientStopCount;
+  vec4 u_GradientInverseLinear;      // from target pixels into the shape's space: a, b, c, d
+  vec4 u_GradientInverseTranslation; // e, f
+  vec4 u_GradientRadial;             // the second centre relative to the first, then the two radii
+  vec4 u_GradientOffsets[64];        // four stops' offsets each
+  vec4 u_GradientColours[256];
+};
+
 layout(location = 0) out vec4 o_Colour;
 
 const uint Textured = 1u;
@@ -125,7 +141,14 @@ const uint StraightAlpha = 2u;
 const uint LinearTexels = 4u;
 const uint Mask = 8u;
 const uint Hole = 16u;
+const uint GradientPaint = 32u;
 const uint BlendModeShift = 8u;
+
+const uint LinearShape = 1u;
+const uint RadialShape = 2u;
+const uint ConicShape = 3u;
+const uint SpreadReflect = 1u;
+const uint SpreadRepeat = 2u;
 
 // BlendMode's values.
 const uint BlendMultiply = 2u;
@@ -230,6 +253,120 @@ vec4 SampleTexture(vec2 dx, vec2 dy)
     texel.rgb *= texel.a;
   }
   return texel;
+}
+
+float GradientOffset(uint i)
+{
+  return u_GradientOffsets[i >> 2u][i & 3u];
+}
+
+// The gradient's colour at the pixel, premultiplied; transparent where a radial gradient has no circle.
+vec4 GradientColour()
+{
+  mat2 inverseLinear = mat2(u_GradientInverseLinear.xy, u_GradientInverseLinear.zw);
+  vec2 p = inverseLinear * v_Pixel + u_GradientInverseTranslation.xy;
+
+  float t = p.x;
+  if (u_GradientShape == RadialShape)
+  {
+    // The largest t whose circle, with a radius that isn't negative, passes through p: the roots of
+    // a t^2 - 2 b t + c = 0, taken as q / a and c / q so neither loses precision.
+    vec2 centre = u_GradientRadial.xy;
+    float r0 = u_GradientRadial.z;
+    float dr = u_GradientRadial.w - r0;
+    float a = dot(centre, centre) - dr * dr;
+    float b = dot(p, centre) + r0 * dr;
+    float c = dot(p, p) - r0 * r0;
+    float discriminant = b * b - a * c;
+    if (discriminant < 0.0)
+    {
+      return vec4(0.0);
+    }
+    float root = sqrt(discriminant);
+    float q = b < 0.0 ? b - root : b + root;
+    bool hasFirst = a != 0.0;
+    bool hasSecond = q != 0.0;
+    float first = hasFirst ? q / a : 0.0;
+    float second = hasSecond ? c / q : 0.0;
+    if (hasFirst && hasSecond && second > first)
+    {
+      float larger = second;
+      second = first;
+      first = larger;
+    }
+    else if (!hasFirst)
+    {
+      first = second;
+      hasFirst = hasSecond;
+      hasSecond = false;
+    }
+    if (hasFirst && r0 + first * dr >= 0.0)
+    {
+      t = first;
+    }
+    else if (hasSecond && r0 + second * dr >= 0.0)
+    {
+      t = second;
+    }
+    else
+    {
+      return vec4(0.0);
+    }
+  }
+  else if (u_GradientShape == ConicShape)
+  {
+    // Clockwise from x, which y pointing down makes atan's direction.
+    t = p == vec2(0.0) ? 0.0 : atan(p.y, p.x) / 6.28318530718;
+    t = t < 0.0 ? t + 1.0 : t;
+  }
+
+  if (u_GradientSpread == SpreadRepeat)
+  {
+    t = fract(t);
+  }
+  else if (u_GradientSpread == SpreadReflect)
+  {
+    t = mod(t, 2.0);
+    t = t > 1.0 ? 2.0 - t : t;
+  }
+
+  // The last stop at or before t, by binary search; past the ends, the end stops' colours carry on.
+  uint count = u_GradientStopCount;
+  uint low = 0u;
+  uint high = count;
+  while (low < high)
+  {
+    uint middle = (low + high) / 2u;
+    if (GradientOffset(middle) <= t)
+    {
+      low = middle + 1u;
+    }
+    else
+    {
+      high = middle;
+    }
+  }
+  if (low == 0u)
+  {
+    return u_GradientColours[0];
+  }
+  if (low == count)
+  {
+    return u_GradientColours[count - 1u];
+  }
+  float from = GradientOffset(low - 1u);
+  return mix(u_GradientColours[low - 1u], u_GradientColours[low], (t - from) / (GradientOffset(low) - from));
+}
+
+// An 8-by-8 ordered dither threshold for the pixel, from 0 to 1: the bits of x ^ y and x interleaved and
+// reversed.
+float Bayer()
+{
+  uvec2 p = uvec2(ivec2(floor(v_Pixel))) & 7u;
+  uint v = p.x ^ p.y;
+  uint bits = ((v & 1u) << 5u) | ((p.x & 1u) << 4u) | ((v & 2u) << 2u) | ((p.x & 2u) << 1u)
+              | ((v & 4u) >> 1u) | ((p.x & 4u) >> 2u);
+  return (float(bits) + 0.5) / 64.0;
 }
 
 // The blend functions of Compositing and Blending Level 1, on straight colours: b is the backdrop's and s
@@ -339,6 +476,13 @@ void main()
   if ((v_Flags & Textured) != 0u)
   {
     colour *= SampleTexture(dx, dy);
+  }
+  if ((v_Flags & GradientPaint) != 0u)
+  {
+    // Dithered by under half a step either way, scaled by alpha so the colour stays premultiplied.
+    vec4 gradient = GradientColour();
+    gradient.rgb = clamp(gradient.rgb + (Bayer() - 0.5) * u_Dither * gradient.a, 0.0, gradient.a);
+    colour *= gradient;
   }
   vec4 source = colour * coverage;
 
@@ -501,6 +645,8 @@ void main()
     _layers.clear();
     _layerOrder.clear();
     _currentLayer = NoLayer;
+    _gradients.clear();
+    _gradientStops.clear();
     _masks.ResetStats();
 
     // Layer textures unused for a while go.
@@ -818,31 +964,27 @@ void main()
     _state.Chain = static_cast<uint32>(_chains.size() - 1u);
   }
 
-  void Renderer2D::FillRect(const Rect2D &rect, SRGBA<uint8> colour) noexcept
+  void Renderer2D::FillRect(const Rect2D &rect, const Paint2D &paint) noexcept
   {
-    FillRoundedRect({.Rect = rect, .Radii = {}}, colour);
+    FillRoundedRect({.Rect = rect, .Radii = {}}, paint);
   }
 
-  void Renderer2D::FillRoundedRect(const RoundedRect2D &roundedRect, SRGBA<uint8> colour) noexcept
+  void Renderer2D::FillRoundedRect(const RoundedRect2D &roundedRect, const Paint2D &paint) noexcept
   {
     krys_debug_assert_msg(_commands != nullptr, "FillRoundedRect outside Begin and End.");
     const auto &rect = roundedRect.Rect;
-    if (rect.Width <= 0.f || rect.Height <= 0.f)
+    if (rect.Width <= 0.f || rect.Height <= 0.f || _state.Clip.IsEmpty())
     {
       return;
     }
 
-    const auto resolved = colour.Resolved();
-    if (resolved.Alpha == 0u)
+    if (const auto resolved = ResolvePaint(paint))
     {
-      return;
+      AddRoundedRect(roundedRect, *resolved, _state.Transform);
     }
-
-    AddRoundedRect(roundedRect, {resolved.Red, resolved.Green, resolved.Blue, resolved.Alpha},
-                   _state.Transform);
   }
 
-  void Renderer2D::AddRoundedRect(const RoundedRect2D &roundedRect, Array<uint8, 4> colour,
+  void Renderer2D::AddRoundedRect(const RoundedRect2D &roundedRect, const ResolvedPaint &paint,
                                   const Transform2D &transform) noexcept
   {
     const auto &rect = roundedRect.Rect;
@@ -858,30 +1000,29 @@ void main()
                  .UV = {},
                  .HoleRect = {},
                  .HoleRadii = {},
-                 .Colour = colour,
+                 .Colour = paint.Colour,
                  .Flags = 0u},
-                transform, {}, {});
+                transform, {}, {}, paint.Gradient);
   }
 
-  void Renderer2D::StrokePath(const Path2D &path, const StrokeStyle &style, SRGBA<uint8> colour) noexcept
+  void Renderer2D::StrokePath(const Path2D &path, const StrokeStyle &style, const Paint2D &paint) noexcept
   {
     krys_debug_assert_msg(_commands != nullptr, "StrokePath outside Begin and End.");
-    if (colour.Resolved().Alpha == 0u || path.IsEmpty() || _state.Clip.IsEmpty())
+    if (IsInvisible(paint) || path.IsEmpty() || _state.Clip.IsEmpty())
     {
       return;
     }
     const auto outline = _stroker.Stroke(path, style, _state.Transform);
     if (!outline.IsEmpty())
     {
-      FillPath(outline, FillRule::NonZero, colour);
+      FillPath(outline, FillRule::NonZero, paint);
     }
   }
 
-  void Renderer2D::StrokeLine(Vec2f from, Vec2f to, const StrokeStyle &style, SRGBA<uint8> colour) noexcept
+  void Renderer2D::StrokeLine(Vec2f from, Vec2f to, const StrokeStyle &style, const Paint2D &paint) noexcept
   {
     krys_debug_assert_msg(_commands != nullptr, "StrokeLine outside Begin and End.");
-    const auto resolved = colour.Resolved();
-    if (resolved.Alpha == 0u || _state.Clip.IsEmpty())
+    if (IsInvisible(paint) || _state.Clip.IsEmpty())
     {
       return;
     }
@@ -906,12 +1047,16 @@ void main()
     // Square and round caps reach half the width past each end; round ones are the rect's rounded ends.
     const float extension = style.Cap == LineCap::Butt ? 0.f : halfWidth;
     const float radius = style.Cap == LineCap::Round ? halfWidth : 0.f;
-    const Array<uint8, 4> packed {resolved.Red, resolved.Green, resolved.Blue, resolved.Alpha};
+    const auto resolved = ResolvePaint(paint);
+    if (!resolved)
+    {
+      return;
+    }
     auto addDash = [&](float start, float end)
     {
       AddRoundedRect({.Rect = {start - extension, -halfWidth, end - start + 2.f * extension, 2.f * halfWidth},
                       .Radii = CornerRadii2D::Uniform(radius)},
-                     packed, transform);
+                     *resolved, transform);
     };
 
     detail::PrepareDashes(style, _dashes);
@@ -941,22 +1086,22 @@ void main()
   }
 
   void Renderer2D::FillRectWithRoundedHole(const Rect2D &rect, const RoundedRect2D &hole,
-                                           SRGBA<uint8> colour) noexcept
+                                           const Paint2D &paint) noexcept
   {
     krys_debug_assert_msg(_commands != nullptr, "FillRectWithRoundedHole outside Begin and End.");
     const auto &holeRect = hole.Rect;
     if (holeRect.Width <= 0.f || holeRect.Height <= 0.f)
     {
-      FillRect(rect, colour);
+      FillRect(rect, paint);
       return;
     }
-    if (rect.Width <= 0.f || rect.Height <= 0.f)
+    if (rect.Width <= 0.f || rect.Height <= 0.f || _state.Clip.IsEmpty())
     {
       return;
     }
 
-    const auto resolved = colour.Resolved();
-    if (resolved.Alpha == 0u)
+    const auto resolved = ResolvePaint(paint);
+    if (!resolved)
     {
       return;
     }
@@ -969,9 +1114,9 @@ void main()
                  .UV = {},
                  .HoleRect = {holeRect.X, holeRect.Y, holeRect.Width, holeRect.Height},
                  .HoleRadii = {radii.TopLeft, radii.TopRight, radii.BottomRight, radii.BottomLeft},
-                 .Colour = {resolved.Red, resolved.Green, resolved.Blue, resolved.Alpha},
+                 .Colour = resolved->Colour,
                  .Flags = Hole},
-                _state.Transform, {}, {});
+                _state.Transform, {}, {}, resolved->Gradient);
   }
 
   void Renderer2D::DrawImage(TextureHandle texture, const Rect2D &source, const Rect2D &destination,
@@ -1018,11 +1163,10 @@ void main()
                 options.Filter == SamplerFilter::Nearest ? _nearestSampler : _linearSampler);
   }
 
-  void Renderer2D::FillPath(const Path2D &path, FillRule rule, SRGBA<uint8> colour) noexcept
+  void Renderer2D::FillPath(const Path2D &path, FillRule rule, const Paint2D &paint) noexcept
   {
     krys_debug_assert_msg(_commands != nullptr, "FillPath outside Begin and End.");
-    const auto resolved = colour.Resolved();
-    if (resolved.Alpha == 0u || path.IsEmpty() || _state.Clip.IsEmpty())
+    if (IsInvisible(paint) || path.IsEmpty() || _state.Clip.IsEmpty())
     {
       return;
     }
@@ -1033,7 +1177,8 @@ void main()
       return;
     }
     const auto desc = _device->GetTextureDesc(mask.Texture);
-    if (!desc)
+    const auto resolved = ResolvePaint(paint);
+    if (!desc || !resolved)
     {
       return;
     }
@@ -1053,9 +1198,9 @@ void main()
                         static_cast<float>(texels.Y + static_cast<int32>(texels.Height)) / height},
                  .HoleRect = {},
                  .HoleRadii = {},
-                 .Colour = {resolved.Red, resolved.Green, resolved.Blue, resolved.Alpha},
+                 .Colour = resolved->Colour,
                  .Flags = Textured | Mask},
-                Transform2D::Identity(), mask.Texture, _nearestSampler);
+                Transform2D::Identity(), mask.Texture, _nearestSampler, resolved->Gradient);
   }
 
   void Renderer2D::DrawImage(TextureHandle texture, const Rect2D &destination,
@@ -1071,7 +1216,7 @@ void main()
   }
 
   void Renderer2D::AddInstance(RectInstance instance, const Transform2D &transform, TextureHandle texture,
-                               SamplerHandle sampler) noexcept
+                               SamplerHandle sampler, uint32 gradient) noexcept
   {
     // Nothing shows through an empty clip or a transform that flattens everything.
     if (_state.Clip.IsEmpty() || transform.Determinant() == 0.f)
@@ -1081,6 +1226,10 @@ void main()
     instance.Linear = {transform.A, transform.B, transform.C, transform.D};
     instance.Translation = {transform.E, transform.F};
     instance.Flags |= static_cast<uint32>(_state.Blend) << BlendModeShift;
+    if (gradient != NoGradient)
+    {
+      instance.Flags |= GradientPaint;
+    }
 
     // A layer is as large as what's drawn in it.
     const auto reach = Reach(instance, transform);
@@ -1092,8 +1241,9 @@ void main()
 
     // Untextured instances join any batch of their layer with the same scissor, chain and blend mode; a
     // textured one needs the batch's texture, or a batch that has none yet. Composites only take untextured
-    // instances. A blend mode that reads the backdrop only joins a batch whose pixels it doesn't overlap,
-    // since the batch's backdrop is copied before any of it is drawn.
+    // instances. Likewise, a gradient instance needs the batch's gradient, or a batch that has none yet. A
+    // blend mode that reads the backdrop only joins a batch whose pixels it doesn't overlap, since the
+    // batch's backdrop is copied before any of it is drawn.
     const bool textured = texture.IsValid();
     const bool copies = CopiesBackdrop(_state.Blend);
     auto joins = [&](const Batch &batch)
@@ -1102,6 +1252,7 @@ void main()
       return batch.Layer == _currentLayer && batch.Scissor == _state.Clip && batch.Chain == _state.Chain
              && batch.Blend == _state.Blend
              && (!textured || !batchTextured || (batch.Texture == texture && batch.Sampler == sampler))
+             && (gradient == NoGradient || batch.Gradient == NoGradient || batch.Gradient == gradient)
              && (!copies || (batch.Composite == NoLayer && Intersect(batch.Backdrop, reach).IsEmpty()));
     };
     if (_batches.empty() || !joins(_batches.back()))
@@ -1124,12 +1275,155 @@ void main()
       batch.Texture = texture;
       batch.Sampler = sampler;
     }
+    if (gradient != NoGradient)
+    {
+      batch.Gradient = gradient;
+    }
     if (copies)
     {
       batch.Backdrop = Union(batch.Backdrop, reach);
     }
     ++batch.InstanceCount;
     _rects.push_back(instance);
+  }
+
+  bool Renderer2D::IsInvisible(const Paint2D &paint) noexcept
+  {
+    const auto *gradient = paint.GetGradient();
+    return gradient != nullptr ? gradient->Stops.empty() : paint.GetColour().Resolved().Alpha == 0u;
+  }
+
+  Maybe<Renderer2D::ResolvedPaint> Renderer2D::ResolvePaint(const Paint2D &paint) noexcept
+  {
+    const auto *gradient = paint.GetGradient();
+    if (gradient == nullptr)
+    {
+      const auto colour = paint.GetColour().Resolved();
+      if (colour.Alpha == 0u)
+      {
+        return {};
+      }
+      return ResolvedPaint {.Colour = {colour.Red, colour.Green, colour.Blue, colour.Alpha},
+                            .Gradient = NoGradient};
+    }
+
+    // A premultiplied colour, as an instance's straight colour.
+    auto solid = [](const Array<float, 4> &colour) -> Maybe<ResolvedPaint>
+    {
+      const auto alpha = static_cast<uint8>(std::clamp(colour[3], 0.f, 1.f) * 255.f + 0.5f);
+      if (alpha == 0u)
+      {
+        return {};
+      }
+      auto channel = [&](float value)
+      {
+        return static_cast<uint8>(std::clamp(value / colour[3], 0.f, 1.f) * 255.f + 0.5f);
+      };
+      return ResolvedPaint {.Colour = {channel(colour[0]), channel(colour[1]), channel(colour[2]), alpha},
+                            .Gradient = NoGradient};
+    };
+
+    detail::FlattenGradientStops(*gradient, _flattened);
+    if (_flattened.empty())
+    {
+      return {};
+    }
+    if (_flattened.size() == 1u)
+    {
+      return solid(_flattened.front().Colour);
+    }
+
+    // Each shape's own space, mapped into the gradient's: there, the shader's sums are short.
+    constexpr float degenerateThreshold = 1.f / 32768.f;
+    GradientData data {.Shape = LinearShape, .Spread = gradient->Spread};
+    Transform2D shape {};
+    bool degenerate = false;
+    SwitchOn(
+      gradient->Shape,
+      [&](const LinearGradient2D &linear)
+      {
+        // The line runs along x from 0 to 1, and y across it.
+        const float dx = linear.Point1.x - linear.Point0.x;
+        const float dy = linear.Point1.y - linear.Point0.y;
+        degenerate = !(std::sqrt(dx * dx + dy * dy) > degenerateThreshold);
+        shape = {.A = dx, .B = dy, .C = -dy, .D = dx, .E = linear.Point0.x, .F = linear.Point0.y};
+      },
+      [&](const RadialGradient2D &radial)
+      {
+        // Elliptical gradients squash circles vertically about the first centre, which is the origin.
+        const float aspectRatio = radial.AspectRatio;
+        shape = Transform2D::Translation(radial.Point0.x, radial.Point0.y)
+                * Transform2D::Scale(1.f, aspectRatio != 1.f ? 1.f / aspectRatio : 1.f);
+        auto radius = [](float value)
+        {
+          return std::isfinite(value) ? std::max(value, 0.f) : 0.f;
+        };
+        const float startRadius = radius(radial.StartRadius);
+        const float endRadius = radius(radial.EndRadius);
+        const float dx = radial.Point1.x - radial.Point0.x;
+        const float dy = radial.Point1.y - radial.Point0.y;
+        data.Shape = RadialShape;
+        data.Radial = {dx, dy, startRadius, endRadius};
+
+        // Circles that coincide: a ring at the radius, so padded, the first colour inside it and the last
+        // outside; otherwise nothing between the ends.
+        if (std::sqrt(dx * dx + dy * dy) <= degenerateThreshold
+            && std::abs(startRadius - endRadius) <= degenerateThreshold)
+        {
+          if (gradient->Spread == GradientSpreadMethod::Pad && endRadius > degenerateThreshold)
+          {
+            const auto first = _flattened.front().Colour;
+            const auto last = _flattened.back().Colour;
+            _flattened = {{.Offset = 0.f, .Colour = first},
+                          {.Offset = 1.f, .Colour = first},
+                          {.Offset = 1.f, .Colour = last}};
+            data.Radial = {0.f, 0.f, 0.f, endRadius};
+          }
+          else
+          {
+            degenerate = true;
+          }
+        }
+      },
+      [&](const ConicGradient2D &conic)
+      {
+        // Upright at the start angle, then clockwise: from x in the shape's space.
+        data.Shape = ConicShape;
+        shape = Transform2D::Translation(conic.Point0.x, conic.Point0.y)
+                * Transform2D::Rotation(conic.AngleRadians - 1.57079632679f);
+      });
+
+    if (degenerate)
+    {
+      return solid(gradient->Spread == GradientSpreadMethod::Pad ? _flattened.back().Colour
+                                                                 : detail::AverageFlatStops(_flattened));
+    }
+
+    const auto inverse = (_state.Transform * paint.GetGradientSpace() * shape).Inverse();
+    if (!inverse)
+    {
+      return {};
+    }
+    data.Inverse = *inverse;
+    data.FirstStop = static_cast<uint32>(_gradientStops.size());
+    data.StopCount = static_cast<uint32>(_flattened.size());
+
+    // Draws in a row with the same gradient share it, and so a batch.
+    if (!_gradients.empty())
+    {
+      const auto &last = _gradients.back();
+      if (last.Shape == data.Shape && last.Spread == data.Spread && last.Inverse == data.Inverse
+          && last.Radial == data.Radial && last.StopCount == data.StopCount
+          && std::equal(_flattened.begin(), _flattened.end(), _gradientStops.begin() + last.FirstStop))
+      {
+        return ResolvedPaint {.Colour = {255u, 255u, 255u, 255u},
+                              .Gradient = static_cast<uint32>(_gradients.size() - 1u)};
+      }
+    }
+    _gradientStops.insert(_gradientStops.end(), _flattened.begin(), _flattened.end());
+    _gradients.push_back(data);
+    return ResolvedPaint {.Colour = {255u, 255u, 255u, 255u},
+                          .Gradient = static_cast<uint32>(_gradients.size() - 1u)};
   }
 
   PixelRect2D Renderer2D::Reach(const RectInstance &instance, const Transform2D &transform) const noexcept
@@ -1354,6 +1648,8 @@ void main()
     _chains.clear();
     _layers.clear();
     _layerOrder.clear();
+    _gradients.clear();
+    _gradientStops.clear();
   }
 
   void Renderer2D::FinishLayer(uint32 index) noexcept
@@ -1457,15 +1753,22 @@ void main()
       commands.EndRenderPass();
       return;
     }
+    // Layers have the target's format, so every pass dithers alike.
+    const auto format = _target.Format;
+    const bool eightBit = format == TextureFormat::R8Unorm || format == TextureFormat::RG8Unorm
+                          || format == TextureFormat::RGBA8Unorm || format == TextureFormat::BGRA8Unorm;
     const FrameUniforms uniforms {
       .ViewportSize = {static_cast<float>(pass.Width), static_cast<float>(pass.Height)},
-      .Origin = {static_cast<float>(pass.OriginX), static_cast<float>(pass.OriginY)}};
+      .Origin = {static_cast<float>(pass.OriginX), static_cast<float>(pass.OriginY)},
+      .Dither = eightBit ? 1.f / 255.f : 0.f,
+      .Padding = {}};
     std::memcpy(frame.Data.data(), &uniforms, sizeof(uniforms));
 
     PipelineHandle boundPipeline {};
     TextureHandle boundTexture {};
     SamplerHandle boundSampler {};
     uint64 boundChain = ~0ull;
+    uint32 boundGradient = NoGradient;
     // Binds what every batch draws with, at the pass's start and again whenever it resumes.
     auto bindFrame = [&]
     {
@@ -1479,6 +1782,7 @@ void main()
       boundTexture = {};
       boundSampler = {};
       boundChain = ~0ull;
+      boundGradient = NoGradient;
     };
     bindFrame();
 
@@ -1576,6 +1880,34 @@ void main()
         // Unit 1 always has a texture: drivers check every declared sampler at each draw.
         commands.BindTexture(1u, clipMask, _nearestSampler);
         boundChain = batch.Chain;
+      }
+
+      // Only gradient instances read the gradient's block.
+      if (batch.Gradient != NoGradient && batch.Gradient != boundGradient)
+      {
+        auto block = _device->AllocateTransient(sizeof(GradientUniforms));
+        if (!block.IsValid())
+        {
+          break;
+        }
+        const auto &gradient = _gradients[batch.Gradient];
+        const auto &inverse = gradient.Inverse;
+        GradientUniforms data {};
+        data.Shape = gradient.Shape;
+        data.Spread = static_cast<uint32>(gradient.Spread);
+        data.StopCount = gradient.StopCount;
+        data.InverseLinear = {inverse.A, inverse.B, inverse.C, inverse.D};
+        data.InverseTranslation = {inverse.E, inverse.F, 0.f, 0.f};
+        data.Radial = gradient.Radial;
+        for (uint32 i = 0u; i < gradient.StopCount; ++i)
+        {
+          const auto &stop = _gradientStops[gradient.FirstStop + i];
+          data.Offsets[i] = stop.Offset;
+          data.Colours[i] = stop.Colour;
+        }
+        std::memcpy(block.Data.data(), &data, sizeof(data));
+        commands.BindUniformBuffer(2u, block.Buffer, block.Offset, sizeof(GradientUniforms));
+        boundGradient = batch.Gradient;
       }
 
       // Untextured batches never sample, but drivers still check the sampler's texture at every draw, so

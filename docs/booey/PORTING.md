@@ -555,7 +555,7 @@ Graph from every `css/values/color` file (headers-only): 156 files (`tools/port/
 | `rendering/RenderTheme.cpp` (`systemColor`) | `port` | `Style/Values/Color/SystemColor.hpp`, `src/.../SystemColor.cpp` | on | tested. The base `RenderTheme::systemColor` as a free function `style::SystemColor`; no platform themes. |
 | `style/values/color/StyleColorOptions.h` | `port` | `Style/Values/Color/ColorOptions.hpp` | on | `style::ColorOptions`, a flags enum. `operator<<` not ported. |
 | `style/StyleForVisitedLink.h` | `have` | `Style/ForVisitedLink.hpp` | on | |
-| `platform/graphics/GraphicsTypes.h` (`BlendMode` only) | `port` | `Graphics/GraphicsTypes.hpp` | on | `BlendMode` and `BlendModeName` moved to `Krystal.Core/Colour/BlendMode.hpp` (2026-10-18, for Render2D's blend modes); `GraphicsTypes.hpp` keeps `using krys::BlendMode;`. |
+| `platform/graphics/GraphicsTypes.h` (`BlendMode` only) | `port` | `Graphics/GraphicsTypes.hpp` | on | `BlendMode` and `BlendModeName` moved to `Krystal.Core/Colour/BlendMode.hpp` (2026-10-18, for Render2D's blend modes); `GraphicsTypes.hpp` keeps `using krys::BlendMode;`. `GradientSpreadMethod` moved to `Krystal.Core/Colour/GradientSpreadMethod.hpp` the same way (2026-10-18, for Render2D's gradients). |
 
 **Bugs fixed:**
 - `ColorType::Absolute` was `0`, so `IsColorKeyword(id, types)` never accepted absolute colour keywords; the other flags were off by one bit from upstream.

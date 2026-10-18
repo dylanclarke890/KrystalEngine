@@ -8,6 +8,8 @@
 #include "Krystal.Gfx/Render2D/PathRasteriser.hpp"
 #include <algorithm>
 #include <cmath>
+#include <functional>
+#include <limits>
 #include <numbers>
 
 namespace krys::gfx::tests
@@ -1752,5 +1754,421 @@ namespace krys::gfx::tests
       CHECK(Near(At(pixels, 3u, 1u), Blended(BlendMode::Multiply, backdrop, source), 2));
       CHECK(Near(At(pixels, 7u, 0u), Blended(BlendMode::Screen, backdrop, {128, 255, 128, 128}), 2));
     }
+  }
+
+  namespace
+  {
+    using GradientShape2D = decltype(Gradient2D::Shape);
+
+    /// @brief Black at offset 0 to white at 1.
+    KRYS_NODISCARD Gradient2D Greys(GradientShape2D shape,
+                                    GradientSpreadMethod spread = GradientSpreadMethod::Pad)
+    {
+      return {.Shape = shape,
+              .Stops = {{.Offset = 0.f, .Colour = {0.f, 0.f, 0.f, 1.f}},
+                        {.Offset = 1.f, .Colour = {1.f, 1.f, 1.f, 1.f}}},
+              .Spread = spread};
+    }
+
+    KRYS_NODISCARD double Spread(double t, GradientSpreadMethod spread)
+    {
+      switch (spread)
+      {
+        case GradientSpreadMethod::Repeat: return t - std::floor(t);
+        case GradientSpreadMethod::Reflect:
+        {
+          const double m = t - 2.0 * std::floor(t / 2.0);
+          return m > 1.0 ? 2.0 - m : m;
+        }
+        default: return t;
+      }
+    }
+
+    KRYS_NODISCARD Pixel Grey(double t)
+    {
+      const auto value = static_cast<uint8>(std::clamp(t, 0.0, 1.0) * 255.0 + 0.5);
+      return {value, value, value, 255};
+    }
+
+    /// @brief How many pixels differ by more than a step from the grey at the offset `offset(x, y)` gives
+    /// their centres; empty offsets expect transparent pixels, and NaN skips the pixel.
+    template <typename TFunc>
+    KRYS_NODISCARD uint32 GreyMismatches(const List<Pixel> &pixels, uint32 width, GradientSpreadMethod spread,
+                                         TFunc &&offset)
+    {
+      uint32 mismatches = 0u;
+      for (uint32 i = 0u; i < pixels.size(); ++i)
+      {
+        const double x = static_cast<double>(i % width) + 0.5;
+        const double y = static_cast<double>(i / width) + 0.5;
+        const Maybe<double> t = offset(x, y);
+        if (t && std::isnan(*t))
+        {
+          continue;
+        }
+        const Pixel expected = t ? Grey(Spread(*t, spread)) : Clear;
+        if (!Near(pixels[i], expected))
+        {
+          if (mismatches == 0u)
+          {
+            UNSCOPED_INFO("first mismatch at " << x << ", " << y << ": " << int(pixels[i][0]) << " for "
+                                               << int(expected[0]));
+          }
+          ++mismatches;
+        }
+      }
+      return mismatches;
+    }
+
+    /// @brief The largest offset whose circle, with a radius that isn't negative, passes through the point.
+    KRYS_NODISCARD Maybe<double> ConicalOffset(double x, double y, Vec2f c0, float r0, Vec2f c1, float r1)
+    {
+      const double cdx = c1.x - c0.x;
+      const double cdy = c1.y - c0.y;
+      const double px = x - c0.x;
+      const double py = y - c0.y;
+      const double dr = static_cast<double>(r1) - r0;
+      const double a = cdx * cdx + cdy * cdy - dr * dr;
+      const double b = px * cdx + py * cdy + r0 * dr;
+      const double c = px * px + py * py - static_cast<double>(r0) * r0;
+      List<double> roots;
+      if (a == 0.0)
+      {
+        if (b != 0.0)
+        {
+          roots.push_back(c / (2.0 * b));
+        }
+      }
+      else if (b * b - a * c >= 0.0)
+      {
+        roots.push_back((b + std::sqrt(b * b - a * c)) / a);
+        roots.push_back((b - std::sqrt(b * b - a * c)) / a);
+      }
+      std::sort(roots.begin(), roots.end(), std::greater<double> {});
+      for (const double t : roots)
+      {
+        if (r0 + t * dr >= 0.0)
+        {
+          return t;
+        }
+      }
+      return {};
+    }
+
+    constexpr double Skip = std::numeric_limits<double>::quiet_NaN();
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: fills linear gradients with each spread method",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(16u, 2u);
+    for (const auto spread :
+         {GradientSpreadMethod::Pad, GradientSpreadMethod::Repeat, GradientSpreadMethod::Reflect})
+    {
+      INFO("spread " << int(spread));
+      // The line runs over a quarter of the target, so the rest is padded or repeated.
+      const auto gradient = Greys(LinearGradient2D {{0.f, 0.f}, {4.f, 0.f}}, spread);
+      Draw([&](Renderer2D &renderer) { renderer.FillRect({0.f, 0.f, 16.f, 2.f}, gradient); });
+      CHECK(GreyMismatches(Read(), _width, spread, [](double x, double) -> Maybe<double> { return x / 4.0; })
+            == 0u);
+    }
+
+    // Down the target, and backwards along a diagonal.
+    const auto down = Greys(LinearGradient2D {{0.f, 0.f}, {0.f, 2.f}});
+    Draw([&](Renderer2D &renderer) { renderer.FillRect({0.f, 0.f, 16.f, 2.f}, down); });
+    CHECK(GreyMismatches(Read(), _width, GradientSpreadMethod::Pad,
+                         [](double, double y) -> Maybe<double> { return y / 2.0; })
+          == 0u);
+    const auto diagonal = Greys(LinearGradient2D {{16.f, 2.f}, {0.f, 0.f}});
+    Draw([&](Renderer2D &renderer) { renderer.FillRect({0.f, 0.f, 16.f, 2.f}, diagonal); });
+    CHECK(GreyMismatches(Read(), _width, GradientSpreadMethod::Pad, [](double x, double y) -> Maybe<double>
+                         { return ((16.0 - x) * 16.0 + (2.0 - y) * 2.0) / (16.0 * 16.0 + 2.0 * 2.0); })
+          == 0u);
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: keeps gradients' hard stops sharp", "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(8u, 1u);
+    const Gradient2D gradient {.Shape = LinearGradient2D {{0.f, 0.f}, {8.f, 0.f}},
+                               .Stops = {{.Offset = 0.f, .Colour = {1.f, 0.f, 0.f, 1.f}},
+                                         {.Offset = 0.5f, .Colour = {1.f, 0.f, 0.f, 1.f}},
+                                         {.Offset = 0.5f, .Colour = {0.f, 0.f, 1.f, 1.f}},
+                                         {.Offset = 1.f, .Colour = {0.f, 0.f, 1.f, 1.f}}}};
+    Draw([&](Renderer2D &renderer) { renderer.FillRect({0.f, 0.f, 8.f, 1.f}, gradient); });
+    auto pixels = Read();
+    CHECK(At(pixels, 0u, 0u) == Red);
+    CHECK(At(pixels, 3u, 0u) == Red);
+    CHECK(At(pixels, 4u, 0u) == Blue);
+    CHECK(At(pixels, 7u, 0u) == Blue);
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: fills radial gradients", "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(16u, 16u);
+
+    SECTION("One centre, growing from nothing, as CSS draws them")
+    {
+      for (const auto spread : {GradientSpreadMethod::Pad, GradientSpreadMethod::Repeat})
+      {
+        INFO("spread " << int(spread));
+        const auto gradient = Greys(RadialGradient2D {{8.f, 8.f}, {8.f, 8.f}, 0.f, 6.f}, spread);
+        Draw([&](Renderer2D &renderer) { renderer.FillRect({0.f, 0.f, 16.f, 16.f}, gradient); });
+        CHECK(GreyMismatches(Read(), _width, spread, [](double x, double y) -> Maybe<double>
+                             { return std::hypot(x - 8.0, y - 8.0) / 6.0; })
+              == 0u);
+      }
+    }
+
+    SECTION("Elliptical, squashed vertically about the centre")
+    {
+      const auto gradient = Greys(RadialGradient2D {{8.f, 8.f}, {8.f, 8.f}, 0.f, 8.f, 2.f});
+      Draw([&](Renderer2D &renderer) { renderer.FillRect({0.f, 0.f, 16.f, 16.f}, gradient); });
+      CHECK(GreyMismatches(Read(), _width, GradientSpreadMethod::Pad, [](double x, double y) -> Maybe<double>
+                           { return std::hypot(x - 8.0, (y - 8.0) * 2.0) / 8.0; })
+            == 0u);
+    }
+
+    SECTION("Two circles: a focal point inside the end circle")
+    {
+      const Vec2f c0 {5.f, 8.f};
+      const Vec2f c1 {8.f, 8.f};
+      const auto gradient = Greys(RadialGradient2D {c0, c1, 0.f, 7.f});
+      Draw([&](Renderer2D &renderer) { renderer.FillRect({0.f, 0.f, 16.f, 16.f}, gradient); });
+      CHECK(GreyMismatches(Read(), _width, GradientSpreadMethod::Pad,
+                           [&](double x, double y) { return ConicalOffset(x, y, c0, 0.f, c1, 7.f); })
+            == 0u);
+    }
+
+    SECTION("Two circles: a start circle larger than the end")
+    {
+      const Vec2f c0 {6.f, 6.f};
+      const Vec2f c1 {9.f, 10.f};
+      const auto gradient = Greys(RadialGradient2D {c0, c1, 7.f, 2.f}, GradientSpreadMethod::Reflect);
+      Draw([&](Renderer2D &renderer) { renderer.FillRect({0.f, 0.f, 16.f, 16.f}, gradient); });
+      CHECK(GreyMismatches(Read(), _width, GradientSpreadMethod::Reflect,
+                           [&](double x, double y) { return ConicalOffset(x, y, c0, 7.f, c1, 2.f); })
+            == 0u);
+    }
+
+    SECTION("Two circles of one size: a strip, with nothing beside it")
+    {
+      const Vec2f c0 {2.f, 8.f};
+      const Vec2f c1 {14.f, 8.f};
+      const auto gradient = Greys(RadialGradient2D {c0, c1, 2.f, 2.f});
+      Draw([&](Renderer2D &renderer) { renderer.FillRect({0.f, 0.f, 16.f, 16.f}, gradient); });
+      auto pixels = Read();
+      CHECK(At(pixels, 8u, 1u) == Clear);
+      CHECK(At(pixels, 8u, 14u) == Clear);
+      CHECK(GreyMismatches(pixels, _width, GradientSpreadMethod::Pad,
+                           [&](double x, double y) -> Maybe<double>
+                           {
+                             // The strip's edge isn't antialiased, so pixels next to it can go either way.
+                             const double across = std::abs(y - 8.0);
+                             if (across > 1.5 && across < 2.5)
+                             {
+                               return Skip;
+                             }
+                             return ConicalOffset(x, y, c0, 2.f, c1, 2.f);
+                           })
+            == 0u);
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: fills conic gradients clockwise from their angle",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(16u, 16u);
+    for (const float angle : {0.f, std::numbers::pi_v<float> / 2.f, -1.f})
+    {
+      INFO("angle " << angle);
+      const auto gradient = Greys(ConicGradient2D {{8.f, 8.f}, angle});
+      Draw([&](Renderer2D &renderer) { renderer.FillRect({0.f, 0.f, 16.f, 16.f}, gradient); });
+      CHECK(GreyMismatches(Read(), _width, GradientSpreadMethod::Pad,
+                           [&](double x, double y) -> Maybe<double>
+                           {
+                             // Up is 0, and angles go clockwise, as y points down. Near the centre and the
+                             // seam, a pixel's colour changes too fast to compare.
+                             const double dx = x - 8.0;
+                             const double dy = y - 8.0;
+                             double t = (std::atan2(dx, -dy) - angle) / (2.0 * std::numbers::pi);
+                             t -= std::floor(t);
+                             if (std::hypot(dx, dy) < 2.0 || t < 0.02 || t > 0.98)
+                             {
+                               return Skip;
+                             }
+                             return t;
+                           })
+            == 0u);
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: maps gradients through the transform and gradient space",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(16u, 2u);
+    // Local x is target x less 2, halved; the gradient's coordinates are a further 1 along.
+    const auto gradient = Greys(LinearGradient2D {{0.f, 0.f}, {4.f, 0.f}});
+    Draw(
+      [&](Renderer2D &renderer)
+      {
+        renderer.Translate(2.f, 0.f);
+        renderer.Scale(2.f, 1.f);
+        renderer.FillRect({-1.f, 0.f, 8.f, 2.f}, Paint2D {gradient, Transform2D::Translation(1.f, 0.f)});
+      });
+    CHECK(GreyMismatches(Read(), _width, GradientSpreadMethod::Pad,
+                         [](double x, double) -> Maybe<double> { return ((x - 2.0) / 2.0 - 1.0) / 4.0; })
+          == 0u);
+
+    // A gradient space that flattens the plane shows nothing.
+    Draw([&](Renderer2D &renderer)
+         { renderer.FillRect({0.f, 0.f, 16.f, 2.f}, Paint2D {gradient, Transform2D::Scale(0.f, 1.f)}); });
+    CHECK(Read()[0] == Clear);
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: paints gradients through masks, strokes, clips and layers",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(16u, 2u);
+    const auto gradient = Greys(LinearGradient2D {{0.f, 0.f}, {16.f, 0.f}});
+    auto alongX = [](double x, double) -> Maybe<double>
+    {
+      return x / 16.0;
+    };
+
+    SECTION("Paths")
+    {
+      Path2D path;
+      path.AddRect({0.f, 0.f, 16.f, 2.f});
+      Draw([&](Renderer2D &renderer) { renderer.FillPath(path, FillRule::NonZero, gradient); });
+      CHECK(GreyMismatches(Read(), _width, GradientSpreadMethod::Pad, alongX) == 0u);
+    }
+
+    SECTION("Strokes, in the current coordinates rather than the line's")
+    {
+      Draw([&](Renderer2D &renderer)
+           { renderer.StrokeLine({16.f, 1.f}, {0.f, 1.f}, {.Width = 2.f}, gradient); });
+      CHECK(GreyMismatches(Read(), _width, GradientSpreadMethod::Pad, alongX) == 0u);
+      Path2D path;
+      path.MoveTo({16.f, 1.f});
+      path.LineTo({0.f, 1.f});
+      Draw([&](Renderer2D &renderer) { renderer.StrokePath(path, {.Width = 2.f}, gradient); });
+      CHECK(GreyMismatches(Read(), _width, GradientSpreadMethod::Pad, alongX) == 0u);
+    }
+
+    SECTION("Clips and layers away from the target's corner")
+    {
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.ClipRoundedRect({{4.f, 0.f, 12.f, 2.f}, CornerRadii2D::Uniform(0.5f)});
+          renderer.BeginLayer(1.f);
+          renderer.FillRect({0.f, 0.f, 16.f, 2.f}, gradient);
+          renderer.EndLayer();
+        });
+      CHECK(GreyMismatches(Read(), _width, GradientSpreadMethod::Pad,
+                           [](double x, double) -> Maybe<double>
+                           {
+                             if (x < 4.0)
+                             {
+                               return {};
+                             }
+                             // The clip's rounded corners.
+                             return x < 5.0 || x > 15.0 ? Skip : x / 16.0;
+                           })
+            == 0u);
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: fills degenerate gradients with one colour",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(16u, 16u);
+    auto fill = [&](const Gradient2D &gradient)
+    {
+      Draw([&](Renderer2D &renderer) { renderer.FillRect({0.f, 0.f, 16.f, 16.f}, gradient); });
+      return Read();
+    };
+
+    // A line of no length is the last colour when padded and the average otherwise.
+    auto pixels = fill(Greys(LinearGradient2D {{4.f, 4.f}, {4.f, 4.f}}));
+    CHECK(At(pixels, 0u, 0u) == White);
+    CHECK(At(pixels, 15u, 15u) == White);
+    pixels = fill(Greys(LinearGradient2D {{4.f, 4.f}, {4.f, 4.f}}, GradientSpreadMethod::Repeat));
+    CHECK(Near(At(pixels, 0u, 0u), {128, 128, 128, 255}));
+
+    // Coinciding circles, padded: the first colour inside them and the last outside.
+    pixels = fill(Greys(RadialGradient2D {{8.f, 8.f}, {8.f, 8.f}, 4.f, 4.f}));
+    CHECK(At(pixels, 8u, 8u) == Pixel {0, 0, 0, 255});
+    CHECK(At(pixels, 1u, 1u) == White);
+    pixels = fill(Greys(RadialGradient2D {{8.f, 8.f}, {8.f, 8.f}, 4.f, 4.f}, GradientSpreadMethod::Reflect));
+    CHECK(Near(At(pixels, 8u, 8u), {128, 128, 128, 255}));
+
+    // One stop is a solid fill, none is nothing.
+    pixels = fill({.Shape = LinearGradient2D {{0.f, 0.f}, {16.f, 0.f}},
+                   .Stops = {{.Offset = 0.5f, .Colour = {0.f, 0.f, 1.f, 1.f}}}});
+    CHECK(At(pixels, 0u, 0u) == Blue);
+    CHECK(At(pixels, 15u, 15u) == Blue);
+    pixels = fill({.Shape = LinearGradient2D {{0.f, 0.f}, {16.f, 0.f}}});
+    CHECK(At(pixels, 0u, 0u) == Clear);
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: batches draws with the same gradient",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(16u, 2u);
+    const auto gradient = Greys(LinearGradient2D {{0.f, 0.f}, {16.f, 0.f}});
+    const auto other = Greys(LinearGradient2D {{16.f, 0.f}, {0.f, 0.f}});
+    Draw(
+      [&](Renderer2D &renderer)
+      {
+        renderer.FillRect({0.f, 0.f, 4.f, 2.f}, gradient);
+        renderer.FillRect({4.f, 0.f, 4.f, 2.f}, SRGBA<uint8> {255, 0, 0});
+        renderer.FillRect({8.f, 0.f, 4.f, 2.f}, gradient);
+      });
+    CHECK(_renderer->GetStats().Batches == 1u);
+    auto pixels = Read();
+    CHECK(At(pixels, 5u, 0u) == Red);
+    CHECK(Near(At(pixels, 9u, 0u), Grey(9.5 / 16.0)));
+
+    Draw(
+      [&](Renderer2D &renderer)
+      {
+        renderer.FillRect({0.f, 0.f, 8.f, 2.f}, gradient);
+        renderer.FillRect({8.f, 0.f, 8.f, 2.f}, other);
+      });
+    CHECK(_renderer->GetStats().Batches == 2u);
+    pixels = Read();
+    CHECK(Near(At(pixels, 1u, 0u), Grey(1.5 / 16.0)));
+    CHECK(Near(At(pixels, 9u, 0u), Grey(6.5 / 16.0)));
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: dithers gradients on 8-bit targets",
+                   "[Gfx][Render2D][GPU]")
+  {
+    // A quarter of a step above 100: undithered, every pixel would be 100; dithered by an 8-by-8 ordered
+    // pattern, about a quarter of them are 101 (16 exactly, but GPUs don't all round alike so near the
+    // threshold).
+    UseTarget(8u, 8u);
+    const float level = 100.25f / 255.f;
+    const Gradient2D gradient {.Shape = LinearGradient2D {{0.f, 0.f}, {8.f, 0.f}},
+                               .Stops = {{.Offset = 0.f, .Colour = {level, level, level, 1.f}},
+                                         {.Offset = 1.f, .Colour = {level, level, level, 1.f}}}};
+    Draw([&](Renderer2D &renderer) { renderer.FillRect({0.f, 0.f, 8.f, 8.f}, gradient); });
+    uint32 lower = 0u;
+    uint32 upper = 0u;
+    for (const auto &pixel : Read())
+    {
+      lower += pixel[0] == 100u ? 1u : 0u;
+      upper += pixel[0] == 101u ? 1u : 0u;
+    }
+    CHECK(lower + upper == 64u);
+    CHECK(upper >= 10u);
+    CHECK(upper <= 22u);
+
+    // Solid colours aren't dithered.
+    Draw([&](Renderer2D &renderer)
+         { renderer.FillRect({0.f, 0.f, 8.f, 8.f}, SRGBA<uint8> {100, 100, 100}); });
+    const auto pixels = Read();
+    CHECK(std::all_of(pixels.begin(), pixels.end(), [](const Pixel &pixel) { return pixel[0] == 100u; }));
   }
 }

@@ -16,7 +16,9 @@
 #include "Krystal.Gfx/Device.hpp"
 #include "Krystal.Gfx/Formats.hpp"
 #include "Krystal.Gfx/Handles.hpp"
+#include "Krystal.Gfx/Render2D/Gradient2D.hpp"
 #include "Krystal.Gfx/Render2D/MaskAtlas.hpp"
+#include "Krystal.Gfx/Render2D/Paint2D.hpp"
 #include "Krystal.Gfx/Render2D/Path2D.hpp"
 #include "Krystal.Gfx/Render2D/PathStroker.hpp"
 #include "Krystal.Gfx/Render2D/Rect2D.hpp"
@@ -88,6 +90,10 @@ namespace krys::gfx
   /// each layer gets a texture the size of what was drawn in it, within the clip, and its pass is recorded
   /// before the pass that composites it.
   ///
+  /// Fills and strokes take a `Paint2D`: a colour, or a gradient. A gradient's stops are flattened on the CPU
+  /// into stops linear in premultiplied encoded sRGB, and the shader finds each pixel's place in it; on 8-bit
+  /// targets, gradients are dithered.
+  ///
   /// Blend modes mix a draw with what's beneath it. Most read it: the pass is split before the draw and the
   /// pixels it reaches are copied. A swapchain can't be copied from, so in a frame that blends straight onto
   /// one, the frame is drawn into a texture first; what was in the window before isn't blended with.
@@ -140,6 +146,8 @@ namespace krys::gfx
       Mask = 1u << 3u,
       /// @brief The hole rect is cut out.
       Hole = 1u << 4u,
+      /// @brief The colour is multiplied by the batch's gradient.
+      GradientPaint = 1u << 5u,
     };
     /// @brief The instance's `BlendMode` is in the flags from this bit, for five bits.
     constexpr static uint32 BlendModeShift = 8u;
@@ -152,6 +160,8 @@ namespace krys::gfx
     constexpr static uint32 WindowLayer = NoLayer - 1u;
     /// @brief The most shape clips a chain holds.
     constexpr static uint32 MaxClips = 16u;
+    /// @brief A batch's state when it has no gradient.
+    constexpr static uint32 NoGradient = ~0u;
 
     struct DrawState
     {
@@ -226,8 +236,56 @@ namespace krys::gfx
     static_assert(sizeof(ClipUniforms) == 48u + 64u * MaxClips,
                   "ClipUniforms mirrors the shader's std140 block.");
 
-    /// @brief A run of instances drawn into one layer with one scissor, texture and blend mode. Untextured
-    /// instances join any batch.
+    enum GradientShape : uint32
+    {
+      LinearShape = 1u,
+      RadialShape = 2u,
+      ConicShape = 3u,
+    };
+
+    /// @brief A gradient as a frame keeps it, its stops in the frame's list.
+    struct GradientData
+    {
+      /// @brief `GradientShape`.
+      uint32 Shape {LinearShape};
+      GradientSpreadMethod Spread {GradientSpreadMethod::Pad};
+      /// @brief Maps target pixels into the shape's own space: along the line for a linear gradient (offset
+      /// 0 to 1 along x), centred on the first circle for a radial one, centred and turned to start along x
+      /// for a conic one.
+      Transform2D Inverse {};
+      /// @brief A radial gradient's second centre, relative to its first, then its start and end radii.
+      Array<float, 4> Radial {};
+      uint32 FirstStop {0u};
+      uint32 StopCount {0u};
+    };
+
+    /// @brief One gradient, as the shader reads it (std140).
+    struct GradientUniforms
+    {
+      uint32 Shape;
+      /// @brief `GradientSpreadMethod`.
+      uint32 Spread;
+      uint32 StopCount;
+      uint32 Padding;
+      Array<float, 4> InverseLinear;
+      /// @brief The inverse transform's E and F, then padding.
+      Array<float, 4> InverseTranslation;
+      Array<float, 4> Radial;
+      Array<float, detail::MaxGradientStops> Offsets;
+      Array<Array<float, 4>, detail::MaxGradientStops> Colours;
+    };
+    static_assert(sizeof(GradientUniforms) == 64u + 20u * detail::MaxGradientStops,
+                  "GradientUniforms mirrors the shader's std140 block.");
+
+    /// @brief A paint ready for an instance: its colour (white for a gradient) and gradient.
+    struct ResolvedPaint
+    {
+      Array<uint8, 4> Colour {};
+      uint32 Gradient {NoGradient};
+    };
+
+    /// @brief A run of instances drawn into one layer with one scissor, texture, gradient and blend mode.
+    /// Untextured, solid instances join any batch.
     struct Batch
     {
       uint32 FirstInstance {0u};
@@ -244,6 +302,9 @@ namespace krys::gfx
       /// @brief For a blend mode that reads what's beneath: the target pixels its instances reach, copied
       /// before it's drawn.
       PixelRect2D Backdrop {};
+      /// @brief The gradient its gradient instances read, an index into the frame's gradients, or
+      /// `NoGradient`.
+      uint32 Gradient {NoGradient};
     };
 
     struct Layer
@@ -292,6 +353,9 @@ namespace krys::gfx
       Array<float, 2> ViewportSize;
       /// @brief The target pixel at the viewport's top-left.
       Array<float, 2> Origin;
+      /// @brief How far gradients are dithered: a colour step of the target's format, or 0.
+      float Dither;
+      Array<float, 3> Padding;
     };
 
     /// @brief What every pass of a frame draws with.
@@ -343,6 +407,9 @@ namespace krys::gfx
     List<LayerTexture> _layerTextures {};
     /// @brief The backdrop copies `End` has recorded this frame.
     uint32 _backdropCopies {0u};
+    List<GradientData> _gradients {};
+    List<detail::FlatGradientStop> _gradientStops {};
+    List<detail::FlatGradientStop> _flattened {};
 
   public:
     /// @brief Compiles the shaders; pipelines are created per target format on first use.
@@ -391,30 +458,31 @@ namespace krys::gfx
     /// @brief Clips out a path in the current coordinates.
     void ClipOutPath(const Path2D &path, FillRule rule) noexcept;
 
-    void FillRect(const Rect2D &rect, SRGBA<uint8> colour) noexcept;
+    void FillRect(const Rect2D &rect, const Paint2D &paint) noexcept;
     /// @brief Fills a rounded rect. Negative radii are treated as zero, and radii that don't fit are scaled
     /// down together until they do, as CSS does for `border-radius`.
-    void FillRoundedRect(const RoundedRect2D &rect, SRGBA<uint8> colour) noexcept;
+    void FillRoundedRect(const RoundedRect2D &rect, const Paint2D &paint) noexcept;
     /// @brief Fills a rect except for a rounded rect inside it: a border's usual shape. Its radii are
     /// constrained as `FillRoundedRect`'s are.
     /// @note Holes have circular corners. For elliptical ones, fill a path with the rect and the hole under
     /// `FillRule::EvenOdd`.
-    void FillRectWithRoundedHole(const Rect2D &rect, const RoundedRect2D &hole, SRGBA<uint8> colour) noexcept;
+    void FillRectWithRoundedHole(const Rect2D &rect, const RoundedRect2D &hole,
+                                 const Paint2D &paint) noexcept;
 
     /// @brief Draws the `source` texels of a texture into `destination`, scaling to fit.
     void DrawImage(TextureHandle texture, const Rect2D &source, const Rect2D &destination,
                    const ImageOptions &options = {}) noexcept;
     /// @brief Fills a path under the fill rule. The path is rasterised on the CPU into a coverage mask, which
     /// is cached, so drawing the same path again (or moved by whole pixels) costs only the draw.
-    void FillPath(const Path2D &path, FillRule rule, SRGBA<uint8> colour) noexcept;
+    void FillPath(const Path2D &path, FillRule rule, const Paint2D &paint) noexcept;
 
     /// @brief Strokes a path. The stroke's outline is filled through a cached coverage mask, as `FillPath`
     /// fills; the outline is worked out on every call.
-    void StrokePath(const Path2D &path, const StrokeStyle &style, SRGBA<uint8> colour) noexcept;
+    void StrokePath(const Path2D &path, const StrokeStyle &style, const Paint2D &paint) noexcept;
     /// @brief Strokes a straight line, with its caps and dashes, without a mask: each dash is a rect (a
     /// rounded one under round caps, so dots are circles) under the line's transform. The style's join
-    /// and miter limit don't apply.
-    void StrokeLine(Vec2f from, Vec2f to, const StrokeStyle &style, SRGBA<uint8> colour) noexcept;
+    /// and miter limit don't apply. A gradient is in the current coordinates, not the line's.
+    void StrokeLine(Vec2f from, Vec2f to, const StrokeStyle &style, const Paint2D &paint) noexcept;
 
     /// @brief Draws the whole of a texture into `destination`.
     void DrawImage(TextureHandle texture, const Rect2D &destination,
@@ -443,12 +511,18 @@ namespace krys::gfx
     KRYS_NODISCARD Expected<void> Initialise() noexcept;
     KRYS_NODISCARD Expected<PipelineHandle> GetPipeline(TextureFormat format, bool additive) noexcept;
     /// @brief Adds a rounded rect in `transform`'s coordinates, its radii constrained.
-    void AddRoundedRect(const RoundedRect2D &rect, Array<uint8, 4> colour,
+    void AddRoundedRect(const RoundedRect2D &rect, const ResolvedPaint &paint,
                         const Transform2D &transform) noexcept;
     /// @brief Fills in the instance's transform and adds it to the batch it can join, or a new one; skips it
     /// when nothing would show.
     void AddInstance(RectInstance instance, const Transform2D &transform, TextureHandle texture,
-                     SamplerHandle sampler) noexcept;
+                     SamplerHandle sampler, uint32 gradient = NoGradient) noexcept;
+
+    /// @brief The paint's colour, or its gradient added to the frame under the current transform; nothing
+    /// when it shows nothing. A gradient that comes down to one colour is that colour.
+    KRYS_NODISCARD Maybe<ResolvedPaint> ResolvePaint(const Paint2D &paint) noexcept;
+    /// @brief Whether a paint certainly shows nothing, before the work of resolving it.
+    KRYS_NODISCARD static bool IsInvisible(const Paint2D &paint) noexcept;
 
     /// @brief Works out a finished layer's bounds and texture, and fills in its composite.
     void FinishLayer(uint32 index) noexcept;

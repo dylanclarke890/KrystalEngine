@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/WindRule.hpp"
 #include "Krystal.Core/Colour/BlendMode.hpp"
+#include "Krystal.Core/Colour/GradientSpreadMethod.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 
@@ -51,12 +52,7 @@ namespace krys::boo
     boo::Color Color;
   };
 
-  enum class GradientSpreadMethod : uint8
-  {
-    Pad,
-    Reflect,
-    Repeat
-  };
+  using krys::GradientSpreadMethod;
 
   // InterpolationQuality::Default
   // For ImagePaintingOptions, it means:

@@ -278,11 +278,58 @@ namespace krys
       _renderer->EndLayer();
 
       DrawBlendModes();
+      DrawGradients();
 
       _renderer->End();
     }
 
   private:
+    /// @brief The gradient sample: a turning linear gradient, a radial one with a circling focal point and a
+    /// turning conic one, then a bar interpolated in OKLCH the long way round and a subtle grey bar that
+    /// shows the dithering.
+    void DrawGradients() noexcept
+    {
+      using namespace gfx;
+      const ExtendedSRGBA<float> orange {1.f, 0.55f, 0.f, 1.f};
+      const ExtendedSRGBA<float> purple {0.45f, 0.2f, 0.9f, 1.f};
+
+      // The line turns about the tile's centre.
+      const Vec2f centre {1073.f, 593.f};
+      const Vec2f along {33.f * std::cos(_time), 33.f * std::sin(_time)};
+      const Gradient2D linear {
+        .Shape = LinearGradient2D {{centre.x - along.x, centre.y - along.y},
+                                   {centre.x + along.x, centre.y + along.y}},
+        .Stops = {{.Offset = 0.f, .Colour = orange}, {.Offset = 1.f, .Colour = purple}}};
+      _renderer->FillRoundedRect({{1040.f, 560.f, 66.f, 66.f}, CornerRadii2D::Uniform(10.f)}, linear);
+
+      const Vec2f focus {1153.f + 14.f * std::cos(_time * 1.3f), 593.f + 14.f * std::sin(_time * 1.3f)};
+      const Gradient2D radial {.Shape = RadialGradient2D {focus, {1153.f, 593.f}, 0.f, 33.f},
+                               .Stops = {{.Offset = 0.f, .Colour = {1.f, 1.f, 1.f, 1.f}},
+                                         {.Offset = 1.f, .Colour = {0.1f, 0.3f, 0.8f, 1.f}}}};
+      _renderer->FillRoundedRect({{1120.f, 560.f, 66.f, 66.f}, CornerRadii2D::Uniform(33.f)}, radial);
+
+      const Gradient2D conic {.Shape = ConicGradient2D {{1233.f, 593.f}, _time * 0.7f},
+                              .Stops = {{.Offset = 0.f, .Colour = {1.f, 0.2f, 0.2f, 1.f}},
+                                        {.Offset = 0.33f, .Colour = {1.f, 0.9f, 0.2f, 1.f}},
+                                        {.Offset = 0.5f, .Colour = {1.f, 0.9f, 0.2f, 1.f}},
+                                        {.Offset = 0.5f, .Colour = {0.2f, 0.7f, 1.f, 1.f}},
+                                        {.Offset = 1.f, .Colour = {1.f, 0.2f, 0.2f, 1.f}}}};
+      _renderer->FillRoundedRect({{1200.f, 560.f, 66.f, 66.f}, CornerRadii2D::Uniform(33.f)}, conic);
+
+      const Gradient2D hues {
+        .Shape = LinearGradient2D {{1040.f, 0.f}, {1266.f, 0.f}},
+        .Stops = {{.Offset = 0.f, .Colour = {1.f, 0.f, 0.f, 1.f}},
+                  {.Offset = 1.f, .Colour = {0.f, 0.f, 1.f, 1.f}}},
+        .Interpolation = {.ColourSpace = ColourInterpolationMethod::OKLCH {HueInterpolationMethod::Longer},
+                          .AlphaPremultiplication = AlphaPremultiplication::Premultiplied}};
+      _renderer->FillRoundedRect({{1040.f, 640.f, 226.f, 22.f}, CornerRadii2D::Uniform(4.f)}, hues);
+
+      const Gradient2D greys {.Shape = LinearGradient2D {{1040.f, 0.f}, {1266.f, 0.f}},
+                              .Stops = {{.Offset = 0.f, .Colour = {0.16f, 0.17f, 0.2f, 1.f}},
+                                        {.Offset = 1.f, .Colour = {0.24f, 0.25f, 0.29f, 1.f}}}};
+      _renderer->FillRoundedRect({{1040.f, 672.f, 226.f, 22.f}, CornerRadii2D::Uniform(4.f)}, greys);
+    }
+
     /// @brief The blend mode sample: circles bobbing over the image in multiply, screen, difference and
     /// color, then two opaque squares in a layer composited with multiply.
     void DrawBlendModes() noexcept

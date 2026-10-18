@@ -100,6 +100,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Colour/ColourTransferFunctions.hpp
       include/Krystal.Core/Colour/ColourTypes.hpp
       include/Krystal.Core/Colour/ColourUtilities.hpp
+      include/Krystal.Core/Colour/GradientSpreadMethod.hpp
 
       # Commands
       include/Krystal.Core/Commands/CommandArena.hpp

@@ -76,7 +76,9 @@ target_sources(Krystal.Gfx
       # Render2D
       include/Krystal.Gfx/Render2D/Dashing.hpp
       include/Krystal.Gfx/Render2D/Flattening.hpp
+      include/Krystal.Gfx/Render2D/Gradient2D.hpp
       include/Krystal.Gfx/Render2D/MaskAtlas.hpp
+      include/Krystal.Gfx/Render2D/Paint2D.hpp
       include/Krystal.Gfx/Render2D/Path2D.hpp
       include/Krystal.Gfx/Render2D/PathRasteriser.hpp
       include/Krystal.Gfx/Render2D/PathStroker.hpp
@@ -99,6 +101,7 @@ target_sources(Krystal.Gfx
     src/OpenGL/Hooks/gl.cpp
 
     # Render2D
+    src/Render2D/Gradient2D.cpp
     src/Render2D/MaskAtlas.cpp
     src/Render2D/Path2D.cpp
     src/Render2D/PathRasteriser.cpp
