@@ -4,11 +4,14 @@
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/String.hpp"
 
+namespace krys
+{
+  enum class ColourSpace : uint8;
+}
+
 namespace krys::boo
 {
   class Color;
-
-  enum class ColorSpace : uint8;
 
   /// @brief Returns the color serialised according to CSS.
   /// @see https://drafts.csswg.org/css-color-4/#serializing-color-values
@@ -22,5 +25,5 @@ namespace krys::boo
   KRYS_NODISCARD utf8_string SerialisationForRenderTreeAsText(const Color &color) noexcept;
 
   /// @brief Returns the CSS name of the color space, as used by `color()`.
-  KRYS_NODISCARD utf8_stringview Serialisation(ColorSpace colorSpace) noexcept;
+  KRYS_NODISCARD utf8_stringview Serialisation(ColourSpace colorSpace) noexcept;
 }

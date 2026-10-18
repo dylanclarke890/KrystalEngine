@@ -25,7 +25,7 @@ namespace krys::boo::style
       KRYS_NODISCARD bool operator==(const Component &) const noexcept = default;
     };
 
-    boo::ColorInterpolationMethod ColorInterpolationMethod;
+    krys::ColourInterpolationMethod ColourInterpolationMethod;
     Component MixComponents1;
     Component MixComponents2;
 

@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/CSS/Values/Color/ColorDescriptors.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
-#include "Krystal.Booey/Graphics/Color/ColorNormalization.hpp"
+#include "Krystal.Core/Colour/ColourNormalization.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include <limits>
 
@@ -15,7 +15,7 @@ namespace krys::boo::css
   {
     constexpr auto info = std::get<Index>(Descriptor::Components);
 
-    if constexpr (info.Type == ColorComponentType::Angle)
+    if constexpr (info.Type == ColourComponentType::Angle)
     {
       return {NormalizeHue(number.Value)};
     }
@@ -66,7 +66,7 @@ namespace krys::boo::css
   KRYS_NODISCARD css::Number<> NormaliseAndClampNumericComponents(css::AngleRaw<> angle) noexcept
   {
     constexpr auto info = std::get<Index>(Descriptor::Components);
-    static_assert(info.Type == ColorComponentType::Angle);
+    static_assert(info.Type == ColourComponentType::Angle);
 
     return {NormalizeHue(css::ConvertToValueInUnitsOf<css::AngleUnit::Deg>(angle))};
   }
@@ -121,7 +121,7 @@ namespace krys::boo::css
   {
     constexpr auto info = std::get<Index>(Descriptor::Components);
 
-    if constexpr (info.Type == ColorComponentType::Angle)
+    if constexpr (info.Type == ColourComponentType::Angle)
     {
       return {NormalizeHue(number.Value)};
     }
@@ -143,7 +143,7 @@ namespace krys::boo::css
   KRYS_NODISCARD css::Number<> NormaliseNumericComponents(css::AngleRaw<> angle) noexcept
   {
     constexpr auto info = std::get<Index>(Descriptor::Components);
-    static_assert(info.Type == ColorComponentType::Angle);
+    static_assert(info.Type == ColourComponentType::Angle);
 
     return {NormalizeHue(css::ConvertToValueInUnitsOf<css::AngleUnit::Deg>(angle))};
   }

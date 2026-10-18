@@ -16,7 +16,7 @@ namespace krys::boo::css::tests
 
     Method Standard()
     {
-      return Method {.Method = {ColorInterpolationMethod::OKLab {}, AlphaPremultiplication::Premultiplied},
+      return Method {.Method = {ColourInterpolationMethod::OKLab {}, AlphaPremultiplication::Premultiplied},
                      .DefaultMethod = Method::Default::OKLab};
     }
 
@@ -24,7 +24,7 @@ namespace krys::boo::css::tests
                     ValueId to = ValueId::Blue)
     {
       return FunctionNotation<ValueId::LinearGradient, LinearGradient> {
-        LinearGradient {.ColorInterpolationMethod = Standard(),
+        LinearGradient {.ColourInterpolationMethod = Standard(),
                         .GradientLine = krys::move(line),
                         .Stops = {GradientLinearColorStop {.Color = Keyword(from), .Position = {}},
                                   GradientLinearColorStop {.Color = Keyword(to), .Position = {}}}}};
@@ -33,7 +33,7 @@ namespace krys::boo::css::tests
     Gradient RepeatingLinear(LinearGradient::GradientLineType line)
     {
       return FunctionNotation<ValueId::RepeatingLinearGradient, LinearGradient> {LinearGradient {
-        .ColorInterpolationMethod = Standard(),
+        .ColourInterpolationMethod = Standard(),
         .GradientLine = krys::move(line),
         .Stops = {GradientLinearColorStop {.Color = Keyword(ValueId::Red), .Position = {}},
                   GradientLinearColorStop {.Color = Keyword(ValueId::Blue), .Position = {}}}}};

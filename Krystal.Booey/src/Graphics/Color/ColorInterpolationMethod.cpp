@@ -4,7 +4,7 @@
 namespace krys::boo
 {
   void SerialisationForCSS(StringBuilder &builder,
-                           ColorInterpolationColorSpace interpolationColorSpace) noexcept
+                           ColourInterpolationColourSpace interpolationColorSpace) noexcept
   {
     builder.Append(SerialisationForCSS(interpolationColorSpace));
   }
@@ -35,20 +35,20 @@ namespace krys::boo
     }
   }
 
-  void SerialisationForCSS(StringBuilder &builder, const ColorInterpolationMethod &method) noexcept
+  void SerialisationForCSS(StringBuilder &builder, const ColourInterpolationMethod &method) noexcept
   {
-    krys::SwitchOn(method.ColorSpace,
-                   [&]<typename MethodColorSpace>(const MethodColorSpace &type)
+    krys::SwitchOn(method.ColourSpace,
+                   [&]<typename MethodColourSpace>(const MethodColourSpace &type)
                    {
-                     SerialisationForCSS(builder, type.InterpolationColorSpace);
-                     if constexpr (hasHueInterpolationMethod<MethodColorSpace>)
+                     SerialisationForCSS(builder, type.InterpolationColourSpace);
+                     if constexpr (hasHueInterpolationMethod<MethodColourSpace>)
                      {
                        SerialisationForCSS(builder, type.HueInterpolationMethod);
                      }
                    });
   }
 
-  utf8_string SerialisationForCSS(const ColorInterpolationMethod &method) noexcept
+  utf8_string SerialisationForCSS(const ColourInterpolationMethod &method) noexcept
   {
     StringBuilder builder;
     SerialisationForCSS(builder, method);

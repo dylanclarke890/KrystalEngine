@@ -333,10 +333,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Transforms/AffineTransform.cpp
 		tests/Graphics/Color/Color.cpp
 		tests/Graphics/Color/ColorBlending.cpp
-		tests/Graphics/Color/ColorConversion.cpp
 		tests/Graphics/Color/ColorInterpolation.cpp
 		tests/Graphics/Color/ColorSerialisation.cpp
-		tests/Graphics/Color/ColorUtilities.cpp
 		tests/Graphics/Color/NamedColors.cpp
 		tests/Graphics/Transforms/Quaternion.cpp
 		tests/Graphics/Transforms/TransformExtras.cpp

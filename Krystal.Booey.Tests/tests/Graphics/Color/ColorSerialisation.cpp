@@ -126,22 +126,22 @@ namespace krys::boo::tests
 
   TEST_CASE("ColorSerialisation: color space names", "[Graphics][Color][Serialisation]")
   {
-    CHECK(Serialisation(ColorSpace::SRGB) == u8"srgb");
-    CHECK(Serialisation(ColorSpace::ExtendedSRGB) == u8"srgb");
-    CHECK(Serialisation(ColorSpace::LinearSRGB) == u8"srgb-linear");
-    CHECK(Serialisation(ColorSpace::ExtendedLinearSRGB) == u8"srgb-linear");
-    CHECK(Serialisation(ColorSpace::DisplayP3) == u8"display-p3");
-    CHECK(Serialisation(ColorSpace::LinearDisplayP3) == u8"display-p3-linear");
-    CHECK(Serialisation(ColorSpace::A98RGB) == u8"a98-rgb");
-    CHECK(Serialisation(ColorSpace::ProPhotoRGB) == u8"prophoto-rgb");
-    CHECK(Serialisation(ColorSpace::Rec2020) == u8"rec2020");
-    CHECK(Serialisation(ColorSpace::HSL) == u8"hsl");
-    CHECK(Serialisation(ColorSpace::HWB) == u8"hwb");
-    CHECK(Serialisation(ColorSpace::Lab) == u8"lab");
-    CHECK(Serialisation(ColorSpace::LCH) == u8"lch");
-    CHECK(Serialisation(ColorSpace::OKLab) == u8"oklab");
-    CHECK(Serialisation(ColorSpace::OKLCH) == u8"oklch");
-    CHECK(Serialisation(ColorSpace::XYZ_D50) == u8"xyz-d50");
-    CHECK(Serialisation(ColorSpace::XYZ_D65) == u8"xyz-d65");
+    CHECK(Serialisation(ColourSpace::SRGB) == u8"srgb");
+    CHECK(Serialisation(ColourSpace::ExtendedSRGB) == u8"srgb");
+    CHECK(Serialisation(ColourSpace::LinearSRGB) == u8"srgb-linear");
+    CHECK(Serialisation(ColourSpace::ExtendedLinearSRGB) == u8"srgb-linear");
+    CHECK(Serialisation(ColourSpace::DisplayP3) == u8"display-p3");
+    CHECK(Serialisation(ColourSpace::LinearDisplayP3) == u8"display-p3-linear");
+    CHECK(Serialisation(ColourSpace::A98RGB) == u8"a98-rgb");
+    CHECK(Serialisation(ColourSpace::ProPhotoRGB) == u8"prophoto-rgb");
+    CHECK(Serialisation(ColourSpace::Rec2020) == u8"rec2020");
+    CHECK(Serialisation(ColourSpace::HSL) == u8"hsl");
+    CHECK(Serialisation(ColourSpace::HWB) == u8"hwb");
+    CHECK(Serialisation(ColourSpace::Lab) == u8"lab");
+    CHECK(Serialisation(ColourSpace::LCH) == u8"lch");
+    CHECK(Serialisation(ColourSpace::OKLab) == u8"oklab");
+    CHECK(Serialisation(ColourSpace::OKLCH) == u8"oklch");
+    CHECK(Serialisation(ColourSpace::XYZ_D50) == u8"xyz-d50");
+    CHECK(Serialisation(ColourSpace::XYZ_D65) == u8"xyz-d65");
   }
 }

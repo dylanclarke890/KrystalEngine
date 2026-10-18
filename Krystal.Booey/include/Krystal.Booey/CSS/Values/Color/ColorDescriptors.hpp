@@ -5,8 +5,8 @@
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSymbolReplacement.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/Color/ColorTypes.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
+#include "Krystal.Core/Colour/ColourTypes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 #include <brigand/algorithms/transform.hpp>
@@ -53,7 +53,7 @@ namespace krys::boo::css
 
     /// @brief Component type for normalization. Angles get normalized using modular arithmetic, numbers get
     /// normalized using clamping.
-    ColorComponentType Type = ColorComponentType::Number;
+    ColourComponentType Type = ColourComponentType::Number;
   };
 
   /// @brief e.g. for GetComponent<ColorRGBFunction<SRGB<float>>, 2> ->
@@ -345,7 +345,7 @@ namespace krys::boo::css
     using L = ColorComponent<css::Percentage<>, css::Number<>, keywords::None>;
 
     constexpr static auto Components =
-      std::make_tuple(H {.Symbol = ValueId::H, .Type = ColorComponentType::Angle},
+      std::make_tuple(H {.Symbol = ValueId::H, .Type = ColourComponentType::Angle},
                       S {.Symbol = ValueId::S, .Min = 0.0, .PercentMultiplier = 1.0},
                       L {.Symbol = ValueId::L, .PercentMultiplier = 1.0}, AlphaComponent);
   };
@@ -368,7 +368,7 @@ namespace krys::boo::css
     using L = ColorComponent<css::Percentage<>>;
 
     constexpr static auto Components =
-      std::make_tuple(H {.Symbol = ValueId::H, .Type = ColorComponentType::Angle},
+      std::make_tuple(H {.Symbol = ValueId::H, .Type = ColourComponentType::Angle},
                       S {.Symbol = ValueId::S, .Min = 0.0, .PercentMultiplier = 1.0},
                       L {.Symbol = ValueId::L, .PercentMultiplier = 1.0}, AlphaLegacyComponent);
   };
@@ -392,7 +392,7 @@ namespace krys::boo::css
     using B = ColorComponent<css::Percentage<>, css::Number<>, keywords::None>;
 
     constexpr static auto Components =
-      std::make_tuple(H {.Symbol = ValueId::H, .Type = ColorComponentType::Angle},
+      std::make_tuple(H {.Symbol = ValueId::H, .Type = ColourComponentType::Angle},
                       W {.Symbol = ValueId::W, .PercentMultiplier = 1.0},
                       B {.Symbol = ValueId::B, .PercentMultiplier = 1.0}, AlphaComponent);
   };
@@ -441,7 +441,7 @@ namespace krys::boo::css
     constexpr static auto Components =
       std::make_tuple(L {.Symbol = ValueId::L, .Min = 0.0, .Max = 100.0, .PercentMultiplier = 1.0},
                       C {.Symbol = ValueId::C, .Min = 0.0, .PercentMultiplier = 150.0 / 100.0},
-                      H {.Symbol = ValueId::H, .Type = ColorComponentType::Angle}, AlphaComponent);
+                      H {.Symbol = ValueId::H, .Type = ColourComponentType::Angle}, AlphaComponent);
   };
 
   // oklab() = oklab( [from <color>]? [<percentage> | <number> | none]{3} [ / [<alpha-value> | none] ]? )
@@ -488,7 +488,7 @@ namespace krys::boo::css
     constexpr static auto Components =
       std::make_tuple(L {.Symbol = ValueId::L, .Min = 0.0, .Max = 1.0},
                       C {.Symbol = ValueId::C, .Min = 0.0, .PercentMultiplier = 0.4 / 100.0},
-                      H {.Symbol = ValueId::H, .Type = ColorComponentType::Angle}, AlphaComponent);
+                      H {.Symbol = ValueId::H, .Type = ColourComponentType::Angle}, AlphaComponent);
   };
 
   // color() = color( [from <color>]? <rgb-params> [ / [ <alpha-value> | none ] ]? )

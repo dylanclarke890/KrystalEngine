@@ -7,7 +7,7 @@
 #include <cmath>
 
 // Transfer functions for colors that can be Gamma encoded.
-namespace krys::boo
+namespace krys
 {
   enum class TransferFunctionMode : uint8
   {

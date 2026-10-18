@@ -23,7 +23,7 @@ namespace krys::boo::css
       KRYS_NODISCARD bool operator==(const Component &) const noexcept = default;
     };
 
-    boo::ColorInterpolationMethod ColorInterpolationMethod;
+    krys::ColourInterpolationMethod ColourInterpolationMethod;
     Component MixComponents1;
     Component MixComponents2;
 
@@ -31,7 +31,7 @@ namespace krys::boo::css
   };
 
   constexpr auto DefaultInterpolationMethodForColorMix =
-    ColorInterpolationMethod {ColorInterpolationMethod::OKLab {}, AlphaPremultiplication::Premultiplied};
+    ColourInterpolationMethod {ColourInterpolationMethod::OKLab {}, AlphaPremultiplication::Premultiplied};
 
   KRYS_NODISCARD boo::Color CreateColor(const ColorMix &unresolved,
                                         PlatformColorResolutionState &state) noexcept;

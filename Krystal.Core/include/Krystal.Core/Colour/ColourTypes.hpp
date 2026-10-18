@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/Color/ColorComponents.hpp"
-#include "Krystal.Booey/Graphics/Color/ColorMatrix.hpp"
-#include "Krystal.Booey/Graphics/Color/ColorModels.hpp"
-#include "Krystal.Booey/Graphics/Color/ColorTransferFunctions.hpp"
+#include "Krystal.Core/Colour/ColourComponents.hpp"
+#include "Krystal.Core/Colour/ColourMatrix.hpp"
+#include "Krystal.Core/Colour/ColourModels.hpp"
+#include "Krystal.Core/Colour/ColourTransferFunctions.hpp"
 
-namespace krys::boo
+namespace krys
 {
   enum class WhitePoint : uint8
   {
@@ -54,43 +54,43 @@ namespace krys::boo
   template <typename T>
   constexpr bool HasCanonicalTypeMember<T, void_t<typename T::CanonicalType>> = true;
 
-  template <typename ColorType, bool hasCononicalType>
-  struct CanonicalColorTypeHelper
+  template <typename ColourType, bool hasCononicalType>
+  struct CanonicalColourTypeHelper
   {
-    using type = ColorType;
+    using type = ColourType;
   };
 
-  template <typename ColorType>
-  struct CanonicalColorTypeHelper<ColorType, true>
+  template <typename ColourType>
+  struct CanonicalColourTypeHelper<ColourType, true>
   {
-    using type = typename ColorType::CanonicalType;
+    using type = typename ColourType::CanonicalType;
   };
 
-  template <typename ColorType>
-  using CanonicalColorType =
-    typename CanonicalColorTypeHelper<ColorType, HasCanonicalTypeMember<ColorType>>::type;
+  template <typename ColourType>
+  using CanonicalColourType =
+    typename CanonicalColourTypeHelper<ColourType, HasCanonicalTypeMember<ColourType>>::type;
 
-  template <typename ColorType, typename T>
-  KRYS_NODISCARD constexpr auto CreateFromComponents(const ColorComponents<T, 4> &c) noexcept
+  template <typename ColourType, typename T>
+  KRYS_NODISCARD constexpr auto CreateFromComponents(const ColourComponents<T, 4> &c) noexcept
   {
-    return CanonicalColorType<ColorType> {c[0], c[1], c[2], c[3]};
+    return CanonicalColourType<ColourType> {c[0], c[1], c[2], c[3]};
   }
 
-  template <typename ColorType, unsigned Index, typename T>
-  KRYS_NODISCARD constexpr auto ClampedComponent(T c) noexcept -> typename ColorType::ComponentType
+  template <typename ColourType, unsigned Index, typename T>
+  KRYS_NODISCARD constexpr auto ClampedComponent(T c) noexcept -> typename ColourType::ComponentType
   {
     static_assert(Integral<T>);
 
-    constexpr auto componentInfo = ColorType::Model::ComponentInfo[Index];
-    return static_cast<ColorType::ComponentType>(std::clamp<T>(c, componentInfo.Min, componentInfo.Max));
+    constexpr auto componentInfo = ColourType::Model::ComponentInfo[Index];
+    return static_cast<ColourType::ComponentType>(std::clamp<T>(c, componentInfo.Min, componentInfo.Max));
   }
 
-  template <typename ColorType, unsigned Index>
+  template <typename ColourType, unsigned Index>
   KRYS_NODISCARD constexpr float ClampedComponent(float c) noexcept
   {
-    constexpr auto componentInfo = ColorType::Model::ComponentInfo[Index];
+    constexpr auto componentInfo = ColourType::Model::ComponentInfo[Index];
 
-    if constexpr (componentInfo.Type == ColorComponentType::Angle)
+    if constexpr (componentInfo.Type == ColourComponentType::Angle)
     {
       return static_cast<float>(std::fmod(std::fmod(c, 360.0) + 360.0, 360.0));
     }
@@ -113,10 +113,10 @@ namespace krys::boo
     }
   }
 
-  template <typename ColorType, unsigned Index, typename T>
-  KRYS_NODISCARD constexpr T ClampedComponent(const ColorComponents<T, 4> &c) noexcept
+  template <typename ColourType, unsigned Index, typename T>
+  KRYS_NODISCARD constexpr T ClampedComponent(const ColourComponents<T, 4> &c) noexcept
   {
-    return ClampedComponent<ColorType, Index>(c[Index]);
+    return ClampedComponent<ColourType, Index>(c[Index]);
   }
 
   template <typename T, typename ComponentType = T>
@@ -126,68 +126,69 @@ namespace krys::boo
       std::clamp<T>(alpha, AlphaTraits<ComponentType>::Transparent, AlphaTraits<ComponentType>::Opaque));
   }
 
-  template <typename ColorType, typename T>
-  KRYS_NODISCARD constexpr ColorComponents<T, 4>
-    ClampedComponents(const ColorComponents<T, 4> &components) noexcept
+  template <typename ColourType, typename T>
+  KRYS_NODISCARD constexpr ColourComponents<T, 4>
+    ClampedComponents(const ColourComponents<T, 4> &components) noexcept
   {
-    return {ClampedComponent<ColorType, 0>(components), ClampedComponent<ColorType, 1>(components),
-            ClampedComponent<ColorType, 2>(components), ClampedAlpha(components[3])};
+    return {ClampedComponent<ColourType, 0>(components), ClampedComponent<ColourType, 1>(components),
+            ClampedComponent<ColourType, 2>(components), ClampedAlpha(components[3])};
   }
 
-  template <typename ColorType, typename T>
-  KRYS_NODISCARD constexpr ColorComponents<T, 4>
-    ClampedComponentsExceptAlpha(const ColorComponents<T, 4> &components) noexcept
+  template <typename ColourType, typename T>
+  KRYS_NODISCARD constexpr ColourComponents<T, 4>
+    ClampedComponentsExceptAlpha(const ColourComponents<T, 4> &components) noexcept
   {
-    return {ClampedComponent<ColorType, 0>(components), ClampedComponent<ColorType, 1>(components),
-            ClampedComponent<ColorType, 2>(components), components[3]};
+    return {ClampedComponent<ColourType, 0>(components), ClampedComponent<ColourType, 1>(components),
+            ClampedComponent<ColourType, 2>(components), components[3]};
   }
 
-  template <typename ColorType, typename T>
-  KRYS_NODISCARD constexpr auto CreateFromComponentsClamping(const ColorComponents<T, 4> &components) noexcept
+  template <typename ColourType, typename T>
+  KRYS_NODISCARD constexpr auto
+    CreateFromComponentsClamping(const ColourComponents<T, 4> &components) noexcept
   {
-    return CreateFromComponents<ColorType>(ClampedComponents<ColorType>(components));
+    return CreateFromComponents<ColourType>(ClampedComponents<ColourType>(components));
   }
 
-  template <typename ColorType, typename T>
+  template <typename ColourType, typename T>
   KRYS_NODISCARD constexpr auto CreateFromComponentsClamping(T c1, T c2, T c3) noexcept
   {
-    return CreateFromComponents<ColorType>(ColorComponents {
-      ClampedComponent<ColorType, 0>(c1), ClampedComponent<ColorType, 1>(c2),
-      ClampedComponent<ColorType, 2>(c3), AlphaTraits<typename ColorType::ComponentType>::Opaque});
+    return CreateFromComponents<ColourType>(ColourComponents {
+      ClampedComponent<ColourType, 0>(c1), ClampedComponent<ColourType, 1>(c2),
+      ClampedComponent<ColourType, 2>(c3), AlphaTraits<typename ColourType::ComponentType>::Opaque});
   }
 
-  template <typename ColorType, typename T>
+  template <typename ColourType, typename T>
   KRYS_NODISCARD constexpr auto CreateFromComponentsClamping(T c1, T c2, T c3, T alpha) noexcept
   {
-    return CreateFromComponents<ColorType>(ColorComponents {
-      ClampedComponent<ColorType, 0>(c1), ClampedComponent<ColorType, 1>(c2),
-      ClampedComponent<ColorType, 2>(c3), ClampedAlpha<T, typename ColorType::ComponentType>(alpha)});
+    return CreateFromComponents<ColourType>(ColourComponents {
+      ClampedComponent<ColourType, 0>(c1), ClampedComponent<ColourType, 1>(c2),
+      ClampedComponent<ColourType, 2>(c3), ClampedAlpha<T, typename ColourType::ComponentType>(alpha)});
   }
 
-  template <typename ColorType, typename T>
+  template <typename ColourType, typename T>
   KRYS_NODISCARD constexpr auto
-    CreateFromComponentsClampingExceptAlpha(const ColorComponents<T, 4> &components) noexcept
+    CreateFromComponentsClampingExceptAlpha(const ColourComponents<T, 4> &components) noexcept
   {
-    return CreateFromComponents<ColorType>(ClampedComponentsExceptAlpha<ColorType>(components));
+    return CreateFromComponents<ColourType>(ClampedComponentsExceptAlpha<ColourType>(components));
   }
 
-  template <typename ColorType, typename T, typename Alpha>
+  template <typename ColourType, typename T, typename Alpha>
   KRYS_NODISCARD constexpr auto CreateFromComponentsClampingExceptAlpha(T c1, T c2, T c3,
                                                                         Alpha alpha) noexcept
   {
-    return CreateFromComponents<ColorType>(ColorComponents {ClampedComponent<ColorType, 0>(c1),
-                                                            ClampedComponent<ColorType, 1>(c2),
-                                                            ClampedComponent<ColorType, 2>(c3), alpha});
+    return CreateFromComponents<ColourType>(ColourComponents {ClampedComponent<ColourType, 0>(c1),
+                                                              ClampedComponent<ColourType, 1>(c2),
+                                                              ClampedComponent<ColourType, 2>(c3), alpha});
   }
 
   // TODO: enable if asserts are enabled
 #if 0
 
-  template <typename ColorType>
-  constexpr void AssertInRange(ColorType color) noexcept
-  requires SameType<typename ColorType::ComponentType, float>
+  template <typename ColourType>
+  constexpr void AssertInRange(ColourType color) noexcept
+  requires SameType<typename ColourType::ComponentType, float>
   {
-    auto components = AsColorComponents(color.Unresolved());
+    auto components = AsColourComponents(color.Unresolved());
     for (size_t i = 0uz; i < 3uz; ++i)
     {
       if (IsNaN(components[i]))
@@ -195,25 +196,25 @@ namespace krys::boo
         continue;
       }
 
-      // "Component at index %d is %f and is less than the allowed minimum %f", i, components[i], ColorType::Model::ComponentInfo[i].Min
-      krys_assert(components[i] >= ColorType::Model::ComponentInfo[i].Min);
+      // "Component at index %d is %f and is less than the allowed minimum %f", i, components[i], ColourType::Model::ComponentInfo[i].Min
+      krys_assert(components[i] >= ColourType::Model::ComponentInfo[i].Min);
       
-      // "Component at index %d is %f and is greater than the allowed maximum %f", i, components[i], ColorType::Model::ComponentInfo[i].Max)
-      krys_assert(components[i] <= ColorType::Model::ComponentInfo[i].Max;
+      // "Component at index %d is %f and is greater than the allowed maximum %f", i, components[i], ColourType::Model::ComponentInfo[i].Max)
+      krys_assert(components[i] <= ColourType::Model::ComponentInfo[i].Max;
     }
 
     if (!IsNaN(components[3]))
     {
-      // "Alpha is %f and is less than the allowed minimum (transparent) %f", components[3], AlphaTraits<typename ColorType::ComponentType>::Transparent
-      krys_assert(components[3] >= AlphaTraits<typename ColorType::ComponentType>::Transparent);
-      // "Alpha is %f and is greater than the allowed maximum (opaque) %f", components[3], AlphaTraits<typename ColorType::ComponentType>::Opaque
-      krys_assert(components[3] <= AlphaTraits<typename ColorType::ComponentType>::Opaque);
+      // "Alpha is %f and is less than the allowed minimum (transparent) %f", components[3], AlphaTraits<typename ColourType::ComponentType>::Transparent
+      krys_assert(components[3] >= AlphaTraits<typename ColourType::ComponentType>::Transparent);
+      // "Alpha is %f and is greater than the allowed maximum (opaque) %f", components[3], AlphaTraits<typename ColourType::ComponentType>::Opaque
+      krys_assert(components[3] <= AlphaTraits<typename ColourType::ComponentType>::Opaque);
     }
   }
 
-  template <typename ColorType>
-  constexpr void AssertInRange(ColorType) noexcept
-  requires SameType<typename ColorType::ComponentType, uint8>
+  template <typename ColourType>
+  constexpr void AssertInRange(ColourType) noexcept
+  requires SameType<typename ColourType::ComponentType, uint8>
   {
   }
 
@@ -227,7 +228,7 @@ namespace krys::boo
 #endif
 
   template <typename T>
-  concept IsConvertibleToColorComponents = requires(T t) { AsColorComponents(t.Unresolved()); };
+  concept IsConvertibleToColourComponents = requires(T t) { AsColourComponents(t.Unresolved()); };
 
   template <typename, typename = void>
   constexpr bool HasComponentTypeMember = false;
@@ -245,27 +246,27 @@ namespace krys::boo
   constexpr bool HasComponentType = HasComponentTypeValue<T, U, HasComponentTypeMember<T>>;
 
   template <typename T>
-  constexpr bool IsColorType = IsConvertibleToColorComponents<T> && HasComponentTypeMember<T>;
+  constexpr bool IsColourType = IsConvertibleToColourComponents<T> && HasComponentTypeMember<T>;
 
   template <typename T, typename U>
-  concept IsColorTypeWithComponentType = IsConvertibleToColorComponents<T> && HasComponentType<T, U>;
+  concept IsColourTypeWithComponentType = IsConvertibleToColourComponents<T> && HasComponentType<T, U>;
 
-  template <template <typename> class ColorType, typename Replacement>
-  struct ColorTypeReplacingComponentTypeHelper
+  template <template <typename> class ColourType, typename Replacement>
+  struct ColourTypeReplacingComponentTypeHelper
   {
-    using type = ColorType<Replacement>;
+    using type = ColourType<Replacement>;
   };
 
-  template <template <typename> class ColorType, typename Replacement>
-  using ColorTypeReplacingComponentType =
-    typename ColorTypeReplacingComponentTypeHelper<ColorType, Replacement>::type;
+  template <template <typename> class ColourType, typename Replacement>
+  using ColourTypeReplacingComponentType =
+    typename ColourTypeReplacingComponentTypeHelper<ColourType, Replacement>::type;
 
   template <typename Parent>
-  struct ColorWithAlphaHelper
+  struct ColourWithAlphaHelper
   {
     // Helper to allow convenient syntax for working with color types.
-    // e.g. auto yellowWith50PercentAlpha = Color::yellow.ColorWithAlphaByte(128);
-    KRYS_NODISCARD constexpr Parent ColorWithAlphaByte(uint8 overrideAlpha) const noexcept
+    // e.g. auto yellowWith50PercentAlpha = Color::yellow.ColourWithAlphaByte(128);
+    KRYS_NODISCARD constexpr Parent ColourWithAlphaByte(uint8 overrideAlpha) const noexcept
     {
       static_assert(SameType<typename Parent::ComponentType, uint8>,
                     "Only uint8 based color types are supported.");
@@ -276,16 +277,16 @@ namespace krys::boo
     }
   };
 
-  template <IsConvertibleToColorComponents ColorType>
-  KRYS_NODISCARD constexpr bool operator==(const ColorType &a, const ColorType &b) noexcept
+  template <IsConvertibleToColourComponents ColourType>
+  KRYS_NODISCARD constexpr bool operator==(const ColourType &a, const ColourType &b) noexcept
   {
-    return AsColorComponents(a.Unresolved()) == AsColorComponents(b.Unresolved());
+    return AsColourComponents(a.Unresolved()) == AsColourComponents(b.Unresolved());
   }
 
   // MARK: - RGB Color Types.
 
-  template <typename T, typename D, typename ColorType, typename M, typename TF>
-  struct RGBAType : ColorWithAlphaHelper<ColorType>
+  template <typename T, typename D, typename ColourType, typename M, typename TF>
+  struct RGBAType : ColourWithAlphaHelper<ColourType>
   {
     using ComponentType = T;
     using Model = M;
@@ -304,7 +305,7 @@ namespace krys::boo
     constexpr RGBAType(T red, T green, T blue, T alpha = AlphaTraits<T>::Opaque) noexcept
         : Red {red}, Green {green}, Blue {blue}, Alpha {alpha}
     {
-      AssertInRange(*static_cast<const ColorType *>(this));
+      AssertInRange(*static_cast<const ColourType *>(this));
     }
 
     constexpr RGBAType() noexcept : RGBAType {0, 0, 0, 0}
@@ -313,12 +314,12 @@ namespace krys::boo
 
     KRYS_NODISCARD constexpr auto Resolved() const noexcept
     {
-      return ResolvedColor(*static_cast<const ColorType *>(this));
+      return ResolvedColour(*static_cast<const ColourType *>(this));
     }
 
     KRYS_NODISCARD constexpr auto Unresolved() const noexcept
     {
-      return UnresolvedColor(*static_cast<const ColorType *>(this));
+      return UnresolvedColour(*static_cast<const ColourType *>(this));
     }
   };
 
@@ -387,122 +388,124 @@ namespace krys::boo
   template <typename, typename = void>
   constexpr bool HasDescriptorMember = false;
 
-  template <typename ColorType>
-  constexpr bool HasDescriptorMember<ColorType, void_t<typename ColorType::Descriptor>> = true;
+  template <typename ColourType>
+  constexpr bool HasDescriptorMember<ColourType, void_t<typename ColourType::Descriptor>> = true;
 
   template <typename, typename = void>
   constexpr bool HasExtendedCounterpartMember = false;
 
-  template <typename ColorType>
-  constexpr bool HasExtendedCounterpartMember<ColorType, void_t<typename ColorType::ExtendedCounterpart>> =
+  template <typename ColourType>
+  constexpr bool HasExtendedCounterpartMember<ColourType, void_t<typename ColourType::ExtendedCounterpart>> =
     true;
 
   template <typename, typename = void>
   constexpr bool HasBoundedCounterpartMember = false;
 
-  template <typename ColorType>
-  constexpr bool HasBoundedCounterpartMember<ColorType, void_t<typename ColorType::BoundedCounterpart>> =
+  template <typename ColourType>
+  constexpr bool HasBoundedCounterpartMember<ColourType, void_t<typename ColourType::BoundedCounterpart>> =
     true;
 
   template <typename, typename = void>
   constexpr bool HasGammaEncodedCounterpartMember = false;
 
-  template <typename ColorType>
+  template <typename ColourType>
   constexpr bool
-    HasGammaEncodedCounterpartMember<ColorType, void_t<typename ColorType::GammaEncodedCounterpart>> = true;
+    HasGammaEncodedCounterpartMember<ColourType, void_t<typename ColourType::GammaEncodedCounterpart>> = true;
 
   template <typename, typename = void>
   constexpr bool HasLinearCounterpartMember = false;
 
-  template <typename ColorType>
-  constexpr bool HasLinearCounterpartMember<ColorType, void_t<typename ColorType::LinearCounterpart>> = true;
+  template <typename ColourType>
+  constexpr bool HasLinearCounterpartMember<ColourType, void_t<typename ColourType::LinearCounterpart>> =
+    true;
 
   template <typename, typename = void>
   constexpr bool HasSelfWithReplacementComponentMember = false;
 
-  template <typename ColorType>
+  template <typename ColourType>
   constexpr bool HasSelfWithReplacementComponentMember<
-    ColorType, void_t<typename ColorType::SelfWithReplacementComponent>> = true;
+    ColourType, void_t<typename ColourType::SelfWithReplacementComponent>> = true;
 
-  template <typename ColorType, typename Replacement>
-  using ColorTypeWithReplacementComponent =
-    typename ColorType::template SelfWithReplacementComponent<Replacement>;
+  template <typename ColourType, typename Replacement>
+  using ColourTypeWithReplacementComponent =
+    typename ColourType::template SelfWithReplacementComponent<Replacement>;
 
-  template <typename ColorType>
-  constexpr bool IsRGBType = HasDescriptorMember<ColorType>;
+  template <typename ColourType>
+  constexpr bool IsRGBType = HasDescriptorMember<ColourType>;
 
-  template <typename ColorType>
-  constexpr bool IsRGBExtendedType = IsRGBType<ColorType> && HasBoundedCounterpartMember<ColorType>;
+  template <typename ColourType>
+  constexpr bool IsRGBExtendedType = IsRGBType<ColourType> && HasBoundedCounterpartMember<ColourType>;
 
-  template <typename ColorType>
-  constexpr bool IsRGBBoundedType = IsRGBType<ColorType> && HasExtendedCounterpartMember<ColorType>;
+  template <typename ColourType>
+  constexpr bool IsRGBBoundedType = IsRGBType<ColourType> && HasExtendedCounterpartMember<ColourType>;
 
-  template <typename ColorType>
-  constexpr bool IsRGBGammaEncodedType = IsRGBType<ColorType> && HasLinearCounterpartMember<ColorType>;
+  template <typename ColourType>
+  constexpr bool IsRGBGammaEncodedType = IsRGBType<ColourType> && HasLinearCounterpartMember<ColourType>;
 
-  template <typename ColorType>
-  constexpr bool IsRGBLinearEncodedType = IsRGBType<ColorType> && HasGammaEncodedCounterpartMember<ColorType>;
+  template <typename ColourType>
+  constexpr bool IsRGBLinearEncodedType =
+    IsRGBType<ColourType> && HasGammaEncodedCounterpartMember<ColourType>;
 
-  template <typename ColorType1, typename ColorType2, bool enabled>
+  template <typename ColourType1, typename ColourType2, bool enabled>
   constexpr bool IsSameRGBTypeFamilyValue = false;
 
-  template <typename ColorType1, typename ColorType2>
-  constexpr bool IsSameRGBTypeFamilyValue<ColorType1, ColorType2, true> =
-    SameType<typename ColorType1::Descriptor, typename ColorType2::Descriptor>;
+  template <typename ColourType1, typename ColourType2>
+  constexpr bool IsSameRGBTypeFamilyValue<ColourType1, ColourType2, true> =
+    SameType<typename ColourType1::Descriptor, typename ColourType2::Descriptor>;
 
-  template <typename ColorType1, typename ColorType2>
+  template <typename ColourType1, typename ColourType2>
   constexpr bool IsSameRGBTypeFamily =
-    IsSameRGBTypeFamilyValue<ColorType1, ColorType2, IsRGBType<ColorType1> && IsRGBType<ColorType2>>;
+    IsSameRGBTypeFamilyValue<ColourType1, ColourType2, IsRGBType<ColourType1> && IsRGBType<ColourType2>>;
 
-  template <typename BoundedColorType>
-  KRYS_NODISCARD constexpr bool InGamut(typename BoundedColorType::ComponentType component) noexcept
+  template <typename BoundedColourType>
+  KRYS_NODISCARD constexpr bool InGamut(typename BoundedColourType::ComponentType component) noexcept
   {
-    static_assert(IsRGBBoundedType<BoundedColorType>);
+    static_assert(IsRGBBoundedType<BoundedColourType>);
 
     return component >= 0.0f && component <= 1.0f;
   }
 
-  template <typename BoundedColorType>
+  template <typename BoundedColourType>
   KRYS_NODISCARD constexpr bool
-    InGamut(ColorComponents<typename BoundedColorType::ComponentType, 4> components) noexcept
+    InGamut(ColourComponents<typename BoundedColourType::ComponentType, 4> components) noexcept
   {
-    static_assert(IsRGBBoundedType<BoundedColorType>);
+    static_assert(IsRGBBoundedType<BoundedColourType>);
 
-    return InGamut<BoundedColorType>(components[0]) && InGamut<BoundedColorType>(components[1])
-           && InGamut<BoundedColorType>(components[2]);
+    return InGamut<BoundedColourType>(components[0]) && InGamut<BoundedColourType>(components[1])
+           && InGamut<BoundedColourType>(components[2]);
   }
 
-  template <typename BoundedColorType, typename ColorType>
-  KRYS_NODISCARD constexpr bool InGamut(ColorType color) noexcept
+  template <typename BoundedColourType, typename ColourType>
+  KRYS_NODISCARD constexpr bool InGamut(ColourType color) noexcept
   {
-    static_assert(IsRGBBoundedType<BoundedColorType>);
-    static_assert(SameType<BoundedColorType, typename ColorType::BoundedCounterpart>);
+    static_assert(IsRGBBoundedType<BoundedColourType>);
+    static_assert(SameType<BoundedColourType, typename ColourType::BoundedCounterpart>);
 
-    return InGamut<BoundedColorType>(AsColorComponents(color.Resolved()));
+    return InGamut<BoundedColourType>(AsColourComponents(color.Resolved()));
   }
 
-  template <typename BoundedColorType, typename ColorType>
-  KRYS_NODISCARD constexpr Maybe<BoundedColorType> ColorIfInGamut(ColorType color) noexcept
+  template <typename BoundedColourType, typename ColourType>
+  KRYS_NODISCARD constexpr Maybe<BoundedColourType> ColourIfInGamut(ColourType color) noexcept
   {
-    static_assert(IsRGBBoundedType<BoundedColorType>);
-    static_assert(SameType<BoundedColorType, typename ColorType::BoundedCounterpart>);
+    static_assert(IsRGBBoundedType<BoundedColourType>);
+    static_assert(SameType<BoundedColourType, typename ColourType::BoundedCounterpart>);
 
-    auto components = AsColorComponents(color.Resolved());
-    if (!InGamut<BoundedColorType>(components))
+    auto components = AsColourComponents(color.Resolved());
+    if (!InGamut<BoundedColourType>(components))
     {
       return null;
     }
 
-    return CreateFromComponents<BoundedColorType>(components);
+    return CreateFromComponents<BoundedColourType>(components);
   }
 
-  template <typename BoundedColorType, typename ColorType>
-  KRYS_NODISCARD constexpr BoundedColorType ClipToGamut(ColorType color) noexcept
+  template <typename BoundedColourType, typename ColourType>
+  KRYS_NODISCARD constexpr BoundedColourType ClipToGamut(ColourType color) noexcept
   {
-    static_assert(IsRGBBoundedType<BoundedColorType>);
-    static_assert(SameType<BoundedColorType, typename ColorType::BoundedCounterpart>);
+    static_assert(IsRGBBoundedType<BoundedColourType>);
+    static_assert(SameType<BoundedColourType, typename ColourType::BoundedCounterpart>);
 
-    return CreateFromComponentsClampingExceptAlpha<BoundedColorType>(AsColorComponents(color.Resolved()));
+    return CreateFromComponentsClampingExceptAlpha<BoundedColourType>(AsColourComponents(color.Resolved()));
   }
 
   struct SRGBADescriptor
@@ -510,14 +513,14 @@ namespace krys::boo
     template <typename T, TransferFunctionMode Mode>
     using TransferFunction = SRGBTransferFunction<T, Mode>;
 
-    constexpr static auto WhitePoint = boo::WhitePoint::D65;
+    constexpr static auto WhitePoint = krys::WhitePoint::D65;
 
     // https://drafts.csswg.org/css-color/#color-conversion-code
-    constexpr static ColorMatrix<3, 3> XyzToLinear {
+    constexpr static ColourMatrix<3, 3> XyzToLinear {
       12831.0 / 3959.0,   -329.0 / 214.0,  -1974.0 / 3959.0,  -851781.0 / 878810.0, 1648619.0 / 878810.0,
       36519.0 / 878810.0, 705.0 / 12673.0, -2585.0 / 12673.0, 705.0 / 667.0,
     };
-    constexpr static ColorMatrix<3, 3> LinearToXYZ {
+    constexpr static ColourMatrix<3, 3> LinearToXYZ {
       506752.0 / 1228815.0, 87881.0 / 245763.0,  12673.0 / 70218.0,
       87098.0 / 409605.0,   175762.0 / 245763.0, 12673.0 / 175545.0,
       7918.0 / 409605.0,    87881.0 / 737289.0,  1001167.0 / 1053270.0,
@@ -541,16 +544,16 @@ namespace krys::boo
     template <typename T, TransferFunctionMode Mode>
     using TransferFunction = A98RGBTransferFunction<T, Mode>;
 
-    constexpr static auto WhitePoint = boo::WhitePoint::D65;
+    constexpr static auto WhitePoint = krys::WhitePoint::D65;
 
     // https://drafts.csswg.org/css-color/#color-conversion-code
-    constexpr static ColorMatrix<3, 3> XyzToLinear {
+    constexpr static ColourMatrix<3, 3> XyzToLinear {
       1829569.0 / 896150.0, -506331.0 / 896150.0,  -308931.0 / 896150.0,
       -851781.0 / 878810.0, 1648619.0 / 878810.0,  36519.0 / 878810.0,
       16779.0 / 1248040.0,  -147721.0 / 1248040.0, 1266979.0 / 1248040.0,
     };
 
-    constexpr static ColorMatrix<3, 3> LinearToXYZ {
+    constexpr static ColourMatrix<3, 3> LinearToXYZ {
       573536.0 / 994567.0,  263643.0 / 1420810.0,  187206.0 / 994567.0,
       591459.0 / 1989134.0, 6239551.0 / 9945670.0, 374412.0 / 4972835.0,
       53769.0 / 1989134.0,  351524.0 / 4972835.0,  4929758.0 / 4972835.0,
@@ -574,15 +577,15 @@ namespace krys::boo
     template <typename T, TransferFunctionMode Mode>
     using TransferFunction = SRGBTransferFunction<T, Mode>;
 
-    constexpr static auto WhitePoint = boo::WhitePoint::D65;
+    constexpr static auto WhitePoint = krys::WhitePoint::D65;
 
     // https://drafts.csswg.org/css-color/#color-conversion-code
-    constexpr static ColorMatrix<3, 3> XyzToLinear {
+    constexpr static ColourMatrix<3, 3> XyzToLinear {
       446124.0 / 178915.0, -333277.0 / 357830.0, -72051.0 / 178915.0, -14852.0 / 17905.0,  63121.0 / 35810.0,
       423.0 / 17905.0,     11844.0 / 330415.0,   -50337.0 / 660830.0, 316169.0 / 330415.0,
     };
 
-    constexpr static ColorMatrix<3, 3> LinearToXYZ {
+    constexpr static ColourMatrix<3, 3> LinearToXYZ {
       608311.0 / 1250200.0,
       189793.0 / 714400.0,
       198249.0 / 1000160.0,
@@ -612,15 +615,15 @@ namespace krys::boo
     template <typename T, TransferFunctionMode Mode>
     using TransferFunction = ProPhotoRGBTransferFunction<T, Mode>;
 
-    constexpr static auto WhitePoint = boo::WhitePoint::D50;
+    constexpr static auto WhitePoint = krys::WhitePoint::D50;
 
     // https://drafts.csswg.org/css-color/#color-conversion-code
-    constexpr static ColorMatrix<3, 3> XyzToLinear {
+    constexpr static ColourMatrix<3, 3> XyzToLinear {
       1.34578688164715830,  -0.25557208737979464, -0.05110186497554526,
       -0.54463070512490190, 1.50824774284514680,  0.02052744743642139,
       0.00000000000000000,  0.00000000000000000,  1.21196754563894520};
 
-    constexpr static ColorMatrix<3, 3> LinearToXYZ {
+    constexpr static ColourMatrix<3, 3> LinearToXYZ {
       0.79776664490064230, 0.13518129740053308, 0.03134773412839220, 0.28807482881940130, 0.71183523424187300,
       0.00008993693872564, 0.00000000000000000, 0.00000000000000000, 0.82510460251046020};
   };
@@ -642,15 +645,15 @@ namespace krys::boo
     template <typename T, TransferFunctionMode Mode>
     using TransferFunction = Rec2020TransferFunction<T, Mode>;
 
-    constexpr static auto WhitePoint = boo::WhitePoint::D65;
+    constexpr static auto WhitePoint = krys::WhitePoint::D65;
 
     // https://drafts.csswg.org/css-color/#color-conversion-code
-    constexpr static ColorMatrix<3, 3> XyzToLinear {
+    constexpr static ColourMatrix<3, 3> XyzToLinear {
       30757411.0 / 17917100.0,  -6372589.0 / 17917100.0, -4539589.0 / 17917100.0,
       -19765991.0 / 29648200.0, 47925759.0 / 29648200.0, 467509.0 / 29648200.0,
       792561.0 / 44930125.0,    -1921689.0 / 44930125.0, 42328811.0 / 44930125.0,
     };
-    constexpr static ColorMatrix<3, 3> LinearToXYZ {
+    constexpr static ColourMatrix<3, 3> LinearToXYZ {
       63426534.0 / 99577255.0,
       20160776.0 / 139408157.0,
       47086771.0 / 278816314.0,
@@ -678,12 +681,12 @@ namespace krys::boo
 #pragma region Lab
 
   template <typename T>
-  struct Lab : ColorWithAlphaHelper<Lab<T>>
+  struct Lab : ColourWithAlphaHelper<Lab<T>>
   {
     using ComponentType = T;
     using Model = LabModel<T>;
 
-    constexpr static auto WhitePoint = boo::WhitePoint::D50;
+    constexpr static auto WhitePoint = krys::WhitePoint::D50;
 
     using Reference = XYZA<T, WhitePoint>;
 
@@ -706,28 +709,28 @@ namespace krys::boo
 
     KRYS_NODISCARD constexpr auto Resolved() const noexcept
     {
-      return ResolvedColor(*this);
+      return ResolvedColour(*this);
     }
     KRYS_NODISCARD constexpr auto Unresolved() const noexcept
     {
-      return UnresolvedColor(*this);
+      return UnresolvedColour(*this);
     }
   };
 
-  template <typename ColorType>
-  constexpr bool IsLab = SameType<Lab<typename ColorType::ComponentType>, ColorType>;
+  template <typename ColourType>
+  constexpr bool IsLab = SameType<Lab<typename ColourType::ComponentType>, ColourType>;
 
 #pragma endregion
 
 #pragma region LCHA
 
   template <typename T>
-  struct LCHA : ColorWithAlphaHelper<LCHA<T>>
+  struct LCHA : ColourWithAlphaHelper<LCHA<T>>
   {
     using ComponentType = T;
     using Model = LCHModel<T>;
 
-    constexpr static auto WhitePoint = boo::WhitePoint::D50;
+    constexpr static auto WhitePoint = krys::WhitePoint::D50;
 
     using Reference = Lab<T>;
 
@@ -750,28 +753,28 @@ namespace krys::boo
 
     KRYS_NODISCARD constexpr auto Resolved() const noexcept
     {
-      return ResolvedColor(*this);
+      return ResolvedColour(*this);
     }
     KRYS_NODISCARD constexpr auto Unresolved() const noexcept
     {
-      return UnresolvedColor(*this);
+      return UnresolvedColour(*this);
     }
   };
 
-  template <typename ColorType>
-  constexpr bool IsLCHA = SameType<LCHA<typename ColorType::ComponentType>, ColorType>;
+  template <typename ColourType>
+  constexpr bool IsLCHA = SameType<LCHA<typename ColourType::ComponentType>, ColourType>;
 
 #pragma endregion
 
 #pragma region OKLab
 
   template <typename T>
-  struct OKLab : ColorWithAlphaHelper<OKLab<T>>
+  struct OKLab : ColourWithAlphaHelper<OKLab<T>>
   {
     using ComponentType = T;
     using Model = OKLabModel<T>;
 
-    constexpr static auto WhitePoint = boo::WhitePoint::D65;
+    constexpr static auto WhitePoint = krys::WhitePoint::D65;
 
     using Reference = XYZA<T, WhitePoint>;
 
@@ -794,29 +797,29 @@ namespace krys::boo
 
     KRYS_NODISCARD constexpr auto Resolved() const noexcept
     {
-      return ResolvedColor(*this);
+      return ResolvedColour(*this);
     }
 
     KRYS_NODISCARD constexpr auto Unresolved() const noexcept
     {
-      return UnresolvedColor(*this);
+      return UnresolvedColour(*this);
     }
   };
 
-  template <typename ColorType>
-  constexpr bool IsOKLab = SameType<OKLab<typename ColorType::ComponentType>, ColorType>;
+  template <typename ColourType>
+  constexpr bool IsOKLab = SameType<OKLab<typename ColourType::ComponentType>, ColourType>;
 
 #pragma endregion
 
 #pragma region OKLCHA
 
   template <typename T>
-  struct OKLCHA : ColorWithAlphaHelper<OKLCHA<T>>
+  struct OKLCHA : ColourWithAlphaHelper<OKLCHA<T>>
   {
     using ComponentType = T;
     using Model = OKLCHModel<T>;
 
-    constexpr static auto WhitePoint = boo::WhitePoint::D65;
+    constexpr static auto WhitePoint = krys::WhitePoint::D65;
 
     using Reference = OKLab<T>;
 
@@ -839,29 +842,29 @@ namespace krys::boo
 
     KRYS_NODISCARD constexpr auto Resolved() const noexcept
     {
-      return ResolvedColor(*this);
+      return ResolvedColour(*this);
     }
 
     KRYS_NODISCARD constexpr auto Unresolved() const noexcept
     {
-      return UnresolvedColor(*this);
+      return UnresolvedColour(*this);
     }
   };
 
-  template <typename ColorType>
-  constexpr bool IsOKLCHA = SameType<OKLCHA<typename ColorType::ComponentType>, ColorType>;
+  template <typename ColourType>
+  constexpr bool IsOKLCHA = SameType<OKLCHA<typename ColourType::ComponentType>, ColourType>;
 
 #pragma endregion
 
 #pragma region HSLA
 
   template <typename T>
-  struct HSLA : ColorWithAlphaHelper<HSLA<T>>
+  struct HSLA : ColourWithAlphaHelper<HSLA<T>>
   {
     using ComponentType = T;
     using Model = HSLModel<T>;
 
-    constexpr static auto WhitePoint = boo::WhitePoint::D65;
+    constexpr static auto WhitePoint = krys::WhitePoint::D65;
 
     using Reference = ExtendedSRGBA<T>;
 
@@ -884,29 +887,29 @@ namespace krys::boo
 
     KRYS_NODISCARD constexpr auto Resolved() const noexcept
     {
-      return ResolvedColor(*this);
+      return ResolvedColour(*this);
     }
 
     KRYS_NODISCARD constexpr auto Unresolved() const noexcept
     {
-      return UnresolvedColor(*this);
+      return UnresolvedColour(*this);
     }
   };
 
-  template <typename ColorType>
-  constexpr bool IsHSLA = SameType<HSLA<typename ColorType::ComponentType>, ColorType>;
+  template <typename ColourType>
+  constexpr bool IsHSLA = SameType<HSLA<typename ColourType::ComponentType>, ColourType>;
 
 #pragma endregion
 
 #pragma region HWBA
 
   template <typename T>
-  struct HWBA : ColorWithAlphaHelper<HWBA<T>>
+  struct HWBA : ColourWithAlphaHelper<HWBA<T>>
   {
     using ComponentType = T;
     using Model = HWBModel<T>;
 
-    constexpr static auto WhitePoint = boo::WhitePoint::D65;
+    constexpr static auto WhitePoint = krys::WhitePoint::D65;
 
     using Reference = ExtendedSRGBA<T>;
 
@@ -929,24 +932,24 @@ namespace krys::boo
 
     KRYS_NODISCARD constexpr auto Resolved() const noexcept
     {
-      return ResolvedColor(*this);
+      return ResolvedColour(*this);
     }
 
     KRYS_NODISCARD constexpr auto Unresolved() const noexcept
     {
-      return UnresolvedColor(*this);
+      return UnresolvedColour(*this);
     }
   };
 
-  template <typename ColorType>
-  constexpr bool IsHWBA = SameType<HWBA<typename ColorType::ComponentType>, ColorType>;
+  template <typename ColourType>
+  constexpr bool IsHWBA = SameType<HWBA<typename ColourType::ComponentType>, ColourType>;
 
 #pragma endregion
 
 #pragma region XYZA
 
   template <typename T, WhitePoint W>
-  struct XYZA : ColorWithAlphaHelper<XYZA<T, W>>
+  struct XYZA : ColourWithAlphaHelper<XYZA<T, W>>
   {
     using ComponentType = T;
     using Model = XYZModel<T>;
@@ -973,23 +976,24 @@ namespace krys::boo
 
     KRYS_NODISCARD constexpr auto Resolved() const noexcept
     {
-      return ResolvedColor(*this);
+      return ResolvedColour(*this);
     }
 
     KRYS_NODISCARD constexpr auto Unresolved() const noexcept
     {
-      return UnresolvedColor(*this);
+      return UnresolvedColour(*this);
     }
   };
 
-  template <typename ColorType>
-  constexpr bool IsXYZA = SameType<XYZA<typename ColorType::ComponentType, ColorType::WhitePoint>, ColorType>;
+  template <typename ColourType>
+  constexpr bool IsXYZA =
+    SameType<XYZA<typename ColourType::ComponentType, ColourType::WhitePoint>, ColourType>;
 
 #pragma endregion
 
   // Packed Color Formats
 
-  namespace PackedColor
+  namespace PackedColour
   {
     struct RGBA
     {
@@ -999,7 +1003,7 @@ namespace krys::boo
       {
       }
 
-      constexpr explicit RGBA(ResolvedColorType<SRGBA<uint8>> color) noexcept
+      constexpr explicit RGBA(ResolvedColourType<SRGBA<uint8>> color) noexcept
           : Value {static_cast<uint32>(color.Red << 24 | color.Green << 16 | color.Blue << 8 | color.Alpha)}
       {
       }
@@ -1017,7 +1021,7 @@ namespace krys::boo
       {
       }
 
-      constexpr explicit ARGB(ResolvedColorType<SRGBA<uint8>> color) noexcept
+      constexpr explicit ARGB(ResolvedColourType<SRGBA<uint8>> color) noexcept
           : Value {static_cast<uint32>(color.Alpha << 24 | color.Red << 16 | color.Green << 8 | color.Blue)}
       {
       }
@@ -1029,13 +1033,13 @@ namespace krys::boo
 
   }
 
-  KRYS_NODISCARD constexpr SRGBA<uint8> AsSRGBA(PackedColor::RGBA color) noexcept
+  KRYS_NODISCARD constexpr SRGBA<uint8> AsSRGBA(PackedColour::RGBA color) noexcept
   {
     return {static_cast<uint8>(color.Value >> 24), static_cast<uint8>(color.Value >> 16),
             static_cast<uint8>(color.Value >> 8), static_cast<uint8>(color.Value)};
   }
 
-  KRYS_NODISCARD constexpr SRGBA<uint8> AsSRGBA(PackedColor::ARGB color) noexcept
+  KRYS_NODISCARD constexpr SRGBA<uint8> AsSRGBA(PackedColour::ARGB color) noexcept
   {
     return {static_cast<uint8>(color.Value >> 16), static_cast<uint8>(color.Value >> 8),
             static_cast<uint8>(color.Value), static_cast<uint8>(color.Value >> 24)};

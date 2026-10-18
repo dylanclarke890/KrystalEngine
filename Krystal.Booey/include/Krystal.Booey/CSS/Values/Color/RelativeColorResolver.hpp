@@ -25,7 +25,7 @@ namespace krys::boo::css
     template <typename Descriptor, typename ColorType>
     KRYS_NODISCARD SymbolTable CreateSymbolTable(const ColorType &originColorAsColorType) noexcept
     {
-      auto originComponents = AsColorComponents(originColorAsColorType.Resolved());
+      auto originComponents = AsColourComponents(originColorAsColorType.Resolved());
 
       return SymbolTable {{std::get<0>(Descriptor::Components).Symbol, UnitType::Number,
                            originComponents[0] * std::get<0>(Descriptor::Components).SymbolMultiplier},

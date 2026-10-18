@@ -68,7 +68,7 @@ namespace krys::boo::css
       if constexpr (D::UsesColorFunctionForSerialisation)
       {
         builder.Append(u8"color(");
-        builder.Append(boo::Serialisation(ColorSpaceFor<typename D::ColorType>));
+        builder.Append(boo::Serialisation(ColourSpaceFor<typename D::ColorType>));
         builder.Append(u8' ');
       }
       else

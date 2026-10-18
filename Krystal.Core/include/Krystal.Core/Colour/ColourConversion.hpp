@@ -1,35 +1,35 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/Color/ColorTypes.hpp"
+#include "Krystal.Core/Colour/ColourTypes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo
+namespace krys
 {
-  enum class ColorSpace : uint8;
+  enum class ColourSpace : uint8;
 
   template <typename Output, typename Input, typename = void>
-  struct ColorConversion;
+  struct ColourConversion;
 
   // All color types, other than XYZA or those inheriting from RGBType, must implement
   // the following conversions to and from their "Reference" color.
   //
   //  template<>
-  //  struct ColorConversion<`ColorType`<float>::Reference, `ColorType`<float>>
+  //  struct ColourConversion<`ColourType`<float>::Reference, `ColourType`<float>>
   //  {
-  //    KRYS_NODISCARD static `ColorType`<float>::Reference Convert(const `ColorType`<float>&) noexcept;
+  //    KRYS_NODISCARD static `ColourType`<float>::Reference Convert(const `ColourType`<float>&) noexcept;
   //  };
   //
   //  template<>
-  //  struct ColorConversion<`ColorType`<float>, `ColorType`<float>::Reference>
+  //  struct ColourConversion<`ColourType`<float>, `ColourType`<float>::Reference>
   //  {
-  //    KRYS_NODISCARD static `ColorType`<float> Convert(const `ColorType`<float>::Reference&) noexcept;
+  //    KRYS_NODISCARD static `ColourType`<float> Convert(const `ColourType`<float>::Reference&) noexcept;
   //  };
 
   /// @brief Conversion function for typed colors.
   template <typename Output, typename Input>
-  KRYS_NODISCARD Output ConvertColor(const Input &color) noexcept
+  KRYS_NODISCARD Output ConvertColour(const Input &color) noexcept
   {
-    return ColorConversion<CanonicalColorType<Output>, CanonicalColorType<Input>>::Convert(color);
+    return ColourConversion<CanonicalColourType<Output>, CanonicalColourType<Input>>::Convert(color);
   }
 
   // MARK: Specialized converters
@@ -79,8 +79,8 @@ namespace krys::boo
   /// @brief Utility to update appropriate component in `output` if an analogous component
   /// in `input` is missing (which is encoded as NaN in color types).
   template <typename Output, typename Input, unsigned IndexInInput>
-  constexpr void TryToCarryForwardComponentIfMissing(const ColorComponents<float, 4> &input,
-                                                     ColorComponents<float, 4> &output) noexcept
+  constexpr void TryToCarryForwardComponentIfMissing(const ColourComponents<float, 4> &input,
+                                                     ColourComponents<float, 4> &output) noexcept
   {
     constexpr auto analogousComponentIndexInOutput = AnalogousComponentIndex<Output, Input, IndexInInput>();
     if constexpr (analogousComponentIndexInOutput)
@@ -98,21 +98,21 @@ namespace krys::boo
   /// from `Input` for analogous components in `Output` as described by CSS Color 4
   /// @see § 12. Color Interpolation, https://drafts.csswg.org/css-color-4/#interpolation.
   template <typename Output, typename Input>
-  KRYS_NODISCARD Output ConvertColorCarryingForwardMissing(const Input &color) noexcept
+  KRYS_NODISCARD Output ConvertColourCarryingForwardMissing(const Input &color) noexcept
   {
     if constexpr (SameType<Input, Output>)
     {
-      return ConvertColor<Output>(color);
+      return ConvertColour<Output>(color);
     }
     else if constexpr (SameType<typename Input::ComponentType, uint8>
                        || SameType<typename Output::ComponentType, uint8>)
     {
-      return ConvertColor<Output>(color);
+      return ConvertColour<Output>(color);
     }
     else
     {
-      auto input = AsColorComponents(color.Unresolved());
-      auto output = AsColorComponents(ConvertColor<Output>(color).Unresolved());
+      auto input = AsColourComponents(color.Unresolved());
+      auto output = AsColourComponents(ConvertColour<Output>(color).Unresolved());
 
       TryToCarryForwardComponentIfMissing<Output, Input, 0>(input, output);
       TryToCarryForwardComponentIfMissing<Output, Input, 1>(input, output);
@@ -124,10 +124,10 @@ namespace krys::boo
   }
 
   // Conversion functions for raw color components with associated color spaces.
-  KRYS_NODISCARD ColorComponents<float, 4>
-    ConvertAndResolveColorComponents(ColorSpace inputColorSpace,
-                                     ColorComponents<float, 4> inputColorComponents,
-                                     ColorSpace outputColorSpace) noexcept;
+  KRYS_NODISCARD ColourComponents<float, 4>
+    ConvertAndResolveColourComponents(ColourSpace inputColorSpace,
+                                      ColourComponents<float, 4> inputColorComponents,
+                                      ColourSpace outputColorSpace) noexcept;
 
   // MARK: White Point.
 
@@ -190,7 +190,7 @@ namespace krys::boo
   template <>
   struct ChromaticAdaptation<WhitePoint::D65, WhitePoint::D50>
   {
-    constexpr static ColorMatrix<3, 3> Matrix {
+    constexpr static ColourMatrix<3, 3> Matrix {
       1.0479297925449969,    0.022946870601609652, -0.05019226628920524,
       0.02962780877005599,   0.9904344267538799,   -0.017073799063418826,
       -0.009243040646204504, 0.015055191490298152, 0.7518742814281371};
@@ -199,7 +199,7 @@ namespace krys::boo
   template <>
   struct ChromaticAdaptation<WhitePoint::D50, WhitePoint::D65>
   {
-    constexpr static ColorMatrix<3, 3> Matrix {
+    constexpr static ColourMatrix<3, 3> Matrix {
       0.955473421488075,    -0.02309845494876471,  0.06325924320057072,
       -0.0283697093338637,  1.0099953980813041,    0.021041441191917323,
       0.012314014864481998, -0.020507649298898964, 1.330365926242124};
@@ -207,88 +207,88 @@ namespace krys::boo
 
   // MARK: HSLA
   template <>
-  struct ColorConversion<ExtendedSRGBA<float>, HSLA<float>>
+  struct ColourConversion<ExtendedSRGBA<float>, HSLA<float>>
   {
     KRYS_NODISCARD static ExtendedSRGBA<float> Convert(const HSLA<float> &) noexcept;
   };
 
   template <>
-  struct ColorConversion<HSLA<float>, ExtendedSRGBA<float>>
+  struct ColourConversion<HSLA<float>, ExtendedSRGBA<float>>
   {
     KRYS_NODISCARD static HSLA<float> Convert(const ExtendedSRGBA<float> &) noexcept;
   };
 
   // MARK: HWBA
   template <>
-  struct ColorConversion<ExtendedSRGBA<float>, HWBA<float>>
+  struct ColourConversion<ExtendedSRGBA<float>, HWBA<float>>
   {
     KRYS_NODISCARD static ExtendedSRGBA<float> Convert(const HWBA<float> &) noexcept;
   };
 
   template <>
-  struct ColorConversion<HWBA<float>, ExtendedSRGBA<float>>
+  struct ColourConversion<HWBA<float>, ExtendedSRGBA<float>>
   {
     KRYS_NODISCARD static HWBA<float> Convert(const ExtendedSRGBA<float> &) noexcept;
   };
 
   // MARK: LCHA
   template <>
-  struct ColorConversion<Lab<float>, LCHA<float>>
+  struct ColourConversion<Lab<float>, LCHA<float>>
   {
     KRYS_NODISCARD static Lab<float> Convert(const LCHA<float> &) noexcept;
   };
 
   template <>
-  struct ColorConversion<LCHA<float>, Lab<float>>
+  struct ColourConversion<LCHA<float>, Lab<float>>
   {
     KRYS_NODISCARD static LCHA<float> Convert(const Lab<float> &) noexcept;
   };
 
   // MARK: Lab
   template <>
-  struct ColorConversion<XYZA<float, WhitePoint::D50>, Lab<float>>
+  struct ColourConversion<XYZA<float, WhitePoint::D50>, Lab<float>>
   {
     KRYS_NODISCARD static XYZA<float, WhitePoint::D50> Convert(const Lab<float> &) noexcept;
   };
 
   template <>
-  struct ColorConversion<Lab<float>, XYZA<float, WhitePoint::D50>>
+  struct ColourConversion<Lab<float>, XYZA<float, WhitePoint::D50>>
   {
     KRYS_NODISCARD static Lab<float> Convert(const XYZA<float, WhitePoint::D50> &) noexcept;
   };
 
   // MARK: OKLCHA
   template <>
-  struct ColorConversion<OKLab<float>, OKLCHA<float>>
+  struct ColourConversion<OKLab<float>, OKLCHA<float>>
   {
     KRYS_NODISCARD static OKLab<float> Convert(const OKLCHA<float> &) noexcept;
   };
 
   template <>
-  struct ColorConversion<OKLCHA<float>, OKLab<float>>
+  struct ColourConversion<OKLCHA<float>, OKLab<float>>
   {
     KRYS_NODISCARD static OKLCHA<float> Convert(const OKLab<float> &) noexcept;
   };
 
   // MARK: OKLab
   template <>
-  struct ColorConversion<XYZA<float, WhitePoint::D65>, OKLab<float>>
+  struct ColourConversion<XYZA<float, WhitePoint::D65>, OKLab<float>>
   {
     KRYS_NODISCARD static XYZA<float, WhitePoint::D65> Convert(const OKLab<float> &) noexcept;
   };
 
   template <>
-  struct ColorConversion<OKLab<float>, XYZA<float, WhitePoint::D65>>
+  struct ColourConversion<OKLab<float>, XYZA<float, WhitePoint::D65>>
   {
     KRYS_NODISCARD static OKLab<float> Convert(const XYZA<float, WhitePoint::D65> &) noexcept;
   };
 
   // Identity conversion.
 
-  template <typename ColorType>
-  struct ColorConversion<ColorType, ColorType>
+  template <typename ColourType>
+  struct ColourConversion<ColourType, ColourType>
   {
-    KRYS_NODISCARD static ColorType Convert(const ColorType &color) noexcept
+    KRYS_NODISCARD static ColourType Convert(const ColourType &color) noexcept
     {
       return color;
     }
@@ -296,13 +296,13 @@ namespace krys::boo
 
   // MARK: DeltaE color difference algorithms.
 
-  template <typename ColorType1, typename ColorType2>
-  KRYS_NODISCARD constexpr float ComputeDeltaEOK(ColorType1 color1, ColorType2 color2) noexcept
+  template <typename ColourType1, typename ColourType2>
+  KRYS_NODISCARD constexpr float ComputeDeltaEOK(ColourType1 color1, ColourType2 color2) noexcept
   {
     // https://drafts.csswg.org/css-color/#color-difference-OK
 
-    auto [L1, a1, b1, alpha1] = ConvertColor<OKLab<float>>(color1).Resolved();
-    auto [L2, a2, b2, alpha2] = ConvertColor<OKLab<float>>(color2).Resolved();
+    auto [L1, a1, b1, alpha1] = ConvertColour<OKLab<float>>(color1).Resolved();
+    auto [L2, a2, b2, alpha2] = ConvertColour<OKLab<float>>(color2).Resolved();
 
     auto deltaL = L1 - L2;
     auto deltaA = a1 - a2;
@@ -315,11 +315,11 @@ namespace krys::boo
 
   struct ClipGamutMapping
   {
-    template <typename ColorType>
-    KRYS_NODISCARD static auto MapToBoundedGamut(const ColorType &color) noexcept ->
-      typename ColorType::BoundedCounterpart
+    template <typename ColourType>
+    KRYS_NODISCARD static auto MapToBoundedGamut(const ColourType &color) noexcept ->
+      typename ColourType::BoundedCounterpart
     {
-      return ClipToGamut<typename ColorType::BoundedCounterpart>(color);
+      return ClipToGamut<typename ColourType::BoundedCounterpart>(color);
     }
   };
 
@@ -356,7 +356,7 @@ namespace krys::boo
   // clang-format on
 
   template <typename Output, typename Input, typename>
-  struct ColorConversion
+  struct ColourConversion
   {
   public:
     KRYS_NODISCARD constexpr static Output Convert(const Input &color) noexcept
@@ -372,15 +372,15 @@ namespace krys::boo
       }
       // 2. Handle all color types that are not IsRGBType<T> or IsXYZA<T> for Input and Output. For all
       //    these other color types, we can unconditionally Convert them to their "reference" color, as
-      //    either they have already been handled by a ColorConversion specialization or this will
+      //    either they have already been handled by a ColourConversion specialization or this will
       //    get us closer to the final conversion.
       else if constexpr (!IsRGBType<Input> && !IsXYZA<Input>)
       {
-        return ConvertColor<Output>(ConvertColor<typename Input::Reference>(color));
+        return ConvertColour<Output>(ConvertColour<typename Input::Reference>(color));
       }
       else if constexpr (!IsRGBType<Output> && !IsXYZA<Output>)
       {
-        return ConvertColor<Output>(ConvertColor<typename Output::Reference>(color));
+        return ConvertColour<Output>(ConvertColour<typename Output::Reference>(color));
       }
       // 3. Handle conversions within a RGBFamily (e.g. all have the same descriptor).
       else if constexpr (IsSameRGBTypeFamily<Output, Input>)
@@ -390,20 +390,20 @@ namespace krys::boo
       // 4. Handle any gamma conversions for the Input and Output.
       else if constexpr (IsRGBGammaEncodedType<Input>)
       {
-        return ConvertColor<Output>(ConvertColor<typename Input::LinearCounterpart>(color));
+        return ConvertColour<Output>(ConvertColour<typename Input::LinearCounterpart>(color));
       }
       else if constexpr (IsRGBGammaEncodedType<Output>)
       {
-        return ConvertColor<Output>(ConvertColor<typename Output::LinearCounterpart>(color));
+        return ConvertColour<Output>(ConvertColour<typename Output::LinearCounterpart>(color));
       }
       // 5. Handle any bounds conversions for the Input and Output.
       else if constexpr (IsRGBBoundedType<Input>)
       {
-        return ConvertColor<Output>(ConvertColor<typename Input::ExtendedCounterpart>(color));
+        return ConvertColour<Output>(ConvertColour<typename Input::ExtendedCounterpart>(color));
       }
       else if constexpr (IsRGBBoundedType<Output>)
       {
-        return ConvertColor<Output>(ConvertColor<typename Output::ExtendedCounterpart>(color));
+        return ConvertColour<Output>(ConvertColour<typename Output::ExtendedCounterpart>(color));
       }
       // 6. At this point, Input and Output are each either ExtendedLinear-RGB types (of different families)
       // or XYZA
@@ -420,15 +420,15 @@ namespace krys::boo
       static_assert(IsRGBBoundedType<Input>,
                     "Only bounded ([0..1]) RGB color types support conversion to/from bytes.");
 
-      using InputWithReplacement = ColorTypeWithReplacementComponent<Input, float>;
+      using InputWithReplacement = ColourTypeWithReplacementComponent<Input, float>;
       if constexpr (SameType<InputWithReplacement, Output>)
       {
         return CreateFromComponents<InputWithReplacement>(
-          AsColorComponents(color.Resolved()).Map([](uint8 value) -> float { return value / 255.0f; }));
+          AsColourComponents(color.Resolved()).Map([](uint8 value) -> float { return value / 255.0f; }));
       }
       else
       {
-        return ConvertColor<Output>(ConvertColor<InputWithReplacement>(color));
+        return ConvertColour<Output>(ConvertColour<InputWithReplacement>(color));
       }
     }
 
@@ -437,50 +437,50 @@ namespace krys::boo
       static_assert(IsRGBBoundedType<Output>,
                     "Only bounded ([0..1]) RGB color types support conversion to/from bytes.");
 
-      using OutputWithReplacement = ColorTypeWithReplacementComponent<Output, float>;
+      using OutputWithReplacement = ColourTypeWithReplacementComponent<Output, float>;
       if constexpr (SameType<OutputWithReplacement, Input>)
       {
         return CreateFromComponents<Output>(
-          AsColorComponents(color.Resolved())
+          AsColourComponents(color.Resolved())
             .Map([](float value) -> uint8
                  { return static_cast<uint8>(std::clamp(std::lround(value * 255.0f), 0l, 255l)); }));
       }
       else
       {
-        return ConvertColor<Output>(ConvertColor<OutputWithReplacement>(color));
+        return ConvertColour<Output>(ConvertColour<OutputWithReplacement>(color));
       }
     }
 
-    template <typename ColorType>
-    KRYS_NODISCARD constexpr static auto ToLinearEncoded(const ColorType &color) noexcept ->
-      typename ColorType::LinearCounterpart
+    template <typename ColourType>
+    KRYS_NODISCARD constexpr static auto ToLinearEncoded(const ColourType &color) noexcept ->
+      typename ColourType::LinearCounterpart
     {
       auto [c1, c2, c3, alpha] = color.Resolved();
-      return {ColorType::TransferFunction::ToLinear(c1), ColorType::TransferFunction::ToLinear(c2),
-              ColorType::TransferFunction::ToLinear(c3), alpha};
+      return {ColourType::TransferFunction::ToLinear(c1), ColourType::TransferFunction::ToLinear(c2),
+              ColourType::TransferFunction::ToLinear(c3), alpha};
     }
 
-    template <typename ColorType>
-    KRYS_NODISCARD constexpr static auto ToGammaEncoded(const ColorType &color) noexcept ->
-      typename ColorType::GammaEncodedCounterpart
+    template <typename ColourType>
+    KRYS_NODISCARD constexpr static auto ToGammaEncoded(const ColourType &color) noexcept ->
+      typename ColourType::GammaEncodedCounterpart
     {
       auto [c1, c2, c3, alpha] = color.Resolved();
-      return {ColorType::TransferFunction::ToGammaEncoded(c1),
-              ColorType::TransferFunction::ToGammaEncoded(c2),
-              ColorType::TransferFunction::ToGammaEncoded(c3), alpha};
+      return {ColourType::TransferFunction::ToGammaEncoded(c1),
+              ColourType::TransferFunction::ToGammaEncoded(c2),
+              ColourType::TransferFunction::ToGammaEncoded(c3), alpha};
     }
 
-    template <typename ColorType>
-    KRYS_NODISCARD constexpr static auto ToExtended(const ColorType &color) noexcept ->
-      typename ColorType::ExtendedCounterpart
+    template <typename ColourType>
+    KRYS_NODISCARD constexpr static auto ToExtended(const ColourType &color) noexcept ->
+      typename ColourType::ExtendedCounterpart
     {
-      return CreateFromComponents<typename ColorType::ExtendedCounterpart>(
-        AsColorComponents(color.Resolved()));
+      return CreateFromComponents<typename ColourType::ExtendedCounterpart>(
+        AsColourComponents(color.Resolved()));
     }
 
-    template <typename ColorType>
-    KRYS_NODISCARD constexpr static auto ToBounded(const ColorType &color) noexcept ->
-      typename ColorType::BoundedCounterpart
+    template <typename ColourType>
+    KRYS_NODISCARD constexpr static auto ToBounded(const ColourType &color) noexcept ->
+      typename ColourType::BoundedCounterpart
     {
       return ClipGamutMapping::MapToBoundedGamut(color);
     }
@@ -576,7 +576,7 @@ namespace krys::boo
       auto ApplyMatrices = [](const Input &color, auto... matrices)
       {
         return CreateFromComponents<Output>(
-          ApplyMatricesToColorComponents(AsColorComponents(color.Resolved()), matrices...));
+          ApplyMatricesToColourComponents(AsColourComponents(color.Resolved()), matrices...));
       };
 
       if constexpr (Input::WhitePoint == Output::WhitePoint)

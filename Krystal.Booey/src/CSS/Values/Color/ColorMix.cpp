@@ -46,7 +46,7 @@ namespace krys::boo::css
     }
 
     return Mix(ColorMixResolver {
-      unresolved.ColorInterpolationMethod,
+      unresolved.ColourInterpolationMethod,
       ColorMixResolver::Component {krys::move(component1Color), krys::move(percentage1)},
       ColorMixResolver::Component {krys::move(component2Color), krys::move(percentage2)},
     });
@@ -153,10 +153,10 @@ namespace krys::boo::css
                                         const ColorMix &value) noexcept
   {
     builder.Append(u8"color-mix(");
-    if (value.ColorInterpolationMethod != DefaultInterpolationMethodForColorMix)
+    if (value.ColourInterpolationMethod != DefaultInterpolationMethodForColorMix)
     {
       builder.Append(u8"in ");
-      boo::SerialisationForCSS(builder, value.ColorInterpolationMethod);
+      boo::SerialisationForCSS(builder, value.ColourInterpolationMethod);
       builder.Append(u8", ");
     }
 

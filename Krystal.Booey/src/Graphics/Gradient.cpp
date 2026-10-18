@@ -3,7 +3,7 @@
 
 namespace krys::boo
 {
-  Ref<Gradient> Gradient::Create(Data &&data, ColorInterpolationMethod colorInterpolationMethod,
+  Ref<Gradient> Gradient::Create(Data &&data, ColourInterpolationMethod colorInterpolationMethod,
                                  GradientSpreadMethod spreadMethod, GradientColorStops &&stops,
                                  bool isTransient) noexcept
   {
@@ -11,7 +11,7 @@ namespace krys::boo
                                   isTransient));
   }
 
-  Gradient::Gradient(Data &&data, ColorInterpolationMethod colorInterpolationMethod,
+  Gradient::Gradient(Data &&data, ColourInterpolationMethod colorInterpolationMethod,
                      GradientSpreadMethod spreadMethod, GradientColorStops &&stops, bool isTransient) noexcept
       : _data {krys::move(data)}, _colorInterpolationMethod {colorInterpolationMethod},
         _spreadMethod {spreadMethod}, _stops {krys::move(stops)}, _isTransient {isTransient}

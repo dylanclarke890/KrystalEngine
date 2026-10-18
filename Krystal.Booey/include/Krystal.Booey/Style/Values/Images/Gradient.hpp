@@ -124,7 +124,7 @@ namespace krys::boo
       using GradientLineType =
         Variant<Angle<>, Horizontal, Vertical, css::SpaceSeparatedTuple<Horizontal, Vertical>>;
 
-      GradientColorInterpolationMethod ColorInterpolationMethod;
+      GradientColorInterpolationMethod ColourInterpolationMethod;
       GradientLineType GradientLine;
       GradientLinearColorStopList Stops;
 
@@ -136,7 +136,7 @@ namespace krys::boo
     {
       if constexpr (!I)
       {
-        return gradient.ColorInterpolationMethod;
+        return gradient.ColourInterpolationMethod;
       }
       else if constexpr (I == 1)
       {
@@ -157,7 +157,7 @@ namespace krys::boo
       using GradientLineType =
         Variant<Angle<>, Horizontal, Vertical, css::SpaceSeparatedTuple<Horizontal, Vertical>>;
 
-      GradientColorInterpolationMethod ColorInterpolationMethod;
+      GradientColorInterpolationMethod ColourInterpolationMethod;
       GradientLineType GradientLine;
       GradientLinearColorStopList Stops;
 
@@ -169,7 +169,7 @@ namespace krys::boo
     {
       if constexpr (!I)
       {
-        return gradient.ColorInterpolationMethod;
+        return gradient.ColourInterpolationMethod;
       }
       else if constexpr (I == 1)
       {
@@ -189,7 +189,7 @@ namespace krys::boo
     {
       using GradientLineType = css::CommaSeparatedArray<DeprecatedGradientPosition, 2>;
 
-      GradientColorInterpolationMethod ColorInterpolationMethod;
+      GradientColorInterpolationMethod ColourInterpolationMethod;
       GradientLineType GradientLine;
       GradientDeprecatedColorStopList Stops;
 
@@ -201,7 +201,7 @@ namespace krys::boo
     {
       if constexpr (!I)
       {
-        return gradient.ColorInterpolationMethod;
+        return gradient.ColourInterpolationMethod;
       }
       else if constexpr (I == 1)
       {
@@ -236,7 +236,7 @@ namespace krys::boo
       };
       using GradientBoxType = Variant<Ellipse, Circle>;
 
-      GradientColorInterpolationMethod ColorInterpolationMethod;
+      GradientColorInterpolationMethod ColourInterpolationMethod;
       GradientBoxType GradientBox;
       GradientLinearColorStopList Stops;
 
@@ -274,7 +274,7 @@ namespace krys::boo
     {
       if constexpr (!I)
       {
-        return gradient.ColorInterpolationMethod;
+        return gradient.ColourInterpolationMethod;
       }
       else if constexpr (I == 1)
       {
@@ -310,7 +310,7 @@ namespace krys::boo
       };
       using GradientBoxType = Variant<Ellipse, Circle>;
 
-      GradientColorInterpolationMethod ColorInterpolationMethod;
+      GradientColorInterpolationMethod ColourInterpolationMethod;
       GradientBoxType GradientBox;
       GradientLinearColorStopList Stops;
 
@@ -348,7 +348,7 @@ namespace krys::boo
     {
       if constexpr (!I)
       {
-        return gradient.ColorInterpolationMethod;
+        return gradient.ColourInterpolationMethod;
       }
       else if constexpr (I == 1)
       {
@@ -378,7 +378,7 @@ namespace krys::boo
         KRYS_NODISCARD bool operator==(const GradientBoxType &) const noexcept = default;
       };
 
-      GradientColorInterpolationMethod ColorInterpolationMethod;
+      GradientColorInterpolationMethod ColourInterpolationMethod;
       GradientBoxType GradientBox;
       GradientDeprecatedColorStopList Stops;
 
@@ -411,7 +411,7 @@ namespace krys::boo
     {
       if constexpr (!I)
       {
-        return gradient.ColorInterpolationMethod;
+        return gradient.ColourInterpolationMethod;
       }
       else if constexpr (I == 1)
       {
@@ -439,7 +439,7 @@ namespace krys::boo
         KRYS_NODISCARD bool operator==(const GradientBoxType &) const noexcept = default;
       };
 
-      GradientColorInterpolationMethod ColorInterpolationMethod;
+      GradientColorInterpolationMethod ColourInterpolationMethod;
       GradientBoxType GradientBox;
       GradientAngularColorStopList Stops;
 
@@ -464,7 +464,7 @@ namespace krys::boo
     {
       if constexpr (!I)
       {
-        return gradient.ColorInterpolationMethod;
+        return gradient.ColourInterpolationMethod;
       }
       else if constexpr (I == 1)
       {

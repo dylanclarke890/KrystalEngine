@@ -72,12 +72,12 @@ namespace krys::boo::html
     Reflection::Reflect<bool>(*this, u8"checked", krys::move(value));
   }
 
-  dom::DOMString HTMLInputElement::ColorSpace() const noexcept
+  dom::DOMString HTMLInputElement::ColourSpace() const noexcept
   {
     return Reflection::Reflect<dom::DOMString>(*this, u8"colorspace").value_or(u8"");
   }
 
-  void HTMLInputElement::ColorSpace(dom::DOMString &&value) noexcept
+  void HTMLInputElement::ColourSpace(dom::DOMString &&value) noexcept
   {
     Reflection::Reflect<dom::DOMString>(*this, u8"colorspace", krys::move(value));
   }

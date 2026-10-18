@@ -79,7 +79,7 @@ namespace krys::boo::css
       InterpolationMethod interpolationMethod, ColorMixPercentages mixPercentages, const boo::Color &color1,
       const boo::Color &color2) noexcept
     {
-      using ColorType = typename InterpolationMethod::ColorType;
+      using ColorType = typename InterpolationMethod::ColourType;
 
       // 1. Both colors are converted to the specified <color-space>. If the specified color space has a
       // smaller
@@ -89,7 +89,7 @@ namespace krys::boo::css
 
       // 2. Colors are then interpolated in the specified color space, as described in CSS Color 4 § 13
       //    Interpolation. [...]
-      auto mixedColor = InterpolateColorComponents<AlphaPremultiplication::Premultiplied>(
+      auto mixedColor = InterpolateColourComponents<AlphaPremultiplication::Premultiplied>(
                           interpolationMethod, convertedColor1, mixPercentages.P1 / 100.0, convertedColor2,
                           mixPercentages.P2 / 100.0)
                           .Unresolved();
@@ -120,7 +120,7 @@ namespace krys::boo::css
       return {};
     }
 
-    return krys::SwitchOn(colorMix.ColorInterpolationMethod.ColorSpace,
+    return krys::SwitchOn(colorMix.ColourInterpolationMethod.ColourSpace,
                           [&](const auto &methodColorSpace)
                           {
                             return MixColorComponentsUsingColorInterpolationMethod(

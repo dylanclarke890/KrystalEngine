@@ -17,7 +17,7 @@ namespace krys::boo::css
       Maybe<PercentageType> Percentage;
     };
 
-    boo::ColorInterpolationMethod ColorInterpolationMethod;
+    krys::ColourInterpolationMethod ColourInterpolationMethod;
     Component MixComponents1;
     Component MixComponents2;
   };

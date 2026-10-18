@@ -21,12 +21,12 @@ namespace krys::boo
 
     if (v == 0.0f)
     {
-      return lightenedBlack.ColorWithAlphaByte(AlphaByte());
+      return lightenedBlack.ColourWithAlphaByte(AlphaByte());
     }
 
     float multiplier = std::min(1.0f, v + 0.33f) / v;
 
-    return ConvertColor<SRGBA<uint8>>(SRGBA<float> {multiplier * r, multiplier * g, multiplier * b, a});
+    return ConvertColour<SRGBA<uint8>>(SRGBA<float> {multiplier * r, multiplier * g, multiplier * b, a});
   }
 
   Color Color::Darkened() const noexcept
@@ -42,7 +42,7 @@ namespace krys::boo
     float v = std::max({r, g, b});
     float multiplier = std::max(0.0f, (v - 0.33f) / v);
 
-    return ConvertColor<SRGBA<uint8>>(SRGBA<float> {multiplier * r, multiplier * g, multiplier * b, a});
+    return ConvertColour<SRGBA<uint8>>(SRGBA<float> {multiplier * r, multiplier * g, multiplier * b, a});
   }
 
   double Color::Lightness() const noexcept
@@ -79,7 +79,7 @@ namespace krys::boo
     return CallOnUnderlyingType(
       [&](const auto &underlyingColor) -> Color
       {
-        auto result = ColorWithOverriddenAlpha(underlyingColor, alpha);
+        auto result = ColourWithOverriddenAlpha(underlyingColor, alpha);
 
         // FIXME: Why is preserving the semantic bit desired and/or correct here?
         if (IsSemantic())
@@ -101,11 +101,11 @@ namespace krys::boo
         // of alternatives.
         if constexpr (ColorType::Model::IsInvertible)
         {
-          return InvertedColorWithOverriddenAlpha(underlyingColor, alpha);
+          return InvertedColourWithOverriddenAlpha(underlyingColor, alpha);
         }
         else
         {
-          return InvertedColorWithOverriddenAlpha(ConvertColor<SRGBA<float>>(underlyingColor), alpha);
+          return InvertedColourWithOverriddenAlpha(ConvertColour<SRGBA<float>>(underlyingColor), alpha);
         }
       });
   }
@@ -125,33 +125,33 @@ namespace krys::boo
     return {AsInline(), ColorFlags::Semantic};
   }
 
-  ColorComponents<float, 4>
-    Color::ToResolvedColorComponentsInColorSpace(ColorSpace outputColorSpace) const noexcept
+  ColourComponents<float, 4>
+    Color::ToResolvedColorComponentsInColorSpace(ColourSpace outputColorSpace) const noexcept
   {
     auto [inputColorSpace, components] = ColorSpaceAndResolvedColorComponents();
-    return ConvertAndResolveColorComponents(inputColorSpace, components, outputColorSpace);
+    return ConvertAndResolveColourComponents(inputColorSpace, components, outputColorSpace);
   }
 
-  Pair<ColorSpace, ColorComponents<float, 4>> Color::ColorSpaceAndResolvedColorComponents() const noexcept
+  Pair<ColourSpace, ColourComponents<float, 4>> Color::ColorSpaceAndResolvedColorComponents() const noexcept
   {
     if (IsOutOfLine())
     {
-      return {Space(), ResolveColorComponents(ProtectedAsOutOfLine()->ResolvedComponents())};
+      return {Space(), ResolveColourComponents(ProtectedAsOutOfLine()->ResolvedComponents())};
     }
 
-    return {ColorSpace::SRGB, AsColorComponents(ConvertColor<SRGBA<float>>(AsInline()).Resolved())};
+    return {ColourSpace::SRGB, AsColourComponents(ConvertColour<SRGBA<float>>(AsInline()).Resolved())};
   }
 
   bool Color::IsBlackColor(const Color &color) noexcept
   {
     return color.CallOnUnderlyingType([](const auto &underlyingColor)
-                                      { return krys::boo::IsBlack(underlyingColor); });
+                                      { return krys::IsBlack(underlyingColor); });
   }
 
   bool Color::IsWhiteColor(const Color &color) noexcept
   {
     return color.CallOnUnderlyingType([](const auto &underlyingColor)
-                                      { return krys::boo::IsWhite(underlyingColor); });
+                                      { return krys::IsWhite(underlyingColor); });
   }
 
   Color::DebugRGBAData Color::DebugRGBA() const noexcept

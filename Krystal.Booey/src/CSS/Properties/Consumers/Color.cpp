@@ -670,7 +670,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
       auto args = ConsumeFunction(tokens);
 
-      Maybe<ColorInterpolationMethod> colorInterpolationMethod = DefaultInterpolationMethodForColorMix;
+      Maybe<ColourInterpolationMethod> colorInterpolationMethod = DefaultInterpolationMethodForColorMix;
       if (args.Peek().ValueId() == ValueId::In)
       {
         colorInterpolationMethod = ConsumeColorInterpolationMethod(args, state.PropertyParserState);
@@ -723,7 +723,7 @@ namespace krys::boo::css::PropertyParserHelpers
       }
 
       return Color {ColorMix {
-        .ColorInterpolationMethod = krys::move(*colorInterpolationMethod),
+        .ColourInterpolationMethod = krys::move(*colorInterpolationMethod),
         .MixComponents1 = krys::move(*mixComponent1),
         .MixComponents2 = krys::move(*mixComponent2),
       }};

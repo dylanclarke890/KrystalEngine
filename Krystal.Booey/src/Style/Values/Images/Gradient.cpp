@@ -203,7 +203,7 @@ namespace krys::boo::style
     }
 
     void NormalizeStopsAndEndpointsOutsideRange(List<ResolvedGradientStop> &stops,
-                                                ColorInterpolationMethod) noexcept
+                                                ColourInterpolationMethod) noexcept
     {
       float firstOffset = *stops.front().Offset;
       float lastOffset = *stops.back().Offset;
@@ -262,7 +262,7 @@ namespace krys::boo::style
     }
 
     void NormalizeStopsAndEndpointsOutsideRange(List<ResolvedGradientStop> &stops,
-                                                ColorInterpolationMethod colorInterpolationMethod) noexcept
+                                                ColourInterpolationMethod colorInterpolationMethod) noexcept
     {
       auto numberOfStops = stops.size();
 
@@ -338,7 +338,7 @@ namespace krys::boo::style
     }
 
     void NormalizeStopsAndEndpointsOutsideRange(List<ResolvedGradientStop> &stops,
-                                                ColorInterpolationMethod colorInterpolationMethod) noexcept
+                                                ColourInterpolationMethod colorInterpolationMethod) noexcept
     {
       size_t numberOfStops = stops.size();
       size_t lastStopIndex = numberOfStops - 1;
@@ -623,7 +623,7 @@ namespace krys::boo::style
       {
         float relativeOffset = (*newStops[y].Offset - offset1) / (offset2 - offset1);
         float multiplier = std::pow(relativeOffset, std::log(.5f) / std::log(midpoint));
-        newStops[y].Color = InterpolateColors(styleGradient.Parameters.ColorInterpolationMethod.Method,
+        newStops[y].Color = InterpolateColors(styleGradient.Parameters.ColourInterpolationMethod.Method,
                                               color1, 1.0f - multiplier, color2, multiplier);
       }
 
@@ -783,7 +783,7 @@ namespace krys::boo::style
     if (stops.size() > 1 && (*stops.front().Offset < 0 || *stops.back().Offset > 1))
     {
       gradientAdapter.NormalizeStopsAndEndpointsOutsideRange(
-        stops, styleGradient.Parameters.ColorInterpolationMethod.Method);
+        stops, styleGradient.Parameters.ColourInterpolationMethod.Method);
     }
 
     GradientColorStops::StopVector result;
@@ -1040,7 +1040,7 @@ namespace krys::boo::style
     LinearGradientAdapter adapter {data};
     auto stops = ComputeStops(adapter, linear, style);
 
-    return boo::Gradient::Create(krys::move(data), linear.Parameters.ColorInterpolationMethod.Method,
+    return boo::Gradient::Create(krys::move(data), linear.Parameters.ColourInterpolationMethod.Method,
                                  GradientSpreadMethod::Pad, krys::move(stops));
   }
 
@@ -1091,7 +1091,7 @@ namespace krys::boo::style
     LinearGradientAdapter adapter {data};
     auto stops = ComputeStops(adapter, linear, style);
 
-    return boo::Gradient::Create(krys::move(data), linear.Parameters.ColorInterpolationMethod.Method,
+    return boo::Gradient::Create(krys::move(data), linear.Parameters.ColourInterpolationMethod.Method,
                                  GradientSpreadMethod::Pad, krys::move(stops));
   }
 
@@ -1111,7 +1111,7 @@ namespace krys::boo::style
     LinearGradientAdapter adapter {data};
     auto stops = ComputeStopsForDeprecatedVariants(adapter, linear, style);
 
-    return boo::Gradient::Create(krys::move(data), linear.Parameters.ColorInterpolationMethod.Method,
+    return boo::Gradient::Create(krys::move(data), linear.Parameters.ColourInterpolationMethod.Method,
                                  GradientSpreadMethod::Pad, krys::move(stops));
   }
 
@@ -1220,7 +1220,7 @@ namespace krys::boo::style
     RadialGradientAdapter adapter {data, size};
     auto stops = ComputeStops(adapter, radial, style);
 
-    return boo::Gradient::Create(krys::move(data), radial.Parameters.ColorInterpolationMethod.Method,
+    return boo::Gradient::Create(krys::move(data), radial.Parameters.ColourInterpolationMethod.Method,
                                  GradientSpreadMethod::Pad, krys::move(stops));
   }
 
@@ -1355,7 +1355,7 @@ namespace krys::boo::style
     RadialGradientAdapter adapter {data, size};
     auto stops = ComputeStops(adapter, radial, style);
 
-    return boo::Gradient::Create(krys::move(data), radial.Parameters.ColorInterpolationMethod.Method,
+    return boo::Gradient::Create(krys::move(data), radial.Parameters.ColourInterpolationMethod.Method,
                                  GradientSpreadMethod::Pad, krys::move(stops));
   }
 
@@ -1379,7 +1379,7 @@ namespace krys::boo::style
     RadialGradientAdapter adapter {data, size};
     auto stops = ComputeStopsForDeprecatedVariants(adapter, radial, style);
 
-    return boo::Gradient::Create(krys::move(data), radial.Parameters.ColorInterpolationMethod.Method,
+    return boo::Gradient::Create(krys::move(data), radial.Parameters.ColourInterpolationMethod.Method,
                                  GradientSpreadMethod::Pad, krys::move(stops));
   }
 
@@ -1407,7 +1407,7 @@ namespace krys::boo::style
     ConicGradientAdapter adapter;
     auto stops = ComputeStops(adapter, conic, style);
 
-    return boo::Gradient::Create(krys::move(data), conic.Parameters.ColorInterpolationMethod.Method,
+    return boo::Gradient::Create(krys::move(data), conic.Parameters.ColourInterpolationMethod.Method,
                                  GradientSpreadMethod::Pad, krys::move(stops));
   }
 

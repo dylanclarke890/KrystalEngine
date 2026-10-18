@@ -85,6 +85,21 @@ target_sources(Krystal.Core
       include/Krystal.Core/TypeTraits.hpp
       include/Krystal.Core/Visitor.hpp
 
+      # Colour
+      include/Krystal.Core/Colour/AlphaPremultiplication.hpp
+      include/Krystal.Core/Colour/ColourComponents.hpp
+      include/Krystal.Core/Colour/ColourConversion.hpp
+      include/Krystal.Core/Colour/ColourInterpolation.hpp
+      include/Krystal.Core/Colour/ColourInterpolationMethod.hpp
+      include/Krystal.Core/Colour/ColourLuminance.hpp
+      include/Krystal.Core/Colour/ColourMatrix.hpp
+      include/Krystal.Core/Colour/ColourModels.hpp
+      include/Krystal.Core/Colour/ColourNormalization.hpp
+      include/Krystal.Core/Colour/ColourSpace.hpp
+      include/Krystal.Core/Colour/ColourTransferFunctions.hpp
+      include/Krystal.Core/Colour/ColourTypes.hpp
+      include/Krystal.Core/Colour/ColourUtilities.hpp
+
       # Commands
       include/Krystal.Core/Commands/CommandArena.hpp
       include/Krystal.Core/Commands/CommandList.hpp
@@ -268,6 +283,10 @@ target_sources(Krystal.Core
       include/Krystal.Core/Utils/ZipTuple.hpp
 
   PRIVATE
+    # Colour
+    src/Colour/ColourConversion.cpp
+    src/Colour/ColourInterpolation.cpp
+
     # Detection
     src/Detection/NumberOfCores.cpp
     

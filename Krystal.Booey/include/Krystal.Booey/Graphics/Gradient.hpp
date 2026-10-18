@@ -43,14 +43,14 @@ namespace krys::boo
 
   private:
     Data _data;
-    ColorInterpolationMethod _colorInterpolationMethod;
+    ColourInterpolationMethod _colorInterpolationMethod;
     GradientSpreadMethod _spreadMethod;
     GradientColorStops _stops;
     bool _isTransient {true};
 
   public:
     /// @param isTransient Whether the gradient is drawn only a few times, so a backend needn't cache for it.
-    KRYS_NODISCARD static Ref<Gradient> Create(Data &&, ColorInterpolationMethod,
+    KRYS_NODISCARD static Ref<Gradient> Create(Data &&, ColourInterpolationMethod,
                                                GradientSpreadMethod = GradientSpreadMethod::Pad,
                                                GradientColorStops && = {}, bool isTransient = true) noexcept;
     ~Gradient() noexcept;
@@ -59,7 +59,7 @@ namespace krys::boo
     {
       return _data;
     }
-    KRYS_NODISCARD ColorInterpolationMethod GetColorInterpolationMethod() const noexcept
+    KRYS_NODISCARD ColourInterpolationMethod GetColorInterpolationMethod() const noexcept
     {
       return _colorInterpolationMethod;
     }
@@ -83,7 +83,7 @@ namespace krys::boo
     void AdjustParametersForTiledDrawing(FloatSize &, FloatRect &, const FloatSize &spacing) noexcept;
 
   private:
-    Gradient(Data &&, ColorInterpolationMethod, GradientSpreadMethod, GradientColorStops &&,
+    Gradient(Data &&, ColourInterpolationMethod, GradientSpreadMethod, GradientColorStops &&,
              bool isTransient) noexcept;
   };
 }

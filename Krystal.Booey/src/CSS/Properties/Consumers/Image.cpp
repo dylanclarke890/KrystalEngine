@@ -344,7 +344,7 @@ namespace krys::boo::css
 
       return GradientValue::Create(
         FunctionNotation<ValueId::WebkitGradient, DeprecatedLinearGradient> {DeprecatedLinearGradient {
-          .ColorInterpolationMethod =
+          .ColourInterpolationMethod =
             GradientColorInterpolationMethod::LegacyMethod(AlphaPremultiplication::Premultiplied),
           .GradientLine = {krys::move(*first), krys::move(*second)},
           .Stops = krys::move(*stops),
@@ -406,7 +406,7 @@ namespace krys::boo::css
 
       return GradientValue::Create(
         FunctionNotation<ValueId::WebkitGradient, DeprecatedRadialGradient> {DeprecatedRadialGradient {
-          .ColorInterpolationMethod =
+          .ColourInterpolationMethod =
             GradientColorInterpolationMethod::LegacyMethod(AlphaPremultiplication::Premultiplied),
           .GradientBox =
             {
@@ -542,7 +542,7 @@ namespace krys::boo::css
 
     template <typename TStop>
     KRYS_NODISCARD static GradientColorInterpolationMethod
-      ComputeGradientColorInterpolationMethod(Maybe<ColorInterpolationMethod> parsedColorInterpolationMethod,
+      ComputeGradientColorInterpolationMethod(Maybe<ColourInterpolationMethod> parsedColorInterpolationMethod,
                                               const GradientColorStopList<TStop> &stops) noexcept
     {
       // We detect whether stops use legacy vs. non-legacy CSS color syntax using the following rules:
@@ -574,18 +574,18 @@ namespace krys::boo::css
       {
         case GradientColorInterpolationMethod::Default::SRGB:
         {
-          return {{ColorInterpolationMethod::SRGB {}, AlphaPremultiplication::Premultiplied},
+          return {{ColourInterpolationMethod::SRGB {}, AlphaPremultiplication::Premultiplied},
                   defaultColorInterpolationMethod};
         }
         case GradientColorInterpolationMethod::Default::OKLab:
         {
-          return {{ColorInterpolationMethod::OKLab {}, AlphaPremultiplication::Premultiplied},
+          return {{ColourInterpolationMethod::OKLab {}, AlphaPremultiplication::Premultiplied},
                   defaultColorInterpolationMethod};
         }
       }
 
       krys_debug_assert(false);
-      return {{ColorInterpolationMethod::SRGB {}, AlphaPremultiplication::Premultiplied},
+      return {{ColourInterpolationMethod::SRGB {}, AlphaPremultiplication::Premultiplied},
               defaultColorInterpolationMethod};
     }
 
@@ -696,7 +696,7 @@ namespace krys::boo::css
       }
 
       return GradientValue::Create(FunctionNotation<Name, PrefixedLinearGradient> {PrefixedLinearGradient {
-        .ColorInterpolationMethod =
+        .ColourInterpolationMethod =
           GradientColorInterpolationMethod::LegacyMethod(AlphaPremultiplication::Premultiplied),
         .GradientLine = gradientLine.value_or(GradientLine {Vertical {keywords::Top {}}}),
         .Stops = krys::move(*stops),
@@ -844,7 +844,7 @@ namespace krys::boo::css
       }
 
       return GradientValue::Create(FunctionNotation<Name, PrefixedRadialGradient> {PrefixedRadialGradient {
-        .ColorInterpolationMethod =
+        .ColourInterpolationMethod =
           GradientColorInterpolationMethod::LegacyMethod(AlphaPremultiplication::Premultiplied),
         .GradientBox = krys::move(*gradientBox),
         .Stops = krys::move(*stops),
@@ -927,7 +927,7 @@ namespace krys::boo::css
         }
       };
 
-      Maybe<ColorInterpolationMethod> colorInterpolationMethod;
+      Maybe<ColourInterpolationMethod> colorInterpolationMethod;
 
       if (tokens.Peek().ValueId() == ValueId::In)
       {
@@ -985,7 +985,7 @@ namespace krys::boo::css
         ComputeGradientColorInterpolationMethod(colorInterpolationMethod, *stops);
 
       return GradientValue::Create(FunctionNotation<Name, LinearGradient> {LinearGradient {
-        .ColorInterpolationMethod = computedColorInterpolationMethod,
+        .ColourInterpolationMethod = computedColorInterpolationMethod,
         .GradientLine = gradientLine.value_or(GradientLine {Vertical {keywords::Bottom {}}}),
         .Stops = krys::move(*stops),
       }});
@@ -1005,7 +1005,7 @@ namespace krys::boo::css
 
       const auto defaultExtent = RadialGradient::Extent {keywords::FarthestCorner {}};
 
-      Maybe<ColorInterpolationMethod> colorInterpolationMethod;
+      Maybe<ColourInterpolationMethod> colorInterpolationMethod;
 
       if (tokens.Peek().ValueId() == ValueId::In)
       {
@@ -1251,7 +1251,7 @@ namespace krys::boo::css
         ComputeGradientColorInterpolationMethod(colorInterpolationMethod, *stops);
 
       return GradientValue::Create(FunctionNotation<Name, RadialGradient> {RadialGradient {
-        .ColorInterpolationMethod = computedColorInterpolationMethod,
+        .ColourInterpolationMethod = computedColorInterpolationMethod,
         .GradientBox = krys::move(*gradientBox),
         .Stops = krys::move(*stops),
       }});
@@ -1269,7 +1269,7 @@ namespace krys::boo::css
       //   <angular-color-stop-list>
       // )
 
-      Maybe<ColorInterpolationMethod> colorInterpolationMethod;
+      Maybe<ColourInterpolationMethod> colorInterpolationMethod;
 
       if (tokens.Peek().ValueId() == ValueId::In)
       {
@@ -1330,7 +1330,7 @@ namespace krys::boo::css
         ComputeGradientColorInterpolationMethod(colorInterpolationMethod, *stops);
 
       return GradientValue::Create(FunctionNotation<Name, ConicGradient> {ConicGradient {
-        .ColorInterpolationMethod = computedColorInterpolationMethod,
+        .ColourInterpolationMethod = computedColorInterpolationMethod,
         .GradientBox =
           {
             .Angle = krys::move(angle),

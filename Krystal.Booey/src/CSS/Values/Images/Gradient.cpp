@@ -104,8 +104,8 @@ namespace krys::boo::css
                                         bool needsLeadingSpace) noexcept
     {
       return krys::SwitchOn(
-        colorInterpolationMethod.Method.ColorSpace,
-        [&](const ColorInterpolationMethod::OKLab &)
+        colorInterpolationMethod.Method.ColourSpace,
+        [&](const ColourInterpolationMethod::OKLab &)
         {
           if (colorInterpolationMethod.DefaultMethod != GradientColorInterpolationMethod::Default::OKLab)
           {
@@ -114,7 +114,7 @@ namespace krys::boo::css
           }
           return false;
         },
-        [&](const ColorInterpolationMethod::SRGB &)
+        [&](const ColourInterpolationMethod::SRGB &)
         {
           if (colorInterpolationMethod.DefaultMethod != GradientColorInterpolationMethod::Default::SRGB)
           {
@@ -123,11 +123,11 @@ namespace krys::boo::css
           }
           return false;
         },
-        [&]<typename MethodColorSpace>(const MethodColorSpace &methodColorSpace)
+        [&]<typename MethodColourSpace>(const MethodColourSpace &methodColorSpace)
         {
           builder.Append(needsLeadingSpace ? u8" in " : u8"in ");
-          builder.Append(SerialisationForCSS(methodColorSpace.InterpolationColorSpace));
-          if constexpr (hasHueInterpolationMethod<MethodColorSpace>)
+          builder.Append(SerialisationForCSS(methodColorSpace.InterpolationColourSpace));
+          if constexpr (hasHueInterpolationMethod<MethodColourSpace>)
           {
             SerialisationForCSS(builder, methodColorSpace.HueInterpolationMethod);
           }
@@ -189,7 +189,7 @@ namespace krys::boo::css
         wroteSomething = true;
       });
 
-    if (AppendColorInterpolationMethod(builder, gradient.ColorInterpolationMethod, wroteSomething))
+    if (AppendColorInterpolationMethod(builder, gradient.ColourInterpolationMethod, wroteSomething))
     {
       wroteSomething = true;
     }
@@ -300,7 +300,7 @@ namespace krys::boo::css
     Serialise(builder, context, gradient.GradientBox);
     bool wroteSomething = builder.Length() != lengthBefore;
 
-    if (AppendColorInterpolationMethod(builder, gradient.ColorInterpolationMethod, wroteSomething))
+    if (AppendColorInterpolationMethod(builder, gradient.ColourInterpolationMethod, wroteSomething))
     {
       wroteSomething = true;
     }
@@ -456,7 +456,7 @@ namespace krys::boo::css
     Serialise(builder, context, gradient.GradientBox);
     bool wroteSomething = builder.Length() != lengthBefore;
 
-    if (AppendColorInterpolationMethod(builder, gradient.ColorInterpolationMethod, wroteSomething))
+    if (AppendColorInterpolationMethod(builder, gradient.ColourInterpolationMethod, wroteSomething))
     {
       wroteSomething = true;
     }

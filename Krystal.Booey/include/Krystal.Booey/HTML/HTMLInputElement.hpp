@@ -52,10 +52,10 @@ namespace krys::boo::html
     void Checked(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-colorspace
-    KRYS_NODISCARD dom::DOMString ColorSpace() const noexcept;
+    KRYS_NODISCARD dom::DOMString ColourSpace() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-colorspace
-    void ColorSpace(dom::DOMString &&value) noexcept;
+    void ColourSpace(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-dirname
     KRYS_NODISCARD dom::DOMString DirName() const noexcept;

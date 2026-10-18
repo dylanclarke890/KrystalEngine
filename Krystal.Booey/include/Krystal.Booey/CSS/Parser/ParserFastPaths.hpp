@@ -2,8 +2,8 @@
 
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Booey/Graphics/Color/ColorTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Colour/ColourTypes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 

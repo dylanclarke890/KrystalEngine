@@ -1,9 +1,9 @@
-﻿#include "Krystal.Booey/Graphics/Color/ColorConversion.hpp"
-#include "Krystal.Booey/Graphics/Color/ColorSpace.hpp"
-#include "Krystal.Booey/Graphics/Color/ColorUtilities.hpp"
+﻿#include "Krystal.Core/Colour/ColourConversion.hpp"
+#include "Krystal.Core/Colour/ColourSpace.hpp"
+#include "Krystal.Core/Colour/ColourUtilities.hpp"
 #include <numeric>
 
-namespace krys::boo
+namespace krys
 {
   // MARK: Lab-Like to LCH-Like conversion utilities.
 
@@ -52,7 +52,7 @@ namespace krys::boo
   // MARK: HSL conversions.
 
   HSLA<float>
-    ColorConversion<HSLA<float>, ExtendedSRGBA<float>>::Convert(const ExtendedSRGBA<float> &color) noexcept
+    ColourConversion<HSLA<float>, ExtendedSRGBA<float>>::Convert(const ExtendedSRGBA<float> &color) noexcept
   {
     // https://drafts.csswg.org/css-color-4/#hsl-to-rgb
 
@@ -111,7 +111,7 @@ namespace krys::boo
   }
 
   ExtendedSRGBA<float>
-    ColorConversion<ExtendedSRGBA<float>, HSLA<float>>::Convert(const HSLA<float> &color) noexcept
+    ColourConversion<ExtendedSRGBA<float>, HSLA<float>>::Convert(const HSLA<float> &color) noexcept
   {
     // https://drafts.csswg.org/css-color-4/#hsl-to-rgb
 
@@ -135,7 +135,7 @@ namespace krys::boo
   // MARK: HWB conversions.
 
   HWBA<float>
-    ColorConversion<HWBA<float>, ExtendedSRGBA<float>>::Convert(const ExtendedSRGBA<float> &color) noexcept
+    ColourConversion<HWBA<float>, ExtendedSRGBA<float>>::Convert(const ExtendedSRGBA<float> &color) noexcept
   {
     // https://drafts.csswg.org/css-color-4/#rgb-to-hwb
 
@@ -178,7 +178,7 @@ namespace krys::boo
   }
 
   ExtendedSRGBA<float>
-    ColorConversion<ExtendedSRGBA<float>, HWBA<float>>::Convert(const HWBA<float> &color) noexcept
+    ColourConversion<ExtendedSRGBA<float>, HWBA<float>>::Convert(const HWBA<float> &color) noexcept
   {
     // https://drafts.csswg.org/css-color-4/#hwb-to-rgb
     auto [hue, whiteness, blackness, alpha] = color.Resolved();
@@ -214,7 +214,7 @@ namespace krys::boo
   constexpr float LABk = static_cast<float>(24389.0 / 27.0);
 
   XYZA<float, WhitePoint::D50>
-    ColorConversion<XYZA<float, WhitePoint::D50>, Lab<float>>::Convert(const Lab<float> &color) noexcept
+    ColourConversion<XYZA<float, WhitePoint::D50>, Lab<float>>::Convert(const Lab<float> &color) noexcept
   {
     auto [lightness, a, b, alpha] = color.Resolved();
 
@@ -251,7 +251,7 @@ namespace krys::boo
     return {x, y, z, alpha};
   }
 
-  Lab<float> ColorConversion<Lab<float>, XYZA<float, WhitePoint::D50>>::Convert(
+  Lab<float> ColourConversion<Lab<float>, XYZA<float, WhitePoint::D50>>::Convert(
     const XYZA<float, WhitePoint::D50> &color) noexcept
   {
     auto [x, y, z, alpha] = color.Resolved();
@@ -278,12 +278,12 @@ namespace krys::boo
 
   // MARK: LCH conversions.
 
-  LCHA<float> ColorConversion<LCHA<float>, Lab<float>>::Convert(const Lab<float> &color) noexcept
+  LCHA<float> ColourConversion<LCHA<float>, Lab<float>>::Convert(const Lab<float> &color) noexcept
   {
     return ConvertToPolarForm<LCHA<float>>(color);
   }
 
-  Lab<float> ColorConversion<Lab<float>, LCHA<float>>::Convert(const LCHA<float> &color) noexcept
+  Lab<float> ColourConversion<Lab<float>, LCHA<float>>::Convert(const LCHA<float> &color) noexcept
   {
     return ConvertToRectangularForm<Lab<float>>(color);
   }
@@ -291,7 +291,7 @@ namespace krys::boo
   // MARK: OKLab conversions.
 
   XYZA<float, WhitePoint::D65>
-    ColorConversion<XYZA<float, WhitePoint::D65>, OKLab<float>>::Convert(const OKLab<float> &color) noexcept
+    ColourConversion<XYZA<float, WhitePoint::D65>, OKLab<float>>::Convert(const OKLab<float> &color) noexcept
   {
     // FIXME: This could be optimized for when we are not explicitly converting to XYZ-D65 by pre-multiplying
     // the 'LMSToXYZD65' matrix with any subsequent matrices in the conversion. This would mean teaching the
@@ -300,33 +300,33 @@ namespace krys::boo
     // https://bottosson.github.io/posts/oklab/ with XYZ <-> LMS matrices recalculated for consistent
     // reference white in https://github.com/w3c/csswg-drafts/issues/6642#issuecomment-943521484
 
-    constexpr ColorMatrix<3, 3> LinearLMSToXYZD65 {
+    constexpr ColourMatrix<3, 3> LinearLMSToXYZD65 {
       1.2268798758459243,  -0.5578149944602171, 0.2813910456659647,  -0.0405757452148008, 1.1122868032803170,
       -0.0717110580655164, -0.0763729366746601, -0.4214933324022432, 1.5869240198367816,
     };
 
-    constexpr ColorMatrix<3, 3> OKLabToNonLinearLMS {
+    constexpr ColourMatrix<3, 3> OKLabToNonLinearLMS {
       1.0000000000000000,  0.3963377773761749, 0.2158037573099136,  1.0000000000000000,  -0.1055613458156586,
       -0.0638541728258133, 1.0000000000000000, -0.0894841775298119, -1.2914855480194092,
     };
 
     auto [lightness, a, b, alpha] = color.Resolved();
 
-    auto components = ColorComponents<float, 3> {lightness, a, b};
+    auto components = ColourComponents<float, 3> {lightness, a, b};
 
     // 1. Transform from Lab-coordinates into non-linear LMS "approximate cone responses".
-    auto nonLinearLMS = OKLabToNonLinearLMS.TransformedColorComponents(components);
+    auto nonLinearLMS = OKLabToNonLinearLMS.TransformedColourComponents(components);
 
     // 2. Apply linearity.
     auto linearLMS = nonLinearLMS.Map([](float v) { return v * v * v; });
 
     // 3. Convert to XYZ.
-    auto [x, y, z] = LinearLMSToXYZD65.TransformedColorComponents(linearLMS);
+    auto [x, y, z] = LinearLMSToXYZD65.TransformedColourComponents(linearLMS);
 
     return {x, y, z, alpha};
   }
 
-  OKLab<float> ColorConversion<OKLab<float>, XYZA<float, WhitePoint::D65>>::Convert(
+  OKLab<float> ColourConversion<OKLab<float>, XYZA<float, WhitePoint::D65>>::Convert(
     const XYZA<float, WhitePoint::D65> &color) noexcept
   {
     // FIXME: This could be optimized for when we are not explicitly converting from XYZ-D65 by
@@ -336,12 +336,12 @@ namespace krys::boo
     // https://bottosson.github.io/posts/oklab/ with XYZ <-> LMS matrices recalculated for consistent
     // reference white in https://github.com/w3c/csswg-drafts/issues/6642#issuecomment-943521484
 
-    constexpr ColorMatrix<3, 3> XYZD65ToLinearLMS {
+    constexpr ColourMatrix<3, 3> XYZD65ToLinearLMS {
       0.8190224379967030, 0.3619062600528904, -0.1288737815209879, 0.0329836539323885, 0.9292868615863434,
       0.0361446663506424, 0.0481771893596242, 0.2642395317527308,  0.6335478284694309,
     };
 
-    constexpr ColorMatrix<3, 3> NonLinearLMSToOKLab {
+    constexpr ColourMatrix<3, 3> NonLinearLMSToOKLab {
       0.2104542683093140, 0.7936177747023054, -0.0040720430116193, 1.9779985324311684,  -2.4285922420485799,
       0.4505937096174110, 0.0259040424655478, 0.7827717124575296,  -0.8086757549230774,
     };
@@ -349,43 +349,44 @@ namespace krys::boo
     auto [x, y, z, alpha] = color.Resolved();
 
     // 1. Convert XYZ into LMS "approximate cone responses".
-    auto linearLMS = XYZD65ToLinearLMS.TransformedColorComponents(ColorComponents<float, 3> {x, y, z});
+    auto linearLMS = XYZD65ToLinearLMS.TransformedColourComponents(ColourComponents<float, 3> {x, y, z});
 
     // 2. Apply non-linearity.
     auto nonLinearLMS = linearLMS.Map([](float v) { return std::cbrt(v); });
 
     // 3. Transform into Lab-coordinates.
-    auto [lightness, a, b] = NonLinearLMSToOKLab.TransformedColorComponents(nonLinearLMS);
+    auto [lightness, a, b] = NonLinearLMSToOKLab.TransformedColourComponents(nonLinearLMS);
 
     return CreateFromComponentsClampingExceptAlpha<OKLab<float>>(lightness, a, b, alpha);
   }
 
   // MARK: OKLCH conversions.
 
-  OKLCHA<float> ColorConversion<OKLCHA<float>, OKLab<float>>::Convert(const OKLab<float> &color) noexcept
+  OKLCHA<float> ColourConversion<OKLCHA<float>, OKLab<float>>::Convert(const OKLab<float> &color) noexcept
   {
     return ConvertToPolarForm<OKLCHA<float>>(color);
   }
 
-  OKLab<float> ColorConversion<OKLab<float>, OKLCHA<float>>::Convert(const OKLCHA<float> &color) noexcept
+  OKLab<float> ColourConversion<OKLab<float>, OKLCHA<float>>::Convert(const OKLCHA<float> &color) noexcept
   {
     return ConvertToRectangularForm<OKLab<float>>(color);
   }
 
   // MARK: Conversion functions for raw color components with associated color spaces.
 
-  ColorComponents<float, 4> ConvertAndResolveColorComponents(ColorSpace inputColorSpace,
-                                                             ColorComponents<float, 4> inputColorComponents,
-                                                             ColorSpace outputColorSpace) noexcept
+  ColourComponents<float, 4>
+    ConvertAndResolveColourComponents(ColourSpace inputColorSpace,
+                                      ColourComponents<float, 4> inputColorComponents,
+                                      ColourSpace outputColorSpace) noexcept
   {
-    return CallWithColorType<float>(
+    return CallWithColourType<float>(
       inputColorSpace,
-      [&]<typename InputColorType>()
+      [&]<typename InputColourType>()
       {
-        auto inputColor = CreateFromComponents<InputColorType>(inputColorComponents);
-        return CallWithColorType<float>(
-          outputColorSpace, [&]<typename OutputColorType>()
-          { return AsColorComponents(ConvertColor<OutputColorType>(inputColor).Resolved()); });
+        auto inputColor = CreateFromComponents<InputColourType>(inputColorComponents);
+        return CallWithColourType<float>(
+          outputColorSpace, [&]<typename OutputColourType>()
+          { return AsColourComponents(ConvertColour<OutputColourType>(inputColor).Resolved()); });
       });
   }
 }

@@ -2,11 +2,11 @@
 
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
-#include "Krystal.Booey/Graphics/Color/ColorConversion.hpp"
-#include "Krystal.Booey/Graphics/Color/ColorMatrix.hpp"
-#include "Krystal.Booey/Graphics/Color/ColorTypes.hpp"
 #include "Krystal.Booey/Graphics/Filters/FEDropShadow.hpp"
 #include "Krystal.Booey/Graphics/Filters/FEGaussianBlur.hpp"
+#include "Krystal.Core/Colour/ColourConversion.hpp"
+#include "Krystal.Core/Colour/ColourMatrix.hpp"
+#include "Krystal.Core/Colour/ColourTypes.hpp"
 
 namespace krys::boo
 {
@@ -94,29 +94,29 @@ namespace krys::boo
       case Type::Grayscale:
       {
         color = CreateFromComponentsClamping<SRGBA<float>>(
-          GrayscaleColorMatrix(static_cast<float>(_amount))
-            .TransformedColorComponents(AsColorComponents(color.Resolved())));
+          GrayscaleColourMatrix(static_cast<float>(_amount))
+            .TransformedColourComponents(AsColourComponents(color.Resolved())));
         return true;
       }
       case Type::Sepia:
       {
         color = CreateFromComponentsClamping<SRGBA<float>>(
-          SepiaColorMatrix(static_cast<float>(_amount))
-            .TransformedColorComponents(AsColorComponents(color.Resolved())));
+          SepiaColourMatrix(static_cast<float>(_amount))
+            .TransformedColourComponents(AsColourComponents(color.Resolved())));
         return true;
       }
       case Type::HueRotate:
       {
         color = CreateFromComponentsClamping<SRGBA<float>>(
-          HueRotateColorMatrix(static_cast<float>(_amount))
-            .TransformedColorComponents(AsColorComponents(color.Resolved())));
+          HueRotateColourMatrix(static_cast<float>(_amount))
+            .TransformedColourComponents(AsColourComponents(color.Resolved())));
         return true;
       }
       case Type::Saturate:
       {
         color = CreateFromComponentsClamping<SRGBA<float>>(
-          SaturationColorMatrix(static_cast<float>(_amount))
-            .TransformedColorComponents(AsColorComponents(color.Resolved())));
+          SaturationColourMatrix(static_cast<float>(_amount))
+            .TransformedColourComponents(AsColourComponents(color.Resolved())));
         return true;
       }
       default: krys_debug_assert_msg(false, "Unreachable"); return false;
@@ -179,12 +179,12 @@ namespace krys::boo
     {
       case Type::Opacity:
         color =
-          ColorWithOverriddenAlpha(color, std::clamp<float>(color.Resolved().Alpha * amount, 0.0f, 1.0f));
+          ColourWithOverriddenAlpha(color, std::clamp<float>(color.Resolved().Alpha * amount, 0.0f, 1.0f));
         return true;
       case Type::Invert:
       {
         float oneMinusAmount = 1.0f - amount;
-        color = ColorByModifyingEachNonAlphaComponent(
+        color = ColourByModifyingEachNonAlphaComponent(
           color,
           [&](float component) { return 1.0f - (oneMinusAmount + component * (amount - oneMinusAmount)); });
         return true;
@@ -192,13 +192,13 @@ namespace krys::boo
       case Type::Contrast:
       {
         float intercept = -(0.5f * amount) + 0.5f;
-        color = ColorByModifyingEachNonAlphaComponent(
+        color = ColourByModifyingEachNonAlphaComponent(
           color,
           [&](float component) { return std::clamp<float>(intercept + amount * component, 0.0f, 1.0f); });
         return true;
       }
       case Type::Brightness:
-        color = ColorByModifyingEachNonAlphaComponent(
+        color = ColourByModifyingEachNonAlphaComponent(
           color, [&](float component) { return std::clamp<float>(amount * component, 0.0f, 1.0f); });
         return true;
       default: krys_debug_assert_msg(false, "Unreachable"); return false;
@@ -258,9 +258,9 @@ namespace krys::boo
   // FIXME: This hueRotate code exists to allow InvertLightnessFilterOperation to perform hue rotation
   // on color values outside of the non-extended SRGB value range (0-1) to maintain the behavior of colors
   // prior to clamping being enforced. It should likely just use the existing hueRotateColorMatrix(amount)
-  // in ColorMatrix.h
-  KRYS_NODISCARD static ColorComponents<float, 4> HueRotate(const ColorComponents<float, 4> &color,
-                                                            float amount) noexcept
+  // in ColourMatrix.h
+  KRYS_NODISCARD static ColourComponents<float, 4> HueRotate(const ColourComponents<float, 4> &color,
+                                                             float amount) noexcept
   {
     auto [r, g, b, alpha] = color;
 
@@ -353,25 +353,25 @@ namespace krys::boo
 
   bool InvertLightnessFilterOperation::TransformColor(SRGBA<float> &color) const noexcept
   {
-    auto hueRotatedSRGBAComponents = HueRotate(AsColorComponents(color.Resolved()), 0.5f);
+    auto hueRotatedSRGBAComponents = HueRotate(AsColourComponents(color.Resolved()), 0.5f);
 
     // Apply the matrix. See rdar://problem/41146650 for how this matrix was derived.
-    constexpr ColorMatrix<5, 3> toDarkModeMatrix {-0.770f, 0.059f,  -0.089f, 0.0f, 1.0f,
-                                                  0.030f,  -0.741f, -0.089f, 0.0f, 1.0f,
-                                                  0.030f,  0.059f,  -0.890f, 0.0f, 1.0f};
+    constexpr ColourMatrix<5, 3> toDarkModeMatrix {-0.770f, 0.059f,  -0.089f, 0.0f, 1.0f,
+                                                   0.030f,  -0.741f, -0.089f, 0.0f, 1.0f,
+                                                   0.030f,  0.059f,  -0.890f, 0.0f, 1.0f};
     color = CreateFromComponentsClamping<SRGBA<float>>(
-      toDarkModeMatrix.TransformedColorComponents(hueRotatedSRGBAComponents));
+      toDarkModeMatrix.TransformedColourComponents(hueRotatedSRGBAComponents));
     return true;
   }
 
   bool InvertLightnessFilterOperation::InverseTransformColor(SRGBA<float> &color) const noexcept
   {
     // Apply the matrix.
-    constexpr ColorMatrix<5, 3> toLightModeMatrix {-1.300f, -0.097f, 0.147f,  0.0f, 1.25f,
-                                                   -0.049f, -1.347f, 0.146f,  0.0f, 1.25f,
-                                                   -0.049f, -0.097f, -1.104f, 0.0f, 1.25f};
+    constexpr ColourMatrix<5, 3> toLightModeMatrix {-1.300f, -0.097f, 0.147f,  0.0f, 1.25f,
+                                                    -0.049f, -1.347f, 0.146f,  0.0f, 1.25f,
+                                                    -0.049f, -0.097f, -1.104f, 0.0f, 1.25f};
     auto convertedToLightModeComponents =
-      toLightModeMatrix.TransformedColorComponents(AsColorComponents(color.Resolved()));
+      toLightModeMatrix.TransformedColourComponents(AsColourComponents(color.Resolved()));
 
     auto hueRotatedSRGBAComponents = HueRotate(convertedToLightModeComponents, 0.5f);
 

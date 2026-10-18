@@ -211,14 +211,14 @@ namespace krys::boo::css::tests
 
     SECTION("Copies, moves and equality, including indirect alternatives")
     {
-      Color mix {ColorMix {.ColorInterpolationMethod = DefaultInterpolationMethodForColorMix,
+      Color mix {ColorMix {.ColourInterpolationMethod = DefaultInterpolationMethodForColorMix,
                            .MixComponents1 = {Keyword(ValueId::Red), null},
                            .MixComponents2 = {Hex(0, 0, 255), null}}};
       Color copy = mix;
       CHECK(copy == mix);
       CHECK(SerialiseForTest(copy) == SerialiseForTest(mix));
 
-      Color other {ColorMix {.ColorInterpolationMethod = DefaultInterpolationMethodForColorMix,
+      Color other {ColorMix {.ColourInterpolationMethod = DefaultInterpolationMethodForColorMix,
                              .MixComponents1 = {Keyword(ValueId::Red), null},
                              .MixComponents2 = {Hex(0, 0, 254), null}}};
       CHECK_FALSE(copy == other);
@@ -293,12 +293,12 @@ namespace krys::boo::css::tests
       Color lab {AbsoluteColor<LabFunction> {{Percentage<> {50.0}, Number<> {20.0}, Number<> {-30.0}, null}}};
       auto resolved = Resolve(lab);
       REQUIRE(resolved.IsValid());
-      CHECK(resolved.Space() == ColorSpace::Lab);
+      CHECK(resolved.Space() == ColourSpace::Lab);
       CHECK(SerialiseForTest(lab) == u8"lab(50% 20 -30)");
 
       Color p3 {AbsoluteColor<ColorRGBFunction<ExtendedDisplayP3<float>>> {
         {Number<> {1.0}, Number<> {0.5}, Percentage<> {0.0}, null}}};
-      CHECK(Resolve(p3).Space() == ColorSpace::ExtendedDisplayP3);
+      CHECK(Resolve(p3).Space() == ColourSpace::ExtendedDisplayP3);
       CHECK(SerialiseForTest(p3) == u8"color(display-p3 1 0.5 0%)");
     }
 
@@ -330,7 +330,7 @@ namespace krys::boo::css::tests
                      .Components = {Symbol {SymbolRaw {ValueId::B}}, Symbol {SymbolRaw {ValueId::G}},
                                     Symbol {SymbolRaw {ValueId::R}}, null}}};
       // Relative colours keep the extended (float) colour type.
-      CHECK(Resolve(color).Space() == ColorSpace::ExtendedSRGB);
+      CHECK(Resolve(color).Space() == ColourSpace::ExtendedSRGB);
       CHECK(Resolve(color).ToColorTypeLossy<SRGBA<uint8>>() == SRGBA<uint8> {0, 0, 255});
       CHECK(SerialiseForTest(color) == u8"rgb(from red b g r)");
     }
@@ -389,9 +389,9 @@ namespace krys::boo::css::tests
     using MixPercentage = ColorMix::Component::PercentageType;
 
     auto mix = [](Maybe<MixPercentage> p1, Maybe<MixPercentage> p2,
-                  ColorInterpolationMethod method = DefaultInterpolationMethodForColorMix)
+                  ColourInterpolationMethod method = DefaultInterpolationMethodForColorMix)
     {
-      return Color {ColorMix {.ColorInterpolationMethod = method,
+      return Color {ColorMix {.ColourInterpolationMethod = method,
                               .MixComponents1 = {Keyword(ValueId::Red), p1},
                               .MixComponents2 = {Keyword(ValueId::Blue), p2}}};
     };
@@ -408,15 +408,15 @@ namespace krys::boo::css::tests
       CHECK(SerialiseForTest(mix(MixPercentage {30_css_percentage}, MixPercentage {20_css_percentage}))
             == u8"color-mix(red 30%, blue 20%)");
       CHECK(SerialiseForTest(mix(null, null,
-                                 ColorInterpolationMethod {ColorInterpolationMethod::SRGB {},
-                                                           AlphaPremultiplication::Premultiplied}))
+                                 ColourInterpolationMethod {ColourInterpolationMethod::SRGB {},
+                                                            AlphaPremultiplication::Premultiplied}))
             == u8"color-mix(in srgb, red, blue)");
     }
 
     SECTION("Resolution")
     {
       auto srgb =
-        ColorInterpolationMethod {ColorInterpolationMethod::SRGB {}, AlphaPremultiplication::Premultiplied};
+        ColourInterpolationMethod {ColourInterpolationMethod::SRGB {}, AlphaPremultiplication::Premultiplied};
 
       auto even = Resolve(mix(null, null, srgb)).ToColorTypeLossy<SRGBA<uint8>>();
       CHECK(even == SRGBA<uint8> {128, 0, 128});
@@ -433,7 +433,7 @@ namespace krys::boo::css::tests
       CHECK_FALSE(Resolve(mix(MixPercentage {0_css_percentage}, MixPercentage {0_css_percentage})).IsValid());
 
       // An invalid colour makes the mix invalid.
-      Color withCurrent {ColorMix {.ColorInterpolationMethod = DefaultInterpolationMethodForColorMix,
+      Color withCurrent {ColorMix {.ColourInterpolationMethod = DefaultInterpolationMethodForColorMix,
                                    .MixComponents1 = {Keyword(ValueId::Currentcolor), null},
                                    .MixComponents2 = {Keyword(ValueId::Blue), null}}};
       CHECK_FALSE(Resolve(withCurrent).IsValid());

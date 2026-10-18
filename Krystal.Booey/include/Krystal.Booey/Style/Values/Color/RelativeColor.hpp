@@ -80,7 +80,7 @@ namespace krys::boo::style
       builder.Append(u8"color(from ");
       SerialisationForCSSTokenization(builder, context, relative.Origin);
       builder.Append(u8' ');
-      builder.Append(boo::Serialisation(ColorSpaceFor<ColorType>));
+      builder.Append(boo::Serialisation(ColourSpaceFor<ColorType>));
     }
     else
     {

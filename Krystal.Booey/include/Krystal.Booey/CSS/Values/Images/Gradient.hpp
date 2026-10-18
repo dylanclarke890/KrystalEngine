@@ -4,8 +4,8 @@
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Position.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
-#include "Krystal.Booey/Graphics/Color/AlphaPremultiplication.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorInterpolationMethod.hpp"
+#include "Krystal.Core/Colour/AlphaPremultiplication.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -36,13 +36,13 @@ namespace krys::boo::css
       OKLab
     };
 
-    ColorInterpolationMethod Method;
+    ColourInterpolationMethod Method;
     Default DefaultMethod;
 
     KRYS_NODISCARD static GradientColorInterpolationMethod
-      LegacyMethod(boo::AlphaPremultiplication alphaPremultiplication) noexcept
+      LegacyMethod(krys::AlphaPremultiplication alphaPremultiplication) noexcept
     {
-      return {{ColorInterpolationMethod::SRGB {}, alphaPremultiplication}, Default::SRGB};
+      return {{ColourInterpolationMethod::SRGB {}, alphaPremultiplication}, Default::SRGB};
     }
 
     KRYS_NODISCARD bool operator==(const GradientColorInterpolationMethod &) const noexcept = default;
@@ -143,7 +143,7 @@ namespace krys::boo::css
     using GradientLineType =
       Variant<Angle<>, Horizontal, Vertical, SpaceSeparatedTuple<Horizontal, Vertical>>;
 
-    GradientColorInterpolationMethod ColorInterpolationMethod;
+    GradientColorInterpolationMethod ColourInterpolationMethod;
     GradientLineType GradientLine;
     GradientLinearColorStopList Stops;
 
@@ -162,7 +162,7 @@ namespace krys::boo::css
   {
     if constexpr (!I)
     {
-      return gradient.ColorInterpolationMethod;
+      return gradient.ColourInterpolationMethod;
     }
     else if constexpr (I == 1)
     {
@@ -181,7 +181,7 @@ namespace krys::boo::css
     using GradientLineType =
       Variant<Angle<>, Horizontal, Vertical, SpaceSeparatedTuple<Horizontal, Vertical>>;
 
-    GradientColorInterpolationMethod ColorInterpolationMethod;
+    GradientColorInterpolationMethod ColourInterpolationMethod;
     GradientLineType GradientLine;
     GradientLinearColorStopList Stops;
 
@@ -200,7 +200,7 @@ namespace krys::boo::css
   {
     if constexpr (!I)
     {
-      return gradient.ColorInterpolationMethod;
+      return gradient.ColourInterpolationMethod;
     }
     else if constexpr (I == 1)
     {
@@ -218,7 +218,7 @@ namespace krys::boo::css
   {
     using GradientLineType = CommaSeparatedArray<DeprecatedGradientPosition, 2>;
 
-    GradientColorInterpolationMethod ColorInterpolationMethod;
+    GradientColorInterpolationMethod ColourInterpolationMethod;
     GradientLineType GradientLine;
     GradientDeprecatedColorStopList Stops;
 
@@ -237,7 +237,7 @@ namespace krys::boo::css
   {
     if constexpr (!I)
     {
-      return gradient.ColorInterpolationMethod;
+      return gradient.ColourInterpolationMethod;
     }
     else if constexpr (I == 1)
     {
@@ -277,7 +277,7 @@ namespace krys::boo::css
 
     using GradientBoxType = Variant<Ellipse, Circle>;
 
-    GradientColorInterpolationMethod ColorInterpolationMethod;
+    GradientColorInterpolationMethod ColourInterpolationMethod;
     GradientBoxType GradientBox;
     GradientLinearColorStopList Stops;
 
@@ -336,7 +336,7 @@ namespace krys::boo::css
   {
     if constexpr (!I)
     {
-      return gradient.ColorInterpolationMethod;
+      return gradient.ColourInterpolationMethod;
     }
     else if constexpr (I == 1)
     {
@@ -374,7 +374,7 @@ namespace krys::boo::css
 
     using GradientBoxType = Variant<Ellipse, Circle>;
 
-    GradientColorInterpolationMethod ColorInterpolationMethod;
+    GradientColorInterpolationMethod ColourInterpolationMethod;
     GradientBoxType GradientBox;
     GradientLinearColorStopList Stops;
 
@@ -433,7 +433,7 @@ namespace krys::boo::css
   {
     if constexpr (!I)
     {
-      return gradient.ColorInterpolationMethod;
+      return gradient.ColourInterpolationMethod;
     }
     else if constexpr (I == 1)
     {
@@ -459,7 +459,7 @@ namespace krys::boo::css
       KRYS_NODISCARD bool operator==(const GradientBoxType &) const noexcept = default;
     };
 
-    GradientColorInterpolationMethod ColorInterpolationMethod;
+    GradientColorInterpolationMethod ColourInterpolationMethod;
     GradientBoxType GradientBox;
     GradientDeprecatedColorStopList Stops;
 
@@ -506,7 +506,7 @@ namespace krys::boo::css
   {
     if constexpr (!I)
     {
-      return gradient.ColorInterpolationMethod;
+      return gradient.ColourInterpolationMethod;
     }
     else if constexpr (I == 1)
     {
@@ -530,7 +530,7 @@ namespace krys::boo::css
       KRYS_NODISCARD bool operator==(const GradientBoxType &) const noexcept = default;
     };
 
-    GradientColorInterpolationMethod ColorInterpolationMethod;
+    GradientColorInterpolationMethod ColourInterpolationMethod;
     GradientBoxType GradientBox;
     GradientAngularColorStopList Stops;
 
@@ -569,7 +569,7 @@ namespace krys::boo::css
   {
     if constexpr (!I)
     {
-      return gradient.ColorInterpolationMethod;
+      return gradient.ColourInterpolationMethod;
     }
     else if constexpr (I == 1)
     {

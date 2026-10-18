@@ -2,8 +2,8 @@
 
 #include "Krystal.Booey/CSS/Values/Color/ColorDescriptors.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/Color/ColorConversion.hpp"
-#include "Krystal.Booey/Graphics/Color/ColorTypes.hpp"
+#include "Krystal.Core/Colour/ColourConversion.hpp"
+#include "Krystal.Core/Colour/ColourTypes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::css
@@ -67,7 +67,7 @@ namespace krys::boo::css
         // storing the color with no extra allocation for an extended color object. This is permissible in
         // some case due to the historical requirement that some syntaxes serialize using the legacy color
         // syntax (rgb()/rgba()) and historically have used the 8-bit rgba internal representation in engines.
-        return {ConvertColor<SRGBA<uint8>>(color), Descriptor::FlagsForAbsolute};
+        return {ConvertColour<SRGBA<uint8>>(color), Descriptor::FlagsForAbsolute};
       }
       else
       {

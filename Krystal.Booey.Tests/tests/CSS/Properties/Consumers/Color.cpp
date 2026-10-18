@@ -398,7 +398,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("Colour parsing(<color-interpolation-method>)", "[CSS][Properties][Consumers][Color]")
   {
-    auto parse = [](utf8_stringview css) -> Maybe<ColorInterpolationMethod>
+    auto parse = [](utf8_stringview css) -> Maybe<ColourInterpolationMethod>
     {
       InputStream input {CSSOMString(css)};
       Tokenizer tokenizer {input};
@@ -416,30 +416,30 @@ namespace krys::boo::css::tests
 
     auto hsl = parse(u8"in hsl");
     REQUIRE(hsl);
-    REQUIRE(std::holds_alternative<ColorInterpolationMethod::HSL>(hsl->ColorSpace));
-    CHECK(std::get<ColorInterpolationMethod::HSL>(hsl->ColorSpace).HueInterpolationMethod
+    REQUIRE(std::holds_alternative<ColourInterpolationMethod::HSL>(hsl->ColourSpace));
+    CHECK(std::get<ColourInterpolationMethod::HSL>(hsl->ColourSpace).HueInterpolationMethod
           == HueInterpolationMethod::Shorter);
     CHECK(hsl->AlphaPremultiplication == AlphaPremultiplication::Premultiplied);
 
     auto longer = parse(u8"in oklch longer hue");
     REQUIRE(longer);
-    CHECK(std::get<ColorInterpolationMethod::OKLCH>(longer->ColorSpace).HueInterpolationMethod
+    CHECK(std::get<ColourInterpolationMethod::OKLCH>(longer->ColourSpace).HueInterpolationMethod
           == HueInterpolationMethod::Longer);
-    CHECK(std::get<ColorInterpolationMethod::LCH>(parse(u8"in lch decreasing hue")->ColorSpace)
+    CHECK(std::get<ColourInterpolationMethod::LCH>(parse(u8"in lch decreasing hue")->ColourSpace)
             .HueInterpolationMethod
           == HueInterpolationMethod::Decreasing);
-    CHECK(std::get<ColorInterpolationMethod::HWB>(parse(u8"in hwb increasing hue")->ColorSpace)
+    CHECK(std::get<ColourInterpolationMethod::HWB>(parse(u8"in hwb increasing hue")->ColourSpace)
             .HueInterpolationMethod
           == HueInterpolationMethod::Increasing);
 
-    CHECK(std::holds_alternative<ColorInterpolationMethod::XYZD65>(parse(u8"in xyz")->ColorSpace));
-    CHECK(std::holds_alternative<ColorInterpolationMethod::XYZD65>(parse(u8"in xyz-d65")->ColorSpace));
-    CHECK(std::holds_alternative<ColorInterpolationMethod::XYZD50>(parse(u8"in xyz-d50")->ColorSpace));
+    CHECK(std::holds_alternative<ColourInterpolationMethod::XYZD65>(parse(u8"in xyz")->ColourSpace));
+    CHECK(std::holds_alternative<ColourInterpolationMethod::XYZD65>(parse(u8"in xyz-d65")->ColourSpace));
+    CHECK(std::holds_alternative<ColourInterpolationMethod::XYZD50>(parse(u8"in xyz-d50")->ColourSpace));
     CHECK(
-      std::holds_alternative<ColorInterpolationMethod::SRGBLinear>(parse(u8"in srgb-linear")->ColorSpace));
-    CHECK(std::holds_alternative<ColorInterpolationMethod::DisplayP3Linear>(
-      parse(u8"in display-p3-linear")->ColorSpace));
-    CHECK(std::holds_alternative<ColorInterpolationMethod::OKLab>(parse(u8"in oklab")->ColorSpace));
+      std::holds_alternative<ColourInterpolationMethod::SRGBLinear>(parse(u8"in srgb-linear")->ColourSpace));
+    CHECK(std::holds_alternative<ColourInterpolationMethod::DisplayP3Linear>(
+      parse(u8"in display-p3-linear")->ColourSpace));
+    CHECK(std::holds_alternative<ColourInterpolationMethod::OKLab>(parse(u8"in oklab")->ColourSpace));
 
     // Rectangular spaces don't take a hue method; polar ones need `hue` after it.
     CHECK_FALSE(parse(u8"in srgb shorter hue"));

@@ -2,8 +2,8 @@
 #include "Krystal.Booey/Core/MathExtras.hpp"
 #include "Krystal.Booey/Core/NumberFormatting.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/Color/ColorNormalization.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Colour/ColourNormalization.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/Array.hpp"
@@ -74,7 +74,7 @@ namespace krys::boo
 
       StringBuilder builder;
       builder.Append(u8"color(");
-      builder.Append(Serialisation(ColorSpaceFor<ColorType>));
+      builder.Append(Serialisation(ColourSpaceFor<ColorType>));
       builder.Append(u8' ');
       AppendNumericComponent(builder, c1);
       builder.Append(u8' ');
@@ -87,7 +87,7 @@ namespace krys::boo
 
     KRYS_NODISCARD utf8_string SerialisationUsingColorFunction(const SRGBA<uint8> &color) noexcept
     {
-      return SerialisationUsingColorFunction(ConvertColor<SRGBA<float>>(color));
+      return SerialisationUsingColorFunction(ConvertColour<SRGBA<float>>(color));
     }
 
     template <typename ColorType>
@@ -99,7 +99,7 @@ namespace krys::boo
       auto [c1, c2, c3, alpha] = color.Unresolved();
 
       StringBuilder builder;
-      builder.Append(Serialisation(ColorSpaceFor<ColorType>));
+      builder.Append(Serialisation(ColourSpaceFor<ColorType>));
       builder.Append(u8'(');
       AppendNumericComponent(builder, c1);
       builder.Append(u8' ');
@@ -123,7 +123,7 @@ namespace krys::boo
       auto [c1, c2, c3, alpha] = color.Unresolved();
 
       StringBuilder builder;
-      builder.Append(Serialisation(ColorSpaceFor<ColorType>));
+      builder.Append(Serialisation(ColourSpaceFor<ColorType>));
       builder.Append(u8'(');
       AppendNumericComponent(builder, c1);
       builder.Append(u8' ');
@@ -258,7 +258,7 @@ namespace krys::boo
         return SerialisationUsingColorFunction(color);
       }
 
-      return SerialisationForCSS(ConvertColor<SRGBA<uint8>>(color), false);
+      return SerialisationForCSS(ConvertColour<SRGBA<uint8>>(color), false);
     }
 
     KRYS_NODISCARD utf8_string SerialisationForHTML(const SRGBA<float> &color,
@@ -269,7 +269,7 @@ namespace krys::boo
         return SerialisationUsingColorFunction(color);
       }
 
-      return SerialisationForHTML(ConvertColor<SRGBA<uint8>>(color), false);
+      return SerialisationForHTML(ConvertColour<SRGBA<uint8>>(color), false);
     }
 
     KRYS_NODISCARD utf8_string SerialisationForRenderTreeAsText(const SRGBA<float> &color,
@@ -324,24 +324,24 @@ namespace krys::boo
       if (useColorFunctionSerialisation)
       {
         return SerialisationUsingColorFunction(
-          ConvertColorCarryingForwardMissing<ExtendedSRGBA<float>>(color));
+          ConvertColourCarryingForwardMissing<ExtendedSRGBA<float>>(color));
       }
 
-      return SerialisationForCSS(ConvertColor<SRGBA<uint8>>(color), false);
+      return SerialisationForCSS(ConvertColour<SRGBA<uint8>>(color), false);
     }
 
     template <SerialisedAsLegacyRGB ColorType>
     KRYS_NODISCARD utf8_string SerialisationForHTML(const ColorType &color,
                                                     bool useColorFunctionSerialisation) noexcept
     {
-      return SerialisationForHTML(ConvertColor<SRGBA<uint8>>(color), useColorFunctionSerialisation);
+      return SerialisationForHTML(ConvertColour<SRGBA<uint8>>(color), useColorFunctionSerialisation);
     }
 
     template <SerialisedAsLegacyRGB ColorType>
     KRYS_NODISCARD utf8_string SerialisationForRenderTreeAsText(const ColorType &color,
                                                                 bool useColorFunctionSerialisation) noexcept
     {
-      return SerialisationForRenderTreeAsText(ConvertColor<SRGBA<uint8>>(color),
+      return SerialisationForRenderTreeAsText(ConvertColour<SRGBA<uint8>>(color),
                                               useColorFunctionSerialisation);
     }
 
@@ -405,74 +405,74 @@ namespace krys::boo
       { return SerialisationForRenderTreeAsText(underlyingColor, color.UsesColorFunctionSerialisation()); });
   }
 
-  utf8_stringview Serialisation(ColorSpace colorSpace) noexcept
+  utf8_stringview Serialisation(ColourSpace colorSpace) noexcept
   {
     switch (colorSpace)
     {
-      case ColorSpace::A98RGB:
-      case ColorSpace::ExtendedA98RGB:
+      case ColourSpace::A98RGB:
+      case ColourSpace::ExtendedA98RGB:
       {
         return u8"a98-rgb";
       }
-      case ColorSpace::DisplayP3:
-      case ColorSpace::ExtendedDisplayP3:
+      case ColourSpace::DisplayP3:
+      case ColourSpace::ExtendedDisplayP3:
       {
         return u8"display-p3";
       }
-      case ColorSpace::HSL:
+      case ColourSpace::HSL:
       {
         return u8"hsl";
       }
-      case ColorSpace::HWB:
+      case ColourSpace::HWB:
       {
         return u8"hwb";
       }
-      case ColorSpace::LCH:
+      case ColourSpace::LCH:
       {
         return u8"lch";
       }
-      case ColorSpace::Lab:
+      case ColourSpace::Lab:
       {
         return u8"lab";
       }
-      case ColorSpace::LinearDisplayP3:
-      case ColorSpace::ExtendedLinearDisplayP3:
+      case ColourSpace::LinearDisplayP3:
+      case ColourSpace::ExtendedLinearDisplayP3:
       {
         return u8"display-p3-linear";
       }
-      case ColorSpace::LinearSRGB:
-      case ColorSpace::ExtendedLinearSRGB:
+      case ColourSpace::LinearSRGB:
+      case ColourSpace::ExtendedLinearSRGB:
       {
         return u8"srgb-linear";
       }
-      case ColorSpace::OKLCH:
+      case ColourSpace::OKLCH:
       {
         return u8"oklch";
       }
-      case ColorSpace::OKLab:
+      case ColourSpace::OKLab:
       {
         return u8"oklab";
       }
-      case ColorSpace::ProPhotoRGB:
-      case ColorSpace::ExtendedProPhotoRGB:
+      case ColourSpace::ProPhotoRGB:
+      case ColourSpace::ExtendedProPhotoRGB:
       {
         return u8"prophoto-rgb";
       }
-      case ColorSpace::Rec2020:
-      case ColorSpace::ExtendedRec2020:
+      case ColourSpace::Rec2020:
+      case ColourSpace::ExtendedRec2020:
       {
         return u8"rec2020";
       }
-      case ColorSpace::SRGB:
-      case ColorSpace::ExtendedSRGB:
+      case ColourSpace::SRGB:
+      case ColourSpace::ExtendedSRGB:
       {
         return u8"srgb";
       }
-      case ColorSpace::XYZ_D50:
+      case ColourSpace::XYZ_D50:
       {
         return u8"xyz-d50";
       }
-      case ColorSpace::XYZ_D65:
+      case ColourSpace::XYZ_D65:
       {
         return u8"xyz-d65";
       }

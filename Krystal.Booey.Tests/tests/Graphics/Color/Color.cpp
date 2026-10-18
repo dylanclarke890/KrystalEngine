@@ -22,7 +22,7 @@ namespace krys::boo::tests
 
       CHECK_THAT(static_cast<float>(color.Lightness() * 100), WithinULP(hslaColor.Lightness, 4));
 
-      auto roundTrippedColor = ConvertColor<SRGBA<uint8>>(hslaColor);
+      auto roundTrippedColor = ConvertColour<SRGBA<uint8>>(hslaColor);
       CHECK(color == Color {roundTrippedColor});
     }
 
@@ -31,7 +31,7 @@ namespace krys::boo::tests
       auto [colorSpace, components] = color.ColorSpaceAndResolvedColorComponents();
       auto [r, g, b, alpha] = components;
 
-      CHECK(colorSpace == ColorSpace::DisplayP3);
+      CHECK(colorSpace == ColourSpace::DisplayP3);
       CHECK_THAT(r, WithinULP(1.0f, 4));
       CHECK_THAT(g, WithinULP(0.5f, 4));
       CHECK_THAT(b, WithinULP(0.25f, 4));
@@ -156,7 +156,7 @@ namespace krys::boo::tests
     }
 
     auto componentBytes = SRGBA<uint8> {255, 128, 63, 127};
-    Color rgb1 {ConvertColor<SRGBA<float>>(componentBytes)};
+    Color rgb1 {ConvertColour<SRGBA<float>>(componentBytes)};
     Color rgb2 {componentBytes};
     CHECK(rgb1 != rgb2);
     CHECK(rgb2 != rgb1);
@@ -182,7 +182,7 @@ namespace krys::boo::tests
     }
 
     auto componentBytes = SRGBA<uint8> {255, 128, 63, 127};
-    Color rgb1 {ConvertColor<SRGBA<float>>(componentBytes)};
+    Color rgb1 {ConvertColour<SRGBA<float>>(componentBytes)};
     Color rgb2 {componentBytes};
     CHECK(hash(rgb1) != hash(rgb2));
   }
@@ -287,7 +287,7 @@ namespace krys::boo::tests
     {
       Color colorWithAlphaMultipliedBy = color.ColorWithAlphaMultipliedBy(multiplier);
       auto [colorSpace, components] = colorWithAlphaMultipliedBy.ColorSpaceAndResolvedColorComponents();
-      CHECK(colorSpace == ColorSpace::SRGB);
+      CHECK(colorSpace == ColourSpace::SRGB);
       auto [r, g, b, a] = components;
       CHECK_THAT(r, WithinULP(0.0f, 4));
       CHECK_THAT(g, WithinULP(0.0f, 4));
@@ -347,12 +347,12 @@ namespace krys::boo::tests
   TEST_CASE("Color: inline and out of line storage", "[Graphics][Color]")
   {
     Color inlineColor {SRGBA<uint8> {1, 2, 3, 4}};
-    CHECK(inlineColor.Space() == ColorSpace::SRGB);
+    CHECK(inlineColor.Space() == ColourSpace::SRGB);
     REQUIRE(inlineColor.TryGetAsPackedInline().has_value());
     CHECK(inlineColor.TryGetAsPackedInline()->Value == 0x01'02'03'04u);
 
     Color outOfLine {Lab<float> {50, 10, 20, 1}};
-    CHECK(outOfLine.Space() == ColorSpace::Lab);
+    CHECK(outOfLine.Space() == ColourSpace::Lab);
     CHECK_FALSE(outOfLine.TryGetAsPackedInline().has_value());
     CHECK_FALSE(outOfLine.TryGetAsSRGBABytes().has_value());
 
@@ -399,13 +399,13 @@ namespace krys::boo::tests
 
     // Non-invertible types are inverted in sRGB.
     auto invertedLab = Color(Lab<float> {100, 0, 0, 1}).InvertedColorWithAlpha(Maybe<float> {1.0f});
-    CHECK(invertedLab.Space() == ColorSpace::SRGB);
+    CHECK(invertedLab.Space() == ColourSpace::SRGB);
     CHECK(Color(Color::red).InvertedColorWithAlpha(Maybe<float> {}) == Color {Color::red});
   }
 
   TEST_CASE("Color: ToResolvedColorComponentsInColorSpace", "[Graphics][Color]")
   {
-    auto [r, g, b, a] = Color(Color::white).ToResolvedColorComponentsInColorSpace(ColorSpace::LinearSRGB);
+    auto [r, g, b, a] = Color(Color::white).ToResolvedColorComponentsInColorSpace(ColourSpace::LinearSRGB);
     CHECK_THAT(r, WithinULP(1.0f, 4));
     CHECK_THAT(g, WithinULP(1.0f, 4));
     CHECK_THAT(b, WithinULP(1.0f, 4));
@@ -414,8 +414,8 @@ namespace krys::boo::tests
     constexpr auto none = std::numeric_limits<float>::quiet_NaN();
     auto [colorSpace, components] =
       Color(SRGBA<float> {none, 0.5f, 0, none}).ColorSpaceAndResolvedColorComponents();
-    CHECK(colorSpace == ColorSpace::SRGB);
-    CHECK(components == ColorComponents<float, 4> {0.0f, 0.5f, 0.0f, 0.0f});
+    CHECK(colorSpace == ColourSpace::SRGB);
+    CHECK(components == ColourComponents<float, 4> {0.0f, 0.5f, 0.0f, 0.0f});
   }
 
   TEST_CASE("Color: debug output", "[Graphics][Color]")

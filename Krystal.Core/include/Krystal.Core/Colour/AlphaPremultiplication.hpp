@@ -2,7 +2,7 @@
 
 #include "Krystal.Core/Enum.hpp"
 
-namespace krys::boo
+namespace krys
 {
   enum class AlphaPremultiplication : uint8
   {
@@ -11,4 +11,4 @@ namespace krys::boo
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::AlphaPremultiplication, 2uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::AlphaPremultiplication, 2uz);

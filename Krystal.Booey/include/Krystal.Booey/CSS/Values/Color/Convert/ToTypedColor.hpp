@@ -18,7 +18,7 @@ namespace krys::boo::css
     constexpr auto min = info.Min * info.NumberMultiplier;
     constexpr auto max = info.Max * info.NumberMultiplier;
 
-    if constexpr (info.Type == ColorComponentType::Angle)
+    if constexpr (info.Type == ColourComponentType::Angle)
     {
       return static_cast<float>(NormalizeHue(number.Value));
     }
@@ -72,7 +72,7 @@ namespace krys::boo::css
   KRYS_NODISCARD float ConvertToTypeColorComponent(style::Angle<> angle) noexcept
   {
     constexpr auto info = std::get<Index>(Descriptor::Components);
-    static_assert(info.Type == ColorComponentType::Angle);
+    static_assert(info.Type == ColourComponentType::Angle);
 
     return static_cast<float>(NormalizeHue(angle.Value));
   }

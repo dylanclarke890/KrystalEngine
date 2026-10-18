@@ -44,8 +44,8 @@ namespace krys::boo::css::tests
       return At({keywords::Center {}}, {keywords::Center {}});
     }
 
-    Method Standard(ColorInterpolationMethod method = {ColorInterpolationMethod::OKLab {},
-                                                       AlphaPremultiplication::Premultiplied})
+    Method Standard(ColourInterpolationMethod method = {ColourInterpolationMethod::OKLab {},
+                                                        AlphaPremultiplication::Premultiplied})
     {
       return Method {.Method = method, .DefaultMethod = Method::Default::OKLab};
     }
@@ -77,25 +77,25 @@ namespace krys::boo::css::tests
                     GradientLinearColorStopList stops = RedBlue())
     {
       return FunctionNotation<ValueId::LinearGradient, LinearGradient> {LinearGradient {
-        .ColorInterpolationMethod = method, .GradientLine = krys::move(line), .Stops = krys::move(stops)}};
+        .ColourInterpolationMethod = method, .GradientLine = krys::move(line), .Stops = krys::move(stops)}};
     }
 
     Gradient Radial(RadialGradient::GradientBoxType box, Method method = Standard())
     {
       return FunctionNotation<ValueId::RadialGradient, RadialGradient> {RadialGradient {
-        .ColorInterpolationMethod = method, .GradientBox = krys::move(box), .Stops = RedBlue()}};
+        .ColourInterpolationMethod = method, .GradientBox = krys::move(box), .Stops = RedBlue()}};
     }
 
     Gradient PrefixedRadial(PrefixedRadialGradient::GradientBoxType box)
     {
       return FunctionNotation<ValueId::WebkitRadialGradient, PrefixedRadialGradient> {PrefixedRadialGradient {
-        .ColorInterpolationMethod = Legacy(), .GradientBox = krys::move(box), .Stops = RedBlue()}};
+        .ColourInterpolationMethod = Legacy(), .GradientBox = krys::move(box), .Stops = RedBlue()}};
     }
 
     Gradient Conic(ConicGradient::GradientBoxType box, Method method = Standard())
     {
       return FunctionNotation<ValueId::ConicGradient, ConicGradient> {ConicGradient {
-        .ColorInterpolationMethod = method, .GradientBox = krys::move(box), .Stops = AngularRedBlue()}};
+        .ColourInterpolationMethod = method, .GradientBox = krys::move(box), .Stops = AngularRedBlue()}};
     }
 
     DeprecatedGradientPosition Point(double x, double y)
@@ -120,17 +120,17 @@ namespace krys::boo::css::tests
     // The interpolation method is only written when it isn't the default.
     CHECK(SerialiseForTest(
             Linear(Vertical {keywords::Bottom {}},
-                   Standard({ColorInterpolationMethod::SRGB {}, AlphaPremultiplication::Premultiplied})))
+                   Standard({ColourInterpolationMethod::SRGB {}, AlphaPremultiplication::Premultiplied})))
           == u8"linear-gradient(in srgb, red, blue)");
     CHECK(SerialiseForTest(Linear(Angle<> {90_css_deg},
-                                  Standard({ColorInterpolationMethod::HSL {HueInterpolationMethod::Longer},
+                                  Standard({ColourInterpolationMethod::HSL {HueInterpolationMethod::Longer},
                                             AlphaPremultiplication::Premultiplied})))
           == u8"linear-gradient(90deg in hsl longer hue, red, blue)");
     CHECK(SerialiseForTest(Linear(Vertical {keywords::Bottom {}}, Legacy()))
           == u8"linear-gradient(red, blue)");
     CHECK(SerialiseForTest(Linear(
             Vertical {keywords::Bottom {}},
-            Method {.Method = {ColorInterpolationMethod::OKLab {}, AlphaPremultiplication::Premultiplied},
+            Method {.Method = {ColourInterpolationMethod::OKLab {}, AlphaPremultiplication::Premultiplied},
                     .DefaultMethod = Method::Default::SRGB}))
           == u8"linear-gradient(in oklab, red, blue)");
 
@@ -142,36 +142,36 @@ namespace krys::boo::css::tests
                                GradientLinearColorStop {.Color = Blue(), .Position = {}}}))
       == u8"linear-gradient(red 10%, 50%, blue)");
 
-    CHECK(
-      SerialiseForTest(
-        Gradient {FunctionNotation<ValueId::RepeatingLinearGradient, LinearGradient> {LinearGradient {
-          .ColorInterpolationMethod = Standard(), .GradientLine = Angle<> {45_css_deg}, .Stops = RedBlue()}}})
-      == u8"repeating-linear-gradient(45deg, red, blue)");
+    CHECK(SerialiseForTest(Gradient {FunctionNotation<ValueId::RepeatingLinearGradient, LinearGradient> {
+            LinearGradient {.ColourInterpolationMethod = Standard(),
+                            .GradientLine = Angle<> {45_css_deg},
+                            .Stops = RedBlue()}}})
+          == u8"repeating-linear-gradient(45deg, red, blue)");
   }
 
   TEST_CASE("Gradient(Serialise prefixed and deprecated linear)", "[CSS][Images][Gradient]")
   {
     CHECK(SerialiseForTest(Gradient {FunctionNotation<ValueId::WebkitLinearGradient, PrefixedLinearGradient> {
-            PrefixedLinearGradient {.ColorInterpolationMethod = Legacy(),
+            PrefixedLinearGradient {.ColourInterpolationMethod = Legacy(),
                                     .GradientLine = Horizontal {keywords::Left {}},
                                     .Stops = RedBlue()}}})
           == u8"-webkit-linear-gradient(left, red, blue)");
-    CHECK(
-      SerialiseForTest(
-        Gradient {FunctionNotation<ValueId::WebkitRepeatingLinearGradient, PrefixedLinearGradient> {
-          PrefixedLinearGradient {
-            .ColorInterpolationMethod = Legacy(), .GradientLine = Angle<> {90_css_deg}, .Stops = RedBlue()}}})
-      == u8"-webkit-repeating-linear-gradient(90deg, red, blue)");
+    CHECK(SerialiseForTest(
+            Gradient {FunctionNotation<ValueId::WebkitRepeatingLinearGradient, PrefixedLinearGradient> {
+              PrefixedLinearGradient {.ColourInterpolationMethod = Legacy(),
+                                      .GradientLine = Angle<> {90_css_deg},
+                                      .Stops = RedBlue()}}})
+          == u8"-webkit-repeating-linear-gradient(90deg, red, blue)");
 
     // `from()` at 0, `to()` at 1 and `color-stop()` otherwise; percentages are written as numbers.
     CHECK(SerialiseForTest(Gradient {FunctionNotation<ValueId::WebkitGradient, DeprecatedLinearGradient> {
-            DeprecatedLinearGradient {.ColorInterpolationMethod = Legacy(),
+            DeprecatedLinearGradient {.ColourInterpolationMethod = Legacy(),
                                       .GradientLine = {Point(0, 0), Point(100, 0)},
                                       .Stops = DeprecatedRedBlue()}}})
           == u8"-webkit-gradient(linear, 0 0, 100 0, from(red), to(blue))");
     CHECK(SerialiseForTest(Gradient {
             FunctionNotation<ValueId::WebkitGradient, DeprecatedLinearGradient> {DeprecatedLinearGradient {
-              .ColorInterpolationMethod = Legacy(),
+              .ColourInterpolationMethod = Legacy(),
               .GradientLine = {Point(0, 0), Point(0, 100)},
               .Stops = {GradientDeprecatedColorStop {.Color = Red(),
                                                      .Position = Percentage<> {50_css_percentage}},
@@ -181,7 +181,7 @@ namespace krys::boo::css::tests
     CHECK(
       SerialiseForTest(Gradient {
         FunctionNotation<ValueId::WebkitGradient, DeprecatedLinearGradient> {DeprecatedLinearGradient {
-          .ColorInterpolationMethod = Legacy(), .GradientLine = {Point(0, 0), Point(1, 1)}, .Stops = {}}}})
+          .ColourInterpolationMethod = Legacy(), .GradientLine = {Point(0, 0), Point(1, 1)}, .Stops = {}}}})
       == u8"-webkit-gradient(linear, 0 0, 1 1)");
   }
 
@@ -215,11 +215,11 @@ namespace krys::boo::css::tests
 
     CHECK(SerialiseForTest(
             Radial(Ellipse {.Size = RadialGradient::Extent {keywords::FarthestCorner {}}},
-                   Standard({ColorInterpolationMethod::SRGB {}, AlphaPremultiplication::Premultiplied})))
+                   Standard({ColourInterpolationMethod::SRGB {}, AlphaPremultiplication::Premultiplied})))
           == u8"radial-gradient(in srgb, red, blue)");
     CHECK(SerialiseForTest(
             Radial(Circle {.Size = RadialGradient::Extent {keywords::FarthestCorner {}}},
-                   Standard({ColorInterpolationMethod::SRGB {}, AlphaPremultiplication::Premultiplied})))
+                   Standard({ColourInterpolationMethod::SRGB {}, AlphaPremultiplication::Premultiplied})))
           == u8"radial-gradient(circle in srgb, red, blue)");
   }
 
@@ -243,7 +243,7 @@ namespace krys::boo::css::tests
           == u8"-webkit-radial-gradient(left top, circle closest-side, red, blue)");
 
     CHECK(SerialiseForTest(Gradient {FunctionNotation<ValueId::WebkitGradient, DeprecatedRadialGradient> {
-            DeprecatedRadialGradient {.ColorInterpolationMethod = Legacy(),
+            DeprecatedRadialGradient {.ColourInterpolationMethod = Legacy(),
                                       .GradientBox = {.First = Point(0, 0),
                                                       .FirstRadius = Number<NonNegative> {0.0},
                                                       .Second = Point(10, 10),
@@ -265,12 +265,12 @@ namespace krys::boo::css::tests
           == u8"conic-gradient(from 90deg at left top, red, blue)");
     CHECK(SerialiseForTest(
             Conic({.Angle = Angle<> {90_css_deg}},
-                  Standard({ColorInterpolationMethod::SRGB {}, AlphaPremultiplication::Premultiplied})))
+                  Standard({ColourInterpolationMethod::SRGB {}, AlphaPremultiplication::Premultiplied})))
           == u8"conic-gradient(from 90deg in srgb, red, blue)");
 
     CHECK(SerialiseForTest(
             Gradient {FunctionNotation<ValueId::RepeatingConicGradient, ConicGradient> {ConicGradient {
-              .ColorInterpolationMethod = Standard(),
+              .ColourInterpolationMethod = Standard(),
               .GradientBox = {},
               .Stops = {GradientAngularColorStop {.Color = Red(), .Position = AnglePercentage<> {10_css_deg}},
                         GradientAngularColorStop {.Color = Blue(),
@@ -287,7 +287,7 @@ namespace krys::boo::css::tests
     CHECK(
       Linear(Angle<> {90_css_deg})
       != Gradient {FunctionNotation<ValueId::RepeatingLinearGradient, LinearGradient> {LinearGradient {
-        .ColorInterpolationMethod = Standard(), .GradientLine = Angle<> {90_css_deg}, .Stops = RedBlue()}}});
+        .ColourInterpolationMethod = Standard(), .GradientLine = Angle<> {90_css_deg}, .Stops = RedBlue()}}});
     CHECK(Conic({.Position = LeftTop()}) != Conic({.Position = Centre()}));
   }
 

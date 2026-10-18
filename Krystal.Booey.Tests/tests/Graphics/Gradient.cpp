@@ -29,7 +29,7 @@ namespace krys::boo::tests
   TEST_CASE("Gradient", "[Graphics][Gradient]")
   {
     auto method =
-      ColorInterpolationMethod {ColorInterpolationMethod::SRGB {}, AlphaPremultiplication::Premultiplied};
+      ColourInterpolationMethod {ColourInterpolationMethod::SRGB {}, AlphaPremultiplication::Premultiplied};
 
     auto linear = Gradient::Create(Gradient::LinearData {{0, 0}, {0, 100}}, method);
     CHECK_FALSE(linear->IsZeroSize());

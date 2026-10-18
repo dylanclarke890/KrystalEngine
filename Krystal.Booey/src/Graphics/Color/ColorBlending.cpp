@@ -133,54 +133,54 @@ namespace krys::boo
 
     if (RequiresLegacyInterpolationRules(from) && RequiresLegacyInterpolationRules(to))
     {
-      using InterpolationColorSpace = ColorInterpolationMethod::SRGB;
+      using InterpolationColourSpace = ColourInterpolationMethod::SRGB;
 
       auto fromComponents =
-        from.ToColorTypeLossyCarryingForwardMissing<typename InterpolationColorSpace::ColorType>();
+        from.ToColorTypeLossyCarryingForwardMissing<typename InterpolationColourSpace::ColourType>();
       auto toComponents =
-        to.ToColorTypeLossyCarryingForwardMissing<typename InterpolationColorSpace::ColorType>();
+        to.ToColorTypeLossyCarryingForwardMissing<typename InterpolationColourSpace::ColourType>();
 
       switch (context.CompositeOperation)
       {
         case CompositeOperation::Replace:
         {
-          auto interpolatedColor = InterpolateColorComponents<AlphaPremultiplication::Premultiplied>(
-            InterpolationColorSpace {}, fromComponents, 1.0 - context.Progress, toComponents,
+          auto interpolatedColor = InterpolateColourComponents<AlphaPremultiplication::Premultiplied>(
+            InterpolationColourSpace {}, fromComponents, 1.0 - context.Progress, toComponents,
             context.Progress);
-          return ConvertColor<SRGBA<uint8>>(ClipToGamut<SRGBA<float>>(interpolatedColor));
+          return ConvertColour<SRGBA<uint8>>(ClipToGamut<SRGBA<float>>(interpolatedColor));
         }
         case CompositeOperation::Add:
         case CompositeOperation::Accumulate:
         {
           krys_assert(context.Progress == 1.0);
-          return AddColorComponents<AlphaPremultiplication::Premultiplied>(InterpolationColorSpace {},
-                                                                           fromComponents, toComponents);
+          return AddColourComponents<AlphaPremultiplication::Premultiplied>(InterpolationColourSpace {},
+                                                                            fromComponents, toComponents);
         }
       }
     }
     else
     {
-      using InterpolationColorSpace = ColorInterpolationMethod::OKLab;
+      using InterpolationColourSpace = ColourInterpolationMethod::OKLab;
 
       auto fromComponents =
-        from.ToColorTypeLossyCarryingForwardMissing<typename InterpolationColorSpace::ColorType>();
+        from.ToColorTypeLossyCarryingForwardMissing<typename InterpolationColourSpace::ColourType>();
       auto toComponents =
-        to.ToColorTypeLossyCarryingForwardMissing<typename InterpolationColorSpace::ColorType>();
+        to.ToColorTypeLossyCarryingForwardMissing<typename InterpolationColourSpace::ColourType>();
 
       switch (context.CompositeOperation)
       {
         case CompositeOperation::Replace:
         {
-          return InterpolateColorComponents<AlphaPremultiplication::Premultiplied>(
-            InterpolationColorSpace {}, fromComponents, 1.0 - context.Progress, toComponents,
+          return InterpolateColourComponents<AlphaPremultiplication::Premultiplied>(
+            InterpolationColourSpace {}, fromComponents, 1.0 - context.Progress, toComponents,
             context.Progress);
         }
         case CompositeOperation::Add:
         case CompositeOperation::Accumulate:
         {
           krys_assert(context.Progress == 1.0);
-          return AddColorComponents<AlphaPremultiplication::Premultiplied>(InterpolationColorSpace {},
-                                                                           fromComponents, toComponents);
+          return AddColourComponents<AlphaPremultiplication::Premultiplied>(InterpolationColourSpace {},
+                                                                            fromComponents, toComponents);
         }
       }
     }
@@ -204,6 +204,6 @@ namespace krys::boo
       boo::Blend(fromRed, toRed, context), boo::Blend(fromGreen, toGreen, context),
       boo::Blend(fromBlue, toBlue, context), boo::Blend(fromAlpha, toAlpha, context));
 
-    return ConvertColor<SRGBA<uint8>>(blended);
+    return ConvertColour<SRGBA<uint8>>(blended);
   }
 }

@@ -49,7 +49,7 @@ namespace krys::boo::tests
 
     // Other colors blend in OKLab.
     auto modern = Blend(Lab<float> {0, 0, 0, 1}, Lab<float> {100, 0, 0, 1}, BlendingContext {0.5});
-    CHECK(modern.Space() == ColorSpace::OKLab);
+    CHECK(modern.Space() == ColourSpace::OKLab);
     CHECK(modern.ToColorTypeLossy<OKLab<float>>().Resolved().Lightness == Approx(0.5f).margin(0.001));
 
     // Additive composition sums the colors.

@@ -40,10 +40,10 @@ Booey never depends on Krystal.Gfx. Krystal.UI is the only module that knows bot
 
 Decision (2026-10-17): the engine uses Booey's typed colours, moved into Krystal.Core, spelled "Colour", in the `krys` namespace.
 
-- Move Booey's colour maths from `Krystal.Booey/Graphics/Color/` to `Krystal.Core/Colour/`: the components, models, types (`SRGBA<T>`, `LinearSRGBA<T>` and the other colour spaces), transfer functions, matrices, conversion, colour spaces, `PackedColour`, and the utilities (blending, interpolation, luminance, normalisation). These headers already depend only on Krystal.Core and each other, so the move is mechanical.
+- Done in C0 (2026-10-17): Booey's typed colour maths moved from `Krystal.Booey/Graphics/Color/` to `Krystal.Core/Colour/`: the components, models, types (`SRGBA<T>`, `LinearSRGBA<T>` and the other colour spaces), transfer functions, matrices, conversion, colour spaces, `PackedColour`, normalisation and utilities, the typed halves of luminance and interpolation, and the interpolation method types. Blending, which works on the CSS `Color`, stays in Booey. The ledger (`docs/booey/PORTING.md`, *Colour types in Krystal.Core*) has the detail.
 - Rename "Color" to "Colour" in the moved files and names (`ColourComponents`, `ColourSpace`, `ColourMatrix`, `PackedColour`, `ColourConversion.hpp`, ...), and move them from `krys::boo` to `krys`.
 - Booey keeps the CSS-facing `Color` value type and its serialisation, built on the moved types. It keeps the spelling `Color`, matching the CSS specifications (decision, 2026-10-17).
-- Delete Gfx's `Colour.hpp`, `ColourFormatter.hpp` and `ColourHasher.hpp`. They're a plain RGBA struct, used only inside the Gfx modules.
+- Delete Gfx's `Colour.hpp`, `ColourFormatter.hpp` and `ColourHasher.hpp` in G1, with the registries and renderer that use them. They're a plain RGBA struct, used only inside the Gfx modules.
 
 Where each layer gets its colours:
 - **The RHI has no colour type.** A clear value is four numbers in the target's encoding (`Array<float, 4>`, or integers for integer formats). Whether a value is sRGB or linear depends on the texture's `Format`, not on a colour class.
@@ -560,7 +560,7 @@ Implementation notes:
 | `ResourceHandleCache` | Deleted; caching moves to the asset layer. |
 | `I*Registry` and the OpenGL registries | Replaced by `Device`. The OpenGL wrappers (`Buffer`, `Image`, `Sampler`, `Shader`) are reused inside the backend. |
 | `IContext`, `IRenderer`, `Commands.hpp` | Replaced by `Device`, `CommandBuffer` and `Renderer2D`. |
-| `Colour.hpp`, `ColourFormatter.hpp`, `ColourHasher.hpp` | Deleted; the colour types move from Booey to `Krystal.Core/Colour/`. |
+| `Colour.hpp`, `ColourFormatter.hpp`, `ColourHasher.hpp` | Deleted in G1; the colour types moved from Booey to `Krystal.Core/Colour/` in C0. |
 | `Context.cpp`'s demo scenes and their shaders (`7/` to `11/`, shadows, SSAO, PBR, IBL) | Moved to Krystal.Samples, or deleted. |
 | `Mesh`, `Material`, `FlatColourMaterials`, `Light`, `ICamera`, `FirstPersonCamera`, `MeshDataUtils`, `InstanceData`, `Vertex.hpp` | Moved out of Gfx, to the future 3D renderer (or the samples). |
 | `FontAtlasLoader`, msdf-atlas-gen | Kept, unused until text in 3D. |
@@ -573,8 +573,8 @@ Implementation notes:
 
 | Slice | Content | Done when |
 |---|---|---|
-| C0 | Move the colour types from Booey to `Krystal.Core/Colour/`, renamed to "Colour" in `krys`; delete Gfx's colour headers. | Booey and its tests build and pass against the moved types. |
-| G1 | The RHI: `Device`, `Pool` and handles, buffers, textures, samplers, shaders, pipelines, command buffers, swapchains, transient memory; the OpenGL backend. The editor moves onto it. | The editor clears its window and draws a triangle through the RHI. The old registries are gone. |
+| C0 | Done (2026-10-17). Move the colour types from Booey to `Krystal.Core/Colour/`, renamed to "Colour" in `krys`. | Booey and its tests build and pass against the moved types. |
+| G1 | The RHI: `Device`, `Pool` and handles, buffers, textures, samplers, shaders, pipelines, command buffers, swapchains, transient memory; the OpenGL backend. The editor moves onto it; Gfx's old colour headers go with the registries. | The editor clears its window and draws a triangle through the RHI. The old registries are gone. |
 | G2 | Render2D: rects, rounded rects, borders, box shadows, images, gradients, clips, transforms, layers. | A test app draws a UI-like scene; golden image tests pass. |
 | G3 | Text: `GlyphAtlas`, `DrawGlyphs`, FreeType rasterisation. | Text renders crisply at several sizes and scales. |
 | G4 | Booey: `GraphicsContext`, the display list recorder, painting (paint order, backgrounds, borders, text); Krystal.UI replays it. | The vertical slice: a page loads, renders, resizes and responds to a click. |

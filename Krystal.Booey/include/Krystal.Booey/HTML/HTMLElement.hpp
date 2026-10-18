@@ -1,12 +1,12 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/StyledElement.hpp"
-#include "Krystal.Booey/Graphics/Color/ColorTypes.hpp"
 #include "Krystal.Booey/HTML/Dicts/ShowPopoverOptions.hpp"
 #include "Krystal.Booey/HTML/Dicts/TogglePopoverOptions.hpp"
 #include "Krystal.Booey/HTML/Enums/HTMLElementFlags.hpp"
 #include "Krystal.Booey/HTML/Enums/HTMLElementInterface.hpp"
 #include "Krystal.Booey/HTML/Mixins/HTMLOrSVGOrMathMLElement.hpp"
+#include "Krystal.Core/Colour/ColourTypes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::dom

@@ -54,6 +54,11 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Hash.cpp
 	PRIVATE tests/RefCounted.cpp
 
+  # Colour
+	PRIVATE tests/Colour/ColourConversion.cpp
+	PRIVATE tests/Colour/ColourInterpolation.cpp
+	PRIVATE tests/Colour/ColourUtilities.cpp
+
   # Text
 	PRIVATE tests/Text/CodePointIterator.cpp
 	PRIVATE tests/Text/StringBuilder.cpp

@@ -19,8 +19,8 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/TransformListValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
-#include "Krystal.Booey/Graphics/Color/ColorUtilities.hpp"
 #include "Krystal.Booey/Graphics/Color/NamedColors.hpp"
+#include "Krystal.Core/Colour/ColourUtilities.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <array>
 #include <charconv>
@@ -554,11 +554,11 @@ namespace krys::boo::css
         }
         case 6:
         {
-          return AsSRGBA(PackedColor::ARGB {0xFF'00'00'00 | value});
+          return AsSRGBA(PackedColour::ARGB {0xFF'00'00'00 | value});
         }
         case 8:
         {
-          return AsSRGBA(PackedColor::RGBA {value});
+          return AsSRGBA(PackedColour::RGBA {value});
         }
         default:
         {
@@ -826,7 +826,7 @@ namespace krys::boo::css
         return null;
       }
 
-      return AsSRGBA(PackedColor::ARGB {namedColor->ARGBValue});
+      return AsSRGBA(PackedColour::ARGB {namedColor->ARGBValue});
     }
   }
 

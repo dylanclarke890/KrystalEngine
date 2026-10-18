@@ -29,14 +29,14 @@ namespace krys::boo::style
       // yet. Instead, we resolve the calc values using the conversion data, and return
       // a style::ColorMix to be resolved at use time.
       return Color {ColorMix {
-        unresolved.ColorInterpolationMethod,
+        unresolved.ColourInterpolationMethod,
         ColorMix::Component {krys::move(component1Color), krys::move(percentage1)},
         ColorMix::Component {krys::move(component2Color), krys::move(percentage2)},
       }};
     }
 
     return css::Mix(css::ColorMixResolver {
-      unresolved.ColorInterpolationMethod,
+      unresolved.ColourInterpolationMethod,
       css::ColorMixResolver::Component {component1Color.GetResolvedColor(), krys::move(percentage1)},
       css::ColorMixResolver::Component {component2Color.GetResolvedColor(), krys::move(percentage2)},
     });
@@ -47,7 +47,7 @@ namespace krys::boo::style
   boo::Color ResolveColor(const ColorMix &colorMix, const boo::Color &currentColor) noexcept
   {
     return css::Mix(css::ColorMixResolver {
-      colorMix.ColorInterpolationMethod,
+      colorMix.ColourInterpolationMethod,
       css::ColorMixResolver::Component {colorMix.MixComponents1.Color.ResolveColor(currentColor),
                                         colorMix.MixComponents1.Percentage},
       css::ColorMixResolver::Component {colorMix.MixComponents2.Color.ResolveColor(currentColor),
@@ -146,10 +146,10 @@ namespace krys::boo::style
   {
     builder.Append(u8"color-mix(");
 
-    if (colorMix.ColorInterpolationMethod != css::DefaultInterpolationMethodForColorMix)
+    if (colorMix.ColourInterpolationMethod != css::DefaultInterpolationMethodForColorMix)
     {
       builder.Append(u8"in ");
-      boo::SerialisationForCSS(builder, colorMix.ColorInterpolationMethod);
+      boo::SerialisationForCSS(builder, colorMix.ColourInterpolationMethod);
       builder.Append(u8", ");
     }
 

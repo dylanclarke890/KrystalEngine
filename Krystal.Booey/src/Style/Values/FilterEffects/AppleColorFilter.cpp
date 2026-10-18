@@ -1,7 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Values/FilterEffects/AppleColorFilter.hpp"
 
 #include "Krystal.Booey/CSS/Values/AppleColorFilterValue.hpp"
-#include "Krystal.Booey/Graphics/Color/ColorConversion.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperations.hpp"
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
@@ -16,6 +15,7 @@
 #include "Krystal.Booey/Style/Values/FilterEffects/SaturateFunction.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/SepiaFunction.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Core/Colour/ColourConversion.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
@@ -49,7 +49,7 @@ namespace krys::boo::style
       }
     }
 
-    color = ConvertColor<SRGBA<uint8>>(sRGBAColor);
+    color = ConvertColour<SRGBA<uint8>>(sRGBAColor);
     return true;
   }
 
@@ -75,7 +75,7 @@ namespace krys::boo::style
       }
     }
 
-    color = ConvertColor<SRGBA<uint8>>(sRGBAColor);
+    color = ConvertColour<SRGBA<uint8>>(sRGBAColor);
     return true;
   }
 
