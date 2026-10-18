@@ -21,19 +21,17 @@ namespace krys
     CreateServices(argc, argv, settings);
 
     _context->Window->SetCallbacks(CreateWindowCallbacks());
-    _context->GraphicsContext->Startup();
-    _context->Renderer->Startup();
   }
 
   Application::~Application() noexcept
   {
-    _context->Renderer->Shutdown();
-    _context->GraphicsContext->Shutdown();
-
     _context->Events.reset();
     _context->Input.reset();
-    _context->Renderer.reset();
-    _context->GraphicsContext.reset();
+    if (_context->Device)
+    {
+      _context->Device->Destroy(_context->Swapchain);
+    }
+    _context->Device.reset();
     _context->VFS.reset();
     _context->Window.reset();
     _context->Logger.reset();
@@ -76,10 +74,13 @@ namespace krys
           OnUpdate(seconds(elapsed));
           if (!_isWindowMinimised)
           {
-            _context->Renderer->BeginFrame();
-            OnRender();
-            _context->Renderer->EndFrame();
-            _context->GraphicsContext->Present();
+            auto &device = *_context->Device;
+            device.BeginFrame();
+            auto &commands = device.GetCommandBuffer();
+            OnRender(commands);
+            device.Submit(commands);
+            device.Present(_context->Swapchain);
+            device.EndFrame();
           }
         }
 
@@ -145,37 +146,32 @@ namespace krys
 
     // TODO(feat): this needs to be configurable on startup.
     auto cwd = std::filesystem::current_path();
-    auto shadersDirectory = cwd / "data/shaders/opengl";
-    auto texturesDirectory = cwd / "data/assets";
-    _context->VFS = io::VirtualFileSystemBuilder()
-                      .Mount<io::NativeFileBackend>(io::Path("/"), io::Path(cwd))
-                      .Mount<io::NativeFileBackend>(io::Path("/shaders"), io::Path(shadersDirectory))
-                      .Mount<io::NativeFileBackend>(io::Path("/textures"), io::Path(texturesDirectory))
-                      .Build();
+    _context->VFS =
+      io::VirtualFileSystemBuilder().Mount<io::NativeFileBackend>(io::Path("/"), io::Path(cwd)).Build();
     if (!_context->VFS)
     {
       throw std::runtime_error("Failed to create virtual file system");
     }
 
-    Gfx::ContextSettings contextSettings {
-      .WindowHandle = _context->Window->GetWindowHandle(),
+    auto device = gfx::Device::Create({.EnableValidation = true});
+    if (!device.has_value())
+    {
+      throw std::runtime_error("Failed to create the graphics device: " + device.error());
+    }
+    _context->Device = krys::move(device.value());
+
+    auto swapchain = _context->Device->CreateSwapchain({
+      .Window = _context->Window->GetWindowHandle(),
       .Width = _context->Settings.WindowSettings.Size.Width,
       .Height = _context->Settings.WindowSettings.Size.Height,
-      .VFS = _context->VFS.get(),
-    };
-    auto gfxContext = Gfx::CreateContext(contextSettings);
-    if (!gfxContext.has_value())
+      .Format = gfx::TextureFormat::RGBA8Srgb,
+      .VSync = _context->Settings.WindowSettings.VSync,
+    });
+    if (!swapchain.has_value())
     {
-      throw std::runtime_error("Failed to create graphics context: " + gfxContext.error());
+      throw std::runtime_error("Failed to create the swapchain: " + swapchain.error());
     }
-    _context->GraphicsContext = krys::move(gfxContext.value());
-
-    auto uiRenderer = CreateRenderer(*_context->GraphicsContext);
-    if (!uiRenderer.has_value())
-    {
-      throw std::runtime_error("Failed to create renderer");
-    }
-    _context->Renderer = krys::move(uiRenderer.value());
+    _context->Swapchain = swapchain.value();
   }
 
   pal::WindowCallbacks Application::CreateWindowCallbacks() noexcept
@@ -203,7 +199,7 @@ namespace krys
         [&](WindowHandle window, uint32 width, uint32 height) noexcept
       {
         _context->Events->Enqueue(CreateUnique<WindowResizeEvent>(window, width, height));
-        _context->GraphicsContext->Resize(width, height);
+        _context->Device->ResizeSwapchain(_context->Swapchain, width, height);
       },
       .OnMinimise =
         [&](WindowHandle window) noexcept
@@ -217,12 +213,8 @@ namespace krys
         _context->Events->Enqueue(CreateUnique<WindowRestoreEvent>(window));
         _isWindowMinimised = false;
       },
-      .OnDPIChange =
-        [&](WindowHandle window, int dpi) noexcept
-      {
-        _context->Events->Enqueue(CreateUnique<WindowDPIChangeEvent>(window, dpi));
-        _context->GraphicsContext->DPIChanged(dpi);
-      },
+      .OnDPIChange = [&](WindowHandle window, int dpi) noexcept
+      { _context->Events->Enqueue(CreateUnique<WindowDPIChangeEvent>(window, dpi)); },
     };
   }
 
@@ -257,7 +249,7 @@ namespace krys
   {
   }
 
-  void Application::OnRender() noexcept
+  void Application::OnRender(gfx::CommandBuffer &) noexcept
   {
   }
 

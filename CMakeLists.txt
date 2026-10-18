@@ -31,9 +31,6 @@ add_subdirectory(Krystal.Core)
 # Krystal Engine modules
 add_subdirectory(Krystal.Booey)
 add_subdirectory(Krystal.Gfx)
-add_subdirectory(Krystal.Gfx.D3D11)
-add_subdirectory(Krystal.Gfx.OpenGL)
-add_subdirectory(Krystal.Gfx.Vulkan)
 add_subdirectory(Krystal.PAL)
 
 # Krystal Editor
@@ -42,3 +39,4 @@ add_subdirectory(Krystal.Editor)
 # Krystal Engine tests
 add_subdirectory(Krystal.Core.Tests)
 add_subdirectory(Krystal.Booey.Tests)
+add_subdirectory(Krystal.Gfx.Tests)

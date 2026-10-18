@@ -6,7 +6,6 @@
     "rapidxml",
     "spdlog",
     "freetype",
-    "vulkan-headers",
     {
       "name": "msdfgen",
       "default-features": false,

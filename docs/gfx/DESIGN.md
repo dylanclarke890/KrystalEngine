@@ -1,6 +1,6 @@
-﻿# Graphics redesign (draft)
+﻿# Graphics redesign
 
-Status: draft for review, 2026-10-17. Nothing here is implemented.
+Status (2026-10-17): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2), text (G3) and the Booey integration (G4) are drafts.
 
 ## Why
 
@@ -24,15 +24,16 @@ Non-goals for now:
 ## Modules
 
 ```
-Krystal.Core                colour types (moved from Booey), CommandList, handles' building blocks
+Krystal.Core                colour types (moved from Booey), CommandList
   └─ Krystal.Gfx            the RHI: device, handles, descriptions, command buffers. No files, no caches.
-      ├─ Krystal.Gfx.OpenGL the OpenGL 4.5 backend
+      │                     Backends are subdirectories (`OpenGL/`, namespace `krys::gfx::opengl`).
       └─ Krystal.Render2D   2D drawing on the RHI: rects, rounded rects, borders, images, glyphs, clips, layers
 Krystal.Booey               paints into a display list; no dependency on Gfx
 Krystal.UI                  the Booey host: pages, display list replay into Render2D, glyph atlas, input routing
 Krystal.Assets (later)      VFS loading, decoding, path caching, reference-counted asset handles
-Krystal.Samples (optional)  the LearnOpenGL scenes, if kept
 ```
+
+Decision (2026-10-17): backends aren't separate modules; Krystal.Gfx holds the RHI and an `OpenGL/` subdirectory (more later, one directory each).
 
 Booey never depends on Krystal.Gfx. Krystal.UI is the only module that knows both.
 
@@ -43,10 +44,10 @@ Decision (2026-10-17): the engine uses Booey's typed colours, moved into Krystal
 - Done in C0 (2026-10-17): Booey's typed colour maths moved from `Krystal.Booey/Graphics/Color/` to `Krystal.Core/Colour/`: the components, models, types (`SRGBA<T>`, `LinearSRGBA<T>` and the other colour spaces), transfer functions, matrices, conversion, colour spaces, `PackedColour`, normalisation and utilities, the typed halves of luminance and interpolation, and the interpolation method types. Blending, which works on the CSS `Color`, stays in Booey. The ledger (`docs/booey/PORTING.md`, *Colour types in Krystal.Core*) has the detail.
 - Rename "Color" to "Colour" in the moved files and names (`ColourComponents`, `ColourSpace`, `ColourMatrix`, `PackedColour`, `ColourConversion.hpp`, ...), and move them from `krys::boo` to `krys`.
 - Booey keeps the CSS-facing `Color` value type and its serialisation, built on the moved types. It keeps the spelling `Color`, matching the CSS specifications (decision, 2026-10-17).
-- Delete Gfx's `Colour.hpp`, `ColourFormatter.hpp` and `ColourHasher.hpp` in G1, with the registries and renderer that use them. They're a plain RGBA struct, used only inside the Gfx modules.
+- Gfx's `Colour.hpp`, `ColourFormatter.hpp` and `ColourHasher.hpp` were deleted in G1, with the registries and renderer that used them.
 
 Where each layer gets its colours:
-- **The RHI has no colour type.** A clear value is four numbers in the target's encoding (`Array<float, 4>`, or integers for integer formats). Whether a value is sRGB or linear depends on the texture's `Format`, not on a colour class.
+- **The RHI has no colour type.** A clear value is four numbers in the target's encoding (`Array<float, 4>`, or integers for integer formats). Whether a value is sRGB or linear depends on the texture's `TextureFormat`, not on a colour class.
 - **Render2D and Krystal.UI** use the typed colours: vertex colours are `PackedColour::RGBA` (premultiplied `SRGBA<uint8>`), and blending happens in a colour space chosen by type.
 
 ## Layer 1: the RHI (Krystal.Gfx)
@@ -83,7 +84,7 @@ Binding one is a single call at draw time, and nothing is left for the driver to
 
 Pipelines are cheap to bind and expensive to create (that's when shaders compile and link), so they're created up front: one per combination of shaders and state actually used. A 2D UI renderer needs about 5 to 8. Pipelines that differ only in state share shaders: today's `CompositeRenderTarget` and `CompositeRenderTargetWithOpacity` become two pipelines with the same shaders and different blend state.
 
-The output formats are part of the pipeline because blending and the conversion to the target's format are compiled in. The same shaders drawing into the window (BGRA8 sRGB) and into an RGBA16F texture are two pipelines; Render2D hides this with a cache keyed by the description and the formats.
+The output formats are part of the pipeline because blending and the conversion to the target's format are compiled in. The same shaders drawing into the window (RGBA8 sRGB) and into an RGBA16F texture are two pipelines; Render2D hides this with a cache keyed by the description and the formats.
 
 #### Binding slots
 
@@ -96,7 +97,7 @@ layout(binding = 0, std140) uniform Frame      // slot 0: per-frame data, one bu
   mat4 u_Projection;
   vec2 u_ViewportSize;
 };
-layout(push_constant) uniform Draw            // small per-draw data (emulated with a uniform buffer in OpenGL)
+KRYS_PUSH_CONSTANTS Draw                      // small per-draw data; the device defines the prefix
 {
   mat4 u_Transform;
 };
@@ -120,364 +121,58 @@ On tiled GPUs this saves memory bandwidth. In OpenGL it's a framebuffer bind, cl
 
 Draws aren't executed when they're recorded. A command buffer records them as plain structs into Krystal.Core's `CommandList`, and the backend replays them on `Submit`. Recording costs a copy per command, there's no virtual call per draw, and the same recording model works for Vulkan, which needs it.
 
-### Files
+### As built (G1, 2026-10-17)
+
+The headers are the reference; this lists what they hold and the behaviour that isn't obvious from them.
 
 ```
 Krystal.Gfx/include/Krystal.Gfx/
-  Handles.hpp          handle types
-  Pool.hpp             generational slot storage (used by backends)
-  Formats.hpp          Format, IndexType, VertexFormat
+  Handles.hpp          Handle<TTag> (24-bit index, 8-bit generation; 0 is invalid) and the six handle types
+  Pool.hpp             generational storage; stale handles resolve to null, nothing throws
+  Formats.hpp          TextureFormat, IndexType, VertexFormat and their sizes and kinds
+  CompareOp.hpp        depth, stencil and sampler comparisons
   Buffer.hpp           BufferDesc, BufferUsage, MemoryUsage
-  Texture.hpp          TextureDesc, TextureUsage, TextureRegion
-  Sampler.hpp          SamplerDesc
+  Texture.hpp          TextureDesc, TextureDimension, TextureUsage, TextureRegion
+  Sampler.hpp          SamplerDesc (SamplerFilter, SamplerMipmapMode, SamplerAddressMode, SamplerBorderColour)
   Shader.hpp           ShaderDesc, ShaderStage
-  Pipeline.hpp         PipelineDesc and its state blocks
+  Pipeline.hpp         PipelineDesc: vertex layouts, topology, BlendState, DepthStencilState, RasterState
+  RenderPass.hpp       RenderPassDesc, ColourAttachment, DepthStencilAttachment, AttachmentLoadOp/StoreOp
   Swapchain.hpp        SwapchainDesc
-  RenderPass.hpp       RenderPassDesc, LoadOp, StoreOp
-  CommandBuffer.hpp    the recorder
-  Device.hpp           the device interface
-Krystal.Gfx.OpenGL/   GLDevice and the per-resource wrappers
+  Commands.hpp         the recorded commands (krys::gfx::commands)
+  CommandBuffer.hpp    the recorder, with usage checks
+  Device.hpp           the device interface; Device::Create
+  OpenGL/              GLDevice, GLContext (Win32), GLMappings, the loader hooks, the Khronos headers
+  Text/                FontAtlas, FontAtlasLoader (kept from the old module, unused until text in 3D)
 ```
 
-### Handles and the pool
+**Conventions.** Pixel coordinates (viewports, scissors, texture regions) have a top-left origin, y pointing down. Texture memory starts with the top row, and UV (0, 0) is the top-left texel. In clip space, y points up and depth runs from 0 to 1. Rendering into a texture and sampling it doesn't flip the image.
 
-```cpp
-/// @brief A typed reference to a device resource: a 24-bit slot index and an 8-bit generation. 0 is invalid.
-template <typename TTag>
-struct Handle
-{
-  uint32 Value {0u};
+**Shaders** are GLSL 4.50 and must start with a `#version` line. The device inserts `#define KRYS_PUSH_CONSTANTS layout(binding = 15, std140) uniform` (and a `#line` directive, so error lines match) after it; push constants are declared with that prefix and fill uniform buffer slot 15, which `BindUniformBuffer` rejects. GLSL puts every uniform block member in one namespace, so blocks can't share member names.
 
-  KRYS_NODISCARD constexpr bool IsValid() const noexcept { return Value != 0u; }
-  KRYS_NODISCARD constexpr uint32 Index() const noexcept { return (Value & 0xFF'FFFFu) - 1u; }
-  KRYS_NODISCARD constexpr uint8 Generation() const noexcept { return static_cast<uint8>(Value >> 24); }
-  constexpr auto operator<=>(const Handle &) const noexcept = default;
-};
+**Device.**
+- `Device::Create(DeviceDesc)` needs no window: the OpenGL context lives on a hidden window the device owns, and each swapchain attaches a real window to it (sharing the pixel format). Several windows can share one device, and tests render offscreen without showing anything.
+- Creation returns `Expected`; shader and pipeline errors carry the compile or link log, prefixed with the debug name.
+- `Destroy` is immediate in OpenGL: the driver keeps objects alive while queued commands use them. Destroying something recorded but not yet submitted is an error, as in Vulkan.
+- Samplers are shared: equal descriptions return the same handle, reference counted by `Destroy`.
+- At destruction, the device logs every resource still alive, by debug name.
+- Beyond the draft: `ReadTexture` (synchronous readback, for tests and screenshots), `GetTextureDesc`, `SetVSync`, `WaitIdle`, `Limits`.
+- `AllocateTransient` hands out per-frame memory from one persistently mapped buffer split into `FramesInFlight` (3) regions; `BeginFrame` waits on the fence of the region it reuses. It returns an empty allocation (and asserts in debug builds) when the frame's memory runs out.
 
-using BufferHandle = Handle<struct BufferTag>;
-using TextureHandle = Handle<struct TextureTag>;
-using SamplerHandle = Handle<struct SamplerTag>;
-using ShaderHandle = Handle<struct ShaderTag>;
-using PipelineHandle = Handle<struct PipelineTag>;
-using SwapchainHandle = Handle<struct SwapchainTag>;
-```
+**Command buffers** record plain structs into `CommandList`; `Submit` replays them and resets the buffer. Debug builds assert on misuse where it happens: drawing outside a render pass or without a pipeline, nested passes, copies inside a pass, unbalanced debug groups. Vertex and index buffer bindings and push constants carry over between render passes; each pass binds its own pipeline.
 
-The index is stored plus one, so slot 0 with generation 0 is still a valid handle.
-
-```cpp
-/// @brief Generational storage for one resource type. Stale handles return null; nothing throws.
-template <typename T, typename THandle>
-class Pool
-{
-public:
-  KRYS_NODISCARD THandle Add(T &&value) noexcept;
-  KRYS_NODISCARD T *TryGet(THandle handle) noexcept;       // null if stale or invalid
-  KRYS_NODISCARD T &Get(THandle handle) noexcept;          // asserts
-  KRYS_NODISCARD Maybe<T> Remove(THandle handle) noexcept; // hands the object back, for deferred destruction
-  template <typename TFunc> void ForEach(TFunc &&func) noexcept; // leak reports at shutdown
-};
-```
-
-Ownership:
-- Whoever creates a resource owns it and destroys it explicitly. The RHI doesn't reference count.
-- `Destroy` is deferred until the GPU has finished the frames that use the resource.
-- `Owned<THandle>` is an optional move-only wrapper that destroys on drop.
-- At shutdown, in debug builds, the device reports leaked resources by debug name.
-- Reference counting and caching by path belong to the asset layer.
-
-### Descriptions
-
-Plain structs with defaults, made with designated initialisers. Each carries a `DebugName`, used for the OpenGL object label and in leak reports.
-
-```cpp
-enum class BufferUsage : uint8 { Vertex = 1, Index = 2, Uniform = 4, Storage = 8, CopyDestination = 16 }; // flags
-enum class MemoryUsage : uint8 { GpuOnly, Dynamic };
-
-struct BufferDesc
-{
-  uint64 Size {0u};
-  BufferUsage Usage {BufferUsage::Vertex};
-  MemoryUsage Memory {MemoryUsage::GpuOnly};
-  Span<const byte> InitialData {};
-  utf8_stringview DebugName {};
-};
-
-enum class TextureDimension : uint8 { Texture1D, Texture2D, Texture3D, Cube };
-enum class TextureUsage : uint8 { Sampled = 1, RenderTarget = 2, DepthStencil = 4, Storage = 8 }; // flags
-
-struct TextureDesc
-{
-  TextureDimension Dimension {TextureDimension::Texture2D};
-  Format Format {Format::RGBA8Unorm};
-  uint32 Width {1u}, Height {1u}, Depth {1u};
-  uint32 Layers {1u};
-  uint32 MipLevels {1u};
-  uint32 Samples {1u};
-  TextureUsage Usage {TextureUsage::Sampled};
-  utf8_stringview DebugName {};
-};
-
-struct ShaderDesc
-{
-  ShaderStage Stage {ShaderStage::Vertex};
-  utf8_stringview Source {}; // GLSL for now; the caller loads it, the RHI never touches files
-  utf8_stringview EntryPoint {"main"};
-  utf8_stringview DebugName {};
-};
-
-struct VertexAttribute
-{
-  uint32 Location;
-  VertexFormat Format;
-  uint32 Offset;
-};
-
-struct VertexBufferLayout
-{
-  uint32 Stride;
-  VertexInputRate Rate {VertexInputRate::PerVertex};
-  FixedVector<VertexAttribute, 16> Attributes;
-};
-
-struct BlendState
-{
-  bool Enabled {false};
-  BlendFactor SourceColour {BlendFactor::One}, DestinationColour {BlendFactor::OneMinusSourceAlpha};
-  BlendFactor SourceAlpha {BlendFactor::One}, DestinationAlpha {BlendFactor::OneMinusSourceAlpha};
-  BlendOp ColourOp {BlendOp::Add}, AlphaOp {BlendOp::Add};
-  ColourWriteMask WriteMask {ColourWriteMask::All};
-
-  KRYS_NODISCARD constexpr static BlendState PremultipliedAlpha() noexcept { return {.Enabled = true}; }
-};
-
-struct DepthStencilState
-{
-  bool DepthTest {false};
-  bool DepthWrite {false};
-  CompareOp DepthCompare {CompareOp::Less};
-  StencilState Stencil {};
-};
-
-struct RasterState
-{
-  CullMode Cull {CullMode::None};
-  FrontFace Front {FrontFace::CounterClockwise};
-  bool Scissor {false};
-};
-
-struct PipelineDesc
-{
-  ShaderHandle VertexShader {};
-  ShaderHandle FragmentShader {};
-  FixedVector<VertexBufferLayout, 4> VertexBuffers {};
-  PrimitiveTopology Topology {PrimitiveTopology::Triangles};
-  BlendState Blend {};
-  DepthStencilState DepthStencil {};
-  RasterState Raster {};
-  FixedVector<Format, 8> ColourFormats {};
-  Format DepthFormat {Format::Undefined};
-  uint32 PushConstantSize {0u}; // at most 128 bytes
-  utf8_stringview DebugName {};
-};
-```
-
-| Resource | Replaces |
-|---|---|
-| Buffer | `BufferRegistry` |
-| Texture (with a default view) | `Image`, `ImageView`, `Texture`, and render target attachments |
-| Sampler (deduplicated by the device) | `SamplerRegistry` and its cache |
-| Shader | the compile half of `ShaderRegistry` |
-| Pipeline | `Shader::SetUniform` by name, `MaterialParameter`, the global state calls in the renderer |
-| Swapchain (one per window) | `IContext::Present`, the screen render target |
-
-There are no render target objects: a render pass names its textures directly. Texture views as separate resources are left out until something needs them.
-
-### Command buffers
-
-```cpp
-struct ColourAttachment
-{
-  Variant<TextureHandle, SwapchainHandle> Target;
-  LoadOp Load {LoadOp::Clear};
-  StoreOp Store {StoreOp::Store};
-  Array<float, 4> Clear {0.f, 0.f, 0.f, 1.f}; // in the target's encoding
-};
-
-struct RenderPassDesc
-{
-  FixedVector<ColourAttachment, 8> Colour {};
-  Maybe<DepthAttachment> Depth {};
-  utf8_stringview DebugName {};
-};
-
-class CommandBuffer
-{
-public:
-  void BeginRenderPass(const RenderPassDesc &desc) noexcept;
-  void EndRenderPass() noexcept;
-
-  void SetViewport(const Viewport &viewport) noexcept;
-  void SetScissor(const ScissorRect &rect) noexcept;
-
-  void BindPipeline(PipelineHandle pipeline) noexcept;
-  void BindVertexBuffer(uint32 slot, BufferHandle buffer, uint64 offset = 0u) noexcept;
-  void BindIndexBuffer(BufferHandle buffer, IndexType type, uint64 offset = 0u) noexcept;
-  void BindUniformBuffer(uint32 slot, BufferHandle buffer, uint64 offset, uint64 size) noexcept;
-  void BindTexture(uint32 slot, TextureHandle texture, SamplerHandle sampler) noexcept;
-  template <typename T> void PushConstants(const T &data) noexcept; // static_assert(sizeof(T) <= 128)
-
-  void Draw(uint32 vertexCount, uint32 instanceCount = 1u, uint32 firstVertex = 0u, uint32 firstInstance = 0u) noexcept;
-  void DrawIndexed(uint32 indexCount, uint32 instanceCount = 1u, uint32 firstIndex = 0u, int32 vertexOffset = 0,
-                   uint32 firstInstance = 0u) noexcept;
-
-  void CopyBufferToTexture(BufferHandle source, uint64 offset, TextureHandle destination, const TextureRegion &region) noexcept;
-  void BlitTexture(TextureHandle source, const Rect &from, TextureHandle destination, const Rect &to, Filter filter) noexcept;
-
-  void PushDebugGroup(utf8_stringview name) noexcept; // shows up in RenderDoc
-  void PopDebugGroup() noexcept;
-
-private:
-  CommandList _commands;
-};
-```
-
-In debug builds the recorder checks usage as it records: a draw outside a render pass, a draw without a pipeline, or nested render passes assert at the mistake rather than at submit.
-
-### The device
-
-```cpp
-class Device
-{
-  KRYS_NON_COPY_MOVABLE(Device);
-
-public:
-  KRYS_NODISCARD static Expected<UniquePtr<Device>> Create(const DeviceDesc &desc) noexcept;
-  virtual ~Device() noexcept = default;
-
-  KRYS_NODISCARD virtual Expected<BufferHandle> CreateBuffer(const BufferDesc &desc) noexcept = 0;
-  KRYS_NODISCARD virtual Expected<TextureHandle> CreateTexture(const TextureDesc &desc) noexcept = 0;
-  KRYS_NODISCARD virtual Expected<SamplerHandle> CreateSampler(const SamplerDesc &desc) noexcept = 0;
-  KRYS_NODISCARD virtual Expected<ShaderHandle> CreateShader(const ShaderDesc &desc) noexcept = 0;       // error: compile log
-  KRYS_NODISCARD virtual Expected<PipelineHandle> CreatePipeline(const PipelineDesc &desc) noexcept = 0; // error: link log
-  KRYS_NODISCARD virtual Expected<SwapchainHandle> CreateSwapchain(const SwapchainDesc &desc) noexcept = 0;
-
-  virtual void Destroy(BufferHandle handle) noexcept = 0; // one overload per handle type; deferred
-  virtual void ResizeSwapchain(SwapchainHandle swapchain, uint32 width, uint32 height) noexcept = 0;
-
-  virtual void WriteBuffer(BufferHandle buffer, uint64 offset, Span<const byte> data) noexcept = 0;
-  virtual void WriteTexture(TextureHandle texture, const TextureRegion &region, Span<const byte> data) noexcept = 0;
-  virtual void GenerateMipmaps(TextureHandle texture) noexcept = 0;
-  KRYS_NODISCARD virtual TransientAllocation AllocateTransient(uint64 size, uint32 alignment = 256u) noexcept = 0;
-
-  virtual void BeginFrame() noexcept = 0;
-  KRYS_NODISCARD virtual CommandBuffer &GetCommandBuffer() noexcept = 0;
-  virtual void Submit(CommandBuffer &commands) noexcept = 0;
-  virtual void Present(SwapchainHandle swapchain) noexcept = 0;
-  virtual void EndFrame() noexcept = 0;
-
-  KRYS_NODISCARD virtual const DeviceLimits &Limits() const noexcept = 0;
-};
-
-/// @brief Per-frame memory from the device's ring buffer, valid until EndFrame.
-struct TransientAllocation
-{
-  BufferHandle Buffer {};
-  uint64 Offset {0u};
-  Span<byte> Data {};
-};
-```
-
-`Device` is virtual, but its calls are coarse; per-draw work goes through the command buffer.
-
-Errors:
-- Creation returns `Expected<THandle>` with a message. Shader and pipeline failures include the compile or link log.
-- Using an invalid handle asserts in debug builds and does nothing in release builds.
-- The OpenGL debug output stays as it is.
-
-### Using it
-
-Setup:
-
-```cpp
-auto device = gfx::Device::Create({.EnableValidation = true});
-auto swapchain = device->CreateSwapchain({.Window = window.GetWindowHandle(), .Width = w, .Height = h, .VSync = true});
-
-auto vs = device->CreateShader({.Stage = ShaderStage::Vertex, .Source = vertexSource, .DebugName = "Triangle.vert"});
-auto fs = device->CreateShader({.Stage = ShaderStage::Fragment, .Source = fragmentSource, .DebugName = "Triangle.frag"});
-if (!vs || !fs)
-{
-  KRYS_LOG_ERROR("{}", !vs ? vs.error() : fs.error()); // the compile log, with line numbers
-  return;
-}
-
-auto pipeline = device->CreatePipeline({
-  .VertexShader = *vs,
-  .FragmentShader = *fs,
-  .VertexBuffers = {{.Stride = sizeof(Vertex),
-                     .Attributes = {{0, VertexFormat::Float2, offsetof(Vertex, Position)},
-                                    {1, VertexFormat::UByte4Norm, offsetof(Vertex, Colour)}}}},
-  .Blend = BlendState::PremultipliedAlpha(),
-  .ColourFormats = {Format::BGRA8Srgb},
-  .DebugName = "Triangle",
-});
-
-auto vertices = device->CreateBuffer({.Size = sizeof(triangle), .Usage = BufferUsage::Vertex,
-                                      .InitialData = AsBytes(triangle), .DebugName = "TriangleVertices"});
-```
-
-Each frame:
-
-```cpp
-device->BeginFrame();
-auto &cmd = device->GetCommandBuffer();
-
-auto frame = device->AllocateTransient(sizeof(FrameUniforms));
-WriteInto(frame.Data, FrameUniforms {.Projection = Ortho(0, w, h, 0), .Time = t});
-
-cmd.BeginRenderPass({.Colour = {{.Target = *swapchain, .Clear = {0.1f, 0.1f, 0.1f, 1.f}}}, .DebugName = "Main"});
-cmd.BindPipeline(*pipeline);
-cmd.BindUniformBuffer(0, frame.Buffer, frame.Offset, sizeof(FrameUniforms));
-cmd.BindVertexBuffer(0, *vertices);
-cmd.Draw(3);
-cmd.EndRenderPass();
-
-device->Submit(cmd);
-device->Present(*swapchain);
-device->EndFrame();
-```
-
-Rendering to a texture (an in-world UI screen) is the same, with a texture as the target:
-
-```cpp
-auto screen = device->CreateTexture({.Format = Format::RGBA8Srgb, .Width = 1024, .Height = 768,
-                                     .Usage = TextureUsage::RenderTarget | TextureUsage::Sampled,
-                                     .DebugName = "TerminalScreen"});
-cmd.BeginRenderPass({.Colour = {{.Target = *screen}}});
-// ... Render2D draws the page ...
-cmd.EndRenderPass();
-// later, in the 3D pass: cmd.BindTexture(0, *screen, linearSampler);
-```
-
-### The OpenGL backend
+**The OpenGL backend.**
 
 | RHI | OpenGL 4.5 |
 |---|---|
-| Buffer | `glCreateBuffers` + `glNamedBufferStorage` (immutable); `Dynamic` adds `GL_DYNAMIC_STORAGE_BIT`. |
-| Texture | `glCreateTextures` + `glTextureStorage*` (the current `Image` wrapper). |
-| Sampler | A sampler object (`glCreateSamplers`), deduplicated by hashing its description. |
-| Shader | `glCreateShader` and compile; failure returns the info log. |
-| Pipeline | A linked program, a VAO built from the vertex layout (`glVertexArrayAttribFormat`, `glVertexArrayAttribBinding`), and the blend, depth and raster state as data. |
-| `BindPipeline` | `glUseProgram`, bind the VAO, apply only the state that differs from the last pipeline (a cached state shadow). |
-| `BindVertexBuffer` | `glVertexArrayVertexBuffer(vao, slot, buffer, offset, stride)`, so one VAO per pipeline serves any buffer. |
-| `BindUniformBuffer`, `BindTexture` | `glBindBufferRange(GL_UNIFORM_BUFFER, slot, ...)`; `glBindTextureUnit` + `glBindSampler`. |
-| `PushConstants` | `glNamedBufferSubData` into a reserved uniform buffer at binding 15. |
-| Render pass | A framebuffer object from a cache keyed by the attachments (framebuffer 0 for a swapchain), `glClearNamedFramebuffer*` for `Clear`, `glInvalidateNamedFramebufferData` for `DontCare` stores. |
-| Transient memory | One persistently mapped buffer (`glNamedBufferStorage` with `GL_MAP_PERSISTENT_BIT`), split into a region per frame in flight, each guarded by a `glFenceSync`. |
-| Deferred destruction | `Destroy` moves the object from the pool into the current frame's graveyard, emptied when that frame's fence signals. |
-| Swapchain | The WGL context and the window's default framebuffer; `Present` is `SwapBuffers`. |
-| Debug names and groups | `glObjectLabel`, `glPushDebugGroup`. |
+| Buffer | `glNamedBufferStorage` with `GL_DYNAMIC_STORAGE_BIT`, so `WriteBuffer` works on any buffer. |
+| Texture | `glTextureStorage*`; BGRA formats are stored as RGBA and uploaded as `GL_BGRA`. |
+| Pipeline | A linked program, a vertex array built from the layouts (`glVertexArrayAttribFormat`/`Binding`), and the state as data. Bound buffers are applied to the pipeline's vertex array at draw time, only when they change. |
+| State | A cache of the last applied blend, depth-stencil and raster state; binding a pipeline changes only what differs. |
+| Render pass | A cached framebuffer object per attachment set (framebuffer 0 for a swapchain). `glClipControl` is `GL_UPPER_LEFT` for textures and `GL_LOWER_LEFT` for windows, which gives the conventions above; the front face is flipped to match. Clears open the write masks and scissor first. `DontCare` stores call `glInvalidateNamedFramebufferData`. |
+| sRGB | `GL_FRAMEBUFFER_SRGB` is on for textures (it only affects sRGB formats) and set per swapchain format. |
+| Context | WGL: a throwaway legacy context loads the entry points, then a 4.5 core context (debug when validating) on the hidden window. Debug output goes to the global logger. |
 
-The current `Buffer`, `Image`, `Sampler` and `Shader` wrappers carry over almost unchanged. The new parts are pipelines, the framebuffer cache, the state shadow and the transient ring.
+Tests: `Krystal.Gfx.Tests` (21 cases): handles and the pool, formats, command recording, and a GPU suite on a real device that reads results back (clears, sRGB encoding, push constants, orientation, sampling, transient uniform buffers, indexed draws, scissor, blending, depth, copies and blits, mipmaps, errors, sampler sharing, stale handles). The editor draws a rotating triangle through the RHI.
 
 ### Left out for now
 
@@ -556,17 +251,23 @@ Implementation notes:
 
 | Current | Fate |
 |---|---|
-| `ResourceManager` | Rewritten as `Pool` (no exceptions, 24/8-bit handles). |
+All done in G1 (2026-10-17) unless noted.
+
+| Old | Fate |
+|---|---|
+| `ResourceManager` | Replaced by `Pool`. |
 | `ResourceHandleCache` | Deleted; caching moves to the asset layer. |
-| `I*Registry` and the OpenGL registries | Replaced by `Device`. The OpenGL wrappers (`Buffer`, `Image`, `Sampler`, `Shader`) are reused inside the backend. |
-| `IContext`, `IRenderer`, `Commands.hpp` | Replaced by `Device`, `CommandBuffer` and `Renderer2D`. |
-| `Colour.hpp`, `ColourFormatter.hpp`, `ColourHasher.hpp` | Deleted in G1; the colour types moved from Booey to `Krystal.Core/Colour/` in C0. |
-| `Context.cpp`'s demo scenes and their shaders (`7/` to `11/`, shadows, SSAO, PBR, IBL) | Moved to Krystal.Samples, or deleted. |
-| `Mesh`, `Material`, `FlatColourMaterials`, `Light`, `ICamera`, `FirstPersonCamera`, `MeshDataUtils`, `InstanceData`, `Vertex.hpp` | Moved out of Gfx, to the future 3D renderer (or the samples). |
-| `FontAtlasLoader`, msdf-atlas-gen | Kept, unused until text in 3D. |
-| `ShaderReflector` | Kept, to check pipeline binding layouts in debug builds. |
-| `Krystal.Gfx.Vulkan`, `Krystal.Gfx.D3D11` | Deleted or parked: they're tutorial contexts that don't implement `IContext`. |
-| `Handle.hpp` in Krystal.Core (namespace `krys::Gfx`) | Replaced by `Krystal.Gfx/Handles.hpp`. |
+| `I*Registry`, the OpenGL registries and resource wrappers | Replaced by `Device` and `GLDevice`'s plain records. |
+| `IContext`, `IRenderer`, `Commands.hpp` | Replaced by `Device` and `CommandBuffer`; `Renderer2D` comes in G2. |
+| `Colour.hpp`, `ColourFormatter.hpp`, `ColourHasher.hpp` | Deleted; the colour types moved to `Krystal.Core/Colour/` in C0. |
+| `Context.cpp`'s demo scenes, every editor shader and asset (`Krystal.Editor/data/`) | Deleted (decision, 2026-10-17); they're in git history. |
+| `Mesh`, `Material`, `FlatColourMaterials`, `Light`, `ICamera`, `FirstPersonCamera`, `MeshDataUtils`, `InstanceData`, `Vertex.hpp` | Deleted with the scenes they served; the 3D renderer will define its own. |
+| The old 2D renderer's text drawing | Deleted; the editor shows no text until G3 (decision, 2026-10-17). |
+| `FontAtlasLoader`, msdf-atlas-gen | Kept, moved to `Text/`, unused until text in 3D. |
+| `ShaderReflector` | Kept in `OpenGL/`, not yet wired up (planned: checking pipeline binding layouts in debug builds). |
+| `Krystal.Gfx.OpenGL` | Merged into Krystal.Gfx as `OpenGL/`; the loader hooks and WGL code moved with it. |
+| `Krystal.Gfx.Vulkan`, `Krystal.Gfx.D3D11` | Deleted (decision, 2026-10-17), with the `vulkan-headers` vcpkg dependency. |
+| `Handle.hpp` in Krystal.Core (namespace `krys::Gfx`) | Deleted; `Krystal.Gfx/Handles.hpp` replaces it. |
 | `Texture.hpp` in Krystal.Gfx (namespace `Gfx::OpenGL`) | Deleted with the registries. |
 
 ## Slices
@@ -574,17 +275,17 @@ Implementation notes:
 | Slice | Content | Done when |
 |---|---|---|
 | C0 | Done (2026-10-17). Move the colour types from Booey to `Krystal.Core/Colour/`, renamed to "Colour" in `krys`. | Booey and its tests build and pass against the moved types. |
-| G1 | The RHI: `Device`, `Pool` and handles, buffers, textures, samplers, shaders, pipelines, command buffers, swapchains, transient memory; the OpenGL backend. The editor moves onto it; Gfx's old colour headers go with the registries. | The editor clears its window and draws a triangle through the RHI. The old registries are gone. |
+| G1 | Done (2026-10-17), as one part. The RHI: `Device`, `Pool` and handles, buffers, textures, samplers, shaders, pipelines, command buffers, swapchains, transient memory; the OpenGL backend. The editor moves onto it; Gfx's old colour headers go with the registries. | The editor clears its window and draws a triangle through the RHI. The old registries are gone. |
 | G2 | Render2D: rects, rounded rects, borders, box shadows, images, gradients, clips, transforms, layers. | A test app draws a UI-like scene; golden image tests pass. |
 | G3 | Text: `GlyphAtlas`, `DrawGlyphs`, FreeType rasterisation. | Text renders crisply at several sizes and scales. |
 | G4 | Booey: `GraphicsContext`, the display list recorder, painting (paint order, backgrounds, borders, text); Krystal.UI replays it. | The vertical slice: a page loads, renders, resizes and responds to a click. |
 
-Testing: a fixture with a hidden window gives the RHI a real OpenGL context. Render2D gets golden image tests: render offscreen, read back, compare against a PNG with a tolerance.
+Testing: the device's hidden window gives tests a real OpenGL context (Krystal.Gfx.Tests). Render2D gets golden image tests: render offscreen, read back with `ReadTexture`, compare against a PNG with a tolerance.
 
 ## Open decisions
 
-1. **Backend selection:** a virtual `Device` chosen at run time (as drafted), or one backend chosen at compile time with no virtual calls.
-2. **Old backends and samples:** delete the Vulkan and D3D11 stubs, or keep them parked. Keep the LearnOpenGL scenes as Krystal.Samples, or delete them.
-3. **Module names:** Krystal.Gfx for the RHI, Krystal.Render2D, Krystal.UI, Krystal.Assets.
-4. **Shaders:** GLSL with explicit binding slots now. Later, possibly SPIR-V compiled offline, which a Vulkan backend would need.
-5. **Text:** FreeType greyscale bitmaps first (recommended), or MSDF.
+Decided (2026-10-17): a virtual `Device` chosen at run time; the Vulkan and D3D11 stubs, the LearnOpenGL scenes and the editor's assets deleted; backends as subdirectories of Krystal.Gfx.
+
+1. **Module names:** Krystal.Render2D, Krystal.UI, Krystal.Assets.
+2. **Shaders:** GLSL with explicit binding slots now. Later, possibly SPIR-V compiled offline, which a Vulkan backend would need.
+3. **Text:** FreeType greyscale bitmaps first (recommended), or MSDF.

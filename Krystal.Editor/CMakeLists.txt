@@ -3,7 +3,7 @@ add_executable(Krystal.Editor)
 target_link_libraries(Krystal.Editor
 	PUBLIC Krystal.Core
 	PUBLIC Krystal.Gfx
-	PUBLIC Krystal.Gfx.OpenGL
+	PUBLIC Krystal.PAL
 )
 
 set_target_properties(Krystal.Editor
