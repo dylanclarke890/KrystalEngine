@@ -576,7 +576,7 @@ namespace krys::boo::style
       if (a.GetInheritedFlags().BorderCollapse != b.GetInheritedFlags().BorderCollapse
           || a.GetInheritedFlags().EmptyCells != b.GetInheritedFlags().EmptyCells
           || a.GetInheritedFlags().CaptionSide != b.GetInheritedFlags().CaptionSide
-          || a.TableLayout() != b.TableLayout())
+          || a.GetTableLayout() != b.GetTableLayout())
       {
         return true;
       }

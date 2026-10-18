@@ -727,7 +727,7 @@ namespace krys::boo
 
   inline bool RenderStyle::IsFixedTableLayout() const noexcept
   {
-    return TableLayout() == TableLayoutType::Fixed
+    return GetTableLayout() == TableLayoutType::Fixed
            && (LogicalWidth().IsSpecified() || LogicalWidth().IsFitContent()
                || LogicalWidth().IsFillAvailable() || LogicalWidth().IsMinContent());
   }
