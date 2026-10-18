@@ -83,23 +83,17 @@ namespace krys::gfx::tests
     CHECK(draw.VertexOffset == -1);
   }
 
-  TEST_CASE("CommandBuffer: push constants and reset", "[Gfx][CommandBuffer]")
+  TEST_CASE("CommandBuffer: uniform buffer bindings and reset", "[Gfx][CommandBuffer]")
   {
-    struct Constants
-    {
-      float Values[4];
-    };
-
     CommandBuffer commands;
-    commands.PushConstants(Constants {{1.f, 2.f, 3.f, 4.f}});
+    commands.BindUniformBuffer(15u, BufferHandle::Create(2u, 0u), 256u, 64u);
 
     CommandListReader reader(commands.Commands());
-    CHECK(reader.ReadHeader().Type == commands::PushConstants::Type);
-    const auto &pushed = reader.ReadCommand<commands::PushConstants>();
-    REQUIRE(pushed.Size == sizeof(Constants));
-    Constants read {};
-    std::memcpy(&read, pushed.Data.data(), sizeof(Constants));
-    CHECK(read.Values[3] == 4.f);
+    CHECK(reader.ReadHeader().Type == commands::BindUniformBuffer::Type);
+    const auto &binding = reader.ReadCommand<commands::BindUniformBuffer>();
+    CHECK(binding.Slot == 15u);
+    CHECK(binding.Offset == 256u);
+    CHECK(binding.Size == 64u);
 
     commands.Reset();
     CHECK(commands.IsEmpty());

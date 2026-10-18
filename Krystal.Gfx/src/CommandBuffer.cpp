@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Gfx/CommandBuffer.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include <cstring>
 
 namespace krys::gfx
 {
@@ -71,7 +72,6 @@ namespace krys::gfx
   void CommandBuffer::BindUniformBuffer(uint32 slot, BufferHandle buffer, uint64 offset, uint64 size) noexcept
   {
     krys_assert_msg(buffer.IsValid(), "Invalid buffer.");
-    krys_assert_msg(slot != PushConstantsBinding, "This uniform buffer slot is reserved for push constants.");
     _commands.Push(commands::BindUniformBuffer {slot, buffer, offset, size});
   }
 
@@ -79,14 +79,6 @@ namespace krys::gfx
   {
     krys_assert_msg(texture.IsValid() && sampler.IsValid(), "Invalid texture or sampler.");
     _commands.Push(commands::BindTexture {slot, texture, sampler});
-  }
-
-  void CommandBuffer::PushConstantBytes(const void *data, uint32 size) noexcept
-  {
-    krys_assert_msg(size <= MaxPushConstantSize, "Push constants are limited to 128 bytes.");
-    commands::PushConstants command {.Size = size, .Data = {}};
-    std::memcpy(command.Data.data(), data, size);
-    _commands.Push(command);
   }
 
   void CommandBuffer::Draw(uint32 vertexCount, uint32 instanceCount, uint32 firstVertex,

@@ -91,7 +91,7 @@ namespace krys::gfx::opengl
       return HasStencil(format) ? GL_DEPTH_STENCIL_ATTACHMENT : GL_DEPTH_ATTACHMENT;
     }
 
-    /// @brief Inserts the push constants macro after the `#version` line, keeping line numbers.
+    /// @brief Copies the source into a null-terminated string, checking it starts with a `#version` line.
     KRYS_NODISCARD Expected<string> PrepareSource(utf8_stringview source) noexcept
     {
       string text = ToString(source);
@@ -99,16 +99,6 @@ namespace krys::gfx::opengl
       {
         return Unexpected<string>("The shader source must start with a #version line.");
       }
-
-      size_t versionEnd = text.find('\n');
-      if (versionEnd == string::npos)
-      {
-        return Unexpected<string>("The shader source has no body.");
-      }
-
-      constexpr auto prelude = "#define KRYS_PUSH_CONSTANTS layout(binding = 15, std140) uniform\n#line 2\n";
-      static_assert(PushConstantsBinding == 15u);
-      text.insert(versionEnd + 1u, prelude);
       return text;
     }
 
@@ -474,10 +464,6 @@ namespace krys::gfx::opengl
     {
       return Unexpected<string>("The pipeline needs a fragment shader.");
     }
-    if (desc.PushConstantSize > MaxPushConstantSize)
-    {
-      return Unexpected<string>("Push constants are limited to 128 bytes.");
-    }
     if (desc.ColourFormats.size() > _limits.MaxColourAttachments)
     {
       return Unexpected<string>("The pipeline has more colour targets than the device supports.");
@@ -535,7 +521,6 @@ namespace krys::gfx::opengl
     pipeline.Blend = desc.Blend;
     pipeline.DepthStencil = desc.DepthStencil;
     pipeline.Raster = desc.Raster;
-    pipeline.PushConstantSize = desc.PushConstantSize;
     pipeline.DebugName = ToString(desc.DebugName);
     Label(GL_PROGRAM, program, desc.DebugName);
     Label(GL_VERTEX_ARRAY, vertexArray, desc.DebugName);
@@ -1029,14 +1014,6 @@ namespace krys::gfx::opengl
           }
           break;
         }
-        case commands::PushConstants::Type:
-        {
-          const auto &command = reader.ReadCommand<commands::PushConstants>();
-          replay.PushConstants = command.Data;
-          replay.PushConstantSize = command.Size;
-          replay.PushConstantsDirty = true;
-          break;
-        }
         case commands::Draw::Type:
         {
           const auto &command = reader.ReadCommand<commands::Draw>();
@@ -1095,7 +1072,7 @@ namespace krys::gfx::opengl
   void GLDevice::ExecuteBeginRenderPass(ReplayState &replay,
                                         const commands::BeginRenderPass &command) noexcept
   {
-    // Buffer bindings and push constants carry over between passes; a pass needs its own pipeline.
+    // Buffer bindings carry over between passes; a pass needs its own pipeline.
     replay.InRenderPass = true;
     replay.TargetIsSwapchain = false;
     replay.Pipeline = nullptr;
@@ -1264,7 +1241,6 @@ namespace krys::gfx::opengl
     glUseProgram(pipeline->Program);
     glBindVertexArray(pipeline->VertexArray);
     ApplyPipelineState(*pipeline, !replay.TargetIsSwapchain);
-    replay.PushConstantsDirty = replay.PushConstantSize > 0u;
   }
 
   void GLDevice::ApplyPipelineState(const GLPipeline &pipeline, bool flipFrontFace) noexcept
@@ -1348,22 +1324,6 @@ namespace krys::gfx::opengl
     {
       glVertexArrayElementBuffer(pipeline.VertexArray, replay.IndexBuffer);
       pipeline.AppliedIndexBuffer = replay.IndexBuffer;
-    }
-
-    if (replay.PushConstantsDirty && pipeline.PushConstantSize > 0u)
-    {
-      auto allocation = AllocateTransient(pipeline.PushConstantSize, _limits.UniformBufferOffsetAlignment);
-      if (allocation.IsValid())
-      {
-        std::memset(allocation.Data.data(), 0, allocation.Data.size());
-        const uint32 size = replay.PushConstantSize < pipeline.PushConstantSize ? replay.PushConstantSize
-                                                                                : pipeline.PushConstantSize;
-        std::memcpy(allocation.Data.data(), replay.PushConstants.data(), size);
-        glBindBufferRange(GL_UNIFORM_BUFFER, PushConstantsBinding, _buffers.Get(allocation.Buffer).Id,
-                          static_cast<GLintptr>(allocation.Offset),
-                          static_cast<GLsizeiptr>(pipeline.PushConstantSize));
-      }
-      replay.PushConstantsDirty = false;
     }
   }
 

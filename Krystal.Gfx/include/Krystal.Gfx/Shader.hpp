@@ -14,15 +14,7 @@ namespace krys::gfx
   /// @brief A shader stage compiled from source.
   ///
   /// Sources are GLSL 4.50. Resources bind by slot, declared in the shader: `layout(binding = N, std140)` for
-  /// uniform blocks and `layout(binding = N)` for samplers; vertex inputs use `layout(location = N)`. Push
-  /// constants are declared with the `KRYS_PUSH_CONSTANTS` prefix, which the device defines after the
-  /// `#version` line:
-  /// @code
-  /// KRYS_PUSH_CONSTANTS Draw
-  /// {
-  ///   mat4 u_Transform;
-  /// };
-  /// @endcode
+  /// uniform blocks and `layout(binding = N)` for samplers; vertex inputs use `layout(location = N)`.
   struct ShaderDesc
   {
     ShaderStage Stage {ShaderStage::Vertex};

@@ -99,13 +99,6 @@ namespace krys::gfx::commands
     SamplerHandle Sampler;
   };
 
-  struct PushConstants
-  {
-    constexpr static CommandType Type = KRYS_CMD_TYPE("gfx::PushConstants");
-    uint32 Size;
-    Array<byte, MaxPushConstantSize> Data;
-  };
-
   struct Draw
   {
     constexpr static CommandType Type = KRYS_CMD_TYPE("gfx::Draw");

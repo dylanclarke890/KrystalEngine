@@ -12,6 +12,7 @@
 #include "Krystal.PAL/Events.hpp"
 #include "Krystal.PAL/Keys.hpp"
 #include <cstddef>
+#include <cstring>
 
 namespace krys
 {
@@ -33,7 +34,7 @@ namespace krys
 layout(location = 0) in vec2 a_Position;
 layout(location = 1) in vec4 a_Colour;
 
-KRYS_PUSH_CONSTANTS Draw
+layout(binding = 0, std140) uniform Draw
 {
   float u_Time;
 };
@@ -152,11 +153,19 @@ void main()
         return;
       }
 
+      auto uniforms = _context->Device->AllocateTransient(sizeof(TriangleUniforms));
+      if (!uniforms.IsValid())
+      {
+        return;
+      }
+      const TriangleUniforms data {.Time = _time, .Padding = {}};
+      std::memcpy(uniforms.Data.data(), &data, sizeof(data));
+
       commands.BeginRenderPass(gfx::RenderPassDesc::SingleColour(
         {.Swapchain = _context->Swapchain, .ClearColour = {0.02f, 0.02f, 0.03f, 1.f}}));
       commands.BindPipeline(_pipeline);
       commands.BindVertexBuffer(0u, _vertices);
-      commands.PushConstants(TriangleUniforms {.Time = _time, .Padding = {}});
+      commands.BindUniformBuffer(0u, uniforms.Buffer, uniforms.Offset, sizeof(TriangleUniforms));
       commands.Draw(3u);
       commands.EndRenderPass();
     }
@@ -183,7 +192,6 @@ void main()
         .FragmentShader = _fragmentShader,
         .Blend = gfx::BlendState::PremultipliedAlpha(),
         .ColourFormats = {gfx::TextureFormat::RGBA8Srgb},
-        .PushConstantSize = sizeof(TriangleUniforms),
         .DebugName = u8"Triangle",
       };
       pipelineDesc.VertexBuffers.push_back({

@@ -75,7 +75,7 @@ Pipeline
 ├─ Depth/stencil     test on or off, write on or off, compare function, stencil ops
 ├─ Blend             on or off, factors and ops, colour write mask
 ├─ Output formats    "renders into one RGBA8 sRGB colour target, no depth"
-└─ Resource layout   "uniform block at slot 0, texture at slot 0, 64 bytes of push constants"
+└─ Resource layout   "uniform block at slot 0, texture at slot 0"
 ```
 
 Binding one is a single call at draw time, and nothing is left for the driver to work out.
@@ -97,7 +97,7 @@ layout(binding = 0, std140) uniform Frame      // slot 0: per-frame data, one bu
   mat4 u_Projection;
   vec2 u_ViewportSize;
 };
-KRYS_PUSH_CONSTANTS Draw                      // small per-draw data; the device defines the prefix
+layout(binding = 1, std140) uniform Draw       // slot 1: small per-draw data, from transient memory
 {
   mat4 u_Transform;
 };
@@ -147,7 +147,9 @@ Krystal.Gfx/include/Krystal.Gfx/
 
 **Conventions.** Pixel coordinates (viewports, scissors, texture regions) have a top-left origin, y pointing down. Texture memory starts with the top row, and UV (0, 0) is the top-left texel. In clip space, y points up and depth runs from 0 to 1. Rendering into a texture and sampling it doesn't flip the image.
 
-**Shaders** are GLSL 4.50 and must start with a `#version` line. The device inserts `#define KRYS_PUSH_CONSTANTS layout(binding = 15, std140) uniform` (and a `#line` directive, so error lines match) after it; push constants are declared with that prefix and fill uniform buffer slot 15, which `BindUniformBuffer` rejects. GLSL puts every uniform block member in one namespace, so blocks can't share member names.
+**Shaders** are GLSL 4.50, passed to the driver unchanged, and must start with a `#version` line. GLSL puts every uniform block member in one namespace, so blocks can't share member names.
+
+**No push constants** (decision, 2026-10-18). G1 had them, emulated in OpenGL with a `KRYS_PUSH_CONSTANTS` macro injected into the source that expanded to a uniform block at a reserved slot 15. They were dropped: the macro was a hidden dialect, the reserved slot was a surprise, and the emulation used `std140` where Vulkan push constants default to `std430`, so it wouldn't have been portable anyway. Per-draw data goes in an ordinary uniform block filled from `AllocateTransient`. Revisit with the shader toolchain decision (open decision 2).
 
 **Device.**
 - `Device::Create(DeviceDesc)` needs no window: the OpenGL context lives on a hidden window the device owns, and each swapchain attaches a real window to it (sharing the pixel format). Several windows can share one device, and tests render offscreen without showing anything.
@@ -158,7 +160,7 @@ Krystal.Gfx/include/Krystal.Gfx/
 - Beyond the draft: `ReadTexture` (synchronous readback, for tests and screenshots), `GetTextureDesc`, `SetVSync`, `WaitIdle`, `Limits`.
 - `AllocateTransient` hands out per-frame memory from one persistently mapped buffer split into `FramesInFlight` (3) regions; `BeginFrame` waits on the fence of the region it reuses. It returns an empty allocation (and asserts in debug builds) when the frame's memory runs out.
 
-**Command buffers** record plain structs into `CommandList`; `Submit` replays them and resets the buffer. Debug builds assert on misuse where it happens: drawing outside a render pass or without a pipeline, nested passes, copies inside a pass, unbalanced debug groups. Vertex and index buffer bindings and push constants carry over between render passes; each pass binds its own pipeline.
+**Command buffers** record plain structs into `CommandList`; `Submit` replays them and resets the buffer. Debug builds assert on misuse where it happens: drawing outside a render pass or without a pipeline, nested passes, copies inside a pass, unbalanced debug groups. Buffer bindings carry over between render passes; each pass binds its own pipeline.
 
 **The OpenGL backend.**
 
@@ -172,7 +174,7 @@ Krystal.Gfx/include/Krystal.Gfx/
 | sRGB | `GL_FRAMEBUFFER_SRGB` is on for textures (it only affects sRGB formats) and set per swapchain format. |
 | Context | WGL: a throwaway legacy context loads the entry points, then a 4.5 core context (debug when validating) on the hidden window. Debug output goes to the global logger. |
 
-Tests: `Krystal.Gfx.Tests` (21 cases): handles and the pool, formats, command recording, and a GPU suite on a real device that reads results back (clears, sRGB encoding, push constants, orientation, sampling, transient uniform buffers, indexed draws, scissor, blending, depth, copies and blits, mipmaps, errors, sampler sharing, stale handles). The editor draws a rotating triangle through the RHI.
+Tests: `Krystal.Gfx.Tests` (21 cases): handles and the pool, formats, command recording, and a GPU suite on a real device that reads results back (clears, sRGB encoding, per-draw uniform data, orientation, sampling, transient uniform buffers, indexed draws, scissor, blending, depth, copies and blits, mipmaps, errors, sampler sharing, stale handles). The editor draws a rotating triangle through the RHI.
 
 ### Left out for now
 

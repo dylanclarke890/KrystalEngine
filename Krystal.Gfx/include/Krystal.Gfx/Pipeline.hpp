@@ -11,12 +11,6 @@
 
 namespace krys::gfx
 {
-  /// @brief The most push constant bytes a pipeline can declare.
-  constexpr uint32 MaxPushConstantSize = 128u;
-
-  /// @brief The uniform buffer slot the OpenGL device reserves for push constants.
-  constexpr uint32 PushConstantsBinding = 15u;
-
   enum class VertexInputRate : uint8
   {
     PerVertex,
@@ -199,8 +193,6 @@ namespace krys::gfx
     /// @brief The formats of the colour targets the pipeline renders into.
     SmallList<TextureFormat, 4> ColourFormats {};
     TextureFormat DepthStencilFormat {TextureFormat::Undefined};
-    /// @brief The size of the shader's push constant block; at most `MaxPushConstantSize`.
-    uint32 PushConstantSize {0u};
     utf8_stringview DebugName {};
   };
 }

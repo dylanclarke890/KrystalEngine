@@ -14,7 +14,7 @@ namespace krys::gfx::tests
   {
     /// @brief A triangle covering the target, with UVs where (0, 0) is the top left.
     constexpr const char8_t *FullscreenVertexSource = u8R"(#version 450
-KRYS_PUSH_CONSTANTS Draw
+layout(binding = 1, std140) uniform Draw
 {
   vec4 u_Colour;
   float u_Depth;
@@ -41,7 +41,7 @@ void main()
 )";
 
     constexpr const char8_t *ColourFragmentSource = u8R"(#version 450
-KRYS_PUSH_CONSTANTS Draw
+layout(binding = 1, std140) uniform Draw
 {
   vec4 u_Colour;
   float u_Depth;
@@ -200,7 +200,6 @@ void main()
           .Raster = {.ScissorTest = options.ScissorTest},
           .ColourFormats = {options.Format},
           .DepthStencilFormat = options.DepthFormat,
-          .PushConstantSize = sizeof(DrawConstants),
           .DebugName = u8"Test",
         };
         if (options.PositionInput)
@@ -228,6 +227,15 @@ void main()
         record(commands);
         _device->Submit(commands);
         _device->EndFrame();
+      }
+
+      /// @brief Copies the draw's constants into transient memory and binds them to the `Draw` block's slot.
+      void Bind(CommandBuffer &commands, const DrawConstants &constants)
+      {
+        auto allocation = _device->AllocateTransient(sizeof(DrawConstants));
+        REQUIRE(allocation.IsValid());
+        std::memcpy(allocation.Data.data(), &constants, sizeof(DrawConstants));
+        commands.BindUniformBuffer(1u, allocation.Buffer, allocation.Offset, sizeof(DrawConstants));
       }
 
       KRYS_NODISCARD List<Pixel> Read(TextureHandle texture, uint32 width, uint32 height,
@@ -293,7 +301,7 @@ void main()
     CHECK(Near(Read(srgb, 2u, 2u)[0], {188, 188, 188, 255}));
   }
 
-  TEST_CASE_METHOD(DeviceFixture, "Device: draws with push constants", "[Gfx][Device][GPU]")
+  TEST_CASE_METHOD(DeviceFixture, "Device: draws with per-draw uniform data", "[Gfx][Device][GPU]")
   {
     auto target = Target(4u, 4u);
     auto pipeline = Pipeline(FullscreenVertexSource, ColourFragmentSource);
@@ -302,9 +310,9 @@ void main()
       {
         commands.BeginRenderPass(Pass(target));
         commands.BindPipeline(pipeline);
-        commands.PushConstants(DrawConstants {.Colour = {0.f, 1.f, 0.f, 1.f}, .Depth = 0.f, .Padding = {}});
+        Bind(commands, DrawConstants {.Colour = {0.f, 1.f, 0.f, 1.f}, .Depth = 0.f, .Padding = {}});
         commands.Draw(3u);
-        // Push constants stay set for later draws.
+        // The binding stays set for later draws.
         commands.Draw(3u);
         commands.EndRenderPass();
       });
@@ -331,7 +339,7 @@ void main()
         commands.BeginRenderPass(Pass(target));
         commands.BindPipeline(pipeline);
         commands.BindVertexBuffer(0u, vertices);
-        commands.PushConstants(DrawConstants {.Colour = {1.f, 0.f, 0.f, 1.f}, .Depth = 0.f, .Padding = {}});
+        Bind(commands, DrawConstants {.Colour = {1.f, 0.f, 0.f, 1.f}, .Depth = 0.f, .Padding = {}});
         commands.Draw(6u);
         commands.EndRenderPass();
       });
@@ -361,7 +369,7 @@ void main()
       {
         commands.BeginRenderPass(Pass(target));
         commands.BindPipeline(pipeline);
-        commands.PushConstants(DrawConstants {});
+        Bind(commands, DrawConstants {});
         commands.BindTexture(0u, source, sampler);
         commands.Draw(3u);
         commands.EndRenderPass();
@@ -391,7 +399,7 @@ void main()
         std::memcpy(second.Data.data(), colour.data(), sizeof(colour));
         commands.BeginRenderPass(Pass(target));
         commands.BindPipeline(pipeline);
-        commands.PushConstants(DrawConstants {});
+        Bind(commands, DrawConstants {});
         commands.BindUniformBuffer(0u, second.Buffer, second.Offset, 16u);
         commands.Draw(3u);
         commands.EndRenderPass();
@@ -419,7 +427,7 @@ void main()
         commands.BindPipeline(pipeline);
         commands.BindVertexBuffer(0u, vertices);
         commands.BindIndexBuffer(indexBuffer, IndexType::UInt16);
-        commands.PushConstants(DrawConstants {.Colour = {1.f, 1.f, 1.f, 1.f}, .Depth = 0.f, .Padding = {}});
+        Bind(commands, DrawConstants {.Colour = {1.f, 1.f, 1.f, 1.f}, .Depth = 0.f, .Padding = {}});
         commands.DrawIndexed(6u);
         commands.EndRenderPass();
       });
@@ -440,7 +448,7 @@ void main()
         commands.BeginRenderPass(Pass(target));
         commands.BindPipeline(pipeline);
         commands.SetScissor(1, 0, 2u, 1u);
-        commands.PushConstants(DrawConstants {.Colour = {1.f, 0.f, 0.f, 1.f}, .Depth = 0.f, .Padding = {}});
+        Bind(commands, DrawConstants {.Colour = {1.f, 0.f, 0.f, 1.f}, .Depth = 0.f, .Padding = {}});
         commands.Draw(3u);
         commands.EndRenderPass();
       });
@@ -463,7 +471,7 @@ void main()
       {
         commands.BeginRenderPass(Pass(target, {0.f, 0.f, 1.f, 1.f}));
         commands.BindPipeline(pipeline);
-        commands.PushConstants(DrawConstants {.Colour = {0.5f, 0.f, 0.f, 0.5f}, .Depth = 0.f, .Padding = {}});
+        Bind(commands, DrawConstants {.Colour = {0.5f, 0.f, 0.f, 0.5f}, .Depth = 0.f, .Padding = {}});
         commands.Draw(3u);
         commands.EndRenderPass();
       });
@@ -491,10 +499,10 @@ void main()
         pass.DepthStencil = {.Texture = depth, .ClearDepth = 1.f};
         commands.BeginRenderPass(pass);
         commands.BindPipeline(pipeline);
-        commands.PushConstants(DrawConstants {.Colour = {1.f, 0.f, 0.f, 1.f}, .Depth = 0.25f, .Padding = {}});
+        Bind(commands, DrawConstants {.Colour = {1.f, 0.f, 0.f, 1.f}, .Depth = 0.25f, .Padding = {}});
         commands.Draw(3u);
         // Further away, so it fails the test.
-        commands.PushConstants(DrawConstants {.Colour = {0.f, 1.f, 0.f, 1.f}, .Depth = 0.75f, .Padding = {}});
+        Bind(commands, DrawConstants {.Colour = {0.f, 1.f, 0.f, 1.f}, .Depth = 0.75f, .Padding = {}});
         commands.Draw(3u);
         commands.EndRenderPass();
       });
@@ -557,7 +565,6 @@ void main()
 
     auto fragment = Shader(ShaderStage::Fragment, ColourFragmentSource);
     CHECK_FALSE(_device->CreatePipeline({.VertexShader = fragment, .FragmentShader = fragment}).has_value());
-    CHECK_FALSE(_device->CreatePipeline({.VertexShader = fragment, .PushConstantSize = 256u}).has_value());
 
     CHECK_FALSE(_device->CreateBuffer({.Size = 0u}).has_value());
     CHECK_FALSE(_device->CreateTexture({.Width = 0u}).has_value());

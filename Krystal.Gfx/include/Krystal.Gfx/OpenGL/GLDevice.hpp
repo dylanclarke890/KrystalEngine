@@ -61,7 +61,6 @@ namespace krys::gfx::opengl
     BlendState Blend {};
     DepthStencilState DepthStencil {};
     RasterState Raster {};
-    uint32 PushConstantSize {0u};
     /// @brief The buffers the vertex array was last given, per slot; buffers are rebound only when they
     /// change.
     SmallList<GLBufferBinding, 2> AppliedVertexBuffers {};
@@ -123,9 +122,6 @@ namespace krys::gfx::opengl
       GLuint IndexBuffer {0u};
       uint64 IndexOffset {0u};
       gfx::IndexType IndexType {gfx::IndexType::UInt32};
-      Array<byte, MaxPushConstantSize> PushConstants {};
-      uint32 PushConstantSize {0u};
-      bool PushConstantsDirty {false};
       /// @brief The depth-stencil attachment and the colour attachments stored with `DontCare`.
       Array<GLenum, MaxColourAttachments + 2u> Discards {};
       uint32 DiscardCount {0u};

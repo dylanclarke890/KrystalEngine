@@ -2,13 +2,11 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Commands/CommandList.hpp"
-#include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Gfx/Commands.hpp"
 #include "Krystal.Gfx/RenderPass.hpp"
-#include <cstring>
 
 namespace krys::gfx
 {
@@ -48,16 +46,6 @@ namespace krys::gfx
     void BindIndexBuffer(BufferHandle buffer, IndexType type, uint64 offset = 0u) noexcept;
     void BindUniformBuffer(uint32 slot, BufferHandle buffer, uint64 offset, uint64 size) noexcept;
     void BindTexture(uint32 slot, TextureHandle texture, SamplerHandle sampler) noexcept;
-
-    /// @brief Sets the bound pipeline's push constants. Stays set until the next call.
-    template <HasStandardLayout T>
-    void PushConstants(const T &data) noexcept
-    {
-      static_assert(sizeof(T) <= MaxPushConstantSize, "Push constants are limited to 128 bytes.");
-      PushConstantBytes(&data, sizeof(T));
-    }
-
-    void PushConstantBytes(const void *data, uint32 size) noexcept;
 
     void Draw(uint32 vertexCount, uint32 instanceCount = 1u, uint32 firstVertex = 0u,
               uint32 firstInstance = 0u) noexcept;
