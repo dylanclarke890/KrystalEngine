@@ -74,6 +74,7 @@ target_sources(Krystal.Gfx
       include/Krystal.Gfx/OpenGL/Official/khrplatform.h
 
       # Render2D
+      include/Krystal.Gfx/Render2D/CoverageBlur.hpp
       include/Krystal.Gfx/Render2D/Dashing.hpp
       include/Krystal.Gfx/Render2D/Flattening.hpp
       include/Krystal.Gfx/Render2D/Gradient2D.hpp
@@ -101,6 +102,7 @@ target_sources(Krystal.Gfx
     src/OpenGL/Hooks/gl.cpp
 
     # Render2D
+    src/Render2D/CoverageBlur.cpp
     src/Render2D/Gradient2D.cpp
     src/Render2D/MaskAtlas.cpp
     src/Render2D/Path2D.cpp

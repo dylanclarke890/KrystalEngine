@@ -279,11 +279,49 @@ namespace krys
 
       DrawBlendModes();
       DrawGradients();
+      DrawShadows();
 
       _renderer->End();
     }
 
   private:
+    /// @brief The shadow sample: a card lifting on a soft shadow, a well with an inset shadow (drawn as
+    /// `box-shadow: inset` is) and a star whose shadow swings round it.
+    void DrawShadows() noexcept
+    {
+      using namespace gfx;
+      const SRGBA<uint8> card {236, 238, 244};
+
+      const float lift = 0.5f + 0.5f * std::sin(_time * 1.7f);
+      _renderer->Save();
+      _renderer->SetDropShadow({.Offset = {0.f, 2.f + 6.f * lift},
+                                .BlurRadius = 6.f + 14.f * lift,
+                                .Colour = SRGBA<uint8> {0, 0, 0, 150}});
+      _renderer->FillRoundedRect({{262.f, 632.f - 3.f * lift, 90.f, 60.f}, CornerRadii2D::Uniform(10.f)},
+                                 card);
+      _renderer->Restore();
+
+      // The inset shadow: a rect with the well as its hole, moved out of a clip to the well, its shadow
+      // offset back in.
+      const RoundedRect2D well {{372.f, 632.f, 90.f, 60.f}, CornerRadii2D::Uniform(10.f)};
+      _renderer->FillRoundedRect(well, card);
+      _renderer->Save();
+      _renderer->ClipRoundedRect(well);
+      _renderer->SetDropShadow(
+        {.Offset = {-1'000.f + 3.f, 4.f}, .BlurRadius = 10.f, .Colour = SRGBA<uint8> {0, 0, 0, 160}});
+      _renderer->Translate(1'000.f, 0.f);
+      _renderer->FillRectWithRoundedHole({332.f, 592.f, 170.f, 140.f}, well, SRGBA<uint8> {0, 0, 0});
+      _renderer->Restore();
+
+      _renderer->Save();
+      _renderer->SetDropShadow({.Offset = {8.f * std::cos(_time), 8.f * std::sin(_time)},
+                                .BlurRadius = 8.f,
+                                .Colour = SRGBA<uint8> {20, 10, 60, 170}});
+      _renderer->Translate(530.f, 662.f);
+      _renderer->FillPath(Star(30.f), FillRule::NonZero, SRGBA<uint8> {255, 200, 60});
+      _renderer->Restore();
+    }
+
     /// @brief The gradient sample: a turning linear gradient, a radial one with a circling focal point and a
     /// turning conic one, then a bar interpolated in OKLCH the long way round and a subtle grey bar that
     /// shows the dithering.

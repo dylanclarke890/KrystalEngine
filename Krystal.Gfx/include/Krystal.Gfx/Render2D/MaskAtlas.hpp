@@ -51,7 +51,8 @@ namespace krys::gfx
   ///
   /// A mask is cached under its path, fill rule, the transform's linear part and the fractional part of its
   /// translation, so it's reused exactly as rasterised: moving a path by whole pixels reuses its mask, and
-  /// any other change rasterises a new one. Masks aren't clipped; the clip is applied when they're drawn.
+  /// any other change rasterises a new one. Blurred masks, for shadows, are cached under their blur too.
+  /// Masks aren't clipped; the clip is applied when they're drawn.
   ///
   /// Space is reclaimed a page at a time: with every page allocated and full, the least recently used page
   /// that the current frame hasn't drawn from is cleared. Masks larger than `MaxPackedSize`, or that find no
@@ -70,6 +71,8 @@ namespace krys::gfx
       Array<float, 4> Linear;
       Array<float, 2> Fraction;
       FillRule Rule;
+      /// @brief The blur's standard deviation, in pixels; 0 for none.
+      float Blur;
 
       KRYS_NODISCARD bool operator==(const Key &) const noexcept = default;
     };
@@ -127,10 +130,11 @@ namespace krys::gfx
     MaskAtlas(Device &device, const MaskAtlasDesc &desc) noexcept;
     ~MaskAtlas() noexcept;
 
-    /// @brief The mask of `path`, mapped into target pixels by `transform`, rasterising it if it isn't
-    /// cached. `clip` only limits masks too large to cache.
+    /// @brief The mask of `path`, mapped into target pixels by `transform` and blurred by a Gaussian with
+    /// standard deviation `blur` pixels (for shadows), rasterising it if it isn't cached. `clip` only limits
+    /// masks too large to cache.
     KRYS_NODISCARD MaskLocation GetMask(const Path2D &path, const Transform2D &transform, FillRule rule,
-                                        const PixelRect2D &clip) noexcept;
+                                        const PixelRect2D &clip, float blur = 0.f) noexcept;
     /// @brief Uploads a mask made elsewhere into a texture of its own, kept for this frame only.
     KRYS_NODISCARD MaskLocation UploadTransient(const CoverageMask &mask) noexcept;
 

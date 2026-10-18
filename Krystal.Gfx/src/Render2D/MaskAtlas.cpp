@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Gfx/Render2D/MaskAtlas.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Gfx/Render2D/CoverageBlur.hpp"
 #include <algorithm>
 #include <bit>
 #include <cmath>
@@ -73,6 +74,7 @@ namespace krys::gfx
     {
       mix(std::bit_cast<uint32>(value));
     }
+    mix(std::bit_cast<uint32>(key.Blur));
     return seed;
   }
 
@@ -100,9 +102,10 @@ namespace krys::gfx
   }
 
   MaskLocation MaskAtlas::GetMask(const Path2D &path, const Transform2D &transform, FillRule rule,
-                                  const PixelRect2D &clip) noexcept
+                                  const PixelRect2D &clip, float blur) noexcept
   {
     Collect();
+    blur = blur > 0.f && std::isfinite(blur) ? blur : 0.f;
     const uint64 frame = _device->FrameNumber();
 
     // The whole-pixel part of the translation moves the mask; the rest shapes it.
@@ -124,7 +127,8 @@ namespace krys::gfx
     Key key {.Path = path,
              .Linear = {shape.A, shape.B, shape.C, shape.D},
              .Fraction = {shape.E, shape.F},
-             .Rule = rule};
+             .Rule = rule,
+             .Blur = blur};
     if (auto found = _entries.find(key); found != _entries.end())
     {
       auto &entry = found->second;
@@ -144,13 +148,23 @@ namespace krys::gfx
       return {};
     }
 
-    // Masks too large for a texture are rasterised within the clip and kept for this frame only.
+    // Masks too large for a texture are rasterised within the clip (and as far around it as a blur reaches
+    // into it) and kept for this frame only.
+    const auto extent = detail::BlurExtent(blur);
     const auto largest = static_cast<float>(std::min(_device->Limits().MaxTextureSize, 4'096u));
-    if (bounds->Width + 2.f > largest || bounds->Height + 2.f > largest)
+    const float spread = 2.f + 2.f * static_cast<float>(extent);
+    if (bounds->Width + spread > largest || bounds->Height + spread > largest)
     {
-      const auto localClip = Offset(clip, -offsetX, -offsetY);
+      auto localClip =
+        Offset(clip, -offsetX - static_cast<int32>(extent), -offsetY - static_cast<int32>(extent));
+      localClip.Width += 2u * extent;
+      localClip.Height += 2u * extent;
       auto mask = _rasteriser.Rasterise(path, shape, rule, localClip);
       ++_stats.Rasterised;
+      if (extent > 0u)
+      {
+        mask = detail::BlurCoverage(mask, blur);
+      }
       mask.Bounds = Offset(mask.Bounds, offsetX, offsetY);
       return UploadTransient(mask);
     }
@@ -159,6 +173,10 @@ namespace krys::gfx
       .X = -(1 << 24), .Y = -(1 << 24), .Width = 1u << 25, .Height = 1u << 25};
     auto mask = _rasteriser.Rasterise(path, shape, rule, everywhere);
     ++_stats.Rasterised;
+    if (extent > 0u)
+    {
+      mask = detail::BlurCoverage(mask, blur);
+    }
 
     Entry entry {.Bounds = mask.Bounds, .LastUsedFrame = frame};
     if (!mask.Bounds.IsEmpty())

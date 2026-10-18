@@ -2171,4 +2171,319 @@ namespace krys::gfx::tests
     const auto pixels = Read();
     CHECK(std::all_of(pixels.begin(), pixels.end(), [](const Pixel &pixel) { return pixel[0] == 100u; }));
   }
+
+  namespace
+  {
+    /// @brief How much of a Gaussian with standard deviation `sigma` centred on `p` falls between `low` and
+    /// `high`.
+    KRYS_NODISCARD double GaussianMass(double low, double high, double p, double sigma)
+    {
+      const double k = 1.0 / (sigma * std::sqrt(2.0));
+      return 0.5 * (std::erf((high - p) * k) - std::erf((low - p) * k));
+    }
+
+    /// @brief A rect with corners of radius `radius`, blurred, at (px, py): across each of many thin rows of
+    /// the shape the blur is exact, and the rows are summed.
+    KRYS_NODISCARD double BlurredRoundedRect(double px, double py, const Rect2D &rect, double radius,
+                                             double sigma)
+    {
+      constexpr int rows = 512;
+      const double height = rect.Height;
+      double total = 0.0;
+      for (int i = 0; i < rows; ++i)
+      {
+        const double y0 = rect.Y + height * i / rows;
+        const double y1 = rect.Y + height * (i + 1) / rows;
+        const double y = (y0 + y1) * 0.5;
+        const double fromEdge = std::min(y - rect.Y, rect.Y + height - y);
+        const double inset =
+          fromEdge < radius ? radius - std::sqrt(radius * radius - (radius - fromEdge) * (radius - fromEdge))
+                            : 0.0;
+        total += GaussianMass(y0, y1, py, sigma)
+                 * GaussianMass(rect.X + inset, rect.X + rect.Width - inset, px, sigma);
+      }
+      return total;
+    }
+
+    /// @brief How many pixels' alpha differs from `expected(x, y)` (from 0 to 1, at their centres) by more
+    /// than `tolerance` steps; NaN skips a pixel.
+    template <typename TFunc>
+    KRYS_NODISCARD uint32 AlphaMismatches(const List<Pixel> &pixels, uint32 width, int tolerance,
+                                          TFunc &&expected)
+    {
+      uint32 mismatches = 0u;
+      for (uint32 i = 0u; i < pixels.size(); ++i)
+      {
+        const double x = static_cast<double>(i % width) + 0.5;
+        const double y = static_cast<double>(i / width) + 0.5;
+        const double value = expected(x, y);
+        if (std::isnan(value))
+        {
+          continue;
+        }
+        const int alpha = static_cast<int>(value * 255.0 + 0.5);
+        if (std::abs(int(pixels[i][3]) - alpha) > tolerance)
+        {
+          if (mismatches == 0u)
+          {
+            UNSCOPED_INFO("first mismatch at " << x << ", " << y << ": " << int(pixels[i][3]) << " for "
+                                               << alpha);
+          }
+          ++mismatches;
+        }
+      }
+      return mismatches;
+    }
+
+    /// @brief Draws only the shadow of a fill, as `box-shadow` does: the fill is moved out of the clip and
+    /// the shadow's offset brings it back.
+    void ShadowOnly(Renderer2D &renderer, float blur, auto &&fill)
+    {
+      renderer.Save();
+      renderer.ClipRect({0.f, 0.f, 32.f, 32.f});
+      renderer.SetDropShadow({.Offset = {-100.f, 0.f}, .BlurRadius = blur, .Colour = SRGBA<uint8> {0, 0, 0}});
+      renderer.Translate(100.f, 0.f);
+      fill(renderer);
+      renderer.Restore();
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: blurs rect and rounded rect shadows analytically",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(32u, 32u);
+    const Rect2D rect {8.f, 6.f, 16.f, 20.f};
+
+    SECTION("A rect is exact")
+    {
+      for (const float blur : {1.f, 4.f, 12.f})
+      {
+        INFO("blur " << blur);
+        Draw(
+          [&](Renderer2D &renderer)
+          {
+            ShadowOnly(renderer, blur, [&](Renderer2D &r) { r.FillRect(rect, SRGBA<uint8> {255, 0, 0}); });
+          });
+        const double sigma = blur / 2.0;
+        CHECK(
+          AlphaMismatches(Read(), _width, 1, [&](double x, double y)
+                          { return GaussianMass(8.0, 24.0, x, sigma) * GaussianMass(6.0, 26.0, y, sigma); })
+          == 0u);
+      }
+    }
+
+    SECTION("A rounded rect is close")
+    {
+      for (const float blur : {2.f, 6.f, 16.f})
+      {
+        INFO("blur " << blur);
+        Draw(
+          [&](Renderer2D &renderer)
+          {
+            ShadowOnly(renderer, blur, [&](Renderer2D &r)
+                       { r.FillRoundedRect({rect, CornerRadii2D::Uniform(6.f)}, SRGBA<uint8> {255, 0, 0}); });
+          });
+        CHECK(AlphaMismatches(Read(), _width, 2, [&](double x, double y)
+                              { return BlurredRoundedRect(x, y, rect, 6.0, blur / 2.0); })
+              == 0u);
+      }
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: casts inset shadows through rounded holes",
+                   "[Gfx][Render2D][GPU]")
+  {
+    // As `box-shadow: inset` draws them: a rect with the box as its hole, moved away, inside a clip to the
+    // box. The shadow is the rect's blur less the hole's.
+    UseTarget(32u, 32u);
+    const Rect2D box {6.f, 6.f, 20.f, 20.f};
+    Draw(
+      [&](Renderer2D &renderer)
+      {
+        renderer.ClipRoundedRect({box, CornerRadii2D::Uniform(5.f)});
+        renderer.SetDropShadow({.Offset = {-97.f, 3.f}, .BlurRadius = 6.f, .Colour = SRGBA<uint8> {0, 0, 0}});
+        renderer.Translate(100.f, 0.f);
+        renderer.FillRectWithRoundedHole({-20.f, -20.f, 72.f, 72.f}, {box, CornerRadii2D::Uniform(5.f)},
+                                         SRGBA<uint8> {255, 0, 0});
+      });
+    CHECK(AlphaMismatches(Read(), _width, 2,
+                          [&](double x, double y)
+                          {
+                            // Inside the box, away from its antialiased edge.
+                            if (x < 7.0 || x > 25.0 || y < 7.0 || y > 25.0
+                                || (std::min(x - 6.0, 26.0 - x) < 5.0 && std::min(y - 6.0, 26.0 - y) < 5.0))
+                            {
+                              return std::numeric_limits<double>::quiet_NaN();
+                            }
+                            // The hole as the shadow sees it: moved by the offset less the translation.
+                            const Rect2D hole {box.X + 3.f, box.Y + 3.f, box.Width, box.Height};
+                            const double sigma = 3.0;
+                            const double outer =
+                              GaussianMass(-17.0, 55.0, x, sigma) * GaussianMass(-17.0, 55.0, y, sigma);
+                            return std::max(outer - BlurredRoundedRect(x, y, hole, 5.0, sigma), 0.0);
+                          })
+          == 0u);
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: places shadows by their offset and the transform",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(16u, 4u);
+    const SRGBA<uint8> blue {0, 0, 255};
+
+    SECTION("Sharp shadows, beneath their shapes")
+    {
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.SetDropShadow({.Offset = {2.f, 0.f}, .Colour = blue});
+          renderer.FillRect({2.f, 0.f, 4.f, 2.f}, SRGBA<uint8> {255, 0, 0});
+        });
+      auto pixels = Read();
+      CHECK(At(pixels, 1u, 0u) == Clear);
+      CHECK(At(pixels, 5u, 0u) == Red);
+      CHECK(At(pixels, 7u, 0u) == Blue);
+      CHECK(At(pixels, 8u, 0u) == Clear);
+      CHECK(At(pixels, 7u, 2u) == Clear);
+      CHECK(_renderer->GetStats().Instances == 2u);
+      CHECK(_renderer->GetStats().Batches == 1u);
+    }
+
+    SECTION("A translucent paint's shadow is as translucent")
+    {
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.SetDropShadow({.Offset = {4.f, 0.f}, .Colour = SRGBA<uint8> {0, 0, 255, 128}});
+          renderer.FillRect({0.f, 0.f, 4.f, 2.f}, SRGBA<uint8> {255, 0, 0, 128});
+        });
+      CHECK(Near(At(Read(), 5u, 0u), {0, 0, 64, 64}));
+    }
+
+    SECTION("In the current coordinates, or in target pixels")
+    {
+      for (const bool ignore : {false, true})
+      {
+        INFO("ignoring transforms " << ignore);
+        Draw(
+          [&](Renderer2D &renderer)
+          {
+            renderer.Scale(2.f, 2.f);
+            renderer.SetShadowsIgnoreTransforms(ignore);
+            renderer.SetDropShadow({.Offset = {2.f, 0.f}, .Colour = blue});
+            renderer.FillRect({0.f, 0.f, 2.f, 1.f}, SRGBA<uint8> {255, 0, 0});
+          });
+        // The shape covers 0 to 4; the shadow is 4 or 2 pixels along.
+        auto pixels = Read();
+        CHECK(At(pixels, 3u, 0u) == Red);
+        CHECK(At(pixels, 5u, 0u) == Blue);
+        CHECK(At(pixels, 7u, 0u) == (ignore ? Clear : Blue));
+      }
+    }
+
+    SECTION("Kept by Save and Restore; nothing without an offset or blur")
+    {
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.Save();
+          renderer.SetDropShadow({.Offset = {1.f, 0.f}, .Colour = blue});
+          CHECK(renderer.GetDropShadow().has_value());
+          renderer.Restore();
+          CHECK_FALSE(renderer.GetDropShadow().has_value());
+          renderer.SetDropShadow({.Offset = {}, .BlurRadius = 0.f, .Colour = blue});
+          renderer.FillRect({0.f, 0.f, 2.f, 2.f}, SRGBA<uint8> {255, 0, 0});
+          renderer.SetDropShadow({.Offset = {2.f, 0.f}, .Colour = blue});
+          renderer.ClearDropShadow();
+          renderer.FillRect({4.f, 0.f, 2.f, 2.f}, SRGBA<uint8> {255, 0, 0});
+        });
+      CHECK(_renderer->GetStats().Instances == 2u);
+      CHECK(At(Read(), 6u, 0u) == Clear);
+    }
+
+    SECTION("Images cast none")
+    {
+      const Pixel texels[] {White};
+      const auto image = Image(1u, 1u, texels);
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.SetDropShadow({.Offset = {2.f, 0.f}, .Colour = blue});
+          renderer.DrawImage(image, {0.f, 0.f, 2.f, 2.f});
+        });
+      CHECK(At(Read(), 3u, 0u) == Clear);
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: blurs paths' and strokes' shadows through their masks",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(32u, 32u);
+    const Rect2D rect {8.f, 6.f, 16.f, 20.f};
+    Path2D path;
+    path.AddRect(rect);
+
+    // Masks are blurred in whole pixels, so they're compared a little more loosely.
+    for (const float blur : {2.f, 8.f})
+    {
+      INFO("blur " << blur);
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          ShadowOnly(renderer, blur,
+                     [&](Renderer2D &r) { r.FillPath(path, FillRule::NonZero, SRGBA<uint8> {255, 0, 0}); });
+        });
+      const double sigma = blur / 2.0;
+      CHECK(AlphaMismatches(Read(), _width, 2, [&](double x, double y)
+                            { return GaussianMass(8.0, 24.0, x, sigma) * GaussianMass(6.0, 26.0, y, sigma); })
+            == 0u);
+    }
+
+    // A stroke's shadow is its outline's; a straight line's is its rect's.
+    Path2D line;
+    line.MoveTo({8.f, 16.f});
+    line.LineTo({24.f, 16.f});
+    Draw(
+      [&](Renderer2D &renderer)
+      {
+        ShadowOnly(renderer, 4.f,
+                   [&](Renderer2D &r) { r.StrokePath(line, {.Width = 4.f}, SRGBA<uint8> {255, 0, 0}); });
+      });
+    const auto stroked = Read();
+    Draw(
+      [&](Renderer2D &renderer)
+      {
+        ShadowOnly(renderer, 4.f, [&](Renderer2D &r)
+                   { r.StrokeLine({8.f, 16.f}, {24.f, 16.f}, {.Width = 4.f}, SRGBA<uint8> {255, 0, 0}); });
+      });
+    const auto straight = Read();
+    CHECK(AlphaMismatches(straight, _width, 1, [](double x, double y)
+                          { return GaussianMass(8.0, 24.0, x, 2.0) * GaussianMass(14.0, 18.0, y, 2.0); })
+          == 0u);
+    uint32 differences = 0u;
+    for (size_t i = 0u; i < stroked.size(); ++i)
+    {
+      differences += Near(stroked[i], straight[i], 2) ? 0u : 1u;
+    }
+    CHECK(differences == 0u);
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: clips shadows and draws them in layers",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(16u, 4u);
+    Draw(
+      [&](Renderer2D &renderer)
+      {
+        renderer.ClipRect({0.f, 0.f, 9.f, 4.f});
+        renderer.BeginLayer(1.f);
+        renderer.SetDropShadow({.Offset = {6.f, 0.f}, .Colour = SRGBA<uint8> {0, 0, 255}});
+        renderer.FillRect({2.f, 0.f, 4.f, 2.f}, SRGBA<uint8> {255, 0, 0});
+        renderer.EndLayer();
+      });
+    auto pixels = Read();
+    CHECK(At(pixels, 3u, 0u) == Red);
+    CHECK(At(pixels, 8u, 0u) == Blue);
+    CHECK(At(pixels, 9u, 0u) == Clear);
+  }
 }

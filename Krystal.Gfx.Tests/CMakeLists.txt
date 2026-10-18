@@ -43,6 +43,7 @@ target_sources(Krystal.Gfx.Tests
     tests/OpenGL/Device.cpp
 
     # Render2D
+    tests/Render2D/CoverageBlur.cpp
     tests/Render2D/Gradient2D.cpp
     tests/Render2D/Path2D.cpp
     tests/Render2D/PathRasteriser.cpp

@@ -56,7 +56,9 @@ void main()
 
   vec2 corner = vec2(gl_VertexID & 1, gl_VertexID >> 1);
   vec2 halfSize = a_Rect.zw * 0.5;
-  vec2 position = (corner * 2.0 - 1.0) * (halfSize + pixelInLocal);
+  // A shadow's quad reaches three standard deviations further, where its blur fades out.
+  float blurReach = (a_Flags & 64u) != 0u ? 3.0 * a_UV.x : 0.0;
+  vec2 position = (corner * 2.0 - 1.0) * (halfSize + pixelInLocal + blurReach);
   vec2 local = a_Rect.xy + halfSize + position;
   vec2 pixel = linear * local + a_Translation;
   vec2 ndc = (pixel - u_Origin) / u_ViewportSize * 2.0 - 1.0;
@@ -142,6 +144,7 @@ const uint LinearTexels = 4u;
 const uint Mask = 8u;
 const uint Hole = 16u;
 const uint GradientPaint = 32u;
+const uint Shadow = 64u;
 const uint BlendModeShift = 8u;
 
 const uint LinearShape = 1u;
@@ -358,6 +361,60 @@ vec4 GradientColour()
   return mix(u_GradientColours[low - 1u], u_GradientColours[low], (t - from) / (GradientOffset(low) - from));
 }
 
+// The error function, within 1.5e-7 (Abramowitz and Stegun 7.1.26).
+float Erf(float x)
+{
+  float t = 1.0 / (1.0 + 0.3275911 * abs(x));
+  float polynomial = ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t;
+  return sign(x) * (1.0 - polynomial * exp(-x * x));
+}
+
+// How much of a Gaussian with standard deviation sigma, centred on p, falls between low and high.
+float GaussianMass(float low, float high, float p, float sigma)
+{
+  float k = 0.70710678 / sigma;
+  return 0.5 * (Erf((high - p) * k) - Erf((low - p) * k));
+}
+
+// A rounded box (centred on the origin, y down) blurred by a Gaussian, at p. A plain box is exact: the
+// blur's mass over it in x times that in y. With rounded corners, rows within four standard deviations of p
+// are taken in sixteen bands, each weighted by the Gaussian's mass over it and as wide as the box is
+// halfway down it.
+float BlurredBox(vec2 p, vec2 halfSize, vec4 radii, float sigma)
+{
+  if (radii == vec4(0.0))
+  {
+    return GaussianMass(-halfSize.x, halfSize.x, p.x, sigma) * GaussianMass(-halfSize.y, halfSize.y, p.y, sigma);
+  }
+
+  float low = max(-halfSize.y, p.y - 4.0 * sigma);
+  float high = min(halfSize.y, p.y + 4.0 * sigma);
+  if (low >= high)
+  {
+    return 0.0;
+  }
+  float band = (high - low) / 16.0;
+  float k = 0.70710678 / sigma;
+  float previous = Erf((low - p.y) * k);
+  float total = 0.0;
+  for (int i = 0; i < 16; ++i)
+  {
+    float y = low + (float(i) + 0.5) * band;
+    float next = Erf((low + float(i + 1) * band - p.y) * k);
+    float weight = 0.5 * (next - previous);
+    previous = next;
+
+    // How far the corners' arcs cut into the row: top-left, top-right, bottom-right, bottom-left.
+    float left = y < 0.0 ? radii.x : radii.w;
+    float right = y < 0.0 ? radii.y : radii.z;
+    float fromEdge = halfSize.y - abs(y);
+    float leftInset = fromEdge < left ? left - sqrt(max(left * left - (left - fromEdge) * (left - fromEdge), 0.0)) : 0.0;
+    float rightInset = fromEdge < right ? right - sqrt(max(right * right - (right - fromEdge) * (right - fromEdge), 0.0)) : 0.0;
+    total += weight * GaussianMass(-halfSize.x + leftInset, halfSize.x - rightInset, p.x, sigma);
+  }
+  return total;
+}
+
 // An 8-by-8 ordered dither threshold for the pixel, from 0 to 1: the bits of x ^ y and x interleaved and
 // reversed.
 float Bayer()
@@ -465,10 +522,24 @@ void main()
   vec2 dx = dFdx(v_UV);
   vec2 dy = dFdy(v_UV);
 
-  float coverage = Coverage(v_Position, v_HalfSize, v_Radii, v_InverseTranspose);
-  if ((v_Flags & Hole) != 0u)
+  float coverage;
+  if ((v_Flags & Shadow) != 0u)
   {
-    coverage *= 1.0 - Coverage(v_Position - v_Hole.xy, v_Hole.zw, v_HoleRadii, v_InverseTranspose);
+    // Blurring is linear, so a box with a hole blurs as the box's blur less the hole's.
+    float sigma = v_UVRect.x;
+    coverage = BlurredBox(v_Position, v_HalfSize, v_Radii, sigma);
+    if ((v_Flags & Hole) != 0u)
+    {
+      coverage = max(coverage - BlurredBox(v_Position - v_Hole.xy, v_Hole.zw, v_HoleRadii, sigma), 0.0);
+    }
+  }
+  else
+  {
+    coverage = Coverage(v_Position, v_HalfSize, v_Radii, v_InverseTranspose);
+    if ((v_Flags & Hole) != 0u)
+    {
+      coverage *= 1.0 - Coverage(v_Position - v_Hole.xy, v_Hole.zw, v_HoleRadii, v_InverseTranspose);
+    }
   }
   coverage *= ClipCoverage();
 
@@ -661,6 +732,31 @@ void main()
                     }
                     return false;
                   });
+  }
+
+  void Renderer2D::SetDropShadow(const DropShadow2D &shadow) noexcept
+  {
+    _state.DropShadow = shadow;
+  }
+
+  void Renderer2D::ClearDropShadow() noexcept
+  {
+    _state.DropShadow = {};
+  }
+
+  const Maybe<DropShadow2D> &Renderer2D::GetDropShadow() const noexcept
+  {
+    return _state.DropShadow;
+  }
+
+  void Renderer2D::SetShadowsIgnoreTransforms(bool ignore) noexcept
+  {
+    _state.ShadowsIgnoreTransforms = ignore;
+  }
+
+  bool Renderer2D::GetShadowsIgnoreTransforms() const noexcept
+  {
+    return _state.ShadowsIgnoreTransforms;
   }
 
   void Renderer2D::SetBlendMode(BlendMode mode) noexcept
@@ -993,16 +1089,24 @@ void main()
       return;
     }
     const auto radii = ConstrainRadii(rect, roundedRect.Radii);
-    AddInstance({.Rect = {rect.X, rect.Y, rect.Width, rect.Height},
-                 .Radii = {radii.TopLeft, radii.TopRight, radii.BottomRight, radii.BottomLeft},
-                 .Linear = {},
-                 .Translation = {},
-                 .UV = {},
-                 .HoleRect = {},
-                 .HoleRadii = {},
-                 .Colour = paint.Colour,
-                 .Flags = 0u},
-                transform, {}, {}, paint.Gradient);
+    RectInstance instance {.Rect = {rect.X, rect.Y, rect.Width, rect.Height},
+                           .Radii = {radii.TopLeft, radii.TopRight, radii.BottomRight, radii.BottomLeft},
+                           .Linear = {},
+                           .Translation = {},
+                           .UV = {},
+                           .HoleRect = {},
+                           .HoleRadii = {},
+                           .Colour = paint.Colour,
+                           .Flags = 0u};
+    if (const auto shadow = PlaceShadow(transform, paint))
+    {
+      auto cast = instance;
+      cast.UV = {shadow->Sigma, 0.f, 0.f, 0.f};
+      cast.Colour = shadow->Colour;
+      cast.Flags = shadow->Sigma > 0.f ? Shadow : 0u;
+      AddInstance(cast, shadow->Transform, {}, {});
+    }
+    AddInstance(instance, transform, {}, {}, paint.Gradient);
   }
 
   void Renderer2D::StrokePath(const Path2D &path, const StrokeStyle &style, const Paint2D &paint) noexcept
@@ -1107,16 +1211,24 @@ void main()
     }
 
     const auto radii = ConstrainRadii(holeRect, hole.Radii);
-    AddInstance({.Rect = {rect.X, rect.Y, rect.Width, rect.Height},
-                 .Radii = {},
-                 .Linear = {},
-                 .Translation = {},
-                 .UV = {},
-                 .HoleRect = {holeRect.X, holeRect.Y, holeRect.Width, holeRect.Height},
-                 .HoleRadii = {radii.TopLeft, radii.TopRight, radii.BottomRight, radii.BottomLeft},
-                 .Colour = resolved->Colour,
-                 .Flags = Hole},
-                _state.Transform, {}, {}, resolved->Gradient);
+    RectInstance instance {.Rect = {rect.X, rect.Y, rect.Width, rect.Height},
+                           .Radii = {},
+                           .Linear = {},
+                           .Translation = {},
+                           .UV = {},
+                           .HoleRect = {holeRect.X, holeRect.Y, holeRect.Width, holeRect.Height},
+                           .HoleRadii = {radii.TopLeft, radii.TopRight, radii.BottomRight, radii.BottomLeft},
+                           .Colour = resolved->Colour,
+                           .Flags = Hole};
+    if (const auto shadow = PlaceShadow(_state.Transform, *resolved))
+    {
+      auto cast = instance;
+      cast.UV = {shadow->Sigma, 0.f, 0.f, 0.f};
+      cast.Colour = shadow->Colour;
+      cast.Flags = shadow->Sigma > 0.f ? Hole | Shadow : Hole;
+      AddInstance(cast, shadow->Transform, {}, {});
+    }
+    AddInstance(instance, _state.Transform, {}, {}, resolved->Gradient);
   }
 
   void Renderer2D::DrawImage(TextureHandle texture, const Rect2D &source, const Rect2D &destination,
@@ -1171,14 +1283,30 @@ void main()
       return;
     }
 
-    const auto mask = _masks.GetMask(path, _state.Transform, rule, _state.Clip);
+    const auto resolved = ResolvePaint(paint);
+    if (!resolved)
+    {
+      return;
+    }
+
+    // The shadow's mask is the path's, moved and blurred in target pixels. It can show where the path
+    // doesn't, so it comes first.
+    if (const auto shadow = PlaceShadow(_state.Transform, *resolved))
+    {
+      AddMask(_masks.GetMask(path, shadow->Transform, rule, _state.Clip, shadow->PixelSigma), shadow->Colour,
+              NoGradient);
+    }
+    AddMask(_masks.GetMask(path, _state.Transform, rule, _state.Clip), resolved->Colour, resolved->Gradient);
+  }
+
+  void Renderer2D::AddMask(const MaskLocation &mask, Array<uint8, 4> colour, uint32 gradient) noexcept
+  {
     if (mask.Bounds.IsEmpty() || Intersect(mask.Bounds, _state.Clip).IsEmpty())
     {
       return;
     }
     const auto desc = _device->GetTextureDesc(mask.Texture);
-    const auto resolved = ResolvePaint(paint);
-    if (!desc || !resolved)
+    if (!desc)
     {
       return;
     }
@@ -1198,9 +1326,9 @@ void main()
                         static_cast<float>(texels.Y + static_cast<int32>(texels.Height)) / height},
                  .HoleRect = {},
                  .HoleRadii = {},
-                 .Colour = resolved->Colour,
+                 .Colour = colour,
                  .Flags = Textured | Mask},
-                Transform2D::Identity(), mask.Texture, _nearestSampler, resolved->Gradient);
+                Transform2D::Identity(), mask.Texture, _nearestSampler, gradient);
   }
 
   void Renderer2D::DrawImage(TextureHandle texture, const Rect2D &destination,
@@ -1285,6 +1413,47 @@ void main()
     }
     ++batch.InstanceCount;
     _rects.push_back(instance);
+  }
+
+  Maybe<Renderer2D::ShadowPlacement> Renderer2D::PlaceShadow(const Transform2D &transform,
+                                                             const ResolvedPaint &paint) const noexcept
+  {
+    if (!_state.DropShadow)
+    {
+      return {};
+    }
+    const auto &shadow = *_state.DropShadow;
+    const auto colour = shadow.Colour.Resolved();
+    const uint32 paintAlpha = paint.Gradient != NoGradient ? 255u : paint.Colour[3];
+    const auto alpha = static_cast<uint8>((colour.Alpha * paintAlpha + 127u) / 255u);
+    const float radius = std::isfinite(shadow.BlurRadius) ? std::max(shadow.BlurRadius, 0.f) : 0.f;
+    Vec2f offset = shadow.Offset;
+    if (alpha == 0u || !std::isfinite(offset.x) || !std::isfinite(offset.y)
+        || (offset.x == 0.f && offset.y == 0.f && radius == 0.f))
+    {
+      return {};
+    }
+
+    // The offset and blur are in the current coordinates unless shadows ignore transforms; the blur is
+    // measured in the shape's own units for the shader, and in target pixels for masks (where a transform
+    // that stretches unevenly is taken by its average scale).
+    const auto &current = _state.Transform;
+    const float currentScale = std::sqrt(std::abs(current.Determinant()));
+    const float localScale = std::sqrt(std::abs(transform.Determinant()));
+    if (!(currentScale > 0.f) || !(localScale > 0.f))
+    {
+      return {};
+    }
+    float pixelSigma = radius * 0.5f;
+    if (!_state.ShadowsIgnoreTransforms)
+    {
+      offset = {current.A * offset.x + current.C * offset.y, current.B * offset.x + current.D * offset.y};
+      pixelSigma *= currentScale;
+    }
+    return ShadowPlacement {.Transform = Transform2D::Translation(offset.x, offset.y) * transform,
+                            .Sigma = pixelSigma / localScale,
+                            .PixelSigma = pixelSigma,
+                            .Colour = {colour.Red, colour.Green, colour.Blue, alpha}};
   }
 
   bool Renderer2D::IsInvisible(const Paint2D &paint) noexcept
@@ -1428,7 +1597,13 @@ void main()
 
   PixelRect2D Renderer2D::Reach(const RectInstance &instance, const Transform2D &transform) const noexcept
   {
-    const auto &rect = instance.Rect;
+    // A shadow reaches as far as its quad: three standard deviations past its shape.
+    auto rect = instance.Rect;
+    if ((instance.Flags & Shadow) != 0u)
+    {
+      const float reach = 3.f * instance.UV[0];
+      rect = {rect[0] - reach, rect[1] - reach, rect[2] + 2.f * reach, rect[3] + 2.f * reach};
+    }
     const Array<Vec2f, 4> corners {
       transform.Apply({rect[0], rect[1]}), transform.Apply({rect[0] + rect[2], rect[1]}),
       transform.Apply({rect[0], rect[1] + rect[3]}), transform.Apply({rect[0] + rect[2], rect[1] + rect[3]})};

@@ -53,6 +53,19 @@ namespace krys::gfx
     float Opacity {1.f};
   };
 
+  /// @brief A shadow cast by fills and strokes: a blurred, offset copy of each shape in one colour, drawn
+  /// beneath it.
+  struct DropShadow2D
+  {
+    /// @brief In the current coordinates, or in target pixels when shadows ignore transforms.
+    Vec2f Offset {};
+    /// @brief Twice the standard deviation of the Gaussian blur, as CSS's shadow blur radius is; 0 for a
+    /// sharp shadow.
+    float BlurRadius {0.f};
+    /// @brief sRGB with straight alpha; multiplied by the alpha of a solid paint.
+    SRGBA<uint8> Colour {};
+  };
+
   struct Renderer2DDesc
   {
     /// @brief The atlas that caches the coverage masks of paths.
@@ -80,10 +93,10 @@ namespace krys::gfx
   /// Edges are antialiased over one target pixel, centred on the edge, so edges on pixel boundaries stay
   /// sharp.
   ///
-  /// Drawing state (the transform, the clip and the blend mode) is a stack: `Save` pushes a copy, `Restore`
-  /// pops it. Draws are made in the current transform's coordinates and clipped to the current clip. Clip
-  /// edges are antialiased like any other edge: each draw's coverage is multiplied by how much of the pixel
-  /// its clips let through.
+  /// Drawing state (the transform, the clip, the blend mode and the shadow) is a stack: `Save` pushes a copy,
+  /// `Restore` pops it. Draws are made in the current transform's coordinates and clipped to the current
+  /// clip. Clip edges are antialiased like any other edge: each draw's coverage is multiplied by how much of
+  /// the pixel its clips let through.
   ///
   /// Layers draw a group into an offscreen texture and composite it as one image: `BeginLayer` starts one
   /// (saving the drawing state) and `EndLayer` composites it at its opacity (restoring the state). At `End`,
@@ -93,6 +106,9 @@ namespace krys::gfx
   /// Fills and strokes take a `Paint2D`: a colour, or a gradient. A gradient's stops are flattened on the CPU
   /// into stops linear in premultiplied encoded sRGB, and the shader finds each pixel's place in it; on 8-bit
   /// targets, gradients are dithered.
+  ///
+  /// A shadow is drawn beneath each fill and stroke while one is set. Rects, rounded rects and rounded holes
+  /// blur analytically in the shader; paths blur their coverage masks on the CPU, cached with the masks.
   ///
   /// Blend modes mix a draw with what's beneath it. Most read it: the pass is split before the draw and the
   /// pixels it reaches are copied. A swapchain can't be copied from, so in a frame that blends straight onto
@@ -148,6 +164,9 @@ namespace krys::gfx
       Hole = 1u << 4u,
       /// @brief The colour is multiplied by the batch's gradient.
       GradientPaint = 1u << 5u,
+      /// @brief A shadow: the rounded rect (less any hole) blurred by a Gaussian whose standard deviation, in
+      /// local units, is the first texture coordinate.
+      Shadow = 1u << 6u,
     };
     /// @brief The instance's `BlendMode` is in the flags from this bit, for five bits.
     constexpr static uint32 BlendModeShift = 8u;
@@ -171,6 +190,9 @@ namespace krys::gfx
       /// @brief The shape clips in effect, an index into the frame's chains, or `NoChain`.
       uint32 Chain {NoChain};
       BlendMode Blend {BlendMode::Normal};
+      Maybe<DropShadow2D> DropShadow {};
+      /// @brief Whether shadows' offsets and blurs are in target pixels rather than the current coordinates.
+      bool ShadowsIgnoreTransforms {false};
     };
 
     /// @brief A clip to a rounded rect, or out of one, in the coordinates of the transform it was made under.
@@ -276,6 +298,16 @@ namespace krys::gfx
     };
     static_assert(sizeof(GradientUniforms) == 64u + 20u * detail::MaxGradientStops,
                   "GradientUniforms mirrors the shader's std140 block.");
+
+    /// @brief Where a shape's shadow goes: the shape's transform moved by the offset, and the blur.
+    struct ShadowPlacement
+    {
+      Transform2D Transform {};
+      /// @brief The standard deviation in the shape's local units, and in target pixels.
+      float Sigma {0.f};
+      float PixelSigma {0.f};
+      Array<uint8, 4> Colour {};
+    };
 
     /// @brief A paint ready for an instance: its colour (white for a gradient) and gradient.
     struct ResolvedPaint
@@ -488,6 +520,17 @@ namespace krys::gfx
     void DrawImage(TextureHandle texture, const Rect2D &destination,
                    const ImageOptions &options = {}) noexcept;
 
+    /// @brief Sets the shadow later fills and strokes cast; images cast none. A shadow with no offset and no
+    /// blur casts nothing.
+    /// @note A gradient's shadow is its shape's, as if the gradient were opaque.
+    void SetDropShadow(const DropShadow2D &shadow) noexcept;
+    void ClearDropShadow() noexcept;
+    KRYS_NODISCARD const Maybe<DropShadow2D> &GetDropShadow() const noexcept;
+    /// @brief Whether shadows' offsets and blurs are in target pixels (as canvas has them) rather than the
+    /// current coordinates.
+    void SetShadowsIgnoreTransforms(bool ignore) noexcept;
+    KRYS_NODISCARD bool GetShadowsIgnoreTransforms() const noexcept;
+
     /// @brief Sets the blend mode later draws mix with what's beneath them by.
     /// @note `BlendMode::PlusDarker` isn't supported: it asserts and draws normally.
     void SetBlendMode(BlendMode mode) noexcept;
@@ -521,6 +564,12 @@ namespace krys::gfx
     /// @brief The paint's colour, or its gradient added to the frame under the current transform; nothing
     /// when it shows nothing. A gradient that comes down to one colour is that colour.
     KRYS_NODISCARD Maybe<ResolvedPaint> ResolvePaint(const Paint2D &paint) noexcept;
+    /// @brief Where the shadow of a shape drawn under `transform` with `paint` goes; nothing when there's no
+    /// shadow to show.
+    KRYS_NODISCARD Maybe<ShadowPlacement> PlaceShadow(const Transform2D &transform,
+                                                      const ResolvedPaint &paint) const noexcept;
+    /// @brief Adds a mask's instance, drawn on whole target pixels, unless it's empty or outside the clip.
+    void AddMask(const MaskLocation &mask, Array<uint8, 4> colour, uint32 gradient) noexcept;
     /// @brief Whether a paint certainly shows nothing, before the work of resolving it.
     KRYS_NODISCARD static bool IsInvisible(const Paint2D &paint) noexcept;
 
