@@ -5,6 +5,8 @@
 #endif
 
 #include "Krystal.Core/Log/ILogger.hpp"
+#include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Utils/ScopedProfiler.hpp"
 #include "Krystal.Editor/Application.hpp"
@@ -22,6 +24,7 @@ namespace krys
     uint32 _height {0u};
     float _time {0.f};
     UniquePtr<gfx::Renderer2D> _renderer {};
+    gfx::TextureHandle _image {};
 
   public:
     explicit Editor(int argc, char **argv, const ApplicationSettings &settings) noexcept
@@ -43,11 +46,45 @@ namespace krys
         return;
       }
       _renderer = krys::move(*renderer);
+      CreateImage();
     }
 
     void OnShutdown() noexcept override
     {
       _renderer = nullptr;
+      if (_image.IsValid())
+      {
+        _context->Device->Destroy(_image);
+      }
+    }
+
+    /// @brief A 16-by-16 colour gradient with a checkerboard over it, since the editor has no image assets.
+    void CreateImage() noexcept
+    {
+      constexpr uint32 size = 16u;
+      Array<Array<uint8, 4>, size * size> texels {};
+      for (uint32 y = 0u; y < size; ++y)
+      {
+        for (uint32 x = 0u; x < size; ++x)
+        {
+          const bool light = (x / 4u + y / 4u) % 2u == 0u;
+          const auto shade = static_cast<uint8>(light ? 255u : 170u);
+          texels[y * size + x] = {static_cast<uint8>(x * shade / (size - 1u)),
+                                  static_cast<uint8>(y * shade / (size - 1u)), shade, 255u};
+        }
+      }
+
+      auto image =
+        _context->Device->CreateTexture({.Width = size, .Height = size, .DebugName = u8"EditorImage"});
+      if (!image)
+      {
+        _context->Logger->Error("{}", image.error());
+        return;
+      }
+      _image = *image;
+      _context->Device->WriteTexture(
+        _image, gfx::TextureRegion::Whole2D(size, size),
+        Span<const byte>(reinterpret_cast<const byte *>(texels.data()), sizeof(texels)));
     }
 
     void BindEvents() noexcept
@@ -144,6 +181,17 @@ namespace krys
       _renderer->FillRoundedRect({{-50.f, -50.f, 100.f, 100.f}, gfx::CornerRadii2D::Uniform(14.f)},
                                  SRGBA<uint8> {120, 200, 120});
       _renderer->Restore();
+
+      // The image, scaled up with nearest filtering in the panel, and turning with linear filtering.
+      if (_image.IsValid())
+      {
+        _renderer->DrawImage(_image, {280.f, 36.f, 128.f, 128.f}, {.Filter = gfx::SamplerFilter::Nearest});
+        _renderer->Save();
+        _renderer->Translate(width - 120.f, 480.f);
+        _renderer->Rotate(-_time * 0.5f);
+        _renderer->DrawImage(_image, {-48.f, -48.f, 96.f, 96.f}, {.Opacity = 0.85f});
+        _renderer->Restore();
+      }
 
       _renderer->End();
     }

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Colour/AlphaPremultiplication.hpp"
 #include "Krystal.Core/Colour/ColourTypes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
@@ -17,6 +18,7 @@
 #include "Krystal.Gfx/Render2D/Rect2D.hpp"
 #include "Krystal.Gfx/Render2D/RoundedRect2D.hpp"
 #include "Krystal.Gfx/Render2D/Transform2D.hpp"
+#include "Krystal.Gfx/Sampler.hpp"
 
 namespace krys::gfx
 {
@@ -34,10 +36,22 @@ namespace krys::gfx
     Maybe<Array<float, 4>> ClearColour {};
   };
 
+  /// @brief How `Renderer2D::DrawImage` samples and blends an image.
+  struct ImageOptions
+  {
+    SamplerFilter Filter {SamplerFilter::Linear};
+    /// @brief Whether the texture's colours are already multiplied by their alpha.
+    AlphaPremultiplication Alpha {AlphaPremultiplication::Premultiplied};
+    /// @brief Multiplies the image's alpha, from 0 to 1.
+    float Opacity {1.f};
+  };
+
   /// @brief Draws 2D primitives through the RHI, batched in painter's order.
   ///
   /// Coordinates are pixels with a top-left origin, y pointing down. Colours are sRGB with straight alpha;
   /// they're premultiplied for blending, in linear light on sRGB targets and as encoded on other targets.
+  /// Images are converted the same way: textures in sRGB formats are decoded by the GPU, others hold
+  /// sRGB-encoded values.
   /// Edges are antialiased over one target pixel, centred on the edge, so edges on pixel boundaries stay
   /// sharp.
   ///
@@ -69,7 +83,21 @@ namespace krys::gfx
       Array<float, 4> Linear;
       /// @brief The transform's E and F.
       Array<float, 2> Translation;
+      /// @brief The texture coordinates at the rect's top-left and bottom-right corners.
+      Array<float, 4> UV;
       Array<uint8, 4> Colour;
+      /// @brief `InstanceFlags`.
+      uint32 Flags;
+    };
+
+    enum InstanceFlags : uint32
+    {
+      /// @brief The colour is multiplied by a texel of the batch's texture.
+      Textured = 1u << 0u,
+      /// @brief The texture's colours aren't premultiplied.
+      StraightAlpha = 1u << 1u,
+      /// @brief The texture is in an sRGB format, so the GPU decodes it to linear light.
+      LinearTexels = 1u << 2u,
     };
 
     /// @brief A rect of whole target pixels.
@@ -90,12 +118,14 @@ namespace krys::gfx
       PixelRect Clip {};
     };
 
-    /// @brief A run of instances drawn with one scissor.
+    /// @brief A run of instances drawn with one scissor and texture. Untextured instances join any batch.
     struct Batch
     {
       uint32 FirstInstance {0u};
       uint32 InstanceCount {0u};
       PixelRect Scissor {};
+      TextureHandle Texture {};
+      SamplerHandle Sampler {};
     };
 
     struct FrameUniforms
@@ -115,6 +145,10 @@ namespace krys::gfx
     Device *_device;
     ShaderHandle _vertexShader {};
     ShaderHandle _fragmentShader {};
+    SamplerHandle _linearSampler {};
+    SamplerHandle _nearestSampler {};
+    /// @brief Bound for batches without a texture of their own.
+    TextureHandle _whiteTexture {};
     SmallList<TargetPipeline, 2> _pipelines {};
     CommandBuffer *_commands {nullptr};
     Render2DTarget _target {};
@@ -163,9 +197,19 @@ namespace krys::gfx
     /// down together until they do, as CSS does for `border-radius`.
     void FillRoundedRect(const RoundedRect2D &rect, SRGBA<uint8> colour) noexcept;
 
+    /// @brief Draws the `source` texels of a texture into `destination`, scaling to fit.
+    void DrawImage(TextureHandle texture, const Rect2D &source, const Rect2D &destination,
+                   const ImageOptions &options = {}) noexcept;
+    /// @brief Draws the whole of a texture into `destination`.
+    void DrawImage(TextureHandle texture, const Rect2D &destination,
+                   const ImageOptions &options = {}) noexcept;
+
   private:
     KRYS_NODISCARD Expected<void> Initialise() noexcept;
     KRYS_NODISCARD Expected<PipelineHandle> GetPipeline(TextureFormat format) noexcept;
+    /// @brief Fills in the instance's transform and adds it to the batch it can join, or a new one; skips it
+    /// when nothing would show.
+    void AddInstance(RectInstance instance, TextureHandle texture, SamplerHandle sampler) noexcept;
 
     /// @brief The target pixels whose centres are inside the rect from (left, top) to (right, bottom).
     KRYS_NODISCARD static PixelRect ToPixelRect(float left, float top, float right, float bottom) noexcept;

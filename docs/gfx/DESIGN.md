@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-18): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, and G2c, transforms and rect clips, are done); text (G3) and the Booey integration (G4) are drafts.
+Status (2026-10-18): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, and G2d, images, are done); text (G3) and the Booey integration (G4) are drafts.
 
 ## Why
 
@@ -309,7 +309,7 @@ Decided (2026-10-18): one part at a time, each reviewed before the next. Revised
 | G2a | Done (2026-10-18). The `Render2D/` skeleton, `Begin`/`End`, solid `FillRect`, batching; an offscreen readback test; the editor draws rects. |
 | G2b | Done (2026-10-18). Rounded rects and antialiasing: the analytic fast path (the signed distance shader). |
 | G2c | Done (2026-10-18). Transforms (`Transform2D`), the `Save`/`Restore` stack, scissor clips; the analytic antialiasing width follows the transform. |
-| G2d | Images: `DrawImage`, sampling, the textured-quad pipeline the masks reuse. |
+| G2d | Done (2026-10-18). Images: `DrawImage`, sampling, the textured-quad pipeline the masks reuse. |
 | G2e | Paths and coverage masks: `Path2D` (lines, arcs, quadratic and cubic Béziers), curve flattening, a CPU coverage rasteriser (non-zero and even-odd), the mask atlas and its cache; `FillPath`, `FillRectWithRoundedHole`. Elliptical corner radii are decided here (analytic or through masks). |
 | G2f | Strokes: a stroker that turns a stroke (width, caps, joins, dashes) into an outline for G2e; `StrokePath`. |
 | G2g | Clips: rounded-rect and path clips as antialiased clip masks; clip-out. |
@@ -345,6 +345,15 @@ Decided (2026-10-18): one part at a time, each reviewed before the next. Revised
 - `ClipRect` intersects the clip with a rect in the current coordinates and becomes the scissor, in whole target pixels: a pixel is inside when its centre is. Clip edges are hard until G2g. Under rotations and skews the clip is the rect's bounding box (a debug assert and a FIXME until G2g's clip masks).
 - Draws under an empty clip or a singular transform are skipped.
 - Tests: `tests/Render2D/Transform2D.cpp` (3 cases); 3 more cases in `tests/Render2D/Renderer2D.cpp` (translations, scales, quarter turns; antialiasing under scale and a 45-degree turn; clip rounding, nesting, transforms, `Restore`, empty clips). The editor adds a clipped, scrolling list in the sidebar and a spinning square.
+
+### G2d as built (2026-10-18)
+
+- `DrawImage(texture, source, destination, ImageOptions)` and `DrawImage(texture, destination)` for the whole texture. The source is in texels with a top-left origin. `ImageOptions`: `Filter` (linear, with linear mipmaps when the texture has them, or nearest), `Alpha` (`AlphaPremultiplication`, premultiplied by default) and `Opacity`.
+- One pipeline and one shader still draw everything: an image is a rounded-rect instance (with zero radii for now) that multiplies its colour by a texel. The instance gains texture coordinates and flags (textured, straight alpha, linear texels) and is 80 bytes. An image's colour is white with the opacity as alpha, so tints come for free later (masks and glyphs need them).
+- Batches break on a change of clip or texture (and sampler). Untextured instances join any batch with the same clip, and a textured one adopts a batch that has no texture yet, so rects drawn between images of the same texture don't break the batch. Batches without a texture bind a 1-by-1 white texture when nothing else is bound: they never sample it, but drivers check every declared sampler's texture at each draw (NVIDIA warns, 131204).
+- Texels are clamped half a texel inside the source rect, so linear filtering never reads the texels around a sub-image (atlases). Texture derivatives are taken outside the textured branch, where every fragment of a quad runs them, and sampled with `textureGrad`.
+- Colours follow the colour path (open decision 4): textures in sRGB formats are decoded by the GPU; others hold sRGB-encoded values; the shader converts texels to the target's blending space (unpremultiplying around the conversion). Premultiplied data in an sRGB-format texture isn't exact, since the GPU decodes each channel before the alpha division; premultiplied images belong in unorm formats.
+- Tests: five more cases in `tests/Render2D/Renderer2D.cpp` (nearest and linear scaling; clamping to the source rect; premultiplied, straight and opacity; sRGB texture into a unorm target and unorm texture into an sRGB target; images and rects interleaved across textures, in painter's order, under a transform). The editor generates a 16-by-16 checkered gradient (there are no image assets) and draws it scaled with nearest filtering and turning with linear filtering.
 
 Testing: the device's hidden window gives tests a real OpenGL context (Krystal.Gfx.Tests). Render2D gets golden image tests: render offscreen, read back with `ReadTexture`, compare against a PNG with a tolerance.
 

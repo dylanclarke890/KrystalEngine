@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include <numbers>
@@ -14,6 +15,8 @@ namespace krys::gfx::tests
 
     constexpr Pixel Red {255, 0, 0, 255};
     constexpr Pixel Green {0, 255, 0, 255};
+    constexpr Pixel Blue {0, 0, 255, 255};
+    constexpr Pixel White {255, 255, 255, 255};
     constexpr Pixel Clear {0, 0, 0, 0};
 
     KRYS_NODISCARD bool Near(const Pixel &pixel, const Pixel &expected, int tolerance = 1)
@@ -35,6 +38,7 @@ namespace krys::gfx::tests
       UniquePtr<Device> _device;
       UniquePtr<Renderer2D> _renderer;
       TextureHandle _target {};
+      List<TextureHandle> _images {};
       uint32 _width {4u};
       uint32 _height {4u};
       TextureFormat _format {TextureFormat::RGBA8Unorm};
@@ -53,10 +57,28 @@ namespace krys::gfx::tests
       ~Renderer2DFixture()
       {
         _renderer = nullptr;
+        for (auto image : _images)
+        {
+          _device->Destroy(image);
+        }
         if (_target.IsValid())
         {
           _device->Destroy(_target);
         }
+      }
+
+      /// @brief A texture holding `texels`, rows from the top; destroyed when the test ends.
+      KRYS_NODISCARD TextureHandle Image(uint32 width, uint32 height, Span<const Pixel> texels,
+                                         TextureFormat format = TextureFormat::RGBA8Unorm)
+      {
+        auto image = _device->CreateTexture(
+          {.Format = format, .Width = width, .Height = height, .DebugName = u8"Image"});
+        REQUIRE(image.has_value());
+        _device->WriteTexture(
+          *image, TextureRegion::Whole2D(width, height),
+          Span<const byte>(reinterpret_cast<const byte *>(texels.data()), texels.size_bytes()));
+        _images.push_back(*image);
+        return *image;
       }
 
       void UseTarget(uint32 width, uint32 height, TextureFormat format = TextureFormat::RGBA8Unorm)
@@ -414,5 +436,146 @@ namespace krys::gfx::tests
         CHECK(pixel == Clear);
       }
     }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: draws images scaled to fit", "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(4u, 4u);
+    constexpr Array<Pixel, 4> texels {Red, Green, Blue, White};
+    auto image = Image(2u, 2u, texels);
+
+    SECTION("Nearest filtering")
+    {
+      Draw([&](Renderer2D &renderer)
+           { renderer.DrawImage(image, {0.f, 0.f, 4.f, 4.f}, {.Filter = SamplerFilter::Nearest}); });
+
+      auto pixels = Read();
+      CHECK(At(pixels, 0u, 0u) == Red);
+      CHECK(At(pixels, 1u, 1u) == Red);
+      CHECK(At(pixels, 3u, 0u) == Green);
+      CHECK(At(pixels, 0u, 3u) == Blue);
+      CHECK(At(pixels, 3u, 3u) == White);
+    }
+
+    SECTION("Linear filtering")
+    {
+      // Corner pixels sit on texel centres; inner pixels blend their neighbours.
+      Draw([&](Renderer2D &renderer) { renderer.DrawImage(image, {0.f, 0.f, 4.f, 4.f}); });
+
+      auto pixels = Read();
+      CHECK(At(pixels, 0u, 0u) == Red);
+      CHECK(At(pixels, 3u, 3u) == White);
+      const auto inner = At(pixels, 1u, 1u);
+      CHECK(inner[0] > 128u);
+      CHECK(inner[1] > 0u);
+      CHECK(inner[2] > 0u);
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: samples only the source rect", "[Gfx][Render2D][GPU]")
+  {
+    // Linear filtering at the edges of the green texel would blend in its red neighbour without the clamp.
+    UseTarget(4u, 4u);
+    constexpr Array<Pixel, 2> texels {Red, Green};
+    auto image = Image(2u, 1u, texels);
+    Draw([&](Renderer2D &renderer)
+         { renderer.DrawImage(image, {1.f, 0.f, 1.f, 1.f}, {0.f, 0.f, 4.f, 4.f}); });
+
+    for (const auto &pixel : Read())
+    {
+      CHECK(pixel == Green);
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: blends images by their alpha and opacity",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(2u, 2u);
+    constexpr Pixel halfRed {128, 0, 0, 128};
+
+    SECTION("Premultiplied")
+    {
+      constexpr Array<Pixel, 1> texels {halfRed};
+      auto image = Image(1u, 1u, texels);
+      Draw([&](Renderer2D &renderer) { renderer.DrawImage(image, {0.f, 0.f, 2.f, 2.f}); });
+      CHECK(Near(Read()[0], halfRed));
+    }
+
+    SECTION("Straight")
+    {
+      constexpr Array<Pixel, 1> texels {Pixel {255, 0, 0, 128}};
+      auto image = Image(1u, 1u, texels);
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.DrawImage(image, {0.f, 0.f, 2.f, 2.f}, {.Alpha = AlphaPremultiplication::Unpremultiplied});
+        });
+      CHECK(Near(Read()[0], halfRed));
+    }
+
+    SECTION("Opacity")
+    {
+      constexpr Array<Pixel, 1> texels {Red};
+      auto image = Image(1u, 1u, texels);
+      Draw([&](Renderer2D &renderer) { renderer.DrawImage(image, {0.f, 0.f, 2.f, 2.f}, {.Opacity = 0.5f}); });
+      CHECK(Near(Read()[0], halfRed));
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: converts images to the target's encoding",
+                   "[Gfx][Render2D][GPU]")
+  {
+    constexpr Array<Pixel, 1> texels {Pixel {188, 188, 188, 255}};
+
+    SECTION("An sRGB texture into a unorm target")
+    {
+      UseTarget(2u, 2u);
+      auto image = Image(1u, 1u, texels, TextureFormat::RGBA8Srgb);
+      Draw([&](Renderer2D &renderer) { renderer.DrawImage(image, {0.f, 0.f, 2.f, 2.f}); });
+      CHECK(Near(Read()[0], texels[0]));
+    }
+
+    SECTION("A unorm texture into an sRGB target")
+    {
+      UseTarget(2u, 2u, TextureFormat::RGBA8Srgb);
+      auto image = Image(1u, 1u, texels);
+      Draw([&](Renderer2D &renderer) { renderer.DrawImage(image, {0.f, 0.f, 2.f, 2.f}); });
+      CHECK(Near(Read()[0], texels[0]));
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: interleaves images and rects in painter's order",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(4u, 4u);
+    constexpr Array<Pixel, 1> greenTexels {Green};
+    constexpr Array<Pixel, 1> blueTexels {Blue};
+    auto green = Image(1u, 1u, greenTexels);
+    auto blue = Image(1u, 1u, blueTexels);
+
+    Draw(
+      [&](Renderer2D &renderer)
+      {
+        renderer.FillRect({0.f, 0.f, 4.f, 4.f}, SRGBA<uint8> {255, 0, 0});
+        renderer.DrawImage(green, {1.f, 1.f, 2.f, 2.f});
+        renderer.FillRect({2.f, 2.f, 2.f, 2.f}, SRGBA<uint8> {0, 0, 255});
+        // Switching between textures keeps the order too.
+        renderer.DrawImage(green, {0.f, 3.f, 1.f, 1.f});
+        renderer.DrawImage(blue, {0.f, 3.f, 1.f, 1.f});
+        renderer.DrawImage(green, {3.f, 0.f, 1.f, 1.f});
+        // Images follow the transform.
+        renderer.Translate(1.f, -1.f);
+        renderer.DrawImage(blue, {0.f, 1.f, 1.f, 1.f});
+      });
+
+    auto pixels = Read();
+    CHECK(At(pixels, 0u, 0u) == Red);
+    CHECK(At(pixels, 1u, 1u) == Green);
+    CHECK(At(pixels, 2u, 1u) == Green);
+    CHECK(At(pixels, 2u, 2u) == Blue);
+    CHECK(At(pixels, 3u, 3u) == Blue);
+    CHECK(At(pixels, 0u, 3u) == Blue);
+    CHECK(At(pixels, 3u, 0u) == Green);
+    CHECK(At(pixels, 1u, 0u) == Blue);
   }
 }

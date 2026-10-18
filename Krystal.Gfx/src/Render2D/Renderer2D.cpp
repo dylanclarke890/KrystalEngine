@@ -25,13 +25,18 @@ layout(location = 0) in vec4 a_Rect;        // x, y, width, height in local coor
 layout(location = 1) in vec4 a_Radii;       // top-left, top-right, bottom-right, bottom-left
 layout(location = 2) in vec4 a_Linear;      // the transform's a, b, c, d
 layout(location = 3) in vec2 a_Translation; // the transform's e, f
-layout(location = 4) in vec4 a_Colour;      // sRGB, straight alpha
+layout(location = 4) in vec4 a_UV;          // texture coordinates at the top-left and bottom-right corners
+layout(location = 5) in vec4 a_Colour;      // sRGB, straight alpha
+layout(location = 6) in uint a_Flags;
 
 layout(location = 0) out vec2 v_Position; // relative to the rect's centre, in local coordinates
 layout(location = 1) flat out vec2 v_HalfSize;
 layout(location = 2) flat out vec4 v_Radii;
 layout(location = 3) flat out mat2 v_InverseTranspose; // takes locations 3 and 4
-layout(location = 5) flat out vec4 v_Colour;
+layout(location = 5) flat out vec4 v_Colour;           // premultiplied, in the target's blending space
+layout(location = 6) out vec2 v_UV;
+layout(location = 7) flat out vec4 v_UVRect;
+layout(location = 8) flat out uint v_Flags;
 
 vec3 SrgbToLinear(vec3 c)
 {
@@ -49,7 +54,8 @@ void main()
   vec2 corner = vec2(gl_VertexID & 1, gl_VertexID >> 1);
   vec2 halfSize = a_Rect.zw * 0.5;
   vec2 position = (corner * 2.0 - 1.0) * (halfSize + pixelInLocal);
-  vec2 pixel = linear * (a_Rect.xy + halfSize + position) + a_Translation;
+  vec2 local = a_Rect.xy + halfSize + position;
+  vec2 pixel = linear * local + a_Translation;
   vec2 ndc = pixel / u_ViewportSize * 2.0 - 1.0;
   gl_Position = vec4(ndc.x, -ndc.y, 0.0, 1.0);
 
@@ -57,6 +63,9 @@ void main()
   v_HalfSize = halfSize;
   v_Radii = a_Radii;
   v_InverseTranspose = transpose(inverseLinear);
+  v_UV = mix(a_UV.xy, a_UV.zw, (local - a_Rect.xy) / a_Rect.zw);
+  v_UVRect = a_UV;
+  v_Flags = a_Flags;
 
   // sRGB targets blend in linear light and encode on write; other targets blend the encoded values.
   vec3 rgb = u_DecodeSrgb != 0u ? SrgbToLinear(a_Colour.rgb) : a_Colour.rgb;
@@ -65,13 +74,38 @@ void main()
 )";
 
     constexpr const char8_t *RectFragmentSource = u8R"(#version 450
+layout(binding = 0, std140) uniform Frame
+{
+  vec2 u_ViewportSize;
+  uint u_DecodeSrgb;
+};
+
+layout(binding = 0) uniform sampler2D u_Texture;
+
 layout(location = 0) in vec2 v_Position;
 layout(location = 1) flat in vec2 v_HalfSize;
 layout(location = 2) flat in vec4 v_Radii;
 layout(location = 3) flat in mat2 v_InverseTranspose;
 layout(location = 5) flat in vec4 v_Colour;
+layout(location = 6) in vec2 v_UV;
+layout(location = 7) flat in vec4 v_UVRect;
+layout(location = 8) flat in uint v_Flags;
 
 layout(location = 0) out vec4 o_Colour;
+
+const uint Textured = 1u;
+const uint StraightAlpha = 2u;
+const uint LinearTexels = 4u;
+
+vec3 SrgbToLinear(vec3 c)
+{
+  return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), greaterThan(c, vec3(0.04045)));
+}
+
+vec3 LinearToSrgb(vec3 c)
+{
+  return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, greaterThan(c, vec3(0.0031308)));
+}
 
 // The signed distance from p to the edge of a rounded box centred on the origin (negative inside), and the
 // direction in which it grows fastest. y points down, so the top corners are where p.y < 0.
@@ -84,8 +118,37 @@ float RoundedBoxDistance(vec2 p, vec2 halfSize, vec4 radii, out vec2 normal)
   return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;
 }
 
+// A texel, premultiplied and in the target's blending space.
+vec4 SampleTexture(vec2 dx, vec2 dy)
+{
+  // Stay half a texel inside the source rect, so filtering never reads the texels around it.
+  vec2 halfTexel = 0.5 / vec2(textureSize(u_Texture, 0));
+  vec2 low = min(v_UVRect.xy, v_UVRect.zw) + halfTexel;
+  vec2 high = max(v_UVRect.xy, v_UVRect.zw) - halfTexel;
+  vec2 uv = clamp(v_UV, min(low, high), max(low, high));
+  vec4 texel = textureGrad(u_Texture, uv, dx, dy);
+
+  if ((v_Flags & StraightAlpha) != 0u)
+  {
+    texel.rgb *= texel.a;
+  }
+
+  bool linearTexels = (v_Flags & LinearTexels) != 0u;
+  bool linearTarget = u_DecodeSrgb != 0u;
+  if (linearTexels != linearTarget && texel.a > 0.0)
+  {
+    vec3 rgb = texel.rgb / texel.a;
+    texel.rgb = (linearTarget ? SrgbToLinear(rgb) : LinearToSrgb(rgb)) * texel.a;
+  }
+  return texel;
+}
+
 void main()
 {
+  // Derivatives are taken here, outside the branch, where every fragment of the quad runs them.
+  vec2 dx = dFdx(v_UV);
+  vec2 dy = dFdy(v_UV);
+
   vec2 normal;
   float distance = RoundedBoxDistance(v_Position, v_HalfSize, v_Radii, normal);
   // The distance grows by this much in local units per target pixel, so this converts it to pixels. It's
@@ -93,7 +156,13 @@ void main()
   float localPerPixel = length(v_InverseTranspose * normal);
   // A one-pixel antialiasing band centred on the edge.
   float coverage = clamp(0.5 - distance / localPerPixel, 0.0, 1.0);
-  o_Colour = v_Colour * coverage;
+
+  vec4 colour = v_Colour;
+  if ((v_Flags & Textured) != 0u)
+  {
+    colour *= SampleTexture(dx, dy);
+  }
+  o_Colour = colour * coverage;
 }
 )";
 
@@ -157,6 +226,18 @@ void main()
     {
       _device->Destroy(_vertexShader);
     }
+    if (_nearestSampler.IsValid())
+    {
+      _device->Destroy(_nearestSampler);
+    }
+    if (_linearSampler.IsValid())
+    {
+      _device->Destroy(_linearSampler);
+    }
+    if (_whiteTexture.IsValid())
+    {
+      _device->Destroy(_whiteTexture);
+    }
   }
 
   Expected<void> Renderer2D::Initialise() noexcept
@@ -176,6 +257,31 @@ void main()
       return Unexpected<string>(fragmentShader.error());
     }
     _fragmentShader = *fragmentShader;
+
+    auto linearSampler = _device->CreateSampler({.MinFilter = SamplerFilter::Linear,
+                                                 .MagFilter = SamplerFilter::Linear,
+                                                 .MipmapMode = SamplerMipmapMode::Linear});
+    if (!linearSampler)
+    {
+      return Unexpected<string>(linearSampler.error());
+    }
+    _linearSampler = *linearSampler;
+
+    auto nearestSampler = _device->CreateSampler(SamplerDesc::NearestClamp());
+    if (!nearestSampler)
+    {
+      return Unexpected<string>(nearestSampler.error());
+    }
+    _nearestSampler = *nearestSampler;
+
+    auto whiteTexture = _device->CreateTexture({.Width = 1u, .Height = 1u, .DebugName = u8"Render2D.White"});
+    if (!whiteTexture)
+    {
+      return Unexpected<string>(whiteTexture.error());
+    }
+    _whiteTexture = *whiteTexture;
+    constexpr Array<byte, 4> white {byte {255}, byte {255}, byte {255}, byte {255}};
+    _device->WriteTexture(_whiteTexture, TextureRegion::Whole2D(1u, 1u), white);
     return {};
   }
 
@@ -282,26 +388,107 @@ void main()
       return;
     }
 
+    const auto radii = ConstrainRadii(rect, roundedRect.Radii);
+    AddInstance({.Rect = {rect.X, rect.Y, rect.Width, rect.Height},
+                 .Radii = {radii.TopLeft, radii.TopRight, radii.BottomRight, radii.BottomLeft},
+                 .Linear = {},
+                 .Translation = {},
+                 .UV = {},
+                 .Colour = {resolved.Red, resolved.Green, resolved.Blue, resolved.Alpha},
+                 .Flags = 0u},
+                {}, {});
+  }
+
+  void Renderer2D::DrawImage(TextureHandle texture, const Rect2D &source, const Rect2D &destination,
+                             const ImageOptions &options) noexcept
+  {
+    krys_debug_assert_msg(_commands != nullptr, "DrawImage outside Begin and End.");
+    const auto desc = _device->GetTextureDesc(texture);
+    krys_debug_assert_msg(desc.has_value(), "Drawing a stale or invalid texture.");
+    if (!desc || source.Width <= 0.f || source.Height <= 0.f || destination.Width <= 0.f
+        || destination.Height <= 0.f)
+    {
+      return;
+    }
+
+    const auto alpha = static_cast<uint8>(std::clamp(options.Opacity, 0.f, 1.f) * 255.f + 0.5f);
+    if (alpha == 0u)
+    {
+      return;
+    }
+
+    const float width = static_cast<float>(desc->Width);
+    const float height = static_cast<float>(desc->Height);
+    uint32 flags = Textured;
+    if (options.Alpha == AlphaPremultiplication::Unpremultiplied)
+    {
+      flags |= StraightAlpha;
+    }
+    if (IsSrgbFormat(desc->Format))
+    {
+      flags |= LinearTexels;
+    }
+
+    AddInstance({.Rect = {destination.X, destination.Y, destination.Width, destination.Height},
+                 .Radii = {},
+                 .Linear = {},
+                 .Translation = {},
+                 .UV = {source.X / width, source.Y / height, (source.X + source.Width) / width,
+                        (source.Y + source.Height) / height},
+                 .Colour = {255u, 255u, 255u, alpha},
+                 .Flags = flags},
+                texture, options.Filter == SamplerFilter::Nearest ? _nearestSampler : _linearSampler);
+  }
+
+  void Renderer2D::DrawImage(TextureHandle texture, const Rect2D &destination,
+                             const ImageOptions &options) noexcept
+  {
+    const auto desc = _device->GetTextureDesc(texture);
+    krys_debug_assert_msg(desc.has_value(), "Drawing a stale or invalid texture.");
+    if (desc)
+    {
+      DrawImage(texture, {0.f, 0.f, static_cast<float>(desc->Width), static_cast<float>(desc->Height)},
+                destination, options);
+    }
+  }
+
+  void Renderer2D::AddInstance(RectInstance instance, TextureHandle texture, SamplerHandle sampler) noexcept
+  {
     // Nothing shows through an empty clip or a transform that flattens everything.
     const auto &transform = _state.Transform;
     if (_state.Clip.Width == 0u || _state.Clip.Height == 0u || transform.Determinant() == 0.f)
     {
       return;
     }
+    instance.Linear = {transform.A, transform.B, transform.C, transform.D};
+    instance.Translation = {transform.E, transform.F};
 
-    if (_batches.empty() || _batches.back().Scissor != _state.Clip)
+    // Untextured instances join any batch with the same scissor; a textured one needs the batch's texture,
+    // or a batch that has none yet.
+    const bool textured = texture.IsValid();
+    auto joins = [&](const Batch &batch)
     {
-      _batches.push_back(
-        {.FirstInstance = static_cast<uint32>(_rects.size()), .InstanceCount = 0u, .Scissor = _state.Clip});
+      return batch.Scissor == _state.Clip
+             && (!textured || !batch.Texture.IsValid()
+                 || (batch.Texture == texture && batch.Sampler == sampler));
+    };
+    if (_batches.empty() || !joins(_batches.back()))
+    {
+      _batches.push_back({.FirstInstance = static_cast<uint32>(_rects.size()),
+                          .InstanceCount = 0u,
+                          .Scissor = _state.Clip,
+                          .Texture = {},
+                          .Sampler = {}});
     }
-    ++_batches.back().InstanceCount;
 
-    const auto radii = ConstrainRadii(rect, roundedRect.Radii);
-    _rects.push_back({.Rect = {rect.X, rect.Y, rect.Width, rect.Height},
-                      .Radii = {radii.TopLeft, radii.TopRight, radii.BottomRight, radii.BottomLeft},
-                      .Linear = {transform.A, transform.B, transform.C, transform.D},
-                      .Translation = {transform.E, transform.F},
-                      .Colour = {resolved.Red, resolved.Green, resolved.Blue, resolved.Alpha}});
+    auto &batch = _batches.back();
+    if (textured && !batch.Texture.IsValid())
+    {
+      batch.Texture = texture;
+      batch.Sampler = sampler;
+    }
+    ++batch.InstanceCount;
+    _rects.push_back(instance);
   }
 
   void Renderer2D::End() noexcept
@@ -341,8 +528,24 @@ void main()
         commands.BindPipeline(*pipeline);
         commands.BindUniformBuffer(0u, frame.Buffer, frame.Offset, sizeof(FrameUniforms));
         commands.BindVertexBuffer(0u, rects.Buffer, rects.Offset);
+        TextureHandle boundTexture {};
+        SamplerHandle boundSampler {};
         for (const auto &batch : _batches)
         {
+          // Untextured batches never sample, but drivers still check the sampler's texture at every draw,
+          // so they get the white texture unless another one is already bound.
+          const auto texture = batch.Texture.IsValid()  ? batch.Texture
+                               : boundTexture.IsValid() ? boundTexture
+                                                        : _whiteTexture;
+          const auto sampler = batch.Texture.IsValid()  ? batch.Sampler
+                               : boundSampler.IsValid() ? boundSampler
+                                                        : _nearestSampler;
+          if (texture != boundTexture || sampler != boundSampler)
+          {
+            commands.BindTexture(0u, texture, sampler);
+            boundTexture = texture;
+            boundSampler = sampler;
+          }
           commands.SetScissor(batch.Scissor.X, batch.Scissor.Y, batch.Scissor.Width, batch.Scissor.Height);
           commands.Draw(4u, batch.InstanceCount, 0u, batch.FirstInstance);
         }
@@ -381,7 +584,9 @@ void main()
                      {1u, VertexFormat::Float4, offsetof(RectInstance, Radii)},
                      {2u, VertexFormat::Float4, offsetof(RectInstance, Linear)},
                      {3u, VertexFormat::Float2, offsetof(RectInstance, Translation)},
-                     {4u, VertexFormat::UByte4Norm, offsetof(RectInstance, Colour)}},
+                     {4u, VertexFormat::Float4, offsetof(RectInstance, UV)},
+                     {5u, VertexFormat::UByte4Norm, offsetof(RectInstance, Colour)},
+                     {6u, VertexFormat::UInt, offsetof(RectInstance, Flags)}},
     });
 
     auto pipeline = _device->CreatePipeline(desc);
