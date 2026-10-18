@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-17): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2), text (G3) and the Booey integration (G4) are drafts.
+Status (2026-10-18): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, is done); text (G3) and the Booey integration (G4) are drafts.
 
 ## Why
 
@@ -49,6 +49,10 @@ Decision (2026-10-17): the engine uses Booey's typed colours, moved into Krystal
 Where each layer gets its colours:
 - **The RHI has no colour type.** A clear value is four numbers in the target's encoding (`Array<float, 4>`, or integers for integer formats). Whether a value is sRGB or linear depends on the texture's `TextureFormat`, not on a colour class.
 - **Render2D and Krystal.UI** use the typed colours: vertex colours are `PackedColour::RGBA` (premultiplied `SRGBA<uint8>`), and blending happens in a colour space chosen by type.
+
+## Geometry
+
+Decided (2026-10-18): Render2D uses its own small, plain geometry types for now. Booey's geometry types (`FloatRect`, `AffineTransform`, ...) stay in Booey; Krystal.UI converts between them at the boundary. Moving Booey's types to Core was considered and dropped for now: they are tied to layout-only types (`LayoutUnit`, `Region`, `Path`, `TransformationMatrix`, `WritingMode`), so the move needed many API changes in Booey.
 
 ## Layer 1: the RHI (Krystal.Gfx)
 
@@ -278,9 +282,33 @@ All done in G1 (2026-10-17) unless noted.
 |---|---|---|
 | C0 | Done (2026-10-17). Move the colour types from Booey to `Krystal.Core/Colour/`, renamed to "Colour" in `krys`. | Booey and its tests build and pass against the moved types. |
 | G1 | Done (2026-10-17), as one part. The RHI: `Device`, `Pool` and handles, buffers, textures, samplers, shaders, pipelines, command buffers, swapchains, transient memory; the OpenGL backend. The editor moves onto it; Gfx's old colour headers go with the registries. | The editor clears its window and draws a triangle through the RHI. The old registries are gone. |
-| G2 | Render2D: rects, rounded rects, borders, box shadows, images, gradients, clips, transforms, layers. | A test app draws a UI-like scene; golden image tests pass. |
+| G2 | Render2D: rects, rounded rects, borders, box shadows, images, gradients, clips, transforms, layers. Reviewed one part at a time (see *G2 parts*). | A test app draws a UI-like scene; golden image tests pass. |
 | G3 | Text: `GlyphAtlas`, `DrawGlyphs`, FreeType rasterisation. | Text renders crisply at several sizes and scales. |
 | G4 | Booey: `GraphicsContext`, the display list recorder, painting (paint order, backgrounds, borders, text); Krystal.UI replays it. | The vertical slice: a page loads, renders, resizes and responds to a click. |
+
+### G2 parts
+
+Decided (2026-10-18): one part at a time, each reviewed before the next.
+
+| Part | Content |
+|---|---|
+| G2a | Done (2026-10-18). The `Render2D/` skeleton, `Begin`/`End`, solid `FillRect`, batching; an offscreen readback test; the editor draws rects. |
+| G2b | Rounded rects and antialiasing (the signed distance shader). |
+| G2c | Transforms, the `Save`/`Restore` stack, scissor clips. |
+| G2d | Images. |
+| G2e | Borders and box shadows. |
+| G2f | Gradients. |
+| G2g | Rounded clips (stencil) and layers (offscreen, opacity, blend modes). |
+
+### G2a as built (2026-10-18)
+
+- `Render2D/Rect2D.hpp`: `Rect2D`, a plain `{X, Y, Width, Height}` in pixels.
+- `Render2D/Renderer2D.hpp`: `Renderer2D::Create(device)`, then per frame `Begin(commands, Render2DTarget)`, `FillRect(rect, SRGBA<uint8>)`, `End()`. The target is a swapchain or a texture with its size, format and an optional clear colour; `End` records one render pass with every draw in it.
+- Rects are instanced: one 20-byte record each (rect, colour) in transient memory, drawn as a 4-vertex strip whose corners come from `gl_VertexID`, so there's no quad vertex buffer. A frame's rects are one draw, in painter's order. Empty and fully transparent rects are skipped.
+- One pipeline per target format, created on first use. The shaders are embedded in `Renderer2D.cpp` until the shader decision (open decision 2).
+- Colours are sRGB with straight alpha, premultiplied in the shader. On sRGB targets they're decoded and blend in linear light; on other targets they blend as encoded (open decision 4).
+- If the frame's transient memory runs out, the frame's rects are dropped (with an assert in debug builds); growing the ring is left for later.
+- Tests: `Krystal.Gfx.Tests/tests/Render2D/Renderer2D.cpp` (5 cases). The GPU tests share `CreateTestDevice` (`include/Krystal.Gfx.Tests/TestDevice.hpp`). The editor's triangle is replaced by rects drawn with Render2D.
 
 Testing: the device's hidden window gives tests a real OpenGL context (Krystal.Gfx.Tests). Render2D gets golden image tests: render offscreen, read back with `ReadTexture`, compare against a PNG with a tolerance.
 
@@ -288,6 +316,9 @@ Testing: the device's hidden window gives tests a real OpenGL context (Krystal.G
 
 Decided (2026-10-17): a virtual `Device` chosen at run time; the Vulkan and D3D11 stubs, the LearnOpenGL scenes and the editor's assets deleted; backends as subdirectories of Krystal.Gfx.
 
-1. **Module names:** Krystal.Render2D, Krystal.UI, Krystal.Assets.
+Decided (2026-10-18): the 2D renderer lives in Krystal.Gfx, as `Render2D/` (namespace `krys::gfx`), not in its own module.
+
+1. **Module names:** Krystal.UI, Krystal.Assets.
 2. **Shaders:** GLSL with explicit binding slots now. Later, possibly SPIR-V compiled offline, which a Vulkan backend would need.
 3. **Text:** FreeType greyscale bitmaps first (recommended), or MSDF.
+4. **Blending space:** Render2D blends in linear light on sRGB targets and in sRGB-encoded values on other targets, so translucent colours look different by target format. Browsers blend encoded values everywhere. To be checked (2026-10-18).

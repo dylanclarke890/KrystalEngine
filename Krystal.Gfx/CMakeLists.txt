@@ -73,6 +73,10 @@ target_sources(Krystal.Gfx
       include/Krystal.Gfx/OpenGL/Official/glext.h
       include/Krystal.Gfx/OpenGL/Official/khrplatform.h
 
+      # Render2D
+      include/Krystal.Gfx/Render2D/Rect2D.hpp
+      include/Krystal.Gfx/Render2D/Renderer2D.hpp
+
       # Text
       include/Krystal.Gfx/Text/FontAtlas.hpp
       include/Krystal.Gfx/Text/FontAtlasLoader.hpp
@@ -84,6 +88,9 @@ target_sources(Krystal.Gfx
     # OpenGL
     src/OpenGL/GLDevice.cpp
     src/OpenGL/Hooks/gl.cpp
+
+    # Render2D
+    src/Render2D/Renderer2D.cpp
 
     # Text
     src/Text/FontAtlasLoader.cpp

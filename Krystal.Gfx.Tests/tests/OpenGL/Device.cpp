@@ -1,11 +1,11 @@
 ﻿#include "Krystal.Gfx/Device.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Core/Concepts.hpp"
-#include "Krystal.Core/Log/ILogger.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Utils/ByteUtils.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include <cstring>
 
 namespace krys::gfx::tests
@@ -110,23 +110,8 @@ void main()
       List<PipelineHandle> _pipelines;
 
     public:
-      DeviceFixture()
+      DeviceFixture() : _device(CreateTestDevice())
       {
-        // The device logs its debug output and leaks through the global logger.
-        static const auto logger = []
-        {
-          auto created = log::CreateLogger({.Name = "Gfx.Tests", .FilePath = {}, .Level = log::Level::Warn});
-          REQUIRE(created.has_value());
-          log::SetGlobalLogger(*created);
-          return krys::move(*created);
-        }();
-
-        auto device = Device::Create({.EnableValidation = true, .TransientMemoryPerFrame = 64u * 1'024u});
-        if (!device)
-        {
-          FAIL("No OpenGL 4.5 device: " << device.error());
-        }
-        _device = krys::move(*device);
       }
 
       ~DeviceFixture()

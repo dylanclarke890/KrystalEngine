@@ -5,69 +5,23 @@
 #endif
 
 #include "Krystal.Core/Log/ILogger.hpp"
-#include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Utils/ByteUtils.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Utils/ScopedProfiler.hpp"
 #include "Krystal.Editor/Application.hpp"
+#include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.PAL/Events.hpp"
 #include "Krystal.PAL/Keys.hpp"
-#include <cstddef>
-#include <cstring>
+#include <cmath>
 
 namespace krys
 {
   class Editor : public Application
   {
-    struct TriangleVertex
-    {
-      float Position[2];
-      uint8 Colour[4];
-    };
-
-    struct TriangleUniforms
-    {
-      float Time;
-      float Padding[3];
-    };
-
-    constexpr static const char8_t *TriangleVertexSource = u8R"(#version 450
-layout(location = 0) in vec2 a_Position;
-layout(location = 1) in vec4 a_Colour;
-
-layout(binding = 0, std140) uniform Draw
-{
-  float u_Time;
-};
-
-layout(location = 0) out vec4 v_Colour;
-
-void main()
-{
-  float angle = u_Time * 0.5;
-  mat2 rotation = mat2(cos(angle), sin(angle), -sin(angle), cos(angle));
-  gl_Position = vec4(rotation * a_Position, 0.0, 1.0);
-  v_Colour = a_Colour;
-}
-)";
-
-    constexpr static const char8_t *TriangleFragmentSource = u8R"(#version 450
-layout(location = 0) in vec4 v_Colour;
-layout(location = 0) out vec4 o_Colour;
-
-void main()
-{
-  o_Colour = v_Colour;
-}
-)";
-
   private:
     uint32 _width {0u};
     uint32 _height {0u};
     float _time {0.f};
-    gfx::ShaderHandle _vertexShader {};
-    gfx::ShaderHandle _fragmentShader {};
-    gfx::PipelineHandle _pipeline {};
-    gfx::BufferHandle _vertices {};
+    UniquePtr<gfx::Renderer2D> _renderer {};
 
   public:
     explicit Editor(int argc, char **argv, const ApplicationSettings &settings) noexcept
@@ -81,28 +35,19 @@ void main()
       _context->Logger->SetLevel(log::Level::Info);
       _context->Logger->Info("Initialising Krystal Editor...");
       BindEvents();
-      CreateTriangle();
+
+      auto renderer = gfx::Renderer2D::Create(*_context->Device);
+      if (!renderer)
+      {
+        _context->Logger->Error("{}", renderer.error());
+        return;
+      }
+      _renderer = krys::move(*renderer);
     }
 
     void OnShutdown() noexcept override
     {
-      auto &device = *_context->Device;
-      if (_vertices.IsValid())
-      {
-        device.Destroy(_vertices);
-      }
-      if (_pipeline.IsValid())
-      {
-        device.Destroy(_pipeline);
-      }
-      if (_fragmentShader.IsValid())
-      {
-        device.Destroy(_fragmentShader);
-      }
-      if (_vertexShader.IsValid())
-      {
-        device.Destroy(_vertexShader);
-      }
+      _renderer = nullptr;
     }
 
     void BindEvents() noexcept
@@ -148,80 +93,28 @@ void main()
 
     void OnRender(gfx::CommandBuffer &commands) noexcept override
     {
-      if (!_pipeline.IsValid() || _width == 0u || _height == 0u)
+      if (!_renderer || _width == 0u || _height == 0u)
       {
         return;
       }
 
-      auto uniforms = _context->Device->AllocateTransient(sizeof(TriangleUniforms));
-      if (!uniforms.IsValid())
-      {
-        return;
-      }
-      const TriangleUniforms data {.Time = _time, .Padding = {}};
-      std::memcpy(uniforms.Data.data(), &data, sizeof(data));
+      _renderer->Begin(commands, {.Swapchain = _context->Swapchain,
+                                  .Width = _width,
+                                  .Height = _height,
+                                  .Format = gfx::TextureFormat::RGBA8Srgb,
+                                  .ClearColour = Array<float, 4> {0.02f, 0.02f, 0.03f, 1.f}});
 
-      commands.BeginRenderPass(gfx::RenderPassDesc::SingleColour(
-        {.Swapchain = _context->Swapchain, .ClearColour = {0.02f, 0.02f, 0.03f, 1.f}}));
-      commands.BindPipeline(_pipeline);
-      commands.BindVertexBuffer(0u, _vertices);
-      commands.BindUniformBuffer(0u, uniforms.Buffer, uniforms.Offset, sizeof(TriangleUniforms));
-      commands.Draw(3u);
-      commands.EndRenderPass();
-    }
+      // A sidebar and a panel, a translucent overlay across both, and a square sliding back and forth.
+      const float width = static_cast<float>(_width);
+      const float height = static_cast<float>(_height);
+      _renderer->FillRect({0.f, 0.f, 240.f, height}, SRGBA<uint8> {40, 44, 52});
+      _renderer->FillRect({260.f, 20.f, width - 280.f, 160.f}, SRGBA<uint8> {70, 130, 180});
+      _renderer->FillRect({120.f, 120.f, 400.f, 200.f}, SRGBA<uint8> {255, 140, 0, 128});
 
-  private:
-    void CreateTriangle() noexcept
-    {
-      auto &device = *_context->Device;
-      auto vertexShader = device.CreateShader(
-        {.Stage = gfx::ShaderStage::Vertex, .Source = TriangleVertexSource, .DebugName = u8"Triangle.vert"});
-      auto fragmentShader = device.CreateShader({.Stage = gfx::ShaderStage::Fragment,
-                                                 .Source = TriangleFragmentSource,
-                                                 .DebugName = u8"Triangle.frag"});
-      if (!vertexShader || !fragmentShader)
-      {
-        _context->Logger->Error("{}", !vertexShader ? vertexShader.error() : fragmentShader.error());
-        return;
-      }
-      _vertexShader = *vertexShader;
-      _fragmentShader = *fragmentShader;
+      const float slide = (std::sin(_time) * 0.5f + 0.5f) * (width - 340.f);
+      _renderer->FillRect({260.f + slide, height - 100.f, 80.f, 80.f}, SRGBA<uint8> {220, 50, 70});
 
-      gfx::PipelineDesc pipelineDesc {
-        .VertexShader = _vertexShader,
-        .FragmentShader = _fragmentShader,
-        .Blend = gfx::BlendState::PremultipliedAlpha(),
-        .ColourFormats = {gfx::TextureFormat::RGBA8Srgb},
-        .DebugName = u8"Triangle",
-      };
-      pipelineDesc.VertexBuffers.push_back({
-        .Stride = sizeof(TriangleVertex),
-        .Attributes = {{0u, gfx::VertexFormat::Float2, offsetof(TriangleVertex, Position)},
-                       {1u, gfx::VertexFormat::UByte4Norm, offsetof(TriangleVertex, Colour)}},
-      });
-      auto pipeline = device.CreatePipeline(pipelineDesc);
-      if (!pipeline)
-      {
-        _context->Logger->Error("{}", pipeline.error());
-        return;
-      }
-      _pipeline = *pipeline;
-
-      constexpr Array<TriangleVertex, 3> vertices {{
-        {{0.f, 0.6f}, {255, 64, 64, 255}},
-        {{-0.6f, -0.45f}, {64, 255, 64, 255}},
-        {{0.6f, -0.45f}, {64, 96, 255, 255}},
-      }};
-      auto buffer = device.CreateBuffer({.Size = sizeof(vertices),
-                                         .Usage = gfx::BufferUsage::Vertex,
-                                         .InitialData = ByteUtils::AsBytesView(vertices),
-                                         .DebugName = u8"TriangleVertices"});
-      if (!buffer)
-      {
-        _context->Logger->Error("{}", buffer.error());
-        return;
-      }
-      _vertices = *buffer;
+      _renderer->End();
     }
   };
 }

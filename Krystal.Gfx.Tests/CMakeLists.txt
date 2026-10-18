@@ -28,10 +28,20 @@ catch_discover_tests(Krystal.Gfx.Tests)
 
 target_sources(Krystal.Gfx.Tests
   PRIVATE
+    FILE_SET HEADERS
+    BASE_DIRS
+      include
+    FILES
+      include/Krystal.Gfx.Tests/TestDevice.hpp
+
+  PRIVATE
     tests/CommandBuffer.cpp
     tests/Formats.cpp
     tests/Pool.cpp
 
     # OpenGL
     tests/OpenGL/Device.cpp
+
+    # Render2D
+    tests/Render2D/Renderer2D.cpp
 )
