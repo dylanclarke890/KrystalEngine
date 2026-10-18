@@ -5,6 +5,7 @@
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
+#include "Krystal.Gfx/Render2D/PathRasteriser.hpp"
 #include <numbers>
 
 namespace krys::gfx::tests
@@ -46,7 +47,13 @@ namespace krys::gfx::tests
     public:
       Renderer2DFixture() : _device(CreateTestDevice())
       {
-        auto renderer = Renderer2D::Create(*_device);
+        UseRenderer({});
+      }
+
+      void UseRenderer(const Renderer2DDesc &desc)
+      {
+        _renderer = nullptr;
+        auto renderer = Renderer2D::Create(*_device, desc);
         if (!renderer)
         {
           FAIL(renderer.error());
@@ -577,5 +584,271 @@ namespace krys::gfx::tests
     CHECK(At(pixels, 0u, 3u) == Blue);
     CHECK(At(pixels, 3u, 0u) == Green);
     CHECK(At(pixels, 1u, 0u) == Blue);
+  }
+
+  namespace
+  {
+    /// @brief A right triangle with its right angle at (x, 0) and legs of `size` along the axes.
+    KRYS_NODISCARD Path2D Triangle(float x, float size = 8.f)
+    {
+      Path2D path;
+      path.MoveTo({x, 0.f});
+      path.LineTo({x + size, 0.f});
+      path.LineTo({x, size});
+      path.Close();
+      return path;
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: fills paths with the rasteriser's coverage",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(8u, 8u);
+    const auto triangle = Triangle(0.f);
+    Draw([&](Renderer2D &renderer)
+         { renderer.FillPath(triangle, FillRule::NonZero, SRGBA<uint8> {255, 0, 0}); });
+
+    PathRasteriser rasteriser;
+    const auto expected =
+      rasteriser.Rasterise(triangle, {}, FillRule::NonZero, {.X = 0, .Y = 0, .Width = 8u, .Height = 8u});
+    auto pixels = Read();
+    for (int32 y = 0; y < 8; ++y)
+    {
+      for (int32 x = 0; x < 8; ++x)
+      {
+        const auto coverage = expected.At(x, y);
+        CHECK(Near(At(pixels, static_cast<uint32>(x), static_cast<uint32>(y)), {coverage, 0, 0, coverage}));
+      }
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: fills paths under the drawing state",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(8u, 8u);
+
+    SECTION("Fill rules")
+    {
+      Path2D nested;
+      nested.AddRect({0.f, 0.f, 8.f, 8.f});
+      nested.AddRect({2.f, 2.f, 4.f, 4.f});
+      Draw([&](Renderer2D &renderer)
+           { renderer.FillPath(nested, FillRule::EvenOdd, SRGBA<uint8> {255, 0, 0}); });
+
+      auto pixels = Read();
+      CHECK(At(pixels, 0u, 0u) == Red);
+      CHECK(At(pixels, 4u, 4u) == Clear);
+    }
+
+    SECTION("Transforms, including fractions of a pixel")
+    {
+      Path2D square;
+      square.AddRect({0.f, 0.f, 1.f, 1.f});
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.Save();
+          renderer.Translate(2.f, 1.f);
+          renderer.Scale(2.f, 2.f);
+          renderer.FillPath(square, FillRule::NonZero, SRGBA<uint8> {255, 0, 0});
+          renderer.Restore();
+          renderer.Translate(0.5f, 6.f);
+          renderer.FillPath(square, FillRule::NonZero, SRGBA<uint8> {255, 0, 0});
+        });
+
+      auto pixels = Read();
+      CHECK(At(pixels, 2u, 1u) == Red);
+      CHECK(At(pixels, 3u, 2u) == Red);
+      CHECK(At(pixels, 4u, 1u) == Clear);
+      CHECK(Near(At(pixels, 0u, 6u), {128, 0, 0, 128}));
+      CHECK(Near(At(pixels, 1u, 6u), {128, 0, 0, 128}));
+    }
+
+    SECTION("Clips, in painter's order with rects")
+    {
+      Path2D square;
+      square.AddRect({0.f, 0.f, 8.f, 8.f});
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.FillRect({0.f, 0.f, 8.f, 8.f}, SRGBA<uint8> {0, 0, 255});
+          renderer.Save();
+          renderer.ClipRect({0.f, 0.f, 2.f, 8.f});
+          renderer.FillPath(square, FillRule::NonZero, SRGBA<uint8> {255, 0, 0});
+          renderer.Restore();
+          renderer.FillRect({0.f, 0.f, 1.f, 1.f}, SRGBA<uint8> {0, 255, 0});
+        });
+
+      auto pixels = Read();
+      CHECK(At(pixels, 0u, 0u) == Green);
+      CHECK(At(pixels, 1u, 4u) == Red);
+      CHECK(At(pixels, 2u, 4u) == Blue);
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: caches path masks", "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(16u, 8u);
+    const auto triangle = Triangle(0.f);
+    const SRGBA<uint8> red {255, 0, 0};
+
+    // The same path again, or moved by whole pixels, reuses the mask.
+    Draw(
+      [&](Renderer2D &renderer)
+      {
+        renderer.FillPath(triangle, FillRule::NonZero, red);
+        renderer.Translate(8.f, 0.f);
+        renderer.FillPath(triangle, FillRule::NonZero, red);
+      });
+    CHECK(_renderer->GetStats().MasksRasterised == 1u);
+    CHECK(_renderer->GetStats().MaskCacheHits == 1u);
+    auto pixels = Read();
+    CHECK(At(pixels, 1u, 1u) == Red);
+    CHECK(At(pixels, 9u, 1u) == Red);
+
+    // Masks outlive the frame.
+    Draw([&](Renderer2D &renderer) { renderer.FillPath(triangle, FillRule::NonZero, red); });
+    CHECK(_renderer->GetStats().MasksRasterised == 0u);
+    CHECK(_renderer->GetStats().MaskCacheHits == 1u);
+
+    // Fractions of a pixel, another fill rule or another path each need a mask of their own.
+    Draw(
+      [&](Renderer2D &renderer)
+      {
+        renderer.FillPath(triangle, FillRule::EvenOdd, red);
+        renderer.FillPath(Triangle(0.f, 7.f), FillRule::NonZero, red);
+        renderer.Translate(0.5f, 0.f);
+        renderer.FillPath(triangle, FillRule::NonZero, red);
+      });
+    CHECK(_renderer->GetStats().MasksRasterised == 3u);
+    CHECK(_renderer->GetStats().MaskCacheHits == 0u);
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: makes room for masks", "[Gfx][Render2D][GPU]")
+  {
+    // One 16-by-16 page holds four of the 8-by-8 triangles.
+    UseRenderer({.Masks = {.PageSize = 16u, .MaxPages = 1u, .MaxPackedSize = 8u}});
+    UseTarget(48u, 16u);
+    const SRGBA<uint8> red {255, 0, 0};
+
+    SECTION("A full page in use this frame sends masks to textures of their own")
+    {
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          for (int i = 0; i < 6; ++i)
+          {
+            renderer.FillPath(Triangle(static_cast<float>(i) * 8.f), FillRule::NonZero, red);
+          }
+        });
+      CHECK(_renderer->GetStats().MasksRasterised == 6u);
+      auto pixels = Read();
+      for (uint32 i = 0u; i < 6u; ++i)
+      {
+        CHECK(At(pixels, i * 8u + 1u, 1u) == Red);
+      }
+    }
+
+    SECTION("A page unused this frame is cleared for new masks")
+    {
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          for (int i = 0; i < 4; ++i)
+          {
+            renderer.FillPath(Triangle(static_cast<float>(i) * 8.f), FillRule::NonZero, red);
+          }
+        });
+      // The fifth triangle clears the page, so the first has to be rasterised again.
+      Draw([&](Renderer2D &renderer) { renderer.FillPath(Triangle(32.f), FillRule::NonZero, red); });
+      Draw([&](Renderer2D &renderer) { renderer.FillPath(Triangle(0.f), FillRule::NonZero, red); });
+      CHECK(_renderer->GetStats().MasksRasterised == 1u);
+      CHECK(At(Read(), 1u, 1u) == Red);
+    }
+
+    SECTION("Masks larger than a page entry get textures of their own")
+    {
+      Draw([&](Renderer2D &renderer) { renderer.FillPath(Triangle(0.f, 16.f), FillRule::NonZero, red); });
+      auto pixels = Read();
+      CHECK(At(pixels, 1u, 1u) == Red);
+      CHECK(At(pixels, 1u, 13u) == Red);
+      CHECK(At(pixels, 15u, 15u) == Clear);
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: fills rects with rounded holes", "[Gfx][Render2D][GPU]")
+  {
+    const SRGBA<uint8> red {255, 0, 0};
+
+    SECTION("Square corners on whole pixels are exact")
+    {
+      UseTarget(6u, 6u);
+      Draw([&](Renderer2D &renderer)
+           { renderer.FillRectWithRoundedHole({0.f, 0.f, 6.f, 6.f}, {{1.f, 1.f, 4.f, 4.f}, {}}, red); });
+
+      auto pixels = Read();
+      CHECK(At(pixels, 0u, 0u) == Red);
+      CHECK(At(pixels, 0u, 3u) == Red);
+      CHECK(At(pixels, 5u, 5u) == Red);
+      CHECK(At(pixels, 1u, 1u) == Clear);
+      CHECK(At(pixels, 4u, 4u) == Clear);
+    }
+
+    SECTION("Rounded corners are antialiased")
+    {
+      // A 6-by-6 hole with radius 3 is a circle of radius 3 centred on (4, 4).
+      UseTarget(8u, 8u);
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.FillRectWithRoundedHole({0.f, 0.f, 8.f, 8.f},
+                                           {{1.f, 1.f, 6.f, 6.f}, CornerRadii2D::Uniform(3.f)}, red);
+        });
+
+      auto circle = Read();
+      CHECK(At(circle, 0u, 0u) == Red);
+      CHECK(At(circle, 1u, 1u) == Red);
+      CHECK(At(circle, 4u, 4u) == Clear);
+      // The circle passes just outside the centre of (1, 2) and well outside the centre of (4, 1).
+      CHECK(Near(At(circle, 1u, 2u), {106, 0, 0, 106}, 2));
+      CHECK(Near(At(circle, 4u, 1u), {13, 0, 0, 13}, 2));
+
+      // Radii that don't fit are scaled down together.
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.FillRectWithRoundedHole({0.f, 0.f, 8.f, 8.f},
+                                           {{1.f, 1.f, 6.f, 6.f}, CornerRadii2D::Uniform(100.f)}, red);
+        });
+      CHECK(Read() == circle);
+    }
+
+    SECTION("Holes follow the transform")
+    {
+      UseTarget(6u, 6u);
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.Scale(2.f, 2.f);
+          renderer.FillRectWithRoundedHole({0.f, 0.f, 3.f, 3.f}, {{1.f, 1.f, 1.f, 1.f}, {}}, red);
+        });
+
+      auto pixels = Read();
+      CHECK(At(pixels, 1u, 1u) == Red);
+      CHECK(At(pixels, 2u, 2u) == Clear);
+      CHECK(At(pixels, 3u, 3u) == Clear);
+      CHECK(At(pixels, 4u, 4u) == Red);
+    }
+
+    SECTION("An empty hole fills the whole rect")
+    {
+      UseTarget(4u, 4u);
+      Draw([&](Renderer2D &renderer)
+           { renderer.FillRectWithRoundedHole({0.f, 0.f, 4.f, 4.f}, {{2.f, 2.f, 0.f, 0.f}, {}}, red); });
+      for (const auto &pixel : Read())
+      {
+        CHECK(pixel == Red);
+      }
+    }
   }
 }

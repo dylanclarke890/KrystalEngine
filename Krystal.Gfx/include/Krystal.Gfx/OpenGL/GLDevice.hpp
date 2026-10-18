@@ -151,6 +151,7 @@ namespace krys::gfx::opengl
     byte *_transientMemory {nullptr};
     uint64 _transientOffset {0u};
     uint32 _frameIndex {0u};
+    uint64 _frameNumber {0u};
     Array<GLsync, FramesInFlight> _frameFences {};
     bool _inFrame {false};
 
@@ -194,6 +195,7 @@ namespace krys::gfx::opengl
     void EndFrame() noexcept override;
     void WaitIdle() noexcept override;
 
+    KRYS_NODISCARD uint64 FrameNumber() const noexcept override;
     KRYS_NODISCARD const DeviceLimits &Limits() const noexcept override;
     KRYS_NODISCARD Maybe<TextureDesc> GetTextureDesc(TextureHandle texture) const noexcept override;
 

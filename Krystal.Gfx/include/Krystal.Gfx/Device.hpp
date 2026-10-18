@@ -129,6 +129,9 @@ namespace krys::gfx
     /// @brief Waits until the GPU has finished every submitted command.
     virtual void WaitIdle() noexcept = 0;
 
+    /// @brief The number of frames begun so far: the current frame's number between `BeginFrame` and
+    /// `EndFrame`, starting at 1. Commands recorded in a frame are submitted by the time the next one begins.
+    KRYS_NODISCARD virtual uint64 FrameNumber() const noexcept = 0;
     KRYS_NODISCARD virtual const DeviceLimits &Limits() const noexcept = 0;
     KRYS_NODISCARD virtual Maybe<TextureDesc> GetTextureDesc(TextureHandle texture) const noexcept = 0;
 

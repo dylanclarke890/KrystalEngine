@@ -28,6 +28,8 @@ layout(location = 3) in vec2 a_Translation; // the transform's e, f
 layout(location = 4) in vec4 a_UV;          // texture coordinates at the top-left and bottom-right corners
 layout(location = 5) in vec4 a_Colour;      // sRGB, straight alpha
 layout(location = 6) in uint a_Flags;
+layout(location = 7) in vec4 a_HoleRect;    // x, y, width, height in local coordinates
+layout(location = 8) in vec4 a_HoleRadii;   // top-left, top-right, bottom-right, bottom-left
 
 layout(location = 0) out vec2 v_Position; // relative to the rect's centre, in local coordinates
 layout(location = 1) flat out vec2 v_HalfSize;
@@ -37,6 +39,8 @@ layout(location = 5) flat out vec4 v_Colour;           // premultiplied, in the 
 layout(location = 6) out vec2 v_UV;
 layout(location = 7) flat out vec4 v_UVRect;
 layout(location = 8) flat out uint v_Flags;
+layout(location = 9) flat out vec4 v_Hole; // the hole's centre relative to the rect's, and its half size
+layout(location = 10) flat out vec4 v_HoleRadii;
 
 vec3 SrgbToLinear(vec3 c)
 {
@@ -66,6 +70,8 @@ void main()
   v_UV = mix(a_UV.xy, a_UV.zw, (local - a_Rect.xy) / a_Rect.zw);
   v_UVRect = a_UV;
   v_Flags = a_Flags;
+  v_Hole = vec4(a_HoleRect.xy + a_HoleRect.zw * 0.5 - (a_Rect.xy + halfSize), a_HoleRect.zw * 0.5);
+  v_HoleRadii = a_HoleRadii;
 
   // sRGB targets blend in linear light and encode on write; other targets blend the encoded values.
   vec3 rgb = u_DecodeSrgb != 0u ? SrgbToLinear(a_Colour.rgb) : a_Colour.rgb;
@@ -90,12 +96,16 @@ layout(location = 5) flat in vec4 v_Colour;
 layout(location = 6) in vec2 v_UV;
 layout(location = 7) flat in vec4 v_UVRect;
 layout(location = 8) flat in uint v_Flags;
+layout(location = 9) flat in vec4 v_Hole;
+layout(location = 10) flat in vec4 v_HoleRadii;
 
 layout(location = 0) out vec4 o_Colour;
 
 const uint Textured = 1u;
 const uint StraightAlpha = 2u;
 const uint LinearTexels = 4u;
+const uint Mask = 8u;
+const uint Hole = 16u;
 
 vec3 SrgbToLinear(vec3 c)
 {
@@ -118,6 +128,18 @@ float RoundedBoxDistance(vec2 p, vec2 halfSize, vec4 radii, out vec2 normal)
   return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;
 }
 
+// How much of the pixel at p (relative to the box's centre, in local units) the box covers.
+float Coverage(vec2 p, vec2 halfSize, vec4 radii)
+{
+  vec2 normal;
+  float distance = RoundedBoxDistance(p, halfSize, radii, normal);
+  // The distance grows by this much in local units per target pixel, so this converts it to pixels. It's
+  // exactly 1 without a transform, which keeps pixel-aligned edges sharp.
+  float localPerPixel = length(v_InverseTranspose * normal);
+  // A one-pixel antialiasing band centred on the edge.
+  return clamp(0.5 - distance / localPerPixel, 0.0, 1.0);
+}
+
 // A texel, premultiplied and in the target's blending space.
 vec4 SampleTexture(vec2 dx, vec2 dy)
 {
@@ -127,6 +149,11 @@ vec4 SampleTexture(vec2 dx, vec2 dy)
   vec2 high = max(v_UVRect.xy, v_UVRect.zw) - halfTexel;
   vec2 uv = clamp(v_UV, min(low, high), max(low, high));
   vec4 texel = textureGrad(u_Texture, uv, dx, dy);
+  if ((v_Flags & Mask) != 0u)
+  {
+    // Coverage, not a colour: nothing to premultiply or convert.
+    return vec4(texel.r);
+  }
 
   if ((v_Flags & StraightAlpha) != 0u)
   {
@@ -149,13 +176,11 @@ void main()
   vec2 dx = dFdx(v_UV);
   vec2 dy = dFdy(v_UV);
 
-  vec2 normal;
-  float distance = RoundedBoxDistance(v_Position, v_HalfSize, v_Radii, normal);
-  // The distance grows by this much in local units per target pixel, so this converts it to pixels. It's
-  // exactly 1 without a transform, which keeps pixel-aligned edges sharp.
-  float localPerPixel = length(v_InverseTranspose * normal);
-  // A one-pixel antialiasing band centred on the edge.
-  float coverage = clamp(0.5 - distance / localPerPixel, 0.0, 1.0);
+  float coverage = Coverage(v_Position, v_HalfSize, v_Radii);
+  if ((v_Flags & Hole) != 0u)
+  {
+    coverage *= 1.0 - Coverage(v_Position - v_Hole.xy, v_Hole.zw, v_HoleRadii);
+  }
 
   vec4 colour = v_Colour;
   if ((v_Flags & Textured) != 0u)
@@ -198,9 +223,9 @@ void main()
     }
   }
 
-  Expected<UniquePtr<Renderer2D>> Renderer2D::Create(Device &device) noexcept
+  Expected<UniquePtr<Renderer2D>> Renderer2D::Create(Device &device, const Renderer2DDesc &desc) noexcept
   {
-    auto renderer = CreateUnique<Renderer2D>(device);
+    auto renderer = CreateUnique<Renderer2D>(device, desc);
     if (auto result = renderer->Initialise(); !result)
     {
       return Unexpected<string>(result.error());
@@ -208,7 +233,8 @@ void main()
     return renderer;
   }
 
-  Renderer2D::Renderer2D(Device &device) noexcept : _device(&device)
+  Renderer2D::Renderer2D(Device &device, const Renderer2DDesc &desc) noexcept
+      : _device(&device), _masks(device, desc.Masks)
   {
   }
 
@@ -296,6 +322,7 @@ void main()
     _savedStates.clear();
     _rects.clear();
     _batches.clear();
+    _masks.ResetStats();
   }
 
   void Renderer2D::Save() noexcept
@@ -394,9 +421,45 @@ void main()
                  .Linear = {},
                  .Translation = {},
                  .UV = {},
+                 .HoleRect = {},
+                 .HoleRadii = {},
                  .Colour = {resolved.Red, resolved.Green, resolved.Blue, resolved.Alpha},
                  .Flags = 0u},
-                {}, {});
+                _state.Transform, {}, {});
+  }
+
+  void Renderer2D::FillRectWithRoundedHole(const Rect2D &rect, const RoundedRect2D &hole,
+                                           SRGBA<uint8> colour) noexcept
+  {
+    krys_debug_assert_msg(_commands != nullptr, "FillRectWithRoundedHole outside Begin and End.");
+    const auto &holeRect = hole.Rect;
+    if (holeRect.Width <= 0.f || holeRect.Height <= 0.f)
+    {
+      FillRect(rect, colour);
+      return;
+    }
+    if (rect.Width <= 0.f || rect.Height <= 0.f)
+    {
+      return;
+    }
+
+    const auto resolved = colour.Resolved();
+    if (resolved.Alpha == 0u)
+    {
+      return;
+    }
+
+    const auto radii = ConstrainRadii(holeRect, hole.Radii);
+    AddInstance({.Rect = {rect.X, rect.Y, rect.Width, rect.Height},
+                 .Radii = {},
+                 .Linear = {},
+                 .Translation = {},
+                 .UV = {},
+                 .HoleRect = {holeRect.X, holeRect.Y, holeRect.Width, holeRect.Height},
+                 .HoleRadii = {radii.TopLeft, radii.TopRight, radii.BottomRight, radii.BottomLeft},
+                 .Colour = {resolved.Red, resolved.Green, resolved.Blue, resolved.Alpha},
+                 .Flags = Hole},
+                _state.Transform, {}, {});
   }
 
   void Renderer2D::DrawImage(TextureHandle texture, const Rect2D &source, const Rect2D &destination,
@@ -435,9 +498,52 @@ void main()
                  .Translation = {},
                  .UV = {source.X / width, source.Y / height, (source.X + source.Width) / width,
                         (source.Y + source.Height) / height},
+                 .HoleRect = {},
+                 .HoleRadii = {},
                  .Colour = {255u, 255u, 255u, alpha},
                  .Flags = flags},
-                texture, options.Filter == SamplerFilter::Nearest ? _nearestSampler : _linearSampler);
+                _state.Transform, texture,
+                options.Filter == SamplerFilter::Nearest ? _nearestSampler : _linearSampler);
+  }
+
+  void Renderer2D::FillPath(const Path2D &path, FillRule rule, SRGBA<uint8> colour) noexcept
+  {
+    krys_debug_assert_msg(_commands != nullptr, "FillPath outside Begin and End.");
+    const auto resolved = colour.Resolved();
+    if (resolved.Alpha == 0u || path.IsEmpty() || _state.Clip.IsEmpty())
+    {
+      return;
+    }
+
+    const auto mask = _masks.GetMask(path, _state.Transform, rule, _state.Clip);
+    if (mask.Bounds.IsEmpty() || Intersect(mask.Bounds, _state.Clip).IsEmpty())
+    {
+      return;
+    }
+    const auto desc = _device->GetTextureDesc(mask.Texture);
+    if (!desc)
+    {
+      return;
+    }
+
+    // The mask is already in target pixels, so it's drawn untransformed, on whole pixels.
+    const float width = static_cast<float>(desc->Width);
+    const float height = static_cast<float>(desc->Height);
+    const auto &bounds = mask.Bounds;
+    const auto &texels = mask.Texels;
+    AddInstance({.Rect = {static_cast<float>(bounds.X), static_cast<float>(bounds.Y),
+                          static_cast<float>(bounds.Width), static_cast<float>(bounds.Height)},
+                 .Radii = {},
+                 .Linear = {},
+                 .Translation = {},
+                 .UV = {static_cast<float>(texels.X) / width, static_cast<float>(texels.Y) / height,
+                        static_cast<float>(texels.X + static_cast<int32>(texels.Width)) / width,
+                        static_cast<float>(texels.Y + static_cast<int32>(texels.Height)) / height},
+                 .HoleRect = {},
+                 .HoleRadii = {},
+                 .Colour = {resolved.Red, resolved.Green, resolved.Blue, resolved.Alpha},
+                 .Flags = Textured | Mask},
+                Transform2D::Identity(), mask.Texture, _nearestSampler);
   }
 
   void Renderer2D::DrawImage(TextureHandle texture, const Rect2D &destination,
@@ -452,11 +558,11 @@ void main()
     }
   }
 
-  void Renderer2D::AddInstance(RectInstance instance, TextureHandle texture, SamplerHandle sampler) noexcept
+  void Renderer2D::AddInstance(RectInstance instance, const Transform2D &transform, TextureHandle texture,
+                               SamplerHandle sampler) noexcept
   {
     // Nothing shows through an empty clip or a transform that flattens everything.
-    const auto &transform = _state.Transform;
-    if (_state.Clip.Width == 0u || _state.Clip.Height == 0u || transform.Determinant() == 0.f)
+    if (_state.Clip.IsEmpty() || transform.Determinant() == 0.f)
     {
       return;
     }
@@ -553,6 +659,10 @@ void main()
     }
 
     commands.EndRenderPass();
+    _stats = {.Instances = static_cast<uint32>(_rects.size()),
+              .Batches = static_cast<uint32>(_batches.size()),
+              .MasksRasterised = _masks.Stats().Rasterised,
+              .MaskCacheHits = _masks.Stats().Hits};
     _savedStates.clear();
     _rects.clear();
     _batches.clear();
@@ -586,7 +696,9 @@ void main()
                      {3u, VertexFormat::Float2, offsetof(RectInstance, Translation)},
                      {4u, VertexFormat::Float4, offsetof(RectInstance, UV)},
                      {5u, VertexFormat::UByte4Norm, offsetof(RectInstance, Colour)},
-                     {6u, VertexFormat::UInt, offsetof(RectInstance, Flags)}},
+                     {6u, VertexFormat::UInt, offsetof(RectInstance, Flags)},
+                     {7u, VertexFormat::Float4, offsetof(RectInstance, HoleRect)},
+                     {8u, VertexFormat::Float4, offsetof(RectInstance, HoleRadii)}},
     });
 
     auto pipeline = _device->CreatePipeline(desc);
@@ -598,7 +710,7 @@ void main()
     return *pipeline;
   }
 
-  Renderer2D::PixelRect Renderer2D::ToPixelRect(float left, float top, float right, float bottom) noexcept
+  PixelRect2D Renderer2D::ToPixelRect(float left, float top, float right, float bottom) noexcept
   {
     const auto x0 = static_cast<int32>(std::ceil(left - 0.5f));
     const auto y0 = static_cast<int32>(std::ceil(top - 0.5f));
@@ -610,7 +722,7 @@ void main()
             .Height = y1 > y0 ? static_cast<uint32>(y1 - y0) : 0u};
   }
 
-  Renderer2D::PixelRect Renderer2D::Intersect(const PixelRect &a, const PixelRect &b) noexcept
+  PixelRect2D Renderer2D::Intersect(const PixelRect2D &a, const PixelRect2D &b) noexcept
   {
     const int32 x0 = std::max(a.X, b.X);
     const int32 y0 = std::max(a.Y, b.Y);

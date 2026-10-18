@@ -193,7 +193,62 @@ namespace krys
         _renderer->Restore();
       }
 
+      // Paths: one star under each fill rule (even-odd leaves the middle hollow), a panel with elliptical
+      // corners, and a star turning, which needs a new mask every frame.
+      const auto star = Star(50.f);
+      _renderer->Save();
+      _renderer->Translate(440.f, 100.f);
+      _renderer->FillPath(star, gfx::FillRule::NonZero, SRGBA<uint8> {255, 215, 0});
+      _renderer->Translate(120.f, 0.f);
+      _renderer->FillPath(star, gfx::FillRule::EvenOdd, SRGBA<uint8> {255, 215, 0});
+      _renderer->Restore();
+
+      gfx::Path2D oval;
+      oval.AddRoundedRect({280.f, 200.f, 260.f, 90.f},
+                          {Vec2f {60.f, 30.f}, Vec2f {20.f, 40.f}, Vec2f {60.f, 30.f}, Vec2f {20.f, 40.f}});
+      _renderer->FillPath(oval, gfx::FillRule::NonZero, SRGBA<uint8> {150, 90, 200, 220});
+
+      // Borders: a frame around the image with a rounded hole (analytic), and one with elliptical inner
+      // corners (a path filled under even-odd, so through a mask).
+      _renderer->FillRectWithRoundedHole({272.f, 28.f, 144.f, 144.f},
+                                         {{280.f, 36.f, 128.f, 128.f}, gfx::CornerRadii2D::Uniform(10.f)},
+                                         SRGBA<uint8> {230, 230, 240});
+      gfx::Path2D ovalBorder;
+      ovalBorder.AddRect({560.f, 200.f, 200.f, 90.f});
+      ovalBorder.AddRoundedRect({572.f, 206.f, 176.f, 78.f}, {Vec2f {40.f, 20.f}, Vec2f {40.f, 20.f},
+                                                              Vec2f {40.f, 20.f}, Vec2f {40.f, 20.f}});
+      _renderer->FillPath(ovalBorder, gfx::FillRule::EvenOdd, SRGBA<uint8> {230, 230, 240});
+
+      _renderer->Save();
+      _renderer->Translate(width - 120.f, 120.f);
+      _renderer->Rotate(_time * 0.8f);
+      _renderer->FillPath(star, gfx::FillRule::NonZero, SRGBA<uint8> {255, 255, 255, 200});
+      _renderer->Restore();
+
       _renderer->End();
+    }
+
+  private:
+    /// @brief A five-pointed star drawn in one stroke, so its contour crosses itself.
+    KRYS_NODISCARD static gfx::Path2D Star(float radius) noexcept
+    {
+      gfx::Path2D path;
+      for (int i = 0; i < 5; ++i)
+      {
+        // Every second point of a pentagon: the classic pentagram.
+        const float angle = -1.5707963f + static_cast<float>(i * 2) * 1.2566371f;
+        const Vec2f point {radius * std::cos(angle), radius * std::sin(angle)};
+        if (i == 0)
+        {
+          path.MoveTo(point);
+        }
+        else
+        {
+          path.LineTo(point);
+        }
+      }
+      path.Close();
+      return path;
     }
   };
 }

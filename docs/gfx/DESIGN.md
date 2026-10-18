@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-18): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, and G2d, images, are done); text (G3) and the Booey integration (G4) are drafts.
+Status (2026-10-18): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, is done); text (G3) and the Booey integration (G4) are drafts.
 
 ## Why
 
@@ -161,7 +161,7 @@ Krystal.Gfx/include/Krystal.Gfx/
 - `Destroy` is immediate in OpenGL: the driver keeps objects alive while queued commands use them. Destroying something recorded but not yet submitted is an error, as in Vulkan.
 - Samplers are shared: equal descriptions return the same handle, reference counted by `Destroy`.
 - At destruction, the device logs every resource still alive, by debug name.
-- Beyond the draft: `ReadTexture` (synchronous readback, for tests and screenshots), `GetTextureDesc`, `SetVSync`, `WaitIdle`, `Limits`.
+- Beyond the draft: `ReadTexture` (synchronous readback, for tests and screenshots), `GetTextureDesc`, `SetVSync`, `WaitIdle`, `Limits`, and `FrameNumber` (added in G2e2: frames begun so far, so caches know when a frame's commands have been submitted).
 - `AllocateTransient` hands out per-frame memory from one persistently mapped buffer split into `FramesInFlight` (3) regions; `BeginFrame` waits on the fence of the region it reuses. It returns an empty allocation (and asserts in debug builds) when the frame's memory runs out.
 
 **Command buffers** record plain structs into `CommandList`; `Submit` replays them and resets the buffer. Debug builds assert on misuse where it happens: drawing outside a render pass or without a pipeline, nested passes, copies inside a pass, unbalanced debug groups. Buffer bindings carry over between render passes; each pass binds its own pipeline.
@@ -310,12 +310,23 @@ Decided (2026-10-18): one part at a time, each reviewed before the next. Revised
 | G2b | Done (2026-10-18). Rounded rects and antialiasing: the analytic fast path (the signed distance shader). |
 | G2c | Done (2026-10-18). Transforms (`Transform2D`), the `Save`/`Restore` stack, scissor clips; the analytic antialiasing width follows the transform. |
 | G2d | Done (2026-10-18). Images: `DrawImage`, sampling, the textured-quad pipeline the masks reuse. |
-| G2e | Paths and coverage masks: `Path2D` (lines, arcs, quadratic and cubic Béziers), curve flattening, a CPU coverage rasteriser (non-zero and even-odd), the mask atlas and its cache; `FillPath`, `FillRectWithRoundedHole`. Elliptical corner radii are decided here (analytic or through masks). |
+| G2e1 | Done (2026-10-18). Paths and the rasteriser, CPU only: `Path2D`, `FillRule`, curve flattening, the coverage rasteriser (see *G2e plan*). |
+| G2e2 | Done (2026-10-18). The mask atlas and its cache; `FillPath`. |
+| G2e3 | Done (2026-10-18). `FillRectWithRoundedHole`, analytic for circular corners; elliptical corners through masks. |
 | G2f | Strokes: a stroker that turns a stroke (width, caps, joins, dashes) into an outline for G2e; `StrokePath`. |
 | G2g | Clips: rounded-rect and path clips as antialiased clip masks; clip-out. |
 | G2h | Layers: offscreen layers with opacity and blend modes. |
 | G2i | Gradients (linear, radial, conic) as `Paint`. |
 | G2j | Shadows: blurred coverage, following upstream's shadow state. |
+
+### G2e plan (decided 2026-10-18)
+
+- **`Path2D`** holds primitive segments only: `MoveTo`, `LineTo`, `QuadTo`, `CubicTo`, `Close`, with helpers that build shapes from them (`AddRect`, `AddRoundedRect` with elliptical radii, `AddEllipse`, `AddArc`, arcs as cubics). Booey's path records richer segments; the Booey host (planned, G4) converts them with these helpers.
+- **Flattening:** the path is transformed into target pixels first, then curves are split into lines whose error stays under a fiftieth of a pixel, so the subdivision is right at any scale. The lines cut inside convex curves; at a tenth of a pixel (the first attempt) curved edges sat about 0.05 px inward, enough to thin a 1 px curved stroke by a tenth.
+- **The rasteriser** (option B of three considered): each pixel row is sliced into 16 sub-scanlines; along each, the edge crossings and their winding give the inside spans under either fill rule, and each pixel accumulates the exact length of the spans over it. Coverage is exact horizontally and in sixteenths vertically, like Chrome's CPU scan converter. Rejected: exact area accumulation (font-rs style; can't do even-odd, which SVG, `clip-path` and canvas need) and 16-by-16 supersampling (about 16 times slower).
+- **The mask atlas:** R8 pages packed into shelves, separate from the glyph atlas. A mask is reused only when the path, the transform's linear part and the fractional part of the translation all match exactly (exact reuse, chosen over rounding to quarter pixels, since Booey snaps most painting to whole pixels anyway); whole-pixel moves reuse it. Masks unused for a few frames are evicted; masks too large for a page get their own texture. Page size, eviction age and the size limit are tuning values.
+- **Drawing masks:** a mask is rasterised in target pixels, so it's drawn as an untransformed, pixel-aligned instance whose colour is multiplied by the mask's coverage (a `Mask` instance flag); the rect shader covers such a quad exactly.
+- **Borders' fast path:** `FillRectWithRoundedHole` is analytic when the hole's corners are circular (outer coverage times one minus the hole's). Rounded rects with elliptical corners (from `10px / 20px`, from percentage radii on non-square boxes, and from the inner edges of borders whose sides differ in width) go through masks for now; an analytic approximation can be added later if profiling asks for it.
 
 ### G2a as built (2026-10-18)
 
@@ -354,6 +365,29 @@ Decided (2026-10-18): one part at a time, each reviewed before the next. Revised
 - Texels are clamped half a texel inside the source rect, so linear filtering never reads the texels around a sub-image (atlases). Texture derivatives are taken outside the textured branch, where every fragment of a quad runs them, and sampled with `textureGrad`.
 - Colours follow the colour path (open decision 4): textures in sRGB formats are decoded by the GPU; others hold sRGB-encoded values; the shader converts texels to the target's blending space (unpremultiplying around the conversion). Premultiplied data in an sRGB-format texture isn't exact, since the GPU decodes each channel before the alpha division; premultiplied images belong in unorm formats.
 - Tests: five more cases in `tests/Render2D/Renderer2D.cpp` (nearest and linear scaling; clamping to the source rect; premultiplied, straight and opacity; sRGB texture into a unorm target and unorm texture into an sRGB target; images and rects interleaved across textures, in painter's order, under a transform). The editor generates a 16-by-16 checkered gradient (there are no image assets) and draws it scaled with nearest filtering and turning with linear filtering.
+
+### G2e1 as built (2026-10-18)
+
+- `Render2D/Path2D.hpp`: `FillRule` (`NonZero`, `EvenOdd`), `PathVerb` and `Path2D` (verbs and points; `MoveTo`, `LineTo`, `QuadTo`, `CubicTo`, `Close`; `AddRect`, `AddRoundedRect` with elliptical radii constrained as CSS does, `AddEllipse`, `AddArc`; equality for the mask cache). A segment without a current point starts a contour, and after `Close` the next one continues from the closed contour's start, as in canvas. Arcs are one cubic per quarter turn or less.
+- `Render2D/PathRasteriser.hpp`: `PathRasteriser::Rasterise(path, transform, rule, clip)` returns a `CoverageMask` (its `PixelRect2D` bounds and a byte per pixel). It flattens the transformed path (quadratics and cubics are split evenly, with the segment count from the curve's largest second difference; at most 1024 lines a curve), clips the mask to the pixels the edges touch within the clip, and samples 16 sub-scanlines per row with an active edge list. Edges outside the clip still count towards the winding. Paths with non-finite points cover nothing. The rasteriser keeps its buffers between paths.
+- `PixelRect2D` (in `Rect2D.hpp`): a rect of whole pixels; the renderer's own pixel rect moves onto it in G2e2.
+- Tests: `tests/Render2D/Path2D.cpp` (4 cases) and `tests/Render2D/PathRasteriser.cpp` (6 cases), CPU only: whole and partial pixels (exact across a row, in sixteenths down it, diagonal edges), both fill rules with nested and reversed contours, curve areas against exact formulas (a parabola, circles and an ellipse, elliptical rounded corners, arcs) within the curved length times the tolerance, transforms, clipping, and empty and invalid paths.
+
+### G2e2 as built (2026-10-18)
+
+- `Render2D/MaskAtlas.hpp`: `MaskAtlas::GetMask(path, transform, rule, clip)` returns a `MaskLocation` (an R8 texture, the mask's texels in it, and the target pixels it covers), rasterising and caching the mask when it isn't cached. `MaskAtlasDesc` (in `Renderer2DDesc::Masks`): `PageSize` (1024), `MaxPages` (4), `MaxPackedSize` (256).
+- The cache key is the path, the fill rule, the transform's linear part and the fractional part of its translation; the mask is rasterised with the whole-pixel part removed and placed by it when drawn, so whole-pixel moves reuse it. Masks aren't clipped; the clip is the scissor when they're drawn, so one mask serves every clip. Masks that cover nothing are cached too.
+- Pages are packed into shelves whose heights are rounded up to 8 pixels; a mask takes the lowest shelf that fits, or opens a new one when the best is more than twice its height. Masks are drawn with nearest sampling at one texel per pixel, clamped inside their texels, so they need no padding.
+- Reclaiming space, with `Device::FrameNumber` deciding what's safe: when every page is allocated and full, the least recently used page that the current frame hasn't drawn from is cleared, since overwriting texels that unsubmitted draws read would change them. If the current frame has drawn from every page, or the mask is larger than `MaxPackedSize`, it gets a texture of its own, destroyed once a whole frame passes without it. Masks whose control points span more than the device's largest texture (or 4096 pixels) are rasterised within the clip only, into a texture destroyed the next frame.
+- Known limit: a page is only cleared whole, so a page with one mask drawn every frame keeps its stale masks (a turning path's old masks, say) until the atlas is destroyed. Freeing single masks, or compacting, can come with profiling.
+- `Renderer2D::FillPath(path, rule, colour)` draws the mask as an untransformed instance on whole pixels with the `Mask` flag: the shader multiplies the colour by the texel's red channel, with no colour conversion. `Renderer2D::Create` takes a `Renderer2DDesc`; `GetStats()` returns a `Renderer2DStats` for the last frame (instances, batches, masks rasterised, mask cache hits). The renderer's clip and scissor rects are now `PixelRect2D`.
+- Tests: four more cases in `tests/Render2D/Renderer2D.cpp` (pixels equal to the rasteriser's coverage; fill rules, transforms with half-pixel offsets, clips and painter's order; the cache across draws, frames, whole-pixel moves, fractional moves, fill rules and paths; eviction, masks in their own textures when the only page is in use, and masks larger than `MaxPackedSize`, with one 16-by-16 page). The editor fills a pentagram under both rules, a panel with elliptical corners, and a turning star.
+
+### G2e3 as built (2026-10-18)
+
+- `Renderer2D::FillRectWithRoundedHole(rect, hole, colour)`: the hole is a `RoundedRect2D` (circular corners), with its radii constrained like `FillRoundedRect`'s; an empty hole fills the whole rect. The shader multiplies the rect's coverage by one minus the hole's, each from its own signed distance and each converted to target pixels, so square corners on whole pixels stay exact. The instance gains the hole's rect and radii as fields of their own (112 bytes), rather than reusing others.
+- Render2D has no elliptical-corner type. A rounded rect or hole with elliptical corners is drawn by its caller as a path: `AddRoundedRect` with the elliptical radii (and the outer rect, under `FillRule::EvenOdd`, for a hole) and `FillPath`. The Booey host (planned, G4) picks the analytic call when every corner is circular and the path otherwise.
+- Tests: one more case in `tests/Render2D/Renderer2D.cpp` (square holes exact on whole pixels; a circular hole's antialiased coverage at two pixels, against values worked out by hand; constrained radii; holes under a transform; empty holes). The editor frames the image with a rounded hole and draws an elliptical border as a path.
 
 Testing: the device's hidden window gives tests a real OpenGL context (Krystal.Gfx.Tests). Render2D gets golden image tests: render offscreen, read back with `ReadTexture`, compare against a PNG with a tolerance.
 

@@ -794,6 +794,7 @@ namespace krys::gfx::opengl
     _transientOffset = 0u;
     _commandBuffer.Reset();
     _inFrame = true;
+    ++_frameNumber;
   }
 
   CommandBuffer &GLDevice::GetCommandBuffer() noexcept
@@ -829,6 +830,11 @@ namespace krys::gfx::opengl
   void GLDevice::WaitIdle() noexcept
   {
     glFinish();
+  }
+
+  uint64 GLDevice::FrameNumber() const noexcept
+  {
+    return _frameNumber;
   }
 
   const DeviceLimits &GLDevice::Limits() const noexcept

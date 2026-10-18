@@ -74,6 +74,9 @@ target_sources(Krystal.Gfx
       include/Krystal.Gfx/OpenGL/Official/khrplatform.h
 
       # Render2D
+      include/Krystal.Gfx/Render2D/MaskAtlas.hpp
+      include/Krystal.Gfx/Render2D/Path2D.hpp
+      include/Krystal.Gfx/Render2D/PathRasteriser.hpp
       include/Krystal.Gfx/Render2D/Rect2D.hpp
       include/Krystal.Gfx/Render2D/Renderer2D.hpp
       include/Krystal.Gfx/Render2D/RoundedRect2D.hpp
@@ -92,6 +95,9 @@ target_sources(Krystal.Gfx
     src/OpenGL/Hooks/gl.cpp
 
     # Render2D
+    src/Render2D/MaskAtlas.cpp
+    src/Render2D/Path2D.cpp
+    src/Render2D/PathRasteriser.cpp
     src/Render2D/Renderer2D.cpp
 
     # Text
