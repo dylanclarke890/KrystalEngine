@@ -2,6 +2,7 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Gfx/Render2D/Dashing.hpp"
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
@@ -117,27 +118,32 @@ vec3 LinearToSrgb(vec3 c)
   return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, greaterThan(c, vec3(0.0031308)));
 }
 
-// The signed distance from p to the edge of a rounded box centred on the origin (negative inside), and the
-// direction in which it grows fastest. y points down, so the top corners are where p.y < 0.
-float RoundedBoxDistance(vec2 p, vec2 halfSize, vec4 radii, out vec2 normal)
+// How much of a pixel an edge covers, from the pixel's distance past the edge in local units and the
+// edge's outward normal. The distance grows by length(v_InverseTranspose * normal) local units per target
+// pixel, so that converts it to pixels; it's exactly 1 without a transform, which keeps pixel-aligned edges
+// sharp. Coverage ramps over one pixel centred on the edge.
+float EdgeCoverage(float distance, vec2 normal)
 {
-  float r = p.x < 0.0 ? (p.y < 0.0 ? radii.x : radii.w) : (p.y < 0.0 ? radii.y : radii.z);
-  vec2 q = abs(p) - halfSize + r;
-  vec2 folded = q.x > 0.0 && q.y > 0.0 ? normalize(q) : (q.x > q.y ? vec2(1.0, 0.0) : vec2(0.0, 1.0));
-  normal = folded * vec2(p.x < 0.0 ? -1.0 : 1.0, p.y < 0.0 ? -1.0 : 1.0);
-  return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;
+  return clamp(0.5 - distance / length(v_InverseTranspose * normal), 0.0, 1.0);
 }
 
-// How much of the pixel at p (relative to the box's centre, in local units) the box covers.
+// How much of the pixel at p (relative to the box's centre, in local units) a rounded box covers. y points
+// down, so the top corners are where p.y < 0.
 float Coverage(vec2 p, vec2 halfSize, vec4 radii)
 {
-  vec2 normal;
-  float distance = RoundedBoxDistance(p, halfSize, radii, normal);
-  // The distance grows by this much in local units per target pixel, so this converts it to pixels. It's
-  // exactly 1 without a transform, which keeps pixel-aligned edges sharp.
-  float localPerPixel = length(v_InverseTranspose * normal);
-  // A one-pixel antialiasing band centred on the edge.
-  return clamp(0.5 - distance / localPerPixel, 0.0, 1.0);
+  vec2 side = vec2(p.x < 0.0 ? -1.0 : 1.0, p.y < 0.0 ? -1.0 : 1.0);
+  float r = p.x < 0.0 ? (p.y < 0.0 ? radii.x : radii.w) : (p.y < 0.0 ? radii.y : radii.z);
+  vec2 q = abs(p) - halfSize + r;
+  if (r > 0.0 && q.x > 0.0 && q.y > 0.0)
+  {
+    // Around a rounded corner: the distance to its arc.
+    return EdgeCoverage(length(q) - r, normalize(q) * side);
+  }
+
+  // Elsewhere the box's vertical and horizontal edges cover the pixel independently, so a square corner
+  // halfway across a pixel and halfway down it covers a quarter of it, as its area does.
+  vec2 d = abs(p) - halfSize;
+  return EdgeCoverage(d.x, vec2(side.x, 0.0)) * EdgeCoverage(d.y, vec2(0.0, side.y));
 }
 
 // A texel, premultiplied and in the target's blending space.
@@ -415,6 +421,18 @@ void main()
       return;
     }
 
+    AddRoundedRect(roundedRect, {resolved.Red, resolved.Green, resolved.Blue, resolved.Alpha},
+                   _state.Transform);
+  }
+
+  void Renderer2D::AddRoundedRect(const RoundedRect2D &roundedRect, Array<uint8, 4> colour,
+                                  const Transform2D &transform) noexcept
+  {
+    const auto &rect = roundedRect.Rect;
+    if (rect.Width <= 0.f || rect.Height <= 0.f)
+    {
+      return;
+    }
     const auto radii = ConstrainRadii(rect, roundedRect.Radii);
     AddInstance({.Rect = {rect.X, rect.Y, rect.Width, rect.Height},
                  .Radii = {radii.TopLeft, radii.TopRight, radii.BottomRight, radii.BottomLeft},
@@ -423,9 +441,86 @@ void main()
                  .UV = {},
                  .HoleRect = {},
                  .HoleRadii = {},
-                 .Colour = {resolved.Red, resolved.Green, resolved.Blue, resolved.Alpha},
+                 .Colour = colour,
                  .Flags = 0u},
-                _state.Transform, {}, {});
+                transform, {}, {});
+  }
+
+  void Renderer2D::StrokePath(const Path2D &path, const StrokeStyle &style, SRGBA<uint8> colour) noexcept
+  {
+    krys_debug_assert_msg(_commands != nullptr, "StrokePath outside Begin and End.");
+    if (colour.Resolved().Alpha == 0u || path.IsEmpty() || _state.Clip.IsEmpty())
+    {
+      return;
+    }
+    const auto outline = _stroker.Stroke(path, style, _state.Transform);
+    if (!outline.IsEmpty())
+    {
+      FillPath(outline, FillRule::NonZero, colour);
+    }
+  }
+
+  void Renderer2D::StrokeLine(Vec2f from, Vec2f to, const StrokeStyle &style, SRGBA<uint8> colour) noexcept
+  {
+    krys_debug_assert_msg(_commands != nullptr, "StrokeLine outside Begin and End.");
+    const auto resolved = colour.Resolved();
+    if (resolved.Alpha == 0u || _state.Clip.IsEmpty())
+    {
+      return;
+    }
+
+    // A hairline is one target pixel wide, whatever the transform's scale.
+    const float halfWidth =
+      style.Width > 0.f ? style.Width * 0.5f : 0.5f / std::sqrt(std::abs(_state.Transform.Determinant()));
+    if (!(halfWidth > 0.f) || !std::isfinite(halfWidth))
+    {
+      return;
+    }
+
+    // The line's own coordinates: x along it from `from`, y across it. A zero-length line lies along x.
+    const float dx = to.x - from.x;
+    const float dy = to.y - from.y;
+    const float length = std::sqrt(dx * dx + dy * dy);
+    const Vec2f along = length > 0.f ? Vec2f {dx / length, dy / length} : Vec2f {1.f, 0.f};
+    const auto transform =
+      _state.Transform
+      * Transform2D {.A = along.x, .B = along.y, .C = -along.y, .D = along.x, .E = from.x, .F = from.y};
+
+    // Square and round caps reach half the width past each end; round ones are the rect's rounded ends.
+    const float extension = style.Cap == LineCap::Butt ? 0.f : halfWidth;
+    const float radius = style.Cap == LineCap::Round ? halfWidth : 0.f;
+    const Array<uint8, 4> packed {resolved.Red, resolved.Green, resolved.Blue, resolved.Alpha};
+    auto addDash = [&](float start, float end)
+    {
+      AddRoundedRect({.Rect = {start - extension, -halfWidth, end - start + 2.f * extension, 2.f * halfWidth},
+                      .Radii = CornerRadii2D::Uniform(radius)},
+                     packed, transform);
+    };
+
+    detail::PrepareDashes(style, _dashes);
+    if (_dashes.empty() || length / detail::PatternLength(_dashes) > static_cast<float>(detail::MaxDashes))
+    {
+      addDash(0.f, length);
+      return;
+    }
+
+    // As the stroker does: a dash ending exactly at the end is followed there by any dash starting there.
+    auto position = detail::StartDashes(_dashes, style.DashOffset);
+    float start = 0.f;
+    for (;;)
+    {
+      const float end = start + position.Remaining;
+      if (position.On)
+      {
+        addDash(start, std::min(end, length));
+      }
+      if (end > length)
+      {
+        break;
+      }
+      start = end;
+      position.Next(_dashes);
+    }
   }
 
   void Renderer2D::FillRectWithRoundedHole(const Rect2D &rect, const RoundedRect2D &hole,

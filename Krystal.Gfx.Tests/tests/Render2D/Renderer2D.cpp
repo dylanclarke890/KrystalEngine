@@ -239,6 +239,13 @@ namespace krys::gfx::tests
     CHECK(Near(At(pixels, 0u, 0u), {128, 0, 0, 128}, 2));
     CHECK(Near(At(pixels, 1u, 2u), {128, 0, 0, 128}, 2));
     CHECK(At(pixels, 2u, 0u) == Clear);
+
+    // A corner halfway across a pixel and halfway down it covers a quarter of it.
+    Draw([](Renderer2D &renderer) { renderer.FillRect({0.5f, 0.5f, 2.f, 2.f}, SRGBA<uint8> {255, 0, 0}); });
+    pixels = Read();
+    CHECK(Near(At(pixels, 0u, 0u), {64, 0, 0, 64}, 2));
+    CHECK(Near(At(pixels, 1u, 0u), {128, 0, 0, 128}, 2));
+    CHECK(At(pixels, 1u, 1u) == Red);
   }
 
   TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: fills rounded rects", "[Gfx][Render2D][GPU]")
@@ -848,6 +855,128 @@ namespace krys::gfx::tests
       for (const auto &pixel : Read())
       {
         CHECK(pixel == Red);
+      }
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: strokes paths", "[Gfx][Render2D][GPU]")
+  {
+    // A 2-wide stroke round the square from 2 to 10 covers 1 to 11, less the inside from 3 to 9.
+    UseTarget(12u, 12u);
+    Path2D square;
+    square.AddRect({2.f, 2.f, 8.f, 8.f});
+    Draw([&](Renderer2D &renderer)
+         { renderer.StrokePath(square, {.Width = 2.f}, SRGBA<uint8> {255, 0, 0}); });
+
+    auto pixels = Read();
+    CHECK(At(pixels, 0u, 0u) == Clear);
+    CHECK(At(pixels, 1u, 1u) == Red);
+    CHECK(At(pixels, 2u, 5u) == Red);
+    CHECK(At(pixels, 10u, 10u) == Red);
+    CHECK(At(pixels, 3u, 3u) == Clear);
+    CHECK(At(pixels, 5u, 5u) == Clear);
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: strokes straight lines analytically",
+                   "[Gfx][Render2D][GPU]")
+  {
+    const SRGBA<uint8> red {255, 0, 0};
+
+    SECTION("Butt caps end at the end points")
+    {
+      UseTarget(8u, 8u);
+      Draw([&](Renderer2D &renderer) { renderer.StrokeLine({1.f, 4.f}, {7.f, 4.f}, {.Width = 2.f}, red); });
+
+      auto pixels = Read();
+      CHECK(At(pixels, 1u, 3u) == Red);
+      CHECK(At(pixels, 6u, 4u) == Red);
+      CHECK(At(pixels, 0u, 3u) == Clear);
+      CHECK(At(pixels, 7u, 3u) == Clear);
+      CHECK(At(pixels, 3u, 2u) == Clear);
+      CHECK(At(pixels, 3u, 5u) == Clear);
+    }
+
+    SECTION("Hairlines and transforms")
+    {
+      UseTarget(8u, 8u);
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.StrokeLine({0.f, 4.5f}, {8.f, 4.5f}, {.Width = 0.f}, red);
+          renderer.Scale(2.f, 2.f);
+          renderer.StrokeLine({0.f, 1.f}, {4.f, 1.f}, {.Width = 1.f}, red);
+        });
+
+      auto pixels = Read();
+      CHECK(At(pixels, 0u, 4u) == Red);
+      CHECK(At(pixels, 7u, 4u) == Red);
+      CHECK(At(pixels, 3u, 3u) == Clear);
+      CHECK(At(pixels, 3u, 5u) == Clear);
+      CHECK(At(pixels, 0u, 1u) == Red);
+      CHECK(At(pixels, 7u, 2u) == Red);
+      CHECK(At(pixels, 3u, 0u) == Clear);
+    }
+
+    SECTION("Dots")
+    {
+      UseTarget(12u, 8u);
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.StrokeLine({1.f, 4.f}, {9.f, 4.f},
+                              {.Width = 2.f, .Cap = LineCap::Round, .Dashes = {0.f, 4.f}}, red);
+        });
+
+      // Circles at x = 1, 5 and 9, and nothing between them.
+      auto pixels = Read();
+      CHECK(At(pixels, 1u, 4u)[3] > 128u);
+      CHECK(At(pixels, 5u, 3u)[3] > 128u);
+      CHECK(At(pixels, 9u, 4u)[3] > 128u);
+      CHECK(At(pixels, 3u, 4u) == Clear);
+      CHECK(At(pixels, 7u, 3u) == Clear);
+      CHECK(At(pixels, 11u, 4u) == Clear);
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: strokes lines and paths alike", "[Gfx][Render2D][GPU]")
+  {
+    // The analytic line and the stroker's outline should agree, up to how each antialiases: on curves and
+    // diagonals, the shader's ramp over the distance differs from the rasteriser's area by up to about 0.1.
+    struct Case
+    {
+      Vec2f From;
+      Vec2f To;
+      StrokeStyle Style;
+      int Tolerance;
+    };
+    const Case cases[] = {
+      {{2.f, 8.f}, {14.f, 8.f}, {.Width = 3.f, .Cap = LineCap::Butt}, 2},
+      {{2.f, 8.f}, {14.f, 8.f}, {.Width = 3.f, .Cap = LineCap::Square}, 2},
+      {{3.f, 8.f}, {13.f, 8.f}, {.Width = 4.f, .Cap = LineCap::Round}, 24},
+      {{1.f, 8.f}, {15.f, 8.f}, {.Width = 2.f, .Dashes = {3.f, 2.f}, .DashOffset = 1.f}, 2},
+      {{2.f, 8.f}, {14.f, 8.f}, {.Width = 2.f, .Cap = LineCap::Round, .Dashes = {0.f, 3.f}}, 24},
+      {{2.f, 3.f}, {13.f, 12.f}, {.Width = 3.f, .Cap = LineCap::Round}, 28},
+    };
+
+    UseTarget(16u, 16u);
+    const SRGBA<uint8> red {255, 0, 0};
+    for (const auto &item : cases)
+    {
+      Draw([&](Renderer2D &renderer) { renderer.StrokeLine(item.From, item.To, item.Style, red); });
+      auto line = Read();
+
+      Path2D path;
+      path.MoveTo(item.From);
+      path.LineTo(item.To);
+      Draw([&](Renderer2D &renderer) { renderer.StrokePath(path, item.Style, red); });
+      auto stroked = Read();
+
+      for (size_t i = 0u; i < line.size(); ++i)
+      {
+        if (!Near(line[i], stroked[i], item.Tolerance))
+        {
+          FAIL_CHECK("Pixel " << i << " differs: " << int(line[i][3]) << " against " << int(stroked[i][3]));
+        }
       }
     }
   }

@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Gfx/Render2D/PathRasteriser.hpp"
+#include "Krystal.Gfx/Render2D/Flattening.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -6,31 +7,9 @@ namespace krys::gfx
 {
   namespace
   {
-    /// @brief The most lines a single curve is flattened into.
-    constexpr int32 MaxCurveSegments = 1'024;
-
     KRYS_NODISCARD bool IsFinite(Vec2f point) noexcept
     {
       return std::isfinite(point.x) && std::isfinite(point.y);
-    }
-
-    KRYS_NODISCARD float Length(Vec2f v) noexcept
-    {
-      return std::sqrt(v.x * v.x + v.y * v.y);
-    }
-
-    KRYS_NODISCARD Vec2f Lerp(Vec2f a, Vec2f b, float t) noexcept
-    {
-      return {a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t};
-    }
-
-    /// @brief The number of lines that keep a curve within the tolerance, given its largest second
-    /// difference and the constant from its second derivative's bound.
-    KRYS_NODISCARD int32 SegmentsFor(float secondDifference, float factor) noexcept
-    {
-      const float segments =
-        std::ceil(std::sqrt(secondDifference * factor / PathRasteriser::FlatteningTolerance));
-      return std::clamp(static_cast<int32>(segments), 1, MaxCurveSegments);
     }
   }
 
@@ -237,15 +216,12 @@ namespace krys::gfx
 
   void PathRasteriser::AddQuad(Vec2f from, Vec2f control, Vec2f to) noexcept
   {
-    // A segment spanning h of the parameter strays at most |p0 - 2 p1 + p2| h^2 / 4 from the curve.
-    const float difference = Length({from.x - 2.f * control.x + to.x, from.y - 2.f * control.y + to.y});
-    const int32 segments = SegmentsFor(difference, 0.25f);
-
+    const int32 segments = detail::QuadSegments(from, control, to, FlatteningTolerance);
     Vec2f previous = from;
     for (int32 i = 1; i <= segments; ++i)
     {
-      const float t = static_cast<float>(i) / static_cast<float>(segments);
-      const Vec2f point = Lerp(Lerp(from, control, t), Lerp(control, to, t), t);
+      const Vec2f point =
+        detail::QuadPoint(from, control, to, static_cast<float>(i) / static_cast<float>(segments));
       AddLine(previous, point);
       previous = point;
     }
@@ -253,20 +229,12 @@ namespace krys::gfx
 
   void PathRasteriser::AddCubic(Vec2f from, Vec2f control1, Vec2f control2, Vec2f to) noexcept
   {
-    // A segment spanning h of the parameter strays at most 3 max|second difference| h^2 / 4 from the curve.
-    const float difference =
-      std::max(Length({from.x - 2.f * control1.x + control2.x, from.y - 2.f * control1.y + control2.y}),
-               Length({control1.x - 2.f * control2.x + to.x, control1.y - 2.f * control2.y + to.y}));
-    const int32 segments = SegmentsFor(difference, 0.75f);
-
+    const int32 segments = detail::CubicSegments(from, control1, control2, to, FlatteningTolerance);
     Vec2f previous = from;
     for (int32 i = 1; i <= segments; ++i)
     {
-      const float t = static_cast<float>(i) / static_cast<float>(segments);
-      const Vec2f a = Lerp(from, control1, t);
-      const Vec2f b = Lerp(control1, control2, t);
-      const Vec2f c = Lerp(control2, to, t);
-      const Vec2f point = Lerp(Lerp(a, b, t), Lerp(b, c, t), t);
+      const Vec2f point = detail::CubicPoint(from, control1, control2, to,
+                                             static_cast<float>(i) / static_cast<float>(segments));
       AddLine(previous, point);
       previous = point;
     }

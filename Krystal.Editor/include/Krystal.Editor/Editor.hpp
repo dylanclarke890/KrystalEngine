@@ -225,10 +225,69 @@ namespace krys
       _renderer->FillPath(star, gfx::FillRule::NonZero, SRGBA<uint8> {255, 255, 255, 200});
       _renderer->Restore();
 
+      DrawStrokes();
+
       _renderer->End();
     }
 
   private:
+    /// @brief The stroke sample: joins, curves, dots, a dashed box, marching ants and a turning dashed line.
+    void DrawStrokes() noexcept
+    {
+      const SRGBA<uint8> blue {120, 180, 255};
+      const SRGBA<uint8> light {230, 230, 240};
+
+      // The same zigzag under each join: miter, round and bevel.
+      const gfx::LineJoin joins[] = {gfx::LineJoin::Miter, gfx::LineJoin::Round, gfx::LineJoin::Bevel};
+      for (int i = 0; i < 3; ++i)
+      {
+        const float left = 290.f + static_cast<float>(i) * 150.f;
+        gfx::Path2D zigzag;
+        zigzag.MoveTo({left, 400.f});
+        zigzag.LineTo({left + 30.f, 345.f});
+        zigzag.LineTo({left + 60.f, 400.f});
+        zigzag.LineTo({left + 90.f, 345.f});
+        zigzag.LineTo({left + 120.f, 400.f});
+        _renderer->StrokePath(zigzag, {.Width = 10.f, .Join = joins[i]}, blue);
+      }
+
+      // A wave of cubics with round caps.
+      gfx::Path2D wave;
+      wave.MoveTo({290.f, 450.f});
+      for (int i = 0; i < 4; ++i)
+      {
+        const float left = 290.f + static_cast<float>(i) * 105.f;
+        wave.CubicTo({left + 35.f, 420.f}, {left + 70.f, 480.f}, {left + 105.f, 450.f});
+      }
+      _renderer->StrokePath(wave, {.Width = 6.f, .Cap = gfx::LineCap::Round}, SRGBA<uint8> {255, 160, 90});
+
+      // Round dots: zero-length dashes under round caps, drawn without masks.
+      _renderer->StrokeLine({295.f, 505.f}, {705.f, 505.f},
+                            {.Width = 6.f, .Cap = gfx::LineCap::Round, .Dashes = {0.f, 14.f}}, light);
+
+      // A dashed box from four straight lines.
+      const gfx::StrokeStyle dashed {.Width = 2.f, .Dashes = {8.f, 5.f}};
+      const Vec2f corners[] = {{780.f, 345.f}, {1000.f, 345.f}, {1000.f, 470.f}, {780.f, 470.f}};
+      for (int i = 0; i < 4; ++i)
+      {
+        _renderer->StrokeLine(corners[i], corners[(i + 1) % 4], dashed, light);
+      }
+
+      // Marching ants: a dashed circle whose pattern slides round it.
+      gfx::Path2D circle;
+      circle.AddEllipse({890.f, 560.f}, {50.f, 50.f});
+      _renderer->StrokePath(circle, {.Width = 3.f, .Dashes = {10.f, 6.f}, .DashOffset = -_time * 24.f},
+                            light);
+
+      // A dashed line turning inside the circle, under the renderer's transform.
+      _renderer->Save();
+      _renderer->Translate(890.f, 560.f);
+      _renderer->Rotate(_time);
+      _renderer->StrokeLine({-38.f, 0.f}, {38.f, 0.f},
+                            {.Width = 4.f, .Cap = gfx::LineCap::Square, .Dashes = {6.f, 6.f}}, blue);
+      _renderer->Restore();
+    }
+
     /// @brief A five-pointed star drawn in one stroke, so its contour crosses itself.
     KRYS_NODISCARD static gfx::Path2D Star(float radius) noexcept
     {

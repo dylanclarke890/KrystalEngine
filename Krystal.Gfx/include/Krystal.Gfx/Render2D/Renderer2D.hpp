@@ -17,8 +17,10 @@
 #include "Krystal.Gfx/Handles.hpp"
 #include "Krystal.Gfx/Render2D/MaskAtlas.hpp"
 #include "Krystal.Gfx/Render2D/Path2D.hpp"
+#include "Krystal.Gfx/Render2D/PathStroker.hpp"
 #include "Krystal.Gfx/Render2D/Rect2D.hpp"
 #include "Krystal.Gfx/Render2D/RoundedRect2D.hpp"
+#include "Krystal.Gfx/Render2D/StrokeStyle.hpp"
 #include "Krystal.Gfx/Render2D/Transform2D.hpp"
 #include "Krystal.Gfx/Sampler.hpp"
 
@@ -166,6 +168,8 @@ namespace krys::gfx
     /// @brief Bound for batches without a texture of their own.
     TextureHandle _whiteTexture {};
     MaskAtlas _masks;
+    PathStroker _stroker {};
+    List<float> _dashes {};
     Renderer2DStats _stats {};
     SmallList<TargetPipeline, 2> _pipelines {};
     CommandBuffer *_commands {nullptr};
@@ -228,6 +232,14 @@ namespace krys::gfx
     /// is cached, so drawing the same path again (or moved by whole pixels) costs only the draw.
     void FillPath(const Path2D &path, FillRule rule, SRGBA<uint8> colour) noexcept;
 
+    /// @brief Strokes a path. The stroke's outline is filled through a cached coverage mask, as `FillPath`
+    /// fills; the outline is worked out on every call.
+    void StrokePath(const Path2D &path, const StrokeStyle &style, SRGBA<uint8> colour) noexcept;
+    /// @brief Strokes a straight line, with its caps and dashes, without a mask: each dash is a rect (a
+    /// rounded one under round caps, so dots are circles) under the line's transform. The style's join
+    /// and miter limit don't apply.
+    void StrokeLine(Vec2f from, Vec2f to, const StrokeStyle &style, SRGBA<uint8> colour) noexcept;
+
     /// @brief Draws the whole of a texture into `destination`.
     void DrawImage(TextureHandle texture, const Rect2D &destination,
                    const ImageOptions &options = {}) noexcept;
@@ -240,6 +252,9 @@ namespace krys::gfx
   private:
     KRYS_NODISCARD Expected<void> Initialise() noexcept;
     KRYS_NODISCARD Expected<PipelineHandle> GetPipeline(TextureFormat format) noexcept;
+    /// @brief Adds a rounded rect in `transform`'s coordinates, its radii constrained.
+    void AddRoundedRect(const RoundedRect2D &rect, Array<uint8, 4> colour,
+                        const Transform2D &transform) noexcept;
     /// @brief Fills in the instance's transform and adds it to the batch it can join, or a new one; skips it
     /// when nothing would show.
     void AddInstance(RectInstance instance, const Transform2D &transform, TextureHandle texture,

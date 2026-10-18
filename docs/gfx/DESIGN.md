@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-18): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, is done); text (G3) and the Booey integration (G4) are drafts.
+Status (2026-10-18): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, and G2f, strokes, are done); text (G3) and the Booey integration (G4) are drafts.
 
 ## Why
 
@@ -313,7 +313,8 @@ Decided (2026-10-18): one part at a time, each reviewed before the next. Revised
 | G2e1 | Done (2026-10-18). Paths and the rasteriser, CPU only: `Path2D`, `FillRule`, curve flattening, the coverage rasteriser (see *G2e plan*). |
 | G2e2 | Done (2026-10-18). The mask atlas and its cache; `FillPath`. |
 | G2e3 | Done (2026-10-18). `FillRectWithRoundedHole`, analytic for circular corners; elliptical corners through masks. |
-| G2f | Strokes: a stroker that turns a stroke (width, caps, joins, dashes) into an outline for G2e; `StrokePath`. |
+| G2f1 | Done (2026-10-18). Strokes, CPU only: `StrokeStyle`, the stroker and dashing (see *G2f plan*). |
+| G2f2 | Done (2026-10-18). `StrokePath` through masks; `StrokeLine` for straight lines, analytic. |
 | G2g | Clips: rounded-rect and path clips as antialiased clip masks; clip-out. |
 | G2h | Layers: offscreen layers with opacity and blend modes. |
 | G2i | Gradients (linear, radial, conic) as `Paint`. |
@@ -327,6 +328,13 @@ Decided (2026-10-18): one part at a time, each reviewed before the next. Revised
 - **The mask atlas:** R8 pages packed into shelves, separate from the glyph atlas. A mask is reused only when the path, the transform's linear part and the fractional part of the translation all match exactly (exact reuse, chosen over rounding to quarter pixels, since Booey snaps most painting to whole pixels anyway); whole-pixel moves reuse it. Masks unused for a few frames are evicted; masks too large for a page get their own texture. Page size, eviction age and the size limit are tuning values.
 - **Drawing masks:** a mask is rasterised in target pixels, so it's drawn as an untransformed, pixel-aligned instance whose colour is multiplied by the mask's coverage (a `Mask` instance flag); the rect shader covers such a quad exactly.
 - **Borders' fast path:** `FillRectWithRoundedHole` is analytic when the hole's corners are circular (outer coverage times one minus the hole's). Rounded rects with elliptical corners (from `10px / 20px`, from percentage radii on non-square boxes, and from the inner edges of borders whose sides differ in width) go through masks for now; an analytic approximation can be added later if profiling asks for it.
+
+### G2f plan (decided 2026-10-18)
+
+- **`StrokeStyle`:** width, caps (butt, round, square), joins (miter, round, bevel), miter limit, dash pattern and dash offset, with the meanings canvas and SVG give them. The miter limit defaults to 10 (canvas's default; SVG's is 4). A width of 0 strokes a hairline one target pixel wide, as Skia does; canvas callers skip such strokes instead.
+- **Dashes** follow SVG and canvas: an odd-length pattern is repeated to make it even (on and off alternate, so the pattern only repeats after two passes); each contour restarts the pattern; a zero-length dash with round or square caps draws a dot or a square. Patterns that are empty, have a negative length or sum to zero stroke solid.
+- **General strokes go through masks:** a CPU stroker turns the stroke into an outline in the path's coordinates (dashing first, by length along the flattened path), which is filled under non-zero with the same transform, so overlapping pieces merge and the mask cache applies. Curves are flattened finely enough for both the curve and the offset edge: the tolerance is in target pixels, and the turn per line is limited by the width, so wide strokes stay accurate on their outer edge.
+- **Straight lines are analytic:** a straight stroke is a rotated rect, a round-capped one a rotated rounded rect with radius half the width, and a round dot a circle, which the rounded-rect shader already draws exactly under any transform. Border sides, underlines and straight dotted or dashed lines don't touch the CPU.
 
 ### G2a as built (2026-10-18)
 
@@ -342,7 +350,7 @@ Decided (2026-10-18): one part at a time, each reviewed before the next. Revised
 
 - `Render2D/RoundedRect2D.hpp`: `CornerRadii2D` (one circular radius per corner, `Uniform(r)`) and `RoundedRect2D`. `FillRoundedRect(rect, colour)`; `FillRect` is a rounded rect with zero radii, so every rect goes through the same shader and draw.
 - Radii are constrained on the CPU as CSS does for `border-radius`: negative radii become zero, and if two adjacent radii are longer than their side, every radius is scaled down by the same factor.
-- The fragment shader computes the signed distance to the rounded box and covers `clamp(0.5 - distance, 0, 1)` of the pixel: a one-pixel band centred on the edge. Edges on pixel boundaries stay sharp; edges between pixels are blended. The quad is a pixel larger than the rect on every side so the band outside the edge is drawn.
+- The fragment shader computes the signed distance to the rounded box and covers `clamp(0.5 - distance, 0, 1)` of the pixel: a one-pixel band centred on the edge. (Changed in G2f2: away from rounded corners, coverage is now the product of the vertical and horizontal edges' coverages; see *G2f2 as built*.) Edges on pixel boundaries stay sharp; edges between pixels are blended. The quad is a pixel larger than the rect on every side so the band outside the edge is drawn.
 - The instance is 36 bytes (rect, radii, colour).
 - Limits: corners are circular (CSS's elliptical radii, `10px / 20px`, are decided in G2e); rects thinner than a pixel come out somewhat heavier than their true coverage; the distance is in target pixels, so transforms (G2c) will need the antialiasing width scaled.
 - Tests: two more cases in `tests/Render2D/Renderer2D.cpp` (edges between pixels; rounded corners, constrained radii, per-corner and negative radii). The editor's panels are rounded.
@@ -388,6 +396,22 @@ Decided (2026-10-18): one part at a time, each reviewed before the next. Revised
 - `Renderer2D::FillRectWithRoundedHole(rect, hole, colour)`: the hole is a `RoundedRect2D` (circular corners), with its radii constrained like `FillRoundedRect`'s; an empty hole fills the whole rect. The shader multiplies the rect's coverage by one minus the hole's, each from its own signed distance and each converted to target pixels, so square corners on whole pixels stay exact. The instance gains the hole's rect and radii as fields of their own (112 bytes), rather than reusing others.
 - Render2D has no elliptical-corner type. A rounded rect or hole with elliptical corners is drawn by its caller as a path: `AddRoundedRect` with the elliptical radii (and the outer rect, under `FillRule::EvenOdd`, for a hole) and `FillPath`. The Booey host (planned, G4) picks the analytic call when every corner is circular and the path otherwise.
 - Tests: one more case in `tests/Render2D/Renderer2D.cpp` (square holes exact on whole pixels; a circular hole's antialiased coverage at two pixels, against values worked out by hand; constrained radii; holes under a transform; empty holes). The editor frames the image with a rounded hole and draws an elliptical border as a path.
+
+### G2f1 as built (2026-10-18)
+
+- `Render2D/StrokeStyle.hpp`: `LineCap`, `LineJoin` and `StrokeStyle` (`Width`, `Cap`, `Join`, `MiterLimit` of 10, `Dashes`, `DashOffset`).
+- `Render2D/PathStroker.hpp`: `PathStroker::Stroke(path, style, transform)` returns the stroke's outline as a `Path2D` in the path's coordinates, to fill under non-zero with the same transform. Every piece is a polygon of its own, wound the same way: a rect along each line, a join at each corner (the style's join at the path's own corners, a bevel between the lines of a flattened curve, where the turn is too small to tell), and caps or dots at open ends. The rasteriser counts windings rather than adding areas, so overlapping pieces merge exactly. Round joins and caps are whole circles; the half inside the stroke changes nothing.
+- Flattening: the transform's largest stretch turns the rasteriser's tolerance into the path's units, and curves are split until both the curve and the stroke's outer edge are within it (the turn per line is at most the square root of 8 times the tolerance over half the width). `Render2D/Flattening.hpp` holds the curve maths the rasteriser and the stroker share.
+- Dashes are cut by length along the flattened contour, restarting on each contour; a closed contour's pattern runs across its closing segment, and its first and last dashes stay separate. More than 100,000 dashes on a contour strokes it solid. Zero-length contours (a line to the same point, or a move and a close) are dots under round and square caps; a lone move draws nothing. A hairline's width is one over the square root of the transform's determinant, exact for rotations and uniform scales.
+- Tests: `tests/Render2D/PathStroker.cpp` (6 cases), comparing the stroke's rasterised area with exact values: caps; miter, bevel and round joins, the miter limit at a right angle and an open corner; dash patterns, odd patterns, offsets either way, dots, invalid patterns and a closed contour; rings, including a stroke wider than its circle is tight; strokes under a scale and hairlines; zero-length contours.
+
+### G2f2 as built (2026-10-18)
+
+- `Renderer2D::StrokePath(path, style, colour)` strokes with the renderer's `PathStroker` under the current transform and fills the outline with `FillPath` under non-zero, so the mask cache applies to the outline. The outline is worked out on every call, before the cache is looked up; caching it by path and style can come with profiling.
+- `Renderer2D::StrokeLine(from, to, style, colour)` draws a straight line without a mask: in the line's own coordinates (x along it, y across it, under the current transform) each dash is a rect, extended by half the width under square and round caps and rounded by half the width under round caps, so round dots are circles and square dots squares. A zero-length line lies along x; joins and the miter limit don't apply. Hairlines are one target pixel wide, as in the stroker.
+- `Render2D/Dashing.hpp`: the pattern rules (`PrepareDashes`, `StartDashes`, `DashPosition`, the 100,000-dash limit) shared by the stroker and `StrokeLine`, so both cut dashes the same way, including a dash that starts exactly where a line ends.
+- **Analytic coverage at corners (changed here).** Comparing `StrokeLine` with `StrokePath` showed the shader covering half of a pixel that a square corner cuts in half both ways, where its area is a quarter: the distance to the nearest edge is 0 at the corner. Away from rounded corners the shader now multiplies the coverage of the box's vertical edges by that of its horizontal edges, which is exact for axis-aligned boxes (as Skia does for rects); around rounded corners it still uses the distance to the arc. Straight edges are unchanged, so pixel-aligned edges stay exact. On curves and diagonals the shader's ramp over the distance still differs from the true area by up to about a tenth of a pixel's coverage.
+- Tests: four more cases in `tests/Render2D/Renderer2D.cpp` (a stroked path; straight lines with butt caps, hairlines, transforms and dots; `StrokeLine` against `StrokePath` for butt, square and round caps, dashes, dots and a diagonal, pixel by pixel within each antialiasing method's difference), and a quarter-covered corner in the partial-pixel case. The editor's stroke sample: the three joins on a zigzag, a wave of cubics, a dotted line, a dashed box, a dashed circle whose pattern slides round it, and a turning dashed line.
 
 Testing: the device's hidden window gives tests a real OpenGL context (Krystal.Gfx.Tests). Render2D gets golden image tests: render offscreen, read back with `ReadTexture`, compare against a PNG with a tolerance.
 
