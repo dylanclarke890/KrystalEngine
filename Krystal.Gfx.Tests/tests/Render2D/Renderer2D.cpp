@@ -4,6 +4,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
+#include <numbers>
 
 namespace krys::gfx::tests
 {
@@ -254,6 +255,164 @@ namespace krys::gfx::tests
       CHECK(At(pixels, 7u, 0u) == Red);
       CHECK(At(pixels, 7u, 7u) == Red);
       CHECK(At(pixels, 0u, 7u) == Red);
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: draws in the current transform's coordinates",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(4u, 4u);
+
+    SECTION("Translations and scales")
+    {
+      Draw(
+        [](Renderer2D &renderer)
+        {
+          renderer.Save();
+          renderer.Translate(2.f, 1.f);
+          renderer.FillRect({0.f, 0.f, 1.f, 1.f}, SRGBA<uint8> {255, 0, 0});
+          renderer.Restore();
+
+          renderer.Scale(2.f, 2.f);
+          renderer.FillRect({0.f, 1.f, 1.f, 1.f}, SRGBA<uint8> {0, 255, 0});
+        });
+
+      auto pixels = Read();
+      CHECK(At(pixels, 2u, 1u) == Red);
+      CHECK(At(pixels, 1u, 1u) == Clear);
+      CHECK(At(pixels, 3u, 1u) == Clear);
+      // Restore undid the translation, so the scaled rect covers (0, 2) to (2, 4).
+      CHECK(At(pixels, 0u, 2u) == Green);
+      CHECK(At(pixels, 1u, 3u) == Green);
+      CHECK(At(pixels, 2u, 2u) == Clear);
+    }
+
+    SECTION("Quarter turns")
+    {
+      // Local (x, y) lands on (4 - y, x): the 2-by-1 rect becomes a 1-by-2 column at the right edge.
+      Draw(
+        [](Renderer2D &renderer)
+        {
+          renderer.Translate(4.f, 0.f);
+          renderer.Rotate(std::numbers::pi_v<float> / 2.f);
+          renderer.FillRect({0.f, 0.f, 2.f, 1.f}, SRGBA<uint8> {255, 0, 0});
+        });
+
+      auto pixels = Read();
+      CHECK(Near(At(pixels, 3u, 0u), Red, 2));
+      CHECK(Near(At(pixels, 3u, 1u), Red, 2));
+      CHECK(Near(At(pixels, 2u, 0u), Clear, 2));
+      CHECK(Near(At(pixels, 3u, 2u), Clear, 2));
+    }
+
+    // Each frame starts untransformed.
+    Draw([](Renderer2D &renderer) { CHECK(renderer.GetTransform() == Transform2D::Identity()); },
+         Maybe<Array<float, 4>> {});
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: antialiases one target pixel under transforms",
+                   "[Gfx][Render2D][GPU]")
+  {
+    SECTION("Scaled")
+    {
+      // The left edge lands at x = 0.5 and the right at x = 4.5; scaling doesn't widen the band.
+      UseTarget(6u, 1u);
+      Draw(
+        [](Renderer2D &renderer)
+        {
+          renderer.Scale(4.f, 1.f);
+          renderer.FillRect({0.125f, 0.f, 1.f, 1.f}, SRGBA<uint8> {255, 0, 0});
+        });
+
+      auto pixels = Read();
+      CHECK(Near(pixels[0], {128, 0, 0, 128}, 2));
+      CHECK(pixels[1] == Red);
+      CHECK(pixels[3] == Red);
+      CHECK(Near(pixels[4], {128, 0, 0, 128}, 2));
+      CHECK(pixels[5] == Clear);
+    }
+
+    SECTION("Rotated")
+    {
+      // A 4-by-4 square turned 45 degrees about the target's centre: a diamond whose edge passes just inside
+      // the centre of pixel (4, 1), covering about 38% of it.
+      UseTarget(8u, 8u);
+      Draw(
+        [](Renderer2D &renderer)
+        {
+          renderer.Translate(4.f, 4.f);
+          renderer.Rotate(std::numbers::pi_v<float> / 4.f);
+          renderer.FillRect({-2.f, -2.f, 4.f, 4.f}, SRGBA<uint8> {255, 0, 0});
+        });
+
+      auto pixels = Read();
+      CHECK(At(pixels, 4u, 4u) == Red);
+      CHECK(At(pixels, 0u, 0u) == Clear);
+      CHECK(Near(At(pixels, 4u, 1u), {97, 0, 0, 97}, 6));
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: clips to rects", "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(4u, 4u);
+
+    SECTION("A clip covers the pixels whose centres are inside it")
+    {
+      Draw(
+        [](Renderer2D &renderer)
+        {
+          renderer.ClipRect({0.6f, 1.f, 2.f, 2.f});
+          renderer.FillRect({0.f, 0.f, 4.f, 4.f}, SRGBA<uint8> {255, 0, 0});
+        });
+
+      auto pixels = Read();
+      CHECK(At(pixels, 0u, 1u) == Clear);
+      CHECK(At(pixels, 1u, 1u) == Red);
+      CHECK(At(pixels, 2u, 2u) == Red);
+      CHECK(At(pixels, 3u, 2u) == Clear);
+      CHECK(At(pixels, 1u, 0u) == Clear);
+      CHECK(At(pixels, 1u, 3u) == Clear);
+    }
+
+    SECTION("Clips intersect, follow the transform and end with Restore")
+    {
+      Draw(
+        [](Renderer2D &renderer)
+        {
+          renderer.Save();
+          renderer.ClipRect({0.f, 0.f, 3.f, 4.f});
+          renderer.Save();
+          renderer.Translate(1.f, 0.f);
+          renderer.ClipRect({0.f, 0.f, 3.f, 1.f});
+          renderer.FillRect({-1.f, 0.f, 4.f, 4.f}, SRGBA<uint8> {255, 0, 0});
+          renderer.Restore();
+          renderer.Restore();
+          // Unclipped again, and drawn after the clipped rect.
+          renderer.FillRect({3.f, 0.f, 1.f, 1.f}, SRGBA<uint8> {0, 255, 0});
+        });
+
+      auto pixels = Read();
+      CHECK(At(pixels, 0u, 0u) == Clear);
+      CHECK(At(pixels, 1u, 0u) == Red);
+      CHECK(At(pixels, 2u, 0u) == Red);
+      CHECK(At(pixels, 3u, 0u) == Green);
+      CHECK(At(pixels, 1u, 1u) == Clear);
+    }
+
+    SECTION("Nothing draws inside an empty clip")
+    {
+      Draw(
+        [](Renderer2D &renderer)
+        {
+          renderer.ClipRect({0.f, 0.f, 2.f, 2.f});
+          renderer.ClipRect({2.f, 2.f, 2.f, 2.f});
+          renderer.FillRect({0.f, 0.f, 4.f, 4.f}, SRGBA<uint8> {255, 0, 0});
+        });
+
+      for (const auto &pixel : Read())
+      {
+        CHECK(pixel == Clear);
+      }
     }
   }
 }

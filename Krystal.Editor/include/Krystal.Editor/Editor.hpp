@@ -122,6 +122,29 @@ namespace krys
         {{280.f + slide, height - 80.f, 40.f, 40.f}, gfx::CornerRadii2D::Uniform(20.f)},
         SRGBA<uint8> {255, 255, 255});
 
+      // A list in the sidebar, clipped to it, scrolling up forever.
+      _renderer->Save();
+      _renderer->ClipRect({16.f, 16.f, 208.f, height - 32.f});
+      const float rowHeight = 36.f;
+      const float scroll = std::fmod(_time * 40.f, rowHeight * 2.f);
+      _renderer->Translate(16.f, 16.f - scroll);
+      for (uint32 row = 0u; static_cast<float>(row) * rowHeight < height + rowHeight * 2.f; ++row)
+      {
+        const bool even = row % 2u == 0u;
+        _renderer->FillRoundedRect({{0.f, static_cast<float>(row) * rowHeight, 208.f, rowHeight - 6.f},
+                                    gfx::CornerRadii2D::Uniform(6.f)},
+                                   even ? SRGBA<uint8> {62, 68, 81} : SRGBA<uint8> {52, 57, 68});
+      }
+      _renderer->Restore();
+
+      // A rounded square spinning about its centre.
+      _renderer->Save();
+      _renderer->Translate(width - 120.f, 300.f);
+      _renderer->Rotate(_time);
+      _renderer->FillRoundedRect({{-50.f, -50.f, 100.f, 100.f}, gfx::CornerRadii2D::Uniform(14.f)},
+                                 SRGBA<uint8> {120, 200, 120});
+      _renderer->Restore();
+
       _renderer->End();
     }
   };

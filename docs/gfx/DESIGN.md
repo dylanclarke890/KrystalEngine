@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-18): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, and G2b, rounded rects and antialiasing, are done); text (G3) and the Booey integration (G4) are drafts.
+Status (2026-10-18): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, and G2c, transforms and rect clips, are done); text (G3) and the Booey integration (G4) are drafts.
 
 ## Why
 
@@ -204,7 +204,9 @@ namespace krys::gfx
     // State, as stacks.
     void Save() noexcept;
     void Restore() noexcept;
-    void Transform(const Transform2D &transform) noexcept;
+    void ConcatTransform(const Transform2D &transform) noexcept; // also Translate, Scale, Rotate
+    void SetTransform(const Transform2D &transform) noexcept;
+    const Transform2D &GetTransform() const noexcept;
     void ClipRect(const Rect2D &rect) noexcept;
     void ClipRoundedRect(const RoundedRect2D &rect) noexcept;
     void ClipOutRect(const Rect2D &rect) noexcept;
@@ -306,7 +308,7 @@ Decided (2026-10-18): one part at a time, each reviewed before the next. Revised
 |---|---|
 | G2a | Done (2026-10-18). The `Render2D/` skeleton, `Begin`/`End`, solid `FillRect`, batching; an offscreen readback test; the editor draws rects. |
 | G2b | Done (2026-10-18). Rounded rects and antialiasing: the analytic fast path (the signed distance shader). |
-| G2c | Transforms (`Transform2D`), the `Save`/`Restore` stack, scissor clips; the analytic antialiasing width follows the transform. |
+| G2c | Done (2026-10-18). Transforms (`Transform2D`), the `Save`/`Restore` stack, scissor clips; the analytic antialiasing width follows the transform. |
 | G2d | Images: `DrawImage`, sampling, the textured-quad pipeline the masks reuse. |
 | G2e | Paths and coverage masks: `Path2D` (lines, arcs, quadratic and cubic Béziers), curve flattening, a CPU coverage rasteriser (non-zero and even-odd), the mask atlas and its cache; `FillPath`, `FillRectWithRoundedHole`. Elliptical corner radii are decided here (analytic or through masks). |
 | G2f | Strokes: a stroker that turns a stroke (width, caps, joins, dashes) into an outline for G2e; `StrokePath`. |
@@ -333,6 +335,16 @@ Decided (2026-10-18): one part at a time, each reviewed before the next. Revised
 - The instance is 36 bytes (rect, radii, colour).
 - Limits: corners are circular (CSS's elliptical radii, `10px / 20px`, are decided in G2e); rects thinner than a pixel come out somewhat heavier than their true coverage; the distance is in target pixels, so transforms (G2c) will need the antialiasing width scaled.
 - Tests: two more cases in `tests/Render2D/Renderer2D.cpp` (edges between pixels; rounded corners, constrained radii, per-corner and negative radii). The editor's panels are rounded.
+
+### G2c as built (2026-10-18)
+
+- `Render2D/Transform2D.hpp`: `Transform2D`, a 2D affine transform laid out as CSS's `matrix(a, b, c, d, e, f)`, with `Identity`, `Translation`, `Scale`, `Rotation` (clockwise on screen, since y points down), composition (`T * U` applies `U` first), `Apply`, `Determinant` and `PreservesAxisAlignment`. Points are Core's `Vec2f`.
+- Drawing state is a stack of (transform, clip): `Save`, `Restore`, `ConcatTransform`, `Translate`, `Scale`, `Rotate`, `SetTransform`, `GetTransform`. Each frame starts with the identity transform and the whole target as the clip; unbalanced `Save`/`Restore` asserts.
+- Every instance carries its own transform (the instance grows to 60 bytes), so draws under different transforms (every scrolled element, for one) still go out in one draw; a batch only breaks when the clip changes.
+- Antialiasing stays one target pixel wide under any transform: the shader measures the distance in local units and divides by how far it grows per target pixel, computed exactly from the inverse transform and the edge's normal. That factor is exactly 1 without a transform, so pixel-aligned edges stay sharp. (Screen-space derivatives were tried on paper and rejected: they smear by 1 to 2/255 at square corners.) The quad is grown by one target pixel in local units along each axis.
+- `ClipRect` intersects the clip with a rect in the current coordinates and becomes the scissor, in whole target pixels: a pixel is inside when its centre is. Clip edges are hard until G2g. Under rotations and skews the clip is the rect's bounding box (a debug assert and a FIXME until G2g's clip masks).
+- Draws under an empty clip or a singular transform are skipped.
+- Tests: `tests/Render2D/Transform2D.cpp` (3 cases); 3 more cases in `tests/Render2D/Renderer2D.cpp` (translations, scales, quarter turns; antialiasing under scale and a 45-degree turn; clip rounding, nesting, transforms, `Restore`, empty clips). The editor adds a clipped, scrolling list in the sidebar and a spinning square.
 
 Testing: the device's hidden window gives tests a real OpenGL context (Krystal.Gfx.Tests). Render2D gets golden image tests: render offscreen, read back with `ReadTexture`, compare against a PNG with a tolerance.
 
