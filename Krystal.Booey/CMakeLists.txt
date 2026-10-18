@@ -153,7 +153,7 @@ add_custom_command(
   VERBATIM
 )
 
-# CSS/Style files are only listed once they've been through the port ledger (PORTING.md).
+# CSS/Style files are only listed once they've been through the port ledger (docs/booey/PORTING.md).
 # Files on disk but not listed here haven't been reviewed yet and aren't built.
 set(KRYSTAL_BOOEY_CSS_HEADERS
   # Slice 1: Tokenizer

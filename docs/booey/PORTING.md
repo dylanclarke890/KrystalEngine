@@ -2,7 +2,7 @@
 
 - **Upstream:** `C:\Users\dylan\repos\WebKit` @ `300e80c70fd3` (2025-12-26). Never update the clone mid-port.
 - **Paths** are relative to `Source/WebCore` (WebKit) and `Krystal.Booey/include/Krystal.Booey` (Krystal) unless stated.
-- **Regenerate a slice:** `python tools/port/graph.py <entries...> --headers-only --out ../build/port/<slice>.md` (the output is temporary and untracked; the `tools/port/out/` paths in older sections were committed once and have been deleted, so regenerate them if needed. To traverse outside `css/` and `style/`, pass all prefixes: `--follow css/ style/ platform/graphics/`; `--follow` replaces the defaults)
+- **Regenerate a slice:** `python tools/graph.py <entries...> --headers-only --out build/port/<slice>.md`, from the repository root (the output is temporary and untracked; the `tools/port/out/` paths in older sections were committed under `Krystal.Booey/` once and have been deleted, so regenerate them if needed. To traverse outside `css/` and `style/`, pass all prefixes: `--follow css/ style/ platform/graphics/`; `--follow` replaces the defaults)
 
 ## Verdicts
 
@@ -22,7 +22,7 @@ Status (for `port`/`have*`) is tracked in Notes: `compiles`, `tested`.
 
 ## Where we are (2026-10-17)
 
-**Process and build:** follow the per-file checklist and gotchas in `Krystal.Booey/CLAUDE.md` and "Building and testing" in the root `CLAUDE.md`. Only files listed in `KRYSTAL_BOOEY_CSS_HEADERS`/`KRYSTAL_BOOEY_CSS_SOURCES` (`Krystal.Booey/CMakeLists.txt`) are built; anything else under `CSS/`/`Style/` is on disk but unreviewed. Code generation runs in the build (`codegen/`). Widely included headers go in the precompiled headers (`target_precompile_headers`); after changing that list, touch `build/<target>/CMakeFiles/<target>.dir/Debug/cmake_pch.hxx`, or MSBuild doesn't rebuild.
+**Process and build:** follow "Porting WebKit into Krystal.Booey" (the per-file checklist and gotchas) and "Building and testing" in the root `CLAUDE.md`. Only files listed in `KRYSTAL_BOOEY_CSS_HEADERS`/`KRYSTAL_BOOEY_CSS_SOURCES` (`Krystal.Booey/CMakeLists.txt`) are built; anything else under `CSS/`/`Style/` is on disk but unreviewed. Code generation runs in the build (`codegen/`). Widely included headers go in the precompiled headers (`target_precompile_headers`); after changing that list, touch `build/<target>/CMakeFiles/<target>.dir/Debug/cmake_pch.hxx`, or MSBuild doesn't rebuild.
 
 **Done** (oldest first; each section has the detail):
 - **Slice 1, Tokenizer** (2026-10-11 to 13): `Token`, `Tokenizer`, `Markup`, `KeywordLookup`, generated `PropertyId`/`ValueId`; numeric and whitespace tokens keep their original text. See *Tokenizer*.
