@@ -198,4 +198,62 @@ namespace krys::gfx::tests
     CHECK(At(pixels, 15u, 15u) == Red);
     CHECK(At(pixels, 14u, 15u) == Green);
   }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: antialiases edges between pixels", "[Gfx][Render2D][GPU]")
+  {
+    // The left edge at x = 0.5 and the right edge at x = 1.5 each cover half of a pixel.
+    UseTarget(4u, 4u);
+    Draw([](Renderer2D &renderer) { renderer.FillRect({0.5f, 0.f, 1.f, 4.f}, SRGBA<uint8> {255, 0, 0}); });
+
+    auto pixels = Read();
+    CHECK(Near(At(pixels, 0u, 0u), {128, 0, 0, 128}, 2));
+    CHECK(Near(At(pixels, 1u, 2u), {128, 0, 0, 128}, 2));
+    CHECK(At(pixels, 2u, 0u) == Clear);
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: fills rounded rects", "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(8u, 8u);
+    Draw(
+      [](Renderer2D &renderer)
+      {
+        renderer.FillRoundedRect({{0.f, 0.f, 8.f, 8.f}, CornerRadii2D::Uniform(4.f)},
+                                 SRGBA<uint8> {255, 0, 0});
+      });
+
+    auto circle = Read();
+    // The corner pixel is outside the curve; the pixel below it is about a fifth covered.
+    CHECK(At(circle, 0u, 0u) == Clear);
+    CHECK(Near(At(circle, 0u, 1u), {51, 0, 0, 51}, 3));
+    CHECK(At(circle, 4u, 4u) == Red);
+    CHECK(At(circle, 7u, 7u) == Clear);
+
+    SECTION("Radii that don't fit are scaled down together")
+    {
+      Draw(
+        [](Renderer2D &renderer)
+        {
+          renderer.FillRoundedRect({{0.f, 0.f, 8.f, 8.f}, CornerRadii2D::Uniform(100.f)},
+                                   SRGBA<uint8> {255, 0, 0});
+        });
+      CHECK(Read() == circle);
+    }
+
+    SECTION("Each corner has its own radius; negative radii are square")
+    {
+      Draw(
+        [](Renderer2D &renderer)
+        {
+          renderer.FillRoundedRect(
+            {{0.f, 0.f, 8.f, 8.f}, {.TopLeft = 4.f, .TopRight = 0.f, .BottomRight = -5.f, .BottomLeft = 0.f}},
+            SRGBA<uint8> {255, 0, 0});
+        });
+
+      auto pixels = Read();
+      CHECK(At(pixels, 0u, 0u) == Clear);
+      CHECK(At(pixels, 7u, 0u) == Red);
+      CHECK(At(pixels, 7u, 7u) == Red);
+      CHECK(At(pixels, 0u, 7u) == Red);
+    }
+  }
 }

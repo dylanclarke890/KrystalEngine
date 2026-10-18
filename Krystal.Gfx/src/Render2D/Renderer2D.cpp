@@ -2,6 +2,7 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
+#include <algorithm>
 #include <cstddef>
 #include <cstring>
 
@@ -9,7 +10,8 @@ namespace krys::gfx
 {
   namespace
   {
-    // A unit quad drawn as a 4-vertex strip per instance; the corner comes from gl_VertexID.
+    // A quad drawn as a 4-vertex strip per instance; the corner comes from gl_VertexID. The quad is a pixel
+    // larger than the rect on every side, so the fragments in the antialiased band outside the edge run.
     constexpr const char8_t *RectVertexSource = u8R"(#version 450
 layout(binding = 0, std140) uniform Frame
 {
@@ -18,9 +20,13 @@ layout(binding = 0, std140) uniform Frame
 };
 
 layout(location = 0) in vec4 a_Rect;   // x, y, width, height in pixels
-layout(location = 1) in vec4 a_Colour; // sRGB, straight alpha
+layout(location = 1) in vec4 a_Radii;  // top-left, top-right, bottom-right, bottom-left
+layout(location = 2) in vec4 a_Colour; // sRGB, straight alpha
 
-layout(location = 0) flat out vec4 v_Colour;
+layout(location = 0) out vec2 v_Position; // relative to the rect's centre, in pixels
+layout(location = 1) flat out vec2 v_HalfSize;
+layout(location = 2) flat out vec4 v_Radii;
+layout(location = 3) flat out vec4 v_Colour;
 
 vec3 SrgbToLinear(vec3 c)
 {
@@ -30,9 +36,15 @@ vec3 SrgbToLinear(vec3 c)
 void main()
 {
   vec2 corner = vec2(gl_VertexID & 1, gl_VertexID >> 1);
-  vec2 pixel = a_Rect.xy + corner * a_Rect.zw;
+  vec2 halfSize = a_Rect.zw * 0.5;
+  vec2 position = (corner * 2.0 - 1.0) * (halfSize + 1.0);
+  vec2 pixel = a_Rect.xy + halfSize + position;
   vec2 ndc = pixel / u_ViewportSize * 2.0 - 1.0;
   gl_Position = vec4(ndc.x, -ndc.y, 0.0, 1.0);
+
+  v_Position = position;
+  v_HalfSize = halfSize;
+  v_Radii = a_Radii;
 
   // sRGB targets blend in linear light and encode on write; other targets blend the encoded values.
   vec3 rgb = u_DecodeSrgb != 0u ? SrgbToLinear(a_Colour.rgb) : a_Colour.rgb;
@@ -41,14 +53,60 @@ void main()
 )";
 
     constexpr const char8_t *RectFragmentSource = u8R"(#version 450
-layout(location = 0) flat in vec4 v_Colour;
+layout(location = 0) in vec2 v_Position;
+layout(location = 1) flat in vec2 v_HalfSize;
+layout(location = 2) flat in vec4 v_Radii;
+layout(location = 3) flat in vec4 v_Colour;
+
 layout(location = 0) out vec4 o_Colour;
+
+// The signed distance from p to the edge of a rounded box centred on the origin: negative inside. y points
+// down, so the top corners are where p.y < 0.
+float RoundedBoxDistance(vec2 p, vec2 halfSize, vec4 radii)
+{
+  float r = p.x < 0.0 ? (p.y < 0.0 ? radii.x : radii.w) : (p.y < 0.0 ? radii.y : radii.z);
+  vec2 q = abs(p) - halfSize + r;
+  return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;
+}
 
 void main()
 {
-  o_Colour = v_Colour;
+  // A one-pixel antialiasing band centred on the edge.
+  float coverage = clamp(0.5 - RoundedBoxDistance(v_Position, v_HalfSize, v_Radii), 0.0, 1.0);
+  o_Colour = v_Colour * coverage;
 }
 )";
+
+    /// @brief Clamps negative radii to zero and scales radii that don't fit down together, as CSS does.
+    KRYS_NODISCARD CornerRadii2D ConstrainRadii(const Rect2D &rect, CornerRadii2D radii) noexcept
+    {
+      radii.TopLeft = std::max(radii.TopLeft, 0.f);
+      radii.TopRight = std::max(radii.TopRight, 0.f);
+      radii.BottomRight = std::max(radii.BottomRight, 0.f);
+      radii.BottomLeft = std::max(radii.BottomLeft, 0.f);
+
+      float scale = 1.f;
+      auto fit = [&](float length, float a, float b)
+      {
+        if (a + b > length)
+        {
+          scale = std::min(scale, length / (a + b));
+        }
+      };
+      fit(rect.Width, radii.TopLeft, radii.TopRight);
+      fit(rect.Width, radii.BottomLeft, radii.BottomRight);
+      fit(rect.Height, radii.TopLeft, radii.BottomLeft);
+      fit(rect.Height, radii.TopRight, radii.BottomRight);
+
+      if (scale < 1.f)
+      {
+        radii.TopLeft *= scale;
+        radii.TopRight *= scale;
+        radii.BottomRight *= scale;
+        radii.BottomLeft *= scale;
+      }
+      return radii;
+    }
   }
 
   Expected<UniquePtr<Renderer2D>> Renderer2D::Create(Device &device) noexcept
@@ -113,7 +171,13 @@ void main()
 
   void Renderer2D::FillRect(const Rect2D &rect, SRGBA<uint8> colour) noexcept
   {
-    krys_debug_assert_msg(_commands != nullptr, "FillRect outside Begin and End.");
+    FillRoundedRect({.Rect = rect, .Radii = {}}, colour);
+  }
+
+  void Renderer2D::FillRoundedRect(const RoundedRect2D &roundedRect, SRGBA<uint8> colour) noexcept
+  {
+    krys_debug_assert_msg(_commands != nullptr, "FillRoundedRect outside Begin and End.");
+    const auto &rect = roundedRect.Rect;
     if (rect.Width <= 0.f || rect.Height <= 0.f)
     {
       return;
@@ -124,7 +188,10 @@ void main()
     {
       return;
     }
+
+    const auto radii = ConstrainRadii(rect, roundedRect.Radii);
     _rects.push_back({.Rect = {rect.X, rect.Y, rect.Width, rect.Height},
+                      .Radii = {radii.TopLeft, radii.TopRight, radii.BottomRight, radii.BottomLeft},
                       .Colour = {resolved.Red, resolved.Green, resolved.Blue, resolved.Alpha}});
   }
 
@@ -194,7 +261,8 @@ void main()
       .Stride = sizeof(RectInstance),
       .InputRate = VertexInputRate::PerInstance,
       .Attributes = {{0u, VertexFormat::Float4, offsetof(RectInstance, Rect)},
-                     {1u, VertexFormat::UByte4Norm, offsetof(RectInstance, Colour)}},
+                     {1u, VertexFormat::Float4, offsetof(RectInstance, Radii)},
+                     {2u, VertexFormat::UByte4Norm, offsetof(RectInstance, Colour)}},
     });
 
     auto pipeline = _device->CreatePipeline(desc);

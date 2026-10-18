@@ -76,6 +76,7 @@ target_sources(Krystal.Gfx
       # Render2D
       include/Krystal.Gfx/Render2D/Rect2D.hpp
       include/Krystal.Gfx/Render2D/Renderer2D.hpp
+      include/Krystal.Gfx/Render2D/RoundedRect2D.hpp
 
       # Text
       include/Krystal.Gfx/Text/FontAtlas.hpp

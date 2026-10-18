@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-18): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, is done); text (G3) and the Booey integration (G4) are drafts.
+Status (2026-10-18): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, and G2b, rounded rects and antialiasing, are done); text (G3) and the Booey integration (G4) are drafts.
 
 ## Why
 
@@ -26,10 +26,10 @@ Non-goals for now:
 ```
 Krystal.Core                colour types (moved from Booey), CommandList
   └─ Krystal.Gfx            the RHI: device, handles, descriptions, command buffers. No files, no caches.
-      │                     Backends are subdirectories (`OpenGL/`, namespace `krys::gfx::opengl`).
-      └─ Krystal.Render2D   2D drawing on the RHI: rects, rounded rects, borders, images, glyphs, clips, layers
+                            Backends are subdirectories (`OpenGL/`, namespace `krys::gfx::opengl`).
+                            Render2D/: 2D drawing on the RHI (fills, strokes, paths, images, glyphs, clips, layers)
 Krystal.Booey               paints into a display list; no dependency on Gfx
-Krystal.UI                  the Booey host: pages, display list replay into Render2D, glyph atlas, input routing
+Krystal.UI                  the Booey host: pages, display list replay into Render2D, glyph rasterisation, input routing
 Krystal.Assets (later)      VFS loading, decoding, path caching, reference-counted asset handles
 ```
 
@@ -184,55 +184,65 @@ Tests: `Krystal.Gfx.Tests` (21 cases): handles and the pool, formats, command re
 
 Compute, texture views, explicit barriers (OpenGL doesn't need them; a Vulkan backend would track them internally), multiple queues, multithreaded recording, bindless. Each can be added without changing the shape above.
 
-## Layer 2: the 2D renderer (Krystal.Render2D)
+## Layer 2: the 2D renderer (Render2D, in Krystal.Gfx)
 
 A generic, immediate-mode 2D API on the RHI. It knows nothing about Booey; game HUD code and debug overlays can use it directly.
 
+Revised (2026-10-18): the API mirrors upstream's `GraphicsContext` primitives, not CSS concepts. Booey ports upstream's painters (`BorderPainter`, `BorderShape`, backgrounds, shadows) as they are, and they express everything as fills, strokes, clips and layers; Render2D only has to draw those. The draft's CSS-shaped calls (`DrawBorder`, `DrawBoxShadow`) are dropped. The goal is upstream's geometry and paint order exactly, with antialiasing that looks the same; browsers don't agree with each other pixel for pixel, so images are compared with a tolerance.
+
 ```cpp
-namespace krys::render2d
+namespace krys::gfx
 {
   class Renderer2D
   {
   public:
-    explicit Renderer2D(gfx::Device &device) noexcept;
+    static Expected<UniquePtr<Renderer2D>> Create(Device &device) noexcept;
 
-    void Begin(gfx::CommandBuffer &commands, const Target &target, float deviceScaleFactor) noexcept;
-    void End() noexcept; // flushes the last batch
+    void Begin(CommandBuffer &commands, const Render2DTarget &target) noexcept;
+    void End() noexcept;
 
     // State, as stacks.
     void Save() noexcept;
     void Restore() noexcept;
-    void Transform(const AffineTransform &transform) noexcept;
-    void ClipRect(const Rect &rect) noexcept;
-    void ClipRoundedRect(const RoundedRect &rect) noexcept;
-    void ClipOutRoundedRect(const RoundedRect &rect) noexcept;
+    void Transform(const Transform2D &transform) noexcept;
+    void ClipRect(const Rect2D &rect) noexcept;
+    void ClipRoundedRect(const RoundedRect2D &rect) noexcept;
+    void ClipOutRect(const Rect2D &rect) noexcept;
+    void ClipOutRoundedRect(const RoundedRect2D &rect) noexcept;
+    void ClipPath(const Path2D &path, FillRule rule) noexcept;
     void BeginLayer(float opacity, BlendMode blend = BlendMode::Normal) noexcept;
     void EndLayer() noexcept;
 
-    // Drawing.
-    void FillRect(const Rect &rect, const Paint &paint) noexcept;
-    void FillRoundedRect(const RoundedRect &rect, const Paint &paint) noexcept;
-    void FillRoundedRectWithHole(const RoundedRect &outer, const RoundedRect &inner, const Paint &paint) noexcept;
-    void DrawBorder(const RoundedRect &outer, const RoundedRect &inner, const BorderSides &sides) noexcept;
-    void DrawBoxShadow(const RoundedRect &rect, const BoxShadow &shadow) noexcept;
-    void DrawImage(gfx::TextureHandle texture, const Rect &source, const Rect &destination, const ImageOptions &options) noexcept;
-    void DrawGlyphs(const GlyphAtlasPage &page, Span<const GlyphQuad> glyphs, const SRGBA<uint8> &colour) noexcept;
-    void FillPath(const Path &path, const Paint &paint) noexcept; // tessellated on the CPU
-    void StrokeLine(const Point &from, const Point &to, const StrokeStyle &stroke) noexcept;
+    // Fills and strokes.
+    void FillRect(const Rect2D &rect, const Paint &paint) noexcept;
+    void FillRoundedRect(const RoundedRect2D &rect, const Paint &paint) noexcept;
+    void FillRectWithRoundedHole(const Rect2D &rect, const RoundedRect2D &hole, const Paint &paint) noexcept;
+    void FillPath(const Path2D &path, FillRule rule, const Paint &paint) noexcept;
+    void StrokePath(const Path2D &path, const StrokeStyle &stroke, const Paint &paint) noexcept; // width, caps, joins, dashes
+
+    // Content.
+    void DrawImage(TextureHandle texture, const Rect2D &source, const Rect2D &destination, const ImageOptions &options) noexcept;
+    void DrawGlyphs(Span<const GlyphQuad> glyphs, const Paint &paint) noexcept;
   };
 }
 ```
 
-`Paint` is a solid colour, a linear, radial or conic gradient (a colour ramp in a texture), or an image pattern.
+`Paint` is a solid colour, a linear, radial or conic gradient (a colour ramp in a texture), or an image pattern. Shadows follow upstream's model (a shadow is graphics state applied to the next fill: a blurred copy of its coverage, offset and coloured), and are designed with that part.
+
+Two ways a shape reaches the screen; everything is drawn on the GPU either way:
+
+- **The fast path: analytic shapes.** Rects and rounded rects (most of a UI: backgrounds, simple borders as a rect with a rounded hole) are instances drawn by the shader from G2b, which computes each pixel's coverage from the signed distance to the shape. No CPU work beyond the instance.
+- **The general path: coverage masks.** Any other shape (paths, strokes, dashed and dotted borders, `clip-path`, multi-coloured borders built from clipped side polygons) is rasterised on the CPU into a greyscale coverage mask, like a font rasteriser does for a glyph, and kept in a mask atlas. The GPU draws a quad that samples the mask and multiplies it by the paint. Masks are cached by shape, so the CPU only works when a shape is new or changes. Glyphs (G3) are drawn the same way, from their own atlas.
+
+Considered for the general path (2026-10-18): CPU tessellation into triangles with MSAA (4 to 8 coverage levels, stepping on near-horizontal edges; concave shapes need a robust triangulator or stencil-then-cover), and tessellation with an antialiased fringe (good for convex shapes only). Coverage masks were chosen for their antialiasing (exact per-pixel coverage, closest to browser output) and because they handle any path and both fill rules.
 
 Implementation notes:
-- One shader handles most primitives. Each vertex carries position, UV, colour (`PackedColour::RGBA`) and per-primitive parameters (the rect, corner radii, primitive kind). The fragment shader computes a signed distance to the rounded rect: antialiased edges and rounded corners without tessellation, and box shadows from an analytic blur.
-- Draws are batched in painter's order; a batch breaks only on a change of texture, pipeline or clip kind.
-- Pipelines (shapes, greyscale glyphs, colour glyphs, images, layer composite, stencil clip) are created at startup and cached per target format.
-- Axis-aligned clips use the scissor. Rounded clips use a stencil mask, or a mask layer when transformed.
+- Draws are batched in painter's order; a batch breaks on a change of pipeline, texture or clip.
+- Pipelines (analytic shapes, masks, images, layer composite) are created on first use and cached per target format.
+- Clips: axis-aligned rects with no transform use the scissor. Other clips (rounded rects, paths, transformed rects) are antialiased like the browser's, as a clip mask the draws inside them multiply their coverage by.
 - Layers render to pooled offscreen textures and composite with their opacity and blend mode.
-- Coordinates have a top-left origin, y pointing down, in CSS pixels times the device scale factor. Colours are premultiplied.
-- `GlyphAtlas` is a separate helper: shelf packing into R8 pages for greyscale glyphs and RGBA pages for colour glyphs. The caller rasterises glyphs and adds them; Render2D only draws quads from the pages.
+- Coordinates are pixels with a top-left origin, y pointing down. Booey's painting already snaps border widths and box edges to device pixels, so untransformed edges land on pixel boundaries; thinner or fractional geometry only comes from transforms, and is antialiased like any other edge.
+- Atlases (decided 2026-10-18): glyphs and shape masks have separate atlases, each with its own packing and eviction, drawn through the same textured-quad pipeline. Glyphs are small, reused every frame and long-lived; masks can be large and short-lived (animated or resized shapes), and sharing would let mask churn fragment the space and evict glyphs. Both use shelf packing into R8 pages; the glyph atlas also has RGBA pages for colour glyphs. Masks too large for an atlas page get their own texture. Switching between the atlases breaks a batch; if that shows up in profiling, both can become layers of one array texture, read from a single binding, while keeping their own allocators.
 
 ## Layer 3: the Booey integration (Krystal.UI)
 
@@ -240,12 +250,14 @@ Implementation notes:
 - The first items to port are the ones boxes and text need:
   - state: `Save`, `Restore`, the transforms;
   - clips: `Clip`, `ClipRoundedRect`, `ClipOut`, `ClipOutRoundedRect`;
-  - fills: `FillRect` (colour, gradient), `FillRoundedRect`, `FillRectWithRoundedHole` (borders, inset shadows);
-  - strokes: `StrokeRect`, `DrawLine`, `DrawLinesForText` (underlines);
+  - fills: `FillRect` (colour, gradient), `FillRoundedRect`, `FillRectWithRoundedHole` (borders, inset shadows), `FillPath`;
+  - strokes: `StrokeRect`, `StrokePath`, `DrawLine`, `DrawLinesForText` (underlines);
+  - path clips: `ClipPath` (side polygons for multi-coloured borders, `clip-path`);
   - content: `DrawGlyphs`, `DrawNativeImage`;
   - layers: `BeginTransparencyLayer`, `EndTransparencyLayer`.
+- Booey ports upstream's painters (`rendering/BorderPainter`, `BorderShape`, the background and shadow painting) as they are; they decide how borders and shadows are built from the primitives above.
 - Krystal.UI replays a display list into Render2D, mostly one call per item.
-- Glyphs are rasterised with FreeType through Booey's `FreeTypeFace`, keyed by (face, glyph, size, subpixel offset), and cached in a `GlyphAtlas`. The MSDF atlas loader can come back later for text in 3D, where scaling matters.
+- Glyphs are rasterised with FreeType through Booey's `FreeTypeFace`, keyed by (face, glyph, size, subpixel offset), and cached in Render2D's glyph atlas. The MSDF atlas loader can come back later for text in 3D, where scaling matters.
 - Images: Booey asks the host to load and decode them; Krystal.UI uploads them to textures and maps Booey's image objects to texture handles.
 - Krystal.UI also hosts pages and routes input.
 
@@ -282,23 +294,26 @@ All done in G1 (2026-10-17) unless noted.
 |---|---|---|
 | C0 | Done (2026-10-17). Move the colour types from Booey to `Krystal.Core/Colour/`, renamed to "Colour" in `krys`. | Booey and its tests build and pass against the moved types. |
 | G1 | Done (2026-10-17), as one part. The RHI: `Device`, `Pool` and handles, buffers, textures, samplers, shaders, pipelines, command buffers, swapchains, transient memory; the OpenGL backend. The editor moves onto it; Gfx's old colour headers go with the registries. | The editor clears its window and draws a triangle through the RHI. The old registries are gone. |
-| G2 | Render2D: rects, rounded rects, borders, box shadows, images, gradients, clips, transforms, layers. Reviewed one part at a time (see *G2 parts*). | A test app draws a UI-like scene; golden image tests pass. |
-| G3 | Text: `GlyphAtlas`, `DrawGlyphs`, FreeType rasterisation. | Text renders crisply at several sizes and scales. |
+| G2 | Render2D: the analytic fast path, transforms, images, paths and coverage masks, strokes, clips, layers, gradients, shadows. Reviewed one part at a time (see *G2 parts*). | A test app draws a UI-like scene; golden image tests pass. |
+| G3 | Text: the glyph atlas (R8 pages, RGBA pages for colour glyphs), `DrawGlyphs`, FreeType rasterisation. It doesn't depend on G2e's mask atlas. | Text renders crisply at several sizes and scales. |
 | G4 | Booey: `GraphicsContext`, the display list recorder, painting (paint order, backgrounds, borders, text); Krystal.UI replays it. | The vertical slice: a page loads, renders, resizes and responds to a click. |
 
 ### G2 parts
 
-Decided (2026-10-18): one part at a time, each reviewed before the next.
+Decided (2026-10-18): one part at a time, each reviewed before the next. Revised the same day after G2b: the API follows `GraphicsContext` and general shapes go through coverage masks (see *Layer 2*), so borders and shadows are no longer Render2D parts of their own.
 
 | Part | Content |
 |---|---|
 | G2a | Done (2026-10-18). The `Render2D/` skeleton, `Begin`/`End`, solid `FillRect`, batching; an offscreen readback test; the editor draws rects. |
-| G2b | Rounded rects and antialiasing (the signed distance shader). |
-| G2c | Transforms, the `Save`/`Restore` stack, scissor clips. |
-| G2d | Images. |
-| G2e | Borders and box shadows. |
-| G2f | Gradients. |
-| G2g | Rounded clips (stencil) and layers (offscreen, opacity, blend modes). |
+| G2b | Done (2026-10-18). Rounded rects and antialiasing: the analytic fast path (the signed distance shader). |
+| G2c | Transforms (`Transform2D`), the `Save`/`Restore` stack, scissor clips; the analytic antialiasing width follows the transform. |
+| G2d | Images: `DrawImage`, sampling, the textured-quad pipeline the masks reuse. |
+| G2e | Paths and coverage masks: `Path2D` (lines, arcs, quadratic and cubic Béziers), curve flattening, a CPU coverage rasteriser (non-zero and even-odd), the mask atlas and its cache; `FillPath`, `FillRectWithRoundedHole`. Elliptical corner radii are decided here (analytic or through masks). |
+| G2f | Strokes: a stroker that turns a stroke (width, caps, joins, dashes) into an outline for G2e; `StrokePath`. |
+| G2g | Clips: rounded-rect and path clips as antialiased clip masks; clip-out. |
+| G2h | Layers: offscreen layers with opacity and blend modes. |
+| G2i | Gradients (linear, radial, conic) as `Paint`. |
+| G2j | Shadows: blurred coverage, following upstream's shadow state. |
 
 ### G2a as built (2026-10-18)
 
@@ -310,6 +325,15 @@ Decided (2026-10-18): one part at a time, each reviewed before the next.
 - If the frame's transient memory runs out, the frame's rects are dropped (with an assert in debug builds); growing the ring is left for later.
 - Tests: `Krystal.Gfx.Tests/tests/Render2D/Renderer2D.cpp` (5 cases). The GPU tests share `CreateTestDevice` (`include/Krystal.Gfx.Tests/TestDevice.hpp`). The editor's triangle is replaced by rects drawn with Render2D.
 
+### G2b as built (2026-10-18)
+
+- `Render2D/RoundedRect2D.hpp`: `CornerRadii2D` (one circular radius per corner, `Uniform(r)`) and `RoundedRect2D`. `FillRoundedRect(rect, colour)`; `FillRect` is a rounded rect with zero radii, so every rect goes through the same shader and draw.
+- Radii are constrained on the CPU as CSS does for `border-radius`: negative radii become zero, and if two adjacent radii are longer than their side, every radius is scaled down by the same factor.
+- The fragment shader computes the signed distance to the rounded box and covers `clamp(0.5 - distance, 0, 1)` of the pixel: a one-pixel band centred on the edge. Edges on pixel boundaries stay sharp; edges between pixels are blended. The quad is a pixel larger than the rect on every side so the band outside the edge is drawn.
+- The instance is 36 bytes (rect, radii, colour).
+- Limits: corners are circular (CSS's elliptical radii, `10px / 20px`, are decided in G2e); rects thinner than a pixel come out somewhat heavier than their true coverage; the distance is in target pixels, so transforms (G2c) will need the antialiasing width scaled.
+- Tests: two more cases in `tests/Render2D/Renderer2D.cpp` (edges between pixels; rounded corners, constrained radii, per-corner and negative radii). The editor's panels are rounded.
+
 Testing: the device's hidden window gives tests a real OpenGL context (Krystal.Gfx.Tests). Render2D gets golden image tests: render offscreen, read back with `ReadTexture`, compare against a PNG with a tolerance.
 
 ## Open decisions
@@ -320,5 +344,5 @@ Decided (2026-10-18): the 2D renderer lives in Krystal.Gfx, as `Render2D/` (name
 
 1. **Module names:** Krystal.UI, Krystal.Assets.
 2. **Shaders:** GLSL with explicit binding slots now. Later, possibly SPIR-V compiled offline, which a Vulkan backend would need.
-3. **Text:** FreeType greyscale bitmaps first (recommended), or MSDF.
-4. **Blending space:** Render2D blends in linear light on sRGB targets and in sRGB-encoded values on other targets, so translucent colours look different by target format. Browsers blend encoded values everywhere. To be checked (2026-10-18).
+3. **Text:** FreeType greyscale bitmaps into the glyph atlas first (recommended), or MSDF.
+4. **Blending space:** Render2D blends in linear light on sRGB targets and in sRGB-encoded values on other targets, so translucent colours look different by target format. Browsers blend encoded values everywhere; emulating them means blending encoded values on every target and an RGBA8Unorm window. Leaning that way, to be checked (2026-10-18).

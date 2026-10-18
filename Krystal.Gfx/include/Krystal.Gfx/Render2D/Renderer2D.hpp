@@ -15,6 +15,7 @@
 #include "Krystal.Gfx/Formats.hpp"
 #include "Krystal.Gfx/Handles.hpp"
 #include "Krystal.Gfx/Render2D/Rect2D.hpp"
+#include "Krystal.Gfx/Render2D/RoundedRect2D.hpp"
 
 namespace krys::gfx
 {
@@ -36,6 +37,7 @@ namespace krys::gfx
   ///
   /// Coordinates are pixels with a top-left origin, y pointing down. Colours are sRGB with straight alpha;
   /// they're premultiplied for blending, in linear light on sRGB targets and as encoded on other targets.
+  /// Edges are antialiased over one pixel, centred on the edge, so edges on pixel boundaries stay sharp.
   ///
   /// A frame, between `Device::BeginFrame` and `Device::Submit`:
   /// @code
@@ -47,10 +49,12 @@ namespace krys::gfx
   {
     KRYS_NON_COPY_MOVABLE(Renderer2D);
 
-    /// @brief One rect, as the shader reads it per instance.
+    /// @brief One rounded rect, as the shader reads it per instance.
     struct RectInstance
     {
       Array<float, 4> Rect;
+      /// @brief Top-left, top-right, bottom-right, bottom-left.
+      Array<float, 4> Radii;
       Array<uint8, 4> Colour;
     };
 
@@ -91,6 +95,9 @@ namespace krys::gfx
     void End() noexcept;
 
     void FillRect(const Rect2D &rect, SRGBA<uint8> colour) noexcept;
+    /// @brief Fills a rounded rect. Negative radii are treated as zero, and radii that don't fit are scaled
+    /// down together until they do, as CSS does for `border-radius`.
+    void FillRoundedRect(const RoundedRect2D &rect, SRGBA<uint8> colour) noexcept;
 
   private:
     KRYS_NODISCARD Expected<void> Initialise() noexcept;

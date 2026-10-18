@@ -104,15 +104,23 @@ namespace krys
                                   .Format = gfx::TextureFormat::RGBA8Srgb,
                                   .ClearColour = Array<float, 4> {0.02f, 0.02f, 0.03f, 1.f}});
 
-      // A sidebar and a panel, a translucent overlay across both, and a square sliding back and forth.
+      // A sidebar, a rounded panel, a translucent rounded overlay across both, and a rounded square sliding
+      // back and forth (with a circle riding on it).
       const float width = static_cast<float>(_width);
       const float height = static_cast<float>(_height);
       _renderer->FillRect({0.f, 0.f, 240.f, height}, SRGBA<uint8> {40, 44, 52});
-      _renderer->FillRect({260.f, 20.f, width - 280.f, 160.f}, SRGBA<uint8> {70, 130, 180});
-      _renderer->FillRect({120.f, 120.f, 400.f, 200.f}, SRGBA<uint8> {255, 140, 0, 128});
+      _renderer->FillRoundedRect({{260.f, 20.f, width - 280.f, 160.f}, gfx::CornerRadii2D::Uniform(12.f)},
+                                 SRGBA<uint8> {70, 130, 180});
+      _renderer->FillRoundedRect({{120.f, 120.f, 400.f, 200.f}, {.TopLeft = 40.f, .BottomRight = 40.f}},
+                                 SRGBA<uint8> {255, 140, 0, 128});
 
       const float slide = (std::sin(_time) * 0.5f + 0.5f) * (width - 340.f);
-      _renderer->FillRect({260.f + slide, height - 100.f, 80.f, 80.f}, SRGBA<uint8> {220, 50, 70});
+      _renderer->FillRoundedRect(
+        {{260.f + slide, height - 100.f, 80.f, 80.f}, gfx::CornerRadii2D::Uniform(16.f)},
+        SRGBA<uint8> {220, 50, 70});
+      _renderer->FillRoundedRect(
+        {{280.f + slide, height - 80.f, 40.f, 40.f}, gfx::CornerRadii2D::Uniform(20.f)},
+        SRGBA<uint8> {255, 255, 255});
 
       _renderer->End();
     }
