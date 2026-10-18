@@ -392,8 +392,9 @@ namespace krys::gfx::tests
   {
     UseTarget(4u, 4u);
 
-    SECTION("A clip covers the pixels whose centres are inside it")
+    SECTION("Clip edges between pixels are antialiased")
     {
+      // The clip from x = 0.6 to 2.6 covers 40% of pixel 0 and 60% of pixel 2.
       Draw(
         [](Renderer2D &renderer)
         {
@@ -402,9 +403,9 @@ namespace krys::gfx::tests
         });
 
       auto pixels = Read();
-      CHECK(At(pixels, 0u, 1u) == Clear);
+      CHECK(Near(At(pixels, 0u, 1u), {102, 0, 0, 102}, 2));
       CHECK(At(pixels, 1u, 1u) == Red);
-      CHECK(At(pixels, 2u, 2u) == Red);
+      CHECK(Near(At(pixels, 2u, 2u), {153, 0, 0, 153}, 2));
       CHECK(At(pixels, 3u, 2u) == Clear);
       CHECK(At(pixels, 1u, 0u) == Clear);
       CHECK(At(pixels, 1u, 3u) == Clear);
@@ -977,6 +978,349 @@ namespace krys::gfx::tests
         {
           FAIL_CHECK("Pixel " << i << " differs: " << int(line[i][3]) << " against " << int(stroked[i][3]));
         }
+      }
+    }
+  }
+
+  namespace
+  {
+    /// @brief Whether two readbacks match pixel by pixel within `tolerance`.
+    KRYS_NODISCARD bool SameImage(const List<Pixel> &a, const List<Pixel> &b, int tolerance = 1)
+    {
+      if (a.size() != b.size())
+      {
+        return false;
+      }
+      for (size_t i = 0u; i < a.size(); ++i)
+      {
+        if (!Near(a[i], b[i], tolerance))
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: clips to shapes like it fills them",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(8u, 8u);
+    const SRGBA<uint8> red {255, 0, 0};
+
+    SECTION("Rounded rects")
+    {
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.ClipRoundedRect({{0.f, 0.f, 8.f, 8.f}, CornerRadii2D::Uniform(4.f)});
+          renderer.FillRect({0.f, 0.f, 8.f, 8.f}, red);
+        });
+      auto clipped = Read();
+      Draw([&](Renderer2D &renderer)
+           { renderer.FillRoundedRect({{0.f, 0.f, 8.f, 8.f}, CornerRadii2D::Uniform(4.f)}, red); });
+      CHECK(SameImage(clipped, Read()));
+      CHECK(At(clipped, 0u, 0u) == Clear);
+    }
+
+    SECTION("Rects under rotations")
+    {
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.Translate(4.f, 4.f);
+          renderer.Rotate(std::numbers::pi_v<float> / 4.f);
+          renderer.ClipRect({-2.f, -2.f, 4.f, 4.f});
+          renderer.SetTransform({});
+          renderer.FillRect({0.f, 0.f, 8.f, 8.f}, red);
+        });
+      auto clipped = Read();
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.Translate(4.f, 4.f);
+          renderer.Rotate(std::numbers::pi_v<float> / 4.f);
+          renderer.FillRect({-2.f, -2.f, 4.f, 4.f}, red);
+        });
+      CHECK(SameImage(clipped, Read()));
+      CHECK(At(clipped, 0u, 0u) == Clear);
+      CHECK(At(clipped, 4u, 4u) == Red);
+    }
+
+    SECTION("Clipping out a rounded rect is a rect with a rounded hole")
+    {
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.ClipOutRoundedRect({{1.f, 1.f, 6.f, 6.f}, CornerRadii2D::Uniform(3.f)});
+          renderer.FillRect({0.f, 0.f, 8.f, 8.f}, red);
+        });
+      auto clipped = Read();
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.FillRectWithRoundedHole({0.f, 0.f, 8.f, 8.f},
+                                           {{1.f, 1.f, 6.f, 6.f}, CornerRadii2D::Uniform(3.f)}, red);
+        });
+      CHECK(SameImage(clipped, Read()));
+    }
+
+    SECTION("Clipping out a rect")
+    {
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.ClipOutRect({2.f, 2.f, 4.f, 4.f});
+          renderer.FillRect({0.f, 0.f, 8.f, 8.f}, red);
+        });
+      auto pixels = Read();
+      CHECK(At(pixels, 0u, 0u) == Red);
+      CHECK(At(pixels, 1u, 2u) == Red);
+      CHECK(At(pixels, 2u, 2u) == Clear);
+      CHECK(At(pixels, 5u, 5u) == Clear);
+      CHECK(At(pixels, 6u, 6u) == Red);
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: nests shape clips", "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(8u, 8u);
+    constexpr Array<Pixel, 1> greenTexels {Green};
+    auto green = Image(1u, 1u, greenTexels);
+
+    Draw(
+      [&](Renderer2D &renderer)
+      {
+        renderer.Save();
+        renderer.ClipRoundedRect({{0.f, 0.f, 8.f, 8.f}, CornerRadii2D::Uniform(4.f)});
+        renderer.Save();
+        renderer.ClipOutRect({3.f, 3.f, 2.f, 2.f});
+        renderer.FillRect({0.f, 0.f, 8.f, 8.f}, SRGBA<uint8> {255, 0, 0});
+        renderer.Restore();
+        // Still inside the rounded clip, so the corner of the image is cut off.
+        renderer.DrawImage(green, {0.f, 0.f, 3.f, 3.f});
+        renderer.Restore();
+        renderer.FillRect({7.f, 7.f, 1.f, 1.f}, SRGBA<uint8> {0, 0, 255});
+      });
+
+    auto pixels = Read();
+    CHECK(At(pixels, 4u, 1u) == Red);
+    CHECK(At(pixels, 3u, 3u) == Clear);
+    CHECK(At(pixels, 4u, 4u) == Clear);
+    CHECK(At(pixels, 0u, 0u) == Clear);
+    CHECK(At(pixels, 2u, 2u) == Green);
+    CHECK(At(pixels, 7u, 7u) == Blue);
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: clips paths and lines too", "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(8u, 8u);
+    const SRGBA<uint8> red {255, 0, 0};
+    Draw(
+      [&](Renderer2D &renderer)
+      {
+        renderer.ClipOutRect({0.f, 0.f, 8.f, 4.f});
+        Path2D square;
+        square.AddRect({0.f, 0.f, 4.f, 8.f});
+        renderer.FillPath(square, FillRule::NonZero, red);
+        renderer.StrokeLine({4.f, 0.f}, {4.f, 8.f}, {.Width = 2.f}, red);
+      });
+
+    auto pixels = Read();
+    CHECK(At(pixels, 1u, 1u) == Clear);
+    CHECK(At(pixels, 1u, 5u) == Red);
+    CHECK(At(pixels, 4u, 2u) == Clear);
+    CHECK(At(pixels, 4u, 6u) == Red);
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: handles empty shape clips", "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(4u, 4u);
+    const SRGBA<uint8> red {255, 0, 0};
+
+    // Clipping to nothing leaves nothing; clipping nothing out changes nothing.
+    Draw(
+      [&](Renderer2D &renderer)
+      {
+        renderer.ClipRoundedRect({{1.f, 1.f, 0.f, 2.f}, CornerRadii2D::Uniform(1.f)});
+        renderer.FillRect({0.f, 0.f, 4.f, 4.f}, red);
+      });
+    for (const auto &pixel : Read())
+    {
+      CHECK(pixel == Clear);
+    }
+
+    Draw(
+      [&](Renderer2D &renderer)
+      {
+        renderer.ClipOutRoundedRect({{1.f, 1.f, 0.f, 2.f}, CornerRadii2D::Uniform(1.f)});
+        renderer.FillRect({0.f, 0.f, 4.f, 4.f}, red);
+      });
+    for (const auto &pixel : Read())
+    {
+      CHECK(pixel == Red);
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: clips to paths through their masks",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(8u, 8u);
+    const SRGBA<uint8> red {255, 0, 0};
+    constexpr PixelRect2D target {.X = 0, .Y = 0, .Width = 8u, .Height = 8u};
+    PathRasteriser rasteriser;
+
+    // A triangle and its mirror image, overlapping in the middle.
+    const auto left = Triangle(0.f);
+    Path2D right;
+    right.MoveTo({8.f, 0.f});
+    right.LineTo({8.f, 8.f});
+    right.LineTo({0.f, 0.f});
+    right.Close();
+    const auto leftCoverage = rasteriser.Rasterise(left, {}, FillRule::NonZero, target);
+    const auto rightCoverage = rasteriser.Rasterise(right, {}, FillRule::NonZero, target);
+    auto coverage = [](const CoverageMask &mask, int32 x, int32 y) -> int
+    {
+      const auto &bounds = mask.Bounds;
+      const bool inside = x >= bounds.X && y >= bounds.Y && x < bounds.X + static_cast<int32>(bounds.Width)
+                          && y < bounds.Y + static_cast<int32>(bounds.Height);
+      return inside ? mask.At(x, y) : 0;
+    };
+
+    // Checks every pixel against the red channel `expected` gives it.
+    auto checkPixels = [&](auto &&expected, int tolerance)
+    {
+      auto pixels = Read();
+      for (int32 y = 0; y < 8; ++y)
+      {
+        for (int32 x = 0; x < 8; ++x)
+        {
+          const auto value = static_cast<uint8>(expected(x, y));
+          const auto pixel = At(pixels, static_cast<uint32>(x), static_cast<uint32>(y));
+          if (!Near(pixel, {value, 0, 0, value}, tolerance))
+          {
+            FAIL_CHECK("Pixel (" << x << ", " << y << ") is " << int(pixel[3]) << ", not " << int(value));
+          }
+        }
+      }
+    };
+
+    SECTION("To a path")
+    {
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.ClipPath(left, FillRule::NonZero);
+          renderer.FillRect({0.f, 0.f, 8.f, 8.f}, red);
+        });
+      checkPixels([&](int32 x, int32 y) { return coverage(leftCoverage, x, y); }, 1);
+    }
+
+    SECTION("Out of a path")
+    {
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.ClipOutPath(left, FillRule::NonZero);
+          renderer.FillRect({0.f, 0.f, 8.f, 8.f}, red);
+        });
+      checkPixels([&](int32 x, int32 y) { return 255 - coverage(leftCoverage, x, y); }, 1);
+    }
+
+    SECTION("Nested path clips multiply")
+    {
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.ClipPath(left, FillRule::NonZero);
+          renderer.ClipPath(right, FillRule::NonZero);
+          renderer.FillRect({0.f, 0.f, 8.f, 8.f}, red);
+        });
+      checkPixels([&](int32 x, int32 y)
+                  { return coverage(leftCoverage, x, y) * coverage(rightCoverage, x, y) / 255; }, 2);
+
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.ClipPath(left, FillRule::NonZero);
+          renderer.ClipOutPath(right, FillRule::NonZero);
+          renderer.FillRect({0.f, 0.f, 8.f, 8.f}, red);
+        });
+      checkPixels([&](int32 x, int32 y)
+                  { return coverage(leftCoverage, x, y) * (255 - coverage(rightCoverage, x, y)) / 255; }, 2);
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: combines path clips with the drawing state",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(8u, 8u);
+    const SRGBA<uint8> red {255, 0, 0};
+
+    SECTION("Shape clips, fill rules and transforms")
+    {
+      Path2D ring;
+      ring.AddRect({0.f, 0.f, 4.f, 4.f});
+      ring.AddRect({1.f, 1.f, 2.f, 2.f});
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.ClipRoundedRect({{0.f, 0.f, 8.f, 8.f}, CornerRadii2D::Uniform(4.f)});
+          renderer.Scale(2.f, 2.f);
+          renderer.ClipPath(ring, FillRule::EvenOdd);
+          renderer.FillRect({0.f, 0.f, 4.f, 4.f}, red);
+        });
+
+      // The ring is 0 to 8 with a hole from 2 to 6; the rounded clip cuts its corners.
+      auto pixels = Read();
+      CHECK(At(pixels, 4u, 1u) == Red);
+      CHECK(At(pixels, 1u, 4u) == Red);
+      CHECK(At(pixels, 3u, 3u) == Clear);
+      CHECK(At(pixels, 0u, 0u) == Clear);
+    }
+
+    SECTION("Restore ends a path clip")
+    {
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.Save();
+          renderer.ClipPath(Triangle(0.f), FillRule::NonZero);
+          renderer.Restore();
+          renderer.FillRect({0.f, 0.f, 8.f, 8.f}, red);
+        });
+      for (const auto &pixel : Read())
+      {
+        CHECK(pixel == Red);
+      }
+    }
+
+    SECTION("Empty paths")
+    {
+      Path2D line;
+      line.MoveTo({1.f, 1.f});
+      line.LineTo({6.f, 6.f});
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.ClipPath(line, FillRule::NonZero);
+          renderer.FillRect({0.f, 0.f, 8.f, 8.f}, red);
+        });
+      for (const auto &pixel : Read())
+      {
+        CHECK(pixel == Clear);
+      }
+
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.ClipOutPath(Path2D {}, FillRule::NonZero);
+          renderer.ClipOutPath(line, FillRule::NonZero);
+          renderer.FillRect({0.f, 0.f, 8.f, 8.f}, red);
+        });
+      for (const auto &pixel : Read())
+      {
+        CHECK(pixel == Red);
       }
     }
   }

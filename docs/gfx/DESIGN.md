@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-18): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, and G2f, strokes, are done); text (G3) and the Booey integration (G4) are drafts.
+Status (2026-10-18): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, G2f, strokes, and G2g, clips, are done); text (G3) and the Booey integration (G4) are drafts.
 
 ## Why
 
@@ -315,7 +315,8 @@ Decided (2026-10-18): one part at a time, each reviewed before the next. Revised
 | G2e3 | Done (2026-10-18). `FillRectWithRoundedHole`, analytic for circular corners; elliptical corners through masks. |
 | G2f1 | Done (2026-10-18). Strokes, CPU only: `StrokeStyle`, the stroker and dashing (see *G2f plan*). |
 | G2f2 | Done (2026-10-18). `StrokePath` through masks; `StrokeLine` for straight lines, analytic. |
-| G2g | Clips: rounded-rect and path clips as antialiased clip masks; clip-out. |
+| G2g1 | Done (2026-10-18). Clips in the shader: `ClipRect` under any transform, `ClipRoundedRect`, `ClipOutRect`, `ClipOutRoundedRect` (see *G2g plan*). |
+| G2g2 | Done (2026-10-18). Path clips through masks: `ClipPath`, `ClipOutPath`. |
 | G2h | Layers: offscreen layers with opacity and blend modes. |
 | G2i | Gradients (linear, radial, conic) as `Paint`. |
 | G2j | Shadows: blurred coverage, following upstream's shadow state. |
@@ -335,6 +336,14 @@ Decided (2026-10-18): one part at a time, each reviewed before the next. Revised
 - **Dashes** follow SVG and canvas: an odd-length pattern is repeated to make it even (on and off alternate, so the pattern only repeats after two passes); each contour restarts the pattern; a zero-length dash with round or square caps draws a dot or a square. Patterns that are empty, have a negative length or sum to zero stroke solid.
 - **General strokes go through masks:** a CPU stroker turns the stroke into an outline in the path's coordinates (dashing first, by length along the flattened path), which is filled under non-zero with the same transform, so overlapping pieces merge and the mask cache applies. Curves are flattened finely enough for both the curve and the offset edge: the tolerance is in target pixels, and the turn per line is limited by the width, so wide strokes stay accurate on their outer edge.
 - **Straight lines are analytic:** a straight stroke is a rotated rect, a round-capped one a rotated rounded rect with radius half the width, and a round dot a circle, which the rounded-rect shader already draws exactly under any transform. Border sides, underlines and straight dotted or dashed lines don't touch the CPU.
+
+### G2g plan (decided 2026-10-18)
+
+- **Clip coverage in the shader** (option B of three considered): every draw multiplies its coverage by how much of the pixel its clips let through, so clip edges are antialiased as in the browser and no extra passes are needed. Rejected: the stencil buffer (pixels are in or out, so clip edges would be jagged) and a layer per clip (an offscreen texture and pass each; layers are G2h's job).
+- **Shape clips** (rects under any transform, rounded rects, and their clip-outs) are computed exactly in the shader, each under its own transform; a clip-out is one minus the shape's coverage, and nested clips multiply. **Path clips** (G2g2) sample the path's coverage mask, from the mask atlas.
+- **Per batch:** a clip change already starts a batch. Each batch binds a small uniform buffer with its clip chain (the shapes in effect), and the scissor is the chain's bounds, so pixels certainly outside are skipped; instances don't change. Clips whose edges are all on whole pixels under a transform that keeps rects axis-aligned are the scissor alone, which costs nothing.
+- **At most 16 shape clips** in a chain; more asserts (a tuning value; real pages rarely nest more than a few).
+- **Known seam:** where a shape's edge lies on a clip's edge, both partly cover the edge pixels and the product is fainter (a half times a half is a quarter, not a half), as in browsers built on Skia.
 
 ### G2a as built (2026-10-18)
 
@@ -361,7 +370,7 @@ Decided (2026-10-18): one part at a time, each reviewed before the next. Revised
 - Drawing state is a stack of (transform, clip): `Save`, `Restore`, `ConcatTransform`, `Translate`, `Scale`, `Rotate`, `SetTransform`, `GetTransform`. Each frame starts with the identity transform and the whole target as the clip; unbalanced `Save`/`Restore` asserts.
 - Every instance carries its own transform (the instance grows to 60 bytes), so draws under different transforms (every scrolled element, for one) still go out in one draw; a batch only breaks when the clip changes.
 - Antialiasing stays one target pixel wide under any transform: the shader measures the distance in local units and divides by how far it grows per target pixel, computed exactly from the inverse transform and the edge's normal. That factor is exactly 1 without a transform, so pixel-aligned edges stay sharp. (Screen-space derivatives were tried on paper and rejected: they smear by 1 to 2/255 at square corners.) The quad is grown by one target pixel in local units along each axis.
-- `ClipRect` intersects the clip with a rect in the current coordinates and becomes the scissor, in whole target pixels: a pixel is inside when its centre is. Clip edges are hard until G2g. Under rotations and skews the clip is the rect's bounding box (a debug assert and a FIXME until G2g's clip masks).
+- `ClipRect` intersects the clip with a rect in the current coordinates and becomes the scissor, in whole target pixels: a pixel is inside when its centre is. Clip edges are hard until G2g. Under rotations and skews the clip is the rect's bounding box (a debug assert and a FIXME until G2g's clip masks). (Superseded in G2g1: see *G2g1 as built*.)
 - Draws under an empty clip or a singular transform are skipped.
 - Tests: `tests/Render2D/Transform2D.cpp` (3 cases); 3 more cases in `tests/Render2D/Renderer2D.cpp` (translations, scales, quarter turns; antialiasing under scale and a 45-degree turn; clip rounding, nesting, transforms, `Restore`, empty clips). The editor adds a clipped, scrolling list in the sidebar and a spinning square.
 
@@ -412,6 +421,19 @@ Decided (2026-10-18): one part at a time, each reviewed before the next. Revised
 - `Render2D/Dashing.hpp`: the pattern rules (`PrepareDashes`, `StartDashes`, `DashPosition`, the 100,000-dash limit) shared by the stroker and `StrokeLine`, so both cut dashes the same way, including a dash that starts exactly where a line ends.
 - **Analytic coverage at corners (changed here).** Comparing `StrokeLine` with `StrokePath` showed the shader covering half of a pixel that a square corner cuts in half both ways, where its area is a quarter: the distance to the nearest edge is 0 at the corner. Away from rounded corners the shader now multiplies the coverage of the box's vertical edges by that of its horizontal edges, which is exact for axis-aligned boxes (as Skia does for rects); around rounded corners it still uses the distance to the arc. Straight edges are unchanged, so pixel-aligned edges stay exact. On curves and diagonals the shader's ramp over the distance still differs from the true area by up to about a tenth of a pixel's coverage.
 - Tests: four more cases in `tests/Render2D/Renderer2D.cpp` (a stroked path; straight lines with butt caps, hairlines, transforms and dots; `StrokeLine` against `StrokePath` for butt, square and round caps, dashes, dots and a diagonal, pixel by pixel within each antialiasing method's difference), and a quarter-covered corner in the partial-pixel case. The editor's stroke sample: the three joins on a zigzag, a wave of cubics, a dotted line, a dashed box, a dashed circle whose pattern slides round it, and a turning dashed line.
+
+### G2g1 as built (2026-10-18)
+
+- `ClipRect` under any transform, `ClipRoundedRect` (radii constrained as `FillRoundedRect`'s), `ClipOutRect` and `ClipOutRoundedRect`. The clip state is the scissor rect plus a clip chain: an index into the frame's chains, each the shapes in effect, each with its rounded rect, the inverse of the transform it was made under (`Transform2D::Inverse`, new) and whether it clips out. Adding a clip copies the current chain with the new shape, so `Save` and `Restore` only save the index. At most 16 shapes a chain; more asserts and the extra clip is dropped.
+- A `ClipRect` whose edges land on whole pixels under a transform that keeps rects axis-aligned is the scissor alone, as before. Any other clip is a shape in the chain, and a clip-in also shrinks the scissor to the pixels its antialiased edge reaches. Clipping to an empty rect, or under a transform that flattens the plane, clips everything; clipping out an empty rect changes nothing. Fractional `ClipRect` edges are now antialiased rather than rounded to pixel centres.
+- The vertex shader passes each fragment's target pixel; the fragment shader maps it into each clip's coordinates and multiplies the draw's coverage by the shape's coverage (one minus it for a clip-out), with the same coverage function as fills, so a clip to a shape matches a fill of it. Every batch binds its chain as a uniform block at slot 1 (`ClipUniforms`, 1040 bytes, std140, mirrored with `static_assert`s), an empty one included, since the shader always reads it; a batch breaks when the chain changes. Images, masks and strokes are clipped like fills.
+- Tests: four more cases and one rewritten section in `tests/Render2D/Renderer2D.cpp`: clipping to a rounded rect against filling it, a rotated clip against a rotated fill, clipping out a rounded rect against `FillRectWithRoundedHole`, clipping out a rect; nesting with `Save` and `Restore` across a fill and an image; paths and lines clipped; empty clips; fractional clip edges antialiased. The editor rounds the sidebar list's clip, draws a drop shadow clipped out of the image's frame, and scrolls the image behind a turning rounded clip.
+
+### G2g2 as built (2026-10-18)
+
+- `ClipPath(path, rule)` and `ClipOutPath(path, rule)`. A chain keeps its path clips (path, transform, rule, in or out) and their coverage as one mask: a single path clip uses the path's cached mask from the atlas; a second nested one multiplies all the chain's path clips (one minus the coverage for clip-outs) on the CPU over the clip's bounds into a mask uploaded for this frame (`MaskAtlas::UploadTransient`, new), which is made again every frame. A clip-in also shrinks the scissor to the mask's bounds. Clipping to an empty path, or one that covers nothing, clips everything; clipping one out changes nothing.
+- The clip block gains the mask's mode (none, to, out), its bounds in target pixels and its first texel (48 bytes before the shapes, 1072 in all). Masks are a texel per target pixel, so the shader reads the fragment's own texel with `texelFetch`; outside the mask's bounds it covers nothing. The mask is on texture unit 1, which always has a texture (the white one when there's no mask), since drivers check every declared sampler.
+- Tests: two more cases in `tests/Render2D/Renderer2D.cpp`: pixels against the rasteriser's coverage when clipping to a path, out of one, and to two nested paths (to and out), where they multiply; a path clip with a rounded clip, even-odd and a transform; `Restore`; empty paths. The editor scrolls the image behind a turning star-shaped clip and cuts a circle out of a panel.
 
 Testing: the device's hidden window gives tests a real OpenGL context (Krystal.Gfx.Tests). Render2D gets golden image tests: render offscreen, read back with `ReadTexture`, compare against a PNG with a tolerance.
 

@@ -77,7 +77,9 @@ namespace krys::gfx
   /// sharp.
   ///
   /// Drawing state (the transform and the clip) is a stack: `Save` pushes a copy, `Restore` pops it. Draws
-  /// are made in the current transform's coordinates and clipped to the current clip.
+  /// are made in the current transform's coordinates and clipped to the current clip. Clip edges are
+  /// antialiased like any other edge: each draw's coverage is multiplied by how much of the pixel its clips
+  /// let through.
   ///
   /// A frame, between `Device::BeginFrame` and `Device::Submit`:
   /// @code
@@ -129,12 +131,83 @@ namespace krys::gfx
       Hole = 1u << 4u,
     };
 
+    /// @brief A chain's state when it has no shape clips.
+    constexpr static uint32 NoChain = ~0u;
+    /// @brief The most shape clips a chain holds.
+    constexpr static uint32 MaxClips = 16u;
+
     struct DrawState
     {
       Transform2D Transform {};
-      /// @brief The clip, in target pixels; draws outside it are discarded by the scissor.
+      /// @brief The clip's bounds, in target pixels; draws outside them are discarded by the scissor.
       PixelRect2D Clip {};
+      /// @brief The shape clips in effect, an index into the frame's chains, or `NoChain`.
+      uint32 Chain {NoChain};
     };
+
+    /// @brief A clip to a rounded rect, or out of one, in the coordinates of the transform it was made under.
+    struct ClipShape
+    {
+      RoundedRect2D Shape {};
+      /// @brief Maps target pixels into the shape's coordinates.
+      Transform2D Inverse {};
+      bool Out {false};
+    };
+
+    /// @brief The shape clips in effect at once; they multiply.
+    /// @brief A clip to a path, or out of one, under the transform it was made under.
+    struct PathClip
+    {
+      Path2D Path {};
+      Transform2D Transform {};
+      FillRule Rule {FillRule::NonZero};
+      bool Out {false};
+    };
+
+    /// @brief The clips in effect at once; they multiply.
+    struct ClipChain
+    {
+      SmallList<ClipShape, 4> Shapes {};
+      List<PathClip> Paths {};
+      /// @brief The path clips' coverage: one path's cached mask, or several multiplied for this frame.
+      MaskLocation Mask {};
+      /// @brief Whether the mask is clipped out rather than to.
+      bool MaskOut {false};
+    };
+
+    enum ClipMaskMode : uint32
+    {
+      NoClipMask = 0u,
+      ClipToMask = 1u,
+      ClipOutMask = 2u,
+    };
+
+    /// @brief One shape clip, as the shader reads it (std140).
+    struct ClipData
+    {
+      Array<float, 4> Rect;
+      Array<float, 4> Radii;
+      /// @brief The inverse transform's A, B, C and D.
+      Array<float, 4> InverseLinear;
+      /// @brief The inverse transform's E and F, then 1 for a clip-out.
+      Array<float, 4> InverseTranslation;
+    };
+
+    struct ClipUniforms
+    {
+      uint32 Count;
+      /// @brief `ClipMaskMode`.
+      uint32 MaskMode;
+      Array<uint32, 2> Padding;
+      /// @brief The target pixels the mask covers: x, y, width and height.
+      Array<int32, 4> MaskBounds;
+      /// @brief The mask's first texel in its texture, then padding.
+      Array<int32, 4> MaskOrigin;
+      Array<ClipData, MaxClips> Clips;
+    };
+    static_assert(sizeof(ClipData) == 64u, "ClipData mirrors the shader's std140 Clip.");
+    static_assert(sizeof(ClipUniforms) == 48u + 64u * MaxClips,
+                  "ClipUniforms mirrors the shader's std140 block.");
 
     /// @brief A run of instances drawn with one scissor and texture. Untextured instances join any batch.
     struct Batch
@@ -142,6 +215,7 @@ namespace krys::gfx
       uint32 FirstInstance {0u};
       uint32 InstanceCount {0u};
       PixelRect2D Scissor {};
+      uint32 Chain {NoChain};
       TextureHandle Texture {};
       SamplerHandle Sampler {};
     };
@@ -169,6 +243,9 @@ namespace krys::gfx
     TextureHandle _whiteTexture {};
     MaskAtlas _masks;
     PathStroker _stroker {};
+    /// @brief Combines nested path clips.
+    PathRasteriser _rasteriser {};
+    List<float> _combinedClip {};
     List<float> _dashes {};
     Renderer2DStats _stats {};
     SmallList<TargetPipeline, 2> _pipelines {};
@@ -178,6 +255,7 @@ namespace krys::gfx
     List<DrawState> _savedStates {};
     List<RectInstance> _rects {};
     List<Batch> _batches {};
+    List<ClipChain> _chains {};
 
   public:
     /// @brief Compiles the shaders; pipelines are created per target format on first use.
@@ -209,11 +287,22 @@ namespace krys::gfx
     void SetTransform(const Transform2D &transform) noexcept;
     KRYS_NODISCARD const Transform2D &GetTransform() const noexcept;
 
-    /// @brief Intersects the clip with a rect in the current coordinates. The clip is in whole target
-    /// pixels: a pixel is inside when its centre is.
-    /// @note Only transforms that keep rects axis-aligned are supported for now; under others the clip is
-    /// the rect's bounding box.
+    /// @brief Intersects the clip with a rect in the current coordinates. A rect whose edges land on whole
+    /// target pixels, under a transform that keeps rects axis-aligned, is the scissor alone.
     void ClipRect(const Rect2D &rect) noexcept;
+    /// @brief Intersects the clip with a rounded rect in the current coordinates, its radii constrained as
+    /// `FillRoundedRect`'s are.
+    void ClipRoundedRect(const RoundedRect2D &rect) noexcept;
+    /// @brief Clips out a rect in the current coordinates: later draws skip it.
+    void ClipOutRect(const Rect2D &rect) noexcept;
+    /// @brief Clips out a rounded rect in the current coordinates.
+    void ClipOutRoundedRect(const RoundedRect2D &rect) noexcept;
+    /// @brief Intersects the clip with a path in the current coordinates, through its coverage mask.
+    /// @note One path clip at a time uses its cached mask; nesting a second multiplies their coverage on the
+    /// CPU into a mask over the clip's bounds, made again every frame.
+    void ClipPath(const Path2D &path, FillRule rule) noexcept;
+    /// @brief Clips out a path in the current coordinates.
+    void ClipOutPath(const Path2D &path, FillRule rule) noexcept;
 
     void FillRect(const Rect2D &rect, SRGBA<uint8> colour) noexcept;
     /// @brief Fills a rounded rect. Negative radii are treated as zero, and radii that don't fit are scaled
@@ -259,6 +348,11 @@ namespace krys::gfx
     /// when nothing would show.
     void AddInstance(RectInstance instance, const Transform2D &transform, TextureHandle texture,
                      SamplerHandle sampler) noexcept;
+
+    /// @brief Adds a shape clip to the current chain, in a new chain.
+    void AddClip(RoundedRect2D shape, bool out) noexcept;
+    /// @brief Adds a path clip to the current chain, in a new chain.
+    void AddPathClip(const Path2D &path, FillRule rule, bool out) noexcept;
 
     /// @brief The target pixels whose centres are inside the rect from (left, top) to (right, bottom).
     KRYS_NODISCARD static PixelRect2D ToPixelRect(float left, float top, float right, float bottom) noexcept;

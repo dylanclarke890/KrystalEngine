@@ -151,20 +151,8 @@ namespace krys::gfx
       const auto localClip = Offset(clip, -offsetX, -offsetY);
       auto mask = _rasteriser.Rasterise(path, shape, rule, localClip);
       ++_stats.Rasterised;
-      if (mask.Bounds.IsEmpty())
-      {
-        return {};
-      }
-      const auto texture =
-        CreateMaskTexture(mask.Bounds.Width, mask.Bounds.Height, u8"Render2D.Mask.Transient");
-      if (!texture.IsValid())
-      {
-        return {};
-      }
-      const PixelRect2D texels {.X = 0, .Y = 0, .Width = mask.Bounds.Width, .Height = mask.Bounds.Height};
-      Upload(texture, texels, mask);
-      _retired.push_back({.Texture = texture, .Frame = frame});
-      return {.Texture = texture, .Texels = texels, .Bounds = Offset(mask.Bounds, offsetX, offsetY)};
+      mask.Bounds = Offset(mask.Bounds, offsetX, offsetY);
+      return UploadTransient(mask);
     }
 
     constexpr PixelRect2D everywhere {
@@ -207,6 +195,25 @@ namespace krys::gfx
       .Texture = texture, .Texels = entry.Texels, .Bounds = Offset(entry.Bounds, offsetX, offsetY)};
     _entries.emplace(krys::move(key), entry);
     return location;
+  }
+
+  MaskLocation MaskAtlas::UploadTransient(const CoverageMask &mask) noexcept
+  {
+    Collect();
+    if (mask.Bounds.IsEmpty())
+    {
+      return {};
+    }
+    const auto texture =
+      CreateMaskTexture(mask.Bounds.Width, mask.Bounds.Height, u8"Render2D.Mask.Transient");
+    if (!texture.IsValid())
+    {
+      return {};
+    }
+    const PixelRect2D texels {.X = 0, .Y = 0, .Width = mask.Bounds.Width, .Height = mask.Bounds.Height};
+    Upload(texture, texels, mask);
+    _retired.push_back({.Texture = texture, .Frame = _device->FrameNumber()});
+    return {.Texture = texture, .Texels = texels, .Bounds = mask.Bounds};
   }
 
   void MaskAtlas::Collect() noexcept

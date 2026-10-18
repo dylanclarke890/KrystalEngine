@@ -42,6 +42,7 @@ layout(location = 7) flat out vec4 v_UVRect;
 layout(location = 8) flat out uint v_Flags;
 layout(location = 9) flat out vec4 v_Hole; // the hole's centre relative to the rect's, and its half size
 layout(location = 10) flat out vec4 v_HoleRadii;
+layout(location = 11) out vec2 v_Pixel; // in target pixels
 
 vec3 SrgbToLinear(vec3 c)
 {
@@ -73,6 +74,7 @@ void main()
   v_Flags = a_Flags;
   v_Hole = vec4(a_HoleRect.xy + a_HoleRect.zw * 0.5 - (a_Rect.xy + halfSize), a_HoleRect.zw * 0.5);
   v_HoleRadii = a_HoleRadii;
+  v_Pixel = pixel;
 
   // sRGB targets blend in linear light and encode on write; other targets blend the encoded values.
   vec3 rgb = u_DecodeSrgb != 0u ? SrgbToLinear(a_Colour.rgb) : a_Colour.rgb;
@@ -99,6 +101,27 @@ layout(location = 7) flat in vec4 v_UVRect;
 layout(location = 8) flat in uint v_Flags;
 layout(location = 9) flat in vec4 v_Hole;
 layout(location = 10) flat in vec4 v_HoleRadii;
+layout(location = 11) in vec2 v_Pixel;
+
+struct Clip
+{
+  vec4 Rect;               // x, y, width, height in the clip's coordinates
+  vec4 Radii;              // top-left, top-right, bottom-right, bottom-left
+  vec4 InverseLinear;      // the inverse transform's a, b, c, d: from target pixels to the clip
+  vec4 InverseTranslation; // the inverse transform's e, f; then 1 for a clip-out
+};
+
+layout(binding = 1, std140) uniform Clips
+{
+  uint u_ClipCount;
+  uint u_ClipMaskMode;    // 0: none; 1: clip to the mask; 2: clip it out
+  ivec4 u_ClipMaskBounds; // the target pixels the mask covers: x, y, width, height
+  ivec4 u_ClipMaskOrigin; // the mask's first texel
+  Clip u_Clips[16];
+};
+
+// The path clips' coverage, a texel per target pixel.
+layout(binding = 1) uniform sampler2D u_ClipMask;
 
 layout(location = 0) out vec4 o_Colour;
 
@@ -119,17 +142,17 @@ vec3 LinearToSrgb(vec3 c)
 }
 
 // How much of a pixel an edge covers, from the pixel's distance past the edge in local units and the
-// edge's outward normal. The distance grows by length(v_InverseTranspose * normal) local units per target
+// edge's outward normal. The distance grows by length(inverseTranspose * normal) local units per target
 // pixel, so that converts it to pixels; it's exactly 1 without a transform, which keeps pixel-aligned edges
 // sharp. Coverage ramps over one pixel centred on the edge.
-float EdgeCoverage(float distance, vec2 normal)
+float EdgeCoverage(float distance, vec2 normal, mat2 inverseTranspose)
 {
-  return clamp(0.5 - distance / length(v_InverseTranspose * normal), 0.0, 1.0);
+  return clamp(0.5 - distance / length(inverseTranspose * normal), 0.0, 1.0);
 }
 
 // How much of the pixel at p (relative to the box's centre, in local units) a rounded box covers. y points
 // down, so the top corners are where p.y < 0.
-float Coverage(vec2 p, vec2 halfSize, vec4 radii)
+float Coverage(vec2 p, vec2 halfSize, vec4 radii, mat2 inverseTranspose)
 {
   vec2 side = vec2(p.x < 0.0 ? -1.0 : 1.0, p.y < 0.0 ? -1.0 : 1.0);
   float r = p.x < 0.0 ? (p.y < 0.0 ? radii.x : radii.w) : (p.y < 0.0 ? radii.y : radii.z);
@@ -137,13 +160,40 @@ float Coverage(vec2 p, vec2 halfSize, vec4 radii)
   if (r > 0.0 && q.x > 0.0 && q.y > 0.0)
   {
     // Around a rounded corner: the distance to its arc.
-    return EdgeCoverage(length(q) - r, normalize(q) * side);
+    return EdgeCoverage(length(q) - r, normalize(q) * side, inverseTranspose);
   }
 
   // Elsewhere the box's vertical and horizontal edges cover the pixel independently, so a square corner
   // halfway across a pixel and halfway down it covers a quarter of it, as its area does.
   vec2 d = abs(p) - halfSize;
-  return EdgeCoverage(d.x, vec2(side.x, 0.0)) * EdgeCoverage(d.y, vec2(0.0, side.y));
+  return EdgeCoverage(d.x, vec2(side.x, 0.0), inverseTranspose)
+         * EdgeCoverage(d.y, vec2(0.0, side.y), inverseTranspose);
+}
+
+// How much of the pixel the clips let through: each shape clip's coverage, or one minus it for a clip-out,
+// multiplied together, and then the path clips' mask's.
+float ClipCoverage()
+{
+  float coverage = 1.0;
+  for (uint i = 0u; i < u_ClipCount; ++i)
+  {
+    Clip clip = u_Clips[i];
+    mat2 inverseLinear = mat2(clip.InverseLinear.xy, clip.InverseLinear.zw);
+    vec2 local = inverseLinear * v_Pixel + clip.InverseTranslation.xy;
+    vec2 halfSize = clip.Rect.zw * 0.5;
+    float inside = Coverage(local - (clip.Rect.xy + halfSize), halfSize, clip.Radii, transpose(inverseLinear));
+    coverage *= clip.InverseTranslation.z != 0.0 ? 1.0 - inside : inside;
+  }
+
+  if (u_ClipMaskMode != 0u)
+  {
+    // Outside its bounds, the mask covers nothing.
+    ivec2 texel = ivec2(floor(v_Pixel)) - u_ClipMaskBounds.xy;
+    bool inside = all(greaterThanEqual(texel, ivec2(0))) && all(lessThan(texel, u_ClipMaskBounds.zw));
+    float mask = inside ? texelFetch(u_ClipMask, texel + u_ClipMaskOrigin.xy, 0).r : 0.0;
+    coverage *= u_ClipMaskMode == 1u ? mask : 1.0 - mask;
+  }
+  return coverage;
 }
 
 // A texel, premultiplied and in the target's blending space.
@@ -182,11 +232,12 @@ void main()
   vec2 dx = dFdx(v_UV);
   vec2 dy = dFdy(v_UV);
 
-  float coverage = Coverage(v_Position, v_HalfSize, v_Radii);
+  float coverage = Coverage(v_Position, v_HalfSize, v_Radii, v_InverseTranspose);
   if ((v_Flags & Hole) != 0u)
   {
-    coverage *= 1.0 - Coverage(v_Position - v_Hole.xy, v_Hole.zw, v_HoleRadii);
+    coverage *= 1.0 - Coverage(v_Position - v_Hole.xy, v_Hole.zw, v_HoleRadii, v_InverseTranspose);
   }
+  coverage *= ClipCoverage();
 
   vec4 colour = v_Colour;
   if ((v_Flags & Textured) != 0u)
@@ -324,7 +375,10 @@ void main()
                     "The target needs a texture or swapchain.");
     _commands = &commands;
     _target = target;
-    _state = {.Transform = {}, .Clip = {.X = 0, .Y = 0, .Width = target.Width, .Height = target.Height}};
+    _state = {.Transform = {},
+              .Clip = {.X = 0, .Y = 0, .Width = target.Width, .Height = target.Height},
+              .Chain = NoChain};
+    _chains.clear();
     _savedStates.clear();
     _rects.clear();
     _batches.clear();
@@ -378,27 +432,181 @@ void main()
 
   void Renderer2D::ClipRect(const Rect2D &rect) noexcept
   {
+    // On whole pixels and axis-aligned, the scissor alone is the clip.
     const auto &transform = _state.Transform;
-    // FIXME: clip to the rotated or skewed rect itself (an antialiased clip mask, G2g), not its bounding box.
-    krys_debug_assert_msg(transform.PreservesAxisAlignment(),
-                          "Clips under rotations and skews aren't supported yet.");
-
-    const Array<Vec2f, 4> corners {transform.Apply({rect.X, rect.Y}),
-                                   transform.Apply({rect.X + rect.Width, rect.Y}),
-                                   transform.Apply({rect.X, rect.Y + rect.Height}),
-                                   transform.Apply({rect.X + rect.Width, rect.Y + rect.Height})};
-    float left = corners[0].x;
-    float top = corners[0].y;
-    float right = corners[0].x;
-    float bottom = corners[0].y;
-    for (const auto &corner : corners)
+    if (transform.PreservesAxisAlignment())
     {
-      left = std::min(left, corner.x);
-      top = std::min(top, corner.y);
-      right = std::max(right, corner.x);
-      bottom = std::max(bottom, corner.y);
+      const auto a = transform.Apply({rect.X, rect.Y});
+      const auto b = transform.Apply({rect.X + rect.Width, rect.Y + rect.Height});
+      const float left = std::min(a.x, b.x);
+      const float top = std::min(a.y, b.y);
+      const float right = std::max(a.x, b.x);
+      const float bottom = std::max(a.y, b.y);
+      if (left == std::floor(left) && top == std::floor(top) && right == std::floor(right)
+          && bottom == std::floor(bottom))
+      {
+        _state.Clip = Intersect(_state.Clip, ToPixelRect(left, top, right, bottom));
+        return;
+      }
     }
-    _state.Clip = Intersect(_state.Clip, ToPixelRect(left, top, right, bottom));
+    AddClip({.Rect = rect, .Radii = {}}, false);
+  }
+
+  void Renderer2D::ClipRoundedRect(const RoundedRect2D &rect) noexcept
+  {
+    if (rect.Radii == CornerRadii2D {})
+    {
+      ClipRect(rect.Rect);
+      return;
+    }
+    AddClip(rect, false);
+  }
+
+  void Renderer2D::ClipOutRect(const Rect2D &rect) noexcept
+  {
+    AddClip({.Rect = rect, .Radii = {}}, true);
+  }
+
+  void Renderer2D::ClipOutRoundedRect(const RoundedRect2D &rect) noexcept
+  {
+    AddClip(rect, true);
+  }
+
+  void Renderer2D::ClipPath(const Path2D &path, FillRule rule) noexcept
+  {
+    AddPathClip(path, rule, false);
+  }
+
+  void Renderer2D::ClipOutPath(const Path2D &path, FillRule rule) noexcept
+  {
+    AddPathClip(path, rule, true);
+  }
+
+  void Renderer2D::AddPathClip(const Path2D &path, FillRule rule, bool out) noexcept
+  {
+    // Clipping to nothing leaves nothing; clipping nothing out changes nothing.
+    if (path.IsEmpty() || _state.Clip.IsEmpty() || !_state.Transform.Inverse())
+    {
+      if (!out)
+      {
+        _state.Clip = {};
+      }
+      return;
+    }
+
+    ClipChain chain = _state.Chain != NoChain ? _chains[_state.Chain] : ClipChain {};
+    chain.Paths.push_back({.Path = path, .Transform = _state.Transform, .Rule = rule, .Out = out});
+
+    if (chain.Paths.size() == 1u)
+    {
+      const auto mask = _masks.GetMask(path, _state.Transform, rule, _state.Clip);
+      if (mask.Bounds.IsEmpty())
+      {
+        if (!out)
+        {
+          _state.Clip = {};
+        }
+        return;
+      }
+      if (!out)
+      {
+        _state.Clip = Intersect(_state.Clip, mask.Bounds);
+      }
+      chain.Mask = mask;
+      chain.MaskOut = out;
+    }
+    else
+    {
+      // Several path clips multiply into one mask over the clip's bounds, for this frame.
+      const auto region = _state.Clip;
+      const size_t pixelCount = static_cast<size_t>(region.Width) * region.Height;
+      _combinedClip.assign(pixelCount, 1.f);
+      for (const auto &clip : chain.Paths)
+      {
+        const auto coverage = _rasteriser.Rasterise(clip.Path, clip.Transform, clip.Rule, region);
+        for (uint32 y = 0u; y < region.Height; ++y)
+        {
+          for (uint32 x = 0u; x < region.Width; ++x)
+          {
+            const int32 pixelX = region.X + static_cast<int32>(x);
+            const int32 pixelY = region.Y + static_cast<int32>(y);
+            const auto &bounds = coverage.Bounds;
+            const bool covered = pixelX >= bounds.X && pixelY >= bounds.Y
+                                 && pixelX < bounds.X + static_cast<int32>(bounds.Width)
+                                 && pixelY < bounds.Y + static_cast<int32>(bounds.Height);
+            const float inside = covered ? static_cast<float>(coverage.At(pixelX, pixelY)) / 255.f : 0.f;
+            _combinedClip[static_cast<size_t>(y) * region.Width + x] *= clip.Out ? 1.f - inside : inside;
+          }
+        }
+      }
+
+      CoverageMask combined {.Bounds = region, .Coverage = {}};
+      combined.Coverage.resize(pixelCount);
+      for (size_t i = 0u; i < pixelCount; ++i)
+      {
+        combined.Coverage[i] = static_cast<uint8>(std::clamp(_combinedClip[i], 0.f, 1.f) * 255.f + 0.5f);
+      }
+      chain.Mask = _masks.UploadTransient(combined);
+      chain.MaskOut = false;
+    }
+
+    _chains.push_back(krys::move(chain));
+    _state.Chain = static_cast<uint32>(_chains.size() - 1u);
+  }
+
+  void Renderer2D::AddClip(RoundedRect2D shape, bool out) noexcept
+  {
+    // Clipping to nothing leaves nothing; clipping nothing out changes nothing.
+    const auto inverse = _state.Transform.Inverse();
+    if (!inverse || shape.Rect.Width <= 0.f || shape.Rect.Height <= 0.f)
+    {
+      if (!out)
+      {
+        _state.Clip = {};
+      }
+      return;
+    }
+    shape.Radii = ConstrainRadii(shape.Rect, shape.Radii);
+
+    if (!out)
+    {
+      // The scissor covers every pixel the shape's antialiased edge reaches.
+      const auto &transform = _state.Transform;
+      const auto &rect = shape.Rect;
+      const Array<Vec2f, 4> corners {transform.Apply({rect.X, rect.Y}),
+                                     transform.Apply({rect.X + rect.Width, rect.Y}),
+                                     transform.Apply({rect.X, rect.Y + rect.Height}),
+                                     transform.Apply({rect.X + rect.Width, rect.Y + rect.Height})};
+      float left = corners[0].x;
+      float top = corners[0].y;
+      float right = corners[0].x;
+      float bottom = corners[0].y;
+      for (const auto &corner : corners)
+      {
+        left = std::min(left, corner.x);
+        top = std::min(top, corner.y);
+        right = std::max(right, corner.x);
+        bottom = std::max(bottom, corner.y);
+      }
+      const auto x0 = static_cast<int32>(std::floor(left));
+      const auto y0 = static_cast<int32>(std::floor(top));
+      const auto x1 = static_cast<int32>(std::ceil(right));
+      const auto y1 = static_cast<int32>(std::ceil(bottom));
+      _state.Clip = Intersect(_state.Clip, {.X = x0,
+                                            .Y = y0,
+                                            .Width = static_cast<uint32>(std::max(x1 - x0, 0)),
+                                            .Height = static_cast<uint32>(std::max(y1 - y0, 0))});
+    }
+
+    ClipChain chain = _state.Chain != NoChain ? _chains[_state.Chain] : ClipChain {};
+    krys_assert_msg(chain.Shapes.size() < MaxClips, "Too many shape clips at once.");
+    if (chain.Shapes.size() >= MaxClips)
+    {
+      return;
+    }
+    chain.Shapes.push_back({.Shape = shape, .Inverse = *inverse, .Out = out});
+    _chains.push_back(krys::move(chain));
+    _state.Chain = static_cast<uint32>(_chains.size() - 1u);
   }
 
   void Renderer2D::FillRect(const Rect2D &rect, SRGBA<uint8> colour) noexcept
@@ -669,7 +877,7 @@ void main()
     const bool textured = texture.IsValid();
     auto joins = [&](const Batch &batch)
     {
-      return batch.Scissor == _state.Clip
+      return batch.Scissor == _state.Clip && batch.Chain == _state.Chain
              && (!textured || !batch.Texture.IsValid()
                  || (batch.Texture == texture && batch.Sampler == sampler));
     };
@@ -678,6 +886,7 @@ void main()
       _batches.push_back({.FirstInstance = static_cast<uint32>(_rects.size()),
                           .InstanceCount = 0u,
                           .Scissor = _state.Clip,
+                          .Chain = _state.Chain,
                           .Texture = {},
                           .Sampler = {}});
     }
@@ -731,8 +940,53 @@ void main()
         commands.BindVertexBuffer(0u, rects.Buffer, rects.Offset);
         TextureHandle boundTexture {};
         SamplerHandle boundSampler {};
+        uint64 boundChain = ~0ull;
         for (const auto &batch : _batches)
         {
+          // Every batch binds its clip chain, even an empty one: the shader always reads the block.
+          if (batch.Chain != boundChain)
+          {
+            auto clips = _device->AllocateTransient(sizeof(ClipUniforms));
+            if (!clips.IsValid())
+            {
+              break;
+            }
+            ClipUniforms data {};
+            TextureHandle clipMask = _whiteTexture;
+            if (batch.Chain != NoChain)
+            {
+              const auto &chain = _chains[batch.Chain];
+              if (chain.Mask.Texture.IsValid())
+              {
+                const auto &bounds = chain.Mask.Bounds;
+                data.MaskMode = chain.MaskOut ? ClipOutMask : ClipToMask;
+                data.MaskBounds = {bounds.X, bounds.Y, static_cast<int32>(bounds.Width),
+                                   static_cast<int32>(bounds.Height)};
+                data.MaskOrigin = {chain.Mask.Texels.X, chain.Mask.Texels.Y, 0, 0};
+                clipMask = chain.Mask.Texture;
+              }
+              const auto &shapes = chain.Shapes;
+              data.Count = static_cast<uint32>(shapes.size());
+              for (size_t i = 0u; i < shapes.size(); ++i)
+              {
+                const auto &clip = shapes[i];
+                const auto &rect = clip.Shape.Rect;
+                const auto &radii = clip.Shape.Radii;
+                const auto &inverse = clip.Inverse;
+                data.Clips[i] = {
+                  .Rect = {rect.X, rect.Y, rect.Width, rect.Height},
+                  .Radii = {radii.TopLeft, radii.TopRight, radii.BottomRight, radii.BottomLeft},
+                  .InverseLinear = {inverse.A, inverse.B, inverse.C, inverse.D},
+                  .InverseTranslation = {inverse.E, inverse.F, clip.Out ? 1.f : 0.f, 0.f}};
+              }
+            }
+            std::memcpy(clips.Data.data(), &data, sizeof(data));
+            commands.BindUniformBuffer(1u, clips.Buffer, clips.Offset, sizeof(ClipUniforms));
+            // Unit 1 always has a texture: drivers check every declared sampler at each draw.
+            commands.BindTexture(1u, clipMask, _nearestSampler);
+            boundChain = batch.Chain;
+          }
+
           // Untextured batches never sample, but drivers still check the sampler's texture at every draw,
           // so they get the white texture unless another one is already bound.
           const auto texture = batch.Texture.IsValid()  ? batch.Texture
@@ -761,6 +1015,7 @@ void main()
     _savedStates.clear();
     _rects.clear();
     _batches.clear();
+    _chains.clear();
   }
 
   Expected<PipelineHandle> Renderer2D::GetPipeline(TextureFormat format) noexcept

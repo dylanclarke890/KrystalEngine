@@ -2,6 +2,7 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Maths/Vector.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include <cmath>
 
 namespace krys::gfx
@@ -61,6 +62,21 @@ namespace krys::gfx
     KRYS_NODISCARD constexpr float Determinant() const noexcept
     {
       return A * D - B * C;
+    }
+
+    /// @brief The transform that undoes this one; empty when this one flattens the plane.
+    KRYS_NODISCARD Maybe<Transform2D> Inverse() const noexcept
+    {
+      const float determinant = Determinant();
+      if (determinant == 0.f || !std::isfinite(determinant))
+      {
+        return {};
+      }
+      const float scale = 1.f / determinant;
+      Transform2D inverse {.A = D * scale, .B = -B * scale, .C = -C * scale, .D = A * scale};
+      inverse.E = -(inverse.A * E + inverse.C * F);
+      inverse.F = -(inverse.B * E + inverse.D * F);
+      return inverse;
     }
 
     /// @brief Whether the transform maps axis-aligned rects to axis-aligned rects: scales, translations,

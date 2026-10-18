@@ -131,6 +131,8 @@ namespace krys::gfx
     /// cached. `clip` only limits masks too large to cache.
     KRYS_NODISCARD MaskLocation GetMask(const Path2D &path, const Transform2D &transform, FillRule rule,
                                         const PixelRect2D &clip) noexcept;
+    /// @brief Uploads a mask made elsewhere into a texture of its own, kept for this frame only.
+    KRYS_NODISCARD MaskLocation UploadTransient(const CoverageMask &mask) noexcept;
 
     KRYS_NODISCARD const MaskAtlasStats &Stats() const noexcept
     {

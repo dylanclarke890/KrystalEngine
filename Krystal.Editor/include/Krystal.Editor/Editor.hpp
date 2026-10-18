@@ -159,9 +159,9 @@ namespace krys
         {{280.f + slide, height - 80.f, 40.f, 40.f}, gfx::CornerRadii2D::Uniform(20.f)},
         SRGBA<uint8> {255, 255, 255});
 
-      // A list in the sidebar, clipped to it, scrolling up forever.
+      // A list in the sidebar, clipped to a rounded rect, scrolling up forever.
       _renderer->Save();
-      _renderer->ClipRect({16.f, 16.f, 208.f, height - 32.f});
+      _renderer->ClipRoundedRect({{16.f, 16.f, 208.f, height - 32.f}, gfx::CornerRadii2D::Uniform(12.f)});
       const float rowHeight = 36.f;
       const float scroll = std::fmod(_time * 40.f, rowHeight * 2.f);
       _renderer->Translate(16.f, 16.f - scroll);
@@ -210,6 +210,12 @@ namespace krys
 
       // Borders: a frame around the image with a rounded hole (analytic), and one with elliptical inner
       // corners (a path filled under even-odd, so through a mask).
+      // A drop shadow under the image's frame, clipped out of the frame so it never shows through it.
+      _renderer->Save();
+      _renderer->ClipOutRoundedRect({{272.f, 28.f, 144.f, 144.f}, gfx::CornerRadii2D::Uniform(4.f)});
+      _renderer->FillRoundedRect({{278.f, 36.f, 144.f, 144.f}, gfx::CornerRadii2D::Uniform(6.f)},
+                                 SRGBA<uint8> {0, 0, 0, 110});
+      _renderer->Restore();
       _renderer->FillRectWithRoundedHole({272.f, 28.f, 144.f, 144.f},
                                          {{280.f, 36.f, 128.f, 128.f}, gfx::CornerRadii2D::Uniform(10.f)},
                                          SRGBA<uint8> {230, 230, 240});
@@ -226,6 +232,37 @@ namespace krys
       _renderer->Restore();
 
       DrawStrokes();
+
+      // Path clips: the image scrolling behind a turning star-shaped window, and a panel with a circle cut
+      // out of it.
+      if (_image.IsValid())
+      {
+        _renderer->Save();
+        _renderer->Translate(340.f, 565.f);
+        _renderer->Rotate(_time * 0.4f);
+        _renderer->ClipPath(Star(45.f), gfx::FillRule::NonZero);
+        _renderer->SetTransform({});
+        const float drift = std::fmod(_time * 20.f, 32.f);
+        for (int y = 0; y < 4; ++y)
+        {
+          for (int x = 0; x < 4; ++x)
+          {
+            _renderer->DrawImage(_image,
+                                 {290.f + static_cast<float>(x) * 32.f - drift,
+                                  515.f + static_cast<float>(y) * 32.f - drift, 32.f, 32.f},
+                                 {.Filter = gfx::SamplerFilter::Nearest});
+          }
+        }
+        _renderer->Restore();
+      }
+
+      gfx::Path2D hole;
+      hole.AddEllipse({490.f, 565.f}, {22.f, 22.f});
+      _renderer->Save();
+      _renderer->ClipOutPath(hole, gfx::FillRule::NonZero);
+      _renderer->FillRoundedRect({{420.f, 528.f, 140.f, 74.f}, gfx::CornerRadii2D::Uniform(10.f)},
+                                 SRGBA<uint8> {90, 160, 120});
+      _renderer->Restore();
 
       _renderer->End();
     }
@@ -271,6 +308,28 @@ namespace krys
       for (int i = 0; i < 4; ++i)
       {
         _renderer->StrokeLine(corners[i], corners[(i + 1) % 4], dashed, light);
+      }
+
+      // Inside the box, the image scrolls behind a rounded clip that turns.
+      if (_image.IsValid())
+      {
+        _renderer->Save();
+        _renderer->Translate(890.f, 407.f);
+        _renderer->Rotate(std::sin(_time * 0.7f) * 0.6f);
+        _renderer->ClipRoundedRect({{-80.f, -42.f, 160.f, 84.f}, gfx::CornerRadii2D::Uniform(18.f)});
+        _renderer->SetTransform({});
+        const float scroll = std::fmod(_time * 30.f, 64.f);
+        for (int y = 0; y < 4; ++y)
+        {
+          for (int x = 0; x < 5; ++x)
+          {
+            _renderer->DrawImage(_image,
+                                 {770.f + static_cast<float>(x) * 64.f - scroll,
+                                  335.f + static_cast<float>(y) * 64.f - scroll, 64.f, 64.f},
+                                 {.Filter = gfx::SamplerFilter::Nearest});
+          }
+        }
+        _renderer->Restore();
       }
 
       // Marching ants: a dashed circle whose pattern slides round it.
