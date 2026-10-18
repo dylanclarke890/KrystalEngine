@@ -261,15 +261,19 @@ namespace krys::gfx::opengl
     _currentSurface = target;
   }
 
-  void GLContext::SwapBuffers(NativeHandle surface, bool vsync) noexcept
+  void GLContext::SetSwapInterval(NativeHandle surface, int interval) noexcept
   {
+    // wglSwapIntervalEXT applies to the surface the context is current on.
     MakeCurrent(surface);
-    int interval = vsync ? 1 : 0;
-    if (interval != _swapInterval && IsWGLExtensionSupported("WGL_EXT_swap_control"))
+    if (IsWGLExtensionSupported("WGL_EXT_swap_control"))
     {
       KRYS_MAYBE_UNUSED auto result = opengl::wglSwapIntervalEXT(interval);
-      _swapInterval = interval;
     }
+  }
+
+  void GLContext::SwapBuffers(NativeHandle surface) noexcept
+  {
+    MakeCurrent(surface);
     auto result = opengl::wglSwapBuffers(surface.As<HDC>());
     krys_assert_msg(result, "Failed to present.");
   }

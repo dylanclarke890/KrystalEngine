@@ -818,11 +818,18 @@ namespace krys::gfx::opengl
 
   void GLDevice::Present(SwapchainHandle swapchain) noexcept
   {
-    const auto *existing = _swapchains.TryGet(swapchain);
+    auto *existing = _swapchains.TryGet(swapchain);
     krys_debug_assert_msg(existing != nullptr, "Presenting a stale or invalid swapchain.");
     if (existing != nullptr)
     {
-      _context->SwapBuffers(existing->Surface, existing->VSync);
+      // Drivers may keep the interval per window, so each swapchain tracks what it last set.
+      int interval = existing->VSync ? 1 : 0;
+      if (interval != existing->SwapInterval)
+      {
+        _context->SetSwapInterval(existing->Surface, interval);
+        existing->SwapInterval = interval;
+      }
+      _context->SwapBuffers(existing->Surface);
     }
   }
 

@@ -77,6 +77,8 @@ namespace krys::gfx::opengl
     uint32 Height {0u};
     TextureFormat Format {TextureFormat::RGBA8Srgb};
     bool VSync {true};
+    /// @brief The swap interval last set on this window, or -1 if none has been set yet.
+    int SwapInterval {-1};
   };
 
   /// @brief The fixed-function state last applied, so binding a pipeline only changes what differs.

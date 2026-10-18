@@ -10,11 +10,10 @@ namespace krys::gfx
   /// @brief The images a window presents.
   struct SwapchainDesc
   {
-    /// @brief The native window (an `HWND` on Windows).
+    /// @brief The native window (an `HWND` on Windows, for example).
     NativeHandle Window {};
     uint32 Width {0u};
     uint32 Height {0u};
-    /// @brief `RGBA8Unorm` or `RGBA8Srgb`.
     TextureFormat Format {TextureFormat::RGBA8Srgb};
     bool VSync {true};
     utf8_stringview DebugName {};

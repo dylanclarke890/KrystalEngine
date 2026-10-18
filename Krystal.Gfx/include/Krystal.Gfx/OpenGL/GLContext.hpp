@@ -20,7 +20,6 @@ namespace krys::gfx::opengl
     void *_context {nullptr};
     void *_currentSurface {nullptr};
     int _pixelFormat {0};
-    int _swapInterval {-1};
     bool _supportsSrgb {false};
 
   public:
@@ -37,8 +36,11 @@ namespace krys::gfx::opengl
 
     /// @brief Makes the context current on a window's surface, or on the hidden window's if null.
     void MakeCurrent(NativeHandle surface) noexcept;
-    /// @brief Presents a window's surface with the given vertical sync.
-    void SwapBuffers(NativeHandle surface, bool vsync) noexcept;
+    /// @brief Sets a window surface's swap interval: 0 presents immediately, 1 waits for vertical sync.
+    /// @note The interval applies to the surface, not the context, on some drivers; set it per window.
+    void SetSwapInterval(NativeHandle surface, int interval) noexcept;
+    /// @brief Presents a window's surface.
+    void SwapBuffers(NativeHandle surface) noexcept;
 
     /// @brief Whether windows' default framebuffers can encode sRGB.
     KRYS_NODISCARD bool SupportsSrgb() const noexcept
