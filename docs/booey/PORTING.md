@@ -555,7 +555,7 @@ Graph from every `css/values/color` file (headers-only): 156 files (`tools/port/
 | `rendering/RenderTheme.cpp` (`systemColor`) | `port` | `Style/Values/Color/SystemColor.hpp`, `src/.../SystemColor.cpp` | on | tested. The base `RenderTheme::systemColor` as a free function `style::SystemColor`; no platform themes. |
 | `style/values/color/StyleColorOptions.h` | `port` | `Style/Values/Color/ColorOptions.hpp` | on | `style::ColorOptions`, a flags enum. `operator<<` not ported. |
 | `style/StyleForVisitedLink.h` | `have` | `Style/ForVisitedLink.hpp` | on | |
-| `platform/graphics/GraphicsTypes.h` (`BlendMode` only) | `port` | `Graphics/GraphicsTypes.hpp` | on | `BlendMode` and `BlendModeName` moved to `Krystal.Core/Colour/BlendMode.hpp` (2026-10-18, for Render2D's blend modes); `GraphicsTypes.hpp` keeps `using krys::BlendMode;`. `GradientSpreadMethod` moved to `Krystal.Core/Colour/GradientSpreadMethod.hpp` the same way (2026-10-18, for Render2D's gradients). |
+| `platform/graphics/GraphicsTypes.h` (`BlendMode` only) | `port` | `Graphics/GraphicsTypes.hpp` | on | `BlendMode` and `BlendModeName` moved to `Krystal.Core/Colour/BlendMode.hpp` (2026-10-18, for Render2D's blend modes); `GraphicsTypes.hpp` keeps `using krys::BlendMode;`. `GradientSpreadMethod` moved to `Krystal.Core/Colour/GradientSpreadMethod.hpp` the same way (2026-10-18, for Render2D's gradients). `codegen/css_properties.py`'s `krystal_type_names` now reads such using-declarations as type names too (2026-10-18): it missed them, so once the code generator reran, `mix-blend-mode`'s getter lost its `Get` prefix and clashed with the type. |
 
 **Bugs fixed:**
 - `ColorType::Absolute` was `0`, so `IsColorKeyword(id, types)` never accepted absolute colour keywords; the other flags were off by one bit from upstream.
@@ -3103,7 +3103,7 @@ Graph: covered by the slice graph (`fonts-scope.md`). Read in full: `platform/gr
 | `platform/graphics/FontPlatformData.h`, `.cpp`, `freetype/FontPlatformDataFreeType.cpp` | `have*` | `Graphics/FontPlatformData.hpp`, `src/...` | on | tested. A face, a size and the synthesis flags; `updateSizeWithFontSizeAdjust` comes with the font cache (t2b). |
 | `platform/graphics/GlyphPage.h`, `freetype/GlyphPageTreeNodeFreeType.cpp` | `port` | `Graphics/GlyphPage.hpp`, `GlyphPage::Fill` in `src/Graphics/Font.cpp` | on | tested. |
 | `platform/graphics/GlyphMetricsMap.h`, `Glyph.h` | `port` | `Graphics/GlyphMetricsMap.hpp`, `Graphics/Glyph.hpp` | on | tested. No path maps (no glyph paths). |
-| (fontconfig, `freetype/FontCacheFreeType.cpp`'s lookup) | `have*` | `Graphics/FreeTypeFace.hpp`, `Graphics/FontDatabase.hpp`, `src/...` | on | tested. See decisions. |
+| (fontconfig, `freetype/FontCacheFreeType.cpp`'s lookup) | `have*` | `Graphics/FreeTypeFace.hpp`, `Graphics/FontDatabase.hpp`, `src/...` | on | tested. See decisions. `FreeTypeFace` and `FontFileData` moved to `Krystal.Text` (2026-10-18, T1: Render2D draws from the same faces), as `krys::text::FreeTypeFace`; the face reports its style (`FaceStyle`) and `CapabilitiesOfFace` (`FontDatabase.hpp`) makes the font selection capabilities from it. |
 | `platform/graphics/FontCascade.h` (`treatAsSpace`, `treatAsZeroWidthSpace`, `treatAsZeroWidthSpaceInComplexScript`, `isCharacterWhoseGlyphsShouldBeDeletedForTextRendering`, `isInvisibleReplacementObjectCharacter`) | `port` | `FontCascade` | on | tested (through glyph pages). |
 | `wtf/unicode/CharacterNames.h` (the spaces, controls and bidi formatting characters, `cjkWater`) | `port` | Krystal.Core `Text/Unicode.hpp` | on | |
 
@@ -3217,9 +3217,9 @@ Graph from `platform/graphics/ComplexTextController.h` (headers-only, following 
 |---|---|---|---|---|
 | `platform/graphics/ComplexTextController.h`, `.cpp` | `port` | `Graphics/ComplexTextController.hpp`, `src/...` | on | tested. See differences. |
 | `platform/graphics/skia/ComplexTextControllerSkia.cpp` (and `harfbuzz/ComplexTextControllerHarfBuzz.cpp`) | `port` | `src/Graphics/ComplexTextControllerHarfBuzz.cpp` | on | tested. The Skia version, with its features computed at shaping time. |
-| `platform/graphics/skia/SkiaHarfBuzzFont.h`, `.cpp`, `SkiaHarfBuzzFontCache.h`, `.cpp` | `port` | `Font::HarfBuzzFont`, `FreeTypeFace::HarfBuzzFace`, `src/Graphics/FontHarfBuzz.cpp` | on | tested. No cache: the face and font are owned by the `FreeTypeFace` and `Font`. |
+| `platform/graphics/skia/SkiaHarfBuzzFont.h`, `.cpp`, `SkiaHarfBuzzFontCache.h`, `.cpp` | `port` | `Font::HarfBuzzFont`, `FreeTypeFace::HarfBuzzFace`, `src/Graphics/FontHarfBuzz.cpp` | on | tested. No cache: the face and font are owned by the `FreeTypeFace` and `Font`. `FreeTypeFace::HarfBuzzFace` is in `Krystal.Text/src/HarfBuzz.cpp` since T1 (2026-10-18). |
 | `platform/graphics/skia/FontCacheSkia.cpp` (`computeFeatures`) | `port` | `src/Graphics/ComplexTextControllerHarfBuzz.cpp` | on | tested. |
-| `platform/graphics/harfbuzz/HbUniquePtr.h` | `port` | `Graphics/HbUniquePtr.hpp`, deleters in `src/Graphics/FontHarfBuzz.cpp` | on | HarfBuzz types are forward-declared, so public headers don't need HarfBuzz. |
+| `platform/graphics/harfbuzz/HbUniquePtr.h` | `port` | `Graphics/HbUniquePtr.hpp`, deleters in `src/Graphics/FontHarfBuzz.cpp` | on | HarfBuzz types are forward-declared, so public headers don't need HarfBuzz. Moved to `Krystal.Text/HarfBuzz.hpp` and `src/HarfBuzz.cpp` with the faces (2026-10-18, T1), as `krys::text::HbUniquePtr`. |
 | `platform/graphics/skia/FontCascadeSkia.cpp` (`fontForCombiningCharacterSequence`) | `port` | `FontCascade::FontForCombiningCharacterSequence` | on | tested. Replaces t2b's generic version. |
 | `platform/graphics/FontCascade.cpp` (the complex path) | `port` | `FontCascade` | on | tested. |
 

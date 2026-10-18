@@ -25,11 +25,12 @@ Non-goals for now:
 
 ```
 Krystal.Core                colour types (moved from Booey), CommandList
-  └─ Krystal.Gfx            the RHI: device, handles, descriptions, command buffers. No files, no caches.
-                            Backends are subdirectories (`OpenGL/`, namespace `krys::gfx::opengl`).
-                            Render2D/: 2D drawing on the RHI (fills, strokes, paths, images, glyphs, clips, layers)
-Krystal.Booey               paints into a display list; no dependency on Gfx
-Krystal.UI                  the Booey host: pages, display list replay into Render2D, glyph rasterisation, input routing
+  └─ Krystal.Text           font files and faces (FreeType, with their HarfBuzz faces), shared by Gfx and Booey
+       ├─ Krystal.Gfx       the RHI: device, handles, descriptions, command buffers. No files, no caches.
+       │                    Backends are subdirectories (`OpenGL/`, namespace `krys::gfx::opengl`).
+       │                    Render2D/: 2D drawing on the RHI (fills, strokes, paths, images, glyphs, clips, layers)
+       └─ Krystal.Booey     paints into a display list; shapes text (its port of upstream's); no dependency on Gfx
+Krystal.UI                  the Booey host: pages, display list replay into Render2D, input routing
 Krystal.Assets (later)      VFS loading, decoding, path caching, reference-counted asset handles
 ```
 
@@ -146,7 +147,6 @@ Krystal.Gfx/include/Krystal.Gfx/
   CommandBuffer.hpp    the recorder, with usage checks
   Device.hpp           the device interface; Device::Create
   OpenGL/              GLDevice, GLContext (Win32), GLMappings, the loader hooks, the Khronos headers
-  Text/                FontAtlas, FontAtlasLoader (kept from the old module, unused until text in 3D)
 ```
 
 **Conventions.** Pixel coordinates (viewports, scissors, texture regions) have a top-left origin, y pointing down. Texture memory starts with the top row, and UV (0, 0) is the top-left texel. In clip space, y points up and depth runs from 0 to 1. Rendering into a texture and sampling it doesn't flip the image.
@@ -259,7 +259,7 @@ Implementation notes:
   - layers: `BeginTransparencyLayer`, `EndTransparencyLayer`.
 - Booey ports upstream's painters (`rendering/BorderPainter`, `BorderShape`, the background and shadow painting) as they are; they decide how borders and shadows are built from the primitives above.
 - Krystal.UI replays a display list into Render2D, mostly one call per item.
-- Glyphs are rasterised with FreeType through Booey's `FreeTypeFace`, keyed by (face, glyph, size, subpixel offset), and cached in Render2D's glyph atlas. The MSDF atlas loader can come back later for text in 3D, where scaling matters.
+- Glyphs are rasterised by Render2D with FreeType, from the same `krys::text::FreeTypeFace` Booey shapes with, and cached in Render2D's glyph atlas (see *G3 plan*).
 - Images: Booey asks the host to load and decode them; Krystal.UI uploads them to textures and maps Booey's image objects to texture handles.
 - Krystal.UI also hosts pages and routes input.
 
@@ -283,7 +283,7 @@ All done in G1 (2026-10-17) unless noted.
 | `Context.cpp`'s demo scenes, every editor shader and asset (`Krystal.Editor/data/`) | Deleted (decision, 2026-10-17); they're in git history. |
 | `Mesh`, `Material`, `FlatColourMaterials`, `Light`, `ICamera`, `FirstPersonCamera`, `MeshDataUtils`, `InstanceData`, `Vertex.hpp` | Deleted with the scenes they served; the 3D renderer will define its own. |
 | The old 2D renderer's text drawing | Deleted; the editor shows no text until G3 (decision, 2026-10-17). |
-| `FontAtlasLoader`, msdf-atlas-gen | Kept, moved to `Text/`, unused until text in 3D. |
+| `FontAtlasLoader`, msdf-atlas-gen | Kept, moved to `Text/`, unused until text in 3D. Deleted in G3a (2026-10-18), with `msdfgen`: text is greyscale bitmaps (open decision 3). |
 | `ShaderReflector` | Kept in `OpenGL/`, not yet wired up (planned: checking pipeline binding layouts in debug builds). |
 | `Krystal.Gfx.OpenGL` | Merged into Krystal.Gfx as `OpenGL/`; the loader hooks and WGL code moved with it. |
 | `Krystal.Gfx.Vulkan`, `Krystal.Gfx.D3D11` | Deleted (decision, 2026-10-17), with the `vulkan-headers` vcpkg dependency. |
@@ -297,7 +297,8 @@ All done in G1 (2026-10-17) unless noted.
 | C0 | Done (2026-10-17). Move the colour types from Booey to `Krystal.Core/Colour/`, renamed to "Colour" in `krys`. | Booey and its tests build and pass against the moved types. |
 | G1 | Done (2026-10-17), as one part. The RHI: `Device`, `Pool` and handles, buffers, textures, samplers, shaders, pipelines, command buffers, swapchains, transient memory; the OpenGL backend. The editor moves onto it; Gfx's old colour headers go with the registries. | The editor clears its window and draws a triangle through the RHI. The old registries are gone. |
 | G2 | Render2D: the analytic fast path, transforms, images, paths and coverage masks, strokes, clips, layers, gradients, shadows. Reviewed one part at a time (see *G2 parts*). | A test app draws a UI-like scene; golden image tests pass. |
-| G3 | Text: the glyph atlas (R8 pages, RGBA pages for colour glyphs), `DrawGlyphs`, FreeType rasterisation. It doesn't depend on G2e's mask atlas. | Text renders crisply at several sizes and scales. |
+| T1 | Done (2026-10-18). `Krystal.Text`: font files and faces move down from Booey, shared by Booey and Gfx (see *T1 plan*). | Booey and its tests build and pass on the moved faces; Krystal.Text has its own tests. |
+| G3 | Text: the glyph atlas (R8 pages, RGBA pages for colour glyphs), `DrawGlyphs`, FreeType rasterisation. It doesn't depend on G2e's mask atlas. In two parts (see *G3 plan*). | Text renders crisply at several sizes and scales. |
 | G4 | Booey: `GraphicsContext`, the display list recorder, painting (paint order, backgrounds, borders, text); Krystal.UI replays it. | The vertical slice: a page loads, renders, resizes and responds to a click. |
 
 ### G2 parts
@@ -390,6 +391,26 @@ Decided (2026-10-18): one part at a time, each reviewed before the next. Revised
 - **Infrastructure:** `stb_image` (in `third-party/stb`) reads PNGs and `stb_image_write` (added beside it) writes them. A test helper renders a scene offscreen, reads it back and compares it with a PNG in `Krystal.Gfx.Tests/golden/`, within a per-channel tolerance and a small share of pixels allowed past it; on a mismatch, it writes the actual image and a difference image into the build directory. `KRYS_UPDATE_GOLDENS=1` writes the goldens instead (a switch of the test harness, not of the renderer).
 - **Scenes:** a few UI-like scenes that together use everything G2 has: cards with rounded corners, borders, gradients and shadows; clips, scrolling and layers; blend modes; strokes and paths. They're G2's "UI-like scene".
 - **References (option C of three):** each scene has a golden of Render2D's own output, reviewed by eye before it's committed, checked with tight tolerances (regressions); and a golden of Chrome's rendering of the same scene written in HTML and CSS, captured by a `tools/` script with headless Chrome at a device pixel ratio of 1, checked with looser tolerances and a report of the largest differences (fidelity). Rejected: either alone.
+
+### T1 plan (decided 2026-10-18)
+
+- **Why:** Render2D draws glyphs from the faces Booey shapes with. Rather than open each font twice, the faces move down into a module both depend on. Shaping stays in Booey: `FontCascade` and `ComplexTextController` are a port of upstream's text system, tied to CSS (fallback through `FontCache`, features, spacing), and the editor's UI will be built with Booey, so nothing needs a shaper outside it yet. A plain run shaper can join Krystal.Text when something outside Booey needs one. Core stays free of FreeType and HarfBuzz.
+- **`Krystal.Text`** (namespace `krys::text`, which Core's text helpers already use): `FontFileData` and `FreeTypeFace` (`FreeTypeFace.hpp`), and `HbUniquePtr` (`HarfBuzz.hpp`, with its deleters), moved from Booey's `Graphics/`. It links FreeType and HarfBuzz; the face keeps its HarfBuzz face.
+- **Font selection stays in Booey:** `FontSelectionCapabilities` is CSS's (from upstream's `FontSelectionAlgorithm`), so the face reports the font's own style instead (`FaceStyle`: its OS/2 weight, its width as a percentage and whether it's italic or oblique), and Booey builds the capabilities from it.
+- **Sizes:** faces stay unsized, as Booey measures in font units. A user that needs a size (Render2D, G3) makes its own FreeType size objects, so sizes never change under another user.
+- **Booey** uses the moved classes as `text::FreeTypeFace`, `text::FontFileData` and `text::HbUniquePtr`; the ledger records the move. Booey's tests of the face move to `Krystal.Text.Tests`, which reads Liberation Sans from `third-party/liberation-fonts`.
+
+### G3 plan (decided 2026-10-18)
+
+- **Out:** `Text/FontAtlas.hpp`, `Text/FontAtlasLoader.hpp` and `.cpp` (the MSDF atlas, unused), the vendored `Krystal.Gfx/third-party/msdf-atlas-gen`, and `msdfgen` from `vcpkg.json` and Gfx's CMake (and `vcpkg.json`'s second `freetype`).
+- **Faces:** Render2D draws from Krystal.Text's faces (T1). `FontFace2D` wraps one with how it's drawn: hinting (slight by default, snapping vertically only, as fontconfig's default has Linux browsers draw; none and full as options), and synthetic bold (`FT_Outline_Embolden`) and oblique (a shear), as Booey's `FontPlatformData` asks for them. It makes its own FreeType sizes.
+- **Rasterising:** FreeType's own rasteriser (exact-area antialiasing, hinting), 8-bit greyscale; colour glyphs (`FT_LOAD_COLOR`) are RGBA. Rejected: Render2D's `PathRasteriser` from the outlines (no hinting; sixteenths down each pixel).
+- **Positions:** horizontally to a quarter of a pixel (four variants of a glyph, as Skia has), vertically to whole pixels. Small text under a scale, rotation or skew is rasterised under it (`FT_Set_Transform`), cached under its linear part as masks are; text over about 256 pixels is drawn as paths (`FontFace2D::GlyphPath`, which stroked text uses too) through the mask atlas, as Skia does.
+- **The glyph atlas:** separate from the mask atlas, as decided, with R8 pages and RGBA pages for colour glyphs; the shelf packing and page eviction move out of `MaskAtlas` into a helper both share. Glyphs are keyed by face, glyph, size, subpixel position and the transform's linear part.
+- **API:** `DrawGlyphs(const FontFace2D &, float size, Span<const uint32> glyphs, Span<const Vec2f> positions, Vec2f origin, const Paint2D &)`, positions rather than advances (upstream's Skia backend turns advances into positions first). Glyphs are mask instances, so paints, clips, layers and blend modes apply; colour glyphs are drawn as images. Shadows (`text-shadow`) blur glyph masks as path masks are blurred, cached per glyph. For tests and the editor until G4: `GlyphIndex(codepoint)` and `Advance(glyph, size)`, enough for left-to-right labels without shaping.
+- **Not yet:** the gamma and contrast adjustments Skia makes to text coverage (raw coverage first, a TODO, compared against Chrome later), LCD antialiasing, variable font axes.
+- **Parts:** G3a: the removals, `FontFace2D`, rasterising, outlines, the shared atlas pages and the glyph atlas, CPU only. G3b: `DrawGlyphs`, colour glyphs, transformed and large text, shadows, a golden text scene (against Chrome, loosely and reported: Chrome on Windows draws text through DirectWrite) and the editor's labels.
+- **Tests:** coverage against FreeType's own output, the subpixel variants, outlines, atlas packing and eviction; drawn glyphs at whole and fractional positions, gradient, clipped and transformed text, large text, text shadows; the golden scene.
 
 ### G2a as built (2026-10-18)
 
@@ -535,6 +556,13 @@ Decided (2026-10-18): one part at a time, each reviewed before the next. Revised
 - **Fidelity, as first measured:** `shadows` is within 2 to 4 steps of Chrome away from the boxes' edges (soft, sharp, wide and inset shadows alike; the inset one half a step darker on average), mean 0.39, largest 25 (curved edge pixels). `ui` matches gradients, the clip, the layer, the blend and the stroke within a step or so away from edges, mean 0.25, largest 81: on curved edges where Chrome antialiases twice (its rounded border is a clip and a fill, so an edge pixel covered 0.38 shows 0.38 squared), where Render2D's single coverage is closer to the true area. Chrome stands in for WebKit, whose painters Booey ports; such differences come from painting, not from Render2D.
 - **For G4:** the Booey host's `box-shadow` painting needs upstream's rule above (clip out a pixel inside an opaque box's edge), or a light seam shows along every shadowed box's antialiased edge (it measured 39 steps in `shadows` before the scene had it).
 
+### T1 as built (2026-10-18)
+
+- **`Krystal.Text`** (static library, namespace `krys::text`, linking FreeType and HarfBuzz privately; Booey links it publicly): `FreeTypeFace.hpp` (`FontFileData`, `FaceStyle`, `FreeTypeFace`) and `HarfBuzz.hpp` (`HbUniquePtr` and its deleters), moved from Booey's `Graphics/` with their history (`src/FreeTypeFace.cpp`; `src/HarfBuzz.cpp` holds the deleters and `FreeTypeFace::HarfBuzzFace`, which were in Booey's `FontHarfBuzz.cpp`).
+- **`FaceStyle`** replaces the face's `FontSelectionCapabilities`: `Weight` (the OS/2 weight class, clamped to 1 to 1,000, or 700 or 400 from the bold flag), `Width` (a percentage, from the OS/2 width class) and `Italic` (the italic flag or the OS/2 italic or oblique bits), read as before. Booey's `CapabilitiesOfFace` (`Graphics/FontDatabase.hpp`) builds the capabilities from it for `FontDatabase`, `FontCache` and `FontCascade`.
+- **Booey** names the moved types `text::FreeTypeFace`, `text::FontFileData` and `text::HbUniquePtr`; its face test moved to Krystal.Text, and the bundled face's capabilities are checked through `CapabilitiesOfFace`.
+- Tests: `Krystal.Text.Tests` (4 cases, 32 assertions) on Liberation Sans from `third-party/liberation-fonts`: names, style, units and no size set; character to glyph mapping; tables and the HarfBuzz face (the same face each time, with FreeType's glyph count and units per em); data that isn't a font, and a face index past the file's faces.
+
 Testing: the device's hidden window gives tests a real OpenGL context (Krystal.Gfx.Tests). Render2D gets golden image tests: render offscreen, read back with `ReadTexture`, compare against a PNG with a tolerance.
 
 ## Open decisions
@@ -545,5 +573,5 @@ Decided (2026-10-18): the 2D renderer lives in Krystal.Gfx, as `Render2D/` (name
 
 1. **Module names:** Krystal.UI, Krystal.Assets.
 2. **Shaders:** GLSL with explicit binding slots now. Later, possibly SPIR-V compiled offline, which a Vulkan backend would need.
-3. **Text:** FreeType greyscale bitmaps into the glyph atlas first (recommended), or MSDF.
+3. **Text:** decided (2026-10-18): FreeType's 8-bit greyscale bitmaps, with hinting; MSDF is dropped (see *G3 plan*).
 4. **Blending space:** decided (2026-10-18): encoded values everywhere, as browsers blend, with unorm targets and an `RGBA8Unorm` window (see *G2h2 plan*). Before, Render2D blended in linear light on sRGB targets and as encoded on other targets.

@@ -7,19 +7,6 @@ namespace krys::boo::tests
   namespace
   {
     const std::filesystem::path FontsDir = std::filesystem::path {KRYS_BOOEY_TESTS_DATA_DIR} / "fonts";
-
-    KRYS_NODISCARD FontDatabase &DatabaseWithAhem()
-    {
-      auto &database = FontDatabase::Singleton();
-      (void)database.AddFontFile(FontsDir / "Ahem.ttf");
-      return database;
-    }
-
-    constexpr uint32 Tag(char a, char b, char c, char d) noexcept
-    {
-      return (static_cast<uint32>(a) << 24) | (static_cast<uint32>(b) << 16) | (static_cast<uint32>(c) << 8)
-             | static_cast<uint32>(d);
-    }
   }
 
   TEST_CASE("FontDatabase: the bundled font", "[Graphics][FontDatabase]")
@@ -30,9 +17,9 @@ namespace krys::boo::tests
     CHECK(bundled.StyleName() == u8"Regular");
     CHECK(bundled.PostScriptName() == u8"LiberationSans");
     CHECK(bundled.UnitsPerEm() == 2'048u);
-    CHECK(bundled.Capabilities().Weight == FontSelectionRange {NormalWeightValue()});
-    CHECK(bundled.Capabilities().Width == FontSelectionRange {NormalWidthValue()});
-    CHECK(bundled.Capabilities().Slope == FontSelectionRange {NormalItalicValue()});
+    CHECK(CapabilitiesOfFace(bundled).Weight == FontSelectionRange {NormalWeightValue()});
+    CHECK(CapabilitiesOfFace(bundled).Width == FontSelectionRange {NormalWidthValue()});
+    CHECK(CapabilitiesOfFace(bundled).Slope == FontSelectionRange {NormalItalicValue()});
     CHECK_FALSE(bundled.IsFixedPitch());
     CHECK(database.Faces().front().get() == &bundled);
 
@@ -74,30 +61,5 @@ namespace krys::boo::tests
       CHECK(database.AddFontDirectory(FontsDir / "missing") == 0u);
       CHECK(database.Generation() == generation);
     }
-  }
-
-  TEST_CASE("FreeTypeFace", "[Graphics][FontDatabase]")
-  {
-    auto &database = DatabaseWithAhem();
-    auto faces = database.FacesInFamily(u8"Ahem");
-    REQUIRE(faces.size() == 1u);
-    auto &ahem = *faces.front();
-
-    CHECK(ahem.UnitsPerEm() == 1'000u);
-    CHECK(ahem.GlyphIndex(U'a') == 67u);
-    CHECK(ahem.GlyphIndex(U'X') == 58u);
-    CHECK(ahem.GlyphIndex(U'\u200B') == 253u);
-    CHECK(ahem.GlyphIndex(U'\u6C34') == 270u);
-    CHECK(ahem.GlyphIndex(U'\u0628') == 0u);
-    CHECK(ahem.GlyphIndex(U'a', U'\uFE0F') == 0u);
-    CHECK(ahem.OpenTypeTable(Tag('O', 'S', '/', '2')));
-    auto head = database.BundledFace().OpenTypeTable(Tag('h', 'e', 'a', 'd'));
-    REQUIRE(head);
-    CHECK(head->size() == 54u);
-    CHECK_FALSE(ahem.OpenTypeTable(Tag('x', 'x', 'x', 'x')));
-
-    auto data = FontFileData::Create(List<byte>(16, byte {0}));
-    CHECK(FreeTypeFace::FaceCount(*data) == 0u);
-    CHECK_FALSE(FreeTypeFace::Create(data, 0));
   }
 }

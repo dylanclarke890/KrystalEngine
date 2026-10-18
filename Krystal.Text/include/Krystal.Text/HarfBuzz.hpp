@@ -8,7 +8,7 @@ struct hb_buffer_t;
 struct hb_face_t;
 struct hb_font_t;
 
-namespace krys::boo
+namespace krys::text
 {
   template <typename T>
   struct HbPtrDeleter

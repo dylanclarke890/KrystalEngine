@@ -7,7 +7,6 @@
 #include "Krystal.Booey/Graphics/GlyphBufferMembers.hpp"
 #include "Krystal.Booey/Graphics/GlyphMetricsMap.hpp"
 #include "Krystal.Booey/Graphics/GlyphPage.hpp"
-#include "Krystal.Booey/Graphics/HbUniquePtr.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -20,6 +19,7 @@
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Text/HarfBuzz.hpp"
 
 namespace krys::boo
 {
@@ -138,7 +138,7 @@ namespace krys::boo
     Attributes _attributes;
 
     mutable UniquePtr<DerivedFonts> _derivedFontData;
-    mutable HbUniquePtr<hb_font_t> _harfBuzzFont;
+    mutable text::HbUniquePtr<hb_font_t> _harfBuzzFont;
 
     Glyph _spaceGlyph {0};
     Glyph _zeroWidthSpaceGlyph {0};

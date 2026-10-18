@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/Graphics/ComplexTextController.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/FontTaggedSettings.hpp"
-#include "Krystal.Booey/Graphics/HbUniquePtr.hpp"
 #include "Krystal.Booey/Graphics/TextRun.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
+#include "Krystal.Text/HarfBuzz.hpp"
 #include <hb.h>
 #include <unicode/uscript.h>
 
@@ -337,7 +337,7 @@ namespace krys::boo
                       hb_feature_t {HB_TAG('k', 'e', 'r', 'n'), 0, 0, static_cast<unsigned>(-1)});
     }
 
-    static thread_local HbUniquePtr<hb_buffer_t> buffer(hb_buffer_create());
+    static thread_local text::HbUniquePtr<hb_buffer_t> buffer(hb_buffer_create());
 
     // The computed "locale" equals the "lang" attribute. The latter must be a valid BCP 47 language tag.
     // This is exactly what hb_language_from_string() expects, so we can pass directly.

@@ -16,11 +16,22 @@ namespace krys::boo
     return folded;
   }
 
-  KRYS_NODISCARD static Ref<FreeTypeFace> CreateBundledFace() noexcept
+  FontSelectionCapabilities CapabilitiesOfFace(const text::FreeTypeFace &face) noexcept
   {
-    auto face = FreeTypeFace::Create(FontFileData::CreateStatic(BundledLiberationSansRegular()), 0);
+    const auto &style = face.Style();
+    FontSelectionCapabilities capabilities;
+    capabilities.Weight = FontSelectionRange {FontSelectionValue {style.Weight}};
+    capabilities.Width = FontSelectionRange {FontSelectionValue {style.Width}};
+    capabilities.Slope = FontSelectionRange {style.Italic ? ItalicValue() : NormalItalicValue()};
+    return capabilities;
+  }
+
+  KRYS_NODISCARD static Ref<text::FreeTypeFace> CreateBundledFace() noexcept
+  {
+    auto face =
+      text::FreeTypeFace::Create(text::FontFileData::CreateStatic(BundledLiberationSansRegular()), 0);
     krys_assert_msg(face, "the bundled font can be read");
-    Ref<FreeTypeFace> result = krys::move(face);
+    Ref<text::FreeTypeFace> result = krys::move(face);
     return result;
   }
 
@@ -67,7 +78,7 @@ namespace krys::boo
       return 0;
     }
 
-    auto count = AddFontFileData(FontFileData::Create(krys::move(bytes)));
+    auto count = AddFontFileData(text::FontFileData::Create(krys::move(bytes)));
     if (count)
     {
       _registeredFiles.push_back(krys::move(canonical));
@@ -110,18 +121,18 @@ namespace krys::boo
 
   uint32 FontDatabase::AddFontData(List<byte> &&bytes) noexcept
   {
-    return AddFontFileData(FontFileData::Create(krys::move(bytes)));
+    return AddFontFileData(text::FontFileData::Create(krys::move(bytes)));
   }
 
-  uint32 FontDatabase::AddFontFileData(Ref<FontFileData> &&data) noexcept
+  uint32 FontDatabase::AddFontFileData(Ref<text::FontFileData> &&data) noexcept
   {
-    auto faceCount = FreeTypeFace::FaceCount(*data);
+    auto faceCount = text::FreeTypeFace::FaceCount(*data);
     uint32 count = 0;
     for (uint32 faceIndex = 0; faceIndex < faceCount; ++faceIndex)
     {
-      if (auto face = FreeTypeFace::Create(data, faceIndex))
+      if (auto face = text::FreeTypeFace::Create(data, faceIndex))
       {
-        Ref<FreeTypeFace> created = krys::move(face);
+        Ref<text::FreeTypeFace> created = krys::move(face);
         AddFace(krys::move(created));
         ++count;
       }
@@ -135,7 +146,7 @@ namespace krys::boo
     return count;
   }
 
-  void FontDatabase::AddFace(Ref<FreeTypeFace> &&face) noexcept
+  void FontDatabase::AddFace(Ref<text::FreeTypeFace> &&face) noexcept
   {
     if (!face->FamilyName().empty())
     {
@@ -144,7 +155,7 @@ namespace krys::boo
     _faces.push_back(krys::move(face));
   }
 
-  Span<const Ref<FreeTypeFace>> FontDatabase::FacesInFamily(utf8_stringview family) const noexcept
+  Span<const Ref<text::FreeTypeFace>> FontDatabase::FacesInFamily(utf8_stringview family) const noexcept
   {
     auto it = _families.find(FoldCase(family));
     if (it == _families.end())
@@ -154,8 +165,8 @@ namespace krys::boo
     return it->second;
   }
 
-  FreeTypeFace *FontDatabase::MatchFace(utf8_stringview family,
-                                        const FontSelectionRequest &request) const noexcept
+  text::FreeTypeFace *FontDatabase::MatchFace(utf8_stringview family,
+                                              const FontSelectionRequest &request) const noexcept
   {
     auto faces = FacesInFamily(family);
     if (faces.empty())
@@ -167,7 +178,7 @@ namespace krys::boo
     capabilities.reserve(faces.size());
     for (auto &face : faces)
     {
-      capabilities.push_back(face->Capabilities());
+      capabilities.push_back(CapabilitiesOfFace(*face));
     }
     FontSelectionAlgorithm algorithm {request, capabilities};
     return faces[algorithm.IndexOfBestCapabilities()].get();

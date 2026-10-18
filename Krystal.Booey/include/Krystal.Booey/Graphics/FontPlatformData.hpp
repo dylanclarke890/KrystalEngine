@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Core/TextFlags.hpp"
-#include "Krystal.Booey/Graphics/FreeTypeFace.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -9,6 +8,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Utils/Tags.hpp"
+#include "Krystal.Text/FreeTypeFace.hpp"
 
 namespace krys::boo
 {
@@ -17,7 +17,7 @@ namespace krys::boo
   class FontPlatformData
   {
   private:
-    RefPtr<FreeTypeFace> _face;
+    RefPtr<text::FreeTypeFace> _face;
     float _size {0};
     FontOrientation _orientation {FontOrientation::Horizontal};
     FontWidthVariant _widthVariant {FontWidthVariant::RegularWidth};
@@ -30,7 +30,7 @@ namespace krys::boo
   public:
     explicit FontPlatformData(HashTableDeletedValueTag) noexcept;
     FontPlatformData() noexcept;
-    FontPlatformData(Ref<FreeTypeFace> face, float size, bool syntheticBold, bool syntheticOblique,
+    FontPlatformData(Ref<text::FreeTypeFace> face, float size, bool syntheticBold, bool syntheticOblique,
                      FontOrientation orientation = FontOrientation::Horizontal,
                      FontWidthVariant widthVariant = FontWidthVariant::RegularWidth,
                      TextRenderingMode textRenderingMode = TextRenderingMode::Auto) noexcept;
@@ -46,7 +46,7 @@ namespace krys::boo
     KRYS_NODISCARD static FontPlatformData CloneWithSize(const FontPlatformData &source, float size) noexcept;
 
     /// @brief The face, or null for an empty or deleted value.
-    KRYS_NODISCARD FreeTypeFace *Face() const noexcept
+    KRYS_NODISCARD text::FreeTypeFace *Face() const noexcept
     {
       return _face.get();
     }

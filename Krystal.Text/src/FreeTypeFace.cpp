@@ -1,11 +1,12 @@
-﻿#include "Krystal.Booey/Graphics/FreeTypeFace.hpp"
+﻿#include "Krystal.Text/FreeTypeFace.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
+#include <algorithm>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_TRUETYPE_TABLES_H
 
-namespace krys::boo
+namespace krys::text
 {
   /// @brief The FreeType library every face is opened with. It's never closed.
   KRYS_NODISCARD static FT_Library Library() noexcept
@@ -72,30 +73,25 @@ namespace krys::boo
     }
   }
 
-  KRYS_NODISCARD static FontSelectionCapabilities CapabilitiesOfFace(FT_Face face) noexcept
+  KRYS_NODISCARD static FaceStyle StyleOfFace(FT_Face face) noexcept
   {
     constexpr FT_UShort italicMask = 1 << 0;
     constexpr FT_UShort obliqueMask = 1 << 9;
 
-    bool isItalic = face->style_flags & FT_STYLE_FLAG_ITALIC;
-    auto weight = face->style_flags & FT_STYLE_FLAG_BOLD ? BoldWeightValue() : NormalWeightValue();
-    auto width = NormalWidthValue();
+    FaceStyle style {.Weight = face->style_flags & FT_STYLE_FLAG_BOLD ? 700.f : 400.f,
+                     .Width = 100.f,
+                     .Italic = (face->style_flags & FT_STYLE_FLAG_ITALIC) != 0};
     if (auto *os2 = static_cast<TT_OS2 *>(FT_Get_Sfnt_Table(face, FT_SFNT_OS2));
         os2 && os2->version != 0xFFFF)
     {
       if (os2->usWeightClass)
       {
-        weight = FontSelectionValue {static_cast<float>(std::clamp<FT_UShort>(os2->usWeightClass, 1, 1'000))};
+        style.Weight = static_cast<float>(std::clamp<FT_UShort>(os2->usWeightClass, 1, 1'000));
       }
-      width = FontSelectionValue {WidthForWidthClass(os2->usWidthClass)};
-      isItalic = isItalic || (os2->fsSelection & (italicMask | obliqueMask));
+      style.Width = WidthForWidthClass(os2->usWidthClass);
+      style.Italic = style.Italic || (os2->fsSelection & (italicMask | obliqueMask));
     }
-
-    FontSelectionCapabilities capabilities;
-    capabilities.Weight = FontSelectionRange {weight};
-    capabilities.Width = FontSelectionRange {width};
-    capabilities.Slope = FontSelectionRange {isItalic ? ItalicValue() : NormalItalicValue()};
-    return capabilities;
+    return style;
   }
 
   KRYS_NODISCARD static utf8_string ToString(const char *name) noexcept
@@ -110,7 +106,7 @@ namespace krys::boo
   FreeTypeFace::FreeTypeFace(Ref<FontFileData> &&data, FT_Face face) noexcept
       : _data(krys::move(data)), _face(face), _familyName(ToString(face->family_name)),
         _styleName(ToString(face->style_name)), _postScriptName(ToString(FT_Get_Postscript_Name(face))),
-        _capabilities(CapabilitiesOfFace(face)), _isFixedPitch(FT_IS_FIXED_WIDTH(face))
+        _style(StyleOfFace(face)), _isFixedPitch(FT_IS_FIXED_WIDTH(face))
   {
   }
 

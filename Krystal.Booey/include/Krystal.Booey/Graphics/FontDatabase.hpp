@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FreeTypeFace.hpp"
+#include "Krystal.Booey/Graphics/FontSelectionAlgorithm.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
@@ -9,10 +9,14 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Text/FreeTypeFace.hpp"
 #include <filesystem>
 
 namespace krys::boo
 {
+  /// @brief The weights, widths and slopes a face provides, for font matching: its own style.
+  KRYS_NODISCARD FontSelectionCapabilities CapabilitiesOfFace(const text::FreeTypeFace &face) noexcept;
+
   /// @brief The fonts documents can use: the faces of the font files the host registers, by family, and the
   /// bundled Liberation Sans, the last resort.
   /// @note The database is process-wide. Families are matched ASCII case-insensitively.
@@ -21,11 +25,11 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(FontDatabase);
 
   private:
-    List<Ref<FreeTypeFace>> _faces;
+    List<Ref<text::FreeTypeFace>> _faces;
     // Lowercased family name to the faces of the family, in registration order.
-    HashMap<utf8_string, List<Ref<FreeTypeFace>>> _families;
+    HashMap<utf8_string, List<Ref<text::FreeTypeFace>>> _families;
     List<std::filesystem::path> _registeredFiles;
-    Ref<FreeTypeFace> _bundledFace;
+    Ref<text::FreeTypeFace> _bundledFace;
     uint32 _generation {0};
 
   public:
@@ -47,24 +51,24 @@ namespace krys::boo
     uint32 AddFontData(List<byte> &&bytes) noexcept;
 
     /// @brief The faces of @p family, in registration order; empty if there's no such family.
-    KRYS_NODISCARD Span<const Ref<FreeTypeFace>> FacesInFamily(utf8_stringview family) const noexcept;
+    KRYS_NODISCARD Span<const Ref<text::FreeTypeFace>> FacesInFamily(utf8_stringview family) const noexcept;
 
     /// @brief The face of @p family that best matches @p request (CSS font matching), or null if there's no
     /// such family.
-    KRYS_NODISCARD FreeTypeFace *MatchFace(utf8_stringview family,
-                                           const FontSelectionRequest &request) const noexcept;
+    KRYS_NODISCARD text::FreeTypeFace *MatchFace(utf8_stringview family,
+                                                 const FontSelectionRequest &request) const noexcept;
 
     /// @brief The names of the registered families, as the fonts give them.
     KRYS_NODISCARD List<utf8_string> Families() const noexcept;
 
     /// @brief Every registered face, in registration order (the bundled face first).
-    KRYS_NODISCARD Span<const Ref<FreeTypeFace>> Faces() const noexcept
+    KRYS_NODISCARD Span<const Ref<text::FreeTypeFace>> Faces() const noexcept
     {
       return _faces;
     }
 
     /// @brief The bundled Liberation Sans, used when no registered font fits.
-    KRYS_NODISCARD FreeTypeFace &BundledFace() const noexcept
+    KRYS_NODISCARD text::FreeTypeFace &BundledFace() const noexcept
     {
       return *_bundledFace;
     }
@@ -76,7 +80,7 @@ namespace krys::boo
     }
 
   private:
-    uint32 AddFontFileData(Ref<FontFileData> &&data) noexcept;
-    void AddFace(Ref<FreeTypeFace> &&face) noexcept;
+    uint32 AddFontFileData(Ref<text::FontFileData> &&data) noexcept;
+    void AddFace(Ref<text::FreeTypeFace> &&face) noexcept;
   };
 }

@@ -278,13 +278,14 @@ namespace krys::boo
     }
   }
 
-  KRYS_NODISCARD static FontPlatformData PlatformDataForFace(FreeTypeFace &face,
+  KRYS_NODISCARD static FontPlatformData PlatformDataForFace(text::FreeTypeFace &face,
                                                              const FontDescription &description,
                                                              EnumSet<FontLookupOptions> options) noexcept
   {
     bool syntheticBold = false;
     bool syntheticOblique = false;
-    GetFontPropertiesFromFace(face.Capabilities(), description, options, syntheticBold, syntheticOblique);
+    GetFontPropertiesFromFace(CapabilitiesOfFace(face), description, options, syntheticBold,
+                              syntheticOblique);
     return FontPlatformData(ShareRef(face), description.ComputedSize(), syntheticBold, syntheticOblique,
                             description.Orientation(), description.WidthVariant(),
                             description.GetTextRenderingMode());
@@ -313,7 +314,8 @@ namespace krys::boo
     return FontForPlatformData(PlatformDataForFace(FontDatabase::Singleton().BundledFace(), description, {}));
   }
 
-  KRYS_NODISCARD static bool FaceHasCharacters(const FreeTypeFace &face, utf8_stringview characters) noexcept
+  KRYS_NODISCARD static bool FaceHasCharacters(const text::FreeTypeFace &face,
+                                               utf8_stringview characters) noexcept
   {
     bool hasAny = false;
     for (text::CodePointIterator it {characters}; !it.AtEnd(); ++it)
@@ -340,7 +342,7 @@ namespace krys::boo
 
     // The registered faces that have every character, the best match for the description first (the earliest
     // registered when they match as well); the bundled face is the last to try.
-    List<FreeTypeFace *> candidates;
+    List<text::FreeTypeFace *> candidates;
     List<FontSelectionCapabilities> capabilities;
     for (auto &face : database.Faces())
     {
@@ -349,10 +351,10 @@ namespace krys::boo
         continue;
       }
       candidates.push_back(face.get());
-      capabilities.push_back(face->Capabilities());
+      capabilities.push_back(CapabilitiesOfFace(*face));
     }
 
-    FreeTypeFace *face = nullptr;
+    text::FreeTypeFace *face = nullptr;
     if (!candidates.empty())
     {
       FontSelectionAlgorithm algorithm {description.GetFontSelectionRequest(), capabilities};

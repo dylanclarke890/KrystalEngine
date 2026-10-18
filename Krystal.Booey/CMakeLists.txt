@@ -30,7 +30,10 @@ target_include_directories(Krystal.Booey PRIVATE ${BRIGAND_INCLUDE_DIRS})
 find_package(ICU REQUIRED COMPONENTS uc dt)
 target_link_libraries(Krystal.Booey PUBLIC ICU::uc PRIVATE ICU::dt)
 
-# Third-party - FreeType (font files, metrics and glyphs)
+# Font faces, shared with Krystal.Gfx
+target_link_libraries(Krystal.Booey PUBLIC Krystal.Text)
+
+# Third-party - FreeType (metrics and glyphs)
 find_package(Freetype REQUIRED)
 target_link_libraries(Krystal.Booey PRIVATE Freetype::Freetype)
 
@@ -921,7 +924,6 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Graphics/Font.hpp
   include/Krystal.Booey/Graphics/FontDatabase.hpp
   include/Krystal.Booey/Graphics/FontPlatformData.hpp
-  include/Krystal.Booey/Graphics/FreeTypeFace.hpp
   include/Krystal.Booey/Graphics/Glyph.hpp
   include/Krystal.Booey/Graphics/GlyphMetricsMap.hpp
   include/Krystal.Booey/Graphics/GlyphPage.hpp
@@ -945,7 +947,6 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
 
   # Shaping (t3b)
   include/Krystal.Booey/Graphics/ComplexTextController.hpp
-  include/Krystal.Booey/Graphics/HbUniquePtr.hpp
 
   # Interaction state
   include/Krystal.Booey/DOM/FocusOptions.hpp
@@ -2266,7 +2267,6 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Graphics/Font.cpp
   src/Graphics/FontDatabase.cpp
   src/Graphics/FontPlatformData.cpp
-  src/Graphics/FreeTypeFace.cpp
 
   # Font selection (t2b)
   src/CSS/CSSFontSelector.cpp

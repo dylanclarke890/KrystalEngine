@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/FontSelectionAlgorithm.hpp"
-#include "Krystal.Booey/Graphics/HbUniquePtr.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
@@ -11,12 +9,26 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Text/HarfBuzz.hpp"
 
 // FreeType's own declarations of these handles.
 typedef struct FT_FaceRec_ *FT_Face;
 
-namespace krys::boo
+namespace krys::text
 {
+  /// @brief The style a face says it has.
+  struct FaceStyle
+  {
+    /// @brief From 1 to 1,000: the OS/2 weight class, or 700 or 400 from the face's bold flag.
+    float Weight {400.f};
+    /// @brief As a percentage of the normal width, from the OS/2 width class.
+    float Width {100.f};
+    /// @brief Whether the face is italic or oblique.
+    bool Italic {false};
+
+    constexpr bool operator==(const FaceStyle &) const noexcept = default;
+  };
+
   /// @brief The contents of a font file (a font or a collection of fonts), which FreeType reads in place.
   class FontFileData final : public RefCounted<FontFileData>
   {
@@ -41,8 +53,9 @@ namespace krys::boo
     }
   };
 
-  /// @brief One face of a font file, opened with FreeType: its names, its font selection capabilities and the
-  /// FreeType face that metrics and glyphs are read from, in font units.
+  /// @brief One face of a font file, opened with FreeType: its names, its style and the FreeType face that
+  /// metrics and glyphs are read from. The face has no size set: its users measure in font units, or make
+  /// FreeType sizes of their own, so none changes what another reads.
   class FreeTypeFace final : public RefCounted<FreeTypeFace>
   {
     KRYS_NON_COPY_MOVABLE(FreeTypeFace);
@@ -53,7 +66,7 @@ namespace krys::boo
     utf8_string _familyName;
     utf8_string _styleName;
     utf8_string _postScriptName;
-    FontSelectionCapabilities _capabilities;
+    FaceStyle _style;
     bool _isFixedPitch {false};
     mutable HbUniquePtr<hb_face_t> _harfBuzzFace;
 
@@ -90,10 +103,9 @@ namespace krys::boo
       return _postScriptName;
     }
 
-    /// @brief The weight, width and slope the face provides.
-    KRYS_NODISCARD const FontSelectionCapabilities &Capabilities() const noexcept
+    KRYS_NODISCARD const FaceStyle &Style() const noexcept
     {
-      return _capabilities;
+      return _style;
     }
 
     KRYS_NODISCARD bool IsFixedPitch() const noexcept

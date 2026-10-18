@@ -103,11 +103,12 @@ def krystal_type_names() -> frozenset[str]:
                     continue
                 if top not in ("krys::boo", "krys::boo::style"):
                     continue
-                match = re.match(r"^  (?:struct|class|enum class|enum|using) (\w+)\b", line)
+                # A using-declaration (`using krys::BlendMode;`) names its last part.
+                match = re.match(r"^  (?:struct|class|enum class|enum|using) (?:\w+::)*(\w+)\b", line)
                 if match:
                     names.add(match.group(1))
                     continue
-                match = re.match(r"^    (?:struct|class|enum class|enum|using) (\w+)\b", line)
+                match = re.match(r"^    (?:struct|class|enum class|enum|using) (?:\w+::)*(\w+)\b", line)
                 if match and top == "krys::boo" and nested == "style":
                     names.add(match.group(1))
     return frozenset(names)

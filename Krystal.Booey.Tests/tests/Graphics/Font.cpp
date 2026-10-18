@@ -8,7 +8,7 @@ namespace krys::boo::tests
 {
   namespace
   {
-    KRYS_NODISCARD FreeTypeFace &Ahem()
+    KRYS_NODISCARD text::FreeTypeFace &Ahem()
     {
       auto &database = FontDatabase::Singleton();
       (void)database.AddFontFile(std::filesystem::path {KRYS_BOOEY_TESTS_DATA_DIR} / "fonts" / "Ahem.ttf");
@@ -17,7 +17,7 @@ namespace krys::boo::tests
       return *faces.front();
     }
 
-    KRYS_NODISCARD Ref<Font> CreateFont(FreeTypeFace &face, float size, bool syntheticBold = false,
+    KRYS_NODISCARD Ref<Font> CreateFont(text::FreeTypeFace &face, float size, bool syntheticBold = false,
                                         bool syntheticOblique = false)
     {
       return Font::Create(FontPlatformData {ShareRef(face), size, syntheticBold, syntheticOblique});

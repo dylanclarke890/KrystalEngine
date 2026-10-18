@@ -10,7 +10,7 @@ namespace krys::boo
 
   FontPlatformData::FontPlatformData() noexcept = default;
 
-  FontPlatformData::FontPlatformData(Ref<FreeTypeFace> face, float size, bool syntheticBold,
+  FontPlatformData::FontPlatformData(Ref<text::FreeTypeFace> face, float size, bool syntheticBold,
                                      bool syntheticOblique, FontOrientation orientation,
                                      FontWidthVariant widthVariant,
                                      TextRenderingMode textRenderingMode) noexcept

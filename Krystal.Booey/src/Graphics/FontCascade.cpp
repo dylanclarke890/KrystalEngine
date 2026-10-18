@@ -2,6 +2,7 @@
 #include "Krystal.Booey/Core/CharacterProperties.hpp"
 #include "Krystal.Booey/Graphics/ComplexTextController.hpp"
 #include "Krystal.Booey/Graphics/FontCache.hpp"
+#include "Krystal.Booey/Graphics/FontDatabase.hpp"
 #include "Krystal.Booey/Graphics/WidthCache.hpp"
 #include "Krystal.Booey/Graphics/WidthIterator.hpp"
 #include "Krystal.Core/Assert.hpp"
@@ -66,7 +67,7 @@ namespace krys::boo
     _fontDescription.SetComputedSize(platformData.Size());
     if (auto *face = platformData.Face())
     {
-      auto &capabilities = face->Capabilities();
+      const auto capabilities = CapabilitiesOfFace(*face);
       _fontDescription.SetIsItalic(capabilities.Slope.Maximum != NormalItalicValue());
       _fontDescription.SetWeight(IsFontWeightBold(capabilities.Weight.Maximum) ? BoldWeightValue()
                                                                                : NormalWeightValue());
