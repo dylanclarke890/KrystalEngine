@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/Rendering/BorderShape.hpp"
 #include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
+#include "Krystal.Booey/Graphics/Path.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Values/Borders/BorderRadius.hpp"
 
@@ -218,6 +220,166 @@ namespace krys::boo
   {
     _borderRect.InflateWithRadii(amount);
     _innerEdgeRect = ComputeInnerEdgeRoundedRect(_borderRect, _borderWidths);
+  }
+
+  namespace
+  {
+    void AddRoundedRectToPath(const FloatRoundedRect &roundedRect, Path &path) noexcept
+    {
+      if (roundedRect.IsRounded())
+      {
+        path.AddRoundedRect(roundedRect);
+      }
+      else
+      {
+        path.AddRect(roundedRect.Rect());
+      }
+    }
+  }
+
+  Path BorderShape::PathForOuterShape(float deviceScaleFactor) const noexcept
+  {
+    auto pixelSnappedRect = _borderRect.PixelSnappedRoundedRectForPainting(deviceScaleFactor);
+    Path path;
+    AddRoundedRectToPath(pixelSnappedRect, path);
+    return path;
+  }
+
+  Path BorderShape::PathForInnerShape(float deviceScaleFactor) const noexcept
+  {
+    auto pixelSnappedRect = _innerEdgeRect.PixelSnappedRoundedRectForPainting(deviceScaleFactor);
+    krys_debug_assert(pixelSnappedRect.IsRenderable());
+
+    Path path;
+    AddRoundedRectToPath(pixelSnappedRect, path);
+    return path;
+  }
+
+  void BorderShape::AddOuterShapeToPath(Path &path, float deviceScaleFactor) const noexcept
+  {
+    auto pixelSnappedRect = _borderRect.PixelSnappedRoundedRectForPainting(deviceScaleFactor);
+    AddRoundedRectToPath(pixelSnappedRect, path);
+  }
+
+  void BorderShape::AddInnerShapeToPath(Path &path, float deviceScaleFactor) const noexcept
+  {
+    auto pixelSnappedRect = _innerEdgeRect.PixelSnappedRoundedRectForPainting(deviceScaleFactor);
+    krys_debug_assert(pixelSnappedRect.IsRenderable());
+    AddRoundedRectToPath(pixelSnappedRect, path);
+  }
+
+  Path BorderShape::PathForBorderArea(float deviceScaleFactor) const noexcept
+  {
+    auto pixelSnappedOuterRect = _borderRect.PixelSnappedRoundedRectForPainting(deviceScaleFactor);
+    auto pixelSnappedInnerRect = _innerEdgeRect.PixelSnappedRoundedRectForPainting(deviceScaleFactor);
+
+    krys_debug_assert(pixelSnappedInnerRect.IsRenderable());
+
+    Path path;
+    AddRoundedRectToPath(pixelSnappedOuterRect, path);
+    AddRoundedRectToPath(pixelSnappedInnerRect, path);
+    return path;
+  }
+
+  void BorderShape::ClipToOuterShape(GraphicsContext &context, float deviceScaleFactor) const noexcept
+  {
+    auto pixelSnappedRect = _borderRect.PixelSnappedRoundedRectForPainting(deviceScaleFactor);
+    if (pixelSnappedRect.IsRounded())
+    {
+      context.ClipRoundedRect(pixelSnappedRect);
+    }
+    else
+    {
+      context.Clip(pixelSnappedRect.Rect());
+    }
+  }
+
+  void BorderShape::ClipToInnerShape(GraphicsContext &context, float deviceScaleFactor) const noexcept
+  {
+    auto pixelSnappedRect = _innerEdgeRect.PixelSnappedRoundedRectForPainting(deviceScaleFactor);
+    krys_debug_assert(pixelSnappedRect.IsRenderable());
+    if (pixelSnappedRect.IsRounded())
+    {
+      context.ClipRoundedRect(pixelSnappedRect);
+    }
+    else
+    {
+      context.Clip(pixelSnappedRect.Rect());
+    }
+  }
+
+  void BorderShape::ClipOutOuterShape(GraphicsContext &context, float deviceScaleFactor) const noexcept
+  {
+    auto pixelSnappedRect = _borderRect.PixelSnappedRoundedRectForPainting(deviceScaleFactor);
+    if (pixelSnappedRect.IsEmpty())
+    {
+      return;
+    }
+
+    if (pixelSnappedRect.IsRounded())
+    {
+      context.ClipOutRoundedRect(pixelSnappedRect);
+    }
+    else
+    {
+      context.ClipOut(pixelSnappedRect.Rect());
+    }
+  }
+
+  void BorderShape::ClipOutInnerShape(GraphicsContext &context, float deviceScaleFactor) const noexcept
+  {
+    auto pixelSnappedRect = _innerEdgeRect.PixelSnappedRoundedRectForPainting(deviceScaleFactor);
+    if (pixelSnappedRect.IsEmpty())
+    {
+      return;
+    }
+
+    if (pixelSnappedRect.IsRounded())
+    {
+      context.ClipOutRoundedRect(pixelSnappedRect);
+    }
+    else
+    {
+      context.ClipOut(pixelSnappedRect.Rect());
+    }
+  }
+
+  void BorderShape::FillOuterShape(GraphicsContext &context, const Color &color,
+                                   float deviceScaleFactor) const noexcept
+  {
+    auto pixelSnappedRect = _borderRect.PixelSnappedRoundedRectForPainting(deviceScaleFactor);
+    if (pixelSnappedRect.IsRounded())
+    {
+      context.FillRoundedRect(pixelSnappedRect, color);
+    }
+    else
+    {
+      context.FillRect(pixelSnappedRect.Rect(), color);
+    }
+  }
+
+  void BorderShape::FillInnerShape(GraphicsContext &context, const Color &color,
+                                   float deviceScaleFactor) const noexcept
+  {
+    auto pixelSnappedRect = _innerEdgeRect.PixelSnappedRoundedRectForPainting(deviceScaleFactor);
+    krys_debug_assert(pixelSnappedRect.IsRenderable());
+    if (pixelSnappedRect.IsRounded())
+    {
+      context.FillRoundedRect(pixelSnappedRect, color);
+    }
+    else
+    {
+      context.FillRect(pixelSnappedRect.Rect(), color);
+    }
+  }
+
+  void BorderShape::FillRectWithInnerHoleShape(GraphicsContext &context, const LayoutRect &outerRect,
+                                               const Color &color, float deviceScaleFactor) const noexcept
+  {
+    auto pixelSnappedOuterRect = SnapRectToDevicePixels(outerRect, deviceScaleFactor);
+    auto innerSnappedRoundedRect = _innerEdgeRect.PixelSnappedRoundedRectForPainting(deviceScaleFactor);
+    krys_debug_assert(innerSnappedRoundedRect.IsRenderable());
+    context.FillRectWithRoundedHole(pixelSnappedOuterRect, innerSnappedRoundedRect, color);
   }
 
   LayoutRoundedRect

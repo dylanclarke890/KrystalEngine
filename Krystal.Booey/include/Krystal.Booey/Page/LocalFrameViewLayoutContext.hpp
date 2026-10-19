@@ -202,6 +202,16 @@ namespace krys::boo
       return _layoutPhase == LayoutPhase::InRenderTreeLayout;
     }
 
+    /// @brief Whether the view may paint: not while its render tree is laid out or its size adjusted, nor in
+    /// the post-layout tasks.
+    /// FIXME: Upstream also paints while running the post-layout tasks asynchronously
+    /// (`inAsynchronousTasks`), once they can be.
+    KRYS_NODISCARD bool InPaintableState() const noexcept
+    {
+      return _layoutPhase != LayoutPhase::InRenderTreeLayout && _layoutPhase != LayoutPhase::InViewSizeAdjust
+             && _layoutPhase != LayoutPhase::InPostLayout;
+    }
+
     void ResetFirstLayoutFlag() noexcept
     {
       _firstLayout = true;

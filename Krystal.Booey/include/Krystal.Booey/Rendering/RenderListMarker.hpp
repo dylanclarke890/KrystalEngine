@@ -61,6 +61,11 @@ namespace krys::boo
     Pair<float, float> _layoutBounds;
 
   public:
+    void Paint(PaintInfo &, const LayoutPoint &) noexcept final
+    {
+      // FIXME: Markers (their text, bullets and images) come with text painting.
+    }
+
     RenderListMarker(RenderListItem &listItem, RenderStyle &&style) noexcept;
     ~RenderListMarker() noexcept override;
 

@@ -1399,6 +1399,15 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Graphics/NullGraphicsContext.hpp
   include/Krystal.Booey/Graphics/SourceBrush.hpp
   include/Krystal.Booey/Graphics/SourceBrushLogicalGradient.hpp
+
+  # Paint plumbing, layers and backgrounds (G4c1)
+  include/Krystal.Booey/Graphics/GeneratedImage.hpp
+  include/Krystal.Booey/Graphics/GradientImage.hpp
+  include/Krystal.Booey/Graphics/Image.hpp
+  include/Krystal.Booey/Graphics/ImagePaintingOptions.hpp
+  include/Krystal.Booey/Rendering/BackgroundPainter.hpp
+  include/Krystal.Booey/Rendering/BorderEdge.hpp
+  include/Krystal.Booey/Rendering/PaintInfo.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -2316,6 +2325,13 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Graphics/GraphicsTypes.cpp
   src/Graphics/RotationDirection.cpp
   src/Graphics/SourceBrush.cpp
+
+  # Paint plumbing, layers and backgrounds (G4c1)
+  src/Graphics/GeneratedImage.cpp
+  src/Graphics/GradientImage.cpp
+  src/Graphics/Image.cpp
+  src/Rendering/BackgroundPainter.cpp
+  src/Rendering/BorderEdge.cpp
 )
 
 target_precompile_headers(Krystal.Booey

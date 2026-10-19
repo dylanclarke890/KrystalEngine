@@ -1,12 +1,14 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Graphics/IntSize.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/Pagination.hpp"
+#include "Krystal.Booey/Rendering/PaintPhase.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
@@ -19,12 +21,13 @@
 
 namespace krys::boo
 {
+  class GraphicsContext;
   class LocalFrame;
   class RenderView;
 
   /// @brief The view a frame's document is laid out in: its frame rect, the size content is laid out at, the
   /// media type, pagination, the sizes viewport units resolve against, and the layout context.
-  /// @note FIXME: No scrolling, scrollbars, obscured insets, visual viewport, auto-sizing, painting or
+  /// @note FIXME: No scrolling, scrollbars, obscured insets, visual viewport, auto-sizing, repaint rects or
   /// compositing, and views aren't widgets in a widget tree: the visible content is the whole frame rect, at
   /// the origin.
   class LocalFrameView final : public RefCounted<LocalFrameView>, public CanMakeWeakPtr<LocalFrameView>
@@ -52,6 +55,11 @@ namespace krys::boo
     Maybe<OverrideViewportSize> _smallViewportSizeOverride;
     Maybe<OverrideViewportSize> _largeViewportSizeOverride;
     LocalFrameViewLayoutContext _layoutContext;
+    EnumSet<PaintBehavior> _paintBehavior;
+    boo::Color _baseBackgroundColor {boo::Color::white};
+    bool _isPainting {false};
+    bool _isTransparent {false};
+    bool _contentIsOpaque {false};
 
     explicit LocalFrameView(LocalFrame &frame) noexcept;
 
@@ -143,6 +151,77 @@ namespace krys::boo
 
     /// @brief The part of the visible content that isn't covered by the host's interface: all of it.
     KRYS_NODISCARD IntRect UnobscuredContentRect() const noexcept;
+
+    /// @brief The size of the visible content.
+    KRYS_NODISCARD IntSize SizeForVisibleContent() const noexcept
+    {
+      return VisibleContentRect().Size();
+    }
+
+    /// @brief The document's scroll position relative to the view's origin: none, as the view doesn't scroll.
+    /// FIXME: Comes with scrolling the viewport.
+    KRYS_NODISCARD IntPoint DocumentScrollPositionRelativeToViewOrigin() const noexcept
+    {
+      return {};
+    }
+
+    /// @brief The scale of the frame's content: none, as there's no page scaling.
+    KRYS_NODISCARD float FrameScaleFactor() const noexcept
+    {
+      return 1;
+    }
+
+    /// @brief Whether the background is painted beyond the document, while rubber-banding: never.
+    /// FIXME: Comes with scrolling the viewport.
+    KRYS_NODISCARD bool HasExtendedBackgroundRectForPainting() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD IntRect ExtendedBackgroundRectForPainting() const noexcept
+    {
+      return {};
+    }
+
+    // Painting
+
+    /// @brief Paints the document's render view over @p dirtyRect, in the view's coordinates.
+    /// FIXME: The overlay scrollbars and painting a single node (`setNodeToDraw`) aren't ported.
+    void PaintContents(GraphicsContext &, const IntRect &dirtyRect) noexcept;
+
+    void SetPaintBehavior(EnumSet<PaintBehavior> behavior) noexcept
+    {
+      _paintBehavior = behavior;
+    }
+    KRYS_NODISCARD EnumSet<PaintBehavior> GetPaintBehavior() const noexcept
+    {
+      return _paintBehavior;
+    }
+    KRYS_NODISCARD bool IsPainting() const noexcept
+    {
+      return _isPainting;
+    }
+
+    KRYS_NODISCARD bool IsTransparent() const noexcept
+    {
+      return _isTransparent;
+    }
+    void SetTransparent(bool isTransparent) noexcept;
+
+    /// @brief The colour painted under the document where nothing else is (white by default).
+    KRYS_NODISCARD boo::Color BaseBackgroundColor() const noexcept
+    {
+      return _baseBackgroundColor;
+    }
+    void SetBaseBackgroundColor(const boo::Color &backgroundColor) noexcept;
+    KRYS_NODISCARD bool HasOpaqueBackground() const noexcept
+    {
+      return !_isTransparent && _baseBackgroundColor.IsOpaque();
+    }
+
+    void SetContentIsOpaque(bool contentIsOpaque) noexcept
+    {
+      _contentIsOpaque = contentIsOpaque;
+    }
 
     /// @brief The view's media type (`screen` by default).
     KRYS_NODISCARD const css::CSSOMStringAtom &MediaType() const noexcept

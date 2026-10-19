@@ -22,6 +22,10 @@ namespace krys::boo
     uint32 _span {1};
 
   public:
+    void Paint(PaintInfo &, const LayoutPoint &) noexcept final
+    {
+    }
+
     RenderTableCol(dom::Element &element, RenderStyle &&style) noexcept;
     RenderTableCol(dom::Document &document, RenderStyle &&style) noexcept;
     ~RenderTableCol() noexcept override;

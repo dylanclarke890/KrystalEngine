@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/HTML/HTMLOListElement.hpp"
 #include "Krystal.Booey/HTML/HTMLUListElement.hpp"
+#include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
@@ -385,5 +386,14 @@ namespace krys::boo
   {
     auto *list = AsOrderedList(EnclosingList(*this));
     return list && list->IsReversed();
+  }
+  void RenderListItem::Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    if (!LogicalHeight() && HasNonVisibleOverflow())
+    {
+      return;
+    }
+
+    RenderBlockFlow::Paint(paintInfo, paintOffset);
   }
 }

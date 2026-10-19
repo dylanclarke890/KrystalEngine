@@ -9,6 +9,7 @@
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
+#include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
@@ -717,6 +718,11 @@ namespace krys::boo
            && Style().OverflowX() != Overflow::Visible;
   }
 
+  bool RenderElement::HasBackground() const noexcept
+  {
+    return Style().HasBackground();
+  }
+
   bool RenderElement::HasClip() const noexcept
   {
     return IsOutOfFlowPositioned() && Style().HasClip();
@@ -1167,6 +1173,44 @@ namespace krys::boo
     // clean-up, once there are any.
     RenderObject::WillBeDestroyed();
   }
+
+#pragma region Painting
+
+  namespace
+  {
+    void PaintPhaseOf(RenderElement &element, PaintPhase phase, PaintInfo &paintInfo,
+                      const LayoutPoint &childPoint) noexcept
+    {
+      paintInfo.Phase = phase;
+      element.Paint(paintInfo, childPoint);
+    }
+  }
+
+  void RenderElement::PaintAsInlineBlock(PaintInfo &paintInfo, const LayoutPoint &childPoint) noexcept
+  {
+    // Paint all phases atomically, as though the element established its own stacking context.
+    // (See Appendix E.2, section 6.4 on inline block/table/replaced elements in the CSS2.1 specification.)
+    // This is also used by other elements (e.g. flex items and grid items).
+    PaintPhase paintPhaseToUse = IsExcludedAndPlacedInBorder() ? paintInfo.Phase : PaintPhase::Foreground;
+    if (paintInfo.Phase == PaintPhase::Selection || paintInfo.Phase == PaintPhase::EventRegion
+        || paintInfo.Phase == PaintPhase::TextClip || paintInfo.Phase == PaintPhase::Accessibility)
+    {
+      Paint(paintInfo, childPoint);
+    }
+    else if (paintInfo.Phase == paintPhaseToUse)
+    {
+      PaintPhaseOf(*this, PaintPhase::BlockBackground, paintInfo, childPoint);
+      PaintPhaseOf(*this, PaintPhase::ChildBlockBackgrounds, paintInfo, childPoint);
+      PaintPhaseOf(*this, PaintPhase::Float, paintInfo, childPoint);
+      PaintPhaseOf(*this, PaintPhase::Foreground, paintInfo, childPoint);
+      PaintPhaseOf(*this, PaintPhase::Outline, paintInfo, childPoint);
+
+      // Reset |paintInfo| to the original phase.
+      paintInfo.Phase = paintPhaseToUse;
+    }
+  }
+
+#pragma endregion
 
 #pragma region Layout
 

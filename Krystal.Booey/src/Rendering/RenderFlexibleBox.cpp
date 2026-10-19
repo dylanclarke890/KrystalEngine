@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/BaselineAlignment.hpp"
+#include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
@@ -3765,5 +3766,16 @@ namespace krys::boo
     }
     // Logically first (but visually last) item on logically last (but visually first) line.
     return FirstBaselineCandidateOnLine(_orderIterator, _numberOfFlexItemsOnFirstLine);
+  }
+  void RenderFlexibleBox::PaintChildren(PaintInfo &paintInfo, const LayoutPoint &paintOffset,
+                                        PaintInfo &paintInfoForFlexItem) noexcept
+  {
+    for (RenderBox *flexItem = _orderIterator.First(); flexItem; flexItem = _orderIterator.Next())
+    {
+      if (!PaintChild(*flexItem, paintInfo, paintOffset, paintInfoForFlexItem, PaintAsInlineBlock))
+      {
+        return;
+      }
+    }
   }
 }

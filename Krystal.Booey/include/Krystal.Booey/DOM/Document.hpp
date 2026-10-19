@@ -17,6 +17,7 @@
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/FontSelector.hpp"
+#include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/HTML/Enums/DocumentReadyState.hpp"
 #include "Krystal.Booey/HTML/Enums/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/HTML/Types/HTMLOrSVGScriptElement.hpp"
@@ -32,6 +33,7 @@ namespace krys::boo
   class HitTestRequest;
   class LocalFrame;
   class LocalFrameView;
+  class RenderElement;
   class RenderStyle;
   class RenderTreeUpdater;
   class RenderView;
@@ -694,6 +696,15 @@ namespace krys::boo::dom
 
     /// @brief Device pixels per CSS pixel: the frame's media environment's, or 1.
     KRYS_NODISCARD float DeviceScaleFactor() const noexcept;
+
+    /// @brief How a background colour is composited: over what's beneath it.
+    /// FIXME: Punching out white backgrounds in dark mode (`punchOutWhiteBackgroundsInDarkMode`, a setting
+    /// off by default) isn't ported.
+    KRYS_NODISCARD CompositeOperator CompositeOperatorForBackgroundColor(const Color &,
+                                                                         const RenderElement &) const noexcept
+    {
+      return CompositeOperator::SourceOver;
+    }
 
     KRYS_NODISCARD bool ShouldScheduleLayout() const noexcept;
     KRYS_NODISCARD bool IsLayoutPending() const noexcept;

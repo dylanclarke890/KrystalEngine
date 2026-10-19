@@ -15,7 +15,7 @@ namespace krys::boo
   class BaselineAlignmentState;
 
   /// @brief A flex container: lays out its children as flex items, in flex lines.
-  // FIXME: Painting and hit testing (paintChildren, hitTestChildren), once there are those.
+  // FIXME: Hit testing (hitTestChildren), once there is hit testing.
   class RenderFlexibleBox : public RenderBlock
   {
     KRYS_NON_COPY_MOVABLE(RenderFlexibleBox);
@@ -214,6 +214,8 @@ namespace krys::boo
     KRYS_NODISCARD bool IsWrapReverse() const noexcept;
 
   protected:
+    void PaintChildren(PaintInfo &forSelf, const LayoutPoint &, PaintInfo &forChild) noexcept override;
+
     void ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,
                                        LayoutUnit &maxLogicalWidth) const noexcept override;
 

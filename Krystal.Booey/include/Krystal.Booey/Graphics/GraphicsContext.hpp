@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Graphics/FloatSegment.hpp"
 #include "Krystal.Booey/Graphics/GlyphBufferMembers.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextState.hpp"
+#include "Krystal.Booey/Graphics/ImagePaintingOptions.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
@@ -16,6 +17,7 @@ namespace krys::boo
   class FloatRoundedRect;
   class Font;
   class Gradient;
+  class Image;
   class Path;
 
   enum class RequiresClipToRect : bool
@@ -31,10 +33,11 @@ namespace krys::boo
 
   /// @brief Where painting goes: state (brushes, shadows, compositing, transforms, clips) and the drawing
   /// operations, implemented by display list recorders and drawing backends.
-  /// FIXME: Images, image buffers, patterns, filters, system images, video frames and form controls
-  /// (`drawNativeImage`, `drawImage`, `drawTiledImage`, `drawImageBuffer`, `drawConsumingImageBuffer`,
+  /// FIXME: Bitmap images, image buffers, patterns, filters, system images, video frames and form controls
+  /// (`drawNativeImage`, `drawTiledImage` by tile rules, `drawImageBuffer`, `drawConsumingImageBuffer`,
   /// `drawFilteredImageBuffer`, `drawPattern`, `drawSystemImage`, `drawVideoFrame`, `drawControlPart`,
-  /// `clipToImageBuffer`, the image buffer factories and the fill and stroke patterns) come with images.
+  /// `clipToImageBuffer`, the image buffer factories and the fill and stroke patterns) come with images;
+  /// generated images draw themselves through `DrawImage` and `DrawTiledImage`.
   /// FIXME: Text runs (`drawText`, `drawEmphasisMarks`, `drawBidiText`) come with text painting.
   class GraphicsContext
   {
@@ -417,6 +420,22 @@ namespace krys::boo
     virtual void SetLineDash(const DashArray &, float dashOffset) noexcept = 0;
     virtual void SetLineJoin(LineJoin) noexcept = 0;
     virtual void SetMiterLimit(float) noexcept = 0;
+
+    // Images
+
+    ImageDrawResult DrawImage(Image &, const FloatPoint &destination,
+                              ImagePaintingOptions = ImagePaintingOptions {
+                                ImageOrientation::Orientation::FromImage}) noexcept;
+    ImageDrawResult DrawImage(Image &, const FloatRect &destination,
+                              ImagePaintingOptions = ImagePaintingOptions {
+                                ImageOrientation::Orientation::FromImage}) noexcept;
+    virtual ImageDrawResult DrawImage(Image &, const FloatRect &destination, const FloatRect &source,
+                                      ImagePaintingOptions = ImagePaintingOptions {
+                                        ImageOrientation::Orientation::FromImage}) noexcept;
+
+    virtual ImageDrawResult DrawTiledImage(Image &, const FloatRect &destination, const FloatPoint &source,
+                                           const FloatSize &tileSize, const FloatSize &spacing,
+                                           ImagePaintingOptions = {}) noexcept;
 
     // Clipping
 

@@ -18,6 +18,7 @@
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.Text/FreeTypeFace.hpp"
 #include "Krystal.UI/Page.hpp"
+#include <algorithm>
 #include <cmath>
 #include <cstring>
 #include <filesystem>
@@ -26,9 +27,23 @@
 
 namespace krys
 {
+  /// @brief What the editor shows below its header; Tab moves to the next.
+  enum class EditorView : uint8
+  {
+    // An HTML page from `Krystal.Editor/pages`, painted by Booey.
+    Page,
+    // A dashboard drawn with Render2D directly.
+    Render2D,
+    // A scene drawn through Booey's graphics context.
+    BooeyScene,
+  };
+
   class Editor : public Application
   {
   private:
+    /// @brief The height of the header the views are drawn under.
+    static constexpr float HeaderHeight = 56.f;
+
     uint32 _width {0u};
     uint32 _height {0u};
     float _time {0.f};
@@ -38,7 +53,7 @@ namespace krys
     UniquePtr<gfx::FontFace2D> _boldFont {};
     UniquePtr<ui::Page> _page {};
     editor::BooeyFonts _booeyFonts {};
-    bool _showBooey {false};
+    EditorView _view {EditorView::Page};
 
   public:
     explicit Editor(int argc, char **argv, const ApplicationSettings &settings) noexcept
@@ -151,7 +166,12 @@ namespace krys
 
           if (event.Key() == pal::Key::Tab && event.State() == pal::KeyState::Pressed)
           {
-            _showBooey = !_showBooey;
+            _view = static_cast<EditorView>((static_cast<uint8>(_view) + 1u) % 3u);
+          }
+
+          if (event.Key() == pal::Key::F5 && event.State() == pal::KeyState::Pressed)
+          {
+            LoadPage();
           }
 
           if (event.Key() == pal::Key::Escape)
@@ -169,7 +189,7 @@ namespace krys
           _height = event.Height();
           if (_page)
           {
-            _page->Resize(boo::IntSize(static_cast<int32>(_width), static_cast<int32>(_height)));
+            _page->Resize(PageSize());
           }
           return true;
         });
@@ -200,29 +220,55 @@ namespace krys
                                   .Format = gfx::TextureFormat::RGBA8Unorm,
                                   .ClearColour = Array<float, 4> {0.933f, 0.945f, 0.965f, 1.f}});
 
+      switch (_view)
+      {
+        case EditorView::Page: DrawPage(); break;
+        case EditorView::Render2D:
+          DrawCard(U"Mask clipping", 24.f, 80.f, 392.f, 616.f);
+          DrawCard(U"Shadows", 444.f, 80.f, 392.f, 616.f);
+          DrawCard(U"Compositing", 864.f, 80.f, 392.f, 616.f);
+          DrawClipping(24.f, 80.f);
+          DrawShadows(444.f, 80.f);
+          DrawCompositing(864.f, 80.f);
+          break;
+        case EditorView::BooeyScene: DrawBooey(); break;
+      }
+      // The header goes over the page, which scrolls under it.
       DrawHeader();
-      if (_showBooey)
-      {
-        DrawBooey();
-      }
-      else
-      {
-        DrawCard(U"Mask clipping", 24.f, 80.f, 392.f, 616.f);
-        DrawCard(U"Shadows", 444.f, 80.f, 392.f, 616.f);
-        DrawCard(U"Compositing", 864.f, 80.f, 392.f, 616.f);
-        DrawClipping(24.f, 80.f);
-        DrawShadows(444.f, 80.f);
-        DrawCompositing(864.f, 80.f);
-      }
 
       _renderer->End();
     }
 
   private:
-    /// @brief The page Booey's drawing is replayed through, and Liberation Sans as Booey's fonts.
+    /// @brief The size of the page view: the window below the header.
+    KRYS_NODISCARD boo::IntSize PageSize() const noexcept
+    {
+      const auto height = std::max(static_cast<float>(_height) - HeaderHeight, 0.f);
+      return boo::IntSize(static_cast<int32>(_width), static_cast<int32>(height));
+    }
+
+    /// @brief Loads (or reloads) the page view's HTML file.
+    void LoadPage() noexcept
+    {
+      if (!_page)
+      {
+        return;
+      }
+      const auto path = std::filesystem::path {KRYS_EDITOR_PAGES_DIR} / "index.html";
+      if (auto loaded = _page->LoadFile(path); !loaded)
+      {
+        _context->Logger->Error("{}", loaded.error());
+        return;
+      }
+      _context->Logger->Info("Loaded {}", path.string());
+    }
+
+    /// @brief The page shown in the page view, which Booey's drawing is also replayed through, and Liberation
+    /// Sans as Booey's fonts.
     void CreatePage() noexcept
     {
-      _page = CreateUnique<ui::Page>(boo::IntSize(static_cast<int32>(_width), static_cast<int32>(_height)));
+      _page = CreateUnique<ui::Page>(PageSize());
+      LoadPage();
       auto &database = boo::FontDatabase::Singleton();
       (void)database.AddFontFile(std::filesystem::path {KRYS_EDITOR_FONTS_DIR}
                                  / "LiberationSans-Regular.ttf");
@@ -237,8 +283,21 @@ namespace krys
       _booeyFonts.Bold = boo::Font::Create(boo::FontPlatformData {ShareRef(*faces.front()), 14, true, false});
     }
 
-    /// @brief The Booey view: a scene drawn through Booey's graphics context, recorded into a display list
-    /// and replayed into Render2D, as pages will be once Booey paints.
+    /// @brief The page view: the page laid out and painted by Booey, below the header.
+    void DrawPage() noexcept
+    {
+      if (!_page)
+      {
+        return;
+      }
+      _renderer->Save();
+      _renderer->Translate(0.f, HeaderHeight);
+      _page->Paint(*_renderer);
+      _renderer->Restore();
+    }
+
+    /// @brief The Booey scene view: a scene drawn through Booey's graphics context, recorded into a display
+    /// list and replayed into Render2D.
     void DrawBooey() noexcept
     {
       if (!_page)
@@ -349,14 +408,14 @@ namespace krys
       _renderer->SetDropShadow({.Offset = {0.f, 1.f}, .BlurRadius = 4.f, .Colour = Rgb(0x1a1040, 120)});
       DrawText(U"Krystal", 56.f, 36.f, 22.f, Rgb(0xffffff), true);
       _renderer->Restore();
-      const char32_t *links[] {U"Render2D", U"Booey"};
-      for (int i = 0; i < 2; ++i)
+      const char32_t *links[] {U"Page", U"Render2D", U"Booey scene"};
+      for (int i = 0; i < 3; ++i)
       {
-        const bool active = (i == 1) == _showBooey;
+        const bool active = i == static_cast<int>(_view);
         DrawText(links[i], 170.f + static_cast<float>(i) * 96.f, 34.f, 15.f,
                  Rgb(0xffffff, active ? 255 : 150), active);
       }
-      DrawText(U"Tab switches views", width - 160.f, 34.f, 13.f, Rgb(0xffffff, 170));
+      DrawText(U"Tab switches views, F5 reloads the page", width - 290.f, 34.f, 13.f, Rgb(0xffffff, 170));
     }
 
     void DrawCard(const char32_t *title, float x, float y, float width, float height) noexcept

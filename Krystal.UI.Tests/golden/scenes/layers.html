@@ -1,0 +1,44 @@
+﻿<!doctype html>
+<!-- The "layers" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page. -->
+<html data-width="360" data-height="240">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 0; }
+  div { position: absolute; box-sizing: border-box; }
+</style>
+</head>
+<body>
+  <!-- Opacity: a group made translucent as one, over a box. -->
+  <div style="left: 16px; top: 16px; width: 64px; height: 64px; background: #073b4c"></div>
+  <div style="left: 40px; top: 40px; width: 64px; height: 64px; opacity: 0.6">
+    <div style="left: 0; top: 0; width: 48px; height: 48px; background: #ef476f"></div>
+    <div style="left: 16px; top: 16px; width: 48px; height: 48px; background: #ffd166"></div>
+  </div>
+
+  <!-- Transforms: a turn, and a scale with a nested turn. -->
+  <div style="left: 136px; top: 24px; width: 64px; height: 48px; border-radius: 8px; background: #118ab2; transform: rotate(20deg)"></div>
+  <div style="left: 232px; top: 24px; width: 64px; height: 48px; background: #06d6a0; transform: scale(1.25, 0.75)">
+    <div style="left: 16px; top: 8px; width: 32px; height: 32px; background: #073b4c; transform: rotate(45deg)"></div>
+  </div>
+
+  <!-- Overflow clipped to a rounded padding box. -->
+  <div style="left: 16px; top: 128px; width: 96px; height: 96px; border-radius: 24px; overflow: hidden; background: #e9ecf2">
+    <div style="position: static; width: 160px; height: 48px; background: linear-gradient(90deg, #ef476f, #ffd166)"></div>
+    <div style="position: static; margin-left: 32px; width: 96px; height: 96px; background: #118ab2"></div>
+  </div>
+
+  <!-- clip-path shapes: a circle, a polygon and a rounded inset. -->
+  <div style="left: 128px; top: 128px; width: 64px; height: 64px; background: linear-gradient(#ef476f, #118ab2); clip-path: circle(28px)"></div>
+  <div style="left: 200px; top: 128px; width: 64px; height: 64px; background: #ffd166; clip-path: polygon(50% 0, 100% 100%, 0 100%)"></div>
+  <div style="left: 272px; top: 128px; width: 72px; height: 64px; background: #06d6a0; clip-path: inset(8px 4px round 12px)"></div>
+
+  <!-- Stacking: negative and positive z-index around a box, and a blend mode. -->
+  <div style="left: 136px; top: 200px; width: 120px; height: 32px; z-index: 1; background: rgba(7, 59, 76, 0.5)"></div>
+  <div style="left: 128px; top: 208px; width: 48px; height: 24px; z-index: -1; background: #ef476f"></div>
+  <div style="left: 272px; top: 200px; width: 72px; height: 32px; background: linear-gradient(90deg, #ffd166, #118ab2)">
+    <div style="left: 16px; top: 4px; width: 40px; height: 24px; background: #ef476f; mix-blend-mode: multiply"></div>
+  </div>
+</body>
+</html>

@@ -22,6 +22,10 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderLineBreak);
 
   public:
+    void Paint(PaintInfo &, const LayoutPoint &) noexcept final
+    {
+    }
+
     RenderLineBreak(html::HTMLElement &element, RenderStyle &&style) noexcept;
     ~RenderLineBreak() noexcept override;
 

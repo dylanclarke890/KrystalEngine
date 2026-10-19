@@ -188,5 +188,16 @@ namespace krys::boo
     void FillRectWithRoundedHole(const FloatRect &, const FloatRoundedRect &, const Color &) noexcept final
     {
     }
+    ImageDrawResult DrawImage(Image &, const FloatRect &, const FloatRect &,
+                              ImagePaintingOptions = ImagePaintingOptions {
+                                ImageOrientation::Orientation::FromImage}) noexcept final
+    {
+      return ImageDrawResult::DidNothing;
+    }
+    ImageDrawResult DrawTiledImage(Image &, const FloatRect &, const FloatPoint &, const FloatSize &,
+                                   const FloatSize &, ImagePaintingOptions = {}) noexcept final
+    {
+      return ImageDrawResult::DidNothing;
+    }
   };
 }

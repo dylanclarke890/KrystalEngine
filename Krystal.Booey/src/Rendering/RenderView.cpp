@@ -1,12 +1,16 @@
 ﻿#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
+#include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/Layout/Integration/LayoutIntegrationFormattingContextLayout.hpp"
 #include "Krystal.Booey/Layout/LayoutState.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInitialContainingBlock.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderCounter.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
@@ -92,6 +96,221 @@ namespace krys::boo
   {
     return std::exchange(_countersNeedingUpdate, {});
   }
+
+#pragma region Painting
+
+  void RenderView::Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    // If we ever require layout but receive a paint anyway, something has gone horribly wrong.
+    krys_debug_assert(!NeedsLayout());
+    // RenderViews should never be called to paint with an offset not on device pixels.
+    krys_debug_assert(LayoutPoint(IntPoint(paintOffset.X().ToInt(), paintOffset.Y().ToInt())) == paintOffset);
+
+    // This avoids painting garbage between columns if there is a column gap.
+    if (FrameView().GetPagination().Mode != PaginationMode::Unpaginated
+        && paintInfo.ShouldPaintWithinRoot(*this))
+    {
+      paintInfo.Context().FillRect(FloatRect(paintInfo.Rect), FrameView().BaseBackgroundColor());
+    }
+
+    PaintObject(paintInfo, paintOffset);
+  }
+
+  RenderElement *RenderView::RendererForRootBackground() const noexcept
+  {
+    auto *firstChild = FirstChild();
+    if (!firstChild)
+    {
+      return nullptr;
+    }
+
+    auto &documentRenderer = Downcast<RenderElement>(*firstChild);
+    if (documentRenderer.HasBackground())
+    {
+      return &documentRenderer;
+    }
+
+    // We propagate the background only for HTML content.
+    if (!Is<html::HTMLHtmlElement>(documentRenderer.GetElement()))
+    {
+      return &documentRenderer;
+    }
+
+    if (documentRenderer.ShouldApplyAnyContainment())
+    {
+      return nullptr;
+    }
+
+    if (auto body = GetDocument().Body())
+    {
+      if (auto *renderer = body->Renderer())
+      {
+        if (!renderer->ShouldApplyAnyContainment())
+        {
+          return renderer;
+        }
+      }
+    }
+    return &documentRenderer;
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD bool RendererObscuresBackground(const RenderElement &rootElement) noexcept
+    {
+      const auto &style = rootElement.Style();
+      if (style.UsedVisibility() != Visibility::Visible || !style.GetOpacity().IsOpaque()
+          || style.HasTransform())
+      {
+        return false;
+      }
+
+      if (style.HasBorderRadius())
+      {
+        return false;
+      }
+
+      // FIXME: Composited roots and SVG roots with a clip path (isComposited, isRenderOrLegacyRenderSVGRoot),
+      // once there are either.
+
+      auto *rendererForBackground = rootElement.View().RendererForRootBackground();
+      if (!rendererForBackground)
+      {
+        return false;
+      }
+
+      if (rendererForBackground->Style().GetBackgroundLayers().UsedFirst().GetClip() == FillBox::Text)
+      {
+        return false;
+      }
+
+      return true;
+    }
+  }
+
+  void RenderView::PaintBoxDecorations(PaintInfo &paintInfo, const LayoutPoint &) noexcept
+  {
+    if (!paintInfo.ShouldPaintWithinRoot(*this))
+    {
+      return;
+    }
+
+    // FIXME: Frames whose enclosing layers can't blit to the window (cannotBlitToWindow), once there are
+    // subframes.
+
+    if (!ShouldPaintBaseBackground())
+    {
+      return;
+    }
+
+    if (paintInfo.SkipRootBackground())
+    {
+      return;
+    }
+
+    bool rootFillsViewport = false;
+    bool rootObscuresBackground = false;
+    if (auto documentElement = GetDocument().DocumentElement())
+    {
+      if (auto *rootRenderer = documentElement->Renderer())
+      {
+        // The document element's renderer is currently forced to be a block, but may not always be.
+        auto *rootBox = DynamicDowncast<RenderBox>(*rootRenderer);
+        rootFillsViewport = rootBox && !rootBox->X() && !rootBox->Y() && rootBox->Width() >= Width()
+                            && rootBox->Height() >= Height();
+        rootObscuresBackground = RendererObscuresBackground(*rootRenderer);
+      }
+    }
+
+    // FIXME: The page scale factor, once pages scale.
+    float pageScaleFactor = 1;
+
+    // If painting will entirely fill the view, no need to fill the background.
+    if (rootFillsViewport && rootObscuresBackground && pageScaleFactor >= 1
+        && RootElementShouldPaintBaseBackground())
+    {
+      return;
+    }
+
+    // This code typically only executes if the root element's visibility has been set to hidden,
+    // if there is a transform on the <html>, or if there is a page scale factor less than 1.
+    // Only fill with a background color (typically white) if we're the root document,
+    // since iframes/frames with no background in the child document should show the parent's background.
+    // FIXME: The document's background colour when the background extends beyond the page
+    // (backgroundShouldExtendBeyondPage), a setting that isn't ported.
+    auto &frameView = FrameView();
+    if (!frameView.IsTransparent())
+    {
+      const auto backgroundColor = frameView.BaseBackgroundColor();
+      if (backgroundColor.IsVisible())
+      {
+        CompositeOperator previousOperator = paintInfo.Context().CompositeOperation();
+        paintInfo.Context().SetCompositeOperation(CompositeOperator::Copy);
+        paintInfo.Context().FillRect(FloatRect(paintInfo.Rect), backgroundColor);
+        paintInfo.Context().SetCompositeOperation(previousOperator);
+      }
+      else
+      {
+        paintInfo.Context().ClearRect(FloatRect(paintInfo.Rect));
+      }
+    }
+  }
+
+  IntRect RenderView::UnscaledDocumentRect() const noexcept
+  {
+    LayoutRect overflowRect(LayoutOverflowRect());
+    FlipForWritingMode(overflowRect);
+    return SnappedIntRect(overflowRect);
+  }
+
+  bool RenderView::ShouldPaintBaseBackground() const noexcept
+  {
+    // Fill with a base color if we're the root document.
+    // FIXME: Subframes (frames, iframes whose colour scheme differs from their owner's, transparent SVG
+    // documents), once there are any; every view is its page's main frame.
+    return !FrameView().IsTransparent();
+  }
+
+  bool RenderView::RootElementShouldPaintBaseBackground() const noexcept
+  {
+    if (auto documentElement = GetDocument().DocumentElement())
+    {
+      if (auto *rootRenderer = documentElement->Renderer())
+      {
+        // The document element's renderer is currently forced to be a block, but may not always be.
+        auto *rootBox = DynamicDowncast<RenderBox>(*rootRenderer);
+        if (rootBox && rootBox->HasLayer())
+        {
+          RenderLayer *layer = rootBox->Layer();
+          // FIXME: Backdrop roots (isBackdropRoot), once there are backdrop filters.
+          if (layer->IsolatesBlending())
+          {
+            return false;
+          }
+        }
+      }
+    }
+    return ShouldPaintBaseBackground();
+  }
+
+  LayoutRect RenderView::UnextendedBackgroundRect() const noexcept
+  {
+    // FIXME: What is this? Need to patch for new columns?
+    return UnscaledDocumentRect();
+  }
+
+  LayoutRect RenderView::BackgroundRect() const noexcept
+  {
+    // FIXME: New columns care about this?
+    if (FrameView().HasExtendedBackgroundRectForPainting())
+    {
+      return FrameView().ExtendedBackgroundRectForPainting();
+    }
+
+    return UnextendedBackgroundRect();
+  }
+
+#pragma endregion
 
   void RenderView::Layout() noexcept
   {

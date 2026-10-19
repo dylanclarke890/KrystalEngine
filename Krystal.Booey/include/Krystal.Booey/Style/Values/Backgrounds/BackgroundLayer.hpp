@@ -12,6 +12,11 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include <tuple>
 
+namespace krys::boo
+{
+  class RenderElement;
+}
+
 namespace krys::boo::style
 {
   // macro(ownerType, property, type, lowercaseName, uppercaseName)
@@ -156,6 +161,9 @@ namespace krys::boo::style
     {
       return _image.IsImage();
     }
+    /// @brief Whether the layer has an image known to cover what it paints.
+    KRYS_NODISCARD bool HasOpaqueImage(const RenderElement &) const noexcept;
+
     KRYS_NODISCARD bool HasRepeatXY() const noexcept
     {
       return GetRepeat() == boo::FillRepeat::Repeat;

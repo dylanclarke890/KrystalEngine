@@ -21,6 +21,11 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderTableRow);
 
   public:
+    void Paint(PaintInfo &, const LayoutPoint &) noexcept final
+    {
+      // FIXME: Table rows (their cells' backgrounds and the row's outline) come with tables.
+    }
+
     constexpr static uint32 UnsetRowIndex = 0x7F'FF'FF'FF;
     constexpr static uint32 MaxRowIndex = 0x7F'FF'FF'FE; // 2,147,483,646
 

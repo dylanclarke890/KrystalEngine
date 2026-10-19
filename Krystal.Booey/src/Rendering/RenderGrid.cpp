@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Rendering/BaselineAlignment.hpp"
 #include "Krystal.Booey/Rendering/GridLayoutFunctions.hpp"
 #include "Krystal.Booey/Rendering/GridLayoutState.hpp"
+#include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
@@ -3416,5 +3417,15 @@ namespace krys::boo
   void GridItemSizeCache::InvalidateSizeForItem(const RenderBox &gridItem) noexcept
   {
     _sizes.erase(&gridItem);
+  }
+  void RenderGrid::PaintChildren(PaintInfo &paintInfo, const LayoutPoint &paintOffset,
+                                 PaintInfo &forChild) noexcept
+  {
+    krys_debug_assert(!CurrentGrid().NeedsItemsPlacement());
+    for (RenderBox *gridItem = CurrentGrid().GetOrderIterator().First(); gridItem;
+         gridItem = CurrentGrid().GetOrderIterator().Next())
+    {
+      (void)PaintChild(*gridItem, paintInfo, paintOffset, forChild, PaintAsInlineBlock);
+    }
   }
 }

@@ -27,6 +27,11 @@ namespace krys::boo
     mutable LayoutSize _intrinsicSize;
 
   public:
+    void Paint(PaintInfo &, const LayoutPoint &) noexcept override
+    {
+      // FIXME: Replaced content (images, media, controls) comes with their renderers.
+    }
+
     ~RenderReplaced() noexcept override;
 
     KRYS_NODISCARD bool CanHaveChildren() const noexcept override

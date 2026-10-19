@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLButtonElement.hpp"
@@ -11,8 +12,11 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
+#include "Krystal.Booey/Rendering/BackgroundPainter.hpp"
+#include "Krystal.Booey/Rendering/BorderShape.hpp"
 #include "Krystal.Booey/Rendering/FloatingObjects.hpp"
 #include "Krystal.Booey/Rendering/GridLayoutFunctions.hpp"
+#include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp"
 #include "Krystal.Booey/Rendering/RenderAncestorIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
@@ -5477,4 +5481,239 @@ namespace krys::boo
         return clipRect;
       });
   }
+#pragma region Painting
+
+  BleedAvoidance RenderBox::DetermineBleedAvoidance(GraphicsContext &context) const noexcept
+  {
+    if (context.PaintingDisabled())
+    {
+      return BleedAvoidance::None;
+    }
+
+    const RenderStyle &style = Style();
+
+    // FIXME: Border images (borderImageIsLoadedAndCanBeRendered) come with bitmap images.
+    if (!style.HasBackground() || !style.HasBorder() || !style.HasBorderRadius())
+    {
+      return BleedAvoidance::None;
+    }
+
+    // FIXME: The theme (mayNeedBleedAvoidance), once there are themed controls.
+
+    AffineTransform ctm = context.GetCTM();
+    FloatSize contextScaling(static_cast<float>(ctm.XScale()), static_cast<float>(ctm.YScale()));
+
+    // Because LayoutRoundedRect uses IntRect internally the inset applied by the
+    // BleedAvoidance::ShrinkBackground strategy cannot be less than one integer
+    // layout coordinate, even with subpixel layout enabled. To take that into
+    // account, we clamp the contextScaling to 1.0 for the following test so
+    // that borderObscuresBackgroundEdge can only return true if the border
+    // widths are greater than 2 in both layout coordinates and screen
+    // coordinates.
+    // This precaution will become obsolete if LayoutRoundedRect is ever promoted to
+    // a sub-pixel representation.
+    if (contextScaling.Width() > 1)
+    {
+      contextScaling.SetWidth(1);
+    }
+    if (contextScaling.Height() > 1)
+    {
+      contextScaling.SetHeight(1);
+    }
+
+    if (BorderObscuresBackgroundEdge(contextScaling))
+    {
+      return BleedAvoidance::ShrinkBackground;
+    }
+
+    if (!style.HasUsedAppearance() && BorderObscuresBackground() && BackgroundHasOpaqueTopLayer())
+    {
+      return BleedAvoidance::BackgroundOverBorder;
+    }
+
+    return BleedAvoidance::UseTransparencyLayer;
+  }
+
+  void RenderBox::PaintBoxDecorations(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    if (!paintInfo.ShouldPaintWithinRoot(*this))
+    {
+      return;
+    }
+
+    LayoutRect paintRect = BorderBoxRect();
+    paintRect.MoveBy(paintOffset);
+    AdjustBorderBoxRectForPainting(paintRect);
+
+    // FIXME: The theme's adjusted paint rect (adjustedPaintRect), once there are themed controls.
+    auto bleedAvoidance = DetermineBleedAvoidance(paintInfo.Context());
+
+    BackgroundPainter backgroundPainter {*this, paintInfo};
+
+    // FIXME: Outer box shadows (paintBoxShadow with ShadowStyle::Normal) come with borders and shadows.
+
+    GraphicsContextStateSaver stateSaver(paintInfo.Context(), false);
+    if (bleedAvoidance == BleedAvoidance::UseTransparencyLayer)
+    {
+      // To avoid the background color bleeding out behind the border, we'll render background and border
+      // into a transparency layer, and then clip that in one go (which requires setting up the clip before
+      // beginning the layer).
+      stateSaver.Save();
+      auto borderShape = BorderShape::ShapeForBorderRect(Style(), paintRect);
+      borderShape.ClipToOuterShape(paintInfo.Context(), GetDocument().DeviceScaleFactor());
+      paintInfo.Context().BeginTransparencyLayer(1);
+    }
+
+    // FIXME: Native theme appearances (theme().paint, paintDecorations, paintBorderOnly), once there are
+    // themed controls; the CSS background and border are always painted.
+
+    // FIXME: Borders (BorderPainter::paintBorder, painted under the background with
+    // BleedAvoidance::BackgroundOverBorder) come with borders.
+
+    backgroundPainter.PaintBackground(paintRect, bleedAvoidance);
+
+    // FIXME: Inset box shadows (paintBoxShadow with ShadowStyle::Inset) and borders
+    // (BorderPainter::paintBorder) come with borders and shadows.
+
+    if (bleedAvoidance == BleedAvoidance::UseTransparencyLayer)
+    {
+      paintInfo.Context().EndTransparencyLayer();
+    }
+  }
+
+  bool RenderBox::BackgroundHasOpaqueTopLayer() const noexcept
+  {
+    const auto &topLayer = Style().GetBackgroundLayers().UsedFirst();
+    if (topLayer.GetClip() != FillBox::BorderBox)
+    {
+      return false;
+    }
+
+    // Clipped with local scrolling
+    if (HasNonVisibleOverflow() && topLayer.GetAttachment() == FillAttachment::LocalBackground)
+    {
+      return false;
+    }
+
+    if (topLayer.HasOpaqueImage(*this) && topLayer.HasRepeatXY()
+        && topLayer.GetImage().TryStyleImage()->CanRender(this, Style().UsedZoom()))
+    {
+      return true;
+    }
+
+    // If there is only one layer and no image, check whether the background color is opaque.
+    if (Style().GetBackgroundLayers().UsedLength() == 1 && !topLayer.HasImage())
+    {
+      Color bgColor = Style().VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor);
+      if (bgColor.IsOpaque())
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  void RenderBox::PaintMask(PaintInfo &paintInfo, const LayoutPoint &) noexcept
+  {
+    if (!paintInfo.ShouldPaintWithinRoot(*this) || Style().UsedVisibility() != Visibility::Visible
+        || paintInfo.Phase != PaintPhase::Mask || paintInfo.Context().PaintingDisabled())
+    {
+      return;
+    }
+
+    // FIXME: Mask images (paintMaskImages) come with masks.
+  }
+
+  void RenderBox::PaintClippingMask(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    if (!paintInfo.ShouldPaintWithinRoot(*this) || Style().UsedVisibility() != Visibility::Visible
+        || paintInfo.Phase != PaintPhase::ClippingMask || paintInfo.Context().PaintingDisabled())
+    {
+      return;
+    }
+
+    LayoutRect paintRect = LayoutRect(paintOffset, Size());
+
+    // FIXME: SVG clipping masks (paintSVGClippingMask) come with the layer-based SVG engine.
+
+    paintInfo.Context().FillRect(FloatRect(SnappedIntRect(paintRect)), Color::black);
+  }
+
+  void RenderBox::ClipToPaddingBoxShape(GraphicsContext &context, const LayoutPoint &accumulatedOffset,
+                                        float deviceScaleFactor) const noexcept
+  {
+    auto borderShape = BorderShape::ShapeForBorderRect(Style(), LayoutRect(accumulatedOffset, Size()));
+    borderShape.ClipToInnerShape(context, deviceScaleFactor);
+  }
+
+  void RenderBox::ClipToContentBoxShape(GraphicsContext &context, const LayoutPoint &accumulatedOffset,
+                                        float deviceScaleFactor) const noexcept
+  {
+    auto borderShape = BorderShapeForContentClipping(LayoutRect {accumulatedOffset, Size()});
+    borderShape.ClipToInnerShape(context, deviceScaleFactor);
+  }
+
+  bool RenderBox::PushContentsClip(PaintInfo &paintInfo, const LayoutPoint &accumulatedOffset) noexcept
+  {
+    if (paintInfo.Phase == PaintPhase::BlockBackground || paintInfo.Phase == PaintPhase::SelfOutline
+        || paintInfo.Phase == PaintPhase::Mask)
+    {
+      return false;
+    }
+
+    // FIXME: Control clips (hasControlClip, controlClipRect), once there are form controls.
+    bool isOverflowClip = HasNonVisibleOverflow() && !Layer()->IsSelfPaintingLayer();
+
+    if (!isOverflowClip)
+    {
+      return false;
+    }
+
+    if (paintInfo.Phase == PaintPhase::Outline)
+    {
+      paintInfo.Phase = PaintPhase::ChildOutlines;
+    }
+    else if (paintInfo.Phase == PaintPhase::ChildBlockBackground)
+    {
+      paintInfo.Phase = PaintPhase::BlockBackground;
+      PaintObject(paintInfo, accumulatedOffset);
+      paintInfo.Phase = PaintPhase::ChildBlockBackgrounds;
+    }
+    float deviceScaleFactor = GetDocument().DeviceScaleFactor();
+    FloatRect clipRect = SnapRectToDevicePixels(
+      OverflowClipRect(accumulatedOffset, OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize),
+      deviceScaleFactor);
+    paintInfo.Context().Save();
+    if (Style().HasBorderRadius())
+    {
+      ClipToPaddingBoxShape(paintInfo.Context(), accumulatedOffset, deviceScaleFactor);
+    }
+
+    paintInfo.Context().Clip(clipRect);
+
+    // FIXME: Event and accessibility region clips (regionContext) come with hit testing.
+
+    return true;
+  }
+
+  void RenderBox::PopContentsClip(PaintInfo &paintInfo, PaintPhase originalPhase,
+                                  const LayoutPoint &accumulatedOffset) noexcept
+  {
+    krys_debug_assert(HasNonVisibleOverflow() && !Layer()->IsSelfPaintingLayer());
+
+    paintInfo.Context().Restore();
+    if (originalPhase == PaintPhase::Outline)
+    {
+      paintInfo.Phase = PaintPhase::SelfOutline;
+      PaintObject(paintInfo, accumulatedOffset);
+      paintInfo.Phase = originalPhase;
+    }
+    else if (originalPhase == PaintPhase::ChildBlockBackground)
+    {
+      paintInfo.Phase = originalPhase;
+    }
+  }
+
+#pragma endregion
 }

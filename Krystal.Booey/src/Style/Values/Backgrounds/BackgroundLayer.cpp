@@ -1,7 +1,25 @@
 ﻿#include "Krystal.Booey/Style/Values/Backgrounds/BackgroundLayer.hpp"
+#include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 
 namespace krys::boo::style
 {
+  bool BackgroundLayer::HasOpaqueImage(const RenderElement &renderer) const noexcept
+  {
+    auto image = _image.TryStyleImage();
+    if (!image)
+    {
+      return false;
+    }
+
+    if (GetComposite() == CompositeOperator::Clear || GetComposite() == CompositeOperator::Copy)
+    {
+      return true;
+    }
+
+    return GetBlendMode() == BlendMode::Normal && GetComposite() == CompositeOperator::SourceOver
+           && image->KnownToBeOpaque(renderer);
+  }
+
   BackgroundLayer::BackgroundLayer() noexcept
       : _image(BackgroundLayer::InitialImage()), _positionX(BackgroundLayer::InitialPositionX()),
         _positionY(BackgroundLayer::InitialPositionY()), _size(BackgroundLayer::InitialSize()),

@@ -35,6 +35,11 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderTableSection);
 
   public:
+    void Paint(PaintInfo &, const LayoutPoint &) noexcept final
+    {
+      // FIXME: Table sections (their rows, cells and collapsed borders) come with tables.
+    }
+
     /// @brief The cells in a slot of the grid; more than one when cells overlap.
     struct CellStruct
     {

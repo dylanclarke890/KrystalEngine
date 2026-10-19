@@ -1,10 +1,11 @@
-﻿"""Captures Chrome's rendering of the golden scenes, for Render2D's fidelity goldens.
+﻿"""Captures Chrome's rendering of golden scenes: Render2D's fidelity goldens, or Krystal.UI's page goldens.
 
-Each scene in Krystal.Gfx.Tests/golden/scenes/<name>.html is rendered by headless Chrome at a device pixel
-ratio of 1, in sRGB, with software rasterisation, into Krystal.Gfx.Tests/golden/<name>.chrome.png. The
-viewport's size comes from the scene's <html data-width="..." data-height="...">.
+Each scene in <golden>/scenes/<name>.html is rendered by headless Chrome at a device pixel ratio of 1, in sRGB,
+with software rasterisation, into <golden>/<name>.chrome.png. The golden directory is Krystal.Gfx.Tests/golden
+unless --golden names another (Krystal.UI.Tests/golden for the page goldens). The viewport's size comes from
+the scene's <html data-width="..." data-height="...">.
 
-Usage: python tools/golden/capture_chrome.py [scene names...] [--chrome PATH]
+Usage: python tools/golden/capture_chrome.py [scene names...] [--golden DIR] [--chrome PATH]
 """
 
 import argparse
@@ -16,8 +17,7 @@ import sys
 import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-GOLDEN = ROOT / "Krystal.Gfx.Tests" / "golden"
-SCENES = GOLDEN / "scenes"
+DEFAULT_GOLDEN = ROOT / "Krystal.Gfx.Tests" / "golden"
 CHROME_CANDIDATES = [
     pathlib.Path(r"C:\Program Files\Google\Chrome\Application\chrome.exe"),
     pathlib.Path(r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"),
@@ -44,9 +44,9 @@ def scene_size(html):
     return int(width.group(1)), int(height.group(1))
 
 
-def capture(chrome, scene):
+def capture(chrome, golden, scene):
     width, height = scene_size(scene.read_text(encoding="utf-8-sig"))
-    output = GOLDEN / f"{scene.stem}.chrome.png"
+    output = golden / f"{scene.stem}.chrome.png"
     with tempfile.TemporaryDirectory() as profile:
         subprocess.run(
             [
@@ -74,16 +74,19 @@ def capture(chrome, scene):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("scenes", nargs="*", help="scene names (default: all)")
+    parser.add_argument("--golden", help="the golden directory (default: Krystal.Gfx.Tests/golden)")
     parser.add_argument("--chrome", help="the Chrome executable")
     args = parser.parse_args()
 
     chrome = find_chrome(args.chrome)
-    names = args.scenes or sorted(path.stem for path in SCENES.glob("*.html"))
+    golden = (ROOT / args.golden).resolve() if args.golden else DEFAULT_GOLDEN
+    scenes = golden / "scenes"
+    names = args.scenes or sorted(path.stem for path in scenes.glob("*.html"))
     for name in names:
-        scene = SCENES / f"{name}.html"
+        scene = scenes / f"{name}.html"
         if not scene.exists():
             sys.exit(f"No scene {scene.relative_to(ROOT)}.")
-        capture(chrome, scene)
+        capture(chrome, golden, scene)
 
 
 if __name__ == "__main__":

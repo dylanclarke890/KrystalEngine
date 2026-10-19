@@ -18,8 +18,11 @@
 
 namespace krys::boo
 {
+  class GraphicsContext;
+  class Image;
   class RenderBlock;
   class RenderTextFragment;
+  class StyleImage;
 
   enum class LineDirection : bool
   {
@@ -27,9 +30,17 @@ namespace krys::boo
     Vertical
   };
 
+  enum class BleedAvoidance : uint8
+  {
+    None,
+    ShrinkBackground,
+    UseTransparencyLayer,
+    BackgroundOverBorder
+  };
+
   /// @brief A renderer that follows the CSS box model: a box or an inline box.
-  // FIXME: Painting (backgrounds, borders, box shadows), continuations and sticky positioning come with
-  // painting and scrolling.
+  // FIXME: Painting borders and box shadows, continuations and sticky positioning come with borders and
+  // scrolling.
   class RenderBoxModelObject : public RenderLayerModelObject
   {
     KRYS_NON_COPY_MOVABLE(RenderBoxModelObject);
@@ -152,6 +163,38 @@ namespace krys::boo
     void ClearFirstLetterRemainingText() noexcept;
 
   public:
+    enum class ScaleByUsedZoom : bool
+    {
+      No,
+      Yes
+    };
+
+    /// @brief The size @p image is drawn at in a positioning area of @p positioningAreaSize, from its natural
+    /// size and ratio where it has them.
+    KRYS_NODISCARD LayoutSize CalculateImageIntrinsicDimensions(StyleImage *image,
+                                                                const LayoutSize &positioningAreaSize,
+                                                                ScaleByUsedZoom) const noexcept;
+
+    /// @brief Whether the root's fixed background is painted in its layer's coordinates: never, as there's no
+    /// compositing.
+    KRYS_NODISCARD bool FixedBackgroundPaintsInLocalCoordinates() const noexcept;
+
+    /// @brief How @p image is interpolated when drawn at @p size.
+    /// FIXME: The image quality controller (low quality while an image is resized live) comes with bitmap
+    /// images.
+    KRYS_NODISCARD InterpolationQuality ChooseInterpolationQuality(GraphicsContext &, Image &, const void *,
+                                                                   const LayoutSize &) const noexcept
+    {
+      return InterpolationQuality::Default;
+    }
+
+    /// @brief Whether every side of the border is opaque and at least two device pixels wide (at
+    /// @p contextScale), so the background's edge needn't show beneath it.
+    KRYS_NODISCARD bool BorderObscuresBackgroundEdge(const FloatSize &contextScale) const noexcept;
+    /// @brief Whether every side of the border is opaque and solid, so the background needn't show beneath
+    /// it.
+    KRYS_NODISCARD bool BorderObscuresBackground() const noexcept;
+
     /// @brief The shape of the content box, inset from the border box by the borders and the padding.
     KRYS_NODISCARD BorderShape BorderShapeForContentClipping(const LayoutRect &borderBoxRect,
                                                              RectEdges<bool> closedEdges = {

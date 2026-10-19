@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/Style/StyleGradientImage.hpp"
 #include "Krystal.Booey/CSS/Values/GradientValue.hpp"
+#include "Krystal.Booey/Graphics/GradientImage.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 
@@ -32,5 +34,33 @@ namespace krys::boo
   bool StyleGradientImage::IsPending() const noexcept
   {
     return false;
+  }
+
+  RefPtr<Image> StyleGradientImage::GetImage(const RenderElement *renderer, const FloatSize &size,
+                                             const GraphicsContext &, bool isForFirstLine) const noexcept
+  {
+    if (!renderer)
+    {
+      return ShareRefPtr(&Image::NullImage());
+    }
+
+    if (size.IsEmpty())
+    {
+      return nullptr;
+    }
+
+    const auto &style = isForFirstLine ? renderer->FirstLineStyle() : renderer->Style();
+    auto gradient = style::CreatePlatformGradient(_gradient, size, style);
+    return GradientImage::Create(*gradient, size);
+  }
+
+  bool StyleGradientImage::KnownToBeOpaque(const RenderElement &renderer) const noexcept
+  {
+    return style::IsOpaque(_gradient, renderer.Style());
+  }
+
+  FloatSize StyleGradientImage::FixedSize(const RenderElement &) const noexcept
+  {
+    return {};
   }
 }

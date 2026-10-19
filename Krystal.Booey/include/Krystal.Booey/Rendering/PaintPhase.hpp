@@ -66,4 +66,4 @@ namespace krys::boo
 }
 
 KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::PaintPhase, 14uz)
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::PaintBehavior, 23uz)
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::PaintBehavior, 24uz)

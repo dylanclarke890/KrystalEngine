@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
+#include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 
 namespace krys::boo::tests
@@ -286,5 +287,40 @@ layer at (0,0) size 800x100
     auto &iterator = FlexBoxOf(fixture, u8"f").GetOrderIterator();
     CHECK(ids(iterator) == u8"bca");
     CHECK(ids(iterator.Reverse()) == u8"acb");
+  }
+
+  TEST_CASE("RenderFlexibleBox: paints items in order", "[Rendering][RenderFlexibleBox][Painting]")
+  {
+    CHECK(Painted(u8"<style>body{margin:0;display:flex}div{width:20px;height:20px}#a{order:2;background:red}#"
+                  u8"b{background:blue}</style><div id=a></div><div id=b></div>")
+          == u8R"(
+(set-state
+  (change-flags [composite-mode])
+  (composite-mode 
+    (composite-operation copy)
+    (blend-mode normal)))
+(fill-rect-with-color
+  (rect at (0,0) size 200x100)
+  (color #FFFFFF))
+(set-state
+  (change-flags [composite-mode])
+  (composite-mode 
+    (composite-operation source-over)
+    (blend-mode normal)))
+(fill-composited-rect
+  (rect at (0,0) size 200x100)
+  (color #FFFFFF)
+  (composite-operation copy)
+  (blend-mode normal))
+(fill-composited-rect
+  (rect at (0,0) size 20x20)
+  (color #0000FF)
+  (composite-operation source-over)
+  (blend-mode normal))
+(fill-composited-rect
+  (rect at (20,0) size 20x20)
+  (color #FF0000)
+  (composite-operation source-over)
+  (blend-mode normal)))");
   }
 }

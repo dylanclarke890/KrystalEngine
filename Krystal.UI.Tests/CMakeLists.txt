@@ -4,6 +4,7 @@ target_link_libraries(Krystal.UI.Tests
   PRIVATE
     Krystal.UI
     Catch2::Catch2WithMain
+    stb
 )
 
 set_target_properties(Krystal.UI.Tests
@@ -32,12 +33,17 @@ target_include_directories(Krystal.UI.Tests
 target_compile_definitions(Krystal.UI.Tests
   PRIVATE
     KRYS_UI_TESTS_FONTS_DIR="${CMAKE_SOURCE_DIR}/third-party/liberation-fonts"
+    # The page goldens are kept in the source tree, compared with Krystal.Gfx.Tests' golden helpers.
+    KRYS_GFX_TESTS_GOLDEN_DIR="${CMAKE_CURRENT_SOURCE_DIR}/golden"
 )
 
 catch_discover_tests(Krystal.UI.Tests)
 
 target_sources(Krystal.UI.Tests
   PRIVATE
+    ${CMAKE_SOURCE_DIR}/Krystal.Gfx.Tests/src/Golden.cpp
+
+    tests/Golden.cpp
     tests/GraphicsContextRender2D.cpp
     tests/Page.cpp
     tests/Render2DConversions.cpp

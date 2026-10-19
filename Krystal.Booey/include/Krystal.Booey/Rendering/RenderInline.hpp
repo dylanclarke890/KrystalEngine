@@ -9,13 +9,18 @@
 namespace krys::boo
 {
   /// @brief An inline box.
-  // FIXME: Line boxes, continuations, hit testing, the geometry and painting come with layout and painting.
+  // FIXME: Line boxes, continuations, hit testing and the geometry come with layout.
   class RenderInline : public RenderBoxModelObject
   {
     KRYS_NON_COPY_MOVABLE(RenderInline);
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderInline);
 
   public:
+    void Paint(PaintInfo &, const LayoutPoint &) noexcept override
+    {
+      // FIXME: The inline's boxes (the inline layout's paint for this renderer) come with text painting.
+    }
+
     RenderInline(Type type, dom::Element &element, RenderStyle &&style) noexcept;
     RenderInline(Type type, dom::Document &document, RenderStyle &&style) noexcept;
     ~RenderInline() noexcept override;

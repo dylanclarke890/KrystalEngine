@@ -6,12 +6,11 @@
 namespace krys::boo
 {
   /// @brief A gradient image.
-  /// FIXME: Drawing (`GradientImage` and the per-size cache) comes with the graphics backend.
   class StyleGradientImage final : public StyleGeneratedImage
   {
   private:
     style::Gradient _gradient;
-    // FIXME: Used by drawing, to decide whether the generated image may be cached.
+    // FIXME: Decides whether the generated image may be cached per size, once it is.
     bool _knownCacheableBarringFilter {false};
 
   public:
@@ -31,6 +30,11 @@ namespace krys::boo
 
     KRYS_NODISCARD Ref<css::Value> ComputedStyleValue(const RenderStyle &) const noexcept final;
     KRYS_NODISCARD bool IsPending() const noexcept final;
+
+    KRYS_NODISCARD RefPtr<Image> GetImage(const RenderElement *, const FloatSize &, const GraphicsContext &,
+                                          bool isForFirstLine) const noexcept final;
+    KRYS_NODISCARD bool KnownToBeOpaque(const RenderElement &) const noexcept final;
+    KRYS_NODISCARD FloatSize FixedSize(const RenderElement &) const noexcept final;
   };
 }
 

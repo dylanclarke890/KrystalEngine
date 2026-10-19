@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -166,5 +167,341 @@ namespace krys::boo::tests
       auto viewRects = viewLayer.CalculateRects(context, {});
       CHECK(viewRects.GetBackgroundRect().IsInfinite());
     }
+  }
+
+  TEST_CASE("RenderLayer: paints opacity in a transparency layer", "[Rendering][RenderLayer][Painting]")
+  {
+    CHECK(
+      Painted(
+        u8"<style>body{margin:0}div{width:40px;height:20px;background:yellow;opacity:.5}</style><div></div>")
+      == u8R"(
+(set-state
+  (change-flags [composite-mode])
+  (composite-mode 
+    (composite-operation copy)
+    (blend-mode normal)))
+(fill-rect-with-color
+  (rect at (0,0) size 200x100)
+  (color #FFFFFF))
+(set-state
+  (change-flags [composite-mode])
+  (composite-mode 
+    (composite-operation source-over)
+    (blend-mode normal)))
+(fill-composited-rect
+  (rect at (0,0) size 200x100)
+  (color #FFFFFF)
+  (composite-operation copy)
+  (blend-mode normal))
+(save)
+(clip
+  (rect at (0,0) size 40x20))
+(begin-transparency-layer
+  (opacity 0.50))
+(fill-composited-rect
+  (rect at (0,0) size 40x20)
+  (color #FFFF00)
+  (composite-operation source-over)
+  (blend-mode normal))
+(end-transparency-layer)
+(restore))");
+  }
+
+  TEST_CASE("RenderLayer: paints with its transform", "[Rendering][RenderLayer][Painting]")
+  {
+    CHECK(Painted(u8"<style>body{margin:0}div{width:40px;height:20px;background:yellow;transform:translate("
+                  u8"10px,5px)}</style><div></div>")
+          == u8R"(
+(set-state
+  (change-flags [composite-mode])
+  (composite-mode 
+    (composite-operation copy)
+    (blend-mode normal)))
+(fill-rect-with-color
+  (rect at (0,0) size 200x100)
+  (color #FFFFFF))
+(set-state
+  (change-flags [composite-mode])
+  (composite-mode 
+    (composite-operation source-over)
+    (blend-mode normal)))
+(fill-composited-rect
+  (rect at (0,0) size 200x100)
+  (color #FFFFFF)
+  (composite-operation copy)
+  (blend-mode normal))
+(concatenate-ctm
+  (ctm {m=((1.00,0.00)(0.00,1.00)) t=(10.00,5.00)}))
+(fill-composited-rect
+  (rect at (0,0) size 40x20)
+  (color #FFFF00)
+  (composite-operation source-over)
+  (blend-mode normal))
+(set-ctm
+  (set-ctm identity)))");
+
+    CHECK(Painted(u8"<style>body{margin:0}div{width:40px;height:20px;background:yellow;transform:rotate("
+                  u8"90deg)}</style><div></div>")
+          == u8R"(
+(set-state
+  (change-flags [composite-mode])
+  (composite-mode 
+    (composite-operation copy)
+    (blend-mode normal)))
+(fill-rect-with-color
+  (rect at (0,0) size 200x100)
+  (color #FFFFFF))
+(set-state
+  (change-flags [composite-mode])
+  (composite-mode 
+    (composite-operation source-over)
+    (blend-mode normal)))
+(fill-composited-rect
+  (rect at (0,0) size 200x100)
+  (color #FFFFFF)
+  (composite-operation copy)
+  (blend-mode normal))
+(concatenate-ctm
+  (ctm {m=((0.00,1.00)(-1.00,0.00)) t=(30.00,-10.00)}))
+(fill-composited-rect
+  (rect at (0,0) size 40x20)
+  (color #FFFF00)
+  (composite-operation source-over)
+  (blend-mode normal))
+(set-ctm
+  (set-ctm identity)))");
+  }
+
+  TEST_CASE("RenderLayer: clips overflow to the rounded padding box", "[Rendering][RenderLayer][Painting]")
+  {
+    CHECK(Painted(u8"<style>body{margin:0}#a{width:40px;height:40px;overflow:hidden;border-radius:10px}#b{"
+                  u8"height:80px;background:blue}</style><div id=a><div id=b></div></div>")
+          == u8R"(
+(set-state
+  (change-flags [composite-mode])
+  (composite-mode 
+    (composite-operation copy)
+    (blend-mode normal)))
+(fill-rect-with-color
+  (rect at (0,0) size 200x100)
+  (color #FFFFFF))
+(set-state
+  (change-flags [composite-mode])
+  (composite-mode 
+    (composite-operation source-over)
+    (blend-mode normal)))
+(fill-composited-rect
+  (rect at (0,0) size 200x100)
+  (color #FFFFFF)
+  (composite-operation copy)
+  (blend-mode normal))
+(save)
+(clip-rounded-rect
+  (rect at (0,0) size 40x40
+    (top-left width=10 height=10)
+    (top-right width=10 height=10)
+    (bottom-left width=10 height=10)
+    (bottom-right width=10 height=10)))
+(clip
+  (rect at (0,0) size 40x40))
+(fill-composited-rect
+  (rect at (0,0) size 40x80)
+  (color #0000FF)
+  (composite-operation source-over)
+  (blend-mode normal))
+(restore)
+(save)
+(clip-rounded-rect
+  (rect at (0,0) size 40x40
+    (top-left width=10 height=10)
+    (top-right width=10 height=10)
+    (bottom-left width=10 height=10)
+    (bottom-right width=10 height=10)))
+(clip
+  (rect at (0,0) size 40x40))
+(restore)
+(save)
+(clip-rounded-rect
+  (rect at (0,0) size 40x40
+    (top-left width=10 height=10)
+    (top-right width=10 height=10)
+    (bottom-left width=10 height=10)
+    (bottom-right width=10 height=10)))
+(clip
+  (rect at (0,0) size 40x40))
+(restore)
+(save)
+(clip-rounded-rect
+  (rect at (0,0) size 40x40
+    (top-left width=10 height=10)
+    (top-right width=10 height=10)
+    (bottom-left width=10 height=10)
+    (bottom-right width=10 height=10)))
+(clip
+  (rect at (0,0) size 40x40))
+(restore))");
+  }
+
+  TEST_CASE("RenderLayer: paints negative z-index layers under normal flow and positive ones over it",
+            "[Rendering][RenderLayer][Painting]")
+  {
+    CHECK(Painted(u8"<style>body{margin:0}#p{position:relative;width:40px;height:40px;background:yellow}#n{"
+                  u8"position:absolute;z-index:-1;width:20px;height:20px;background:blue}#q{position:"
+                  u8"absolute;z-index:1;left:10px;width:20px;height:20px;background:red}</style><div "
+                  u8"id=p><div id=n></div><div id=q></div></div>")
+          == u8R"(
+(set-state
+  (change-flags [composite-mode])
+  (composite-mode 
+    (composite-operation copy)
+    (blend-mode normal)))
+(fill-rect-with-color
+  (rect at (0,0) size 200x100)
+  (color #FFFFFF))
+(set-state
+  (change-flags [composite-mode])
+  (composite-mode 
+    (composite-operation source-over)
+    (blend-mode normal)))
+(fill-composited-rect
+  (rect at (0,0) size 200x100)
+  (color #FFFFFF)
+  (composite-operation copy)
+  (blend-mode normal))
+(fill-composited-rect
+  (rect at (0,0) size 20x20)
+  (color #0000FF)
+  (composite-operation source-over)
+  (blend-mode normal))
+(fill-composited-rect
+  (rect at (0,0) size 40x40)
+  (color #FFFF00)
+  (composite-operation source-over)
+  (blend-mode normal))
+(fill-composited-rect
+  (rect at (10,0) size 20x20)
+  (color #FF0000)
+  (composite-operation source-over)
+  (blend-mode normal)))");
+  }
+
+  TEST_CASE("RenderLayer: isolates blend modes in the stacking context", "[Rendering][RenderLayer][Painting]")
+  {
+    CHECK(Painted(u8"<style>body{margin:0}div{width:40px;height:20px;background:red;mix-blend-mode:multiply}<"
+                  u8"/style><div></div>")
+          == u8R"(
+(set-state
+  (change-flags [composite-mode])
+  (composite-mode 
+    (composite-operation copy)
+    (blend-mode normal)))
+(fill-rect-with-color
+  (rect at (0,0) size 200x100)
+  (color #FFFFFF))
+(set-state
+  (change-flags [composite-mode])
+  (composite-mode 
+    (composite-operation source-over)
+    (blend-mode normal)))
+(save)
+(clip
+  (rect at (0,0) size 200x100))
+(begin-transparency-layer
+  (opacity 1.00))
+(save)
+(clip
+  (rect at (0,0) size 40x20))
+(set-state
+  (change-flags [composite-mode])
+  (composite-mode 
+    (composite-operation source-over)
+    (blend-mode multiply)))
+(begin-transparency-layer
+  (opacity 1.00))
+(set-state
+  (change-flags [composite-mode])
+  (composite-mode 
+    (composite-operation source-over)
+    (blend-mode normal)))
+(fill-composited-rect
+  (rect at (0,0) size 40x20)
+  (color #FF0000)
+  (composite-operation source-over)
+  (blend-mode normal))
+(end-transparency-layer)
+(restore)
+(end-transparency-layer)
+(restore))");
+  }
+
+  TEST_CASE("RenderLayer: clips to clip-path shapes", "[Rendering][RenderLayer][Painting]")
+  {
+    CHECK(Painted(u8"<style>body{margin:0}div{width:40px;height:40px;background:red;clip-path:inset(5px "
+                  u8"round 4px)}</style><div></div>")
+          == u8R"(
+(set-state
+  (change-flags [composite-mode])
+  (composite-mode 
+    (composite-operation copy)
+    (blend-mode normal)))
+(fill-rect-with-color
+  (rect at (0,0) size 200x100)
+  (color #FFFFFF))
+(set-state
+  (change-flags [composite-mode])
+  (composite-mode 
+    (composite-operation source-over)
+    (blend-mode normal)))
+(fill-composited-rect
+  (rect at (0,0) size 200x100)
+  (color #FFFFFF)
+  (composite-operation copy)
+  (blend-mode normal))
+(save)
+(clip-path
+  (path add rounded rect at (5,5) size 30x30
+    (top-left width=4 height=4)
+    (top-right width=4 height=4)
+    (bottom-left width=4 height=4)
+    (bottom-right width=4 height=4))
+  (wind-rule NON-ZERO))
+(fill-composited-rect
+  (rect at (0,0) size 40x40)
+  (color #FF0000)
+  (composite-operation source-over)
+  (blend-mode normal))
+(restore))");
+
+    CHECK(Painted(u8"<style>body{margin:0}div{width:40px;height:40px;background:red;clip-path:circle(10px)}</"
+                  u8"style><div></div>")
+          == u8R"(
+(set-state
+  (change-flags [composite-mode])
+  (composite-mode 
+    (composite-operation copy)
+    (blend-mode normal)))
+(fill-rect-with-color
+  (rect at (0,0) size 200x100)
+  (color #FFFFFF))
+(set-state
+  (change-flags [composite-mode])
+  (composite-mode 
+    (composite-operation source-over)
+    (blend-mode normal)))
+(fill-composited-rect
+  (rect at (0,0) size 200x100)
+  (color #FFFFFF)
+  (composite-operation copy)
+  (blend-mode normal))
+(save)
+(clip-path
+  (path add ellipse in rect at (10,10) size 20x20)
+  (wind-rule NON-ZERO))
+(fill-composited-rect
+  (rect at (0,0) size 40x40)
+  (color #FF0000)
+  (composite-operation source-over)
+  (blend-mode normal))
+(restore))");
   }
 }

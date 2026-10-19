@@ -6,15 +6,16 @@
 
 namespace krys::boo
 {
+  class Color;
   class FloatRect;
   class FloatRoundedRect;
+  class GraphicsContext;
+  class Path;
   class RenderStyle;
 
   /// @brief The shape formed by the border and padding boxes with border-radius, used to fill and clip.
   /// @note In future, this may be a more complex shape than a rounded rect, so accessors that return rounded
   /// rects are deprecated.
-  // FIXME: Paths, clipping and filling (pathForOuterShape, clipToOuterShape, fillOuterShape, ...) come with
-  // painting.
   class BorderShape
   {
   private:
@@ -116,6 +117,26 @@ namespace krys::boo
     /// @brief Inflates the border rect and scales the radii up accordingly. Note that this changes the
     /// meaning of the "inner shape", which no longer corresponds to the padding box.
     void Inflate(LayoutUnit amount) noexcept;
+
+    KRYS_NODISCARD Path PathForOuterShape(float deviceScaleFactor) const noexcept;
+    KRYS_NODISCARD Path PathForInnerShape(float deviceScaleFactor) const noexcept;
+
+    void AddOuterShapeToPath(Path &, float deviceScaleFactor) const noexcept;
+    void AddInnerShapeToPath(Path &, float deviceScaleFactor) const noexcept;
+
+    KRYS_NODISCARD Path PathForBorderArea(float deviceScaleFactor) const noexcept;
+
+    void ClipToOuterShape(GraphicsContext &, float deviceScaleFactor) const noexcept;
+    void ClipToInnerShape(GraphicsContext &, float deviceScaleFactor) const noexcept;
+
+    void ClipOutOuterShape(GraphicsContext &, float deviceScaleFactor) const noexcept;
+    void ClipOutInnerShape(GraphicsContext &, float deviceScaleFactor) const noexcept;
+
+    void FillOuterShape(GraphicsContext &, const Color &, float deviceScaleFactor) const noexcept;
+    void FillInnerShape(GraphicsContext &, const Color &, float deviceScaleFactor) const noexcept;
+
+    void FillRectWithInnerHoleShape(GraphicsContext &, const LayoutRect &outerRect, const Color &,
+                                    float deviceScaleFactor) const noexcept;
 
   private:
     KRYS_NODISCARD static LayoutRoundedRect

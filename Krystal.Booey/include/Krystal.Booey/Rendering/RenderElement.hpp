@@ -45,6 +45,7 @@ namespace krys::boo
   class RenderBlock;
   class RenderBoxModelObject;
   class RenderLayer;
+  struct PaintInfo;
 
   /// @brief A renderer with its own style: an element's, or an anonymous box's.
   class RenderElement : public RenderObject
@@ -177,6 +178,14 @@ namespace krys::boo
 
     KRYS_NODISCARD const RenderStyle &FirstLineStyle() const noexcept;
 
+    /// @brief Paints this renderer's @p paintInfo phase, at @p paintOffset (its container's position in the
+    /// painting coordinates).
+    virtual void Paint(PaintInfo &, const LayoutPoint &paintOffset) noexcept = 0;
+
+    /// @brief Paints every phase at once, as though this renderer established its own stacking context (as
+    /// inline blocks, flex items and grid items paint).
+    void PaintAsInlineBlock(PaintInfo &, const LayoutPoint &childPoint) noexcept;
+
     /// @brief Lays out this renderer and its descendants that need layout.
     virtual void Layout() noexcept;
     void LayoutIfNeeded() noexcept
@@ -250,6 +259,7 @@ namespace krys::boo
     KRYS_NODISCARD Pair<LayoutRect, LayoutRect>
       AbsoluteAnchorRectWithScrollMargin(bool *insideFixed = nullptr) const noexcept;
 
+    KRYS_NODISCARD bool HasBackground() const noexcept;
     KRYS_NODISCARD bool HasClip() const noexcept;
     KRYS_NODISCARD bool HasClipOrNonVisibleOverflow() const noexcept;
 

@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/Style/StyleGeneratedImage.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
 
 namespace krys::boo
 {
@@ -8,4 +10,51 @@ namespace krys::boo
   }
 
   StyleGeneratedImage::~StyleGeneratedImage() noexcept = default;
+
+  FloatSize StyleGeneratedImage::ImageSize(const RenderElement *renderer, float multiplier) const noexcept
+  {
+    if (!_fixedSize)
+    {
+      return _containerSize;
+    }
+
+    if (!renderer)
+    {
+      return {};
+    }
+
+    FloatSize fixedSize = FixedSize(*renderer);
+    if (multiplier == 1.0f)
+    {
+      return fixedSize;
+    }
+
+    float width = fixedSize.Width() * multiplier;
+    float height = fixedSize.Height() * multiplier;
+
+    // Don't let images that have a width/height >= 1 shrink below 1 device pixel when zoomed.
+    float deviceScaleFactor = renderer->GetDocument().DeviceScaleFactor();
+    if (fixedSize.Width() > 0)
+    {
+      width = std::max<float>(1 / deviceScaleFactor, width);
+    }
+    if (fixedSize.Height() > 0)
+    {
+      height = std::max<float>(1 / deviceScaleFactor, height);
+    }
+
+    return {width, height};
+  }
+
+  void StyleGeneratedImage::ComputeIntrinsicDimensions(const RenderElement *renderer, float &intrinsicWidth,
+                                                       float &intrinsicHeight,
+                                                       FloatSize &intrinsicRatio) noexcept
+  {
+    // At a zoom level of 1 the image is guaranteed to have a device pixel size.
+    FloatSize size = FloorSizeToDevicePixels(LayoutSize(ImageSize(renderer, 1)),
+                                             renderer ? renderer->GetDocument().DeviceScaleFactor() : 1);
+    intrinsicWidth = size.Width();
+    intrinsicHeight = size.Height();
+    intrinsicRatio = size;
+  }
 }

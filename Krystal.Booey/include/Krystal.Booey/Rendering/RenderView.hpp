@@ -27,8 +27,8 @@ namespace krys::boo
   using RenderCounterSet = HashMap<const RenderCounter *, WeakPtr<RenderCounter>>;
 
   /// @brief The root of a document's render tree, shown in the document's view.
-  // FIXME: Layout, painting, layers, selection, printing and the repaint and compositing bookkeeping come
-  // with layout and painting.
+  // FIXME: Layout, layers, selection, printing and the repaint and compositing bookkeeping come with layout,
+  // selection and compositing.
   class RenderView final : public RenderBlockFlow
   {
     KRYS_NON_COPY_MOVABLE(RenderView);
@@ -93,6 +93,26 @@ namespace krys::boo
     }
 
     void Layout() noexcept override;
+
+#pragma region Painting
+
+    void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
+    void PaintBoxDecorations(PaintInfo &, const LayoutPoint &) noexcept override;
+
+    /// @brief The renderer whose background paints the canvas: the root element's, or the body's when the
+    /// root has none (in HTML).
+    KRYS_NODISCARD RenderElement *RendererForRootBackground() const noexcept;
+
+    /// @brief The rect the root background is painted over.
+    KRYS_NODISCARD LayoutRect BackgroundRect() const noexcept;
+    KRYS_NODISCARD LayoutRect UnextendedBackgroundRect() const noexcept;
+    KRYS_NODISCARD IntRect UnscaledDocumentRect() const noexcept;
+
+    /// @brief Whether the view fills with the base background colour first.
+    KRYS_NODISCARD bool ShouldPaintBaseBackground() const noexcept;
+    KRYS_NODISCARD bool RootElementShouldPaintBaseBackground() const noexcept;
+
+#pragma endregion
 
     KRYS_NODISCARD bool RequiresLayer() const noexcept override
     {

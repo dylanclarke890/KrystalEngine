@@ -5,10 +5,13 @@
 namespace krys::boo
 {
   /// @brief An image generated from its CSS description rather than loaded.
-  /// FIXME: The container size, the clients and the per-size cache of generated images (`cachedImageForSize`)
-  /// come with the renderer and `GeneratedImage`.
+  /// FIXME: The clients come with the resource loader; generated images are made again for each paint rather
+  /// than kept per size for a few seconds (`cachedImageForSize`).
   class StyleGeneratedImage : public StyleImage
   {
+  protected:
+    FloatSize _containerSize;
+
   private:
     bool _fixedSize;
 
@@ -36,6 +39,22 @@ namespace krys::boo
     KRYS_NODISCARD bool ImageHasNaturalDimensions() const noexcept final
     {
       return !UsesImageContainerSize();
+    }
+
+    KRYS_NODISCARD FloatSize ImageSize(const RenderElement *, float multiplier) const noexcept final;
+    void ComputeIntrinsicDimensions(const RenderElement *, float &intrinsicWidth, float &intrinsicHeight,
+                                    FloatSize &intrinsicRatio) noexcept final;
+    void SetContainerContextForRenderer(const RenderElement &, const FloatSize &containerSize,
+                                        float) noexcept final
+    {
+      _containerSize = containerSize;
+    }
+
+    // All generated images must be able to compute their fixed size.
+    // FIXME: Pure upstream; the generated images other than gradients implement it with their drawing.
+    KRYS_NODISCARD virtual FloatSize FixedSize(const RenderElement &) const noexcept
+    {
+      return {};
     }
   };
 }

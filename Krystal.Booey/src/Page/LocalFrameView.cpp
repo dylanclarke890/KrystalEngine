@@ -1,11 +1,13 @@
 ﻿#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Core/Assert.hpp"
@@ -115,6 +117,53 @@ namespace krys::boo
   IntRect LocalFrameView::UnobscuredContentRect() const noexcept
   {
     return IntRect(IntPoint(), Size().ExpandedTo(IntSize()));
+  }
+
+  void LocalFrameView::SetTransparent(bool isTransparent) noexcept
+  {
+    if (_isTransparent == isTransparent)
+    {
+      return;
+    }
+
+    _isTransparent = isTransparent;
+    // FIXME: Lay the view out again after the configuration change and update compositing, once there's
+    // compositing (setNeedsLayoutAfterViewConfigurationChange, setNeedsCompositingConfigurationUpdate).
+  }
+
+  void LocalFrameView::SetBaseBackgroundColor(const boo::Color &backgroundColor) noexcept
+  {
+    _baseBackgroundColor = backgroundColor.IsValid() ? backgroundColor : boo::Color(boo::Color::white);
+  }
+
+  void LocalFrameView::PaintContents(GraphicsContext &context, const IntRect &dirtyRect) noexcept
+  {
+    auto *renderView = const_cast<RenderView *>(GetRenderView());
+    if (!renderView)
+    {
+      return;
+    }
+
+    if (!LayoutContext().InPaintableState())
+    {
+      return;
+    }
+
+    krys_debug_assert(!LayoutContext().NeedsLayout());
+    if (LayoutContext().NeedsLayout())
+    {
+      return;
+    }
+
+    krys_debug_assert(!_isPainting);
+    _isPainting = true;
+    auto paintBehavior = _paintBehavior;
+
+    RenderLayer *rootLayer = renderView->Layer();
+    rootLayer->Paint(context, LayoutRect(dirtyRect), LayoutSize(), _paintBehavior, nullptr);
+
+    _paintBehavior = paintBehavior;
+    _isPainting = false;
   }
 
   void LocalFrameView::AvailableContentSizeChanged() noexcept

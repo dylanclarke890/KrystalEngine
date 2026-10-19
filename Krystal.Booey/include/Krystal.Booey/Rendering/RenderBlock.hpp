@@ -30,8 +30,8 @@ namespace krys::boo
   };
 
   /// @brief A box that contains other boxes: a block container, flex, grid or table.
-  // FIXME: Floats, line boxes, continuations, fragmentation, selection and painting come with the rest of
-  // layout and with painting.
+  // FIXME: Floats, line boxes, continuations, fragmentation, selection, carets, column rules and outlines
+  // come with the rest of layout, editing, borders and outlines.
   class RenderBlock : public RenderBox
   {
     friend class RenderBlockFlow;
@@ -276,6 +276,38 @@ namespace krys::boo
     /// @brief The logical bottom of a flex or grid container's layout overflow: its in-flow children's margin
     /// boxes plus its after padding, and at least its client box.
     KRYS_NODISCARD static LayoutUnit LayoutOverflowLogicalBottom(const RenderBlock &renderer) noexcept;
+
+#pragma region Painting
+
+    void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
+    void PaintObject(PaintInfo &, const LayoutPoint &) noexcept override;
+
+    /// @brief @p paintInfo as passed to this block's children: the child phases mapped to the phases children
+    /// paint in.
+    KRYS_NODISCARD PaintInfo PaintInfoForBlockChildren(const PaintInfo &paintInfo) const noexcept;
+
+  protected:
+    enum PaintBlockType
+    {
+      PaintAsBlock,
+      PaintAsInlineBlock
+    };
+
+    virtual void PaintChildren(PaintInfo &forSelf, const LayoutPoint &, PaintInfo &forChild) noexcept;
+    /// @brief Paints @p child unless it paints itself (a self-painting layer or a float); false stops
+    /// painting the remaining children.
+    bool PaintChild(RenderBox &, PaintInfo &forSelf, const LayoutPoint &, PaintInfo &forChild,
+                    PaintBlockType paintType = PaintAsBlock) noexcept;
+
+    virtual void PaintFloats(PaintInfo &, const LayoutPoint &, bool) noexcept
+    {
+    }
+    virtual void PaintInlineChildren(PaintInfo &, const LayoutPoint &) noexcept
+    {
+    }
+    void PaintContents(PaintInfo &, const LayoutPoint &) noexcept;
+
+#pragma endregion
 
   protected:
     RenderBlock(Type type, dom::Element &element, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags = {},

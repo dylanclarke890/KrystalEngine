@@ -1,12 +1,14 @@
 ﻿#include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/BorderEdge.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/RenderTableRow.hpp"
 #include "Krystal.Booey/Rendering/RenderTextFragment.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Booey/Style/Calc/TreeEvaluation.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
@@ -783,6 +785,179 @@ namespace krys::boo
                                               RenderBlock::ContainingBlockState::NewContainingBlock);
       }
     }
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD LayoutUnit ResolveWidthForRatio(LayoutUnit height,
+                                                   const LayoutSize &intrinsicRatio) noexcept
+    {
+      return height * intrinsicRatio.Width() / intrinsicRatio.Height();
+    }
+
+    KRYS_NODISCARD LayoutUnit ResolveHeightForRatio(LayoutUnit width,
+                                                    const LayoutSize &intrinsicRatio) noexcept
+    {
+      return width * intrinsicRatio.Height() / intrinsicRatio.Width();
+    }
+
+    KRYS_NODISCARD LayoutSize ResolveAgainstIntrinsicWidthOrHeightAndRatio(const LayoutSize &size,
+                                                                           const LayoutSize &intrinsicRatio,
+                                                                           LayoutUnit useWidth,
+                                                                           LayoutUnit useHeight) noexcept
+    {
+      if (intrinsicRatio.IsEmpty())
+      {
+        if (useWidth)
+        {
+          return LayoutSize(useWidth, size.Height());
+        }
+        return LayoutSize(size.Width(), useHeight);
+      }
+
+      if (useWidth)
+      {
+        return LayoutSize(useWidth, ResolveHeightForRatio(useWidth, intrinsicRatio));
+      }
+      return LayoutSize(ResolveWidthForRatio(useHeight, intrinsicRatio), useHeight);
+    }
+
+    KRYS_NODISCARD LayoutSize ResolveAgainstIntrinsicRatio(const LayoutSize &size,
+                                                           const LayoutSize &intrinsicRatio) noexcept
+    {
+      // Two possible solutions: (size.width(), solutionHeight) or (solutionWidth, size.height())
+      // "... must be assumed to be the largest dimensions..." = easiest answer: the rect with the largest
+      // surface area.
+
+      LayoutUnit solutionWidth = ResolveWidthForRatio(size.Height(), intrinsicRatio);
+      LayoutUnit solutionHeight = ResolveHeightForRatio(size.Width(), intrinsicRatio);
+      if (solutionWidth <= size.Width())
+      {
+        if (solutionHeight <= size.Height())
+        {
+          // If both solutions fit, choose the one covering the larger area.
+          LayoutUnit areaOne = solutionWidth * size.Height();
+          LayoutUnit areaTwo = size.Width() * solutionHeight;
+          if (areaOne < areaTwo)
+          {
+            return LayoutSize(size.Width(), solutionHeight);
+          }
+          return LayoutSize(solutionWidth, size.Height());
+        }
+
+        // Only the first solution fits.
+        return LayoutSize(solutionWidth, size.Height());
+      }
+
+      // Only the second solution fits, assert that.
+      krys_debug_assert(solutionHeight <= size.Height());
+      return LayoutSize(size.Width(), solutionHeight);
+    }
+  }
+
+  LayoutSize RenderBoxModelObject::CalculateImageIntrinsicDimensions(
+    StyleImage *image, const LayoutSize &positioningAreaSize, ScaleByUsedZoom scaleByUsedZoom) const noexcept
+  {
+    // A generated image without a fixed size, will always return the container size as intrinsic size.
+    if (!image->ImageHasNaturalDimensions())
+    {
+      return LayoutSize(positioningAreaSize.Width(), positioningAreaSize.Height());
+    }
+
+    float intrinsicWidth = 0;
+    float intrinsicHeight = 0;
+    FloatSize intrinsicRatio;
+    image->ComputeIntrinsicDimensions(this, intrinsicWidth, intrinsicHeight, intrinsicRatio);
+
+    LayoutSize resolvedSize(intrinsicWidth, intrinsicHeight);
+    LayoutSize minimumSize(resolvedSize.Width() > 0 ? 1 : 0, resolvedSize.Height() > 0 ? 1 : 0);
+
+    if (scaleByUsedZoom == ScaleByUsedZoom::Yes)
+    {
+      resolvedSize.Scale(Style().UsedZoom());
+    }
+    resolvedSize.ClampToMinimumSize(minimumSize);
+
+    if (!resolvedSize.IsEmpty())
+    {
+      return resolvedSize;
+    }
+
+    // If the image has one of either an intrinsic width or an intrinsic height:
+    // * and an intrinsic aspect ratio, then the missing dimension is calculated from the given dimension and
+    // the ratio.
+    // * and no intrinsic aspect ratio, then the missing dimension is assumed to be the size of the rectangle
+    // that
+    //   establishes the coordinate system for the 'background-position' property.
+    if (resolvedSize.Width() > 0 || resolvedSize.Height() > 0)
+    {
+      return ResolveAgainstIntrinsicWidthOrHeightAndRatio(positioningAreaSize, LayoutSize(intrinsicRatio),
+                                                          resolvedSize.Width(), resolvedSize.Height());
+    }
+
+    // If the image has no intrinsic dimensions and has an intrinsic ratio the dimensions must be assumed to
+    // be the largest dimensions at that ratio such that neither dimension exceeds the dimensions of the
+    // rectangle that establishes the coordinate system for the 'background-position' property.
+    if (!intrinsicRatio.IsEmpty())
+    {
+      return ResolveAgainstIntrinsicRatio(positioningAreaSize, LayoutSize(intrinsicRatio));
+    }
+
+    // If the image has no intrinsic ratio either, then the dimensions must be assumed to be the rectangle
+    // that establishes the coordinate system for the 'background-position' property.
+    return positioningAreaSize;
+  }
+
+  bool RenderBoxModelObject::FixedBackgroundPaintsInLocalCoordinates() const noexcept
+  {
+    // Only a composited root layer paints its fixed background in its own coordinates; there's no
+    // compositing.
+    return false;
+  }
+
+  bool RenderBoxModelObject::BorderObscuresBackgroundEdge(const FloatSize &contextScale) const noexcept
+  {
+    auto edges = GetBorderEdges(Style(), GetDocument().DeviceScaleFactor());
+
+    for (auto side : AllBoxSides)
+    {
+      auto &currEdge = edges.At(side);
+      // FIXME: for vertical text
+      float axisScale =
+        (side == BoxSide::Top || side == BoxSide::Bottom) ? contextScale.Height() : contextScale.Width();
+      if (!currEdge.ObscuresBackgroundEdge(axisScale))
+      {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool RenderBoxModelObject::BorderObscuresBackground() const noexcept
+  {
+    if (!Style().HasBorder())
+    {
+      return false;
+    }
+
+    // Bail if we have any border-image for now. We could look at the image alpha to improve this.
+    if (!Style().GetBorderImageSource().IsNone())
+    {
+      return false;
+    }
+
+    auto edges = GetBorderEdges(Style(), GetDocument().DeviceScaleFactor());
+
+    for (auto side : AllBoxSides)
+    {
+      if (!edges.At(side).ObscuresBackground())
+      {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   BorderShape RenderBoxModelObject::BorderShapeForContentClipping(const LayoutRect &borderBoxRect,

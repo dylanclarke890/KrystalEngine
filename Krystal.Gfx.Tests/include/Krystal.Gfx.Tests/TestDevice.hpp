@@ -10,7 +10,8 @@ namespace krys::gfx::tests
 {
   /// @brief Creates a validating device for GPU tests, failing the test if there's no OpenGL 4.5 device.
   /// The device logs its debug output and leaks through the global logger, which the first call sets up.
-  KRYS_NODISCARD inline UniquePtr<Device> CreateTestDevice()
+  /// @param transientMemoryPerFrame Small by default, so tests notice drawing that uses more than it should.
+  KRYS_NODISCARD inline UniquePtr<Device> CreateTestDevice(uint64 transientMemoryPerFrame = 64u * 1'024u)
   {
     static const auto logger = []
     {
@@ -20,7 +21,8 @@ namespace krys::gfx::tests
       return krys::move(*created);
     }();
 
-    auto device = Device::Create({.EnableValidation = true, .TransientMemoryPerFrame = 64u * 1'024u});
+    auto device =
+      Device::Create({.EnableValidation = true, .TransientMemoryPerFrame = transientMemoryPerFrame});
     if (!device)
     {
       FAIL("No OpenGL 4.5 device: " << device.error());

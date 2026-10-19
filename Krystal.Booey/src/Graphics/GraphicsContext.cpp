@@ -2,6 +2,7 @@
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp"
 #include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
+#include "Krystal.Booey/Graphics/Image.hpp"
 #include "Krystal.Booey/Graphics/Path.hpp"
 #include <cmath>
 
@@ -126,6 +127,36 @@ namespace krys::boo
     // Called by implementations that transform drawGlyphs into drawGlyphsImmediate, drawImageBuffer, etc
     // calls.
     DrawGlyphs(font, glyphs, advances, point, fontSmoothingMode);
+  }
+
+  ImageDrawResult GraphicsContext::DrawImage(Image &image, const FloatPoint &destination,
+                                             ImagePaintingOptions imagePaintingOptions) noexcept
+  {
+    return DrawImage(image, FloatRect(destination, image.Size()), FloatRect(FloatPoint(), image.Size()),
+                     imagePaintingOptions);
+  }
+
+  ImageDrawResult GraphicsContext::DrawImage(Image &image, const FloatRect &destination,
+                                             ImagePaintingOptions imagePaintingOptions) noexcept
+  {
+    FloatRect srcRect(FloatPoint(), image.Size(imagePaintingOptions.Orientation()));
+    return DrawImage(image, destination, srcRect, imagePaintingOptions);
+  }
+
+  ImageDrawResult GraphicsContext::DrawImage(Image &image, const FloatRect &destination,
+                                             const FloatRect &source, ImagePaintingOptions options) noexcept
+  {
+    InterpolationQualityMaintainer interpolationQualityForThisScope(*this, options.GetInterpolationQuality());
+    return image.Draw(*this, destination, source, options);
+  }
+
+  ImageDrawResult GraphicsContext::DrawTiledImage(Image &image, const FloatRect &destination,
+                                                  const FloatPoint &source, const FloatSize &tileSize,
+                                                  const FloatSize &spacing,
+                                                  ImagePaintingOptions options) noexcept
+  {
+    InterpolationQualityMaintainer interpolationQualityForThisScope(*this, options.GetInterpolationQuality());
+    return image.DrawTiled(*this, destination, source, tileSize, spacing, options);
   }
 
   void GraphicsContext::ClipRoundedRect(const FloatRoundedRect &rect) noexcept

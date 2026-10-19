@@ -1,7 +1,10 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
+#include "Krystal.Booey/Rendering/BorderShape.hpp"
+#include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
@@ -10,9 +13,12 @@
 #include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderTableRow.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
+#include "Krystal.Booey/Rendering/Shapes/BoxLayoutShape.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/TransformResolver.hpp"
+#include "Krystal.Booey/Style/Values/Masking/ClipPath.hpp"
+#include "Krystal.Booey/Style/Values/Shapes/BasicShape.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
@@ -2849,10 +2855,18 @@ namespace krys::boo
       // there's painting.
       result = box->VisualOverflowRect();
 
-      // FIXME: The root's background painting area (IncludeRootBackgroundPaintingArea), once the frame view
-      // has contents sizes.
+      if (flags.Contains(IncludeRootBackgroundPaintingArea) && Renderer().IsDocumentElementRenderer())
+      {
+        // If the root layer becomes composited (e.g. because some descendant with negative z-index is
+        // composited), then it has to be big enough to cover the viewport in order to display the background.
+        // This is akin to the code in RenderBox::paintRootBoxFillLayers().
+        // FIXME: The frame view's contents size (contentsWidth, contentsHeight), once it has one; it's set
+        // from the view's document rect.
+        const auto contentsSize = Renderer().View().UnscaledDocumentRect().Size();
+        result.SetWidth(std::max(result.Width(), LayoutUnit(contentsSize.Width()) - result.X()));
+        result.SetHeight(std::max(result.Height(), LayoutUnit(contentsSize.Height()) - result.Y()));
+      }
     }
-    (void)flags;
     return result;
   }
 
@@ -3336,4 +3350,1195 @@ namespace krys::boo
     return box.HasPotentiallyScrollableOverflow()
            && (box.HasHorizontalOverflow() || box.HasVerticalOverflow());
   }
+#pragma region Painting
+
+  namespace
+  {
+    KRYS_NODISCARD float RendererOpacity(const RenderLayerModelObject &renderer) noexcept
+    {
+      return renderer.Style().GetOpacity().Value.Value;
+    }
+
+    // Every renderer is pixel snapped: there are no layer-aware SVG renderers.
+    KRYS_NODISCARD FloatRect SnapRectToDevicePixelsIfNeeded(const LayoutRect &rect,
+                                                            const RenderLayerModelObject &renderer) noexcept
+    {
+      return SnapRectToDevicePixels(rect, renderer.GetDocument().DeviceScaleFactor());
+    }
+    KRYS_NODISCARD FloatRect SnapRectToDevicePixelsIfNeeded(const FloatRect &rect,
+                                                            const RenderLayerModelObject &renderer) noexcept
+    {
+      return SnapRectToDevicePixels(LayoutRect(rect), renderer.GetDocument().DeviceScaleFactor());
+    }
+
+    enum TransparencyClipBoxBehavior
+    {
+      PaintingTransparencyClipBox,
+      HitTestingTransparencyClipBox
+    };
+
+    enum TransparencyClipBoxMode
+    {
+      DescendantsOfTransparencyClipBox,
+      RootOfTransparencyClipBox
+    };
+
+    KRYS_NODISCARD LayoutRect TransparencyClipBox(const RenderLayer &, const RenderLayer *rootLayer,
+                                                  TransparencyClipBoxBehavior, TransparencyClipBoxMode,
+                                                  EnumSet<PaintBehavior> = {},
+                                                  const LayoutRect *paintDirtyRect = nullptr) noexcept;
+
+    void ExpandClipRectForDescendantsAndReflection(LayoutRect &clipRect, const RenderLayer &layer,
+                                                   const RenderLayer *rootLayer,
+                                                   TransparencyClipBoxBehavior transparencyBehavior,
+                                                   EnumSet<PaintBehavior> paintBehavior,
+                                                   const LayoutRect *paintDirtyRect) noexcept
+    {
+      // If we have a mask, then the clip is limited to the border box area (and there is
+      // no need to examine child layers).
+      if (!layer.Renderer().HasMask())
+      {
+        // Note: we don't have to walk z-order lists since transparent elements always establish
+        // a stacking container. This means we can just walk the layer tree directly.
+        // FIXME: Reflection layers (isReflectionLayer) are skipped upstream, once there are reflections.
+        for (RenderLayer *curr = layer.FirstChild(); curr; curr = curr->NextSibling())
+        {
+          clipRect.Unite(TransparencyClipBox(*curr, rootLayer, transparencyBehavior,
+                                             DescendantsOfTransparencyClipBox, paintBehavior,
+                                             paintDirtyRect));
+        }
+      }
+
+      // FIXME: Reflections (the reflected rect of the clip, united into it) come with reflections.
+    }
+
+    LayoutRect TransparencyClipBox(const RenderLayer &layer, const RenderLayer *rootLayer,
+                                   TransparencyClipBoxBehavior transparencyBehavior,
+                                   TransparencyClipBoxMode transparencyMode,
+                                   EnumSet<PaintBehavior> paintBehavior,
+                                   const LayoutRect *paintDirtyRect) noexcept
+    {
+      // FIXME: Although this function completely ignores CSS-imposed clipping, we did already intersect with
+      // the paintDirtyRect, and that should cut down on the amount we have to paint.  Still it would be
+      // better to respect clips.
+
+      if (rootLayer != &layer
+          && ((transparencyBehavior == PaintingTransparencyClipBox && layer.PaintsWithTransform())
+              || (transparencyBehavior == HitTestingTransparencyClipBox && layer.IsTransformed())))
+      {
+        // The best we can do here is to use enclosed bounding boxes to establish a "fuzzy" enough clip to
+        // encompass the transformed layer and all of its children.
+        // FIXME: Transformed layers in a paginated layer (split across its fragments with
+        // fragmentsBoundingBox) come with fragmentation.
+        (void)transparencyMode;
+        LayoutSize delta = layer.OffsetFromAncestor(rootLayer);
+
+        TransformationMatrix transform;
+        transform.Translate(delta.Width(), delta.Height());
+        transform.Multiply(*layer.Transform());
+
+        // We don't use fragment boxes when collecting a transformed layer's bounding box, since it always
+        // paints unfragmented.
+        LayoutRect clipRect = layer.BoundingBox(&layer);
+        ExpandClipRectForDescendantsAndReflection(clipRect, layer, &layer, transparencyBehavior,
+                                                  paintBehavior, paintDirtyRect);
+        // FIXME: Filter outsets (filterOutsets) come with filters.
+        LayoutRect result = transform.MapRect(clipRect);
+        if (paintDirtyRect)
+        {
+          result = Intersection(result, *paintDirtyRect);
+        }
+        return result;
+      }
+
+      EnumSet<RenderLayer::CalculateLayerBoundsFlag> flags =
+        transparencyBehavior == HitTestingTransparencyClipBox
+          ? RenderLayer::UseFragmentBoxesIncludingCompositing
+          : RenderLayer::UseFragmentBoxesExcludingCompositing;
+      flags.Add(RenderLayer::IncludeRootBackgroundPaintingArea);
+      auto clipRect = layer.BoundingBox(rootLayer, layer.OffsetFromAncestor(rootLayer), flags);
+      ExpandClipRectForDescendantsAndReflection(clipRect, layer, rootLayer, transparencyBehavior,
+                                                paintBehavior, paintDirtyRect);
+      // FIXME: Filter outsets (filterOutsets) come with filters.
+
+      if (paintDirtyRect)
+      {
+        clipRect = Intersection(clipRect, *paintDirtyRect);
+      }
+
+      return clipRect;
+    }
+  }
+
+  void RenderLayer::Paint(GraphicsContext &context, const LayoutRect &damageRect,
+                          const LayoutSize &subpixelOffset, EnumSet<PaintBehavior> paintBehavior,
+                          RenderObject *subtreePaintRoot, EnumSet<PaintLayerFlag> paintFlags) noexcept
+  {
+    // FIXME: Overlap test requests (for widgets), the security origin paint policy and region contexts come
+    // with widgets and hit testing.
+    LayerPaintingInfo paintingInfo(this, LayoutRect(EnclosingIntRect(damageRect)), paintBehavior,
+                                   subpixelOffset, subtreePaintRoot);
+    PaintLayer(context, paintingInfo, paintFlags);
+  }
+
+  bool RenderLayer::PaintsWithTransparency(EnumSet<PaintBehavior>) const noexcept
+  {
+    // FIXME: Composited layers paint their transparency in the backing, once there's compositing.
+    return Renderer().IsTransparent() || HasNonOpacityTransparency();
+  }
+
+  bool RenderLayer::HasNonOpacityTransparency() const noexcept
+  {
+    if (Renderer().HasMask())
+    {
+      return true;
+    }
+
+    if (HasBlendMode() || IsolatesBlending())
+    {
+      return true;
+    }
+
+    // FIXME: SVG clip paths that use clipping masks, once there's the layer-based SVG engine.
+    return false;
+  }
+
+  TransformationMatrix RenderLayer::RenderableTransform(EnumSet<PaintBehavior> paintBehavior) const noexcept
+  {
+    if (!_transform)
+    {
+      return TransformationMatrix();
+    }
+
+    if (paintBehavior.Contains(PaintBehavior::FlattenCompositingLayers))
+    {
+      TransformationMatrix matrix = *_transform;
+      MakeMatrixRenderable(matrix, false /* flatten 3d */);
+      return matrix;
+    }
+
+    return *_transform;
+  }
+
+  bool RenderLayer::ShouldPaintMask(EnumSet<PaintBehavior>, EnumSet<PaintLayerFlag>) const noexcept
+  {
+    // Every layer paints into the window: there's no compositing.
+    return Renderer().HasMask();
+  }
+
+  bool RenderLayer::ShouldApplyClipPath(EnumSet<PaintBehavior>, EnumSet<PaintLayerFlag>) const noexcept
+  {
+    // Every layer paints into the window: there's no compositing.
+    return Renderer().HasClipPath();
+  }
+
+  FloatRect RenderLayer::ReferenceBoxRectForClipPath(CSSBoxType boxType, const LayoutSize &offsetFromRoot,
+                                                     const LayoutRect &rootRelativeBounds) const noexcept
+  {
+    // FIXME: Layer-aware SVG renderers, once there's the layer-based SVG engine.
+    bool isReferenceBox = Renderer().IsRenderBox();
+
+    // FIXME: Support different reference boxes for inline content.
+    // https://bugs.webkit.org/show_bug.cgi?id=129047
+    if (!isReferenceBox)
+    {
+      return FloatRect(rootRelativeBounds);
+    }
+
+    auto referenceBoxRect = Renderer().ReferenceBoxRect(boxType);
+    referenceBoxRect.Move(FloatSize(offsetFromRoot));
+    return referenceBoxRect;
+  }
+
+  RenderLayer *RenderLayer::TransparentPaintingAncestor(const LayerPaintingInfo &info) noexcept
+  {
+    // FIXME: Composited layers and layers painting into provided backing, once there's compositing.
+    if (this == info.RootLayer)
+    {
+      return nullptr;
+    }
+    for (auto *ancestor = Parent(); ancestor; ancestor = ancestor->Parent())
+    {
+      if (ancestor->IsStackingContext())
+      {
+        if (ancestor->IsTransparent())
+        {
+          return ancestor;
+        }
+      }
+      if (ancestor == info.RootLayer)
+      {
+        return nullptr;
+      }
+    }
+    return nullptr;
+  }
+
+  void RenderLayer::BeginTransparencyLayers(GraphicsContext &context, const LayerPaintingInfo &paintingInfo,
+                                            const LayoutRect &dirtyRect) noexcept
+  {
+    if (context.PaintingDisabled()
+        || (PaintsWithTransparency(paintingInfo.PaintBehavior) && _usedTransparency))
+    {
+      return;
+    }
+
+    if (auto *ancestor = TransparentPaintingAncestor(paintingInfo))
+    {
+      ancestor->BeginTransparencyLayers(context, paintingInfo, dirtyRect);
+    }
+
+    if (PaintsWithTransparency(paintingInfo.PaintBehavior))
+    {
+      krys_debug_assert(IsStackingContext());
+      _usedTransparency = true;
+      if (CanPaintTransparencyWithSetOpacity())
+      {
+        _savedAlphaForTransparency = context.Alpha();
+        context.SetAlpha(context.Alpha() * RendererOpacity(Renderer()));
+        return;
+      }
+      context.Save();
+      LayoutRect adjustedClipRect =
+        TransparencyClipBox(*this, paintingInfo.RootLayer, PaintingTransparencyClipBox,
+                            RootOfTransparencyClipBox, paintingInfo.PaintBehavior, &dirtyRect);
+      adjustedClipRect.Move(paintingInfo.SubpixelOffset);
+      auto snappedClipRect = SnapRectToDevicePixelsIfNeeded(adjustedClipRect, Renderer());
+      context.Clip(snappedClipRect);
+
+      // FIXME: Legacy SVG roots directly under the view don't composite with their blend mode, once there's
+      // SVG.
+      bool usesCompositeOperation = HasBlendMode();
+      if (usesCompositeOperation)
+      {
+        context.SetCompositeOperation(context.CompositeOperation(), GetBlendMode());
+      }
+
+      context.BeginTransparencyLayer(RendererOpacity(Renderer()));
+
+      if (usesCompositeOperation)
+      {
+        context.SetCompositeOperation(context.CompositeOperation(), BlendMode::Normal);
+      }
+    }
+  }
+
+  void RenderLayer::ClipToRect(GraphicsContext &context, GraphicsContextStateSaver &stateSaver,
+                               const LayerPaintingInfo &paintingInfo, EnumSet<PaintBehavior>,
+                               const ClipRect &clipRect, BorderRadiusClippingRule rule) noexcept
+  {
+    float deviceScaleFactor = Renderer().GetDocument().DeviceScaleFactor();
+    bool needsClipping = !clipRect.IsInfinite() && clipRect.Rect() != paintingInfo.PaintDirtyRect;
+    if (needsClipping || clipRect.AffectedByRadius())
+    {
+      stateSaver.Save();
+    }
+
+    if (needsClipping)
+    {
+      LayoutRect adjustedClipRect = clipRect.Rect();
+      adjustedClipRect.Move(paintingInfo.SubpixelOffset);
+      auto snappedClipRect = SnapRectToDevicePixelsIfNeeded(adjustedClipRect, Renderer());
+      context.Clip(snappedClipRect);
+    }
+
+    if (clipRect.AffectedByRadius())
+    {
+      // If the clip rect has been tainted by a border radius, then we have to walk up our layer chain
+      // applying the clips from any layers with overflow. The condition for being able to apply these clips
+      // is that the overflow object be in our containing block chain so we check that also.
+      // FIXME: Composited overflow scrolling (CompositedOverflowScrollContent) stops the walk, once there's
+      // compositing.
+      for (RenderLayer *layer = rule == IncludeSelfForBorderRadius ? this : Parent(); layer;
+           layer = layer->Parent())
+      {
+        if (layer->Renderer().HasNonVisibleOverflow() && layer->Renderer().Style().HasBorderRadius()
+            && AncestorLayerIsInContainingBlockChain(*layer))
+        {
+          auto adjustedClipRect =
+            LayoutRect {LayoutPoint {layer->OffsetFromAncestor(paintingInfo.RootLayer, AdjustForColumns)},
+                        layer->RendererBorderBoxRect().Size()};
+          adjustedClipRect.Move(paintingInfo.SubpixelOffset);
+          auto borderShape = BorderShape::ShapeForBorderRect(layer->Renderer().Style(), adjustedClipRect);
+          if (borderShape.InnerShapeContains(paintingInfo.PaintDirtyRect))
+          {
+            context.Clip(SnapRectToDevicePixels(Intersection(paintingInfo.PaintDirtyRect, adjustedClipRect),
+                                                deviceScaleFactor));
+          }
+          else
+          {
+            borderShape.ClipToInnerShape(context, deviceScaleFactor);
+          }
+        }
+
+        if (layer == paintingInfo.RootLayer)
+        {
+          break;
+        }
+      }
+    }
+  }
+
+  void RenderLayer::PaintLayer(GraphicsContext &context, const LayerPaintingInfo &paintingInfo,
+                               EnumSet<PaintLayerFlag> paintFlags) noexcept
+  {
+    // FIXME: Layers painting into a different composited destination, and out-of-view viewport-constrained
+    // layers that aren't composited (NotCompositedForBoundsOutOfView), once there's compositing.
+    PaintLayerWithEffects(context, paintingInfo, paintFlags);
+  }
+
+  void RenderLayer::PaintLayerWithEffects(GraphicsContext &context, const LayerPaintingInfo &paintingInfo,
+                                          EnumSet<PaintLayerFlag> paintFlags) noexcept
+  {
+    // Non self-painting leaf layers don't need to be painted as their renderer() should properly paint
+    // itself.
+    if (!IsSelfPaintingLayer() && !HasSelfPaintingLayerDescendant())
+    {
+      return;
+    }
+
+    // FIXME: Suppressed painting while visual updates aren't allowed (visualUpdatesAllowed), once documents
+    // defer visual updates.
+
+    // If this layer is totally invisible then there is nothing to paint.
+    // FIXME: Accessibility and event region paints continue, once there are those.
+    if (!RendererOpacity(Renderer()))
+    {
+      return;
+    }
+
+    if (PaintsWithTransparency(paintingInfo.PaintBehavior))
+    {
+      paintFlags.Add(PaintLayerFlag::HaveTransparency);
+    }
+
+    // PaintLayerFlag::AppliedTransform is used in RenderReplica, to avoid applying the transform twice.
+    if (PaintsWithTransform() && !paintFlags.Contains(PaintLayerFlag::AppliedTransform))
+    {
+      TransformationMatrix layerTransform = RenderableTransform(paintingInfo.PaintBehavior);
+      // If the transform can't be inverted, then don't paint anything.
+      if (!layerTransform.IsInvertible())
+      {
+        return;
+      }
+
+      // If we have a transparency layer enclosing us and we are the root of a transform, then we need to
+      // establish the transparency layer from the parent now, assuming there is a parent
+      if (paintFlags.Contains(PaintLayerFlag::HaveTransparency))
+      {
+        if (this != paintingInfo.RootLayer && Parent())
+        {
+          Parent()->BeginTransparencyLayers(context, paintingInfo, paintingInfo.PaintDirtyRect);
+        }
+        else
+        {
+          BeginTransparencyLayers(context, paintingInfo, paintingInfo.PaintDirtyRect);
+        }
+      }
+
+      // FIXME: Transformed layers in a paginated layer (paintTransformedLayerIntoFragments) come with
+      // fragmentation; they paint unfragmented.
+
+      // Make sure the parent's clip rects have been calculated.
+      ClipRect clipRect = paintingInfo.PaintDirtyRect;
+      GraphicsContextStateSaver stateSaver(context, false);
+      if (Parent())
+      {
+        auto options = paintFlags.Contains(PaintLayerFlag::PaintingOverflowContents)
+                         ? ClipRectOptionsForPaintingOverflowContents
+                         : ClipRectDefaultOptions;
+        // FIXME: Clip rects outside filters (ClipRectsOption::OutsideFilter) come with filters.
+        if (paintFlags.Contains(PaintLayerFlag::TemporaryClipRects))
+        {
+          options.Add(ClipRectsOption::Temporary);
+        }
+        auto clipRectsContext = ClipRectsContext(paintingInfo.RootLayer, PaintingClipRects, options);
+        clipRect = BackgroundClipRect(clipRectsContext);
+        clipRect.Intersect(paintingInfo.PaintDirtyRect);
+
+        EnumSet<PaintBehavior> paintBehavior;
+        if (paintFlags.Contains(PaintLayerFlag::PaintingOverflowContents))
+        {
+          paintBehavior.Add(PaintBehavior::CompositedOverflowScrollContent);
+        }
+
+        // FIXME: SVG viewport clipping (shouldApplyViewportClip) comes with SVG.
+
+        // Push the parent coordinate space's clip.
+        Parent()->ClipToRect(context, stateSaver, paintingInfo, paintBehavior, clipRect);
+      }
+
+      PaintLayerByApplyingTransform(context, paintingInfo, paintFlags);
+      return;
+    }
+
+    PaintLayerContentsAndReflection(context, paintingInfo, paintFlags);
+  }
+
+  void RenderLayer::PaintLayerContentsAndReflection(GraphicsContext &context,
+                                                    const LayerPaintingInfo &paintingInfo,
+                                                    EnumSet<PaintLayerFlag> paintFlags) noexcept
+  {
+    krys_debug_assert(IsSelfPaintingLayer() || HasSelfPaintingLayerDescendant());
+
+    auto localPaintFlags = paintFlags;
+    localPaintFlags.Remove(PaintLayerFlag::AppliedTransform);
+    localPaintFlags.Remove(PaintLayerFlag::PaintingOverflowContentsRoot);
+
+    // FIXME: Reflections (painted first, from the reflection layer) come with reflections.
+
+    localPaintFlags.Add(PaintLayerPaintingCompositingAllPhasesFlags());
+    PaintLayerContents(context, paintingInfo, localPaintFlags);
+  }
+
+  Pair<Path, WindRule>
+    RenderLayer::ComputeClipPath(const LayoutSize &offsetFromRoot,
+                                 const LayoutRect &rootRelativeBoundsForNonBoxes) const noexcept
+  {
+    const auto &clipPath = Renderer().Style().GetClipPath();
+
+    if (auto basicShape = clipPath.TryBasicShape())
+    {
+      auto referenceBoxRect = ReferenceBoxRectForClipPath(basicShape->ReferenceBox(), offsetFromRoot,
+                                                          rootRelativeBoundsForNonBoxes);
+      auto snappedReferenceBoxRect = SnapRectToDevicePixelsIfNeeded(referenceBoxRect, Renderer());
+      return {style::ComputePath(basicShape->GetShape(), snappedReferenceBoxRect),
+              style::ComputeWindRule(basicShape->GetShape())};
+    }
+
+    if (auto box = clipPath.TryBox())
+    {
+      if (const auto *renderBox = DynamicDowncast<RenderBox>(Renderer()))
+      {
+        auto shapeRect = ComputeRoundedRectForBoxShape(box->ReferenceBox(), *renderBox)
+                           .PixelSnappedRoundedRectForPainting(Renderer().GetDocument().DeviceScaleFactor());
+        shapeRect.Move(FloatSize(offsetFromRoot));
+        return {shapeRect.GetPath(), WindRule::NonZero};
+      }
+    }
+
+    return {Path(), WindRule::NonZero};
+  }
+
+  void RenderLayer::SetupClipPath(GraphicsContext &context, GraphicsContextStateSaver &stateSaver,
+                                  const LayerPaintingInfo &paintingInfo, EnumSet<PaintLayerFlag> &,
+                                  const LayoutSize &offsetFromRoot) noexcept
+  {
+    // FIXME: Event region clips (CollectingEventRegion) come with hit testing.
+    if (!Renderer().HasClipPath() || context.PaintingDisabled() || paintingInfo.PaintDirtyRect.IsEmpty())
+    {
+      return;
+    }
+
+    // FIXME: Clipping inside SVG resource containers (<clipPath>, <mask>), once there's SVG.
+
+    auto clippedContentBounds =
+      CalculateLayerBounds(paintingInfo.RootLayer, offsetFromRoot, {UseLocalClipRectIfPossible});
+
+    const auto &style = Renderer().Style();
+    LayoutSize paintingOffsetFromRoot =
+      LayoutSize(SnapSizeToDevicePixel(offsetFromRoot + paintingInfo.SubpixelOffset, LayoutPoint(),
+                                       Renderer().GetDocument().DeviceScaleFactor()));
+    krys_debug_assert(!style.GetClipPath().IsNone());
+    if (style.GetClipPath().IsBasicShape() || (style.GetClipPath().IsBox() && Is<RenderBox>(Renderer())))
+    {
+      // clippedContentBounds is used as the reference box for inlines, which is also poorly specified:
+      // https://github.com/w3c/csswg-drafts/issues/6383.
+      auto [path, windRule] = ComputeClipPath(paintingOffsetFromRoot, clippedContentBounds);
+
+      stateSaver.Save();
+      context.ClipPath(path, windRule);
+      return;
+    }
+
+    // FIXME: SVG clip paths (`url()` references to <clipPath>, applied as path clips or clipping masks) come
+    // with SVG.
+  }
+
+  void RenderLayer::PaintLayerContents(GraphicsContext &context, const LayerPaintingInfo &paintingInfo,
+                                       EnumSet<PaintLayerFlag> paintFlags) noexcept
+  {
+    krys_debug_assert(IsSelfPaintingLayer() || HasSelfPaintingLayerDescendant());
+
+    // FIXME: Contentful paint detection (detectingContentfulPaint) comes with paint timing.
+
+    auto localPaintFlags = paintFlags;
+    localPaintFlags.Remove(PaintLayerFlag::AppliedTransform);
+
+    bool haveTransparency = localPaintFlags.Contains(PaintLayerFlag::HaveTransparency);
+    bool isPaintingOverlayScrollbars = localPaintFlags.Contains(PaintLayerFlag::PaintingOverlayScrollbars);
+    bool isPaintingCompositedForeground =
+      localPaintFlags.Contains(PaintLayerFlag::PaintingCompositingForegroundPhase);
+    bool isPaintingCompositedBackground =
+      localPaintFlags.Contains(PaintLayerFlag::PaintingCompositingBackgroundPhase);
+    bool isPaintingOverflowContents = localPaintFlags.Contains(PaintLayerFlag::PaintingOverflowContents);
+    bool isCollectingEventRegion = localPaintFlags.Contains(PaintLayerFlag::CollectingEventRegion);
+
+    bool isSelfPaintingLayer = IsSelfPaintingLayer();
+    bool isInsideSkippedSubtree = Renderer().IsSkippedContent();
+
+    auto hasVisibleContent = [&]() -> bool
+    {
+      if (isInsideSkippedSubtree)
+      {
+        return false;
+      }
+
+      // FIXME: Hidden SVG containers and SVG resource layers (painted indirectly), once there's SVG.
+      return _hasVisibleContent;
+    };
+
+    auto shouldSkipNonFixedTopDocumentContent = [&]
+    {
+      if (!paintingInfo.PaintBehavior.Contains(PaintBehavior::FixedAndStickyLayersOnly))
+      {
+        return false;
+      }
+
+      if (_hasFixedAncestor || _hasStickyAncestor)
+      {
+        return false;
+      }
+
+      if (IsViewportConstrained())
+      {
+        return false;
+      }
+
+      // Every view is its page's main frame.
+      return true;
+    };
+
+    // FIXME: Accessibility regions come with accessibility.
+    bool shouldPaintContent = hasVisibleContent() && isSelfPaintingLayer && !isPaintingOverlayScrollbars
+                              && !isCollectingEventRegion && !shouldSkipNonFixedTopDocumentContent();
+
+    bool shouldPaintOutline = [&]()
+    {
+      if (!isSelfPaintingLayer)
+      {
+        return false;
+      }
+
+      if (!shouldPaintContent)
+      {
+        return false;
+      }
+
+      if (isPaintingOverlayScrollbars || isCollectingEventRegion)
+      {
+        return false;
+      }
+
+      // For the current layer, the outline has been painted by the primary GraphicsLayer.
+      if (localPaintFlags.Contains(PaintLayerFlag::PaintingOverflowContentsRoot))
+      {
+        return false;
+      }
+
+      // Paint outlines in the background phase for a scroll container so that they don't scroll with the
+      // content.
+      // FIXME: inset outlines will have the wrong z-ordering with scrolled content. See also
+      // webkit.org/b/249457.
+      if (localPaintFlags.Contains(PaintLayerFlag::PaintingOverflowContainer))
+      {
+        return isPaintingCompositedBackground;
+      }
+
+      return isPaintingCompositedForeground;
+    }();
+
+    bool shouldPaintNegativeZIndexChildren = [&]()
+    {
+      if (localPaintFlags.Contains(PaintLayerFlag::PaintingOverflowContainer))
+      {
+        return false;
+      }
+
+      if (localPaintFlags.Contains(PaintLayerFlag::PaintingOverflowContents))
+      {
+        // Overflow contents has the "PaintingCompositingForegroundPhase" phase,
+        // but we need to paint negative z-index layers here so they scroll with the content.
+        return true;
+      }
+
+      return isPaintingCompositedBackground;
+    }();
+
+    auto shouldExcludeBasedOnContainingBlock = [&]()
+    {
+      if (auto *rootAsBlock = DynamicDowncast<RenderBlock>(paintingInfo.SubtreePaintRoot))
+      {
+        return !rootAsBlock->IsContainingBlockAncestorFor(Renderer());
+      }
+      return false;
+    };
+
+    if (paintingInfo.PaintBehavior.Contains(PaintBehavior::DraggableSnapshot)
+        && paintingInfo.SubtreePaintRoot)
+    {
+      if (paintingInfo.SubtreePaintRoot->HasLayer())
+      {
+        auto *subtreeRootLayer = paintingInfo.SubtreePaintRoot->EnclosingLayer();
+        bool isLayerInSubtree = (this == subtreeRootLayer) || IsDescendantOf(*subtreeRootLayer);
+
+        if (!isLayerInSubtree
+            || (paintingInfo.SubtreePaintRoot != &Renderer() && shouldExcludeBasedOnContainingBlock()))
+        {
+          shouldPaintContent = false;
+        }
+      }
+      else if (Renderer().IsAbsolutelyPositioned() && paintingInfo.SubtreePaintRoot != &Renderer()
+               && shouldExcludeBasedOnContainingBlock())
+      {
+        shouldPaintContent = false;
+      }
+    }
+
+    if (localPaintFlags.Contains(PaintLayerFlag::PaintingRootBackgroundOnly) && !Renderer().IsRenderView()
+        && !Renderer().IsDocumentElementRenderer())
+    {
+      // If beginTransparencyLayers was called prior to this, ensure the transparency state is cleaned up
+      // before returning.
+      if (haveTransparency && _usedTransparency)
+      {
+        if (_savedAlphaForTransparency)
+        {
+          context.SetAlpha(*_savedAlphaForTransparency);
+          _savedAlphaForTransparency = std::nullopt;
+        }
+        else
+        {
+          context.EndTransparencyLayer();
+          context.Restore();
+        }
+        _usedTransparency = false;
+      }
+
+      return;
+    }
+
+    UpdateLayerListsIfNeeded();
+
+    LayoutSize offsetFromRoot = OffsetFromAncestor(paintingInfo.RootLayer);
+
+    // FIXME: Font subpixel quantization (setupFontSubpixelQuantization) comes with text painting.
+
+    // FIXME: Clip paths and filters in a fragmented flow use the column-aware offset
+    // (enclosingFragmentedFlow), once there's fragmentation.
+    LayoutSize columnAwareOffsetFromRoot = offsetFromRoot;
+
+    GraphicsContextStateSaver stateSaver(context, false);
+
+    // Apply clip-path to context.
+    if (ShouldApplyClipPath(paintingInfo.PaintBehavior, localPaintFlags))
+    {
+      SetupClipPath(context, stateSaver, paintingInfo, localPaintFlags, columnAwareOffsetFromRoot);
+    }
+
+    bool applySVGClippingMask = localPaintFlags.Contains(PaintLayerFlag::PaintingSVGClippingMask);
+    if (applySVGClippingMask)
+    {
+      localPaintFlags.Remove(PaintLayerFlag::PaintingSVGClippingMask);
+    }
+
+    bool selectionAndBackgroundsOnly =
+      paintingInfo.PaintBehavior.Contains(PaintBehavior::SelectionAndBackgroundsOnly);
+    bool selectionOnly = paintingInfo.PaintBehavior.Contains(PaintBehavior::SelectionOnly);
+
+    LayerFragments layerFragments;
+    RenderObject *subtreePaintRootForRenderer = nullptr;
+
+    auto paintBehavior = [&]()
+    {
+      static constexpr EnumSet<PaintBehavior> flagsToCopy {
+        PaintBehavior::FlattenCompositingLayers,
+        PaintBehavior::Snapshotting,
+        PaintBehavior::ExcludeSelection,
+        PaintBehavior::ExcludeReplacedContentExceptForIFrames,
+        PaintBehavior::ExcludeText,
+        PaintBehavior::FixedAndStickyLayersOnly,
+        PaintBehavior::DrawsHDRContent,
+      };
+      EnumSet<PaintBehavior> paintBehavior = paintingInfo.PaintBehavior & flagsToCopy;
+
+      if (localPaintFlags.Contains(PaintLayerFlag::PaintingSkipRootBackground))
+      {
+        paintBehavior.Add(PaintBehavior::SkipRootBackground);
+      }
+      else if (localPaintFlags.Contains(PaintLayerFlag::PaintingRootBackgroundOnly))
+      {
+        paintBehavior.Add(PaintBehavior::RootBackgroundOnly);
+      }
+
+      // FIXME: This seems wrong. We should retain the DefaultAsynchronousImageDecode flag for all
+      // RenderLayers painted into the root tile cache.
+      if (paintingInfo.PaintBehavior.Contains(PaintBehavior::DefaultAsynchronousImageDecode)
+          && IsRenderViewLayer())
+      {
+        paintBehavior.Add(PaintBehavior::DefaultAsynchronousImageDecode);
+      }
+
+      if (isPaintingOverflowContents)
+      {
+        paintBehavior.Add(PaintBehavior::CompositedOverflowScrollContent);
+      }
+
+      return paintBehavior;
+    }();
+
+    { // Scope for filter-related state changes.
+      // FIXME: Filters (the uncontaminated background rect, the filter context, applyFilters) come with
+      // filters.
+      LayerPaintingInfo localPaintingInfo(paintingInfo);
+      GraphicsContext &currentContext = context;
+
+      // If this layer's renderer is a child of the subtreePaintRoot, we render unconditionally, which
+      // is done by passing a nil subtreePaintRoot down to our renderer (as if no subtreePaintRoot was ever
+      // set). Otherwise, our renderer tree may or may not contain the subtreePaintRoot root, so we pass that
+      // root along so it will be tested against as we descend through the renderers.
+      if (localPaintingInfo.SubtreePaintRoot
+          && !Renderer().IsDescendantOf(localPaintingInfo.SubtreePaintRoot))
+      {
+        subtreePaintRootForRenderer = localPaintingInfo.SubtreePaintRoot;
+      }
+
+      LayoutRect paintDirtyRect = localPaintingInfo.PaintDirtyRect;
+      if (shouldPaintContent || shouldPaintOutline || isPaintingOverlayScrollbars || isCollectingEventRegion)
+      {
+        // Collect the fragments. This will compute the clip rectangles and paint offsets for each layer
+        // fragment, as well as whether or not the content of each fragment should paint.
+        auto clipRectOptions =
+          isPaintingOverflowContents ? ClipRectOptionsForPaintingOverflowContents : ClipRectDefaultOptions;
+        if (localPaintFlags.Contains(PaintLayerFlag::TemporaryClipRects))
+        {
+          clipRectOptions.Add(ClipRectsOption::Temporary);
+        }
+        CollectFragments(layerFragments, localPaintingInfo.RootLayer, paintDirtyRect, PaintingClipRects,
+                         clipRectOptions, offsetFromRoot);
+        UpdatePaintingInfoForFragments(layerFragments, localPaintingInfo, localPaintFlags, shouldPaintContent,
+                                       offsetFromRoot);
+      }
+
+      if (isPaintingCompositedBackground)
+      {
+        // Paint only the backgrounds for all of the fragments of the layer.
+        if (shouldPaintContent && !selectionOnly)
+        {
+          PaintBackgroundForFragments(layerFragments, currentContext, context, paintingInfo.PaintDirtyRect,
+                                      haveTransparency, localPaintingInfo, paintBehavior,
+                                      subtreePaintRootForRenderer);
+        }
+      }
+
+      // Now walk the sorted list of children with negative z-indices.
+      if (shouldPaintNegativeZIndexChildren)
+      {
+        PaintList(NegativeZOrderLayers(), currentContext, paintingInfo, localPaintFlags);
+      }
+
+      if (isPaintingCompositedForeground && shouldPaintContent)
+      {
+        PaintForegroundForFragments(layerFragments, currentContext, context, paintingInfo.PaintDirtyRect,
+                                    haveTransparency, localPaintingInfo, paintBehavior,
+                                    subtreePaintRootForRenderer);
+      }
+
+      // FIXME: Event and accessibility regions (collectEventRegionForFragments,
+      // collectAccessibilityRegionsForFragments) come with hit testing and accessibility.
+
+      if (shouldPaintOutline)
+      {
+        PaintOutlineForFragments(layerFragments, currentContext, localPaintingInfo, paintBehavior,
+                                 subtreePaintRootForRenderer);
+      }
+
+      if (isPaintingCompositedForeground)
+      {
+        // Paint any child layers that have overflow.
+        PaintList(NormalFlowLayers(), currentContext, paintingInfo, localPaintFlags);
+
+        // Now walk the sorted list of children with positive z-indices.
+        PaintList(PositiveZOrderLayers(), currentContext, localPaintingInfo, localPaintFlags);
+      }
+
+      // FIXME: Overlay scrollbars (paintOverflowControlsForFragments) come with scrollbars.
+    }
+
+    if (shouldPaintContent && !(selectionOnly || selectionAndBackgroundsOnly))
+    {
+      if (ShouldPaintMask(paintingInfo.PaintBehavior, localPaintFlags))
+      {
+        // Paint the mask for the fragments.
+        PaintMaskForFragments(layerFragments, context, paintingInfo, paintBehavior,
+                              subtreePaintRootForRenderer);
+      }
+
+      if (applySVGClippingMask
+          || (!paintFlags.Contains(PaintLayerFlag::PaintingCompositingMaskPhase)
+              && paintFlags.Contains(PaintLayerFlag::PaintingCompositingClipPathPhase)))
+      {
+        // Re-use paintChildClippingMaskForFragments to paint black for the compositing clipping mask.
+        PaintChildClippingMaskForFragments(layerFragments, context, paintingInfo, paintBehavior,
+                                           subtreePaintRootForRenderer);
+      }
+
+      if (localPaintFlags.Contains(PaintLayerFlag::PaintingChildClippingMaskPhase))
+      {
+        // Paint the border radius mask for the fragments.
+        PaintChildClippingMaskForFragments(layerFragments, context, paintingInfo, paintBehavior,
+                                           subtreePaintRootForRenderer);
+      }
+    }
+
+    // End our transparency layer
+    if (haveTransparency && _usedTransparency)
+    {
+      if (_savedAlphaForTransparency)
+      {
+        context.SetAlpha(*_savedAlphaForTransparency);
+        _savedAlphaForTransparency = std::nullopt;
+      }
+      else
+      {
+        context.EndTransparencyLayer();
+        context.Restore();
+      }
+      _usedTransparency = false;
+    }
+  }
+
+  void RenderLayer::PaintLayerByApplyingTransform(GraphicsContext &context,
+                                                  const LayerPaintingInfo &paintingInfo,
+                                                  EnumSet<PaintLayerFlag> paintFlags,
+                                                  const LayoutSize &translationOffset) noexcept
+  {
+    // This involves subtracting out the position of the layer in our current coordinate space, but preserving
+    // the accumulated error for sub-pixel layout.
+    float deviceScaleFactor = Renderer().GetDocument().DeviceScaleFactor();
+    LayoutSize offsetFromParent = OffsetFromAncestor(paintingInfo.RootLayer);
+    offsetFromParent += translationOffset;
+    TransformationMatrix transform(RenderableTransform(paintingInfo.PaintBehavior));
+    // Add the subpixel accumulation to the current layer's offset so that we can always snap the
+    // translateRight value to where the renderer() is supposed to be painting.
+    LayoutSize offsetForThisLayer = offsetFromParent + paintingInfo.SubpixelOffset;
+    FloatSize alignedOffsetForThisLayer =
+      ToFloatSize(RoundPointToDevicePixels(ToLayoutPoint(offsetForThisLayer), deviceScaleFactor));
+    // We handle accumulated subpixels through nested layers here. Since the context gets translated to device
+    // pixels, all we need to do is add the delta to the accumulated pixels coming from ancestor layers.
+    // Translate the graphics context to the snapping position to avoid off-device-pixel positing.
+    transform.TranslateRight(alignedOffsetForThisLayer.Width(), alignedOffsetForThisLayer.Height());
+    // Apply the transform.
+    auto oldTransform = context.GetCTM();
+    auto affineTransform = transform.ToAffineTransform();
+    context.ConcatCTM(affineTransform);
+
+    LayoutSize adjustedSubpixelOffset = offsetForThisLayer - LayoutSize(alignedOffsetForThisLayer);
+
+    // Now do a paint with the root layer shifted to be us.
+    LayerPaintingInfo transformedPaintingInfo(paintingInfo);
+    transformedPaintingInfo.RootLayer = this;
+    if (!transformedPaintingInfo.PaintDirtyRect.IsInfinite())
+    {
+      transformedPaintingInfo.PaintDirtyRect = LayoutRect(EncloseRectToDevicePixels(
+        transform.Inverse().value_or(TransformationMatrix()).MapRect(paintingInfo.PaintDirtyRect),
+        deviceScaleFactor));
+    }
+
+    paintFlags.Remove(PaintLayerFlag::PaintingOverflowContents);
+
+    transformedPaintingInfo.SubpixelOffset = adjustedSubpixelOffset;
+    PaintLayerContentsAndReflection(context, transformedPaintingInfo, paintFlags);
+
+    context.SetCTM(oldTransform);
+  }
+
+  void RenderLayer::PaintList(LayerList layerIterator, GraphicsContext &context,
+                              const LayerPaintingInfo &paintingInfo,
+                              EnumSet<PaintLayerFlag> paintFlags) noexcept
+  {
+    if (layerIterator.begin() == layerIterator.end())
+    {
+      return;
+    }
+
+    if (!HasSelfPaintingLayerDescendant())
+    {
+      return;
+    }
+
+#if KRYS_DEBUG
+    LayerListMutationDetector mutationChecker(*this);
+#endif
+
+    // FIXME: Skipping view transition captures (PaintingSkipDescendantViewTransition), once there are view
+    // transitions.
+    for (auto *childLayer : layerIterator)
+    {
+      childLayer->PaintLayer(context, paintingInfo, paintFlags);
+    }
+  }
+
+  void RenderLayer::CollectFragments(LayerFragments &fragments, const RenderLayer *rootLayer,
+                                     const LayoutRect &dirtyRect, ClipRectsType clipRectsType,
+                                     EnumSet<ClipRectsOption> clipRectOptions,
+                                     const LayoutSize &offsetFromRoot) const noexcept
+  {
+    // FIXME: Paginated layers (one fragment per column or page, from the enclosing fragmented flow) come with
+    // fragmentation; every layer has one fragment.
+    ClipRectsContext clipRectsContext(rootLayer, clipRectsType, clipRectOptions);
+    fragments.push_back(LayerFragment {CalculateRects(clipRectsContext, offsetFromRoot, dirtyRect)});
+  }
+
+  void RenderLayer::UpdatePaintingInfoForFragments(LayerFragments &fragments,
+                                                   const LayerPaintingInfo &localPaintingInfo,
+                                                   EnumSet<PaintLayerFlag> localPaintFlags,
+                                                   bool shouldPaintContent,
+                                                   const LayoutSize &offsetFromRoot) const noexcept
+  {
+    for (auto &fragment : fragments)
+    {
+      fragment.ShouldPaintContent = shouldPaintContent;
+      if (this != localPaintingInfo.RootLayer
+          || !localPaintFlags.Contains(PaintLayerFlag::PaintingOverflowContents))
+      {
+        LayoutSize newOffsetFromRoot = offsetFromRoot + fragment.PaginationOffset;
+        fragment.ShouldPaintContent &=
+          IntersectsDamageRect(fragment.LayerBounds(), fragment.DirtyBackgroundRect().Rect(),
+                               localPaintingInfo.RootLayer, newOffsetFromRoot, fragment.BoundingBox());
+      }
+    }
+  }
+
+  void RenderLayer::PaintBackgroundForFragments(
+    const LayerFragments &layerFragments, GraphicsContext &context,
+    GraphicsContext &contextForTransparencyLayer, const LayoutRect &transparencyPaintDirtyRect,
+    bool haveTransparency, const LayerPaintingInfo &localPaintingInfo, EnumSet<PaintBehavior> paintBehavior,
+    RenderObject *subtreePaintRootForRenderer) noexcept
+  {
+    for (const auto &fragment : layerFragments)
+    {
+      if (!fragment.ShouldPaintContent)
+      {
+        continue;
+      }
+
+      // Begin transparency layers lazily now that we know we have to paint something.
+      if (haveTransparency)
+      {
+        BeginTransparencyLayers(contextForTransparencyLayer, localPaintingInfo, transparencyPaintDirtyRect);
+      }
+
+      GraphicsContextStateSaver stateSaver(context, false);
+
+      // Paint our background first, before painting any child layers.
+      // Establish the clip used to paint our background.
+      ClipToRect(context, stateSaver, localPaintingInfo, paintBehavior, fragment.DirtyBackgroundRect(),
+                 DoNotIncludeSelfForBorderRadius); // Background painting will handle clipping to self.
+
+      // Paint the background.
+      PaintInfo paintInfo(context, fragment.DirtyBackgroundRect().Rect(), PaintPhase::BlockBackground,
+                          paintBehavior, subtreePaintRootForRenderer,
+                          &localPaintingInfo.RootLayer->Renderer(), this);
+      Renderer().Paint(paintInfo, PaintOffsetForRenderer(fragment, localPaintingInfo));
+    }
+  }
+
+  void RenderLayer::PaintForegroundForFragments(
+    const LayerFragments &layerFragments, GraphicsContext &context,
+    GraphicsContext &contextForTransparencyLayer, const LayoutRect &transparencyPaintDirtyRect,
+    bool haveTransparency, const LayerPaintingInfo &localPaintingInfo, EnumSet<PaintBehavior> paintBehavior,
+    RenderObject *subtreePaintRootForRenderer) noexcept
+  {
+    // Begin transparency if we have something to paint.
+    if (haveTransparency)
+    {
+      for (const auto &fragment : layerFragments)
+      {
+        if (fragment.ShouldPaintContent && !fragment.DirtyForegroundRect().IsEmpty())
+        {
+          BeginTransparencyLayers(contextForTransparencyLayer, localPaintingInfo, transparencyPaintDirtyRect);
+          break;
+        }
+      }
+    }
+
+    EnumSet<PaintBehavior> localPaintBehavior;
+    if (localPaintingInfo.PaintBehavior.Contains(PaintBehavior::ForceBlackText))
+    {
+      localPaintBehavior = PaintBehavior::ForceBlackText;
+    }
+    else if (localPaintingInfo.PaintBehavior.Contains(PaintBehavior::ForceWhiteText))
+    {
+      localPaintBehavior = PaintBehavior::ForceWhiteText;
+    }
+    else
+    {
+      localPaintBehavior = paintBehavior;
+    }
+
+    // FIXME: It's unclear if this flag copying is necessary.
+    static constexpr EnumSet<PaintBehavior> flagsToCopy {
+      PaintBehavior::ExcludeSelection,
+      PaintBehavior::Snapshotting,
+      PaintBehavior::DefaultAsynchronousImageDecode,
+      PaintBehavior::CompositedOverflowScrollContent,
+      PaintBehavior::ForceSynchronousImageDecode,
+      PaintBehavior::ExcludeReplacedContentExceptForIFrames,
+      PaintBehavior::ExcludeText,
+      PaintBehavior::FixedAndStickyLayersOnly,
+      PaintBehavior::DontShowVisitedLinks,
+      PaintBehavior::DrawsHDRContent,
+    };
+    localPaintBehavior.Add(localPaintingInfo.PaintBehavior & flagsToCopy);
+
+    GraphicsContextStateSaver stateSaver(context, false);
+
+    // Optimize clipping for the single fragment case.
+    bool shouldClip = layerFragments.size() == 1 && layerFragments[0].ShouldPaintContent
+                      && !layerFragments[0].DirtyForegroundRect().IsEmpty();
+    if (shouldClip)
+    {
+      ClipToRect(context, stateSaver, localPaintingInfo, localPaintBehavior,
+                 layerFragments[0].DirtyForegroundRect());
+    }
+
+    // We have to loop through every fragment multiple times, since we have to repaint in each specific phase
+    // in order for interleaving of the fragments to work properly.
+    bool selectionOnly = localPaintingInfo.PaintBehavior.Contains(PaintBehavior::SelectionOnly);
+    bool selectionAndBackgroundsOnly =
+      localPaintingInfo.PaintBehavior.Contains(PaintBehavior::SelectionAndBackgroundsOnly);
+
+    // FIXME: SVG renderers that aren't containers (painted in the foreground phase only), once there's SVG.
+
+    if (!selectionOnly)
+    {
+      PaintForegroundForFragmentsWithPhase(PaintPhase::ChildBlockBackgrounds, layerFragments, context,
+                                           localPaintingInfo, localPaintBehavior,
+                                           subtreePaintRootForRenderer);
+    }
+
+    if (selectionOnly || selectionAndBackgroundsOnly)
+    {
+      PaintForegroundForFragmentsWithPhase(PaintPhase::Selection, layerFragments, context, localPaintingInfo,
+                                           localPaintBehavior, subtreePaintRootForRenderer);
+    }
+    else
+    {
+      PaintForegroundForFragmentsWithPhase(PaintPhase::Float, layerFragments, context, localPaintingInfo,
+                                           localPaintBehavior, subtreePaintRootForRenderer);
+      PaintForegroundForFragmentsWithPhase(PaintPhase::Foreground, layerFragments, context, localPaintingInfo,
+                                           localPaintBehavior, subtreePaintRootForRenderer);
+      PaintForegroundForFragmentsWithPhase(PaintPhase::ChildOutlines, layerFragments, context,
+                                           localPaintingInfo, localPaintBehavior,
+                                           subtreePaintRootForRenderer);
+    }
+  }
+
+  void RenderLayer::PaintForegroundForFragmentsWithPhase(PaintPhase phase,
+                                                         const LayerFragments &layerFragments,
+                                                         GraphicsContext &context,
+                                                         const LayerPaintingInfo &localPaintingInfo,
+                                                         EnumSet<PaintBehavior> paintBehavior,
+                                                         RenderObject *subtreePaintRootForRenderer) noexcept
+  {
+    bool shouldClip = layerFragments.size() > 1;
+
+    for (const auto &fragment : layerFragments)
+    {
+      if (!fragment.ShouldPaintContent || fragment.DirtyForegroundRect().IsEmpty())
+      {
+        continue;
+      }
+
+      GraphicsContextStateSaver stateSaver(context, false);
+
+      if (shouldClip)
+      {
+        ClipToRect(context, stateSaver, localPaintingInfo, paintBehavior, fragment.DirtyForegroundRect());
+      }
+
+      PaintInfo paintInfo(context, fragment.DirtyForegroundRect().Rect(), phase, paintBehavior,
+                          subtreePaintRootForRenderer, &localPaintingInfo.RootLayer->Renderer(), this,
+                          localPaintingInfo.RequireSecurityOriginAccessForWidgets);
+      Renderer().Paint(paintInfo, PaintOffsetForRenderer(fragment, localPaintingInfo));
+    }
+  }
+
+  void RenderLayer::PaintOutlineForFragments(const LayerFragments &layerFragments, GraphicsContext &context,
+                                             const LayerPaintingInfo &localPaintingInfo,
+                                             EnumSet<PaintBehavior> paintBehavior,
+                                             RenderObject *subtreePaintRootForRenderer) noexcept
+  {
+    for (const auto &fragment : layerFragments)
+    {
+      if (fragment.DirtyBackgroundRect().IsEmpty())
+      {
+        continue;
+      }
+
+      // Paint our own outline
+      PaintInfo paintInfo(context, fragment.DirtyBackgroundRect().Rect(), PaintPhase::SelfOutline,
+                          paintBehavior, subtreePaintRootForRenderer,
+                          &localPaintingInfo.RootLayer->Renderer(), this);
+
+      GraphicsContextStateSaver stateSaver(context, false);
+
+      ClipToRect(context, stateSaver, localPaintingInfo, paintBehavior, fragment.DirtyBackgroundRect(),
+                 DoNotIncludeSelfForBorderRadius);
+      Renderer().Paint(paintInfo, PaintOffsetForRenderer(fragment, localPaintingInfo));
+    }
+  }
+
+  void RenderLayer::PaintMaskForFragments(const LayerFragments &layerFragments, GraphicsContext &context,
+                                          const LayerPaintingInfo &localPaintingInfo,
+                                          EnumSet<PaintBehavior> paintBehavior,
+                                          RenderObject *subtreePaintRootForRenderer) noexcept
+  {
+    for (const auto &fragment : layerFragments)
+    {
+      if (!fragment.ShouldPaintContent)
+      {
+        continue;
+      }
+
+      GraphicsContextStateSaver stateSaver(context, false);
+
+      ClipToRect(context, stateSaver, localPaintingInfo, paintBehavior, fragment.DirtyBackgroundRect(),
+                 DoNotIncludeSelfForBorderRadius); // Mask painting will handle clipping to self.
+
+      // Paint the mask.
+      PaintInfo paintInfo(context, fragment.DirtyBackgroundRect().Rect(), PaintPhase::Mask, paintBehavior,
+                          subtreePaintRootForRenderer, &localPaintingInfo.RootLayer->Renderer(), this);
+      Renderer().Paint(paintInfo, PaintOffsetForRenderer(fragment, localPaintingInfo));
+    }
+  }
+
+  void RenderLayer::PaintChildClippingMaskForFragments(const LayerFragments &layerFragments,
+                                                       GraphicsContext &context,
+                                                       const LayerPaintingInfo &localPaintingInfo,
+                                                       EnumSet<PaintBehavior> paintBehavior,
+                                                       RenderObject *subtreePaintRootForRenderer) noexcept
+  {
+    for (const auto &fragment : layerFragments)
+    {
+      if (!fragment.ShouldPaintContent)
+      {
+        continue;
+      }
+
+      GraphicsContextStateSaver stateSaver(context, false);
+
+      ClipToRect(context, stateSaver, localPaintingInfo, paintBehavior, fragment.DirtyForegroundRect(),
+                 IncludeSelfForBorderRadius); // Child clipping mask painting will handle clipping to self.
+
+      // Paint the clipped mask.
+      PaintInfo paintInfo(context, fragment.DirtyBackgroundRect().Rect(), PaintPhase::ClippingMask,
+                          paintBehavior, subtreePaintRootForRenderer,
+                          &localPaintingInfo.RootLayer->Renderer(), this);
+      Renderer().Paint(paintInfo, PaintOffsetForRenderer(fragment, localPaintingInfo));
+    }
+  }
+
+#pragma endregion
 }

@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Rendering/BlockStepSizing.hpp"
 #include "Krystal.Booey/Rendering/InlineWalker.hpp"
 #include "Krystal.Booey/Rendering/LineClampUpdater.hpp"
+#include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderAncestorIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"
@@ -4423,4 +4424,61 @@ namespace krys::boo
     }
     return true;
   }
+#pragma region Painting
+
+  void RenderBlockFlow::PaintFloats(PaintInfo &paintInfo, const LayoutPoint &paintOffset,
+                                    bool preservePhase) noexcept
+  {
+    if (!_floatingObjects)
+    {
+      return;
+    }
+
+    for (const auto &floatingObject : _floatingObjects->Set())
+    {
+      if (!floatingObject->Renderer())
+      {
+        continue;
+      }
+      if (!floatingObject->ShouldPaint())
+      {
+        continue;
+      }
+
+      auto floatBoxLocation = FlipFloatForWritingModeForChild(
+        *floatingObject, paintOffset + floatingObject->TranslationOffsetToAncestor());
+      if (preservePhase)
+      {
+        floatingObject->Renderer()->Paint(paintInfo, floatBoxLocation);
+        continue;
+      }
+      auto &renderer = *floatingObject->Renderer();
+      auto paintInfoForFloat = PaintInfo {paintInfo};
+
+      paintInfoForFloat.Phase = PaintPhase::BlockBackground;
+      renderer.Paint(paintInfoForFloat, floatBoxLocation);
+
+      paintInfoForFloat.Phase = PaintPhase::ChildBlockBackgrounds;
+      renderer.Paint(paintInfoForFloat, floatBoxLocation);
+
+      paintInfoForFloat.Phase = PaintPhase::Float;
+      renderer.Paint(paintInfoForFloat, floatBoxLocation);
+
+      paintInfoForFloat.Phase = PaintPhase::Foreground;
+      renderer.Paint(paintInfoForFloat, floatBoxLocation);
+
+      paintInfoForFloat.Phase = PaintPhase::Outline;
+      renderer.Paint(paintInfoForFloat, floatBoxLocation);
+    }
+  }
+
+  void RenderBlockFlow::PaintInlineChildren(PaintInfo &, const LayoutPoint &) noexcept
+  {
+    krys_debug_assert(ChildrenInline());
+
+    // FIXME: Inline content (the inline layout's paint: text, inline boxes and atomic inlines) comes with
+    // text painting.
+  }
+
+#pragma endregion
 }

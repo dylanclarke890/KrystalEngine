@@ -17,7 +17,6 @@ namespace krys::boo
   class RenderListMarker;
 
   /// @brief A list item: a block flow with a marker and an ordinal value.
-  // FIXME: Painting (paint), once there is painting.
   class RenderListItem final : public RenderBlockFlow
   {
     KRYS_NON_COPY_MOVABLE(RenderListItem);
@@ -30,6 +29,8 @@ namespace krys::boo
   public:
     RenderListItem(dom::Element &element, RenderStyle &&style) noexcept;
     ~RenderListItem() noexcept override;
+
+    void Paint(PaintInfo &, const LayoutPoint &) noexcept final;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept final
     {

@@ -38,9 +38,9 @@ namespace krys::boo
 
   /// @brief A renderer that generates a box: its frame rect (relative to its container), margins, overflow
   /// and the computation of its sizes.
-  // FIXME: Painting, hit testing, the repaint rects, scrolling (and autoscrolling), the coordinate mapping,
-  // the shape outside, fragmentation, and the sizing of out-of-flow positioned boxes
-  // (PositionedLayoutConstraints) come with painting, scrolling and the later layout slices.
+  // FIXME: Hit testing, the repaint rects, scrolling (and autoscrolling), the coordinate mapping, the shape
+  // outside, fragmentation, and the sizing of out-of-flow positioned boxes (PositionedLayoutConstraints) come
+  // with hit testing, scrolling and the later layout slices.
   class RenderBox : public RenderBoxModelObject
   {
     KRYS_NON_COPY_MOVABLE(RenderBox);
@@ -824,6 +824,46 @@ namespace krys::boo
       return OverflowClipRect(location, relevancy);
     }
     KRYS_NODISCARD LayoutRect ClipRect(const LayoutPoint &location) const noexcept;
+
+#pragma region Painting
+
+    /// @brief Paints the phase of @p paintInfo at @p paintOffset, this box's own position.
+    virtual void PaintObject(PaintInfo &, const LayoutPoint &) noexcept
+    {
+      krys_debug_assert(false);
+    }
+    virtual void PaintBoxDecorations(PaintInfo &, const LayoutPoint &) noexcept;
+    virtual void PaintMask(PaintInfo &, const LayoutPoint &) noexcept;
+    virtual void PaintClippingMask(PaintInfo &, const LayoutPoint &) noexcept;
+
+    KRYS_NODISCARD BleedAvoidance DetermineBleedAvoidance(GraphicsContext &) const noexcept;
+    KRYS_NODISCARD bool BackgroundHasOpaqueTopLayer() const noexcept;
+
+    /// @brief Whether the box's background is hidden by what's painted over it, so needn't be painted.
+    /// FIXME: The obscuration test (foregroundIsKnownToBeOpaqueInRect and its cached status) is an
+    /// optimisation that isn't ported; backgrounds are always painted.
+    KRYS_NODISCARD virtual bool BackgroundIsKnownToBeObscured(const LayoutPoint &) noexcept
+    {
+      return false;
+    }
+
+    /// @brief Clips to the box's overflow clip for painting its contents, painting the background phase first
+    /// if it's to be painted under the clip; false if the box doesn't clip.
+    bool PushContentsClip(PaintInfo &, const LayoutPoint &accumulatedOffset) noexcept;
+    void PopContentsClip(PaintInfo &, PaintPhase originalPhase,
+                         const LayoutPoint &accumulatedOffset) noexcept;
+
+    void ClipToPaddingBoxShape(GraphicsContext &, const LayoutPoint &,
+                               float deviceScaleFactor) const noexcept;
+    void ClipToContentBoxShape(GraphicsContext &, const LayoutPoint &,
+                               float deviceScaleFactor) const noexcept;
+
+  protected:
+    virtual void AdjustBorderBoxRectForPainting(LayoutRect &) noexcept
+    {
+    }
+
+#pragma endregion
 
   public:
     void RemoveFloatingOrOutOfFlowChildFromBlockLists() noexcept;

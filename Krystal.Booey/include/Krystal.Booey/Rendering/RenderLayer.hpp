@@ -13,6 +13,7 @@
 #include "Krystal.Booey/Platform/ScrollAlignment.hpp"
 #include "Krystal.Booey/Rendering/ClipRect.hpp"
 #include "Krystal.Booey/Rendering/LayerFragment.hpp"
+#include "Krystal.Booey/Rendering/PaintPhase.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
@@ -21,6 +22,7 @@
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
@@ -36,6 +38,10 @@ namespace krys::boo
 
   class ClipRects;
   class ClipRectsCache;
+  class GraphicsContext;
+  class GraphicsContextStateSaver;
+  class Path;
+  class RenderObject;
   class RenderBox;
   class RenderLayerModelObject;
   class RenderLayerScrollableArea;
@@ -96,9 +102,9 @@ namespace krys::boo
 
   /// @brief The layer of a renderer that needs one: it positions, clips and orders (in z-order) the
   /// renderer's subtree.
-  // FIXME: Painting, hit testing, repaint, compositing, filters, clip paths, reflections, resizing, selection
-  // gaps, event regions and fragmentation (collectFragments) come with painting, hit testing and
-  // fragmentation.
+  // FIXME: Hit testing, repaint, compositing, filters, masks, SVG clip paths, reflections, resizing,
+  // scrollbars, selection gaps, event regions and fragmentation (paginated collectFragments) come with hit
+  // testing, compositing, effects and fragmentation.
   class RenderLayer final : public CanMakeWeakPtr<RenderLayer>, public CanMakeCheckedPtr<RenderLayer>
   {
     KRYS_NON_COPY_MOVABLE(RenderLayer);
@@ -319,6 +325,10 @@ namespace krys::boo
     BlendMode _blendMode {BlendMode::Normal};
     bool _hasNotIsolatedBlendingDescendants : 1 {false};
     bool _hasNotIsolatedBlendingDescendantsStatusDirty : 1 {false};
+
+    // Whether this layer has begun its transparency layer during the current paint.
+    bool _usedTransparency : 1 {false};
+    Maybe<float> _savedAlphaForTransparency;
 
     RenderLayerModelObject &_renderer;
 
@@ -691,6 +701,63 @@ namespace krys::boo
       const RenderLayer *ancestorLayer, const LayoutSize &offsetFromRoot,
       EnumSet<CalculateLayerBoundsFlag> flags = DefaultCalculateLayerBoundsFlags()) const noexcept;
 
+#pragma region Painting
+
+    enum class PaintLayerFlag : uint8
+    {
+      HaveTransparency,
+      AppliedTransform,
+      TemporaryClipRects,
+      PaintingReflection,
+      PaintingOverlayScrollbars,
+      PaintingCompositingBackgroundPhase,
+      PaintingCompositingForegroundPhase,
+      PaintingCompositingMaskPhase,
+      PaintingCompositingClipPathPhase,
+      PaintingOverflowContainer,
+      PaintingOverflowContentsRoot,
+      PaintingOverflowContents,
+      PaintingRootBackgroundOnly,
+      PaintingSkipRootBackground,
+      PaintingChildClippingMaskPhase,
+      PaintingSVGClippingMask,
+      CollectingEventRegion,
+      PaintingSkipDescendantViewTransition,
+    };
+    static constexpr EnumSet<PaintLayerFlag> PaintLayerPaintingCompositingAllPhasesFlags()
+    {
+      return {PaintLayerFlag::PaintingCompositingBackgroundPhase,
+              PaintLayerFlag::PaintingCompositingForegroundPhase};
+    }
+
+    /// @brief Paints the layers that intersect @p damageRect from back to front, starting at this layer.
+    /// @param subtreePaintRoot If set, only this renderer's subtree is painted.
+    void Paint(GraphicsContext &, const LayoutRect &damageRect,
+               const LayoutSize &subpixelOffset = LayoutSize(), EnumSet<PaintBehavior> paintBehavior = {},
+               RenderObject *subtreePaintRoot = nullptr, EnumSet<PaintLayerFlag> paintFlags = {}) noexcept;
+
+    KRYS_NODISCARD bool PaintsWithTransparency(EnumSet<PaintBehavior>) const noexcept;
+    KRYS_NODISCARD bool HasNonOpacityTransparency() const noexcept;
+    /// @brief Whether the layer's opacity can be applied as an alpha rather than a transparency layer.
+    /// FIXME: Only bitmap-only layers (isBitmapOnly: canvases and bitmap images) can, which come with images;
+    /// always false.
+    KRYS_NODISCARD bool CanPaintTransparencyWithSetOpacity() const noexcept
+    {
+      return false;
+    }
+
+    /// @brief The transform the layer paints with, flattened to 2D when flattening compositing layers.
+    KRYS_NODISCARD TransformationMatrix RenderableTransform(EnumSet<PaintBehavior>) const noexcept;
+
+    KRYS_NODISCARD bool ShouldPaintMask(EnumSet<PaintBehavior>, EnumSet<PaintLayerFlag>) const noexcept;
+    KRYS_NODISCARD bool ShouldApplyClipPath(EnumSet<PaintBehavior>, EnumSet<PaintLayerFlag>) const noexcept;
+
+    /// @brief The reference box a `clip-path` resolves against, relative to the painting root.
+    KRYS_NODISCARD FloatRect ReferenceBoxRectForClipPath(CSSBoxType boxType, const LayoutSize &offsetFromRoot,
+                                                         const LayoutRect &rootRelativeBounds) const noexcept;
+
+#pragma endregion
+
     void SetRepaintStatus(RepaintStatus status) noexcept;
     KRYS_NODISCARD RepaintStatus GetRepaintStatus() const noexcept
     {
@@ -948,6 +1015,97 @@ namespace krys::boo
     KRYS_NODISCARD RenderLayer *EnclosingTransformedAncestor() const noexcept;
 
     void UpdatePagination() noexcept;
+
+#pragma region Painting
+
+    struct LayerPaintingInfo
+    {
+      RenderLayer *RootLayer;
+      RenderObject *SubtreePaintRoot; // Only paint descendants of this object.
+      LayoutRect PaintDirtyRect;      // Relative to rootLayer;
+      LayoutSize SubpixelOffset;
+      EnumSet<boo::PaintBehavior> PaintBehavior;
+      bool RequireSecurityOriginAccessForWidgets;
+
+      LayerPaintingInfo(RenderLayer *inRootLayer, const LayoutRect &inDirtyRect,
+                        EnumSet<boo::PaintBehavior> inPaintBehavior, const LayoutSize &inSubpixelOffset,
+                        RenderObject *inSubtreePaintRoot = nullptr,
+                        bool inRequireSecurityOriginAccessForWidgets = false) noexcept
+          : RootLayer(inRootLayer), SubtreePaintRoot(inSubtreePaintRoot), PaintDirtyRect(inDirtyRect),
+            SubpixelOffset(inSubpixelOffset), PaintBehavior(inPaintBehavior),
+            RequireSecurityOriginAccessForWidgets(inRequireSecurityOriginAccessForWidgets)
+      {
+      }
+    };
+
+    enum BorderRadiusClippingRule
+    {
+      IncludeSelfForBorderRadius,
+      DoNotIncludeSelfForBorderRadius
+    };
+
+    KRYS_NODISCARD LayoutPoint PaintOffsetForRenderer(const LayerFragment &fragment,
+                                                      const LayerPaintingInfo &paintingInfo) const noexcept
+    {
+      return ToLayoutPoint(fragment.LayerBounds().Location() - RendererLocation()
+                           + paintingInfo.SubpixelOffset);
+    }
+
+    void PaintLayer(GraphicsContext &, const LayerPaintingInfo &, EnumSet<PaintLayerFlag>) noexcept;
+    void PaintLayerWithEffects(GraphicsContext &, const LayerPaintingInfo &,
+                               EnumSet<PaintLayerFlag>) noexcept;
+    void PaintLayerContentsAndReflection(GraphicsContext &, const LayerPaintingInfo &,
+                                         EnumSet<PaintLayerFlag>) noexcept;
+    void PaintLayerContents(GraphicsContext &, const LayerPaintingInfo &, EnumSet<PaintLayerFlag>) noexcept;
+    void PaintLayerByApplyingTransform(GraphicsContext &, const LayerPaintingInfo &, EnumSet<PaintLayerFlag>,
+                                       const LayoutSize &translationOffset = LayoutSize()) noexcept;
+    void PaintList(LayerList, GraphicsContext &, const LayerPaintingInfo &, EnumSet<PaintLayerFlag>) noexcept;
+
+    void CollectFragments(LayerFragments &, const RenderLayer *rootLayer, const LayoutRect &dirtyRect,
+                          ClipRectsType, EnumSet<ClipRectsOption>,
+                          const LayoutSize &offsetFromRoot) const noexcept;
+    void UpdatePaintingInfoForFragments(LayerFragments &, const LayerPaintingInfo &, EnumSet<PaintLayerFlag>,
+                                        bool shouldPaintContent,
+                                        const LayoutSize &offsetFromRoot) const noexcept;
+
+    void PaintBackgroundForFragments(const LayerFragments &, GraphicsContext &,
+                                     GraphicsContext &contextForTransparencyLayer,
+                                     const LayoutRect &transparencyPaintDirtyRect, bool haveTransparency,
+                                     const LayerPaintingInfo &, EnumSet<boo::PaintBehavior>,
+                                     RenderObject *subtreePaintRootForRenderer) noexcept;
+    void PaintForegroundForFragments(const LayerFragments &, GraphicsContext &,
+                                     GraphicsContext &contextForTransparencyLayer,
+                                     const LayoutRect &transparencyPaintDirtyRect, bool haveTransparency,
+                                     const LayerPaintingInfo &, EnumSet<boo::PaintBehavior>,
+                                     RenderObject *subtreePaintRootForRenderer) noexcept;
+    void PaintForegroundForFragmentsWithPhase(PaintPhase, const LayerFragments &, GraphicsContext &,
+                                              const LayerPaintingInfo &, EnumSet<boo::PaintBehavior>,
+                                              RenderObject *subtreePaintRootForRenderer) noexcept;
+    void PaintOutlineForFragments(const LayerFragments &, GraphicsContext &, const LayerPaintingInfo &,
+                                  EnumSet<boo::PaintBehavior>,
+                                  RenderObject *subtreePaintRootForRenderer) noexcept;
+    void PaintMaskForFragments(const LayerFragments &, GraphicsContext &, const LayerPaintingInfo &,
+                               EnumSet<boo::PaintBehavior>,
+                               RenderObject *subtreePaintRootForRenderer) noexcept;
+    void PaintChildClippingMaskForFragments(const LayerFragments &, GraphicsContext &,
+                                            const LayerPaintingInfo &, EnumSet<boo::PaintBehavior>,
+                                            RenderObject *subtreePaintRootForRenderer) noexcept;
+
+    void ClipToRect(GraphicsContext &, GraphicsContextStateSaver &, const LayerPaintingInfo &,
+                    EnumSet<boo::PaintBehavior>, const ClipRect &,
+                    BorderRadiusClippingRule = IncludeSelfForBorderRadius) noexcept;
+
+    void SetupClipPath(GraphicsContext &, GraphicsContextStateSaver &, const LayerPaintingInfo &,
+                       EnumSet<PaintLayerFlag> &, const LayoutSize &offsetFromRoot) noexcept;
+    KRYS_NODISCARD Pair<Path, WindRule>
+      ComputeClipPath(const LayoutSize &offsetFromRoot,
+                      const LayoutRect &rootRelativeBoundsForNonBoxes) const noexcept;
+
+    KRYS_NODISCARD RenderLayer *TransparentPaintingAncestor(const LayerPaintingInfo &) noexcept;
+    void BeginTransparencyLayers(GraphicsContext &, const LayerPaintingInfo &,
+                                 const LayoutRect &dirtyRect) noexcept;
+
+#pragma endregion
   };
 
 #if KRYS_DEBUG

@@ -50,7 +50,12 @@ namespace krys::ui
     {
       return Unexpected(std::format("Couldn't open {}", path.string()));
     }
-    const std::string bytes {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
+    std::string bytes {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
+    // Decoding UTF-8 removes its byte order mark, which would otherwise be text in the document.
+    if (bytes.starts_with("\xEF\xBB\xBF"))
+    {
+      bytes.erase(0, 3);
+    }
     LoadHTML(utf8_string(bytes.begin(), bytes.end()));
     return {};
   }
@@ -80,7 +85,10 @@ namespace krys::ui
     const auto size = ViewportSize();
     boo::display_list::RecorderImpl recorder(
       boo::FloatSize(static_cast<float>(size.Width()), static_cast<float>(size.Height())));
-    // FIXME: Paint the frame view's contents into the recorder, once there's painting.
+    if (auto *view = _frame->View())
+    {
+      view->PaintContents(recorder, boo::IntRect(0, 0, size.Width(), size.Height()));
+    }
     return recorder.TakeDisplayList();
   }
 

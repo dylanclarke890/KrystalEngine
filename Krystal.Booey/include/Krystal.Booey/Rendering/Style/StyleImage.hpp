@@ -1,6 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Value.hpp"
+#include "Krystal.Booey/Graphics/FloatSize.hpp"
+#include "Krystal.Booey/Graphics/Image.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/Url.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/RefCounted.hpp"
@@ -10,15 +12,17 @@
 namespace krys::boo
 {
   class CachedImage;
+  class GraphicsContext;
+  class RenderElement;
   class RenderStyle;
 
   /// @brief An opaque pointer identifying the image data behind a style image.
   using WrappedImagePtr = const void *;
 
   /// @brief The computed value of an `<image>`.
-  /// FIXME: Loading (`load`, `isLoaded`), clients (`addClient`, `removeClient`, `hasClient`), sizing against
-  /// a renderer (`imageSize`, `computeIntrinsicDimensions`, `setContainerContextForRenderer`), drawing
-  /// (`image`, `canRender`, `knownToBeOpaque`) come with the resource loader and the renderer.
+  /// FIXME: Loading (`load`) and clients (`addClient`, `removeClient`, `hasClient`) come with the resource
+  /// loader. Sizing against a renderer and drawing are pure upstream; here they default to an image of no
+  /// size that draws nothing, until loaded images implement them.
   class StyleImage : public RefCounted<StyleImage>, public CanMakeWeakPtr<StyleImage>
   {
   protected:
@@ -86,8 +90,29 @@ namespace krys::boo
     {
       return true;
     }
+    KRYS_NODISCARD virtual bool IsLoaded(const RenderElement *) const noexcept
+    {
+      return true;
+    }
+    KRYS_NODISCARD virtual FloatSize ImageSize(const RenderElement *, float /* multiplier */) const noexcept
+    {
+      return {};
+    }
+    virtual void ComputeIntrinsicDimensions(const RenderElement *, float &intrinsicWidth,
+                                            float &intrinsicHeight, FloatSize &intrinsicRatio) noexcept
+    {
+      intrinsicWidth = 0;
+      intrinsicHeight = 0;
+      intrinsicRatio = {};
+    }
 
     // Image.
+    KRYS_NODISCARD virtual RefPtr<Image> GetImage(const RenderElement *, const FloatSize &,
+                                                  const GraphicsContext & /* destinationContext */,
+                                                  bool /* isForFirstLine */ = false) const noexcept
+    {
+      return nullptr;
+    }
     KRYS_NODISCARD virtual StyleImage *SelectedImage() noexcept
     {
       return this;
@@ -99,6 +124,19 @@ namespace krys::boo
     KRYS_NODISCARD virtual CachedImage *GetCachedImage() const noexcept
     {
       return nullptr;
+    }
+
+    // Rendering.
+    KRYS_NODISCARD virtual bool CanRender(const RenderElement *, float /* multiplier */) const noexcept
+    {
+      return true;
+    }
+    virtual void SetContainerContextForRenderer(const RenderElement &, const FloatSize &, float) noexcept
+    {
+    }
+    KRYS_NODISCARD virtual bool KnownToBeOpaque(const RenderElement &) const noexcept
+    {
+      return false;
     }
 
     // Derived type.

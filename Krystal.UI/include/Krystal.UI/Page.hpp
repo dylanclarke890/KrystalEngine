@@ -29,7 +29,7 @@ namespace krys::ui
 
     /// @brief Replaces the document with one parsed from @p markup.
     void LoadHTML(utf8_string &&markup) noexcept;
-    /// @brief Replaces the document with one parsed from the file at @p path.
+    /// @brief Replaces the document with one parsed from the UTF-8 file at @p path.
     KRYS_NODISCARD Expected<void> LoadFile(const std::filesystem::path &path) noexcept;
 
     /// @brief Resizes the viewport; the document is laid out again at its next update.

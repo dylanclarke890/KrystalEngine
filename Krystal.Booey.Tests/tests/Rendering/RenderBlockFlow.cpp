@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -160,5 +161,40 @@ layer at (0,0) size 800x600
     REQUIRE(parent.FirstChild() == anonymous);
     CHECK(anonymous->Style().VisitedDependentColor(css::PropertyId::Color)
           == Color(SRGBA<uint8> {255, 0, 0}));
+  }
+
+  TEST_CASE("RenderBlockFlow: paints floats over block backgrounds", "[Rendering][RenderBlockFlow][Painting]")
+  {
+    CHECK(Painted(u8"<style>body{margin:0}div{float:left;width:20px;height:20px;background:red}p{margin:0;"
+                  u8"height:30px;background:blue}</style><div></div><p></p>")
+          == u8R"(
+(set-state
+  (change-flags [composite-mode])
+  (composite-mode 
+    (composite-operation copy)
+    (blend-mode normal)))
+(fill-rect-with-color
+  (rect at (0,0) size 200x100)
+  (color #FFFFFF))
+(set-state
+  (change-flags [composite-mode])
+  (composite-mode 
+    (composite-operation source-over)
+    (blend-mode normal)))
+(fill-composited-rect
+  (rect at (0,0) size 200x100)
+  (color #FFFFFF)
+  (composite-operation copy)
+  (blend-mode normal))
+(fill-composited-rect
+  (rect at (0,0) size 200x30)
+  (color #0000FF)
+  (composite-operation source-over)
+  (blend-mode normal))
+(fill-composited-rect
+  (rect at (0,0) size 20x20)
+  (color #FF0000)
+  (composite-operation source-over)
+  (blend-mode normal)))");
   }
 }

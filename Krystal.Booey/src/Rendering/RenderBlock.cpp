@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/LayoutScope.hpp"
+#include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
@@ -2049,4 +2050,214 @@ namespace krys::boo
     }
     return std::max(renderer.ClientLogicalBottom(), maxChildLogicalBottom + renderer.PaddingAfter());
   }
+
+#pragma region Painting
+
+  namespace
+  {
+    KRYS_NODISCARD bool IsSkippedContentRoot(const RenderBox &renderer) noexcept
+    {
+      const auto *element = renderer.GetElement();
+      return element && IsSkippedContentRoot(renderer.Style(), *element);
+    }
+  }
+
+  void RenderBlock::Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    auto adjustedPaintOffset = paintOffset + Location();
+    PaintPhase phase = paintInfo.Phase;
+
+    // FIXME: Could eliminate the isDocumentElementRenderer() check if we fix background painting so that the
+    // RenderView paints the root's background.
+    auto visualContentIsClippedOut = [&](LayoutRect paintingRect)
+    {
+      if (IsDocumentElementRenderer())
+      {
+        return false;
+      }
+
+      auto overflowBox = VisualOverflowRect();
+      FlipForWritingMode(overflowBox);
+      overflowBox.MoveBy(adjustedPaintOffset);
+      return !overflowBox.Intersects(paintingRect);
+    };
+
+    if (visualContentIsClippedOut(paintInfo.Rect))
+    {
+      return;
+    }
+
+    bool pushedClip = PushContentsClip(paintInfo, adjustedPaintOffset);
+    PaintObject(paintInfo, adjustedPaintOffset);
+    if (pushedClip)
+    {
+      PopContentsClip(paintInfo, phase, adjustedPaintOffset);
+    }
+
+    // FIXME: Scrollbars (paintOverflowControls, painted over the background and border in the block
+    // background phases) come with scrollbars.
+  }
+
+  PaintInfo RenderBlock::PaintInfoForBlockChildren(const PaintInfo &paintInfo) const noexcept
+  {
+    auto phaseForChildren = [&]
+    {
+      switch (paintInfo.Phase)
+      {
+        case PaintPhase::ChildOutlines:         return PaintPhase::Outline;
+        case PaintPhase::ChildBlockBackgrounds: return PaintPhase::ChildBlockBackground;
+        default:                                return paintInfo.Phase;
+      }
+    };
+
+    PaintInfo paintInfoForChildren(paintInfo);
+    paintInfoForChildren.Phase = phaseForChildren();
+    paintInfoForChildren.UpdateSubtreePaintRootForChildren(this);
+
+    // FIXME: Event regions (EventRegionIncludeBackground) come with hit testing.
+
+    return paintInfoForChildren;
+  }
+
+  void RenderBlock::PaintContents(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    krys_debug_assert(!IsSkippedContentRoot(*this));
+
+    if (ChildrenInline())
+    {
+      PaintInlineChildren(paintInfo, paintOffset);
+    }
+    else
+    {
+      PaintInfo paintInfoForChildren = PaintInfoForBlockChildren(paintInfo);
+      PaintChildren(paintInfo, paintOffset, paintInfoForChildren);
+    }
+  }
+
+  void RenderBlock::PaintChildren(PaintInfo &paintInfo, const LayoutPoint &paintOffset,
+                                  PaintInfo &paintInfoForChild) noexcept
+  {
+    krys_debug_assert(!IsSkippedContentRoot(*this));
+
+    for (auto &child : ChildrenOfType<RenderBox>(*this))
+    {
+      if (!PaintChild(child, paintInfo, paintOffset, paintInfoForChild))
+      {
+        return;
+      }
+    }
+  }
+
+  bool RenderBlock::PaintChild(RenderBox &child, PaintInfo &, const LayoutPoint &paintOffset,
+                               PaintInfo &paintInfoForChild, PaintBlockType paintType) noexcept
+  {
+    krys_debug_assert(!IsSkippedContentRoot(*this));
+
+    if (child.IsExcludedAndPlacedInBorder())
+    {
+      return true;
+    }
+
+    if (child.IsSkippedContent())
+    {
+      krys_debug_assert(child.IsColumnSpanner());
+      return true;
+    }
+
+    LayoutPoint childPoint = FlipForWritingModeForChild(child, paintOffset);
+    if (!child.HasSelfPaintingLayer() && !child.IsFloating())
+    {
+      if (paintType == PaintAsInlineBlock)
+      {
+        child.PaintAsInlineBlock(paintInfoForChild, childPoint);
+      }
+      else
+      {
+        child.Paint(paintInfoForChild, childPoint);
+      }
+    }
+
+    return true;
+  }
+
+  void RenderBlock::PaintObject(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    PaintPhase paintPhase = paintInfo.Phase;
+    auto shouldPaintContent = !IsSkippedContentRoot(*this);
+
+    // 1. paint background, borders etc
+    if ((paintPhase == PaintPhase::BlockBackground || paintPhase == PaintPhase::ChildBlockBackground)
+        && Style().UsedVisibility() == Visibility::Visible)
+    {
+      if (HasVisibleBoxDecorations())
+      {
+        PaintBoxDecorations(paintInfo, paintOffset);
+      }
+    }
+
+    // FIXME: Fieldset legends painted in the border (paintExcludedChildrenInBorder), once fieldsets are laid
+    // out.
+
+    if (paintPhase == PaintPhase::Mask && Style().UsedVisibility() == Visibility::Visible)
+    {
+      PaintMask(paintInfo, paintOffset);
+      return;
+    }
+
+    if (paintPhase == PaintPhase::ClippingMask && Style().UsedVisibility() == Visibility::Visible)
+    {
+      PaintClippingMask(paintInfo, paintOffset);
+      return;
+    }
+
+    // If just painting the root background, then return.
+    if (paintInfo.PaintRootBackgroundOnly())
+    {
+      return;
+    }
+
+    // FIXME: The accessibility and event region phases come with hit testing.
+
+    // Adjust our painting position if we're inside a scrolled layer (e.g., an overflow:auto div).
+    LayoutPoint scrolledOffset = paintOffset;
+    scrolledOffset.MoveBy(-GetScrollPosition());
+
+    // FIXME: Column rules (paintColumnRules) come with borders.
+
+    // Done with backgrounds, borders and column rules.
+    if (paintPhase == PaintPhase::BlockBackground)
+    {
+      return;
+    }
+
+    // 2. paint contents
+    if (shouldPaintContent)
+    {
+      if (paintPhase != PaintPhase::SelfOutline)
+      {
+        PaintContents(paintInfo, scrolledOffset);
+      }
+    }
+
+    // FIXME: 3. Selection gaps (paintSelection) come with selection.
+
+    if (shouldPaintContent)
+    {
+      // 4. paint floats.
+      if (paintPhase == PaintPhase::Float || paintPhase == PaintPhase::Selection
+          || paintPhase == PaintPhase::TextClip || paintPhase == PaintPhase::EventRegion
+          || paintPhase == PaintPhase::Accessibility)
+      {
+        PaintFloats(paintInfo, scrolledOffset,
+                    paintPhase == PaintPhase::Selection || paintPhase == PaintPhase::TextClip
+                      || paintPhase == PaintPhase::EventRegion || paintPhase == PaintPhase::Accessibility);
+      }
+    }
+
+    // FIXME: 5. Outlines and 6. continuation outlines (paintOutline, paintContinuationOutlines) come with
+    // outlines.
+    // FIXME: 7. Carets (paintCarets) come with editing.
+  }
+
+#pragma endregion
 }

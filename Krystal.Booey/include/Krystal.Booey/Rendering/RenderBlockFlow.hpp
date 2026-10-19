@@ -514,6 +514,9 @@ namespace krys::boo
     void MaterializeRareBlockFlowData() noexcept;
 
   protected:
+    void PaintFloats(PaintInfo &, const LayoutPoint &, bool preservePhase = false) noexcept override;
+    void PaintInlineChildren(PaintInfo &, const LayoutPoint &) noexcept override;
+
     void LayoutBlockWithNoChildren() noexcept;
 
     // This method is called at the start of layout to wipe away all of the floats in our floating objects
