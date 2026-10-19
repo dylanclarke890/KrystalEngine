@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/BlockStepSizing.hpp"
+#include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/InlineWalker.hpp"
 #include "Krystal.Booey/Rendering/LineClampUpdater.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
@@ -4506,4 +4507,51 @@ namespace krys::boo
   }
 
 #pragma endregion
+
+  bool RenderBlockFlow::HitTestFloats(const HitTestRequest &request, HitTestResult &result,
+                                      const HitTestLocation &locationInContainer,
+                                      const LayoutPoint &accumulatedOffset) noexcept
+  {
+    if (!_floatingObjects)
+    {
+      return false;
+    }
+
+    const LayoutPoint &adjustedLocation = accumulatedOffset;
+    // FIXME: The frame view's scroll position (added for the view) comes with frame view scrolling.
+
+    const auto &set = _floatingObjects->Set();
+    for (auto it = set.rbegin(); it != set.rend(); ++it)
+    {
+      const auto &floatingObject = *it;
+      auto *renderer = floatingObject->Renderer();
+      if (!renderer)
+      {
+        continue;
+      }
+      if (floatingObject->ShouldPaint())
+      {
+        LayoutPoint childPoint = FlipFloatForWritingModeForChild(
+          *floatingObject, adjustedLocation + floatingObject->TranslationOffsetToAncestor());
+        if (renderer->HitTest(request, result, locationInContainer, childPoint))
+        {
+          UpdateHitTestResult(result, locationInContainer.Point() - ToLayoutSize(childPoint));
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  bool RenderBlockFlow::HitTestInlineChildren(const HitTestRequest &request, HitTestResult &result,
+                                              const HitTestLocation &locationInContainer,
+                                              const LayoutPoint &accumulatedOffset,
+                                              HitTestAction hitTestAction) noexcept
+  {
+    krys_debug_assert(ChildrenInline());
+
+    return InlineLayout()
+           && InlineLayout()->HitTest(request, result, locationInContainer, accumulatedOffset, hitTestAction);
+  }
 }

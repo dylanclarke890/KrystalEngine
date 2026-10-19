@@ -37,6 +37,9 @@ namespace krys::boo
   }
 
   class ClipRects;
+  class HitTestingTransformState;
+  class HitTestRequest;
+  class HitTestResult;
   class ClipRectsCache;
   class GraphicsContext;
   class GraphicsContextStateSaver;
@@ -102,9 +105,9 @@ namespace krys::boo
 
   /// @brief The layer of a renderer that needs one: it positions, clips and orders (in z-order) the
   /// renderer's subtree.
-  // FIXME: Hit testing, repaint, compositing, filters, masks, SVG clip paths, reflections, resizing,
-  // scrollbars, selection gaps, event regions and fragmentation (paginated collectFragments) come with hit
-  // testing, compositing, effects and fragmentation.
+  // FIXME: Repaint, compositing, filters, masks, SVG clip paths, reflections, resizing, scrollbars, selection
+  // gaps, event regions and fragmentation (paginated collectFragments) come with compositing, effects and
+  // fragmentation.
   class RenderLayer final : public CanMakeWeakPtr<RenderLayer>, public CanMakeCheckedPtr<RenderLayer>
   {
     KRYS_NON_COPY_MOVABLE(RenderLayer);
@@ -701,6 +704,21 @@ namespace krys::boo
       const RenderLayer *ancestorLayer, const LayoutSize &offsetFromRoot,
       EnumSet<CalculateLayerBoundsFlag> flags = DefaultCalculateLayerBoundsFlags()) const noexcept;
 
+#pragma region Hit testing
+
+    /// @brief Hit tests the layers under the result's location from front to back, starting at this layer,
+    /// and sets the result's link element.
+    /// @return Whether a layer was hit: always for the view's layer on a move over the document, or a press
+    /// or release.
+    bool HitTest(const HitTestRequest &request, HitTestResult &result) noexcept;
+    bool HitTest(const HitTestRequest &request, const HitTestLocation &hitTestLocation,
+                 HitTestResult &result) noexcept;
+
+    /// @brief The nearest element of the layer's renderer or its ancestors.
+    KRYS_NODISCARD dom::Element *EnclosingElement() const noexcept;
+
+#pragma endregion
+
 #pragma region Painting
 
     enum class PaintLayerFlag : uint8
@@ -811,6 +829,11 @@ namespace krys::boo
     KRYS_NODISCARD FloatPoint PerspectiveOrigin() const noexcept;
     KRYS_NODISCARD FloatPoint3D TransformOriginPixelSnappedIfNeeded() const noexcept;
     KRYS_NODISCARD bool Preserves3D() const noexcept;
+    KRYS_NODISCARD bool Has3DTransformedDescendant() const noexcept
+    {
+      krys_debug_assert(!_3DTransformedDescendantStatusDirty);
+      return _has3DTransformedDescendant;
+    }
     /// @brief Whether this layer is part of its parent's 3D rendering context.
     KRYS_NODISCARD bool ParticipatesInPreserve3D() const noexcept;
     KRYS_NODISCARD bool AncestorLayerIsDOMParent(const RenderLayer *ancestor) const noexcept;
@@ -1015,6 +1038,42 @@ namespace krys::boo
     KRYS_NODISCARD RenderLayer *EnclosingTransformedAncestor() const noexcept;
 
     void UpdatePagination() noexcept;
+
+#pragma region Hit testing
+
+    struct HitLayer
+    {
+      RenderLayer *Layer {nullptr};
+      double ZOffset {0};
+    };
+    HitLayer HitTestLayer(RenderLayer *rootLayer, RenderLayer *containerLayer, const HitTestRequest &,
+                          HitTestResult &, const LayoutRect &hitTestRect, const HitTestLocation &,
+                          bool appliedTransform, const HitTestingTransformState * = nullptr,
+                          double *zOffset = nullptr) noexcept;
+    HitLayer HitTestLayerByApplyingTransform(RenderLayer *rootLayer, RenderLayer *containerLayer,
+                                             const HitTestRequest &, HitTestResult &,
+                                             const LayoutRect &hitTestRect, const HitTestLocation &,
+                                             const HitTestingTransformState * = nullptr,
+                                             double *zOffset = nullptr,
+                                             const LayoutSize &translationOffset = LayoutSize()) noexcept;
+    HitLayer HitTestList(LayerList, RenderLayer *rootLayer, const HitTestRequest &, HitTestResult &,
+                         const LayoutRect &hitTestRect, const HitTestLocation &,
+                         const HitTestingTransformState *, double *zOffsetForDescendants,
+                         bool depthSortDescendants) noexcept;
+
+    KRYS_NODISCARD Ref<HitTestingTransformState>
+      CreateLocalTransformState(RenderLayer *rootLayer, RenderLayer *containerLayer,
+                                const LayoutRect &hitTestRect, const HitTestLocation &,
+                                const HitTestingTransformState *containerTransformState,
+                                const LayoutSize &translationOffset = LayoutSize()) const noexcept;
+
+    bool HitTestContents(const HitTestRequest &, HitTestResult &, const LayoutRect &layerBounds,
+                         const HitTestLocation &, HitTestFilter) const noexcept;
+    bool HitTestContentsForFragments(const LayerFragments &, const HitTestRequest &, HitTestResult &,
+                                     const HitTestLocation &, HitTestFilter,
+                                     bool &insideClipRect) const noexcept;
+
+#pragma endregion
 
 #pragma region Painting
 

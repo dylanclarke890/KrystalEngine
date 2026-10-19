@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/BaselineAlignment.hpp"
+#include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
@@ -3777,5 +3778,50 @@ namespace krys::boo
         return;
       }
     }
+  }
+
+  bool RenderFlexibleBox::HitTestChildren(const HitTestRequest &request, HitTestResult &result,
+                                          const HitTestLocation &locationInContainer,
+                                          const LayoutPoint &adjustedLocation,
+                                          HitTestAction hitTestAction) noexcept
+  {
+    if (hitTestAction != HitTestForeground)
+    {
+      return false;
+    }
+
+    LayoutPoint scrolledOffset = HasNonVisibleOverflow()
+                                   ? adjustedLocation - ToLayoutSize(LayoutPoint(GetScrollPosition()))
+                                   : adjustedLocation;
+
+    // If collecting the children in reverse order is bad for performance, this list could be determined at
+    // layout time.
+    List<RenderBox *> reversedOrderIteratorForHitTesting;
+    for (auto *flexItem = _orderIterator.First(); flexItem; flexItem = _orderIterator.Next())
+    {
+      if (flexItem->IsOutOfFlowPositioned())
+      {
+        continue;
+      }
+      reversedOrderIteratorForHitTesting.push_back(flexItem);
+    }
+    std::ranges::reverse(reversedOrderIteratorForHitTesting);
+
+    for (auto *flexItem : reversedOrderIteratorForHitTesting)
+    {
+      if (flexItem->HasSelfPaintingLayer())
+      {
+        continue;
+      }
+      auto location = FlipForWritingModeForChild(*flexItem, scrolledOffset);
+      if (flexItem->HitTest(request, result, locationInContainer, location))
+      {
+        UpdateHitTestResult(
+          result, FlipForWritingMode(ToLayoutPoint(locationInContainer.Point() - adjustedLocation)));
+        return true;
+      }
+    }
+
+    return false;
   }
 }

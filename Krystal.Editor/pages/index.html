@@ -13,17 +13,24 @@
   .row { display: flex; gap: 20px; margin-bottom: 20px; }
   .card { flex: 1; height: 180px; border-radius: 16px; background: #ffffff; padding: 20px; box-sizing: border-box;
           box-shadow: 0 2px 6px rgba(26, 34, 64, 0.1), 0 12px 32px rgba(26, 34, 64, 0.12); }
+  /* Hovering lifts a card; pressing sets it down. */
+  .card:hover { box-shadow: 0 0 0 2px #4f6df5, 0 16px 40px rgba(26, 34, 64, 0.22); }
+  .card:active { box-shadow: 0 0 0 2px #ef476f, 0 2px 6px rgba(26, 34, 64, 0.1); }
 
   .boxes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; height: 100%; }
   .boxes div { background: #f7f8fb; }
+  .boxes div:hover { background: #dfe5ff; }
 
   .swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; height: 100%; }
   .swatches div { border-radius: 10px; }
+  .swatches div:hover { transform: scale(1.1); }
 
   .gradient { border-radius: 12px; height: 100%; }
 
   .stage { position: relative; height: 100%; overflow: hidden; border-radius: 12px; background: #e9ecf2; }
   .stage div { position: absolute; width: 64px; height: 64px; border-radius: 12px; }
+  .stage div:hover { outline: 3px solid #073b4c; }
+  tr:hover td { text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -167,8 +174,9 @@
       <table style="border-collapse: collapse; width: 100%; font-size: 13px; line-height: 18px">
         <tr style="background: #073b4c; color: #ffffff"><th style="border: 2px solid #073b4c">Part</th><th style="border: 2px solid #073b4c">Status</th></tr>
         <tr><td style="border: 1px solid #9aa5b1; padding: 0 6px">Text</td><td style="border: 1px solid #9aa5b1; padding: 0 6px; background: #06d6a0">Done</td></tr>
-        <tr style="background: #eef1f6"><td style="border: 1px solid #9aa5b1; padding: 0 6px">Tables</td><td style="border: 1px solid #9aa5b1; padding: 0 6px; background: #ffd166">Now</td></tr>
-        <tr><td colspan="2" style="border: 3px double #ef476f; padding: 0 6px; text-align: center">Hit testing next</td></tr>
+        <tr style="background: #eef1f6"><td style="border: 1px solid #9aa5b1; padding: 0 6px">Tables</td><td style="border: 1px solid #9aa5b1; padding: 0 6px; background: #06d6a0">Done</td></tr>
+        <tr><td style="border: 1px solid #9aa5b1; padding: 0 6px">Hover</td><td style="border: 1px solid #9aa5b1; padding: 0 6px; background: #ffd166">Now</td></tr>
+        <tr><td colspan="2" style="border: 3px double #ef476f; padding: 0 6px; text-align: center">Mouse events next</td></tr>
       </table>
     </div>
   </div>

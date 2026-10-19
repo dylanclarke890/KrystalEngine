@@ -277,6 +277,36 @@ namespace krys::boo
     /// boxes plus its after padding, and at least its client box.
     KRYS_NODISCARD static LayoutUnit LayoutOverflowLogicalBottom(const RenderBlock &renderer) noexcept;
 
+#pragma region Hit testing
+
+    bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
+                     const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
+                     HitTestAction hitTestAction) noexcept override;
+    /// @brief Moves @p offset by the block's scroll position, in its writing mode.
+    void OffsetForContents(LayoutPoint &offset) const noexcept;
+    KRYS_NODISCARD dom::Node *NodeForHitTest() const noexcept override;
+
+  protected:
+    virtual bool HitTestChildren(const HitTestRequest &request, HitTestResult &result,
+                                 const HitTestLocation &locationInContainer,
+                                 const LayoutPoint &adjustedLocation, HitTestAction hitTestAction) noexcept;
+    virtual bool HitTestContents(const HitTestRequest &request, HitTestResult &result,
+                                 const HitTestLocation &locationInContainer,
+                                 const LayoutPoint &accumulatedOffset, HitTestAction hitTestAction) noexcept;
+    virtual bool HitTestFloats(const HitTestRequest &, HitTestResult &, const HitTestLocation &,
+                               const LayoutPoint &) noexcept
+    {
+      return false;
+    }
+    virtual bool HitTestInlineChildren(const HitTestRequest &, HitTestResult &, const HitTestLocation &,
+                                       const LayoutPoint &, HitTestAction) noexcept
+    {
+      return false;
+    }
+
+  public:
+#pragma endregion
+
 #pragma region Painting
 
     void Paint(PaintInfo &, const LayoutPoint &) noexcept override;

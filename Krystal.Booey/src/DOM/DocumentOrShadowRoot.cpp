@@ -4,9 +4,13 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 
 namespace krys::boo::dom
@@ -101,5 +105,164 @@ namespace krys::boo::dom
       return {};
     }
     return _adoptedStyleSheets->Sheets();
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD Maybe<LayoutPoint> AbsolutePointIfNotClipped(Document &document,
+                                                                const LayoutPoint &clientPoint) noexcept
+    {
+      if (!document.Frame() || !document.View())
+      {
+        return null;
+      }
+
+      // FIXME: The visual viewport (clientCoordinatesRelativeToLayoutViewport) comes with visual viewports.
+
+      auto *frame = document.Frame();
+      auto *view = document.View();
+      // FIXME: The frame's scale factor (frameScaleFactor) comes with pinch zooming.
+      float scaleFactor = frame->PageZoomFactor();
+
+      LayoutPoint absolutePoint = clientPoint;
+      absolutePoint.Scale(scaleFactor);
+      // FIXME: The contents' scroll position (contentsScrollPosition) comes with frame view scrolling.
+
+      LayoutRect visibleRect = view->VisibleContentRect();
+      if (visibleRect.Contains(absolutePoint))
+      {
+        return absolutePoint;
+      }
+      return null;
+    }
+
+    /// @brief @p node retargeted against @p scope, or null if it isn't a node.
+    KRYS_NODISCARD RefPtr<Node> RetargetToScope(Node &node, ContainerNode &scope) noexcept
+    {
+      return ShareRefPtr(DynamicDowncast<Node>(EventTargetAlgorithms::Retarget(&node, scope)));
+    }
+  }
+
+  RefPtr<Node> DocumentOrShadowRoot::NodeFromPoint(const LayoutPoint &clientPoint, LayoutPoint *localPoint,
+                                                   HitTestSource source) noexcept
+  {
+    Ref document = ShareRef(_rootNode.NodeDocument());
+    auto absolutePoint = AbsolutePointIfNotClipped(*document, clientPoint);
+    if (!absolutePoint)
+    {
+      return nullptr;
+    }
+
+    HitTestResult result(absolutePoint.value());
+    document->HitTest(HitTestRequest(source, HitTestRequest::DefaultTypes), result);
+    if (localPoint)
+    {
+      *localPoint = result.LocalPoint();
+    }
+    return ShareRefPtr(result.InnerNode());
+  }
+
+  RefPtr<Element> DocumentOrShadowRoot::ElementFromPoint(double clientX, double clientY,
+                                                         HitTestSource source) noexcept
+  {
+    if (!_rootNode.NodeDocument().HasLivingRenderTree())
+    {
+      return nullptr;
+    }
+
+    auto node = NodeFromPoint(LayoutPoint(clientX, clientY), nullptr, source);
+    if (!node)
+    {
+      return nullptr;
+    }
+
+    node = RetargetToScope(*node, _rootNode);
+    while (node && !Is<Element>(*node))
+    {
+      node = ShareRefPtr(node->ParentInComposedTree());
+      if (!node)
+      {
+        break;
+      }
+      node = RetargetToScope(*node, _rootNode);
+    }
+
+    return ShareRefPtr(DynamicDowncast<Element>(node.get()));
+  }
+
+  List<RefPtr<Element>> DocumentOrShadowRoot::ElementsFromPoint(double clientX, double clientY,
+                                                                HitTestSource source) noexcept
+  {
+    List<RefPtr<Element>> elements;
+
+    Ref document = ShareRef(_rootNode.NodeDocument());
+    if (!document->HasLivingRenderTree())
+    {
+      return elements;
+    }
+
+    auto absolutePoint = AbsolutePointIfNotClipped(*document, LayoutPoint(clientX, clientY));
+    if (!absolutePoint)
+    {
+      return elements;
+    }
+
+    static constexpr EnumSet<HitTestRequest::Type> hitTypes {
+      HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active,
+      HitTestRequest::Type::DisallowUserAgentShadowContent, HitTestRequest::Type::CollectMultipleElements,
+      HitTestRequest::Type::IncludeAllElementsUnderPoint};
+
+    HitTestResult result {absolutePoint.value()};
+    document->HitTest(HitTestRequest(source, hitTypes), result);
+
+    RefPtr<Node> lastNode;
+    auto &nodeSet = result.ListBasedTestResult();
+    elements.reserve(nodeSet.size());
+    for (auto &listBasedNode : nodeSet)
+    {
+      RefPtr<Node> node = RetargetToScope(*listBasedNode, _rootNode);
+      while (node && !Is<Element>(*node))
+      {
+        node = ShareRefPtr(node->ParentInComposedTree());
+        if (!node)
+        {
+          break;
+        }
+        node = RetargetToScope(*node, _rootNode);
+      }
+
+      if (!node)
+      {
+        continue;
+      }
+
+      if (auto *pseudoElement = DynamicDowncast<PseudoElement>(*node))
+      {
+        node = ShareRefPtr(pseudoElement->HostElement());
+      }
+
+      // Prune duplicate entries. A pseudo ::before content above its parent
+      // node should only result in one entry.
+      if (node == lastNode)
+      {
+        continue;
+      }
+
+      elements.push_back(ShareRefPtr(DynamicDowncast<Element>(node.get())));
+      lastNode = node;
+    }
+
+    if (auto *rootDocument = DynamicDowncast<Document>(_rootNode))
+    {
+      if (RefPtr rootElement = rootDocument->DocumentElement())
+      {
+        if (elements.empty() || elements.back() != rootElement)
+        {
+          elements.push_back(rootElement);
+        }
+      }
+    }
+
+    return elements;
   }
 }

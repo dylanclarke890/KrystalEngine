@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-19): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, G2f, strokes, G2g, clips, G2h, layers and blend modes, G2i, gradients, and G2j, shadows, and G2k, golden image tests, are done); Krystal.Text (T1) and text (G3) are done; the Booey integration (G4) is in progress (G4a, the graphics context and display lists, G4b, Krystal.UI and replay, G4c1, the paint plumbing, layers and backgrounds, G4c2, borders, shadows and outlines, G4c3, image buffers and patterns, G4d1, text and inline boxes, G4d2, decorations, markers and ellipses, and G4e, table painting, are done; see *G4 plan*).
+Status (2026-10-19): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, G2f, strokes, G2g, clips, G2h, layers and blend modes, G2i, gradients, and G2j, shadows, and G2k, golden image tests, are done); Krystal.Text (T1) and text (G3) are done; the Booey integration (G4) is in progress (G4a, the graphics context and display lists, G4b, Krystal.UI and replay, G4c1, the paint plumbing, layers and backgrounds, G4c2, borders, shadows and outlines, G4c3, image buffers and patterns, G4d1, text and inline boxes, G4d2, decorations, markers and ellipses, G4e, table painting, and G4f1, hit testing, hover and active, are done; see *G4 plan*).
 
 ## Why
 
@@ -432,7 +432,8 @@ Booey has layout (block, inline, flex, grid, table), the layer tree, fonts holdi
   - **G4d1, text and inline boxes** (Booey): `InlineContentPainter`, `TextBoxPainter`, `TextPainter`, `FontCascade::drawText` and `drawGlyphBuffer`, `text-shadow`, `InlineBoxPainter`, atomic inlines.
   - **G4d2, decorations, markers and ellipses** (Booey): `TextDecorationPainter` with skip-ink, emphasis marks, list markers, ellipses, inline outlines.
   - **G4e, the other boxes** (Booey): flex, grid and table painting, collapsed table borders, placeholders for replaced content.
-  - **G4f, hit testing and clicks** (Booey and Krystal.UI): `HitTestRequest`, `HitTestLocation`, `HitTestResult`, `RenderLayer::hitTest`, `nodeAtPoint` for boxes and inline content; mouse move, down, up and click events with hover and active state; Krystal.UI routes the window's mouse to the page.
+  - **G4f1, hit testing, hover and active** (Booey and Krystal.UI): `HitTestLocation`, `HitTestResult`, `RenderLayer::hitTest`, `nodeAtPoint` for boxes, inline content, flex, grid and tables, `clip-path` and radii; hover and active state.
+  - **G4f2, mouse events and clicks** (Booey, Krystal.UI and Krystal.PAL): `MouseEvent`, the mouse half of `EventHandler`, click counting, cursors; Krystal.UI routes the window's mouse to the page.
 - **Tests:** the Booey parts compare display list dumps of small documents (as layout compares render tree dumps); the whole pipeline is checked with page goldens, HTML drawn through Krystal.UI and compared with Chrome's rendering (`tools/golden/capture_chrome.py`, extended to pages): strictly for boxes, loosely for text. The Booey parts follow the porting checklist and get ledger entries in `docs/booey/PORTING.md`.
 
 ### G4b plan (decided 2026-10-18)
@@ -515,6 +516,24 @@ One part (decided by the user). Flex and grid already paint their items in order
 - **Out (FIXMEs):** masks, selection, hit testing, fieldset legends' border gaps; `RenderReplaced::paint` waits for images (decided), when there's replaced content to paint.
 - **Tests:** Booey compares dumps of small tables (separated borders and `border-spacing`, collapsed borders and their conflict resolution by width, style and owner, backgrounds of tables, column groups, columns, row groups, rows and cells, `empty-cells: hide`, spans, captions, row outlines); Krystal.UI adds a `tables` page golden of sized cells without text (decided), checked strictly against Chrome.
 - **Editor:** the page gains a table card (collapsed coloured borders, striped rows, a spanning cell).
+
+### G4f plan (decided 2026-10-19)
+
+Two parts (decided by the user). Booey has `HitTestRequest`, `HitTestSource`, `Document::updateHoverActiveState` (the `:hover` and `:active` styles), event dispatch to native listeners and `UIEvent`; it has no `HitTestLocation`, `HitTestResult`, renderer hit testing, `MouseEvent` or `EventHandler` (upstream's is 5.7k lines, of which only the mouse handling is wanted). Krystal.PAL reports mouse input; the editor doesn't use it yet.
+
+- **G4f1, hit testing, hover and active:**
+  - **Booey:** `HitTestLocation` (points and rects) and `HitTestResult` (the inner node, the URL element, the local point, the node list of rect tests); `RenderLayer::hitTest` and the layer walk (z-order lists, transforms, clips, the foreground and background passes); `nodeAtPoint` for boxes and blocks (floats and children), inline content (`LineLayout::hitTest` and the inline content's boxes, so text and inline boxes hit), flex and grid items (`hitTestChildren`) and tables (tables, sections, rows and cells); the view and the document (`Document::hitTest`, `elementFromPoint`). `pointer-events` and `visibility` are respected, and so are border radii and `clip-path` (decided), with `Path::contains`.
+  - **Hover and active:** a point hit tests and updates the hover and active chains through `updateHoverActiveState`, which restyles.
+  - **Krystal.UI:** `Page::HitTest` gives the element at a point.
+  - **Tests:** Booey compares hit test results of small documents (the topmost box, `z-index`, transforms, rounded corners, `clip-path`, `pointer-events: none`, text and inline boxes across lines, table cells, flex and grid items) and hover restyles.
+  - **Editor:** the mouse moving over the page applies `:hover` styles.
+- **G4f2, mouse events and clicks:**
+  - **Booey:** `MouseEvent`, `MouseRelatedEvent` and `MouseEventInit`; a trimmed `EventHandler` (mouse move, down and up; `mouseover`, `mouseout`, `mouseenter` and `mouseleave` as the hovered element changes; `click` and `dblclick` with click counting; the active state while a button is down) fed by a `PlatformMouseEvent` that Krystal.UI fills.
+  - **Cursors** (decided): the CSS `cursor` of the hovered element sets the window's cursor, through a new Krystal.PAL cursor call.
+  - **Krystal.UI:** routes the window's mouse events to the page, in page coordinates.
+  - **Out (FIXMEs):** focus and blur on click (decided: later), pointer events, drag and drop, selection by dragging, wheel scrolling, context menus, scripts (listeners are native).
+  - **Tests:** the order and targets of move, over, out, enter, leave, down, up, click and dblclick, recorded by listeners; the cursor chosen for an element.
+  - **Editor:** a native click listener toggling a class on the page.
 
 ### G2a as built (2026-10-18)
 
@@ -765,6 +784,14 @@ Testing: the device's hidden window gives tests a real OpenGL context (Krystal.G
 - **Out:** `RenderReplaced::paint` waits for images (decided); masks, selection and hit testing stay FIXMEs.
 - **Editor:** a table card (collapsed coloured borders, a dark header, striped rows, a double-bordered spanning cell).
 - **Tests:** Booey compares dumps of separated and collapsed tables, the background stack, hidden empty cells, spans, captions and row outlines (7 cases); Krystal.UI adds the `tables` page golden (no text), checked strictly against Chrome (mean 0.47; the only differences are the dash phase of collapsed dashed borders and corner pixels).
+
+### G4f1 as built (2026-10-19)
+
+- **Booey** (the ledger entry is *Hit testing, hover and active* in `docs/booey/PORTING.md`): `HitTestLocation`, `HitTestResult` and `HitTestingTransformState`; the layer walk (positive z-order, normal flow, the layer's foreground, negative z-order, then its background, with transforms, 3D depth sorting, clip rects and `clip-path`); `nodeAtPoint` for boxes (visual overflow, `clip-path` and border radii), blocks (children, floats, inline content), inline boxes, flex and grid items in `order`, tables, sections and rows; the view and `Document::hitTest`; `elementFromPoint`, `elementsFromPoint` and `nodeFromPoint` on `DocumentOrShadowRoot`. `pointer-events` and `visibility` are respected. `Path::contains` is a winding number test with curves flattened. Hover and active state now follow renderers (it used render styles, from before the render tree), and a rect path now applies elements without a platform path.
+- **Krystal.UI:** `Page::HitTest` gives the element at a point; `PointerMoved`, `PointerPressed`, `PointerReleased` and `PointerLeft` hit test and update the hover and active chains, as the mouse half of `EventHandler` will in G4f2.
+- **Out (FIXMEs):** scrollbars and resizers, the frame view's scroll position, reference clip paths, continuations, the top layer, view transitions, SVG and transformed layers in paginated layers.
+- **Editor:** the mouse drives the page view's pointer: cards lift on `:hover` and set down on `:active`, grid boxes, swatches and stage boxes react to hover, and table rows underline.
+- **Tests:** Booey compares hit test results (12 cases: the topmost box and local point, `z-index`, transforms, rounded corners, `clip-path`, `pointer-events`, `visibility`, overflow clips, text and inline boxes, floats, tables, flex and grid items, `elementsFromPoint`, hover restyles) and `Path::contains`; Krystal.UI tests hit testing, hover and active through `Page`. No golden: hit testing paints nothing new.
 
 ## Open decisions
 

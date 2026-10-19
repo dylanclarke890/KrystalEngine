@@ -1,9 +1,12 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayer.hpp"
+#include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/BorderShape.hpp"
+#include "Krystal.Booey/Rendering/HitTestingTransformState.hpp"
+#include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -23,6 +26,7 @@
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include <algorithm>
+#include <limits>
 
 namespace krys::boo
 {
@@ -4538,6 +4542,615 @@ namespace krys::boo
                           &localPaintingInfo.RootLayer->Renderer(), this);
       Renderer().Paint(paintInfo, PaintOffsetForRenderer(fragment, localPaintingInfo));
     }
+  }
+
+#pragma endregion
+
+#pragma region Hit testing
+
+  namespace
+  {
+    // Compute the z-offset of the point in the transformState.
+    // This is effectively projecting a ray normal to the plane of ancestor, finding where that
+    // ray intersects target, and computing the z delta between those two points.
+    KRYS_NODISCARD double ComputeZOffset(const HitTestingTransformState &transformState) noexcept
+    {
+      // We got an affine transform, so no z-offset
+      if (transformState.AccumulatedTransform.IsAffine())
+      {
+        return 0;
+      }
+
+      // Flatten the point into the target plane
+      FloatPoint targetPoint = transformState.MappedPoint();
+
+      // Now map the point back through the transform, which computes Z.
+      FloatPoint3D backmappedPoint = transformState.AccumulatedTransform.MapPoint(FloatPoint3D(targetPoint));
+      return backmappedPoint.Z();
+    }
+
+    /// @brief The nearest link at or above @p node in the composed tree.
+    // FIXME: Images (which are never the link: an image map's area is) come with images.
+    KRYS_NODISCARD dom::Element *EnclosingLinkEventParentOrSelf(dom::Node &node) noexcept
+    {
+      for (dom::Node *current = &node; current; current = current->ParentInComposedTree())
+      {
+        if (auto *element = DynamicDowncast<dom::Element>(*current); element && css::IsLink(*element))
+        {
+          return element;
+        }
+      }
+      return nullptr;
+    }
+
+    KRYS_NODISCARD bool IsSkippedContentRoot(const RenderBox &renderer) noexcept
+    {
+      const auto *element = renderer.GetElement();
+      return element && IsSkippedContentRoot(renderer.Style(), *element);
+    }
+  }
+
+  bool RenderLayer::HitTest(const HitTestRequest &request, HitTestResult &result) noexcept
+  {
+    return HitTest(request, result.GetHitTestLocation(), result);
+  }
+
+  bool RenderLayer::HitTest(const HitTestRequest &request, const HitTestLocation &hitTestLocation,
+                            HitTestResult &result) noexcept
+  {
+    krys_debug_assert(IsSelfPaintingLayer() || HasSelfPaintingLayerDescendant());
+    krys_debug_assert(!Renderer().View().NeedsLayout());
+
+    LayoutRect hitTestArea = Renderer().View().DocumentRect();
+    if (!request.IgnoreClipping())
+    {
+      // FIXME: The visual viewport (clientCoordinatesRelativeToLayoutViewport) comes with visual viewports.
+      hitTestArea.Intersect(Renderer().View().FrameView().VisibleContentRect());
+    }
+
+    auto insideLayer = HitTestLayer(this, nullptr, request, result, hitTestArea, hitTestLocation, false);
+    if (!insideLayer.Layer)
+    {
+      // We didn't hit any layer. If we are the root layer and the mouse is -- or just was -- down,
+      // return ourselves. We do this so mouse events continue getting delivered after a drag has
+      // exited the view, and so hit testing over a scrollbar hits the content document.
+      // In addtion, it is possible for the mouse to stay in the document but there is no element.
+      // At that time, the events of the mouse should be fired.
+      LayoutPoint hitPoint = hitTestLocation.Point();
+      bool moveRequestIsOverDocument = request.Move() && hitTestArea.Contains(hitPoint);
+      if (!request.IsChildFrameHitTest()
+          && (request.Active() || request.Release() || moveRequestIsOverDocument) && IsRenderViewLayer())
+      {
+        Renderer().UpdateHitTestResult(
+          result, Downcast<RenderView>(Renderer()).FlipForWritingMode(hitTestLocation.Point()));
+        insideLayer = {this};
+      }
+    }
+
+    // Now determine if the result is inside an anchor - if the urlElement isn't already set.
+    auto *node = result.InnerNode();
+    if (node && !result.URLElement())
+    {
+      result.SetURLElement(EnclosingLinkEventParentOrSelf(*node));
+    }
+
+    // Now return whether we were inside this layer (this will always be true for the root
+    // layer).
+    return insideLayer.Layer;
+  }
+
+  dom::Element *RenderLayer::EnclosingElement() const noexcept
+  {
+    for (RenderElement *r = &Renderer(); r; r = r->Parent())
+    {
+      if (auto *e = r->GetElement())
+      {
+        return e;
+      }
+    }
+    return nullptr;
+  }
+
+  Ref<HitTestingTransformState> RenderLayer::CreateLocalTransformState(
+    RenderLayer *rootLayer, RenderLayer *containerLayer, const LayoutRect &hitTestRect,
+    const HitTestLocation &hitTestLocation, const HitTestingTransformState *containerTransformState,
+    const LayoutSize &translationOffset) const noexcept
+  {
+    RefPtr<HitTestingTransformState> transformState;
+    LayoutSize offset;
+    if (containerTransformState)
+    {
+      // If we're already computing transform state, then it's relative to the container (which we know is
+      // non-null).
+      transformState = HitTestingTransformState::Create(*containerTransformState);
+      offset = OffsetFromAncestor(containerLayer);
+    }
+    else
+    {
+      // If this is the first time we need to make transform state, then base it off of hitTestLocation,
+      // which is relative to rootLayer.
+      transformState = HitTestingTransformState::Create(
+        hitTestLocation.TransformedPoint(), hitTestLocation.TransformedRect(), FloatQuad(hitTestRect));
+      offset = OffsetFromAncestor(rootLayer);
+    }
+    offset += translationOffset;
+
+    if (Renderer().ShouldUseTransformFromContainer(containerLayer ? &containerLayer->Renderer() : nullptr))
+    {
+      TransformationMatrix containerTransform;
+      Renderer().GetTransformFromContainer(offset, containerTransform);
+      transformState->ApplyTransform(containerTransform);
+    }
+    else
+    {
+      transformState->Translate(offset.Width(), offset.Height());
+    }
+
+    Ref<HitTestingTransformState> result = transformState;
+    return result;
+  }
+
+  // hitTestLocation and hitTestRect are relative to rootLayer.
+  // A 'flattening' layer is one preserves3D() == false.
+  // transformState.AccumulatedTransform holds the transform from the containing flattening layer.
+  // transformState.LastPlanarPoint is the hitTestLocation in the plane of the containing flattening layer.
+  // transformState.LastPlanarQuad is the hitTestRect as a quad in the plane of the containing flattening
+  // layer.
+  //
+  // If zOffset is non-null (which indicates that the caller wants z offset information),
+  //  *zOffset on return is the z offset of the hit point relative to the containing flattening layer.
+  RenderLayer::HitLayer RenderLayer::HitTestLayer(
+    RenderLayer *rootLayer, RenderLayer *containerLayer, const HitTestRequest &request, HitTestResult &result,
+    const LayoutRect &hitTestRect, const HitTestLocation &hitTestLocation, bool appliedTransform,
+    const HitTestingTransformState *transformState, double *zOffset) noexcept
+  {
+    UpdateLayerListsIfNeeded();
+
+    if (!IsSelfPaintingLayer() && !HasSelfPaintingLayerDescendant())
+    {
+      return {};
+    }
+
+    // FIXME: Renderers captured in a view transition, SVG resources and hidden SVG containers, and fixed
+    // container sampling (isForFixedContainerSampling) come with view transitions, SVG and scrolling.
+
+    // The natural thing would be to keep HitTestingTransformState on the stack, but it's big, so we
+    // heap-allocate.
+
+    // Apply a transform if we have one.
+    if (Transform() && !appliedTransform)
+    {
+      // FIXME: Transformed layers in a paginated layer (hitTestTransformedLayerInFragments) come with
+      // fragmentation; they're hit tested unfragmented.
+
+      // Make sure the parent's clip rects have been calculated.
+      if (Parent())
+      {
+        ClipRectsContext clipRectsContext(rootLayer, RootRelativeClipRects,
+                                          {ClipRectsOption::RespectOverflowClip});
+        ClipRect clipRect = BackgroundClipRect(clipRectsContext);
+        // Test the enclosing clip now.
+        if (!clipRect.Intersects(hitTestLocation))
+        {
+          return {};
+        }
+      }
+
+      return HitTestLayerByApplyingTransform(rootLayer, containerLayer, request, result, hitTestRect,
+                                             hitTestLocation, transformState, zOffset);
+    }
+
+    // Ensure our lists and 3d status are up-to-date.
+    Update3DTransformedDescendantStatus();
+
+    RefPtr<HitTestingTransformState> localTransformState;
+    if (appliedTransform)
+    {
+      // We computed the correct state in the caller (above code), so just reference it.
+      krys_debug_assert(transformState);
+      localTransformState = ShareRefPtr(const_cast<HitTestingTransformState *>(transformState));
+    }
+    else if (transformState || Has3DTransformedDescendant() || Preserves3D())
+    {
+      // We need transform state for the first time, or to offset the container state, so create it here.
+      localTransformState =
+        CreateLocalTransformState(rootLayer, containerLayer, hitTestRect, hitTestLocation, transformState);
+    }
+
+    // Check for hit test on backface if backface-visibility is 'hidden'
+    if (localTransformState && Renderer().Style().GetBackfaceVisibility() == BackfaceVisibility::Hidden)
+    {
+      Maybe<TransformationMatrix> invertedMatrix = localTransformState->AccumulatedTransform.Inverse();
+      // If the z-vector of the matrix is negative, the back is facing towards the viewer.
+      if (invertedMatrix && invertedMatrix.value().M33() < 0)
+      {
+        return {};
+      }
+    }
+
+    // The following are used for keeping track of the z-depth of the hit point of 3d-transformed
+    // descendants.
+    double localZOffset = -std::numeric_limits<double>::infinity();
+    double *zOffsetForDescendantsPtr = nullptr;
+
+    bool depthSortDescendants = false;
+    if (Preserves3D())
+    {
+      depthSortDescendants = true;
+      // Our layers can depth-test with our container, so share the z depth pointer with the container, if it
+      // passed one down.
+      zOffsetForDescendantsPtr = zOffset ? zOffset : &localZOffset;
+    }
+    else if (zOffset)
+    {
+      zOffsetForDescendantsPtr = nullptr;
+    }
+
+    double selfZOffset = localTransformState ? ComputeZOffset(*localTransformState) : 0;
+
+    // This variable tracks which layer the mouse ends up being inside.
+    auto candidateLayer = HitLayer {nullptr, -std::numeric_limits<double>::infinity()};
+#if KRYS_DEBUG
+    LayerListMutationDetector mutationChecker(*this);
+#endif
+
+    auto offsetFromRoot = OffsetFromAncestor(rootLayer);
+    // FIXME: We need to correctly hit test the clip-path when we have a RenderInline too.
+    if (auto *rendererBox = GetRenderBox();
+        rendererBox
+        && !rendererBox->HitTestClipPath(hitTestLocation,
+                                         ToLayoutPoint(offsetFromRoot - ToLayoutSize(RendererLocation()))))
+    {
+      return {};
+    }
+
+    // Begin by walking our list of positive layers from highest z-index down to the lowest z-index.
+    auto hitLayer =
+      HitTestList(PositiveZOrderLayers(), rootLayer, request, result, hitTestRect, hitTestLocation,
+                  localTransformState.get(), zOffsetForDescendantsPtr, depthSortDescendants);
+    if (hitLayer.Layer)
+    {
+      if (!depthSortDescendants)
+      {
+        return hitLayer;
+      }
+      if (hitLayer.ZOffset > candidateLayer.ZOffset)
+      {
+        candidateLayer = hitLayer;
+      }
+    }
+
+    // Now check our overflow objects.
+    {
+      HitTestResult tempResult(result.GetHitTestLocation());
+      hitLayer = HitTestList(NormalFlowLayers(), rootLayer, request, tempResult, hitTestRect, hitTestLocation,
+                             localTransformState.get(), zOffsetForDescendantsPtr, depthSortDescendants);
+
+      if (request.ResultIsElementList())
+      {
+        result.Append(tempResult, request);
+      }
+
+      if (hitLayer.Layer)
+      {
+        if (!depthSortDescendants || hitLayer.ZOffset > candidateLayer.ZOffset)
+        {
+          if (!request.ResultIsElementList())
+          {
+            result = tempResult;
+          }
+
+          candidateLayer = hitLayer;
+        }
+
+        if (!depthSortDescendants)
+        {
+          return hitLayer;
+        }
+      }
+    }
+
+    // Collect the fragments. This will compute the clip rectangles for each layer fragment.
+    LayerFragments layerFragments;
+    CollectFragments(layerFragments, rootLayer, hitTestRect, RootRelativeClipRects,
+                     {ClipRectsOption::RespectOverflowClip}, offsetFromRoot);
+
+    // FIXME: Resizers (hitTestResizerInFragments) come with resizing.
+
+    auto isHitCandidate = [&]()
+    {
+      return !depthSortDescendants || selfZOffset > candidateLayer.ZOffset;
+    };
+
+    // Next we want to see if the mouse pos is inside the child RenderObjects of the layer. Check
+    // every fragment in reverse order.
+    if (IsSelfPaintingLayer())
+    {
+      // Hit test with a temporary HitTestResult, because we only want to commit to 'result' if we know we're
+      // frontmost.
+      HitTestResult tempResult(result.GetHitTestLocation());
+      bool insideFragmentForegroundRect = false;
+      if (HitTestContentsForFragments(layerFragments, request, tempResult, hitTestLocation,
+                                      HitTestDescendants, insideFragmentForegroundRect)
+          && isHitCandidate())
+      {
+        if (request.ResultIsElementList())
+        {
+          result.Append(tempResult, request);
+        }
+        else
+        {
+          result = tempResult;
+        }
+
+        if (!depthSortDescendants)
+        {
+          return {this, selfZOffset};
+        }
+
+        // Foreground can depth-sort with descendant layers, so keep this as a candidate.
+        candidateLayer = {this, selfZOffset};
+      }
+      else if (insideFragmentForegroundRect && request.ResultIsElementList())
+      {
+        result.Append(tempResult, request);
+      }
+    }
+
+    // Now check our negative z-index children.
+    {
+      HitTestResult tempResult(result.GetHitTestLocation());
+      hitLayer =
+        HitTestList(NegativeZOrderLayers(), rootLayer, request, tempResult, hitTestRect, hitTestLocation,
+                    localTransformState.get(), zOffsetForDescendantsPtr, depthSortDescendants);
+
+      if (request.ResultIsElementList())
+      {
+        result.Append(tempResult, request);
+      }
+
+      if (hitLayer.Layer)
+      {
+        if (!depthSortDescendants || hitLayer.ZOffset > candidateLayer.ZOffset)
+        {
+          if (!request.ResultIsElementList())
+          {
+            result = tempResult;
+          }
+
+          candidateLayer = hitLayer;
+        }
+
+        if (!depthSortDescendants)
+        {
+          return hitLayer;
+        }
+      }
+    }
+
+    // If we found a layer, return. Child layers, and foreground always render in front of background.
+    if (candidateLayer.Layer && !depthSortDescendants)
+    {
+      return candidateLayer;
+    }
+
+    if (IsSelfPaintingLayer())
+    {
+      HitTestResult tempResult(result.GetHitTestLocation());
+      bool insideFragmentBackgroundRect = false;
+      if (HitTestContentsForFragments(layerFragments, request, tempResult, hitTestLocation, HitTestSelf,
+                                      insideFragmentBackgroundRect)
+          && isHitCandidate())
+      {
+        if (request.ResultIsElementList())
+        {
+          result.Append(tempResult, request);
+        }
+        else
+        {
+          result = tempResult;
+        }
+
+        if (!depthSortDescendants)
+        {
+          return {this, selfZOffset};
+        }
+
+        candidateLayer = {this, selfZOffset};
+      }
+
+      if (insideFragmentBackgroundRect && request.ResultIsElementList())
+      {
+        result.Append(tempResult, request);
+      }
+    }
+
+    return candidateLayer;
+  }
+
+  bool RenderLayer::HitTestContentsForFragments(const LayerFragments &layerFragments,
+                                                const HitTestRequest &request, HitTestResult &result,
+                                                const HitTestLocation &hitTestLocation,
+                                                HitTestFilter hitTestFilter,
+                                                bool &insideClipRect) const noexcept
+  {
+    for (size_t i = layerFragments.size(); i;)
+    {
+      --i;
+      const auto &fragment = layerFragments[i];
+      if ((hitTestFilter == HitTestSelf && !fragment.DirtyBackgroundRect().Intersects(hitTestLocation))
+          || (hitTestFilter == HitTestDescendants
+              && !fragment.DirtyForegroundRect().Intersects(hitTestLocation)))
+      {
+        continue;
+      }
+      insideClipRect = true;
+      if (HitTestContents(request, result, fragment.LayerBounds(), hitTestLocation, hitTestFilter))
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  RenderLayer::HitLayer RenderLayer::HitTestLayerByApplyingTransform(
+    RenderLayer *rootLayer, RenderLayer *containerLayer, const HitTestRequest &request, HitTestResult &result,
+    const LayoutRect &hitTestRect, const HitTestLocation &hitTestLocation,
+    const HitTestingTransformState *transformState, double *zOffset,
+    const LayoutSize &translationOffset) noexcept
+  {
+    // Create a transform state to accumulate this transform.
+    Ref<HitTestingTransformState> newTransformState = CreateLocalTransformState(
+      rootLayer, containerLayer, hitTestRect, hitTestLocation, transformState, translationOffset);
+
+    // If the transform can't be inverted, then don't hit test this layer at all.
+    if (!newTransformState->AccumulatedTransform.IsInvertible())
+    {
+      return {};
+    }
+
+    // Compute the point and the hit test rect in the coords of this layer by using the values
+    // from the transformState, which store the point and quad in the coords of the last flattened
+    // layer, and the accumulated transform which lets up map through preserve-3d layers.
+    //
+    // We can't just map hitTestLocation and hitTestRect because they may have been flattened (losing z)
+    // by our container.
+    auto localPoint = newTransformState->MappedPoint();
+    auto localHitTestRect = newTransformState->BoundsOfMappedArea();
+    auto newHitTestLocation = [&]
+    {
+      if (hitTestLocation.IsRectBasedTest())
+      {
+        return HitTestLocation(localPoint, newTransformState->MappedQuad());
+      }
+      return HitTestLocation(localPoint, FloatQuad(FloatRect(newTransformState->BoundsOfMappedQuad())));
+    }();
+
+    // Now do a hit test with the root layer shifted to be us.
+    return HitTestLayer(this, containerLayer, request, result, localHitTestRect, newHitTestLocation, true,
+                        newTransformState.get(), zOffset);
+  }
+
+  bool RenderLayer::HitTestContents(const HitTestRequest &request, HitTestResult &result,
+                                    const LayoutRect &layerBounds, const HitTestLocation &hitTestLocation,
+                                    HitTestFilter hitTestFilter) const noexcept
+  {
+    krys_debug_assert(IsSelfPaintingLayer() || HasSelfPaintingLayerDescendant());
+
+    if (!Renderer().HitTest(request, result, hitTestLocation,
+                            ToLayoutPoint(layerBounds.Location() - RendererLocation()), hitTestFilter))
+    {
+      // It's wrong to set innerNode, but then claim that you didn't hit anything, unless it is
+      // a rect-based test.
+      krys_debug_assert(!result.InnerNode()
+                        || (request.ResultIsElementList() && result.ListBasedTestResult().size()));
+      return false;
+    }
+
+    // For positioned generated content, we might still not have a
+    // node by the time we get to the layer level, since none of
+    // the content in the layer has an element. So just walk up
+    // the tree.
+    if (!result.InnerNode() || !result.InnerNonSharedNode())
+    {
+      auto *e = EnclosingElement();
+      if (!result.InnerNode())
+      {
+        result.SetInnerNode(e);
+      }
+      if (!result.InnerNonSharedNode())
+      {
+        result.SetInnerNonSharedNode(e);
+      }
+    }
+
+    return true;
+  }
+
+  RenderLayer::HitLayer RenderLayer::HitTestList(LayerList layerIterator, RenderLayer *rootLayer,
+                                                 const HitTestRequest &request, HitTestResult &result,
+                                                 const LayoutRect &hitTestRect,
+                                                 const HitTestLocation &hitTestLocation,
+                                                 const HitTestingTransformState *transformState,
+                                                 double *zOffsetForDescendants,
+                                                 bool depthSortDescendants) noexcept
+  {
+    if (layerIterator.begin() == layerIterator.end())
+    {
+      return {};
+    }
+
+    if (!HasSelfPaintingLayerDescendant())
+    {
+      return {};
+    }
+
+    if (auto *renderBox = GetRenderBox(); renderBox && IsSkippedContentRoot(*renderBox))
+    {
+      return {};
+    }
+
+    auto resultLayer = HitLayer {nullptr, -std::numeric_limits<double>::infinity()};
+
+    RefPtr<HitTestingTransformState> flattenedTransformState;
+    double unflattenedZOffset = 0;
+    for (auto iter = layerIterator.end(); iter != layerIterator.begin();)
+    {
+      auto *childLayer = *--iter;
+
+      // If we're about to cross a flattening boundary, then pass the (lazily-initialized)
+      // flattened transfomState to the child layer.
+      auto *transformStateForChild = transformState;
+      if (transformState && !childLayer->ParticipatesInPreserve3D())
+      {
+        if (!flattenedTransformState)
+        {
+          flattenedTransformState = HitTestingTransformState::Create(*transformState);
+          flattenedTransformState->Flatten();
+          unflattenedZOffset = ComputeZOffset(*transformState);
+        }
+        transformStateForChild = flattenedTransformState.get();
+      }
+
+      HitTestResult tempResult(result.GetHitTestLocation());
+      auto hitLayer =
+        childLayer->HitTestLayer(rootLayer, this, request, tempResult, hitTestRect, hitTestLocation, false,
+                                 transformStateForChild, zOffsetForDescendants);
+
+      // If it is a list-based test, we can safely append the temporary result since it might had hit
+      // nodes but not necessarily had hitLayer set.
+      krys_debug_assert(!result.IsRectBasedTest() || request.ResultIsElementList());
+      if (request.ResultIsElementList())
+      {
+        result.Append(tempResult, request);
+      }
+
+      if (hitLayer.Layer)
+      {
+        // If the child was flattened, then override the returned depth with the depth of the
+        // plane we flattened into (ourselves) instead.
+        if (transformStateForChild == flattenedTransformState.get())
+        {
+          hitLayer.ZOffset = unflattenedZOffset;
+        }
+
+        if (!depthSortDescendants || hitLayer.ZOffset > resultLayer.ZOffset)
+        {
+          resultLayer = hitLayer;
+          if (!request.ResultIsElementList())
+          {
+            result = tempResult;
+          }
+          if (!depthSortDescendants)
+          {
+            break;
+          }
+        }
+      }
+    }
+
+    return resultLayer;
   }
 
 #pragma endregion

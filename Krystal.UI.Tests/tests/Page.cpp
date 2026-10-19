@@ -81,4 +81,40 @@ namespace krys::ui::tests
   (composite-operation source-over)
   (blend-mode normal)))"));
   }
+
+  TEST_CASE("Page: hit tests, hovers and activates", "[UI]")
+  {
+    Page page({400, 300});
+    page.LoadHTML(
+      u8"<!DOCTYPE html><style>body { margin: 0 } div { height: 50px }"
+      u8"#a:hover { width: 100px } #a:active { width: 50px }</style><div id=a></div><div id=b></div>");
+    auto a = page.Document().GetElementById(u8"a");
+    auto b = page.Document().GetElementById(u8"b");
+    CHECK(page.HitTest({10, 10}) == a.get());
+    CHECK(page.HitTest({10, 60}) == b.get());
+
+    page.PointerMoved({10, 10});
+    page.UpdateRendering();
+    CHECK(a->Hovered());
+    CHECK(WidthOf(page, u8"a") == 100);
+
+    page.PointerPressed({10, 10});
+    page.UpdateRendering();
+    CHECK(a->Active());
+    CHECK(WidthOf(page, u8"a") == 50);
+
+    // While the button is down, only the active chain stays hovered.
+    page.PointerMoved({10, 60});
+    CHECK_FALSE(b->Hovered());
+    page.PointerReleased({10, 60});
+    CHECK_FALSE(a->Active());
+    page.PointerMoved({10, 10});
+    CHECK(a->Hovered());
+    page.PointerMoved({10, 60});
+    CHECK(b->Hovered());
+    CHECK_FALSE(a->Hovered());
+
+    page.PointerLeft();
+    CHECK_FALSE(b->Hovered());
+  }
 }

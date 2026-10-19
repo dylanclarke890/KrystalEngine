@@ -52,6 +52,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
+#include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
@@ -819,12 +820,39 @@ namespace krys::boo::dom
       return Is<ShadowRoot>(element.ParentNode());
     }
 
-    // FIXME: The renderer, once there's a render tree; until then an element has one when it has a render
-    // style.
     KRYS_NODISCARD bool HasRenderer(const Element &element) noexcept
     {
-      return element.GetRenderStyle();
+      return element.Renderer();
     }
+  }
+
+  bool Document::HitTest(const HitTestRequest &request, HitTestResult &result) noexcept
+  {
+    return HitTest(request, result.GetHitTestLocation(), result);
+  }
+
+  bool Document::HitTest(const HitTestRequest &request, const HitTestLocation &location,
+                         HitTestResult &result) noexcept
+  {
+    Ref protectedThis = ShareRef(*this);
+
+    if (!GetRenderView())
+    {
+      return false;
+    }
+
+    // FIXME: Child frames (allowsAnyFrameContent: updating their layout too) come with frames.
+    (void)UpdateLayout();
+    if (!GetRenderView())
+    {
+      return false;
+    }
+
+    bool resultLayer = GetRenderView()->Layer()->HitTest(request, location, result);
+
+    // FIXME: The frame view's scrollbars (allowsFrameScrollbars, scrollbarAtPoint) come with frame view
+    // scrolling.
+    return resultLayer;
   }
 
   void Document::UpdateHoverActiveState(const HitTestRequest &request, Element *innerElement,
@@ -864,12 +892,10 @@ namespace krys::boo::dom
       {
         // We are setting the :active chain and freezing it. If future moves happen, they
         // will need to reference this chain.
-        // FIXME: The chain of renderers, once there's a render tree; until then the composed tree ancestors
-        // with a renderer.
-        for (auto *element = newActiveElement.get(); element;
-             element = element->ParentElementInComposedTree())
+        for (RenderElement *current = newActiveElement->Renderer(); current; current = current->Parent())
         {
-          if (!HasRenderer(*element))
+          auto *element = current->GetElement();
+          if (!element || current->IsRenderTextOrLineBreak())
           {
             continue;
           }

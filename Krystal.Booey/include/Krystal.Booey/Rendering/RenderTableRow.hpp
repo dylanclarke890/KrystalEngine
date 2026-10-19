@@ -13,8 +13,7 @@ namespace krys::boo
   struct BorderValue;
 
   /// @brief A table row.
-  // FIXME: Hit testing (nodeAtPoint) and repaints (clippedOverflowRect, rectsForRepaintingAfterLayout,
-  // imageChanged), once there are those.
+  // FIXME: Repaints (clippedOverflowRect, rectsForRepaintingAfterLayout, imageChanged), once there are those.
   class RenderTableRow final : public RenderBox
   {
     KRYS_NON_COPY_MOVABLE(RenderTableRow);
@@ -25,6 +24,9 @@ namespace krys::boo
     /// cells; rows without layers are painted by their section.
     void Paint(PaintInfo &, const LayoutPoint &) noexcept final;
     void PaintOutlineForRowIfNeeded(PaintInfo &, const LayoutPoint &) noexcept;
+    bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
+                     const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
+                     HitTestAction action) noexcept final;
 
     constexpr static uint32 UnsetRowIndex = 0x7F'FF'FF'FF;
     constexpr static uint32 MaxRowIndex = 0x7F'FF'FF'FE; // 2,147,483,646

@@ -56,7 +56,6 @@ namespace krys::boo
 
   /// @brief A grid container: places its items in a grid, sizes the grid's tracks and aligns the items in
   /// their areas. Also lays out subgrids and masonry (grid lanes) containers.
-  // FIXME: Hit testing (hitTestChildren), once there is hit testing.
   class RenderGrid final : public RenderBlock
   {
     KRYS_NON_COPY_MOVABLE(RenderGrid);
@@ -259,6 +258,9 @@ namespace krys::boo
     }
 
   protected:
+    bool HitTestChildren(const HitTestRequest &request, HitTestResult &result,
+                         const HitTestLocation &locationInContainer, const LayoutPoint &adjustedLocation,
+                         HitTestAction hitTestAction) noexcept override;
     void PaintChildren(PaintInfo &forSelf, const LayoutPoint &, PaintInfo &forChild) noexcept override;
 
   private:

@@ -9,7 +9,7 @@
 namespace krys::boo
 {
   /// @brief An inline box.
-  // FIXME: Line boxes, continuations, hit testing and the geometry come with layout.
+  // FIXME: Line boxes, continuations and the geometry come with layout.
   class RenderInline : public RenderBoxModelObject
   {
     KRYS_NON_COPY_MOVABLE(RenderInline);
@@ -17,6 +17,10 @@ namespace krys::boo
 
   public:
     void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
+    bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
+                     const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
+                     HitTestAction hitTestAction) noexcept override;
+    void UpdateHitTestResult(HitTestResult &result, const LayoutPoint &point) const noexcept override;
 
     RenderInline(Type type, dom::Element &element, RenderStyle &&style) noexcept;
     RenderInline(Type type, dom::Document &document, RenderStyle &&style) noexcept;

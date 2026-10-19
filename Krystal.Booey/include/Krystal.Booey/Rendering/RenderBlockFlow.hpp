@@ -516,6 +516,13 @@ namespace krys::boo
   protected:
     void PaintFloats(PaintInfo &, const LayoutPoint &, bool preservePhase = false) noexcept override;
     void PaintInlineChildren(PaintInfo &, const LayoutPoint &) noexcept override;
+    bool HitTestFloats(const HitTestRequest &request, HitTestResult &result,
+                       const HitTestLocation &locationInContainer,
+                       const LayoutPoint &accumulatedOffset) noexcept override;
+    bool HitTestInlineChildren(const HitTestRequest &request, HitTestResult &result,
+                               const HitTestLocation &locationInContainer,
+                               const LayoutPoint &accumulatedOffset,
+                               HitTestAction hitTestAction) noexcept override;
 
   public:
     /// @brief Paints the blocks in this block's inline content, when it has no other painted content.

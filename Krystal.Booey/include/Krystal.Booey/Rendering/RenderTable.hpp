@@ -25,7 +25,7 @@ namespace krys::boo
   };
 
   /// @brief A table: its sections, columns and captions, its column structure and its collapsed borders.
-  // FIXME: Masks (paintMask) and hit testing (nodeAtPoint), once there are those.
+  // FIXME: Masks (paintMask), once there are those.
   class RenderTable : public RenderBlock
   {
     KRYS_NON_COPY_MOVABLE(RenderTable);
@@ -277,6 +277,9 @@ namespace krys::boo
     using CollapsedBorderValues = List<CollapsedBorderValue>;
 
     void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
+    bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
+                     const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
+                     HitTestAction action) noexcept override;
     void PaintObject(PaintInfo &, const LayoutPoint &) noexcept override;
     void PaintBoxDecorations(PaintInfo &, const LayoutPoint &) noexcept override;
     void AdjustBorderBoxRectForPainting(LayoutRect &) noexcept override;

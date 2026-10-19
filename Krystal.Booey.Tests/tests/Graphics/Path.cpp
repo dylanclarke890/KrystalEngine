@@ -143,4 +143,50 @@ namespace krys::boo::tests
       CHECK(combined.IsEmpty());
     }
   }
+
+  TEST_CASE("Path: contains", "[Graphics][Path]")
+  {
+    CHECK_FALSE(Path().Contains({0, 0}));
+
+    Path rect;
+    rect.AddRect({10, 10, 20, 20});
+    CHECK(rect.Contains({15, 15}));
+    CHECK_FALSE(rect.Contains({5, 15}));
+    CHECK_FALSE(rect.Contains({35, 15}));
+
+    SECTION("an open subpath is filled as if closed")
+    {
+      Path triangle;
+      triangle.MoveTo({0, 0});
+      triangle.AddLineTo({40, 0});
+      triangle.AddLineTo({0, 40});
+      CHECK(triangle.Contains({10, 10}));
+      CHECK_FALSE(triangle.Contains({30, 30}));
+    }
+
+    SECTION("wind rules")
+    {
+      // Two rects wound the same way: the inner one is filled with nonzero, a hole with evenodd.
+      Path nested;
+      nested.AddRect({0, 0, 40, 40});
+      nested.AddRect({10, 10, 20, 20});
+      CHECK(nested.Contains({20, 20}));
+      CHECK_FALSE(nested.Contains({20, 20}, WindRule::EvenOdd));
+      CHECK(nested.Contains({5, 5}, WindRule::EvenOdd));
+    }
+
+    SECTION("curves")
+    {
+      Path ellipse;
+      ellipse.AddEllipseInRect({0, 0, 40, 20});
+      CHECK(ellipse.Contains({20, 10}));
+      CHECK(ellipse.Contains({2, 10}));
+      CHECK_FALSE(ellipse.Contains({2, 2}));
+
+      Path rounded;
+      rounded.AddRoundedRect(FloatRoundedRect({0, 0, 40, 40}, FloatRoundedRect::Radii(10)));
+      CHECK(rounded.Contains({20, 1}));
+      CHECK_FALSE(rounded.Contains({1, 1}));
+    }
+  }
 }

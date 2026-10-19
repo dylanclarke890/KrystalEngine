@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
+#include "Krystal.Booey/Rendering/HitTestLocation.hpp"
 #include "Krystal.Core/Attributes.hpp"
 
 namespace krys::boo
@@ -85,6 +86,14 @@ namespace krys::boo
         return true;
       }
       return _rect.Intersects(rect);
+    }
+    KRYS_NODISCARD bool Intersects(const HitTestLocation &hitTestLocation) const noexcept
+    {
+      if (IsInfinite())
+      {
+        return true;
+      }
+      return hitTestLocation.Intersects(_rect);
     }
 
     KRYS_NODISCARD bool IsEmpty() const noexcept

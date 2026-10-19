@@ -30,7 +30,9 @@
 
 namespace krys::boo
 {
+  class HitTestLocation;
   class HitTestRequest;
+  class HitTestResult;
   class LocalFrame;
   class LocalFrameView;
   class RenderElement;
@@ -525,7 +527,6 @@ namespace krys::boo::dom
     /// @brief Updates the hover and active state for a pointer over @p innerElement (or outside the document,
     /// if it's null), as hit testing finds it: hover follows the pointer, and a press makes the element and
     /// its ancestors `:active` until the release.
-    /// @note There's no hit testing yet: the host says which element is under the pointer.
     void UpdateHoverActiveState(const HitTestRequest &request, Element *innerElement,
                                 CaptureChange captureElementChanged = CaptureChange::No) noexcept;
 
@@ -717,6 +718,12 @@ namespace krys::boo::dom
       NoChange,
       ChangesDone
     };
+
+    /// @brief Lays the document out, then hit tests its layers at the result's location.
+    /// @return Whether a layer was hit.
+    bool HitTest(const HitTestRequest &request, HitTestResult &result) noexcept;
+    bool HitTest(const HitTestRequest &request, const HitTestLocation &location,
+                 HitTestResult &result) noexcept;
 
     /// @brief Updates style, then lays the document out if it needs it.
     UpdateLayoutResult UpdateLayout() noexcept;

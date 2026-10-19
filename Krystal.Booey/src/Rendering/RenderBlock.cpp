@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/LayoutScope.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
@@ -2264,10 +2265,160 @@ namespace krys::boo
       PaintOutline(paintInfo, LayoutRect(paintOffset, Size()));
     }
 
-    // 6. Continuation outlines (paintContinuationOutlines): there are no continuations, as blocks in inlines are
-    // laid out in the inline's lines, so inlines paint their own outlines.
+    // 6. Continuation outlines (paintContinuationOutlines): there are no continuations, as blocks in inlines
+    // are laid out in the inline's lines, so inlines paint their own outlines.
     // FIXME: 7. Carets (paintCarets) come with editing.
   }
 
 #pragma endregion
+
+  dom::Node *RenderBlock::NodeForHitTest() const noexcept
+  {
+    if (auto type = Style().GetPseudoElementType())
+    {
+      switch (*type)
+      {
+        case PseudoElementType::Backdrop:
+          // FIXME: ::backdrop hit tests to the element that generated it, which comes with the top layer.
+          break;
+
+        case PseudoElementType::ViewTransition:
+        case PseudoElementType::ViewTransitionGroup:
+        case PseudoElementType::ViewTransitionImagePair:
+          // The view transition pseudo-elements should hit-test to their originating element (the document
+          // element).
+          return GetDocument().DocumentElement().get();
+
+        default: break;
+      }
+    }
+
+    // FIXME: Continuations (the enclosing element that was split) come with continuations.
+    return GetElement();
+  }
+
+  bool RenderBlock::HitTestChildren(const HitTestRequest &request, HitTestResult &result,
+                                    const HitTestLocation &locationInContainer,
+                                    const LayoutPoint &adjustedLocation, HitTestAction hitTestAction) noexcept
+  {
+    krys_debug_assert(!IsSkippedContentRoot(*this));
+
+    // Hit test descendants first.
+    const LayoutSize localOffset = ToLayoutSize(adjustedLocation);
+    const LayoutSize scrolledOffset(localOffset - ToLayoutSize(LayoutPoint(GetScrollPosition())));
+
+    if (hitTestAction == HitTestFloat
+        && HitTestFloats(request, result, locationInContainer, ToLayoutPoint(scrolledOffset)))
+    {
+      return true;
+    }
+    if (HitTestContents(request, result, locationInContainer, ToLayoutPoint(scrolledOffset), hitTestAction))
+    {
+      UpdateHitTestResult(result, FlipForWritingMode(locationInContainer.Point() - localOffset));
+      return true;
+    }
+    return false;
+  }
+
+  bool RenderBlock::NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
+                                const HitTestLocation &locationInContainer,
+                                const LayoutPoint &accumulatedOffset, HitTestAction hitTestAction) noexcept
+  {
+    const LayoutPoint adjustedLocation(accumulatedOffset + Location());
+    const LayoutSize localOffset = ToLayoutSize(adjustedLocation);
+
+    // Check if we need to do anything at all.
+    if (!HitTestVisualOverflow(locationInContainer, accumulatedOffset))
+    {
+      return false;
+    }
+
+    // FIXME: Scrollbars and resizers (isPointInOverflowControl) come with scrollbars.
+
+    if (!HitTestClipPath(locationInContainer, accumulatedOffset))
+    {
+      return false;
+    }
+
+    auto shouldHittestContent = !IsSkippedContentRoot(*this);
+    if (shouldHittestContent)
+    {
+      // If we have clipping, then we can't have any spillout.
+      // FIXME: Control clips (hasControlClip, controlClipRect) come with form controls.
+      bool useClip = HasNonVisibleOverflow();
+      bool checkChildren = !useClip
+                           || locationInContainer.Intersects(OverflowClipRect(
+                             adjustedLocation, OverlayScrollbarSizeRelevancy::IncludeOverlayScrollbarSize));
+      if (checkChildren
+          && HitTestChildren(request, result, locationInContainer, adjustedLocation, hitTestAction))
+      {
+        return true;
+      }
+
+      // FIXME: Children painted in the border (hitTestExcludedChildrenInBorder: fieldset legends) come with
+      // fieldsets.
+    }
+
+    if (!HitTestBorderRadius(locationInContainer, accumulatedOffset))
+    {
+      return false;
+    }
+
+    // Now hit test our background
+    if (hitTestAction == HitTestBlockBackground || hitTestAction == HitTestChildBlockBackground)
+    {
+      LayoutRect boundsRect(adjustedLocation, Size());
+      if (VisibleToHitTesting(&request) && locationInContainer.Intersects(boundsRect))
+      {
+        UpdateHitTestResult(result, FlipForWritingMode(locationInContainer.Point() - localOffset));
+        if (result.AddNodeToListBasedTestResult(NodeForHitTest(), request, locationInContainer, boundsRect)
+            == HitTestProgress::Stop)
+        {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  bool RenderBlock::HitTestContents(const HitTestRequest &request, HitTestResult &result,
+                                    const HitTestLocation &locationInContainer,
+                                    const LayoutPoint &accumulatedOffset,
+                                    HitTestAction hitTestAction) noexcept
+  {
+    if (ChildrenInline() && !IsRenderTable())
+    {
+      if (Style().IsSkippedRootOrSkippedContent())
+      {
+        return false;
+      }
+      return HitTestInlineChildren(request, result, locationInContainer, accumulatedOffset, hitTestAction);
+    }
+
+    // Hit test our children.
+    HitTestAction childHitTest = hitTestAction;
+    if (hitTestAction == HitTestChildBlockBackgrounds)
+    {
+      childHitTest = HitTestChildBlockBackground;
+    }
+    for (auto *child = LastChildBox(); child; child = child->PreviousSiblingBox())
+    {
+      LayoutPoint childPoint = FlipForWritingModeForChild(*child, accumulatedOffset);
+      if (!child->HasSelfPaintingLayer() && !child->IsFloating()
+          && child->NodeAtPoint(request, result, locationInContainer, childPoint, childHitTest))
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  void RenderBlock::OffsetForContents(LayoutPoint &offset) const noexcept
+  {
+    offset = FlipForWritingMode(offset);
+    offset += ToLayoutSize(LayoutPoint(GetScrollPosition()));
+    offset = FlipForWritingMode(offset);
+  }
 }

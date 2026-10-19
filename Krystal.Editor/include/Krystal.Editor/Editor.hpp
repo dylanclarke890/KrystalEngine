@@ -54,6 +54,8 @@ namespace krys
     UniquePtr<ui::Page> _page {};
     editor::BooeyFonts _booeyFonts {};
     EditorView _view {EditorView::Page};
+    /// @brief The mouse in page view coordinates: below the header.
+    boo::IntPoint _pointer {};
 
   public:
     explicit Editor(int argc, char **argv, const ApplicationSettings &settings) noexcept
@@ -190,6 +192,44 @@ namespace krys
           if (_page)
           {
             _page->Resize(PageSize());
+          }
+          return true;
+        });
+
+      // The page view's pointer: hover follows the mouse, and the left button makes elements active.
+      _context->Events->On<MouseMoveEvent>(
+        [&](const auto &event)
+        {
+          _pointer = boo::IntPoint(static_cast<int32>(event.ClientX()),
+                                   static_cast<int32>(event.ClientY() - HeaderHeight));
+          if (_page && _view == EditorView::Page)
+          {
+            if (_pointer.Y() < 0)
+            {
+              _page->PointerLeft();
+            }
+            else
+            {
+              _page->PointerMoved(_pointer);
+            }
+          }
+          return true;
+        });
+
+      _context->Events->On<MouseButtonEvent>(
+        [&](const auto &event)
+        {
+          if (!_page || _view != EditorView::Page || event.Button() != pal::MouseButton::Left)
+          {
+            return true;
+          }
+          if (event.IsPressed() && _pointer.Y() >= 0)
+          {
+            _page->PointerPressed(_pointer);
+          }
+          else if (event.WasReleased())
+          {
+            _page->PointerReleased(_pointer);
           }
           return true;
         });

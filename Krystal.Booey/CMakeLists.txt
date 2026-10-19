@@ -1432,6 +1432,10 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   # Decorations, markers and ellipses (G4d2)
   include/Krystal.Booey/Graphics/FloatPointGraph.hpp
   include/Krystal.Booey/Rendering/EllipsisBoxPainter.hpp
+  # Hit testing, hover and active (G4f1)
+  include/Krystal.Booey/Rendering/HitTestLocation.hpp
+  include/Krystal.Booey/Rendering/HitTestResult.hpp
+  include/Krystal.Booey/Rendering/HitTestingTransformState.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -2378,6 +2382,10 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   # Decorations, markers and ellipses (G4d2)
   src/Graphics/FloatPointGraph.cpp
   src/Rendering/EllipsisBoxPainter.cpp
+  # Hit testing, hover and active (G4f1)
+  src/Rendering/HitTestLocation.cpp
+  src/Rendering/HitTestResult.cpp
+  src/Rendering/HitTestingTransformState.cpp
 )
 
 target_precompile_headers(Krystal.Booey

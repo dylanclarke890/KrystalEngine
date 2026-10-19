@@ -30,6 +30,9 @@ namespace krys::boo::layout
 namespace krys::boo
 {
   class FloatPoint;
+  class HitTestLocation;
+  class HitTestRequest;
+  class HitTestResult;
   class FloatQuad;
   class IntRect;
   class LayoutPoint;
@@ -76,6 +79,24 @@ namespace krys::boo
     UseTransforms,
     ApplyContainerFlip,
     IgnoreStickyOffsets
+  };
+
+  /// @brief Which part of a renderer a hit test looks at: itself, its descendants or both.
+  enum HitTestFilter
+  {
+    HitTestAll,
+    HitTestSelf,
+    HitTestDescendants
+  };
+
+  /// @brief The hit testing counterpart of a paint phase: what a renderer is tested for in one pass.
+  enum HitTestAction
+  {
+    HitTestBlockBackground,
+    HitTestChildBlockBackground,
+    HitTestChildBlockBackgrounds,
+    HitTestFloat,
+    HitTestForeground
   };
 
   /// @brief Whether marking a renderer as needing layout also marks its containing blocks.
@@ -722,6 +743,24 @@ namespace krys::boo
     KRYS_NODISCARD RenderLayer *EnclosingLayer() const noexcept;
 
     KRYS_NODISCARD bool IsSkippedContent() const noexcept;
+
+    /// @brief Hit tests the renderer in each of the hit test actions, foreground first, as @p hitTestFilter
+    /// allows.
+    bool HitTest(const HitTestRequest &request, HitTestResult &result,
+                 const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
+                 HitTestFilter hitTestFilter = HitTestAll) noexcept;
+    /// @brief Whether @p locationInContainer hits the renderer (or its descendants) in @p hitTestAction,
+    /// setting
+    /// @p result's inner node when it does.
+    virtual bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
+                             const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
+                             HitTestAction hitTestAction) noexcept;
+    /// @brief Sets @p result's inner node to this renderer's node (if it has none yet), @p point being the
+    /// hit point in the renderer's coordinates.
+    virtual void UpdateHitTestResult(HitTestResult &result, const LayoutPoint &point) const noexcept;
+    /// @brief The node hit testing reports for the renderer: its node, or for anonymous renderers in
+    /// generated content, the pseudo-element's.
+    KRYS_NODISCARD virtual dom::Node *NodeForHitTest() const noexcept;
     KRYS_NODISCARD bool HasTransformOrPerspective() const noexcept;
 
     KRYS_NODISCARD bool PaintContainmentApplies() const noexcept

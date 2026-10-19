@@ -59,6 +59,10 @@ namespace krys::boo
 
     KRYS_NODISCARD float ZoomFactor() const noexcept;
 
+    void UpdateHitTestResult(HitTestResult &result, const LayoutPoint &point) const noexcept override;
+    /// @brief The root element.
+    KRYS_NODISCARD dom::Node *NodeForHitTest() const noexcept override;
+
     KRYS_NODISCARD LocalFrameView &FrameView() const noexcept
     {
       return _frameView;
@@ -107,6 +111,8 @@ namespace krys::boo
     KRYS_NODISCARD LayoutRect BackgroundRect() const noexcept;
     KRYS_NODISCARD LayoutRect UnextendedBackgroundRect() const noexcept;
     KRYS_NODISCARD IntRect UnscaledDocumentRect() const noexcept;
+    /// @brief The document's rect, transformed by the view's transform if it has one.
+    KRYS_NODISCARD IntRect DocumentRect() const noexcept;
 
     /// @brief Whether the view fills with the base background colour first.
     KRYS_NODISCARD bool ShouldPaintBaseBackground() const noexcept;

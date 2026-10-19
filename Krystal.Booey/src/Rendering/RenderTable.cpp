@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Rendering/BorderPainter.hpp"
 #include "Krystal.Booey/Rendering/BorderShape.hpp"
 #include "Krystal.Booey/Rendering/FixedTableLayout.hpp"
+#include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
@@ -2208,5 +2209,48 @@ namespace krys::boo
     {
       paintInfo.Context().EndTransparencyLayer();
     }
+  }
+
+  bool RenderTable::NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
+                                const HitTestLocation &locationInContainer,
+                                const LayoutPoint &accumulatedOffset, HitTestAction action) noexcept
+  {
+    LayoutPoint adjustedLocation = accumulatedOffset + Location();
+
+    // Check kids first.
+    if (!HasNonVisibleOverflow() || locationInContainer.Intersects(OverflowClipRect(adjustedLocation)))
+    {
+      for (RenderObject *child = LastChild(); child; child = child->PreviousSibling())
+      {
+        auto *box = DynamicDowncast<RenderBox>(*child);
+        if (box && !box->HasSelfPaintingLayer()
+            && (box->IsRenderTableSection() || box->IsRenderTableCaption()))
+        {
+          LayoutPoint childPoint = FlipForWritingModeForChild(*box, adjustedLocation);
+          if (box->NodeAtPoint(request, result, locationInContainer, childPoint, action))
+          {
+            UpdateHitTestResult(result, ToLayoutPoint(locationInContainer.Point() - childPoint));
+            return true;
+          }
+        }
+      }
+    }
+
+    // Check our bounds next.
+    LayoutRect boundsRect(adjustedLocation, Size());
+    if (VisibleToHitTesting(&request)
+        && (action == HitTestBlockBackground || action == HitTestChildBlockBackground)
+        && locationInContainer.Intersects(boundsRect))
+    {
+      UpdateHitTestResult(result,
+                          FlipForWritingMode(locationInContainer.Point() - ToLayoutSize(adjustedLocation)));
+      if (result.AddNodeToListBasedTestResult(NodeForHitTest(), request, locationInContainer, boundsRect)
+          == HitTestProgress::Stop)
+      {
+        return true;
+      }
+    }
+
+    return false;
   }
 }

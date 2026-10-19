@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
@@ -398,6 +399,41 @@ namespace krys::boo
     if (oldStyle)
     {
       RemoveOutOfFlowBoxesIfNeededOnStyleChange(*container, *oldStyle, newStyle);
+    }
+  }
+
+  bool RenderInline::NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
+                                 const HitTestLocation &locationInContainer,
+                                 const LayoutPoint &accumulatedOffset, HitTestAction hitTestAction) noexcept
+  {
+    krys_debug_assert(Layer());
+    if (auto *lineLayout = layout_integration::LineLayout::Containing(*this))
+    {
+      return lineLayout->HitTest(request, result, locationInContainer, accumulatedOffset, hitTestAction,
+                                 this);
+    }
+    return false;
+  }
+
+  void RenderInline::UpdateHitTestResult(HitTestResult &result, const LayoutPoint &point) const noexcept
+  {
+    if (result.InnerNode())
+    {
+      return;
+    }
+
+    // There are no continuations whose points would need moving into the principal renderer's containing
+    // block.
+    LayoutPoint localPoint(point);
+    if (auto *node = NodeForHitTest())
+    {
+      result.SetInnerNode(node);
+      if (!result.InnerNonSharedNode())
+      {
+        result.SetInnerNonSharedNode(node);
+      }
+      result.SetPseudoElementIdentifier(Style().GetPseudoElementIdentifier());
+      result.SetLocalPoint(localPoint);
     }
   }
 }

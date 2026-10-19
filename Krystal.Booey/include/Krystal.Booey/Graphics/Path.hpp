@@ -19,9 +19,9 @@ namespace krys::boo
   class PathTraversalState;
 
   /// @brief A path made of line, curve, arc and shape segments.
-  /// FIXME: Hit testing (`contains`, `strokeContains`), stroke bounds (`strokeBoundingRect`) and the platform
-  /// path (`platformPath`, used where a segment can't produce elements or be transformed, and by `addPath`)
-  /// come with the graphics backend.
+  /// FIXME: Stroke hit testing (`strokeContains`), stroke bounds (`strokeBoundingRect`) and the platform path
+  /// (`platformPath`, used where a segment can't produce elements or be transformed, and by `addPath`) come
+  /// with the graphics backend.
   class Path
   {
   public:
@@ -63,6 +63,9 @@ namespace krys::boo
 
     void ApplySegments(const PathSegmentApplier &) const noexcept;
     void ApplyElements(const PathElementApplier &) const noexcept;
+
+    /// @brief Whether @p point is inside the path, filled with @p rule; curves are flattened into lines.
+    KRYS_NODISCARD bool Contains(const FloatPoint &point, WindRule rule = WindRule::NonZero) const noexcept;
     void Clear() noexcept;
 
     void Translate(const FloatSize &delta) noexcept;

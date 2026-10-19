@@ -17,6 +17,7 @@
 #include "Krystal.Booey/Rendering/BorderShape.hpp"
 #include "Krystal.Booey/Rendering/FloatingObjects.hpp"
 #include "Krystal.Booey/Rendering/GridLayoutFunctions.hpp"
+#include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp"
 #include "Krystal.Booey/Rendering/RenderAncestorIterator.hpp"
@@ -41,7 +42,9 @@
 #include "Krystal.Booey/Rendering/TransformOperationData.hpp"
 #include "Krystal.Booey/Style/Calc/TreeEvaluation.hpp"
 #include "Krystal.Booey/Style/TransformResolver.hpp"
+#include "Krystal.Booey/Style/Values/Masking/ClipPath.hpp"
 #include "Krystal.Booey/Style/Values/ScrollSnap/ScrollPadding.hpp"
+#include "Krystal.Booey/Style/Values/Shapes/BasicShape.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include <cmath>
 
@@ -5734,4 +5737,103 @@ namespace krys::boo
   }
 
 #pragma endregion
+
+  bool RenderBox::HitTestVisualOverflow(const HitTestLocation &hitTestLocation,
+                                        const LayoutPoint &accumulatedOffset) const noexcept
+  {
+    if (IsRenderView())
+    {
+      return true;
+    }
+
+    LayoutPoint adjustedLocation = accumulatedOffset + Location();
+    LayoutRect overflowBox = VisualOverflowRect();
+    FlipForWritingMode(overflowBox);
+    overflowBox.MoveBy(adjustedLocation);
+    return hitTestLocation.Intersects(overflowBox);
+  }
+
+  bool RenderBox::HitTestClipPath(const HitTestLocation &hitTestLocation,
+                                  const LayoutPoint &accumulatedOffset) const noexcept
+  {
+    auto offsetFromHitTestRoot = ToLayoutSize(accumulatedOffset + Location());
+    auto hitTestLocationInLocalCoordinates = hitTestLocation.Point() - offsetFromHitTestRoot;
+
+    const auto &clipPath = Style().GetClipPath();
+    if (auto basicShape = clipPath.TryBasicShape())
+    {
+      auto &shape = basicShape->GetShape();
+      auto path = style::ComputePath(shape, ReferenceBoxRect(basicShape->ReferenceBox()));
+      return path.Contains(FloatPoint(hitTestLocationInLocalCoordinates), style::ComputeWindRule(shape));
+    }
+    // FIXME: Reference paths (url(), clipped by SVG <clipPath> content) come with SVG.
+    return true;
+  }
+
+  bool RenderBox::HitTestBorderRadius(const HitTestLocation &hitTestLocation,
+                                      const LayoutPoint &accumulatedOffset) const noexcept
+  {
+    if (IsRenderView() || !Style().HasBorderRadius())
+    {
+      return true;
+    }
+
+    LayoutPoint adjustedLocation = accumulatedOffset + Location();
+    LayoutRect borderRect = BorderBoxRect();
+    borderRect.MoveBy(adjustedLocation);
+
+    auto borderShape = BorderShape::ShapeForBorderRect(Style(), borderRect);
+    // To handle non-round corners, BorderShape should do the hit-testing.
+    return hitTestLocation.Intersects(borderShape.DeprecatedRoundedRect());
+  }
+
+  bool RenderBox::NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
+                              const HitTestLocation &locationInContainer,
+                              const LayoutPoint &accumulatedOffset, HitTestAction action) noexcept
+  {
+    LayoutPoint adjustedLocation = accumulatedOffset + Location();
+
+    // Check kids first.
+    for (RenderObject *child = LastChild(); child; child = child->PreviousSibling())
+    {
+      if (!child->HasLayer()
+          && child->NodeAtPoint(request, result, locationInContainer, adjustedLocation, action))
+      {
+        UpdateHitTestResult(result, locationInContainer.Point() - ToLayoutSize(adjustedLocation));
+        return true;
+      }
+    }
+
+    // Check our bounds next. For this purpose always assume that we can only be hit in the
+    // foreground phase (which is true for replaced elements like images).
+    LayoutRect boundsRect = BorderBoxRect();
+    boundsRect.MoveBy(adjustedLocation);
+    if (VisibleToHitTesting(&request) && action == HitTestForeground
+        && locationInContainer.Intersects(boundsRect))
+    {
+      if (!HitTestVisualOverflow(locationInContainer, accumulatedOffset))
+      {
+        return false;
+      }
+
+      if (!HitTestClipPath(locationInContainer, accumulatedOffset))
+      {
+        return false;
+      }
+
+      if (!HitTestBorderRadius(locationInContainer, accumulatedOffset))
+      {
+        return false;
+      }
+
+      UpdateHitTestResult(result, locationInContainer.Point() - ToLayoutSize(adjustedLocation));
+      if (result.AddNodeToListBasedTestResult(NodeForHitTest(), request, locationInContainer, boundsRect)
+          == HitTestProgress::Stop)
+      {
+        return true;
+      }
+    }
+
+    return RenderBoxModelObject::NodeAtPoint(request, result, locationInContainer, accumulatedOffset, action);
+  }
 }

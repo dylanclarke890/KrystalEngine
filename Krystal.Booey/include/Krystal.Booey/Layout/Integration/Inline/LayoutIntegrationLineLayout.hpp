@@ -23,6 +23,9 @@ namespace krys::boo
 {
   class RenderBox;
   class RenderElement;
+  class HitTestLocation;
+  class HitTestRequest;
+  class HitTestResult;
   class RenderInline;
   struct PaintInfo;
   class RenderObject;
@@ -49,7 +52,7 @@ namespace krys::boo::layout_integration
   /// @brief Lays out a block container's inline content with the inline formatting context and hands the
   /// result to the render tree: the lines and boxes, the geometry of the boxes in it, its height and
   /// baselines.
-  // FIXME: Hit testing, pagination and SVG text, once there are those.
+  // FIXME: Pagination and SVG text, once there are those.
   class LineLayout final : public CanMakeCheckedPtr<LineLayout>
   {
     KRYS_NON_COPY_MOVABLE(LineLayout);
@@ -111,6 +114,12 @@ namespace krys::boo::layout_integration
     /// @param layerRenderer The inline box whose layer is being painted, if any: only its content is painted.
     void Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset,
                const RenderInline *layerRenderer = nullptr) noexcept;
+    /// @brief Hit tests the inline content for @p hitTestAction, the last box first.
+    /// @param layerRenderer The inline box whose layer is being hit tested, if any: only its content is
+    /// tested.
+    bool HitTest(const HitTestRequest &request, HitTestResult &result,
+                 const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
+                 HitTestAction hitTestAction, const RenderInline *layerRenderer = nullptr) noexcept;
 
     Maybe<LayoutRect> Layout(RenderBlockFlow::MarginInfo &marginInfo,
                              ForceFullLayout forceFullLayout = ForceFullLayout::No) noexcept;

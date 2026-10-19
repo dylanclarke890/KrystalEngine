@@ -825,6 +825,20 @@ namespace krys::boo
     }
     KRYS_NODISCARD LayoutRect ClipRect(const LayoutPoint &location) const noexcept;
 
+#pragma region Hit testing
+
+    bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
+                     const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
+                     HitTestAction action) noexcept override;
+    KRYS_NODISCARD bool HitTestVisualOverflow(const HitTestLocation &hitTestLocation,
+                                              const LayoutPoint &accumulatedOffset) const noexcept;
+    KRYS_NODISCARD bool HitTestClipPath(const HitTestLocation &hitTestLocation,
+                                        const LayoutPoint &accumulatedOffset) const noexcept;
+    KRYS_NODISCARD bool HitTestBorderRadius(const HitTestLocation &hitTestLocation,
+                                            const LayoutPoint &accumulatedOffset) const noexcept;
+
+#pragma endregion
+
 #pragma region Painting
 
     /// @brief Paints the phase of @p paintInfo at @p paintOffset, this box's own position.

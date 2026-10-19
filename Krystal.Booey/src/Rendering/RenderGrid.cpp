@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Rendering/BaselineAlignment.hpp"
 #include "Krystal.Booey/Rendering/GridLayoutFunctions.hpp"
 #include "Krystal.Booey/Rendering/GridLayoutState.hpp"
+#include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
@@ -3427,5 +3428,50 @@ namespace krys::boo
     {
       (void)PaintChild(*gridItem, paintInfo, paintOffset, forChild, PaintAsInlineBlock);
     }
+  }
+
+  bool RenderGrid::HitTestChildren(const HitTestRequest &request, HitTestResult &result,
+                                   const HitTestLocation &locationInContainer,
+                                   const LayoutPoint &adjustedLocation, HitTestAction hitTestAction) noexcept
+  {
+    if (hitTestAction != HitTestForeground)
+    {
+      return false;
+    }
+
+    LayoutPoint scrolledOffset = HasNonVisibleOverflow()
+                                   ? adjustedLocation - ToLayoutSize(LayoutPoint(GetScrollPosition()))
+                                   : adjustedLocation;
+
+    // If collecting the children in reverse order is bad for performance, this list could be determined at
+    // layout time.
+    List<RenderBox *> reversedOrderIteratorForHitTesting;
+    for (auto *gridItem = CurrentGrid().GetOrderIterator().First(); gridItem;
+         gridItem = CurrentGrid().GetOrderIterator().Next())
+    {
+      if (gridItem->IsOutOfFlowPositioned())
+      {
+        continue;
+      }
+      reversedOrderIteratorForHitTesting.push_back(gridItem);
+    }
+    std::ranges::reverse(reversedOrderIteratorForHitTesting);
+
+    for (auto *gridItem : reversedOrderIteratorForHitTesting)
+    {
+      if (gridItem->HasSelfPaintingLayer())
+      {
+        continue;
+      }
+      auto location = FlipForWritingModeForChild(*gridItem, scrolledOffset);
+      if (gridItem->HitTest(request, result, locationInContainer, location))
+      {
+        UpdateHitTestResult(
+          result, FlipForWritingMode(ToLayoutPoint(locationInContainer.Point() - adjustedLocation)));
+        return true;
+      }
+    }
+
+    return false;
   }
 }

@@ -10,6 +10,7 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInitialContainingBlock.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderCounter.hpp"
@@ -263,6 +264,16 @@ namespace krys::boo
     return SnappedIntRect(overflowRect);
   }
 
+  IntRect RenderView::DocumentRect() const noexcept
+  {
+    FloatRect overflowRect(UnscaledDocumentRect());
+    if (HasTransformRelatedProperty())
+    {
+      overflowRect = Layer()->CurrentTransform().MapRect(overflowRect);
+    }
+    return IntRect(overflowRect);
+  }
+
   bool RenderView::ShouldPaintBaseBackground() const noexcept
   {
     // Fill with a base color if we're the root document.
@@ -481,5 +492,34 @@ namespace krys::boo
       *wasFixed = false;
     }
     quads.push_back(FloatRect(FloatPoint(), FloatSize(Layer()->Size())));
+  }
+
+  dom::Node *RenderView::NodeForHitTest() const noexcept
+  {
+    return GetDocument().DocumentElement().get();
+  }
+
+  void RenderView::UpdateHitTestResult(HitTestResult &result, const LayoutPoint &point) const noexcept
+  {
+    if (result.InnerNode())
+    {
+      return;
+    }
+
+    // FIXME: Multi-column flows (their first column set's hit test result) come with multi-column layout.
+
+    if (auto *node = NodeForHitTest())
+    {
+      result.SetInnerNode(node);
+      if (!result.InnerNonSharedNode())
+      {
+        result.SetInnerNonSharedNode(node);
+      }
+
+      LayoutPoint adjustedPoint = point;
+      OffsetForContents(adjustedPoint);
+
+      result.SetLocalPoint(adjustedPoint);
+    }
   }
 }

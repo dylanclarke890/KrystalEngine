@@ -263,6 +263,9 @@ namespace krys::boo
     KRYS_NODISCARD bool HasBackground() const noexcept;
     KRYS_NODISCARD bool BorderImageIsLoadedAndCanBeRendered() const noexcept;
     KRYS_NODISCARD bool HasOutline() const noexcept;
+    /// @brief Whether hit tests (@p request's, or user-triggered ones) can hit the renderer: visible, not
+    /// skipped, and taking pointer events.
+    KRYS_NODISCARD bool VisibleToHitTesting(const HitTestRequest *request = nullptr) const noexcept;
     /// @brief Whether a link's outline carries its URL as an annotation (painting PDFs).
     KRYS_NODISCARD bool HasOutlineAnnotation() const noexcept;
 

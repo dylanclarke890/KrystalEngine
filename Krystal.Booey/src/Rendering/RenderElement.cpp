@@ -12,6 +12,7 @@
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/OutlinePainter.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
@@ -1548,5 +1549,14 @@ namespace krys::boo
     auto marginRect = anchorRect;
     marginRect.Expand(style::ExtentForRect(scrollMarginBox, anchorRect));
     return {marginRect, anchorRect};
+  }
+
+  bool RenderElement::VisibleToHitTesting(const HitTestRequest *request) const noexcept
+  {
+    auto visibility =
+      !request || request->UserTriggered() ? Style().UsedVisibility() : Style().GetVisibility();
+    return visibility == Visibility::Visible && !IsSkippedContent()
+           && ((request && request->IgnoreCSSPointerEventsProperty())
+               || Style().UsedPointerEvents() != PointerEvents::None);
   }
 }

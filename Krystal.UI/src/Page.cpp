@@ -6,6 +6,7 @@
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.UI/GraphicsContextRender2D.hpp"
 #include <fstream>
@@ -123,5 +124,46 @@ namespace krys::ui
       context.DrawDisplayList(displayList);
     }
     _imageBuffers->Release();
+  }
+
+  boo::dom::Element *Page::HitTest(const boo::IntPoint &point) noexcept
+  {
+    return _document->ElementFromPoint(point.X(), point.Y()).get();
+  }
+
+  void Page::PointerMoved(const boo::IntPoint &point) noexcept
+  {
+    using Type = boo::HitTestRequest::Type;
+    UpdateHoverActiveState(
+      _pointerPressed ? EnumSet<Type> {Type::Move, Type::Active} : EnumSet<Type> {Type::Move}, &point);
+  }
+
+  void Page::PointerPressed(const boo::IntPoint &point) noexcept
+  {
+    _pointerPressed = true;
+    UpdateHoverActiveState(EnumSet<boo::HitTestRequest::Type> {boo::HitTestRequest::Type::Active}, &point);
+  }
+
+  void Page::PointerReleased(const boo::IntPoint &point) noexcept
+  {
+    _pointerPressed = false;
+    UpdateHoverActiveState(EnumSet<boo::HitTestRequest::Type> {boo::HitTestRequest::Type::Release}, &point);
+  }
+
+  void Page::PointerLeft() noexcept
+  {
+    UpdateHoverActiveState(EnumSet<boo::HitTestRequest::Type> {boo::HitTestRequest::Type::Move}, nullptr);
+  }
+
+  void Page::UpdateHoverActiveState(const boo::HitTestRequest &request, const boo::IntPoint *point) noexcept
+  {
+    RefPtr<boo::dom::Element> target;
+    if (point)
+    {
+      boo::HitTestResult result {boo::LayoutPoint(*point)};
+      _document->HitTest(request, result);
+      target = ShareRefPtr(result.TargetElement());
+    }
+    _document->UpdateHoverActiveState(request, target.get());
   }
 }

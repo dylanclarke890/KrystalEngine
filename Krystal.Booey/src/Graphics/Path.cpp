@@ -248,6 +248,93 @@ namespace krys::boo
     }
   }
 
+  bool Path::Contains(const FloatPoint &point, WindRule rule) const noexcept
+  {
+    if (IsEmpty() || !FastBoundingRect().Contains(point))
+    {
+      return false;
+    }
+
+    // The winding number of the point: each edge crossing the horizontal line through it to its right counts
+    // one way going up and the other going down. Curves are flattened into lines.
+    constexpr int32 curveSteps = 16;
+    int32 winding = 0;
+    FloatPoint current;
+    FloatPoint subpathStart;
+    auto addEdge = [&](FloatPoint from, FloatPoint to)
+    {
+      if (from.Y() <= point.Y())
+      {
+        if (to.Y() > point.Y()
+            && (to.X() - from.X()) * (point.Y() - from.Y()) - (point.X() - from.X()) * (to.Y() - from.Y())
+                 > 0)
+        {
+          ++winding;
+        }
+      }
+      else if (to.Y() <= point.Y()
+               && (to.X() - from.X()) * (point.Y() - from.Y()) - (point.X() - from.X()) * (to.Y() - from.Y())
+                    < 0)
+      {
+        --winding;
+      }
+    };
+    ApplyElements(
+      [&](const PathElement &element)
+      {
+        switch (element.ElementType)
+        {
+          case PathElement::Type::MoveToPoint:
+            addEdge(current, subpathStart);
+            current = subpathStart = element.Points[0];
+            break;
+          case PathElement::Type::AddLineToPoint:
+            addEdge(current, element.Points[0]);
+            current = element.Points[0];
+            break;
+          case PathElement::Type::AddQuadCurveToPoint:
+          {
+            FloatPoint start = current;
+            for (int32 step = 1; step <= curveSteps; ++step)
+            {
+              float t = static_cast<float>(step) / curveSteps;
+              float u = 1 - t;
+              FloatPoint next(
+                u * u * start.X() + 2 * u * t * element.Points[0].X() + t * t * element.Points[1].X(),
+                u * u * start.Y() + 2 * u * t * element.Points[0].Y() + t * t * element.Points[1].Y());
+              addEdge(current, next);
+              current = next;
+            }
+            break;
+          }
+          case PathElement::Type::AddCurveToPoint:
+          {
+            FloatPoint start = current;
+            for (int32 step = 1; step <= curveSteps; ++step)
+            {
+              float t = static_cast<float>(step) / curveSteps;
+              float u = 1 - t;
+              FloatPoint next(u * u * u * start.X() + 3 * u * u * t * element.Points[0].X()
+                                + 3 * u * t * t * element.Points[1].X() + t * t * t * element.Points[2].X(),
+                              u * u * u * start.Y() + 3 * u * u * t * element.Points[0].Y()
+                                + 3 * u * t * t * element.Points[1].Y() + t * t * t * element.Points[2].Y());
+              addEdge(current, next);
+              current = next;
+            }
+            break;
+          }
+          case PathElement::Type::CloseSubpath:
+            addEdge(current, subpathStart);
+            current = subpathStart;
+            break;
+        }
+      });
+    // Subpaths are filled closed.
+    addEdge(current, subpathStart);
+
+    return rule == WindRule::EvenOdd ? (winding % 2) != 0 : winding != 0;
+  }
+
   void Path::ApplyElements(const PathElementApplier &applier) const noexcept
   {
     if (IsEmpty())
@@ -267,8 +354,8 @@ namespace krys::boo
       return;
     }
 
-    // There's no platform path to flatten the segments that can't produce elements, so rounded rects and
-    // ellipses become beziers, as a platform path preferring them adds them
+    // There's no platform path to flatten the segments that can't produce elements, so rects become lines and
+    // rounded rects and ellipses become beziers, as a platform path preferring them adds them
     // (PathImpl::BeziersForRoundedRect).
     // FIXME: Arcs, closed arcs, rotated ellipses and continuous rounded rects need a platform path; they
     // apply nothing.
@@ -288,7 +375,17 @@ namespace krys::boo
           }
         };
 
-        if (const auto *roundedRect = std::get_if<PathRoundedRect>(&segment.GetData()))
+        if (const auto *rect = std::get_if<PathRect>(&segment.GetData()))
+        {
+          // As a platform path adds a rect: a closed subpath clockwise from its top left corner.
+          const auto &r = rect->Rect;
+          applier({PathElement::Type::MoveToPoint, {r.MinXMinYCorner()}});
+          applier({PathElement::Type::AddLineToPoint, {r.MaxXMinYCorner()}});
+          applier({PathElement::Type::AddLineToPoint, {r.MaxXMaxYCorner()}});
+          applier({PathElement::Type::AddLineToPoint, {r.MinXMaxYCorner()}});
+          applier({PathElement::Type::CloseSubpath, {}});
+        }
+        else if (const auto *roundedRect = std::get_if<PathRoundedRect>(&segment.GetData()))
         {
           applyBeziers(roundedRect->RoundedRect);
         }

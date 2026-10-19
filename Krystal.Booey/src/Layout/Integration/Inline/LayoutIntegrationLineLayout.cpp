@@ -20,6 +20,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/FloatingObjects.hpp"
+#include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/InlineWalker.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"
@@ -767,6 +768,144 @@ namespace krys::boo::layout_integration
     }
 
     InlineContentPainter {paintInfo, paintOffset, layerRenderer, *_inlineContent, Flow()}.Paint();
+  }
+
+  bool LineLayout::HitTest(const HitTestRequest &request, HitTestResult &result,
+                           const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
+                           HitTestAction hitTestAction, const RenderInline *layerRenderer) noexcept
+  {
+    if (!_inlineContent)
+    {
+      return false;
+    }
+
+    // All real inline content is foreground.
+    if (hitTestAction != HitTestForeground && !_inlineContent->HasBlockLevelBoxes())
+    {
+      return false;
+    }
+    if (hitTestAction == HitTestBlockBackground)
+    {
+      return false;
+    }
+
+    if (IsContentConsideredStale())
+    {
+      krys_debug_assert(false);
+      return false;
+    }
+
+    auto hitTestBoundingBox = locationInContainer.BoundingBox();
+    hitTestBoundingBox.MoveBy(-accumulatedOffset);
+    auto boxRange = _inlineContent->BoxesForRect(hitTestBoundingBox);
+
+    LayerPaintScope layerPaintScope(layerRenderer);
+
+    auto flippedContentOffsetIfNeeded = [&](const RenderBox &childRenderer, const LayoutPoint &contentOffset)
+    {
+      if (Flow().GetWritingMode().IsBlockFlipped())
+      {
+        return Flow().FlipForWritingModeForChild(childRenderer, contentOffset);
+      }
+      return contentOffset;
+    };
+
+    for (auto it = boxRange.rbegin(); it != boxRange.rend(); ++it)
+    {
+      auto &box = *it;
+      if (!layerPaintScope.TestIsIncludesAndUpdate(box))
+      {
+        continue;
+      }
+
+      bool visibleForHitTesting =
+        request.UserTriggered() ? box.IsVisible() : box.IsVisibleIgnoringUsedVisibility();
+      if (!visibleForHitTesting)
+      {
+        continue;
+      }
+
+      auto shouldHitTestForPhase = [&]
+      {
+        switch (hitTestAction)
+        {
+          case HitTestForeground:
+            // Inline boxes around block-in-inline are hit tested in block background phase.
+            return !_inlineContent->IsInlineBoxWrapperForBlockLevelBox(box);
+          case HitTestChildBlockBackground:
+            return box.IsBlockLevelBox() || _inlineContent->IsInlineBoxWrapperForBlockLevelBox(box);
+          case HitTestChildBlockBackgrounds:
+          case HitTestFloat:                 return box.IsBlockLevelBox();
+          case HitTestBlockBackground:       break;
+        }
+        krys_debug_assert(false);
+        return false;
+      };
+
+      if (!shouldHitTestForPhase())
+      {
+        continue;
+      }
+
+      auto &renderer = *box.LayoutBox().RendererForIntegration();
+
+      if (box.IsBlockLevelBox())
+      {
+        auto &renderBox = Downcast<RenderBox>(renderer);
+        auto childHitTest =
+          hitTestAction == HitTestChildBlockBackgrounds ? HitTestChildBlockBackground : hitTestAction;
+        LayoutPoint childPoint = flippedContentOffsetIfNeeded(renderBox, accumulatedOffset);
+        if (!renderBox.HasSelfPaintingLayer()
+            && renderBox.NodeAtPoint(request, result, locationInContainer, childPoint, childHitTest))
+        {
+          return true;
+        }
+        continue;
+      }
+
+      if (box.IsAtomicInlineBox())
+      {
+        if (renderer.HitTest(request, result, locationInContainer,
+                             flippedContentOffsetIfNeeded(Downcast<RenderBox>(renderer), accumulatedOffset)))
+        {
+          return true;
+        }
+        continue;
+      }
+
+      auto &currentLine = _inlineContent->DisplayContent().LineList[box.LineIndex()];
+      auto flippedRect = LayoutRect {inline_display::Box::VisibleRectIgnoringBlockDirection(
+        box, currentLine.VisibleRectIgnoringBlockDirection())};
+      Flow().FlipForWritingMode(flippedRect);
+      auto boxRect = flippedRect;
+      boxRect.MoveBy(accumulatedOffset);
+
+      if (!locationInContainer.Intersects(boxRect))
+      {
+        continue;
+      }
+
+      auto &elementRenderer = *[&]() -> const RenderElement *
+      {
+        auto *renderElement = DynamicDowncast<RenderElement>(renderer);
+        return renderElement ? renderElement : renderer.Parent();
+      }();
+      if (!elementRenderer.VisibleToHitTesting(&request))
+      {
+        continue;
+      }
+
+      renderer.UpdateHitTestResult(
+        result, Flow().FlipForWritingMode(locationInContainer.Point() - ToLayoutSize(accumulatedOffset)));
+      if (result.AddNodeToListBasedTestResult(renderer.NodeForHitTest(), request, locationInContainer,
+                                              boxRect)
+          == HitTestProgress::Stop)
+      {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   std::pair<LayoutUnit, LayoutUnit> LineLayout::ComputeIntrinsicWidthConstraints() noexcept

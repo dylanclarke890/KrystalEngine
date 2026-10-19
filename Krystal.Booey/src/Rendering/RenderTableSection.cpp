@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/BorderPainter.hpp"
+#include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
@@ -2064,5 +2065,91 @@ namespace krys::boo
     {
       paintDirtyCells();
     }
+  }
+
+  bool RenderTableSection::NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
+                                       const HitTestLocation &locationInContainer,
+                                       const LayoutPoint &accumulatedOffset, HitTestAction action) noexcept
+  {
+    // If we have no children then we have nothing to do.
+    if (!FirstRow())
+    {
+      return false;
+    }
+
+    // Table sections cannot ever be hit tested.  Effectively they do not exist.
+    // Just forward to our children always.
+    LayoutPoint adjustedLocation = accumulatedOffset + Location();
+
+    if (HasNonVisibleOverflow() && !locationInContainer.Intersects(OverflowClipRect(adjustedLocation)))
+    {
+      return false;
+    }
+
+    if (HasOverflowingCell())
+    {
+      for (RenderTableRow *row = LastRow(); row; row = row->PreviousRow())
+      {
+        // FIXME: We have to skip over inline flows, since they can show up inside table rows
+        // at the moment (a demoted inline <form> for example). If we ever implement a
+        // table-specific hit-test method (which we should do for performance reasons anyway),
+        // then we can remove this check.
+        if (!row->HasSelfPaintingLayer())
+        {
+          if (row->NodeAtPoint(request, result, locationInContainer, adjustedLocation, action))
+          {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    RecalcCellsIfNeeded();
+
+    LayoutRect hitTestRect = locationInContainer.BoundingBox();
+    hitTestRect.MoveBy(-adjustedLocation);
+
+    LayoutRect tableAlignedRect = LogicalRectForWritingModeAndDirection(hitTestRect);
+    CellSpan rowSpan = SpannedRows(tableAlignedRect, DoNotIncludeAllIntersectingCells);
+    CellSpan columnSpan = SpannedColumns(tableAlignedRect, DoNotIncludeAllIntersectingCells);
+
+    // Now iterate over the spanned rows and columns.
+    for (uint32 hitRow = rowSpan.Start; hitRow < rowSpan.End; ++hitRow)
+    {
+      for (uint32 hitColumn = columnSpan.Start; hitColumn < columnSpan.End; ++hitColumn)
+      {
+        CellStruct &current = CellAt(hitRow, hitColumn);
+
+        // If the cell is empty, there's nothing to do
+        if (!current.HasCells())
+        {
+          continue;
+        }
+
+        for (size_t i = current.Cells.size(); i;)
+        {
+          --i;
+          RenderTableCell *cell = current.Cells[i];
+          LayoutPoint cellPoint = FlipForWritingModeForChild(*cell, adjustedLocation);
+          if (static_cast<RenderObject *>(cell)->NodeAtPoint(request, result, locationInContainer, cellPoint,
+                                                             action))
+          {
+            UpdateHitTestResult(result, locationInContainer.Point() - ToLayoutSize(cellPoint));
+            return true;
+          }
+        }
+        if (!request.ResultIsElementList())
+        {
+          break;
+        }
+      }
+      if (!request.ResultIsElementList())
+      {
+        break;
+      }
+    }
+
+    return false;
   }
 }

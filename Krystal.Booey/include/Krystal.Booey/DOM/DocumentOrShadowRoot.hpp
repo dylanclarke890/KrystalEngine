@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Graphics/LayoutPoint.hpp"
+#include "Krystal.Booey/Rendering/HitTestSource.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -89,6 +91,28 @@ namespace krys::boo::dom
     ExceptionOr<void> SetAdoptedStyleSheets(List<Ref<css::CSSStyleSheet>> &&sheets) noexcept;
 
 #pragma endregion
+
+#pragma region DocumentOrShadowRoot Extensions (CSSOM View) - https://drafts.csswg.org/cssom-view/#extensions-to-the-document-interface
+
+    /// @brief The topmost element at the point (in CSS pixels, relative to the viewport), retargeted against
+    /// this; null if the point is outside the viewport or hits nothing.
+    /// @see https://drafts.csswg.org/cssom-view/#dom-document-elementfrompoint
+    KRYS_NODISCARD RefPtr<Element> ElementFromPoint(double clientX, double clientY,
+                                                    HitTestSource source = HitTestSource::User) noexcept;
+
+    /// @brief Every element at the point, topmost first, retargeted against this.
+    /// @see https://drafts.csswg.org/cssom-view/#dom-document-elementsfrompoint
+    KRYS_NODISCARD List<RefPtr<Element>>
+      ElementsFromPoint(double clientX, double clientY, HitTestSource source = HitTestSource::User) noexcept;
+
+#pragma endregion
+
+    /// @brief The node hit at @p clientPoint (in CSS pixels, relative to the viewport), if it's inside the
+    /// viewport.
+    /// @param localPoint Set to the point in the coordinates of the hit node's renderer.
+    KRYS_NODISCARD RefPtr<Node> NodeFromPoint(const LayoutPoint &clientPoint,
+                                              LayoutPoint *localPoint = nullptr,
+                                              HitTestSource source = HitTestSource::User) noexcept;
 
     /// @brief The adopted style sheets, without creating the array.
     KRYS_NODISCARD Span<const Ref<css::CSSStyleSheet>> GetAdoptedStyleSheets() const noexcept;

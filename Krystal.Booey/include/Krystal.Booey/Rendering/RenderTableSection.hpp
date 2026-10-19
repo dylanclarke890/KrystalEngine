@@ -34,7 +34,6 @@ namespace krys::boo
   };
 
   /// @brief A table row group: the grid of its rows and cells, and their layout.
-  // FIXME: Hit testing (nodeAtPoint), once there is hit testing.
   class RenderTableSection final : public RenderBox
   {
     KRYS_NON_COPY_MOVABLE(RenderTableSection);
@@ -43,6 +42,9 @@ namespace krys::boo
   public:
     void Paint(PaintInfo &, const LayoutPoint &) noexcept final;
     void PaintObject(PaintInfo &, const LayoutPoint &) noexcept final;
+    bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
+                     const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
+                     HitTestAction action) noexcept final;
 
     /// @brief The cells in a slot of the grid; more than one when cells overlap.
     struct CellStruct

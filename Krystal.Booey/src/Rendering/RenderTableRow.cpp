@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/RenderTableRow.hpp"
+#include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderTable.hpp"
@@ -238,5 +239,37 @@ namespace krys::boo
         cell->Paint(paintInfo, paintOffset);
       }
     }
+  }
+
+  bool RenderTableRow::NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
+                                   const HitTestLocation &locationInContainer,
+                                   const LayoutPoint &accumulatedOffset, HitTestAction action) noexcept
+  {
+    // Table rows cannot ever be hit tested.  Effectively they do not exist.
+    // Just forward to our children always.
+    auto *section = Section();
+    if (!section)
+    {
+      return false;
+    }
+
+    for (RenderTableCell *cell = LastCell(); cell; cell = cell->PreviousCell())
+    {
+      // FIXME: We have to skip over inline flows, since they can show up inside table rows
+      // at the moment (a demoted inline <form> for example). If we ever implement a
+      // table-specific hit-test method (which we should do for performance reasons anyway),
+      // then we can remove this check.
+      if (!cell->HasSelfPaintingLayer())
+      {
+        auto cellPoint = section->FlipForWritingModeForChild(*cell, accumulatedOffset);
+        if (cell->NodeAtPoint(request, result, locationInContainer, cellPoint, action))
+        {
+          UpdateHitTestResult(result, locationInContainer.Point() - ToLayoutSize(cellPoint));
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 }

@@ -11,6 +11,7 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBox.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -1237,4 +1238,77 @@ namespace krys::boo
   }
 
 #pragma endregion
+
+  bool RenderObject::HitTest(const HitTestRequest &request, HitTestResult &result,
+                             const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
+                             HitTestFilter hitTestFilter) noexcept
+  {
+    bool inside = false;
+    if (hitTestFilter != HitTestSelf)
+    {
+      // First test the foreground layer (lines and inlines).
+      inside = NodeAtPoint(request, result, locationInContainer, accumulatedOffset, HitTestForeground);
+
+      // Test floats next.
+      if (!inside)
+      {
+        inside = NodeAtPoint(request, result, locationInContainer, accumulatedOffset, HitTestFloat);
+      }
+
+      // Finally test to see if the mouse is in the background (within a child block's background).
+      if (!inside)
+      {
+        inside =
+          NodeAtPoint(request, result, locationInContainer, accumulatedOffset, HitTestChildBlockBackgrounds);
+      }
+    }
+
+    // See if the mouse is inside us but not any of our descendants
+    if (hitTestFilter != HitTestDescendants && !inside)
+    {
+      inside = NodeAtPoint(request, result, locationInContainer, accumulatedOffset, HitTestBlockBackground);
+    }
+
+    return inside;
+  }
+
+  dom::Node *RenderObject::NodeForHitTest() const noexcept
+  {
+    auto *node = GetNode();
+    // If we hit the anonymous renderers inside generated content we should
+    // actually hit the generated content so walk up to the PseudoElement.
+    if (!node && Parent() && Parent()->IsBeforeOrAfterContent())
+    {
+      for (auto *renderer = Parent(); renderer && !node; renderer = renderer->Parent())
+      {
+        node = renderer->GetElement();
+      }
+    }
+    return node;
+  }
+
+  void RenderObject::UpdateHitTestResult(HitTestResult &result, const LayoutPoint &point) const noexcept
+  {
+    if (result.InnerNode())
+    {
+      return;
+    }
+
+    if (auto *node = NodeForHitTest())
+    {
+      result.SetInnerNode(node);
+      if (!result.InnerNonSharedNode())
+      {
+        result.SetInnerNonSharedNode(node);
+      }
+      result.SetPseudoElementIdentifier(Style().GetPseudoElementIdentifier());
+      result.SetLocalPoint(point);
+    }
+  }
+
+  bool RenderObject::NodeAtPoint(const HitTestRequest &, HitTestResult &, const HitTestLocation &,
+                                 const LayoutPoint &, HitTestAction) noexcept
+  {
+    return false;
+  }
 }
