@@ -536,8 +536,8 @@ namespace krys::gfx
     /// whole one down; glyphs come from the glyph atlas, rasterised under the transform (at the scaled size
     /// under a uniform scale, so hinting applies). Text over `LargeGlyphSize` target pixels per em is filled
     /// as outlines instead. Colour glyphs keep their colours, taking only the paint's alpha.
-    /// @note Shadows follow each glyph: sharp ones are the glyph again, blurred ones its outline's blurred
-    /// mask, unhinted.
+    /// @note Shadows follow each glyph: its coverage (a colour glyph's alpha) in the shadow's colour, blurred
+    /// from the glyph's own bitmap for a blurred shadow.
     void DrawGlyphs(const FontFace2D &face, float size, Span<const uint32> glyphs,
                     Span<const Vec2f> positions, Vec2f origin, const Paint2D &paint) noexcept;
 

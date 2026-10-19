@@ -4,16 +4,20 @@
   #define KRYS_ENABLE_PROFILING
 #endif
 
+#include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
+#include "Krystal.Booey/Graphics/FontDatabase.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Utils/ScopedProfiler.hpp"
 #include "Krystal.Editor/Application.hpp"
+#include "Krystal.Editor/BooeyScene.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.PAL/Events.hpp"
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.Text/FreeTypeFace.hpp"
+#include "Krystal.UI/Page.hpp"
 #include <cmath>
 #include <cstring>
 #include <filesystem>
@@ -32,6 +36,9 @@ namespace krys
     gfx::TextureHandle _image {};
     UniquePtr<gfx::FontFace2D> _font {};
     UniquePtr<gfx::FontFace2D> _boldFont {};
+    UniquePtr<ui::Page> _page {};
+    editor::BooeyFonts _booeyFonts {};
+    bool _showBooey {false};
 
   public:
     explicit Editor(int argc, char **argv, const ApplicationSettings &settings) noexcept
@@ -55,10 +62,13 @@ namespace krys
       _renderer = krys::move(*renderer);
       CreateImage();
       LoadFonts();
+      CreatePage();
     }
 
     void OnShutdown() noexcept override
     {
+      _page = nullptr;
+      _booeyFonts = {};
       _renderer = nullptr;
       _boldFont = nullptr;
       _font = nullptr;
@@ -139,6 +149,11 @@ namespace krys
             _context->Logger->Info("Key Pressed '{}'", event.Key());
           }
 
+          if (event.Key() == pal::Key::Tab && event.State() == pal::KeyState::Pressed)
+          {
+            _showBooey = !_showBooey;
+          }
+
           if (event.Key() == pal::Key::Escape)
           {
             _context->Logger->Info("ESC key pressed, quitting application...");
@@ -152,6 +167,10 @@ namespace krys
         {
           _width = event.Width();
           _height = event.Height();
+          if (_page)
+          {
+            _page->Resize(boo::IntSize(static_cast<int32>(_width), static_cast<int32>(_height)));
+          }
           return true;
         });
 
@@ -182,17 +201,56 @@ namespace krys
                                   .ClearColour = Array<float, 4> {0.933f, 0.945f, 0.965f, 1.f}});
 
       DrawHeader();
-      DrawCard(U"Mask clipping", 24.f, 80.f, 392.f, 616.f);
-      DrawCard(U"Shadows", 444.f, 80.f, 392.f, 616.f);
-      DrawCard(U"Compositing", 864.f, 80.f, 392.f, 616.f);
-      DrawClipping(24.f, 80.f);
-      DrawShadows(444.f, 80.f);
-      DrawCompositing(864.f, 80.f);
+      if (_showBooey)
+      {
+        DrawBooey();
+      }
+      else
+      {
+        DrawCard(U"Mask clipping", 24.f, 80.f, 392.f, 616.f);
+        DrawCard(U"Shadows", 444.f, 80.f, 392.f, 616.f);
+        DrawCard(U"Compositing", 864.f, 80.f, 392.f, 616.f);
+        DrawClipping(24.f, 80.f);
+        DrawShadows(444.f, 80.f);
+        DrawCompositing(864.f, 80.f);
+      }
 
       _renderer->End();
     }
 
   private:
+    /// @brief The page Booey's drawing is replayed through, and Liberation Sans as Booey's fonts.
+    void CreatePage() noexcept
+    {
+      _page = CreateUnique<ui::Page>(boo::IntSize(static_cast<int32>(_width), static_cast<int32>(_height)));
+      auto &database = boo::FontDatabase::Singleton();
+      (void)database.AddFontFile(std::filesystem::path {KRYS_EDITOR_FONTS_DIR}
+                                 / "LiberationSans-Regular.ttf");
+      auto faces = database.FacesInFamily(u8"Liberation Sans");
+      if (faces.empty())
+      {
+        _context->Logger->Error("Booey couldn't load Liberation Sans.");
+        return;
+      }
+      _booeyFonts.Regular =
+        boo::Font::Create(boo::FontPlatformData {ShareRef(*faces.front()), 14, false, false});
+      _booeyFonts.Bold = boo::Font::Create(boo::FontPlatformData {ShareRef(*faces.front()), 14, true, false});
+    }
+
+    /// @brief The Booey view: a scene drawn through Booey's graphics context, recorded into a display list
+    /// and replayed into Render2D, as pages will be once Booey paints.
+    void DrawBooey() noexcept
+    {
+      if (!_page)
+      {
+        return;
+      }
+      boo::display_list::RecorderImpl recorder(
+        boo::FloatSize(static_cast<float>(_width), static_cast<float>(_height)));
+      editor::BooeyScene(recorder, _booeyFonts, _time).Draw();
+      _page->Replay(*recorder.TakeDisplayList(), *_renderer);
+    }
+
     KRYS_NODISCARD static gfx::RoundedRect2D Rounded(float x, float y, float width, float height,
                                                      float radius) noexcept
     {
@@ -291,12 +349,14 @@ namespace krys
       _renderer->SetDropShadow({.Offset = {0.f, 1.f}, .BlurRadius = 4.f, .Colour = Rgb(0x1a1040, 120)});
       DrawText(U"Krystal", 56.f, 36.f, 22.f, Rgb(0xffffff), true);
       _renderer->Restore();
-      const char32_t *links[] {U"Render2D", U"Text", U"Goldens", U"About"};
-      for (int i = 0; i < 4; ++i)
+      const char32_t *links[] {U"Render2D", U"Booey"};
+      for (int i = 0; i < 2; ++i)
       {
+        const bool active = (i == 1) == _showBooey;
         DrawText(links[i], 170.f + static_cast<float>(i) * 96.f, 34.f, 15.f,
-                 Rgb(0xffffff, i == 0 ? 255 : 170));
+                 Rgb(0xffffff, active ? 255 : 150), active);
       }
+      DrawText(U"Tab switches views", width - 160.f, 34.f, 13.f, Rgb(0xffffff, 170));
     }
 
     void DrawCard(const char32_t *title, float x, float y, float width, float height) noexcept

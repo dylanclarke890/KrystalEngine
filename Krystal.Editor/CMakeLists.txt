@@ -4,6 +4,7 @@ target_link_libraries(Krystal.Editor
 	PUBLIC Krystal.Core
 	PUBLIC Krystal.Gfx
 	PUBLIC Krystal.PAL
+	PUBLIC Krystal.UI
 )
 
 set_target_properties(Krystal.Editor
@@ -20,7 +21,7 @@ target_compile_features(Krystal.Editor
 
 target_compile_options(Krystal.Editor
   PRIVATE
-    $<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8>
+    $<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8 /bigobj>
 )
 
 # The editor draws its labels in Liberation Sans, from the repository.
@@ -36,6 +37,7 @@ target_sources(Krystal.Editor
 			include
 		FILES
 			include/Krystal.Editor/Application.hpp
+			include/Krystal.Editor/BooeyScene.hpp
 			include/Krystal.Editor/Editor.hpp
 		
 	PRIVATE

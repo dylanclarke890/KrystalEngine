@@ -1,0 +1,44 @@
+﻿add_executable(Krystal.UI.Tests)
+
+target_link_libraries(Krystal.UI.Tests
+  PRIVATE
+    Krystal.UI
+    Catch2::Catch2WithMain
+)
+
+set_target_properties(Krystal.UI.Tests
+  PROPERTIES
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS OFF
+    COMPILE_WARNING_AS_ERROR ON
+)
+
+target_compile_features(Krystal.UI.Tests
+  PUBLIC
+    cxx_std_23
+)
+
+target_compile_options(Krystal.UI.Tests
+  PRIVATE
+    $<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8 /bigobj>
+)
+
+# The GPU tests use Krystal.Gfx.Tests' test device (header-only).
+target_include_directories(Krystal.UI.Tests
+  PRIVATE
+    ${CMAKE_SOURCE_DIR}/Krystal.Gfx.Tests/include
+)
+
+target_compile_definitions(Krystal.UI.Tests
+  PRIVATE
+    KRYS_UI_TESTS_FONTS_DIR="${CMAKE_SOURCE_DIR}/third-party/liberation-fonts"
+)
+
+catch_discover_tests(Krystal.UI.Tests)
+
+target_sources(Krystal.UI.Tests
+  PRIVATE
+    tests/GraphicsContextRender2D.cpp
+    tests/Page.cpp
+    tests/Render2DConversions.cpp
+)

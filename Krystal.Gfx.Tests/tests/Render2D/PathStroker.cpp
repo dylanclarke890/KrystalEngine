@@ -112,6 +112,16 @@ namespace krys::gfx::tests
 
     // Closed contours dash across their closing segment: here the first and third sides.
     CHECK(StrokedArea(Square(), {.Width = 2.f, .Dashes = {10.f, 10.f}}) == 40.f);
+
+    // A closed contour's last dash runs on into its first and is joined at the start, as at any other
+    // corner: dashes over [30, 40) and [0, 5) of the perimeter meet at the start's corner. Each mitred
+    // corner adds its outer square and overlaps its inner one, so the area is the dashes' alone.
+    CHECK(StrokedArea(Square(), {.Width = 2.f, .Dashes = {15.f, 5.f}, .DashOffset = 10.f}) == 60.f);
+    // A dash all the way round strokes the whole closed contour.
+    CHECK(StrokedArea(Square(), {.Width = 2.f, .Dashes = {100.f, 5.f}})
+          == StrokedArea(Square(), {.Width = 2.f}));
+    // A first dash the last doesn't reach is stroked alone.
+    CHECK(StrokedArea(Square(), {.Width = 2.f, .Dashes = {5.f, 15.f}}) == 20.f);
   }
 
   TEST_CASE("PathStroker: strokes curves", "[Gfx][Render2D]")

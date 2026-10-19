@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Gfx/Render2D/PathStroker.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Gfx/Render2D/Dashing.hpp"
 #include "Krystal.Gfx/Render2D/Flattening.hpp"
 #include "Krystal.Gfx/Render2D/PathRasteriser.hpp"
@@ -275,8 +276,23 @@ namespace krys::gfx
       _piece.push_back(point);
       _pieceCorners.push_back(corner ? 1u : 0u);
     };
+    // A closed contour that starts in a dash holds its first dash back, to join it to the last if that runs
+    // round to the start, so the start point is joined like any other.
+    const bool holdFirst = closed && position.On;
+    bool holdingFirst = holdFirst;
+    List<Vec2f> first;
+    List<uint8> firstCorners;
     auto finishPiece = [&](Vec2f direction)
     {
+      if (holdingFirst)
+      {
+        holdingFirst = false;
+        first = _piece;
+        firstCorners = _pieceCorners;
+        _piece.clear();
+        _pieceCorners.clear();
+        return;
+      }
       if (_piece.size() == 1u)
       {
         AddDot(_piece[0], direction);
@@ -330,9 +346,35 @@ namespace krys::gfx
         addToPiece(to, _corners[toIndex] != 0u);
       }
     }
+
+    if (holdingFirst)
+    {
+      // One dash runs all the way round: the contour is stroked whole.
+      _piece.clear();
+      _pieceCorners.clear();
+      StrokeClosed(_points, _corners);
+      return;
+    }
+    if (holdFirst && position.On)
+    {
+      // The last dash runs on into the first, joined at the start.
+      for (size_t i = 0u; i < first.size(); ++i)
+      {
+        addToPiece(first[i], firstCorners[i] != 0u);
+      }
+      finishPiece(direction);
+      return;
+    }
     if (position.On)
     {
       finishPiece(direction);
+    }
+    if (holdFirst)
+    {
+      // The last dash ended before the start: the first is stroked alone.
+      _piece = krys::move(first);
+      _pieceCorners = krys::move(firstCorners);
+      finishPiece(_piece.size() > 1u ? Direction(_piece[0], _piece[1]) : Direction(_points[0], _points[1]));
     }
   }
 
