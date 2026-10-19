@@ -1383,6 +1383,22 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/Style/RenderStyleBase+SettersInlines.hpp
   include/Krystal.Booey/Rendering/Style/RenderStyleBase.hpp
   include/Krystal.Booey/Rendering/PaintPhase.hpp
+
+  # Graphics context and display lists (G4a)
+  include/Krystal.Booey/Graphics/DashArray.hpp
+  include/Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp
+  include/Krystal.Booey/Graphics/DisplayLists/DisplayListItem.hpp
+  include/Krystal.Booey/Graphics/DisplayLists/DisplayListItems.hpp
+  include/Krystal.Booey/Graphics/DisplayLists/DisplayListRecorder.hpp
+  include/Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp
+  include/Krystal.Booey/Graphics/FloatSegment.hpp
+  include/Krystal.Booey/Graphics/GraphicsContext.hpp
+  include/Krystal.Booey/Graphics/GraphicsContextState.hpp
+  include/Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp
+  include/Krystal.Booey/Graphics/GraphicsStyle.hpp
+  include/Krystal.Booey/Graphics/NullGraphicsContext.hpp
+  include/Krystal.Booey/Graphics/SourceBrush.hpp
+  include/Krystal.Booey/Graphics/SourceBrushLogicalGradient.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -2284,6 +2300,22 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Graphics/ComplexTextController.cpp
   src/Graphics/ComplexTextControllerHarfBuzz.cpp
   src/Graphics/FontHarfBuzz.cpp
+
+  # Graphics context and display lists (G4a)
+  src/Graphics/DisplayLists/DisplayList.cpp
+  src/Graphics/DisplayLists/DisplayListItem.cpp
+  src/Graphics/DisplayLists/DisplayListItems.cpp
+  src/Graphics/DisplayLists/DisplayListRecorder.cpp
+  src/Graphics/DisplayLists/DisplayListRecorderImpl.cpp
+  src/Graphics/FloatSegment.cpp
+  src/Graphics/GradientColorStop.cpp
+  src/Graphics/GradientColorStops.cpp
+  src/Graphics/GraphicsContext.cpp
+  src/Graphics/GraphicsContextState.cpp
+  src/Graphics/GraphicsStyle.cpp
+  src/Graphics/GraphicsTypes.cpp
+  src/Graphics/RotationDirection.cpp
+  src/Graphics/SourceBrush.cpp
 )
 
 target_precompile_headers(Krystal.Booey

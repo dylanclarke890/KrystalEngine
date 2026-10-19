@@ -7,6 +7,11 @@
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   enum class CompositeOperator : uint8
@@ -140,4 +145,16 @@ namespace krys::boo
 
   // FIXME: `compositeOperatorName`, `parseBlendMode` and `parseCompositeAndBlendOperator` come with the
   // canvas 2D context.
+}
+
+namespace krys::boo
+{
+  TextStream &operator<<(TextStream &ts, CompositeOperator op) noexcept;
+  TextStream &operator<<(TextStream &ts, CompositeMode compositeMode) noexcept;
+  TextStream &operator<<(TextStream &ts, InterpolationQuality interpolationQuality) noexcept;
+  TextStream &operator<<(TextStream &ts, WindRule rule) noexcept;
+  TextStream &operator<<(TextStream &ts, LineCap capStyle) noexcept;
+  TextStream &operator<<(TextStream &ts, LineJoin joinStyle) noexcept;
+  TextStream &operator<<(TextStream &ts, StrokeStyle strokeStyle) noexcept;
+  TextStream &operator<<(TextStream &ts, TextDrawingMode textDrawingMode) noexcept;
 }

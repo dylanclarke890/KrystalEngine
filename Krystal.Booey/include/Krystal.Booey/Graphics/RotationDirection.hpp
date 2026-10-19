@@ -2,6 +2,11 @@
 
 #include "Krystal.Core/Numeric.hpp"
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   /// @brief The direction an arc is drawn in.
@@ -10,4 +15,9 @@ namespace krys::boo
     Counterclockwise,
     Clockwise
   };
+}
+
+namespace krys::boo
+{
+  TextStream &operator<<(TextStream &ts, RotationDirection direction) noexcept;
 }

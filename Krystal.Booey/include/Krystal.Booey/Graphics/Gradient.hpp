@@ -8,6 +8,11 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   class FloatRect;
@@ -86,4 +91,9 @@ namespace krys::boo
     Gradient(Data &&, ColourInterpolationMethod, GradientSpreadMethod, GradientColorStops &&,
              bool isTransient) noexcept;
   };
+}
+
+namespace krys::boo
+{
+  TextStream &operator<<(TextStream &ts, const Gradient &gradient) noexcept;
 }

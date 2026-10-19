@@ -3,10 +3,12 @@
 #include "Krystal.Booey/Graphics/PathStream.hpp"
 #include "Krystal.Booey/Graphics/PathTraversalState.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
+#include "Krystal.Core/Text/TextStream.hpp"
 
 namespace krys::boo
 {
-  Path::Path(const List<FloatPoint> &points) noexcept : _data(DataRef<PathImpl> {Ref<PathImpl> {PathStream::Create(points)}})
+  Path::Path(const List<FloatPoint> &points) noexcept
+      : _data(DataRef<PathImpl> {Ref<PathImpl> {PathStream::Create(points)}})
   {
   }
 
@@ -442,5 +444,24 @@ namespace krys::boo
     }
 
     return {};
+  }
+
+  TextStream &operator<<(TextStream &ts, const Path &path) noexcept
+  {
+    bool isFirst = true;
+    path.ApplySegments(
+      [&ts, &isFirst](const PathSegment &segment)
+      {
+        if (!isFirst)
+        {
+          ts << ", ";
+        }
+        else
+        {
+          isFirst = false;
+        }
+        ts << segment;
+      });
+    return ts;
   }
 }

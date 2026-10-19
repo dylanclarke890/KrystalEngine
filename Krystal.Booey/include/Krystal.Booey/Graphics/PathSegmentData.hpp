@@ -5,6 +5,11 @@
 #include "Krystal.Booey/Graphics/PathElement.hpp"
 #include "Krystal.Booey/Graphics/RotationDirection.hpp"
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   struct PathMoveTo
@@ -423,4 +428,25 @@ namespace krys::boo
 
     void Transform(const AffineTransform &) noexcept;
   };
+}
+
+namespace krys::boo
+{
+  TextStream &operator<<(TextStream &ts, const PathMoveTo &data) noexcept;
+  TextStream &operator<<(TextStream &ts, const PathLineTo &data) noexcept;
+  TextStream &operator<<(TextStream &ts, const PathQuadCurveTo &data) noexcept;
+  TextStream &operator<<(TextStream &ts, const PathBezierCurveTo &data) noexcept;
+  TextStream &operator<<(TextStream &ts, const PathArcTo &data) noexcept;
+  TextStream &operator<<(TextStream &ts, const PathArc &data) noexcept;
+  TextStream &operator<<(TextStream &ts, const PathClosedArc &data) noexcept;
+  TextStream &operator<<(TextStream &ts, const PathEllipse &data) noexcept;
+  TextStream &operator<<(TextStream &ts, const PathEllipseInRect &data) noexcept;
+  TextStream &operator<<(TextStream &ts, const PathRect &data) noexcept;
+  TextStream &operator<<(TextStream &ts, const PathRoundedRect &data) noexcept;
+  TextStream &operator<<(TextStream &ts, const PathContinuousRoundedRect &data) noexcept;
+  TextStream &operator<<(TextStream &ts, const PathDataLine &data) noexcept;
+  TextStream &operator<<(TextStream &ts, const PathDataQuadCurve &data) noexcept;
+  TextStream &operator<<(TextStream &ts, const PathDataBezierCurve &data) noexcept;
+  TextStream &operator<<(TextStream &ts, const PathDataArc &data) noexcept;
+  TextStream &operator<<(TextStream &ts, const PathCloseSubpath &data) noexcept;
 }

@@ -5,6 +5,11 @@
 #include "Krystal.Core/Types/SmallList.hpp"
 #include <algorithm>
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   /// @brief A gradient's colour stops, sorted by offset on demand.
@@ -109,4 +114,9 @@ namespace krys::boo
       return std::ranges::is_sorted(_stops, {}, &GradientColorStop::Offset);
     }
   };
+}
+
+namespace krys::boo
+{
+  TextStream &operator<<(TextStream &ts, const GradientColorStops &stops) noexcept;
 }

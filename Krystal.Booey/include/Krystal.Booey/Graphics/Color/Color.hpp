@@ -14,6 +14,11 @@
 #include <functional>
 #include <utility>
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   class Color;
@@ -575,4 +580,9 @@ namespace krys
       return a == b;
     }
   };
+}
+
+namespace krys::boo
+{
+  TextStream &operator<<(TextStream &ts, const Color &color) noexcept;
 }

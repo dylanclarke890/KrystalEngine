@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/Graphics/PathElement.hpp"
 #include "Krystal.Booey/Graphics/PathImpl.hpp"
+#include "Krystal.Core/Text/TextStream.hpp"
 
 namespace krys::boo
 {
@@ -90,5 +91,10 @@ namespace krys::boo
                               return false;
                             }
                           });
+  }
+
+  TextStream &operator<<(TextStream &ts, const PathSegment &segment) noexcept
+  {
+    return std::visit([&](const auto &data) -> TextStream & { return ts << data; }, segment.GetData());
   }
 }

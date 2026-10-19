@@ -7,6 +7,11 @@
 #include "Krystal.Core/Types/DataRef.hpp"
 #include <variant>
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   class GraphicsContext;
@@ -294,4 +299,9 @@ namespace krys::boo
     }
     return std::nullopt;
   }
+}
+
+namespace krys::boo
+{
+  TextStream &operator<<(TextStream &ts, const Path &path) noexcept;
 }

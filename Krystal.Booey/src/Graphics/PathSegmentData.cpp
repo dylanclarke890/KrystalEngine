@@ -1,9 +1,11 @@
 ﻿#include "Krystal.Booey/Graphics/PathSegmentData.hpp"
 
 #include "Krystal.Booey/Core/MathExtras.hpp"
+#include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Text/TextStream.hpp"
 #include <cmath>
 #include <numbers>
 
@@ -795,5 +797,102 @@ namespace krys::boo
 
   void PathCloseSubpath::Transform(const AffineTransform &) noexcept
   {
+  }
+
+  TextStream &operator<<(TextStream &ts, const PathMoveTo &data) noexcept
+  {
+    return ts << "move to " << data.Point;
+  }
+
+  TextStream &operator<<(TextStream &ts, const PathLineTo &data) noexcept
+  {
+    return ts << "add line to " << data.Point;
+  }
+
+  TextStream &operator<<(TextStream &ts, const PathQuadCurveTo &data) noexcept
+  {
+    return ts << "add quad curve to " << data.ControlPoint << ' ' << data.EndPoint;
+  }
+
+  TextStream &operator<<(TextStream &ts, const PathBezierCurveTo &data) noexcept
+  {
+    return ts << "add curve to " << data.ControlPoint1 << ' ' << data.ControlPoint2 << ' ' << data.EndPoint;
+  }
+
+  TextStream &operator<<(TextStream &ts, const PathArcTo &data) noexcept
+  {
+    return ts << "add arc to " << data.ControlPoint1 << ' ' << data.ControlPoint2 << ' ' << data.Radius;
+  }
+
+  TextStream &operator<<(TextStream &ts, const PathArc &data) noexcept
+  {
+    return ts << "add arc " << data.Center << ' ' << data.Radius << ' ' << data.StartAngle << ' '
+              << data.EndAngle << ' ' << data.Direction;
+  }
+
+  TextStream &operator<<(TextStream &ts, const PathClosedArc &data) noexcept
+  {
+    return ts << "add closed arc " << data.Arc.Center << ' ' << data.Arc.Radius << ' ' << data.Arc.StartAngle
+              << ' ' << data.Arc.EndAngle << ' ' << data.Arc.Direction;
+  }
+
+  TextStream &operator<<(TextStream &ts, const PathEllipse &data) noexcept
+  {
+    return ts << "add ellipse " << data.Center << ' ' << data.RadiusX << ' ' << data.RadiusY << ' '
+              << data.Rotation << ' ' << data.StartAngle << ' ' << data.EndAngle << ' ' << data.Direction;
+  }
+
+  TextStream &operator<<(TextStream &ts, const PathEllipseInRect &data) noexcept
+  {
+    return ts << "add ellipse in rect " << data.Rect;
+  }
+
+  TextStream &operator<<(TextStream &ts, const PathRect &data) noexcept
+  {
+    return ts << "add rect " << data.Rect;
+  }
+
+  TextStream &operator<<(TextStream &ts, const PathRoundedRect &data) noexcept
+  {
+    return ts << "add rounded rect " << data.RoundedRect;
+  }
+
+  TextStream &operator<<(TextStream &ts, const PathContinuousRoundedRect &data) noexcept
+  {
+    return ts << "add continuous rounded rect " << data.Rect << ' ' << data.CornerWidth << ' '
+              << data.CornerHeight;
+  }
+
+  TextStream &operator<<(TextStream &ts, const PathDataLine &data) noexcept
+  {
+    ts << "move to " << data.Start();
+    ts << ", ";
+    return ts << "add line to " << data.End();
+  }
+
+  TextStream &operator<<(TextStream &ts, const PathDataQuadCurve &data) noexcept
+  {
+    ts << "move to " << data.Start;
+    ts << ", ";
+    return ts << "add quad curve to " << data.ControlPoint << ' ' << data.EndPoint;
+  }
+
+  TextStream &operator<<(TextStream &ts, const PathDataBezierCurve &data) noexcept
+  {
+    ts << "move to " << data.Start;
+    ts << ", ";
+    return ts << "add curve to " << data.ControlPoint1 << ' ' << data.ControlPoint2 << ' ' << data.EndPoint;
+  }
+
+  TextStream &operator<<(TextStream &ts, const PathDataArc &data) noexcept
+  {
+    ts << "move to " << data.Start;
+    ts << ", ";
+    return ts << "add arc to " << data.ControlPoint1 << ' ' << data.ControlPoint2 << ' ' << data.Radius;
+  }
+
+  TextStream &operator<<(TextStream &ts, const PathCloseSubpath &) noexcept
+  {
+    return ts << "close subpath";
   }
 }

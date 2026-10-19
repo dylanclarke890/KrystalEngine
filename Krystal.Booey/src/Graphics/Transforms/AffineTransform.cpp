@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Graphics/Region.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Text/TextStream.hpp"
 #include <cmath>
 #include <numbers>
 
@@ -498,5 +499,19 @@ namespace krys::boo
     this->SetF(decomp.TranslateY);
     this->RotateRadians(decomp.Angle);
     this->Scale(decomp.ScaleX, decomp.ScaleY);
+  }
+
+  TextStream &operator<<(TextStream &ts, const AffineTransform &transform) noexcept
+  {
+    if (transform.IsIdentity())
+    {
+      ts << "identity";
+    }
+    else
+    {
+      ts << "{m=((" << transform.A() << "," << transform.B() << ")(" << transform.C() << "," << transform.D()
+         << ")) t=(" << transform.E() << "," << transform.F() << ")}";
+    }
+    return ts;
   }
 }

@@ -11,6 +11,11 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   class FontFeatureValues;
@@ -413,4 +418,9 @@ namespace krys
   {
     KRYS_NODISCARD static size_t Hash(const boo::FontVariantAlternates &key) noexcept;
   };
+}
+
+namespace krys::boo
+{
+  TextStream &operator<<(TextStream &ts, FontSmoothingMode mode) noexcept;
 }

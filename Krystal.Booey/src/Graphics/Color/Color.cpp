@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorLuminance.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
+#include "Krystal.Core/Text/TextStream.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -163,5 +164,10 @@ namespace krys::boo
   utf8_string Color::DebugDescription() const noexcept
   {
     return SerialisationForRenderTreeAsText(*this);
+  }
+
+  TextStream &operator<<(TextStream &ts, const Color &color) noexcept
+  {
+    return ts << SerialisationForRenderTreeAsText(color);
   }
 }

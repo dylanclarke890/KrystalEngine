@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-18): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, G2f, strokes, G2g, clips, G2h, layers and blend modes, G2i, gradients, and G2j, shadows, and G2k, golden image tests, are done); Krystal.Text (T1) and text (G3) are done; the Booey integration (G4) is planned (see *G4 plan*).
+Status (2026-10-18): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, G2f, strokes, G2g, clips, G2h, layers and blend modes, G2i, gradients, and G2j, shadows, and G2k, golden image tests, are done); Krystal.Text (T1) and text (G3) are done; the Booey integration (G4) is in progress (G4a, the graphics context and display lists, is done; see *G4 plan*).
 
 ## Why
 
@@ -606,6 +606,14 @@ Booey has layout (block, inline, flex, grid, table), the layer tree, fonts holdi
 - Tests: `tests/Render2D/Text.cpp` (Liberation Sans): a glyph on a whole pixel, at a fractional pen and under a uniform scale exactly as rasterised; a run in one batch, cached on the next frame; gradient, clipped and turned text (coverage kept within 3%); large text filled as an outline (one mask, coverage within 2% of the bitmap); sharp shadows as the glyph again, blurred ones exactly the glyph's coverage blurred, none for a transparent paint; large text moved by whole pixels reusing its mask while a gradient stays put; colour glyphs in their own colours, faded by the paint's alpha, casting sharp shadows as their silhouette and blurred ones keeping their alpha (within 1%; skipped without Segoe UI Emoji). 8 cases. `tests/Render2D/Golden.cpp` gains the `text` scene.
 
 Testing: the device's hidden window gives tests a real OpenGL context (Krystal.Gfx.Tests). Render2D gets golden image tests: render offscreen, read back with `ReadTexture`, compare against a PNG with a tolerance.
+
+### G4a as built (2026-10-18)
+
+- Booey ports upstream's `GraphicsContext`, its state and state savers, `NullGraphicsContext` and the display lists (`DisplayList`, the items, `Recorder` and `RecorderImpl`) in `Graphics/` and `Graphics/DisplayLists/` (namespace `krys::boo::display_list`); the ledger entry is *Graphics context and display lists* in `docs/booey/PORTING.md`.
+- 52 item types: state (save, restore, transforms, inline fill and stroke, the whole state, line caps, joins, dashes, mitre limit), clips (rect, rounded rect, clip-out, path, reset), fills (a rect with the current brush, a colour, a gradient or composited; a rounded rect; a rect with a rounded hole; a path; an ellipse), strokes (rect, path, ellipse), lines, text lines, document marker dots, focus rings, glyphs, nested display lists, placeholders, transparency layers, the device scale, pages and links. Image, filter and control items wait for images.
+- Glyph items keep a `Ref` to Booey's `Font`, whose platform data holds the `text::FreeTypeFace` Render2D rasterises from, plus glyph IDs and advances; replay turns the advances into positions.
+- Recording keeps upstream's state handling: changes are recorded just before the next drawing item, colour and thickness changes inline, anything else as the whole state, and changes back to what was last drawn with not at all.
+- Display lists dump as text, in upstream's format, which the tests compare.
 
 ## Open decisions
 

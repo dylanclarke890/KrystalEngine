@@ -6,6 +6,11 @@
 #include "Krystal.Core/Visitor.hpp"
 #include <span>
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   class PathSegment
@@ -64,4 +69,9 @@ namespace krys::boo
   inline PathSegment::PathSegment(Data &&data) noexcept : _data(krys::move(data))
   {
   }
+}
+
+namespace krys::boo
+{
+  TextStream &operator<<(TextStream &ts, const PathSegment &segment) noexcept;
 }

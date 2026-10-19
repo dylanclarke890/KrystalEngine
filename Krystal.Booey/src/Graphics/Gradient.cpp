@@ -1,5 +1,8 @@
 ﻿#include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
+#include "Krystal.Core/Colour/ColourTextStream.hpp"
+#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Visitor.hpp"
 
 namespace krys::boo
 {
@@ -72,5 +75,33 @@ namespace krys::boo
   void Gradient::AddColorStop(GradientColorStop &&stop) noexcept
   {
     _stops.AddColorStop(krys::move(stop));
+  }
+
+  TextStream &operator<<(TextStream &ts, const Gradient &gradient) noexcept
+  {
+    std::visit(CreateVisitor(
+                 [&](const Gradient::LinearData &data)
+                 {
+                   ts.DumpProperty(u8"p0", data.Point0);
+                   ts.DumpProperty(u8"p1", data.Point1);
+                 },
+                 [&](const Gradient::RadialData &data)
+                 {
+                   ts.DumpProperty(u8"p0", data.Point0);
+                   ts.DumpProperty(u8"p1", data.Point1);
+                   ts.DumpProperty(u8"start-radius", data.StartRadius);
+                   ts.DumpProperty(u8"end-radius", data.EndRadius);
+                   ts.DumpProperty(u8"aspect-ratio", data.AspectRatio);
+                 },
+                 [&](const Gradient::ConicData &data)
+                 {
+                   ts.DumpProperty(u8"p0", data.Point0);
+                   ts.DumpProperty(u8"angle-radians", data.AngleRadians);
+                 }),
+               gradient.GetData());
+    ts.DumpProperty(u8"color-interpolation-method", gradient.GetColorInterpolationMethod());
+    ts.DumpProperty(u8"spread-method", gradient.SpreadMethod());
+    ts.DumpProperty(u8"stops", gradient.Stops());
+    return ts;
   }
 }

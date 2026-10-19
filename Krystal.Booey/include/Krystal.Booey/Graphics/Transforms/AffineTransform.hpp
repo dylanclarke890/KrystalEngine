@@ -10,6 +10,11 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   class FloatQuad;
@@ -249,4 +254,9 @@ namespace krys::boo
   inline constexpr AffineTransform AffineTransform::Identity {};
 
   KRYS_NODISCARD AffineTransform MakeMapBetweenRects(const FloatRect &source, const FloatRect &dest) noexcept;
+}
+
+namespace krys::boo
+{
+  TextStream &operator<<(TextStream &ts, const AffineTransform &transform) noexcept;
 }

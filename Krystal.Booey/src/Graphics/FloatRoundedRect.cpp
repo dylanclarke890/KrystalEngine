@@ -2,6 +2,7 @@
 #include "Krystal.Booey/Core/MathExtras.hpp"
 #include "Krystal.Booey/Graphics/Path.hpp"
 #include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Text/TextStream.hpp"
 #include <algorithm>
 #include <cmath>
 #include <numbers>
@@ -312,5 +313,15 @@ namespace krys::boo
     }
 
     return region;
+  }
+
+  TextStream &operator<<(TextStream &ts, const FloatRoundedRect &roundedRect) noexcept
+  {
+    ts << roundedRect.Rect();
+    ts.DumpProperty(u8"top-left", roundedRect.GetRadii().TopLeft());
+    ts.DumpProperty(u8"top-right", roundedRect.GetRadii().TopRight());
+    ts.DumpProperty(u8"bottom-left", roundedRect.GetRadii().BottomLeft());
+    ts.DumpProperty(u8"bottom-right", roundedRect.GetRadii().BottomRight());
+    return ts;
   }
 }

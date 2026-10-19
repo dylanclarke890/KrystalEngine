@@ -97,6 +97,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Colour/ColourModels.hpp
       include/Krystal.Core/Colour/ColourNormalization.hpp
       include/Krystal.Core/Colour/ColourSpace.hpp
+      include/Krystal.Core/Colour/ColourTextStream.hpp
       include/Krystal.Core/Colour/ColourTransferFunctions.hpp
       include/Krystal.Core/Colour/ColourTypes.hpp
       include/Krystal.Core/Colour/ColourUtilities.hpp
@@ -287,6 +288,7 @@ target_sources(Krystal.Core
     # Colour
     src/Colour/ColourConversion.cpp
     src/Colour/ColourInterpolation.cpp
+    src/Colour/ColourTextStream.cpp
 
     # Detection
     src/Detection/NumberOfCores.cpp

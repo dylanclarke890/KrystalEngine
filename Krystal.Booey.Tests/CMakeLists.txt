@@ -309,6 +309,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Gradient.cpp
 		tests/Graphics/RoundedRect.cpp
 		tests/Graphics/Path.cpp
+		tests/Graphics/DisplayLists/DisplayListRecorder.cpp
+		tests/Graphics/GraphicsContext.cpp
 		tests/Style/Values/Shapes/Shapes.cpp
 		tests/Style/Values/Masking/Masking.cpp
 		tests/Style/Values/Motion/Motion.cpp

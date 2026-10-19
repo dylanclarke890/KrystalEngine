@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Core/TextFlags.hpp"
 #include "Krystal.Booey/Graphics/FontFeatureValues.hpp"
+#include "Krystal.Core/Text/TextStream.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 
 namespace krys::boo
@@ -240,5 +241,20 @@ namespace krys
       return krys::Hash::Combine(false);
     }
     return krys::Hash::Combine(true, key.GetValues());
+  }
+}
+
+namespace krys::boo
+{
+  TextStream &operator<<(TextStream &ts, FontSmoothingMode mode) noexcept
+  {
+    switch (mode)
+    {
+      case FontSmoothingMode::Auto:                ts << "auto"; break;
+      case FontSmoothingMode::None:                ts << "none"; break;
+      case FontSmoothingMode::Antialiased:         ts << "antialiased"; break;
+      case FontSmoothingMode::SubpixelAntialiased: ts << "subpixel-antialiased"; break;
+    }
+    return ts;
   }
 }
