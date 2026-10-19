@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-18): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, G2f, strokes, G2g, clips, G2h, layers and blend modes, G2i, gradients, and G2j, shadows, and G2k, golden image tests, are done); text (G3) and the Booey integration (G4) are drafts.
+Status (2026-10-18): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, G2f, strokes, G2g, clips, G2h, layers and blend modes, G2i, gradients, and G2j, shadows, and G2k, golden image tests, are done); Krystal.Text (T1) and text (G3) are done; the Booey integration (G4) is planned (see *G4 plan*).
 
 ## Why
 
@@ -299,7 +299,7 @@ All done in G1 (2026-10-17) unless noted.
 | G2 | Render2D: the analytic fast path, transforms, images, paths and coverage masks, strokes, clips, layers, gradients, shadows. Reviewed one part at a time (see *G2 parts*). | A test app draws a UI-like scene; golden image tests pass. |
 | T1 | Done (2026-10-18). `Krystal.Text`: font files and faces move down from Booey, shared by Booey and Gfx (see *T1 plan*). | Booey and its tests build and pass on the moved faces; Krystal.Text has its own tests. |
 | G3 | Done (2026-10-18). Text: the glyph atlas (R8 pages, RGBA pages for colour glyphs), `DrawGlyphs`, FreeType rasterisation. It doesn't depend on G2e's mask atlas. In two parts (see *G3 plan*): done (2026-10-18). | Text renders crisply at several sizes and scales. |
-| G4 | Booey: `GraphicsContext`, the display list recorder, painting (paint order, backgrounds, borders, text); Krystal.UI replays it. | The vertical slice: a page loads, renders, resizes and responds to a click. |
+| G4 | Booey: `GraphicsContext`, the display list recorder, painting (paint order, backgrounds, borders, text), hit testing; Krystal.UI replays it. In seven parts (see *G4 plan*). | The vertical slice: a page loads, renders, resizes and responds to a click. |
 
 ### G2 parts
 
@@ -411,6 +411,27 @@ Decided (2026-10-18): one part at a time, each reviewed before the next. Revised
 - **Not yet:** the gamma and contrast adjustments Skia makes to text coverage (raw coverage first, a TODO, compared against Chrome later), LCD antialiasing, variable font axes.
 - **Parts:** G3a: the removals, `FontFace2D`, rasterising, outlines, the shared atlas pages and the glyph atlas, CPU only. G3b: `DrawGlyphs`, colour glyphs, transformed and large text, shadows, a golden text scene (against Chrome, loosely and reported: Chrome on Windows draws text through DirectWrite) and the editor's labels.
 - **Tests:** coverage against FreeType's own output, the subpixel variants, outlines, atlas packing and eviction; drawn glyphs at whole and fractional positions, gradient, clipped and transformed text, large text, text shadows; the golden scene.
+
+### G4 plan (decided 2026-10-18)
+
+Booey has layout (block, inline, flex, grid, table), the layer tree, fonts holding `text::FreeTypeFace`s, `Path` with `PathStream`, `Gradient`, `FloatRoundedRect` and the colour types; it has no painting, no hit testing and no host. Upstream's sizes: `GraphicsContext` and its state about 1.4k lines, `displaylists/` about 1.8k (67 item types), `BackgroundPainter` 1.1k, `BorderPainter` and `BorderShape` 1.7k, `OutlinePainter` 0.7k, the text painters (`TextBoxPainter`, `TextPainter`, `TextDecorationPainter`, `InlineBoxPainter`) 2.5k, and the painting and hit testing in `RenderLayer.cpp` (7k in all).
+
+- **Decisions:**
+  - Booey ports upstream's display list (the item types, `DisplayList`, the recorder), trimmed to the items in *Layer 3*; the rest are FIXMEs.
+  - No repaint rects and no compositing at first: any change (style, layout, hover) marks the page dirty; a dirty page is painted into a new display list, and every frame replays the last one. The repaint FIXMEs stay until a damage-tracking part.
+  - Hit testing and clicks are part of G4 (G4f).
+  - A device scale factor of 1; Booey keeps its scale plumbing, HiDPI comes later.
+  - The host module is Krystal.UI (open decision 1).
+  - Out of G4 (FIXMEs in Booey): images, `border-image` and `mask-image` (resource loading), `filter` and `backdrop-filter` (Render2D has no GPU filters), scrolling input and scrollbars, selection and carets, SVG, form controls.
+- **Parts:**
+  - **G4a, the graphics context and display lists** (Booey): `GraphicsContext` with its state (fill and stroke, shadows, composite and blend, alpha, clips), `NullGraphicsContext`, `DisplayList`, the recorder and the items boxes and text need; `Path` backed by `PathStream`.
+  - **G4b, Krystal.UI and replay**: a new module on Booey and Gfx. Replays a display list into Render2D, mostly one call per item (`Path` to `Path2D` through its segments, `Gradient` to `Gradient2D`, colours as they are, fonts cached as `FontFace2D`s keyed by face and synthetic bold and oblique, shadows to `SetDropShadow`, transparency layers to `BeginLayer`). A `Page` host loads HTML from a string or a file, sets the viewport, lays out, paints and replays. The editor shows a page.
+  - **G4c1, paint plumbing, layers and backgrounds** (Booey): `PaintPhase`, `PaintInfo`, the renderers' `paint`, `paintObject` and `paintChildren`, `RenderLayer::paintLayer` (stacking order, opacity layers, overflow clips, transforms, `z-index`, positioned content), `LocalFrameView::paintContents` and `RenderView`'s painting, and `BackgroundPainter` for colours and gradients.
+  - **G4c2, borders, shadows and outlines** (Booey): `BorderPainter`, `BorderShape` and `BorderEdge` (every style, rounded corners, multi-coloured sides through side clips), outer and inset box shadows, `OutlinePainter` and focus rings.
+  - **G4d, text** (Booey): `FontCascade::drawText` and `drawGlyphBuffer`, `InlineBoxPainter`, `TextBoxPainter`, `TextPainter`, `TextDecorationPainter`, `text-shadow`, list markers and ellipses.
+  - **G4e, the other boxes** (Booey): flex, grid and table painting, collapsed table borders, placeholders for replaced content.
+  - **G4f, hit testing and clicks** (Booey and Krystal.UI): `HitTestRequest`, `HitTestLocation`, `HitTestResult`, `RenderLayer::hitTest`, `nodeAtPoint` for boxes and inline content; mouse move, down, up and click events with hover and active state; Krystal.UI routes the window's mouse to the page.
+- **Tests:** the Booey parts compare display list dumps of small documents (as layout compares render tree dumps); the whole pipeline is checked with page goldens, HTML drawn through Krystal.UI and compared with Chrome's rendering (`tools/golden/capture_chrome.py`, extended to pages): strictly for boxes, loosely for text. The Booey parts follow the porting checklist and get ledger entries in `docs/booey/PORTING.md`.
 
 ### G2a as built (2026-10-18)
 
