@@ -67,6 +67,7 @@ namespace krys::gfx
       float Size;
       uint32 Subpixel;
       Array<float, 4> Linear;
+      float Blur;
 
       KRYS_NODISCARD bool operator==(const Key &) const noexcept = default;
     };
@@ -101,8 +102,12 @@ namespace krys::gfx
     /// @brief The glyph rasterised at `size` pixels per em, its pen `subpixel` quarters of a pixel right of a
     /// pixel's left edge, under `linear` (its translation is ignored); rasterised if it isn't cached. Nothing
     /// if FreeType can't load it, or there's no room for it: draw it as a path instead.
+    ///
+    /// With a `blur` (a standard deviation in pixels), it's the glyph's coverage blurred, for shadows: a
+    /// colour glyph's alpha, so always coverage, its bounds grown by the blur's reach.
     KRYS_NODISCARD Maybe<GlyphLocation> GetGlyph(const FontFace2D &face, uint32 glyph, float size,
-                                                 uint32 subpixel, const Transform2D &linear = {}) noexcept;
+                                                 uint32 subpixel, const Transform2D &linear = {},
+                                                 float blur = 0.f) noexcept;
 
     /// @brief Splits a pen's x into the whole pixel it's in and its quarter within it, rounding to the
     /// nearest quarter (a pen that rounds up to the next pixel is in that pixel, at quarter 0).

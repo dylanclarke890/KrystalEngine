@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
+#include "Krystal.Gfx/Render2D/CoverageBlur.hpp"
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -66,6 +67,14 @@ namespace krys::gfx::tests
     auto other = LiberationSansFace();
     CHECK(atlas.GetGlyph(*other, a, 16.f, 0u)->Texels != first->Texels);
     CHECK(atlas.Stats().Rasterised == 5u);
+
+    // A blurred glyph, for shadows, is another: coverage grown by the blur's reach.
+    const auto blurred = atlas.GetGlyph(*face, a, 16.f, 0u, {}, 2.f);
+    REQUIRE(blurred.has_value());
+    CHECK_FALSE(blurred->Colour);
+    CHECK(blurred->Bounds.Width == first->Bounds.Width + 2u * detail::BlurExtent(2.f));
+    CHECK(blurred->Bounds.X == first->Bounds.X - static_cast<int32>(detail::BlurExtent(2.f)));
+    CHECK(atlas.Stats().Rasterised == 6u);
 
     // A space has no pixels, so no texture.
     const auto space = atlas.GetGlyph(*face, face->GlyphIndex(U' '), 16.f, 0u);

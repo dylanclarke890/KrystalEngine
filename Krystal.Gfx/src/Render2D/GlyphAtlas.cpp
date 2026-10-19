@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Gfx/Render2D/GlyphAtlas.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Gfx/Render2D/CoverageBlur.hpp"
 #include <algorithm>
 #include <bit>
 #include <cmath>
@@ -19,6 +21,7 @@ namespace krys::gfx
     {
       mix(std::bit_cast<uint32>(value));
     }
+    mix(std::bit_cast<uint32>(key.Blur));
     return seed;
   }
 
@@ -35,14 +38,16 @@ namespace krys::gfx
   }
 
   Maybe<GlyphLocation> GlyphAtlas::GetGlyph(const FontFace2D &face, uint32 glyph, float size, uint32 subpixel,
-                                            const Transform2D &linear) noexcept
+                                            const Transform2D &linear, float blur) noexcept
   {
     subpixel %= SubpixelPositions;
+    blur = blur > 0.f && std::isfinite(blur) ? blur : 0.f;
     const Key key {.Face = face.Id(),
                    .Glyph = glyph,
                    .Size = size,
                    .Subpixel = subpixel,
-                   .Linear = {linear.A, linear.B, linear.C, linear.D}};
+                   .Linear = {linear.A, linear.B, linear.C, linear.D},
+                   .Blur = blur};
     auto locate = [&](const Entry &entry)
     {
       auto &pages = entry.Colour ? _colour : _coverage;
@@ -63,13 +68,35 @@ namespace krys::gfx
       return locate(found->second);
     }
 
-    const auto bitmap = face.Rasterise(glyph, size, static_cast<float>(subpixel) / SubpixelPositions,
-                                       {.A = linear.A, .B = linear.B, .C = linear.C, .D = linear.D});
+    auto bitmap = face.Rasterise(glyph, size, static_cast<float>(subpixel) / SubpixelPositions,
+                                 {.A = linear.A, .B = linear.B, .C = linear.C, .D = linear.D});
     if (!bitmap)
     {
       return {};
     }
     ++_stats.Rasterised;
+
+    // A shadow's glyph is coverage (a colour glyph's alpha), blurred.
+    if (blur > 0.f && !bitmap->Bounds.IsEmpty())
+    {
+      CoverageMask coverage {.Bounds = bitmap->Bounds, .Coverage = {}};
+      if (bitmap->Colour)
+      {
+        coverage.Coverage.resize(bitmap->Pixels.size() / 4u);
+        for (size_t i = 0u; i < coverage.Coverage.size(); ++i)
+        {
+          coverage.Coverage[i] = bitmap->Pixels[i * 4u + 3u];
+        }
+      }
+      else
+      {
+        coverage.Coverage = krys::move(bitmap->Pixels);
+      }
+      auto blurred = detail::BlurCoverage(coverage, blur);
+      bitmap->Bounds = blurred.Bounds;
+      bitmap->Pixels = krys::move(blurred.Coverage);
+      bitmap->Colour = false;
+    }
 
     Entry entry {.Colour = bitmap->Colour, .Page = NoPage, .Texels = {}, .Bounds = bitmap->Bounds};
     if (!bitmap->Bounds.IsEmpty())

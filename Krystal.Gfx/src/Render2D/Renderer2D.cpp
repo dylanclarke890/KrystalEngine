@@ -145,6 +145,7 @@ const uint Mask = 8u;
 const uint Hole = 16u;
 const uint GradientPaint = 32u;
 const uint Shadow = 64u;
+const uint AlphaMask = 128u;
 const uint BlendModeShift = 8u;
 
 const uint LinearShape = 1u;
@@ -243,6 +244,11 @@ vec4 SampleTexture(vec2 dx, vec2 dy)
   {
     // Coverage, not a colour: nothing to premultiply or convert.
     return vec4(texel.r);
+  }
+  if ((v_Flags & AlphaMask) != 0u)
+  {
+    // A colour image's alpha as coverage: its silhouette.
+    return vec4(texel.a);
   }
 
   // The GPU decoded each channel of an sRGB texture; encoding each back gives the stored values, whether
@@ -1290,14 +1296,20 @@ void main()
       return;
     }
 
+    FillPathMask(path, _state.Transform, rule, *resolved);
+  }
+
+  void Renderer2D::FillPathMask(const Path2D &path, const Transform2D &geometry, FillRule rule,
+                                const ResolvedPaint &paint) noexcept
+  {
     // The shadow's mask is the path's, moved and blurred in target pixels. It can show where the path
     // doesn't, so it comes first.
-    if (const auto shadow = PlaceShadow(_state.Transform, *resolved))
+    if (const auto shadow = PlaceShadow(geometry, paint))
     {
       AddMask(_masks.GetMask(path, shadow->Transform, rule, _state.Clip, shadow->PixelSigma), shadow->Colour,
               NoGradient);
     }
-    AddMask(_masks.GetMask(path, _state.Transform, rule, _state.Clip), resolved->Colour, resolved->Gradient);
+    AddMask(_masks.GetMask(path, geometry, rule, _state.Clip), paint.Colour, paint.Gradient);
   }
 
   void Renderer2D::AddMask(const MaskLocation &mask, Array<uint8, 4> colour, uint32 gradient) noexcept
@@ -1354,16 +1366,24 @@ void main()
       return Vec2f {origin.x + positions[i].x, origin.y + positions[i].y};
     };
 
+    // A glyph's outline, at the origin, placed at its pen by the transform, so moving it by whole pixels
+    // reuses its mask.
+    auto fillOutline = [&](size_t i)
+    {
+      const auto path = face.GlyphPath(glyphs[i], size);
+      if (!path.IsEmpty())
+      {
+        const auto at = pen(i);
+        FillPathMask(path, transform * Transform2D::Translation(at.x, at.y), FillRule::NonZero, *resolved);
+      }
+    };
+
     // Large text is filled as outlines, shadows and all; colour glyphs only come as bitmaps.
     if (size * scale > LargeGlyphSize && !face.HasColour())
     {
       for (size_t i = 0u; i < count; ++i)
       {
-        const auto path = face.GlyphPath(glyphs[i], size, pen(i));
-        if (!path.IsEmpty())
-        {
-          FillPath(path, FillRule::NonZero, paint);
-        }
+        fillOutline(i);
       }
       return;
     }
@@ -1377,62 +1397,66 @@ void main()
       uniform ? Transform2D {}
               : Transform2D {.A = transform.A, .B = transform.B, .C = transform.C, .D = transform.D};
 
-    // A glyph from the atlas, its pen in target pixels snapped to a quarter across and a whole pixel down.
-    // A shadow can't tint a colour glyph's bitmap, so `shadow` skips those.
-    auto drawGlyph = [&](uint32 glyph, Vec2f at, const ResolvedPaint &glyphPaint, bool shadow)
+    // A glyph from the atlas, its pen in target pixels snapped to a quarter across and a whole pixel down;
+    // false when the atlas has no room for it.
+    auto drawGlyph = [&](uint32 glyph, Vec2f at, const ResolvedPaint &glyphPaint, float blur, bool shadow)
     {
       const auto [x, quarter] = GlyphAtlas::SnapPen(at.x);
       const auto y = static_cast<int32>(std::lround(at.y));
-      if (const auto location = _glyphs.GetGlyph(face, glyph, rasterSize, quarter, linear))
+      if (const auto location = _glyphs.GetGlyph(face, glyph, rasterSize, quarter, linear, blur))
       {
-        if (location->Texture.IsValid() && !(shadow && location->Colour))
+        if (location->Texture.IsValid())
         {
-          AddGlyph(*location, x, y, glyphPaint);
+          AddGlyph(*location, x, y, glyphPaint, shadow);
         }
         return true;
       }
       return false;
     };
 
-    // Shadows go beneath the whole run: a sharp one is each glyph again, offset; a blurred one is each
-    // glyph's outline's mask, blurred.
+    // Shadows go beneath the whole run: each glyph's coverage (a colour glyph's alpha), blurred in target
+    // pixels, at its pen moved by the offset, in the shadow's colour.
     if (const auto shadow = PlaceShadow(transform, *resolved))
     {
       const Vec2f offset {shadow->Transform.E - transform.E, shadow->Transform.F - transform.F};
       const ResolvedPaint shadowPaint {.Colour = shadow->Colour, .Gradient = NoGradient};
       for (size_t i = 0u; i < count; ++i)
       {
-        if (shadow->PixelSigma <= 0.f)
+        const auto at = transform.Apply(pen(i));
+        if (!drawGlyph(glyphs[i], {at.x + offset.x, at.y + offset.y}, shadowPaint, shadow->PixelSigma, true))
         {
-          const auto at = transform.Apply(pen(i));
-          static_cast<void>(drawGlyph(glyphs[i], {at.x + offset.x, at.y + offset.y}, shadowPaint, true));
-          continue;
-        }
-        const auto path = face.GlyphPath(glyphs[i], size, pen(i));
-        if (!path.IsEmpty())
-        {
-          AddMask(_masks.GetMask(path, shadow->Transform, FillRule::NonZero, _state.Clip, shadow->PixelSigma),
-                  shadow->Colour, NoGradient);
+          // No room: the outline's shadow alone.
+          const auto path = face.GlyphPath(glyphs[i], size);
+          const auto from = pen(i);
+          if (!path.IsEmpty())
+          {
+            AddMask(_masks.GetMask(path, shadow->Transform * Transform2D::Translation(from.x, from.y),
+                                   FillRule::NonZero, _state.Clip, shadow->PixelSigma),
+                    shadow->Colour, NoGradient);
+          }
         }
       }
     }
 
     for (size_t i = 0u; i < count; ++i)
     {
-      if (!drawGlyph(glyphs[i], transform.Apply(pen(i)), *resolved, false))
+      if (!drawGlyph(glyphs[i], transform.Apply(pen(i)), *resolved, 0.f, false))
       {
         // No room in the atlas (or too large for a page): the glyph's outline instead.
-        const auto path = face.GlyphPath(glyphs[i], size, pen(i));
+        const auto path = face.GlyphPath(glyphs[i], size);
+        const auto at = pen(i);
         if (!path.IsEmpty())
         {
-          AddMask(_masks.GetMask(path, transform, FillRule::NonZero, _state.Clip), resolved->Colour,
-                  resolved->Gradient);
+          AddMask(_masks.GetMask(path, transform * Transform2D::Translation(at.x, at.y), FillRule::NonZero,
+                                 _state.Clip),
+                  resolved->Colour, resolved->Gradient);
         }
       }
     }
   }
 
-  void Renderer2D::AddGlyph(const GlyphLocation &glyph, int32 x, int32 y, const ResolvedPaint &paint) noexcept
+  void Renderer2D::AddGlyph(const GlyphLocation &glyph, int32 x, int32 y, const ResolvedPaint &paint,
+                            bool shadow) noexcept
   {
     const auto desc = _device->GetTextureDesc(glyph.Texture);
     if (!desc)
@@ -1445,7 +1469,9 @@ void main()
     const auto &bounds = glyph.Bounds;
 
     // Coverage multiplies the paint, as a mask does; colour glyphs are premultiplied images, faded by the
-    // paint's alpha.
+    // paint's alpha. A shadow is coverage in its colour: a colour glyph's alpha.
+    const bool image = glyph.Colour && !shadow;
+    const uint32 mask = glyph.Colour ? AlphaMask : Mask;
     const uint8 alpha = paint.Gradient != NoGradient ? 255u : paint.Colour[3];
     AddInstance({.Rect = {static_cast<float>(x + bounds.X), static_cast<float>(y + bounds.Y),
                           static_cast<float>(bounds.Width), static_cast<float>(bounds.Height)},
@@ -1457,10 +1483,9 @@ void main()
                         static_cast<float>(texels.Y + static_cast<int32>(texels.Height)) / height},
                  .HoleRect = {},
                  .HoleRadii = {},
-                 .Colour = glyph.Colour ? Array<uint8, 4> {255u, 255u, 255u, alpha} : paint.Colour,
-                 .Flags = glyph.Colour ? Textured : Textured | Mask},
-                Transform2D::Identity(), glyph.Texture, _nearestSampler,
-                glyph.Colour ? NoGradient : paint.Gradient);
+                 .Colour = image ? Array<uint8, 4> {255u, 255u, 255u, alpha} : paint.Colour,
+                 .Flags = image ? Textured : Textured | mask},
+                Transform2D::Identity(), glyph.Texture, _nearestSampler, image ? NoGradient : paint.Gradient);
   }
 
   void Renderer2D::DrawImage(TextureHandle texture, const Rect2D &destination,

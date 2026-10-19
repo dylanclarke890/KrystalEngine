@@ -1,6 +1,7 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
+#include "Krystal.Gfx/Render2D/CoverageBlur.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include <cmath>
 #include <cstring>
@@ -351,14 +352,49 @@ namespace krys::gfx::tests
             {.Offset = {-1'000.f, 0.f}, .BlurRadius = 6.f, .Colour = SRGBA<uint8> {0, 0, 0}});
           renderer.DrawGlyphs(*_face, 24.f, glyphs, positions, {16.f, 32.f}, Red);
         });
-      double expected = 0.0;
-      for (const auto value : bitmap->Pixels)
+      // Exactly the glyph's own coverage blurred, at its pen.
+      const auto blurred = detail::BlurCoverage({.Bounds = bitmap->Bounds, .Coverage = bitmap->Pixels}, 3.f);
+      const auto pixels = Read();
+      bool same = true;
+      for (uint32 row = 0u; row < _height; ++row)
       {
-        expected += value / 255.0;
+        for (uint32 column = 0u; column < _width; ++column)
+        {
+          const int32 u = static_cast<int32>(column) - 16 - blurred.Bounds.X;
+          const int32 v = static_cast<int32>(row) - 32 - blurred.Bounds.Y;
+          const bool inside = u >= 0 && v >= 0 && u < static_cast<int32>(blurred.Bounds.Width)
+                              && v < static_cast<int32>(blurred.Bounds.Height);
+          const uint8 expected =
+            inside ? blurred.Coverage[static_cast<size_t>(v) * blurred.Bounds.Width + static_cast<size_t>(u)]
+                   : 0u;
+          same = same && pixels[row * _width + column][3] == expected;
+        }
       }
-      // The blur keeps the coverage's total; the outline is unhinted, so within a few percent.
-      CHECK(std::abs(Total(Read(), 3) - expected) < expected * 0.05);
+      CHECK(same);
     }
+  }
+
+  TEST_CASE_METHOD(TextFixture, "Renderer2D: reuses large text's outlines when it moves by whole pixels",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(320u, 320u);
+    const uint32 glyphs[] {_face->GlyphIndex(U'l')};
+    const Vec2f positions[] {{0.f, 0.f}};
+    const Gradient2D gradient {.Shape = LinearGradient2D {{0.f, 0.f}, {320.f, 0.f}},
+                               .Stops = {{.Offset = 0.f, .Colour = {1.f, 0.f, 0.f, 1.f}},
+                                         {.Offset = 1.f, .Colour = {0.f, 0.f, 1.f, 1.f}}}};
+    Draw([&](Renderer2D &renderer)
+         { renderer.DrawGlyphs(*_face, 300.f, glyphs, positions, {100.f, 290.f}, gradient); });
+    CHECK(_renderer->GetStats().MasksRasterised == 1u);
+    const auto before = Read();
+    Draw([&](Renderer2D &renderer)
+         { renderer.DrawGlyphs(*_face, 300.f, glyphs, positions, {140.f, 290.f}, gradient); });
+    CHECK(_renderer->GetStats().MasksRasterised == 0u);
+    CHECK(_renderer->GetStats().MaskCacheHits == 1u);
+    // The glyph moved; the gradient, in the current coordinates, didn't: further right, it's bluer.
+    const auto after = Read();
+    CHECK(std::abs(Total(after, 3) - Total(before, 3)) < 0.5);
+    CHECK(Total(after, 2) > Total(before, 2));
   }
 
   TEST_CASE_METHOD(TextFixture, "Renderer2D: draws colour glyphs in their colours", "[Gfx][Render2D][GPU]")
@@ -382,5 +418,65 @@ namespace krys::gfx::tests
       [&](Renderer2D &renderer)
       { renderer.DrawGlyphs(**face, 32.f, glyphs, positions, {8.f, 38.f}, SRGBA<uint8> {0, 0, 255, 128}); });
     CHECK(std::abs(Total(Read(), 3) - Total(opaque, 3) * 0.5) < Total(opaque, 3) * 0.02);
+  }
+
+  TEST_CASE_METHOD(TextFixture, "Renderer2D: casts colour glyphs' shadows from their alpha",
+                   "[Gfx][Render2D][GPU]")
+  {
+    const std::filesystem::path emoji = "C:/Windows/Fonts/seguiemj.ttf";
+    if (!std::filesystem::exists(emoji))
+    {
+      SKIP("No colour font on this machine.");
+    }
+    auto face = FontFace2D::Create(ReadFace(emoji));
+    REQUIRE(face.has_value());
+    UseTarget(96u, 48u);
+    const uint32 glyphs[] {(*face)->GlyphIndex(U'\U0001F600')};
+    const Vec2f positions[] {{0.f, 0.f}};
+    const auto bitmap = (*face)->Rasterise(glyphs[0], 32.f, 0.f);
+    REQUIRE(bitmap.has_value());
+    REQUIRE(bitmap->Colour);
+
+    SECTION("A sharp shadow is its silhouette in the shadow's colour")
+    {
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.SetDropShadow({.Offset = {44.f, 0.f}, .Colour = SRGBA<uint8> {0, 0, 255}});
+          renderer.DrawGlyphs(**face, 32.f, glyphs, positions, {4.f, 38.f}, SRGBA<uint8> {0, 0, 0});
+        });
+      const auto pixels = Read();
+      bool same = true;
+      for (uint32 v = 0u; v < bitmap->Bounds.Height; ++v)
+      {
+        for (uint32 u = 0u; u < bitmap->Bounds.Width; ++u)
+        {
+          const int32 x = 48 + bitmap->Bounds.X + static_cast<int32>(u);
+          const int32 y = 38 + bitmap->Bounds.Y + static_cast<int32>(v);
+          const auto &pixel = pixels[static_cast<size_t>(y) * 96u + static_cast<size_t>(x)];
+          const uint8 alpha = bitmap->Pixels[(v * bitmap->Bounds.Width + u) * 4u + 3u];
+          same = same && pixel[0] == 0u && pixel[1] == 0u && pixel[2] == alpha && pixel[3] == alpha;
+        }
+      }
+      CHECK(same);
+    }
+
+    SECTION("A blurred shadow spreads its alpha")
+    {
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.Translate(1'000.f, 0.f);
+          renderer.SetDropShadow(
+            {.Offset = {-1'000.f, 0.f}, .BlurRadius = 6.f, .Colour = SRGBA<uint8> {0, 0, 0}});
+          renderer.DrawGlyphs(**face, 32.f, glyphs, positions, {24.f, 38.f}, SRGBA<uint8> {0, 0, 0});
+        });
+      double expected = 0.0;
+      for (size_t i = 3u; i < bitmap->Pixels.size(); i += 4u)
+      {
+        expected += bitmap->Pixels[i] / 255.0;
+      }
+      CHECK(std::abs(Total(Read(), 3) - expected) < expected * 0.01);
+    }
   }
 }

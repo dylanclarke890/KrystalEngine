@@ -175,6 +175,8 @@ namespace krys::gfx
       /// @brief A shadow: the rounded rect (less any hole) blurred by a Gaussian whose standard deviation, in
       /// local units, is the first texture coordinate.
       Shadow = 1u << 6u,
+      /// @brief The texture's alpha is coverage that multiplies the colour: a colour glyph's silhouette.
+      AlphaMask = 1u << 7u,
     };
     /// @brief The instance's `BlendMode` is in the flags from this bit, for five bits.
     constexpr static uint32 BlendModeShift = 8u;
@@ -593,8 +595,15 @@ namespace krys::gfx
                                                       const ResolvedPaint &paint) const noexcept;
     /// @brief Adds a mask's instance, drawn on whole target pixels, unless it's empty or outside the clip.
     void AddMask(const MaskLocation &mask, Array<uint8, 4> colour, uint32 gradient) noexcept;
-    /// @brief Adds a glyph's instance from the atlas, its pen's pixel at (`x`, `y`) in target pixels.
-    void AddGlyph(const GlyphLocation &glyph, int32 x, int32 y, const ResolvedPaint &paint) noexcept;
+    /// @brief Adds a glyph's instance from the atlas, its pen's pixel at (`x`, `y`) in target pixels. A
+    /// shadow takes the glyph's coverage (a colour glyph's alpha) in the paint's colour.
+    void AddGlyph(const GlyphLocation &glyph, int32 x, int32 y, const ResolvedPaint &paint,
+                  bool shadow = false) noexcept;
+    /// @brief Fills a path through its mask under `geometry` (which may differ from the current transform,
+    /// as a glyph's outline is placed at its pen), with its shadow, the paint resolved in the current
+    /// coordinates.
+    void FillPathMask(const Path2D &path, const Transform2D &geometry, FillRule rule,
+                      const ResolvedPaint &paint) noexcept;
     /// @brief Whether a paint certainly shows nothing, before the work of resolving it.
     KRYS_NODISCARD static bool IsInvisible(const Paint2D &paint) noexcept;
 

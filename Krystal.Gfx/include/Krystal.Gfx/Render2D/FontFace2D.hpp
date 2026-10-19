@@ -102,9 +102,9 @@ namespace krys::gfx
     KRYS_NODISCARD Maybe<GlyphBitmap> Rasterise(uint32 glyph, float size, float subpixel,
                                                 const Transform2D &linear = {}) const noexcept;
 
-    /// @brief The outline of `glyph` at `size` pixels per em, the pen at `origin`, y pointing down, with the
-    /// synthetic styles; unhinted. Empty for a glyph without one.
-    KRYS_NODISCARD Path2D GlyphPath(uint32 glyph, float size, Vec2f origin = {}) const noexcept;
+    /// @brief The outline of `glyph` at `size` pixels per em, the pen at the origin, y pointing down, with
+    /// the synthetic styles; unhinted. Empty for a glyph without one.
+    KRYS_NODISCARD Path2D GlyphPath(uint32 glyph, float size) const noexcept;
 
     /// @brief Whether the face has colour glyphs, which come only as bitmaps.
     KRYS_NODISCARD bool HasColour() const noexcept;
