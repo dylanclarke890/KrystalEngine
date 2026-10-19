@@ -31,10 +31,8 @@ namespace krys::boo
   };
 
   /// @brief A table cell: its place in the grid, its spans, its collapsed borders and its layout.
-  // FIXME: Painting (paint, paintCollapsedBorders, paintBackgroundsBehindCell, paintBoxDecorations,
-  // paintMask, the collapsed borders collected for painting), repaints (localRectsForRepaint,
-  // computeVisibleRectsInContainer) and sticky positioning (frameRectForStickyPositioning), once there are
-  // those.
+  // FIXME: Masks (paintMask), repaints (localRectsForRepaint, computeVisibleRectsInContainer) and sticky
+  // positioning (frameRectForStickyPositioning), once there are those.
   class RenderTableCell final : public RenderBlockFlow
   {
     KRYS_NON_COPY_MOVABLE(RenderTableCell);
@@ -216,6 +214,20 @@ namespace krys::boo
       return (IsAnonymous() || IsPseudoElement()) ? u8"RenderTableCell (anonymous)" : u8"RenderTableCell";
     }
 
+    void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
+    /// @brief Paints the cell's sides whose collapsed border is the table's current one.
+    void PaintCollapsedBorders(PaintInfo &, const LayoutPoint &) noexcept;
+    /// @brief Paints @p backgroundObject's background (the cell's, or its row's, row group's, column's or
+    /// column group's) behind the cell.
+    void PaintBackgroundsBehindCell(PaintInfo &, LayoutPoint paintOffset, RenderBox *backgroundObject,
+                                    LayoutPoint backgroundPaintOffset) noexcept;
+    void PaintBoxDecorations(PaintInfo &, const LayoutPoint &) noexcept override;
+
+    /// @brief Adds the cell's collapsed borders not yet in @p borderValues.
+    void CollectBorderValues(List<CollapsedBorderValue> &borderValues) const noexcept;
+    /// @brief Sorts @p borderValues from the lowest precedence to the highest.
+    static void SortBorderValues(List<CollapsedBorderValue> &borderValues) noexcept;
+
   protected:
     KRYS_NODISCARD LogicalExtentComputedValues
       ComputeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logicalTop) const noexcept override;
@@ -267,6 +279,11 @@ namespace krys::boo
                               const style::PreferredSize &widthFromStyle) const noexcept;
 
     KRYS_NODISCARD CollapsedBorderValue EmptyBorder() const noexcept;
+
+    KRYS_NODISCARD CollapsedBorderValue CachedCollapsedLeftBorder(WritingMode writingMode) const noexcept;
+    KRYS_NODISCARD CollapsedBorderValue CachedCollapsedRightBorder(WritingMode writingMode) const noexcept;
+    KRYS_NODISCARD CollapsedBorderValue CachedCollapsedTopBorder(WritingMode writingMode) const noexcept;
+    KRYS_NODISCARD CollapsedBorderValue CachedCollapsedBottomBorder(WritingMode writingMode) const noexcept;
 
     KRYS_NODISCARD const html::HTMLTableCellElement *TableCellElement() const noexcept;
     void UpdateColAndRowSpanFlags() noexcept;

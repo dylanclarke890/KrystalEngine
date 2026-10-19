@@ -25,8 +25,7 @@ namespace krys::boo
   };
 
   /// @brief A table: its sections, columns and captions, its column structure and its collapsed borders.
-  // FIXME: Painting and hit testing (paint, paintObject, paintBoxDecorations, paintMask, nodeAtPoint, the
-  // collapsed borders sorted for painting), once there are those.
+  // FIXME: Masks (paintMask) and hit testing (nodeAtPoint), once there are those.
   class RenderTable : public RenderBlock
   {
     KRYS_NON_COPY_MOVABLE(RenderTable);
@@ -54,6 +53,11 @@ namespace krys::boo
 
     UniquePtr<TableLayout> _tableLayout;
 
+    /// @brief The distinct collapsed borders, from the lowest precedence to the highest, painted in that
+    /// order.
+    List<CollapsedBorderValue> _collapsedBorders;
+    /// @brief The collapsed border being painted, during the collapsed borders phase.
+    const CollapsedBorderValue *_currentBorder {nullptr};
     bool _collapsedBordersValid : 1 {false};
     bool _collapsedEmptyBorderIsPresent : 1 {false};
     mutable bool _hasColElements : 1 {false};
@@ -269,6 +273,21 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool HasSections() const noexcept;
+
+    using CollapsedBorderValues = List<CollapsedBorderValue>;
+
+    void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
+    void PaintObject(PaintInfo &, const LayoutPoint &) noexcept override;
+    void PaintBoxDecorations(PaintInfo &, const LayoutPoint &) noexcept override;
+    void AdjustBorderBoxRectForPainting(LayoutRect &) noexcept override;
+
+    /// @brief The collapsed border cells paint in the current pass of the collapsed borders phase.
+    KRYS_NODISCARD const CollapsedBorderValue *CurrentBorderValue() const noexcept
+    {
+      return _currentBorder;
+    }
+    /// @brief Collects the cells' distinct collapsed borders, sorted by precedence, if they're out of date.
+    void RecalcCollapsedBorders() noexcept;
 
     void RecalcSectionsIfNeeded() const noexcept
     {

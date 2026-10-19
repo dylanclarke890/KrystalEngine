@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/RenderTableRow.hpp"
+#include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/RenderTableCell.hpp"
@@ -205,5 +206,37 @@ namespace krys::boo
     // RenderTableSection::LayoutRows will set our logical height and width later, so it calls
     // UpdateLayerTransform().
     ClearNeedsLayout();
+  }
+
+  void RenderTableRow::PaintOutlineForRowIfNeeded(PaintInfo &paintInfo,
+                                                  const LayoutPoint &paintOffset) noexcept
+  {
+    PaintPhase paintPhase = paintInfo.Phase;
+    if ((paintPhase == PaintPhase::Outline || paintPhase == PaintPhase::SelfOutline)
+        && Style().UsedVisibility() == Visibility::Visible)
+    {
+      auto adjustedPaintOffset = paintOffset + Location();
+      PaintOutline(paintInfo, LayoutRect(adjustedPaintOffset, Size()));
+    }
+  }
+
+  void RenderTableRow::Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    krys_debug_assert(HasSelfPaintingLayer());
+
+    PaintOutlineForRowIfNeeded(paintInfo, paintOffset);
+    for (RenderTableCell *cell = FirstCell(); cell; cell = cell->NextCell())
+    {
+      // Paint the row background behind the cell.
+      if (paintInfo.Phase == PaintPhase::BlockBackground
+          || paintInfo.Phase == PaintPhase::ChildBlockBackground)
+      {
+        cell->PaintBackgroundsBehindCell(paintInfo, paintOffset, this, paintOffset);
+      }
+      if (!cell->HasSelfPaintingLayer())
+      {
+        cell->Paint(paintInfo, paintOffset);
+      }
+    }
   }
 }

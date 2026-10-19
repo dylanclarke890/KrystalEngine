@@ -2,7 +2,11 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLTableElement.hpp"
 #include "Krystal.Booey/Rendering/AutoTableLayout.hpp"
+#include "Krystal.Booey/Rendering/BackgroundPainter.hpp"
+#include "Krystal.Booey/Rendering/BorderPainter.hpp"
+#include "Krystal.Booey/Rendering/BorderShape.hpp"
 #include "Krystal.Booey/Rendering/FixedTableLayout.hpp"
+#include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
@@ -754,6 +758,7 @@ namespace krys::boo
   void RenderTable::InvalidateCollapsedBorders(RenderTableCell *cellWithStyleChange) noexcept
   {
     _collapsedBordersValid = false;
+    _collapsedBorders.clear();
 
     for (auto &section : ChildrenOfType<RenderTableSection>(*this))
     {
@@ -2004,5 +2009,204 @@ namespace krys::boo
     }
 
     return rect;
+  }
+
+  // Collect all the unique border values that we want to paint in a sorted list.
+  void RenderTable::RecalcCollapsedBorders() noexcept
+  {
+    if (_collapsedBordersValid)
+    {
+      return;
+    }
+    _collapsedBorders.clear();
+    for (auto &section : ChildrenOfType<RenderTableSection>(*this))
+    {
+      for (RenderTableRow *row = section.FirstRow(); row; row = row->NextRow())
+      {
+        for (RenderTableCell *cell = row->FirstCell(); cell; cell = cell->NextCell())
+        {
+          krys_debug_assert(cell->Table() == this);
+          cell->CollectBorderValues(_collapsedBorders);
+        }
+      }
+    }
+    RenderTableCell::SortBorderValues(_collapsedBorders);
+    _collapsedBordersValid = true;
+  }
+
+  void RenderTable::Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    // FIXME: Tables inside skipped content behind continuations (the isSkippedContent check) come with
+    // content-visibility's skipped content.
+
+    LayoutPoint adjustedPaintOffset = paintOffset + Location();
+
+    PaintPhase paintPhase = paintInfo.Phase;
+
+    if (!IsDocumentElementRenderer())
+    {
+      LayoutRect overflowBox = VisualOverflowRect();
+      FlipForWritingMode(overflowBox);
+      overflowBox.MoveBy(adjustedPaintOffset);
+      if (!overflowBox.Intersects(paintInfo.Rect))
+      {
+        return;
+      }
+    }
+
+    bool pushedClip = PushContentsClip(paintInfo, adjustedPaintOffset);
+    PaintObject(paintInfo, adjustedPaintOffset);
+    if (pushedClip)
+    {
+      PopContentsClip(paintInfo, paintPhase, adjustedPaintOffset);
+    }
+  }
+
+  void RenderTable::PaintObject(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    PaintPhase paintPhase = paintInfo.Phase;
+    if ((paintPhase == PaintPhase::BlockBackground || paintPhase == PaintPhase::ChildBlockBackground)
+        && HasVisibleBoxDecorations() && Style().UsedVisibility() == Visibility::Visible)
+    {
+      PaintBoxDecorations(paintInfo, paintOffset);
+    }
+
+    if (paintPhase == PaintPhase::Mask)
+    {
+      // FIXME: Masks (paintMask) come with masks.
+      return;
+    }
+
+    // FIXME: Accessibility bounds come with accessibility.
+
+    // We're done.  We don't bother painting any children.
+    if (paintPhase == PaintPhase::BlockBackground)
+    {
+      return;
+    }
+
+    // We don't paint our own background, but we do let the kids paint their backgrounds.
+    if (paintPhase == PaintPhase::ChildBlockBackgrounds)
+    {
+      paintPhase = PaintPhase::ChildBlockBackground;
+    }
+
+    PaintInfo info(paintInfo);
+    info.Phase = paintPhase;
+    info.UpdateSubtreePaintRootForChildren(this);
+
+    for (auto &box : ChildrenOfType<RenderBox>(*this))
+    {
+      if (!box.HasSelfPaintingLayer() && (box.IsRenderTableSection() || box.IsRenderTableCaption()))
+      {
+        LayoutPoint childPoint = FlipForWritingModeForChild(box, paintOffset);
+        box.Paint(info, childPoint);
+      }
+    }
+
+    if (CollapseBorders() && paintPhase == PaintPhase::ChildBlockBackground
+        && Style().UsedVisibility() == Visibility::Visible)
+    {
+      RecalcCollapsedBorders();
+      // Using our cached sorted styles, we then do individual passes,
+      // painting each style of border from lowest precedence to highest precedence.
+      info.Phase = PaintPhase::CollapsedTableBorders;
+      size_t count = _collapsedBorders.size();
+      for (size_t i = 0; i < count; ++i)
+      {
+        _currentBorder = &_collapsedBorders[i];
+        for (RenderTableSection *section = BottomSection(); section; section = SectionAbove(section))
+        {
+          LayoutPoint childPoint = FlipForWritingModeForChild(*section, paintOffset);
+          section->Paint(info, childPoint);
+        }
+      }
+      _currentBorder = nullptr;
+    }
+
+    // Paint outline.
+    if ((paintPhase == PaintPhase::Outline || paintPhase == PaintPhase::SelfOutline) && HasOutline()
+        && Style().UsedVisibility() == Visibility::Visible)
+    {
+      PaintOutline(paintInfo, LayoutRect(paintOffset, Size()));
+    }
+  }
+
+  void RenderTable::AdjustBorderBoxRectForPainting(LayoutRect &rect) noexcept
+  {
+    for (auto &weakCaption : _captions)
+    {
+      auto *caption = weakCaption.get();
+      if (!caption)
+      {
+        continue;
+      }
+      LayoutUnit captionLogicalHeight =
+        caption->LogicalHeight() + caption->MarginBefore() + caption->MarginAfter();
+      bool captionIsBefore =
+        (caption->Style().GetCaptionSide() != CaptionSide::Bottom) ^ GetWritingMode().IsBlockFlipped();
+      if (GetWritingMode().IsHorizontal())
+      {
+        rect.SetHeight(rect.Height() - captionLogicalHeight);
+        if (captionIsBefore)
+        {
+          rect.Move(0_lu, captionLogicalHeight);
+        }
+      }
+      else
+      {
+        rect.SetWidth(rect.Width() - captionLogicalHeight);
+        if (captionIsBefore)
+        {
+          rect.Move(captionLogicalHeight, 0_lu);
+        }
+      }
+    }
+
+    RenderBlock::AdjustBorderBoxRectForPainting(rect);
+  }
+
+  void RenderTable::PaintBoxDecorations(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    if (!paintInfo.ShouldPaintWithinRoot(*this))
+    {
+      return;
+    }
+
+    LayoutRect rect(paintOffset, Size());
+    AdjustBorderBoxRectForPainting(rect);
+
+    BackgroundPainter backgroundPainter {*this, paintInfo};
+
+    auto bleedAvoidance = DetermineBleedAvoidance(paintInfo.Context());
+    if (!BackgroundPainter::BoxShadowShouldBeAppliedToBackground(*this, rect.Location(), bleedAvoidance, {}))
+    {
+      backgroundPainter.PaintBoxShadow(rect, Style(), style::ShadowStyle::Normal);
+    }
+
+    GraphicsContextStateSaver stateSaver(paintInfo.Context(), false);
+    if (bleedAvoidance == BleedAvoidance::UseTransparencyLayer)
+    {
+      // To avoid the background color bleeding out behind the border, we'll render background and border
+      // into a transparency layer, and then clip that in one go (which requires setting up the clip before
+      // beginning the layer).
+      stateSaver.Save();
+      auto borderShape = BorderShape::ShapeForBorderRect(Style(), rect);
+      borderShape.ClipToOuterShape(paintInfo.Context(), GetDocument().DeviceScaleFactor());
+      paintInfo.Context().BeginTransparencyLayer(1);
+    }
+
+    backgroundPainter.PaintBackground(rect, bleedAvoidance);
+    backgroundPainter.PaintBoxShadow(rect, Style(), style::ShadowStyle::Inset);
+
+    if (Style().HasVisibleBorderDecoration() && !CollapseBorders())
+    {
+      BorderPainter {*this, paintInfo}.PaintBorder(rect, Style());
+    }
+
+    if (bleedAvoidance == BleedAvoidance::UseTransparencyLayer)
+    {
+      paintInfo.Context().EndTransparencyLayer();
+    }
   }
 }

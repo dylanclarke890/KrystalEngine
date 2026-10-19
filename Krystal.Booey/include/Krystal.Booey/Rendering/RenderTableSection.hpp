@@ -26,19 +26,23 @@ namespace krys::boo
     End
   };
 
+  /// @brief A run of rows or columns, from `Start` up to `End`.
+  struct CellSpan
+  {
+    uint32 Start;
+    uint32 End;
+  };
+
   /// @brief A table row group: the grid of its rows and cells, and their layout.
-  // FIXME: Painting and hit testing (paint, paintObject, paintCell, the row group borders, nodeAtPoint, the
-  // overflowing cells kept for painting), once there are those.
+  // FIXME: Hit testing (nodeAtPoint), once there is hit testing.
   class RenderTableSection final : public RenderBox
   {
     KRYS_NON_COPY_MOVABLE(RenderTableSection);
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderTableSection);
 
   public:
-    void Paint(PaintInfo &, const LayoutPoint &) noexcept final
-    {
-      // FIXME: Table sections (their rows, cells and collapsed borders) come with tables.
-    }
+    void Paint(PaintInfo &, const LayoutPoint &) noexcept final;
+    void PaintObject(PaintInfo &, const LayoutPoint &) noexcept final;
 
     /// @brief The cells in a slot of the grid; more than one when cells overlap.
     struct CellStruct
@@ -101,6 +105,10 @@ namespace krys::boo
     // (RemoveCachedCollapsedBorders).
     HashMap<const RenderTableCell *, CachedCollapsedBorders> _cellsCollapsedBorders;
 
+    // The cells whose visual overflow reaches past their rows, painted whenever the section paints: kept only
+    // while few enough, else every cell is painted (_forceSlowPaintPathWithOverflowingCell).
+    HashSet<const RenderTableCell *> _overflowingCells;
+    bool _forceSlowPaintPathWithOverflowingCell {false};
     bool _hasMultipleCellLevels {false};
     bool _needsCellRecalc {false};
 
@@ -216,6 +224,31 @@ namespace krys::boo
                                                               CollapsedBorderSide side) const noexcept;
 
     /// @return The *consumed* extra logical height.
+    KRYS_NODISCARD bool HasOverflowingCell() const noexcept
+    {
+      return !_overflowingCells.empty() || _forceSlowPaintPathWithOverflowingCell;
+    }
+
+    KRYS_NODISCARD CellSpan FullTableRowSpan() const noexcept;
+    KRYS_NODISCARD CellSpan FullTableColumnSpan() const noexcept;
+    /// @brief The rows and columns @p damageRect (aligned with the table's rows and columns) reaches, and
+    /// those whose borders may reach into it.
+    KRYS_NODISCARD CellSpan DirtiedRows(const LayoutRect &damageRect) const noexcept;
+    KRYS_NODISCARD CellSpan DirtiedColumns(const LayoutRect &damageRect) const noexcept;
+
+    enum ShouldIncludeAllIntersectingCells
+    {
+      IncludeAllIntersectingCells,
+      DoNotIncludeAllIntersectingCells
+    };
+    KRYS_NODISCARD CellSpan SpannedRows(const LayoutRect &flippedRect,
+                                        ShouldIncludeAllIntersectingCells shouldInclude) const noexcept;
+    KRYS_NODISCARD CellSpan SpannedColumns(const LayoutRect &flippedRect,
+                                           ShouldIncludeAllIntersectingCells shouldInclude) const noexcept;
+
+    /// @brief @p rect flipped to align with the coordinates of the row and column positions.
+    KRYS_NODISCARD LayoutRect LogicalRectForWritingModeAndDirection(const LayoutRect &rect) const noexcept;
+
     // FIXME: We may want to introduce a structure holding the in-flux layout information.
     KRYS_NODISCARD LayoutUnit DistributeExtraLogicalHeightToRows(LayoutUnit extraLogicalHeight) noexcept;
 
@@ -241,6 +274,25 @@ namespace krys::boo
     }
 
     void EnsureRows(uint32 numRows) noexcept;
+
+    void PaintCell(RenderTableCell *cell, PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept;
+    void PaintRowGroupBorder(const PaintInfo &paintInfo, bool antialias, LayoutRect rect, BoxSide side,
+                             css::PropertyId borderColor, BorderStyle borderStyle,
+                             BorderStyle tableBorderStyle) noexcept;
+    void PaintRowGroupBorderIfRequired(const PaintInfo &paintInfo, const LayoutPoint &paintOffset, uint32 row,
+                                       uint32 column, BoxSide borderSide,
+                                       RenderTableCell *cell = nullptr) noexcept;
+    KRYS_NODISCARD LayoutUnit OffsetLeftForRowGroupBorder(RenderTableCell *cell,
+                                                          const LayoutRect &rowGroupRect,
+                                                          uint32 row) noexcept;
+    KRYS_NODISCARD LayoutUnit OffsetTopForRowGroupBorder(RenderTableCell *cell, BoxSide borderSide,
+                                                         uint32 row) noexcept;
+    KRYS_NODISCARD LayoutUnit VerticalRowGroupBorderHeight(RenderTableCell *cell,
+                                                           const LayoutRect &rowGroupRect,
+                                                           uint32 row) noexcept;
+    KRYS_NODISCARD LayoutUnit HorizontalRowGroupBorderWidth(RenderTableCell *cell,
+                                                            const LayoutRect &rowGroupRect, uint32 row,
+                                                            uint32 column) noexcept;
 
     void RelayoutCellIfFlexed(RenderTableCell &cell, uint32 rowIndex, LayoutUnit rowHeight) noexcept;
 

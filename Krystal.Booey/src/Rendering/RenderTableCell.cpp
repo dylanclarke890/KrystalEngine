@@ -3,7 +3,10 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableCellElement.hpp"
+#include "Krystal.Booey/Rendering/BackgroundPainter.hpp"
+#include "Krystal.Booey/Rendering/BorderPainter.hpp"
 #include "Krystal.Booey/Rendering/LayoutScope.hpp"
+#include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/RenderTableCol.hpp"
 #include "Krystal.Booey/Rendering/RenderTableRow.hpp"
@@ -1726,5 +1729,414 @@ namespace krys::boo
     }
 
     return offset;
+  }
+
+  CollapsedBorderValue RenderTableCell::CachedCollapsedLeftBorder(WritingMode writingMode) const noexcept
+  {
+    if (writingMode.IsHorizontal())
+    {
+      return writingMode.IsInlineLeftToRight()
+               ? Section()->CachedCollapsedBorder(*this, CollapsedBorderSide::Start)
+               : Section()->CachedCollapsedBorder(*this, CollapsedBorderSide::End);
+    }
+    return writingMode.IsBlockLeftToRight()
+             ? Section()->CachedCollapsedBorder(*this, CollapsedBorderSide::Before)
+             : Section()->CachedCollapsedBorder(*this, CollapsedBorderSide::After);
+  }
+
+  CollapsedBorderValue RenderTableCell::CachedCollapsedRightBorder(WritingMode writingMode) const noexcept
+  {
+    if (writingMode.IsHorizontal())
+    {
+      return writingMode.IsInlineLeftToRight()
+               ? Section()->CachedCollapsedBorder(*this, CollapsedBorderSide::End)
+               : Section()->CachedCollapsedBorder(*this, CollapsedBorderSide::Start);
+    }
+    return writingMode.IsBlockLeftToRight()
+             ? Section()->CachedCollapsedBorder(*this, CollapsedBorderSide::After)
+             : Section()->CachedCollapsedBorder(*this, CollapsedBorderSide::Before);
+  }
+
+  CollapsedBorderValue RenderTableCell::CachedCollapsedTopBorder(WritingMode writingMode) const noexcept
+  {
+    if (writingMode.IsHorizontal())
+    {
+      return writingMode.IsBlockTopToBottom()
+               ? Section()->CachedCollapsedBorder(*this, CollapsedBorderSide::Before)
+               : Section()->CachedCollapsedBorder(*this, CollapsedBorderSide::After);
+    }
+    return writingMode.IsInlineTopToBottom()
+             ? Section()->CachedCollapsedBorder(*this, CollapsedBorderSide::Start)
+             : Section()->CachedCollapsedBorder(*this, CollapsedBorderSide::End);
+  }
+
+  CollapsedBorderValue RenderTableCell::CachedCollapsedBottomBorder(WritingMode writingMode) const noexcept
+  {
+    if (writingMode.IsHorizontal())
+    {
+      return writingMode.IsBlockTopToBottom()
+               ? Section()->CachedCollapsedBorder(*this, CollapsedBorderSide::After)
+               : Section()->CachedCollapsedBorder(*this, CollapsedBorderSide::Before);
+    }
+    return writingMode.IsInlineTopToBottom()
+             ? Section()->CachedCollapsedBorder(*this, CollapsedBorderSide::End)
+             : Section()->CachedCollapsedBorder(*this, CollapsedBorderSide::Start);
+  }
+
+  void RenderTableCell::Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    krys_debug_assert(paintInfo.Phase != PaintPhase::CollapsedTableBorders);
+    RenderBlockFlow::Paint(paintInfo, paintOffset);
+  }
+
+  namespace
+  {
+    struct CollapsedBorder
+    {
+      CollapsedBorderValue BorderValue;
+      BoxSide Side {BoxSide::Top};
+      bool ShouldPaint {false};
+      LayoutUnit X1;
+      LayoutUnit Y1;
+      LayoutUnit X2;
+      LayoutUnit Y2;
+      BorderStyle Style {BorderStyle::None};
+    };
+
+    class CollapsedBorders
+    {
+    public:
+      void AddBorder(const CollapsedBorderValue &borderValue, BoxSide borderSide, bool shouldPaint,
+                     LayoutUnit x1, LayoutUnit y1, LayoutUnit x2, LayoutUnit y2,
+                     BorderStyle borderStyle) noexcept
+      {
+        if (borderValue.Exists() && shouldPaint)
+        {
+          _borders[_count].BorderValue = borderValue;
+          _borders[_count].Side = borderSide;
+          _borders[_count].ShouldPaint = shouldPaint;
+          _borders[_count].X1 = x1;
+          _borders[_count].X2 = x2;
+          _borders[_count].Y1 = y1;
+          _borders[_count].Y2 = y2;
+          _borders[_count].Style = borderStyle;
+          _count++;
+        }
+      }
+
+      KRYS_NODISCARD CollapsedBorder *NextBorder() noexcept
+      {
+        for (uint32 i = 0; i < _count; i++)
+        {
+          if (_borders[i].BorderValue.Exists() && _borders[i].ShouldPaint)
+          {
+            _borders[i].ShouldPaint = false;
+            return &_borders[i];
+          }
+        }
+
+        return nullptr;
+      }
+
+    private:
+      Array<CollapsedBorder, 4> _borders {};
+      uint32 _count {0};
+    };
+
+    void AddBorderStyle(List<CollapsedBorderValue> &borderValues, CollapsedBorderValue borderValue) noexcept
+    {
+      if (!borderValue.Exists())
+      {
+        return;
+      }
+      size_t count = borderValues.size();
+      for (size_t i = 0; i < count; ++i)
+      {
+        if (borderValues[i].IsSameIgnoringColor(borderValue))
+        {
+          return;
+        }
+      }
+      borderValues.push_back(borderValue);
+    }
+  }
+
+  void RenderTableCell::CollectBorderValues(List<CollapsedBorderValue> &borderValues) const noexcept
+  {
+    AddBorderStyle(borderValues, CollapsedStartBorder());
+    AddBorderStyle(borderValues, CollapsedEndBorder());
+    AddBorderStyle(borderValues, CollapsedBeforeBorder());
+    AddBorderStyle(borderValues, CollapsedAfterBorder());
+  }
+
+  void RenderTableCell::SortBorderValues(List<CollapsedBorderValue> &borderValues) noexcept
+  {
+    std::ranges::sort(borderValues, CompareBorders);
+  }
+
+  void RenderTableCell::PaintCollapsedBorders(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    krys_debug_assert(paintInfo.Phase == PaintPhase::CollapsedTableBorders);
+
+    if (!paintInfo.ShouldPaintWithinRoot(*this) || Style().UsedVisibility() != Visibility::Visible)
+    {
+      return;
+    }
+
+    LayoutRect localRepaintRect = paintInfo.Rect;
+    LayoutRect paintRect = LayoutRect(paintOffset + Location(), FrameRect().Size());
+    if (paintRect.Y() - Table()->OuterBorderTop() >= localRepaintRect.MaxY())
+    {
+      return;
+    }
+
+    if (paintRect.MaxY() + Table()->OuterBorderBottom() <= localRepaintRect.Y())
+    {
+      return;
+    }
+
+    GraphicsContext &graphicsContext = paintInfo.Context();
+    if (!Table()->CurrentBorderValue() || graphicsContext.PaintingDisabled())
+    {
+      return;
+    }
+
+    WritingMode writingMode = TableWritingMode();
+    CollapsedBorderValue leftVal = CachedCollapsedLeftBorder(writingMode);
+    CollapsedBorderValue rightVal = CachedCollapsedRightBorder(writingMode);
+    CollapsedBorderValue topVal = CachedCollapsedTopBorder(writingMode);
+    CollapsedBorderValue bottomVal = CachedCollapsedBottomBorder(writingMode);
+
+    // Adjust our x/y/width/height so that we paint the collapsed borders at the correct location.
+    LayoutUnit topWidth = topVal.Width();
+    LayoutUnit bottomWidth = bottomVal.Width();
+    LayoutUnit leftWidth = leftVal.Width();
+    LayoutUnit rightWidth = rightVal.Width();
+
+    float deviceScaleFactor = GetDocument().DeviceScaleFactor();
+    LayoutUnit leftHalfCollapsedBorder =
+      CollapsedBorderValue::AdjustedCollapsedBorderWidth(leftWidth, deviceScaleFactor, false);
+    LayoutUnit topHalfCollapsedBorder =
+      CollapsedBorderValue::AdjustedCollapsedBorderWidth(topWidth, deviceScaleFactor, false);
+    LayoutUnit rightHalfCollapsedBorder =
+      CollapsedBorderValue::AdjustedCollapsedBorderWidth(rightWidth, deviceScaleFactor, true);
+    LayoutUnit bottomHalfCollapsedBorder =
+      CollapsedBorderValue::AdjustedCollapsedBorderWidth(bottomWidth, deviceScaleFactor, true);
+
+    LayoutRect borderRect =
+      LayoutRect(paintRect.X() - leftHalfCollapsedBorder, paintRect.Y() - topHalfCollapsedBorder,
+                 paintRect.Width() + leftHalfCollapsedBorder + rightHalfCollapsedBorder,
+                 paintRect.Height() + topHalfCollapsedBorder + bottomHalfCollapsedBorder);
+
+    BorderStyle topStyle = CollapsedBorderStyle(topVal.Style());
+    BorderStyle bottomStyle = CollapsedBorderStyle(bottomVal.Style());
+    BorderStyle leftStyle = CollapsedBorderStyle(leftVal.Style());
+    BorderStyle rightStyle = CollapsedBorderStyle(rightVal.Style());
+
+    bool renderTop = topStyle > BorderStyle::Hidden && !topVal.IsTransparent()
+                     && FloorToDevicePixel(topWidth, deviceScaleFactor);
+    bool renderBottom = bottomStyle > BorderStyle::Hidden && !bottomVal.IsTransparent()
+                        && FloorToDevicePixel(bottomWidth, deviceScaleFactor);
+    bool renderLeft = leftStyle > BorderStyle::Hidden && !leftVal.IsTransparent()
+                      && FloorToDevicePixel(leftWidth, deviceScaleFactor);
+    bool renderRight = rightStyle > BorderStyle::Hidden && !rightVal.IsTransparent()
+                       && FloorToDevicePixel(rightWidth, deviceScaleFactor);
+
+    // We never paint diagonals at the joins.  We simply let the border with the highest
+    // precedence paint on top of borders with lower precedence.
+    CollapsedBorders borders;
+    borders.AddBorder(topVal, BoxSide::Top, renderTop, borderRect.X(), borderRect.Y(), borderRect.MaxX(),
+                      borderRect.Y() + topWidth, topStyle);
+    borders.AddBorder(bottomVal, BoxSide::Bottom, renderBottom, borderRect.X(),
+                      borderRect.MaxY() - bottomWidth, borderRect.MaxX(), borderRect.MaxY(), bottomStyle);
+    borders.AddBorder(leftVal, BoxSide::Left, renderLeft, borderRect.X(), borderRect.Y(),
+                      borderRect.X() + leftWidth, borderRect.MaxY(), leftStyle);
+    borders.AddBorder(rightVal, BoxSide::Right, renderRight, borderRect.MaxX() - rightWidth, borderRect.Y(),
+                      borderRect.MaxX(), borderRect.MaxY(), rightStyle);
+
+    bool antialias = BorderPainter::ShouldAntialiasLines(graphicsContext);
+
+    for (CollapsedBorder *border = borders.NextBorder(); border; border = borders.NextBorder())
+    {
+      if (border->BorderValue.IsSameIgnoringColor(*Table()->CurrentBorderValue()))
+      {
+        BorderPainter::DrawLineForBoxSide(
+          graphicsContext, GetDocument(),
+          FloatRect(LayoutRect(LayoutPoint(border->X1, border->Y1), LayoutPoint(border->X2, border->Y2))),
+          border->Side, border->BorderValue.GetColor(), border->Style, 0, 0, antialias);
+      }
+    }
+  }
+
+  KRYS_NODISCARD static LayoutRect BackgroundRectForRow(const RenderBox &tableRow,
+                                                        const RenderTable &table) noexcept
+  {
+    LayoutRect rect = tableRow.FrameRect();
+    if (!table.CollapseBorders())
+    {
+      // Row frameRects include unwanted hSpacing on both inline ends.
+      auto hSpacing = table.HBorderSpacing();
+      LayoutUnit vSpacing = 0_lu;
+      if (table.GetWritingMode().IsHorizontal())
+      {
+        rect.Contract({vSpacing, hSpacing, vSpacing, hSpacing});
+      }
+      else
+      {
+        rect.Contract({hSpacing, vSpacing, hSpacing, vSpacing});
+      }
+    }
+    return rect;
+  }
+
+  KRYS_NODISCARD static LayoutRect BackgroundRectForSection(const RenderTableSection &tableSection,
+                                                            const RenderTable &table) noexcept
+  {
+    LayoutRect rect = {{}, tableSection.Size()};
+    if (!table.CollapseBorders())
+    {
+      auto hSpacing = table.HBorderSpacing();
+      auto vSpacing = table.VBorderSpacing();
+      // All sections' size()s include unwanted vSpacing at the block-end
+      // position. The first section's size() includes additional unwanted
+      // vSpacing at the block-start position. All sections' size()s include
+      // unwanted hSpacing on both inline ends.
+      auto beforeBlockSpacing = &tableSection == table.TopSection() ? vSpacing : 0_lu;
+      if (table.GetWritingMode().IsHorizontal())
+      {
+        rect.Contract({beforeBlockSpacing, hSpacing, vSpacing, hSpacing});
+      }
+      else if (table.GetWritingMode().IsBlockFlipped())
+      {
+        rect.Contract({hSpacing, beforeBlockSpacing, hSpacing, vSpacing});
+      }
+      else
+      {
+        rect.Contract({hSpacing, vSpacing, hSpacing, beforeBlockSpacing});
+      }
+    }
+    return rect;
+  }
+
+  void RenderTableCell::PaintBackgroundsBehindCell(PaintInfo &paintInfo, LayoutPoint paintOffset,
+                                                   RenderBox *backgroundObject,
+                                                   LayoutPoint backgroundPaintOffset) noexcept
+  {
+    krys_debug_assert(backgroundObject);
+
+    if (!paintInfo.ShouldPaintWithinRoot(*this))
+    {
+      return;
+    }
+
+    if (Style().UsedVisibility() != Visibility::Visible)
+    {
+      return;
+    }
+
+    RenderTable *tableElt = Table();
+    if (!tableElt->CollapseBorders() && Style().EmptyCells() == EmptyCell::Hide && !FirstChild())
+    {
+      return;
+    }
+
+    const auto &backgroundStyle = backgroundObject->Style();
+    auto &bgLayers = backgroundStyle.GetBackgroundLayers();
+
+    auto color = backgroundStyle.VisitedDependentColor(css::PropertyId::BackgroundColor);
+    if (!style::HasImageInAnyLayer(bgLayers) && !color.IsVisible())
+    {
+      return;
+    }
+
+    color = backgroundStyle.ColorByApplyingColorFilter(color);
+
+    LayoutPoint adjustedPaintOffset = paintOffset;
+    if (backgroundObject != this)
+    {
+      adjustedPaintOffset.MoveBy(Location());
+    }
+
+    // Background images attached to the row or row group must span the row
+    // or row group. Draw them at the backgroundObject's dimensions, but
+    // clipped to this cell.
+    // FIXME: This should also apply to columns and column groups.
+    bool paintBackgroundObject = backgroundObject != this && style::HasImageInAnyLayer(bgLayers)
+                                 && !Is<RenderTableCol>(backgroundObject);
+    // We have to clip here because the background would paint
+    // on top of the borders otherwise. This only matters for cells and rows.
+    bool shouldClip =
+      paintBackgroundObject
+      || (backgroundObject->HasLayer() && (backgroundObject == this || backgroundObject == Parent())
+          && tableElt->CollapseBorders());
+    GraphicsContextStateSaver stateSaver(paintInfo.Context(), shouldClip);
+    if (paintBackgroundObject)
+    {
+      paintInfo.Context().Clip(FloatRect(LayoutRect {adjustedPaintOffset, Size()}));
+    }
+    else if (shouldClip)
+    {
+      LayoutRect clipRect(adjustedPaintOffset.X() + BorderLeft(), adjustedPaintOffset.Y() + BorderTop(),
+                          Width() - BorderLeft() - BorderRight(), Height() - BorderTop() - BorderBottom());
+      paintInfo.Context().Clip(FloatRect(clipRect));
+    }
+    LayoutRect fillRect;
+    if (paintBackgroundObject)
+    {
+      if (auto *tableSectionRenderer = DynamicDowncast<RenderTableSection>(backgroundObject))
+      {
+        fillRect = BackgroundRectForSection(*tableSectionRenderer, *tableElt);
+      }
+      else
+      {
+        fillRect = BackgroundRectForRow(*backgroundObject, *tableElt);
+      }
+      fillRect.MoveBy(backgroundPaintOffset);
+    }
+    else
+    {
+      fillRect = LayoutRect {adjustedPaintOffset, Size()};
+    }
+    auto compositeOp = GetDocument().CompositeOperatorForBackgroundColor(color, *this);
+    BackgroundPainter painter {*this, paintInfo};
+    if (backgroundObject != this)
+    {
+      painter.SetOverrideClip(FillBox::BorderBox);
+      painter.SetOverrideOrigin(FillBox::BorderBox);
+    }
+    painter.PaintFillLayers(color, bgLayers, fillRect, BleedAvoidance::None, compositeOp, backgroundObject);
+  }
+
+  void RenderTableCell::PaintBoxDecorations(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    if (!paintInfo.ShouldPaintWithinRoot(*this))
+    {
+      return;
+    }
+
+    RenderTable *table = Table();
+    if (!table->CollapseBorders() && Style().EmptyCells() == EmptyCell::Hide && !FirstChild())
+    {
+      return;
+    }
+
+    LayoutRect paintRect = LayoutRect(paintOffset, FrameRect().Size());
+    AdjustBorderBoxRectForPainting(paintRect);
+
+    BackgroundPainter backgroundPainter {*this, paintInfo};
+    backgroundPainter.PaintBoxShadow(paintRect, Style(), style::ShadowStyle::Normal);
+
+    // Paint our cell background.
+    PaintBackgroundsBehindCell(paintInfo, paintOffset, this, paintOffset);
+
+    backgroundPainter.PaintBoxShadow(paintRect, Style(), style::ShadowStyle::Inset);
+
+    if (!Style().HasBorder() || table->CollapseBorders())
+    {
+      return;
+    }
+
+    BorderPainter borderPainter {*this, paintInfo};
+    borderPainter.PaintBorder(paintRect, Style());
   }
 }

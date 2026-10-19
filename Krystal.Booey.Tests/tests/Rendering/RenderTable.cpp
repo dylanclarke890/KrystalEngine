@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
+#include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Rendering/RenderTableCell.hpp"
 
@@ -259,5 +260,498 @@ layer at (0,0) size 800x10
     CHECK(RectOf(fixture, u8"a") == LayoutRect(0, 0, 50, 10));
     CHECK(RectOf(fixture, u8"b") == LayoutRect(50, 0, 10, 10));
     CHECK(CellOf(fixture, u8"b").Col() == 2);
+  }
+
+  TEST_CASE("RenderTable: paints separated borders and backgrounds", "[Rendering][RenderTable]")
+  {
+    CHECK(Painted(u8"<style>body{margin:0}table{border:2px solid "
+                  u8"red;border-spacing:4px;background:#eee}td{width:20px;height:10px;border:1px solid "
+                  u8"blue;background:yellow;padding:0}</style><table><tr><td></td><td></td></tr><tr><td></"
+                  u8"td><td></td></tr></table>")
+          == Canvas() + u8R"(
+(fill-composited-rect
+  (rect at (0,0) size 60x40)
+  (color #EEEEEE)
+  (composite-operation source-over)
+  (blend-mode normal))
+(set-state
+  (change-flags [fill-brush, stroke-style, should-antialias])
+  (fill-brush 
+    (color #FF0000))
+  (stroke-style no-stroke)
+  (should-antialias 0))
+(draw-rect
+  (rect at (0,0) size 60x2)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (0,38) size 60x2)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (0,0) size 2x40)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (58,0) size 2x40)
+  (border-thickness 1.00))
+(set-state
+  (change-flags [stroke-style, should-antialias])
+  (stroke-style solid-stroke)
+  (should-antialias 1))
+(fill-composited-rect
+  (rect at (6,6) size 22x12)
+  (color #FFFF00)
+  (composite-operation source-over)
+  (blend-mode normal))
+(set-state
+  (change-flags [fill-brush, stroke-style, should-antialias])
+  (fill-brush 
+    (color #0000FF))
+  (stroke-style no-stroke)
+  (should-antialias 0))
+(draw-rect
+  (rect at (6,6) size 22x1)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (6,17) size 22x1)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (6,6) size 1x12)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (27,6) size 1x12)
+  (border-thickness 1.00))
+(set-state
+  (change-flags [stroke-style, should-antialias])
+  (stroke-style solid-stroke)
+  (should-antialias 1))
+(fill-composited-rect
+  (rect at (32,6) size 22x12)
+  (color #FFFF00)
+  (composite-operation source-over)
+  (blend-mode normal))
+(set-state
+  (change-flags [stroke-style, should-antialias])
+  (stroke-style no-stroke)
+  (should-antialias 0))
+(draw-rect
+  (rect at (32,6) size 22x1)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (32,17) size 22x1)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (32,6) size 1x12)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (53,6) size 1x12)
+  (border-thickness 1.00))
+(set-state
+  (change-flags [stroke-style, should-antialias])
+  (stroke-style solid-stroke)
+  (should-antialias 1))
+(fill-composited-rect
+  (rect at (6,22) size 22x12)
+  (color #FFFF00)
+  (composite-operation source-over)
+  (blend-mode normal))
+(set-state
+  (change-flags [stroke-style, should-antialias])
+  (stroke-style no-stroke)
+  (should-antialias 0))
+(draw-rect
+  (rect at (6,22) size 22x1)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (6,33) size 22x1)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (6,22) size 1x12)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (27,22) size 1x12)
+  (border-thickness 1.00))
+(set-state
+  (change-flags [stroke-style, should-antialias])
+  (stroke-style solid-stroke)
+  (should-antialias 1))
+(fill-composited-rect
+  (rect at (32,22) size 22x12)
+  (color #FFFF00)
+  (composite-operation source-over)
+  (blend-mode normal))
+(set-state
+  (change-flags [stroke-style, should-antialias])
+  (stroke-style no-stroke)
+  (should-antialias 0))
+(draw-rect
+  (rect at (32,22) size 22x1)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (32,33) size 22x1)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (32,22) size 1x12)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (53,22) size 1x12)
+  (border-thickness 1.00))
+(set-state
+  (change-flags [stroke-style, should-antialias])
+  (stroke-style solid-stroke)
+  (should-antialias 1)))");
+  }
+
+  TEST_CASE("RenderTable: paints collapsed borders by precedence, row groups included",
+            "[Rendering][RenderTable]")
+  {
+    CHECK(
+      Painted(u8"<style>body{margin:0}table{border-collapse:collapse;border:3px solid "
+              u8"red}td{width:20px;height:10px;border:1px solid blue;padding:0}td.w{border:5px dashed "
+              u8"green}</style><table><tr><td></td><td class=w></td></tr><tr><td></td><td></td></tr></table>")
+      == Canvas() + u8R"(
+(set-state
+  (change-flags [fill-brush, stroke-style, should-antialias])
+  (fill-brush 
+    (color #0000FF))
+  (stroke-style no-stroke)
+  (should-antialias 0))
+(draw-rect
+  (rect at (25,15) size 1x18)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (0,17) size 26x1)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (25,17) size 1x16)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (0,17) size 28x1)
+  (border-thickness 1.00))
+(set-inline-fill-color
+  (color #FF0000))
+(draw-rect
+  (rect at (25,30) size 27x3)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (49,15) size 3x18)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (0,30) size 26x3)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (0,17) size 3x16)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (0,1) size 28x3)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (0,1) size 3x17)
+  (border-thickness 1.00))
+(set-state
+  (change-flags [stroke-brush, stroke-thickness, stroke-style])
+  (stroke-brush 
+    (color #008000))
+  (stroke-thickness 5.00)
+  (stroke-style dashed-stroke))
+(draw-line
+  (point-1 (25,15))
+  (point-2 (52,20)))
+(draw-line
+  (point-1 (23,0))
+  (point-2 (53,5)))
+(draw-line
+  (point-1 (23,15))
+  (point-2 (53,20)))
+(draw-line
+  (point-1 (23,0))
+  (point-2 (28,20)))
+(draw-line
+  (point-1 (48,0))
+  (point-2 (53,20)))
+(draw-line
+  (point-1 (23,1))
+  (point-2 (28,18)))
+(set-state
+  (change-flags [stroke-style, should-antialias])
+  (stroke-style solid-stroke)
+  (should-antialias 1)))");
+
+    CHECK(Painted(u8"<style>body{margin:0}table{border-collapse:collapse}tbody{border:4px solid "
+                  u8"purple}td{width:20px;height:10px;padding:0;border:1px solid "
+                  u8"black}</style><table><tbody><tr><td></td><td></td></tr></tbody></table>")
+          == Canvas() + u8R"(
+(set-state
+  (change-flags [stroke-style, should-antialias])
+  (stroke-style no-stroke)
+  (should-antialias 0))
+(draw-rect
+  (rect at (24,0) size 1x18)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (24,0) size 1x18)
+  (border-thickness 1.00))
+(set-inline-fill-color
+  (color #800080))
+(draw-rect
+  (rect at (24,0) size 25x4)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (24,14) size 25x4)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (45,0) size 4x18)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (0,0) size 25x4)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (0,14) size 25x4)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (0,0) size 4x18)
+  (border-thickness 1.00))
+(set-state
+  (change-flags [stroke-style, should-antialias])
+  (stroke-style solid-stroke)
+  (should-antialias 1)))");
+  }
+
+  TEST_CASE("RenderTable: paints column group, column, row group and row backgrounds behind cells",
+            "[Rendering][RenderTable]")
+  {
+    CHECK(
+      Painted(
+        u8"<style>body{margin:0}table{border-spacing:0}td{width:20px;height:10px;padding:0}</"
+        u8"style><table><colgroup style=background:red><col style=background:green><col></colgroup><tbody "
+        u8"style=background:blue><tr style=background:yellow><td></td><td "
+        u8"style=background:white></td></tr><tr><td></td><td></td></tr></tbody></table>")
+      == Canvas() + u8R"(
+(fill-composited-rect
+  (rect at (0,0) size 20x10)
+  (color #FF0000)
+  (composite-operation source-over)
+  (blend-mode normal))
+(fill-composited-rect
+  (rect at (0,0) size 20x10)
+  (color #008000)
+  (composite-operation source-over)
+  (blend-mode normal))
+(fill-composited-rect
+  (rect at (0,0) size 20x10)
+  (color #0000FF)
+  (composite-operation source-over)
+  (blend-mode normal))
+(fill-composited-rect
+  (rect at (0,0) size 20x10)
+  (color #FFFF00)
+  (composite-operation source-over)
+  (blend-mode normal))
+(fill-composited-rect
+  (rect at (20,0) size 20x10)
+  (color #FF0000)
+  (composite-operation source-over)
+  (blend-mode normal))
+(fill-composited-rect
+  (rect at (20,0) size 20x10)
+  (color #0000FF)
+  (composite-operation source-over)
+  (blend-mode normal))
+(fill-composited-rect
+  (rect at (20,0) size 20x10)
+  (color #FFFF00)
+  (composite-operation source-over)
+  (blend-mode normal))
+(fill-composited-rect
+  (rect at (20,0) size 20x10)
+  (color #FFFFFF)
+  (composite-operation source-over)
+  (blend-mode normal))
+(fill-composited-rect
+  (rect at (0,10) size 20x10)
+  (color #FF0000)
+  (composite-operation source-over)
+  (blend-mode normal))
+(fill-composited-rect
+  (rect at (0,10) size 20x10)
+  (color #008000)
+  (composite-operation source-over)
+  (blend-mode normal))
+(fill-composited-rect
+  (rect at (0,10) size 20x10)
+  (color #0000FF)
+  (composite-operation source-over)
+  (blend-mode normal))
+(fill-composited-rect
+  (rect at (20,10) size 20x10)
+  (color #FF0000)
+  (composite-operation source-over)
+  (blend-mode normal))
+(fill-composited-rect
+  (rect at (20,10) size 20x10)
+  (color #0000FF)
+  (composite-operation source-over)
+  (blend-mode normal)))");
+  }
+
+  TEST_CASE("RenderTable: hides empty cells", "[Rendering][RenderTable]")
+  {
+    CHECK(Painted(
+            u8"<style>body{margin:0}table{border-spacing:2px}td{width:20px;height:10px;padding:0;background:"
+            u8"yellow;border:1px solid}td:empty{empty-cells:hide}</style><table><tr><td></td><td><div "
+            u8"style=height:10px></div></td></tr></table>")
+          == Canvas() + u8R"(
+(fill-composited-rect
+  (rect at (26,2) size 22x12)
+  (color #FFFF00)
+  (composite-operation source-over)
+  (blend-mode normal))
+(set-state
+  (change-flags [stroke-style, should-antialias])
+  (stroke-style no-stroke)
+  (should-antialias 0))
+(draw-rect
+  (rect at (26,2) size 22x1)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (26,13) size 22x1)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (26,2) size 1x12)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (47,2) size 1x12)
+  (border-thickness 1.00))
+(set-state
+  (change-flags [stroke-style, should-antialias])
+  (stroke-style solid-stroke)
+  (should-antialias 1)))");
+  }
+
+  TEST_CASE("RenderTable: paints spanning cells once", "[Rendering][RenderTable]")
+  {
+    CHECK(Painted(u8"<style>body{margin:0}table{border-spacing:0}td{width:20px;height:10px;padding:0;border:"
+                  u8"1px solid black}</style><table><tr><td rowspan=2 style=background:red></td><td "
+                  u8"colspan=2 style=background:blue></td></tr><tr><td></td><td></td></tr></table>")
+          == Canvas() + u8R"(
+(fill-composited-rect
+  (rect at (0,0) size 22x24)
+  (color #FF0000)
+  (composite-operation source-over)
+  (blend-mode normal))
+(set-state
+  (change-flags [stroke-style, should-antialias])
+  (stroke-style no-stroke)
+  (should-antialias 0))
+(draw-rect
+  (rect at (0,0) size 22x1)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (0,23) size 22x1)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (0,0) size 1x24)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (21,0) size 1x24)
+  (border-thickness 1.00))
+(set-state
+  (change-flags [stroke-style, should-antialias])
+  (stroke-style solid-stroke)
+  (should-antialias 1))
+(fill-composited-rect
+  (rect at (22,0) size 44x12)
+  (color #0000FF)
+  (composite-operation source-over)
+  (blend-mode normal))
+(set-state
+  (change-flags [stroke-style, should-antialias])
+  (stroke-style no-stroke)
+  (should-antialias 0))
+(draw-rect
+  (rect at (22,0) size 44x1)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (22,11) size 44x1)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (22,0) size 1x12)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (65,0) size 1x12)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (22,12) size 22x1)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (22,23) size 22x1)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (22,12) size 1x12)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (43,12) size 1x12)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (44,12) size 22x1)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (44,23) size 22x1)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (44,12) size 1x12)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (65,12) size 1x12)
+  (border-thickness 1.00))
+(set-state
+  (change-flags [stroke-style, should-antialias])
+  (stroke-style solid-stroke)
+  (should-antialias 1)))");
+  }
+
+  TEST_CASE("RenderTable: paints captions", "[Rendering][RenderTable]")
+  {
+    CHECK(
+      Painted(u8"<style>body{margin:0}caption{height:8px;background:green}td{width:20px;height:10px;padding:"
+              u8"0;background:yellow}</style><table><caption></caption><tr><td></td></tr></table>")
+      == Canvas() + u8R"(
+(fill-composited-rect
+  (rect at (0,0) size 24x8)
+  (color #008000)
+  (composite-operation source-over)
+  (blend-mode normal))
+(fill-composited-rect
+  (rect at (2,10) size 20x10)
+  (color #FFFF00)
+  (composite-operation source-over)
+  (blend-mode normal)))");
+  }
+
+  TEST_CASE("RenderTable: paints row outlines", "[Rendering][RenderTable]")
+  {
+    CHECK(Painted(u8"<style>body{margin:0}table{border-spacing:0}td{width:20px;height:10px;padding:0}tr{"
+                  u8"outline:2px solid green}</style><table><tr><td></td><td></td></tr></table>")
+          == Canvas() + u8R"(
+(set-state
+  (change-flags [fill-brush, stroke-style, should-antialias])
+  (fill-brush 
+    (color #008000))
+  (stroke-style no-stroke)
+  (should-antialias 0))
+(draw-rect
+  (rect at (-2,-2) size 44x2)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (-2,10) size 44x2)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (-2,-2) size 2x14)
+  (border-thickness 1.00))
+(draw-rect
+  (rect at (40,-2) size 2x14)
+  (border-thickness 1.00))
+(set-state
+  (change-flags [stroke-style, should-antialias])
+  (stroke-style solid-stroke)
+  (should-antialias 1)))");
   }
 }

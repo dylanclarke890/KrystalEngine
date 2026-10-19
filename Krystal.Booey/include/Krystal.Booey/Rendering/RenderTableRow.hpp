@@ -13,18 +13,18 @@ namespace krys::boo
   struct BorderValue;
 
   /// @brief A table row.
-  // FIXME: Painting and hit testing (paint, paintOutlineForRowIfNeeded, nodeAtPoint), and repaints
-  // (clippedOverflowRect, rectsForRepaintingAfterLayout, imageChanged), once there are those.
+  // FIXME: Hit testing (nodeAtPoint) and repaints (clippedOverflowRect, rectsForRepaintingAfterLayout,
+  // imageChanged), once there are those.
   class RenderTableRow final : public RenderBox
   {
     KRYS_NON_COPY_MOVABLE(RenderTableRow);
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderTableRow);
 
   public:
-    void Paint(PaintInfo &, const LayoutPoint &) noexcept final
-    {
-      // FIXME: Table rows (their cells' backgrounds and the row's outline) come with tables.
-    }
+    /// @brief Paints a row with a self-painting layer: its outline, its background behind its cells, and the
+    /// cells; rows without layers are painted by their section.
+    void Paint(PaintInfo &, const LayoutPoint &) noexcept final;
+    void PaintOutlineForRowIfNeeded(PaintInfo &, const LayoutPoint &) noexcept;
 
     constexpr static uint32 UnsetRowIndex = 0x7F'FF'FF'FF;
     constexpr static uint32 MaxRowIndex = 0x7F'FF'FF'FE; // 2,147,483,646

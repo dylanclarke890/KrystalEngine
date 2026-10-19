@@ -146,4 +146,9 @@ namespace krys::ui::tests
     // Text, so Chrome's golden is only reported (see "Golden: text").
     CheckPage("decorations", 360u, 240u, true);
   }
+
+  TEST_CASE("Golden: tables", "[UI][GPU][Golden]")
+  {
+    CheckPage("tables", 360u, 240u);
+  }
 }

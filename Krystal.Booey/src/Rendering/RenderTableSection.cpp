@@ -1,7 +1,10 @@
 ﻿#include "Krystal.Booey/Rendering/RenderTableSection.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Rendering/BorderPainter.hpp"
+#include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderTableCell.hpp"
@@ -13,6 +16,13 @@
 
 namespace krys::boo
 {
+  namespace
+  {
+    // Those 2 variables are used to balance the memory consumption vs the repaint time on big tables.
+    constexpr uint32 MinTableSizeToUseFastPaintPathWithOverflowingCell = 75 * 75;
+    constexpr float MaxAllowedOverflowingCellRatioForFastPaintPath = 0.1f;
+  }
+
   namespace
   {
     inline void SetRowLogicalHeightToRowStyleLogicalHeight(RenderTableSection::RowStruct &row) noexcept
@@ -443,6 +453,7 @@ namespace krys::boo
     krys_debug_assert(!NeedsCellRecalc());
     krys_debug_assert(!Table()->NeedsSectionRecalc());
 
+    _forceSlowPaintPathWithOverflowingCell = false;
     // AddChild may over-grow _grid but we don't want to throw away the memory too early as AddChild
     // can be called in a loop (e.g during parsing). Doing it now ensures we have a stable-enough structure.
     _grid.shrink_to_fit();
@@ -696,6 +707,7 @@ namespace krys::boo
 
     // Set the width of our section now.  The rows will also be this width.
     SetLogicalWidth(Table()->ContentBoxLogicalWidth());
+    _forceSlowPaintPathWithOverflowingCell = false;
 
     auto vspacing = Table()->VBorderSpacing();
     size_t numberOfEffectiveColumns = Table()->NumEffCols();
@@ -801,6 +813,13 @@ namespace krys::boo
   void RenderTableSection::ComputeOverflowFromCells(uint32 totalRows, uint32 nEffCols) noexcept
   {
     ClearOverflow();
+    _overflowingCells.clear();
+    uint32 totalCellsCount = nEffCols * totalRows;
+    uint32 maxAllowedOverflowingCellsCount =
+      totalCellsCount < MinTableSizeToUseFastPaintPathWithOverflowingCell
+        ? 0
+        : static_cast<uint32>(MaxAllowedOverflowingCellRatioForFastPaintPath
+                              * static_cast<float>(totalCellsCount));
 
     // Now that our height has been determined, add in overflow from cells.
     for (uint32 r = 0; r < totalRows; r++)
@@ -818,8 +837,18 @@ namespace krys::boo
           continue;
         }
         AddOverflowFromContainedBox(*cell);
-        // FIXME: Keep the overflowing cells for painting and hit testing (m_overflowingCells,
-        // m_forceSlowPaintPathWithOverflowingCell), once there are those.
+        if (cell->HasVisualOverflow() && !_forceSlowPaintPathWithOverflowingCell)
+        {
+          _overflowingCells.insert(cell);
+          if (_overflowingCells.size() > maxAllowedOverflowingCellsCount)
+          {
+            // We need to set _forceSlowPaintPathWithOverflowingCell only if there is a least one overflowing
+            // cells as the hit testing code rely on this information.
+            _forceSlowPaintPathWithOverflowingCell = true;
+            // The slow path does not make any use of the overflowing cells info, don't hold on to the memory.
+            _overflowingCells.clear();
+          }
+        }
       }
     }
   }
@@ -1302,6 +1331,9 @@ namespace krys::boo
 
   void RenderTableSection::RemoveCachedCollapsedBorders(const RenderTableCell &cell) noexcept
   {
+    // The cell is leaving the section: it isn't painted as an overflowing cell any more.
+    _overflowingCells.erase(&cell);
+
     if (!Table()->CollapseBorders())
     {
       return;
@@ -1361,5 +1393,676 @@ namespace krys::boo
     }
     cell->SetLogicalLocation(cellLocation);
     View().FrameView().LayoutContext().AddLayoutDelta(oldCellLocation - cell->Location());
+  }
+
+  CellSpan RenderTableSection::FullTableRowSpan() const noexcept
+  {
+    krys_debug_assert(!_needsCellRecalc);
+    return CellSpan {0, static_cast<uint32>(_grid.size())};
+  }
+
+  CellSpan RenderTableSection::FullTableColumnSpan() const noexcept
+  {
+    return CellSpan {0, static_cast<uint32>(Table()->Columns().size())};
+  }
+
+  void RenderTableSection::Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    krys_debug_assert(!NeedsLayout());
+    // avoid crashing on bugs that cause us to paint with dirty layout
+    if (NeedsLayout())
+    {
+      return;
+    }
+
+    auto totalRows = _grid.size();
+    auto totalCols = Table()->Columns().size();
+
+    if (!totalRows || !totalCols)
+    {
+      return;
+    }
+
+    LayoutPoint adjustedPaintOffset = paintOffset + Location();
+
+    PaintPhase phase = paintInfo.Phase;
+    bool pushedClip = PushContentsClip(paintInfo, adjustedPaintOffset);
+    PaintObject(paintInfo, adjustedPaintOffset);
+    if (pushedClip)
+    {
+      PopContentsClip(paintInfo, phase, adjustedPaintOffset);
+    }
+
+    if ((phase == PaintPhase::Outline || phase == PaintPhase::SelfOutline)
+        && Style().UsedVisibility() == Visibility::Visible)
+    {
+      PaintOutline(paintInfo, LayoutRect(adjustedPaintOffset, Size()));
+    }
+  }
+
+  void RenderTableSection::PaintCell(RenderTableCell *cell, PaintInfo &paintInfo,
+                                     const LayoutPoint &paintOffset) noexcept
+  {
+    LayoutPoint cellPoint = FlipForWritingModeForChild(*cell, paintOffset);
+    PaintPhase paintPhase = paintInfo.Phase;
+    auto &row = Downcast<RenderTableRow>(*cell->Parent());
+
+    if (paintPhase == PaintPhase::BlockBackground || paintPhase == PaintPhase::ChildBlockBackground)
+    {
+      // We need to handle painting a stack of backgrounds.  This stack (from bottom to top) consists of
+      // the column group, column, row group, row, and then the cell.
+
+      // Column groups and columns first.
+      // FIXME: Columns and column groups do not currently support opacity, and they are being painted "too
+      // late" in the stack, since we have already opened a transparency layer (potentially) for the table row
+      // group. Note that we deliberately ignore whether or not the cell has a layer, since these backgrounds
+      // paint "behind" the cell.
+      if (RenderTableCol *column = Table()->ColElement(cell->Col()))
+      {
+        if (RenderTableCol *columnGroup = column->EnclosingColumnGroup())
+        {
+          cell->PaintBackgroundsBehindCell(paintInfo, cellPoint, columnGroup, cellPoint);
+        }
+        cell->PaintBackgroundsBehindCell(paintInfo, cellPoint, column, cellPoint);
+      }
+
+      // Paint the row group next.
+      cell->PaintBackgroundsBehindCell(paintInfo, cellPoint, this, paintOffset);
+
+      // Paint the row next, but only if it doesn't have a layer.  If a row has a layer, it will be
+      // responsible for painting the row background for the cell.
+      if (!row.HasSelfPaintingLayer())
+      {
+        cell->PaintBackgroundsBehindCell(paintInfo, cellPoint, &row, cellPoint);
+      }
+    }
+    if ((!cell->HasSelfPaintingLayer() && !row.HasSelfPaintingLayer()))
+    {
+      cell->Paint(paintInfo, cellPoint);
+    }
+  }
+
+  LayoutRect RenderTableSection::LogicalRectForWritingModeAndDirection(const LayoutRect &rect) const noexcept
+  {
+    LayoutRect tableAlignedRect(rect);
+
+    FlipForWritingMode(tableAlignedRect);
+
+    if (!GetWritingMode().IsHorizontal())
+    {
+      tableAlignedRect = tableAlignedRect.TransposedRect();
+    }
+
+    const auto &columnPos = Table()->ColumnPositions();
+    // The table's writing mode determines in which direction the rows flow.
+    if (Table()->GetWritingMode().IsInlineFlipped())
+    {
+      tableAlignedRect.SetX(columnPos[columnPos.size() - 1] - tableAlignedRect.MaxX());
+    }
+
+    return tableAlignedRect;
+  }
+
+  CellSpan RenderTableSection::DirtiedRows(const LayoutRect &damageRect) const noexcept
+  {
+    if (_forceSlowPaintPathWithOverflowingCell)
+    {
+      return FullTableRowSpan();
+    }
+
+    CellSpan coveredRows = SpannedRows(damageRect, IncludeAllIntersectingCells);
+
+    // To repaint the border we might need to repaint first or last row even if they are not spanned
+    // themselves.
+    if (coveredRows.Start >= _rowPos.size() - 1
+        && _rowPos[_rowPos.size() - 1] + Table()->OuterBorderAfter() >= damageRect.Y())
+    {
+      --coveredRows.Start;
+    }
+
+    if (!coveredRows.End && _rowPos[0] - Table()->OuterBorderBefore() <= damageRect.MaxY())
+    {
+      ++coveredRows.End;
+    }
+
+    return coveredRows;
+  }
+
+  CellSpan RenderTableSection::DirtiedColumns(const LayoutRect &damageRect) const noexcept
+  {
+    if (_forceSlowPaintPathWithOverflowingCell)
+    {
+      return FullTableColumnSpan();
+    }
+
+    CellSpan coveredColumns = SpannedColumns(damageRect, IncludeAllIntersectingCells);
+
+    const auto &columnPos = Table()->ColumnPositions();
+    // To repaint the border we might need to repaint first or last column even if they are not spanned
+    // themselves.
+    if (coveredColumns.Start >= columnPos.size() - 1
+        && columnPos[columnPos.size() - 1] + Table()->OuterBorderEnd() >= damageRect.X())
+    {
+      --coveredColumns.Start;
+    }
+
+    if (!coveredColumns.End && columnPos[0] - Table()->OuterBorderStart() <= damageRect.MaxX())
+    {
+      ++coveredColumns.End;
+    }
+
+    return coveredColumns;
+  }
+
+  CellSpan RenderTableSection::SpannedRows(
+    const LayoutRect &flippedRect,
+    ShouldIncludeAllIntersectingCells shouldIncludeAllIntersectionCells) const noexcept
+  {
+    // Find the first row that starts after rect top.
+    auto nextRow = static_cast<uint32>(std::ranges::upper_bound(_rowPos, flippedRect.Y()) - _rowPos.begin());
+    if (shouldIncludeAllIntersectionCells == IncludeAllIntersectingCells && nextRow
+        && _rowPos[nextRow - 1] == flippedRect.Y())
+    {
+      --nextRow;
+    }
+
+    auto rowCount = static_cast<uint32>(_rowPos.size());
+    if (nextRow == rowCount)
+    {
+      return CellSpan {rowCount - 1, rowCount - 1}; // After all rows.
+    }
+
+    uint32 startRow = nextRow > 0 ? nextRow - 1 : 0;
+
+    // Find the first row that starts after rect bottom.
+    uint32 endRow;
+    if (_rowPos[nextRow] >= flippedRect.MaxY())
+    {
+      endRow = nextRow;
+    }
+    else
+    {
+      endRow = static_cast<uint32>(
+        std::upper_bound(_rowPos.begin() + nextRow, _rowPos.end(), flippedRect.MaxY()) - _rowPos.begin());
+      if (endRow == rowCount)
+      {
+        endRow = rowCount - 1;
+      }
+    }
+
+    return CellSpan {startRow, endRow};
+  }
+
+  CellSpan RenderTableSection::SpannedColumns(
+    const LayoutRect &flippedRect,
+    ShouldIncludeAllIntersectingCells shouldIncludeAllIntersectionCells) const noexcept
+  {
+    const auto &columnPos = Table()->ColumnPositions();
+
+    // Find the first column that starts after rect left.
+    // lower_bound doesn't handle the edge between two cells properly as it would wrongly return the
+    // cell on the logical top/left.
+    // upper_bound on the other hand properly returns the cell on the logical bottom/right, which also
+    // matches the behavior of other browsers.
+    auto nextColumn =
+      static_cast<uint32>(std::ranges::upper_bound(columnPos, flippedRect.X()) - columnPos.begin());
+    if (shouldIncludeAllIntersectionCells == IncludeAllIntersectingCells && nextColumn
+        && columnPos[nextColumn - 1] == flippedRect.X())
+    {
+      --nextColumn;
+    }
+
+    auto columnCount = static_cast<uint32>(columnPos.size());
+    if (nextColumn == columnCount)
+    {
+      return CellSpan {columnCount - 1, columnCount - 1}; // After all columns.
+    }
+
+    uint32 startColumn = nextColumn > 0 ? nextColumn - 1 : 0;
+
+    // Find the first column that starts after rect right.
+    uint32 endColumn;
+    if (columnPos[nextColumn] >= flippedRect.MaxX())
+    {
+      endColumn = nextColumn;
+    }
+    else
+    {
+      endColumn = static_cast<uint32>(
+        std::upper_bound(columnPos.begin() + nextColumn, columnPos.end(), flippedRect.MaxX())
+        - columnPos.begin());
+      if (endColumn == columnCount)
+      {
+        endColumn = columnCount - 1;
+      }
+    }
+
+    return CellSpan {startColumn, endColumn};
+  }
+
+  void RenderTableSection::PaintRowGroupBorder(const PaintInfo &paintInfo, bool antialias, LayoutRect rect,
+                                               BoxSide side, css::PropertyId borderColor,
+                                               BorderStyle borderStyle, BorderStyle tableBorderStyle) noexcept
+  {
+    if (tableBorderStyle == BorderStyle::Hidden)
+    {
+      return;
+    }
+    rect.Intersect(paintInfo.Rect);
+    if (rect.IsEmpty())
+    {
+      return;
+    }
+    BorderPainter::DrawLineForBoxSide(paintInfo.Context(), GetDocument(), FloatRect(rect), side,
+                                      Style().VisitedDependentColorWithColorFilter(borderColor), borderStyle,
+                                      0, 0, antialias);
+  }
+
+  LayoutUnit RenderTableSection::OffsetLeftForRowGroupBorder(RenderTableCell *cell,
+                                                             const LayoutRect &rowGroupRect,
+                                                             uint32 row) noexcept
+  {
+    if (Table()->GetWritingMode().IsHorizontal())
+    {
+      if (Table()->GetWritingMode().IsInlineLeftToRight())
+      {
+        return cell ? cell->X() + cell->Width() : 0_lu;
+      }
+      return -OuterBorderLeft(Table()->GetWritingMode());
+    }
+    bool isLastRow = row + 1 == _grid.size();
+    return rowGroupRect.Width() - _rowPos[row + 1]
+           + (isLastRow ? -OuterBorderLeft(Table()->GetWritingMode()) : 0_lu);
+  }
+
+  LayoutUnit RenderTableSection::OffsetTopForRowGroupBorder(RenderTableCell *cell, BoxSide borderSide,
+                                                            uint32 row) noexcept
+  {
+    bool isLastRow = row + 1 == _grid.size();
+
+    if (Table()->GetWritingMode().IsHorizontal())
+    {
+      return _rowPos[row]
+             + (!row && borderSide == BoxSide::Right       ? -OuterBorderTop(Table()->GetWritingMode())
+                : isLastRow && borderSide == BoxSide::Left ? OuterBorderTop(Table()->GetWritingMode())
+                                                           : 0_lu);
+    }
+    if (Table()->GetWritingMode().IsInlineTopToBottom())
+    {
+      return (cell ? cell->Y() + cell->Height() : 0_lu)
+             + (borderSide == BoxSide::Left ? OuterBorderTop(Table()->GetWritingMode()) : 0_lu);
+    }
+    return borderSide == BoxSide::Right ? -OuterBorderTop(Table()->GetWritingMode()) : 0_lu;
+  }
+
+  LayoutUnit RenderTableSection::VerticalRowGroupBorderHeight(RenderTableCell *cell,
+                                                              const LayoutRect &rowGroupRect,
+                                                              uint32 row) noexcept
+  {
+    bool isLastRow = row + 1 == _grid.size();
+
+    if (Table()->GetWritingMode().IsHorizontal())
+    {
+      return _rowPos[row + 1] - _rowPos[row]
+             + (!row        ? OuterBorderTop(Table()->GetWritingMode())
+                : isLastRow ? OuterBorderBottom(Table()->GetWritingMode())
+                            : 0_lu);
+    }
+    if (Table()->GetWritingMode().IsInlineTopToBottom())
+    {
+      return rowGroupRect.Height() - (cell ? cell->Y() + cell->Height() : 0_lu)
+             + OuterBorderBottom(Table()->GetWritingMode());
+    }
+    return cell ? rowGroupRect.Height() - (cell->Y() - cell->Height()) : 0_lu;
+  }
+
+  LayoutUnit RenderTableSection::HorizontalRowGroupBorderWidth(RenderTableCell *cell,
+                                                               const LayoutRect &rowGroupRect, uint32 row,
+                                                               uint32 column) noexcept
+  {
+    if (Table()->GetWritingMode().IsHorizontal())
+    {
+      if (Table()->GetWritingMode().IsInlineLeftToRight())
+      {
+        return rowGroupRect.Width() - (cell ? cell->X() + cell->Width() : 0_lu)
+               + (!column                           ? OuterBorderLeft(Table()->GetWritingMode())
+                  : column == Table()->NumEffCols() ? OuterBorderRight(Table()->GetWritingMode())
+                                                    : 0_lu);
+      }
+      return cell ? rowGroupRect.Width() - (cell->X() - cell->Width()) : 0_lu;
+    }
+    bool isLastRow = row + 1 == _grid.size();
+    return _rowPos[row + 1] - _rowPos[row]
+           + (isLastRow ? OuterBorderLeft(Table()->GetWritingMode())
+              : !row    ? OuterBorderRight(Table()->GetWritingMode())
+                        : 0_lu);
+  }
+
+  void RenderTableSection::PaintRowGroupBorderIfRequired(const PaintInfo &paintInfo,
+                                                         const LayoutPoint &paintOffset, uint32 row,
+                                                         uint32 column, BoxSide borderSide,
+                                                         RenderTableCell *cell) noexcept
+  {
+    if (Table()->CurrentBorderValue()->Precedence() > BorderPrecedence::RowGroup)
+    {
+      return;
+    }
+    if (paintInfo.Context().PaintingDisabled())
+    {
+      return;
+    }
+
+    const RenderStyle &sectionStyle = Style();
+    bool antialias = BorderPainter::ShouldAntialiasLines(paintInfo.Context());
+    LayoutRect rowGroupRect = LayoutRect(paintOffset, Size());
+    rowGroupRect.MoveBy(
+      -LayoutPoint(OuterBorderLeft(Table()->GetWritingMode()),
+                   (borderSide == BoxSide::Right) ? 0_lu : OuterBorderTop(Table()->GetWritingMode())));
+
+    switch (borderSide)
+    {
+      case BoxSide::Top:
+        PaintRowGroupBorder(
+          paintInfo, antialias,
+          LayoutRect {
+            paintOffset.X() + OffsetLeftForRowGroupBorder(cell, rowGroupRect, row), rowGroupRect.Y(),
+            HorizontalRowGroupBorderWidth(cell, rowGroupRect, row, column),
+            LayoutUnit {style::Evaluate<float>(sectionStyle.BorderTop().Width, style::ZoomNeeded {})}},
+          BoxSide::Top, css::PropertyId::BorderTopColor, sectionStyle.BorderTopStyle(),
+          Table()->Style().BorderTopStyle());
+        break;
+      case BoxSide::Bottom:
+        PaintRowGroupBorder(
+          paintInfo, antialias,
+          LayoutRect {
+            paintOffset.X() + OffsetLeftForRowGroupBorder(cell, rowGroupRect, row),
+            rowGroupRect.Y() + rowGroupRect.Height(),
+            HorizontalRowGroupBorderWidth(cell, rowGroupRect, row, column),
+            LayoutUnit {style::Evaluate<float>(sectionStyle.BorderBottom().Width, style::ZoomNeeded {})}},
+          BoxSide::Bottom, css::PropertyId::BorderBottomColor, sectionStyle.BorderBottomStyle(),
+          Table()->Style().BorderBottomStyle());
+        break;
+      case BoxSide::Left:
+        PaintRowGroupBorder(
+          paintInfo, antialias,
+          LayoutRect {
+            rowGroupRect.X(), rowGroupRect.Y() + OffsetTopForRowGroupBorder(cell, borderSide, row),
+            LayoutUnit {style::Evaluate<float>(sectionStyle.BorderLeft().Width, style::ZoomNeeded {})},
+            VerticalRowGroupBorderHeight(cell, rowGroupRect, row)},
+          BoxSide::Left, css::PropertyId::BorderLeftColor, sectionStyle.BorderLeftStyle(),
+          Table()->Style().BorderLeftStyle());
+        break;
+      case BoxSide::Right:
+        PaintRowGroupBorder(paintInfo, antialias,
+                            LayoutRect {rowGroupRect.X() + rowGroupRect.Width(),
+                                        rowGroupRect.Y() + OffsetTopForRowGroupBorder(cell, borderSide, row),
+                                        LayoutUnit {style::Evaluate<float>(sectionStyle.BorderRight().Width,
+                                                                           style::ZoomNeeded {})},
+                                        VerticalRowGroupBorderHeight(cell, rowGroupRect, row)},
+                            BoxSide::Right, css::PropertyId::BorderRightColor,
+                            sectionStyle.BorderRightStyle(), Table()->Style().BorderRightStyle());
+        break;
+      default: break;
+    }
+  }
+
+  KRYS_NODISCARD static BoxSide PhysicalBorderForDirection(const WritingMode writingMode,
+                                                           CollapsedBorderSide side) noexcept
+  {
+    // FIXME: Replace this with types/methods from BoxSides.h
+    switch (side)
+    {
+      case CollapsedBorderSide::Start:
+        if (writingMode.IsHorizontal())
+        {
+          return writingMode.IsInlineLeftToRight() ? BoxSide::Left : BoxSide::Right;
+        }
+        return writingMode.IsInlineTopToBottom() ? BoxSide::Top : BoxSide::Bottom;
+      case CollapsedBorderSide::End:
+        if (writingMode.IsHorizontal())
+        {
+          return writingMode.IsInlineLeftToRight() ? BoxSide::Right : BoxSide::Left;
+        }
+        return writingMode.IsInlineTopToBottom() ? BoxSide::Bottom : BoxSide::Top;
+      case CollapsedBorderSide::Before:
+        if (writingMode.IsHorizontal())
+        {
+          return writingMode.IsBlockTopToBottom() ? BoxSide::Top : BoxSide::Bottom;
+        }
+        return writingMode.IsBlockLeftToRight() ? BoxSide::Left : BoxSide::Right;
+      case CollapsedBorderSide::After:
+        if (writingMode.IsHorizontal())
+        {
+          return writingMode.IsBlockTopToBottom() ? BoxSide::Bottom : BoxSide::Top;
+        }
+        return writingMode.IsBlockLeftToRight() ? BoxSide::Right : BoxSide::Left;
+    }
+    krys_debug_assert(false);
+    return BoxSide::Left;
+  }
+
+  void RenderTableSection::PaintObject(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    auto localRepaintRect = paintInfo.Rect;
+    localRepaintRect.MoveBy(-paintOffset);
+
+    CellSpan dirtiedRows {0, 0};
+    CellSpan dirtiedColumns {0, 0};
+
+    if (localRepaintRect.Contains(FrameRect()))
+    {
+      dirtiedRows = FullTableRowSpan();
+      dirtiedColumns = FullTableColumnSpan();
+    }
+    else
+    {
+      auto tableAlignedRect = LogicalRectForWritingModeAndDirection(localRepaintRect);
+      dirtiedRows = DirtiedRows(tableAlignedRect);
+      dirtiedColumns = DirtiedColumns(tableAlignedRect);
+    }
+
+    if (dirtiedColumns.Start == dirtiedColumns.End)
+    {
+      return;
+    }
+
+    auto paintRowOutline = [&](uint32 rowIndex, PaintPhase phase)
+    {
+      if (phase != PaintPhase::Outline && phase != PaintPhase::SelfOutline)
+      {
+        return;
+      }
+
+      auto *row = _grid[rowIndex].RowRenderer;
+      if (row && !row->HasSelfPaintingLayer() && row->HasOutline())
+      {
+        row->PaintOutlineForRowIfNeeded(paintInfo, paintOffset);
+      }
+    };
+
+    auto paintContiguousCells = [&]()
+    {
+      // Draw the dirty cells in the order that they appear.
+      for (uint32 r = dirtiedRows.Start; r < dirtiedRows.End; r++)
+      {
+        paintRowOutline(r, paintInfo.Phase);
+
+        for (uint32 c = dirtiedColumns.Start; c < dirtiedColumns.End; c++)
+        {
+          CellStruct &current = CellAt(r, c);
+          RenderTableCell *cell = current.PrimaryCell();
+          if (!cell || (r > dirtiedRows.Start && PrimaryCellAt(r - 1, c) == cell)
+              || (c > dirtiedColumns.Start && PrimaryCellAt(r, c - 1) == cell))
+          {
+            continue;
+          }
+          PaintCell(cell, paintInfo, paintOffset);
+        }
+      }
+    };
+
+    auto paintContiguousCellsWithCollapsedBorders = [&]()
+    {
+      // Collapsed borders are painted from the bottom right to the top left so that precedence
+      // due to cell position is respected. We need to paint one row beyond the topmost dirtied
+      // row to calculate its collapsed border value.
+      uint32 startRow = dirtiedRows.Start ? dirtiedRows.Start - 1 : 0;
+      for (uint32 r = dirtiedRows.End; r > startRow; r--)
+      {
+        uint32 row = r - 1;
+        bool shouldPaintRowGroupBorder = false;
+        for (uint32 c = dirtiedColumns.End; c > dirtiedColumns.Start; c--)
+        {
+          uint32 col = c - 1;
+          CellStruct &current = CellAt(row, col);
+          RenderTableCell *cell = current.PrimaryCell();
+          if (!cell)
+          {
+            if (!c)
+            {
+              PaintRowGroupBorderIfRequired(
+                paintInfo, paintOffset, row, col,
+                PhysicalBorderForDirection(Table()->GetWritingMode(), CollapsedBorderSide::Start));
+            }
+            else if (c == Table()->NumEffCols())
+            {
+              PaintRowGroupBorderIfRequired(
+                paintInfo, paintOffset, row, col,
+                PhysicalBorderForDirection(Table()->GetWritingMode(), CollapsedBorderSide::End));
+            }
+
+            shouldPaintRowGroupBorder = true;
+            continue;
+          }
+
+          if ((row > dirtiedRows.Start && PrimaryCellAt(row - 1, col) == cell)
+              || (col > dirtiedColumns.Start && PrimaryCellAt(row, col - 1) == cell))
+          {
+            continue;
+          }
+
+          // If we had a run of null cells paint their corresponding section of the row group's border if
+          // necessary. Note that this will only happen once within a row as the null cells will always be
+          // clustered together on one end of the row.
+          if (shouldPaintRowGroupBorder)
+          {
+            if (r == _grid.size())
+            {
+              PaintRowGroupBorderIfRequired(
+                paintInfo, paintOffset, row, col,
+                PhysicalBorderForDirection(Table()->GetWritingMode(), CollapsedBorderSide::After), cell);
+            }
+            else if (!row && !Table()->SectionAbove(this))
+            {
+              PaintRowGroupBorderIfRequired(
+                paintInfo, paintOffset, row, col,
+                PhysicalBorderForDirection(Table()->GetWritingMode(), CollapsedBorderSide::Before), cell);
+            }
+
+            shouldPaintRowGroupBorder = false;
+          }
+
+          auto cellPoint = FlipForWritingModeForChild(*cell, paintOffset);
+          cell->PaintCollapsedBorders(paintInfo, cellPoint);
+        }
+      }
+    };
+
+    auto paintDirtyCells = [&]()
+    {
+      // To make sure we properly repaint the section, we repaint all the overflowing cells that we collected.
+      List<RenderTableCell *> cells;
+      for (auto *overflowingCell : _overflowingCells)
+      {
+        cells.push_back(const_cast<RenderTableCell *>(overflowingCell));
+      }
+
+      HashSet<RenderTableCell *> spanningCells;
+
+      for (uint32 r = dirtiedRows.Start; r < dirtiedRows.End; r++)
+      {
+        paintRowOutline(r, paintInfo.Phase);
+
+        for (uint32 c = dirtiedColumns.Start; c < dirtiedColumns.End; c++)
+        {
+          CellStruct &current = CellAt(r, c);
+          if (!current.HasCells())
+          {
+            continue;
+          }
+
+          for (auto *currentCell : current.Cells)
+          {
+            if (_overflowingCells.contains(currentCell))
+            {
+              continue;
+            }
+
+            if (currentCell->RowSpan() > 1 || currentCell->ColSpan() > 1)
+            {
+              if (!spanningCells.insert(currentCell).second)
+              {
+                continue;
+              }
+            }
+
+            cells.push_back(currentCell);
+          }
+        }
+      }
+
+      // Sort the dirty cells by paint order.
+      if (_overflowingCells.empty())
+      {
+        std::ranges::stable_sort(cells, [](const RenderTableCell *a, const RenderTableCell *b)
+                                 { return a->RowIndex() < b->RowIndex(); });
+      }
+      else
+      {
+        // This comparison is used only when we have overflowing cells as we have an unsorted array to sort.
+        // We thus need to sort both on rows and columns to properly repaint.
+        std::ranges::sort(cells,
+                          [](const RenderTableCell *a, const RenderTableCell *b)
+                          {
+                            if (a->RowIndex() != b->RowIndex())
+                            {
+                              return a->RowIndex() < b->RowIndex();
+                            }
+                            return a->Col() < b->Col();
+                          });
+      }
+
+      if (paintInfo.Phase == PaintPhase::CollapsedTableBorders)
+      {
+        for (size_t i = cells.size(); i > 0; --i)
+        {
+          auto cellPoint = FlipForWritingModeForChild(*cells[i - 1], paintOffset);
+          cells[i - 1]->PaintCollapsedBorders(paintInfo, cellPoint);
+        }
+      }
+      else
+      {
+        for (auto *cell : cells)
+        {
+          PaintCell(cell, paintInfo, paintOffset);
+        }
+      }
+    };
+
+    if (!_hasMultipleCellLevels && _overflowingCells.empty())
+    {
+      if (paintInfo.Phase == PaintPhase::CollapsedTableBorders)
+      {
+        paintContiguousCellsWithCollapsedBorders();
+      }
+      else
+      {
+        paintContiguousCells();
+      }
+    }
+    else
+    {
+      paintDirtyCells();
+    }
   }
 }

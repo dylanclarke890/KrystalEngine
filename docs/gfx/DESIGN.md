@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-19): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, G2f, strokes, G2g, clips, G2h, layers and blend modes, G2i, gradients, and G2j, shadows, and G2k, golden image tests, are done); Krystal.Text (T1) and text (G3) are done; the Booey integration (G4) is in progress (G4a, the graphics context and display lists, G4b, Krystal.UI and replay, G4c1, the paint plumbing, layers and backgrounds, G4c2, borders, shadows and outlines, G4c3, image buffers and patterns, G4d1, text and inline boxes, and G4d2, decorations, markers and ellipses, are done; see *G4 plan*).
+Status (2026-10-19): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, G2f, strokes, G2g, clips, G2h, layers and blend modes, G2i, gradients, and G2j, shadows, and G2k, golden image tests, are done); Krystal.Text (T1) and text (G3) are done; the Booey integration (G4) is in progress (G4a, the graphics context and display lists, G4b, Krystal.UI and replay, G4c1, the paint plumbing, layers and backgrounds, G4c2, borders, shadows and outlines, G4c3, image buffers and patterns, G4d1, text and inline boxes, G4d2, decorations, markers and ellipses, and G4e, table painting, are done; see *G4 plan*).
 
 ## Why
 
@@ -504,6 +504,18 @@ Two parts (decided by the user). Booey has the modern inline layout (the inline 
 - **Tests:** Booey compares display list dumps of small documents (text runs and glyph positions, mixed fonts, bidi, shadows, inline boxes across lines; decorations, skip-ink, markers and ellipses in G4d2); Krystal.UI adds a `text` page golden in Liberation Sans, its Chrome comparison reported only (Chrome on Windows rasterises with DirectWrite, as for the G3b scene).
 - **Editor:** the page gains text (headings, paragraphs, inline spans with backgrounds and borders, text shadows) in G4d1, and decorations, a list and an ellipsis in G4d2.
 
+### G4e plan (decided 2026-10-19)
+
+One part (decided by the user). Flex and grid already paint their items in order (G4c1), and no element makes a replaced renderer yet (images, media, canvases and controls come later), so the part is tables. Table layout is ported, with the cells' collapsed border values and their validity.
+
+- **Table:** `RenderTable::paint` and `paintObject` (captions and sections in order, then the collapsed borders phase), `paintBoxDecorations`, and the collapsed borders collected and sorted by precedence for painting.
+- **Sections:** `paint` and `paintObject` over the rows and columns the paint rect reaches (`dirtiedRows`, `dirtiedColumns`) and the cells overflowing their rows, `paintCell`, and the row group borders in the collapsed model.
+- **Cells:** `paint`, `paintBoxDecorations`, `paintBackgroundsBehindCell` (column groups, columns, row groups and rows paint their backgrounds through their cells) and `paintCollapsedBorders`.
+- **Rows:** `paint` and their outlines; columns paint nothing themselves.
+- **Out (FIXMEs):** masks, selection, hit testing, fieldset legends' border gaps; `RenderReplaced::paint` waits for images (decided), when there's replaced content to paint.
+- **Tests:** Booey compares dumps of small tables (separated borders and `border-spacing`, collapsed borders and their conflict resolution by width, style and owner, backgrounds of tables, column groups, columns, row groups, rows and cells, `empty-cells: hide`, spans, captions, row outlines); Krystal.UI adds a `tables` page golden of sized cells without text (decided), checked strictly against Chrome.
+- **Editor:** the page gains a table card (collapsed coloured borders, striped rows, a spanning cell).
+
 ### G2a as built (2026-10-18)
 
 - `Render2D/Rect2D.hpp`: `Rect2D`, a plain `{X, Y, Width, Height}` in pixels.
@@ -746,6 +758,13 @@ Testing: the device's hidden window gives tests a real OpenGL context (Krystal.G
 - **Editor:** the text row gains a card of decorations (skip-ink, wavy, struck and double overlined text), a list, an ellipsis and an outlined span.
 - **Tests:** Booey compares dumps of each decoration, skip-ink, shadows, markers, the ellipsis and inline outlines, and unit tests glyph paths, line intersections and the point graph; Krystal.UI adds the `decorations` page golden (decorations, skip-ink on and off, bullets and counters, an ellipsis, an outline wrapping across lines), reported against Chrome only (text; mean 6.6): Chrome's wave is taller and its skip-ink gaps a little wider, and its ordered markers sit closer to their text.
 - **Not yet:** the selection's part in all of these (G4 leaves selection out).
+
+### G4e as built (2026-10-19)
+
+- **Booey** (the ledger entry is *Table painting* in `docs/booey/PORTING.md`): tables paint as upstream. The table paints its background and border (beside its captions), then its captions and sections; sections paint the cells in the rows and columns the paint rect reaches (and cells overflowing their rows), each cell over the stack of backgrounds behind it (column group, column, row group, row, then the cell's own); rows with layers paint their own cells. In the collapsed model the table collects the cells' distinct borders, sorts them by precedence, and paints one pass per border, each cell drawing the sides that use it and row groups their own borders where cells are missing, from the bottom right to the top left so precedence by position holds. `empty-cells: hide`, spans, captions and row outlines paint.
+- **Out:** `RenderReplaced::paint` waits for images (decided); masks, selection and hit testing stay FIXMEs.
+- **Editor:** a table card (collapsed coloured borders, a dark header, striped rows, a double-bordered spanning cell).
+- **Tests:** Booey compares dumps of separated and collapsed tables, the background stack, hidden empty cells, spans, captions and row outlines (7 cases); Krystal.UI adds the `tables` page golden (no text), checked strictly against Chrome (mean 0.47; the only differences are the dash phase of collapsed dashed borders and corner pixels).
 
 ## Open decisions
 
