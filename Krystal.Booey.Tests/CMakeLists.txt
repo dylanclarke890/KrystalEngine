@@ -363,6 +363,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/RenderCounter.cpp
 		tests/Rendering/RenderLayer.cpp
 		tests/Rendering/BackgroundPainter.cpp
+		tests/Rendering/BorderPainter.cpp
+		tests/Rendering/OutlinePainter.cpp
 		tests/Rendering/RenderLayerScrollableArea.cpp
 		tests/Rendering/RenderTreeAsText.cpp
 		tests/Rendering/RenderBlockFlow.cpp

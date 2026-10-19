@@ -35,6 +35,8 @@ namespace krys::boo
 
     ImageDrawResult Draw(GraphicsContext &, const FloatRect &dstRect, const FloatRect &srcRect,
                          ImagePaintingOptions = {}) noexcept override;
+    /// @brief Fills @p dstRect with the gradient's @p srcRect, unclipped.
+    void FillMapped(GraphicsContext &, const FloatRect &dstRect, const FloatRect &srcRect) noexcept;
     void DrawPattern(GraphicsContext &, const FloatRect &destRect, const FloatRect &srcRect,
                      const AffineTransform &patternTransform, const FloatPoint &phase,
                      const FloatSize &spacing, ImagePaintingOptions = {}) noexcept override;

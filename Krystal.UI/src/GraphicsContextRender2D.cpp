@@ -579,25 +579,33 @@ namespace krys::ui
     }
   }
 
-  void GraphicsContextRender2D::DrawFocusRing(const boo::Path &path, float outlineWidth,
-                                              const boo::Color &color) noexcept
+  void GraphicsContextRender2D::DrawFocusRing(const boo::Path &path, float, const boo::Color &color) noexcept
   {
-    // FIXME: Focus rings are drawn as a plain outline until the theme's (Adwaita's) are ported.
+    // As the Adwaita theme paints focus (Skia's backend draws nothing without it): a ring of a fixed width
+    // outside the path, with round joins, at the colour's alpha. Adwaita strokes the path twice as wide and
+    // clears its inside; Render2D has no clear operator, so the inside is clipped out instead.
+    constexpr float focusLineWidth = 2.f;
+
     PrepareDraw(false);
-    _renderer.StrokePath(ToPath2D(path), {.Width = outlineWidth}, ToColour(color));
+    const auto path2D = ToPath2D(path);
+    _renderer.BeginLayer(color.AlphaAsFloat());
+    _renderer.ClipOutPath(path2D, gfx::FillRule::NonZero);
+    _renderer.StrokePath(
+      path2D, {.Width = focusLineWidth * 2, .Cap = gfx::LineCap::Round, .Join = gfx::LineJoin::Round},
+      ToColour(color.OpaqueColor()));
+    _renderer.EndLayer();
   }
 
   void GraphicsContextRender2D::DrawFocusRing(const List<boo::FloatRect> &rects, float, float outlineWidth,
                                               const boo::Color &color) noexcept
   {
-    // FIXME: Focus rings are drawn as a plain outline until the theme's (Adwaita's) are ported.
-    PrepareDraw(false);
+    // Adwaita rounds each rect's corners by 2.
+    boo::Path path;
     for (const auto &rect : rects)
     {
-      gfx::Path2D path;
-      path.AddRect(ToRect2D(rect));
-      _renderer.StrokePath(path, {.Width = outlineWidth}, ToColour(color));
+      path.AddRoundedRect(rect, boo::FloatSize(2, 2));
     }
+    DrawFocusRing(path, outlineWidth, color);
   }
 
   void GraphicsContextRender2D::Scale(const boo::FloatSize &scale) noexcept

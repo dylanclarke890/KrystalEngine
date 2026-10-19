@@ -2254,8 +2254,18 @@ namespace krys::boo
       }
     }
 
-    // FIXME: 5. Outlines and 6. continuation outlines (paintOutline, paintContinuationOutlines) come with
-    // outlines.
+    // 5. paint outline.
+    if ((paintPhase == PaintPhase::Outline || paintPhase == PaintPhase::SelfOutline) && HasOutline()
+        && Style().UsedVisibility() == Visibility::Visible)
+    {
+      // Don't paint focus ring for anonymous block continuation because the
+      // inline element having outline-style:auto paints the whole focus ring.
+      // FIXME: Continuations (isContinuation), once there are continuations; no block is one.
+      PaintOutline(paintInfo, LayoutRect(paintOffset, Size()));
+    }
+
+    // FIXME: 6. Continuation outlines (inlineContinuation, paintContinuationOutlines) come with inline
+    // painting.
     // FIXME: 7. Carets (paintCarets) come with editing.
   }
 

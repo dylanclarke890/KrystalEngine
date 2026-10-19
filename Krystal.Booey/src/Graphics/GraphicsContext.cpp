@@ -159,6 +159,22 @@ namespace krys::boo
     return image.DrawTiled(*this, destination, source, tileSize, spacing, options);
   }
 
+  ImageDrawResult GraphicsContext::DrawTiledImage(Image &image, const FloatRect &destination,
+                                                  const FloatRect &source, const FloatSize &tileScaleFactor,
+                                                  Image::TileRule hRule, Image::TileRule vRule,
+                                                  ImagePaintingOptions options) noexcept
+  {
+    if (hRule == Image::StretchTile && vRule == Image::StretchTile)
+    {
+      // Just do a scale.
+      return DrawImage(image, destination, source, options);
+    }
+
+    InterpolationQualityMaintainer interpolationQualityForThisScope(*this, options.GetInterpolationQuality());
+    return image.DrawTiled(*this, destination, source, tileScaleFactor, hRule, vRule,
+                           ImagePaintingOptions {options.GetCompositeOperator()});
+  }
+
   void GraphicsContext::ClipRoundedRect(const FloatRoundedRect &rect) noexcept
   {
     Path path;

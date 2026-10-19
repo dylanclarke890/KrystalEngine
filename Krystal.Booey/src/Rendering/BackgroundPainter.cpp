@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Graphics/Image.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/BorderPainter.hpp"
 #include "Krystal.Booey/Rendering/BorderShape.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -937,6 +938,254 @@ namespace krys::boo
       });
   }
 
+  void BackgroundPainter::PaintBoxShadow(const LayoutRect &paintRect, const RenderStyle &style,
+                                         style::ShadowStyle shadowStyle,
+                                         RectEdges<bool> closedEdges) const noexcept
+  {
+    // FIXME: Deal with border-image. Would be great to use border-image as a mask.
+    GraphicsContext &context = _paintInfo.Context();
+    if (context.PaintingDisabled() || !style.HasBoxShadow())
+    {
+      return;
+    }
+
+    const auto borderShape = BorderShape::ShapeForBorderRect(style, paintRect, closedEdges);
+
+    bool hasBorderRadius = style.HasBorderRadius();
+    float deviceScaleFactor = Document().DeviceScaleFactor();
+
+    bool hasOpaqueBackground =
+      style.VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor).IsOpaque();
+    const auto &zoomFactor = style.UsedZoomForLength();
+    for (const auto &shadow : style.GetBoxShadow())
+    {
+      if (style::GetShadowStyle(shadow) != shadowStyle)
+      {
+        continue;
+      }
+
+      LayoutSize shadowOffset(shadow.Location.x().ResolveZoom(zoomFactor),
+                              shadow.Location.y().ResolveZoom(zoomFactor));
+      LayoutUnit shadowPaintingExtent = style::PaintingExtent(shadow, zoomFactor);
+      LayoutUnit shadowSpread = LayoutUnit(shadow.Spread.ResolveZoom(zoomFactor));
+      auto shadowRadius = shadow.Blur.ResolveZoom(zoomFactor);
+
+      if (shadowOffset.IsZero() && !shadowRadius && !shadowSpread)
+      {
+        continue;
+      }
+
+      auto shadowColor = style.ColorWithColorFilter(shadow.Color);
+
+      auto shouldInflateBorderRect = [&]()
+      {
+        if (!hasOpaqueBackground)
+        {
+          return false;
+        }
+
+        // FIXME: The function to decide on the policy based on the transform should be a named function.
+        // FIXME: It's not clear if this check is right. What about integral scale factors?
+        auto transform = context.GetCTM();
+        if (transform.A() != 1 || (transform.D() != 1 && transform.D() != -1) || transform.B()
+            || transform.C())
+        {
+          return true;
+        }
+
+        return false;
+      };
+
+      if (!style::IsInset(shadow))
+      {
+        auto shadowShape = [&]
+        {
+          if (!shadowSpread)
+          {
+            return borderShape;
+          }
+
+          if (shadowSpread > 0)
+          {
+            auto spreadRect = paintRect;
+            spreadRect.Inflate(shadowSpread);
+            return BorderShape::ShapeForOutsetRect(style, paintRect, spreadRect, {}, closedEdges);
+          }
+
+          auto spreadRect = paintRect;
+          auto inflateX = std::max(shadowSpread, -paintRect.Width() / 2);
+          auto inflateY = std::max(shadowSpread, -paintRect.Height() / 2);
+          spreadRect.Inflate(LayoutSize {inflateX, inflateY});
+          return BorderShape::ShapeForInsetRect(style, paintRect, spreadRect /* , closedEdges*/);
+        }();
+
+        if (shadowShape.IsEmpty())
+        {
+          continue;
+        }
+
+        // If the box is opaque, it is unnecessary to clip it out. However, doing so saves time
+        // when painting the shadow. On the other hand, it introduces subpixel gaps along the
+        // corners. Those are avoided by insetting the clipping path by one pixel.
+        auto adjustedBorderShape = borderShape;
+        if (shouldInflateBorderRect())
+        {
+          adjustedBorderShape.Inflate(-1_lu);
+        }
+
+        auto shadowRect = paintRect;
+        shadowRect.Inflate(shadowPaintingExtent + shadowSpread);
+        shadowRect.Move(shadowOffset);
+
+        if (!closedEdges.Left())
+        {
+          shadowRect.ShiftXEdgeTo(paintRect.X());
+        }
+
+        if (!closedEdges.Top())
+        {
+          shadowRect.ShiftYEdgeTo(paintRect.Y());
+        }
+
+        if (!closedEdges.Right())
+        {
+          shadowRect.ShiftMaxXEdgeTo(paintRect.MaxX());
+        }
+
+        if (!closedEdges.Bottom())
+        {
+          shadowRect.ShiftMaxYEdgeTo(paintRect.MaxY());
+        }
+
+        auto pixelSnappedShadowRect = SnapRectToDevicePixels(shadowRect, deviceScaleFactor);
+
+        GraphicsContextStateSaver stateSaver(context);
+        context.Clip(pixelSnappedShadowRect);
+
+        // Move the fill just outside the clip, adding at least 1 pixel of separation so that the fill does
+        // not bleed in (due to antialiasing) if the context is transformed.
+        LayoutUnit xOffset = paintRect.Width() + std::max<LayoutUnit>(0, shadowOffset.Width())
+                             + shadowPaintingExtent + 2 * shadowSpread + LayoutUnit(1);
+        LayoutSize extraOffset(xOffset.Ceil(), 0);
+        shadowOffset -= extraOffset;
+        shadowShape.Move(extraOffset);
+
+        auto pixelSnappedFillRect = shadowShape.SnappedOuterRect(deviceScaleFactor);
+
+        LayoutPoint shadowRectOrigin = shadowShape.BorderRect().Location() + shadowOffset;
+        FloatPoint snappedShadowOrigin =
+          FloatPoint(RoundToDevicePixel(shadowRectOrigin.X(), deviceScaleFactor),
+                     RoundToDevicePixel(shadowRectOrigin.Y(), deviceScaleFactor));
+        FloatSize snappedShadowOffset = snappedShadowOrigin - pixelSnappedFillRect.Location();
+
+        context.SetDropShadow(
+          {snappedShadowOffset, shadowRadius, shadowColor,
+           shadow.IsWebkitBoxShadow ? ShadowRadiusMode::Legacy : ShadowRadiusMode::Default});
+
+        adjustedBorderShape.ClipOutOuterShape(context, deviceScaleFactor);
+
+        if (hasBorderRadius)
+        {
+          auto influenceShape = BorderShape::ShapeForBorderRect(style, shadowRect);
+          auto influenceRadii = influenceShape.Radii();
+          influenceRadii.Expand(2 * shadowPaintingExtent + shadowSpread);
+          influenceShape.SetRadii(influenceRadii);
+
+          if (influenceShape.OuterShapeContains(_paintInfo.Rect))
+          {
+            context.FillRect(shadowShape.SnappedOuterRect(deviceScaleFactor), Color::black);
+          }
+          else
+          {
+            shadowShape.FillOuterShape(context, Color::black, deviceScaleFactor);
+          }
+        }
+        else
+        {
+          context.FillRect(pixelSnappedFillRect, Color::black);
+        }
+      }
+      else
+      {
+        // Inset shadow.
+        auto borderWidthsWithSpread = borderShape.BorderWidths() + RectEdges<LayoutUnit> {shadowSpread};
+
+        auto outerRectExpandedToObscureOpenEdges = paintRect;
+
+        auto shadowInfluence = shadowPaintingExtent + shadowSpread;
+        if (!closedEdges.Left())
+        {
+          outerRectExpandedToObscureOpenEdges.ShiftXEdgeBy(
+            -(std::max<LayoutUnit>(shadowOffset.Width(), 0) + shadowInfluence));
+        }
+        if (!closedEdges.Top())
+        {
+          outerRectExpandedToObscureOpenEdges.ShiftYEdgeBy(
+            -(std::max<LayoutUnit>(shadowOffset.Height(), 0) + shadowInfluence));
+        }
+        if (!closedEdges.Right())
+        {
+          outerRectExpandedToObscureOpenEdges.SetWidth(outerRectExpandedToObscureOpenEdges.Width()
+                                                       - std::min<LayoutUnit>(shadowOffset.Width(), 0)
+                                                       + shadowInfluence);
+        }
+        if (!closedEdges.Bottom())
+        {
+          outerRectExpandedToObscureOpenEdges.SetHeight(outerRectExpandedToObscureOpenEdges.Height()
+                                                        - std::min<LayoutUnit>(shadowOffset.Height(), 0)
+                                                        + shadowInfluence);
+        }
+
+        auto shapeForInnerHole =
+          BorderShape(outerRectExpandedToObscureOpenEdges, borderWidthsWithSpread, borderShape.Radii());
+        if (shapeForInnerHole.SnappedInnerRect(deviceScaleFactor).IsEmpty())
+        {
+          shapeForInnerHole.FillOuterShape(context, shadowColor, deviceScaleFactor);
+          continue;
+        }
+
+        auto areaCastingShadowInHole = [](const LayoutRect &holeRect, LayoutUnit shadowExtent,
+                                          LayoutUnit shadowSpread, const LayoutSize &shadowOffset)
+        {
+          auto bounds = holeRect;
+          bounds.Inflate(shadowExtent);
+
+          if (shadowSpread < 0)
+          {
+            bounds.Inflate(-shadowSpread);
+          }
+
+          LayoutRect offsetBounds = bounds;
+          offsetBounds.Move(-shadowOffset);
+          return UnionRect(bounds, offsetBounds);
+        };
+
+        auto fillColor = shadowColor.OpaqueColor();
+        auto shadowCastingRect = areaCastingShadowInHole(borderShape.InnerEdgeRect(), shadowPaintingExtent,
+                                                         shadowSpread, shadowOffset);
+
+        GraphicsContextStateSaver stateSaver(context);
+
+        borderShape.ClipToInnerShape(context, deviceScaleFactor);
+
+        LayoutUnit xOffset = 2 * paintRect.Width() + std::max<LayoutUnit>(0, shadowOffset.Width())
+                             + shadowPaintingExtent - 2 * shadowSpread + LayoutUnit(1);
+        LayoutSize extraOffset(xOffset.Ceil(), 0);
+
+        context.Translate(FloatSize(extraOffset));
+        shadowOffset -= extraOffset;
+
+        auto snappedShadowOffset = RoundSizeToDevicePixels(shadowOffset, deviceScaleFactor);
+        context.SetDropShadow(
+          {snappedShadowOffset, shadowRadius, shadowColor,
+           shadow.IsWebkitBoxShadow ? ShadowRadiusMode::Legacy : ShadowRadiusMode::Default});
+
+        shapeForInnerHole.FillRectWithInnerHoleShape(context, shadowCastingRect, fillColor,
+                                                     deviceScaleFactor);
+      }
+    }
+  }
+
   bool BackgroundPainter::BoxShadowShouldBeAppliedToBackground(
     const RenderBoxModelObject &renderer, const LayoutPoint &, BleedAvoidance bleedAvoidance,
     const inline_iterator::InlineBoxIterator &inlineBox) noexcept
@@ -1044,27 +1293,5 @@ namespace krys::boo
   const RenderView &BackgroundPainter::View() const noexcept
   {
     return _renderer.View();
-  }
-
-  namespace
-  {
-    KRYS_NODISCARD LayoutSize SizeForDevicePixel(const GraphicsContext &context,
-                                                 float devicePixelRatio) noexcept
-    {
-      auto transform = context.GetCTM();
-      return {LayoutUnit(CeilToDevicePixel(LayoutUnit(static_cast<float>(1.0 / transform.XScale())),
-                                           devicePixelRatio)),
-              LayoutUnit(CeilToDevicePixel(LayoutUnit(static_cast<float>(1.0 / transform.YScale())),
-                                           devicePixelRatio))};
-    }
-  }
-
-  LayoutRect ShrinkRectByOneDevicePixel(const GraphicsContext &context, const LayoutRect &rect,
-                                        float devicePixelRatio) noexcept
-  {
-    auto shrunkRect = rect;
-    auto devicePixelUnits = SizeForDevicePixel(context, devicePixelRatio);
-    shrunkRect.Inflate(-devicePixelUnits);
-    return shrunkRect;
   }
 }

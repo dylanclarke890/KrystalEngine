@@ -18,8 +18,8 @@ namespace krys::boo
   class GraphicsContext;
 
   /// @brief Something drawable as an image: generated images (gradients) for now.
-  /// FIXME: Bitmap, SVG and PDF images (their data, decoding, animation, observers and native images) and
-  /// tiling by `TileRule` (for `border-image`) come with images.
+  /// FIXME: Bitmap, SVG and PDF images (their data, decoding, animation, observers and native images) come
+  /// with images.
   class Image : public RefCounted<Image>, public CanMakeWeakPtr<Image>
   {
     friend class GraphicsContext;
@@ -114,6 +114,9 @@ namespace krys::boo
                                  ImagePaintingOptions = {}) noexcept = 0;
     ImageDrawResult DrawTiled(GraphicsContext &, const FloatRect &dstRect, const FloatPoint &srcPoint,
                               const FloatSize &tileSize, const FloatSize &spacing,
+                              ImagePaintingOptions = {}) noexcept;
+    ImageDrawResult DrawTiled(GraphicsContext &, const FloatRect &dstRect, const FloatRect &srcRect,
+                              const FloatSize &tileScaleFactor, TileRule hRule, TileRule vRule,
                               ImagePaintingOptions = {}) noexcept;
 
     // Supporting tiled drawing

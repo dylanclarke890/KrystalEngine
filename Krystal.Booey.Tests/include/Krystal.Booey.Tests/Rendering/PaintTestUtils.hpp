@@ -38,12 +38,16 @@ namespace krys::boo::tests
   }
 
   /// @brief The start of a 200x100 view's display list: the view's base colour.
+  /// @note The dumps put a space after `(composite-mode`, kept outside the raw strings so tools that strip
+  /// trailing whitespace can't drop it.
   KRYS_NODISCARD inline utf8_string BaseCanvas() noexcept
   {
     return u8R"(
 (set-state
   (change-flags [composite-mode])
-  (composite-mode
+  (composite-mode)"
+           u8" "
+           u8R"(
     (composite-operation copy)
     (blend-mode normal)))
 (fill-rect-with-color
@@ -55,10 +59,13 @@ namespace krys::boo::tests
   /// @p rootColour over the canvas.
   KRYS_NODISCARD inline utf8_string Canvas(utf8_stringview rootColour = u8"#FFFFFF") noexcept
   {
-    return BaseCanvas() + u8R"(
+    return BaseCanvas()
+           + u8R"(
 (set-state
   (change-flags [composite-mode])
-  (composite-mode
+  (composite-mode)"
+             u8" "
+             u8R"(
     (composite-operation source-over)
     (blend-mode normal)))
 (fill-composited-rect

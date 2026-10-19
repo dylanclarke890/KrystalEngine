@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/PathImpl.hpp"
 
 #include "Krystal.Booey/Graphics/PathStream.hpp"
 #include "Krystal.Booey/Graphics/PathTraversalState.hpp"
@@ -266,8 +267,37 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Segments that can't produce elements (arcs, ellipses and continuous rounded rects) need a
-    // platform path.
+    // There's no platform path to flatten the segments that can't produce elements, so rounded rects and
+    // ellipses become beziers, as a platform path preferring them adds them
+    // (PathImpl::BeziersForRoundedRect).
+    // FIXME: Arcs, closed arcs, rotated ellipses and continuous rounded rects need a platform path; they
+    // apply nothing.
+    ApplySegments(
+      [&applier](const PathSegment &segment)
+      {
+        if (segment.ApplyElements(applier))
+        {
+          return;
+        }
+
+        auto applyBeziers = [&applier](const FloatRoundedRect &roundedRect)
+        {
+          for (const auto &bezierSegment : PathImpl::BeziersForRoundedRect(roundedRect))
+          {
+            (void)bezierSegment.ApplyElements(applier);
+          }
+        };
+
+        if (const auto *roundedRect = std::get_if<PathRoundedRect>(&segment.GetData()))
+        {
+          applyBeziers(roundedRect->RoundedRect);
+        }
+        else if (const auto *ellipse = std::get_if<PathEllipseInRect>(&segment.GetData()))
+        {
+          applyBeziers(FloatRoundedRect(
+            ellipse->Rect, FloatRoundedRect::Radii(ellipse->Rect.Width() / 2, ellipse->Rect.Height() / 2)));
+        }
+      });
   }
 
   void Path::Clear() noexcept

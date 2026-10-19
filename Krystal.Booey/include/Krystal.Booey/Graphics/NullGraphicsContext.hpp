@@ -199,5 +199,10 @@ namespace krys::boo
     {
       return ImageDrawResult::DidNothing;
     }
+    ImageDrawResult DrawTiledImage(Image &, const FloatRect &, const FloatRect &, const FloatSize &,
+                                   Image::TileRule, Image::TileRule, ImagePaintingOptions = {}) noexcept final
+    {
+      return ImageDrawResult::DidNothing;
+    }
   };
 }

@@ -52,7 +52,9 @@ namespace krys::ui::tests
 
     /// @brief Checks a page against its own golden (writing it when updating or missing) and against
     /// Chrome's, writing the actual image and the differences to the output directory either way.
-    void CheckPage(const std::string &name, uint32 width, uint32 height)
+    /// @param chromeReportOnly Whether Chrome's golden is only reported, not checked: where Chrome's
+    /// rendering follows its own algorithm rather than the one ported (border image tiling).
+    void CheckPage(const std::string &name, uint32 width, uint32 height, bool chromeReportOnly = false)
     {
       // Pages draw in many small batches (a tile, a clip, a gradient each), so they get a full frame's
       // memory.
@@ -96,6 +98,10 @@ namespace krys::ui::tests
                 << comparison.MeanDifference << ", " << comparison.PixelsOver << " of "
                 << comparison.PixelCount << " pixels over " << ChromeTolerance);
       CHECK(comparison.SizesMatch);
+      if (chromeReportOnly)
+      {
+        return;
+      }
       // Antialiased curves differ most, so a few pixels may differ by more; on average, images should be
       // within a step or so.
       CHECK(comparison.PixelsOver <= comparison.PixelCount / 200u);
@@ -111,5 +117,17 @@ namespace krys::ui::tests
   TEST_CASE("Golden: layers", "[UI][GPU][Golden]")
   {
     CheckPage("layers", 360u, 240u);
+  }
+
+  TEST_CASE("Golden: borders", "[UI][GPU][Golden]")
+  {
+    CheckPage("borders", 360u, 240u);
+  }
+
+  TEST_CASE("Golden: border images", "[UI][GPU][Golden]")
+  {
+    // Chrome tiles `repeat` and `space` pieces its own way (no joins between repeated tiles, hairline gaps
+    // for space); the page follows the ported tiling, so only its own golden is checked.
+    CheckPage("border-images", 360u, 200u, true);
   }
 }

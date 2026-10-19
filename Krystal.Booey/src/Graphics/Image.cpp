@@ -59,6 +59,109 @@ namespace krys::boo
     ctxt.SetCompositeOperation(previousOperator);
   }
 
+  ImageDrawResult Image::DrawTiled(GraphicsContext &ctxt, const FloatRect &dstRect, const FloatRect &srcRect,
+                                   const FloatSize &tileScaleFactor, TileRule hRule, TileRule vRule,
+                                   ImagePaintingOptions options) noexcept
+  {
+    if (auto color = SinglePixelSolidColor())
+    {
+      FillWithSolidColor(ctxt, dstRect, *color, options.GetCompositeOperator());
+      return ImageDrawResult::DidDraw;
+    }
+
+    FloatSize tileScale = tileScaleFactor;
+    FloatSize spacing;
+
+    // FIXME: These rules follow CSS border-image rules, but they should not be down here in Image.
+    bool centerOnGapHorizonally = false;
+    bool centerOnGapVertically = false;
+    switch (hRule)
+    {
+      case RoundTile:
+      {
+        float scaledSourceWidth = srcRect.Width() * tileScale.Width();
+        int32 numItems =
+          std::max<int32>(static_cast<int32>(std::round(dstRect.Width() / scaledSourceWidth)), 1);
+        tileScale.SetWidth(dstRect.Width() / (srcRect.Width() * static_cast<float>(numItems)));
+        break;
+      }
+      case SpaceTile:
+      {
+        float scaledSourceWidth = srcRect.Width() * tileScale.Width();
+        auto numItems = static_cast<int32>(std::floor(dstRect.Width() / scaledSourceWidth));
+        if (!numItems)
+        {
+          return ImageDrawResult::DidNothing;
+        }
+        spacing.SetWidth((dstRect.Width() - scaledSourceWidth * static_cast<float>(numItems))
+                         / static_cast<float>(numItems + 1));
+        centerOnGapHorizonally = !(numItems & 1);
+        break;
+      }
+      case StretchTile:
+      case RepeatTile:  break;
+    }
+
+    switch (vRule)
+    {
+      case RoundTile:
+      {
+        float scaledSourceHeight = srcRect.Height() * tileScale.Height();
+        int32 numItems =
+          std::max<int32>(static_cast<int32>(std::round(dstRect.Height() / scaledSourceHeight)), 1);
+        tileScale.SetHeight(dstRect.Height() / (srcRect.Height() * static_cast<float>(numItems)));
+        break;
+      }
+      case SpaceTile:
+      {
+        float scaledSourceHeight = srcRect.Height() * tileScale.Height();
+        auto numItems = static_cast<int32>(std::floor(dstRect.Height() / scaledSourceHeight));
+        if (!numItems)
+        {
+          return ImageDrawResult::DidNothing;
+        }
+        spacing.SetHeight((dstRect.Height() - scaledSourceHeight * static_cast<float>(numItems))
+                          / static_cast<float>(numItems + 1));
+        centerOnGapVertically = !(numItems & 1);
+        break;
+      }
+      case StretchTile:
+      case RepeatTile:  break;
+    }
+
+    AffineTransform patternTransform =
+      AffineTransform().ScaleNonUniform(tileScale.Width(), tileScale.Height());
+
+    // We want to construct the phase such that the pattern is centered (when stretch is not
+    // set for a particular rule).
+    float hPhase = tileScale.Width() * srcRect.X();
+    float vPhase = tileScale.Height() * srcRect.Y();
+    float scaledTileWidth = tileScale.Width() * srcRect.Width();
+    float scaledTileHeight = tileScale.Height() * srcRect.Height();
+
+    if (centerOnGapHorizonally)
+    {
+      hPhase -= spacing.Width();
+    }
+    else if (hRule == RepeatTile || hRule == SpaceTile)
+    {
+      hPhase -= (dstRect.Width() - scaledTileWidth) / 2;
+    }
+
+    if (centerOnGapVertically)
+    {
+      vPhase -= spacing.Height();
+    }
+    else if (vRule == RepeatTile || vRule == SpaceTile)
+    {
+      vPhase -= (dstRect.Height() - scaledTileHeight) / 2;
+    }
+
+    FloatPoint patternPhase(dstRect.X() - hPhase, dstRect.Y() - vPhase);
+    DrawPattern(ctxt, dstRect, srcRect, patternTransform, patternPhase, spacing, options);
+    return ImageDrawResult::DidDraw;
+  }
+
   void Image::DrawPattern(GraphicsContext &, const FloatRect &, const FloatRect &, const AffineTransform &,
                           const FloatPoint &, const FloatSize &, ImagePaintingOptions) noexcept
   {

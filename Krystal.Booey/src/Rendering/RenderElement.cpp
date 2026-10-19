@@ -1,7 +1,9 @@
 ﻿#include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
+#include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/HTML/HTMLMarqueeElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableCellElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableElement.hpp"
@@ -9,6 +11,8 @@
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/OutlinePainter.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -31,6 +35,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderRuby.hpp"
 #include "Krystal.Booey/Style/PseudoElementRequest.hpp"
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
@@ -723,6 +728,27 @@ namespace krys::boo
     return Style().HasBackground();
   }
 
+  bool RenderElement::BorderImageIsLoadedAndCanBeRendered() const noexcept
+  {
+    krys_debug_assert(Style().HasBorder());
+
+    auto borderImage = Style().GetBorderImage().Source.TryStyleImage();
+    return borderImage && borderImage->CanRender(this, Style().UsedZoom()) && borderImage->IsLoaded(this);
+  }
+
+  bool RenderElement::HasOutline() const noexcept
+  {
+    return Style().HasOutline() || HasOutlineAnnotation();
+  }
+
+  bool RenderElement::HasOutlineAnnotation() const noexcept
+  {
+    // Nothing prints: only an explicit request annotates links.
+    const auto *element = GetElement();
+    return element && css::IsLink(*element)
+           && View().FrameView().GetPaintBehavior().Contains(PaintBehavior::AnnotateLinks);
+  }
+
   bool RenderElement::HasClip() const noexcept
   {
     return IsOutOfFlowPositioned() && Style().HasClip();
@@ -1184,6 +1210,21 @@ namespace krys::boo
       paintInfo.Phase = phase;
       element.Paint(paintInfo, childPoint);
     }
+  }
+
+  void RenderElement::PaintOutline(PaintInfo &paintInfo, const LayoutRect &paintRect) noexcept
+  {
+    if (paintInfo.Context().PaintingDisabled())
+    {
+      return;
+    }
+
+    if (!HasOutline())
+    {
+      return;
+    }
+
+    OutlinePainter {paintInfo}.PaintOutline(*this, paintRect);
   }
 
   void RenderElement::PaintAsInlineBlock(PaintInfo &paintInfo, const LayoutPoint &childPoint) noexcept

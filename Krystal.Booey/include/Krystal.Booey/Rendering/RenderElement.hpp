@@ -184,6 +184,7 @@ namespace krys::boo
 
     /// @brief Paints every phase at once, as though this renderer established its own stacking context (as
     /// inline blocks, flex items and grid items paint).
+    void PaintOutline(PaintInfo &, const LayoutRect &) noexcept;
     void PaintAsInlineBlock(PaintInfo &, const LayoutPoint &childPoint) noexcept;
 
     /// @brief Lays out this renderer and its descendants that need layout.
@@ -260,6 +261,17 @@ namespace krys::boo
       AbsoluteAnchorRectWithScrollMargin(bool *insideFixed = nullptr) const noexcept;
 
     KRYS_NODISCARD bool HasBackground() const noexcept;
+    KRYS_NODISCARD bool BorderImageIsLoadedAndCanBeRendered() const noexcept;
+    KRYS_NODISCARD bool HasOutline() const noexcept;
+    /// @brief Whether a link's outline carries its URL as an annotation (painting PDFs).
+    KRYS_NODISCARD bool HasOutlineAnnotation() const noexcept;
+
+    /// @brief The rect cut out of the border when painting it: a fieldset's legend.
+    /// FIXME: Fieldsets (RenderBlock's override, around the legend) come with fieldset layout.
+    KRYS_NODISCARD virtual LayoutRect PaintRectToClipOutFromBorder(const LayoutRect &) noexcept
+    {
+      return {};
+    }
     KRYS_NODISCARD bool HasClip() const noexcept;
     KRYS_NODISCARD bool HasClipOrNonVisibleOverflow() const noexcept;
 

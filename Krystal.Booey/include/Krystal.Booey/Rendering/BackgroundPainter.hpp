@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/BackgroundLayers.hpp"
+#include "Krystal.Booey/Style/Values/Borders/Shadow.hpp"
 
 namespace krys::boo
 {
@@ -59,8 +60,8 @@ namespace krys::boo
 
   /// @brief Paints a box's backgrounds: its colour and images, layer by layer, clipped and positioned as
   /// their properties say, and the root's background over the canvas.
-  /// FIXME: Mask layers (`mask-image`) come with images; box shadows (`paintBoxShadow`) come with borders;
-  /// `background-clip: text` and `border-area` need text painting and borders.
+  /// FIXME: Mask layers (`mask-image`) come with masks; `background-clip: text` and `border-area` come with
+  /// text painting.
   class BackgroundPainter
   {
   private:
@@ -91,6 +92,9 @@ namespace krys::boo
                         CompositeOperator = CompositeOperator::SourceOver,
                         RenderElement *backgroundObject = nullptr,
                         BaseBackgroundColorUsage = BaseBackgroundColorUse) const noexcept;
+
+    void PaintBoxShadow(const LayoutRect &, const RenderStyle &, style::ShadowStyle,
+                        RectEdges<bool> closedEdges = {true}) const noexcept;
 
     KRYS_NODISCARD static bool PaintsOwnBackground(const RenderBoxModelObject &) noexcept;
 
@@ -133,8 +137,4 @@ namespace krys::boo
     KRYS_NODISCARD const dom::Document &Document() const noexcept;
     KRYS_NODISCARD const RenderView &View() const noexcept;
   };
-
-  /// @brief @p rect inset by a device pixel on each side.
-  KRYS_NODISCARD LayoutRect ShrinkRectByOneDevicePixel(const GraphicsContext &, const LayoutRect &,
-                                                       float devicePixelRatio) noexcept;
 }

@@ -1408,6 +1408,11 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/BackgroundPainter.hpp
   include/Krystal.Booey/Rendering/BorderEdge.hpp
   include/Krystal.Booey/Rendering/PaintInfo.hpp
+
+  # Borders, shadows and outlines (G4c2)
+  include/Krystal.Booey/Rendering/BorderPainter.hpp
+  include/Krystal.Booey/Rendering/NinePieceImagePainter.hpp
+  include/Krystal.Booey/Rendering/OutlinePainter.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -2332,6 +2337,11 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Graphics/Image.cpp
   src/Rendering/BackgroundPainter.cpp
   src/Rendering/BorderEdge.cpp
+
+  # Borders, shadows and outlines (G4c2)
+  src/Rendering/BorderPainter.cpp
+  src/Rendering/NinePieceImagePainter.cpp
+  src/Rendering/OutlinePainter.cpp
 )
 
 target_precompile_headers(Krystal.Booey

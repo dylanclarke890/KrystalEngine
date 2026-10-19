@@ -30,8 +30,8 @@ namespace krys::boo
   };
 
   /// @brief A box that contains other boxes: a block container, flex, grid or table.
-  // FIXME: Floats, line boxes, continuations, fragmentation, selection, carets, column rules and outlines
-  // come with the rest of layout, editing, borders and outlines.
+  // FIXME: Floats, line boxes, continuations (and their outlines), fragmentation, selection, carets and
+  // column rules come with the rest of layout, inline painting, editing and multi-column layout.
   class RenderBlock : public RenderBox
   {
     friend class RenderBlockFlow;

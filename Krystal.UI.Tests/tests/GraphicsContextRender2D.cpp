@@ -447,4 +447,30 @@ namespace krys::ui::tests
     CHECK(replayed == direct);
     CHECK(_fonts.Size() == 1u);
   }
+
+  TEST_CASE_METHOD(ReplayFixture, "GraphicsContextRender2D: focus rings", "[UI][GPU]")
+  {
+    const boo::Color colour(SRGBA<uint8> {131, 56, 236, 204});
+    auto replayed =
+      Replayed([&](boo::GraphicsContext &context)
+               { context.DrawFocusRing(List<boo::FloatRect> {{10, 10, 30, 20}}, 0, 3, colour); });
+    auto direct = Draw(
+      [](gfx::Renderer2D &renderer)
+      {
+        // A ring two units wide outside the rect, its corners rounded by 2, at the colour's alpha.
+        boo::Path ring;
+        ring.AddRoundedRect(boo::FloatRect {10, 10, 30, 20}, boo::FloatSize(2, 2));
+        const auto path = ToPath2D(ring);
+        renderer.BeginLayer(0.8f);
+        renderer.ClipOutPath(path, gfx::FillRule::NonZero);
+        renderer.StrokePath(path, {.Width = 4, .Cap = gfx::LineCap::Round, .Join = gfx::LineJoin::Round},
+                            SRGBA<uint8> {131, 56, 236, 255});
+        renderer.EndLayer();
+      });
+    CHECK(Painted(direct));
+    CHECK(replayed == direct);
+    // The ring is outside the rect; inside, nothing is drawn.
+    CHECK(replayed[9 * Width + 25][3] > 0u);
+    CHECK(replayed[20 * Width + 25][3] == 0u);
+  }
 }

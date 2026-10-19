@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Graphics/FloatSegment.hpp"
 #include "Krystal.Booey/Graphics/GlyphBufferMembers.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextState.hpp"
+#include "Krystal.Booey/Graphics/Image.hpp"
 #include "Krystal.Booey/Graphics/ImagePaintingOptions.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
@@ -17,7 +18,6 @@ namespace krys::boo
   class FloatRoundedRect;
   class Font;
   class Gradient;
-  class Image;
   class Path;
 
   enum class RequiresClipToRect : bool
@@ -435,6 +435,9 @@ namespace krys::boo
 
     virtual ImageDrawResult DrawTiledImage(Image &, const FloatRect &destination, const FloatPoint &source,
                                            const FloatSize &tileSize, const FloatSize &spacing,
+                                           ImagePaintingOptions = {}) noexcept;
+    virtual ImageDrawResult DrawTiledImage(Image &, const FloatRect &destination, const FloatRect &source,
+                                           const FloatSize &tileScaleFactor, Image::TileRule, Image::TileRule,
                                            ImagePaintingOptions = {}) noexcept;
 
     // Clipping

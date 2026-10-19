@@ -13,6 +13,7 @@
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/BackgroundPainter.hpp"
+#include "Krystal.Booey/Rendering/BorderPainter.hpp"
 #include "Krystal.Booey/Rendering/BorderShape.hpp"
 #include "Krystal.Booey/Rendering/FloatingObjects.hpp"
 #include "Krystal.Booey/Rendering/GridLayoutFunctions.hpp"
@@ -5492,8 +5493,8 @@ namespace krys::boo
 
     const RenderStyle &style = Style();
 
-    // FIXME: Border images (borderImageIsLoadedAndCanBeRendered) come with bitmap images.
-    if (!style.HasBackground() || !style.HasBorder() || !style.HasBorderRadius())
+    if (!style.HasBackground() || !style.HasBorder() || !style.HasBorderRadius()
+        || BorderImageIsLoadedAndCanBeRendered())
     {
       return BleedAvoidance::None;
     }
@@ -5550,7 +5551,13 @@ namespace krys::boo
 
     BackgroundPainter backgroundPainter {*this, paintInfo};
 
-    // FIXME: Outer box shadows (paintBoxShadow with ShadowStyle::Normal) come with borders and shadows.
+    // FIXME: Should eventually give the theme control over whether the box shadow should paint, since
+    // controls could have custom shadows of their own.
+    if (!BackgroundPainter::BoxShadowShouldBeAppliedToBackground(*this, paintRect.Location(), bleedAvoidance,
+                                                                 {}))
+    {
+      backgroundPainter.PaintBoxShadow(paintRect, Style(), style::ShadowStyle::Normal);
+    }
 
     GraphicsContextStateSaver stateSaver(paintInfo.Context(), false);
     if (bleedAvoidance == BleedAvoidance::UseTransparencyLayer)
@@ -5567,13 +5574,24 @@ namespace krys::boo
     // FIXME: Native theme appearances (theme().paint, paintDecorations, paintBorderOnly), once there are
     // themed controls; the CSS background and border are always painted.
 
-    // FIXME: Borders (BorderPainter::paintBorder, painted under the background with
-    // BleedAvoidance::BackgroundOverBorder) come with borders.
+    BorderPainter borderPainter {*this, paintInfo};
+
+    if (bleedAvoidance == BleedAvoidance::BackgroundOverBorder)
+    {
+      borderPainter.PaintBorder(paintRect, Style(), bleedAvoidance);
+    }
 
     backgroundPainter.PaintBackground(paintRect, bleedAvoidance);
 
-    // FIXME: Inset box shadows (paintBoxShadow with ShadowStyle::Inset) and borders
-    // (BorderPainter::paintBorder) come with borders and shadows.
+    backgroundPainter.PaintBoxShadow(paintRect, Style(), style::ShadowStyle::Inset);
+
+    if (bleedAvoidance != BleedAvoidance::BackgroundOverBorder)
+    {
+      if (Style().HasVisibleBorderDecoration())
+      {
+        borderPainter.PaintBorder(paintRect, Style(), bleedAvoidance);
+      }
+    }
 
     if (bleedAvoidance == BleedAvoidance::UseTransparencyLayer)
     {

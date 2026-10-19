@@ -1,0 +1,25 @@
+﻿<!doctype html>
+<!-- The "border-images" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page. -->
+<html data-width="360" data-height="200">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #f4f6fa; overflow: hidden; }
+  body { margin: 0; }
+  div { position: absolute; box-sizing: border-box; width: 96px; height: 64px; border: 16px solid; }
+  .stripes { border-image-source: repeating-linear-gradient(45deg, #ef476f 0 6px, #ffd166 6px 12px); }
+  .radial { border-image-source: radial-gradient(circle, #118ab2 30%, #06d6a0 31% 60%, #073b4c 61%); }
+</style>
+</head>
+<body>
+  <!-- Each repeat rule, on stripes sliced at a third. -->
+  <div class="stripes" style="left: 16px; top: 16px; border-image-slice: 33%; border-image-repeat: stretch"></div>
+  <div class="stripes" style="left: 128px; top: 16px; border-image-slice: 33%; border-image-repeat: repeat"></div>
+  <div class="stripes" style="left: 240px; top: 16px; border-image-slice: 33%; border-image-repeat: round"></div>
+
+  <!-- Space, fill with a different width, and an outset. -->
+  <div class="radial" style="left: 16px; top: 112px; border-image-slice: 25%; border-image-repeat: space"></div>
+  <div class="radial" style="left: 128px; top: 112px; border-image-slice: 25% fill; border-image-width: 8px"></div>
+  <div class="radial" style="left: 248px; top: 120px; width: 80px; height: 48px; border-image-slice: 30%; border-image-outset: 8px; border-image-repeat: round repeat"></div>
+</body>
+</html>

@@ -1,0 +1,36 @@
+﻿<!doctype html>
+<!-- The "borders" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page. -->
+<html data-width="360" data-height="240">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #f4f6fa; overflow: hidden; }
+  body { margin: 0; }
+  div { position: absolute; box-sizing: border-box; width: 64px; height: 40px; background: #ffffff; }
+</style>
+</head>
+<body>
+  <!-- Border styles. -->
+  <div style="left: 16px; top: 16px; border: 4px solid #073b4c"></div>
+  <div style="left: 96px; top: 16px; border: 6px solid; border-color: #ef476f #ffd166 #06d6a0 #118ab2"></div>
+  <div style="left: 176px; top: 16px; border: 6px double #073b4c"></div>
+  <div style="left: 256px; top: 16px; border: 6px groove #9aa5b1"></div>
+
+  <div style="left: 16px; top: 72px; border: 6px ridge #9aa5b1"></div>
+  <div style="left: 96px; top: 72px; border: 6px inset #9aa5b1"></div>
+  <div style="left: 176px; top: 72px; border: 6px outset #9aa5b1"></div>
+  <div style="left: 256px; top: 72px; border: 4px solid rgba(17, 138, 178, 0.5)"></div>
+
+  <!-- Rounded borders, a border image and box shadows. -->
+  <div style="left: 16px; top: 128px; border: 4px solid #ef476f; border-radius: 12px"></div>
+  <div style="left: 96px; top: 128px; border: 6px solid; border-color: #ef476f #118ab2; border-radius: 20px / 12px"></div>
+  <div style="left: 176px; top: 128px; border: 8px solid; border-image: linear-gradient(135deg, #ef476f, #ffd166, #06d6a0) 8"></div>
+  <div style="left: 256px; top: 128px; border-radius: 10px; box-shadow: 0 0 0 4px #ffd166, 0 6px 10px rgba(7, 59, 76, 0.4)"></div>
+
+  <!-- More shadows and outlines. -->
+  <div style="left: 16px; top: 184px; box-shadow: 3px 4px 0 #073b4c"></div>
+  <div style="left: 96px; top: 184px; border-radius: 8px; box-shadow: inset 0 3px 8px rgba(7, 59, 76, 0.6)"></div>
+  <div style="left: 176px; top: 184px; outline: 3px solid #118ab2; outline-offset: 3px"></div>
+  <div style="left: 256px; top: 184px; border-radius: 8px; outline: 2px solid #ef476f"></div>
+</body>
+</html>
