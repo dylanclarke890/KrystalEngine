@@ -1,0 +1,24 @@
+﻿<!doctype html>
+<!-- The "text" golden scene; Krystal.Gfx.Tests/tests/Render2D/Golden.cpp draws the same. SVG text puts the
+     baseline exactly at y; kerning and ligatures are off, as Render2D's scene places glyphs by advances. -->
+<html data-width="360" data-height="200">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "Liberation Sans Golden"; src: url("../../../third-party/liberation-fonts/LiberationSans-Regular.ttf"); }
+  html, body { margin: 0; background: #ffffff; overflow: hidden; }
+  svg { position: absolute; left: 0; top: 0; }
+  text { font-family: "Liberation Sans Golden"; font-kerning: none; font-variant-ligatures: none; }
+</style>
+</head>
+<body>
+  <svg width="360" height="200" viewBox="0 0 360 200">
+    <text x="10" y="20" font-size="12" fill="#222222">The quick brown fox jumps over the lazy dog</text>
+    <text x="10" y="44" font-size="16" fill="#222222">The quick brown fox jumps over the lazy</text>
+    <text x="10" y="78" font-size="24" fill="#222222">Krystal Engine 0123456789</text>
+    <text x="10" y="140" font-size="48" fill="#4f6df5">Hamburgefonstiv</text>
+    <rect x="0" y="160" width="360" height="40" fill="#23283a"></rect>
+    <text x="10" y="185" font-size="14" fill="#ffffff">Light on dark, at 14 pixels</text>
+  </svg>
+</body>
+</html>

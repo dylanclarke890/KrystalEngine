@@ -57,6 +57,9 @@ def capture(chrome, scene):
                 "--hide-scrollbars",
                 "--force-device-scale-factor=1",
                 "--force-color-profile=srgb",
+                # Scenes load fonts from the repository by relative file URLs, and wait for them.
+                "--allow-file-access-from-files",
+                "--virtual-time-budget=5000",
                 f"--user-data-dir={profile}",
                 f"--window-size={width},{height}",
                 f"--screenshot={output}",

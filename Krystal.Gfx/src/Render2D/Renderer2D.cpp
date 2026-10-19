@@ -615,7 +615,7 @@ void main()
   }
 
   Renderer2D::Renderer2D(Device &device, const Renderer2DDesc &desc) noexcept
-      : _device(&device), _masks(device, desc.Masks)
+      : _device(&device), _masks(device, desc.Masks), _glyphs(device, desc.Glyphs)
   {
   }
 
@@ -719,6 +719,7 @@ void main()
     _gradients.clear();
     _gradientStops.clear();
     _masks.ResetStats();
+    _glyphs.ResetStats();
 
     // Layer textures unused for a while go.
     const uint64 frame = _device->FrameNumber();
@@ -1331,6 +1332,137 @@ void main()
                 Transform2D::Identity(), mask.Texture, _nearestSampler, gradient);
   }
 
+  void Renderer2D::DrawGlyphs(const FontFace2D &face, float size, Span<const uint32> glyphs,
+                              Span<const Vec2f> positions, Vec2f origin, const Paint2D &paint) noexcept
+  {
+    krys_debug_assert_msg(_commands != nullptr, "DrawGlyphs outside Begin and End.");
+    krys_assert_msg(glyphs.size() == positions.size(), "Every glyph needs a position.");
+    const size_t count = std::min(glyphs.size(), positions.size());
+    if (count == 0u || IsInvisible(paint) || _state.Clip.IsEmpty() || !(size > 0.f) || !std::isfinite(size))
+    {
+      return;
+    }
+    const auto resolved = ResolvePaint(paint);
+    const auto &transform = _state.Transform;
+    const float scale = std::sqrt(std::abs(transform.Determinant()));
+    if (!resolved || !(scale > 0.f) || !std::isfinite(scale))
+    {
+      return;
+    }
+    auto pen = [&](size_t i)
+    {
+      return Vec2f {origin.x + positions[i].x, origin.y + positions[i].y};
+    };
+
+    // Large text is filled as outlines, shadows and all; colour glyphs only come as bitmaps.
+    if (size * scale > LargeGlyphSize && !face.HasColour())
+    {
+      for (size_t i = 0u; i < count; ++i)
+      {
+        const auto path = face.GlyphPath(glyphs[i], size, pen(i));
+        if (!path.IsEmpty())
+        {
+          FillPath(path, FillRule::NonZero, paint);
+        }
+      }
+      return;
+    }
+
+    // Under a uniform scale, glyphs are rasterised at the scaled size, so hinting still applies; under any
+    // other transform, they're rasterised under it.
+    const bool uniform =
+      transform.B == 0.f && transform.C == 0.f && transform.A == transform.D && transform.A > 0.f;
+    const float rasterSize = uniform ? size * transform.A : size;
+    const Transform2D linear =
+      uniform ? Transform2D {}
+              : Transform2D {.A = transform.A, .B = transform.B, .C = transform.C, .D = transform.D};
+
+    // A glyph from the atlas, its pen in target pixels snapped to a quarter across and a whole pixel down.
+    // A shadow can't tint a colour glyph's bitmap, so `shadow` skips those.
+    auto drawGlyph = [&](uint32 glyph, Vec2f at, const ResolvedPaint &glyphPaint, bool shadow)
+    {
+      const auto [x, quarter] = GlyphAtlas::SnapPen(at.x);
+      const auto y = static_cast<int32>(std::lround(at.y));
+      if (const auto location = _glyphs.GetGlyph(face, glyph, rasterSize, quarter, linear))
+      {
+        if (location->Texture.IsValid() && !(shadow && location->Colour))
+        {
+          AddGlyph(*location, x, y, glyphPaint);
+        }
+        return true;
+      }
+      return false;
+    };
+
+    // Shadows go beneath the whole run: a sharp one is each glyph again, offset; a blurred one is each
+    // glyph's outline's mask, blurred.
+    if (const auto shadow = PlaceShadow(transform, *resolved))
+    {
+      const Vec2f offset {shadow->Transform.E - transform.E, shadow->Transform.F - transform.F};
+      const ResolvedPaint shadowPaint {.Colour = shadow->Colour, .Gradient = NoGradient};
+      for (size_t i = 0u; i < count; ++i)
+      {
+        if (shadow->PixelSigma <= 0.f)
+        {
+          const auto at = transform.Apply(pen(i));
+          static_cast<void>(drawGlyph(glyphs[i], {at.x + offset.x, at.y + offset.y}, shadowPaint, true));
+          continue;
+        }
+        const auto path = face.GlyphPath(glyphs[i], size, pen(i));
+        if (!path.IsEmpty())
+        {
+          AddMask(_masks.GetMask(path, shadow->Transform, FillRule::NonZero, _state.Clip, shadow->PixelSigma),
+                  shadow->Colour, NoGradient);
+        }
+      }
+    }
+
+    for (size_t i = 0u; i < count; ++i)
+    {
+      if (!drawGlyph(glyphs[i], transform.Apply(pen(i)), *resolved, false))
+      {
+        // No room in the atlas (or too large for a page): the glyph's outline instead.
+        const auto path = face.GlyphPath(glyphs[i], size, pen(i));
+        if (!path.IsEmpty())
+        {
+          AddMask(_masks.GetMask(path, transform, FillRule::NonZero, _state.Clip), resolved->Colour,
+                  resolved->Gradient);
+        }
+      }
+    }
+  }
+
+  void Renderer2D::AddGlyph(const GlyphLocation &glyph, int32 x, int32 y, const ResolvedPaint &paint) noexcept
+  {
+    const auto desc = _device->GetTextureDesc(glyph.Texture);
+    if (!desc)
+    {
+      return;
+    }
+    const float width = static_cast<float>(desc->Width);
+    const float height = static_cast<float>(desc->Height);
+    const auto &texels = glyph.Texels;
+    const auto &bounds = glyph.Bounds;
+
+    // Coverage multiplies the paint, as a mask does; colour glyphs are premultiplied images, faded by the
+    // paint's alpha.
+    const uint8 alpha = paint.Gradient != NoGradient ? 255u : paint.Colour[3];
+    AddInstance({.Rect = {static_cast<float>(x + bounds.X), static_cast<float>(y + bounds.Y),
+                          static_cast<float>(bounds.Width), static_cast<float>(bounds.Height)},
+                 .Radii = {},
+                 .Linear = {},
+                 .Translation = {},
+                 .UV = {static_cast<float>(texels.X) / width, static_cast<float>(texels.Y) / height,
+                        static_cast<float>(texels.X + static_cast<int32>(texels.Width)) / width,
+                        static_cast<float>(texels.Y + static_cast<int32>(texels.Height)) / height},
+                 .HoleRect = {},
+                 .HoleRadii = {},
+                 .Colour = glyph.Colour ? Array<uint8, 4> {255u, 255u, 255u, alpha} : paint.Colour,
+                 .Flags = glyph.Colour ? Textured : Textured | Mask},
+                Transform2D::Identity(), glyph.Texture, _nearestSampler,
+                glyph.Colour ? NoGradient : paint.Gradient);
+  }
+
   void Renderer2D::DrawImage(TextureHandle texture, const Rect2D &destination,
                              const ImageOptions &options) noexcept
   {
@@ -1816,6 +1948,8 @@ void main()
               .Batches = static_cast<uint32>(_batches.size()),
               .MasksRasterised = _masks.Stats().Rasterised,
               .MaskCacheHits = _masks.Stats().Hits,
+              .GlyphsRasterised = _glyphs.Stats().Rasterised,
+              .GlyphCacheHits = _glyphs.Stats().Hits,
               .BackdropCopies = _backdropCopies};
     _savedStates.clear();
     _rects.clear();

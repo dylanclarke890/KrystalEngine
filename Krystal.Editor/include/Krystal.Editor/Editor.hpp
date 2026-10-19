@@ -13,7 +13,12 @@
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.PAL/Events.hpp"
 #include "Krystal.PAL/Keys.hpp"
+#include "Krystal.Text/FreeTypeFace.hpp"
 #include <cmath>
+#include <cstring>
+#include <filesystem>
+#include <fstream>
+#include <iterator>
 
 namespace krys
 {
@@ -25,6 +30,8 @@ namespace krys
     float _time {0.f};
     UniquePtr<gfx::Renderer2D> _renderer {};
     gfx::TextureHandle _image {};
+    UniquePtr<gfx::FontFace2D> _font {};
+    UniquePtr<gfx::FontFace2D> _boldFont {};
 
   public:
     explicit Editor(int argc, char **argv, const ApplicationSettings &settings) noexcept
@@ -47,11 +54,14 @@ namespace krys
       }
       _renderer = krys::move(*renderer);
       CreateImage();
+      LoadFonts();
     }
 
     void OnShutdown() noexcept override
     {
       _renderer = nullptr;
+      _boldFont = nullptr;
+      _font = nullptr;
       if (_image.IsValid())
       {
         _context->Device->Destroy(_image);
@@ -85,6 +95,36 @@ namespace krys
       _context->Device->WriteTexture(
         _image, gfx::TextureRegion::Whole2D(size, size),
         Span<const byte>(reinterpret_cast<const byte *>(texels.data()), sizeof(texels)));
+    }
+
+    /// @brief Liberation Sans, regular and synthetically bold, for the labels.
+    void LoadFonts() noexcept
+    {
+      std::ifstream file(std::filesystem::path {KRYS_EDITOR_FONTS_DIR} / "LiberationSans-Regular.ttf",
+                         std::ios::binary);
+      if (!file)
+      {
+        _context->Logger->Error("Couldn't open Liberation Sans.");
+        return;
+      }
+      const List<char> bytes {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
+      List<byte> data(bytes.size());
+      std::memcpy(data.data(), bytes.data(), bytes.size());
+      auto face = text::FreeTypeFace::Create(text::FontFileData::Create(krys::move(data)), 0);
+      if (!face)
+      {
+        _context->Logger->Error("Couldn't read Liberation Sans.");
+        return;
+      }
+      Ref<text::FreeTypeFace> shared {krys::move(face)};
+      if (auto font = gfx::FontFace2D::Create(shared))
+      {
+        _font = krys::move(*font);
+      }
+      if (auto font = gfx::FontFace2D::Create(shared, {.SyntheticBold = true}))
+      {
+        _boldFont = krys::move(*font);
+      }
     }
 
     void BindEvents() noexcept
@@ -142,9 +182,9 @@ namespace krys
                                   .ClearColour = Array<float, 4> {0.933f, 0.945f, 0.965f, 1.f}});
 
       DrawHeader();
-      DrawCard(24.f, 80.f, 392.f, 616.f);
-      DrawCard(444.f, 80.f, 392.f, 616.f);
-      DrawCard(864.f, 80.f, 392.f, 616.f);
+      DrawCard(U"Mask clipping", 24.f, 80.f, 392.f, 616.f);
+      DrawCard(U"Shadows", 444.f, 80.f, 392.f, 616.f);
+      DrawCard(U"Compositing", 864.f, 80.f, 392.f, 616.f);
       DrawClipping(24.f, 80.f);
       DrawShadows(444.f, 80.f);
       DrawCompositing(864.f, 80.f);
@@ -213,10 +253,26 @@ namespace krys
       _renderer->FillRoundedRect(tile, colour);
     }
 
-    /// @brief A placeholder for a line of text, since there's no text yet.
-    void DrawLabel(float x, float y, float width, SRGBA<uint8> colour = {205, 211, 222}) noexcept
+    /// @brief A line of text on a baseline, left to right, placed by advances (Booey shapes text; this is
+    /// just for labels until it draws the editor).
+    void DrawText(const char32_t *text, float x, float baseline, float size, const gfx::Paint2D &paint,
+                  bool bold = false) noexcept
     {
-      _renderer->FillRoundedRect(Rounded(x, y, width, 8.f, 4.f), colour);
+      const auto *font = bold ? _boldFont.get() : _font.get();
+      if (font == nullptr)
+      {
+        return;
+      }
+      List<uint32> glyphs;
+      List<Vec2f> positions;
+      float pen = 0.f;
+      for (const char32_t *character = text; *character != U'\0'; ++character)
+      {
+        glyphs.push_back(font->GlyphIndex(*character));
+        positions.push_back({pen, 0.f});
+        pen += font->Advance(glyphs.back(), size);
+      }
+      _renderer->DrawGlyphs(*font, size, glyphs, positions, {x, baseline}, paint);
     }
 
     void DrawHeader() noexcept
@@ -231,20 +287,25 @@ namespace krys
       _renderer->FillRect({0.f, 0.f, width, 56.f}, header);
       _renderer->Restore();
       _renderer->FillRoundedRect(Rounded(20.f, 16.f, 24.f, 24.f, 12.f), Rgb(0xffffff));
+      _renderer->Save();
+      _renderer->SetDropShadow({.Offset = {0.f, 1.f}, .BlurRadius = 4.f, .Colour = Rgb(0x1a1040, 120)});
+      DrawText(U"Krystal", 56.f, 36.f, 22.f, Rgb(0xffffff), true);
+      _renderer->Restore();
+      const char32_t *links[] {U"Render2D", U"Text", U"Goldens", U"About"};
       for (int i = 0; i < 4; ++i)
       {
-        _renderer->FillRoundedRect(Rounded(64.f + static_cast<float>(i) * 92.f, 22.f, 76.f, 12.f, 6.f),
-                                   Rgb(0xffffff, i == 0 ? 230 : 110));
+        DrawText(links[i], 170.f + static_cast<float>(i) * 96.f, 34.f, 15.f,
+                 Rgb(0xffffff, i == 0 ? 255 : 170));
       }
     }
 
-    void DrawCard(float x, float y, float width, float height) noexcept
+    void DrawCard(const char32_t *title, float x, float y, float width, float height) noexcept
     {
       const auto card = Rounded(x, y, width, height, 16.f);
       BoxShadow(card, {0.f, 2.f}, 6.f, Rgb(0x1a2240, 26));
       BoxShadow(card, {0.f, 12.f}, 32.f, Rgb(0x1a2240, 30));
       _renderer->FillRoundedRect(card, Rgb(0xffffff));
-      DrawLabel(x + 24.f, y + 22.f, 140.f, Rgb(0x8a93a6));
+      DrawText(title, x + 24.f, y + 34.f, 16.f, Rgb(0x5a6378), true);
     }
 
     /// @brief Mask clipping: a turning star window, a panel with orbiting holes, two path clips at once, a
@@ -404,7 +465,7 @@ namespace krys
       const auto sharp = Rounded(x + 24.f, row, 74.f, 64.f, 0.f);
       BoxShadow(sharp, {6.f, 6.f}, 0.f, Rgb(0x4f6df5));
       _renderer->FillRoundedRect(sharp, Rgb(0xffffff));
-      DrawLabel(sharp.Rect.X + 12.f, row + 14.f, 40.f);
+      DrawText(U"Sharp", sharp.Rect.X + 12.f, row + 24.f, 13.f, Rgb(0x5a6378));
 
       const auto well = Rounded(x + 114.f, row, 74.f, 64.f, 14.f);
       _renderer->FillRoundedRect(well, Rgb(0xeef1f6));
@@ -470,8 +531,9 @@ namespace krys
       const auto lifted = Rounded(x + 24.f, y + 520.f - 4.f * lift, 160.f, 64.f, 12.f);
       BoxShadow(lifted, {0.f, 2.f + 8.f * lift}, 6.f + 18.f * lift, Rgb(0x000000, 80));
       _renderer->FillRoundedRect(lifted, Rgb(0xffffff));
-      DrawLabel(lifted.Rect.X + 16.f, lifted.Rect.Y + 18.f, 90.f);
-      DrawLabel(lifted.Rect.X + 16.f, lifted.Rect.Y + 36.f, 120.f, Rgb(0xe3e7ef));
+      DrawText(U"Lifting card", lifted.Rect.X + 16.f, lifted.Rect.Y + 26.f, 14.f, Rgb(0x222733), true);
+      DrawText(U"Its shadow grows as it rises", lifted.Rect.X + 16.f, lifted.Rect.Y + 46.f, 11.f,
+               Rgb(0x8a93a6));
 
       _renderer->Save();
       _renderer->SetDropShadow({.Offset = {8.f * std::cos(_time), 8.f * std::sin(_time)},

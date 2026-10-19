@@ -23,6 +23,12 @@ target_compile_options(Krystal.Editor
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8>
 )
 
+# The editor draws its labels in Liberation Sans, from the repository.
+target_compile_definitions(Krystal.Editor
+  PRIVATE
+    KRYS_EDITOR_FONTS_DIR="${CMAKE_SOURCE_DIR}/third-party/liberation-fonts"
+)
+
 target_sources(Krystal.Editor
 	PUBLIC
 		FILE_SET HEADERS

@@ -16,6 +16,8 @@
 #include "Krystal.Gfx/Device.hpp"
 #include "Krystal.Gfx/Formats.hpp"
 #include "Krystal.Gfx/Handles.hpp"
+#include "Krystal.Gfx/Render2D/FontFace2D.hpp"
+#include "Krystal.Gfx/Render2D/GlyphAtlas.hpp"
 #include "Krystal.Gfx/Render2D/Gradient2D.hpp"
 #include "Krystal.Gfx/Render2D/MaskAtlas.hpp"
 #include "Krystal.Gfx/Render2D/Paint2D.hpp"
@@ -70,6 +72,8 @@ namespace krys::gfx
   {
     /// @brief The atlas that caches the coverage masks of paths.
     MaskAtlasDesc Masks {};
+    /// @brief The atlas that caches rasterised glyphs.
+    GlyphAtlasDesc Glyphs {};
   };
 
   /// @brief What `Renderer2D` drew in the last frame `End` recorded.
@@ -81,6 +85,10 @@ namespace krys::gfx
     uint32 MasksRasterised {0u};
     /// @brief Paths drawn from cached masks.
     uint32 MaskCacheHits {0u};
+    /// @brief Glyphs rasterised because they weren't cached.
+    uint32 GlyphsRasterised {0u};
+    /// @brief Glyphs drawn from the glyph atlas's cache.
+    uint32 GlyphCacheHits {0u};
     /// @brief Copies of what's beneath draws with blend modes.
     uint32 BackdropCopies {0u};
   };
@@ -419,6 +427,7 @@ namespace krys::gfx
     /// @brief Bound for batches without a texture of their own.
     TextureHandle _whiteTexture {};
     MaskAtlas _masks;
+    GlyphAtlas _glyphs;
     PathStroker _stroker {};
     /// @brief Combines nested path clips.
     PathRasteriser _rasteriser {};
@@ -445,6 +454,9 @@ namespace krys::gfx
     List<detail::FlatGradientStop> _flattened {};
 
   public:
+    /// @brief Past this many target pixels per em, glyphs are filled as outlines, as Skia draws large text.
+    constexpr static float LargeGlyphSize = 256.f;
+
     /// @brief Compiles the shaders; pipelines are created per target format on first use.
     KRYS_NODISCARD static Expected<UniquePtr<Renderer2D>> Create(Device &device,
                                                                  const Renderer2DDesc &desc = {}) noexcept;
@@ -517,6 +529,16 @@ namespace krys::gfx
     /// and miter limit don't apply. A gradient is in the current coordinates, not the line's.
     void StrokeLine(Vec2f from, Vec2f to, const StrokeStyle &style, const Paint2D &paint) noexcept;
 
+    /// @brief Draws glyphs of `face` at `size` pixels per em (in the current coordinates), each with its pen
+    /// at `origin` plus its position, on the baseline. Pens snap to a quarter of a target pixel across and a
+    /// whole one down; glyphs come from the glyph atlas, rasterised under the transform (at the scaled size
+    /// under a uniform scale, so hinting applies). Text over `LargeGlyphSize` target pixels per em is filled
+    /// as outlines instead. Colour glyphs keep their colours, taking only the paint's alpha.
+    /// @note Shadows follow each glyph: sharp ones are the glyph again, blurred ones its outline's blurred
+    /// mask, unhinted.
+    void DrawGlyphs(const FontFace2D &face, float size, Span<const uint32> glyphs,
+                    Span<const Vec2f> positions, Vec2f origin, const Paint2D &paint) noexcept;
+
     /// @brief Draws the whole of a texture into `destination`.
     void DrawImage(TextureHandle texture, const Rect2D &destination,
                    const ImageOptions &options = {}) noexcept;
@@ -571,6 +593,8 @@ namespace krys::gfx
                                                       const ResolvedPaint &paint) const noexcept;
     /// @brief Adds a mask's instance, drawn on whole target pixels, unless it's empty or outside the clip.
     void AddMask(const MaskLocation &mask, Array<uint8, 4> colour, uint32 gradient) noexcept;
+    /// @brief Adds a glyph's instance from the atlas, its pen's pixel at (`x`, `y`) in target pixels.
+    void AddGlyph(const GlyphLocation &glyph, int32 x, int32 y, const ResolvedPaint &paint) noexcept;
     /// @brief Whether a paint certainly shows nothing, before the work of resolving it.
     KRYS_NODISCARD static bool IsInvisible(const Paint2D &paint) noexcept;
 

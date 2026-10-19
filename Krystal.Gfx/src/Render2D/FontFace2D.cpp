@@ -32,13 +32,14 @@ namespace krys::gfx
       Path2D Path {};
       float Scale {1.f};
       float Slant {0.f};
+      Vec2f Origin {};
       bool Open {false};
 
       KRYS_NODISCARD Vec2f Map(const FT_Vector &point) const noexcept
       {
         const float x = static_cast<float>(point.x);
         const float y = static_cast<float>(point.y);
-        return {(x + Slant * y) * Scale, -y * Scale};
+        return {Origin.x + (x + Slant * y) * Scale, Origin.y - y * Scale};
       }
     };
   }
@@ -65,6 +66,11 @@ namespace krys::gfx
   FontFace2D::~FontFace2D() noexcept
   {
     FT_Done_Size(_size);
+  }
+
+  bool FontFace2D::HasColour() const noexcept
+  {
+    return FT_HAS_COLOR(_face->Face());
   }
 
   uint32 FontFace2D::GlyphIndex(char32 codePoint) const noexcept
@@ -193,7 +199,7 @@ namespace krys::gfx
     return result;
   }
 
-  Path2D FontFace2D::GlyphPath(uint32 glyph, float size) const noexcept
+  Path2D FontFace2D::GlyphPath(uint32 glyph, float size, Vec2f origin) const noexcept
   {
     FT_Face face = _face->Face();
     if (!(size > 0.f) || !std::isfinite(size)
@@ -213,6 +219,7 @@ namespace krys::gfx
     OutlineBuilder builder {.Path = {},
                             .Scale = size / static_cast<float>(face->units_per_EM),
                             .Slant = _options.SyntheticOblique ? ObliqueSlant : 0.f,
+                            .Origin = origin,
                             .Open = false};
     FT_Outline_Funcs functions {};
     functions.move_to = [](const FT_Vector *to, void *user)

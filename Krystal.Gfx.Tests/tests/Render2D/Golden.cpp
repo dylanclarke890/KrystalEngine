@@ -5,6 +5,9 @@
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include <cmath>
 #include <cstring>
+#include <filesystem>
+#include <fstream>
+#include <iterator>
 #include <numbers>
 
 namespace krys::gfx::tests
@@ -160,7 +163,8 @@ namespace krys::gfx::tests
       renderer.StrokePath(zigzag, {.Width = 3.f, .Join = LineJoin::Round}, Rgb(0x333333));
     }
 
-    /// @brief `golden/scenes/conic.html`: a conic gradient through saturated stops, whose corners show as rays.
+    /// @brief `golden/scenes/conic.html`: a conic gradient through saturated stops, whose corners show as
+    /// rays.
     void ConicScene(Renderer2D &renderer)
     {
       renderer.FillRect({0.f, 0.f, 200.f, 200.f}, Rgb(0xffffff));
@@ -172,12 +176,64 @@ namespace krys::gfx::tests
       renderer.FillRoundedRect(Box(10.f, 10.f, 180.f, 180.f, 90.f), wheel);
     }
 
+    /// @brief Liberation Sans, as the text scene draws it; made once.
+    KRYS_NODISCARD const FontFace2D &LiberationSans()
+    {
+      static const auto face = []
+      {
+        std::ifstream file(std::filesystem::path {KRYS_GFX_TESTS_FONTS_DIR} / "LiberationSans-Regular.ttf",
+                           std::ios::binary);
+        REQUIRE(file);
+        const List<char> bytes {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
+        List<byte> data(bytes.size());
+        std::memcpy(data.data(), bytes.data(), bytes.size());
+        auto opened = text::FreeTypeFace::Create(text::FontFileData::Create(krys::move(data)), 0);
+        REQUIRE(opened);
+        auto created = FontFace2D::Create(Ref<text::FreeTypeFace> {krys::move(opened)});
+        REQUIRE(created.has_value());
+        return krys::move(*created);
+      }();
+      return *face;
+    }
+
+    /// @brief Left-to-right text without shaping or kerning: each glyph at the sum of the advances before it.
+    void DrawText(Renderer2D &renderer, const char32_t *text, Vec2f baseline, float size,
+                  const Paint2D &paint)
+    {
+      const auto &face = LiberationSans();
+      List<uint32> glyphs;
+      List<Vec2f> positions;
+      float x = 0.f;
+      for (const char32_t *character = text; *character != U'\0'; ++character)
+      {
+        glyphs.push_back(face.GlyphIndex(*character));
+        positions.push_back({x, 0.f});
+        x += face.Advance(glyphs.back(), size);
+      }
+      renderer.DrawGlyphs(face, size, glyphs, positions, baseline, paint);
+    }
+
+    /// @brief `golden/scenes/text.html`: Liberation Sans at several sizes, dark on light and light on dark.
+    void TextScene(Renderer2D &renderer)
+    {
+      renderer.FillRect({0.f, 0.f, 360.f, 200.f}, Rgb(0xffffff));
+      DrawText(renderer, U"The quick brown fox jumps over the lazy dog", {10.f, 20.f}, 12.f, Rgb(0x222222));
+      DrawText(renderer, U"The quick brown fox jumps over the lazy", {10.f, 44.f}, 16.f, Rgb(0x222222));
+      DrawText(renderer, U"Krystal Engine 0123456789", {10.f, 78.f}, 24.f, Rgb(0x222222));
+      DrawText(renderer, U"Hamburgefonstiv", {10.f, 140.f}, 48.f, Rgb(0x4f6df5));
+      renderer.FillRect({0.f, 160.f, 360.f, 40.f}, Rgb(0x23283a));
+      DrawText(renderer, U"Light on dark, at 14 pixels", {10.f, 185.f}, 14.f, Rgb(0xffffff));
+    }
+
     struct Scene
     {
       const char *Name;
       uint32 Width;
       uint32 Height;
       void (*Draw)(Renderer2D &);
+      /// @brief Whether Chrome's golden is only reported, not checked: Chrome on Windows draws text with
+      /// DirectWrite, which hints and weighs glyphs differently from FreeType.
+      bool ChromeReportOnly {false};
     };
 
     KRYS_NODISCARD GoldenImage Render(Device &device, Renderer2D &renderer, const Scene &scene)
@@ -252,6 +308,10 @@ namespace krys::gfx::tests
                 << comparison.MeanDifference << ", " << comparison.PixelsOver << " of "
                 << comparison.PixelCount << " pixels over " << ChromeTolerance);
       CHECK(comparison.SizesMatch);
+      if (scene.ChromeReportOnly)
+      {
+        return;
+      }
       // Antialiased curves differ most (Chrome antialiases some edges twice, through a clip and a fill), so a
       // few pixels may differ by more; on average, images should be within a step or so.
       CHECK(comparison.PixelsOver <= comparison.PixelCount / 200u);
@@ -267,6 +327,11 @@ namespace krys::gfx::tests
   TEST_CASE("Golden: a conic gradient", "[Gfx][Render2D][GPU][Golden]")
   {
     CheckScene({.Name = "conic", .Width = 200u, .Height = 200u, .Draw = ConicScene});
+  }
+
+  TEST_CASE("Golden: text", "[Gfx][Render2D][GPU][Golden]")
+  {
+    CheckScene({.Name = "text", .Width = 360u, .Height = 200u, .Draw = TextScene, .ChromeReportOnly = true});
   }
 
   TEST_CASE("Golden: a UI", "[Gfx][Render2D][GPU][Golden]")

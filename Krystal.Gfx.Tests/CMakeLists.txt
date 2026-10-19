@@ -68,5 +68,6 @@ target_sources(Krystal.Gfx.Tests
     tests/Render2D/PathRasteriser.cpp
     tests/Render2D/PathStroker.cpp
     tests/Render2D/Renderer2D.cpp
+    tests/Render2D/Text.cpp
     tests/Render2D/Transform2D.cpp
 )
