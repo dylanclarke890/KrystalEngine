@@ -211,4 +211,23 @@ namespace krys::pal
 
     KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
   };
+
+  /// @brief A window gained or lost keyboard focus.
+  class WindowFocusEvent : public Event
+  {
+  private:
+    WindowHandle _window;
+    bool _focused;
+
+  public:
+    KRYS_EVENT_CLASS_TYPE("window-focus-event")
+
+    /// @brief Constructs a `WindowFocusEvent`.
+    /// @param focused Whether the window gained focus (rather than lost it).
+    WindowFocusEvent(WindowHandle window, const bool focused) noexcept;
+
+    KRYS_NODISCARD bool Focused() const noexcept;
+
+    KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
+  };
 }

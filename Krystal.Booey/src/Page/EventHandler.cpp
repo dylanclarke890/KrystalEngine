@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/MouseEventWithHitTestResults.hpp"
@@ -511,8 +512,22 @@ namespace krys::boo
       return true;
     }
 
-    // FIXME: Focus on mousedown: walking up from the element under the mouse to a mouse focusable element (or
-    // a shadow root's focus delegate) and focusing it, or clearing the focus.
+    // FIXME: Clicking a frame scrollbar doesn't change the focus, once there are scrollbars.
+
+    // Walk up the tree from the element under the mouse to an element to focus, or focus the viewport if
+    // there's none.
+    // FIXME: A press inside a selected range in the focused element doesn't move the focus, once there's a
+    // selection; form controls that aren't mouse focusable still set the latest focus trigger, once there are
+    // form controls.
+    if (RefPtr<dom::Element> element = _elementUnderMouse)
+    {
+      html::FocusAlgorithms::FocusForClick(*element);
+    }
+    else if (RefPtr<dom::Document> document = ShareRefPtr(_frame.Document()))
+    {
+      html::FocusAlgorithms::FocusingSteps(*document, nullptr, {.Trigger = dom::FocusTrigger::Click});
+    }
+    // FIXME: Selecting the contents of a shadow host's focus delegate (findTargetAndUpdateFocusAppearance).
     return true;
   }
 

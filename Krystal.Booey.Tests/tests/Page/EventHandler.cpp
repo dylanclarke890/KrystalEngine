@@ -4,7 +4,9 @@
 #include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/FocusEvent.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
+#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include <string>
 
@@ -25,8 +27,8 @@ namespace krys::boo::tests
       return std::string(name.begin(), name.end());
     }
 
-    /// @brief Records the mouse events it handles as `type:target`, with the related target of `mouseover`
-    /// and `mouseout` and the detail of presses, releases and clicks.
+    /// @brief Records the mouse and focus events it handles as `type:target`, with the related target of
+    /// `mouseover`, `mouseout` and the focus events and the detail of presses, releases and clicks.
     struct MouseRecorder : public dom::EventListenerCallback
     {
       List<std::string> &Records;
@@ -37,17 +39,18 @@ namespace krys::boo::tests
 
       void HandleEvent(dom::Event &event) noexcept override
       {
-        auto &mouse = static_cast<dom::MouseEvent &>(event);
-        auto type = std::string(mouse.Type().View().begin(), mouse.Type().View().end());
+        auto type = std::string(event.Type().View().begin(), event.Type().View().end());
         auto record = type + ":" + Name(event.Target().get());
-        if (type == "mouseover" || type == "mouseout")
+        if (!event.IsMouseEvent() || type == "mouseover" || type == "mouseout")
         {
-          record += "(" + Name(mouse.RelatedTarget().get()) + ")";
+          auto related = event.IsMouseEvent() ? static_cast<dom::MouseEvent &>(event).RelatedTarget()
+                                              : static_cast<dom::FocusEvent &>(event).RelatedTarget();
+          record += "(" + Name(related.get()) + ")";
         }
-        if (type != "mousemove" && type != "mouseover" && type != "mouseout" && type != "mouseenter"
-            && type != "mouseleave")
+        if (event.IsMouseEvent() && type != "mousemove" && type != "mouseover" && type != "mouseout"
+            && type != "mouseenter" && type != "mouseleave")
         {
-          record += "/" + std::to_string(mouse.Detail());
+          record += "/" + std::to_string(static_cast<dom::MouseEvent &>(event).Detail());
         }
         Records.push_back(record);
       }
@@ -244,6 +247,88 @@ namespace krys::boo::tests
       (void)fixture.Release(5, 5);
       auto records = fixture.Take();
       CHECK(std::ranges::find(records, std::string("click:a/1")) == records.end());
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "EventHandler: a press focuses", "[Page][EventHandler]")
+  {
+    MouseFixture fixture {
+      u8"<style>#outer:focus{margin-right:100px}</style>"
+      u8"<div id=outer tabindex=0 style=padding:10px><div id=inner style=height:20px></div></div>"
+      u8"<div id=other tabindex=-1 style=height:20px></div><div id=plain style=height:20px></div>"};
+    Ref<dom::EventListenerCallback> recorder = CreateRef<MouseRecorder>(fixture.Records);
+    for (auto type : {u8"focus", u8"blur", u8"focusin", u8"focusout"})
+    {
+      fixture.Document->AddEventListener(dom::DOMStringAtom(type), Ref {recorder}, true);
+    }
+    auto &outer = fixture.ById(u8"outer");
+    auto &other = fixture.ById(u8"other");
+    auto pressAt = [&](double x, double y)
+    {
+      (void)fixture.Move(x, y);
+      (void)fixture.Take();
+      (void)fixture.Press(x, y);
+      (void)fixture.Release(x, y);
+      return fixture.Take();
+    };
+
+    // The nearest focusable ancestor of the element pressed takes the focus, between the press and the
+    // release; a click focus isn't focus visible.
+    CHECK(pressAt(15, 15)
+          == Strings {"mousedown:inner/1", "focus:outer(null)", "focusin:outer(null)", "mouseup:inner/1",
+                      "click:inner/1"});
+    CHECK(fixture.Document->FocusedElement() == &outer);
+    CHECK(outer.Focused());
+    CHECK_FALSE(outer.HasFocusVisible());
+    CHECK(outer.HasFocusWithin());
+    // `:focus` restyles.
+    (void)fixture.Document->UpdateLayout();
+    CHECK(outer.OffsetWidth() == 100);
+
+    SECTION("pressing another focusable element moves the focus")
+    {
+      CHECK(pressAt(5, 45)
+            == Strings {"mousedown:other/1", "blur:outer(other)", "focusout:outer(other)",
+                        "focus:other(outer)", "focusin:other(outer)", "mouseup:other/1", "click:other/1"});
+      CHECK(fixture.Document->FocusedElement() == &other);
+      (void)fixture.Document->UpdateLayout();
+      CHECK(outer.OffsetWidth() == 200);
+    }
+
+    SECTION("pressing nothing focusable focuses the viewport")
+    {
+      CHECK(pressAt(5, 65)
+            == Strings {"mousedown:plain/1", "blur:outer(null)", "focusout:outer(null)", "mouseup:plain/1",
+                        "click:plain/1"});
+      CHECK(fixture.Document->FocusedElement() == nullptr);
+      CHECK_FALSE(outer.Focused());
+    }
+
+    SECTION("a cancelled press keeps the focus")
+    {
+      Listen(other, u8"mousedown", [](dom::Event &event) { event.PreventDefault(); });
+      CHECK(pressAt(5, 45) == Strings {"mousedown:other/1", "mouseup:other/1", "click:other/1"});
+      CHECK(fixture.Document->FocusedElement() == &outer);
+    }
+
+    SECTION("the window losing and regaining focus")
+    {
+      // The focused element gets blur, without focusout, stays focused and stops matching `:focus`.
+      html::FocusAlgorithms::SystemFocusChanged(*fixture.Document, false);
+      CHECK(fixture.Take() == Strings {"blur:outer(null)"});
+      CHECK(fixture.Document->FocusedElement() == &outer);
+      CHECK_FALSE(fixture.Document->HasFocus());
+      (void)fixture.Document->UpdateLayout();
+      CHECK(outer.OffsetWidth() == 200);
+
+      // Losing it again changes nothing.
+      html::FocusAlgorithms::SystemFocusChanged(*fixture.Document, false);
+      CHECK(fixture.Take().empty());
+
+      html::FocusAlgorithms::SystemFocusChanged(*fixture.Document, true);
+      CHECK(fixture.Take() == Strings {"focus:outer(null)"});
+      (void)fixture.Document->UpdateLayout();
+      CHECK(outer.OffsetWidth() == 100);
     }
   }
 

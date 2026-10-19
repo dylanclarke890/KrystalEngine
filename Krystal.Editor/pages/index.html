@@ -18,6 +18,9 @@
   .card:hover { box-shadow: 0 0 0 2px #4f6df5, 0 16px 40px rgba(26, 34, 64, 0.22); }
   .card:active { box-shadow: 0 0 0 2px #ef476f, 0 2px 6px rgba(26, 34, 64, 0.1); }
   .card.picked { background: #fff4d1; }
+  /* Clicking a card focuses it (each takes a tabindex); a click focus isn't focus visible, so there's no focus
+     ring, only this style. */
+  .card:focus { outline: 3px solid #118ab2; outline-offset: 4px; }
 
   .boxes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; height: 100%; }
   .boxes div { background: #f7f8fb; }
@@ -33,13 +36,15 @@
   .stage { position: relative; height: 100%; overflow: hidden; border-radius: 12px; background: #e9ecf2; }
   .stage div { position: absolute; width: 64px; height: 64px; border-radius: 12px; cursor: move; }
   .stage div:hover { outline: 3px solid #073b4c; }
+  /* The first stage's boxes are focusable by clicking (tabindex -1): the stage shows when one has focus. */
+  .stage:focus-within { box-shadow: inset 0 0 0 3px #118ab2; }
   tr:hover td { text-decoration: underline; }
 </style>
 </head>
 <body>
   <div class="row">
     <!-- Text: headings, paragraphs and inline boxes. -->
-    <div class="card" style="flex: 2">
+    <div class="card" tabindex="0" style="flex: 2">
       <h2>Pages in Krystal</h2>
       <p>Booey lays out and shapes this text, and Render2D draws its glyphs. <span class="tag">Inline boxes
         keep their backgrounds and borders</span> as they wrap from one line to the next, and words can be
@@ -47,14 +52,14 @@
     </div>
 
     <!-- Text shadows. -->
-    <div class="card">
+    <div class="card" tabindex="0">
       <p style="font-size: 26px; line-height: 34px; color: #073b4c; text-shadow: 0 2px 4px rgba(7, 59, 76, 0.6)">Soft shadow</p>
       <p style="font-size: 26px; line-height: 34px; text-shadow: 2px 2px 0 #ffd166, 4px 4px 0 #ef476f">Layered</p>
       <p style="font-size: 26px; line-height: 34px; color: #06d6a0; text-shadow: 0 0 6px #118ab2">Glow</p>
     </div>
 
     <!-- Decorations, list markers, an ellipsis and an outlined inline box. -->
-    <div class="card">
+    <div class="card" tabindex="0">
       <p><span style="text-decoration: underline #ef476f">Underlines skip descenders</span></p>
       <p><span style="text-decoration: underline wavy #118ab2">wavy</span>, <span style="text-decoration: line-through">struck</span> and <span style="text-decoration: overline double #06d6a0">over</span></p>
       <ul style="margin: 2px 0; padding-left: 22px"><li>A list item</li><li style="list-style-type: square">Another</li></ul>
@@ -65,7 +70,7 @@
 
   <div class="row">
     <!-- Colours on a grid. -->
-    <div class="card">
+    <div class="card" tabindex="0">
       <div class="swatches">
         <div style="background: #ef476f"></div>
         <div style="background: #ffd166"></div>
@@ -79,36 +84,36 @@
     </div>
 
     <!-- Linear, radial and conic gradients. -->
-    <div class="card">
+    <div class="card" tabindex="0">
       <div class="gradient" style="background: linear-gradient(120deg, #4f6df5, #b04ff5 60%, #ef476f)"></div>
     </div>
-    <div class="card">
+    <div class="card" tabindex="0">
       <div class="gradient" style="background: radial-gradient(circle at 35% 35%, #ffffff, #ffd166 30%, #ef476f 70%, #073b4c)"></div>
     </div>
-    <div class="card">
+    <div class="card" tabindex="0">
       <div class="gradient" style="border-radius: 50%; background: conic-gradient(#ef476f, #ffd166, #06d6a0, #118ab2, #8338ec, #ef476f)"></div>
     </div>
   </div>
 
   <div class="row">
     <!-- Tiled backgrounds. -->
-    <div class="card">
+    <div class="card" tabindex="0">
       <div class="gradient" style="background: linear-gradient(45deg, #118ab2 25%, transparent 25%, transparent 75%, #118ab2 75%) 0 0 / 24px 24px, linear-gradient(45deg, #118ab2 25%, transparent 25%, transparent 75%, #118ab2 75%) 12px 12px / 24px 24px, #e9f5fb"></div>
     </div>
 
     <!-- Opacity, transforms and stacking. -->
-    <div class="card">
+    <div class="card" tabindex="0">
       <div class="stage">
-        <div style="left: 24px; top: 24px; background: #073b4c"></div>
-        <div style="left: 56px; top: 48px; background: #ef476f; opacity: 0.7"></div>
-        <div style="left: 150px; top: 30px; background: #ffd166; transform: rotate(25deg)"></div>
-        <div style="left: 210px; top: 60px; background: #06d6a0; transform: scale(0.75) rotate(-15deg); z-index: 1"></div>
-        <div style="left: 240px; top: 30px; background: #118ab2; z-index: -1"></div>
+        <div tabindex="-1" style="left: 24px; top: 24px; background: #073b4c"></div>
+        <div tabindex="-1" style="left: 56px; top: 48px; background: #ef476f; opacity: 0.7"></div>
+        <div tabindex="-1" style="left: 150px; top: 30px; background: #ffd166; transform: rotate(25deg)"></div>
+        <div tabindex="-1" style="left: 210px; top: 60px; background: #06d6a0; transform: scale(0.75) rotate(-15deg); z-index: 1"></div>
+        <div tabindex="-1" style="left: 240px; top: 30px; background: #118ab2; z-index: -1"></div>
       </div>
     </div>
 
     <!-- Clips: clip-path shapes and a rounded overflow clip. -->
-    <div class="card">
+    <div class="card" tabindex="0">
       <div class="stage">
         <div style="left: 20px; top: 34px; background: linear-gradient(#ef476f, #8338ec); clip-path: circle(32px)"></div>
         <div style="left: 100px; top: 34px; background: #ffd166; clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)"></div>
@@ -119,7 +124,7 @@
     </div>
 
     <!-- Blend modes over a gradient. -->
-    <div class="card">
+    <div class="card" tabindex="0">
       <div class="stage" style="background: linear-gradient(90deg, #ffd166, #118ab2)">
         <div style="left: 24px; top: 40px; background: #ef476f; mix-blend-mode: multiply"></div>
         <div style="left: 104px; top: 40px; background: #ef476f; mix-blend-mode: screen"></div>
@@ -130,7 +135,7 @@
 
   <div class="row">
     <!-- Border styles. -->
-    <div class="card">
+    <div class="card" tabindex="0">
       <div class="boxes">
         <div style="border: 3px solid #073b4c"></div>
         <div style="border: 3px dashed #ef476f"></div>
@@ -144,7 +149,7 @@
     </div>
 
     <!-- Rounded and multi-coloured borders. -->
-    <div class="card">
+    <div class="card" tabindex="0">
       <div class="boxes" style="grid-template-columns: repeat(2, 1fr)">
         <div style="border: 4px solid #ef476f; border-radius: 14px"></div>
         <div style="border: 6px solid; border-color: #ef476f #ffd166 #06d6a0 #118ab2; border-radius: 50%"></div>
@@ -154,7 +159,7 @@
     </div>
 
     <!-- Shadows. -->
-    <div class="card">
+    <div class="card" tabindex="0">
       <div class="boxes" style="grid-template-columns: repeat(3, 1fr); gap: 20px">
         <div style="border-radius: 12px; background: #ffffff; box-shadow: 0 8px 16px rgba(7, 59, 76, 0.35)"></div>
         <div style="border-radius: 12px; box-shadow: inset 0 4px 10px rgba(7, 59, 76, 0.5)"></div>
@@ -163,7 +168,7 @@
     </div>
 
     <!-- Outlines, including a focus ring (outline-style: auto). -->
-    <div class="card">
+    <div class="card" tabindex="0">
       <div class="boxes" style="grid-template-columns: repeat(2, 1fr); gap: 24px; padding: 6px">
         <div style="outline: 3px solid #118ab2; outline-offset: 3px"></div>
         <div style="border-radius: 10px; outline: 3px dashed #ef476f"></div>
@@ -173,14 +178,14 @@
     </div>
 
     <!-- A table: collapsed coloured borders, striped rows and a spanning cell. -->
-    <div class="card">
+    <div class="card" tabindex="0">
       <table style="border-collapse: collapse; width: 100%; font-size: 13px; line-height: 18px">
         <tr style="background: #073b4c; color: #ffffff"><th style="border: 2px solid #073b4c">Part</th><th style="border: 2px solid #073b4c">Status</th></tr>
-        <tr><td style="border: 1px solid #9aa5b1; padding: 0 6px">Text</td><td style="border: 1px solid #9aa5b1; padding: 0 6px; background: #06d6a0">Done</td></tr>
-        <tr style="background: #eef1f6"><td style="border: 1px solid #9aa5b1; padding: 0 6px">Tables</td><td style="border: 1px solid #9aa5b1; padding: 0 6px; background: #06d6a0">Done</td></tr>
-        <tr><td style="border: 1px solid #9aa5b1; padding: 0 6px">Hover</td><td style="border: 1px solid #9aa5b1; padding: 0 6px; background: #06d6a0">Done</td></tr>
-        <tr style="background: #eef1f6"><td style="border: 1px solid #9aa5b1; padding: 0 6px">Clicks</td><td style="border: 1px solid #9aa5b1; padding: 0 6px; background: #ffd166">Now</td></tr>
-        <tr><td colspan="2" style="border: 3px double #ef476f; padding: 0 6px; text-align: center">Focus next</td></tr>
+        <tr><td style="border: 1px solid #9aa5b1; padding: 0 6px">Tables</td><td style="border: 1px solid #9aa5b1; padding: 0 6px; background: #06d6a0">Done</td></tr>
+        <tr style="background: #eef1f6"><td style="border: 1px solid #9aa5b1; padding: 0 6px">Hover</td><td style="border: 1px solid #9aa5b1; padding: 0 6px; background: #06d6a0">Done</td></tr>
+        <tr><td style="border: 1px solid #9aa5b1; padding: 0 6px">Clicks</td><td style="border: 1px solid #9aa5b1; padding: 0 6px; background: #06d6a0">Done</td></tr>
+        <tr style="background: #eef1f6"><td style="border: 1px solid #9aa5b1; padding: 0 6px">Focus</td><td style="border: 1px solid #9aa5b1; padding: 0 6px; background: #ffd166">Now</td></tr>
+        <tr><td colspan="2" style="border: 3px double #ef476f; padding: 0 6px; text-align: center">Keys next</td></tr>
       </table>
     </div>
   </div>

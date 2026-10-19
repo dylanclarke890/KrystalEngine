@@ -36,6 +36,8 @@ namespace krys::ui
     boo::MouseButton _lastClickButton {boo::MouseButton::None};
     MonotonicTime::duration _lastClickTime {};
     boo::IntPoint _lastClickPosition;
+    /// @brief Whether the window showing the page has system focus.
+    bool _focused {true};
 
     // FIXME: The system's double click time and distance, once the host reports them.
     static constexpr std::chrono::milliseconds DoubleClickTime {500};
@@ -93,6 +95,10 @@ namespace krys::ui
 
     /// @brief The cursor the page wants over it, as of the last mouse move.
     KRYS_NODISCARD boo::Cursor CurrentCursor() const noexcept;
+
+    /// @brief The window showing the page gained (true) or lost (false) system focus: `:focus` matches only
+    /// while it's focused, and the focused element gets `focus` or `blur`. A page starts focused.
+    void SetFocused(bool focused) noexcept;
 
     KRYS_NODISCARD boo::dom::HTMLDocument &Document() const noexcept
     {

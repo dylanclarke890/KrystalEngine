@@ -183,4 +183,40 @@ namespace krys::ui::tests
           == List<std::string> {"mousedown:a/1/1", "mouseup:a/1/0", "click:a/1/0", "mousedown:a/1/2",
                                 "mouseup:a/1/0", "auxclick:a/1/0"});
   }
+
+  TEST_CASE("Page: a click focuses and the window's focus", "[UI]")
+  {
+    Page page({400, 300});
+    page.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } div { height: 50px }</style>"
+                  u8"<div id=a tabindex=0></div><div id=b></div>");
+    page.UpdateRendering();
+    auto a = page.Document().GetElementById(u8"a");
+    REQUIRE(a);
+
+    page.MousePressed({10, 10}, boo::MouseButton::Left);
+    page.MouseReleased({10, 10}, boo::MouseButton::Left);
+    CHECK(page.Document().FocusedElement() == a.get());
+    CHECK(page.Document().HasFocus());
+
+    // The window losing focus keeps the focused element, but the page doesn't have focus.
+    page.SetFocused(false);
+    CHECK(page.Document().FocusedElement() == a.get());
+    CHECK_FALSE(page.Document().HasFocus());
+    // A page loaded meanwhile doesn't have focus either.
+    page.LoadHTML(u8"<!DOCTYPE html><p>text</p>");
+    CHECK_FALSE(page.Document().HasFocus());
+    page.SetFocused(true);
+    CHECK(page.Document().HasFocus());
+
+    // A press on nothing focusable focuses the viewport.
+    page.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } div { height: 50px }</style>"
+                  u8"<div id=a tabindex=0></div><div id=b></div>");
+    page.UpdateRendering();
+    page.MousePressed({10, 10}, boo::MouseButton::Left);
+    page.MouseReleased({10, 10}, boo::MouseButton::Left);
+    REQUIRE(page.Document().FocusedElement());
+    page.MousePressed({10, 60}, boo::MouseButton::Left);
+    page.MouseReleased({10, 60}, boo::MouseButton::Left);
+    CHECK_FALSE(page.Document().FocusedElement());
+  }
 }

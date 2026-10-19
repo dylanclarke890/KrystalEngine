@@ -76,6 +76,7 @@ namespace krys
     UniquePtr<gfx::FontFace2D> _font {};
     UniquePtr<gfx::FontFace2D> _boldFont {};
     UniquePtr<ui::Page> _page {};
+    bool _focused {true};
     editor::BooeyFonts _booeyFonts {};
     EditorView _view {EditorView::Page};
     /// @brief The mouse in page view coordinates: below the header.
@@ -216,6 +217,19 @@ namespace krys
           if (_page)
           {
             _page->Resize(PageSize());
+          }
+          return true;
+        });
+
+      // `:focus` matches, and the focused element gets `focus` and `blur`, as the window gains and loses
+      // focus.
+      _context->Events->On<WindowFocusEvent>(
+        [&](const auto &event)
+        {
+          _focused = event.Focused();
+          if (_page)
+          {
+            _page->SetFocused(_focused);
           }
           return true;
         });
@@ -395,6 +409,7 @@ namespace krys
     {
       (void)ui::Page::AddFontDirectory(std::filesystem::path {KRYS_EDITOR_FONTS_DIR});
       _page = CreateUnique<ui::Page>(PageSize());
+      _page->SetFocused(_focused);
       LoadPage();
       auto &database = boo::FontDatabase::Singleton();
       auto faces = database.FacesInFamily(u8"Liberation Sans");

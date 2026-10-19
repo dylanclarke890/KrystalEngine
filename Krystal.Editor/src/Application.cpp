@@ -215,6 +215,8 @@ namespace krys
       },
       .OnDPIChange = [&](WindowHandle window, int dpi) noexcept
       { _context->Events->Enqueue(CreateUnique<WindowDPIChangeEvent>(window, dpi)); },
+      .OnFocusChange = [&](WindowHandle window, bool focused) noexcept
+      { _context->Events->Enqueue(CreateUnique<WindowFocusEvent>(window, focused)); },
     };
   }
 

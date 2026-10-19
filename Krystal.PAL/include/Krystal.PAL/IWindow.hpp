@@ -65,6 +65,7 @@ namespace krys::pal
     using MinimiseHandler = Func<void(WindowHandle)>;
     using RestoreHandler = Func<void(WindowHandle)>;
     using DPIChangeHandler = Func<void(WindowHandle, int)>;
+    using FocusChangeHandler = Func<void(WindowHandle, bool)>;
 
     MouseMoveHandler OnMouseMove = nullptr;
     MouseButtonHandler OnMouseButton = nullptr;
@@ -75,6 +76,8 @@ namespace krys::pal
     MinimiseHandler OnMinimise = nullptr;
     RestoreHandler OnRestore = nullptr;
     DPIChangeHandler OnDPIChange = nullptr;
+    /// @brief Called when the window gains (true) or loses (false) keyboard focus.
+    FocusChangeHandler OnFocusChange = nullptr;
   };
 
   class IWindow

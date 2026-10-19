@@ -200,4 +200,23 @@ namespace krys::pal
   }
 
 #pragma endregion
+
+#pragma region WindowFocusEvent
+
+  WindowFocusEvent::WindowFocusEvent(WindowHandle window, const bool focused) noexcept
+      : _window(window), _focused(focused)
+  {
+  }
+
+  bool WindowFocusEvent::Focused() const noexcept
+  {
+    return _focused;
+  }
+
+  WindowHandle WindowFocusEvent::GetWindowHandle() const noexcept
+  {
+    return _window;
+  }
+
+#pragma endregion
 }

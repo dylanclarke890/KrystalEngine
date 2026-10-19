@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-19): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, G2f, strokes, G2g, clips, G2h, layers and blend modes, G2i, gradients, and G2j, shadows, and G2k, golden image tests, are done); Krystal.Text (T1) and text (G3) are done; the Booey integration (G4) is in progress (G4a, the graphics context and display lists, G4b, Krystal.UI and replay, G4c1, the paint plumbing, layers and backgrounds, G4c2, borders, shadows and outlines, G4c3, image buffers and patterns, G4d1, text and inline boxes, G4d2, decorations, markers and ellipses, G4e, table painting, G4f1, hit testing, hover and active, and G4f2, mouse events, clicks and cursors, are done; see *G4 plan*).
+Status (2026-10-19): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, G2f, strokes, G2g, clips, G2h, layers and blend modes, G2i, gradients, and G2j, shadows, and G2k, golden image tests, are done); Krystal.Text (T1) and text (G3) are done; the Booey integration (G4) is in progress (G4a, the graphics context and display lists, G4b, Krystal.UI and replay, G4c1, the paint plumbing, layers and backgrounds, G4c2, borders, shadows and outlines, G4c3, image buffers and patterns, G4d1, text and inline boxes, G4d2, decorations, markers and ellipses, G4e, table painting, G4f1, hit testing, hover and active, G4f2, mouse events, clicks and cursors, and G4g, focus and blur, are done; see *G4 plan*).
 
 ## Why
 
@@ -299,7 +299,7 @@ All done in G1 (2026-10-17) unless noted.
 | G2 | Render2D: the analytic fast path, transforms, images, paths and coverage masks, strokes, clips, layers, gradients, shadows. Reviewed one part at a time (see *G2 parts*). | A test app draws a UI-like scene; golden image tests pass. |
 | T1 | Done (2026-10-18). `Krystal.Text`: font files and faces move down from Booey, shared by Booey and Gfx (see *T1 plan*). | Booey and its tests build and pass on the moved faces; Krystal.Text has its own tests. |
 | G3 | Done (2026-10-18). Text: the glyph atlas (R8 pages, RGBA pages for colour glyphs), `DrawGlyphs`, FreeType rasterisation. It doesn't depend on G2e's mask atlas. In two parts (see *G3 plan*): done (2026-10-18). | Text renders crisply at several sizes and scales. |
-| G4 | Booey: `GraphicsContext`, the display list recorder, painting (paint order, backgrounds, borders, text), hit testing; Krystal.UI replays it. In seven parts (see *G4 plan*). | The vertical slice: a page loads, renders, resizes and responds to a click. |
+| G4 | Booey: `GraphicsContext`, the display list recorder, painting (paint order, backgrounds, borders, text), hit testing; Krystal.UI replays it. Done (2026-10-19), in parts G4a to G4g (see *G4 plan*). | The vertical slice: a page loads, renders, resizes and responds to a click. |
 
 ### G2 parts
 
@@ -434,6 +434,7 @@ Booey has layout (block, inline, flex, grid, table), the layer tree, fonts holdi
   - **G4e, the other boxes** (Booey): flex, grid and table painting, collapsed table borders, placeholders for replaced content.
   - **G4f1, hit testing, hover and active** (Booey and Krystal.UI): `HitTestLocation`, `HitTestResult`, `RenderLayer::hitTest`, `nodeAtPoint` for boxes, inline content, flex, grid and tables, `clip-path` and radii; hover and active state.
   - **G4f2, mouse events and clicks** (Booey, Krystal.UI and Krystal.PAL): `MouseEvent`, the mouse half of `EventHandler`, click counting, cursors; Krystal.UI routes the window's mouse to the page.
+  - **G4g, focus and blur** (Booey, Krystal.UI and Krystal.PAL): focus on click, the window's focus (see *G4g plan*).
 - **Tests:** the Booey parts compare display list dumps of small documents (as layout compares render tree dumps); the whole pipeline is checked with page goldens, HTML drawn through Krystal.UI and compared with Chrome's rendering (`tools/golden/capture_chrome.py`, extended to pages): strictly for boxes, loosely for text. The Booey parts follow the porting checklist and get ledger entries in `docs/booey/PORTING.md`.
 
 ### G4b plan (decided 2026-10-18)
@@ -534,6 +535,17 @@ Two parts (decided by the user). Booey has `HitTestRequest`, `HitTestSource`, `D
   - **Out (FIXMEs):** focus and blur on click (decided: later), pointer events, drag and drop, selection by dragging, wheel scrolling, context menus, scripts (listeners are native).
   - **Tests:** the order and targets of move, over, out, enter, leave, down, up, click and dblclick, recorded by listeners; the cursor chosen for an element.
   - **Editor:** a native click listener toggling a class on the page.
+
+### G4g plan (decided 2026-10-19)
+
+One part (decided by the user); keyboard events and sequential focus navigation follow as G4h. Booey has the focus processing model (`FocusAlgorithms`: the focusing, unfocusing and focus update steps, `FireFocusEvent` with `focusin` and `focusout`, `FocusForClick`), `FocusEvent`, `tabindex`, `focus()` and `blur()`, the `:focus`, `:focus-visible` and `:focus-within` state with its restyles, `Document::SetFocusedAndActive` and `outline: auto` focus rings (G4c2); nothing calls them on a click, and Krystal.PAL doesn't report the window's focus.
+
+- **Booey:** a `mousedown` that isn't cancelled focuses the nearest click focusable element under the mouse (or the viewport) through `FocusForClick`, in the event handler (the old element gets `blur` and `focusout`, the new one `focus` and `focusin`, between `mousedown` and `mouseup`); a cancelled `mousedown` leaves the focus. A click focus isn't focus visible (upstream: except text fields), so it shows `:focus` without a ring. The window losing or gaining system focus sets the document's focused and active flag (restyling `:focus`) and fires `blur` or `focus` at the focused element, which stays the active element (FIXME: at the `Window`, once there is one).
+- **Krystal.PAL:** `WindowCallbacks::OnFocusChange`, from `WM_SETFOCUS` and `WM_KILLFOCUS` on Win32.
+- **Krystal.UI:** `Page::SetFocused(bool)`; a page starts focused.
+- **Out (FIXMEs):** keyboard events and sequential navigation (G4h), the focus navigation starting point, focus visible after keyboard use, `autofocus`, events at the `Window`, text fields and form controls.
+- **Tests:** Booey: the order and targets of the mouse and focus events, focus moving to the nearest focusable ancestor, a press on nothing focusable clearing it, a cancelled `mousedown`, `:focus` restyling and `:focus-visible` staying off after a click, the window losing and regaining focus; Krystal.UI: a click focus and `SetFocused` through `Page`. No golden: nothing new paints.
+- **Editor:** the cards take a `tabindex` and a `:focus` style, the stage a `:focus-within` style; the window's focus reaches the page.
 
 ### G2a as built (2026-10-18)
 
@@ -801,6 +813,15 @@ Testing: the device's hidden window gives tests a real OpenGL context (Krystal.G
 - **Out (FIXMEs):** focus and blur on click (next), pointer events (clicks are mouse events), selection, dragging, wheel scrolling, context menus, scrollbars, resizers, custom cursor images, the system's double click settings and the screen position.
 - **Editor:** every button reaches the page; the window shows the page's cursor over the page view (crosshair over the grid boxes, the hand over the swatches, move over the stage boxes, the I-beam over text); a native click listener on the document toggles `picked` on the card clicked; the status table shows hover done and clicks now.
 - **Tests:** Booey tests `MouseEvent` (2 cases) and the event handler's order and targets of moves, presses, releases and clicks, removal and cursors (4 cases); Krystal.UI tests mouse events, double clicks, `auxclick`, the buttons held and the cursor through `Page`. No golden: nothing new paints.
+
+### G4g as built (2026-10-19)
+
+- **Booey** (the ledger entry is *Focus and blur on click* in `docs/booey/PORTING.md`): a `mousedown` that isn't cancelled focuses the nearest click focusable element under the mouse, or the viewport, through `FocusAlgorithms::FocusForClick`; the old element gets `blur` and `focusout`, the new one `focus` and `focusin`, between `mousedown` and `mouseup`. A click focus isn't focus visible. `FocusAlgorithms::SystemFocusChanged` sets the document's focused and active flag (restyling `:focus`) and fires `blur` or `focus` at the focused element, which stays focused.
+- **Krystal.PAL:** `WindowCallbacks::OnFocusChange` (from `WM_SETFOCUS` and `WM_KILLFOCUS`) and a `WindowFocusEvent`.
+- **Krystal.UI:** `Page::SetFocused`; a page starts focused, and a page loaded while the window is unfocused starts unfocused.
+- **Out (FIXMEs):** keyboard events and sequential navigation (G4h), the focus navigation starting point, focus visible after keyboard use, `autofocus`, events at the `Window`, scrollbars, selection, text fields and form controls.
+- **Editor:** the cards take `tabindex=0` and show an outline when focused; the first stage's boxes take `tabindex=-1` and the stage shows `:focus-within`; the window's focus reaches the page; the status table shows clicks done and focus now.
+- **Tests:** Booey tests a press focusing (the order and targets of the events, the nearest focusable ancestor, the viewport, a cancelled press, `:focus` restyling, no focus visible) and the window's focus; Krystal.UI tests a click focus, `SetFocused` and loading while unfocused through `Page`. No golden: nothing new paints.
 
 ## Open decisions
 

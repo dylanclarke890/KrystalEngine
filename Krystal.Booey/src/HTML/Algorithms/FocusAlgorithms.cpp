@@ -540,6 +540,32 @@ namespace krys::boo::html
     FocusingSteps(element.NodeDocument(), nullptr, options);
   }
 
+  void FocusAlgorithms::SystemFocusChanged(dom::Document &document, bool focused) noexcept
+  {
+    if (document.IsFocusedAndActive() == focused)
+    {
+      return;
+    }
+    document.SetFocusedAndActive(focused);
+
+    // The focused element gets `blur` before the window, and `focus` after it.
+    auto fire = [](dom::DOMStringAtom type, dom::Element &target)
+    {
+      (void)dom::EventDispatcher::FireEvent<dom::FocusEvent>(type, target, [](dom::FocusEvent &event)
+                                                             { event._composed = true; });
+    };
+    RefPtr<dom::Element> focusedElement = ShareRefPtr(document.FocusedElement());
+    if (!focused && focusedElement)
+    {
+      fire(dom::DOMStringAtom(u8"blur"), *focusedElement);
+    }
+    // FIXME: Fire `focus` or `blur` at the document's Window, once there's a Window.
+    if (focused && focusedElement)
+    {
+      fire(dom::DOMStringAtom(u8"focus"), *focusedElement);
+    }
+  }
+
   void FocusAlgorithms::DesignateFocusedArea(dom::Document &document, dom::Element *element,
                                              dom::FocusVisibility visibility) noexcept
   {

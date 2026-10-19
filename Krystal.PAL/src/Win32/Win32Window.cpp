@@ -291,6 +291,15 @@ namespace krys::pal
           }
           break;
         }
+        case WM_SETFOCUS:
+        case WM_KILLFOCUS:
+        {
+          if (_callbacks.OnFocusChange)
+          {
+            _callbacks.OnFocusChange(handle, message == WM_SETFOCUS);
+          }
+          return 0;
+        }
         case WM_CLOSE:
         {
           if (_callbacks.OnClose)

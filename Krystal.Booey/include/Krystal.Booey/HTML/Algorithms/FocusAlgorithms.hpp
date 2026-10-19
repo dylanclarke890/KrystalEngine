@@ -85,6 +85,10 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#click-focusable
     static void FocusForClick(dom::Element &element) noexcept;
 
+    /// @brief Updates @p document when its window gains or loses system focus: its focused and active flag,
+    /// and a `focus` or `blur` event at its focused element, which stays focused.
+    static void SystemFocusChanged(dom::Document &document, bool focused) noexcept;
+
   private:
     /// @brief Designates @p element (or the viewport, if it's null) as the focused area of @p document,
     /// updating the elements' focus state.

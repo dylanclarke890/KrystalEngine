@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/FontCache.hpp"
 #include "Krystal.Booey/Graphics/FontDatabase.hpp"
+#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -43,6 +44,7 @@ namespace krys::ui
   void Page::LoadHTML(utf8_string &&markup) noexcept
   {
     _document = Parse(krys::move(markup));
+    _document->SetFocusedAndActive(_focused);
     _frame->SetDocument(ShareRefPtr<boo::dom::Document>(_document.get()));
   }
 
@@ -174,6 +176,12 @@ namespace krys::ui
   boo::Cursor Page::CurrentCursor() const noexcept
   {
     return _frame->GetEventHandler().CurrentMouseCursor();
+  }
+
+  void Page::SetFocused(bool focused) noexcept
+  {
+    _focused = focused;
+    boo::html::FocusAlgorithms::SystemFocusChanged(*_document, focused);
   }
 
   boo::PlatformMouseEvent Page::MouseEvent(boo::PlatformEvent::Type type, const boo::IntPoint &point,
