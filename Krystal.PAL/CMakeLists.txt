@@ -27,6 +27,7 @@ target_sources(Krystal.PAL
     BASE_DIRS
       include
     FILES
+      include/Krystal.PAL/CursorShapes.hpp
       include/Krystal.PAL/Events.hpp
       include/Krystal.PAL/Input.hpp
       include/Krystal.PAL/IWindow.hpp

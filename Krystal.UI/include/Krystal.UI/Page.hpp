@@ -5,11 +5,14 @@
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/IntSize.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Rendering/HitTestRequest.hpp"
+#include "Krystal.Booey/Platform/Cursor.hpp"
+#include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
+#include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.UI/FontFaceCache.hpp"
 #include "Krystal.UI/ImageBufferTextures.hpp"
+#include <chrono>
 #include <filesystem>
 
 namespace krys::ui
@@ -26,8 +29,17 @@ namespace krys::ui
     FontFaceCache _fonts;
     /// @brief Made on the first replay, with the renderer's device.
     UniquePtr<ImageBufferTextures> _imageBuffers;
-    /// @brief Whether the pointer's button is down, freezing the `:active` chain.
-    bool _pointerPressed {false};
+    /// @brief The buttons held, as the DOM's `buttons` bit set.
+    uint16 _buttons {0};
+    /// @brief The last press, which the next one counts on from if it's a double click.
+    int32 _clickCount {0};
+    boo::MouseButton _lastClickButton {boo::MouseButton::None};
+    MonotonicTime::duration _lastClickTime {};
+    boo::IntPoint _lastClickPosition;
+
+    // FIXME: The system's double click time and distance, once the host reports them.
+    static constexpr std::chrono::milliseconds DoubleClickTime {500};
+    static constexpr int32 DoubleClickDistance {2};
 
   public:
     /// @brief A page with an empty document and a view of @p viewportSize.
@@ -63,16 +75,24 @@ namespace krys::ui
     /// @brief The topmost element at @p point (in viewport coordinates), or null if there's none.
     KRYS_NODISCARD boo::dom::Element *HitTest(const boo::IntPoint &point) noexcept;
 
-    /// @brief Moves the pointer to @p point (in viewport coordinates): the elements under it become
-    /// `:hover`, only those in the `:active` chain while the button is down.
-    void PointerMoved(const boo::IntPoint &point) noexcept;
-    /// @brief Presses the pointer's button at @p point: the element under it and its ancestors become
-    /// `:active` until the release.
-    void PointerPressed(const boo::IntPoint &point) noexcept;
-    /// @brief Releases the pointer's button at @p point, clearing `:active`.
-    void PointerReleased(const boo::IntPoint &point) noexcept;
-    /// @brief The pointer left the page: nothing is `:hover`.
-    void PointerLeft() noexcept;
+    /// @brief Moves the mouse to @p point (in viewport coordinates): mouse events fire at the elements it
+    /// leaves and enters, the elements under it become `:hover`, and the cursor follows.
+    void MouseMoved(const boo::IntPoint &point,
+                    EnumSet<boo::PlatformEvent::Modifier> modifiers = {}) noexcept;
+    /// @brief Presses @p button at @p point: `mousedown` fires, and the element under the mouse and its
+    /// ancestors become `:active` until the release. A press soon after the last and near it is a double
+    /// click.
+    void MousePressed(const boo::IntPoint &point, boo::MouseButton button,
+                      EnumSet<boo::PlatformEvent::Modifier> modifiers = {}) noexcept;
+    /// @brief Releases @p button at @p point: `mouseup` fires, then `click` (`auxclick` for other buttons)
+    /// and `dblclick` for a double click, and `:active` is cleared.
+    void MouseReleased(const boo::IntPoint &point, boo::MouseButton button,
+                       EnumSet<boo::PlatformEvent::Modifier> modifiers = {}) noexcept;
+    /// @brief The mouse left the page: it leaves the element it was over, and nothing is `:hover`.
+    void MouseLeft() noexcept;
+
+    /// @brief The cursor the page wants over it, as of the last mouse move.
+    KRYS_NODISCARD boo::Cursor CurrentCursor() const noexcept;
 
     KRYS_NODISCARD boo::dom::HTMLDocument &Document() const noexcept
     {
@@ -90,7 +110,10 @@ namespace krys::ui
     }
 
   private:
-    /// @brief Hit tests @p point (if any) for @p request and updates the hover and active state to match.
-    void UpdateHoverActiveState(const boo::HitTestRequest &request, const boo::IntPoint *point) noexcept;
+    KRYS_NODISCARD boo::PlatformMouseEvent
+      MouseEvent(boo::PlatformEvent::Type type, const boo::IntPoint &point, boo::MouseButton button,
+                 int32 clickCount, EnumSet<boo::PlatformEvent::Modifier> modifiers) const noexcept;
+    /// @brief @p button's bit in the DOM's `buttons` bit set.
+    KRYS_NODISCARD static uint16 ButtonsBit(boo::MouseButton button) noexcept;
   };
 }

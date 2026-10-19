@@ -6,9 +6,9 @@
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.UI/GraphicsContextRender2D.hpp"
+#include <cstdlib>
 #include <fstream>
 #include <iterator>
 #include <mutex>
@@ -131,39 +131,71 @@ namespace krys::ui
     return _document->ElementFromPoint(point.X(), point.Y()).get();
   }
 
-  void Page::PointerMoved(const boo::IntPoint &point) noexcept
+  void Page::MouseMoved(const boo::IntPoint &point, EnumSet<boo::PlatformEvent::Modifier> modifiers) noexcept
   {
-    using Type = boo::HitTestRequest::Type;
-    UpdateHoverActiveState(
-      _pointerPressed ? EnumSet<Type> {Type::Move, Type::Active} : EnumSet<Type> {Type::Move}, &point);
+    (void)_frame->GetEventHandler().MouseMoved(
+      MouseEvent(boo::PlatformEvent::Type::MouseMoved, point, boo::MouseButton::None, 0, modifiers));
   }
 
-  void Page::PointerPressed(const boo::IntPoint &point) noexcept
+  void Page::MousePressed(const boo::IntPoint &point, boo::MouseButton button,
+                          EnumSet<boo::PlatformEvent::Modifier> modifiers) noexcept
   {
-    _pointerPressed = true;
-    UpdateHoverActiveState(EnumSet<boo::HitTestRequest::Type> {boo::HitTestRequest::Type::Active}, &point);
+    // A press soon after the last, near it and with the same button, counts on from it.
+    auto now = MonotonicTime::Now();
+    bool continuesClicks = _clickCount > 0 && button == _lastClickButton
+                           && now - _lastClickTime <= DoubleClickTime
+                           && std::abs(point.X() - _lastClickPosition.X()) <= DoubleClickDistance
+                           && std::abs(point.Y() - _lastClickPosition.Y()) <= DoubleClickDistance;
+    _clickCount = continuesClicks ? _clickCount + 1 : 1;
+    _lastClickButton = button;
+    _lastClickTime = now;
+    _lastClickPosition = point;
+
+    _buttons |= ButtonsBit(button);
+    (void)_frame->GetEventHandler().HandleMousePressEvent(
+      MouseEvent(boo::PlatformEvent::Type::MousePressed, point, button, _clickCount, modifiers));
   }
 
-  void Page::PointerReleased(const boo::IntPoint &point) noexcept
+  void Page::MouseReleased(const boo::IntPoint &point, boo::MouseButton button,
+                           EnumSet<boo::PlatformEvent::Modifier> modifiers) noexcept
   {
-    _pointerPressed = false;
-    UpdateHoverActiveState(EnumSet<boo::HitTestRequest::Type> {boo::HitTestRequest::Type::Release}, &point);
+    _buttons &= static_cast<uint16>(~ButtonsBit(button));
+    (void)_frame->GetEventHandler().HandleMouseReleaseEvent(
+      MouseEvent(boo::PlatformEvent::Type::MouseReleased, point, button, _clickCount, modifiers));
   }
 
-  void Page::PointerLeft() noexcept
+  void Page::MouseLeft() noexcept
   {
-    UpdateHoverActiveState(EnumSet<boo::HitTestRequest::Type> {boo::HitTestRequest::Type::Move}, nullptr);
+    // A move outside the viewport hits nothing, so the element under the mouse is left and nothing is
+    // hovered.
+    MouseMoved(boo::IntPoint(-1, -1));
   }
 
-  void Page::UpdateHoverActiveState(const boo::HitTestRequest &request, const boo::IntPoint *point) noexcept
+  boo::Cursor Page::CurrentCursor() const noexcept
   {
-    RefPtr<boo::dom::Element> target;
-    if (point)
+    return _frame->GetEventHandler().CurrentMouseCursor();
+  }
+
+  boo::PlatformMouseEvent Page::MouseEvent(boo::PlatformEvent::Type type, const boo::IntPoint &point,
+                                           boo::MouseButton button, int32 clickCount,
+                                           EnumSet<boo::PlatformEvent::Modifier> modifiers) const noexcept
+  {
+    // FIXME: The screen position, once the host reports where the page is on the screen.
+    return boo::PlatformMouseEvent(boo::DoublePoint(point), boo::DoublePoint(point), button, type, clickCount,
+                                   modifiers, MonotonicTime::Now(), _buttons);
+  }
+
+  uint16 Page::ButtonsBit(boo::MouseButton button) noexcept
+  {
+    // The DOM's buttons: https://w3c.github.io/uievents/#dom-mouseevent-buttons
+    switch (button)
     {
-      boo::HitTestResult result {boo::LayoutPoint(*point)};
-      _document->HitTest(request, result);
-      target = ShareRefPtr(result.TargetElement());
+      case boo::MouseButton::Left:    return 1;
+      case boo::MouseButton::Right:   return 2;
+      case boo::MouseButton::Middle:  return 4;
+      case boo::MouseButton::Back:    return 8;
+      case boo::MouseButton::Forward: return 16;
+      default:                        return 0;
     }
-    _document->UpdateHoverActiveState(request, target.get());
   }
 }

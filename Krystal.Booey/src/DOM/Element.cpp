@@ -1,7 +1,9 @@
 ﻿#include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/Constants/Attributes.hpp"
+#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
@@ -18,6 +20,7 @@
 #include "Krystal.Booey/DOM/Mixins/NonDocumentTypeChildNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/ParentNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/Slottable.hpp"
+#include "Krystal.Booey/DOM/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/NamedNodeMap.hpp"
 #include "Krystal.Booey/DOM/NodeList.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
@@ -33,6 +36,7 @@
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Platform/ScrollAlignment.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
@@ -610,6 +614,54 @@ namespace krys::boo::dom
   {
     krys_debug_assert(IsUserActionElement());
     return NodeDocument().UserActionElements().IsFocused(*this);
+  }
+
+  Element::DispatchMouseEventResult Element::DispatchMouseEvent(const PlatformMouseEvent &platformEvent,
+                                                                DOMStringAtom eventType, int32 detail,
+                                                                Element *relatedTarget) noexcept
+  {
+    auto eventIsDefaultPrevented = EventIsDefaultPrevented::No;
+
+    Ref<MouseEvent> mouseEvent =
+      MouseEvent::Create(eventType, NodeDocument().View(), platformEvent, detail, relatedTarget);
+
+    if (mouseEvent->Type().View().empty())
+    {
+      return {EventIsDispatched::Yes, eventIsDefaultPrevented}; // Shouldn't happen.
+    }
+
+    Ref protectedThis = ShareRef(*this);
+    bool didNotSwallowEvent = true;
+
+    // FIXME: Pointer events (dispatchPointerEventIfNeeded), which dispatch clicks as pointer events; until
+    // then clicks are mouse events.
+    krys_debug_assert(!mouseEvent->Target() || mouseEvent->Target() != relatedTarget);
+    (void)EventDispatcher::DispatchToTarget(*mouseEvent, this);
+    if (mouseEvent->DefaultPrevented())
+    {
+      eventIsDefaultPrevented = EventIsDefaultPrevented::Yes;
+      didNotSwallowEvent = false;
+    }
+
+    // The document should not receive dblclick for non-primary buttons.
+    if (mouseEvent->Type() == EventNames::Click && mouseEvent->Detail() == 2)
+    {
+      // Special case: If it's a double click event, we also send the dblclick event. This is not part
+      // of the DOM specs, but is used for compatibility with the ondblclick="" attribute. This is treated
+      // as a separate event in other DOM-compliant browsers like Firefox, and so we do the same.
+      Ref<MouseEvent> doubleClickEvent = MouseEvent::Create(
+        DOMStringAtom(EventNames::DblClick), mouseEvent->Bubbles(), mouseEvent->Cancelable(), true,
+        mouseEvent->TimeStamp(), mouseEvent->View(), mouseEvent->Detail(), mouseEvent->ScreenX(),
+        mouseEvent->ScreenY(), mouseEvent->ClientX(), mouseEvent->ClientY(), mouseEvent->ModifierKeys(),
+        mouseEvent->ButtonType(), mouseEvent->Buttons(), relatedTarget);
+
+      (void)EventDispatcher::DispatchToTarget(*doubleClickEvent, this);
+      if (doubleClickEvent->DefaultPrevented())
+      {
+        return {EventIsDispatched::No, eventIsDefaultPrevented};
+      }
+    }
+    return {didNotSwallowEvent ? EventIsDispatched::Yes : EventIsDispatched::No, eventIsDefaultPrevented};
   }
 
   bool Element::IsUserActionElementHovered() const noexcept

@@ -28,6 +28,11 @@ namespace krys::boo
   class RenderTreeUpdater;
 }
 
+namespace krys::boo
+{
+  class PlatformMouseEvent;
+}
+
 namespace krys::boo::css::calc
 {
   struct RandomCachingKey;
@@ -718,6 +723,35 @@ namespace krys::boo::dom
     }
 
     void SetChildIndex(uint32 index) noexcept;
+
+#pragma endregion
+
+#pragma region Mouse Events
+
+    enum class EventIsDispatched : bool
+    {
+      No,
+      Yes
+    };
+
+    enum class EventIsDefaultPrevented : bool
+    {
+      No,
+      Yes
+    };
+
+    struct DispatchMouseEventResult
+    {
+      EventIsDispatched Dispatched;
+      EventIsDefaultPrevented DefaultPrevented;
+    };
+
+    /// @brief Dispatches a trusted mouse event of type @p eventType from @p platformEvent at this element; a
+    /// `click` with a @p detail of 2 is followed by a `dblclick`.
+    /// @return Whether the event was dispatched without being cancelled, and whether it was cancelled.
+    DispatchMouseEventResult DispatchMouseEvent(const PlatformMouseEvent &platformEvent,
+                                                DOMStringAtom eventType, int32 detail = 0,
+                                                Element *relatedTarget = nullptr) noexcept;
 
 #pragma endregion
 

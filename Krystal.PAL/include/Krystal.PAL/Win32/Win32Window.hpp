@@ -17,6 +17,7 @@ namespace krys::pal::win32
     WindowCallbacks _callbacks;
     WNDCLASSW _class;
     HWND _handle;
+    CursorShape _cursor {CursorShape::Arrow};
 
   public:
     Win32Window(const WindowSettings &settings);
@@ -39,11 +40,17 @@ namespace krys::pal::win32
 
     void SetCallbacks(WindowCallbacks &&callbacks) noexcept override;
 
+    void SetCursor(CursorShape cursor) noexcept override;
+
+    KRYS_NODISCARD CursorShape GetCursor() const noexcept override;
+
     LRESULT HandleMessage(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) const noexcept;
 
   private:
     void CreateWindowClass(HMODULE instance);
     void CreateWindowHandle(HMODULE instance);
     void RegisterRawInput() const;
+    /// @brief Shows the window's cursor, as the mouse is over the client area.
+    void ApplyCursor() const noexcept;
   };
 }

@@ -206,15 +206,17 @@ namespace krys::boo::dom
 
 #pragma endregion
 
+  public:
 #pragma region Type Checks
 
-    KRYS_NODISCARD bool IsMouseEvent() const noexcept
+    KRYS_NODISCARD virtual bool IsMouseEvent() const noexcept
     {
       return false;
     }
 
 #pragma endregion
 
+  protected:
     /// @see https://dom.spec.whatwg.org/#concept-event-initialize
     static void Initialize(Event &event, DOMStringAtom type, bool bubbles, bool cancelable) noexcept;
 

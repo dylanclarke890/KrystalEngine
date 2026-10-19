@@ -7,7 +7,9 @@
 
 namespace krys::boo
 {
-  LocalFrame::LocalFrame() noexcept = default;
+  LocalFrame::LocalFrame() noexcept : _eventHandler(CreateUnique<EventHandler>(*this))
+  {
+  }
 
   LocalFrame::~LocalFrame() noexcept
   {
@@ -65,6 +67,9 @@ namespace krys::boo
     }
 
     SetForScope documentIsBeingReplaced(_documentIsBeingReplaced, true);
+
+    // The mouse's state refers to the old document's nodes.
+    _eventHandler->Clear();
 
     if (RefPtr<dom::Document> previousDocument = _document)
     {

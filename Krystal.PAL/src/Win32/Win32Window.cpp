@@ -135,6 +135,29 @@ namespace
     }
   }
 
+  static LPCWSTR CursorShapeToResource(const krys::pal::CursorShape cursor) noexcept
+  {
+    using krys::pal::CursorShape;
+    switch (cursor)
+    {
+      case CursorShape::Arrow:      return IDC_ARROW;
+      case CursorShape::IBeam:      return IDC_IBEAM;
+      case CursorShape::Hand:       return IDC_HAND;
+      case CursorShape::Crosshair:  return IDC_CROSS;
+      case CursorShape::Wait:       return IDC_WAIT;
+      case CursorShape::Progress:   return IDC_APPSTARTING;
+      case CursorShape::Help:       return IDC_HELP;
+      case CursorShape::NotAllowed: return IDC_NO;
+      case CursorShape::Move:       return IDC_SIZEALL;
+      case CursorShape::ResizeNS:   return IDC_SIZENS;
+      case CursorShape::ResizeEW:   return IDC_SIZEWE;
+      case CursorShape::ResizeNESW: return IDC_SIZENESW;
+      case CursorShape::ResizeNWSE: return IDC_SIZENWSE;
+      case CursorShape::Hidden:     return NULL;
+    }
+    return IDC_ARROW;
+  }
+
   static std::wstring ToWideString(const krys::string &str)
   {
     const int sizeNeeded =
@@ -263,7 +286,7 @@ namespace krys::pal
         {
           if (LOWORD(lParam) == HTCLIENT)
           {
-            ::SetCursor(::LoadCursorW(NULL, IDC_ARROW));
+            ApplyCursor();
             return TRUE;
           }
           break;
@@ -549,6 +572,43 @@ namespace krys::pal
     void Win32Window::SetCallbacks(WindowCallbacks &&callbacks) noexcept
     {
       _callbacks = std::move(callbacks);
+    }
+
+    void Win32Window::SetCursor(CursorShape cursor) noexcept
+    {
+      if (_cursor == cursor)
+      {
+        return;
+      }
+      _cursor = cursor;
+
+      // WM_SETCURSOR only comes as the mouse moves, so a change under a still mouse is applied now.
+      POINT point {};
+      if (!::GetCursorPos(&point) || ::WindowFromPoint(point) != _handle)
+      {
+        return;
+      }
+      RECT client {};
+      if (::ScreenToClient(_handle, &point) && ::GetClientRect(_handle, &client)
+          && ::PtInRect(&client, point))
+      {
+        ApplyCursor();
+      }
+    }
+
+    CursorShape Win32Window::GetCursor() const noexcept
+    {
+      return _cursor;
+    }
+
+    void Win32Window::ApplyCursor() const noexcept
+    {
+      if (_cursor == CursorShape::Hidden)
+      {
+        ::SetCursor(NULL);
+        return;
+      }
+      ::SetCursor(::LoadCursorW(NULL, CursorShapeToResource(_cursor)));
     }
   }
 }

@@ -4,6 +4,10 @@
   #define KRYS_ENABLE_PROFILING
 #endif
 
+#include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
+#include "Krystal.Booey/DOM/DOMTokenList.hpp"
+#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/FontDatabase.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
@@ -14,6 +18,7 @@
 #include "Krystal.Editor/Application.hpp"
 #include "Krystal.Editor/BooeyScene.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
+#include "Krystal.PAL/CursorShapes.hpp"
 #include "Krystal.PAL/Events.hpp"
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.Text/FreeTypeFace.hpp"
@@ -36,6 +41,25 @@ namespace krys
     Render2D,
     // A scene drawn through Booey's graphics context.
     BooeyScene,
+  };
+
+  /// @brief Toggles `picked` on the card a click lands in.
+  struct CardPicker final : boo::dom::EventListenerCallback
+  {
+    void HandleEvent(boo::dom::Event &event) noexcept override
+    {
+      auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
+      auto *target = node ? DynamicDowncast<boo::dom::Element>(*node) : nullptr;
+      if (!target)
+      {
+        return;
+      }
+      auto card = target->Closest(u8".card");
+      if (card.HasValue() && card.Value())
+      {
+        (void)card.Value()->ClassList().Toggle(boo::dom::DOMString(u8"picked"));
+      }
+    }
   };
 
   class Editor : public Application
@@ -196,7 +220,7 @@ namespace krys
           return true;
         });
 
-      // The page view's pointer: hover follows the mouse, and the left button makes elements active.
+      // The page view's mouse: mouse events, hover and active state and the cursor follow it.
       _context->Events->On<MouseMoveEvent>(
         [&](const auto &event)
         {
@@ -206,31 +230,34 @@ namespace krys
           {
             if (_pointer.Y() < 0)
             {
-              _page->PointerLeft();
+              _page->MouseLeft();
             }
             else
             {
-              _page->PointerMoved(_pointer);
+              _page->MouseMoved(_pointer);
             }
           }
+          UpdateCursor();
           return true;
         });
 
       _context->Events->On<MouseButtonEvent>(
         [&](const auto &event)
         {
-          if (!_page || _view != EditorView::Page || event.Button() != pal::MouseButton::Left)
+          auto button = ToBooeyButton(event.Button());
+          if (!_page || _view != EditorView::Page || button == boo::MouseButton::None)
           {
             return true;
           }
           if (event.IsPressed() && _pointer.Y() >= 0)
           {
-            _page->PointerPressed(_pointer);
+            _page->MousePressed(_pointer, button);
           }
           else if (event.WasReleased())
           {
-            _page->PointerReleased(_pointer);
+            _page->MouseReleased(_pointer, button);
           }
+          UpdateCursor();
           return true;
         });
 
@@ -300,7 +327,66 @@ namespace krys
         _context->Logger->Error("{}", loaded.error());
         return;
       }
+      _page->Document().AddEventListener(boo::dom::DOMStringAtom(u8"click"), CreateRef<CardPicker>(), false);
       _context->Logger->Info("Loaded {}", path.string());
+    }
+
+    /// @brief Shows the page's cursor over the page view, and the arrow everywhere else.
+    void UpdateCursor() noexcept
+    {
+      bool overPage = _page && _view == EditorView::Page && _pointer.Y() >= 0;
+      _context->Window->SetCursor(overPage ? ToCursorShape(_page->CurrentCursor()) : pal::CursorShape::Arrow);
+    }
+
+    KRYS_NODISCARD static boo::MouseButton ToBooeyButton(pal::MouseButton button) noexcept
+    {
+      switch (button)
+      {
+        case pal::MouseButton::Left:   return boo::MouseButton::Left;
+        case pal::MouseButton::Right:  return boo::MouseButton::Right;
+        case pal::MouseButton::Middle: return boo::MouseButton::Middle;
+        case pal::MouseButton::Thumb1: return boo::MouseButton::Back;
+        case pal::MouseButton::Thumb2: return boo::MouseButton::Forward;
+        default:                       return boo::MouseButton::None;
+      }
+    }
+
+    /// @brief The system cursor nearest to a Booey cursor.
+    KRYS_NODISCARD static pal::CursorShape ToCursorShape(boo::Cursor cursor) noexcept
+    {
+      using Type = boo::Cursor::Type;
+      switch (cursor.GetType())
+      {
+        case Type::Hand:
+        case Type::Grab:
+        case Type::Grabbing:                 return pal::CursorShape::Hand;
+        case Type::IBeam:
+        case Type::VerticalText:             return pal::CursorShape::IBeam;
+        case Type::Cross:
+        case Type::Cell:                     return pal::CursorShape::Crosshair;
+        case Type::Wait:                     return pal::CursorShape::Wait;
+        case Type::Progress:                 return pal::CursorShape::Progress;
+        case Type::Help:                     return pal::CursorShape::Help;
+        case Type::NoDrop:
+        case Type::NotAllowed:               return pal::CursorShape::NotAllowed;
+        case Type::Move:                     return pal::CursorShape::Move;
+        case Type::NorthResize:
+        case Type::SouthResize:
+        case Type::NorthSouthResize:
+        case Type::RowResize:                return pal::CursorShape::ResizeNS;
+        case Type::EastResize:
+        case Type::WestResize:
+        case Type::EastWestResize:
+        case Type::ColumnResize:             return pal::CursorShape::ResizeEW;
+        case Type::NorthEastResize:
+        case Type::SouthWestResize:
+        case Type::NorthEastSouthWestResize: return pal::CursorShape::ResizeNESW;
+        case Type::NorthWestResize:
+        case Type::SouthEastResize:
+        case Type::NorthWestSouthEastResize: return pal::CursorShape::ResizeNWSE;
+        case Type::None:                     return pal::CursorShape::Hidden;
+        default:                             return pal::CursorShape::Arrow;
+      }
     }
 
     /// @brief The page shown in the page view, which Booey's drawing is also replayed through, and Liberation

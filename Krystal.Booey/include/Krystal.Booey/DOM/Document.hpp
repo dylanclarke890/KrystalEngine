@@ -14,6 +14,7 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
+#include "Krystal.Booey/Graphics/DoublePoint.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/FontSelector.hpp"
@@ -33,6 +34,8 @@ namespace krys::boo
   class HitTestLocation;
   class HitTestRequest;
   class HitTestResult;
+  class MouseEventWithHitTestResults;
+  class PlatformMouseEvent;
   class LocalFrame;
   class LocalFrameView;
   class RenderElement;
@@ -529,6 +532,12 @@ namespace krys::boo::dom
     /// its ancestors `:active` until the release.
     void UpdateHoverActiveState(const HitTestRequest &request, Element *innerElement,
                                 CaptureChange captureElementChanged = CaptureChange::No) noexcept;
+
+    /// @brief Hit tests @p documentPoint for @p event and, unless the request is read-only, updates the hover
+    /// and active state to match.
+    KRYS_NODISCARD MouseEventWithHitTestResults PrepareMouseEvent(const HitTestRequest &request,
+                                                                  const DoublePoint &documentPoint,
+                                                                  const PlatformMouseEvent &event) noexcept;
 
     void HoveredElementDidDetach(Element &element) noexcept;
     /// @brief Moves the hovered element and the active chain out of @p node's subtree before it's removed.

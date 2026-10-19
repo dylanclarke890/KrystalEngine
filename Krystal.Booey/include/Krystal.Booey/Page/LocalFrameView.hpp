@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
+#include "Krystal.Booey/Graphics/DoublePoint.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
@@ -292,6 +293,11 @@ namespace krys::boo
                                                     Maybe<float> usedZoom = null) const noexcept;
     /// @brief The offset from document coordinates to client (viewport) ones.
     KRYS_NODISCARD FloatSize DocumentToClientOffset() const noexcept;
+    KRYS_NODISCARD DoublePoint AbsoluteToDocumentPoint(DoublePoint point,
+                                                       Maybe<float> usedZoom = null) const noexcept;
+    KRYS_NODISCARD DoublePoint DocumentToClientPoint(DoublePoint point) const noexcept;
+    /// @brief Converts a point in the view's coordinates to the contents' (absolute) coordinates.
+    KRYS_NODISCARD DoublePoint WindowToContents(const DoublePoint &point) const noexcept;
     KRYS_NODISCARD FloatRect DocumentToClientRect(FloatRect rect) const noexcept;
 
   private:

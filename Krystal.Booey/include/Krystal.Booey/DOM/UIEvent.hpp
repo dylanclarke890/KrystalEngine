@@ -29,5 +29,20 @@ namespace krys::boo::dom
     {
       return _detail;
     }
+
+    /// @note Legacy.
+    /// @see https://w3c.github.io/uievents/#dom-uievent-inituievent
+    // FIXME: The view, once there's a Window.
+    void InitUIEvent(DOMStringAtom type, bool bubbles = false, bool cancelable = false,
+                     int32 detail = 0) noexcept
+    {
+      if (_dispatched)
+      {
+        return;
+      }
+
+      InitEvent(type, bubbles, cancelable);
+      _detail = detail;
+    }
   };
 }

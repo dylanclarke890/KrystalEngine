@@ -1436,6 +1436,19 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/HitTestLocation.hpp
   include/Krystal.Booey/Rendering/HitTestResult.hpp
   include/Krystal.Booey/Rendering/HitTestingTransformState.hpp
+
+  # Mouse events, clicks and cursors (G4f2)
+  include/Krystal.Booey/DOM/Dicts/EventModifierInit.hpp
+  include/Krystal.Booey/DOM/Dicts/MouseEventInit.hpp
+  include/Krystal.Booey/DOM/MouseEvent.hpp
+  include/Krystal.Booey/DOM/MouseRelatedEvent.hpp
+  include/Krystal.Booey/DOM/UIEventWithKeyState.hpp
+  include/Krystal.Booey/Page/EventHandler.hpp
+  include/Krystal.Booey/Page/MouseEventTypes.hpp
+  include/Krystal.Booey/Page/MouseEventWithHitTestResults.hpp
+  include/Krystal.Booey/Platform/Cursor.hpp
+  include/Krystal.Booey/Platform/PlatformEvent.hpp
+  include/Krystal.Booey/Platform/PlatformMouseEvent.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -2386,6 +2399,11 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/HitTestLocation.cpp
   src/Rendering/HitTestResult.cpp
   src/Rendering/HitTestingTransformState.cpp
+
+  # Mouse events, clicks and cursors (G4f2)
+  src/DOM/MouseEvent.cpp
+  src/DOM/MouseRelatedEvent.cpp
+  src/Page/EventHandler.cpp
 )
 
 target_precompile_headers(Krystal.Booey

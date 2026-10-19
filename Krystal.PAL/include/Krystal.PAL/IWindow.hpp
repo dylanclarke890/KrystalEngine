@@ -6,6 +6,7 @@
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Utils/NativeHandle.hpp"
+#include "Krystal.PAL/CursorShapes.hpp"
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.PAL/MouseButtons.hpp"
 
@@ -99,5 +100,11 @@ namespace krys::pal
     virtual void Hide() noexcept = 0;
 
     virtual void SetCallbacks(WindowCallbacks &&callbacks) noexcept = 0;
+
+    /// @brief Sets the cursor shown while the mouse is over the window's client area; it changes at once if
+    /// the mouse is there now.
+    virtual void SetCursor(CursorShape cursor) noexcept = 0;
+
+    KRYS_NODISCARD virtual CursorShape GetCursor() const noexcept = 0;
   };
 }

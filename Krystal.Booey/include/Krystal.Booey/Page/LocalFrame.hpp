@@ -3,12 +3,14 @@
 #include "Krystal.Booey/CSS/Queries/MediaEnvironment.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/IntSize.hpp"
+#include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
 {
@@ -24,6 +26,7 @@ namespace krys::boo
   private:
     RefPtr<dom::Document> _document;
     RefPtr<LocalFrameView> _view;
+    UniquePtr<EventHandler> _eventHandler;
     css::mq::MediaEnvironment _mediaEnvironment;
     float _pageZoomFactor {1};
     float _textZoomFactor {1};
@@ -50,6 +53,12 @@ namespace krys::boo
 
     /// @brief Replaces the frame's view. The document's render tree is destroyed with the old view and
     /// created with the new one.
+    /// @brief Turns the host's mouse input into DOM events for this frame.
+    KRYS_NODISCARD EventHandler &GetEventHandler() const noexcept
+    {
+      return *_eventHandler;
+    }
+
     void SetView(RefPtr<LocalFrameView> &&view) noexcept;
 
     /// @brief Gives the frame a new view of @p viewportSize, laid out at @p fixedLayoutSize if

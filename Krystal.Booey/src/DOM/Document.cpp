@@ -50,6 +50,7 @@
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/MouseEventWithHitTestResults.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
@@ -855,6 +856,29 @@ namespace krys::boo::dom
     return resultLayer;
   }
 
+  MouseEventWithHitTestResults Document::PrepareMouseEvent(const HitTestRequest &request,
+                                                           const DoublePoint &documentPoint,
+                                                           const PlatformMouseEvent &event) noexcept
+  {
+    if (!HasLivingRenderTree())
+    {
+      return MouseEventWithHitTestResults(event, HitTestResult(LayoutPoint()));
+    }
+
+    HitTestResult result {LayoutPoint(documentPoint)};
+    HitTest(request, result);
+
+    if (!request.ReadOnly())
+    {
+      // FIXME: Pointer capture (processPendingPointerCapture, targeting the capture element and reporting its
+      // changes) comes with pointer events.
+      RefPtr<Element> targetElement = ShareRefPtr(result.TargetElement());
+      UpdateHoverActiveState(request, targetElement.get());
+    }
+
+    return MouseEventWithHitTestResults(event, result);
+  }
+
   void Document::UpdateHoverActiveState(const HitTestRequest &request, Element *innerElement,
                                         CaptureChange captureElementChanged) noexcept
   {
@@ -1063,6 +1087,11 @@ namespace krys::boo::dom
     };
     moveOutOfRemovedSubtree(_hoveredElement);
     moveOutOfRemovedSubtree(_activeElement);
+
+    if (auto *frame = Frame())
+    {
+      frame->GetEventHandler().NodeWillBeRemoved(node);
+    }
   }
 
   void Document::ElementInActiveChainDidDetach(Element &element) noexcept

@@ -513,4 +513,21 @@ namespace krys::boo
     rect.Move(DocumentToClientOffset());
     return rect;
   }
+
+  DoublePoint LocalFrameView::AbsoluteToDocumentPoint(DoublePoint point, Maybe<float> usedZoom) const noexcept
+  {
+    return point.Scaled(AbsoluteToDocumentScaleFactor(usedZoom));
+  }
+
+  DoublePoint LocalFrameView::DocumentToClientPoint(DoublePoint point) const noexcept
+  {
+    return point + DoubleSize(DocumentToClientOffset());
+  }
+
+  DoublePoint LocalFrameView::WindowToContents(const DoublePoint &point) const noexcept
+  {
+    // FIXME: The scroll position, once the frame view scrolls; until then the view and its contents share an
+    // origin.
+    return point;
+  }
 }
