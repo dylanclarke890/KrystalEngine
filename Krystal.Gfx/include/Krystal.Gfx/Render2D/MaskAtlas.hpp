@@ -9,6 +9,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Gfx/Device.hpp"
 #include "Krystal.Gfx/Handles.hpp"
+#include "Krystal.Gfx/Render2D/AtlasPages.hpp"
 #include "Krystal.Gfx/Render2D/Path2D.hpp"
 #include "Krystal.Gfx/Render2D/PathRasteriser.hpp"
 #include "Krystal.Gfx/Render2D/Rect2D.hpp"
@@ -54,9 +55,9 @@ namespace krys::gfx
   /// any other change rasterises a new one. Blurred masks, for shadows, are cached under their blur too.
   /// Masks aren't clipped; the clip is applied when they're drawn.
   ///
-  /// Space is reclaimed a page at a time: with every page allocated and full, the least recently used page
-  /// that the current frame hasn't drawn from is cleared. Masks larger than `MaxPackedSize`, or that find no
-  /// page, get textures of their own, destroyed once a frame passes without them. Masks too large for a
+  /// Masks are packed into R8 pages (`AtlasPages`), which reclaim space a page at a time. Masks larger than
+  /// `MaxPackedSize`, or that find no page, get textures of their own, destroyed once a frame passes without
+  /// them. Masks too large for a
   /// texture are rasterised within the clip only, and not kept past the frame.
   class MaskAtlas
   {
@@ -82,21 +83,6 @@ namespace krys::gfx
       KRYS_NODISCARD size_t operator()(const Key &key) const noexcept;
     };
 
-    struct Shelf
-    {
-      uint32 Y {0u};
-      uint32 Height {0u};
-      uint32 NextX {0u};
-    };
-
-    struct Page
-    {
-      TextureHandle Texture {};
-      List<Shelf> Shelves {};
-      uint32 NextShelfY {0u};
-      uint64 LastUsedFrame {0u};
-    };
-
     struct Entry
     {
       /// @brief The page holding the mask, or `NoPage`.
@@ -120,7 +106,7 @@ namespace krys::gfx
     Device *_device;
     MaskAtlasDesc _desc;
     PathRasteriser _rasteriser {};
-    List<Page> _pages {};
+    AtlasPages _pages;
     HashMap<Key, Entry, KeyHash> _entries {};
     List<RetiredTexture> _retired {};
     MaskAtlasStats _stats {};
@@ -150,16 +136,14 @@ namespace krys::gfx
 
     KRYS_NODISCARD uint32 PageCount() const noexcept
     {
-      return static_cast<uint32>(_pages.size());
+      return _pages.PageCount();
     }
 
   private:
     /// @brief Once per frame: destroys the textures no frame still needs.
     void Collect() noexcept;
-    /// @brief Finds atlas space, evicting a page if it has to.
-    KRYS_NODISCARD Maybe<Entry> Allocate(uint32 width, uint32 height) noexcept;
-    KRYS_NODISCARD Maybe<PixelRect2D> AllocateInPage(Page &page, uint32 width, uint32 height) const noexcept;
-    void EvictPage(uint32 index) noexcept;
+    /// @brief Finds page space, forgetting the masks of any page cleared to make room.
+    KRYS_NODISCARD Maybe<AtlasSlot> Allocate(uint32 width, uint32 height) noexcept;
     KRYS_NODISCARD TextureHandle CreateMaskTexture(uint32 width, uint32 height,
                                                    utf8_stringview name) noexcept;
     void Upload(TextureHandle texture, const PixelRect2D &texels, const CoverageMask &mask) noexcept;

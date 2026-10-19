@@ -6,6 +6,7 @@ target_link_libraries(Krystal.Gfx.Tests
     Krystal.Gfx
     Catch2::Catch2WithMain
     stb
+    Krystal.Text
 )
 
 set_target_properties(Krystal.Gfx.Tests
@@ -29,7 +30,12 @@ target_compile_options(Krystal.Gfx.Tests
 target_compile_definitions(Krystal.Gfx.Tests
   PRIVATE
     KRYS_GFX_TESTS_GOLDEN_DIR="${CMAKE_CURRENT_SOURCE_DIR}/golden"
+    KRYS_GFX_TESTS_FONTS_DIR="${CMAKE_SOURCE_DIR}/third-party/liberation-fonts"
 )
+
+# FreeType is read directly, to compare glyphs with its own rendering.
+find_package(Freetype REQUIRED)
+target_link_libraries(Krystal.Gfx.Tests PRIVATE Freetype::Freetype)
 
 catch_discover_tests(Krystal.Gfx.Tests)
 
@@ -54,6 +60,8 @@ target_sources(Krystal.Gfx.Tests
 
     # Render2D
     tests/Render2D/CoverageBlur.cpp
+    tests/Render2D/FontFace2D.cpp
+    tests/Render2D/GlyphAtlas.cpp
     tests/Render2D/Golden.cpp
     tests/Render2D/Gradient2D.cpp
     tests/Render2D/Path2D.cpp

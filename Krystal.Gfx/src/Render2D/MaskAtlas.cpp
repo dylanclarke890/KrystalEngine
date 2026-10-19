@@ -10,9 +10,6 @@ namespace krys::gfx
 {
   namespace
   {
-    /// @brief Shelf heights are rounded up to this, so masks of similar heights share shelves.
-    constexpr uint32 ShelfGranularity = 8u;
-
     /// @brief Bounds of every point of the path once transformed. Curves stay within their control points,
     /// so this contains the path; it's cheap enough to check a mask's size before rasterising it.
     KRYS_NODISCARD Maybe<Rect2D> ControlBounds(const Path2D &path, const Transform2D &transform) noexcept
@@ -78,7 +75,11 @@ namespace krys::gfx
     return seed;
   }
 
-  MaskAtlas::MaskAtlas(Device &device, const MaskAtlasDesc &desc) noexcept : _device(&device), _desc(desc)
+  MaskAtlas::MaskAtlas(Device &device, const MaskAtlasDesc &desc) noexcept
+      : _device(&device), _desc(desc), _pages(device, {.Format = TextureFormat::R8Unorm,
+                                                       .PageSize = desc.PageSize,
+                                                       .MaxPages = desc.MaxPages,
+                                                       .DebugName = u8"Render2D.MaskPage"})
   {
   }
 
@@ -94,10 +95,6 @@ namespace krys::gfx
     for (const auto &retired : _retired)
     {
       _device->Destroy(retired.Texture);
-    }
-    for (const auto &page : _pages)
-    {
-      _device->Destroy(page.Texture);
     }
   }
 
@@ -135,10 +132,10 @@ namespace krys::gfx
       entry.LastUsedFrame = frame;
       if (entry.Page != NoPage)
       {
-        _pages[entry.Page].LastUsedFrame = frame;
+        _pages.MarkUsed(entry.Page);
       }
       ++_stats.Hits;
-      const auto texture = entry.Page != NoPage ? _pages[entry.Page].Texture : entry.OwnTexture;
+      const auto texture = entry.Page != NoPage ? _pages.Texture(entry.Page) : entry.OwnTexture;
       return {.Texture = texture, .Texels = entry.Texels, .Bounds = Offset(entry.Bounds, offsetX, offsetY)};
     }
 
@@ -183,7 +180,7 @@ namespace krys::gfx
     {
       const uint32 width = mask.Bounds.Width;
       const uint32 height = mask.Bounds.Height;
-      Maybe<Entry> packed {};
+      Maybe<AtlasSlot> packed {};
       if (width <= _desc.MaxPackedSize && height <= _desc.MaxPackedSize)
       {
         packed = Allocate(width, height);
@@ -193,8 +190,9 @@ namespace krys::gfx
       {
         entry.Page = packed->Page;
         entry.Texels = packed->Texels;
-        _pages[entry.Page].LastUsedFrame = frame;
-        Upload(_pages[entry.Page].Texture, entry.Texels, mask);
+        _pages.MarkUsed(entry.Page);
+        _pages.Write(*packed, Span<const byte>(reinterpret_cast<const byte *>(mask.Coverage.data()),
+                                               mask.Coverage.size()));
       }
       else
       {
@@ -208,7 +206,7 @@ namespace krys::gfx
       }
     }
 
-    const auto texture = entry.Page != NoPage ? _pages[entry.Page].Texture : entry.OwnTexture;
+    const auto texture = entry.Page != NoPage ? _pages.Texture(entry.Page) : entry.OwnTexture;
     const MaskLocation location {
       .Texture = texture, .Texels = entry.Texels, .Bounds = Offset(entry.Bounds, offsetX, offsetY)};
     _entries.emplace(krys::move(key), entry);
@@ -273,104 +271,15 @@ namespace krys::gfx
                   });
   }
 
-  Maybe<MaskAtlas::Entry> MaskAtlas::Allocate(uint32 width, uint32 height) noexcept
+  Maybe<AtlasSlot> MaskAtlas::Allocate(uint32 width, uint32 height) noexcept
   {
-    for (uint32 index = 0u; index < _pages.size(); ++index)
-    {
-      if (auto texels = AllocateInPage(_pages[index], width, height))
-      {
-        return Entry {.Page = index, .Texels = *texels};
-      }
-    }
-
-    if (_pages.size() < _desc.MaxPages)
-    {
-      const auto texture = CreateMaskTexture(_desc.PageSize, _desc.PageSize, u8"Render2D.MaskPage");
-      if (texture.IsValid())
-      {
-        _pages.push_back({.Texture = texture});
-        if (auto texels = AllocateInPage(_pages.back(), width, height))
-        {
-          return Entry {.Page = static_cast<uint32>(_pages.size() - 1u), .Texels = *texels};
-        }
-      }
-    }
-
-    // Clear the least recently used page, unless the current frame has drawn from every page: overwriting
-    // texels its unsubmitted draws read would change what they draw.
-    const uint64 frame = _device->FrameNumber();
-    uint32 oldest = NoPage;
-    for (uint32 index = 0u; index < _pages.size(); ++index)
-    {
-      if (_pages[index].LastUsedFrame < frame
-          && (oldest == NoPage || _pages[index].LastUsedFrame < _pages[oldest].LastUsedFrame))
-      {
-        oldest = index;
-      }
-    }
-    if (oldest == NoPage)
-    {
-      return {};
-    }
-
-    EvictPage(oldest);
-    if (auto texels = AllocateInPage(_pages[oldest], width, height))
-    {
-      return Entry {.Page = oldest, .Texels = *texels};
-    }
-    return {};
-  }
-
-  Maybe<PixelRect2D> MaskAtlas::AllocateInPage(Page &page, uint32 width, uint32 height) const noexcept
-  {
-    const uint32 size = _desc.PageSize;
-    if (width > size || height > size)
-    {
-      return {};
-    }
-
-    // The lowest shelf that fits, so tall shelves aren't spent on short masks.
-    Shelf *best = nullptr;
-    for (auto &shelf : page.Shelves)
-    {
-      if (shelf.Height >= height && shelf.NextX + width <= size
-          && (best == nullptr || shelf.Height < best->Height))
-      {
-        best = &shelf;
-      }
-    }
-
-    const uint32 shelfHeight =
-      std::min((height + ShelfGranularity - 1u) / ShelfGranularity * ShelfGranularity, size);
-    if (best == nullptr || best->Height > shelfHeight * 2u)
-    {
-      if (page.NextShelfY + shelfHeight <= size)
-      {
-        page.Shelves.push_back({.Y = page.NextShelfY, .Height = shelfHeight, .NextX = 0u});
-        page.NextShelfY += shelfHeight;
-        best = &page.Shelves.back();
-      }
-      else if (best == nullptr)
-      {
-        return {};
-      }
-    }
-
-    const PixelRect2D texels {.X = static_cast<int32>(best->NextX),
-                              .Y = static_cast<int32>(best->Y),
-                              .Width = width,
-                              .Height = height};
-    best->NextX += width;
-    return texels;
-  }
-
-  void MaskAtlas::EvictPage(uint32 index) noexcept
-  {
-    std::erase_if(_entries, [&](const auto &item) { return item.second.Page == index; });
-    auto &page = _pages[index];
-    page.Shelves.clear();
-    page.NextShelfY = 0u;
-    ++_stats.PageEvictions;
+    return _pages.Allocate(width, height,
+                           [&](uint32 page)
+                           {
+                             std::erase_if(_entries,
+                                           [&](const auto &item) { return item.second.Page == page; });
+                             ++_stats.PageEvictions;
+                           });
   }
 
   TextureHandle MaskAtlas::CreateMaskTexture(uint32 width, uint32 height, utf8_stringview name) noexcept

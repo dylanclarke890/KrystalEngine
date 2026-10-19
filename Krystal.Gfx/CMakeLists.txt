@@ -3,12 +3,10 @@ add_library(Krystal.Gfx)
 target_link_libraries(Krystal.Gfx 
   PUBLIC
     Krystal.Core
+    Krystal.Text
 
   PRIVATE
     stb
-    msdf-atlas-gen::msdf-atlas-gen
-    msdfgen::msdfgen
-    msdfgen::msdfgen-ext
     Freetype::Freetype
 )
 
@@ -29,17 +27,8 @@ target_compile_options(Krystal.Gfx
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8>
 )
 
+# Third-party - FreeType (glyph rasterisation, on Krystal.Text's faces)
 find_package(Freetype REQUIRED)
-find_package(msdfgen CONFIG REQUIRED)
-
-set(MSDF_ATLAS_USE_VCPKG        OFF CACHE BOOL "" FORCE)  # we already have msdfgen/freetype from vcpkg
-set(MSDF_ATLAS_USE_SKIA         OFF CACHE BOOL "" FORCE)  # no skia
-set(MSDF_ATLAS_MSDFGEN_EXTERNAL ON  CACHE BOOL "" FORCE)  # use find_package(msdfgen)
-set(MSDF_ATLAS_BUILD_STANDALONE OFF CACHE BOOL "" FORCE)  # no CLI
-set(MSDF_ATLAS_INSTALL          OFF CACHE BOOL "" FORCE)  # source consumption
-set(MSDF_ATLAS_NO_ARTERY_FONT   ON  CACHE BOOL "" FORCE)  # drops artery-font-format submodule
-set(MSDF_ATLAS_DYNAMIC_RUNTIME  ON  CACHE BOOL "" FORCE)  # use dynamic runtime for msdf-atlas-gen
-add_subdirectory(third-party/msdf-atlas-gen)
 
 target_sources(Krystal.Gfx
   PUBLIC
@@ -74,9 +63,12 @@ target_sources(Krystal.Gfx
       include/Krystal.Gfx/OpenGL/Official/khrplatform.h
 
       # Render2D
+      include/Krystal.Gfx/Render2D/AtlasPages.hpp
       include/Krystal.Gfx/Render2D/CoverageBlur.hpp
       include/Krystal.Gfx/Render2D/Dashing.hpp
       include/Krystal.Gfx/Render2D/Flattening.hpp
+      include/Krystal.Gfx/Render2D/FontFace2D.hpp
+      include/Krystal.Gfx/Render2D/GlyphAtlas.hpp
       include/Krystal.Gfx/Render2D/Gradient2D.hpp
       include/Krystal.Gfx/Render2D/MaskAtlas.hpp
       include/Krystal.Gfx/Render2D/Paint2D.hpp
@@ -89,10 +81,6 @@ target_sources(Krystal.Gfx
       include/Krystal.Gfx/Render2D/StrokeStyle.hpp
       include/Krystal.Gfx/Render2D/Transform2D.hpp
 
-      # Text
-      include/Krystal.Gfx/Text/FontAtlas.hpp
-      include/Krystal.Gfx/Text/FontAtlasLoader.hpp
-
   PRIVATE
     src/CommandBuffer.cpp
     src/Device.cpp
@@ -102,16 +90,16 @@ target_sources(Krystal.Gfx
     src/OpenGL/Hooks/gl.cpp
 
     # Render2D
+    src/Render2D/AtlasPages.cpp
     src/Render2D/CoverageBlur.cpp
+    src/Render2D/FontFace2D.cpp
+    src/Render2D/GlyphAtlas.cpp
     src/Render2D/Gradient2D.cpp
     src/Render2D/MaskAtlas.cpp
     src/Render2D/Path2D.cpp
     src/Render2D/PathRasteriser.cpp
     src/Render2D/PathStroker.cpp
     src/Render2D/Renderer2D.cpp
-
-    # Text
-    src/Text/FontAtlasLoader.cpp
 )
 
 if(WIN32)

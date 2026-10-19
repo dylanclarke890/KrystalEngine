@@ -5,12 +5,6 @@
     "rapidjson",
     "rapidxml",
     "spdlog",
-    "freetype",
-    {
-      "name": "msdfgen",
-      "default-features": false,
-      "features": [ "extensions" ]
-    },
     "brigand",
     "harfbuzz",
     "icu"
