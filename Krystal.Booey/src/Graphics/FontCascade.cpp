@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Graphics/ComplexTextController.hpp"
 #include "Krystal.Booey/Graphics/FontCache.hpp"
 #include "Krystal.Booey/Graphics/FontDatabase.hpp"
+#include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/WidthCache.hpp"
 #include "Krystal.Booey/Graphics/WidthIterator.hpp"
 #include "Krystal.Core/Assert.hpp"
@@ -758,6 +759,58 @@ namespace krys::boo
     return result
            - (syntheticBoldInclusion == Font::SyntheticBoldInclusion::Exclude ? font.SyntheticBoldOffset()
                                                                               : 0);
+  }
+
+  GlyphBuffer FontCascade::LayoutText(CodePath codePathToUse, const TextRun &run, uint32 from, uint32 to,
+                                      ForTextEmphasisOrNot forTextEmphasis) const noexcept
+  {
+    if (ShouldUseComplexTextController(codePathToUse))
+    {
+      return LayoutComplexText(run, from, to, forTextEmphasis);
+    }
+
+    return LayoutSimpleText(run, from, to, forTextEmphasis);
+  }
+
+  FloatSize FontCascade::DrawText(GraphicsContext &context, const TextRun &run, const FloatPoint &point,
+                                  uint32 from, Maybe<uint32> to,
+                                  CustomFontNotReadyAction customFontNotReadyAction) const noexcept
+  {
+    uint32 destination = to.value_or(run.Length());
+    auto glyphBuffer = LayoutText(GetCodePath(run, from, to), run, from, destination);
+    glyphBuffer.Flatten();
+
+    if (glyphBuffer.IsEmpty())
+    {
+      return FloatSize();
+    }
+
+    FloatPoint startPoint = point + boo::Size(glyphBuffer.InitialAdvance());
+    DrawGlyphBuffer(context, glyphBuffer, startPoint, customFontNotReadyAction);
+    return startPoint - point;
+  }
+
+  void FontCascade::DrawEmphasisMarks(GraphicsContext &context, const TextRun &run, const StringAtom &mark,
+                                      const FloatPoint &point, uint32 from, Maybe<uint32> to) const noexcept
+  {
+    if (IsLoadingCustomFonts())
+    {
+      return;
+    }
+
+    uint32 destination = to.value_or(run.Length());
+
+    auto glyphBuffer =
+      LayoutText(GetCodePath(run, from, to), run, from, destination, ForTextEmphasisOrNot::ForTextEmphasis);
+    glyphBuffer.Flatten();
+
+    if (glyphBuffer.IsEmpty())
+    {
+      return;
+    }
+
+    FloatPoint startPoint = point + boo::Size(glyphBuffer.InitialAdvance());
+    DrawEmphasisMarks(context, glyphBuffer, mark, startPoint);
   }
 
   float FontCascade::WidthOfTextRange(const TextRun &run, uint32 from, uint32 to, float &outWidthBeforeRange,
@@ -1798,6 +1851,219 @@ namespace krys::boo
       return font->GetFontMetrics().Height();
     }
     return {};
+  }
+
+  GlyphBuffer FontCascade::LayoutSimpleText(const TextRun &run, uint32 from, uint32 to,
+                                            ForTextEmphasisOrNot forTextEmphasis) const noexcept
+  {
+    GlyphBuffer glyphBuffer;
+
+    WidthIterator it(*this, run, nullptr, false, forTextEmphasis == ForTextEmphasisOrNot::ForTextEmphasis);
+    // FIXME: Using separate glyph buffers for the prefix and the suffix is incorrect when kerning or
+    // ligatures are enabled.
+    GlyphBuffer localGlyphBuffer;
+    it.Advance(from, localGlyphBuffer);
+    float beforeWidth = it.RunWidthSoFar();
+    it.Advance(to, glyphBuffer);
+
+    if (glyphBuffer.IsEmpty())
+    {
+      return glyphBuffer;
+    }
+
+    float afterWidth = it.RunWidthSoFar();
+
+    float initialAdvance = 0;
+    if (run.Rtl())
+    {
+      it.Advance(run.Length(), localGlyphBuffer);
+      it.Finalize(localGlyphBuffer);
+      initialAdvance = it.RunWidthSoFar() - afterWidth;
+    }
+    else
+    {
+      it.Finalize(localGlyphBuffer);
+      initialAdvance = beforeWidth;
+    }
+    glyphBuffer.ExpandInitialAdvance(initialAdvance);
+
+    // The glyph buffer is currently in logical order,
+    // but we need to return the results in visual order.
+    if (run.Rtl())
+    {
+      glyphBuffer.Reverse(0, glyphBuffer.Size());
+    }
+
+    return glyphBuffer;
+  }
+
+  GlyphBuffer FontCascade::LayoutComplexText(const TextRun &run, uint32 from, uint32 to,
+                                             ForTextEmphasisOrNot forTextEmphasis) const noexcept
+  {
+    GlyphBuffer glyphBuffer;
+
+    ComplexTextController controller(*this, run, false, nullptr,
+                                     forTextEmphasis == ForTextEmphasisOrNot::ForTextEmphasis);
+    GlyphBuffer glyphBufferForStartingIndex;
+    controller.Advance(from, &glyphBufferForStartingIndex);
+    controller.Advance(to, &glyphBuffer);
+
+    if (glyphBuffer.IsEmpty())
+    {
+      return glyphBuffer;
+    }
+
+    if (run.Rtl())
+    {
+      // Exploit the fact that the sum of the paint advances is equal to
+      // the sum of the layout advances.
+      FloatSize initialAdvance = controller.TotalAdvance();
+      for (uint32 i = 0; i < glyphBufferForStartingIndex.Size(); ++i)
+      {
+        initialAdvance -= boo::Size(glyphBufferForStartingIndex.AdvanceAt(i));
+      }
+      for (uint32 i = 0; i < glyphBuffer.Size(); ++i)
+      {
+        initialAdvance -= boo::Size(glyphBuffer.AdvanceAt(i));
+      }
+      // FIXME: Shouldn't we subtract the other initial advance?
+      glyphBuffer.Reverse(0, glyphBuffer.Size());
+      glyphBuffer.SetInitialAdvance(MakeGlyphBufferAdvance(initialAdvance));
+    }
+    else
+    {
+      FloatSize initialAdvance = boo::Size(glyphBufferForStartingIndex.InitialAdvance());
+      for (uint32 i = 0; i < glyphBufferForStartingIndex.Size(); ++i)
+      {
+        initialAdvance += boo::Size(glyphBufferForStartingIndex.AdvanceAt(i));
+      }
+      // FIXME: Shouldn't we add the other initial advance?
+      glyphBuffer.SetInitialAdvance(MakeGlyphBufferAdvance(initialAdvance));
+    }
+
+    return glyphBuffer;
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD inline bool ShouldDrawIfLoading(const Font &font,
+                                                   FontCascade::CustomFontNotReadyAction action) noexcept
+    {
+      // Don't draw anything while we are using custom fonts that are in the process of loading,
+      // except if the 'customFontNotReadyAction' argument is set to UseFallbackIfFontNotReady
+      // (in which case "font" will be a fallback font).
+      return !font.IsInterstitial() || font.GetVisibility() == Font::Visibility::Visible
+             || action == FontCascade::CustomFontNotReadyAction::UseFallbackIfFontNotReady;
+    }
+
+    KRYS_NODISCARD inline float OffsetToMiddleOfGlyph(const Font &fontData, Glyph glyph) noexcept
+    {
+      if (fontData.PlatformData().Orientation() == FontOrientation::Horizontal)
+      {
+        FloatRect bounds = fontData.BoundsForGlyph(glyph);
+        return bounds.X() + bounds.Width() / 2;
+      }
+      // FIXME: Use glyph bounds once they make sense for vertical fonts.
+      return fontData.WidthForGlyph(glyph) / 2;
+    }
+
+    KRYS_NODISCARD inline float OffsetToMiddleOfGlyphAtIndex(const GlyphBuffer &glyphBuffer,
+                                                             uint32 i) noexcept
+    {
+      return OffsetToMiddleOfGlyph(glyphBuffer.FontAt(i), glyphBuffer.GlyphAt(i));
+    }
+  }
+
+  // This function assumes the GlyphBuffer's initial advance has already been incorporated into the start
+  // point.
+  void FontCascade::DrawGlyphBuffer(GraphicsContext &context, const GlyphBuffer &glyphBuffer,
+                                    FloatPoint &point,
+                                    CustomFontNotReadyAction customFontNotReadyAction) const noexcept
+  {
+    krys_debug_assert(glyphBuffer.IsFlattened());
+    const Font *fontData = &glyphBuffer.FontAt(0);
+    FloatPoint startPoint = point;
+    float nextX = startPoint.X() + boo::Width(glyphBuffer.AdvanceAt(0));
+    float nextY = startPoint.Y() + boo::Height(glyphBuffer.AdvanceAt(0));
+    uint32 lastFrom = 0;
+    uint32 nextGlyph = 1;
+    while (nextGlyph < glyphBuffer.Size())
+    {
+      const Font *nextFontData = &glyphBuffer.FontAt(nextGlyph);
+
+      if (nextFontData != fontData)
+      {
+        if (ShouldDrawIfLoading(*fontData, customFontNotReadyAction))
+        {
+          size_t glyphCount = nextGlyph - lastFrom;
+          context.DrawGlyphs(*fontData, glyphBuffer.Glyphs(lastFrom, glyphCount),
+                             glyphBuffer.Advances(lastFrom, glyphCount), startPoint,
+                             _fontDescription.UsedFontSmoothing());
+        }
+        lastFrom = nextGlyph;
+        fontData = nextFontData;
+        startPoint.SetX(nextX);
+        startPoint.SetY(nextY);
+      }
+      nextX += boo::Width(glyphBuffer.AdvanceAt(nextGlyph));
+      nextY += boo::Height(glyphBuffer.AdvanceAt(nextGlyph));
+      nextGlyph++;
+    }
+
+    if (ShouldDrawIfLoading(*fontData, customFontNotReadyAction))
+    {
+      size_t glyphCount = nextGlyph - lastFrom;
+      context.DrawGlyphs(*fontData, glyphBuffer.Glyphs(lastFrom, glyphCount),
+                         glyphBuffer.Advances(lastFrom, glyphCount), startPoint,
+                         _fontDescription.UsedFontSmoothing());
+    }
+    point.SetX(nextX);
+  }
+
+  void FontCascade::DrawEmphasisMarks(GraphicsContext &context, const GlyphBuffer &glyphBuffer,
+                                      const StringAtom &mark, const FloatPoint &point) const noexcept
+  {
+    krys_debug_assert(glyphBuffer.IsFlattened());
+    Maybe<GlyphData> markGlyphData = GetEmphasisMarkGlyphData(mark);
+    if (!markGlyphData)
+    {
+      return;
+    }
+
+    const Font *markFontData = markGlyphData->Font.get();
+    krys_debug_assert(markFontData);
+    if (!markFontData)
+    {
+      return;
+    }
+
+    Glyph markGlyph = markGlyphData->Glyph;
+    Glyph spaceGlyph = markFontData->SpaceGlyph();
+
+    // FIXME: This needs to take the initial advance into account.
+    // The problem might actually be harder for complex text, though.
+    // Putting a mark over every glyph probably isn't great in complex scripts.
+    float middleOfLastGlyph = OffsetToMiddleOfGlyphAtIndex(glyphBuffer, 0);
+    FloatPoint startPoint(point.X() + middleOfLastGlyph - OffsetToMiddleOfGlyph(*markFontData, markGlyph),
+                          point.Y());
+
+    GlyphBuffer markBuffer;
+    auto glyphForMarker = [&](uint32 index)
+    {
+      auto glyph = glyphBuffer.GlyphAt(index);
+      return (glyph && glyph != DeletedGlyph) ? markGlyph : spaceGlyph;
+    };
+
+    for (uint32 i = 0; i + 1 < glyphBuffer.Size(); ++i)
+    {
+      float middleOfNextGlyph = OffsetToMiddleOfGlyphAtIndex(glyphBuffer, i + 1);
+      float advance = boo::Width(glyphBuffer.AdvanceAt(i)) - middleOfLastGlyph + middleOfNextGlyph;
+      markBuffer.Add(glyphForMarker(i), *markFontData, advance);
+      middleOfLastGlyph = middleOfNextGlyph;
+    }
+    markBuffer.Add(glyphForMarker(glyphBuffer.Size() - 1), *markFontData, 0);
+
+    DrawGlyphBuffer(context, markBuffer, startPoint, CustomFontNotReadyAction::DoNotPaintIfFontNotReady);
   }
 
   void FontCascade::AdjustSelectionRectForSimpleText(const TextRun &run, LayoutRect &selectionRect,

@@ -9,6 +9,7 @@
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContent.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContentBuilder.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContentPainter.hpp"
 #include "Krystal.Booey/Layout/Integration/LayoutIntegrationBoxTreeUpdater.hpp"
 #include "Krystal.Booey/Layout/Integration/LayoutIntegrationUtils.hpp"
 #include "Krystal.Booey/Layout/LayoutState.hpp"
@@ -20,6 +21,7 @@
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/FloatingObjects.hpp"
 #include "Krystal.Booey/Rendering/InlineWalker.hpp"
+#include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
@@ -685,6 +687,86 @@ namespace krys::boo::layout_integration
       return;
     }
     InlineContentBuilder {Flow()}.UpdateLineOverflow(*_inlineContent);
+  }
+
+  bool LineLayout::IsContentConsideredStale() const noexcept
+  {
+    auto *rootRenderer = _rootLayoutBox->RendererForIntegration();
+    if (!rootRenderer)
+    {
+      return true;
+    }
+    if (rootRenderer->NormalChildNeedsLayout())
+    {
+      // FIXME: Let's bail out on needsLayout() -see webkit.org/b/304002
+      return true;
+    }
+    if (rootRenderer->Style().IsSkippedRootOrSkippedContent())
+    {
+      return true;
+    }
+    if (_lineDamage && _lineDamage->HasDetachedContent())
+    {
+      return true;
+    }
+    return false;
+  }
+
+  void LineLayout::Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset,
+                         const RenderInline *layerRenderer) noexcept
+  {
+    if (!_inlineContent)
+    {
+      return;
+    }
+
+    if (IsContentConsideredStale())
+    {
+      krys_debug_assert(false);
+      return;
+    }
+
+    auto shouldPaintForPhase = [&]
+    {
+      switch (paintInfo.Phase)
+      {
+        case PaintPhase::Accessibility:
+        case PaintPhase::Foreground:
+        case PaintPhase::EventRegion:
+        case PaintPhase::TextClip:
+        case PaintPhase::Mask:
+        case PaintPhase::Selection:
+        case PaintPhase::Outline:
+        case PaintPhase::ChildOutlines:
+        case PaintPhase::SelfOutline:   return true;
+        case PaintPhase::ChildBlockBackground:
+        case PaintPhase::ChildBlockBackgrounds:
+        case PaintPhase::Float:
+          // These phases are only needed in blocks-in-inline case.
+          return _inlineContent->HasBlockLevelBoxes();
+        default: return false;
+      }
+    };
+    if (!shouldPaintForPhase())
+    {
+      return;
+    }
+
+    if (!_inlineContent->HasPaintedInlineLevelBoxes())
+    {
+      if (!_inlineContent->HasBlockLevelBoxes())
+      {
+        return;
+      }
+      if (!layerRenderer)
+      {
+        // Shortcut block-only painting.
+        Flow().PaintBlockLevelContentInInline(paintInfo, paintOffset);
+        return;
+      }
+    }
+
+    InlineContentPainter {paintInfo, paintOffset, layerRenderer, *_inlineContent, Flow()}.Paint();
   }
 
   std::pair<LayoutUnit, LayoutUnit> LineLayout::ComputeIntrinsicWidthConstraints() noexcept

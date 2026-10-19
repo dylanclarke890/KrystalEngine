@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Core/CharacterProperties.hpp"
+#include "Krystal.Booey/Graphics/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/FontCascadeDescription.hpp"
 #include "Krystal.Booey/Graphics/FontCascadeFonts.hpp"
 #include "Krystal.Booey/Graphics/FontMetrics.hpp"
@@ -19,6 +20,8 @@
 
 namespace krys::boo
 {
+  class GraphicsContext;
+
   /// @brief How far a run's glyphs reach outside its box.
   struct GlyphOverflow
   {
@@ -60,7 +63,9 @@ namespace krys::boo
 
   /// @brief The fonts a run of text is drawn with: a description, the spacing applied between letters and
   /// words, and the fonts that description resolves to (with the document's font selector).
-  /// @note FIXME: No drawing APIs yet.
+  /// @note FIXME: Display lists of text runs (`displayListForTextRun`, for the glyph display list cache) and
+  /// the line segments where glyphs cross a rect (`lineSegmentsForIntersectionsWithRect`, for skip-ink) are
+  /// still to come.
   class FontCascade final
   {
     friend struct WidthIterator;
@@ -134,6 +139,22 @@ namespace krys::boo
     {
       return GetFontDescription().ComputedSize();
     }
+
+    enum class CustomFontNotReadyAction : bool
+    {
+      DoNotPaintIfFontNotReady,
+      UseFallbackIfFontNotReady
+    };
+    /// @brief Draws @p run from byte offset @p from to @p to at @p point (its start on the baseline).
+    /// @return How far the first glyph drawn is from @p point (the width of the text before @p from).
+    FloatSize DrawText(GraphicsContext &context, const TextRun &run, const FloatPoint &point, uint32 from = 0,
+                       Maybe<uint32> to = null,
+                       CustomFontNotReadyAction customFontNotReadyAction =
+                         CustomFontNotReadyAction::DoNotPaintIfFontNotReady) const noexcept;
+    /// @brief Draws @p mark over each character of @p run from byte offset @p from to @p to that can take
+    /// one, @p point being the run's start on the baseline the marks are drawn on.
+    void DrawEmphasisMarks(GraphicsContext &context, const TextRun &run, const StringAtom &mark,
+                           const FloatPoint &point, uint32 from = 0, Maybe<uint32> to = null) const noexcept;
 
     /// @brief The width of @p run from byte offset @p from to @p to.
     /// @param outWidthBeforeRange Set to the width of the run before @p from.
@@ -429,6 +450,30 @@ namespace krys::boo
     }
 
   private:
+    enum class ForTextEmphasisOrNot : bool
+    {
+      NotForTextEmphasis,
+      ForTextEmphasis
+    };
+
+    /// @brief The glyphs of @p run from byte offset @p from to @p to, in visual order, the initial advance
+    /// being the width before them.
+    KRYS_NODISCARD GlyphBuffer LayoutText(
+      CodePath codePath, const TextRun &run, uint32 from, uint32 to,
+      ForTextEmphasisOrNot forTextEmphasis = ForTextEmphasisOrNot::NotForTextEmphasis) const noexcept;
+    KRYS_NODISCARD GlyphBuffer LayoutSimpleText(
+      const TextRun &run, uint32 from, uint32 to,
+      ForTextEmphasisOrNot forTextEmphasis = ForTextEmphasisOrNot::NotForTextEmphasis) const noexcept;
+    KRYS_NODISCARD GlyphBuffer LayoutComplexText(
+      const TextRun &run, uint32 from, uint32 to,
+      ForTextEmphasisOrNot forTextEmphasis = ForTextEmphasisOrNot::NotForTextEmphasis) const noexcept;
+    /// @brief Draws @p glyphBuffer's glyphs from @p point, one run per font, moving @p point past them.
+    /// @note @p point already includes the glyph buffer's initial advance.
+    void DrawGlyphBuffer(GraphicsContext &context, const GlyphBuffer &glyphBuffer, FloatPoint &point,
+                         CustomFontNotReadyAction customFontNotReadyAction) const noexcept;
+    void DrawEmphasisMarks(GraphicsContext &context, const GlyphBuffer &glyphBuffer, const StringAtom &mark,
+                           const FloatPoint &point) const noexcept;
+
     KRYS_NODISCARD int32 OffsetForPositionForSimpleText(const TextRun &run, float position,
                                                         bool includePartialGlyphs) const noexcept;
     KRYS_NODISCARD int32 OffsetForPositionForComplexText(const TextRun &run, float position,

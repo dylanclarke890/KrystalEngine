@@ -40,6 +40,14 @@ namespace krys::boo
     SetHasTransformRelatedProperty(false);
   }
 
+  void RenderInline::Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    if (auto *lineLayout = layout_integration::LineLayout::Containing(*this))
+    {
+      lineLayout->Paint(paintInfo, paintOffset, this);
+    }
+  }
+
   utf8_stringview RenderInline::RenderName() const noexcept
   {
     if (IsRelativelyPositioned())

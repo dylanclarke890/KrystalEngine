@@ -12,14 +12,18 @@
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Core/Types/StringAtom.hpp"
 
 namespace krys::boo
 {
   class FloatRoundedRect;
   class Font;
+  class FontCascade;
   class Gradient;
   class Path;
+  class TextRun;
 
   enum class RequiresClipToRect : bool
   {
@@ -34,12 +38,11 @@ namespace krys::boo
 
   /// @brief Where painting goes: state (brushes, shadows, compositing, transforms, clips) and the drawing
   /// operations, implemented by display list recorders and drawing backends.
-  /// FIXME: Bitmap images, image buffers, patterns, filters, system images, video frames and form controls
-  /// (`drawNativeImage`, `drawTiledImage` by tile rules, `drawImageBuffer`, `drawConsumingImageBuffer`,
-  /// `drawFilteredImageBuffer`, `drawPattern`, `drawSystemImage`, `drawVideoFrame`, `drawControlPart`,
-  /// `clipToImageBuffer`, the image buffer factories and the fill and stroke patterns) come with images;
-  /// generated images draw themselves through `DrawImage` and `DrawTiledImage`.
-  /// FIXME: Text runs (`drawText`, `drawEmphasisMarks`, `drawBidiText`) come with text painting.
+  /// FIXME: Bitmap images, filters, system images, video frames and form controls (`drawNativeImage`,
+  /// `drawConsumingImageBuffer`, `drawFilteredImageBuffer`, `drawPattern` of native images,
+  /// `drawSystemImage`, `drawVideoFrame`, `drawControlPart`, `clipToImageBuffer` and the fill and stroke
+  /// patterns) come with images.
+  /// FIXME: Bidirectional text runs (`drawBidiText`) need a bidi resolver over text runs.
   class GraphicsContext
   {
     KRYS_NON_COPYABLE(GraphicsContext);
@@ -481,6 +484,12 @@ namespace krys::boo
 
     // Text
 
+    /// @brief Draws @p run from byte offset @p from to @p to at @p point, through `DrawGlyphs`.
+    /// @return How far the first glyph drawn is from @p point.
+    virtual FloatSize DrawText(const FontCascade &, const TextRun &, const FloatPoint &, uint32 from = 0,
+                               Maybe<uint32> to = null) noexcept;
+    virtual void DrawEmphasisMarks(const FontCascade &, const TextRun &, const StringAtom &mark,
+                                   const FloatPoint &, uint32 from = 0, Maybe<uint32> to = null) noexcept;
     virtual void DrawGlyphs(const Font &, Span<const GlyphBufferGlyph>, Span<const GlyphBufferAdvance>,
                             const FloatPoint &, FontSmoothingMode) noexcept = 0;
     virtual void DrawDisplayList(const display_list::DisplayList &) noexcept;

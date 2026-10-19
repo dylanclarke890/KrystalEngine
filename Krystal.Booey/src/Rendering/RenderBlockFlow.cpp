@@ -4472,12 +4472,37 @@ namespace krys::boo
     }
   }
 
-  void RenderBlockFlow::PaintInlineChildren(PaintInfo &, const LayoutPoint &) noexcept
+  void RenderBlockFlow::PaintInlineChildren(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
   {
     krys_debug_assert(ChildrenInline());
 
-    // FIXME: Inline content (the inline layout's paint: text, inline boxes and atomic inlines) comes with
-    // text painting.
+    if (!InlineLayout())
+    {
+      return;
+    }
+
+    InlineLayout()->Paint(paintInfo, paintOffset);
+  }
+
+  void RenderBlockFlow::PaintBlockLevelContentInInline(PaintInfo &paintInfo,
+                                                       const LayoutPoint &paintOffset) noexcept
+  {
+    krys_debug_assert(ChildrenInline());
+
+    PaintInfo paintInfoForChildren = PaintInfoForBlockChildren(paintInfo);
+
+    for (auto walker = InlineWalker(*this); !walker.AtEnd(); walker.Advance())
+    {
+      auto *child = DynamicDowncast<RenderBox>(walker.Current());
+      if (!child)
+      {
+        continue;
+      }
+      if (!PaintChild(*child, paintInfo, paintOffset, paintInfoForChildren, PaintAsBlock))
+      {
+        return;
+      }
+    }
   }
 
 #pragma endregion

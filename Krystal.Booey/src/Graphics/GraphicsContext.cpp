@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp"
 #include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "Krystal.Booey/Graphics/Image.hpp"
 #include "Krystal.Booey/Graphics/Path.hpp"
@@ -118,6 +119,19 @@ namespace krys::boo
   {
     krys_debug_assert(_transparencyLayerCount > 0);
     --_transparencyLayerCount;
+  }
+
+  FloatSize GraphicsContext::DrawText(const FontCascade &font, const TextRun &run, const FloatPoint &point,
+                                      uint32 from, Maybe<uint32> to) noexcept
+  {
+    // Display list recording for text content is done at glyphs level. See GraphicsContext::drawGlyphs.
+    return font.DrawText(*this, run, point, from, to);
+  }
+
+  void GraphicsContext::DrawEmphasisMarks(const FontCascade &font, const TextRun &run, const StringAtom &mark,
+                                          const FloatPoint &point, uint32 from, Maybe<uint32> to) noexcept
+  {
+    font.DrawEmphasisMarks(*this, run, mark, point, from, to);
   }
 
   void GraphicsContext::DrawGlyphsImmediate(const Font &font, Span<const GlyphBufferGlyph> glyphs,

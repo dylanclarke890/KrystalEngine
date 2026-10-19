@@ -267,11 +267,10 @@ namespace krys
     /// Sans as Booey's fonts.
     void CreatePage() noexcept
     {
+      (void)ui::Page::AddFontDirectory(std::filesystem::path {KRYS_EDITOR_FONTS_DIR});
       _page = CreateUnique<ui::Page>(PageSize());
       LoadPage();
       auto &database = boo::FontDatabase::Singleton();
-      (void)database.AddFontFile(std::filesystem::path {KRYS_EDITOR_FONTS_DIR}
-                                 / "LiberationSans-Regular.ttf");
       auto faces = database.FacesInFamily(u8"Liberation Sans");
       if (faces.empty())
       {

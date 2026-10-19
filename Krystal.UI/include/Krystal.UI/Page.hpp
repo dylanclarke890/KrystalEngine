@@ -35,6 +35,11 @@ namespace krys::ui
     /// @brief Replaces the document with one parsed from the UTF-8 file at @p path.
     KRYS_NODISCARD Expected<void> LoadFile(const std::filesystem::path &path) noexcept;
 
+    /// @brief Registers the font files (`.ttf`, `.otf`, `.ttc`, `.otc`) in @p directory for every page, so
+    /// `font-family` finds them by name; documents already loaded pick them up at their next update.
+    /// @return How many faces were registered.
+    static uint32 AddFontDirectory(const std::filesystem::path &directory);
+
     /// @brief Resizes the viewport; the document is laid out again at its next update.
     void Resize(const boo::IntSize &viewportSize) noexcept;
     KRYS_NODISCARD boo::IntSize ViewportSize() const noexcept;

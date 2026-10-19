@@ -24,6 +24,7 @@ namespace krys::boo
   class RenderBox;
   class RenderElement;
   class RenderInline;
+  struct PaintInfo;
   class RenderObject;
   class RenderText;
   class RenderView;
@@ -48,7 +49,7 @@ namespace krys::boo::layout_integration
   /// @brief Lays out a block container's inline content with the inline formatting context and hands the
   /// result to the render tree: the lines and boxes, the geometry of the boxes in it, its height and
   /// baselines.
-  // FIXME: Painting, hit testing, pagination and SVG text, once there are those.
+  // FIXME: Hit testing, pagination and SVG text, once there are those.
   class LineLayout final : public CanMakeCheckedPtr<LineLayout>
   {
     KRYS_NON_COPY_MOVABLE(LineLayout);
@@ -105,6 +106,11 @@ namespace krys::boo::layout_integration
     bool BoxContentWillChange(const RenderBox &renderer) noexcept;
 
     KRYS_NODISCARD std::pair<LayoutUnit, LayoutUnit> ComputeIntrinsicWidthConstraints() noexcept;
+
+    /// @brief Paints the inline content for @p paintInfo's phase.
+    /// @param layerRenderer The inline box whose layer is being painted, if any: only its content is painted.
+    void Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset,
+               const RenderInline *layerRenderer = nullptr) noexcept;
 
     Maybe<LayoutRect> Layout(RenderBlockFlow::MarginInfo &marginInfo,
                              ForceFullLayout forceFullLayout = ForceFullLayout::No) noexcept;
@@ -165,6 +171,7 @@ namespace krys::boo::layout_integration
     KRYS_NODISCARD bool HasBlocks() const noexcept;
 
   private:
+    KRYS_NODISCARD bool IsContentConsideredStale() const noexcept;
     void PreparePlacedFloats() noexcept;
     FloatRect ConstructContent(const layout::InlineLayoutState &inlineLayoutState,
                                layout::InlineLayoutResult &&layoutResult) noexcept;

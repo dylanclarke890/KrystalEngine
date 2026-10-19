@@ -16,10 +16,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderInline);
 
   public:
-    void Paint(PaintInfo &, const LayoutPoint &) noexcept override
-    {
-      // FIXME: The inline's boxes (the inline layout's paint for this renderer) come with text painting.
-    }
+    void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
 
     RenderInline(Type type, dom::Element &element, RenderStyle &&style) noexcept;
     RenderInline(Type type, dom::Document &document, RenderStyle &&style) noexcept;

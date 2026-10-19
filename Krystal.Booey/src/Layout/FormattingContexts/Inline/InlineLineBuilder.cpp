@@ -2193,7 +2193,7 @@ namespace krys::boo::layout
     // 4. check if there's enough space for both content and its cloned decoration(s)
     // 5. if not, let's try again (go to #1) with reduced available space
     // At some point we either manage to fit the content + its cloned decoration(s) or we run out of available
-    // space e.g. <div style="width: 30px; word-break: break-all">ab<span style="-webkit-box-decoration-break:
+    // space e.g. <div style="width: 30px; word-break: break-all">ab<span style="box-decoration-break:
     // clone; padding-right: 20px">cd</span>ef</div> (where each character is 10px wide) [ab<span>cd</span>ef]
     // is the continous content (there's no soft wrap opportunity in-between) The breaking position is between
     // [c] and [d]. We are going to put [abc] on the line which means we have to have space for the enclosing

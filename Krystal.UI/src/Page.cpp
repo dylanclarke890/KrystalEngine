@@ -1,6 +1,8 @@
 ﻿#include "Krystal.UI/Page.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
+#include "Krystal.Booey/Graphics/FontCache.hpp"
+#include "Krystal.Booey/Graphics/FontDatabase.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -58,6 +60,16 @@ namespace krys::ui
     }
     LoadHTML(utf8_string(bytes.begin(), bytes.end()));
     return {};
+  }
+
+  uint32 Page::AddFontDirectory(const std::filesystem::path &directory)
+  {
+    auto count = boo::FontDatabase::Singleton().AddFontDirectory(directory);
+    if (count)
+    {
+      boo::FontCache::InvalidateAllFontCaches();
+    }
+    return count;
   }
 
   void Page::Resize(const boo::IntSize &viewportSize) noexcept

@@ -364,6 +364,9 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/RenderLayer.cpp
 		tests/Rendering/BackgroundPainter.cpp
 		tests/Rendering/BorderPainter.cpp
+		tests/Rendering/InlineBoxPainter.cpp
+		tests/Rendering/MarkedText.cpp
+		tests/Rendering/TextBoxPainter.cpp
 		tests/Rendering/OutlinePainter.cpp
 		tests/Rendering/RenderLayerScrollableArea.cpp
 		tests/Rendering/RenderTreeAsText.cpp

@@ -517,6 +517,11 @@ namespace krys::boo
     void PaintFloats(PaintInfo &, const LayoutPoint &, bool preservePhase = false) noexcept override;
     void PaintInlineChildren(PaintInfo &, const LayoutPoint &) noexcept override;
 
+  public:
+    /// @brief Paints the blocks in this block's inline content, when it has no other painted content.
+    void PaintBlockLevelContentInInline(PaintInfo &, const LayoutPoint &) noexcept;
+
+  protected:
     void LayoutBlockWithNoChildren() noexcept;
 
     // This method is called at the start of layout to wipe away all of the floats in our floating objects

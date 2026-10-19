@@ -9493,7 +9493,7 @@
         "url": "https://www.w3.org/TR/css3-multicol/#columns"
       }
     },
-    "-webkit-box-decoration-break": {
+    "box-decoration-break": {
       "animation-type": "discrete",
       "initial": "slice",
       "values": ["clone", "slice"],

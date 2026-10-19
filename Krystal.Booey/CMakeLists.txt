@@ -1419,6 +1419,16 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Graphics/ImageBufferBackend.hpp
   include/Krystal.Booey/Graphics/ImageBufferDisplayListBackend.hpp
   include/Krystal.Booey/Graphics/RenderingResourceIdentifier.hpp
+  # Text and inline boxes (G4d1)
+  include/Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContentPainter.hpp
+  include/Krystal.Booey/Rendering/InlineBoxPainter.hpp
+  include/Krystal.Booey/Rendering/MarkedText.hpp
+  include/Krystal.Booey/Rendering/StyledMarkedText.hpp
+  include/Krystal.Booey/Rendering/TextBoxPainter.hpp
+  include/Krystal.Booey/Rendering/TextBoxSelectableRange.hpp
+  include/Krystal.Booey/Rendering/TextDecorationPainter.hpp
+  include/Krystal.Booey/Rendering/TextPaintStyle.hpp
+  include/Krystal.Booey/Rendering/TextPainter.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -2353,6 +2363,15 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Graphics/ImageBuffer.cpp
   src/Graphics/ImageBufferBackend.cpp
   src/Graphics/ImageBufferDisplayListBackend.cpp
+  # Text and inline boxes (G4d1)
+  src/Layout/Integration/Inline/LayoutIntegrationInlineContentPainter.cpp
+  src/Rendering/InlineBoxPainter.cpp
+  src/Rendering/MarkedText.cpp
+  src/Rendering/StyledMarkedText.cpp
+  src/Rendering/TextBoxPainter.cpp
+  src/Rendering/TextDecorationPainter.cpp
+  src/Rendering/TextPaintStyle.cpp
+  src/Rendering/TextPainter.cpp
 )
 
 target_precompile_headers(Krystal.Booey

@@ -2,6 +2,7 @@
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
+#include "Krystal.Booey/Layout/LayoutTree/LayoutInlineTextBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
@@ -40,6 +41,33 @@ namespace krys::boo::inline_iterator
                characterScanForCodePath};
     textRun.SetTabSize(!style.CollapseWhiteSpace(), style::ToPlatform<style::TabSize> {}(style.GetTabSize()));
     return textRun;
+  }
+
+  TextBoxSelectableRange BoxModernPath::SelectableRange() const noexcept
+  {
+    auto &box = GetBox();
+    auto &textContent = box.GetText();
+    auto extraTrailingLength = [&]() -> uint32
+    {
+      if (textContent.HasHyphen())
+      {
+        return static_cast<uint32>(box.Style().HyphenString().View().size());
+      }
+      if (Downcast<layout::InlineTextBox>(box.LayoutBox()).IsCombined())
+      {
+        krys_debug_assert(textContent.RenderedContent().size() >= Length());
+        return static_cast<uint32>(textContent.RenderedContent().size() - Length());
+      }
+      return 0;
+    };
+    auto partiallyVisibleContentLength = textContent.PartiallyVisibleContentLength();
+    return {Start(),
+            Length(),
+            extraTrailingLength(),
+            box.IsLineBreak(),
+            partiallyVisibleContentLength ? Maybe<uint32>(static_cast<uint32>(*partiallyVisibleContentLength))
+                                          : null,
+            FormattingContextRoot().GetWritingMode().BidiDirection() != Direction()};
   }
 
   bool BoxIterator::operator==(const BoxIterator &other) const noexcept

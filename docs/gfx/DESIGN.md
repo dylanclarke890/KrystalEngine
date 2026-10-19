@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-19): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, G2f, strokes, G2g, clips, G2h, layers and blend modes, G2i, gradients, and G2j, shadows, and G2k, golden image tests, are done); Krystal.Text (T1) and text (G3) are done; the Booey integration (G4) is in progress (G4a, the graphics context and display lists, G4b, Krystal.UI and replay, G4c1, the paint plumbing, layers and backgrounds, G4c2, borders, shadows and outlines, and G4c3, image buffers and patterns, are done; see *G4 plan*).
+Status (2026-10-19): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, G2f, strokes, G2g, clips, G2h, layers and blend modes, G2i, gradients, and G2j, shadows, and G2k, golden image tests, are done); Krystal.Text (T1) and text (G3) are done; the Booey integration (G4) is in progress (G4a, the graphics context and display lists, G4b, Krystal.UI and replay, G4c1, the paint plumbing, layers and backgrounds, G4c2, borders, shadows and outlines, G4c3, image buffers and patterns, and G4d1, text and inline boxes, are done; see *G4 plan*).
 
 ## Why
 
@@ -429,7 +429,8 @@ Booey has layout (block, inline, flex, grid, table), the layer tree, fonts holdi
   - **G4c1, paint plumbing, layers and backgrounds** (Booey): `PaintPhase`, `PaintInfo`, the renderers' `paint`, `paintObject` and `paintChildren`, `RenderLayer::paintLayer` (stacking order, opacity layers, overflow clips, transforms, `z-index`, positioned content), `LocalFrameView::paintContents` and `RenderView`'s painting, and `BackgroundPainter` for colours and gradients.
   - **G4c2, borders, shadows and outlines** (Booey): `BorderPainter`, `BorderShape` and `BorderEdge` (every style, rounded corners, multi-coloured sides through side clips), outer and inset box shadows, `OutlinePainter` and focus rings.
   - **G4c3, image buffers and patterns** (Booey, Krystal.UI, Render2D): `ImageBuffer` with a display list backend, `GraphicsContext::drawImageBuffer` and `drawPattern`, gradient tiles drawn as upstream (rendered once into an image buffer, then filled as a pattern); replay renders image buffers into textures, and Render2D fills with a repeating image.
-  - **G4d, text** (Booey): `FontCascade::drawText` and `drawGlyphBuffer`, `InlineBoxPainter`, `TextBoxPainter`, `TextPainter`, `TextDecorationPainter`, `text-shadow`, list markers and ellipses.
+  - **G4d1, text and inline boxes** (Booey): `InlineContentPainter`, `TextBoxPainter`, `TextPainter`, `FontCascade::drawText` and `drawGlyphBuffer`, `text-shadow`, `InlineBoxPainter`, atomic inlines.
+  - **G4d2, decorations, markers and ellipses** (Booey): `TextDecorationPainter` with skip-ink, emphasis marks, list markers, ellipses, inline outlines.
   - **G4e, the other boxes** (Booey): flex, grid and table painting, collapsed table borders, placeholders for replaced content.
   - **G4f, hit testing and clicks** (Booey and Krystal.UI): `HitTestRequest`, `HitTestLocation`, `HitTestResult`, `RenderLayer::hitTest`, `nodeAtPoint` for boxes and inline content; mouse move, down, up and click events with hover and active state; Krystal.UI routes the window's mouse to the page.
 - **Tests:** the Booey parts compare display list dumps of small documents (as layout compares render tree dumps); the whole pipeline is checked with page goldens, HTML drawn through Krystal.UI and compared with Chrome's rendering (`tools/golden/capture_chrome.py`, extended to pages): strictly for boxes, loosely for text. The Booey parts follow the porting checklist and get ledger entries in `docs/booey/PORTING.md`.
@@ -480,6 +481,28 @@ Replaces G4c1's shortcut of filling each repeated gradient tile with its own gra
 - **Out (FIXMEs):** bitmap images (`<img>`, `url()` backgrounds and border images) reuse this later, with decoding and resource loading; `NativeImage` and its items; accelerated (GPU) backends of `ImageBuffer` beyond the display list one; luminance masks.
 - **Editor:** the border image demo moves to a source that isn't a sliced diagonal stripe pattern (which breaks at every tile join, in Chrome too).
 - **Tests:** Booey dumps of tiled gradients and border images (the image buffer and pattern items); Render2D image pattern tests (repeat, phase, spacing, transforms, sampling) against direct per-tile drawing; the `backgrounds` and `border-images` page goldens checked against Chrome again, the latter strictly if the tiling now matches.
+
+### G4d plan (decided 2026-10-19)
+
+Two parts (decided by the user). Booey has the modern inline layout (the inline formatting context, its display boxes, `InlineContent` and the inline iterators), shaping (`FontCascade`, `WidthIterator`, `ComplexTextController` with HarfBuzz, `GlyphBuffer`), the bundled Liberation Sans and the text style values (`TextShadow` among them); nothing paints inline content yet. Krystal.UI already replays glyphs, text lines and drop shadows, so the parts are mostly Booey's.
+
+- **G4d1, text and inline boxes:**
+  - **Inline painting:** `LineLayout::paint` and `InlineContentPainter` (the display boxes in order, damage culled to the paint rect), from `RenderBlockFlow::paintInlineChildren` and the layers' painting of `RenderInline`s.
+  - **Text:** `TextBoxPainter` (the background and foreground phases, the text origin, combined and vertical text), `TextPainter`, `TextPaintStyle` and `MarkedText` and `StyledMarkedText`, unmarked only: selection, document markers and highlights make no marks (FIXMEs, as G4 leaves them out).
+  - **Drawing:** `FontCascade::drawText` and `drawGlyphBuffer`, `GraphicsContext::drawText`, through the existing glyph item.
+  - **`text-shadow`:** every shadow, blurred and offset, through the context's drop shadow as upstream.
+  - **`InlineBoxPainter`:** inline boxes' backgrounds, borders and box shadows, split across lines with their slices.
+  - **Atomic inlines:** inline blocks and replaced placeholders paint in line order (`paintAsInlineBlock`).
+  - **Krystal.UI:** `Page` registers font directories; the editor and the goldens register `third-party/liberation-fonts`, so bold and italic have their own faces.
+- **G4d2, decorations, markers and ellipses:**
+  - **`TextDecorationPainter`:** underlines, overlines and line-throughs in every style (wavy included), thickness and offset, decorations' shadows.
+  - **`text-decoration-skip-ink`** (decided: now, not a FIXME): `FontCascade::lineSegmentsForIntersectionsWithRect` with `Font::pathForGlyph` (the glyph's FreeType outline as a `Path`) and the glyph iteration state, so underlines and overlines break around descenders.
+  - **Emphasis marks:** `FontCascade::drawEmphasisMarks`.
+  - **List markers:** `RenderListMarker::paint` (disc, circle, square and counters as text).
+  - **Ellipses:** `EllipsisBoxPainter`, for `text-overflow: ellipsis`.
+  - **Inline outlines:** inlines' focus ring and outline rects from their line boxes, continuation outlines (left from G4c2).
+- **Tests:** Booey compares display list dumps of small documents (text runs and glyph positions, mixed fonts, bidi, shadows, inline boxes across lines; decorations, skip-ink, markers and ellipses in G4d2); Krystal.UI adds a `text` page golden in Liberation Sans, its Chrome comparison reported only (Chrome on Windows rasterises with DirectWrite, as for the G3b scene).
+- **Editor:** the page gains text (headings, paragraphs, inline spans with backgrounds and borders, text shadows) in G4d1, and decorations, a list and an ellipsis in G4d2.
 
 ### G2a as built (2026-10-18)
 
@@ -707,6 +730,14 @@ Testing: the device's hidden window gives tests a real OpenGL context (Krystal.G
 - **Fixed:** hard colour stops in repeated gradients are soft where Chrome's are (the tile is sampled), and the dotted seams where layers of hard-stopped tiles met are gone (every tile is the same pixels).
 - **Editor:** the border image comes off the page: its stripes, sliced at a third of a box that isn't square, skew and break at every tile join, in Chrome too.
 - **Tests:** Render2D: patterns repeat as the image drawn tile by tile, move and scale with pattern space, leave spacing transparent, join without seams under fractional scales, clamp when not repeated, paint paths and fade; another renderer's frame drawn into a texture is drawn in the same frame (124 cases). Krystal.UI: image buffers and their patterns replay (19 cases); the `border-images` golden is updated (its Chrome comparison stays reported only: Chrome spaces `space` tiles its own way). Booey: the tiled gradient and border image dumps show the pattern items.
+
+### G4d1 as built (2026-10-19)
+
+- **Booey** (the ledger entry is *Text and inline boxes* in `docs/booey/PORTING.md`): `LineLayout::Paint` and `InlineContentPainter` paint a block's inline content from `RenderBlockFlow::PaintInlineChildren` (and an inline's layer from `RenderInline::Paint`): text boxes through `TextBoxPainter` and `TextPainter`, inline boxes through `InlineBoxPainter`, atomic inlines with `PaintAsInlineBlock` and blocks in inline as blocks. Text is unmarked text (`MarkedText`, `StyledMarkedText`, `TextPaintStyle`), drawn with `FontCascade::DrawText` into the glyph items; each `text-shadow` is drawn as upstream (`ShadowApplier`: every shadow but the last alone, clipped to where it falls with the text moved off it, the last with the text); emphasis marks are drawn with the text (moved here from G4d2). Inline boxes paint their box shadows, backgrounds and borders per slice, open where they break across lines, and as one strip for border images and backgrounds with images or radii.
+- **Krystal.UI:** `Page::AddFontDirectory` registers a directory's fonts for every page; the editor and the goldens register `third-party/liberation-fonts`, which gains Liberation Sans Bold, Italic and Bold Italic (2.1.5, as the regular face), so bold and italic text have faces of their own.
+- **Editor:** the page's first row is text: a heading, a paragraph with a wrapping inline box, coloured, bold, italic and larger words, and a card of soft, layered and glowing text shadows.
+- **Tests:** Booey compares dumps of text runs, shadows, right-to-left and hidden text, emphasis marks and inline boxes (11 cases with the marked text tests); Krystal.UI adds the `text` page golden (a heading, a paragraph with a wrapping inline box, bold and italic words, layered shadows, an inline block and right-to-left text; the scene gives Chrome all four faces with `@font-face`), its Chrome comparison reported only: the glyphs and boxes land in the same places, but Chrome on Windows rasterises with DirectWrite (mean 8.2, as the G3b scene's 6.9).
+- **Not yet:** decorations, skip-ink, list markers, ellipses and inline outlines (G4d2); selection and markers stay out of G4.
 
 ## Open decisions
 

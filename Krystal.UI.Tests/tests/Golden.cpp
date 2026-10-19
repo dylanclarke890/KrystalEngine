@@ -20,6 +20,9 @@ namespace krys::ui::tests
     KRYS_NODISCARD GoldenImage Render(gfx::Device &device, gfx::Renderer2D &renderer, const std::string &name,
                                       uint32 width, uint32 height)
     {
+      // Liberation Sans, as the scenes name it.
+      static const auto fonts = Page::AddFontDirectory(std::filesystem::path {KRYS_UI_TESTS_FONTS_DIR});
+      (void)fonts;
       Page page({static_cast<int32>(width), static_cast<int32>(height)});
       REQUIRE(page.LoadFile(GoldenDirectory() / "scenes" / (name + ".html")).has_value());
 
@@ -129,5 +132,12 @@ namespace krys::ui::tests
     // Chrome tiles `repeat` and `space` pieces its own way (no joins between repeated tiles, hairline gaps
     // for space); the page follows the ported tiling, so only its own golden is checked.
     CheckPage("border-images", 360u, 200u, true);
+  }
+
+  TEST_CASE("Golden: text", "[UI][GPU][Golden]")
+  {
+    // Chrome on Windows rasterises glyphs with DirectWrite, whose hinting and contrast differ from
+    // FreeType's, so its golden is only reported.
+    CheckPage("text", 360u, 200u, true);
   }
 }
