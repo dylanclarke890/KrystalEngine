@@ -1,7 +1,10 @@
 ﻿#include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContentPainter.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContent.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
+#include "Krystal.Booey/Rendering/EllipsisBoxPainter.hpp"
 #include "Krystal.Booey/Rendering/InlineBoxPainter.hpp"
+#include "Krystal.Booey/Rendering/OutlinePainter.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
@@ -20,6 +23,24 @@ namespace krys::boo::layout_integration
   {
     _damageRect = _paintInfo.Rect;
     _damageRect.MoveBy(-_paintOffset);
+  }
+
+  void InlineContentPainter::PaintEllipsis(size_t lineIndex) noexcept
+  {
+    if ((_paintInfo.Phase != PaintPhase::Foreground && _paintInfo.Phase != PaintPhase::TextClip)
+        || Root().Style().UsedVisibility() != Visibility::Visible)
+    {
+      return;
+    }
+
+    auto lineBox =
+      inline_iterator::LineBox {inline_iterator::LineBoxIteratorModernPath {_inlineContent, lineIndex}};
+    if (!lineBox.HasEllipsis())
+    {
+      return;
+    }
+    // FIXME: The root's selection colours come with selection.
+    EllipsisBoxPainter {lineBox, _paintInfo, _paintOffset}.Paint();
   }
 
   void InlineContentPainter::PaintDisplayBox(const inline_display::Box &box) noexcept
@@ -83,7 +104,7 @@ namespace krys::boo::layout_integration
       auto inlineBoxPaintInfo = PaintInfo {_paintInfo};
       inlineBoxPaintInfo.Phase =
         _paintInfo.Phase == PaintPhase::ChildOutlines ? PaintPhase::Outline : _paintInfo.Phase;
-      // FIXME: The outline objects the inline boxes gather come with inline outlines.
+      inlineBoxPaintInfo.OutlineObjects = &_outlineObjects;
 
       InlineBoxPainter {_inlineContent, box, inlineBoxPaintInfo, _paintOffset}.Paint();
       return;
@@ -126,8 +147,24 @@ namespace krys::boo::layout_integration
   {
     auto layerPaintScope = LayerPaintScope {_inlineBoxWithLayer};
 
-    // FIXME: Line-ending ellipses (paintLineEndingEllipsisIfApplicable, painted after each line's last box)
-    // come with ellipses.
+    auto lastBoxLineIndex = Maybe<size_t> {};
+
+    auto paintLineEndingEllipsisIfApplicable = [&](Maybe<size_t> currentLineIndex)
+    {
+      // Since line ending ellipsis belongs to the line structure but we don't have the concept of painting
+      // the line itself let's paint it when we are either at the end of the content or finished painting a
+      // line with ellipsis. While normally ellipsis is on the last line, -webkit-line-clamp can make us put
+      // ellipsis on any line.
+      if (_inlineBoxWithLayer)
+      {
+        // Line ending ellipsis is never on the inline box (with layer).
+        return;
+      }
+      if (lastBoxLineIndex && (!currentLineIndex || *lastBoxLineIndex != currentLineIndex))
+      {
+        PaintEllipsis(*lastBoxLineIndex);
+      }
+    };
 
     for (auto &box : _inlineContent.BoxesForRect(_damageRect))
     {
@@ -157,12 +194,18 @@ namespace krys::boo::layout_integration
 
       if (includedInPaintScope && shouldPaintBoxForPhase())
       {
+        paintLineEndingEllipsisIfApplicable(box.LineIndex());
         PaintDisplayBox(box);
       }
+      lastBoxLineIndex = box.LineIndex();
     }
+    paintLineEndingEllipsisIfApplicable({});
 
-    // FIXME: The outlines of the inline boxes gathered above (OutlinePainter::paintOutline for each
-    // RenderInline) come with inline outlines.
+    OutlinePainter outlinePainter {_paintInfo};
+    for (auto *renderInline : _outlineObjects)
+    {
+      outlinePainter.PaintOutline(*renderInline, _paintOffset);
+    }
   }
 
   LayoutPoint

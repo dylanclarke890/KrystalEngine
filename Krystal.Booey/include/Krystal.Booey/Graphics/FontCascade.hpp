@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/Core/CharacterProperties.hpp"
 #include "Krystal.Booey/Graphics/FloatPoint.hpp"
+#include "Krystal.Booey/Graphics/FloatSegment.hpp"
 #include "Krystal.Booey/Graphics/FontCascadeDescription.hpp"
 #include "Krystal.Booey/Graphics/FontCascadeFonts.hpp"
 #include "Krystal.Booey/Graphics/FontMetrics.hpp"
@@ -63,8 +64,7 @@ namespace krys::boo
 
   /// @brief The fonts a run of text is drawn with: a description, the spacing applied between letters and
   /// words, and the fonts that description resolves to (with the document's font selector).
-  /// @note FIXME: Display lists of text runs (`displayListForTextRun`, for the glyph display list cache) and
-  /// the line segments where glyphs cross a rect (`lineSegmentsForIntersectionsWithRect`, for skip-ink) are
+  /// @note FIXME: Display lists of text runs (`displayListForTextRun`, for the glyph display list cache) are
   /// still to come.
   class FontCascade final
   {
@@ -155,6 +155,12 @@ namespace krys::boo
     /// one, @p point being the run's start on the baseline the marks are drawn on.
     void DrawEmphasisMarks(GraphicsContext &context, const TextRun &run, const StringAtom &mark,
                            const FloatPoint &point, uint32 from = 0, Maybe<uint32> to = null) const noexcept;
+    /// @brief Where @p run's glyphs, drawn from @p textOrigin, cross @p lineExtents (an underline or
+    /// overline), as spans along the line from its left: each glyph's outline where it crosses the line's top
+    /// and bottom, for decorations that skip ink.
+    KRYS_NODISCARD List<FloatSegment>
+      LineSegmentsForIntersectionsWithRect(const TextRun &run, const FloatPoint &textOrigin,
+                                           const FloatRect &lineExtents) const noexcept;
 
     /// @brief The width of @p run from byte offset @p from to @p to.
     /// @param outWidthBeforeRange Set to the width of the run before @p from.

@@ -1429,6 +1429,9 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/TextDecorationPainter.hpp
   include/Krystal.Booey/Rendering/TextPaintStyle.hpp
   include/Krystal.Booey/Rendering/TextPainter.hpp
+  # Decorations, markers and ellipses (G4d2)
+  include/Krystal.Booey/Graphics/FloatPointGraph.hpp
+  include/Krystal.Booey/Rendering/EllipsisBoxPainter.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -2372,6 +2375,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/TextDecorationPainter.cpp
   src/Rendering/TextPaintStyle.cpp
   src/Rendering/TextPainter.cpp
+  # Decorations, markers and ellipses (G4d2)
+  src/Graphics/FloatPointGraph.cpp
+  src/Rendering/EllipsisBoxPainter.cpp
 )
 
 target_precompile_headers(Krystal.Booey

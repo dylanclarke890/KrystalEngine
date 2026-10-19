@@ -57,6 +57,8 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD IntRect LinesBoundingBox() const noexcept;
+    /// @brief Adds the rects of the inline's line boxes, moved by @p additionalOffset, skipping empty ones.
+    void CollectLineBoxRects(List<LayoutRect> &rects, const LayoutPoint &additionalOffset) const noexcept;
 
     /// @brief The offset an absolutely positioned descendant gets from this in-flow positioned inline.
     KRYS_NODISCARD LayoutSize OffsetForInFlowPositionedInline(const RenderBox *child) const noexcept;

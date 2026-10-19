@@ -13,6 +13,7 @@
 #include FT_FREETYPE_H
 #include FT_ADVANCES_H
 #include FT_TRUETYPE_TABLES_H
+#include FT_OUTLINE_H
 
 namespace krys::boo
 {
@@ -711,6 +712,111 @@ namespace krys::boo
     }
 
     return FloatRect(left, top, width, height);
+  }
+
+  Path Font::PathForGlyph(Glyph glyph) const noexcept
+  {
+    if (_glyphPathMap)
+    {
+      if (const auto &path = _glyphPathMap->ExistingMetricsForGlyph(glyph))
+      {
+        return *path;
+      }
+    }
+    auto path = PlatformPathForGlyph(glyph);
+    if (!_glyphPathMap)
+    {
+      _glyphPathMap = CreateUnique<GlyphMetricsMap<Maybe<Path>>>();
+    }
+
+    _glyphPathMap->SetMetricsForGlyph(glyph, path);
+    return *_glyphPathMap->ExistingMetricsForGlyph(glyph);
+  }
+
+  Path Font::PlatformPathForGlyph(Glyph glyph) const noexcept
+  {
+    Path path;
+    auto *face = _platformData.Face();
+    if (!_platformData.Size() || !face)
+    {
+      return path;
+    }
+
+    // The outline in font units, unhinted, as the glyph's bounds are measured.
+    FT_Face ftFace = face->Face();
+    if (FT_Load_Glyph(ftFace, glyph, FT_LOAD_NO_SCALE | FT_LOAD_NO_BITMAP)
+        || ftFace->glyph->format != FT_GLYPH_FORMAT_OUTLINE)
+    {
+      return path;
+    }
+    FT_Outline &outline = ftFace->glyph->outline;
+    if (_platformData.SyntheticBold())
+    {
+      // Emboldened by a 24th of the em, as glyphs are drawn.
+      auto strength = static_cast<FT_Pos>(face->UnitsPerEm() / 24);
+      FT_Outline_EmboldenXY(&outline, strength, strength);
+    }
+
+    // Font units have y pointing up; the path has it pointing down, from the baseline.
+    float scale = Scale(_platformData);
+    float skew = _platformData.SyntheticOblique()
+                   ? std::tan(FontCascade::SyntheticObliqueAngle() * std::numbers::pi_v<float> / 180.f)
+                   : 0.f;
+    struct Decomposer
+    {
+      Path &Target;
+      float Scale;
+      float Skew;
+      bool Open {false};
+
+      KRYS_NODISCARD FloatPoint Map(const FT_Vector *v) const noexcept
+      {
+        float x = static_cast<float>(v->x) * Scale;
+        float y = -static_cast<float>(v->y) * Scale;
+        return {x - y * Skew, y};
+      }
+    } decomposer {path, scale, skew};
+
+    FT_Outline_Funcs funcs {};
+    funcs.move_to = [](const FT_Vector *to, void *user) -> int
+    {
+      auto &d = *static_cast<Decomposer *>(user);
+      if (d.Open)
+      {
+        d.Target.CloseSubpath();
+      }
+      d.Target.MoveTo(d.Map(to));
+      d.Open = true;
+      return 0;
+    };
+    funcs.line_to = [](const FT_Vector *to, void *user) -> int
+    {
+      auto &d = *static_cast<Decomposer *>(user);
+      d.Target.AddLineTo(d.Map(to));
+      return 0;
+    };
+    funcs.conic_to = [](const FT_Vector *control, const FT_Vector *to, void *user) -> int
+    {
+      auto &d = *static_cast<Decomposer *>(user);
+      d.Target.AddQuadCurveTo(d.Map(control), d.Map(to));
+      return 0;
+    };
+    funcs.cubic_to = [](const FT_Vector *control1, const FT_Vector *control2, const FT_Vector *to,
+                        void *user) -> int
+    {
+      auto &d = *static_cast<Decomposer *>(user);
+      d.Target.AddBezierCurveTo(d.Map(control1), d.Map(control2), d.Map(to));
+      return 0;
+    };
+    if (FT_Outline_Decompose(&outline, &funcs, &decomposer))
+    {
+      return Path();
+    }
+    if (decomposer.Open)
+    {
+      path.CloseSubpath();
+    }
+    return path;
   }
 
   float Font::PlatformWidthForGlyph(Glyph glyph) const noexcept

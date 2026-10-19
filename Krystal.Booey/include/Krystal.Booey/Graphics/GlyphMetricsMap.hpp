@@ -2,9 +2,11 @@
 
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Glyph.hpp"
+#include "Krystal.Booey/Graphics/Path.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
@@ -109,6 +111,12 @@ namespace krys::boo
   inline float GlyphMetricsMap<float>::UnknownMetrics() noexcept
   {
     return GlyphSizeUnknown;
+  }
+
+  template <>
+  inline Maybe<Path> GlyphMetricsMap<Maybe<Path>>::UnknownMetrics() noexcept
+  {
+    return null;
   }
 
   template <>

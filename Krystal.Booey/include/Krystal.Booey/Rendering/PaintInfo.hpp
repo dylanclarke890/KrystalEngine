@@ -5,10 +5,12 @@
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/PaintPhase.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Types/ListHashSet.hpp"
 
 namespace krys::boo
 {
   class RenderLayer;
+  class RenderInline;
   class RenderLayerModelObject;
   class RenderObject;
 
@@ -16,8 +18,8 @@ namespace krys::boo
    * Paint the object and its children, clipped by (x|y|w|h).
    * (tx|ty) is the calculated position of the parent
    */
-  /// FIXME: The continuation outlines to paint (`outlineObjects`) come with outlines; overlap test requests
-  /// (for plug-ins) and event and accessibility regions (`regionContext`) aren't ported.
+  /// FIXME: Overlap test requests (for plug-ins) and event and accessibility regions (`regionContext`) aren't
+  /// ported.
   struct PaintInfo
   {
     LayoutRect Rect;
@@ -25,6 +27,8 @@ namespace krys::boo
     EnumSet<boo::PaintBehavior> PaintBehavior;
     RenderObject *SubtreePaintRoot;               // used to draw just one element and its visual children
     const RenderLayerModelObject *PaintContainer; // the layer object that originates the current painting
+    /// @brief The inlines whose outlines the inline content being painted paints after its boxes.
+    ListHashSet<const RenderInline *> *OutlineObjects {nullptr};
     bool RequireSecurityOriginAccessForWidgets {false};
 
   private:

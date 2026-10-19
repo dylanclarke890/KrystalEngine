@@ -45,8 +45,8 @@ namespace krys::boo
 
   /// @brief Used to render the list item's marker.
   /// The RenderListMarker always has to be a child of a RenderListItem.
-  // FIXME: Painting (paint, relativeMarkerRect), selection and image loading (the image client, imageChanged)
-  // come with painting and resource loading.
+  // FIXME: Selection (the selection's background, localSelectionRect) and image loading (the image client,
+  // imageChanged) come with selection and resource loading.
   class RenderListMarker final : public RenderBox
   {
     KRYS_NON_COPY_MOVABLE(RenderListMarker);
@@ -61,10 +61,7 @@ namespace krys::boo
     Pair<float, float> _layoutBounds;
 
   public:
-    void Paint(PaintInfo &, const LayoutPoint &) noexcept final
-    {
-      // FIXME: Markers (their text, bullets and images) come with text painting.
-    }
+    void Paint(PaintInfo &, const LayoutPoint &) noexcept final;
 
     RenderListMarker(RenderListItem &listItem, RenderStyle &&style) noexcept;
     ~RenderListMarker() noexcept override;
@@ -90,6 +87,9 @@ namespace krys::boo
     void UpdateInlineMarginsAndContent() noexcept;
 
     KRYS_NODISCARD bool IsImage() const noexcept;
+
+    /// @brief Where the marker's image, bullet or text is drawn, relative to the marker.
+    KRYS_NODISCARD FloatRect RelativeMarkerRect() noexcept;
 
     KRYS_NODISCARD LayoutUnit LineLogicalOffsetForListItem() const noexcept
     {

@@ -3,12 +3,15 @@
 #include "Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/TextRun.hpp"
+#include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/Values/Lists/ListStyleType.hpp"
+#include "Krystal.Core/Maths/Base.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include <unicode/uchar.h>
@@ -150,6 +153,139 @@ namespace krys::boo
       // FIXME: Stop being the old image's client and become the new one's, once there's image loading.
       _image = krys::move(newImage);
     }
+  }
+
+  void RenderListMarker::Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    if (paintInfo.Phase != PaintPhase::Foreground && paintInfo.Phase != PaintPhase::Accessibility)
+    {
+      return;
+    }
+
+    if (Style().UsedVisibility() != Visibility::Visible)
+    {
+      return;
+    }
+
+    LayoutPoint boxOrigin(paintOffset + Location());
+    LayoutRect overflowRect(VisualOverflowRect());
+    overflowRect.MoveBy(boxOrigin);
+    if (!paintInfo.Rect.Intersects(overflowRect))
+    {
+      return;
+    }
+
+    LayoutRect box(boxOrigin, Size());
+
+    auto markerRect = RelativeMarkerRect();
+    markerRect.MoveBy(boxOrigin);
+
+    if (paintInfo.Phase == PaintPhase::Accessibility)
+    {
+      // FIXME: Accessibility bounds come with accessibility.
+      return;
+    }
+
+    if (markerRect.IsEmpty())
+    {
+      return;
+    }
+
+    GraphicsContext &context = paintInfo.Context();
+
+    // FIXME: The selection's background (when selectionState() isn't None) comes with selection.
+
+    if (IsImage())
+    {
+      if (RefPtr markerImage = _image->GetImage(this, markerRect.Size(), context))
+      {
+        context.DrawImage(*markerImage, markerRect);
+      }
+      return;
+    }
+
+    auto color = Style().VisitedDependentColorWithColorFilter(css::PropertyId::Color);
+    context.SetStrokeColor(color);
+    context.SetStrokeStyle(StrokeStyle::SolidStroke);
+    context.SetStrokeThickness(1.0f);
+    context.SetFillColor(color);
+
+    auto &listStyleType = Style().GetListStyleType();
+    if (listStyleType.IsDisc())
+    {
+      context.FillEllipse(markerRect);
+      return;
+    }
+    if (listStyleType.IsCircle())
+    {
+      context.StrokeEllipse(markerRect);
+      return;
+    }
+    if (listStyleType.IsSquare())
+    {
+      context.FillRect(markerRect);
+      return;
+    }
+    if (_textContent.IsEmpty())
+    {
+      return;
+    }
+
+    GraphicsContextStateSaver stateSaver(context, false);
+    if (!GetWritingMode().IsHorizontal())
+    {
+      markerRect.MoveBy(-FloatPoint(boxOrigin));
+      markerRect = markerRect.TransposedRect();
+      markerRect.MoveBy(FloatPoint(box.X(), box.Y() - LogicalHeight()));
+      stateSaver.Save();
+      context.Translate(markerRect.X(), markerRect.MaxY());
+      context.Rotate(deg2rad(90.f));
+      context.Translate(-markerRect.X(), -markerRect.MaxY());
+    }
+
+    auto textOrigin =
+      FloatPoint {markerRect.X(), markerRect.Y() + Snap(Style().MetricsOfPrimaryFont().Ascent())};
+    textOrigin = RoundPointToDevicePixels(LayoutPoint(textOrigin), GetDocument().DeviceScaleFactor(),
+                                          GetWritingMode().IsLogicalLeftInlineStart());
+    auto text = TextForRun(_textContent, Style());
+    context.DrawText(Style().GetFontCascade(), RenderBlock::ConstructTextRun(text, Style()), textOrigin);
+  }
+
+  FloatRect RenderListMarker::RelativeMarkerRect() noexcept
+  {
+    if (IsImage())
+    {
+      auto imageSize = _image->ImageSize(this, Style().UsedZoom());
+      return {0.f, 0.f, imageSize.Width(), imageSize.Height()};
+    }
+
+    FloatRect relativeRect;
+    if (WidthUsesMetricsOfPrimaryFont())
+    {
+      auto &fontMetrics = Style().MetricsOfPrimaryFont();
+      auto ascent = Snap(fontMetrics.Ascent());
+      auto bulletWidth = (ascent * 2 / 3 + 1) / 2;
+      relativeRect = {1, 3 * (ascent - ascent * 2 / 3) / 2, bulletWidth, bulletWidth};
+    }
+    else
+    {
+      if (_textContent.IsEmpty())
+      {
+        return {};
+      }
+      auto &font = Style().GetFontCascade();
+      auto text = TextForRun(_textContent, Style());
+      relativeRect = {0.f, 0.f, font.Width(RenderBlock::ConstructTextRun(text, Style())),
+                      Snap(font.MetricsOfPrimaryFont().Height())};
+    }
+
+    if (!GetWritingMode().IsHorizontal())
+    {
+      relativeRect = relativeRect.TransposedRect();
+      relativeRect.SetX(Width() - relativeRect.X() - relativeRect.Width());
+    }
+
+    return relativeRect;
   }
 
   bool RenderListMarker::IsImage() const noexcept

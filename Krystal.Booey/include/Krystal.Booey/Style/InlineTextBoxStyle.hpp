@@ -6,6 +6,13 @@
 namespace krys::boo
 {
   class RenderStyle;
+  class RenderText;
+
+  namespace inline_iterator
+  {
+    class InlineBox;
+    class LineBoxIterator;
+  }
 
   KRYS_NODISCARD inline float WavyOffsetFromDecoration() noexcept
   {
@@ -35,17 +42,27 @@ namespace krys::boo
     float TextRunOffsetFromBottomMost {0.f};
   };
 
-  // FIXME: The line box versions (inkOverflowForDecorations of a line box and text renderer,
-  // underlineOffsetForTextBoxPainting, overlineOffsetForTextBoxPainting), once there's inline layout.
-
   /// @brief The ink overflow of the text decorations of text with @p style.
   KRYS_NODISCARD GlyphOverflow InkOverflowForDecorations(const RenderStyle &style) noexcept;
   KRYS_NODISCARD GlyphOverflow InkOverflowForDecorations(
     const RenderStyle &style, TextUnderlinePositionUnder textUnderlinePositionUnder) noexcept;
+  /// @brief The ink overflow of the text decorations of @p renderer's text box from @p textBoxLogicalTop to
+  /// @p textBoxLogicalBottom on @p lineBox.
+  KRYS_NODISCARD GlyphOverflow InkOverflowForDecorations(const inline_iterator::LineBoxIterator &lineBox,
+                                                         const RenderText &renderer, float textBoxLogicalTop,
+                                                         float textBoxLogicalBottom) noexcept;
 
   /// @brief Whether underlines are aligned as for `text-underline-position: under` in a decorating box with
   /// @p decoratingBoxStyle.
   KRYS_NODISCARD bool IsAlignedForUnder(const RenderStyle &decoratingBoxStyle) noexcept;
 
+  /// @brief How far below the top of @p inlineBox's content an underline of its decorations (with @p style)
+  /// is drawn.
+  KRYS_NODISCARD float UnderlineOffsetForTextBoxPainting(const inline_iterator::InlineBox &inlineBox,
+                                                         const RenderStyle &style) noexcept;
+  /// @brief How far below the top of @p inlineBox's content an overline of its decorations (with @p style) is
+  /// drawn: only moved in vertical typographic modes.
+  KRYS_NODISCARD float OverlineOffsetForTextBoxPainting(const inline_iterator::InlineBox &inlineBox,
+                                                        const RenderStyle &style) noexcept;
   KRYS_NODISCARD float TextBoxEdgeAdjustmentForUnderline(const RenderStyle &style) noexcept;
 }

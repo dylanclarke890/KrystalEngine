@@ -813,6 +813,252 @@ namespace krys::boo
     DrawEmphasisMarks(context, glyphBuffer, mark, startPoint);
   }
 
+  namespace
+  {
+    enum class GlyphUnderlineType : uint8
+    {
+      SkipDescenders,
+      SkipGlyph,
+      DrawOverGlyph
+    };
+
+    KRYS_NODISCARD GlyphUnderlineType ComputeUnderlineType(const TextRun &textRun,
+                                                           const GlyphBuffer &glyphBuffer,
+                                                           uint32 index) noexcept
+    {
+      // In general, we want to skip descenders. However, skipping descenders on CJK characters leads to
+      // undesirable renderings, so we want to draw through CJK characters (on a character-by-character
+      // basis).
+      // FIXME: The CSS spec says this should instead be done by the user-agent stylesheet using the lang=
+      // attribute.
+      auto offsetInString = glyphBuffer.UncheckedStringOffsetAt(index);
+      if (offsetInString < 0 || static_cast<uint32>(offsetInString) >= textRun.Length())
+      {
+        return GlyphUnderlineType::SkipDescenders;
+      }
+
+      char32 baseCharacter =
+        text::DecodeUTF8(Span<const char8> {textRun.Text()}.subspan(static_cast<size_t>(offsetInString)))
+          .CodePoint;
+      // u_getIntPropertyValue with UCHAR_IDEOGRAPHIC doesn't return true for Japanese or Korean codepoints.
+      // Instead, we can use the "Unicode allocation block" for the character.
+      UBlockCode blockCode = ublock_getCode(static_cast<UChar32>(baseCharacter));
+      switch (blockCode)
+      {
+        case UBLOCK_CJK_RADICALS_SUPPLEMENT:
+        case UBLOCK_CJK_SYMBOLS_AND_PUNCTUATION:
+        case UBLOCK_ENCLOSED_CJK_LETTERS_AND_MONTHS:
+        case UBLOCK_CJK_COMPATIBILITY:
+        case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A:
+        case UBLOCK_CJK_UNIFIED_IDEOGRAPHS:
+        case UBLOCK_CJK_COMPATIBILITY_IDEOGRAPHS:
+        case UBLOCK_CJK_COMPATIBILITY_FORMS:
+        case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B:
+        case UBLOCK_CJK_COMPATIBILITY_IDEOGRAPHS_SUPPLEMENT:
+        case UBLOCK_CJK_STROKES:
+        case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_C:
+        case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_D:
+        case UBLOCK_IDEOGRAPHIC_DESCRIPTION_CHARACTERS:
+        case UBLOCK_LINEAR_B_IDEOGRAMS:
+        case UBLOCK_ENCLOSED_IDEOGRAPHIC_SUPPLEMENT:
+        case UBLOCK_HIRAGANA:
+        case UBLOCK_KATAKANA:
+        case UBLOCK_BOPOMOFO:
+        case UBLOCK_BOPOMOFO_EXTENDED:
+        case UBLOCK_HANGUL_JAMO:
+        case UBLOCK_HANGUL_COMPATIBILITY_JAMO:
+        case UBLOCK_HANGUL_SYLLABLES:
+        case UBLOCK_HANGUL_JAMO_EXTENDED_A:
+        case UBLOCK_HANGUL_JAMO_EXTENDED_B:                  return GlyphUnderlineType::DrawOverGlyph;
+        default:                                             return GlyphUnderlineType::SkipDescenders;
+      }
+    }
+
+    struct GlyphIterationState
+    {
+      FloatPoint StartingPoint;
+      FloatPoint CurrentPoint;
+      float Y1;
+      float Y2;
+      float MinX;
+      float MaxX;
+    };
+
+    KRYS_NODISCARD Maybe<float> FindIntersectionPoint(float y, FloatPoint p1, FloatPoint p2) noexcept
+    {
+      if ((p1.Y() < y && p2.Y() > y) || (p1.Y() > y && p2.Y() < y))
+      {
+        return p1.X() + (y - p1.Y()) * (p2.X() - p1.X()) / (p2.Y() - p1.Y());
+      }
+      return null;
+    }
+
+    void UpdateX(GlyphIterationState &state, float x) noexcept
+    {
+      state.MinX = std::min(state.MinX, x);
+      state.MaxX = std::max(state.MaxX, x);
+    }
+
+    // This function is invoked for each element of a glyph's path. It models each contour as straight lines
+    // and calculates the intersections between each pseudo-contour and two horizontal lines (the upper and
+    // lower bounds of an underline) found in GlyphIterationState::Y1 and GlyphIterationState::Y2. It keeps
+    // track of the leftmost and rightmost intersection in GlyphIterationState::MinX and
+    // GlyphIterationState::MaxX.
+    void FindPathIntersections(GlyphIterationState &state, const PathElement &element) noexcept
+    {
+      bool doIntersection = false;
+      FloatPoint point = FloatPoint();
+      switch (element.ElementType)
+      {
+        case PathElement::Type::MoveToPoint:
+          state.StartingPoint = element.Points[0];
+          state.CurrentPoint = element.Points[0];
+          break;
+        case PathElement::Type::AddLineToPoint:
+          doIntersection = true;
+          point = element.Points[0];
+          break;
+        case PathElement::Type::AddQuadCurveToPoint:
+          doIntersection = true;
+          point = element.Points[1];
+          break;
+        case PathElement::Type::AddCurveToPoint:
+          doIntersection = true;
+          point = element.Points[2];
+          break;
+        case PathElement::Type::CloseSubpath:
+          doIntersection = true;
+          point = state.StartingPoint;
+          break;
+      }
+      if (!doIntersection)
+      {
+        return;
+      }
+      if (auto intersectionPoint = FindIntersectionPoint(state.Y1, state.CurrentPoint, point))
+      {
+        UpdateX(state, *intersectionPoint);
+      }
+      if (auto intersectionPoint = FindIntersectionPoint(state.Y2, state.CurrentPoint, point))
+      {
+        UpdateX(state, *intersectionPoint);
+      }
+      if ((state.CurrentPoint.Y() >= state.Y1 && state.CurrentPoint.Y() <= state.Y2)
+          || (state.CurrentPoint.Y() <= state.Y1 && state.CurrentPoint.Y() >= state.Y2))
+      {
+        UpdateX(state, state.CurrentPoint.X());
+      }
+      state.CurrentPoint = point;
+    }
+
+    /// @brief Walks a glyph buffer's glyphs, giving each one's outline moved to where it's drawn.
+    class GlyphToPathTranslator
+    {
+    private:
+      uint32 _index {0};
+      const TextRun &_textRun;
+      const GlyphBuffer &_glyphBuffer;
+      const Font *_fontData;
+      AffineTransform _translation;
+
+    public:
+      GlyphToPathTranslator(const TextRun &textRun, const GlyphBuffer &glyphBuffer,
+                            const FloatPoint &textOrigin) noexcept
+          : _textRun(textRun), _glyphBuffer(glyphBuffer), _fontData(&glyphBuffer.FontAt(_index)),
+            _translation(AffineTransform::MakeTranslation(ToFloatSize(textOrigin)))
+      {
+      }
+
+      KRYS_NODISCARD bool ContainsMorePaths() const noexcept
+      {
+        return _index != _glyphBuffer.Size();
+      }
+
+      KRYS_NODISCARD Path GetPath() const noexcept
+      {
+        Path path = _fontData->PathForGlyph(_glyphBuffer.GlyphAt(_index));
+        path.Transform(_translation);
+        return path;
+      }
+
+      KRYS_NODISCARD std::pair<float, float> Extents() const noexcept
+      {
+        auto beginning = _translation.MapPoint(FloatPoint(0, 0));
+        auto advance = _glyphBuffer.AdvanceAt(_index);
+        auto end = _translation.MapSize(boo::Size(advance));
+        return std::make_pair(beginning.X(), beginning.X() + end.Width());
+      }
+
+      KRYS_NODISCARD GlyphUnderlineType UnderlineType() const noexcept
+      {
+        return ComputeUnderlineType(_textRun, _glyphBuffer, _index);
+      }
+
+      void Advance() noexcept
+      {
+        GlyphBufferAdvance advance = _glyphBuffer.AdvanceAt(_index);
+        _translation.Translate(boo::Size(advance));
+        ++_index;
+        if (_index < _glyphBuffer.Size())
+        {
+          _fontData = &_glyphBuffer.FontAt(_index);
+        }
+      }
+    };
+  }
+
+  List<FloatSegment>
+    FontCascade::LineSegmentsForIntersectionsWithRect(const TextRun &run, const FloatPoint &textOrigin,
+                                                      const FloatRect &lineExtents) const noexcept
+  {
+    List<FloatSegment> result;
+    if (IsLoadingCustomFonts())
+    {
+      return result;
+    }
+
+    auto glyphBuffer = LayoutText(GetCodePath(run), run, 0, run.Length());
+    if (!glyphBuffer.Size())
+    {
+      return result;
+    }
+
+    FloatPoint origin = textOrigin + boo::Size(glyphBuffer.InitialAdvance());
+    GlyphToPathTranslator translator(run, glyphBuffer, origin);
+    for (; translator.ContainsMorePaths(); translator.Advance())
+    {
+      GlyphIterationState info = {FloatPoint(0, 0),
+                                  FloatPoint(0, 0),
+                                  lineExtents.Y(),
+                                  lineExtents.Y() + lineExtents.Height(),
+                                  lineExtents.X() + lineExtents.Width(),
+                                  lineExtents.X()};
+      switch (translator.UnderlineType())
+      {
+        case GlyphUnderlineType::SkipDescenders:
+        {
+          Path path = translator.GetPath();
+          path.ApplyElements([&](const PathElement &element) { FindPathIntersections(info, element); });
+          if (info.MinX < info.MaxX)
+          {
+            result.push_back({info.MinX - lineExtents.X(), info.MaxX - lineExtents.X()});
+          }
+          break;
+        }
+        case GlyphUnderlineType::SkipGlyph:
+        {
+          std::pair<float, float> extents = translator.Extents();
+          result.push_back({extents.first - lineExtents.X(), extents.second - lineExtents.X()});
+          break;
+        }
+        case GlyphUnderlineType::DrawOverGlyph:
+          // Nothing to do
+          break;
+      }
+    }
+    return result;
+  }
+
   float FontCascade::WidthOfTextRange(const TextRun &run, uint32 from, uint32 to, float &outWidthBeforeRange,
                                       float &outWidthAfterRange) const noexcept
   {

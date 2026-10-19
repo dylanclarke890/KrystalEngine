@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Graphics/GlyphBufferMembers.hpp"
 #include "Krystal.Booey/Graphics/GlyphMetricsMap.hpp"
 #include "Krystal.Booey/Graphics/GlyphPage.hpp"
+#include "Krystal.Booey/Graphics/Path.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -131,6 +132,7 @@ namespace krys::boo
     mutable HashMap<uint32, RefPtr<GlyphPage>> _glyphPages;
     mutable GlyphMetricsMap<float> _glyphToWidthMap;
     mutable UniquePtr<GlyphMetricsMap<FloatRect>> _glyphToBoundsMap;
+    mutable UniquePtr<GlyphMetricsMap<Maybe<Path>>> _glyphPathMap;
     // Two bits per code point of `CodePointSupportIndex`: whether it's been checked, and whether it's
     // supported.
     mutable List<bool> _codePointSupport;
@@ -252,6 +254,8 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD FloatRect BoundsForGlyph(Glyph glyph) const noexcept;
+    /// @brief @p glyph's outline at the font's size, with its origin on the baseline and y pointing down.
+    KRYS_NODISCARD Path PathForGlyph(Glyph glyph) const noexcept;
     KRYS_NODISCARD SmallList<FloatRect, InlineGlyphRunCapacity>
       BoundsForGlyphs(Span<const Glyph> glyphs) const noexcept;
 
@@ -384,6 +388,7 @@ namespace krys::boo
     KRYS_NODISCARD DerivedFonts &EnsureDerivedFontData() const noexcept;
 
     KRYS_NODISCARD FloatRect PlatformBoundsForGlyph(Glyph glyph) const noexcept;
+    KRYS_NODISCARD Path PlatformPathForGlyph(Glyph glyph) const noexcept;
     KRYS_NODISCARD float PlatformWidthForGlyph(Glyph glyph) const noexcept;
   };
 }

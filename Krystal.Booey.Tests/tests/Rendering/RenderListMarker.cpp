@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/RenderListMarker.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
 #include "Krystal.Booey/Rendering/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -98,5 +98,58 @@ namespace krys::boo::tests
       CHECK(MarkerOf(fixture, u8"tall").LayoutBounds() == Pair<float, float> {20.f, 10.f});
       CHECK(MarkerOf(fixture, u8"tall").LogicalHeight() == 17);
     }
+  }
+
+  TEST_CASE("RenderListMarker: paints bullets as shapes and counters as text",
+            "[Rendering][RenderListMarker]")
+  {
+    CHECK(
+      Painted(u8"<style>body{margin:0;font:16px "
+              u8"sans-serif}ul{margin:0;padding-left:30px}</style><ul><li>disc</li><li "
+              u8"style=list-style-type:circle>circle</li><li style=list-style-type:square>square</li></ul>")
+      == Canvas() + u8R"(
+(set-inline-stroke
+  (thickness 1.00))
+(fill-ellipse
+  (rect at (14,7) size 5.17x5.17))
+(draw-glyphs
+  (local-anchor (30,14))
+  (font-smoothing-mode auto)
+  (length 4))
+(stroke-ellipse
+  (rect at (14,25) size 5.17x5.17))
+(draw-glyphs
+  (local-anchor (30,32))
+  (font-smoothing-mode auto)
+  (length 6))
+(fill-rect
+  (rect at (14,43) size 5.17x5.17)
+  (requiresClipToRect 1))
+(draw-glyphs
+  (local-anchor (30,50))
+  (font-smoothing-mode auto)
+  (length 6)))");
+
+    CHECK(Painted(u8"<style>body{margin:0;font:16px "
+                  u8"sans-serif}ol{margin:0;padding-left:30px}</style><ol><li>one</li><li>two</li></ol>")
+          == Canvas() + u8R"(
+(set-inline-stroke
+  (thickness 1.00))
+(draw-glyphs
+  (local-anchor (8,14))
+  (font-smoothing-mode auto)
+  (length 3))
+(draw-glyphs
+  (local-anchor (30,14))
+  (font-smoothing-mode auto)
+  (length 3))
+(draw-glyphs
+  (local-anchor (8,32))
+  (font-smoothing-mode auto)
+  (length 3))
+(draw-glyphs
+  (local-anchor (30,32))
+  (font-smoothing-mode auto)
+  (length 3)))");
   }
 }

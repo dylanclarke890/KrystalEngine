@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Rendering/BorderPainter.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
+#include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include <ranges>
 
@@ -32,8 +33,19 @@ namespace krys::boo
   {
     if (_paintInfo.Phase == PaintPhase::Outline || _paintInfo.Phase == PaintPhase::SelfOutline)
     {
-      // FIXME: Inline outlines (the inline added to the paint info's outline objects, or to its containing
-      // block's continuation outlines) come with inline outlines.
+      if (Renderer().Style().UsedVisibility() != Visibility::Visible || !Renderer().HasOutline()
+          || _isRootInlineBox)
+      {
+        return;
+      }
+
+      // There are no continuations: blocks in inlines are laid out in the inline's lines, so the inline
+      // paints its own outline.
+      auto &inlineFlow = Downcast<RenderInline>(Renderer());
+      if (_paintInfo.OutlineObjects)
+      {
+        _paintInfo.OutlineObjects->add(&inlineFlow);
+      }
       return;
     }
 

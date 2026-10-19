@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Types/ListHashSet.hpp"
 
 namespace krys::boo
 {
@@ -30,8 +31,7 @@ namespace krys::boo::layout_integration
 
   /// @brief Paints a block's inline content for one paint phase: its display boxes in order (text, inline
   /// boxes, atomic inlines and blocks in inline), culled to the paint rect.
-  /// FIXME: Line-ending ellipses (`paintEllipsis`) and the outlines of the inline boxes gathered in the
-  /// outline phases come with ellipses and inline outlines; accessibility bounds come with accessibility.
+  /// FIXME: Accessibility bounds come with accessibility.
   class InlineContentPainter
   {
     KRYS_NON_COPY_MOVABLE(InlineContentPainter);
@@ -43,6 +43,7 @@ namespace krys::boo::layout_integration
     const RenderInline *_inlineBoxWithLayer {nullptr};
     const InlineContent &_inlineContent;
     const RenderBlockFlow &_root;
+    ListHashSet<const RenderInline *> _outlineObjects;
 
   public:
     /// @param inlineBoxWithLayer The inline box whose layer is being painted, if any: only its content is
@@ -55,6 +56,7 @@ namespace krys::boo::layout_integration
 
   private:
     void PaintDisplayBox(const inline_display::Box &box) noexcept;
+    void PaintEllipsis(size_t lineIndex) noexcept;
     KRYS_NODISCARD LayoutPoint FlippedContentOffsetIfNeeded(const RenderBox &childRenderer) const noexcept;
     KRYS_NODISCARD const RenderBlock &Root() const noexcept;
   };

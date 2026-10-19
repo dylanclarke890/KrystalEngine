@@ -187,6 +187,21 @@ namespace krys::boo
     // There are no continuations: blocks in inlines are laid out in the inline's lines.
   }
 
+  void RenderInline::CollectLineBoxRects(List<LayoutRect> &rects,
+                                         const LayoutPoint &additionalOffset) const noexcept
+  {
+    for (const auto &rect : LineBoxRects(*this))
+    {
+      if (rect.IsEmpty())
+      {
+        continue;
+      }
+      auto layoutRect = LayoutRect(rect);
+      layoutRect.MoveBy(additionalOffset);
+      rects.push_back(layoutRect);
+    }
+  }
+
   void RenderInline::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
   {
     for (const auto &rect : LineBoxRects(*this))

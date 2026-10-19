@@ -349,6 +349,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/Style/RenderStyleConstants.cpp
 
 		# Style
+		tests/Graphics/FloatPointGraph.cpp
 		tests/Graphics/Font.cpp
 		tests/Graphics/FontCache.cpp
 		tests/Graphics/ComplexTextController.cpp
@@ -367,6 +368,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/InlineBoxPainter.cpp
 		tests/Rendering/MarkedText.cpp
 		tests/Rendering/TextBoxPainter.cpp
+		tests/Rendering/EllipsisBoxPainter.cpp
+		tests/Rendering/TextDecorationPainter.cpp
 		tests/Rendering/OutlinePainter.cpp
 		tests/Rendering/RenderLayerScrollableArea.cpp
 		tests/Rendering/RenderTreeAsText.cpp

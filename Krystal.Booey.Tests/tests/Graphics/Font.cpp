@@ -182,4 +182,35 @@ namespace krys::boo::tests
       CHECK(Font::Create(data)->Description() == u8"Ahem 16px");
     }
   }
+
+  TEST_CASE("Font: glyph paths", "[Graphics][Font]")
+  {
+    auto font = CreateFont(Ahem(), 16);
+    auto glyph = font->GlyphForCharacter(U'X');
+
+    // Ahem's glyphs are squares on the em box: 0.8em above the baseline and 0.2em below.
+    auto path = font->PathForGlyph(glyph);
+    REQUIRE_FALSE(path.IsEmpty());
+    auto bounds = path.BoundingRect();
+    CHECK(bounds.X() == Catch::Approx(0.f));
+    CHECK(bounds.Y() == Catch::Approx(-12.8f));
+    CHECK(bounds.Width() == Catch::Approx(16.f));
+    CHECK(bounds.Height() == Catch::Approx(16.f));
+
+    // Cached, and the same path again.
+    CHECK(font->PathForGlyph(glyph).BoundingRect() == bounds);
+
+    // Synthetic oblique slants the outline to the right as it rises.
+    auto oblique = CreateFont(Ahem(), 16, false, true)->PathForGlyph(glyph).BoundingRect();
+    CHECK(oblique.Width() > 16.f);
+    CHECK(oblique.Height() == Catch::Approx(16.f));
+
+    // Synthetic bold makes it larger all round.
+    auto bold = CreateFont(Ahem(), 16, true)->PathForGlyph(glyph).BoundingRect();
+    CHECK(bold.Width() > 16.f);
+    CHECK(bold.Height() > 16.f);
+
+    // A space has no outline.
+    CHECK(font->PathForGlyph(font->GlyphForCharacter(U' ')).IsEmpty());
+  }
 }

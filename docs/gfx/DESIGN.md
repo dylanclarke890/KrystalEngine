@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-19): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, G2f, strokes, G2g, clips, G2h, layers and blend modes, G2i, gradients, and G2j, shadows, and G2k, golden image tests, are done); Krystal.Text (T1) and text (G3) are done; the Booey integration (G4) is in progress (G4a, the graphics context and display lists, G4b, Krystal.UI and replay, G4c1, the paint plumbing, layers and backgrounds, G4c2, borders, shadows and outlines, G4c3, image buffers and patterns, and G4d1, text and inline boxes, are done; see *G4 plan*).
+Status (2026-10-19): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, G2f, strokes, G2g, clips, G2h, layers and blend modes, G2i, gradients, and G2j, shadows, and G2k, golden image tests, are done); Krystal.Text (T1) and text (G3) are done; the Booey integration (G4) is in progress (G4a, the graphics context and display lists, G4b, Krystal.UI and replay, G4c1, the paint plumbing, layers and backgrounds, G4c2, borders, shadows and outlines, G4c3, image buffers and patterns, G4d1, text and inline boxes, and G4d2, decorations, markers and ellipses, are done; see *G4 plan*).
 
 ## Why
 
@@ -738,6 +738,14 @@ Testing: the device's hidden window gives tests a real OpenGL context (Krystal.G
 - **Editor:** the page's first row is text: a heading, a paragraph with a wrapping inline box, coloured, bold, italic and larger words, and a card of soft, layered and glowing text shadows.
 - **Tests:** Booey compares dumps of text runs, shadows, right-to-left and hidden text, emphasis marks and inline boxes (11 cases with the marked text tests); Krystal.UI adds the `text` page golden (a heading, a paragraph with a wrapping inline box, bold and italic words, layered shadows, an inline block and right-to-left text; the scene gives Chrome all four faces with `@font-face`), its Chrome comparison reported only: the glyphs and boxes land in the same places, but Chrome on Windows rasterises with DirectWrite (mean 8.2, as the G3b scene's 6.9).
 - **Not yet:** decorations, skip-ink, list markers, ellipses and inline outlines (G4d2); selection and markers stay out of G4.
+
+### G4d2 as built (2026-10-19)
+
+- **Booey** (the ledger entry is *Decorations, markers and ellipses* in `docs/booey/PORTING.md`): `TextDecorationPainter` paints underlines and overlines under the text and line-throughs over it, in every style (double, dotted, dashed and wavy, the wave a stroked bezier path clipped to the line's bounds), at the decorating boxes' offsets and thicknesses, with the text's shadows. **Skip-ink** (decided: now): underlines and overlines break where glyphs cross them, `FontCascade::LineSegmentsForIntersectionsWithRect` walking each glyph's outline (`Font::PathForGlyph`, the unhinted FreeType outline, cached) for where its contours cross the line's top and bottom, CJK glyphs drawn over. List markers paint as filled or stroked circles, squares or their counter text; `text-overflow` ellipses paint after their line; inlines' outlines go round their line boxes, shrink-wrapped into one path where the lines touch (`FloatPointGraph`, the corner radii on the first and last lines), and their focus rings round the line boxes and children.
+- **Krystal.UI:** nothing new: text lines, paths, ellipses and focus rings already replayed.
+- **Editor:** the text row gains a card of decorations (skip-ink, wavy, struck and double overlined text), a list, an ellipsis and an outlined span.
+- **Tests:** Booey compares dumps of each decoration, skip-ink, shadows, markers, the ellipsis and inline outlines, and unit tests glyph paths, line intersections and the point graph; Krystal.UI adds the `decorations` page golden (decorations, skip-ink on and off, bullets and counters, an ellipsis, an outline wrapping across lines), reported against Chrome only (text; mean 6.6): Chrome's wave is taller and its skip-ink gaps a little wider, and its ordered markers sit closer to their text.
+- **Not yet:** the selection's part in all of these (G4 leaves selection out).
 
 ## Open decisions
 

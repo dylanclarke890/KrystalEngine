@@ -2264,8 +2264,8 @@ namespace krys::boo
       PaintOutline(paintInfo, LayoutRect(paintOffset, Size()));
     }
 
-    // FIXME: 6. Continuation outlines (inlineContinuation, paintContinuationOutlines) come with inline
-    // painting.
+    // 6. Continuation outlines (paintContinuationOutlines): there are no continuations, as blocks in inlines are
+    // laid out in the inline's lines, so inlines paint their own outlines.
     // FIXME: 7. Carets (paintCarets) come with editing.
   }
 

@@ -2,6 +2,9 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
+#include "Krystal.Booey/HTML/Enums/TagName.hpp"
+#include "Krystal.Booey/HTML/HTMLAnchorElement.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContent.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
@@ -10,8 +13,10 @@
 #include "Krystal.Booey/Rendering/StyledMarkedText.hpp"
 #include "Krystal.Booey/Rendering/TextPainter.hpp"
 #include "Krystal.Booey/Rendering/TextPaintStyle.hpp"
+#include "Krystal.Booey/Style/InlineTextBoxStyle.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include <cmath>
+#include <ranges>
 
 namespace krys::boo
 {
@@ -307,15 +312,31 @@ namespace krys::boo
       auto coalescedStyledMarkedTexts =
         StyledMarkedText::CoalesceAdjacentWithEqualDecorations(styledMarkedTexts);
 
+      FloatRect textDecorationSelectionClipOutRect;
+
       for (auto &markedText : coalescedStyledMarkedTexts)
       {
         uint32 startOffset = markedText.StartOffset;
         uint32 endOffset = markedText.EndOffset;
         if (startOffset < endOffset)
         {
-          // FIXME: The decorations under and over the text (paintBackgroundDecorations) and through it
-          // (paintForegroundDecorations), painted on either side of the foreground, are still to come.
+          // Avoid measuring the text when the entire line box is selected as an optimization.
+          auto snappedPaintRect = SnapRectToDevicePixelsWithWritingDirection(
+            LayoutRect {_paintRect}, _document.DeviceScaleFactor(), _paintTextRun.Ltr());
+          if (startOffset || endOffset != _paintTextRun.Length())
+          {
+            LayoutRect selectionRect = {LayoutUnit(_paintRect.X()), LayoutUnit(_paintRect.Y()),
+                                        LayoutUnit(_paintRect.Width()), LayoutUnit(_paintRect.Height())};
+            GetFontCascade().AdjustSelectionRectForText(
+              _renderer.CanUseSimplifiedTextMeasuring().value_or(false), _paintTextRun, selectionRect,
+              startOffset, endOffset);
+            snappedPaintRect = SnapRectToDevicePixelsWithWritingDirection(
+              selectionRect, _document.DeviceScaleFactor(), _paintTextRun.Ltr());
+          }
+          auto decorationPainter = CreateDecorationPainter(markedText, textDecorationSelectionClipOutRect);
+          PaintBackgroundDecorations(decorationPainter, markedText, snappedPaintRect);
           PaintForeground(markedText);
+          PaintForegroundDecorations(decorationPainter, markedText, snappedPaintRect);
         }
       }
     }
@@ -437,6 +458,316 @@ namespace krys::boo
                            static_cast<uint32>(text.size()));
     context.Restore();
     return true;
+  }
+
+  TextDecorationPainter TextBoxPainter::CreateDecorationPainter(const StyledMarkedText &markedText,
+                                                                const FloatRect &clipOutRect) noexcept
+  {
+    auto &context = _paintInfo.Context();
+
+    UpdateGraphicsContext(context, markedText.MarkedStyle.TextStyles);
+
+    // Note that if the text is truncated, we let the thing being painted in the truncation
+    // draw its own decoration.
+    GraphicsContextStateSaver stateSaver {context, false};
+    bool isTransparentContent = markedText.MarkedType == MarkedText::Type::DraggedContent
+                                || markedText.MarkedType == MarkedText::Type::TransparentContent;
+    if (isTransparentContent || !clipOutRect.IsEmpty())
+    {
+      stateSaver.Save();
+      if (isTransparentContent)
+      {
+        context.SetAlpha(markedText.MarkedStyle.Alpha);
+      }
+      if (!clipOutRect.IsEmpty())
+      {
+        context.ClipOut(clipOutRect);
+      }
+    }
+
+    // Create painter
+    return {context, GetFontCascade(), markedText.MarkedStyle.TextShadow, _document.Printing(),
+            GetWritingMode()};
+  }
+
+  KRYS_NODISCARD static inline float ComputedTextDecorationThickness(const RenderStyle &styleToUse,
+                                                                     float deviceScaleFactor) noexcept
+  {
+    return CeilToDevicePixel(styleToUse.GetTextDecorationThickness().Resolve(styleToUse), deviceScaleFactor);
+  }
+
+  KRYS_NODISCARD static inline float ComputedAutoTextDecorationThickness(const RenderStyle &styleToUse,
+                                                                         float deviceScaleFactor) noexcept
+  {
+    return CeilToDevicePixel(style::TextDecorationThickness {css::keywords::Auto {}}.Resolve(styleToUse),
+                             deviceScaleFactor);
+  }
+
+  KRYS_NODISCARD static inline float ComputedLinethroughCenter(const RenderStyle &styleToUse,
+                                                               float textDecorationThickness,
+                                                               float autoTextDecorationThickness) noexcept
+  {
+    auto center = 2 * styleToUse.MetricsOfPrimaryFont().Ascent() / 3 + autoTextDecorationThickness / 2;
+    return center - textDecorationThickness / 2;
+  }
+
+  KRYS_NODISCARD static inline style::TextDecorationLine
+    ComputedTextDecorationType(const RenderStyle &styleToUse,
+                               const TextDecorationPainter::Styles &textDecorationStyles) noexcept
+  {
+    auto textDecorations = styleToUse.TextDecorationLineInEffect();
+    (void)textDecorations.AddOrReplaceIfNotNone(
+      TextDecorationPainter::TextDecorationsInEffectForStyle(textDecorationStyles));
+    return textDecorations;
+  }
+
+  KRYS_NODISCARD static inline const RenderStyle &
+    DecoratingBoxStyleForInlineBox(const inline_iterator::InlineBox &inlineBox, bool isFirstLine) noexcept
+  {
+    if (!inlineBox.IsRootInlineBox())
+    {
+      return inlineBox.Style();
+    }
+    // "When specified on or propagated to a block container that establishes an inline formatting context,
+    // the decorations are propagated to an anonymous inline box that wraps all the in-flow inline-level
+    // children of the block container" https://drafts.csswg.org/css-text-decor-4/#line-decoration Sadly we
+    // don't have the concept of anonymous inline box for all inline-level chidren when content forces us to
+    // generate anonymous block containers.
+    for (const RenderElement *ancestor = &inlineBox.Renderer(); ancestor; ancestor = ancestor->Parent())
+    {
+      if (!ancestor->IsAnonymous())
+      {
+        return isFirstLine ? ancestor->FirstLineStyle() : ancestor->Style();
+      }
+    }
+    krys_debug_assert(false);
+    return inlineBox.Style();
+  }
+
+  KRYS_NODISCARD static inline bool IsDecoratingBoxForBackground(const inline_iterator::InlineBox &inlineBox,
+                                                                 const RenderStyle &styleToUse) noexcept
+  {
+    using Flag = style::TextDecorationLine::Flag;
+    auto *element = DynamicDowncast<html::HTMLElement>(inlineBox.Renderer().GetElement());
+    if (element
+        && (Is<html::HTMLAnchorElement>(*element)
+            || element->TagQualifiedName().TagName() == html::TagName::font))
+    {
+      // <font> and <a> are always considered decorating boxes.
+      return true;
+    }
+    return styleToUse.GetTextDecorationLine().ContainsAny({Flag::Underline, Flag::Overline})
+           || (inlineBox.IsRootInlineBox()
+               && styleToUse.TextDecorationLineInEffect().ContainsAny({Flag::Underline, Flag::Overline}));
+  }
+
+  void TextBoxPainter::CollectDecoratingBoxesForBackgroundPainting(
+    DecoratingBoxList &decoratingBoxList, const inline_iterator::TextBoxIterator &textBox,
+    FloatPoint textBoxLocation, const TextDecorationPainter::Styles &overrideDecorationStyle) noexcept
+  {
+    auto ancestorInlineBox = textBox->ParentInlineBox();
+    if (!ancestorInlineBox)
+    {
+      krys_debug_assert(false);
+      return;
+    }
+
+    if (ancestorInlineBox->IsRootInlineBox())
+    {
+      decoratingBoxList.push_back({ancestorInlineBox,
+                                   DecoratingBoxStyleForInlineBox(*ancestorInlineBox, _isFirstLine),
+                                   overrideDecorationStyle, textBoxLocation});
+      return;
+    }
+
+    if (GetWritingMode().IsLineInverted())
+    {
+      // FIXME: underlineOffsetForTextBoxPainting returns incorrect value for vertical-lr.
+      decoratingBoxList.push_back({ancestorInlineBox, _style, overrideDecorationStyle, textBoxLocation});
+      return;
+    }
+
+    enum UseOverriderDecorationStyle : bool
+    {
+      No,
+      Yes
+    };
+    auto appendIfIsDecoratingBoxForBackground = [&](const inline_iterator::InlineBoxIterator &inlineBox,
+                                                    UseOverriderDecorationStyle useOverriderDecorationStyle)
+    {
+      auto &boxStyle = DecoratingBoxStyleForInlineBox(*inlineBox, _isFirstLine);
+
+      auto computedDecorationStyle = [&]
+      {
+        return TextDecorationPainter::StylesForRenderer(inlineBox->Renderer(),
+                                                        boxStyle.TextDecorationLineInEffect(), _isFirstLine);
+      };
+      if (!IsDecoratingBoxForBackground(*inlineBox, boxStyle))
+      {
+        // Some cases even non-decoration boxes may have some decoration pieces coming from the marked text
+        // (e.g. highlight).
+        if (useOverriderDecorationStyle == UseOverriderDecorationStyle::No
+            || overrideDecorationStyle == computedDecorationStyle())
+        {
+          return;
+        }
+      }
+
+      auto decoratingBoxLocation = textBoxLocation;
+      auto parentInlineBox = textBox->ParentInlineBox();
+      // Normally text box top is aligned with the parent inline box top (i.e. textBox->logicalTop() ==
+      // parentInlineBox->logicalTop()) but when inline box sides are trimmed (see: text-box property) inline
+      // box gets an offset while text box does not.
+      if (&inlineBox->Renderer() != &parentInlineBox->Renderer())
+      {
+        auto decoratingBoxContentBoxTop =
+          inlineBox->LogicalTop()
+          + (!inlineBox->IsRootInlineBox()
+               ? static_cast<float>(inlineBox->Renderer().BorderAndPaddingBefore())
+               : 0.f);
+        auto parentInlineBoxContentBoxTop =
+          parentInlineBox->LogicalTop()
+          + (!parentInlineBox->IsRootInlineBox()
+               ? static_cast<float>(parentInlineBox->Renderer().BorderAndPaddingBefore())
+               : 0.f);
+        decoratingBoxLocation.MoveBy(
+          FloatPoint {0.f, decoratingBoxContentBoxTop - parentInlineBoxContentBoxTop
+                             + TextBoxEdgeAdjustmentForUnderline(parentInlineBox->Style())});
+      }
+      else
+      {
+        decoratingBoxLocation.MoveBy(FloatPoint {0.f, TextBoxEdgeAdjustmentForUnderline(inlineBox->Style())});
+      }
+      auto decorationStyleToUse = useOverriderDecorationStyle == UseOverriderDecorationStyle::Yes
+                                    ? overrideDecorationStyle
+                                    : computedDecorationStyle();
+      decoratingBoxList.push_back({inlineBox, boxStyle, decorationStyleToUse, decoratingBoxLocation});
+    };
+
+    // FIXME: Figure out if the decoration styles coming from the styled marked text should be used only on
+    // the closest inline box (direct parent).
+    appendIfIsDecoratingBoxForBackground(ancestorInlineBox, UseOverriderDecorationStyle::Yes);
+    while (!ancestorInlineBox->IsRootInlineBox())
+    {
+      ancestorInlineBox = ancestorInlineBox->ParentInlineBox();
+      if (!ancestorInlineBox)
+      {
+        krys_debug_assert(false);
+        break;
+      }
+      appendIfIsDecoratingBoxForBackground(ancestorInlineBox, UseOverriderDecorationStyle::No);
+    }
+  }
+
+  void TextBoxPainter::PaintBackgroundDecorations(TextDecorationPainter &decorationPainter,
+                                                  const StyledMarkedText &markedText,
+                                                  const FloatRect &textBoxPaintRect) noexcept
+  {
+    auto textRun =
+      _paintTextRun.SubRun(markedText.StartOffset, markedText.EndOffset - markedText.StartOffset);
+
+    auto textBox = MakeIterator();
+    auto decoratingBoxList = DecoratingBoxList {};
+    CollectDecoratingBoxesForBackgroundPainting(decoratingBoxList, textBox, textBoxPaintRect.Location(),
+                                                markedText.MarkedStyle.TextDecorationStyles);
+
+    for (auto &decoratingBox : decoratingBoxList | std::views::reverse)
+    {
+      auto computedTextDecorationType =
+        ComputedTextDecorationType(decoratingBox.Style, decoratingBox.TextDecorationStyles);
+      auto computedBackgroundDecorationGeometry = [&]
+      {
+        auto textDecorationThickness =
+          ComputedTextDecorationThickness(decoratingBox.Style, _document.DeviceScaleFactor());
+        auto underlineOffset = [&]
+        {
+          if (!computedTextDecorationType.HasUnderline())
+          {
+            return 0.f;
+          }
+          auto baseOffset = UnderlineOffsetForTextBoxPainting(*decoratingBox.InlineBox, decoratingBox.Style);
+          auto wavyOffset =
+            decoratingBox.TextDecorationStyles.Underline.DecorationStyle == TextDecorationStyle::Wavy
+              ? WavyOffsetFromDecoration()
+              : 0.f;
+          return baseOffset + wavyOffset;
+        };
+        auto autoTextDecorationThickness =
+          ComputedAutoTextDecorationThickness(decoratingBox.Style, _document.DeviceScaleFactor());
+        auto overlineOffset = [&]
+        {
+          if (!computedTextDecorationType.HasOverline())
+          {
+            return 0.f;
+          }
+          auto baseOffset = OverlineOffsetForTextBoxPainting(*decoratingBox.InlineBox, decoratingBox.Style);
+          baseOffset += (autoTextDecorationThickness - textDecorationThickness);
+          auto wavyOffset =
+            decoratingBox.TextDecorationStyles.Overline.DecorationStyle == TextDecorationStyle::Wavy
+              ? WavyOffsetFromDecoration()
+              : 0.f;
+          return baseOffset - wavyOffset;
+        };
+
+        return TextDecorationPainter::BackgroundDecorationGeometry {
+          TextOriginFromPaintRect(textBoxPaintRect),
+          RoundPointToDevicePixels(LayoutPoint {decoratingBox.Location}, _document.DeviceScaleFactor(),
+                                   _paintTextRun.Ltr()),
+          textBoxPaintRect.Width(),
+          textDecorationThickness,
+          underlineOffset(),
+          overlineOffset(),
+          ComputedLinethroughCenter(decoratingBox.Style, textDecorationThickness,
+                                    autoTextDecorationThickness),
+          Snap(decoratingBox.Style.MetricsOfPrimaryFont().Ascent()) + 2.f,
+          GetWavyStrokeParameters(decoratingBox.Style.ComputedFontSize())};
+      };
+
+      decorationPainter.PaintBackgroundDecorations(_style, textRun, computedBackgroundDecorationGeometry(),
+                                                   computedTextDecorationType,
+                                                   decoratingBox.TextDecorationStyles);
+    }
+  }
+
+  KRYS_NODISCARD static const RenderStyle &
+    DecoratingBoxStyle(const inline_iterator::TextBoxIterator &textBox) noexcept
+  {
+    if (auto parentInlineBox = textBox->ParentInlineBox())
+    {
+      return parentInlineBox->Style();
+    }
+    krys_debug_assert(false);
+    return textBox->Style();
+  }
+
+  void TextBoxPainter::PaintForegroundDecorations(TextDecorationPainter &decorationPainter,
+                                                  const StyledMarkedText &markedText,
+                                                  const FloatRect &textBoxPaintRect) noexcept
+  {
+    auto textBox = MakeIterator();
+    auto &styleForDecoration = DecoratingBoxStyle(textBox);
+    auto computedTextDecorationType = [&]
+    {
+      auto textDecorations = styleForDecoration.TextDecorationLineInEffect();
+      (void)textDecorations.AddOrReplaceIfNotNone(
+        TextDecorationPainter::TextDecorationsInEffectForStyle(markedText.MarkedStyle.TextDecorationStyles));
+      return textDecorations;
+    }();
+
+    if (!computedTextDecorationType.HasLineThrough())
+    {
+      return;
+    }
+
+    auto deviceScaleFactor = _document.DeviceScaleFactor();
+    auto textDecorationThickness = ComputedTextDecorationThickness(styleForDecoration, deviceScaleFactor);
+    auto linethroughCenter =
+      ComputedLinethroughCenter(styleForDecoration, textDecorationThickness,
+                                ComputedAutoTextDecorationThickness(styleForDecoration, deviceScaleFactor));
+    decorationPainter.PaintForegroundDecorations(
+      {textBoxPaintRect.Location(), textBoxPaintRect.Width(), textDecorationThickness, linethroughCenter,
+       GetWavyStrokeParameters(styleForDecoration.ComputedFontSize())},
+      markedText.MarkedStyle.TextDecorationStyles);
   }
 
   FloatRect TextBoxPainter::ComputePaintRect(const LayoutPoint &paintOffset) const noexcept
