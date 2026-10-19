@@ -7,6 +7,7 @@
 #include "Krystal.Core/Types/Expected.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.UI/FontFaceCache.hpp"
+#include "Krystal.UI/ImageBufferTextures.hpp"
 #include <filesystem>
 
 namespace krys::ui
@@ -21,6 +22,8 @@ namespace krys::ui
     Ref<boo::LocalFrame> _frame;
     RefPtr<boo::dom::HTMLDocument> _document;
     FontFaceCache _fonts;
+    /// @brief Made on the first replay, with the renderer's device.
+    UniquePtr<ImageBufferTextures> _imageBuffers;
 
   public:
     /// @brief A page with an empty document and a view of @p viewportSize.

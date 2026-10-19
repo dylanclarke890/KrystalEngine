@@ -111,9 +111,11 @@ namespace krys::gfx
   /// each layer gets a texture the size of what was drawn in it, within the clip, and its pass is recorded
   /// before the pass that composites it.
   ///
-  /// Fills and strokes take a `Paint2D`: a colour, or a gradient. A gradient's stops are flattened on the CPU
-  /// into stops linear in premultiplied encoded sRGB, and the shader finds each pixel's place in it; on 8-bit
-  /// targets, gradients are dithered.
+  /// Fills and strokes take a `Paint2D`: a colour, a gradient or a repeated image. A gradient's stops are
+  /// flattened on the CPU into stops linear in premultiplied encoded sRGB, and the shader finds each pixel's
+  /// place in it; on 8-bit targets, gradients are dithered. A pattern samples its texture, which repeats, at
+  /// each pixel's place in pattern space; with no spacing, filtering wraps across tile edges, so repeated
+  /// tiles join without seams.
   ///
   /// A shadow is drawn beneath each fill and stroke while one is set. Rects, rounded rects and rounded holes
   /// blur analytically in the shader; paths blur their coverage masks on the CPU, cached with the masks.
@@ -177,6 +179,8 @@ namespace krys::gfx
       Shadow = 1u << 6u,
       /// @brief The texture's alpha is coverage that multiplies the colour: a colour glyph's silhouette.
       AlphaMask = 1u << 7u,
+      /// @brief The colour is multiplied by the batch's pattern (above the blend mode's bits).
+      PatternPaint = 1u << 13u,
     };
     /// @brief The instance's `BlendMode` is in the flags from this bit, for five bits.
     constexpr static uint32 BlendModeShift = 8u;
@@ -191,6 +195,8 @@ namespace krys::gfx
     constexpr static uint32 MaxClips = 16u;
     /// @brief A batch's state when it has no gradient.
     constexpr static uint32 NoGradient = ~0u;
+    /// @brief A batch's state when it has no pattern.
+    constexpr static uint32 NoPattern = ~0u;
 
     struct DrawState
     {
@@ -309,6 +315,42 @@ namespace krys::gfx
     static_assert(sizeof(GradientUniforms) == 64u + 20u * detail::MaxGradientStops,
                   "GradientUniforms mirrors the shader's std140 block.");
 
+    enum PatternFlags : uint32
+    {
+      /// @brief The texture's colours aren't premultiplied.
+      PatternStraightAlpha = 1u << 0u,
+      /// @brief The texture is in an sRGB format: the GPU decodes it, so the shader encodes it back.
+      PatternLinearTexels = 1u << 1u,
+      /// @brief Filtering clamps to the tile's edges along x, or y, rather than wrapping across them.
+      PatternClampX = 1u << 2u,
+      PatternClampY = 1u << 3u,
+    };
+
+    /// @brief A pattern as a frame keeps it.
+    struct PatternData
+    {
+      TextureHandle Texture {};
+      SamplerHandle Sampler {};
+      /// @brief Maps target pixels into pattern space.
+      Transform2D Inverse {};
+      /// @brief The tile's size, then the spacing after it, in pattern space.
+      Array<float, 4> TileAndSpacing {};
+      /// @brief `PatternFlags`.
+      uint32 Flags {0u};
+    };
+
+    /// @brief One pattern, as the shader reads it (std140).
+    struct PatternUniforms
+    {
+      Array<float, 4> InverseLinear;
+      /// @brief The inverse transform's E and F, then padding.
+      Array<float, 4> InverseTranslation;
+      Array<float, 4> TileAndSpacing;
+      /// @brief `PatternFlags`, then padding.
+      Array<uint32, 4> Flags;
+    };
+    static_assert(sizeof(PatternUniforms) == 64u, "PatternUniforms mirrors the shader's std140 block.");
+
     /// @brief Where a shape's shadow goes: the shape's transform moved by the offset, and the blur.
     struct ShadowPlacement
     {
@@ -319,11 +361,13 @@ namespace krys::gfx
       Array<uint8, 4> Colour {};
     };
 
-    /// @brief A paint ready for an instance: its colour (white for a gradient) and gradient.
+    /// @brief A paint ready for an instance: its colour (white for a gradient, white at the opacity for a
+    /// pattern) and gradient or pattern.
     struct ResolvedPaint
     {
       Array<uint8, 4> Colour {};
       uint32 Gradient {NoGradient};
+      uint32 Pattern {NoPattern};
     };
 
     /// @brief A run of instances drawn into one layer with one scissor, texture, gradient and blend mode.
@@ -347,6 +391,8 @@ namespace krys::gfx
       /// @brief The gradient its gradient instances read, an index into the frame's gradients, or
       /// `NoGradient`.
       uint32 Gradient {NoGradient};
+      /// @brief The pattern its pattern instances read, an index into the frame's patterns, or `NoPattern`.
+      uint32 Pattern {NoPattern};
     };
 
     struct Layer
@@ -426,6 +472,9 @@ namespace krys::gfx
     ShaderHandle _fragmentShader {};
     SamplerHandle _linearSampler {};
     SamplerHandle _nearestSampler {};
+    /// @brief For patterns, whose textures repeat.
+    SamplerHandle _linearRepeatSampler {};
+    SamplerHandle _nearestRepeatSampler {};
     /// @brief Bound for batches without a texture of their own.
     TextureHandle _whiteTexture {};
     MaskAtlas _masks;
@@ -454,6 +503,7 @@ namespace krys::gfx
     List<GradientData> _gradients {};
     List<detail::FlatGradientStop> _gradientStops {};
     List<detail::FlatGradientStop> _flattened {};
+    List<PatternData> _patterns {};
 
   public:
     /// @brief Past this many target pixels per em, glyphs are filled as outlines, as Skia draws large text.
@@ -472,6 +522,19 @@ namespace krys::gfx
     /// @brief Records the frame: a render pass per layer, children first, then the target's, each with its
     /// draws in the order they were made.
     void End() noexcept;
+
+    /// @brief The command buffer the frame records into, between `Begin` and `End`; otherwise null.
+    /// @note Another renderer can draw a frame into a texture with it in the meantime: that frame is recorded
+    /// at its own `End`, before this frame's passes, so this frame can draw the texture.
+    KRYS_NODISCARD CommandBuffer *GetCommandBuffer() const noexcept
+    {
+      return _commands;
+    }
+
+    KRYS_NODISCARD Device &GetDevice() const noexcept
+    {
+      return *_device;
+    }
 
     /// @brief Pushes a copy of the drawing state.
     void Save() noexcept;
@@ -584,8 +647,11 @@ namespace krys::gfx
     /// @brief Fills in the instance's transform and adds it to the batch it can join, or a new one; skips it
     /// when nothing would show.
     void AddInstance(RectInstance instance, const Transform2D &transform, TextureHandle texture,
-                     SamplerHandle sampler, uint32 gradient = NoGradient) noexcept;
+                     SamplerHandle sampler, uint32 gradient = NoGradient,
+                     uint32 pattern = NoPattern) noexcept;
 
+    /// @brief Adds a pattern paint to the frame under the current transform; nothing when it shows nothing.
+    KRYS_NODISCARD Maybe<ResolvedPaint> ResolvePattern(const ImagePattern2D &pattern) noexcept;
     /// @brief The paint's colour, or its gradient added to the frame under the current transform; nothing
     /// when it shows nothing. A gradient that comes down to one colour is that colour.
     KRYS_NODISCARD Maybe<ResolvedPaint> ResolvePaint(const Paint2D &paint) noexcept;
@@ -594,7 +660,8 @@ namespace krys::gfx
     KRYS_NODISCARD Maybe<ShadowPlacement> PlaceShadow(const Transform2D &transform,
                                                       const ResolvedPaint &paint) const noexcept;
     /// @brief Adds a mask's instance, drawn on whole target pixels, unless it's empty or outside the clip.
-    void AddMask(const MaskLocation &mask, Array<uint8, 4> colour, uint32 gradient) noexcept;
+    void AddMask(const MaskLocation &mask, Array<uint8, 4> colour, uint32 gradient,
+                 uint32 pattern = NoPattern) noexcept;
     /// @brief Adds a glyph's instance from the atlas, its pen's pixel at (`x`, `y`) in target pixels. A
     /// shadow takes the glyph's coverage (a colour glyph's alpha) in the paint's colour.
     void AddGlyph(const GlyphLocation &glyph, int32 x, int32 y, const ResolvedPaint &paint,

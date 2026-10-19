@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Core/Colour/ColourTextStream.hpp"
+#include "Krystal.Core/Hash.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
 #include "Krystal.Core/Visitor.hpp"
 
@@ -75,6 +76,45 @@ namespace krys::boo
   void Gradient::AddColorStop(GradientColorStop &&stop) noexcept
   {
     _stops.AddColorStop(krys::move(stop));
+    _cachedHash = 0;
+  }
+
+  uint32 Gradient::Hash() const noexcept
+  {
+    if (!_cachedHash)
+    {
+      auto combine = [](size_t hash, float value)
+      {
+        return UnsignedIntegerPairHash(hash, FloatingPointHash<float>::Hash(value));
+      };
+      auto point = [&](size_t hash, const FloatPoint &value)
+      {
+        return combine(combine(hash, value.X()), value.Y());
+      };
+
+      size_t hash = std::visit(
+        CreateVisitor(
+          [&](const LinearData &data) { return point(point(1u, data.Point0), data.Point1); },
+          [&](const RadialData &data)
+          {
+            return combine(
+              combine(combine(point(point(2u, data.Point0), data.Point1), data.StartRadius), data.EndRadius),
+              data.AspectRatio);
+          },
+          [&](const ConicData &data) { return combine(point(3u, data.Point0), data.AngleRadians); }),
+        _data);
+      hash = UnsignedIntegerPairHash(hash,
+                                     DefaultHash<ColourInterpolationMethod>::Hash(_colorInterpolationMethod));
+      hash = UnsignedIntegerPairHash(hash, static_cast<size_t>(_spreadMethod));
+      for (const auto &stop : _stops.GetSorted().Stops())
+      {
+        hash = combine(hash, stop.Offset);
+        hash = UnsignedIntegerPairHash(hash, DefaultHash<Color>::Hash(stop.Color));
+      }
+      // Zero means the hash isn't computed yet.
+      _cachedHash = static_cast<uint32>(hash) | 1u;
+    }
+    return _cachedHash;
   }
 
   TextStream &operator<<(TextStream &ts, const Gradient &gradient) noexcept

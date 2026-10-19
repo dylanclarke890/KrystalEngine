@@ -136,6 +136,17 @@ layout(binding = 2, std140) uniform Gradient
   vec4 u_GradientColours[256];
 };
 
+// The batch's pattern: its texture is one tile, repeating.
+layout(binding = 3, std140) uniform Pattern
+{
+  vec4 u_PatternInverseLinear;      // from target pixels into pattern space: a, b, c, d
+  vec4 u_PatternInverseTranslation; // e, f
+  vec4 u_PatternTileAndSpacing;     // the tile's size, then the spacing after it
+  uvec4 u_PatternFlags;             // 1: straight alpha; 2: an sRGB texture; 4, 8: clamp along x, y
+};
+
+layout(binding = 3) uniform sampler2D u_Pattern;
+
 layout(location = 0) out vec4 o_Colour;
 
 const uint Textured = 1u;
@@ -146,6 +157,7 @@ const uint Hole = 16u;
 const uint GradientPaint = 32u;
 const uint Shadow = 64u;
 const uint AlphaMask = 128u;
+const uint PatternPaint = 8192u;
 const uint BlendModeShift = 8u;
 
 const uint LinearShape = 1u;
@@ -270,6 +282,44 @@ float GradientOffset(uint i)
 }
 
 // The gradient's colour at the pixel, premultiplied; transparent where a radial gradient has no circle.
+// The pattern's premultiplied colour at the pixel. Without spacing along an axis, the texture is sampled
+// continuously there, so the sampler's repeat wraps filtering across tile edges.
+vec4 PatternColour()
+{
+  mat2 inverseLinear = mat2(u_PatternInverseLinear.xy, u_PatternInverseLinear.zw);
+  vec2 p = inverseLinear * v_Pixel + u_PatternInverseTranslation.xy;
+  vec2 tile = u_PatternTileAndSpacing.xy;
+  vec2 spacing = u_PatternTileAndSpacing.zw;
+  vec2 cellSize = tile + spacing;
+  vec2 cell = p - floor(p / cellSize) * cellSize;
+  if ((spacing.x > 0.0 && cell.x >= tile.x) || (spacing.y > 0.0 && cell.y >= tile.y))
+  {
+    return vec4(0.0);
+  }
+  vec2 uv = vec2(spacing.x > 0.0 ? cell.x : p.x, spacing.y > 0.0 ? cell.y : p.y) / tile;
+  // A clamped axis stays half a texel inside the tile, as the sampler's clamp would keep it.
+  vec2 halfTexel = 0.5 / vec2(textureSize(u_Pattern, 0));
+  if ((u_PatternFlags.x & 4u) != 0u)
+  {
+    uv.x = clamp(uv.x, halfTexel.x, 1.0 - halfTexel.x);
+  }
+  if ((u_PatternFlags.x & 8u) != 0u)
+  {
+    uv.y = clamp(uv.y, halfTexel.y, 1.0 - halfTexel.y);
+  }
+  // Per target pixel, p moves by the inverse's columns.
+  vec4 texel = textureGrad(u_Pattern, uv, inverseLinear[0] / tile, inverseLinear[1] / tile);
+  if ((u_PatternFlags.x & 2u) != 0u)
+  {
+    texel.rgb = LinearToSrgb(texel.rgb);
+  }
+  if ((u_PatternFlags.x & 1u) != 0u)
+  {
+    texel.rgb *= texel.a;
+  }
+  return texel;
+}
+
 vec4 GradientColour()
 {
   mat2 inverseLinear = mat2(u_GradientInverseLinear.xy, u_GradientInverseLinear.zw);
@@ -561,6 +611,10 @@ void main()
     gradient.rgb = clamp(gradient.rgb + (Bayer() - 0.5) * u_Dither * gradient.a, 0.0, gradient.a);
     colour *= gradient;
   }
+  if ((v_Flags & PatternPaint) != 0u)
+  {
+    colour *= PatternColour();
+  }
   vec4 source = colour * coverage;
 
   // Blend modes mix the source's colour with the backdrop's; normal blending then adds the backdrop
@@ -691,6 +745,26 @@ void main()
     }
     _nearestSampler = *nearestSampler;
 
+    auto repeatSampler = [&](SamplerFilter filter)
+    {
+      return _device->CreateSampler({.MinFilter = filter,
+                                     .MagFilter = filter,
+                                     .AddressU = SamplerAddressMode::Repeat,
+                                     .AddressV = SamplerAddressMode::Repeat});
+    };
+    auto linearRepeatSampler = repeatSampler(SamplerFilter::Linear);
+    if (!linearRepeatSampler)
+    {
+      return Unexpected<string>(linearRepeatSampler.error());
+    }
+    _linearRepeatSampler = *linearRepeatSampler;
+    auto nearestRepeatSampler = repeatSampler(SamplerFilter::Nearest);
+    if (!nearestRepeatSampler)
+    {
+      return Unexpected<string>(nearestRepeatSampler.error());
+    }
+    _nearestRepeatSampler = *nearestRepeatSampler;
+
     auto whiteTexture = _device->CreateTexture({.Width = 1u, .Height = 1u, .DebugName = u8"Render2D.White"});
     if (!whiteTexture)
     {
@@ -724,6 +798,7 @@ void main()
     _currentLayer = NoLayer;
     _gradients.clear();
     _gradientStops.clear();
+    _patterns.clear();
     _masks.ResetStats();
     _glyphs.ResetStats();
 
@@ -1113,7 +1188,7 @@ void main()
       cast.Flags = shadow->Sigma > 0.f ? Shadow : 0u;
       AddInstance(cast, shadow->Transform, {}, {});
     }
-    AddInstance(instance, transform, {}, {}, paint.Gradient);
+    AddInstance(instance, transform, {}, {}, paint.Gradient, paint.Pattern);
   }
 
   void Renderer2D::StrokePath(const Path2D &path, const StrokeStyle &style, const Paint2D &paint) noexcept
@@ -1235,7 +1310,7 @@ void main()
       cast.Flags = shadow->Sigma > 0.f ? Hole | Shadow : Hole;
       AddInstance(cast, shadow->Transform, {}, {});
     }
-    AddInstance(instance, _state.Transform, {}, {}, resolved->Gradient);
+    AddInstance(instance, _state.Transform, {}, {}, resolved->Gradient, resolved->Pattern);
   }
 
   void Renderer2D::DrawImage(TextureHandle texture, const Rect2D &source, const Rect2D &destination,
@@ -1309,10 +1384,11 @@ void main()
       AddMask(_masks.GetMask(path, shadow->Transform, rule, _state.Clip, shadow->PixelSigma), shadow->Colour,
               NoGradient);
     }
-    AddMask(_masks.GetMask(path, geometry, rule, _state.Clip), paint.Colour, paint.Gradient);
+    AddMask(_masks.GetMask(path, geometry, rule, _state.Clip), paint.Colour, paint.Gradient, paint.Pattern);
   }
 
-  void Renderer2D::AddMask(const MaskLocation &mask, Array<uint8, 4> colour, uint32 gradient) noexcept
+  void Renderer2D::AddMask(const MaskLocation &mask, Array<uint8, 4> colour, uint32 gradient,
+                           uint32 pattern) noexcept
   {
     if (mask.Bounds.IsEmpty() || Intersect(mask.Bounds, _state.Clip).IsEmpty())
     {
@@ -1341,7 +1417,7 @@ void main()
                  .HoleRadii = {},
                  .Colour = colour,
                  .Flags = Textured | Mask},
-                Transform2D::Identity(), mask.Texture, _nearestSampler, gradient);
+                Transform2D::Identity(), mask.Texture, _nearestSampler, gradient, pattern);
   }
 
   void Renderer2D::DrawGlyphs(const FontFace2D &face, float size, Span<const uint32> glyphs,
@@ -1449,7 +1525,7 @@ void main()
         {
           AddMask(_masks.GetMask(path, transform * Transform2D::Translation(at.x, at.y), FillRule::NonZero,
                                  _state.Clip),
-                  resolved->Colour, resolved->Gradient);
+                  resolved->Colour, resolved->Gradient, resolved->Pattern);
         }
       }
     }
@@ -1485,7 +1561,8 @@ void main()
                  .HoleRadii = {},
                  .Colour = image ? Array<uint8, 4> {255u, 255u, 255u, alpha} : paint.Colour,
                  .Flags = image ? Textured : Textured | mask},
-                Transform2D::Identity(), glyph.Texture, _nearestSampler, image ? NoGradient : paint.Gradient);
+                Transform2D::Identity(), glyph.Texture, _nearestSampler, image ? NoGradient : paint.Gradient,
+                image ? NoPattern : paint.Pattern);
   }
 
   void Renderer2D::DrawImage(TextureHandle texture, const Rect2D &destination,
@@ -1501,7 +1578,7 @@ void main()
   }
 
   void Renderer2D::AddInstance(RectInstance instance, const Transform2D &transform, TextureHandle texture,
-                               SamplerHandle sampler, uint32 gradient) noexcept
+                               SamplerHandle sampler, uint32 gradient, uint32 pattern) noexcept
   {
     // Nothing shows through an empty clip or a transform that flattens everything.
     if (_state.Clip.IsEmpty() || transform.Determinant() == 0.f)
@@ -1514,6 +1591,10 @@ void main()
     if (gradient != NoGradient)
     {
       instance.Flags |= GradientPaint;
+    }
+    if (pattern != NoPattern)
+    {
+      instance.Flags |= PatternPaint;
     }
 
     // A layer is as large as what's drawn in it.
@@ -1538,6 +1619,7 @@ void main()
              && batch.Blend == _state.Blend
              && (!textured || !batchTextured || (batch.Texture == texture && batch.Sampler == sampler))
              && (gradient == NoGradient || batch.Gradient == NoGradient || batch.Gradient == gradient)
+             && (pattern == NoPattern || batch.Pattern == NoPattern || batch.Pattern == pattern)
              && (!copies || (batch.Composite == NoLayer && Intersect(batch.Backdrop, reach).IsEmpty()));
     };
     if (_batches.empty() || !joins(_batches.back()))
@@ -1563,6 +1645,10 @@ void main()
     if (gradient != NoGradient)
     {
       batch.Gradient = gradient;
+    }
+    if (pattern != NoPattern)
+    {
+      batch.Pattern = pattern;
     }
     if (copies)
     {
@@ -1615,12 +1701,64 @@ void main()
 
   bool Renderer2D::IsInvisible(const Paint2D &paint) noexcept
   {
+    if (const auto *pattern = paint.GetPattern())
+    {
+      return !pattern->Texture.IsValid() || !(pattern->Opacity > 0.f);
+    }
     const auto *gradient = paint.GetGradient();
     return gradient != nullptr ? gradient->Stops.empty() : paint.GetColour().Resolved().Alpha == 0u;
   }
 
+  Maybe<Renderer2D::ResolvedPaint> Renderer2D::ResolvePattern(const ImagePattern2D &pattern) noexcept
+  {
+    const auto alpha = static_cast<uint8>(std::clamp(pattern.Opacity, 0.f, 1.f) * 255.f + 0.5f);
+    const auto desc = _device->GetTextureDesc(pattern.Texture);
+    krys_debug_assert_msg(desc.has_value(), "Painting with a stale or invalid texture.");
+    if (alpha == 0u || !desc || !(pattern.TileSize.x > 0.f) || !(pattern.TileSize.y > 0.f)
+        || pattern.Spacing.x < 0.f || pattern.Spacing.y < 0.f)
+    {
+      return {};
+    }
+    const auto inverse = (_state.Transform * pattern.PatternSpace).Inverse();
+    if (!inverse)
+    {
+      return {};
+    }
+
+    PatternData data {
+      .Texture = pattern.Texture,
+      .Sampler = pattern.Filter == SamplerFilter::Nearest ? _nearestRepeatSampler : _linearRepeatSampler,
+      .Inverse = *inverse,
+      .TileAndSpacing = {pattern.TileSize.x, pattern.TileSize.y, pattern.Spacing.x, pattern.Spacing.y},
+      .Flags = (pattern.Alpha == AlphaPremultiplication::Unpremultiplied ? PatternStraightAlpha : 0u)
+               | (IsSrgbFormat(desc->Format) ? PatternLinearTexels : 0u)
+               | (pattern.RepeatX ? 0u : PatternClampX) | (pattern.RepeatY ? 0u : PatternClampY)};
+    const ResolvedPaint resolved {.Colour = {255u, 255u, 255u, alpha}, .Gradient = NoGradient, .Pattern = 0u};
+
+    // Draws in a row with the same pattern share it, and so a batch.
+    if (!_patterns.empty())
+    {
+      const auto &last = _patterns.back();
+      if (last.Texture == data.Texture && last.Sampler == data.Sampler && last.Inverse == data.Inverse
+          && last.TileAndSpacing == data.TileAndSpacing && last.Flags == data.Flags)
+      {
+        return ResolvedPaint {.Colour = resolved.Colour,
+                              .Gradient = NoGradient,
+                              .Pattern = static_cast<uint32>(_patterns.size() - 1u)};
+      }
+    }
+    _patterns.push_back(data);
+    return ResolvedPaint {.Colour = resolved.Colour,
+                          .Gradient = NoGradient,
+                          .Pattern = static_cast<uint32>(_patterns.size() - 1u)};
+  }
+
   Maybe<Renderer2D::ResolvedPaint> Renderer2D::ResolvePaint(const Paint2D &paint) noexcept
   {
+    if (const auto *pattern = paint.GetPattern())
+    {
+      return ResolvePattern(*pattern);
+    }
     const auto *gradient = paint.GetGradient();
     if (gradient == nullptr)
     {
@@ -1984,6 +2122,7 @@ void main()
     _layerOrder.clear();
     _gradients.clear();
     _gradientStops.clear();
+    _patterns.clear();
   }
 
   void Renderer2D::FinishLayer(uint32 index) noexcept
@@ -2116,6 +2255,7 @@ void main()
     SamplerHandle boundSampler {};
     uint64 boundChain = ~0ull;
     uint32 boundGradient = NoGradient;
+    uint32 boundPattern = NoPattern;
     // Binds what every batch draws with, at the pass's start and again whenever it resumes.
     auto bindFrame = [&]
     {
@@ -2125,11 +2265,14 @@ void main()
       // Unit 2 always has a texture: drivers check every declared sampler at each draw.
       commands.BindTexture(2u, resources.Backdrop.IsValid() ? resources.Backdrop : _whiteTexture,
                            _nearestSampler);
+      // Unit 3 too, for patterns.
+      commands.BindTexture(3u, _whiteTexture, _nearestSampler);
       boundPipeline = resources.Pipeline;
       boundTexture = {};
       boundSampler = {};
       boundChain = ~0ull;
       boundGradient = NoGradient;
+      boundPattern = NoPattern;
     };
     bindFrame();
 
@@ -2255,6 +2398,26 @@ void main()
         std::memcpy(block.Data.data(), &data, sizeof(data));
         commands.BindUniformBuffer(2u, block.Buffer, block.Offset, sizeof(GradientUniforms));
         boundGradient = batch.Gradient;
+      }
+
+      // Likewise, only pattern instances read the pattern's block and texture.
+      if (batch.Pattern != NoPattern && batch.Pattern != boundPattern)
+      {
+        auto block = _device->AllocateTransient(sizeof(PatternUniforms));
+        if (!block.IsValid())
+        {
+          break;
+        }
+        const auto &pattern = _patterns[batch.Pattern];
+        const auto &inverse = pattern.Inverse;
+        const PatternUniforms data {.InverseLinear = {inverse.A, inverse.B, inverse.C, inverse.D},
+                                    .InverseTranslation = {inverse.E, inverse.F, 0.f, 0.f},
+                                    .TileAndSpacing = pattern.TileAndSpacing,
+                                    .Flags = {pattern.Flags, 0u, 0u, 0u}};
+        std::memcpy(block.Data.data(), &data, sizeof(data));
+        commands.BindUniformBuffer(3u, block.Buffer, block.Offset, sizeof(PatternUniforms));
+        commands.BindTexture(3u, pattern.Texture, pattern.Sampler);
+        boundPattern = batch.Pattern;
       }
 
       // Untextured batches never sample, but drivers still check the sampler's texture at every draw, so

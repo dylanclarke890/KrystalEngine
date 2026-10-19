@@ -24,6 +24,7 @@ namespace krys::ui::tests
       UniquePtr<gfx::Device> _device;
       UniquePtr<gfx::Renderer2D> _renderer;
       FontFaceCache _fonts;
+      UniquePtr<ImageBufferTextures> _imageBuffers;
       gfx::TextureHandle _target {};
       static constexpr uint32 Width = 96u;
       static constexpr uint32 Height = 64u;
@@ -34,6 +35,7 @@ namespace krys::ui::tests
         auto renderer = gfx::Renderer2D::Create(*_device);
         REQUIRE(renderer.has_value());
         _renderer = krys::move(*renderer);
+        _imageBuffers = CreateUnique<ImageBufferTextures>(*_device, _fonts);
         auto target =
           _device->CreateTexture({.Format = gfx::TextureFormat::RGBA8Unorm,
                                   .Width = Width,
@@ -46,6 +48,7 @@ namespace krys::ui::tests
 
       ~ReplayFixture()
       {
+        _imageBuffers = nullptr;
         _fonts.Clear();
         _renderer = nullptr;
         _device->Destroy(_target);
@@ -80,12 +83,14 @@ namespace krys::ui::tests
         boo::display_list::RecorderImpl recorder(boo::FloatSize {Width, Height});
         record(static_cast<boo::GraphicsContext &>(recorder));
         auto displayList = recorder.TakeDisplayList();
-        return Draw(
+        auto pixels = Draw(
           [&](gfx::Renderer2D &renderer)
           {
-            GraphicsContextRender2D context(renderer, _fonts, {0, 0, Width, Height});
+            GraphicsContextRender2D context(renderer, _fonts, {0, 0, Width, Height}, _imageBuffers.get());
             context.DrawDisplayList(*displayList);
           });
+        _imageBuffers->Release();
+        return pixels;
       }
 
       KRYS_NODISCARD static bool Painted(const List<Pixel> &pixels)
@@ -472,5 +477,61 @@ namespace krys::ui::tests
     // The ring is outside the rect; inside, nothing is drawn.
     CHECK(replayed[9 * Width + 25][3] > 0u);
     CHECK(replayed[20 * Width + 25][3] == 0u);
+  }
+
+  TEST_CASE_METHOD(ReplayFixture, "GraphicsContextRender2D: draws image buffers and their patterns",
+                   "[UI][GPU]")
+  {
+    // A 4 by 2 buffer, red on its left half and blue on its right.
+    auto record = [](boo::GraphicsContext &context, auto &&draw)
+    {
+      auto buffer = context.CreateImageBuffer({4, 2});
+      REQUIRE(buffer);
+      buffer->Context().FillRect({0, 0, 2, 2}, boo::Color(SRGBA<uint8> {255, 0, 0}));
+      buffer->Context().FillRect({2, 0, 2, 2}, boo::Color(SRGBA<uint8> {0, 0, 255}));
+      draw(context, *buffer);
+    };
+    constexpr Pixel red {255, 0, 0, 255};
+    constexpr Pixel blue {0, 0, 255, 255};
+
+    SECTION("An image buffer draws as an image of what it recorded")
+    {
+      auto replayed = Replayed(
+        [&](boo::GraphicsContext &context)
+        {
+          record(context,
+                 [](boo::GraphicsContext &context, boo::ImageBuffer &buffer)
+                 {
+                   context.SetImageInterpolationQuality(boo::InterpolationQuality::DoNotInterpolate);
+                   context.DrawImageBuffer(buffer, boo::FloatRect {0, 0, 8, 4});
+                 });
+        });
+      CHECK(replayed[0] == red);
+      CHECK(replayed[3 * Width + 3] == red);
+      CHECK(replayed[4] == blue);
+      CHECK(replayed[3 * Width + 7] == blue);
+      CHECK(replayed[4 * Width][3] == 0u);
+    }
+
+    SECTION("A pattern repeats a tile of it from the phase, with spacing")
+    {
+      // The buffer's right half as the tile, two units wide, a unit apart, from x = 1.
+      auto replayed = Replayed(
+        [&](boo::GraphicsContext &context)
+        {
+          record(context,
+                 [](boo::GraphicsContext &context, boo::ImageBuffer &buffer)
+                 {
+                   context.SetImageInterpolationQuality(boo::InterpolationQuality::DoNotInterpolate);
+                   context.DrawPattern(buffer, {0, 0, 12, 2}, {2, 0, 2, 2}, {}, {-1, 0}, {1, 0});
+                 });
+        });
+      CHECK(replayed[0][3] == 0u);
+      CHECK(replayed[1] == blue);
+      CHECK(replayed[2] == blue);
+      CHECK(replayed[3][3] == 0u);
+      CHECK(replayed[4] == blue);
+      CHECK(replayed[Width + 5] == blue);
+    }
   }
 }

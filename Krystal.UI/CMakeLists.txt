@@ -32,12 +32,14 @@ target_sources(Krystal.UI
     FILES
       include/Krystal.UI/FontFaceCache.hpp
       include/Krystal.UI/GraphicsContextRender2D.hpp
+      include/Krystal.UI/ImageBufferTextures.hpp
       include/Krystal.UI/Page.hpp
       include/Krystal.UI/Render2DConversions.hpp
 
   PRIVATE
     src/FontFaceCache.cpp
     src/GraphicsContextRender2D.cpp
+    src/ImageBufferTextures.cpp
     src/Page.cpp
     src/Render2DConversions.cpp
 )

@@ -93,108 +93,17 @@ namespace krys::boo::tests
   {
     CHECK(Painted(u8"<style>body{margin:0}div{width:40px;height:20px;background:linear-gradient(red,blue) 0 "
                   u8"0/20px 10px}</style><div></div>")
-          == u8R"(
-(set-state
-  (change-flags [composite-mode])
-  (composite-mode 
-    (composite-operation copy)
-    (blend-mode normal)))
-(fill-rect-with-color
-  (rect at (0,0) size 200x100)
-  (color #FFFFFF))
-(set-state
-  (change-flags [composite-mode])
-  (composite-mode 
-    (composite-operation source-over)
-    (blend-mode normal)))
-(fill-composited-rect
-  (rect at (0,0) size 200x100)
-  (color #FFFFFF)
-  (composite-operation copy)
-  (blend-mode normal))
-(save)
-(clip
-  (rect at (0,0) size 40x20))
-(save)
-(clip
-  (rect at (0,0) size 20x10))
-(fill-rect-with-gradient
-  (rect at (0,0) size 20x10)
-  (gradient 
-    (p0 (0,0))
-    (p1 (0,10))
-    (color-interpolation-method sRGB premultiplied)
-    (spread-method pad)
-    (stops [#FF0000 at 0.00, #0000FF at 1.00])))
-(restore)
-(save)
-(clip
-  (rect at (20,0) size 20x10))
-(translate
-  (x 20.00)
-  (y 0.00))
-(fill-rect-with-gradient
-  (rect at (0,0) size 20x10)
-  (gradient 
-    (p0 (0,0))
-    (p1 (0,10))
-    (color-interpolation-method sRGB premultiplied)
-    (spread-method pad)
-    (stops [#FF0000 at 0.00, #0000FF at 1.00])))
-(restore)
-(save)
-(clip
-  (rect at (0,10) size 20x10))
-(translate
-  (x 0.00)
-  (y 10.00))
-(fill-rect-with-gradient
-  (rect at (0,0) size 20x10)
-  (gradient 
-    (p0 (0,0))
-    (p1 (0,10))
-    (color-interpolation-method sRGB premultiplied)
-    (spread-method pad)
-    (stops [#FF0000 at 0.00, #0000FF at 1.00])))
-(restore)
-(save)
-(clip
-  (rect at (20,10) size 20x10))
-(translate
-  (x 20.00)
-  (y 10.00))
-(fill-rect-with-gradient
-  (rect at (0,0) size 20x10)
-  (gradient 
-    (p0 (0,0))
-    (p1 (0,10))
-    (color-interpolation-method sRGB premultiplied)
-    (spread-method pad)
-    (stops [#FF0000 at 0.00, #0000FF at 1.00])))
-(restore)
-(restore))");
+          == Canvas() + u8R"(
+(draw-pattern-imagebuffer
+  (pattern-transform identity)
+  (tile-rect at (0,0) size 1x10)
+  (dest-rect at (0,0) size 40x20)
+  (phase (0,0))
+  (spacing width=0 height=0)))");
 
     CHECK(Painted(u8"<style>body{margin:0}div{width:40px;height:20px;background:linear-gradient(red,blue) "
                   u8"5px 5px/10px 10px no-repeat,yellow}</style><div></div>")
-          == u8R"(
-(set-state
-  (change-flags [composite-mode])
-  (composite-mode 
-    (composite-operation copy)
-    (blend-mode normal)))
-(fill-rect-with-color
-  (rect at (0,0) size 200x100)
-  (color #FFFFFF))
-(set-state
-  (change-flags [composite-mode])
-  (composite-mode 
-    (composite-operation source-over)
-    (blend-mode normal)))
-(fill-composited-rect
-  (rect at (0,0) size 200x100)
-  (color #FFFFFF)
-  (composite-operation copy)
-  (blend-mode normal))
+          == Canvas() + u8R"(
 (fill-composited-rect
   (rect at (0,0) size 40x20)
   (color #FFFF00)

@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.UI/FontFaceCache.hpp"
+#include "Krystal.UI/ImageBufferTextures.hpp"
 
 namespace krys::ui
 {
@@ -33,6 +34,7 @@ namespace krys::ui
 
     gfx::Renderer2D &_renderer;
     FontFaceCache &_fonts;
+    ImageBufferTextures *_imageBuffers;
     StrokeState _stroke;
     List<StrokeState> _strokeStack;
     List<LayerState> _layerStack;
@@ -42,8 +44,9 @@ namespace krys::ui
 
   public:
     /// @param bounds The target's rect, in its pixels, the initial clip bounds.
-    GraphicsContextRender2D(gfx::Renderer2D &renderer, FontFaceCache &fonts,
-                            const boo::FloatRect &bounds) noexcept;
+    /// @param imageBuffers Renders the image buffers drawn; without it, they draw nothing.
+    GraphicsContextRender2D(gfx::Renderer2D &renderer, FontFaceCache &fonts, const boo::FloatRect &bounds,
+                            ImageBufferTextures *imageBuffers = nullptr) noexcept;
     ~GraphicsContextRender2D() noexcept override;
 
     using GraphicsContext::FillRect;
@@ -106,6 +109,12 @@ namespace krys::ui
     void BeginTransparencyLayer(boo::CompositeOperator, boo::BlendMode = BlendMode::Normal) noexcept override;
     void EndTransparencyLayer() noexcept override;
 
+    void DrawImageBuffer(boo::ImageBuffer &, const boo::FloatRect &destination, const boo::FloatRect &source,
+                         boo::ImagePaintingOptions = {}) noexcept override;
+    void DrawPattern(boo::ImageBuffer &, const boo::FloatRect &destRect, const boo::FloatRect &tileRect,
+                     const boo::AffineTransform &patternTransform, const boo::FloatPoint &phase,
+                     const boo::FloatSize &spacing, boo::ImagePaintingOptions = {}) noexcept override;
+
     void DrawFocusRing(const boo::Path &, float outlineWidth, const boo::Color &) noexcept override;
     void DrawFocusRing(const List<boo::FloatRect> &, float outlineOffset, float outlineWidth,
                        const boo::Color &) noexcept override;
@@ -135,6 +144,9 @@ namespace krys::ui
     KRYS_NODISCARD Brush FillBrushPaint() const noexcept;
     KRYS_NODISCARD Brush StrokeBrushPaint() const noexcept;
     KRYS_NODISCARD gfx::StrokeStyle CurrentStrokeStyle(float width) const noexcept;
+
+    /// @brief How images are sampled at the context's interpolation quality, as Skia's sampling options.
+    KRYS_NODISCARD gfx::SamplerFilter ImageFilter() const noexcept;
 
     /// @brief Brings the renderer's blend mode and drop shadow up to date with the context's state.
     void PrepareDraw(bool shadow = true) noexcept;

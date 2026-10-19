@@ -100,8 +100,16 @@ namespace krys::ui
   void Page::Replay(const boo::display_list::DisplayList &displayList, gfx::Renderer2D &renderer) noexcept
   {
     const auto size = ViewportSize();
-    GraphicsContextRender2D context(
-      renderer, _fonts, {0.f, 0.f, static_cast<float>(size.Width()), static_cast<float>(size.Height())});
-    context.DrawDisplayList(displayList);
+    if (!_imageBuffers)
+    {
+      _imageBuffers = CreateUnique<ImageBufferTextures>(renderer.GetDevice(), _fonts);
+    }
+    {
+      GraphicsContextRender2D context(
+        renderer, _fonts, {0.f, 0.f, static_cast<float>(size.Width()), static_cast<float>(size.Height())},
+        _imageBuffers.get());
+      context.DrawDisplayList(displayList);
+    }
+    _imageBuffers->Release();
   }
 }

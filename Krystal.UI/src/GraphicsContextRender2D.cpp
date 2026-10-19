@@ -1,9 +1,12 @@
 ﻿#include "Krystal.UI/GraphicsContextRender2D.hpp"
 #include "Krystal.Booey/Graphics/Font.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffer.hpp"
 #include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.UI/ImageBufferTextures.hpp"
 #include "Krystal.UI/Render2DConversions.hpp"
 #include <cmath>
+#include <limits>
 #include <numbers>
 
 namespace krys::ui
@@ -109,8 +112,9 @@ namespace krys::ui
   }
 
   GraphicsContextRender2D::GraphicsContextRender2D(gfx::Renderer2D &renderer, FontFaceCache &fonts,
-                                                   const boo::FloatRect &bounds) noexcept
-      : _renderer(renderer), _fonts(fonts), _clipBounds(bounds)
+                                                   const boo::FloatRect &bounds,
+                                                   ImageBufferTextures *imageBuffers) noexcept
+      : _renderer(renderer), _fonts(fonts), _imageBuffers(imageBuffers), _clipBounds(bounds)
   {
     _renderer.Save();
   }
@@ -668,6 +672,131 @@ namespace krys::ui
             .MiterLimit = _stroke.MiterLimit,
             .Dashes = _stroke.Dashes,
             .DashOffset = _stroke.DashOffset};
+  }
+
+  gfx::SamplerFilter GraphicsContextRender2D::ImageFilter() const noexcept
+  {
+    // Skia samples without interpolating only when asked not to.
+    return ImageInterpolationQuality() == boo::InterpolationQuality::DoNotInterpolate
+             ? gfx::SamplerFilter::Nearest
+             : gfx::SamplerFilter::Linear;
+  }
+
+  void GraphicsContextRender2D::DrawImageBuffer(boo::ImageBuffer &image, const boo::FloatRect &destination,
+                                                const boo::FloatRect &source,
+                                                boo::ImagePaintingOptions options) noexcept
+  {
+    auto *commands = _renderer.GetCommandBuffer();
+    if (!_imageBuffers || !commands)
+    {
+      return;
+    }
+    const auto texture = _imageBuffers->Render(image, *commands);
+    if (!texture.IsValid())
+    {
+      return;
+    }
+
+    boo::InterpolationQualityMaintainer interpolationQualityForThisScope(*this,
+                                                                         options.GetInterpolationQuality());
+    boo::FloatRect sourceScaled = source;
+    sourceScaled.Scale(image.ResolutionScale());
+
+    // FIXME: Compositing operators other than source-over draw as source-over.
+    PrepareDraw();
+    _renderer.Save();
+    _renderer.SetBlendMode(options.GetBlendMode());
+    _renderer.DrawImage(texture, ToRect2D(sourceScaled), ToRect2D(destination),
+                        {.Filter = ImageFilter(), .Opacity = Alpha()});
+    _renderer.Restore();
+  }
+
+  void GraphicsContextRender2D::DrawPattern(boo::ImageBuffer &image, const boo::FloatRect &destRect,
+                                            const boo::FloatRect &tileRect,
+                                            const boo::AffineTransform &patternTransform,
+                                            const boo::FloatPoint &phase, const boo::FloatSize &spacing,
+                                            boo::ImagePaintingOptions options) noexcept
+  {
+    auto *commands = _renderer.GetCommandBuffer();
+    if (!_imageBuffers || !commands || !patternTransform.IsInvertible() || tileRect.IsEmpty())
+    {
+      return;
+    }
+    const auto texture = _imageBuffers->Render(image, *commands);
+    if (!texture.IsValid())
+    {
+      return;
+    }
+
+    // As Skia's: the shader places the tile at the phase, moved by the tile's place in the image under the
+    // pattern transform's scale. The tile is the whole texture, so a tile that's part of the image (or has
+    // spacing after it) is copied into a texture of its own, its size rounded out to whole texels.
+    boo::FloatPoint phaseOffset(tileRect.Location());
+    phaseOffset.Scale(static_cast<float>(patternTransform.A()), static_cast<float>(patternTransform.D()));
+    phaseOffset.MoveBy(phase);
+    const auto shaderMatrix =
+      gfx::Transform2D::Translation(phaseOffset.X(), phaseOffset.Y()) * ToTransform2D(patternTransform);
+
+    const auto size = boo::FloatSize(image.BackendSize());
+    auto tileTexture = texture;
+    bool repeatX = true;
+    bool repeatY = true;
+    if (spacing.IsZero() && tileRect.Size() == size)
+    {
+      // Repeat only along an axis the destination reaches past the image on; otherwise clamp, so a tile
+      // scaled to fit the destination exactly doesn't filter in the texels at its other end.
+      if (const auto inverse = shaderMatrix.Inverse())
+      {
+        const auto corners = {inverse->Apply({destRect.X(), destRect.Y()}),
+                              inverse->Apply({destRect.MaxX(), destRect.Y()}),
+                              inverse->Apply({destRect.X(), destRect.MaxY()}),
+                              inverse->Apply({destRect.MaxX(), destRect.MaxY()})};
+        float left = std::numeric_limits<float>::max();
+        float top = left;
+        float right = std::numeric_limits<float>::lowest();
+        float bottom = right;
+        for (const auto &corner : corners)
+        {
+          left = std::min(left, corner.x);
+          top = std::min(top, corner.y);
+          right = std::max(right, corner.x);
+          bottom = std::max(bottom, corner.y);
+        }
+        repeatX = left < 0.f || std::trunc(right) > size.Width();
+        repeatY = top < 0.f || std::trunc(bottom) > size.Height();
+      }
+    }
+    else
+    {
+      const auto enclosing = boo::EnclosingIntRect(tileRect);
+      tileTexture = _imageBuffers->Copy(texture, ToRect2D(tileRect), static_cast<uint32>(enclosing.Width()),
+                                        static_cast<uint32>(enclosing.Height()), *commands);
+      if (!tileTexture.IsValid())
+      {
+        return;
+      }
+    }
+
+    boo::InterpolationQualityMaintainer interpolationQualityForThisScope(*this,
+                                                                         options.GetInterpolationQuality());
+    // Spacing is in the destination's units; the pattern's is in the tile's.
+    const gfx::ImagePattern2D pattern {
+      .Texture = tileTexture,
+      .PatternSpace = shaderMatrix,
+      .TileSize = {tileRect.Width(), tileRect.Height()},
+      .Spacing = {spacing.Width() / static_cast<float>(patternTransform.A()),
+                  spacing.Height() / static_cast<float>(patternTransform.D())},
+      .Filter = ImageFilter(),
+      .Opacity = Alpha(),
+      .RepeatX = repeatX,
+      .RepeatY = repeatY};
+
+    // FIXME: Compositing operators other than source-over draw as source-over.
+    PrepareDraw();
+    _renderer.Save();
+    _renderer.SetBlendMode(options.GetBlendMode());
+    _renderer.FillRect(ToRect2D(destRect), pattern);
+    _renderer.Restore();
   }
 
   void GraphicsContextRender2D::PrepareDraw(bool shadow) noexcept

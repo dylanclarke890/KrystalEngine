@@ -2512,4 +2512,150 @@ namespace krys::gfx::tests
     CHECK(At(pixels, 8u, 0u) == Blue);
     CHECK(At(pixels, 9u, 0u) == Clear);
   }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: fills with repeated images", "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(8u, 8u);
+    constexpr Array<Pixel, 4> texels {Red, Green, Blue, White};
+    auto image = Image(2u, 2u, texels);
+
+    SECTION("Tiles repeat from pattern space's origin, as the image drawn tile by tile")
+    {
+      const ImagePattern2D pattern {
+        .Texture = image, .TileSize = {2.f, 2.f}, .Filter = SamplerFilter::Nearest};
+      Draw([&](Renderer2D &renderer) { renderer.FillRect({0.f, 0.f, 8.f, 8.f}, pattern); });
+      const auto patterned = Read();
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          for (float y = 0.f; y < 8.f; y += 2.f)
+          {
+            for (float x = 0.f; x < 8.f; x += 2.f)
+            {
+              renderer.DrawImage(image, {x, y, 2.f, 2.f}, {.Filter = SamplerFilter::Nearest});
+            }
+          }
+        });
+      CHECK(patterned == Read());
+    }
+
+    SECTION("Pattern space moves and scales the tiles")
+    {
+      const ImagePattern2D pattern {.Texture = image,
+                                    .PatternSpace =
+                                      Transform2D::Translation(1.f, 0.f) * Transform2D::Scale(2.f, 2.f),
+                                    .TileSize = {2.f, 2.f},
+                                    .Filter = SamplerFilter::Nearest};
+      Draw([&](Renderer2D &renderer) { renderer.FillRect({0.f, 0.f, 8.f, 8.f}, pattern); });
+      auto pixels = Read();
+      // Each texel covers two by two pixels; the tile starts at x = 1, so x = 0 is the tile before's last
+      // column.
+      CHECK(At(pixels, 1u, 0u) == Red);
+      CHECK(At(pixels, 2u, 1u) == Red);
+      CHECK(At(pixels, 0u, 0u) == Green);
+      CHECK(At(pixels, 3u, 0u) == Green);
+      CHECK(At(pixels, 1u, 2u) == Blue);
+      CHECK(At(pixels, 3u, 3u) == White);
+      CHECK(At(pixels, 5u, 0u) == Red);
+    }
+
+    SECTION("Spacing leaves transparent gaps between tiles")
+    {
+      const ImagePattern2D pattern {
+        .Texture = image, .TileSize = {2.f, 2.f}, .Spacing = {2.f, 0.f}, .Filter = SamplerFilter::Nearest};
+      Draw([&](Renderer2D &renderer) { renderer.FillRect({0.f, 0.f, 8.f, 8.f}, pattern); });
+      auto pixels = Read();
+      CHECK(At(pixels, 0u, 0u) == Red);
+      CHECK(At(pixels, 1u, 1u) == White);
+      CHECK(At(pixels, 2u, 0u) == Clear);
+      CHECK(At(pixels, 3u, 3u) == Clear);
+      CHECK(At(pixels, 4u, 0u) == Red);
+      CHECK(At(pixels, 4u, 2u) == Red);
+    }
+
+    SECTION("Filtering wraps across tile edges, so tiles join without seams")
+    {
+      // A uniform tile at a fractional scale and offset: tile by tile, its antialiased or clamped edges would
+      // show; as a pattern, every pixel is the tile's colour.
+      constexpr Array<Pixel, 4> blue {Blue, Blue, Blue, Blue};
+      auto uniform = Image(2u, 2u, blue);
+      const ImagePattern2D pattern {.Texture = uniform,
+                                    .PatternSpace =
+                                      Transform2D::Translation(0.3f, 0.7f) * Transform2D::Scale(0.76f, 0.61f),
+                                    .TileSize = {2.f, 2.f}};
+      Draw([&](Renderer2D &renderer) { renderer.FillRect({0.f, 0.f, 8.f, 8.f}, pattern); });
+      for (const auto &pixel : Read())
+      {
+        CHECK(Near(pixel, Blue));
+      }
+    }
+
+    SECTION("A tile that isn't repeated clamps filtering to its edges")
+    {
+      // Scaled to fill the row exactly, the first pixel samples the tile's left edge: wrapping blends in the
+      // right edge, clamping doesn't.
+      constexpr Array<Pixel, 2> redBlue {Red, Blue};
+      auto row = Image(2u, 1u, redBlue);
+      auto first = [&](bool repeat)
+      {
+        const ImagePattern2D pattern {.Texture = row,
+                                      .PatternSpace = Transform2D::Scale(4.f, 8.f),
+                                      .TileSize = {2.f, 1.f},
+                                      .RepeatX = repeat,
+                                      .RepeatY = repeat};
+        Draw([&](Renderer2D &renderer) { renderer.FillRect({0.f, 0.f, 8.f, 8.f}, pattern); });
+        return At(Read(), 0u, 0u);
+      };
+      CHECK(first(false) == Red);
+      CHECK(first(true)[2] > 0u);
+    }
+
+    SECTION("Patterns paint paths and fade by their opacity")
+    {
+      const ImagePattern2D pattern {
+        .Texture = image, .TileSize = {2.f, 2.f}, .Filter = SamplerFilter::Nearest, .Opacity = 0.5f};
+      Path2D path;
+      path.AddRect({0.f, 0.f, 4.f, 4.f});
+      Draw([&](Renderer2D &renderer) { renderer.FillPath(path, FillRule::NonZero, pattern); });
+      auto pixels = Read();
+      CHECK(Near(At(pixels, 0u, 0u), {128, 0, 0, 128}));
+      CHECK(Near(At(pixels, 3u, 3u), {128, 128, 128, 128}));
+      CHECK(At(pixels, 5u, 5u) == Clear);
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: draws what another renderer draws in the same frame",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(4u, 4u);
+    auto offscreen = _device->CreateTexture({.Format = TextureFormat::RGBA8Unorm,
+                                             .Width = 2u,
+                                             .Height = 2u,
+                                             .Usage = TextureUsage::RenderTarget | TextureUsage::Sampled,
+                                             .DebugName = u8"Offscreen"});
+    REQUIRE(offscreen.has_value());
+    _images.push_back(*offscreen);
+    auto other = Renderer2D::Create(*_device);
+    REQUIRE(other.has_value());
+
+    Draw(
+      [&](Renderer2D &renderer)
+      {
+        // Drawn after this frame began, but recorded at its own End, before this frame's passes.
+        REQUIRE(renderer.GetCommandBuffer() != nullptr);
+        (*other)->Begin(*renderer.GetCommandBuffer(), {.Texture = *offscreen,
+                                                       .Width = 2u,
+                                                       .Height = 2u,
+                                                       .ClearColour = Array<float, 4> {0.f, 0.f, 0.f, 0.f}});
+        (*other)->FillRect({0.f, 0.f, 1.f, 2.f}, SRGBA<uint8> {255, 0, 0, 255});
+        (*other)->FillRect({1.f, 0.f, 1.f, 2.f}, SRGBA<uint8> {0, 0, 255, 255});
+        (*other)->End();
+        renderer.DrawImage(*offscreen, {0.f, 0.f, 4.f, 4.f}, {.Filter = SamplerFilter::Nearest});
+      });
+    auto pixels = Read();
+    CHECK(At(pixels, 0u, 0u) == Red);
+    CHECK(At(pixels, 1u, 3u) == Red);
+    CHECK(At(pixels, 2u, 0u) == Blue);
+    CHECK(At(pixels, 3u, 3u) == Blue);
+  }
 }

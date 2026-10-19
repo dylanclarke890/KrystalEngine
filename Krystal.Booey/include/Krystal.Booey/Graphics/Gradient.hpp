@@ -18,8 +18,8 @@ namespace krys::boo
   class FloatRect;
 
   /// @brief A linear, radial or conic gradient: its geometry, colour stops, interpolation and spread.
-  /// FIXME: Drawing (`fill`, the platform shaders and patterns), the cached hash and the rendering resource
-  /// observers come with the graphics backend.
+  /// FIXME: Drawing (`fill`, the platform shaders and patterns) and the rendering resource observers come
+  /// with the graphics backend.
   class Gradient final : public ThreadSafeRefCounted<Gradient>
   {
   public:
@@ -51,6 +51,7 @@ namespace krys::boo
     ColourInterpolationMethod _colorInterpolationMethod;
     GradientSpreadMethod _spreadMethod;
     GradientColorStops _stops;
+    mutable uint32 _cachedHash {0};
     bool _isTransient {true};
 
   public:
@@ -86,6 +87,9 @@ namespace krys::boo
     KRYS_NODISCARD bool IsZeroSize() const noexcept;
 
     void AdjustParametersForTiledDrawing(FloatSize &, FloatRect &, const FloatSize &spacing) noexcept;
+
+    /// @brief A hash of the geometry, interpolation, spread and stops, for caches drawn from the gradient.
+    KRYS_NODISCARD uint32 Hash() const noexcept;
 
   private:
     Gradient(Data &&, ColourInterpolationMethod, GradientSpreadMethod, GradientColorStops &&,

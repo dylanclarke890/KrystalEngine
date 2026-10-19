@@ -500,50 +500,12 @@ namespace krys::boo::tests
     (spread-method pad)
     (stops [#FF0000 at 0.00, #0000FF at 1.00])))
 (restore)
-(save)
-(clip
-  (rect at (0,5) size 5x10))
-(save)
-(clip
-  (rect at (0,5) size 5x5))
-(translate
-  (x 0.00)
-  (y 5.00))
-(scale
-  (size width=0.56 height=0.63))
-(translate
-  (x 0.00)
-  (y -6.00))
-(fill-rect-with-gradient
-  (rect at (0,0) size 30x20)
-  (gradient 
-    (p0 (0,0))
-    (p1 (0,20))
-    (color-interpolation-method sRGB premultiplied)
-    (spread-method pad)
-    (stops [#FF0000 at 0.00, #0000FF at 1.00])))
-(restore)
-(save)
-(clip
-  (rect at (0,10) size 5x5))
-(translate
-  (x 0.00)
-  (y 10.00))
-(scale
-  (size width=0.56 height=0.63))
-(translate
-  (x 0.00)
-  (y -6.00))
-(fill-rect-with-gradient
-  (rect at (0,0) size 30x20)
-  (gradient 
-    (p0 (0,0))
-    (p1 (0,20))
-    (color-interpolation-method sRGB premultiplied)
-    (spread-method pad)
-    (stops [#FF0000 at 0.00, #0000FF at 1.00])))
-(restore)
-(restore)
+(draw-pattern-imagebuffer
+  (pattern-transform {m=((0.56,0.00)(0.00,0.63)) t=(0.00,0.00)})
+  (tile-rect at (0,6) size 1x8)
+  (dest-rect at (0,5) size 5x10)
+  (phase (0,1.25))
+  (spacing width=0 height=0))
 (save)
 (clip
   (rect at (0,15) size 5x5))
@@ -584,50 +546,12 @@ namespace krys::boo::tests
     (spread-method pad)
     (stops [#FF0000 at 0.00, #0000FF at 1.00])))
 (restore)
-(save)
-(clip
-  (rect at (25,5) size 5x10))
-(save)
-(clip
-  (rect at (25,5) size 5x5))
-(translate
-  (x 25.00)
-  (y 5.00))
-(scale
-  (size width=0.56 height=0.63))
-(translate
-  (x -21.00)
-  (y -6.00))
-(fill-rect-with-gradient
-  (rect at (0,0) size 30x20)
-  (gradient 
-    (p0 (0,0))
-    (p1 (0,20))
-    (color-interpolation-method sRGB premultiplied)
-    (spread-method pad)
-    (stops [#FF0000 at 0.00, #0000FF at 1.00])))
-(restore)
-(save)
-(clip
-  (rect at (25,10) size 5x5))
-(translate
-  (x 25.00)
-  (y 10.00))
-(scale
-  (size width=0.56 height=0.63))
-(translate
-  (x -21.00)
-  (y -6.00))
-(fill-rect-with-gradient
-  (rect at (0,0) size 30x20)
-  (gradient 
-    (p0 (0,0))
-    (p1 (0,20))
-    (color-interpolation-method sRGB premultiplied)
-    (spread-method pad)
-    (stops [#FF0000 at 0.00, #0000FF at 1.00])))
-(restore)
-(restore)
+(draw-pattern-imagebuffer
+  (pattern-transform {m=((0.56,0.00)(0.00,0.63)) t=(0.00,0.00)})
+  (tile-rect at (0,6) size 1x8)
+  (dest-rect at (25,5) size 5x10)
+  (phase (13.33,1.25))
+  (spacing width=0 height=0))
 (save)
 (clip
   (rect at (25,15) size 5x5))
@@ -648,93 +572,17 @@ namespace krys::boo::tests
     (spread-method pad)
     (stops [#FF0000 at 0.00, #0000FF at 1.00])))
 (restore)
-(save)
-(clip
-  (rect at (5,0) size 20x5))
-(save)
-(clip
-  (rect at (5,0) size 10x5))
-(translate
-  (x 5.00)
-  (y 0.00))
-(scale
-  (size width=0.83 height=0.83))
-(translate
-  (x -9.00)
-  (y 0.00))
-(fill-rect-with-gradient
-  (rect at (0,0) size 30x20)
-  (gradient 
-    (p0 (0,0))
-    (p1 (0,20))
-    (color-interpolation-method sRGB premultiplied)
-    (spread-method pad)
-    (stops [#FF0000 at 0.00, #0000FF at 1.00])))
-(restore)
-(save)
-(clip
-  (rect at (15,0) size 10x5))
-(translate
-  (x 15.00)
-  (y 0.00))
-(scale
-  (size width=0.83 height=0.83))
-(translate
-  (x -9.00)
-  (y 0.00))
-(fill-rect-with-gradient
-  (rect at (0,0) size 30x20)
-  (gradient 
-    (p0 (0,0))
-    (p1 (0,20))
-    (color-interpolation-method sRGB premultiplied)
-    (spread-method pad)
-    (stops [#FF0000 at 0.00, #0000FF at 1.00])))
-(restore)
-(restore)
-(save)
-(clip
-  (rect at (5,15) size 20x5))
-(save)
-(clip
-  (rect at (5,15) size 10x5))
-(translate
-  (x 5.00)
-  (y 15.00))
-(scale
-  (size width=0.83 height=0.83))
-(translate
-  (x -9.00)
-  (y -14.00))
-(fill-rect-with-gradient
-  (rect at (0,0) size 30x20)
-  (gradient 
-    (p0 (0,0))
-    (p1 (0,20))
-    (color-interpolation-method sRGB premultiplied)
-    (spread-method pad)
-    (stops [#FF0000 at 0.00, #0000FF at 1.00])))
-(restore)
-(save)
-(clip
-  (rect at (15,15) size 10x5))
-(translate
-  (x 15.00)
-  (y 15.00))
-(scale
-  (size width=0.83 height=0.83))
-(translate
-  (x -9.00)
-  (y -14.00))
-(fill-rect-with-gradient
-  (rect at (0,0) size 30x20)
-  (gradient 
-    (p0 (0,0))
-    (p1 (0,20))
-    (color-interpolation-method sRGB premultiplied)
-    (spread-method pad)
-    (stops [#FF0000 at 0.00, #0000FF at 1.00])))
-(restore)
-(restore))");
+(draw-pattern-imagebuffer
+  (pattern-transform {m=((0.83,0.00)(0.00,0.83)) t=(0.00,0.00)})
+  (tile-rect at (0,0) size 1x6)
+  (dest-rect at (5,0) size 20x5)
+  (phase (-2.50,0))
+  (spacing width=0 height=0))
+(draw-pattern-imagebuffer
+  (pattern-transform {m=((0.83,0.00)(0.00,0.83)) t=(0.00,0.00)})
+  (tile-rect at (0,14) size 1x6)
+  (dest-rect at (5,15) size 20x5)
+  (phase (-2.50,3.33))
+  (spacing width=0 height=0)))");
   }
 }

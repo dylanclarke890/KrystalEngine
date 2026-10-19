@@ -199,6 +199,14 @@ namespace krys::boo
     {
       return ImageDrawResult::DidNothing;
     }
+    void DrawImageBuffer(ImageBuffer &, const FloatRect &, const FloatRect &,
+                         ImagePaintingOptions = {}) noexcept final
+    {
+    }
+    void DrawPattern(ImageBuffer &, const FloatRect &, const FloatRect &, const AffineTransform &,
+                     const FloatPoint &, const FloatSize &, ImagePaintingOptions = {}) noexcept final
+    {
+    }
     ImageDrawResult DrawTiledImage(Image &, const FloatRect &, const FloatRect &, const FloatSize &,
                                    Image::TileRule, Image::TileRule, ImagePaintingOptions = {}) noexcept final
     {

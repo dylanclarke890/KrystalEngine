@@ -1413,6 +1413,12 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/BorderPainter.hpp
   include/Krystal.Booey/Rendering/NinePieceImagePainter.hpp
   include/Krystal.Booey/Rendering/OutlinePainter.hpp
+
+  # Image buffers and patterns (G4c3)
+  include/Krystal.Booey/Graphics/ImageBuffer.hpp
+  include/Krystal.Booey/Graphics/ImageBufferBackend.hpp
+  include/Krystal.Booey/Graphics/ImageBufferDisplayListBackend.hpp
+  include/Krystal.Booey/Graphics/RenderingResourceIdentifier.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -2342,6 +2348,11 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/BorderPainter.cpp
   src/Rendering/NinePieceImagePainter.cpp
   src/Rendering/OutlinePainter.cpp
+
+  # Image buffers and patterns (G4c3)
+  src/Graphics/ImageBuffer.cpp
+  src/Graphics/ImageBufferBackend.cpp
+  src/Graphics/ImageBufferDisplayListBackend.cpp
 )
 
 target_precompile_headers(Krystal.Booey

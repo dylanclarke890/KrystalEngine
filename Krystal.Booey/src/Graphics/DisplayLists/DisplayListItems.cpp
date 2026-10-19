@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Graphics/DisplayLists/DisplayListItems.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffer.hpp"
 #include "Krystal.Core/Colour/ColourTextStream.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
 
@@ -510,6 +511,79 @@ namespace krys::boo::display_list
   Ref<const boo::display_list::DisplayList> DrawDisplayList::GetDisplayList() const noexcept
   {
     return _displayList;
+  }
+
+  DrawImageBuffer::DrawImageBuffer(ImageBuffer &imageBuffer, const FloatRect &destRect,
+                                   const FloatRect &srcRect, ImagePaintingOptions options) noexcept
+      : _imageBuffer(ShareRef(imageBuffer)), _destinationRect(destRect), _srcRect(srcRect), _options(options)
+  {
+  }
+
+  DrawImageBuffer::DrawImageBuffer(const DrawImageBuffer &) noexcept = default;
+  DrawImageBuffer::DrawImageBuffer(DrawImageBuffer &&) noexcept = default;
+  DrawImageBuffer &DrawImageBuffer::operator=(const DrawImageBuffer &) noexcept = default;
+  DrawImageBuffer &DrawImageBuffer::operator=(DrawImageBuffer &&) noexcept = default;
+  DrawImageBuffer::~DrawImageBuffer() noexcept = default;
+
+  ImageBuffer &DrawImageBuffer::GetImageBuffer() const noexcept
+  {
+    return *_imageBuffer;
+  }
+
+  void DrawImageBuffer::Apply(GraphicsContext &context) const noexcept
+  {
+    context.DrawImageBuffer(*_imageBuffer, _destinationRect, _srcRect, _options);
+  }
+
+  void DrawImageBuffer::Dump(TextStream &ts, EnumSet<AsTextFlag> flags) const noexcept
+  {
+    if (flags.Contains(AsTextFlag::IncludeResourceIdentifiers))
+    {
+      ts.DumpProperty(u8"image-buffer-identifier", _imageBuffer->GetRenderingResourceIdentifier());
+    }
+    ts.DumpProperty(u8"source-rect", Source());
+    ts.DumpProperty(u8"dest-rect", DestinationRect());
+  }
+
+  DrawPatternImageBuffer::DrawPatternImageBuffer(ImageBuffer &image, const FloatRect &destRect,
+                                                 const FloatRect &tileRect,
+                                                 const AffineTransform &patternTransform,
+                                                 const FloatPoint &phase, const FloatSize &spacing,
+                                                 ImagePaintingOptions options) noexcept
+      : _imageBuffer(ShareRef(image)), _destination(destRect), _tileRect(tileRect),
+        _patternTransform(patternTransform), _phase(phase), _spacing(spacing), _options(options)
+  {
+  }
+
+  DrawPatternImageBuffer::DrawPatternImageBuffer(const DrawPatternImageBuffer &) noexcept = default;
+  DrawPatternImageBuffer::DrawPatternImageBuffer(DrawPatternImageBuffer &&) noexcept = default;
+  DrawPatternImageBuffer &
+    DrawPatternImageBuffer::operator=(const DrawPatternImageBuffer &) noexcept = default;
+  DrawPatternImageBuffer &DrawPatternImageBuffer::operator=(DrawPatternImageBuffer &&) noexcept = default;
+  DrawPatternImageBuffer::~DrawPatternImageBuffer() noexcept = default;
+
+  ImageBuffer &DrawPatternImageBuffer::GetImageBuffer() const noexcept
+  {
+    return *_imageBuffer;
+  }
+
+  void DrawPatternImageBuffer::Apply(GraphicsContext &context) const noexcept
+  {
+    context.DrawPattern(*_imageBuffer, _destination, _tileRect, _patternTransform, _phase, _spacing,
+                        _options);
+  }
+
+  void DrawPatternImageBuffer::Dump(TextStream &ts, EnumSet<AsTextFlag> flags) const noexcept
+  {
+    if (flags.Contains(AsTextFlag::IncludeResourceIdentifiers))
+    {
+      ts.DumpProperty(u8"image-identifier", _imageBuffer->GetRenderingResourceIdentifier());
+    }
+    ts.DumpProperty(u8"pattern-transform", PatternTransform());
+    ts.DumpProperty(u8"tile-rect", TileRect());
+    ts.DumpProperty(u8"dest-rect", DestRect());
+    ts.DumpProperty(u8"phase", Phase());
+    ts.DumpProperty(u8"spacing", Spacing());
   }
 
   void DrawDisplayList::Apply(GraphicsContext &context) const noexcept

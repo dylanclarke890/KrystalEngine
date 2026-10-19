@@ -33,6 +33,8 @@ namespace krys::boo::display_list
   class DrawFocusRingRects;
   class DrawGlyphs;
   class DrawDisplayList;
+  class DrawImageBuffer;
+  class DrawPatternImageBuffer;
   class DrawPlaceholder;
   class DrawLine;
   class DrawLinesForText;
@@ -76,12 +78,13 @@ namespace krys::boo::display_list
     Variant<ApplyDeviceScaleFactor, BeginTransparencyLayer, BeginTransparencyLayerWithCompositeMode,
             ClearRect, Clip, ClipRoundedRect, ClipOut, ClipOutRoundedRect, ClipOutToPath, ClipPath,
             ConcatenateCTM, DrawDotsForDocumentMarker, DrawEllipse, DrawFocusRingPath, DrawFocusRingRects,
-            DrawGlyphs, DrawDisplayList, DrawPlaceholder, DrawLine, DrawLinesForText, DrawPath, DrawRect,
-            EndTransparencyLayer, FillCompositedRect, FillEllipse, FillPath, FillRect, FillRectWithColor,
-            FillRectWithGradient, FillRectWithGradientAndSpaceTransform, FillRectWithRoundedHole,
-            FillRoundedRect, ResetClip, Restore, Rotate, Save, Scale, SetCTM, SetInlineFillColor,
-            SetInlineStroke, SetLineCap, SetLineDash, SetLineJoin, SetMiterLimit, SetState, StrokeEllipse,
-            StrokePath, StrokeRect, Translate, BeginPage, EndPage, SetURLForRect>;
+            DrawGlyphs, DrawDisplayList, DrawImageBuffer, DrawPatternImageBuffer, DrawPlaceholder, DrawLine,
+            DrawLinesForText, DrawPath, DrawRect, EndTransparencyLayer, FillCompositedRect, FillEllipse,
+            FillPath, FillRect, FillRectWithColor, FillRectWithGradient,
+            FillRectWithGradientAndSpaceTransform, FillRectWithRoundedHole, FillRoundedRect, ResetClip,
+            Restore, Rotate, Save, Scale, SetCTM, SetInlineFillColor, SetInlineStroke, SetLineCap,
+            SetLineDash, SetLineJoin, SetMiterLimit, SetState, StrokeEllipse, StrokePath, StrokeRect,
+            Translate, BeginPage, EndPage, SetURLForRect>;
 
   enum class AsTextFlag : uint8
   {

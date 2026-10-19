@@ -1,0 +1,132 @@
+﻿#include "Krystal.UI/ImageBufferTextures.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffer.hpp"
+#include "Krystal.Booey/Graphics/ImageBufferDisplayListBackend.hpp"
+#include "Krystal.UI/GraphicsContextRender2D.hpp"
+
+namespace krys::ui
+{
+  ImageBufferTextures::ImageBufferTextures(gfx::Device &device, FontFaceCache &fonts) noexcept
+      : _device(device), _fonts(fonts)
+  {
+  }
+
+  ImageBufferTextures::~ImageBufferTextures() noexcept
+  {
+    _renderers.clear();
+    for (const auto &pooled : _pool)
+    {
+      _device.Destroy(pooled.Texture);
+    }
+  }
+
+  gfx::TextureHandle ImageBufferTextures::Render(boo::ImageBuffer &buffer,
+                                                 gfx::CommandBuffer &commands) noexcept
+  {
+    const auto identifier = buffer.GetRenderingResourceIdentifier().ToUInt64();
+    if (const auto found = _rendered.find(identifier); found != _rendered.end())
+    {
+      return found->second;
+    }
+
+    // Every image buffer records into a display list.
+    auto *backend = static_cast<boo::ImageBufferDisplayListBackend *>(buffer.Backend());
+    const auto size = buffer.BackendSize();
+    if (!backend || size.IsEmpty())
+    {
+      return {};
+    }
+    const auto width = static_cast<uint32>(size.Width());
+    const auto height = static_cast<uint32>(size.Height());
+    const auto texture = Acquire(width, height);
+    auto *renderer = RendererForDepth();
+    if (!texture.IsValid() || !renderer)
+    {
+      return {};
+    }
+
+    const auto displayList = backend->CopyDisplayList();
+    ++_depth;
+    renderer->Begin(commands, {.Texture = texture,
+                               .Width = width,
+                               .Height = height,
+                               .Format = gfx::TextureFormat::RGBA8Unorm,
+                               .ClearColour = Array<float, 4> {0.f, 0.f, 0.f, 0.f}});
+    {
+      GraphicsContextRender2D context(
+        *renderer, _fonts, {0.f, 0.f, static_cast<float>(width), static_cast<float>(height)}, this);
+      context.DrawDisplayList(*displayList);
+    }
+    renderer->End();
+    --_depth;
+
+    _rendered[identifier] = texture;
+    return texture;
+  }
+
+  gfx::TextureHandle ImageBufferTextures::Copy(gfx::TextureHandle texture, const gfx::Rect2D &source,
+                                               uint32 width, uint32 height,
+                                               gfx::CommandBuffer &commands) noexcept
+  {
+    const auto copy = Acquire(width, height);
+    auto *renderer = RendererForDepth();
+    if (!copy.IsValid() || !renderer)
+    {
+      return {};
+    }
+    renderer->Begin(commands, {.Texture = copy,
+                               .Width = width,
+                               .Height = height,
+                               .Format = gfx::TextureFormat::RGBA8Unorm,
+                               .ClearColour = Array<float, 4> {0.f, 0.f, 0.f, 0.f}});
+    renderer->DrawImage(texture, source, {0.f, 0.f, static_cast<float>(width), static_cast<float>(height)});
+    renderer->End();
+    return copy;
+  }
+
+  void ImageBufferTextures::Release() noexcept
+  {
+    for (auto &pooled : _pool)
+    {
+      pooled.InUse = false;
+    }
+    _rendered.clear();
+  }
+
+  gfx::TextureHandle ImageBufferTextures::Acquire(uint32 width, uint32 height) noexcept
+  {
+    for (auto &pooled : _pool)
+    {
+      if (!pooled.InUse && pooled.Width == width && pooled.Height == height)
+      {
+        pooled.InUse = true;
+        return pooled.Texture;
+      }
+    }
+    auto texture =
+      _device.CreateTexture({.Format = gfx::TextureFormat::RGBA8Unorm,
+                             .Width = width,
+                             .Height = height,
+                             .Usage = gfx::TextureUsage::RenderTarget | gfx::TextureUsage::Sampled,
+                             .DebugName = u8"UI.ImageBuffer"});
+    if (!texture)
+    {
+      return {};
+    }
+    _pool.push_back({.Texture = *texture, .Width = width, .Height = height, .InUse = true});
+    return *texture;
+  }
+
+  gfx::Renderer2D *ImageBufferTextures::RendererForDepth() noexcept
+  {
+    while (_renderers.size() <= _depth)
+    {
+      auto renderer = gfx::Renderer2D::Create(_device);
+      if (!renderer)
+      {
+        return nullptr;
+      }
+      _renderers.push_back(krys::move(*renderer));
+    }
+    return _renderers[_depth].get();
+  }
+}

@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Graphics/GlyphBufferMembers.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextState.hpp"
 #include "Krystal.Booey/Graphics/Image.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffer.hpp"
 #include "Krystal.Booey/Graphics/ImagePaintingOptions.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
@@ -436,6 +437,32 @@ namespace krys::boo
     virtual ImageDrawResult DrawTiledImage(Image &, const FloatRect &destination, const FloatPoint &source,
                                            const FloatSize &tileSize, const FloatSize &spacing,
                                            ImagePaintingOptions = {}) noexcept;
+
+    // Image buffers
+
+    KRYS_NODISCARD virtual RefPtr<ImageBuffer> CreateImageBuffer(const FloatSize &,
+                                                                 float resolutionScale = 1) const noexcept;
+    KRYS_NODISCARD RefPtr<ImageBuffer> CreateScaledImageBuffer(const FloatSize &,
+                                                               const FloatSize &scale) const noexcept;
+    /// @brief A buffer of @p size at the resolution this context draws at, its context scaled so @p size
+    /// fills it.
+    KRYS_NODISCARD virtual RefPtr<ImageBuffer> CreateAlignedImageBuffer(const FloatSize &size) const noexcept;
+
+    void DrawImageBuffer(ImageBuffer &, const FloatPoint &destination, ImagePaintingOptions = {}) noexcept;
+    void DrawImageBuffer(ImageBuffer &, const FloatRect &destination, ImagePaintingOptions = {}) noexcept;
+    /// @brief Draws @p source of the buffer into @p destination.
+    /// FIXME: Without native images, the base draws nothing; display list recorders record the draw and
+    /// drawing backends render the buffer.
+    virtual void DrawImageBuffer(ImageBuffer &, const FloatRect &destination, const FloatRect &source,
+                                 ImagePaintingOptions = {}) noexcept;
+
+    /// @brief Fills @p destRect with @p tileRect of the buffer, repeated: tiles are mapped by @p
+    /// patternTransform, start at @p phase (where the buffer's origin goes) and are @p spacing apart.
+    /// FIXME: Without native images, the base draws nothing; display list recorders record the draw and
+    /// drawing backends render the buffer.
+    virtual void DrawPattern(ImageBuffer &, const FloatRect &destRect, const FloatRect &tileRect,
+                             const AffineTransform &patternTransform, const FloatPoint &phase,
+                             const FloatSize &spacing, ImagePaintingOptions = {}) noexcept;
     virtual ImageDrawResult DrawTiledImage(Image &, const FloatRect &destination, const FloatRect &source,
                                            const FloatSize &tileScaleFactor, Image::TileRule, Image::TileRule,
                                            ImagePaintingOptions = {}) noexcept;

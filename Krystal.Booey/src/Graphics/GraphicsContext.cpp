@@ -159,6 +159,85 @@ namespace krys::boo
     return image.DrawTiled(*this, destination, source, tileSize, spacing, options);
   }
 
+  namespace
+  {
+    KRYS_NODISCARD IntSize ScaledImageBufferSize(const FloatSize &size, const FloatSize &scale) noexcept
+    {
+      // Enlarge the buffer size if the context's transform is scaling it so we need a higher
+      // resolution than one pixel per unit.
+      return ExpandedIntSize(size * scale);
+    }
+
+    KRYS_NODISCARD FloatSize ClampingScaleForImageBufferSize(const FloatSize &size) noexcept
+    {
+      FloatSize clampingScale(1, 1);
+      (void)ImageBuffer::SizeNeedsClamping(size, clampingScale);
+      return clampingScale;
+    }
+  }
+
+  RefPtr<ImageBuffer> GraphicsContext::CreateImageBuffer(const FloatSize &size,
+                                                         float resolutionScale) const noexcept
+  {
+    return ImageBuffer::Create(size, resolutionScale);
+  }
+
+  RefPtr<ImageBuffer> GraphicsContext::CreateScaledImageBuffer(const FloatSize &size,
+                                                               const FloatSize &scale) const noexcept
+  {
+    auto expandedScaledSize = ScaledImageBufferSize(size, scale);
+    if (expandedScaledSize.IsEmpty())
+    {
+      return nullptr;
+    }
+
+    auto clampingScale = ClampingScaleForImageBufferSize(FloatSize(expandedScaledSize));
+
+    auto imageBuffer = CreateImageBuffer(FloatSize(expandedScaledSize) * clampingScale, 1);
+    if (!imageBuffer)
+    {
+      return nullptr;
+    }
+
+    imageBuffer->Context().Scale(clampingScale);
+
+    // 'expandedScaledSize' is mapped to 'size'. So use 'expandedScaledSize / size'
+    // not 'scale' because they are not necessarily equal.
+    imageBuffer->Context().Scale(FloatSize(expandedScaledSize) / size);
+    return imageBuffer;
+  }
+
+  RefPtr<ImageBuffer> GraphicsContext::CreateAlignedImageBuffer(const FloatSize &size) const noexcept
+  {
+    return CreateScaledImageBuffer(size, ScaleFactor());
+  }
+
+  void GraphicsContext::DrawImageBuffer(ImageBuffer &image, const FloatPoint &destination,
+                                        ImagePaintingOptions imagePaintingOptions) noexcept
+  {
+    DrawImageBuffer(image, FloatRect(destination, image.LogicalSize()), FloatRect({}, image.LogicalSize()),
+                    imagePaintingOptions);
+  }
+
+  void GraphicsContext::DrawImageBuffer(ImageBuffer &image, const FloatRect &destination,
+                                        ImagePaintingOptions imagePaintingOptions) noexcept
+  {
+    DrawImageBuffer(image, destination, FloatRect({}, image.LogicalSize()), imagePaintingOptions);
+  }
+
+  void GraphicsContext::DrawImageBuffer(ImageBuffer &, const FloatRect &, const FloatRect &,
+                                        ImagePaintingOptions) noexcept
+  {
+    // FIXME: Native images (nativeImageForDrawing, drawNativeImage) come with bitmap images.
+  }
+
+  void GraphicsContext::DrawPattern(ImageBuffer &, const FloatRect &, const FloatRect &,
+                                    const AffineTransform &, const FloatPoint &, const FloatSize &,
+                                    ImagePaintingOptions) noexcept
+  {
+    // FIXME: Native images (nativeImageForDrawing, the native image drawPattern) come with bitmap images.
+  }
+
   ImageDrawResult GraphicsContext::DrawTiledImage(Image &image, const FloatRect &destination,
                                                   const FloatRect &source, const FloatSize &tileScaleFactor,
                                                   Image::TileRule hRule, Image::TileRule vRule,

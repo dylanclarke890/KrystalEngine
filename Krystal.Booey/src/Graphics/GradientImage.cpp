@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Graphics/GradientImage.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
+#include "Krystal.Core/Numeric.hpp"
 #include <cmath>
 
 namespace krys::boo
@@ -18,13 +19,6 @@ namespace krys::boo
     GraphicsContextStateSaver stateSaver(destContext);
     destContext.SetCompositeOperation(options.GetCompositeOperator(), options.GetBlendMode());
     destContext.Clip(destRect);
-    FillMapped(destContext, destRect, srcRect);
-    return ImageDrawResult::DidDraw;
-  }
-
-  void GradientImage::FillMapped(GraphicsContext &destContext, const FloatRect &destRect,
-                                 const FloatRect &srcRect) noexcept
-  {
     destContext.Translate(destRect.Location());
     if (destRect.Size() != srcRect.Size())
     {
@@ -32,6 +26,7 @@ namespace krys::boo
     }
     destContext.Translate(-srcRect.Location());
     destContext.FillRect(FloatRect(FloatPoint(), Size()), *_gradient);
+    return ImageDrawResult::DidDraw;
   }
 
   void GradientImage::DrawPattern(GraphicsContext &destContext, const FloatRect &destRect,
@@ -39,51 +34,48 @@ namespace krys::boo
                                   const FloatPoint &phase, const FloatSize &spacing,
                                   ImagePaintingOptions options) noexcept
   {
-    // Each tile is the gradient drawn into its own rect, the tiles starting at the phase and repeating every
-    // tile and spacing, clipped to the destination.
-    const FloatSize tileSize(srcRect.Width() * static_cast<float>(patternTransform.A()),
-                             srcRect.Height() * static_cast<float>(patternTransform.D()));
-    const FloatSize step = tileSize + spacing;
-    if (tileSize.IsEmpty() || step.Width() <= 0 || step.Height() <= 0 || destRect.IsEmpty())
-    {
-      return;
-    }
+    // Allow the generator to provide visually-equivalent tiling parameters for better performance.
+    FloatSize adjustedSize = Size();
+    FloatRect adjustedSrcRect = srcRect;
+    _gradient->AdjustParametersForTiledDrawing(adjustedSize, adjustedSrcRect, spacing);
 
-    // The phase is where the whole image's origin goes, so the tile starts at its source rect's scaled
-    // location from there.
-    const FloatPoint tileOrigin(phase.X() + srcRect.X() * static_cast<float>(patternTransform.A()),
-                                phase.Y() + srcRect.Y() * static_cast<float>(patternTransform.D()));
-    const float startX =
-      tileOrigin.X() + std::floor((destRect.X() - tileOrigin.X()) / step.Width()) * step.Width();
-    const float startY =
-      tileOrigin.Y() + std::floor((destRect.Y() - tileOrigin.Y()) / step.Height()) * step.Height();
-    const double columns = std::ceil((destRect.MaxX() - startX) / step.Width());
-    const double rows = std::ceil((destRect.MaxY() - startY) / step.Height());
-    if (columns * rows > static_cast<double>(MaxTiles))
-    {
-      return;
-    }
+    // Factor in the destination context's scale to generate at the best resolution
+    AffineTransform destContextCTM = destContext.GetCTM(GraphicsContext::DefinitelyIncludeDeviceScale);
+    double xScale = std::abs(destContextCTM.XScale());
+    double yScale = std::abs(destContextCTM.YScale());
+    AffineTransform adjustedPatternCTM = patternTransform;
+    adjustedPatternCTM.Scale(1.0 / xScale, 1.0 / yScale);
+    adjustedSrcRect.Scale(static_cast<float>(xScale), static_cast<float>(yScale));
 
-    // Each tile is clipped to its rect with the edges rounded to whole units, so neighbouring tiles share an
-    // edge rather than both antialiasing it (which would let what's beneath show through as a seam).
-    auto snappedTileRect = [](float x, float y, const FloatSize &size)
-    {
-      const float left = std::round(x);
-      const float top = std::round(y);
-      return FloatRect(left, top, std::round(x + size.Width()) - left, std::round(y + size.Height()) - top);
-    };
+    uint32 generatorHash = _gradient->Hash();
 
-    GraphicsContextStateSaver stateSaver(destContext);
-    destContext.Clip(destRect);
-    destContext.SetCompositeOperation(options.GetCompositeOperator(), options.GetBlendMode());
-    for (float y = startY; y < destRect.MaxY(); y += step.Height())
+    if (!_cachedImage || _cachedGeneratorHash != generatorHash || _cachedAdjustedSize != adjustedSize
+        || !AreEssentiallyEqual(destContext.ScaleFactor(), _cachedScaleFactor))
     {
-      for (float x = startX; x < destRect.MaxX(); x += step.Width())
+      auto imageBuffer = destContext.CreateAlignedImageBuffer(adjustedSize);
+      if (!imageBuffer)
       {
-        GraphicsContextStateSaver tileStateSaver(destContext);
-        destContext.Clip(snappedTileRect(x, y, tileSize));
-        FillMapped(destContext, FloatRect(FloatPoint(x, y), tileSize), srcRect);
+        return;
+      }
+
+      // Fill with the generated image.
+      imageBuffer->Context().FillRect(FloatRect(FloatPoint(), adjustedSize), *_gradient);
+
+      _cachedGeneratorHash = generatorHash;
+      _cachedAdjustedSize = adjustedSize;
+      _cachedScaleFactor = destContext.ScaleFactor();
+
+      // FIXME: Luminance masks (drawLuminanceMask, convertToLuminanceMask) come with masks.
+
+      _cachedImage = krys::move(imageBuffer);
+      if (!_cachedImage)
+      {
+        return;
       }
     }
+
+    destContext.SetDrawLuminanceMask(false);
+    destContext.DrawPattern(*_cachedImage, destRect, adjustedSrcRect, adjustedPatternCTM, phase, spacing,
+                            options);
   }
 }
