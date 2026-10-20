@@ -2,10 +2,12 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
+#include "Krystal.Booey.Tests/Platform/ImageDecoders/AnimatedImages.hpp"
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/Graphics/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
@@ -310,5 +312,82 @@ namespace krys::boo::tests
     CHECK(fixture.RendererSize(u8"replaced") == IntSize(3, 2));
     CHECK(Count(fixture.Painted(), u8"draw-native-image") == 2u);
   }
-}
 
+  TEST_CASE("HTMLImageElement: animated images advance as they're painted", "[HTML][HTMLImageElement]")
+  {
+    using namespace std::chrono_literals;
+    LoaderFixture loader;
+    loader.Strategy.Resources[u8"file:///a.gif"] = images::AnimatedGIF;
+    loader.Strategy.Resources[u8"file:///b.webp"] = images::AnimatedWebP;
+
+    ImageFixture fixture(
+      u8"<img id=img src='file:///a.gif'>"
+      u8"<div id=box style='width: 2px; height: 2px; background: url(file:///b.webp)'></div>");
+    RunNetworkingTasks();
+    auto &loop = html::EventLoop::Current();
+    auto &image = Downcast<BitmapImage>(*fixture.Image(u8"img").GetImage());
+    auto *background = fixture.ById(u8"box")
+                         .Renderer()
+                         ->Style()
+                         .GetBackgroundLayers()
+                         .UsedValues()
+                         .begin()
+                         ->GetImage()
+                         .TryStyleImage()
+                         ->GetCachedImage();
+    REQUIRE(background);
+    auto &backgroundImage = Downcast<BitmapImage>(*background->GetImage());
+
+    auto start = loop.Now();
+    (void)fixture.Painted();
+    CHECK(image.IsAnimating());
+    CHECK(backgroundImage.IsAnimating());
+
+    loop.Run(start + 100ms);
+    CHECK(image.CurrentFrameIndex() == 1u);
+    CHECK(backgroundImage.CurrentFrameIndex() == 1u);
+    // Painting the new frames starts their timers.
+    (void)fixture.Painted();
+    loop.Run(start + 200ms);
+    CHECK(image.CurrentFrameIndex() == 2u);
+    CHECK(backgroundImage.CurrentFrameIndex() == 2u);
+  }
+
+  TEST_CASE("HTMLImageElement: animations pause out of view and resume in view", "[HTML][HTMLImageElement]")
+  {
+    using namespace std::chrono_literals;
+    LoaderFixture loader;
+    loader.Strategy.Resources[u8"file:///a.gif"] = images::AnimatedGIF;
+
+    ImageFixture fixture(
+      u8"<style>body { margin: 0 }</style>"
+      u8"<div id=box style='height: 100px; overflow: auto'>"
+      u8"<img id=img src='file:///a.gif' style='display: block'><div style='height: 1000px'></div>"
+      u8"</div>");
+    RunNetworkingTasks();
+    auto &loop = html::EventLoop::Current();
+    auto &image = Downcast<BitmapImage>(*fixture.Image(u8"img").GetImage());
+    auto &renderer = *fixture.Image(u8"img").Renderer();
+
+    auto start = loop.Now();
+    (void)fixture.Painted();
+    REQUIRE(image.IsAnimating());
+
+    // Scrolled out of view, the next frame finds the image hidden, and its animation pauses.
+    fixture.ById(u8"box").ScrollTo(0, 500);
+    loop.Run(start + 100ms);
+    CHECK(image.CurrentFrameIndex() == 1u);
+    CHECK(renderer.HasPausedImageAnimations());
+    (void)fixture.Painted();
+    CHECK_FALSE(image.IsAnimating());
+    loop.Run(start + 400ms);
+    CHECK(image.CurrentFrameIndex() == 1u);
+
+    // Scrolled back, it resumes.
+    fixture.ById(u8"box").ScrollTo(0, 0);
+    CHECK_FALSE(renderer.HasPausedImageAnimations());
+    CHECK(image.IsAnimating());
+    loop.Run(start + 400ms);
+    CHECK(image.CurrentFrameIndex() == 2u);
+  }
+}

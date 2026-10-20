@@ -179,8 +179,8 @@ namespace krys::boo
       // FIXME: The compositing layers, rendering-dependent regions and debug overlays, once there are any.
     }
 
-    // FIXME: The caret rect, repaint and the frame view's scroll offset and viewport notifications, once
-    // there are selection and repaint tracking.
+    // FIXME: The caret rect, repaint and the frame view's scroll offset notification, once there are
+    // selection and repaint tracking.
 
     // A mouse over the box moves soon, so the hover state follows the scrolled content.
     // FIXME: The rect for repaint (clippedOverflowRectForRepaint) rather than the border box, once there's
@@ -199,6 +199,8 @@ namespace krys::boo
       SetIsAwaitingScrollend(true);
       element->NodeDocument().AddPendingScrollEventTarget(*element, dom::ScrollEventType::Scroll);
     }
+
+    view.FrameView().ViewportContentsChanged();
   }
 
   void RenderLayerScrollableArea::ScrollDidEnd() noexcept

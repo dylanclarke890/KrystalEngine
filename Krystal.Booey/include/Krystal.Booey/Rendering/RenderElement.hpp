@@ -66,6 +66,7 @@ namespace krys::boo
     bool _renderBlockHasMarginAfterQuirk {false};
     bool _renderBlockShouldForceRelayoutChildren {false};
     bool _renderBoxHasShapeOutsideInfo {false};
+    bool _hasPausedImageAnimations {false};
 
   public:
     /// @brief Displays that get a block flow instead of their usual renderer.
@@ -184,6 +185,36 @@ namespace krys::boo
     // FIXME: An image element that doesn't allow the orientation to be overridden draws its image's
     // (allowsOrientationOverride, G7c).
     KRYS_NODISCARD boo::ImageOrientation GetImageOrientation() const noexcept;
+
+    /// @brief Whether the renderer can be seen at all: it's visible and its document's frame is on screen.
+    KRYS_NODISCARD bool IsVisibleIgnoringGeometry() const noexcept;
+    /// @brief Whether the renderer can be seen in @p documentRect, in document coordinates.
+    KRYS_NODISCARD bool IsVisibleInDocumentRect(const IntRect &documentRect) const noexcept;
+    /// @brief Whether the renderer can be seen in its frame's visible content.
+    KRYS_NODISCARD bool IsVisibleInViewport() const noexcept;
+
+    /// @brief Whether the images of the renderer may animate.
+    KRYS_NODISCARD bool AllowsAnimation() const noexcept;
+
+    /// @brief Repaints the renderer and starts its paused @p cachedImage's animation if it's now visible in
+    /// @p visibleRect.
+    /// @return Whether it resumed.
+    bool RepaintForPausedImageAnimationsIfNeeded(const IntRect &visibleRect,
+                                                 CachedImage &cachedImage) noexcept;
+    KRYS_NODISCARD bool HasPausedImageAnimations() const noexcept
+    {
+      return _hasPausedImageAnimations;
+    }
+    void SetHasPausedImageAnimations(bool b) noexcept
+    {
+      _hasPausedImageAnimations = b;
+    }
+
+    VisibleInViewportState ImageFrameAvailable(CachedImage &, ImageAnimatingState,
+                                               const IntRect *) noexcept override;
+    KRYS_NODISCARD VisibleInViewportState
+      ImageVisibleInViewport(const dom::Document &) const noexcept override;
+    void DidRemoveCachedImageClient(CachedImage &) noexcept override;
 
     KRYS_NODISCARD const RenderStyle &FirstLineStyle() const noexcept;
 

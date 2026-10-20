@@ -19,6 +19,7 @@ namespace krys::boo::layout
 
 namespace krys::boo
 {
+  class CachedImage;
   class LocalFrameView;
   class RenderCounter;
 
@@ -44,6 +45,8 @@ namespace krys::boo
     RenderCounterSet _countersNeedingUpdate;
     // Keyed by address: a box unregisters itself when it's destroyed or stops being a query container.
     HashSet<const RenderBox *> _containerQueryBoxes;
+    // Renderers remove themselves when they're destroyed or stop being an image's client.
+    HashMap<RenderElement *, List<CachedImage *>> _renderersWithPausedImageAnimation;
 
   public:
     RenderView(dom::Document &document, RenderStyle &&style) noexcept;
@@ -185,6 +188,12 @@ namespace krys::boo
                                  TransformState &transformState) const noexcept override;
     void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
     void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
+
+    /// @brief Resumes the paused image animations of the renderers now visible in @p visibleRect.
+    void ResumePausedImageAnimationsIfNeeded(const IntRect &visibleRect) noexcept;
+    void AddRendererWithPausedImageAnimations(RenderElement &renderer, CachedImage &image) noexcept;
+    void RemoveRendererWithPausedImageAnimations(RenderElement &renderer) noexcept;
+    void RemoveRendererWithPausedImageAnimations(RenderElement &renderer, CachedImage &image) noexcept;
 
   private:
     void UpdateInitialContainingBlockSize() noexcept;

@@ -153,6 +153,9 @@ namespace krys::boo
       }
       krys_debug_assert(_percentHeightIgnoreList.empty());
     }
+
+    // The post-layout task that resumes the animations layout brought into view.
+    _frameView.ViewportContentsChanged();
   }
 
   bool LocalFrameViewLayoutContext::NeedsLayout() const noexcept

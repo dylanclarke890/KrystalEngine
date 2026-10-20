@@ -279,6 +279,76 @@ namespace krys::boo
     }
   }
 
+  ImageFrameAnimator *BitmapImageSource::FrameAnimator() const noexcept
+  {
+    if (_frameAnimator)
+    {
+      return _frameAnimator.get();
+    }
+
+    // Number of frames can only be known for sure when loading the image is complete.
+    if (GetEncodedDataStatus() != EncodedDataStatus::Complete)
+    {
+      return nullptr;
+    }
+
+    if (!IsAnimated())
+    {
+      return nullptr;
+    }
+
+    _frameAnimator = CreateUnique<ImageFrameAnimator>(const_cast<BitmapImageSource &>(*this));
+    return _frameAnimator.get();
+  }
+
+  void BitmapImageSource::StartAnimation() noexcept
+  {
+    (void)StartAnimation(SubsamplingLevel::Default, DecodingOptions(DecodingMode::Synchronous));
+  }
+
+  bool BitmapImageSource::StartAnimation(SubsamplingLevel subsamplingLevel,
+                                         const DecodingOptions &options) noexcept
+  {
+    auto *frameAnimator = FrameAnimator();
+    if (!frameAnimator)
+    {
+      return false;
+    }
+
+    return frameAnimator->StartAnimation(subsamplingLevel, options);
+  }
+
+  void BitmapImageSource::StopAnimation() noexcept
+  {
+    if (!_frameAnimator || !_frameAnimator->IsAnimating())
+    {
+      return;
+    }
+
+    _frameAnimator->StopAnimation();
+    StopDecodingWorkQueue();
+  }
+
+  void BitmapImageSource::ResetAnimation() noexcept
+  {
+    if (!_frameAnimator)
+    {
+      return;
+    }
+
+    _frameAnimator->ResetAnimation();
+  }
+
+  bool BitmapImageSource::IsAnimating() const noexcept
+  {
+    return _frameAnimator && _frameAnimator->IsAnimating();
+  }
+
+  bool BitmapImageSource::HasEverAnimated() const noexcept
+  {
+    return _frameAnimator && _frameAnimator->HasEverAnimated();
+  }
+
   bool BitmapImageSource::IsAnimated() const noexcept
   {
     return FrameCount() > 1 && GetRepetitionCount() != RepetitionCountNone;
@@ -286,6 +356,11 @@ namespace krys::boo
 
   bool BitmapImageSource::IsAnimationAllowed() const noexcept
   {
+    if (_frameAnimator && !_frameAnimator->IsAnimationAllowed())
+    {
+      return false;
+    }
+
     // ImageObserver may disallow animation.
     if (auto imageObserver = GetImageObserver())
     {
@@ -298,14 +373,20 @@ namespace krys::boo
   bool BitmapImageSource::IsLargeForDecoding() const noexcept
   {
     constexpr uint64 KB = 1'024;
-    auto sizeInBytes =
-      Size(ImageOrientation::Orientation::None).UnclampedArea() * sizeof(uint32);
+    auto sizeInBytes = Size(ImageOrientation::Orientation::None).UnclampedArea() * sizeof(uint32);
     return sizeInBytes > (IsAnimated() ? 100 * KB : 500 * KB);
   }
 
   void BitmapImageSource::StopDecodingWorkQueue() noexcept
   {
     // Frames are decoded synchronously, so there's no work queue to stop.
+  }
+
+  bool BitmapImageSource::IsPendingDecodingAtIndex(uint32, SubsamplingLevel,
+                                                   const DecodingOptions &) const noexcept
+  {
+    // Frames are decoded synchronously, so none is ever pending.
+    return false;
   }
 
   bool BitmapImageSource::IsCompatibleWithOptionsAtIndex(uint32 index, SubsamplingLevel subsamplingLevel,
@@ -318,6 +399,22 @@ namespace krys::boo
   {
     _decodeCallbacks.push_back(krys::move(decodeCallback));
     uint32 index = CurrentFrameIndex();
+
+    bool isCompatibleNativeImage = IsCompatibleWithOptionsAtIndex(
+      index, SubsamplingLevel::Default, DecodingOptions(DecodingMode::Asynchronous));
+
+    auto *frameAnimator = FrameAnimator();
+    if (frameAnimator && (frameAnimator->HasEverAnimated() || isCompatibleNativeImage))
+    {
+      // startAnimation() always decodes the nextFrame which is currentFrameIndex + 1.
+      // If primaryFrameIndex = 0, then the sequence of decoding is { 1, 2, .., n, 0, 1, ...}.
+      if (StartAnimation(SubsamplingLevel::Default, DecodingOptions(DecodingMode::Asynchronous)))
+      {
+        // Frames decode as they're drawn, so the current one is as decoded as it will be.
+        CallDecodeCallbacks(FrameDecodingStatusAtIndex(index));
+        return;
+      }
+    }
 
     // FIXME: Decode on the work queue; for now the frame decodes now, and the callbacks are called before
     // this returns.
@@ -340,10 +437,30 @@ namespace krys::boo
     }
   }
 
+  void BitmapImageSource::ImageFrameAtIndexAvailable(uint32 index, ImageAnimatingState animatingState,
+                                                     DecodingStatus decodingStatus) noexcept
+  {
+    krys_debug_assert(index < FrameCount());
+    (void)index;
+
+    // Decode callbacks have to called regardless of the decoding status.
+    // Decoding promises have to resolved or rejected.
+    CallDecodeCallbacks(decodingStatus);
+
+    if (decodingStatus == DecodingStatus::Invalid)
+    {
+      return;
+    }
+
+    if (auto imageObserver = GetImageObserver())
+    {
+      imageObserver->ImageFrameAvailable(*_bitmapImage, animatingState, nullptr, decodingStatus);
+    }
+  }
+
   uint32 BitmapImageSource::CurrentFrameIndex() const noexcept
   {
-    // FIXME: The frame animator's current frame, with animated images (G7d).
-    return PrimaryFrameIndex();
+    return _frameAnimator ? _frameAnimator->CurrentFrameIndex() : PrimaryFrameIndex();
   }
 
   void BitmapImageSource::CacheMetadataAtIndex(uint32 index, SubsamplingLevel subsamplingLevel,
@@ -483,8 +600,12 @@ namespace krys::boo
     BitmapImageSource::CurrentNativeImageForDrawing(SubsamplingLevel subsamplingLevel,
                                                     const DecodingOptions &options) noexcept
   {
-    // FIXME: Start the animation (G7d).
-    return NativeImageAtIndexForDrawing(CurrentFrameIndex(), subsamplingLevel, options);
+    // The current frame decodes before the animation starts, so its duration (known once it's decoded) times
+    // the frame.
+    // FIXME: Decode the next frame ahead on the decoding work queue, once there's one.
+    auto nativeImage = NativeImageAtIndexForDrawing(CurrentFrameIndex(), subsamplingLevel, options);
+    (void)StartAnimation(subsamplingLevel, options);
+    return nativeImage;
   }
 
   RefPtr<NativeImage> BitmapImageSource::NativeImageAtIndex(uint32 index) noexcept
@@ -573,6 +694,11 @@ namespace krys::boo
 
   void BitmapImageSource::Dump(TextStream &ts) const noexcept
   {
+    if (_frameAnimator)
+    {
+      _frameAnimator->Dump(ts);
+    }
+
     _descriptor.Dump(ts);
 
     ts.DumpProperty(u8"decoded-size", _decodedSize);

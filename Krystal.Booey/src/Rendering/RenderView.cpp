@@ -527,4 +527,72 @@ namespace krys::boo
       result.SetLocalPoint(adjustedPoint);
     }
   }
+
+  void RenderView::AddRendererWithPausedImageAnimations(RenderElement &renderer, CachedImage &image) noexcept
+  {
+    krys_debug_assert(!renderer.HasPausedImageAnimations()
+                      || _renderersWithPausedImageAnimation.contains(&renderer));
+
+    renderer.SetHasPausedImageAnimations(true);
+    auto &images = _renderersWithPausedImageAnimation[&renderer];
+    if (std::ranges::find(images, &image) == images.end())
+    {
+      images.push_back(&image);
+    }
+  }
+
+  void RenderView::RemoveRendererWithPausedImageAnimations(RenderElement &renderer) noexcept
+  {
+    krys_debug_assert(renderer.HasPausedImageAnimations());
+    krys_debug_assert(_renderersWithPausedImageAnimation.contains(&renderer));
+
+    renderer.SetHasPausedImageAnimations(false);
+    _renderersWithPausedImageAnimation.erase(&renderer);
+  }
+
+  void RenderView::RemoveRendererWithPausedImageAnimations(RenderElement &renderer,
+                                                           CachedImage &image) noexcept
+  {
+    krys_debug_assert(renderer.HasPausedImageAnimations());
+
+    auto it = _renderersWithPausedImageAnimation.find(&renderer);
+    krys_debug_assert(it != _renderersWithPausedImageAnimation.end());
+
+    auto &images = it->second;
+    auto found = std::ranges::find(images, &image);
+    if (found == images.end())
+    {
+      return;
+    }
+
+    if (images.size() == 1)
+    {
+      RemoveRendererWithPausedImageAnimations(renderer);
+    }
+    else
+    {
+      images.erase(found);
+    }
+  }
+
+  void RenderView::ResumePausedImageAnimationsIfNeeded(const IntRect &visibleRect) noexcept
+  {
+    List<Pair<RenderElement *, CachedImage *>> toRemove;
+    for (auto &[renderer, images] : _renderersWithPausedImageAnimation)
+    {
+      for (auto *image : images)
+      {
+        if (renderer->RepaintForPausedImageAnimationsIfNeeded(visibleRect, *image))
+        {
+          toRemove.emplace_back(renderer, image);
+        }
+      }
+    }
+    for (auto &[renderer, image] : toRemove)
+    {
+      RemoveRendererWithPausedImageAnimations(*renderer, *image);
+    }
+
+    // FIXME: SVG elements with paused animations, once there's SVG.
+  }
 }

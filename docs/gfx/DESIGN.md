@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-20): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5: G5a, the viewport scrolls, and G5b, scrollbars, wheel and keyboard scrolling) is done; see *G5 plan*. The event and rendering loops (G6: G6a, timers and running the loop; G6b, the rendering update; G6c, mutation observers and slot change) are done; see *G6 plan*. Images (G7) are in progress: G7a, decoding and drawing, G7b, loading and CSS images, and G7c, `<img>`, are done; see *G7 plan*.
+Status (2026-10-20): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5: G5a, the viewport scrolls, and G5b, scrollbars, wheel and keyboard scrolling) is done; see *G5 plan*. The event and rendering loops (G6: G6a, timers and running the loop; G6b, the rendering update; G6c, mutation observers and slot change) are done; see *G6 plan*. Images (G7: G7a, decoding and drawing; G7b, loading and CSS images; G7c, `<img>`; G7d, animated images) are done; see *G7 plan*.
 
 ## Why
 
@@ -626,6 +626,10 @@ Images: decoding, drawing, loading, `<img>` and animated images. Booey has the C
     - **Rendering:** upstream's `RenderImageResource`, `RenderImageResourceStyleImage` and `RenderImage` (intrinsic sizes, the device pixel ratio from `srcset`, alt text sizing and painting with the incomplete image outline, collapsing an empty `alt`); `RenderReplaced::Paint` and `ShouldPaint`; generated content images (`content: url()` on an element and in `::before`/`::after`).
     - **Out (FIXMEs):** the broken image icon (no built-in images), image maps and `usemap`, forms (`form` association), lazy loading, `decode()`, re-selecting sources when media queries change, selection painting.
 - **G7d, animated images** (Booey): GIF, APNG and animated WebP through upstream's `ImageFrameAnimator`, on G6's timers, scheduling rendering updates for new frames; animations pause while an image isn't visible.
+  - **Detail (2026-10-20):**
+    - **Animator:** upstream's `ImageFrameAnimator`, on G6's timers and the host's time (`ThreadTimers::CurrentTime`), and the animation half of `BitmapImageSource` (starting when a frame is drawn, stopping, resetting, the current frame, a frame becoming available); frames decode synchronously when drawn, as G7a's do (no work queue), so the animator never waits for a decode. The G7a decoders already read GIF, APNG and animated WebP frames, durations and loop counts.
+    - **Pausing:** upstream's `RenderElement::imageFrameAvailable` with `isVisibleInViewport`; renderers whose animations paused are kept on the `RenderView` and resume (repaint and start) when the viewport's contents change: `LocalFrameView::ViewportContentsChanged` after layout, scrolling (the view's and scrolling boxes') and resizing. Without repaint rects, a renderer's rect is its absolute visual overflow, unclipped by its ancestors.
+    - **Tests:** decoding animated GIF, APNG and WebP frames; an `<img>` and a CSS background advancing frames with the host's time and stopping after their loops; an image scrolled out of view pausing and resuming. **Editor:** an animated GIF in the images card.
 - **Out (FIXMEs):** SVG images (no SVG rendering), AVIF and JPEG XL, lazy loading (intersection observers), `decode()` (promises), CORS and `crossorigin`, network URLs (the interface allows them; only `file:` is implemented), canvas.
 
 ### G2a as built (2026-10-18)
@@ -993,6 +997,15 @@ Testing: the device's hidden window gives tests a real OpenGL context (Krystal.G
 - **Changed from the plan:** the elements stay written from the HTML standard and gain upstream's behaviour through Booey's DOM hooks; generated content images came along (they need `RenderImage`).
 - **Out (FIXMEs):** the broken image icon (no built-in images), `currentSrc` (`USVString` holds no string yet), image maps, forms, lazy loading, `decode()`, re-selecting sources when media queries change, selection, animation (G7d).
 - **Tests:** Booey tests the `<img>` element (7 cases: loading and painting, errors and alt text, attribute sizes and object-fit, `srcset` and `sizes`, `<picture>`, changing the source, generated content), the srcset parser (2), the sizes parser (3) and the strict number parsers (1); Krystal.UI tests a file page's `<img>`, and a page golden, `img` (natural and attribute sizes, translucent WebP, a GIF with padding and border, the four object-fits with object-position, a width descriptor with `sizes`, a `<picture>` choosing by type and density, a rounded border, a width giving the height), checked against Chrome (mean difference 0.12, no pixel over tolerance).
+
+### G7d as built (2026-10-20)
+
+- **Booey** (the ledger entry is *Animated images* in `docs/booey/PORTING.md`): upstream's `ImageFrameAnimator` on G6's timers and the host's time, with the animation half of `BitmapImageSource`: drawing an animated image starts its frame timer, the timer advances the frame and tells the image's observers, whose renderers repaint (a rendering update) if they're visible; an animation stops after its loops. Renderers that can't see their new frame pause the animation and wait on the `RenderView`; `LocalFrameView::ViewportContentsChanged` (after layout, scrolling the view or a box, and resizing) resumes the ones now in view. The G7a decoders already read GIF, APNG and animated WebP frames.
+- **Krystal.UI:** unchanged; `View::Update` reports a rendering update for each new frame (tested).
+- **Editor:** an animated spinner GIF in the images card.
+- **Changed from the plan:** the current frame decodes before its animation starts (decoding is synchronous), so its duration is known.
+- **Out (FIXMEs):** the decoding work queue (frames decode as they're drawn), animation controls (`allowsAnimation`), clipping by ancestors in the visibility test (no repaint rects), SVG image animations, subframes.
+- **Tests:** Booey tests animated decoding (1 case), frames advancing and stopping (2) and `<img>` and CSS animations with pausing and resuming (2); Krystal.UI tests the rendering updates of an animated page. No golden: a still frame is G7c's.
 
 ## Open decisions
 

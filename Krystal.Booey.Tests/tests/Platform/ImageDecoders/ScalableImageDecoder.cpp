@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoder.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Platform/ImageDecoders/AnimatedImages.hpp"
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey/Graphics/ImageFrame.hpp"
 #include "Krystal.Booey/Platform/SharedBuffer.hpp"
@@ -191,5 +192,30 @@ namespace krys::boo::tests
       CHECK(pixels[0] == Blue);
       CHECK(pixels[255] == Blue);
     }
+  }
+
+  TEST_CASE("ScalableImageDecoder: animated GIF, APNG and WebP frames", "[Platform][ImageDecoders]")
+  {
+    for (auto bytes : {images::AnimatedGIF, images::AnimatedPNG, images::AnimatedWebP})
+    {
+      auto decoder = Decode(bytes);
+      REQUIRE(decoder);
+      INFO(reinterpret_cast<const char *>(decoder->FilenameExtension().c_str()));
+      REQUIRE(decoder->FrameCount() == 3u);
+      CHECK(decoder->GetRepetitionCount() == RepetitionCountInfinite);
+      CHECK(Pixels(*decoder, 0) == List<uint32>(4, Red));
+      CHECK(Pixels(*decoder, 1) == List<uint32>(4, Green));
+      CHECK(Pixels(*decoder, 2) == List<uint32>(4, Blue));
+      // A frame's duration is known once it's decoded.
+      for (size_t index = 0; index < 3; ++index)
+      {
+        CHECK(decoder->FrameDurationAtIndex(index).count() == 0.1);
+      }
+    }
+
+    auto once = Decode(images::OnceGIF);
+    REQUIRE(once);
+    CHECK(once->FrameCount() == 2u);
+    CHECK(once->GetRepetitionCount() == RepetitionCountOnce);
   }
 }

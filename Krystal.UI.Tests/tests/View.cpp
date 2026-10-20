@@ -527,6 +527,42 @@ namespace krys::ui::tests
     std::filesystem::remove_all(directory);
   }
 
+  TEST_CASE("View: an animated image asks for a rendering update for each frame", "[UI]")
+  {
+    using namespace std::chrono_literals;
+    const auto directory = std::filesystem::temp_directory_path() / "krystal-ui-animation-test";
+    std::filesystem::create_directories(directory);
+    {
+      // A 1x1 GIF of two frames, red then blue, 100ms each, repeating forever.
+      const unsigned char gif[] = {
+        71, 73,  70, 56, 57,  97, 1,  0,  1,  0,  129, 0,  0,  255, 0,  0,  0,  0, 0, 0, 0,   0,
+        0,  0,   0,  33, 255, 11, 78, 69, 84, 83, 67,  65, 80, 69,  50, 46, 48, 3, 1, 0, 0,   0,
+        33, 249, 4,  0,  10,  0,  0,  0,  44, 0,  0,   0,  0,  1,   0,  1,  0,  0, 8, 4, 0,   1,
+        4,  4,   0,  33, 249, 4,  1,  10, 0,  1,  0,   44, 0,  0,   0,  0,  1,  0, 1, 0, 129, 0,
+        0,  255, 0,  0,  0,   0,  0,  0,  0,  0,  0,   8,  4,  0,   1,  4,  4,  0, 59};
+      std::ofstream image(directory / "spin.gif", std::ios::binary);
+      image.write(reinterpret_cast<const char *>(gif), sizeof(gif));
+      std::ofstream page(directory / "page.html", std::ios::binary);
+      page << "<!DOCTYPE html><img id=img src=spin.gif>";
+    }
+
+    View view({200, 100});
+    REQUIRE(view.LoadFile(directory / "page.html").has_value());
+    view.UpdateRendering();
+    auto now = boo::html::EventLoop::Current().Now();
+    // The load completes; painting the image starts its animation.
+    CHECK(view.Update(now));
+    (void)view.Record();
+    CHECK_FALSE(view.Update(now + 50ms));
+    // Each new frame asks for a rendering update.
+    CHECK(view.Update(now + 100ms));
+    (void)view.Record();
+    CHECK_FALSE(view.Update(now + 150ms));
+    CHECK(view.Update(now + 200ms));
+
+    std::filesystem::remove_all(directory);
+  }
+
   TEST_CASE("FileLoaderStrategy: MIME types by extension", "[UI]")
   {
     CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".PNG") == u8"image/png");

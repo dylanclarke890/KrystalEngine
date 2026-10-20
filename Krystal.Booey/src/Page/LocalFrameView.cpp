@@ -80,6 +80,8 @@ namespace krys::boo
       AvailableContentSizeChanged(AvailableSizeChangeReason::AreaSizeChanged);
     }
 
+    ViewportContentsChanged();
+
     // FIXME: Tell the document its view changed size (resize events) and update the viewport-constrained
     // objects and intersection observers, once there's a window and layout.
   }
@@ -1479,9 +1481,37 @@ namespace krys::boo
     // FIXME: Throttling the scroll events (eventThrottlingDelay), once there's a client.
     ScheduleScrollEvent();
 
-    // FIXME: The compositor, the layout viewport (updateLayoutViewport, with visual viewports), what's
-    // relevant to the viewport (viewportContentsChanged: content visibility, lazy loading, intersection
-    // observers) and the editor, once there are those.
+    // FIXME: The compositor, the layout viewport (updateLayoutViewport, with visual viewports) and the
+    // editor, once there are those.
+    ViewportContentsChanged();
+  }
+
+  void LocalFrameView::ViewportContentsChanged() noexcept
+  {
+    if (!Frame().View())
+    {
+      // The frame is being destroyed.
+      return;
+    }
+
+    // When the viewport contents changes (scroll, resize, style recalc, layout, ...),
+    // check if we should resume animated images.
+    // FIXME: Subframes, once there are any.
+    ResumeVisibleImageAnimations(VisibleContentRect());
+  }
+
+  void LocalFrameView::ResumeVisibleImageAnimations(const IntRect &visibleRect) noexcept
+  {
+    if (visibleRect.IsEmpty())
+    {
+      return;
+    }
+
+    auto *document = Frame().Document();
+    if (auto *renderView = document ? document->GetRenderView() : nullptr)
+    {
+      renderView->ResumePausedImageAnimationsIfNeeded(visibleRect);
+    }
   }
 
   void LocalFrameView::ScheduleScrollEvent() noexcept

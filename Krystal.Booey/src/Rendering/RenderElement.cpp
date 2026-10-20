@@ -1146,6 +1146,129 @@ namespace krys::boo
     return Style().HasMask();
   }
 
+  bool RenderElement::IsVisibleIgnoringGeometry() const noexcept
+  {
+    // FIXME: Documents whose active DOM objects are suspended, once they can be.
+    if (Style().UsedVisibility() != Visibility::Visible)
+    {
+      return false;
+    }
+    // FIXME: Off-screen frame views (isOffscreen), once a view can be off screen.
+    return true;
+  }
+
+  bool RenderElement::IsVisibleInDocumentRect(const IntRect &documentRect) const noexcept
+  {
+    if (!IsVisibleIgnoringGeometry())
+    {
+      return false;
+    }
+
+    // Use background rect if we are the root or if we are the body and the background is propagated to the
+    // root.
+    // FIXME: This is overly conservative as the image may not be a background-image, in which case it will
+    // not be propagated to the root. At this point, we unfortunately don't have access to the image anymore
+    // so we can no longer check if it is a background image.
+    auto rendererHasBackground = [](const RenderElement *renderer)
+    {
+      return renderer && renderer->HasBackground();
+    };
+    auto *documentElement = GetDocument().DocumentElement().get();
+    auto backgroundIsPaintedByRoot =
+      IsDocumentElementRenderer()
+      || (IsBody() && !rendererHasBackground(documentElement ? documentElement->Renderer() : nullptr));
+
+    LayoutRect backgroundPaintingRect;
+    if (backgroundIsPaintedByRoot)
+    {
+      backgroundPaintingRect = View().BackgroundRect();
+    }
+    else if (auto *box = DynamicDowncast<RenderBox>(*this))
+    {
+      // FIXME: The clipped overflow rect for repaint (absoluteClippedOverflowRectForRepaint), once there are
+      // repaint rects; for now the visual overflow, unclipped by the ancestors.
+      backgroundPaintingRect =
+        LayoutRect(box->LocalToAbsoluteQuad(FloatQuad(FloatRect(box->VisualOverflowRect()))).BoundingBox());
+    }
+    else
+    {
+      backgroundPaintingRect = LayoutRect(AbsoluteBoundingBoxRect());
+    }
+    return documentRect.Intersects(EnclosingIntRect(backgroundPaintingRect));
+  }
+
+  bool RenderElement::IsVisibleInViewport() const noexcept
+  {
+    return IsVisibleInDocumentRect(View().FrameView().VisibleContentRect());
+  }
+
+  VisibleInViewportState RenderElement::ImageFrameAvailable(CachedImage &image,
+                                                            ImageAnimatingState animatingState,
+                                                            const IntRect *changeRect) noexcept
+  {
+    bool isVisible = IsVisibleInViewport();
+
+    if (!isVisible && animatingState == ImageAnimatingState::Yes)
+    {
+      View().AddRendererWithPausedImageAnimations(*this, image);
+    }
+
+    // Static images should repaint even if they are outside the viewport rectangle
+    // because they should be inside the TileCoverageRect.
+    if (isVisible || animatingState == ImageAnimatingState::No)
+    {
+      ImageChanged(&image, changeRect);
+    }
+
+    return isVisible ? VisibleInViewportState::Yes : VisibleInViewportState::No;
+  }
+
+  VisibleInViewportState RenderElement::ImageVisibleInViewport(const dom::Document &document) const noexcept
+  {
+    if (&GetDocument() != &document)
+    {
+      return VisibleInViewportState::No;
+    }
+
+    return IsVisibleInViewport() ? VisibleInViewportState::Yes : VisibleInViewportState::No;
+  }
+
+  bool RenderElement::AllowsAnimation() const noexcept
+  {
+    // FIXME: An image element's own animation control (HTMLImageElement::allowsAnimation) and the page's
+    // (imageAnimationEnabled), once there are animation controls.
+    return true;
+  }
+
+  void RenderElement::DidRemoveCachedImageClient(CachedImage &cachedImage) noexcept
+  {
+    if (HasPausedImageAnimations())
+    {
+      View().RemoveRendererWithPausedImageAnimations(*this, cachedImage);
+    }
+  }
+
+  bool RenderElement::RepaintForPausedImageAnimationsIfNeeded(const IntRect &visibleRect,
+                                                              CachedImage &cachedImage) noexcept
+  {
+    krys_debug_assert(_hasPausedImageAnimations);
+    if (!AllowsAnimation() || !IsVisibleInDocumentRect(visibleRect))
+    {
+      return false;
+    }
+
+    Repaint();
+
+    // FIXME: SVG images schedule their start (scheduleStartAnimation), once there are SVG images.
+    if (auto *image = cachedImage.GetImage())
+    {
+      image->StartAnimation();
+    }
+
+    // FIXME: Tell compositing layers the image changed (contentChanged), once there are layers.
+    return true;
+  }
+
   bool RenderElement::HasShapeOutside() const noexcept
   {
     return !Style().GetShapeOutside().IsNone();
@@ -1399,8 +1522,7 @@ namespace krys::boo
 
     RenderObject::WillBeDestroyed();
 
-    // FIXME: The subtree layout root, outlines, paused image animations and the other upstream clean-up, once
-    // there are any.
+    // FIXME: The subtree layout root, outlines and the other upstream clean-up, once there are any.
 
     auto unregisterImage = [this](StyleImage *image)
     {
@@ -1433,6 +1555,11 @@ namespace krys::boo
       {
         unregisterImages(*firstLineStyle);
       }
+    }
+
+    if (_hasPausedImageAnimations)
+    {
+      View().RemoveRendererWithPausedImageAnimations(*this);
     }
   }
 

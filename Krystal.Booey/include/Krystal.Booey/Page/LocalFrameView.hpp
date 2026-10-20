@@ -378,6 +378,13 @@ namespace krys::boo
     /// @brief Fires `scrollend` at the document after a scroll it fired `scroll` for.
     void ScrollDidEnd() noexcept override;
 
+    /// @brief Called when what the viewport shows may have changed (scrolling, resizing, layout): resumes the
+    /// image animations now visible.
+    // FIXME: Intersection observers, lazy loading, content visibility and the visible viewport rect, once
+    // there are any.
+    void ViewportContentsChanged() noexcept;
+    void ResumeVisibleImageAnimations(const IntRect &visibleRect) noexcept;
+
     // Conversions between the view's coordinates (its frame's, at the origin, as there's no widget tree) and
     // the contents'.
     KRYS_NODISCARD IntPoint ViewToContents(const IntPoint &point) const noexcept;

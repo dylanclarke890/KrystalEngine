@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/Graphics/BitmapImageDescriptor.hpp"
 #include "Krystal.Booey/Graphics/ImageDecoder.hpp"
+#include "Krystal.Booey/Graphics/ImageFrameAnimator.hpp"
 #include "Krystal.Booey/Graphics/ImageSource.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
@@ -12,8 +13,8 @@ namespace krys::boo
   class ImageObserver;
 
   /// @brief The source of a bitmap image: its decoder, the frames decoded from it and their metadata.
-  /// FIXME: The decoding work queue: asynchronous decoding decodes synchronously for now. The frame
-  /// animator, and with it animated images, come in G7d.
+  /// FIXME: The decoding work queue: asynchronous decoding decodes synchronously for now, so a frame is never
+  /// pending decoding.
   class BitmapImageSource final : public ImageSource
   {
   private:
@@ -25,6 +26,7 @@ namespace krys::boo
 
     BitmapImageDescriptor _descriptor;
     mutable RefPtr<ImageDecoder> _decoder;
+    mutable UniquePtr<ImageFrameAnimator> _frameAnimator;
     List<Func<void(DecodingStatus)>> _decodeCallbacks;
 
     // ImageFrame
@@ -40,6 +42,7 @@ namespace krys::boo
 
     // State
     KRYS_NODISCARD ImageDecoder *Decoder(SharedBuffer * = nullptr) const noexcept;
+    KRYS_NODISCARD ImageFrameAnimator *FrameAnimator() const noexcept;
     KRYS_NODISCARD ImageDecoder *DecoderIfExists() const noexcept
     {
       return _decoder.get();
@@ -55,7 +58,19 @@ namespace krys::boo
     void DidDecodeProperties(uint32 decodedPropertiesSize) noexcept;
 
     // Animation
+    void StartAnimation() noexcept final;
+    bool StartAnimation(SubsamplingLevel, const DecodingOptions &) noexcept;
+    void StopAnimation() noexcept final;
+    void ResetAnimation() noexcept final;
+    KRYS_NODISCARD bool IsAnimating() const noexcept final;
     KRYS_NODISCARD bool IsAnimationAllowed() const noexcept;
+    KRYS_NODISCARD bool HasEverAnimated() const noexcept final;
+
+    // Decoding
+    KRYS_NODISCARD bool IsPendingDecodingAtIndex(uint32 index, SubsamplingLevel,
+                                                 const DecodingOptions &) const noexcept;
+    void ImageFrameAtIndexAvailable(uint32 index, ImageAnimatingState, DecodingStatus) noexcept;
+    KRYS_NODISCARD uint32 CurrentFrameIndex() const noexcept final;
 
     // Decoding & animation
     void DestroyNativeImageAtIndex(uint32 index) noexcept;
@@ -131,7 +146,6 @@ namespace krys::boo
     void CallDecodeCallbacks(DecodingStatus) noexcept;
 
     // ImageFrame
-    KRYS_NODISCARD uint32 CurrentFrameIndex() const noexcept final;
 
     void CacheMetadataAtIndex(uint32 index, SubsamplingLevel, const DecodingOptions &) noexcept;
     void CacheNativeImageAtIndex(uint32 index, SubsamplingLevel, const DecodingOptions &,

@@ -1,11 +1,13 @@
 ﻿#include "Krystal.Booey/Graphics/BitmapImage.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Platform/ImageDecoders/AnimatedImages.hpp"
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListItems.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/ImageObserver.hpp"
 #include "Krystal.Booey/Graphics/NativeImage.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
 
 namespace krys::boo::tests
 {
@@ -16,6 +18,7 @@ namespace krys::boo::tests
     {
     public:
       int Draws {0};
+      int FramesAvailable {0};
       int64 DecodedSize {0};
       List<EncodedDataStatus> Statuses;
 
@@ -43,9 +46,13 @@ namespace krys::boo::tests
       {
         ++Draws;
       }
-      void ImageFrameAvailable(const Image &, ImageAnimatingState, const IntRect *,
+      void ImageFrameAvailable(const Image &, ImageAnimatingState state, const IntRect *,
                                DecodingStatus) noexcept override
       {
+        if (state == ImageAnimatingState::Yes)
+        {
+          ++FramesAvailable;
+        }
       }
       void ChangedInRect(const Image &, const IntRect *) noexcept override
       {
@@ -231,5 +238,73 @@ namespace krys::boo::tests
     CHECK(PixelAt(*nativeImage, 1, 0) == 0xFF'00'FF'00u);
 
     CHECK_FALSE(BitmapImage::Create(RefPtr<NativeImage>()));
+  }
+
+  TEST_CASE("BitmapImage: animated images advance their frames in the host's time", "[Graphics][BitmapImage]")
+  {
+    using namespace std::chrono_literals;
+    auto &loop = html::EventLoop::Current();
+    loop.RunUntilIdle();
+
+    for (auto bytes : {images::AnimatedGIF, images::AnimatedPNG, images::AnimatedWebP})
+    {
+      auto observer = AdoptRef(*new CountingObserver());
+      auto image = ImageFrom(bytes, observer.get());
+      REQUIRE(image->IsAnimated());
+      CHECK(image->CurrentFrameIndex() == 0u);
+      CHECK_FALSE(image->IsAnimating());
+
+      // Drawing starts the animation: the first frame shows for its 100ms.
+      auto start = loop.Now();
+      (void)Record(*image, FloatRect(0, 0, 2, 2));
+      CHECK(image->IsAnimating());
+      loop.Run(start + 50ms);
+      CHECK(image->CurrentFrameIndex() == 0u);
+      loop.Run(start + 100ms);
+      CHECK(image->CurrentFrameIndex() == 1u);
+      CHECK(observer->FramesAvailable == 1);
+      // The next frame's timer starts when the frame is drawn.
+      CHECK_FALSE(image->IsAnimating());
+      loop.Run(start + 250ms);
+      CHECK(image->CurrentFrameIndex() == 1u);
+
+      // Drawn late, the frame shows for what's left of its time (none, so it advances at once).
+      (void)Record(*image, FloatRect(0, 0, 2, 2));
+      loop.Run(start + 250ms);
+      CHECK(image->CurrentFrameIndex() == 2u);
+      (void)Record(*image, FloatRect(0, 0, 2, 2));
+      loop.Run(start + 350ms);
+      CHECK(image->CurrentFrameIndex() == 0u);
+
+      image->ResetAnimation();
+      CHECK(image->CurrentFrameIndex() == 0u);
+      CHECK_FALSE(image->IsAnimating());
+    }
+  }
+
+  TEST_CASE("BitmapImage: an animation stops after its loops", "[Graphics][BitmapImage]")
+  {
+    using namespace std::chrono_literals;
+    auto &loop = html::EventLoop::Current();
+    loop.RunUntilIdle();
+
+    auto image = ImageFrom(images::OnceGIF);
+    REQUIRE(image->IsAnimated());
+    auto start = loop.Now();
+    (void)Record(*image, FloatRect(0, 0, 2, 2));
+    loop.Run(start + 100ms);
+    CHECK(image->CurrentFrameIndex() == 1u);
+
+    // It played once, so it stays on its last frame.
+    (void)Record(*image, FloatRect(0, 0, 2, 2));
+    CHECK_FALSE(image->IsAnimating());
+    loop.Run(start + 300ms);
+    CHECK(image->CurrentFrameIndex() == 1u);
+
+    // Stopping keeps the frame; resetting goes back to the first.
+    image->StopAnimation();
+    CHECK(image->CurrentFrameIndex() == 1u);
+    image->ResetAnimation();
+    CHECK(image->CurrentFrameIndex() == 0u);
   }
 }
