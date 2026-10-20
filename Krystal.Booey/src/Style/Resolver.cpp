@@ -1,10 +1,14 @@
 ﻿#include "Krystal.Booey/Style/Resolver.hpp"
+#include "Krystal.Booey/Animation/BlendingKeyframes.hpp"
+#include "Krystal.Booey/Animation/CompositeOperation.hpp"
 #include "Krystal.Booey/CSS/CSSFontSelector.hpp"
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
+#include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Booey/CSS/Selectors/MutableSelector.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
+#include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/CSS/WebKitFontFamilyNames.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
@@ -27,6 +31,9 @@
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/UserAgentStyle.hpp"
+#include "Krystal.Booey/Style/Values/Animations/Animation.hpp"
+#include "Krystal.Booey/Style/Values/Animations/SingleAnimationRangeName.hpp"
+#include "Krystal.Booey/Style/Values/Easing/EasingFunction.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 #include "Krystal.Core/Assert.hpp"
@@ -350,10 +357,272 @@ namespace krys::boo::style
             .MatchResult = unadjustedStyle.MatchResult};
   }
 
+  UniquePtr<RenderStyle> Resolver::StyleForKeyframe(dom::Element &element, const RenderStyle &elementStyle,
+                                                    const ResolutionContext &context,
+                                                    const css::KeyframeRule &keyframe,
+                                                    BlendingKeyframe &blendingKeyframe) const noexcept
+  {
+    // Add all the animating properties to the keyframe.
+    bool hasRevert = false;
+    for (auto propertyReference : keyframe.Properties())
+    {
+      auto unresolvedProperty = propertyReference.Id();
+      // The animation-composition and animation-timing-function within keyframes are special
+      // because they are not animated; they just describe the composite operation and timing
+      // function between this keyframe and the next.
+      if (css::Property::IsDirectionAwareProperty(unresolvedProperty))
+      {
+        blendingKeyframe.SetContainsDirectionAwareProperty(true);
+      }
+      if (const auto *value = propertyReference.Value())
+      {
+        auto resolvedProperty =
+          css::Property::ResolveDirectionAwareProperty(unresolvedProperty, elementStyle.GetWritingMode());
+        if (resolvedProperty != css::PropertyId::AnimationTimingFunction
+            && resolvedProperty != css::PropertyId::AnimationComposition)
+        {
+          if (const auto *customValue = DynamicDowncast<css::CustomPropertyValue>(*value))
+          {
+            blendingKeyframe.AddProperty(customValue->Name());
+          }
+          else
+          {
+            blendingKeyframe.AddProperty(resolvedProperty);
+          }
+        }
+        if (css::IsValueId(*value, css::ValueId::Revert))
+        {
+          hasRevert = true;
+        }
+      }
+    }
+
+    auto state = State(element, nullptr, context.DocumentElementStyle);
+
+    state.SetStyle(RenderStyle::ClonePtr(elementStyle));
+    state.SetParentStyle(RenderStyle::ClonePtr(context.ParentStyle ? *context.ParentStyle : elementStyle));
+
+    ElementRuleCollector collector(element, _ruleSets, context.SelectorMatchingState);
+
+    auto pseudoElementIdentifier = elementStyle.GetPseudoElementIdentifier();
+    if (pseudoElementIdentifier)
+    {
+      collector.SetPseudoElementRequest(PseudoElementRequest {*pseudoElementIdentifier});
+    }
+
+    if (hasRevert)
+    {
+      // In the animation origin, 'revert' rolls back the cascaded value to the user level.
+      // Therefore, we need to collect UA and user rules.
+      collector.SetMedium(_mediaQueryEvaluator);
+      collector.MatchUARules();
+      collector.MatchUserRules();
+    }
+    collector.AddAuthorKeyframeRules(keyframe);
+    Builder builder(*state.Style(), GetBuilderContext(state), collector.GetMatchResult());
+    builder.State().SetIsBuildingKeyframeStyle();
+    builder.ApplyAllProperties();
+
+    Adjuster adjuster(Document(), *state.ParentStyle(), nullptr,
+                      !pseudoElementIdentifier ? &element : nullptr);
+    adjuster.Adjust(*state.Style());
+
+    return state.TakeStyle();
+  }
+
   bool Resolver::IsAnimationNameValid(const css::CSSOMString &name) const noexcept
   {
     auto atom = css::CSSOMStringAtom(name);
     return _keyframesRuleMap.contains(atom) || UserAgentKeyframes().contains(atom);
+  }
+
+  List<Ref<css::KeyframeRule>>
+    Resolver::KeyframeRulesForName(const css::CSSOMStringAtom &animationName,
+                                   const TimingFunction *defaultTimingFunction) const noexcept
+  {
+    if (animationName.View().empty())
+    {
+      return {};
+    }
+
+    // Check author map first then check user-agent map.
+    auto it = _keyframesRuleMap.find(animationName);
+    if (it == _keyframesRuleMap.end())
+    {
+      it = UserAgentKeyframes().find(animationName);
+      if (it == UserAgentKeyframes().end())
+      {
+        return {};
+      }
+    }
+
+    auto compositeOperationForKeyframe = [](const css::KeyframeRule &keyframe) -> CompositeOperation
+    {
+      if (auto compositeOperationCSSValue =
+            keyframe.Properties().GetPropertyCSSValue(css::PropertyId::AnimationComposition))
+      {
+        if (auto compositeOperation = ToCompositeOperation(*compositeOperationCSSValue))
+        {
+          return *compositeOperation;
+        }
+      }
+      return Animation::InitialCompositeOperation();
+    };
+
+    auto timingFunctionForKeyframe = [&](const css::KeyframeRule &keyframe) -> RefPtr<const TimingFunction>
+    {
+      if (auto timingFunctionCSSValue =
+            keyframe.Properties().GetPropertyCSSValue(css::PropertyId::AnimationTimingFunction))
+      {
+        if (auto timingFunction = CreateTimingFunctionDeprecated(*timingFunctionCSSValue))
+        {
+          return timingFunction;
+        }
+      }
+      if (defaultTimingFunction)
+      {
+        return ShareRefPtr(defaultTimingFunction);
+      }
+      return ShareRefPtr<const TimingFunction>(&CubicBezierTimingFunction::DefaultTimingFunction());
+    };
+
+    List<RefPtr<const TimingFunction>> timingFunctions;
+    auto uniqueTimingFunctionForKeyframe =
+      [&](const css::KeyframeRule &keyframe) -> RefPtr<const TimingFunction>
+    {
+      auto timingFunction = timingFunctionForKeyframe(keyframe);
+      for (const auto &existingTimingFunction : timingFunctions)
+      {
+        if (*timingFunction == *existingTimingFunction)
+        {
+          return existingTimingFunction;
+        }
+      }
+      timingFunctions.push_back(timingFunction);
+      return timingFunction;
+    };
+
+    const auto &keyframes = it->second->Keyframes();
+
+    struct KeyframeUniqueKey
+    {
+      css::KeyframeRule::Key Key;
+      RefPtr<const TimingFunction> TimingFunction;
+      CompositeOperation CompositeOperation;
+
+      KRYS_NODISCARD bool operator==(const KeyframeUniqueKey &other) const noexcept
+      {
+        return Key == other.Key && TimingFunction.get() == other.TimingFunction.get()
+               && CompositeOperation == other.CompositeOperation;
+      }
+    };
+
+    auto hasDuplicateKeys = [&]() -> bool
+    {
+      List<KeyframeUniqueKey> uniqueKeyframeKeys;
+      for (const auto &keyframe : keyframes)
+      {
+        auto compositeOperation = compositeOperationForKeyframe(*keyframe);
+        auto timingFunction = uniqueTimingFunctionForKeyframe(*keyframe);
+        for (auto key : keyframe->Keys())
+        {
+          KeyframeUniqueKey uniqueKey {key, timingFunction, compositeOperation};
+          if (std::ranges::find(uniqueKeyframeKeys, uniqueKey) != uniqueKeyframeKeys.end())
+          {
+            return true;
+          }
+          uniqueKeyframeKeys.push_back(krys::move(uniqueKey));
+        }
+      }
+      return false;
+    }();
+
+    if (!hasDuplicateKeys)
+    {
+      return keyframes;
+    }
+
+    // Merge keyframes with a similar offset and timing function ensuring that merged keyframes
+    // move to the end of the list if the offset is a timeline range.
+    List<Ref<css::KeyframeRule>> deduplicatedKeyframes;
+    List<Pair<KeyframeUniqueKey, Ref<css::KeyframeRule>>> keyframesMap;
+    for (const auto &originalKeyframe : keyframes)
+    {
+      auto compositeOperation = compositeOperationForKeyframe(*originalKeyframe);
+      auto timingFunction = uniqueTimingFunctionForKeyframe(*originalKeyframe);
+      for (auto key : originalKeyframe->Keys())
+      {
+        KeyframeUniqueKey uniqueKey {key, timingFunction, compositeOperation};
+        auto existing =
+          std::ranges::find_if(keyframesMap, [&](const auto &entry) { return entry.first == uniqueKey; });
+        if (existing != keyframesMap.end())
+        {
+          Ref<css::KeyframeRule> existingStyleRuleKeyframe = existing->second;
+          existingStyleRuleKeyframe->MutableProperties().MergeAndOverrideOnConflict(
+            originalKeyframe->Properties());
+          if (existingStyleRuleKeyframe->Keys()[0].RangeName == css::ValueId::Normal)
+          {
+            continue;
+          }
+          std::erase_if(deduplicatedKeyframes, [&](const Ref<css::KeyframeRule> &styleRuleKeyframe)
+                        { return &*styleRuleKeyframe == &*existingStyleRuleKeyframe; });
+          deduplicatedKeyframes.push_back(existingStyleRuleKeyframe);
+        }
+        else
+        {
+          auto styleRuleKeyframe = css::KeyframeRule::Create(css::MutableStyleProperties::Create());
+          styleRuleKeyframe->SetKey(key);
+          styleRuleKeyframe->MutableProperties().MergeAndOverrideOnConflict(originalKeyframe->Properties());
+          keyframesMap.emplace_back(krys::move(uniqueKey), styleRuleKeyframe);
+          deduplicatedKeyframes.push_back(styleRuleKeyframe);
+        }
+      }
+    }
+
+    return deduplicatedKeyframes;
+  }
+
+  bool Resolver::KeyframeStylesForAnimation(dom::Element &element, const RenderStyle &elementStyle,
+                                            const ResolutionContext &context, BlendingKeyframes &list,
+                                            const TimingFunction *defaultTimingFunction) const noexcept
+  {
+    list.Clear();
+
+    auto keyframeRules = KeyframeRulesForName(list.KeyframesName(), defaultTimingFunction);
+    if (keyframeRules.empty())
+    {
+      return false;
+    }
+
+    // Construct and populate the style for each keyframe.
+    for (const auto &keyframeRule : keyframeRules)
+    {
+      // Add this keyframe style to all the indicated key times
+      for (const auto &key : keyframeRule->Keys())
+      {
+        BlendingKeyframe blendingKeyframe(
+          {ConvertValueIdToSingleAnimationRangeName(key.RangeName), key.Offset}, nullptr);
+        blendingKeyframe.SetStyle(
+          StyleForKeyframe(element, elementStyle, context, *keyframeRule, blendingKeyframe));
+        if (auto timingFunctionCSSValue =
+              keyframeRule->Properties().GetPropertyCSSValue(css::PropertyId::AnimationTimingFunction))
+        {
+          blendingKeyframe.SetTimingFunction(CreateTimingFunctionDeprecated(*timingFunctionCSSValue));
+        }
+        if (auto compositeOperationCSSValue =
+              keyframeRule->Properties().GetPropertyCSSValue(css::PropertyId::AnimationComposition))
+        {
+          if (auto compositeOperation = ToCompositeOperation(*compositeOperationCSSValue))
+          {
+            blendingKeyframe.SetCompositeOperation(*compositeOperation);
+          }
+        }
+        list.Insert(krys::move(blendingKeyframe));
+        list.UpdatePropertiesMetadata(keyframeRule->Properties());
+      }
+    }
+
+    return true;
   }
 
   bool Resolver::HasSelectorForId(const css::CSSOMStringAtom &idValue) const noexcept

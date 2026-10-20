@@ -66,11 +66,10 @@ def generate(args: argparse.Namespace):
             GeneratePropertyParsing,
             GeneratePropertyShorthandFunctions,
             GenerateStyleBuilderGenerated,
-            # TODO: Uncomment these generators when they are supported.
-            # GenerateStyleChangedAnimatablePropertiesGenerated,
+            GenerateStyleChangedAnimatablePropertiesGenerated,
             GenerateStyleComputedStyleProperties,
             GenerateStyleExtractorGenerated,
-            # GenerateStyleInterpolationWrapperMap,
+            GenerateStyleInterpolationWrapperMap,
             GenerateRenderStyleProperties,
         ]
     ]
@@ -8026,8 +8025,8 @@ class GeneratePropertyId:
                 ),
             )
 
-            # TODO: Re-enable this once we support animation properties.
-            # self._generate_animation_property_functions(to=writer)
+            self._generate_animation_property_functions(to=writer)
+            self._generate_property_lists(to=writer)
             self._generate_css_property_settings_constructor(to=writer)
             self._generate_css_property_settings_operator_equal(to=writer)
             self._generate_css_property_settings_hash(to=writer)
@@ -8300,6 +8299,38 @@ class GeneratePropertyId:
             default="return false;",
         )
 
+    def _generate_property_lists(self, *, to: Writer):
+        def write_list(signature, properties):
+            with to.function_block(signature=signature):
+                to.write("static constexpr PropertyId properties[] {")
+                with to.indent():
+                    for property in properties:
+                        to.write(f"{property.id},")
+                to.write("};")
+                to.write("return properties;")
+
+        write_list(
+            "Span<const PropertyId> Property::ColorProperties() noexcept",
+            [p for p in self.properties_and_descriptors.style_properties.all if p.codegen_properties.color_property],
+        )
+
+        physical_properties = []
+        for _, property_group in sorted(
+            self.generation_context.properties_and_descriptors.style_properties.logical_property_groups.items(),
+            key=lambda x: x[0],
+        ):
+            kind = property_group["kind"]
+            destinations = LogicalPropertyGroup.logical_property_group_resolvers["physical"][kind]
+            for property in [property_group["physical"][a_destination] for a_destination in destinations]:
+                physical_properties.append(property)
+
+        write_list(
+            "Span<const PropertyId> Property::PhysicalProperties() noexcept",
+            sorted(list(set(physical_properties)), key=lambda x: x.id),
+        )
+
+    def _unused_all_accelerated_animation_properties(self, *, to: Writer):
+        # FIXME: The accelerated animation properties, once there are accelerated animations.
         with to.function_block(
             signature="Span<const PropertyId> Property::AllAcceleratedAnimationProperties([[maybe_unused]] const Settings &settings) noexcept",
         ):
@@ -9692,10 +9723,11 @@ class GenerateStyleInterpolationWrapperMap:
                 headers=[
                     "Krystal.Booey/CSS/Properties/PropertyId.hpp",
                     "Krystal.Core/Types/Array.hpp",
+                    "Krystal.Core/Utils/NeverDestroyed.hpp",
                 ],
             )
 
-            with writer.namespace(namespace="krys::boo::css"):
+            with writer.namespace(namespace="krys::boo::style::interpolation"):
                 writer.forward_declarations(classes=["WrapperBase"])
                 self._generate_css_property_animation_wrapper_map_h_wrapper_map_declaration(to=writer)
 
@@ -9708,6 +9740,7 @@ class GenerateStyleInterpolationWrapperMap:
                 for_header="Krystal.Booey/Style/InterpolationWrapperMap.hpp",
                 headers=[
                     "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp",
+                    "Krystal.Core/Types/List.hpp",
                 ],
             )
 
@@ -9715,35 +9748,40 @@ class GenerateStyleInterpolationWrapperMap:
             writer.write('#include "Krystal.Booey/Style/InterpolationWrappers.hpp"')
             writer.write("#undef STYLE_INTERPOLATION_GENERATED_INCLUDE_TRAP")
 
-            with writer.namespace(namespace="krys::boo::css"):
+            with writer.namespace(namespace="krys::boo::style::interpolation"):
                 self._generate_css_property_animation_wrapper_map_cpp_constructor(to=writer)
 
     # MARK: - Helper generator functions for StyleInterpolationWrapperMap.h
 
     def _generate_css_property_animation_wrapper_map_h_wrapper_map_declaration(self, *, to):
         to.write_block("""\
-            class WrapperMap final {
-            public:
-                static WrapperMap& singleton()
-                {
-                    static NeverDestroyed<WrapperMap> map;
-                    return map;
-                }
-
-                WrapperBase* wrapper(PropertyId id)
-                {
-                    if (id >= TotalPropertyIdValues)
-                        return nullptr;
-                    return m_wrappers[id];
-                }
+            /// @brief The interpolation wrapper of each animatable property.
+            class WrapperMap final
+            {
+              friend class NeverDestroyed<WrapperMap>;
 
             private:
-                friend class WTF::NeverDestroyed<WrapperMap>;
+              Array<WrapperBase *, css::TotalPropertyIdValues> _wrappers;
 
-                WrapperMap();
-                ~WrapperMap() = delete;
+              WrapperMap() noexcept;
 
-                std::array<WrapperBase*, TotalPropertyIdValues> m_wrappers;
+            public:
+              KRYS_NODISCARD static WrapperMap &Singleton() noexcept
+              {
+                static NeverDestroyed<WrapperMap> map;
+                return map.get();
+              }
+
+              /// @brief The wrapper of @p id, or null if it isn't animatable.
+              KRYS_NODISCARD WrapperBase *GetWrapper(css::PropertyId id) const noexcept
+              {
+                auto index = static_cast<size_t>(id);
+                if (index >= css::TotalPropertyIdValues)
+                {
+                  return nullptr;
+                }
+                return _wrappers[index];
+              }
             };""")
 
         to.newline()
@@ -9778,7 +9816,7 @@ class GenerateStyleInterpolationWrapperMap:
             property_wrapper_parameters = property.codegen_properties.animation_wrapper_requires_override_parameters
         else:
             # Add PropertyId
-            property_wrapper_parameters = [property.id]
+            property_wrapper_parameters = [f"css::{property.id}"]
 
             # Compute style class.
             style_type = "RenderStyle"
@@ -9787,11 +9825,13 @@ class GenerateStyleInterpolationWrapperMap:
             setter = property.codegen_properties.render_style_setter
 
             if property.codegen_properties.coordinated_value_list_property and property_wrapper_type is not None:
+                list_name = property.codegen_properties.coordinated_value_list_property_name_for_methods
+                list_value_type = f"style::{property.type_name_for_coordinated_value_list}::value_type"
                 property_wrapper_parameters += [
                     f"&{style_type}::{property.method_name_for_get_coordinated_value_list}",
                     f"&{style_type}::{property.method_name_for_ensure_coordinated_value_list}",
                     f"&{style_type}::{property.method_name_for_set_coordinated_value_list}",
-                    f"{property_wrapper_type}({property.id}, &{property.type_name_for_coordinated_value_list}::value_type::{property.codegen_properties.coordinated_value_list_property_getter}, &{property.type_name_for_coordinated_value_list}::value_type::{property.codegen_properties.coordinated_value_list_property_setter})",
+                    f"{property_wrapper_type}(css::{property.id}, &{list_value_type}::Get{list_name}, &{list_value_type}::Set{list_name})",
                 ]
                 property_wrapper_type = "CoordinatedValueListPropertyWrapper"
             else:
@@ -9814,8 +9854,8 @@ class GenerateStyleInterpolationWrapperMap:
                 # Add property type specific parameters
                 if property.codegen_properties.visited_link_color_support:
                     property_wrapper_parameters += [
-                        f"&{style_type}::visitedLink{name_for_methods}",
-                        f"&{style_type}::setVisitedLink{name_for_methods}",
+                        f"&{style_type}::VisitedLink{name_for_methods}",
+                        f"&{style_type}::SetVisitedLink{name_for_methods}",
                     ]
 
                 # Add additional specified parameters
@@ -9840,33 +9880,39 @@ class GenerateStyleInterpolationWrapperMap:
 
     def _generate_css_property_animation_wrapper_map_cpp_constructor(self, *, to):
         to.write_block("""\
-            static WrapperBase* makeShorthandWrapper(PropertyId id, const std::array<WrapperBase*, TotalPropertyIdValues>& wrappers)
+            namespace
             {
-                auto shorthand = shorthandForProperty(id);
-                ASSERT(shorthand.length());
+              KRYS_NODISCARD WrapperBase *MakeShorthandWrapper(css::PropertyId id,
+                                                               const Array<WrapperBase *, css::TotalPropertyIdValues> &wrappers) noexcept
+              {
+                auto shorthand = css::ShorthandForProperty(id);
+                krys_debug_assert(!shorthand.Properties().empty());
 
-                auto longhandWrappers = WTF::compactMap(shorthand, [&](auto longhand) -> std::optional<WrapperBase*> {
-                    auto wrapper = wrappers[longhand];
-                    if (!wrapper)
-                        return std::nullopt;
-                    return wrapper;
-                });
+                List<WrapperBase *> longhandWrappers;
+                for (auto longhand : shorthand)
+                {
+                  if (auto *wrapper = wrappers[static_cast<size_t>(longhand)])
+                  {
+                    longhandWrappers.push_back(wrapper);
+                  }
+                }
 
                 return new ShorthandWrapper(id, krys::move(longhandWrappers));
+              }
             }
             """)
 
-        to.write("WrapperMap::WrapperMap()")
+        to.write("WrapperMap::WrapperMap() noexcept")
 
         with to.indent():
             animatable_longhands = set()
             animatable_shorthands = set()
 
-            to.write(": m_wrappers {")
+            to.write(": _wrappers {")
 
             with to.indent():
-                to.write(f"nullptr, // PropertyId::CSSPropertyInvalid")
-                to.write(f"nullptr, // PropertyId::CSSPropertyCustom")
+                to.write(f"nullptr, // PropertyId::Invalid")
+                to.write(f"nullptr, // PropertyId::Custom")
 
                 for property in self.properties_and_descriptors.all_unique:
                     if not property.codegen_properties.longhands:
@@ -9909,7 +9955,9 @@ class GenerateStyleInterpolationWrapperMap:
             to.newline()
             for property in self.properties_and_descriptors.all_unique:
                 if property in animatable_shorthands:
-                    to.write(f"m_wrappers[{property.id}] = makeShorthandWrapper({property.id}, m_wrappers);")
+                    to.write(
+                        f"_wrappers[static_cast<size_t>(css::{property.id})] = MakeShorthandWrapper(css::{property.id}, _wrappers);"
+                    )
 
         to.write("}")
         to.newline()
@@ -11625,7 +11673,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
         assert tree_node.kind == "opaque"
         assert not tree_node.children
 
-        to.write(f"static void {function_name}(const auto&, const auto&, CSSPropertiesBitSet& changingProperties)")
+        to.write(f"static void {function_name}(const auto &, const auto &, CSSPropertiesBitSet &changingProperties) noexcept")
         to.write(f"{{")
 
         with to.indent():
@@ -11639,7 +11687,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
                     animatable_properties.add(property)
 
             for property in sorted(animatable_properties, key=lambda x: x.id):
-                to.write(f"changingProperties.m_properties.set({property.id_without_scope});")
+                to.write(f"changingProperties.Set(css::{property.id});")
 
             if non_animatable_properties:
                 to.newline()
@@ -11663,7 +11711,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
             )
             return
 
-        to.write(f"static void {function_name}(const auto& a, const auto& b, CSSPropertiesBitSet& changingProperties)")
+        to.write(f"static void {function_name}(const auto &a, const auto &b, CSSPropertiesBitSet &changingProperties) noexcept")
         to.write(f"{{")
 
         with to.indent():
@@ -11705,7 +11753,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
                 child_value_getter = f"{child.name}"
 
                 # For "data" nodes, first check if both point to the same object.
-                to.write(f"if (a.{child_value_getter}.ptr() != b.{child_value_getter}.ptr())")
+                to.write(f"if (a.{child_value_getter}.Ptr() != b.{child_value_getter}.Ptr())")
                 with to.indent():
                     to.write(
                         f"{child_function_name}(*a.{child_value_getter}, *b.{child_value_getter}, changingProperties);"
@@ -11742,7 +11790,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
             for property in animatable_properties:
                 if property.codegen_properties.render_style_changed_for_animation_custom:
                     to.write(
-                        f"ChangedAnimatablePropertiesCustom::conservativelyCollectChangedAnimatablePropertiesFor{property.id_without_prefix}(a, b, changingProperties);"
+                        f"ChangedAnimatablePropertiesCustom::ConservativelyCollectChangedAnimatablePropertiesFor{property.id_without_prefix}(a, b, changingProperties);"
                     )
                     continue
 
@@ -11759,7 +11807,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
 
                 to.write(f"if (a.{expression} != b.{expression})")
                 with to.indent():
-                    to.write(f"changingProperties.m_properties.set({property.id_without_scope});")
+                    to.write(f"changingProperties.Set(css::{property.id});")
 
             if (
                 data_children or opaque_children or struct_children or animatable_properties
@@ -11770,7 +11818,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
             for property in animatable_visited_link_properties:
                 if property.codegen_properties.render_style_changed_for_animation_custom:
                     to.write(
-                        f"ChangedAnimatablePropertiesCustom::conservativelyCollectChangedAnimatablePropertiesForVisitedLink{property.id_without_prefix}(a, b, changingProperties);"
+                        f"ChangedAnimatablePropertiesCustom::ConservativelyCollectChangedAnimatablePropertiesForVisitedLink{property.id_without_prefix}(a, b, changingProperties);"
                     )
                     continue
 
@@ -11787,7 +11835,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
 
                 to.write(f"if (a.{expression} != b.{expression})")
                 with to.indent():
-                    to.write(f"changingProperties.m_properties.set({property.id_without_scope});")
+                    to.write(f"changingProperties.Set(css::{property.id});")
 
             # Print out comments detailing the non-animatable properties that were skipped.
             if non_animatable_properties:
@@ -11844,7 +11892,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
         to.write(f"public:")
 
         with to.indent():
-            function_name = "collect"
+            function_name = "Collect"
             root = self.properties_and_descriptors.render_style_storage_model
 
             self._generate_conservatively_collect_changed_animatable_properties_recursive(
@@ -11855,12 +11903,12 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
         to.newline()
 
         to.write(
-            f"void ChangedAnimatablePropertiesGenerated::conservativelyCollectChangedAnimatableProperties(const ComputedStyle& a, const ComputedStyle& b, CSSPropertiesBitSet& changingProperties)"
+            f"void ChangedAnimatablePropertiesGenerated::ConservativelyCollectChangedAnimatableProperties(const ComputedStyle &a, const ComputedStyle &b, CSSPropertiesBitSet &changingProperties) noexcept"
         )
         to.write(f"{{")
 
         with to.indent():
-            to.write(f"ChangedAnimatablePropertiesFunctions::collect(a, b, changingProperties);")
+            to.write(f"ChangedAnimatablePropertiesFunctions::Collect(a, b, changingProperties);")
 
         to.write(f"}}")
         to.newline()
@@ -11879,7 +11927,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
                     "Krystal.Booey/Style/ChangedAnimatablePropertiesCustom.hpp",
                 ],
             )
-            with writer.namespace(namespace="krys::boo"):
+            with writer.namespace(namespace="krys::boo::style"):
                 self._generate_conservatively_collect_changed_animatable_properties(to=writer)
 
 

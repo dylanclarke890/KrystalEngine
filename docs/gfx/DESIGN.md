@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-20): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5: G5a, the viewport scrolls, and G5b, scrollbars, wheel and keyboard scrolling) is done; see *G5 plan*. The event and rendering loops (G6: G6a, timers and running the loop; G6b, the rendering update; G6c, mutation observers and slot change) are done; see *G6 plan*. Images (G7: G7a, decoding and drawing; G7b, loading and CSS images; G7c, `<img>`; G7d, animated images) are done; see *G7 plan*. Style sheets and web fonts (G8: G8a, style sheets; G8b, web fonts) are done; see *G8 plan*.
+Status (2026-10-20): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5: G5a, the viewport scrolls, and G5b, scrollbars, wheel and keyboard scrolling) is done; see *G5 plan*. The event and rendering loops (G6: G6a, timers and running the loop; G6b, the rendering update; G6c, mutation observers and slot change) are done; see *G6 plan*. Images (G7: G7a, decoding and drawing; G7b, loading and CSS images; G7c, `<img>`; G7d, animated images) are done; see *G7 plan*. Style sheets and web fonts (G8: G8a, style sheets; G8b, web fonts) are done; see *G8 plan*. CSS animations and transitions (G9) are in progress: G9a, interpolation and keyframe styles, is done; see *G9 plan*.
 
 ## Why
 
@@ -304,6 +304,7 @@ All done in G1 (2026-10-17) unless noted.
 | G6 | Done (2026-10-20). The event and rendering loops: timers, running tasks and microtasks with the host's time, the rendering update (`Page`), mutation observers. In three parts (see *G6 plan*): done (2026-10-20). | Timers and the rendering update run from the host's frame; style, layout and hover update without the host forcing them. |
 | G7 | Done (2026-10-20). Images: decoding and drawing, loading (through the host) and CSS images, `<img>`, animated images. In four parts (see *G7 plan*). | Pages show PNG, JPEG, GIF and WebP images, in `<img>` and CSS, loaded through the host. |
 | G8 | Style sheets and web fonts: `<link rel=stylesheet>` and `@import` loading through the host, `@font-face` with TTF, OTF and WOFF2. In two parts (see *G8 plan*). | Pages use external style sheets and their own fonts, loaded through the host, without a flash of unstyled content. |
+| G9 | CSS animations and transitions: interpolation, the animation model on the rendering update, `transition`, `animation` and `@keyframes`, their events. In three parts (see *G9 plan*). | Hover transitions and keyframe animations run from the host's frame, with their events, without script. |
 
 ### G2 parts
 
@@ -647,6 +648,18 @@ Style sheets and web fonts, loaded through G7b's `CachedResourceLoader` and the 
   - **Krystal.UI:** `FileLoaderStrategy` knows `.ttf`, `.otf` and `.woff2`.
   - **Tests:** loading TTF, OTF and WOFF2 faces, matching by weight, style and `unicode-range`, `font-display` periods, failures falling back. **Golden:** a web fonts scene, checked against Chrome as the text goldens are (reported only: glyph rasterisation differs). **Editor:** a card in a web font.
 - **Out (FIXMEs):** the `FontFace` and `FontFaceSet` (`document.fonts`) interfaces (no scripting), preloads (`rel=preload`), CORS and `crossorigin`, `integrity`, alternate and title-named sheets, `<style>` imports from other origins, SVG fonts, WOFF 1, font variations from `font-variation-settings` descriptors.
+
+### G9 plan (decided 2026-10-20)
+
+CSS animations and transitions. `transition` and `animation` parse and compute (layer f3), `@keyframes` rules reach the resolver's keyframes map, and every style value type has its blending (`Blending<T>`), but nothing animates: the interpolation, keyframe styles, the animation model and the tree resolver's animated updates were deferred in layer f4. Three parts, in order (decided by the user):
+
+- **G9a, interpolation** (Booey): upstream's `Style::Interpolation` (`StyleInterpolation`, its wrappers, functions, context and client), the generated changed animatable properties, `BlendingKeyframes` and the resolver's keyframe styles (`styleForKeyframe`, `keyframeStylesForAnimation`). **Tests:** blending two styles at chosen points for each kind of property (numbers, lengths, colours, transforms, shadows, lists, discrete properties and `transition-behavior: allow-discrete`), keyframe styles from `@keyframes`.
+- **G9b, the animation model and transitions** (Booey, Krystal.UI):
+  - **Booey:** `AnimationTimeline` and `DocumentTimeline`, run by the rendering update's "update animations and send events" step on the host's time; `WebAnimation`, `AnimationEffect` and `KeyframeEffect` without their script API; `Styleable`'s animation half; the tree resolver's animated updates (after-change style, `@starting-style`); `CSSTransition`, with `transitionrun`, `transitionstart`, `transitionend` and `transitioncancel`.
+  - **Krystal.UI:** a view keeps asking for frames while its page animates.
+  - **Tests:** transitions starting, running at chosen times, reversing, cancelling and their events.
+- **G9c, CSS animations** (Booey): `CSSAnimation` from `@keyframes` (iteration count, direction, fill mode, play state, delays, timing functions with `steps()` and `linear()`), with `animationstart`, `animationiteration`, `animationend` and `animationcancel`. **Tests:** animations at chosen times and their events. **Golden:** an animations scene captured partway through at a fixed host time (Chrome's captured with the same time held). **Editor:** the cards' shadows transition on hover, and a spinner animates with `@keyframes`.
+- **Out (FIXMEs):** `Element.animate()` and `getAnimations()` (no scripting), scroll and view timelines (scroll-driven animations, a later part), composited animations, view transitions.
 
 ### G2a as built (2026-10-18)
 
@@ -1041,6 +1054,14 @@ Testing: the device's hidden window gives tests a real OpenGL context (Krystal.G
 - **Changed from the plan:** WOFF 1 came along (zlib was at hand), and the WOFF decoding lives in Booey rather than Krystal.Text, as upstream. Krystal.Core's `text::Decode` only stripped a byte order mark from an input that was nothing else; fixed (style sheets from the repository, which have one, lost their first rule).
 - **Out (FIXMEs):** the `FontFace` and `FontFaceSet` interfaces, SVG fonts, font collections, features, palettes and variations on fonts, a safe font parser, the load event's request count.
 - **Tests:** Booey tests faces loading in each format, source order and failures, matching, `font-display` periods and faces following their rules (6 cases), `CachedFont` (2) and the WOFF conversion (2). Krystal.UI adds the `webfonts` page golden (Chrome's is reported only: its rasteriser hints Ahem's boxes differently); the golden harness now runs the event loop before painting, so pages' resources and fonts are in, and the text goldens are unchanged with their `@font-face` rules loading.
+
+### G9a as built (2026-10-20)
+
+- **Booey** (the ledger entry is *Interpolation and keyframe styles* in `docs/booey/PORTING.md`): upstream's `Style::Interpolation` (as `style::interpolation`: the wrappers, the generated wrapper map, custom properties by their registered syntax), the changed animatable properties (generated), `KeyframeInterpolation`, `WebAnimationTime`, `BlendingKeyframes` and the resolver's keyframe styles (`StyleForKeyframe`, `KeyframeRulesForName` with duplicate keys merged, `KeyframeStylesForAnimation`).
+- **Code generation:** the wrapper map and changed animatable properties generators, translated earlier but disabled, are finished and on, with the animation property functions and the colour and physical property lists.
+- **Changed from the plan:** `KeyframeInterpolation` and `WebAnimationTime` came along, since `BlendingKeyframe` is a keyframe of the interpolation; `fillImplicitKeyframes` waits for the keyframe effect (G9b).
+- **Out (FIXMEs):** accelerated animations (the accelerated property list and animation names), `CSSNumberish`.
+- **Tests:** Booey tests interpolation by property kind (5 cases), keyframe styles and blending keyframes (2) and the keyframe interpolation procedure with animation times (3).
 
 ## Open decisions
 

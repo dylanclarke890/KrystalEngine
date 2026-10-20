@@ -4491,7 +4491,7 @@
       "codegen-properties": {
         "animation-wrapper": "CounterWrapper",
         "animation-wrapper-requires-override-parameters": [
-          "CSSPropertyCounterIncrement"
+          "css::PropertyId::CounterIncrement"
         ],
         "style-builder-custom": "All",
         "style-extractor-custom": true,
@@ -4521,7 +4521,7 @@
       "codegen-properties": {
         "animation-wrapper": "CounterWrapper",
         "animation-wrapper-requires-override-parameters": [
-          "CSSPropertyCounterReset"
+          "css::PropertyId::CounterReset"
         ],
         "style-builder-custom": "All",
         "style-extractor-custom": true,
@@ -4552,7 +4552,7 @@
       "codegen-properties": {
         "animation-wrapper": "CounterWrapper",
         "animation-wrapper-requires-override-parameters": [
-          "CSSPropertyCounterSet"
+          "css::PropertyId::CounterSet"
         ],
         "style-builder-custom": "All",
         "style-extractor-custom": true,
@@ -4792,11 +4792,11 @@
       "codegen-properties": {
         "animation-wrapper": "VisitedAffectedStyleTypeWrapper<SVGPaint>",
         "animation-wrapper-requires-override-parameters": [
-          "CSSPropertyID::CSSPropertyFill",
-          "&RenderStyle::fill",
-          "&RenderStyle::setFill",
-          "&RenderStyle::visitedLinkFill",
-          "&RenderStyle::setVisitedLinkFill"
+          "css::PropertyId::Fill",
+          "&RenderStyle::Fill",
+          "&RenderStyle::SetFill",
+          "&RenderStyle::VisitedLinkFill",
+          "&RenderStyle::SetVisitedLinkFill"
         ],
         "style-builder-custom": "All",
         "render-style-storage-path": ["m_svgStyle", "fillData"],
@@ -5296,8 +5296,8 @@
       "values": ["normal"],
       "codegen-properties": {
         "accepts-quirky-length": true,
-        "animation-wrapper-requires-getter": "computedLetterSpacing",
-        "animation-wrapper-requires-setter": "setLetterSpacingFromAnimation",
+        "animation-wrapper-requires-getter": "ComputedLetterSpacing",
+        "animation-wrapper-requires-setter": "SetLetterSpacingFromAnimation",
         "style-builder-custom": "All",
         "style-extractor-custom": true,
         "font-property": true,
@@ -5367,7 +5367,7 @@
       "codegen-properties": [
         {
           "enable-if": "ENABLE_TEXT_AUTOSIZING",
-          "animation-wrapper-requires-getter": "specifiedLineHeight",
+          "animation-wrapper-requires-getter": "SpecifiedLineHeight",
           "style-builder-custom": "All",
           "style-extractor-custom": true,
           "render-style-storage-path": ["_inheritedData"],
@@ -7930,11 +7930,11 @@
       "codegen-properties": {
         "animation-wrapper": "VisitedAffectedStyleTypeWrapper<SVGPaint>",
         "animation-wrapper-requires-override-parameters": [
-          "CSSPropertyID::CSSPropertyStroke",
-          "&RenderStyle::stroke",
-          "&RenderStyle::setStroke",
-          "&RenderStyle::visitedLinkStroke",
-          "&RenderStyle::setVisitedLinkStroke"
+          "css::PropertyId::Stroke",
+          "&RenderStyle::Stroke",
+          "&RenderStyle::SetStroke",
+          "&RenderStyle::VisitedLinkStroke",
+          "&RenderStyle::SetVisitedLinkStroke"
         ],
         "style-builder-custom": "All",
         "render-style-storage-path": ["m_svgStyle", "strokeData"],
@@ -8070,9 +8070,9 @@
         "animation-wrapper": "StyleTypeWrapper",
         "animation-wrapper-comment": "FIXME: Why doesn't this use VisitedAffectedStyleTypeWrapper?",
         "animation-wrapper-requires-override-parameters": [
-          "CSSPropertyID::CSSPropertyStrokeColor",
-          "&RenderStyle::strokeColor",
-          "&RenderStyle::setStrokeColor"
+          "css::PropertyId::StrokeColor",
+          "&RenderStyle::StrokeColor",
+          "&RenderStyle::SetStrokeColor"
         ],
         "style-builder-custom": "Value",
         "render-style-has-explicitly-set-storage-path": ["m_rareInheritedData"],
@@ -8899,8 +8899,8 @@
       "values": ["normal"],
       "codegen-properties": {
         "accepts-quirky-length": true,
-        "animation-wrapper-requires-getter": "computedWordSpacing",
-        "animation-wrapper-requires-setter": "setWordSpacingFromAnimation",
+        "animation-wrapper-requires-getter": "ComputedWordSpacing",
+        "animation-wrapper-requires-setter": "SetWordSpacingFromAnimation",
         "style-builder-custom": "All",
         "style-extractor-custom": true,
         "font-property": true,

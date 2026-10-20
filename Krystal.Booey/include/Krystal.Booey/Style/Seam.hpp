@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Core/BoxSides.hpp"
 #include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/Core/WritingMode.hpp"
+#include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
@@ -149,6 +150,19 @@ namespace krys::boo::style
                                                  Side) noexcept;
     KRYS_NODISCARD static Maybe<double> EvaluateSize(BuilderState &, Maybe<ScopedName> elementName,
                                                      Maybe<AnchorSizeDimension>) noexcept;
+
+    /// @brief Whether @p property takes `anchor()`: the inset properties.
+    KRYS_NODISCARD static bool PropertyAllowsAnchorFunction(css::PropertyId property) noexcept
+    {
+      return css::Property::IsInsetProperty(property);
+    }
+
+    /// @brief Whether @p property takes `anchor-size()`: the sizing, inset and margin properties.
+    KRYS_NODISCARD static bool PropertyAllowsAnchorSizeFunction(css::PropertyId property) noexcept
+    {
+      return css::Property::IsSizingProperty(property) || css::Property::IsInsetProperty(property)
+             || css::Property::IsMarginProperty(property);
+    }
 
     /// @brief Swaps a self-alignment position (`align-self`/`justify-self`) according to a position-try
     /// fallback's tactics.

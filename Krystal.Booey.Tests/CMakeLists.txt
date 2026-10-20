@@ -319,6 +319,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/Values/Motion/Motion.cpp
 		tests/Style/Values/SVG/SVG.cpp
 		tests/Rendering/Style/BorderValues.cpp
+		tests/Style/Interpolation.cpp
 		tests/Style/CustomProperty.cpp
 		tests/Rendering/Style/StyleDataGroups.cpp
 		tests/Rendering/Style/RenderStyle.cpp
@@ -357,6 +358,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/FontCache.cpp
 		tests/Graphics/ComplexTextController.cpp
 		tests/Graphics/FontCascade.cpp
+		tests/Animation/BlendingKeyframes.cpp
+		tests/Animation/KeyframeInterpolation.cpp
 		tests/CSS/CSSFontSelector.cpp
 		tests/CSS/Font/FontFace.cpp
 		tests/Graphics/FontDatabase.cpp

@@ -51,6 +51,13 @@ namespace krys::boo
   };
 }
 
+namespace krys::boo
+{
+  class BlendingKeyframe;
+  class BlendingKeyframes;
+  class TimingFunction;
+}
+
 namespace krys::boo::style
 {
   class BuilderState;
@@ -77,8 +84,6 @@ namespace krys::boo::style
 
   /// @brief Resolves the style of the elements of a document or of shadow trees from the rule sets of their
   /// style sheets.
-  // FIXME: Keyframe styles (styleForKeyframe, keyframeStylesForAnimation, keyframeRulesForName) come with
-  // animations.
   class Resolver : public RefCounted<Resolver>, public CanMakeWeakPtr<Resolver>
   {
     KRYS_NON_COPY_MOVABLE(Resolver);
@@ -170,6 +175,19 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool IsAnimationNameValid(const css::CSSOMString &name) const noexcept;
 
+    /// @brief Fills @p list with the keyframes of the `@keyframes` rule it names, each with its style.
+    /// @return Whether there's such a rule.
+    bool KeyframeStylesForAnimation(dom::Element &element, const RenderStyle &elementStyle,
+                                    const ResolutionContext &context, BlendingKeyframes &list,
+                                    const TimingFunction *defaultTimingFunction) const noexcept;
+    /// @brief The style of @p elementStyle with @p keyframe's declarations applied; adds the properties it
+    /// animates to @p blendingKeyframe.
+    KRYS_NODISCARD UniquePtr<RenderStyle> StyleForKeyframe(dom::Element &element,
+                                                           const RenderStyle &elementStyle,
+                                                           const ResolutionContext &context,
+                                                           const css::KeyframeRule &keyframe,
+                                                           BlendingKeyframe &blendingKeyframe) const noexcept;
+
     void SetViewTransitionStyles(css::SelectorPseudoElement element, const css::CSSOMStringAtom &name,
                                  Ref<css::MutableStyleProperties> properties) noexcept;
 
@@ -190,6 +208,9 @@ namespace krys::boo::style
     KRYS_NODISCARD static KeyframesRuleMap &UserAgentKeyframes() noexcept;
     static void AddUserAgentKeyframeStyle(Ref<css::KeyframesRule> &&rule) noexcept;
     void AddKeyframeStyle(Ref<css::KeyframesRule> &&rule) noexcept;
+    KRYS_NODISCARD List<Ref<css::KeyframeRule>>
+      KeyframeRulesForName(const css::CSSOMStringAtom &animationName,
+                           const TimingFunction *defaultTimingFunction) const noexcept;
 
     KRYS_NODISCARD RefPtr<css::ViewTransitionRule> GetViewTransitionRule() const noexcept;
 
